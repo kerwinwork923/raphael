@@ -124,7 +124,7 @@
             <input type="text" placeholder="請輸入您的體重" />
           </div>
           <div class="groupGroup">
-            <img class="icon1" src="../assets/imgs/group.svg" alt="" />
+            <!-- <img class="icon1" src="../assets/imgs/group.svg" alt="" /> -->
             <input type="text" placeholder="請輸入您的性別" />
           </div>
         </div>
