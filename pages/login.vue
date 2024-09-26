@@ -33,14 +33,17 @@
           </div>
         </div>
         <div class="privacyGroup">
-          <input type="checkbox" id="privacyInput" />
-          <label for="privacyInput">我已詳細閱讀隱私權政策</label>
+          <input type="checkbox" v-model="isPrivacy" id="privacyInput" />
+          <router-link to="/privacy">
+            <label >我已詳細閱讀隱私權政策</label>
+          </router-link>
+        
         </div>
 
         <div class="forgetPasswordGroup">
           <router-link to="/forgetPassword">忘記密碼?</router-link>
         </div>
-        <button class="loginBtn" @click="login">登入</button>
+        <button class="loginBtn" :disabled="!isPrivacy" @click="login">登入</button>
 
         <div class="bottomHintGroup">
           <router-link to="/register">
@@ -60,6 +63,7 @@
   background-attachment: fixed;
   background-size: cover;
   min-height: 100vh;
+  padding-bottom: 2rem;
   width: 100%;
 
   .raphaelIconImgGroup {
@@ -136,6 +140,7 @@
       align-items: center;
       gap: 3px;
       margin-top: 1rem;
+      
       input {
         appearance: none;
         width: 1.5rem;
@@ -161,13 +166,19 @@
           font-family: "Arial", sans-serif;
         }
       }
-      label {
+
+      a{
+        text-decoration: none;
         color: #666;
         font-size: 1.25rem;
         letter-spacing: 0.09px;
         font-weight: 400;
+        transform: translateY(10%);
+       label{
         cursor: pointer;
+       }
       }
+    
     }
     .forgetPasswordGroup {
       text-align: center;
@@ -197,6 +208,11 @@
       &:hover {
         background-color: $raphael-green-500;
       }
+      &:disabled {
+        background-color: $raphael-gray-400; 
+        cursor: not-allowed; 
+        opacity: 0.6;
+      }
     }
 
     .bottomHintGroup {
@@ -207,7 +223,7 @@
         gap: 4px;
         margin: 0 auto;
         width: 100%;
-        margin-top: 180px;
+        margin-top: 120px;
         text-align: center;
         text-decoration: none;
         color: #666;
@@ -232,6 +248,7 @@ export default {
     const password = ref("");
     const passwordVisible = ref(false);
     const router = useRouter();
+    const isPrivacy = ref(false)
     const togglePasswordVisibility = () => {
       passwordVisible.value = !passwordVisible.value;
     };
@@ -254,6 +271,20 @@ export default {
           ) {
             console.log("登入成功:", response.data);
             loading.value = false;
+            if (response.data) {
+              localStorage.setItem(
+                "userData",
+                JSON.stringify({
+                  Token: response.data.Token,
+                  MAID: response.data.MAID,
+                  MID: response.data.MID,
+                  A5Digit: response.data.A5Digit,
+                  Mobile: response.data.Mobile,
+                  startTime: response.data.startTime,
+                })
+              );
+            }
+
             router.push({ name: "user" });
           } else {
             alert(`登入失敗 : ${response.data.Result}`);
@@ -277,6 +308,7 @@ export default {
       mobile,
       password,
       login,
+      isPrivacy
     };
   },
 };

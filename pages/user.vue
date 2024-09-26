@@ -1,20 +1,23 @@
 <template>
   <div class="raphaelUser">
-    <Navbar></Navbar>
+    <RaphaelLoading v-if="loading" />
+    <Navbar />
     <div class="userGroup">
       <div class="userInfo">
         <div class="imgGroup">
           <img src="../assets/imgs/sticker.svg" alt="" />
         </div>
         <div class="infoTextGroup">
-          <div class="topText">王先生，您好</div>
+          <div class="topText">{{ userInfo?.Name }}，您好</div>
           <div class="score">
             <div class="circle"></div>
-            <div class="scoreText">目前積分 <span>150</span> 分</div>
+            <div class="scoreText">
+              目前積分 <span>{{ userInfo?.Score || 0 }}</span> 分
+            </div>
           </div>
         </div>
         <div class="qrCode">
-          <img src="../assets//imgs/qrcode.svg" alt="" />
+          <img src="../assets/imgs/qrcode.svg" alt="" />
         </div>
       </div>
       <div class="bannerGroup">
@@ -25,7 +28,6 @@
         <div class="item item1">
           <div class="topTitle">領取</div>
           <div class="bottomTitle">積分</div>
-          <!-- <img src="../assets/imgs/faceIcon.svg" alt="" /> -->
         </div>
 
         <div class="item item2">
@@ -79,6 +81,7 @@
     margin: 0 auto;
     width: 90%;
     max-width: 768px;
+
     .userInfo {
       display: flex;
       align-items: center;
@@ -87,29 +90,33 @@
       .imgGroup {
         width: 20%;
       }
+
       .infoTextGroup {
         width: 60%;
 
         .topText {
           font-size: 1.5rem;
-
           color: #1e1e1e;
           font-weight: bold;
         }
+
         .score {
           display: flex;
           align-items: center;
           margin-top: 12px;
           gap: 0.25rem;
+
           .circle {
             width: 12px;
             height: 12px;
             background-color: $raphael-purple-200;
             border-radius: 50%;
           }
+
           .scoreText {
             font-size: 20px;
             color: $raphael-gray-500;
+
             span {
               color: $raphael-green-400;
               font-size: 1.5rem;
@@ -118,20 +125,22 @@
           }
         }
       }
-      .qrCode {
-      }
     }
+
     .bannerGroup {
       margin-top: 30px;
+
       img {
         width: 100%;
       }
     }
+
     .itemsGroup {
       display: grid;
       margin-top: 1.25rem;
       grid-template-columns: repeat(2, 1fr);
       gap: 1rem;
+
       .item {
         height: 100px;
         border-radius: 0.5rem;
@@ -144,6 +153,7 @@
           color: #fff;
         }
         transition: 0.15s all ease;
+
         .topTitle {
           position: absolute;
           top: 1rem;
@@ -153,6 +163,7 @@
           color: #fefefe;
           letter-spacing: 0.09px;
         }
+
         .bottomTitle {
           position: absolute;
           bottom: 1rem;
@@ -161,6 +172,7 @@
           font-weight: bold;
           letter-spacing: 0.09px;
         }
+
         img {
           position: absolute;
           right: 0.75rem;
@@ -168,6 +180,7 @@
           transform: translateY(-50%);
         }
       }
+
       .item1 {
         background-color: $raphael-green-400;
         filter: blur(2px);
@@ -202,10 +215,82 @@
 </style>
 
 <script>
+import { onMounted, ref } from "vue"; // Import necessary functions
+import { useRouter } from "vue-router"; // Import useRouter
 import Navbar from "../components/Navbar";
+import RaphaelLoading from "../components/RaphaelLoading";
+import axios from "axios";
 
 export default {
   components: { Navbar },
-  setup() {},
+  setup() {
+    const router = useRouter();
+    const loading = ref(true);
+    const userInfo = ref(null); 
+
+    const getUserData = async () => {
+      const localData = localStorage.getItem("userData");
+      const { MID, Token, MAID, Mobile } = localData
+        ? JSON.parse(localData)
+        : {};
+
+      if (!MID || !Token || !MAID || !Mobile) {
+       
+        router.push('/login'); 
+        return;
+      }
+
+      try {
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_AA6.jsp",
+          {
+            MID,
+            Token,
+            MAID,
+            Mobile,
+          }
+        );
+
+        if (response.status === 200) {
+          const data = response.data;
+          console.log(data);
+
+          if (data.Result === "OK" && data.Member) {
+            // 獲取原有的用戶資料
+            const existingData = localData ? JSON.parse(localData) : {};
+
+            // 合併新資料，保留 Token
+            const newUserInfo = {
+              ...existingData,
+              ...data.Member, // 將新資料合併進來
+            };
+
+            localStorage.setItem("userData", JSON.stringify(newUserInfo)); // 儲存合併後的用戶資料
+            userInfo.value = newUserInfo; // 更新用戶資訊
+            
+          } else {
+            alert("取得會員資料失敗");
+          }
+        } else {
+          alert("取得會員資料失敗");
+        }
+      } catch (err) {
+        alert("取得會員資料失敗");
+      } finally {
+        setTimeout(() => {
+          loading.value = false; 
+        }, 300); 
+      }
+    };
+
+    onMounted(() => {
+      getUserData(); 
+    });
+
+    return {
+      loading,
+      userInfo, 
+    };
+  },
 };
 </script>

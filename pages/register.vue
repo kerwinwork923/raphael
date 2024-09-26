@@ -58,7 +58,7 @@
         </div>
         <div class="privacyGroup">
           <input type="checkbox" v-model="isPrivacy" id="privacyInput" />
-          <router-link to="privacy">
+          <router-link to="/privacy">
             <label >我已詳細閱讀隱私權政策</label>
           </router-link>
         
@@ -124,7 +124,7 @@
             <input type="text" placeholder="請輸入您的體重" />
           </div>
           <div class="groupGroup">
-            <!-- <img class="icon1" src="../assets/imgs/group.svg" alt="" /> -->
+            <img class="icon1" src="../assets/imgs/group.svg" alt="" />
             <input type="text" placeholder="請輸入您的性別" />
           </div>
         </div>
@@ -142,7 +142,7 @@
   background-size: cover;
   min-height: 100vh;
   width: 100%;
-
+  padding-bottom: 2rem;
   .registerGroup {
     padding-top: 100px;
     width: 90%;
@@ -365,23 +365,20 @@
     }
 
     .bottomHintGroup {
-      a{
+      a {
         display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
+        margin: 0 auto;
+        width: 100%;
+        margin-top: 90px;
+        text-align: center;
         text-decoration: none;
         color: #666;
-      justify-content: center;
-      align-items: center;
-      gap: 4px;
-      position: absolute;
-      bottom: 12.5%;
-      left: 50%;
-      transform: translateX(-50%);
       }
-      
     }
-    @include respond-to("tablet") {
-      display: none;
-    }
+   
   }
 }
 </style>
@@ -500,13 +497,15 @@ export default {
   const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
   try {
     const response = await axios.post("https://23700999.com:8081/HMA/TTEAA4_1.jsp", {
-      "D1": enteredCode[0],
-      "D2": enteredCode[1],
-      "D3": enteredCode[2],
-      "D4": enteredCode[3],
-      "D5": enteredCode[4],
-      "MID": MID
-    });
+        D1: enteredCode[0],
+        D2: enteredCode[1],
+        D3: enteredCode[2],
+        D4: enteredCode[3],
+        D5: enteredCode[4],
+        MID: MID,
+      }, {
+        withCredentials: true 
+      });
 
     if (response.status === 200) {
       const data = response.data;
