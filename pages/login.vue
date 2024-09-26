@@ -123,7 +123,7 @@
       border: none;
       border-bottom: 1px solid $raphael-gray-400;
       font-size: 1.2rem;
-      width: 90%;
+      width: 100%;
       padding-left: 36px;
       padding-bottom: 16px;
       padding-top: 16px;

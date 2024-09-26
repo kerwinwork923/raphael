@@ -108,27 +108,35 @@
        
     
       </div>
-
-      <div class="infoWrap" v-if="currentStep === 'info'">
+      <div class="infoWrap"  v-if="currentStep === 'info'"   >
         <div class="infoBox">
           <div class="nameGroup">
             <img class="icon1" src="../assets/imgs/user.svg" alt="" />
-            <input type="text" placeholder="請輸入您的姓名(暱稱)" />
+            <input type="text" placeholder="請輸入您的姓名(暱稱)" v-model="name" />
           </div>
           <div class="heightGroup">
             <img class="icon1" src="../assets/imgs/height.svg" alt="" />
-            <input type="text" placeholder="請輸入您的身高" />
+            <input type="text" placeholder="請輸入您的身高" v-model="height" />
           </div>
           <div class="weightGroup">
             <img class="icon1" src="../assets/imgs/weight.svg" alt="" />
-            <input type="text" placeholder="請輸入您的體重" />
+            <input type="text" placeholder="請輸入您的體重" v-model="weight" />
           </div>
           <div class="groupGroup">
+           
             <img class="icon1" src="../assets/imgs/group.svg" alt="" />
-            <input type="text" placeholder="請輸入您的性別" />
+            <select ref="sexSelect" v-model="sex" name="" id="">
+              <option class="placeholder" value="" disabled selected hidden>請選擇您的性別</option>
+              <option value="1">男生</option>
+              <option value="2">女生</option>
+             
+            </select>
+            <img class="icon2" src="../assets/imgs/arrowDown.svg" alt="">
+            <!-- <input type="text" disabled placeholder="請輸入您的性別"  v-model="sex"/> -->
+           
           </div>
         </div>
-        <button class="infoSendBtn">送出</button>
+        <button class="infoSendBtn" @click="addUser">送出</button>
       </div>
     </div>
   </div>
@@ -173,6 +181,7 @@
       padding: 1rem;
       margin-top: 2.25rem;
 
+   
       .phoneGroup,
       .passwordGroup,
       .passwordAgainGroup {
@@ -198,6 +207,8 @@
         color: #f00;
       }
     }
+   
+
 
     .verfifyWrap {
       padding: 1rem;
@@ -262,8 +273,7 @@
       margin-top: 1.5rem;
       .nameGroup,
       .heightGroup,
-      .weightGroup,
-      .groupGroup {
+      .weightGroup {
         position: relative;
         margin-bottom: 1rem;
         .icon1 {
@@ -272,11 +282,73 @@
           left: 2px;
           transform: translateY(-50%);
         }
+        .icon2 {
+          position: absolute;
+          top: 50%;
+          right: 2px;
+          transform: translateY(-50%);
+        }
+
+      
+      }
+
+      .groupGroup{
+        display: flex;
+        position: relative;
+        width: 100%;
+        select {
+          outline: none;
+          border: none;
+          padding-left: 36px;
+          padding-bottom: 16px;
+          padding-top: 16px;
+          font-size: 1.2rem; 
+          width: 100%; 
+          border-bottom: 1px solid $raphael-gray-400; 
+
+          appearance: none; 
+          color: $raphael-gray-400;
+            font-family: Inter;
+            font-size: 1.2rem;
+            font-weight: 400;
+          
+          &::selection{
+            color: #f00;
+          }
+        
+
+          &::placeholder {
+            color: $raphael-gray-400;
+            font-family: Inter;
+            font-size: 1.2rem;
+            font-weight: 400;
+          }
+
+
+          &::-ms-expand {
+            display: none; 
+          }
+          
+        }
+        .icon1{
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+          }
+          .icon2 {
+            position: absolute;
+            top: 50%;
+            right: 10px; 
+            transform: translateY(-50%);
+            pointer-events: none; 
+          }
       }
     }
 
     input[type="text"],
-    input[type="password"] {
+    input[type="password"],
+    input[type="number"] {
       outline: none;
       border: none;
       border-bottom: 1px solid $raphael-gray-400;
@@ -390,10 +462,11 @@ import eyesCloseGreen from "../assets/imgs/eyesCloseGreen.svg";
 import eyesOpenGreen from "../assets/imgs/eyesOpenGreen.svg";
 import axios from "axios";
 import Navbar from "../components/Navbar";
-
+import { useRouter } from 'vue-router';
 export default {
   components: { Navbar },
   setup() {
+    const router = useRouter();
     const passwordVisible = ref(false);
     const passwordAgainVisible = ref(false);
     const loading = ref(false);
@@ -405,6 +478,12 @@ export default {
     const passwordAgainError = ref("");
     const isPrivacy = ref(false)
     const isReSend = ref(false)
+    const sexSelect = ref(null)
+
+    const name = ref("");
+    const height = ref("");
+    const weight = ref("");
+    const sex  = ref("")
 
     const currentStep = ref("register");
     const verificationCodes = ref(["", "", "", "", ""]);
@@ -490,51 +569,65 @@ export default {
     };
 
     const verifyCode = async () => {
-  loading.value = true;
+      loading.value = true;
 
-  const enteredCode = verificationCodes.value.join("");
-  const localData = localStorage.getItem("userData");
-  const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
-  try {
-    const response = await axios.post("https://23700999.com:8081/HMA/TTEAA4_1.jsp", {
-        D1: enteredCode[0],
-        D2: enteredCode[1],
-        D3: enteredCode[2],
-        D4: enteredCode[3],
-        D5: enteredCode[4],
-        MID: MID,
-      }, {
-        withCredentials: true 
-      });
+    const enteredCode = verificationCodes.value.join("");
+    const localData = localStorage.getItem("userData");
+    const { MID, Token, MAID, Mobile, A5Digit } = localData ? JSON.parse(localData) : {};
 
-    if (response.status === 200) {
-      const data = response.data;
-
-      if (data.Result === true) {
-        alert("驗證成功");
-        const localData = localStorage.getItem("userData");
-        const updatedData = {
-          ...JSON.parse(localData),
-          // Include any additional data returned from your API
-        };
-        localStorage.setItem('userData', JSON.stringify(updatedData));
-        
-        // Clear the verification codes
-        verificationCodes.value = ["", "", "", "", ""]; // Reset to empty
-
-        // Proceed to the next step
-        currentStep.value = "info"; 
-      } else {
-        verificationCodes.value = ["", "", "", "", ""];
-        verificationInputs.value[0].focus();
-        alert("驗證碼錯誤，請再試一次");
-      }
+    if (enteredCode == A5Digit) {
+      alert("驗證成功");
+      currentStep.value = "info";
+      verificationCodes.value = ["", "", "", "", ""];
+    } else {
+      verificationCodes.value = ["", "", "", "", ""];
+      nextTick(() => {
+      verificationInput.value[0]?.focus(); 
+    });
+      alert("驗證碼錯誤");
     }
-  } catch (error) {
-    alert("驗證失敗，請稍後再試");
-  } finally {
+
     loading.value = false;
-  }
+  // try {
+  //   const response = await axios.post("https://23700999.com:8081/HMA/TTEAA4_1.jsp", {
+  //       D1: enteredCode[0],
+  //       D2: enteredCode[1],
+  //       D3: enteredCode[2],
+  //       D4: enteredCode[3],
+  //       D5: enteredCode[4],
+  //       MID: MID,
+  //     }, {
+  //       withCredentials: true 
+  //     });
+
+  //   if (response.status === 200) {
+  //     const data = response.data;
+
+  //     if (data.Result === true) {
+  //       alert("驗證成功");
+  //       const localData = localStorage.getItem("userData");
+  //       const updatedData = {
+  //         ...JSON.parse(localData),
+  //         // Include any additional data returned from your API
+  //       };
+  //       localStorage.setItem('userData', JSON.stringify(updatedData));
+        
+  //       // Clear the verification codes
+  //       verificationCodes.value = ["", "", "", "", ""]; // Reset to empty
+
+  //       // Proceed to the next step
+  //       currentStep.value = "info"; 
+  //     } else {
+  //       verificationCodes.value = ["", "", "", "", ""];
+  //       verificationInputs.value[0].focus();
+  //       alert("驗證碼錯誤，請再試一次");
+  //     }
+  //   }
+  // } catch (error) {
+  //   alert("驗證失敗，請稍後再試");
+  // } finally {
+  //   loading.value = false;
+  // }
 };
 
 
@@ -580,13 +673,13 @@ export default {
           verificationCodes.value.length
         );
       });
+
     });
 
     const reSend = async () => {
       try {
         const localData = localStorage.getItem("userData");
         const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
-        alert(MID,Token,MAID,Mobile)
         const response = await axios.post(
           "https://23700999.com:8081/HMA/API_AA4.jsp",
           {
@@ -599,16 +692,18 @@ export default {
 
         if (response.status === 200) {
           const { startTime, A5Digit, Result } = response.data;
-
-        localStorage.setItem(
-          "userData", 
-          JSON.stringify({
-            ...JSON.parse(localData), 
-            startTime, 
-            A5Digit,   
-            Result,    
-          })
-        );
+         
+          localStorage.setItem(
+            "userData", 
+            JSON.stringify({
+              ...JSON.parse(localData), 
+              startTime, 
+              A5Digit,   
+              Result,    
+            })
+          );
+          alert("簡訊已重新發送")
+          startCountdown()
         } else {
           alert("重新發送失敗");
         }
@@ -618,6 +713,41 @@ export default {
         loading.value = false;
       }
     }
+
+    const addUser = async () => {
+  try {
+    const localData = localStorage.getItem("userData");
+    const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
+
+    // Ensure that required values are available
+    if (!MID || !Token || !MAID || !Mobile || !name.value || !height.value || !sex.value) {
+      throw new Error("資料不完整");
+    }
+
+    const response = await axios.post("https://23700999.com:8081/HMA/API_AA5.jsp", {
+      MID: MID,
+      Token: Token,
+      MAID: MAID,
+      Mobile: Mobile,
+      Name: name.value,
+      Height: height.value, // Use height.value if height is a ref
+      Weight: weight.value, // Ensure you have the weight variable defined
+      Sex: sex.value
+    });
+
+    if (response.status === 200) {
+      router.push('/user');
+      console.log(response.data);
+    }
+
+  } catch (err) {
+    alert(err.message || "資料不完整"); // Log the specific error message
+    console.error(err); // Log the error for debugging
+  } finally {
+    // Optional cleanup code can go here
+  }
+};
+
 
     return {
       passwordVisible,
@@ -645,7 +775,13 @@ export default {
       countdownTime,
       isPrivacy,
       isReSend,
-      reSend
+      reSend,
+      addUser,
+      name,
+      height,
+      weight,
+      sex,
+      sexSelect
     };
   },
 };
