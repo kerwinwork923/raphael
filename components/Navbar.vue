@@ -1,7 +1,7 @@
 <template>
   <div class="raphaelNavbar">
     <div class="logoGroup">
-      <router-link to="#">
+      <router-link to="/user">
         <img src="../assets/imgs/neuro-plus.svg" alt="" />
       </router-link>
       

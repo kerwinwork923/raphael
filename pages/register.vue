@@ -83,12 +83,15 @@
             v-for="(code, index) in verificationCodes"
             :key="index"
             ref="verificationInput"
-            type="text"
+            type="number"
             maxlength="1"
             class="vertifyCode"
             v-model="verificationCodes[index]"
             @input="handleInput(index)"
             @keypress="allowOnlyNumbers"
+            min="0"
+            max="9"
+        oninput="this.value = Math.max(0, Math.min(9, this.value))"
           />
         </div>
         <div class="verificationCodeHintText">
@@ -631,19 +634,22 @@ export default {
 };
 
 
-    const handleInput = async (index) => {
-    const currentValue = verificationCodes.value[index];
+const handleInput = (index) => {
+  // 如果當前輸入的數字不在範圍內，則清空該輸入框
+  if (verificationCodes.value[index] < 0 || verificationCodes.value[index] > 9) {
+    verificationCodes.value[index] = '';
+  }
 
-    if (currentValue.length === 1 && index < verificationCodes.value.length - 1) {
-      verificationInput.value[index + 1]?.focus();
-    } else if (currentValue === "" && index > 0) {
-      verificationInput.value[index - 1]?.focus();
-    }
+  // 將焦點移到下一個輸入框
+  if (verificationCodes.value[index] && index < verificationCodes.value.length - 1) {
+    verificationInput.value[index + 1]?.focus();
+  }
 
-    if (verificationCodes.value.every(code => code !== "")) {
-      await verifyCode();
-    }
-  };
+  // 當5個數字都填寫完成時，進行驗證
+  if (verificationCodes.value.every(code => code !== '')) {
+    verifyCode(); // 調用驗證方法
+  }
+};
 
     const allowOnlyNumbers = (event) => {
       const char = String.fromCharCode(event.which);

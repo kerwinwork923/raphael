@@ -1,6 +1,6 @@
 <template>
   <div class="privacy">
-    <Navbar />
+    <!-- <Navbar /> -->
     <div class="privacyWrap">
       <h1>服務條款與隱私權政策</h1>
       <p>
