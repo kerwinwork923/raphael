@@ -66,10 +66,7 @@
         if (this.selectedHour && this.selectedMinute) {
           return `${this.selectedHour}:${this.selectedMinute}`;
         }
-        return this.value;
-      },
-      isTimePicked() {
-        return !!this.formattedTime; // 判斷是否已選擇時間
+        return this.value; // 如果有選擇時間，返回選擇的時間；否則返回傳入的值
       },
     },
     watch: {
@@ -85,12 +82,13 @@
       confirmTime() {
         if (this.selectedHour && this.selectedMinute) {
           const time = `${this.selectedHour}:${this.selectedMinute}`;
-          this.$emit("input", time);
+          this.$emit("input", time); // 正確發送事件
           this.closeModal();
+      
         }
       },
       closeModal() {
-        this.showModal = false;
+        this.showModal = false; // 關閉模態窗
       },
     },
   };
@@ -113,7 +111,6 @@
   }
   
   .time-picker-btn.time-picked { 
-
     color: #666 !important; 
   }
   

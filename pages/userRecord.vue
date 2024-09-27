@@ -46,7 +46,7 @@
         <div class="sleepRecord">
           <h4>3.幾點起床</h4>
           <div class="sleepInputGroup">
-            <TimePicker2 v-model="bedTime" label="請選擇起床時間" />
+            <TimePicker2 v-model="bedTisme" label="請選擇起床時間" />
           </div>
         </div>
 
@@ -210,7 +210,7 @@
 
 <script>
 import Navbar from "~/components/Navbar.vue";
-import { ref } from "vue";
+import { ref , onMounted, onBeforeUnmount} from "vue";
 import ScoreBar from "~/components/ScoreBar.vue";
 import TimePicker from "../components/TimePicker.vue";
 import TimePicker2 from "../components/TimePicker2.vue";
@@ -230,7 +230,7 @@ export default {
     const daySleepScore = ref(0);
     const selectedBedTime = ref("");
     const sleepState = ref("firstTest");
-
+    const bedTime = ref()
     // 定義各個問題的選項
     const sleepQualityOptions = [
       { label: "很滿意", value: 0 },
@@ -273,6 +273,7 @@ export default {
       // });
     };
 
+
     return {
       sleepScore,
       dayEmotionScore,
@@ -285,6 +286,7 @@ export default {
       sleepState,
       firstTest,
       selectedBedTime,
+      bedTime,
     };
   },
 };

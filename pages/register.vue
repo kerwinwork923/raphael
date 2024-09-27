@@ -58,7 +58,7 @@
         </div>
         <div class="privacyGroup">
           <input type="checkbox" v-model="isPrivacy" id="privacyInput" />
-          <router-link to="/privacy">
+          <router-link to="#">
             <label >我已詳細閱讀隱私權政策</label>
           </router-link>
         
