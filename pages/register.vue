@@ -514,11 +514,11 @@ export default {
       if(password.value.length<6) {alert("密碼小於6位數") ; return}
       if(password.value !== passwordAgain.value){ alert("密碼不一致"); return}
       loading.value = true;
-      await new Promise((resolve) => setTimeout(resolve, 750));
-      loading.value = false;
-      currentStep.value = "verify";
-      verificationTitle.value = "輸入驗證碼";
-      startCountdown();
+      // await new Promise((resolve) => setTimeout(resolve, 750));
+      // loading.value = false;
+      // currentStep.value = "verify";
+      // verificationTitle.value = "輸入驗證碼";
+      // startCountdown();
       try {
         const response = await axios.post(
           "https://23700999.com:8081/HMA/API_AA3.jsp",
@@ -530,8 +530,7 @@ export default {
 
         if (response.status === 200) {
           const data = response.data;
-          if (data.Token.trim() != "" && data.MAID.trim() != "") {
-            console.log("登入成功:", data);
+          if (data.Token.trim()!==""||data.MID.trim()!=="") {
             currentStep.value = "verify";
             verificationTitle.value = "輸入驗證碼";
             startCountdown();
@@ -545,11 +544,12 @@ export default {
               startTime: data.startTime
             }));
           }
-        } else {
-          alert("登入失敗，請檢查手機號碼和密碼。");
+          else {
+          alert(`註冊失敗 : ${data.Result}`);
         }
+        } 
       } catch (err) {
-        alert("登入失敗，請檢查手機號碼和密碼。");
+        alert("註冊失敗");
       } finally {
         loading.value = false;
       }
