@@ -1,5 +1,5 @@
 <template>
-  <div class="time-picker">
+  <div class="time-picker" ref="timePicker">
     <div
       class="time-display"
       @click="toggleDropdown"
@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 
 export default {
   props: {
@@ -36,6 +36,7 @@ export default {
   setup(props) {
     const showDropdown = ref(false);
     const selectedTime = ref("");
+    const timePicker = ref(null);
 
     const toggleDropdown = () => {
       showDropdown.value = !showDropdown.value;
@@ -45,6 +46,20 @@ export default {
       selectedTime.value = time;
       showDropdown.value = false;
     };
+
+    const handleClickOutside = (event) => {
+      if (timePicker.value && !timePicker.value.contains(event.target)) {
+        showDropdown.value = false;
+      }
+    };
+
+    onMounted(() => {
+      document.addEventListener("click", handleClickOutside);
+    });
+
+    onBeforeUnmount(() => {
+      document.removeEventListener("click", handleClickOutside);
+    });
 
     const availableTimes = [];
     for (let i = 0; i < 4 * 4; i++) {
@@ -64,6 +79,7 @@ export default {
       availableTimes,
       formattedTime,
       selectedTime,
+      timePicker,
     };
   },
 };
@@ -90,8 +106,12 @@ export default {
 }
 
 .picked-text {
-  color: #666 !important;
+  color: #1e1e1e !important;
   font-size: 1.075rem;
+  margin: 0 auto;
+  transform: translateX(-40%);
+  letter-spacing: 1.25px;
+  font-weight: bold;
 }
 
 .dropdown {

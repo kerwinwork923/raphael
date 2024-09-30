@@ -32,7 +32,43 @@
           <h4>1.幾點上床</h4>
           <div class="sleepInputGroup">
             <!-- <input class="timeInput" placeholder="請選擇上床時間" /> -->
-            <TimePicker2 v-model="bedTime" label="請選擇上床時間" />
+            <!-- <TimePicker2 v-model="bedTimeHour" label="請選擇上床時間" /> -->
+            <div class="selectGroup1">
+              <img class="timeIcon" src="../assets/imgs/time.svg" alt="" />
+              <div class="dropListGroup">
+                <div class="dropListText" @click="toggleDropdown('1')">
+                  點
+                  <div class="dropListHour">{{ bedTimeHour || "" }}</div>
+                </div>
+
+                <div class="dropList" v-if="showDropdown1">
+                  <div
+                    class="list"
+                    v-for="(hour, index) in hours"
+                    :key="index"
+                    @click="selectTime('bedTimeHour', hour)"
+                  >
+                    {{ hour }}
+                  </div>
+                </div>
+              </div>
+              <div class="dropListGroup">
+                <div class="dropListText" @click="toggleDropdown('1_2')">
+                  分
+                  <div class="dropListMinute">{{ bedTimeMinute || "" }}</div>
+                </div>
+                <div class="dropList" v-if="showDropdown1_2">
+                  <div
+                    class="list"
+                    v-for="(minute, index) in minutes"
+                    :key="index"
+                    @click="selectTime('bedTimeMinute', minute)"
+                  >
+                    {{ minute }}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -46,7 +82,42 @@
         <div class="sleepRecord">
           <h4>3.幾點起床</h4>
           <div class="sleepInputGroup">
-            <TimePicker2 v-model="bedTisme" label="請選擇起床時間" />
+            <div class="selectGroup1">
+              <img class="timeIcon" src="../assets/imgs/time.svg" alt="" />
+              <div class="dropListGroup">
+                <div class="dropListText" @click="toggleDropdown('2')">
+                  點
+                  <div class="dropListHour">{{ getupTimeHour || "" }}</div>
+                </div>
+
+                <div class="dropList" v-if="showDropdown2">
+                  <div
+                    class="list"
+                    v-for="(hour, index) in hours"
+                    :key="index"
+                    @click="selectTime('getupTimeHour', hour)"
+                  >
+                    {{ hour }}
+                  </div>
+                </div>
+              </div>
+              <div class="dropListGroup">
+                <div class="dropListText" @click="toggleDropdown('2_2')">
+                  分
+                  <div class="dropListMinute">{{ getupTimeMinute || "" }}</div>
+                </div>
+                <div class="dropList" v-if="showDropdown2_2">
+                  <div
+                    class="list"
+                    v-for="(minute, index) in minutes"
+                    :key="index"
+                    @click="selectTime('getupTimeMinute', minute)"
+                  >
+                    {{ minute }}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -60,54 +131,124 @@
         <div class="sleepRecord">
           <h4>5.睡眠中斷次數</h4>
           <div class="sleepInputGroup">
-            <TimesOption
-              placeholder="請選擇睡眠中斷次數"
-              :minValue="0"
-              :maxValue="20"
-            />
+            <div class="sleepInputGroup">
+              <div class="selectGroup1" @click="toggleDropdown('5')">
+                <img class="timeIcon" src="../assets/imgs/time.svg" alt="" />
+                <div class="dropListGroup dropListGroupTimes">
+                  <div class="dropListText">
+                    <div :class="{ dropListTextActive: sleepBreak >= 0 }">
+                      {{ sleepBreak >= 0 ? sleepBreak : "請選擇睡眠中斷次數" }}
+                    </div>
+                  </div>
+
+                  <div class="dropList" v-if="showDropdown5">
+                    <div
+                      class="list"
+                      v-for="(sleepBreak, index) in sleepBreaks"
+                      :key="index"
+                      @click="selectTime('sleepBreak', sleepBreak)"
+                    >
+                      {{ sleepBreak }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
         <div class="sleepRecord">
           <h4>6.夜尿次數</h4>
           <div class="sleepInputGroup">
-            <TimesOption
-              placeholder="請選擇夜尿次數"
-              :minValue="0"
-              :maxValue="20"
-            />
+            <div class="sleepInputGroup">
+              <div class="selectGroup1" @click="toggleDropdown('6')">
+                <img class="timeIcon" src="../assets/imgs/time.svg" alt="" />
+                <div class="dropListGroup dropListGroupTimes">
+                  <div class="dropListText">
+                    <div :class="{ dropListTextActive: peeTime >= 0 }">
+                      {{ peeTime >= 0 ? peeTime : "請選擇夜尿次數" }}
+                    </div>
+                  </div>
+
+                  <div class="dropList" v-if="showDropdown6">
+                    <div
+                      class="list"
+                      v-for="(peeTime, index) in peeTimes"
+                      :key="index"
+                      @click="selectTime('peeTime', peeTime)"
+                    >
+                      {{ peeTime }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
         <div class="sleepRecord">
           <h4>7.藥物輔助情形</h4>
           <div class="sleepInputGroup">
-            <TimesOption
-              placeholder="請選擇每週使用藥物幫助睡眠天數"
-              :minValue="0"
-              :maxValue="7"
-            />
+            <div class="sleepInputGroup">
+              <div class="selectGroup1" @click="toggleDropdown('7')">
+                <img class="timeIcon" src="../assets/imgs/time.svg" alt="" />
+                <div class="dropListGroup dropListGroupTimes">
+                  <div class="dropListText">
+                    <div :class="{ dropListTextActive: medhelp >= 0 }">
+                      {{
+                        medhelp >= 0
+                          ? medhelp
+                          : "請選擇每週使用藥物幫助睡眠天數"
+                      }} 天
+                    </div>
+                  </div>
+
+                  <div class="dropList" v-if="showDropdown7">
+                    <div
+                      class="list"
+                      v-for="(medhelp, index) in medhelps"
+                      :key="index"
+                      @click="selectTime('medhelp', medhelp)"
+                    >
+                      {{ medhelp }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
         <div class="sleepRecord">
           <h4>8.自覺睡眠品質</h4>
-          <ScoreBar v-model="sleepScore" :options="sleepQualityOptions" />
+          <ScoreBar
+            v-model="sleepProperty"
+            :options="useFirstSleepRecordData.sleepQualityOptions"
+          />
         </div>
 
         <div class="sleepRecord">
           <h4>9.白天情緒狀態</h4>
-          <ScoreBar v-model="dayEmotionScore" :options="dayEmotionOptions" />
+          <ScoreBar
+            v-model="emotionalState"
+            :options="useFirstSleepRecordData.dayEmotionOptions"
+          />
         </div>
 
         <div class="sleepRecord">
           <h4>10.白天體力、專注力、記憶力</h4>
-          <ScoreBar v-model="dayStateScore" :options="dayStateOptions" />
+          <ScoreBar
+            v-model="physocalStrength"
+            :options="useFirstSleepRecordData.dayStateOptions"
+          />
         </div>
 
         <div class="sleepRecord">
           <h4>11.白天嗜睡程度</h4>
-          <ScoreBar v-model="daySleepScore" :options="daySleepOptions" />
+          <ScoreBar
+            v-model="dayTimeSleepIness"
+            :options="useFirstSleepRecordData.daySleepOptions"
+          />
         </div>
 
         <div class="sleepRecord">
@@ -118,6 +259,7 @@
               rows="5"
               placeholder="請簡短講述近期壓力事件"
               id=""
+              v-model="otherPressureEvent"
             ></textarea>
           </div>
         </div>
@@ -133,7 +275,7 @@
         </div>
         <div class="firstSleepRecord">
           <h2>檢測紀錄</h2>
-          <div class="emojiGroup">
+          <div class="emoji Group">
             <div class="firstScore">
               <div class="firstScoreTitle">
                 <h3>第一次檢測分數</h3>
@@ -210,11 +352,13 @@
 
 <script>
 import Navbar from "~/components/Navbar.vue";
-import { ref , onMounted, onBeforeUnmount} from "vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 import ScoreBar from "~/components/ScoreBar.vue";
 import TimePicker from "../components/TimePicker.vue";
 import TimePicker2 from "../components/TimePicker2.vue";
 import TimesOption from "../components/TimesOption.vue";
+import { useFirstSleepRecordStore } from "~/stores/firstSleepRecord";
+
 export default {
   components: {
     Navbar,
@@ -224,69 +368,175 @@ export default {
     TimesOption,
   },
   setup() {
-    const sleepScore = ref(0);
-    const dayEmotionScore = ref(0);
-    const dayStateScore = ref(0);
-    const daySleepScore = ref(0);
-    const selectedBedTime = ref("");
+    const useFirstSleepRecordData = useFirstSleepRecordStore();
+    console.log(useFirstSleepRecordData);
+
     const sleepState = ref("firstTest");
-    const bedTime = ref()
-    // 定義各個問題的選項
-    const sleepQualityOptions = [
-      { label: "很滿意", value: 0 },
-      { label: "有點不佳", value: 1 },
-      { label: "中度不佳", value: 2 },
-      { label: "嚴重不足", value: 3 },
-      { label: "非常嚴重", value: 4 },
-    ];
+    const bedTimeHour = ref();
+    const bedTimeMinute = ref();
+    const getupTimeHour = ref();
+    const getupTimeMinute = ref();
+    const sleepBreak = ref();
+    const peeTime = ref();
+    const medhelp = ref();
+    const otherPressureEvent = ref();
+    const showDropdown1 = ref(false);
+    const showDropdown1_2 = ref(false);
+    const showDropdown2 = ref(false);
+    const showDropdown2_2 = ref(false);
+    const showDropdown5 = ref(false);
+    const showDropdown6 = ref(false);
+    const showDropdown7 = ref(false);
+    // 引用下拉選單的 DOM 元素
+    const userRecord = ref(null);
+    const bedTimeHourDropdown = ref(null);
+    const bedTimeMinuteDropdown = ref(null);
+    const getupTimeHourDropdown = ref(null);
+    const getupTimeMinuteDropdown = ref(null);
 
-    const dayEmotionOptions = [
-      { label: "還不錯", value: 0 },
-      { label: "有點下降", value: 1 },
-      { label: "明顯欠佳", value: 2 },
-      { label: "嚴重不足", value: 3 },
-      { label: "非常嚴重", value: 4 },
-    ];
+    // 時間選項
+    const hours = Array.from({ length: 24 }, (_, i) =>
+      String(i).padStart(2, "0")
+    );
+    const minutes = Array.from({ length: 4 }, (_, i) =>
+      String(i * 15).padStart(2, "0")
+    );
 
-    const dayStateOptions = [
-      { label: "還不錯", value: 0 },
-      { label: "有點下降", value: 1 },
-      { label: "明顯欠佳", value: 2 },
-      { label: "嚴重不足", value: 3 },
-      { label: "非常嚴重", value: 4 },
-    ];
+    const sleepBreaks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const peeTimes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const medhelps = [0, 1, 2, 3, 4, 5, 6, 7];
+    const closeAllSelect = (currentDropdown) => {
+      showDropdown1.value =
+        currentDropdown === "1" ? !showDropdown1.value : false;
+      showDropdown1_2.value =
+        currentDropdown === "1_2" ? !showDropdown1_2.value : false;
+      showDropdown2.value =
+        currentDropdown === "2" ? !showDropdown2.value : false;
+      showDropdown2_2.value =
+        currentDropdown === "2_2" ? !showDropdown2_2.value : false;
+      showDropdown5.value =
+        currentDropdown === "5" ? !showDropdown5.value : false;
+      showDropdown6.value =
+        currentDropdown === "6" ? !showDropdown6.value : false;
+      showDropdown7.value =
+        currentDropdown === "7" ? !showDropdown7.value : false;
+    };
+    // 切換下拉選單顯示狀態
+    const toggleDropdown = (dropdown) => {
+      switch (dropdown) {
+        case "1": {
+          closeAllSelect("1");
+          break;
+        }
+        case "1_2": {
+          closeAllSelect("1_2");
+          break;
+        }
+        case "2": {
+          closeAllSelect("2");
+          break;
+        }
+        case "2_2": {
+          closeAllSelect("2_2");
+          break;
+        }
+        case "5": {
+          closeAllSelect("5");
+          break;
+        }
+        case "6": {
+          closeAllSelect("6");
+          break;
+        }
+        case "7": {
+          closeAllSelect("7");
+          break;
+        }
+      }
+    };
 
-    const daySleepOptions = [
-      { label: "沒有嗜睡", value: 0 },
-      { label: "少許嗜睡", value: 1 },
-      { label: "輕度嗜睡", value: 2 },
-      { label: "中度嗜睡", value: 3 },
-      { label: "嚴重嗜睡", value: 4 },
-    ];
+    // 選擇時間
+    const selectTime = (type, value) => {
+      if (type === "bedTimeHour") {
+        bedTimeHour.value = value;
+        showDropdown1.value = false;
+      } else if (type === "bedTimeMinute") {
+        bedTimeMinute.value = value;
+        showDropdown1_2.value = false;
+      } else if (type === "getupTimeHour") {
+        getupTimeHour.value = value;
+        showDropdown2.value = false;
+      } else if (type === "getupTimeMinute") {
+        getupTimeMinute.value = value;
+        showDropdown2_2.value = false;
+      } else if (type === "sleepBreak") {
+        sleepBreak.value = value;
+      } else if (type === "peeTime") {
+        peeTime.value = value;
+      } else if (type === "medhelp") {
+        medhelp.value = value;
+      }
+    };
 
+    // 點擊外部關閉所有下拉選單
+    const handleClickOutside = (event) => {
+      if (userRecord.value && !userRecord.value.contains(event.target)) {
+        // 點擊在 userRecord 之外
+        showDropdown1.value = false;
+        showDropdown1_2.value = false;
+        showDropdown2.value = false;
+        showDropdown2_2.value = false;
+      }
+    };
+
+    // 添加和移除全局點擊事件監聽器
+    onMounted(() => {
+      document.addEventListener("click", handleClickOutside);
+    });
+
+    onBeforeUnmount(() => {
+      document.removeEventListener("click", handleClickOutside);
+    });
+
+    // 完成測試
     const firstTest = () => {
       sleepState.value = "sleepRecord1";
       window.scrollTo(0, 0);
-      // window.scrollTo({
-      //   top: 0,
-      //   behavior: "smooth",
-      // });
     };
 
-
     return {
-      sleepScore,
-      dayEmotionScore,
-      dayStateScore,
-      daySleepScore,
-      sleepQualityOptions,
-      dayEmotionOptions,
-      dayStateOptions,
-      daySleepOptions,
       sleepState,
       firstTest,
-      selectedBedTime,
-      bedTime,
+      useFirstSleepRecordData,
+      hours,
+      minutes,
+      showDropdown1,
+      showDropdown1_2,
+      showDropdown2,
+      showDropdown2_2,
+      showDropdown5,
+      showDropdown6,
+      showDropdown7,
+      sleepBreak,
+
+      medhelp,
+      toggleDropdown,
+      selectTime,
+      bedTimeHour,
+      bedTimeMinute,
+      getupTimeHour,
+      getupTimeMinute,
+      userRecord,
+      peeTimes,
+      peeTime,
+
+      medhelps,
+      bedTimeHourDropdown,
+      bedTimeMinuteDropdown,
+      getupTimeHourDropdown,
+      getupTimeMinuteDropdown,
+      sleepBreaks,
+      otherPressureEvent,
     };
   },
 };
@@ -344,106 +594,108 @@ export default {
   margin-top: 0.75rem;
   .sleepRecord {
     background-color: #fff;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
     padding: 0.75rem;
     border-radius: 12px;
 
-        textarea {
-        width: 100%;
-        border: none;
-        outline: none;
-        border: 1px solid #666;
-        border-radius: 8px;
-        padding: 0.5rem 1rem;
-        margin-top: .85rem;
-      }
-      .timeInput {
-        padding-left: 1.5rem;
-      }
-      .icon1 {
+    .selectGroup1 {
+      display: flex;
+      position: relative;
+
+      .timeIcon {
         position: absolute;
-        top: 5%;
-        left: 2px;
+        left: 0;
+        top: 50%;
+        transform: translateY(-5%);
       }
-    
-    // .sleepInputGroup {
-    //   margin-top: 1rem;
-    //   position: relative;
+      .dropListGroup {
+        width: 50%;
+        padding-top: 0.75rem;
 
-    //   input {
-    //     border: none;
-    //     outline: none;
-    //     border-bottom: 1px solid #666;
-    //     width: 100%;
-    //     padding-bottom: 0.25rem;
-    //   }
+        position: relative;
+        .dropListText {
+          text-align: right;
+          color: #b3b3b3;
+          padding: 12px 0;
+          cursor: pointer;
 
-    //   textarea {
-    //     width: 100%;
-    //     border: none;
-    //     outline: none;
-    //     border: 1px solid #666;
-    //     border-radius: 8px;
-    //     padding: 0.5rem 1rem;
-    //   }
-    //   .timeInput {
-    //     padding-left: 1.5rem;
-    //   }
-    //   .icon1 {
-    //     position: absolute;
-    //     top: 5%;
-    //     left: 2px;
-    //   }
-    // }
-    // .scoreBarGroup {
-    //   position: relative;
-    //   margin: 1.5rem 0;
-    //   display: flex;
-    //   align-items: center;
-    //   height: 6px;
-    //   width: 100%;
+          .dropListHour,
+          .dropListMinute {
+            position: absolute;
+            left: 50%;
+            top: 60%;
 
-    //   .scoreBar {
-    //     height: 100%;
-    //     background-color: $raphael-green-400; /* 绿色 */
-    //   }
-    //   .remainingBar {
-    //     height: 100%;
-    //     background-color: $raphael-gray-400; /* 灰色 */
-    //   }
+            transform: translate(-50%, -50%);
+            color: #1e1e1e;
+            font-weight: bold;
+          }
+        }
+        .dropListActive {
+        }
+        width: 100%;
+        .dropList {
+          position: absolute;
+          display: flex;
+          flex-direction: column;
+          width: 70%;
+          left: 12.5%;
+          z-index: 2;
+          background-color: #fff;
+          border: 1px solid #666;
+          border-radius: 8px;
+          padding: 0.25rem 0;
+          max-height: 200px;
+          overflow-y: scroll;
 
-    //   .numberGroup {
-    //     display: flex;
-    //     position: absolute;
-    //     top: 0;
-    //     left: 0;
-    //     width: 100%;
-    //     height: 100%;
-    //     justify-content: space-between;
-    //     align-items: center;
-    //     .number {
-    //       background-color: $raphael-gray-400; /* 默认颜色 */
-    //       border-radius: 50%;
-    //       color: #fff;
-    //       width: 1.5rem;
-    //       height: 1.5rem;
-    //       display: flex;
-    //       justify-content: center;
-    //       align-items: center;
-    //       cursor: pointer; /* 添加鼠标指针效果 */
-    //       transition: background-color 0.3s; /* 添加过渡效果 */
+          .list {
+            padding: 0.5rem 0.75rem;
+            text-align: center;
+            cursor: pointer;
+          }
+        }
+      }
+      .dropListGroupTimes {
+        width: 100%;
+        .dropListText {
+          text-align: left;
+          margin-left: 1.25rem;
+        }
+        .dropListTextActive{
+          color: #1e1e1e;
+          font-weight: bold;
+          
+        display: flex;
+        justify-content: center;
+        width: 90%;
+          
+        }
+        .dropList {
+          width: 100%;
+          left: 0;
+          .list {
+            text-align-last: left;
+          }
+        }
+      }
+    }
 
-    //       &.selected {
-    //         background-color: $raphael-green-400; /* 选中时的颜色 */
-    //       }
-    //     }
-    //   }
-    // }
-    // .scoreText {
-    //   text-align: center;
-    //   color: $raphael-green-400;
-    //   margin-top: 0.5rem;
-    // }
+    textarea {
+      width: 100%;
+      border: none;
+      outline: none;
+      border: 1px solid #666;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      margin-top: 0.85rem;
+    }
+    .timeInput {
+      padding-left: 1.5rem;
+    }
+    .icon1 {
+      position: absolute;
+      top: 5%;
+      left: 2px;
+    }
   }
 }
 .submitBtn {

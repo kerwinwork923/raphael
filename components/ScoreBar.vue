@@ -13,35 +13,35 @@
         <div
           class="number"
           :class="{ selected: score >= 0 }"
-          @click="setScore(0)"
+          @click="setScore(0, 'sleepProperty')"
         >
           0
         </div>
         <div
           class="number"
           :class="{ selected: score >= 1 }"
-          @click="setScore(1)"
+          @click="setScore(1, 'emotionalState')"
         >
           1
         </div>
         <div
           class="number"
           :class="{ selected: score >= 2 }"
-          @click="setScore(2)"
+          @click="setScore(2, 'physicalStrength')"
         >
           2
         </div>
         <div
           class="number"
           :class="{ selected: score >= 3 }"
-          @click="setScore(3)"
+          @click="setScore(3, 'dayTimeSleepiness')"
         >
           3
         </div>
         <div
           class="number"
           :class="{ selected: score >= 4 }"
-          @click="setScore(4)"
+          @click="setScore(4, 'otherPressureEvent')"
         >
           4
         </div>
@@ -53,6 +53,7 @@
 
 <script>
 import { ref, defineComponent } from "vue";
+import { useFirstSleepRecordStore } from "@/stores/firstSleepRecord";
 
 export default defineComponent({
   props: {
@@ -62,27 +63,26 @@ export default defineComponent({
     },
     options: {
       type: Array,
-      required: true, // Ensure that options are provided
+      required: true,
     },
   },
-  setup(props, { emit }) {
+  setup(props) {
     const score = ref(props.modelValue);
+    const store = useFirstSleepRecordStore();
 
-    const setScore = (value) => {
+    const setScore = (value, property) => {
       score.value = value;
-      emit("update:modelValue", value);
+      store.updateScore(property, value);
     };
 
     const getScoreText = (scoreValue) => {
-      // Use the options prop to get the score text
-      return props.options[scoreValue]?.label || ""; // Return label or empty if undefined
+      return props.options[scoreValue]?.label || "";
     };
 
     return { score, setScore, getScoreText };
   },
 });
 </script>
-
 <style scoped lang="scss">
 .scoreBarGroup {
   position: relative;
