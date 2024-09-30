@@ -9,7 +9,6 @@
       <span :class="{ 'picked-text': selectedTime !== '' }">{{
         formattedTime
       }}</span>
-      <!-- 添加一个类来改变文本颜色 -->
     </div>
     <div class="dropdown" v-if="showDropdown">
       <div

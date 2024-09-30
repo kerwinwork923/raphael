@@ -10,11 +10,10 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@pinia/nuxt": "^0.5.4",
     "axios": "^1.7.7",
     "nuxt": "^3.13.0",
-    "timepicker-ui": "^2.6.1",
-    "vue": "latest",
-    "vue-router": "latest"
+    "pinia": "^2.0.0"
   },
   "devDependencies": {
     "sass": "^1.79.1",

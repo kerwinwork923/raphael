@@ -8,7 +8,7 @@
           <img src="../assets/imgs/sticker.svg" alt="" />
         </div>
         <div class="infoTextGroup">
-          <div class="topText">{{ userInfo?.Name }}，您好</div>
+          <div class="topText">{{ userInfo?.Name }} <span v-if="userInfo?.Name">，</span>您好</div>
           <div class="score">
             <div class="circle"></div>
             <div class="scoreText">
