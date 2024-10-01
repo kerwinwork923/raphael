@@ -1,6 +1,6 @@
 // stores/firstSleepRecord.js
 import { defineStore } from "pinia";
-
+import axios from "axios";
 export const useFirstSleepRecordStore = defineStore("firstSleepRecord", {
   state: () => ({
     // 您的狀態屬性
@@ -8,14 +8,20 @@ export const useFirstSleepRecordStore = defineStore("firstSleepRecord", {
     layTimeToSleep: null,
     getupTime: null,
     sleepTime: null,
-    sleepBreak: 0,
-    peeTimes: 0,
-    medhelp: 0,
+    sleepBreak:null,
+    specialDiet:null ,
+    // peeTime: 0,
+    medhelp:null,
     sleepProperty: 0,
     emotionalState: 0,
     physicalStrength: 0,
     dayTimeSleepiness: 0,
-    otherPressureEvent: "",
+    workStress: 0,
+    relationshipStress: 0,
+    healthStress: 0,
+    lifestyleChangeStress: 0,
+    financialStress: 0,
+    otherPressureEventt: "",
   }),
 
   getters: {
@@ -47,12 +53,73 @@ export const useFirstSleepRecordStore = defineStore("firstSleepRecord", {
       { label: "中度嗜睡", value: 3 },
       { label: "嚴重嗜睡", value: 4 },
     ],
+    defaultOptions: () => [
+      { label: "無", value: 0 },
+      { label: "輕微", value: 1 },
+      { label: "輕度", value: 2 },
+      { label: "中度", value: 3 },
+      { label: "嚴重", value: 4 },
+    ],
   },
 
   actions: {
     updateScore(scoreBarValueName, newScore) {
-      this[scoreBarValueName] = newScore; 
- 
+      this[scoreBarValueName] = newScore;
+      console.log("更新後的狀態:", this.$state);
+    },
+    async saveSleepRecord() {
+      const localData = localStorage.getItem("userData");
+      const { MID, Token, MAID, Mobile } = localData
+        ? JSON.parse(localData)
+        : {};
+
+      const router = useRouter();
+
+      try {
+        if (!MID || !Token || !MAID || !Mobile) {
+          router.push("/login");
+          return;
+        }
+
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_SleepRecSave.jsp",
+          {
+            MID: String(MID),
+            Token: String(Token),
+            MAID: String(MAID),
+            Mobile: String(Mobile),
+            bedTime: String(this.bedTime),
+            LayTimeToSleep: String(this.layTimeToSleep),
+            getupTime: String(this.getupTime),
+            SleepTime: String(this.sleepTime),
+            SleepBreak: String(this.sleepBreak),
+            SpecialDiet: String(this.specialDiet),
+            MedHelp: String(this.medhelp),
+            SleepProperty: String(this.sleepProperty),
+            emotionalState: String(this.emotionalState),
+            physicalStrength: String(this.physicalStrength),
+            daytimeSleepiness: String(this.dayTimeSleepiness),
+            OtherPressureEvent: String(this.otherPressureEventt),
+            workStress: String(this.workStress),
+            relationshipStress: String(this.relationshipStress),
+            healthStress: String(this.healthStress),
+            lifestyleChangeStress: String(this.lifestyleChangeStress),
+            financialStress: String(this.financialStress),
+          }
+        );
+
+        if (response.status === 200) {
+          console.log("數據成功保存");
+          // 在這裡可以重置狀態或進行其他處理
+        } else {
+          console.error("API 返回的狀態碼不是 200:", response.status);
+        }
+      } catch (err) {
+        console.error("API 調用時發生錯誤:", err);
+        // 顯示錯誤通知
+      } finally {
+        // 清理工作，如重置狀態或隱藏加載指示器
+      }
     },
   },
 });

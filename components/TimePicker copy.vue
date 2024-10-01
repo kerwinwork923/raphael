@@ -25,28 +25,18 @@
 
 <script>
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
-import { useFirstSleepRecordStore } from "~/stores/firstSleepRecord"; // 根據實際路徑調整
 
 export default {
   props: {
-    modelValue: { // 使用 v-model 時需要的 props
-      type: String,
-      default: "",
-    },
-    currentTimeMode: {
-      type: String,
-      required: true,
-    },
     placeholder: {
       type: String,
       default: "請選擇時間",
     },
   },
   setup(props) {
-    const sleepStore = useFirstSleepRecordStore(); // 獲取 Pinia store
     const showDropdown = ref(false);
-    const selectedTime = ref(props.modelValue); // 初始化為 props 的值
-    const timePicker = ref(null); // 定義 timePicker
+    const selectedTime = ref("");
+    const timePicker = ref(null);
 
     const toggleDropdown = () => {
       showDropdown.value = !showDropdown.value;
@@ -54,15 +44,7 @@ export default {
 
     const selectTime = (time) => {
       selectedTime.value = time;
-
-      // 根據傳來的 currentTimeMode 更新對應的 Pinia store 值
-      if (props.currentTimeMode === 'layTime') {
-        sleepStore.layTimeToSleep = time; // 更新 layTimeToSleep
-      } else if (props.currentTimeMode === 'sleepTime') {
-        sleepStore.sleepTime = time; // 更新 sleepTime
-      }
-
-      showDropdown.value = false; // 關閉下拉選單
+      showDropdown.value = false;
     };
 
     const handleClickOutside = (event) => {
@@ -80,7 +62,7 @@ export default {
     });
 
     const availableTimes = [];
-    for (let i = 0; i < 4 * 8; i++) {
+    for (let i = 0; i < 4 * 4; i++) {
       const hours = String(Math.floor(i / 4)).padStart(2, "0");
       const minutes = String((i % 4) * 15).padStart(2, "0");
       availableTimes.push(`${hours}:${minutes}`);
@@ -97,7 +79,7 @@ export default {
       availableTimes,
       formattedTime,
       selectedTime,
-      timePicker, // 確保返回 timePicker
+      timePicker,
     };
   },
 };
@@ -126,6 +108,8 @@ export default {
 .picked-text {
   color: #1e1e1e !important;
   font-size: 1.075rem !important;
+
+
   letter-spacing: 1.25px;
   font-weight: bold;
 }

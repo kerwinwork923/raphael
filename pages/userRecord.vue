@@ -75,7 +75,10 @@
         <div class="sleepRecord">
           <h4>2.需要躺多久才入睡</h4>
           <div class="sleepInputGroup">
-            <TimePicker v-model="layTimeToSleep" placeholder="請選擇入睡時間" />
+            <TimePicker
+              currentTimeMode="layTime"
+              placeholder="請選擇入睡時間"
+            />
           </div>
         </div>
 
@@ -124,7 +127,10 @@
         <div class="sleepRecord">
           <h4>4.實際睡眠時間</h4>
           <div class="sleepInputGroup">
-            <TimePicker v-model="sleepTime" placeholder="請選擇深沉睡眠時間" />
+            <TimePicker
+              currentTimeMode="sleepTime"
+              placeholder="請選擇深沉睡眠時間"
+            />
           </div>
         </div>
 
@@ -136,8 +142,17 @@
                 <img class="timeIcon" src="../assets/imgs/time.svg" alt="" />
                 <div class="dropListGroup dropListGroupTimes">
                   <div class="dropListText">
-                    <div :class="{ dropListTextActive: sleepBreak >= 0 }">
-                      {{ sleepBreak >= 0 ? sleepBreak : "請選擇睡眠中斷次數" }}
+                    <div
+                      :class="{
+                        dropListTextActive:
+                          useFirstSleepRecordData.sleepBreak != null,
+                      }"
+                    >
+                      {{
+                        useFirstSleepRecordData.sleepBreak != null
+                          ? useFirstSleepRecordData.sleepBreak
+                          : "請選擇睡眠中斷次數"
+                      }}
                     </div>
                   </div>
 
@@ -157,7 +172,7 @@
           </div>
         </div>
 
-        <div class="sleepRecord">
+        <!-- <div class="sleepRecord">
           <h4>6.夜尿次數</h4>
           <div class="sleepInputGroup">
             <div class="sleepInputGroup">
@@ -165,8 +180,17 @@
                 <img class="timeIcon" src="../assets/imgs/time.svg" alt="" />
                 <div class="dropListGroup dropListGroupTimes">
                   <div class="dropListText">
-                    <div :class="{ dropListTextActive: peeTime >= 0 }">
-                      {{ peeTime >= 0 ? peeTime : "請選擇夜尿次數" }}
+                    <div
+                      :class="{
+                        dropListTextActive:
+                          useFirstSleepRecordData.peeTime >= 0,
+                      }"
+                    >
+                      {{
+                        useFirstSleepRecordData.peeTime >= 0
+                          ? useFirstSleepRecordData.peeTime
+                          : "請選擇夜尿次數"
+                      }}
                     </div>
                   </div>
 
@@ -184,6 +208,44 @@
               </div>
             </div>
           </div>
+        </div> -->
+
+        <div class="sleepRecord">
+          <h4>6.特殊飲食次數(應酬、聚餐 etc...)</h4>
+          <div class="sleepInputGroup">
+            <div class="sleepInputGroup">
+              <div class="selectGroup1" @click="toggleDropdown('6')">
+                <img class="timeIcon" src="../assets/imgs/time.svg" alt="" />
+                <div class="dropListGroup dropListGroupTimes">
+                  <div class="dropListText">
+                    <div
+                      :class="{
+                        dropListTextActive:
+                          useFirstSleepRecordData.specialDiet != null,
+                      }"
+                    >
+                      {{
+                        useFirstSleepRecordData.specialDiet != null
+                          ? useFirstSleepRecordData.specialDiet
+                          : "請選擇次數"
+                      }}
+                    </div>
+                  </div>
+
+                  <div class="dropList" v-if="showDropdown6">
+                    <div
+                      class="list"
+                      v-for="(specialDiet, index) in specialDiets"
+                      :key="index"
+                      @click="selectTime('specialDiet', specialDiet)"
+                    >
+                      {{ specialDiet }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="sleepRecord">
@@ -194,12 +256,18 @@
                 <img class="timeIcon" src="../assets/imgs/time.svg" alt="" />
                 <div class="dropListGroup dropListGroupTimes">
                   <div class="dropListText">
-                    <div :class="{ dropListTextActive: medhelp >= 0 }">
+                    <div
+                      :class="{
+                        dropListTextActive:
+                          useFirstSleepRecordData.medhelp != null,
+                      }"
+                    >
                       {{
-                        medhelp >= 0
-                          ? medhelp
+                        useFirstSleepRecordData.medhelp != null
+                          ? useFirstSleepRecordData.medhelp
                           : "請選擇每週使用藥物幫助睡眠天數"
-                      }} 天
+                      }}
+                      天
                     </div>
                   </div>
 
@@ -222,44 +290,84 @@
         <div class="sleepRecord">
           <h4>8.自覺睡眠品質</h4>
           <ScoreBar
-            v-model="sleepProperty"
             :options="useFirstSleepRecordData.sleepQualityOptions"
+            property="sleepProperty"
           />
         </div>
 
         <div class="sleepRecord">
           <h4>9.白天情緒狀態</h4>
           <ScoreBar
-            v-model="emotionalState"
             :options="useFirstSleepRecordData.dayEmotionOptions"
+            property="emotionalState"
           />
         </div>
 
         <div class="sleepRecord">
           <h4>10.白天體力、專注力、記憶力</h4>
           <ScoreBar
-            v-model="physocalStrength"
             :options="useFirstSleepRecordData.dayStateOptions"
+            property="physicalStrength"
           />
         </div>
 
         <div class="sleepRecord">
           <h4>11.白天嗜睡程度</h4>
           <ScoreBar
-            v-model="dayTimeSleepIness"
             :options="useFirstSleepRecordData.daySleepOptions"
+            property="dayTimeSleepiness"
           />
         </div>
 
         <div class="sleepRecord">
-          <h4>12.其他壓力來源</h4>
+          <h4>12.工作壓力、變動 (含升遷、離職、工作轉換)</h4>
+          <ScoreBar
+            :options="useFirstSleepRecordData.defaultOptions"
+            property="workStress"
+          />
+        </div>
+
+        <div class="sleepRecord">
+          <h4>13.親密關係壓力 (含結婚、爭吵、離婚等)</h4>
+          <ScoreBar
+            :options="useFirstSleepRecordData.defaultOptions"
+            property="relationshipStress"
+          />
+        </div>
+
+        <div class="sleepRecord">
+          <h4>14.自身或家人健康狀況壓力</h4>
+          <ScoreBar
+            :options="useFirstSleepRecordData.defaultOptions"
+            property="healthStress"
+          />
+        </div>
+
+        <div class="sleepRecord">
+          <h4>15.生活型態變動壓力 (含飲食習慣調整、強迫運動等)</h4>
+          <ScoreBar
+            :options="useFirstSleepRecordData.defaultOptions"
+            property="lifestyleChangeStress"
+          />
+        </div>
+
+        <div class="sleepRecord">
+          <h4>16.經濟壓力 (含常態性支出或突發性支出)</h4>
+          <ScoreBar
+            :options="useFirstSleepRecordData.defaultOptions"
+            property="financialStress"
+          />
+        </div>
+
+        <div class="sleepRecord">
+          <h4>17.其他壓力來源</h4>
           <div class="sleepInputGroup">
             <textarea
               name=""
               rows="5"
               placeholder="請簡短講述近期壓力事件"
               id=""
-              v-model="otherPressureEvent"
+              v-model="useFirstSleepRecordData.otherPressureEventt"
             ></textarea>
           </div>
         </div>
@@ -352,7 +460,7 @@
 
 <script>
 import Navbar from "~/components/Navbar.vue";
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, onMounted, onBeforeUnmount, watch } from "vue";
 import ScoreBar from "~/components/ScoreBar.vue";
 import TimePicker from "../components/TimePicker.vue";
 import TimePicker2 from "../components/TimePicker2.vue";
@@ -376,10 +484,7 @@ export default {
     const bedTimeMinute = ref();
     const getupTimeHour = ref();
     const getupTimeMinute = ref();
-    const sleepBreak = ref();
-    const peeTime = ref();
-    const medhelp = ref();
-    const otherPressureEvent = ref();
+
     const showDropdown1 = ref(false);
     const showDropdown1_2 = ref(false);
     const showDropdown2 = ref(false);
@@ -394,6 +499,26 @@ export default {
     const getupTimeHourDropdown = ref(null);
     const getupTimeMinuteDropdown = ref(null);
 
+    watch([bedTimeHour, bedTimeMinute], ([newHour, newMinute]) => {
+      if (newHour !== undefined && newMinute !== undefined) {
+        // 格式化為 "xx:xx"
+        const bedTime = `${String(newHour).padStart(2, "0")}:${String(
+          newMinute
+        ).padStart(2, "0")}`;
+        useFirstSleepRecordData.bedTime = bedTime; // 更新 Pinia 狀態
+      }
+    });
+
+    watch([getupTimeHour, getupTimeMinute], ([newHour, newMinute]) => {
+      if (newHour !== undefined && newMinute !== undefined) {
+        // 格式化為 "xx:xx"
+        const getupTime = `${String(newHour).padStart(2, "0")}:${String(
+          newMinute
+        ).padStart(2, "0")}`;
+        useFirstSleepRecordData.getupTime = getupTime; // 更新 Pinia 狀態
+      }
+    });
+
     // 時間選項
     const hours = Array.from({ length: 24 }, (_, i) =>
       String(i).padStart(2, "0")
@@ -403,7 +528,8 @@ export default {
     );
 
     const sleepBreaks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    const peeTimes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    // const peeTimes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const specialDiets = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     const medhelps = [0, 1, 2, 3, 4, 5, 6, 7];
     const closeAllSelect = (currentDropdown) => {
       showDropdown1.value =
@@ -457,24 +583,40 @@ export default {
 
     // 選擇時間
     const selectTime = (type, value) => {
-      if (type === "bedTimeHour") {
-        bedTimeHour.value = value;
-        showDropdown1.value = false;
-      } else if (type === "bedTimeMinute") {
-        bedTimeMinute.value = value;
-        showDropdown1_2.value = false;
-      } else if (type === "getupTimeHour") {
-        getupTimeHour.value = value;
-        showDropdown2.value = false;
-      } else if (type === "getupTimeMinute") {
-        getupTimeMinute.value = value;
-        showDropdown2_2.value = false;
-      } else if (type === "sleepBreak") {
-        sleepBreak.value = value;
-      } else if (type === "peeTime") {
-        peeTime.value = value;
-      } else if (type === "medhelp") {
-        medhelp.value = value;
+      const timeMappings = {
+        bedTimeHour: () => {
+          bedTimeHour.value = value;
+          showDropdown1.value = false;
+        },
+        bedTimeMinute: () => {
+          bedTimeMinute.value = value;
+          showDropdown1_2.value = false;
+        },
+        getupTimeHour: () => {
+          getupTimeHour.value = value;
+          showDropdown2.value = false;
+        },
+        getupTimeMinute: () => {
+          getupTimeMinute.value = value;
+          showDropdown2_2.value = false;
+        },
+        sleepBreak: () => {
+          useFirstSleepRecordData.sleepBreak = value;
+        },
+        peeTime: () => {
+          useFirstSleepRecordData.peeTime = value;
+        },
+        specialDiet: () => {
+          useFirstSleepRecordData.specialDiet = value;
+        },
+        medhelp: () => {
+          useFirstSleepRecordData.medhelp = value;
+        },
+      };
+
+      // 如果存在對應的函數，則執行它
+      if (timeMappings[type]) {
+        timeMappings[type]();
       }
     };
 
@@ -499,7 +641,9 @@ export default {
     });
 
     // 完成測試
-    const firstTest = () => {
+    const firstTest = async () => {
+      const sleepStore = useFirstSleepRecordStore();
+      await sleepStore.saveSleepRecord();
       sleepState.value = "sleepRecord1";
       window.scrollTo(0, 0);
     };
@@ -517,9 +661,7 @@ export default {
       showDropdown5,
       showDropdown6,
       showDropdown7,
-      sleepBreak,
-
-      medhelp,
+      sleepBreaks,
       toggleDropdown,
       selectTime,
       bedTimeHour,
@@ -527,16 +669,14 @@ export default {
       getupTimeHour,
       getupTimeMinute,
       userRecord,
-      peeTimes,
-      peeTime,
 
       medhelps,
       bedTimeHourDropdown,
       bedTimeMinuteDropdown,
       getupTimeHourDropdown,
       getupTimeMinuteDropdown,
-      sleepBreaks,
-      otherPressureEvent,
+      useFirstSleepRecordData,
+      specialDiets,
     };
   },
 };
@@ -649,7 +789,6 @@ export default {
 
           .list {
             padding: 0.5rem 0.75rem;
-            text-align: center;
             cursor: pointer;
           }
         }
@@ -660,14 +799,13 @@ export default {
           text-align: left;
           margin-left: 1.25rem;
         }
-        .dropListTextActive{
+        .dropListTextActive {
           color: #1e1e1e;
           font-weight: bold;
-          
-        display: flex;
-        justify-content: center;
-        width: 90%;
-          
+          color: #1e1e1e;
+          font-size: 1.075rem;
+          letter-spacing: 1.25px;
+          font-weight: bold;
         }
         .dropList {
           width: 100%;

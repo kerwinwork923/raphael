@@ -11,39 +11,13 @@
       ></div>
       <div class="numberGroup">
         <div
+          v-for="(option, index) in options"
+          :key="index"
           class="number"
-          :class="{ selected: score >= 0 }"
-          @click="setScore(0, 'sleepProperty')"
+          :class="{ selected: score >= index }"
+          @click="setScore(index, property)"
         >
-          0
-        </div>
-        <div
-          class="number"
-          :class="{ selected: score >= 1 }"
-          @click="setScore(1, 'emotionalState')"
-        >
-          1
-        </div>
-        <div
-          class="number"
-          :class="{ selected: score >= 2 }"
-          @click="setScore(2, 'physicalStrength')"
-        >
-          2
-        </div>
-        <div
-          class="number"
-          :class="{ selected: score >= 3 }"
-          @click="setScore(3, 'dayTimeSleepiness')"
-        >
-          3
-        </div>
-        <div
-          class="number"
-          :class="{ selected: score >= 4 }"
-          @click="setScore(4, 'otherPressureEvent')"
-        >
-          4
+          {{ index }}
         </div>
       </div>
     </div>
@@ -65,6 +39,10 @@ export default defineComponent({
       type: Array,
       required: true,
     },
+    property: {
+      type: String,
+      required: true,
+    },
   },
   setup(props) {
     const score = ref(props.modelValue);
@@ -83,6 +61,7 @@ export default defineComponent({
   },
 });
 </script>
+
 <style scoped lang="scss">
 .scoreBarGroup {
   position: relative;
