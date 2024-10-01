@@ -1,5 +1,6 @@
 <template>
   <div class="userRecord">
+    <RaphaelLoading v-if="loading" />
     <Navbar />
     <div class="userRecoreWrap">
       <div class="tagList">
@@ -376,14 +377,13 @@
 
       <div class="sleepIndex1" v-if="sleepState === 'sleepRecord1'">
         <div class="floatGroup">
-          <div class="floatLeft">
-            感謝您使用我們的系統請等待<span>12天</span>後再進行第二次檢測
-          </div>
+          <div v-html="SleepText" class="floatLeft"></div>
+
           <img src="../assets/imgs/doctor.png" alt="" />
         </div>
         <div class="firstSleepRecord">
           <h2>檢測紀錄</h2>
-          <div class="emoji Group">
+          <div class="emojiGroup">
             <div class="firstScore">
               <div class="firstScoreTitle">
                 <h3>第一次檢測分數</h3>
@@ -404,51 +404,183 @@
             </div>
           </div>
           <div class="sleepRecordListGroup">
-            <h5 class="sleepRecordListDate">8/24</h5>
+            <h5 class="sleepRecordListDate">
+              {{
+                sleepRecData.SleepRec.length > 0
+                  ? formatCheckTime(sleepRecData?.SleepRec[0].CheckTime)
+                  : ""
+              }}
+            </h5>
             <div class="sleepRecordList">
               <div class="sleepRecordItem">
                 <h4>上床時間</h4>
-                <h5>23:10 pm</h5>
+                <h5>{{ sleepRecData?.SleepRec[0].bedTime || "-" }}</h5>
               </div>
               <div class="sleepRecordItem">
                 <h4>入睡時間</h4>
-                <h5>00:15 am</h5>
+                <h5>{{ sleepRecData?.SleepRec[0].LayTimeToSleep || "-" }}</h5>
               </div>
               <div class="sleepRecordItem">
                 <h4>起床時間</h4>
-                <h5>07:20 am</h5>
+                <h5>{{ sleepRecData?.SleepRec[0].getupTime || "-" }}</h5>
               </div>
               <div class="sleepRecordItem">
                 <h4>深層睡眠時間</h4>
-                <h5>1hr 20分min</h5>
+                <h5>{{ sleepRecData?.SleepRec[0].SleepTime || "-" }}</h5>
               </div>
               <div class="sleepRecordItem">
                 <h4>睡眠中斷次數</h4>
-                <h5>3</h5>
+                <h5>{{ sleepRecData?.SleepRec[0].SleepBreak || "-" }}</h5>
               </div>
               <div class="sleepRecordItem">
-                <h4>夜尿次數</h4>
-                <h5>-</h5>
+                <h4>特殊飲食次數</h4>
+                <h5>{{ sleepRecData?.SleepRec[0].SpecialDiet || "-" }}</h5>
               </div>
               <div class="sleepRecordItem">
-                <h4>整體睡眠品質</h4>
-                <h5>中度不足</h5>
+                <h4>藥物輔助天數</h4>
+                <h5>{{ sleepRecData?.SleepRec[0].MedHelp || "-" }}</h5>
+              </div>
+
+              <div class="sleepRecordItem">
+                <h4>自覺睡覺品質</h4>
+                <h5>{{ sleepRecData?.SleepRec[0].SleepProperty || "-" }}</h5>
+              </div>
+
+              <div class="sleepRecordItem">
+                <h4>白天情緒狀態</h4>
+                <h5>{{ sleepRecData?.SleepRec[0].emotionalState || "-" }}</h5>
               </div>
               <div class="sleepRecordItem">
-                <h4>白天美好感</h4>
-                <h5>還不錯</h5>
-              </div>
-              <div class="sleepRecordItem">
-                <h4>白天身心功能</h4>
-                <h5>還不錯</h5>
+                <h4>白天體力、專注力、記憶力</h4>
+                <h5>{{ sleepRecData?.SleepRec[0].SpecialDiet || "-" }}</h5>
               </div>
               <div class="sleepRecordItem">
                 <h4>白天嗜睡程度</h4>
-                <h5>輕度</h5>
+                <h5>
+                  {{ sleepRecData?.SleepRec[0].daytimeSleepiness || "-" }}
+                </h5>
               </div>
               <div class="sleepRecordItem">
-                <h4>近期壓力事件</h4>
-                <h5>-</h5>
+                <h4>工作壓力、變動</h4>
+                <h5>{{ sleepRecData?.SleepRec[0].workStress || "-" }}</h5>
+              </div>
+              <div class="sleepRecordItem">
+                <h4>輕密關係壓力</h4>
+                <h5>
+                  {{ sleepRecData?.SleepRec[0].relationshipStress || "-" }}
+                </h5>
+              </div>
+              <div class="sleepRecordItem">
+                <h4>自身或家人健康狀況壓力</h4>
+                <h5>{{ sleepRecData?.SleepRec[0].healthStress || "-" }}</h5>
+              </div>
+              <div class="sleepRecordItem">
+                <h4>生活型態變動壓力</h4>
+                <h5>
+                  {{ sleepRecData?.SleepRec[0].lifestyleChangeStress || "-" }}
+                </h5>
+              </div>
+              <div class="sleepRecordItem">
+                <h4>經濟壓力</h4>
+                <h5>{{ sleepRecData?.SleepRec[0].physicalStrength || "-" }}</h5>
+              </div>
+              <div class="sleepRecordItem">
+                <h4>壓力事件紀錄</h4>
+                <h5>
+                  {{ sleepRecData?.SleepRec[0].OtherPressureEvent || "-" }}
+                </h5>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="firstSleepRecord" v-if="sleepRecData?.SleepRec[1]">
+          <div class="sleepRecordListGroup">
+            <h5 class="sleepRecordListDate">
+              {{
+                sleepRecData
+                  ? formatCheckTime(sleepRecData?.SleepRec[1].CheckTime)
+                  : ""
+              }}
+            </h5>
+            <div class="sleepRecordList">
+              <div class="sleepRecordItem">
+                <h4>上床時間</h4>
+                <h5>{{ sleepRecData?.SleepRec[1].bedTime || "-" }}</h5>
+              </div>
+              <div class="sleepRecordItem">
+                <h4>入睡時間</h4>
+                <h5>{{ sleepRecData?.SleepRec[1].LayTimeToSleep || "-" }}</h5>
+              </div>
+              <div class="sleepRecordItem">
+                <h4>起床時間</h4>
+                <h5>{{ sleepRecData?.SleepRec[1].getupTime || "-" }}</h5>
+              </div>
+              <div class="sleepRecordItem">
+                <h4>深層睡眠時間</h4>
+                <h5>{{ sleepRecData?.SleepRec[1].SleepTime || "-" }}</h5>
+              </div>
+              <div class="sleepRecordItem">
+                <h4>睡眠中斷次數</h4>
+                <h5>{{ sleepRecData?.SleepRec[1].SleepBreak || "-" }}</h5>
+              </div>
+              <div class="sleepRecordItem">
+                <h4>特殊飲食次數</h4>
+                <h5>{{ sleepRecData?.SleepRec[1].SpecialDiet || "-" }}</h5>
+              </div>
+              <div class="sleepRecordItem">
+                <h4>藥物輔助天數</h4>
+                <h5>{{ sleepRecData?.SleepRec[1].MedHelp || "-" }}</h5>
+              </div>
+
+              <div class="sleepRecordItem">
+                <h4>自覺睡覺品質</h4>
+                <h5>{{ sleepRecData?.SleepRec[1].SleepProperty || "-" }}</h5>
+              </div>
+
+              <div class="sleepRecordItem">
+                <h4>白天情緒狀態</h4>
+                <h5>{{ sleepRecData?.SleepRec[1].emotionalState || "-" }}</h5>
+              </div>
+              <div class="sleepRecordItem">
+                <h4>白天體力、專注力、記憶力</h4>
+                <h5>{{ sleepRecData?.SleepRec[1].SpecialDiet || "-" }}</h5>
+              </div>
+              <div class="sleepRecordItem">
+                <h4>白天嗜睡程度</h4>
+                <h5>
+                  {{ sleepRecData?.SleepRec[1].daytimeSleepiness || "-" }}
+                </h5>
+              </div>
+              <div class="sleepRecordItem">
+                <h4>工作壓力、變動</h4>
+                <h5>{{ sleepRecData?.SleepRec[1].workStress || "-" }}</h5>
+              </div>
+              <div class="sleepRecordItem">
+                <h4>輕密關係壓力</h4>
+                <h5>
+                  {{ sleepRecData?.SleepRec[1].relationshipStress || "-" }}
+                </h5>
+              </div>
+              <div class="sleepRecordItem">
+                <h4>自身或家人健康狀況壓力</h4>
+                <h5>{{ sleepRecData?.SleepRec[1].healthStress || "-" }}</h5>
+              </div>
+              <div class="sleepRecordItem">
+                <h4>生活型態變動壓力</h4>
+                <h5>
+                  {{ sleepRecData?.SleepRec[1].lifestyleChangeStress || "-" }}
+                </h5>
+              </div>
+              <div class="sleepRecordItem">
+                <h4>經濟壓力</h4>
+                <h5>{{ sleepRecData?.SleepRec[1].physicalStrength || "-" }}</h5>
+              </div>
+              <div class="sleepRecordItem">
+                <h4>壓力事件紀錄</h4>
+                <h5>
+                  {{ sleepRecData?.SleepRec[1].OtherPressureEvent || "-" }}
+                </h5>
               </div>
             </div>
           </div>
@@ -466,6 +598,10 @@ import TimePicker from "../components/TimePicker.vue";
 import TimePicker2 from "../components/TimePicker2.vue";
 import TimesOption from "../components/TimesOption.vue";
 import { useFirstSleepRecordStore } from "~/stores/firstSleepRecord";
+import axios from "axios";
+import { useRouter } from "vue-router";
+
+import RaphaelLoading from "../components/RaphaelLoading";
 
 export default {
   components: {
@@ -474,12 +610,14 @@ export default {
     TimePicker,
     TimePicker2,
     TimesOption,
+    RaphaelLoading,
   },
   setup() {
     const useFirstSleepRecordData = useFirstSleepRecordStore();
-    console.log(useFirstSleepRecordData);
 
-    const sleepState = ref("firstTest");
+    const router = useRouter();
+
+    const sleepState = ref();
     const bedTimeHour = ref();
     const bedTimeMinute = ref();
     const getupTimeHour = ref();
@@ -492,12 +630,22 @@ export default {
     const showDropdown5 = ref(false);
     const showDropdown6 = ref(false);
     const showDropdown7 = ref(false);
+
     // 引用下拉選單的 DOM 元素
     const userRecord = ref(null);
     const bedTimeHourDropdown = ref(null);
     const bedTimeMinuteDropdown = ref(null);
     const getupTimeHourDropdown = ref(null);
     const getupTimeMinuteDropdown = ref(null);
+
+    const sleepRecData = ref(null);
+
+    const SleepRecCond = ref(null);
+    const loading = ref(false);
+
+    const SleepText = ref(`
+    感謝您使用我們的系統請等待<span>${SleepRecCond.value}天</span>後再進行第二次檢測
+    `);
 
     watch([bedTimeHour, bedTimeMinute], ([newHour, newMinute]) => {
       if (newHour !== undefined && newMinute !== undefined) {
@@ -631,6 +779,100 @@ export default {
       }
     };
 
+    const getSleepRecData = async () => {
+      loading.value = true;
+      const localData = localStorage.getItem("userData");
+      const { MID, Token, MAID, Mobile } = localData
+        ? JSON.parse(localData)
+        : {};
+
+      if (!MID || !Token || !MAID || !Mobile) {
+        router.push("/login");
+        return;
+      }
+
+      try {
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_SleepRecDetail.jsp",
+          {
+            MID: String(MID),
+            Token: String(Token),
+            MAID: String(MAID),
+            Mobile: String(Mobile),
+          }
+        );
+        if (response.status === 200) {
+          response.data.SleepRec.reverse();
+          sleepRecData.value = response.data;
+
+          if (
+            sleepRecData.value.SleepRec.length < 2 &&
+            SleepRecCond.value == "-1"
+          ) {
+            sleepState.value = "firstTest";
+          } else if (
+            sleepRecData.value.SleepRec.length < 1 &&
+            SleepRecCond.value == "-1"
+          ) {
+            sleepState.value = "firstTest";
+          } else {
+            sleepState.value = "sleepRecord1";
+          }
+        }
+      } catch (err) {
+        console.log(err);
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    const getIndexSleepRecData = async () => {
+      const localData = localStorage.getItem("userData");
+      const { MID, Token, MAID, Mobile } = localData
+        ? JSON.parse(localData)
+        : {};
+
+      if (!MID || !Token || !MAID || !Mobile) {
+        router.push("/login");
+        return;
+      }
+
+      try {
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_SleepRec.jsp",
+          {
+            MID: String(MID),
+            Token: String(Token),
+            MAID: String(MAID),
+            Mobile: String(Mobile),
+          }
+        );
+
+        if (response.status === 200) {
+          SleepRecCond.value = response.data.SleepRecCond;
+
+          if (sleepRecData.value.SleepRec.length >= 2) {
+            SleepText.value = `
+          感謝您使用我們的系統恭喜您已完成了兩次測驗 ! 
+          `;
+          } else {
+            SleepText.value = `
+          感謝您使用我們的系統請等待<span>${SleepRecCond.value}天</span>後再進行第二次檢測
+          `;
+          }
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    const cc = async () => {
+      await getSleepRecData();
+      await getIndexSleepRecData();
+    };
+
+    cc()
+ 
+    // getSleepRecData();
     // 添加和移除全局點擊事件監聽器
     onMounted(() => {
       document.addEventListener("click", handleClickOutside);
@@ -644,13 +886,25 @@ export default {
     const firstTest = async () => {
       const sleepStore = useFirstSleepRecordStore();
       await sleepStore.saveSleepRecord();
+      await getSleepRecData();
+      await getIndexSleepRecData();
       sleepState.value = "sleepRecord1";
       window.scrollTo(0, 0);
+    };
+
+    const formatCheckTime = (timeString) => {
+      const year = timeString.substring(0, 4);
+      const month = timeString.substring(4, 6);
+      const day = timeString.substring(6, 8);
+
+      // Return formatted date as MM/DD (remove leading zeros from month and day)
+      return `${parseInt(month)}/${parseInt(day)}`;
     };
 
     return {
       sleepState,
       firstTest,
+      loading,
       useFirstSleepRecordData,
       hours,
       minutes,
@@ -677,6 +931,9 @@ export default {
       getupTimeMinuteDropdown,
       useFirstSleepRecordData,
       specialDiets,
+      sleepRecData,
+      formatCheckTime,
+      SleepText,
     };
   },
 };
@@ -915,6 +1172,7 @@ export default {
     animation: fade 0.5s forwards ease;
     animation-delay: 0.5s;
     opacity: 0;
+    margin-bottom: 0.5rem;
     @include respond-to("tablet") {
       width: 100%;
       transform: translateY(0%);
@@ -967,7 +1225,7 @@ export default {
     }
 
     .sleepRecordListGroup {
-      margin-top: 1.5rem;
+      margin-top: 0.5rem;
       .sleepRecordListDate {
         text-align: center;
         color: #1e1e1e;
@@ -988,9 +1246,14 @@ export default {
             font-size: 1rem;
             font-weight: 400;
             letter-spacing: 0.5px;
+            width: 40%;
+            white-space: nowrap;
           }
           h5 {
             color: $raphael-green-400;
+            width: 60%;
+            display: flex;
+            justify-content: end;
           }
         }
       }

@@ -15,7 +15,7 @@
           :key="index"
           class="number"
           :class="{ selected: score >= index }"
-          @click="setScore(index, property)"
+          @click="setScore(option.label, property, index)"
         >
           {{ index }}
         </div>
@@ -48,8 +48,8 @@ export default defineComponent({
     const score = ref(props.modelValue);
     const store = useFirstSleepRecordStore();
 
-    const setScore = (value, property) => {
-      score.value = value;
+    const setScore = (value, property, index) => {
+      score.value = index;
       store.updateScore(property, value);
     };
 
