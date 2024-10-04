@@ -850,15 +850,16 @@ export default {
 
         if (response.status === 200) {
           SleepRecCond.value = response.data.SleepRecCond;
-
-          if (sleepRecData.value.SleepRec.length >= 2) {
-            SleepText.value = `
+          if (sleepRecData.value && sleepRecData.value.SleepRec) {
+            if (sleepRecData.value.SleepRec.length >= 2) {
+              SleepText.value = `
           感謝您使用我們的系統恭喜您已完成了兩次測驗 ! 
           `;
-          } else {
-            SleepText.value = `
+            } else {
+              SleepText.value = `
           感謝您使用我們的系統請等待<span>${SleepRecCond.value}天</span>後再進行第二次檢測
           `;
+            }
           }
         }
       } catch (err) {
@@ -866,12 +867,16 @@ export default {
       }
     };
     const cc = async () => {
-      await getSleepRecData();
-      await getIndexSleepRecData();
+      try {
+        await getSleepRecData();
+        await getIndexSleepRecData();
+      } catch (err) {
+        console.log("Error in cc function:", err);
+      }
     };
 
-    cc()
- 
+    cc();
+
     // getSleepRecData();
     // 添加和移除全局點擊事件監聽器
     onMounted(() => {
