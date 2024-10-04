@@ -3,13 +3,7 @@
     <RaphaelLoading v-if="loading" />
     <Navbar />
     <div class="userRecoreWrap">
-      <div class="tagList">
-        <div class="listItem">總覽</div>
-        <div class="listItem">每周量表</div>
-        <div class="listItem listActive">睡眠紀錄</div>
-        <div class="listItem">兒童成長紀錄</div>
-      </div>
-
+      <tagList />
       <div class="sleepRecordWrap" v-if="sleepState === 'firstTest'">
         <div class="subList">
           <span class="subListActive">填寫問卷</span>
@@ -32,8 +26,6 @@
         <div class="sleepRecord">
           <h4>1.幾點上床</h4>
           <div class="sleepInputGroup">
-            <!-- <input class="timeInput" placeholder="請選擇上床時間" /> -->
-            <!-- <TimePicker2 v-model="bedTimeHour" label="請選擇上床時間" /> -->
             <div class="selectGroup1">
               <img class="timeIcon" src="../assets/imgs/time.svg" alt="" />
               <div class="dropListGroup">
@@ -361,7 +353,7 @@
         </div>
 
         <div class="sleepRecord">
-          <h4>17.其他壓力來源</h4>
+          <h4>17.壓力事件紀錄</h4>
           <div class="sleepInputGroup">
             <textarea
               name=""
@@ -380,7 +372,6 @@
       <div class="sleepIndex1" v-if="sleepState === 'sleepRecord1'">
         <div class="floatGroup">
           <div v-html="SleepText" class="floatLeft"></div>
-
           <img src="../assets/imgs/doctor.png" alt="" />
         </div>
         <div class="firstSleepRecord">
@@ -589,6 +580,12 @@
             </div>
           </div>
         </div>
+
+        <div class="backToUserBtnGroup">
+          <button class="backToUserBtn" @click="backToUser">
+            返回會員中心
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -605,6 +602,8 @@ import { useFirstSleepRecordStore } from "~/stores/firstSleepRecord";
 import axios from "axios";
 import { useRouter } from "vue-router";
 
+import TagList from "../components/TagList.vue";
+
 import RaphaelLoading from "../components/RaphaelLoading";
 
 const isSubmitting = ref(false);
@@ -617,6 +616,7 @@ export default {
     TimePicker2,
     TimesOption,
     RaphaelLoading,
+    TagList,
   },
   setup() {
     const useFirstSleepRecordData = useFirstSleepRecordStore();
@@ -786,9 +786,11 @@ export default {
       }
     };
 
-    const getSleepRecData = async () => {
-  
+    const backToUser = () => {
+      router.push({ name: "user" });
+    };
 
+    const getSleepRecData = async () => {
       const localData = localStorage.getItem("userData");
       const { MID, Token, MAID, Mobile } = localData
         ? JSON.parse(localData)
@@ -819,7 +821,6 @@ export default {
           感謝您使用我們的系統恭喜您已完成了兩次測驗 !
           `;
           } else {
-        
             SleepText.value = `
           感謝您使用我們的系統請等待<span>${SleepRecCond.value}天</span>後再進行第二次檢測
           `;
@@ -841,7 +842,7 @@ export default {
         }
       } catch (err) {
         console.log(err);
-      } 
+      }
     };
 
     const getIndexSleepRecData = async () => {
@@ -960,6 +961,7 @@ export default {
       formatCheckTime,
       SleepText,
       isSubmitting,
+      backToUser,
     };
   },
 };
@@ -976,26 +978,7 @@ export default {
 .userRecoreWrap {
   padding: 0 5%;
 }
-.tagList {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.75%;
-  padding-top: 4.5rem;
-  .listItem {
-    font-size: 14px;
-    font-weight: 400;
-    letter-spacing: 0.1px;
-    padding: 10px 12px;
-    border-radius: 6px;
-    color: $raphael-gray-500;
-    cursor: pointer;
-  }
-  .listActive {
-    background-color: $raphael-green-400;
-    color: #fff;
-  }
-}
+
 .subList {
   color: #666;
   font-family: 14px;
@@ -1108,6 +1091,7 @@ export default {
       border-radius: 8px;
       padding: 0.5rem 1rem;
       margin-top: 0.85rem;
+      font-size: 1rem;
     }
     .timeInput {
       padding-left: 1.5rem;
@@ -1119,7 +1103,8 @@ export default {
     }
   }
 }
-.submitBtn {
+.submitBtn,
+.backToUserBtn {
   background-color: $raphael-green-400;
   color: #fff;
   padding: 12px;
@@ -1135,6 +1120,21 @@ export default {
   &:hover {
     background-color: $raphael-green-500;
   }
+}
+
+.backToUserBtnGroup {
+  position: fixed;
+  bottom: 5.5%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  background-color: $raphael-gray-200;
+  text-align: center;
+}
+.backToUserBtn {
+  width: 90%;
+  padding: 0;
+  padding: 8px;
 }
 
 .sleepIndex1 {
