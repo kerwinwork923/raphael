@@ -1115,7 +1115,7 @@ export default {
   font-weight: 400;
   letter-spacing: 0.5px;
   transition: 0.25s ease;
-
+ 
   cursor: pointer;
   &:hover {
     background-color: $raphael-green-500;
@@ -1124,17 +1124,21 @@ export default {
 
 .backToUserBtnGroup {
   position: fixed;
-  bottom: 5.5%;
+  bottom: 2%;
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
   background-color: $raphael-gray-200;
   text-align: center;
+  z-index: 100;
+
+  padding: 3% 0;
 }
 .backToUserBtn {
   width: 90%;
   padding: 0;
   padding: 8px;
+ 
 }
 
 .sleepIndex1 {
