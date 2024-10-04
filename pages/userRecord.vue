@@ -372,7 +372,9 @@
             ></textarea>
           </div>
         </div>
-        <button class="submitBtn" @click="firstTest">完成</button>
+        <button class="submitBtn" @click="firstTest" :disabled="isSubmitting">
+          完成
+        </button>
       </div>
 
       <div class="sleepIndex1" v-if="sleepState === 'sleepRecord1'">
@@ -414,80 +416,82 @@
             <div class="sleepRecordList">
               <div class="sleepRecordItem">
                 <h4>上床時間</h4>
-                <h5>{{ sleepRecData?.SleepRec[0].bedTime || "-" }}</h5>
+                <h5>{{ sleepRecData?.SleepRec[0]?.bedTime || "-" }}</h5>
               </div>
               <div class="sleepRecordItem">
                 <h4>入睡時間</h4>
-                <h5>{{ sleepRecData?.SleepRec[0].LayTimeToSleep || "-" }}</h5>
+                <h5>{{ sleepRecData?.SleepRec[0]?.LayTimeToSleep || "-" }}</h5>
               </div>
               <div class="sleepRecordItem">
                 <h4>起床時間</h4>
-                <h5>{{ sleepRecData?.SleepRec[0].getupTime || "-" }}</h5>
+                <h5>{{ sleepRecData?.SleepRec[0]?.getupTime || "-" }}</h5>
               </div>
               <div class="sleepRecordItem">
                 <h4>深層睡眠時間</h4>
-                <h5>{{ sleepRecData?.SleepRec[0].SleepTime || "-" }}</h5>
+                <h5>{{ sleepRecData?.SleepRec[0]?.SleepTime || "-" }}</h5>
               </div>
               <div class="sleepRecordItem">
                 <h4>睡眠中斷次數</h4>
-                <h5>{{ sleepRecData?.SleepRec[0].SleepBreak || "-" }}</h5>
+                <h5>{{ sleepRecData?.SleepRec[0]?.SleepBreak || "-" }}</h5>
               </div>
               <div class="sleepRecordItem">
                 <h4>特殊飲食次數</h4>
-                <h5>{{ sleepRecData?.SleepRec[0].SpecialDiet || "-" }}</h5>
+                <h5>{{ sleepRecData?.SleepRec[0]?.SpecialDiet || "-" }}</h5>
               </div>
               <div class="sleepRecordItem">
                 <h4>藥物輔助天數</h4>
-                <h5>{{ sleepRecData?.SleepRec[0].MedHelp || "-" }}</h5>
+                <h5>{{ sleepRecData?.SleepRec[0]?.MedHelp || "-" }}</h5>
               </div>
 
               <div class="sleepRecordItem">
                 <h4>自覺睡覺品質</h4>
-                <h5>{{ sleepRecData?.SleepRec[0].SleepProperty || "-" }}</h5>
+                <h5>{{ sleepRecData?.SleepRec[0]?.SleepProperty || "-" }}</h5>
               </div>
 
               <div class="sleepRecordItem">
                 <h4>白天情緒狀態</h4>
-                <h5>{{ sleepRecData?.SleepRec[0].emotionalState || "-" }}</h5>
+                <h5>{{ sleepRecData?.SleepRec[0]?.emotionalState || "-" }}</h5>
               </div>
               <div class="sleepRecordItem">
                 <h4>白天體力、專注力、記憶力</h4>
-                <h5>{{ sleepRecData?.SleepRec[0].SpecialDiet || "-" }}</h5>
+                <h5>{{ sleepRecData?.SleepRec[0]?.SpecialDiet || "-" }}</h5>
               </div>
               <div class="sleepRecordItem">
                 <h4>白天嗜睡程度</h4>
                 <h5>
-                  {{ sleepRecData?.SleepRec[0].daytimeSleepiness || "-" }}
+                  {{ sleepRecData?.SleepRec[0]?.daytimeSleepiness || "-" }}
                 </h5>
               </div>
               <div class="sleepRecordItem">
                 <h4>工作壓力、變動</h4>
-                <h5>{{ sleepRecData?.SleepRec[0].workStress || "-" }}</h5>
+                <h5>{{ sleepRecData?.SleepRec[0]?.workStress || "-" }}</h5>
               </div>
               <div class="sleepRecordItem">
                 <h4>輕密關係壓力</h4>
                 <h5>
-                  {{ sleepRecData?.SleepRec[0].relationshipStress || "-" }}
+                  {{ sleepRecData?.SleepRec[0]?.relationshipStress || "-" }}
                 </h5>
               </div>
               <div class="sleepRecordItem">
                 <h4>自身或家人健康狀況壓力</h4>
-                <h5>{{ sleepRecData?.SleepRec[0].healthStress || "-" }}</h5>
+                <h5>{{ sleepRecData?.SleepRec[0]?.healthStress || "-" }}</h5>
               </div>
               <div class="sleepRecordItem">
                 <h4>生活型態變動壓力</h4>
                 <h5>
-                  {{ sleepRecData?.SleepRec[0].lifestyleChangeStress || "-" }}
+                  {{ sleepRecData?.SleepRec[0]?.lifestyleChangeStress || "-" }}
                 </h5>
               </div>
               <div class="sleepRecordItem">
                 <h4>經濟壓力</h4>
-                <h5>{{ sleepRecData?.SleepRec[0].physicalStrength || "-" }}</h5>
+                <h5>
+                  {{ sleepRecData?.SleepRec[0]?.physicalStrength || "-" }}
+                </h5>
               </div>
               <div class="sleepRecordItem">
                 <h4>壓力事件紀錄</h4>
                 <h5>
-                  {{ sleepRecData?.SleepRec[0].OtherPressureEvent || "-" }}
+                  {{ sleepRecData?.SleepRec[0]?.OtherPressureEvent || "-" }}
                 </h5>
               </div>
             </div>
@@ -603,6 +607,8 @@ import { useRouter } from "vue-router";
 
 import RaphaelLoading from "../components/RaphaelLoading";
 
+const isSubmitting = ref(false);
+
 export default {
   components: {
     Navbar,
@@ -639,6 +645,7 @@ export default {
     const getupTimeMinuteDropdown = ref(null);
 
     const sleepRecData = ref(null);
+    const sleepRecIndexData = ref(null);
 
     const SleepRecCond = ref(null);
     const loading = ref(false);
@@ -780,7 +787,8 @@ export default {
     };
 
     const getSleepRecData = async () => {
-      loading.value = true;
+  
+
       const localData = localStorage.getItem("userData");
       const { MID, Token, MAID, Mobile } = localData
         ? JSON.parse(localData)
@@ -805,6 +813,18 @@ export default {
           response.data.SleepRec.reverse();
           sleepRecData.value = response.data;
 
+          SleepRecCond.value = sleepRecIndexData.value.SleepRecCond;
+          if (sleepRecData.value.SleepRec.length >= 2) {
+            SleepText.value = `
+          感謝您使用我們的系統恭喜您已完成了兩次測驗 !
+          `;
+          } else {
+        
+            SleepText.value = `
+          感謝您使用我們的系統請等待<span>${SleepRecCond.value}天</span>後再進行第二次檢測
+          `;
+          }
+
           if (
             sleepRecData.value.SleepRec.length < 2 &&
             SleepRecCond.value == "-1"
@@ -821,9 +841,7 @@ export default {
         }
       } catch (err) {
         console.log(err);
-      } finally {
-        loading.value = false;
-      }
+      } 
     };
 
     const getIndexSleepRecData = async () => {
@@ -849,18 +867,7 @@ export default {
         );
 
         if (response.status === 200) {
-          SleepRecCond.value = response.data.SleepRecCond;
-          if (sleepRecData.value && sleepRecData.value.SleepRec) {
-            if (sleepRecData.value.SleepRec.length >= 2) {
-              SleepText.value = `
-          感謝您使用我們的系統恭喜您已完成了兩次測驗 ! 
-          `;
-            } else {
-              SleepText.value = `
-          感謝您使用我們的系統請等待<span>${SleepRecCond.value}天</span>後再進行第二次檢測
-          `;
-            }
-          }
+          sleepRecIndexData.value = response.data;
         }
       } catch (err) {
         console.log(err);
@@ -868,12 +875,18 @@ export default {
     };
     const cc = async () => {
       try {
-        await getSleepRecData();
+        loading.value = true;
         await getIndexSleepRecData();
+        await getSleepRecData();
       } catch (err) {
         console.log("Error in cc function:", err);
       }
+      loading.value = false;
     };
+
+    watch(SleepRecCond, (newVal) => {
+      console.log("SleepRecCond updated:", newVal);
+    });
 
     cc();
 
@@ -889,12 +902,20 @@ export default {
 
     // 完成測試
     const firstTest = async () => {
-      const sleepStore = useFirstSleepRecordStore();
-      await sleepStore.saveSleepRecord();
-      await getSleepRecData();
-      await getIndexSleepRecData();
-      sleepState.value = "sleepRecord1";
-      window.scrollTo(0, 0);
+      if (isSubmitting.value) return;
+      isSubmitting.value = true;
+      try {
+        const sleepStore = useFirstSleepRecordStore();
+        await sleepStore.saveSleepRecord();
+        await getSleepRecData();
+        await getIndexSleepRecData();
+        sleepState.value = "sleepRecord1";
+        window.scrollTo(0, 0);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        isSubmitting.value = false;
+      }
     };
 
     const formatCheckTime = (timeString) => {
@@ -928,7 +949,6 @@ export default {
       getupTimeHour,
       getupTimeMinute,
       userRecord,
-
       medhelps,
       bedTimeHourDropdown,
       bedTimeMinuteDropdown,
@@ -939,6 +959,7 @@ export default {
       sleepRecData,
       formatCheckTime,
       SleepText,
+      isSubmitting,
     };
   },
 };
