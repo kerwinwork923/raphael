@@ -2,7 +2,7 @@
   <div
     class="scoreBarGroupWrap"
     v-for="(QAData, index) in paginatedQuestions"
-    :key="QAData.question" 
+    :key="QAData.question"
   >
     <div class="scrollBarTitle">
       {{ startIndex + index + 1 }}. {{ QAData.question }}
@@ -38,7 +38,10 @@
     </div>
     <!-- 顯示根據選擇分數對應的 label -->
     <div class="scoreText">{{ getLabel(QAData.score) }}</div>
+    
   </div>
+
+  <button @click="store.API_ANSOnlineQSaveAns">測試按鈕</button>
 </template>
 
 <script>
@@ -65,17 +68,16 @@ export default defineComponent({
     );
 
     const setScore = (QAData, scoreValue) => {
-  const index = store.weeklyQA.indexOf(QAData);
-  if (index !== -1) {
-    // 替换对象以触发 Vue 的响应式系统
-    store.weeklyQA[index] = {
-      ...store.weeklyQA[index],
-      score: scoreValue,
+      const index = store.weeklyQA.indexOf(QAData);
+      if (index !== -1) {
+        store.weeklyQA[index] = {
+          ...store.weeklyQA[index],
+          score: scoreValue,
+        };
+        QAData.score = scoreValue;
+        console.log(`Updated score for question ${index + 1}: ${QAData.score}`);
+      }
     };
-    QAData.score = scoreValue; // 更新 UI 上的 QAData 的分数
-    console.log(`Updated score for question ${index + 1}: ${QAData.score}`);
-  }
-};
 
     const getLabel = (score) => {
       const labels = ["無", "輕度", "中度", "嚴重"];
