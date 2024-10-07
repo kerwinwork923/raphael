@@ -4,6 +4,7 @@ export default defineNuxtConfig({
   app: {
     baseURL: '/testR/'  
   },
+  ssr: false,
   modules: [
     '@pinia/nuxt',
   ],
