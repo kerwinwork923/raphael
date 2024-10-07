@@ -4,15 +4,12 @@ import { useRouter } from "vue-router";
 
 export const useWeeklyRecord = defineStore("weeklyQA", {
   state: () => ({
-    weeklyQA: null,
-    defaultOptions: [
-      { label: "無", value: 0 },
-      { label: "輕微", value: 1 },
-      { label: "輕度", value: 2 },
-      { label: "中度", value: 3 },
-      { label: "嚴重", value: 4 },
-    ],
+    weeklyQA: [],
+    currentStep: 1,
+    totalStep: 0, // 初始化為0
+    questionsPerPage: 7, // 每頁問題數量
   }),
+
   actions: {
     async getQues() {
       const localData = localStorage.getItem("userData");
@@ -48,31 +45,52 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
             throw new Error("QuesArray is undefined or not an array");
           }
 
-          const labels = [
-            { label: "無", value: 0 },
-            { label: "輕微", value: 1 },
-            { label: "輕度", value: 2 },
-            { label: "中度", value: 3 },
-            { label: "嚴重", value: 4 },
-          ];
-
           const combinedData = QuesArray.map((question, index) => {
             const score = 0;
-            const label = labels[score].label;
 
             return {
               question,
               category: QesCategoryNameArray[QesCategoryArray[index]] || "", // 根據類別索引獲取類別名稱
               categoryIndex: QesCategoryArray[index],
               score,
-              label,
+              label: "未知",
             };
           });
 
           this.weeklyQA = combinedData;
+
+          // 根據獲取的問題數量更新 totalStep
+          this.totalStep = Math.ceil(
+            combinedData.length / this.questionsPerPage
+          ); // 更新 totalStep 為頁數
         }
       } catch (err) {
         console.error("Error while fetching questions:", err);
+      }
+    },
+    handleNextStep() {
+      // 計算當前頁面問題的起始和結束索引
+      const startIdx = (this.currentStep - 1) * this.questionsPerPage;
+      const endIdx = Math.min(startIdx + this.questionsPerPage, this.weeklyQA.length);
+    
+      // 檢查當前頁面的問題是否都已填寫
+      const allAnswered = this.weeklyQA
+        .slice(startIdx, endIdx)
+        .every((q) => q.score > 0); // 假設 score 為 0 表示未填寫
+    
+      if (!allAnswered) {
+        alert("尚未填寫完成");
+      } else if (this.currentStep < this.totalStep) {
+        this.currentStep += 1;
+      } else {
+        alert("已經到達最後一步");
+      }
+    },
+    
+
+    handlePrevStep() {
+      if (this.currentStep > 1) {
+        this.currentStep -= 1;
       }
     },
   },

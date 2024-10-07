@@ -1,6 +1,5 @@
 <template>
   <div class="weeklyRecord">
-    <Navbar />
     <TagList />
     <div class="weeklyQAGroup">
       <div class="subList">
@@ -35,16 +34,72 @@
       <div class="subListTitle">以下問題對您的困擾程度</div>
       <WeeklyScoreBar />
     </div>
+
+    <div class="weeklyBtnGroup">
+      <button
+        class="weeklyBtn"
+        @click="store.handlePrevStep"
+        :disabled="store.currentStep === 1"
+      >
+        上一步{{ preText }}
+      </button>
+      <button class="weeklyBtn" @click="store.handleNextStep">
+        下一步{{ nextText }}
+      </button>
+    </div>
   </div>
 </template>
+
+<script>
+import Navbar from "~/components/Navbar.vue";
+import TagList from "../components/TagList.vue";
+import { ref, watch } from "vue";
+import { useRouter } from "vue-router";
+import { useWeeklyRecord } from "~/stores/weeklyQA.js";
+import WeeklyScoreBar from "~/components/WeeklyScoreBar.vue";
+
+export default {
+  components: {
+    Navbar,
+    TagList,
+    WeeklyScoreBar,
+  },
+  setup() {
+    const store = useWeeklyRecord();
+
+    const preText = ref("");
+    const nextText = ref("");
+
+    watch(
+      () => store.currentStep,
+      (newVal) => {
+        if (newVal+1 > store.totalStep) {
+          nextText.value = "";
+        } else {
+          nextText.value = `(${newVal+1}/${store.totalStep})`;
+        }
+
+        if (newVal <= 1) {
+          preText.value = "";
+        } else {
+          preText.value = `(${newVal }/${store.totalStep})`;
+        }
+      },
+      { immediate: true }
+    );
+
+    return { store, preText, nextText };
+  },
+};
+</script>
 
 <style lang="scss">
 .weeklyRecord {
   min-height: 100vh;
   width: 100%;
   background-color: $raphael-gray-200;
-  margin-bottom: 50px;
-  padding-bottom: 2rem;
+
+  padding-bottom: 150px;
   .weeklyQAGroup {
     max-width: 768px;
     margin: 0 auto;
@@ -61,31 +116,43 @@
     font-weight: 40;
     margin-bottom: 0.75rem;
   }
+
+  .weeklyBtnGroup {
+    position: fixed;
+    bottom: 0%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    background-color: $raphael-gray-200;
+    text-align: center;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 3%;
+    padding: 3% 0;
+    max-width: 768px;
+    width: 100%;
+  }
+  .weeklyBtn {
+    background-color: $raphael-green-400;
+    color: #fff;
+    padding: 12px;
+    width: 100%;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    transition: 0.25s ease;
+    width: 44%;
+    padding: 0;
+    padding: 8px;
+    cursor: pointer;
+    &:disabled {
+      background-color: #b3b3b3;
+      cursor: not-allowed;
+    }
+  }
 }
 </style>
-
-<script>
-import Navbar from "~/components/Navbar.vue";
-import TagList from "../components/TagList.vue";
-import { ref } from "vue";
-import { useRouter } from "vue-router"; // 引入 useRouter
-import axios from "axios"; // 引入 axios
-import { useWeeklyRecord } from "~/stores/weeklyQA.js";
-
-import WeeklyScoreBar from "~/components/WeeklyScoreBar.vue";
-
-export default {
-  components: {
-    Navbar,
-    TagList,
-    WeeklyScoreBar,
-  },
-  setup() {
-    const store = useWeeklyRecord();
-
-    // store.getQues();
-
-    return { store };
-  },
-};
-</script>
