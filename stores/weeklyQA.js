@@ -137,14 +137,16 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
 
     handlePrevStep() {
       if (this.nowState === "times") {
-   
-
-        this.currentStep = this.totalStep; // 返回到 score 階段的最後一步
+        // 在 times 階段時不做任何操作
+        return; // 直接返回，防止回到 score 階段
+      } else if (this.nowState === "score" && this.currentStep > 1) {
+        // 如果在 score 階段且還有前一步，則回到前一步
+        this.currentStep -= 1;
       }
 
       // 更新按鈕狀態
-      this.preDisabled = this.currentStep === 1 && this.nowState === "score"; // 只在 score 的第一步禁用
-      this.nextDisabled = false; // 確保「下一步」按鈕可用
+      this.preDisabled = this.nowState === "score" && this.currentStep === 1; // 只在 score 的第一步禁用
+      this.nextDisabled = false;
     },
   },
 });

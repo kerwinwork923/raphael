@@ -44,7 +44,7 @@
       >
         上一步{{ store.preText }}
       </button>
-      <button class="weeklyBtn" @click="store.handleNextStep" :disabled="nextDisabled">
+      <button class="weeklyBtn" @click="store.handleNextStep" >
         下一步{{ store.nextText }}
       </button>
     </div>
@@ -92,6 +92,10 @@ export default {
   .subList {
     color: #ccc;
     font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
   }
   .subListTitle {
     color: #666;
@@ -99,6 +103,9 @@ export default {
     letter-spacing: 0.5px;
     font-weight: 40;
     margin-bottom: 0.75rem;
+  }
+  .subListActive{
+    color: #EC4F4F;
   }
 
   .weeklyBtnGroup {
