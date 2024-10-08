@@ -32,19 +32,20 @@
         <span>結果分析</span>
       </div>
       <div class="subListTitle">以下問題對您的困擾程度</div>
-      <WeeklyScoreBar />
+      <WeeklyScoreBar v-if="store.nowState == 'score'" />
+      <TagTimesList v-if="store.nowState == 'times'" />
     </div>
 
     <div class="weeklyBtnGroup">
       <button
-        class="weeklyBtn"
+        class="weeklyBtn preBtn"
         @click="store.handlePrevStep"
-        :disabled="store.currentStep === 1"
+        :disabled="preDisabled"
       >
-        上一步{{ preText }}
+        上一步{{ store.preText }}
       </button>
-      <button class="weeklyBtn" @click="store.handleNextStep">
-        下一步{{ nextText }}
+      <button class="weeklyBtn" @click="store.handleNextStep" :disabled="nextDisabled">
+        下一步{{ store.nextText }}
       </button>
     </div>
   </div>
@@ -57,38 +58,21 @@ import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useWeeklyRecord } from "~/stores/weeklyQA.js";
 import WeeklyScoreBar from "~/components/WeeklyScoreBar.vue";
+import TagTimesList from "~/components/TagTimesList.vue";
 
 export default {
   components: {
     Navbar,
     TagList,
     WeeklyScoreBar,
+    TagTimesList,
   },
   setup() {
     const store = useWeeklyRecord();
 
-    const preText = ref("");
-    const nextText = ref("");
+    const weeklyStep = ref("quetions");
 
-    watch(
-      () => store.currentStep,
-      (newVal) => {
-        if (newVal+1 > store.totalStep) {
-          nextText.value = "";
-        } else {
-          nextText.value = `(${newVal+1}/${store.totalStep})`;
-        }
-
-        if (newVal <= 1) {
-          preText.value = "";
-        } else {
-          preText.value = `(${newVal }/${store.totalStep})`;
-        }
-      },
-      { immediate: true }
-    );
-
-    return { store, preText, nextText };
+    return { store, weeklyStep };
   },
 };
 </script>
@@ -150,9 +134,12 @@ export default {
     padding: 8px;
     cursor: pointer;
     &:disabled {
-      background-color: #b3b3b3;
-      cursor: not-allowed;
+      opacity: .5;
     }
+  }
+  .preBtn {
+    background-color: #dfdfdf;
+    color: #666;
   }
 }
 </style>

@@ -1,9 +1,5 @@
 <template>
-  <div
-    class="scoreBarGroupWrap"
-    v-for="(QAData, index) in paginatedQuestions"
-    :key="QAData.question"
-  >
+  <div class="scoreBarGroupWrap" v-for="(QAData, index) in paginatedQuestions" :key="QAData.question">
     <div class="scrollBarTitle">
       {{ startIndex + index + 1 }}. {{ QAData.question }}
     </div>
@@ -12,33 +8,31 @@
       <div
         class="scoreBar"
         :style="{
-          width: `${(QAData.score - 1) * 33.33}%`, // 分数为 1 时为 0%，2 为 33.33%，3 为 66.67%，4 为 100%
+          width: QAData.score !== undefined ? `${QAData.score * 33.33}%` : '0%', // No progress if not filled
           backgroundColor: '#74bc1f',
         }"
       ></div>
       <div
         class="remainingBar"
         :style="{
-          width: `${(4 - QAData.score) * 33.33}%`, // 剩余部分的宽度
+          width: QAData.score !== undefined ? `${(3 - QAData.score) * 33.33}%` : '100%', // Full width if not filled
           backgroundColor: '#b3b3b3',
         }"
       ></div>
       <div class="numberGroup">
-        <!-- 顯示 1 到 4 的分數按鈕 -->
         <div
           v-for="value in 4"
           :key="value"
           class="number"
-          :class="{ selected: QAData.score >= value }"
-          @click="setScore(QAData, value)"
+          :class="{ selected: QAData.score >= value - 1 }"
+          @click="setScore(QAData, value - 1)"
         >
           {{ value }}
         </div>
       </div>
     </div>
-    <!-- 顯示根據選擇分數對應的 label -->
+
     <div class="scoreText">{{ getLabel(QAData.score) }}</div>
-    
   </div>
 
   <button @click="store.API_ANSOnlineQSaveAns">測試按鈕</button>
@@ -63,9 +57,7 @@ export default defineComponent({
       return store.weeklyQA.slice(start, end);
     });
 
-    const startIndex = computed(
-      () => (currentPage.value - 1) * questionsPerPage
-    );
+    const startIndex = computed(() => (currentPage.value - 1) * questionsPerPage);
 
     const setScore = (QAData, scoreValue) => {
       const index = store.weeklyQA.indexOf(QAData);
@@ -74,20 +66,18 @@ export default defineComponent({
           ...store.weeklyQA[index],
           score: scoreValue,
         };
-        QAData.score = scoreValue;
+        QAData.score = scoreValue; // Update to new score
         console.log(`Updated score for question ${index + 1}: ${QAData.score}`);
       }
     };
 
     const getLabel = (score) => {
-      const labels = ["無", "輕度", "中度", "嚴重"];
-      return labels[score - 1];
+      const labels = ["無", "輕微", "中等", "嚴重"];
+      return labels[score] || ""; // Return an empty string if score is undefined
     };
 
     // 分頁相關的邏輯
-    const totalPages = computed(() =>
-      Math.ceil(store.weeklyQA.length / questionsPerPage)
-    );
+    const totalPages = computed(() => Math.ceil(store.weeklyQA.length / questionsPerPage));
 
     return {
       store,
