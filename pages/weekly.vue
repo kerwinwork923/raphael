@@ -34,6 +34,8 @@
       <div class="subListTitle">以下問題對您的困擾程度</div>
       <WeeklyScoreBar v-if="store.nowState == 'score'" />
       <TagTimesList v-if="store.nowState == 'times'" />
+
+      <SymptomChoose v-if="store.nowState == 'choose'" />
     </div>
 
     <div class="weeklyBtnGroup">
@@ -42,10 +44,10 @@
         @click="store.handlePrevStep"
         :disabled="preDisabled"
       >
-        上一步{{ store.preText }}
+        {{ store.preText }}
       </button>
-      <button class="weeklyBtn" @click="store.handleNextStep" >
-        下一步{{ store.nextText }}
+      <button class="weeklyBtn" @click="store.handleNextStep">
+        {{ store.nextText }}
       </button>
     </div>
   </div>
@@ -59,13 +61,14 @@ import { useRouter } from "vue-router";
 import { useWeeklyRecord } from "~/stores/weeklyQA.js";
 import WeeklyScoreBar from "~/components/WeeklyScoreBar.vue";
 import TagTimesList from "~/components/TagTimesList.vue";
-
+import SymptomChoose from "~/components/SymptomChoose.vue";
 export default {
   components: {
     Navbar,
     TagList,
     WeeklyScoreBar,
     TagTimesList,
+    SymptomChoose,
   },
   setup() {
     const store = useWeeklyRecord();
@@ -104,8 +107,8 @@ export default {
     font-weight: 40;
     margin-bottom: 0.75rem;
   }
-  .subListActive{
-    color: #EC4F4F;
+  .subListActive {
+    color: #ec4f4f;
   }
 
   .weeklyBtnGroup {
@@ -141,7 +144,7 @@ export default {
     padding: 8px;
     cursor: pointer;
     &:disabled {
-      opacity: .5;
+      opacity: 0.5;
     }
   }
   .preBtn {

@@ -1,5 +1,9 @@
 <template>
-  <div class="scoreBarGroupWrap" v-for="(QAData, index) in paginatedQuestions" :key="QAData.question">
+  <div
+    class="scoreBarGroupWrap"
+    v-for="(QAData, index) in paginatedQuestions"
+    :key="QAData.question"
+  >
     <div class="scrollBarTitle">
       {{ startIndex + index + 1 }}. {{ QAData.question }}
     </div>
@@ -8,14 +12,20 @@
       <div
         class="scoreBar"
         :style="{
-          width: QAData.score !== undefined ? `${QAData.score * 33.33}%` : '0%', // No progress if not filled
+          width:
+            QAData.selectScore !== undefined
+              ? `${QAData.selectScore * 33.33}%`
+              : '0%', // No progress if not filled
           backgroundColor: '#74bc1f',
         }"
       ></div>
       <div
         class="remainingBar"
         :style="{
-          width: QAData.score !== undefined ? `${(3 - QAData.score) * 33.33}%` : '100%', // Full width if not filled
+          width:
+            QAData.selectScore !== undefined
+              ? `${(3 - QAData.selectScore) * 33.33}%`
+              : '100%', // Full width if not filled
           backgroundColor: '#b3b3b3',
         }"
       ></div>
@@ -24,7 +34,7 @@
           v-for="value in 4"
           :key="value"
           class="number"
-          :class="{ selected: QAData.score >= value - 1 }"
+          :class="{ selected: QAData.selectScore >= value - 1 }"
           @click="setScore(QAData, value - 1)"
         >
           {{ value }}
@@ -32,10 +42,10 @@
       </div>
     </div>
 
-    <div class="scoreText">{{ getLabel(QAData.score) }}</div>
+    <div class="scoreText">{{ getLabel(QAData.selectScore) }}</div>
   </div>
 
-  <button @click="store.API_ANSOnlineQSaveAns">測試按鈕</button>
+  <!-- <button @click="store.API_ANSOnlineQSaveAns">測試按鈕</button> -->
 </template>
 
 <script>
@@ -47,37 +57,41 @@ export default defineComponent({
     const store = useWeeklyRecord();
     store.getQues();
 
-    const currentPage = computed(() => store.currentStep); // 當前頁數
-    const questionsPerPage = 7; // 每頁顯示 7 個問題
+    const currentPage = computed(() => store.currentStep);
+    const questionsPerPage = 7;
 
-    // 計算當前頁面顯示的問題
     const paginatedQuestions = computed(() => {
       const start = (currentPage.value - 1) * questionsPerPage;
       const end = currentPage.value * questionsPerPage;
       return store.weeklyQA.slice(start, end);
     });
 
-    const startIndex = computed(() => (currentPage.value - 1) * questionsPerPage);
+    const startIndex = computed(
+      () => (currentPage.value - 1) * questionsPerPage
+    );
 
     const setScore = (QAData, scoreValue) => {
       const index = store.weeklyQA.indexOf(QAData);
       if (index !== -1) {
+        // 根據 scoreValue 更新相應的 score 值
+        const actualScore = 3 - scoreValue; // 將 0 對應到 3，1 對應到 2，依此類推
         store.weeklyQA[index] = {
           ...store.weeklyQA[index],
-          score: scoreValue,
+          selectScore: scoreValue, // 更新 selectScore
+          score: actualScore, // 更新實際分數
         };
-        QAData.score = scoreValue; // Update to new score
-        console.log(`Updated score for question ${index + 1}: ${QAData.score}`);
+        console.log(
+          `Updated selectScore for question ${
+            index + 1
+          }: ${scoreValue}, actual score: ${actualScore}`
+        );
       }
     };
 
     const getLabel = (score) => {
       const labels = ["無", "輕微", "中等", "嚴重"];
-      return labels[score] || ""; // Return an empty string if score is undefined
+      return labels[score] || "";
     };
-
-    // 分頁相關的邏輯
-    const totalPages = computed(() => Math.ceil(store.weeklyQA.length / questionsPerPage));
 
     return {
       store,
@@ -85,7 +99,6 @@ export default defineComponent({
       getLabel,
       paginatedQuestions,
       currentPage,
-      totalPages,
       startIndex,
     };
   },

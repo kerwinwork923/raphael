@@ -10,16 +10,19 @@
       <select
         @change="(event) => updateTimes(question.id, event.target.value)"
         class="timesList"
+        v-model="question.times"
       >
-        <option selected disabled>請選擇次數</option>
-        <option value="0">0</option>
-        <option value="1">1</option>
+        <option selected disabled value="">請選擇次數</option>
+        <option value="4">0</option>
+        <option value="3">1</option>
         <option value="2">2</option>
-        <option value="3">3~4</option>
-        <option value="4">>5</option>
+        <option value="1">3~4</option>
+        <option value="0">>5</option>
       </select>
     </div>
   </div>
+
+  <!-- <button @click="store.API_ANSOnlineTimesSaveTimes">Test</button> -->
 </template>
 
 <script>
@@ -30,15 +33,13 @@ export default {
   setup() {
     const store = useWeeklyRecord();
 
-    // 當前頁數
     const currentPage = computed(() => store.timesStep);
-    const questionsPerPage = 7; // 每頁顯示 7 個問題
+    const questionsPerPage = 7;
 
-    // 計算當前頁面顯示的問題
     const paginatedQuestions = computed(() => {
       const start = (currentPage.value - 1) * questionsPerPage;
       const end = currentPage.value * questionsPerPage;
-      return store.sortedByScore.slice(start, end); // 確保使用 sortedByScore
+      return store.sortedByScore.slice(start, end);
     });
 
     const startIndex = computed(
@@ -48,7 +49,7 @@ export default {
     const updateTimes = (id, times) => {
       const question = store.weeklyQA.find((q) => q.id === id);
       if (question) {
-        question.times = Number(times); // 更新該問題的 times 值
+        question.times = Number(times);
       }
     };
 
@@ -56,6 +57,7 @@ export default {
       paginatedQuestions,
       updateTimes,
       startIndex,
+      store,
     };
   },
 };
