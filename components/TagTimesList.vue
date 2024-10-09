@@ -12,7 +12,7 @@
         class="timesList"
         v-model="question.times"
       >
-        <option selected disabled value="">請選擇次數</option>
+        <option selected disabled value="-1">請選擇次數</option>
         <option value="0">0</option>
         <option value="1">1</option>
         <option value="2">2</option>

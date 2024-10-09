@@ -85,7 +85,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
             score: 0,
             selectScore: 0,
             label: "未知",
-            times: "",
+            times: -1,
           }));
 
           this.weeklyQA = combinedData;
