@@ -74,17 +74,13 @@ export default defineComponent({
       const index = store.weeklyQA.indexOf(QAData);
       if (index !== -1) {
         // 根據 scoreValue 更新相應的 score 值
-        const actualScore = 3 - scoreValue; // 將 0 對應到 3，1 對應到 2，依此類推
+      
         store.weeklyQA[index] = {
           ...store.weeklyQA[index],
           selectScore: scoreValue, // 更新 selectScore
-          score: actualScore, // 更新實際分數
+          score: scoreValue, // 更新實際分數
         };
-        console.log(
-          `Updated selectScore for question ${
-            index + 1
-          }: ${scoreValue}, actual score: ${actualScore}`
-        );
+
       }
     };
 

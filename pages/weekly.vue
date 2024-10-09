@@ -127,6 +127,7 @@ export default {
     padding: 3% 0;
     max-width: 768px;
     width: 100%;
+    touch-action: manipulation; 
   }
   .weeklyBtn {
     background-color: $raphael-green-400;

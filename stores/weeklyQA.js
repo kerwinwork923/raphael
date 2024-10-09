@@ -82,7 +82,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
             question,
             category: QesCategoryNameArray[QesCategoryArray[index]] || "",
             categoryIndex: QesCategoryArray[index],
-            score: 3,
+            score: 0,
             selectScore: 0,
             label: "未知",
             times: "",
@@ -191,6 +191,45 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
       }
     },
 
+    async API_ANSOnlineSolveSaveSolve() {
+      const localData = localStorage.getItem("userData");
+      const { MID, Token, MAID, Mobile, Name, Sex, AID } = localData
+        ? JSON.parse(localData)
+        : {};
+
+      let AnsSolveArray = [];
+
+      this.sortedByScore.forEach((question) => {
+        if (question.active) {
+          AnsSolveArray.push(`key${question.id + 1}`);
+        }
+      });
+
+      const AnsSolveArrayJson = JSON.stringify(AnsSolveArray);
+      console.log();
+
+      try {
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_ANSOnlineSolveSaveSolve.jsp",
+          {
+            MID: String(MID),
+            Token: String(Token),
+            MAID: String(MAID),
+            Mobile: String(Mobile),
+            AID: String(AID),
+            AnsSolveArray: AnsSolveArrayJson, // 將 AnsSolveArray 包含在請求中
+          }
+        );
+
+        if (response.status === 200) {
+          // 成功處理
+        }
+      } catch (err) {
+        console.error("Error while fetching questions:", err);
+        throw err;
+      }
+    },
+
     async handleNextStep() {
       if (this.nowState === "score") {
         const startIdx = (this.currentStep - 1) * this.questionsPerPage;
@@ -222,6 +261,8 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
           // await this.API_ANSOnlineTimesSaveTimes();
           this.nowState = "choose";
         }
+      } else if (this.nowState === "choose") {
+        // await this.API_ANSOnlineSolveSaveSolve();
       }
 
       // Update button states
