@@ -382,8 +382,12 @@
                 <h3>第一次檢測分數</h3>
               </div>
               <div class="emojiBox">
-                <img src="../assets/imgs/smile.png" alt="" />
-                <div class="score">80</div>
+                <img
+                  :src="computedEmoji(sleepRecData?.SleepRec[0]?.Score)"
+                  alt="Emotion Emoji"
+                />
+
+                <div class="score">{{ sleepRecData?.SleepRec[0].Score }}</div>
               </div>
             </div>
             <div class="secScore">
@@ -391,7 +395,10 @@
                 <h3>第二次檢測分數</h3>
               </div>
               <div class="emojiBox">
-                <img src="../assets/imgs/unSmile.png" alt="" />
+                <img
+                  :src="computedEmoji(sleepRecData?.SleepRec[1]?.Score)"
+                  alt="Emotion Emoji"
+                />
                 <div class="score">---</div>
               </div>
             </div>
@@ -606,6 +613,13 @@ import TagList from "../components/TagList.vue";
 
 import RaphaelLoading from "../components/RaphaelLoading";
 
+//圖片
+
+import unSmile from "@/assets/imgs/unSmile.png";
+import sad from "@/assets/imgs/sad.png";
+import happy from "@/assets/imgs/happy.png";
+import smile from "@/assets/imgs/smile.png";
+
 const isSubmitting = ref(false);
 
 export default {
@@ -656,25 +670,22 @@ export default {
 
     watch([bedTimeHour, bedTimeMinute], ([newHour, newMinute]) => {
       if (newHour !== undefined && newMinute !== undefined) {
-        // 格式化為 "xx:xx"
         const bedTime = `${String(newHour).padStart(2, "0")}:${String(
           newMinute
         ).padStart(2, "0")}`;
-        useFirstSleepRecordData.bedTime = bedTime; // 更新 Pinia 狀態
+        useFirstSleepRecordData.bedTime = bedTime;
       }
     });
 
     watch([getupTimeHour, getupTimeMinute], ([newHour, newMinute]) => {
       if (newHour !== undefined && newMinute !== undefined) {
-        // 格式化為 "xx:xx"
         const getupTime = `${String(newHour).padStart(2, "0")}:${String(
           newMinute
         ).padStart(2, "0")}`;
-        useFirstSleepRecordData.getupTime = getupTime; // 更新 Pinia 狀態
+        useFirstSleepRecordData.getupTime = getupTime;
       }
     });
 
-    // 時間選項
     const hours = Array.from({ length: 24 }, (_, i) =>
       String(i).padStart(2, "0")
     );
@@ -874,6 +885,20 @@ export default {
         console.log(err);
       }
     };
+
+    const computedEmoji = (score) => {
+      if (score <= 8) {
+        return unSmile;
+      } else if (score <= 18) {
+        return sad;
+      } else if (score <= 28) {
+        return happy;
+      } else if (score >= 36) {
+        return smile;
+      } else {
+        return unSmile;
+      }
+    };
     const cc = async () => {
       try {
         loading.value = true;
@@ -962,6 +987,7 @@ export default {
       SleepText,
       isSubmitting,
       backToUser,
+      computedEmoji,
     };
   },
 };
@@ -1115,7 +1141,7 @@ export default {
   font-weight: 400;
   letter-spacing: 0.5px;
   transition: 0.25s ease;
- 
+
   cursor: pointer;
   &:hover {
     background-color: $raphael-green-500;
@@ -1138,7 +1164,6 @@ export default {
   width: 90%;
   padding: 0;
   padding: 8px;
- 
 }
 
 .sleepIndex1 {
@@ -1224,6 +1249,10 @@ export default {
         justify-content: center;
         align-items: center;
         gap: 3%;
+        img {
+          width: 70px;
+          height: 70px;
+        }
       }
       h3 {
         color: $raphael-gray-500;
