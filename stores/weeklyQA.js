@@ -9,6 +9,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
     timesStep: 1,
     totalTimesStep: 0,
     questionsPerPage: 7,
+    selectQuestionPerPage: 7,
     nowState: "score",
     preDisabled: true,
     nextDisabled: false,
@@ -94,7 +95,6 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
             combinedData.length / this.questionsPerPage
           );
 
-          // Set initial button states
           this.preDisabled = this.currentStep === 1;
           this.nextDisabled = this.totalStep <= 1;
         }
@@ -136,9 +136,8 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         );
 
         if (response.status === 200) {
-          const AID = response.data.AID; // 假設 AID 在 response.data 中
+          const AID = response.data.AID;
           if (AID) {
-            // 更新 localStorage
             const updatedLocalData = {
               MID,
               Token,
@@ -146,7 +145,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
               Mobile,
               Name,
               Sex,
-              AID, // 添加 AID
+              AID,
             };
             localStorage.setItem("userData", JSON.stringify(updatedLocalData));
           }
@@ -186,7 +185,6 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         if (response.status === 200) {
         }
       } catch (err) {
-        console.error("Error while fetching questions:", err);
         throw err;
       }
     },
@@ -217,17 +215,25 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
             MAID: String(MAID),
             Mobile: String(Mobile),
             AID: String(AID),
-            AnsSolveArray: AnsSolveArrayJson, // 將 AnsSolveArray 包含在請求中
+            AnsSolveArray: AnsSolveArrayJson,
           }
         );
 
         if (response.status === 200) {
-          // 成功處理
         }
       } catch (err) {
         console.error("Error while fetching questions:", err);
         throw err;
       }
+    },
+
+    checkMinimumItems() {
+      const itemsAboveZero = this.weeklyQA.filter((q) => q.selectScore > 0);
+      if (itemsAboveZero.length < 10) {
+        alert("選項項目不足，請至少選擇 10 項超過 0 分的問題");
+        return false;
+      }
+      return true;
     },
 
     async handleNextStep() {
@@ -242,11 +248,15 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
           .slice(startIdx, endIdx)
           .every((q) => q.score > 0);
 
-        // Move to the next step
         if (this.currentStep < this.totalStep) {
           this.currentStep += 1;
         } else {
-          // If on the last step of scores, switch to times
+          //判別項目是否超過10個
+          const itemsAboveZero = this.weeklyQA.filter((q) => q.selectScore > 0);
+          if (itemsAboveZero.length < 10) {
+            alert("選項項目不足，請至少選擇 10 的項目");
+            return false;
+          }
           // await this.API_ANSOnlineQSaveAns();
           this.nowState = "times";
 
@@ -255,17 +265,39 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
           );
         }
       } else if (this.nowState === "times") {
+        // 計算當前頁面應回答的問題總數
+        const selectedCount = this.weeklyQA.filter((q) => q.times >= 0).length;
+        const currentPage = this.timesStep;
+
+        const total = this.sortedByScore.length;
+        const totalPage = Math.floor(total / this.selectQuestionPerPage);
+
+        if (currentPage > totalPage) {
+          if (selectedCount  % this.selectQuestionPerPage != total % this.selectQuestionPerPage) {
+            alert("尚未選擇完成");
+            return;
+          }
+        } 
+        
+        
+        else {
+          if (selectedCount < this.selectQuestionPerPage *currentPage) {
+            alert("尚未選擇完成");
+            return;
+          }
+        }
+
+        // 繼續下一頁或處理完成邏輯
         if (this.timesStep < this.totalTimesStep) {
-          this.timesStep += 1;
+          this.timesStep += 1; // 移動到下一頁
         } else {
-          // await this.API_ANSOnlineTimesSaveTimes();
-          this.nowState = "choose";
+          // 處理最後一步
+          this.nowState = "choose"; // 轉換狀態
         }
       } else if (this.nowState === "choose") {
         // await this.API_ANSOnlineSolveSaveSolve();
       }
 
-      // Update button states
       this.preDisabled = this.currentStep === 1;
       this.nextDisabled =
         this.nowState === "score"
@@ -277,11 +309,9 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
       if (this.nowState === "times" && this.timesStep > 1) {
         this.timesStep -= 1;
       } else if (this.nowState === "score" && this.currentStep > 1) {
-        // 如果在 score 階段且還有前一步，則回到前一步
         this.currentStep -= 1;
       }
 
-      // 更新按鈕狀態
       this.preDisabled = this.nowState === "score" && this.currentStep === 1; // 只在 score 的第一步禁用
       this.nextDisabled = false;
     },
@@ -289,7 +319,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
     toggleActive(symptomId) {
       const symptom = this.weeklyQA.find((q) => q.id === symptomId);
       if (symptom) {
-        symptom.active = !symptom.active; // 切換 active 狀態
+        symptom.active = !symptom.active;
       }
     },
   },

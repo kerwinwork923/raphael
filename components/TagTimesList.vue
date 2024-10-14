@@ -34,7 +34,7 @@ export default {
     const store = useWeeklyRecord();
 
     const currentPage = computed(() => store.timesStep);
-    const questionsPerPage = 7;
+    const questionsPerPage = store.selectQuestionPerPage;
 
     const paginatedQuestions = computed(() => {
       const start = (currentPage.value - 1) * questionsPerPage;

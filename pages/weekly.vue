@@ -36,11 +36,13 @@
           />
         </svg>
         <span>結果分析</span>
+        <button style="margin-left: auto" @click="resultChange">結果頁面</button>
       </div>
       <div class="subListTitle">以下問題對您的困擾程度</div>
+
+      <WeeklyResult v-if="store.nowState == 'result'" />
       <WeeklyScoreBar v-if="store.nowState == 'score'" />
       <TagTimesList v-if="store.nowState == 'times'" />
-
       <SymptomChoose v-if="store.nowState == 'choose'" />
     </div>
 
@@ -68,6 +70,7 @@ import { useWeeklyRecord } from "~/stores/weeklyQA.js";
 import WeeklyScoreBar from "~/components/WeeklyScoreBar.vue";
 import TagTimesList from "~/components/TagTimesList.vue";
 import SymptomChoose from "~/components/SymptomChoose.vue";
+
 export default {
   components: {
     Navbar,
@@ -85,14 +88,15 @@ export default {
         case "times":
         case "choose":
           return "每週評估";
-    
-     
+
         default:
           return "每週評估";
       }
     });
-
-    return { store, h1Text };
+    const resultChange = () =>{
+      store.nowState = "result"
+    }
+    return { store, h1Text ,resultChange };
   },
 };
 </script>
@@ -104,18 +108,17 @@ export default {
   background-color: $raphael-gray-200;
 
   padding-bottom: 150px;
-
+  width: 100%;
   .titleBar {
     position: absolute;
     top: 1rem;
-    max-width: 768px;
     display: flex;
     width: 100%;
-
     justify-content: center;
+
     svg {
       position: absolute;
-      left: 2%;
+      left: 3.5%;
       cursor: pointer;
     }
     h1 {
