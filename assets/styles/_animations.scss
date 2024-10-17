@@ -1,0 +1,61 @@
+// _animations.scss
+
+@mixin fade-in {
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+  
+    animation: fadeIn 0.5s ease-in-out forwards;
+  }
+  
+  @mixin slide-in {
+    @keyframes slideIn {
+      0% {
+        transform: translateX(-100%);
+        opacity: 0;
+      }
+      100% {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+  
+    animation: slideIn 0.5s ease-in-out forwards;
+  }
+  
+  @mixin bounce {
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+      }
+      40% {
+        transform: translateY(-30px);
+      }
+      60% {
+        transform: translateY(-15px);
+      }
+    }
+  
+    animation: bounce 1s infinite;
+  }
+  
+  // 使用動畫的樣式
+  .animated {
+    &.fade-in {
+      @include fade-in;
+    }
+  
+    &.slide-in {
+      @include slide-in;
+    }
+  
+    &.bounce {
+      @include bounce;
+    }
+  }
+  

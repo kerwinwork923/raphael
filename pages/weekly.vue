@@ -22,13 +22,14 @@
 
     <TagList />
     <div class="weeklyQAGroup">
-      
-      <StepIndicator v-if="store.nowState == 'result'"
+      <StepIndicator
+        v-if="store.nowState == 'result'"
         :stepTexts="['填寫問卷', '結果分析']"
         :currentStep="1"
       />
 
-      <StepIndicator v-if="store.nowState !== 'result'"
+      <StepIndicator
+        v-if="store.nowState !== 'result'"
         :stepTexts="['填寫問卷', '結果分析']"
         :currentStep="0"
       />
@@ -40,7 +41,11 @@
       <SymptomChoose v-if="store.nowState == 'choose'" />
     </div>
 
-    <div class="weeklyBtnGroup">
+    <div
+      class="weeklyBtnGroup"
+      v-if="store.nowState === 'score' || store.nowState === 'times' || store.nowState === 'choose'"
+
+    >
       <button
         class="weeklyBtn preBtn"
         @click="store.handlePrevStep"

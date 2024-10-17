@@ -265,7 +265,6 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
       const { MID, Token, MAID, Mobile } = localData
         ? JSON.parse(localData)
         : {};
-
       try {
         const response1 = await axios.post(
           "https://23700999.com:8081/HMA/API_ANSFirstDetail.jsp",
@@ -277,10 +276,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
             AID: "",
           }
         );
-
         if (response1.status === 200) {
-          console.log(response1.data);
-
           // 假設大於1以上
           if (response1.data.History.length > 1) {
             this.theLatestHistory = response1.data.History[0];
@@ -306,8 +302,8 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
                 AID: response1.data.History[1].preAID,
               }
             );
-
             this.theLatestDataPreData = response3.data;
+            await this.checkTestDate();
           }
           //只有一個
           else if (response1.data.History.length > 0) {
@@ -322,58 +318,10 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
                 AID: response1.data.History[0].preAID,
               }
             );
-            this.theLatestHistory = response2.data;
-          }
+            this.theLatestData = response2.data;
+            console.log(this.theLatestHistory);
 
-          // 確保有歷史記錄
-          if (this.theLatestHistory.CheckTime) {
-            const currentDate = new Date();
-
-            // 解析 CheckTime，格式为 "20241016113108"
-            const lastTestDateStr = this.theLatestHistory.CheckTime;
-            const year = parseInt(lastTestDateStr.substring(0, 4), 10);
-            const month = parseInt(lastTestDateStr.substring(4, 6), 10) - 1;
-            const day = parseInt(lastTestDateStr.substring(6, 8), 10);
-            const hours = parseInt(lastTestDateStr.substring(8, 10), 10);
-            const minutes = parseInt(lastTestDateStr.substring(10, 12), 10);
-            const seconds = parseInt(lastTestDateStr.substring(12, 14), 10);
-
-            const lastTestDate = new Date(
-              year,
-              month,
-              day,
-              hours,
-              minutes,
-              seconds
-            );
-
-            if (!isNaN(lastTestDate.getTime())) {
-              const diffTime = currentDate - lastTestDate;
-
-              const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-              const diffHours = Math.floor(
-                (diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-              );
-
-              const remainingDays = 12 - diffDays;
-              const remainingHours = diffHours > 0 ? 24 - diffHours : 0;
-
-              if (remainingDays > 0) {
-                this.diffDays = `${remainingDays}天`;
-              } else if (remainingDays === 0 && remainingHours > 0) {
-                this.diffDays = `${remainingHours}小時`;
-              } else {
-                this.diffDays = "已經超過12天";
-              }
-
-              if (diffDays < 12) {
-                this.nowState = "result";
-                await this.API_API_ANSSecond();
-                return;
-              } else {
-                await this.getQues();
-              }
-            }
+            await this.checkTestDate();
           } else {
             await this.getQues();
           }
@@ -383,6 +331,59 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         throw err;
       }
     },
+    //輔助API_API_ANSFirstDetail
+    async checkTestDate() {
+      if (this.theLatestHistory.CheckTime) {
+        const currentDate = new Date();
+        const lastTestDateStr = this.theLatestHistory.CheckTime;
+        const year = parseInt(lastTestDateStr.substring(0, 4), 10);
+        const month = parseInt(lastTestDateStr.substring(4, 6), 10) - 1;
+        const day = parseInt(lastTestDateStr.substring(6, 8), 10);
+        const hours = parseInt(lastTestDateStr.substring(8, 10), 10);
+        const minutes = parseInt(lastTestDateStr.substring(10, 12), 10);
+        const seconds = parseInt(lastTestDateStr.substring(12, 14), 10);
+
+        const lastTestDate = new Date(
+          year,
+          month,
+          day,
+          hours,
+          minutes,
+          seconds
+        );
+
+        if (!isNaN(lastTestDate.getTime())) {
+          const diffTime = currentDate - lastTestDate;
+
+          const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+          const diffHours = Math.floor(
+            (diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+          );
+
+          const remainingDays = 12 - diffDays;
+          const remainingHours = diffHours > 0 ? 24 - diffHours : 0;
+
+          if (remainingDays > 0) {
+            this.diffDays = `${remainingDays}天`;
+          } else if (remainingDays === 0 && remainingHours > 0) {
+            this.diffDays = `${remainingHours}小時`;
+          } else {
+            this.diffDays = "已經超過12天";
+          }
+
+          if (diffDays < 12) {
+            this.nowState = "result";
+            await this.API_API_ANSSecond();
+            return;
+          } else {
+            await this.getQues();
+          }
+        }
+      } else {
+        await this.getQues();
+      }
+    },
+
     // 比較前後次
     async API_API_ANSSecond() {
       const localData = localStorage.getItem("userData");
@@ -435,8 +436,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
 
     // 下一步按鈕處理
     async handleNextStep() {
-      const common = useCommon(); // 引入 useCommon store
-
+      const common = useCommon();
       if (this.nowState === "score") {
         const startIdx = (this.currentStep - 1) * this.questionsPerPage;
         const endIdx = Math.min(

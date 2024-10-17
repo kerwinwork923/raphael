@@ -10,7 +10,7 @@
         <h5 class="subText">
           (本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}
         </h5>
-        
+
         <div class="severity">
           <div class="imgGroup">
             <img :src="computedEmoji2(store.theLatestData.TotalScore)" alt="" />
@@ -112,9 +112,7 @@
         >
           {{ item }}
         </div>
-        <h5>
-          (本次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
-        </h5>
+        <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
         <ProgressBar2
           :score="computedScore(store.theLatestData.C1Ratio)"
           :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C1Ratio))"
@@ -186,9 +184,7 @@
         >
           {{ item }}
         </div>
-        <h5>
-          (本次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
-        </h5>
+        <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
         <ProgressBar2
           :score="computedScore(store.theLatestData.C2Ratio)"
           :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C2Ratio))"
@@ -260,9 +256,7 @@
         >
           {{ item }}
         </div>
-        <h5>
-          (本次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
-        </h5>
+        <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
         <ProgressBar2
           :score="computedScore(store.theLatestData.C3Ratio)"
           :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C3Ratio))"
@@ -334,9 +328,7 @@
         >
           {{ item }}
         </div>
-        <h5>
-          (本次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
-        </h5>
+        <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
         <ProgressBar2
           :score="computedScore(store.theLatestData.C4Ratio)"
           :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C4Ratio))"
@@ -408,9 +400,7 @@
         >
           {{ item }}
         </div>
-        <h5>
-          (本次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
-        </h5>
+        <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
         <ProgressBar2
           :score="computedScore(store.theLatestData.C5Ratio)"
           :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C5Ratio))"
@@ -482,9 +472,7 @@
         >
           {{ item }}
         </div>
-        <h5>
-          (本次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
-        </h5>
+        <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
         <ProgressBar2
           :score="computedScore(store.theLatestData.C6Ratio)"
           :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C6Ratio))"
@@ -556,9 +544,7 @@
         >
           {{ item }}
         </div>
-        <h5>
-          (本次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
-        </h5>
+        <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
         <ProgressBar2
           :score="computedScore(store.theLatestData.C7Ratio)"
           :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C7Ratio))"
@@ -630,9 +616,7 @@
         >
           {{ item }}
         </div>
-        <h5>
-          (本次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
-        </h5>
+        <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
         <ProgressBar2
           :score="computedScore(store.theLatestData.C8Ratio)"
           :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C8Ratio))"
@@ -704,9 +688,7 @@
         >
           {{ item }}
         </div>
-        <h5>
-          (本次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
-        </h5>
+        <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
         <ProgressBar2
           :score="computedScore(store.theLatestData.C9Ratio)"
           :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C9Ratio))"
@@ -753,13 +735,13 @@
     <div class="symptomWrap">
       <div class="symptomGroup">
         <div class="symptomButtonGroup">
-          <button class="symptomBtn" @click="changeSymptomLavel('Serious')">
+          <button class="symptomBtn" :class="{ symptomBtnActive: selectedType === 'Serious' }" @click="changeSymptomLavel('Serious')">
             嚴重
           </button>
-          <button class="symptomBtn" @click="changeSymptomLavel('Middle')">
+          <button class="symptomBtn"  :class="{ symptomBtnActive: selectedType === 'Middle' }" @click="changeSymptomLavel('Middle')">
             中等
           </button>
-          <button class="symptomBtn" @click="changeSymptomLavel('Light')">
+          <button class="symptomBtn"   :class="{ symptomBtnActive: selectedType === 'Light' }" @click="changeSymptomLavel('Light')">
             輕微
           </button>
         </div>
@@ -825,7 +807,7 @@
         </div>
       </div>
 
-      <div class="detection">
+      <div class="detection" v-if="store.theLatestDataPreData.AID">
         <div class="cGroup">
           <img class="img" src="../assets/imgs/calendar.png" alt="" />
         </div>
@@ -848,7 +830,9 @@
     </div>
 
     <div class="backToUserBtnGroupWeekly">
-      <button class="backToUserBtnWeekly" @click="backToUser()">返回會員中心</button>
+      <button class="backToUserBtnWeekly" @click="backToUser()">
+        返回會員中心
+      </button>
     </div>
   </div>
 </template>
@@ -1041,16 +1025,16 @@ export default {
     background-color: #fff;
     border-radius: 12px;
     margin-top: 0.75rem;
-    padding: 12px;
+    padding: 12px 16px;
     .symptomButtonGroup {
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
       gap: 3.5%;
-
+        
       button {
         background-color: #f6f6f6;
         color: #666;
-        width: 25%;
+        width: 32.5%;
         border: none;
         transition: 0.5s all ease;
         border-radius: 12px;
@@ -1064,6 +1048,7 @@ export default {
       .symptomBtnActive {
         background-color: $raphael-green-400;
         color: #fff;
+   
       }
     }
     .symptomMenuList {
@@ -1071,12 +1056,16 @@ export default {
       grid-template-columns: repeat(2, 1fr);
       grid-gap: 0.5rem;
       margin-top: 0.25rem;
-
+      @include fade-in;
+      &:nth-child(1) {
+      animation-delay: 0.1s;
+    }
       .symptomList {
         display: flex;
         align-items: center;
 
         margin-top: 0.5rem;
+        
       }
     }
 
@@ -1181,7 +1170,7 @@ export default {
 }
 
 .backToUserBtnGroupWeekly {
-  margin-top: 1.25rem;  
+  margin-top: 1.25rem;
   width: 100%;
 }
 .backToUserBtnWeekly {

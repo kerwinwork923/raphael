@@ -15,7 +15,7 @@
           width:
             QAData.selectScore !== undefined
               ? `${QAData.selectScore * 33.33}%`
-              : '0%', 
+              : '0%',
           backgroundColor: '#74bc1f',
         }"
       ></div>
@@ -25,7 +25,7 @@
           width:
             QAData.selectScore !== undefined
               ? `${(3 - QAData.selectScore) * 33.33}%`
-              : '100%', 
+              : '100%',
           backgroundColor: '#b3b3b3',
         }"
       ></div>
@@ -49,13 +49,12 @@
 </template>
 
 <script>
-import { defineComponent, computed } from "vue";
+import { defineComponent, computed, watch } from "vue";
 import { useWeeklyRecord } from "~/stores/weeklyQA.js";
 
 export default defineComponent({
   setup() {
     const store = useWeeklyRecord();
-  
 
     const currentPage = computed(() => store.currentStep);
     const questionsPerPage = 7;
@@ -75,10 +74,9 @@ export default defineComponent({
       if (index !== -1) {
         store.weeklyQA[index] = {
           ...store.weeklyQA[index],
-          selectScore: scoreValue, 
-          score: scoreValue, 
+          selectScore: scoreValue,
+          score: scoreValue,
         };
-
       }
     };
 
@@ -86,6 +84,11 @@ export default defineComponent({
       const labels = ["無", "輕微", "中等", "嚴重"];
       return labels[score] || "";
     };
+
+    watch(currentPage, () => {
+      // 每次頁碼變更時瞬間滾動到頁面頂部
+      window.scrollTo(100, 145); // 瞬間滾動到頂部
+    });
 
     return {
       store,
