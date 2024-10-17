@@ -634,22 +634,22 @@ export default {
 };
 
 
-const handleInput = (index) => {
-  // 如果當前輸入的數字不在範圍內，則清空該輸入框
-  if (verificationCodes.value[index] < 0 || verificationCodes.value[index] > 9) {
-    verificationCodes.value[index] = '';
-  }
+    const handleInput = (index) => {
+      // 如果當前輸入的數字不在範圍內，則清空該輸入框
+      if (verificationCodes.value[index] < 0 || verificationCodes.value[index] > 9) {
+        verificationCodes.value[index] = '';
+      }
 
-  // 將焦點移到下一個輸入框
-  if (verificationCodes.value[index] && index < verificationCodes.value.length - 1) {
-    verificationInput.value[index + 1]?.focus();
-  }
+      // 將焦點移到下一個輸入框
+      if (verificationCodes.value[index] && index < verificationCodes.value.length - 1) {
+        verificationInput.value[index + 1]?.focus();
+      }
 
-  // 當5個數字都填寫完成時，進行驗證
-  if (verificationCodes.value.every(code => code !== '')) {
-    verifyCode(); // 調用驗證方法
-  }
-};
+      // 當5個數字都填寫完成時，進行驗證
+      if (verificationCodes.value.every(code => code !== '')) {
+        verifyCode(); // 調用驗證方法
+      }
+    };
 
     const allowOnlyNumbers = (event) => {
       const char = String.fromCharCode(event.which);
