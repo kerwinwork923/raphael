@@ -634,31 +634,22 @@ export default {
 };
 
 
-const handleInput = (index, event) => {
-  const key = event.keyCode || event.which;
-  
-  // 如果按下退格鍵並且當前輸入框為空，將焦點移到上一個輸入框
-  if (key === 8 && verificationCodes.value[index] === "" && index > 0) {
-    verificationInput.value[index - 1]?.focus();
-  }
-
-  // 確保只允許輸入 0 到 9 的數字
+const handleInput = (index) => {
+  // 如果當前輸入的數字不在範圍內，則清空該輸入框
   if (verificationCodes.value[index] < 0 || verificationCodes.value[index] > 9) {
     verificationCodes.value[index] = '';
   }
 
-  // 如果當前輸入框有值且不是最後一個，移動焦點到下一個輸入框
+  // 將焦點移到下一個輸入框
   if (verificationCodes.value[index] && index < verificationCodes.value.length - 1) {
     verificationInput.value[index + 1]?.focus();
   }
 
-  // 當所有驗證碼輸入完成，調用驗證邏輯
+  // 當5個數字都填寫完成時，進行驗證
   if (verificationCodes.value.every(code => code !== '')) {
     verifyCode(); // 調用驗證方法
   }
 };
-
-
 
     const allowOnlyNumbers = (event) => {
       const char = String.fromCharCode(event.which);
