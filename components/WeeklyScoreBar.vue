@@ -15,7 +15,7 @@
           width:
             QAData.selectScore !== undefined
               ? `${QAData.selectScore * 33.33}%`
-              : '0%', // No progress if not filled
+              : '0%', 
           backgroundColor: '#74bc1f',
         }"
       ></div>
@@ -25,7 +25,7 @@
           width:
             QAData.selectScore !== undefined
               ? `${(3 - QAData.selectScore) * 33.33}%`
-              : '100%', // Full width if not filled
+              : '100%', 
           backgroundColor: '#b3b3b3',
         }"
       ></div>
@@ -55,7 +55,7 @@ import { useWeeklyRecord } from "~/stores/weeklyQA.js";
 export default defineComponent({
   setup() {
     const store = useWeeklyRecord();
-    store.getQues();
+  
 
     const currentPage = computed(() => store.currentStep);
     const questionsPerPage = 7;
@@ -73,12 +73,10 @@ export default defineComponent({
     const setScore = (QAData, scoreValue) => {
       const index = store.weeklyQA.indexOf(QAData);
       if (index !== -1) {
-        // 根據 scoreValue 更新相應的 score 值
-      
         store.weeklyQA[index] = {
           ...store.weeklyQA[index],
-          selectScore: scoreValue, // 更新 selectScore
-          score: scoreValue, // 更新實際分數
+          selectScore: scoreValue, 
+          score: scoreValue, 
         };
 
       }

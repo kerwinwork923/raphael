@@ -17,7 +17,7 @@
   background: rgba(217, 217, 217, 0.5);
   backdrop-filter: blur(2.5px);
   img {
-    transform: translateY(-125%);
+    transform: translateY(-15%);
   }
 }
 </style>

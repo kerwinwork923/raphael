@@ -1,13 +1,15 @@
 <template>
   <div class="scoreBarGroupWrap">
     <div class="scoreBarGroup">
+      <!-- 綠色部分進度條，對應分數的百分比 -->
       <div
         class="scoreBar"
-        :style="{ width: `${score * 25}%`, backgroundColor: '#74bc1f' }"
+        :style="{ width: `${score * 33.3333}%`, backgroundColor: '#74bc1f' }"
       ></div>
+      <!-- 剩餘部分進度條 -->
       <div
         class="remainingBar"
-        :style="{ width: `${(4 - score) * 25}%`, backgroundColor: '#b3b3b3' }"
+        :style="{ width: `${(3 - score) * 33.3333}%`, backgroundColor: '#b3b3b3' }"
       ></div>
       <div class="numberGroup">
         <div

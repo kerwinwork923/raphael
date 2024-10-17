@@ -2,41 +2,78 @@
   <div class="resultWrap">
     <div class="resultTopGroup">
       <div class="resultInfo">
-        <div class="resultHintText">12天後再進行檢測</div>
-        <h5 class="subText">(本次)8/01</h5>
+        <div class="resultHintText">
+          {{
+            store.diffDays >= 1 ? diffDays + "天" : store.diffDays
+          }}後再進行檢測
+        </div>
+        <h5 class="subText">
+          (本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}
+        </h5>
+        
         <div class="severity">
           <div class="imgGroup">
-            <img :src="computedEmoji2(85)" alt="" />
+            <img :src="computedEmoji2(store.theLatestData.TotalScore)" alt="" />
 
             <div class="scoreText">
-              <div class="score" :style="{ color: scoreColorFn(85) }">85</div>
+              <div
+                class="score"
+                :style="{ color: scoreColorFn(store.theLatestData.TotalScore) }"
+              >
+                {{ store.theLatestData.TotalScore }}
+              </div>
               <h5>分</h5>
             </div>
           </div>
 
-          <ProgressBar :score="85" :colorProp="scoreColorFn(85)" />
+          <ProgressBar
+            :score="store.theLatestData.TotalScore"
+            :colorProp="scoreColorFn(store.theLatestData.TotalScore)"
+          />
 
           <h6 class="severityText">
             嚴重程度 :
-            <span :style="{ color: scoreColorFn(85) }"> 83.8%(嚴重失調)</span>
+            <span
+              :style="{ color: scoreColorFn(store.theLatestData.TotalScore) }"
+            >
+              {{ store.theLatestData.TotalRatio }}%(嚴重失調)</span
+            >
           </h6>
         </div>
-        <div class="dashDiv">---</div>
-        <div class="severity">
+        <div class="dashDiv" v-if="store.theLatestDataPreData.TotalScore">
+          ---
+        </div>
+        <div class="severity" v-if="store.theLatestDataPreData.TotalScore">
           <div class="imgGroup">
-            <img :src="computedEmoji2(23)" alt="" />
-
+            <img
+              :src="computedEmoji2(store.theLatestDataPreData.TotalScore)"
+              alt=""
+            />
             <div class="scoreText">
-              <div class="score" :style="{ color: scoreColorFn(25) }">25</div>
+              <div
+                class="score"
+                :style="{
+                  color: scoreColorFn(store.theLatestDataPreData.TotalScore),
+                }"
+              >
+                {{ store.theLatestDataPreData.TotalScore }}
+              </div>
               <h5>分</h5>
             </div>
           </div>
-
-          <ProgressBar :score="25" :colorProp="scoreColorFn(25)" />
-
+          <ProgressBar
+            :score="store.theLatestDataPreData.TotalScore"
+            :colorProp="scoreColorFn(store.theLatestDataPreData.TotalScore)"
+          />
           <h6 class="severityText">
             嚴重程度 :
-            <span :style="{ color: scoreColorFn(25) }"> 23.8%(嚴重失調)</span>
+            <span
+              :style="{
+                color: scoreColorFn(store.theLatestDataPreData.TotalScore),
+              }"
+            >
+              {{ store.theLatestDataPreData.TotalRatio }}%(嚴重失調)</span
+            >
           </h6>
         </div>
       </div>
@@ -46,48 +83,772 @@
     <h4 class="textResultText">以下為分類系統的自律神經分析結果</h4>
     <div class="resultListGroup">
       <div class="resultList">
-        <h3>精神系統</h3>
-        <div class="resultTag">想解決的症狀名稱</div>
-        <h5>(本次)8/15</h5>
-        <ProgressBar2 :score="55" :emojiSrc="computedEmoji2(55)" />
+        <div class="titleGroup">
+          <h3>{{ store.diffenenceObj.C1Symptom }}</h3>
+
+          <p
+            v-if="
+              Number(store.diffenenceObj.C1Difference?.replace('%', '')) > 0
+            "
+            class="upIcon"
+          >
+            ▲
+          </p>
+          <p
+            v-if="
+              Number(store.diffenenceObj.C1Difference?.replace('%', '')) < 0
+            "
+            class="downIcon"
+          >
+            ▼
+          </p>
+          <div class="titleScore">100%</div>
+        </div>
+
+        <div
+          class="resultTag"
+          v-for="item in store.diffenenceObj.C1Solve"
+          :key="item"
+        >
+          {{ item }}
+        </div>
+        <h5>
+          (本次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
+        </h5>
+        <ProgressBar2
+          :score="computedScore(store.theLatestData.C1Ratio)"
+          :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C1Ratio))"
+        />
         <h4>
           嚴重程度 :
-          <span :style="{ color: scoreColorFn(92) }">92.3%(重度失調)</span>
+          <span
+            :style="{
+              color: scoreColorFn(computedScore(store.theLatestData.C1Ratio)),
+            }"
+            >{{ store.theLatestData.C1Ratio }}({{
+              computedText(computedScore(store.theLatestData.C1Ratio))
+            }})</span
+          >
         </h4>
+        <div class="nextGroup" v-if="store.theLatestHistoryPre.CheckTime">
+          <h5>
+            (前次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
+          </h5>
+          <ProgressBar2
+            :score="computedScore(store.theLatestDataPreData.C1Ratio)"
+            :emojiSrc="
+              computedEmoji2(computedScore(store.theLatestDataPreData.C1Ratio))
+            "
+          />
+          <h4>
+            嚴重程度 :
+            <span
+              :style="{
+                color: scoreColorFn(
+                  computedScore(store.theLatestDataPreData.C1Ratio)
+                ),
+              }"
+              >{{ store.theLatestDataPreData.C1Ratio }}({{
+                computedText(computedScore(store.theLatestDataPreData.C1Ratio))
+              }})</span
+            >
+          </h4>
+        </div>
       </div>
 
       <div class="resultList">
-        <h3>神經系統</h3>
-        <div class="resultTag">想解決的症狀名稱</div>
-        <h5>(本次)8/15</h5>
-        <ProgressBar2 :score="23" :emojiSrc="computedEmoji2(23)" />
+        <div class="titleGroup">
+          <h3>{{ store.diffenenceObj.C2Symptom }}</h3>
+
+          <p
+            v-if="
+              parseFloat(store.diffenenceObj.C2Difference?.replace('%', '')) > 0
+            "
+            class="upIcon"
+          >
+            ▲
+          </p>
+          <p
+            v-if="
+              parseFloat(store.diffenenceObj.C2Difference?.replace('%', '')) < 0
+            "
+            class="downIcon"
+          >
+            ▼
+          </p>
+          <div class="titleScore">100%</div>
+        </div>
+
+        <div
+          class="resultTag"
+          v-for="item in store.diffenenceObj.C2Solve"
+          :key="item"
+        >
+          {{ item }}
+        </div>
+        <h5>
+          (本次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
+        </h5>
+        <ProgressBar2
+          :score="computedScore(store.theLatestData.C2Ratio)"
+          :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C2Ratio))"
+        />
         <h4>
           嚴重程度 :
-          <span :style="{ color: scoreColorFn(92) }">92.3%(重度失調)</span>
+          <span
+            :style="{
+              color: scoreColorFn(computedScore(store.theLatestData.C2Ratio)),
+            }"
+            >{{ store.theLatestData.C2Ratio }}({{
+              computedText(computedScore(store.theLatestData.C2Ratio))
+            }})</span
+          >
         </h4>
+        <div class="nextGroup" v-if="store.theLatestHistoryPre.CheckTime">
+          <h5>
+            (前次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
+          </h5>
+          <ProgressBar2
+            :score="computedScore(store.theLatestDataPreData.C2Ratio)"
+            :emojiSrc="
+              computedEmoji2(computedScore(store.theLatestDataPreData.C2Ratio))
+            "
+          />
+          <h4>
+            嚴重程度 :
+            <span
+              :style="{
+                color: scoreColorFn(
+                  computedScore(store.theLatestDataPreData.C2Ratio)
+                ),
+              }"
+              >{{ store.theLatestDataPreData.C2Ratio }}({{
+                computedText(computedScore(store.theLatestDataPreData.C2Ratio))
+              }})</span
+            >
+          </h4>
+        </div>
       </div>
 
       <div class="resultList">
-        <h3>血液循環系統</h3>
-        <div class="resultTag">想解決的症狀名稱</div>
-        <h5>(本次)7/15</h5>
-        <ProgressBar2 :score="87" :emojiSrc="computedEmoji2(87)" />
+        <div class="titleGroup">
+          <h3>{{ store.diffenenceObj.C3Symptom }}</h3>
+
+          <p
+            v-if="
+              parseFloat(store.diffenenceObj.C3Difference?.replace('%', '')) > 0
+            "
+            class="upIcon"
+          >
+            ▲
+          </p>
+          <p
+            v-if="
+              parseFloat(store.diffenenceObj.C3Difference?.replace('%', '')) < 0
+            "
+            class="downIcon"
+          >
+            ▼
+          </p>
+          <div class="titleScore">100%</div>
+        </div>
+
+        <div
+          class="resultTag"
+          v-for="item in store.diffenenceObj.C3Solve"
+          :key="item"
+        >
+          {{ item }}
+        </div>
+        <h5>
+          (本次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
+        </h5>
+        <ProgressBar2
+          :score="computedScore(store.theLatestData.C3Ratio)"
+          :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C3Ratio))"
+        />
         <h4>
           嚴重程度 :
-          <span :style="{ color: scoreColorFn(92) }">92.3%(重度失調)</span>
+          <span
+            :style="{
+              color: scoreColorFn(computedScore(store.theLatestData.C3Ratio)),
+            }"
+            >{{ store.theLatestData.C3Ratio }}({{
+              computedText(computedScore(store.theLatestData.C3Ratio))
+            }})</span
+          >
         </h4>
+        <div class="nextGroup" v-if="store.theLatestHistoryPre.CheckTime">
+          <h5>
+            (前次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
+          </h5>
+          <ProgressBar2
+            :score="computedScore(store.theLatestDataPreData.C3Ratio)"
+            :emojiSrc="
+              computedEmoji2(computedScore(store.theLatestDataPreData.C3Ratio))
+            "
+          />
+          <h4>
+            嚴重程度 :
+            <span
+              :style="{
+                color: scoreColorFn(
+                  computedScore(store.theLatestDataPreData.C3Ratio)
+                ),
+              }"
+              >{{ store.theLatestDataPreData.C3Ratio }}({{
+                computedText(computedScore(store.theLatestDataPreData.C3Ratio))
+              }})</span
+            >
+          </h4>
+        </div>
       </div>
 
       <div class="resultList">
-        <h3>感官系統</h3>
-        <div class="resultTag">想解決的症狀名稱</div>
-        <h5>(本次)8/15</h5>
-        <ProgressBar2 :score="33" :emojiSrc="computedEmoji2(33)" />
+        <div class="titleGroup">
+          <h3>{{ store.diffenenceObj.C4Symptom }}</h3>
+
+          <p
+            v-if="
+              parseFloat(store.diffenenceObj.C4Difference?.replace('%', '')) > 0
+            "
+            class="upIcon"
+          >
+            ▲
+          </p>
+          <p
+            v-if="
+              parseFloat(store.diffenenceObj.C4Difference?.replace('%', '')) < 0
+            "
+            class="downIcon"
+          >
+            ▼
+          </p>
+          <div class="titleScore">100%</div>
+        </div>
+
+        <div
+          class="resultTag"
+          v-for="item in store.diffenenceObj.C4Solve"
+          :key="item"
+        >
+          {{ item }}
+        </div>
+        <h5>
+          (本次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
+        </h5>
+        <ProgressBar2
+          :score="computedScore(store.theLatestData.C4Ratio)"
+          :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C4Ratio))"
+        />
         <h4>
           嚴重程度 :
-          <span :style="{ color: scoreColorFn(92) }">92.3%(重度失調)</span>
+          <span
+            :style="{
+              color: scoreColorFn(computedScore(store.theLatestData.C4Ratio)),
+            }"
+            >{{ store.theLatestData.C4Ratio }}({{
+              computedText(computedScore(store.theLatestData.C4Ratio))
+            }})</span
+          >
         </h4>
+        <div class="nextGroup" v-if="store.theLatestHistoryPre.CheckTime">
+          <h5>
+            (前次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
+          </h5>
+          <ProgressBar2
+            :score="computedScore(store.theLatestDataPreData.C4Ratio)"
+            :emojiSrc="
+              computedEmoji2(computedScore(store.theLatestDataPreData.C4Ratio))
+            "
+          />
+          <h4>
+            嚴重程度 :
+            <span
+              :style="{
+                color: scoreColorFn(
+                  computedScore(store.theLatestDataPreData.C4Ratio)
+                ),
+              }"
+              >{{ store.theLatestDataPreData.C4Ratio }}({{
+                computedText(computedScore(store.theLatestDataPreData.C4Ratio))
+              }})</span
+            >
+          </h4>
+        </div>
       </div>
+
+      <div class="resultList">
+        <div class="titleGroup">
+          <h3>{{ store.diffenenceObj.C5Symptom }}</h3>
+
+          <p
+            v-if="
+              parseFloat(store.diffenenceObj.C5Difference?.replace('%', '')) > 0
+            "
+            class="upIcon"
+          >
+            ▲
+          </p>
+          <p
+            v-if="
+              parseFloat(store.diffenenceObj.C5Difference?.replace('%', '')) < 0
+            "
+            class="downIcon"
+          >
+            ▼
+          </p>
+          <div class="titleScore">100%</div>
+        </div>
+
+        <div
+          class="resultTag"
+          v-for="item in store.diffenenceObj.C5Solve"
+          :key="item"
+        >
+          {{ item }}
+        </div>
+        <h5>
+          (本次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
+        </h5>
+        <ProgressBar2
+          :score="computedScore(store.theLatestData.C5Ratio)"
+          :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C5Ratio))"
+        />
+        <h4>
+          嚴重程度 :
+          <span
+            :style="{
+              color: scoreColorFn(computedScore(store.theLatestData.C5Ratio)),
+            }"
+            >{{ store.theLatestData.C5Ratio }}({{
+              computedText(computedScore(store.theLatestData.C5Ratio))
+            }})</span
+          >
+        </h4>
+        <div class="nextGroup" v-if="store.theLatestHistoryPre.CheckTime">
+          <h5>
+            (前次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
+          </h5>
+          <ProgressBar2
+            :score="computedScore(store.theLatestDataPreData.C5Ratio)"
+            :emojiSrc="
+              computedEmoji2(computedScore(store.theLatestDataPreData.C5Ratio))
+            "
+          />
+          <h4>
+            嚴重程度 :
+            <span
+              :style="{
+                color: scoreColorFn(
+                  computedScore(store.theLatestDataPreData.C5Ratio)
+                ),
+              }"
+              >{{ store.theLatestDataPreData.C5Ratio }}({{
+                computedText(computedScore(store.theLatestDataPreData.C5Ratio))
+              }})</span
+            >
+          </h4>
+        </div>
+      </div>
+
+      <div class="resultList">
+        <div class="titleGroup">
+          <h3>{{ store.diffenenceObj.C6Symptom }}</h3>
+
+          <p
+            v-if="
+              parseFloat(store.diffenenceObj.C6Difference?.replace('%', '')) > 0
+            "
+            class="upIcon"
+          >
+            ▲
+          </p>
+          <p
+            v-if="
+              parseFloat(store.diffenenceObj.C6Difference?.replace('%', '')) < 0
+            "
+            class="downIcon"
+          >
+            ▼
+          </p>
+          <div class="titleScore">100%</div>
+        </div>
+
+        <div
+          class="resultTag"
+          v-for="item in store.diffenenceObj.C6Solve"
+          :key="item"
+        >
+          {{ item }}
+        </div>
+        <h5>
+          (本次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
+        </h5>
+        <ProgressBar2
+          :score="computedScore(store.theLatestData.C6Ratio)"
+          :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C6Ratio))"
+        />
+        <h4>
+          嚴重程度 :
+          <span
+            :style="{
+              color: scoreColorFn(computedScore(store.theLatestData.C6Ratio)),
+            }"
+            >{{ store.theLatestData.C6Ratio }}({{
+              computedText(computedScore(store.theLatestData.C6Ratio))
+            }})</span
+          >
+        </h4>
+        <div class="nextGroup" v-if="store.theLatestHistoryPre.CheckTime">
+          <h5>
+            (前次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
+          </h5>
+          <ProgressBar2
+            :score="computedScore(store.theLatestDataPreData.C6Ratio)"
+            :emojiSrc="
+              computedEmoji2(computedScore(store.theLatestDataPreData.C6Ratio))
+            "
+          />
+          <h4>
+            嚴重程度 :
+            <span
+              :style="{
+                color: scoreColorFn(
+                  computedScore(store.theLatestDataPreData.C6Ratio)
+                ),
+              }"
+              >{{ store.theLatestDataPreData.C6Ratio }}({{
+                computedText(computedScore(store.theLatestDataPreData.C6Ratio))
+              }})</span
+            >
+          </h4>
+        </div>
+      </div>
+
+      <div class="resultList">
+        <div class="titleGroup">
+          <h3>{{ store.diffenenceObj.C7Symptom }}</h3>
+
+          <p
+            v-if="
+              parseFloat(store.diffenenceObj.C7Difference?.replace('%', '')) > 0
+            "
+            class="upIcon"
+          >
+            ▲
+          </p>
+          <p
+            v-if="
+              parseFloat(store.diffenenceObj.C7Difference?.replace('%', '')) < 0
+            "
+            class="downIcon"
+          >
+            ▼
+          </p>
+          <div class="titleScore">100%</div>
+        </div>
+
+        <div
+          class="resultTag"
+          v-for="item in store.diffenenceObj.C7Solve"
+          :key="item"
+        >
+          {{ item }}
+        </div>
+        <h5>
+          (本次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
+        </h5>
+        <ProgressBar2
+          :score="computedScore(store.theLatestData.C7Ratio)"
+          :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C7Ratio))"
+        />
+        <h4>
+          嚴重程度 :
+          <span
+            :style="{
+              color: scoreColorFn(computedScore(store.theLatestData.C7Ratio)),
+            }"
+            >{{ store.theLatestData.C7Ratio }}({{
+              computedText(computedScore(store.theLatestData.C7Ratio))
+            }})</span
+          >
+        </h4>
+        <div class="nextGroup" v-if="store.theLatestHistoryPre.CheckTime">
+          <h5>
+            (前次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
+          </h5>
+          <ProgressBar2
+            :score="computedScore(store.theLatestDataPreData.C7Ratio)"
+            :emojiSrc="
+              computedEmoji2(computedScore(store.theLatestDataPreData.C7Ratio))
+            "
+          />
+          <h4>
+            嚴重程度 :
+            <span
+              :style="{
+                color: scoreColorFn(
+                  computedScore(store.theLatestDataPreData.C7Ratio)
+                ),
+              }"
+              >{{ store.theLatestDataPreData.C7Ratio }}({{
+                computedText(computedScore(store.theLatestDataPreData.C7Ratio))
+              }})</span
+            >
+          </h4>
+        </div>
+      </div>
+
+      <div class="resultList">
+        <div class="titleGroup">
+          <h3>{{ store.diffenenceObj.C8Symptom }}</h3>
+
+          <p
+            v-if="
+              parseFloat(store.diffenenceObj.C8Difference?.replace('%', '')) > 0
+            "
+            class="upIcon"
+          >
+            ▲
+          </p>
+          <p
+            v-if="
+              parseFloat(store.diffenenceObj.C8Difference?.replace('%', '')) < 0
+            "
+            class="downIcon"
+          >
+            ▼
+          </p>
+          <div class="titleScore">100%</div>
+        </div>
+
+        <div
+          class="resultTag"
+          v-for="item in store.diffenenceObj.C8Solve"
+          :key="item"
+        >
+          {{ item }}
+        </div>
+        <h5>
+          (本次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
+        </h5>
+        <ProgressBar2
+          :score="computedScore(store.theLatestData.C8Ratio)"
+          :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C8Ratio))"
+        />
+        <h4>
+          嚴重程度 :
+          <span
+            :style="{
+              color: scoreColorFn(computedScore(store.theLatestData.C8Ratio)),
+            }"
+            >{{ store.theLatestData.C8Ratio }}({{
+              computedText(computedScore(store.theLatestData.C8Ratio))
+            }})</span
+          >
+        </h4>
+        <div class="nextGroup" v-if="store.theLatestHistoryPre.CheckTime">
+          <h5>
+            (前次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
+          </h5>
+          <ProgressBar2
+            :score="computedScore(store.theLatestDataPreData.C8Ratio)"
+            :emojiSrc="
+              computedEmoji2(computedScore(store.theLatestDataPreData.C8Ratio))
+            "
+          />
+          <h4>
+            嚴重程度 :
+            <span
+              :style="{
+                color: scoreColorFn(
+                  computedScore(store.theLatestDataPreData.C8Ratio)
+                ),
+              }"
+              >{{ store.theLatestDataPreData.C8Ratio }}({{
+                computedText(computedScore(store.theLatestDataPreData.C8Ratio))
+              }})</span
+            >
+          </h4>
+        </div>
+      </div>
+
+      <div class="resultList">
+        <div class="titleGroup">
+          <h3>{{ store.diffenenceObj.C9Symptom }}</h3>
+
+          <p
+            v-if="
+              parseFloat(store.diffenenceObj.C9Difference?.replace('%', '')) > 0
+            "
+            class="upIcon"
+          >
+            ▲
+          </p>
+          <p
+            v-if="
+              parseFloat(store.diffenenceObj.C9Difference?.replace('%', '')) < 0
+            "
+            class="downIcon"
+          >
+            ▼
+          </p>
+          <div class="titleScore">100%</div>
+        </div>
+
+        <div
+          class="resultTag"
+          v-for="item in store.diffenenceObj.C9Solve"
+          :key="item"
+        >
+          {{ item }}
+        </div>
+        <h5>
+          (本次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
+        </h5>
+        <ProgressBar2
+          :score="computedScore(store.theLatestData.C9Ratio)"
+          :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C9Ratio))"
+        />
+        <h4>
+          嚴重程度 :
+          <span
+            :style="{
+              color: scoreColorFn(computedScore(store.theLatestData.C9Ratio)),
+            }"
+            >{{ store.theLatestData.C9Ratio }}({{
+              computedText(computedScore(store.theLatestData.C9Ratio))
+            }})</span
+          >
+        </h4>
+        <div class="nextGroup" v-if="store.theLatestHistoryPre.CheckTime">
+          <h5>
+            (前次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
+          </h5>
+          <ProgressBar2
+            :score="computedScore(store.theLatestDataPreData.C9Ratio)"
+            :emojiSrc="
+              computedEmoji2(computedScore(store.theLatestDataPreData.C9Ratio))
+            "
+          />
+          <h4>
+            嚴重程度 :
+            <span
+              :style="{
+                color: scoreColorFn(
+                  computedScore(store.theLatestDataPreData.C9Ratio)
+                ),
+              }"
+              >{{ store.theLatestDataPreData.C9Ratio }}({{
+                computedText(computedScore(store.theLatestDataPreData.C9Ratio))
+              }})</span
+            >
+          </h4>
+        </div>
+      </div>
+    </div>
+    <h4 class="textResultText">您最近常出現的症狀依困擾程度排序</h4>
+
+    <div class="symptomWrap">
+      <div class="symptomGroup">
+        <div class="symptomButtonGroup">
+          <button class="symptomBtn" @click="changeSymptomLavel('Serious')">
+            嚴重
+          </button>
+          <button class="symptomBtn" @click="changeSymptomLavel('Middle')">
+            中等
+          </button>
+          <button class="symptomBtn" @click="changeSymptomLavel('Light')">
+            輕微
+          </button>
+        </div>
+        <div
+          class="symptomMenuList symptomSeriousList"
+          v-if="selectedType == 'Serious'"
+        >
+          <div
+            class="symptomList"
+            v-for="(item, index) in store.theLatestData.Serious"
+            :key="index"
+          >
+            {{ item }}
+          </div>
+        </div>
+
+        <div
+          class="symptomMenuList symptomMeddleList"
+          v-if="selectedType == 'Middle'"
+        >
+          <div
+            class="symptomList"
+            v-for="(item, index) in store.theLatestData.Middle"
+            :key="index"
+          >
+            {{ item }}
+          </div>
+        </div>
+
+        <div
+          class="symptomMenuList symptomLightList"
+          v-if="selectedType == 'Light'"
+        >
+          <div
+            class="symptomList"
+            v-for="(item, index) in store.theLatestData.Light"
+            :key="index"
+          >
+            {{ item }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h4 class="textResultText">檢測紀錄</h4>
+    <div class="detectionGroup">
+      <div class="detection">
+        <div class="cGroup">
+          <img class="img" src="../assets/imgs/calendar.png" alt="" />
+        </div>
+        <h3 class="detectionDate">
+          {{ formatTimestamp(store.theLatestHistory.CheckTime) }}
+        </h3>
+        <div class="detectionGroup">
+          <div class="scroeTotal">
+            <h5>總分</h5>
+            <div class="totalScore">{{ store.theLatestHistory.Score }}</div>
+          </div>
+          <div class="seriousDegreeGroup">
+            <h5>嚴重程度</h5>
+            <div class="seriousScore">{{ store.theLatestHistory.Ratio }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detection">
+        <div class="cGroup">
+          <img class="img" src="../assets/imgs/calendar.png" alt="" />
+        </div>
+        <h3 class="detectionDate">
+          {{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
+        </h3>
+        <div class="detectionGroup">
+          <div class="scroeTotal">
+            <h5>總分</h5>
+            <div class="totalScore">{{ store.theLatestHistoryPre.Score }}</div>
+          </div>
+          <div class="seriousDegreeGroup">
+            <h5>嚴重程度</h5>
+            <div class="seriousScore">
+              {{ store.theLatestHistoryPre.Ratio }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="backToUserBtnGroupWeekly">
+      <button class="backToUserBtnWeekly" @click="backToUser()">返回會員中心</button>
     </div>
   </div>
 </template>
@@ -96,16 +857,50 @@
 import { ref } from "vue";
 import ProgressBar from "./ProgressBar.vue";
 import ProgressBar2 from "./ProgressBar2.vue";
-import { scoreColorFn, computedEmoji2 } from "../fn/utils";
+import {
+  scoreColorFn,
+  computedEmoji2,
+  formatTimestamp,
+  computedText,
+} from "../fn/utils";
+import { useWeeklyRecord } from "../stores/weeklyQA";
+
+import { useRouter } from "vue-router";
+import axios from "axios";
+
 export default {
   components: {
     ProgressBar,
     ProgressBar2,
   },
   setup() {
+    const store = useWeeklyRecord();
+    const router = useRouter();
+    const backToUser = () => {
+      router.push({ name: "user" });
+    };
+
+    const selectedType = ref("Serious");
+
+    const changeSymptomLavel = (lavel) => {
+      selectedType.value = lavel;
+    };
+
+    const computedScore = (scoreStr) => {
+      const numericScore = parseFloat(scoreStr.replace("%", ""));
+      return isNaN(numericScore) ? 0 : numericScore;
+    };
+
     return {
       scoreColorFn,
       computedEmoji2,
+      store,
+      formatTimestamp,
+      backToUser,
+      computedScore,
+      selectedType,
+      changeSymptomLavel,
+      computedText,
     };
   },
 };
@@ -188,6 +983,26 @@ export default {
       padding: 12px;
       border-radius: 12px;
       margin-top: 0.75rem;
+      .nextGroup {
+        margin-top: 0.75rem;
+      }
+      .titleGroup {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        .upIcon {
+          color: #ec4f4f;
+          font-size: 10px;
+        }
+        .downIcon {
+          color: $raphael-green-400;
+          font-size: 10px;
+        }
+        .titleScore {
+          color: $raphael-green-400;
+          font-size: 12px;
+        }
+      }
       h3 {
         color: #1e1e1e;
         font-size: 20px;
@@ -202,6 +1017,7 @@ export default {
         border-radius: 8px;
         color: #666;
         font-size: 12px;
+        margin-right: 0.35rem;
       }
       h5 {
         color: #1e1e1e;
@@ -220,9 +1036,164 @@ export default {
       }
     }
   }
+
+  .symptomGroup {
+    background-color: #fff;
+    border-radius: 12px;
+    margin-top: 0.75rem;
+    padding: 12px;
+    .symptomButtonGroup {
+      display: flex;
+      justify-content: center;
+      gap: 3.5%;
+
+      button {
+        background-color: #f6f6f6;
+        color: #666;
+        width: 25%;
+        border: none;
+        transition: 0.5s all ease;
+        border-radius: 12px;
+        padding: 6px 12px;
+
+        &:hover {
+          background-color: $raphael-green-400;
+          color: #fff;
+        }
+      }
+      .symptomBtnActive {
+        background-color: $raphael-green-400;
+        color: #fff;
+      }
+    }
+    .symptomMenuList {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-gap: 0.5rem;
+      margin-top: 0.25rem;
+
+      .symptomList {
+        display: flex;
+        align-items: center;
+
+        margin-top: 0.5rem;
+      }
+    }
+
+    .symptomSeriousList {
+      .symptomList {
+        &::before {
+          content: "";
+          width: 4px;
+          height: 100%;
+          margin-right: 4px;
+          display: inline-block;
+          background: #bc581f;
+          border-radius: 4px;
+        }
+      }
+    }
+
+    .symptomMeddleList {
+      .symptomList {
+        &::before {
+          content: "";
+          width: 4px;
+          height: 100%;
+          margin-right: 4px;
+          display: inline-block;
+          background: #65558f;
+          border-radius: 4px;
+        }
+      }
+    }
+
+    .symptomLightList {
+      .symptomList {
+        &::before {
+          content: "";
+          width: 4px;
+          height: 100%;
+          margin-right: 4px;
+          display: inline-block;
+          background: #1fbcb3;
+          border-radius: 4px;
+        }
+      }
+    }
+  }
+  .detectionGroup {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-top: 0.85rem;
+    .detection {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      .cGroup {
+        border: 2px solid $raphael-green-400;
+        padding: 0.25rem;
+        border-radius: 7px;
+        img {
+          width: 1rem;
+          height: 1rem;
+        }
+      }
+
+      .detectionGroup {
+        margin-left: auto;
+        display: flex;
+        text-align: center;
+        gap: 14px;
+        .scroeTotal,
+        .seriousDegreeGroup {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+          h5 {
+            color: #666;
+            font-size: 14px;
+            letter-spacing: 0.1px;
+            font-weight: 400;
+          }
+          .totalScore,
+          .seriousScore {
+            color: #1e1e1e;
+            font-size: 24px;
+          }
+        }
+      }
+    }
+    .detectionDate {
+      font-size: 20px;
+      color: #1e1e1e;
+      letter-spacing: 0.15px;
+    }
+  }
 }
 
 .doctorImg {
   width: 40%;
+}
+
+.backToUserBtnGroupWeekly {
+  margin-top: 1.25rem;  
+  width: 100%;
+}
+.backToUserBtnWeekly {
+  background-color: $raphael-green-400;
+  color: #fff;
+  padding: 12px;
+  width: 100%;
+  border-radius: 8px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  transition: 0.25s ease;
 }
 </style>

@@ -15,7 +15,7 @@ export const scoreColorFn = (score) => {
     case score >= 72:
       return "#EC4F4F"; // 重度失調
     default:
-      return "gray"; // 默认颜色
+      return "gray";
   }
 };
 
@@ -47,4 +47,38 @@ export const computedEmoji2 = (score) => {
   } else {
     return unSmile;
   }
+};
+
+export const computedText = (score) => {
+  if (score >= 1 && score <= 25) {
+    return "正常";
+  } else if (score >= 26 && score <= 45) {
+    return "輕度失調";
+  } else if (score >= 46 && score <= 71) {
+    return "中度失調";
+  } else if (score >= 72) {
+    return "嚴重失調";
+  } else {
+    return "";
+  }
+};
+
+//時間戳轉月份
+export const formatTimestamp = (timestampStr) => {
+  // 確保字串長度符合標準格式 "YYYYMMDDHHMMSS"
+  if (timestampStr.length !== 14) {
+    return "Invalid timestamp format"; // 如果長度不對，返回錯誤提示
+  }
+
+  // 提取年月日
+  const year = timestampStr.slice(0, 4); // 提取年份
+  const month = timestampStr.slice(4, 6); // 提取月份
+  const day = timestampStr.slice(6, 8); // 提取日期
+
+  // 將月份和日期轉換為整數去掉前導零（如有）
+  const formattedMonth = parseInt(month, 10); // 將字串轉為數字，去掉前導零
+  const formattedDay = parseInt(day, 10);
+
+  // 返回格式化結果
+  return `${formattedMonth}/${formattedDay}`;
 };

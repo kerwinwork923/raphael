@@ -36,7 +36,7 @@
           <img src="../assets/imgs/faceIcon.svg" alt="" />
         </div>
 
-        <router-link to="/userRecord">
+        <router-link to="/weekly">
           <div class="item item3">
             <div class="topTitle">每周</div>
             <div class="bottomTitle">評估</div>

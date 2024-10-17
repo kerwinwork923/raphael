@@ -18,29 +18,16 @@
         </svg>
       </router-link>
 
-      <h1>{{sleepState === 'sleepRecord1' ? "結果分析" : "每週評估" }}</h1>
+      <h1>{{ sleepState === "sleepRecord1" ? "結果分析" : "每週評估" }}</h1>
     </div>
 
     <!-- <Navbar /> -->
     <div class="userRecoreWrap">
       <tagList />
+      <StepIndicator  v-if="sleepState === 'firstTest'" :stepTexts="['填寫問卷', '結果分析']" :currentStep="0" />
+      <StepIndicator  v-if="sleepState === 'sleepRecord1'" :stepTexts="['填寫問卷', '結果分析']" :currentStep="1" />
       <div class="sleepRecordWrap" v-if="sleepState === 'firstTest'">
-        <div class="subList">
-          <span class="subListActive">填寫問卷</span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="33"
-            height="9"
-            viewBox="0 0 33 9"
-            fill="none"
-          >
-            <path
-              d="M32.3536 4.85355C32.5488 4.65829 32.5488 4.34171 32.3536 4.14645L29.1716 0.964466C28.9763 0.769204 28.6597 0.769204 28.4645 0.964466C28.2692 1.15973 28.2692 1.47631 28.4645 1.67157L31.2929 4.5L28.4645 7.32843C28.2692 7.52369 28.2692 7.84027 28.4645 8.03553C28.6597 8.2308 28.9763 8.2308 29.1716 8.03553L32.3536 4.85355ZM0 5H32V4H0V5Z"
-              fill="#CCCCCC"
-            />
-          </svg>
-          <span>結果分析</span>
-        </div>
+        
 
         <h5 class="pleaseWrite">請填寫以下問題</h5>
         <div class="sleepRecord">
@@ -633,13 +620,15 @@ import TagList from "../components/TagList.vue";
 
 import RaphaelLoading from "../components/RaphaelLoading";
 
+import StepIndicator from "~/components/StepIndicator.vue";
+
 //圖片
 
 import unSmile from "@/assets/imgs/unSmile.png";
 import sad from "@/assets/imgs/sad.png";
 import happy from "@/assets/imgs/happy.png";
 import smile from "@/assets/imgs/smile.png";
-import {computedEmoji } from "../fn/utils";
+import { scoreColorFn, computedEmoji } from "../fn/utils";
 const isSubmitting = ref(false);
 
 export default {
@@ -906,7 +895,6 @@ export default {
       }
     };
 
-  
     const cc = async () => {
       try {
         loading.value = true;
@@ -996,6 +984,8 @@ export default {
       isSubmitting,
       backToUser,
       computedEmoji,
+      scoreColorFn,
+      StepIndicator
     };
   },
 };
@@ -1028,24 +1018,12 @@ export default {
       letter-spacing: 0.5px;
     }
   }
-  
 }
 .userRecoreWrap {
   padding: 0 5%;
 }
 
-.subList {
-  color: #666;
-  font-family: 14px;
-  margin-top: 1rem;
-  svg {
-    margin-left: 8px;
-    margin-right: 4px;
-  }
-  .subListActive {
-    color: $raphael-red-500;
-  }
-}
+
 .pleaseWrite {
   margin: 1rem 0 0.75rem 0;
   color: $raphael-gray-500;

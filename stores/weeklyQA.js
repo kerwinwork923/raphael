@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import axios from "axios";
+import { useCommon } from "./common";
 
 export const useWeeklyRecord = defineStore("weeklyQA", {
   state: () => ({
@@ -13,6 +14,12 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
     nowState: "score",
     preDisabled: true,
     nextDisabled: false,
+    theLatestHistory: {},
+    theLatestData: {},
+    theLatestHistoryPre: {},
+    theLatestDataPreData: {},
+    diffDays: "",
+    diffenenceObj: {},
   }),
 
   getters: {
@@ -52,7 +59,11 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
   },
 
   actions: {
+    //獲取題目
     async getQues() {
+      const common = useCommon();
+      common.startLoading();
+
       const localData = localStorage.getItem("userData");
       const { MID, Token, MAID, Mobile } = localData
         ? JSON.parse(localData)
@@ -100,16 +111,25 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         }
       } catch (err) {
         console.error("Error while fetching questions:", err);
-        throw err;
+        common.setError(err);
+      } finally {
+        common.stopLoading();
       }
     },
-
+    // 保存答案
     async API_ANSOnlineQSaveAns() {
+      const common = useCommon();
+      common.startLoading();
+
       const localData = localStorage.getItem("userData");
-      const { MID, Token, MAID, Mobile, Name, Sex } = localData
+      const { MID, Token, MAID, Mobile, Name } = localData
         ? JSON.parse(localData)
         : {};
+      let { Sex } = localData ? JSON.parse(localData) : {};
 
+      if (Sex == "0") {
+        Sex = 1;
+      }
       let AnsMap = new Map();
       this.weeklyQA.forEach((question, index) => {
         AnsMap.set(`key${index + 1}`, String(question.score));
@@ -137,6 +157,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
 
         if (response.status === 200) {
           const AID = response.data.AID;
+
           if (AID) {
             const updatedLocalData = {
               MID,
@@ -151,12 +172,17 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
           }
         }
       } catch (err) {
-        console.error("Error while fetching questions:", err);
-        throw err;
+        console.error("Error while saving answers:", err);
+        common.setError(err);
+      } finally {
+        common.stopLoading();
       }
     },
-
+    // 儲存題目
     async API_ANSOnlineTimesSaveTimes() {
+      const common = useCommon();
+      common.startLoading();
+
       const localData = localStorage.getItem("userData");
       const { MID, Token, MAID, Mobile, Name, Sex, AID } = localData
         ? JSON.parse(localData)
@@ -185,11 +211,17 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         if (response.status === 200) {
         }
       } catch (err) {
-        throw err;
+        console.error("Error while saving times:", err);
+        common.setError(err);
+      } finally {
+        common.stopLoading();
       }
     },
-
+    // 想解決的方案
     async API_ANSOnlineSolveSaveSolve() {
+      const common = useCommon(); // 引入 useCommon store
+      common.startLoading();
+
       const localData = localStorage.getItem("userData");
       const { MID, Token, MAID, Mobile, Name, Sex, AID } = localData
         ? JSON.parse(localData)
@@ -204,7 +236,6 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
       });
 
       const AnsSolveArrayJson = JSON.stringify(AnsSolveArray);
-      console.log();
 
       try {
         const response = await axios.post(
@@ -222,11 +253,177 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         if (response.status === 200) {
         }
       } catch (err) {
+        console.error("Error while saving solve:", err);
+        common.setError(err);
+      } finally {
+        common.stopLoading();
+      }
+    },
+    // 第一次打API並紀錄最新紀錄
+    async API_API_ANSFirstDetail() {
+      const localData = localStorage.getItem("userData");
+      const { MID, Token, MAID, Mobile } = localData
+        ? JSON.parse(localData)
+        : {};
+
+      try {
+        const response1 = await axios.post(
+          "https://23700999.com:8081/HMA/API_ANSFirstDetail.jsp",
+          {
+            MID: String(MID),
+            Token: String(Token),
+            MAID: String(MAID),
+            Mobile: String(Mobile),
+            AID: "",
+          }
+        );
+
+        if (response1.status === 200) {
+          console.log(response1.data);
+
+          // 假設大於1以上
+          if (response1.data.History.length > 1) {
+            this.theLatestHistory = response1.data.History[0];
+            const response2 = await axios.post(
+              "https://23700999.com:8081/HMA/API_ANSFirstDetail.jsp",
+              {
+                MID: String(MID),
+                Token: String(Token),
+                MAID: String(MAID),
+                Mobile: String(Mobile),
+                AID: response1.data.History[0].preAID,
+              }
+            );
+            this.theLatestData = response2.data;
+            this.theLatestHistoryPre = response1.data.History[1];
+            const response3 = await axios.post(
+              "https://23700999.com:8081/HMA/API_ANSFirstDetail.jsp",
+              {
+                MID: String(MID),
+                Token: String(Token),
+                MAID: String(MAID),
+                Mobile: String(Mobile),
+                AID: response1.data.History[1].preAID,
+              }
+            );
+
+            this.theLatestDataPreData = response3.data;
+          }
+          //只有一個
+          else if (response1.data.History.length > 0) {
+            this.theLatestHistory = response1.data.History[0];
+            const response2 = await axios.post(
+              "https://23700999.com:8081/HMA/API_ANSFirstDetail.jsp",
+              {
+                MID: String(MID),
+                Token: String(Token),
+                MAID: String(MAID),
+                Mobile: String(Mobile),
+                AID: response1.data.History[0].preAID,
+              }
+            );
+            this.theLatestHistory = response2.data;
+          }
+
+          // 確保有歷史記錄
+          if (this.theLatestHistory.CheckTime) {
+            const currentDate = new Date();
+
+            // 解析 CheckTime，格式为 "20241016113108"
+            const lastTestDateStr = this.theLatestHistory.CheckTime;
+            const year = parseInt(lastTestDateStr.substring(0, 4), 10);
+            const month = parseInt(lastTestDateStr.substring(4, 6), 10) - 1;
+            const day = parseInt(lastTestDateStr.substring(6, 8), 10);
+            const hours = parseInt(lastTestDateStr.substring(8, 10), 10);
+            const minutes = parseInt(lastTestDateStr.substring(10, 12), 10);
+            const seconds = parseInt(lastTestDateStr.substring(12, 14), 10);
+
+            const lastTestDate = new Date(
+              year,
+              month,
+              day,
+              hours,
+              minutes,
+              seconds
+            );
+
+            if (!isNaN(lastTestDate.getTime())) {
+              const diffTime = currentDate - lastTestDate;
+
+              const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+              const diffHours = Math.floor(
+                (diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+              );
+
+              const remainingDays = 12 - diffDays;
+              const remainingHours = diffHours > 0 ? 24 - diffHours : 0;
+
+              if (remainingDays > 0) {
+                this.diffDays = `${remainingDays}天`;
+              } else if (remainingDays === 0 && remainingHours > 0) {
+                this.diffDays = `${remainingHours}小時`;
+              } else {
+                this.diffDays = "已經超過12天";
+              }
+
+              if (diffDays < 12) {
+                this.nowState = "result";
+                await this.API_API_ANSSecond();
+                return;
+              } else {
+                await this.getQues();
+              }
+            }
+          } else {
+            await this.getQues();
+          }
+        }
+      } catch (err) {
         console.error("Error while fetching questions:", err);
         throw err;
       }
     },
+    // 比較前後次
+    async API_API_ANSSecond() {
+      const localData = localStorage.getItem("userData");
+      const { MID, Token, MAID, Mobile } = localData
+        ? JSON.parse(localData)
+        : {};
 
+      try {
+        const response1 = await axios.post(
+          "https://23700999.com:8081/HMA/API_ANSSecond.jsp",
+          {
+            MID: String(MID),
+            Token: String(Token),
+            MAID: String(MAID),
+            Mobile: String(Mobile),
+            AID: String(this.theLatestHistory?.preAID),
+            preAID: String(this.theLatestHistoryPre?.preAID),
+          }
+        );
+
+        if (response1.status === 200) {
+          console.log(response1.data);
+          this.diffenenceObj = {
+            ...response1.data,
+            C1Symptom: "精神系統",
+            C2Symptom: "神經系統",
+            C3Symptom: "血液循環系統",
+            C4Symptom: "感官系統",
+            C5Symptom: "心肺系統",
+            C6Symptom: "過敏免疫系統",
+            C7Symptom: "腸胃系統",
+            C8Symptom: "泌尿生殖系統",
+            C9Symptom: "血液循環系統",
+          };
+        }
+      } catch (err) {
+        console.error("Error while fetching questions:", err);
+        throw err;
+      }
+    },
+    // 檢查題目是否有10題
     checkMinimumItems() {
       const itemsAboveZero = this.weeklyQA.filter((q) => q.selectScore > 0);
       if (itemsAboveZero.length < 10) {
@@ -236,7 +433,10 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
       return true;
     },
 
+    // 下一步按鈕處理
     async handleNextStep() {
+      const common = useCommon(); // 引入 useCommon store
+
       if (this.nowState === "score") {
         const startIdx = (this.currentStep - 1) * this.questionsPerPage;
         const endIdx = Math.min(
@@ -251,13 +451,13 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         if (this.currentStep < this.totalStep) {
           this.currentStep += 1;
         } else {
-          //判別項目是否超過10個
+          // 判别项目是否超过10个
           const itemsAboveZero = this.weeklyQA.filter((q) => q.selectScore > 0);
           if (itemsAboveZero.length < 10) {
             alert("選項項目不足，請至少選擇 10 的項目");
             return false;
           }
-          // await this.API_ANSOnlineQSaveAns();
+          await this.API_ANSOnlineQSaveAns();
           this.nowState = "times";
 
           this.totalTimesStep = Math.ceil(
@@ -265,37 +465,45 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
           );
         }
       } else if (this.nowState === "times") {
-        // 計算當前頁面應回答的問題總數
+        // 計算已選擇的問題數量
         const selectedCount = this.weeklyQA.filter((q) => q.times >= 0).length;
+
+        // 當前頁面
         const currentPage = this.timesStep;
 
+        // 總問題數量
         const total = this.sortedByScore.length;
-        const totalPage = Math.floor(total / this.selectQuestionPerPage);
 
-        if (currentPage > totalPage) {
-          if (selectedCount  % this.selectQuestionPerPage != total % this.selectQuestionPerPage) {
+        // 總頁數
+        const totalPage = Math.ceil(total / this.selectQuestionPerPage);
+
+        // 檢查是否為最後一頁
+        const isLastPage = currentPage === totalPage;
+
+        if (!isLastPage) {
+          // 如果不是最後一頁，檢查當前頁是否選擇了足夠的問題
+          if (selectedCount < this.selectQuestionPerPage * currentPage) {
             alert("尚未選擇完成");
             return;
           }
-        } 
-        
-        
-        else {
-          if (selectedCount < this.selectQuestionPerPage *currentPage) {
+        } else {
+          // 如果是最後一頁，檢查選擇的問題總數是否正確
+          if (selectedCount < total) {
             alert("尚未選擇完成");
             return;
           }
         }
 
-        // 繼續下一頁或處理完成邏輯
+        // 進入下一頁或處理最後一步
         if (this.timesStep < this.totalTimesStep) {
-          this.timesStep += 1; // 移動到下一頁
+          this.timesStep += 1;
         } else {
-          // 處理最後一步
-          this.nowState = "choose"; // 轉換狀態
+          this.nowState = "choose";
         }
       } else if (this.nowState === "choose") {
-        // await this.API_ANSOnlineSolveSaveSolve();
+        await this.API_ANSOnlineSolveSaveSolve();
+        await this.API_API_ANSFirstDetail();
+        this.nowState = "result";
       }
 
       this.preDisabled = this.currentStep === 1;

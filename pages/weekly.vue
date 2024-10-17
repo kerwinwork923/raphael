@@ -1,4 +1,5 @@
 <template>
+  <RaphaelLoading v-if="common.isLoading" />
   <div class="weeklyRecord">
     <div class="titleBar">
       <router-link to="/user">
@@ -21,23 +22,16 @@
 
     <TagList />
     <div class="weeklyQAGroup">
-      <div class="subList">
-        <span class="subListActive">填寫問卷</span>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="33"
-          height="8"
-          viewBox="0 0 33 8"
-          fill="none"
-        >
-          <path
-            d="M32.4972 4.22778C32.6916 4.03345 32.6916 3.71838 32.4972 3.52405L29.3304 0.357228C29.1361 0.162896 28.821 0.162896 28.6267 0.357228C28.4324 0.551559 28.4324 0.866633 28.6267 1.06097L31.4416 3.87592L28.6267 6.69087C28.4324 6.8852 28.4324 7.20027 28.6267 7.3946C28.821 7.58894 29.1361 7.58894 29.3304 7.3946L32.4972 4.22778ZM0.297852 4.37353H32.1454V3.3783H0.297852V4.37353Z"
-            fill="#CCCCCC"
-          />
-        </svg>
-        <span>結果分析</span>
-        <button style="margin-left: auto" @click="resultChange">結果頁面</button>
-      </div>
+      
+      <StepIndicator v-if="store.nowState == 'result'"
+        :stepTexts="['填寫問卷', '結果分析']"
+        :currentStep="1"
+      />
+
+      <StepIndicator v-if="store.nowState !== 'result'"
+        :stepTexts="['填寫問卷', '結果分析']"
+        :currentStep="0"
+      />
       <div class="subListTitle">以下問題對您的困擾程度</div>
 
       <WeeklyResult v-if="store.nowState == 'result'" />
@@ -64,12 +58,15 @@
 <script>
 import Navbar from "~/components/Navbar.vue";
 import TagList from "../components/TagList.vue";
+import RaphaelLoading from "~/components/RaphaelLoading.vue";
 import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useWeeklyRecord } from "~/stores/weeklyQA.js";
 import WeeklyScoreBar from "~/components/WeeklyScoreBar.vue";
 import TagTimesList from "~/components/TagTimesList.vue";
 import SymptomChoose from "~/components/SymptomChoose.vue";
+import { useCommon } from "@/stores/common";
+import StepIndicator from "~/components/StepIndicator.vue";
 
 export default {
   components: {
@@ -78,25 +75,40 @@ export default {
     WeeklyScoreBar,
     TagTimesList,
     SymptomChoose,
+    RaphaelLoading,
+    StepIndicator,
   },
   setup() {
     const store = useWeeklyRecord();
+    const common = useCommon();
 
+    const start = async () => {
+      common.startLoading();
+      await store.API_API_ANSFirstDetail();
+      common.stopLoading();
+    };
+
+    start();
+
+    // store.API_API_ANSSecond()
     const h1Text = computed(() => {
       switch (store.nowState) {
         case "score":
         case "times":
         case "choose":
-          return "每週評估";
-
+          return "每週評估"; // 不需要 break，因為已經 return 了
+        case "result":
+          return "結果分析"; // 這裡應該加冒號，並 return 正確的值
         default:
-          return "每週評估";
+          return "每週評估"; // default 也不需要 break
       }
     });
-    const resultChange = () =>{
-      store.nowState = "result"
-    }
-    return { store, h1Text ,resultChange };
+
+    const resultChange = () => {
+      store.nowState = "result";
+    };
+
+    return { store, h1Text, common, resultChange, useCommon };
   },
 };
 </script>
@@ -133,14 +145,7 @@ export default {
     margin: 0 auto;
     padding: 0 5%;
   }
-  .subList {
-    color: #ccc;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 12px;
-  }
+
   .subListTitle {
     color: #666;
     margin-top: 1.25rem;
