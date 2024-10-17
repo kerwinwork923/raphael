@@ -43,8 +43,11 @@
 
     <div
       class="weeklyBtnGroup"
-      v-if="store.nowState === 'score' || store.nowState === 'times' || store.nowState === 'choose'"
-
+      v-if="
+        store.nowState === 'score' ||
+        store.nowState === 'times' ||
+        store.nowState === 'choose'
+      "
     >
       <button
         class="weeklyBtn preBtn"
@@ -73,6 +76,8 @@ import SymptomChoose from "~/components/SymptomChoose.vue";
 import { useCommon } from "@/stores/common";
 import StepIndicator from "~/components/StepIndicator.vue";
 
+
+
 export default {
   components: {
     Navbar,
@@ -84,6 +89,19 @@ export default {
     StepIndicator,
   },
   setup() {
+    const router = useRouter();
+
+    const localData = localStorage.getItem("userDadta");
+      const { MID, Token, MAID, Mobile } = localData
+        ? JSON.parse(localData)
+        : {};
+
+      if (!MID || !Token || !MAID || !Mobile) {
+       
+        router.push('/login'); 
+        return;
+      }
+
     const store = useWeeklyRecord();
     const common = useCommon();
 
@@ -112,6 +130,8 @@ export default {
     const resultChange = () => {
       store.nowState = "result";
     };
+
+
 
     return { store, h1Text, common, resultChange, useCommon };
   },

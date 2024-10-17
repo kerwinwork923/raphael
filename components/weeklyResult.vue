@@ -735,13 +735,25 @@
     <div class="symptomWrap">
       <div class="symptomGroup">
         <div class="symptomButtonGroup">
-          <button class="symptomBtn" :class="{ symptomBtnActive: selectedType === 'Serious' }" @click="changeSymptomLavel('Serious')">
+          <button
+            class="symptomBtn"
+            :class="{ symptomBtnActive: selectedType === 'Serious' }"
+            @click="changeSymptomLavel('Serious')"
+          >
             嚴重
           </button>
-          <button class="symptomBtn"  :class="{ symptomBtnActive: selectedType === 'Middle' }" @click="changeSymptomLavel('Middle')">
+          <button
+            class="symptomBtn"
+            :class="{ symptomBtnActive: selectedType === 'Middle' }"
+            @click="changeSymptomLavel('Middle')"
+          >
             中等
           </button>
-          <button class="symptomBtn"   :class="{ symptomBtnActive: selectedType === 'Light' }" @click="changeSymptomLavel('Light')">
+          <button
+            class="symptomBtn"
+            :class="{ symptomBtnActive: selectedType === 'Light' }"
+            @click="changeSymptomLavel('Light')"
+          >
             輕微
           </button>
         </div>
@@ -1030,7 +1042,7 @@ export default {
       display: flex;
       justify-content: space-between;
       gap: 3.5%;
-        
+
       button {
         background-color: #f6f6f6;
         color: #666;
@@ -1048,7 +1060,6 @@ export default {
       .symptomBtnActive {
         background-color: $raphael-green-400;
         color: #fff;
-   
       }
     }
     .symptomMenuList {
@@ -1058,14 +1069,13 @@ export default {
       margin-top: 0.25rem;
       @include fade-in;
       &:nth-child(1) {
-      animation-delay: 0.1s;
-    }
+        animation-delay: 0.1s;
+      }
       .symptomList {
         display: flex;
         align-items: center;
 
         margin-top: 0.5rem;
-        
       }
     }
 
