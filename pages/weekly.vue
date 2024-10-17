@@ -76,8 +76,6 @@ import SymptomChoose from "~/components/SymptomChoose.vue";
 import { useCommon } from "@/stores/common";
 import StepIndicator from "~/components/StepIndicator.vue";
 
-
-
 export default {
   components: {
     Navbar,
@@ -91,17 +89,21 @@ export default {
   setup() {
     const router = useRouter();
 
-    const localData = localStorage.getItem("userDadta");
-      const { MID, Token, MAID, Mobile } = localData
-        ? JSON.parse(localData)
-        : {};
+    const localData = localStorage.getItem("userData");
+    let MID, Token, MAID, Mobile;
 
-      if (!MID || !Token || !MAID || !Mobile) {
-       
-        router.push('/login'); 
-        return;
+    try {
+      if (localData) {
+        ({ MID, Token, MAID, Mobile } = JSON.parse(localData));
       }
+    } catch (e) {
+      console.error("Error parsing localStorage data", e);
+    }
 
+    if (!MID || !Token || !MAID || !Mobile) {
+      router.push("/login");
+      return;
+    }
     const store = useWeeklyRecord();
     const common = useCommon();
 
@@ -130,8 +132,6 @@ export default {
     const resultChange = () => {
       store.nowState = "result";
     };
-
-
 
     return { store, h1Text, common, resultChange, useCommon };
   },
