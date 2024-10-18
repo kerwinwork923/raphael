@@ -80,19 +80,19 @@
       <div class="verfifyWrap" v-if="currentStep === 'verify'">
         <div class="verificationCodeGroup">
           <input
-            v-for="(code, index) in verificationCodes"
-            :key="index"
-            ref="verificationInput"
-            type="number"
-            maxlength="1"
-            class="vertifyCode"
-            v-model="verificationCodes[index]"
-            @input="handleInput(index)"
-            @keypress="allowOnlyNumbers"
-            min="0"
-            max="9"
-        oninput="this.value = Math.max(0, Math.min(9, this.value))"
-          />
+          v-for="(code, index) in verificationCodes"
+          :key="index"
+          ref="verificationInput"
+          type="number"
+          maxlength="1"
+          class="vertifyCode"
+          v-model="verificationCodes[index]"
+          @input="handleInput(index)"
+          @keydown="handleInput(index, $event)"
+          @keypress="allowOnlyNumbers"
+          :disabled="isDisabled" 
+        />
+
         </div>
         <div class="verificationCodeHintText">
         <template v-if="typeof countdownTime === 'number'">
@@ -111,39 +111,451 @@
        
     
       </div>
-      <div class="infoWrap"  v-if="currentStep === 'info'"   >
-        <div class="infoBox">
-          <div class="nameGroup">
-            <img class="icon1" src="../assets/imgs/user.svg" alt="" />
-            <input type="text" placeholder="請輸入您的姓名(暱稱)" v-model="name" />
-          </div>
-          <div class="heightGroup">
-            <img class="icon1" src="../assets/imgs/height.svg" alt="" />
-            <input type="text" placeholder="請輸入您的身高" v-model="height" />
-          </div>
-          <div class="weightGroup">
-            <img class="icon1" src="../assets/imgs/weight.svg" alt="" />
-            <input type="text" placeholder="請輸入您的體重" v-model="weight" />
-          </div>
-          <div class="groupGroup">
-           
-            <img class="icon1" src="../assets/imgs/group.svg" alt="" />
-            <select ref="sexSelect" v-model="sex" name="" id="">
-              <option class="placeholder" value="" disabled selected hidden>請選擇您的性別</option>
-              <option value="1">男生</option>
-              <option value="2">女生</option>
-             
-            </select>
-            <img class="icon2" src="../assets/imgs/arrowDown.svg" alt="">
-            <!-- <input type="text" disabled placeholder="請輸入您的性別"  v-model="sex"/> -->
-           
-          </div>
-        </div>
-        <button class="infoSendBtn" @click="addUser">送出</button>
-      </div>
+      <div v-if="currentStep === 'info'">
+      <UserInfoForm
+        :name="name"
+        :height="height"
+        :weight="weight"
+        :sex="sex"
+        @update:name="name = $event"
+        @update:height="height = $event"
+        @update:weight="weight = $event"
+        @update:sex="sex = $event"
+        @submit="addUser"
+      />
+    </div>
     </div>
   </div>
 </template>
+
+
+
+<script>
+import { ref, onMounted, nextTick, watch } from "vue";
+import RaphaelLoading from "../components/RaphaelLoading";
+import eyesCloseGreen from "../assets/imgs/eyesCloseGreen.svg";
+import eyesOpenGreen from "../assets/imgs/eyesOpenGreen.svg";
+import axios from "axios";
+import Navbar from "../components/Navbar";
+import { useRouter } from 'vue-router';
+
+import UserInfoForm from '../components/UserInfoWrap.vue';
+
+
+export default {
+  components: { Navbar,UserInfoForm },
+  setup() {
+    const router = useRouter();
+    const passwordVisible = ref(false);
+    const passwordAgainVisible = ref(false);
+    const loading = ref(false);
+
+    const mobile = ref("");
+    const password = ref("");
+    const passwordAgain = ref("");
+    const passwordError = ref("");
+    const passwordAgainError = ref("");
+    const isPrivacy = ref(false)
+    const isReSend = ref(false)
+    const sexSelect = ref(null)
+
+    const isDisabled = ref(true); 
+
+
+    const name = ref("");
+    const height = ref("");
+    const weight = ref("");
+    const sex  = ref("")
+
+    const currentStep = ref("register");
+    const verificationCodes = ref(["", "", "", "", ""]);
+    const verificationInput = ref([]);
+    const verificationTitle = ref("註冊會員");
+
+    const countdownTime = ref(60);
+    const countdownInterval = ref(null);
+
+    const togglePasswordVisibility = () => {
+      passwordVisible.value = !passwordVisible.value;
+    };
+
+    const togglePasswordAgainVisibility = () => {
+      passwordAgainVisible.value = !passwordAgainVisible.value;
+    };
+
+    watch(verificationCodes, (newCodes) => {
+      if (newCodes.every((code) => code !== "")) {
+        currentStep.value = "info";
+        verificationTitle.value = "輸入基本資料";
+      }
+    });
+
+    const getVerificationCode = async () => {
+      if(password.value.length<6) {alert("密碼小於6位數") ; return}
+      if(password.value !== passwordAgain.value){ alert("密碼不一致"); return}
+      loading.value = true;
+      // await new Promise((resolve) => setTimeout(resolve, 750));
+      // loading.value = false;
+      // currentStep.value = "verify";
+      // verificationTitle.value = "輸入驗證碼";
+      // startCountdown();
+      try {
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_AA3.jsp",
+          {
+            Mobile: mobile.value,
+            Password: password.value,
+          }
+        );
+
+        if (response.status === 200) {
+          const data = response.data;
+          if (data.Token.trim()!==""||data.MID.trim()!=="") {
+            currentStep.value = "verify";
+            verificationTitle.value = "輸入驗證碼";
+            startCountdown();
+            
+            localStorage.setItem('userData', JSON.stringify({
+              Token: data.Token,
+              MAID: data.MAID,
+              MID: data.MID,
+              A5Digit: data.A5Digit,
+              Mobile: data.Mobile,
+              startTime: data.startTime,
+            }));
+          }
+          else {
+          alert(`註冊失敗 : ${data.Result}`);
+        }
+        } 
+      } catch (err) {
+        alert("註冊失敗");
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    const validatePassword = () => {
+      if (password.value.length < 6) {
+        passwordError.value = "密碼長度必須至少 6 位";
+      } else {
+        passwordError.value = "";
+      }
+    };
+
+    const validatePasswordAgain = () => {
+      if (passwordAgain.value !== password.value) {
+        passwordAgainError.value = "兩次輸入的密碼不一致";
+      } else {
+        passwordAgainError.value = "";
+      }
+    };
+
+    const verifyCode = async () => {
+    loading.value = true;
+    const enteredCode = verificationCodes.value.join("");
+    const localData = localStorage.getItem("userData");
+    const { MID, Token, MAID, Mobile, A5Digit } = localData ? JSON.parse(localData) : {};
+
+    if(countdownTime.value > 0)
+    {
+      if (enteredCode == A5Digit  ) {
+      await API_doExamAuth();
+      currentStep.value = "info";
+      verificationCodes.value = ["", "", "", "", ""];
+    } else {
+      verificationCodes.value = ["", "", "", "", ""];
+      nextTick(() => {
+      verificationInput.value[0]?.focus(); 
+      });
+      alert("驗證碼錯誤");
+    }
+
+    }
+    else{
+      verificationCodes.value = ["", "", "", "", ""];
+      nextTick(() => {
+      verificationInput.value[0]?.focus(); 
+      });
+      alert("驗證碼時間已過")
+    }
+   
+    loading.value = false;
+    // try {
+    //   const response = await axios.post("https://23700999.com:8081/HMA/TTEAA4_1.jsp", {
+    //       D1: enteredCode[0],
+    //       D2: enteredCode[1],
+    //       D3: enteredCode[2],
+    //       D4: enteredCode[3],
+    //       D5: enteredCode[4],
+    //       MID: MID,
+    //     }, {
+    //       withCredentials: true 
+    //     });
+
+    //   if (response.status === 200) {
+    //     const data = response.data;
+
+    //     if (data.Result === true) {
+    //       alert("驗證成功");
+    //       const localData = localStorage.getItem("userData");
+    //       const updatedData = {
+    //         ...JSON.parse(localData),
+    //         // Include any additional data returned from your API
+    //       };
+    //       localStorage.setItem('userData', JSON.stringify(updatedData));
+          
+    //       // Clear the verification codes
+    //       verificationCodes.value = ["", "", "", "", ""]; // Reset to empty
+
+    //       // Proceed to the next step
+    //       currentStep.value = "info"; 
+    //     } else {
+    //       verificationCodes.value = ["", "", "", "", ""];
+    //       verificationInputs.value[0].focus();
+    //       alert("驗證碼錯誤，請再試一次");
+    //     }
+    //   }
+    // } catch (error) {
+    //   alert("驗證失敗，請稍後再試");
+    // } finally {
+    //   loading.value = false;
+    // }
+  };
+
+  const API_doExamAuth = async() =>{
+    loading.value = true;
+    const enteredCode = verificationCodes.value.join("");
+    const localData = localStorage.getItem("userData");
+    const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
+
+     try {
+      const response = await axios.post("https://23700999.com:8081/HMA/API_doExamAuth.jsp", {
+          Token: Token,
+          MAID: MAID,
+          Mobile: Mobile,
+          MID: MID,
+          D1: enteredCode[0],
+          D2: enteredCode[1],
+          D3: enteredCode[2],
+          D4: enteredCode[3],
+          D5: enteredCode[4],
+        }, 
+      );
+
+      if (response.status === 200) {
+        const data = response.data;
+        if (data.Result === true) {
+          const localData = localStorage.getItem("userData");
+          const updatedData = {
+            ...JSON.parse(localData),
+          };
+          localStorage.setItem('userData', JSON.stringify(updatedData));
+          verificationCodes.value = ["", "", "", "", ""]; 
+          currentStep.value = "info"; 
+        } else {
+          verificationCodes.value = ["", "", "", "", ""];
+          verificationInputs.value[0].focus();
+        }
+      }
+    } catch (error) {
+      // alert("驗證失敗，請稍後再試");
+    } finally {
+      loading.value = false;
+    }
+
+  }
+
+  const handleInput = (index, event) => {
+  const key = event?.key;
+
+  // 如果按下退格鍵並且當前輸入框為空，將焦點移到上一個輸入框
+  if (key === "Backspace" && verificationCodes.value[index] === "" && index > 0) {
+    verificationInput.value[index - 1]?.focus();
+    return; // 返回以避免繼續執行其他邏輯
+  }
+
+  // 如果當前輸入的數字不在範圍內，則清空該輸入框
+  if (verificationCodes.value[index] < 0 || verificationCodes.value[index] > 9) {
+    verificationCodes.value[index] = '';
+  }
+
+  // 將焦點移到下一個輸入框
+  // 修改這裡以包含 0
+  if (verificationCodes.value[index] !== '' && index < verificationCodes.value.length - 1) {
+    verificationInput.value[index + 1]?.focus();
+  }
+
+  // 當5個數字都填寫完成時，進行驗證
+  if (verificationCodes.value.every(code => code !== '')) {
+    verifyCode(); // 調用驗證方法
+  }
+  };
+
+
+
+
+    const allowOnlyNumbers = (event) => {
+      const char = String.fromCharCode(event.which);
+      if (!/[0-9]/.test(char)) {
+        event.preventDefault();
+      }
+    };
+
+    const startCountdown = () => {
+    countdownTime.value = 60;
+    isReSend.value = false;
+    isDisabled.value = true;  // 在開始倒計時時禁用輸入框
+    countdownInterval.value = setInterval(() => {
+    if (countdownTime.value > 0) {
+      countdownTime.value--;
+    } else {
+      clearInterval(countdownInterval.value);
+      countdownTime.value = "驗證碼已失效，請重新發送";  
+      isReSend.value = true;  
+      isDisabled.value = false;  // 倒計時結束後啟用輸入框
+    }
+  }, 1000);
+};
+
+
+    onMounted(() => {
+      nextTick(() => {
+        verificationInput.value = verificationInput.value.slice(
+          0,
+          verificationCodes.value.length
+        );
+      });
+
+    });
+
+
+    const isFormValid = computed(() => {
+    return (
+      mobile.value.trim() !== "" && 
+      password.value.length >= 6 && 
+      password.value === passwordAgain.value && 
+      isPrivacy.value
+    );
+    });
+
+    const reSend = async () => {
+      try {
+        const localData = localStorage.getItem("userData");
+
+        const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
+
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_AA4.jsp",
+          {
+            MID:MID,
+            Token:Token,
+            MAID:MAID,
+            Mobile:Mobile
+          }
+        );
+
+        if (response.status === 200) {
+          const { startTime, A5Digit, Result } = response.data;
+          localStorage.setItem(
+            "userData", 
+            JSON.stringify({
+              ...JSON.parse(localData), 
+              startTime, 
+              A5Digit,   
+              Result,    
+            })
+          );
+          alert("簡訊已重新發送")
+          startCountdown()
+        } else {
+          // alert("重新發送失敗");
+        }
+      } catch (err) {
+        // alert("重新發送失敗");
+      } finally {
+       
+        loading.value = false;
+        startCountdown()
+      }
+    }
+
+    const addUser = async () => {
+    try {
+    const localData = localStorage.getItem("userData");
+    const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
+
+
+    if (!MID || !Token || !MAID || !Mobile || !name.value || !height.value || !sex.value) {
+      throw new Error("資料不完整");
+    }
+
+    const response = await axios.post("https://23700999.com:8081/HMA/API_AA5.jsp", {
+      MID: MID,
+      Token: Token,
+      MAID: MAID,
+      Mobile: Mobile,
+      Name: name.value,
+      Height: height.value, 
+      Weight: weight.value, 
+      Sex: sex.value
+    });
+
+    if (response.status === 200) {
+      // router.push('/user');
+      console.log(response.data);
+    }
+
+  } catch (err) {
+    alert(err.message || "資料不完整"); 
+    console.error(err); 
+  } finally {
+ 
+  }
+};
+
+
+    return {
+      passwordVisible,
+      passwordAgainVisible,
+      mobile,
+      password,
+      passwordAgain,
+      passwordError,
+      passwordAgainError,
+      togglePasswordVisibility,
+      togglePasswordAgainVisibility,
+      validatePassword,
+      validatePasswordAgain,
+      eyesCloseGreen,
+      eyesOpenGreen,
+      loading,
+      getVerificationCode,
+      currentStep,
+      verificationCodes,
+      handleInput,
+      allowOnlyNumbers,
+      verificationInput,
+      verificationTitle,
+      startCountdown,
+      countdownTime,
+      isPrivacy,
+      isReSend,
+      reSend,
+      addUser,
+      name,
+      height,
+      weight,
+      sex,
+      sexSelect,
+      isFormValid
+    };
+  },
+};
+</script>
+
+
+
 
 <style lang="scss" scoped>
 .register {
@@ -269,85 +681,7 @@
       
     }
 
-    .infoWrap {
-      background-color: #fff;
-      border-radius: 1rem;
-      padding: 1rem;
-      margin-top: 1.5rem;
-      .nameGroup,
-      .heightGroup,
-      .weightGroup {
-        position: relative;
-        margin-bottom: 1rem;
-        .icon1 {
-          position: absolute;
-          top: 50%;
-          left: 2px;
-          transform: translateY(-50%);
-        }
-        .icon2 {
-          position: absolute;
-          top: 50%;
-          right: 2px;
-          transform: translateY(-50%);
-        }
 
-      
-      }
-
-      .groupGroup{
-        display: flex;
-        position: relative;
-        width: 100%;
-        select {
-          outline: none;
-          border: none;
-          padding-left: 36px;
-          padding-bottom: 16px;
-          padding-top: 16px;
-          font-size: 1.2rem; 
-          width: 100%; 
-          border-bottom: 1px solid $raphael-gray-400; 
-
-          appearance: none; 
-          color: $raphael-gray-400;
-            font-family: Inter;
-            font-size: 1.2rem;
-            font-weight: 400;
-          
-          &::selection{
-            color: #f00;
-          }
-        
-
-          &::placeholder {
-            color: $raphael-gray-400;
-            font-family: Inter;
-            font-size: 1.2rem;
-            font-weight: 400;
-          }
-
-
-          &::-ms-expand {
-            display: none; 
-          }
-          
-        }
-        .icon1{
-            position: absolute;
-            left: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-          }
-          .icon2 {
-            position: absolute;
-            top: 50%;
-            right: 10px; 
-            transform: translateY(-50%);
-            pointer-events: none; 
-          }
-      }
-    }
 
     input[type="text"],
     input[type="password"],
@@ -457,338 +791,3 @@
   }
 }
 </style>
-
-<script>
-import { ref, onMounted, nextTick, watch } from "vue";
-import RaphaelLoading from "../components/RaphaelLoading";
-import eyesCloseGreen from "../assets/imgs/eyesCloseGreen.svg";
-import eyesOpenGreen from "../assets/imgs/eyesOpenGreen.svg";
-import axios from "axios";
-import Navbar from "../components/Navbar";
-import { useRouter } from 'vue-router';
-export default {
-  components: { Navbar },
-  setup() {
-    const router = useRouter();
-    const passwordVisible = ref(false);
-    const passwordAgainVisible = ref(false);
-    const loading = ref(false);
-
-    const mobile = ref("");
-    const password = ref("");
-    const passwordAgain = ref("");
-    const passwordError = ref("");
-    const passwordAgainError = ref("");
-    const isPrivacy = ref(false)
-    const isReSend = ref(false)
-    const sexSelect = ref(null)
-
-    const name = ref("");
-    const height = ref("");
-    const weight = ref("");
-    const sex  = ref("")
-
-    const currentStep = ref("register");
-    const verificationCodes = ref(["", "", "", "", ""]);
-    const verificationInput = ref([]);
-    const verificationTitle = ref("註冊會員");
-
-    const countdownTime = ref(60);
-    const countdownInterval = ref(null);
-
-    const togglePasswordVisibility = () => {
-      passwordVisible.value = !passwordVisible.value;
-    };
-
-    const togglePasswordAgainVisibility = () => {
-      passwordAgainVisible.value = !passwordAgainVisible.value;
-    };
-
-    watch(verificationCodes, (newCodes) => {
-      if (newCodes.every((code) => code !== "")) {
-        currentStep.value = "info";
-      }
-    });
-
-    const getVerificationCode = async () => {
-      if(password.value.length<6) {alert("密碼小於6位數") ; return}
-      if(password.value !== passwordAgain.value){ alert("密碼不一致"); return}
-      loading.value = true;
-      // await new Promise((resolve) => setTimeout(resolve, 750));
-      // loading.value = false;
-      // currentStep.value = "verify";
-      // verificationTitle.value = "輸入驗證碼";
-      // startCountdown();
-      try {
-        const response = await axios.post(
-          "https://23700999.com:8081/HMA/API_AA3.jsp",
-          {
-            Mobile: mobile.value,
-            Password: password.value,
-          }
-        );
-
-        if (response.status === 200) {
-          const data = response.data;
-          if (data.Token.trim()!==""||data.MID.trim()!=="") {
-            currentStep.value = "verify";
-            verificationTitle.value = "輸入驗證碼";
-            startCountdown();
-            
-            localStorage.setItem('userData', JSON.stringify({
-              Token: data.Token,
-              MAID: data.MAID,
-              MID: data.MID,
-              A5Digit: data.A5Digit,
-              Mobile: data.Mobile,
-              startTime: data.startTime
-            }));
-          }
-          else {
-          alert(`註冊失敗 : ${data.Result}`);
-        }
-        } 
-      } catch (err) {
-        alert("註冊失敗");
-      } finally {
-        loading.value = false;
-      }
-    };
-
-    const validatePassword = () => {
-      if (password.value.length < 6) {
-        passwordError.value = "密碼長度必須至少 6 位";
-      } else {
-        passwordError.value = "";
-      }
-    };
-
-    const validatePasswordAgain = () => {
-      if (passwordAgain.value !== password.value) {
-        passwordAgainError.value = "兩次輸入的密碼不一致";
-      } else {
-        passwordAgainError.value = "";
-      }
-    };
-
-    const verifyCode = async () => {
-      loading.value = true;
-
-    const enteredCode = verificationCodes.value.join("");
-    const localData = localStorage.getItem("userData");
-    const { MID, Token, MAID, Mobile, A5Digit } = localData ? JSON.parse(localData) : {};
-
-    if (enteredCode == A5Digit) {
-      alert("驗證成功");
-      currentStep.value = "info";
-      verificationCodes.value = ["", "", "", "", ""];
-    } else {
-      verificationCodes.value = ["", "", "", "", ""];
-      nextTick(() => {
-      verificationInput.value[0]?.focus(); 
-    });
-      alert("驗證碼錯誤");
-    }
-
-    loading.value = false;
-  // try {
-  //   const response = await axios.post("https://23700999.com:8081/HMA/TTEAA4_1.jsp", {
-  //       D1: enteredCode[0],
-  //       D2: enteredCode[1],
-  //       D3: enteredCode[2],
-  //       D4: enteredCode[3],
-  //       D5: enteredCode[4],
-  //       MID: MID,
-  //     }, {
-  //       withCredentials: true 
-  //     });
-
-  //   if (response.status === 200) {
-  //     const data = response.data;
-
-  //     if (data.Result === true) {
-  //       alert("驗證成功");
-  //       const localData = localStorage.getItem("userData");
-  //       const updatedData = {
-  //         ...JSON.parse(localData),
-  //         // Include any additional data returned from your API
-  //       };
-  //       localStorage.setItem('userData', JSON.stringify(updatedData));
-        
-  //       // Clear the verification codes
-  //       verificationCodes.value = ["", "", "", "", ""]; // Reset to empty
-
-  //       // Proceed to the next step
-  //       currentStep.value = "info"; 
-  //     } else {
-  //       verificationCodes.value = ["", "", "", "", ""];
-  //       verificationInputs.value[0].focus();
-  //       alert("驗證碼錯誤，請再試一次");
-  //     }
-  //   }
-  // } catch (error) {
-  //   alert("驗證失敗，請稍後再試");
-  // } finally {
-  //   loading.value = false;
-  // }
-};
-
-
-    const handleInput = (index) => {
-      // 如果當前輸入的數字不在範圍內，則清空該輸入框
-      if (verificationCodes.value[index] < 0 || verificationCodes.value[index] > 9) {
-        verificationCodes.value[index] = '';
-      }
-
-      // 將焦點移到下一個輸入框
-      if (verificationCodes.value[index] && index < verificationCodes.value.length - 1) {
-        verificationInput.value[index + 1]?.focus();
-      }
-
-      // 當5個數字都填寫完成時，進行驗證
-      if (verificationCodes.value.every(code => code !== '')) {
-        verifyCode(); // 調用驗證方法
-      }
-    };
-
-    const allowOnlyNumbers = (event) => {
-      const char = String.fromCharCode(event.which);
-      if (!/[0-9]/.test(char)) {
-        event.preventDefault();
-      }
-    };
-
-    const startCountdown = () => {
-    countdownTime.value = 60;
-    isReSend.value = false;  
-    countdownInterval.value = setInterval(() => {
-      if (countdownTime.value > 0) {
-        countdownTime.value--;
-      } else {
-        clearInterval(countdownInterval.value);
-        countdownTime.value = "驗證碼已失效，請重新發送";  
-        isReSend.value = true;  
-      }
-    }, 1000);
-  };
-
-    onMounted(() => {
-      nextTick(() => {
-        verificationInput.value = verificationInput.value.slice(
-          0,
-          verificationCodes.value.length
-        );
-      });
-
-    });
-
-    const reSend = async () => {
-      try {
-        const localData = localStorage.getItem("userData");
-        const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
-        const response = await axios.post(
-          "https://23700999.com:8081/HMA/API_AA4.jsp",
-          {
-            MID:MID,
-            Token:Token,
-            MAID:MAID,
-            Mobile:Mobile
-          }
-        );
-
-        if (response.status === 200) {
-          const { startTime, A5Digit, Result } = response.data;
-         
-          localStorage.setItem(
-            "userData", 
-            JSON.stringify({
-              ...JSON.parse(localData), 
-              startTime, 
-              A5Digit,   
-              Result,    
-            })
-          );
-          alert("簡訊已重新發送")
-          startCountdown()
-        } else {
-          alert("重新發送失敗");
-        }
-      } catch (err) {
-        alert("重新發送失敗");
-      } finally {
-        loading.value = false;
-      }
-    }
-
-    const addUser = async () => {
-  try {
-    const localData = localStorage.getItem("userData");
-    const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
-
-    // Ensure that required values are available
-    if (!MID || !Token || !MAID || !Mobile || !name.value || !height.value || !sex.value) {
-      throw new Error("資料不完整");
-    }
-
-    const response = await axios.post("https://23700999.com:8081/HMA/API_AA5.jsp", {
-      MID: MID,
-      Token: Token,
-      MAID: MAID,
-      Mobile: Mobile,
-      Name: name.value,
-      Height: height.value, // Use height.value if height is a ref
-      Weight: weight.value, // Ensure you have the weight variable defined
-      Sex: sex.value
-    });
-
-    if (response.status === 200) {
-      router.push('/user');
-      console.log(response.data);
-    }
-
-  } catch (err) {
-    alert(err.message || "資料不完整"); // Log the specific error message
-    console.error(err); // Log the error for debugging
-  } finally {
-    // Optional cleanup code can go here
-  }
-};
-
-
-    return {
-      passwordVisible,
-      passwordAgainVisible,
-      mobile,
-      password,
-      passwordAgain,
-      passwordError,
-      passwordAgainError,
-      togglePasswordVisibility,
-      togglePasswordAgainVisibility,
-      validatePassword,
-      validatePasswordAgain,
-      eyesCloseGreen,
-      eyesOpenGreen,
-      loading,
-      getVerificationCode,
-      currentStep,
-      verificationCodes,
-      handleInput,
-      allowOnlyNumbers,
-      verificationInput,
-      verificationTitle,
-      startCountdown,
-      countdownTime,
-      isPrivacy,
-      isReSend,
-      reSend,
-      addUser,
-      name,
-      height,
-      weight,
-      sex,
-      sexSelect
-    };
-  },
-};
-</script>

@@ -1,7 +1,10 @@
 <template>
+  
   <div class="raphaelLoading">
     <img src="../assets/imgs/spinner.gif" alt="" />
   </div>
+
+  
 </template>
 
 <style scoped lang="scss">
