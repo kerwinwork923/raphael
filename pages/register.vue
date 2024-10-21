@@ -319,8 +319,9 @@ export default {
           };
           localStorage.setItem('userData', JSON.stringify(updatedData));
           verificationCodes.value = ["", "", "", "", ""]; 
-          currentStep.value = "info"; 
           verificationTitle.value = "輸入基本資料"
+          currentStep.value = "info"; 
+      
         } else {
           verificationCodes.value = ["", "", "", "", ""];
           verificationInputs.value[0].focus();
@@ -408,45 +409,59 @@ export default {
     });
 
     const reSend = async () => {
-      try {
-        const localData = localStorage.getItem("userData");
+  try {
+    // 從 localStorage 獲取用戶資料
+    const localData = localStorage.getItem("userData");
+    const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
 
-        const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
-
-        const response = await axios.post(
-          "https://23700999.com:8081/HMA/API_AA4.jsp",
-          {
-            MID:MID,
-            Token:Token,
-            MAID:MAID,
-            Mobile:Mobile
-          }
-        );
-
-        if (response.status === 200) {
-          const { startTime, A5Digit, Result } = response.data;
-          localStorage.setItem(
-            "userData", 
-            JSON.stringify({
-              ...JSON.parse(localData), 
-              startTime, 
-              A5Digit,   
-              Result,    
-            })
-          );
-          alert("簡訊已重新發送")
-          startCountdown()
-        } else {
-          // alert("重新發送失敗");
-        }
-      } catch (err) {
-        // alert("重新發送失敗");
-      } finally {
-       
-        loading.value = false;
-        startCountdown()
-      }
+    // 檢查必需的資料是否存在
+    if (!MID || !Token || !MAID || !Mobile) {
+      alert("資料不完整，無法重新發送驗證碼");
+      return;
     }
+
+    // 發送請求以重新發送驗證碼
+    const response = await axios.post(
+      "https://23700999.com:8081/HMA/API_AA4.jsp",
+      {
+        MID: MID,
+        Token: Token,
+        MAID: MAID,
+        Mobile: Mobile,
+      }
+    );
+
+    // 檢查回應是否成功
+    if (response.status === 200) {
+      const { startTime, A5Digit, Result } = response.data;
+      
+      // 更新 localStorage 中的資料
+      localStorage.setItem(
+        "userData", 
+        JSON.stringify({
+          ...JSON.parse(localData), 
+          startTime, 
+          A5Digit,   
+          Result,    
+        })
+      );
+
+      // 提示用戶簡訊已重新發送
+      alert("簡訊已重新發送");
+      
+      // 開始倒計時
+      startCountdown();
+    } else {
+      alert("重新發送失敗，請稍後再試");
+    }
+  } catch (err) {
+    // 捕捉任何錯誤並顯示錯誤信息
+    alert("重新發送失敗，請稍後再試");
+  } finally {
+    loading.value = false; // 結束加載狀態
+  }
+}
+
     const addUser = async () => {
       try {
         const localData = localStorage.getItem("userData");
