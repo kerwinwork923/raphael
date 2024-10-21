@@ -112,17 +112,21 @@
     
       </div>
       <div v-if="currentStep === 'info'">
-      <UserInfoForm
-        :name="name"
-        :height="height"
-        :weight="weight"
-        :sex="sex"
-        @update:name="name = $event"
-        @update:height="height = $event"
-        @update:weight="weight = $event"
-        @update:sex="sex = $event"
-        @submit="addUser"
-      />
+        <UserInfoForm
+          :name="name"
+          :height="height"
+          :weight="weight"
+          :sex="sex"
+          :DSPR="DSPR"
+          :date="date"
+          @update:name="name = $event"
+          @update:height="height = $event"
+          @update:weight="weight = $event"
+          @update:sex="sex = $event"
+          @update:date="date = $event"
+          @update:DSPR="DSPR = $event"
+          @submit="addUser"
+/>
     </div>
     </div>
   </div>
@@ -165,7 +169,10 @@ export default {
     const name = ref("");
     const height = ref("");
     const weight = ref("");
-    const sex  = ref("")
+    const sex = ref("");
+    const date = ref("");
+    const DSPR = ref("");
+
 
     const currentStep = ref("register");
     const verificationCodes = ref(["", "", "", "", ""]);
@@ -281,46 +288,6 @@ export default {
     }
    
     loading.value = false;
-    // try {
-    //   const response = await axios.post("https://23700999.com:8081/HMA/TTEAA4_1.jsp", {
-    //       D1: enteredCode[0],
-    //       D2: enteredCode[1],
-    //       D3: enteredCode[2],
-    //       D4: enteredCode[3],
-    //       D5: enteredCode[4],
-    //       MID: MID,
-    //     }, {
-    //       withCredentials: true 
-    //     });
-
-    //   if (response.status === 200) {
-    //     const data = response.data;
-
-    //     if (data.Result === true) {
-    //       alert("驗證成功");
-    //       const localData = localStorage.getItem("userData");
-    //       const updatedData = {
-    //         ...JSON.parse(localData),
-    //         // Include any additional data returned from your API
-    //       };
-    //       localStorage.setItem('userData', JSON.stringify(updatedData));
-          
-    //       // Clear the verification codes
-    //       verificationCodes.value = ["", "", "", "", ""]; // Reset to empty
-
-    //       // Proceed to the next step
-    //       currentStep.value = "info"; 
-    //     } else {
-    //       verificationCodes.value = ["", "", "", "", ""];
-    //       verificationInputs.value[0].focus();
-    //       alert("驗證碼錯誤，請再試一次");
-    //     }
-    //   }
-    // } catch (error) {
-    //   alert("驗證失敗，請稍後再試");
-    // } finally {
-    //   loading.value = false;
-    // }
   };
 
   const API_doExamAuth = async() =>{
@@ -359,7 +326,7 @@ export default {
         }
       }
     } catch (error) {
-      // alert("驗證失敗，請稍後再試");
+
     } finally {
       loading.value = false;
     }
@@ -479,40 +446,61 @@ export default {
         startCountdown()
       }
     }
-
     const addUser = async () => {
-    try {
-    const localData = localStorage.getItem("userData");
-    const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
+      try {
+        const localData = localStorage.getItem("userData");
+        const { MID, Token, MAID, Mobile } = localData
+          ? JSON.parse(localData)
+          : {};
 
+        if (
+          !MID ||
+          !Token ||
+          !MAID ||
+          !Mobile ||
+          !name.value ||
+          !height.value ||
+          !sex.value
+        ) {
+          throw new Error("資料不完整");
+        }
 
-    if (!MID || !Token || !MAID || !Mobile || !name.value || !height.value || !sex.value) {
-      throw new Error("資料不完整");
-    }
+        // 日期轉換成民國格式
+        let birthday = "";
+        if (date.value) {
+          const birthDate = new Date(date.value); 
+          const rocYear = birthDate.getFullYear() - 1911; // 西元年轉民國年
+          birthday = `${rocYear}/${
+            birthDate.getMonth() + 1
+          }/${birthDate.getDate()}`;
+        }
 
-    const response = await axios.post("https://23700999.com:8081/HMA/API_AA5.jsp", {
-      MID: MID,
-      Token: Token,
-      MAID: MAID,
-      Mobile: Mobile,
-      Name: name.value,
-      Height: height.value, 
-      Weight: weight.value, 
-      Sex: sex.value
-    });
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_AA5.jsp",
+          {
+            MID: MID,
+            Token: Token,
+            MAID: MAID,
+            Mobile: Mobile,
+            Name: name.value,
+            Height: height.value,
+            Weight: weight.value,
+            Sex: sex.value,
+            Birthday: birthday,
+            DSPR: DSPR.value || "",
+          }
+        );
 
-    if (response.status === 200) {
-      // router.push('/user');
-      console.log(response.data);
-    }
-
-  } catch (err) {
-    alert(err.message || "資料不完整"); 
-    console.error(err); 
-  } finally {
- 
-  }
-};
+        if (response.status === 200) {
+          router.push("/user");
+          console.log(response.data);
+        }
+      } catch (err) {
+        alert(err.message || "資料不完整");
+        console.error(err);
+      } finally {
+      }
+    };
 
 
     return {
@@ -548,7 +536,9 @@ export default {
       weight,
       sex,
       sexSelect,
-      isFormValid
+      isFormValid,
+      date,
+      DSPR
     };
   },
 };

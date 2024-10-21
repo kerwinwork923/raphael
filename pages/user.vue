@@ -8,7 +8,9 @@
           <img src="../assets/imgs/sticker.svg" alt="" />
         </div>
         <div class="infoTextGroup">
-          <div class="topText">{{ userInfo?.Name }} <span v-if="userInfo?.Name">，</span>您好</div>
+          <div class="topText">
+            {{ userInfo?.Name }} <span v-if="userInfo?.Name">，</span>您好
+          </div>
           <div class="score">
             <div class="circle"></div>
             <div class="scoreText">
@@ -226,20 +228,21 @@ export default {
   setup() {
     const router = useRouter();
     const loading = ref(true);
-    const userInfo = ref(null); 
+    const userInfo = ref(null);
 
     const getUserData = async () => {
       const localData = localStorage.getItem("userData");
-      const { MID, Token, MAID, Mobile } = localData
+      const { MID, Token, MAID, Mobile, Name } = localData
         ? JSON.parse(localData)
         : {};
 
       if (!MID || !Token || !MAID || !Mobile) {
-       
-        router.push('/login'); 
+        router.push("/login");
+        return;
+      } else if (Name.trim() == "") {
+        router.push("/changeMember");
         return;
       }
-
       try {
         const response = await axios.post(
           "https://23700999.com:8081/HMA/API_AA6.jsp",
@@ -267,7 +270,6 @@ export default {
 
             localStorage.setItem("userData", JSON.stringify(newUserInfo)); // 儲存合併後的用戶資料
             userInfo.value = newUserInfo; // 更新用戶資訊
-            
           } else {
             alert("取得會員資料失敗");
           }
@@ -278,18 +280,18 @@ export default {
         alert("取得會員資料失敗");
       } finally {
         setTimeout(() => {
-          loading.value = false; 
-        }, 300); 
+          loading.value = false;
+        }, 300);
       }
     };
 
     onMounted(() => {
-      getUserData(); 
+      getUserData();
     });
 
     return {
       loading,
-      userInfo, 
+      userInfo,
     };
   },
 };

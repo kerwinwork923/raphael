@@ -1,68 +1,82 @@
 <template>
   <div class="infoWrap">
     <div class="infoBox">
+      <!-- 姓名輸入 -->
       <div class="nameGroup">
         <img class="icon1" src="../assets/imgs/user.svg" alt="" />
         <input
           type="text"
           placeholder="請輸入您的姓名(暱稱)"
-          :value="name"
-          @input="(event) => updateName(event.target.value)"
+          v-model="localName"
         />
       </div>
+
+      <!-- 身高輸入 -->
       <div class="heightGroup">
         <img class="icon1" src="../assets/imgs/height.svg" alt="" />
-        <input
-          type="text"
-          placeholder="請輸入您的身高"
-          :value="height"
-          @input="(event) => updateHeight(event.target.value)"
-        />
+        <input type="text" placeholder="請輸入您的身高" v-model="localHeight" />
       </div>
+
+      <!-- 體重輸入 -->
       <div class="weightGroup">
         <img class="icon1" src="../assets/imgs/weight.svg" alt="" />
-        <input
-          type="text"
-          placeholder="請輸入您的體重"
-          :value="weight"
-          @input="(event) => updateWeight(event.target.value)"
-        />
+        <input type="text" placeholder="請輸入您的體重" v-model="localWeight" />
       </div>
+
+      <!-- 性別選擇 -->
       <div class="groupGroup">
         <img class="icon1" src="../assets/imgs/group.svg" alt="" />
         <select
-          ref="sexSelect"
-          :value="sex"
-          @change="(event) => updateSex(event.target.value)"
+          v-model="localSex"
+          class="custom-select"
+          :class="{ selected: localSex }"
         >
-          <option class="placeholder" value="" disabled selected hidden>
-            請選擇您的性別
-          </option>
+          <option value="" disabled selected hidden>請選擇您的性別</option>
           <option value="1">男生</option>
           <option value="2">女生</option>
         </select>
-        <img class="icon2" src="../assets/imgs/arrowDown.svg" alt="" />
       </div>
+
+      <!-- 生日選擇 -->
       <div class="dateGroup">
         <img class="icon1" src="../assets/imgs/date.svg" alt="" />
-
         <VueDatePicker
-          v-model="selectedDate"
+          v-model="localDate"
           :format="formatDate"
-          :locale="zhTWLocale"
+          :locale="'zh-TW'"
           :enable-time-picker="false"
           cancel-text="取消"
           select-text="確定"
           :max-date="new Date()"
+          :placeholder="'請選擇您的生日'"
         />
       </div>
+
+      <!-- 日常收縮壓選擇 -->
+      <div class="DSPR">
+        <img class="icon1" src="../assets/imgs/DSPR.svg" alt="" />
+        <select
+          v-model="localDSPR"
+          class="custom-select"
+          :class="{ selected: localDSPR }"
+        >
+          <option value="" disabled selected hidden>
+            請選擇日常收縮壓(選填)
+          </option>
+          <option value="正常">正常(120mmHg)</option>
+          <option value="高血壓前期">高血壓前期(120~139mmHg)</option>
+          <option value="高血壓">高血壓(>=140mmHg)</option>
+        </select>
+      </div>
     </div>
+
+    <!-- 送出按鈕 -->
     <button class="infoSendBtn" @click="submitForm">送出</button>
   </div>
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { zhTW } from "date-fns/locale";
 
 export default {
@@ -71,73 +85,54 @@ export default {
     height: String,
     weight: String,
     sex: String,
+    DSPR: String,
+    date: String,
   },
   setup(props, { emit }) {
-    const selectedDate = ref(null);
+    const localName = ref(props.name);
+    const localHeight = ref(props.height);
+    const localWeight = ref(props.weight);
+    const localSex = ref(props.sex || ""); // 設置初始值為空字符串
+    const localDate = ref(null);
+    const localDSPR = ref(props.DSPR || ""); // 設置初始值為空字符串
 
     // 自訂民國日期格式
     const formatDate = (date) => {
-      if (!date) return ""; // 如果沒有日期，則返回空字符串
-      const rocYear = date.getFullYear() - 1911; // 將西元年轉為民國年
+      if (!date) return ""; // 如果沒有日期，返回空字符串
+      const rocYear = date.getFullYear() - 1911;
       return `${rocYear}年${date.getMonth() + 1}月${date.getDate()}日`;
     };
 
     const zhTWLocale = zhTW;
 
-    const updateName = (value) => {
-      emit("update:name", value);
-    };
+    // Watchers to emit changes to parent
+    watch(localName, (newValue) => emit("update:name", newValue));
+    watch(localHeight, (newValue) => emit("update:height", newValue));
+    watch(localWeight, (newValue) => emit("update:weight", newValue));
+    watch(localSex, (newValue) => emit("update:sex", newValue));
+    watch(localDate, (newValue) => emit("update:date", newValue));
+    watch(localDSPR, (newValue) => emit("update:DSPR", newValue));
 
-    const updateHeight = (value) => {
-      emit("update:height", value);
-    };
-
-    const updateWeight = (value) => {
-      emit("update:weight", value);
-    };
-
-    const updateSex = (value) => {
-      emit("update:sex", value);
-    };
-
+    // 送出表單
     const submitForm = () => {
-      if (!selectedDate.value) return;
-
-   
-      const rocYear = selectedDate.value.getFullYear() - 1911; // 转换为民国年
-      const month = (selectedDate.value.getMonth() + 1)
-        .toString()
-        .padStart(2, "0"); 
-      const day = selectedDate.value.getDate().toString().padStart(2, "0"); // 日期需补零
-
-
-      const formattedDate = `${rocYear
-        .toString()
-        .padStart(3, "0")}${month}${day}`;
-
-    
-      emit("submit", {
-        name: props.name,
-        height: props.height,
-        weight: props.weight,
-        sex: props.sex,
-        date: formattedDate, // 提交格式化后的日期
-      });
+      emit("submit");
     };
 
     return {
-      selectedDate,
+      localName,
+      localHeight,
+      localWeight,
+      localSex,
+      localDate,
+      localDSPR,
       formatDate,
       zhTWLocale,
-      updateName,
-      updateHeight,
-      updateWeight,
-      updateSex,
       submitForm,
     };
   },
 };
 </script>
+
 <style lang="scss">
 .infoWrap {
   .infoBox {
@@ -147,6 +142,13 @@ export default {
     margin-top: 1.5rem;
   }
 
+  .custom-select {
+    color: #999; /* 預設 placeholder 的顏色 */
+  }
+
+  .custom-select.selected {
+    color: black; /* 選擇後變為黑色 */
+  }
   .nameGroup,
   .heightGroup,
   .weightGroup,
@@ -173,7 +175,8 @@ export default {
     display: flex;
   }
 
-  .groupGroup {
+  .groupGroup,
+  .DSPR {
     display: flex;
     position: relative;
     width: 100%;
