@@ -239,7 +239,7 @@ export default {
       if (!MID || !Token || !MAID || !Mobile) {
         router.push("/login");
         return;
-      } else if (Name.trim() == "") {
+      } else if (Name == "") {
         router.push("/changeMember");
         return;
       }

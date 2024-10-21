@@ -126,7 +126,7 @@
           @update:date="date = $event"
           @update:DSPR="DSPR = $event"
           @submit="addUser"
-/>
+      />
     </div>
     </div>
   </div>
@@ -320,6 +320,7 @@ export default {
           localStorage.setItem('userData', JSON.stringify(updatedData));
           verificationCodes.value = ["", "", "", "", ""]; 
           currentStep.value = "info"; 
+          verificationTitle.value = "輸入基本資料"
         } else {
           verificationCodes.value = ["", "", "", "", ""];
           verificationInputs.value[0].focus();

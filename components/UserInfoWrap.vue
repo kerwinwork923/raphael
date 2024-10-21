@@ -49,6 +49,7 @@
           select-text="確定"
           :max-date="new Date()"
           :placeholder="'請選擇您的生日'"
+          no-today
         />
       </div>
 
@@ -143,7 +144,13 @@ export default {
   }
 
   .custom-select {
-    color: #999; /* 預設 placeholder 的顏色 */
+    -webkit-appearance: none; /* Chrome 和 Safari */
+    -moz-appearance: none; /* Firefox */
+    appearance: none; /* 標準 */
+    background: url("../assets/imgs/arrow-down.svg") no-repeat right 10px center; /* 添加下拉箭頭 */
+    background-size: 12px;
+    color: #999; /* 預設顏色 */
+    font-size: 1.2rem;
   }
 
   .custom-select.selected {
@@ -180,10 +187,17 @@ export default {
     display: flex;
     position: relative;
     width: 100%;
+    .icon1{
+      position: absolute;
+      top: 50%;
+      left: 2px;
+      transform: translateY(-50%);
+      z-index: 2;
+    }
     select {
       outline: none;
       border: none;
-      padding-left: 16px;
+      padding-left: 36px;
       padding-bottom: 16px;
       padding-top: 16px;
       font-size: 1.2rem;
@@ -194,7 +208,7 @@ export default {
       font-family: Inter;
       font-size: 1.2rem;
       font-weight: 400;
-
+    
       &::placeholder {
         color: #ccc;
         font-family: Inter;
@@ -253,7 +267,7 @@ export default {
   border: none;
   border-bottom: 1px solid #ccc;
   padding: 16px;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   color: #666;
   font-family: Inter, sans-serif;
 
@@ -277,6 +291,7 @@ export default {
     border: none;
     background-color: none;
     width: 100%;
+    font-size: 1.25rem;
   }
   svg {
     display: none;

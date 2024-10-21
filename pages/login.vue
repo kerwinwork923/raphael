@@ -32,18 +32,18 @@
             />
           </div>
         </div>
-        <div class="privacyGroup">
+        <!-- <div class="privacyGroup">
           <input type="checkbox" v-model="isPrivacy" id="privacyInput" />
           <router-link to="#">
             <label >我已詳細閱讀隱私權政策</label>
           </router-link>
         
-        </div>
+        </div> -->
 
         <div class="forgetPasswordGroup">
           <router-link to="#">忘記密碼?</router-link>
         </div>
-        <button class="loginBtn" :disabled="!isPrivacy" @click="login">登入</button>
+        <button class="loginBtn" @click="login" :disabled="!mobile || !password">登入</button>
 
         <div class="bottomHintGroup">
           <router-link to="/register">
