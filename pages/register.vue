@@ -192,10 +192,10 @@ export default {
 
     watch(verificationCodes, (newCodes) => {
       if (newCodes.every((code) => code !== "")) {
-        currentStep.value = "info";
-        verificationTitle.value = "輸入基本資料";
+        verifyCode(); 
       }
     });
+
 
     const getVerificationCode = async () => {
       if(password.value.length<6) {alert("密碼小於6位數") ; return}
@@ -268,6 +268,7 @@ export default {
     {
       if (enteredCode == A5Digit  ) {
       await API_doExamAuth();
+       verificationTitle.value = "輸入基本資料"
       currentStep.value = "info";
       verificationCodes.value = ["", "", "", "", ""];
     } else {
