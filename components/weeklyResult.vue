@@ -104,14 +104,16 @@
           </p>
           <div class="titleScore">100%</div>
         </div>
-
-        <div
-          class="resultTag"
-          v-for="item in store.diffenenceObj.C1Solve"
-          :key="item"
-        >
-          {{ item }}
+        <div class="resultTagGroup">
+          <div
+            class="resultTag"
+            v-for="item in store.diffenenceObj.C1Solve"
+            :key="item"
+          >
+            {{ item }}
+          </div>
         </div>
+
         <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
         <ProgressBar2
           :score="computedScore(store.theLatestData.C1Ratio)"
@@ -176,13 +178,14 @@
           </p>
           <div class="titleScore">100%</div>
         </div>
-
-        <div
-          class="resultTag"
-          v-for="item in store.diffenenceObj.C2Solve"
-          :key="item"
-        >
-          {{ item }}
+        <div class="resultTagGroup">
+          <div
+            class="resultTag"
+            v-for="item in store.diffenenceObj.C2Solve"
+            :key="item"
+          >
+            {{ item }}
+          </div>
         </div>
         <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
         <ProgressBar2
@@ -248,13 +251,14 @@
           </p>
           <div class="titleScore">100%</div>
         </div>
-
-        <div
-          class="resultTag"
-          v-for="item in store.diffenenceObj.C3Solve"
-          :key="item"
-        >
-          {{ item }}
+        <div class="resultTagGroup">
+          <div
+            class="resultTag"
+            v-for="item in store.diffenenceObj.C3Solve"
+            :key="item"
+          >
+            {{ item }}
+          </div>
         </div>
         <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
         <ProgressBar2
@@ -320,13 +324,14 @@
           </p>
           <div class="titleScore">100%</div>
         </div>
-
-        <div
-          class="resultTag"
-          v-for="item in store.diffenenceObj.C4Solve"
-          :key="item"
-        >
-          {{ item }}
+        <div class="resultTagGroup">
+          <div
+            class="resultTag"
+            v-for="item in store.diffenenceObj.C4Solve"
+            :key="item"
+          >
+            {{ item }}
+          </div>
         </div>
         <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
         <ProgressBar2
@@ -392,13 +397,14 @@
           </p>
           <div class="titleScore">100%</div>
         </div>
-
-        <div
-          class="resultTag"
-          v-for="item in store.diffenenceObj.C5Solve"
-          :key="item"
-        >
-          {{ item }}
+        <div class="resultTagGroup">
+          <div
+            class="resultTag"
+            v-for="item in store.diffenenceObj.C5Solve"
+            :key="item"
+          >
+            {{ item }}
+          </div>
         </div>
         <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
         <ProgressBar2
@@ -464,13 +470,14 @@
           </p>
           <div class="titleScore">100%</div>
         </div>
-
-        <div
-          class="resultTag"
-          v-for="item in store.diffenenceObj.C6Solve"
-          :key="item"
-        >
-          {{ item }}
+        <div class="resultTagGroup">
+          <div
+            class="resultTag"
+            v-for="item in store.diffenenceObj.C6Solve"
+            :key="item"
+          >
+            {{ item }}
+          </div>
         </div>
         <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
         <ProgressBar2
@@ -536,13 +543,14 @@
           </p>
           <div class="titleScore">100%</div>
         </div>
-
-        <div
-          class="resultTag"
-          v-for="item in store.diffenenceObj.C7Solve"
-          :key="item"
-        >
-          {{ item }}
+        <div class="resultTagGroup">
+          <div
+            class="resultTag"
+            v-for="item in store.diffenenceObj.C7Solve"
+            :key="item"
+          >
+            {{ item }}
+          </div>
         </div>
         <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
         <ProgressBar2
@@ -608,13 +616,14 @@
           </p>
           <div class="titleScore">100%</div>
         </div>
-
-        <div
-          class="resultTag"
-          v-for="item in store.diffenenceObj.C8Solve"
-          :key="item"
-        >
-          {{ item }}
+        <div class="resultTagGroup">
+          <div
+            class="resultTag"
+            v-for="item in store.diffenenceObj.C8Solve"
+            :key="item"
+          >
+            {{ item }}
+          </div>
         </div>
         <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
         <ProgressBar2
@@ -680,13 +689,14 @@
           </p>
           <div class="titleScore">100%</div>
         </div>
-
-        <div
-          class="resultTag"
-          v-for="item in store.diffenenceObj.C9Solve"
-          :key="item"
-        >
-          {{ item }}
+        <div class="resultTagGroup">
+          <div
+            class="resultTag"
+            v-for="item in store.diffenenceObj.C9Solve"
+            :key="item"
+          >
+            {{ item }}
+          </div>
         </div>
         <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
         <ProgressBar2
@@ -1006,15 +1016,21 @@ export default {
         letter-spacing: 0.15px;
         margin-bottom: 0.25rem;
       }
-      .resultTag {
-        display: inline;
-        background: #fef1e2;
-        padding: 2px 8px;
-        border-radius: 8px;
-        color: #666;
-        font-size: 12px;
-        margin-right: 0.35rem;
+      .resultTagGroup {
+        display: flex;
+        flex-wrap: wrap;
+
+        .resultTag {
+          margin-bottom: 0.25rem;
+          background: #fef1e2;
+          padding: 2px 8px;
+          border-radius: 8px;
+          color: #666;
+          font-size: 12px;
+          margin-right: 0.35rem;
+        }
       }
+
       h5 {
         color: #1e1e1e;
         font-size: 14px;
