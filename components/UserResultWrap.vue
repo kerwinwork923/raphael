@@ -11,14 +11,18 @@
         </div>
         <h5 class="subText">
           (本次){{
-            formatTimestamp(useSleepRecordData?.SleepRec?.[0]?.CheckTime)
+            useSleepRecordData?.SleepRec?.length > 0
+              ? formatTimestamp(useSleepRecordData.SleepRec[0].CheckTime)
+              : "No data available"
           }}
         </h5>
 
         <div class="severity">
           <div class="imgGroup">
             <img
-              :src="computedSleepEmoji(useSleepRecordData?.SleepRec?.[0]?.Score)"
+              :src="
+                computedSleepEmoji(useSleepRecordData?.SleepRec?.[0]?.Score)
+              "
               alt=""
             />
 
@@ -54,9 +58,11 @@
         <!-- <div class="dashDiv" v-if="useSleepRecordData.SleepRec?.[1]?.Score">
           ---
         </div> -->
-        <h5 class="subText">
+        <h5 class="subText" v-if="useSleepRecordData?.SleepRec[1]">
           (前次){{
-            formatTimestamp(useSleepRecordData.SleepRec?.[1].CheckTime)
+            useSleepRecordData?.SleepRec?.length > 0
+              ? formatTimestamp(useSleepRecordData.SleepRec[1].CheckTime)
+              : "No data available"
           }}
         </h5>
         <div class="severity" v-if="useSleepRecordData.SleepRec?.[1]?.Score">

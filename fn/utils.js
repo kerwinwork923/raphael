@@ -94,8 +94,9 @@ export const computedText = (score) => {
 };
 
 export const formatTimestamp = (timestampStr) => {
+  // 檢查輸入是否為有效的字符串
   if (typeof timestampStr !== "string" || timestampStr.length !== 14) {
-    console.error("Invalid timestamp format:", timestampStr);
+    console.error("Invalid timestamp format. Expected a 14-character string:", timestampStr);
     return "Invalid timestamp format";
   }
 
@@ -109,17 +110,19 @@ export const formatTimestamp = (timestampStr) => {
   const formattedDay = parseInt(day, 10);
 
   // 驗證日期的有效性
-  const date = new Date(year, formattedMonth - 1, formattedDay); // JavaScript中月份從0開始計算
+  const date = new Date(year, formattedMonth - 1, formattedDay);
 
+  // 檢查日期是否有效
   if (
-    date.getFullYear() !== parseInt(year) ||
+    date.getFullYear() !== parseInt(year, 10) ||
     date.getMonth() !== formattedMonth - 1 ||
     date.getDate() !== formattedDay
   ) {
-    console.error("Invalid date:", year, formattedMonth, formattedDay); // 紀錄錯誤
-    return "Invalid date"; // 如果日期無效，返回錯誤提示
+    console.error("Invalid date constructed from timestamp:", year, formattedMonth, formattedDay);
+    return "Invalid date";
   }
 
   // 返回格式化結果
   return `${formattedMonth}/${formattedDay}`; // 返回 MM/DD 格式
 };
+
