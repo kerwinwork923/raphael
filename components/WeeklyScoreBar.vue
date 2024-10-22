@@ -7,7 +7,7 @@
     <div class="scrollBarTitle">
       {{ startIndex + index + 1 }}. {{ QAData.question }}
     </div>
-    <div class="hashTag">#{{ QAData.category }}</div>
+    <!-- <div class="hashTag">#{{ QAData.category }}</div> -->
     <div class="scoreBarGroup">
       <div
         class="scoreBar"
