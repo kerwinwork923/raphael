@@ -11,14 +11,14 @@
         </div>
         <h5 class="subText">
           (本次){{
-            formatTimestamp(useSleepRecordData.SleepRec?.[0].CheckTime)
+            formatTimestamp(useSleepRecordData?.SleepRec?.[0]?.CheckTime)
           }}
         </h5>
 
         <div class="severity">
           <div class="imgGroup">
             <img
-              :src="computedSleepEmoji(useSleepRecordData.SleepRec?.[0]?.Score)"
+              :src="computedSleepEmoji(useSleepRecordData?.SleepRec?.[0]?.Score)"
               alt=""
             />
 

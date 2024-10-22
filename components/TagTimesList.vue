@@ -6,18 +6,18 @@
       :key="question.id"
     >
       <h3>{{ startIndex + index + 1 }}. {{ question.question }}</h3>
-      <div class="hashTag">#{{ question.category }}</div>
+      <!-- <div class="hashTag">#{{ question.category }}</div> -->
       <select
         @change="(event) => updateTimes(question.id, event.target.value)"
         class="timesList"
         v-model="question.times"
       >
-        <option selected disabled value="-1">請選擇次數</option>
-        <option value="0">0</option>
+        <!-- <option selected disabled value="-1">請選擇次數</option> -->
+        <option value="-1">0</option>
         <option value="1">1</option>
         <option value="2">2</option>
         <option value="3">3~4</option>
-        <option value="4">>5</option>
+        <option value="6">>5</option>
       </select>
     </div>
   </div>

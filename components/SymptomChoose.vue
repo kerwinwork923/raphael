@@ -27,9 +27,10 @@ export default {
   setup() {
     const store = useWeeklyRecord();
 
+    // 計算已排序的症狀
     const sortedSymptoms = computed(() => {
       return store.weeklyQA
-        .filter((q) => q.times >= 0 )
+        .filter((q) => store.sortedByScore.some((s) => s.id === q.id))
         .sort((a, b) => b.times - a.times);
     });
 
@@ -46,12 +47,13 @@ export default {
       }
     };
 
+    // 確保 sortedSymptoms 有返回到 template 中
     return {
       store,
       activeImage,
       inactiveImage,
       toggleActive,
-      sortedSymptoms,
+      sortedSymptoms,  // 確保這行存在
     };
   },
 };

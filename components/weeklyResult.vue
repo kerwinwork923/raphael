@@ -917,7 +917,7 @@ export default {
   .resultTopGroup {
     display: flex;
     align-items: start;
-
+    margin-top: 0.5rem;
     .resultInfo {
       background-color: #fff;
       padding: 12px;

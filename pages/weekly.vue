@@ -33,8 +33,9 @@
         :stepTexts="['填寫問卷', '結果分析']"
         :currentStep="0"
       />
-      <div class="subListTitle">以下問題對您的困擾程度</div>
-
+      <div class="subListTitle" v-if="store.nowState == 'score'">以下問題對您的困擾程度</div>
+      <div class="subListTitle" v-if="store.nowState == 'times'">以下問題上週發生幾次</div>
+      <div class="subListTitle" v-if="store.nowState == 'choose'">您好, 下列為您目前覺得困擾的症狀，請從中選擇<strong>最多10個目前最想解決的症狀</strong></div>
       <WeeklyResult v-if="store.nowState == 'result'" />
       <WeeklyScoreBar v-if="store.nowState == 'score'" />
       <TagTimesList v-if="store.nowState == 'times'" />

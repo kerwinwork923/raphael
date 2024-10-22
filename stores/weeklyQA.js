@@ -221,22 +221,22 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
     async API_ANSOnlineSolveSaveSolve() {
       const common = useCommon(); // 引入 useCommon store
       common.startLoading();
-
+    
       const localData = localStorage.getItem("userData");
-      const { MID, Token, MAID, Mobile, Name, Sex, AID } = localData
+      const { MID, Token, MAID, Mobile, AID } = localData
         ? JSON.parse(localData)
         : {};
-
+    
       let AnsSolveArray = [];
-
+    
       this.sortedByScore.forEach((question) => {
-        if (question.active) {
+        if (question.active && question.times >= 0) { // 濾掉 times 小於 0 的項目
           AnsSolveArray.push(`key${question.id + 1}`);
         }
       });
-
+    
       const AnsSolveArrayJson = JSON.stringify(AnsSolveArray);
-
+    
       try {
         const response = await axios.post(
           "https://23700999.com:8081/HMA/API_ANSOnlineSolveSaveSolve.jsp",
@@ -249,8 +249,9 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
             AnsSolveArray: AnsSolveArrayJson,
           }
         );
-
+    
         if (response.status === 200) {
+          // 處理成功回應
         }
       } catch (err) {
         console.error("Error while saving solve:", err);
@@ -259,6 +260,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         common.stopLoading();
       }
     },
+    
     // 第一次打API並紀錄最新紀錄
     async API_API_ANSFirstDetail() {
       const localData = localStorage.getItem("userData");
@@ -457,7 +459,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
             alert("選項項目不足，請至少選擇 10 的項目");
             return false;
           }
-          await this.API_ANSOnlineQSaveAns();
+          // await this.API_ANSOnlineQSaveAns();
           this.nowState = "times";
 
           this.totalTimesStep = Math.ceil(
@@ -465,34 +467,34 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
           );
         }
       } else if (this.nowState === "times") {
-        // 計算已選擇的問題數量
-        const selectedCount = this.weeklyQA.filter((q) => q.times >= 0).length;
+        // // 計算已選擇的問題數量
+        // const selectedCount = this.weeklyQA.filter((q) => q.times >= 0).length;
 
-        // 當前頁面
-        const currentPage = this.timesStep;
+        // // 當前頁面
+        // const currentPage = this.timesStep;
 
-        // 總問題數量
-        const total = this.sortedByScore.length;
+        // // 總問題數量
+        // const total = this.sortedByScore.length;
 
-        // 總頁數
-        const totalPage = Math.ceil(total / this.selectQuestionPerPage);
+        // // 總頁數
+        // const totalPage = Math.ceil(total / this.selectQuestionPerPage);
 
-        // 檢查是否為最後一頁
-        const isLastPage = currentPage === totalPage;
+        // // 檢查是否為最後一頁
+        // const isLastPage = currentPage === totalPage;
 
-        if (!isLastPage) {
-          // 如果不是最後一頁，檢查當前頁是否選擇了足夠的問題
-          if (selectedCount < this.selectQuestionPerPage * currentPage) {
-            alert("尚未選擇完成");
-            return;
-          }
-        } else {
-          // 如果是最後一頁，檢查選擇的問題總數是否正確
-          if (selectedCount < total) {
-            alert("尚未選擇完成");
-            return;
-          }
-        }
+        // if (!isLastPage) {
+        //   // 如果不是最後一頁，檢查當前頁是否選擇了足夠的問題
+        //   if (selectedCount < this.selectQuestionPerPage * currentPage) {
+        //     alert("尚未選擇完成");
+        //     return;
+        //   }
+        // } else {
+        //   // 如果是最後一頁，檢查選擇的問題總數是否正確
+        //   if (selectedCount < total) {
+        //     alert("尚未選擇完成");
+        //     return;
+        //   }
+        // }
 
         // 進入下一頁或處理最後一步
         if (this.timesStep < this.totalTimesStep) {
@@ -501,6 +503,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
           this.nowState = "choose";
         }
       } else if (this.nowState === "choose") {
+        await this.API_ANSOnlineQSaveAns();
         await this.API_ANSOnlineSolveSaveSolve();
         await this.API_API_ANSFirstDetail();
         this.nowState = "result";
