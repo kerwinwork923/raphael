@@ -56,7 +56,7 @@ export default {
         // 日期轉換成民國格式
         let birthday = "";
         if (date.value) {
-          const birthDate = new Date(date.value); 
+          const birthDate = new Date(date.value);
           const rocYear = birthDate.getFullYear() - 1911; // 西元年轉民國年
           birthday = `${rocYear}/${
             birthDate.getMonth() + 1
@@ -89,6 +89,16 @@ export default {
       } finally {
       }
     };
+
+    const localData = localStorage.getItem("userData");
+    const { MID, Token, MAID, Mobile, Name } = localData
+      ? JSON.parse(localData)
+      : {};
+
+    if (!MID || !Token || !MAID || !Mobile) {
+      router.push("/login");
+      return;
+    }
 
     return {
       name,

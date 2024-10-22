@@ -217,8 +217,8 @@
 </style>
 
 <script>
-import { onMounted, ref } from "vue"; // Import necessary functions
-import { useRouter } from "vue-router"; // Import useRouter
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import Navbar from "../components/Navbar";
 import RaphaelLoading from "../components/RaphaelLoading";
 import axios from "axios";

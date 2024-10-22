@@ -29,7 +29,7 @@
 
 <script>
 import { ref, defineComponent } from "vue";
-import { useFirstSleepRecordStore } from "@/stores/firstSleepRecord";
+import { useSleepRecordStore } from "../stores/sleepRecord";
 
 export default defineComponent({
   props: {
@@ -48,7 +48,7 @@ export default defineComponent({
   },
   setup(props) {
     const score = ref(props.modelValue);
-    const store = useFirstSleepRecordStore();
+    const store = useSleepRecordStore();
 
     const setScore = (value, property, index) => {
       score.value = index;

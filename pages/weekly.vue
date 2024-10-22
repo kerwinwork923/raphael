@@ -88,7 +88,6 @@ export default {
   },
   setup() {
     const router = useRouter();
-
     const localData = localStorage.getItem("userData");
     let MID, Token, MAID, Mobile;
 

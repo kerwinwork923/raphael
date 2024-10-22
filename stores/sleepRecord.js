@@ -1,16 +1,16 @@
-// stores/firstSleepRecord.js
 import { defineStore } from "pinia";
 import axios from "axios";
-export const useFirstSleepRecordStore = defineStore("firstSleepRecord", {
+import { useRouter } from "vue-router";
+
+export const useSleepRecordStore = defineStore("sleepRecord", {
   state: () => ({
-    // 您的狀態屬性
+    sleepState: "",
     bedTime: null,
     layTimeToSleep: null,
     getupTime: null,
     sleepTime: null,
     sleepBreak: null,
     specialDiet: null,
-    // peeTime: 0,
     medhelp: null,
     sleepProperty: "很滿意",
     emotionalState: "還不錯",
@@ -22,6 +22,11 @@ export const useFirstSleepRecordStore = defineStore("firstSleepRecord", {
     lifestyleChangeStress: "無",
     financialStress: "無",
     otherPressureEventt: "",
+    sleepRecData: null,
+    sleepRecIndexData: null,
+    SleepText: "",
+    SleepRecCond: null,
+    SleepRec: null,
   }),
 
   getters: {
@@ -62,6 +67,7 @@ export const useFirstSleepRecordStore = defineStore("firstSleepRecord", {
       this[scoreBarValueName] = newScore;
       console.log("更新後的狀態:", this.$state);
     },
+
     async saveSleepRecord() {
       const localData = localStorage.getItem("userData");
       const { MID, Token, MAID, Mobile } = localData
@@ -112,8 +118,108 @@ export const useFirstSleepRecordStore = defineStore("firstSleepRecord", {
       } catch (err) {
         console.error("API 調用時發生錯誤:", err);
         // 顯示錯誤通知
-      } finally {
-        // 清理工作，如重置狀態或隱藏加載指示器
+      }
+    },
+
+    async getSleepRecData() {
+      const localData = localStorage.getItem("userData");
+      const { MID, Token, MAID, Mobile } = localData
+        ? JSON.parse(localData)
+        : {};
+
+      const router = useRouter();
+
+      if (!MID || !Token || !MAID || !Mobile) {
+        router.push("/login");
+        return;
+      }
+
+      try {
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_SleepRecDetail.jsp",
+          {
+            MID: String(MID),
+            Token: String(Token),
+            MAID: String(MAID),
+            Mobile: String(Mobile),
+          }
+        );
+        // alert("Asd")
+        if (response.status === 200) {
+          console.log(response.data);
+          this.SleepRec = response.data.SleepRec;
+          // response.data?.SleepRec?.reverse();
+          // this.sleepRecData = response.data;
+          // console.log(response.data);
+
+          // this.SleepRecCond = this.sleepRecIndexData.SleepRecCond;
+          // if (this.sleepRecData.SleepRec.length >= 2) {
+          //   this.SleepText = `
+          //     感謝您使用我們的系統恭喜您已完成了兩次測驗 !
+          //   `;
+          // } else {
+          //   this.SleepText = `
+          //     感謝您使用我們的系統請等待<span>${this.SleepRecCond}天</span>後再進行第二次檢測
+          //   `;
+          // }
+
+          // if (
+          //   this.sleepRecData?.SleepRec?.length < 2 &&
+          //   this.SleepRecCond === "-1"
+          // ) {
+          //   this.sleepState = "sleepRecord";
+          // } else if (
+          //   this.sleepRecData?.SleepRec?.length < 1 &&
+          //   this.SleepRecCond === "-1"
+          // ) {
+          //   this.sleepState = "sleepRecord";
+          // } else {
+          //   this.sleepState = "sleepResult";
+          // }
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    },
+
+    async getIndexSleepRecData() {
+      const localData = localStorage.getItem("userData");
+      const { MID, Token, MAID, Mobile } = localData
+        ? JSON.parse(localData)
+        : {};
+
+      const router = useRouter();
+
+      if (!MID || !Token || !MAID || !Mobile) {
+        router.push("/login");
+        return;
+      }
+
+      try {
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_SleepRec.jsp",
+          {
+            MID: String(MID),
+            Token: String(Token),
+            MAID: String(MAID),
+            Mobile: String(Mobile),
+          }
+        );
+
+        if (response.status === 200) {
+          // this.sleepRecIndexData = response.data;
+          console.log(response.data);
+          this.SleepRec = response.data.SleepRec;
+          this.SleepRecCond = response.data.SleepRecCond
+          if (response.data.SleepRecCond == "-1") {
+            this.sleepState = "sleepRecord";
+          } else {
+            this.sleepState = "sleepResult";
+          }
+          // this.sleepState = "sleepRecord";
+        }
+      } catch (err) {
+        console.log(err);
       }
     },
   },

@@ -58,7 +58,7 @@
         </div>
         <div class="privacyGroup">
           <input type="checkbox" v-model="isPrivacy" id="privacyInput" />
-          <router-link to="#">
+          <router-link to="/privacy">
             <label >我已詳細閱讀隱私權政策</label>
           </router-link>
         
@@ -198,7 +198,7 @@ export default {
 
 
     const getVerificationCode = async () => {
-      if(password.value.length<6) {alert("密碼小於6位數") ; return}
+      if(password.value.length<8) {alert("密碼小於8位數") ; return}
       if(password.value !== passwordAgain.value){ alert("密碼不一致"); return}
       loading.value = true;
       // await new Promise((resolve) => setTimeout(resolve, 750));
@@ -243,8 +243,8 @@ export default {
     };
 
     const validatePassword = () => {
-      if (password.value.length < 6) {
-        passwordError.value = "密碼長度必須至少 6 位";
+      if (password.value.length < 8) {
+        passwordError.value = "密碼長度必須至少 8 位";
       } else {
         passwordError.value = "";
       }
@@ -748,7 +748,7 @@ export default {
         font-size: 1.25rem;
         letter-spacing: 0.09px;
         font-weight: 400;
-        transform: translateY(10%);
+   
        label{
         cursor: pointer;
        }

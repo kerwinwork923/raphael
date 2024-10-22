@@ -25,11 +25,12 @@
 
 <script>
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
-import { useFirstSleepRecordStore } from "~/stores/firstSleepRecord"; // 根據實際路徑調整
+import { useSleepRecordStore } from "../stores/sleepRecord";
 
 export default {
   props: {
-    modelValue: { // 使用 v-model 時需要的 props
+    modelValue: {
+      // 使用 v-model 時需要的 props
       type: String,
       default: "",
     },
@@ -43,7 +44,7 @@ export default {
     },
   },
   setup(props) {
-    const sleepStore = useFirstSleepRecordStore(); // 獲取 Pinia store
+    const sleepStore = useSleepRecordStore();
     const showDropdown = ref(false);
     const selectedTime = ref(props.modelValue); // 初始化為 props 的值
     const timePicker = ref(null); // 定義 timePicker
@@ -56,9 +57,9 @@ export default {
       selectedTime.value = time;
 
       // 根據傳來的 currentTimeMode 更新對應的 Pinia store 值
-      if (props.currentTimeMode === 'layTime') {
+      if (props.currentTimeMode === "layTime") {
         sleepStore.layTimeToSleep = time; // 更新 layTimeToSleep
-      } else if (props.currentTimeMode === 'sleepTime') {
+      } else if (props.currentTimeMode === "sleepTime") {
         sleepStore.sleepTime = time; // 更新 sleepTime
       }
 

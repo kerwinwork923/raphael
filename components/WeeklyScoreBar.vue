@@ -86,8 +86,7 @@ export default defineComponent({
     };
 
     watch(currentPage, () => {
-      // 每次頁碼變更時瞬間滾動到頁面頂部
-      window.scrollTo(100, 145); // 瞬間滾動到頂部
+      window.scrollTo(100, 145);
     });
 
     return {
