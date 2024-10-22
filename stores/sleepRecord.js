@@ -210,7 +210,7 @@ export const useSleepRecordStore = defineStore("sleepRecord", {
           // this.sleepRecIndexData = response.data;
           console.log(response.data);
           this.SleepRec = response.data.SleepRec;
-          this.SleepRecCond = response.data.SleepRecCond
+          this.SleepRecCond = response.data.SleepRecCond;
           if (response.data.SleepRecCond == "-1") {
             this.sleepState = "sleepRecord";
           } else {

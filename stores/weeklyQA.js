@@ -221,22 +221,23 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
     async API_ANSOnlineSolveSaveSolve() {
       const common = useCommon(); // 引入 useCommon store
       common.startLoading();
-    
+
       const localData = localStorage.getItem("userData");
       const { MID, Token, MAID, Mobile, AID } = localData
         ? JSON.parse(localData)
         : {};
-    
+
       let AnsSolveArray = [];
-    
+
       this.sortedByScore.forEach((question) => {
-        if (question.active && question.times >= 0) { // 濾掉 times 小於 0 的項目
+        if (question.active && question.times >= 0) {
+          // 濾掉 times 小於 0 的項目
           AnsSolveArray.push(`key${question.id + 1}`);
         }
       });
-    
+
       const AnsSolveArrayJson = JSON.stringify(AnsSolveArray);
-    
+
       try {
         const response = await axios.post(
           "https://23700999.com:8081/HMA/API_ANSOnlineSolveSaveSolve.jsp",
@@ -249,7 +250,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
             AnsSolveArray: AnsSolveArrayJson,
           }
         );
-    
+
         if (response.status === 200) {
           // 處理成功回應
         }
@@ -260,7 +261,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         common.stopLoading();
       }
     },
-    
+
     // 第一次打API並紀錄最新紀錄
     async API_API_ANSFirstDetail() {
       const localData = localStorage.getItem("userData");

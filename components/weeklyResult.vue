@@ -36,7 +36,7 @@
             <span
               :style="{ color: scoreColorFn(store.theLatestData.TotalScore) }"
             >
-              {{ store.theLatestData.TotalRatio }}%(嚴重失調)</span
+              {{ store.theLatestData.TotalRatio }}(嚴重失調)</span
             >
           </h6>
         </div>
@@ -86,23 +86,40 @@
         <div class="titleGroup">
           <h3>{{ store.diffenenceObj.C1Symptom }}</h3>
 
-          <p
-            v-if="
-              Number(store.diffenenceObj.C1Difference?.replace('%', '')) > 0
-            "
-            class="upIcon"
-          >
-            ▲
-          </p>
-          <p
-            v-if="
-              Number(store.diffenenceObj.C1Difference?.replace('%', '')) < 0
-            "
-            class="downIcon"
-          >
-            ▼
-          </p>
-          <div class="titleScore">100%</div>
+          <div class="pGroup" v-if="store.diffenenceObj.preCheckTime != ''">
+            <p
+              v-if="
+                Number(store.diffenenceObj.C1Difference?.replace('%', '')) > 0
+              "
+              class="upIcon"
+            >
+              ▲
+            </p>
+            <p
+              v-if="
+                Number(store.diffenenceObj.C1Difference?.replace('%', '')) < 0
+              "
+              class="downIcon"
+            >
+              ▼
+            </p>
+            <div
+              class="titleScoreUp"
+              v-if="
+                Number(store.diffenenceObj.C1Difference?.replace('%', '')) > 0
+              "
+            >
+              {{ store.diffenenceObj.C1Difference }}
+            </div>
+            <div
+              class="titleScoreDown"
+              v-if="
+                Number(store.diffenenceObj.C1Difference?.replace('%', '')) < 0
+              "
+            >
+              {{ store.diffenenceObj.C1Difference }}
+            </div>
+          </div>
         </div>
         <div class="resultTagGroup">
           <div
@@ -160,23 +177,40 @@
         <div class="titleGroup">
           <h3>{{ store.diffenenceObj.C2Symptom }}</h3>
 
-          <p
-            v-if="
-              parseFloat(store.diffenenceObj.C2Difference?.replace('%', '')) > 0
-            "
-            class="upIcon"
-          >
-            ▲
-          </p>
-          <p
-            v-if="
-              parseFloat(store.diffenenceObj.C2Difference?.replace('%', '')) < 0
-            "
-            class="downIcon"
-          >
-            ▼
-          </p>
-          <div class="titleScore">100%</div>
+          <div class="pGroup" v-if="store.diffenenceObj.preCheckTime != ''">
+            <p
+              v-if="
+                Number(store.diffenenceObj.C2Difference?.replace('%', '')) > 0
+              "
+              class="upIcon"
+            >
+              ▲
+            </p>
+            <p
+              v-if="
+                Number(store.diffenenceObj.C2Difference?.replace('%', '')) < 0
+              "
+              class="downIcon"
+            >
+              ▼
+            </p>
+            <div
+              class="titleScoreUp"
+              v-if="
+                Number(store.diffenenceObj.C2Difference?.replace('%', '')) > 0
+              "
+            >
+              {{ store.diffenenceObj.C2Difference }}
+            </div>
+            <div
+              class="titleScoreDown"
+              v-if="
+                Number(store.diffenenceObj.C2Difference?.replace('%', '')) < 0
+              "
+            >
+              {{ store.diffenenceObj.C2Difference }}
+            </div>
+          </div>
         </div>
         <div class="resultTagGroup">
           <div
@@ -233,22 +267,40 @@
         <div class="titleGroup">
           <h3>{{ store.diffenenceObj.C3Symptom }}</h3>
 
-          <p
-            v-if="
-              parseFloat(store.diffenenceObj.C3Difference?.replace('%', '')) > 0
-            "
-            class="upIcon"
-          >
-            ▲
-          </p>
-          <p
-            v-if="
-              parseFloat(store.diffenenceObj.C3Difference?.replace('%', '')) < 0
-            "
-            class="downIcon"
-          >
-            ▼
-          </p>
+          <div class="pGroup" v-if="store.diffenenceObj.preCheckTime != ''">
+            <p
+              v-if="
+                Number(store.diffenenceObj.C3Difference?.replace('%', '')) > 0
+              "
+              class="upIcon"
+            >
+              ▲
+            </p>
+            <p
+              v-if="
+                Number(store.diffenenceObj.C3Difference?.replace('%', '')) < 0
+              "
+              class="downIcon"
+            >
+              ▼
+            </p>
+            <div
+              class="titleScoreUp"
+              v-if="
+                Number(store.diffenenceObj.C3Difference?.replace('%', '')) > 0
+              "
+            >
+              {{ store.diffenenceObj.C3Difference }}
+            </div>
+            <div
+              class="titleScoreDown"
+              v-if="
+                Number(store.diffenenceObj.C3Difference?.replace('%', '')) < 0
+              "
+            >
+              {{ store.diffenenceObj.C3Difference }}
+            </div>
+          </div>
           <div class="titleScore">100%</div>
         </div>
         <div class="resultTagGroup">
@@ -306,22 +358,40 @@
         <div class="titleGroup">
           <h3>{{ store.diffenenceObj.C4Symptom }}</h3>
 
-          <p
-            v-if="
-              parseFloat(store.diffenenceObj.C4Difference?.replace('%', '')) > 0
-            "
-            class="upIcon"
-          >
-            ▲
-          </p>
-          <p
-            v-if="
-              parseFloat(store.diffenenceObj.C4Difference?.replace('%', '')) < 0
-            "
-            class="downIcon"
-          >
-            ▼
-          </p>
+          <div class="pGroup" v-if="store.diffenenceObj.preCheckTime != ''">
+            <p
+              v-if="
+                Number(store.diffenenceObj.C4Difference?.replace('%', '')) > 0
+              "
+              class="upIcon"
+            >
+              ▲
+            </p>
+            <p
+              v-if="
+                Number(store.diffenenceObj.C4Difference?.replace('%', '')) < 0
+              "
+              class="downIcon"
+            >
+              ▼
+            </p>
+            <div
+              class="titleScoreUp"
+              v-if="
+                Number(store.diffenenceObj.C4Difference?.replace('%', '')) > 0
+              "
+            >
+              {{ store.diffenenceObj.C4Difference }}
+            </div>
+            <div
+              class="titleScoreDown"
+              v-if="
+                Number(store.diffenenceObj.C4Difference?.replace('%', '')) < 0
+              "
+            >
+              {{ store.diffenenceObj.C4Difference }}
+            </div>
+          </div>
           <div class="titleScore">100%</div>
         </div>
         <div class="resultTagGroup">
@@ -379,23 +449,40 @@
         <div class="titleGroup">
           <h3>{{ store.diffenenceObj.C5Symptom }}</h3>
 
-          <p
-            v-if="
-              parseFloat(store.diffenenceObj.C5Difference?.replace('%', '')) > 0
-            "
-            class="upIcon"
-          >
-            ▲
-          </p>
-          <p
-            v-if="
-              parseFloat(store.diffenenceObj.C5Difference?.replace('%', '')) < 0
-            "
-            class="downIcon"
-          >
-            ▼
-          </p>
-          <div class="titleScore">100%</div>
+          <div class="pGroup" v-if="store.diffenenceObj.preCheckTime != ''">
+            <p
+              v-if="
+                Number(store.diffenenceObj.C5Difference?.replace('%', '')) > 0
+              "
+              class="upIcon"
+            >
+              ▲
+            </p>
+            <p
+              v-if="
+                Number(store.diffenenceObj.C5Difference?.replace('%', '')) < 0
+              "
+              class="downIcon"
+            >
+              ▼
+            </p>
+            <div
+              class="titleScoreUp"
+              v-if="
+                Number(store.diffenenceObj.C5Difference?.replace('%', '')) > 0
+              "
+            >
+              {{ store.diffenenceObj.C5Difference }}
+            </div>
+            <div
+              class="titleScoreDown"
+              v-if="
+                Number(store.diffenenceObj.C5Difference?.replace('%', '')) < 0
+              "
+            >
+              {{ store.diffenenceObj.C5Difference }}
+            </div>
+          </div>
         </div>
         <div class="resultTagGroup">
           <div
@@ -452,23 +539,40 @@
         <div class="titleGroup">
           <h3>{{ store.diffenenceObj.C6Symptom }}</h3>
 
-          <p
-            v-if="
-              parseFloat(store.diffenenceObj.C6Difference?.replace('%', '')) > 0
-            "
-            class="upIcon"
-          >
-            ▲
-          </p>
-          <p
-            v-if="
-              parseFloat(store.diffenenceObj.C6Difference?.replace('%', '')) < 0
-            "
-            class="downIcon"
-          >
-            ▼
-          </p>
-          <div class="titleScore">100%</div>
+          <div class="pGroup" v-if="store.diffenenceObj.preCheckTime != ''">
+            <p
+              v-if="
+                Number(store.diffenenceObj.C6Difference?.replace('%', '')) > 0
+              "
+              class="upIcon"
+            >
+              ▲
+            </p>
+            <p
+              v-if="
+                Number(store.diffenenceObj.C6Difference?.replace('%', '')) < 0
+              "
+              class="downIcon"
+            >
+              ▼
+            </p>
+            <div
+              class="titleScoreUp"
+              v-if="
+                Number(store.diffenenceObj.C6Difference?.replace('%', '')) > 0
+              "
+            >
+              {{ store.diffenenceObj.C6Difference }}
+            </div>
+            <div
+              class="titleScoreDown"
+              v-if="
+                Number(store.diffenenceObj.C6Difference?.replace('%', '')) < 0
+              "
+            >
+              {{ store.diffenenceObj.C6Difference }}
+            </div>
+          </div>
         </div>
         <div class="resultTagGroup">
           <div
@@ -525,22 +629,40 @@
         <div class="titleGroup">
           <h3>{{ store.diffenenceObj.C7Symptom }}</h3>
 
-          <p
-            v-if="
-              parseFloat(store.diffenenceObj.C7Difference?.replace('%', '')) > 0
-            "
-            class="upIcon"
-          >
-            ▲
-          </p>
-          <p
-            v-if="
-              parseFloat(store.diffenenceObj.C7Difference?.replace('%', '')) < 0
-            "
-            class="downIcon"
-          >
-            ▼
-          </p>
+          <div class="pGroup" v-if="store.diffenenceObj.preCheckTime != ''">
+            <p
+              v-if="
+                Number(store.diffenenceObj.C7Difference?.replace('%', '')) > 0
+              "
+              class="upIcon"
+            >
+              ▲
+            </p>
+            <p
+              v-if="
+                Number(store.diffenenceObj.C7Difference?.replace('%', '')) < 0
+              "
+              class="downIcon"
+            >
+              ▼
+            </p>
+            <div
+              class="titleScoreUp"
+              v-if="
+                Number(store.diffenenceObj.C7Difference?.replace('%', '')) > 0
+              "
+            >
+              {{ store.diffenenceObj.C7Difference }}
+            </div>
+            <div
+              class="titleScoreDown"
+              v-if="
+                Number(store.diffenenceObj.C7Difference?.replace('%', '')) < 0
+              "
+            >
+              {{ store.diffenenceObj.C7Difference }}
+            </div>
+          </div>
           <div class="titleScore">100%</div>
         </div>
         <div class="resultTagGroup">
@@ -598,23 +720,40 @@
         <div class="titleGroup">
           <h3>{{ store.diffenenceObj.C8Symptom }}</h3>
 
-          <p
-            v-if="
-              parseFloat(store.diffenenceObj.C8Difference?.replace('%', '')) > 0
-            "
-            class="upIcon"
-          >
-            ▲
-          </p>
-          <p
-            v-if="
-              parseFloat(store.diffenenceObj.C8Difference?.replace('%', '')) < 0
-            "
-            class="downIcon"
-          >
-            ▼
-          </p>
-          <div class="titleScore">100%</div>
+          <div class="pGroup" v-if="store.diffenenceObj.preCheckTime != ''">
+            <p
+              v-if="
+                Number(store.diffenenceObj.C8Difference?.replace('%', '')) > 0
+              "
+              class="upIcon"
+            >
+              ▲
+            </p>
+            <p
+              v-if="
+                Number(store.diffenenceObj.C8Difference?.replace('%', '')) < 0
+              "
+              class="downIcon"
+            >
+              ▼
+            </p>
+            <div
+              class="titleScoreUp"
+              v-if="
+                Number(store.diffenenceObj.C8Difference?.replace('%', '')) > 0
+              "
+            >
+              {{ store.diffenenceObj.C8Difference }}
+            </div>
+            <div
+              class="titleScoreDown"
+              v-if="
+                Number(store.diffenenceObj.C8Difference?.replace('%', '')) < 0
+              "
+            >
+              {{ store.diffenenceObj.C8Difference }}
+            </div>
+          </div>
         </div>
         <div class="resultTagGroup">
           <div
@@ -670,24 +809,40 @@
       <div class="resultList">
         <div class="titleGroup">
           <h3>{{ store.diffenenceObj.C9Symptom }}</h3>
-
-          <p
-            v-if="
-              parseFloat(store.diffenenceObj.C9Difference?.replace('%', '')) > 0
-            "
-            class="upIcon"
-          >
-            ▲
-          </p>
-          <p
-            v-if="
-              parseFloat(store.diffenenceObj.C9Difference?.replace('%', '')) < 0
-            "
-            class="downIcon"
-          >
-            ▼
-          </p>
-          <div class="titleScore">100%</div>
+          <div class="pGroup" v-if="store.diffenenceObj.preCheckTime != ''">
+            <p
+              v-if="
+                Number(store.diffenenceObj.C9Difference?.replace('%', '')) > 0
+              "
+              class="upIcon"
+            >
+              ▲
+            </p>
+            <p
+              v-if="
+                Number(store.diffenenceObj.C9Difference?.replace('%', '')) < 0
+              "
+              class="downIcon"
+            >
+              ▼
+            </p>
+            <div
+              class="titleScoreUp"
+              v-if="
+                Number(store.diffenenceObj.C9Difference?.replace('%', '')) > 0
+              "
+            >
+              {{ store.diffenenceObj.C9Difference }}
+            </div>
+            <div
+              class="titleScoreDown"
+              v-if="
+                Number(store.diffenenceObj.C9Difference?.replace('%', '')) < 0
+              "
+            >
+              {{ store.diffenenceObj.C9Difference }}
+            </div>
+          </div>
         </div>
         <div class="resultTagGroup">
           <div
@@ -820,11 +975,29 @@
         <div class="detectionGroup">
           <div class="scroeTotal">
             <h5>總分</h5>
-            <div class="totalScore">{{ store.theLatestHistory.Score }}</div>
+            <div
+              :style="{
+                color: scoreColorFn(
+                  computedScore(store.theLatestHistory.Score)
+                ),
+              }"
+              class="totalScore"
+            >
+              {{ store.theLatestHistory.Score }}
+            </div>
           </div>
           <div class="seriousDegreeGroup">
             <h5>嚴重程度</h5>
-            <div class="seriousScore">{{ store.theLatestHistory.Ratio }}</div>
+            <div
+              :style="{
+                color: scoreColorFn(
+                  computedScore(store.theLatestHistory.Score)
+                ),
+              }"
+              class="seriousScore"
+            >
+              {{ store.theLatestHistory.Ratio }}
+            </div>
           </div>
         </div>
       </div>
@@ -839,11 +1012,27 @@
         <div class="detectionGroup">
           <div class="scroeTotal">
             <h5>總分</h5>
-            <div class="totalScore">{{ store.theLatestHistoryPre.Score }}</div>
+            <div
+              :style="{
+                color: scoreColorFn(
+                  computedScore(store.theLatestHistoryPre.Score)
+                ),
+              }"
+              class="totalScore"
+            >
+              {{ store.theLatestHistoryPre.Score }}
+            </div>
           </div>
           <div class="seriousDegreeGroup">
             <h5>嚴重程度</h5>
-            <div class="seriousScore">
+            <div
+              :style="{
+                color: scoreColorFn(
+                  computedScore(store.theLatestHistoryPre.Score)
+                ),
+              }"
+              class="seriousScore"
+            >
               {{ store.theLatestHistoryPre.Ratio }}
             </div>
           </div>
@@ -948,6 +1137,10 @@ export default {
         margin-top: 0.5rem;
       }
     }
+    .pGroup {
+      display: flex;
+      align-items: center;
+    }
 
     .imgGroup {
       display: flex;
@@ -996,6 +1189,10 @@ export default {
         display: flex;
         align-items: center;
         gap: 2px;
+        .pGroup {
+          display: flex;
+          align-items: center;
+        }
         .upIcon {
           color: #ec4f4f;
           font-size: 10px;
@@ -1004,8 +1201,12 @@ export default {
           color: $raphael-green-400;
           font-size: 10px;
         }
-        .titleScore {
+        .titleScoreDown {
           color: $raphael-green-400;
+          font-size: 12px;
+        }
+        .titleScoreUp {
+          color: #ec4f4f;
           font-size: 12px;
         }
       }

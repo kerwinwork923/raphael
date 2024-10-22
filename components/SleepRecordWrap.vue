@@ -332,7 +332,7 @@ export default {
     const showDropdown7 = ref(false);
 
     // 引用下拉選單的 DOM 元素
-        const userRecord = ref(null);
+    const userRecord = ref(null);
     // const bedTimeHourDropdown = ref(null);
     // const bedTimeMinuteDropdown = ref(null);
     // const getupTimeHourDropdown = ref(null);
@@ -487,8 +487,6 @@ export default {
         await sleepStore.saveSleepRecord();
         await sleepStore.getSleepRecData();
         await sleepStore.getIndexSleepRecData();
-
-      
 
         window.scrollTo(0, 0);
       } catch (err) {
