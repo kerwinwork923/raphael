@@ -104,10 +104,11 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .time-picker {
   position: relative;
-  width: 100%;
+  width: 100%;  
+  border-bottom:1px solid #eee;
 }
 
 .time-display {
@@ -124,9 +125,9 @@ export default {
   color: #ccc;
 }
 
-.picked-text {
-  color: #1e1e1e !important;
-  font-size: 1.075rem !important;
+.picked-text{
+  color: $raphael-green-400 !important;
+  font-size: 1.075rem ;
   letter-spacing: 1.25px;
   font-weight: bold;
 }

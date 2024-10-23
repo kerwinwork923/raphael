@@ -381,7 +381,7 @@
         gap: 4px;
 
         .score {
-          font-size: 2rem;
+          font-size: 2.25rem;
         }
 
         h5 {
@@ -408,15 +408,16 @@
     width: 80%;
     box-shadow: 0px -2px 4px 0px rgba(0, 0, 0, 0.25) inset;
     .subText {
-      margin-top: 8px;
-      font-size: 12px;
-    }
+        font-size: 16px;
+        margin-bottom: 0.5rem;
+      }
 
     .resultHintText {
-      color: $raphael-green-400;
-      font-weight: 400;
-      font-size: 12px;
-      letter-spacing: 0.048px;
+        color: $raphael-green-400;
+        font-weight: 400;
+        font-size: 16px;
+        letter-spacing: 0.048px;
+        margin-bottom: 0.75rem;
     }
 
     .severityText {
@@ -464,8 +465,8 @@
         align-items: center;
         gap: 3%;
         img {
-          width: 70px;
-          height: 70px;
+          width: 36px;
+          height: 36px;
         }
       }
       h3 {

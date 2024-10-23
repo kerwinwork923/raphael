@@ -19,9 +19,8 @@
 
       <h1>{{ h1Text }}</h1>
     </div>
-
-    <TagList />
     <div class="weeklyQAGroup">
+    <TagList />
       <StepIndicator
         v-if="store.nowState == 'result'"
         :stepTexts="['填寫問卷', '結果分析']"
