@@ -191,6 +191,7 @@
   padding-top: 4rem;
   padding-left: 1.5rem;
   padding-right: 1.5rem;
+  line-height: 29.124px;
   h1 {
     font-weight: bold;
     font-size: 24px;
@@ -212,7 +213,6 @@
       color: #666;
       font-weight: 400;
       letter-spacing: 0.09px;
-      line-height: 1.25;
     }
   }
   h2 {
