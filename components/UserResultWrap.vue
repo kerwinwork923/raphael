@@ -58,7 +58,7 @@
         <!-- <div class="dashDiv" v-if="useSleepRecordData.SleepRec?.[1]?.Score">
           ---
         </div> -->
-        <h5 class="subText" v-if="useSleepRecordData?.SleepRec[1]">
+        <h5 class="subText" v-if="useSleepRecordData?.SleepRec?.[1]">
           (前次){{
             useSleepRecordData?.SleepRec?.length > 0
               ? formatTimestamp(useSleepRecordData.SleepRec[1].CheckTime)

@@ -483,12 +483,10 @@ export default {
       if (isSubmitting.value) return;
       isSubmitting.value = true;
       try {
-        const sleepStore = useSleepRecordStore();
-        await sleepStore.saveSleepRecord();
-        await sleepStore.getSleepRecData();
-        await sleepStore.getIndexSleepRecData();
+        await useSleepRecordData.saveSleepRecord();
 
-        window.scrollTo(0, 0);
+        // 在儲存成功後直接重整頁面
+        location.reload();
       } catch (err) {
         console.error(err);
       } finally {
