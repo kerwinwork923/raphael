@@ -1316,6 +1316,7 @@ export default {
       button {
         background-color: #f6f6f6;
         color: #666;
+        font-size: 1rem;
         width: 32.5%;
         border: none;
         transition: 0.5s all ease;
