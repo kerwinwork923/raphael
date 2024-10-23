@@ -189,8 +189,11 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         : {};
 
       let AnsTimesMap = new Map();
-      this.sortedByScore.forEach((question, index) => {
-        AnsTimesMap.set(`key${question.id + 1}`, String(question.times));
+      this.sortedByScore.forEach((question) => {
+        // 濾掉次數小於等於 0 的問題
+        if (question.times > 0) {
+          AnsTimesMap.set(`key${question.id + 1}`, String(question.times));
+        }
       });
 
       const ansMapTimesJson = JSON.stringify(Array.from(AnsTimesMap.entries()));
@@ -209,6 +212,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         );
 
         if (response.status === 200) {
+          // 這裡可以處理成功的情況
         }
       } catch (err) {
         console.error("Error while saving times:", err);
@@ -217,6 +221,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         common.stopLoading();
       }
     },
+
     // 想解決的方案
     async API_ANSOnlineSolveSaveSolve() {
       const common = useCommon(); // 引入 useCommon store
@@ -505,6 +510,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         }
       } else if (this.nowState === "choose") {
         await this.API_ANSOnlineQSaveAns();
+        await this.API_ANSOnlineTimesSaveTimes();
         await this.API_ANSOnlineSolveSaveSolve();
         await this.API_API_ANSFirstDetail();
         this.nowState = "result";

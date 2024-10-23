@@ -18,7 +18,9 @@
             <div class="scoreText">
               <div
                 class="score"
-                :style="{ color: scoreColorFn(store.theLatestData.TotalScore) }"
+                :style="{
+                  color: scoreColorFn(store.theLatestData.TotalScore, sex),
+                }"
               >
                 {{ store.theLatestData.TotalScore }}
               </div>
@@ -28,13 +30,15 @@
 
           <ProgressBar
             :score="store.theLatestData.TotalScore"
-            :colorProp="scoreColorFn(store.theLatestData.TotalScore)"
+            :colorProp="scoreColorFn(store.theLatestData.TotalScore, sex)"
           />
 
           <h6 class="severityText">
             嚴重程度 :
             <span
-              :style="{ color: scoreColorFn(store.theLatestData.TotalScore) }"
+              :style="{
+                color: scoreColorFn(store.theLatestData.TotalScore, sex),
+              }"
             >
               {{ store.theLatestData.TotalRatio }}(嚴重失調)</span
             >
@@ -53,7 +57,10 @@
               <div
                 class="score"
                 :style="{
-                  color: scoreColorFn(store.theLatestDataPreData.TotalScore),
+                  color: scoreColorFn(
+                    store.theLatestDataPreData.TotalScore,
+                    sex
+                  ),
                 }"
               >
                 {{ store.theLatestDataPreData.TotalScore }}
@@ -63,13 +70,15 @@
           </div>
           <ProgressBar
             :score="store.theLatestDataPreData.TotalScore"
-            :colorProp="scoreColorFn(store.theLatestDataPreData.TotalScore)"
+            :colorProp="
+              scoreColorFn(store.theLatestDataPreData.TotalScore, sex)
+            "
           />
           <h6 class="severityText">
             嚴重程度 :
             <span
               :style="{
-                color: scoreColorFn(store.theLatestDataPreData.TotalScore),
+                color: scoreColorFn(store.theLatestDataPreData.TotalScore, sex),
               }"
             >
               {{ store.theLatestDataPreData.TotalRatio }}%(嚴重失調)</span
@@ -140,7 +149,10 @@
           嚴重程度 :
           <span
             :style="{
-              color: scoreColorFn(computedScore(store.theLatestData.C1Ratio)),
+              color: scoreColorFn(
+                computedScore(store.theLatestData.C1Ratio),
+                sex
+              ),
             }"
             >{{ store.theLatestData.C1Ratio }}({{
               computedText(computedScore(store.theLatestData.C1Ratio))
@@ -162,7 +174,8 @@
             <span
               :style="{
                 color: scoreColorFn(
-                  computedScore(store.theLatestDataPreData.C1Ratio)
+                  computedScore(store.theLatestDataPreData.C1Ratio),
+                  sex
                 ),
               }"
               >{{ store.theLatestDataPreData.C1Ratio }}({{
@@ -230,7 +243,10 @@
           嚴重程度 :
           <span
             :style="{
-              color: scoreColorFn(computedScore(store.theLatestData.C2Ratio)),
+              color: scoreColorFn(
+                computedScore(store.theLatestData.C2Ratio),
+                sex
+              ),
             }"
             >{{ store.theLatestData.C2Ratio }}({{
               computedText(computedScore(store.theLatestData.C2Ratio))
@@ -252,7 +268,8 @@
             <span
               :style="{
                 color: scoreColorFn(
-                  computedScore(store.theLatestDataPreData.C2Ratio)
+                  computedScore(store.theLatestDataPreData.C2Ratio),
+                  sex
                 ),
               }"
               >{{ store.theLatestDataPreData.C2Ratio }}({{
@@ -321,7 +338,10 @@
           嚴重程度 :
           <span
             :style="{
-              color: scoreColorFn(computedScore(store.theLatestData.C3Ratio)),
+              color: scoreColorFn(
+                computedScore(store.theLatestData.C3Ratio),
+                sex
+              ),
             }"
             >{{ store.theLatestData.C3Ratio }}({{
               computedText(computedScore(store.theLatestData.C3Ratio))
@@ -343,7 +363,8 @@
             <span
               :style="{
                 color: scoreColorFn(
-                  computedScore(store.theLatestDataPreData.C3Ratio)
+                  computedScore(store.theLatestDataPreData.C3Ratio),
+                  sex
                 ),
               }"
               >{{ store.theLatestDataPreData.C3Ratio }}({{
@@ -412,7 +433,10 @@
           嚴重程度 :
           <span
             :style="{
-              color: scoreColorFn(computedScore(store.theLatestData.C4Ratio)),
+              color: scoreColorFn(
+                computedScore(store.theLatestData.C4Ratio),
+                sex
+              ),
             }"
             >{{ store.theLatestData.C4Ratio }}({{
               computedText(computedScore(store.theLatestData.C4Ratio))
@@ -434,7 +458,8 @@
             <span
               :style="{
                 color: scoreColorFn(
-                  computedScore(store.theLatestDataPreData.C4Ratio)
+                  computedScore(store.theLatestDataPreData.C4Ratio),
+                  sex
                 ),
               }"
               >{{ store.theLatestDataPreData.C4Ratio }}({{
@@ -502,7 +527,10 @@
           嚴重程度 :
           <span
             :style="{
-              color: scoreColorFn(computedScore(store.theLatestData.C5Ratio)),
+              color: scoreColorFn(
+                computedScore(store.theLatestData.C5Ratio),
+                sex
+              ),
             }"
             >{{ store.theLatestData.C5Ratio }}({{
               computedText(computedScore(store.theLatestData.C5Ratio))
@@ -524,7 +552,8 @@
             <span
               :style="{
                 color: scoreColorFn(
-                  computedScore(store.theLatestDataPreData.C5Ratio)
+                  computedScore(store.theLatestDataPreData.C5Ratio),
+                  sex
                 ),
               }"
               >{{ store.theLatestDataPreData.C5Ratio }}({{
@@ -592,7 +621,10 @@
           嚴重程度 :
           <span
             :style="{
-              color: scoreColorFn(computedScore(store.theLatestData.C6Ratio)),
+              color: scoreColorFn(
+                computedScore(store.theLatestData.C6Ratio),
+                sex
+              ),
             }"
             >{{ store.theLatestData.C6Ratio }}({{
               computedText(computedScore(store.theLatestData.C6Ratio))
@@ -614,7 +646,8 @@
             <span
               :style="{
                 color: scoreColorFn(
-                  computedScore(store.theLatestDataPreData.C6Ratio)
+                  computedScore(store.theLatestDataPreData.C6Ratio),
+                  sex
                 ),
               }"
               >{{ store.theLatestDataPreData.C6Ratio }}({{
@@ -683,7 +716,10 @@
           嚴重程度 :
           <span
             :style="{
-              color: scoreColorFn(computedScore(store.theLatestData.C7Ratio)),
+              color: scoreColorFn(
+                computedScore(store.theLatestData.C7Ratio),
+                sex
+              ),
             }"
             >{{ store.theLatestData.C7Ratio }}({{
               computedText(computedScore(store.theLatestData.C7Ratio))
@@ -705,7 +741,8 @@
             <span
               :style="{
                 color: scoreColorFn(
-                  computedScore(store.theLatestDataPreData.C7Ratio)
+                  computedScore(store.theLatestDataPreData.C7Ratio),
+                  sex
                 ),
               }"
               >{{ store.theLatestDataPreData.C7Ratio }}({{
@@ -773,7 +810,10 @@
           嚴重程度 :
           <span
             :style="{
-              color: scoreColorFn(computedScore(store.theLatestData.C8Ratio)),
+              color: scoreColorFn(
+                computedScore(store.theLatestData.C8Ratio),
+                sex
+              ),
             }"
             >{{ store.theLatestData.C8Ratio }}({{
               computedText(computedScore(store.theLatestData.C8Ratio))
@@ -795,7 +835,8 @@
             <span
               :style="{
                 color: scoreColorFn(
-                  computedScore(store.theLatestDataPreData.C8Ratio)
+                  computedScore(store.theLatestDataPreData.C8Ratio),
+                  sex
                 ),
               }"
               >{{ store.theLatestDataPreData.C8Ratio }}({{
@@ -862,7 +903,10 @@
           嚴重程度 :
           <span
             :style="{
-              color: scoreColorFn(computedScore(store.theLatestData.C9Ratio)),
+              color: scoreColorFn(
+                computedScore(store.theLatestData.C9Ratio),
+                sex
+              ),
             }"
             >{{ store.theLatestData.C9Ratio }}({{
               computedText(computedScore(store.theLatestData.C9Ratio))
@@ -884,7 +928,8 @@
             <span
               :style="{
                 color: scoreColorFn(
-                  computedScore(store.theLatestDataPreData.C9Ratio)
+                  computedScore(store.theLatestDataPreData.C9Ratio),
+                  sex
                 ),
               }"
               >{{ store.theLatestDataPreData.C9Ratio }}({{
@@ -978,7 +1023,8 @@
             <div
               :style="{
                 color: scoreColorFn(
-                  computedScore(store.theLatestHistory.Score)
+                  computedScore(store.theLatestHistory.Score),
+                  sex
                 ),
               }"
               class="totalScore"
@@ -991,7 +1037,8 @@
             <div
               :style="{
                 color: scoreColorFn(
-                  computedScore(store.theLatestHistory.Score)
+                  computedScore(store.theLatestHistory.Score),
+                  sex
                 ),
               }"
               class="seriousScore"
@@ -1015,7 +1062,8 @@
             <div
               :style="{
                 color: scoreColorFn(
-                  computedScore(store.theLatestHistoryPre.Score)
+                  computedScore(store.theLatestHistoryPre.Score),
+                  sex
                 ),
               }"
               class="totalScore"
@@ -1028,7 +1076,8 @@
             <div
               :style="{
                 color: scoreColorFn(
-                  computedScore(store.theLatestHistoryPre.Score)
+                  computedScore(store.theLatestHistoryPre.Score),
+                  sex
                 ),
               }"
               class="seriousScore"
@@ -1075,6 +1124,10 @@ export default {
       router.push({ name: "user" });
     };
 
+    const localData = localStorage.getItem("userData");
+    const parsedData = localData ? JSON.parse(localData) : null;
+    const sex = ref(parsedData?.Sex || null);
+
     const selectedType = ref("Serious");
 
     const changeSymptomLavel = (lavel) => {
@@ -1096,6 +1149,7 @@ export default {
       selectedType,
       changeSymptomLavel,
       computedText,
+      sex,
     };
   },
 };

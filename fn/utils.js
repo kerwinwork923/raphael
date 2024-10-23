@@ -4,18 +4,34 @@ import happy from "@/assets/imgs/happy.png";
 import smile from "@/assets/imgs/smile.png";
 
 //顏色判定
-export const scoreColorFn = (score) => {
-  switch (true) {
-    case score >= 1 && score <= 25:
-      return "#74BC1F"; // 正常
-    case score >= 26 && score <= 45:
-      return "#1FBCB3"; // 輕度失調
-    case score >= 46 && score <= 71:
-      return "#65558F"; // 中度失調
-    case score >= 72:
-      return "#EC4F4F"; // 重度失調
-    default:
-      return "gray";
+export const scoreColorFn = (score, sex) => {
+  if (sex == 2) {
+ 
+    switch (true) {
+      case score >= 1 && score <= 35:
+        return "#74BC1F"; // 正常
+      case score >= 36 && score <= 60:
+        return "#1FBCB3"; // 輕度失調
+      case score >= 61 && score <= 89:
+        return "#65558F"; // 中度失調
+      case score >= 90:
+        return "#EC4F4F"; // 重度失調
+      default:
+        return "gray";
+    }
+  } else {
+    switch (true) {
+      case score >= 1 && score <= 25:
+        return "#74BC1F"; // 正常
+      case score >= 26 && score <= 45:
+        return "#1FBCB3"; // 輕度失調
+      case score >= 46 && score <= 71:
+        return "#65558F"; // 中度失調
+      case score >= 72:
+        return "#EC4F4F"; // 重度失調
+      default:
+        return "gray";
+    }
   }
 };
 
@@ -96,7 +112,10 @@ export const computedText = (score) => {
 export const formatTimestamp = (timestampStr) => {
   // 檢查輸入是否為有效的字符串
   if (typeof timestampStr !== "string" || timestampStr.length !== 14) {
-    console.error("Invalid timestamp format. Expected a 14-character string:", timestampStr);
+    console.error(
+      "Invalid timestamp format. Expected a 14-character string:",
+      timestampStr
+    );
     return "Invalid timestamp format";
   }
 
@@ -118,11 +137,15 @@ export const formatTimestamp = (timestampStr) => {
     date.getMonth() !== formattedMonth - 1 ||
     date.getDate() !== formattedDay
   ) {
-    console.error("Invalid date constructed from timestamp:", year, formattedMonth, formattedDay);
+    console.error(
+      "Invalid date constructed from timestamp:",
+      year,
+      formattedMonth,
+      formattedDay
+    );
     return "Invalid date";
   }
 
   // 返回格式化結果
   return `${formattedMonth}/${formattedDay}`; // 返回 MM/DD 格式
 };
-

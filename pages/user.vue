@@ -19,13 +19,19 @@
           </div>
         </div>
         <div class="qrCode">
-          <img src="../assets/imgs/qrcode.svg" alt="" />
+          <!-- <img src="../assets/imgs/qrcode.svg" alt="" /> -->
         </div>
       </div>
       <div class="bannerGroup">
-        <img src="../assets/imgs/banner-1.png" alt="" />
+        <img class="imgHide" src="../assets//imgs/banner-1.png" alt="" />
+        <img
+          v-for="(slide, index) in slides"
+          :key="index"
+          :class="{ active: currentSlide === index }"
+          :src="slide"
+          alt=""
+        />
       </div>
-
       <div class="itemsGroup">
         <div class="item item1">
           <div class="topTitle">領取</div>
@@ -131,9 +137,23 @@
 
     .bannerGroup {
       margin-top: 30px;
+      position: relative;
+      width: 100%;
 
       img {
         width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        transition: opacity 1s ease-in-out;
+      }
+      .imgHide {
+        position: relative;
+        opacity: 0;
+      }
+      .active {
+        opacity: 1;
       }
     }
 
@@ -217,18 +237,23 @@
 </style>
 
 <script>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import Navbar from "../components/Navbar";
 import RaphaelLoading from "../components/RaphaelLoading";
 import axios from "axios";
+//圖片
+import banner1 from "@/assets/imgs/banner-1.png";
+import banner2 from "@/assets/imgs/banner-2.png";
 
 export default {
-  components: { Navbar },
+  components: { Navbar, RaphaelLoading },
   setup() {
     const router = useRouter();
     const loading = ref(true);
     const userInfo = ref(null);
+    const currentSlide = ref(0);
+    const slides = ref([banner1, banner2]);
 
     const getUserData = async () => {
       const localData = localStorage.getItem("userData");
@@ -239,7 +264,7 @@ export default {
       if (!MID || !Token || !MAID || !Mobile) {
         router.push("/login");
         return;
-      } else if (Name == "") {
+      } else if (Name === "") {
         router.push("/changeMember");
         return;
       }
@@ -256,20 +281,14 @@ export default {
 
         if (response.status === 200) {
           const data = response.data;
-          console.log(data);
-
           if (data.Result === "OK" && data.Member) {
-            // 獲取原有的用戶資料
             const existingData = localData ? JSON.parse(localData) : {};
-
-            // 合併新資料，保留 Token
             const newUserInfo = {
               ...existingData,
-              ...data.Member, // 將新資料合併進來
+              ...data.Member,
             };
-
-            localStorage.setItem("userData", JSON.stringify(newUserInfo)); // 儲存合併後的用戶資料
-            userInfo.value = newUserInfo; // 更新用戶資訊
+            localStorage.setItem("userData", JSON.stringify(newUserInfo));
+            userInfo.value = newUserInfo;
           } else {
             alert("取得會員資料失敗");
           }
@@ -285,13 +304,30 @@ export default {
       }
     };
 
+    getUserData();
+
+    const changeSlide = () => {
+      currentSlide.value = (currentSlide.value + 1) % slides.value.length;
+    };
+
+    let slideInterval;
+
     onMounted(() => {
-      getUserData();
+      // 開始幻燈片循環
+      slideInterval = setInterval(() => {
+        changeSlide();
+      }, 3000);
+    });
+
+    onBeforeUnmount(() => {
+      clearInterval(slideInterval);
     });
 
     return {
       loading,
       userInfo,
+      currentSlide,
+      slides,
     };
   },
 };
