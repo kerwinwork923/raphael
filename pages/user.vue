@@ -93,14 +93,14 @@
     .userInfo {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      gap: 0.5rem;
 
       .imgGroup {
-        width: 20%;
+        width: auto;
       }
 
       .infoTextGroup {
-        width: 60%;
+        width: 100%;
 
         .topText {
           font-size: 1.5rem;
@@ -178,19 +178,19 @@
 
         .topTitle {
           position: absolute;
-          top: 1rem;
+          top: 1.2rem;
           left: 0.75rem;
           font-weight: 400;
-          font-family: Roboto;
+          font-size: 1.25rem;
           color: #fefefe;
           letter-spacing: 0.09px;
         }
 
         .bottomTitle {
           position: absolute;
-          bottom: 1rem;
+          bottom: 1.2rem;
           left: 0.75rem;
-          font-size: 2rem;
+          font-size: 2.25rem;
           font-weight: bold;
           letter-spacing: 0.09px;
         }
