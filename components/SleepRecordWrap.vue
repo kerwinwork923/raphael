@@ -544,8 +544,9 @@ export default {
       .dropListGroup {
         width: 50%;
         padding-top: 0.75rem;
-
         position: relative;
+        border-bottom:1px solid #eee;
+
         .dropListText {
           text-align: right;
           color: #b3b3b3;
@@ -559,7 +560,7 @@ export default {
             top: 60%;
 
             transform: translate(-50%, -50%);
-            color: #1e1e1e;
+            color: #74bc1f;
             font-weight: bold;
           }
         }
@@ -593,10 +594,8 @@ export default {
           margin-left: 1.25rem;
         }
         .dropListTextActive {
-          color: #1e1e1e;
-          font-weight: bold;
-          color: #1e1e1e;
-          font-size: 1.075rem;
+          color: #74bc1f !important;
+          font-size: 1.075rem ;
           letter-spacing: 1.25px;
           font-weight: bold;
         }

@@ -52,7 +52,6 @@ export default defineComponent({
 <style lang="scss">
 .subList {
   color: #666;
-  font-family: 14px;
   margin-top: 1rem;
   font-size: 14px;
   display: flex;

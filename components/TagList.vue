@@ -9,21 +9,21 @@
 
 <style lang="scss">
 .tagList {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.75%;
-  padding-top: 4.5rem;
+  display: grid;
+    grid-auto-flow: column;
+    gap: 4px;    
+    padding-top: 4.5rem;
   a{
     text-decoration: none;
   }
   .listItem {
-    font-size: 14px;
+    font-size: 1rem;
     font-weight: 400;
     letter-spacing: 0.1px;
     padding: 10px 12px;
     border-radius: 6px;
     color: $raphael-gray-500;
+    text-align: center;
     cursor: pointer;
 
     &:hover {
