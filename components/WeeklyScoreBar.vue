@@ -133,11 +133,11 @@ export default defineComponent({
 
   .scoreBar {
     height: 100%;
-    background-color: #74bc1f; // 绿色
+    background-color: #74bc1f;
   }
   .remainingBar {
     height: 100%;
-    background-color: #b3b3b3; // 灰色
+    background-color: #b3b3b3; 
   }
 
   .numberGroup {
@@ -151,7 +151,7 @@ export default defineComponent({
     align-items: center;
 
     .number {
-      background-color: #b3b3b3; // 按钮的灰色背景
+      background-color: #b3b3b3;
       border-radius: 50%;
       color: #fff;
       width: 1.5rem;
@@ -163,7 +163,7 @@ export default defineComponent({
       transition: background-color 0.3s;
 
       &.selected {
-        background-color: #74bc1f; // 选中时的绿色背景
+        background-color: #74bc1f; 
       }
     }
   }
@@ -171,7 +171,7 @@ export default defineComponent({
 
 .scoreText {
   text-align: center;
-  color: #74bc1f; // 文字颜色
+  color: #74bc1f; 
   margin-top: 0.5rem;
 }
 
@@ -181,13 +181,13 @@ export default defineComponent({
   margin-top: 1rem;
   button {
     padding: 0.5rem 1rem;
-    background-color: #74bc1f; // 按钮背景色
+    background-color: #74bc1f;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     &:disabled {
-      background-color: #b3b3b3; // 禁用状态的颜色
+      background-color: #b3b3b3; 
       cursor: not-allowed;
     }
   }

@@ -110,7 +110,7 @@ export const computedText = (score) => {
 };
 
 export const formatTimestamp = (timestampStr) => {
-  // 檢查輸入是否為有效的字符串
+
   if (typeof timestampStr !== "string" || timestampStr.length !== 14) {
     console.error(
       "Invalid timestamp format. Expected a 14-character string:",
@@ -119,19 +119,19 @@ export const formatTimestamp = (timestampStr) => {
     return "Invalid timestamp format";
   }
 
-  // 提取年月日
+ 
   const year = timestampStr.slice(0, 4);
   const month = timestampStr.slice(4, 6);
   const day = timestampStr.slice(6, 8);
 
-  // 將月份和日期轉換為整數去掉前導零（如有）
+
   const formattedMonth = parseInt(month, 10);
   const formattedDay = parseInt(day, 10);
 
-  // 驗證日期的有效性
+
   const date = new Date(year, formattedMonth - 1, formattedDay);
 
-  // 檢查日期是否有效
+
   if (
     date.getFullYear() !== parseInt(year, 10) ||
     date.getMonth() !== formattedMonth - 1 ||
@@ -146,6 +146,6 @@ export const formatTimestamp = (timestampStr) => {
     return "Invalid date";
   }
 
-  // 返回格式化結果
-  return `${formattedMonth}/${formattedDay}`; // 返回 MM/DD 格式
+
+  return `${formattedMonth}/${formattedDay}`; 
 };

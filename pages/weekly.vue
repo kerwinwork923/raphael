@@ -131,11 +131,11 @@ export default {
         case "score":
         case "times":
         case "choose":
-          return "每週評估"; // 不需要 break，因為已經 return 了
+          return "每週評估"; 
         case "result":
-          return "結果分析"; // 這裡應該加冒號，並 return 正確的值
+          return "結果分析"; 
         default:
-          return "每週評估"; // default 也不需要 break
+          return "每週評估"; 
       }
     });
 

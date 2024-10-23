@@ -351,7 +351,6 @@ export default {
   }
 
   // 將焦點移到下一個輸入框
-  // 修改這裡以包含 0
   if (verificationCodes.value[index] !== '' && index < verificationCodes.value.length - 1) {
     verificationInput.value[index + 1]?.focus();
   }
@@ -375,7 +374,7 @@ export default {
     const startCountdown = () => {
     countdownTime.value = 60;
     isReSend.value = false;
-    isDisabled.value = true;  // 在開始倒計時時禁用輸入框
+    isDisabled.value = true; 
     countdownInterval.value = setInterval(() => {
     if (countdownTime.value > 0) {
       countdownTime.value--;
@@ -383,7 +382,7 @@ export default {
       clearInterval(countdownInterval.value);
       countdownTime.value = "驗證碼已失效，請重新發送";  
       isReSend.value = true;  
-      isDisabled.value = false;  // 倒計時結束後啟用輸入框
+      isDisabled.value = false;  
     }
   }, 1000);
 };
