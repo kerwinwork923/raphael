@@ -408,7 +408,7 @@
     width: 80%;
     box-shadow: 0px -2px 4px 0px rgba(0, 0, 0, 0.25) inset;
     .subText {
-        font-size: 16px;
+        font-size: 0.875rem;
         margin-bottom: 0.5rem;
       }
 
@@ -421,9 +421,8 @@
     }
 
     .severityText {
-      margin-top: 6px;
-      font-size: 12px;
-      letter-spacing: 0.048px;
+        font-size: 0.875rem;
+        letter-spacing: 0.048px;
       span {
         color: #ec4f4f;
       }

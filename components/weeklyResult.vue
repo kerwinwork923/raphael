@@ -1169,7 +1169,7 @@ export default {
       box-shadow: 0px -2px 4px 0px rgba(0, 0, 0, 0.25) inset;
 
       .subText {
-        font-size: 16px;
+        font-size: 0.875rem;
         margin-bottom: 0.5rem;
       }
 
@@ -1182,7 +1182,7 @@ export default {
       }
 
       .severityText {
-        font-size: 1rem;
+        font-size: 0.875rem;
         letter-spacing: 0.048px;
         span {
           color: #ec4f4f;
@@ -1269,7 +1269,7 @@ export default {
         font-size: 20px;
         font-weight: bold;
         letter-spacing: 0.15px;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.5rem;
       }
       .resultTagGroup {
         display: flex;
@@ -1278,7 +1278,7 @@ export default {
 
         .resultTag {
           background: #fef1e2;
-          padding: 2px 8px;
+          padding: 4px 8px;
           border-radius: 8px;
           color: #666;
           font-size: 0.875rem;
@@ -1287,14 +1287,14 @@ export default {
 
       h5 {
         color: #1e1e1e;
-        font-size: 1rem;
+        font-size: 0.875rem;
         font-weight: 400;
         letter-spacing: 0.1px;
         margin-top: 0.5rem;
       }
       h4 {
         color: #666;
-        font-size: 1rem;
+        font-size: 0.875rem;
         margin-top: 0.35rem;
         span {
           color: #ec4f4f;
