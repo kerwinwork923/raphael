@@ -76,6 +76,7 @@ export default {
       align-items: center;
       padding: 6px 12px;
       background-color: #eee;
+      font-size: 1.125rem;
       color: #ccc;
       border-radius: 8px;
       cursor: pointer;

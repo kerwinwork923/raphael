@@ -65,12 +65,13 @@ export default {
 
 <style lang="scss">
 .tagTimesList {
-  background-color: #fff;
-  padding: 1rem;
-  border-radius: 12px;
+  display: grid;
+  gap: 0.75rem;
 
-  .timesList {
-    margin-bottom: 0.25rem;
+  &>.timesList {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 0.375rem 0.75rem;
   }
 
   h3 {
@@ -92,13 +93,11 @@ export default {
     cursor: pointer;
     width: 100%;
     height: 2.5rem;
-    padding: 0.5rem;
     border: none;
-    border-radius: 4px;
-    background-color: #fff;
+    border-bottom: 1px solid #eeeeee;
     font-size: 16px;
-    color: #333;
-    margin-top: 0.25rem;
+    color: #74bc1f;    
+    padding: 0 8px;
 
     &:focus {
       outline: none;

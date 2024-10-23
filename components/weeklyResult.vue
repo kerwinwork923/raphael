@@ -318,7 +318,7 @@
               {{ store.diffenenceObj.C3Difference }}
             </div>
           </div>
-          <div class="titleScore">100%</div>
+
         </div>
         <div class="resultTagGroup">
           <div
@@ -413,7 +413,7 @@
               {{ store.diffenenceObj.C4Difference }}
             </div>
           </div>
-          <div class="titleScore">100%</div>
+         
         </div>
         <div class="resultTagGroup">
           <div
@@ -696,7 +696,7 @@
               {{ store.diffenenceObj.C7Difference }}
             </div>
           </div>
-          <div class="titleScore">100%</div>
+    
         </div>
         <div class="resultTagGroup">
           <div
@@ -1167,21 +1167,22 @@ export default {
       border-radius: 12px;
       width: 80%;
       box-shadow: 0px -2px 4px 0px rgba(0, 0, 0, 0.25) inset;
+
       .subText {
-        margin-top: 8px;
-        font-size: 12px;
+        font-size: 16px;
+        margin-bottom: 0.5rem;
       }
 
       .resultHintText {
         color: $raphael-green-400;
         font-weight: 400;
-        font-size: 12px;
+        font-size: 16px;
         letter-spacing: 0.048px;
+        margin-bottom: 0.75rem;
       }
 
       .severityText {
-        margin-top: 6px;
-        font-size: 12px;
+        font-size: 1rem;
         letter-spacing: 0.048px;
         span {
           color: #ec4f4f;
@@ -1199,12 +1200,11 @@ export default {
     .imgGroup {
       display: flex;
       align-items: center;
-      margin-top: 4px;
       gap: 4px;
 
       img {
-        width: 40px;
-        height: 40px;
+        width: 2.25rem;
+        height: 2.25rem;
       }
 
       .scoreText {
@@ -1216,7 +1216,7 @@ export default {
         gap: 4px;
 
         .score {
-          font-size: 2rem;
+          font-size: 2.25rem;
         }
 
         h5 {
@@ -1274,28 +1274,27 @@ export default {
       .resultTagGroup {
         display: flex;
         flex-wrap: wrap;
+        gap: 8px;
 
         .resultTag {
-          margin-bottom: 0.25rem;
           background: #fef1e2;
           padding: 2px 8px;
           border-radius: 8px;
           color: #666;
-          font-size: 12px;
-          margin-right: 0.35rem;
+          font-size: 0.875rem;
         }
       }
 
       h5 {
         color: #1e1e1e;
-        font-size: 14px;
+        font-size: 1rem;
         font-weight: 400;
         letter-spacing: 0.1px;
         margin-top: 0.5rem;
       }
       h4 {
         color: #666;
-        font-size: 12px;
+        font-size: 1rem;
         margin-top: 0.35rem;
         span {
           color: #ec4f4f;
@@ -1434,6 +1433,7 @@ export default {
           .seriousScore {
             color: #1e1e1e;
             font-size: 24px;
+            font-weight: bold;
           }
         }
       }

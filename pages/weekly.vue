@@ -154,7 +154,7 @@ export default {
   width: 100%;
   background-color: $raphael-gray-200;
 
-  padding-bottom: 150px;
+  padding-bottom: 66px;
   width: 100%;
   .titleBar {
     position: absolute;
@@ -185,7 +185,7 @@ export default {
     color: #666;
     margin-top: 1.25rem;
     letter-spacing: 0.5px;
-    font-weight: 40;
+    font-weight: 400;
     margin-bottom: 0.75rem;
   }
   .subListActive {

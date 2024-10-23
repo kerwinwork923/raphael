@@ -1,9 +1,11 @@
 <template>
     <div class="progress-container">
-      <!-- 漸變條形進度條 -->
-      <div class="progress-bar"></div>
-      <!-- 使用 props 傳遞的 emojiSrc 來顯示表情符號 -->
-      <img class="emoji-dot" :src="emojiSrc" :style="{ left: dotPosition + '%' }" alt="emoji" />
+      <div class="progress">
+        <!-- 漸變條形進度條 -->
+        <div class="progress-bar"></div>
+        <!-- 使用 props 傳遞的 emojiSrc 來顯示表情符號 -->
+        <img class="emoji-dot" :src="emojiSrc" :style="{ left: dotPosition + '%' }" alt="emoji" />
+      </div>
       <div class="progressText">
         <div class="progressSubText">
           <span>0%</span>
@@ -46,20 +48,25 @@
     position: relative;
     width: 100%;
     margin: 10px 0;
-  
-    .progress-bar {
-      width: 100%;
-      height: 4px;
-      border-radius: 50px;
-      background: linear-gradient(90deg, #74BC1F 0%, #1FBCB3 50%, #65558F 75%, #EC4F4F 100%);
-    }
-  
-    .emoji-dot {
-      position: absolute;
-      top: -7px;
-      width: 18px;
-      height: 18px;
-      transform: translateX(-50%);
+    .progress{
+      position: relative;
+      display: grid;
+      align-items: center;
+      margin: 0 1rem;
+      .progress-bar {
+        width: 100%;
+        height: 4px;
+        border-radius: 50px;
+        background: linear-gradient(90deg, #74BC1F 0%, #1FBCB3 50%, #65558F 75%, #EC4F4F 100%);
+      }
+    
+      .emoji-dot {
+        position: absolute;
+        top: -7px;
+        width: 18px;
+        height: 18px;
+        transform: translateX(-50%);
+      }
     }
   
     .progressText {
