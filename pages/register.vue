@@ -12,7 +12,7 @@
         <div class="registerBox">
           <div class="phoneGroup">
             <input
-              type="text"
+              type="tel"
               v-model="mobile"
               placeholder="請輸入您的手機號碼"
             />
@@ -201,11 +201,12 @@ export default {
       if(password.value.length<8) {alert("密碼小於8位數") ; return}
       if(password.value !== passwordAgain.value){ alert("密碼不一致"); return}
       loading.value = true;
-      // await new Promise((resolve) => setTimeout(resolve, 750));
-      // loading.value = false;
-      // currentStep.value = "verify";
-      // verificationTitle.value = "輸入驗證碼";
-      // startCountdown();
+      await new Promise((resolve) => setTimeout(resolve, 750));
+      loading.value = false;
+
+      verificationTitle.value = "輸入驗證碼";
+      startCountdown();
+      
       try {
         const response = await axios.post(
           "https://23700999.com:8081/HMA/API_AA3.jsp",
@@ -217,11 +218,10 @@ export default {
 
         if (response.status === 200) {
           const data = response.data;
-          if (data.Token.trim()!==""||data.MID.trim()!=="") {
+          if (data.Token.trim()!==""&&data.MID.trim()!=="") {
             currentStep.value = "verify";
             verificationTitle.value = "輸入驗證碼";
-            startCountdown();
-            
+       
             localStorage.setItem('userData', JSON.stringify({
               Token: data.Token,
               MAID: data.MAID,
@@ -402,7 +402,7 @@ export default {
     const isFormValid = computed(() => {
     return (
       mobile.value.trim() !== "" && 
-      password.value.length >= 6 && 
+      password.value.length >= 8 && 
       password.value === passwordAgain.value && 
       isPrivacy.value
     );
@@ -690,6 +690,7 @@ export default {
 
 
     input[type="text"],
+    input[type="tel"],
     input[type="password"],
     input[type="number"] {
       outline: none;
