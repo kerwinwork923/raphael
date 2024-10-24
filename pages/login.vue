@@ -41,7 +41,7 @@
         </div> -->
 
         <div class="forgetPasswordGroup">
-          <router-link to="#">忘記密碼?</router-link>
+          <router-link to="/forgetPassword">忘記密碼?</router-link>
         </div>
         <button class="loginBtn" @click="login" :disabled="!mobile || !password">登入</button>
 

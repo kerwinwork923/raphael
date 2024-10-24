@@ -72,12 +72,18 @@
     </div>
 
     <!-- 送出按鈕 -->
-    <button class="infoSendBtn" @click="submitForm">送出</button>
+    <button 
+      class="infoSendBtn" 
+      @click="submitForm" 
+      :disabled="isSubmitDisabled"
+    >
+      送出
+    </button>
   </div>
 </template>
 
 <script>
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import { zhTW } from "date-fns/locale";
 
 export default {
@@ -114,6 +120,17 @@ export default {
     watch(localDate, (newValue) => emit("update:date", newValue));
     watch(localDSPR, (newValue) => emit("update:DSPR", newValue));
 
+    // 計算屬性判斷送出按鈕是否禁用
+    const isSubmitDisabled = computed(() => {
+      return (
+        !localName.value ||
+        !localHeight.value ||
+        !localWeight.value ||
+        !localSex.value ||
+        !localDate.value
+      );
+    });
+
     // 送出表單
     const submitForm = () => {
       emit("submit");
@@ -129,6 +146,7 @@ export default {
       formatDate,
       zhTWLocale,
       submitForm,
+      isSubmitDisabled, // 返回計算屬性
     };
   },
 };
@@ -156,6 +174,7 @@ export default {
   .custom-select.selected {
     color: black; /* 選擇後變為黑色 */
   }
+  
   .nameGroup,
   .heightGroup,
   .weightGroup,
@@ -170,12 +189,6 @@ export default {
       transform: translateY(-50%);
       z-index: 2;
     }
-    .icon2 {
-      position: absolute;
-      top: 50%;
-      right: 2px;
-      transform: translateY(-50%);
-    }
   }
 
   .dateGroup {
@@ -187,7 +200,7 @@ export default {
     display: flex;
     position: relative;
     width: 100%;
-    .icon1{
+    .icon1 {
       position: absolute;
       top: 50%;
       left: 2px;
@@ -243,7 +256,7 @@ export default {
   }
 
   .infoSendBtn {
-    background-color: #28a745;
+    background-color: $raphael-green-400;
     border: none;
     display: flex;
     margin-top: 30px;
@@ -258,10 +271,15 @@ export default {
     font-size: 1rem;
     letter-spacing: 0.5px;
     font-weight: 400;
+    
+    &:disabled {
+      background-color: #ccc; 
+      cursor: not-allowed; 
+    }
   }
 }
 
-// 覆蓋 VueDatePicker 樣式
+
 .vue-datepicker {
   width: 100%;
   border: none;
@@ -271,7 +289,7 @@ export default {
   color: #666;
   font-family: Inter, sans-serif;
 
-  // 類似 input 的樣式
+
   &::placeholder {
     color: #999;
     font-weight: 400;
