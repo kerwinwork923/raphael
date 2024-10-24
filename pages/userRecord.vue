@@ -93,14 +93,13 @@ export default {
 .userRecord {
   min-height: 100vh;
   width: 100%;
-  background-color: $raphael-gray-200;
+  background-color: $raphael-gray-100;
 
   padding-bottom: 2rem;
 
   .titleBar {
     position: absolute;
     top: 1rem;
-    max-width: 768px;
     display: flex;
     width: 100%;
 
@@ -149,7 +148,7 @@ export default {
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
-  background-color: $raphael-gray-200;
+  background-color: $raphael-gray-100;
   text-align: center;
   z-index: 100;
 

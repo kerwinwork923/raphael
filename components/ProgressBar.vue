@@ -54,8 +54,10 @@ export default {
 
 <style lang="scss">
 .progress2-container {
-  position: relative;
-  margin: 0.5rem 0;
+  position: relative;    
+  display: grid;
+  gap: 4px;
+  margin: 0.75rem 0;
   .progress{
     position: relative;
     display: grid;
@@ -65,6 +67,7 @@ export default {
   .progressText {
     display: flex;
     justify-content: space-between;
+    font-size: 0.75rem;
 
     .progressSubText {
       display: flex;

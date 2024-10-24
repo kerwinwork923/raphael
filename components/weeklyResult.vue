@@ -1158,18 +1158,19 @@ export default {
 <style lang="scss">
 .resultWrap {
   .resultTopGroup {
-    display: flex;
-    align-items: start;
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: calc(100% - 120px) max-content;
     margin-top: 0.5rem;
+    overflow: hidden;
+
     .resultInfo {
       background-color: #fff;
       padding: 12px;
       border-radius: 12px;
-      width: 80%;
       box-shadow: 0px -2px 4px 0px rgba(0, 0, 0, 0.25) inset;
 
       .subText {
-        font-size: 0.875rem;
         margin-bottom: 0.5rem;
       }
 
@@ -1182,7 +1183,6 @@ export default {
       }
 
       .severityText {
-        font-size: 0.875rem;
         letter-spacing: 0.048px;
         span {
           color: #ec4f4f;
@@ -1287,15 +1287,12 @@ export default {
 
       h5 {
         color: #1e1e1e;
-        font-size: 0.875rem;
         font-weight: 400;
         letter-spacing: 0.1px;
         margin-top: 0.5rem;
       }
       h4 {
         color: #666;
-        font-size: 0.875rem;
-        margin-top: 0.35rem;
         span {
           color: #ec4f4f;
         }
@@ -1421,12 +1418,12 @@ export default {
         .seriousDegreeGroup {
           display: flex;
           flex-direction: column;
-          align-items: center;
+          align-items: baseline;
           justify-content: center;
-          gap: 4px;
+          gap: 8px;
           h5 {
             color: #666;
-            font-size: 14px;
+            font-size: 16px;
             letter-spacing: 0.1px;
             font-weight: 400;
           }
@@ -1448,7 +1445,7 @@ export default {
 }
 
 .doctorImg {
-  width: 40%;
+  width: 100%
 }
 
 .backToUserBtnGroupWeekly {

@@ -45,9 +45,12 @@
   
   <style lang="scss">
   .progress-container {
-    position: relative;
+    position: relative;  
+    display: grid;
+    gap: 8px;
     width: 100%;
-    margin: 10px 0;
+    margin: 12px 0;
+
     .progress{
       position: relative;
       display: grid;
@@ -72,7 +75,7 @@
     .progressText {
       display: flex;
       justify-content: space-between;
-      margin-top: 8px;
+      font-size: 0.75rem;
   
       .progressSubText {
         display: flex;

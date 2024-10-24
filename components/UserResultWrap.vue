@@ -350,6 +350,8 @@
 </template>
 <style lang="scss">
 .userRecoreWrap {
+  max-width: 768px;
+  margin: 0 auto;
   padding: 0 5%;
 }
 .sleepIndex {
@@ -357,9 +359,11 @@
   margin: 0 auto;
   animation: fade 0.5s forwards ease;
   .resultTopGroup {
-    display: flex;
-    align-items: start;
-    margin-top: 0.75rem;
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: calc(100% - 120px) max-content;
+    margin-top: 0.5rem;
+    overflow: hidden;
 
     .imgGroup {
       display: flex;
@@ -405,7 +409,6 @@
     background-color: #fff;
     padding: 12px;
     border-radius: 12px;
-    width: 80%;
     box-shadow: 0px -2px 4px 0px rgba(0, 0, 0, 0.25) inset;
     .subText {
         font-size: 0.875rem;
