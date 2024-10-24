@@ -8,7 +8,7 @@ export const scoreColorFn = (score, sex) => {
   if (sex == 2) {
  
     switch (true) {
-      case score >= 1 && score <= 35:
+      case score >= 0 && score <= 35:
         return "#74BC1F"; // 正常
       case score >= 36 && score <= 60:
         return "#1FBCB3"; // 輕度失調
@@ -21,7 +21,7 @@ export const scoreColorFn = (score, sex) => {
     }
   } else {
     switch (true) {
-      case score >= 1 && score <= 25:
+      case score >= 0 && score <= 25:
         return "#74BC1F"; // 正常
       case score >= 26 && score <= 45:
         return "#1FBCB3"; // 輕度失調
@@ -37,7 +37,7 @@ export const scoreColorFn = (score, sex) => {
 
 export const scoreSleepColorFn = (score) => {
   switch (true) {
-    case score >= 1 && score <= 6:
+    case score >= 0 && score <= 6:
       return "#EC4F4F"; // 重度失調
 
     case score >= 7 && score <= 13:
@@ -96,7 +96,7 @@ export const computedEmoji2 = (score) => {
 };
 
 export const computedText = (score) => {
-  if (score >= 1 && score <= 25) {
+  if (score >= 0 && score <= 25) {
     return "正常";
   } else if (score >= 26 && score <= 45) {
     return "輕度失調";
