@@ -745,7 +745,7 @@ export default {
       a{
         text-decoration: none;
         color: #666;
-        font-size: 1.25rem;
+        font-size: 1.125rem;
         letter-spacing: 0.09px;
         font-weight: 400;
    
@@ -788,7 +788,7 @@ export default {
         gap: 4px;
         margin: 0 auto;
         width: 100%;
-        margin-top: 90px;
+        margin-top: 60px;
         text-align: center;
         text-decoration: none;
         color: #666;
