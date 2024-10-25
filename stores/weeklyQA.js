@@ -462,7 +462,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
           // 判别项目是否超过10个
           const itemsAboveZero = this.weeklyQA.filter((q) => q.selectScore > 0);
           if (itemsAboveZero.length < 3) {
-            alert("選項項目不足，請至少選擇 3 的項目");
+            alert("選項項目不足，請至少選擇3題");
             return false;
           }
           // await this.API_ANSOnlineQSaveAns();
