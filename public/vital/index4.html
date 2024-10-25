@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>WebSocket Client</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+  <style>
+    progress {
+      width: 100%;
+      height: 20px;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    input, button {
+      padding: 10px;
+      margin-top: 10px;
+      width: 100%;
+      font-size: 16px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    h1, h2 {
+      color: #333;
+    }
+
+    /* Loading spinner CSS */
+    .spinner {
+      margin-left: 10px;
+      border: 4px solid #f3f3f3; /* Light grey */
+      border-top: 4px solid #3498db; /* Blue */
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* 隱藏 spinner 的樣式 */
+    .hidden {
+      display: none;
+    }
+  </style>
+  <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .chat-container {
+            width: 60%;
+            max-width: 900px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            overflow-y: auto;
+            height: 90vh;
+        }
+        .chat-message {
+            margin-bottom: 15px;
+            display: flex;
+        }
+        .my-message, .knowledge-message, .answer-message {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .my-message {
+            background-color: #0084ff;
+            color: white;
+            margin-left: auto;
+        }
+        .knowledge-message {
+            background-color: #f1f0f0;
+            color: black;
+            margin-right: auto;
+        }
+        .answer-message {
+            background-color: #e5e7eb;
+            color: black;
+            margin-right: auto;
+        }
+        /* Section Title Styles */
+        .section-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin: 20px 0 10px;
+            text-align: center;
+            color: #333;
+        }
+    </style>
+  <script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+      var socket = io.connect('http://114.34.55.242:5000'); // 與伺服器連接
+  
+      // 註冊接收 ai_response 事件，當模型運算完成時，將結果顯示
+      socket.on('ai_response', function(data) {
+        console.log("Received AI Response:", data.response);
+        document.getElementById("aiResponse").innerText = "AI 回應: " + data.response;
+        document.getElementById("statusMessage").innerText = "";  // 清除狀態訊息
+        document.getElementById("progressBar").value = 100;  // 完成時設置進度條到100%
+        document.getElementById("loadingSpinner").classList.add('hidden');  // 隱藏轉圈動畫
+      });
+  
+      // 註冊接收 progress_update 事件，顯示當前的模型運算進度
+      socket.on('progress_update', function(data) {
+        console.log("Progress Update:", data.progress);
+        document.getElementById("statusMessage").innerText = data.message;
+        document.getElementById("progressBar").value = data.progress; // 更新進度條
+
+        // 當進度為 50% 時顯示轉圈動畫，表示使用資料進行回答
+        if (data.progress >= 50 && data.progress < 100) {
+          document.getElementById("loadingSpinner").classList.remove('hidden');  // 顯示轉圈動畫
+        } else {
+          document.getElementById("loadingSpinner").classList.add('hidden');  // 隱藏轉圈動畫
+        }
+      });
+  
+      // 發送查詢後的處理
+      function sendQuery() {
+        
+        const inputData = {values: [21.78, 59, 119, 70]};
+
+// 使用 fetch 發送 POST 請求到 API
+        fetch('https://114.34.55.242/predict', {
+               method: 'POST',
+               headers: {
+              'Content-Type': 'application/json'
+             },
+             body: JSON.stringify(inputData) // 將數據轉換為 JSON 格式
+             })
+             .then(response => response.json())
+             .then(data => {
+              console.log('預測的生理年齡區段為:', data.predicted_age_group);
+              document.getElementById("initialResponse").innerText = "預測的生理年齡區段為:" + data.predicted_age_group;
+               })
+              .catch(error => {
+              console.error('錯誤:', error);
+            });
+
+
+        //var question = document.getElementById("userQuestion").value;
+        
+        // 發送請求後，立即顯示運算中的訊息
+       // document.getElementById("statusMessage").innerText = "AI 模型正在運算，請稍後...";
+       /// document.getElementById("progressBar").value = 0;  // 查詢開始，進度條歸零
+       // document.getElementById("loadingSpinner").classList.add('hidden');  // 隱藏轉圈動畫
+  
+      /* fetch('http://114.34.55.242:5000/query', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ "question": question, "client_id": "client123" })
+        }).then(response => response.json())
+        .then(data => {
+          console.log("Initial Response:", data);
+          document.getElementById("initialResponse").innerText = "初步結果: " + data.clean_data;
+        }).catch(error => console.error('Error:', error));
+          */
+
+
+      }
+  
+      // 綁定查詢按鈕
+      document.getElementById("queryButton").addEventListener("click", sendQuery);
+    });
+  </script>
+  
+</head>
+<body>
+  <button id="queryButton">送出查詢</button>
+  <br>
+  <p id="initialResponse"></p>
+</body>
+</html>
