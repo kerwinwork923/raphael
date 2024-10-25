@@ -432,11 +432,11 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         throw err;
       }
     },
-    // 檢查題目是否有10題
+    // 檢查題目是否有3題
     checkMinimumItems() {
       const itemsAboveZero = this.weeklyQA.filter((q) => q.selectScore > 0);
-      if (itemsAboveZero.length < 10) {
-        alert("選項項目不足，請至少選擇 10 項超過 0 分的問題");
+      if (itemsAboveZero.length < 3) {
+        alert("選項項目不足，請至少選擇 3 項超過 0 分的問題");
         return false;
       }
       return true;
