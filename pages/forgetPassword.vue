@@ -282,10 +282,9 @@ export default {
         const response = await axios.post(
           "https://23700999.com:8081/HMA/API_ChangePassword.jsp",
           {
-       
             MID: MID,
             Mobile: Mobile,
-            Password:password.value
+            Password: password.value,
           }
         );
 
@@ -387,7 +386,7 @@ export default {
       passwordAgain,
       passwordError,
       passwordAgainError,
-      API_reset
+      API_reset,
     };
   },
 };
