@@ -2,10 +2,8 @@
   <div class="raphaelAlert">
     <div class="content">
       <slot>{{ defaultContent }}</slot>
-      <!-- 使用插槽顯示內容 -->
     </div>
     <div class="btnGroup">
-      <!-- 關閉按鈕始終顯示 -->
       <button class="closeBtn" @click="onClose">關閉</button>
       <button v-if="showRedirectButton" class="redirectBtn" @click="onRedirect">
         跳轉
@@ -23,6 +21,13 @@
   width: 270px;
   margin: 0 auto;
   margin-top: 1rem;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -60%);
+  z-index: 99;
+  transition: 0.35s ease;
+
 }
 .raphaelAlert .content {
   text-align: center;
@@ -34,6 +39,9 @@
   min-height: 80px;
   border-bottom: #aaa 1px solid;
   line-height: 1.2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .raphaelAlert .btnGroup {
   display: flex;
