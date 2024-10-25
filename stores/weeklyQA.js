@@ -433,14 +433,14 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
       }
     },
     // 檢查題目是否有3題
-    checkMinimumItems() {
-      const itemsAboveZero = this.weeklyQA.filter((q) => q.selectScore > 0);
-      if (itemsAboveZero.length < 3) {
-        alert("選項項目不足，請至少選擇 3 項超過 0 分的問題");
-        return false;
-      }
-      return true;
-    },
+    // checkMinimumItems() {
+    //   const itemsAboveZero = this.weeklyQA.filter((q) => q.selectScore > 0);
+    //   if (itemsAboveZero.length < 3) {
+    //     alert("選項項目不足，請至少選擇 3 項超過 0 分的問題");
+    //     return false;
+    //   }
+    //   return true;
+    // },
 
     // 下一步按鈕處理
     async handleNextStep() {
@@ -461,8 +461,8 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         } else {
           // 判别项目是否超过10个
           const itemsAboveZero = this.weeklyQA.filter((q) => q.selectScore > 0);
-          if (itemsAboveZero.length < 10) {
-            alert("選項項目不足，請至少選擇 10 的項目");
+          if (itemsAboveZero.length < 3) {
+            alert("選項項目不足，請至少選擇 3 的項目");
             return false;
           }
           // await this.API_ANSOnlineQSaveAns();
