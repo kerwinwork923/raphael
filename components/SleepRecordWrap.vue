@@ -531,6 +531,13 @@ export default {
     padding: 0.75rem;
     border-radius: 12px;
 
+    &>h4{
+      font-size: 20px;
+      color: #1e1e1e;
+      letter-spacing: 0.15px;
+      line-height: 32.36px;
+    }
+
     .selectGroup1 {
       display: flex;
       position: relative;

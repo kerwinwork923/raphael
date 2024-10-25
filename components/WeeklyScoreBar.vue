@@ -119,8 +119,8 @@ export default defineComponent({
 .scrollBarTitle {
   font-size: 20px;
   color: #1e1e1e;
-  font-weight: bold;
   letter-spacing: 0.15px;
+  line-height: 32.36px;
 }
 
 .scoreBarGroup {
