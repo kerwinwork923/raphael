@@ -37,7 +37,7 @@
           :class="{ selected: QAData.selectScore >= value - 1 }"
           @click="setScore(QAData, value - 1)"
         >
-          {{ value }}
+          {{ value-1 }}
         </div>
       </div>
     </div>
