@@ -3,7 +3,7 @@
     <div class="stepGroup" v-for="(text, index) in stepTexts" :key="index">
       <span
         :class="{ subListActive: isActive(index) }"
-        :style="{ color: isActive(index) ? '#EC4F4F' : 'black' }"
+        :style="{ color: isActive(index) ? '#EC4F4F' : '#CCCCCC' }"
       >
         {{ text }}
       </span>

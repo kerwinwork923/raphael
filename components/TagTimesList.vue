@@ -89,6 +89,7 @@ export default {
   }
 
   select {
+    background-color: #fff;
     appearance: none;
     cursor: pointer;
     width: 100%;
