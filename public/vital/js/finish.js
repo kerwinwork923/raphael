@@ -23,7 +23,7 @@ const VIEW_FINISH_RELAXATION = "f_v_relaxation";
 const VIEW_FINISH_SLEEP = "f_v_sleep";
 const VIEW_FINISH_BTN_HOME = "f_eid_btn_home";
 const VIEW_BACK_BTN_HOME = "f_back";
-const VIEW_FINISH_SP_PREFIX = "images/icon_sp_";
+const VIEW_FINISH_SP_PREFIX = "images/raphael/progress";
 // ==============================================================
 
 // Finish Page
@@ -32,7 +32,7 @@ let _finish_spower_chart = null;
 let _finish_vital_result_printer = null;
 const SetSPowerValue = (id, value) => {
   if (value >= 0) {
-    document.getElementById(id).src =  `${VIEW_FINISH_SP_PREFIX}${value}.svg`;
+    document.getElementById(id).src =  `${VIEW_FINISH_SP_PREFIX}${value}.png`;
     show(id)
   }
   else {
