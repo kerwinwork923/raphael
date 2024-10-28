@@ -91,6 +91,8 @@ export default defineComponent({
     height: 100%;
     justify-content: space-between;
     align-items: center;
+    font-size: 0.875rem;
+
     .number {
       background-color: $raphael-gray-400;
       border-radius: 50%;

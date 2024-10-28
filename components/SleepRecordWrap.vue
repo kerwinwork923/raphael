@@ -550,13 +550,13 @@ export default {
       }
       .dropListGroup {
         width: 50%;
-        padding-top: 0.75rem;
         position: relative;
         border-bottom:1px solid #eee;
 
         .dropListText {
           text-align: right;
           color: #b3b3b3;
+          font-size: 1.125rem;
           padding: 12px 0;
           cursor: pointer;
 
@@ -579,17 +579,20 @@ export default {
           display: flex;
           flex-direction: column;
           width: 70%;
+          font-size: 1.125rem;
           left: 12.5%;
           z-index: 2;
-          background-color: #fff;
-          border: 1px solid #666;
+          background-color: rgba(255, 255, 255, 0.85);
+          backdrop-filter: blur(6px);
           border-radius: 8px;
+          color: $raphael-gray-500;
           padding: 0.25rem 0;
           max-height: 200px;
+          box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
           overflow-y: scroll;
 
           .list {
-            padding: 0.5rem 0.75rem;
+            padding: 0.75rem;
             cursor: pointer;
           }
         }
