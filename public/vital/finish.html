@@ -42,9 +42,9 @@
         }
       }
     </style>
-    <!-- <script src="js/thirdparty/charts/dist/chart.min.js"></script> -->
+    <script src="js/thirdparty/charts/dist/chart.min.js"></script>
     <script src="js/vital_result_printer.js"></script>
-    <!-- <script src="js/spower_chart.js"></script> -->
+    <script src="js/spower_chart.js"></script>
   </head>
 
   <body>
@@ -100,7 +100,7 @@
             <img src="images/raphael/HRVFace.svg" class="HRVFace" alt="" />
           </div>
           <div class="HRV">
-            <h3 >心律變異性</h3>
+            <h3>心律變異性</h3>
             <div id="f_v_hrv" class="value"></div>
             <div class="info">ms</div>
           </div>
@@ -109,7 +109,7 @@
         <div class="row">
           <div class="Rhythm">
             <div class="titleGroup">
-              <h3 >心率</h3>
+              <h3>心率</h3>
               <img src="images/raphael/heartBeat.svg" alt="" />
             </div>
             <div id="f_v_hr" class="value"></div>
@@ -131,7 +131,7 @@
         <div class="row">
           <div class="BO">
             <div class="titleGroup">
-              <h3 >血氧</h3>
+              <h3>血氧</h3>
               <img src="images/raphael/spo2.svg" alt="" />
             </div>
             <div id="f_v_spo2" class="value"></div>
@@ -140,7 +140,7 @@
           </div>
           <div class="breathe">
             <div class="titleGroup">
-              <h3 >呼吸</h3>
+              <h3>呼吸</h3>
               <img src="images/raphael/spo2.svg" alt="" />
             </div>
             <div id="f_v_rr" class="value"></div>
@@ -149,7 +149,7 @@
           </div>
           <div class="pressure">
             <div class="titleGroup">
-              <h3 >壓力</h3>
+              <h3>壓力</h3>
               <img src="images/raphael/pressure.svg" alt="" />
             </div>
             <div id="f_v_si" class="value"></div>
@@ -208,9 +208,7 @@
       </div>
 
       <div class="subBtnGroup">
-        <button class="backToUserBtn" class="">
-          會員中心
-        </button>
+        <button class="backToUserBtn" class="">會員中心</button>
         <button class="backToDetect">重新檢測</button>
       </div>
 
@@ -224,22 +222,32 @@
       </div>
 
       <div class="col-5 px-0 m-auto hide">
-        <p id="f_v_ans_index_sns" class="text-center text-dark fs-6 m-0">
-          --
-        </p>
+        <p id="f_v_ans_index_sns" class="text-center text-dark fs-6 m-0">--</p>
       </div>
 
       <p id="f_v_ans_index_pns" class="text-center text-dark fs-6 m-0 hide">
         --
       </p>
 
-      <canvas id="f_spower_canvas" class="hide" width="100%" height="100%"></canvas>
+      <canvas
+        id="f_spower_canvas"
+        class="hide"
+        width="100%"
+        height="100%"
+      ></canvas>
 
+      <button
+        type="button"
+        class="btn btn-secondary btn-lg hide"
+        id="f_eid_btn_home"
+      >
+        回首頁
+      </button>
 
       <button
       type="button"
       class="btn btn-secondary btn-lg hide"
-      id="f_eid_btn_home"
+      id="f_back"
     >
       回首頁
     </button>
@@ -731,7 +739,7 @@
   * {
     box-sizing: border-box;
   }
-  .hide{
+  .hide {
     position: absolute;
     bottom: 0;
     height: 0;

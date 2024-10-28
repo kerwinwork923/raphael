@@ -21,8 +21,8 @@ const VIEW_FINISH_HEALTH = "f_v_health";
 const VIEW_FINISH_METABOLISM = "f_v_metabolism";
 const VIEW_FINISH_RELAXATION = "f_v_relaxation";
 const VIEW_FINISH_SLEEP = "f_v_sleep";
-const VIEW_FINISH_BTN_HOME = "f_eid_btn_home";
-const VIEW_BACK_BTN_HOME = "f_back";
+// const VIEW_FINISH_BTN_HOME = "f_eid_btn_home";
+// const VIEW_BACK_BTN_HOME = "f_back";
 const VIEW_FINISH_SP_PREFIX = "images/raphael/progress";
 // ==============================================================
 
@@ -63,8 +63,8 @@ const InitFinish = () => {
   _finish_spower_chart = new SPowerChart(
     document.getElementById(VIEW_FINISH_CANVAS_SP).getContext("2d")
   );
-  document.getElementById(VIEW_FINISH_BTN_HOME).onclick = ()=> GoToBasicInfo()
-  document.getElementById(VIEW_BACK_BTN_HOME).onclick = ()=> GoToBasicInfo()
+  // document.getElementById(VIEW_FINISH_BTN_HOME).onclick = ()=> GoToBasicInfo()
+  // document.getElementById(VIEW_BACK_BTN_HOME).onclick = ()=> GoToBasicInfo()
 };
 
 const GoToFinish = () => {
@@ -176,9 +176,9 @@ const GoToFinish = () => {
   }, 200);
 };
 
-const GoToBasicInfo = () => {
-  window.location.href = "basic_info.html";
-}
+// const GoToBasicInfo = () => {
+//   window.location.href = "basic_info.html";
+// }
 // ==============================================================
 
 document.addEventListener("DOMContentLoaded", () => {
