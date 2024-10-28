@@ -1,4 +1,13 @@
 <template>
+  <Alert
+    :showRedirectButton="false"
+    :redirectTarget="handleRedirect"
+    @close="handleClose"
+    v-if="alertVisable === true"
+  >
+    <!-- v-if="alertVisable === true" -->
+    <span>{{ alertContent }}</span>
+  </Alert>
   <div class="forgetPassword">
     <RaphaelLoading v-if="loading" />
     <div class="forgetPasswordGroup">
@@ -114,12 +123,19 @@ import RaphaelLoading from "../components/RaphaelLoading";
 import eyesCloseGreen from "../assets/imgs/eyesCloseGreen.svg";
 import eyesOpenGreen from "../assets/imgs/eyesOpenGreen.svg";
 import axios from "axios";
+
+import Alert from "../components/Alert.vue";
 export default {
+  components: {
+    Alert,
+  },
   setup() {
     const loading = ref(false);
     const router = useRouter();
     const verificationTitle = ref("忘記密碼");
     const passwordAgainVisible = ref(false);
+    const alertVisable = ref(false);
+    const alertContent = ref("");
 
     const mobile = ref("");
     const passwordVisible = ref(false);
@@ -142,6 +158,10 @@ export default {
         API_doExamAuthPassword();
       }
     });
+
+    const handleClose = () => {
+      alertVisable.value = false;
+    };
 
     const togglePasswordVisibility = () => {
       passwordVisible.value = !passwordVisible.value;
@@ -219,7 +239,8 @@ export default {
           }
         }
       } catch (err) {
-        alert("發送失敗");
+        alertVisable.value = true;
+        alertContent.value = err;
       } finally {
         loading.value = false;
       }
@@ -252,14 +273,16 @@ export default {
           nextTick(() => {
             verificationInput.value[0]?.focus();
           });
-          alert("驗證碼輸入錯誤");
+          alertVisable.value = true;
+          alertContent.value = "驗證碼輸入錯誤";
         }
       } else {
         verificationCodes.value = ["", "", "", "", ""];
         nextTick(() => {
           verificationInput.value[0]?.focus();
         });
-        alert("驗證碼時間已過");
+        alertVisable.value = true;
+        alertContent.value = "驗證碼時間已過";
       }
 
       loading.value = false;
@@ -270,11 +293,13 @@ export default {
       const { MID, Mobile } = localData ? JSON.parse(localData) : {};
 
       if (password.value.length < 8) {
-        alert("密碼小於8位數");
+        alertVisable.value = true;
+        alertContent.value = "密碼小於8位數";
         return;
       }
       if (password.value !== passwordAgain.value) {
-        alert("密碼不一致");
+        alertVisable.value = true;
+        alertContent.value = "密碼不一致";
         return;
       }
       loading.value = true;
@@ -282,10 +307,9 @@ export default {
         const response = await axios.post(
           "https://23700999.com:8081/HMA/API_ChangePassword.jsp",
           {
-       
             MID: MID,
             Mobile: Mobile,
-            Password:password.value
+            Password: password.value,
           }
         );
 
@@ -294,7 +318,8 @@ export default {
 
           loading.value = false;
           if (response.data.Result == "OK") {
-            alert("密碼重新設定完成，請用新密碼登入");
+            alertVisable.value = true;
+            alertContent.value = "密碼重新設定完成，請用新密碼登入";
             router.push("/login");
           }
         }
@@ -365,7 +390,8 @@ export default {
       verificationTitle,
       API_ForgetPassword,
       API_doExamAuthPassword,
-
+      handleClose,
+      alertVisable,
       verificationCodes,
       verificationInput,
       countdownTime,
@@ -387,7 +413,8 @@ export default {
       passwordAgain,
       passwordError,
       passwordAgainError,
-      API_reset
+      API_reset,
+      alertContent,
     };
   },
 };

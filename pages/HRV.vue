@@ -55,12 +55,12 @@
         <div class="row">
           <div class="years">
             <h3>心理年齡</h3>
-            <div class="value">25</div>
+            <div class="value" id="v_ba4">25</div>
             <div class="info">years old</div>
             <img src="../assets/imgs/HRVFace.svg" class="HRVFace" alt="" />
           </div>
           <div class="HRV">
-            <h3>心律變異性</h3>
+            <h3 id="v_hrv">心律變異性</h3>
             <div class="value">37</div>
             <div class="info">ms</div>
           </div>
@@ -69,7 +69,7 @@
         <div class="row">
           <div class="Rhythm">
             <div class="titleGroup">
-              <h3>心率</h3>
+              <h3 id="v_hr">心率</h3>
               <img src="../assets/imgs/heartBeat.svg" alt="" />
             </div>
             <div class="value">60</div>
@@ -81,7 +81,7 @@
               <h3>血壓</h3>
               <img src="../assets/imgs/bloodPressure.svg" alt="" />
             </div>
-            <div class="value">130/85</div>
+            <div class="value"><span id="v_sbp">138</span>/<span id="v_dbp">42</span></div>
             <div class="info">mmHg</div>
             <img class="bgImg" src="../assets/imgs/purpleChart.svg" alt="" />
           </div>
@@ -89,7 +89,7 @@
         <div class="row">
           <div class="BO">
             <div class="titleGroup">
-              <h3>血氧</h3>
+              <h3 id="v_spo2">血氧</h3>
               <img src="../assets/imgs/spo2.svg" alt="" />
             </div>
             <div class="value">95</div>
@@ -98,7 +98,7 @@
           </div>
           <div class="breathe">
             <div class="titleGroup">
-              <h3>呼吸</h3>
+              <h3 id="v_rr">呼吸</h3>
               <img src="../assets/imgs/spo2.svg" alt="" />
             </div>
             <div class="value">100</div>
@@ -107,7 +107,7 @@
           </div>
           <div class="pressure">
             <div class="titleGroup">
-              <h3>壓力</h3>
+              <h3 id="v_si">壓力</h3>
               <img src="../assets/imgs/pressure.svg" alt="" />
             </div>
             <div class="value">低</div>
@@ -373,11 +373,13 @@
           bottom: 0%;
         }
       }
-      .BO,.breathe,.pressure{
+      .BO,
+      .breathe,
+      .pressure {
         width: 33.333%;
         background-color: #fff;
         border-radius: 8px;
- 
+
         position: relative;
         overflow: hidden;
         padding: 12px;

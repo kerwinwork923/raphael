@@ -95,18 +95,21 @@ export const computedEmoji2 = (score) => {
   }
 };
 
-export const computedText = (score) => {
-  if (score >= 0 && score <= 25) {
-    return "正常";
-  } else if (score >= 26 && score <= 45) {
-    return "輕度失調";
-  } else if (score >= 46 && score <= 71) {
-    return "中度失調";
-  } else if (score >= 72) {
-    return "嚴重失調";
-  } else {
-    return "";
-  }
+export const computedText = (score,sex) => {
+
+    if (score >= 0 && score <= 25) {
+      return "正常";
+    } else if (score >= 26 && score <= 45) {
+      return "輕度失調";
+    } else if (score >= 46 && score <= 71) {
+      return "中度失調";
+    } else if (score >= 72) {
+      return "嚴重失調";
+    } else {
+      return "";
+    }
+  
+  
 };
 
 export const formatTimestamp = (timestampStr) => {

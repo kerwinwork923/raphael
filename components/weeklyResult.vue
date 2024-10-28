@@ -40,7 +40,7 @@
                 color: scoreColorFn(store.theLatestData.TotalScore, sex),
               }"
             >
-              {{ store.theLatestData.TotalRatio }}(嚴重失調)</span
+              {{ store.theLatestData.TotalRatio }}({{store.diffenenceObj.TotalDesc}})</span
             >
           </h6>
         </div>
@@ -63,7 +63,7 @@
                   ),
                 }"
               >
-                {{ store.theLatestDataPreData.TotalScore }}
+                {{ store.theLatestDataPreData?.TotalScore }}
               </div>
               <h5>分</h5>
             </div>
@@ -81,7 +81,7 @@
                 color: scoreColorFn(store.theLatestDataPreData.TotalScore, sex),
               }"
             >
-              {{ store.theLatestDataPreData.TotalRatio }}%(嚴重失調)</span
+              {{ store.theLatestDataPreData.TotalRatio }}({{store.diffenenceObj.preTotalDesc}})</span
             >
           </h6>
         </div>
@@ -318,7 +318,6 @@
               {{ store.diffenenceObj.C3Difference }}
             </div>
           </div>
-
         </div>
         <div class="resultTagGroup">
           <div
@@ -413,7 +412,6 @@
               {{ store.diffenenceObj.C4Difference }}
             </div>
           </div>
-         
         </div>
         <div class="resultTagGroup">
           <div
@@ -696,7 +694,6 @@
               {{ store.diffenenceObj.C7Difference }}
             </div>
           </div>
-    
         </div>
         <div class="resultTagGroup">
           <div
@@ -1445,7 +1442,7 @@ export default {
 }
 
 .doctorImg {
-  width: 100%
+  width: 100%;
 }
 
 .backToUserBtnGroupWeekly {
