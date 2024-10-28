@@ -1,37 +1,12 @@
 ﻿<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NeuroPlus 自律神經HRV檢測</title>
+    <link href="css/my.css" rel="stylesheet" />
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
 
-<head>
-  <meta charset='utf-8' />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NeuroPlus 自律神經HRV檢測</title>
-  <link href="css/my.css" rel="stylesheet" />
-  <link href="css/bootstrap.min.css" rel="stylesheet">
-
-  <style>
-    .a-ellipsis {
-      text-overflow: ellipsis;
-      padding-right: 0px;
-      padding-left: 0px;
-      width: 200px;
-      max-width: 200px;
-      display: block;
-      overflow: hidden;
-      white-space: nowrap
-    }
-
-    .auto_table {
-      width: 100%;
-      margin-bottom: 0px
-    }
-
-    @media only screen and (min-width: 768px) {
-
-      /* For desktop: */
-      .auto_table {
-        width: 210px;
-        margin-bottom: 0px
-      }
-
+    <style>
       .a-ellipsis {
         text-overflow: ellipsis;
         padding-right: 0px;
@@ -40,319 +15,859 @@
         max-width: 200px;
         display: block;
         overflow: hidden;
-        white-space: nowrap
+        white-space: nowrap;
+      }
+
+      .auto_table {
+        width: 100%;
+        margin-bottom: 0px;
+      }
+
+      @media only screen and (min-width: 768px) {
+        /* For desktop: */
+        .auto_table {
+          width: 210px;
+          margin-bottom: 0px;
+        }
+
+        .a-ellipsis {
+          text-overflow: ellipsis;
+          padding-right: 0px;
+          padding-left: 0px;
+          width: 200px;
+          max-width: 200px;
+          display: block;
+          overflow: hidden;
+          white-space: nowrap;
+        }
+      }
+    </style>
+    <script src="js/thirdparty/charts/dist/chart.min.js"></script>
+    <script src="js/vital_result_printer.js"></script>
+    <script src="js/spower_chart.js"></script>
+  </head>
+
+  <body>
+    <div class="finishWrap">
+      <div class="raphaelNavbar">
+        <div class="logoGroup">
+          <a to="/user">
+            <img src="images/raphael/neuro-plus.svg" alt="" />
+          </a>
+        </div>
+        <div class="optionGroup">
+          <!-- <img class="cartIcon" src="images/raphael/cart.svg" alt="" />
+        <img class="alertIcon" src="images/raphael/alert.svg" alt="" />
+        <img class="settingIcon" src="images/raphael/setting.svg" alt="" /> -->
+        </div>
+      </div>
+      <div class="titleGroup">
+        <div class="textGroup">
+          <h3>王先生，您好</h3>
+          <div class="timeGroup">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+            >
+              <path
+                d="M7 13C10.3137 13 13 10.3137 13 7C13 3.68629 10.3137 1 7 1C3.68629 1 1 3.68629 1 7C1 10.3137 3.68629 13 7 13Z"
+                stroke="#666666"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M6.33325 4.33334V7.66668H9.66659"
+                stroke="#666666"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <h4>2024/08/23</h4>
+          </div>
+        </div>
+        <img src="images/raphael/doctor.png" alt="" />
+      </div>
+
+      <div class="scanInfo">
+        <div class="row">
+          <div class="years">
+            <h3>心理年齡</h3>
+            <div class="value" id="v_ba4">25</div>
+            <div class="info">years old</div>
+            <img src="images/raphael/HRVFace.svg" class="HRVFace" alt="" />
+          </div>
+          <div class="HRV">
+            <h3 id="v_hrv">心律變異性</h3>
+            <div class="value">37</div>
+            <div class="info">ms</div>
+          </div>
+        </div>
+  
+        <div class="row">
+          <div class="Rhythm">
+            <div class="titleGroup">
+              <h3 id="v_hr">心率</h3>
+              <img src="images/raphael/heartBeat.svg" alt="" />
+            </div>
+            <div class="value">60</div>
+            <div class="info">bpm</div>
+            <img class="bgImg" src="images/raphael/greenChart.svg" alt="" />
+          </div>
+          <div class="bloodPressure">
+            <div class="titleGroup">
+              <h3>血壓</h3>
+              <img src="images/raphael/bloodPressure.svg" alt="" />
+            </div>
+            <div class="value"><span id="v_sbp">138</span><span id="v_dbp">42</span></div>
+            <div class="info">mmHg</div>
+            <img class="bgImg" src="images/raphael/purpleChart.svg" alt="" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="BO">
+            <div class="titleGroup">
+              <h3 id="v_spo2">血氧</h3>
+              <img src="images/raphael/spo2.svg" alt="" />
+            </div>
+            <div class="value">95</div>
+            <div class="info">SpO2%</div>
+            <img class="bgImg" src="images/raphael/blueChart.svg" alt="" />
+          </div>
+          <div class="breathe">
+            <div class="titleGroup">
+              <h3 id="v_rr">呼吸</h3>
+              <img src="images/raphael/spo2.svg" alt="" />
+            </div>
+            <div class="value">100</div>
+            <div class="info">bpm</div>
+            <img class="bgImg" src="images/raphael/brownChart.svg" alt="" />
+          </div>
+          <div class="pressure">
+            <div class="titleGroup">
+              <h3 id="v_si">壓力</h3>
+              <img src="images/raphael/pressure.svg" alt="" />
+            </div>
+            <div class="value">低</div>
+            <div class="info">low</div>
+            <img class="bgImg" src="images/raphael/redChart.svg" alt="" />
+          </div>
+        </div>
+      </div>
+      <div class="row justify-content-md-center">
+        <!-- Heart Rate -->
+        <div class="col-6 col-md-4 col-xxl-2 px-3">
+          <div
+            class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white"
+            style="height: 80px"
+          >
+            <div class="col-5 m-auto p-0">
+              <p
+                class="text-start text-dark m-auto mx-1"
+                style="font-size: small"
+              >
+                心率
+              </p>
+            </div>
+            <div class="col-5 px-0 m-auto">
+              <p id="f_v_hr" class="text-center text-dark fs-6 m-0">--</p>
+            </div>
+            <div class="col-2 m-auto p-0">
+              <img
+                class="bi m-auto d-block"
+                src="images/hr.svg"
+                width="24"
+                height="24"
+              />
+              <p class="text-center text-muted m-auto" style="font-size: 9px">
+                bpm
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- HR Variability -->
+        <div class="col-6 col-md-4 col-xxl-2 px-3">
+          <div
+            class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white"
+            style="height: 80px"
+          >
+            <div class="col-5 m-auto p-0">
+              <p
+                class="text-start text-dark m-auto mx-1"
+                style="font-size: small"
+              >
+                心律變異性<br />HRV
+              </p>
+            </div>
+            <div class="col-5 px-0 m-auto">
+              <p id="f_v_hrv" class="text-center text-dark fs-6 m-0">--</p>
+            </div>
+            <div class="col-2 m-auto p-0">
+              <img
+                class="bi m-auto d-block"
+                src="images/hrv.svg"
+                width="24"
+                height="24"
+              />
+              <p class="text-center text-muted m-auto" style="font-size: 9px">
+                ms
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Blood Pressure -->
+        <div class="col-6 col-md-4 col-xxl-2 px-3">
+          <div
+            class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white"
+            style="height: 80px"
+          >
+            <div class="col-5 m-auto p-0">
+              <p
+                class="text-start text-dark m-auto mx-1"
+                style="font-size: small"
+              >
+                血壓
+              </p>
+            </div>
+            <div class="col-5 px-0 m-auto">
+              <p id="f_v_sbp" class="text-center text-dark fs-6 m-0">--</p>
+              <p
+                id="f_v_dbp"
+                class="text-center text-dark fs-6"
+                style="margin-top: -0.6rem"
+              >
+                /--
+              </p>
+            </div>
+            <div class="col-2 m-auto p-0">
+              <img
+                class="bi m-auto d-block"
+                src="images/bp.svg"
+                width="24"
+                height="24"
+              />
+              <p class="text-center text-muted m-auto" style="font-size: 9px">
+                mmHg
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Oxygen Saturation -->
+        <div class="col-6 col-md-4 col-xxl-2 px-3">
+          <div
+            class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white"
+            style="height: 80px"
+          >
+            <div class="col-5 m-auto p-0">
+              <p
+                class="text-start text-dark m-auto mx-1"
+                style="font-size: small"
+              >
+                血氧
+              </p>
+            </div>
+
+            <div class="col-5 px-0 m-auto">
+              <p id="f_v_spo2" class="text-center text-dark fs-6 m-0">99</p>
+            </div>
+
+            <div class="col-2 m-auto p-0">
+              <img
+                class="bi m-auto d-block"
+                src="images/spo2.svg"
+                width="24"
+                height="24"
+              />
+              <p class="text-center text-muted m-auto" style="font-size: 9px">
+                SpO₂%
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Respiration Rate -->
+        <div class="col-6 col-md-4 col-xxl-2 px-3">
+          <div
+            class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white"
+            style="height: 80px"
+          >
+            <div class="col-5 m-auto p-0">
+              <p
+                class="text-start text-dark m-auto mx-1"
+                style="font-size: small"
+              >
+                呼吸
+              </p>
+            </div>
+            <div class="col-5 px-0 m-auto">
+              <p id="f_v_rr" class="text-center text-dark fs-6 m-0">24</p>
+            </div>
+            <div class="col-2 m-auto p-0">
+              <img
+                class="bi m-auto d-block"
+                src="images/rr.svg"
+                width="24"
+                height="24"
+              />
+              <p class="text-center text-muted m-auto" style="font-size: 9px">
+                bpm
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stress Index -->
+        <div class="col-6 col-md-4 col-xxl-2 px-3">
+          <div
+            class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white"
+            style="height: 80px"
+          >
+            <div class="col-5 m-auto p-0">
+              <p
+                class="text-start text-dark m-auto mx-1"
+                style="font-size: small"
+              >
+                壓力指數
+              </p>
+            </div>
+            <div class="col-5 px-0 m-auto">
+              <p id="f_v_si" class="text-center text-dark fs-6 m-0">--</p>
+            </div>
+            <div class="col-2 m-auto p-0">
+              <img
+                class="bi m-auto d-block"
+                src="images/si.svg"
+                width="24"
+                height="24"
+              />
+            </div>
+          </div>
+        </div>
+        <!-- bioage -->
+        <div class="col-6 col-md-4 col-xxl-2 px-3">
+          <div
+            class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white"
+            style="height: 80px"
+          >
+            <div class="col-5 m-auto p-0">
+              <p
+                class="text-start text-dark m-auto mx-1"
+                style="font-size: small"
+              >
+                多項式回歸<br />生理年齡y/o
+              </p>
+            </div>
+            <div class="col-5 px-0 m-auto">
+              <p id="f_v_ba4" class="text-center text-dark fs-6 m-0">--</p>
+            </div>
+            <div class="col-2 m-auto p-0">
+              <img
+                class="bi m-auto d-block"
+                src="images/hrv.svg"
+                width="24"
+                height="24"
+              />
+              <p class="text-center text-muted m-auto" style="font-size: 9px">
+                ms
+              </p>
+            </div>
+          </div>
+        </div>
+        <!-- bioage -->
+        <div class="col-6 col-md-4 col-xxl-2 px-3">
+          <div
+            class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white"
+            style="height: 80px"
+          >
+            <div class="col-5 m-auto p-0">
+              <p
+                class="text-start text-dark m-auto mx-1"
+                style="font-size: small"
+              >
+                HR,SDNN<br />生理年齡y/o
+              </p>
+            </div>
+            <div class="col-5 px-0 m-auto">
+              <p id="f_v_ba2" class="text-center text-dark fs-6 m-0">--</p>
+            </div>
+            <div class="col-2 m-auto p-0">
+              <img
+                class="bi m-auto d-block"
+                src="images/hrv.svg"
+                width="24"
+                height="24"
+              />
+              <p class="text-center text-muted m-auto" style="font-size: 9px">
+                ms
+              </p>
+            </div>
+          </div>
+        </div>
+        <!-- bioage -->
+        <div class="col-6 col-md-4 col-xxl-2 px-3">
+          <div
+            class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white"
+            style="height: 80px"
+          >
+            <div class="col-5 m-auto p-0">
+              <p
+                class="text-start text-dark m-auto mx-1"
+                style="font-size: small"
+              >
+                生理年齡<br />y/o
+              </p>
+            </div>
+            <div class="col-5 px-0 m-auto">
+              <p id="f_v_bioage" class="text-center text-dark fs-6 m-0">--</p>
+            </div>
+            <div class="col-2 m-auto p-0">
+              <img
+                class="bi m-auto d-block"
+                src="images/hrv.svg"
+                width="24"
+                height="24"
+              />
+              <p class="text-center text-muted m-auto" style="font-size: 9px">
+                ms
+              </p>
+            </div>
+          </div>
+        </div>
+        <!-- ANS Index SNS -->
+        <div class="col-6 col-md-4 col-xxl-2 px-3">
+          <div
+            class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white"
+            style="height: 80px"
+          >
+            <div class="col-5 m-auto p-0">
+              <p
+                class="text-start text-dark m-auto mx-1"
+                style="font-size: small"
+              >
+                ANS Index<br />SNS
+              </p>
+            </div>
+            <div class="col-5 px-0 m-auto">
+              <p id="f_v_ans_index_sns" class="text-center text-dark fs-6 m-0">
+                --
+              </p>
+            </div>
+            <div class="col-2 m-auto p-0"></div>
+          </div>
+        </div>
+
+        <!-- ANS Index PNS -->
+        <div class="col-6 col-md-4 col-xxl-2 px-3">
+          <div
+            class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white"
+            style="height: 80px"
+          >
+            <div class="col-5 m-auto p-0">
+              <p
+                class="text-start text-dark m-auto mx-1"
+                style="font-size: small"
+              >
+                ANS Index<br />PNS
+              </p>
+            </div>
+            <div class="col-5 px-0 m-auto">
+              <p id="f_v_ans_index_pns" class="text-center text-dark fs-6 m-0">
+                --
+              </p>
+            </div>
+            <div class="col-2 m-auto p-0"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row justify-content-md-center">
+        <div
+          class="col-12 col-lg-4 col-xxl-3 mx-1 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative bg-white"
+        >
+          <canvas id="f_spower_canvas" width="100%" height="100%"></canvas>
+        </div>
+
+        <div class="col-12 col-lg-6 col-xxl-4">
+          <div class="row">
+            <div class="col-6 col-md-4 py-0">
+              <div
+                class="p-4 row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative bg-white"
+              >
+                <div class="col-md-12">
+                  <div class="row">
+                    <strong class="text-black text-center">活動力</strong>
+                  </div>
+                  <div class="row">
+                    <img
+                      id="f_v_activity"
+                      class="bi m-auto d-block"
+                      src="images/icon_sp_1.svg"
+                      width="90%"
+                      height="90%"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-6 col-md-4 py-0">
+              <div
+                class="p-4 row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative bg-white"
+              >
+                <div class="col-md-12">
+                  <div class="row">
+                    <strong class="text-black text-center">睡眠力</strong>
+                  </div>
+                  <div class="row">
+                    <img
+                      id="f_v_sleep"
+                      class="bi m-auto d-block"
+                      src="images/icon_sp_2.svg"
+                      width="90%"
+                      height="90%"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-6 col-md-4 py-0">
+              <div
+                class="p-4 row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative bg-white"
+              >
+                <div class="col-md-12">
+                  <div class="row">
+                    <strong class="text-black text-center">平衡性</strong>
+                  </div>
+                  <div class="row">
+                    <img
+                      id="f_v_equilibrium"
+                      class="bi m-auto d-block"
+                      src="images/icon_sp_3.svg"
+                      width="90%"
+                      height="90%"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-6 col-md-4 py-0">
+              <div
+                class="p-4 row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative bg-white"
+              >
+                <div class="col-md-12">
+                  <div class="row">
+                    <strong class="text-black text-center">代謝力</strong>
+                  </div>
+                  <div class="row">
+                    <img
+                      id="f_v_metabolism"
+                      class="bi m-auto d-block"
+                      src="images/icon_sp_4.svg"
+                      width="90%"
+                      height="90%"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-6 col-md-4 py-0">
+              <div
+                class="p-4 row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative bg-white"
+              >
+                <div class="col-md-12">
+                  <div class="row">
+                    <strong class="text-black text-center">健康力</strong>
+                  </div>
+                  <div class="row">
+                    <img
+                      id="f_v_health"
+                      class="bi m-auto d-block"
+                      src="images/icon_sp_5.svg"
+                      width="90%"
+                      height="90%"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-6 col-md-4 py-0">
+              <div
+                class="p-4 row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative bg-white"
+              >
+                <div class="col-md-12">
+                  <div class="row">
+                    <strong class="text-black text-center">放鬆力</strong>
+                  </div>
+                  <div class="row">
+                    <img
+                      id="f_v_relaxation"
+                      class="bi m-auto d-block"
+                      src="images/icon_sp_5.svg"
+                      width="90%"
+                      height="90%"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row justify-content-md-center">
+        <div class="col-md-2 text-center">
+          <button
+            type="button"
+            class="btn btn-secondary btn-lg"
+            id="f_eid_btn_home"
+          >
+            回首頁
+          </button>
+        </div>
+      </div>
+    </div>
+    <script src="js/tools.js"></script>
+    <script src="js/finish.js?v=1.0.2"></script>
+  </body>
+</html>
+
+<style lang="scss">
+  .finishWrap {
+    background: url("images/raphael/gradient-bg.png");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    min-height: 100vh;
+    width: 100%;
+    padding: 0 5%;
+   
+  }
+  .raphaelNavbar {
+    position: absolute;
+    top: 0;
+    left: 50%;
+
+    transform: translateX(-50%);
+    padding: 5px 1rem;
+    display: flex;
+    width: 100%;
+    z-index: 999;
+    align-items: center;
+    max-width: 768px;
+    height: 50px;
+  }
+
+  .raphaelNavbar .logoGroup {
+    width: 65%;
+  }
+
+  .raphaelNavbar .optionGroup {
+    display: flex;
+    justify-content: flex-end;
+    gap: 2px;
+
+    width: 35%;
+    margin-right: auto;
+  }
+
+  .raphaelNavbar .optionGroup img {
+    cursor: pointer;
+  }
+
+  .finishWrap{
+  padding-top: 50px;
+  width: 100%;
+ 
+  }
+
+  .finishWrap .titleGroup {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+  }
+
+  .finishWrap .textGroup{
+    width: 60%;
+ 
+  }
+
+  .finishWrap .textGroup .timeGroup{
+    display: flex;
+     gap: 4px;
+  }
+
+  .finishWrap .textGroup h3{
+    font-size: 1.5rem;
+   font-weight: 400;
+  }
+
+  .finishWrap .textGroup .timeGroup svg{
+    transform: translateY(6%);
+  }
+
+  .finishWrap .textGroup .timeGroup h4{
+    font-size: 14px;
+    font-weight: 400;
+  }
+
+  .finishWrap img{
+    width: 40%;
+  }
+
+
+  .scanInfo {
+      display: flex;
+      margin-top: 10px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      width: 100%;
+      h3 {
+        font-size: 20px;
+        font-weight: 400;
+        letter-spacing: 0.15px;
+        padding: 0;
+        margin: 0;
+      }
+      .row {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        width: 100%;
+        gap: 3%;
+        margin-bottom: 1rem;
+      }
+      .years {
+        width: 55%;
+        padding: 6px;
+        border-radius: 8px;
+        background: linear-gradient(
+          180deg,
+          #74bc1f 0%,
+          rgba(116, 188, 31, 0.35) 100%
+        );
+        padding: 12px;
+        align-items: center;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        .value {
+          font-size: 48px;
+          font-weight: bold;
+          padding: 0.25rem 0;
+        }
+        .info {
+          font-size: 1rem;
+          font-weight: 400;
+          letter-spacing: 0.5px;
+        }
+        .HRVFace {
+          position: absolute;
+          right: -22%;
+          top: 0;
+        }
+      }
+      .HRV {
+        background: linear-gradient(
+          180deg,
+          #dfecc5 0%,
+          rgba(223, 236, 197, 0.35) 100%
+        );
+        padding: 12px;
+        border-radius: 8px;
+
+        .value {
+          color: #74bc1f;
+          font-size: 48px;
+          font-weight: bold;
+          padding: 0.25rem 0;
+        }
+        .info {
+          color: #666;
+          font-size: 1rem;
+          font-weight: 400;
+          letter-spacing: 0.5px;
+        }
+        width: 45%;
+      }
+      .Rhythm,
+      .bloodPressure {
+        width: 50%;
+        background-color: #fff;
+        border-radius: 8px;
+        border-top-style: 8px;
+        position: relative;
+        overflow: hidden;
+        padding: 12px;
+        .titleGroup {
+          display: flex;
+          justify-content: space-between;
+          img{
+            width: 20px;
+          }
+        }
+        .value {
+          color: $raphael-green-400;
+          font-size: 24px;
+          font-weight: 700;
+          letter-spacing: 0.12px;
+          margin-top: 0.5rem;
+        }
+        .info {
+          color: #ccc;
+
+          letter-spacing: 0.5px;
+        }
+        .bgImg {
+          position: absolute;
+          bottom: 0%;
+          width: 100%;
+        }
+      }
+      .BO,
+      .breathe,
+      .pressure {
+        width: 33.333%;
+        background-color: #fff;
+        border-radius: 8px;
+
+        position: relative;
+        overflow: hidden;
+        padding: 12px;
+        .titleGroup {
+          display: flex;
+          justify-content: space-between;
+          img{
+            width: 20px;
+          }
+        }
+        .value {
+          color: $raphael-green-400;
+          font-size: 24px;
+          font-weight: 700;
+          letter-spacing: 0.12px;
+          margin-top: 0.5rem;
+        }
+        .info {
+          color: #ccc;
+
+          letter-spacing: 0.5px;
+        }
+        .bgImg {
+          position: absolute;
+          bottom: 0%;
+          width: 100%;
+     
+        }
       }
     }
-  </style>
-  <script src="js/thirdparty/charts/dist/chart.min.js"></script>
-  <script src="js/vital_result_printer.js"></script>
-  <script src="js/spower_chart.js"></script>
-
-</head>
-
-<body>
-  <div class="header" style="background-color:#ffffff;height:60px">
-    <h3><button id="f_back"> </button></h3>
-    <img class="bi m-auto d-block" src="images/neuro-plus.svg" width="260" height="38" alt="" />
-    <h3><button onclick=""></button></h3>
-  </div>
-
-  <div class="container-fluid">
-
-    <div class="row justify-content-md-center">
-
-      <!-- Heart Rate -->
-      <div class="col-6 col-md-4 col-xxl-2 px-3">
-        <div class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white " style="height: 80px">
-          <div class="col-5 m-auto p-0">
-            <p class="text-start text-dark m-auto mx-1 " style="font-size:small">心率</p>
-          </div>
-          <div class="col-5 px-0 m-auto">
-            <p id="f_v_hr" class="text-center text-dark fs-6 m-0">--</p>
-          </div>
-          <div class="col-2 m-auto p-0">
-            <img class="bi m-auto d-block" src="images/hr.svg" width="24" height="24" />
-            <p class="text-center text-muted m-auto" style="font-size: 9px">bpm</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- HR Variability -->
-      <div class="col-6 col-md-4 col-xxl-2 px-3">
-        <div class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white " style="height: 80px">
-          <div class="col-5 m-auto p-0">
-            <p class="text-start text-dark m-auto mx-1 " style="font-size:small">心律變異性<br>HRV</p>
-          </div>
-          <div class="col-5 px-0 m-auto">
-            <p id="f_v_hrv" class="text-center text-dark fs-6 m-0">--</p>
-          </div>
-          <div class="col-2 m-auto p-0">
-            <img class="bi m-auto d-block" src="images/hrv.svg" width="24" height="24" />
-            <p class="text-center text-muted m-auto" style="font-size: 9px">ms</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Blood Pressure -->
-      <div class="col-6 col-md-4 col-xxl-2 px-3">
-        <div class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white " style="height: 80px">
-          <div class="col-5 m-auto p-0">
-            <p class="text-start text-dark m-auto mx-1 " style="font-size:small">血壓</p>
-          </div>
-          <div class="col-5 px-0 m-auto">
-            <p id="f_v_sbp" class="text-center text-dark fs-6 m-0">--</p>
-            <p id="f_v_dbp" class="text-center text-dark fs-6" style="margin-top:-0.6rem;">/--</p>
-          </div>
-          <div class="col-2 m-auto p-0">
-            <img class="bi m-auto d-block" src="images/bp.svg" width="24" height="24" />
-            <p class="text-center text-muted m-auto" style="font-size: 9px">mmHg</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Oxygen Saturation -->
-      <div class="col-6 col-md-4 col-xxl-2 px-3">
-        <div class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white " style="height: 80px">
-          <div class="col-5 m-auto p-0">
-            <p class="text-start text-dark m-auto mx-1 " style="font-size:small">血氧</p>
-          </div>
-
-          <div class="col-5 px-0 m-auto">
-            <p id="f_v_spo2" class="text-center text-dark fs-6 m-0">99</p>
-          </div>
-
-          <div class="col-2 m-auto p-0">
-            <img class="bi m-auto d-block" src="images/spo2.svg" width="24" height="24" />
-            <p class="text-center text-muted m-auto" style="font-size: 9px">SpO₂%</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Respiration Rate -->
-      <div class="col-6 col-md-4 col-xxl-2 px-3">
-        <div class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white " style="height: 80px">
-          <div class="col-5 m-auto p-0">
-            <p class="text-start text-dark m-auto mx-1 " style="font-size:small">呼吸</p>
-          </div>
-          <div class="col-5 px-0 m-auto">
-            <p id="f_v_rr" class="text-center text-dark fs-6 m-0">24</p>
-          </div>
-          <div class="col-2 m-auto p-0">
-            <img class="bi m-auto d-block" src="images/rr.svg" width="24" height="24" />
-            <p class="text-center text-muted m-auto" style="font-size: 9px">bpm</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Stress Index -->
-      <div class="col-6 col-md-4 col-xxl-2 px-3">
-        <div class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white " style="height: 80px">
-          <div class="col-5 m-auto p-0">
-            <p class="text-start text-dark m-auto mx-1 " style="font-size:small">壓力指數</p>
-          </div>
-          <div class="col-5 px-0 m-auto">
-            <p id="f_v_si" class="text-center text-dark fs-6 m-0">--</p>
-          </div>
-          <div class="col-2 m-auto p-0">
-            <img class="bi m-auto d-block" src="images/si.svg" width="24" height="24" />
-          </div>
-        </div>
-      </div>
-<!-- bioage -->
-<div class="col-6 col-md-4 col-xxl-2 px-3">
-  <div class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white " style="height: 80px">
-    <div class="col-5 m-auto p-0">
-      <p class="text-start text-dark m-auto mx-1 " style="font-size:small">多項式回歸<br>生理年齡y/o</p>
-    </div>
-    <div class="col-5 px-0 m-auto">
-      <p id="f_v_ba4" class="text-center text-dark fs-6 m-0">--</p>
-    </div>
-    <div class="col-2 m-auto p-0">
-      <img class="bi m-auto d-block" src="images/hrv.svg" width="24" height="24" />
-      <p class="text-center text-muted m-auto" style="font-size: 9px">ms</p>
-    </div>
-  </div>
-</div>
-<!-- bioage -->
-<div class="col-6 col-md-4 col-xxl-2 px-3">
-  <div class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white " style="height: 80px">
-    <div class="col-5 m-auto p-0">
-      <p class="text-start text-dark m-auto mx-1 " style="font-size:small">HR,SDNN<br>生理年齡y/o</p>
-    </div>
-    <div class="col-5 px-0 m-auto">
-      <p id="f_v_ba2" class="text-center text-dark fs-6 m-0">--</p>
-    </div>
-    <div class="col-2 m-auto p-0">
-      <img class="bi m-auto d-block" src="images/hrv.svg" width="24" height="24" />
-      <p class="text-center text-muted m-auto" style="font-size: 9px">ms</p>
-    </div>
-  </div>
-</div>
-<!-- bioage -->
-<div class="col-6 col-md-4 col-xxl-2 px-3">
-  <div class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white " style="height: 80px">
-    <div class="col-5 m-auto p-0">
-      <p class="text-start text-dark m-auto mx-1 " style="font-size:small">生理年齡<br>y/o</p>
-    </div>
-    <div class="col-5 px-0 m-auto">
-      <p id="f_v_bioage" class="text-center text-dark fs-6 m-0">--</p>
-    </div>
-    <div class="col-2 m-auto p-0">
-      <img class="bi m-auto d-block" src="images/hrv.svg" width="24" height="24" />
-      <p class="text-center text-muted m-auto" style="font-size: 9px">ms</p>
-    </div>
-  </div>
-</div>
-      <!-- ANS Index SNS -->
-      <div class="col-6 col-md-4 col-xxl-2 px-3">
-        <div class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white " style="height: 80px">
-          <div class="col-5 m-auto p-0">
-            <p class="text-start text-dark m-auto mx-1 " style="font-size:small">ANS Index<br>SNS</p>
-          </div>
-          <div class="col-5 px-0 m-auto">
-            <p id="f_v_ans_index_sns" class="text-center text-dark fs-6 m-0">--</p>
-          </div>
-          <div class="col-2 m-auto p-0">
-          </div>
-        </div>
-      </div>
-
-      <!-- ANS Index PNS -->
-      <div class="col-6 col-md-4 col-xxl-2 px-3">
-        <div class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white " style="height: 80px">
-          <div class="col-5 m-auto p-0">
-            <p class="text-start text-dark m-auto mx-1 " style="font-size:small">ANS Index<br>PNS</p>
-          </div>
-          <div class="col-5 px-0 m-auto">
-            <p id="f_v_ans_index_pns" class="text-center text-dark fs-6 m-0">--</p>
-          </div>
-          <div class="col-2 m-auto p-0">
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="row justify-content-md-center">
-
-      <div
-        class="col-12 col-lg-4 col-xxl-3 mx-1 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative bg-white">
-        <canvas id="f_spower_canvas" width="100%" height="100%"></canvas>
-      </div>
-
-      <div class="col-12 col-lg-6 col-xxl-4 ">
-
-        <div class="row">
-          <div class="col-6 col-md-4 py-0">
-            <div
-              class="p-4 row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative bg-white">
-              <div class="col-md-12">
-                <div class="row">
-                  <strong class=" text-black text-center">活動力</strong>
-                </div>
-                <div class="row">
-                  <img id="f_v_activity" class="bi m-auto d-block" src="images/icon_sp_1.svg" width="90%"
-                    height="90%" />
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-
-          <div class="col-6 col-md-4 py-0">
-            <div
-              class="p-4 row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative bg-white">
-              <div class="col-md-12">
-                <div class="row">
-                  <strong class=" text-black text-center">睡眠力</strong>
-                </div>
-                <div class="row">
-                  <img id="f_v_sleep" class="bi m-auto d-block" src="images/icon_sp_2.svg" width="90%" height="90%" />
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-          <div class="col-6 col-md-4 py-0">
-            <div
-              class="p-4 row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative bg-white">
-              <div class="col-md-12">
-                <div class="row">
-                  <strong class=" text-black text-center">平衡性</strong>
-                </div>
-                <div class="row">
-                  <img id="f_v_equilibrium" class="bi m-auto d-block" src="images/icon_sp_3.svg" width="90%"
-                    height="90%" />
-                </div>
-              </div>
-
-            </div>
-          </div>
-          <div class="col-6 col-md-4 py-0">
-            <div
-              class="p-4 row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative bg-white">
-              <div class="col-md-12">
-                <div class="row">
-                  <strong class=" text-black text-center">代謝力</strong>
-                </div>
-                <div class="row">
-                  <img id="f_v_metabolism" class="bi m-auto d-block" src="images/icon_sp_4.svg" width="90%"
-                    height="90%" />
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-
-          <div class="col-6 col-md-4 py-0">
-            <div
-              class="p-4 row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative bg-white">
-              <div class="col-md-12">
-                <div class="row">
-                  <strong class=" text-black text-center">健康力</strong>
-                </div>
-                <div class="row">
-                  <img id="f_v_health" class="bi m-auto d-block" src="images/icon_sp_5.svg" width="90%" height="90%" />
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-          <div class="col-6 col-md-4 py-0">
-            <div
-              class="p-4 row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative bg-white">
-              <div class="col-md-12">
-                <div class="row">
-                  <strong class=" text-black text-center">放鬆力</strong>
-                </div>
-                <div class="row">
-                  <img id="f_v_relaxation" class="bi m-auto d-block" src="images/icon_sp_5.svg" width="90%"
-                    height="90%" />
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
-
-      </div>
-
-    </div>
-
-    <div class="row justify-content-md-center">
-      <div class="col-md-2 text-center">
-        <button type="button" class="btn btn-secondary btn-lg" id="f_eid_btn_home">回首頁</button>
-      </div>
-    </div>
-
-  </div>
-  <script src="js/tools.js"></script>
-  <script src="js/finish.js?v=1.0.2"></script>
-</body>
-
-</html>
+</style>
+<img src="images/" alt="" />
