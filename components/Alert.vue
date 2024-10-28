@@ -1,4 +1,7 @@
 <template>
+  <div class="raphaelCover">
+
+  </div>
   <div class="raphaelAlert">
     <div class="content">
       <slot>{{ defaultContent }}</slot>
@@ -13,6 +16,14 @@
 </template>
 
 <style scoped>
+.raphaelCover{
+  background: rgba(217, 217, 217, 0.50);
+  backdrop-filter: blur(2.5px);
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  z-index: 12;
+}
 .raphaelAlert {
   background: #fbfbfb;
   color: var(--shade-black, #1e1e1e);
