@@ -1132,7 +1132,7 @@ export default {
       box-shadow: 0px -2px 4px 0px rgba(0, 0, 0, 0.25) inset;
 
       .subText {
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.75rem;
       }
 
       .resultHintText {
@@ -1144,6 +1144,7 @@ export default {
       }
 
       .severityText {
+        color:$raphael-gray-500;
         letter-spacing: 0.048px;
         span {
           color: #ec4f4f;
@@ -1228,7 +1229,6 @@ export default {
       h3 {
         color: #1e1e1e;
         font-size: 20px;
-        font-weight: bold;
         letter-spacing: 0.15px;
         margin-bottom: 0.5rem;
       }
@@ -1240,7 +1240,7 @@ export default {
         .resultTag {
           background: #fef1e2;
           padding: 4px 8px;
-          border-radius: 8px;
+          border-radius: 12px;
           color: #666;
           font-size: 0.875rem;
         }
@@ -1248,9 +1248,8 @@ export default {
 
       h5 {
         color: #1e1e1e;
-        font-weight: 400;
         letter-spacing: 0.1px;
-        margin-top: 0.5rem;
+        margin-top: 0.75rem;
       }
       h4 {
         color: #666;

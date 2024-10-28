@@ -136,12 +136,15 @@ export default {
   position: absolute;
   top: 100%;
   left: 0;
-  background-color: white;
-  border: 1px solid #666;
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(6px);
   border-radius: 8px;
+  color: $raphael-gray-500;
+  font-size: 1.125rem;
   z-index: 10;
   width: 100%;
   max-height: 200px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
   overflow-y: auto;
 }
 
