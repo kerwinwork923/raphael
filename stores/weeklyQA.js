@@ -20,6 +20,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
     theLatestDataPreData: {},
     diffDays: "",
     diffenenceObj: {},
+    History:{}
   }),
 
   getters: {
@@ -59,7 +60,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
   },
 
   actions: {
-    //獲取題目
+    // 獲取題目
     async getQues() {
       const common = useCommon();
       common.startLoading();
@@ -285,6 +286,8 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
           }
         );
         if (response1.status === 200) {
+          this.History = response1.data?.History
+
           // 假設大於1以上
           if (response1.data.History.length > 1) {
             this.theLatestHistory = response1.data.History[0];

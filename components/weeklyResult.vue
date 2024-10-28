@@ -40,7 +40,9 @@
                 color: scoreColorFn(store.theLatestData.TotalScore, sex),
               }"
             >
-              {{ store.theLatestData.TotalRatio }}({{store.diffenenceObj.TotalDesc}})</span
+              {{ store.theLatestData.TotalRatio }}({{
+                store.theLatestData.TotalDesc
+              }})</span
             >
           </h6>
         </div>
@@ -81,7 +83,9 @@
                 color: scoreColorFn(store.theLatestDataPreData.TotalScore, sex),
               }"
             >
-              {{ store.theLatestDataPreData.TotalRatio }}({{store.diffenenceObj.preTotalDesc}})</span
+              {{ store.theLatestDataPreData.TotalRatio }}({{
+                store.theLatestDataPreData.preTotalDesc
+              }})</span
             >
           </h6>
         </div>
@@ -155,7 +159,7 @@
               ),
             }"
             >{{ store.theLatestData.C1Ratio }}({{
-              computedText(computedScore(store.theLatestData.C1Ratio))
+              store.theLatestData.C1Desc
             }})</span
           >
         </h4>
@@ -179,7 +183,7 @@
                 ),
               }"
               >{{ store.theLatestDataPreData.C1Ratio }}({{
-                computedText(computedScore(store.theLatestDataPreData.C1Ratio))
+                store.theLatestPreData.C1Desc
               }})</span
             >
           </h4>
@@ -249,7 +253,7 @@
               ),
             }"
             >{{ store.theLatestData.C2Ratio }}({{
-              computedText(computedScore(store.theLatestData.C2Ratio))
+              store.theLatestData.C2Desc
             }})</span
           >
         </h4>
@@ -273,7 +277,7 @@
                 ),
               }"
               >{{ store.theLatestDataPreData.C2Ratio }}({{
-                computedText(computedScore(store.theLatestDataPreData.C2Ratio))
+                store.theLatestPreData.C2Desc
               }})</span
             >
           </h4>
@@ -343,7 +347,7 @@
               ),
             }"
             >{{ store.theLatestData.C3Ratio }}({{
-              computedText(computedScore(store.theLatestData.C3Ratio))
+              store.theLatestData.C3Desc
             }})</span
           >
         </h4>
@@ -367,7 +371,7 @@
                 ),
               }"
               >{{ store.theLatestDataPreData.C3Ratio }}({{
-                computedText(computedScore(store.theLatestDataPreData.C3Ratio))
+                store.theLatestPreData.C3Desc
               }})</span
             >
           </h4>
@@ -436,9 +440,8 @@
                 sex
               ),
             }"
-            >{{ store.theLatestData.C4Ratio }}({{
-              computedText(computedScore(store.theLatestData.C4Ratio))
-            }})</span
+            >{{ store.theLatestData.C4Ratio
+            }}{{ store.theLatestData.C4Desc }}</span
           >
         </h4>
         <div class="nextGroup" v-if="store.theLatestHistoryPre.CheckTime">
@@ -461,7 +464,7 @@
                 ),
               }"
               >{{ store.theLatestDataPreData.C4Ratio }}({{
-                computedText(computedScore(store.theLatestDataPreData.C4Ratio))
+                store.theLatestPreData.C4Desc
               }})</span
             >
           </h4>
@@ -531,7 +534,7 @@
               ),
             }"
             >{{ store.theLatestData.C5Ratio }}({{
-              computedText(computedScore(store.theLatestData.C5Ratio))
+              store.theLatestData.C5Desc
             }})</span
           >
         </h4>
@@ -555,7 +558,7 @@
                 ),
               }"
               >{{ store.theLatestDataPreData.C5Ratio }}({{
-                computedText(computedScore(store.theLatestDataPreData.C5Ratio))
+                store.theLatestPreData.C5Desc
               }})</span
             >
           </h4>
@@ -625,7 +628,7 @@
               ),
             }"
             >{{ store.theLatestData.C6Ratio }}({{
-              computedText(computedScore(store.theLatestData.C6Ratio))
+              store.theLatestData.C6Desc
             }})</span
           >
         </h4>
@@ -649,7 +652,7 @@
                 ),
               }"
               >{{ store.theLatestDataPreData.C6Ratio }}({{
-                computedText(computedScore(store.theLatestDataPreData.C6Ratio))
+                store.theLatestPreData.C6Desc
               }})</span
             >
           </h4>
@@ -719,7 +722,7 @@
               ),
             }"
             >{{ store.theLatestData.C7Ratio }}({{
-              computedText(computedScore(store.theLatestData.C7Ratio))
+              store.theLatestData.C7Desc
             }})</span
           >
         </h4>
@@ -743,7 +746,7 @@
                 ),
               }"
               >{{ store.theLatestDataPreData.C7Ratio }}({{
-                computedText(computedScore(store.theLatestDataPreData.C7Ratio))
+                store.theLatestPreData.C7Desc
               }})</span
             >
           </h4>
@@ -813,7 +816,7 @@
               ),
             }"
             >{{ store.theLatestData.C8Ratio }}({{
-              computedText(computedScore(store.theLatestData.C8Ratio))
+              store.theLatestData.C8Desc
             }})</span
           >
         </h4>
@@ -837,7 +840,7 @@
                 ),
               }"
               >{{ store.theLatestDataPreData.C8Ratio }}({{
-                computedText(computedScore(store.theLatestDataPreData.C8Ratio))
+                store.theLatestPreData.C8Desc
               }})</span
             >
           </h4>
@@ -906,7 +909,7 @@
               ),
             }"
             >{{ store.theLatestData.C9Ratio }}({{
-              computedText(computedScore(store.theLatestData.C9Ratio))
+              store.theLatestData.C9Desc
             }})</span
           >
         </h4>
@@ -930,7 +933,7 @@
                 ),
               }"
               >{{ store.theLatestDataPreData.C9Ratio }}({{
-                computedText(computedScore(store.theLatestDataPreData.C9Ratio))
+                store.theLatestPreData.C9Desc
               }})</span
             >
           </h4>
@@ -1006,80 +1009,39 @@
     </div>
 
     <h4 class="textResultText">檢測紀錄</h4>
-    <div class="detectionGroup">
-      <div class="detection">
+    <div class="detectionWrap">
+      <div
+        class="detection"
+        v-for="(history, index) in store.History"
+        :key="index"
+      >
         <div class="cGroup">
           <img class="img" src="../assets/imgs/calendar.png" alt="" />
         </div>
         <h3 class="detectionDate">
-          {{ formatTimestamp(store.theLatestHistory.CheckTime) }}
+          {{ formatTimestamp2(history?.CheckTime) }}
         </h3>
         <div class="detectionGroup">
           <div class="scroeTotal">
             <h5>總分</h5>
             <div
               :style="{
-                color: scoreColorFn(
-                  computedScore(store.theLatestHistory.Score),
-                  sex
-                ),
+                color: scoreColorFn(computedScore(history?.Score), sex),
               }"
               class="totalScore"
             >
-              {{ store.theLatestHistory.Score }}
+              {{ history?.Score }}
             </div>
           </div>
           <div class="seriousDegreeGroup">
             <h5>嚴重程度</h5>
             <div
               :style="{
-                color: scoreColorFn(
-                  computedScore(store.theLatestHistory.Score),
-                  sex
-                ),
+                color: scoreColorFn(computedScore(history?.Score), sex),
               }"
               class="seriousScore"
             >
-              {{ store.theLatestHistory.Ratio }}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="detection" v-if="store.theLatestDataPreData.AID">
-        <div class="cGroup">
-          <img class="img" src="../assets/imgs/calendar.png" alt="" />
-        </div>
-        <h3 class="detectionDate">
-          {{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
-        </h3>
-        <div class="detectionGroup">
-          <div class="scroeTotal">
-            <h5>總分</h5>
-            <div
-              :style="{
-                color: scoreColorFn(
-                  computedScore(store.theLatestHistoryPre.Score),
-                  sex
-                ),
-              }"
-              class="totalScore"
-            >
-              {{ store.theLatestHistoryPre.Score }}
-            </div>
-          </div>
-          <div class="seriousDegreeGroup">
-            <h5>嚴重程度</h5>
-            <div
-              :style="{
-                color: scoreColorFn(
-                  computedScore(store.theLatestHistoryPre.Score),
-                  sex
-                ),
-              }"
-              class="seriousScore"
-            >
-              {{ store.theLatestHistoryPre.Ratio }}
+              {{ history.Ratio }}
             </div>
           </div>
         </div>
@@ -1102,6 +1064,7 @@ import {
   scoreColorFn,
   computedEmoji2,
   formatTimestamp,
+  formatTimestamp2,
   computedText,
 } from "../fn/utils";
 import { useWeeklyRecord } from "../stores/weeklyQA";
@@ -1147,6 +1110,7 @@ export default {
       changeSymptomLavel,
       computedText,
       sex,
+      formatTimestamp2,
     };
   },
 };
@@ -1386,16 +1350,19 @@ export default {
       }
     }
   }
-  .detectionGroup {
+  .detectionWrap {
     background-color: #fff;
     border-radius: 12px;
-    padding: 12px 16px;
+    padding: 0 16px;
     margin-top: 0.85rem;
+    max-height: 400px;
+    overflow-y: auto; /* 超出高度時顯示滾動條 */
     .detection {
       display: flex;
       align-items: center;
       gap: 4px;
 
+      height: 80px;
       .cGroup {
         border: 2px solid $raphael-green-400;
         padding: 0.25rem;
@@ -1409,8 +1376,11 @@ export default {
       .detectionGroup {
         margin-left: auto;
         display: flex;
-        text-align: center;
+        justify-content: center;
+        align-items: center;
+
         gap: 14px;
+
         .scroeTotal,
         .seriousDegreeGroup {
           display: flex;
