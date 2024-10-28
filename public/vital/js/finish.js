@@ -44,13 +44,13 @@ const SetSPowerValue = (id, value) => {
 const InitFinish = () => {
   _finish_vital_result_printer = new VitalResultPrinter();
   _finish_vital_result_printer.setDefaultElement({
-    hr_id:   VIEW_FINISH_HR,
-    hrv_id:  VIEW_FINISH_HRV,
-    sbp_id:  VIEW_FINISH_SBP,
-    dbp_id:  VIEW_FINISH_DBP,
-    rr_id:   VIEW_FINISH_RR,
+    hr_id: VIEW_FINISH_HR,
+    hrv_id: VIEW_FINISH_HRV,
+    sbp_id: VIEW_FINISH_SBP,
+    dbp_id: VIEW_FINISH_DBP,
+    rr_id: VIEW_FINISH_RR,
     spo2_id: VIEW_FINISH_SPO2,
-    si_id:   VIEW_FINISH_SI,
+    si_id: VIEW_FINISH_SI,
     bioage_id: VIEW_FINISH_BIOAGE,
     ba2_id: VIEW_FINISH_BA2,
     ba4_id: VIEW_FINISH_BA4
@@ -60,12 +60,16 @@ const InitFinish = () => {
     ans_index_pns_id: VIEW_FINISH_ANS_INDEX_PNS
   });
 
-  _finish_spower_chart = new SPowerChart(
-    document.getElementById(VIEW_FINISH_CANVAS_SP).getContext("2d")
-  );
-  // document.getElementById(VIEW_FINISH_BTN_HOME).onclick = ()=> GoToBasicInfo()
-  // document.getElementById(VIEW_BACK_BTN_HOME).onclick = ()=> GoToBasicInfo()
+  // 檢查 SPowerChart 是否存在
+  // if (typeof SPowerChart !== 'undefined') {
+  //   _finish_spower_chart = new SPowerChart(
+  //     document.getElementById(VIEW_FINISH_CANVAS_SP).getContext("2d")
+  //   );
+  // } else {
+  //   console.error("SPowerChart is not defined. Please ensure it is correctly included.");
+  // }
 };
+
 
 const GoToFinish = () => {
   _finish_spower_chart.reset();
