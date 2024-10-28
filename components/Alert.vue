@@ -22,12 +22,12 @@
   margin: 0 auto;
   margin-top: 1rem;
   position: fixed;
+  min-height: 120px;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -60%);
   z-index: 99;
   transition: 0.35s ease;
-
 }
 .raphaelAlert .content {
   text-align: center;
@@ -36,8 +36,13 @@
   font-weight: 400;
   letter-spacing: 0.5px;
   padding: 1rem;
-  min-height: 80px;
-  border-bottom: #aaa 1px solid;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -75%);
+  width: 100%;
+  font-size: 1rem;
+
   line-height: 1.2;
   display: flex;
   justify-content: center;
@@ -46,13 +51,19 @@
 .raphaelAlert .btnGroup {
   display: flex;
   justify-content: center;
+  border-top: #aaa 1px solid;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
 }
 .raphaelAlert .btnGroup button {
   border: none;
   width: 100%;
-  color: #007aff;
+  color: #74bc1f;
   padding: 6px;
   cursor: pointer;
+ 
+  font-size: 1rem;
 }
 .raphaelAlert .btnGroup .redirectBtn {
   border-left: 1px solid #aaa;
