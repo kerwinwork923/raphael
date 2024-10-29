@@ -194,7 +194,6 @@
                       ? useSleepRecordData.medhelp
                       : "請選擇每週使用藥物幫助睡眠天數"
                   }}
-                  天
                 </div>
               </div>
 
@@ -540,13 +539,12 @@ export default {
 
     .selectGroup1 {
       display: flex;
+      align-items: center;
       position: relative;
 
       .timeIcon {
         position: absolute;
         left: 0;
-        top: 50%;
-        transform: translateY(-5%);
       }
       .dropListGroup {
         width: 50%;
@@ -554,19 +552,18 @@ export default {
         border-bottom:1px solid #eee;
 
         .dropListText {
+          position: relative;
           text-align: right;
           color: #b3b3b3;
-          font-size: 1.125rem;
-          padding: 12px 0;
+          margin: 12px 0;
           cursor: pointer;
 
           .dropListHour,
           .dropListMinute {
             position: absolute;
             left: 50%;
-            top: 60%;
-
-            transform: translate(-50%, -50%);
+            top: 0;
+            transform: translate(-50%, 0);
             color: #74bc1f;
             font-weight: bold;
           }
@@ -605,7 +602,6 @@ export default {
         }
         .dropListTextActive {
           color: #74bc1f !important;
-          font-size: 1.075rem ;
           letter-spacing: 1.25px;
           font-weight: bold;
         }

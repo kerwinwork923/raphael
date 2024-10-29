@@ -127,7 +127,6 @@ export default {
 
 .picked-text{
   color: $raphael-green-400 !important;
-  font-size: 1.075rem ;
   letter-spacing: 1.25px;
   font-weight: bold;
 }
