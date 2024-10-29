@@ -1,6 +1,7 @@
 <template>
   <div class="raphaelUser">
     <RaphaelLoading v-if="loading" />
+    <DSPRSelect :visible="showDSPRSelect" @close="showDSPRSelect = false" />
     <Navbar />
     <div class="userGroup">
       <div class="userInfo">
@@ -79,6 +80,7 @@ import { onMounted, ref, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import Navbar from "../components/Navbar";
 import RaphaelLoading from "../components/RaphaelLoading";
+import DSPRSelect from "../components/DSPRSelect.vue";
 import axios from "axios";
 //圖片
 import banner1 from "@/assets/imgs/banner-1.png";
@@ -92,6 +94,7 @@ export default {
     const userInfo = ref(null);
     const currentSlide = ref(0);
     const slides = ref([banner1, banner2]);
+    const showDSPRSelect = ref(false);
 
     const getUserData = async () => {
       const localData = localStorage.getItem("userData");
@@ -162,42 +165,67 @@ export default {
     });
 
     const convertAndSaveUserData = async () => {
-      const localData = JSON.parse(localStorage.getItem("userData"));
+  const localData = JSON.parse(localStorage.getItem("userData"));
 
-      let scanAge = localData.SexF;
-      if (localData.Sex == 2) {
-        scanAge = 0;
-      }
+  if (!localData) {
+    alert("本地存儲中沒有用戶數據。");
+    return;
+  }
 
-      // 確認是否存在用戶數據
-      if (localData) {
-        const convertedData = {
-          age: calculateAge(localData.Birthday), // 計算年齡的輔助函數
-          bp_group: "normal",
-          bp_mode: "ternary",
-          facing_mode: "user",
-          height: parseInt(localData.Height) || 170,
-          sex: scanAge,
-          weight: parseInt(localData.Weight) || 60,
-        };
+  const isInteger = (value) => Number.isInteger(parseInt(value, 10));
 
-        // 保存轉換後的數據到 session storage
-        sessionStorage.setItem("data", JSON.stringify(convertedData));
+  if (!isInteger(localData.Height) || parseInt(localData.Height) <= 0) {
+    alert("您的身高格式不正確，請修改會員資料");
+    return;
+  }
 
-        try {
-          // 請求相機權限
-          await navigator.mediaDevices.getUserMedia({ video: true });
-          alert("相機已啟用。請在下一步繼續測量。");
+  if (!isInteger(localData.Weight) || parseInt(localData.Weight) <= 0) {
+    alert("您的體重格式不正確，請修改會員資料");
+    return;
+  }
 
-          // 跳轉到目標頁面
-          window.location.href = "/vital/scan.html";
-        } catch (err) {
-          alert("無法訪問相機。請檢查您的權限設置。");
-        }
-      } else {
-        alert("本地存儲中沒有用戶數據。");
-      }
-    };
+  // 檢查生日格式並確保日、月、年為合理數值
+  const birthdayParts = localData.Birthday.split("/");
+  if (
+    birthdayParts.length !== 3 ||
+    parseInt(birthdayParts[0]) <= 0 ||  // 年份檢查
+    parseInt(birthdayParts[1]) < 1 ||   // 月份檢查
+    parseInt(birthdayParts[1]) > 12 ||  // 月份上限檢查
+    parseInt(birthdayParts[2]) < 1 ||   // 日期下限檢查
+    parseInt(birthdayParts[2]) > 31 ||  // 日期上限檢查
+    isNaN(calculateAge(localData.Birthday))  // 年齡計算有效性檢查
+  ) {
+    alert("生日格式不正確或包含無效日期，請修改會員資料。");
+    return;
+  }
+
+  // 性別檢查
+  let scanAge = parseInt(localData.Sex);
+  if (scanAge !== 1 && scanAge !== 2) {
+    alert("性別格式不正確，請修改會員資料。");
+    return;
+  }
+
+  // DSPR 檢查
+  if (localData.DSPR === "") {
+    showDSPRSelect.value = true;
+    return;
+  }
+
+  const convertedData = {
+    age: calculateAge(localData.Birthday), // 計算年齡的輔助函數
+    bp_group: localData.DSPR,
+    bp_mode: "ternary",
+    facing_mode: "user",
+    height: parseInt(localData.Height),
+    sex: scanAge,
+    weight: parseInt(localData.Weight),
+  };
+
+  sessionStorage.setItem("data", JSON.stringify(convertedData));
+  window.location.href = "/vital/scan.html";
+};
+
 
     // Helper function to calculate age based on Birthday
     const calculateAge = (birthday) => {
@@ -212,6 +240,7 @@ export default {
       currentSlide,
       slides,
       convertAndSaveUserData,
+      showDSPRSelect,
     };
   },
 };

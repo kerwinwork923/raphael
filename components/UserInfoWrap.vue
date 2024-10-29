@@ -64,9 +64,9 @@
           <option value="" disabled selected hidden>
             請選擇日常收縮壓(選填)
           </option>
-          <option value="正常">正常(120mmHg)</option>
-          <option value="高血壓前期">高血壓前期(120~139mmHg)</option>
-          <option value="高血壓">高血壓(>=140mmHg)</option>
+          <option value="normal">正常(120mmHg)</option>
+          <option value="prehypertension">高血壓前期(120~139mmHg)</option>
+          <option value="hypertension">高血壓(>=140mmHg)</option>
         </select>
       </div>
     </div>
