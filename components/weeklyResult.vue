@@ -46,9 +46,9 @@
             >
           </h6>
         </div>
-        <div class="dashDiv" v-if="store.theLatestDataPreData.TotalScore">
-          ---
-        </div>
+        <h5 class="subText nextSunText">
+          (前次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
+        </h5>
         <div class="severity" v-if="store.theLatestDataPreData.TotalScore">
           <div class="imgGroup">
             <img
@@ -84,7 +84,7 @@
               }"
             >
               {{ store.theLatestDataPreData.TotalRatio }}({{
-                store.theLatestDataPreData.preTotalDesc
+                store.theLatestDataPreData.TotalDesc
               }})</span
             >
           </h6>
@@ -1133,6 +1133,10 @@ export default {
 
       .subText {
         margin-bottom: 0.75rem;
+      }
+
+      .nextSunText{
+        margin-top:.75rem;
       }
 
       .resultHintText {
