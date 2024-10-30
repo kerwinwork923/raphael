@@ -808,69 +808,100 @@
 <script>
   // 從本地儲存中獲取 userData
   const userData = JSON.parse(localStorage.getItem("userData"));
+  const currentResult = JSON.parse(sessionStorage.getItem("result"));
 
-  // 比較並請求結果
+  if (currentResult && currentResult.ANSIndex) {
+    const resultTextGroupP = document.querySelector(".resultTextGroup p");
+
+    const SNS = currentResult.ANSIndex.SNS;
+    const PNS = currentResult.ANSIndex.PNS;
+
+    // 判斷 SNS 和 PNS 的狀態並顯示對應訊息
+    if (
+      (SNS > 2 || (2 > SNS && SNS > 1)) &&
+      (PNS < -2 || (-2 < PNS && PNS < -1))
+    ) {
+      resultTextGroupP.textContent =
+        "您的自律神經失調狀態極為嚴重，建議保持規律作息，避免過度壓力，適當運動，並練習深呼吸或冥想等放鬆技巧。如果症狀持續或加重，應尋求專業醫療協助，透過專業診斷與治療來改善身體狀況。";
+    } else if (
+      ((-2 < SNS && SNS < -1) || SNS < -2) &&
+      ((2 > PNS && PNS > 1) || PNS > 2)
+    ) {
+      resultTextGroupP.textContent =
+        "當交感神經嚴重低落，副交感神經極度亢奮時，患者可能會出現心跳過慢、低血壓、疲倦、頭暈等症狀。建議病患調整生活作息，逐步增加適度的體力活動，如散步或輕運動，以促進交感神經的回復。避免長時間靜坐或臥床，並可透過冷水淋浴或短暫的冷熱交替淋浴來刺激交感神經。同時，減少過度放鬆的活動，如過長的冥想或呼吸練習，並密切監測身體反應，必要時尋求專業醫療協助。";
+    } else if (SNS > 2 || (2 > SNS && SNS > 1)) {
+      resultTextGroupP.textContent =
+        "您的交感神經過於亢奮，可能導致長期緊張、心跳過快、血壓升高、焦慮、失眠等症狀。建議保持規律作息，避免過度壓力，適當運動，並練習深呼吸或冥想等放鬆技巧。如果症狀持續或加重，應尋求專業醫療協助，透過專業診斷與治療來改善身體狀況。";
+    } else if (PNS < -2 || (-2 < PNS && PNS < -1)) {
+      resultTextGroupP.textContent =
+        "您的副交感神經過於低落，可能會導致心跳加快、睡眠質量差、消化不良、容易感到焦慮和壓力等問題。建議保持規律作息，避免過度壓力，適當運動，並練習深呼吸或冥想等放鬆技巧。如果症狀持續或加重，應尋求專業醫療協助，透過專業診斷與治療來改善身體狀況。";
+    } else {
+      resultTextGroupP.textContent =
+        "其他您的自律神經狀態正常，仍建議保持規律作息、適度運動，如散步或瑜伽，並進行放鬆練習，減輕壓力。維持均衡飲食，攝取足夠的維生素與礦物質，避免過多的咖啡因與糖分。保持良好的心理健康，進行社交互動和正念練習，有助於維持自律神經的平衡和長期健康。";
+    }
+  }
+
   async function fetchResultIfChanged() {
-    const currentResult = JSON.parse(sessionStorage.getItem("result"));
     const previousResult = sessionStorage.getItem("lastFetchedResult");
 
-    // 將物件轉為字串以便簡單比較
     if (JSON.stringify(currentResult) === previousResult) {
       console.log("結果未改變，跳過 API 呼叫。");
       return;
     }
 
     try {
-      // 儲存當前的 result 作為上次請求的結果
-      sessionStorage.setItem("lastFetchedResult", JSON.stringify(currentResult));
+      sessionStorage.setItem(
+        "lastFetchedResult",
+        JSON.stringify(currentResult)
+      );
 
-      const response = await fetch("https://23700999.com:8081/HMA/API_HRV2Save.jsp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          MID: userData.MID,
-          MAID: userData.MAID,
-          Token: userData.Token,
-          Mobile: userData.Mobile,
-          // 使用 currentResult 來填充參數
-          PNS: String(currentResult.ANSIndex.PNS),
-          SNS: String(currentResult.ANSIndex.SNS),
-          DBP: String(currentResult.dbp), // 舒張壓
-          HR: String(currentResult.hr), // 心率
-          HRV: String(currentResult.hrv), // 心律變異性
-          rr: String(currentResult.rr), // 呼吸
-          SBP: String(currentResult.sbp), // 收縮壓
-          SPO2: String(currentResult.spo2), // 血氧
-          Activity: String(currentResult.activity), // 活動力
-          Equilibrium: String(currentResult.equilibrium), // 平衡力
-          Health: String(currentResult.health), // 健康力
-          Metabolism: String(currentResult.metabolism), // 代謝力
-          Relaxation: String(currentResult.relaxation), // 放鬆力
-          Sleep: String(currentResult.sleep), // 睡眠力
-          HF: String(currentResult.hrv_indices.HF),
-          LF: String(currentResult.hrv_indices.LF),
-          LF_HF_Ratio: String(currentResult.hrv_indices.LF_HF_RATIO),
-          Mean_RR: String(currentResult.hrv_indices.MEAN_RR),
-          PHF: String(currentResult.hrv_indices.PHF),
-          PLF: String(currentResult.hrv_indices.PLF),
-          RMSSD: String(currentResult.hrv_indices.RMSSD),
-          RRIV: String(currentResult.hrv_indices.RRIV),
-          SD1: String(currentResult.hrv_indices.SD1),
-          SD2: String(currentResult.hrv_indices.SD2),
-          SDNN: String(currentResult.hrv_indices.SDNN),
-          hr: String(currentResult.hr_hrv),
-          si: String(currentResult.si),
-        }),
-      });
+      const response = await fetch(
+        "https://23700999.com:8081/HMA/API_HRV2Save.jsp",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            MID: userData.MID,
+            MAID: userData.MAID,
+            Token: userData.Token,
+            Mobile: userData.Mobile,
+            PNS: String(currentResult.ANSIndex.PNS),
+            SNS: String(currentResult.ANSIndex.SNS),
+            DBP: String(currentResult.dbp),
+            HR: String(currentResult.hr),
+            HRV: String(currentResult.hrv),
+            rr: String(currentResult.rr),
+            SBP: String(currentResult.sbp),
+            SPO2: String(currentResult.spo2),
+            Activity: String(currentResult.activity),
+            Equilibrium: String(currentResult.equilibrium),
+            Health: String(currentResult.health),
+            Metabolism: String(currentResult.metabolism),
+            Relaxation: String(currentResult.relaxation),
+            Sleep: String(currentResult.sleep),
+            HF: String(currentResult.hrv_indices.HF),
+            LF: String(currentResult.hrv_indices.LF),
+            LF_HF_Ratio: String(currentResult.hrv_indices.LF_HF_RATIO),
+            Mean_RR: String(currentResult.hrv_indices.MEAN_RR),
+            PHF: String(currentResult.hrv_indices.PHF),
+            PLF: String(currentResult.hrv_indices.PLF),
+            RMSSD: String(currentResult.hrv_indices.RMSSD),
+            RRIV: String(currentResult.hrv_indices.RRIV),
+            SD1: String(currentResult.hrv_indices.SD1),
+            SD2: String(currentResult.hrv_indices.SD2),
+            SDNN: String(currentResult.hrv_indices.SDNN),
+            hr: String(currentResult.hr_hrv),
+            si: String(currentResult.si),
+          }),
+        }
+      );
 
-      // 檢查響應狀態
       if (!response.ok) {
         throw new Error("網路響應不是成功狀態");
       }
 
-      // 獲取 JSON 響應
       const apiResult = await response.json();
       return apiResult;
     } catch (error) {
