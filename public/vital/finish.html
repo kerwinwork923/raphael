@@ -3,8 +3,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NeuroPlus 自律神經HRV檢測</title>
-    <link href="css/my.css" rel="stylesheet" />
-    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <!-- <link href="css/my.css" rel="stylesheet" /> -->
+    <!-- <link href="css/bootstrap.min.css" rel="stylesheet" /> -->
 
     <style>
       .a-ellipsis {
@@ -42,9 +42,9 @@
         }
       }
     </style>
-    <script src="js/thirdparty/charts/dist/chart.min.js"></script>
+    <!-- <script src="js/thirdparty/charts/dist/chart.min.js"></script> -->
     <script src="js/vital_result_printer.js"></script>
-    <script src="js/spower_chart.js"></script>
+    <!-- <script src="js/spower_chart.js"></script> -->
   </head>
 
   <body>
@@ -95,24 +95,24 @@
         <div class="row">
           <div class="years">
             <h3>心理年齡</h3>
-            <div class="value" id="v_ba4">25</div>
+            <div class="value" id="f_v_ba2"></div>
             <div class="info">years old</div>
             <img src="images/raphael/HRVFace.svg" class="HRVFace" alt="" />
           </div>
           <div class="HRV">
-            <h3 id="v_hrv">心律變異性</h3>
-            <div class="value">37</div>
+            <h3>心律變異性</h3>
+            <div id="f_v_hrv" class="value"></div>
             <div class="info">ms</div>
           </div>
         </div>
-  
+
         <div class="row">
           <div class="Rhythm">
             <div class="titleGroup">
-              <h3 id="v_hr">心率</h3>
+              <h3>心率</h3>
               <img src="images/raphael/heartBeat.svg" alt="" />
             </div>
-            <div class="value">60</div>
+            <div id="f_v_hr" class="value"></div>
             <div class="info">bpm</div>
             <img class="bgImg" src="images/raphael/greenChart.svg" alt="" />
           </div>
@@ -121,7 +121,9 @@
               <h3>血壓</h3>
               <img src="images/raphael/bloodPressure.svg" alt="" />
             </div>
-            <div class="value"><span id="v_sbp">138</span><span id="v_dbp">42</span></div>
+            <div class="value">
+              <span id="f_v_sbp"></span><span id="f_v_dbp"></span>
+            </div>
             <div class="info">mmHg</div>
             <img class="bgImg" src="images/raphael/purpleChart.svg" alt="" />
           </div>
@@ -129,35 +131,129 @@
         <div class="row">
           <div class="BO">
             <div class="titleGroup">
-              <h3 id="v_spo2">血氧</h3>
+              <h3>血氧</h3>
               <img src="images/raphael/spo2.svg" alt="" />
             </div>
-            <div class="value">95</div>
+            <div id="f_v_spo2" class="value"></div>
             <div class="info">SpO2%</div>
             <img class="bgImg" src="images/raphael/blueChart.svg" alt="" />
           </div>
           <div class="breathe">
             <div class="titleGroup">
-              <h3 id="v_rr">呼吸</h3>
+              <h3>呼吸</h3>
               <img src="images/raphael/spo2.svg" alt="" />
             </div>
-            <div class="value">100</div>
+            <div id="f_v_rr" class="value"></div>
             <div class="info">bpm</div>
             <img class="bgImg" src="images/raphael/brownChart.svg" alt="" />
           </div>
           <div class="pressure">
             <div class="titleGroup">
-              <h3 id="v_si">壓力</h3>
+              <h3>壓力</h3>
               <img src="images/raphael/pressure.svg" alt="" />
             </div>
-            <div class="value">低</div>
+            <div id="f_v_si" class="value"></div>
             <div class="info">low</div>
             <img class="bgImg" src="images/raphael/redChart.svg" alt="" />
           </div>
         </div>
+        <div class="row">
+          <div class="progressItem Health">
+            <h3>健康力</h3>
+            <img id="f_v_health" src="images/raphael/progress1.png" alt="" />
+          </div>
+          <div class="progressItem Sleep">
+            <h3>睡眠力</h3>
+            <img id="f_v_sleep" src="images/raphael/progress2.png" alt="" />
+          </div>
+          <div class="progressItem Metabolic">
+            <h3>代謝力</h3>
+            <img
+              id="f_v_metabolism"
+              src="images/raphael/progress3.png"
+              alt=""
+            />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="progressItem Balance">
+            <h3>平衡力</h3>
+            <img
+              id="f_v_equilibrium"
+              src="images/raphael/progress4.png"
+              alt=""
+            />
+          </div>
+          <div class="progressItem Active">
+            <h3>活動力</h3>
+            <img id="f_v_activity" src="images/raphael/progress5.png" alt="" />
+          </div>
+          <div class="progressItem Relax">
+            <h3>放鬆力</h3>
+            <img
+              id="f_v_relaxation"
+              src="images/raphael/progress1.png"
+              alt=""
+            />
+          </div>
+        </div>
       </div>
+
+      <div class="resultTextGroup">
+        <h3>根據您的神經系統數據分析</h3>
+        <p>
+          當交感神經嚴重低落，副交感神經極度亢奮時，患者可能會出現心跳過慢、低血壓、疲倦、頭暈等症狀。建議病患調整生活作息，逐步增加適度的體力活動，如散步或輕運動，以促進交感神經的回復。避免長時間靜坐或臥床，並可透過冷水淋浴或短暫的冷熱交替淋浴來刺激交感神經。同時，減少過度放鬆的活動，如過長的冥想或呼吸練習，並密切監測身體反應，必要時尋求專業醫療協助。
+        </p>
+      </div>
+
+      <div class="subBtnGroup">
+        <button class="backToUserBtn" class="">會員中心</button>
+        <button class="backToDetect">重新檢測</button>
+      </div>
+
+      <!-- 暫放 -->
+      <div class="col-5 px-0 m-auto hide">
+        <p id="f_v_bioage" class="text-center text-dark fs-6 m-0 hide">--</p>
+      </div>
+
+      <!-- <div class="col-5 px-0 m-auto hide">
+        <p id="f_v_ba4" class="text-center text-dark fs-6 m-0">--</p>
+      </div> -->
+
+      <div class="col-5 px-0 m-auto hide">
+        <p id="f_v_ans_index_sns" class="text-center text-dark fs-6 m-0">--</p>
+      </div>
+
+      <p id="f_v_ans_index_pns" class="text-center text-dark fs-6 m-0 hide">
+        --
+      </p>
+
+      <canvas
+        id="f_spower_canvas"
+        class="hide"
+        width="100%"
+        height="100%"
+      ></canvas>
+
+      <button
+        type="button"
+        class="btn btn-secondary btn-lg hide"
+        id="f_eid_btn_home"
+      >
+        回首頁
+      </button>
+
+      <button
+      type="button"
+      class="btn btn-secondary btn-lg hide"
+      id="f_back"
+    >
+      回首頁
+    </button>
+      <!--
       <div class="row justify-content-md-center">
-        <!-- Heart Rate -->
+
         <div class="col-6 col-md-4 col-xxl-2 px-3">
           <div
             class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white"
@@ -188,7 +284,7 @@
           </div>
         </div>
 
-        <!-- HR Variability -->
+
         <div class="col-6 col-md-4 col-xxl-2 px-3">
           <div
             class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white"
@@ -219,7 +315,6 @@
           </div>
         </div>
 
-        <!-- Blood Pressure -->
         <div class="col-6 col-md-4 col-xxl-2 px-3">
           <div
             class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white"
@@ -257,7 +352,7 @@
           </div>
         </div>
 
-        <!-- Oxygen Saturation -->
+  
         <div class="col-6 col-md-4 col-xxl-2 px-3">
           <div
             class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white"
@@ -290,7 +385,7 @@
           </div>
         </div>
 
-        <!-- Respiration Rate -->
+      
         <div class="col-6 col-md-4 col-xxl-2 px-3">
           <div
             class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white"
@@ -321,7 +416,7 @@
           </div>
         </div>
 
-        <!-- Stress Index -->
+
         <div class="col-6 col-md-4 col-xxl-2 px-3">
           <div
             class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white"
@@ -348,7 +443,7 @@
             </div>
           </div>
         </div>
-        <!-- bioage -->
+
         <div class="col-6 col-md-4 col-xxl-2 px-3">
           <div
             class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white"
@@ -378,7 +473,7 @@
             </div>
           </div>
         </div>
-        <!-- bioage -->
+  
         <div class="col-6 col-md-4 col-xxl-2 px-3">
           <div
             class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white"
@@ -408,7 +503,7 @@
             </div>
           </div>
         </div>
-        <!-- bioage -->
+   
         <div class="col-6 col-md-4 col-xxl-2 px-3">
           <div
             class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white"
@@ -438,7 +533,7 @@
             </div>
           </div>
         </div>
-        <!-- ANS Index SNS -->
+
         <div class="col-6 col-md-4 col-xxl-2 px-3">
           <div
             class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white"
@@ -461,7 +556,7 @@
           </div>
         </div>
 
-        <!-- ANS Index PNS -->
+    
         <div class="col-6 col-md-4 col-xxl-2 px-3">
           <div
             class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white"
@@ -621,8 +716,9 @@
           </div>
         </div>
       </div>
+      -->
 
-      <div class="row justify-content-md-center">
+      <!-- <div class="row justify-content-md-center">
         <div class="col-md-2 text-center">
           <button
             type="button"
@@ -632,7 +728,7 @@
             回首頁
           </button>
         </div>
-      </div>
+      </div> -->
     </div>
     <script src="js/tools.js"></script>
     <script src="js/finish.js?v=1.0.2"></script>
@@ -640,6 +736,19 @@
 </html>
 
 <style lang="scss">
+  * {
+    box-sizing: border-box;
+  }
+  .hide {
+    position: absolute;
+    bottom: 0;
+    height: 0;
+    opacity: 0;
+  }
+  body {
+    margin: 0;
+    padding: 0;
+  }
   .finishWrap {
     background: url("images/raphael/gradient-bg.png");
     background-repeat: no-repeat;
@@ -648,7 +757,6 @@
     min-height: 100vh;
     width: 100%;
     padding: 0 5%;
-   
   }
   .raphaelNavbar {
     position: absolute;
@@ -682,192 +790,242 @@
     cursor: pointer;
   }
 
-  .finishWrap{
-  padding-top: 50px;
-  width: 100%;
- 
+  .finishWrap {
+    padding-top: 50px;
+    width: 100%;
   }
 
   .finishWrap .titleGroup {
     display: flex;
     align-items: center;
     justify-content: space-between;
-
   }
 
-  .finishWrap .textGroup{
+  .finishWrap .textGroup {
     width: 60%;
- 
   }
 
-  .finishWrap .textGroup .timeGroup{
+  .finishWrap .textGroup .timeGroup {
     display: flex;
-     gap: 4px;
+    align-items: center;
+    gap: 4px;
+    margin-top: 0.25rem;
   }
 
-  .finishWrap .textGroup h3{
+  .finishWrap .textGroup h3 {
     font-size: 1.5rem;
-   font-weight: 400;
+    font-weight: 400;
+    margin: 0;
   }
 
-  .finishWrap .textGroup .timeGroup svg{
-    transform: translateY(6%);
+  .finishWrap .textGroup .timeGroup svg {
+    transform: translateY(-4%);
   }
 
-  .finishWrap .textGroup .timeGroup h4{
+  .finishWrap .textGroup .timeGroup h4 {
     font-size: 14px;
     font-weight: 400;
+    margin: 0;
   }
 
-  .finishWrap img{
+  .finishWrap img {
     width: 40%;
   }
 
-
   .scanInfo {
+    display: flex;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 100%;
+    h3 {
+      font-size: 20px;
+      font-weight: 400;
+      letter-spacing: 0.15px;
+      padding: 0;
+      margin: 0;
+    }
+    .row {
       display: flex;
-      margin-top: 10px;
-      flex-wrap: wrap;
-      justify-content: space-between;
+      flex-wrap: nowrap;
+
       width: 100%;
-      h3 {
-        font-size: 20px;
+      gap: 3%;
+      margin-bottom: 1rem;
+    }
+    .years {
+      width: 55%;
+      padding: 6px;
+      border-radius: 8px;
+      background: linear-gradient(
+        180deg,
+        #74bc1f 0%,
+        rgba(116, 188, 31, 0.35) 100%
+      );
+      padding: 12px;
+      align-items: center;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+      .value {
+        font-size: 48px;
+        font-weight: bold;
+        padding: 0.25rem 0;
+      }
+      .info {
+        font-size: 1rem;
         font-weight: 400;
-        letter-spacing: 0.15px;
-        padding: 0;
-        margin: 0;
+        letter-spacing: 0.5px;
       }
-      .row {
-        display: flex;
-        flex-wrap: nowrap;
-        justify-content: space-between;
-        width: 100%;
-        gap: 3%;
-        margin-bottom: 1rem;
-      }
-      .years {
-        width: 55%;
-        padding: 6px;
-        border-radius: 8px;
-        background: linear-gradient(
-          180deg,
-          #74bc1f 0%,
-          rgba(116, 188, 31, 0.35) 100%
-        );
-        padding: 12px;
-        align-items: center;
-        color: #fff;
-        position: relative;
-        overflow: hidden;
-        .value {
-          font-size: 48px;
-          font-weight: bold;
-          padding: 0.25rem 0;
-        }
-        .info {
-          font-size: 1rem;
-          font-weight: 400;
-          letter-spacing: 0.5px;
-        }
-        .HRVFace {
-          position: absolute;
-          right: -22%;
-          top: 0;
-        }
-      }
-      .HRV {
-        background: linear-gradient(
-          180deg,
-          #dfecc5 0%,
-          rgba(223, 236, 197, 0.35) 100%
-        );
-        padding: 12px;
-        border-radius: 8px;
-
-        .value {
-          color: #74bc1f;
-          font-size: 48px;
-          font-weight: bold;
-          padding: 0.25rem 0;
-        }
-        .info {
-          color: #666;
-          font-size: 1rem;
-          font-weight: 400;
-          letter-spacing: 0.5px;
-        }
-        width: 45%;
-      }
-      .Rhythm,
-      .bloodPressure {
-        width: 50%;
-        background-color: #fff;
-        border-radius: 8px;
-        border-top-style: 8px;
-        position: relative;
-        overflow: hidden;
-        padding: 12px;
-        .titleGroup {
-          display: flex;
-          justify-content: space-between;
-          img{
-            width: 20px;
-          }
-        }
-        .value {
-          color: $raphael-green-400;
-          font-size: 24px;
-          font-weight: 700;
-          letter-spacing: 0.12px;
-          margin-top: 0.5rem;
-        }
-        .info {
-          color: #ccc;
-
-          letter-spacing: 0.5px;
-        }
-        .bgImg {
-          position: absolute;
-          bottom: 0%;
-          width: 100%;
-        }
-      }
-      .BO,
-      .breathe,
-      .pressure {
-        width: 33.333%;
-        background-color: #fff;
-        border-radius: 8px;
-
-        position: relative;
-        overflow: hidden;
-        padding: 12px;
-        .titleGroup {
-          display: flex;
-          justify-content: space-between;
-          img{
-            width: 20px;
-          }
-        }
-        .value {
-          color: $raphael-green-400;
-          font-size: 24px;
-          font-weight: 700;
-          letter-spacing: 0.12px;
-          margin-top: 0.5rem;
-        }
-        .info {
-          color: #ccc;
-
-          letter-spacing: 0.5px;
-        }
-        .bgImg {
-          position: absolute;
-          bottom: 0%;
-          width: 100%;
-     
-        }
+      .HRVFace {
+        position: absolute;
+        right: -22%;
+        top: 0;
       }
     }
+    .HRV {
+      background: linear-gradient(
+        180deg,
+        #dfecc5 0%,
+        rgba(223, 236, 197, 0.35) 100%
+      );
+      padding: 12px;
+      border-radius: 8px;
+
+      .value {
+        color: #74bc1f;
+        font-size: 48px;
+        font-weight: bold;
+        padding: 0.25rem 0;
+      }
+      .info {
+        color: #666;
+        font-size: 1rem;
+        font-weight: 400;
+        letter-spacing: 0.5px;
+      }
+      width: 45%;
+    }
+    .Rhythm,
+    .bloodPressure {
+      width: 50%;
+      background-color: #fff;
+      border-radius: 8px;
+      border-top-style: 8px;
+      position: relative;
+      overflow: hidden;
+      padding: 12px;
+      .titleGroup {
+        display: flex;
+        justify-content: space-between;
+        img {
+          width: 20px;
+        }
+      }
+      .value {
+        color: $raphael-green-400;
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: 0.12px;
+        margin-top: 0.5rem;
+      }
+      .info {
+        color: #ccc;
+
+        letter-spacing: 0.5px;
+      }
+      .bgImg {
+        position: absolute;
+        bottom: 0%;
+        width: 100%;
+      }
+    }
+    .BO,
+    .breathe,
+    .pressure {
+      width: 33.333%;
+      background-color: #fff;
+      border-radius: 8px;
+
+      position: relative;
+      overflow: hidden;
+      padding: 12px;
+      .titleGroup {
+        display: flex;
+        justify-content: space-between;
+        img {
+          width: 20px;
+        }
+      }
+      .value {
+        color: $raphael-green-400;
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: 0.12px;
+        margin-top: 0.5rem;
+      }
+      .info {
+        color: #ccc;
+
+        letter-spacing: 0.5px;
+      }
+      .bgImg {
+        position: absolute;
+        bottom: 0%;
+        width: 100%;
+      }
+    }
+
+    .progressItem {
+      width: 33.3333%;
+      text-align: center;
+      background-color: #fff;
+      padding: 12px;
+      border-radius: 8px;
+      img {
+        width: 100%;
+        margin-top: 0.25rem;
+      }
+    }
+  }
+
+  .resultTextGroup {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 12px;
+    h3 {
+      margin: 0;
+      font-weight: 400;
+    }
+    p {
+      margin: 0;
+      margin-top: 0.5rem;
+    }
+  }
+
+  .subBtnGroup {
+    display: flex;
+    justify-content: space-between;
+
+    width: 100%;
+  }
+
+  .subBtnGroup button {
+    background-color: #74bc1f;
+    color: #fff;
+    padding: 8px;
+    width: 100%;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    transition: 0.25s ease;
+    width: 49%;
+  }
+
+  .subBtnGroup .backToUserBtn {
+    background-color: #eee;
+    color: #666;
+  }
 </style>
-<img src="images/" alt="" />

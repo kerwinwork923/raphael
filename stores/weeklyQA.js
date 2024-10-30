@@ -286,9 +286,10 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
           }
         );
         if (response1.status === 200) {
+          //Pinia取得歷史紀錄
           this.History = response1.data?.History
 
-          // 假設大於1以上
+          // 假設大於1以上，紀錄theLatestData、theLatestDataPreData
           if (response1.data.History.length > 1) {
             this.theLatestHistory = response1.data.History[0];
             const response2 = await axios.post(
@@ -316,7 +317,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
             this.theLatestDataPreData = response3.data;
             await this.checkTestDate();
           }
-          //只有一個
+          //只有一個紀錄theLatestData
           else if (response1.data.History.length > 0) {
             this.theLatestHistory = response1.data.History[0];
             const response2 = await axios.post(

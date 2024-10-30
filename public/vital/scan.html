@@ -112,13 +112,13 @@
       <div class="row">
         <div class="years">
           <h3>心理年齡</h3>
-          <div class="value" id="v_ba4">25</div>
+          <div class="value" id="v_ba2"></div>
           <div class="info">years old</div>
           <img src="images/raphael/HRVFace.svg" class="HRVFace" alt="" />
         </div>
         <div class="HRV">
-          <h3 id="v_hrv">心律變異性</h3>
-          <div class="value">37</div>
+          <h3 >心律變異性</h3>
+          <div id="v_hrv" class="value"></div>
           <div class="info">ms</div>
         </div>
       </div>
@@ -126,10 +126,10 @@
       <div class="row">
         <div class="Rhythm">
           <div class="titleGroup">
-            <h3 id="v_hr">心率</h3>
+            <h3 >心率</h3>
             <img src="images/raphael/heartBeat.svg" alt="" />
           </div>
-          <div class="value">60</div>
+          <div id="v_hr" class="value"></div>
           <div class="info">bpm</div>
           <img class="bgImg" src="images/raphael/greenChart.svg" alt="" />
         </div>
@@ -138,7 +138,7 @@
             <h3>血壓</h3>
             <img src="images/raphael/bloodPressure.svg" alt="" />
           </div>
-          <div class="value"><span id="v_sbp">138</span><span id="v_dbp">42</span></div>
+          <div class="value"><span id="v_sbp"></span><span id="v_dbp"></span></div>
           <div class="info">mmHg</div>
           <img class="bgImg" src="images/raphael/purpleChart.svg" alt="" />
         </div>
@@ -149,25 +149,25 @@
             <h3 id="v_spo2">血氧</h3>
             <img src="images/raphael/spo2.svg" alt="" />
           </div>
-          <div class="value">95</div>
+          <div id="v_spo2" class="value"></div>
           <div class="info">SpO2%</div>
           <img class="bgImg" src="images/raphael/blueChart.svg" alt="" />
         </div>
         <div class="breathe">
           <div class="titleGroup">
-            <h3 id="v_rr">呼吸</h3>
+            <h3 >呼吸</h3>
             <img src="images/raphael/spo2.svg" alt="" />
           </div>
-          <div class="value">100</div>
+          <div id="v_rr" class="value"></div>
           <div class="info">bpm</div>
           <img class="bgImg" src="images/raphael/brownChart.svg" alt="" />
         </div>
         <div class="pressure">
           <div class="titleGroup">
-            <h3 id="v_si">壓力</h3>
+            <h3 >壓力</h3>
             <img src="images/raphael/pressure.svg" alt="" />
           </div>
-          <div class="value">低</div>
+          <div id="v_si" class="value"></div>
           <div class="info">low</div>
           <img class="bgImg" src="images/raphael/redChart.svg" alt="" />
         </div>
@@ -176,116 +176,6 @@
 
 
     <div class="row justify-content-md-center mx-1">
-      <!-- Heart Rate -->
-      <!-- <div class="col-6 col-md-4 col-xxl-2 px-3">
-        <div class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white " style="height: 80px">
-          <div class="col-5 m-auto p-0">
-            <p class="text-start text-dark m-auto mx-1" style="font-size:small">心率</p>
-          </div>
-          <div class="col-5 px-0 m-auto">
-            <p id="v_hr" class="text-center text-dark fs-6 m-0">--</p>
-          </div>
-          <div class="col-2 m-auto p-0">
-            <img class="bi m-auto d-block" src="images/hr.svg" width="24" height="24" />
-            <p class="text-center text-muted m-auto" style="font-size: 9px">bpm</p>
-          </div>
-        </div>
-      </div> -->
-
-      <!-- HR Variability -->
-      <!-- <div class="col-6 col-md-4 col-xxl-2 px-3">
-        <div class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white " style="height: 80px">
-          <div class="col-5 m-auto p-0">
-            <p class="text-start text-dark m-auto mx-1" style="font-size:small">心率變異性<BR>HRV</p>
-          </div>
-          <div class="col-5 px-0 m-auto">
-            <p id="v_hrv" class="text-center text-dark fs-6 m-0">--</p>
-          </div>
-          <div class="col-2 m-auto p-0">
-            <img class="bi m-auto d-block" src="images/hrv.svg" width="24" height="24" />
-            <p class="text-center text-muted m-auto" style="font-size: 9px">ms</p>
-          </div>
-        </div>
-      </div> -->
-
-      <!-- Blood Pressure -->
-      <!-- <div class="col-6 col-md-4 col-xxl-2 px-3">
-        <div class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white " style="height: 80px">
-          <div class="col-5 m-auto p-0">
-            <p class="text-start text-dark m-auto mx-1" style="font-size:small">血壓</p>
-          </div>
-          <div class="col-5 px-0 m-auto">
-            <p id="v_sbp" class="text-center text-dark fs-6 m-0">--</p>
-            <p id="v_dbp" class="text-center text-dark fs-6" style="margin-top:-0.6rem;">/--</p>
-          </div>
-          <div class="col-2 m-auto p-0">
-            <img class="bi m-auto d-block" src="images/bp.svg" width="24" height="24" />
-            <p class="text-center text-muted m-auto" style="font-size: 9px">mmHg</p>
-          </div>
-        </div>
-      </div> -->
-
-      <!-- Oxygen Saturation -->
-      <!-- <div class="col-6 col-md-4 col-xxl-2 px-3">
-        <div class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white " style="height: 80px">
-          <div class="col-5 m-auto p-0">
-            <p class="text-start text-dark m-auto mx-1" style="font-size:small">血氧</p>
-          </div>
-          <div class="col-5 px-0 m-auto">
-            <p id="v_spo2" class="text-center text-dark fs-6 m-0">--</p>
-          </div>
-          <div class="col-2 m-auto p-0">
-            <img class="bi m-auto d-block" src="images/spo2.svg" width="24" height="24" />
-            <p class="text-center text-muted m-auto" style="font-size: 9px">SpO₂%</p>
-          </div>
-        </div>
-      </div> -->
-
-      <!-- Respiration Rate -->
-      <!-- <div class="col-6 col-md-4 col-xxl-2 px-3">
-        <div class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white " style="height: 80px">
-          <div class="col-5 m-auto p-0">
-            <p class="text-start text-dark m-auto mx-1" style="font-size:small">呼吸</p>
-          </div>
-          <div class="col-5 px-0 m-auto">
-            <p id="v_rr" class="text-center text-dark fs-6 m-0">--</p>
-          </div>
-          <div class="col-2 m-auto p-0">
-            <img class="bi m-auto d-block" src="images/rr.svg" width="24" height="24" />
-            <p class="text-center text-muted m-auto" style="font-size: 9px">bpm</p>
-          </div>
-        </div>
-      </div> -->
-
-      <!-- Stress Index -->
-      <!-- <div class="col-6 col-md-4 col-xxl-2 px-3">
-        <div class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white " style="height: 80px">
-          <div class="col-5 m-auto p-0">
-            <p class="text-start text-dark m-auto mx-1" style="font-size:small">壓力指數</p>
-          </div>
-          <div class="col-5 px-0 m-auto">
-            <p id="v_si" class="text-center text-dark fs-6 m-0">--</p>
-          </div>
-          <div class="col-2 m-auto p-0">
-            <img class="bi m-auto d-block" src="images/si.svg" width="24" height="24" />
-          </div>
-        </div>
-      </div> -->
-      <!-- Bio Age -->
-      <!-- <div class="col-6 col-md-4 col-xxl-2 px-3">
-        <div class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white " style="height: 80px">
-          <div class="col-5 m-auto p-0">
-           <p class="text-start text-dark m-auto mx-1" style="font-size:small">多項式回歸<BR>生理年齡y/o</p>
-          </div>
-         <div class="col-5 px-0 m-auto">
-          <p id="v_ba4" class="text-center text-dark fs-6 m-0">--</p>
-         </div>
-         <div class="col-2 m-auto p-0">
-            <img class="bi m-auto d-block" src="images/hrv.svg" width="24" height="24" />
-            <p class="text-center text-muted m-auto" style="font-size: 9px">ms</p>
-         </div>
-        </div>
-      </div> -->
       <!-- Bio Age -->
       <div class="col-6 col-md-4 col-xxl-2 px-3 opH">
         <div class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white " style="height: 80px">
@@ -373,7 +263,8 @@
   background-size: cover;
   min-height: 100vh;
   width: 100%;
-  padding: 0 5%;
+ padding: 48px 5% 0;
+  
 }
 
 .scanInfo {

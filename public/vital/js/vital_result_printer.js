@@ -327,15 +327,15 @@ class VitalResultPrinter {
       if (si < 0) {
         this._si_name_element.innerHTML = "---";
       } else if (si < 50) {
-        this._si_name_element.innerHTML = "Low";
+        this._si_name_element.innerHTML = "低";
       } else if (si < 200) {
-        this._si_name_element.innerHTML = "Normal";
+        this._si_name_element.innerHTML = "正常";
       } else if (si < 350) {
-        this._si_name_element.innerHTML = "Mild";
+        this._si_name_element.innerHTML = "中";
       } else if (si < 500) {
-        this._si_name_element.innerHTML = "High";
+        this._si_name_element.innerHTML = "高";
       } else {
-        this._si_name_element.innerHTML = "Very High";
+        this._si_name_element.innerHTML = "非常高";
       }
     }
   }

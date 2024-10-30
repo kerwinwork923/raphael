@@ -73,7 +73,6 @@
   color: #74bc1f;
   padding: 6px;
   cursor: pointer;
- 
   font-size: 1rem;
 }
 .raphaelAlert .btnGroup .redirectBtn {
