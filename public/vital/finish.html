@@ -831,33 +831,33 @@
             MAID: userData.MAID,
             Token: userData.Token,
             Mobile: userData.Mobile,
-            PNS: result.PNS,
-            SNS: result.SNS,
-            DBP: result.DBP, // 舒張壓
-            HR: result.HR, // 心率
-            HRV: result.HRV, // 心律變異性
+            PNS: result.ANSIndex.PNS,
+            SNS: result.ANSIndex.SNS,
+            DBP: result.dbp, // 舒張壓
+            HR: result.hr, // 心率
+            HRV: result.hrv, // 心律變異性
             rr: result.rr, // 呼吸
-            SBP: result.SBP, // 收縮壓
-            SPO2: result.SPO2, // 血氧
-            Activity: result.Activity, // 活動力
-            Equilibrium: result.Equilibrium, // 平衡力
-            Health: result.Health, // 健康力
-            Metabolism: result.Metabolism, // 代謝力
-            Relaxation: result.Relaxation, // 放鬆力
-            Sleep: result.Sleep, // 睡眠力
-            HF: result.HF,
-            LF: result.LF,
-            LF_HF_Ratio: result.LF_HF_Ratio,
-            Mean_RR: result.Mean_RR,
-            PHF: result.PHF,
-            PLF: result.PLF,
+            SBP: result.sbp, // 收縮壓
+            SPO2: result.spo2, // 血氧
+            Activity: result.activity, // 活動力
+            Equilibrium: result.equilibrium, // 平衡力
+            Health: result.health, // 健康力
+            Metabolism: result.metabolism, // 代謝力
+            Relaxation: result.relaxation, // 放鬆力
+            Sleep: result.sleep, // 睡眠力
+            HF: result.hrv_indices.HF,
+            LF: result.hrv_indices.LF,
+            LF_HF_Ratio: result.hrv_indices.LF_HF_Ratio,
+            Mean_RR: result.hrv_indices.Mean_RR,
+            PHF: result.hrv_indices.PHF,
+            PLF: result.hrv_indices.PLF,
             RMSSD: result.RMSSD,
-            RRIV: result.RRIV,
-            SD1: result.SD1,
-            SD2: result.SD2,
-            SDNN: result.SDNN,
-            hr: result.shr,
-            si: result.ssi,
+            RRIV: result.hrv_indices.RRIV,
+            SD1: result.hrv_indices.SD1,
+            SD2: result.hrv_indices.SD2,
+            SDNN: result.hrv_indices.SDNN,
+            hr: result.hr_hrv,
+            si: result.si,
           }),
         }
       );
