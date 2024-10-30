@@ -781,6 +781,7 @@ export default {
     }
 
     .bottomHintGroup {
+      margin-top: 60px;
       a {
         display: flex;
         justify-content: center;
@@ -788,7 +789,6 @@ export default {
         gap: 4px;
         margin: 0 auto;
         width: 100%;
-        margin-top: 60px;
         text-align: center;
         text-decoration: none;
         color: #666;
