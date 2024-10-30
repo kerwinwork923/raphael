@@ -63,7 +63,7 @@
       </div>
       <div class="titleGroup">
         <div class="textGroup">
-          <h3>王先生，您好</h3>
+          <h3>您好</h3>
           <div class="timeGroup">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -880,8 +880,8 @@
   if (currentResult && currentResult.ANSIndex) {
     const resultTextGroupP = document.querySelector(".resultTextGroup p");
 
-    const SNS = currentResult.ANSIndex.SNS;
-    const PNS = currentResult.ANSIndex.PNS;
+    const SNS = currentResult?.ANSIndex.SNS;
+    const PNS = currentResult?.ANSIndex.PNS;
 
     // 判斷 SNS 和 PNS 的狀態並顯示對應訊息
     if (

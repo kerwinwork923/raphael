@@ -183,7 +183,7 @@
                 ),
               }"
               >{{ store.theLatestDataPreData.C1Ratio }}({{
-                store.theLatestPreData.C1Desc
+                store.theLatestDataPreData.C1Desc
               }})</span
             >
           </h4>
@@ -277,7 +277,7 @@
                 ),
               }"
               >{{ store.theLatestDataPreData.C2Ratio }}({{
-                store.theLatestPreData.C2Desc
+                store.theLatestDataPreData.C2Desc
               }})</span
             >
           </h4>
@@ -371,7 +371,7 @@
                 ),
               }"
               >{{ store.theLatestDataPreData.C3Ratio }}({{
-                store.theLatestPreData.C3Desc
+                store.theLatestDataPreData.C3Desc
               }})</span
             >
           </h4>
@@ -464,7 +464,7 @@
                 ),
               }"
               >{{ store.theLatestDataPreData.C4Ratio }}({{
-                store.theLatestPreData.C4Desc
+                store.theLatestDataPreData.C4Desc
               }})</span
             >
           </h4>
@@ -558,7 +558,7 @@
                 ),
               }"
               >{{ store.theLatestDataPreData.C5Ratio }}({{
-                store.theLatestPreData.C5Desc
+                store.theLatestDataPreData.C5Desc
               }})</span
             >
           </h4>
@@ -652,7 +652,7 @@
                 ),
               }"
               >{{ store.theLatestDataPreData.C6Ratio }}({{
-                store.theLatestPreData.C6Desc
+                store.theLatestDataPreData.C6Desc
               }})</span
             >
           </h4>
@@ -746,7 +746,7 @@
                 ),
               }"
               >{{ store.theLatestDataPreData.C7Ratio }}({{
-                store.theLatestPreData.C7Desc
+                store.theLatestDataPreData.C7Desc
               }})</span
             >
           </h4>
@@ -840,7 +840,7 @@
                 ),
               }"
               >{{ store.theLatestDataPreData.C8Ratio }}({{
-                store.theLatestPreData.C8Desc
+                store.theLatestDataPreData.C8Desc
               }})</span
             >
           </h4>
@@ -933,7 +933,7 @@
                 ),
               }"
               >{{ store.theLatestDataPreData.C9Ratio }}({{
-                store.theLatestPreData.C9Desc
+                store.theLatestDataPreData.C9Desc
               }})</span
             >
           </h4>
