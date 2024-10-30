@@ -10,7 +10,7 @@
         <div class="loginBox">
           <div class="phoneGroup">
             <input
-              type="text"
+              type="tel"
               v-model="mobile"
               placeholder="請輸入您的手機號碼"
             />
@@ -43,9 +43,20 @@
         <div class="forgetPasswordGroup">
           <router-link to="/forgetPassword">忘記密碼?</router-link>
         </div>
-        <button class="loginBtn" @click="login" :disabled="!mobile || !password">登入</button>
+        <button
+          class="loginBtn"
+          @click="login"
+          :disabled="!mobile || !password"
+        >
+          登入
+        </button>
 
         <div class="bottomHintGroup">
+          <!-- PWA 安裝按鈕 -->
+          <button class="btngroup">
+            <img src="../assets/imgs/download.svg" />
+            <h5 @click="installPWA">下載APP</h5>
+          </button>
           <router-link to="/register">
             <img class="icon" src="../assets/imgs/register.svg" alt="" />
             <h5>註冊會員</h5>
@@ -118,6 +129,7 @@
     }
 
     input[type="text"],
+    input[type="tel"],
     input[type="password"] {
       outline: none;
       border: none;
@@ -140,7 +152,7 @@
       align-items: center;
       gap: 3px;
       margin-top: 1rem;
-      
+
       input {
         appearance: none;
         width: 1.5rem;
@@ -167,18 +179,17 @@
         }
       }
 
-      a{
+      a {
         text-decoration: none;
         color: #666;
         font-size: 1.25rem;
         letter-spacing: 0.09px;
         font-weight: 400;
         transform: translateY(10%);
-       label{
-        cursor: pointer;
-       }
+        label {
+          cursor: pointer;
+        }
       }
-    
     }
     .forgetPasswordGroup {
       text-align: center;
@@ -209,13 +220,14 @@
         background-color: $raphael-green-500;
       }
       &:disabled {
-        background-color: $raphael-gray-400; 
-        cursor: not-allowed; 
+        background-color: $raphael-gray-400;
+        cursor: not-allowed;
         opacity: 0.6;
       }
     }
 
     .bottomHintGroup {
+      margin-top: 0.75rem;
       a {
         display: flex;
         justify-content: center;
@@ -234,12 +246,13 @@
 </style>
 
 <script>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import RaphaelLoading from "../components/RaphaelLoading";
 import eyesCloseGreen from "../assets/imgs/eyesCloseGreen.svg";
 import eyesOpenGreen from "../assets/imgs/eyesOpenGreen.svg";
+
 export default {
   setup() {
     const verificationTitle = ref("會員登入");
@@ -248,7 +261,14 @@ export default {
     const password = ref("");
     const passwordVisible = ref(false);
     const router = useRouter();
-    const isPrivacy = ref(false)
+
+    const isIOS =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone;
+    let deferredPrompt = null;
+
     const togglePasswordVisibility = () => {
       passwordVisible.value = !passwordVisible.value;
     };
@@ -264,32 +284,16 @@ export default {
           }
         );
 
-        if (response.status === 200) {
-          if (
-            response.data.Token.trim() !== "" &&
-            response.data.MAID.trim() !== ""
-          ) {
-            console.log("登入成功:", response.data);
-            loading.value = false;
-            if (response.data) {
-              localStorage.setItem(
-                "userData",
-                JSON.stringify({
-                  Token: response.data.Token,
-                  MAID: response.data.MAID,
-                  MID: response.data.MID,
-                  A5Digit: response.data.A5Digit,
-                  Mobile: response.data.Mobile,
-                  startTime: response.data.startTime,
-                })
-              );
-            }
-
-            router.push({ name: "user" });
-          } else {
-            alert(`登入失敗 : ${response.data.Result}`);
-            loading.value = false;
-          }
+        if (
+          response.status === 200 &&
+          response.data.Token.trim() &&
+          response.data.MAID.trim()
+        ) {
+          console.log("登入成功:", response.data);
+          localStorage.setItem("userData", JSON.stringify(response.data));
+          router.push({ name: "user" });
+        } else {
+          alert(`登入失敗 : ${response.data.Result}`);
         }
       } catch (err) {
         alert("登入失敗，請檢查手機號碼和密碼。");
@@ -297,6 +301,36 @@ export default {
         loading.value = false;
       }
     };
+
+    const installPWA = async () => {
+      if (isIOS && !isStandalone) {
+        // 提示 iOS 用戶如何安裝 PWA
+        alert("在瀏覽器中點擊分享按鈕，然後選擇『加入主畫面』以安裝 APP。");
+      } else if (deferredPrompt) {
+        // 顯示 Android 和桌機瀏覽器的安裝提示
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === "accepted") {
+          console.log("用戶已安裝");
+        } else {
+          console.log("用戶取消安裝");
+        }
+        deferredPrompt = null;
+      } else {
+        alert("您的裝置已支援安裝或已安裝，若無法安裝請檢查瀏覽器設置。");
+      }
+    };
+
+    onMounted(() => {
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+      });
+
+      window.addEventListener("appinstalled", () => {
+        console.log("PWA 已成功安裝");
+      });
+    });
 
     return {
       verificationTitle,
@@ -308,7 +342,7 @@ export default {
       mobile,
       password,
       login,
-      isPrivacy
+      installPWA,
     };
   },
 };
