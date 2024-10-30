@@ -809,62 +809,65 @@
   // 從本地儲存中獲取 userData
   const userData = JSON.parse(localStorage.getItem("userData"));
 
-  // 獲取工作機器的 result
-  const result = JSON.parse(sessionStorage.getItem("result"));
+  // 比較並請求結果
+  async function fetchResultIfChanged() {
+    const currentResult = JSON.parse(sessionStorage.getItem("result"));
+    const previousResult = sessionStorage.getItem("lastFetchedResult");
 
-  // 檢查是否成功獲取資料
-  console.log(userData);
-  console.log(result);
+    // 將物件轉為字串以便簡單比較
+    if (JSON.stringify(currentResult) === previousResult) {
+      console.log("結果未改變，跳過 API 呼叫。");
+      return;
+    }
 
-  async function fetchResult() {
     try {
-      // 設定要傳送的資料
-      const response = await fetch(
-        "https://23700999.com:8081/HMA/API_HRV2Save.jsp",
-        {
-          method: "POST", // 設定 HTTP 方法為 POST
-          headers: {
-            "Content-Type": "application/json", // 設定內容類型為 JSON
-          },
-          body: JSON.stringify({
-            MID: userData.MID,
-            MAID: userData.MAID,
-            Token: userData.Token,
-            Mobile: userData.Mobile,
-            PNS: String(result.ANSIndex.PNS),
-            SNS: String(result.ANSIndex.SNS),
-            DBP: String(result.dbp), // 舒張壓
-            HR: String(result.hr), // 心率
-            HRV: String(result.hrv), // 心律變異性
-            rr: String(result.rr), // 呼吸
-            SBP: String(result.sbp), // 收縮壓
-            SPO2: String(result.spo2), // 血氧
-            Activity: String(result.activity), // 活動力
-            Equilibrium: String(result.equilibrium), // 平衡力
-            Health: String(result.health), // 健康力
-            Metabolism: String(result.metabolism), // 代謝力
-            Relaxation: String(result.relaxation), // 放鬆力
-            Sleep: String(result.sleep), // 睡眠力
-            HF: String(result.hrv_indices.HF),
-            LF: String(result.hrv_indices.LF),
-            LF_HF_Ratio: String(result.hrv_indices.LF_HF_RATIO),
-            Mean_RR: String(result.hrv_indices.MEAN_RR),
-            PHF: String(result.hrv_indices.PHF),
-            PLF: String(result.hrv_indices.PLF),
-            RMSSD: String(result.hrv_indices.RMSSD),
-            RRIV: String(result.hrv_indices.RRIV),
-            SD1: String(result.hrv_indices.SD1),
-            SD2: String(result.hrv_indices.SD2),
-            SDNN: String(result.hrv_indices.SDNN),
-            hr: String(result.hr_hrv),
-            si: String(result.si),
-          }),
-        }
-      );
+      // 儲存當前的 result 作為上次請求的結果
+      sessionStorage.setItem("lastFetchedResult", JSON.stringify(currentResult));
+
+      const response = await fetch("https://23700999.com:8081/HMA/API_HRV2Save.jsp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          MID: userData.MID,
+          MAID: userData.MAID,
+          Token: userData.Token,
+          Mobile: userData.Mobile,
+          // 使用 currentResult 來填充參數
+          PNS: String(currentResult.ANSIndex.PNS),
+          SNS: String(currentResult.ANSIndex.SNS),
+          DBP: String(currentResult.dbp), // 舒張壓
+          HR: String(currentResult.hr), // 心率
+          HRV: String(currentResult.hrv), // 心律變異性
+          rr: String(currentResult.rr), // 呼吸
+          SBP: String(currentResult.sbp), // 收縮壓
+          SPO2: String(currentResult.spo2), // 血氧
+          Activity: String(currentResult.activity), // 活動力
+          Equilibrium: String(currentResult.equilibrium), // 平衡力
+          Health: String(currentResult.health), // 健康力
+          Metabolism: String(currentResult.metabolism), // 代謝力
+          Relaxation: String(currentResult.relaxation), // 放鬆力
+          Sleep: String(currentResult.sleep), // 睡眠力
+          HF: String(currentResult.hrv_indices.HF),
+          LF: String(currentResult.hrv_indices.LF),
+          LF_HF_Ratio: String(currentResult.hrv_indices.LF_HF_RATIO),
+          Mean_RR: String(currentResult.hrv_indices.MEAN_RR),
+          PHF: String(currentResult.hrv_indices.PHF),
+          PLF: String(currentResult.hrv_indices.PLF),
+          RMSSD: String(currentResult.hrv_indices.RMSSD),
+          RRIV: String(currentResult.hrv_indices.RRIV),
+          SD1: String(currentResult.hrv_indices.SD1),
+          SD2: String(currentResult.hrv_indices.SD2),
+          SDNN: String(currentResult.hrv_indices.SDNN),
+          hr: String(currentResult.hr_hrv),
+          si: String(currentResult.si),
+        }),
+      });
 
       // 檢查響應狀態
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        throw new Error("網路響應不是成功狀態");
       }
 
       // 獲取 JSON 響應
@@ -875,7 +878,7 @@
     }
   }
 
-  fetchResult();
+  fetchResultIfChanged();
 </script>
 
 <style lang="scss">
