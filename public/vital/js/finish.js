@@ -32,12 +32,11 @@ let _finish_spower_chart = null;
 let _finish_vital_result_printer = null;
 const SetSPowerValue = (id, value) => {
   if (value >= 0) {
-    document.getElementById(id).src =  `${VIEW_FINISH_SP_PREFIX}${value}.png`;
-    show(id)
-  }
-  else {
-    document.getElementById(id).src = ''
-    hide(id)
+    document.getElementById(id).src = `${VIEW_FINISH_SP_PREFIX}${value}.png`;
+    show(id);
+  } else {
+    document.getElementById(id).src = "";
+    hide(id);
   }
 };
 
@@ -53,11 +52,11 @@ const InitFinish = () => {
     si_id: VIEW_FINISH_SI,
     bioage_id: VIEW_FINISH_BIOAGE,
     ba2_id: VIEW_FINISH_BA2,
-    ba4_id: VIEW_FINISH_BA4
+    ba4_id: VIEW_FINISH_BA4,
   });
   _finish_vital_result_printer.setAnsIndexElement({
     ans_index_sns_id: VIEW_FINISH_ANS_INDEX_SNS,
-    ans_index_pns_id: VIEW_FINISH_ANS_INDEX_PNS
+    ans_index_pns_id: VIEW_FINISH_ANS_INDEX_PNS,
   });
 
   // 檢查 SPowerChart 是否存在
@@ -69,7 +68,6 @@ const InitFinish = () => {
   //   console.error("SPowerChart is not defined. Please ensure it is correctly included.");
   // }
 };
-
 
 const GoToFinish = () => {
   // 檢查 _finish_spower_chart 是否已初始化，避免 null 錯誤
@@ -100,7 +98,7 @@ const GoToFinish = () => {
   SetSPowerValue(VIEW_FINISH_SLEEP, result.sleep);
 
   let storedData = JSON.parse(sessionStorage.getItem("Age"));
-  
+
   // 確認是否有資料
   if (storedData && storedData.length > 0) {
     // 處理 storedData 資料
@@ -122,13 +120,13 @@ const GoToFinish = () => {
       si: result.si,
       ans_index_sns: result.ANSIndex.SNS,
       ans_index_pns: result.ANSIndex.PNS,
-      hr_valid: (result.signal_quality.hr_hrv > 0.7),
-      bp_valid: (result.signal_quality.bp > 0.6),
-      rr_valid: (result.signal_quality.resp > 0.7),
-      spo2_valid: (result.signal_quality.spo2 > 0.9),
+      hr_valid: result.signal_quality.hr_hrv > 0.7,
+      bp_valid: result.signal_quality.bp > 0.6,
+      rr_valid: result.signal_quality.resp > 0.7,
+      spo2_valid: result.signal_quality.spo2 > 0.9,
       bioage: upbioage,
       ba2: upba2,
-      ba4: upba4
+      ba4: upba4,
     });
   }
 
@@ -145,7 +143,6 @@ const GoToFinish = () => {
     }
   }, 200);
 };
-
 
 // const GoToBasicInfo = () => {
 //   window.location.href = "basic_info.html";

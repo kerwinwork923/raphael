@@ -176,15 +176,16 @@ export default {
 
   if (!isInteger(localData.Height) || parseInt(localData.Height) <= 0) {
     alert("您的身高格式不正確，請修改會員資料");
+     window.location.href = "/changeMember"
     return;
   }
 
   if (!isInteger(localData.Weight) || parseInt(localData.Weight) <= 0) {
     alert("您的體重格式不正確，請修改會員資料");
+     window.location.href = "/changeMember"
     return;
   }
 
-  // 檢查生日格式並確保日、月、年為合理數值
   const birthdayParts = localData.Birthday.split("/");
   if (
     birthdayParts.length !== 3 ||
@@ -196,24 +197,27 @@ export default {
     isNaN(calculateAge(localData.Birthday))  // 年齡計算有效性檢查
   ) {
     alert("生日格式不正確或包含無效日期，請修改會員資料。");
+    window.location.href = "/changeMember"
     return;
   }
 
-  // 性別檢查
   let scanAge = parseInt(localData.Sex);
   if (scanAge !== 1 && scanAge !== 2) {
     alert("性別格式不正確，請修改會員資料。");
+     window.location.href = "/changeMember"
     return;
   }
 
-  // DSPR 檢查
-  if (localData.DSPR === "") {
-    showDSPRSelect.value = true;
+  // DSPR 檢查 - 判斷是否為預期的三個值之一
+  const validDSPRValues = ["normal", "prehypertension", "hypertension"];
+  if (!validDSPRValues.includes(localData.DSPR)) {
+    // alert("請選擇有效的血壓範圍。");
+    showDSPRSelect.value = true; // 顯示選擇彈窗
     return;
   }
 
   const convertedData = {
-    age: calculateAge(localData.Birthday), // 計算年齡的輔助函數
+    age: calculateAge(localData.Birthday),
     bp_group: localData.DSPR,
     bp_mode: "ternary",
     facing_mode: "user",
@@ -225,6 +229,7 @@ export default {
   sessionStorage.setItem("data", JSON.stringify(convertedData));
   window.location.href = "/vital/scan.html";
 };
+
 
 
     // Helper function to calculate age based on Birthday
