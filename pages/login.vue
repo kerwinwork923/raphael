@@ -227,7 +227,7 @@
     .bottomHintGroup {
       display: grid;
       gap: 1.5rem;
-      margin-top: 44px;
+      margin-top: 60px;
 
       .downloadBtn {
         display: flex;
