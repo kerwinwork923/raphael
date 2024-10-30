@@ -9,27 +9,15 @@
       <div class="loginWrap">
         <div class="loginBox">
           <div class="phoneGroup">
-            <input
-              type="tel"
-              v-model="mobile"
-              placeholder="請輸入您的手機號碼"
-            />
+            <input type="tel" v-model="mobile" placeholder="請輸入您的手機號碼" />
             <img class="icon1" src="../assets/imgs/phoneGreen.svg" alt="" />
           </div>
           <div class="passwordGroup">
-            <input
-              :type="passwordVisible ? 'text' : 'password'"
-              v-model="password"
-              placeholder="請輸入密碼"
-              @input="validatePassword"
-            />
+            <input :type="passwordVisible ? 'text' : 'password'" v-model="password" placeholder="請輸入密碼"
+              @input="validatePassword" />
             <img class="icon1" src="../assets/imgs/passwordGreen.svg" alt="" />
-            <img
-              class="icon2"
-              :src="passwordVisible ? eyesOpenGreen : eyesCloseGreen"
-              @click="togglePasswordVisibility"
-              alt=""
-            />
+            <img class="icon2" :src="passwordVisible ? eyesOpenGreen : eyesCloseGreen" @click="togglePasswordVisibility"
+              alt="" />
           </div>
         </div>
         <!-- <div class="privacyGroup">
@@ -43,17 +31,13 @@
         <div class="forgetPasswordGroup">
           <router-link to="/forgetPassword">忘記密碼?</router-link>
         </div>
-        <button
-          class="loginBtn"
-          @click="login"
-          :disabled="!mobile || !password"
-        >
+        <button class="loginBtn" @click="login" :disabled="!mobile || !password">
           登入
         </button>
 
         <div class="bottomHintGroup">
           <!-- PWA 安裝按鈕 -->
-          <button class="btngroup">
+          <button class="downloadBtn">
             <img src="../assets/imgs/download.svg" />
             <h5 @click="installPWA">下載APP</h5>
           </button>
@@ -79,6 +63,7 @@
 
   .raphaelIconImgGroup {
     text-align: center;
+
     .raphaelIcon {
       width: 50px;
       height: 50px;
@@ -101,6 +86,7 @@
     margin: 0 auto;
     max-width: 576px;
   }
+
   .loginWrap {
     .loginBox {
       background-color: #fff;
@@ -108,17 +94,20 @@
       padding: 1rem;
       margin-top: 2.25rem;
     }
+
     .phoneGroup,
     .passwordGroup,
     .passwordAgainGroup {
       position: relative;
       margin-bottom: 1rem;
+
       .icon1 {
         position: absolute;
         top: 50%;
         left: 2px;
         transform: translateY(-50%);
       }
+
       .icon2 {
         position: absolute;
         top: 50%;
@@ -139,6 +128,7 @@
       padding-left: 36px;
       padding-bottom: 16px;
       padding-top: 16px;
+
       &::placeholder {
         color: $raphael-gray-500;
         font-family: Inter;
@@ -147,6 +137,7 @@
         color: $raphael-gray-400;
       }
     }
+
     .privacyGroup {
       display: flex;
       align-items: center;
@@ -161,6 +152,7 @@
         border-radius: 4px;
         cursor: pointer;
         position: relative;
+
         &:checked {
           background-color: $raphael-green-400;
           border: none;
@@ -186,14 +178,17 @@
         letter-spacing: 0.09px;
         font-weight: 400;
         transform: translateY(10%);
+
         label {
           cursor: pointer;
         }
       }
     }
+
     .forgetPasswordGroup {
       text-align: center;
       margin-top: 1.25rem;
+
       a {
         color: #666;
         font-family: Roboto;
@@ -203,6 +198,7 @@
         text-decoration: none;
       }
     }
+
     .loginBtn {
       background-color: $raphael-green-400;
       color: #fff;
@@ -216,9 +212,11 @@
       transition: 0.25s ease;
       margin-top: 1.5rem;
       cursor: pointer;
+
       &:hover {
         background-color: $raphael-green-500;
       }
+
       &:disabled {
         background-color: $raphael-gray-400;
         cursor: not-allowed;
@@ -227,7 +225,27 @@
     }
 
     .bottomHintGroup {
-      margin-top: 0.75rem;
+      display: grid;
+      gap: 1.5rem;
+      margin-top: 44px;
+
+      .downloadBtn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        background: transparent;
+        border: 0;
+        color: $raphael-gray-500;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all .2s ease;
+
+        &:hover {
+          color: $raphael-green-400;
+        }
+      }
+
       a {
         display: flex;
         justify-content: center;
@@ -235,10 +253,14 @@
         gap: 4px;
         margin: 0 auto;
         width: 100%;
-        margin-top: 60px;
         text-align: center;
         text-decoration: none;
         color: #666;
+        transition: all .2s ease;
+
+        &:hover {
+          color: $raphael-green-400;
+        }
       }
     }
   }
