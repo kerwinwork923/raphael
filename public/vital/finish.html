@@ -810,7 +810,7 @@
   const userData = JSON.parse(localStorage.getItem("userData"));
 
   // 獲取工作機器的 result
-  const result = JSON.parse(localStorage.getItem("result"));
+  const result = JSON.parse(sessionStorage.getItem("result"));
 
   // 檢查是否成功獲取資料
   console.log(userData);
