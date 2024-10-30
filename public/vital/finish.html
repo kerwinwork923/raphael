@@ -1,4 +1,4 @@
-﻿<html>
+<html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -806,10 +806,77 @@
 </html>
 
 <script>
+  let upbioage, upba2, upba4;
+
+  let storedData = JSON.parse(sessionStorage.getItem("Age"));
+  //console.log(storedData); // 這裡你將看到存入的 nArray 陣列
+  //alert(storedData);
+
+  if (storedData.length > 0) {
+    // 建立三個陣列來分別存儲 A, B, C
+    let aValues = [];
+    let bValues = [];
+    let cValues = [];
+
+    // 遍歷 storedData，取出正值並分別存入三個陣列
+    storedData.forEach((data) => {
+      let [a, b, c] = data;
+      if (a > 0 && a < 100) aValues.push(a);
+      if (b > 0 && b < 100) bValues.push(b);
+      if (c > 0 && c < 100) cValues.push(c);
+    });
+
+    // 計算平均值的函數
+    const calculateAverage = (values) => {
+      if (values.length === 0) return 0; // 避免除以 0
+      let sum = values.reduce((acc, val) => acc + val, 0);
+      return sum / values.length;
+    };
+    console.log(storedData);
+    console.log(cValues);
+
+    // 函數：計算移除極端值後的平均數
+    function trimmedMean(arr, trimPercent) {
+      // 先對數據進行排序
+      const sortedArr = arr.slice().sort((a, b) => a - b);
+      // 計算要移除的數據筆數
+      const trimCount = Math.floor(trimPercent * sortedArr.length);
+      // 移除最小和最大指定百分比的數據
+      const trimmedArr = sortedArr.slice(
+        trimCount,
+        sortedArr.length - trimCount
+      );
+      // 計算剩餘數據的平均數
+      const sum = trimmedArr.reduce((acc, value) => acc + value, 0);
+      const mean = sum / trimmedArr.length;
+      return mean;
+    }
+    // 假設移除最小與最大各10%的數據
+    const trimPercent = 0.1; // 移除10%資料
+
+    // 計算 A, B, C 的平均值
+    //upbioage = calculateAverage(aValues);
+    //upba2 = calculateAverage(bValues);
+    //upba4 = calculateAverage(cValues);
+    upbioage = trimmedMean(aValues, trimPercent);
+    upba2 = trimmedMean(bValues, trimPercent); //生理年零
+    upba4 = trimmedMean(cValues, trimPercent);
+  }
+</script>
+
+<script>
   // 從本地儲存中獲取 userData
   const userData = JSON.parse(localStorage.getItem("userData"));
   const currentResult = JSON.parse(sessionStorage.getItem("result"));
+  if (userData.name) {
+    const userName = document.querySelector(".titleGroup .textGroup h3");
 
+    userName.textContent = `${userName?.Name}，您好`;
+    const currentDate = new Date();
+    today.textContent = `${currentDate.getFullYear()}-${
+      currentDate.getMonth() + 1
+    }-${currentDate.getDate()}`;
+  }
   if (currentResult && currentResult.ANSIndex) {
     const resultTextGroupP = document.querySelector(".resultTextGroup p");
 
@@ -894,6 +961,10 @@
             SDNN: String(currentResult.hrv_indices.SDNN),
             hr: String(currentResult.hr_hrv),
             si: String(currentResult.si),
+            bioage: String(upbioage),
+            selage: String(upba2),
+            ba2: String(upba2),
+            ba4: String(upba4),
           }),
         }
       );
