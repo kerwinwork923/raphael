@@ -46,7 +46,10 @@
             >
           </h6>
         </div>
-        <h5 class="subText nextSunText">
+        <h5
+          class="subText nextSunText"
+          v-if="store.theLatestHistoryPre.CheckTime"
+        >
           (前次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
         </h5>
         <div class="severity" v-if="store.theLatestDataPreData.TotalScore">
@@ -1135,8 +1138,8 @@ export default {
         margin-bottom: 0.75rem;
       }
 
-      .nextSunText{
-        margin-top:.75rem;
+      .nextSunText {
+        margin-top: 0.75rem;
       }
 
       .resultHintText {
@@ -1148,7 +1151,7 @@ export default {
       }
 
       .severityText {
-        color:$raphael-gray-500;
+        color: $raphael-gray-500;
         letter-spacing: 0.048px;
         span {
           color: #ec4f4f;
