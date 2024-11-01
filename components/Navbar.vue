@@ -20,9 +20,8 @@
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  padding: 5px 1rem;
   display: flex;
-  width: 100%;
+  width: 90%;
   z-index: 999;
   align-items: center;
   max-width: 768px;
