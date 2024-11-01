@@ -37,9 +37,9 @@
 
         <div class="bottomHintGroup">
           <!-- PWA 安裝按鈕 -->
-          <button class="downloadBtn">
+          <button type="button" class="downloadBtn" @click="installPWA">
             <img src="../assets/imgs/download.svg" />
-            <h5 @click="installPWA">下載APP</h5>
+            <h5>下載APP</h5>
           </button>
           <router-link to="/register">
             <img class="icon" src="../assets/imgs/register.svg" alt="" />
