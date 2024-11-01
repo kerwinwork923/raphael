@@ -138,12 +138,12 @@ export default {
 
 <style lang="scss">
 .cover {
-  position: absolute;
+ position: fixed;
   left: 0;
   top: 0;
 
   width: 100%;
-  height: 100%;
+  height: 100vh;
   z-index: 9;
   background: rgba(217, 217, 217, 0.5);
   backdrop-filter: blur(2.5px);
