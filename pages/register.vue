@@ -792,9 +792,13 @@ export default {
         text-align: center;
         text-decoration: none;
         color: #666;
+        transition: all .2s ease;
+
+        &:hover {
+          color: $raphael-green-400;
+        }
       }
-    }
-   
+    }   
   }
 }
 </style>
