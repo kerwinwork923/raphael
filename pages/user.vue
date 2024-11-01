@@ -261,7 +261,7 @@ export default {
   width: 100%;
 
   .userGroup {
-    padding-top: 90px;
+    padding-top: 68px;
     max-width: 90%;
     margin: 0 auto;
     width: 90%;
