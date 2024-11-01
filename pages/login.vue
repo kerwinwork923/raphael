@@ -193,7 +193,6 @@
 
       a {
         color: #666;
-        font-family: Roboto;
         font-size: 1rem;
         font-weight: 400;
         letter-spacing: 0.5px;
