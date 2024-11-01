@@ -69,6 +69,8 @@
         </button>
 
         <div class="bottomHintGroup">
+          <!-- 分隔線 -->
+          <div class="separate">or</div>
           <router-link to=/login>
             <img class="icon" src="../assets/imgs/change.svg" alt="" />
             <h5>已有會員</h5>
@@ -573,7 +575,7 @@ export default {
   width: 100%;
   padding-bottom: 2rem;
   .registerGroup {
-    padding-top: 100px;
+    padding-top: 4.25rem;
     width: 90%;
     margin: 0 auto;
     max-width: 576px;
@@ -781,7 +783,32 @@ export default {
     }
 
     .bottomHintGroup {
+      display: grid;   
+      gap: 1.5rem;
       margin-top: 60px;
+      .separate{
+        position: relative;
+        display: flex;    
+        align-items: center;
+        justify-content: center;
+        color: $raphael-gray-300;
+
+        &::before,&::after{
+          content:"";
+          position: absolute;
+          background: $raphael-gray-300;
+          width: 45%;
+          height: 1px;
+        }
+
+        &::before{
+          left: 0;
+        }
+        
+        &::after{
+          right: 0;
+        }
+      }
       a {
         display: flex;
         justify-content: center;
@@ -791,11 +818,15 @@ export default {
         width: 100%;
         text-align: center;
         text-decoration: none;
+        border-radius: 8px;
+        border: 1px solid #1e1e1e;
+        padding: 9px;
         color: #666;
         transition: all .2s ease;
 
         &:hover {
           color: $raphael-green-400;
+          border: 1px solid $raphael-green-400;
         }
       }
     }   
