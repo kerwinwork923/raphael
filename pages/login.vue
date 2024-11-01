@@ -59,10 +59,8 @@
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-size: cover;
-  min-height: 100vh;
-  padding-bottom: 2rem;
   width: 100%;
-
+  height: 100vh;
   .raphaelIconImgGroup {
     text-align: center;
 
@@ -87,6 +85,7 @@
     width: 90%;
     margin: 0 auto;
     max-width: 576px;
+    height: 100%;
   }
 
   .loginWrap {

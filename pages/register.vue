@@ -571,12 +571,12 @@ export default {
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-size: cover;
-  min-height: 100vh;
+  height: 100vh;
   width: 100%;
-  padding-bottom: 2rem;
   .registerGroup {
     padding-top: 4.25rem;
     width: 90%;
+    height: 100%;
     margin: 0 auto;
     max-width: 576px;
 
