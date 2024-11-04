@@ -391,6 +391,21 @@
 </script>
 
 <script>
+  //dom獲取元素
+  f_v_ba2 = document.querySelector("#f_v_ba2");
+  f_v_hrv = document.querySelector("#f_v_hrv");
+  f_v_hr = document.querySelector("#f_v_hr");
+  f_v_sbp = document.querySelector("#f_v_sbp");
+  f_v_dbp = document.querySelector("#f_v_dbp");
+  f_v_spo2 = document.querySelector("#f_v_spo2");
+  f_v_rr = document.querySelector("#f_v_rr");
+  f_v_si = document.querySelector("#f_v_si");
+  f_v_health = document.querySelector("#f_v_health");
+  f_v_sleep = document.querySelector("#f_v_sleep");
+  f_v_metabolism = document.querySelector("#f_v_metabolism");
+  f_v_equilibrium = document.querySelector("#f_v_equilibrium");
+  f_v_activity = document.querySelector("#f_v_activity");
+  f_v_relaxation = document.querySelector("#f_v_relaxation");
   // 從本地儲存中獲取 userData
   const userData = JSON.parse(localStorage.getItem("userData"));
   const currentResult = JSON.parse(sessionStorage.getItem("result"));
@@ -524,6 +539,25 @@
         }
       );
 
+      if (response.ok) {
+        if (HRV.length > 0) {
+          const HRVData = response.HRV[0];
+          f_v_ba2.textContent = HRVData.ba2;
+          f_v_hrv.textContent = HRVData.HRV;
+          f_v_hr.textContent = HRVData.HR;
+          f_v_sbp.textContent = HRVData.SBP;
+          f_v_dbp.textContent = HRVData.DBP;
+          f_v_spo2.textContent = SPO2;
+          f_v_rr.textContent = HRVData.rr;
+          f_v_si.textContent = HRVData.stress;
+          f_v_health.textContent = HRVData.Health;
+          f_v_sleep.textContent = HRVData.Sleep;
+          f_v_metabolism.textContent = HRVData.Metabolism;
+          f_v_equilibrium.textContent = HRVData.Equilibrium;
+          f_v_activity.textContent = HRVData.Activity;
+          f_v_relaxation.textContent = HRVData.Relaxation;
+        }
+      }
       if (!response.ok) {
         throw new Error("網路響應不是成功狀態");
       }
@@ -549,7 +583,7 @@
             MAID: userData.MAID,
             Token: userData.Token,
             Mobile: userData.Mobile,
-            AID:"1"
+            AID: "1",
           }),
         }
       );
@@ -567,9 +601,12 @@
   // async function fetchResultIfChanged() {
 
   // }
-  fetchResultIfChanged();
-  API_HRV2();
-  API_HRV2Detail()
+  async function fetchData() {
+    await fetchResultIfChanged();
+    await API_HRV2();
+    await API_HRV2Detail();
+  }
+  fetchData()
 </script>
 
 <style>
