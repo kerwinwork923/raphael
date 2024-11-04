@@ -522,52 +522,52 @@
   }
 
   async function API_HRV2() {
-    try {
-      const response = await fetch(
-        "https://23700999.com:8081/HMA/API_HRV2.jsp",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            MID: userData.MID,
-            MAID: userData.MAID,
-            Token: userData.Token,
-            Mobile: userData.Mobile,
-          }),
-        }
-      );
-
-      if (response.ok) {
-        if (HRV.length > 0) {
-          const HRVData = response.data.HRV[0];
-          f_v_ba2.textContent = HRVData.ba2;
-          f_v_hrv.textContent = HRVData.HRV;
-          f_v_hr.textContent = HRVData.HR;
-          f_v_sbp.textContent = HRVData.SBP;
-          f_v_dbp.textContent = HRVData.DBP;
-          f_v_spo2.textContent = SPO2;
-          f_v_rr.textContent = HRVData.rr;
-          f_v_si.textContent = HRVData.stress;
-          f_v_health.textContent = HRVData.Health;
-          f_v_sleep.textContent = HRVData.Sleep;
-          f_v_metabolism.textContent = HRVData.Metabolism;
-          f_v_equilibrium.textContent = HRVData.Equilibrium;
-          f_v_activity.textContent = HRVData.Activity;
-          f_v_relaxation.textContent = HRVData.Relaxation;
-        }
+  try {
+    const response = await fetch(
+      "https://23700999.com:8081/HMA/API_HRV2.jsp",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          MID: userData.MID,
+          MAID: userData.MAID,
+          Token: userData.Token,
+          Mobile: userData.Mobile,
+        }),
       }
-      if (!response.ok) {
-        throw new Error("網路響應不是成功狀態");
-      }
+    );
 
-      const apiResult = await response.json();
-      return apiResult;
-    } catch (error) {
-      console.error("Fetch error:", error);
+    if (!response.ok) {
+      throw new Error("網路響應不是成功狀態");
     }
+
+    const apiResult = await response.json();
+    
+    if (apiResult.HRV && apiResult.HRV.length > 0) {
+      const HRVData = apiResult.HRV[0];
+      f_v_ba2.textContent = HRVData.ba2;
+      f_v_hrv.textContent = HRVData.HRV;
+      f_v_hr.textContent = HRVData.HR;
+      f_v_sbp.textContent = HRVData.SBP;
+      f_v_dbp.textContent = HRVData.DBP;
+      f_v_spo2.textContent = HRVData.SPO2;
+      f_v_rr.textContent = HRVData.rr;
+      f_v_si.textContent = HRVData.stress;
+      f_v_health.textContent = HRVData.Health;
+      f_v_sleep.textContent = HRVData.Sleep;
+      f_v_metabolism.textContent = HRVData.Metabolism;
+      f_v_equilibrium.textContent = HRVData.Equilibrium;
+      f_v_activity.textContent = HRVData.Activity;
+      f_v_relaxation.textContent = HRVData.Relaxation;
+    }
+
+    return apiResult;
+  } catch (error) {
+    console.error("Fetch error:", error);
   }
+}
 
   async function API_HRV2Detail() {
     try {
