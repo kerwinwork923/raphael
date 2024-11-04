@@ -28,23 +28,25 @@
         
         </div> -->
 
-        <div class="forgetPasswordGroup">
-          <router-link to="/forgetPassword">忘記密碼?</router-link>
-        </div>
         <button class="loginBtn" @click="login" :disabled="!mobile || !password">
           登入
         </button>
+        <div class="forgetPasswordGroup">
+          <router-link to="/forgetPassword">忘記密碼?</router-link>
+        </div>
 
         <div class="bottomHintGroup">
+          <!-- 分隔線 -->
+          <div class="separate">or</div>
+          <router-link to="/register">
+            <img class="icon" src="../assets/imgs/register.svg" alt="" />
+            <h5>註冊會員</h5>
+          </router-link>
           <!-- PWA 安裝按鈕 -->
           <button type="button" class="downloadBtn" @click="installPWA">
             <img src="../assets/imgs/download.svg" />
             <h5>下載APP</h5>
           </button>
-          <router-link to="/register">
-            <img class="icon" src="../assets/imgs/register.svg" alt="" />
-            <h5>註冊會員</h5>
-          </router-link>
         </div>
       </div>
     </div>
@@ -57,10 +59,8 @@
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-size: cover;
-  min-height: 100vh;
-  padding-bottom: 2rem;
   width: 100%;
-
+  height: 100vh;
   .raphaelIconImgGroup {
     text-align: center;
 
@@ -81,10 +81,11 @@
   }
 
   .loginGroup {
-    padding-top: 100px;
+    padding-top: 4.25rem;
     width: 90%;
     margin: 0 auto;
     max-width: 576px;
+    height: 100%;
   }
 
   .loginWrap {
@@ -191,7 +192,6 @@
 
       a {
         color: #666;
-        font-family: Roboto;
         font-size: 1rem;
         font-weight: 400;
         letter-spacing: 0.5px;
@@ -225,24 +225,53 @@
     }
 
     .bottomHintGroup {
-      display: grid;
+      display: grid;   
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, 1fr);
       gap: 1.5rem;
       margin-top: 60px;
+      .separate{
+        position: relative;
+        display: flex;    
+        align-items: center;
+        justify-content: center;
+        color: $raphael-gray-300;
+        grid-column: 1 / 3;
 
+        &::before,&::after{
+          content:"";
+          position: absolute;
+          background: $raphael-gray-300;
+          width: 45%;
+          height: 1px;
+        }
+
+        &::before{
+          left: 0;
+        }
+        
+        &::after{
+          right: 0;
+        }
+      }
       .downloadBtn {
+        background: transparent;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 4px;
-        background: transparent;
         border: 0;
         color: $raphael-gray-500;
         font-size: 1rem;
+        border-radius: 8px;
+        border: 1px solid #1e1e1e;
+        padding: 9px;
         cursor: pointer;
         transition: all .2s ease;
 
         &:hover {
           color: $raphael-green-400;
+          border: 1px solid $raphael-green-400;
         }
       }
 
@@ -255,11 +284,15 @@
         width: 100%;
         text-align: center;
         text-decoration: none;
+        border-radius: 8px;
+        border: 1px solid #1e1e1e;
+        padding: 9px;
         color: #666;
         transition: all .2s ease;
 
         &:hover {
           color: $raphael-green-400;
+          border: 1px solid $raphael-green-400;
         }
       }
     }

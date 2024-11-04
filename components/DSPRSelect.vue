@@ -153,12 +153,14 @@ export default {
   position: fixed;
   top: 50%;
   left: 50%;
-
   transform: translate(-50%, -50%);
   z-index: 99;
-  padding: 12px;
+  padding: 12px;    
+  padding-top: 32px;
   border-radius: 12px;
   width: 80%;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+
   .closeBtn {
     position: absolute;
     top: 3.25%;
@@ -182,8 +184,7 @@ export default {
     padding: 0.5rem 0;
     label {
       color: #666;
-      font-size: 1.5rem;
-      font-weight: 400;
+      font-size: 1.25rem;
       letter-spacing: 0.15px;
       margin-left: 0.15rem;
     }
