@@ -557,7 +557,8 @@
         apiResult.HRV2.forEach((history) => {
           const detectionDiv = document.createElement("div");
           detectionDiv.classList.add("detection");
-
+          detectionDiv.classList.add("detection");
+          detectionDiv.classList.add("detection");
           // 將 HTML 結構組合成內部內容
           detectionDiv.innerHTML = `
                 <div class="cGroup">
@@ -568,7 +569,7 @@
                     <div class="scroeTotal">
                         <h5>生理年齡</h5>
                         <div class="totalScore">
-                            ${history.Score} 歲
+                            ${history.ba2} 歲
                         </div>
                     </div>
                     <div class="seriousDegreeGroup">
