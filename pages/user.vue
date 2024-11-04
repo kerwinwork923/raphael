@@ -38,8 +38,8 @@
           <div class="topTitle">領取</div>
           <div class="bottomTitle">積分</div>
         </div>
-
-        <div class="item item2" @click="convertAndSaveUserData">
+        <!-- @click="convertAndSaveUserData" -->
+        <div class="item item2">
           <div class="topTitle">檢測</div>
           <div class="bottomTitle">HRV</div>
           <img src="../assets/imgs/faceIcon.svg" alt="" />
@@ -165,72 +165,70 @@ export default {
     });
 
     const convertAndSaveUserData = async () => {
-  const localData = JSON.parse(localStorage.getItem("userData"));
+      const localData = JSON.parse(localStorage.getItem("userData"));
 
-  if (!localData) {
-    alert("本地存儲中沒有用戶數據。");
-    return;
-  }
+      if (!localData) {
+        alert("本地存儲中沒有用戶數據。");
+        return;
+      }
 
-  const isInteger = (value) => Number.isInteger(parseInt(value, 10));
+      const isInteger = (value) => Number.isInteger(parseInt(value, 10));
 
-  if (!isInteger(localData.Height) || parseInt(localData.Height) <= 0) {
-    alert("您的身高格式不正確，請修改會員資料");
-     window.location.href = "/changeMember"
-    return;
-  }
+      if (!isInteger(localData.Height) || parseInt(localData.Height) <= 0) {
+        alert("您的身高格式不正確，請修改會員資料");
+        window.location.href = "/changeMember";
+        return;
+      }
 
-  if (!isInteger(localData.Weight) || parseInt(localData.Weight) <= 0) {
-    alert("您的體重格式不正確，請修改會員資料");
-     window.location.href = "/changeMember"
-    return;
-  }
+      if (!isInteger(localData.Weight) || parseInt(localData.Weight) <= 0) {
+        alert("您的體重格式不正確，請修改會員資料");
+        window.location.href = "/changeMember";
+        return;
+      }
 
-  const birthdayParts = localData.Birthday.split("/");
-  if (
-    birthdayParts.length !== 3 ||
-    parseInt(birthdayParts[0]) <= 0 ||  // 年份檢查
-    parseInt(birthdayParts[1]) < 1 ||   // 月份檢查
-    parseInt(birthdayParts[1]) > 12 ||  // 月份上限檢查
-    parseInt(birthdayParts[2]) < 1 ||   // 日期下限檢查
-    parseInt(birthdayParts[2]) > 31 ||  // 日期上限檢查
-    isNaN(calculateAge(localData.Birthday))  // 年齡計算有效性檢查
-  ) {
-    alert("生日格式不正確或包含無效日期，請修改會員資料。");
-    window.location.href = "/changeMember"
-    return;
-  }
+      const birthdayParts = localData.Birthday.split("/");
+      if (
+        birthdayParts.length !== 3 ||
+        parseInt(birthdayParts[0]) <= 0 || // 年份檢查
+        parseInt(birthdayParts[1]) < 1 || // 月份檢查
+        parseInt(birthdayParts[1]) > 12 || // 月份上限檢查
+        parseInt(birthdayParts[2]) < 1 || // 日期下限檢查
+        parseInt(birthdayParts[2]) > 31 || // 日期上限檢查
+        isNaN(calculateAge(localData.Birthday)) // 年齡計算有效性檢查
+      ) {
+        alert("生日格式不正確或包含無效日期，請修改會員資料。");
+        window.location.href = "/changeMember";
+        return;
+      }
 
-  let scanAge = parseInt(localData.Sex);
-  if (scanAge !== 1 && scanAge !== 2) {
-    alert("性別格式不正確，請修改會員資料。");
-     window.location.href = "/changeMember"
-    return;
-  }
+      let scanAge = parseInt(localData.Sex);
+      if (scanAge !== 1 && scanAge !== 2) {
+        alert("性別格式不正確，請修改會員資料。");
+        window.location.href = "/changeMember";
+        return;
+      }
 
-  // DSPR 檢查 - 判斷是否為預期的三個值之一
-  const validDSPRValues = ["normal", "prehypertension", "hypertension"];
-  if (!validDSPRValues.includes(localData.DSPR)) {
-    // alert("請選擇有效的血壓範圍。");
-    showDSPRSelect.value = true; // 顯示選擇彈窗
-    return;
-  }
+      // DSPR 檢查 - 判斷是否為預期的三個值之一
+      const validDSPRValues = ["normal", "prehypertension", "hypertension"];
+      if (!validDSPRValues.includes(localData.DSPR)) {
+        // alert("請選擇有效的血壓範圍。");
+        showDSPRSelect.value = true; // 顯示選擇彈窗
+        return;
+      }
 
-  const convertedData = {
-    age: calculateAge(localData.Birthday),
-    bp_group: localData.DSPR,
-    bp_mode: "ternary",
-    facing_mode: "user",
-    height: parseInt(localData.Height),
-    sex: scanAge,
-    weight: parseInt(localData.Weight),
-  };
+      const convertedData = {
+        age: calculateAge(localData.Birthday),
+        bp_group: localData.DSPR,
+        bp_mode: "ternary",
+        facing_mode: "user",
+        height: parseInt(localData.Height),
+        sex: scanAge,
+        weight: parseInt(localData.Weight),
+      };
 
-  sessionStorage.setItem("data", JSON.stringify(convertedData));
-  window.location.href = "/vital/scan.html";
-};
-
-
+      sessionStorage.setItem("data", JSON.stringify(convertedData));
+      window.location.href = "/vital/scan.html";
+    };
 
     // Helper function to calculate age based on Birthday
     const calculateAge = (birthday) => {
@@ -386,7 +384,7 @@ export default {
       }
       .item2 {
         background-color: $raphael-purple-200;
-        opacity: 1;
+        opacity: 0;
         cursor: pointer;
         &:hover {
           filter: brightness(0.95);
