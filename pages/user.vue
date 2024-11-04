@@ -384,8 +384,7 @@ export default {
       }
       .item2 {
         background-color: $raphael-purple-200;
-        opacity: 0;
-        cursor: pointer;
+
         &:hover {
           filter: brightness(0.95);
         }
