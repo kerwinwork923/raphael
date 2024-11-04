@@ -10,27 +10,31 @@ export default defineNuxtConfig({
           content: "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no",
         },
       ],
-      // 移除對 manifest 的引用
-      link: [],
+      link: [
+        {
+          rel: "manifest",
+          href: "/manifest.webmanifest", // 添加 manifest 文件的鏈接
+        },
+      ],
     },
   },
   ssr: false,
   modules: [
     "@pinia/nuxt",
-    "@vite-pwa/nuxt", // 使用 @vite-pwa/nuxt 模組替代 @nuxtjs/pwa
+    "@vite-pwa/nuxt",
   ],
   pwa: {
     registerType: "autoUpdate",
     manifest: {
       name: "NeuroPlus神經調節家",
-      id: "/", // 與 start_url 一致
+      id: "/",
       short_name: "NeuroPlus",
       theme_color: "#4DBA87",
       background_color: "#ffffff",
       display: "standalone",
       lang: "zh-TW",
       start_url: "/",
-      scope: "/", // 確保 scope 與 start_url 一致
+      scope: "/",
       icons: [
         {
           src: "/icon-192x192.png",
@@ -45,10 +49,10 @@ export default defineNuxtConfig({
       ],
       screenshots: [
         {
-          src: "/screenshot1.png", // 螢幕截圖
+          src: "/screenshot1.png",
           sizes: "1080x1920",
           type: "image/png",
-          form_factor: "narrow", // 可選值：'narrow', 'wide'
+          form_factor: "narrow",
         },
       ],
     },
