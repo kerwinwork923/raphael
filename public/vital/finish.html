@@ -245,9 +245,7 @@
       </div> -->
       <div class="detectionWrap">
         <h4 class="textResultText">檢測紀錄</h4>
-        <div class="detectionContainer">
-          
-        </div>
+        <div class="detectionContainer"></div>
         <!-- <div class="detection">
           <div class="cGroup">
             <img class="img" src="images/detectTime.svg" alt="" />
@@ -551,50 +549,39 @@
         document.querySelector(".titleGroup .timeGroup h4").textContent =
           formattedDate;
 
-        if (apiResult.HRV2 && apiResult.HRV2.length > 0) {
-          const detectionContainer = document.querySelector(
-            ".detectionContainer"
-          ); // 父容器
-          detectionContainer.innerHTML = ""; // 清空容器
+        const detectionContainer = document.querySelector(
+          ".detectionContainer"
+        );
+        detectionContainer.innerHTML = ""; // 清空容器
 
-          apiResult.HRV2.forEach((history) => {
-            // 建立一個 div 並設定 class
-            const detectionDiv = document.createElement("div");
-            detectionDiv.classList.add("detection");
+        apiResult.HRV2.forEach((history) => {
+          const detectionDiv = document.createElement("div");
+          detectionDiv.classList.add("detection");
 
-            // 將 HTML 結構組合成內部內容
-            detectionDiv.innerHTML = `
-            <div class="cGroup">
-                <img class="img" src="images/detectTime.svg" alt="" />
-            </div>
-            <h3 class="detectionDate">${formatDate(history.CheckTime)}</h3>
-            <div class="detectionGroup">
-                <div class="scroeTotal">
-                    <h5>生理年齡</h5>
-                    <div class="totalScore" style="color: ${scoreColorFn(
-                      computedScore(history.Score),
-                      sex
-                    )}">
-                        ${history.Score} 歲
-                    </div>
+          // 將 HTML 結構組合成內部內容
+          detectionDiv.innerHTML = `
+                <div class="cGroup">
+                    <img class="img" src="images/detectTime.svg" alt="" />
                 </div>
-                <div class="seriousDegreeGroup">
-                    <h5>HRV</h5>
-                    <div class="seriousScore" style="color: ${scoreColorFn(
-                      computedScore(history.Score),
-                      sex
-                    )}">
-                        ${history.HRV}ms
+                <h3 class="detectionDate">${formatDate(history.CheckTime)}</h3>
+                <div class="detectionGroup">
+                    <div class="scroeTotal">
+                        <h5>生理年齡</h5>
+                        <div class="totalScore">
+                            ${history.Score} 歲
+                        </div>
                     </div>
-                </div>
-            </div>
-        `;
+                    <div class="seriousDegreeGroup">
+                        <h5>HRV</h5>
+                        <div class="seriousScore">
+                            ${history.HRV} ms
+                        </div>
+                    </div>
+                </div>`;
 
-            // 將新的 detectionDiv 添加到容器中
-            detectionContainer.appendChild(detectionDiv);
-          });
-        }
-
+          // 將新的 detectionDiv 添加到容器中
+          detectionContainer.appendChild(detectionDiv);
+        });
         // 格式化日期的函數
         function formatDate(checkTime) {
           const dateOnly = checkTime.split(" ")[0]; // 提取日期部分
