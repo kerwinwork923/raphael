@@ -394,7 +394,7 @@
   // 從本地儲存中獲取 userData
   const userData = JSON.parse(localStorage.getItem("userData"));
   const currentResult = JSON.parse(sessionStorage.getItem("result"));
-  if (userData.name) {
+  if (userData.Name) {
     nameText.textContent = `${userName?.Name}，您好`;
     const currentDate = new Date();
   }
