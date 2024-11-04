@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- 更新為正確的 manifest 路徑 -->
+    <link rel="manifest" href="/manifest.json"> 
+</head>
+<body>
+    ads
+</body>
+<script>
+    const manifestLink = document.querySelector('link[rel="manifest"]');
+    if (manifestLink) {
+        console.log('Manifest URL:', manifestLink.href);
+    } else {
+        console.log('Manifest link not found.');
+    }
+</script>
+</html>
