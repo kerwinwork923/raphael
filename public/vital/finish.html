@@ -538,7 +538,7 @@
   async function API_HRV2Detail() {
     try {
       const response = await fetch(
-        "https://23700999.com:8081/HMA/API_HRV2Detail.jsp.jsp",
+        "https://23700999.com:8081/HMA/API_HRV2Detail.jsp",
         {
           method: "POST",
           headers: {
@@ -549,7 +549,7 @@
             MAID: userData.MAID,
             Token: userData.Token,
             Mobile: userData.Mobile,
-            AID:1
+            AID:"1"
           }),
         }
       );
