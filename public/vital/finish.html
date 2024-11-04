@@ -335,16 +335,12 @@
   let upbioage, upba2, upba4;
 
   let storedData = JSON.parse(sessionStorage.getItem("Age"));
-  //console.log(storedData); // 這裡你將看到存入的 nArray 陣列
-  //alert(storedData);
 
-  if (storedData.length > 0) {
-    // 建立三個陣列來分別存儲 A, B, C
+  if (storedData && storedData.length > 0) {
     let aValues = [];
     let bValues = [];
     let cValues = [];
 
-    // 遍歷 storedData，取出正值並分別存入三個陣列
     storedData.forEach((data) => {
       let [a, b, c] = data;
       if (a > 0 && a < 100) aValues.push(a);
@@ -352,40 +348,28 @@
       if (c > 0 && c < 100) cValues.push(c);
     });
 
-    // 計算平均值的函數
     const calculateAverage = (values) => {
-      if (values.length === 0) return 0; // 避免除以 0
+      if (values.length === 0) return 0;
       let sum = values.reduce((acc, val) => acc + val, 0);
       return sum / values.length;
     };
-    console.log(storedData);
-    console.log(cValues);
 
-    // 函數：計算移除極端值後的平均數
     function trimmedMean(arr, trimPercent) {
-      // 先對數據進行排序
       const sortedArr = arr.slice().sort((a, b) => a - b);
-      // 計算要移除的數據筆數
       const trimCount = Math.floor(trimPercent * sortedArr.length);
-      // 移除最小和最大指定百分比的數據
       const trimmedArr = sortedArr.slice(
         trimCount,
         sortedArr.length - trimCount
       );
-      // 計算剩餘數據的平均數
       const sum = trimmedArr.reduce((acc, value) => acc + value, 0);
       const mean = sum / trimmedArr.length;
       return mean;
     }
-    // 假設移除最小與最大各10%的數據
-    const trimPercent = 0.1; // 移除10%資料
 
-    // 計算 A, B, C 的平均值
-    //upbioage = calculateAverage(aValues);
-    //upba2 = calculateAverage(bValues);
-    //upba4 = calculateAverage(cValues);
+    const trimPercent = 0.1;
+
     upbioage = trimmedMean(aValues, trimPercent);
-    upba2 = trimmedMean(bValues, trimPercent); //生理年零
+    upba2 = trimmedMean(bValues, trimPercent);
     upba4 = trimmedMean(cValues, trimPercent);
   }
 </script>
@@ -522,52 +506,52 @@
   }
 
   async function API_HRV2() {
-  try {
-    const response = await fetch(
-      "https://23700999.com:8081/HMA/API_HRV2.jsp",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          MID: userData.MID,
-          MAID: userData.MAID,
-          Token: userData.Token,
-          Mobile: userData.Mobile,
-        }),
+    try {
+      const response = await fetch(
+        "https://23700999.com:8081/HMA/API_HRV2.jsp",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            MID: userData.MID,
+            MAID: userData.MAID,
+            Token: userData.Token,
+            Mobile: userData.Mobile,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("網路響應不是成功狀態");
       }
-    );
 
-    if (!response.ok) {
-      throw new Error("網路響應不是成功狀態");
+      const apiResult = await response.json();
+
+      if (apiResult.HRV && apiResult.HRV.length > 0) {
+        const HRVData = apiResult.HRV[0];
+        f_v_ba2.textContent = HRVData.ba2;
+        f_v_hrv.textContent = HRVData.HRV;
+        f_v_hr.textContent = HRVData.HR;
+        f_v_sbp.textContent = HRVData.SBP;
+        f_v_dbp.textContent = HRVData.DBP;
+        f_v_spo2.textContent = HRVData.SPO2;
+        f_v_rr.textContent = HRVData.rr;
+        f_v_si.textContent = HRVData.stress;
+        f_v_health.textContent = HRVData.Health;
+        f_v_sleep.textContent = HRVData.Sleep;
+        f_v_metabolism.textContent = HRVData.Metabolism;
+        f_v_equilibrium.textContent = HRVData.Equilibrium;
+        f_v_activity.textContent = HRVData.Activity;
+        f_v_relaxation.textContent = HRVData.Relaxation;
+      }
+
+      return apiResult;
+    } catch (error) {
+      console.error("Fetch error:", error);
     }
-
-    const apiResult = await response.json();
-    
-    if (apiResult.HRV && apiResult.HRV.length > 0) {
-      const HRVData = apiResult.HRV[0];
-      f_v_ba2.textContent = HRVData.ba2;
-      f_v_hrv.textContent = HRVData.HRV;
-      f_v_hr.textContent = HRVData.HR;
-      f_v_sbp.textContent = HRVData.SBP;
-      f_v_dbp.textContent = HRVData.DBP;
-      f_v_spo2.textContent = HRVData.SPO2;
-      f_v_rr.textContent = HRVData.rr;
-      f_v_si.textContent = HRVData.stress;
-      f_v_health.textContent = HRVData.Health;
-      f_v_sleep.textContent = HRVData.Sleep;
-      f_v_metabolism.textContent = HRVData.Metabolism;
-      f_v_equilibrium.textContent = HRVData.Equilibrium;
-      f_v_activity.textContent = HRVData.Activity;
-      f_v_relaxation.textContent = HRVData.Relaxation;
-    }
-
-    return apiResult;
-  } catch (error) {
-    console.error("Fetch error:", error);
   }
-}
 
   async function API_HRV2Detail() {
     try {
@@ -606,7 +590,7 @@
     await API_HRV2();
     await API_HRV2Detail();
   }
-  fetchData()
+  fetchData();
 </script>
 
 <style>
