@@ -38,8 +38,8 @@
           <div class="topTitle">領取</div>
           <div class="bottomTitle">積分</div>
         </div>
-       
-        <div class="item item2" @click="convertAndSaveUserData" >
+        <!-- @click="convertAndSaveUserData" -->
+        <div class="item item2">
           <div class="topTitle">檢測</div>
           <div class="bottomTitle">HRV</div>
           <img src="../assets/imgs/faceIcon.svg" alt="" />
@@ -384,8 +384,7 @@ export default {
       }
       .item2 {
         background-color: $raphael-purple-200;
-        opacity: 1;
-        cursor: pointer;
+
         &:hover {
           filter: brightness(0.95);
         }
