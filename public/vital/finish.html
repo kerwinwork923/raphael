@@ -395,7 +395,7 @@
   const userData = JSON.parse(localStorage.getItem("userData"));
   const currentResult = JSON.parse(sessionStorage.getItem("result"));
   if (userData.Name) {
-    nameText.textContent = `${userName?.Name}，您好`;
+    nameText.textContent = `${userData?.Name}，您好`;
     const currentDate = new Date();
   }
   if (currentResult && currentResult.ANSIndex) {
