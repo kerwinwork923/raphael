@@ -214,11 +214,12 @@
 
 </html>
 
-<style lang="scss">
-  body{
-    margin: 0;
-  }
-  .raphaelNavbar {
+<style>
+  body {
+  margin: 0;
+}
+
+.raphaelNavbar {
   position: absolute;
   top: 0;
   left: 50%;
@@ -230,10 +231,9 @@
   align-items: center;
   max-width: 768px;
   height: 50px;
- 
 }
 
-.opH{
+.opH {
   height: 0;
   opacity: 0;
   position: absolute;
@@ -256,149 +256,176 @@
   cursor: pointer;
 }
 
-.scanWrap{
+.scanWrap {
   background: url("images/raphael/gradient-bg.png");
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-size: cover;
   min-height: 100vh;
   width: 100%;
- padding: 48px 5% 0;
-  
+  padding: 48px 5% 0;
 }
 
 .scanInfo {
-      display: flex;
-      margin-top: 10px;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      h3 {
-        font-size: 20px;
-        font-weight: 400;
-        letter-spacing: 0.15px;
-        padding: 0;
-        margin: 0;
-      }
-      .row {
-        display: flex;
-        flex-wrap: nowrap;
-        width: 100%;
-        gap: 3%;
-        margin-bottom: 1rem;
-      }
-      .years {
-        width: 55%;
-        padding: 6px;
-        border-radius: 8px;
-        background: linear-gradient(
-          180deg,
-          #74bc1f 0%,
-          rgba(116, 188, 31, 0.35) 100%
-        );
-        padding: 12px;
-        align-items: center;
-        color: #fff;
-        position: relative;
-        overflow: hidden;
-        .value {
-          font-size: 48px;
-          font-weight: bold;
-          padding: 0.25rem 0;
-        }
-        .info {
-          font-size: 1rem;
-          font-weight: 400;
-          letter-spacing: 0.5px;
-        }
-        .HRVFace {
-          position: absolute;
-          right: -22%;
-          top: 0;
-        }
-      }
-      .HRV {
-        background: linear-gradient(
-          180deg,
-          #dfecc5 0%,
-          rgba(223, 236, 197, 0.35) 100%
-        );
-        padding: 12px;
-        border-radius: 8px;
+  display: flex;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
 
-        .value {
-          color: #74bc1f;
-          font-size: 48px;
-          font-weight: bold;
-          padding: 0.25rem 0;
-        }
-        .info {
-          color: #666;
-          font-size: 1rem;
-          font-weight: 400;
-          letter-spacing: 0.5px;
-        }
-        width: 45%;
-      }
-      .Rhythm,
-      .bloodPressure {
-        width: 50%;
-        background-color: #fff;
-        border-radius: 8px;
-        border-top-style: 8px;
-        position: relative;
-        overflow: hidden;
-        padding: 12px;
-        .titleGroup {
-          display: flex;
-          justify-content: space-between;
-        }
-        .value {
-          color: $raphael-green-400;
-          font-size: 24px;
-          font-weight: 700;
-          letter-spacing: 0.12px;
-          margin-top: 0.5rem;
-        }
-        .info {
-          color: #ccc;
+.scanInfo h3 {
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 0.15px;
+  padding: 0;
+  margin: 0;
+}
 
-          letter-spacing: 0.5px;
-        }
-        .bgImg {
-          position: absolute;
-          bottom: 0%;
-        }
-      }
-      .BO,
-      .breathe,
-      .pressure {
-        width: 33.333%;
-        background-color: #fff;
-        border-radius: 8px;
+.scanInfo .row {
+  display: flex;
+  flex-wrap: nowrap;
+  width: 100%;
+  gap: 3%;
+  margin-bottom: 1rem;
+}
 
-        position: relative;
-        overflow: hidden;
-        padding: 12px;
-        .titleGroup {
-          display: flex;
-          justify-content: space-between;
-        }
-        .value {
-          color: $raphael-green-400;
-          font-size: 24px;
-          font-weight: 700;
-          letter-spacing: 0.12px;
-          margin-top: 0.5rem;
-        }
-        .info {
-          color: #ccc;
+.scanInfo .years {
+  width: 55%;
+  padding: 6px;
+  border-radius: 8px;
+  background: linear-gradient(
+    180deg,
+    #74bc1f 0%,
+    rgba(116, 188, 31, 0.35) 100%
+  );
+  padding: 12px;
+  align-items: center;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
 
-          letter-spacing: 0.5px;
-        }
-        .bgImg {
-          position: absolute;
-          bottom: 0%;
-        }
-      }
-    }
+.scanInfo .years .value {
+  font-size: 48px;
+  font-weight: bold;
+  padding: 0.25rem 0;
+}
+
+.scanInfo .years .info {
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+.scanInfo .years .HRVFace {
+  position: absolute;
+  right: -22%;
+  top: 0;
+}
+
+.scanInfo .HRV {
+  background: linear-gradient(
+    180deg,
+    #dfecc5 0%,
+    rgba(223, 236, 197, 0.35) 100%
+  );
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.scanInfo .HRV .value {
+  color: #74bc1f;
+  font-size: 48px;
+  font-weight: bold;
+  padding: 0.25rem 0;
+}
+
+.scanInfo .HRV .info {
+  color: #666;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  width: 45%;
+}
+
+.scanInfo .Rhythm,
+.scanInfo .bloodPressure {
+  width: 50%;
+  background-color: #fff;
+  border-radius: 8px;
+  border-top-style: 8px;
+  position: relative;
+  overflow: hidden;
+  padding: 12px;
+}
+
+.scanInfo .Rhythm .titleGroup,
+.scanInfo .bloodPressure .titleGroup {
+  display: flex;
+  justify-content: space-between;
+}
+
+.scanInfo .Rhythm .value,
+.scanInfo .bloodPressure .value {
+  color: #74bc1f; /* 此处应替换为相应的绿色变量 */
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.12px;
+  margin-top: 0.5rem;
+}
+
+.scanInfo .Rhythm .info,
+.scanInfo .bloodPressure .info {
+  color: #ccc;
+  letter-spacing: 0.5px;
+}
+
+.scanInfo .Rhythm .bgImg,
+.scanInfo .bloodPressure .bgImg {
+  position: absolute;
+  bottom: 0%;
+}
+
+.scanInfo .BO,
+.scanInfo .breathe,
+.scanInfo .pressure {
+  width: 33.333%;
+  background-color: #fff;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  padding: 12px;
+}
+
+.scanInfo .BO .titleGroup,
+.scanInfo .breathe .titleGroup,
+.scanInfo .pressure .titleGroup {
+  display: flex;
+  justify-content: space-between;
+}
+
+.scanInfo .BO .value,
+.scanInfo .breathe .value,
+.scanInfo .pressure .value {
+  color: #74bc1f; 
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.12px;
+  margin-top: 0.5rem;
+}
+
+.scanInfo .BO .info,
+.scanInfo .breathe .info,
+.scanInfo .pressure .info {
+  color: #ccc;
+  letter-spacing: 0.5px;
+}
+
+.scanInfo .BO .bgImg,
+.scanInfo .breathe .bgImg,
+.scanInfo .pressure .bgImg {
+  position: absolute;
+  bottom: 0%;
+}
+
 </style>

@@ -506,23 +506,58 @@
     }
   }
 
+  async function API_HRV2() {
+    try {
+      const response = await fetch(
+        "https://23700999.com:8081/HMA/API_HRV2Save.jsp",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            MID: userData.MID,
+            MAID: userData.MAID,
+            Token: userData.Token,
+            Mobile: userData.Mobile,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("網路響應不是成功狀態");
+      }
+
+      const apiResult = await response.json();
+      return apiResult;
+    } catch (error) {
+      console.error("Fetch error:", error);
+    }
+  }
+  // async function fetchResultIfChanged() {
+
+  // }
   fetchResultIfChanged();
+  API_HRV2();
 </script>
 
-<style lang="scss">
+<style>
   * {
     box-sizing: border-box;
   }
+
   .hide {
     position: absolute;
     bottom: 0;
     height: 0;
     opacity: 0;
   }
+
   body {
     margin: 0;
     padding: 0;
   }
+
   .finishWrap {
     background: url("images/raphael/gradient-bg.png");
     background-repeat: no-repeat;
@@ -532,11 +567,11 @@
     width: 100%;
     padding: 0 5%;
   }
+
   .raphaelNavbar {
     position: absolute;
     top: 0;
     left: 50%;
-
     transform: translateX(-50%);
     padding: 5px 1rem;
     display: flex;
@@ -555,7 +590,6 @@
     display: flex;
     justify-content: flex-end;
     gap: 2px;
-
     width: 35%;
     margin-right: auto;
   }
@@ -611,156 +645,187 @@
     margin-top: 10px;
     flex-wrap: wrap;
     justify-content: space-between;
+  }
+
+  .scanInfo h3 {
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 0.15px;
+    padding: 0;
+    margin: 0;
+  }
+
+  .scanInfo .row {
+    display: flex;
+    flex-wrap: nowrap;
     width: 100%;
-    h3 {
-      font-size: 20px;
-      font-weight: 400;
-      letter-spacing: 0.15px;
-      padding: 0;
-      margin: 0;
-    }
-    .row {
-      display: flex;
-      flex-wrap: nowrap;
+    gap: 3%;
+    margin-bottom: 1rem;
+  }
 
-      width: 100%;
-      gap: 3%;
-      margin-bottom: 1rem;
-    }
-    .years {
-      width: 55%;
-      padding: 6px;
-      border-radius: 8px;
-      background: linear-gradient(
-        180deg,
-        #74bc1f 0%,
-        rgba(116, 188, 31, 0.35) 100%
-      );
-      padding: 12px;
-      align-items: center;
-      color: #fff;
-      position: relative;
-      overflow: hidden;
-      .value {
-        font-size: 48px;
-        font-weight: bold;
-        padding: 0.25rem 0;
-      }
-      .info {
-        font-size: 1rem;
-        font-weight: 400;
-        letter-spacing: 0.5px;
-      }
-      .HRVFace {
-        position: absolute;
-        right: -22%;
-        top: 0;
-      }
-    }
-    .HRV {
-      background: linear-gradient(
-        180deg,
-        #dfecc5 0%,
-        rgba(223, 236, 197, 0.35) 100%
-      );
-      padding: 12px;
-      border-radius: 8px;
+  .scanInfo .years {
+    width: 55%;
+    padding: 6px;
+    border-radius: 8px;
+    background: linear-gradient(
+      180deg,
+      #74bc1f 0%,
+      rgba(116, 188, 31, 0.35) 100%
+    );
+    padding: 12px;
+    align-items: center;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
 
-      .value {
-        color: #74bc1f;
-        font-size: 48px;
-        font-weight: bold;
-        padding: 0.25rem 0;
-      }
-      .info {
-        color: #666;
-        font-size: 1rem;
-        font-weight: 400;
-        letter-spacing: 0.5px;
-      }
-      width: 45%;
-    }
-    .Rhythm,
-    .bloodPressure {
-      width: 50%;
-      background-color: #fff;
-      border-radius: 8px;
-      border-top-style: 8px;
-      position: relative;
-      overflow: hidden;
-      padding: 12px;
-      .titleGroup {
-        display: flex;
-        justify-content: space-between;
-        img {
-          width: 20px;
-        }
-      }
-      .value {
-        color: $raphael-green-400;
-        font-size: 24px;
-        font-weight: 700;
-        letter-spacing: 0.12px;
-        margin-top: 0.5rem;
-      }
-      .info {
-        color: #ccc;
+  .scanInfo .years .value {
+    font-size: 48px;
+    font-weight: bold;
+    padding: 0.25rem 0;
+  }
 
-        letter-spacing: 0.5px;
-      }
-      .bgImg {
-        position: absolute;
-        bottom: 0%;
-        width: 100%;
-      }
-    }
-    .BO,
-    .breathe,
-    .pressure {
-      width: 33.333%;
-      background-color: #fff;
-      border-radius: 8px;
+  .scanInfo .years .info {
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+  }
 
-      position: relative;
-      overflow: hidden;
-      padding: 12px;
-      .titleGroup {
-        display: flex;
-        justify-content: space-between;
-        img {
-          width: 20px;
-        }
-      }
-      .value {
-        color: $raphael-green-400;
-        font-size: 24px;
-        font-weight: 700;
-        letter-spacing: 0.12px;
-        margin-top: 0.5rem;
-      }
-      .info {
-        color: #ccc;
+  .scanInfo .years .HRVFace {
+    position: absolute;
+    right: -22%;
+    top: 0;
+  }
 
-        letter-spacing: 0.5px;
-      }
-      .bgImg {
-        position: absolute;
-        bottom: 0%;
-        width: 100%;
-      }
-    }
+  .scanInfo .HRV {
+    background: linear-gradient(
+      180deg,
+      #dfecc5 0%,
+      rgba(223, 236, 197, 0.35) 100%
+    );
+    padding: 12px;
+    border-radius: 8px;
+    width: 45%;
+  }
 
-    .progressItem {
-      width: 33.3333%;
-      text-align: center;
-      background-color: #fff;
-      padding: 12px;
-      border-radius: 8px;
-      img {
-        width: 100%;
-        margin-top: 0.25rem;
-      }
-    }
+  .scanInfo .HRV .value {
+    color: #74bc1f;
+    font-size: 48px;
+    font-weight: bold;
+    padding: 0.25rem 0;
+  }
+
+  .scanInfo .HRV .info {
+    color: #666;
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    width: 45%;
+  }
+
+  .scanInfo .Rhythm,
+  .scanInfo .bloodPressure {
+    width: 50%;
+    background-color: #fff;
+    border-radius: 8px;
+    border-top-style: 8px;
+    position: relative;
+    overflow: hidden;
+    padding: 12px;
+  }
+
+  .scanInfo .Rhythm .titleGroup,
+  .scanInfo .bloodPressure .titleGroup {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .scanInfo .Rhythm .titleGroup img,
+  .scanInfo .bloodPressure .titleGroup img {
+    width: 20px;
+  }
+
+  .scanInfo .Rhythm .value,
+  .scanInfo .bloodPressure .value {
+    color: #74bc1f;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.12px;
+    margin-top: 0.5rem;
+  }
+
+  .scanInfo .Rhythm .info,
+  .scanInfo .bloodPressure .info {
+    color: #ccc;
+    letter-spacing: 0.5px;
+  }
+
+  .scanInfo .Rhythm .bgImg,
+  .scanInfo .bloodPressure .bgImg {
+    position: absolute;
+    bottom: 0%;
+    width: 100%;
+  }
+
+  .scanInfo .BO,
+  .scanInfo .breathe,
+  .scanInfo .pressure {
+    width: 33.333%;
+    background-color: #fff;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    padding: 12px;
+  }
+
+  .scanInfo .BO .titleGroup,
+  .scanInfo .breathe .titleGroup,
+  .scanInfo .pressure .titleGroup {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .scanInfo .BO .titleGroup img,
+  .scanInfo .breathe .titleGroup img,
+  .scanInfo .pressure .titleGroup img {
+    width: 20px;
+  }
+
+  .scanInfo .BO .value,
+  .scanInfo .breathe .value,
+  .scanInfo .pressure .value {
+    color: #74bc1f;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.12px;
+    margin-top: 0.5rem;
+  }
+
+  .scanInfo .BO .info,
+  .scanInfo .breathe .info,
+  .scanInfo .pressure .info {
+    color: #ccc;
+    letter-spacing: 0.5px;
+  }
+
+  .scanInfo .BO .bgImg,
+  .scanInfo .breathe .bgImg,
+  .scanInfo .pressure .bgImg {
+    position: absolute;
+    bottom: 0%;
+    width: 100%;
+  }
+
+  .progressItem {
+    width: 33.3333%;
+    text-align: center;
+    background-color: #fff;
+    padding: 12px;
+  }
+
+  .progressItem img {
+    width: 100%;
+    margin-top: 0.25rem;
   }
 
   .textResultText {
@@ -778,24 +843,26 @@
     background-color: #fff;
     border-radius: 12px;
     padding: 12px;
-    h3 {
-      margin: 0;
-      font-weight: 400;
-    }
-    p {
-      margin: 0;
-      margin-top: 0.5rem;
-    }
+  }
+
+  .resultTextGroup h3 {
+    margin: 0;
+    font-weight: 400;
+  }
+
+  .resultTextGroup p {
+    margin: 0;
+    margin-top: 0.5rem;
   }
 
   .subBtnGroup {
     display: flex;
     justify-content: space-between;
-
     width: 100%;
     gap: 3%;
-    margin-top: .75rem;
+    margin-top: 0.75rem;
   }
+
   .subBtnGroup a {
     text-decoration: none;
     width: 100%;
@@ -828,54 +895,31 @@
     margin-top: 0.85rem;
     max-height: 400px;
     overflow-y: auto; /* 超出高度時顯示滾動條 */
-    .detection {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      height: 80px;
-      .cGroup {
-        border: 2px solid #74bc1f;
-        padding: 0.25rem;
-        border-radius: 7px;
-        img {
-          width: 1rem;
-          height: 1rem;
-        }
-      }
-      .detectionGroup {
-        margin-left: auto;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 14px;
-        .scroeTotal,
-        .seriousDegreeGroup {
-          display: flex;
-          flex-direction: column;
-          align-items: baseline;
-          justify-content: center;
-          gap: 8px;
-          h5 {
-            color: #666;
-            font-size: 16px;
-            letter-spacing: 0.1px;
-            font-weight: 400;
-            margin: 0;
-          }
-          .totalScore,
-          .seriousScore {
-            color: #1e1e1e;
-            font-size: 24px;
-            font-weight: bold;
-            margin: 0;
-          }
-        }
-      }
-    }
-    .detectionDate {
-      font-size: 20px;
-      color: #1e1e1e;
-      letter-spacing: 0.15px;
-    }
+  }
+
+  .detectionWrap .detection {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 80px;
+  }
+
+  .detectionWrap .detection .cGroup {
+    border: 2px solid #74bc1f;
+    padding: 0.25rem;
+    border-radius: 7px;
+  }
+
+  .detectionWrap .detection .cGroup img {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .detectionWrap .detectionGroup {
+    margin-left: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
   }
 </style>
