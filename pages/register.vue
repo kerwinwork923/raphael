@@ -71,7 +71,7 @@
         <div class="bottomHintGroup">
           <!-- 分隔線 -->
           <div class="separate">or</div>
-          <router-link to=/login>
+          <router-link to="/">
             <img class="icon" src="../assets/imgs/change.svg" alt="" />
             <h5>已有會員</h5>
           </router-link>
