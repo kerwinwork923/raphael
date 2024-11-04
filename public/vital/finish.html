@@ -529,7 +529,10 @@
 
       const apiResult = await response.json();
 
+      
       if (apiResult.HRV && apiResult.HRV.length > 0) {
+        console.log(apiResult);
+        
         const HRVData = apiResult.HRV[0];
         f_v_ba2.textContent = HRVData.ba2;
         f_v_hrv.textContent = HRVData.HRV;
