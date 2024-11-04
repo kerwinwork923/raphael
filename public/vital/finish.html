@@ -509,7 +509,7 @@
   async function API_HRV2() {
     try {
       const response = await fetch(
-        "https://23700999.com:8081/HMA/API_HRV2Save.jsp",
+        "https://23700999.com:8081/HMA/API_HRV2.jsp",
         {
           method: "POST",
           headers: {
@@ -534,11 +534,42 @@
       console.error("Fetch error:", error);
     }
   }
+
+  async function API_HRV2Detail() {
+    try {
+      const response = await fetch(
+        "https://23700999.com:8081/HMA/API_HRV2Detail.jsp.jsp",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            MID: userData.MID,
+            MAID: userData.MAID,
+            Token: userData.Token,
+            Mobile: userData.Mobile,
+            AID:1
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("網路響應不是成功狀態");
+      }
+
+      const apiResult = await response.json();
+      return apiResult;
+    } catch (error) {
+      console.error("Fetch error:", error);
+    }
+  }
   // async function fetchResultIfChanged() {
 
   // }
   fetchResultIfChanged();
   API_HRV2();
+  API_HRV2Detail()
 </script>
 
 <style>
