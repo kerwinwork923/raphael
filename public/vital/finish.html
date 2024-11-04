@@ -63,7 +63,7 @@
       </div>
       <div class="titleGroup">
         <div class="textGroup">
-          <h3>您好</h3>
+          <h3 class="nameText">您好</h3>
           <div class="timeGroup">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -202,9 +202,7 @@
 
       <div class="resultTextGroup">
         <h3>根據您的神經系統數據分析</h3>
-        <p>
-          當交感神經嚴重低落，副交感神經極度亢奮時，患者可能會出現心跳過慢、低血壓、疲倦、頭暈等症狀。建議病患調整生活作息，逐步增加適度的體力活動，如散步或輕運動，以促進交感神經的回復。避免長時間靜坐或臥床，並可透過冷水淋浴或短暫的冷熱交替淋浴來刺激交感神經。同時，減少過度放鬆的活動，如過長的冥想或呼吸練習，並密切監測身體反應，必要時尋求專業醫療協助。
-        </p>
+        <p></p>
       </div>
 
       <!-- <div class="detectionWrap">
@@ -390,17 +388,15 @@
   f_v_equilibrium = document.querySelector("#f_v_equilibrium");
   f_v_activity = document.querySelector("#f_v_activity");
   f_v_relaxation = document.querySelector("#f_v_relaxation");
+  resultTextGroupP = document.querySelector(".resultTextGroup p");
+  nameText = document.querySelector(".nameText");
+
   // 從本地儲存中獲取 userData
   const userData = JSON.parse(localStorage.getItem("userData"));
   const currentResult = JSON.parse(sessionStorage.getItem("result"));
   if (userData.name) {
-    const userName = document.querySelector(".titleGroup .textGroup h3");
-
-    userName.textContent = `${userName?.Name}，您好`;
+    nameText.textContent = `${userName?.Name}，您好`;
     const currentDate = new Date();
-    today.textContent = `${currentDate.getFullYear()}-${
-      currentDate.getMonth() + 1
-    }-${currentDate.getDate()}`;
   }
   if (currentResult && currentResult.ANSIndex) {
     const resultTextGroupP = document.querySelector(".resultTextGroup p");
@@ -409,28 +405,28 @@
     const PNS = currentResult?.ANSIndex.PNS;
 
     // 判斷 SNS 和 PNS 的狀態並顯示對應訊息
-    if (
-      (SNS > 2 || (2 > SNS && SNS > 1)) &&
-      (PNS < -2 || (-2 < PNS && PNS < -1))
-    ) {
-      resultTextGroupP.textContent =
-        "您的自律神經失調狀態極為嚴重，建議保持規律作息，避免過度壓力，適當運動，並練習深呼吸或冥想等放鬆技巧。如果症狀持續或加重，應尋求專業醫療協助，透過專業診斷與治療來改善身體狀況。";
-    } else if (
-      ((-2 < SNS && SNS < -1) || SNS < -2) &&
-      ((2 > PNS && PNS > 1) || PNS > 2)
-    ) {
-      resultTextGroupP.textContent =
-        "當交感神經嚴重低落，副交感神經極度亢奮時，患者可能會出現心跳過慢、低血壓、疲倦、頭暈等症狀。建議病患調整生活作息，逐步增加適度的體力活動，如散步或輕運動，以促進交感神經的回復。避免長時間靜坐或臥床，並可透過冷水淋浴或短暫的冷熱交替淋浴來刺激交感神經。同時，減少過度放鬆的活動，如過長的冥想或呼吸練習，並密切監測身體反應，必要時尋求專業醫療協助。";
-    } else if (SNS > 2 || (2 > SNS && SNS > 1)) {
-      resultTextGroupP.textContent =
-        "您的交感神經過於亢奮，可能導致長期緊張、心跳過快、血壓升高、焦慮、失眠等症狀。建議保持規律作息，避免過度壓力，適當運動，並練習深呼吸或冥想等放鬆技巧。如果症狀持續或加重，應尋求專業醫療協助，透過專業診斷與治療來改善身體狀況。";
-    } else if (PNS < -2 || (-2 < PNS && PNS < -1)) {
-      resultTextGroupP.textContent =
-        "您的副交感神經過於低落，可能會導致心跳加快、睡眠質量差、消化不良、容易感到焦慮和壓力等問題。建議保持規律作息，避免過度壓力，適當運動，並練習深呼吸或冥想等放鬆技巧。如果症狀持續或加重，應尋求專業醫療協助，透過專業診斷與治療來改善身體狀況。";
-    } else {
-      resultTextGroupP.textContent =
-        "其他您的自律神經狀態正常，仍建議保持規律作息、適度運動，如散步或瑜伽，並進行放鬆練習，減輕壓力。維持均衡飲食，攝取足夠的維生素與礦物質，避免過多的咖啡因與糖分。保持良好的心理健康，進行社交互動和正念練習，有助於維持自律神經的平衡和長期健康。";
-    }
+    // if (
+    //   (SNS > 2 || (2 > SNS && SNS > 1)) &&
+    //   (PNS < -2 || (-2 < PNS && PNS < -1))
+    // ) {
+    //   resultTextGroupP.textContent =
+    //     "您的自律神經失調狀態極為嚴重，建議保持規律作息，避免過度壓力，適當運動，並練習深呼吸或冥想等放鬆技巧。如果症狀持續或加重，應尋求專業醫療協助，透過專業診斷與治療來改善身體狀況。";
+    // } else if (
+    //   ((-2 < SNS && SNS < -1) || SNS < -2) &&
+    //   ((2 > PNS && PNS > 1) || PNS > 2)
+    // ) {
+    //   resultTextGroupP.textContent =
+    //     "當交感神經嚴重低落，副交感神經極度亢奮時，患者可能會出現心跳過慢、低血壓、疲倦、頭暈等症狀。建議病患調整生活作息，逐步增加適度的體力活動，如散步或輕運動，以促進交感神經的回復。避免長時間靜坐或臥床，並可透過冷水淋浴或短暫的冷熱交替淋浴來刺激交感神經。同時，減少過度放鬆的活動，如過長的冥想或呼吸練習，並密切監測身體反應，必要時尋求專業醫療協助。";
+    // } else if (SNS > 2 || (2 > SNS && SNS > 1)) {
+    //   resultTextGroupP.textContent =
+    //     "您的交感神經過於亢奮，可能導致長期緊張、心跳過快、血壓升高、焦慮、失眠等症狀。建議保持規律作息，避免過度壓力，適當運動，並練習深呼吸或冥想等放鬆技巧。如果症狀持續或加重，應尋求專業醫療協助，透過專業診斷與治療來改善身體狀況。";
+    // } else if (PNS < -2 || (-2 < PNS && PNS < -1)) {
+    //   resultTextGroupP.textContent =
+    //     "您的副交感神經過於低落，可能會導致心跳加快、睡眠質量差、消化不良、容易感到焦慮和壓力等問題。建議保持規律作息，避免過度壓力，適當運動，並練習深呼吸或冥想等放鬆技巧。如果症狀持續或加重，應尋求專業醫療協助，透過專業診斷與治療來改善身體狀況。";
+    // } else {
+    //   resultTextGroupP.textContent =
+    //     "其他您的自律神經狀態正常，仍建議保持規律作息、適度運動，如散步或瑜伽，並進行放鬆練習，減輕壓力。維持均衡飲食，攝取足夠的維生素與礦物質，避免過多的咖啡因與糖分。保持良好的心理健康，進行社交互動和正念練習，有助於維持自律神經的平衡和長期健康。";
+    // }
   }
 
   async function fetchResultIfChanged() {
@@ -531,7 +527,6 @@
 
       console.log(apiResult);
       if (apiResult.HRV2 && apiResult.HRV2.length > 0) {
-
         const HRVData = apiResult.HRV2[0];
         f_v_ba2.textContent = HRVData.ba2;
         f_v_hrv.textContent = HRVData.HRV;
@@ -547,6 +542,15 @@
         f_v_equilibrium.textContent = HRVData.Equilibrium;
         f_v_activity.textContent = HRVData.Activity;
         f_v_relaxation.textContent = HRVData.Relaxation;
+        resultTextGroupP.textContent = HRVData.TotalDesc;
+        let checkTime = HRVData.CheckTime;
+        let formattedDate = formatCheckDate(checkTime);
+        document.querySelector(".titleGroup .timeGroup h4").textContent =
+          formattedDate;
+      }
+      function formatCheckDate(checkTime) {
+        const dateOnly = checkTime.split(" ")[0];
+        return dateOnly;
       }
 
       return apiResult;
@@ -747,8 +751,12 @@
 
   .scanInfo .years .HRVFace {
     position: absolute;
-    right: -22%;
+    right: -8%;
     top: 0;
+  }
+
+  .scanInfo .years .HRVFace img {
+    width: 60%;
   }
 
   .scanInfo .HRV {
