@@ -541,7 +541,7 @@
 
       if (response.ok) {
         if (HRV.length > 0) {
-          const HRVData = response.HRV[0];
+          const HRVData = response.data.HRV[0];
           f_v_ba2.textContent = HRVData.ba2;
           f_v_hrv.textContent = HRVData.HRV;
           f_v_hr.textContent = HRVData.HR;
