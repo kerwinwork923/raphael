@@ -78,7 +78,7 @@ export const useSleepRecordStore = defineStore("sleepRecord", {
 
       try {
         if (!MID || !Token || !MAID || !Mobile) {
-          router.push("/login");
+          router.push("/");
           return;
         }
 
@@ -130,7 +130,7 @@ export const useSleepRecordStore = defineStore("sleepRecord", {
       const router = useRouter();
 
       if (!MID || !Token || !MAID || !Mobile) {
-        router.push("/login");
+        router.push("/");
         return;
       }
 
@@ -191,7 +191,7 @@ export const useSleepRecordStore = defineStore("sleepRecord", {
       const router = useRouter();
 
       if (!MID || !Token || !MAID || !Mobile) {
-        router.push("/login");
+        router.push("/");
         return;
       }
 
