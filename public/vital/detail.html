@@ -173,7 +173,7 @@
 
   <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const aidValue = urlParams.get("AID");
+    const aidValue = urlParams.get("AID")?.replace(/^"(.*)"$/, '$1');
     const userData = JSON.parse(localStorage.getItem("userData"));
     // 定義 API 調用函數
     async function API_HRV2Detail() {
