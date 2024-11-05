@@ -425,7 +425,7 @@ export default {
       }
 
       //暫時的樣式
-      .item2,.item3_link{        
+      .item2,.item3_link{     
         grid-row: 1/3;
         place-items: center;
         align-content: center;
@@ -459,8 +459,12 @@ export default {
           }
         }
       }
+      .item2{
+        display: grid;   
+      }
       .item3_link{
         .item3{    
+          display: grid;
           width: 100%;
           height: 100%;
           place-items: center;
