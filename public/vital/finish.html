@@ -503,156 +503,127 @@
   }
 
   async function API_HRV2() {
-    try {
-      const response = await fetch(
-        "https://23700999.com:8081/HMA/API_HRV2.jsp",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            MID: userData.MID,
-            MAID: userData.MAID,
-            Token: userData.Token,
-            Mobile: userData.Mobile,
-          }),
-        }
-      );
+  try {
+    const response = await fetch("https://23700999.com:8081/HMA/API_HRV2.jsp", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        MID: userData.MID,
+        MAID: userData.MAID,
+        Token: userData.Token,
+        Mobile: userData.Mobile,
+      }),
+    });
 
-      if (!response.ok) {
-        throw new Error("網路響應不是成功狀態");
+    if (!response.ok) {
+      throw new Error("網路響應不是成功狀態");
+    }
+
+    const apiResult = await response.json();
+    console.log(apiResult);
+
+    if (apiResult.HRV2 && apiResult.HRV2.length > 0) {
+      const HRVData = apiResult.HRV2[0];
+      f_v_ba2.textContent = HRVData.ba2;
+      f_v_hrv.textContent = HRVData.HRV;
+      f_v_hr.textContent = HRVData.HR;
+      f_v_sbp.textContent = HRVData.SBP;
+      f_v_dbp.textContent = HRVData.DBP;
+      f_v_spo2.textContent = HRVData.SPO2;
+      f_v_rr.textContent = HRVData.rr;
+      f_v_si.textContent = HRVData.stress;
+
+      function getProgressImage(score) {
+        return `images/raphael/progress${score}.png`;
       }
 
-      const apiResult = await response.json();
+      document.getElementById("f_v_health").src = getProgressImage(HRVData.Health);
+      document.getElementById("f_v_sleep").src = getProgressImage(HRVData.Sleep);
+      document.getElementById("f_v_metabolism").src = getProgressImage(HRVData.Metabolism);
+      document.getElementById("f_v_equilibrium").src = getProgressImage(HRVData.Equilibrium);
+      document.getElementById("f_v_activity").src = getProgressImage(HRVData.Activity);
+      document.getElementById("f_v_relaxation").src = getProgressImage(HRVData.Relaxation);
 
-      console.log(apiResult);
-      if (apiResult.HRV2 && apiResult.HRV2.length > 0) {
-        const HRVData = apiResult.HRV2[0];
-        f_v_ba2.textContent = HRVData.ba2;
-        f_v_hrv.textContent = HRVData.HRV;
-        f_v_hr.textContent = HRVData.HR;
-        f_v_sbp.textContent = HRVData.SBP;
-        f_v_dbp.textContent = HRVData.DBP;
-        f_v_spo2.textContent = HRVData.SPO2;
-        f_v_rr.textContent = HRVData.rr;
-        f_v_si.textContent = HRVData.stress;
+      resultTextGroupP.textContent = HRVData.TotalDesc;
+      let checkTime = HRVData.CheckTime;
+      let formattedDate = formatCheckDate(checkTime);
+      document.querySelector(".titleGroup .timeGroup h4").textContent = formattedDate;
 
-        function getProgressImage(score) {
-          return `images/raphael/progress${score}.png`;
-        }
+      const detectionContainer = document.querySelector(".detectionContainer");
+      detectionContainer.innerHTML = ""; // 清空容器
 
-        document.getElementById("f_v_health").src = getProgressImage(
-          HRVData.Health
-        );
-        document.getElementById("f_v_sleep").src = getProgressImage(
-          HRVData.Sleep
-        );
-        document.getElementById("f_v_metabolism").src = getProgressImage(
-          HRVData.Metabolism
-        );
-        document.getElementById("f_v_equilibrium").src = getProgressImage(
-          HRVData.Equilibrium
-        );
-        document.getElementById("f_v_activity").src = getProgressImage(
-          HRVData.Activity
-        );
-        document.getElementById("f_v_relaxation").src = getProgressImage(
-          HRVData.Relaxation
-        );
+      apiResult.HRV2.forEach((history) => {
+        const detectionDiv = document.createElement("div");
+        detectionDiv.classList.add("detection");
 
-        resultTextGroupP.textContent = HRVData.TotalDesc;
-        let checkTime = HRVData.CheckTime;
-        let formattedDate = formatCheckDate(checkTime);
-        document.querySelector(".titleGroup .timeGroup h4").textContent =
-          formattedDate;
+        const age = parseInt(history.ba2, 10);
+        const hrvValue = parseFloat(history.HRV);
+        const gender = userData.Sex;
 
-        const detectionContainer = document.querySelector(
-          ".detectionContainer"
-        );
-        detectionContainer.innerHTML = ""; // 清空容器
+        const [minHRV, maxHRV] = getHRVRange(age, gender);
+        const isBelowAverage = hrvValue < minHRV;
 
-        apiResult.HRV2.forEach((history) => {
-          const detectionDiv = document.createElement("div");
-          detectionDiv.classList.add("detection");
-
-          // HRV and age data
-          const age = parseInt(history.ba2, 10);
-          const hrvValue = parseFloat(history.HRV);
-          const gender = userData.Sex; // Assuming "M" for male and "F" for female
-
-          // Get the HRV range based on age and gender
-          const [minHRV, maxHRV] = getHRVRange(age, gender);
-          const isBelowAverage = hrvValue < minHRV;
-
-          // HTML content with conditional class for below-average HRV
-          detectionDiv.innerHTML = `
-          <a href='detail.html?AID="${HRVData.AID}"'>
-          <div class="cGroup">
-            <img class="img" src="images/detectTime.svg" alt="" />
-          </div>
-          <h3 class="detectionDate">${formatDate(history.CheckTime)}</h3>
-          <div class="detectionGroup">
-            <div class="scroeTotal">
-              <h5>生理年齡</h5>
-              <div class="totalScore">
-                <span>${history.ba2}</span> 歲
+        // 使用每筆紀錄的 AID
+        detectionDiv.innerHTML = `
+          <a href='detail.html?AID=${history.AID}'>
+            <div class="cGroup">
+              <img class="img" src="images/detectTime.svg" alt="" />
+            </div>
+            <h3 class="detectionDate">${formatDate(history.CheckTime)}</h3>
+            <div class="detectionGroup">
+              <div class="scroeTotal">
+                <h5>生理年齡</h5>
+                <div class="totalScore">
+                  <span>${history.ba2}</span> 歲
+                </div>
+              </div>
+              <div class="seriousDegreeGroup">
+                <h5>HRV</h5>
+                <div class="seriousScore ${isBelowAverage ? "redValue" : ""}">
+                  <span>${history.HRV}</span> ms
+                </div>
               </div>
             </div>
-            <div class="seriousDegreeGroup">
-              <h5>HRV</h5>
-              <div class="seriousScore ${isBelowAverage ? "redValue" : ""}">
-                <span>${history.HRV}</span> ms
-              </div>
-            </div>
-          </div>
           </a>
-          `;
+        `;
 
-          // Append detectionDiv to the container
-          detectionContainer.appendChild(detectionDiv);
-        });
+        detectionContainer.appendChild(detectionDiv);
+      });
 
-        // Function to get the HRV range based on age and gender
-        function getHRVRange(age, gender) {
-          if (age >= 0 && age <= 29) {
-            return gender === "M" ? [29, 53] : [30, 57];
-          } else if (age >= 30 && age <= 39) {
-            return gender === "M" ? [25, 47] : [25, 44];
-          } else if (age >= 40 && age <= 49) {
-            return gender === "M" ? [21, 40] : [20, 40];
-          } else if (age >= 50 && age <= 59) {
-            return gender === "M" ? [15, 34] : [18, 38];
-          } else if (age >= 60) {
-            return gender === "M" ? [16, 33] : [15, 30];
-          }
-          return [0, Infinity]; // Default to a very broad range if age/gender is not matched
+      function getHRVRange(age, gender) {
+        if (age >= 0 && age <= 29) {
+          return gender === "M" ? [29, 53] : [30, 57];
+        } else if (age >= 30 && age <= 39) {
+          return gender === "M" ? [25, 47] : [25, 44];
+        } else if (age >= 40 && age <= 49) {
+          return gender === "M" ? [21, 40] : [20, 40];
+        } else if (age >= 50 && age <= 59) {
+          return gender === "M" ? [15, 34] : [18, 38];
+        } else if (age >= 60) {
+          return gender === "M" ? [16, 33] : [15, 30];
         }
-
-        // Helper function to format the date
-        function formatDate(checkTime) {
-          const dateOnly = checkTime.split(" ")[0];
-          const [year, month, day] = dateOnly.split("/");
-          return `${month}/${day}`;
-        }
-
-        // 格式化日期的函數
-        function formatDate(checkTime) {
-          const dateOnly = checkTime.split(" ")[0]; // 提取日期部分
-          const [year, month, day] = dateOnly.split("/"); // 拆分年月日
-          return `${month}/${day}`; // 格式化成 "MM/DD"
-        }
+        return [0, Infinity];
       }
+
+      function formatDate(checkTime) {
+        const dateOnly = checkTime.split(" ")[0];
+        const [year, month, day] = dateOnly.split("/");
+        return `${month}/${day}`;
+      }
+
       function formatCheckDate(checkTime) {
         const dateOnly = checkTime.split(" ")[0];
         return dateOnly;
       }
-
-      return apiResult;
-    } catch (error) {
-      console.error("Fetch error:", error);
     }
+
+    return apiResult;
+  } catch (error) {
+    console.error("Fetch error:", error);
   }
+}
 
   async function API_HRV2Detail() {
     try {
