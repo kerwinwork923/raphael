@@ -45,7 +45,7 @@
           <img src="../assets/imgs/faceIcon.svg" alt="" />
         </div>
 
-        <router-link to="/weekly">
+        <router-link to="/weekly" class="item3_link">
           <div class="item item3">
             <div class="topTitle">每周</div>
             <div class="bottomTitle">評估</div>
@@ -71,6 +71,7 @@
           <img src="../assets/imgs/relationshopIcon.svg" alt="" />
         </div>
       </div>
+      <footer class="copyrights">© 2024 拉菲爾股份有限公司 all rights reserved. </footer>
     </div>
   </div>
 </template>
@@ -288,6 +289,7 @@ export default {
           align-items: center;
           margin-top: 12px;
           gap: 0.25rem;
+          display: none; //暫時隱藏
 
           .circle {
             width: 12px;
@@ -335,39 +337,46 @@ export default {
     .itemsGroup {
       display: grid;
       margin-top: 1.25rem;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, 1fr);      
       gap: 1rem;
+      //暫時的樣式
+      grid-template-rows: repeat(2, 84px); 
+      @include respond-to("tablet") {
+        grid-template-rows: repeat(3, 84px); 
+      }
 
       .item {
-        height: 100px;
-        border-radius: 0.5rem;
         background-color: #999;
         position: relative;
-
+        border-radius: 0.75rem;
+        padding: 0.75rem;
         opacity: 0.15;
         color: #fff;
+        //暫時的樣式
+        overflow: hidden;
+        //暫時的樣式 end
+
         a {
           color: #fff;
         }
         transition: 0.15s all ease;
 
         .topTitle {
-          position: absolute;
-          top: 1.2rem;
-          left: 0.75rem;
           font-weight: 400;
           font-size: 1.25rem;
           color: #fefefe;
           letter-spacing: 0.09px;
+          margin-bottom: 4px;
         }
 
         .bottomTitle {
-          position: absolute;
-          bottom: 1.2rem;
-          left: 0.75rem;
           font-size: 2.25rem;
           font-weight: bold;
           letter-spacing: 0.09px;
+
+          @include respond-to("tablet") {
+            font-size: 3rem;
+          }
         }
 
         img {
@@ -410,6 +419,61 @@ export default {
         background-color: $raphael-gray-300;
         filter: blur(2px);
       }
+      //暫時隱藏
+      .item1,.item4,.item5,.item6{
+        display: none;
+      }
+
+      //暫時的樣式
+      .item2,.item3_link{        
+        grid-row: 1/3;
+        place-items: center;
+        align-content: center;
+        
+          
+        @include respond-to("tablet") {
+          grid-row: 1/4;
+          place-items: center;
+          align-content: center;
+        }
+
+        img{
+          width: 85%;
+          top: 16px;
+          right: 0;
+          opacity: 0.1;
+          left: 0;
+          margin: auto;
+          transform: none;
+          filter: blur(2px); 
+          
+          @include respond-to("tablet") {
+            width: 70%;
+            top: 10px;
+            right: 0;
+            opacity: 0.1;
+            left: 0;
+            margin: auto;
+            transform: none;
+            filter: blur(2px); 
+          }
+        }
+      }
+      .item3_link{
+        .item3{    
+          width: 100%;
+          height: 100%;
+          place-items: center;
+          align-content: center;
+        }
+      }
+    }
+
+    .copyrights{
+      font-size: 13px;
+      color: $raphael-gray-500;
+      text-align: center;
+      padding: 1.5rem 0;
     }
   }
 }
