@@ -153,12 +153,7 @@
     f_v_si = document.querySelector("#f_v_si");
 
     resultTextGroupP = document.querySelector(".resultTextGroup p");
-    nameText = document.querySelector(".nameText");
 
-    if (userData.Name) {
-      nameText.textContent = `${userData?.Name}，您好`;
-      const currentDate = new Date();
-    }
 
     async function API_HRV2Detail() {
       try {
