@@ -383,12 +383,12 @@
   f_v_spo2 = document.querySelector("#f_v_spo2");
   f_v_rr = document.querySelector("#f_v_rr");
   f_v_si = document.querySelector("#f_v_si");
-  f_v_health = document.querySelector("#f_v_health");
-  f_v_sleep = document.querySelector("#f_v_sleep");
-  f_v_metabolism = document.querySelector("#f_v_metabolism");
-  f_v_equilibrium = document.querySelector("#f_v_equilibrium");
-  f_v_activity = document.querySelector("#f_v_activity");
-  f_v_relaxation = document.querySelector("#f_v_relaxation");
+  // f_v_health = document.querySelector("#f_v_health");
+  // f_v_sleep = document.querySelector("#f_v_sleep");
+  // f_v_metabolism = document.querySelector("#f_v_metabolism");
+  // f_v_equilibrium = document.querySelector("#f_v_equilibrium");
+  // f_v_activity = document.querySelector("#f_v_activity");
+  // f_v_relaxation = document.querySelector("#f_v_relaxation");
   resultTextGroupP = document.querySelector(".resultTextGroup p");
   nameText = document.querySelector(".nameText");
 
@@ -537,12 +537,30 @@
         f_v_spo2.textContent = HRVData.SPO2;
         f_v_rr.textContent = HRVData.rr;
         f_v_si.textContent = HRVData.stress;
-        f_v_health.textContent = HRVData.Health;
-        f_v_sleep.textContent = HRVData.Sleep;
-        f_v_metabolism.textContent = HRVData.Metabolism;
-        f_v_equilibrium.textContent = HRVData.Equilibrium;
-        f_v_activity.textContent = HRVData.Activity;
-        f_v_relaxation.textContent = HRVData.Relaxation;
+
+        function getProgressImage(score) {
+          return `images/raphael/progress${score}.png`;
+        }
+
+        document.getElementById("f_v_health").src = getProgressImage(
+          HRVData.Health
+        );
+        document.getElementById("f_v_sleep").src = getProgressImage(
+          HRVData.Sleep
+        );
+        document.getElementById("f_v_metabolism").src = getProgressImage(
+          HRVData.Metabolism
+        );
+        document.getElementById("f_v_equilibrium").src = getProgressImage(
+          HRVData.Equilibrium
+        );
+        document.getElementById("f_v_activity").src = getProgressImage(
+          HRVData.Activity
+        );
+        document.getElementById("f_v_relaxation").src = getProgressImage(
+          HRVData.Relaxation
+        );
+
         resultTextGroupP.textContent = HRVData.TotalDesc;
         let checkTime = HRVData.CheckTime;
         let formattedDate = formatCheckDate(checkTime);
@@ -569,24 +587,24 @@
 
           // HTML content with conditional class for below-average HRV
           detectionDiv.innerHTML = `
-    <div class="cGroup">
-      <img class="img" src="images/detectTime.svg" alt="" />
-    </div>
-    <h3 class="detectionDate">${formatDate(history.CheckTime)}</h3>
-    <div class="detectionGroup">
-      <div class="scroeTotal">
-        <h5>生理年齡</h5>
-        <div class="totalScore">
-          <span>${history.ba2}</span> 歲
-        </div>
-      </div>
-      <div class="seriousDegreeGroup">
-        <h5>HRV</h5>
-        <div class="seriousScore ${isBelowAverage ? "redValue" : ""}">
-          <span>${history.HRV}</span> ms
-        </div>
-      </div>
-    </div>`;
+          <div class="cGroup">
+            <img class="img" src="images/detectTime.svg" alt="" />
+          </div>
+          <h3 class="detectionDate">${formatDate(history.CheckTime)}</h3>
+          <div class="detectionGroup">
+            <div class="scroeTotal">
+              <h5>生理年齡</h5>
+              <div class="totalScore">
+                <span>${history.ba2}</span> 歲
+              </div>
+            </div>
+            <div class="seriousDegreeGroup">
+              <h5>HRV</h5>
+              <div class="seriousScore ${isBelowAverage ? "redValue" : ""}">
+                <span>${history.HRV}</span> ms
+              </div>
+            </div>
+          </div>`;
 
           // Append detectionDiv to the container
           detectionContainer.appendChild(detectionDiv);
@@ -1053,8 +1071,7 @@
     color: #666;
     font-weight: 400;
     font-size: 1rem;
-    letter-spacing: .5px;
-    
+    letter-spacing: 0.5px;
   }
 
   .detectionWrap .detection .cGroup img {
