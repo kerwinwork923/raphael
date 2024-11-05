@@ -188,6 +188,11 @@
     resultTextGroupP = document.querySelector(".resultTextGroup p");
     nameText = document.querySelector(".nameText");
 
+    if (userData.Name) {
+      nameText.textContent = `${userData?.Name}，您好`;
+      const currentDate = new Date();
+    }
+
     async function API_HRV2Detail() {
       try {
         const response = await fetch(
@@ -262,12 +267,11 @@
         function formatCheckDate(checkTime) {
           const dateOnly = checkTime.split(" ")[0];
           return dateOnly;
-
-          function formatDate(checkTime) {
-            const dateOnly = checkTime.split(" ")[0]; // 提取日期部分
-            const [year, month, day] = dateOnly.split("/"); // 拆分年月日
-            return `${month}/${day}`; // 格式化成 "MM/DD"
-          }
+        }
+        function formatDate(checkTime) {
+          const dateOnly = checkTime.split(" ")[0]; // 提取日期部分
+          const [year, month, day] = dateOnly.split("/"); // 拆分年月日
+          return `${month}/${day}`; // 格式化成 "MM/DD"
         }
       }
     });
