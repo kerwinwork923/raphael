@@ -173,9 +173,21 @@
 
   <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const aidValue = urlParams.get("AID")?.replace(/^"(.*)"$/, '$1');
+    const aidValue = urlParams.get("AID")?.replace(/^"(.*)"$/, "$1");
     const userData = JSON.parse(localStorage.getItem("userData"));
-    // 定義 API 調用函數
+    //
+    f_v_ba2 = document.querySelector("#f_v_ba2");
+    f_v_hrv = document.querySelector("#f_v_hrv");
+    f_v_hr = document.querySelector("#f_v_hr");
+    f_v_sbp = document.querySelector("#f_v_sbp");
+    f_v_dbp = document.querySelector("#f_v_dbp");
+    f_v_spo2 = document.querySelector("#f_v_spo2");
+    f_v_rr = document.querySelector("#f_v_rr");
+    f_v_si = document.querySelector("#f_v_si");
+
+    resultTextGroupP = document.querySelector(".resultTextGroup p");
+    nameText = document.querySelector(".nameText");
+
     async function API_HRV2Detail() {
       try {
         const response = await fetch(
@@ -209,6 +221,54 @@
     API_HRV2Detail().then((apiResult) => {
       if (apiResult) {
         console.log("API 結果:", apiResult);
+        const HRVData = apiResult.HRV2Detail;
+        f_v_ba2.textContent = HRVData.ba2;
+        f_v_hrv.textContent = HRVData.HRV;
+        f_v_hr.textContent = HRVData.HR;
+        f_v_sbp.textContent = HRVData.SBP;
+        f_v_dbp.textContent = HRVData.DBP;
+        f_v_spo2.textContent = HRVData.SPO2;
+        f_v_rr.textContent = HRVData.rr;
+        f_v_si.textContent = HRVData.stress;
+        function getProgressImage(score) {
+          return `images/raphael/progress${score}.png`;
+        }
+
+        document.getElementById("f_v_health").src = getProgressImage(
+          HRVData.Health
+        );
+        document.getElementById("f_v_sleep").src = getProgressImage(
+          HRVData.Sleep
+        );
+        document.getElementById("f_v_metabolism").src = getProgressImage(
+          HRVData.Metabolism
+        );
+        document.getElementById("f_v_equilibrium").src = getProgressImage(
+          HRVData.Equilibrium
+        );
+        document.getElementById("f_v_activity").src = getProgressImage(
+          HRVData.Activity
+        );
+        document.getElementById("f_v_relaxation").src = getProgressImage(
+          HRVData.Relaxation
+        );
+
+        resultTextGroupP.textContent = HRVData.TotalDesc;
+        let checkTime = HRVData.CheckTime;
+        let formattedDate = formatCheckDate(checkTime);
+        document.querySelector(".titleGroup .timeGroup h4").textContent =
+          formattedDate;
+
+        function formatCheckDate(checkTime) {
+          const dateOnly = checkTime.split(" ")[0];
+          return dateOnly;
+
+          function formatDate(checkTime) {
+            const dateOnly = checkTime.split(" ")[0]; // 提取日期部分
+            const [year, month, day] = dateOnly.split("/"); // 拆分年月日
+            return `${month}/${day}`; // 格式化成 "MM/DD"
+          }
+        }
       }
     });
   </script>
