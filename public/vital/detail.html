@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>結果詳細頁</title>
+  </head>
+  <body>
+    <div class="finishWrap">
+      <div class="raphaelNavbar">
+        <div class="logoGroup">
+          <a to="/user">
+            <img src="images/raphael/neuro-plus.svg" alt="" />
+          </a>
+        </div>
+        <div class="optionGroup"></div>
+      </div>
+      <div class="titleGroup">
+        <div class="textGroup">
+          <h3 class="nameText">您好</h3>
+          <div class="timeGroup">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+            >
+              <path
+                d="M7 13C10.3137 13 13 10.3137 13 7C13 3.68629 10.3137 1 7 1C3.68629 1 1 3.68629 1 7C1 10.3137 3.68629 13 7 13Z"
+                stroke="#666666"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M6.33325 4.33334V7.66668H9.66659"
+                stroke="#666666"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <h4>2024/08/23</h4>
+          </div>
+        </div>
+        <img src="images/raphael/doctor.png" alt="" />
+      </div>
+
+      <div class="scanInfo">
+        <div class="row">
+          <div class="years">
+            <h3>心理年齡</h3>
+            <div class="value" id="f_v_ba2"></div>
+            <div class="info">years old</div>
+            <img src="images/raphael/HRVFace.svg" class="HRVFace" alt="" />
+          </div>
+          <div class="HRV">
+            <h3>心律變異性</h3>
+            <div id="f_v_hrv" class="value"></div>
+            <div class="info">ms</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="Rhythm">
+            <div class="titleGroup">
+              <h3>心率</h3>
+              <img src="images/raphael/heartBeat.svg" alt="" />
+            </div>
+            <div id="f_v_hr" class="value"></div>
+            <div class="info">bpm</div>
+            <img class="bgImg" src="images/raphael/greenChart.svg" alt="" />
+          </div>
+          <div class="bloodPressure">
+            <div class="titleGroup">
+              <h3>血壓</h3>
+              <img src="images/raphael/bloodPressure.svg" alt="" />
+            </div>
+            <div class="value">
+              <span id="f_v_sbp"></span>/<span id="f_v_dbp"></span>
+            </div>
+            <div class="info">mmHg</div>
+            <img class="bgImg" src="images/raphael/purpleChart.svg" alt="" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="BO">
+            <div class="titleGroup">
+              <h3>血氧</h3>
+              <img src="images/raphael/spo2.svg" alt="" />
+            </div>
+            <div id="f_v_spo2" class="value"></div>
+            <div class="info">SpO2%</div>
+            <img class="bgImg" src="images/raphael/blueChart.svg" alt="" />
+          </div>
+          <div class="breathe">
+            <div class="titleGroup">
+              <h3>呼吸</h3>
+              <img src="images/raphael/spo2.svg" alt="" />
+            </div>
+            <div id="f_v_rr" class="value"></div>
+            <div class="info">bpm</div>
+            <img class="bgImg" src="images/raphael/brownChart.svg" alt="" />
+          </div>
+          <div class="pressure">
+            <div class="titleGroup">
+              <h3>壓力</h3>
+              <img src="images/raphael/pressure.svg" alt="" />
+            </div>
+            <div id="f_v_si" class="value"></div>
+            <div class="info">low</div>
+            <img class="bgImg" src="images/raphael/redChart.svg" alt="" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="progressItem Health">
+            <h3>健康力</h3>
+            <img id="f_v_health" src="images/raphael/progress1.png" alt="" />
+          </div>
+          <div class="progressItem Sleep">
+            <h3>睡眠力</h3>
+            <img id="f_v_sleep" src="images/raphael/progress2.png" alt="" />
+          </div>
+          <div class="progressItem Metabolic">
+            <h3>代謝力</h3>
+            <img
+              id="f_v_metabolism"
+              src="images/raphael/progress3.png"
+              alt=""
+            />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="progressItem Balance">
+            <h3>平衡力</h3>
+            <img
+              id="f_v_equilibrium"
+              src="images/raphael/progress4.png"
+              alt=""
+            />
+          </div>
+          <div class="progressItem Active">
+            <h3>活動力</h3>
+            <img id="f_v_activity" src="images/raphael/progress5.png" alt="" />
+          </div>
+          <div class="progressItem Relax">
+            <h3>放鬆力</h3>
+            <img
+              id="f_v_relaxation"
+              src="images/raphael/progress1.png"
+              alt=""
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="resultTextGroup">
+        <h3>根據您的神經系統數據分析</h3>
+        <p></p>
+      </div>
+
+      <div class="subBtnGroup">
+        <a href="/user">
+          <button class="backToUserBtn" class="">會員中心</button>
+        </a>
+
+        <a href="/vital/scan.html">
+          <button class="backToDetect">重新檢測</button>
+        </a>
+      </div>
+    </div>
+  </body>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const aidValue = urlParams.get("AID");
+    const userData = JSON.parse(localStorage.getItem("userData"));
+    // 定義 API 調用函數
+    async function API_HRV2Detail() {
+      try {
+        const response = await fetch(
+          "https://23700999.com:8081/HMA/API_HRV2Detail.jsp",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              MID: userData.MID,
+              MAID: userData.MAID,
+              Token: userData.Token,
+              Mobile: userData.Mobile,
+              AID: aidValue,
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("網路響應不是成功狀態");
+        }
+
+        const apiResult = await response.json();
+        return apiResult;
+      } catch (error) {
+        console.error("Fetch error:", error);
+      }
+    }
+
+    API_HRV2Detail().then((apiResult) => {
+      if (apiResult) {
+        console.log("API 結果:", apiResult);
+      }
+    });
+  </script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    .finishWrap {
+      background: url("images/raphael/gradient-bg.png");
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-size: cover;
+      min-height: 100vh;
+      width: 100%;
+      padding: 0 5%;
+    }
+
+    .finishWrap {
+      padding-top: 50px;
+      width: 100%;
+    }
+
+    .finishWrap .titleGroup {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .finishWrap .textGroup {
+      width: 60%;
+    }
+
+    .finishWrap .textGroup .timeGroup {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 0.25rem;
+    }
+
+    .finishWrap .textGroup h3 {
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin: 0;
+    }
+
+    .finishWrap .textGroup .timeGroup svg {
+      transform: translateY(-4%);
+    }
+
+    .finishWrap .textGroup .timeGroup h4 {
+      font-size: 14px;
+      font-weight: 400;
+      margin: 0;
+    }
+
+    .finishWrap img {
+      width: 40%;
+    }
+
+    .scanInfo {
+      display: flex;
+      margin-top: 10px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    .scanInfo h3 {
+      font-size: 20px;
+      font-weight: 400;
+      letter-spacing: 0.15px;
+      padding: 0;
+      margin: 0;
+    }
+
+    .scanInfo .row {
+      display: flex;
+      flex-wrap: nowrap;
+      width: 100%;
+      gap: 3%;
+      margin-bottom: 1rem;
+    }
+
+    .scanInfo .years {
+      width: 55%;
+      padding: 6px;
+      border-radius: 8px;
+      background: linear-gradient(
+        180deg,
+        #74bc1f 0%,
+        rgba(116, 188, 31, 0.35) 100%
+      );
+      padding: 12px;
+      align-items: center;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .scanInfo .years .value {
+      font-size: 48px;
+      font-weight: bold;
+      padding: 0.25rem 0;
+    }
+
+    .scanInfo .years .info {
+      font-size: 1rem;
+      font-weight: 400;
+      letter-spacing: 0.5px;
+    }
+
+    .scanInfo .years .HRVFace {
+      position: absolute;
+      right: -8%;
+      top: 0;
+      width: 60%;
+    }
+
+    .scanInfo .HRV {
+      background: linear-gradient(
+        180deg,
+        #dfecc5 0%,
+        rgba(223, 236, 197, 0.35) 100%
+      );
+      padding: 12px;
+      border-radius: 8px;
+      width: 45%;
+    }
+
+    .scanInfo .HRV .value {
+      color: #74bc1f;
+      font-size: 48px;
+      font-weight: bold;
+      padding: 0.25rem 0;
+    }
+
+    .scanInfo .HRV .info {
+      color: #666;
+      font-size: 1rem;
+      font-weight: 400;
+      letter-spacing: 0.5px;
+      width: 45%;
+    }
+
+    .scanInfo .Rhythm,
+    .scanInfo .bloodPressure {
+      width: 50%;
+      background-color: #fff;
+      border-radius: 8px;
+      border-top-style: 8px;
+      position: relative;
+      overflow: hidden;
+      padding: 12px;
+    }
+
+    .scanInfo .Rhythm .titleGroup,
+    .scanInfo .bloodPressure .titleGroup {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .scanInfo .Rhythm .titleGroup img,
+    .scanInfo .bloodPressure .titleGroup img {
+      width: 20px;
+    }
+
+    .scanInfo .Rhythm .value,
+    .scanInfo .bloodPressure .value {
+      color: #74bc1f;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.12px;
+      margin-top: 0.5rem;
+    }
+
+    .scanInfo .Rhythm .info,
+    .scanInfo .bloodPressure .info {
+      color: #ccc;
+      letter-spacing: 0.5px;
+    }
+
+    .scanInfo .Rhythm .bgImg,
+    .scanInfo .bloodPressure .bgImg {
+      position: absolute;
+      bottom: 0%;
+      width: 100%;
+    }
+
+    .scanInfo .BO,
+    .scanInfo .breathe,
+    .scanInfo .pressure {
+      width: 33.333%;
+      background-color: #fff;
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+      padding: 12px;
+    }
+
+    .scanInfo .BO .titleGroup,
+    .scanInfo .breathe .titleGroup,
+    .scanInfo .pressure .titleGroup {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .scanInfo .BO .titleGroup img,
+    .scanInfo .breathe .titleGroup img,
+    .scanInfo .pressure .titleGroup img {
+      width: 20px;
+    }
+
+    .scanInfo .BO .value,
+    .scanInfo .breathe .value,
+    .scanInfo .pressure .value {
+      color: #74bc1f;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.12px;
+      margin-top: 0.5rem;
+    }
+
+    .scanInfo .BO .info,
+    .scanInfo .breathe .info,
+    .scanInfo .pressure .info {
+      color: #ccc;
+      letter-spacing: 0.5px;
+    }
+
+    .scanInfo .BO .bgImg,
+    .scanInfo .breathe .bgImg,
+    .scanInfo .pressure .bgImg {
+      position: absolute;
+      bottom: 0%;
+      width: 100%;
+    }
+
+    .progressItem {
+      width: 33.3333%;
+      text-align: center;
+      background-color: #fff;
+      padding: 12px;
+    }
+
+    .progressItem img {
+      width: 100%;
+      margin-top: 0.25rem;
+    }
+
+    .textResultText {
+      color: #666;
+      margin: 0;
+      padding-top: 0.75rem;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: #1e1e1e;
+      letter-spacing: 0.5px;
+    }
+
+    .resultTextGroup {
+      background-color: #fff;
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .resultTextGroup h3 {
+      margin: 0;
+      font-weight: 400;
+    }
+
+    .resultTextGroup p {
+      margin: 0;
+      margin-top: 0.5rem;
+    }
+
+    .subBtnGroup {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      gap: 3%;
+      margin-top: 0.75rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .subBtnGroup a {
+      text-decoration: none;
+      width: 100%;
+      text-align: center;
+    }
+
+    .subBtnGroup button {
+      background-color: #74bc1f;
+      color: #fff;
+      padding: 8px;
+      width: 90%;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 400;
+      letter-spacing: 0.5px;
+      transition: 0.25s ease;
+      width: 100%;
+    }
+
+    .subBtnGroup .backToUserBtn {
+      background-color: #eee;
+      color: #666;
+    }
+  </style>
+</html>
