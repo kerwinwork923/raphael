@@ -6,6 +6,10 @@
     <title>結果詳細頁</title>
   </head>
   <body>
+    <div id="raphaelLoading" class="raphaelLoading" 　style="display: none;">
+      <img src="images/raphael/spinner.gif" alt="Loading..." />
+    </div>
+
     <div class="finishWrap">
       <div class="detailHeader">
         <img src="../vital/images/raphael/backArrow.png" class="backIcon" />
@@ -126,7 +130,6 @@
         <h3>根據您的神經系統數據分析</h3>
         <p></p>
       </div>
-
     </div>
   </body>
 
@@ -134,10 +137,18 @@
     const urlParams = new URLSearchParams(window.location.search);
     const aidValue = urlParams.get("AID")?.replace(/^"(.*)"$/, "$1");
 
+    function showLoading() {
+      document.getElementById("raphaelLoading").style.display = "flex";
+    }
+
+    function hideLoading() {
+      document.getElementById("raphaelLoading").style.display = "none";
+    }
+
     document.querySelector(".backIcon").addEventListener(
       "click",
       () => {
-        window.history.back()
+        window.history.back();
       },
       false
     );
@@ -153,7 +164,6 @@
     f_v_si = document.querySelector("#f_v_si");
 
     resultTextGroupP = document.querySelector(".resultTextGroup p");
-
 
     async function API_HRV2Detail() {
       try {
@@ -186,57 +196,63 @@
     }
 
     API_HRV2Detail().then((apiResult) => {
-      if (apiResult) {
-        console.log("API 結果:", apiResult);
-        const HRVData = apiResult.HRV2Detail;
-        f_v_ba2.textContent = HRVData.ba2;
-        f_v_hrv.textContent = HRVData.HRV;
-        f_v_hr.textContent = HRVData.HR;
-        f_v_sbp.textContent = HRVData.SBP;
-        f_v_dbp.textContent = HRVData.DBP;
-        f_v_spo2.textContent = HRVData.SPO2;
-        f_v_rr.textContent = HRVData.rr;
-        f_v_si.textContent = HRVData.stress;
-        function getProgressImage(score) {
-          return `images/raphael/progress${score}.png`;
-        }
+      try {
+        showLoading();
+        if (apiResult) {
+          console.log("API 結果:", apiResult);
+          const HRVData = apiResult.HRV2Detail;
+          f_v_ba2.textContent = HRVData.ba2;
+          f_v_hrv.textContent = HRVData.HRV;
+          f_v_hr.textContent = HRVData.HR;
+          f_v_sbp.textContent = HRVData.SBP;
+          f_v_dbp.textContent = HRVData.DBP;
+          f_v_spo2.textContent = HRVData.SPO2;
+          f_v_rr.textContent = HRVData.rr;
+          f_v_si.textContent = HRVData.stress;
+          function getProgressImage(score) {
+            return `images/raphael/progress${score}.png`;
+          }
 
-        document.getElementById("f_v_health").src = getProgressImage(
-          HRVData.Health
-        );
-        document.getElementById("f_v_sleep").src = getProgressImage(
-          HRVData.Sleep
-        );
-        document.getElementById("f_v_metabolism").src = getProgressImage(
-          HRVData.Metabolism
-        );
-        document.getElementById("f_v_equilibrium").src = getProgressImage(
-          HRVData.Equilibrium
-        );
-        document.getElementById("f_v_activity").src = getProgressImage(
-          HRVData.Activity
-        );
-        document.getElementById("f_v_relaxation").src = getProgressImage(
-          HRVData.Relaxation
-        );
+          document.getElementById("f_v_health").src = getProgressImage(
+            HRVData.Health
+          );
+          document.getElementById("f_v_sleep").src = getProgressImage(
+            HRVData.Sleep
+          );
+          document.getElementById("f_v_metabolism").src = getProgressImage(
+            HRVData.Metabolism
+          );
+          document.getElementById("f_v_equilibrium").src = getProgressImage(
+            HRVData.Equilibrium
+          );
+          document.getElementById("f_v_activity").src = getProgressImage(
+            HRVData.Activity
+          );
+          document.getElementById("f_v_relaxation").src = getProgressImage(
+            HRVData.Relaxation
+          );
 
-        resultTextGroupP.textContent = HRVData.TotalDesc;
-        let checkTime = HRVData.CheckTime;
-        let formattedDate = formatCheckDate(checkTime);
-        document.querySelector(".detailHeader h5").textContent = formattedDate;
+          resultTextGroupP.textContent = HRVData.TotalDesc;
+          let checkTime = HRVData.CheckTime;
+          let formattedDate = formatCheckDate(checkTime);
+          document.querySelector(".detailHeader h5").textContent =
+            formattedDate;
 
-        function formatCheckDate(checkTime) {
-          const dateOnly = checkTime.split(" ")[0];
-          return dateOnly;
+          function formatCheckDate(checkTime) {
+            const dateOnly = checkTime.split(" ")[0];
+            return dateOnly;
+          }
+          function formatDate(checkTime) {
+            const dateOnly = checkTime.split(" ")[0]; // 提取日期部分
+            const [year, month, day] = dateOnly.split("/"); // 拆分年月日
+            return `${month}/${day}`; // 格式化成 "MM/DD"
+          }
         }
-        function formatDate(checkTime) {
-          const dateOnly = checkTime.split(" ")[0]; // 提取日期部分
-          const [year, month, day] = dateOnly.split("/"); // 拆分年月日
-          return `${month}/${day}`; // 格式化成 "MM/DD"
-        }
+      } catch {
+      } finally {
+        hideLoading();
       }
     });
-    
   </script>
 
   <style>
@@ -246,6 +262,24 @@
     body {
       margin: 0;
       padding: 0;
+    }
+
+    .raphaelLoading {
+      width: 100%;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99;
+      background: rgba(217, 217, 217, 0.5);
+      backdrop-filter: blur(2.5px);
+    }
+
+    .raphaelLoading img {
+      transform: translateY(-15%);
     }
     .detailHeader {
       position: absolute;
