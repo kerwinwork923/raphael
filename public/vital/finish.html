@@ -587,6 +587,7 @@
 
           // HTML content with conditional class for below-average HRV
           detectionDiv.innerHTML = `
+          <a href='detail?AID="${HRVData.AID}"'>
           <div class="cGroup">
             <img class="img" src="images/detectTime.svg" alt="" />
           </div>
@@ -604,7 +605,9 @@
                 <span>${history.HRV}</span> ms
               </div>
             </div>
-          </div>`;
+          </div>
+          </a>
+          `;
 
           // Append detectionDiv to the container
           detectionContainer.appendChild(detectionDiv);
