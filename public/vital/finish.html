@@ -383,12 +383,12 @@
   f_v_spo2 = document.querySelector("#f_v_spo2");
   f_v_rr = document.querySelector("#f_v_rr");
   f_v_si = document.querySelector("#f_v_si");
-  f_v_health = document.querySelector("#f_v_health");
-  f_v_sleep = document.querySelector("#f_v_sleep");
-  f_v_metabolism = document.querySelector("#f_v_metabolism");
-  f_v_equilibrium = document.querySelector("#f_v_equilibrium");
-  f_v_activity = document.querySelector("#f_v_activity");
-  f_v_relaxation = document.querySelector("#f_v_relaxation");
+  // f_v_health = document.querySelector("#f_v_health");
+  // f_v_sleep = document.querySelector("#f_v_sleep");
+  // f_v_metabolism = document.querySelector("#f_v_metabolism");
+  // f_v_equilibrium = document.querySelector("#f_v_equilibrium");
+  // f_v_activity = document.querySelector("#f_v_activity");
+  // f_v_relaxation = document.querySelector("#f_v_relaxation");
   resultTextGroupP = document.querySelector(".resultTextGroup p");
   nameText = document.querySelector(".nameText");
 
@@ -537,12 +537,30 @@
         f_v_spo2.textContent = HRVData.SPO2;
         f_v_rr.textContent = HRVData.rr;
         f_v_si.textContent = HRVData.stress;
-        f_v_health.textContent = HRVData.Health;
-        f_v_sleep.textContent = HRVData.Sleep;
-        f_v_metabolism.textContent = HRVData.Metabolism;
-        f_v_equilibrium.textContent = HRVData.Equilibrium;
-        f_v_activity.textContent = HRVData.Activity;
-        f_v_relaxation.textContent = HRVData.Relaxation;
+
+        function getProgressImage(score) {
+          return `images/raphael/progress${score}.png`;
+        }
+
+        document.getElementById("f_v_health").src = getProgressImage(
+          HRVData.Health
+        );
+        document.getElementById("f_v_sleep").src = getProgressImage(
+          HRVData.Sleep
+        );
+        document.getElementById("f_v_metabolism").src = getProgressImage(
+          HRVData.Metabolism
+        );
+        document.getElementById("f_v_equilibrium").src = getProgressImage(
+          HRVData.Equilibrium
+        );
+        document.getElementById("f_v_activity").src = getProgressImage(
+          HRVData.Activity
+        );
+        document.getElementById("f_v_relaxation").src = getProgressImage(
+          HRVData.Relaxation
+        );
+
         resultTextGroupP.textContent = HRVData.TotalDesc;
         let checkTime = HRVData.CheckTime;
         let formattedDate = formatCheckDate(checkTime);
@@ -557,32 +575,67 @@
         apiResult.HRV2.forEach((history) => {
           const detectionDiv = document.createElement("div");
           detectionDiv.classList.add("detection");
-          detectionDiv.classList.add("detection");
-          detectionDiv.classList.add("detection");
-          // 將 HTML 結構組合成內部內容
-          detectionDiv.innerHTML = `
-                <div class="cGroup">
-                    <img class="img" src="images/detectTime.svg" alt="" />
-                </div>
-                <h3 class="detectionDate">${formatDate(history.CheckTime)}</h3>
-                <div class="detectionGroup">
-                    <div class="scroeTotal">
-                        <h5>生理年齡</h5>
-                        <div class="totalScore">
-                            ${history.ba2} 歲
-                        </div>
-                    </div>
-                    <div class="seriousDegreeGroup">
-                        <h5>HRV</h5>
-                        <div class="seriousScore">
-                            ${history.HRV} ms
-                        </div>
-                    </div>
-                </div>`;
 
-          // 將新的 detectionDiv 添加到容器中
+          // HRV and age data
+          const age = parseInt(history.ba2, 10);
+          const hrvValue = parseFloat(history.HRV);
+          const gender = userData.Sex; // Assuming "M" for male and "F" for female
+
+          // Get the HRV range based on age and gender
+          const [minHRV, maxHRV] = getHRVRange(age, gender);
+          const isBelowAverage = hrvValue < minHRV;
+
+          // HTML content with conditional class for below-average HRV
+          detectionDiv.innerHTML = `
+          <a href='detail.html?AID="${HRVData.AID}"'>
+          <div class="cGroup">
+            <img class="img" src="images/detectTime.svg" alt="" />
+          </div>
+          <h3 class="detectionDate">${formatDate(history.CheckTime)}</h3>
+          <div class="detectionGroup">
+            <div class="scroeTotal">
+              <h5>生理年齡</h5>
+              <div class="totalScore">
+                <span>${history.ba2}</span> 歲
+              </div>
+            </div>
+            <div class="seriousDegreeGroup">
+              <h5>HRV</h5>
+              <div class="seriousScore ${isBelowAverage ? "redValue" : ""}">
+                <span>${history.HRV}</span> ms
+              </div>
+            </div>
+          </div>
+          </a>
+          `;
+
+          // Append detectionDiv to the container
           detectionContainer.appendChild(detectionDiv);
         });
+
+        // Function to get the HRV range based on age and gender
+        function getHRVRange(age, gender) {
+          if (age >= 0 && age <= 29) {
+            return gender === "M" ? [29, 53] : [30, 57];
+          } else if (age >= 30 && age <= 39) {
+            return gender === "M" ? [25, 47] : [25, 44];
+          } else if (age >= 40 && age <= 49) {
+            return gender === "M" ? [21, 40] : [20, 40];
+          } else if (age >= 50 && age <= 59) {
+            return gender === "M" ? [15, 34] : [18, 38];
+          } else if (age >= 60) {
+            return gender === "M" ? [16, 33] : [15, 30];
+          }
+          return [0, Infinity]; // Default to a very broad range if age/gender is not matched
+        }
+
+        // Helper function to format the date
+        function formatDate(checkTime) {
+          const dateOnly = checkTime.split(" ")[0];
+          const [year, month, day] = dateOnly.split("/");
+          return `${month}/${day}`;
+        }
+
         // 格式化日期的函數
         function formatDate(checkTime) {
           const dateOnly = checkTime.split(" ")[0]; // 提取日期部分
@@ -932,7 +985,7 @@
   .textResultText {
     color: #666;
     margin: 0;
-    margin-top: 1rem;
+    padding-top: 0.75rem;
     text-align: center;
     font-size: 1.5rem;
     font-weight: 400;
@@ -995,29 +1048,43 @@
     border-radius: 12px;
     padding: 0 16px;
     margin-top: 0.85rem;
-    max-height: 400px;
-    overflow-y: auto; /* 超出高度時顯示滾動條 */
   }
 
-  .detectionWrap .detection {
+  .detectionWrap .detectionContainer {
+    overflow-y: auto;
+    max-height: 400px;
+  }
+
+  .detectionWrap .detection a {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     height: 80px;
+    text-decoration: none;
+    color: #1e1e1e;
+    margin: 1rem 0;
+  }
+  .detectionWrap .detection a:hover {
+    background-color: #f4f4f4;
+
   }
 
-  .detectionWrap .detection .cGroup {
+  .detectionWrap .detection a  .cGroup {
     border: 2px solid #74bc1f;
     padding: 0.25rem;
     border-radius: 7px;
   }
 
-  .detectionWrap .detection h5 {
+  .detectionWrap .detection a h5 {
     margin: 0;
     margin-top: 0.25rem;
+    color: #666;
+    font-weight: 400;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
   }
 
-  .detectionWrap .detection .cGroup img {
+  .detectionWrap .detection a .cGroup img {
     width: 1rem;
     height: 1rem;
   }
@@ -1028,5 +1095,16 @@
     justify-content: center;
     align-items: center;
     gap: 14px;
+  }
+
+  .detectionWrap .detectionGroup span {
+    font-weight: bold;
+    font-size: 1.5rem;
+    letter-spacing: 0.05px;
+    color: #1e1e1e;
+  }
+
+  .detectionWrap .detectionGroup .redValue {
+    color: #ec4f4f;
   }
 </style>

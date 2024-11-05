@@ -320,7 +320,7 @@ export default {
           if (response.data.Result == "OK") {
             alertVisable.value = true;
             alertContent.value = "密碼重新設定完成，請用新密碼登入";
-            router.push("/login");
+            router.push("/");
           }
         }
       } catch (err) {

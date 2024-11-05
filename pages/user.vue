@@ -103,7 +103,7 @@ export default {
         : {};
 
       if (!MID || !Token || !MAID || !Mobile) {
-        router.push("/login");
+        router.push("/");
         return;
       } else if (Name === "") {
         router.push("/changeMember");

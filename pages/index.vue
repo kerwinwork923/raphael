@@ -357,6 +357,8 @@ export default {
       }
     };
 
+
+
     const installPWA = async () => {
       if (isIOS && !isStandalone) {
         // 提示 iOS 用戶如何安裝 PWA
