@@ -71,7 +71,7 @@
           <img src="../assets/imgs/relationshopIcon.svg" alt="" />
         </div>
       </div>
-      <footer class="copyrights">© 2024 拉菲爾股份有限公司 all rights reserved. </footer>
+      <footer class="copyrights">© 2024 智平衡健康事業股份有限公司 all rights reserved. </footer>
     </div>
   </div>
 </template>
