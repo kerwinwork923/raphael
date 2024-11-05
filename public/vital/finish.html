@@ -587,7 +587,7 @@
 
           // HTML content with conditional class for below-average HRV
           detectionDiv.innerHTML = `
-          <a href='detail?AID="${HRVData.AID}"'>
+          <a href='detail.html?AID="${HRVData.AID}"'>
           <div class="cGroup">
             <img class="img" src="images/detectTime.svg" alt="" />
           </div>
@@ -1055,24 +1055,24 @@
     max-height: 400px;
   }
 
-  .detectionWrap .detection {
+  .detectionWrap .detection a {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     height: 80px;
   }
-  .detectionWrap .detection &:hover {
+  .detectionWrap .detection a &:hover {
     background-color: #f4f4f4;
     margin: 1rem 0;
   }
 
-  .detectionWrap .detection .cGroup {
+  .detectionWrap .detection a  .cGroup {
     border: 2px solid #74bc1f;
     padding: 0.25rem;
     border-radius: 7px;
   }
 
-  .detectionWrap .detection h5 {
+  .detectionWrap .detection a h5 {
     margin: 0;
     margin-top: 0.25rem;
     color: #666;
@@ -1081,7 +1081,7 @@
     letter-spacing: 0.5px;
   }
 
-  .detectionWrap .detection .cGroup img {
+  .detectionWrap .detection a .cGroup img {
     width: 1rem;
     height: 1rem;
   }
