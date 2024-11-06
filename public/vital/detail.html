@@ -178,7 +178,6 @@
     if (!localData) {
       console.warn("No user data found, redirecting...");
       window.location.href = "/";
- 
     }
 
     function showLoading() {
@@ -251,7 +250,7 @@
         if (apiResult) {
           console.log("API 結果:", apiResult);
           const HRVData = apiResult.HRV2Detail;
-          f_v_bioage.textContent = HRVData.bioage;
+          f_v_bioage.textContent = `${HRVData.bioage - 4}-${HRVData.bioage}`;
           f_v_hrv.textContent = HRVData.HRV;
           f_v_hr.textContent = HRVData.HR;
           f_v_sbp.textContent = HRVData.SBP;

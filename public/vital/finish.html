@@ -624,7 +624,7 @@
           const detectionDiv = document.createElement("div");
           detectionDiv.classList.add("detection");
 
-          const age = parseInt(history.ba2, 10);
+          const age = parseInt(history.bioage, 10);
           const hrvValue = parseFloat(history.HRV);
           const gender = userData.Sex;
 
@@ -642,7 +642,7 @@
               <div class="scroeTotal">
                 <h5>生理年齡</h5>
                 <div class="totalScore">
-                  <span>${history.ba2}</span> 歲
+                  <span>${history.bioage - 4} - ${history.bioage}</span> 歲
                 </div>
               </div>
               <div class="seriousDegreeGroup">
