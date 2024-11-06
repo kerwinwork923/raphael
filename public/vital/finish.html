@@ -427,6 +427,15 @@
   // 從本地儲存中獲取 userData
   const userData = JSON.parse(localStorage.getItem("userData"));
   const currentResult = JSON.parse(sessionStorage.getItem("result"));
+  //登入
+  const localData = localStorage.getItem("userData");
+  const { MID, Token, MAID, Mobile, Name } = localData
+    ? JSON.parse(localData)
+    : {};
+  if (!MID || !Token || !MAID || !Mobile) {
+    window.location.href = "/";
+    return;
+  }
 
   function showLoading() {
     document.getElementById("raphaelLoading").style.display = "flex";
