@@ -98,7 +98,7 @@
         <div class="row">
           <div class="years">
             <h3>心理年齡</h3>
-            <div class="value" id="f_v_ba2"></div>
+            <div class="value" id="bioage"></div>
             <div class="info">years old</div>
             <img src="images/raphael/HRVFace.svg" class="HRVFace" alt="" />
           </div>
@@ -378,7 +378,7 @@
 
 <script>
   //dom獲取元素
-  f_v_ba2 = document.querySelector("#f_v_ba2");
+  bioage = document.querySelector("#bioage");
   f_v_hrv = document.querySelector("#f_v_hrv");
   f_v_hr = document.querySelector("#f_v_hr");
   f_v_sbp = document.querySelector("#f_v_sbp");
@@ -486,8 +486,8 @@
             LF: String(currentResult.hrv_indices.LF),
             LF_HF_Ratio: String(currentResult.hrv_indices.LF_HF_RATIO),
             Mean_RR: String(currentResult.hrv_indices.MEAN_RR),
-            PHF: String(currentResult.hrv_indices.PHF),
-            PLF: String(currentResult.hrv_indices.PLF),
+            PHF: String(currentResult.hrv_indices.PHF), //
+            PLF: String(currentResult.hrv_indices.PLF), //
             RMSSD: String(currentResult.hrv_indices.RMSSD),
             RRIV: String(currentResult.hrv_indices.RRIV),
             SD1: String(currentResult.hrv_indices.SD1),
@@ -541,7 +541,7 @@
 
       if (apiResult.HRV2 && apiResult.HRV2.length > 0) {
         const HRVData = apiResult.HRV2[0];
-        f_v_ba2.textContent = HRVData.ba2;
+        bioage.textContent = HRVData.bioage;
         f_v_hrv.textContent = HRVData.HRV;
         f_v_hr.textContent = HRVData.HR;
         f_v_sbp.textContent = HRVData.SBP;
