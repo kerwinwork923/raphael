@@ -83,6 +83,42 @@
             <img class="bgImg" src="images/raphael/redChart.svg" alt="" />
           </div>
         </div>
+
+        <div class="row">
+          <div class="nerve">
+            <div class="titleGroup">
+              <h3>交感神經</h3>
+              <img src="images/raphael/nerveIcon.png " alt="" />
+            </div>
+
+            <div id="f_v_SNS" class="value"></div>
+            <div class="subTag" id="f_v_SNSDesc">中度亢奮</div>
+            <img
+              class="nerveImg"
+              id="f_v_SNSImg"
+              src="images/raphael/curve_H_98.png"
+              alt=""
+            />
+            <h5 id="f_v_SNSPercent">高於84%的人</h5>
+          </div>
+          <div class="nerve">
+            <div class="titleGroup">
+              <h3>副交感神經</h3>
+              <img src="images/raphael/nerveSubIcon.png" alt="" />
+            </div>
+
+            <div id="f_v_PNS" class="value">1.5</div>
+            <div class="subTag" id="f_v_PNSDesc">極度低落</div>
+            <img
+              class="nerveImg"
+              d="f_v_PNSImg"
+              src="images/raphael/curve_H_98.png"
+              alt=""
+            />
+            <h5 id="f_v_PNSPercent">低於98%的人</h5>
+          </div>
+        </div>
+
         <div class="row">
           <div class="progressItem Health">
             <h3>健康力</h3>
@@ -162,6 +198,12 @@
     f_v_spo2 = document.querySelector("#f_v_spo2");
     f_v_rr = document.querySelector("#f_v_rr");
     f_v_si = document.querySelector("#f_v_si");
+    f_v_SNS = document.querySelector("#f_v_SNS");
+    f_v_SNSDesc = document.querySelector("#f_v_SNSDesc");
+    f_v_SNSPercent = document.querySelector("#f_v_SNSPercent");
+    f_v_PNS = document.querySelector("#f_v_PNS");
+    f_v_PNSDesc = document.querySelector("#f_v_PNSDesc");
+    f_v_PNSPercent = document.querySelector("#f_v_PNSPercent");
 
     resultTextGroupP = document.querySelector(".resultTextGroup p");
 
@@ -209,6 +251,68 @@
           f_v_spo2.textContent = HRVData.SPO2;
           f_v_rr.textContent = HRVData.rr;
           f_v_si.textContent = HRVData.stress;
+          f_v_SNS.textContent = HRVData.SNS;
+          f_v_SNSDesc = HRVData.SNSDesc;
+          f_v_SNSPercent = HRVData.SNSPercent;
+          f_v_PNS = HRVData.PNS;
+          f_v_PNSDesc = HRVData.PNSDesc;
+          f_v_PNSPercent = HRVData.PNSPercent;
+
+          const SNS = apiResult?.SNS;
+          const PNS = apiResult?.PNS;
+
+          if (SNS < -2) {
+            document.getElementById(
+              "f_v_SNSImg"
+            ).src = `images/raphael/curve_H_98.png`;
+          } else if (SNS >= -2 && SNS < -1) {
+            document.getElementById(
+              "f_v_SNSImg"
+            ).src = `images/raphael/curve_H_84.png`;
+          } else if (SNS >= -1 && SNS < 0) {
+            document.getElementById(
+              "f_v_SNSImg"
+            ).src = `images/raphael/curve_H_50.png`;
+          } else if (SNS >= 0 && SNS < 1) {
+            document.getElementById(
+              "f_v_SNSImg"
+            ).src = `images/raphael/curve_L_50.png`;
+          } else if (SNS >= 1 && SNS < 2) {
+            document.getElementById(
+              "f_v_SNSImg"
+            ).src = `images/raphael/curve_L_84.png`;
+          } else if (SNS >= 2) {
+            document.getElementById(
+              "f_v_SNSImg"
+            ).src = `images/raphael/curve_L_98.png`;
+          }
+
+          if (PNS > 2) {
+            document.getElementById(
+              "f_v_PNSImg"
+            ).src = `images/raphael/curve_H_98.png`;
+          } else if (PNS <= 2 && PNS > 1) {
+            document.getElementById(
+              "f_v_PNSImg"
+            ).src = `images/raphael/curve_H_84.png`;
+          } else if (PNS <= 1 && PNS > 0) {
+            document.getElementById(
+              "f_v_PNSImg"
+            ).src = `images/raphael/curve_H_50.png`;
+          } else if (PNS <= 0 && PNS > -1) {
+            document.getElementById(
+              "f_v_PNSImg"
+            ).src = `images/raphael/curve_L_50.png`;
+          } else if (PNS <= -1 && PNS > -2) {
+            document.getElementById(
+              "f_v_PNSImg"
+            ).src = `images/raphael/curve_L_84.png`;
+          } else if (PNS <= -2) {
+            document.getElementById(
+              "f_v_PNSImg"
+            ).src = `images/raphael/curve_L_98.png`;
+          }
+
           function getProgressImage(score) {
             return `images/raphael/progress${score}.png`;
           }
@@ -446,6 +550,56 @@
       position: relative;
       overflow: hidden;
       padding: 12px;
+    }
+
+    .scanInfo .nerve {
+      width: 50%;
+      background-color: #fff;
+      border-radius: 8px;
+      border-top-style: 8px;
+      position: relative;
+      overflow: hidden;
+      padding: 12px;
+    }
+
+    .scanInfo .nerve .titleGroup {
+      display: flex;
+    }
+
+    .scanInfo .nerve .titleGroup img {
+      width: 20px;
+    }
+
+    .scanInfo .nerve .value {
+      color: #74bc1f;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.12px;
+      margin-top: 0.25rem;
+    }
+
+    .scanInfo .nerve .nerveImg {
+      width: 100%;
+    }
+
+    .scanInfo .nerve .subTag {
+      font-size: 12px;
+      padding: 6px;
+      background-color: #65558f;
+      color: #fff;
+      display: inline-block;
+      border-radius: 4px;
+      transform: translateY(8px);
+      margin: 0;
+    }
+
+    .scanInfo .nerve h5 {
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      font-size: 1rem;
+      color: #65558f;
+      letter-spacing: 0.5px;
     }
 
     .scanInfo .Rhythm .titleGroup,
