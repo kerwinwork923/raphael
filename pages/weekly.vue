@@ -109,7 +109,7 @@ export default {
     }
 
     if (!MID || !Token || !MAID || !Mobile) {
-      router.push("/login");
+      router.push("/");
       return;
     }
     const store = useWeeklyRecord();
