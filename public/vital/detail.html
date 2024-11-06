@@ -178,10 +178,7 @@
       ? JSON.parse(localData)
       : {};
     if (!MID || !Token || !MAID || !Mobile) {
-      router.push("/");
-      return;
-    } else if (Name === "") {
-      router.push("/changeMember");
+      window.location.href = "/";
       return;
     }
 
