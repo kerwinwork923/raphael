@@ -106,7 +106,6 @@
               <h3>副交感神經</h3>
               <img src="images/raphael/nerveSubIcon.png" alt="" />
             </div>
-
             <div id="f_v_PNS" class="value"></div>
             <div class="subTag" id="f_v_PNSDesc">極度低落</div>
             <img
@@ -252,11 +251,11 @@
           f_v_rr.textContent = HRVData.rr;
           f_v_si.textContent = HRVData.stress;
           f_v_SNS.textContent = HRVData.SNS;
-          f_v_SNSDesc = HRVData.SNSDesc;
-          f_v_SNSPercent = HRVData.SNSPercent;
-          f_v_PNS = HRVData.PNS;
-          f_v_PNSDesc = HRVData.PNSDesc;
-          f_v_PNSPercent = HRVData.PNSPercent;
+          f_v_SNSDesc.textContent = HRVData.SNSDesc;
+          f_v_SNSPercent.textContent = HRVData.SNSPercent;
+          f_v_PNS.textContent = HRVData.PNS;
+          f_v_PNSDesc.textContent = HRVData.PNSDesc;
+          f_v_PNSPercent.textContent = HRVData.PNSPercent;
 
           const SNS = apiResult?.SNS;
           const PNS = apiResult?.PNS;
