@@ -354,35 +354,31 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         const hours = parseInt(lastTestDateStr.substring(8, 10), 10);
         const minutes = parseInt(lastTestDateStr.substring(10, 12), 10);
         const seconds = parseInt(lastTestDateStr.substring(12, 14), 10);
-
-        const lastTestDate = new Date(
-          year,
-          month,
-          day,
-          hours,
-          minutes,
-          seconds
-        );
-
+    
+        const lastTestDate = new Date(year, month, day, hours, minutes, seconds);
+    
         if (!isNaN(lastTestDate.getTime())) {
           const diffTime = currentDate - lastTestDate;
-
+    
           const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
           const diffHours = Math.floor(
             (diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
           );
-
+    
           const remainingDays = 12 - diffDays;
-          const remainingHours = diffHours > 0 ? 24 - diffHours : 0;
-
+          let remainingHours = 0;
+    
           if (remainingDays > 0) {
+            if (diffDays === 0) {
+              remainingHours = 12 - diffHours;
+            }
             this.diffDays = `${remainingDays}天`;
           } else if (remainingDays === 0 && remainingHours > 0) {
             this.diffDays = `${remainingHours}小時`;
           } else {
             this.diffDays = "已經超過12天";
           }
-
+    
           if (diffDays < 12) {
             this.nowState = "result";
             await this.API_API_ANSSecond();
@@ -395,6 +391,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         await this.getQues();
       }
     },
+    
 
     // 比較前後次
     async API_API_ANSSecond() {
