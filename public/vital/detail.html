@@ -20,7 +20,7 @@
       <div class="scanInfo">
         <div class="row">
           <div class="years">
-            <h3>心理年齡</h3>
+            <h3>生理年齡</h3>
             <div class="value" id="f_v_bioage"></div>
             <div class="info">years old</div>
             <img src="images/raphael/HRVFace.svg" class="HRVFace" alt="" />
@@ -257,8 +257,8 @@
           f_v_PNSDesc.textContent = HRVData.PNSDesc;
           f_v_PNSPercent.textContent = HRVData.PNSPercent;
 
-          const SNS = HRVData.SNS;
-          const PNS = HRVData.PNS;
+          const SNS = number(HRVData.SNS);
+          const PNS = number(HRVData.PNS);
 
           if (SNS < -2) {
             document.getElementById(
