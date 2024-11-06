@@ -43,7 +43,7 @@ let infodata = JSON.parse(sessionStorage.getItem("data"));
 const OnVisibilityChange = () => {
   if (document.hidden) {
     console.log("unvisible")
-    StoptMeasuring('basic_info.html');
+    StoptMeasuring('/user');
   }
 }
 
@@ -279,20 +279,20 @@ const OnEvent = (x) => {
     else if (x.reason === 'ABNORMAL_RESULT') {
       alert('ABNORMAL_RESULT');
     }
-    StoptMeasuring('basic_info.html');
+    StoptMeasuring('/user');
   }
   else if (x.state === '_connection_close_') {
     if (x.reason === 'reject') {
       alert('connect to server fail by reason: reject');
-      StoptMeasuring('basic_info.html');
+      StoptMeasuring('/user');
     }
     else if (x.reason === 'connect_failed') {
       alert('connect to server fail by reason: connect_failed');
-      StoptMeasuring('basic_info.html');
+      StoptMeasuring('/user');
     }
     else if (x.reason === 'path_not_found') {
       alert('connect to server fail by reason: path_not_found');
-      StoptMeasuring('basic_info.html');
+      StoptMeasuring('/user');
     }
   }
 }
@@ -311,7 +311,7 @@ const StartMeasuring = () => {
       }
       else {
         alert(`start measuring failed, reason=${result.error}`);
-        StoptMeasuring('basic_info.html');
+        StoptMeasuring('/user');
       }
     })
 }
@@ -358,7 +358,7 @@ FHVitalsSDK.init({
   .catch(e => {
     console.error(e);
     alert('init FHVitalsSDK failed');
-    StoptMeasuring('basic_info.html');
+    StoptMeasuring('/user');
   })
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -366,7 +366,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (your_auth_url.includes("XXXX.XXXX.XXXX")) {
     alert("Not set your_auth_url.\nPlease follow the \"readme_web.txt\" to change url");
-    window.location.href = 'basic_info.html';
+    window.location.href = '/user';
     return;
   }
 
@@ -392,7 +392,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   _scan_vital_result_printer.reset();
 
-  document.getElementById(VIEW_S_CANCEL).onclick = () => StoptMeasuring('basic_info.html');
+  document.getElementById(VIEW_S_CANCEL).onclick = () => StoptMeasuring('/user');
 });
 
 document.addEventListener("visibilitychange", OnVisibilityChange);
