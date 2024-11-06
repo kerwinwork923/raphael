@@ -429,10 +429,9 @@
   const currentResult = JSON.parse(sessionStorage.getItem("result"));
   //登入
   const localData = localStorage.getItem("userData");
-  const { MID, Token, MAID, Mobile, Name } = localData
-    ? JSON.parse(localData)
-    : {};
-  if (!MID || !Token || !MAID || !Mobile) {
+
+  if (!localData) {
+    console.warn("No user data found, redirecting...");
     window.location.href = "/";
     return;
   }
