@@ -257,8 +257,8 @@
           f_v_PNSDesc.textContent = HRVData.PNSDesc;
           f_v_PNSPercent.textContent = HRVData.PNSPercent;
 
-          const SNS = apiResult?.SNS;
-          const PNS = apiResult?.PNS;
+          const SNS = HRVData.SNS;
+          const PNS = HRVData.PNS;
 
           if (SNS < -2) {
             document.getElementById(
