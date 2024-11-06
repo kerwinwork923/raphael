@@ -71,7 +71,7 @@
           <img src="../assets/imgs/relationshopIcon.svg" alt="" />
         </div>
       </div>
-      <footer class="copyrights">© 2024 拉菲爾股份有限公司 all rights reserved. </footer>
+      <footer class="copyrights">© 2024 智平衡健康事業股份有限公司 all rights reserved. </footer>
     </div>
   </div>
 </template>
@@ -425,7 +425,7 @@ export default {
       }
 
       //暫時的樣式
-      .item2,.item3_link{        
+      .item2,.item3_link{     
         grid-row: 1/3;
         place-items: center;
         align-content: center;
@@ -459,8 +459,12 @@ export default {
           }
         }
       }
+      .item2{
+        display: grid;   
+      }
       .item3_link{
         .item3{    
+          display: grid;
           width: 100%;
           height: 100%;
           place-items: center;
