@@ -247,12 +247,12 @@
     f_v_spo2 = document.querySelector("#f_v_spo2");
     f_v_rr = document.querySelector("#f_v_rr");
     f_v_si = document.querySelector("#f_v_si");
-    f_v_SNS = document.querySelector("#f_v_SNS");
-    f_v_SNSDesc = document.querySelector("#f_v_SNSDesc");
-    f_v_SNSPercent = document.querySelector("#f_v_SNSPercent");
-    f_v_PNS = document.querySelector("#f_v_PNS");
-    f_v_PNSDesc = document.querySelector("#f_v_PNSDesc");
-    f_v_PNSPercent = document.querySelector("#f_v_PNSPercent");
+    // f_v_SNS = document.querySelector("#f_v_SNS");
+    // f_v_SNSDesc = document.querySelector("#f_v_SNSDesc");
+    // f_v_SNSPercent = document.querySelector("#f_v_SNSPercent");
+    // f_v_PNS = document.querySelector("#f_v_PNS");
+    // f_v_PNSDesc = document.querySelector("#f_v_PNSDesc");
+    // f_v_PNSPercent = document.querySelector("#f_v_PNSPercent");
 
     PLFValue = document.querySelector(".text-container-PLF .value");
     PHFValue = document.querySelector(".text-container-PHF .value");
@@ -402,6 +402,7 @@
           );
 
           //交感神經 const PLF = HRVData.PLF;
+          const PLF = HRVData.PLF;
           const roundedPLF = Math.round(PLF);
           const PHF = 100 - roundedPLF;
 
