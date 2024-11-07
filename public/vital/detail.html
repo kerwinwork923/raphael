@@ -84,6 +84,48 @@
           </div>
         </div>
 
+        <div class="row">
+          <div class="boxGroup">
+            <div class="titleGroup">
+              <h3>交感/副交感比例</h3>
+            </div>
+            <div class="boxText">
+              <div class="text-container-PLF">
+                <h4>交感神經</h4>
+                <div class="value"></div>
+              </div>
+              <div class="text-container-PHF">
+                <h4>副交感神經</h4>
+                <div class="value"></div>
+              </div>
+            </div>
+            <div class="box">
+              <div class="circle-PLF"></div>
+              <div class="circle-PHF"></div>
+            </div>
+          </div>
+          <svg style="display: none">
+            <defs>
+              <filter id="blob">
+                <feGaussianBlur
+                  in="SourceGraphic"
+                  stdDeviation="10"
+                  result="blur"
+                ></feGaussianBlur>
+                <feColorMatrix
+                  in="blur"
+                  mode="matrix"
+                  values="
+                     1 0 0 0 0
+                     0 1 0 0 0
+                     0 0 1 0 0
+                     0 0 0 20 -10"
+                ></feColorMatrix>
+              </filter>
+            </defs>
+          </svg>
+        </div>
+
         <!-- <div class="row">
           <div class="nerve">
             <div class="titleGroup">
@@ -212,6 +254,10 @@
     f_v_PNSDesc = document.querySelector("#f_v_PNSDesc");
     f_v_PNSPercent = document.querySelector("#f_v_PNSPercent");
 
+    PLFValue = document.querySelector(".text-container-PLF .value");
+    PHFValue = document.querySelector(".text-container-PHF .value");
+    let boxSize = 100;
+
     resultTextGroupP = document.querySelector(".resultTextGroup p");
 
     async function API_HRV2Detail() {
@@ -258,7 +304,7 @@
           f_v_spo2.textContent = HRVData.SPO2;
           f_v_rr.textContent = HRVData.rr;
           f_v_si.textContent = HRVData.stress;
-        //   f_v_SNS.textContent = HRVData.SNS;
+          //   f_v_SNS.textContent = HRVData.SNS;
           //   f_v_SNSDesc.textContent = HRVData.SNSDesc;
           //   f_v_SNSPercent.textContent = HRVData.SNSPercent;
           //   f_v_PNS.textContent = HRVData.PNS;
@@ -354,6 +400,25 @@
           document.getElementById("f_v_relaxation").src = getProgressImage(
             HRVData.Relaxation
           );
+
+          //交感神經 const PLF = HRVData.PLF;
+          const roundedPLF = Math.round(PLF);
+          const PHF = 100 - roundedPLF;
+
+          let PLFBoxSize = boxSize + roundedPLF;
+          let PHFBoxSize = boxSize + PHF;
+          console.log(roundedPLF, PHF, PLFBoxSize, PHFBoxSize);
+
+          document.querySelector(".circle-PLF").style.width = `${PLFBoxSize}px`;
+          document.querySelector(
+            ".circle-PLF"
+          ).style.height = `${PLFBoxSize}px`;
+          document.querySelector(".circle-PHF").style.width = `${PHFBoxSize}px`;
+          document.querySelector(
+            ".circle-PHF"
+          ).style.height = `${PHFBoxSize}px`;
+          PLFValue.textContent = roundedPLF + "%";
+          PHFValue.textContent = PHF + "%";
 
           resultTextGroupP.textContent = HRVData.TotalDesc;
           let checkTime = HRVData.CheckTime;
@@ -774,6 +839,122 @@
     .subBtnGroup .backToUserBtn {
       background-color: #eee;
       color: #666;
+    }
+
+    .boxGroup {
+      width: 100%;
+      background-color: #fff;
+    }
+    .boxGroup h3 {
+      margin-top: 1rem;
+      margin-left: 1rem;
+      color: #1e1e1e;
+    }
+    .box {
+      position: relative;
+
+      /* filter: contrast(20); */
+      filter: url(#blob);
+      width: 100%;
+      height: 200px;
+    }
+    .circle-PHF,
+    .circle-PLF {
+      border-radius: 50%;
+      /* filter: blur(10px); */
+      /* animation: 2s infinite move alternate; */
+      width: 100px;
+      height: 100px;
+      /* filter: url(#blob); */
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      filter: drop-shadow(0px 3px 5px #fff) brightness(1.06);
+    }
+    .boxGroup {
+      position: relative;
+
+      height: 100%;
+    }
+    .boxText {
+      position: absolute;
+      top: 0;
+      background-color: none;
+
+      width: 100%;
+      height: 200px;
+      z-index: 99;
+    }
+    .text-container-PLF {
+      position: absolute;
+
+      left: 50%;
+      top: 70%;
+      text-align: center;
+      z-index: 99;
+      color: #fff;
+      /* transform: translate(-50%, -50%); */
+      transform: translate(calc(-50% - 60px), -50%);
+    }
+    .text-container-PHF {
+      position: absolute;
+      left: 50%;
+      top: 70%;
+      text-align: center;
+      z-index: 99;
+      color: #fff;
+      transform: translate(calc(-50% + 60px), -50%);
+    }
+    .boxText h4 {
+      margin: 0;
+    }
+    .circle-PHF {
+      background-color: rgba(31, 188, 179, 0.75);
+      animation: 2s moveRight forwards ease-in;
+
+      /* transform: translate(calc(-50% + 60px), -50%); */
+    }
+    .circle-PLF {
+      /* transform: translate(calc(-50% - 60px), -50%); */
+      background-color: rgba(236, 79, 79, 0.75);
+
+      animation: 2s moveLeft forwards ease-in;
+    }
+
+    @keyframes move {
+      from {
+        transform: translate(calc(-50% + 100px), -50%);
+      }
+      to {
+        transform: translate(calc(-50% - 100px), -50%);
+      }
+    }
+    @keyframes moveLeft {
+      0% {
+        opacity: 0;
+
+        transform: translate(-50%, -50%);
+      }
+
+      to {
+        opacity: 1;
+
+        transform: translate(calc(-50% - 60px), -50%);
+      }
+    }
+    @keyframes moveRight {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%);
+      }
+
+      to {
+        opacity: 1;
+
+        transform: translate(calc(-50% + 60px), -50%);
+      }
     }
   </style>
 </html>
