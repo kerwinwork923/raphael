@@ -307,6 +307,7 @@ import { useRouter } from "vue-router";
 import RaphaelLoading from "../components/RaphaelLoading";
 import eyesCloseGreen from "../assets/imgs/eyesCloseGreen.svg";
 import eyesOpenGreen from "../assets/imgs/eyesOpenGreen.svg";
+import { requestPermission, messagingToken } from '../fn/firebaseMessaging'; //firebase
 
 export default {
   setup() {
@@ -316,6 +317,8 @@ export default {
     const password = ref("");
     const passwordVisible = ref(false);
     const router = useRouter();
+    const localMessagingToken = ref(""); // firebase 儲存取得的推播 token
+
 
     const isIOS =
       /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -346,6 +349,16 @@ export default {
         ) {
           console.log("登入成功:", response.data);
           localStorage.setItem("userData", JSON.stringify(response.data));
+          
+          // 取得firebase推播 token
+          await requestPermission();
+          localMessagingToken.value = messagingToken.value;
+          //alert(localMessagingToken.value);
+          console.log("取得的推播 Token:", localMessagingToken.value);
+          console.log("取得的MAID:", response.data.MAID.trim());
+
+          savePushKey(response.data.MAID.trim(),messagingToken.value)
+          
           router.push({ name: "user" });
         } else {
           alert(`登入失敗 : ${response.data.Result}`);
@@ -357,7 +370,25 @@ export default {
       }
     };
 
+    const savePushKey = async (loadMAID, loadPushkey) => {
+      try {
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_PushKey.jsp",
+          {
+            MAID:loadMAID,
+            PushKey:loadPushkey
+          }
+        );
 
+        if (response.status === 200 ) {
+          console.log("存儲Pushkey成功:", response.data);
+        } else {
+          alert(`存儲Pushkey失敗 : ${response.data.Result}`);
+        }
+      } catch (err) {
+        alert("存儲Pushkey失敗");
+      } 
+    };
 
     const installPWA = async () => {
       if (isIOS && !isStandalone) {
@@ -400,6 +431,7 @@ export default {
       password,
       login,
       installPWA,
+      localMessagingToken, // 用於顯示推播 token
     };
   },
 };
