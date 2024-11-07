@@ -779,6 +779,7 @@
   body {
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
   }
 
   .raphaelLoading {
@@ -1280,13 +1281,10 @@
   @keyframes moveLeft {
   0% {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.7);
+    transform: translate(-50%, -50%) scale(0.8); 
   }
   50% {
-    transform: translate(calc(-50% - 50px), -50%) scale(1.1); 
-  }
-  70% {
-    transform: translate(calc(-50% - 55px), -50%) scale(0.9);
+    transform: translate(calc(-50% - 50px), -50%) scale(1); 
   }
   100% {
     opacity: 1;
@@ -1297,13 +1295,10 @@
 @keyframes moveRight {
   0% {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.7);
+    transform: translate(-50%, -50%) scale(0.8);
   }
   50% {
-    transform: translate(calc(-50% + 50px), -50%) scale(1.1); 
-  }
-  70% {
-    transform: translate(calc(-50% + 55px), -50%) scale(0.9); 
+    transform: translate(calc(-50% + 50px), -50%) scale(1);
   }
   100% {
     opacity: 1;
