@@ -29,15 +29,19 @@
     color: $raphael-gray-500;
     text-align: center;
     cursor: pointer;
-
-    // &:hover {
-    //   background-color: $raphael-green-400;
-    //   color: #fff;
-    // }
+    transition: all .3s ease;
+    &:hover {
+      background-color: $raphael-green-300;
+    }
   }
   .listActive {
     background-color: $raphael-green-400;
     color: #fff;
+    transition: all .3s ease;
+    &:hover {
+      background-color: $raphael-green-400;
+      color: #fff;
+    }
   }
 }
 </style>

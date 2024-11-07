@@ -1428,6 +1428,7 @@ export default {
 .backToUserBtnWeekly {
   background-color: $raphael-green-400;
   color: #fff;
+  cursor: pointer;
   padding: 12px;
   width: 100%;
   border-radius: 8px;
@@ -1436,5 +1437,8 @@ export default {
   font-weight: 400;
   letter-spacing: 0.5px;
   transition: 0.25s ease;
+  &:hover{
+    background-color: $raphael-green-500;
+  }
 }
 </style>
