@@ -636,6 +636,8 @@
 
         let PLFBoxSize = boxSize + PLF;
         let PHFBoxSize = boxSize + PHF;
+        console.log(PLF, PHF, PLFBoxSize, PHFBoxSize);
+
         document.querySelector(".circle-PLF").style.width = `${PLFBoxSize}px`;
         document.querySelector(".circle-PLF").style.Hight = `${PLFBoxSize}px`;
         document.querySelector(".circle-PHF").style.width = `${PHFBoxSize}px`;
@@ -1217,7 +1219,7 @@
     /* animation: 2s infinite move alternate; */
     width: 100px;
     height: 100px;
-    filter: url(#blob);
+    /* filter: url(#blob); */
     position: absolute;
     left: 50%;
     top: 50%;
