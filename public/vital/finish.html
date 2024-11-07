@@ -1266,7 +1266,7 @@
   }
   .circle-PHF {
     background-color: rgba(31, 188, 179, 0.75);
-    animation: 2s moveRight forwards ease-in;
+    animation: 1.5s moveRight forwards ease-out;
 
     /* transform: translate(calc(-50% + 60px), -50%); */
   }
@@ -1274,40 +1274,40 @@
     /* transform: translate(calc(-50% - 60px), -50%); */
     background-color: rgba(236, 79, 79, 0.75);
 
-    animation: 2s moveLeft forwards ease-in;
+    animation: 1.75s moveLeft forwards ease-out;
   }
 
-  @keyframes move {
-    from {
-      transform: translate(calc(-50% + 100px), -50%);
-    }
-    to {
-      transform: translate(calc(-50% - 100px), -50%);
-    }
-  }
   @keyframes moveLeft {
-    0% {
-      opacity: 0;
-
-      transform: translate(-50%, -50%);
-    }
-
-    to {
-      opacity: 1;
-
-      transform: translate(calc(-50% - 60px), -50%);
-    }
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.7);
   }
-  @keyframes moveRight {
-    0% {
-      opacity: 0;
-      transform: translate(-50%, -50%);
-    }
-
-    to {
-      opacity: 1;
-
-      transform: translate(calc(-50% + 60px), -50%);
-    }
+  50% {
+    transform: translate(calc(-50% - 50px), -50%) scale(1.1); 
   }
+  70% {
+    transform: translate(calc(-50% - 55px), -50%) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(calc(-50% - 60px), -50%) scale(1);
+  }
+}
+
+@keyframes moveRight {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.7);
+  }
+  50% {
+    transform: translate(calc(-50% + 50px), -50%) scale(1.1); 
+  }
+  70% {
+    transform: translate(calc(-50% + 55px), -50%) scale(0.9); 
+  }
+  100% {
+    opacity: 1;
+    transform: translate(calc(-50% + 60px), -50%) scale(1);
+  }
+}
 </style>
