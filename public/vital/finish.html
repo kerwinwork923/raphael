@@ -634,9 +634,9 @@
         const roundedPLF = Math.round(PLF);
         const PHF = 100 - roundedPLF;
 
-        let PLFBoxSize = boxSize + PLF;
+        let PLFBoxSize = boxSize + roundedPLF;
         let PHFBoxSize = boxSize + PHF;
-        console.log(PLF, PHF, PLFBoxSize, PHFBoxSize);
+        console.log(roundedPLF, PHF, PLFBoxSize, PHFBoxSize);
 
         document.querySelector(".circle-PLF").style.width = `${PLFBoxSize}px`;
         document.querySelector(".circle-PLF").style.Hight = `${PLFBoxSize}px`;
