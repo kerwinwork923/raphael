@@ -473,13 +473,13 @@
   const userData = JSON.parse(localStorage.getItem("userData"));
   const currentResult = JSON.parse(sessionStorage.getItem("result"));
   //登入
-  // const localData = localStorage.getItem("userData");
+  const localData = localStorage.getItem("userData");
 
-  // if (!localData) {
-  //   console.warn("No user data found, redirecting...");
-  //   window.location.href = "/";
+  if (!localData) {
+    console.warn("No user data found, redirecting...");
+    window.location.href = "/";
 
-  // }
+  }
 
   function showLoading() {
     document.getElementById("raphaelLoading").style.display = "flex";
