@@ -410,6 +410,12 @@
           let PHFBoxSize = boxSize + PHF;
           console.log(roundedPLF, PHF, PLFBoxSize, PHFBoxSize);
 
+          document.querySelector(
+            ".text-container-PLF"
+          ).style.width = `${PLFBoxSize}px`;
+          document.querySelector(
+            ".text-container-PHF"
+          ).style.width = `${PHFBoxSize}px`;
           document.querySelector(".circle-PLF").style.width = `${PLFBoxSize}px`;
           document.querySelector(
             ".circle-PLF"
@@ -843,17 +849,24 @@
     }
 
     .boxGroup {
+      display: grid;
+      place-items: center;
+      gap: 0.75rem;
+      background-color: #fff;
       width: 100%;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
     }
     .boxGroup h3 {
-      margin-top: 1rem;
-      margin-left: 1rem;
       color: #1e1e1e;
     }
     .box {
       position: relative;
-
-      /* filter: contrast(20); */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      grid-column: 1/2;
+      grid-row: 2;
       filter: url(#blob);
       width: 100%;
       height: 200px;
@@ -861,69 +874,49 @@
     .circle-PHF,
     .circle-PLF {
       border-radius: 50%;
-      /* filter: blur(10px); */
-      /* animation: 2s infinite move alternate; */
       width: 100px;
       height: 100px;
-      /* filter: url(#blob); */
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
       opacity: 0;
       filter: drop-shadow(0px 3px 5px #fff) brightness(1.06);
     }
     .boxGroup {
       position: relative;
-
       height: 100%;
     }
     .boxText {
-      position: absolute;
-      top: 0;
-      background-color: none;
-
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      grid-column: 1/2;
+      grid-row: 2;
       width: 100%;
       height: 200px;
-      z-index: 99;
+      z-index: 2;
     }
     .text-container-PLF {
-      position: absolute;
-
-      left: 50%;
-      top: 70%;
       text-align: center;
-      z-index: 99;
       color: #fff;
-      /* transform: translate(-50%, -50%); */
-      transform: translate(calc(-50% - 60px), -50%);
+      opacity: 1;
+      animation: 1.5s moveRight forwards ease-out;
     }
     .text-container-PHF {
-      position: absolute;
-      left: 50%;
-      top: 70%;
       text-align: center;
-      z-index: 99;
       color: #fff;
-      transform: translate(calc(-50% + 60px), -50%);
+      opacity: 1;
+      animation: 1.75s moveLeft forwards ease-out;
     }
     .boxText h4 {
       margin: 0;
     }
     .circle-PLF {
       background-color: rgba(236, 79, 79, 0.75);
-      /* animation: 1.5s moveRight forwards ease-out; */
+      animation: 1.5s moveRight forwards ease-out;
       opacity: 1;
-      transform: translate(calc(-50% - 60px), -50%) scale(1);
-      /* transform: translate(calc(-50% + 60px), -50%); */
     }
     .circle-PHF {
-      /* transform: translate(calc(-50% - 60px), -50%); */
-
       background-color: rgba(31, 188, 179, 0.75);
       opacity: 1;
-      transform: translate(calc(-50% + 60px), -50%) scale(1);
-      /* animation: 1.75s moveLeft forwards ease-out; */
+      animation: 1.75s moveLeft forwards ease-out;
     }
 
     .text-container-PLF .value,
@@ -937,34 +930,34 @@
     @keyframes moveLeft {
       0% {
         opacity: 0;
-        transform: translate(-50%, -50%) scale(0.7);
+        transform: scale(0.7);
       }
       50% {
-        transform: translate(calc(-50% - 50px), -50%) scale(1.1);
+        transform: scale(1.1);
       }
       70% {
-        transform: translate(calc(-50% - 55px), -50%) scale(0.9);
+        transform: scale(0.9);
       }
       100% {
         opacity: 1;
-        transform: translate(calc(-50% - 60px), -50%) scale(1);
+        transform: scale(1);
       }
     }
 
     @keyframes moveRight {
       0% {
         opacity: 0;
-        transform: translate(-50%, -50%) scale(0.7);
+        transform: scale(0.7);
       }
       50% {
-        transform: translate(calc(-50% + 50px), -50%) scale(1.1);
+        transform: scale(1.1);
       }
       70% {
-        transform: translate(calc(-50% + 55px), -50%) scale(0.9);
+        transform: scale(0.9);
       }
       100% {
         opacity: 1;
-        transform: translate(calc(-50% + 60px), -50%) scale(1);
+        transform: scale(1);
       }
     }
   </style>
