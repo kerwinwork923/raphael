@@ -1,6 +1,6 @@
 <template>
-  <div v-if="visible" class="modal">
-    <div class="cover" @click="closeComponent"></div>
+  <div v-if="store.showDSPRSelect" class="modal">
+    <div class="cover"></div>
     <div class="DSPRSelect">
       <img
         src="../assets/imgs/selectClose.svg"
@@ -44,44 +44,33 @@
     </div>
   </div>
 </template>
+
 <script>
+import { ref, computed } from "vue";
+import { useCommon } from "@/stores/common";
+
 export default {
-  props: {
-    visible: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  emits: ["close"],
-  data() {
-    return {
-      selectedDSPR: null, // 儲存選中的血壓狀態
+  setup() {
+    const store = useCommon();
+    const selectedDSPR = ref("");
+    const closeComponent = () => {
+      store.showDSPRSelect = false;
     };
-  },
-  methods: {
-    closeComponent() {
-      this.$emit("close");
-    },
-    submitData() {
+
+    const submitData = () => {
       const validDSPRValues = ["normal", "prehypertension", "hypertension"];
 
-      // 檢查是否選擇了有效的 DSPR 值
-      if (this.selectedDSPR && validDSPRValues.includes(this.selectedDSPR)) {
-        // 取得 localStorage 中的 userData 並解析為物件
+      if (selectedDSPR.value && validDSPRValues.includes(selectedDSPR.value)) {
         const userData = JSON.parse(localStorage.getItem("userData")) || {};
+        userData.DSPR = selectedDSPR.value;
 
-        // 更新 DSPR 為選中的狀態值
-        userData.DSPR = this.selectedDSPR;
-
-        // 檢查 userData 格式有效性
-        if (!this.isUserDataValid(userData)) {
+        if (!isUserDataValid(userData)) {
           alert("會員資料格式有誤，請修改您的資料！");
           return;
         }
 
-        // 轉換並儲存資料到 sessionStorage
         const convertedData = {
-          age: this.calculateAge(userData.Birthday),
+          age: calculateAge(userData.Birthday),
           bp_group: userData.DSPR,
           bp_mode: "ternary",
           facing_mode: "user",
@@ -90,19 +79,16 @@ export default {
           weight: parseInt(userData.Weight),
         };
         sessionStorage.setItem("data", JSON.stringify(convertedData));
-
-        // 儲存更新後的 userData 到 localStorage
         localStorage.setItem("userData", JSON.stringify(userData));
 
-        // 關閉元件並跳轉
-        this.closeComponent();
+        closeComponent();
         window.location.href = "/vital/scan.html";
       } else {
         alert("請選擇一個有效的血壓範圍！");
       }
-    },
-    isUserDataValid(userData) {
-      // 格式檢查條件與 convertAndSaveUserData 保持一致
+    };
+
+    const isUserDataValid = (userData) => {
       const isInteger = (value) => Number.isInteger(parseInt(value, 10));
 
       return (
@@ -110,11 +96,12 @@ export default {
         parseInt(userData.Height) > 0 &&
         isInteger(userData.Weight) &&
         parseInt(userData.Weight) > 0 &&
-        this.isValidBirthday(userData.Birthday) &&
+        isValidBirthday(userData.Birthday) &&
         (userData.Sex === "1" || userData.Sex === "2")
       );
-    },
-    isValidBirthday(birthday) {
+    };
+
+    const isValidBirthday = (birthday) => {
       const parts = birthday.split("/");
       return (
         parts.length === 3 &&
@@ -124,24 +111,31 @@ export default {
         parseInt(parts[2]) >= 1 &&
         parseInt(parts[2]) <= 31
       );
-    },
-    calculateAge(birthday) {
+    };
+
+    const calculateAge = (birthday) => {
       const [year, month, day] = birthday.split("/").map(Number);
-      const birthDate = new Date(year + 1911, month - 1, day); // ROC to AD conversion
+      const birthDate = new Date(year + 1911, month - 1, day);
       const ageDifMs = Date.now() - birthDate.getTime();
       const ageDate = new Date(ageDifMs);
       return Math.abs(ageDate.getUTCFullYear() - 1970);
-    },
+    };
+
+    return {
+      store,
+      closeComponent,
+      submitData,
+      selectedDSPR,
+    };
   },
 };
 </script>
 
 <style lang="scss">
 .cover {
- position: fixed;
+  position: fixed;
   left: 0;
   top: 0;
-
   width: 100%;
   height: 100vh;
   z-index: 9;
@@ -155,7 +149,7 @@ export default {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 99;
-  padding: 12px;    
+  padding: 12px;
   padding-top: 32px;
   border-radius: 12px;
   width: 80%;
@@ -173,8 +167,6 @@ export default {
     text-align: center;
     font-size: 24px;
     font-weight: 400;
-
-    font-style: normal;
     line-height: 100%;
     margin-bottom: 1rem;
   }
@@ -198,7 +190,6 @@ export default {
       cursor: pointer;
       position: relative;
       transition: background-color 0.2s;
-
       &:checked {
         background-color: $raphael-green-400;
         border-color: $raphael-green-400;

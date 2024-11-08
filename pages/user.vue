@@ -1,7 +1,8 @@
 <template>
   <div class="raphaelUser">
+    <HRVAlert />
     <RaphaelLoading v-if="loading" />
-    <DSPRSelect :visible="showDSPRSelect" @close="showDSPRSelect = false" />
+    <DSPRSelect  />
     <Navbar />
     <div class="userGroup">
       <div class="userInfo">
@@ -38,8 +39,8 @@
           <div class="topTitle">領取</div>
           <div class="bottomTitle">積分</div>
         </div>
-    
-        <div class="item item2"  @click="convertAndSaveUserData">
+
+        <div class="item item2" @click="convertAndSaveUserData">
           <div class="topTitle">檢測</div>
           <div class="bottomTitle">HRV</div>
           <img src="../assets/imgs/faceIcon.svg" alt="" />
@@ -71,7 +72,9 @@
           <img src="../assets/imgs/relationshopIcon.svg" alt="" />
         </div>
       </div>
-      <footer class="copyrights">© 2024 智平衡健康事業股份有限公司 all rights reserved. </footer>
+      <footer class="copyrights">
+        © 2024 智平衡健康事業股份有限公司 all rights reserved.
+      </footer>
     </div>
   </div>
 </template>
@@ -82,20 +85,23 @@ import { useRouter } from "vue-router";
 import Navbar from "../components/Navbar";
 import RaphaelLoading from "../components/RaphaelLoading";
 import DSPRSelect from "../components/DSPRSelect.vue";
+import HRVAlert from "~/components/HRVAlert.vue";
 import axios from "axios";
+import { useCommon } from "../stores/common";
 //圖片
 import banner1 from "@/assets/imgs/banner-1.png";
 import banner2 from "@/assets/imgs/banner-2.png";
 
 export default {
-  components: { Navbar, RaphaelLoading },
+  components: { Navbar, RaphaelLoading, HRVAlert,DSPRSelect },
   setup() {
     const router = useRouter();
     const loading = ref(true);
     const userInfo = ref(null);
     const currentSlide = ref(0);
     const slides = ref([banner1, banner2]);
-    const showDSPRSelect = ref(false);
+
+    const store = useCommon();
 
     const getUserData = async () => {
       const localData = localStorage.getItem("userData");
@@ -165,70 +171,74 @@ export default {
       clearInterval(slideInterval);
     });
 
+    //   const convertAndSaveUserData = async () => {
+    //   const localData = JSON.parse(localStorage.getItem("userData"));
+
+    //   if (!localData) {
+    //     alert("本地存儲中沒有用戶數據。");
+    //     return;
+    //   }
+
+    //   const isInteger = (value) => Number.isInteger(parseInt(value, 10));
+
+    //   if (!isInteger(localData.Height) || parseInt(localData.Height) <= 0) {
+    //     alert("您的身高格式不正確，請修改會員資料");
+    //     window.location.href = "/changeMember";
+    //     return;
+    //   }
+
+    //   if (!isInteger(localData.Weight) || parseInt(localData.Weight) <= 0) {
+    //     alert("您的體重格式不正確，請修改會員資料");
+    //     window.location.href = "/changeMember";
+    //     return;
+    //   }
+
+    //   const birthdayParts = localData.Birthday.split("/");
+    //   if (
+    //     birthdayParts.length !== 3 ||
+    //     parseInt(birthdayParts[0]) <= 0 || // 年份檢查
+    //     parseInt(birthdayParts[1]) < 1 || // 月份檢查
+    //     parseInt(birthdayParts[1]) > 12 || // 月份上限檢查
+    //     parseInt(birthdayParts[2]) < 1 || // 日期下限檢查
+    //     parseInt(birthdayParts[2]) > 31 || // 日期上限檢查
+    //     isNaN(calculateAge(localData.Birthday)) // 年齡計算有效性檢查
+    //   ) {
+    //     alert("生日格式不正確或包含無效日期，請修改會員資料。");
+    //     window.location.href = "/changeMember";
+    //     return;
+    //   }
+
+    //   let scanAge = parseInt(localData.Sex);
+    //   if (scanAge !== 1 && scanAge !== 2) {
+    //     alert("性別格式不正確，請修改會員資料。");
+    //     window.location.href = "/changeMember";
+    //     return;
+    //   }
+
+    //   // DSPR 檢查 - 判斷是否為預期的三個值之一
+    //   const validDSPRValues = ["normal", "prehypertension", "hypertension"];
+    //   if (!validDSPRValues.includes(localData.DSPR)) {
+    //     // alert("請選擇有效的血壓範圍。");
+    //     showDSPRSelect.value = true; // 顯示選擇彈窗
+    //     return;
+    //   }
+
+    //   const convertedData = {
+    //     age: calculateAge(localData.Birthday),
+    //     bp_group: localData.DSPR,
+    //     bp_mode: "ternary",
+    //     facing_mode: "user",
+    //     height: parseInt(localData.Height),
+    //     sex: scanAge,
+    //     weight: parseInt(localData.Weight),
+    //   };
+
+    //   sessionStorage.setItem("data", JSON.stringify(convertedData));
+    //   window.location.href = "/vital/scan.html";
+    // };
+
     const convertAndSaveUserData = async () => {
-      const localData = JSON.parse(localStorage.getItem("userData"));
-
-      if (!localData) {
-        alert("本地存儲中沒有用戶數據。");
-        return;
-      }
-
-      const isInteger = (value) => Number.isInteger(parseInt(value, 10));
-
-      if (!isInteger(localData.Height) || parseInt(localData.Height) <= 0) {
-        alert("您的身高格式不正確，請修改會員資料");
-        window.location.href = "/changeMember";
-        return;
-      }
-
-      if (!isInteger(localData.Weight) || parseInt(localData.Weight) <= 0) {
-        alert("您的體重格式不正確，請修改會員資料");
-        window.location.href = "/changeMember";
-        return;
-      }
-
-      const birthdayParts = localData.Birthday.split("/");
-      if (
-        birthdayParts.length !== 3 ||
-        parseInt(birthdayParts[0]) <= 0 || // 年份檢查
-        parseInt(birthdayParts[1]) < 1 || // 月份檢查
-        parseInt(birthdayParts[1]) > 12 || // 月份上限檢查
-        parseInt(birthdayParts[2]) < 1 || // 日期下限檢查
-        parseInt(birthdayParts[2]) > 31 || // 日期上限檢查
-        isNaN(calculateAge(localData.Birthday)) // 年齡計算有效性檢查
-      ) {
-        alert("生日格式不正確或包含無效日期，請修改會員資料。");
-        window.location.href = "/changeMember";
-        return;
-      }
-
-      let scanAge = parseInt(localData.Sex);
-      if (scanAge !== 1 && scanAge !== 2) {
-        alert("性別格式不正確，請修改會員資料。");
-        window.location.href = "/changeMember";
-        return;
-      }
-
-      // DSPR 檢查 - 判斷是否為預期的三個值之一
-      const validDSPRValues = ["normal", "prehypertension", "hypertension"];
-      if (!validDSPRValues.includes(localData.DSPR)) {
-        // alert("請選擇有效的血壓範圍。");
-        showDSPRSelect.value = true; // 顯示選擇彈窗
-        return;
-      }
-
-      const convertedData = {
-        age: calculateAge(localData.Birthday),
-        bp_group: localData.DSPR,
-        bp_mode: "ternary",
-        facing_mode: "user",
-        height: parseInt(localData.Height),
-        sex: scanAge,
-        weight: parseInt(localData.Weight),
-      };
-
-      sessionStorage.setItem("data", JSON.stringify(convertedData));
-      window.location.href = "/vital/scan.html";
+      store.showHRVAlert = true;
     };
 
     // Helper function to calculate age based on Birthday
@@ -244,7 +254,7 @@ export default {
       currentSlide,
       slides,
       convertAndSaveUserData,
-      showDSPRSelect,
+      store,
     };
   },
 };
@@ -337,12 +347,12 @@ export default {
     .itemsGroup {
       display: grid;
       margin-top: 1.25rem;
-      grid-template-columns: repeat(2, 1fr);      
+      grid-template-columns: repeat(2, 1fr);
       gap: 1rem;
       //暫時的樣式
-      grid-template-rows: repeat(2, 84px); 
+      grid-template-rows: repeat(2, 84px);
       @include respond-to("tablet") {
-        grid-template-rows: repeat(3, 84px); 
+        grid-template-rows: repeat(3, 84px);
       }
 
       .item {
@@ -420,24 +430,27 @@ export default {
         filter: blur(2px);
       }
       //暫時隱藏
-      .item1,.item4,.item5,.item6{
+      .item1,
+      .item4,
+      .item5,
+      .item6 {
         display: none;
       }
 
       //暫時的樣式
-      .item2,.item3_link{     
+      .item2,
+      .item3_link {
         grid-row: 1/3;
         place-items: center;
         align-content: center;
-        
-          
+
         @include respond-to("tablet") {
           grid-row: 1/4;
           place-items: center;
           align-content: center;
         }
 
-        img{
+        img {
           width: 85%;
           top: 16px;
           right: 0;
@@ -445,8 +458,8 @@ export default {
           left: 0;
           margin: auto;
           transform: none;
-          filter: blur(2px); 
-          
+          filter: blur(2px);
+
           @include respond-to("tablet") {
             width: 70%;
             top: 10px;
@@ -455,15 +468,15 @@ export default {
             left: 0;
             margin: auto;
             transform: none;
-            filter: blur(2px); 
+            filter: blur(2px);
           }
         }
       }
-      .item2{
-        display: grid;   
+      .item2 {
+        display: grid;
       }
-      .item3_link{
-        .item3{    
+      .item3_link {
+        .item3 {
           display: grid;
           width: 100%;
           height: 100%;
@@ -473,7 +486,7 @@ export default {
       }
     }
 
-    .copyrights{
+    .copyrights {
       font-size: 13px;
       color: $raphael-gray-500;
       text-align: center;
