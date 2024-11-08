@@ -201,7 +201,6 @@ export default {
     width: 100%;
     padding: 8px;
     border-radius: 8px;
-    margin-top: 1rem;
     font-size: 1.25rem;
     font-weight: 400;
     letter-spacing: 0.09px;
