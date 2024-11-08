@@ -1418,7 +1418,7 @@ export default {
 }
 
 .doctorImg {
-  width: 100%;
+  height:174px;
 }
 
 .backToUserBtnGroupWeekly {

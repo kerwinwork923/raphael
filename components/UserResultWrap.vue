@@ -101,7 +101,7 @@
           </h6> -->
         </div>
       </div>
-      <img src="../assets/imgs/doctor.png" alt="" />
+      <img class="doctorImg" src="../assets/imgs/doctor.png" alt="" />
     </div>
 
     <div class="firstSleepRecord">
@@ -364,7 +364,9 @@
     grid-template-columns: calc(100% - 120px) max-content;
     margin-top: 0.5rem;
     overflow: hidden;
-
+    .doctorImg {
+      height:174px;
+    }
     .imgGroup {
       display: flex;
       align-items: center;
