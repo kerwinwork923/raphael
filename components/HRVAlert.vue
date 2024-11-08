@@ -8,7 +8,6 @@
       alt=""
     />
     <h3>拉菲爾人本診所提醒事項</h3>
-    <div class="HRVAlertHr"></div>
     <ul>
       <li>
         測量過程長<span class="point">約60秒</span
@@ -144,6 +143,8 @@ export default {
   backdrop-filter: blur(2.5px);
 }
 .HRVAlert {
+  display: grid;
+  gap: 1rem;
   width: 90%;
 
   position: fixed;
@@ -156,17 +157,12 @@ export default {
   background: var(--Grays-White, #fff);
   box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
   max-width: 648px;
-
-  padding: 2rem 5% 1rem;
-
-  overflow-y: auto;
+  padding: .75rem;
   .HRVAlertClose {
-    position: absolute;
-    right: 10px;
-    top: 10px;
     width: 24px;
     height: 24px;
     cursor: pointer;
+    place-self: end;
   }
   h3 {
     text-align: center;
@@ -175,25 +171,20 @@ export default {
     letter-spacing: 0.12px;
     font-size: 1.5rem;
   }
-  .HRVAlertHr {
-    width: 100%;
-    height: 1px;
-    background: #191919;
-    color: #191919;
-    margin-top: 0.5rem;
-  }
   ul {
-    list-style-type: disc;
-    width: 95%;
-    margin-left: auto;
-    margin-top: 0.75rem;
+    display: grid;
+    gap: 0.75rem;
+    height: 45vh;
+    padding-top: 0.75rem;
+    border-top: 1px solid #1e1e1e;
+    list-style: disc;
+    overflow-x: scroll;
     li {
-      padding-left: 0px;
+      margin-left: 1.5rem;
       color: #666;
       font-size: 18px;
-      letter-spacing: 0.09px;
-      line-height: 1.1;
-      margin-top: 0.15rem;
+      letter-spacing: 4px;
+      line-height: 29.1px;
       .point {
         color: #ec4f4f;
       }
@@ -206,6 +197,7 @@ export default {
     background-color: $raphael-green-400;
     border: none;
     color: #fff;
+    cursor: pointer;
     width: 100%;
     padding: 8px;
     border-radius: 8px;
@@ -213,6 +205,10 @@ export default {
     font-size: 1.25rem;
     font-weight: 400;
     letter-spacing: 0.09px;
+    transition: all .3s ease;
+    &:hover{
+      background-color: $raphael-green-500;
+    }
   }
 }
 </style>

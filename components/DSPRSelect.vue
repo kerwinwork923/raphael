@@ -161,6 +161,7 @@ export default {
     right: 3%;
     width: 26px;
     height: 26px;
+    cursor: pointer;
   }
   h3 {
     margin-top: 1rem;
@@ -199,12 +200,17 @@ export default {
   .selectSendBtn {
     background-color: $raphael-green-400;
     color: #fff;
+    cursor: pointer;
     text-align: center;
     border-radius: 8px;
     padding: 12px;
     margin-top: 0.75rem;
     letter-spacing: 0.5px;
     font-size: 18px;
+    transition: all .3s ease;
+    &:hover{
+      background-color: $raphael-green-500;
+    }
   }
 }
 </style>
