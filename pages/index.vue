@@ -192,7 +192,7 @@
 
       a {
         color: #666;
-        font-size: 1rem;
+        font-size: 1.125rem;
         font-weight: 400;
         letter-spacing: 0.5px;
         text-decoration: none;
@@ -206,7 +206,7 @@
       width: 100%;
       border-radius: 8px;
       border: none;
-      font-size: 1rem;
+      font-size: 1.125rem;
       font-weight: 400;
       letter-spacing: 0.5px;
       transition: 0.25s ease;
@@ -262,7 +262,7 @@
         gap: 4px;
         border: 0;
         color: $raphael-gray-500;
-        font-size: 1rem;
+        font-size: 1.125rem;
         border-radius: 8px;
         border: 1px solid #1e1e1e;
         padding: 9px;
@@ -280,6 +280,7 @@
         justify-content: center;
         align-items: center;
         gap: 4px;
+        font-size: 1.125rem;
         margin: 0 auto;
         width: 100%;
         text-align: center;

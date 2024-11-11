@@ -766,7 +766,7 @@ export default {
       width: 100%;
       border-radius: 8px;
       border: none;
-      font-size: 1rem;
+      font-size: 1.125rem;
       font-weight: 400;
       letter-spacing: 0.5px;
       transition: 0.25s ease;
@@ -814,6 +814,7 @@ export default {
         justify-content: center;
         align-items: center;
         gap: 4px;
+        font-size:1.125rem;
         margin: 0 auto;
         width: 100%;
         text-align: center;

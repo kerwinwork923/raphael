@@ -21,7 +21,7 @@
     text-decoration: none;
   }
   .listItem {
-    font-size: 1rem;
+    font-size: 1.125rem;
     font-weight: 400;
     letter-spacing: 0.1px;
     padding: 10px 12px;

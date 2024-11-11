@@ -126,10 +126,8 @@ h1 {
 .changeMemberWrap {
   width: 100%;
   min-height: 100vh;
-  background: url("../assets/imgs/gradient-bg.png");
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-size: cover;
+  background: $raphael-gray-100;
+  
   .changeMemberGroup {
     width: 90%;
     margin: 0 auto;

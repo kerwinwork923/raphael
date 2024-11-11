@@ -1284,7 +1284,7 @@ export default {
         width: 32.5%;
         border: none;
         transition: 0.5s all ease;
-        border-radius: 12px;
+        border-radius: 8px;
         padding: 6px 12px;
 
         &:hover {
@@ -1433,7 +1433,7 @@ export default {
   width: 100%;
   border-radius: 8px;
   border: none;
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 400;
   letter-spacing: 0.5px;
   transition: 0.25s ease;

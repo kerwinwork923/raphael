@@ -94,8 +94,7 @@ export default {
   min-height: 100vh;
   width: 100%;
   background-color: $raphael-gray-100;
-
-  padding-bottom: 2rem;
+  padding-bottom: 66px;
 
   .titleBar {
     position: absolute;

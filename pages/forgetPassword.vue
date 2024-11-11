@@ -506,7 +506,7 @@ export default {
       width: 100%;
       border-radius: 8px;
       border: none;
-      font-size: 1rem;
+      font-size: 1.125rem;
       font-weight: 400;
       letter-spacing: 0.5px;
       transition: 0.25s ease;

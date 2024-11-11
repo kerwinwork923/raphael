@@ -201,7 +201,7 @@ export default {
     width: 100%;
     padding: 8px;
     border-radius: 8px;
-    font-size: 1.25rem;
+    font-size: 1.125rem;
     font-weight: 400;
     letter-spacing: 0.09px;
     transition: all .3s ease;

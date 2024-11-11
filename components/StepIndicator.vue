@@ -53,7 +53,7 @@ export default defineComponent({
 .subList {
   color: #666;
   margin-top: 1rem;
-  font-size: 14px;
+  font-size: 1rem;
   display: flex;
   svg {
     margin-left: 8px;
