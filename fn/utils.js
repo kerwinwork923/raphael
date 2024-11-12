@@ -6,7 +6,6 @@ import smile from "@/assets/imgs/smile.png";
 //顏色判定
 export const scoreColorFn = (score, sex) => {
   if (sex == 2) {
- 
     switch (true) {
       case score >= 0 && score <= 35:
         return "#74BC1F"; // 正常
@@ -95,24 +94,21 @@ export const computedEmoji2 = (score) => {
   }
 };
 
-export const computedText = (score,sex) => {
-
-    if (score >= 0 && score <= 25) {
-      return "正常";
-    } else if (score >= 26 && score <= 45) {
-      return "輕度失調";
-    } else if (score >= 46 && score <= 71) {
-      return "中度失調";
-    } else if (score >= 72) {
-      return "嚴重失調";
-    } else {
-      return "";
-    }
-  
-  
+export const computedText = (score, sex) => {
+  if (score >= 0 && score <= 25) {
+    return "正常";
+  } else if (score >= 26 && score <= 45) {
+    return "輕度失調";
+  } else if (score >= 46 && score <= 71) {
+    return "中度失調";
+  } else if (score >= 72) {
+    return "嚴重失調";
+  } else {
+    return "";
+  }
 };
 
-export const formatTimestamp = (timestampStr) => { 
+export const formatTimestamp = (timestampStr) => {
   if (typeof timestampStr !== "string" || timestampStr.length !== 14) {
     console.error(
       "Invalid timestamp format. Expected a 14-character string:",
@@ -151,12 +147,11 @@ export const formatTimestamp = (timestampStr) => {
   }
 
   // 返回格式為 "YYYY/MM/DD HH:MM:SS"
-  return `${year}/${formattedMonth}/${formattedDay}`; 
+  return `${year}/${formattedMonth}/${formattedDay}`;
 };
-
 
 // 月份/天
-export const formatTimestamp2 = (timestampStr) => { 
+export const formatTimestamp2 = (timestampStr) => {
   if (typeof timestampStr !== "string" || timestampStr.length !== 14) {
     console.error(
       "Invalid timestamp format. Expected a 14-character string:",
@@ -194,6 +189,26 @@ export const formatTimestamp2 = (timestampStr) => {
     return "Invalid date";
   }
 
-  // 返回格式為 "YYYY/MM/DD HH:MM:SS"
-  return `${formattedMonth}/${formattedDay}`; 
+  return `${formattedMonth}/${formattedDay}`;
+};
+
+export const formatTimestampMDH = (timestampStr) => {
+  if (
+    typeof timestampStr !== "string" ||
+    !/^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/.test(timestampStr)
+  ) {
+    console.error(
+      "Invalid timestamp format. Expected format YYYY/MM/DD HH:mm:",
+      timestampStr
+    );
+    return "Invalid timestamp format";
+  }
+
+  // 擷取年月日和時間
+  const [datePart, timePart] = timestampStr.split(" ");
+  const [year, month, day] = datePart.split("/").map(Number);
+  const [hour, minute] = timePart.split(":");
+
+  // 回傳格式化後的字串，為 MM/DD HH:mm
+  return `${month}/${day} ${hour}:${minute}`;
 };
