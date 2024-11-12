@@ -352,7 +352,7 @@
 .userRecoreWrap {
   max-width: 768px;
   margin: 0 auto;
-  padding: 0 5%;
+  padding: 0 1rem;
 }
 .sleepIndex {
   max-width: 768px;
