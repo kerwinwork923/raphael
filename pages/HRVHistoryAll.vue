@@ -451,7 +451,7 @@ export default {
   }
   .detectList {
     overflow-y: auto;
-    height: 60vh;
+    height: calc(100% - 54px);
     position: relative;
   }
 

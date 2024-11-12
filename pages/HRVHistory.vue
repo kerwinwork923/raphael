@@ -217,7 +217,7 @@ export default {
   }
   .detectList {
     overflow-y: auto;
-    height: 100%;
+    height: calc(100% - 52px);
   }
 
   .detectItem {
