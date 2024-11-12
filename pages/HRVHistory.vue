@@ -5,10 +5,9 @@
   <div class="HRVHistory">
     <div class="titleGroup">
       <img src="/assets/imgs/backArrow.svg" @click="goBack" alt="" />
-      <h2>檢測HRV</h2>
+      <h2>HRV 檢測紀錄</h2>
     </div>
     <div class="detectWrap">
-      <h3>檢測紀錄</h3>
       <div class="detectList">
         <div class="detectItem" v-for="item in limitedHRVData" :key="item.AID">
           <a :href="`/vital/detail.html?AID=${item.AID}`">
@@ -204,25 +203,14 @@ export default {
 
 .detectWrap {
   background-color: #fff;
-  min-height: 70vh;
-
+  height: 70vh;
   max-width: 768px;
-  margin: 1.5rem auto 0;
+  margin-top: 0.75rem;
   border-radius: 12px;
-
-  h3 {
-    text-align: center;
-    color: #1e1e1e;
-    text-align: center;
-    font-size: 24px;
-    font-weight: 400;
-    letter-spacing: 0.5px;
-    padding-top: 0.75rem;
-  }
 
   .detectList {
     overflow-y: auto;
-    max-height: 70vh;
+    height: 100%;
   }
 
   .detectItem {
@@ -330,7 +318,7 @@ export default {
   letter-spacing: 0.09px;
   display: inline-block;
   width: 100%;
-  margin-top: 0.75rem;
+  margin-top: 1.5rem;
 }
 
 .goToHRVBtn {
@@ -347,6 +335,6 @@ export default {
   font-weight: 400;
   line-height: 100%;
   letter-spacing: 0.09px;
-  margin-top: 5vh;
+  margin-top: 60px;
 }
 </style>

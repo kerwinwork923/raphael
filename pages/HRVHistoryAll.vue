@@ -5,7 +5,7 @@
   <div class="HRVHistoryAll">
     <div class="titleGroup">
       <img src="/assets/imgs/backArrow.svg" alt="" @click="goBack" />
-      <h2>HRV檢測歷史紀錄</h2>
+      <h2>HRV 檢測歷史紀錄</h2>
     </div>
 
     <div class="detectWrap">
@@ -398,7 +398,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: end;
-    padding: 0.75rem 0 0.25rem;
+    padding: 0.75rem 0;
     color: #666;
   }
   .yearSelectGroup {
