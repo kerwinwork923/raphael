@@ -80,9 +80,9 @@ export default {
     const router = useRouter();
     const HRVData = ref([]);
     const userData = JSON.parse(localStorage.getItem("userData"));
-    const goBack = () =>{
-        router.push("/user")
-    }
+    const goBack = () => {
+      router.push("/user");
+    };
     const API_HRV2 = async () => {
       try {
         const response = await fetch(
@@ -143,7 +143,7 @@ export default {
       limitedHRVData,
       formatTimestampMDH,
       isHRVBelowAverage,
-      goBack
+      goBack,
     };
   },
 };
@@ -203,7 +203,14 @@ export default {
   .detectItem {
     width: 100%;
     margin: 0 auto;
-
+    animation: fadeIn2 1s ease forwards; // 設置動畫效果
+    animation-delay: 0s;
+    opacity: 0;
+    @for $i from 1 through 10 {
+      &:nth-child(#{$i}) {
+        animation-delay: $i * 0.07s;
+      }
+    }
     a {
       text-decoration: none;
       color: #1e1e1e;
@@ -213,7 +220,7 @@ export default {
         display: flex;
         align-items: center;
         gap: 4px;
-        width: 50%;
+        width: 45%;
         padding: 1.25rem 0;
         .timeIcon {
           border-radius: 7px;
@@ -230,17 +237,25 @@ export default {
         }
       }
       .infoGroup {
-        width: 50%;
+        width: 60%;
         display: flex;
         align-items: center;
         white-space: nowrap;
-        gap: 0.75rem;
+        justify-content: end;
+        
         white-space: nowrap h4 {
           color: #666;
           font-size: 1rem;
           font-style: normal;
           font-weight: 400;
           letter-spacing: 0.5px;
+        }
+
+        .detectAgeGroup{
+          margin-right: 0.75rem;
+        }
+        .detectHRVGroup{
+            margin-right: 0.5rem;
         }
         h5 {
           color: #b3b3b3;
@@ -264,7 +279,6 @@ export default {
           color: #ec4f4f;
         }
         svg {
-          margin-left: auto;
           width: 18px;
         }
       }
@@ -272,6 +286,17 @@ export default {
         background-color: #f4f4f4;
       }
     }
+  }
+}
+
+@keyframes fadeIn2 {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

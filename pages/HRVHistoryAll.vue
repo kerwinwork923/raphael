@@ -65,8 +65,17 @@
                   >ms
                 </h5>
               </div>
-              <svg width="18" height="18" viewBox="0 0 18 18">
-                <path d="..." fill="#666666" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 18 18"
+                fill="none"
+              >
+                <path
+                  d="M5.99159 3.37719L11.4726 8.99994L5.99159 14.6227C5.89346 14.7232 5.83853 14.858 5.83853 14.9984C5.83853 15.1389 5.89346 15.2737 5.99159 15.3742C6.03925 15.4228 6.09613 15.4615 6.15891 15.4879C6.2217 15.5142 6.28911 15.5278 6.35721 15.5278C6.42531 15.5278 6.49273 15.5142 6.55551 15.4879C6.61829 15.4615 6.67518 15.4228 6.72284 15.3742L12.5548 9.39257C12.6572 9.28752 12.7145 9.14664 12.7145 8.99994C12.7145 8.85325 12.6572 8.71236 12.5548 8.60732L6.72396 2.62569C6.67627 2.57671 6.61924 2.53777 6.55625 2.51119C6.49326 2.4846 6.42558 2.4709 6.35721 2.4709C6.28884 2.4709 6.22116 2.4846 6.15817 2.51119C6.09518 2.53777 6.03816 2.57671 5.99046 2.62569C5.89234 2.72615 5.8374 2.86101 5.8374 3.00144C5.8374 3.14187 5.89234 3.27673 5.99046 3.37719L5.99159 3.37719Z"
+                  fill="#666666"
+                />
               </svg>
             </div>
           </a>
@@ -76,20 +85,22 @@
 
     <!-- Pagination Controls -->
     <div class="paginationWrap">
-      <button
-        class="firstPageBtn"
-        @click="firstPage"
-        :disabled="currentPage === 1"
-      >
-        <<
-      </button>
-      <button
-        class="prevPageBtn"
-        @click="prevPage"
-        :disabled="currentPage === 1"
-      >
-        <
-      </button>
+      <div class="preBtnGroup">
+        <button
+          class="firstPageBtn"
+          @click="firstPage"
+          :disabled="currentPage === 1"
+        >
+          <<
+        </button>
+        <button
+          class="prevPageBtn"
+          @click="prevPage"
+          :disabled="currentPage === 1"
+        >
+          <
+        </button>
+      </div>
 
       <div class="paginationCenter">
         <button
@@ -102,20 +113,22 @@
         </button>
       </div>
 
-      <button
-        class="nextPageBtn"
-        @click="nextPage"
-        :disabled="currentPage === totalPages"
-      >
+      <div class="nextBtnGroup">
+        <button
+          class="nextPageBtn"
+          @click="nextPage"
+          :disabled="currentPage === totalPages"
         >
-      </button>
-      <button
-        class="lastPageBtn"
-        @click="lastPage"
-        :disabled="currentPage === totalPages"
-      >
-        >>
-      </button>
+          >
+        </button>
+        <button
+          class="lastPageBtn"
+          @click="lastPage"
+          :disabled="currentPage === totalPages"
+        >
+          >>
+        </button>
+      </div>
     </div>
 
     <div class="itemsGroup">
@@ -306,7 +319,7 @@ export default {
       lastPage,
       changePage,
       paginatedData,
-      goBack
+      goBack,
     };
   },
 };
@@ -396,6 +409,7 @@ export default {
     gap: 2px;
     margin-right: 0.75rem;
     position: relative;
+
     .monthBox {
       position: absolute;
       top: 100%;
@@ -427,8 +441,9 @@ export default {
     margin: 0 auto;
     opacity: 0;
     transition: 0.24s ease all;
-    animation: fadeIn 1s ease forwards; // 設置動畫效果
+    animation: fadeIn2 1s ease forwards; // 設置動畫效果
     animation-delay: 0s;
+
     @for $i from 1 through 10 {
       &:nth-child(#{$i}) {
         animation-delay: $i * 0.07s;
@@ -460,12 +475,16 @@ export default {
         }
       }
       .infoGroup {
-        width: 50%;
+        width: 60%;
         display: flex;
+
         align-items: center;
         white-space: nowrap;
         gap: 0.75rem;
-        white-space: nowrap h4 {
+
+        justify-content: end;
+
+        h4 {
           color: #666;
           font-size: 1rem;
           font-style: normal;
@@ -494,7 +513,6 @@ export default {
           color: #ec4f4f;
         }
         svg {
-          margin-left: auto;
           width: 18px;
         }
       }
@@ -513,8 +531,14 @@ export default {
   justify-content: space-between;
   color: #666;
   font-size: 18px;
-  margin-top: 0.75rem;
-
+  max-width: 768px;
+  margin: 0.85rem auto 0;
+  .preBtnGroup,
+  .nextBtnGroup {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
   button {
     width: 36px;
     height: 36px;
@@ -565,7 +589,7 @@ export default {
     background-color: #999;
     position: relative;
     border-radius: 0.75rem;
-    padding: .75rem;
+    padding: 0.75rem;
     opacity: 0.15;
     color: #fff;
     line-height: 1.2;
