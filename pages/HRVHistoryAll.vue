@@ -380,20 +380,10 @@ export default {
 
 .detectWrap {
   background-color: #fff;
-
-  max-width: 768px;
-  margin: 1.5rem auto 0;
+  height: 70vh;
+  margin-top: 0.75rem;
   border-radius: 12px;
-
-  h3 {
-    text-align: center;
-    color: #1e1e1e;
-    text-align: center;
-    font-size: 24px;
-    font-weight: 400;
-    letter-spacing: 0.5px;
-    padding-top: 0.75rem;
-  }
+  
   .detectSelectGroup {
     display: flex;
     align-items: center;
