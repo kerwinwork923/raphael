@@ -4,7 +4,7 @@
   <DSPRSelect />
   <div class="HRVHistory">
     <div class="titleGroup">
-      <img src="/assets/imgs/backArrow.png" @click="goBack" alt="" />
+      <img src="/assets/imgs/backArrow.svg" @click="goBack" alt="" />
       <h2>檢測HRV</h2>
     </div>
     <div class="detectWrap">
@@ -183,11 +183,14 @@ export default {
 }
 .titleGroup {
   padding-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 
   img {
     position: absolute;
-    width: 14px;
-    left: 3.5%;
+    left: 0;
     cursor: pointer;
   }
   h2 {
@@ -211,7 +214,6 @@ export default {
     text-align: center;
     color: #1e1e1e;
     text-align: center;
-    font-family: "Noto Sans";
     font-size: 24px;
     font-weight: 400;
     letter-spacing: 0.5px;
@@ -229,6 +231,7 @@ export default {
     animation: fadeIn2 1s ease forwards;
     animation-delay: 0s;
     opacity: 0;
+
     @for $i from 1 through 10 {
       &:nth-child(#{$i}) {
         animation-delay: $i * 0.07s;
@@ -238,12 +241,12 @@ export default {
       text-decoration: none;
       color: #1e1e1e;
       display: flex;
-      padding: 0 5%;
+      justify-content: space-between;
+      padding: 0 12px;
       .timeGroup {
         display: flex;
         align-items: center;
         gap: 4px;
-        width: 45%;
         padding: 1.25rem 0;
         .timeIcon {
           border-radius: 7px;
@@ -251,22 +254,19 @@ export default {
           border: 1px solid var(--brand-green-400, #74bc1f);
         }
         .time {
-          font-family: "Noto Sans";
           font-size: 20px;
           font-style: normal;
           font-weight: 400;
           letter-spacing: 0.15px;
-          margin-left: 0.5rem;
         }
       }
       .infoGroup {
-        width: 60%;
         display: flex;
         align-items: center;
         white-space: nowrap;
         justify-content: end;
-
-        white-space: nowrap h4 {
+        gap: 0.5rem;
+         h4 {
           color: #666;
           font-size: 1rem;
           font-style: normal;
@@ -275,14 +275,13 @@ export default {
         }
 
         .detectAgeGroup {
-          margin-right: 0.75rem;
+          color: #666;
         }
         .detectHRVGroup {
-          margin-right: 0.5rem;
+          color: #666;
         }
         h5 {
           color: #b3b3b3;
-          font-family: "Noto Sans";
           font-size: 1rem;
           font-style: normal;
           font-weight: 400;
@@ -290,12 +289,11 @@ export default {
           margin-top: 0.25rem;
           span {
             color: #1e1e1e;
-            font-family: "Noto Sans";
             font-size: 1.5rem;
             font-style: normal;
             font-weight: 700;
             letter-spacing: 0.12px;
-            margin-right: 0.5rem;
+            margin-right: 0.25rem;
           }
         }
         .redValue {

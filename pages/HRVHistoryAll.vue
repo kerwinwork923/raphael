@@ -4,7 +4,7 @@
   <DSPRSelect />
   <div class="HRVHistoryAll">
     <div class="titleGroup">
-      <img src="/assets/imgs/backArrow.png" alt="" @click="goBack" />
+      <img src="/assets/imgs/backArrow.svg" alt="" @click="goBack" />
       <h2>HRV檢測歷史紀錄</h2>
     </div>
 
@@ -168,7 +168,7 @@ export default {
     const currentPage = ref(1);
     const itemsPerPage = 10;
     const store = useCommon();
-    const months = Array.from({ length: 12 }, (_, i) => i + 1);
+    const months = Array.from({ length: 12 }, (_, i) => i + 1).reverse();
     const loading = ref(false);
 
     useUserData();
@@ -352,21 +352,21 @@ export default {
 
 <style lang="scss">
 .HRVHistoryAll {
-  background: url("../assets/imgs/gradient-bg.png");
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-size: cover;
+  background-color: $raphael-gray-100;
   min-height: 100vh;
   width: 100%;
   padding: 0 5% 5%;
 }
 .titleGroup {
   padding-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 
   img {
     position: absolute;
-    width: 14px;
-    left: 3.5%;
+    left: 0;
     cursor: pointer;
   }
   h2 {
@@ -389,7 +389,6 @@ export default {
     text-align: center;
     color: #1e1e1e;
     text-align: center;
-    font-family: "Noto Sans";
     font-size: 24px;
     font-weight: 400;
     letter-spacing: 0.5px;
@@ -412,13 +411,15 @@ export default {
       position: absolute;
       top: 100%;
       right: 0;
-      background: #f4f4f4;
+      background: rgba(255, 255, 255, 0.85);
       width: 200%;
       border-radius: 8px;
       text-align: center;
-      padding: 0.75rem 0 0;
-      min-height: 45px;
+      padding: 0.75rem;
+      font-size: 18px;
       max-height: 200px;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
       overflow-y: auto;
       transform: 0.25s all ease;
       animation: 0.3s fadeIn forwards;
@@ -439,12 +440,15 @@ export default {
       position: absolute;
       top: 100%;
       right: 0;
-      background: #f4f4f4;
+      background: rgba(255, 255, 255, 0.85);
       width: 200%;
       border-radius: 8px;
       text-align: center;
-      padding: 0.75rem 0 0;
-      height: 200px;
+      padding: 0.75rem;
+      font-size: 18px;
+      max-height: 200px;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
       overflow-y: auto;
       transform: 0.25s all ease;
       opacity: 0;
@@ -458,7 +462,6 @@ export default {
   .detectList {
     overflow-y: auto;
     height: 60vh;
-    margin-top: 0.5rem;
     position: relative;
   }
 
@@ -490,12 +493,12 @@ export default {
       text-decoration: none;
       color: #1e1e1e;
       display: flex;
-      padding: 0 5%;
+      justify-content: space-between;
+      padding: 0 12px;
       .timeGroup {
         display: flex;
         align-items: center;
         gap: 4px;
-        width: 50%;
         padding: 1.25rem 0;
         .timeIcon {
           border-radius: 7px;
@@ -503,34 +506,34 @@ export default {
           border: 1px solid var(--brand-green-400, #74bc1f);
         }
         .time {
-          font-family: "Noto Sans";
           font-size: 20px;
           font-style: normal;
           font-weight: 400;
           letter-spacing: 0.15px;
-          margin-left: 0.5rem;
         }
       }
       .infoGroup {
-        width: 60%;
         display: flex;
-
         align-items: center;
         white-space: nowrap;
-        gap: 0.75rem;
-
         justify-content: end;
-
-        h4 {
+        gap: 0.5rem;
+         h4 {
           color: #666;
           font-size: 1rem;
           font-style: normal;
           font-weight: 400;
           letter-spacing: 0.5px;
         }
+
+        .detectAgeGroup {
+          color: #666;
+        }
+        .detectHRVGroup {
+          color: #666;
+        }
         h5 {
           color: #b3b3b3;
-          font-family: "Noto Sans";
           font-size: 1rem;
           font-style: normal;
           font-weight: 400;
@@ -538,12 +541,11 @@ export default {
           margin-top: 0.25rem;
           span {
             color: #1e1e1e;
-            font-family: "Noto Sans";
             font-size: 1.5rem;
             font-style: normal;
             font-weight: 700;
             letter-spacing: 0.12px;
-            margin-right: 0.5rem;
+            margin-right: 0.25rem;
           }
         }
         .redValue {
@@ -553,7 +555,6 @@ export default {
           width: 18px;
         }
       }
-
       &:hover {
         background-color: #f4f4f4;
       }
@@ -580,7 +581,7 @@ export default {
     width: 36px;
     height: 36px;
     padding: 5px 13px;
-    background: #eee;
+    background: #fff;
     border: none;
     border-radius: var(--Radius-200, 8px);
     color: #666;
