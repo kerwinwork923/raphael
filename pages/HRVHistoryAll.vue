@@ -97,14 +97,14 @@
           @click="firstPage"
           :disabled="currentPage === 1"
         >
-          <<
+          &lt;&lt;
         </button>
         <button
           class="prevPageBtn"
           @click="prevPage"
           :disabled="currentPage === 1"
         >
-          <
+          &lt;
         </button>
       </div>
 
@@ -125,14 +125,14 @@
           @click="nextPage"
           :disabled="currentPage === totalPages"
         >
-          >
+          &gt;
         </button>
         <button
           class="lastPageBtn"
           @click="lastPage"
           :disabled="currentPage === totalPages"
         >
-          >>
+          &gt;&gt;
         </button>
       </div>
     </div>
@@ -583,12 +583,14 @@ export default {
     background: #eee;
     border: none;
     border-radius: var(--Radius-200, 8px);
+    color: #666;
   }
   .paginationCenter {
     width: 50%;
     display: flex;
     justify-content: center;
     gap: 10px;
+
     button {
       align-items: center;
     }

@@ -40,7 +40,7 @@
           <div class="bottomTitle">積分</div>
         </div>
 
-        <div class="item item2" @click="openHRVAlert">
+        <div class="item item2" @click="goHRVHistory">
           <div class="topTitle">檢測</div>
           <div class="bottomTitle">HRV</div>
           <img src="../assets/imgs/faceIcon.svg" alt="" />
@@ -171,7 +171,7 @@ export default {
       clearInterval(slideInterval);
     });
 
-    //   const openHRVAlert = async () => {
+    //   const goHRVHistory = async () => {
     //   const localData = JSON.parse(localStorage.getItem("userData"));
 
     //   if (!localData) {
@@ -237,8 +237,8 @@ export default {
     //   window.location.href = "/vital/scan.html";
     // };
 
-    const openHRVAlert = async () => {
-      store.showHRVAlert = true;
+    const goHRVHistory = async () => {
+      router.push("/HRVHistory");
     };
 
     // Helper function to calculate age based on Birthday
@@ -253,7 +253,7 @@ export default {
       userInfo,
       currentSlide,
       slides,
-      openHRVAlert,
+      goHRVHistory,
       store,
     };
   },
