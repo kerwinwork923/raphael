@@ -46,7 +46,7 @@
 
       <div class="detectList">
         <div class="detectItem" v-for="item in paginatedData" :key="item.AID">
-          <a :href="`detail.html?AID=${item.AID}`">
+          <a :href="`/vital/detail.html?AID=${item.AID}`">
             <div class="timeGroup">
               <div class="timeIcon">
                 <img src="../assets/imgs/detectTime.svg" alt="" />
