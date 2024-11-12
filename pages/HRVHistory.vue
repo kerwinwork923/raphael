@@ -179,7 +179,7 @@ export default {
   background-size: cover;
   min-height: 100vh;
   width: 100%;
-  padding: 0 5%;
+  padding: 0 1rem;
 }
 .titleGroup {
   padding-top: 1.5rem;
