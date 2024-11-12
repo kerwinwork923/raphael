@@ -8,6 +8,7 @@
       <h2>HRV 檢測紀錄</h2>
     </div>
     <div class="detectWrap">
+      <h3>僅顯示近 10筆 記錄</h3>
       <div class="detectList">
         <div class="detectItem" v-for="item in limitedHRVData" :key="item.AID">
           <a :href="`/vital/detail.html?AID=${item.AID}`">
@@ -207,6 +208,13 @@ export default {
   margin-top: 0.75rem;
   border-radius: 12px;
 
+  &>h3{
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    padding: 0.75rem;
+    color: #666;
+  }
   .detectList {
     overflow-y: auto;
     height: 100%;
