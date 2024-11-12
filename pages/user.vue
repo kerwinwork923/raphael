@@ -2,7 +2,7 @@
   <div class="raphaelUser">
     <HRVAlert />
     <RaphaelLoading v-if="loading" />
-    <DSPRSelect  />
+    <DSPRSelect />
     <Navbar />
     <div class="userGroup">
       <div class="userInfo">
@@ -40,7 +40,7 @@
           <div class="bottomTitle">積分</div>
         </div>
 
-        <div class="item item2" @click="convertAndSaveUserData">
+        <div class="item item2" @click="openHRVAlert">
           <div class="topTitle">檢測</div>
           <div class="bottomTitle">HRV</div>
           <img src="../assets/imgs/faceIcon.svg" alt="" />
@@ -93,7 +93,7 @@ import banner1 from "@/assets/imgs/banner-1.png";
 import banner2 from "@/assets/imgs/banner-2.png";
 
 export default {
-  components: { Navbar, RaphaelLoading, HRVAlert,DSPRSelect },
+  components: { Navbar, RaphaelLoading, HRVAlert, DSPRSelect },
   setup() {
     const router = useRouter();
     const loading = ref(true);
@@ -171,7 +171,7 @@ export default {
       clearInterval(slideInterval);
     });
 
-    //   const convertAndSaveUserData = async () => {
+    //   const openHRVAlert = async () => {
     //   const localData = JSON.parse(localStorage.getItem("userData"));
 
     //   if (!localData) {
@@ -237,7 +237,7 @@ export default {
     //   window.location.href = "/vital/scan.html";
     // };
 
-    const convertAndSaveUserData = async () => {
+    const openHRVAlert = async () => {
       store.showHRVAlert = true;
     };
 
@@ -253,7 +253,7 @@ export default {
       userInfo,
       currentSlide,
       slides,
-      convertAndSaveUserData,
+      openHRVAlert,
       store,
     };
   },

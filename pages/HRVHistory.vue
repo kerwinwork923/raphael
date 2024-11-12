@@ -1,4 +1,7 @@
 <template>
+  <HRVAlert />
+  <RaphaelLoading v-if="loading" />
+  <DSPRSelect />
   <div class="HRVHistory">
     <div class="titleGroup">
       <img src="/assets/imgs/backArrow.png" @click="goBack" alt="" />
@@ -69,22 +72,32 @@
         />
       </svg>
     </a>
-    <button class="goToHRVBtn">前往檢測</button>
+    <button class="goToHRVBtn" @click="openHRVAlert">前往檢測</button>
   </div>
 </template>
 <script>
 import { useRouter } from "vue-router";
 import { formatTimestampMDH } from "~/fn/utils";
+import HRVAlert from "~/components/HRVAlert.vue";
+import RaphaelLoading from "../components/RaphaelLoading";
+import DSPRSelect from "../components/DSPRSelect.vue";
+import axios from "axios";
+import { useCommon } from "../stores/common";
+import { useUserData } from "~/fn/api";
 export default {
+  components: { RaphaelLoading, HRVAlert, DSPRSelect },
   setup() {
     const router = useRouter();
     const HRVData = ref([]);
     const userData = JSON.parse(localStorage.getItem("userData"));
+    const store = useCommon();
+    const loading = ref(false);
     const goBack = () => {
       router.push("/user");
     };
     const API_HRV2 = async () => {
       try {
+        loading.value = true;
         const response = await fetch(
           "https://23700999.com:8081/HMA/API_HRV2.jsp",
           {
@@ -109,6 +122,8 @@ export default {
         }
       } catch (error) {
         console.error("Error fetching data", error);
+      } finally {
+        loading.value = false;
       }
     };
 
@@ -138,12 +153,20 @@ export default {
       return HRV < range[0];
     }
 
+    useUserData();
+
+    const openHRVAlert = async () => {
+      store.showHRVAlert = true;
+    };
+
     return {
       HRVData,
       limitedHRVData,
       formatTimestampMDH,
       isHRVBelowAverage,
       goBack,
+      openHRVAlert,
+      loading,
     };
   },
 };
@@ -203,7 +226,7 @@ export default {
   .detectItem {
     width: 100%;
     margin: 0 auto;
-    animation: fadeIn2 1s ease forwards; // 設置動畫效果
+    animation: fadeIn2 1s ease forwards;
     animation-delay: 0s;
     opacity: 0;
     @for $i from 1 through 10 {
@@ -242,7 +265,7 @@ export default {
         align-items: center;
         white-space: nowrap;
         justify-content: end;
-        
+
         white-space: nowrap h4 {
           color: #666;
           font-size: 1rem;
@@ -251,11 +274,11 @@ export default {
           letter-spacing: 0.5px;
         }
 
-        .detectAgeGroup{
+        .detectAgeGroup {
           margin-right: 0.75rem;
         }
-        .detectHRVGroup{
-            margin-right: 0.5rem;
+        .detectHRVGroup {
+          margin-right: 0.5rem;
         }
         h5 {
           color: #b3b3b3;

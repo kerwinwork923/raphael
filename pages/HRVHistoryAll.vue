@@ -1,4 +1,7 @@
 <template>
+  <HRVAlert />
+  <RaphaelLoading v-if="loading" />
+  <DSPRSelect />
   <div class="HRVHistoryAll">
     <div class="titleGroup">
       <img src="/assets/imgs/backArrow.png" alt="" @click="goBack" />
@@ -80,6 +83,9 @@
             </div>
           </a>
         </div>
+        <div class="notDetectData" v-if="filteredHRVData.length === 0">
+          無檢測資料
+        </div>
       </div>
     </div>
 
@@ -132,7 +138,7 @@
     </div>
 
     <div class="itemsGroup">
-      <div class="item item2" @click="convertAndSaveUserData">
+      <div class="item item2" @click="openHRVAlert">
         <div class="topTitle">檢測</div>
         <div class="bottomTitle">HRV</div>
         <img src="../assets/imgs/faceIcon.svg" alt="" />
@@ -144,7 +150,13 @@
 import { ref, computed, onMounted } from "vue";
 import { formatTimestampMDH } from "~/fn/utils";
 import { useRouter } from "vue-router";
+import HRVAlert from "~/components/HRVAlert.vue";
+import RaphaelLoading from "../components/RaphaelLoading";
+import DSPRSelect from "../components/DSPRSelect.vue";
+import { useCommon } from "../stores/common";
+import { useUserData } from "~/fn/api";
 export default {
+  components: { RaphaelLoading, HRVAlert, DSPRSelect },
   setup() {
     const HRVData = ref([]);
     const router = useRouter();
@@ -155,10 +167,15 @@ export default {
     const monthBoxVisible = ref(false);
     const currentPage = ref(1);
     const itemsPerPage = 10;
+    const store = useCommon();
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
+    const loading = ref(false);
+
+    useUserData();
 
     const API_HRV2 = async () => {
       try {
+        loading.value = true;
         const response = await fetch(
           "https://23700999.com:8081/HMA/API_HRV2.jsp",
           {
@@ -181,6 +198,8 @@ export default {
         }
       } catch (error) {
         console.error("Error fetching data", error);
+      } finally {
+        loading.value = false;
       }
     };
 
@@ -296,6 +315,10 @@ export default {
       router.push("/HRVHistory");
     };
 
+    const openHRVAlert = async () => {
+      store.showHRVAlert = true;
+    };
+
     return {
       filteredHRVData,
       selectedYear,
@@ -320,6 +343,8 @@ export default {
       changePage,
       paginatedData,
       goBack,
+      openHRVAlert,
+      loading,
     };
   },
 };
@@ -434,8 +459,20 @@ export default {
     overflow-y: auto;
     height: 60vh;
     margin-top: 0.5rem;
+    position: relative;
   }
 
+  .notDetectData {
+    position: absolute;
+    z-index: 11;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    letter-spacing: 10px;
+    font-size: 1.25rem;
+    white-space: nowrap;
+    color: #999;
+  }
   .detectItem {
     width: 100%;
     margin: 0 auto;

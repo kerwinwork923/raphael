@@ -4,14 +4,13 @@
       <router-link to="/user">
         <img src="../assets/imgs/neuro-plus.svg" alt="" />
       </router-link>
-      
     </div>
     <div class="optionGroup">
       <!-- <img class="cartIcon" src="../assets/imgs/cart.svg" alt="" />
       <img class="alertIcon" src="../assets/imgs/alert.svg" alt="" />-->
       <a href="/ChangeMember">
-      <img class="settingIcon" src="../assets/imgs/setting.svg" alt="" /> 
-    </a>
+        <img class="settingIcon" src="../assets/imgs/setting.svg" alt="" />
+      </a>
     </div>
   </div>
 </template>
@@ -28,7 +27,7 @@
   align-items: center;
   max-width: 768px;
   height: 50px;
-  
+
   // background-color: $raphael-gray-200;
   .logoGroup {
     width: 65%;
