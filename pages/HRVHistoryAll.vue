@@ -614,6 +614,7 @@ export default {
 .itemsGroup {
   display: grid;
   padding: 1.5rem 0;
+  padding-bottom: 4.25rem;
 
   .item {
     background-color: #999;
