@@ -174,7 +174,7 @@ export default {
   },
 };
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 .HRVHistory {
   background: url("../assets/imgs/gradient-bg.png");
   background-repeat: no-repeat;
@@ -208,7 +208,7 @@ export default {
 .detectWrap {
   background-color: #fff;
   height: 70vh;
-  margin-top: 0.75rem;
+  margin-top: 1.5rem;
   border-radius: 12px;
 
   & > h3 {
