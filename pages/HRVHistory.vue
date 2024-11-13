@@ -48,6 +48,9 @@
             </div>
           </a>
         </div>
+        <div class="notDetectData" v-if="limitedHRVData.length === 0">
+          無檢測資料
+        </div>
       </div>
     </div>
     <a href="/HRVHistoryAll" class="goToHistoryAll"
@@ -208,7 +211,7 @@ export default {
   margin-top: 0.75rem;
   border-radius: 12px;
 
-  &>h3{
+  & > h3 {
     display: flex;
     align-items: center;
     justify-content: start;
@@ -218,6 +221,18 @@ export default {
   .detectList {
     overflow-y: auto;
     height: calc(100% - 52px);
+    position: relative;
+    .notDetectData {
+      position: absolute;
+      z-index: 11;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      letter-spacing: 10px;
+      font-size: 1.25rem;
+      white-space: nowrap;
+      color: #999;
+    }
   }
 
   .detectItem {
@@ -261,7 +276,7 @@ export default {
         white-space: nowrap;
         justify-content: end;
         gap: 0.5rem;
-         h4 {
+        h4 {
           color: #666;
           font-size: 1rem;
           font-style: normal;
@@ -341,6 +356,5 @@ export default {
   line-height: 100%;
   letter-spacing: 0.09px;
   margin: 24px 0 66px 0;
-
 }
 </style>

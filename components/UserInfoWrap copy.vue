@@ -68,45 +68,13 @@
           <option value="prehypertension">高血壓前期(120~139mmHg)</option>
           <option value="hypertension">高血壓(>=140mmHg)</option>
         </select>
-        <img class="icon2" src="../assets/imgs/arrowDown.svg" />
-      </div>
-
-      <div class="addressGroup">
-        <div class="city">
-          <select v-model="selectedCity" @change="updateAreas">
-            <option value="" disabled selected hidden>縣市</option>
-            <option
-              v-for="city in citiesData"
-              :key="city.CityName"
-              :value="city.CityName"
-            >
-              {{ city.CityName }}
-            </option>
-          </select>
-          <img class="icon2" src="../assets/imgs/arrowDown.svg" />
-        </div>
-        <div class="area">
-          <select v-model="selectedArea">
-            <option value="" disabled selected hidden>鎮地區</option>
-            <option
-              v-for="area in filteredAreas"
-              :key="area.AreaName"
-              :value="area.AreaName"
-            >
-              {{ area.AreaName }}
-            </option>
-          </select>
-        </div>
-        <div class="address">
-          <input type="text" placeholder="輸入地址" v-model="inputAddress" />
-        </div>
       </div>
     </div>
 
     <!-- 送出按鈕 -->
-    <button
-      class="infoSendBtn"
-      @click="submitForm"
+    <button 
+      class="infoSendBtn" 
+      @click="submitForm" 
       :disabled="isSubmitDisabled"
     >
       送出
@@ -115,7 +83,7 @@
 </template>
 
 <script>
-import { ref, watch, computed, onMounted } from "vue";
+import { ref, watch, computed } from "vue";
 import { zhTW } from "date-fns/locale";
 
 export default {
@@ -128,80 +96,31 @@ export default {
     date: String,
   },
   setup(props, { emit }) {
-    const localName = ref(props.name || "");
-    const localHeight = ref(props.height || "");
-    const localWeight = ref(props.weight || "");
-    const localSex = ref(props.sex || "");
+    const localName = ref(props.name);
+    const localHeight = ref(props.height);
+    const localWeight = ref(props.weight);
+    const localSex = ref(props.sex || ""); // 設置初始值為空字符串
     const localDate = ref(null);
-    const localDSPR = ref(props.DSPR || "");
+    const localDSPR = ref(props.DSPR || ""); // 設置初始值為空字符串
 
-    const inputAddress = ref("");
-    const citiesData = ref([]);
-    const selectedCity = ref("");
-    const selectedArea = ref("");
-    const filteredAreas = ref([]);
-
-    onMounted(async () => {
-      try {
-        const response = await fetch("/AllData.json");
-        if (response.ok) {
-          citiesData.value = await response.json();
-        } else {
-          console.error("Failed to load city data:", response.status);
-        }
-      } catch (error) {
-        console.error("Error loading city data:", error);
-      }
-
-      const userData = JSON.parse(localStorage.getItem("userData") || "{}");
-
-      localName.value = userData.Name || "";
-      localHeight.value = userData.Height || "";
-      localWeight.value = userData.Weight || "";
-      localSex.value = userData.Sex || "";
-      localDate.value = userData.Birthday
-        ? new Date(
-            parseInt(userData.Birthday.split("/")[0]) + 1911,
-            parseInt(userData.Birthday.split("/")[1]) - 1,
-            parseInt(userData.Birthday.split("/")[2])
-          )
-        : null;
-      localDSPR.value = userData.DSPR || "";
-      selectedCity.value = userData.City || "";
-      selectedArea.value = userData.Zone || "";
-      inputAddress.value = userData.Address || "";
-
-
-      if (selectedCity.value) {
-        updateAreas(true);
-      }
-    });
-
-    const updateAreas = (initial = false) => {
-      const city = citiesData.value.find(
-        (c) => c.CityName === selectedCity.value
-      );
-      filteredAreas.value = city ? city.AreaList : [];
-
-      if (
-        !initial ||
-        !filteredAreas.value.some(
-          (area) => area.AreaName === selectedArea.value
-        )
-      ) {
-        selectedArea.value = ""; 
-      }
-    };
-
-    // 民國年轉換
+    // 自訂民國日期格式
     const formatDate = (date) => {
-      if (!date) return "";
-      const rocYear = date.getFullYear() - 1911; // Convert to ROC year
+      if (!date) return ""; // 如果沒有日期，返回空字符串
+      const rocYear = date.getFullYear() - 1911;
       return `${rocYear}年${date.getMonth() + 1}月${date.getDate()}日`;
     };
 
     const zhTWLocale = zhTW;
 
+    // Watchers to emit changes to parent
+    watch(localName, (newValue) => emit("update:name", newValue));
+    watch(localHeight, (newValue) => emit("update:height", newValue));
+    watch(localWeight, (newValue) => emit("update:weight", newValue));
+    watch(localSex, (newValue) => emit("update:sex", newValue));
+    watch(localDate, (newValue) => emit("update:date", newValue));
+    watch(localDSPR, (newValue) => emit("update:DSPR", newValue));
+
+    // 計算屬性判斷送出按鈕是否禁用
     const isSubmitDisabled = computed(() => {
       return (
         !localName.value ||
@@ -212,29 +131,10 @@ export default {
       );
     });
 
+    // 送出表單
     const submitForm = () => {
-      emit("submit", {
-        name: localName.value,
-        height: localHeight.value,
-        weight: localWeight.value,
-        sex: localSex.value,
-        date: localDate.value,
-        DSPR: localDSPR.value,
-        city: selectedCity.value,
-        area: selectedArea.value,
-        address: inputAddress.value,
-      });
+      emit("submit");
     };
-
-    watch(localName, (newValue) => emit("update:name", newValue));
-    watch(localHeight, (newValue) => emit("update:height", newValue));
-    watch(localWeight, (newValue) => emit("update:weight", newValue));
-    watch(localSex, (newValue) => emit("update:sex", newValue));
-    watch(localDate, (newValue) => emit("update:date", newValue));
-    watch(localDSPR, (newValue) => emit("update:DSPR", newValue));
-    watch(selectedCity, (newValue) => emit("update:city", newValue));
-    watch(selectedArea, (newValue) => emit("update:area", newValue));
-    watch(inputAddress, (newValue) => emit("update:address", newValue));
 
     return {
       localName,
@@ -243,15 +143,10 @@ export default {
       localSex,
       localDate,
       localDSPR,
-      inputAddress,
-      citiesData,
-      selectedCity,
-      selectedArea,
-      filteredAreas,
-      updateAreas,
-      submitForm,
-      isSubmitDisabled,
       formatDate,
+      zhTWLocale,
+      submitForm,
+      isSubmitDisabled, // 返回計算屬性
     };
   },
 };
@@ -279,7 +174,7 @@ export default {
   .custom-select.selected {
     color: black; /* 選擇後變為黑色 */
   }
-
+  
   .nameGroup,
   .heightGroup,
   .weightGroup,
@@ -293,62 +188,6 @@ export default {
       left: 2px;
       transform: translateY(-50%);
       z-index: 2;
-    }
-  }
-
-  .addressGroup {
-    display: flex;
-    flex-wrap: wrap;
-    width: 100%;
-    justify-content: space-between;
-    .city,
-    .area {
-      width: 48%;
-      position: relative;
-      select {
-        outline: none;
-        border: none;
-        padding-left: 0;
-        padding-bottom: 16px;
-        padding-top: 16px;
-        font-size: 1.2rem;
-        width: 100%;
-        border-bottom: 1px solid #ccc;
-        appearance: none;
-        color: #999;
-        font-family: Inter;
-        font-size: 1.2rem;
-        font-weight: 400;
-        padding-left: 0.5rem;
-
-        option {
-        }
-        &::placeholder {
-          color: #ccc;
-          font-family: Inter;
-          font-size: 1.2rem;
-          font-weight: 400;
-        }
-
-        &::-ms-expand {
-          display: none;
-        }
-      }
-
-      .icon2 {
-        position: absolute;
-        top: 50%;
-        right: 2px;
-        transform: translateY(-50%);
-        z-index: 1;
-        width: 18px;
-      }
-    }
-    .address {
-      width: 100%;
-      input[type="text"] {
-        padding-left: 0.5rem;
-      }
     }
   }
 
@@ -368,14 +207,6 @@ export default {
       transform: translateY(-50%);
       z-index: 2;
     }
-    .icon2 {
-      position: absolute;
-      top: 50%;
-      right: 2px;
-      transform: translateY(-50%);
-      z-index: 1;
-      width: 18px;
-    }
     select {
       outline: none;
       border: none;
@@ -390,7 +221,7 @@ export default {
       font-family: Inter;
       font-size: 1.2rem;
       font-weight: 400;
-
+    
       &::placeholder {
         color: #ccc;
         font-family: Inter;
@@ -440,13 +271,14 @@ export default {
     font-size: 1rem;
     letter-spacing: 0.5px;
     font-weight: 400;
-
+    
     &:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
+      background-color: #ccc; 
+      cursor: not-allowed; 
     }
   }
 }
+
 
 .vue-datepicker {
   width: 100%;
@@ -456,6 +288,7 @@ export default {
   font-size: 1.5rem;
   color: #666;
   font-family: Inter, sans-serif;
+
 
   &::placeholder {
     color: #999;

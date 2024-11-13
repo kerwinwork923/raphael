@@ -59,12 +59,15 @@
         <div class="privacyGroup">
           <input type="checkbox" v-model="isPrivacy" id="privacyInput" />
           <router-link to="/privacy">
-            <label >我已詳細閱讀隱私權政策</label>
+            <label>我已詳細閱讀隱私權政策</label>
           </router-link>
-        
         </div>
 
-        <button class="vertificationBtn" :disabled="!isPrivacy" @click="getVerificationCode">
+        <button
+          class="vertificationBtn"
+          :disabled="!isPrivacy"
+          @click="getVerificationCode"
+        >
           取得驗證碼
         </button>
 
@@ -75,66 +78,59 @@
             <img class="icon" src="../assets/imgs/change.svg" alt="" />
             <h5>已有會員</h5>
           </router-link>
-        
         </div>
       </div>
 
       <div class="verfifyWrap" v-if="currentStep === 'verify'">
         <div class="verificationCodeGroup">
           <input
-          v-for="(code, index) in verificationCodes"
-          :key="index"
-          ref="verificationInput"
-          type="number"
-          maxlength="1"
-          class="vertifyCode"
-          v-model="verificationCodes[index]"
-          @input="handleInput(index)"
-          @keydown="handleInput(index, $event)"
-          @keypress="allowOnlyNumbers"
-          :disabled="isDisabled" 
-        />
-
+            v-for="(code, index) in verificationCodes"
+            :key="index"
+            ref="verificationInput"
+            type="number"
+            maxlength="1"
+            class="vertifyCode"
+            v-model="verificationCodes[index]"
+            @input="handleInput(index)"
+            @keydown="handleInput(index, $event)"
+            @keypress="allowOnlyNumbers"
+            :disabled="isDisabled"
+          />
         </div>
         <div class="verificationCodeHintText">
-        <template v-if="typeof countdownTime === 'number'">
-          驗證碼已傳送至您的裝置，請輸入驗證碼
-          <br />
-          ({{ countdownTime }}秒後失效)
-        </template>
-        <template v-else>
-          {{ countdownTime }}
-        </template>
-      </div>
+          <template v-if="typeof countdownTime === 'number'">
+            驗證碼已傳送至您的裝置，請輸入驗證碼
+            <br />
+            ({{ countdownTime }}秒後失效)
+          </template>
+          <template v-else>
+            {{ countdownTime }}
+          </template>
+        </div>
 
         <div class="reSendTextGroup">
-          <button class="reSendText" :disabled="!isReSend" @click="reSend">重新發送</button>
+          <button class="reSendText" :disabled="!isReSend" @click="reSend">
+            重新發送
+          </button>
         </div>
-       
-    
       </div>
       <div v-if="currentStep === 'info'">
         <UserInfoForm
-          :name="name"
-          :height="height"
-          :weight="weight"
-          :sex="sex"
-          :DSPR="DSPR"
-          :date="date"
           @update:name="name = $event"
           @update:height="height = $event"
           @update:weight="weight = $event"
           @update:sex="sex = $event"
           @update:date="date = $event"
           @update:DSPR="DSPR = $event"
+          @update:city="city = $event"
+          @update:area="area = $event"
+          @update:address="address = $event"
           @submit="addUser"
-      />
-    </div>
+        />
+      </div>
     </div>
   </div>
 </template>
-
-
 
 <script>
 import { ref, onMounted, nextTick, watch } from "vue";
@@ -143,13 +139,12 @@ import eyesCloseGreen from "../assets/imgs/eyesCloseGreen.svg";
 import eyesOpenGreen from "../assets/imgs/eyesOpenGreen.svg";
 import axios from "axios";
 import Navbar from "../components/Navbar";
-import { useRouter } from 'vue-router';
+import { useRouter } from "vue-router";
 
-import UserInfoForm from '../components/UserInfoWrap.vue';
-
+import UserInfoForm from "../components/UserInfoWrap.vue";
 
 export default {
-  components: { Navbar,UserInfoForm },
+  components: { Navbar, UserInfoForm },
   setup() {
     const router = useRouter();
     const passwordVisible = ref(false);
@@ -161,12 +156,11 @@ export default {
     const passwordAgain = ref("");
     const passwordError = ref("");
     const passwordAgainError = ref("");
-    const isPrivacy = ref(false)
-    const isReSend = ref(false)
-    const sexSelect = ref(null)
+    const isPrivacy = ref(false);
+    const isReSend = ref(false);
+    const sexSelect = ref(null);
 
-    const isDisabled = ref(true); 
-
+    const isDisabled = ref(true);
 
     const name = ref("");
     const height = ref("");
@@ -174,7 +168,9 @@ export default {
     const sex = ref("");
     const date = ref("");
     const DSPR = ref("");
-
+    const city = ref("");
+    const area = ref("");
+    const address = ref("");
 
     const currentStep = ref("register");
     const verificationCodes = ref(["", "", "", "", ""]);
@@ -194,21 +190,26 @@ export default {
 
     watch(verificationCodes, (newCodes) => {
       if (newCodes.every((code) => code !== "")) {
-        verifyCode(); 
+        verifyCode();
       }
     });
 
-
     const getVerificationCode = async () => {
-      if(password.value.length<8) {alert("密碼小於8位數") ; return}
-      if(password.value !== passwordAgain.value){ alert("密碼不一致"); return}
+      if (password.value.length < 8) {
+        alert("密碼小於8位數");
+        return;
+      }
+      if (password.value !== passwordAgain.value) {
+        alert("密碼不一致");
+        return;
+      }
       loading.value = true;
       await new Promise((resolve) => setTimeout(resolve, 750));
       loading.value = false;
 
       verificationTitle.value = "輸入驗證碼";
       startCountdown();
-      
+
       try {
         const response = await axios.post(
           "https://23700999.com:8081/HMA/API_AA3.jsp",
@@ -220,23 +221,25 @@ export default {
 
         if (response.status === 200) {
           const data = response.data;
-          if (data.Token.trim()!==""&&data.MID.trim()!=="") {
+          if (data.Token.trim() !== "" && data.MID.trim() !== "") {
             currentStep.value = "verify";
             verificationTitle.value = "輸入驗證碼";
-       
-            localStorage.setItem('userData', JSON.stringify({
-              Token: data.Token,
-              MAID: data.MAID,
-              MID: data.MID,
-              A5Digit: data.A5Digit,
-              Mobile: data.Mobile,
-              startTime: data.startTime,
-            }));
+
+            localStorage.setItem(
+              "userData",
+              JSON.stringify({
+                Token: data.Token,
+                MAID: data.MAID,
+                MID: data.MID,
+                A5Digit: data.A5Digit,
+                Mobile: data.Mobile,
+                startTime: data.startTime,
+              })
+            );
+          } else {
+            alert(`註冊失敗 : ${data.Result}`);
           }
-          else {
-          alert(`註冊失敗 : ${data.Result}`);
         }
-        } 
       } catch (err) {
         alert("註冊失敗");
       } finally {
@@ -261,110 +264,117 @@ export default {
     };
 
     const verifyCode = async () => {
-    loading.value = true;
-    const enteredCode = verificationCodes.value.join("");
-    const localData = localStorage.getItem("userData");
-    const { MID, Token, MAID, Mobile, A5Digit } = localData ? JSON.parse(localData) : {};
+      loading.value = true;
+      const enteredCode = verificationCodes.value.join("");
+      const localData = localStorage.getItem("userData");
+      const { MID, Token, MAID, Mobile, A5Digit } = localData
+        ? JSON.parse(localData)
+        : {};
 
-    if(countdownTime.value > 0)
-    {
-      if (enteredCode == A5Digit  ) {
-      await API_doExamAuth();
-       verificationTitle.value = "輸入基本資料"
-      currentStep.value = "info";
-      verificationCodes.value = ["", "", "", "", ""];
-    } else {
-      verificationCodes.value = ["", "", "", "", ""];
-      nextTick(() => {
-      verificationInput.value[0]?.focus(); 
-      });
-      alert("驗證碼錯誤");
-    }
-
-    }
-    else{
-      verificationCodes.value = ["", "", "", "", ""];
-      nextTick(() => {
-      verificationInput.value[0]?.focus(); 
-      });
-      alert("驗證碼時間已過")
-    }
-   
-    loading.value = false;
-  };
-
-  const API_doExamAuth = async() =>{
-    loading.value = true;
-    const enteredCode = verificationCodes.value.join("");
-    const localData = localStorage.getItem("userData");
-    const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
-
-     try {
-      const response = await axios.post("https://23700999.com:8081/HMA/API_doExamAuth.jsp", {
-          Token: Token,
-          MAID: MAID,
-          Mobile: Mobile,
-          MID: MID,
-          D1: enteredCode[0],
-          D2: enteredCode[1],
-          D3: enteredCode[2],
-          D4: enteredCode[3],
-          D5: enteredCode[4],
-        }, 
-      );
-
-      if (response.status === 200) {
-        const data = response.data;
-        if (data.Result === true) {
-          const localData = localStorage.getItem("userData");
-          const updatedData = {
-            ...JSON.parse(localData),
-          };
-          localStorage.setItem('userData', JSON.stringify(updatedData));
-          verificationCodes.value = ["", "", "", "", ""]; 
-          verificationTitle.value = "輸入基本資料"
-          currentStep.value = "info"; 
-      
+      if (countdownTime.value > 0) {
+        if (enteredCode == A5Digit) {
+          await API_doExamAuth();
+          verificationTitle.value = "輸入基本資料";
+          currentStep.value = "info";
+          verificationCodes.value = ["", "", "", "", ""];
         } else {
           verificationCodes.value = ["", "", "", "", ""];
-          verificationInputs.value[0].focus();
+          nextTick(() => {
+            verificationInput.value[0]?.focus();
+          });
+          alert("驗證碼錯誤");
         }
+      } else {
+        verificationCodes.value = ["", "", "", "", ""];
+        nextTick(() => {
+          verificationInput.value[0]?.focus();
+        });
+        alert("驗證碼時間已過");
       }
-    } catch (error) {
 
-    } finally {
       loading.value = false;
-    }
+    };
 
-  }
+    const API_doExamAuth = async () => {
+      loading.value = true;
+      const enteredCode = verificationCodes.value.join("");
+      const localData = localStorage.getItem("userData");
+      const { MID, Token, MAID, Mobile } = localData
+        ? JSON.parse(localData)
+        : {};
 
-  const handleInput = (index, event) => {
-  const key = event?.key;
+      try {
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_doExamAuth.jsp",
+          {
+            Token: Token,
+            MAID: MAID,
+            Mobile: Mobile,
+            MID: MID,
+            D1: enteredCode[0],
+            D2: enteredCode[1],
+            D3: enteredCode[2],
+            D4: enteredCode[3],
+            D5: enteredCode[4],
+          }
+        );
 
-  // 如果按下退格鍵並且當前輸入框為空，將焦點移到上一個輸入框
-  if (key === "Backspace" && verificationCodes.value[index] === "" && index > 0) {
-    verificationInput.value[index - 1]?.focus();
-    return; // 返回以避免繼續執行其他邏輯
-  }
+        if (response.status === 200) {
+          const data = response.data;
+          if (data.Result === true) {
+            const localData = localStorage.getItem("userData");
+            const updatedData = {
+              ...JSON.parse(localData),
+            };
+            localStorage.setItem("userData", JSON.stringify(updatedData));
+            verificationCodes.value = ["", "", "", "", ""];
+            verificationTitle.value = "輸入基本資料";
+            currentStep.value = "info";
+          } else {
+            verificationCodes.value = ["", "", "", "", ""];
+            verificationInputs.value[0].focus();
+          }
+        }
+      } catch (error) {
+      } finally {
+        loading.value = false;
+      }
+    };
 
-  // 如果當前輸入的數字不在範圍內，則清空該輸入框
-  if (verificationCodes.value[index] < 0 || verificationCodes.value[index] > 9) {
-    verificationCodes.value[index] = '';
-  }
+    const handleInput = (index, event) => {
+      const key = event?.key;
 
-  // 將焦點移到下一個輸入框
-  if (verificationCodes.value[index] !== '' && index < verificationCodes.value.length - 1) {
-    verificationInput.value[index + 1]?.focus();
-  }
+      // 如果按下退格鍵並且當前輸入框為空，將焦點移到上一個輸入框
+      if (
+        key === "Backspace" &&
+        verificationCodes.value[index] === "" &&
+        index > 0
+      ) {
+        verificationInput.value[index - 1]?.focus();
+        return; // 返回以避免繼續執行其他邏輯
+      }
 
-  // 當5個數字都填寫完成時，進行驗證
-  if (verificationCodes.value.every(code => code !== '')) {
-    verifyCode(); // 調用驗證方法
-  }
-  };
+      // 如果當前輸入的數字不在範圍內，則清空該輸入框
+      if (
+        verificationCodes.value[index] < 0 ||
+        verificationCodes.value[index] > 9
+      ) {
+        verificationCodes.value[index] = "";
+      }
 
+      // 將焦點移到下一個輸入框
+      if (
+        verificationCodes.value[index] !== "" &&
+        index < verificationCodes.value.length - 1
+      ) {
+        verificationInput.value[index + 1]?.focus();
+      }
 
-
+      // 當5個數字都填寫完成時，進行驗證
+      if (verificationCodes.value.every((code) => code !== "")) {
+        verifyCode(); // 調用驗證方法
+      }
+    };
 
     const allowOnlyNumbers = (event) => {
       const char = String.fromCharCode(event.which);
@@ -374,21 +384,20 @@ export default {
     };
 
     const startCountdown = () => {
-    countdownTime.value = 60;
-    isReSend.value = false;
-    isDisabled.value = true; 
-    countdownInterval.value = setInterval(() => {
-    if (countdownTime.value > 0) {
-      countdownTime.value--;
-    } else {
-      clearInterval(countdownInterval.value);
-      countdownTime.value = "驗證碼已失效，請重新發送";  
-      isReSend.value = true;  
-      isDisabled.value = false;  
-    }
-  }, 1000);
-};
-
+      countdownTime.value = 60;
+      isReSend.value = false;
+      isDisabled.value = true;
+      countdownInterval.value = setInterval(() => {
+        if (countdownTime.value > 0) {
+          countdownTime.value--;
+        } else {
+          clearInterval(countdownInterval.value);
+          countdownTime.value = "驗證碼已失效，請重新發送";
+          isReSend.value = true;
+          isDisabled.value = false;
+        }
+      }, 1000);
+    };
 
     onMounted(() => {
       nextTick(() => {
@@ -397,72 +406,72 @@ export default {
           verificationCodes.value.length
         );
       });
-
     });
 
-
     const isFormValid = computed(() => {
-    return (
-      mobile.value.trim() !== "" && 
-      password.value.length >= 8 && 
-      password.value === passwordAgain.value && 
-      isPrivacy.value
-    );
+      return (
+        mobile.value.trim() !== "" &&
+        password.value.length >= 8 &&
+        password.value === passwordAgain.value &&
+        isPrivacy.value
+      );
     });
 
     const reSend = async () => {
-  try {
-    // 從 localStorage 獲取用戶資料
-    const localData = localStorage.getItem("userData");
-    const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
+      try {
+        // 從 localStorage 獲取用戶資料
+        const localData = localStorage.getItem("userData");
+        const { MID, Token, MAID, Mobile } = localData
+          ? JSON.parse(localData)
+          : {};
 
-    // 檢查必需的資料是否存在
-    if (!MID || !Token || !MAID || !Mobile) {
-      alert("資料不完整，無法重新發送驗證碼");
-      return;
-    }
+        // 檢查必需的資料是否存在
+        if (!MID || !Token || !MAID || !Mobile) {
+          alert("資料不完整，無法重新發送驗證碼");
+          return;
+        }
 
-    // 發送請求以重新發送驗證碼
-    const response = await axios.post(
-      "https://23700999.com:8081/HMA/API_AA4.jsp",
-      {
-        MID: MID,
-        Token: Token,
-        MAID: MAID,
-        Mobile: Mobile,
+        // 發送請求以重新發送驗證碼
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_AA4.jsp",
+          {
+            MID: MID,
+            Token: Token,
+            MAID: MAID,
+            Mobile: Mobile,
+          }
+        );
+
+        // 檢查回應是否成功
+        if (response.status === 200) {
+          const { startTime, A5Digit, Result } = response.data;
+
+          // 更新 localStorage 中的資料
+          localStorage.setItem(
+            "userData",
+            JSON.stringify({
+              ...JSON.parse(localData),
+              startTime,
+              A5Digit,
+              Result,
+            })
+          );
+
+          // 提示用戶簡訊已重新發送
+          alert("簡訊已重新發送");
+
+          // 開始倒計時
+          startCountdown();
+        } else {
+          alert("重新發送失敗，請稍後再試");
+        }
+      } catch (err) {
+        // 捕捉任何錯誤並顯示錯誤信息
+        alert("重新發送失敗，請稍後再試");
+      } finally {
+        loading.value = false; // 結束加載狀態
       }
-    );
-
-    // 檢查回應是否成功
-    if (response.status === 200) {
-      const { startTime, A5Digit, Result } = response.data;
-      
-      // 更新 localStorage 中的資料
-      localStorage.setItem(
-        "userData", 
-        JSON.stringify({
-          ...JSON.parse(localData), 
-          startTime, 
-          A5Digit,   
-          Result,    
-        })
-      );
-
-      // 提示用戶簡訊已重新發送
-      alert("簡訊已重新發送");
-      
-      // 開始倒計時
-      startCountdown();
-    } else {
-      alert("重新發送失敗，請稍後再試");
-    }
-  } catch (err) {
-    // 捕捉任何錯誤並顯示錯誤信息
-    alert("重新發送失敗，請稍後再試");
-  } finally {
-    loading.value = false; // 結束加載狀態
-  }
-}
+    };
 
     const addUser = async () => {
       try {
@@ -486,7 +495,7 @@ export default {
         // 日期轉換成民國格式
         let birthday = "";
         if (date.value) {
-          const birthDate = new Date(date.value); 
+          const birthDate = new Date(date.value);
           const rocYear = birthDate.getFullYear() - 1911; // 西元年轉民國年
           birthday = `${rocYear}/${
             birthDate.getMonth() + 1
@@ -496,16 +505,19 @@ export default {
         const response = await axios.post(
           "https://23700999.com:8081/HMA/API_AA5.jsp",
           {
-            MID: MID,
-            Token: Token,
-            MAID: MAID,
-            Mobile: Mobile,
+            MID,
+            Token,
+            MAID,
+            Mobile,
             Name: name.value,
             Height: height.value,
             Weight: weight.value,
             Sex: sex.value,
             Birthday: birthday,
             DSPR: DSPR.value || "",
+            City: city.value,
+            Zone: area.value,
+            Address: address.value,
           }
         );
 
@@ -519,7 +531,6 @@ export default {
       } finally {
       }
     };
-
 
     return {
       passwordVisible,
@@ -556,14 +567,14 @@ export default {
       sexSelect,
       isFormValid,
       date,
-      DSPR
+      DSPR,
+      city,
+      area,
+      address
     };
   },
 };
 </script>
-
-
-
 
 <style lang="scss" scoped>
 .register {
@@ -604,7 +615,6 @@ export default {
       padding: 1rem;
       margin-top: 2.25rem;
 
-   
       .phoneGroup,
       .passwordGroup,
       .passwordAgainGroup {
@@ -630,8 +640,6 @@ export default {
         color: #f00;
       }
     }
-   
-
 
     .verfifyWrap {
       padding: 1rem;
@@ -640,23 +648,21 @@ export default {
         display: flex;
         justify-content: space-between;
         align-items: center;
-      
+
         padding: 1rem;
         border-radius: 12px;
         background-color: #fff;
         width: 100%;
-            gap: 3.5%;
+        gap: 3.5%;
         .vertifyCode {
           background-color: #eee;
-       
+
           height: 3rem;
-        
+
           padding-left: 7%;
           border-radius: 0.5rem;
           border: none;
           cursor: pointer;
-      
-          
         }
       }
       .verificationCodeHintText {
@@ -669,7 +675,7 @@ export default {
         line-height: 22.652px;
       }
 
-      .reSendTextGroup{
+      .reSendTextGroup {
         text-align: center;
         .reSendText {
           outline: none;
@@ -679,17 +685,14 @@ export default {
           color: #222;
           font-weight: bold;
           text-decoration: underline;
-          transition: .15s all ease;
-          &:disabled{
+          transition: 0.15s all ease;
+          &:disabled {
             color: $raphael-gray-500;
-            text-decoration:none;
+            text-decoration: none;
           }
         }
       }
-      
     }
-
-
 
     input[type="text"],
     input[type="tel"],
@@ -717,7 +720,7 @@ export default {
       align-items: center;
       gap: 3px;
       margin-top: 1rem;
-      
+
       input {
         appearance: none;
         width: 1.5rem;
@@ -744,18 +747,17 @@ export default {
         }
       }
 
-      a{
+      a {
         text-decoration: none;
         color: #666;
         font-size: 1.125rem;
         letter-spacing: 0.09px;
         font-weight: 400;
-   
-       label{
-        cursor: pointer;
-       }
+
+        label {
+          cursor: pointer;
+        }
       }
-    
     }
 
     .vertificationBtn,
@@ -776,36 +778,37 @@ export default {
         background-color: $raphael-green-500;
       }
       &:disabled {
-        background-color: $raphael-gray-400; 
-        cursor: not-allowed; 
+        background-color: $raphael-gray-400;
+        cursor: not-allowed;
         opacity: 0.6;
       }
     }
 
     .bottomHintGroup {
-      display: grid;   
+      display: grid;
       gap: 1.5rem;
       margin-top: 60px;
-      .separate{
+      .separate {
         position: relative;
-        display: flex;    
+        display: flex;
         align-items: center;
         justify-content: center;
         color: $raphael-gray-300;
 
-        &::before,&::after{
-          content:"";
+        &::before,
+        &::after {
+          content: "";
           position: absolute;
           background: $raphael-gray-300;
           width: 45%;
           height: 1px;
         }
 
-        &::before{
+        &::before {
           left: 0;
         }
-        
-        &::after{
+
+        &::after {
           right: 0;
         }
       }
@@ -814,7 +817,7 @@ export default {
         justify-content: center;
         align-items: center;
         gap: 4px;
-        font-size:1.125rem;
+        font-size: 1.125rem;
         margin: 0 auto;
         width: 100%;
         text-align: center;
@@ -823,14 +826,14 @@ export default {
         border: 1px solid #1e1e1e;
         padding: 9px;
         color: #666;
-        transition: all .2s ease;
+        transition: all 0.2s ease;
 
         &:hover {
           color: $raphael-green-400;
           border: 1px solid $raphael-green-400;
         }
       }
-    }   
+    }
   }
 }
 </style>

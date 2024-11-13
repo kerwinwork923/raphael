@@ -5,7 +5,7 @@
       <div class="raphaelIconImgGroup">
         <img class="raphaelIcon" src="../assets/imgs/raphael.svg" alt="" />
       </div>
-      <h1>輸入基本資料</h1>
+      <h1>基本資料設定</h1>
       <UserInfoForm
         @update:name="name = $event"
         @update:height="height = $event"
@@ -13,6 +13,9 @@
         @update:sex="sex = $event"
         @update:date="date = $event"
         @update:DSPR="DSPR = $event"
+        @update:city="city = $event"
+        @update:area="area = $event"
+        @update:address="address = $event"
         @submit="addUser"
       />
     </div>
@@ -24,6 +27,8 @@ import Navbar from "../components/Navbar.vue";
 import UserInfoForm from "../components/UserInfoWrap.vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
+import { ref } from "vue";
+
 export default {
   components: { Navbar, UserInfoForm },
   setup() {
@@ -33,7 +38,11 @@ export default {
     const sex = ref("");
     const date = ref("");
     const DSPR = ref("");
+    const city = ref("");
+    const area = ref("");
+    const address = ref("");
     const router = useRouter();
+
     const addUser = async () => {
       try {
         const localData = localStorage.getItem("userData");
@@ -48,16 +57,17 @@ export default {
           !Mobile ||
           !name.value ||
           !height.value ||
-          !sex.value
+          !weight.value ||
+          !sex.value ||
+          !date.value
         ) {
           throw new Error("資料不完整");
         }
 
-        // 日期轉換成民國格式
         let birthday = "";
         if (date.value) {
           const birthDate = new Date(date.value);
-          const rocYear = birthDate.getFullYear() - 1911; // 西元年轉民國年
+          const rocYear = birthDate.getFullYear() - 1911;
           birthday = `${rocYear}/${
             birthDate.getMonth() + 1
           }/${birthDate.getDate()}`;
@@ -66,16 +76,19 @@ export default {
         const response = await axios.post(
           "https://23700999.com:8081/HMA/API_AA5.jsp",
           {
-            MID: MID,
-            Token: Token,
-            MAID: MAID,
-            Mobile: Mobile,
+            MID,
+            Token,
+            MAID,
+            Mobile,
             Name: name.value,
             Height: height.value,
             Weight: weight.value,
             Sex: sex.value,
             Birthday: birthday,
             DSPR: DSPR.value || "",
+            City: city.value,
+            Zone: area.value,
+            Address: address.value,
           }
         );
 
@@ -86,18 +99,14 @@ export default {
       } catch (err) {
         alert(err.message || "資料不完整");
         console.error(err);
-      } finally {
       }
     };
 
     const localData = localStorage.getItem("userData");
-    const { MID, Token, MAID, Mobile, Name } = localData
-      ? JSON.parse(localData)
-      : {};
+    const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
 
     if (!MID || !Token || !MAID || !Mobile) {
       router.push("/");
-      return;
     }
 
     return {
@@ -107,6 +116,9 @@ export default {
       sex,
       date,
       DSPR,
+      city,
+      area,
+      address,
       addUser,
     };
   },
@@ -127,7 +139,7 @@ h1 {
   width: 100%;
   min-height: 100vh;
   background: $raphael-gray-100;
-  
+
   .changeMemberGroup {
     width: 90%;
     margin: 0 auto;
