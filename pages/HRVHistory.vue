@@ -330,10 +330,8 @@ export default {
 
 .goToHRVBtn {
   width: 100%;
-
   border-radius: 8px;
   background: #74bc1f;
-
   font-size: 18px;
   color: #fff;
   border: none;
@@ -342,6 +340,7 @@ export default {
   font-weight: 400;
   line-height: 100%;
   letter-spacing: 0.09px;
-  margin-top: 60px;
+  margin: 24px 0 66px 0;
+
 }
 </style>
