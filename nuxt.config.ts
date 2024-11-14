@@ -24,7 +24,7 @@ export default defineNuxtConfig({
     "@vite-pwa/nuxt",
   ],
   pwa: {
-    registerType: "prompt", // 使用 prompt，避免自動更新
+    // registerType: "none", // 完全不註冊 Service Worker
     manifest: {
       name: "NeuroPlus神經調節家",
       id: "/",
