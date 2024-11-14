@@ -24,7 +24,7 @@ export default defineNuxtConfig({
     "@vite-pwa/nuxt",
   ],
   pwa: {
-    registerType: "autoUpdate",
+    registerType: "prompt", // 使用 prompt，避免自動更新
     manifest: {
       name: "NeuroPlus神經調節家",
       id: "/",
@@ -33,8 +33,8 @@ export default defineNuxtConfig({
       background_color: "#ffffff",
       display: "standalone",
       lang: "zh-TW",
-      start_url: "/",
-      scope: "/",
+      start_url: ".", // 更改為 "." 以靈活處理路徑
+      scope: ".", // 更改為 "." 以靈活處理路徑
       icons: [
         {
           src: "/icon-192x192.png",
@@ -57,7 +57,7 @@ export default defineNuxtConfig({
       ],
     },
     devOptions: {
-      enabled: true,
+      enabled: false, // 在開發環境中禁用 PWA 快取
     },
   },
   vite: {
