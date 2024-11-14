@@ -24,7 +24,7 @@ export default defineNuxtConfig({
     "@vite-pwa/nuxt",
   ],
   pwa: {
-    registerType: "autoUpdate", // 完全不註冊 Service Worker
+    registerType: undefined, 
     manifest: {
       name: "NeuroPlus神經調節家",
       id: "/",
