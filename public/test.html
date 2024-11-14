@@ -35,6 +35,10 @@
     button:hover {
       background-color: #3a9e6b;
     }
+    .error-message {
+      color: red;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
@@ -44,11 +48,13 @@
   <br>
   <button id="startButton">開啟鏡頭</button>
   <button id="stopButton" style="display:none;">停止鏡頭</button>
+  <div id="errorMessage" class="error-message" style="display:none;"></div>
 
   <script>
     const videoElement = document.getElementById('videoElement');
     const startButton = document.getElementById('startButton');
     const stopButton = document.getElementById('stopButton');
+    const errorMessage = document.getElementById('errorMessage');
     let mediaStream = null;
 
     // 開啟鏡頭
@@ -63,8 +69,18 @@
         // 隱藏開啟鏡頭按鈕，顯示停止鏡頭按鈕
         startButton.style.display = 'none';
         stopButton.style.display = 'inline-block';
+        errorMessage.style.display = 'none'; // 隱藏錯誤訊息
+
       } catch (error) {
         console.error('無法開啟鏡頭:', error);
+
+        // 顯示錯誤訊息
+        errorMessage.style.display = 'block';
+        errorMessage.innerText = '無法開啟鏡頭，請檢查您的設備和權限設置。';
+
+        // 隱藏按鈕
+        startButton.style.display = 'none';
+        stopButton.style.display = 'none';
       }
     });
 
