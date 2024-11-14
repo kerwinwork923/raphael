@@ -80,7 +80,7 @@
           <h4>2024/08/23</h4>
         </div>
       </div>
-      <img src="images/raphael/doctor.png" alt="" />
+      <img src="images/raphael/doctor_nocomment.png" class="doctorImg" alt="" />
     </div>
 
     <div class="scanInfo">
@@ -807,15 +807,17 @@
     width: 100%;
   }
 
-  .finishWrap .titleGroup {
+  .finishWrap>.titleGroup {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    place-self: baseline;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    padding: 0 1rem;
   }
 
-  .finishWrap .textGroup {
-    width: 60%;
+  .doctorImg {
+    height: 150px;
   }
 
   .finishWrap .textGroup .timeGroup {
@@ -839,10 +841,6 @@
     font-size: 14px;
     font-weight: 400;
     margin: 0;
-  }
-
-  .finishWrap img {
-    width: 40%;
   }
 
   .scanInfo {
@@ -941,6 +939,7 @@
   .scanInfo .bloodPressure .titleGroup {
     display: flex;
     justify-content: space-between;
+    width: 100%;
   }
 
   .scanInfo .Rhythm .titleGroup img,
@@ -986,6 +985,7 @@
   .scanInfo .pressure .titleGroup {
     display: flex;
     justify-content: space-between;
+    width: 100%;
   }
 
   .scanInfo .BO .titleGroup img,
@@ -1046,7 +1046,6 @@
     background-color: #fff;
     border-radius: 12px;
     margin: 12px;
-    margin-bottom: 66px;
     padding: 12px;
   }
 
