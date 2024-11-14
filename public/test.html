@@ -1,21 +1,86 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <!-- 更新為正確的 manifest 路徑 -->
-    <link rel="manifest" href="/manifest.json"> 
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>開啟鏡頭測試</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f0f0;
+    }
+    h1 {
+      margin-top: 20px;
+    }
+    video {
+      width: 100%;
+      max-width: 600px;
+      height: auto;
+      border: 1px solid #ccc;
+      margin-top: 20px;
+    }
+    button {
+      background-color: #4DBA87;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #3a9e6b;
+    }
+  </style>
 </head>
 <body>
-    ads
+
+  <h1>開啟鏡頭測試</h1>
+  <video id="videoElement" autoplay></video>
+  <br>
+  <button id="startButton">開啟鏡頭</button>
+  <button id="stopButton" style="display:none;">停止鏡頭</button>
+
+  <script>
+    const videoElement = document.getElementById('videoElement');
+    const startButton = document.getElementById('startButton');
+    const stopButton = document.getElementById('stopButton');
+    let mediaStream = null;
+
+    // 開啟鏡頭
+    startButton.addEventListener('click', async () => {
+      try {
+        // 獲取用戶的媒體設備（鏡頭）
+        mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        
+        // 將獲取到的流設置到 video 元素
+        videoElement.srcObject = mediaStream;
+
+        // 隱藏開啟鏡頭按鈕，顯示停止鏡頭按鈕
+        startButton.style.display = 'none';
+        stopButton.style.display = 'inline-block';
+      } catch (error) {
+        console.error('無法開啟鏡頭:', error);
+      }
+    });
+
+    // 停止鏡頭
+    stopButton.addEventListener('click', () => {
+      if (mediaStream) {
+        // 停止流中的所有媒體
+        mediaStream.getTracks().forEach(track => track.stop());
+        videoElement.srcObject = null;
+
+        // 顯示開啟鏡頭按鈕，隱藏停止鏡頭按鈕
+        startButton.style.display = 'inline-block';
+        stopButton.style.display = 'none';
+      }
+    });
+  </script>
+
 </body>
-<script>
-    const manifestLink = document.querySelector('link[rel="manifest"]');
-    if (manifestLink) {
-        console.log('Manifest URL:', manifestLink.href);
-    } else {
-        console.log('Manifest link not found.');
-    }
-</script>
 </html>

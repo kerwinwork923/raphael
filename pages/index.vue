@@ -48,6 +48,13 @@
             <h5>下載APP</h5>
           </button>
         </div>
+        <br>   <br>   <br>
+        <div class="testBtn" style="display: flex; justify-content: space-between;">
+       
+          <a href="/test">測試鏡頭</a>
+
+          <a href="/test.html">測試鏡頭2</a>
+        </div>
       </div>
     </div>
   </div>
