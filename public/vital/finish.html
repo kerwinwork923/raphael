@@ -1,12 +1,37 @@
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NeuroPlus 自律神經HRV檢測</title>
-    <!-- <link href="css/my.css" rel="stylesheet" /> -->
-    <!-- <link href="css/bootstrap.min.css" rel="stylesheet" /> -->
 
-    <style>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NeuroPlus 自律神經HRV檢測</title>
+  <!-- <link href="css/my.css" rel="stylesheet" /> -->
+  <!-- <link href="css/bootstrap.min.css" rel="stylesheet" /> -->
+
+  <style>
+    .a-ellipsis {
+      text-overflow: ellipsis;
+      padding-right: 0px;
+      padding-left: 0px;
+      width: 200px;
+      max-width: 200px;
+      display: block;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .auto_table {
+      width: 100%;
+      margin-bottom: 0px;
+    }
+
+    @media only screen and (min-width: 768px) {
+
+      /* For desktop: */
+      .auto_table {
+        width: 210px;
+        margin-bottom: 0px;
+      }
+
       .a-ellipsis {
         text-overflow: ellipsis;
         padding-right: 0px;
@@ -17,240 +42,184 @@
         overflow: hidden;
         white-space: nowrap;
       }
+    }
+  </style>
+  <!-- <script src="js/thirdparty/charts/dist/chart.min.js"></script> -->
+  <script src="js/vital_result_printer.js"></script>
+  <!-- <script src="js/spower_chart.js"></script> -->
+</head>
 
-      .auto_table {
-        width: 100%;
-        margin-bottom: 0px;
-      }
-
-      @media only screen and (min-width: 768px) {
-        /* For desktop: */
-        .auto_table {
-          width: 210px;
-          margin-bottom: 0px;
-        }
-
-        .a-ellipsis {
-          text-overflow: ellipsis;
-          padding-right: 0px;
-          padding-left: 0px;
-          width: 200px;
-          max-width: 200px;
-          display: block;
-          overflow: hidden;
-          white-space: nowrap;
-        }
-      }
-    </style>
-    <!-- <script src="js/thirdparty/charts/dist/chart.min.js"></script> -->
-    <script src="js/vital_result_printer.js"></script>
-    <!-- <script src="js/spower_chart.js"></script> -->
-  </head>
-
-  <body>
-    <div id="raphaelLoading" class="raphaelLoading" 　style="display: none;">
-      <img src="images/raphael/spinner.gif" alt="Loading..." />
-    </div>
-    <div class="finishWrap">
-      <div class="raphaelNavbar">
-        <div class="logoGroup">
-          <a to="/user">
-            <img src="images/raphael/neuro-plus.svg" alt="" />
-          </a>
-        </div>
-        <div class="optionGroup">
-          <!-- <img class="cartIcon" src="images/raphael/cart.svg" alt="" />
+<body>
+  <div id="raphaelLoading" class="raphaelLoading" 　style="display: none;">
+    <img src="images/raphael/spinner.gif" alt="Loading..." />
+  </div>
+  <div class="finishWrap">
+    <div class="raphaelNavbar">
+      <div class="logoGroup">
+        <a to="/user">
+          <img src="images/raphael/neuro-plus.svg" alt="" />
+        </a>
+      </div>
+      <div class="optionGroup">
+        <!-- <img class="cartIcon" src="images/raphael/cart.svg" alt="" />
         <img class="alertIcon" src="images/raphael/alert.svg" alt="" />
         <img class="settingIcon" src="images/raphael/setting.svg" alt="" /> -->
+      </div>
+    </div>
+    <div class="titleGroup">
+      <div class="textGroup">
+        <h3 class="nameText">您好</h3>
+        <div class="timeGroup">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path
+              d="M7 13C10.3137 13 13 10.3137 13 7C13 3.68629 10.3137 1 7 1C3.68629 1 1 3.68629 1 7C1 10.3137 3.68629 13 7 13Z"
+              stroke="#666666" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M6.33325 4.33334V7.66668H9.66659" stroke="#666666" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+          <h4>2024/08/23</h4>
         </div>
       </div>
-      <div class="titleGroup">
-        <div class="textGroup">
-          <h3 class="nameText">您好</h3>
-          <div class="timeGroup">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="14"
-              height="14"
-              viewBox="0 0 14 14"
-              fill="none"
-            >
-              <path
-                d="M7 13C10.3137 13 13 10.3137 13 7C13 3.68629 10.3137 1 7 1C3.68629 1 1 3.68629 1 7C1 10.3137 3.68629 13 7 13Z"
-                stroke="#666666"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-              <path
-                d="M6.33325 4.33334V7.66668H9.66659"
-                stroke="#666666"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-            <h4>2024/08/23</h4>
-          </div>
+      <img src="images/raphael/doctor.png" alt="" />
+    </div>
+
+    <div class="scanInfo">
+      <div class="row">
+        <div class="years">
+          <h3>生理年齡</h3>
+          <div class="value" id="f_v_bioage"></div>
+          <div class="info">years old</div>
+          <img src="images/raphael/HRVFace.svg" class="HRVFace" alt="" />
         </div>
-        <img src="images/raphael/doctor.png" alt="" />
+        <div class="HRV">
+          <h3>心律變異性</h3>
+          <div id="f_v_hrv" class="value"></div>
+          <div class="info">ms</div>
+        </div>
       </div>
 
-      <div class="scanInfo">
-        <div class="row">
-          <div class="years">
-            <h3>生理年齡</h3>
-            <div class="value" id="f_v_bioage"></div>
-            <div class="info">years old</div>
-            <img src="images/raphael/HRVFace.svg" class="HRVFace" alt="" />
+      <div class="row">
+        <div class="Rhythm">
+          <div class="titleGroup">
+            <h3>心率</h3>
+            <img src="images/raphael/heartBeat.svg" alt="" />
           </div>
-          <div class="HRV">
-            <h3>心律變異性</h3>
-            <div id="f_v_hrv" class="value"></div>
-            <div class="info">ms</div>
+          <div id="f_v_hr" class="value"></div>
+          <div class="info">bpm</div>
+          <img class="bgImg" src="images/raphael/greenChart.svg" alt="" />
+        </div>
+        <div class="bloodPressure">
+          <div class="titleGroup">
+            <h3>血壓</h3>
+            <img src="images/raphael/bloodPressure.svg" alt="" />
+          </div>
+          <div class="value">
+            <span id="f_v_sbp"></span>/<span id="f_v_dbp"></span>
+          </div>
+          <div class="info">mmHg</div>
+          <img class="bgImg" src="images/raphael/purpleChart.svg" alt="" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="BO">
+          <div class="titleGroup">
+            <h3>血氧</h3>
+            <img src="images/raphael/spo2.svg" alt="" />
+          </div>
+          <div id="f_v_spo2" class="value"></div>
+          <div class="info">SpO2%</div>
+          <img class="bgImg" src="images/raphael/blueChart.svg" alt="" />
+        </div>
+        <div class="breathe">
+          <div class="titleGroup">
+            <h3>呼吸</h3>
+            <img src="images/raphael/spo2.svg" alt="" />
+          </div>
+          <div id="f_v_rr" class="value"></div>
+          <div class="info">bpm</div>
+          <img class="bgImg" src="images/raphael/brownChart.svg" alt="" />
+        </div>
+        <div class="pressure">
+          <div class="titleGroup">
+            <h3>壓力</h3>
+            <img src="images/raphael/pressure.svg" alt="" />
+          </div>
+          <div id="f_v_si" class="value"></div>
+          <div class="info">low</div>
+          <img class="bgImg" src="images/raphael/redChart.svg" alt="" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="boxGroup">
+          <div class="titleGroup">
+            <h3>交感/副交感比例</h3>
+          </div>
+          <div class="boxText">
+            <div class="text-container-PLF">
+              <h4>交感神經</h4>
+              <div class="value"></div>
+            </div>
+            <div class="text-container-PHF">
+              <h4>副交感神經</h4>
+              <div class="value"></div>
+            </div>
+          </div>
+          <div class="box">
+            <div class="circle-PLF"></div>
+            <div class="circle-PHF"></div>
           </div>
         </div>
-
-        <div class="row">
-          <div class="Rhythm">
-            <div class="titleGroup">
-              <h3>心率</h3>
-              <img src="images/raphael/heartBeat.svg" alt="" />
-            </div>
-            <div id="f_v_hr" class="value"></div>
-            <div class="info">bpm</div>
-            <img class="bgImg" src="images/raphael/greenChart.svg" alt="" />
-          </div>
-          <div class="bloodPressure">
-            <div class="titleGroup">
-              <h3>血壓</h3>
-              <img src="images/raphael/bloodPressure.svg" alt="" />
-            </div>
-            <div class="value">
-              <span id="f_v_sbp"></span>/<span id="f_v_dbp"></span>
-            </div>
-            <div class="info">mmHg</div>
-            <img class="bgImg" src="images/raphael/purpleChart.svg" alt="" />
-          </div>
-        </div>
-        <div class="row">
-          <div class="BO">
-            <div class="titleGroup">
-              <h3>血氧</h3>
-              <img src="images/raphael/spo2.svg" alt="" />
-            </div>
-            <div id="f_v_spo2" class="value"></div>
-            <div class="info">SpO2%</div>
-            <img class="bgImg" src="images/raphael/blueChart.svg" alt="" />
-          </div>
-          <div class="breathe">
-            <div class="titleGroup">
-              <h3>呼吸</h3>
-              <img src="images/raphael/spo2.svg" alt="" />
-            </div>
-            <div id="f_v_rr" class="value"></div>
-            <div class="info">bpm</div>
-            <img class="bgImg" src="images/raphael/brownChart.svg" alt="" />
-          </div>
-          <div class="pressure">
-            <div class="titleGroup">
-              <h3>壓力</h3>
-              <img src="images/raphael/pressure.svg" alt="" />
-            </div>
-            <div id="f_v_si" class="value"></div>
-            <div class="info">low</div>
-            <img class="bgImg" src="images/raphael/redChart.svg" alt="" />
-          </div>
-        </div>
-        <div class="row">
-          <div class="boxGroup">
-            <div class="titleGroup">
-              <h3>交感/副交感比例</h3>
-            </div>
-            <div class="boxText">
-              <div class="text-container-PLF">
-                <h4>交感神經</h4>
-                <div class="value"></div>
-              </div>
-              <div class="text-container-PHF">
-                <h4>副交感神經</h4>
-                <div class="value"></div>
-              </div>
-            </div>
-            <div class="box">
-              <div class="circle-PLF"></div>
-              <div class="circle-PHF"></div>
-            </div>
-          </div>
-          <svg style="display: none">
-            <defs>
-              <filter id="blob">
-                <feGaussianBlur
-                  in="SourceGraphic"
-                  stdDeviation="10"
-                  result="blur"
-                ></feGaussianBlur>
-                <feColorMatrix
-                  in="blur"
-                  mode="matrix"
-                  values="
+        <svg style="display: none">
+          <defs>
+            <filter id="blob">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"></feGaussianBlur>
+              <feColorMatrix in="blur" mode="matrix" values="
                      1 0 0 0 0
                      0 1 0 0 0
                      0 0 1 0 0
-                     0 0 0 20 -10"
-                ></feColorMatrix>
-              </filter>
-            </defs>
-          </svg>
-        </div>
+                     0 0 0 20 -10"></feColorMatrix>
+            </filter>
+          </defs>
+        </svg>
+      </div>
 
-        <div class="row">
-          <div class="progressItem Health">
-            <h3>健康力</h3>
-            <img id="f_v_health" src="images/raphael/progress1.png" alt="" />
-          </div>
-          <div class="progressItem Sleep">
-            <h3>睡眠力</h3>
-            <img id="f_v_sleep" src="images/raphael/progress2.png" alt="" />
-          </div>
-          <div class="progressItem Metabolic">
-            <h3>代謝力</h3>
-            <img
-              id="f_v_metabolism"
-              src="images/raphael/progress3.png"
-              alt=""
-            />
-          </div>
+      <div class="row">
+        <div class="progressItem Health">
+          <h3>健康力</h3>
+          <img id="f_v_health" src="images/raphael/progress1.png" alt="" />
         </div>
-
-        <div class="row">
-          <div class="progressItem Balance">
-            <h3>平衡力</h3>
-            <img
-              id="f_v_equilibrium"
-              src="images/raphael/progress4.png"
-              alt=""
-            />
-          </div>
-          <div class="progressItem Active">
-            <h3>活動力</h3>
-            <img id="f_v_activity" src="images/raphael/progress5.png" alt="" />
-          </div>
-          <div class="progressItem Relax">
-            <h3>放鬆力</h3>
-            <img
-              id="f_v_relaxation"
-              src="images/raphael/progress1.png"
-              alt=""
-            />
-          </div>
+        <div class="progressItem Sleep">
+          <h3>睡眠力</h3>
+          <img id="f_v_sleep" src="images/raphael/progress2.png" alt="" />
+        </div>
+        <div class="progressItem Metabolic">
+          <h3>代謝力</h3>
+          <img id="f_v_metabolism" src="images/raphael/progress3.png" alt="" />
         </div>
       </div>
 
-      <div class="resultTextGroup">
-        <h3>根據您的神經系統數據分析</h3>
-        <p></p>
+      <div class="row">
+        <div class="progressItem Balance">
+          <h3>平衡力</h3>
+          <img id="f_v_equilibrium" src="images/raphael/progress4.png" alt="" />
+        </div>
+        <div class="progressItem Active">
+          <h3>活動力</h3>
+          <img id="f_v_activity" src="images/raphael/progress5.png" alt="" />
+        </div>
+        <div class="progressItem Relax">
+          <h3>放鬆力</h3>
+          <img id="f_v_relaxation" src="images/raphael/progress1.png" alt="" />
+        </div>
       </div>
+    </div>
 
-      <!-- <div class="detectionWrap">
+    <div class="resultTextGroup">
+      <h3>根據您的神經系統數據分析</h3>
+      <p></p>
+    </div>
+
+    <!-- <div class="detectionWrap">
         <div
           class="detection"
           v-for="(history, index) in store.History"
@@ -288,10 +257,10 @@
           </div>
         </div>
       </div> -->
-      <div class="detectionWrap">
-        <h4 class="textResultText">檢測紀錄</h4>
-        <div class="detectionContainer"></div>
-        <!-- <div class="detection">
+    <div class="detectionWrap">
+      <h4 class="textResultText">檢測紀錄</h4>
+      <div class="detectionContainer"></div>
+      <!-- <div class="detection">
           <div class="cGroup">
             <img class="img" src="images/detectTime.svg" alt="" />
           </div>
@@ -322,57 +291,49 @@
             </div>
           </div>
         </div> -->
-      </div>
+    </div>
 
-      <div class="subBtnGroup">
-        <a href="/user">
-          <button class="backToUserBtn" class="">會員中心</button>
-        </a>
+    <div class="subBtnGroup">
+      <a href="/user">
+        <button class="backToUserBtn" class="">會員中心</button>
+      </a>
 
-        <a href="/vital/scan.html">
-          <button class="backToDetect">重新檢測</button>
-        </a>
-      </div>
+      <a href="/vital/scan.html">
+        <button class="backToDetect">重新檢測</button>
+      </a>
+    </div>
 
-      <!-- 暫放 -->
-      <!-- <div class="col-5 px-0 m-auto hide">
+    <!-- 暫放 -->
+    <!-- <div class="col-5 px-0 m-auto hide">
         <p id="f_v_bioage" class="text-center text-dark fs-6 m-0 hide">--</p>
       </div> -->
 
-      <!-- <div class="col-5 px-0 m-auto hide">
+    <!-- <div class="col-5 px-0 m-auto hide">
         <p id="f_v_ba4" class="text-center text-dark fs-6 m-0">--</p>
       </div> -->
 
-      <div class="col-5 px-0 m-auto hide">
-        <p id="f_v_ans_index_sns" class="text-center text-dark fs-6 m-0">--</p>
-      </div>
-
-      <p id="f_v_ans_index_pns" class="text-center text-dark fs-6 m-0 hide">
-        --
-      </p>
-
-      <canvas
-        id="f_spower_canvas"
-        class="hide"
-        width="100%"
-        height="100%"
-      ></canvas>
-
-      <button
-        type="button"
-        class="btn btn-secondary btn-lg hide"
-        id="f_eid_btn_home"
-      >
-        回首頁
-      </button>
-
-      <button type="button" class="btn btn-secondary btn-lg hide" id="f_back">
-        回首頁
-      </button>
+    <div class="col-5 px-0 m-auto hide">
+      <p id="f_v_ans_index_sns" class="text-center text-dark fs-6 m-0">--</p>
     </div>
-    <script src="js/tools.js"></script>
-    <script src="js/finish.js?v=1.0.2"></script>
-  </body>
+
+    <p id="f_v_ans_index_pns" class="text-center text-dark fs-6 m-0 hide">
+      --
+    </p>
+
+    <canvas id="f_spower_canvas" class="hide" width="100%" height="100%"></canvas>
+
+    <button type="button" class="btn btn-secondary btn-lg hide" id="f_eid_btn_home">
+      回首頁
+    </button>
+
+    <button type="button" class="btn btn-secondary btn-lg hide" id="f_back">
+      回首頁
+    </button>
+  </div>
+  <script src="js/tools.js"></script>
+  <script src="js/finish.js?v=1.0.2"></script>
+</body>
+
 </html>
 
 <script>
@@ -638,7 +599,7 @@
         let PHFBoxSize = boxSize + PHF;
         console.log(roundedPLF, PHF, PLFBoxSize, PHFBoxSize);
 
-        document.querySelector(".text-container-PLF").style.width = `${PLFBoxSize}px`;  
+        document.querySelector(".text-container-PLF").style.width = `${PLFBoxSize}px`;
         document.querySelector(".text-container-PHF").style.width = `${PHFBoxSize}px`;
         document.querySelector(".circle-PLF").style.width = `${PLFBoxSize}px`;
         document.querySelector(".circle-PLF").style.height = `${PLFBoxSize}px`;
@@ -809,7 +770,6 @@
     background-size: cover;
     min-height: 100vh;
     width: 100%;
-    padding: 0 1rem;
   }
 
   .raphaelNavbar {
@@ -890,6 +850,7 @@
     margin-top: 10px;
     flex-wrap: wrap;
     justify-content: space-between;
+    padding: 0 1rem;
   }
 
   .scanInfo h3 {
@@ -912,11 +873,9 @@
     width: 55%;
     padding: 6px;
     border-radius: 8px;
-    background: linear-gradient(
-      180deg,
-      #74bc1f 0%,
-      rgba(116, 188, 31, 0.35) 100%
-    );
+    background: linear-gradient(180deg,
+        #74bc1f 0%,
+        rgba(116, 188, 31, 0.35) 100%);
     padding: 12px;
     align-items: center;
     color: #fff;
@@ -927,7 +886,7 @@
   .scanInfo .years .value {
     font-size: 48px;
     font-weight: bold;
-    padding: 0.25rem 0;
+    margin-top: 0.25rem;
   }
 
   .scanInfo .years .info {
@@ -938,17 +897,15 @@
 
   .scanInfo .years .HRVFace {
     position: absolute;
-    right: -8%;
+    right: -12%;
     top: 0;
-    width: 60%;
+    width: 74%;
   }
 
   .scanInfo .HRV {
-    background: linear-gradient(
-      180deg,
-      #dfecc5 0%,
-      rgba(223, 236, 197, 0.35) 100%
-    );
+    background: linear-gradient(180deg,
+        #dfecc5 0%,
+        rgba(223, 236, 197, 0.35) 100%);
     padding: 12px;
     border-radius: 8px;
     width: 45%;
@@ -958,7 +915,7 @@
     color: #74bc1f;
     font-size: 48px;
     font-weight: bold;
-    padding: 0.25rem 0;
+    margin-top: 0.25rem;
   }
 
   .scanInfo .HRV .info {
@@ -1088,6 +1045,8 @@
   .resultTextGroup {
     background-color: #fff;
     border-radius: 12px;
+    margin: 12px;
+    margin-bottom: 66px;
     padding: 12px;
   }
 
@@ -1156,6 +1115,7 @@
     color: #1e1e1e;
     margin: 1rem 0;
   }
+
   .detectionWrap .detection a:hover {
     background-color: #f4f4f4;
   }
@@ -1208,9 +1168,11 @@
     padding: .75rem;
     border-radius: .5rem;
   }
+
   .boxGroup h3 {
     color: #1e1e1e;
   }
+
   .box {
     position: relative;
     display: flex;
@@ -1222,18 +1184,21 @@
     width: 100%;
     height: 200px;
   }
+
   .circle-PHF,
   .circle-PLF {
+    position: relative;
     border-radius: 50%;
     width: 100px;
     height: 100px;
-    opacity: 0;
     filter: drop-shadow(0px 3px 5px #fff) brightness(1.06);
   }
+
   .boxGroup {
     position: relative;
     height: 100%;
   }
+
   .boxText {
     display: flex;
     align-items: center;
@@ -1244,70 +1209,81 @@
     height: 200px;
     z-index: 2;
   }
+
   .text-container-PLF {
     text-align: center;
     color: #fff;
-    opacity: 1;
     animation: 1.5s moveRight forwards ease-out;
   }
+
   .text-container-PHF {
     text-align: center;
     color: #fff;
-    opacity: 1;
     animation: 1.75s moveLeft forwards ease-out;
   }
+
   .boxText h4 {
     margin: 0;
   }
+
   .circle-PLF {
     background-color: rgba(236, 79, 79, 0.75);
     animation: 1.5s moveRight forwards ease-out;
-    opacity: 1;
   }
+
   .circle-PHF {
     background-color: rgba(31, 188, 179, 0.75);
-    opacity: 1;
     animation: 1.75s moveLeft forwards ease-out;
   }
 
   .text-container-PLF .value,
-    .text-container-PHF .value {
-      font-size: 24px;
-      font-style: normal;
-      font-weight: 700;
-      letter-spacing: 0.12px;
-    }
+  .text-container-PHF .value {
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: 0.12px;
+  }
 
   @keyframes moveLeft {
     0% {
-      opacity: 0;
+      left: -32px;
       transform: scale(0.7);
     }
+
     50% {
+      left: -16px;
       transform: scale(1.1);
     }
+
     70% {
+      left: -24px;
       transform: scale(0.9);
     }
+
     100% {
-      opacity: 1;
+      left: 0;
       transform: scale(1);
     }
   }
 
   @keyframes moveRight {
     0% {
-      opacity: 0;
+      left: 32px;
       transform: scale(0.7);
     }
+
     50% {
+      left: 16px;
       transform: scale(1.1);
     }
+
     70% {
-      transform:  scale(0.9);
+      left: 24px;
+      transform: scale(0.9);
     }
+
     100% {
-      opacity: 1;
+      left: 0;
       transform: scale(1);
     }
   }
