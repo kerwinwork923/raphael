@@ -14,7 +14,7 @@
 
   <div class="finishWrap">
     <div class="detailHeader">
-      <img src="../vital/images/raphael/backArrow.png" class="backIcon" />
+      <img src="../vital/images/raphael/backArrow.svg" class="backIcon" />
 
       <h5>2024/08/23</h5>
     </div>
@@ -462,26 +462,23 @@
   }
 
   .detailHeader {
-    position: absolute;
-    top: 20px;
-    width: 100%;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    margin: 0 1rem;
+    padding-top: 24px;
   }
 
   .detailHeader .backIcon {
     position: absolute;
-    left: 1%;
-    width: 14px;
+    left: 0;
     cursor: pointer;
   }
 
   .detailHeader h5 {
-    position: absolute;
-    left: 46%;
-    transform: translateX(-50%);
     font-size: 1.5rem;
     font-weight: 400;
     color: #1e1e1e;
-    margin: 0;
   }
 
   .finishWrap {
@@ -921,17 +918,17 @@
 
   @keyframes moveLeft {
     0% {
-      left: -32px;
+      left: -50px;
       transform: scale(0.7);
     }
 
     50% {
-      left: -16px;
+      left: -25px;
       transform: scale(1.1);
     }
 
     70% {
-      left: -24px;
+      left: -36px;
       transform: scale(0.9);
     }
 
@@ -943,17 +940,17 @@
 
   @keyframes moveRight {
     0% {
-      left: 32px;
+      left: 50px;
       transform: scale(0.7);
     }
 
     50% {
-      left: 16px;
+      left: 25px;
       transform: scale(1.1);
     }
 
     70% {
-      left: 24px;
+      left: 36px;
       transform: scale(0.9);
     }
 
