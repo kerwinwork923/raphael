@@ -9,15 +9,27 @@
       <div class="loginWrap">
         <div class="loginBox">
           <div class="phoneGroup">
-            <input type="tel" v-model="mobile" placeholder="請輸入您的手機號碼" />
+            <input
+              type="tel"
+              v-model="mobile"
+              placeholder="請輸入您的手機號碼"
+            />
             <img class="icon1" src="../assets/imgs/phoneGreen.svg" alt="" />
           </div>
           <div class="passwordGroup">
-            <input :type="passwordVisible ? 'text' : 'password'" v-model="password" placeholder="請輸入密碼"
-              @input="validatePassword" />
+            <input
+              :type="passwordVisible ? 'text' : 'password'"
+              v-model="password"
+              placeholder="請輸入密碼"
+              @input="validatePassword"
+            />
             <img class="icon1" src="../assets/imgs/passwordGreen.svg" alt="" />
-            <img class="icon2" :src="passwordVisible ? eyesOpenGreen : eyesCloseGreen" @click="togglePasswordVisibility"
-              alt="" />
+            <img
+              class="icon2"
+              :src="passwordVisible ? eyesOpenGreen : eyesCloseGreen"
+              @click="togglePasswordVisibility"
+              alt=""
+            />
           </div>
         </div>
         <!-- <div class="privacyGroup">
@@ -28,7 +40,11 @@
         
         </div> -->
 
-        <button class="loginBtn" @click="login" :disabled="!mobile || !password">
+        <button
+          class="loginBtn"
+          @click="login"
+          :disabled="!mobile || !password"
+        >
           登入
         </button>
         <div class="forgetPasswordGroup">
@@ -48,13 +64,11 @@
             <h5>下載APP</h5>
           </button>
         </div>
-        <br>   <br>   <br>
+        <!-- <br>   <br>   <br>
         <div class="testBtn" style="display: flex; justify-content: space-between;">
-       
           <a href="/test">測試鏡頭</a>
-
           <a href="/test.html">測試鏡頭2</a>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
@@ -232,32 +246,33 @@
     }
 
     .bottomHintGroup {
-      display: grid;   
+      display: grid;
       grid-template-columns: repeat(2, 1fr);
       grid-template-rows: repeat(2, 1fr);
       gap: 1.5rem;
       margin-top: 60px;
-      .separate{
+      .separate {
         position: relative;
-        display: flex;    
+        display: flex;
         align-items: center;
         justify-content: center;
         color: $raphael-gray-300;
         grid-column: 1 / 3;
 
-        &::before,&::after{
-          content:"";
+        &::before,
+        &::after {
+          content: "";
           position: absolute;
           background: $raphael-gray-300;
           width: 45%;
           height: 1px;
         }
 
-        &::before{
+        &::before {
           left: 0;
         }
-        
-        &::after{
+
+        &::after {
           right: 0;
         }
       }
@@ -274,7 +289,7 @@
         border: 1px solid #1e1e1e;
         padding: 9px;
         cursor: pointer;
-        transition: all .2s ease;
+        transition: all 0.2s ease;
 
         &:hover {
           color: $raphael-green-400;
@@ -296,7 +311,7 @@
         border: 1px solid #1e1e1e;
         padding: 9px;
         color: #666;
-        transition: all .2s ease;
+        transition: all 0.2s ease;
 
         &:hover {
           color: $raphael-green-400;
@@ -315,7 +330,7 @@ import { useRouter } from "vue-router";
 import RaphaelLoading from "../components/RaphaelLoading";
 import eyesCloseGreen from "../assets/imgs/eyesCloseGreen.svg";
 import eyesOpenGreen from "../assets/imgs/eyesOpenGreen.svg";
-import { requestPermission, messagingToken } from '../fn/firebaseMessaging'; //firebase
+import { requestPermission, messagingToken } from "../fn/firebaseMessaging"; //firebase
 
 export default {
   setup() {
@@ -326,7 +341,6 @@ export default {
     const passwordVisible = ref(false);
     const router = useRouter();
     const localMessagingToken = ref(""); // firebase 儲存取得的推播 token
-
 
     const isIOS =
       /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -357,7 +371,7 @@ export default {
         ) {
           console.log("登入成功:", response.data);
           localStorage.setItem("userData", JSON.stringify(response.data));
-          
+
           // 取得firebase推播 token
           await requestPermission();
           localMessagingToken.value = messagingToken.value;
@@ -365,8 +379,8 @@ export default {
           console.log("取得的推播 Token:", localMessagingToken.value);
           console.log("取得的MAID:", response.data.MAID.trim());
 
-          savePushKey(response.data.MAID.trim(),messagingToken.value)
-          
+          savePushKey(response.data.MAID.trim(), messagingToken.value);
+
           router.push({ name: "user" });
         } else {
           alert(`登入失敗 : ${response.data.Result}`);
@@ -383,19 +397,19 @@ export default {
         const response = await axios.post(
           "https://23700999.com:8081/HMA/API_PushKey.jsp",
           {
-            MAID:loadMAID,
-            PushKey:loadPushkey
+            MAID: loadMAID,
+            PushKey: loadPushkey,
           }
         );
 
-        if (response.status === 200 ) {
+        if (response.status === 200) {
           console.log("存儲Pushkey成功:", response.data);
         } else {
           alert(`存儲Pushkey失敗 : ${response.data.Result}`);
         }
       } catch (err) {
         alert("存儲Pushkey失敗");
-      } 
+      }
     };
 
     const installPWA = async () => {
