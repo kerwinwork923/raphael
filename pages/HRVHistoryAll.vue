@@ -350,7 +350,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .HRVHistoryAll {
   background-color: $raphael-gray-100;
   min-height: 100vh;
@@ -381,7 +381,7 @@ export default {
 .detectWrap {
   background-color: #fff;
   height: 70vh;
-  margin-top: 0.75rem;
+  margin-top: 1.5rem;
   border-radius: 12px;
   
   .detectSelectGroup {
