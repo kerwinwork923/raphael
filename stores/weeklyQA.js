@@ -316,6 +316,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
             );
             this.theLatestDataPreData = response3.data;
             await this.checkTestDate();
+            await this.API_API_ANSSecond();
           }
           //只有一個紀錄theLatestData
           else if (response1.data.History.length > 0) {

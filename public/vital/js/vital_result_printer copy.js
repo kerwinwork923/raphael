@@ -12,6 +12,7 @@ class VitalResultPrinter {
     this._bioage_element = null;
     this._ba2_element = null;
     this._ba4_element = null;
+    this._syn_element = null;
     this._sbp_element = null;
     this._dbp_element = null;
     this._rr_element = null;
@@ -33,6 +34,7 @@ class VitalResultPrinter {
     this._last_bioage = -1;
     this._last_ba2 = -1;
     this._last_ba4 = -1;
+    this._last_syn = -1;
     this._last_sbp = -1;
     this._last_dbp = -1;
     this._last_rr = -1;
@@ -50,7 +52,7 @@ class VitalResultPrinter {
     this._last_cholesterol_range = "";
   }
 
-  setDefaultElement({ hr_id, hrv_id, sbp_id, dbp_id, rr_id, spo2_id, si_id, bioage_id,ba2_id,ba4_id }) {
+  setDefaultElement({ hr_id, hrv_id, sbp_id, dbp_id, rr_id, spo2_id, si_id, bioage_id,ba2_id,ba4_id, syn_id }) {
     if (typeof hr_id === "string") {
       this._hr_element = document.getElementById(hr_id);
     }
@@ -82,11 +84,15 @@ class VitalResultPrinter {
     if (typeof ba4_id === "string") {
       this._ba4_element = document.getElementById(ba4_id);
     }
+    if (typeof syn_id === "string") {
+      this._syn_element = document.getElementById(syn_id);
+    }
     this._last_hr = -1;
     this._last_hrv = -1;
     this._last_bioage = -1;
     this._last_ba2 = -1;
     this._last_ba4 = -1;
+    this._last_syn = -1;
     this._last_sbp = -1;
     this._last_dbp = -1;
     this._last_rr = -1;
@@ -164,6 +170,7 @@ class VitalResultPrinter {
     this._setValue(this._bioage_element, default_value);
     this._setValue(this._ba2_element, default_value);
     this._setValue(this._ba4_element, default_value);
+    this._setValue(this._syn_element, default_value);
     this._setValue(this._sbp_element, default_value);
     this._setValue(this._dbp_element, "/" + default_value);
     this._setValue(this._rr_element, default_value);
@@ -185,6 +192,7 @@ class VitalResultPrinter {
     this._last_bioage = -1;
     this._last_ba2 = -1;
     this._last_ba4 = -1;
+    this._last_syn = -1;
     this._last_sbp = -1;
     this._last_dbp = -1;
     this._last_rr = -1;
@@ -202,15 +210,13 @@ class VitalResultPrinter {
     this._last_cholesterol_range = "";
   }
 
-  update({ hr, hrv, sbp, dbp, rr, spo2, si, ans_index_sns, ans_index_pns, wellness, hba1c, hba1c_risk, hba1c_range, hemoglobin, cholesterol, cholesterol_risk, cholesterol_range, hr_valid, bp_valid, rr_valid, spo2_valid, bioage, ba2, ba4}) {
+  update({ hr, hrv, sbp, dbp, rr, spo2, si, ans_index_sns, ans_index_pns, wellness, hba1c, hba1c_risk, hba1c_range, hemoglobin, cholesterol, cholesterol_risk, cholesterol_range, hr_valid, bp_valid, rr_valid, spo2_valid, bioage, ba2, ba4,syn}) {
     this._updateHR(hr, hr_valid);
     this._updateHRV(hrv);
-    //this._updateBIOAGE(hrv);
-    //this._updateBA2(hr,hrv);
-    //this._updateBA4(hr,hrv,sbp,dbp);
     this._updateBIOAGE(bioage);
     this._updateBA2(ba2);
     this._updateBA4(ba4);
+    this._updateSYN(syn);
     this._updateBP(sbp, dbp, bp_valid);
     this._updateRR(rr, rr_valid);
     this._updateSpO2(spo2, spo2_valid);
@@ -247,45 +253,36 @@ class VitalResultPrinter {
       this._setValue(this._hrv_element, Math.round(hrv));
     }
   }
-  /*_updateBIOAGE(hrv_indices) {
-    if (typeof hrv === "number" && hrv> 0 && this._last_hrv != hrv) {
-      this._last_hrv = hrv;
-      this._setValue(this._bioage_element, Math.round((hrv-53.907)/-0.502));
-    }
-  }
-  _updateBA2(hr,hrv) {
-    if (typeof hrv === "number" && hrv > 0 && this._last_hrv != hrv) {
-      this._last_hrv = hrv;
-      this._setValue(this._ba2_element, Math.round((29.740-0.204*hrv-0.154*hr)*5));
-    }
-  }
-  _updateBA4(hr,hrv,sbp,dbp) {
-    if (typeof hrv === "number" && hrv > 0 && this._last_hrv != hrv) {
-      this._last_hrv = hrv;
-      this._setValue(this._ba4_element, Math.round((28.553-0.201*hrv-0.152*hr+0.012*sbp-0.006*dbp)*5));
-    }
-  }*/
+
   _updateBIOAGE(bioage) {
-    if (typeof bioage === "number" && bioage> 0 && this._last_bioage != bioage) {
+    if (typeof bioage === "number" && bioage> 4 && bioage<100 && this._last_bioage != bioage) {
       this._last_bioage = bioage;
-      this._setValue(this._bioage_element, Math.round(bioage));
+      let showage=(Math.round(bioage)-5)+"-"+Math.round(bioage);
+      this._setValue(this._bioage_element, showage);
     }
   }
   _updateBA2(ba2) {
-    if (typeof ba2 === "number" && ba2 > 0 && this._last_ba2 != ba2) {
+    if (typeof ba2 === "number" && ba2 > 4 && ba2 < 100 && this._last_ba2 != ba2) {
       this._last_ba2 = ba2;
-      this._setValue(this._ba2_element, Math.round(ba2));
+      let showage2=(Math.round(ba2)-5)+"-"+Math.round(ba2);
+      this._setValue(this._ba2_element, showage2);
     }
   }
   _updateBA4(ba4) {
-    if (typeof ba4 === "number" && ba4 > 0 && this._last_ba4 != ba4) {
+    if (typeof ba4 === "number" && ba4 > 4  && ba4 < 100 && this._last_ba4 != ba4) {
       this._last_ba4 = ba4;
-      this._setValue(this._ba4_element, Math.round(ba4));
+      let showage4=(Math.round(ba4)-5)+"-"+Math.round(ba4);
+      this._setValue(this._ba4_element, showage4);
     }
   }
 
-
-
+  _updateSYN(syn) {
+    if (typeof syn=== "number" && syn > 0  && syn < 100 && this._last_syn != syn) {
+      this._last_syn = syn;
+      let showagesyn=(Math.round(syn));
+      this._setValue(this._syn_element, showagesyn);
+    }
+  }
 
   _updateBP(sbp, dbp, bp_valid) {
     let to_update = false;
@@ -327,15 +324,15 @@ class VitalResultPrinter {
       if (si < 0) {
         this._si_name_element.innerHTML = "---";
       } else if (si < 50) {
-        this._si_name_element.innerHTML = "低";
+        this._si_name_element.innerHTML = "Low";
       } else if (si < 200) {
-        this._si_name_element.innerHTML = "正常";
+        this._si_name_element.innerHTML = "Normal";
       } else if (si < 350) {
-        this._si_name_element.innerHTML = "中";
+        this._si_name_element.innerHTML = "Mild";
       } else if (si < 500) {
-        this._si_name_element.innerHTML = "高";
+        this._si_name_element.innerHTML = "High";
       } else {
-        this._si_name_element.innerHTML = "非常高";
+        this._si_name_element.innerHTML = "Very High";
       }
     }
   }

@@ -145,7 +145,7 @@ export default {
         }
       } catch (err) {
         alert("取得會員資料失敗");
-        router.push("/");
+        
       } finally {
         setTimeout(() => {
           loading.value = false;

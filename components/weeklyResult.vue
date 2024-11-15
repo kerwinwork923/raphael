@@ -1,10 +1,11 @@
 <template>
   <div class="resultWrap">
+    <!-- Top section: Display result info and severity -->
     <div class="resultTopGroup">
       <div class="resultInfo">
         <div class="resultHintText">
           {{
-            store.diffDays >= 1 ? diffDays + "天" : store.diffDays
+            store.diffDays >= 1 ? store.diffDays + "天" : store.diffDays
           }}後再進行檢測
         </div>
         <h5 class="subText">
@@ -14,7 +15,6 @@
         <div class="severity">
           <div class="imgGroup">
             <img :src="computedEmoji2(store.theLatestData.TotalScore)" alt="" />
-
             <div class="scoreText">
               <div
                 class="score"
@@ -42,16 +42,19 @@
             >
               {{ store.theLatestData.TotalRatio }}({{
                 store.theLatestData.TotalDesc
-              }})</span
-            >
+              }})
+            </span>
           </h6>
         </div>
+
         <h5
           class="subText nextSunText"
           v-if="store.theLatestHistoryPre.CheckTime"
         >
           (前次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
         </h5>
+
+        <!-- Previous check data -->
         <div class="severity" v-if="store.theLatestDataPreData.TotalScore">
           <div class="imgGroup">
             <img
@@ -88,863 +91,35 @@
             >
               {{ store.theLatestDataPreData.TotalRatio }}({{
                 store.theLatestDataPreData.TotalDesc
-              }})</span
-            >
+              }})
+            </span>
           </h6>
         </div>
       </div>
       <img class="doctorImg" src="../assets/imgs/doctor.png" alt="" />
     </div>
 
+    <!-- Symptom analysis results -->
     <h4 class="textResultText">以下為分類系統的自律神經分析結果</h4>
     <div class="resultListGroup">
-      <div class="resultList">
-        <div class="titleGroup">
-          <h3>{{ store.diffenenceObj.C1Symptom }}</h3>
-
-          <div class="pGroup" v-if="store.diffenenceObj.preCheckTime != ''">
-            <p
-              v-if="
-                Number(store.diffenenceObj.C1Difference?.replace('%', '')) > 0
-              "
-              class="upIcon"
-            >
-              ▲
-            </p>
-            <p
-              v-if="
-                Number(store.diffenenceObj.C1Difference?.replace('%', '')) < 0
-              "
-              class="downIcon"
-            >
-              ▼
-            </p>
-            <div
-              class="titleScoreUp"
-              v-if="
-                Number(store.diffenenceObj.C1Difference?.replace('%', '')) > 0
-              "
-            >
-              {{ store.diffenenceObj.C1Difference }}
-            </div>
-            <div
-              class="titleScoreDown"
-              v-if="
-                Number(store.diffenenceObj.C1Difference?.replace('%', '')) < 0
-              "
-            >
-              {{ store.diffenenceObj.C1Difference }}
-            </div>
-          </div>
-        </div>
-        <div class="resultTagGroup">
-          <div
-            class="resultTag"
-            v-for="item in store.diffenenceObj.C1Solve"
-            :key="item"
-          >
-            {{ item }}
-          </div>
-        </div>
-
-        <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
-        <ProgressBar2
-          :score="computedScore(store.theLatestData.C1Ratio)"
-          :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C1Ratio))"
-        />
-        <h4>
-          嚴重程度 :
-          <span
-            :style="{
-              color: scoreColorFn(
-                computedScore(store.theLatestData.C1Ratio),
-                sex
-              ),
-            }"
-            >{{ store.theLatestData.C1Ratio }}({{
-              store.theLatestData.C1Desc
-            }})</span
-          >
-        </h4>
-        <div class="nextGroup" v-if="store.theLatestHistoryPre.CheckTime">
-          <h5>
-            (前次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
-          </h5>
-          <ProgressBar2
-            :score="computedScore(store.theLatestDataPreData.C1Ratio)"
-            :emojiSrc="
-              computedEmoji2(computedScore(store.theLatestDataPreData.C1Ratio))
-            "
-          />
-          <h4>
-            嚴重程度 :
-            <span
-              :style="{
-                color: scoreColorFn(
-                  computedScore(store.theLatestDataPreData.C1Ratio),
-                  sex
-                ),
-              }"
-              >{{ store.theLatestDataPreData.C1Ratio }}({{
-                store.theLatestDataPreData.C1Desc
-              }})</span
-            >
-          </h4>
-        </div>
-      </div>
-
-      <div class="resultList">
-        <div class="titleGroup">
-          <h3>{{ store.diffenenceObj.C2Symptom }}</h3>
-
-          <div class="pGroup" v-if="store.diffenenceObj.preCheckTime != ''">
-            <p
-              v-if="
-                Number(store.diffenenceObj.C2Difference?.replace('%', '')) > 0
-              "
-              class="upIcon"
-            >
-              ▲
-            </p>
-            <p
-              v-if="
-                Number(store.diffenenceObj.C2Difference?.replace('%', '')) < 0
-              "
-              class="downIcon"
-            >
-              ▼
-            </p>
-            <div
-              class="titleScoreUp"
-              v-if="
-                Number(store.diffenenceObj.C2Difference?.replace('%', '')) > 0
-              "
-            >
-              {{ store.diffenenceObj.C2Difference }}
-            </div>
-            <div
-              class="titleScoreDown"
-              v-if="
-                Number(store.diffenenceObj.C2Difference?.replace('%', '')) < 0
-              "
-            >
-              {{ store.diffenenceObj.C2Difference }}
-            </div>
-          </div>
-        </div>
-        <div class="resultTagGroup">
-          <div
-            class="resultTag"
-            v-for="item in store.diffenenceObj.C2Solve"
-            :key="item"
-          >
-            {{ item }}
-          </div>
-        </div>
-        <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
-        <ProgressBar2
-          :score="computedScore(store.theLatestData.C2Ratio)"
-          :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C2Ratio))"
-        />
-        <h4>
-          嚴重程度 :
-          <span
-            :style="{
-              color: scoreColorFn(
-                computedScore(store.theLatestData.C2Ratio),
-                sex
-              ),
-            }"
-            >{{ store.theLatestData.C2Ratio }}({{
-              store.theLatestData.C2Desc
-            }})</span
-          >
-        </h4>
-        <div class="nextGroup" v-if="store.theLatestHistoryPre.CheckTime">
-          <h5>
-            (前次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
-          </h5>
-          <ProgressBar2
-            :score="computedScore(store.theLatestDataPreData.C2Ratio)"
-            :emojiSrc="
-              computedEmoji2(computedScore(store.theLatestDataPreData.C2Ratio))
-            "
-          />
-          <h4>
-            嚴重程度 :
-            <span
-              :style="{
-                color: scoreColorFn(
-                  computedScore(store.theLatestDataPreData.C2Ratio),
-                  sex
-                ),
-              }"
-              >{{ store.theLatestDataPreData.C2Ratio }}({{
-                store.theLatestDataPreData.C2Desc
-              }})</span
-            >
-          </h4>
-        </div>
-      </div>
-
-      <div class="resultList">
-        <div class="titleGroup">
-          <h3>{{ store.diffenenceObj.C3Symptom }}</h3>
-
-          <div class="pGroup" v-if="store.diffenenceObj.preCheckTime != ''">
-            <p
-              v-if="
-                Number(store.diffenenceObj.C3Difference?.replace('%', '')) > 0
-              "
-              class="upIcon"
-            >
-              ▲
-            </p>
-            <p
-              v-if="
-                Number(store.diffenenceObj.C3Difference?.replace('%', '')) < 0
-              "
-              class="downIcon"
-            >
-              ▼
-            </p>
-            <div
-              class="titleScoreUp"
-              v-if="
-                Number(store.diffenenceObj.C3Difference?.replace('%', '')) > 0
-              "
-            >
-              {{ store.diffenenceObj.C3Difference }}
-            </div>
-            <div
-              class="titleScoreDown"
-              v-if="
-                Number(store.diffenenceObj.C3Difference?.replace('%', '')) < 0
-              "
-            >
-              {{ store.diffenenceObj.C3Difference }}
-            </div>
-          </div>
-        </div>
-        <div class="resultTagGroup">
-          <div
-            class="resultTag"
-            v-for="item in store.diffenenceObj.C3Solve"
-            :key="item"
-          >
-            {{ item }}
-          </div>
-        </div>
-        <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
-        <ProgressBar2
-          :score="computedScore(store.theLatestData.C3Ratio)"
-          :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C3Ratio))"
-        />
-        <h4>
-          嚴重程度 :
-          <span
-            :style="{
-              color: scoreColorFn(
-                computedScore(store.theLatestData.C3Ratio),
-                sex
-              ),
-            }"
-            >{{ store.theLatestData.C3Ratio }}({{
-              store.theLatestData.C3Desc
-            }})</span
-          >
-        </h4>
-        <div class="nextGroup" v-if="store.theLatestHistoryPre.CheckTime">
-          <h5>
-            (前次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
-          </h5>
-          <ProgressBar2
-            :score="computedScore(store.theLatestDataPreData.C3Ratio)"
-            :emojiSrc="
-              computedEmoji2(computedScore(store.theLatestDataPreData.C3Ratio))
-            "
-          />
-          <h4>
-            嚴重程度 :
-            <span
-              :style="{
-                color: scoreColorFn(
-                  computedScore(store.theLatestDataPreData.C3Ratio),
-                  sex
-                ),
-              }"
-              >{{ store.theLatestDataPreData.C3Ratio }}({{
-                store.theLatestDataPreData.C3Desc
-              }})</span
-            >
-          </h4>
-        </div>
-      </div>
-
-      <div class="resultList">
-        <div class="titleGroup">
-          <h3>{{ store.diffenenceObj.C4Symptom }}</h3>
-
-          <div class="pGroup" v-if="store.diffenenceObj.preCheckTime != ''">
-            <p
-              v-if="
-                Number(store.diffenenceObj.C4Difference?.replace('%', '')) > 0
-              "
-              class="upIcon"
-            >
-              ▲
-            </p>
-            <p
-              v-if="
-                Number(store.diffenenceObj.C4Difference?.replace('%', '')) < 0
-              "
-              class="downIcon"
-            >
-              ▼
-            </p>
-            <div
-              class="titleScoreUp"
-              v-if="
-                Number(store.diffenenceObj.C4Difference?.replace('%', '')) > 0
-              "
-            >
-              {{ store.diffenenceObj.C4Difference }}
-            </div>
-            <div
-              class="titleScoreDown"
-              v-if="
-                Number(store.diffenenceObj.C4Difference?.replace('%', '')) < 0
-              "
-            >
-              {{ store.diffenenceObj.C4Difference }}
-            </div>
-          </div>
-        </div>
-        <div class="resultTagGroup">
-          <div
-            class="resultTag"
-            v-for="item in store.diffenenceObj.C4Solve"
-            :key="item"
-          >
-            {{ item }}
-          </div>
-        </div>
-        <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
-        <ProgressBar2
-          :score="computedScore(store.theLatestData.C4Ratio)"
-          :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C4Ratio))"
-        />
-        <h4>
-          嚴重程度 :
-          <span
-            :style="{
-              color: scoreColorFn(
-                computedScore(store.theLatestData.C4Ratio),
-                sex
-              ),
-            }"
-            >{{ store.theLatestData.C4Ratio
-            }}{{ store.theLatestData.C4Desc }}</span
-          >
-        </h4>
-        <div class="nextGroup" v-if="store.theLatestHistoryPre.CheckTime">
-          <h5>
-            (前次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
-          </h5>
-          <ProgressBar2
-            :score="computedScore(store.theLatestDataPreData.C4Ratio)"
-            :emojiSrc="
-              computedEmoji2(computedScore(store.theLatestDataPreData.C4Ratio))
-            "
-          />
-          <h4>
-            嚴重程度 :
-            <span
-              :style="{
-                color: scoreColorFn(
-                  computedScore(store.theLatestDataPreData.C4Ratio),
-                  sex
-                ),
-              }"
-              >{{ store.theLatestDataPreData.C4Ratio }}({{
-                store.theLatestDataPreData.C4Desc
-              }})</span
-            >
-          </h4>
-        </div>
-      </div>
-
-      <div class="resultList">
-        <div class="titleGroup">
-          <h3>{{ store.diffenenceObj.C5Symptom }}</h3>
-
-          <div class="pGroup" v-if="store.diffenenceObj.preCheckTime != ''">
-            <p
-              v-if="
-                Number(store.diffenenceObj.C5Difference?.replace('%', '')) > 0
-              "
-              class="upIcon"
-            >
-              ▲
-            </p>
-            <p
-              v-if="
-                Number(store.diffenenceObj.C5Difference?.replace('%', '')) < 0
-              "
-              class="downIcon"
-            >
-              ▼
-            </p>
-            <div
-              class="titleScoreUp"
-              v-if="
-                Number(store.diffenenceObj.C5Difference?.replace('%', '')) > 0
-              "
-            >
-              {{ store.diffenenceObj.C5Difference }}
-            </div>
-            <div
-              class="titleScoreDown"
-              v-if="
-                Number(store.diffenenceObj.C5Difference?.replace('%', '')) < 0
-              "
-            >
-              {{ store.diffenenceObj.C5Difference }}
-            </div>
-          </div>
-        </div>
-        <div class="resultTagGroup">
-          <div
-            class="resultTag"
-            v-for="item in store.diffenenceObj.C5Solve"
-            :key="item"
-          >
-            {{ item }}
-          </div>
-        </div>
-        <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
-        <ProgressBar2
-          :score="computedScore(store.theLatestData.C5Ratio)"
-          :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C5Ratio))"
-        />
-        <h4>
-          嚴重程度 :
-          <span
-            :style="{
-              color: scoreColorFn(
-                computedScore(store.theLatestData.C5Ratio),
-                sex
-              ),
-            }"
-            >{{ store.theLatestData.C5Ratio }}({{
-              store.theLatestData.C5Desc
-            }})</span
-          >
-        </h4>
-        <div class="nextGroup" v-if="store.theLatestHistoryPre.CheckTime">
-          <h5>
-            (前次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
-          </h5>
-          <ProgressBar2
-            :score="computedScore(store.theLatestDataPreData.C5Ratio)"
-            :emojiSrc="
-              computedEmoji2(computedScore(store.theLatestDataPreData.C5Ratio))
-            "
-          />
-          <h4>
-            嚴重程度 :
-            <span
-              :style="{
-                color: scoreColorFn(
-                  computedScore(store.theLatestDataPreData.C5Ratio),
-                  sex
-                ),
-              }"
-              >{{ store.theLatestDataPreData.C5Ratio }}({{
-                store.theLatestDataPreData.C5Desc
-              }})</span
-            >
-          </h4>
-        </div>
-      </div>
-
-      <div class="resultList">
-        <div class="titleGroup">
-          <h3>{{ store.diffenenceObj.C6Symptom }}</h3>
-
-          <div class="pGroup" v-if="store.diffenenceObj.preCheckTime != ''">
-            <p
-              v-if="
-                Number(store.diffenenceObj.C6Difference?.replace('%', '')) > 0
-              "
-              class="upIcon"
-            >
-              ▲
-            </p>
-            <p
-              v-if="
-                Number(store.diffenenceObj.C6Difference?.replace('%', '')) < 0
-              "
-              class="downIcon"
-            >
-              ▼
-            </p>
-            <div
-              class="titleScoreUp"
-              v-if="
-                Number(store.diffenenceObj.C6Difference?.replace('%', '')) > 0
-              "
-            >
-              {{ store.diffenenceObj.C6Difference }}
-            </div>
-            <div
-              class="titleScoreDown"
-              v-if="
-                Number(store.diffenenceObj.C6Difference?.replace('%', '')) < 0
-              "
-            >
-              {{ store.diffenenceObj.C6Difference }}
-            </div>
-          </div>
-        </div>
-        <div class="resultTagGroup">
-          <div
-            class="resultTag"
-            v-for="item in store.diffenenceObj.C6Solve"
-            :key="item"
-          >
-            {{ item }}
-          </div>
-        </div>
-        <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
-        <ProgressBar2
-          :score="computedScore(store.theLatestData.C6Ratio)"
-          :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C6Ratio))"
-        />
-        <h4>
-          嚴重程度 :
-          <span
-            :style="{
-              color: scoreColorFn(
-                computedScore(store.theLatestData.C6Ratio),
-                sex
-              ),
-            }"
-            >{{ store.theLatestData.C6Ratio }}({{
-              store.theLatestData.C6Desc
-            }})</span
-          >
-        </h4>
-        <div class="nextGroup" v-if="store.theLatestHistoryPre.CheckTime">
-          <h5>
-            (前次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
-          </h5>
-          <ProgressBar2
-            :score="computedScore(store.theLatestDataPreData.C6Ratio)"
-            :emojiSrc="
-              computedEmoji2(computedScore(store.theLatestDataPreData.C6Ratio))
-            "
-          />
-          <h4>
-            嚴重程度 :
-            <span
-              :style="{
-                color: scoreColorFn(
-                  computedScore(store.theLatestDataPreData.C6Ratio),
-                  sex
-                ),
-              }"
-              >{{ store.theLatestDataPreData.C6Ratio }}({{
-                store.theLatestDataPreData.C6Desc
-              }})</span
-            >
-          </h4>
-        </div>
-      </div>
-
-      <div class="resultList">
-        <div class="titleGroup">
-          <h3>{{ store.diffenenceObj.C7Symptom }}</h3>
-
-          <div class="pGroup" v-if="store.diffenenceObj.preCheckTime != ''">
-            <p
-              v-if="
-                Number(store.diffenenceObj.C7Difference?.replace('%', '')) > 0
-              "
-              class="upIcon"
-            >
-              ▲
-            </p>
-            <p
-              v-if="
-                Number(store.diffenenceObj.C7Difference?.replace('%', '')) < 0
-              "
-              class="downIcon"
-            >
-              ▼
-            </p>
-            <div
-              class="titleScoreUp"
-              v-if="
-                Number(store.diffenenceObj.C7Difference?.replace('%', '')) > 0
-              "
-            >
-              {{ store.diffenenceObj.C7Difference }}
-            </div>
-            <div
-              class="titleScoreDown"
-              v-if="
-                Number(store.diffenenceObj.C7Difference?.replace('%', '')) < 0
-              "
-            >
-              {{ store.diffenenceObj.C7Difference }}
-            </div>
-          </div>
-        </div>
-        <div class="resultTagGroup">
-          <div
-            class="resultTag"
-            v-for="item in store.diffenenceObj.C7Solve"
-            :key="item"
-          >
-            {{ item }}
-          </div>
-        </div>
-        <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
-        <ProgressBar2
-          :score="computedScore(store.theLatestData.C7Ratio)"
-          :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C7Ratio))"
-        />
-        <h4>
-          嚴重程度 :
-          <span
-            :style="{
-              color: scoreColorFn(
-                computedScore(store.theLatestData.C7Ratio),
-                sex
-              ),
-            }"
-            >{{ store.theLatestData.C7Ratio }}({{
-              store.theLatestData.C7Desc
-            }})</span
-          >
-        </h4>
-        <div class="nextGroup" v-if="store.theLatestHistoryPre.CheckTime">
-          <h5>
-            (前次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
-          </h5>
-          <ProgressBar2
-            :score="computedScore(store.theLatestDataPreData.C7Ratio)"
-            :emojiSrc="
-              computedEmoji2(computedScore(store.theLatestDataPreData.C7Ratio))
-            "
-          />
-          <h4>
-            嚴重程度 :
-            <span
-              :style="{
-                color: scoreColorFn(
-                  computedScore(store.theLatestDataPreData.C7Ratio),
-                  sex
-                ),
-              }"
-              >{{ store.theLatestDataPreData.C7Ratio }}({{
-                store.theLatestDataPreData.C7Desc
-              }})</span
-            >
-          </h4>
-        </div>
-      </div>
-
-      <div class="resultList">
-        <div class="titleGroup">
-          <h3>{{ store.diffenenceObj.C8Symptom }}</h3>
-
-          <div class="pGroup" v-if="store.diffenenceObj.preCheckTime != ''">
-            <p
-              v-if="
-                Number(store.diffenenceObj.C8Difference?.replace('%', '')) > 0
-              "
-              class="upIcon"
-            >
-              ▲
-            </p>
-            <p
-              v-if="
-                Number(store.diffenenceObj.C8Difference?.replace('%', '')) < 0
-              "
-              class="downIcon"
-            >
-              ▼
-            </p>
-            <div
-              class="titleScoreUp"
-              v-if="
-                Number(store.diffenenceObj.C8Difference?.replace('%', '')) > 0
-              "
-            >
-              {{ store.diffenenceObj.C8Difference }}
-            </div>
-            <div
-              class="titleScoreDown"
-              v-if="
-                Number(store.diffenenceObj.C8Difference?.replace('%', '')) < 0
-              "
-            >
-              {{ store.diffenenceObj.C8Difference }}
-            </div>
-          </div>
-        </div>
-        <div class="resultTagGroup">
-          <div
-            class="resultTag"
-            v-for="item in store.diffenenceObj.C8Solve"
-            :key="item"
-          >
-            {{ item }}
-          </div>
-        </div>
-        <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
-        <ProgressBar2
-          :score="computedScore(store.theLatestData.C8Ratio)"
-          :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C8Ratio))"
-        />
-        <h4>
-          嚴重程度 :
-          <span
-            :style="{
-              color: scoreColorFn(
-                computedScore(store.theLatestData.C8Ratio),
-                sex
-              ),
-            }"
-            >{{ store.theLatestData.C8Ratio }}({{
-              store.theLatestData.C8Desc
-            }})</span
-          >
-        </h4>
-        <div class="nextGroup" v-if="store.theLatestHistoryPre.CheckTime">
-          <h5>
-            (前次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
-          </h5>
-          <ProgressBar2
-            :score="computedScore(store.theLatestDataPreData.C8Ratio)"
-            :emojiSrc="
-              computedEmoji2(computedScore(store.theLatestDataPreData.C8Ratio))
-            "
-          />
-          <h4>
-            嚴重程度 :
-            <span
-              :style="{
-                color: scoreColorFn(
-                  computedScore(store.theLatestDataPreData.C8Ratio),
-                  sex
-                ),
-              }"
-              >{{ store.theLatestDataPreData.C8Ratio }}({{
-                store.theLatestDataPreData.C8Desc
-              }})</span
-            >
-          </h4>
-        </div>
-      </div>
-
-      <div class="resultList">
-        <div class="titleGroup">
-          <h3>{{ store.diffenenceObj.C9Symptom }}</h3>
-          <div class="pGroup" v-if="store.diffenenceObj.preCheckTime != ''">
-            <p
-              v-if="
-                Number(store.diffenenceObj.C9Difference?.replace('%', '')) > 0
-              "
-              class="upIcon"
-            >
-              ▲
-            </p>
-            <p
-              v-if="
-                Number(store.diffenenceObj.C9Difference?.replace('%', '')) < 0
-              "
-              class="downIcon"
-            >
-              ▼
-            </p>
-            <div
-              class="titleScoreUp"
-              v-if="
-                Number(store.diffenenceObj.C9Difference?.replace('%', '')) > 0
-              "
-            >
-              {{ store.diffenenceObj.C9Difference }}
-            </div>
-            <div
-              class="titleScoreDown"
-              v-if="
-                Number(store.diffenenceObj.C9Difference?.replace('%', '')) < 0
-              "
-            >
-              {{ store.diffenenceObj.C9Difference }}
-            </div>
-          </div>
-        </div>
-        <div class="resultTagGroup">
-          <div
-            class="resultTag"
-            v-for="item in store.diffenenceObj.C9Solve"
-            :key="item"
-          >
-            {{ item }}
-          </div>
-        </div>
-        <h5>(本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}</h5>
-        <ProgressBar2
-          :score="computedScore(store.theLatestData.C9Ratio)"
-          :emojiSrc="computedEmoji2(computedScore(store.theLatestData.C9Ratio))"
-        />
-        <h4>
-          嚴重程度 :
-          <span
-            :style="{
-              color: scoreColorFn(
-                computedScore(store.theLatestData.C9Ratio),
-                sex
-              ),
-            }"
-            >{{ store.theLatestData.C9Ratio }}({{
-              store.theLatestData.C9Desc
-            }})</span
-          >
-        </h4>
-        <div class="nextGroup" v-if="store.theLatestHistoryPre.CheckTime">
-          <h5>
-            (前次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
-          </h5>
-          <ProgressBar2
-            :score="computedScore(store.theLatestDataPreData.C9Ratio)"
-            :emojiSrc="
-              computedEmoji2(computedScore(store.theLatestDataPreData.C9Ratio))
-            "
-          />
-          <h4>
-            嚴重程度 :
-            <span
-              :style="{
-                color: scoreColorFn(
-                  computedScore(store.theLatestDataPreData.C9Ratio),
-                  sex
-                ),
-              }"
-              >{{ store.theLatestDataPreData.C9Ratio }}({{
-                store.theLatestDataPreData.C9Desc
-              }})</span
-            >
-          </h4>
-        </div>
-      </div>
+      <SymptomResult
+        v-for="(symptom, index) in symptoms"
+        :key="index"
+        :symptomName="symptom.name"
+        :symptomDifference="symptom.difference"
+        :symptomSolve="symptom.solve"
+        :symptomRatio="symptom.ratio"
+        :symptomPreRatio="symptom.ratioPre"
+        :symptomDesc="symptom.desc"
+        :symptomPreDesc="symptom.descPre"
+        :theLatestHistory="store.theLatestHistory"
+        :theLatestHistoryPre="store.theLatestHistoryPre"
+        :sex="sex"
+      />
     </div>
-    <h4 class="textResultText">您最近常出現的症狀依困擾程度排序</h4>
 
+    <!-- Symptom by severity -->
+    <h4 class="textResultText">您最近常出現的症狀依困擾程度排序</h4>
     <div class="symptomWrap">
       <div class="symptomGroup">
         <div class="symptomButtonGroup">
@@ -1011,8 +186,10 @@
       </div>
     </div>
 
+    <!-- Detection records -->
     <h4 class="textResultText">檢測紀錄</h4>
     <div class="detectionWrap">
+      <router-link to="/" />
       <div
         class="detection"
         v-for="(history, index) in store.History"
@@ -1052,7 +229,7 @@
     </div>
 
     <div class="backToUserBtnGroupWeekly">
-      <button class="backToUserBtnWeekly" @click="backToUser()">
+      <button class="backToUserBtnWeekly" @click="backToUser">
         返回會員中心
       </button>
     </div>
@@ -1060,32 +237,21 @@
 </template>
 
 <script>
-import { ref } from "vue";
-import ProgressBar from "./ProgressBar.vue";
-import ProgressBar2 from "./ProgressBar2.vue";
-import {
-  scoreColorFn,
-  computedEmoji2,
-  formatTimestamp,
-  formatTimestamp2,
-  computedText,
-} from "../fn/utils";
+import { ref, reactive } from "vue";
+import SymptomResult from "./SymptomResult.vue";
 import { useWeeklyRecord } from "../stores/weeklyQA";
-
 import { useRouter } from "vue-router";
-import axios from "axios";
-
+import { scoreColorFn, computedEmoji2, formatTimestamp } from "../fn/utils";
+import { formatTimestamp2 } from "../fn/utils";
 export default {
-  components: {
-    ProgressBar,
-    ProgressBar2,
-  },
+  components: { SymptomResult },
   setup() {
     const store = useWeeklyRecord();
+
+    console.log(store.diffenenceObj);
+
     const router = useRouter();
-    const backToUser = () => {
-      router.push({ name: "user" });
-    };
+    const backToUser = () => router.push({ name: "user" });
 
     const localData = localStorage.getItem("userData");
     const parsedData = localData ? JSON.parse(localData) : null;
@@ -1096,23 +262,35 @@ export default {
     const changeSymptomLavel = (lavel) => {
       selectedType.value = lavel;
     };
-
-    const computedScore = (scoreStr) => {
-      const numericScore = parseFloat(scoreStr.replace("%", ""));
-      return isNaN(numericScore) ? 0 : numericScore;
-    };
+    const symptoms = reactive([]);
+    watchEffect(() => {
+      symptoms.length = 0;
+      for (let i = 1; i <= 9; i++) {
+        symptoms.push({
+          name: store.diffenenceObj[`C${i}Symptom`] || "",
+          difference: store.diffenenceObj[`C${i}Difference`] || "",
+          solve: store.diffenenceObj[`C${i}Solve`] || "",
+          ratio: store.theLatestData[`C${i}Ratio`] || "",
+          ratioPre: store.theLatestDataPreData[`C${i}Ratio`] || "",
+          desc: store.theLatestData[`C${i}Desc`] || "",
+          descPre: store.theLatestDataPreData[`C${i}Desc`] || "",
+        });
+      }
+    });
+    const computedScore = (scoreStr) =>
+      parseFloat(scoreStr.replace("%", "")) || 0;
 
     return {
-      scoreColorFn,
-      computedEmoji2,
       store,
       formatTimestamp,
       backToUser,
       computedScore,
       selectedType,
       changeSymptomLavel,
-      computedText,
       sex,
+      symptoms,
+      computedEmoji2,
+      scoreColorFn,
       formatTimestamp2,
     };
   },
@@ -1418,7 +596,7 @@ export default {
 }
 
 .doctorImg {
-  height:174px;
+  height: 174px;
 }
 
 .backToUserBtnGroupWeekly {
@@ -1437,7 +615,7 @@ export default {
   font-weight: 400;
   letter-spacing: 0.5px;
   transition: 0.25s ease;
-  &:hover{
+  &:hover {
     background-color: $raphael-green-500;
   }
 }

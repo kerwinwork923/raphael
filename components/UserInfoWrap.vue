@@ -96,6 +96,7 @@
               {{ area.AreaName }}
             </option>
           </select>
+          <img class="icon2" src="../assets/imgs/arrowDown.svg" />
         </div>
         <div class="address">
           <input type="text" placeholder="輸入地址" v-model="inputAddress" />
@@ -171,7 +172,6 @@ export default {
       selectedArea.value = userData.Zone || "";
       inputAddress.value = userData.Address || "";
 
-
       if (selectedCity.value) {
         updateAreas(true);
       }
@@ -189,7 +189,7 @@ export default {
           (area) => area.AreaName === selectedArea.value
         )
       ) {
-        selectedArea.value = ""; 
+        selectedArea.value = "";
       }
     };
 
@@ -306,6 +306,7 @@ export default {
       width: 48%;
       position: relative;
       select {
+       
         outline: none;
         border: none;
         padding-left: 0;
@@ -315,6 +316,7 @@ export default {
         width: 100%;
         border-bottom: 1px solid #ccc;
         appearance: none;
+        background-color: transparent;
         color: #999;
         font-family: Inter;
         font-size: 1.2rem;

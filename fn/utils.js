@@ -109,15 +109,16 @@ export const computedText = (score, sex) => {
 };
 
 export const formatTimestamp = (timestampStr) => {
+  // Check if the input is a valid string and has the expected length of 14
   if (typeof timestampStr !== "string" || timestampStr.length !== 14) {
     console.error(
       "Invalid timestamp format. Expected a 14-character string:",
       timestampStr
     );
-    return "Invalid timestamp format";
+    return "Invalid timestamp format"; // Return a friendly message or handle it accordingly
   }
 
-  // 擷取年份、月份、日期、時間
+  // Attempt to extract components from the timestamp string
   const year = timestampStr.slice(0, 4);
   const month = timestampStr.slice(4, 6);
   const day = timestampStr.slice(6, 8);
@@ -125,11 +126,9 @@ export const formatTimestamp = (timestampStr) => {
   const minute = timestampStr.slice(10, 12);
   const second = timestampStr.slice(12, 14);
 
-  // 格式化月份和日期
+  // Validate the date using the Date constructor
   const formattedMonth = parseInt(month, 10);
   const formattedDay = parseInt(day, 10);
-
-  // 建立日期物件以驗證日期
   const date = new Date(year, formattedMonth - 1, formattedDay);
 
   if (
@@ -143,10 +142,10 @@ export const formatTimestamp = (timestampStr) => {
       formattedMonth,
       formattedDay
     );
-    return "Invalid date";
+    return "Invalid date"; // Handle invalid date case
   }
 
-  // 返回格式為 "YYYY/MM/DD HH:MM:SS"
+  // Return the formatted timestamp string
   return `${year}/${formattedMonth}/${formattedDay}`;
 };
 
