@@ -73,7 +73,11 @@
 
       <div class="addressGroup">
         <div class="city">
-          <select v-model="selectedCity" @change="updateAreas">
+          <select
+            v-model="selectedCity"
+            :class="{ selected: selectedCity }"
+            @change="updateAreas"
+          >
             <option value="" disabled selected hidden>縣市</option>
             <option
               v-for="city in citiesData"
@@ -86,7 +90,7 @@
           <img class="icon2" src="../assets/imgs/arrowDown.svg" />
         </div>
         <div class="area">
-          <select v-model="selectedArea">
+          <select v-model="selectedArea" :class="{ selected: selectedArea }">
             <option value="" disabled selected hidden>鎮地區</option>
             <option
               v-for="area in filteredAreas"
@@ -267,17 +271,17 @@ export default {
   }
 
   .custom-select {
-    -webkit-appearance: none; /* Chrome 和 Safari */
-    -moz-appearance: none; /* Firefox */
-    appearance: none; /* 標準 */
-    background: url("../assets/imgs/arrow-down.svg") no-repeat right 10px center; /* 添加下拉箭頭 */
+    -webkit-appearance: none; 
+    -moz-appearance: none; 
+    appearance: none; 
+    background: url("../assets/imgs/arrow-down.svg") no-repeat right 10px center;
     background-size: 12px;
-    color: #999; /* 預設顏色 */
+    color: #999; 
     font-size: 1.2rem;
   }
 
   .custom-select.selected {
-    color: black; /* 選擇後變為黑色 */
+    color: #1E1E1E; 
   }
 
   .nameGroup,
@@ -306,7 +310,6 @@ export default {
       width: 48%;
       position: relative;
       select {
-       
         outline: none;
         border: none;
         padding-left: 0;
@@ -335,6 +338,10 @@ export default {
         &::-ms-expand {
           display: none;
         }
+      }
+
+      .selected {
+        color: #1E1E1E; 
       }
 
       .icon2 {
@@ -417,7 +424,7 @@ export default {
     padding-left: 36px;
     padding-bottom: 16px;
     padding-top: 16px;
-
+    color: #1E1E1E;
     &::placeholder {
       color: #999;
       font-family: Inter;

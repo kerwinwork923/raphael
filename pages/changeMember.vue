@@ -1,11 +1,8 @@
 <template>
   <div class="changeMemberWrap">
-    <Navbar />
+    <TitleMenu Text="基本資料設定" link="./user"/>
     <div class="changeMemberGroup">
-      <div class="raphaelIconImgGroup">
-        <img class="raphaelIcon" src="../assets/imgs/raphael.svg" alt="" />
-      </div>
-      <h1>基本資料設定</h1>
+     
       <UserInfoForm
         @update:name="name = $event"
         @update:height="height = $event"
@@ -19,18 +16,19 @@
         @submit="addUser"
       />
     </div>
+    <button class="logoutBtn" @click="logout">登出</button>
   </div>
 </template>
 
 <script>
-import Navbar from "../components/Navbar.vue";
+import TitleMenu from "~/components/TitleMenu.vue";
 import UserInfoForm from "../components/UserInfoWrap.vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import { ref } from "vue";
 
 export default {
-  components: { Navbar, UserInfoForm },
+  components: { UserInfoForm, TitleMenu },
   setup() {
     const name = ref("");
     const height = ref("");
@@ -102,6 +100,11 @@ export default {
       }
     };
 
+    const logout = () => {
+      localStorage.removeItem("userData");
+      router.push("/");
+    };
+
     const localData = localStorage.getItem("userData");
     const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
 
@@ -120,6 +123,7 @@ export default {
       area,
       address,
       addUser,
+      logout,
     };
   },
 };
@@ -139,13 +143,35 @@ h1 {
   width: 100%;
   min-height: 100vh;
   background: $raphael-gray-100;
-
+  padding-bottom: 1.5rem;
   .changeMemberGroup {
     width: 90%;
     margin: 0 auto;
     max-width: 576px;
-    padding-top: 100px;
+    padding-top: 60px;
     text-align: center;
+  }
+
+  .logoutBtn {
+    max-width: 576px;
+    background-color: #ec4f4f;
+    border: none;
+    display: flex;
+    margin-top: 30px;
+    padding: 12px;
+    width: 100%;
+    border-radius: 8px;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    font-weight: 400;
+    margin: 0 auto;
+    margin-top: 1rem;
+    width: 90%;
   }
 }
 </style>
