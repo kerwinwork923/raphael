@@ -29,7 +29,7 @@ const VIEW_FINISH_SP_PREFIX = "images/icon_sp_";
 
 // Finish Page
 // ==============================================================
-let _finish_spower_chart = null;
+// let _finish_spower_chart = null;
 let _finish_vital_result_printer = null;
 let infodata = JSON.parse(sessionStorage.getItem("data"));
 
@@ -111,15 +111,15 @@ const InitFinish = () => {
     ans_index_pns_id: VIEW_FINISH_ANS_INDEX_PNS,
   });
 
-  _finish_spower_chart = new SPowerChart(
-    document.getElementById(VIEW_FINISH_CANVAS_SP).getContext("2d")
-  );
+  // _finish_spower_chart = new SPowerChart(
+  //   document.getElementById(VIEW_FINISH_CANVAS_SP).getContext("2d")
+  // );
   document.getElementById(VIEW_FINISH_BTN_HOME).onclick = () => GoToBasicInfo();
   document.getElementById(VIEW_BACK_BTN_HOME).onclick = () => GoToBasicInfo();
 };
 
 const GoToFinish = () => {
-  _finish_spower_chart.reset();
+  // _finish_spower_chart.reset();
   _finish_vital_result_printer.reset();
   let result = JSON.parse(sessionStorage.getItem("result"));
   let upbioage = 0;
@@ -236,16 +236,16 @@ const GoToFinish = () => {
     syn: pLF,
   });
 
-  setTimeout(() => {
-    _finish_spower_chart.update({
-      activity: result.activity,
-      equilibrium: result.equilibrium,
-      health: result.health,
-      metabolism: result.metabolism,
-      relaxation: result.relaxation,
-      sleep: result.sleep,
-    });
-  }, 200);
+  // setTimeout(() => {
+  //   _finish_spower_chart.update({
+  //     activity: result.activity,
+  //     equilibrium: result.equilibrium,
+  //     health: result.health,
+  //     metabolism: result.metabolism,
+  //     relaxation: result.relaxation,
+  //     sleep: result.sleep,
+  //   });
+  // }, 200);
 };
 
 const GoToBasicInfo = () => {
