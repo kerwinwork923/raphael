@@ -15,7 +15,7 @@
       <div class="phoneGroup" v-if="phoneShow">
         <img class="icon1" src="../assets/imgs/phone.svg" alt="" />
         <input type="text" :value="phone" disabled />
-        <img class="icon2" src="../assets/imgs/nowrap.svg" alt="" />
+        <img class="icon2" src="../assets/imgs/noWrap.svg" alt="" />
       </div>
 
       <!-- 信箱輸入 -->
