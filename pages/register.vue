@@ -511,9 +511,7 @@ export default {
             Sex: sex.value,
             Birthday: birthday,
             DSPR: DSPR.value || "",
-            City: city.value,
-            Zone: area.value,
-            Address: address.value,
+          
           }
         );
 
