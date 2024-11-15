@@ -117,12 +117,12 @@ const InitFinish = () => {
   document.getElementById(VIEW_FINISH_BTN_HOME).onclick = () => GoToBasicInfo();
   document.getElementById(VIEW_BACK_BTN_HOME).onclick = () => GoToBasicInfo();
 };
-let upbioage = 0;
+
 const GoToFinish = () => {
   // _finish_spower_chart.reset();
   _finish_vital_result_printer.reset();
   let result = JSON.parse(sessionStorage.getItem("result"));
-  
+  let upbioage = 0;
   let upba2 = 0;
   let upba4 = 0;
   let pLF = 0;
@@ -210,7 +210,7 @@ const GoToFinish = () => {
     console.log(
       `upbioage: ${aSDNNage}, upba2: ${upba2}, upba4: ${upba4}, SYN%: ${pLF}`
     );
-    SaveHRV2(result, upba2, upba4, aSDNNage, pLF, pHF);
+    // SaveHRV2(result, upba2, upba4, aSDNNage, pLF, pHF);
   } else {
     console.log("No stored data available.");
     alert("No stored data available.");
