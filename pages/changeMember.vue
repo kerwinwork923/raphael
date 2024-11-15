@@ -1,8 +1,7 @@
 <template>
   <div class="changeMemberWrap">
-    <TitleMenu Text="基本資料設定" link="./user"/>
+    <TitleMenu Text="基本資料設定" link="./user" />
     <div class="changeMemberGroup">
-     
       <UserInfoForm
         @update:name="name = $event"
         @update:height="height = $event"
@@ -13,6 +12,8 @@
         @update:city="city = $event"
         @update:area="area = $event"
         @update:address="address = $event"
+        phoneShow="true"
+        addressShow="true"
         @submit="addUser"
       />
     </div>

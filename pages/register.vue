@@ -122,9 +122,6 @@
           @update:sex="sex = $event"
           @update:date="date = $event"
           @update:DSPR="DSPR = $event"
-          @update:city="city = $event"
-          @update:area="area = $event"
-          @update:address="address = $event"
           @submit="addUser"
         />
       </div>
@@ -168,9 +165,7 @@ export default {
     const sex = ref("");
     const date = ref("");
     const DSPR = ref("");
-    const city = ref("");
-    const area = ref("");
-    const address = ref("");
+
 
     const currentStep = ref("register");
     const verificationCodes = ref(["", "", "", "", ""]);
@@ -568,9 +563,6 @@ export default {
       isFormValid,
       date,
       DSPR,
-      city,
-      area,
-      address
     };
   },
 };

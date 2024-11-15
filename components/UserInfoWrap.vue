@@ -11,6 +11,19 @@
         />
       </div>
 
+      <!-- 電話欄位 不可選 -->
+      <div class="phoneGroup" v-if="phoneShow">
+        <img class="icon1" src="../assets/imgs/phone.svg" alt="" />
+        <input type="text" :value="phone" disabled />
+        <img class="icon2" src="../assets/imgs/nowrap.svg" alt="" />
+      </div>
+
+      <!-- 信箱輸入 -->
+      <div class="emailGroup" v-if="emailShow">
+        <img class="icon1" src="../assets/imgs/mail.svg" alt="" />
+        <input type="email" placeholder="請輸入您的信箱" />
+      </div>
+
       <!-- 身高輸入 -->
       <div class="heightGroup">
         <img class="icon1" src="../assets/imgs/height.svg" alt="" />
@@ -35,6 +48,7 @@
           <option value="1">男生</option>
           <option value="2">女生</option>
         </select>
+        <img class="icon2" src="../assets/imgs/arrowDown.svg" />
       </div>
 
       <!-- 生日選擇 -->
@@ -71,7 +85,8 @@
         <img class="icon2" src="../assets/imgs/arrowDown.svg" />
       </div>
 
-      <div class="addressGroup">
+      <!-- 地址 -->
+      <div class="addressGroup" v-if="addressShow">
         <div class="city">
           <select
             v-model="selectedCity"
@@ -91,7 +106,7 @@
         </div>
         <div class="area">
           <select v-model="selectedArea" :class="{ selected: selectedArea }">
-            <option value="" disabled selected hidden>鎮地區</option>
+            <option value="" disabled selected hidden>鄉鎮地區</option>
             <option
               v-for="area in filteredAreas"
               :key="area.AreaName"
@@ -131,6 +146,9 @@ export default {
     sex: String,
     DSPR: String,
     date: String,
+    phoneShow: false,
+    addressShow: false,
+    emailShow: false,
   },
   setup(props, { emit }) {
     const localName = ref(props.name || "");
@@ -145,6 +163,7 @@ export default {
     const selectedCity = ref("");
     const selectedArea = ref("");
     const filteredAreas = ref([]);
+    const phone = ref("");
 
     onMounted(async () => {
       try {
@@ -175,7 +194,7 @@ export default {
       selectedCity.value = userData.City || "";
       selectedArea.value = userData.Zone || "";
       inputAddress.value = userData.Address || "";
-
+      phone.value = userData.Mobile || "";
       if (selectedCity.value) {
         updateAreas(true);
       }
@@ -256,6 +275,7 @@ export default {
       submitForm,
       isSubmitDisabled,
       formatDate,
+      phone,
     };
   },
 };
@@ -271,23 +291,25 @@ export default {
   }
 
   .custom-select {
-    -webkit-appearance: none; 
-    -moz-appearance: none; 
-    appearance: none; 
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
     background: url("../assets/imgs/arrow-down.svg") no-repeat right 10px center;
     background-size: 12px;
-    color: #999; 
+    color: #999;
     font-size: 1.2rem;
   }
 
   .custom-select.selected {
-    color: #1E1E1E; 
+    color: #1e1e1e;
   }
 
   .nameGroup,
   .heightGroup,
   .weightGroup,
-  .dateGroup {
+  .dateGroup,
+  .phoneGroup,
+  .emailGroup {
     position: relative;
     margin-bottom: 1rem;
 
@@ -297,6 +319,15 @@ export default {
       left: 2px;
       transform: translateY(-50%);
       z-index: 2;
+    }
+
+    .icon2 {
+      position: absolute;
+      top: 50%;
+      right: 2px;
+      transform: translateY(-50%);
+      z-index: 1;
+      width: 18px;
     }
   }
 
@@ -341,7 +372,7 @@ export default {
       }
 
       .selected {
-        color: #1E1E1E; 
+        color: #1e1e1e;
       }
 
       .icon2 {
@@ -415,7 +446,8 @@ export default {
 
   input[type="text"],
   input[type="password"],
-  input[type="number"] {
+  input[type="number"],
+  input[type="email"] {
     outline: none;
     border: none;
     border-bottom: 1px solid #ccc;
@@ -424,7 +456,7 @@ export default {
     padding-left: 36px;
     padding-bottom: 16px;
     padding-top: 16px;
-    color: #1E1E1E;
+    color: #1e1e1e;
     &::placeholder {
       color: #999;
       font-family: Inter;
