@@ -124,6 +124,7 @@
           @update:DSPR="DSPR = $event"
           @submit="addUser"
         />
+        <div class="mbDiv"></div>
       </div>
     </div>
   </div>
@@ -827,5 +828,8 @@ export default {
       }
     }
   }
+}
+.mbDiv{
+  margin-bottom: 2rem;
 }
 </style>
