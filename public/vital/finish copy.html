@@ -379,39 +379,31 @@
   </body>
 </html>
 
-<script>
+<!-- <script>
   let upbioage, upba2, upba4;
 
   let storedData = JSON.parse(sessionStorage.getItem("Age"));
 
   if (storedData.length > 0) {
+    // 建立三個陣列來分別存儲 A, B, C
     let aValues = [];
     let bValues = [];
     let cValues = [];
     let dValues = [];
     let eValues = [];
-    let fValues = [];
-    let gValues = [];
-    let hValues = [];
 
     // 遍歷 storedData，取出正值並分別存入三個陣列
     storedData.forEach((data) => {
-      let [a, b, c, d, e, f, g, h] = data;
+      let [a, b, c, d, e] = data;
       if (a > 0 && a < 100) aValues.push(a);
       if (b > 0 && b < 100) bValues.push(b);
       if (c > 0 && c < 100) cValues.push(c);
       if (d > 0 && d < 100) dValues.push(d);
       if (e > 0 && e < 100) eValues.push(e);
-      if (f > 0) fValues.push(f);
-      if (g > 0) gValues.push(g);
-      if (h > 0) hValues.push(h);
     });
 
     console.log("PLF=", dValues);
     console.log("PHF=", eValues);
-    console.log("LF=", fValues);
-    console.log("HF=", gValues);
-    console.log("SDNNI=", hValues);
 
     // 計算平均值的函數
     const calculateAverage = (values) => {
@@ -445,23 +437,19 @@
     upba4 = trimmedMean(cValues, trimPercent);
     pLF = trimmedMean(dValues, trimPercent);
     pHF = trimmedMean(eValues, trimPercent);
-    aSDNN = trimmedMean(hValues, trimPercent);
-    let SDNNc = aSDNN * Math.exp(-0.02263 * (60 - result.hr));
-    aSDNNage = SDNNdetermineAge(SDNNc, infodata.sex);
 
     console.log("result:" + sessionStorage.getItem("result"));
 
     // 顯示結果
     console.log(
-      `upbioage: ${aSDNNage}, upba2: ${upba2}, upba4: ${upba4}, SYN%: ${pLF}`
+      `upbioage: ${upbioage}, upba2: ${upba2}, upba4: ${upba4}, SYN%: ${pLF}`
     );
-    SaveHRV2(result, upba2, upba4, aSDNNage, pLF, pHF);
+    //SaveHRV2(result,upba2,upba4);
   } else {
     console.log("No stored data available.");
     alert("No stored data available.");
   }
-</script>
-
+</script> -->
 
 <script>
   //dom獲取元素
