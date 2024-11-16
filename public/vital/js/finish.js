@@ -33,15 +33,15 @@ const VIEW_FINISH_SP_PREFIX = "images/icon_sp_";
 let _finish_vital_result_printer = null;
 let infodata = JSON.parse(sessionStorage.getItem("data"));
 
-const SetSPowerValue = (id, value) => {
-  if (value >= 0) {
-    document.getElementById(id).src = `${VIEW_FINISH_SP_PREFIX}${value}.svg`;
-    show(id);
-  } else {
-    document.getElementById(id).src = "";
-    hide(id);
-  }
-};
+// const SetSPowerValue = (id, value) => {
+//   if (value >= 0) {
+//     document.getElementById(id).src = `${VIEW_FINISH_SP_PREFIX}${value}.svg`;
+//     show(id);
+//   } else {
+//     document.getElementById(id).src = "";
+//     hide(id);
+//   }
+// };
 
 function SDNNdetermineAge(SDNN, gender) {
   const ageGroups = [
@@ -130,12 +130,12 @@ const GoToFinish = () => {
   let pHF = 0;
   let aSDNN = 0;
   let aSDNNage = 0;
-  SetSPowerValue(VIEW_FINISH_ACTIVITY, result.activity);
-  SetSPowerValue(VIEW_FINISH_EQUILIBRIUM, result.equilibrium);
-  SetSPowerValue(VIEW_FINISH_HEALTH, result.health);
-  SetSPowerValue(VIEW_FINISH_METABOLISM, result.metabolism);
-  SetSPowerValue(VIEW_FINISH_RELAXATION, result.relaxation);
-  SetSPowerValue(VIEW_FINISH_SLEEP, result.sleep);
+  // SetSPowerValue(VIEW_FINISH_ACTIVITY, result.activity);
+  // SetSPowerValue(VIEW_FINISH_EQUILIBRIUM, result.equilibrium);
+  // SetSPowerValue(VIEW_FINISH_HEALTH, result.health);
+  // SetSPowerValue(VIEW_FINISH_METABOLISM, result.metabolism);
+  // SetSPowerValue(VIEW_FINISH_RELAXATION, result.relaxation);
+  // SetSPowerValue(VIEW_FINISH_SLEEP, result.sleep);
 
   let storedData = JSON.parse(sessionStorage.getItem("Age"));
   console.log(storedData);
