@@ -117,19 +117,19 @@ const InitFinish = () => {
   document.getElementById(VIEW_FINISH_BTN_HOME).onclick = () => GoToBasicInfo();
   document.getElementById(VIEW_BACK_BTN_HOME).onclick = () => GoToBasicInfo();
 };
-let upbioage = 0;
 
-let upba2 = 0;
-let upba4 = 0;
-let pLF = 0;
-let pHF = 0;
-let aSDNN = 0;
-let aSDNNage = 0;
 const GoToFinish = () => {
   // _finish_spower_chart.reset();
   _finish_vital_result_printer.reset();
   let result = JSON.parse(sessionStorage.getItem("result"));
+  let upbioage = 0;
 
+  let upba2 = 0;
+  let upba4 = 0;
+  let pLF = 0;
+  let pHF = 0;
+  let aSDNN = 0;
+  let aSDNNage = 0;
   SetSPowerValue(VIEW_FINISH_ACTIVITY, result.activity);
   SetSPowerValue(VIEW_FINISH_EQUILIBRIUM, result.equilibrium);
   SetSPowerValue(VIEW_FINISH_HEALTH, result.health);
@@ -256,5 +256,5 @@ const GoToBasicInfo = () => {
 
 document.addEventListener("DOMContentLoaded", () => {
   InitFinish();
-  GoToFinish();
+  // GoToFinish();
 });
