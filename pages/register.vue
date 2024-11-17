@@ -573,14 +573,17 @@ export default {
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-size: cover;
-  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  place-items: center;
   width: 100%;
+  min-height: 100vh;
+  padding: 4.25rem 1rem;
+
   .registerGroup {
-    padding-top: 4.25rem;
-    width: 90%;
+    width: 100%;
     height: 100%;
-    margin: 0 auto;
-    max-width: 576px;
+    max-width: 768px;
 
     .raphaelIconImgGroup {
       text-align: center;

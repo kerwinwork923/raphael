@@ -80,8 +80,13 @@
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-size: cover;
+  display: flex;
+  flex-direction: column;
+  place-items: center;
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
+  padding: 4.25rem 1rem;
+
   .raphaelIconImgGroup {
     text-align: center;
 
@@ -102,11 +107,9 @@
   }
 
   .loginGroup {
-    padding-top: 4.25rem;
-    width: 90%;
-    margin: 0 auto;
-    max-width: 576px;
+    width: 100%;
     height: 100%;
+    max-width: 768px;
   }
 
   .loginWrap {
