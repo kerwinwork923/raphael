@@ -348,7 +348,7 @@
     </div>
   </div>
 </template>
-<style lang="scss">
+<style lang="scss" scoped>
 .userRecoreWrap {
   max-width: 768px;
   margin: 0 auto;

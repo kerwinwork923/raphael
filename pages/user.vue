@@ -269,13 +269,14 @@ export default {
   background-size: cover;
   min-height: 100vh;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  place-items: center;
 
   .userGroup {
-    padding-top: 4.25rem;
-    max-width: 90%;
-    margin: 0 auto;
-    width: 90%;
-    max-width: 768px;
+    max-width: 768px; 
+    padding: 0 1rem;
+    padding-top: 0.75rem;
 
     .userInfo {
       display: flex;
@@ -292,7 +293,6 @@ export default {
         .topText {
           font-size: 1.5rem;
           color: #1e1e1e;
-          font-weight: bold;
         }
 
         .score {
@@ -324,7 +324,7 @@ export default {
     }
 
     .bannerGroup {
-      margin-top: 30px;
+      margin-top: 0.75rem;
       position: relative;
       width: 100%;
 

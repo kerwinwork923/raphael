@@ -17,27 +17,18 @@
 
 <style lang="scss">
 .raphaelNavbar {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
-  width: 90%;
-  z-index: 999;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem 1rem;
   max-width: 768px;
-  height: 50px;
 
-  // background-color: $raphael-gray-200;
-  .logoGroup {
-    width: 65%;
-  }
   .optionGroup {
     display: flex;
-    justify-content: flex-end;
-    gap: 2px;
-    width: 35%;
-    margin-right: auto;
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem;
     img {
       cursor: pointer;
     }

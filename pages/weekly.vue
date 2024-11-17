@@ -134,17 +134,19 @@ export default {
 
 <style lang="scss">
 .weeklyRecord {
-  min-height: 100vh;
-  width: 100%;
   background-color: $raphael-gray-100;
-
-  padding-bottom: 66px;
+  display: flex;
+  flex-direction: column;
+  place-items: center;
   width: 100%;
+  min-height: 100vh;
+  padding: 0 1rem;
+  padding-bottom: 66px;
 
   .weeklyQAGroup {
     max-width: 768px;
-    margin: 0 auto;
-    padding: 0 1rem;
+    width: 100%;
+    padding: 0.75rem 0;
   }
 
   .subListTitle {

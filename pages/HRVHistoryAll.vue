@@ -138,7 +138,7 @@
     </div>
 
     <div class="itemsGroup">
-      <div class="item item2" @click="openHRVAlert">
+      <div class="item" @click="openHRVAlert">
         <div class="topTitle">檢測</div>
         <div class="bottomTitle">HRV</div>
         <img src="../assets/imgs/faceIcon.svg" alt="" />
@@ -353,16 +353,22 @@ export default {
 <style lang="scss" scoped>
 .HRVHistoryAll {
   background-color: $raphael-gray-100;
-  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  place-items: center;
   width: 100%;
+  min-height: 100vh;
   padding: 0 1rem;
+  padding-bottom: 66px;
 }
 .titleGroup {
-  padding-top: 1.5rem;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  width: 100%;
+  padding: 0.75rem 0;
+  max-width: 768px;
 
   img {
     position: absolute;
@@ -381,14 +387,17 @@ export default {
 .detectWrap {
   background-color: #fff;
   height: 70vh;
-  margin-top: 1.5rem;
   border-radius: 12px;
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  width: 100%;
+  max-width: 768px;
   
   .detectSelectGroup {
     display: flex;
     align-items: center;
     justify-content: end;
-    padding: 0.75rem;
+    padding: 0.75rem 0;
     color: #666;
   }
   .yearSelectGroup {
@@ -484,7 +493,6 @@ export default {
       color: #1e1e1e;
       display: flex;
       justify-content: space-between;
-      padding: 0 12px;
       .timeGroup {
         display: flex;
         align-items: center;
@@ -553,14 +561,15 @@ export default {
 }
 
 .paginationWrap {
-  text-align: center;
   display: flex;
-  justify-content: center;
   justify-content: space-between;
   color: #666;
   font-size: 18px;
+  text-align: center;
   max-width: 768px;
-  margin: 0.85rem auto 0;
+  width: calc(100% - 32px);
+  margin-top: 1.5rem;
+  
   .preBtnGroup,
   .nextBtnGroup {
     display: flex;
@@ -613,22 +622,20 @@ export default {
 
 .itemsGroup {
   display: grid;
-  padding: 1.5rem 0;
-  padding-bottom: 4.25rem;
+  width: 100%;
+  max-width: 768px;
+  margin-top: 32px;
 
   .item {
-    background-color: #999;
+    background-color: $raphael-purple-200;
     position: relative;
+    cursor: pointer;
     border-radius: 0.75rem;
     padding: 0.75rem;
-    opacity: 0.15;
+    opacity: 1;
     color: #fff;
     line-height: 1.2;
     overflow: hidden;
-
-    a {
-      color: #fff;
-    }
     transition: 0.15s all ease;
 
     .topTitle {
@@ -649,18 +656,11 @@ export default {
       }
     }
 
-    img {
+    &>img{
       position: absolute;
-      right: 0.75rem;
-      top: 50%;
-      transform: translateY(-50%);
+      top: 1rem;
+      right: 1rem;
     }
-  }
-
-  .item2 {
-    background-color: $raphael-purple-200;
-    opacity: 1;
-    cursor: pointer;
     &:hover {
       filter: brightness(0.95);
     }

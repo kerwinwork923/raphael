@@ -180,16 +180,22 @@ export default {
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-size: cover;
-  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  place-items: center;
   width: 100%;
+  min-height: 100vh;
   padding: 0 1rem;
+  padding-bottom: 66px;
 }
 .titleGroup {
-  padding-top: 1.5rem;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  width: 100%;
+  padding: 0.75rem 0;
+  max-width: 768px;
 
   img {
     position: absolute;
@@ -208,14 +214,17 @@ export default {
 .detectWrap {
   background-color: #fff;
   height: 70vh;
-  margin-top: 1.5rem;
   border-radius: 12px;
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  width: 100%;
+  max-width: 768px;
 
   & > h3 {
     display: flex;
     align-items: center;
     justify-content: start;
-    padding: 0.75rem;
+    padding: 0.75rem 0;
     color: #666;
   }
   .detectList {
@@ -252,7 +261,7 @@ export default {
       color: #1e1e1e;
       display: flex;
       justify-content: space-between;
-      padding: 0 12px;
+      
       .timeGroup {
         display: flex;
         align-items: center;
@@ -338,23 +347,23 @@ export default {
   font-style: normal;
   font-weight: 400;
   letter-spacing: 0.09px;
-  display: inline-block;
   width: 100%;
+  max-width: 768px;
   margin-top: 1.5rem;
 }
 
 .goToHRVBtn {
-  width: 100%;
-  border-radius: 8px;
   background: #74bc1f;
+  width: calc(100% - 32px);
+  max-width: 768px;
+  border-radius: 8px;
   font-size: 18px;
   color: #fff;
   border: none;
-  padding: 12px;
-  font-style: normal;
   font-weight: 400;
   line-height: 100%;
   letter-spacing: 0.09px;
-  margin: 24px 0 66px 0;
+  margin-top: 32px;
+  padding: 12px;
 }
 </style>

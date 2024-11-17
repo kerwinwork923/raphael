@@ -16,7 +16,7 @@
   display: grid;
   grid-auto-flow: column;
   gap: 4px;
-  padding-top: 4.25rem;
+  
   a {
     text-decoration: none;
   }

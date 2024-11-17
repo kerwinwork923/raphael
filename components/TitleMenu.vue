@@ -38,22 +38,21 @@ export default {
 
 <style lang="scss">
 .titleMenu {
-  position: absolute;
-  top: 1rem;
+  position: relative;
   display: flex;
-  width: 100%;
-
+  align-items: center;
   justify-content: center;
-  svg {
+  width: 100%;
+  padding: 0.75rem 0;
+  max-width: 768px;
+
+  &>a {
     position: absolute;
-    left: 3.5%;
-    top: 50%;
-    transform: translateY(-35%);
+    left: 0;
     cursor: pointer;
   }
   h1 {
     font-size: 1.5rem;
-    font-weight: 400;
     letter-spacing: 0.5px;
     color: #1e1e1e;
     letter-spacing: 1px;

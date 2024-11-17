@@ -75,10 +75,20 @@ export default {
 
 <style lang="scss">
 .userRecord {
-  min-height: 100vh;
-  width: 100%;
   background-color: $raphael-gray-100;
+  display: flex;
+  flex-direction: column;
+  place-items: center;
+  width: 100%;
+  min-height: 100vh;
+  padding: 0 1rem;
   padding-bottom: 66px;
+  
+  .userRecoreWrap{
+    max-width: 768px;
+    width: 100%;
+    padding: 0.75rem 0;
+  }
 }
 
 .pleaseWrite {

@@ -131,48 +131,37 @@ export default {
 </script>
 
 <style lang="scss">
-h1 {
-  font-family: "Noto Sans";
-  font-size: 1.5rem;
-  font-weight: 400;
-  letter-spacing: 0.5px;
-  margin-top: 8px;
-  text-align: center;
-  color: $raphael-purple-200;
-}
+
 .changeMemberWrap {
+  display: flex;
+  flex-direction: column;
+  place-items: center;
   width: 100%;
   min-height: 100vh;
   background: $raphael-gray-100;
-  padding-bottom: 1.5rem;
+  padding: 0 1rem;
+  padding-bottom: 66px;
   .changeMemberGroup {
-    width: 90%;
-    margin: 0 auto;
-    max-width: 576px;
-    padding-top: 60px;
-    text-align: center;
+    padding: 0.75rem 0;
+    width: 100%;
+    max-width: 768px;
   }
 
   .logoutBtn {
-    max-width: 576px;
     background-color: #ec4f4f;
-    border: none;
-    display: flex;
-    margin-top: 30px;
-    padding: 12px;
-    width: 100%;
-    border-radius: 8px;
-    color: #fff;
     display: flex;
     justify-content: center;
     align-items: center;
+    border: none;
+    width: 100%;
+    max-width: 768px;
+    border-radius: 8px;
+    color: #fff;
     cursor: pointer;
     font-size: 1rem;
     letter-spacing: 0.5px;
-    font-weight: 400;
-    margin: 0 auto;
-    margin-top: 1rem;
-    width: 90%;
+    margin-top: 32px;
+    padding: 12px;
   }
 }
 </style>

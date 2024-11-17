@@ -287,7 +287,6 @@ export default {
     background-color: #fff;
     border-radius: 1rem;
     padding: 1rem;
-    margin-top: 1.5rem;
   }
 
   .custom-select {
@@ -469,7 +468,7 @@ export default {
     background-color: $raphael-green-400;
     border: none;
     display: flex;
-    margin-top: 30px;
+    margin-top: 24px;
     padding: 12px;
     width: 100%;
     border-radius: 8px;
