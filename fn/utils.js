@@ -190,6 +190,47 @@ export const formatTimestamp2 = (timestampStr) => {
 
   return `${formattedMonth}/${formattedDay}`;
 };
+// 月份/時間 小時
+export const formatTimestamp3 = (timestampStr) => {
+  if (typeof timestampStr !== "string" || timestampStr.length !== 14) {
+    console.error(
+      "Invalid timestamp format. Expected a 14-character string:",
+      timestampStr
+    );
+    return "Invalid timestamp format";
+  }
+
+  // 擷取年份、月份、日期、時間
+  const year = timestampStr.slice(0, 4);
+  const month = timestampStr.slice(4, 6);
+  const day = timestampStr.slice(6, 8);
+  const hour = timestampStr.slice(8, 10);
+  const minute = timestampStr.slice(10, 12);
+  const second = timestampStr.slice(12, 14);
+
+  // 格式化月份和日期
+  const formattedMonth = parseInt(month, 10);
+  const formattedDay = parseInt(day, 10);
+
+  // 建立日期物件以驗證日期
+  const date = new Date(year, formattedMonth - 1, formattedDay);
+
+  if (
+    date.getFullYear() !== parseInt(year, 10) ||
+    date.getMonth() !== formattedMonth - 1 ||
+    date.getDate() !== formattedDay
+  ) {
+    console.error(
+      "Invalid date constructed from timestamp:",
+      year,
+      formattedMonth,
+      formattedDay
+    );
+    return "Invalid date";
+  }
+
+  return `${formattedMonth}/${formattedDay} ${hour}:${minute}`;
+};
 
 export const formatTimestampMDH = (timestampStr) => {
   if (

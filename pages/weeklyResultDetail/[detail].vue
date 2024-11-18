@@ -1,96 +1,86 @@
 <template>
-  <div class="resultWrap">
-    <!-- Top section: Display result info and severity -->
+  <!-- <RaphaelLoading v-if="theLatestData" /> -->
+
+  <div class="resultWrapDetail">
+
+    <TitleMenu Text="結果分析" link="/weekly" />
     <div class="resultTopGroup">
       <div class="resultInfo">
         <div class="resultHintText">
-          {{
-            store.diffDays >= 1 ? store.diffDays + "天" : store.diffDays
-          }}後再進行檢測
+          {{ diffDays >= 1 ? diffDays + "天" : diffDays }}後再進行檢測
         </div>
         <h5 class="subText">
-          (本次){{ formatTimestamp(store.theLatestHistory.CheckTime) }}
+          (本次){{ formatTimestamp(theLatestHistory?.CheckTime) }}
         </h5>
 
         <div class="severity">
           <div class="imgGroup">
-            <img :src="computedEmoji2(store.theLatestData.TotalScore)" alt="" />
+            <img :src="computedEmoji2(theLatestData?.TotalScore)" alt="" />
             <div class="scoreText">
               <div
                 class="score"
                 :style="{
-                  color: scoreColorFn(store.theLatestData.TotalScore, sex),
+                  color: scoreColorFn(theLatestData?.TotalScore, sex),
                 }"
               >
-                {{ store.theLatestData.TotalScore }}
+                {{ theLatestData?.TotalScore }}
               </div>
               <h5>分</h5>
             </div>
           </div>
 
           <ProgressBar
-            :score="store.theLatestData.TotalScore"
-            :colorProp="scoreColorFn(store.theLatestData.TotalScore, sex)"
+            :score="theLatestData?.TotalScore"
+            :colorProp="scoreColorFn(theLatestData?.TotalScore, sex)"
           />
 
           <h6 class="severityText">
             嚴重程度 :
             <span
               :style="{
-                color: scoreColorFn(store.theLatestData.TotalScore, sex),
+                color: scoreColorFn(theLatestData?.TotalScore, sex),
               }"
             >
-              {{ store.theLatestData.TotalRatio }}({{
-                store.theLatestData.TotalDesc
-              }})
+              {{ theLatestData?.TotalRatio }}({{ theLatestData?.TotalDesc }})
             </span>
           </h6>
-        </div> 
+        </div>
 
-        <h5
-          class="subText nextSunText"
-          v-if="store.theLatestHistoryPre.CheckTime"
-        >
-          (前次){{ formatTimestamp(store.theLatestHistoryPre.CheckTime) }}
-        </h5>
+        <!-- <h5 class="subText nextSunText" v-if="theLatestHistoryPre?.CheckTime">
+          (前次){{ formatTimestamp(theLatestHistoryPre?.CheckTime) }}
+        </h5> -->
 
-        <!-- Previous check data -->
-        <div class="severity" v-if="store.theLatestDataPreData.TotalScore">
+        <div class="severity" v-if="theLatestDataPreData?.TotalScore">
           <div class="imgGroup">
             <img
-              :src="computedEmoji2(store.theLatestDataPreData.TotalScore)"
+              :src="computedEmoji2(theLatestDataPreData?.TotalScore)"
               alt=""
             />
             <div class="scoreText">
               <div
                 class="score"
                 :style="{
-                  color: scoreColorFn(
-                    store.theLatestDataPreData.TotalScore,
-                    sex
-                  ),
+                  color: scoreColorFn(theLatestDataPreData?.TotalScore, sex),
                 }"
               >
-                {{ store.theLatestDataPreData?.TotalScore }}
+                {{ theLatestDataPreData?.TotalScore }}
               </div>
               <h5>分</h5>
             </div>
           </div>
           <ProgressBar
-            :score="store.theLatestDataPreData.TotalScore"
-            :colorProp="
-              scoreColorFn(store.theLatestDataPreData.TotalScore, sex)
-            "
+            :score="theLatestDataPreData.TotalScore"
+            :colorProp="scoreColorFn(theLatestDataPreData?.TotalScore, sex)"
           />
           <h6 class="severityText">
             嚴重程度 :
             <span
               :style="{
-                color: scoreColorFn(store.theLatestDataPreData.TotalScore, sex),
+                color: scoreColorFn(theLatestDataPreData?.TotalScore, sex),
               }"
             >
-              {{ store.theLatestDataPreData.TotalRatio }}({{
-                store.theLatestDataPreData.TotalDesc
+              {{ theLatestDataPreData?.TotalRatio }}({{
+                theLatestDataPreData?.TotalDesc
               }})
             </span>
           </h6>
@@ -99,7 +89,6 @@
       <img class="doctorImg" src="../assets/imgs/doctor.png" alt="" />
     </div>
 
-    <!-- Symptom analysis results -->
     <h4 class="textResultText">以下為分類系統的自律神經分析結果</h4>
     <div class="resultListGroup">
       <SymptomResult
@@ -112,121 +101,10 @@
         :symptomPreRatio="symptom.ratioPre"
         :symptomDesc="symptom.desc"
         :symptomPreDesc="symptom.descPre"
-        :theLatestHistory="store.theLatestHistory"
-        :theLatestHistoryPre="store.theLatestHistoryPre"
+        :theLatestHistory="theLatestHistory"
+        :theLatestHistoryPre="theLatestHistoryPre"
         :sex="sex"
       />
-    </div>
-
-    <!-- Symptom by severity -->
-    <h4 class="textResultText">您最近常出現的症狀依困擾程度排序</h4>
-    <div class="symptomWrap">
-      <div class="symptomGroup">
-        <div class="symptomButtonGroup">
-          <button
-            class="symptomBtn"
-            :class="{ symptomBtnActive: selectedType === 'Serious' }"
-            @click="changeSymptomLavel('Serious')"
-          >
-            嚴重
-          </button>
-          <button
-            class="symptomBtn"
-            :class="{ symptomBtnActive: selectedType === 'Middle' }"
-            @click="changeSymptomLavel('Middle')"
-          >
-            中等
-          </button>
-          <button
-            class="symptomBtn"
-            :class="{ symptomBtnActive: selectedType === 'Light' }"
-            @click="changeSymptomLavel('Light')"
-          >
-            輕微
-          </button>
-        </div>
-        <div
-          class="symptomMenuList symptomSeriousList"
-          v-if="selectedType == 'Serious'"
-        >
-          <div
-            class="symptomList"
-            v-for="(item, index) in store.theLatestData.Serious"
-            :key="index"
-          >
-            {{ item }}
-          </div>
-        </div>
-
-        <div
-          class="symptomMenuList symptomMeddleList"
-          v-if="selectedType == 'Middle'"
-        >
-          <div
-            class="symptomList"
-            v-for="(item, index) in store.theLatestData.Middle"
-            :key="index"
-          >
-            {{ item }}
-          </div>
-        </div>
-
-        <div
-          class="symptomMenuList symptomLightList"
-          v-if="selectedType == 'Light'"
-        >
-          <div
-            class="symptomList"
-            v-for="(item, index) in store.theLatestData.Light"
-            :key="index"
-          >
-            {{ item }}
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Detection records -->
-    <h4 class="textResultText">檢測紀錄</h4>
-    <div class="detectionWrap">
-      <router-link
-        class="detection"
-        v-for="(history, index) in store.History"
-        :key="index"
-        :to="`/weeklyResultDetail/${history.preAID}`"
-      >
-
-        <div class="cGroup">
-          <img class="img" src="../assets/imgs/calendar.png" alt="" />
-        </div>
-        <h3 class="detectionDate">
-          {{ formatTimestamp3(history?.CheckTime) }}
-        </h3>
-        <div class="detectionGroup">
-          <div class="scroeTotal">
-            <h5>總分</h5>
-            <div
-              :style="{
-                color: scoreColorFn(computedScore(history?.Score), sex),
-              }"
-              class="totalScore"
-            >
-              {{ history?.Score }}
-            </div>
-          </div>
-          <div class="seriousDegreeGroup">
-            <h5>嚴重程度</h5>
-            <div
-              :style="{
-                color: scoreColorFn(computedScore(history?.Score), sex),
-              }"
-              class="seriousScore"
-            >
-              {{ history.Ratio }}
-            </div>
-          </div>
-        </div>
-      </router-link>
     </div>
 
     <div class="backToUserBtnGroupWeekly">
@@ -238,50 +116,157 @@
 </template>
 
 <script>
-import { ref, reactive } from "vue";
-import SymptomResult from "./SymptomResult.vue";
-import { useWeeklyRecord } from "../stores/weeklyQA";
-import { useRouter } from "vue-router";
-import { scoreColorFn, computedEmoji2, formatTimestamp } from "../fn/utils";
-import { formatTimestamp3 } from "../fn/utils";
+import { ref, reactive, onMounted } from "vue";
+import SymptomResult from "~/components/SymptomResult.vue";
+import { useWeeklyRecord } from "~/stores/weeklyQA";
+import { useRoute } from "vue-router";
+import axios from "axios";
+import { scoreColorFn, computedEmoji2, formatTimestamp } from "~/fn/utils";
+import { formatTimestamp3 } from "~/fn/utils";
+import TitleMenu from "~/components/TitleMenu.vue";
 export default {
   components: { SymptomResult },
   setup() {
     const store = useWeeklyRecord();
-
     console.log(store.diffenenceObj);
+    const route = useRoute();
+    const theLatestHistory = ref();
+    const theLatestHistoryPre = ref();
+    const theLatestData = ref();
+    const theLatestDataPreData = ref();
+    const preAID = ref();
+    const diffenenceObj = ref();
 
-    const router = useRouter();
- 
+    const AID = route.params.detail;
+
+    const API_API_ANSFirstDetail = async () => {
+      const localData = localStorage.getItem("userData");
+      const { MID, Token, MAID, Mobile } = localData
+        ? JSON.parse(localData)
+        : {};
+      try {
+        const response1 = await axios.post(
+          "https://23700999.com:8081/HMA/API_ANSFirstDetail.jsp",
+          {
+            MID: String(MID),
+            Token: String(Token),
+            MAID: String(MAID),
+            Mobile: String(Mobile),
+            AID: AID,
+          }
+        );
+        if (response1.status === 200) {
+          console.log(response1);
+          theLatestData.value = response1.data;
+          theLatestHistoryPre.value = response1.data.History[0];
+          if (response1.data.History> 0) {
+            // preAID.value = response1.data.History.find(item=> item.preAID)
+
+            const response2 = await axios.post(
+              "https://23700999.com:8081/HMA/API_ANSFirstDetail.jsp",
+              {
+                MID: String(MID),
+                Token: String(Token),
+                MAID: String(MAID),
+                Mobile: String(Mobile),
+                AID: preAID.value,
+              }
+            );
+            theLatestDataPreData.value = response2.data;
+           
+          }
+          console.log(theLatestData.value);
+        }
+      } catch (err) {
+        console.error("Error while fetching questions:", err);
+        throw err;
+      }
+    };
+
+    const API_API_ANSSecond = async () => {
+      const localData = localStorage.getItem("userData");
+      const { MID, Token, MAID, Mobile } = localData
+        ? JSON.parse(localData)
+        : {};
+
+      try {
+        const response1 = await axios.post(
+          "https://23700999.com:8081/HMA/API_ANSSecond.jsp",
+          {
+            MID: String(MID),
+            Token: String(Token),
+            MAID: String(MAID),
+            Mobile: String(Mobile),
+            AID: AID,
+            preAID: preAID?.value,
+          }
+        );
+
+        if (response1.status === 200) {
+          console.log(response1.data);
+          diffenenceObj.value = {
+            ...response1.data,
+            C1Symptom: "精神系統",
+            C2Symptom: "神經系統",
+            C3Symptom: "血液循環系統",
+            C4Symptom: "感官系統",
+            C5Symptom: "心肺系統",
+            C6Symptom: "過敏免疫系統",
+            C7Symptom: "腸胃系統",
+            C8Symptom: "泌尿生殖系統",
+            C9Symptom: "血液循環系統",
+          };
+          if (response1.data.CheckTime) {
+            theLatestHistory.value = {
+              CheckTime: response1.data.CheckTime,
+            };
+          }
+        }
+      } catch (err) {
+        console.error("Error while fetching questions:", err);
+        throw err;
+      }
+    };
+
+    const fetchAPI = async () => {
+      await API_API_ANSFirstDetail();
+      await API_API_ANSSecond();
+    };
+
+    fetchAPI();
+
     const backToUser = () => router.push({ name: "user" });
-
     const localData = localStorage.getItem("userData");
     const parsedData = localData ? JSON.parse(localData) : null;
     const sex = ref(parsedData?.Sex || null);
-
     const selectedType = ref("Serious");
-
     const changeSymptomLavel = (lavel) => {
       selectedType.value = lavel;
     };
     const symptoms = reactive([]);
     watchEffect(() => {
+      // 清空 symptoms
       symptoms.length = 0;
-      for (let i = 1; i <= 9; i++) {
-        symptoms.push({
-          name: store.diffenenceObj[`C${i}Symptom`] || "",
-          difference: store.diffenenceObj[`C${i}Difference`] || "",
-          solve: store.diffenenceObj[`C${i}Solve`] || "",
-          ratio: store.theLatestData[`C${i}Ratio`] || "",
-          ratioPre: store.theLatestDataPreData[`C${i}Ratio`] || "",
-          desc: store.theLatestData[`C${i}Desc`] || "",
-          descPre: store.theLatestDataPreData[`C${i}Desc`] || "",
-        });
+      console.log(diffenenceObj.value);
+
+      // 確保 diffenenceObj 和 theLatestData 等有數據時才進行處理
+      if (diffenenceObj.value && theLatestData.value) {
+        for (let i = 1; i <= 9; i++) {
+          symptoms.push({
+            name: diffenenceObj.value[`C${i}Symptom`] || "",
+            difference: diffenenceObj.value[`C${i}Difference`] || "",
+            solve: diffenenceObj.value[`C${i}Solve`] || "",
+            ratio: theLatestData.value[`C${i}Ratio`] || "",
+            ratioPre: theLatestDataPreData.value?.[`C${i}Ratio`] || "",
+            desc: theLatestData.value[`C${i}Desc`] || "",
+            descPre: theLatestDataPreData.value?.[`C${i}Desc`] || "",
+          });
+        }
       }
     });
+
     const computedScore = (scoreStr) =>
       parseFloat(scoreStr.replace("%", "")) || 0;
-
     return {
       store,
       formatTimestamp,
@@ -294,13 +279,22 @@ export default {
       computedEmoji2,
       scoreColorFn,
       formatTimestamp3,
+      TitleMenu,
+      theLatestData,
+      diffenenceObj,
+      theLatestDataPreData,
+      theLatestDataPreData,
+      theLatestHistory,
+      theLatestHistoryPre,
     };
   },
 };
 </script>
 
 <style lang="scss">
-.resultWrap {
+.resultWrapDetail {
+  padding: 0 5%;
+  background-color: $raphael-gray-100;
   .resultTopGroup {
     display: grid;
     grid-auto-flow: column;

@@ -1,4 +1,5 @@
 <template>
+  <QRCodeScanner v-if="qrcodeShow" />
   <div class="raphaelUser">
     <HRVAlert />
     <RaphaelLoading v-if="loading" />
@@ -21,7 +22,11 @@
           </div>
         </div>
         <div class="qrCode">
-          <!-- <img src="../assets/imgs/qrcode.svg" alt="" /> -->
+          <img
+            @click="toggleQrcodeShow"
+            src="../assets/imgs/qrcode.svg"
+            alt=""
+          />
         </div>
       </div>
       <div class="bannerGroup">
@@ -92,8 +97,10 @@ import { useCommon } from "../stores/common";
 import banner1 from "@/assets/imgs/banner-1.png";
 import banner2 from "@/assets/imgs/banner-2.png";
 
+import QRCodeScanner from "~/components/QRCodeScanner.vue";
+
 export default {
-  components: { Navbar, RaphaelLoading, HRVAlert, DSPRSelect },
+  components: { Navbar, RaphaelLoading, HRVAlert, DSPRSelect, QRCodeScanner },
   setup() {
     const router = useRouter();
     const loading = ref(true);
@@ -101,7 +108,12 @@ export default {
     const currentSlide = ref(0);
     const slides = ref([banner1, banner2]);
 
+    const qrcodeShow = ref(false);
     const store = useCommon();
+
+    const toggleQrcodeShow = () => {
+      qrcodeShow.value = !qrcodeShow.value;
+    };
 
     const getUserData = async () => {
       const localData = localStorage.getItem("userData");
@@ -145,7 +157,6 @@ export default {
         }
       } catch (err) {
         alert("取得會員資料失敗");
-        
       } finally {
         setTimeout(() => {
           loading.value = false;
@@ -256,6 +267,8 @@ export default {
       slides,
       goHRVHistory,
       store,
+      toggleQrcodeShow,
+      qrcodeShow,
     };
   },
 };
@@ -274,7 +287,7 @@ export default {
   place-items: center;
 
   .userGroup {
-    max-width: 768px; 
+    max-width: 768px;
     padding: 0 1rem;
     padding-top: 0.75rem;
 
