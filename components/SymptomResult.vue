@@ -3,7 +3,7 @@
     <div class="titleGroup">
       <h3>{{ symptomName }}</h3>
 
-      <div class="pGroup" v-if="theLatestHistoryPre.CheckTime">
+      <div class="pGroup" v-if="theLatestHistoryPre?.CheckTime">
         <p v-if="differenceValue > 0" class="upIcon">▲</p>
         <p v-else-if="differenceValue < 0" class="downIcon">▼</p>
         <div v-if="differenceValue > 0" class="titleScoreUp">
@@ -37,8 +37,8 @@
       </span>
     </h4>
 
-    <div class="nextGroup" v-if="theLatestHistoryPre.CheckTime">
-      <h5>(前次){{ formatTimestamp(theLatestHistoryPre.CheckTime || "") }}</h5>
+    <div class="nextGroup" v-if="theLatestHistoryPre?.CheckTime">
+      <h5>(前次){{ formatTimestamp(theLatestHistoryPre?.CheckTime || "") }}</h5>
       <ProgressBar2
         :score="computedScore(symptomPreRatio)"
         :emojiSrc="computedEmoji2(computedScore(symptomPreRatio))"

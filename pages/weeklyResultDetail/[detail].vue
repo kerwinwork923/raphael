@@ -2,13 +2,9 @@
   <!-- <RaphaelLoading v-if="theLatestData" /> -->
 
   <div class="resultWrapDetail">
-
     <TitleMenu Text="結果分析" link="/weekly" />
     <div class="resultTopGroup">
       <div class="resultInfo">
-        <div class="resultHintText">
-          {{ diffDays >= 1 ? diffDays + "天" : diffDays }}後再進行檢測
-        </div>
         <h5 class="subText">
           (本次){{ formatTimestamp(theLatestHistory?.CheckTime) }}
         </h5>
@@ -157,24 +153,47 @@ export default {
         );
         if (response1.status === 200) {
           console.log(response1);
-          theLatestData.value = response1.data;
-          theLatestHistoryPre.value = response1.data.History[0];
-          if (response1.data.History> 0) {
-            // preAID.value = response1.data.History.find(item=> item.preAID)
 
-            const response2 = await axios.post(
-              "https://23700999.com:8081/HMA/API_ANSFirstDetail.jsp",
-              {
-                MID: String(MID),
-                Token: String(Token),
-                MAID: String(MAID),
-                Mobile: String(Mobile),
-                AID: preAID.value,
+          // 儲存目前資料
+          theLatestData.value = response1.data;
+          theLatestHistory.value = {
+            CheckTime: response1.data.CheckTime,
+          };
+
+          // 檢查 History 是否存在且有內容
+          if (response1.data.History.length>0)  {
+        
+
+            try {
+              // 發送第二次請求
+              const response2 = await axios.post(
+                "https://23700999.com:8081/HMA/API_ANSFirstDetail.jsp",
+                {
+                  MID: String(MID),
+                  Token: String(Token),
+                  MAID: String(MAID),
+                  Mobile: String(Mobile),
+                  AID: response1.data.History[0].preAID, 
+                }
+              );
+
+              // 處理第二次請求的回應
+              if (response2.status === 200) {
+                theLatestDataPreData.value = response2.data;
+                theLatestHistoryPre.value = {
+                  CheckTime: response2.data.CheckTime,
+                };
+              } else {
+                console.error("Response2 status not OK:", response2.status);
               }
-            );
-            theLatestDataPreData.value = response2.data;
-           
+            } catch (error) {
+              console.error("Error in response2 request:", error);
+            }
+          } else {
+            console.warn("No History data available.");
           }
+
+          // 印出目前資料
           console.log(theLatestData.value);
         }
       } catch (err) {
@@ -216,11 +235,6 @@ export default {
             C8Symptom: "泌尿生殖系統",
             C9Symptom: "血液循環系統",
           };
-          if (response1.data.CheckTime) {
-            theLatestHistory.value = {
-              CheckTime: response1.data.CheckTime,
-            };
-          }
         }
       } catch (err) {
         console.error("Error while fetching questions:", err);

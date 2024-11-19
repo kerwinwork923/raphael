@@ -126,6 +126,8 @@ export default {
         this.cend = searchParams.get("End");
         this.mobile = searchParams.get("Mobile");
 
+   
+
         // 將所有查詢參數轉換為物件格式
         this.allParams = {};
         for (const [key, value] of searchParams.entries()) {
