@@ -1,18 +1,16 @@
 <template>
-  <div class="symptomChoose">
-    <div class="symptomChooseBox">
-      <div
-        class="symptomChoose"
-        v-for="symptom in sortedSymptoms"
-        :key="symptom.id"
-        :class="{
-          symptomChooseActive: symptom.active,
-        }"
-        @click="toggleActive(symptom.id)"
-      >
-        <img :src="symptom.active ? activeImage : inactiveImage" alt="" />
-        <h3>{{ symptom.question }}</h3>
-      </div>
+  <div class="symptomChooseBox">
+    <div
+      class="symptomChoose"
+      v-for="symptom in sortedSymptoms"
+      :key="symptom.id"
+      :class="{
+        symptomChooseActive: symptom.active,
+      }"
+      @click="toggleActive(symptom.id)"
+    >
+      <img :src="symptom.active ? activeImage : inactiveImage" alt="" />
+      <h3>{{ symptom.question }}</h3>
     </div>
   </div>
 </template>
@@ -59,32 +57,31 @@ export default {
 };
 </script>
 
-<style lang="scss">
-.symptomChoose {
+<style lang="scss" scoped>
+.symptomChooseBox {
   background-color: #fff;
   border-radius: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 12px;
+  height: calc(100vh - 290px);
+  overflow-y: auto;
 
-  .symptomChooseBox {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    padding: 12px;
+  .symptomChoose {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    padding: 6px 12px;
+    background-color: #eee;
+    font-size: 1.125rem;
+    color: #ccc;
+    border-radius: 8px;
+    cursor: pointer;
 
-    .symptomChoose {
-      display: flex;
-      gap: 2px;
-      align-items: center;
-      padding: 6px 12px;
-      background-color: #eee;
-      font-size: 1.125rem;
-      color: #ccc;
-      border-radius: 8px;
-      cursor: pointer;
-
-      &.symptomChooseActive {
-        background-color: #74bc1f;
-        color: #fff;
-      }
+    &.symptomChooseActive {
+      background-color: #74bc1f;
+      color: #fff;
     }
   }
 }

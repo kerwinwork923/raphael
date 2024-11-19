@@ -1,50 +1,51 @@
 <template>
-  <div
-    class="scoreBarGroupWrap"
-    v-for="(QAData, index) in paginatedQuestions"
-    :key="QAData.question"
-  >
-    <div class="scrollBarTitle">
-      {{ startIndex + index + 1 }}. {{ QAData.question }}
-    </div>
-    <!-- <div class="hashTag">#{{ QAData.category }}</div> -->
-    <div class="scoreBarGroup">
-      <div
-        class="scoreBar"
-        :style="{
-          width:
-            QAData.selectScore !== undefined
-              ? `${QAData.selectScore * 33.33}%`
-              : '0%',
-          backgroundColor: '#74bc1f',
-        }"
-      ></div>
-      <div
-        class="remainingBar"
-        :style="{
-          width:
-            QAData.selectScore !== undefined
-              ? `${(3 - QAData.selectScore) * 33.33}%`
-              : '100%',
-          backgroundColor: '#b3b3b3',
-        }"
-      ></div>
-      <div class="numberGroup">
+  <div class="QAList">
+    <div
+      class="scoreBarGroupWrap"
+      v-for="(QAData, index) in paginatedQuestions"
+      :key="QAData.question"
+    >
+      <div class="scrollBarTitle">
+        {{ startIndex + index + 1 }}. {{ QAData.question }}
+      </div>
+      <!-- <div class="hashTag">#{{ QAData.category }}</div> -->
+      <div class="scoreBarGroup">
         <div
-          v-for="value in 4"
-          :key="value"
-          class="number"
-          :class="{ selected: QAData.selectScore >= value - 1 }"
-          @click="setScore(QAData, value - 1)"
-        >
-          {{ value-1 }}
+          class="scoreBar"
+          :style="{
+            width:
+              QAData.selectScore !== undefined
+                ? `${QAData.selectScore * 33.33}%`
+                : '0%',
+            backgroundColor: '#74bc1f',
+          }"
+        ></div>
+        <div
+          class="remainingBar"
+          :style="{
+            width:
+              QAData.selectScore !== undefined
+                ? `${(3 - QAData.selectScore) * 33.33}%`
+                : '100%',
+            backgroundColor: '#b3b3b3',
+          }"
+        ></div>
+        <div class="numberGroup">
+          <div
+            v-for="value in 4"
+            :key="value"
+            class="number"
+            :class="{ selected: QAData.selectScore >= value - 1 }"
+            @click="setScore(QAData, value - 1)"
+          >
+            {{ value-1 }}
+          </div>
         </div>
       </div>
+
+      <div class="scoreText">{{ getLabel(QAData.selectScore) }}</div>
     </div>
-
-    <div class="scoreText">{{ getLabel(QAData.selectScore) }}</div>
   </div>
-
   <!-- <button @click="store.API_ANSOnlineQSaveAns">測試按鈕</button> -->
 </template>
 
@@ -101,7 +102,11 @@ export default defineComponent({
 });
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
+.QAList{
+  height: calc(100vh - 290px);
+  overflow-y: auto;
+}
 .scoreBarGroupWrap {
   background-color: #fff;
   margin-bottom: 0.75rem;

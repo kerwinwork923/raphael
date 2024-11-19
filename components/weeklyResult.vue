@@ -187,7 +187,8 @@
     </div>
 
     <!-- Detection records -->
-    <h4 class="textResultText" v-if="store.History>0">檢測紀錄</h4>
+    <!-- <h4 class="textResultText" v-if="store.History>0">檢測紀錄</h4> -->
+    <h4 class="textResultText">檢測紀錄</h4>
     <div class="detectionWrap">
       <router-link
         class="detection"
@@ -620,8 +621,9 @@ export default {
 }
 
 .backToUserBtnGroupWeekly {
-  margin-top: 1.25rem;
   width: 100%;
+  margin-top: 1.5rem;
+  padding-bottom: 4.25rem;
 }
 .backToUserBtnWeekly {
   background-color: $raphael-green-400;

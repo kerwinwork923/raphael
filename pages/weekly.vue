@@ -141,41 +141,33 @@ export default {
   width: 100%;
   min-height: 100vh;
   padding: 0 1rem;
-  padding-bottom: 66px;
 
   .weeklyQAGroup {
     max-width: 768px;
     width: 100%;
-    padding: 0.75rem 0 64px;
+    padding: 0.75rem 0 0;
   }
 
   .subListTitle {
     color: #666;
-    margin-top: 1.25rem;
-    letter-spacing: 0.5px;
     font-weight: 400;
-    margin-bottom: 0.75rem;
+    line-height: 25.9px;
+    letter-spacing: 0.5px;
+    margin: 0.75rem 0 0.5rem 0;
   }
   .subListActive {
     color: #ec4f4f;
   }
 
   .weeklyBtnGroup {
-    position: fixed;
-    bottom: 0%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    background-color: $raphael-gray-100;
-    text-align: center;
-    z-index: 100;
+    background-color: #F6F6F6;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 3%;
-    padding: 0.75rem 0 66px;
+    gap: 0.75rem;
     max-width: 768px;
     width: 100%;
+    padding: 0.75rem 0 4.25rem 0;
     touch-action: manipulation;
   }
   .weeklyBtn {
@@ -189,8 +181,6 @@ export default {
     font-weight: 400;
     letter-spacing: 0.5px;
     transition: 0.25s ease;
-    width: 44%;
-    padding: 0;
     padding: 8px;
     cursor: pointer;
     &:disabled {
