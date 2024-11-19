@@ -349,14 +349,14 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
       if (this.theLatestHistory.CheckTime) {
         const currentDate = new Date();
         const lastTestDateStr = this.theLatestHistory.CheckTime;
-        const year = parseInt(lastTestDateStr.substring(0, 4), 10);
-        const month = parseInt(lastTestDateStr.substring(4, 6), 10) - 1;
-        const day = parseInt(lastTestDateStr.substring(6, 8), 10);
-        const hours = parseInt(lastTestDateStr.substring(8, 10), 10);
-        const minutes = parseInt(lastTestDateStr.substring(10, 12), 10);
-        const seconds = parseInt(lastTestDateStr.substring(12, 14), 10);
     
-        const lastTestDate = new Date(year, month, day, hours, minutes, seconds);
+        // 將日期和時間從格式 "2024/11/18 15:42" 中解析出來
+        const [datePart, timePart] = lastTestDateStr.split(" ");
+        const [year, month, day] = datePart.split("/").map(Number);
+        const [hours, minutes] = timePart.split(":").map(Number);
+    
+        // 建立日期物件
+        const lastTestDate = new Date(year, month - 1, day, hours, minutes);
     
         if (!isNaN(lastTestDate.getTime())) {
           const diffTime = currentDate - lastTestDate;
@@ -392,6 +392,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         await this.getQues();
       }
     },
+    
     
 
     // 比較前後次

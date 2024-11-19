@@ -109,127 +109,131 @@ export const computedText = (score, sex) => {
 };
 
 export const formatTimestamp = (timestampStr) => {
-  // Check if the input is a valid string and has the expected length of 14
-  if (typeof timestampStr !== "string" || timestampStr.length !== 14) {
-    console.error(
-      "Invalid timestamp format. Expected a 14-character string:",
-      timestampStr
-    );
-    return "Invalid timestamp format"; // Return a friendly message or handle it accordingly
-  }
-
-  // Attempt to extract components from the timestamp string
-  const year = timestampStr.slice(0, 4);
-  const month = timestampStr.slice(4, 6);
-  const day = timestampStr.slice(6, 8);
-  const hour = timestampStr.slice(8, 10);
-  const minute = timestampStr.slice(10, 12);
-  const second = timestampStr.slice(12, 14);
-
-  // Validate the date using the Date constructor
-  const formattedMonth = parseInt(month, 10);
-  const formattedDay = parseInt(day, 10);
-  const date = new Date(year, formattedMonth - 1, formattedDay);
-
+  // 檢查輸入是否為有效的字串且符合格式 "YYYY/MM/DD HH:mm"
   if (
-    date.getFullYear() !== parseInt(year, 10) ||
-    date.getMonth() !== formattedMonth - 1 ||
-    date.getDate() !== formattedDay
+    typeof timestampStr !== "string" || 
+    !/^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/.test(timestampStr)
   ) {
     console.error(
-      "Invalid date constructed from timestamp:",
-      year,
-      formattedMonth,
-      formattedDay
+      "Invalid timestamp format. Expected format 'YYYY/MM/DD HH:mm':",
+      timestampStr
     );
-    return "Invalid date"; // Handle invalid date case
+    return ""; // 回傳友好的錯誤訊息
   }
 
-  // Return the formatted timestamp string
-  return `${year}/${formattedMonth}/${formattedDay}`;
+  try {
+    // 解析輸入的日期與時間
+    const [datePart, timePart] = timestampStr.split(" ");
+    const [year, month, day] = datePart.split("/").map(Number);
+    const [hour, minute] = timePart.split(":").map(Number);
+
+    // 驗證日期是否有效
+    const date = new Date(year, month - 1, day, hour, minute);
+    if (
+      date.getFullYear() !== year ||
+      date.getMonth() !== month - 1 ||
+      date.getDate() !== day
+    ) {
+      throw new Error("");
+    }
+
+    // 格式化回傳的日期字串
+    const formattedMonth = month.toString().padStart(2, "0");
+    const formattedDay = day.toString().padStart(2, "0");
+    const formattedHour = hour.toString().padStart(2, "0");
+    const formattedMinute = minute.toString().padStart(2, "0");
+
+    return `${year}/${formattedMonth}/${formattedDay} ${formattedHour}:${formattedMinute}`;
+  } catch (error) {
+    console.error(error.message, timestampStr);
+    return ""; // 處理錯誤情況
+  }
 };
+
 
 // 月份/天
 export const formatTimestamp2 = (timestampStr) => {
-  if (typeof timestampStr !== "string" || timestampStr.length !== 14) {
-    console.error(
-      "Invalid timestamp format. Expected a 14-character string:",
-      timestampStr
-    );
-    return "Invalid timestamp format";
-  }
-
-  // 擷取年份、月份、日期、時間
-  const year = timestampStr.slice(0, 4);
-  const month = timestampStr.slice(4, 6);
-  const day = timestampStr.slice(6, 8);
-  const hour = timestampStr.slice(8, 10);
-  const minute = timestampStr.slice(10, 12);
-  const second = timestampStr.slice(12, 14);
-
-  // 格式化月份和日期
-  const formattedMonth = parseInt(month, 10);
-  const formattedDay = parseInt(day, 10);
-
-  // 建立日期物件以驗證日期
-  const date = new Date(year, formattedMonth - 1, formattedDay);
-
+  // 檢查輸入是否為有效的字串且符合格式 "YYYY/MM/DD HH:mm"
   if (
-    date.getFullYear() !== parseInt(year, 10) ||
-    date.getMonth() !== formattedMonth - 1 ||
-    date.getDate() !== formattedDay
+    typeof timestampStr !== "string" || 
+    !/^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/.test(timestampStr)
   ) {
     console.error(
-      "Invalid date constructed from timestamp:",
-      year,
-      formattedMonth,
-      formattedDay
+      "Invalid timestamp format. Expected format 'YYYY/MM/DD HH:mm':",
+      timestampStr
     );
-    return "Invalid date";
+    return ""; // 回傳友好的錯誤訊息
   }
 
-  return `${formattedMonth}/${formattedDay}`;
+  try {
+    // 解析輸入的日期與時間
+    const [datePart, timePart] = timestampStr.split(" ");
+    const [year, month, day] = datePart.split("/").map(Number);
+    const [hour, minute] = timePart.split(":").map(Number);
+
+    // 驗證日期是否有效
+    const date = new Date(year, month - 1, day, hour, minute);
+    if (
+      date.getFullYear() !== year ||
+      date.getMonth() !== month - 1 ||
+      date.getDate() !== day
+    ) {
+      throw new Error("");
+    }
+
+    // 格式化回傳的日期字串
+    const formattedMonth = month.toString().padStart(2, "0");
+    const formattedDay = day.toString().padStart(2, "0");
+    const formattedHour = hour.toString().padStart(2, "0");
+    const formattedMinute = minute.toString().padStart(2, "0");
+
+    return `${formattedMonth}/${formattedDay}`;
+  } catch (error) {
+    console.error(error.message, timestampStr);
+    return ""; // 處理錯誤情況
+  }
 };
 // 月份/時間 小時
 export const formatTimestamp3 = (timestampStr) => {
-  if (typeof timestampStr !== "string" || timestampStr.length !== 14) {
-    console.error(
-      "Invalid timestamp format. Expected a 14-character string:",
-      timestampStr
-    );
-    return "Invalid timestamp format";
-  }
-
-  // 擷取年份、月份、日期、時間
-  const year = timestampStr.slice(0, 4);
-  const month = timestampStr.slice(4, 6);
-  const day = timestampStr.slice(6, 8);
-  const hour = timestampStr.slice(8, 10);
-  const minute = timestampStr.slice(10, 12);
-  const second = timestampStr.slice(12, 14);
-
-  // 格式化月份和日期
-  const formattedMonth = parseInt(month, 10);
-  const formattedDay = parseInt(day, 10);
-
-  // 建立日期物件以驗證日期
-  const date = new Date(year, formattedMonth - 1, formattedDay);
-
+  // 檢查輸入是否為有效的字串且符合格式 "YYYY/MM/DD HH:mm"
   if (
-    date.getFullYear() !== parseInt(year, 10) ||
-    date.getMonth() !== formattedMonth - 1 ||
-    date.getDate() !== formattedDay
+    typeof timestampStr !== "string" || 
+    !/^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/.test(timestampStr)
   ) {
     console.error(
-      "Invalid date constructed from timestamp:",
-      year,
-      formattedMonth,
-      formattedDay
+      "Invalid timestamp format. Expected format 'YYYY/MM/DD HH:mm':",
+      timestampStr
     );
-    return "Invalid date";
+    return ""; // 回傳友好的錯誤訊息
   }
 
-  return `${formattedMonth}/${formattedDay} ${hour}:${minute}`;
+  try {
+    // 解析輸入的日期與時間
+    const [datePart, timePart] = timestampStr.split(" ");
+    const [year, month, day] = datePart.split("/").map(Number);
+    const [hour, minute] = timePart.split(":").map(Number);
+
+    // 驗證日期是否有效
+    const date = new Date(year, month - 1, day, hour, minute);
+    if (
+      date.getFullYear() !== year ||
+      date.getMonth() !== month - 1 ||
+      date.getDate() !== day
+    ) {
+      throw new Error("");
+    }
+
+    // 格式化回傳的日期字串
+    const formattedMonth = month.toString().padStart(2, "0");
+    const formattedDay = day.toString().padStart(2, "0");
+    const formattedHour = hour.toString().padStart(2, "0");
+    const formattedMinute = minute.toString().padStart(2, "0");
+
+    return `${formattedMonth}/${formattedDay} ${formattedHour}:${formattedMinute}` ;
+  } catch (error) {
+    console.error(error.message, timestampStr);
+    return ""; // 處理錯誤情況
+  }
 };
 
 export const formatTimestampMDH = (timestampStr) => {
