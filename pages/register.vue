@@ -168,7 +168,6 @@ export default {
     const date = ref("");
     const DSPR = ref("");
 
-
     const currentStep = ref("register");
     const verificationCodes = ref(["", "", "", "", ""]);
     const verificationInput = ref([]);
@@ -512,7 +511,6 @@ export default {
             Sex: sex.value,
             Birthday: birthday,
             DSPR: DSPR.value || "",
-          
           }
         );
 
@@ -831,10 +829,11 @@ export default {
     }
   }
 }
-.mbDiv{
+.mbDiv {
   margin-bottom: 2rem;
 }
-.mtDiv{
+.mtDiv {
   margin-top: 0.75rem;
+  padding-top: 0.75rem;
 }
 </style>
