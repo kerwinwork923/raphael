@@ -65,7 +65,7 @@ export default {
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   padding: 12px;
-  height: calc(100vh - 290px);
+  height: calc(100vh - 314px);
   overflow-y: auto;
 
   .symptomChoose {

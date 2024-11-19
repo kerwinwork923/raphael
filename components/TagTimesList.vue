@@ -67,6 +67,8 @@ export default {
 .tagTimesList {
   display: grid;
   gap: 0.75rem;
+  height: calc(100vh - 290px);
+  overflow-y: auto;
 
   &>.timesList {
     background-color: #fff;
