@@ -224,7 +224,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: start;
-    padding: 0.75rem 0;
+    padding: 0 0 0.75rem 0;
     color: #666;
   }
   .detectList {
