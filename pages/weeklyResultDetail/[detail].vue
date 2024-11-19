@@ -2,7 +2,7 @@
   <!-- <RaphaelLoading v-if="theLatestData" /> -->
 
   <div class="resultWrapDetail">
-    <TitleMenu Text="結果分析" link="/weekly" />
+    <TitleMenu Text="結果分析" link="/weekly" :scrollToBottom="true" />
     <div class="resultTopGroup">
       <div class="resultInfo">
         <h5 class="subText">
@@ -249,7 +249,7 @@ export default {
 
     fetchAPI();
 
-    const backToUser = () => router.push({ name: "user" });
+    const backToUser = () => {window.location.href="/user"};
     const localData = localStorage.getItem("userData");
     const parsedData = localData ? JSON.parse(localData) : null;
     const sex = ref(parsedData?.Sex || null);
@@ -307,7 +307,7 @@ export default {
 
 <style lang="scss">
 .resultWrapDetail {
-  padding: 0 5%;
+  padding: 0 5% 2rem;
   background-color: $raphael-gray-100;
   .resultTopGroup {
     display: grid;

@@ -167,7 +167,7 @@ const GoToFinish = () => {
     console.log("PHF=", eValues);
     console.log("LF=", fValues);
     console.log("HF=", gValues);
-    console.log("SDNNI=", hValues);
+    console.log("SDNN=", hValues);
 
     // 計算平均值的函數
     const calculateAverage = (values) => {
@@ -219,7 +219,7 @@ const GoToFinish = () => {
 
   _finish_vital_result_printer.update({
     hr: result.hr,
-    hrv: result.hrv_indices.SDNNI,
+    hrv: result.hrv_indices.SDNN,
     sbp: result.sbp,
     dbp: result.dbp,
     rr: result.rr,
