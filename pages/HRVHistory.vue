@@ -354,7 +354,7 @@ export default {
 
 .goToHRVBtn {
   background: #74bc1f;
-  width: calc(100% - 32px);
+  width: 100%;
   max-width: 768px;
   border-radius: 8px;
   font-size: 18px;

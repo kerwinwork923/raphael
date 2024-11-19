@@ -567,7 +567,7 @@ export default {
   font-size: 18px;
   text-align: center;
   max-width: 768px;
-  width: calc(100% - 32px);
+  width: 100%;
   margin-top: 1.5rem;
   
   .preBtnGroup,
