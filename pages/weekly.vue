@@ -173,7 +173,7 @@ export default {
     justify-content: center;
     align-items: center;
     gap: 3%;
-    padding: 3% 0;
+    padding: 0.75rem 0 66px;
     max-width: 768px;
     width: 100%;
     touch-action: manipulation;
