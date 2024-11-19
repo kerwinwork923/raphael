@@ -115,6 +115,7 @@
         </div>
       </div>
       <div v-if="currentStep === 'info'">
+        <div class="mtDIv"></div>
         <UserInfoForm
           @update:name="name = $event"
           @update:height="height = $event"
@@ -832,5 +833,8 @@ export default {
 }
 .mbDiv{
   margin-bottom: 2rem;
+}
+.mtDiv{
+  margin-top: 0.75rem;
 }
 </style>
