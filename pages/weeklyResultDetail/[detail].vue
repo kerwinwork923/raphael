@@ -1,5 +1,5 @@
 <template>
-  <!-- <RaphaelLoading v-if="theLatestData" /> -->
+  <RaphaelLoading v-if="loading" />
 
   <div class="resultWrapDetail">
     <TitleMenu Text="結果分析" link="/weekly" :scrollToBottom="true" />
@@ -120,6 +120,7 @@ import axios from "axios";
 import { scoreColorFn, computedEmoji2, formatTimestamp } from "~/fn/utils";
 import { formatTimestamp3 } from "~/fn/utils";
 import TitleMenu from "~/components/TitleMenu.vue";
+
 export default {
   components: { SymptomResult },
   setup() {
@@ -132,6 +133,7 @@ export default {
     const theLatestDataPreData = ref();
     const preAID = ref();
     const diffenenceObj = ref();
+    const loading  = ref();
 
     const AID = route.params.detail;
 
@@ -243,8 +245,10 @@ export default {
     };
 
     const fetchAPI = async () => {
+      loading.value = true
       await API_API_ANSFirstDetail();
       await API_API_ANSSecond();
+      loading.value = false
     };
 
     fetchAPI();
@@ -300,6 +304,7 @@ export default {
       theLatestDataPreData,
       theLatestHistory,
       theLatestHistoryPre,
+      loading
     };
   },
 };

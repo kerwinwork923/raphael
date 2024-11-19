@@ -20,7 +20,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
     theLatestDataPreData: {},
     diffDays: "",
     diffenenceObj: {},
-    History:{}
+    History: {},
   }),
 
   getters: {
@@ -192,9 +192,10 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
       let AnsTimesMap = new Map();
       this.sortedByScore.forEach((question) => {
         // 濾掉次數小於等於 0 的問題
-        if (question.times > 0) {
-          AnsTimesMap.set(`key${question.id + 1}`, String(question.times));
+        if (question.times < 0) {
+          question.times = 0;
         }
+        AnsTimesMap.set(`key${question.id + 1}`, String(question.times));
       });
 
       const ansMapTimesJson = JSON.stringify(Array.from(AnsTimesMap.entries()));
@@ -287,7 +288,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         );
         if (response1.status === 200) {
           //Pinia取得歷史紀錄
-          this.History = response1.data?.History
+          this.History = response1.data?.History;
 
           // 假設大於1以上，紀錄theLatestData、theLatestDataPreData
           if (response1.data.History.length > 1) {
@@ -349,26 +350,26 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
       if (this.theLatestHistory.CheckTime) {
         const currentDate = new Date();
         const lastTestDateStr = this.theLatestHistory.CheckTime;
-    
+
         // 將日期和時間從格式 "2024/11/18 15:42" 中解析出來
         const [datePart, timePart] = lastTestDateStr.split(" ");
         const [year, month, day] = datePart.split("/").map(Number);
         const [hours, minutes] = timePart.split(":").map(Number);
-    
+
         // 建立日期物件
         const lastTestDate = new Date(year, month - 1, day, hours, minutes);
-    
+
         if (!isNaN(lastTestDate.getTime())) {
           const diffTime = currentDate - lastTestDate;
-    
+
           const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
           const diffHours = Math.floor(
             (diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
           );
-    
+
           const remainingDays = 12 - diffDays;
           let remainingHours = 0;
-    
+
           if (remainingDays > 0) {
             if (diffDays === 0) {
               remainingHours = 12 - diffHours;
@@ -379,7 +380,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
           } else {
             this.diffDays = "已經超過12天";
           }
-    
+
           if (diffDays < 12) {
             this.nowState = "result";
             await this.API_API_ANSSecond();
@@ -392,8 +393,6 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         await this.getQues();
       }
     },
-    
-    
 
     // 比較前後次
     async API_API_ANSSecond() {

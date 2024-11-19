@@ -262,6 +262,8 @@ export default {
     const selectedType = ref("Serious");
 
     const changeSymptomLavel = (lavel) => {
+      console.log("Changing level to:", lavel);
+  
       selectedType.value = lavel;
     };
     const symptoms = reactive([]);
