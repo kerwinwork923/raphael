@@ -146,7 +146,7 @@ export default {
   .weeklyQAGroup {
     max-width: 768px;
     width: 100%;
-    padding: 0.75rem 0;
+    padding: 0.75rem 0 64px;
   }
 
   .subListTitle {
