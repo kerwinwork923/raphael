@@ -114,7 +114,7 @@
           </button>
         </div>
       </div>
-      <div v-if="currentStep === 'info'">
+      <div class="UserInfoFormWrap" v-if="currentStep === 'info'">
         <div class="mtDIv"></div>
         <UserInfoForm
           @update:name="name = $event"
@@ -832,8 +832,7 @@ export default {
 .mbDiv {
   margin-bottom: 2rem;
 }
-.mtDiv {
-  margin-top: 0.75rem;
+.UserInfoFormWrap {
   padding-top: 0.75rem;
 }
 </style>

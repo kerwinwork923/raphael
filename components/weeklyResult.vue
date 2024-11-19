@@ -45,7 +45,7 @@
               }})
             </span>
           </h6>
-        </div> 
+        </div>
 
         <h5
           class="subText nextSunText"
@@ -187,7 +187,7 @@
     </div>
 
     <!-- Detection records -->
-    <h4 class="textResultText">檢測紀錄</h4>
+    <h4 class="textResultText" v-if="store.History>0">檢測紀錄</h4>
     <div class="detectionWrap">
       <router-link
         class="detection"
@@ -195,7 +195,6 @@
         :key="index"
         :to="`/weeklyResultDetail/${history.preAID}`"
       >
-
         <div class="cGroup">
           <img class="img" src="../assets/imgs/calendar.png" alt="" />
         </div>
@@ -252,7 +251,7 @@ export default {
     console.log(store.diffenenceObj);
 
     const router = useRouter();
- 
+
     const backToUser = () => router.push({ name: "user" });
 
     const localData = localStorage.getItem("userData");
@@ -262,8 +261,6 @@ export default {
     const selectedType = ref("Serious");
 
     const changeSymptomLavel = (lavel) => {
-      console.log("Changing level to:", lavel);
-  
       selectedType.value = lavel;
     };
     const symptoms = reactive([]);

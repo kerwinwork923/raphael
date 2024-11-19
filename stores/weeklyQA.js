@@ -289,36 +289,29 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         if (response1.status === 200) {
           //Pinia取得歷史紀錄
           this.History = response1.data?.History;
+          if (response1.data.AID != "") {
+            this.theLatestHistory = response1.data;
+            this.theLatestData = response1.data;
+            //假如有兩筆
+            if (response1.data.History.length > 0) {
+              this.theLatestHistoryPre = response1.data.History[0];
+              const response2 = await axios.post(
+                "https://23700999.com:8081/HMA/API_ANSFirstDetail.jsp",
+                {
+                  MID: String(MID),
+                  Token: String(Token),
+                  MAID: String(MAID),
+                  Mobile: String(Mobile),
+                  AID: response1.data.History[0].preAID,
+                }
+              );
 
-          // 假設大於1以上，紀錄theLatestData、theLatestDataPreData
-          if (response1.data.History.length > 1) {
-            this.theLatestHistory = response1.data.History[0];
-            const response2 = await axios.post(
-              "https://23700999.com:8081/HMA/API_ANSFirstDetail.jsp",
-              {
-                MID: String(MID),
-                Token: String(Token),
-                MAID: String(MAID),
-                Mobile: String(Mobile),
-                AID: response1.data.History[0].preAID,
-              }
-            );
-            this.theLatestData = response2.data;
-            this.theLatestHistoryPre = response1.data.History[1];
-            const response3 = await axios.post(
-              "https://23700999.com:8081/HMA/API_ANSFirstDetail.jsp",
-              {
-                MID: String(MID),
-                Token: String(Token),
-                MAID: String(MAID),
-                Mobile: String(Mobile),
-                AID: response1.data.History[1].preAID,
-              }
-            );
-            this.theLatestDataPreData = response3.data;
+              this.theLatestDataPreData = response2.data;
+            }
             await this.checkTestDate();
             await this.API_API_ANSSecond();
           }
+
           //只有一個紀錄theLatestData
           else if (response1.data.History.length > 0) {
             this.theLatestHistory = response1.data.History[0];
@@ -381,7 +374,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
             this.diffDays = "已經超過12天";
           }
 
-          if (diffDays < 12) {
+          if (diffDays > 12) {
             this.nowState = "result";
             await this.API_API_ANSSecond();
             return;
@@ -409,7 +402,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
             Token: String(Token),
             MAID: String(MAID),
             Mobile: String(Mobile),
-            AID: String(this.theLatestHistory?.preAID),
+            AID: String(this.theLatestData?.AID),
             preAID: String(this.theLatestHistoryPre?.preAID),
           }
         );
