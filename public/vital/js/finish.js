@@ -217,25 +217,25 @@ const InitFinish = () => {
 //     alert("No stored data available.");
 //   }
 
-//   _finish_vital_result_printer.update({
-//     hr: result.hr,
-//     hrv: result.hrv_indices.SDNN,
-//     sbp: result.sbp,
-//     dbp: result.dbp,
-//     rr: result.rr,
-//     spo2: result.spo2,
-//     si: result.si,
-//     ans_index_sns: result.ANSIndex.SNS,
-//     ans_index_pns: result.ANSIndex.PNS,
-//     hr_valid: result.signal_quality.hr_hrv > 0.7,
-//     bp_valid: result.signal_quality.bp > 0.6,
-//     rr_valid: result.signal_quality.resp > 0.7,
-//     spo2_valid: result.signal_quality.spo2 > 0.9,
-//     bioage: aSDNNage,
-//     ba2: upba2,
-//     ba4: upba4,
-//     syn: pLF,
-//   });
+  _finish_vital_result_printer.update({
+    hr: result.hr,
+    hrv: result.hrv_indices.SDNNI,
+    sbp: result.sbp,
+    dbp: result.dbp,
+    rr: result.rr,
+    spo2: result.spo2,
+    si: result.si,
+    ans_index_sns: result.ANSIndex.SNS,
+    ans_index_pns: result.ANSIndex.PNS,
+    hr_valid: result.signal_quality.hr_hrv > 0.7,
+    bp_valid: result.signal_quality.bp > 0.6,
+    rr_valid: result.signal_quality.resp > 0.7,
+    spo2_valid: result.signal_quality.spo2 > 0.9,
+    bioage: aSDNNage,
+    ba2: upba2,
+    ba4: upba4,
+    syn: pLF,
+  });
 
 //   // setTimeout(() => {
 //   //   _finish_spower_chart.update({
