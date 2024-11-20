@@ -1,5 +1,5 @@
 <template>
-  <div class="QAList">
+  <div class="QAList" ref="qaList">
     <div
       class="scoreBarGroupWrap"
       v-for="(QAData, index) in paginatedQuestions"
@@ -8,7 +8,6 @@
       <div class="scrollBarTitle">
         {{ startIndex + index + 1 }}. {{ QAData.question }}
       </div>
-      <!-- <div class="hashTag">#{{ QAData.category }}</div> -->
       <div class="scoreBarGroup">
         <div
           class="scoreBar"
@@ -38,24 +37,23 @@
             :class="{ selected: QAData.selectScore >= value - 1 }"
             @click="setScore(QAData, value - 1)"
           >
-            {{ value-1 }}
+            {{ value - 1 }}
           </div>
         </div>
       </div>
-
       <div class="scoreText">{{ getLabel(QAData.selectScore) }}</div>
     </div>
   </div>
-  <!-- <button @click="store.API_ANSOnlineQSaveAns">測試按鈕</button> -->
 </template>
 
 <script>
-import { defineComponent, computed, watch } from "vue";
+import { defineComponent, computed, watch, onMounted, ref } from "vue";
 import { useWeeklyRecord } from "~/stores/weeklyQA.js";
 
 export default defineComponent({
   setup() {
     const store = useWeeklyRecord();
+    const qaList = ref(null);
 
     const currentPage = computed(() => store.currentStep);
     const questionsPerPage = 7;
@@ -86,8 +84,27 @@ export default defineComponent({
       return labels[score] || "";
     };
 
+    const scrollToTop = () => {
+      if (qaList.value) {
+        // 滾動到容器頂部
+        qaList.value.scrollTop = 0;
+
+        // 確保頁面滾動到 .QAList 容器的位置
+        const rect = qaList.value.getBoundingClientRect();
+        const offsetTop = rect.top + window.scrollY;
+        window.scrollTo({
+          top: offsetTop,
+          behavior: "smooth",
+        });
+      }
+    };
+
     watch(currentPage, () => {
-      window.scrollTo(100, 145);
+      scrollToTop(); // 當頁面切換時觸發滾動
+    });
+
+    onMounted(() => {
+      scrollToTop(); // 初始化時滾動到頂部
     });
 
     return {
@@ -97,13 +114,14 @@ export default defineComponent({
       paginatedQuestions,
       currentPage,
       startIndex,
+      qaList,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-.QAList{
+.QAList {
   height: calc(100vh - 293px);
   overflow-y: auto;
 }
@@ -142,7 +160,7 @@ export default defineComponent({
   }
   .remainingBar {
     height: 100%;
-    background-color: #b3b3b3; 
+    background-color: #b3b3b3;
   }
 
   .numberGroup {
@@ -168,7 +186,7 @@ export default defineComponent({
       transition: background-color 0.3s;
 
       &.selected {
-        background-color: #74bc1f; 
+        background-color: #74bc1f;
       }
     }
   }
@@ -176,7 +194,7 @@ export default defineComponent({
 
 .scoreText {
   text-align: center;
-  color: #74bc1f; 
+  color: #74bc1f;
   margin-top: 0.5rem;
 }
 
@@ -192,7 +210,7 @@ export default defineComponent({
     border-radius: 5px;
     cursor: pointer;
     &:disabled {
-      background-color: #b3b3b3; 
+      background-color: #b3b3b3;
       cursor: not-allowed;
     }
   }

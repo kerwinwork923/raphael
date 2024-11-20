@@ -42,9 +42,9 @@
           </h6>
         </div>
 
-        <!-- <h5 class="subText nextSunText" v-if="theLatestHistoryPre?.CheckTime">
+        <h5 class="subText nextSunText" v-if="theLatestHistoryPre?.CheckTime">
           (前次){{ formatTimestamp(theLatestHistoryPre?.CheckTime) }}
-        </h5> -->
+        </h5>
 
         <div class="severity" v-if="theLatestDataPreData?.TotalScore">
           <div class="imgGroup">
