@@ -405,6 +405,8 @@ export default {
         display: flex;
         align-items: center;
         gap: 2px;
+        margin-bottom: 0.5rem;
+        
         .pGroup {
           display: flex;
           align-items: center;
