@@ -29,7 +29,7 @@ export default defineNuxtConfig({
       name: "NeuroPlus神經調節家",
       id: "/",
       short_name: "NeuroPlus",
-      theme_color: "#F6F6F6",
+      theme_color: "transparent",
       background_color: "#ffffff",
       display: "standalone",
       lang: "zh-TW",
