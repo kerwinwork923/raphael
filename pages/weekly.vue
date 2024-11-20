@@ -139,8 +139,10 @@ export default {
   flex-direction: column;
   place-items: center;
   width: 100%;
+  height: 100vh;
   min-height: 100vh;
   padding: 0 1rem;
+  overflow-y: auto;
 
   .weeklyQAGroup {
     max-width: 768px;

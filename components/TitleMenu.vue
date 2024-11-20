@@ -60,13 +60,18 @@
   
   <style lang="scss">
   .titleMenu {
-    position: relative;
+    position: sticky;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: rgba(246,246,246,0.7);
     width: 100%;
     padding: 0.75rem 0;
     max-width: 768px;
+    top: 0;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 10;
   
     & > div {
       position: absolute;
