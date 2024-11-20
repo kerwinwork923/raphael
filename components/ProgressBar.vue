@@ -57,7 +57,7 @@ export default {
   position: relative;    
   display: grid;
   gap: 4px;
-  margin: 0.75rem 0;
+  margin: 0.5rem 0;
   .progress{
     position: relative;
     display: grid;

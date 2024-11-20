@@ -330,11 +330,11 @@ export default {
       box-shadow: 0px -2px 4px 0px rgba(0, 0, 0, 0.25) inset;
 
       .subText {
-        margin-bottom: 0.75rem;
+        margin-bottom: 0.5rem;
       }
 
       .nextSunText {
-        margin-top: 0.75rem;
+        margin-top: 1rem;
       }
 
       .resultHintText {
@@ -407,6 +407,7 @@ export default {
         display: flex;
         align-items: center;
         gap: 2px;
+        margin-bottom: 0.5rem;
         .pGroup {
           display: flex;
           align-items: center;
@@ -432,7 +433,6 @@ export default {
         color: #1e1e1e;
         font-size: 20px;
         letter-spacing: 0.15px;
-        margin-bottom: 0.5rem;
       }
       .resultTagGroup {
         display: flex;
@@ -451,7 +451,8 @@ export default {
       h5 {
         color: #1e1e1e;
         letter-spacing: 0.1px;
-        margin-top: 0.75rem;
+        margin-top: 1rem;
+        margin-bottom: 0.75rem;
       }
       h4 {
         color: #666;

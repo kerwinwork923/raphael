@@ -104,7 +104,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .QAList{
-  height: calc(100vh - 290px);
+  height: calc(100vh - 293px);
   overflow-y: auto;
 }
 .scoreBarGroupWrap {
