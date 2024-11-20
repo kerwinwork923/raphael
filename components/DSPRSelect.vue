@@ -164,8 +164,7 @@ export default {
     cursor: pointer;
   }
   h3 {
-    margin-top: 1rem;
-    text-align: center;
+    text-align: left;
     font-size: 24px;
     font-weight: 400;
     line-height: 100%;
