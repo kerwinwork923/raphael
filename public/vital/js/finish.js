@@ -219,7 +219,7 @@ const GoToFinish = () => {
 
   _finish_vital_result_printer.update({
     hr: result.hr,
-    hrv: result.hrv_indices.SDNN,
+    hrv: result.hrv_indices.SDNNI,
     sbp: result.sbp,
     dbp: result.dbp,
     rr: result.rr,
