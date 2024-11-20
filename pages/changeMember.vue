@@ -137,12 +137,10 @@ export default {
   flex-direction: column;
   place-items: center;
   width: 100%;
-  height: 100vh;
   min-height: 100vh;
   background: $raphael-gray-100;
   padding: 0 1rem;
   padding-bottom: 66px;
-  overflow-x: auto;
   
   .changeMemberGroup {
     padding: 0.75rem 0;
