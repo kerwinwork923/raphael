@@ -7,7 +7,7 @@
           ? '結果分析'
           : '每週評估'
       "
-      link="/"
+      link="/user"
     />
 
     <div class="userRecoreWrap">

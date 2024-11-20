@@ -82,7 +82,7 @@
           </h6>
         </div>
       </div>
-      <img class="doctorImg" src="../assets/imgs/doctor.png" alt="" />
+      <img class="doctorImg" src="~/assets/imgs/doctor.png" alt="" />
     </div>
 
     <h4 class="textResultText">以下為分類系統的自律神經分析結果</h4>
@@ -432,7 +432,6 @@ export default {
         color: #1e1e1e;
         font-size: 20px;
         letter-spacing: 0.15px;
-        margin-bottom: 0.5rem;
       }
       .resultTagGroup {
         display: flex;
