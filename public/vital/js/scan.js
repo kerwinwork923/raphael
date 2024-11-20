@@ -145,9 +145,9 @@ function RMSSDdetermineAge(RMSSD, gender) {
 
 const OnResult = (result) => {
   console.log(JSON.stringify(result));
-  let RMSSDc = result.hrv_indices.RMSSD * Math.exp(-0.03243 * (60 - result.hr));
-  let SDNNc = result.hrv_indices.SDNN * Math.exp(-0.02263 * (60 - result.hr));
-  let RMSSDage = RMSSDdetermineAge(RMSSDc, infodata.sex);
+  //let RMSSDc = result.hrv_indices.RMSSD * Math.exp(-0.03243 * (60 - result.hr));
+  let SDNNc = result.hrv_indices.SDNNI * Math.exp(-0.02263 * (60 - result.hr));
+  //let RMSSDage = RMSSDdetermineAge(RMSSDc, infodata.sex);
   let SDNNage = SDNNdetermineAge(SDNNc, infodata.sex);
 
   console.log(JSON.stringify(nArray));
@@ -164,31 +164,31 @@ const OnResult = (result) => {
       (1.22998789167383e-5 * Math.pow(result.hrv_indices.HF, 2) -
         0.00285801868585652 * result.hrv_indices.HF * result.hr -
         0.000239207626756333 * result.hrv_indices.HF * result.hrv_indices.LF +
-        0.000115433772745047 * result.hrv_indices.HF * result.hrv_indices.SDNN +
+        0.000115433772745047 * result.hrv_indices.HF * result.hrv_indices.SDNNI +
         0.192669128355982 * result.hrv_indices.HF -
         0.00503253900946111 * Math.pow(result.hr, 2) -
         0.00270880024950466 * result.hr * result.hrv_indices.LF +
-        0.0109856786957088 * result.hr * result.hrv_indices.SDNN +
+        0.0109856786957088 * result.hr * result.hrv_indices.SDNNI +
         0.259208120733664 * result.hr -
         0.000103105240872536 * Math.pow(result.hrv_indices.LF, 2) +
-        0.000641149188132378 * result.hrv_indices.LF * result.hrv_indices.SDNN +
+        0.000641149188132378 * result.hrv_indices.LF * result.hrv_indices.SDNNI +
         0.165776939998542 * result.hrv_indices.LF +
-        0.000594377645649714 * Math.pow(result.hrv_indices.SDNN, 2) -
-        0.929727006002682 * result.hrv_indices.SDNN +
+        0.000594377645649714 * Math.pow(result.hrv_indices.SDNNI, 2) -
+        0.929727006002682 * result.hrv_indices.SDNNI +
         20.6746119954053) *
         5,
       (30.05 +
-        -0.161 * result.hrv_indices.SDNN +
+        -0.161 * result.hrv_indices.SDNNI +
         -0.129 * result.hr +
-        0.00182 * Math.pow(result.hrv_indices.SDNN, 2) +
-        -0.00301 * result.hrv_indices.SDNN * result.hr +
+        0.00182 * Math.pow(result.hrv_indices.SDNNI, 2) +
+        -0.00301 * result.hrv_indices.SDNNI * result.hr +
         0.000204 * Math.pow(result.hr, 2)) *
         5, // polynomial regression計算生理年齡 ba4
       result.hrv_indices.PLF,
       result.hrv_indices.PHF,
       result.hrv_indices.LF,
       result.hrv_indices.HF,
-      result.hrv_indices.SDNN,
+      result.hrv_indices.SDNNI,
     ]);
   }
 
@@ -202,7 +202,7 @@ const OnResult = (result) => {
     console.log("SDNNage=", SDNNage);
     _scan_vital_result_printer.update({
       hr: result.hr,
-      hrv: result.hrv_indices.SDNN,
+      hrv: result.hrv_indices.SDNNI,
       sbp: result.sbp,
       dbp: result.dbp,
       rr: result.rr,
@@ -219,27 +219,27 @@ const OnResult = (result) => {
           0.000239207626756333 * result.hrv_indices.HF * result.hrv_indices.LF +
           0.000115433772745047 *
             result.hrv_indices.HF *
-            result.hrv_indices.SDNN +
+            result.hrv_indices.SDNNI +
           0.192669128355982 * result.hrv_indices.HF -
           0.00503253900946111 * Math.pow(result.hr, 2) -
           0.00270880024950466 * result.hr * result.hrv_indices.LF +
-          0.0109856786957088 * result.hr * result.hrv_indices.SDNN +
+          0.0109856786957088 * result.hr * result.hrv_indices.SDNNI +
           0.259208120733664 * result.hr -
           0.000103105240872536 * Math.pow(result.hrv_indices.LF, 2) +
           0.000641149188132378 *
             result.hrv_indices.LF *
-            result.hrv_indices.SDNN +
+            result.hrv_indices.SDNNI +
           0.165776939998542 * result.hrv_indices.LF +
-          0.000594377645649714 * Math.pow(result.hrv_indices.SDNN, 2) -
-          0.929727006002682 * result.hrv_indices.SDNN +
+          0.000594377645649714 * Math.pow(result.hrv_indices.SDNNI, 2) -
+          0.929727006002682 * result.hrv_indices.SDNNI +
           20.6746119954053) *
         5,
       ba4:
         (30.05 +
-          -0.161 * result.hrv_indices.SDNN +
+          -0.161 * result.hrv_indices.SDNNI +
           -0.129 * result.hr +
-          0.00182 * Math.pow(result.hrv_indices.SDNN, 2) +
-          -0.00301 * result.hrv_indices.SDNN * result.hr +
+          0.00182 * Math.pow(result.hrv_indices.SDNNI, 2) +
+          -0.00301 * result.hrv_indices.SDNNI * result.hr +
           0.000204 * Math.pow(result.hr, 2)) *
         5,
       syn: result.hrv_indices.PLF,
