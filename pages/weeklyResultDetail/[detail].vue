@@ -314,8 +314,6 @@ export default {
 .resultWrapDetail {
   padding: 0 5% 2rem;
   background-color: $raphael-gray-100;
-  height: 100vh;
-  overflow-y: auto;
   .resultTopGroup {
     display: grid;
     grid-auto-flow: column;
