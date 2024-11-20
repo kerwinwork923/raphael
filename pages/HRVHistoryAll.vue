@@ -386,7 +386,7 @@ export default {
 
 .detectWrap {
   background-color: #fff;
-  height: 70vh;
+  height: 64vh;
   border-radius: 12px;
   margin-top: 0.75rem;
   padding: 0.75rem;

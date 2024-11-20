@@ -65,9 +65,10 @@ export default {
 
 <style lang="scss">
 .tagTimesList {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.75rem;
-  height: calc(100vh - 290px);
+  height: calc(100vh - 293px);
   overflow-y: auto;
 
   &>.timesList {

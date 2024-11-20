@@ -49,7 +49,7 @@
     display: grid;
     gap: 8px;
     width: 100%;
-    margin: 12px 0;
+    margin: 0.5rem 0;
 
     .progress{
       position: relative;

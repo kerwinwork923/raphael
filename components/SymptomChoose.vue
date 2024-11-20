@@ -63,6 +63,7 @@ export default {
   border-radius: 12px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(auto-fit, 36px);
   gap: 16px;
   padding: 12px;
   height: calc(100vh - 314px);
