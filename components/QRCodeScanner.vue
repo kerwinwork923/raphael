@@ -88,6 +88,7 @@ export default {
               this.scannedText = decodedText;
               this.processQRCode(decodedText);
               this.stopScanner();
+              alert(!this.scannedText)
             }
           },
           (errorMessage) => {
