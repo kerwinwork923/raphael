@@ -1,32 +1,36 @@
 <template>
-  <div class="qrcode">
-    <div id="qr-reader" style="width: 300px"></div>
-
-    <div v-if="scannedText">
-      <h3>掃描結果：</h3>
-      <p>{{ scannedText }}</p>
-
-      <h3>解析出的參數：</h3>
-      <ul>
-        <li><strong>Key:</strong> {{ key }}</li>
-        <li><strong>Type:</strong> {{ type }}</li>
-        <li><strong>NewOld:</strong> {{ newOld }}</li>
-        <li><strong>Start:</strong> {{ cstart }}</li>
-        <li><strong>End:</strong> {{ cend }}</li>
-        <li><strong>Mobile:</strong> {{ mobile }}</li>
-      </ul>
-
-      <h3>所有查詢參數：</h3>
-      <pre>{{ allParams }}</pre>
+     <RaphaelAlert
+      v-if="alertVisible"
+      :defaultContent="alertMessage"
+      :showRedirectButton="false"
+      @close="alertVisible = false"
+    />
+  <div class="cover" v-if="scannerVisible"></div>
+  <div class="qrcode" v-if="scannerVisible">
+    <div id="qr-reader"></div>
+    <div class="close" @click="closeScanner">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path
+          d="M13.2314 0.768622C13.3369 0.874111 13.3961 1.01719 13.3961 1.16637C13.3961 1.31555 13.3369 1.45863 13.2314 1.56412L7.7955 7L13.2314 12.4359C13.3369 12.5414 13.3961 12.6844 13.3961 12.8336C13.3961 12.9828 13.3369 13.1259 13.2314 13.2314C13.1259 13.3369 12.9828 13.3961 12.8336 13.3961C12.6845 13.3961 12.5414 13.3369 12.4359 13.2314L7 7.7955L1.56412 13.2314C1.45863 13.3369 1.31556 13.3961 1.16637 13.3961C1.01719 13.3961 0.874114 13.3369 0.768625 13.2314C0.663136 13.1259 0.603873 12.9828 0.603873 12.8336C0.603873 12.6844 0.663136 12.5414 0.768625 12.4359L6.20451 7L0.768625 1.56412C0.663136 1.45863 0.603873 1.31555 0.603873 1.16637C0.603873 1.01718 0.663136 0.874111 0.768625 0.768622C0.874114 0.663132 1.01719 0.603869 1.16637 0.603869C1.31556 0.603869 1.45863 0.663132 1.56412 0.768622L7 6.2045L12.4359 0.768622C12.5414 0.663132 12.6845 0.603869 12.8336 0.60387C12.9828 0.603869 13.1259 0.663132 13.2314 0.768622Z"
+          fill="black"
+        />
+      </svg>
     </div>
+
+    <!-- RaphaelAlert component -->
+ 
   </div>
 </template>
 
 <script>
+import { ref, reactive, onMounted, onBeforeUnmount, watch } from "vue";
 import { Html5Qrcode } from "html5-qrcode";
 import axios from "axios";
+import RaphaelAlert from "./Alert.vue";
 
-const saveQRCode = async (key, type, newOld, cstart, cend, mobile) => {
+const saveQRCode = async (
+  key, type, newOld, cstart, cend, mobile, showAlert
+) => {
   try {
     const response = await axios.post(
       "https://23700999.com:8081/HMA/TTEAddHomeOrder.jsp",
@@ -42,41 +46,50 @@ const saveQRCode = async (key, type, newOld, cstart, cend, mobile) => {
 
     if (response.status === 200) {
       console.log("資料已成功送出:", response.data);
+      showAlert("產品開通成功！");
     } else {
-      alert(`資料送出失敗 : ${response.data.Result}`);
+      showAlert(`資料送出失敗 : ${response.data.Result}`);
     }
   } catch (err) {
-    alert("資料送出失敗");
+    showAlert("資料送出失敗");
   }
 };
 
 export default {
-  data() {
-    return {
-      html5QrCode: null,
-      scannedText: null,
+  components: { RaphaelAlert },
+  setup() {
+    const html5QrCode = ref(null);
+    const scannedText = ref(null);
+    const alertVisible = ref(false);
+    const alertMessage = ref("");
+    const scannerVisible = ref(true);
+    const params = reactive({
       key: null,
       type: null,
       newOld: null,
       cstart: null,
       cend: null,
       mobile: null,
-      allParams: {}, // 用於顯示所有的查詢參數
-    };
-  },
-  mounted() {
-    this.startScanner();
-  },
-  beforeDestroy() {
-    this.stopScanner();
-  },
-  methods: {
-    // 啟動 QR Code 掃描器
-    startScanner() {
-      const qrCodeRegionId = "qr-reader";
-      this.html5QrCode = new Html5Qrcode(qrCodeRegionId);
+      allParams: {},
+    });
 
-      this.html5QrCode
+    const showAlert = (message) => {
+      alertMessage.value = message;
+      alertVisible.value = true;
+      scannerVisible.value = false;
+    };
+
+    const startScanner = () => {
+      const qrCodeRegionId = "qr-reader";
+      html5QrCode.value = new Html5Qrcode(qrCodeRegionId);
+
+      const qrReader = document.getElementById(qrCodeRegionId);
+      if (!qrReader) {
+        // console.error("QR reader element not found!");
+        return;
+      }
+
+      html5QrCode.value
         .start(
           { facingMode: "environment" },
           {
@@ -84,96 +97,160 @@ export default {
             qrbox: { width: 250, height: 250 },
           },
           (decodedText) => {
-            if (!this.scannedText) {
-              this.scannedText = decodedText;
-              this.processQRCode(decodedText);
-              this.stopScanner();
-              alert(!this.scannedText)
+            if (!scannedText.value) {
+              scannedText.value = decodedText;
+              processQRCode(decodedText);
+              stopScanner();
             }
           },
           (errorMessage) => {
-            console.error("掃描錯誤：", errorMessage);
+            // console.error("Scanning error: ", errorMessage);
           }
         )
         .catch((err) => {
-          console.error("相機啟動失敗：", err);
+          // console.error("Error starting QR scanner:", err);
         });
-    },
-    // 停止掃描
-    stopScanner() {
-      if (this.html5QrCode) {
-        this.html5QrCode.stop().then(() => {
-          this.html5QrCode.clear();
-        });
+    };
+
+    const stopScanner = () => {
+      if (html5QrCode.value && html5QrCode.value.isScanning) {
+        html5QrCode.value
+          .stop()
+          .then(() => {
+            html5QrCode.value.clear();
+          })
+          .catch((err) => {
+            // console.error("Error stopping QR scanner:", err);
+          });
       }
-    },
-    // 處理 QR Code 並解析參數
-    async processQRCode(decodedText) {
+    };
+
+    const processQRCode = async (decodedText) => {
       try {
-        // 檢查 URL 是否符合格式
         if (!decodedText.includes("HMA/TTEAddHomeOrder.jsp")) {
-          alert("無效的 QR Code 內容");
+          showAlert("無效的 QR Code 內容");
           return;
         }
 
         const url = new URL(decodedText);
         const searchParams = new URLSearchParams(url.search);
 
-        // 提取參數並更新 data
-        this.key = searchParams.get("Key");
-        this.type = searchParams.get("Type");
-        this.newOld = searchParams.get("NewOld");
-        this.cstart = searchParams.get("Start");
-        this.cend = searchParams.get("End");
-        this.mobile = searchParams.get("Mobile");
+        params.key = searchParams.get("Key");
+        params.type = searchParams.get("Type");
+        params.newOld = searchParams.get("NewOld");
+        params.cstart = searchParams.get("Start");
+        params.cend = searchParams.get("End");
+        params.mobile = searchParams.get("Mobile");
 
-   
-
-        // 將所有查詢參數轉換為物件格式
-        this.allParams = {};
+        params.allParams = {};
         for (const [key, value] of searchParams.entries()) {
-          this.allParams[key] = value;
+          params.allParams[key] = value;
         }
 
-        console.log("解析的參數：", {
-          key: this.key,
-          type: this.type,
-          newOld: this.newOld,
-          cstart: this.cstart,
-          cend: this.cend,
-          mobile: this.mobile,
-        });
-
-        console.log("所有查詢參數：", this.allParams);
-
+        console.log("解析的參數：", params);
         saveQRCode(
-          this.key,
-          this.type,
-          this.newOld,
-          this.cstart,
-          this.cend,
-          this.mobile
+          params.key,
+          params.type,
+          params.newOld,
+          params.cstart,
+          params.cend,
+          params.mobile,
+          showAlert
         );
       } catch (error) {
         console.error("URL 解析失敗：", error);
-        alert("QR Code 內容格式錯誤，無法解析。");
+        showAlert("QR Code 內容格式錯誤，無法解析。");
       }
-    },
+    };
+
+    onMounted(() => {
+      startScanner();
+    });
+
+    onBeforeUnmount(() => {
+      stopScanner();
+    });
+
+    const closeScanner = () => {
+      stopScanner();
+      scannerVisible.value = false;
+    };
+
+    watch(
+      () => scannerVisible.value,
+      (newVal) => {
+        if (!newVal) {
+          stopScanner(); // Stop the scanner when it's not visible
+        }
+      }
+    );
+
+    return {
+      scannedText,
+      params,
+      startScanner,
+      stopScanner,
+      alertVisible,
+      alertMessage,
+      closeScanner,
+      scannerVisible,
+    };
   },
 };
 </script>
 
 <style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s, transform 0.5s;
+}
+.fade-enter {
+  opacity: 0;
+  transform: scale(0.9);
+}
+.fade-leave-to {
+  opacity: 0;
+  transform: scale(1.1);
+}
+
 #qr-reader {
   margin: auto;
-  border: 2px solid #000;
- 
+
+  height: 300px;
+  width: 300px;
+  border-radius: 15px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-.qrcode{
+
+.qrcode {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 99;
+  animation: fade 0.5s ease-in-out;
+}
+
+.qrcode .close {
+  position: absolute;
+  top: -6%;
+  right: -6%;
+}
+
+.qrcode .close svg {
+  width: 3rem;
+  height: 3rem;
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 0.25rem;
+  border-radius: 50%;
+}
+
+.cover {
+  backdrop-filter: brightness(0.9);
 }
 </style>
