@@ -218,13 +218,13 @@ export default {
 
   height: 300px;
   width: 300px;
-  border-radius: 15px;
+  /* border-radius: 15px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
   background-color: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: center; */
 }
 
 .qrcode {
@@ -238,15 +238,15 @@ export default {
 
 .qrcode .close {
   position: absolute;
-  top: -6%;
-  right: -6%;
+  top: -8%;
+  right: -7%;
 }
 
 .qrcode .close svg {
   width: 3rem;
   height: 3rem;
-  background-color: rgba(255, 255, 255, 0.7);
-  padding: 0.25rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 0.5rem;
   border-radius: 50%;
 }
 
