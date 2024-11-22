@@ -53,16 +53,26 @@
     </div>
 
     <div class="optionWrap">
-      <button>開始使用</button>
+      <button @click="goUse">開始使用</button>
     </div>
   </div>
 </template>
 
 <script>
-// import { TitleMenu } from "~/component/TitleMenu.vue";
+import { useRouter } from "vue-router";
 
 export default {
-  setep() {},
+  setup() {
+    const router = useRouter();
+
+    const goUse = () => {
+      router.push("/usageHistoryInfo");
+    };
+
+    return {
+      goUse,
+    };
+  },
 };
 </script>
 
@@ -112,6 +122,8 @@ export default {
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
+          filter:  blur(3px) ;
+          box-shadow: 0 0 10px rgba($color: #fff, $alpha: .1);
         }
         .bigCircle {
           width: 285px;
@@ -134,6 +146,7 @@ export default {
           );
 
           background-size: 200% 200%;
+          filter: blur(2px);
           animation: rotate 4s infinite linear, aurora 10s infinite ease-in-out;
         }
       }
@@ -317,6 +330,7 @@ export default {
     font-style: normal;
     font-weight: 400;
     letter-spacing: 0.09px;
+    cursor: pointer;
   }
 }
 
@@ -324,9 +338,17 @@ export default {
 @keyframes rotate {
   0% {
     transform: translate(-50%, -50%) scale(1.03) rotate(0deg);
+    filter: brightness(1);
+    filter: brightness(1.2) blur(1px);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.05) rotate(180deg);
+    filter: brightness(1.2) blur(3px);
   }
   100% {
     transform: translate(-50%, -50%) scale(1.03) rotate(360deg);
+    filter: brightness(1);
+    filter: brightness(1.2) blur(1px);
   }
 }
 
@@ -340,6 +362,39 @@ export default {
   }
   100% {
     background-position: 0% 50%;
+  }
+}
+// 外光暈
+@keyframes outerLight {
+  20% {
+    box-shadow: 0 0 12px rgba(114, 188, 32, 0.9),
+      0 0 10px rgba(71, 188, 107, 0.9), 0 0 8px rgba(0, 210, 255, 0.9),
+      0 0 6px rgba(58, 123, 213, 0.9), 0 0 4px rgba(98, 87, 143, 0.9),
+      0 0 2px rgba(167, 82, 111, 0.9);
+  }
+  40% {
+    box-shadow: 0 0 12px rgba(114, 188, 32, 0.8),
+      0 0 10px rgba(71, 188, 107, 0.8), 0 0 8px rgba(0, 210, 255, 0.8),
+      0 0 6px rgba(58, 123, 213, 0.8), 0 0 4px rgba(98, 87, 143, 0.8),
+      0 0 2px rgba(167, 82, 111, 0.8);
+  }
+  60% {
+    box-shadow: 0 0 12px rgba(114, 188, 32, 0.7),
+      0 0 10px rgba(71, 188, 107, 0.7), 0 0 8px rgba(0, 210, 255, 0.7),
+      0 0 6px rgba(58, 123, 213, 0.7), 0 0 4px rgba(98, 87, 143, 0.7),
+      0 0 2px rgba(167, 82, 111, 0.7);
+  }
+  80% {
+    box-shadow: 0 0 12px rgba(114, 188, 32, 0.6),
+      0 0 10px rgba(71, 188, 107, 0.6), 0 0 8px rgba(0, 210, 255, 0.6),
+      0 0 6px rgba(58, 123, 213, 0.6), 0 0 4px rgba(98, 87, 143, 0.6),
+      0 0 2px rgba(167, 82, 111, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 12px rgba(114, 188, 32, 0.5),
+      0 0 10px rgba(71, 188, 107, 0.5), 0 0 8px rgba(0, 210, 255, 0.5),
+      0 0 6px rgba(58, 123, 213, 0.5), 0 0 4px rgba(98, 87, 143, 0.5),
+      0 0 2px rgba(167, 82, 111, 0.5);
   }
 }
 </style>

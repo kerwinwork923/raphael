@@ -56,8 +56,9 @@ const saveQRCode = async (
     );
 
     if (response.status === 200) {
-      console.log("資料已成功送出:", response.data);
-      showAlert("產品開通成功！");
+      console.log(response.data);
+      
+      showAlert(response.data.Result);
     } else {
       showAlert(`資料送出失敗 : ${response.data.Result}`);
     }
