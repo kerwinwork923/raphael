@@ -7,7 +7,7 @@
       src="/assets/video/useInfo.mp4"
       controls
       autoplay
-      muted
+      
     ></video>
     <ul class="usageHistoryInfoList">
       <li>請裸身穿著穿戴調節衣 Neuro-Plus+。</li>
