@@ -122,8 +122,8 @@ export default {
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
-          filter:  blur(3px) ;
-          box-shadow: 0 0 10px rgba($color: #fff, $alpha: .1);
+          filter: blur(3px);
+          box-shadow: 0 0 10px rgba($color: #fff, $alpha: 0.1);
         }
         .bigCircle {
           width: 285px;

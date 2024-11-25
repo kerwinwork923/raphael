@@ -38,7 +38,7 @@ let _height = 0;
 const OnVisibilityChange = () => {
   if (document.hidden) {
     console.log("unvisible")
-    StoptMeasuring('basic_info.html');
+    StoptMeasuring('/user');
   }
 }
 
@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   _scan_vital_result_printer.reset();
 
-  document.getElementById(VIEW_S_CANCEL).onclick = () => StoptMeasuring('basic_info.html');
+  document.getElementById(VIEW_S_CANCEL).onclick = () => StoptMeasuring('/user');
 
   _live_video = new camera({
     canvas_out: document.getElementById(VIEW_SCAN_CANVAS_LIVE),

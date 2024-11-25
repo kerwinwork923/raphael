@@ -49,7 +49,7 @@
 
   <script src="js/vital_result_printer.js"></script>
   <script src="js/camera.js"></script>
-  <script src="js/fhvitals/fhvitals_sdk.js"></script>
+  <!-- <script src="js/fhvitals/fhvitals_sdk.js"></script> -->
 </head>
 
 
@@ -209,6 +209,8 @@
       </div>
     </div>
   </div>
+
+  <img id="s_cancel" class="bi d-block" src="images/back.svg" width="20" height="20" alt="" />
     <script src="js/tools.js"></script>
     <script src="js/scan_camera_only.js"></script>
 </body>
@@ -232,6 +234,14 @@
   align-items: center;
   max-width: 768px;
   height: 50px;
+}
+
+#opH{
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  z-index: -111;
 }
 
 .opH {
