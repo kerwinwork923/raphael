@@ -39,7 +39,9 @@ export default {
       router.push("/usageHistory");
     };
 
-    const goNext = () => {};
+    const goNext = () => {
+        router.push("/usage");
+    };
 
     return {
       goPre,

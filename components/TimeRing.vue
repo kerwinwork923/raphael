@@ -148,7 +148,7 @@ const countdown = () => {
   flex-direction: column;
   align-items: center;
   gap: 20px;
-  background: transparent;
+  background: #f6f6f6;
 }
 
 .progress-border {
