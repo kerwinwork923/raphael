@@ -118,104 +118,104 @@ const InitFinish = () => {
   document.getElementById(VIEW_BACK_BTN_HOME).onclick = () => GoToBasicInfo();
 };
 
-const GoToFinish = () => {
-  // _finish_spower_chart.reset();
-  _finish_vital_result_printer.reset();
-  let result = JSON.parse(sessionStorage.getItem("result"));
-  let upbioage = 0;
+// const GoToFinish = () => {
+//   // _finish_spower_chart.reset();
+//   _finish_vital_result_printer.reset();
+//   let result = JSON.parse(sessionStorage.getItem("result"));
+//   let upbioage = 0;
 
-  let upba2 = 0;
-  let upba4 = 0;
-  let pLF = 0;
-  let pHF = 0;
-  let aSDNN = 0;
-  let aSDNNage = 0;
-  // SetSPowerValue(VIEW_FINISH_ACTIVITY, result.activity);
-  // SetSPowerValue(VIEW_FINISH_EQUILIBRIUM, result.equilibrium);
-  // SetSPowerValue(VIEW_FINISH_HEALTH, result.health);
-  // SetSPowerValue(VIEW_FINISH_METABOLISM, result.metabolism);
-  // SetSPowerValue(VIEW_FINISH_RELAXATION, result.relaxation);
-  // SetSPowerValue(VIEW_FINISH_SLEEP, result.sleep);
+//   let upba2 = 0;
+//   let upba4 = 0;
+//   let pLF = 0;
+//   let pHF = 0;
+//   let aSDNN = 0;
+//   let aSDNNage = 0;
+//   // SetSPowerValue(VIEW_FINISH_ACTIVITY, result.activity);
+//   // SetSPowerValue(VIEW_FINISH_EQUILIBRIUM, result.equilibrium);
+//   // SetSPowerValue(VIEW_FINISH_HEALTH, result.health);
+//   // SetSPowerValue(VIEW_FINISH_METABOLISM, result.metabolism);
+//   // SetSPowerValue(VIEW_FINISH_RELAXATION, result.relaxation);
+//   // SetSPowerValue(VIEW_FINISH_SLEEP, result.sleep);
 
-  let storedData = JSON.parse(sessionStorage.getItem("Age"));
-  console.log(storedData);
+//   let storedData = JSON.parse(sessionStorage.getItem("Age"));
+//   console.log(storedData);
 
-  if (storedData.length > 0) {
-    let aValues = [];
-    let bValues = [];
-    let cValues = [];
-    let dValues = [];
-    let eValues = [];
-    let fValues = [];
-    let gValues = [];
-    let hValues = [];
+//   if (storedData.length > 0) {
+//     let aValues = [];
+//     let bValues = [];
+//     let cValues = [];
+//     let dValues = [];
+//     let eValues = [];
+//     let fValues = [];
+//     let gValues = [];
+//     let hValues = [];
 
-    // 遍歷 storedData，取出正值並分別存入三個陣列
-    storedData.forEach((data) => {
-      let [a, b, c, d, e, f, g, h] = data;
-      if (a > 0 && a < 100) aValues.push(a);
-      if (b > 0 && b < 100) bValues.push(b);
-      if (c > 0 && c < 100) cValues.push(c);
-      if (d > 0 && d < 100) dValues.push(d);
-      if (e > 0 && e < 100) eValues.push(e);
-      if (f > 0) fValues.push(f);
-      if (g > 0) gValues.push(g);
-      if (h > 0) hValues.push(h);
-    });
+//     // 遍歷 storedData，取出正值並分別存入三個陣列
+//     storedData.forEach((data) => {
+//       let [a, b, c, d, e, f, g, h] = data;
+//       if (a > 0 && a < 100) aValues.push(a);
+//       if (b > 0 && b < 100) bValues.push(b);
+//       if (c > 0 && c < 100) cValues.push(c);
+//       if (d > 0 && d < 100) dValues.push(d);
+//       if (e > 0 && e < 100) eValues.push(e);
+//       if (f > 0) fValues.push(f);
+//       if (g > 0) gValues.push(g);
+//       if (h > 0) hValues.push(h);
+//     });
 
-    console.log("PLF=", dValues);
-    console.log("PHF=", eValues);
-    console.log("LF=", fValues);
-    console.log("HF=", gValues);
-    console.log("SDNN=", hValues);
+//     console.log("PLF=", dValues);
+//     console.log("PHF=", eValues);
+//     console.log("LF=", fValues);
+//     console.log("HF=", gValues);
+//     console.log("SDNN=", hValues);
 
-    // 計算平均值的函數
-    const calculateAverage = (values) => {
-      if (values.length === 0) return 0; // 避免除以 0
-      let sum = values.reduce((acc, val) => acc + val, 0);
-      return sum / values.length;
-    };
+//     // 計算平均值的函數
+//     const calculateAverage = (values) => {
+//       if (values.length === 0) return 0; // 避免除以 0
+//       let sum = values.reduce((acc, val) => acc + val, 0);
+//       return sum / values.length;
+//     };
 
-    // 函數：計算移除極端值後的平均數
-    function trimmedMean(arr, trimPercent) {
-      // 先對數據進行排序
-      const sortedArr = arr.slice().sort((a, b) => a - b);
-      // 計算要移除的數據筆數
-      const trimCount = Math.floor(trimPercent * sortedArr.length);
-      // 移除最小和最大指定百分比的數據
-      const trimmedArr = sortedArr.slice(
-        trimCount,
-        sortedArr.length - trimCount
-      );
-      // 計算剩餘數據的平均數
-      const sum = trimmedArr.reduce((acc, value) => acc + value, 0);
-      const mean = sum / trimmedArr.length;
-      return mean;
-    }
-    // 假設移除最小與最大各5%的數據
-    const trimPercent = 0.05; // 移除5%資料
+//     // 函數：計算移除極端值後的平均數
+//     function trimmedMean(arr, trimPercent) {
+//       // 先對數據進行排序
+//       const sortedArr = arr.slice().sort((a, b) => a - b);
+//       // 計算要移除的數據筆數
+//       const trimCount = Math.floor(trimPercent * sortedArr.length);
+//       // 移除最小和最大指定百分比的數據
+//       const trimmedArr = sortedArr.slice(
+//         trimCount,
+//         sortedArr.length - trimCount
+//       );
+//       // 計算剩餘數據的平均數
+//       const sum = trimmedArr.reduce((acc, value) => acc + value, 0);
+//       const mean = sum / trimmedArr.length;
+//       return mean;
+//     }
+//     // 假設移除最小與最大各5%的數據
+//     const trimPercent = 0.05; // 移除5%資料
 
-    // 計算 A, B, C 的平均值
-    upbioage = trimmedMean(aValues, trimPercent);
-    upba2 = trimmedMean(bValues, trimPercent);
-    upba4 = trimmedMean(cValues, trimPercent);
-    pLF = trimmedMean(dValues, trimPercent);
-    pHF = trimmedMean(eValues, trimPercent);
-    aSDNN = trimmedMean(hValues, trimPercent);
-    let SDNNc = aSDNN * Math.exp(-0.02263 * (60 - result.hr));
-    aSDNNage = SDNNdetermineAge(SDNNc, infodata.sex);
+//     // 計算 A, B, C 的平均值
+//     upbioage = trimmedMean(aValues, trimPercent);
+//     upba2 = trimmedMean(bValues, trimPercent);
+//     upba4 = trimmedMean(cValues, trimPercent);
+//     pLF = trimmedMean(dValues, trimPercent);
+//     pHF = trimmedMean(eValues, trimPercent);
+//     aSDNN = trimmedMean(hValues, trimPercent);
+//     let SDNNc = aSDNN * Math.exp(-0.02263 * (60 - result.hr));
+//     aSDNNage = SDNNdetermineAge(SDNNc, infodata.sex);
 
-    console.log("result:" + sessionStorage.getItem("result"));
+//     console.log("result:" + sessionStorage.getItem("result"));
 
-    // 顯示結果
-    console.log(
-      `upbioage: ${aSDNNage}, upba2: ${upba2}, upba4: ${upba4}, SYN%: ${pLF}`
-    );
-    // SaveHRV2(result, upba2, upba4, aSDNNage, pLF, pHF);
-  } else {
-    console.log("No stored data available.");
-    alert("No stored data available.");
-  }
+//     // 顯示結果
+//     console.log(
+//       `upbioage: ${aSDNNage}, upba2: ${upba2}, upba4: ${upba4}, SYN%: ${pLF}`
+//     );
+//     // SaveHRV2(result, upba2, upba4, aSDNNage, pLF, pHF);
+//   } else {
+//     console.log("No stored data available.");
+//     alert("No stored data available.");
+//   }
 
   _finish_vital_result_printer.update({
     hr: result.hr,
@@ -237,17 +237,17 @@ const GoToFinish = () => {
     syn: pLF,
   });
 
-  // setTimeout(() => {
-  //   _finish_spower_chart.update({
-  //     activity: result.activity,
-  //     equilibrium: result.equilibrium,
-  //     health: result.health,
-  //     metabolism: result.metabolism,
-  //     relaxation: result.relaxation,
-  //     sleep: result.sleep,
-  //   });
-  // }, 200);
-};
+//   // setTimeout(() => {
+//   //   _finish_spower_chart.update({
+//   //     activity: result.activity,
+//   //     equilibrium: result.equilibrium,
+//   //     health: result.health,
+//   //     metabolism: result.metabolism,
+//   //     relaxation: result.relaxation,
+//   //     sleep: result.sleep,
+//   //   });
+//   // }, 200);
+// };
 
 const GoToBasicInfo = () => {
   window.location.href = "/user";

@@ -392,7 +392,7 @@ export default {
   padding: 0.75rem;
   width: 100%;
   max-width: 768px;
-  
+
   .detectSelectGroup {
     display: flex;
     align-items: center;
@@ -418,7 +418,7 @@ export default {
       font-size: 18px;
       max-height: 200px;
       backdrop-filter: blur(6px);
-      box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
       overflow-y: auto;
       transform: 0.25s all ease;
       animation: 0.3s fadeIn forwards;
@@ -447,7 +447,7 @@ export default {
       font-size: 18px;
       max-height: 200px;
       backdrop-filter: blur(6px);
-      box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
       overflow-y: auto;
       transform: 0.25s all ease;
       opacity: 0;
@@ -516,7 +516,7 @@ export default {
         white-space: nowrap;
         justify-content: end;
         gap: 0.5rem;
-         h4 {
+        h4 {
           color: #666;
           font-size: 1rem;
           font-style: normal;
@@ -569,7 +569,7 @@ export default {
   max-width: 768px;
   width: 100%;
   margin-top: 1.5rem;
-  
+
   .preBtnGroup,
   .nextBtnGroup {
     display: flex;
@@ -656,7 +656,7 @@ export default {
       }
     }
 
-    &>img{
+    & > img {
       position: absolute;
       top: 1rem;
       right: 1rem;

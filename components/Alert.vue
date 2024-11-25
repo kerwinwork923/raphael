@@ -1,23 +1,63 @@
 <template>
-  <div class="raphaelCover">
-
-  </div>
+  <div class="raphaelCover"></div>
   <div class="raphaelAlert">
     <div class="content">
       <slot>{{ defaultContent }}</slot>
     </div>
     <div class="btnGroup">
-      <button class="closeBtn" @click="onClose">關閉</button>
-      <button v-if="showRedirectButton" class="redirectBtn" @click="onRedirect">
+      <button class="closeBtn" @click="handleClose">關閉</button>
+      <button v-if="showRedirectButton" class="redirectBtn" @click="handleRedirect">
         跳轉
       </button>
     </div>
   </div>
 </template>
 
+<script>
+import { defineComponent, toRefs } from "vue";
+
+export default defineComponent({
+  name: "RaphaelAlert",
+  props: {
+    defaultContent: {
+      type: String,
+      default:
+        "您的回答顯示沒有健康問題，是否確認送出問卷？如果不確定，可以返回修改答案。",
+    },
+    showRedirectButton: {
+      type: Boolean,
+      default: false, // 默認為不顯示跳轉按鈕
+    },
+    redirectTarget: {
+      type: Function,
+      default: () => {}, // 默認為空函數
+    },
+  },
+  emits: ["close"],
+  setup(props, { emit }) {
+    const { defaultContent, showRedirectButton, redirectTarget } = toRefs(props);
+
+    const handleClose = () => {
+      emit("close"); // 通知父組件關閉
+    };
+
+    const handleRedirect = () => {
+      redirectTarget.value(); // 調用自定義跳轉行為
+    };
+
+    return {
+      defaultContent,
+      showRedirectButton,
+      handleClose,
+      handleRedirect,
+    };
+  },
+});
+</script>
+
 <style scoped>
-.raphaelCover{
-  background: rgba(217, 217, 217, 0.50);
+.raphaelCover {
+  background: rgba(217, 217, 217, 0.5);
   backdrop-filter: blur(2.5px);
   width: 100%;
   height: 100%;
@@ -79,34 +119,3 @@
   border-left: 1px solid #aaa;
 }
 </style>
-
-<script>
-export default {
-  name: "RaphaelAlert",
-  props: {
-    defaultContent: {
-      type: String,
-      default:
-        "您的回答顯示沒有健康問題，是否確認送出問卷？如果不確定，可以返回修改答案。",
-    },
-    showRedirectButton: {
-      // 將 showButtons 改為 showRedirectButton
-      type: Boolean,
-      default: false, // 默認為不顯示跳轉按鈕
-    },
-    redirectTarget: {
-      // 接受一個自定義的跳轉行為
-      type: Function,
-      default: () => {}, // 默認為空函數
-    },
-  },
-  methods: {
-    onClose() {
-      this.$emit("close"); // 向父組件發送關閉事件
-    },
-    onRedirect() {
-      this.redirectTarget(); // 調用自定義的跳轉行為
-    },
-  },
-};
-</script>
