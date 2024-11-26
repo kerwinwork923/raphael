@@ -118,7 +118,7 @@ const GoToNext = () => {
       bp_mode: "ternary",
       bp_group: ht,
       facing_mode: facing_mode,
-      time: 3, 
+      time: _info_map_value_dict[VIEW_TIME_THREE], 
     });
 
     //time: time, 
