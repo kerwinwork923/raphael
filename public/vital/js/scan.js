@@ -31,10 +31,11 @@ const VIEW_S_CANCEL = "s_cancel";
 const VIEW_LIVE_RECT = "live_rect";
 
 const MAX_MEASURING_SECOND = 50;
-const your_auth_url = "wss://hcs-tyo.faceheart.com:9443/wasm/v2";
+const your_auth_url = "wss://hcs-tyo.faceheart.com:9543/wasm/v2";
 preditage = 0;
 // ==============================================================
 let _scan_vital_result_printer = new VitalResultPrinter();
+let _max_measuring_second = 60;
 let nArray = [];
 let infodata = JSON.parse(sessionStorage.getItem("data"));
 
@@ -153,10 +154,10 @@ const OnResult = (result) => {
   console.log(JSON.stringify(nArray));
 
   let fps = 30;
-  let proc = (result.frame_id * 100) / (MAX_MEASURING_SECOND * fps);
+  let proc = result.frame_id * 100 / ((_max_measuring_second) * fps);
 
-  document.getElementById(VIEW_SCAN_PROGRESS_VALUE).innerHTML =
-    parseInt(proc) + "%";
+  document.getElementById(VIEW_SCAN_PROGRESS_VALUE).innerHTML = parseInt(proc) + '%';
+
   console.log(proc, result.scanning_status);
   if (proc > 75 && result.scanning_status != "Motion") {
     nArray.push([
@@ -194,8 +195,7 @@ const OnResult = (result) => {
 
   if ("scanning_status" in result && result.scanning_status != "") {
     console.log(result.scanning_status);
-    document.getElementById(VIEW_SCANNING_STATUS).innerHTML =
-      result.scanning_status;
+    document.getElementById(VIEW_SCANNING_STATUS).innerHTML = result.scanning_status;
     show(VIEW_SCANNING_STATUS);
   } else {
     show(VIEW_SCANNING_STATUS, false);
@@ -208,10 +208,10 @@ const OnResult = (result) => {
       rr: result.rr,
       spo2: result.spo2,
       si: result.si,
-      hr_valid: result.signal_quality.hr_hrv > 0.7,
-      bp_valid: result.signal_quality.bp > 0.6,
-      rr_valid: result.signal_quality.resp > 0.7,
-      spo2_valid: result.signal_quality.spo2 > 0.9,
+      hr_valid: (result.signal_quality.hr_hrv > 0.7),
+      bp_valid: (result.signal_quality.bp > 0.6),
+      rr_valid: (result.signal_quality.resp > 0.7),
+      spo2_valid: (result.signal_quality.spo2 > 0.9),
       bioage: SDNNage,
       ba2:
         (1.22998789167383e-5 * Math.pow(result.hrv_indices.HF, 2) -
@@ -341,6 +341,7 @@ FHVitalsSDK.init({
       throw new Error(`init FHVitalsSDK failed, reason=${result.error}`);
     }
     const user = JSON.parse(sessionStorage.getItem("data"));
+    _max_measuring_second = 60 * user.time;
     return FHVitalsSDK.startPreview(VIEW_SCAN_CANVAS_LIVE, user.facing_mode);
   })
   .then((result) => {
