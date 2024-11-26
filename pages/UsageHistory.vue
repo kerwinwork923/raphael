@@ -7,18 +7,50 @@
         <div class="haveIcon">
           <img src="/assets/imgs/haveCheck.svg" alt="" />
         </div>
-        <div class="haveProduct">
-          <div class="imgGroup">
-            <img src="/assets/imgs/redLightClothes.png" alt="" />
-            <div class="circle"></div>
-            <div class="bigCircle"></div>
+        <div class="haveGroup">
+          <div class="haveProduct">
+            <div class="imgGroup">
+              <img src="/assets/imgs/redLightClothes.png" alt="" />
+              <div class="circle"></div>
+              <div class="bigCircle"></div>
+            </div>
+            <h3 class="productName">第四代穿戴式調節衣</h3>
+            <h3 class="productSubTitle">(紅光加強版)</h3>
           </div>
-          <h3 class="productName">第四代穿戴式調節衣</h3>
-          <h3 class="productSubTitle">(紅光加強版)</h3>
         </div>
+        <!-- <div class="haveGroup2">
+          <div class="haveProduct">
+            <div class="imgGroup">
+              <img src="/assets/imgs/redLightClothes.png" alt="" />
+              <div class="circle"></div>
+              <div class="bigCircle"></div>
+            </div>
+            <h3 class="productName">第四代穿戴式調節衣</h3>
+            <h3 class="productSubTitle">(紅光加強版)</h3>
+          </div>
+          <div class="haveProduct">
+            <div class="imgGroup">
+              <img src="/assets/imgs/redLightClothes.png" alt="" />
+              <div class="circle"></div>
+              <div class="bigCircle"></div>
+            </div>
+            <h3 class="productName">第四代穿戴式調節衣</h3>
+            <h3 class="productSubTitle">(紅光加強版)</h3>
+          </div>
+          <div class="haveProduct">
+            <div class="imgGroup">
+              <img src="/assets/imgs/redLightClothes.png" alt="" />
+              <div class="circle"></div>
+              <div class="bigCircle"></div>
+            </div>
+            <h3 class="productName">第四代穿戴式調節衣</h3>
+            <h3 class="productSubTitle">(紅光加強版)</h3>
+          </div>
+        </div> -->
+
         <h3 class="recommendTitle">健康方案推薦</h3>
-        <div class="recommendWrap" v-for="(item, key) in 3" :key="key">
-          <div class="recommendDiv">
+        <div class="recommendWrap">
+          <div class="recommendDiv" v-for="(item, key) in 3" :key="key">
             <div class="imgGroup">
               <img src="/assets/imgs/normalClothes.png" alt="" />
               <div class="circle"></div>
@@ -60,7 +92,7 @@
 
 <script>
 import { useRouter } from "vue-router";
-
+import axios from "axios";
 export default {
   setup() {
     const router = useRouter();
@@ -68,6 +100,36 @@ export default {
     const goUse = () => {
       router.push("/usageHistoryInfo");
     };
+
+    const localData = localStorage.getItem("userData");
+    const { MID, Token, MAID, Mobile, Name } = localData
+      ? JSON.parse(localData)
+      : {};
+
+    if (!MID || !Token || !MAID || !Mobile) {
+      router.push("/");
+      return;
+    }
+
+    const getProducts = async () => {
+      try {
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/Use1.jsp",
+          { MID, Token, MAID, Mobile }
+        );
+        if (response.status === 200) {
+          console.log(response.data);
+        } else {
+          console.error("Unexpected response status:", response.status);
+        }
+      } catch (error) {
+        console.error("API request failed:", error);
+
+   
+      }
+    };
+
+    getProducts();
 
     return {
       goUse,
@@ -96,75 +158,160 @@ export default {
       text-align: center;
       margin-bottom: 0.6rem;
     }
-    .haveProduct {
-      width: 100%;
-      text-align: center;
-      position: relative;
-
-      img {
-        width: 260px;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 3;
-      }
-      .imgGroup {
+    .haveGroup {
+      .haveProduct {
+        width: 100%;
+        text-align: center;
         position: relative;
-        height: 285px;
-        .circle {
-          width: 285px;
-          height: 100%;
-          z-index: 2;
-          background-color: #fff;
-          border-radius: 50%;
+
+        img {
+          width: 260px;
           position: absolute;
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
-          filter: blur(3px);
-          box-shadow: 0 0 10px rgba($color: #fff, $alpha: 0.1);
+          z-index: 3;
         }
-        .bigCircle {
-          width: 285px;
-          height: 100%;
-          z-index: 1;
-          border-radius: 50%;
+        .imgGroup {
+          position: relative;
+          height: 285px;
+          .circle {
+            width: 285px;
+            height: 100%;
+            z-index: 2;
+            background-color: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            filter: blur(3px);
+            box-shadow: 0 0 10px rgba($color: #fff, $alpha: 0.1);
+          }
+          .bigCircle {
+            width: 285px;
+            height: 100%;
+            z-index: 1;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1.03);
+
+            background: linear-gradient(
+              135deg,
+              rgba(114, 188, 32, 0.9) 0%,
+              rgba(71, 188, 107, 0.9) 20%,
+              rgba(0, 210, 255, 0.9) 40%,
+              rgba(58, 123, 213, 0.9) 60%,
+              rgba(98, 87, 143, 0.9) 80%,
+              rgba(167, 82, 111, 0.9) 100%
+            );
+
+            background-size: 200% 200%;
+            filter: blur(2px);
+            animation: rotate 4s infinite linear,
+              aurora 10s infinite ease-in-out;
+          }
+        }
+        .productName {
+          color: #1e1e1e;
+          font-size: 1.5rem;
+          font-style: normal;
+          font-weight: 700;
+          letter-spacing: 0.12px;
+          margin-top: 0.75rem;
+        }
+        .productSubTitle {
+          color: #1e1e1e;
+          font-size: 1.5rem;
+          font-style: normal;
+          font-weight: 700;
+          letter-spacing: 0.12px;
+          margin-top: 0.75rem;
+        }
+      }
+    }
+
+    .haveGroup2 {
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+      flex-wrap: wrap;
+
+      .haveProduct {
+        width: 47%;
+        margin-bottom: 2rem;
+        text-align: center;
+        position: relative;
+
+        img {
+          width: 100%;
+          width: 170px;
           position: absolute;
           top: 50%;
           left: 50%;
-          transform: translate(-50%, -50%) scale(1.03);
-
-          background: linear-gradient(
-            135deg,
-            rgba(114, 188, 32, 0.9) 0%,
-            rgba(71, 188, 107, 0.9) 20%,
-            rgba(0, 210, 255, 0.9) 40%,
-            rgba(58, 123, 213, 0.9) 60%,
-            rgba(98, 87, 143, 0.9) 80%,
-            rgba(167, 82, 111, 0.9) 100%
-          );
-
-          background-size: 200% 200%;
-          filter: blur(2px);
-          animation: rotate 4s infinite linear, aurora 10s infinite ease-in-out;
+          transform: translate(-50%, -50%);
+          z-index: 3;
         }
-      }
-      .productName {
-        color: #1e1e1e;
-        font-size: 1.5rem;
-        font-style: normal;
-        font-weight: 700;
-        letter-spacing: 0.12px;
-        margin-top: 0.75rem;
-      }
-      .productSubTitle {
-        color: #1e1e1e;
-        font-size: 1.5rem;
-        font-style: normal;
-        font-weight: 700;
-        letter-spacing: 0.12px;
-        margin-top: 0.75rem;
+        .imgGroup {
+          position: relative;
+          height: 170px;
+          .circle {
+            width: 170px;
+            height: 100%;
+            z-index: 2;
+            background-color: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            filter: blur(3px);
+            box-shadow: 0 0 10px rgba($color: #fff, $alpha: 0.1);
+          }
+          .bigCircle {
+            width: 170px;
+            height: 100%;
+            z-index: 1;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1.03);
+
+            background: linear-gradient(
+              135deg,
+              rgba(114, 188, 32, 0.9) 0%,
+              rgba(71, 188, 107, 0.9) 20%,
+              rgba(0, 210, 255, 0.9) 40%,
+              rgba(58, 123, 213, 0.9) 60%,
+              rgba(98, 87, 143, 0.9) 80%,
+              rgba(167, 82, 111, 0.9) 100%
+            );
+
+            background-size: 200% 200%;
+            filter: blur(2px);
+            animation: rotate 4s infinite linear,
+              aurora 10s infinite ease-in-out;
+          }
+        }
+        .productName {
+          color: #1e1e1e;
+          font-size: 1.25rem;
+          font-style: normal;
+          font-weight: 700;
+          letter-spacing: 0.12px;
+          margin-top: 0.75rem;
+        }
+        .productSubTitle {
+          color: #1e1e1e;
+          font-size: 1.25rem;
+          font-style: normal;
+          font-weight: 700;
+          letter-spacing: 0.12px;
+          margin-top: 0.75rem;
+        }
       }
     }
 
