@@ -114,7 +114,7 @@ export default {
     const getProducts = async () => {
       try {
         const response = await axios.post(
-          "https://23700999.com:8081/HMA/Use1.jsp",
+          "https://23700999.com:8081/HMA/API_USE1.jsp",
           { MID, Token, MAID, Mobile }
         );
         if (response.status === 200) {
