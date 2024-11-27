@@ -532,6 +532,7 @@ export default {
 
     &>h4{
       font-size: 20px;
+      font-weight: 500;
       color: #1e1e1e;
       letter-spacing: 0.15px;
       line-height: 32.36px;

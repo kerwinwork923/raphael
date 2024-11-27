@@ -8,6 +8,7 @@
       <div class="scrollBarTitle">
         {{ startIndex + index + 1 }}. {{ QAData.question }}
       </div>
+      <div class="scoreText">{{ getLabel(QAData.selectScore) }}</div>
       <div class="scoreBarGroup">
         <div
           class="scoreBar"
@@ -41,7 +42,6 @@
           </div>
         </div>
       </div>
-      <div class="scoreText">{{ getLabel(QAData.selectScore) }}</div>
     </div>
   </div>
 </template>
@@ -141,6 +141,7 @@ export default defineComponent({
 
 .scrollBarTitle {
   font-size: 20px;
+  font-weight: 500;
   color: #1e1e1e;
   letter-spacing: 0.15px;
   line-height: 32.36px;
@@ -148,11 +149,11 @@ export default defineComponent({
 
 .scoreBarGroup {
   position: relative;
-  margin: 1.5rem 0;
   display: flex;
   align-items: center;
   height: 6px;
   width: 100%;
+  margin-bottom: 10px;
 
   .scoreBar {
     height: 100%;
@@ -195,7 +196,7 @@ export default defineComponent({
 .scoreText {
   text-align: center;
   color: #74bc1f;
-  margin-top: 0.5rem;
+  margin: 0.25rem 0 1rem 0;
 }
 
 .pagination {

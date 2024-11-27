@@ -404,7 +404,6 @@ export default {
         display: flex;
         align-items: center;
         gap: 2px;
-        margin-bottom: 0.5rem;
         .pGroup {
           display: flex;
           align-items: center;
@@ -428,7 +427,8 @@ export default {
       }
       h3 {
         color: #1e1e1e;
-        font-size: 20px;
+        font-size: 22px;
+        font-weight: 500;
         letter-spacing: 0.15px;
       }
       .resultTagGroup {
@@ -446,7 +446,7 @@ export default {
       }
 
       h5 {
-        color: #1e1e1e;
+        color: #666666;
         letter-spacing: 0.1px;
         margin-top: 1rem;
         margin-bottom: 0.75rem;
