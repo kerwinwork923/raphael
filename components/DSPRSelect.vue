@@ -77,6 +77,7 @@ export default {
           height: parseInt(userData.Height),
           sex: parseInt(userData.Sex),
           weight: parseInt(userData.Weight),
+          time: 3,
         };
         sessionStorage.setItem("data", JSON.stringify(convertedData));
         localStorage.setItem("userData", JSON.stringify(userData));
@@ -206,8 +207,8 @@ export default {
     margin-top: 0.75rem;
     letter-spacing: 0.5px;
     font-size: 18px;
-    transition: all .3s ease;
-    &:hover{
+    transition: all 0.3s ease;
+    &:hover {
       background-color: $raphael-green-500;
     }
   }

@@ -50,7 +50,7 @@
 
         <h3 class="recommendTitle">健康方案推薦</h3>
         <div class="recommendWrap">
-          <div class="recommendDiv" v-for="(item, key) in 3" :key="key">
+          <div class="recommendDiv">
             <div class="imgGroup">
               <img src="/assets/imgs/normalClothes.png" alt="" />
               <div class="circle"></div>
@@ -78,6 +78,57 @@
               <li>專利貼片技術，輕便舒適</li>
               <li>提升免疫力，改善疲勞與不適</li>
               <li>每晚穿著，提升睡眠與活力</li>
+            </ul>
+          </div>
+
+          <div class="recommendDiv">
+            <div class="imgGroup">
+              <img src="/assets/imgs/redLightClothes2.png" alt="" />
+              <div class="circle"></div>
+              <div class="bigCircle"></div>
+            </div>
+            <h3 class="recommendName">穿戴式調節衣</h3>
+            <h3 class="recommendSubTitle">(調節衣)</h3>
+            <div class="priceGroup">
+              <div class="priceList">
+                <span class="price">NT$34,800</span> / 60天
+              </div>
+            </div>
+            <div class="recommendBtnGroup">
+              <button class="contactBtn">聯絡客服</button>
+            </div>
+            <div class="featureTitle">產品特色</div>
+            <ul class="featureListGroup">
+              <li>睡眠時調節自律神經，促進自癒</li>
+              <li>提升免疫力，改善疲勞與不適</li>
+              <li>每晚穿著，提升睡眠與活力</li>
+            </ul>
+          </div>
+
+          <div class="recommendDiv">
+            <div class="imgGroup">
+              <img src="/assets/imgs/redLightClothes2.png" alt="" />
+              <div class="circle"></div>
+              <div class="bigCircle"></div>
+              <img class="robotImg" src="/assets/imgs/clothRobot.png" alt="" />
+            </div>
+            <h3 class="recommendName">穿戴式調節衣</h3>
+            <h3 class="recommendSubTitle">(調節衣)</h3>
+            <div class="priceGroup">
+              <div class="priceList">
+                <span class="price">NT$90,000</span> / 60天
+              </div>
+            </div>
+            <div class="recommendBtnGroup">
+              <button class="contactBtn">聯絡客服</button>
+            </div>
+            <div class="featureTitle">產品特色</div>
+            <ul class="featureListGroup">
+              <li>中頻電刺激調節神經</li>
+              <li>非侵入性，無副作用</li>
+              <li>改善自律神經失調</li>
+              <li>簡單易用，每日輕鬆操作</li>
+              <li>提升睡眠與生活品質</li>
             </ul>
           </div>
         </div>
@@ -124,8 +175,6 @@ export default {
         }
       } catch (error) {
         console.error("API request failed:", error);
-
-   
       }
     };
 
@@ -345,6 +394,12 @@ export default {
             transform: translate(-50%, -50%);
             z-index: 3;
           }
+          .robotImg {
+            left: 70%;
+            top: 87%;
+            width: 120px;
+            z-index: 3;
+          }
           .circle {
             width: 180px;
             height: 100%;
@@ -385,7 +440,7 @@ export default {
           font-size: 18px;
           font-weight: 400;
           letter-spacing: 0.09px;
-          margin-top: 0.75rem;
+          margin-top: 1.5rem;
         }
         .recommendSubTitle {
           color: #1e1e1e;

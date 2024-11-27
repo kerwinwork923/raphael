@@ -374,7 +374,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
             this.diffDays = "已經超過12天";
           }
 
-          if (diffDays < 12) {
+          if (diffDays > 12) {
             this.nowState = "result";
             await this.API_API_ANSSecond();
             return;
