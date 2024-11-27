@@ -78,7 +78,9 @@
         </div>
       </div>
       <footer class="copyrights">
-        © 2024 智平衡健康事業股份有限公司 all rights reserved.
+        <!-- <a href="/usageHistory"></a> -->
+         © 2024 智平衡健康事業股份有限公司 all rights reserved.
+       
       </footer>
     </div>
   </div>

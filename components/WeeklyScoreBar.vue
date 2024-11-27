@@ -86,10 +86,10 @@ export default defineComponent({
 
     const scrollToTop = () => {
       if (qaList.value) {
-        // 滾動到容器頂部
+    
         qaList.value.scrollTop = 0;
 
-        // 確保頁面滾動到 .QAList 容器的位置
+
         const rect = qaList.value.getBoundingClientRect();
         const offsetTop = rect.top + window.scrollY;
         window.scrollTo({

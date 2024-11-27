@@ -10,9 +10,10 @@ const VIEW_BASICINFO_HT_PREHYPERTENSION = "eid_ht_prehypertension";
 const VIEW_BASICINFO_HT_HYPERTENSION = "eid_ht_hypertension";
 const VIEW_CAMERA_FRONT = "eid_camera_front";
 const VIEW_CAMERA_BACK = "eid_camera_back";
+const VIEW_TIME_ONE = "eid_time_one";
+const VIEW_TIME_THREE = "eid_time_three";
 const VIEW_BASICINFO_BTN_NEXT = "eid_btn_next";
 // ==============================================================
-
 
 // Basic Info Page
 // ==============================================================
@@ -24,10 +25,12 @@ let _info_map_value_dict = {
   [VIEW_BASICINFO_HT_HYPERTENSION]: "hypertension",
   [VIEW_CAMERA_FRONT]: "user",
   [VIEW_CAMERA_BACK]: "environment",
+  [VIEW_TIME_ONE]: 1,
+  [VIEW_TIME_THREE]: 3,
 };
 
 const CheckedUpdate = (self_id, others_id) => {
-   if (document.getElementById(self_id).checked) {
+  if (document.getElementById(self_id).checked) {
     others_id.forEach((element) => {
       if (element != self_id) document.getElementById(element).checked = false;
     });
@@ -61,10 +64,12 @@ const GetBirthYear = () => {
 
 const GetHT = () => {
   let ht = null;
-  
+
   if (document.getElementById(VIEW_BASICINFO_HT_NORMAL).checked) {
     ht = _info_map_value_dict[VIEW_BASICINFO_HT_NORMAL];
-  } else if (document.getElementById(VIEW_BASICINFO_HT_PREHYPERTENSION).checked) {
+  } else if (
+    document.getElementById(VIEW_BASICINFO_HT_PREHYPERTENSION).checked
+  ) {
     ht = _info_map_value_dict[VIEW_BASICINFO_HT_PREHYPERTENSION];
   } else if (document.getElementById(VIEW_BASICINFO_HT_HYPERTENSION).checked) {
     ht = _info_map_value_dict[VIEW_BASICINFO_HT_HYPERTENSION];
@@ -74,13 +79,23 @@ const GetHT = () => {
 
 const GetCameraFacingMode = () => {
   let facing_mode = null;
-  
+
   if (document.getElementById(VIEW_CAMERA_FRONT).checked) {
     facing_mode = _info_map_value_dict[VIEW_CAMERA_FRONT];
   } else if (document.getElementById(VIEW_CAMERA_BACK).checked) {
     facing_mode = _info_map_value_dict[VIEW_CAMERA_BACK];
   }
   return facing_mode;
+};
+
+const GetTime = () => {
+  let time = null;
+  if (document.getElementById(VIEW_TIME_ONE).checked) {
+    time = _info_map_value_dict[VIEW_TIME_ONE];
+  } else if (document.getElementById(VIEW_TIME_THREE).checked) {
+    time = _info_map_value_dict[VIEW_TIME_THREE];
+  }
+  return time;
 };
 
 const GoToNext = () => {
@@ -91,6 +106,7 @@ const GoToNext = () => {
   let birth_year = GetBirthYear();
   let ht = GetHT();
   let facing_mode = GetCameraFacingMode();
+  let time = GetTime();
 
   if (isNaN(height) || isNaN(weight) || isNaN(birth_year)) {
     alert("Pelease input the basic information!");
@@ -103,25 +119,54 @@ const GoToNext = () => {
       bp_mode: "ternary",
       bp_group: ht,
       facing_mode: facing_mode,
+      time: _info_map_value_dict[VIEW_TIME_THREE],
     });
+
+    //time: time,
     console.log(data);
 
     sessionStorage.setItem("data", data);
 
-    window.location.href = "scan.html"
+    window.location.href = "scan.html";
   }
 };
 
 const InitBasicInfo = () => {
   console.log("InitBasicInfo() called");
   // Set the group & clicked event of the checkboxes.
-  document.getElementById(VIEW_BASICINFO_MALE).onclick = () => { CheckedUpdate(VIEW_BASICINFO_MALE, [VIEW_BASICINFO_FEMALE]) }
-  document.getElementById(VIEW_BASICINFO_FEMALE).onclick = () => { CheckedUpdate(VIEW_BASICINFO_FEMALE, [VIEW_BASICINFO_MALE]) }
-  document.getElementById(VIEW_BASICINFO_HT_NORMAL).onclick = () => CheckedUpdate(VIEW_BASICINFO_HT_NORMAL, [VIEW_BASICINFO_HT_PREHYPERTENSION, VIEW_BASICINFO_HT_HYPERTENSION])
-  document.getElementById(VIEW_BASICINFO_HT_PREHYPERTENSION).onclick = () => CheckedUpdate(VIEW_BASICINFO_HT_PREHYPERTENSION, [VIEW_BASICINFO_HT_NORMAL, VIEW_BASICINFO_HT_HYPERTENSION])
-  document.getElementById(VIEW_BASICINFO_HT_HYPERTENSION).onclick = () => CheckedUpdate(VIEW_BASICINFO_HT_HYPERTENSION, [VIEW_BASICINFO_HT_NORMAL, VIEW_BASICINFO_HT_PREHYPERTENSION])
-  document.getElementById(VIEW_CAMERA_FRONT).onclick = () => { CheckedUpdate(VIEW_CAMERA_FRONT, [VIEW_CAMERA_BACK]) }
-  document.getElementById(VIEW_CAMERA_BACK).onclick = () => { CheckedUpdate(VIEW_CAMERA_BACK, [VIEW_CAMERA_FRONT]) }
+  document.getElementById(VIEW_BASICINFO_MALE).onclick = () => {
+    CheckedUpdate(VIEW_BASICINFO_MALE, [VIEW_BASICINFO_FEMALE]);
+  };
+  document.getElementById(VIEW_BASICINFO_FEMALE).onclick = () => {
+    CheckedUpdate(VIEW_BASICINFO_FEMALE, [VIEW_BASICINFO_MALE]);
+  };
+  document.getElementById(VIEW_BASICINFO_HT_NORMAL).onclick = () =>
+    CheckedUpdate(VIEW_BASICINFO_HT_NORMAL, [
+      VIEW_BASICINFO_HT_PREHYPERTENSION,
+      VIEW_BASICINFO_HT_HYPERTENSION,
+    ]);
+  document.getElementById(VIEW_BASICINFO_HT_PREHYPERTENSION).onclick = () =>
+    CheckedUpdate(VIEW_BASICINFO_HT_PREHYPERTENSION, [
+      VIEW_BASICINFO_HT_NORMAL,
+      VIEW_BASICINFO_HT_HYPERTENSION,
+    ]);
+  document.getElementById(VIEW_BASICINFO_HT_HYPERTENSION).onclick = () =>
+    CheckedUpdate(VIEW_BASICINFO_HT_HYPERTENSION, [
+      VIEW_BASICINFO_HT_NORMAL,
+      VIEW_BASICINFO_HT_PREHYPERTENSION,
+    ]);
+  document.getElementById(VIEW_CAMERA_FRONT).onclick = () => {
+    CheckedUpdate(VIEW_CAMERA_FRONT, [VIEW_CAMERA_BACK]);
+  };
+  document.getElementById(VIEW_CAMERA_BACK).onclick = () => {
+    CheckedUpdate(VIEW_CAMERA_BACK, [VIEW_CAMERA_FRONT]);
+  };
+  document.getElementById(VIEW_TIME_ONE).onclick = () => {
+    CheckedUpdate(VIEW_TIME_ONE, [VIEW_TIME_THREE]);
+  };
+  document.getElementById(VIEW_TIME_THREE).onclick = () => {
+    CheckedUpdate(VIEW_TIME_THREE, [VIEW_TIME_ONE]);
+  };
 
   // Set the clicked event of the next button.
   document.getElementById(VIEW_BASICINFO_BTN_NEXT).onclick = () => GoToNext();

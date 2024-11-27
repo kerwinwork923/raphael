@@ -115,6 +115,7 @@ export default {
         height: parseInt(localData.Height),
         sex: scanAge,
         weight: parseInt(localData.Weight),
+        time: 3 
       };
 
       sessionStorage.setItem("data", JSON.stringify(convertedData));

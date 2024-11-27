@@ -360,21 +360,21 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
             (diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
           );
 
-          const remainingDays = 12 - diffDays;
+          const remainingDays = 6 - diffDays;
           let remainingHours = 0;
 
           if (remainingDays > 0) {
             if (diffDays === 0) {
-              remainingHours = 12 - diffHours;
+              remainingHours = 6 - diffHours;
             }
             this.diffDays = `${remainingDays}天`;
           } else if (remainingDays === 0 && remainingHours > 0) {
             this.diffDays = `${remainingHours}小時`;
           } else {
-            this.diffDays = "已經超過12天";
+            // this.diffDays = "已經超過6天";
           }
 
-          if (diffDays < 12) {
+          if (diffDays < 6) {
             this.nowState = "result";
             await this.API_API_ANSSecond();
             return;
