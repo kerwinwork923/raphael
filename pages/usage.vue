@@ -164,6 +164,7 @@ import { useRouter } from "vue-router";
 import TitleMenu from "@/components/TitleMenu.vue";
 import TimeRing from "@/components/TimeRing.vue";
 import { formatTimestampMDH } from "~/fn/utils";
+import axios from "axios";
 export default {
   components: {
     TitleMenu,
@@ -223,8 +224,92 @@ export default {
     };
 
     const goNext = () => {
-        router.push("/usageHistory");
+      router.push("/usageHistory");
     };
+
+    //
+    const localData = localStorage.getItem("userData");
+    const { MID, Token, MAID, Mobile, Name } = localData
+      ? JSON.parse(localData)
+      : {};
+
+    if (!MID || !Token || !MAID || !Mobile) {
+      router.push("/");
+      return;
+    }
+
+    const getStart = async () => {
+      try {
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_UseStart_Data.jsp",
+          { MID, Token, MAID, Mobile }
+        );
+        if (response.status === 200) {
+          console.log(response.data);
+        } else {
+          console.error("Unexpected response status:", response.status);
+        }
+      } catch (error) {
+        console.error("API request failed:", error);
+      }
+    };
+
+    //開始計時
+    const useStart = async () => {
+      try {
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_UseStart.jsp",
+          { MID, Token, MAID, Mobile, ProductName: "紅光版" }
+        );
+        if (response.status === 200) {
+          console.log(response.data);
+        } else {
+          console.error("Unexpected response status:", response.status);
+        }
+      } catch (error) {
+        console.error("API request failed:", error);
+      }
+    };
+
+    //暫停
+    const usePause = async () => {
+      try {
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_UsePauseStart.jsp",
+          { MID, Token, MAID, Mobile, UID: "18" }
+        );
+        if (response.status === 200) {
+          console.log(response.data);
+        } else {
+          console.error("Unexpected response status:", response.status);
+        }
+      } catch (error) {
+        console.error("API request failed:", error);
+      }
+    };
+
+    //計時結束
+    const useEnd = async () => {
+      try {
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_UseEnd.jsp",
+          { MID, Token, MAID, Mobile, UID: "" }
+        );
+        if (response.status === 200) {
+          console.log(response.data);
+        } else {
+          console.error("Unexpected response status:", response.status);
+        }
+      } catch (error) {
+        console.error("API request failed:", error);
+      }
+    };
+
+    getStart();
+
+    // useStart()
+    usePause()
+
     return {
       selectedYear,
       selectedMonth,
@@ -241,7 +326,8 @@ export default {
       changeUseActive,
       changeDetectActive,
       goPre,
-      goNext
+      goNext,
+      getStart,
     };
   },
 };
@@ -265,8 +351,6 @@ export default {
     width: max-content;
     width: 100%;
     margin-top: 1rem;
-
-
 
     .usageInfoCard {
       background-color: #fff;

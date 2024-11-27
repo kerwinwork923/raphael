@@ -70,7 +70,9 @@
               </div>
             </div>
             <div class="recommendBtnGroup">
-              <button class="contactBtn">聯絡客服</button>
+              <a href="/usageHistoryInfo/調節衣">
+                <button class="contactBtn">聯絡客服</button>
+              </a>
             </div>
             <div class="featureTitle">產品特色</div>
             <ul class="featureListGroup">
@@ -95,7 +97,9 @@
               </div>
             </div>
             <div class="recommendBtnGroup">
-              <button class="contactBtn">聯絡客服</button>
+              <a href="/usageHistoryInfo/保健版">
+                <button class="contactBtn">聯絡客服</button>
+              </a>
             </div>
             <div class="featureTitle">產品特色</div>
             <ul class="featureListGroup">
@@ -120,7 +124,9 @@
               </div>
             </div>
             <div class="recommendBtnGroup">
-              <button class="contactBtn">聯絡客服</button>
+              <a href="/usageHistoryInfo/居家治療儀">
+                <button class="contactBtn">聯絡客服</button>
+              </a>
             </div>
             <div class="featureTitle">產品特色</div>
             <ul class="featureListGroup">
@@ -149,7 +155,7 @@ export default {
     const router = useRouter();
 
     const goUse = () => {
-      router.push("/usageHistoryInfo");
+      router.push("/usageHistoryInfo/紅光版");
     };
 
     const localData = localStorage.getItem("userData");
