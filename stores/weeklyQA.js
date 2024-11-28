@@ -454,7 +454,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         if (this.currentStep < this.totalStep) {
           this.currentStep += 1;
         } else {
-          // 判别项目是否超过10个
+      
           const itemsAboveZero = this.weeklyQA.filter((q) => q.selectScore > 0);
           if (itemsAboveZero.length < 3) {
             alert("選項項目不足，請至少選擇3題");

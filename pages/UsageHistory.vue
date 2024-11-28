@@ -71,7 +71,7 @@
             </div>
             <div class="recommendBtnGroup">
               <a href="/usageHistoryInfo/調節衣">
-                <button class="contactBtn">聯絡客服</button>
+                <button class="contactBtn">使用測試</button>
               </a>
             </div>
             <div class="featureTitle">產品特色</div>
@@ -98,7 +98,7 @@
             </div>
             <div class="recommendBtnGroup">
               <a href="/usageHistoryInfo/保健版">
-                <button class="contactBtn">聯絡客服</button>
+                <button class="contactBtn">使用測試</button>
               </a>
             </div>
             <div class="featureTitle">產品特色</div>
@@ -125,7 +125,7 @@
             </div>
             <div class="recommendBtnGroup">
               <a href="/usageHistoryInfo/居家治療儀">
-                <button class="contactBtn">聯絡客服</button>
+                <button class="contactBtn">使用測試</button>
               </a>
             </div>
             <div class="featureTitle">產品特色</div>

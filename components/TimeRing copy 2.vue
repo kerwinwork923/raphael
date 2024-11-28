@@ -30,7 +30,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 
@@ -199,7 +199,6 @@ const startTimer = async () => {
   await useStartAPI();
   if (!UID.value) return; // UID 不存在則停止
   countdown();
-  saveTimerState();
 };
 
 const pauseTimer = async () => {
@@ -210,7 +209,6 @@ const pauseTimer = async () => {
   isPaused.value = true;
   elapsedTime.value = (Date.now() - startTime.value) / 1000;
   await usePauseAPI();
-  saveTimerState();
 };
 
 const resumeTimer = async () => {
@@ -222,7 +220,6 @@ const resumeTimer = async () => {
   startTime.value = Date.now() - elapsedTime.value * 1000;
   await usePauseEndAPI();
   countdown();
-  saveTimerState();
 };
 
 const countdown = () => {
@@ -248,43 +245,6 @@ const countdown = () => {
 
   update();
 };
-
-// Save timer state in localStorage
-const saveTimerState = () => {
-  const state = {
-    isCounting: isCounting.value,
-    isPaused: isPaused.value,
-    remainingTime: remainingTime.value,
-    startTime: startTime.value,
-    elapsedTime: elapsedTime.value,
-    UID: UID.value,
-    BID: BID.value,
-  };
-  localStorage.setItem("timerState", JSON.stringify(state));
-};
-
-// Load timer state from localStorage
-const loadTimerState = () => {
-  const savedState = localStorage.getItem("timerState");
-  if (savedState) {
-    const state = JSON.parse(savedState);
-    isCounting.value = state.isCounting;
-    isPaused.value = state.isPaused;
-    remainingTime.value = state.remainingTime;
-    startTime.value = state.startTime;
-    elapsedTime.value = state.elapsedTime;
-    UID.value = state.UID;
-    BID.value = state.BID;
-  }
-};
-
-// On component mount, load the timer state from localStorage
-onMounted(() => {
-  loadTimerState();
-  if (isCounting.value && !isPaused.value) {
-    countdown();
-  }
-});
 </script>
 
 <style scoped>

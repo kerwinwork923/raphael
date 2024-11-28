@@ -52,20 +52,31 @@
 <script>
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { ref } from "vue";
+
 export default {
   setup() {
-    const route = useRouter().currentRoute.value;
-    const productName = decodeURIComponent(route.params.productName || "");
+    const router = useRouter(); // Only call useRouter once
+    const route = router.currentRoute.value; // Use the `router` instance for `currentRoute`
+    const productName = decodeURIComponent(route.params.clothType);
+
+    const validName = ["調節衣", "紅光版", "保健版", "居家治療儀"];
+
+    // Redirect if product name is invalid
+    if (!validName.includes(productName)) {
+      window.location.href = "/usageHistory"; // If needed, you can also use router.push here
+    }
 
     const usageHistoryInfoList = ref([]);
     const precautionsList = ref([]);
     const videoShow = ref(false);
+
     const goPre = () => {
       router.push("/usageHistory");
     };
 
     const goNext = () => {
-      router.push("/usage");
+      router.push(`/usage/${productName}`);
     };
 
     const localData = localStorage.getItem("userData");
@@ -73,6 +84,7 @@ export default {
       ? JSON.parse(localData)
       : {};
 
+    // Redirect if required data is missing
     if (!MID || !Token || !MAID || !Mobile) {
       router.push("/");
       return;
@@ -80,9 +92,6 @@ export default {
 
     const getProductsInfo = async () => {
       try {
-        const route = useRouter().currentRoute.value;
-        const productName = decodeURIComponent(route.params.clothType || "");
-
         const response = await axios.post(
           "https://23700999.com:8081/HMA/API_Use2.jsp",
           {
@@ -93,6 +102,7 @@ export default {
             ProductName: productName,
           }
         );
+
         if (response.status === 200) {
           console.log(response.data);
           if (productName === "紅光版") {
@@ -100,9 +110,11 @@ export default {
           }
           usageHistoryInfoList.value = response.data.Product.Desc1List;
           precautionsList.value = response.data.Product.Desc2List;
+
+          // Redirect if both lists are empty
           if (
-            usageHistoryInfoList.value.length == 0 &&
-            precautionsList.value.length == 0
+            usageHistoryInfoList.value.length === 0 &&
+            precautionsList.value.length === 0
           ) {
             window.location.href = "/usageHistory";
           }

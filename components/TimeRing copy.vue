@@ -30,9 +30,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import axios from "axios";
-import { useRouter } from "vue-router";
+import { ref, computed } from "vue";
 
 // Props
 const props = defineProps({
@@ -42,26 +40,13 @@ const props = defineProps({
   },
 });
 
-// Router
-const router = useRouter();
-
-// 驗證 LocalStorage 資料
-const localData = localStorage.getItem("userData");
-const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
-
-if (!MID || !Token || !MAID || !Mobile) {
-  router.push("/");
-}
-
 // State
-const remainingTime = ref(props.totalTime);
-const isCounting = ref(false);
-const isPaused = ref(false);
-const showMessage = ref(false);
-const UID = ref(""); // 保存 UID
-const BID = ref(""); // 保存 BID
-let startTime = ref(0);
-let elapsedTime = ref(0);
+const remainingTime = ref(props.totalTime); // 剩餘時間
+const isCounting = ref(false); // 計時器狀態（是否計時中）
+const isPaused = ref(false); // 是否暫停
+const showMessage = ref(false); // 控制訊息顯示
+let startTime = ref(0); // 計時開始時間
+let elapsedTime = ref(0); // 已經過的時間
 
 // 計算進度條樣式
 const progressStyle = computed(() => {
@@ -77,7 +62,7 @@ const progressStyle = computed(() => {
   };
 });
 
-// 格式化時間
+// 格式化時間（HH:MM:SS）
 const formattedTime = computed(() => {
   const hours = Math.floor(remainingTime.value / 3600);
   const minutes = Math.floor((remainingTime.value % 3600) / 60);
@@ -92,90 +77,13 @@ const formattedTime = computed(() => {
 const buttonStyle = computed(() => {
   if (!isCounting.value) {
     return {
-      backgroundColor: "#74bc1f",
+      backgroundColor: "#74bc1f", // 開始計時時的綠色
     };
   }
   return {
     backgroundColor: isPaused.value ? "#74bc1f" : "#ec4f4f",
   };
 });
-
-// API Methods
-const apiRequest = async (url, payload) => {
-  try {
-    const response = await axios.post(url, payload);
-    console.log(`${url} 回應:`, response.data);
-    return response.data;
-  } catch (error) {
-    console.error(`${url} 請求失敗:`, error);
-    return null;
-  }
-};
-
-const useStartAPI = async () => {
-  const response = await apiRequest(
-    "https://23700999.com:8081/HMA/API_UseStart.jsp",
-    {
-      MID,
-      Token,
-      MAID,
-      Mobile,
-      ProductName: "紅光版",
-    }
-  );
-  if (response && response.UID) {
-    UID.value = response.UID; // 儲存 UID
-  } else {
-    console.error("無法取得 UID，請檢查 API 回應");
-  }
-};
-
-const usePauseAPI = async () => {
-  const response = await apiRequest(
-    "https://23700999.com:8081/HMA/API_UsePauseStart.jsp",
-    {
-      MID,
-      Token,
-      MAID,
-      Mobile,
-      UID: UID.value,
-    }
-  );
-  if (response && response.BID) {
-    BID.value = response.BID; // 儲存 BID
-  } else {
-    console.error("無法取得 BID，請檢查 API 回應");
-  }
-};
-
-const usePauseEndAPI = async () => {
-  if (!BID.value) {
-    console.error("BID 不存在，無法繼續計時！");
-    return;
-  }
-  await apiRequest("https://23700999.com:8081/HMA/API_UsePauseEnd.jsp", {
-    MID,
-    Token,
-    MAID,
-    Mobile,
-    UID: UID.value,
-    BID: BID.value,
-  });
-};
-
-const useEndAPI = async () => {
-  if (!UID.value) {
-    console.error("UID 不存在，無法結束計時！");
-    return;
-  }
-  await apiRequest("https://23700999.com:8081/HMA/API_UseEnd.jsp", {
-    MID,
-    Token,
-    MAID,
-    Mobile,
-    UID: UID.value,
-  });
-};
 
 // 方法
 const toggleTimer = () => {
@@ -190,39 +98,24 @@ const toggleTimer = () => {
   }
 };
 
-const startTimer = async () => {
+const startTimer = () => {
   isCounting.value = true;
   isPaused.value = false;
   showMessage.value = false;
   startTime.value = Date.now();
   elapsedTime.value = 0;
-  await useStartAPI();
-  if (!UID.value) return; // UID 不存在則停止
   countdown();
-  saveTimerState();
 };
 
-const pauseTimer = async () => {
-  if (!UID.value) {
-    console.error("UID 不存在，無法暫停！");
-    return;
-  }
+const pauseTimer = () => {
   isPaused.value = true;
   elapsedTime.value = (Date.now() - startTime.value) / 1000;
-  await usePauseAPI();
-  saveTimerState();
 };
 
-const resumeTimer = async () => {
-  if (!UID.value || !BID.value) {
-    console.error("UID 或 BID 不存在，無法繼續！");
-    return;
-  }
+const resumeTimer = () => {
   isPaused.value = false;
   startTime.value = Date.now() - elapsedTime.value * 1000;
-  await usePauseEndAPI();
   countdown();
-  saveTimerState();
 };
 
 const countdown = () => {
@@ -239,7 +132,6 @@ const countdown = () => {
       isCounting.value = false;
       remainingTime.value = 0;
       showMessage.value = true;
-      useEndAPI(); // 倒數結束時呼叫 API
       return;
     }
 
@@ -248,43 +140,6 @@ const countdown = () => {
 
   update();
 };
-
-// Save timer state in localStorage
-const saveTimerState = () => {
-  const state = {
-    isCounting: isCounting.value,
-    isPaused: isPaused.value,
-    remainingTime: remainingTime.value,
-    startTime: startTime.value,
-    elapsedTime: elapsedTime.value,
-    UID: UID.value,
-    BID: BID.value,
-  };
-  localStorage.setItem("timerState", JSON.stringify(state));
-};
-
-// Load timer state from localStorage
-const loadTimerState = () => {
-  const savedState = localStorage.getItem("timerState");
-  if (savedState) {
-    const state = JSON.parse(savedState);
-    isCounting.value = state.isCounting;
-    isPaused.value = state.isPaused;
-    remainingTime.value = state.remainingTime;
-    startTime.value = state.startTime;
-    elapsedTime.value = state.elapsedTime;
-    UID.value = state.UID;
-    BID.value = state.BID;
-  }
-};
-
-// On component mount, load the timer state from localStorage
-onMounted(() => {
-  loadTimerState();
-  if (isCounting.value && !isPaused.value) {
-    countdown();
-  }
-});
 </script>
 
 <style scoped>
