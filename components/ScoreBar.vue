@@ -1,5 +1,6 @@
 <template>
   <div class="scoreBarGroupWrap">
+    <div class="scoreText">{{ getScoreText(score) }}</div>
     <div class="scoreBarGroup">
 
       <div
@@ -23,7 +24,6 @@
         </div>
       </div>
     </div>
-    <div class="scoreText">{{ getScoreText(score) }}</div>
   </div>
 </template>
 
@@ -67,11 +67,11 @@ export default defineComponent({
 <style scoped lang="scss">
 .scoreBarGroup {
   position: relative;
-  margin: 1.5rem 0;
   display: flex;
   align-items: center;
   height: 6px;
   width: 100%;
+  margin-bottom: 10px;
 
   .scoreBar {
     height: 100%;
@@ -114,6 +114,6 @@ export default defineComponent({
 .scoreText {
   text-align: center;
   color: $raphael-green-400;
-  margin-top: 0.5rem;
+  margin: 0.25rem 0 1rem 0;
 }
 </style>

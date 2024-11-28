@@ -250,18 +250,20 @@ export default {
 
 .qrcode .close {
   position: absolute;
-  top: -8%;
-  right: -7%;
-
-
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  bottom: -2.5rem;
 }
 
 .qrcode .close svg {
-  width: 3rem;
-  height: 3rem;
+  width: 2rem;
+  height: 2rem;
   background-color: rgba(255, 255, 255, 0.8);
   padding: 0.5rem;
   border-radius: 50%;
+  backdrop-filter: blur(2px);
+  box-shadow: 0px 2px 20px 0px #666;
 }
 
 .cover {
