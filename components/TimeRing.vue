@@ -38,7 +38,10 @@ import { useRouter } from "vue-router";
 const props = defineProps({
   totalTime: {
     type: Number,
-    default: 60, // 默認 60 秒
+    default: 60,
+  },
+  productName: {
+    type: String,
   },
 });
 
@@ -53,7 +56,6 @@ if (!MID || !Token || !MAID || !Mobile) {
   router.push("/");
 }
 
-// State
 const remainingTime = ref(props.totalTime);
 const isCounting = ref(false);
 const isPaused = ref(false);
@@ -120,7 +122,7 @@ const useStartAPI = async () => {
       Token,
       MAID,
       Mobile,
-      ProductName: "紅光版",
+      ProductName: productName,
     }
   );
   if (response && response.UID) {
@@ -197,14 +199,14 @@ const startTimer = async () => {
   startTime.value = Date.now();
   elapsedTime.value = 0;
   await useStartAPI();
-  if (!UID.value) return; // UID 不存在則停止
+  if (!UID.value) return; 
   countdown();
   saveTimerState();
 };
 
 const pauseTimer = async () => {
   if (!UID.value) {
-    console.error("UID 不存在，無法暫停！");
+
     return;
   }
   isPaused.value = true;
@@ -249,7 +251,6 @@ const countdown = () => {
   update();
 };
 
-// Save timer state in localStorage
 const saveTimerState = () => {
   const state = {
     isCounting: isCounting.value,
@@ -263,7 +264,6 @@ const saveTimerState = () => {
   localStorage.setItem("timerState", JSON.stringify(state));
 };
 
-// Load timer state from localStorage
 const loadTimerState = () => {
   const savedState = localStorage.getItem("timerState");
   if (savedState) {
@@ -278,7 +278,6 @@ const loadTimerState = () => {
   }
 };
 
-// On component mount, load the timer state from localStorage
 onMounted(() => {
   loadTimerState();
   if (isCounting.value && !isPaused.value) {

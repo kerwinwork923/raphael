@@ -1,7 +1,7 @@
 <template>
   <div class="usageWrap">
     <TitleMenu Text="使用紀錄" link="/UsageHistory" />
-    <TimeRing :totalTime="90" />
+    <TimeRing :totalTime="90" :product-name="productName" />
     <div class="usageInfoGroup" v-if="usageCardState === '紅光版'">
       <div class="usageInfoCard">
         <h3>電量提示燈使用說明</h3>
@@ -119,13 +119,8 @@
       </div>
 
       <div class="useGroup" v-if="useActive">
-        <div
-          class="useList"
-          v-for="item in useData"
-          :key="item.StartTime"
-          @click="selectDate(item)"
-        >
-          <div class="dateList">
+        <div class="useList" v-for="item in useData" :key="item.StartTime">
+          <div class="dateList" @click="selectDate(item)">
             <div class="timeGroup">
               <div class="timeIcon">
                 <img src="../assets/imgs/detectTime.svg" alt="" />
@@ -138,7 +133,13 @@
               height="18"
               viewBox="0 0 18 18"
               fill="none"
-               :style="{ transform: selectedDate === item.StartTime ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }"
+              :style="{
+                transform:
+                  selectedDate === item.StartTime
+                    ? 'rotate(90deg)'
+                    : 'rotate(0deg)',
+                transition: 'transform 0.3s ease',
+              }"
             >
               <path
                 d="M5.99159 3.37719L11.4726 8.99994L5.99159 14.6227C5.89346 14.7232 5.83853 14.858 5.83853 14.9984C5.83853 15.1389 5.89346 15.2737 5.99159 15.3742C6.03925 15.4228 6.09613 15.4615 6.15891 15.4879C6.2217 15.5142 6.28911 15.5278 6.35721 15.5278C6.42531 15.5278 6.49273 15.5142 6.55551 15.4879C6.61829 15.4615 6.67518 15.4228 6.72284 15.3742L12.5548 9.39257C12.6572 9.28752 12.7145 9.14664 12.7145 8.99994C12.7145 8.85325 12.6572 8.71236 12.5548 8.60732L6.72396 2.62569C6.67627 2.57671 6.61924 2.53777 6.55625 2.51119C6.49326 2.4846 6.42558 2.4709 6.35721 2.4709C6.28884 2.4709 6.22116 2.4846 6.15817 2.51119C6.09518 2.53777 6.03816 2.57671 5.99046 2.62569C5.89234 2.72615 5.8374 2.86101 5.8374 3.00144C5.8374 3.14187 5.89234 3.27673 5.99046 3.37719L5.99159 3.37719Z"
@@ -155,15 +156,15 @@
                 <p>{{ formatTimestamp3(item?.StartTime) }}</p>
               </div>
             </div>
-            <div
-              class="pauseGroup"
-              v-for="pause in item.Pause"
-              :key="pause.PauseStart"
-            >
+            <div class="pauseGroup">
               <img src="/assets/imgs/pause.svg" alt="" />
               <div class="actionContent">
                 <h4>暫停時間</h4>
-                <p>{{ formatTimestamp3(pause?.PauseStart) }}</p>
+                <p v-for="pause in item.Pause" :key="pause.PauseStart">
+                  {{ formatTimestamp3(pause?.PauseStart) }} -
+                  {{ formatTimestamp3(pause?.PauseEnd) }}
+                  <span> ({{ pause?.minutesDifference }})分鐘 </span>
+                </p>
               </div>
             </div>
             <div class="stopGroup">
@@ -313,9 +314,7 @@ export default {
     };
 
     const localData = localStorage.getItem("userData");
-    const { MID, Token, MAID, Mobile } = localData
-      ? JSON.parse(localData)
-      : {};
+    const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
 
     if (!MID || !Token || !MAID || !Mobile) {
       router.push("/");
@@ -345,7 +344,7 @@ export default {
           { MID, Token, MAID, Mobile }
         );
         if (response.status === 200) {
-          log
+          log;
         } else {
           console.error("Unexpected response status:", response.status);
         }
@@ -355,7 +354,7 @@ export default {
     };
 
     getStart();
-    getHRV2()
+    getHRV2();
 
     return {
       selectedYear,
@@ -380,6 +379,7 @@ export default {
       formatTimestamp3,
       selectedDate,
       selectDate,
+      productName
     };
   },
 };
@@ -503,12 +503,11 @@ export default {
         }
       }
       .actionGroup {
-
         .startGroup,
         .pauseGroup,
         .stopGroup {
           opacity: 0;
-          animation: fadeIn2 .5s ease forwards;
+          animation: fadeIn2 0.5s ease forwards;
           display: flex;
           border-radius: 12px;
           background: var(--shade-white, #fff);
@@ -517,6 +516,23 @@ export default {
           gap: 8px;
           line-height: 1.3;
           margin-bottom: 0.5rem;
+          .actionContent {
+            color: #666;
+            font-size: 18px;
+            font-weight: 400;
+            letter-spacing: 0.09px;
+            h4 {
+              font-size: 20px;
+            }
+          }
+        }
+        .pauseGroup {
+          span {
+            color: #ccc;
+            text-align: center;
+            font-size: 14px;
+            letter-spacing: 0.1px;
+          }
         }
       }
     }
@@ -725,11 +741,9 @@ export default {
 @keyframes fadeIn {
   from {
     opacity: 0;
-
   }
   to {
     opacity: 1;
-
   }
 }
 
