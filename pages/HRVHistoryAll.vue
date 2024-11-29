@@ -497,7 +497,7 @@ export default {
         display: flex;
         align-items: center;
         gap: 4px;
-        padding: 1.25rem 0;
+        padding: 0.75rem 0;
         .timeIcon {
           border-radius: 7px;
           padding: 6px;
