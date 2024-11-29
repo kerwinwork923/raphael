@@ -46,6 +46,7 @@
         class="weeklyBtn preBtn"
         @click="store.handlePrevStep"
         :disabled="preDisabled"
+        v-if="!(store.nowState === 'score' && store.currentStep === 1) && !(store.nowState === 'times' && store.timesStep === 1) && !(store.nowState === 'choose' && store.timesStep === 1)"
       >
         {{ store.preText }}
       </button>
