@@ -6,6 +6,7 @@
       :totalTime="90"
       :product-name="productName"
       :startBtnActive="startBtnActive"
+      :showMessageProp="showMessage"
     />
     <div class="usageInfoGroup" v-if="usageCardState === '紅光版'">
       <div class="usageInfoCard">
@@ -181,6 +182,8 @@
             </div>
           </div>
         </div>
+
+        <div class="notDetectData" v-if="useData.length === 0">無檢測資料</div>
       </div>
 
       <div class="detectGroup" v-if="detectActive">
@@ -260,6 +263,7 @@ export default {
     const loading = ref(false);
 
     const startBtnActive = ref(false);
+    const showMessage = ref(false);
 
     const usageCardState = ref("");
     if (productName) usageCardState.value = productName;
@@ -341,14 +345,15 @@ export default {
 
         if (response.status === 200) {
           const records = response.data?.UseRecord || [];
+
           // 過濾出與當前產品相關的記錄
           useData.value = records.filter(
             (record) => record.ProductName === productName
           );
 
-          if (useData.length > 0) {
+          if (useData.value.length > 0) {
             // 假設只使用第一筆記錄的結束時間
-            const endTimeStr = useData[0].EndTime;
+            const endTimeStr = useData.value[0].EndTime;
             const endTime = new Date(endTimeStr);
 
             // 計算當天凌晨 5 點
@@ -363,6 +368,7 @@ export default {
 
             // 判斷是否能啟動按鈕（結束時間是否在可重置時間之前）
             startBtnActive.value = endTime < resetTime;
+            showMessage.value = !(endTime < resetTime);
           } else {
             // 如果沒有記錄，啟用按鈕
             startBtnActive.value = true;
@@ -423,6 +429,7 @@ export default {
       productName,
       loading,
       startBtnActive,
+      showMessage,
     };
   },
 };
@@ -438,6 +445,7 @@ export default {
   padding: 0 5%;
   position: relative;
   padding-bottom: 6rem;
+
   .usageInfoGroup {
     display: flex;
 
@@ -510,6 +518,19 @@ export default {
 
     .useGroup {
       padding: 0 1.25rem;
+      position: relative;
+      min-height:30vh;
+      .notDetectData {
+        position: absolute;
+        z-index: 11;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        letter-spacing: 10px;
+        font-size: 1.25rem;
+        white-space: nowrap;
+        color: #999;
+      }
       .useList {
         opacity: 0;
         animation: fadeIn2 1s ease forwards;

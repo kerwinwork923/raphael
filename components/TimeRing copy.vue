@@ -21,7 +21,7 @@
     </div>
     <div v-if="showMessage" class="completion-message">感謝您的使用</div>
     <div v-if="showMessage" class="completion-delayMessage">
-      ※ 請於隔天後再使用
+      ※ 請於24小時後再使用
     </div>
 
     <button :style="buttonStyle" @click="toggleTimer" v-if="ThisStartBtnActive">
@@ -48,10 +48,6 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  showMessageProp: {
-    type: Boolean,
-    default: false,
-  },
 });
 
 // Router
@@ -66,8 +62,6 @@ if (!MID || !Token || !MAID || !Mobile) {
 }
 
 const ThisStartBtnActive = ref(props.startBtnActive);
-const showMessage = ref(props.showMessageProp);
-
 watch(
   () => props.startBtnActive,
   (newValue) => {
@@ -75,17 +69,10 @@ watch(
   }
 );
 
-watch(
-  () => props.showMessageProp,
-  (newVal) => {
-    showMessage.value = newVal;
-  }
-);
-
 const remainingTime = ref(props.totalTime);
 const isCounting = ref(false);
 const isPaused = ref(false);
-
+const showMessage = ref(false);
 const UID = ref(""); // 保存 UID
 const BID = ref(""); // 保存 BID
 let startTime = ref(0);
@@ -107,10 +94,6 @@ const progressStyle = computed(() => {
 
 // 格式化時間
 const formattedTime = computed(() => {
-  if (!ThisStartBtnActive.value) {
-    return "00:00:00"; // 如果 startBtnActive 為 false，顯示結束狀態的時間
-  }
-
   const hours = Math.floor(remainingTime.value / 3600);
   const minutes = Math.floor((remainingTime.value % 3600) / 60);
   const seconds = Math.floor(remainingTime.value % 60);
@@ -132,7 +115,7 @@ const buttonStyle = computed(() => {
   };
 });
 
-// API 方法
+// API Methods
 const apiRequest = async (url, payload) => {
   try {
     const response = await axios.post(url, payload);
@@ -225,6 +208,7 @@ const toggleTimer = () => {
 const startTimer = async () => {
   isCounting.value = true;
   isPaused.value = false;
+  showMessage.value = false;
   startTime.value = Date.now();
   elapsedTime.value = 0;
   await useStartAPI();
@@ -250,46 +234,56 @@ const resumeTimer = async () => {
     return;
   }
   isPaused.value = false;
+  // 計算剩餘時間
   const remainingTimeSincePause = props.totalTime - elapsedTime.value;
-  startTime.value =
-    Date.now() - (props.totalTime - remainingTimeSincePause) * 1000;
+  startTime.value = Date.now() - (props.totalTime - remainingTimeSincePause) * 1000;  // 計算開始時間
   await usePauseEndAPI();
-  countdown();
+  countdown(); // 繼續倒數
   saveTimerState();
 };
-
 let timerInterval;
+
+let lastTime = 0;  // 儲存上一次更新的時間戳
+let deltaTime = 0; // 儲存每次更新的時間差
 
 const countdown = () => {
   if (timerInterval) {
     clearInterval(timerInterval);
   }
 
+  // 使用 requestAnimationFrame 每次重新計算倒計時
   const tick = () => {
-    if (isPaused.value) return;
+    if (isPaused.value) return;  // 如果暫停中則不執行
 
-    const now = Date.now();
+    const now = Date.now(); // 當前時間戳
+    deltaTime = (now - lastTime) / 1000; // 計算兩次更新的時間差（秒）
+    lastTime = now; // 更新為當前時間戳
+
+    // 計算倒數剩餘時間
     remainingTime.value = Math.max(
       props.totalTime - (now - startTime.value) / 1000 - elapsedTime.value,
       0
     );
 
+    // 更新進度條樣式
     if (remainingTime.value <= 0) {
-      clearInterval(timerInterval);
+      clearInterval(timerInterval); // 倒數結束時清除計時器
       isCounting.value = false;
       remainingTime.value = 0;
       showMessage.value = true;
-      useEndAPI();
+      useEndAPI();  // 呼叫 API 結束倒數
       ThisStartBtnActive.value = false;
     } else {
-      requestAnimationFrame(tick);
+      // 繼續進行倒計時
+      requestAnimationFrame(tick); // 讓動畫更新更加流暢
     }
   };
 
+  // 開始第一次計算
   requestAnimationFrame(tick);
 };
 
-// 保存計時器狀態，根據產品名稱
+
 const saveTimerState = () => {
   const state = {
     isCounting: isCounting.value,
@@ -297,17 +291,15 @@ const saveTimerState = () => {
     remainingTime: remainingTime.value,
     startTime: startTime.value,
     elapsedTime: elapsedTime.value,
+    productName: props.productName,
     UID: UID.value,
     BID: BID.value,
   };
-  const timerKey = `timerState_${props.productName}`;
-  localStorage.setItem(timerKey, JSON.stringify(state));
+  localStorage.setItem("timerState", JSON.stringify(state));
 };
 
-// 根據產品名稱加載計時器狀態
 const loadTimerState = () => {
-  const timerKey = `timerState_${props.productName}`;
-  const savedState = localStorage.getItem(timerKey);
+  const savedState = localStorage.getItem("timerState");
   if (savedState) {
     const state = JSON.parse(savedState);
     isCounting.value = state.isCounting;
