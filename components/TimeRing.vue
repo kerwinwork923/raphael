@@ -23,7 +23,8 @@
     <div v-if="showMessage" class="completion-delayMessage">
       ※ 請於24小時後再使用
     </div>
-    <button :style="buttonStyle" @click="toggleTimer">
+
+    <button :style="buttonStyle" @click="toggleTimer" v-if="startBtnActive">
       {{ isCounting ? (isPaused ? "繼續" : "暫停") : "開始" }}
     </button>
   </div>
@@ -42,6 +43,10 @@ const props = defineProps({
   },
   productName: {
     type: String,
+  },
+  startBtnActive: {
+    type: Boolean,
+    default: false, 
   },
 });
 
@@ -122,7 +127,7 @@ const useStartAPI = async () => {
       Token,
       MAID,
       Mobile,
-      ProductName: productName,
+      ProductName: props.productName,
     }
   );
   if (response && response.UID) {
@@ -199,14 +204,14 @@ const startTimer = async () => {
   startTime.value = Date.now();
   elapsedTime.value = 0;
   await useStartAPI();
-  if (!UID.value) return; 
+  if (!UID.value) return;
   countdown();
   saveTimerState();
 };
 
 const pauseTimer = async () => {
   if (!UID.value) {
-
+    console.error("UID 不存在，無法暫停！");
     return;
   }
   isPaused.value = true;
@@ -258,6 +263,7 @@ const saveTimerState = () => {
     remainingTime: remainingTime.value,
     startTime: startTime.value,
     elapsedTime: elapsedTime.value,
+    productName: props.productName,
     UID: UID.value,
     BID: BID.value,
   };

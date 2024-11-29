@@ -1,4 +1,5 @@
 <template>
+  <RaphaelLoading v-if="loading" />
   <TitleMenu Text="使用紀錄" link="/usageHistory" />
   <div class="usageHistoryInfoWrap">
     <h3>產品使用說明</h3>
@@ -56,13 +57,12 @@ import { ref } from "vue";
 
 export default {
   setup() {
-    const router = useRouter(); // Only call useRouter once
-    const route = router.currentRoute.value; // Use the `router` instance for `currentRoute`
+    const router = useRouter();
+    const route = router.currentRoute.value;
     const productName = decodeURIComponent(route.params.clothType);
 
     const validName = ["調節衣", "紅光版", "保健版", "居家治療儀"];
 
-    // Redirect if product name is invalid
     if (!validName.includes(productName)) {
       window.location.href = "/usageHistory"; // If needed, you can also use router.push here
     }
@@ -70,6 +70,7 @@ export default {
     const usageHistoryInfoList = ref([]);
     const precautionsList = ref([]);
     const videoShow = ref(false);
+    const loading = ref(false);
 
     const goPre = () => {
       router.push("/usageHistory");
@@ -126,7 +127,13 @@ export default {
       }
     };
 
-    getProductsInfo();
+    const init = async () => {
+      loading.value = true;
+      await getProductsInfo();
+      loading.value = false;
+    };
+
+    init();
 
     return {
       goPre,
@@ -135,6 +142,7 @@ export default {
       usageHistoryInfoList,
       precautionsList,
       videoShow,
+      loading,
     };
   },
 };

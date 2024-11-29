@@ -1,7 +1,12 @@
 <template>
+  <RaphaelLoading v-if="loading" />
   <div class="usageWrap">
     <TitleMenu Text="使用紀錄" link="/UsageHistory" />
-    <TimeRing :totalTime="90" :product-name="productName" />
+    <TimeRing
+      :totalTime="90"
+      :product-name="productName"
+      :startBtnActive="startBtnActive"
+    />
     <div class="usageInfoGroup" v-if="usageCardState === '紅光版'">
       <div class="usageInfoCard">
         <h3>電量提示燈使用說明</h3>
@@ -123,7 +128,7 @@
           <div class="dateList" @click="selectDate(item)">
             <div class="timeGroup">
               <div class="timeIcon">
-                <img src="../assets/imgs/detectTime.svg" alt="" />
+                <img src="../../assets/imgs/detectTime.svg" alt="" />
               </div>
               <div class="time">{{ formatTimestamp3(item?.StartTime) }}</div>
             </div>
@@ -183,7 +188,7 @@
           <a :href="`/vital/detail.html?AID=`">
             <div class="timeGroup">
               <div class="timeIcon">
-                <img src="../assets/imgs/detectTime.svg" alt="" />
+                <img src="../../assets/imgs/detectTime.svg" alt="" />
               </div>
               <div class="timeTextGroup">
                 <div class="time">8/25</div>
@@ -229,7 +234,9 @@ import TitleMenu from "@/components/TitleMenu.vue";
 import TimeRing from "@/components/TimeRing.vue";
 import { formatTimestampMDH, formatTimestamp3 } from "~/fn/utils";
 import axios from "axios";
+import RaphaelLoading from "../components/RaphaelLoading";
 export default {
+  components: { RaphaelLoading },
   components: {
     TitleMenu,
     TimeRing,
@@ -250,6 +257,9 @@ export default {
     const monthBoxVisible = ref(false);
     const selectedDate = ref(null);
     const useData = ref();
+    const loading = ref(false);
+
+    const startBtnActive = ref(false);
 
     const usageCardState = ref("");
     if (productName) usageCardState.value = productName;
@@ -323,12 +333,40 @@ export default {
 
     const getStart = async () => {
       try {
+        // 發送 API 請求
         const response = await axios.post(
           "https://23700999.com:8081/HMA/API_UseStart_Data.jsp",
           { MID, Token, MAID, Mobile }
         );
+
         if (response.status === 200) {
-          useData.value = response.data?.UseRecord;
+          const records = response.data?.UseRecord || [];
+          // 過濾出與當前產品相關的記錄
+          useData.value = records.filter(
+            (record) => record.ProductName === productName
+          );
+
+          if (useData.length > 0) {
+            // 假設只使用第一筆記錄的結束時間
+            const endTimeStr = useData[0].EndTime;
+            const endTime = new Date(endTimeStr);
+
+            // 計算當天凌晨 5 點
+            const now = new Date();
+            const resetTime = new Date();
+            resetTime.setHours(5, 0, 0, 0); // 當天凌晨 5 點
+
+            // 如果當前時間小於凌晨 5 點，重置時間為前一天的凌晨 5 點
+            if (now < resetTime) {
+              resetTime.setDate(resetTime.getDate() - 1);
+            }
+
+            // 判斷是否能啟動按鈕（結束時間是否在可重置時間之前）
+            startBtnActive.value = endTime < resetTime;
+          } else {
+            // 如果沒有記錄，啟用按鈕
+            startBtnActive.value = true;
+          }
         } else {
           console.error("Unexpected response status:", response.status);
         }
@@ -353,8 +391,11 @@ export default {
       }
     };
 
-    getStart();
-    getHRV2();
+    const init = async () => {
+      await getStart();
+    };
+
+    init();
 
     return {
       selectedYear,
@@ -379,7 +420,9 @@ export default {
       formatTimestamp3,
       selectedDate,
       selectDate,
-      productName
+      productName,
+      loading,
+      startBtnActive,
     };
   },
 };

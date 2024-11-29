@@ -40,6 +40,7 @@ const saveQRCode = async (
   cstart,
   cend,
   mobile,
+  period,
   showAlert
 ) => {
   try {
@@ -52,12 +53,13 @@ const saveQRCode = async (
         Start: cstart,
         End: cend,
         Mobile: mobile,
+        Period: period,
       }
     );
 
     if (response.status === 200) {
       console.log(response.data);
-      
+
       showAlert(response.data.Result);
     } else {
       showAlert(`資料送出失敗 : ${response.data.Result}`);
@@ -82,6 +84,7 @@ export default {
       cstart: null,
       cend: null,
       mobile: null,
+      period: null,
       allParams: {},
     });
 
@@ -153,6 +156,7 @@ export default {
         params.cstart = searchParams.get("Start");
         params.cend = searchParams.get("End");
         params.mobile = searchParams.get("Mobile");
+        params.period = searchParams.get("Period");
 
         params.allParams = {};
         for (const [key, value] of searchParams.entries()) {
@@ -167,6 +171,7 @@ export default {
           params.cstart,
           params.cend,
           params.mobile,
+          params.period,
           showAlert
         );
       } catch (error) {
