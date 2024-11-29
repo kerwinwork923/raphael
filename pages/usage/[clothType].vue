@@ -183,7 +183,7 @@
           </div>
         </div>
 
-        <div class="notDetectData" v-if="useData.length === 0">無檢測資料</div>
+        <div class="notDetectData" v-if="useData?.length === 0">無檢測資料</div>
       </div>
 
       <div class="detectGroup" v-if="detectActive">
@@ -519,7 +519,7 @@ export default {
     .useGroup {
       padding: 0 1.25rem;
       position: relative;
-      min-height:30vh;
+      min-height: 30vh;
       .notDetectData {
         position: absolute;
         z-index: 11;
