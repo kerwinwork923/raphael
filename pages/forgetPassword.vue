@@ -34,6 +34,9 @@
           取得驗證碼
         </button>
       </div>
+      <div class="returnLogin">
+          <router-link to="/">返回</router-link>
+        </div>
       <div class="verfifyWrap" v-if="currentStep === 'verify'">
         <div class="verificationCodeGroup">
           <input
@@ -526,6 +529,18 @@ export default {
       }
     }
   }
+  .returnLogin {
+      text-align: center;
+      margin-top: 1.25rem;
+
+      a {
+        color: #666;
+        font-size: 1.125rem;
+        font-weight: 400;
+        letter-spacing: 0.5px;
+        text-decoration: none;
+      }
+    }
 
   .verfifyWrap {
     padding: 1rem;

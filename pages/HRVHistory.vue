@@ -228,9 +228,13 @@ export default {
     color: #666;
   }
   .detectList {
-    overflow-y: auto;
-    height: calc(100% - 52px);
     position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: calc(100% - 52px);
+    overflow-y: auto;
+    
     .notDetectData {
       position: absolute;
       z-index: 11;
@@ -266,7 +270,6 @@ export default {
         display: flex;
         align-items: center;
         gap: 4px;
-        padding: 1.25rem 0;
         .timeIcon {
           border-radius: 7px;
           padding: 6px;
