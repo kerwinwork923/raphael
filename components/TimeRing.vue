@@ -239,10 +239,11 @@ const pauseTimer = async () => {
     return;
   }
   isPaused.value = true;
-  elapsedTime.value = (Date.now() - startTime.value) / 1000;
+  elapsedTime.value += (Date.now() - startTime.value) / 1000; // 正確累加
   await usePauseAPI();
   saveTimerState();
 };
+
 
 const resumeTimer = async () => {
   if (!UID.value || !BID.value) {
@@ -250,13 +251,12 @@ const resumeTimer = async () => {
     return;
   }
   isPaused.value = false;
-  const remainingTimeSincePause = props.totalTime - elapsedTime.value;
-  startTime.value =
-    Date.now() - (props.totalTime - remainingTimeSincePause) * 1000;
+  startTime.value = Date.now(); // 重新計算開始時間
   await usePauseEndAPI();
   countdown();
   saveTimerState();
 };
+
 
 let timerInterval;
 
@@ -270,7 +270,7 @@ const countdown = () => {
 
     const now = Date.now();
     remainingTime.value = Math.max(
-      props.totalTime - (now - startTime.value) / 1000 - elapsedTime.value,
+      props.totalTime - elapsedTime.value - (now - startTime.value) / 1000,
       0
     );
 
@@ -288,6 +288,7 @@ const countdown = () => {
 
   requestAnimationFrame(tick);
 };
+
 
 // 保存計時器狀態，根據產品名稱
 const saveTimerState = () => {
