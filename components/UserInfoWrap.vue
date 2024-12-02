@@ -176,7 +176,7 @@ export default {
     const localSex = ref(props.sex || "");
     const localDate = ref(null);
     const localDSPR = ref(props.DSPR || "");
-    const localTime = ref(props.HRVCalTime);
+    const localTime = ref(props.HRVCalTime || "");
 
     const inputAddress = ref("");
     const citiesData = ref([]);
