@@ -166,7 +166,7 @@ export default {
     phoneShow: false,
     addressShow: false,
     emailShow: false,
-    timeShow:false,
+    timeShow: false,
     HRVCalTime: String,
   },
   setup(props, { emit }) {
@@ -176,7 +176,7 @@ export default {
     const localSex = ref(props.sex || "");
     const localDate = ref(null);
     const localDSPR = ref(props.DSPR || "");
-    const localTime = ref(props.HRVCalTime || "2");
+    const localTime = ref(props.HRVCalTime);
 
     const inputAddress = ref("");
     const citiesData = ref([]);
