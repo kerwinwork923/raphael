@@ -1,9 +1,9 @@
 <template>
   <RaphaelLoading v-if="loading" />
   <div class="usageWrap">
-    <TitleMenu Text="使用紀錄" link="/UsageHistory" />
+    <TitleMenu Text="使用紀錄" :link="`/usageHistoryInfo/${productName}`" />
     <TimeRing
-      :totalTime="90"
+      :totalTime="30"
       :product-name="productName"
       :startBtnActive="startBtnActive"
       :showMessageProp="showMessage"
@@ -89,9 +89,11 @@
           檢測紀錄
         </h3>
       </div>
+
+      <!-- 年份和月份選擇框 -->
       <div class="detectSelectGroup">
         <div class="yearSelectGroup">
-          <img src="/assets/imgs/filter.svg" alt="" />
+          <img src="/assets/imgs/filter.svg" alt="年份篩選" />
           <div class="monthText" @click="toggleYearBox">
             {{ selectedYear }}年
           </div>
@@ -107,7 +109,7 @@
           </div>
         </div>
         <div class="monthSelectGroup">
-          <img src="/assets/imgs/filter.svg" alt="" />
+          <img src="/assets/imgs/filter.svg" alt="月份篩選" />
           <div class="monthText" @click="toggleMonthBox">
             {{ selectedMonth }}月份
           </div>
@@ -125,7 +127,11 @@
       </div>
 
       <div class="useGroup" v-if="useActive">
-        <div class="useList" v-for="item in useData" :key="item.StartTime">
+        <div
+          class="useList"
+          v-for="item in filteredUsage"
+          :key="item.StartTime"
+        >
           <div class="dateList" @click="selectDate(item)">
             <div class="timeGroup">
               <div class="timeIcon">
@@ -189,7 +195,7 @@
       <div class="detectGroup" v-if="detectActive">
         <div
           class="detectItem"
-          v-for="(item, index) in detectData"
+          v-for="(item, index) in filteredHRVData"
           :key="index"
         >
           <!-- `/vital/detail.html?AID=` -->
@@ -250,9 +256,10 @@ import TitleMenu from "@/components/TitleMenu.vue";
 import TimeRing from "@/components/TimeRing.vue";
 import { formatTimestampMDH, formatTimestamp3 } from "~/fn/utils";
 import axios from "axios";
+import { ref, computed, onMounted } from "vue";
 import RaphaelLoading from "../components/RaphaelLoading";
 export default {
-  components: { RaphaelLoading },
+  components: { RaphaelLoading, TitleMenu, TimeRing },
   components: {
     TitleMenu,
     TimeRing,
@@ -419,6 +426,27 @@ export default {
       await getStart();
     };
 
+    const filteredHRVData = computed(() => {
+      return detectData.value.filter((item) => {
+        const itemDate = new Date(item.CheckTime);
+        return (
+          itemDate.getFullYear() === selectedYear.value &&
+          itemDate.getMonth() + 1 === selectedMonth.value
+        );
+      });
+    });
+
+    const filteredUsage = computed(() => {
+      if (!Array.isArray(useData.value)) return []; // 保護機制
+      return useData.value.filter((item) => {
+        const itemDate = new Date(item.StartTime);
+        return (
+          itemDate.getFullYear() === selectedYear.value &&
+          itemDate.getMonth() + 1 === selectedMonth.value
+        );
+      });
+    });
+
     init();
 
     return {
@@ -449,6 +477,8 @@ export default {
       startBtnActive,
       showMessage,
       detectData,
+      filteredHRVData,
+      filteredUsage,
     };
   },
 };
