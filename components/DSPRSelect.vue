@@ -77,7 +77,7 @@ export default {
           height: parseInt(userData.Height),
           sex: parseInt(userData.Sex),
           weight: parseInt(userData.Weight),
-          time: 2,
+          time: parseInt(userData.HRVCalTime) || 2,
         };
         sessionStorage.setItem("data", JSON.stringify(convertedData));
         localStorage.setItem("userData", JSON.stringify(userData));

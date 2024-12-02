@@ -115,7 +115,7 @@ export default {
         height: parseInt(localData.Height),
         sex: scanAge,
         weight: parseInt(localData.Weight),
-        time: 2
+        time: parseInt(localData.HRVCalTime) || 2,
       };
 
       sessionStorage.setItem("data", JSON.stringify(convertedData));
@@ -158,7 +158,7 @@ export default {
   background: var(--Grays-White, #fff);
   box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
   max-width: 648px;
-  padding: .75rem;
+  padding: 0.75rem;
   .HRVAlertClose {
     width: 24px;
     height: 24px;
@@ -205,8 +205,8 @@ export default {
     font-size: 1.125rem;
     font-weight: 400;
     letter-spacing: 0.09px;
-    transition: all .3s ease;
-    &:hover{
+    transition: all 0.3s ease;
+    &:hover {
       background-color: $raphael-green-500;
     }
   }

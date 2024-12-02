@@ -85,6 +85,23 @@
         <img class="icon2" src="../assets/imgs/arrowDown.svg" />
       </div>
 
+      <!-- 檢測時間 -->
+      <div class="detectTime" v-if="timeShow">
+        <img class="icon1" src="../assets/imgs/detectTime.svg" alt="" />
+        <select
+          v-model="localTime"
+          class="custom-select"
+          :class="{ selected: localTime }"
+        >
+          <option value="" disabled selected hidden>選擇HRV量測時間</option>
+
+          <option value="1">1分鐘</option>
+          <option value="2">2分鐘</option>
+          <option value="3">3分鐘</option>
+        </select>
+        <img class="icon2" src="../assets/imgs/arrowDown.svg" />
+      </div>
+
       <!-- 地址 -->
       <div class="addressGroup" v-if="addressShow">
         <div class="city">
@@ -149,6 +166,8 @@ export default {
     phoneShow: false,
     addressShow: false,
     emailShow: false,
+    timeShow:false,
+    HRVCalTime: String,
   },
   setup(props, { emit }) {
     const localName = ref(props.name || "");
@@ -157,6 +176,7 @@ export default {
     const localSex = ref(props.sex || "");
     const localDate = ref(null);
     const localDSPR = ref(props.DSPR || "");
+    const localTime = ref(props.HRVCalTime || "2");
 
     const inputAddress = ref("");
     const citiesData = ref([]);
@@ -191,6 +211,7 @@ export default {
           )
         : null;
       localDSPR.value = userData.DSPR || "";
+      localTime.value = userData.HRVCalTime || "";
       selectedCity.value = userData.City || "";
       selectedArea.value = userData.Zone || "";
       inputAddress.value = userData.Address || "";
@@ -246,6 +267,7 @@ export default {
         city: selectedCity.value,
         area: selectedArea.value,
         address: inputAddress.value,
+        HRVCalTime: localTime.value,
       });
     };
 
@@ -258,6 +280,7 @@ export default {
     watch(selectedCity, (newValue) => emit("update:city", newValue));
     watch(selectedArea, (newValue) => emit("update:area", newValue));
     watch(inputAddress, (newValue) => emit("update:address", newValue));
+    watch(localTime, (newValue) => emit("update:HRVCalTime", newValue));
 
     return {
       localName,
@@ -276,6 +299,7 @@ export default {
       isSubmitDisabled,
       formatDate,
       phone,
+      localTime,
     };
   },
 };
@@ -396,7 +420,8 @@ export default {
   }
 
   .groupGroup,
-  .DSPR {
+  .DSPR,
+  .detectTime {
     display: flex;
     position: relative;
     width: 100%;
@@ -428,7 +453,6 @@ export default {
       color: #999;
       font-family: Inter;
       font-size: 1.2rem;
-      font-weight: 400;
 
       &::placeholder {
         color: #ccc;
@@ -440,6 +464,14 @@ export default {
       &::-ms-expand {
         display: none;
       }
+    }
+  }
+
+  .detectTime {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    .icon1 {
+      width: 22px;
     }
   }
 

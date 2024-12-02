@@ -187,25 +187,38 @@
       </div>
 
       <div class="detectGroup" v-if="detectActive">
-        <div class="detectItem" v-for="(item, index) in 4" :key="index">
-          <a :href="`/vital/detail.html?AID=`">
+        <div
+          class="detectItem"
+          v-for="(item, index) in detectData"
+          :key="index"
+        >
+          <!-- `/vital/detail.html?AID=` -->
+          <a href="#">
             <div class="timeGroup">
               <div class="timeIcon">
                 <img src="../../assets/imgs/detectTime.svg" alt="" />
               </div>
               <div class="timeTextGroup">
-                <div class="time">8/25</div>
-                <div class="timeInfoText">紅光 治療後</div>
+                <div class="time">{{ formatTimestamp3(item.CheckTime) }}</div>
+                <div class="timeInfoText">
+                  {{ item.ProductName }} {{ item.BcAf }}
+                </div>
               </div>
             </div>
             <div class="infoGroup">
               <div class="detectAgeGroup">
                 <h4>生理年齡</h4>
-                <h5><span>23</span>歲</h5>
+                <h5>
+                  <span>{{ item.bioage }}</span
+                  >歲
+                </h5>
               </div>
               <div class="detectHRVGroup">
                 <h4>HRV</h4>
-                <h5><span>23</span>ms</h5>
+                <h5>
+                  <span>{{ Math.round(item.HRV * 10) / 10 }}</span
+                  >ms
+                </h5>
               </div>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -260,6 +273,7 @@ export default {
     const monthBoxVisible = ref(false);
     const selectedDate = ref(null);
     const useData = ref();
+    const detectData = ref();
     const loading = ref(false);
 
     const startBtnActive = ref(false);
@@ -345,10 +359,14 @@ export default {
 
         if (response.status === 200) {
           const records = response.data?.UseRecord || [];
-
+          const detects = response.data?.HRV2Record || [];
           // 過濾出與當前產品相關的記錄
           useData.value = records.filter(
             (record) => record.ProductName === productName
+          );
+
+          detectData.value = detects.filter(
+            (detect) => detect.ProductName === productName
           );
 
           if (useData.value.length > 0) {
@@ -430,6 +448,7 @@ export default {
       loading,
       startBtnActive,
       showMessage,
+      detectData,
     };
   },
 };

@@ -12,8 +12,10 @@
         @update:city="city = $event"
         @update:area="area = $event"
         @update:address="address = $event"
+        @update:HRVCalTime="HRVCalTime = $event"
         phoneShow="true"
         addressShow="true"
+        timeShow = "true"
         @submit="addUser"
       />
     </div>
@@ -40,6 +42,7 @@ export default {
     const city = ref("");
     const area = ref("");
     const address = ref("");
+    const HRVCalTime = ref("");
     const router = useRouter();
 
     const addUser = async () => {
@@ -88,6 +91,7 @@ export default {
             City: city.value,
             Zone: area.value,
             Address: address.value,
+            HRVCalTime: HRVCalTime.value,
           }
         );
 
@@ -125,13 +129,13 @@ export default {
       address,
       addUser,
       logout,
+      HRVCalTime,
     };
   },
 };
 </script>
 
 <style lang="scss">
-
 .changeMemberWrap {
   display: flex;
   flex-direction: column;
@@ -141,7 +145,7 @@ export default {
   background: $raphael-gray-100;
   padding: 0 1rem;
   padding-bottom: 66px;
-  
+
   .changeMemberGroup {
     padding: 0.75rem 0;
     width: 100%;
