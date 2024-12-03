@@ -70,7 +70,7 @@ export default {
         }
 
         if (userData.Sex == "2") {
-          userData.Sex == "0";
+          userData.Sex = "0";
         }
 
         const convertedData = {
