@@ -98,7 +98,7 @@ export default {
         return;
       }
       if (scanAge == "2") {
-        scanAge = "0";
+        scanAge = 0;
       }
 
       // DSPR 檢查 - 判斷是否為預期的三個值之一
