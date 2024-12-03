@@ -91,11 +91,14 @@ export default {
       }
 
       let scanAge = parseInt(localData.Sex);
-      if (scanAge !== 1 && scanAge !== 2) {
+      if (scanAge !== 1 && scanAge !== 2 && scanAge !== 0) {
         alert("性別格式不正確，請修改會員資料。");
         window.location.href = "/changeMember";
 
         return;
+      }
+      if (scanAge == "2") {
+        scanAge = "0";
       }
 
       // DSPR 檢查 - 判斷是否為預期的三個值之一

@@ -69,6 +69,10 @@ export default {
           return;
         }
 
+        if (userData.Sex == "2") {
+          userData.Sex == "0";
+        }
+
         const convertedData = {
           age: calculateAge(userData.Birthday),
           bp_group: userData.DSPR,
