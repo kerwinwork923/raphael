@@ -366,10 +366,7 @@ export default {
       grid-template-columns: repeat(2, 1fr);
       gap: 1rem;
       //暫時的樣式
-      grid-template-rows: repeat(2, 84px);
-      @include respond-to("tablet") {
-        grid-template-rows: repeat(4, 84px);
-      }
+      grid-template-rows: repeat(3, 84px);
 
       .item {
         background-color: #999;
@@ -406,9 +403,12 @@ export default {
 
         img {
           position: absolute;
-          right: 0.75rem;
-          top: 50%;
-          transform: translateY(-50%);
+          width: 100%;
+          opacity: 0.1;
+          filter: blur(2px);
+
+          @include respond-to("tablet") {
+          }
         }
       }
 
@@ -452,45 +452,16 @@ export default {
 
       .item2 {
         display: grid;
-        grid-column: 1 / 3;
-        grid-row: 1 / 2;
+        grid-row: 1 / 4;
         place-items: center;
         align-content: center;
 
         @include respond-to("tablet") {
-          grid-row: 1 / 3;
-        }
-
-        img {
-          width: 85%;
-          top: 16px;
-          right: 0;
-          opacity: 0.1;
-          left: 0;
-          margin: auto;
-          transform: none;
-          filter: blur(2px);
-
-          @include respond-to("tablet") {
-            width: 70%;
-            top: 10px;
-            right: 0;
-            opacity: 0.1;
-            left: 0;
-            margin: auto;
-            transform: none;
-            filter: blur(2px);
-          }
         }
       }
       .item3_link {
-        grid-row: 2 / 2;
-        grid-column: 1 / 2;
-        place-items: center;
-        align-content: center;
-
+        
         @include respond-to("tablet") {
-          grid-row: 3 / 5;
         }
 
         .item3 {
@@ -500,38 +471,12 @@ export default {
           place-items: center;
           align-content: center;
         }
-        
-        img {
-          width: 85%;
-          top: 16px;
-          right: 0;
-          opacity: 0.1;
-          left: 0;
-          margin: auto;
-          transform: none;
-          filter: blur(2px);
-
-          @include respond-to("tablet") {
-            width: 70%;
-            top: 10px;
-            right: 0;
-            opacity: 0.1;
-            left: 0;
-            margin: auto;
-            transform: none;
-            filter: blur(2px);
-          }
-        }
       }
 
       .item4_link {
-        grid-row: 2 / 2;
-        grid-column: 2 / 3;
-        place-items: center;
-        align-content: center;
+        grid-row: 2/4;
 
         @include respond-to("tablet") {
-          grid-row: 3 / 5;
         }
 
         .item4{
@@ -540,28 +485,6 @@ export default {
           height: 100%;
           place-items: center;
           align-content: center;
-        }
-        
-        img {
-          width: 85%;
-          top: 16px;
-          right: 0;
-          opacity: 0.1;
-          left: 0;
-          margin: auto;
-          transform: none;
-          filter: blur(2px);
-
-          @include respond-to("tablet") {
-            width: 70%;
-            top: 10px;
-            right: 0;
-            opacity: 0.1;
-            left: 0;
-            margin: auto;
-            transform: none;
-            filter: blur(2px);
-          }
         }
       }
       
