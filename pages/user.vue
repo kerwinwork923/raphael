@@ -58,7 +58,7 @@
           </div>
         </router-link>
 
-        <router-link to="/UsageHistory.vue" class="item3_link">
+        <router-link to="/UsageHistory.vue" class="item4_link">
           <div class="item item4">
             <div class="topTitle">使用</div>
             <div class="bottomTitle">紀錄</div>
@@ -368,7 +368,7 @@ export default {
       //暫時的樣式
       grid-template-rows: repeat(2, 84px);
       @include respond-to("tablet") {
-        grid-template-rows: repeat(3, 84px);
+        grid-template-rows: repeat(4, 84px);
       }
 
       .item {
@@ -376,7 +376,6 @@ export default {
         position: relative;
         border-radius: 0.75rem;
         padding: 0.75rem;
-        opacity: 0.15;
         color: #fff;
         //暫時的樣式
         overflow: hidden;
@@ -435,15 +434,12 @@ export default {
       }
       .item4 {
         background-color: $raphael-orange-400;
-        filter: blur(2px);
       }
       .item5 {
         background-color: $raphael-brown-400;
-        filter: blur(2px);
       }
       .item6 {
         background-color: $raphael-gray-300;
-        filter: blur(2px);
       }
       //暫時隱藏
       .item1,
@@ -453,16 +449,16 @@ export default {
       }
 
       //暫時的樣式
-      .item2,
-      .item3_link {
-        grid-row: 1/3;
+
+      .item2 {
+        display: grid;
+        grid-column: 1 / 3;
+        grid-row: 1 / 2;
         place-items: center;
         align-content: center;
 
         @include respond-to("tablet") {
-          grid-row: 1/4;
-          place-items: center;
-          align-content: center;
+          grid-row: 1 / 3;
         }
 
         img {
@@ -487,10 +483,16 @@ export default {
           }
         }
       }
-      .item2 {
-        display: grid;
-      }
       .item3_link {
+        grid-row: 2 / 2;
+        grid-column: 1 / 2;
+        place-items: center;
+        align-content: center;
+
+        @include respond-to("tablet") {
+          grid-row: 3 / 5;
+        }
+
         .item3 {
           display: grid;
           width: 100%;
@@ -498,7 +500,71 @@ export default {
           place-items: center;
           align-content: center;
         }
+        
+        img {
+          width: 85%;
+          top: 16px;
+          right: 0;
+          opacity: 0.1;
+          left: 0;
+          margin: auto;
+          transform: none;
+          filter: blur(2px);
+
+          @include respond-to("tablet") {
+            width: 70%;
+            top: 10px;
+            right: 0;
+            opacity: 0.1;
+            left: 0;
+            margin: auto;
+            transform: none;
+            filter: blur(2px);
+          }
+        }
       }
+
+      .item4_link {
+        grid-row: 2 / 2;
+        grid-column: 2 / 3;
+        place-items: center;
+        align-content: center;
+
+        @include respond-to("tablet") {
+          grid-row: 3 / 5;
+        }
+
+        .item4{
+          display: grid;
+          width: 100%;
+          height: 100%;
+          place-items: center;
+          align-content: center;
+        }
+        
+        img {
+          width: 85%;
+          top: 16px;
+          right: 0;
+          opacity: 0.1;
+          left: 0;
+          margin: auto;
+          transform: none;
+          filter: blur(2px);
+
+          @include respond-to("tablet") {
+            width: 70%;
+            top: 10px;
+            right: 0;
+            opacity: 0.1;
+            left: 0;
+            margin: auto;
+            transform: none;
+            filter: blur(2px);
+          }
+        }
+      }
+      
     }
 
     .copyrights {
