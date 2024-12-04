@@ -58,11 +58,13 @@
           </div>
         </router-link>
 
-        <div class="item item4">
-          <div class="topTitle">使用</div>
-          <div class="bottomTitle">紀錄</div>
-          <img src="../assets/imgs/clothIcon.svg" alt="" />
-        </div>
+        <router-link to="/UsageHistory.vue" class="item3_link">
+          <div class="item item4">
+            <div class="topTitle">使用</div>
+            <div class="bottomTitle">紀錄</div>
+            <img src="../assets/imgs/clothIcon.svg" alt="" />
+          </div>
+        </router-link>
 
         <div class="item item5">
           <div class="topTitle">積分</div>
@@ -445,7 +447,6 @@ export default {
       }
       //暫時隱藏
       .item1,
-      .item4,
       .item5,
       .item6 {
         display: none;
