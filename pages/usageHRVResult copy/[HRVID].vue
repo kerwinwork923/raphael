@@ -223,33 +223,55 @@
         </div>
       </div>
     </div>
-    <!-- <div class="SympatheticRatioGroup">
-      <h3>交感/副交感比例</h3>
-      <h4>使用前</h4>
-      <SympatheticRatio :sympathetic="90" :parasympathetic="10" />
-      <h4>使用後</h4>
-      <SympatheticRatio :sympathetic="30" :parasympathetic="70" />
-    </div> -->
-    <div class="healthAnalyse"></div>
-    <div class="usageBtnGroup">
-      <button class="nextBtn" @click="goNext">返回產品頁面</button>
+
+    <div class="row">
+      <div class="boxGroup">
+        <div class="titleGroup">
+          <h3>交感/副交感比例</h3>
+        </div>
+        <div class="boxText">
+          <div class="text-container-PLF">
+            <h4>交感神經</h4>
+            <div class="value">60</div>
+          </div>
+          <div class="text-container-PHF">
+            <h4>副交感神經</h4>
+            <div class="value">40</div>
+          </div>
+        </div>
+        <div class="box">
+          <div class="circle-PLF"></div>
+          <div class="circle-PHF"></div>
+        </div>
+      </div>
+      <svg style="display: none">
+        <defs>
+          <filter id="blob">
+            <feGaussianBlur
+              in="SourceGraphic"
+              stdDeviation="10"
+              result="blur"
+            ></feGaussianBlur>
+            <feColorMatrix
+              in="blur"
+              mode="matrix"
+              values="
+                     1 0 0 0 0
+                     0 1 0 0 0
+                     0 0 1 0 0
+                     0 0 0 20 -10"
+            ></feColorMatrix>
+          </filter>
+        </defs>
+      </svg>
     </div>
   </div>
 </template>
 
 <script>
-import ResultChart from "~/components/ResultChart.vue";
-import SympatheticRatio from "~/components/SympatheticRatio.vue";
-import { useRouter } from "vue-router";
+import ResultChart from "~/components/ResultChart.vue"; // 不需要花括号
 export default {
-  components: { ResultChart, SympatheticRatio },
-  setup() {
-    const router = useRouter();
-    const goNext = () => {
-      router.push("/usageHistory");
-    };
-    return {goNext};
-  },
+  components: { ResultChart },
 };
 </script>
 
@@ -258,7 +280,6 @@ export default {
   background-color: #f6f6f6;
   padding: 1rem 5% 7rem;
   font-family: "Noto Sans";
-  min-height: 100vh;
   h1 {
     color: #000;
     text-align: center;
@@ -353,51 +374,124 @@ export default {
     }
   }
 
-  .SympatheticRatioGroup {
+  .boxGroup {
+    display: grid;
+    place-items: center;
+    gap: 0.75rem;
     background-color: #fff;
-    border-radius: 12px;
-    margin-top: 1rem;
-    padding: 0.75rem 12px 0;
-    h3 {
-      color: #1e1e1e;
-      font-family: "Noto Sans";
-      font-size: 20px;
-      font-style: normal;
-      font-weight: 400;
-      letter-spacing: 0.15px;
-      margin-bottom: 0.5rem;
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+  }
+
+  .boxGroup h3 {
+    color: #1e1e1e;
+  }
+
+  .box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-column: 1/2;
+    grid-row: 2;
+    filter: url(#blob);
+    width: 100%;
+    height: 200px;
+  }
+
+  .circle-PHF,
+  .circle-PLF {
+    position: relative;
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    filter: drop-shadow(0px 3px 5px #fff) brightness(1.06);
+  }
+
+  .boxGroup {
+    position: relative;
+    height: 100%;
+  }
+
+  .boxText {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-column: 1/2;
+    grid-row: 2;
+    width: 100%;
+    height: 200px;
+    z-index: 2;
+  }
+
+  .text-container-PLF {
+    text-align: center;
+    color: #fff;
+    animation: 1.5s moveRight forwards ease-out;
+  }
+
+  .text-container-PHF {
+    text-align: center;
+    color: #fff;
+    animation: 1.75s moveLeft forwards ease-out;
+  }
+
+  .boxText h4 {
+    margin: 0;
+  }
+
+  .circle-PLF {
+    background-color: rgba(236, 79, 79, 0.75);
+    animation: 1.5s moveRight forwards ease-out;
+  }
+
+  .circle-PHF {
+    background-color: rgba(31, 188, 179, 0.75);
+    animation: 1.75s moveLeft forwards ease-out;
+  }
+
+  .text-container-PLF .value,
+  .text-container-PHF .value {
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: 0.12px;
+  }
+
+  @keyframes moveLeft {
+    0% {
+      left: -50px;
+    }
+
+    50% {
+      left: -25px;
+    }
+
+    70% {
+      left: -36px;
+    }
+
+    100% {
+      left: 0;
     }
   }
-  .usageBtnGroup {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: #f6f6f6;
-    z-index: 99;
-    display: flex;
-    justify-content: center;
-    padding: 24px 5%;
-    gap: 16px;
-    button {
-      width: 50%;
-      background-color: $raphael-green-400;
-      color: #fff;
-      border: none;
-      padding: 8px;
-      border-radius: 8px;
-      color: #fff;
-      font-size: 18px;
-      font-style: normal;
-      font-weight: 400;
-      letter-spacing: 0.09px;
+
+  @keyframes moveRight {
+    0% {
+      left: 50px;
     }
-    .preBtn {
-      background-color: #eee;
-      color: #666;
+
+    50% {
+      left: 25px;
     }
-    .nextBtn {
-      background-color: $raphael-green-400;
+
+    70% {
+      left: 36px;
+    }
+
+    100% {
+      left: 0;
     }
   }
 }

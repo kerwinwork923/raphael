@@ -1,9 +1,8 @@
 <template>
   <QRCodeScanner v-if="qrcodeShow" />
   <div class="raphaelUser">
-    <HRVAlert />
     <RaphaelLoading v-if="loading" />
-    <DSPRSelect />
+
     <Navbar />
     <div class="userGroup">
       <div class="userInfo">
@@ -79,8 +78,7 @@
       </div>
       <footer class="copyrights">
         <!-- <a href="/usageHistory"></a> -->
-         © 2024 智平衡健康事業股份有限公司 all rights reserved.
-       
+        © 2024 智平衡健康事業股份有限公司 all rights reserved.
       </footer>
     </div>
   </div>

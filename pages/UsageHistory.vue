@@ -4,143 +4,79 @@
     <div class="productWrap">
       <h3 class="yourProductTitle">您的產品</h3>
       <div class="haveProductWrap">
-        <div class="haveIcon">
-          <img src="/assets/imgs/haveCheck.svg" alt="" />
+        <!-- 單件產品展示 -->
+        <div class="haveGroup" v-if="purchasedProducts.length === 1">
+          <div class="haveIcon">
+            <img src="/assets/imgs/haveCheck.svg" alt="checked icon" />
+          </div>
+          <div class="haveProduct">
+            <div class="imgGroup">
+              <img src="/assets/imgs/redLightClothes.png" alt="product image" />
+              <div class="circle"></div>
+              <div class="bigCircle"></div>
+            </div>
+            <h3 class="productName">{{ purchasedProducts[0] }}</h3>
+          </div>
         </div>
-        <div class="haveGroup">
-          <div class="haveProduct">
+        <!-- 多件產品展示 -->
+        <div class="haveGroup2" v-if="purchasedProducts.length > 1">
+          <div
+            v-for="(product, index) in purchasedProducts"
+            :key="index"
+            class="haveProduct"
+          >
+            <div class="haveIcon">
+              <img src="/assets/imgs/haveCheck.svg" alt="checked icon" />
+            </div>
             <div class="imgGroup">
-              <img src="/assets/imgs/redLightClothes.png" alt="" />
+              <img src="/assets/imgs/redLightClothes.png" alt="product image" />
               <div class="circle"></div>
               <div class="bigCircle"></div>
             </div>
-            <h3 class="productName">第四代穿戴式調節衣</h3>
-            <h3 class="productSubTitle">(紅光加強版)</h3>
-          </div>
-        </div>
-        <!-- <div class="haveGroup2">
-          <div class="haveProduct">
-            <div class="imgGroup">
-              <img src="/assets/imgs/redLightClothes.png" alt="" />
-              <div class="circle"></div>
-              <div class="bigCircle"></div>
-            </div>
-            <h3 class="productName">第四代穿戴式調節衣</h3>
-            <h3 class="productSubTitle">(紅光加強版)</h3>
-          </div>
-          <div class="haveProduct">
-            <div class="imgGroup">
-              <img src="/assets/imgs/redLightClothes.png" alt="" />
-              <div class="circle"></div>
-              <div class="bigCircle"></div>
-            </div>
-            <h3 class="productName">第四代穿戴式調節衣</h3>
-            <h3 class="productSubTitle">(紅光加強版)</h3>
-          </div>
-          <div class="haveProduct">
-            <div class="imgGroup">
-              <img src="/assets/imgs/redLightClothes.png" alt="" />
-              <div class="circle"></div>
-              <div class="bigCircle"></div>
-            </div>
-            <h3 class="productName">第四代穿戴式調節衣</h3>
-            <h3 class="productSubTitle">(紅光加強版)</h3>
-          </div>
-        </div> -->
-
-        <h3 class="recommendTitle">健康方案推薦</h3>
-        <div class="recommendWrap">
-          <div class="recommendDiv">
-            <div class="imgGroup">
-              <img src="/assets/imgs/normalClothes.png" alt="" />
-              <div class="circle"></div>
-              <div class="bigCircle"></div>
-            </div>
-            <h3 class="recommendName">第四代穿戴式調節衣</h3>
-            <h3 class="recommendSubTitle">(保健版)</h3>
-            <div class="priceGroup">
-              <div class="priceList">
-                <span class="price">NT$9,999</span> / 30天
-              </div>
-              <div class="priceList">
-                <span class="price">NT$26,888</span> / 90天
-              </div>
-              <div class="priceList">
-                <span class="price">NT$34,800</span> / 180天
-              </div>
-            </div>
-            <div class="recommendBtnGroup">
-              <a href="/usageHistoryInfo/調節衣">
-                <button class="contactBtn">使用測試</button>
-              </a>
-            </div>
-            <div class="featureTitle">產品特色</div>
-            <ul class="featureListGroup">
-              <li>睡眠時調節自律神經，促進自癒</li>
-              <li>專利貼片技術，輕便舒適</li>
-              <li>提升免疫力，改善疲勞與不適</li>
-              <li>每晚穿著，提升睡眠與活力</li>
-            </ul>
-          </div>
-
-          <div class="recommendDiv">
-            <div class="imgGroup">
-              <img src="/assets/imgs/redLightClothes2.png" alt="" />
-              <div class="circle"></div>
-              <div class="bigCircle"></div>
-            </div>
-            <h3 class="recommendName">穿戴式調節衣</h3>
-            <h3 class="recommendSubTitle">(調節衣)</h3>
-            <div class="priceGroup">
-              <div class="priceList">
-                <span class="price">NT$34,800</span> / 60天
-              </div>
-            </div>
-            <div class="recommendBtnGroup">
-              <a href="/usageHistoryInfo/保健版">
-                <button class="contactBtn">使用測試</button>
-              </a>
-            </div>
-            <div class="featureTitle">產品特色</div>
-            <ul class="featureListGroup">
-              <li>睡眠時調節自律神經，促進自癒</li>
-              <li>提升免疫力，改善疲勞與不適</li>
-              <li>每晚穿著，提升睡眠與活力</li>
-            </ul>
-          </div>
-
-          <div class="recommendDiv">
-            <div class="imgGroup">
-              <img src="/assets/imgs/redLightClothes2.png" alt="" />
-              <div class="circle"></div>
-              <div class="bigCircle"></div>
-              <img class="robotImg" src="/assets/imgs/clothRobot.png" alt="" />
-            </div>
-            <h3 class="recommendName">穿戴式調節衣</h3>
-            <h3 class="recommendSubTitle">(調節衣)</h3>
-            <div class="priceGroup">
-              <div class="priceList">
-                <span class="price">NT$90,000</span> / 60天
-              </div>
-            </div>
-            <div class="recommendBtnGroup">
-              <a href="/usageHistoryInfo/居家治療儀">
-                <button class="contactBtn">使用測試</button>
-              </a>
-            </div>
-            <div class="featureTitle">產品特色</div>
-            <ul class="featureListGroup">
-              <li>中頻電刺激調節神經</li>
-              <li>非侵入性，無副作用</li>
-              <li>改善自律神經失調</li>
-              <li>簡單易用，每日輕鬆操作</li>
-              <li>提升睡眠與生活品質</li>
-            </ul>
+            <h3 class="productName">{{ product }}</h3>
           </div>
         </div>
       </div>
-    </div>
 
+      <!-- 健康方案推薦 -->
+      <h3 class="recommendTitle">健康方案推薦</h3>
+      <div class="recommendWrap">
+        <div
+          class="recommendDiv"
+          v-for="(recommendation, index) in recommendedProducts"
+          :key="index"
+        >
+          <div class="imgGroup">
+            <img
+              :src="'/assets/imgs/' + recommendation.image"
+              alt="product image"
+            />
+            <div class="circle"></div>
+            <div class="bigCircle"></div>
+          </div>
+          <h3 class="recommendName">{{ recommendation.name }}</h3>
+          <div class="priceGroup">
+            <div class="priceList">
+              <span class="price">{{ recommendation.price }}</span>
+            </div>
+          </div>
+          <div class="recommendBtnGroup">
+            <a :href="recommendation.link">
+              <button class="contactBtn">了解更多</button>
+            </a>
+          </div>
+          <div class="featureTitle">產品特色</div>
+          <ul class="featureListGroup">
+            <li
+              v-for="(feature, index) in recommendation.features"
+              :key="index"
+            >
+              {{ feature }}
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
     <div class="optionWrap">
       <button @click="goUse">開始使用</button>
     </div>
@@ -148,45 +84,62 @@
 </template>
 
 <script>
-import { useRouter } from "vue-router";
+import { ref, onMounted } from "vue";
 import axios from "axios";
+
 export default {
   setup() {
-    const router = useRouter();
+    const purchasedProducts = ref([]); 
+    const recommendedProducts = ref([]); 
 
-    const goUse = () => {
-      router.push("/usageHistoryInfo/紅光版");
-    };
+    const fetchProducts = async () => {
+      const localData = localStorage.getItem("userData");
+      const { MID, Token, MAID, Mobile } = localData
+        ? JSON.parse(localData)
+        : {};
 
-    const localData = localStorage.getItem("userData");
-    const { MID, Token, MAID, Mobile, Name } = localData
-      ? JSON.parse(localData)
-      : {};
+      if (!MID || !Token || !MAID || !Mobile) {
+        window.location.href = "/";
+        return;
+      }
 
-    if (!MID || !Token || !MAID || !Mobile) {
-      router.push("/");
-      return;
-    }
-
-    const getProducts = async () => {
       try {
         const response = await axios.post(
           "https://23700999.com:8081/HMA/API_USE1.jsp",
           { MID, Token, MAID, Mobile }
         );
+
         if (response.status === 200) {
-          console.log(response.data);
+          purchasedProducts.value = response.data.PurchaseProduct;
+
+          recommendedProducts.value = response.data.PromoteProduct.map(
+            (item) => ({
+              name: item.ProductName,
+              price: item.Desc1,
+              image: "placeholder.png", 
+              link: `/usageHistoryInfo/${item.ProductName}`,
+              features: item.Desc2.split("。").filter((desc) => desc), // 分割特色描述
+            })
+          );
         } else {
-          console.error("Unexpected response status:", response.status);
+          console.error("獲取產品資料失敗");
         }
       } catch (error) {
-        console.error("API request failed:", error);
+        console.error("API 請求失敗：", error);
       }
     };
 
-    getProducts();
+    const goUse = () => {
+      if (purchasedProducts.value.length > 0) {
+        window.location.href = `/usageHistoryInfo/${purchasedProducts.value[0]}`;
+      }
+    };
+
+    onMounted(fetchProducts);
 
     return {
+      purchasedProducts,
+      recommendedProducts,
       goUse,
     };
   },
@@ -295,6 +248,22 @@ export default {
       flex-wrap: wrap;
 
       .haveProduct {
+        position: relative;
+        .haveIcon {
+          background-color: #fff;
+
+          width: 2px;
+          height: 24px;
+          top: 0%;
+
+          img {
+            width: 24px;
+            z-index: 9;
+
+            position: absolute;
+            top: 0;
+          }
+        }
         width: 47%;
         margin-bottom: 2rem;
         text-align: center;
