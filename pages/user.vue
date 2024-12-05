@@ -58,7 +58,7 @@
           </div>
         </router-link>
 
-        <router-link to="/UsageHistory.vue" class="item4_link">
+        <router-link to="/UsageHistory" class="item4_link">
           <div class="item item4">
             <div class="topTitle">使用</div>
             <div class="bottomTitle">紀錄</div>
@@ -251,7 +251,12 @@ export default {
     //   window.location.href = "/vital/scan.html";
     // };
 
+    const clearFormCookie = (cookieName) => {
+      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    };
+
     const goHRVHistory = async () => {
+      clearFormCookie("form");
       router.push("/HRVHistory");
     };
 
@@ -460,7 +465,6 @@ export default {
         }
       }
       .item3_link {
-        
         @include respond-to("tablet") {
         }
 
@@ -479,7 +483,7 @@ export default {
         @include respond-to("tablet") {
         }
 
-        .item4{
+        .item4 {
           display: grid;
           width: 100%;
           height: 100%;
@@ -487,7 +491,6 @@ export default {
           align-content: center;
         }
       }
-      
     }
 
     .copyrights {

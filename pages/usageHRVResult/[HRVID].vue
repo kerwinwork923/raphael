@@ -3,7 +3,8 @@
     <h1>結果分析</h1>
     <div class="resultChartGroup">
       <h2>生理年齡</h2>
-      <ResultChart></ResultChart>
+      <ResultChart :bioageData="listBioage" />
+     
     </div>
     <div class="BAGroup">
       <div class="BACard">
@@ -239,16 +240,76 @@
 
 <script>
 import ResultChart from "~/components/ResultChart.vue";
-import SympatheticRatio from "~/components/SympatheticRatio.vue";
-import { useRouter } from "vue-router";
+import { reactive, ref, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
+
 export default {
-  components: { ResultChart, SympatheticRatio },
+  components: { ResultChart },
   setup() {
     const router = useRouter();
-    const goNext = () => {
-      router.push("/usageHistory");
+    const route = useRoute();
+
+    const listBioage = ref([]);
+    const bioData = reactive({
+      BcBioage: "",
+      AfBioage: "",
+    });
+
+    const localData = localStorage.getItem("userData");
+    const { MID, Token, MAID, Mobile, Name } = localData
+      ? JSON.parse(localData)
+      : {};
+
+    // 檢查必要參數是否存在
+    if (!MID || !Token || !MAID || !Mobile) {
+      router.push("/");
+      return;
+    } else if (!Name) {
+      router.push("/changeMember");
+      return;
+    }
+
+    // 從路由參數中獲取 UID
+    const UID = route.params.HRVID;
+
+    const API_HRV2UseAf_Compare = async () => {
+      try {
+        const response = await fetch(
+          "https://23700999.com:8081/HMA/API_HRV2UseAf_Compare.jsp",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              MID,
+              Token,
+              MAID,
+              Mobile,
+              UID, // 使用從路由獲取的 UID
+            }),
+          }
+        );
+        const data = await response.json();
+
+        if (data.Result === "OK") {
+          listBioage.value = data.HRV2.listBioage || [];
+          bioData.BcBioage = data.HRV2.BcUse.bioage || "N/A";
+          bioData.AfBioage = data.HRV2.AfUse.bioage || "N/A";
+        } else {
+          console.error("API Response Error", data);
+        }
+      } catch (error) {
+        console.error("API Error", error);
+      }
     };
-    return {goNext};
+
+    onMounted(() => {
+      API_HRV2UseAf_Compare();
+    });
+
+    return {
+      listBioage,
+      bioData,
+    };
   },
 };
 </script>

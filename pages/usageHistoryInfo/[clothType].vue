@@ -48,7 +48,7 @@
   </div>
   <div class="usageHistoryInfoBtnGroup">
     <button class="preBtn" @click="goPre">上一步</button>
-    <button class="nextBtn" @click="goNext">{{nextText}}</button>
+    <button class="nextBtn" @click="goNext">{{ nextText }}</button>
   </div>
 </template>
 
@@ -56,7 +56,6 @@
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { ref } from "vue";
-
 
 import { useCommon } from "../stores/common";
 export default {
@@ -66,7 +65,7 @@ export default {
     const productName = decodeURIComponent(route.params.clothType);
     const store = useCommon();
     const validName = ["調節衣", "紅光版", "保健版", "居家治療儀"];
-    const nextText =  ref("檢測紀錄");
+    const nextText = ref("檢測HRV");
     if (!validName.includes(productName)) {
       window.location.href = "/usageHistory"; // If needed, you can also use router.push here
     }
@@ -81,7 +80,8 @@ export default {
     };
 
     const goNext = () => {
-      // router.push(`/usage/${productName}`);
+      const formCookie = `form=${productName}; path=/; max-age=1800`; 
+      document.cookie = formCookie;
       store.showHRVAlert = true;
     };
 
@@ -148,7 +148,7 @@ export default {
       precautionsList,
       videoShow,
       loading,
-      nextText
+      nextText,
     };
   },
 };
