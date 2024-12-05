@@ -58,7 +58,7 @@
           </div>
         </router-link>
 
-        <router-link to="/UsageHistory.vue" class="item3_link">
+        <router-link to="/UsageHistory.vue" class="item4_link">
           <div class="item item4">
             <div class="topTitle">使用</div>
             <div class="bottomTitle">紀錄</div>
@@ -366,17 +366,13 @@ export default {
       grid-template-columns: repeat(2, 1fr);
       gap: 1rem;
       //暫時的樣式
-      grid-template-rows: repeat(2, 84px);
-      @include respond-to("tablet") {
-        grid-template-rows: repeat(3, 84px);
-      }
+      grid-template-rows: repeat(3, 84px);
 
       .item {
         background-color: #999;
         position: relative;
         border-radius: 0.75rem;
         padding: 0.75rem;
-        opacity: 0.15;
         color: #fff;
         //暫時的樣式
         overflow: hidden;
@@ -407,9 +403,12 @@ export default {
 
         img {
           position: absolute;
-          right: 0.75rem;
-          top: 50%;
-          transform: translateY(-50%);
+          width: 100%;
+          opacity: 0.1;
+          filter: blur(2px);
+
+          @include respond-to("tablet") {
+          }
         }
       }
 
@@ -435,15 +434,12 @@ export default {
       }
       .item4 {
         background-color: $raphael-orange-400;
-        filter: blur(2px);
       }
       .item5 {
         background-color: $raphael-brown-400;
-        filter: blur(2px);
       }
       .item6 {
         background-color: $raphael-gray-300;
-        filter: blur(2px);
       }
       //暫時隱藏
       .item1,
@@ -453,44 +449,21 @@ export default {
       }
 
       //暫時的樣式
-      .item2,
-      .item3_link {
-        grid-row: 1/3;
+
+      .item2 {
+        display: grid;
+        grid-row: 1 / 4;
         place-items: center;
         align-content: center;
 
         @include respond-to("tablet") {
-          grid-row: 1/4;
-          place-items: center;
-          align-content: center;
         }
-
-        img {
-          width: 85%;
-          top: 16px;
-          right: 0;
-          opacity: 0.1;
-          left: 0;
-          margin: auto;
-          transform: none;
-          filter: blur(2px);
-
-          @include respond-to("tablet") {
-            width: 70%;
-            top: 10px;
-            right: 0;
-            opacity: 0.1;
-            left: 0;
-            margin: auto;
-            transform: none;
-            filter: blur(2px);
-          }
-        }
-      }
-      .item2 {
-        display: grid;
       }
       .item3_link {
+        
+        @include respond-to("tablet") {
+        }
+
         .item3 {
           display: grid;
           width: 100%;
@@ -499,6 +472,22 @@ export default {
           align-content: center;
         }
       }
+
+      .item4_link {
+        grid-row: 2/4;
+
+        @include respond-to("tablet") {
+        }
+
+        .item4{
+          display: grid;
+          width: 100%;
+          height: 100%;
+          place-items: center;
+          align-content: center;
+        }
+      }
+      
     }
 
     .copyrights {
