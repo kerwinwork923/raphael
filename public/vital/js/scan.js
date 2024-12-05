@@ -170,6 +170,7 @@ const OnResult = (result) => {
       nHRV.push([ '','','',''
      ]);
    }
+  console.log(nHRV);
 
   if (proc > 75 && result.scanning_status != "Motion") {
     nArray.push([

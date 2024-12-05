@@ -502,16 +502,17 @@
   const userData = JSON.parse(localStorage.getItem("userData"));
   const currentResult = JSON.parse(sessionStorage.getItem("result"));
   const userHRV = JSON.parse(localStorage.getItem("rHRV"));
+  console.log(userHRV);
   let getHF = [];
   let getLF = [];
   let getSDNN = [];
   let getSDNNI = [];
   userHRV.forEach((data) => {
-      let [a, b, c, d] = data;
-      getHF.push(a);
-      getLF.push(b);
-      getSDNN.push(c);
-      getSDNNI.push(d);
+      let [a1, b1, c1, d1] = data;
+      getHF.push(a1);
+      getLF.push(b1);
+      getSDNN.push(c1);
+      getSDNNI.push(d1);
   });
   console.log("ayHF=", getHF);
   console.log("ayLF=", getLF);
