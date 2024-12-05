@@ -199,7 +199,7 @@
           :key="index"
         >
           <!-- `/vital/detail.html?AID=` -->
-          <a href="#">
+          <a :href="`/usageHRVResult/${item.UID}`">
             <div class="timeGroup">
               <div class="timeIcon">
                 <img src="../../assets/imgs/detectTime.svg" alt="" />
@@ -366,36 +366,23 @@ export default {
 
         if (response.status === 200) {
           const records = response.data?.UseRecord || [];
+          const hrvRecords = response.data?.HRV2Record || []; // 提取 HRV2Record
+
           useData.value = records.filter(
             (record) => record.ProductName === productName
           );
+          detectData.value = hrvRecords; // 賦值給 detectData
 
-          if (useData.value.length > 0) {
-            // 解析 API 返回的 EndTime
-            const endTimeStr = useData.value[0].EndTime;
-            const endTime = parseEndTime(endTimeStr);
-
-            // 计算重置时间
-            const now = new Date();
-            const resetTime = calculateResetTime(now);
-
-            // 打印调试信息
-            console.log("EndTime:", endTime);
-            console.log("ResetTime:", resetTime);
-
-            // 按钮激活判断
-            startBtnActive.value = endTime < resetTime;
-            showMessage.value = !(endTime < resetTime);
-          } else {
-            // 如果没有记录，默认允许计时
-            startBtnActive.value = true;
-            showMessage.value = false;
-          }
+          console.log("getStart - useData:", useData.value);
+          console.log("getStart - detectData:", detectData.value);
         } else {
-          console.error("Unexpected response status:", response.status);
+          console.error(
+            "Unexpected response status in getStart:",
+            response.status
+          );
         }
       } catch (error) {
-        console.error("API request failed:", error);
+        console.error("API request failed in getStart:", error);
       }
     };
 
@@ -461,8 +448,11 @@ export default {
           "https://23700999.com:8081/HMA/API_HRV2UseAf_Compare.jsp",
           { MID, Token, MAID, Mobile }
         );
+        console.log("API Response:", response.data); // 打印完整回應
+
         if (response.status === 200) {
-          log;
+          detectData.value = response.data?.HRV2Record || [];
+          console.log("Updated detectData:", detectData.value);
         } else {
           console.error("Unexpected response status:", response.status);
         }
@@ -472,18 +462,20 @@ export default {
     };
 
     const init = async () => {
-      await getStart();
+      try {
+        loading.value = true; // 開始加載
+        await getStart(); // 初始化使用記錄和檢測記錄
+      } catch (error) {
+        console.error("Initialization failed:", error); // 捕捉錯誤
+      } finally {
+        loading.value = false; // 結束加載
+      }
     };
 
-    let isInitialized = false; // 添加标志位，防止重复初始化
-
     onMounted(() => {
-      useActive.value = true; 
+      useActive.value = true;
       detectActive.value = false;
-      if (!isInitialized) {
-        init();
-        isInitialized = true; // 标记为已初始化
-      }
+      init(); // 直接調用初始化函數
     });
 
     const filteredHRVData = computed(() => {

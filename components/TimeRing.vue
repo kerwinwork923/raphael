@@ -143,48 +143,44 @@ const formattedTime = computed(() => {
 // 保存計時器狀態到動態 Cookie
 const saveTimerState = () => {
   const now = Date.now();
-  setCookie(getProductCookieKey("remainingTime"), remainingTime.value);
-  setCookie(getProductCookieKey("elapsedTime"), elapsedTime.value);
-  setCookie(getProductCookieKey("startTime"), isPaused.value ? null : now); // 保存當前時間，如果暫停，則設置為 null
-  setCookie(getProductCookieKey("isPaused"), isPaused.value);
-  setCookie(getProductCookieKey("isCounting"), isCounting.value);
-  setCookie(getProductCookieKey("UID"), UID.value);
-  setCookie(getProductCookieKey("BID"), BID.value);
+  const timerState = {
+    remainingTime: remainingTime.value,
+    elapsedTime: elapsedTime.value,
+    startTime: isPaused.value ? null : now, // 如果暫停，保存 null
+    isPaused: isPaused.value,
+    isCounting: isCounting.value,
+    UID: UID.value,
+    BID: BID.value,
+  };
+  setCookie(getProductCookieKey("timerState"), JSON.stringify(timerState), 1); // 保存為 JSON
 };
 
 // 從動態 Cookie 加載計時器狀態
 const loadTimerState = () => {
-  const savedRemainingTime = parseFloat(
-    getCookie(getProductCookieKey("remainingTime"))
-  );
-  const savedElapsedTime = parseFloat(
-    getCookie(getProductCookieKey("elapsedTime"))
-  );
-  const savedStartTime = parseFloat(
-    getCookie(getProductCookieKey("startTime"))
-  );
-  const savedIsPaused = getCookie(getProductCookieKey("isPaused")) === "true";
-  const savedIsCounting =
-    getCookie(getProductCookieKey("isCounting")) === "true";
-  const savedUID = getCookie(getProductCookieKey("UID"));
-  const savedBID = getCookie(getProductCookieKey("BID"));
+  const savedState = getCookie(getProductCookieKey("timerState"));
+  if (savedState) {
+    try {
+      const timerState = JSON.parse(savedState);
+      remainingTime.value = timerState.remainingTime || props.totalTime;
+      elapsedTime.value = timerState.elapsedTime || 0;
+      startTime.value = timerState.startTime || 0;
+      isPaused.value = timerState.isPaused || false;
+      isCounting.value = timerState.isCounting || false;
+      UID.value = timerState.UID || "";
+      BID.value = timerState.BID || "";
 
-  if (!isNaN(savedRemainingTime)) remainingTime.value = savedRemainingTime;
-  if (!isNaN(savedElapsedTime)) elapsedTime.value = savedElapsedTime;
-  if (!isNaN(savedStartTime)) startTime.value = savedStartTime;
-  isPaused.value = savedIsPaused;
-  isCounting.value = savedIsCounting;
-  UID.value = savedUID || "";
-  BID.value = savedBID || "";
-
-  // 恢復狀態
-  if (!isPaused.value && startTime.value) {
-    const now = Date.now();
-    const elapsedSinceStart = (now - startTime.value) / 1000;
-    remainingTime.value = Math.max(
-      props.totalTime - elapsedTime.value - elapsedSinceStart,
-      0
-    );
+      // 計算頁面載入後的剩餘時間
+      if (!isPaused.value && startTime.value) {
+        const now = Date.now();
+        const elapsedSinceStart = (now - startTime.value) / 1000;
+        remainingTime.value = Math.max(
+          props.totalTime - elapsedTime.value - elapsedSinceStart,
+          0
+        );
+      }
+    } catch (error) {
+      console.error("無法解析計時器狀態:", error);
+    }
   }
 };
 
