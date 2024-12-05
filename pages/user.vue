@@ -52,8 +52,8 @@
 
         <router-link to="/weekly" class="item3_link">
           <div class="item item3">
-            <div class="topTitle">每周</div>
-            <div class="bottomTitle">評估</div>
+            <div class="topTitle">健康</div>
+            <div class="bottomTitle">紀錄</div>
             <img src="../assets/imgs/noteIcon.svg" alt="" />
           </div>
         </router-link>

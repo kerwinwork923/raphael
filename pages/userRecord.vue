@@ -5,7 +5,7 @@
       :Text="
         useSleepRecordData.sleepState === 'sleepResult'
           ? '結果分析'
-          : '每週評估'
+          : '健康紀錄'
       "
       link="/user"
     />
