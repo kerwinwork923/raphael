@@ -57,6 +57,26 @@ const props = defineProps({
 // Router
 const router = useRouter();
 
+// 動態生成 Cookie 鍵名
+const getProductCookieKey = (key) => `${props.productName}_${key}`;
+
+// Cookie 操作方法
+const getCookie = (name) => {
+  const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
+  return match ? decodeURIComponent(match[2]) : null;
+};
+
+const setCookie = (name, value, days = 1) => {
+  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  document.cookie = `${name}=${encodeURIComponent(
+    value
+  )}; path=/; expires=${expires}`;
+};
+
+const deleteCookie = (name) => {
+  document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+};
+
 // 驗證 LocalStorage 資料
 const localData = localStorage.getItem("userData");
 const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
@@ -88,29 +108,29 @@ const isPaused = ref(false);
 
 const UID = ref(""); // 保存 UID
 const BID = ref(""); // 保存 BID
-let startTime = ref(0);
-let elapsedTime = ref(0);
+let startTime = ref(0); // 開始時間（毫秒）
+let elapsedTime = ref(0); // 已經過時間（秒）
 
 // 計算進度條樣式
 const progressStyle = computed(() => {
-  const progress =
-    ((props.totalTime - remainingTime.value) / props.totalTime) * 100;
+  let progress;
+  if (remainingTime.value <= 0) {
+    progress = 100; // 如果剩餘時間為0，進度條顯示100%
+  } else {
+    progress =
+      ((props.totalTime - remainingTime.value) / props.totalTime) * 100;
+  }
   return {
     background: `conic-gradient(
         #74BC1F 0% ${progress}%, 
         #e0e0e0 ${progress}% 100%
       )`,
-    transition:
-      isCounting.value && !isPaused.value ? "none" : "background 1s ease-out",
+    transition: "background 0.5s ease-out", // 確保平滑過渡
   };
 });
 
 // 格式化時間
 const formattedTime = computed(() => {
-  if (!ThisStartBtnActive.value) {
-    return "00:00:00"; // 如果 startBtnActive 為 false，顯示結束狀態的時間
-  }
-
   const hours = Math.floor(remainingTime.value / 3600);
   const minutes = Math.floor((remainingTime.value % 3600) / 60);
   const seconds = Math.floor(remainingTime.value % 60);
@@ -120,17 +140,53 @@ const formattedTime = computed(() => {
   )}:${String(seconds).padStart(2, "0")}`;
 });
 
-// 按鈕樣式
-const buttonStyle = computed(() => {
-  if (!isCounting.value) {
-    return {
-      backgroundColor: "#74bc1f",
-    };
+// 保存計時器狀態到動態 Cookie
+const saveTimerState = () => {
+  const now = Date.now();
+  setCookie(getProductCookieKey("remainingTime"), remainingTime.value);
+  setCookie(getProductCookieKey("elapsedTime"), elapsedTime.value);
+  setCookie(getProductCookieKey("startTime"), isPaused.value ? null : now); // 保存當前時間，如果暫停，則設置為 null
+  setCookie(getProductCookieKey("isPaused"), isPaused.value);
+  setCookie(getProductCookieKey("isCounting"), isCounting.value);
+  setCookie(getProductCookieKey("UID"), UID.value);
+  setCookie(getProductCookieKey("BID"), BID.value);
+};
+
+// 從動態 Cookie 加載計時器狀態
+const loadTimerState = () => {
+  const savedRemainingTime = parseFloat(
+    getCookie(getProductCookieKey("remainingTime"))
+  );
+  const savedElapsedTime = parseFloat(
+    getCookie(getProductCookieKey("elapsedTime"))
+  );
+  const savedStartTime = parseFloat(
+    getCookie(getProductCookieKey("startTime"))
+  );
+  const savedIsPaused = getCookie(getProductCookieKey("isPaused")) === "true";
+  const savedIsCounting =
+    getCookie(getProductCookieKey("isCounting")) === "true";
+  const savedUID = getCookie(getProductCookieKey("UID"));
+  const savedBID = getCookie(getProductCookieKey("BID"));
+
+  if (!isNaN(savedRemainingTime)) remainingTime.value = savedRemainingTime;
+  if (!isNaN(savedElapsedTime)) elapsedTime.value = savedElapsedTime;
+  if (!isNaN(savedStartTime)) startTime.value = savedStartTime;
+  isPaused.value = savedIsPaused;
+  isCounting.value = savedIsCounting;
+  UID.value = savedUID || "";
+  BID.value = savedBID || "";
+
+  // 恢復狀態
+  if (!isPaused.value && startTime.value) {
+    const now = Date.now();
+    const elapsedSinceStart = (now - startTime.value) / 1000;
+    remainingTime.value = Math.max(
+      props.totalTime - elapsedTime.value - elapsedSinceStart,
+      0
+    );
   }
-  return {
-    backgroundColor: isPaused.value ? "#74bc1f" : "#ec4f4f",
-  };
-});
+};
 
 // API 方法
 const apiRequest = async (url, payload) => {
@@ -209,7 +265,39 @@ const useEndAPI = async () => {
   });
 };
 
-// 方法
+// 計時器邏輯
+let timerInterval;
+
+const countdown = () => {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+  }
+
+  const tick = () => {
+    if (isPaused.value) return;
+
+    const now = Date.now();
+    const elapsedSinceStart = (now - startTime.value) / 1000;
+    remainingTime.value = Math.max(
+      props.totalTime - elapsedTime.value - elapsedSinceStart,
+      0
+    );
+
+    if (remainingTime.value <= 0) {
+      clearInterval(timerInterval);
+      isCounting.value = false;
+      remainingTime.value = 0;
+      showMessage.value = true;
+      useEndAPI();
+      ThisStartBtnActive.value = false;
+    } else {
+      requestAnimationFrame(tick);
+    }
+  };
+
+  requestAnimationFrame(tick);
+};
+
 const toggleTimer = () => {
   if (isCounting.value) {
     if (isPaused.value) {
@@ -239,11 +327,10 @@ const pauseTimer = async () => {
     return;
   }
   isPaused.value = true;
-  elapsedTime.value += (Date.now() - startTime.value) / 1000; // 正確累加
+  elapsedTime.value += (Date.now() - startTime.value) / 1000;
   await usePauseAPI();
   saveTimerState();
 };
-
 
 const resumeTimer = async () => {
   if (!UID.value || !BID.value) {
@@ -251,81 +338,55 @@ const resumeTimer = async () => {
     return;
   }
   isPaused.value = false;
-  startTime.value = Date.now(); // 重新計算開始時間
+  startTime.value = Date.now();
   await usePauseEndAPI();
   countdown();
   saveTimerState();
 };
 
-
-let timerInterval;
-
-const countdown = () => {
-  if (timerInterval) {
-    clearInterval(timerInterval);
-  }
-
-  const tick = () => {
-    if (isPaused.value) return;
-
-    const now = Date.now();
-    remainingTime.value = Math.max(
-      props.totalTime - elapsedTime.value - (now - startTime.value) / 1000,
-      0
-    );
-
-    if (remainingTime.value <= 0) {
-      clearInterval(timerInterval);
-      isCounting.value = false;
-      remainingTime.value = 0;
-      showMessage.value = true;
-      useEndAPI();
-      ThisStartBtnActive.value = false;
-    } else {
-      requestAnimationFrame(tick);
-    }
-  };
-
-  requestAnimationFrame(tick);
-};
-
-
-// 保存計時器狀態，根據產品名稱
-const saveTimerState = () => {
-  const state = {
-    isCounting: isCounting.value,
-    isPaused: isPaused.value,
-    remainingTime: remainingTime.value,
-    startTime: startTime.value,
-    elapsedTime: elapsedTime.value,
-    UID: UID.value,
-    BID: BID.value,
-  };
-  const timerKey = `timerState_${props.productName}`;
-  localStorage.setItem(timerKey, JSON.stringify(state));
-};
-
-// 根據產品名稱加載計時器狀態
-const loadTimerState = () => {
-  const timerKey = `timerState_${props.productName}`;
-  const savedState = localStorage.getItem(timerKey);
-  if (savedState) {
-    const state = JSON.parse(savedState);
-    isCounting.value = state.isCounting;
-    isPaused.value = state.isPaused;
-    remainingTime.value = state.remainingTime;
-    startTime.value = state.startTime;
-    elapsedTime.value = state.elapsedTime;
-    UID.value = state.UID;
-    BID.value = state.BID;
-  }
-};
-
+// 初始化
 onMounted(() => {
   loadTimerState();
-  if (isCounting.value && !isPaused.value) {
-    countdown();
+  if (!isPaused.value && startTime.value) {
+    const now = Date.now();
+    const elapsedSinceStart = (now - startTime.value) / 1000;
+    remainingTime.value = Math.max(
+      props.totalTime - elapsedTime.value - elapsedSinceStart,
+      0
+    );
   }
+
+  if (remainingTime.value <= 0) {
+    showMessage.value = true;
+    ThisStartBtnActive.value = false;
+    remainingTime.value = 0;
+  } else if (isCounting.value && !isPaused.value) {
+    countdown(); // 繼續倒數
+  }
+});
+
+const buttonStyle = computed(() => {
+  if (!isCounting.value) {
+    // 開始狀態
+    return {
+      backgroundColor: "#74BC1F", // 綠色
+      color: "#fff",
+    };
+  }
+
+  if (isPaused.value) {
+    // 暫停狀態
+    return {
+      backgroundColor: "#74BC1F", // 橙色
+      color: "#fff",
+    };
+  }
+
+  // 繼續狀態
+  return {
+    backgroundColor: "#EC4F4F", // 紅色
+    color: "#fff",
+  };
 });
 </script>
 

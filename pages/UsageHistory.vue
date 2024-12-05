@@ -7,31 +7,56 @@
         <!-- 單件產品展示 -->
         <div class="haveGroup" v-if="purchasedProducts.length === 1">
           <div class="haveIcon">
-            <img src="/assets/imgs/haveCheck.svg" alt="checked icon" />
+            <img src="/_nuxt/assets/imgs/haveCheck.svg" alt="checked icon" />
           </div>
           <div class="haveProduct">
             <div class="imgGroup">
-              <img src="/assets/imgs/redLightClothes.png" alt="product image" />
+              <img :src="getImage(purchasedProducts[0])" alt="product image" />
               <div class="circle"></div>
               <div class="bigCircle"></div>
+              <img
+                v-if="shouldShowRobot(purchasedProducts[0])"
+                class="robotImg"
+                src="/_nuxt/assets/imgs/clothRobot.png"
+                alt="robot image"
+              />
             </div>
             <h3 class="productName">{{ purchasedProducts[0] }}</h3>
           </div>
         </div>
+
         <!-- 多件產品展示 -->
         <div class="haveGroup2" v-if="purchasedProducts.length > 1">
           <div
+            class="haveProduct"
             v-for="(product, index) in purchasedProducts"
             :key="index"
-            class="haveProduct"
+            @click="selectProduct(index)"
           >
             <div class="haveIcon">
-              <img src="/assets/imgs/haveCheck.svg" alt="checked icon" />
+              <img
+                :src="
+                  selectedProductIndex === index
+                    ? '/_nuxt/assets/imgs/haveCheck.svg'
+                    : '/_nuxt/assets/imgs/usageUnCheck.svg'
+                "
+                :alt="
+                  selectedProductIndex === index
+                    ? 'checked icon'
+                    : 'unchecked icon'
+                "
+              />
             </div>
             <div class="imgGroup">
-              <img src="/assets/imgs/redLightClothes.png" alt="product image" />
+              <img :src="getImage(product)" alt="product image" />
               <div class="circle"></div>
               <div class="bigCircle"></div>
+              <img
+                v-if="shouldShowRobot(product)"
+                class="robotImg"
+                src="/_nuxt/assets/imgs/clothRobot.png"
+                alt="robot image"
+              />
             </div>
             <h3 class="productName">{{ product }}</h3>
           </div>
@@ -47,23 +72,30 @@
           :key="index"
         >
           <div class="imgGroup">
-            <img
-              :src="'/assets/imgs/' + recommendation.image"
-              alt="product image"
-            />
+            <img :src="getImage(recommendation.name)" alt="product image" />
             <div class="circle"></div>
             <div class="bigCircle"></div>
+            <img
+              v-if="shouldShowRobot(recommendation.name)"
+              class="robotImg"
+              src="/_nuxt/assets/imgs/clothRobot.png"
+              alt="robot image"
+            />
           </div>
           <h3 class="recommendName">{{ recommendation.name }}</h3>
           <div class="priceGroup">
-            <div class="priceList">
-              <span class="price">{{ recommendation.price }}</span>
+            <div
+              class="priceItem"
+              v-for="(price, index) in parsePrices(recommendation.price)"
+              :key="index"
+            >
+              <span class="priceValue">{{ price.value }}</span>
+              <span class="pricePeriod">/{{ price.period }}</span>
             </div>
           </div>
+
           <div class="recommendBtnGroup">
-            <a :href="recommendation.link">
-              <button class="contactBtn">了解更多</button>
-            </a>
+            <button class="contactBtn" @click="contactSupport">聯絡客服</button>
           </div>
           <div class="featureTitle">產品特色</div>
           <ul class="featureListGroup">
@@ -89,20 +121,44 @@ import axios from "axios";
 
 export default {
   setup() {
-    const purchasedProducts = ref([]); 
-    const recommendedProducts = ref([]); 
+    const purchasedProducts = ref([]);
+    const recommendedProducts = ref([]);
+    const selectedProductIndex = ref(0); // 選中的產品索引
+    const hasCheckedToday = ref(false); // 判斷今日是否有檢測記錄
+
+    const localData = localStorage.getItem("userData");
+    let userData = null;
+
+    try {
+      userData = localData ? JSON.parse(localData) : null;
+    } catch (error) {
+      console.error("localStorage userData 解析失敗：", error);
+    }
+
+    if (
+      !userData ||
+      !userData.MID ||
+      !userData.Token ||
+      !userData.MAID ||
+      !userData.Mobile
+    ) {
+      console.warn("必要的用戶資料缺失，重定向至首頁");
+      window.location.href = "/";
+      return;
+    }
+
+    const { MID, Token, MAID, Mobile } = userData;
+
+    const productImages = {
+      紅光版: "redLightClothes.png",
+      保健版: "normalClothes.png",
+      調節衣: "redLightClothes2.png",
+      居家治療儀: "redLightClothes2.png",
+    };
+
+    const basePath = "/_nuxt/assets/imgs/";
 
     const fetchProducts = async () => {
-      const localData = localStorage.getItem("userData");
-      const { MID, Token, MAID, Mobile } = localData
-        ? JSON.parse(localData)
-        : {};
-
-      if (!MID || !Token || !MAID || !Mobile) {
-        window.location.href = "/";
-        return;
-      }
-
       try {
         const response = await axios.post(
           "https://23700999.com:8081/HMA/API_USE1.jsp",
@@ -116,31 +172,127 @@ export default {
             (item) => ({
               name: item.ProductName,
               price: item.Desc1,
-              image: "placeholder.png", 
-              link: `/usageHistoryInfo/${item.ProductName}`,
-              features: item.Desc2.split("。").filter((desc) => desc), // 分割特色描述
+              image: getImage(item.ProductName),
+              features: item.Desc2.split("。").filter((desc) => desc),
             })
           );
         } else {
-          console.error("獲取產品資料失敗");
+          console.error("獲取產品資料失敗", response.data);
         }
       } catch (error) {
         console.error("API 請求失敗：", error);
       }
     };
 
-    const goUse = () => {
-      if (purchasedProducts.value.length > 0) {
-        window.location.href = `/usageHistoryInfo/${purchasedProducts.value[0]}`;
+    const API_HRV2 = async () => {
+      try {
+        const response = await fetch(
+          "https://23700999.com:8081/HMA/API_HRV2.jsp",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ MID, MAID, Token, Mobile }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("網路響應不是成功狀態");
+        }
+
+        const result = await response.json();
+        if (result && Array.isArray(result.HRV2)) {
+          handleCheckTime(result.HRV2);
+        }
+      } catch (error) {
+        console.error("Fetch error:", error);
       }
     };
 
-    onMounted(fetchProducts);
+    const handleCheckTime = (hrvData) => {
+      const today = new Date();
+      const today5AM = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        5,
+        0,
+        0
+      );
+
+      const filteredData = hrvData.some((record) => {
+        const checkTimeStr = record.CheckTime;
+        if (!checkTimeStr) return false;
+
+        const [datePart, timePart] = checkTimeStr.split(" ");
+        const [year, month, day] = datePart.split("/").map(Number);
+        const [hour, minute] = timePart.split(":").map(Number);
+        const checkTime = new Date(year, month - 1, day, hour, minute);
+
+        return checkTime >= today5AM && checkTime <= new Date();
+      });
+
+      hasCheckedToday.value = filteredData;
+    };
+
+    const getImage = (productName) => {
+      const productImages = {
+        紅光版: "redLightClothes.png",
+        保健版: "normalClothes.png",
+        調節衣: "redLightClothes2.png",
+        居家治療儀: "redLightClothes2.png",
+      };
+      return `${basePath}${productImages[productName] || "placeholder.png"}`;
+    };
+
+    const shouldShowRobot = (productName) => {
+      return productName === "居家治療儀";
+    };
+
+    const parsePrices = (priceString) => {
+      return priceString.split(";").map((price) => {
+        const [value, period] = price.trim().split("/");
+        return { value: value.trim(), period: period ? period.trim() : "" };
+      });
+    };
+
+    const selectProduct = (index) => {
+      selectedProductIndex.value = index;
+    };
+
+    const goUse = () => {
+      const productName = purchasedProducts.value[selectedProductIndex.value];
+      if (hasCheckedToday.value) {
+        window.location.href = `/usage/${productName}`;
+      } else {
+        window.location.href = `/usageHistoryInfo/${productName}`;
+      }
+    };
+
+    const contactSupport = () => {
+      window.location.href = "tel:+1234567890"; // 修改為你的電話號碼
+    };
+
+    onMounted(async () => {
+      try {
+        await fetchProducts();
+        await API_HRV2();
+      } catch (error) {
+        console.error("初始化過程中出現錯誤：", error);
+      }
+    });
 
     return {
       purchasedProducts,
       recommendedProducts,
+      selectedProductIndex,
+      getImage,
+      shouldShowRobot,
+      parsePrices,
+      selectProduct,
       goUse,
+      contactSupport,
     };
   },
 };
@@ -171,7 +323,12 @@ export default {
         width: 100%;
         text-align: center;
         position: relative;
-
+        .robotImg {
+            left: 70%;
+            top: 87%;
+            width: 120px;
+            z-index: 3;
+          }
         img {
           width: 260px;
           position: absolute;
@@ -246,9 +403,15 @@ export default {
       width: 100%;
       justify-content: space-between;
       flex-wrap: wrap;
-
+      padding-top: 2rem;
       .haveProduct {
         position: relative;
+        .robotImg {
+            left: 70%;
+            top: 87%;
+            width: 120px;
+            z-index: 3;
+          }
         .haveIcon {
           background-color: #fff;
 
@@ -369,12 +532,7 @@ export default {
             transform: translate(-50%, -50%);
             z-index: 3;
           }
-          .robotImg {
-            left: 70%;
-            top: 87%;
-            width: 120px;
-            z-index: 3;
-          }
+          
           .circle {
             width: 180px;
             height: 100%;
@@ -434,15 +592,16 @@ export default {
           font-weight: 400;
           letter-spacing: 0.09px;
 
-          .priceList {
+          .priceItem {
             width: 100%;
             text-align: center;
             display: flex;
             justify-content: center;
             align-items: baseline;
+            line-height: 1.2;
           }
 
-          .price {
+          .priceItem {
             font-weight: 700;
             font-size: 1.5rem;
           }

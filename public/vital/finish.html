@@ -330,11 +330,19 @@
 
       <div class="subBtnGroup">
         <a href="/user">
-          <button class="backToUserBtn" class="">會員中心</button>
+          <button class="backToUserBtn">會員中心</button>
         </a>
-
         <a href="/vital/scan.html">
           <button class="backToDetect">重新檢測</button>
+        </a>
+      </div>
+
+      <div class="subBtnGroup2" style="display: none">
+        <a href="/vital/scan.html">
+          <button class="backToDetect">重新檢測</button>
+        </a>
+        <a class="goToUsage">
+          <button class="backToUserBtn">前往檢測紀錄</button>
         </a>
       </div>
 
@@ -378,6 +386,67 @@
     <script src="js/finish.js?v=1.0.2"></script>
   </body>
 </html>
+
+<script>
+  const formValue = localStorage.getItem("form");
+
+  // 查找需要切换显示的元素
+
+  // 根据 localStorage 的值调整显示
+  if (formValue === "product") {
+    if (subBtnGroup) subBtnGroup.style.display = "none";
+    if (subBtnGroup2) subBtnGroup2.style.display = "flex";
+  } else {
+    if (subBtnGroup) subBtnGroup.style.display = "flex";
+    if (subBtnGroup2) subBtnGroup2.style.display = "none";
+  }
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Function to get cookie value by name
+    const getCookieValue = (name) => {
+      const cookies = document.cookie.split("; ");
+      for (let cookie of cookies) {
+        const [key, value] = cookie.split("=");
+        if (key === name) {
+          return decodeURIComponent(value); // 解碼避免編碼問題
+        }
+      }
+      return null; // Cookie 不存在時返回 null
+    };
+
+    // 獲取需要切換顯示的元素
+    const subBtnGroup = document.querySelector(".subBtnGroup");
+    const subBtnGroup2 = document.querySelector(".subBtnGroup2");
+    const goToUsageLink = document.querySelector(".goToUsage");
+
+    // 獲取 Cookie 名稱為 "form" 的值
+    const formValue = getCookieValue("form");
+
+    // 判別顯示邏輯
+    if (formValue) {
+      // 如果 Cookie 存在且有值
+      if (goToUsageLink) {
+        goToUsageLink.href = `/usage/${formValue}`; // 動態設置 href
+      }
+      if (subBtnGroup) {
+        subBtnGroup.style.display = "none"; // 隱藏第一組按鈕
+      }
+      if (subBtnGroup2) {
+        subBtnGroup2.style.display = "flex"; // 顯示第二組按鈕
+      }
+    } else {
+      // 如果 Cookie 不存在或沒有值
+      if (subBtnGroup) {
+        subBtnGroup.style.display = "flex"; // 顯示第一組按鈕
+      }
+      if (subBtnGroup2) {
+        subBtnGroup2.style.display = "none"; // 隱藏第二組按鈕
+      }
+    }
+  });
+</script>
 
 <script>
   let upbioage = 0;
@@ -854,6 +923,7 @@
     background-size: cover;
     min-height: 100vh;
     width: 100%;
+    padding-bottom: 7rem;
   }
 
   .raphaelNavbar {
@@ -1180,6 +1250,44 @@
   .subBtnGroup .backToUserBtn {
     background-color: #eee;
     color: #666;
+  }
+
+  .subBtnGroup2 {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 3%;
+    margin-top: 0.75rem;
+
+    padding: 24px 1rem;
+    position: fixed;
+    bottom: 0;
+    background-color: #f6f6f6;
+  }
+
+  .subBtnGroup2 a {
+    text-decoration: none;
+    width: 100%;
+    text-align: center;
+  }
+
+  .subBtnGroup2 button {
+    background-color: #eee;
+    color: #666;
+    padding: 8px;
+    width: 90%;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    transition: 0.25s ease;
+    width: 100%;
+  }
+
+  .subBtnGroup2 :nth-child(2) button {
+    color: #fff;
+    background-color: #74bc1f;
   }
 
   .detectionWrap {

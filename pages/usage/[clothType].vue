@@ -1,7 +1,7 @@
 <template>
   <RaphaelLoading v-if="loading" />
   <div class="usageWrap">
-    <TitleMenu Text="使用紀錄" :link="`/usageHistoryInfo/${productName}`" />
+    <TitleMenu Text="使用紀錄" :link="`back`" />
     <TimeRing
       :totalTime="30"
       :product-name="productName"
@@ -280,7 +280,7 @@ export default {
     const monthBoxVisible = ref(false);
     const selectedDate = ref(null);
     const useData = ref();
-    const detectData = ref();
+    const detectData = ref([]);
     const loading = ref(false);
 
     const startBtnActive = ref(false);
@@ -341,7 +341,8 @@ export default {
     }
 
     const goPre = () => {
-      router.push(`/usageHistoryInfo/${productName}`);
+      // router.push(`/usageHistoryInfo/${productName}`);
+      window.history.back();
     };
 
     const goNext = () => {
@@ -358,7 +359,6 @@ export default {
 
     const getStart = async () => {
       try {
-        // 發送 API 請求
         const response = await axios.post(
           "https://23700999.com:8081/HMA/API_UseStart_Data.jsp",
           { MID, Token, MAID, Mobile }
@@ -366,37 +366,30 @@ export default {
 
         if (response.status === 200) {
           const records = response.data?.UseRecord || [];
-          const detects = response.data?.HRV2Record || [];
-          // 過濾出與當前產品相關的記錄
           useData.value = records.filter(
             (record) => record.ProductName === productName
           );
 
-          detectData.value = detects.filter(
-            (detect) => detect.ProductName === productName
-          );
-
           if (useData.value.length > 0) {
-            // 假設只使用第一筆記錄的結束時間
+            // 解析 API 返回的 EndTime
             const endTimeStr = useData.value[0].EndTime;
-            const endTime = new Date(endTimeStr);
+            const endTime = parseEndTime(endTimeStr);
 
-            // 計算當天凌晨 5 點
+            // 计算重置时间
             const now = new Date();
-            const resetTime = new Date();
-            resetTime.setHours(5, 0, 0, 0); // 當天凌晨 5 點
+            const resetTime = calculateResetTime(now);
 
-            // 如果當前時間小於凌晨 5 點，重置時間為前一天的凌晨 5 點
-            if (now < resetTime) {
-              resetTime.setDate(resetTime.getDate() - 1);
-            }
+            // 打印调试信息
+            console.log("EndTime:", endTime);
+            console.log("ResetTime:", resetTime);
 
-            // 判斷是否能啟動按鈕（結束時間是否在可重置時間之前）
+            // 按钮激活判断
             startBtnActive.value = endTime < resetTime;
             showMessage.value = !(endTime < resetTime);
           } else {
-            // 如果沒有記錄，啟用按鈕
+            // 如果没有记录，默认允许计时
             startBtnActive.value = true;
+            showMessage.value = false;
           }
         } else {
           console.error("Unexpected response status:", response.status);
@@ -405,6 +398,62 @@ export default {
         console.error("API request failed:", error);
       }
     };
+
+    const parseEndTime = (endTimeStr) => {
+      if (!endTimeStr) return null;
+      // 替换 `/` 为 `-`，确保兼容性
+      const isoString = endTimeStr.replace(/\//g, "-").replace(" ", "T");
+      return new Date(isoString);
+    };
+
+    const calculateResetTime = (now) => {
+      const resetTime = new Date(now);
+      resetTime.setHours(5, 0, 0, 0); // 设置为今天凌晨 5 点
+      if (now < resetTime) {
+        resetTime.setDate(resetTime.getDate() - 1); // 如果当前时间小于 5 点，取前一天的 5 点
+      }
+      return resetTime;
+    };
+
+    const checkResetTime = () => {
+      const now = new Date();
+      const resetTime = new Date();
+      resetTime.setHours(5, 0, 0, 0);
+
+      // 如果当前时间已经过了当天的重置时间，则设置为下一天凌晨 5 点
+      if (now >= resetTime) {
+        resetTime.setDate(resetTime.getDate() + 1);
+      }
+
+      const lastEndTime = useData.value?.[0]?.EndTime; // 假设取第一个记录
+      if (lastEndTime) {
+        const lastEndDate = new Date(lastEndTime);
+        startBtnActive.value = lastEndDate < resetTime;
+        showMessage.value = !(lastEndDate < resetTime);
+      } else {
+        startBtnActive.value = true;
+        showMessage.value = false;
+      }
+    };
+
+    // 定時每分鐘檢查一次
+    const scheduleNextCheck = () => {
+      const now = new Date();
+      const nextReset = new Date();
+      nextReset.setHours(5, 0, 0, 0);
+      if (now >= nextReset) {
+        nextReset.setDate(nextReset.getDate() + 1);
+      }
+
+      const delay = nextReset - now; // 下次检查的延迟时间
+      setTimeout(() => {
+        checkResetTime();
+        scheduleNextCheck();
+      }, delay);
+    };
+
+    // 在組件加載時初始化檢查
+    checkResetTime();
 
     const getHRV2 = async () => {
       try {
@@ -425,6 +474,17 @@ export default {
     const init = async () => {
       await getStart();
     };
+
+    let isInitialized = false; // 添加标志位，防止重复初始化
+
+    onMounted(() => {
+      useActive.value = true; 
+      detectActive.value = false;
+      if (!isInitialized) {
+        init();
+        isInitialized = true; // 标记为已初始化
+      }
+    });
 
     const filteredHRVData = computed(() => {
       return detectData.value.filter((item) => {
