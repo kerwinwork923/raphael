@@ -7,7 +7,7 @@
     <div class="userGroup">
       <div class="userInfo">
         <div class="imgGroup">
-          <img src="../assets/imgs/sticker.svg" alt="" />
+          <img src="../assets/imgs/sticker.png" alt="" />
         </div>
         <div class="infoTextGroup">
           <div class="topText">
