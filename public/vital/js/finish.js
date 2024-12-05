@@ -70,7 +70,6 @@ function SDNNdetermineAge(SDNN, gender) {
   } else {
     genderKey = "female";
   }
-  console.log("genderKey=", genderKey, "/SDNN=", SDNN);
 
   for (let i = 0; i < ageGroups.length - 1; i++) {
     const currentGroup = ageGroups[i];

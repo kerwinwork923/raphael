@@ -2,12 +2,12 @@
   <div class="tagList">
     <!-- <router-link to="#" class="listItem" >總覽</router-link> -->
     <router-link to="/weekly" class="listItem" active-class="listActive"
-      >每周量表</router-link
+      >自律神經</router-link
     >
     <router-link to="/userRecord" class="listItem" active-class="listActive"
-      >睡眠紀錄</router-link
+      >生活紀錄</router-link
     >
-    <!-- <router-link to="#" class="listItem" >兒童成長紀錄</router-link> -->
+    <!-- <router-link to="#" class="listItem" >寶貝紀錄</router-link> -->
   </div>
 </template>
 

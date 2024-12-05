@@ -116,11 +116,11 @@ export default {
         case "score":
         case "times":
         case "choose":
-          return "每週評估";
+          return "健康紀錄";
         case "result":
           return "結果分析";
         default:
-          return "每週評估";
+          return "健康紀錄";
       }
     });
 

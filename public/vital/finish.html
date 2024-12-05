@@ -570,6 +570,23 @@
   // 從本地儲存中獲取 userData
   const userData = JSON.parse(localStorage.getItem("userData"));
   const currentResult = JSON.parse(sessionStorage.getItem("result"));
+  const userHRV = JSON.parse(localStorage.getItem("rHRV"));
+  let getHF = [];
+  let getLF = [];
+  let getSDNN = [];
+  let getSDNNI = [];
+  userHRV.forEach((data) => {
+      let [a, b, c, d] = data;
+      getHF.push(a);
+      getLF.push(b);
+      getSDNN.push(c);
+      getSDNNI.push(d);
+  });
+  console.log("ayHF=", getHF);
+  console.log("ayLF=", getLF);
+  console.log("aySDNN=", getSDNN);
+  console.log("aySDNNI=", getSDNNI);
+
   //登入
   const localData = localStorage.getItem("userData");
 
@@ -678,6 +695,10 @@
             ba2: String(Math.floor(upba2)),
             ba4: String(Math.floor(upba4)),
             HRVCallTime: userData.HRVCalTime || "",
+            ayHF:getHF,
+            ayLF:getLF,
+            aySDNN:getSDNN,
+            aySDNNI:getSDNNI,
           }),
         }
       );
