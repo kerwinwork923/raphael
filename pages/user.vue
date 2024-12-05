@@ -7,7 +7,7 @@
     <div class="userGroup">
       <div class="userInfo">
         <div class="imgGroup">
-          <img src="../assets/imgs/sticker.png" alt="" />
+          <img src="../assets/imgs/sticker.svg" alt="" />
         </div>
         <div class="infoTextGroup">
           <div class="topText">
@@ -304,7 +304,11 @@ export default {
       gap: 0.5rem;
 
       .imgGroup {
-        width: 61px;
+        width: 70px;
+        &>img{
+          width: 100%;
+          height: 100%;
+        }
       }
 
       .infoTextGroup {
