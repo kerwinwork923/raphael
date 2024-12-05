@@ -299,7 +299,7 @@ export default {
       gap: 0.5rem;
 
       .imgGroup {
-        width: auto;
+        width: 70px;
       }
 
       .infoTextGroup {
