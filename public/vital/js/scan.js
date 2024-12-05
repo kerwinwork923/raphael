@@ -37,6 +37,7 @@ preditage = 0;
 let _scan_vital_result_printer = new VitalResultPrinter();
 let _max_measuring_second = 60;
 let nArray = [];
+let nHRV=[];
 let infodata = JSON.parse(sessionStorage.getItem("data"));
 
 const OnVisibilityChange = () => {
@@ -74,7 +75,6 @@ function SDNNdetermineAge(SDNN, gender) {
   } else {
     genderKey = "female";
   }
-  console.log("genderKey=", genderKey, "/SDNN=", SDNN);
 
   for (let i = 0; i < ageGroups.length - 1; i++) {
     const currentGroup = ageGroups[i];
@@ -124,7 +124,6 @@ function RMSSDdetermineAge(RMSSD, gender) {
     genderKey = "female";
   }
 
-  console.log("genderKey=", genderKey, "/RMSSD=", RMSSD);
   for (let i = 0; i < ageGroups.length - 1; i++) {
     const currentGroup = ageGroups[i];
     const nextGroup = ageGroups[i + 1];
@@ -159,6 +158,19 @@ const OnResult = (result) => {
   document.getElementById(VIEW_SCAN_PROGRESS_VALUE).innerHTML = parseInt(proc) + '%';
 
   console.log(proc, result.scanning_status);
+  
+  if (result.scanning_status != "Motion") {
+    nHRV.push([
+       result.hrv_indices.HF,
+       result.hrv_indices.LF,
+       result.hrv_indices.SDNN,
+       result.hrv_indices.SDNNI
+    ]);
+   } else{
+      nHRV.push([ '','','',''
+     ]);
+   }
+
   if (proc > 75 && result.scanning_status != "Motion") {
     nArray.push([
       SDNNage,
@@ -199,7 +211,7 @@ const OnResult = (result) => {
     show(VIEW_SCANNING_STATUS);
   } else {
     show(VIEW_SCANNING_STATUS, false);
-    console.log("SDNNage=", SDNNage);
+    
     _scan_vital_result_printer.update({
       hr: result.hr,
       hrv: result.hrv_indices.SDNNI,
@@ -250,6 +262,7 @@ const OnResult = (result) => {
   if (proc >= 100) {
     sessionStorage.setItem("result", JSON.stringify(result));
     sessionStorage.setItem("Age", JSON.stringify(nArray));
+    sessionStorage.setItem("rHRV", JSON.stringify(nHRV));
     document.removeEventListener("visibilitychange", OnVisibilityChange);
     StoptMeasuring("finish.html");
   }
