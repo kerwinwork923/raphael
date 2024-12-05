@@ -501,7 +501,7 @@
   // 從本地儲存中獲取 userData
   const userData = JSON.parse(localStorage.getItem("userData"));
   const currentResult = JSON.parse(sessionStorage.getItem("result"));
-  const userHRV = JSON.parse(localStorage.getItem("rHRV"));
+  const userHRV = JSON.parse(sessionStorage.getItem("rHRV"));
   console.log("USERHRV=",userHRV);
   let getHF = [];
   let getLF = [];
