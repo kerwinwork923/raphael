@@ -5,43 +5,32 @@
 </template>
 
 <script>
-import { ref, watch, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { Chart, registerables } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 
 Chart.register(...registerables, ChartDataLabels);
 
 export default {
-  props: {
-    bioageData: {
-      type: Array,
-      required: true,
-    },
-  },
-  setup(props) {
+  setup() {
     const chartCanvas = ref(null);
     let chartInstance = null;
 
-    // 初始化圖表
     const initChart = () => {
-      if (!chartCanvas.value || !props.bioageData.length) return;
-
       const ctx = chartCanvas.value.getContext("2d");
 
-      // 格式化日期為 "MM/DD"
-      const labels = props.bioageData.map((item) => {
-        const dateParts = item.DateTime.split(" ")[0].split("/");
-        return `${dateParts[1]}/${dateParts[2]}`;
-      });
-
-      const dataset1 = props.bioageData.map((item) => parseInt(item.BcBioage, 10) || 0);
-      const dataset2 = props.bioageData.map((item) => parseInt(item.AfBioage, 10) || 0);
-      const difference = dataset2.map((val, index) => val - dataset1[index]);
-
-      // 如果圖表已存在，先銷毀再重建
-      if (chartInstance) {
-        chartInstance.destroy();
-      }
+      const labels = [
+        "10/21",
+        "10/22",
+        "10/23",
+        "10/24",
+        "10/25",
+        "10/26",
+        "10/27",
+      ];
+      const dataset1 = [20, 25, 60, 65, 80, 30, 45];
+      const dataset2 = [15, 30, 45, 60, 75, 25, 40];
+      const difference = dataset1.map((val, index) => val - dataset2[index]);
 
       chartInstance = new Chart(ctx, {
         type: "bar",
@@ -93,6 +82,10 @@ export default {
         options: {
           responsive: true,
           plugins: {
+            title: {
+              display: false,
+              text: "",
+            },
             tooltip: {
               mode: "index",
               intersect: false,
@@ -106,6 +99,23 @@ export default {
                 boxWidth: 12,
                 boxHeight: 12,
                 padding: 20,
+                generateLabels: (chart) => {
+                  const datasets = chart.data.datasets;
+                  const order = ["使用前", "使用后", "改善幅度"];
+                  return order.map((label) => {
+                    const dataset = datasets.find((ds) => ds.label === label);
+                    return {
+                      text: dataset.label,
+                      fillStyle: dataset.backgroundColor || dataset.borderColor,
+                      hidden: !chart.isDatasetVisible(
+                        datasets.indexOf(dataset)
+                      ),
+                      datasetIndex: datasets.indexOf(dataset),
+                      strokeStyle: "transparent", // 设置边框为透明
+                      borderWidth: 0, // 强制设置边框宽度为 0
+                    };
+                  });
+                },
               },
             },
             datalabels: {
@@ -133,7 +143,6 @@ export default {
       });
     };
 
-    // 銷毀圖表
     const destroyChart = () => {
       if (chartInstance) {
         chartInstance.destroy();
@@ -141,18 +150,6 @@ export default {
       }
     };
 
-    // 監聽 bioageData 的變化
-    watch(
-      () => props.bioageData,
-      (newData) => {
-        if (newData.length) {
-          initChart();
-        }
-      },
-      { immediate: true } // 初始化時立即執行一次
-    );
-
-    // 註冊生命周期
     onMounted(() => {
       initChart();
     });
