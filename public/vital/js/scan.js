@@ -159,17 +159,16 @@ const OnResult = (result) => {
 
   console.log(proc, result.scanning_status);
   
-  if (result.scanning_status != "Motion") {
-    nHRV.push([
+ 
+  nHRV.push([
        result.hrv_indices.HF,
        result.hrv_indices.LF,
        result.hrv_indices.SDNN,
        result.hrv_indices.SDNNI
     ]);
-   } else{
-      nHRV.push([ '','','',''
-     ]);
-   }
+   
+  
+  console.log("nHRV=",nHRV);
 
   if (proc > 75 && result.scanning_status != "Motion") {
     nArray.push([
