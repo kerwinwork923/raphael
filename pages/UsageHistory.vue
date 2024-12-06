@@ -313,7 +313,7 @@ export default {
   background-color: rgba(246, 246, 246, 1);
   min-height: 100vh;
   width: 100%;
-  padding-bottom: 7rem;
+  padding-bottom: 100px;
   .productWrap {
     max-width: 90%;
     margin: 0 auto;
@@ -433,8 +433,8 @@ export default {
             }
 
             .circle {
-              width: 160px;
-              height: 160px;
+              width: 150px;
+              height: 150px;
               z-index: 2;
               background-color: #fff;
               border-radius: 50%;
@@ -447,8 +447,8 @@ export default {
             }
 
             .bigCircle {
-              width: 160px;
-              height: 160px;
+              width: 150px;
+              height: 150px;
               z-index: 1;
               border-radius: 50%;
               position: absolute;
@@ -529,8 +529,8 @@ export default {
           }
 
           .circle {
-            width: 160px;
-            height: 160px;
+            width: 150px;
+            height: 150px;
             z-index: 2;
             background-color: #fff;
             border-radius: 50%;
@@ -540,8 +540,8 @@ export default {
             transform: translate(-50%, -50%);
           }
           .bigCircle {
-            width: 160px;
-            height: 160px;
+            width: 150px;
+            height: 150px;
             z-index: 1;
             border-radius: 50%;
             position: absolute;
@@ -640,9 +640,10 @@ export default {
   position: fixed;
   bottom: 0;
   width: 100%;
-  padding: 24px 5%;
+  padding: 1rem 1rem 2.25rem 1rem;
   background-color: #f6f6f6;
   z-index: 99;
+
   button {
     width: 100%;
     background-color: $raphael-green-400;
