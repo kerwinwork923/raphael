@@ -387,20 +387,6 @@
   </body>
 </html>
 
-<script>
-  const formValue = localStorage.getItem("form");
-
-  // 查找需要切换显示的元素
-
-  // 根据 localStorage 的值调整显示
-  if (formValue === "product") {
-    if (subBtnGroup) subBtnGroup.style.display = "none";
-    if (subBtnGroup2) subBtnGroup2.style.display = "flex";
-  } else {
-    if (subBtnGroup) subBtnGroup.style.display = "flex";
-    if (subBtnGroup2) subBtnGroup2.style.display = "none";
-  }
-</script>
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {
@@ -467,7 +453,7 @@
   // SetSPowerValue(VIEW_FINISH_RELAXATION, result.relaxation);
   // SetSPowerValue(VIEW_FINISH_SLEEP, result.sleep);
 
-  let storedData = JSON.parse(sessionStorage.getItem("Age"));
+  let storedData = JSON.parse(sessionStorage.getItem("Age")) || [];
   console.log(storedData);
 
   if (storedData.length > 0) {
@@ -576,7 +562,7 @@
   let getLF = [];
   let getSDNN = [];
   let getSDNNI = [];
-  userHRV.forEach((data) => {
+  userHRV?.forEach((data) => {
     let [a1, b1, c1, d1] = data;
     getHF.push(a1);
     getLF.push(b1);

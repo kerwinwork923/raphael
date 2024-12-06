@@ -519,7 +519,7 @@ export default {
       font-weight: 400;
       line-height: 100%;
       letter-spacing: 0.15px;
-      margin-top: 1.25rem;
+      padding-top: 1.25rem;
     }
 
     .recommendWrap {
