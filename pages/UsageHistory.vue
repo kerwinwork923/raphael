@@ -31,7 +31,8 @@
         </div>
 
         <!-- 多件產品展示 -->
-        <div class="haveGroup2" v-if="purchasedProducts.length > 1">
+        <!-- <div class="haveGroup2" v-if="purchasedProducts.length > 1"> -->
+          <div class="haveGroup2">
           <div
             class="haveProduct"
             v-for="(product, index) in purchasedProducts"
@@ -96,10 +97,7 @@
               <span class="pricePeriod">/{{ price.period }}</span>
             </div>
           </div>
-
-          <div class="recommendBtnGroup">
-            <button class="contactBtn" @click="contactSupport">聯絡客服</button>
-          </div>
+          <button class="contactBtn" @click="contactSupport">聯絡客服</button>          
           <div class="featureTitle">產品特色</div>
           <ul class="featureListGroup">
             <li
@@ -324,190 +322,179 @@ export default {
       font-size: 20px;
       font-weight: 400;
       letter-spacing: 0.15px;
-      padding-top: 0.85rem;
+      padding-top: 0.75rem;
     }
-    .haveIcon {
-      text-align: center;
-      margin-bottom: 0.6rem;
-    }
-    .haveGroup {
-      .haveProduct {
-        width: 100%;
-        text-align: center;
-        position: relative;
-        .robotImg {
-          left: 70%;
-          top: 87%;
-          width: 120px;
-          z-index: 3;
-        }
-        img {
-          width: 260px;
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          z-index: 3;
-        }
-        .imgGroup {
-          position: relative;
-          height: 285px;
-          .circle {
-            width: 285px;
-            height: 100%;
-            z-index: 2;
-            background-color: #fff;
-            border-radius: 50%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            filter: blur(3px);
-            box-shadow: 0 0 10px rgba($color: #fff, $alpha: 0.1);
-          }
-          .bigCircle {
-            width: 285px;
-            height: 100%;
-            z-index: 1;
-            border-radius: 50%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(1.03);
+    .haveProductWrap{
+      margin-top: 0.75rem;
+      .haveGroup {
+        display: gri;
+        place-items: center;
+        gap: 0.75rem;
 
-            background: linear-gradient(
-              135deg,
-              rgba(114, 188, 32, 0.9) 0%,
-              rgba(71, 188, 107, 0.9) 20%,
-              rgba(0, 210, 255, 0.9) 40%,
-              rgba(58, 123, 213, 0.9) 60%,
-              rgba(98, 87, 143, 0.9) 80%,
-              rgba(167, 82, 111, 0.9) 100%
-            );
+        .haveProduct {
+          display: grid;
+          place-items: center;
+          gap: 0.5rem;
 
-            background-size: 200% 200%;
-            filter: blur(2px);
-            animation: rotate 4s infinite linear,
-              aurora 10s infinite ease-in-out;
+          .imgGroup {
+            position: relative;      
+            display: grid;
+            place-items: center;           
+
+            >img {
+              height: 285px;
+              z-index: 3;
+            }
+            
+            .robotImg {
+              position: absolute;
+              width: 176px;
+              height: auto;
+              bottom:0;
+              right:0;
+              z-index: 3;
+            }
+            
+            .circle {
+              width: 270px;
+              height: 270px;
+              z-index: 2;
+              background-color: #fff;
+              border-radius: 50%;
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              filter: blur(3px);
+              box-shadow: 0 0 10px rgba($color: #fff, $alpha: 0.1);
+            }
+            .bigCircle {
+              width: 270px;
+              height: 270px;
+              z-index: 1;
+              border-radius: 50%;
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+
+              background: linear-gradient(
+                135deg,
+                rgba(114, 188, 32, 0.9) 0%,
+                rgba(71, 188, 107, 0.9) 20%,
+                rgba(0, 210, 255, 0.9) 40%,
+                rgba(58, 123, 213, 0.9) 60%,
+                rgba(98, 87, 143, 0.9) 80%,
+                rgba(167, 82, 111, 0.9) 100%
+              );
+
+              background-size: 200% 200%;
+              filter: blur(2px);
+              animation: rotate 4s infinite linear,
+                aurora 10s infinite ease-in-out;
+            }
           }
-        }
-        .productName {
-          color: #1e1e1e;
-          font-size: 1.5rem;
-          font-style: normal;
-          font-weight: 700;
-          letter-spacing: 0.12px;
-          margin-top: 0.75rem;
-        }
-        .productSubTitle {
-          color: #1e1e1e;
-          font-size: 1.5rem;
-          font-style: normal;
-          font-weight: 700;
-          letter-spacing: 0.12px;
-          margin-top: 0.75rem;
+          
+          .productName {
+            color: #1e1e1e;
+            font-size: 1.5rem;
+            font-style: normal;
+            font-weight: 700;
+            letter-spacing: 0.12px;
+          }
         }
       }
-    }
 
-    .haveGroup2 {
-      display: flex;
-      width: 100%;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      padding-top: 2rem;
-      .haveProduct {
-        position: relative;
-        .robotImg {
-          left: 70%;
-          top: 87%;
-          width: 120px;
-          z-index: 3;
-        }
-        .haveIcon {
-          width: 2px;
-          height: 24px;
-          top: 2%;
-          margin-bottom: 0.5rem;
-          img {
-            width: 24px;
-            z-index: 9;
-
-            position: absolute;
-            top: 0;
+      .haveGroup2 {
+        display: grid;
+        grid-template-columns: repeat(2,1fr);
+        place-items: center;
+        gap: 0.75rem;
+        
+        .haveProduct {
+          display: grid;
+          place-items: center;
+          gap: 0.5rem;
+          
+          .haveIcon {
+            img {
+            }
           }
-        }
-        width: 47%;
-        margin-bottom: 2rem;
-        text-align: center;
-        position: relative;
+          
+          .imgGroup {
+            position: relative;
+            display: grid;
+            place-items: center;
+            gap: 0.5rem;
 
-        img {
-          width: 100%;
-          width: 170px;
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          z-index: 3;
-        }
-        .imgGroup {
-          position: relative;
-          height: 170px;
-          .circle {
-            width: 170px;
-            height: 100%;
-            z-index: 2;
-            background-color: #fff;
-            border-radius: 50%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            filter: blur(3px);
-            box-shadow: 0 0 10px rgba($color: #fff, $alpha: 0.1);
+            >img{
+              height: 170px;
+                z-index: 3;
+            }
+
+            .circle {
+              width: 160px;
+              height: 160px;
+              z-index: 2;
+              background-color: #fff;
+              border-radius: 50%;
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              filter: blur(3px);
+              box-shadow: 0 0 10px rgba($color: #fff, $alpha: 0.1);
+            }
+
+            .bigCircle {
+              width: 160px;
+              height: 160px;
+              z-index: 1;
+              border-radius: 50%;
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+
+              background: linear-gradient(
+                135deg,
+                rgba(114, 188, 32, 0.9) 0%,
+                rgba(71, 188, 107, 0.9) 20%,
+                rgba(0, 210, 255, 0.9) 40%,
+                rgba(58, 123, 213, 0.9) 60%,
+                rgba(98, 87, 143, 0.9) 80%,
+                rgba(167, 82, 111, 0.9) 100%
+              );
+
+              background-size: 200% 200%;
+              filter: blur(2px);
+              animation: rotate 4s infinite linear,
+                aurora 10s infinite ease-in-out;
+            }
+            .robotImg {
+              position: absolute;
+              width: 105px;
+              height: auto;
+              bottom: 0;
+              right: 0;
+              z-index: 3;
+            }
           }
-          .bigCircle {
-            width: 170px;
-            height: 100%;
-            z-index: 1;
-            border-radius: 50%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(1.03);
-
-            background: linear-gradient(
-              135deg,
-              rgba(114, 188, 32, 0.9) 0%,
-              rgba(71, 188, 107, 0.9) 20%,
-              rgba(0, 210, 255, 0.9) 40%,
-              rgba(58, 123, 213, 0.9) 60%,
-              rgba(98, 87, 143, 0.9) 80%,
-              rgba(167, 82, 111, 0.9) 100%
-            );
-
-            background-size: 200% 200%;
-            filter: blur(2px);
-            animation: rotate 4s infinite linear,
-              aurora 10s infinite ease-in-out;
+          .productName {
+            color: #1e1e1e;
+            font-size: 1.25rem;
+            font-style: normal;
+            font-weight: 700;
+            letter-spacing: 0.12px;
           }
-        }
-        .productName {
-          color: #1e1e1e;
-          font-size: 1.25rem;
-          font-style: normal;
-          font-weight: 700;
-          letter-spacing: 0.12px;
-          margin-top: 1.5rem;
-        }
-        .productSubTitle {
-          color: #1e1e1e;
-          font-size: 1.25rem;
-          font-style: normal;
-          font-weight: 700;
-          letter-spacing: 0.12px;
-          margin-top: 0.75rem;
+          .productSubTitle {
+            color: #1e1e1e;
+            font-size: 1.25rem;
+            font-style: normal;
+            font-weight: 700;
+            letter-spacing: 0.12px;
+            margin-top: 0.75rem;
+          }
         }
       }
     }
@@ -519,33 +506,31 @@ export default {
       font-weight: 400;
       line-height: 100%;
       letter-spacing: 0.15px;
-      padding-top: 1.25rem;
+      padding-top: 1rem;
     }
 
     .recommendWrap {
+      margin-top: 0.75rem;
       .recommendDiv {
         width: 100%;
         background-color: #fff;
         border-radius: 12px;
-        margin-top: 1rem;
         padding-top: 0.75rem;
-        padding: 1rem 5% 0.5rem;
+        padding: 0.75rem;
         .imgGroup {
           position: relative;
-          height: 180px;
+          display: grid;
+          place-items: center;
+          gap: 0.5rem;
 
           img {
-            width: 180px;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            height: 170px;
             z-index: 3;
           }
 
           .circle {
-            width: 180px;
-            height: 100%;
+            width: 160px;
+            height: 160px;
             z-index: 2;
             background-color: #fff;
             border-radius: 50%;
@@ -555,8 +540,8 @@ export default {
             transform: translate(-50%, -50%);
           }
           .bigCircle {
-            width: 180px;
-            height: 100%;
+            width: 160px;
+            height: 160px;
             z-index: 1;
             border-radius: 50%;
             position: absolute;
@@ -577,15 +562,8 @@ export default {
             background-size: 100% 100%;
           }
         }
+        
         .recommendName {
-          color: #1e1e1e;
-          text-align: center;
-          font-size: 18px;
-          font-weight: 400;
-          letter-spacing: 0.09px;
-          margin-top: 1.5rem;
-        }
-        .recommendSubTitle {
           color: #1e1e1e;
           text-align: center;
           font-size: 18px;
@@ -595,42 +573,43 @@ export default {
         }
 
         .priceGroup {
+          display: grid;
+          justify-content: center;
+          gap: 0.75rem;
           margin-top: 1rem;
-          color: #1e1e1e;
-
-          font-size: 18px;
-          font-weight: 400;
-          letter-spacing: 0.09px;
 
           .priceItem {
-            width: 100%;
-            text-align: center;
             display: flex;
-            justify-content: center;
-            align-items: baseline;
-            line-height: 1.2;
-          }
-
-          .priceItem {
-            font-weight: 700;
-            font-size: 1.5rem;
-          }
-        }
-
-        .recommendBtnGroup {
-          text-align: center;
-          .contactBtn {
-            border: $raphael-green-400 1px solid;
-            color: $raphael-green-400;
+            align-items: center;
+            gap: 0.5rem;
             width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            background-color: transparent;
-            font-size: 18px;
-            letter-spacing: 0.09px;
-            margin-top: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            line-height: 1.2;
+            .pricePeriod{
+              font-size: 1.125rem;
+              font-weight: normal;
+            }
           }
         }
+
+        .contactBtn {
+          border: $raphael-green-400 1px solid;
+          color: $raphael-green-400;
+          cursor: pointer;
+          width: 100%;
+          margin-top: 1rem;
+          padding: 12px;
+          border-radius: 8px;
+          background-color: transparent;
+          font-size: 18px;
+          letter-spacing: 0.09px;
+          transition: all .2s ease;
+          &:hover{
+            background-color: $raphael-green-400;
+            color: #fff;
+          }
+        }        
 
         .featureTitle {
           color: #1e1e1e;
@@ -638,12 +617,12 @@ export default {
           font-style: normal;
           font-weight: 400;
           letter-spacing: 0.15px;
-          margin-top: 1.5rem;
+          margin-top: 1rem;
         }
         .featureListGroup {
-          margin-top: 0.5rem;
           list-style-type: disc;
-          margin-left: 0.75rem;
+          margin-top: 0.5rem;
+          padding-left: 1.75rem;
           li {
             color: #1e1e1e;
             font-size: 18px;
