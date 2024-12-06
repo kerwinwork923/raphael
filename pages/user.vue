@@ -305,6 +305,10 @@ export default {
 
       .imgGroup {
         width: 70px;
+        &>img{
+          width: 100%;
+          height: 100%;
+        }
       }
 
       .infoTextGroup {
