@@ -32,7 +32,7 @@
 
         <!-- 多件產品展示 -->
         <!-- <div class="haveGroup2" v-if="purchasedProducts.length > 1"> -->
-        <div class="haveGroup2">
+        <div class="haveGroup2" v-if="purchasedProducts.length > 1">
           <div
             class="haveProduct"
             v-for="(product, index) in purchasedProducts"
@@ -82,7 +82,7 @@
             <img
               v-if="shouldShowRobot(recommendation.name)"
               class="robotImg"
-              :src="robotImage"
+              src="/assets/imgs/clothRobot.png"
               alt="robot image"
             />
           </div>

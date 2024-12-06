@@ -8,6 +8,7 @@
       :startBtnActive="startBtnActive"
       :redirectPath="{ default: '/usageHistory', hrv: '/vital/scan.html' }"
       :showMessageProp="showMessage"
+      @countdownComplete="handleCountdownComplete"
     />
     <div class="usageInfoGroup" v-if="usageCardState === '紅光版'">
       <div class="usageInfoCard">
@@ -246,7 +247,7 @@
     </div>
     <div class="usageBtnGroup">
       <button class="preBtn" @click="goPre">上一步</button>
-      <button class="nextBtn" @click="goNext">返回產品頁面</button>
+      <button class="nextBtn" @click="goNext">{{ goNextText }}</button>
     </div>
   </div>
 </template>
@@ -270,6 +271,15 @@ export default {
     const productName = decodeURIComponent(route.params.clothType);
 
     const validName = ["調節衣", "紅光版", "保健版", "居家治療儀"];
+
+    const redirectToHRV = ref(false);
+
+    const handleCountdownComplete = () => {
+      redirectToHRV.value = true;
+      goNextText.value = "HRV检测";
+    };
+
+    const goNextText = ref("");
 
     if (!validName.includes(productName)) {
       window.location.href = "/usageHistory";
@@ -346,12 +356,29 @@ export default {
       window.history.back();
     };
 
+    if (startBtnActive.value) {
+      goNextText.value = "返回產品頁面";
+    } else {
+      goNextText.value = "HRV檢測";
+    }
+
+    watch(
+      () => startBtnActive.value,
+      (newValue) => {
+        if (newValue) {
+          goNextText.value = "返回產品頁面";
+        } else {
+          goNextText.value = "HRV检测";
+        }
+      },
+      { immediate: true }
+    );
+
     const goNext = () => {
-      // 根據 productName 決定跳轉路徑
-      if (productName === "HRV") {
-        router.push("/vital/scan.html"); // HRV 專屬路徑
+      if (!startBtnActive.value || redirectToHRV.value) {
+        router.push("/vital/scan.html"); 
       } else {
-        router.push("/usageHistory"); // 默認返回使用紀錄頁面
+        router.push("/usageHistory"); 
       }
     };
 
@@ -537,6 +564,8 @@ export default {
       detectData,
       filteredHRVData,
       filteredUsage,
+      goNextText,
+      handleCountdownComplete
     };
   },
 };
@@ -580,7 +609,7 @@ export default {
       &:nth-child(3) {
         border-left: 2px solid #65558f;
       }
-      h3{
+      h3 {
         margin-bottom: 0.75rem;
       }
       h4 {

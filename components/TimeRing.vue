@@ -264,6 +264,8 @@ const useEndAPI = async () => {
 // 計時器邏輯
 let timerInterval;
 
+const emit = defineEmits(["countdownComplete"]);
+
 const countdown = () => {
   if (timerInterval) {
     clearInterval(timerInterval);
@@ -284,6 +286,7 @@ const countdown = () => {
       isCounting.value = false;
       remainingTime.value = 0;
       showMessage.value = true;
+      emit("countdownComplete"); 
       useEndAPI();
       ThisStartBtnActive.value = false;
     } else {
