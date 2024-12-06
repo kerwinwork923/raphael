@@ -32,7 +32,7 @@
 
         <!-- 多件產品展示 -->
         <!-- <div class="haveGroup2" v-if="purchasedProducts.length > 1"> -->
-          <div class="haveGroup2">
+        <div class="haveGroup2">
           <div
             class="haveProduct"
             v-for="(product, index) in purchasedProducts"
@@ -97,7 +97,7 @@
               <span class="pricePeriod">/{{ price.period }}</span>
             </div>
           </div>
-          <button class="contactBtn" @click="contactSupport">聯絡客服</button>          
+          <button class="contactBtn" @click="contactSupport">聯絡客服</button>
           <div class="featureTitle">產品特色</div>
           <ul class="featureListGroup">
             <li
@@ -328,7 +328,7 @@ export default {
       letter-spacing: 0.15px;
       padding-top: 0.75rem;
     }
-    .haveProductWrap{
+    .haveProductWrap {
       margin-top: 0.75rem;
       .haveGroup {
         display: gri;
@@ -341,24 +341,24 @@ export default {
           gap: 0.5rem;
 
           .imgGroup {
-            position: relative;      
+            position: relative;
             display: grid;
-            place-items: center;           
+            place-items: center;
 
-            >img {
+            > img {
               height: 285px;
               z-index: 3;
             }
-            
+
             .robotImg {
               position: absolute;
               width: 176px;
               height: auto;
-              bottom:0;
-              right:0;
+              bottom: 0;
+              right: 0;
               z-index: 3;
             }
-            
+
             .circle {
               width: 270px;
               height: 270px;
@@ -398,7 +398,7 @@ export default {
                 aurora 10s infinite ease-in-out;
             }
           }
-          
+
           .productName {
             color: #1e1e1e;
             font-size: 1.5rem;
@@ -411,29 +411,29 @@ export default {
 
       .haveGroup2 {
         display: grid;
-        grid-template-columns: repeat(2,1fr);
+        grid-template-columns: repeat(2, 1fr);
         place-items: center;
         gap: 0.75rem;
-        
+
         .haveProduct {
           display: grid;
           place-items: center;
           gap: 0.5rem;
-          
+
           .haveIcon {
             img {
             }
           }
-          
+
           .imgGroup {
             position: relative;
             display: grid;
             place-items: center;
             gap: 0.5rem;
 
-            >img{
+            > img {
               height: 170px;
-                z-index: 3;
+              z-index: 3;
             }
 
             .circle {
@@ -566,7 +566,7 @@ export default {
             background-size: 100% 100%;
           }
         }
-        
+
         .recommendName {
           color: #1e1e1e;
           text-align: center;
@@ -590,7 +590,7 @@ export default {
             font-size: 1.5rem;
             font-weight: 600;
             line-height: 1.2;
-            .pricePeriod{
+            .pricePeriod {
               font-size: 1.125rem;
               font-weight: normal;
             }
@@ -608,12 +608,12 @@ export default {
           background-color: transparent;
           font-size: 18px;
           letter-spacing: 0.09px;
-          transition: all .2s ease;
-          &:hover{
+          transition: all 0.2s ease;
+          &:hover {
             background-color: $raphael-green-400;
             color: #fff;
           }
-        }        
+        }
 
         .featureTitle {
           color: #1e1e1e;

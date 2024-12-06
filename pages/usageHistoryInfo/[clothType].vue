@@ -80,9 +80,8 @@ export default {
     };
 
     const goNext = () => {
-      const formCookie = `form=${productName}; path=/; max-age=1800`; 
-      document.cookie = formCookie;
-      store.showHRVAlert = true;
+      localStorage.setItem("form", productName); // 直接存储当前产品名称
+      store.showHRVAlert = true; // 显示 HRV 警告
     };
 
     const localData = localStorage.getItem("userData");

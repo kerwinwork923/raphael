@@ -159,6 +159,7 @@ export default {
     useUserData();
 
     const openHRVAlert = async () => {
+      localStorage.removeItem("form");
       store.showHRVAlert = true;
     };
 
