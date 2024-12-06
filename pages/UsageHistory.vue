@@ -2,7 +2,9 @@
   <TitleMenu Text="使用紀錄" link="/user" />
   <div class="usageHistoryWrap">
     <div class="productWrap">
-      <h3 class="yourProductTitle">您的產品</h3>
+      <h3 class="yourProductTitle" v-if="purchasedProducts.length < 1">
+        您的產品
+      </h3>
       <div class="haveProductWrap">
         <!-- 單件產品展示 -->
         <div class="haveGroup" v-if="purchasedProducts.length === 1">
@@ -55,7 +57,7 @@
               <img
                 v-if="shouldShowRobot(product)"
                 class="robotImg"
-                 src="/assets/imgs/clothRobot.png"
+                src="/assets/imgs/clothRobot.png"
                 alt="robot image"
               />
             </div>
@@ -111,7 +113,9 @@
       </div>
     </div>
     <div class="optionWrap">
-      <button @click="goUse">開始使用</button>
+      <button @click="goUse" v-if="purchasedProducts.length < 1">
+        開始使用
+      </button>
     </div>
   </div>
 </template>
@@ -252,7 +256,7 @@ export default {
         調節衣: redLightClothes2,
         居家治療儀: redLightClothes2,
       };
-      return productImages[productName] ;
+      return productImages[productName];
     };
     const shouldShowRobot = (productName) => {
       return productName === "居家治療儀";
@@ -302,7 +306,7 @@ export default {
       goUse,
       contactSupport,
       checkedIcon,
-      uncheckedIcon
+      uncheckedIcon,
     };
   },
 };
@@ -426,7 +430,7 @@ export default {
           width: 2px;
           height: 24px;
           top: 2%;
-          margin-bottom: .5rem;
+          margin-bottom: 0.5rem;
           img {
             width: 24px;
             z-index: 9;
