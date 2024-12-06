@@ -2,7 +2,7 @@
   <TitleMenu Text="使用紀錄" link="/user" />
   <div class="usageHistoryWrap">
     <div class="productWrap">
-      <h3 class="yourProductTitle" v-if="purchasedProducts.length < 1">
+      <h3 class="yourProductTitle" v-if="purchasedProducts.length > 1">
         您的產品
       </h3>
       <div class="haveProductWrap">
@@ -113,7 +113,7 @@
       </div>
     </div>
     <div class="optionWrap">
-      <button @click="goUse" v-if="purchasedProducts.length < 1">
+      <button @click="goUse" v-if="purchasedProducts.length > 1">
         開始使用
       </button>
     </div>
@@ -129,8 +129,6 @@ import uncheckedIcon from "@/assets/imgs/usageUnCheck.svg";
 import redLightClothes from "@/assets/imgs/redLightClothes.png";
 import normalClothes from "@/assets/imgs/normalClothes.png";
 import redLightClothes2 from "@/assets/imgs/redLightClothes2.png";
-
-import robotImage from "@/assets/imgs/clothRobot.png";
 
 export default {
   setup() {
