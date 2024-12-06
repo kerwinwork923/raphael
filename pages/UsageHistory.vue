@@ -32,7 +32,7 @@
 
         <!-- 多件產品展示 -->
         <!-- <div class="haveGroup2" v-if="purchasedProducts.length > 1"> -->
-          <div class="haveGroup2">
+        <div class="haveGroup2">
           <div
             class="haveProduct"
             v-for="(product, index) in purchasedProducts"
@@ -97,7 +97,7 @@
               <span class="pricePeriod">/{{ price.period }}</span>
             </div>
           </div>
-          <button class="contactBtn" @click="contactSupport">聯絡客服</button>          
+          <button class="contactBtn" @click="contactSupport">聯絡客服</button>
           <div class="featureTitle">產品特色</div>
           <ul class="featureListGroup">
             <li
@@ -132,18 +132,20 @@ export default {
   setup() {
     const purchasedProducts = ref([]);
     const recommendedProducts = ref([]);
-    const selectedProductIndex = ref(0); // 選中的產品索引
-    const hasCheckedToday = ref(false); // 判斷今日是否有檢測記錄
+    const selectedProductIndex = ref(0); // 当前选中的产品索引
+    const hasCheckedToday = ref(false); // 判断当天是否有检测记录
 
+    // 从 localStorage 获取用户数据
     const localData = localStorage.getItem("userData");
     let userData = null;
 
     try {
       userData = localData ? JSON.parse(localData) : null;
     } catch (error) {
-      console.error("localStorage userData 解析失敗：", error);
+      console.error("localStorage userData 解析失败：", error);
     }
 
+    // 判断用户数据是否完整
     if (
       !userData ||
       !userData.MID ||
@@ -151,21 +153,12 @@ export default {
       !userData.MAID ||
       !userData.Mobile
     ) {
-      console.warn("必要的用戶資料缺失，重定向至首頁");
+      console.warn("必要的用户资料缺失，重定向至首页");
       window.location.href = "/";
       return;
     }
 
     const { MID, Token, MAID, Mobile } = userData;
-
-    const productImages = {
-      紅光版: "redLightClothes.png",
-      保健版: "normalClothes.png",
-      調節衣: "redLightClothes2.png",
-      居家治療儀: "redLightClothes2.png",
-    };
-
-    const basePath = "/assets/imgs/";
 
     const fetchProducts = async () => {
       try {
@@ -181,15 +174,14 @@ export default {
             (item) => ({
               name: item.ProductName,
               price: item.Desc1,
-              image: getImage(item.ProductName),
               features: item.Desc2.split("。").filter((desc) => desc),
             })
           );
         } else {
-          console.error("獲取產品資料失敗", response.data);
+          console.error("获取产品数据失败", response.data);
         }
       } catch (error) {
-        console.error("API 請求失敗：", error);
+        console.error("API 请求失败：", error);
       }
     };
 
@@ -207,7 +199,7 @@ export default {
         );
 
         if (!response.ok) {
-          throw new Error("網路響應不是成功狀態");
+          throw new Error("网络响应不是成功状态");
         }
 
         const result = await response.json();
@@ -215,7 +207,7 @@ export default {
           handleCheckTime(result.HRV2);
         }
       } catch (error) {
-        console.error("Fetch error:", error);
+        console.error("Fetch 错误：", error);
       }
     };
 
@@ -230,6 +222,7 @@ export default {
         0
       );
 
+      // 检测是否当天有记录
       const filteredData = hrvData.some((record) => {
         const checkTimeStr = record.CheckTime;
         if (!checkTimeStr) return false;
@@ -243,6 +236,14 @@ export default {
       });
 
       hasCheckedToday.value = filteredData;
+      // 将结果存入 localStorage
+      localStorage.setItem("hasCheckedToday", JSON.stringify(filteredData));
+    };
+
+    const getLocalCheckedStatus = () => {
+      // 从 localStorage 获取当天检测状态
+      const storedStatus = localStorage.getItem("hasCheckedToday");
+      hasCheckedToday.value = storedStatus ? JSON.parse(storedStatus) : false;
     };
 
     const getImage = (productName) => {
@@ -254,6 +255,7 @@ export default {
       };
       return productImages[productName];
     };
+
     const shouldShowRobot = (productName) => {
       return productName === "居家治療儀";
     };
@@ -279,15 +281,16 @@ export default {
     };
 
     const contactSupport = () => {
-      window.location.href = "tel:+1234567890"; // 修改為你的電話號碼
+      window.location.href = "tel:+1234567890"; // 修改为你的电话号码
     };
 
     onMounted(async () => {
       try {
+        getLocalCheckedStatus(); // 初始化时获取本地检测状态
         await fetchProducts();
         await API_HRV2();
       } catch (error) {
-        console.error("初始化過程中出現錯誤：", error);
+        console.error("初始化过程中出现错误：", error);
       }
     });
 
@@ -324,7 +327,7 @@ export default {
       letter-spacing: 0.15px;
       padding-top: 0.75rem;
     }
-    .haveProductWrap{
+    .haveProductWrap {
       margin-top: 0.75rem;
       .haveGroup {
         display: gri;
@@ -337,24 +340,24 @@ export default {
           gap: 0.5rem;
 
           .imgGroup {
-            position: relative;      
+            position: relative;
             display: grid;
-            place-items: center;           
+            place-items: center;
 
-            >img {
+            > img {
               height: 285px;
               z-index: 3;
             }
-            
+
             .robotImg {
               position: absolute;
               width: 176px;
               height: auto;
-              bottom:0;
-              right:0;
+              bottom: 0;
+              right: 0;
               z-index: 3;
             }
-            
+
             .circle {
               width: 270px;
               height: 270px;
@@ -394,7 +397,7 @@ export default {
                 aurora 10s infinite ease-in-out;
             }
           }
-          
+
           .productName {
             color: #1e1e1e;
             font-size: 1.5rem;
@@ -407,29 +410,29 @@ export default {
 
       .haveGroup2 {
         display: grid;
-        grid-template-columns: repeat(2,1fr);
+        grid-template-columns: repeat(2, 1fr);
         place-items: center;
         gap: 0.75rem;
-        
+
         .haveProduct {
           display: grid;
           place-items: center;
           gap: 0.5rem;
-          
+
           .haveIcon {
             img {
             }
           }
-          
+
           .imgGroup {
             position: relative;
             display: grid;
             place-items: center;
             gap: 0.5rem;
 
-            >img{
+            > img {
               height: 170px;
-                z-index: 3;
+              z-index: 3;
             }
 
             .circle {
@@ -562,7 +565,7 @@ export default {
             background-size: 100% 100%;
           }
         }
-        
+
         .recommendName {
           color: #1e1e1e;
           text-align: center;
@@ -586,7 +589,7 @@ export default {
             font-size: 1.5rem;
             font-weight: 600;
             line-height: 1.2;
-            .pricePeriod{
+            .pricePeriod {
               font-size: 1.125rem;
               font-weight: normal;
             }
@@ -604,12 +607,12 @@ export default {
           background-color: transparent;
           font-size: 18px;
           letter-spacing: 0.09px;
-          transition: all .2s ease;
-          &:hover{
+          transition: all 0.2s ease;
+          &:hover {
             background-color: $raphael-green-400;
             color: #fff;
           }
-        }        
+        }
 
         .featureTitle {
           color: #1e1e1e;

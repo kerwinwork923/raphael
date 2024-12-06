@@ -251,12 +251,8 @@ export default {
     //   window.location.href = "/vital/scan.html";
     // };
 
-    const clearFormCookie = (cookieName) => {
-      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-    };
-
     const goHRVHistory = async () => {
-      clearFormCookie("form");
+      localStorage.removeItem("form");
       router.push("/HRVHistory");
     };
 
@@ -305,7 +301,7 @@ export default {
 
       .imgGroup {
         width: 70px;
-        &>img{
+        & > img {
           width: 100%;
           height: 100%;
         }
