@@ -25,6 +25,9 @@ export default defineNuxtConfig({
   ],
   pwa: {
     registerType: "autoUpdate",
+    workbox: {
+      cleanupOutdatedCaches: true, // 自動清除舊緩存
+    },
     manifest: {
       name: "NeuroPlus神經調節家",
       id: "/",
