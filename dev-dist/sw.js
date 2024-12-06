@@ -87,4 +87,20 @@ define(['./workbox-54d0af47'], (function (workbox) { 'use strict';
   }));
 
 }));
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cache) => {
+          if (cache !== '新緩存名稱') {
+            console.log(`刪除舊緩存: ${cache}`);
+            return caches.delete(cache);
+          }
+        })
+      );
+    })
+  );
+});
+
 //# sourceMappingURL=sw.js.map
