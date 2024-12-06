@@ -275,6 +275,13 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
       const { MID, Token, MAID, Mobile } = localData
         ? JSON.parse(localData)
         : {};
+
+      // 如果 sortedByScore 不为空，直接返回，不执行后续逻辑
+      if (this.sortedByScore.length > 0) {
+        console.log("sortedByScore 已有值，跳过 API 调用");
+        return;
+      }
+
       try {
         const response1 = await axios.post(
           "https://23700999.com:8081/HMA/API_ANSFirstDetail.jsp",
@@ -286,13 +293,15 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
             AID: "",
           }
         );
+
         if (response1.status === 200) {
           //Pinia取得歷史紀錄
           this.History = response1.data?.History;
-          if (response1.data.AID != "") {
+          if (response1.data.AID !== "") {
             this.theLatestHistory = response1.data;
             this.theLatestData = response1.data;
-            //假如有兩筆
+
+            // 假如有两笔记录
             if (response1.data.History.length > 0) {
               this.theLatestHistoryPre = response1.data.History[0];
               const response2 = await axios.post(
@@ -308,12 +317,11 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
 
               this.theLatestDataPreData = response2.data;
             }
+
             await this.checkTestDate();
             await this.API_API_ANSSecond();
-          }
-
-          //只有一個紀錄theLatestData
-          else if (response1.data.History.length > 0) {
+          } else if (response1.data.History.length > 0) {
+            // 只有一个记录
             this.theLatestHistory = response1.data.History[0];
             const response2 = await axios.post(
               "https://23700999.com:8081/HMA/API_ANSFirstDetail.jsp",
@@ -454,7 +462,6 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         if (this.currentStep < this.totalStep) {
           this.currentStep += 1;
         } else {
-      
           const itemsAboveZero = this.weeklyQA.filter((q) => q.selectScore > 0);
           if (itemsAboveZero.length < 3) {
             alert("選項項目不足，請至少選擇3題");
