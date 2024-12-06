@@ -541,27 +541,25 @@ export default {
   background-color: rgba(246, 246, 246, 1);
   min-height: 100vh;
   width: 100%;
-  padding-bottom: 7rem;
   overflow-x: hidden;
-  padding: 0 5%;
+  padding: 0 1rem;
   position: relative;
   padding-bottom: 6rem;
 
   .usageInfoGroup {
     display: flex;
-
-    gap: 5%;
+    gap: 0.75rem;
     overflow-x: auto;
     width: max-content;
     width: 100%;
-    margin-top: 1rem;
+    margin-top: 0.75rem;
 
     .usageInfoCard {
       background-color: #fff;
       padding: 12px;
       border-radius: 12px;
-      width: 90%;
       flex-shrink: 0;
+      max-width: 324px;
       color: #666;
       font-size: 18px;
       font-weight: 400;
@@ -576,8 +574,11 @@ export default {
       &:nth-child(3) {
         border-left: 2px solid #65558f;
       }
+      h3{
+        margin-bottom: 0.75rem;
+      }
       h4 {
-        margin-top: 0.35rem;
+        margin-top: 0.5rem;
       }
       .greenLight {
         color: $raphael-green-400;
@@ -595,13 +596,15 @@ export default {
         font-weight: 400;
         letter-spacing: 0.09px;
         margin-top: 0.5rem;
-        line-height: 1.15;
+        line-height: 29.1px;
       }
     }
   }
   .usageRecord {
     background-color: #fff;
-    margin-top: 1rem;
+    margin-top: 0.75rem;
+    border-radius: 0.75rem;
+    padding: 0.75rem;
     .usageRecordTitleGroup {
       display: flex;
       justify-content: space-around;
@@ -609,7 +612,6 @@ export default {
         color: #ddd;
         font-size: 24px;
         letter-spacing: 0.5px;
-        margin-top: 1rem;
         transition: 0.3s ease all;
       }
       .active {
@@ -623,7 +625,7 @@ export default {
       min-height: 30vh;
       .notDetectData {
         position: absolute;
-        z-index: 11;
+        z-index: 1;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
@@ -878,7 +880,7 @@ export default {
     z-index: 99;
     display: flex;
     justify-content: center;
-    padding: 24px 5%;
+    padding: 1rem 1rem 2.25rem 1rem;
     gap: 16px;
     button {
       width: 50%;

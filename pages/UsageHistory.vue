@@ -309,14 +309,18 @@ export default {
 </script>
 
 <style lang="scss">
+.titleMenu{
+  &>div{
+    left: 1rem;
+  }
+}
 .usageHistoryWrap {
   background-color: rgba(246, 246, 246, 1);
   min-height: 100vh;
   width: 100%;
+  padding: 0 1rem;
   padding-bottom: 100px;
   .productWrap {
-    max-width: 90%;
-    margin: 0 auto;
     .yourProductTitle {
       color: #1e1e1e;
       font-size: 20px;
@@ -639,6 +643,9 @@ export default {
 .optionWrap {
   position: fixed;
   bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
   width: 100%;
   padding: 1rem 1rem 2.25rem 1rem;
   background-color: #f6f6f6;

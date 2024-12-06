@@ -123,7 +123,7 @@ const progressStyle = computed(() => {
   return {
     background: `conic-gradient(
         #74BC1F 0% ${progress}%, 
-        #e0e0e0 ${progress}% 100%
+        #ffffff ${progress}% 100%
       )`,
     transition: "background 0.5s ease-out", // 確保平滑過渡
   };
@@ -391,30 +391,28 @@ const buttonStyle = computed(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 0.5rem;
   background-color: rgb(246, 246, 246);
 }
 
 .progress-border {
-  width: 150px;
-  height: 150px;
+  width: 210px;
+  height: 210px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.2) inset;
 }
 
 .progress-border .timeDot {
   position: absolute;
-  width: 100%;
-  height: 100%;
-  transform: scale(0.9);
 }
 
 .content {
-  width: 120px;
-  height: 120px;
+  width: 190px;
+  height: 190px;
   border-radius: 50%;
   background-color: white;
   display: flex;
