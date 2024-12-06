@@ -7,7 +7,10 @@
         <!-- 單件產品展示 -->
         <div class="haveGroup" v-if="purchasedProducts.length === 1">
           <div class="haveIcon">
-            <img src="/assets/imgs/haveCheck.svg" alt="checked icon" />
+            <img
+              :src="selectedProductIndex === 0 ? checkedIcon : uncheckedIcon"
+              alt="checked icon"
+            />
           </div>
           <div class="haveProduct">
             <div class="imgGroup">
@@ -36,9 +39,7 @@
             <div class="haveIcon">
               <img
                 :src="
-                  selectedProductIndex === index
-                    ? '/assets/imgs/haveCheck.svg'
-                    : '/assets/imgs/usageUnCheck.svg'
+                  selectedProductIndex === index ? checkedIcon : uncheckedIcon
                 "
                 :alt="
                   selectedProductIndex === index
@@ -54,7 +55,7 @@
               <img
                 v-if="shouldShowRobot(product)"
                 class="robotImg"
-                src="/assets/imgs/clothRobot.png"
+                 src="/assets/imgs/clothRobot.png"
                 alt="robot image"
               />
             </div>
@@ -78,7 +79,7 @@
             <img
               v-if="shouldShowRobot(recommendation.name)"
               class="robotImg"
-              src="/assets/imgs/clothRobot.png"
+              :src="robotImage"
               alt="robot image"
             />
           </div>
@@ -118,6 +119,14 @@
 <script>
 import { ref, onMounted } from "vue";
 import axios from "axios";
+
+import checkedIcon from "@/assets/imgs/haveCheck.svg";
+import uncheckedIcon from "@/assets/imgs/usageUnCheck.svg";
+import redLightClothes from "@/assets/imgs/redLightClothes.png";
+import normalClothes from "@/assets/imgs/normalClothes.png";
+import redLightClothes2 from "@/assets/imgs/redLightClothes2.png";
+
+import robotImage from "@/assets/imgs/clothRobot.png";
 
 export default {
   setup() {
@@ -238,14 +247,13 @@ export default {
 
     const getImage = (productName) => {
       const productImages = {
-        紅光版: "redLightClothes.png",
-        保健版: "normalClothes.png",
-        調節衣: "redLightClothes2.png",
-        居家治療儀: "redLightClothes2.png",
+        紅光版: redLightClothes,
+        保健版: normalClothes,
+        調節衣: redLightClothes2,
+        居家治療儀: redLightClothes2,
       };
-      return `${basePath}${productImages[productName] || "placeholder.png"}`;
+      return productImages[productName] ;
     };
-
     const shouldShowRobot = (productName) => {
       return productName === "居家治療儀";
     };
@@ -293,6 +301,8 @@ export default {
       selectProduct,
       goUse,
       contactSupport,
+      checkedIcon,
+      uncheckedIcon
     };
   },
 };
@@ -413,12 +423,10 @@ export default {
           z-index: 3;
         }
         .haveIcon {
-          background-color: #fff;
-
           width: 2px;
           height: 24px;
-          top: 0%;
-
+          top: 2%;
+          margin-bottom: .5rem;
           img {
             width: 24px;
             z-index: 9;
@@ -489,7 +497,7 @@ export default {
           font-style: normal;
           font-weight: 700;
           letter-spacing: 0.12px;
-          margin-top: 0.75rem;
+          margin-top: 1.5rem;
         }
         .productSubTitle {
           color: #1e1e1e;
