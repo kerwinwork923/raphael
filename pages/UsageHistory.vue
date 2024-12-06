@@ -279,7 +279,7 @@ export default {
     };
 
     const contactSupport = () => {
-      window.location.href = "tel:+1234567890"; // 修改為你的電話號碼
+      window.location.href = "0800000760"; 
     };
 
     onMounted(async () => {
