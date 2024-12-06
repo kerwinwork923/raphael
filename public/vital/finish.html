@@ -571,17 +571,17 @@
   const userData = JSON.parse(localStorage.getItem("userData"));
   const currentResult = JSON.parse(sessionStorage.getItem("result"));
   const userHRV = JSON.parse(sessionStorage.getItem("rHRV"));
-  console.log("USERHRV=",userHRV);
+  console.log("USERHRV=", userHRV);
   let getHF = [];
   let getLF = [];
   let getSDNN = [];
   let getSDNNI = [];
   userHRV.forEach((data) => {
-      let [a1, b1, c1, d1] = data;
-      getHF.push(a1);
-      getLF.push(b1);
-      getSDNN.push(c1);
-      getSDNNI.push(d1);
+    let [a1, b1, c1, d1] = data;
+    getHF.push(a1);
+    getLF.push(b1);
+    getSDNN.push(c1);
+    getSDNNI.push(d1);
   });
   console.log("ayHF=", getHF);
   console.log("ayLF=", getLF);
@@ -695,11 +695,11 @@
             Selage: String(Math.floor(upba2)),
             ba2: String(Math.floor(upba2)),
             ba4: String(Math.floor(upba4)),
-            HRVCalTime: userData.HRVCalTime || "",
-            ayHF:String(getHF),
-            ayLF:String(getLF),
-            aySDNN:String(getSDNN),
-            aySDNNI:String(getSDNNI),
+            HRVCalTime: String(userData.HRVCalTime) || "",
+            ayHF: String(getHF),
+            ayLF: String(getLF),
+            aySDNN: String(getSDNN),
+            aySDNNI: String(getSDNNI),
           }),
         }
       );
