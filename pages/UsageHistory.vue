@@ -111,7 +111,7 @@
       </div>
     </div>
     <div class="optionWrap">
-      <button @click="goUse" v-if="purchasedProducts.length > 1">
+      <button @click="goUse" v-if="purchasedProducts.length >= 1">
         開始使用
       </button>
     </div>
