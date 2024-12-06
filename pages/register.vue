@@ -511,6 +511,7 @@ export default {
             Sex: sex.value,
             Birthday: birthday,
             DSPR: DSPR.value || "",
+            HRVCalTime: "1",
           }
         );
 
