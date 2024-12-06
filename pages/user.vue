@@ -371,9 +371,9 @@ export default {
 
     .itemsGroup {
       display: grid;
-      margin-top: 1.25rem;
+      margin-top: 0.75rem;
       grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
+      gap: 0.75rem;
       //暫時的樣式
       grid-template-rows: repeat(3, 84px);
 
