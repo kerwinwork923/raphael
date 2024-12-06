@@ -386,46 +386,39 @@
     <script src="js/finish.js?v=1.0.2"></script>
   </body>
 </html>
-
 <script>
   document.addEventListener("DOMContentLoaded", () => {
-    // Function to get value from localStorage
     const getLocalStorageValue = (key) => {
-      return localStorage.getItem(key);
+      return localStorage.getItem(key) || "";
     };
 
-    // 获取需要切换显示的元素
     const subBtnGroup = document.querySelector(".subBtnGroup");
     const subBtnGroup2 = document.querySelector(".subBtnGroup2");
     const goToUsageLink = document.querySelector(".goToUsage");
 
-    // 获取 localStorage 名称为 "form" 的值
+    // 獲取當前產品名稱
     const formValue = getLocalStorageValue("form");
 
-    // 判别显示逻辑
     if (formValue) {
-      // 如果 localStorage 存在且有值
       if (goToUsageLink) {
-        goToUsageLink.href = `/usage/${formValue}`; // 动态设置 href
+        goToUsageLink.href = `/usage/${formValue}`;
       }
       if (subBtnGroup) {
-        subBtnGroup.style.display = "none"; // 隐藏第一组按钮
+        subBtnGroup.style.display = "none";
       }
       if (subBtnGroup2) {
-        subBtnGroup2.style.display = "flex"; // 显示第二组按钮
+        subBtnGroup2.style.display = "flex";
       }
     } else {
-      // 如果 localStorage 不存在或没有值
       if (subBtnGroup) {
-        subBtnGroup.style.display = "flex"; // 显示第一组按钮
+        subBtnGroup.style.display = "flex";
       }
       if (subBtnGroup2) {
-        subBtnGroup2.style.display = "none"; // 隐藏第二组按钮
+        subBtnGroup2.style.display = "none";
       }
     }
   });
 </script>
-
 <script>
   let upbioage = 0;
 
