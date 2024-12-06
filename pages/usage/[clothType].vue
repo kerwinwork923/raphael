@@ -6,6 +6,7 @@
       :totalTime="30"
       :product-name="productName"
       :startBtnActive="startBtnActive"
+      :redirectPath="{ default: '/usageHistory', hrv: '/vital/scan.html' }"
       :showMessageProp="showMessage"
     />
     <div class="usageInfoGroup" v-if="usageCardState === '紅光版'">
@@ -346,7 +347,12 @@ export default {
     };
 
     const goNext = () => {
-      router.push("/usageHistory");
+      // 根據 productName 決定跳轉路徑
+      if (productName === "HRV") {
+        router.push("/vital/scan.html"); // HRV 專屬路徑
+      } else {
+        router.push("/usageHistory"); // 默認返回使用紀錄頁面
+      }
     };
 
     const localData = localStorage.getItem("userData");

@@ -170,7 +170,7 @@ export default {
     const store = useCommon();
     const months = Array.from({ length: 12 }, (_, i) => i + 1).reverse();
     const loading = ref(false);
-    
+
     useUserData();
 
     const API_HRV2 = async () => {
@@ -316,6 +316,7 @@ export default {
     };
 
     const openHRVAlert = async () => {
+      localStorage.removeItem("form");
       store.showHRVAlert = true;
     };
 
