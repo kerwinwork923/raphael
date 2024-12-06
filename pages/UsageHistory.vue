@@ -37,8 +37,8 @@
               <img
                 :src="
                   selectedProductIndex === index
-                    ? '/_nuxt/assets/imgs/haveCheck.svg'
-                    : '/_nuxt/assets/imgs/usageUnCheck.svg'
+                    ? '/assets/imgs/haveCheck.svg'
+                    : '/assets/imgs/usageUnCheck.svg'
                 "
                 :alt="
                   selectedProductIndex === index
@@ -54,7 +54,7 @@
               <img
                 v-if="shouldShowRobot(product)"
                 class="robotImg"
-                src="/_nuxt/assets/imgs/clothRobot.png"
+                src="/assets/imgs/clothRobot.png"
                 alt="robot image"
               />
             </div>
@@ -78,7 +78,7 @@
             <img
               v-if="shouldShowRobot(recommendation.name)"
               class="robotImg"
-              src="/_nuxt/assets/imgs/clothRobot.png"
+              src="/assets/imgs/clothRobot.png"
               alt="robot image"
             />
           </div>
@@ -156,7 +156,7 @@ export default {
       居家治療儀: "redLightClothes2.png",
     };
 
-    const basePath = "/_nuxt/assets/imgs/";
+    const basePath = "/assets/imgs/";
 
     const fetchProducts = async () => {
       try {
