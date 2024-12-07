@@ -173,6 +173,7 @@ export default defineComponent({
     height: 100%;
     justify-content: space-between;
     align-items: center;
+    font-size: 0.875rem;
 
     .number {
       background-color: #b3b3b3;

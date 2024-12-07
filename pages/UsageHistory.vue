@@ -316,7 +316,7 @@ export default {
   min-height: 100vh;
   width: 100%;
   padding: 0 1rem;
-  padding-bottom: 100px;
+  padding-bottom: 136px;
   .productWrap {
     .yourProductTitle {
       color: #1e1e1e;
@@ -601,7 +601,7 @@ export default {
           cursor: pointer;
           width: 100%;
           margin-top: 1rem;
-          padding: 12px;
+          padding: 8px;
           border-radius: 8px;
           background-color: transparent;
           font-size: 18px;
@@ -648,7 +648,7 @@ export default {
   right: 0;
   margin: auto;
   width: 100%;
-  padding: 1rem 1rem 2.25rem 1rem;
+  padding: 1rem 1rem 4.25rem 1rem;
   background-color: #f6f6f6;
   z-index: 99;
 
@@ -657,7 +657,7 @@ export default {
     background-color: $raphael-green-400;
     color: #fff;
     border: none;
-    padding: 12px;
+    padding: 8px;
     border-radius: 8px;
     color: #fff;
     font-size: 18px;

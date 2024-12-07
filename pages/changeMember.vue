@@ -163,10 +163,10 @@ export default {
     border-radius: 8px;
     color: #fff;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 1.125rem;
     letter-spacing: 0.5px;
     margin-top: 32px;
-    padding: 12px;
+    padding: 8px;
   }
 }
 </style>

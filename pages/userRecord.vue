@@ -87,7 +87,7 @@ export default {
   .userRecoreWrap{
     max-width: 768px;
     width: 100%;
-    padding: 0.75rem 0;
+    padding-top: 0.75rem;
   }
 }
 
@@ -101,11 +101,11 @@ export default {
 .backToUserBtn {
   background-color: $raphael-green-400;
   color: #fff;
-  padding: 12px;
+  padding: 8px;
   width: 100%;
   border-radius: 8px;
   border: none;
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 400;
   letter-spacing: 0.5px;
   transition: 0.25s ease;

@@ -164,7 +164,7 @@ export default {
   min-height: 100vh;
   width: 100%;
   padding: 0 1rem;
-  padding-bottom: 100px;
+  padding-bottom: 136px;
   &>h3{
     font-size: 20px;
   }
@@ -203,7 +203,7 @@ export default {
   display: grid;
   grid-auto-flow: column;
   gap: 0.75rem;
-  padding: 1rem 1rem 2.25rem 1rem;
+  padding: 1rem 1rem 4.25rem 1rem;
   button {
     background-color: $raphael-green-400;
     color: #fff;

@@ -368,6 +368,6 @@ export default {
   line-height: 100%;
   letter-spacing: 0.09px;
   margin-top: 32px;
-  padding: 12px;
+  padding: 8px;
 }
 </style>

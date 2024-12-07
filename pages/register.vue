@@ -758,7 +758,7 @@ export default {
     .infoSendBtn {
       background-color: $raphael-green-400;
       color: #fff;
-      padding: 12px;
+      padding: 8px;
       width: 100%;
       border-radius: 8px;
       border: none;

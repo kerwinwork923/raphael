@@ -501,7 +501,7 @@ export default {
     border: none;
     display: flex;
     margin-top: 24px;
-    padding: 12px;
+    padding: 8px;
     width: 100%;
     border-radius: 8px;
     color: #fff;
@@ -509,7 +509,7 @@ export default {
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 1.125rem;
     letter-spacing: 0.5px;
     font-weight: 400;
 
