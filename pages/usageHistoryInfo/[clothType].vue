@@ -12,6 +12,7 @@
       controls
       autoplay
       muted
+      playsinline
     ></video>
     <ul class="usageHistoryInfoList">
       <li v-for="(item, key) in usageHistoryInfoList" :key="key">
