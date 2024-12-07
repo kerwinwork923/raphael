@@ -31,7 +31,6 @@
         </div>
 
         <!-- 多件產品展示 -->
-        <!-- <div class="haveGroup2" v-if="purchasedProducts.length > 1"> -->
         <div class="haveGroup2" v-if="purchasedProducts.length > 1">
           <div
             class="haveProduct"
@@ -122,8 +121,8 @@
 import { ref, onMounted } from "vue";
 import axios from "axios";
 
-import checkedIcon from "@/assets/imgs/haveCheck.svg";
-import uncheckedIcon from "@/assets/imgs/usageUnCheck.svg";
+import checkedIcon from "@/assets/imgs/haveCheck.png";
+import uncheckedIcon from "@/assets/imgs/usageUnCheck.png";
 import redLightClothes from "@/assets/imgs/redLightClothes.png";
 import normalClothes from "@/assets/imgs/normalClothes.png";
 import redLightClothes2 from "@/assets/imgs/redLightClothes2.png";
@@ -308,11 +307,9 @@ export default {
 };
 </script>
 
-<style lang="scss">
-.titleMenu{
-  &>div{
-    left: 1rem;
-  }
+<style lang="scss" scoped>
+.titleMenu:deep(div){
+  left: 1rem;
 }
 .usageHistoryWrap {
   background-color: rgba(246, 246, 246, 1);
@@ -331,10 +328,12 @@ export default {
     .haveProductWrap {
       margin-top: 0.75rem;
       .haveGroup {
-        display: gri;
+        display: grid;
         place-items: center;
         gap: 0.75rem;
-
+        .haveIcon{
+          width: 24px;
+        }
         .haveProduct {
           display: grid;
           place-items: center;
@@ -421,8 +420,7 @@ export default {
           gap: 0.5rem;
 
           .haveIcon {
-            img {
-            }
+            width: 24px;
           }
 
           .imgGroup {
@@ -624,15 +622,18 @@ export default {
           margin-top: 1rem;
         }
         .featureListGroup {
-          list-style-type: disc;
           margin-top: 0.5rem;
-          padding-left: 1.75rem;
+          counter-reset: list-counter;
           li {
             color: #1e1e1e;
             font-size: 18px;
             font-weight: 400;
             line-height: 29.124px;
             letter-spacing: 0.09px;
+            counter-increment: list-counter;
+            &::before {
+                content: "•"; 
+            }
           }
         }
       }

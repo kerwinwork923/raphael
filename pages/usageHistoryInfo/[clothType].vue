@@ -11,6 +11,7 @@
       src="/assets/video/useInfo.mp4"
       controls
       autoplay
+      muted
     ></video>
     <ul class="usageHistoryInfoList">
       <li v-for="(item, key) in usageHistoryInfoList" :key="key">
@@ -47,7 +48,7 @@
     </ul>
   </div>
   <div class="usageHistoryInfoBtnGroup">
-    <button class="preBtn" @click="goPre">上一步</button>
+    <!-- <button class="preBtn" @click="goPre">上一步</button> -->
     <button class="nextBtn" @click="goNext">{{ nextText }}</button>
   </div>
 </template>
@@ -153,12 +154,19 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+.titleMenu:deep(div){
+  left: 1rem;
+}
 .usageHistoryInfoWrap {
   background-color: rgba(246, 246, 246, 1);
   min-height: 100vh;
   width: 100%;
-  padding: 0 5% 7rem;
+  padding: 0 1rem;
+  padding-bottom: 100px;
+  &>h3{
+    font-size: 20px;
+  }
   .usageHistoryVideo {
     width: 100%;
     height: auto;
@@ -167,17 +175,20 @@ export default {
     margin-top: 0.75rem;
   }
   .usageHistoryInfoList {
-    list-style: desc;
-    margin-left: 1.5rem;
-    margin-top: 1rem;
+    counter-reset: list-counter;
+    margin-top: 0.75rem;
     li {
-      line-height: 1.5;
+      display: flex;
+      line-height: 29.1px;
       color: #666;
-      font-family: "Noto Sans";
       font-size: 18px;
       font-style: normal;
       font-weight: 400;
       letter-spacing: 0.09px;
+      counter-increment: list-counter;
+      &::before {
+        content: counter(list-counter) ". "; 
+      }
     }
   }
 }
@@ -188,11 +199,11 @@ export default {
   width: 100%;
   background-color: #f6f6f6;
   z-index: 99;
-  display: flex;
-  gap: 10px;
-  padding: 24px 5%;
+  display: grid;
+  grid-auto-flow: column;
+  gap: 0.75rem;
+  padding: 1rem 1rem 2.25rem 1rem;
   button {
-    width: 50%;
     background-color: $raphael-green-400;
     color: #fff;
     border: none;
@@ -221,14 +232,19 @@ export default {
 }
 .precautionsList {
   list-style-type: disc;
-  margin-left: 1.5rem;
   margin-top: 0.75rem;
+  counter-reset: list-counter;
 
   li {
+    display: flex;
     color: #ec4f4f;
     font-size: 18px;
-    line-height: 1.25;
+    line-height: 29.1px;
     letter-spacing: 0.09px;
+    counter-increment: list-counter;
+    &::before {
+        content: "•"; 
+    }
   }
 }
 </style>

@@ -7,7 +7,7 @@
     <div class="userGroup">
       <div class="userInfo">
         <div class="imgGroup">
-          <img src="../assets/imgs/sticker.svg" alt="" />
+          <img src="../assets/imgs/sticker.png" alt="" />
         </div>
         <div class="infoTextGroup">
           <div class="topText">
@@ -423,7 +423,6 @@ export default {
       }
       .item2 {
         background-color: $raphael-purple-200;
-        opacity: 1;
         cursor: pointer;
         &:hover {
           filter: brightness(0.95);
@@ -431,7 +430,6 @@ export default {
       }
       .item3 {
         background-color: $raphael-cyan-400;
-        opacity: 1;
         cursor: pointer;
         &:hover {
           filter: brightness(0.95);
@@ -439,12 +437,24 @@ export default {
       }
       .item4 {
         background-color: $raphael-orange-400;
+        cursor: pointer;
+        &:hover {
+          filter: brightness(0.95);
+        }
       }
       .item5 {
         background-color: $raphael-brown-400;
+        cursor: pointer;
+        &:hover {
+          filter: brightness(0.95);
+        }
       }
       .item6 {
         background-color: $raphael-gray-300;
+        cursor: pointer;
+        &:hover {
+          filter: brightness(0.95);
+        }
       }
       //暫時隱藏
       .item1,

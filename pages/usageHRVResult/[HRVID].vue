@@ -314,7 +314,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .usageHRVResultWrap {
   background-color: #f6f6f6;
   padding: 1rem 5% 7rem;

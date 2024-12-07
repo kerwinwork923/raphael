@@ -72,7 +72,7 @@ export default {
   padding: 0.75rem 0;
   // max-width: 768px;
   top: 0;
-  z-index: 10;
+  z-index: 6;
 
   & > div {
     position: absolute;
