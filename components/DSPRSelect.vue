@@ -48,7 +48,7 @@
 <script>
 import { ref, computed } from "vue";
 import { useCommon } from "@/stores/common";
-
+import axios from "axios";
 export default {
   setup() {
     const store = useCommon();
