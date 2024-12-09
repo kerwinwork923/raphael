@@ -278,7 +278,7 @@ export default {
     };
 
     const contactSupport = () => {
-      window.location.href = "0800000760"; 
+      window.location.href = "tel:0800000760"; 
     };
 
     onMounted(async () => {
