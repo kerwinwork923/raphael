@@ -7,10 +7,11 @@ export const useCommon = defineStore('common', () => {
 
   // 全局错误状态
   const error = ref(null);
-
   const showDSPRSelect = ref(false);
   const showHRVAlert = ref(false);
 
+  const detectUID = ref("");
+  const detectFlag = ref("")
   // 设置 loading 状态
   const setLoading = (status) => {
     isLoading.value = status;
@@ -30,10 +31,8 @@ export const useCommon = defineStore('common', () => {
   };
 
   const closeHRVAlert = () => {
-
     alert(showHRVAlert.value)
     showHRVAlert.value = false;
-   
   };
 
   return {
@@ -44,6 +43,8 @@ export const useCommon = defineStore('common', () => {
     setError,
     showDSPRSelect,
     showHRVAlert,
-    closeHRVAlert
+    closeHRVAlert,
+    detectUID,
+    detectFlag
   };
 });

@@ -122,7 +122,15 @@ export default {
       };
 
       sessionStorage.setItem("data", JSON.stringify(convertedData));
-      window.location.href = "/vital/scan.html";
+      const detectUID = store.detectUID;
+      const detectFlag = store.detectFlag;
+      let redirectUrl = "/vital/scan.html";
+
+      if ( detectFlag) {
+        redirectUrl += `?UID=${detectUID}&flag=${detectFlag}`;
+      }
+
+      window.location.href = redirectUrl;
     };
 
     return {

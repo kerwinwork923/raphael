@@ -82,8 +82,10 @@ export default {
     };
 
     const goNext = () => {
-      localStorage.setItem("form", productName); // 直接存储当前产品名称
-      store.showHRVAlert = true; // 显示 HRV 警告
+      localStorage.setItem("form", productName);
+      store.detectFlag = "1";
+      store.detectUID = ""
+      store.showHRVAlert = true;
     };
 
     const localData = localStorage.getItem("userData");
@@ -156,7 +158,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.titleMenu:deep(div){
+.titleMenu:deep(div) {
   left: 1rem;
 }
 .usageHistoryInfoWrap {
@@ -165,7 +167,7 @@ export default {
   width: 100%;
   padding: 0 1rem;
   padding-bottom: 136px;
-  &>h3{
+  & > h3 {
     font-size: 20px;
   }
   .usageHistoryVideo {
@@ -188,7 +190,7 @@ export default {
       letter-spacing: 0.09px;
       counter-increment: list-counter;
       &::before {
-        content: counter(list-counter) ". "; 
+        content: counter(list-counter) ". ";
       }
     }
   }
@@ -244,7 +246,7 @@ export default {
     letter-spacing: 0.09px;
     counter-increment: list-counter;
     &::before {
-        content: "•"; 
+      content: "•";
     }
   }
 }

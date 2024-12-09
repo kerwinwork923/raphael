@@ -97,7 +97,17 @@ export default {
             sessionStorage.setItem("data", JSON.stringify(convertedData));
             localStorage.setItem("userData", JSON.stringify(userData));
             closeComponent();
-            window.location.href = "/vital/scan.html";
+
+            // 從 Pinia store 獲取 detectUID 和 detectFlag
+            const detectUID = store.detectUID;
+            const detectFlag = store.detectFlag;
+            let redirectUrl = "/vital/scan.html";
+            if (detectFlag) {
+              
+            }
+            redirectUrl += `?UID=${detectUID}&flag=${detectFlag}`;
+
+            window.location.href = redirectUrl;
           } else {
             alert("伺服器回應失敗，請稍後再試。");
           }
@@ -142,9 +152,6 @@ export default {
       const ageDate = new Date(ageDifMs);
       return Math.abs(ageDate.getUTCFullYear() - 1970);
     };
-
-    const localData = localStorage.getItem("userData");
-    console.log(localData);
 
     return {
       store,
