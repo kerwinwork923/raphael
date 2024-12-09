@@ -3,8 +3,7 @@
     <h1>結果分析</h1>
     <div class="resultChartGroup">
       <h2>生理年齡</h2>
-      <ResultChart :bioageData="listBioage" />
-     
+      <ResultChart v-if="listBioage.length > 0" :bioageData="listBioage" />
     </div>
     <div class="BAGroup">
       <div class="BACard">
@@ -15,7 +14,9 @@
         <div class="BAContent">
           <div class="BA">
             <div class="subTitle">使用前</div>
-            <div class="value">35~40</div>
+            <div class="value">
+              {{ HRVBeforeData?.bioage - 5 }}~{{ HRVBeforeData?.bioage }}
+            </div>
             <div class="unit">years old</div>
           </div>
           <svg
@@ -32,7 +33,9 @@
           </svg>
           <div class="BA">
             <div class="subTitle">使用後</div>
-            <div class="value afterValue">40~50</div>
+            <div class="value afterValue">
+              {{ HRVAfterData?.bioage - 5 }}~{{ HRVAfterData?.bioage }}
+            </div>
             <div class="unit">years old</div>
           </div>
         </div>
@@ -46,7 +49,9 @@
         <div class="BAContent">
           <div class="BA">
             <div class="subTitle">使用前</div>
-            <div class="value">35</div>
+            <div class="value">
+              {{ Math.round(HRVBeforeData?.HRV * 10) / 10 }}
+            </div>
             <div class="unit">ms</div>
           </div>
           <svg
@@ -63,7 +68,9 @@
           </svg>
           <div class="BA">
             <div class="subTitle">使用後</div>
-            <div class="value afterValue">50</div>
+            <div class="value afterValue">
+              {{ Math.round(HRVAfterData?.HRV * 10) / 10 }}
+            </div>
             <div class="unit">ms</div>
           </div>
         </div>
@@ -77,7 +84,7 @@
         <div class="BAContent">
           <div class="BA">
             <div class="subTitle">使用前</div>
-            <div class="value">30</div>
+            <div class="value">{{ HRVBeforeData?.HR }}</div>
             <div class="unit">bpm</div>
           </div>
           <svg
@@ -94,7 +101,7 @@
           </svg>
           <div class="BA">
             <div class="subTitle">使用後</div>
-            <div class="value afterValue">50</div>
+            <div class="value afterValue">{{ HRVAfterData?.HR }}</div>
             <div class="unit">bpm</div>
           </div>
         </div>
@@ -108,7 +115,9 @@
         <div class="BAContent">
           <div class="BA">
             <div class="subTitle">使用前</div>
-            <div class="value">130/85</div>
+            <div class="value">
+              {{ HRVBeforeData?.SBP }}/{{ HRVBeforeData?.DBP }}
+            </div>
             <div class="unit">mmHg</div>
           </div>
           <svg
@@ -125,7 +134,9 @@
           </svg>
           <div class="BA">
             <div class="subTitle">使用後</div>
-            <div class="value afterValue">134/85</div>
+            <div class="value afterValue">
+              {{ HRVAfterData?.SBP }}/{{ HRVAfterData?.DBP }}
+            </div>
             <div class="unit">mmHg</div>
           </div>
         </div>
@@ -139,7 +150,7 @@
         <div class="BAContent">
           <div class="BA">
             <div class="subTitle">使用前</div>
-            <div class="value">95</div>
+            <div class="value">{{ HRVBeforeData?.SPO2 }}</div>
             <div class="unit">SpO2%</div>
           </div>
           <svg
@@ -156,7 +167,7 @@
           </svg>
           <div class="BA">
             <div class="subTitle">使用後</div>
-            <div class="value afterValue">92</div>
+            <div class="value afterValue">{{ HRVAfterData?.SPO2 }}</div>
             <div class="unit">SpO2%</div>
           </div>
         </div>
@@ -170,7 +181,7 @@
         <div class="BAContent">
           <div class="BA">
             <div class="subTitle">使用前</div>
-            <div class="value">95</div>
+            <div class="value">{{ HRVBeforeData?.rr }}</div>
             <div class="unit">bpm</div>
           </div>
           <svg
@@ -187,7 +198,7 @@
           </svg>
           <div class="BA">
             <div class="subTitle">使用後</div>
-            <div class="value afterValue">92</div>
+            <div class="value afterValue">{{ HRVAfterData?.rr }}</div>
             <div class="unit">bpm</div>
           </div>
         </div>
@@ -201,8 +212,8 @@
         <div class="BAContent">
           <div class="BA">
             <div class="subTitle">使用前</div>
-            <div class="value">低</div>
-            <div class="unit">low</div>
+            <div class="value">{{ HRVBeforeData?.stress }}</div>
+            <div class="unit"></div>
           </div>
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -218,12 +229,13 @@
           </svg>
           <div class="BA">
             <div class="subTitle">使用後</div>
-            <div class="value afterValue">高</div>
-            <div class="unit">height</div>
+            <div class="value afterValue">{{ HRVAfterData?.stress }}</div>
+            <div class="unit"></div>
           </div>
         </div>
       </div>
     </div>
+
     <!-- <div class="SympatheticRatioGroup">
       <h3>交感/副交感比例</h3>
       <h4>使用前</h4>
@@ -233,7 +245,7 @@
     </div> -->
     <div class="healthAnalyse"></div>
     <div class="usageBtnGroup">
-      <button class="nextBtn" @click="goNext">返回產品頁面</button>
+      <button class="nextBtn" @click="goNext">返回</button>
     </div>
   </div>
 </template>
@@ -250,10 +262,9 @@ export default {
     const route = useRoute();
 
     const listBioage = ref([]);
-    const bioData = reactive({
-      BcBioage: "",
-      AfBioage: "",
-    });
+
+    const HRVBeforeData = ref(null);
+    const HRVAfterData = ref(null);
 
     const localData = localStorage.getItem("userData");
     const { MID, Token, MAID, Mobile, Name } = localData
@@ -284,16 +295,15 @@ export default {
               Token,
               MAID,
               Mobile,
-              UID, // 使用從路由獲取的 UID
+              UID,
             }),
           }
         );
         const data = await response.json();
-
+        HRVBeforeData.value = data.HRV2.BcUse;
+        HRVAfterData.value = data.HRV2.AfUse;
         if (data.Result === "OK") {
-          listBioage.value = data.HRV2.listBioage || [];
-          bioData.BcBioage = data.HRV2.BcUse.bioage || "N/A";
-          bioData.AfBioage = data.HRV2.AfUse.bioage || "N/A";
+          listBioage.value = (data.HRV2 && data.HRV2.listBioage) || [];
         } else {
           console.error("API Response Error", data);
         }
@@ -302,13 +312,19 @@ export default {
       }
     };
 
+    const goNext = () => {
+      window.history.back();
+    };
     onMounted(() => {
       API_HRV2UseAf_Compare();
     });
 
     return {
       listBioage,
-      bioData,
+
+      HRVBeforeData,
+      HRVAfterData,
+      goNext,
     };
   },
 };

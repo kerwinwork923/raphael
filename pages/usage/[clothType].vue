@@ -1,5 +1,7 @@
 <template>
   <RaphaelLoading v-if="loading" />
+  <HRVAlert />
+  <DSPRSelect />
   <div class="usageWrap">
     <TitleMenu Text="使用紀錄" :link="`back`" />
     <TimeRing
@@ -171,7 +173,7 @@
                 <p>{{ formatTimestamp3(item?.StartTime) }}</p>
               </div>
             </div>
-            <div class="pauseGroup">
+            <div class="pauseGroup"  v-if="item.Pause && item.Pause.length > 0">
               <img src="/assets/imgs/pause.svg" alt="" />
               <div class="actionContent">
                 <h4>暫停時間</h4>
@@ -261,6 +263,7 @@ import { formatTimestampMDH, formatTimestamp3 } from "~/fn/utils";
 import axios from "axios";
 import { ref, computed, onMounted } from "vue";
 import RaphaelLoading from "../components/RaphaelLoading";
+import { useCommon } from "../stores/common";
 export default {
   components: { RaphaelLoading, TitleMenu, TimeRing },
   components: {
@@ -274,6 +277,8 @@ export default {
     const validName = ["調節衣", "紅光版", "保健版", "居家治療儀"];
 
     const redirectToHRV = ref(false);
+
+    const store = useCommon();
 
     const handleCountdownComplete = async () => {
       redirectToHRV.value = true;
@@ -387,16 +392,42 @@ export default {
         if (newValue) {
           goNextText.value = "返回產品頁面";
         } else {
-          goNextText.value = "HRV检测";
+          goNextText.value = "HRV檢測";
         }
       },
       { immediate: true }
     );
+    console.log(useData[0]);
 
     const goNext = () => {
       if (!startBtnActive.value || redirectToHRV.value) {
-        window.location.href = "/vital/scan.html";
+        // 保存当前产品名称到 localStorage
+        localStorage.setItem("form", productName);
+
+        // 设置 detectFlag
+        store.detectFlag = "2";
+
+        // 确保最新记录存在，获取最新的 UID
+        const latestUID =
+          useData.value.length > 0 ? useData.value[0]?.UID : null;
+
+        // 检查是否有 UID
+        if (!latestUID) {
+          console.error("未找到最新的使用记录 UID，请检查 useData 数据！");
+          alert("无法获取最新的使用记录 UID，请稍后重试。");
+          return;
+        }
+
+        // 构造跳转 URL
+        const redirectURL = `/vital/scan.html?UID=${latestUID}&flag=2`;
+
+        // 输出日志以确认 URL
+        console.log("跳转 URL:", redirectURL);
+
+        // 跳转
+        window.location.href = redirectURL;
       } else {
+ 
         router.push("/usageHistory");
       }
     };
