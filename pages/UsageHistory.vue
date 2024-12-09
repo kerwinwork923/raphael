@@ -278,7 +278,7 @@ export default {
     };
 
     const contactSupport = () => {
-      window.location.href = "tel:0800000760"; 
+      window.location.href = "tel:0800000760";
     };
 
     onMounted(async () => {
@@ -308,7 +308,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.titleMenu:deep(div){
+.titleMenu:deep(div) {
   left: 1rem;
 }
 .usageHistoryWrap {
@@ -331,7 +331,7 @@ export default {
         display: grid;
         place-items: center;
         gap: 0.75rem;
-        .haveIcon{
+        .haveIcon {
           width: 24px;
         }
         .haveProduct {
@@ -513,6 +513,15 @@ export default {
 
     .recommendWrap {
       margin-top: 0.75rem;
+      .robotImg {
+        position: absolute;
+        width: 176px;
+        height: auto;
+        bottom: 0;
+        right: 0;
+        z-index: 3;
+      }
+
       .recommendDiv {
         width: 100%;
         background-color: #fff;
@@ -632,7 +641,7 @@ export default {
             letter-spacing: 0.09px;
             counter-increment: list-counter;
             &::before {
-                content: "•"; 
+              content: "•";
             }
           }
         }
