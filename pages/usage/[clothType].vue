@@ -276,7 +276,7 @@ export default {
 
     const handleCountdownComplete = () => {
       redirectToHRV.value = true;
-      goNextText.value = "HRV检测";
+      goNextText.value = "HRV檢測";
     };
 
     const goNextText = ref("");
@@ -376,9 +376,9 @@ export default {
 
     const goNext = () => {
       if (!startBtnActive.value || redirectToHRV.value) {
-        router.push("/vital/scan.html"); 
+        window.location.href = "/vital/scan.html";
       } else {
-        router.push("/usageHistory"); 
+        router.push("/usageHistory");
       }
     };
 
@@ -565,7 +565,7 @@ export default {
       filteredHRVData,
       filteredUsage,
       goNextText,
-      handleCountdownComplete
+      handleCountdownComplete,
     };
   },
 };
