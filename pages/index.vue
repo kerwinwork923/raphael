@@ -445,6 +445,16 @@ export default {
       });
     });
 
+    const localData = localStorage.getItem("userData");
+    const { MID, Token, MAID, Mobile, Name } = localData
+      ? JSON.parse(localData)
+      : {};
+
+    if (MID || Token || MAID || Mobile) {
+      router.push("/user");
+      return;
+    }
+
     return {
       verificationTitle,
       passwordVisible,
