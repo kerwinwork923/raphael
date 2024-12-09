@@ -57,7 +57,7 @@ export default {
       store.showDSPRSelect = false;
     };
 
-    const submitData = () => {
+    const submitData = async () => {
       const validDSPRValues = ["normal", "prehypertension", "hypertension"];
 
       if (selectedDSPR.value && validDSPRValues.includes(selectedDSPR.value)) {
@@ -83,11 +83,28 @@ export default {
           weight: parseInt(userData.Weight),
           time: parseInt(userData.HRVCalTime) || 2,
         };
-        sessionStorage.setItem("data", JSON.stringify(convertedData));
-        localStorage.setItem("userData", JSON.stringify(userData));
 
-        closeComponent();
-        window.location.href = "/vital/scan.html";
+        try {
+          // 呼叫 API 儲存資料
+          const response = await axios.post(
+            "https://23700999.com:8081/HMA/API_AA5.jsp",
+            {
+              ...userData,
+            }
+          );
+
+          if (response.status === 200) {
+            sessionStorage.setItem("data", JSON.stringify(convertedData));
+            localStorage.setItem("userData", JSON.stringify(userData));
+            closeComponent();
+            window.location.href = "/vital/scan.html";
+          } else {
+            alert("伺服器回應失敗，請稍後再試。");
+          }
+        } catch (error) {
+          console.error("API 儲存失敗：", error);
+          alert("資料儲存失敗，請稍後再試。");
+        }
       } else {
         alert("請選擇一個有效的血壓範圍！");
       }
@@ -125,6 +142,9 @@ export default {
       const ageDate = new Date(ageDifMs);
       return Math.abs(ageDate.getUTCFullYear() - 1970);
     };
+
+    const localData = localStorage.getItem("userData");
+    console.log(localData);
 
     return {
       store,
