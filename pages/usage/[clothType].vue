@@ -10,6 +10,7 @@
       :showMessageProp="showMessage"
       @countdownComplete="handleCountdownComplete"
     />
+
     <div class="usageInfoGroup" v-if="usageCardState === '紅光版'">
       <div class="usageInfoCard">
         <h3>電量提示燈使用說明</h3>
@@ -274,9 +275,27 @@ export default {
 
     const redirectToHRV = ref(false);
 
-    const handleCountdownComplete = () => {
+    const handleCountdownComplete = async () => {
       redirectToHRV.value = true;
       goNextText.value = "HRV檢測";
+      loading.value = true;
+
+      try {
+        await getStart();
+
+        // 強制清空和重新賦值
+        const tempData = [...useData.value];
+        useData.value = []; // 清空
+        setTimeout(() => {
+          useData.value = tempData; // 再次賦值
+        }, 0);
+
+        console.log("Data reloaded and manually triggered update.");
+      } catch (error) {
+        console.error("Error in handleCountdownComplete:", error);
+      } finally {
+        loading.value = false;
+      }
     };
 
     const goNextText = ref("");
@@ -290,7 +309,7 @@ export default {
     const yearBoxVisible = ref(false);
     const monthBoxVisible = ref(false);
     const selectedDate = ref(null);
-    const useData = ref();
+    const useData = ref([]);
     const detectData = ref([]);
     const loading = ref(false);
 
@@ -399,31 +418,28 @@ export default {
 
         if (response.status === 200) {
           const records = response.data?.UseRecord || [];
-          const hrvRecords = response.data?.HRV2Record || []; // 提取 HRV2Record
+          const hrvRecords = response.data?.HRV2Record || [];
 
           useData.value = records.filter(
             (record) => record.ProductName === productName
           );
-          detectData.value = hrvRecords; // 賦值給 detectData
-
-          console.log("getStart - useData:", useData.value);
-          console.log("getStart - detectData:", detectData.value);
-        } else {
-          console.error(
-            "Unexpected response status in getStart:",
-            response.status
+          detectData.value = hrvRecords.filter(
+            (record) => record.ProductName === productName
           );
+
+          console.log("Filtered useData:", useData.value);
+          console.log("Filtered detectData:", detectData.value);
+        } else {
+          console.error("Unexpected response status:", response.status);
         }
       } catch (error) {
-        console.error("API request failed in getStart:", error);
+        console.error("Error in getStart:", error);
       }
     };
 
     const parseEndTime = (endTimeStr) => {
       if (!endTimeStr) return null;
-      // 替换 `/` 为 `-`，确保兼容性
-      const isoString = endTimeStr.replace(/\//g, "-").replace(" ", "T");
-      return new Date(isoString);
+      return new Date(endTimeStr.replace(/\//g, "-").replace(" ", "T"));
     };
 
     const calculateResetTime = (now) => {
@@ -436,20 +452,32 @@ export default {
     };
 
     const checkResetTime = () => {
+      console.log("Raw useData:", useData.value);
+
       const now = new Date();
       const resetTime = new Date();
       resetTime.setHours(5, 0, 0, 0);
 
-      // 如果当前时间已经过了当天的重置时间，则设置为下一天凌晨 5 点
-      if (now >= resetTime) {
-        resetTime.setDate(resetTime.getDate() + 1);
+      if (now < resetTime) {
+        resetTime.setDate(resetTime.getDate() - 1);
       }
 
-      const lastEndTime = useData.value?.[0]?.EndTime; // 假设取第一个记录
-      if (lastEndTime) {
-        const lastEndDate = new Date(lastEndTime);
-        startBtnActive.value = lastEndDate < resetTime;
-        showMessage.value = !(lastEndDate < resetTime);
+      console.log("Reset time:", resetTime);
+
+      const todayRecords = useData.value.filter((record) => {
+        const endTime = parseEndTime(record.EndTime);
+        console.log("Checking record EndTime:", endTime);
+        return (
+          endTime >= resetTime &&
+          endTime < new Date(resetTime.getTime() + 24 * 60 * 60 * 1000)
+        );
+      });
+
+      console.log("Filtered today's records:", todayRecords);
+
+      if (todayRecords.length > 0) {
+        startBtnActive.value = false;
+        showMessage.value = true;
       } else {
         startBtnActive.value = true;
         showMessage.value = false;
@@ -475,35 +503,21 @@ export default {
     // 在組件加載時初始化檢查
     checkResetTime();
 
-    const getHRV2 = async () => {
-      try {
-        const response = await axios.post(
-          "https://23700999.com:8081/HMA/API_HRV2UseAf_Compare.jsp",
-          { MID, Token, MAID, Mobile }
-        );
-        console.log("API Response:", response.data); // 打印完整回應
-
-        if (response.status === 200) {
-          detectData.value = response.data?.HRV2Record || [];
-          console.log("Updated detectData:", detectData.value);
-        } else {
-          console.error("Unexpected response status:", response.status);
-        }
-      } catch (error) {
-        console.error("API request failed:", error);
-      }
-    };
-
     const init = async () => {
       try {
-        loading.value = true; // 開始加載
-        await getStart(); // 初始化使用記錄和檢測記錄
+        loading.value = true;
+        await getStart(); // 確保數據加載完成
+        checkResetTime(); // 加載完成後執行檢查
       } catch (error) {
-        console.error("Initialization failed:", error); // 捕捉錯誤
+        console.error("Initialization failed:", error);
       } finally {
-        loading.value = false; // 結束加載
+        loading.value = false;
       }
     };
+
+    onMounted(() => {
+      init(); // 執行初始化
+    });
 
     onMounted(() => {
       useActive.value = true;
@@ -512,6 +526,7 @@ export default {
     });
 
     const filteredHRVData = computed(() => {
+      if (!Array.isArray(detectData.value)) return [];
       return detectData.value.filter((item) => {
         const itemDate = new Date(item.CheckTime);
         return (
@@ -522,7 +537,7 @@ export default {
     });
 
     const filteredUsage = computed(() => {
-      if (!Array.isArray(useData.value)) return []; // 保護機制
+      if (!Array.isArray(useData.value)) return [];
       return useData.value.filter((item) => {
         const itemDate = new Date(item.StartTime);
         return (

@@ -2,6 +2,10 @@
   <QRCodeScanner v-if="qrcodeShow" />
   <div class="raphaelUser">
     <RaphaelLoading v-if="loading" />
+    <HealthRecordAlert v-if="isHealthRecordAlertActive"
+      :HealthRecordAlertActive="isHealthRecordAlertActive"
+      @update:HealthRecordAlertActive="hideHealthRecordAlert"
+    />
 
     <Navbar />
     <div class="userGroup">
@@ -50,13 +54,13 @@
           <img src="../assets/imgs/faceIcon.svg" alt="" />
         </div>
 
-        <router-link to="/weekly" class="item3_link">
+        <div @click="showHealthRecordAlert" class="item3_link">
           <div class="item item3">
             <div class="topTitle">健康</div>
             <div class="bottomTitle">紀錄</div>
             <img src="../assets/imgs/noteIcon.svg" alt="" />
           </div>
-        </router-link>
+        </div>
 
         <router-link to="/UsageHistory" class="item4_link">
           <div class="item item4">
@@ -93,6 +97,7 @@ import Navbar from "../components/Navbar";
 import RaphaelLoading from "../components/RaphaelLoading";
 import DSPRSelect from "../components/DSPRSelect.vue";
 import HRVAlert from "~/components/HRVAlert.vue";
+import HealthRecordAlert from "~/components/HealthRecordAlert.vue";
 import axios from "axios";
 import { useCommon } from "../stores/common";
 //圖片
@@ -102,7 +107,14 @@ import banner2 from "@/assets/imgs/banner-2.png";
 import QRCodeScanner from "~/components/QRCodeScanner.vue";
 
 export default {
-  components: { Navbar, RaphaelLoading, HRVAlert, DSPRSelect, QRCodeScanner },
+  components: {
+    Navbar,
+    RaphaelLoading,
+    HRVAlert,
+    DSPRSelect,
+    QRCodeScanner,
+    HealthRecordAlert,
+  },
   setup() {
     const router = useRouter();
     const loading = ref(true);
@@ -115,6 +127,16 @@ export default {
 
     const toggleQrcodeShow = () => {
       qrcodeShow.value = !qrcodeShow.value;
+    };
+
+    const isHealthRecordAlertActive = ref(false);
+
+    const showHealthRecordAlert = () => {
+      isHealthRecordAlertActive.value = true;
+    };
+
+    const hideHealthRecordAlert = () => {
+      isHealthRecordAlertActive.value = false;
     };
 
     const getUserData = async () => {
@@ -272,6 +294,9 @@ export default {
       store,
       toggleQrcodeShow,
       qrcodeShow,
+      isHealthRecordAlertActive,
+      showHealthRecordAlert,
+      hideHealthRecordAlert,
     };
   },
 };
