@@ -332,7 +332,7 @@ const StoptMeasuring = (html_page) => {
   const { UID, flag } = getUrlParams();
 
   // 動態拼接參數
-  if (UID && flag) {
+  if (flag) {
     html_page += `?UID=${encodeURIComponent(UID)}&flag=${encodeURIComponent(
       flag
     )}`;
