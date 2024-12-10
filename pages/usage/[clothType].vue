@@ -173,7 +173,7 @@
                 <p>{{ formatTimestamp3(item?.StartTime) }}</p>
               </div>
             </div>
-            <div class="pauseGroup"  v-if="item.Pause && item.Pause.length > 0">
+            <div class="pauseGroup" v-if="item.Pause && item.Pause.length > 0">
               <img src="/assets/imgs/pause.svg" alt="" />
               <div class="actionContent">
                 <h4>暫停時間</h4>
@@ -401,8 +401,6 @@ export default {
 
     const goNext = () => {
       if (!startBtnActive.value || redirectToHRV.value) {
-
-   
         // 设置 detectFlag
         store.detectFlag = "2";
 
@@ -410,6 +408,10 @@ export default {
         const latestUID =
           useData.value.length > 0 ? useData.value[0]?.UID : null;
 
+        if (!latestUID) {
+          console.error("最新的 UID 不存在，无法跳转！");
+          return;
+        }
 
         // 构造跳转 URL
         const redirectURL = `/vital/scan.html?UID=${latestUID}&flag=2&form=*${productName}`;
@@ -420,7 +422,6 @@ export default {
         // 跳转
         window.location.href = redirectURL;
       } else {
- 
         router.push("/usageHistory");
       }
     };
