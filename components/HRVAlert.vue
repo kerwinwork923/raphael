@@ -124,10 +124,11 @@ export default {
       sessionStorage.setItem("data", JSON.stringify(convertedData));
       const detectUID = store.detectUID;
       const detectFlag = store.detectFlag;
+      const detectForm = store.detectForm
       let redirectUrl = "/vital/scan.html";
 
       if ( detectFlag) {
-        redirectUrl += `?UID=${detectUID}&flag=${detectFlag}`;
+        redirectUrl += `?UID=${detectUID}&flag=${detectFlag}&form=${detectForm}`;
       }
 
       window.location.href = redirectUrl;

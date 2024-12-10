@@ -12,6 +12,7 @@ export const useCommon = defineStore('common', () => {
 
   const detectUID = ref("");
   const detectFlag = ref("")
+  const detectForm  = ref("")
   // 设置 loading 状态
   const setLoading = (status) => {
     isLoading.value = status;
@@ -45,6 +46,7 @@ export const useCommon = defineStore('common', () => {
     showHRVAlert,
     closeHRVAlert,
     detectUID,
-    detectFlag
+    detectFlag,
+    detectForm
   };
 });

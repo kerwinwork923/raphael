@@ -84,7 +84,8 @@ export default {
     const goNext = () => {
       localStorage.setItem("form", productName);
       store.detectFlag = "1";
-      store.detectUID = ""
+      store.detectUID = "";
+      store.detectForm = productName;
       store.showHRVAlert = true;
     };
 

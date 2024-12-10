@@ -49,7 +49,7 @@
       </div>
     </div>
 
-    <div class="usageInfoGroup" v-if="usageCardState === '調節衣'">
+    <div class="usageInfoGroup" v-if="usageCardState === '居家治療儀'">
       <div class="usageInfoCard">
         <h3 style="font-weight: 700; font-size: 20px">安全模式啟動</h3>
         <p>
@@ -64,7 +64,7 @@
       </div>
     </div>
 
-    <div class="usageInfoGroup" v-if="usageCardState === '居家治療儀'">
+    <div class="usageInfoGroup" v-if="usageCardState === '調節衣'">
       <div class="usageInfoCard">
         <h3 style="font-weight: 700; font-size: 20px">非侵入性治療</h3>
         <p>
@@ -249,7 +249,7 @@
       </div>
     </div>
     <div class="usageBtnGroup">
-      <button class="preBtn" @click="goPre">上一步</button>
+      <!-- <button class="preBtn" @click="goPre">返回產品頁面</button> -->
       <button class="nextBtn" @click="goNext">{{ goNextText }}</button>
     </div>
   </div>
@@ -401,9 +401,8 @@ export default {
 
     const goNext = () => {
       if (!startBtnActive.value || redirectToHRV.value) {
-        // 保存当前产品名称到 localStorage
-        localStorage.setItem("form", productName);
 
+   
         // 设置 detectFlag
         store.detectFlag = "2";
 
@@ -411,15 +410,9 @@ export default {
         const latestUID =
           useData.value.length > 0 ? useData.value[0]?.UID : null;
 
-        // 检查是否有 UID
-        if (!latestUID) {
-          console.error("未找到最新的使用记录 UID，请检查 useData 数据！");
-          alert("无法获取最新的使用记录 UID，请稍后重试。");
-          return;
-        }
 
         // 构造跳转 URL
-        const redirectURL = `/vital/scan.html?UID=${latestUID}&flag=2`;
+        const redirectURL = `/vital/scan.html?UID=${latestUID}&flag=2&form=*${productName}`;
 
         // 输出日志以确认 URL
         console.log("跳转 URL:", redirectURL);

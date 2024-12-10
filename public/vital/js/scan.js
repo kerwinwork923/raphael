@@ -329,13 +329,13 @@ const StartMeasuring = () => {
   });
 };
 const StoptMeasuring = (html_page) => {
-  const { UID, flag } = getUrlParams();
+  const { UID, flag, form } = getUrlParams();
 
   // 動態拼接參數
   if (flag) {
     html_page += `?UID=${encodeURIComponent(UID)}&flag=${encodeURIComponent(
       flag
-    )}`;
+    )}&form=${encodeURIComponent(form)}`;
   }
 
   FHVitalsSDK.stopMeasuring()
@@ -427,5 +427,6 @@ function getUrlParams() {
   const params = new URLSearchParams(window.location.search);
   const UID = params.get("UID") || "";
   const flag = params.get("flag") || "";
-  return { UID, flag };
+  const form = params.get("form") || "";
+  return { UID, flag, form };
 }

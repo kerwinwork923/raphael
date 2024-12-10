@@ -342,7 +342,7 @@
           <button class="backToDetect">重新檢測</button>
         </a>
         <a class="goToUsage">
-          <button class="backToUserBtn">前往檢測紀錄</button>
+          <button class="backToUserBtn2">前往檢測紀錄</button>
         </a>
       </div>
 
@@ -388,32 +388,35 @@
 </html>
 <script>
   document.addEventListener("DOMContentLoaded", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const uid = urlParams.get("UID");
+    const form = urlParams.get("form");
+    const hasAsterisk = form?.includes("*");
+
+    const backToUserBtn2 = document.querySelector(".backToUserBtn2");
+    const goToUsageLink = document.querySelector(".goToUsage");
     const subBtnGroup = document.querySelector(".subBtnGroup");
     const subBtnGroup2 = document.querySelector(".subBtnGroup2");
-    const goToUsageLink = document.querySelector(".goToUsage");
 
-    // 从 URL 中获取参数
-    const params = new URLSearchParams(window.location.search);
-    const formValue = params.get("form"); // 假定 URL 中 form 参数决定显示的内容
+    console.log("UID:", uid);
+    console.log("Form:", form);
+    console.log("Has Asterisk:", hasAsterisk);
 
-    if (formValue) {
-      if (goToUsageLink) {
-        goToUsageLink.href = `/usage/${formValue}`;
+    if (form) {
+      if (hasAsterisk) {
+        if (backToUserBtn2) backToUserBtn2.textContent = "看報告";
+        if (goToUsageLink) goToUsageLink.href = `/usageHRVResult/${uid}`;
+      } else {
+        if (goToUsageLink) goToUsageLink.href = `/usage/${form}`;
       }
-      if (subBtnGroup) {
-        subBtnGroup.style.display = "none"; // 隐藏 subBtnGroup
-      }
-      if (subBtnGroup2) {
-        subBtnGroup2.style.display = "flex"; // 显示 subBtnGroup2
-      }
+      subBtnGroup.style.display = "none";
+      subBtnGroup2.style.display = "flex";
     } else {
-      if (subBtnGroup) {
-        subBtnGroup.style.display = "flex"; // 显示 subBtnGroup
-      }
-      if (subBtnGroup2) {
-        subBtnGroup2.style.display = "none"; // 隐藏 subBtnGroup2
-      }
+      subBtnGroup.style.display = "flex";
+      subBtnGroup2.style.display = "none";
     }
+
+    console.log("Final goToUsageLink.href:", goToUsageLink?.href);
   });
 </script>
 <script>

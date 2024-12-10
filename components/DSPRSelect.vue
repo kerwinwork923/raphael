@@ -101,11 +101,11 @@ export default {
             // 從 Pinia store 獲取 detectUID 和 detectFlag
             const detectUID = store.detectUID;
             const detectFlag = store.detectFlag;
+            const detectForm = store.detectForm
             let redirectUrl = "/vital/scan.html";
             if (detectFlag) {
-              
+              redirectUrl += `?UID=${detectUID}&flag=${detectFlag}&form=${detectForm}`;
             }
-            redirectUrl += `?UID=${detectUID}&flag=${detectFlag}`;
 
             window.location.href = redirectUrl;
           } else {
