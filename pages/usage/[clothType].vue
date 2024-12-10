@@ -237,7 +237,8 @@
                   >ms
                 </h5>
               </div>
-              <svg v-if=" item.BcAf !== '治療前'"
+              <svg
+                v-if="item.BcAf !== '治療前'"
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"
                 height="18"
@@ -411,16 +412,12 @@ export default {
         store.detectFlag = "2";
 
         // 确保最新记录存在，获取最新的 UID
-        const latestUID =
+        store.detectUID =
           useData.value.length > 0 ? useData.value[0]?.UID : null;
-
-        if (!latestUID) {
-          console.error("最新的 UID 不存在，无法跳转！");
-          return;
-        }
-
+        store.detectForm = productName;
         // 构造跳转 URL
-        const redirectURL = `/vital/scan.html?UID=${latestUID}&flag=2&form=*${productName}`;
+        // const redirectURL = `/vital/scan.html?UID=${latestUID}&flag=2&form=*${productName}`;
+        store.showHRVAlert = true;
 
         // 输出日志以确认 URL
         console.log("跳转 URL:", redirectURL);
