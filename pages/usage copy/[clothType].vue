@@ -8,9 +8,9 @@
       :totalTime="30"
       :product-name="productName"
       :startBtnActive="startBtnActive"
+      :redirectPath="{ default: '/usageHistory', hrv: '/vital/scan.html' }"
       :showMessageProp="showMessage"
       @countdownComplete="handleCountdownComplete"
-      @requireHRVCheck="handleHRVCheck"
     />
 
     <div class="usageInfoGroup" v-if="usageCardState === '紅光版'">
@@ -431,14 +431,6 @@ export default {
       }
     };
 
-    const handleHRVCheck = () => {
-      store.showHRVAlert = true; // 顯示 HRVAlert
-    };
-
-    const handleHRVCompleted = () => {
-      store.showHRVAlert = false; // 隱藏 HRVAlert
-    };
-
     const localData = localStorage.getItem("userData");
     const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
 
@@ -603,8 +595,6 @@ export default {
       filteredUsage,
       goNextText,
       handleCountdownComplete,
-      handleHRVCheck,
-      handleHRVCompleted
     };
   },
 };

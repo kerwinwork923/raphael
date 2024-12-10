@@ -67,7 +67,7 @@ export default {
     const productName = decodeURIComponent(route.params.clothType);
     const store = useCommon();
     const validName = ["調節衣", "紅光版", "保健版", "居家治療儀"];
-    const nextText = ref("檢測HRV");
+    const nextText = ref("下一步");
     if (!validName.includes(productName)) {
       window.location.href = "/usageHistory"; // If needed, you can also use router.push here
     }
@@ -82,11 +82,12 @@ export default {
     };
 
     const goNext = () => {
-      localStorage.setItem("form", productName);
-      store.detectFlag = "1";
-      store.detectUID = "";
-      store.detectForm = productName;
-      store.showHRVAlert = true;
+      router.push(`/usage/${productName}`);
+      // localStorage.setItem("form", productName);
+      // store.detectFlag = "1";
+      // store.detectUID = "";
+      // store.detectForm = productName;
+      // store.showHRVAlert = true;
     };
 
     const localData = localStorage.getItem("userData");
@@ -96,9 +97,11 @@ export default {
 
     // Redirect if required data is missing
     if (!MID || !Token || !MAID || !Mobile) {
-      router.push("/");
+      router.push("/")
       return;
     }
+
+
 
     const getProductsInfo = async () => {
       try {
@@ -139,6 +142,7 @@ export default {
     const init = async () => {
       loading.value = true;
       await getProductsInfo();
+
       loading.value = false;
     };
 

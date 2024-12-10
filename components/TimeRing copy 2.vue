@@ -110,9 +110,7 @@ const UID = ref(""); // 保存 UID
 const BID = ref(""); // 保存 BID
 let startTime = ref(0); // 開始時間（毫秒）
 let elapsedTime = ref(0); // 已經過時間（秒）
-import { useCommon } from "../stores/common";
 
-const store = useCommon();
 // 計算進度條樣式
 const progressStyle = computed(() => {
   let progress;
@@ -211,10 +209,6 @@ const useStartAPI = async () => {
   );
   if (response && response.UID) {
     UID.value = response.UID; // 儲存 UID
-    store.detectFlag = "1";
-    store.detectUID = response.UID;
-    store.detectForm = props.productName;
-    store.showHRVAlert = true;
   } else {
     console.error("無法取得 UID，請檢查 API 回應");
   }
@@ -292,7 +286,7 @@ const countdown = () => {
       isCounting.value = false;
       remainingTime.value = 0;
       showMessage.value = true;
-      emit("countdownComplete");
+      emit("countdownComplete"); 
       useEndAPI();
       ThisStartBtnActive.value = false;
     } else {
@@ -305,24 +299,17 @@ const countdown = () => {
 
 const toggleTimer = () => {
   if (isCounting.value) {
-    isPaused.value ? resumeTimer() : pauseTimer();
+    if (isPaused.value) {
+      resumeTimer();
+    } else {
+      pauseTimer();
+    }
   } else {
     startTimer();
   }
 };
 
 const startTimer = async () => {
-  // 如果是初次開始，觸發 HRV 檢測邏輯
-  if (!UID.value) {
-    isCounting.value = true;
-    isPaused.value = true; // 暫停計時器
-    await useStartAPI();
-    emit("requireHRVCheck"); // 通知父組件顯示 HRVAlert
-    saveTimerState(); // 儲存當前狀態
-    return; // 結束後續邏輯
-  }
-
-  // 正常計時邏輯
   isCounting.value = true;
   isPaused.value = false;
   startTime.value = Date.now();
