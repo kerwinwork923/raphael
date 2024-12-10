@@ -263,321 +263,226 @@
 </template>
 
 <script>
+import { ref, computed, onMounted, watch, nextTick } from "vue";
 import { useRouter } from "vue-router";
 import TitleMenu from "@/components/TitleMenu.vue";
 import TimeRing from "@/components/TimeRing.vue";
-import { formatTimestampMDH, formatTimestamp3 } from "~/fn/utils";
-import axios from "axios";
-import { ref, computed, onMounted } from "vue";
 import RaphaelLoading from "../components/RaphaelLoading";
 import { useCommon } from "../stores/common";
+import axios from "axios";
+import { formatTimestamp3 } from "~/fn/utils";
+
 export default {
   components: { RaphaelLoading, TitleMenu, TimeRing },
-  components: {
-    TitleMenu,
-    TimeRing,
-  },
+
   setup() {
-    const route = useRouter().currentRoute.value;
-    const productName = decodeURIComponent(route.params.clothType);
-
-    const validName = ["調節衣", "紅光版", "保健版", "居家治療儀"];
-
-    const redirectToHRV = ref(false);
-
+    // Router and Store
+    const router = useRouter();
     const store = useCommon();
 
-    const handleCountdownComplete = async () => {
-      redirectToHRV.value = true;
-      goNextText.value = "HRV檢測";
-      loading.value = true;
+    // State Variables
+    const productName = decodeURIComponent(
+      router.currentRoute.value.params.clothType
+    );
+    const validNames = ["調節衣", "紅光版", "保健版", "居家治療儀"];
+    const usageCardState = ref(productName);
 
-      try {
-        await getStart();
-
-        // 強制清空和重新賦值
-        const tempData = [...useData.value];
-        useData.value = []; // 清空
-        setTimeout(() => {
-          useData.value = tempData; // 再次賦值
-        }, 0);
-
-        console.log("Data reloaded and manually triggered update.");
-      } catch (error) {
-        console.error("Error in handleCountdownComplete:", error);
-      } finally {
-        loading.value = false;
-      }
-    };
-
-    const goNextText = ref("");
-
-    if (!validName.includes(productName)) {
-      window.location.href = "/usageHistory";
-    }
-
-    const selectedYear = ref(new Date().getFullYear());
-    const selectedMonth = ref(new Date().getMonth() + 1);
-    const yearBoxVisible = ref(false);
-    const monthBoxVisible = ref(false);
-    const selectedDate = ref(null);
     const useData = ref([]);
     const detectData = ref([]);
     const loading = ref(false);
 
     const startBtnActive = ref(false);
     const showMessage = ref(false);
-
-    const usageCardState = ref("");
-    if (productName) usageCardState.value = productName;
-
     const useActive = ref(true);
     const detectActive = ref(false);
+    const goNextText = ref("");
+    const redirectToHRV = ref(false);
 
-    const months = Array.from({ length: 12 }, (_, i) => i + 1).reverse();
+    // Date Filters
+    const selectedYear = ref(new Date().getFullYear());
+    const selectedMonth = ref(new Date().getMonth() + 1);
+    const yearBoxVisible = ref(false);
+    const monthBoxVisible = ref(false);
+
+    // Selected Record
+    const selectedDate = ref(null);
+
+    // Computed Properties
     const displayYears = computed(() => {
       const currentYear = new Date().getFullYear();
-      const startYear = 2024;
-      const years = [];
-      for (let year = startYear; year <= currentYear; year++) {
-        years.push(year);
-      }
-      return years;
+      return Array.from({ length: currentYear - 2023 }, (_, i) => 2024 + i);
     });
 
-    const router = useRouter();
-    function toggleYearBox() {
-      yearBoxVisible.value = !yearBoxVisible.value;
-      monthBoxVisible.value = false;
-    }
-    function toggleMonthBox() {
-      monthBoxVisible.value = !monthBoxVisible.value;
-      yearBoxVisible.value = false;
-    }
-    function selectYear(year) {
-      selectedYear.value = year;
-      yearBoxVisible.value = false;
-    }
+    const months = Array.from({ length: 12 }, (_, i) => 12 - i);
 
-    function selectMonth(month) {
-      selectedMonth.value = month;
-      monthBoxVisible.value = false;
-    }
-
-    function changeUseActive() {
-      useActive.value = true;
-      detectActive.value = false;
-    }
-
-    function changeDetectActive() {
-      useActive.value = false;
-      detectActive.value = true;
-    }
-
-    function selectDate(item) {
-      if (item.StartTime === selectedDate.value) {
-        selectedDate.value = null;
-      } else {
-        selectedDate.value = item.StartTime;
-      }
-    }
-
-    const goPre = () => {
-      // router.push(`/usageHistoryInfo/${productName}`);
-      window.history.back();
-    };
-
-    if (startBtnActive.value) {
-      goNextText.value = "返回產品頁面";
-    } else {
-      goNextText.value = "HRV檢測";
-    }
-
-    watch(
-      () => startBtnActive.value,
-      (newValue) => {
-        if (newValue) {
-          goNextText.value = "返回產品頁面";
-        } else {
-          goNextText.value = "HRV檢測";
-        }
-      },
-      { immediate: true }
-    );
-    console.log(useData[0]);
-
-    const goNext = () => {
-      if (!startBtnActive.value || redirectToHRV.value) {
-        // 设置 detectFlag
-        store.detectFlag = "2";
-
-        // 确保最新记录存在，获取最新的 UID
-        store.detectUID =
-          useData.value.length > 0 ? useData.value[0]?.UID : null;
-        store.detectForm = productName;
-        // 构造跳转 URL
-        // const redirectURL = `/vital/scan.html?UID=${latestUID}&flag=2&form=*${productName}`;
-        store.showHRVAlert = true;
-
-        // 输出日志以确认 URL
-        console.log("跳转 URL:", redirectURL);
-
-        // 跳转
-        window.location.href = redirectURL;
-      } else {
-        router.push("/usageHistory");
-      }
-    };
-
-    const localData = localStorage.getItem("userData");
-    const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
-
-    if (!MID || !Token || !MAID || !Mobile) {
-      router.push("/");
-      return;
-    }
-
-    const getStart = async () => {
-      try {
-        const response = await axios.post(
-          "https://23700999.com:8081/HMA/API_UseStart_Data.jsp",
-          { MID, Token, MAID, Mobile }
-        );
-
-        if (response.status === 200) {
-          const records = response.data?.UseRecord || [];
-          const hrvRecords = response.data?.HRV2Record || [];
-
-          useData.value = records.filter(
-            (record) => record.ProductName === productName
-          );
-          detectData.value = hrvRecords.filter(
-            (record) => record.ProductName === productName
-          );
-
-          console.log("Filtered useData:", useData.value);
-          console.log("Filtered detectData:", detectData.value);
-        } else {
-          console.error("Unexpected response status:", response.status);
-        }
-      } catch (error) {
-        console.error("Error in getStart:", error);
-      }
-    };
-
-    const parseEndTime = (endTimeStr) => {
-      if (!endTimeStr) return null;
-      return new Date(endTimeStr.replace(/\//g, "-").replace(" ", "T"));
-    };
-
-    const calculateResetTime = (now) => {
-      const resetTime = new Date(now);
-      resetTime.setHours(5, 0, 0, 0); // 设置为今天凌晨 5 点
-      if (now < resetTime) {
-        resetTime.setDate(resetTime.getDate() - 1); // 如果当前时间小于 5 点，取前一天的 5 点
-      }
-      return resetTime;
-    };
-
-    const checkResetTime = () => {
-      console.log("Raw useData:", useData.value);
-
-      const now = new Date();
-      const resetTime = new Date();
-      resetTime.setHours(5, 0, 0, 0);
-
-      if (now < resetTime) {
-        resetTime.setDate(resetTime.getDate() - 1);
-      }
-
-      console.log("Reset time:", resetTime);
-
-      const todayRecords = useData.value.filter((record) => {
-        const endTime = parseEndTime(record.EndTime);
-        console.log("Checking record EndTime:", endTime);
-        return (
-          endTime >= resetTime &&
-          endTime < new Date(resetTime.getTime() + 24 * 60 * 60 * 1000)
-        );
-      });
-
-      console.log("Filtered today's records:", todayRecords);
-
-      if (todayRecords.length > 0) {
-        startBtnActive.value = false;
-        showMessage.value = true;
-      } else {
-        startBtnActive.value = true;
-        showMessage.value = false;
-      }
-    };
-
-    // 定時每分鐘檢查一次
-    const scheduleNextCheck = () => {
-      const now = new Date();
-      const nextReset = new Date();
-      nextReset.setHours(5, 0, 0, 0);
-      if (now >= nextReset) {
-        nextReset.setDate(nextReset.getDate() + 1);
-      }
-
-      const delay = nextReset - now; // 下次检查的延迟时间
-      setTimeout(() => {
-        checkResetTime();
-        scheduleNextCheck();
-      }, delay);
-    };
-
-    // 在組件加載時初始化檢查
-    checkResetTime();
-
-    const init = async () => {
-      try {
-        loading.value = true;
-        await getStart(); // 確保數據加載完成
-        checkResetTime(); // 加載完成後執行檢查
-      } catch (error) {
-        console.error("Initialization failed:", error);
-      } finally {
-        loading.value = false;
-      }
-    };
-
-    onMounted(() => {
-      init(); // 執行初始化
-    });
-
-    onMounted(() => {
-      useActive.value = true;
-      detectActive.value = false;
-      init(); // 直接調用初始化函數
-    });
-
-    const filteredHRVData = computed(() => {
-      if (!Array.isArray(detectData.value)) return [];
-      return detectData.value.filter((item) => {
-        const itemDate = new Date(item.CheckTime);
-        return (
-          itemDate.getFullYear() === selectedYear.value &&
-          itemDate.getMonth() + 1 === selectedMonth.value
-        );
-      });
-    });
-
-    const filteredUsage = computed(() => {
-      if (!Array.isArray(useData.value)) return [];
-      return useData.value.filter((item) => {
+    const filteredUsage = computed(() =>
+      useData.value.filter((item) => {
         const itemDate = new Date(item.StartTime);
         return (
           itemDate.getFullYear() === selectedYear.value &&
           itemDate.getMonth() + 1 === selectedMonth.value
         );
-      });
-    });
+      })
+    );
 
-    init();
+    const filteredHRVData = computed(() =>
+      detectData.value.filter((item) => {
+        const itemDate = new Date(item.CheckTime);
+        return (
+          itemDate.getFullYear() === selectedYear.value &&
+          itemDate.getMonth() + 1 === selectedMonth.value
+        );
+      })
+    );
+
+    // UI Actions
+    const toggleYearBox = () => {
+      yearBoxVisible.value = !yearBoxVisible.value;
+      monthBoxVisible.value = false;
+    };
+
+    const toggleMonthBox = () => {
+      monthBoxVisible.value = !monthBoxVisible.value;
+      yearBoxVisible.value = false;
+    };
+
+    const selectYear = (year) => {
+      selectedYear.value = year;
+      yearBoxVisible.value = false;
+    };
+
+    const selectMonth = (month) => {
+      selectedMonth.value = month;
+      monthBoxVisible.value = false;
+    };
+
+    const changeUseActive = () => {
+      useActive.value = true;
+      detectActive.value = false;
+      updateGoNextText();
+    };
+
+    const changeDetectActive = () => {
+      useActive.value = false;
+      detectActive.value = true;
+      updateGoNextText();
+    };
+
+    const selectDate = (item) => {
+      selectedDate.value =
+        selectedDate.value === item.StartTime ? null : item.StartTime;
+    };
+
+    // Button Actions
+    const goNext = () => {
+      if (redirectToHRV.value) {
+        // 判斷是否顯示 HRV 提示框
+        if (store.showHRVAlert) {
+          console.log("HRV 提示框已顯示");
+          return; // 阻止進一步執行
+        }
+
+        // 確保找到有效的 UID
+        const uid = detectData.value.find(
+          (record) => record.BcAf === "治療前"
+        )?.UID;
+
+        if (uid) {
+          // 更新 Pinia store 並顯示提示框
+          store.detectFlag = "2";
+          store.detectUID = uid;
+          store.detectForm = `*${productName}`;
+          store.showHRVAlert = true; // 顯示提示框
+          console.log("HRV 提示框已啟動，UID:", uid);
+        } else {
+          console.warn("未找到有效的 UID，請檢查檢測記錄");
+        }
+      } else {
+        // 默認情況返回產品頁面
+        router.push("/usageHistory");
+      }
+    };
+
+    const updateGoNextText = () => {
+      const hasPreRecord = detectData.value.some(
+        (record) => record.BcAf === "治療前"
+      );
+      const hasPostRecord = detectData.value.some(
+        (record) => record.BcAf === "治療後"
+      );
+
+      if (hasPreRecord && !hasPostRecord) {
+        // 檢測存在「治療前」但不存在「治療後」
+        goNextText.value = "HRV檢測";
+        redirectToHRV.value = true;
+      } else {
+        // 返回產品頁面
+        goNextText.value = "返回產品頁面";
+        redirectToHRV.value = false;
+      }
+    };
+
+    const handleCountdownComplete = async () => {
+      loading.value = true;
+      await fetchData();
+      useActive.value = false;
+      await nextTick();
+      useActive.value = true;
+      loading.value = false;
+      updateGoNextText();
+    };
+
+    // Data Fetching
+    const fetchData = async () => {
+      loading.value = true;
+      try {
+        const localData = JSON.parse(localStorage.getItem("userData"));
+        const { MID, Token, MAID, Mobile } = localData || {};
+
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_UseStart_Data.jsp",
+          { MID, Token, MAID, Mobile }
+        );
+
+        const records = response.data?.UseRecord || [];
+        const hrvRecords = response.data?.HRV2Record || [];
+        useData.value = records.filter(
+          (record) => record.ProductName === productName
+        );
+        detectData.value = hrvRecords.filter(
+          (record) => record.ProductName === productName
+        );
+
+        // 確保按鈕文案更新
+        updateGoNextText();
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    // Initialization
+    const init = async () => {
+      if (!validNames.includes(productName)) {
+        router.push("/usageHistory");
+        return;
+      }
+      await fetchData();
+      updateGoNextText();
+    };
+
+    watch(detectData, { deep: true, immediate: true });
+
+    onMounted(init);
 
     return {
+      productName,
+      usageCardState,
+      useData,
+      detectData,
+      filteredUsage,
+      filteredHRVData,
       selectedYear,
       selectedMonth,
       yearBoxVisible,
@@ -592,23 +497,15 @@ export default {
       detectActive,
       changeUseActive,
       changeDetectActive,
-      goPre,
-      goNext,
-      getStart,
-      usageCardState,
-      useData,
-      formatTimestamp3,
-      selectedDate,
       selectDate,
-      productName,
+      selectedDate,
+      goNextText,
+      goNext,
       loading,
       startBtnActive,
       showMessage,
-      detectData,
-      filteredHRVData,
-      filteredUsage,
-      goNextText,
       handleCountdownComplete,
+      formatTimestamp3,
     };
   },
 };

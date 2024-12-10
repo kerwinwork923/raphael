@@ -129,11 +129,14 @@ import redLightClothes2 from "@/assets/imgs/redLightClothes2.png";
 
 export default {
   setup() {
-    const purchasedProducts = ref([]);
-    const recommendedProducts = ref([]);
+    // 狀態管理
+    const purchasedProducts = ref([]); // 已購買的產品
+    const recommendedProducts = ref([]); // 推薦的產品
     const selectedProductIndex = ref(0); // 選中的產品索引
+    const useRecord = ref([]); // 使用記錄
     const hasCheckedToday = ref(false); // 判斷今日是否有檢測記錄
 
+    // 從 localStorage 中獲取用戶資料
     const localData = localStorage.getItem("userData");
     let userData = null;
 
@@ -143,6 +146,7 @@ export default {
       console.error("localStorage userData 解析失敗：", error);
     }
 
+    // 驗證用戶資料完整性
     if (
       !userData ||
       !userData.MID ||
@@ -157,15 +161,15 @@ export default {
 
     const { MID, Token, MAID, Mobile } = userData;
 
+    // 產品圖片映射
     const productImages = {
-      紅光版: "redLightClothes.png",
-      保健版: "normalClothes.png",
-      調節衣: "redLightClothes2.png",
-      居家治療儀: "redLightClothes2.png",
+      紅光版: redLightClothes,
+      保健版: normalClothes,
+      調節衣: redLightClothes2,
+      居家治療儀: redLightClothes2,
     };
 
-    const basePath = "/assets/imgs/";
-
+    // API 請求：獲取產品與使用記錄
     const fetchProducts = async () => {
       try {
         const response = await axios.post(
@@ -175,12 +179,11 @@ export default {
 
         if (response.status === 200) {
           purchasedProducts.value = response.data.PurchaseProduct;
-
+          useRecord.value = response.data.UseRecord; // 保存使用記錄
           recommendedProducts.value = response.data.PromoteProduct.map(
             (item) => ({
               name: item.ProductName,
               price: item.Desc1,
-              image: getImage(item.ProductName),
               features: item.Desc2.split("。").filter((desc) => desc),
             })
           );
@@ -192,71 +195,47 @@ export default {
       }
     };
 
-    const API_HRV2 = async () => {
-      try {
-        const response = await fetch(
-          "https://23700999.com:8081/HMA/API_HRV2.jsp",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ MID, MAID, Token, Mobile }),
-          }
-        );
+    // 判斷指定產品是否在今日使用過（以凌晨 5 點為新的一天）
+    const hasUsedToday = (productName) => {
+      const now = new Date();
 
-        if (!response.ok) {
-          throw new Error("網路響應不是成功狀態");
-        }
-
-        const result = await response.json();
-        if (result && Array.isArray(result.HRV2)) {
-          handleCheckTime(result.HRV2);
-        }
-      } catch (error) {
-        console.error("Fetch error:", error);
-      }
-    };
-
-    const handleCheckTime = (hrvData) => {
-      const today = new Date();
+      // 計算今天 5:00 的時間點
       const today5AM = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate(),
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
         5,
         0,
         0
       );
 
-      const filteredData = hrvData.some((record) => {
-        const checkTimeStr = record.CheckTime;
-        if (!checkTimeStr) return false;
+      // 如果現在時間早於今天的 5:00，則視為昨天
+      if (now < today5AM) {
+        today5AM.setDate(today5AM.getDate() - 1);
+      }
 
-        const [datePart, timePart] = checkTimeStr.split(" ");
-        const [year, month, day] = datePart.split("/").map(Number);
-        const [hour, minute] = timePart.split(":").map(Number);
-        const checkTime = new Date(year, month - 1, day, hour, minute);
+      // 計算明天 4:59:59 的時間點
+      const tomorrow5AM = new Date(today5AM);
+      tomorrow5AM.setDate(tomorrow5AM.getDate() + 1);
 
-        return checkTime >= today5AM && checkTime <= new Date();
+      // 檢查使用記錄是否符合條件
+      return useRecord.value.some((record) => {
+        const recordTime = new Date(record.StartTime.replace(/-/g, "/")); // 確保日期格式正確
+        return (
+          record.ProductName === productName &&
+          recordTime >= today5AM &&
+          recordTime < tomorrow5AM
+        );
       });
-
-      hasCheckedToday.value = filteredData;
     };
 
-    const getImage = (productName) => {
-      const productImages = {
-        紅光版: redLightClothes,
-        保健版: normalClothes,
-        調節衣: redLightClothes2,
-        居家治療儀: redLightClothes2,
-      };
-      return productImages[productName];
-    };
-    const shouldShowRobot = (productName) => {
-      return productName === "居家治療儀";
-    };
+    // 獲取產品圖片
+    const getImage = (productName) => productImages[productName];
 
+    // 判斷是否顯示機器人圖標
+    const shouldShowRobot = (productName) => productName === "居家治療儀";
+
+    // 解析產品價格格式
     const parsePrices = (priceString) => {
       return priceString.split(";").map((price) => {
         const [value, period] = price.trim().split("/");
@@ -264,32 +243,36 @@ export default {
       });
     };
 
+    // 選擇產品
     const selectProduct = (index) => {
       selectedProductIndex.value = index;
     };
 
+    // 開始使用產品
     const goUse = () => {
       const productName = purchasedProducts.value[selectedProductIndex.value];
-      if (hasCheckedToday.value) {
+      if (hasUsedToday(productName)) {
         window.location.href = `/usage/${productName}`;
       } else {
         window.location.href = `/usageHistoryInfo/${productName}`;
       }
     };
 
+    // 聯繫客服
     const contactSupport = () => {
       window.location.href = "tel:0800000760";
     };
 
+    // 初始化邏輯
     onMounted(async () => {
       try {
         await fetchProducts();
-        await API_HRV2();
       } catch (error) {
         console.error("初始化過程中出現錯誤：", error);
       }
     });
 
+    // 返回值
     return {
       purchasedProducts,
       recommendedProducts,
