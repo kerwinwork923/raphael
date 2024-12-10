@@ -409,25 +409,21 @@ export default {
     const goNext = () => {
       if (!startBtnActive.value || redirectToHRV.value) {
         // 设置 detectFlag
+        const uid = detectData.value.find(
+          (record) => record.BcAf === "治療前"
+        )?.UID;
+
         store.detectFlag = "2";
-
-        // 确保最新记录存在，获取最新的 UID
-        const latestUID =
-          useData.value.length > 0 ? useData.value[0]?.UID : null;
-
-        if (!latestUID) {
-          console.error("最新的 UID 不存在，无法跳转！");
-          return;
+        if (uid) {
+          // 更新 Pinia store 並顯示提示框
+          store.detectFlag = "2";
+          store.detectUID = uid;
+          store.detectForm = productName;
+          store.showHRVAlert = true; // 顯示提示框
+          console.log("HRV 提示框已啟動，UID:", uid);
+        } else {
+          console.warn("未找到有效的 UID，請檢查檢測記錄");
         }
-
-        // 构造跳转 URL
-        const redirectURL = `/vital/scan.html?UID=${latestUID}&flag=2&form=*${productName}`;
-
-        // 输出日志以确认 URL
-        console.log("跳转 URL:", redirectURL);
-
-        // 跳转
-        window.location.href = redirectURL;
       } else {
         router.push("/usageHistory");
       }
