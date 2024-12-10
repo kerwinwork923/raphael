@@ -204,7 +204,13 @@
           :key="index"
         >
           <!-- `/vital/detail.html?AID=` -->
-          <a :href="`/usageHRVResult/${item.UID}`">
+          <a
+            :href="
+              item.BcAf === '治療前'
+                ? 'javascript:void(0)'
+                : `/usageHRVResult/${item.UID}`
+            "
+          >
             <div class="timeGroup">
               <div class="timeIcon">
                 <img src="../../assets/imgs/detectTime.svg" alt="" />
@@ -231,7 +237,7 @@
                   >ms
                 </h5>
               </div>
-              <svg
+              <svg v-if=" item.BcAf !== '治療前'"
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"
                 height="18"
