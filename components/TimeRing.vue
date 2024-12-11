@@ -211,12 +211,16 @@ const useStartAPI = async () => {
   );
   if (response && response.UID) {
     UID.value = response.UID;
+    store.detectFlag = "1"; // 設置 HRV 檢測進行中標記
+    store.detectUID = response.UID; // 設置檢測 UID
+    store.detectForm = props.productName; // 設置產品名稱
+    store.showHRVAlert = true; // 顯示 HRV 檢測提示框
+
     buttonText.value = "開始"; // 更新按鈕文字
   } else {
     console.error("無法取得 UID，請檢查 API 回應");
   }
 };
-
 
 const usePauseAPI = async () => {
   const response = await apiRequest(
@@ -368,8 +372,6 @@ const checkHRVCompletion = async () => {
   showButton.value = true;
 };
 
-
-
 const getProductInfo = async (UID) => {
   const response = await apiRequest(
     "https://23700999.com:8081/HMA/API_UIDInfo.jsp",
@@ -457,7 +459,6 @@ const checkHRVAndUpdateButton = async () => {
   showButton.value = true;
 };
 
-
 // 初始化
 onMounted(async () => {
   loadTimerState();
@@ -481,7 +482,6 @@ onMounted(async () => {
     countdown(); // 繼續倒數
   }
 });
-
 
 const buttonStyle = computed(() => {
   if (!isCounting.value) {
