@@ -19,8 +19,8 @@
         />
       </svg>
     </div>
-    <div v-if="showMessage" class="completion-message">感謝您的使用</div>
-    <div v-if="showMessage" class="completion-delayMessage">
+    <div v-if="hasDetectRecord" class="completion-message">感謝您的使用</div>
+    <div v-if="hasDetectRecord" class="completion-delayMessage">
       ※ 請於隔天後再使用
     </div>
 
@@ -43,6 +43,15 @@ const props = defineProps({
   },
   productName: {
     type: String,
+  },
+  hasUseRecord: {
+    type: Boolean,
+  },
+  hasBeforeDetect: {
+    type: Boolean,
+  },
+  hasDetectRecord: {
+    type: Boolean,
   },
 });
 
@@ -307,8 +316,16 @@ const showButton = ref(false);
 
 const toggleTimer = async () => {
   if (buttonText.value === "HRV檢測") {
-    await useStartAPI(); // 執行 HRV 檢測
-    buttonText.value = "開始"; // 更新按鈕為「開始」
+    // 執行 HRV 檢測邏輯
+    const uid = await useStartAPI(); // 假設 `useStartAPI` 返回 UID
+    if (uid) {
+      // 更新 Pinia store 並顯示提示框
+      store.detectFlag = "2";
+      store.detectUID = uid;
+      store.detectForm = props.productName;
+      store.showHRVAlert = true; // 顯示提示框
+      console.log("HRV 提示框已啟動，UID:", uid);
+    }
   } else if (buttonText.value === "繼續") {
     startTimer(); // 開始倒數計時
   } else if (buttonText.value === "暫停") {
@@ -509,7 +526,23 @@ const checkHRVAndUpdateButton = async () => {
 onMounted(async () => {
   loadTimerState();
 
-  await checkHRVCompletion(); // 檢查是否需要隱藏按鈕或顯示繼續
+  // 如果有使用記錄
+  if (props.hasUseRecord) {
+    // 檢查是否已完成 HRV 檢測
+    if (store.detectFlag !== "2") {
+      buttonText.value = "HRV檢測"; // 顯示 HRV 檢測按鈕
+      showButton.value = true;
+      return;
+    } else {
+      // 如果已完成檢測，隱藏按鈕並顯示提示訊息
+      showButton.value = false;
+      showMessage.value = true;
+      return;
+    }
+  }
+
+  await checkHRVCompletion(); // 檢查是否需要顯示繼續按鈕或其他狀態
+
   if (!isPaused.value && startTime.value) {
     const now = Date.now();
     const elapsedSinceStart = (now - startTime.value) / 1000;

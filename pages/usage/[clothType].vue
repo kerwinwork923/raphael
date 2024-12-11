@@ -1,12 +1,15 @@
 <template>
   <RaphaelLoading v-if="loading" />
-  <HRVAlert :showCloseButton= "false" />
-  <DSPRSelect :showCloseButton= "false" />
+  <HRVAlert :showCloseButton="false" />
+  <DSPRSelect :showCloseButton="false" />
   <div class="usageWrap">
     <TitleMenu Text="使用紀錄" :link="`back`" />
     <TimeRing
       :totalTime="30"
       :product-name="productName"
+      :hasUseRecord="hasUseRecord"
+      :hasDetectReord="hasDetectRecord"
+      :hasBeforeDetect = "hasBeforeDetect"
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
     />
@@ -285,24 +288,9 @@ export default {
 
     const store = useCommon();
 
-    const handleCountdownComplete = async () => {
-      redirectToHRV.value = true;
-      goNextText.value = "HRV檢測";
-      loading.value = true;
-
-      try {
-        await getStart(); // 重新加載數據
-        // 強制觸發響應式更新
-        const tempData = [...useData.value];
-        useData.value = []; // 清空
-        setTimeout(() => {
-          useData.value = tempData; // 再次賦值
-        }, 0);
-      } catch (error) {
-        console.error("Error in handleCountdownComplete:", error);
-      } finally {
-        loading.value = false;
-      }
+    const handleCountdownComplete = () => {
+      startBtnActive.value = true;
+      goNextText.value = "返回產品頁面";
     };
 
     const goNextText = ref("");
@@ -319,6 +307,9 @@ export default {
     const useData = ref([]);
     const detectData = ref([]);
     const loading = ref(false);
+    const hasUseRecord = ref(false);
+    const hasDetectRecord = ref(false);
+    const hasBeforeDetect = ref(false);
 
     const startBtnActive = ref(false);
     const showMessage = ref(false);
@@ -406,27 +397,35 @@ export default {
     );
     console.log(useData[0]);
 
-    const goNext = () => {
-      if (!startBtnActive.value || redirectToHRV.value) {
-        // 设置 detectFlag
-        const uid = detectData.value.find(
-          (record) => record.BcAf === "治療前"
-        )?.UID;
+    // const goNext = () => {
+    //   if (!startBtnActive.value || redirectToHRV.value) {
+    //     // 设置 detectFlag
+    //     const uid = detectData.value.find(
+    //       (record) => record.BcAf === "治療前"
+    //     )?.UID;
 
-        store.detectFlag = "2";
-        if (uid) {
-          // 更新 Pinia store 並顯示提示框
-          store.detectFlag = "2";
-          store.detectUID = uid;
-          store.detectForm = productName;
-          store.showHRVAlert = true; // 顯示提示框
-          console.log("HRV 提示框已啟動，UID:", uid);
-        } else {
-          console.warn("未找到有效的 UID，請檢查檢測記錄");
-        }
-      } else {
-        router.push("/usageHistory");
+    //     store.detectFlag = "2";
+    //     if (uid) {
+    //       // 更新 Pinia store 並顯示提示框
+    //       store.detectFlag = "2";
+    //       store.detectUID = uid;
+    //       store.detectForm = productName;
+    //       store.showHRVAlert = true; // 顯示提示框
+    //       console.log("HRV 提示框已啟動，UID:", uid);
+    //     } else {
+    //       console.warn("未找到有效的 UID，請檢查檢測記錄");
+    //     }
+    //   } else {
+    //     router.push("/usageHistory");
+    //   }
+    // };
+
+    const goNext = () => {
+      if (!startBtnActive.value) {
+        alert("今日已使用，請於明日再使用！");
+        return;
       }
+      router.push("/usageHistory");
     };
 
     const handleHRVCheck = () => {
@@ -447,26 +446,53 @@ export default {
 
     const getStart = async () => {
       try {
+        loading.value = true;
         const response = await axios.post(
           "https://23700999.com:8081/HMA/API_UseStart_Data.jsp",
-          { MID, Token, MAID, Mobile }
+          {
+            MID: MID,
+            Token: Token,
+            MAID: MAID,
+            Mobile: Mobile,
+          }
         );
 
         if (response.status === 200) {
           const records = response.data?.UseRecord || [];
           const hrvRecords = response.data?.HRV2Record || [];
-
           useData.value = records.filter(
             (record) => record.ProductName === productName
           );
           detectData.value = hrvRecords.filter(
             (record) => record.ProductName === productName
           );
-        } else {
-          console.error("Unexpected response status:", response.status);
+
+          // 計算是否有今日使用紀錄
+          const resetTime = calculateResetTime(new Date());
+          hasUseRecord.value = useData.value.some((record) => {
+            const endTime = new Date(record.EndTime.replace(/\//g, "-"));
+            return endTime >= resetTime;
+          });
+
+          // 計算是否有「治療前」和「治療後」的紀錄
+          const todayDetectRecords = detectData.value.filter((record) => {
+            const checkTime = new Date(record.CheckTime.replace(/\//g, "-"));
+            return checkTime >= resetTime;
+          });
+
+          const hasBeforeRecord = todayDetectRecords.some(
+            (record) => record.BcAf === "治療前"
+          );
+          const hasAfterRecord = todayDetectRecords.some(
+            (record) => record.BcAf === "治療後"
+          );
+
+          hasDetectRecord.value = hasBeforeRecord && hasAfterRecord;
         }
       } catch (error) {
         console.error("Error in getStart:", error);
+      } finally {
+        loading.value = false;
       }
     };
 
@@ -477,30 +503,19 @@ export default {
 
     const calculateResetTime = (now) => {
       const resetTime = new Date(now);
-      resetTime.setHours(5, 0, 0, 0); // 设置为今天凌晨 5 点
+      resetTime.setHours(5, 0, 0, 0);
       if (now < resetTime) {
-        resetTime.setDate(resetTime.getDate() - 1); // 如果当前时间小于 5 点，取前一天的 5 点
+        resetTime.setDate(resetTime.getDate() - 1);
       }
       return resetTime;
     };
 
     const checkResetTime = () => {
-      const now = new Date();
-      const resetTime = calculateResetTime(now); // 計算當天 5:00 的重置時間
-
-      const todayRecords = useData.value.filter((record) => {
-        const endTime = parseEndTime(record.EndTime); // 解析結束時間
-        return (
-          endTime >= resetTime &&
-          endTime < new Date(resetTime.getTime() + 24 * 60 * 60 * 1000)
-        );
-      });
-
-      if (todayRecords.length > 0) {
-        startBtnActive.value = false; // 今日已使用，按鈕不可用
-        showMessage.value = true; // 顯示已使用消息
+      if (hasUseRecord.value || hasDetectRecord.value) {
+        startBtnActive.value = false;
+        showMessage.value = true;
       } else {
-        startBtnActive.value = true; // 按鈕可用
+        startBtnActive.value = true;
         showMessage.value = false;
       }
     };
@@ -524,26 +539,25 @@ export default {
     // 在組件加載時初始化檢查
     checkResetTime();
 
+    const updateBeforeDetect = () => {
+      const resetTime = calculateResetTime(new Date());
+      const todayDetectRecords = detectData.value.filter((record) => {
+        const checkTime = new Date(record.CheckTime.replace(/\//g, "-"));
+        return checkTime >= resetTime;
+      });
+      hasBeforeDetect.value = todayDetectRecords.some(
+        (record) => record.BcAf === "治療前"
+      );
+    };
+
     const init = async () => {
-      try {
-        loading.value = true;
-        await getStart(); // 確保數據加載完成
-        checkResetTime(); // 加載完成後執行檢查
-      } catch (error) {
-        console.error("Initialization failed:", error);
-      } finally {
-        loading.value = false;
-      }
+      await getStart();
+      checkResetTime();
+      updateBeforeDetect();
     };
 
     onMounted(() => {
       init(); // 執行初始化
-    });
-
-    onMounted(() => {
-      useActive.value = true;
-      detectActive.value = false;
-      init(); // 直接調用初始化函數
     });
 
     const filteredHRVData = computed(() => {
@@ -602,7 +616,10 @@ export default {
       goNextText,
       handleCountdownComplete,
       handleHRVCheck,
-      handleHRVCompleted
+      handleHRVCompleted,
+      hasUseRecord,
+      hasDetectRecord,
+      hasBeforeDetect
     };
   },
 };
