@@ -2,7 +2,8 @@
   <QRCodeScanner v-if="qrcodeShow" />
   <div class="raphaelUser">
     <RaphaelLoading v-if="loading" />
-    <HealthRecordAlert v-if="isHealthRecordAlertActive"
+    <HealthRecordAlert
+      v-if="isHealthRecordAlertActive"
       :HealthRecordAlertActive="isHealthRecordAlertActive"
       @update:HealthRecordAlertActive="hideHealthRecordAlert"
     />
@@ -175,9 +176,13 @@ export default {
             userInfo.value = newUserInfo;
           } else {
             alert("取得會員資料失敗");
+            localStorage.removeItem("userData");
+            router.push("/");
           }
         } else {
           alert("取得會員資料失敗");
+          localStorage.removeItem("userData");
+          router.push("/");
         }
       } catch (err) {
         alert("取得會員資料失敗");
