@@ -7,7 +7,7 @@
     <TimeRing
       :totalTime="30"
       :product-name="productName"
-      :startBtnActive="startBtnActive"
+
       :showMessageProp="showMessage"
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
