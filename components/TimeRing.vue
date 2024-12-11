@@ -309,11 +309,8 @@ const toggleTimer = async () => {
   if (buttonText.value === "HRV檢測") {
     await useStartAPI(); // 執行 HRV 檢測
     buttonText.value = "開始"; // 更新按鈕為「開始」
-    return;
-  }
-
-  if (buttonText.value === "開始" || buttonText.value === "繼續") {
-    startTimer(); // 開始或繼續計時
+  } else if (buttonText.value === "繼續") {
+    startTimer(); // 開始倒數計時
   } else if (buttonText.value === "暫停") {
     pauseTimer(); // 暫停計時
   }
@@ -343,32 +340,49 @@ const checkHRVCompletion = async () => {
     const now = new Date();
     const resetTime = calculateResetTime(now);
 
-    const hasFlag1 = response.HRV2.some((record) => {
+    // 查找當日 Flag: 1 的紀錄
+    const flag1Records = response.HRV2.filter((record) => {
       const recordTime = new Date(record.CheckTime);
-      return (
-        record.Flag === "1" &&
-        recordTime >= resetTime &&
-        record.ProductName === props.productName
-      );
+      return record.Flag === "1" && recordTime >= resetTime;
     });
 
-    const hasFlag2 = response.HRV2.some((record) => {
-      const recordTime = new Date(record.CheckTime);
-      return (
-        record.Flag === "2" &&
-        recordTime >= resetTime &&
-        record.ProductName === props.productName
-      );
-    });
+    for (const record of flag1Records) {
+      const productInfo = await getProductInfo(record.UID);
 
-    if (hasFlag1 && hasFlag2) {
-      showMessage.value = true; // 顯示感謝訊息
-      showButton.value = false; // 隱藏按鈕
-      return;
+      if (
+        productInfo &&
+        productInfo.Result === "OK" &&
+        productInfo.ProductName === props.productName
+      ) {
+        UID.value = record.UID;
+
+        // 查找當日 Flag: 2 並且 UID 相同的紀錄
+        const hasMatchingFlag2 = response.HRV2.some((record) => {
+          const recordTime = new Date(record.CheckTime);
+          return (
+            record.Flag === "2" &&
+            record.UID === UID.value &&
+            recordTime >= resetTime
+          );
+        });
+
+        if (hasMatchingFlag2) {
+          // 如果找到匹配的 Flag: 2，顯示感謝訊息並隱藏按鈕
+          showMessage.value = true;
+          showButton.value = false;
+          return;
+        }
+
+        // 如果只有 Flag: 1，顯示繼續按鈕
+        buttonText.value = "繼續";
+        showButton.value = true;
+        return;
+      }
     }
   }
 
-  // 如果無法完成條件，保持按鈕可見
+  // 如果無法完成條件，保持按鈕顯示 HRV 檢測
+  buttonText.value = "HRV檢測";
   showButton.value = true;
 };
 
@@ -377,7 +391,16 @@ const getProductInfo = async (UID) => {
     "https://23700999.com:8081/HMA/API_UIDInfo.jsp",
     { MID, Token, MAID, Mobile, UID }
   );
-  return response && response.Result === "OK" ? response : null;
+
+  if (response && response.Result === "OK") {
+    return {
+      Result: response.Result,
+      ProductName: response.ProductName, // 確保返回產品名稱
+    };
+  } else {
+    console.error("無法取得產品資訊，請檢查 UID 或 API 回應。");
+    return null;
+  }
 };
 
 const pauseTimer = async () => {
@@ -416,26 +439,32 @@ const resumeTimer = async () => {
 };
 const calculateResetTime = (currentTime) => {
   const resetTime = new Date(currentTime);
-  resetTime.setHours(5, 0, 0, 0); // 設定時間為今日凌晨5點
+  resetTime.setHours(5, 0, 0, 0); // 設定時間為今日凌晨 5 點
   if (currentTime < resetTime) {
-    // 如果當前時間小於今日凌晨5點，則取前一天的凌晨5點
+    // 如果當前時間小於今日凌晨 5 點，則取前一天的凌晨 5 點
     resetTime.setDate(resetTime.getDate() - 1);
   }
   return resetTime;
 };
 
+// 檢查 HRV 狀態並更新按鈕
 const checkHRVAndUpdateButton = async () => {
   const response = await apiRequest(
     "https://23700999.com:8081/HMA/API_HRV2.jsp",
-    { MID, Token, MAID, Mobile }
+    {
+      MID: store.MID,
+      Token: store.Token,
+      MAID: store.MAID,
+      Mobile: store.Mobile,
+    }
   );
 
   if (response && response.Result === "OK") {
     const now = new Date();
     const resetTime = calculateResetTime(now);
 
-    // 檢查是否有當日 `Flag: 1` 紀錄
-    const validRecords = response.HRV2.filter((record) => {
+    // 查找 Flag 為 1 的紀錄
+    const flag1Records = response.HRV2.filter((record) => {
       const recordTime = new Date(record.CheckTime);
       return (
         record.Flag === "1" &&
@@ -444,17 +473,34 @@ const checkHRVAndUpdateButton = async () => {
       );
     });
 
-    if (validRecords.length > 0) {
-      // 找到符合條件的紀錄
-      const record = validRecords[0];
-      UID.value = record.UID;
-      buttonText.value = "繼續"; // 更新按鈕文字
-      showButton.value = true; // 顯示按鈕
-      return;
+    // 查找 Flag 為 2 的紀錄
+    const flag2Records = response.HRV2.filter((record) => {
+      const recordTime = new Date(record.CheckTime);
+      return (
+        record.Flag === "2" &&
+        recordTime >= resetTime &&
+        record.ProductName === props.productName
+      );
+    });
+
+    if (flag1Records.length > 0) {
+      // 只要有 Flag: 1 紀錄
+      UID.value = flag1Records[0].UID; // 設定 UID
+      buttonText.value = "繼續"; // 更新按鈕狀態
+      showButton.value = true;
+
+      // 如果有 Flag: 2 的紀錄
+      if (flag2Records.length > 0) {
+        showMessage.value = true; // 顯示感謝訊息
+        showButton.value = false; // 隱藏按鈕
+        return;
+      }
+
+      return; // 結束檢查，按鈕設為「繼續」
     }
   }
 
-  // 如果無符合條件的紀錄，顯示 HRV 檢測
+  // 如果沒有符合條件的紀錄，顯示 HRV 檢測
   buttonText.value = "HRV檢測";
   showButton.value = true;
 };
@@ -463,9 +509,7 @@ const checkHRVAndUpdateButton = async () => {
 onMounted(async () => {
   loadTimerState();
 
-  await checkHRVAndUpdateButton(); // 初始按鈕狀態
-  await checkHRVCompletion(); // 檢查是否需要隱藏按鈕
-
+  await checkHRVCompletion(); // 檢查是否需要隱藏按鈕或顯示繼續
   if (!isPaused.value && startTime.value) {
     const now = Date.now();
     const elapsedSinceStart = (now - startTime.value) / 1000;
