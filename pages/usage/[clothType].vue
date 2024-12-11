@@ -632,7 +632,7 @@ export default {
   overflow-x: hidden;
   padding: 0 1rem;
   position: relative;
-  padding-bottom: 6rem;
+  padding-bottom: 136px;
 
   .usageInfoGroup {
     display: flex;
@@ -966,12 +966,10 @@ export default {
     width: 100%;
     background-color: #f6f6f6;
     z-index: 99;
-    display: flex;
-    justify-content: center;
-    padding: 1rem 1rem 2.25rem 1rem;
+    display: grid;
+    padding: 1rem 1rem 4.25rem 1rem;
     gap: 16px;
     button {
-      width: 50%;
       background-color: $raphael-green-400;
       color: #fff;
       border: none;
