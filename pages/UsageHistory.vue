@@ -495,6 +495,8 @@ export default {
     }
 
     .recommendWrap {
+      display: grid;
+      gap: .75rem;
       margin-top: 0.75rem;
       .robotImg {
         position: absolute;
