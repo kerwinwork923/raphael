@@ -3,6 +3,7 @@
     <div class="cover"></div>
     <div class="DSPRSelect">
       <img
+      v-if="showCloseButton"
         src="../assets/imgs/selectClose.svg"
         class="closeBtn"
         alt=""
@@ -50,6 +51,12 @@ import { ref, computed } from "vue";
 import { useCommon } from "@/stores/common";
 import axios from "axios";
 export default {
+  props: {
+    showCloseButton: {
+      type: Boolean,
+      default: true,
+    },
+  },
   setup() {
     const store = useCommon();
     const selectedDSPR = ref("");

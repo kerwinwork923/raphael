@@ -1,7 +1,7 @@
 <template>
   <RaphaelLoading v-if="loading" />
-  <HRVAlert />
-  <DSPRSelect />
+  <HRVAlert :showCloseButton= "false" />
+  <DSPRSelect :showCloseButton= "false" />
   <div class="usageWrap">
     <TitleMenu Text="使用紀錄" :link="`back`" />
     <TimeRing

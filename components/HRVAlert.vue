@@ -2,6 +2,7 @@
   <div v-if="store.showHRVAlert" class="cover"></div>
   <div v-if="store.showHRVAlert" class="HRVAlert">
     <img
+      v-if="showCloseButton"
       class="HRVAlertClose"
       @click="handleCloseHRVAlert"
       src="/assets/imgs/selectClose.svg"
@@ -36,6 +37,12 @@
 import { useCommon } from "@/stores/common";
 
 export default {
+  props: {
+    showCloseButton: {
+      type: Boolean,
+      default: true,
+    },
+  },
   setup() {
     const store = useCommon();
 
@@ -124,10 +131,10 @@ export default {
       sessionStorage.setItem("data", JSON.stringify(convertedData));
       const detectUID = store.detectUID;
       const detectFlag = store.detectFlag;
-      const detectForm = store.detectForm
+      const detectForm = store.detectForm;
       let redirectUrl = "/vital/scan.html";
 
-      if ( detectFlag) {
+      if (detectFlag) {
         redirectUrl += `?UID=${detectUID}&flag=${detectFlag}&form=${detectForm}`;
       }
 
