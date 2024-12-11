@@ -355,8 +355,8 @@ export default {
               box-shadow: 0 0 10px rgba($color: #fff, $alpha: 0.1);
             }
             .bigCircle {
-              width: 270px;
-              height: 270px;
+              width: 265px;
+              height: 265px;
               z-index: 1;
               border-radius: 50%;
               position: absolute;
@@ -432,8 +432,8 @@ export default {
             }
 
             .bigCircle {
-              width: 150px;
-              height: 150px;
+              width: 145px;
+              height: 145px;
               z-index: 1;
               border-radius: 50%;
               position: absolute;
