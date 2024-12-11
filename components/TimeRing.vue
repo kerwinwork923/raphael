@@ -44,11 +44,6 @@ const props = defineProps({
   productName: {
     type: String,
   },
-
-  showMessageProp: {
-    type: Boolean,
-    default: false,
-  },
 });
 
 // Router
@@ -83,7 +78,6 @@ if (!MID || !Token || !MAID || !Mobile) {
 }
 
 const ThisStartBtnActive = ref(props.startBtnActive);
-const showMessage = ref(props.showMessageProp);
 
 watch(
   () => props.startBtnActive,
@@ -102,6 +96,7 @@ watch(
 const remainingTime = ref(props.totalTime);
 const isCounting = ref(false);
 const isPaused = ref(false);
+const showMessage = ref(false);
 
 const UID = ref(""); // 保存 UID
 const BID = ref(""); // 保存 BID
@@ -216,6 +211,7 @@ const useStartAPI = async () => {
   );
   if (response && response.UID) {
     UID.value = response.UID;
+    store.detectFlag = "1";
     store.detectUID = response.UID;
     store.detectForm = props.productName;
     store.showHRVAlert = true;
@@ -295,11 +291,10 @@ const countdown = () => {
       clearInterval(timerInterval);
       isCounting.value = false;
       remainingTime.value = 0;
-      showMessage.value = true;
+      showMessage.value = true; // 顯示「感謝您的使用」
       showButton.value = false; // 隱藏按鈕
       emit("countdownComplete");
       useEndAPI();
-      ThisStartBtnActive.value = false;
     } else {
       requestAnimationFrame(tick);
     }
@@ -371,37 +366,15 @@ const checkHRVAndUpdateButton = async () => {
     });
 
     if (alreadyUsed) {
-      remainingTime.value = 0;
-      showMessage.value = true;
-      showButton.value = false; // 確保按鈕消失
-      buttonText.value = ""; // 按鈕文字清空
-      isCounting.value = false;
+      showMessage.value = true; // 顯示「感謝您的使用」
+      showButton.value = false; // 隱藏按鈕
       return;
     }
 
-    // 若無已使用記錄，繼續檢查有效 HRV 檢測紀錄
-    const validRecords = response.HRV2.filter((item) => {
-      const itemTime = new Date(item.CheckTime);
-      return item.Flag === "1" && itemTime >= resetTime;
-    });
-
-    for (const record of validRecords) {
-      const productInfo = await getProductInfo(record.UID);
-      if (productInfo && productInfo.ProductName === props.productName) {
-        UID.value = record.UID;
-        isHRVCheckComplete.value = true;
-        buttonText.value = "開始"; // 顯示開始
-        // showButton.value = true; // 顯示按鈕
-        return;
-      }
-    }
+    // 如果沒有使用過，顯示按鈕
+    showButton.value = true;
   }
-
-  // 若無符合條件的紀錄
-  buttonText.value = "HRV檢測";
-  showButton.value = true;
 };
-
 
 const getProductInfo = async (UID) => {
   const response = await apiRequest(
