@@ -391,6 +391,13 @@ const checkHRVCompletion = async () => {
         }
 
         // 如果只有 Flag: 1，顯示繼續按鈕
+        if (props.hasUseRecord) {
+          // 檢查是否已完成 HRV 檢測
+
+          buttonText.value = "HRV檢測"; // 顯示 HRV 檢測按鈕
+          showButton.value = true;
+          return;
+        }
         buttonText.value = "繼續";
         showButton.value = true;
         return;
@@ -529,16 +536,9 @@ onMounted(async () => {
   // 如果有使用記錄
   if (props.hasUseRecord) {
     // 檢查是否已完成 HRV 檢測
-    if (store.detectFlag !== "2") {
-      buttonText.value = "HRV檢測"; // 顯示 HRV 檢測按鈕
-      showButton.value = true;
-      return;
-    } else {
-      // 如果已完成檢測，隱藏按鈕並顯示提示訊息
-      showButton.value = false;
-      showMessage.value = true;
-      return;
-    }
+
+    buttonText.value = "HRV檢測"; // 顯示 HRV 檢測按鈕
+    showButton.value = true;
   }
 
   await checkHRVCompletion(); // 檢查是否需要顯示繼續按鈕或其他狀態

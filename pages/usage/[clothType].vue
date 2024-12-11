@@ -12,7 +12,7 @@
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
     />
-    {{ hasUseRecord }}
+  
     <div class="usageInfoGroup" v-if="usageCardState === '紅光版'">
       <div class="usageInfoCard">
         <h3>電量提示燈使用說明</h3>
