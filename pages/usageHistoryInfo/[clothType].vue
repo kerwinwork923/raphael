@@ -97,11 +97,9 @@ export default {
 
     // Redirect if required data is missing
     if (!MID || !Token || !MAID || !Mobile) {
-      router.push("/")
+      router.push("/");
       return;
     }
-
-
 
     const getProductsInfo = async () => {
       try {
