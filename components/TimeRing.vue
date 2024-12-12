@@ -19,6 +19,7 @@
         />
       </svg>
     </div>
+
     <div v-if="hasDetectRecord" class="completion-message">感謝您的使用</div>
     <div v-if="hasDetectRecord" class="completion-delayMessage">
       ※ 請於隔天後再使用
@@ -98,6 +99,7 @@ watch(
     ThisStartBtnActive.value = newValue;
   }
 );
+
 
 watch(
   () => props.showMessageProp,

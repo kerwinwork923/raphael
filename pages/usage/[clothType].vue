@@ -7,12 +7,12 @@
     <TimeRing
       :totalTime="30"
       :product-name="productName"
-      :hasDetectReord="hasDetectRecord"
+      :hasDetectRecord="hasDetectRecord"
       :todayUseRecord="todayUseRecord"
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
     />
-
+  
     <div class="usageInfoGroup" v-if="usageCardState === '紅光版'">
       <div class="usageInfoCard">
         <h3>電量提示燈使用說明</h3>
@@ -307,7 +307,7 @@ export default {
     const detectData = ref([]);
     const loading = ref(false);
     const hasUseRecord = ref(false);
-    // const hasDetectRecord = ref(false);
+    const hasDetectRecord = ref(false);
     const hasBeforeDetect = ref(false);
 
     const startBtnActive = ref(false);
@@ -488,7 +488,7 @@ export default {
             (record) => record.BcAf === "治療後"
           );
 
-          // hasDetectRecord.value = hasBeforeRecord && hasAfterRecord;
+          hasDetectRecord.value = hasBeforeRecord && hasAfterRecord;
         }
       } catch (error) {
         console.error("Error in getStart:", error);
@@ -619,7 +619,7 @@ export default {
       handleHRVCheck,
       handleHRVCompleted,
       hasUseRecord,
-      // hasDetectRecord,
+      hasDetectRecord,
       hasBeforeDetect,
       todayUseRecord,
     };
