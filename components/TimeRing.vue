@@ -225,8 +225,12 @@ const apiRequest = async (url, payload) => {
 
 const saveInitialHRVState = () => {
   const now = Date.now();
-  setLocalStorage(getProductStorageKey("startTime"), now); // 設置開始時間
-  setLocalStorage(getProductStorageKey("UID"), UID.value); // 設置 UID
+  setLocalStorage(getProductStorageKey("startTime"), now);
+  setLocalStorage(getProductStorageKey("UID"), UID.value);
+};
+const clearHRVState = () => {
+  deleteLocalStorage(getProductStorageKey("startTime"));
+  deleteLocalStorage(getProductStorageKey("UID"));
 };
 
 const useStartAPI = async () => {
@@ -242,25 +246,38 @@ const useStartAPI = async () => {
 };
 
 const usePauseAPI = async () => {
-  const response = await apiRequest(
-    "https://23700999.com:8081/HMA/API_UsePauseStart.jsp",
-    { MID, Token, MAID, Mobile, UID: UID.value }
-  );
-  if (response && response.BID) {
-    BID.value = response.BID;
+  try {
+    const response = await apiRequest(
+      "https://23700999.com:8081/HMA/API_UsePauseStart.jsp",
+      { MID, Token, MAID, Mobile, UID: UID.value }
+    );
+    if (response && response.BID) {
+      BID.value = response.BID;
+      console.log("暫停API調用成功", response);
+    }
+  } catch (error) {
+    console.error("暫停API調用失敗", error);
   }
 };
 
 const usePauseEndAPI = async () => {
-  if (!BID.value) return;
-  await apiRequest("https://23700999.com:8081/HMA/API_UsePauseEnd.jsp", {
-    MID,
-    Token,
-    MAID,
-    Mobile,
-    UID: UID.value,
-    BID: BID.value,
-  });
+  if (!BID.value) {
+    console.error("無法恢復，因為 BID 不存在");
+    return;
+  }
+  try {
+    await apiRequest("https://23700999.com:8081/HMA/API_UsePauseEnd.jsp", {
+      MID,
+      Token,
+      MAID,
+      Mobile,
+      UID: UID.value,
+      BID: BID.value,
+    });
+    console.log("恢復API調用成功");
+  } catch (error) {
+    console.error("恢復API調用失敗", error);
+  }
 };
 
 const useEndAPI = async () => {
@@ -272,6 +289,7 @@ const useEndAPI = async () => {
     Mobile,
     UID: UID.value,
   });
+  clearHRVState(); // 清除檢測紀錄
 };
 
 // 計時器邏輯
@@ -308,37 +326,35 @@ const countdown = () => {
 };
 
 const toggleTimer = async () => {
-  if (Array.isArray(props.hasBeforeData) && props.hasBeforeData.length === 0) {
-    // 檢測前邏輯
-    console.log("檢測前流程");
+  if (buttonText.value === "HRV檢測") {
+    // 檢測前初始化
     const response = await useStartAPI();
     if (response && UID.value) {
-      // 更新狀態
       store.detectFlag = "1"; // 檢測前
-      store.detectUID = UID.value; // 保存檢測 UID
-      store.detectForm = props.productName; // 保存產品名稱
-      store.showHRVAlert = true; // 顯示 HRV 提示框
+      store.detectUID = UID.value;
+      store.detectForm = props.productName;
+      store.showHRVAlert = true;
 
       // 保存到 localStorage
       const now = Date.now();
       setLocalStorage(getProductStorageKey("startTime"), now);
       setLocalStorage(getProductStorageKey("UID"), UID.value);
 
-      // 更新按鈕狀態
       buttonText.value = "暫停";
-      startTimer(); // 開始倒數
+      startTimer();
     } else {
       console.error("檢測前 API 調用失敗");
     }
-  } else if (props.hasUseRecord) {
-    // 檢測後邏輯
-    console.log("檢測後流程");
-    store.detectFlag = "2"; // 更新為檢測後
-    store.detectUID = UID.value; // 保存檢測 UID
-    store.detectForm = props.productName; // 保存產品名稱
-    store.showHRVAlert = true; // 顯示 HRV 提示框
+  } else if (buttonText.value === "暫停") {
+    // 暫停計時
+    await usePauseAPI(); // 調用暫停API
+    pauseTimer();
+  } else if (buttonText.value === "繼續") {
+    // 恢復計時
+    await usePauseEndAPI(); // 調用恢復API
+    resumeTimer();
   } else {
-    console.error("未知流程，無法進行操作");
+    console.error("未知按鈕狀態");
   }
 };
 
@@ -355,7 +371,7 @@ const pauseTimer = () => {
   elapsedTime.value += (Date.now() - startTime.value) / 1000;
   startTime.value = null;
   buttonText.value = "繼續";
-  saveTimerState();
+  saveTimerState(); // 保存暫停狀態
 };
 
 const resumeTimer = () => {
@@ -363,25 +379,54 @@ const resumeTimer = () => {
   startTime.value = Date.now();
   buttonText.value = "暫停";
   countdown();
-  saveTimerState();
+  saveTimerState(); // 保存恢復狀態
 };
 
 onMounted(() => {
-  if (Array.isArray(props.hasBeforeData) && props.hasBeforeData.length === 0) {
+  const savedUID = getLocalStorage(getProductStorageKey("UID"));
+  const savedStartTime = getLocalStorage(getProductStorageKey("startTime"));
+
+  if (savedUID && !props.hasUseRecord) {
+    // 恢復未完成的檢測前紀錄
+    console.log("檢測前紀錄存在但未完成，恢復狀態");
+    UID.value = savedUID;
+    startTime.value = savedStartTime;
+
+    store.detectFlag = "1"; // 檢測前
+    store.detectUID = savedUID;
+    store.detectForm = props.productName;
+    buttonText.value = "HRV檢測";
+
+    const elapsed = Math.floor((Date.now() - savedStartTime) / 1000);
+    remainingTime.value = Math.max(props.totalTime - elapsed, 0);
+
+    if (remainingTime.value > 0) {
+      countdown(); // 繼續倒數
+    } else {
+      buttonText.value = "HRV檢測";
+      remainingTime.value = props.totalTime;
+    }
+  } else if (
+    Array.isArray(props.hasBeforeData) &&
+    props.hasBeforeData.length === 0
+  ) {
+    // 檢測前邏輯
     console.log("初始化為檢測前狀態");
     buttonText.value = "HRV檢測";
-    store.detectFlag = "1"; // 初始化為檢測前
+    store.detectFlag = "1";
   } else if (props.hasUseRecord) {
+    // 檢測後邏輯
     console.log("初始化為檢測後狀態");
     const record = props.todayUseRecord[0];
     UID.value = record.UID;
-    store.detectFlag = "2"; // 初始化為檢測後
+    store.detectFlag = "2";
     store.detectUID = record.UID;
     store.detectForm = record.ProductName;
-    store.showHRVAlert = true; // 顯示 HRV 提示框
+    store.showHRVAlert = true;
   } else {
     console.log("初始化為未知狀態");
     buttonText.value = "HRV檢測";
+    remainingTime.value = props.totalTime;
   }
 
   showButton.value = true; // 確保按鈕顯示
