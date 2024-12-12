@@ -321,7 +321,7 @@ const countdown = () => {
     if (remainingTime.value <= 0) {
       clearInterval(timerInterval);
       isCounting.value = false;
-      buttonText.value = "HRV检测";
+      buttonText.value = "HRV檢測";
       remainingTime.value = 0;
 
       // 清除 UID
@@ -329,6 +329,9 @@ const countdown = () => {
 
       // 调用结束 API
       useEndAPI();
+
+      // 刷新页面
+      window.location.reload();
     } else {
       requestAnimationFrame(tick);
     }
