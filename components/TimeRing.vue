@@ -231,15 +231,18 @@ const clearHRVState = () => {
 };
 
 const useStartAPI = async () => {
-  const response = await apiRequest(
-    "https://23700999.com:8081/HMA/API_UseStart.jsp",
-    { MID, Token, MAID, Mobile, ProductName: props.productName }
-  );
-  if (response && response.UID) {
-    UID.value = response.UID; // 保存 UID
+  try {
+    const response = await apiRequest(
+      "https://23700999.com:8081/HMA/API_UseStart.jsp",
+      { MID, Token, MAID, Mobile, ProductName: props.productName }
+    );
+    console.log("useStartAPI 回應:", response);
+    UID.value = response.UID;
     return response;
+  } catch (error) {
+    console.error("useStartAPI 請求失敗:", error);
+    return null;
   }
-  return null;
 };
 
 const usePauseAPI = async () => {
@@ -326,24 +329,64 @@ const countdown = () => {
 };
 
 const toggleTimer = async () => {
+  // 若今日已有檢測記錄，應直接顯示提示框
+  if (props.todayUseRecord.length > 0) {
+    console.log("執行檢測後邏輯 - 顯示提示框");
+    store.detectFlag = "2"; // 標記為檢測後
+    store.detectUID = UID.value;
+    store.detectForm = props.productName;
+
+    store.showHRVAlert = true; // 顯示提示框
+    return;
+  }
+
+  // 當檢測前數據為空時，執行檢測邏輯
   if (Array.isArray(props.hasBeforeData) && props.hasBeforeData.length === 0) {
     if (buttonText.value === "HRV檢測") {
-      const response = await useStartAPI();
-      if (response && UID.value) {
-        buttonText.value = "暫停";
-        startTimer();
+      console.log("執行檢測前邏輯 - 開始倒數");
+      try {
+        const response = await useStartAPI();
+        if (response && UID.value) {
+          store.detectFlag = "1"; // 標記為檢測前
+          store.detectUID = UID.value;
+          store.detectForm = props.productName;
+          store.showHRVAlert = true;
+          
+          // 保存檢測前狀態到 localStorage
+          const now = Date.now();
+          setLocalStorage(getProductStorageKey("startTime"), now);
+          setLocalStorage(getProductStorageKey("UID"), UID.value);
+
+          buttonText.value = "暫停"; // 更新按鈕文字
+          startTimer(); // 啟動倒數計時
+        } else {
+          console.error("檢測前 API 調用失敗，未獲得有效 UID");
+        }
+      } catch (error) {
+        console.error("檢測前 API 發生錯誤:", error);
       }
     } else if (buttonText.value === "暫停") {
-      await usePauseAPI();
-      pauseTimer();
+      console.log("執行檢測前邏輯 - 暫停倒數");
+      try {
+        await usePauseAPI(); // 調用暫停 API
+        pauseTimer();
+      } catch (error) {
+        console.error("暫停倒數時發生錯誤:", error);
+      }
     } else if (buttonText.value === "繼續") {
-      await usePauseEndAPI();
-      resumeTimer();
+      console.log("執行檢測前邏輯 - 恢復倒數");
+      try {
+        await usePauseEndAPI(); // 調用恢復 API
+        resumeTimer();
+      } catch (error) {
+        console.error("恢復倒數時發生錯誤:", error);
+      }
     }
-  } else if (props.todayUseRecord.length > 0) {
-    // 檢測後顯示提示框邏輯
-    store.showHRVAlert = true;
+    return;
   }
+
+  // 若條件不滿足，打印錯誤提示
+  console.error("未知邏輯分支，無法操作");
 };
 
 const startTimer = () => {
