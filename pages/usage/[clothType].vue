@@ -37,28 +37,28 @@
 
     <div class="usageInfoGroup" v-if="usageCardState === '保健版'">
       <div class="usageInfoCard">
-        <h3 style="font-weight: 700; font-size: 20px">量身訂製</h3>
+        <h3>量身訂製</h3>
         <p>依照您的健康狀況製作客製化調節貼片位置。</p>
       </div>
       <div class="usageInfoCard">
-        <h3 style="font-weight: 700; font-size: 20px">持續調節</h3>
+        <h3>持續調節</h3>
         <p>將第四代穿戴調節衣取代睡衣，每日穿著，持續調節自律神經生理機能。</p>
       </div>
       <div class="usageInfoCard">
-        <h3 style="font-weight: 700; font-size: 20px">洗滌維護</h3>
+        <h3>洗滌維護</h3>
         <p>可以直接手洗、或放置洗衣袋隨一般衣物清洗(勿加漂白水)。</p>
       </div>
     </div>
 
     <div class="usageInfoGroup" v-if="usageCardState === '居家治療儀'">
       <div class="usageInfoCard">
-        <h3 style="font-weight: 700; font-size: 20px">安全模式啟動</h3>
+        <h3>安全模式啟動</h3>
         <p>
           如果治療過程中遇到問題，設備會進入安全模式，使用者可以按下「解除」鍵，排除問題後繼續使用。
         </p>
       </div>
       <div class="usageInfoCard">
-        <h3 style="font-weight: 700; font-size: 20px">貼片脫落提示</h3>
+        <h3>貼片脫落提示</h3>
         <p>
           當設備提示貼片可能脫落時，應根據示意圖檢查貼片位置，並在確認貼好後按下「解除」鍵繼續治療。
         </p>
@@ -67,19 +67,19 @@
 
     <div class="usageInfoGroup" v-if="usageCardState === '調節衣'">
       <div class="usageInfoCard">
-        <h3 style="font-weight: 700; font-size: 20px">非侵入性治療</h3>
+        <h3>非侵入性治療</h3>
         <p>
           這款調節衣使用的是物理性治療，不涉及任何藥物，適合那些想要避免藥物副作用的患者。它依賴於專利技術的貼片，通過波頻影響神經系統​
         </p>
       </div>
       <div class="usageInfoCard">
-        <h3 style="font-weight: 700; font-size: 20px">針對自律神經問題設計</h3>
+        <h3>針對自律神經問題設計</h3>
         <p>
           穿戴調節衣專為改善自律神經失調而設計，適用於失眠、焦慮、情緒不穩定等問題，也能幫助增強免疫系統
         </p>
       </div>
       <div class="usageInfoCard">
-        <h3 style="font-weight: 700; font-size: 20px">適合居家使用</h3>
+        <h3>適合居家使用</h3>
         <p>
           普通版穿戴調節衣是一款設計簡單、方便的保健產品，適合在家中進行日常使用，無需到診所即可完成自律神經的調節
         </p>
@@ -670,6 +670,8 @@ export default {
         border-left: 2px solid #65558f;
       }
       h3 {
+        font-size: 20px;
+        color: #1e1e1e;
         margin-bottom: 0.75rem;
       }
       h4 {
