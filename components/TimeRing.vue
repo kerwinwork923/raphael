@@ -414,7 +414,11 @@ onMounted(() => {
     const savedUID = getLocalStorage(getProductStorageKey("UID"));
     const savedStartTime = getLocalStorage(getProductStorageKey("startTime"));
 
-    if (props.todayUseRecord.length > 0) {
+    // 确保 todayUseRecord 是数组并非 null 或 undefined
+    if (
+      Array.isArray(props.todayUseRecord) &&
+      props.todayUseRecord.length > 0
+    ) {
       console.log("今日已檢測，初始化為檢測後狀態");
       store.detectFlag = "2";
       store.detectUID = props.todayUseRecord[0]?.UID;
@@ -446,10 +450,17 @@ onMounted(() => {
       return;
     }
 
-    console.log("初始化為檢測前狀態");
-    store.detectFlag = "1";
-    buttonText.value = "HRV檢測";
-    remainingTime.value = props.totalTime;
+    // 确保 hasBeforeData 是数组并非 null 或 undefined
+    if (
+      Array.isArray(props.hasBeforeData) &&
+      props.hasBeforeData.length === 0
+    ) {
+      console.log("初始化為檢測前狀態");
+      store.detectFlag = "1";
+      buttonText.value = "HRV檢測";
+      remainingTime.value = props.totalTime;
+      return;
+    }
   } catch (error) {
     console.error("onMounted 初始化出錯:", error);
   }
