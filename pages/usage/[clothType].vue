@@ -307,7 +307,7 @@ export default {
     const useData = ref([]);
     const detectData = ref([]);
     const loading = ref(false);
-    const hasUseRecord = ref(false);
+
     const hasDetectRecord = ref(false);
     const hasBeforeData = ref(false);
 
@@ -506,6 +506,7 @@ export default {
 
           console.log("當日檢測紀錄（治療前）:", hasBeforeRecord);
           console.log("當日檢測紀錄（治療後）:", hasAfterRecord);
+          console.log("當日使用紀錄:", todayUseRecord.value);
         }
       } catch (error) {
         console.error("Error in getStart:", error);
@@ -621,7 +622,6 @@ export default {
       handleCountdownComplete,
       handleHRVCheck,
       handleHRVCompleted,
-      hasUseRecord,
       hasDetectRecord,
 
       todayUseRecord,
