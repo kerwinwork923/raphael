@@ -101,6 +101,14 @@ watch(
 );
 
 watch(
+  () => props.hasDetectRecord,
+  (newVal) => {
+    clearInterval(timerInterval);
+    isCounting.value = false;
+  }
+);
+
+watch(
   () => props.showMessageProp,
   (newVal) => {
     showMessage.value = newVal;
@@ -323,13 +331,15 @@ const toggleTimer = async () => {
   if (buttonText.value === "HRV檢測") {
     // 執行 HRV 檢測邏輯
     const uid = props.todayUseRecord[0]?.UID; // 假設 `useStartAPI` 返回 UID
-    if (uid != "") {
+    if (uid != "" && uid != undefined) {
       // 更新 Pinia store 並顯示提示框
       store.detectFlag = "2";
       store.detectUID = uid;
       store.detectForm = props.productName;
       store.showHRVAlert = true; // 顯示提示框
       console.log("HRV 提示框已啟動，UID:", uid);
+    } else {
+      startTimer();
     }
   } else if (buttonText.value === "繼續") {
     startTimer(); // 開始倒數計時
