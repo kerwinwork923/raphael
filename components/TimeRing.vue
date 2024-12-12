@@ -279,6 +279,7 @@ const usePauseEndAPI = async () => {
 
 const useEndAPI = async () => {
   if (!UID.value) return;
+
   await apiRequest("https://23700999.com:8081/HMA/API_UseEnd.jsp", {
     MID,
     Token,
@@ -286,7 +287,9 @@ const useEndAPI = async () => {
     Mobile,
     UID: UID.value,
   });
+
   clearHRVState(); // 清除檢測紀錄
+  showButton.value = true; // 確保按鈕在檢測完成後顯示
 };
 
 // 計時器邏輯
@@ -308,12 +311,12 @@ const countdown = () => {
     if (remainingTime.value <= 0) {
       clearInterval(timerInterval);
       isCounting.value = false;
-      buttonText.value = "HRV檢測";
+      buttonText.value = "HRV檢測"; // 重置按鈕文字
       remainingTime.value = 0;
+      showButton.value = true; // 確保按鈕可見
 
       // 確保倒數結束時觸發 API
       useEndAPI();
-      showButton.value = true;
     } else {
       requestAnimationFrame(tick);
     }
@@ -324,45 +327,22 @@ const countdown = () => {
 
 const toggleTimer = async () => {
   if (Array.isArray(props.hasBeforeData) && props.hasBeforeData.length === 0) {
-    // 檢測前邏輯
     if (buttonText.value === "HRV檢測") {
-      console.log("執行檢測前邏輯 - 開始倒數");
       const response = await useStartAPI();
       if (response && UID.value) {
-        store.detectFlag = "1"; // 標記為檢測前
-        store.detectUID = UID.value;
-        store.detectForm = props.productName;
-
-        // 保存檢測前狀態到 localStorage
-        const now = Date.now();
-        setLocalStorage(getProductStorageKey("startTime"), now);
-        setLocalStorage(getProductStorageKey("UID"), UID.value);
-
-        buttonText.value = "暫停"; // 更新按鈕文字
-        startTimer(); // 啟動倒數計時
-      } else {
-        console.error("檢測前 API 調用失敗");
+        buttonText.value = "暫停";
+        startTimer();
       }
     } else if (buttonText.value === "暫停") {
-      console.log("執行檢測前邏輯 - 暫停倒數");
-      await usePauseAPI(); // 調用暫停 API
+      await usePauseAPI();
       pauseTimer();
     } else if (buttonText.value === "繼續") {
-      console.log("執行檢測前邏輯 - 恢復倒數");
-      await usePauseEndAPI(); // 調用恢復 API
+      await usePauseEndAPI();
       resumeTimer();
     }
   } else if (props.todayUseRecord.length > 0) {
-    // 檢測後邏輯
-    console.log("執行檢測後邏輯 - 顯示提示框");
-    store.detectFlag = "2"; // 標記為檢測後
-    store.detectUID = UID.value;
-    store.detectForm = props.productName;
-
-    // 僅顯示提示框，不啟動倒數計時
+    // 檢測後顯示提示框邏輯
     store.showHRVAlert = true;
-  } else {
-    console.error("未知狀態，無法操作");
   }
 };
 
