@@ -355,6 +355,7 @@ const toggleTimer = async () => {
     if (response && UID.value) {
       store.detectFlag = "1";
       store.detectUID = UID.value;
+      store.detectForm = props.productName;
       store.showHRVAlert = true;
       const now = Date.now();
       setLocalStorage(getProductStorageKey("startTime"), now);
