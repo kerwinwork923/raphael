@@ -335,7 +335,7 @@ const toggleTimer = async () => {
   if (props.todayUseRecord.length > 0) {
     console.log("今日已完成檢測，顯示提示框");
     store.detectFlag = "2";
-    store.detectUID = UID.value;
+    store.detectUID = props.todayUseRecord[0].UID;
     store.showHRVAlert = true;
     return;
   }
@@ -407,6 +407,17 @@ onMounted(() => {
     const savedUID = getLocalStorage(getProductStorageKey("UID"));
     const savedStartTime = getLocalStorage(getProductStorageKey("startTime"));
 
+    // 检测后逻辑：使用 todayUseRecord 的 UID
+    if (props.todayUseRecord.length > 0) {
+      console.log("今日已檢測，初始化為檢測後狀態");
+      store.detectFlag = "2";
+      store.detectUID = props.todayUseRecord[0]?.UID; // 使用今日记录的 UID
+      buttonText.value = "HRV檢測";
+      remainingTime.value = props.totalTime;
+      return;
+    }
+
+    // 检测进行中或暂停恢复逻辑
     if (savedUID) {
       console.log("檢測到已存在的計時 UID，嘗試恢復計時");
       UID.value = savedUID;
@@ -427,19 +438,16 @@ onMounted(() => {
           remainingTime.value = props.totalTime;
         }
       }
-    } else if (props.todayUseRecord.length > 0) {
-      console.log("今日已檢測，初始化為檢測後狀態");
-      store.detectFlag = "2";
-      buttonText.value = "HRV檢測";
-      remainingTime.value = props.totalTime;
-    } else {
-      console.log("初始化為檢測前狀態");
-      store.detectFlag = "1";
-      buttonText.value = "HRV檢測";
-      remainingTime.value = props.totalTime;
+      return;
     }
 
-    showButton.value = true; // 確保按鈕顯示
+    // 检测前逻辑
+    console.log("初始化為檢測前狀態");
+    store.detectFlag = "1";
+    buttonText.value = "HRV檢測";
+    remainingTime.value = props.totalTime;
+
+    showButton.value = true; // 确保按钮显示
   } catch (error) {
     console.error("onMounted 初始化出錯:", error);
   }
