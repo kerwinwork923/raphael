@@ -5,7 +5,7 @@
   <div class="usageWrap">
     <TitleMenu Text="使用紀錄" :link="`back`" />
     <TimeRing
-      :totalTime="30"
+      :totalTime="300"
       :product-name="productName"
       :hasDetectRecord="hasDetectRecord"
       :todayUseRecord="todayUseRecord"
@@ -489,8 +489,6 @@ export default {
             (record) => record?.BcAf === "治療後"
           );
 
-          
-          
           // 更新 hasDetectRecord 值
           hasDetectRecord.value = hasBeforeRecord && hasAfterRecord;
 
