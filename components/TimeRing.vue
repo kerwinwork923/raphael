@@ -314,10 +314,14 @@ const countdown = () => {
     if (remainingTime.value <= 0) {
       clearInterval(timerInterval);
       isCounting.value = false;
-      buttonText.value = "HRV檢測";
+      buttonText.value = "HRV检测";
       remainingTime.value = 0;
+
+      // 清除 UID
       clearHRVState();
-      useEndAPI(); // 確保倒數結束時觸發 API
+
+      // 调用结束 API
+      useEndAPI();
     } else {
       requestAnimationFrame(tick);
     }
@@ -327,6 +331,16 @@ const countdown = () => {
 };
 
 const toggleTimer = async () => {
+  // 如果有 todayUseRecord，直接进入检测后逻辑
+  if (props.todayUseRecord.length > 0) {
+    console.log("今日已完成檢測，顯示提示框");
+    store.detectFlag = "2";
+    store.detectUID = UID.value;
+    store.showHRVAlert = true;
+    return;
+  }
+
+  // 如果存在 UID，说明正在计时或已暂停，处理恢复或暂停逻辑
   if (UID.value) {
     console.log("已有計時 UID，恢復倒數或暫停");
     if (buttonText.value === "暫停") {
@@ -341,14 +355,7 @@ const toggleTimer = async () => {
     return;
   }
 
-  if (props.todayUseRecord.length > 0) {
-    console.log("今日已完成檢測，顯示提示框");
-    store.detectFlag = "2";
-    store.detectUID = UID.value;
-    store.showHRVAlert = true;
-    return;
-  }
-
+  // 如果没有 todayUseRecord 并且没有计时 UID，进入检测前逻辑
   if (Array.isArray(props.hasBeforeData) && props.hasBeforeData.length === 0) {
     console.log("檢測前開始倒數");
     const response = await useStartAPI();

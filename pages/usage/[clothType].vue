@@ -5,7 +5,7 @@
   <div class="usageWrap">
     <TitleMenu Text="使用紀錄" :link="`back`" />
     <TimeRing
-      :totalTime="180"
+      :totalTime="120"
       :product-name="productName"
       :hasDetectRecord="hasDetectRecord"
       :todayUseRecord="todayUseRecord"
