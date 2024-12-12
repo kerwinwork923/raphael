@@ -56,7 +56,7 @@ const props = defineProps({
   },
   todayUseRecord: {
     type: Array,
-    default: () => [],
+    default: () => [], // 預設為空數組
   },
 });
 
@@ -91,15 +91,6 @@ if (!MID || !Token || !MAID || !Mobile) {
   router.push("/");
 }
 
-const ThisStartBtnActive = ref(props.startBtnActive);
-
-watch(
-  () => props.startBtnActive,
-  (newValue) => {
-    ThisStartBtnActive.value = newValue;
-  }
-);
-
 watch(
   () => props.hasDetectRecord,
   (newVal) => {
@@ -108,17 +99,9 @@ watch(
   }
 );
 
-watch(
-  () => props.showMessageProp,
-  (newVal) => {
-    showMessage.value = newVal;
-  }
-);
-
-const remainingTime = ref(props.totalTime);
-const isCounting = ref(false);
-const isPaused = ref(false);
-const showMessage = ref(false);
+const remainingTime = ref(props.totalTime); //倒數時間
+const isCounting = ref(false); //正在倒數
+const isPaused = ref(false); //暫停狀態
 
 const UID = ref(""); // 保存 UID
 const BID = ref(""); // 保存 BID
@@ -162,48 +145,37 @@ const saveTimerState = () => {
   const timerState = {
     remainingTime: remainingTime.value,
     elapsedTime: elapsedTime.value,
-    startTime: isPaused.value ? null : now, // 暫停時，開始時間應為 null
+    startTime: isPaused.value ? null : now,
     isPaused: isPaused.value,
     isCounting: isCounting.value,
     UID: UID.value,
     BID: BID.value,
   };
-
-  // 保存到 Cookie
-  try {
-    setCookie(getProductCookieKey("timerState"), JSON.stringify(timerState), 1);
-  } catch (error) {
-    console.error("保存計時器狀態到 Cookie 時失敗：", error);
-  }
+  setCookie(getProductCookieKey("timerState"), JSON.stringify(timerState), 1);
 };
 
-// 從動態 Cookie 加載計時器狀態
 const loadTimerState = () => {
   const savedState = getCookie(getProductCookieKey("timerState"));
   if (savedState) {
-    try {
-      const timerState = JSON.parse(savedState);
-      remainingTime.value = timerState.remainingTime || props.totalTime;
-      elapsedTime.value = timerState.elapsedTime || 0;
-      startTime.value = timerState.startTime || 0;
-      isPaused.value = timerState.isPaused || false;
-      isCounting.value = timerState.isCounting || false;
-      UID.value = timerState.UID || "";
-      BID.value = timerState.BID || "";
+    const timerState = JSON.parse(savedState);
+    remainingTime.value = timerState.remainingTime || props.totalTime;
+    elapsedTime.value = timerState.elapsedTime || 0;
+    startTime.value = timerState.startTime || 0;
+    isPaused.value = timerState.isPaused || false;
+    isCounting.value = timerState.isCounting || false;
+    UID.value = timerState.UID || "";
+    BID.value = timerState.BID || "";
 
-      // 如果是暫停狀態，計算當前剩餘時間
-      if (isPaused.value) {
-        console.log("暫停狀態載入成功");
-      } else if (startTime.value) {
-        const now = Date.now();
-        const elapsedSinceStart = (now - startTime.value) / 1000;
-        remainingTime.value = Math.max(
-          props.totalTime - elapsedTime.value - elapsedSinceStart,
-          0
-        );
-      }
-    } catch (error) {
-      console.error("無法解析計時器狀態：", error);
+    if (isPaused.value) {
+      buttonText.value = "繼續"; // 按鈕文字設為繼續
+    } else if (startTime.value) {
+      const now = Date.now();
+      const elapsedSinceStart = (now - startTime.value) / 1000;
+      remainingTime.value = Math.max(
+        props.totalTime - elapsedTime.value - elapsedSinceStart,
+        0
+      );
+      if (remainingTime.value > 0) countdown();
     }
   }
 };
@@ -300,8 +272,7 @@ const countdown = () => {
   if (timerInterval) clearInterval(timerInterval);
 
   const tick = () => {
-    if (isPaused.value) return;
-
+    if (isPaused.value) return; // 暫停時不更新
     const now = Date.now();
     const elapsedSinceStart = (now - startTime.value) / 1000;
     remainingTime.value = Math.max(
@@ -312,7 +283,7 @@ const countdown = () => {
     if (remainingTime.value <= 0) {
       clearInterval(timerInterval);
       isCounting.value = false;
-      showButton.value = true; // 再次顯示 HRV 檢測按鈕
+      showButton.value = true; // 顯示按鈕
       buttonText.value = "HRV檢測";
       useEndAPI();
     } else {
@@ -322,6 +293,7 @@ const countdown = () => {
 
   requestAnimationFrame(tick);
 };
+
 const buttonText = ref("HRV檢測"); // 按鈕文字
 const isHRVCheckComplete = ref(false); // HRV 檢測是否完成
 
@@ -329,22 +301,22 @@ const showButton = ref(false);
 
 const toggleTimer = async () => {
   if (buttonText.value === "HRV檢測") {
-    // 執行 HRV 檢測邏輯
-    const uid = props.todayUseRecord[0]?.UID; // 假設 `useStartAPI` 返回 UID
+    const uid = props.todayUseRecord[0]?.UID; // 從使用記錄中獲取 UID
     if (uid != "" && uid != undefined) {
-      // 更新 Pinia store 並顯示提示框
-      store.detectFlag = "2";
-      store.detectUID = uid;
-      store.detectForm = props.productName;
+      // 更新 Pinia store 狀態
+      store.detectFlag = "2"; // 設置檢測進行中標記
+      store.detectUID = uid; // 設置檢測 UID
+      store.detectForm = props.productName; // 設置產品名稱
       store.showHRVAlert = true; // 顯示提示框
+
       console.log("HRV 提示框已啟動，UID:", uid);
     } else {
-      startTimer();
+      await startTimer(); // 如果無法獲取 UID，則開始計時
     }
   } else if (buttonText.value === "繼續") {
-    startTimer(); // 開始倒數計時
+    await resumeTimer();
   } else if (buttonText.value === "暫停") {
-    pauseTimer(); // 暫停計時
+    await pauseTimer();
   }
 };
 
@@ -447,22 +419,12 @@ const pauseTimer = async () => {
     console.error("UID 不存在，無法暫停！");
     return;
   }
-
-  // 更新暫停狀態
   isPaused.value = true;
   elapsedTime.value += (Date.now() - startTime.value) / 1000; // 累計已經過的時間
   startTime.value = null; // 清空開始時間
   buttonText.value = "繼續"; // 更新按鈕文字
-
-  // 調用 API 保存暫停狀態
-  try {
-    await usePauseAPI();
-  } catch (error) {
-    console.error("暫停時保存失敗：", error);
-  }
-
-  // 更新暫停狀態到 Cookie
-  saveTimerState();
+  await usePauseAPI(); // 調用 API
+  saveTimerState(); // 儲存狀態
 };
 
 const resumeTimer = async () => {
@@ -472,10 +434,11 @@ const resumeTimer = async () => {
   }
   isPaused.value = false;
   startTime.value = Date.now();
-  buttonText.value = "暫停"; // 更新按鈕為暫停
-  countdown();
-  saveTimerState();
+  buttonText.value = "暫停"; // 更新按鈕文字
+  countdown(); // 重新啟動倒數
+  saveTimerState(); // 儲存狀態
 };
+
 const calculateResetTime = (currentTime) => {
   const resetTime = new Date(currentTime);
   resetTime.setHours(5, 0, 0, 0); // 設定時間為今日凌晨 5 點

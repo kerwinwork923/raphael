@@ -12,7 +12,7 @@
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
     />
-  
+
     <div class="usageInfoGroup" v-if="usageCardState === '紅光版'">
       <div class="usageInfoCard">
         <h3>電量提示燈使用說明</h3>
@@ -399,7 +399,7 @@ export default {
     console.log(useData[0]);
 
     // const goNext = () => {
-    //   if (!startBtnActive.value || redirectToHRV.value) {
+    //   if (  redirectToHRV.value) {
     //     // 设置 detectFlag
     //     const uid = detectData.value.find(
     //       (record) => record.BcAf === "治療前"
@@ -457,38 +457,53 @@ export default {
         if (response.status === 200) {
           const records = response.data?.UseRecord || [];
           const hrvRecords = response.data?.HRV2Record || [];
-          useData.value = records.filter(
-            (record) => record.ProductName === productName
-          );
-          detectData.value = hrvRecords.filter(
-            (record) => record.ProductName === productName
-          );
 
-          // 計算是否有今日使用紀錄
+          // 過濾出與產品名稱匹配的使用與檢測紀錄
+          useData.value = Array.isArray(records)
+            ? records.filter((record) => record.ProductName === productName)
+            : [];
+
+          detectData.value = Array.isArray(hrvRecords)
+            ? hrvRecords.filter((record) => record.ProductName === productName)
+            : [];
+
+          // 計算當日重置時間（凌晨5點）
           const resetTime = calculateResetTime(new Date());
-          hasUseRecord.value = useData.value.some((record) => {
-            const endTime = new Date(record.EndTime.replace(/\//g, "-"));
-            return endTime >= resetTime;
-          });
 
-          todayUseRecord.value = useData.value.filter((record) => {
-            const endTime = new Date(record.EndTime.replace(/\//g, "-"));
-            return endTime >= resetTime;
-          });
-          // 計算是否有「治療前」和「治療後」的紀錄
-          const todayDetectRecords = detectData.value.filter((record) => {
-            const checkTime = new Date(record.CheckTime.replace(/\//g, "-"));
-            return checkTime >= resetTime;
-          });
+          // 過濾當日（5點為基準）的檢測紀錄
+          const todayDetectRecords = Array.isArray(detectData.value)
+            ? detectData.value.filter((record) => {
+                const checkTime = record?.CheckTime
+                  ? new Date(record.CheckTime.replace(/\//g, "-"))
+                  : null;
+                return checkTime && checkTime >= resetTime; // 檢查是否為當天紀錄
+              })
+            : [];
 
+          // 判斷是否同時存在「治療前」和「治療後」的紀錄
           const hasBeforeRecord = todayDetectRecords.some(
-            (record) => record.BcAf === "治療前"
-          );
-          const hasAfterRecord = todayDetectRecords.some(
-            (record) => record.BcAf === "治療後"
+            (record) => record?.BcAf === "治療前"
           );
 
+          const hasAfterRecord = todayDetectRecords.some(
+            (record) => record?.BcAf === "治療後"
+          );
+
+          
+          
+          // 更新 hasDetectRecord 值
           hasDetectRecord.value = hasBeforeRecord && hasAfterRecord;
+
+          // 過濾當日的使用記錄（以凌晨5點為基準）
+          todayUseRecord.value = useData.value.filter((record) => {
+            const endTime = record?.EndTime
+              ? new Date(record.EndTime.replace(/\//g, "-"))
+              : null;
+            return endTime && endTime >= resetTime; // 確保有值並且在重置時間後
+          });
+
+          console.log("當日檢測紀錄（治療前）:", hasBeforeRecord);
+          console.log("當日檢測紀錄（治療後）:", hasAfterRecord);
         }
       } catch (error) {
         console.error("Error in getStart:", error);
@@ -497,29 +512,15 @@ export default {
       }
     };
 
-    const parseEndTime = (endTimeStr) => {
-      if (!endTimeStr) return null;
-      return new Date(endTimeStr.replace(/\//g, "-").replace(" ", "T"));
-    };
-
+    // 計算當日重置時間（凌晨5點）
     const calculateResetTime = (now) => {
       const resetTime = new Date(now);
       resetTime.setHours(5, 0, 0, 0);
       if (now < resetTime) {
-        resetTime.setDate(resetTime.getDate() - 1);
+        resetTime.setDate(resetTime.getDate() - 1); // 如果當前時間在5點之前，重置時間設為前一天
       }
       return resetTime;
     };
-
-    // const checkResetTime = () => {
-    //   if (hasUseRecord.value || hasDetectRecord.value) {
-    //     startBtnActive.value = false;
-    //     showMessage.value = true;
-    //   } else {
-    //     startBtnActive.value = true;
-    //     showMessage.value = false;
-    //   }
-    // };
 
     // 定時每分鐘檢查一次
     const scheduleNextCheck = () => {
