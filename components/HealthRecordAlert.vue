@@ -89,6 +89,8 @@ export default {
 
   p {
     margin-left: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #1e1e1e;
     color: #666;
     font-size: 18px;
     letter-spacing: 2px;
