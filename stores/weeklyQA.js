@@ -48,7 +48,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
       if (state.nowState === "score") {
         return state.currentStep <= 1
           ? "上一步"
-          : `上一步(${state.currentStep}/${state.totalStep})`;
+          : `上一頁 (${state.currentStep}/${state.totalStep})`;
       } else if (state.nowState === "times") {
         return state.timesStep < 2
           ? "上一步"
