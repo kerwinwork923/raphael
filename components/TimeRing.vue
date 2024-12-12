@@ -421,9 +421,10 @@ onMounted(() => {
           buttonText.value = "暫停";
           countdown();
         } else {
-          console.log("計時已完成，重置為初始狀態");
+          console.log("計時已完成，清除狀態並重置為初始狀態");
           clearHRVState();
           buttonText.value = "HRV檢測";
+          remainingTime.value = props.totalTime;
         }
       }
     } else if (props.todayUseRecord.length > 0) {
