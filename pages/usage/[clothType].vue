@@ -670,6 +670,8 @@ export default {
         border-left: 2px solid #65558f;
       }
       h3 {
+        font-size: 20px;
+        color: #1e1e1e;
         margin-bottom: 0.75rem;
       }
       h4 {
