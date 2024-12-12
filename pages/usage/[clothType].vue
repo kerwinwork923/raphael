@@ -7,12 +7,12 @@
     <TimeRing
       :totalTime="30"
       :product-name="productName"
-      :hasUseRecord="hasUseRecord"
       :hasDetectReord="hasDetectRecord"
+      :todayUseRecord="todayUseRecord"
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
     />
-  
+
     <div class="usageInfoGroup" v-if="usageCardState === '紅光版'">
       <div class="usageInfoCard">
         <h3>電量提示燈使用說明</h3>
@@ -307,7 +307,7 @@ export default {
     const detectData = ref([]);
     const loading = ref(false);
     const hasUseRecord = ref(false);
-    const hasDetectRecord = ref(false);
+    // const hasDetectRecord = ref(false);
     const hasBeforeDetect = ref(false);
 
     const startBtnActive = ref(false);
@@ -318,6 +318,8 @@ export default {
 
     const useActive = ref(true);
     const detectActive = ref(false);
+
+    const todayUseRecord = ref(null);
 
     const months = Array.from({ length: 12 }, (_, i) => i + 1).reverse();
     const displayYears = computed(() => {
@@ -372,11 +374,11 @@ export default {
       window.history.back();
     };
 
-    if (startBtnActive.value) {
-      goNextText.value = "返回產品頁面";
-    } else {
-      goNextText.value = "HRV檢測";
-    }
+    // if (startBtnActive.value) {
+    goNextText.value = "返回產品頁面";
+    // } else {
+    //   goNextText.value = "HRV檢測";
+    // }
 
     watch(useData, () => {
       // 當 useData 改變時，重新計算 filteredUsage
@@ -386,11 +388,11 @@ export default {
     watch(
       () => startBtnActive.value,
       (newValue) => {
-        if (newValue) {
-          goNextText.value = "返回產品頁面";
-        } else {
-          goNextText.value = "HRV檢測";
-        }
+        goNextText.value = "返回產品頁面";
+
+        //  else {
+        //   goNextText.value = "HRV檢測";
+        // }
       },
       { immediate: true }
     );
@@ -420,10 +422,6 @@ export default {
     // };
 
     const goNext = () => {
-      if (!startBtnActive.value) {
-        alert("今日已使用，請於明日再使用！");
-        return;
-      }
       router.push("/usageHistory");
     };
 
@@ -473,6 +471,10 @@ export default {
             return endTime >= resetTime;
           });
 
+          todayUseRecord.value = useData.value.filter((record) => {
+            const endTime = new Date(record.EndTime.replace(/\//g, "-"));
+            return endTime >= resetTime;
+          });
           // 計算是否有「治療前」和「治療後」的紀錄
           const todayDetectRecords = detectData.value.filter((record) => {
             const checkTime = new Date(record.CheckTime.replace(/\//g, "-"));
@@ -486,7 +488,7 @@ export default {
             (record) => record.BcAf === "治療後"
           );
 
-          hasDetectRecord.value = hasBeforeRecord && hasAfterRecord;
+          // hasDetectRecord.value = hasBeforeRecord && hasAfterRecord;
         }
       } catch (error) {
         console.error("Error in getStart:", error);
@@ -509,15 +511,15 @@ export default {
       return resetTime;
     };
 
-    const checkResetTime = () => {
-      if (hasUseRecord.value || hasDetectRecord.value) {
-        startBtnActive.value = false;
-        showMessage.value = true;
-      } else {
-        startBtnActive.value = true;
-        showMessage.value = false;
-      }
-    };
+    // const checkResetTime = () => {
+    //   if (hasUseRecord.value || hasDetectRecord.value) {
+    //     startBtnActive.value = false;
+    //     showMessage.value = true;
+    //   } else {
+    //     startBtnActive.value = true;
+    //     showMessage.value = false;
+    //   }
+    // };
 
     // 定時每分鐘檢查一次
     const scheduleNextCheck = () => {
@@ -530,13 +532,13 @@ export default {
 
       const delay = nextReset - now; // 下次检查的延迟时间
       setTimeout(() => {
-        checkResetTime();
+        // checkResetTime();
         scheduleNextCheck();
       }, delay);
     };
 
     // 在組件加載時初始化檢查
-    checkResetTime();
+    // checkResetTime();
 
     const updateBeforeDetect = () => {
       const resetTime = calculateResetTime(new Date());
@@ -551,7 +553,7 @@ export default {
 
     const init = async () => {
       await getStart();
-      checkResetTime();
+      // checkResetTime();
       updateBeforeDetect();
     };
 
@@ -617,8 +619,9 @@ export default {
       handleHRVCheck,
       handleHRVCompleted,
       hasUseRecord,
-      hasDetectRecord,
+      // hasDetectRecord,
       hasBeforeDetect,
+      todayUseRecord,
     };
   },
 };
