@@ -182,7 +182,7 @@ export default {
   }
   .usageHistoryInfoList {
     counter-reset: list-counter;
-    margin-top: 0.75rem;
+    margin-top: 0.5rem;
     li {
       display: flex;
       line-height: 29.1px;
@@ -234,11 +234,11 @@ export default {
   font-size: 20px;
   font-weight: 400;
   letter-spacing: 0.15px;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
 }
 .precautionsList {
   list-style-type: disc;
-  margin-top: 0.75rem;
+  margin-top: 0.5rem;
   counter-reset: list-counter;
 
   li {
