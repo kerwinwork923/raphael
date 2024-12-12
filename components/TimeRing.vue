@@ -100,7 +100,6 @@ watch(
   }
 );
 
-
 watch(
   () => props.showMessageProp,
   (newVal) => {
@@ -323,8 +322,8 @@ const showButton = ref(false);
 const toggleTimer = async () => {
   if (buttonText.value === "HRV檢測") {
     // 執行 HRV 檢測邏輯
-    const uid = props.todayUseRecord[0].UID; // 假設 `useStartAPI` 返回 UID
-    if (uid) {
+    const uid = props.todayUseRecord[0]?.UID; // 假設 `useStartAPI` 返回 UID
+    if (uid != "") {
       // 更新 Pinia store 並顯示提示框
       store.detectFlag = "2";
       store.detectUID = uid;
