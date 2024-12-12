@@ -8,7 +8,7 @@
       src="/assets/imgs/selectClose.svg"
       alt=""
     />
-    <h3>拉菲爾人本診所提醒事項</h3>
+    <h3>智平衡健康集團提醒事項</h3>
     <ul>
       <li>
         測量過程長<span class="point">約60秒</span
