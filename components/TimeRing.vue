@@ -90,8 +90,10 @@ if (!MID || !Token || !MAID || !Mobile) {
 watch(
   () => props.hasDetectRecord,
   (newVal) => {
-    clearInterval(timerInterval);
-    isCounting.value = false;
+    if (newVal) {
+      console.log("检测记录存在，隐藏按钮");
+      showButton.value = false; // 隐藏按钮
+    }
   }
 );
 
@@ -134,7 +136,12 @@ import { useCommon } from "../stores/common";
 const store = useCommon();
 
 const buttonText = ref("HRV檢測"); // 按鈕文字
-const showButton = ref(true); // 顯示按鈕的狀態
+const showButton = computed(() => {
+  if (props.hasDetectRecord) {
+    return false; // 如果已经检测完成，始终隐藏按钮
+  }
+  return true; // 其他情况根据逻辑显示
+});
 
 // 計算進度條樣式
 const progressStyle = computed(() => {
@@ -407,17 +414,15 @@ onMounted(() => {
     const savedUID = getLocalStorage(getProductStorageKey("UID"));
     const savedStartTime = getLocalStorage(getProductStorageKey("startTime"));
 
-    // 检测后逻辑：使用 todayUseRecord 的 UID
     if (props.todayUseRecord.length > 0) {
       console.log("今日已檢測，初始化為檢測後狀態");
       store.detectFlag = "2";
-      store.detectUID = props.todayUseRecord[0]?.UID; // 使用今日记录的 UID
+      store.detectUID = props.todayUseRecord[0]?.UID;
       buttonText.value = "HRV檢測";
       remainingTime.value = props.totalTime;
       return;
     }
 
-    // 检测进行中或暂停恢复逻辑
     if (savedUID) {
       console.log("檢測到已存在的計時 UID，嘗試恢復計時");
       UID.value = savedUID;
@@ -441,13 +446,10 @@ onMounted(() => {
       return;
     }
 
-    // 检测前逻辑
     console.log("初始化為檢測前狀態");
     store.detectFlag = "1";
     buttonText.value = "HRV檢測";
     remainingTime.value = props.totalTime;
-
-    showButton.value = true; // 确保按钮显示
   } catch (error) {
     console.error("onMounted 初始化出錯:", error);
   }
