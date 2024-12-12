@@ -5,10 +5,11 @@
   <div class="usageWrap">
     <TitleMenu Text="使用紀錄" :link="`back`" />
     <TimeRing
-      :totalTime="300"
+      :totalTime="180"
       :product-name="productName"
       :hasDetectRecord="hasDetectRecord"
       :todayUseRecord="todayUseRecord"
+      :hasBeforeData="hasBeforeData"
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
     />
@@ -308,7 +309,7 @@ export default {
     const loading = ref(false);
     const hasUseRecord = ref(false);
     const hasDetectRecord = ref(false);
-    const hasBeforeDetect = ref(false);
+    const hasBeforeData = ref(false);
 
     const startBtnActive = ref(false);
     const showMessage = ref(false);
@@ -484,6 +485,9 @@ export default {
           const hasBeforeRecord = todayDetectRecords.some(
             (record) => record?.BcAf === "治療前"
           );
+          hasBeforeData.value = todayDetectRecords.filter(
+            (record) => record?.BcAf === "治療前"
+          );
 
           const hasAfterRecord = todayDetectRecords.some(
             (record) => record?.BcAf === "治療後"
@@ -540,14 +544,14 @@ export default {
     // checkResetTime();
 
     const updateBeforeDetect = () => {
-      const resetTime = calculateResetTime(new Date());
-      const todayDetectRecords = detectData.value.filter((record) => {
-        const checkTime = new Date(record.CheckTime.replace(/\//g, "-"));
-        return checkTime >= resetTime;
-      });
-      hasBeforeDetect.value = todayDetectRecords.some(
-        (record) => record.BcAf === "治療前"
-      );
+      // const resetTime = calculateResetTime(new Date());
+      // const todayDetectRecords = detectData.value.filter((record) => {
+      //   const checkTime = new Date(record.CheckTime.replace(/\//g, "-"));
+      //   return checkTime >= resetTime;
+      // });
+      // hasBeforeDetect.value = todayDetectRecords.some(
+      //   (record) => record.BcAf === "治療前"
+      // );
     };
 
     const init = async () => {
@@ -619,8 +623,9 @@ export default {
       handleHRVCompleted,
       hasUseRecord,
       hasDetectRecord,
-      hasBeforeDetect,
+
       todayUseRecord,
+      hasBeforeData,
     };
   },
 };

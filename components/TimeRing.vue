@@ -48,13 +48,15 @@ const props = defineProps({
   hasUseRecord: {
     type: Boolean,
   },
-  hasBeforeDetect: {
-    type: Boolean,
-  },
+
   hasDetectRecord: {
     type: Boolean,
   },
   todayUseRecord: {
+    type: Array,
+    default: () => [],
+  },
+  hasBeforeData: {
     type: Array,
     default: () => [],
   },
@@ -93,6 +95,32 @@ watch(
   (newVal) => {
     clearInterval(timerInterval);
     isCounting.value = false;
+  }
+);
+
+watch(
+  () => props.todayUseRecord,
+  (newVal) => {
+    if (Array.isArray(newVal) && newVal.length > 0) {
+      const record = newVal[0];
+      UID.value = record.UID;
+      store.detectFlag = "2";
+      store.detectUID = record.UID;
+      store.detectForm = record.ProductName;
+
+      const startTimeStamp = parseTime(record.oriStartTime);
+      const elapsed = Math.floor((Date.now() - startTimeStamp) / 1000);
+      remainingTime.value = Math.max(props.totalTime - elapsed, 0);
+
+      if (remainingTime.value > 0) {
+        buttonText.value = "暫停";
+        countdown();
+      } else {
+        buttonText.value = "HRV檢測";
+        remainingTime.value = 0;
+        useEndAPI();
+      }
+    }
   }
 );
 
@@ -254,6 +282,7 @@ const countdown = () => {
 
   const tick = () => {
     if (isPaused.value) return;
+
     const now = Date.now();
     const elapsedSinceStart = (now - startTime.value) / 1000;
     remainingTime.value = Math.max(
@@ -265,6 +294,9 @@ const countdown = () => {
       clearInterval(timerInterval);
       isCounting.value = false;
       buttonText.value = "HRV檢測";
+      remainingTime.value = 0;
+
+      // 確保倒數結束時觸發 API
       useEndAPI();
       showButton.value = true;
     } else {
@@ -276,33 +308,37 @@ const countdown = () => {
 };
 
 const toggleTimer = async () => {
-  if (buttonText.value === "HRV檢測") {
-    if (!UID.value) {
-      // 如果尚未開始，進行 HRV 檢測初始化
-      const response = await useStartAPI(); // 呼叫 API 開始檢測
-      if (response && UID.value) {
-        // 設置 Pinia store 狀態
-        store.detectFlag = "1"; // 更新檢測標記
-        store.detectUID = UID.value; // 保存檢測 UID
-        store.detectForm = props.productName; // 保存產品名稱
-        store.showHRVAlert = true; // 顯示 HRV 提示框
+  if (Array.isArray(props.hasBeforeData) && props.hasBeforeData.length === 0) {
+    // 檢測前邏輯
+    console.log("檢測前流程");
+    const response = await useStartAPI();
+    if (response && UID.value) {
+      // 更新狀態
+      store.detectFlag = "1"; // 檢測前
+      store.detectUID = UID.value; // 保存檢測 UID
+      store.detectForm = props.productName; // 保存產品名稱
+      store.showHRVAlert = true; // 顯示 HRV 提示框
 
-        // 保存初始化時間到 localStorage
-        const now = Date.now();
-        setLocalStorage(getProductStorageKey("startTime"), now);
-        setLocalStorage(getProductStorageKey("UID"), UID.value);
+      // 保存到 localStorage
+      const now = Date.now();
+      setLocalStorage(getProductStorageKey("startTime"), now);
+      setLocalStorage(getProductStorageKey("UID"), UID.value);
 
-        // 更新按鈕文字，等待倒數計時
-        buttonText.value = "暫停";
-        return;
-      }
+      // 更新按鈕狀態
+      buttonText.value = "暫停";
+      startTimer(); // 開始倒數
+    } else {
+      console.error("檢測前 API 調用失敗");
     }
-  } else if (buttonText.value === "繼續") {
-    await usePauseEndAPI();
-    resumeTimer();
-  } else if (buttonText.value === "暫停") {
-    await usePauseAPI();
-    pauseTimer();
+  } else if (props.hasUseRecord) {
+    // 檢測後邏輯
+    console.log("檢測後流程");
+    store.detectFlag = "2"; // 更新為檢測後
+    store.detectUID = UID.value; // 保存檢測 UID
+    store.detectForm = props.productName; // 保存產品名稱
+    store.showHRVAlert = true; // 顯示 HRV 提示框
+  } else {
+    console.error("未知流程，無法進行操作");
   }
 };
 
@@ -331,21 +367,42 @@ const resumeTimer = () => {
 };
 
 onMounted(() => {
-  const savedUID = getLocalStorage(getProductStorageKey("UID"));
-  const savedStartTime = getLocalStorage(getProductStorageKey("startTime"));
-  if (savedUID && savedStartTime) {
-    UID.value = savedUID;
-    startTime.value = savedStartTime;
-    remainingTime.value =
-      props.totalTime - Math.floor((Date.now() - savedStartTime) / 1000); // 恢復剩餘時間
-    if (remainingTime.value > 0) {
-      countdown(); // 繼續倒數
-      buttonText.value = "暫停";
-    } else {
-      buttonText.value = "HRV檢測";
-    }
+  if (Array.isArray(props.hasBeforeData) && props.hasBeforeData.length === 0) {
+    console.log("初始化為檢測前狀態");
+    buttonText.value = "HRV檢測";
+    store.detectFlag = "1"; // 初始化為檢測前
+  } else if (props.hasUseRecord) {
+    console.log("初始化為檢測後狀態");
+    const record = props.todayUseRecord[0];
+    UID.value = record.UID;
+    store.detectFlag = "2"; // 初始化為檢測後
+    store.detectUID = record.UID;
+    store.detectForm = record.ProductName;
+    store.showHRVAlert = true; // 顯示 HRV 提示框
+  } else {
+    console.log("初始化為未知狀態");
+    buttonText.value = "HRV檢測";
   }
+
+  showButton.value = true; // 確保按鈕顯示
 });
+
+const parseTime = (timeString) => {
+  // 解析 oriStartTime 和 oriEndTime 为时间戳
+  return new Date(
+    timeString.substring(0, 4) +
+      "/" +
+      timeString.substring(4, 6) +
+      "/" +
+      timeString.substring(6, 8) +
+      " " +
+      timeString.substring(8, 10) +
+      ":" +
+      timeString.substring(10, 12) +
+      ":" +
+      timeString.substring(12)
+  ).getTime();
+};
 
 const buttonStyle = computed(() => {
   if (!isCounting.value) return { backgroundColor: "#74BC1F", color: "#fff" };
