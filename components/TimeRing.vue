@@ -25,7 +25,12 @@
       ※ 請於隔天後再使用
     </div>
 
-    <button v-if="showButton" :style="buttonStyle" @click="toggleTimer">
+    <button
+      v-if="showButton"
+      :disabled="!isButtonEnabled"
+      :style="buttonStyle"
+      @click="toggleTimer"
+    >
       {{ buttonText }}
     </button>
   </div>
@@ -126,6 +131,7 @@ watch(
 const remainingTime = ref(props.totalTime); // 倒數時間
 const isCounting = ref(false); // 正在倒數
 const isPaused = ref(false); // 暫停狀態
+const isButtonEnabled = ref(true);
 
 const UID = ref(""); // 保存 UID
 const BID = ref(""); // 保存 BID
@@ -316,25 +322,27 @@ const countdown = () => {
     const now = Date.now();
 
     // 每分鐘檢查一次 `isFirstHRVDetect`
-    if (now - lastCheckTime >= 60 * 1000) {
+    if (now - lastCheckTime >= 60 * 100) {
       lastCheckTime = now;
 
       // 檢查 `isFirstHRVDetect`
       if (!getLocalStorage("isFirstHRVDetect")) {
-        console.log("未檢測到 isFirstHRVDetect，重新初始化流程。");
+        console.log("未檢測到 isFirstHRVDetect，清除 localStorage，禁用按鈕並彈出警告框。");
 
-        // 不停止計時器，僅執行初始化邏輯
-        const response = await useStartAPI();
-        if (response && UID.value) {
-          store.detectFlag = "1";
-          store.detectUID = UID.value;
-          store.detectForm = props.productName;
+        // 清除對應的 `localStorage` 數據
+        deleteLocalStorage(getProductStorageKey("UID"));
+        deleteLocalStorage(getProductStorageKey("startTime"));
 
-          setLocalStorage(getProductStorageKey("UID"), UID.value);
-          console.log("流程重新初始化完成。");
-        } else {
-          console.error("重新初始化流程失敗！");
-        }
+        // 禁用按鈕
+        isButtonEnabled.value = false;
+
+        // 彈出提示框
+        alert("尚未完成 HRV 檢測，請完成檢測後再繼續！");
+
+        // 暫停計時器
+        pauseTimer();
+
+        return; // 中斷倒數
       }
     }
 
@@ -372,8 +380,14 @@ const countdown = () => {
   requestAnimationFrame(tick);
 };
 
+
 const toggleTimer = async () => {
-  // 如果有 todayUseRecord，直接进入检测后逻辑
+  if (buttonText.value === "請完成 HRV 檢測") {
+    console.log("檢測未完成，請先完成 HRV 檢測。");
+    return;
+  }
+
+  // 如果有 todayUseRecord，直接進入檢測後邏輯
   if (props.todayUseRecord.length > 0) {
     console.log("今日已完成檢測，顯示提示框");
     store.detectFlag = "2";
@@ -383,7 +397,7 @@ const toggleTimer = async () => {
     return;
   }
 
-  // 如果存在 UID，说明正在计时或已暂停，处理恢复或暂停逻辑
+  // 如果存在 UID，處理恢復或暫停邏輯
   if (UID.value) {
     console.log("已有計時 UID，恢復倒數或暫停");
     if (buttonText.value === "暫停") {
@@ -398,7 +412,7 @@ const toggleTimer = async () => {
     return;
   }
 
-  // 如果没有 todayUseRecord 并且没有计时 UID，进入检测前逻辑
+  // 如果沒有 todayUseRecord 並且沒有計時 UID，進入檢測前邏輯
   if (Array.isArray(props.hasBeforeData) && props.hasBeforeData.length === 0) {
     console.log("檢測前開始倒數");
     const response = await useStartAPI();
