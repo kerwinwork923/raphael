@@ -338,9 +338,6 @@
       </div>
 
       <div class="subBtnGroup2" style="display: none">
-        <a href="/vital/scan.html">
-          <button class="backToDetect">重新檢測</button>
-        </a>
         <a class="goToUsage">
           <button class="backToUserBtn2">前往檢測紀錄</button>
         </a>
@@ -1285,6 +1282,7 @@
     position: fixed;
     bottom: 0;
     background-color: #f6f6f6;
+    z-index: 5;
   }
 
   .subBtnGroup2 a {
@@ -1294,8 +1292,8 @@
   }
 
   .subBtnGroup2 button {
-    background-color: #eee;
-    color: #666;
+    background-color: #74bc1f;
+    color: #fff;
     padding: 8px;
     width: 90%;
     border-radius: 8px;
@@ -1305,11 +1303,6 @@
     letter-spacing: 0.5px;
     transition: 0.25s ease;
     width: 100%;
-  }
-
-  .subBtnGroup2 :nth-child(2) button {
-    color: #fff;
-    background-color: #74bc1f;
   }
 
   .detectionWrap {
