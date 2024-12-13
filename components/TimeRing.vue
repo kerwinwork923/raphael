@@ -539,10 +539,10 @@ const buttonStyle = computed(() => {
   if (!isButtonEnabled.value) {
     return { backgroundColor: "#E0E0E0", color: "#999" }; // 禁用樣式
   }
-  if (buttonText.value.includes("使用前")) {
+  if (buttonText.value === "HRV檢測(使用前)") {
     return { backgroundColor: "#74BC1F", color: "#fff" }; // 綠色
-  } else if (buttonText.value.includes("使用後")) {
-    return { backgroundColor: "#E0E0E0", color: "#999" }; // 灰色
+  } else if (buttonText.value === "HRV檢測(使用後)") {
+    return { backgroundColor: "#74BC1F", color: "#fff" }; // 藍色，表示已完成
   } else if (buttonText.value === "暫停") {
     return { backgroundColor: "#EC4F4F", color: "#fff" }; // 紅色
   } else if (buttonText.value === "繼續") {
