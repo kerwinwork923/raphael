@@ -322,7 +322,7 @@ const countdown = () => {
     const now = Date.now();
 
     // 每分鐘檢查一次 `isFirstHRVDetect`
-    if (now - lastCheckTime >= 60 * 100) {
+    if (now - lastCheckTime >= 60 * 1000) {
       lastCheckTime = now;
 
       const isFirstHRVDetect = getLocalStorage(`${props.productName}_isFirstHRVDetect`);
@@ -343,6 +343,9 @@ const countdown = () => {
 
         // 暫停計時器
         pauseTimer();
+
+        // 刷新頁面
+        router.go(0);
 
         return; // 中斷倒數
       }
@@ -369,6 +372,9 @@ const countdown = () => {
       try {
         await useEndAPI();
         console.log("倒計時結束，API 調用成功。");
+
+        // 刷新頁面
+        router.go(0);
       } catch (error) {
         console.error("結束 API 調用失敗：", error);
       }
@@ -381,6 +387,7 @@ const countdown = () => {
 
   requestAnimationFrame(tick);
 };
+
 
 
 
