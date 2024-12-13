@@ -324,20 +324,18 @@ const countdown = () => {
   let lastCheckTime = Date.now(); // 記錄最後檢查的時間
 
   const tick = async () => {
-    if (isPaused.value) return;
+    if (isPaused.value) return; // 如果暫停則不繼續倒數
 
     const now = Date.now();
 
     // 每分鐘檢查一次 `isFirstHRVDetect`
     if (now - lastCheckTime >= 60 * 1000) {
-      // 檢查間隔 1 分鐘
       lastCheckTime = now;
 
       const isFirstHRVDetect = getLocalStorage(
         `${props.productName}_isFirstHRVDetect`
       );
 
-      // 如果未檢測到 `isFirstHRVDetect`
       if (!isFirstHRVDetect) {
         console.log(
           `未檢測到 ${props.productName}_isFirstHRVDetect，清除 localStorage，禁用按鈕並彈出警告框。`
@@ -370,18 +368,21 @@ const countdown = () => {
       0
     );
 
+    // 保存狀態
+    saveTimerState();
+
     // 倒計時結束邏輯
     if (remainingTime.value <= 0) {
       clearInterval(timerInterval);
       isCounting.value = false;
       remainingTime.value = 0;
 
-      // 調用結束 API
       try {
-        await useEndAPI();
+        await useEndAPI(); // 調用結束 API
         console.log("倒計時結束，API 調用成功");
-        clearHRVState();
+        clearHRVState(); // 清理狀態
         buttonText.value = "HRV檢測(使用前)";
+        router.go(0); // 刷新頁面
       } catch (error) {
         console.error("結束 API 調用失敗：", error);
       }
@@ -389,10 +390,10 @@ const countdown = () => {
       return;
     }
 
-    requestAnimationFrame(tick);
+    requestAnimationFrame(tick); // 繼續下一輪計時
   };
 
-  requestAnimationFrame(tick);
+  requestAnimationFrame(tick); // 開始計時
 };
 
 const toggleTimer = async () => {
