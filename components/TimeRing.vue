@@ -319,7 +319,11 @@ const countdown = async () => {
   const tick = async () => {
     if (isPaused.value) return;
 
-    if (!getFirstHRVDetect()) {
+    // 如果没有完成第一次 HRV 检测，并且没有 todayUseRecord，则暂停并提示
+    if (
+      !getFirstHRVDetect() &&
+      (!props.todayUseRecord || props.todayUseRecord.length === 0)
+    ) {
       pauseTimer();
       alert("尚未檢測HRV，請完成檢測後再繼續！");
       buttonText.value = "HRV檢測";
@@ -361,7 +365,11 @@ const countdown = async () => {
 };
 
 const toggleTimer = async () => {
-  if (!getFirstHRVDetect() && buttonText.value === "HRV檢測") {
+  // 如果没有完成第一次 HRV 检测，且没有 todayUseRecord，禁止继续
+  if (
+    !getFirstHRVDetect() &&
+    (!props.todayUseRecord || props.todayUseRecord.length === 0)
+  ) {
     alert("請完成HRV檢測後再繼續！");
     return;
   }
@@ -372,7 +380,7 @@ const toggleTimer = async () => {
     store.detectFlag = "2";
     store.detectUID = props.todayUseRecord[0].UID;
     store.showHRVAlert = true;
-    setFirstHRVDetect(false); // 重置状态
+    setFirstHRVDetect(true); // 标记为已完成检测
     return;
   }
 
