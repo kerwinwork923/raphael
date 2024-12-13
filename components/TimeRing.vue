@@ -308,9 +308,34 @@ let timerInterval;
 const countdown = () => {
   if (timerInterval) clearInterval(timerInterval);
 
-  const tick = () => {
+  const tick = async () => {
     if (isPaused.value) return;
 
+    // 判斷倒數過程中是否有檢測的 localStorage
+    if (!getLocalStorage(getProductStorageKey("UID"))) {
+      pauseTimer();
+      alert("尚未檢測HRV，請完成檢測後再繼續！");
+
+      // 執行檢測前邏輯
+      const response = await useStartAPI();
+      if (response && UID.value) {
+        store.detectFlag = "1";
+        store.detectUID = UID.value;
+        store.detectForm = props.productName;
+        const now = Date.now();
+        setLocalStorage(getProductStorageKey("startTime"), now);
+        setLocalStorage(getProductStorageKey("UID"), UID.value);
+        startTime.value = now;
+        buttonText.value = "暫停";
+        startTimer(); // 重新啟動倒數計時
+        return; // 跳過當前 `tick`
+      } else {
+        console.error("開始檢測失敗");
+        return;
+      }
+    }
+
+    // 計算倒數時間
     const now = Date.now();
     const elapsedSinceStart = (now - startTime.value) / 1000;
     remainingTime.value = Math.max(
@@ -327,18 +352,23 @@ const countdown = () => {
       // 清除 UID
       clearHRVState();
 
-      // 调用结束 API
-      useEndAPI();
+      // 調用結束 API
+      try {
+        await useEndAPI();
+        console.log("API 調用成功，倒數結束");
+      } catch (error) {
+        console.error("API 調用失敗", error);
+      }
 
-      // 刷新页面
-      // window.location.reload();
-    } else {
-      requestAnimationFrame(tick);
+      return;
     }
+
+    requestAnimationFrame(tick);
   };
 
   requestAnimationFrame(tick);
 };
+
 
 const toggleTimer = async () => {
   // 如果有 todayUseRecord，直接进入检测后逻辑
