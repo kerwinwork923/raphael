@@ -266,6 +266,8 @@ export default {
     const HRVBeforeData = ref(null);
     const HRVAfterData = ref(null);
 
+    const productName = ref("");
+
     const localData = localStorage.getItem("userData");
     const { MID, Token, MAID, Mobile, Name } = localData
       ? JSON.parse(localData)
@@ -312,12 +314,45 @@ export default {
       }
     };
 
-    const goNext = () => {
-      window.history.back();
+    const getProductName = async () => {
+      try {
+        const response = await fetch(
+          "https://23700999.com:8081/HMA/API_UIDInfo.jsp",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              MID,
+              Token,
+              MAID,
+              Mobile,
+              UID,
+            }),
+          }
+        );
+
+        if (response.status === 200) {
+          const data = await response.json();
+          productName.value = data?.ProductName || "";
+        } else {
+          console.error("API Response Error", data);
+        }
+      } catch (error) {
+        console.error("API Error", error);
+      }
     };
-    onMounted(() => {
-      API_HRV2UseAf_Compare();
+
+    const goNext = () => {
+      router.push(`/usage/${productName.value}`);
+    };
+    onMounted(async () => {
+      try {
+        await Promise.all([API_HRV2UseAf_Compare(), getProductName()]);
+      } catch (error) {
+        console.error("Error during API calls:", error);
+      }
     });
+
 
     return {
       listBioage,
