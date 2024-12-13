@@ -311,31 +311,35 @@ const countdown = () => {
   const tick = async () => {
     if (isPaused.value) return;
 
-    // 判斷倒數過程中是否有檢測的 localStorage
-    if (!getLocalStorage(getProductStorageKey("UID"))) {
+    // 检查是否存在 `isFirstHRVDetect`
+    if (!getLocalStorage("isFirstHRVDetect")) {
+      console.log("未检测到 isFirstHRVDetect，暂停计时并重新初始化检测流程。");
       pauseTimer();
-      alert("尚未檢測HRV，請完成檢測後再繼續！");
+      alert("尚未完成 HRV 检测，请重新检测！");
 
-      // 執行檢測前邏輯
+      // 重新初始化检测流程
       const response = await useStartAPI();
       if (response && UID.value) {
         store.detectFlag = "1";
         store.detectUID = UID.value;
         store.detectForm = props.productName;
+
         const now = Date.now();
+        setLocalStorage("isFirstHRVDetect", true); // 设置检测标志
         setLocalStorage(getProductStorageKey("startTime"), now);
         setLocalStorage(getProductStorageKey("UID"), UID.value);
+
         startTime.value = now;
-        buttonText.value = "暫停";
-        startTimer(); // 重新啟動倒數計時
-        return; // 跳過當前 `tick`
+        buttonText.value = "暂停";
+        startTimer(); // 重新启动计时器
+        return;
       } else {
-        console.error("開始檢測失敗");
+        console.error("检测流程重新初始化失败！");
         return;
       }
     }
 
-    // 計算倒數時間
+    // 更新倒计时
     const now = Date.now();
     const elapsedSinceStart = (now - startTime.value) / 1000;
     remainingTime.value = Math.max(
@@ -343,21 +347,23 @@ const countdown = () => {
       0
     );
 
+    // 倒计时结束逻辑
     if (remainingTime.value <= 0) {
       clearInterval(timerInterval);
       isCounting.value = false;
-      buttonText.value = "HRV檢測";
+      buttonText.value = "HRV检测";
       remainingTime.value = 0;
 
-      // 清除 UID
+      // 清理 `isFirstHRVDetect`
+      deleteLocalStorage("isFirstHRVDetect");
       clearHRVState();
 
-      // 調用結束 API
+      // 调用结束 API
       try {
         await useEndAPI();
-        console.log("API 調用成功，倒數結束");
+        console.log("API 调用成功，倒计时结束。");
       } catch (error) {
-        console.error("API 調用失敗", error);
+        console.error("API 调用失败：", error);
       }
 
       return;
@@ -369,13 +375,13 @@ const countdown = () => {
   requestAnimationFrame(tick);
 };
 
-
 const toggleTimer = async () => {
   // 如果有 todayUseRecord，直接进入检测后逻辑
   if (props.todayUseRecord.length > 0) {
     console.log("今日已完成檢測，顯示提示框");
     store.detectFlag = "2";
     store.detectUID = props.todayUseRecord[0].UID;
+    store.detectForm = `*${props.productName}`;
     store.showHRVAlert = true;
     return;
   }

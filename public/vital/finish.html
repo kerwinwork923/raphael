@@ -407,6 +407,7 @@
         if (backToUserBtn2) backToUserBtn2.textContent = "看報告";
         if (goToUsageLink) goToUsageLink.href = `/usageHRVResult/${uid}`;
       } else {
+        localStorage.setItem(`${form}_isFirstHRVDetect`, true);
         if (goToUsageLink) goToUsageLink.href = `/usage/${form}`;
       }
       subBtnGroup.style.display = "none";
