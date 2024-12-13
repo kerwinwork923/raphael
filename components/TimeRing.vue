@@ -331,7 +331,7 @@ const countdown = () => {
       useEndAPI();
 
       // 刷新页面
-      window.location.reload();
+      // window.location.reload();
     } else {
       requestAnimationFrame(tick);
     }
