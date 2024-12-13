@@ -355,7 +355,9 @@ const countdown = () => {
         pauseTimer();
 
         // 刷新頁面
-        router.go(0);
+        if (!props.hasDetectRecord) {
+          router.go(0);
+        }
 
         return; // 中斷倒數
       }
