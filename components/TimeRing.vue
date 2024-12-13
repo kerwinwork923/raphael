@@ -321,16 +321,56 @@ let timerInterval;
 const countdown = () => {
   if (timerInterval) clearInterval(timerInterval);
 
+  let lastCheckTime = Date.now(); // 記錄最後檢查的時間
+
   const tick = async () => {
     if (isPaused.value) return;
 
     const now = Date.now();
+
+    // 每分鐘檢查一次 `isFirstHRVDetect`
+    if (now - lastCheckTime >= 60 * 1000) {
+      // 檢查間隔 1 分鐘
+      lastCheckTime = now;
+
+      const isFirstHRVDetect = getLocalStorage(
+        `${props.productName}_isFirstHRVDetect`
+      );
+
+      // 如果未檢測到 `isFirstHRVDetect`
+      if (!isFirstHRVDetect) {
+        console.log(
+          `未檢測到 ${props.productName}_isFirstHRVDetect，清除 localStorage，禁用按鈕並彈出警告框。`
+        );
+
+        // 清除對應的 `localStorage` 數據
+        deleteLocalStorage(getProductStorageKey("UID"));
+        deleteLocalStorage(getProductStorageKey("startTime"));
+
+        // 禁用按鈕
+        isButtonEnabled.value = false;
+
+        // 彈出提示框
+        alert("尚未完成 HRV 檢測，請完成檢測後再繼續！");
+
+        // 暫停計時器
+        pauseTimer();
+
+        // 刷新頁面
+        router.go(0);
+
+        return; // 中斷倒數
+      }
+    }
+
+    // 更新倒計時邏輯
     const elapsedSinceStart = (now - startTime.value) / 1000;
     remainingTime.value = Math.max(
       props.totalTime - elapsedTime.value - elapsedSinceStart,
       0
     );
 
+    // 倒計時結束邏輯
     if (remainingTime.value <= 0) {
       clearInterval(timerInterval);
       isCounting.value = false;
