@@ -11,7 +11,7 @@
       @timer-finished="onTimerFinished"
     /> -->
 
-    <TimeRing
+    <!-- <TimeRing
       v-if="productName === '保健版'"
       :totalTime="21600"
       :product-name="productName"
@@ -41,9 +41,9 @@
       :hasBeforeData="hasBeforeData"
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
-    />
+    /> -->
 
-    <!-- <TimeRing
+    <TimeRing
 
       :totalTime="90"
       :product-name="productName"
@@ -52,7 +52,7 @@
       :hasBeforeData="hasBeforeData"
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
-    /> -->
+    />
 
     <div class="usageInfoGroup" v-if="usageCardState === '紅光版'">
       <div class="usageInfoCard">
