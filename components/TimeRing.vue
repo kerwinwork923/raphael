@@ -325,9 +325,11 @@ const countdown = () => {
     if (now - lastCheckTime >= 60 * 100) {
       lastCheckTime = now;
 
+      const isFirstHRVDetect = getLocalStorage(`${props.productName}_isFirstHRVDetect`);
+      
       // 檢查 `isFirstHRVDetect`
-      if (!getLocalStorage("isFirstHRVDetect")) {
-        console.log("未檢測到 isFirstHRVDetect，清除 localStorage，禁用按鈕並彈出警告框。");
+      if (!isFirstHRVDetect) {
+        console.log(`未檢測到 ${props.productName}_isFirstHRVDetect，清除 localStorage，禁用按鈕並彈出警告框。`);
 
         // 清除對應的 `localStorage` 數據
         deleteLocalStorage(getProductStorageKey("UID"));
@@ -379,6 +381,7 @@ const countdown = () => {
 
   requestAnimationFrame(tick);
 };
+
 
 
 const toggleTimer = async () => {
