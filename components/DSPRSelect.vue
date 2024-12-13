@@ -177,7 +177,7 @@ export default {
   top: 0;
   width: 100%;
   height: 100vh;
-  z-index: 9;
+  z-index: 102;
   background: rgba(217, 217, 217, 0.5);
   backdrop-filter: blur(2.5px);
 }
@@ -187,7 +187,7 @@ export default {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 99;
+  z-index: 103;
   padding: 12px;
   padding-top: 32px;
   border-radius: 12px;

@@ -322,7 +322,7 @@ const countdown = () => {
     const now = Date.now();
 
     // 每分鐘檢查一次 `isFirstHRVDetect`
-    if (now - lastCheckTime >= 60 * 1000) {
+    if (now - lastCheckTime >= 60 * 100) {
       lastCheckTime = now;
 
       const isFirstHRVDetect = getLocalStorage(`${props.productName}_isFirstHRVDetect`);
