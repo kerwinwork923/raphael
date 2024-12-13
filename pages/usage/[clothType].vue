@@ -4,6 +4,15 @@
   <DSPRSelect :showCloseButton="false" />
   <div class="usageWrap">
     <TitleMenu Text="使用紀錄" :link="`back`" />
+    <!-- <TimeRing
+      :totalTime="120"
+      :product-name="productName"
+      :hasDetectRecord="hasDetectRecord"
+      :todayUseRecord="todayUseRecord"
+      :hasBeforeData="hasBeforeData"
+      @countdownComplete="handleCountdownComplete"
+      @requireHRVCheck="handleHRVCheck"
+    /> -->
     <TimeRing
       :totalTime="120"
       :product-name="productName"
