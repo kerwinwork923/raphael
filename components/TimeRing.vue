@@ -382,7 +382,9 @@ const countdown = () => {
         console.log("倒計時結束，API 調用成功");
         clearHRVState(); // 清理狀態
         buttonText.value = "HRV檢測(使用前)";
-        router.go(0); // 刷新頁面
+        if (!props.hasDetectRecord) {
+          router.go(0); // 刷新頁面
+        }
       } catch (error) {
         console.error("結束 API 調用失敗：", error);
       }
