@@ -4,17 +4,37 @@
   <DSPRSelect :showCloseButton="false" />
   <div class="usageWrap">
     <TitleMenu Text="使用紀錄" :link="`back`" />
-    <!-- <TimeRing
-      :totalTime="120"
+    <!-- <TimeRing2
+      v-if="productName === '保健版'"
+      :productName="productName"
+      :hasDetectRecord="hasDetectRecord"
+      @timer-finished="onTimerFinished"
+    /> -->
+
+    <TimeRing
+      v-if="productName === '保健版'"
+      :totalTime="21600"
       :product-name="productName"
       :hasDetectRecord="hasDetectRecord"
       :todayUseRecord="todayUseRecord"
       :hasBeforeData="hasBeforeData"
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
-    /> -->
+    />
     <TimeRing
-      :totalTime="120"
+      v-if="productName === '紅光版' || productName === '居家治療儀'"
+      :totalTime="5400"
+      :product-name="productName"
+      :hasDetectRecord="hasDetectRecord"
+      :todayUseRecord="todayUseRecord"
+      :hasBeforeData="hasBeforeData"
+      @countdownComplete="handleCountdownComplete"
+      @requireHRVCheck="handleHRVCheck"
+    />
+
+    <TimeRing
+      v-if="productName === '調節衣'"
+      :totalTime="7200"
       :product-name="productName"
       :hasDetectRecord="hasDetectRecord"
       :todayUseRecord="todayUseRecord"
@@ -265,10 +285,10 @@
         </div>
       </div>
     </div>
-    <div class="usageBtnGroup">
-      <!-- <button class="preBtn" @click="goPre">返回產品頁面</button> -->
+    <!-- <div class="usageBtnGroup">
+      <button class="preBtn" @click="goPre">返回產品頁面</button> 
       <button class="nextBtn" @click="goNext">{{ goNextText }}</button>
-    </div>
+    </div> -->
   </div>
 </template>
 
