@@ -308,60 +308,59 @@ let timerInterval;
 const countdown = () => {
   if (timerInterval) clearInterval(timerInterval);
 
+  let lastCheckTime = Date.now(); // 記錄最後一次檢查時間
+
   const tick = async () => {
     if (isPaused.value) return;
 
-    // 检查是否存在 `isFirstHRVDetect`
-    if (!getLocalStorage("isFirstHRVDetect")) {
-      pauseTimer();
+    const now = Date.now();
 
-      // 重新初始化检测流程
-      const response = await useStartAPI();
-      if (response && UID.value) {
-        store.detectFlag = "1";
-        store.detectUID = UID.value;
-        store.detectForm = props.productName;
+    // 每分鐘檢查一次 `isFirstHRVDetect`
+    if (now - lastCheckTime >= 60 * 1000) {
+      lastCheckTime = now;
 
-        const now = Date.now();
+      // 檢查 `isFirstHRVDetect`
+      if (!getLocalStorage("isFirstHRVDetect")) {
+        console.log("未檢測到 isFirstHRVDetect，重新初始化流程。");
 
-        setLocalStorage(getProductStorageKey("startTime"), now);
-        setLocalStorage(getProductStorageKey("UID"), UID.value);
+        // 不停止計時器，僅執行初始化邏輯
+        const response = await useStartAPI();
+        if (response && UID.value) {
+          store.detectFlag = "1";
+          store.detectUID = UID.value;
+          store.detectForm = props.productName;
 
-        startTime.value = now;
-        buttonText.value = "暂停";
-        startTimer(); // 重新启动计时器
-        return;
-      } else {
-        console.error("检测流程重新初始化失败！");
-        return;
+          setLocalStorage(getProductStorageKey("UID"), UID.value);
+          console.log("流程重新初始化完成。");
+        } else {
+          console.error("重新初始化流程失敗！");
+        }
       }
     }
 
-    // 更新倒计时
-    const now = Date.now();
+    // 更新倒計時邏輯
     const elapsedSinceStart = (now - startTime.value) / 1000;
     remainingTime.value = Math.max(
       props.totalTime - elapsedTime.value - elapsedSinceStart,
       0
     );
 
-    // 倒计时结束逻辑
+    // 倒計時結束邏輯
     if (remainingTime.value <= 0) {
       clearInterval(timerInterval);
       isCounting.value = false;
-      buttonText.value = "HRV检测";
+      buttonText.value = "HRV檢測";
       remainingTime.value = 0;
 
-      // 清理 `isFirstHRVDetect`
-      deleteLocalStorage("isFirstHRVDetect");
+      // 清理計時狀態
       clearHRVState();
 
-      // 调用结束 API
+      // 調用結束 API
       try {
         await useEndAPI();
-        console.log("API 调用成功，倒计时结束。");
+        console.log("倒計時結束，API 調用成功。");
       } catch (error) {
-        console.error("API 调用失败：", error);
+        console.error("結束 API 調用失敗：", error);
       }
 
       return;
@@ -451,7 +450,7 @@ onMounted(() => {
     const savedUID = getLocalStorage(getProductStorageKey("UID"));
     const savedStartTime = getLocalStorage(getProductStorageKey("startTime"));
 
-    // 确保 todayUseRecord 是数组并非 null 或 undefined
+    // 如果今日有檢測紀錄，初始化為檢測後狀態
     if (
       Array.isArray(props.todayUseRecord) &&
       props.todayUseRecord.length > 0
@@ -487,7 +486,7 @@ onMounted(() => {
       return;
     }
 
-    // 确保 hasBeforeData 是数组并非 null 或 undefined
+    // 如果無歷史檢測紀錄，初始化為檢測前狀態
     if (
       Array.isArray(props.hasBeforeData) &&
       props.hasBeforeData.length === 0
