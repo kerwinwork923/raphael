@@ -305,10 +305,10 @@ const useEndAPI = async () => {
 // 計時器邏輯
 let timerInterval;
 
-const countdown = () => {
+const countdown = async () => {
   if (timerInterval) clearInterval(timerInterval);
 
-  const tick = () => {
+  const tick = async () => {
     if (isPaused.value) return;
 
     const now = Date.now();
@@ -327,11 +327,16 @@ const countdown = () => {
       // 清除 UID
       clearHRVState();
 
-      // 调用结束 API
-      useEndAPI();
+      // 调用结束 API并等待完成
+      try {
+        await useEndAPI();
+        console.log("API 调用成功，准备刷新页面");
+      } catch (error) {
+        console.error("API 调用失败", error);
+      }
 
       // 刷新页面
-      // window.location.reload();
+      window.location.reload();
     } else {
       requestAnimationFrame(tick);
     }
