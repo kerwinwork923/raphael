@@ -11,7 +11,6 @@
       src="/assets/video/useInfo.mp4"
       controls
       autoplay
-      muted
       playsinline
     ></video>
     <ul class="usageHistoryInfoList">
