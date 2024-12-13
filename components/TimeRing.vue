@@ -311,11 +311,11 @@ const countdown = () => {
   const tick = async () => {
     if (isPaused.value) return;
 
-    // 檢查是否存在 `isFirstHRVDetect`
+    // 检查是否存在 `isFirstHRVDetect`
     if (!getLocalStorage("isFirstHRVDetect")) {
-      console.log("未檢測到 isFirstHRVDetect，重置流程。");
+      pauseTimer();
 
-      // 重置流程
+      // 重新初始化检测流程
       const response = await useStartAPI();
       if (response && UID.value) {
         store.detectFlag = "1";
@@ -323,21 +323,21 @@ const countdown = () => {
         store.detectForm = props.productName;
 
         const now = Date.now();
-        setLocalStorage("isFirstHRVDetect", true); // 設置標記
+
         setLocalStorage(getProductStorageKey("startTime"), now);
         setLocalStorage(getProductStorageKey("UID"), UID.value);
 
         startTime.value = now;
-        buttonText.value = "暫停";
-        startTimer(); // 重啟倒計時
+        buttonText.value = "暂停";
+        startTimer(); // 重新启动计时器
         return;
       } else {
-        console.error("重新初始化檢測流程失敗！");
+        console.error("检测流程重新初始化失败！");
         return;
       }
     }
 
-    // 更新倒計時邏輯
+    // 更新倒计时
     const now = Date.now();
     const elapsedSinceStart = (now - startTime.value) / 1000;
     remainingTime.value = Math.max(
@@ -345,23 +345,23 @@ const countdown = () => {
       0
     );
 
-    // 倒計時結束
+    // 倒计时结束逻辑
     if (remainingTime.value <= 0) {
       clearInterval(timerInterval);
       isCounting.value = false;
-      buttonText.value = "HRV檢測";
+      buttonText.value = "HRV检测";
       remainingTime.value = 0;
 
-      // 清除 `isFirstHRVDetect`
+      // 清理 `isFirstHRVDetect`
       deleteLocalStorage("isFirstHRVDetect");
       clearHRVState();
 
-      // 調用結束 API
+      // 调用结束 API
       try {
         await useEndAPI();
-        console.log("倒計時結束，調用 API 成功。");
+        console.log("API 调用成功，倒计时结束。");
       } catch (error) {
-        console.error("結束 API 調用失敗：", error);
+        console.error("API 调用失败：", error);
       }
 
       return;
@@ -373,50 +373,54 @@ const countdown = () => {
   requestAnimationFrame(tick);
 };
 
-
 const toggleTimer = async () => {
-  // 如果有當天檢測紀錄，進入檢測後邏輯
+  // 如果有 todayUseRecord，直接进入检测后逻辑
   if (props.todayUseRecord.length > 0) {
-    console.log("今日已完成檢測，初始化為檢測後狀態。");
+    console.log("今日已完成檢測，顯示提示框");
     store.detectFlag = "2";
     store.detectUID = props.todayUseRecord[0].UID;
     store.detectForm = `*${props.productName}`;
+    store.showHRVAlert = true;
     return;
   }
 
-  // 如果存在 UID，處理暫停或恢復邏輯
+  // 如果存在 UID，说明正在计时或已暂停，处理恢复或暂停逻辑
   if (UID.value) {
+    console.log("已有計時 UID，恢復倒數或暫停");
     if (buttonText.value === "暫停") {
-      console.log("暫停倒計時");
+      console.log("暫停倒數");
       await usePauseAPI();
       pauseTimer();
     } else if (buttonText.value === "繼續") {
-      console.log("恢復倒計時");
+      console.log("繼續倒數");
       await usePauseEndAPI();
       resumeTimer();
     }
     return;
   }
 
-  // 如果無 UID，初始化檢測前邏輯
-  const response = await useStartAPI();
-  if (response && UID.value) {
-    store.detectFlag = "1";
-    store.detectUID = UID.value;
-    store.detectForm = props.productName;
-
-    const now = Date.now();
-    setLocalStorage(getProductStorageKey("startTime"), now);
-    setLocalStorage(getProductStorageKey("UID"), UID.value);
-
-    startTime.value = now;
-    buttonText.value = "暫停";
-    startTimer();
+  // 如果没有 todayUseRecord 并且没有计时 UID，进入检测前逻辑
+  if (Array.isArray(props.hasBeforeData) && props.hasBeforeData.length === 0) {
+    console.log("檢測前開始倒數");
+    const response = await useStartAPI();
+    if (response && UID.value) {
+      store.detectFlag = "1";
+      store.detectUID = UID.value;
+      store.detectForm = props.productName;
+      store.showHRVAlert = true;
+      const now = Date.now();
+      setLocalStorage(getProductStorageKey("startTime"), now);
+      setLocalStorage(getProductStorageKey("UID"), UID.value);
+      startTime.value = now;
+      buttonText.value = "暫停";
+      startTimer();
+    } else {
+      console.error("開始檢測失敗");
+    }
   } else {
-    console.error("初始化檢測失敗！");
+    console.error("未知邏輯分支，無法操作");
   }
 };
-
 
 const startTimer = () => {
   isCounting.value = true;
