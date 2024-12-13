@@ -514,8 +514,8 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         await this.API_ANSOnlineQSaveAns();
         await this.API_ANSOnlineTimesSaveTimes();
         await this.API_ANSOnlineSolveSaveSolve();
-        await this.API_API_ANSFirstDetail();
-        this.nowState = "result";
+        location.reload();
+        // this.nowState = "result";
       }
 
       this.preDisabled = this.currentStep === 1;
