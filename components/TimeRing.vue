@@ -557,7 +557,7 @@ const buttonStyle = computed(() => {
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .progress-container {
   display: flex;
   flex-direction: column;
@@ -595,7 +595,7 @@ const buttonStyle = computed(() => {
 }
 
 button {
-  padding: 10px 20px;
+  padding: 0.5rem 0.75rem;
   font-size: 1rem;
   cursor: pointer;
   color: white;

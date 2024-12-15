@@ -354,6 +354,10 @@ export default {
   width: 100%;
   max-width: 768px;
   margin-top: 1.5rem;
+  transition: all 0.2s ease;
+  &:hover{
+    color: $raphael-red-500;
+  }
 }
 
 .goToHRVBtn {
@@ -363,11 +367,17 @@ export default {
   border-radius: 8px;
   font-size: 18px;
   color: #fff;
+  cursor: pointer;
   border: none;
   font-weight: 400;
   line-height: 100%;
   letter-spacing: 0.09px;
   margin-top: 32px;
-  padding: 8px;
+  padding: 0.5rem 0.75rem;
+  transition: all .2s ease;
+
+  &:hover{
+    background:$raphael-green-500;
+  }
 }
 </style>

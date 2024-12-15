@@ -219,7 +219,7 @@ export default {
     color: #fff;
     cursor: pointer;
     width: 100%;
-    padding: 8px;
+    padding: 0.5rem 0.75rem;
     border-radius: 8px;
     font-size: 1.125rem;
     font-weight: 400;

@@ -509,7 +509,7 @@ export default {
     .resetPasswordBtn {
       background-color: $raphael-green-400;
       color: #fff;
-      padding: 12px;
+      padding: 0.5rem 0.75rem;
       width: 100%;
       border-radius: 8px;
       border: none;

@@ -435,7 +435,8 @@ export default {
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
-
+        margin-top: 0.375rem;
+        
         .resultTag {
           background: #fef1e2;
           padding: 4px 8px;
@@ -466,28 +467,32 @@ export default {
     margin-top: 0.75rem;
     padding: 12px 16px;
     .symptomButtonGroup {
-      display: flex;
-      justify-content: space-between;
-      gap: 3.5%;
+      display: grid;
+      grid-auto-flow: column;
 
       button {
-        background-color: #f6f6f6;
+        background-color: transparent;
         color: #666;
-        font-size: 1rem;
-        width: 32.5%;
+        cursor: pointer;
+        font-size: 1.125rem;
+        width: 100%;
         border: none;
         transition: 0.5s all ease;
         border-radius: 8px;
-        padding: 6px 12px;
+        padding: 0.5rem 0.75rem;
 
         &:hover {
-          background-color: $raphael-green-400;
-          color: #fff;
+          background-color: $raphael-green-300;
+          color: #1e1e1e;
         }
       }
       .symptomBtnActive {
         background-color: $raphael-green-400;
         color: #fff;
+        &:hover {
+          background-color: $raphael-green-400;
+          color: #fff;
+        }
       }
     }
     .symptomMenuList {
@@ -627,7 +632,7 @@ export default {
   background-color: $raphael-green-400;
   color: #fff;
   cursor: pointer;
-  padding: 12px;
+  padding: 0.5rem 0.75rem;
   width: 100%;
   border-radius: 8px;
   border: none;

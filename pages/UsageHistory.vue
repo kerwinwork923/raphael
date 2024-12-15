@@ -651,14 +651,18 @@ export default {
     background-color: $raphael-green-400;
     color: #fff;
     border: none;
-    padding: 8px;
+    padding: 0.5rem 0.75rem;
     border-radius: 8px;
     color: #fff;
     font-size: 18px;
     font-style: normal;
     font-weight: 400;
     letter-spacing: 0.09px;
-    cursor: pointer;
+    cursor: pointer;    
+    transition: all 0.3s ease;
+    &:hover {
+      background-color: $raphael-green-500;
+    }
   }
 }
 

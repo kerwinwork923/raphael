@@ -147,7 +147,7 @@ export default {
   padding-bottom: 66px;
 
   .changeMemberGroup {
-    padding: 0.75rem 0;
+    padding: 0.75rem 0 0 0;
     width: 100%;
     max-width: 768px;
   }

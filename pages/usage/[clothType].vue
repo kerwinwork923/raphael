@@ -679,7 +679,7 @@ export default {
   overflow-x: hidden;
   padding: 0 1rem;
   position: relative;
-  padding-bottom: 4,25rem;
+  padding-bottom: 4.25rem;
 
   .usageInfoGroup {
     display: flex;
@@ -743,16 +743,29 @@ export default {
     border-radius: 0.75rem;
     padding: 0.75rem;
     .usageRecordTitleGroup {
-      display: flex;
-      justify-content: space-around;
+      display: grid;
+      grid-auto-flow: column;
       h3 {
         color: #ddd;
-        font-size: 24px;
+        cursor: pointer;
+        border-radius: 0.5rem;
+        font-size: 1.125rem;
         letter-spacing: 0.5px;
+        text-align: center;
+        padding: 0.5rem 0.75rem;
         transition: 0.3s ease all;
+        &:hover{
+          background-color: $raphael-green-300;
+          color: #1e1e1e;
+        }
       }
       .active {
-        color: #1e1e1e;
+        background-color: $raphael-green-400;
+        color: #fff;
+        &:hover{
+          background-color: $raphael-green-400;
+          color: #fff;
+        }
       }
     }
 

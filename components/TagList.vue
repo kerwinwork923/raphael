@@ -24,7 +24,7 @@
     font-size: 1.125rem;
     font-weight: 400;
     letter-spacing: 0.1px;
-    padding: 8px;
+    padding: 0.5rem;
     border-radius: 6px;
     color: $raphael-gray-500;
     text-align: center;

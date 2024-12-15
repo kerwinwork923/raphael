@@ -311,6 +311,8 @@ export default {
     background-color: #fff;
     border-radius: 1rem;
     padding: 1rem;
+    height: calc(100vh - 256px);
+    overflow-y: scroll;
   }
 
   .custom-select {
@@ -501,7 +503,7 @@ export default {
     border: none;
     display: flex;
     margin-top: 24px;
-    padding: 8px;
+    padding: 0.5rem 0.75rem;
     width: 100%;
     border-radius: 8px;
     color: #fff;
