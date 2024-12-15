@@ -679,7 +679,7 @@ export default {
   overflow-x: hidden;
   padding: 0 1rem;
   position: relative;
-  padding-bottom: 136px;
+  padding-bottom: 4,25rem;
 
   .usageInfoGroup {
     display: flex;
