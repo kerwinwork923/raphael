@@ -272,7 +272,7 @@ article{
     overflow-y: auto;
     
     .notDetectData {
-      position: absolute;
+      position: absolute; 
       z-index: 11;
       top: 50%;
       left: 50%;
