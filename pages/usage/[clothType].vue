@@ -4,12 +4,12 @@
   <DSPRSelect :showCloseButton="false" />
   <div class="usageWrap">
     <TitleMenu Text="使用紀錄" :link="`back`" />
-    <!-- <TimeRing2
+    <TimeRing2
       v-if="productName === '保健版'"
       :productName="productName"
       :hasDetectRecord="hasDetectRecord"
       @timer-finished="onTimerFinished"
-    /> -->
+    />
 
     <!-- <TimeRing
       v-if="productName === '保健版'"
@@ -42,7 +42,7 @@
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
     /> -->
-
+<!-- 
     <TimeRing
 
       :totalTime="90"
@@ -52,7 +52,7 @@
       :hasBeforeData="hasBeforeData"
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
-    />
+    /> -->
 
     <div class="usageInfoGroup" v-if="usageCardState === '紅光版'">
       <div class="usageInfoCard">
