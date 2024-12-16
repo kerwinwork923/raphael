@@ -770,7 +770,6 @@ export default {
     }
 
     .useGroup {
-      padding: 0 1.25rem;
       position: relative;
       min-height: 30vh;
       .notDetectData {
@@ -799,7 +798,6 @@ export default {
             display: flex;
             align-items: center;
             gap: 4px;
-            padding-bottom: 1rem;
             .timeIcon {
               border-radius: 7px;
               padding: 6px;
@@ -820,6 +818,9 @@ export default {
         }
       }
       .actionGroup {
+        display: grid;
+        gap:0.75rem;
+        margin-top: 0.75rem;
         .startGroup,
         .pauseGroup,
         .stopGroup {
@@ -832,7 +833,6 @@ export default {
           padding: 6px 12px;
           gap: 8px;
           line-height: 1.3;
-          margin-bottom: 0.5rem;
           .actionContent {
             color: #666;
             font-size: 18px;
@@ -858,7 +858,6 @@ export default {
       overflow-y: auto;
       height: calc(100% - 54px);
       position: relative;
-      padding: 0 1.25rem;
       .detectItem {
         width: 100%;
         margin: 0 auto;

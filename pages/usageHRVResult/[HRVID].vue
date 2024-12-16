@@ -368,22 +368,23 @@ export default {
 <style lang="scss" scoped>
 .usageHRVResultWrap {
   background-color: #f6f6f6;
-  padding: 1rem 5% 7rem;
-  font-family: "Noto Sans";
   min-height: 100vh;
+  padding: 0 1rem;
+  padding-bottom: 136px;
   h1 {
     color: #000;
     text-align: center;
     font-size: 24px;
     font-weight: 400;
     letter-spacing: 0.5px;
-    padding-bottom: 1rem;
+    padding: 0.75rem 0;
   }
   .resultChartGroup {
     background-color: #fff;
-    padding: 0.5rem 0 0;
+    border-radius: 0.5rem;
+    padding: 12px;
     h2 {
-      padding-left: 0.5rem;
+      margin-bottom: 0.75rem;
       color: #1e1e1e;
       font-size: 20px;
       font-style: normal;
@@ -392,16 +393,14 @@ export default {
     }
   }
   .BAGroup {
-    display: flex;
-    gap: 3%;
-    overflow-x: auto;
+    display: grid;
+    gap: 0.75rem;
     width: max-content;
     width: 100%;
-    margin-top: 1rem;
+    margin-top: 0.75rem;
     white-space: nowrap;
     .BACard {
       background-color: #fff;
-      width: 80%;
       border-left: 2px solid var(--brand-green-400, #74bc1f);
       border-radius: 8px;
       padding: 12px;
@@ -413,7 +412,7 @@ export default {
         font-size: 20px;
         font-style: normal;
         font-weight: 400;
-
+        margin-bottom: 0.75rem;
         letter-spacing: 0.15px;
 
         img {
@@ -428,7 +427,7 @@ export default {
         .BA {
           .subTitle {
             color: #666;
-            margin-top: 0.25rem;
+            margin-bottom: 0.25rem;
             font-size: 16px;
             font-style: normal;
             font-weight: 400;
@@ -438,11 +437,11 @@ export default {
           .value {
             color: #74bc1f;
             text-align: center;
-            font-family: "Noto Sans";
             font-size: 36px;
             font-style: normal;
             font-weight: 700;
             letter-spacing: 0.09px;
+            margin-bottom: 0.25rem;
           }
           .afterValue {
             color: #1fbcb3;
@@ -450,7 +449,6 @@ export default {
 
           .unit {
             color: #ccc;
-            font-family: "Noto Sans";
             font-size: 16px;
             font-style: normal;
             font-weight: 400;
@@ -461,7 +459,7 @@ export default {
       }
     }
     .BACardS {
-      width: 160px;
+      // width: 160px;
     }
   }
 
@@ -472,7 +470,6 @@ export default {
     padding: 0.75rem 12px 0;
     h3 {
       color: #1e1e1e;
-      font-family: "Noto Sans";
       font-size: 20px;
       font-style: normal;
       font-weight: 400;
@@ -487,22 +484,26 @@ export default {
     width: 100%;
     background-color: #f6f6f6;
     z-index: 99;
-    display: flex;
-    justify-content: center;
-    padding: 24px 5%;
-    gap: 16px;
+    padding: 1rem;
+    padding-bottom: 4.25rem;
+
     button {
-      width: 50%;
+      width: 100%;
       background-color: $raphael-green-400;
       color: #fff;
       border: none;
-      padding: 8px;
+      padding: 0.5rem 0.75rem;
       border-radius: 8px;
       color: #fff;
+      cursor: pointer;
       font-size: 18px;
       font-style: normal;
       font-weight: 400;
       letter-spacing: 0.09px;
+      transition: all .2s ease;
+      &:hover{
+        background-color: $raphael-green-500;
+      }
     }
     .preBtn {
       background-color: #eee;
