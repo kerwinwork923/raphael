@@ -5,10 +5,18 @@
   <div class="HRVHistory">
     <div class="titleGroup">
       <img src="/assets/imgs/backArrow.svg" @click="goBack" alt="" />
-      <h2>HRV 檢測紀錄</h2>
-    </div>
+      <h2>HRV 檢測</h2>
+    </div>    
+    <article>
+      <h3>AI智慧檢測，健康隨手掌握</h3>
+      <ul>
+        <li>只需<span class="point">1-2分鐘</span>，透過手機相機掃描臉部，即可運用<span class="point">FDA認證AI技術</span>分析您的生理數據(如心跳)。</li>
+        <li>醫師會根據數據了解您的自律神經狀態，提供適合您的健康建議，助您改善體質。</li>
+        <li>為確保檢測結果準確性，請於開始前<span class="point">關閉螢幕保護程式</span>，輕鬆掌控健康每一天。</li>
+      </ul>
+    </article>
     <div class="detectWrap">
-      <h3>僅顯示近 10筆 記錄</h3>
+      <h3>最近 10筆 檢測記錄</h3>
       <div class="detectList">
         <div class="detectItem" v-for="item in limitedHRVData" :key="item.AID">
           <a :href="`/vital/detail.html?AID=${item.AID}`">
@@ -212,6 +220,34 @@ export default {
   }
 }
 
+article{
+  display: grid;
+  gap: 0.75rem;
+
+  &>h3{
+    font-size: 20px;
+  }
+  &>ul{
+    display: grid;
+    list-style-type: disc;
+    &>li{      
+      line-height: 29.1px;
+      color: #666;
+      font-size: 18px;
+      font-style: normal;
+      font-weight: 400;
+      letter-spacing: 0.09px;
+      margin-left: 1rem;
+      &::marker{
+        content: "•";
+      }
+      .point{
+        color: $raphael-red-300;
+      }
+    }
+  }
+}
+
 .detectWrap {
   background-color: #fff;
   height: calc(100vh - 234px);
@@ -353,7 +389,7 @@ export default {
   letter-spacing: 0.09px;
   width: 100%;
   max-width: 768px;
-  margin-top: 1.5rem;
+  margin-top: 0.75rem;
   transition: all 0.2s ease;
   &:hover{
     color: $raphael-red-500;
@@ -372,7 +408,7 @@ export default {
   font-weight: 400;
   line-height: 100%;
   letter-spacing: 0.09px;
-  margin-top: 32px;
+  margin-top: 1.5rem;
   padding: 0.5rem 0.75rem;
   transition: all .2s ease;
 
