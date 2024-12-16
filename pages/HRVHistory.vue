@@ -249,13 +249,9 @@ article{
 }
 
 .detectWrap {
-  background-color: #fff;
-  height: calc(100vh - 234px);
-  border-radius: 12px;
-  margin-top: 0.75rem;
-  padding: 0.75rem;
   width: 100%;
   max-width: 768px;
+  margin-top: 0.75rem;
 
   & > h3 {
     display: flex;
@@ -268,8 +264,11 @@ article{
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    height: calc(100% - 52px);
+    background: #fff;
+    border-radius: 12px;
+    padding: 0.75rem;
+    gap: 1.5rem;
+    height: calc(100vh - 336px);
     overflow-y: auto;
     
     .notDetectData {
