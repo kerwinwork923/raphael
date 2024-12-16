@@ -237,9 +237,9 @@ article{
       font-style: normal;
       font-weight: 400;
       letter-spacing: 0.09px;
-      margin-left: 1rem;
+      margin-left: 1.25rem;
       &::marker{
-        content: "•";
+        font-size: 0.75rem;
       }
       .point{
         color: $raphael-red-300;
