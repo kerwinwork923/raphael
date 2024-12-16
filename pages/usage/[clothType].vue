@@ -674,7 +674,7 @@ export default {
 <style lang="scss">
 .usageWrap {
   background-color: rgba(246, 246, 246, 1);
-  min-height: 100vh;
+  height: 100vh;
   width: 100%;
   overflow-x: hidden;
   padding: 0 1rem;

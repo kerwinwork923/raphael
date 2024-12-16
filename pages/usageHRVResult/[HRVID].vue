@@ -372,12 +372,15 @@ export default {
   padding: 0 1rem;
   padding-bottom: 136px;
   h1 {
+    position: sticky;
+    background: $raphael-gray-100;
     color: #000;
     text-align: center;
     font-size: 24px;
     font-weight: 400;
     letter-spacing: 0.5px;
     padding: 0.75rem 0;
+    top: 0;
   }
   .resultChartGroup {
     background-color: #fff;
