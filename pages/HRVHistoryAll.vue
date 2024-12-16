@@ -463,7 +463,7 @@ export default {
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.5rem;
     height: calc(100% - 54px);
     overflow-y: auto;
   }
