@@ -1000,6 +1000,7 @@ export default {
       display: flex;
       align-items: center;
       justify-content: end;
+      gap: 0.75rem;
       padding: 0.75rem 0;
       color: #666;
       margin-top: 0.25rem;
@@ -1009,9 +1010,12 @@ export default {
       display: flex;
       align-items: center;
       gap: 2px;
-      margin-right: 0.75rem;
       position: relative;
+      cursor: pointer;
       .yearBox {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
         position: absolute;
         top: 100%;
         right: 0;
@@ -1028,8 +1032,11 @@ export default {
         transform: 0.25s all ease;
         animation: 0.3s fadeIn forwards;
         z-index: 10;
-        .month {
-          margin-bottom: 1rem;
+        .year {
+          transform: 0.25s all ease;
+          &:hover{
+            color: $raphael-green-400;
+          }
         }
       }
     }
@@ -1037,10 +1044,13 @@ export default {
       display: flex;
       align-items: center;
       gap: 2px;
-      margin-right: 0.75rem;
       position: relative;
+      cursor: pointer;
 
       .monthBox {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
         position: absolute;
         top: 100%;
         right: 0;
@@ -1059,7 +1069,10 @@ export default {
         animation: 0.3s fadeIn forwards;
         z-index: 10;
         .month {
-          margin-bottom: 1rem;
+          transform: 0.25s all ease;
+          &:hover{
+            color: $raphael-green-400;
+          }
         }
       }
     }
