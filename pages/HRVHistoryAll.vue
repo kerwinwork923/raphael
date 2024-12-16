@@ -387,7 +387,6 @@ export default {
 
 .detectWrap {
   background-color: #fff;
-  height: calc(100vh - 314px);
   border-radius: 12px;
   margin-top: 0.75rem;
   padding: 0.75rem;
@@ -463,8 +462,8 @@ export default {
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    height: calc(100% - 54px);
+    gap: 1.5rem;
+    height: calc(100vh - 381px);
     overflow-y: auto;
   }
 
