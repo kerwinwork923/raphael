@@ -772,7 +772,11 @@ export default {
 
     .useGroup {
       position: relative;
-      min-height: 30vh;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      height: calc(100vh - 293px);
+      overflow-y: auto;
       .notDetectData {
         position: absolute;
         z-index: 1;
@@ -788,7 +792,6 @@ export default {
         opacity: 0;
         animation: fadeIn2 1s ease forwards;
         animation-delay: 0s;
-        margin-bottom: 1.25rem;
         .dateList {
           display: flex;
           align-items: center;
@@ -819,21 +822,37 @@ export default {
         }
       }
       .actionGroup {
+        position: relative;
         display: grid;
         gap:0.75rem;
         margin-top: 0.75rem;
+
+        &::before{
+          position: absolute;
+          content: '';
+          box-shadow: 0px -1px 2px 0px rgba(0, 0, 0, 0.25) inset;
+          width: 8px;
+          height: 100%;
+          border-radius: 0.75rem;
+          left: 0.5rem;
+        }
+
         .startGroup,
         .pauseGroup,
         .stopGroup {
+          position: relative;
           opacity: 0;
           animation: fadeIn2 0.5s ease forwards;
           display: flex;
+          align-items: center;
           border-radius: 12px;
           background: var(--shade-white, #fff);
           box-shadow: 0px -2px 3px 0px rgba(0, 0, 0, 0.25) inset;
           padding: 6px 12px;
+          margin-left:1.5rem;
           gap: 8px;
           line-height: 1.3;
+
           .actionContent {
             color: #666;
             font-size: 18px;
@@ -843,8 +862,25 @@ export default {
               font-size: 20px;
             }
           }
+
+          &::before{
+            position: absolute;
+            content: "";
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            left: -1rem;
+          }
+        }
+        .startGroup{
+          &::before{
+            background: $raphael-green-400;
+          }
         }
         .pauseGroup {
+          &::before{
+            background: $raphael-orange-400;
+          }
           span {
             color: #ccc;
             text-align: center;
@@ -852,13 +888,21 @@ export default {
             letter-spacing: 0.1px;
           }
         }
+        .stopGroup{
+          &::before{
+            background: $raphael-red-300;
+          }
+        }
       }
     }
 
     .detectGroup {
       overflow-y: auto;
-      height: calc(100% - 54px);
+      height: calc(100vh - 293px);
       position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
       .detectItem {
         width: 100%;
         margin: 0 auto;
@@ -890,7 +934,6 @@ export default {
             display: flex;
             align-items: center;
             gap: 4px;
-            padding: 1.25rem 0;
             .timeIcon {
               border-radius: 7px;
               padding: 6px;
