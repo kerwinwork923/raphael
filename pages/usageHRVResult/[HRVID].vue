@@ -397,6 +397,7 @@ export default {
   }
   .BAGroup {
     display: grid;
+    grid-template-columns: repeat(2,1fr);
     gap: 0.75rem;
     width: max-content;
     width: 100%;
@@ -458,6 +459,15 @@ export default {
             line-height: 100%;
             letter-spacing: 0.5px;
           }
+        }
+        &>svg{
+          transform: scale(2);
+        }
+      }
+
+      @for $i from 1 through 4 {
+        &:nth-child(#{$i}) {
+          grid-column: 1/3;
         }
       }
     }

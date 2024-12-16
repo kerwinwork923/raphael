@@ -671,7 +671,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .usageWrap {
   background-color: rgba(246, 246, 246, 1);
   height: 100vh;
