@@ -1,8 +1,16 @@
 <template>
   <div>
-    <h1>Bluetooth Communication</h1>
-    <button @click="connectToDevice">Connect to Device</button>
-    <p>{{ message }}</p>
+    <h1>尋找藍牙裝置</h1>
+    <button @click="scanForDevices">尋找藍牙裝置</button>
+    <div v-if="devices.length">
+      <h2>可配對的藍牙裝置：</h2>
+      <ul>
+        <li v-for="(device, index) in devices" :key="index">
+          {{ device.name || '無名稱裝置' }} (ID: {{ device.id }})
+        </li>
+      </ul>
+    </div>
+    <p v-else>尚未找到任何裝置。</p>
   </div>
 </template>
 
@@ -10,34 +18,29 @@
 export default {
   data() {
     return {
-      message: 'No device connected.',
+      devices: [], // 存儲掃描到的裝置
     };
   },
   methods: {
-    async connectToDevice() {
+    async scanForDevices() {
       try {
-        // 尋找藍牙裝置
+        // 開始尋找藍牙裝置
         const device = await navigator.bluetooth.requestDevice({
-          acceptAllDevices: true,
-          optionalServices: ['battery_service'], // 可自定義 Service UUID
+          acceptAllDevices: true, // 接受所有藍牙裝置
+          optionalServices: ['generic_access'], // 可選，指定服務 UUID (可根據需求更改)
         });
 
-        this.message = `Connected to: ${device.name}`;
-        
-        // 連接裝置的 GATT 伺服器
-        const server = await device.gatt.connect();
-        
-        // 獲取服務與特徵值
-        const service = await server.getPrimaryService('battery_service'); // 替換為你的服務 UUID
-        const characteristic = await service.getCharacteristic('battery_level'); // 替換為你的特徵 UUID
-
-        // 讀取特徵值
-        const value = await characteristic.readValue();
-        const batteryLevel = value.getUint8(0);
-        this.message = `Battery Level: ${batteryLevel}%`;
+        // 檢查裝置是否已經存在於清單中，避免重複
+        const exists = this.devices.find((d) => d.id === device.id);
+        if (!exists) {
+          this.devices.push({
+            name: device.name || '無名稱裝置',
+            id: device.id,
+          });
+        }
       } catch (error) {
-        console.error(error);
-        this.message = 'Failed to connect to device.';
+        console.error('藍牙掃描錯誤:', error);
+        alert('無法掃描藍牙裝置，請確認瀏覽器支援並開啟藍牙。');
       }
     },
   },
