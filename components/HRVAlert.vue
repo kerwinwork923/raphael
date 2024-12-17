@@ -224,6 +224,7 @@ export default {
     font-size: 1.125rem;
     font-weight: 400;
     letter-spacing: 0.09px;
+    line-height: 100%;
     transition: all 0.3s ease;
     &:hover {
       background-color: $raphael-green-500;
