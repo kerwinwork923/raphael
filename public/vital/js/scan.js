@@ -170,7 +170,7 @@ const OnResult = (result) => {
   
   console.log("nHRV=",nHRV);
 
-  if (proc > 75 && result.scanning_status != "Motion") {
+  if (proc > 50 && proc < 80 && result.scanning_status != "Motion") {
     nArray.push([
       SDNNage,
       (1.22998789167383e-5 * Math.pow(result.hrv_indices.HF, 2) -
