@@ -35,7 +35,7 @@
       </div>
 
       <div class="subListTitle" v-if="store.nowState == 'score'">
-        以下問題對您的困擾程度
+        以下問題的困擾程度
       </div>
       <div class="subListTitle" v-if="store.nowState == 'times'">
         以下問題上週發生幾次
