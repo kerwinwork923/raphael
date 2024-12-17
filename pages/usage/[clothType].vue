@@ -11,7 +11,7 @@
       @timer-finished="onTimerFinished"
     />
 
-    <!-- <TimeRing
+    <TimeRing
       v-if="productName === '保健版'"
       :totalTime="21600"
       :product-name="productName"
@@ -41,10 +41,9 @@
       :hasBeforeData="hasBeforeData"
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
-    /> -->
+    />
 <!-- 
     <TimeRing
-
       :totalTime="90"
       :product-name="productName"
       :hasDetectRecord="hasDetectRecord"
