@@ -73,7 +73,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .userRecord {
   background-color: $raphael-gray-100;
   display: flex;
@@ -90,30 +90,9 @@ export default {
     padding-top: 0.75rem;
   }
 }
-
-.pleaseWrite {
-  margin: 1rem 0 0.75rem 0;
-  color: $raphael-gray-500;
-  font-size: 1rem;
-}
-
 .submitBtn,
 .backToUserBtn {
-  background-color: $raphael-green-400;
-  color: #fff;
-  padding: 8px;
-  width: 100%;
-  border-radius: 8px;
-  border: none;
-  font-size: 1.125rem;
-  font-weight: 400;
-  letter-spacing: 0.5px;
-  transition: 0.25s ease;
-
-  cursor: pointer;
-  &:hover {
-    background-color: $raphael-green-500;
-  }
+  @include btnStyle($raphael-green-400,$raphael-white);
 }
 
 .backToUserBtnGroup {

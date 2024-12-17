@@ -152,83 +152,36 @@ export default {
 
 <style lang="scss" scoped>
 .cover {
-  position: fixed;
-  left: 0;
-  top: 0;
-
-  width: 100%;
-  height: 100vh;
-  z-index: 102;
-  background: rgba(217, 217, 217, 0.5);
-  backdrop-filter: blur(2.5px);
+  @include coverbg();
 }
 .HRVAlert {
-  display: grid;
-  gap: 1rem;
-  width: 90%;
 
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  background-color: #fff;
-  z-index: 1000;
-  border-radius: 12px;
-  background: var(--Grays-White, #fff);
-  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-  max-width: 648px;
-  padding: 0.75rem;
-  .HRVAlertClose {
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-    place-self: end;
-  }
-  h3 {
-    text-align: center;
-    color: $raphael-green-400;
-    font-weight: bold;
-    letter-spacing: 0.12px;
-    font-size: 1.5rem;
-  }
+  @include alertStyle();
+
   ul {
     display: grid;
     gap: 0.75rem;
     height: 45vh;
     padding-top: 0.75rem;
-    border-top: 1px solid #1e1e1e;
+    border-top: 1px solid $raphael-black;
     list-style: disc;
     overflow-x: scroll;
     li {
       margin-left: 1.5rem;
-      color: #666;
+      color: $raphael-gray-500;
       font-size: 18px;
       letter-spacing: 4px;
       line-height: 29.1px;
       .point {
-        color: #ec4f4f;
+        color: $raphael-red-300;
       }
     }
     li::marker {
-      color: #666;
+      color: $raphael-gray-500;
     }
   }
   .HRVAlertBtn {
-    background-color: $raphael-green-400;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    width: 100%;
-    padding: 0.5rem 0.75rem;
-    border-radius: 8px;
-    font-size: 1.125rem;
-    font-weight: 400;
-    letter-spacing: 0.09px;
-    line-height: 100%;
-    transition: all 0.3s ease;
-    &:hover {
-      background-color: $raphael-green-500;
-    }
+    @include btnStyle($raphael-green-400,$raphael-white);
   }
 }
 </style>

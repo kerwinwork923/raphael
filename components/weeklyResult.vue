@@ -471,20 +471,7 @@ export default {
       grid-auto-flow: column;
 
       button {
-        background-color: transparent;
-        color: #666;
-        cursor: pointer;
-        font-size: 1.125rem;
-        width: 100%;
-        border: none;
-        transition: 0.5s all ease;
-        border-radius: 8px;
-        padding: 0.5rem 0.75rem;
-
-        &:hover {
-          background-color: $raphael-green-300;
-          color: #1e1e1e;
-        }
+        @include btnStyle($raphael-white,$raphael-gray-500);
       }
       .symptomBtnActive {
         background-color: $raphael-green-400;
@@ -629,19 +616,6 @@ export default {
   padding-bottom: 4.25rem;
 }
 .backToUserBtnWeekly {
-  background-color: $raphael-green-400;
-  color: #fff;
-  cursor: pointer;
-  padding: 0.5rem 0.75rem;
-  width: 100%;
-  border-radius: 8px;
-  border: none;
-  font-size: 1.125rem;
-  font-weight: 400;
-  letter-spacing: 0.5px;
-  transition: 0.25s ease;
-  &:hover {
-    background-color: $raphael-green-500;
-  }
+  @include btnStyle($raphael-green-400,$raphael-white);
 }
 </style>

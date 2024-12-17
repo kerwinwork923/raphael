@@ -201,7 +201,7 @@
             >
               <path
                 d="M5.99159 3.37719L11.4726 8.99994L5.99159 14.6227C5.89346 14.7232 5.83853 14.858 5.83853 14.9984C5.83853 15.1389 5.89346 15.2737 5.99159 15.3742C6.03925 15.4228 6.09613 15.4615 6.15891 15.4879C6.2217 15.5142 6.28911 15.5278 6.35721 15.5278C6.42531 15.5278 6.49273 15.5142 6.55551 15.4879C6.61829 15.4615 6.67518 15.4228 6.72284 15.3742L12.5548 9.39257C12.6572 9.28752 12.7145 9.14664 12.7145 8.99994C12.7145 8.85325 12.6572 8.71236 12.5548 8.60732L6.72396 2.62569C6.67627 2.57671 6.61924 2.53777 6.55625 2.51119C6.49326 2.4846 6.42558 2.4709 6.35721 2.4709C6.28884 2.4709 6.22116 2.4846 6.15817 2.51119C6.09518 2.53777 6.03816 2.57671 5.99046 2.62569C5.89234 2.72615 5.8374 2.86101 5.8374 3.00144C5.8374 3.14187 5.89234 3.27673 5.99046 3.37719L5.99159 3.37719Z"
-                fill="#666666"
+                fill="$raphael-gray-500666"
               />
             </svg>
           </div>
@@ -289,7 +289,7 @@
               >
                 <path
                   d="M5.99159 3.37719L11.4726 8.99994L5.99159 14.6227C5.89346 14.7232 5.83853 14.858 5.83853 14.9984C5.83853 15.1389 5.89346 15.2737 5.99159 15.3742C6.03925 15.4228 6.09613 15.4615 6.15891 15.4879C6.2217 15.5142 6.28911 15.5278 6.35721 15.5278C6.42531 15.5278 6.49273 15.5142 6.55551 15.4879C6.61829 15.4615 6.67518 15.4228 6.72284 15.3742L12.5548 9.39257C12.6572 9.28752 12.7145 9.14664 12.7145 8.99994C12.7145 8.85325 12.6572 8.71236 12.5548 8.60732L6.72396 2.62569C6.67627 2.57671 6.61924 2.53777 6.55625 2.51119C6.49326 2.4846 6.42558 2.4709 6.35721 2.4709C6.28884 2.4709 6.22116 2.4846 6.15817 2.51119C6.09518 2.53777 6.03816 2.57671 5.99046 2.62569C5.89234 2.72615 5.8374 2.86101 5.8374 3.00144C5.8374 3.14187 5.89234 3.27673 5.99046 3.37719L5.99159 3.37719Z"
-                  fill="#666666"
+                  fill="$raphael-gray-500666"
                 />
               </svg>
             </div>
@@ -674,13 +674,14 @@ export default {
 
 <style lang="scss" scoped>
 .usageWrap {
-  background-color: rgba(246, 246, 246, 1);
+  background-color: $raphael-gray-100;
   height: 100vh;
   width: 100%;
   overflow-x: hidden;
   padding: 0 1rem;
   position: relative;
   padding-bottom: 4.25rem;
+  place-items: center;
 
   .usageInfoGroup {
     display: flex;
@@ -688,31 +689,31 @@ export default {
     overflow-x: auto;
     width: max-content;
     width: 100%;
+    max-width: 768px;
     margin-top: 0.75rem;
 
     .usageInfoCard {
-      background-color: #fff;
+      background-color: $raphael-white;
       padding: 12px;
       border-radius: 12px;
       flex-shrink: 0;
       max-width: 324px;
-      color: #666;
+      color: $raphael-gray-500;
       font-size: 18px;
       font-weight: 400;
       letter-spacing: 0.09px;
       min-height: 140px;
-      &:nth-child(1) {
-        border-left: 2px solid #74bc1f;
+
+      $colors: $raphael-green-400, $raphael-cyan-400, $raphael-purple-200;
+      @for $i from 1 through length($colors) {
+        &:nth-child(#{$i}) {
+          border-left: 2px solid nth($colors, $i);
+        }
       }
-      &:nth-child(2) {
-        border-left: 2px solid #1fbcb3;
-      }
-      &:nth-child(3) {
-        border-left: 2px solid #65558f;
-      }
+      
       h3 {
         font-size: 20px;
-        color: #1e1e1e;
+        color: $raphael-black;
         margin-bottom: 0.75rem;
       }
       h4 {
@@ -728,7 +729,7 @@ export default {
         color: $raphael-orange-400;
       }
       p {
-        color: #666;
+        color: $raphael-gray-500;
         font-size: 18px;
         font-style: normal;
         font-weight: 400;
@@ -739,33 +740,25 @@ export default {
     }
   }
   .usageRecord {
-    background-color: #fff;
+    background-color: $raphael-white;
     margin-top: 0.75rem;
     border-radius: 0.75rem;
-    padding: 0.75rem;
+    padding: 0.75rem;    
+    width: 100%;
+    max-width: 768px;
+
     .usageRecordTitleGroup {
       display: grid;
       grid-auto-flow: column;
       h3 {
-        color: #ddd;
-        cursor: pointer;
-        border-radius: 0.5rem;
-        font-size: 1.125rem;
-        letter-spacing: 0.5px;
-        text-align: center;
-        padding: 0.5rem 0.75rem;
-        transition: 0.3s ease all;
-        &:hover{
-          background-color: $raphael-green-300;
-          color: #1e1e1e;
-        }
+        @include btnStyle($raphael-white,$raphael-gray-300);
       }
       .active {
         background-color: $raphael-green-400;
-        color: #fff;
+        color: $raphael-white;
         &:hover{
           background-color: $raphael-green-400;
-          color: #fff;
+          color: $raphael-white;
         }
       }
     }
@@ -777,6 +770,10 @@ export default {
       gap: 1.5rem;
       height: calc(100vh - 293px);
       overflow-y: auto;
+      @include respond-to("phone-landscape"){
+        height: calc(100vh - 100px);
+      }
+
       .notDetectData {
         position: absolute;
         z-index: 1;
@@ -786,7 +783,7 @@ export default {
         letter-spacing: 10px;
         font-size: 1.25rem;
         white-space: nowrap;
-        color: #999;
+        color: $raphael-gray-500;
       }
       .useList {
         opacity: 0;
@@ -805,7 +802,7 @@ export default {
             .timeIcon {
               border-radius: 7px;
               padding: 6px;
-              border: 1px solid var(--brand-green-400, #74bc1f);
+              border: 1px solid var(--brand-green-400, $raphael-green-400);
             }
             .time {
               font-size: 20px;
@@ -846,7 +843,7 @@ export default {
           display: flex;
           align-items: center;
           border-radius: 12px;
-          background: var(--shade-white, #fff);
+          background: $raphael-white;
           box-shadow: 0px -2px 3px 0px rgba(0, 0, 0, 0.25) inset;
           padding: 6px 12px;
           margin-left:1.5rem;
@@ -854,7 +851,7 @@ export default {
           line-height: 1.3;
 
           .actionContent {
-            color: #666;
+            color: $raphael-gray-500;
             font-size: 18px;
             font-weight: 400;
             letter-spacing: 0.09px;
@@ -882,7 +879,7 @@ export default {
             background: $raphael-orange-400;
           }
           span {
-            color: #ccc;
+            color: $raphael-gray-300;
             text-align: center;
             font-size: 14px;
             letter-spacing: 0.1px;
@@ -915,7 +912,7 @@ export default {
           flex-direction: column;
           line-height: 1.35;
           .timeInfoText {
-            color: #666;
+            color: $raphael-gray-500;
             font-size: 16px;
             letter-spacing: 0.5px;
           }
@@ -927,7 +924,7 @@ export default {
         }
         a {
           text-decoration: none;
-          color: #1e1e1e;
+          color: $raphael-black;
           display: flex;
           justify-content: space-between;
           .timeGroup {
@@ -937,7 +934,7 @@ export default {
             .timeIcon {
               border-radius: 7px;
               padding: 6px;
-              border: 1px solid var(--brand-green-400, #74bc1f);
+              border: 1px solid var(--brand-green-400, $raphael-green-400);
             }
             .time {
               font-size: 20px;
@@ -953,7 +950,7 @@ export default {
             justify-content: end;
             gap: 0.5rem;
             h4 {
-              color: #666;
+              color: $raphael-gray-500;
               font-size: 1rem;
               font-style: normal;
               font-weight: 400;
@@ -961,20 +958,20 @@ export default {
             }
 
             .detectAgeGroup {
-              color: #666;
+              color: $raphael-gray-500;
             }
             .detectHRVGroup {
-              color: #666;
+              color: $raphael-gray-500;
             }
             h5 {
-              color: #b3b3b3;
+              color: $raphael-gray-400;
               font-size: 1rem;
               font-style: normal;
               font-weight: 400;
               letter-spacing: 0.5px;
               margin-top: 0.25rem;
               span {
-                color: #1e1e1e;
+                color: $raphael-black;
                 font-size: 1.5rem;
                 font-style: normal;
                 font-weight: 700;
@@ -983,14 +980,14 @@ export default {
               }
             }
             .redValue {
-              color: #ec4f4f;
+              color: $raphael-red-500;
             }
             svg {
               width: 18px;
             }
           }
           &:hover {
-            background-color: #f4f4f4;
+            background-color: $raphael-gray-100;
           }
         }
       }
@@ -1002,7 +999,7 @@ export default {
       justify-content: end;
       gap: 0.75rem;
       padding: 0.75rem 0;
-      color: #666;
+      color: $raphael-gray-500;
       margin-top: 0.25rem;
     }
 
@@ -1089,19 +1086,19 @@ export default {
     gap: 16px;
     button {
       background-color: $raphael-green-400;
-      color: #fff;
+      color: $raphael-white;
       border: none;
       padding: 8px;
       border-radius: 8px;
-      color: #fff;
+      color: $raphael-white;
       font-size: 18px;
       font-style: normal;
       font-weight: 400;
       letter-spacing: 0.09px;
     }
     .preBtn {
-      background-color: #eee;
-      color: #666;
+      background-color: $raphael-gray-200;
+      color: $raphael-gray-500;
     }
     .nextBtn {
       background-color: $raphael-green-400;

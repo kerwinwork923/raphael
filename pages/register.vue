@@ -756,21 +756,9 @@ export default {
 
     .vertificationBtn,
     .infoSendBtn {
-      background-color: $raphael-green-400;
-      color: #fff;
-      padding: 0.5rem 0.75rem;
-      width: 100%;
-      border-radius: 8px;
-      border: none;
-      font-size: 1.125rem;
-      font-weight: 400;
-      letter-spacing: 0.5px;
-      transition: 0.25s ease;
+      @include btnStyle($raphael-green-400,$raphael-white);
       margin-top: 1.5rem;
       cursor: pointer;
-      &:hover {
-        background-color: $raphael-green-500;
-      }
       &:disabled {
         background-color: $raphael-gray-400;
         cursor: not-allowed;
