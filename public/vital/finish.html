@@ -942,7 +942,6 @@
     background-size: cover;
     min-height: 100vh;
     width: 100%;
-    padding-bottom: 7rem;
   }
 
   .raphaelNavbar {
@@ -993,6 +992,11 @@
     height: 150px;
   }
 
+  .finishWrap > .titleGroup > .textGroup {
+    flex:1;
+    padding:0.75rem;
+  }
+  
   .finishWrap .textGroup .timeGroup {
     display: flex;
     align-items: center;
@@ -1314,6 +1318,9 @@
   }
 
   .detectionWrap .detectionContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
     overflow-y: auto;
     max-height: 400px;
   }
@@ -1322,10 +1329,8 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    height: 80px;
     text-decoration: none;
     color: #1e1e1e;
-    margin: 1rem 0;
   }
 
   .detectionWrap .detection a:hover {
