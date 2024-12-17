@@ -176,7 +176,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .weeklyRecord {
   background-color: $raphael-gray-100;
   display: flex;
@@ -199,44 +199,28 @@ export default {
     margin: 0.75rem 0 0.5rem 0;
   }
   .subListActive {
-    color: #ec4f4f;
+    color: $raphael-red-300;
   }
 
   .weeklyBtnGroup {
-    background-color: #f6f6f6;
+    background-color: #F6F6F6;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 0.75rem;
-    position: fixed;
-    bottom: -0.15%;
+    max-width: 768px;
     width: 100%;
-    padding: 0 5%;
-    height: 54px;
-    line-height: 1.5;
+    padding: 0.75rem 0 4.25rem 0;
     touch-action: manipulation;
   }
   .weeklyBtn {
-    background-color: $raphael-green-400;
-    color: #fff;
-    padding: 12px;
-    width: 100%;
-    border-radius: 8px;
-    border: none;
-    font-size: 1.125rem;
-    font-weight: 400;
-    letter-spacing: 0.5px;
-    transition: 0.25s ease;
-    padding: 8px;
-    margin-bottom: 2rem;
-
-    cursor: pointer;
+    @include btnStyle($raphael-green-400,$raphael-white);
     &:disabled {
       opacity: 0.5;
     }
   }
   .preBtn {
-    background-color: #dfdfdf;
+    background-color: $raphael-gray-300;
     color: #666;
   }
 
@@ -245,7 +229,7 @@ export default {
     margin: 1rem 0 0 0;
     .babyGroup {
       width: 100%;
-      background-color: #fff;
+      background-color: $raphael-white;
       border-radius: 8px;
       padding: 8px 12px;
       text-align: center;
@@ -259,7 +243,7 @@ export default {
       }
       .QAScrollBar {
         position: relative;
-        background-color: #eee;
+        background-color: $raphael-gray-200;
         border-radius: 5px;
         height: 8px;
         width: 100%;
@@ -268,7 +252,7 @@ export default {
         .progress {
           position: absolute;
           height: 100%;
-          background-color: #65558f;
+          background-color: $raphael-purple-200;
           border-radius: 5px;
           transition: width 0.3s ease;
         }
