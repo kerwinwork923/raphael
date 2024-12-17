@@ -268,7 +268,7 @@ article{
     border-radius: 12px;
     padding: 0.75rem;
     gap: 1.5rem;
-    height: calc(100vh - 336px);
+    height: calc(100vh - 478px);
     overflow-y: auto;
     
     .notDetectData {
