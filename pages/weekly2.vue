@@ -158,7 +158,7 @@ export default {
     onMounted(async () => {
       try {
         await store.getQues();
-        await store.fetchResultAnalysis("0");
+        await store.fetchResultAnalysis("");
       } catch (error) {
         console.error("Error during getQues:", error);
       }

@@ -166,7 +166,7 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
           Token,
           MAID,
           Mobile,
-          CID: String(this.childInfo.Name),
+          CID: String(this.childInfo.CID),
           MaxQ: String(this.totalQuestions), // 使用正确的总问题数
           ChildAns: answers,
         };
@@ -315,7 +315,7 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
           console.log("Result Analysis Response:", response.data);
 
           // 检查 diffDaysFromToday 并根据结果更新状态或决定是否再次调用 API
-          if (response.data.diffDaysFromToday <= 0) {
+          if (Number(response.data.ChildInfo[0].diffDaysFromToday) <= 0) {
             this.nowState = "score";
           } else {
             this.nowState = "result";
@@ -364,7 +364,7 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
           this.currentStep += 1;
         } else {
           if (this.sortedByScore.length < 3) {
-            alert("请至少選擇3題目=！");
+            alert("请至少選擇3題目！");
             return;
           }
           this.nowState = "times";
@@ -381,6 +381,9 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
         }
       } else if (this.nowState === "choose") {
         this.saveAllData();
+        // await this.fetchResultAnalysis("");
+        // this.nowState = "result";
+        location.reload();
       }
 
       // 在状态切换完成后更新进度条
