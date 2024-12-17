@@ -7,7 +7,7 @@
         <!-- 單件產品展示 -->
         <div class="haveGroup" v-if="purchasedProducts.length === 1">
           <div class="haveIcon">
-            <img src="/_nuxt/assets/imgs/haveCheck.svg" alt="checked icon" />
+            <img src="/assets/imgs/haveCheck.svg" alt="checked icon" />
           </div>
           <div class="haveProduct">
             <div class="imgGroup">
@@ -17,7 +17,7 @@
               <img
                 v-if="shouldShowRobot(purchasedProducts[0])"
                 class="robotImg"
-                src="/_nuxt/assets/imgs/clothRobot.png"
+                src="/assets/imgs/clothRobot.png"
                 alt="robot image"
               />
             </div>
@@ -324,11 +324,11 @@ export default {
         text-align: center;
         position: relative;
         .robotImg {
-            left: 70%;
-            top: 87%;
-            width: 120px;
-            z-index: 3;
-          }
+          left: 70%;
+          top: 87%;
+          width: 120px;
+          z-index: 3;
+        }
         img {
           width: 260px;
           position: absolute;
@@ -407,11 +407,11 @@ export default {
       .haveProduct {
         position: relative;
         .robotImg {
-            left: 70%;
-            top: 87%;
-            width: 120px;
-            z-index: 3;
-          }
+          left: 70%;
+          top: 87%;
+          width: 120px;
+          z-index: 3;
+        }
         .haveIcon {
           background-color: #fff;
 
@@ -532,7 +532,7 @@ export default {
             transform: translate(-50%, -50%);
             z-index: 3;
           }
-          
+
           .circle {
             width: 180px;
             height: 100%;
