@@ -688,6 +688,7 @@ export default {
     width: 100%;
     max-width: 768px;
     margin-top: 0.75rem;
+    @include scrollbarStyle();
 
     .usageInfoCard {
       background-color: $raphael-white;

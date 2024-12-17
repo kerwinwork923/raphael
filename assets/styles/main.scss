@@ -108,12 +108,13 @@ body {
   &::-webkit-scrollbar {
     background-color: transparent;
     width: 4px;
+    height: 4px;
   }
   &::-webkit-scrollbar-track {
     background-color: transparent;
   }
   &::-webkit-scrollbar-thumb {
-    background-color: #74bc1f;
+    background-color: #DFECC5;
     border-radius: 8px;
     border: 2px solid transparent;
   }
