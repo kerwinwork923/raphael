@@ -674,9 +674,7 @@ export default {
 <style lang="scss" scoped>
 .usageWrap {
   background-color: $raphael-gray-100;
-  height: 100vh;
   width: 100%;
-  overflow-x: hidden;
   padding: 0 1rem;
   position: relative;
   padding-bottom: 4.25rem;
