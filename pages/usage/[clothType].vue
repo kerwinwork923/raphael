@@ -898,6 +898,11 @@ export default {
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
+
+      @include respond-to("phone-landscape"){
+        height: calc(100vh - 100px);
+      }
+      
       .detectItem {
         width: 100%;
         margin: 0 auto;
