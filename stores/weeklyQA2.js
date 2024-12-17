@@ -17,6 +17,7 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
     childInfo: {},
     selectQuestionPerPage: 7,
     totalQuestions: 0,
+    childResultData: {},
   }),
 
   getters: {
@@ -276,21 +277,23 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
     async fetchResultAnalysis(AID) {
       const common = useCommon();
       common.startLoading();
-    
+
       try {
         const localData = JSON.parse(localStorage.getItem("userData") || "{}");
         const { MID, Token, MAID, Mobile } = localData;
-    
+
         // 确保所有必要数据存在
         if (!MID || !Token || !MAID || !Mobile) {
           throw new Error("Missing required data for result analysis");
         }
-    
+
         // 确保 childInfo 已初始化
         if (!this.childInfo || !this.childInfo.CID) {
-          throw new Error("Child information (CID) is missing or not initialized.");
+          throw new Error(
+            "Child information (CID) is missing or not initialized."
+          );
         }
-    
+
         const payload = {
           MID,
           Token,
@@ -299,18 +302,18 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
           CID: this.childInfo.CID, // 使用正确的属性名
           AID: AID,
         };
-    
+
         console.log("Result Analysis Payload:", payload);
-    
+
         // 调用 API
         const response = await axios.post(
           "https://23700999.com:8081/HMA/API_BB_GrowthFirst.jsp",
           payload
         );
-    
+
         if (response.data) {
           console.log("Result Analysis Response:", response.data);
-    
+
           // 检查 diffDaysFromToday 并根据结果更新状态或决定是否再次调用 API
           if (response.data.diffDaysFromToday <= 0) {
             this.nowState = "score";
@@ -321,9 +324,11 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
             if (newAID && newAID !== AID) {
               // 如果新 AID 不同，则重新调用分析 API
               await this.fetchResultAnalysis(newAID);
+            } else {
+              this.childResultData = response.data;
             }
           }
-    
+
           // 处理结果分析数据，例如存储或更新到状态
           this.theLatestData.resultAnalysis = response.data;
         } else {
@@ -335,7 +340,7 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
         common.stopLoading();
       }
     },
-    
+
     // 保存所有數據
     async saveAllData() {
       const common = useCommon();
@@ -385,26 +390,26 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
     async getQues() {
       const common = useCommon();
       common.startLoading();
-    
+
       try {
         const localData = JSON.parse(localStorage.getItem("userData") || "{}");
         const { MID, Token, MAID, Mobile } = localData;
-    
+
         if (!MID || !Token || !MAID || !Mobile) {
           throw new Error("缺少用户凭据");
         }
-    
+
         const response = await axios.post(
           "https://23700999.com:8081/HMA/API_BB_GrowthRec2.jsp",
           { MID, Token, MAID, Mobile }
         );
-    
+
         if (response.data?.ChildQues && response.data?.ChildInfo?.[0]) {
           const { ChildQues, ChildInfo } = response.data;
-    
+
           this.childInfo = {
             CID: ChildInfo[0].CID,
-            Name: ChildInfo[0].Name || "未命名宝贝",
+            Name: ChildInfo[0].Name || "寶貝",
             AID: ChildInfo[0].AID || "",
             MaxQ: ChildInfo[0].MaxQ,
             BirthDay: ChildInfo[0].BirthDay,
@@ -414,9 +419,9 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
             ratioComplete: ChildInfo[0].ratioComplete,
             diffDaysFromToday: ChildInfo[0].diffDaysFromToday,
           };
-    
+
           this.totalQuestions = ChildQues.length;
-    
+
           this.weeklyQA = ChildQues.map((q, index) => ({
             id: index,
             question: q.Question,
@@ -424,11 +429,11 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
             times: -1, // 初始化次数
             active: false, // 初始化为未选中
           }));
-    
+
           this.totalStep = Math.ceil(
             this.weeklyQA.length / this.questionsPerPage
           );
-    
+
           this.updateProgress();
         } else {
           throw new Error("ChildQues 或 ChildInfo 数据为空");
@@ -439,7 +444,6 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
         common.stopLoading();
       }
     },
-    
 
     handlePrevStep() {
       if (this.nowState === "times") {

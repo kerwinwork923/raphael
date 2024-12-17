@@ -1,87 +1,25 @@
 <template>
-  <div class="resultWrap">
-    <!-- Top section: Display result info and severity -->
+  <RaphaelLoading v-if="loading" />
+
+  <div class="resultWrapDetail">
+    <TitleMenu Text="結果分析" link="/weekly2" :scrollToBottom="true" />
     <div class="resultTopGroup">
       <div class="resultInfo">
-        <h4>
-          感謝您的使用！以下是{{ store.childInfo.Name || "寶貝" }}的最新測量结果
-        </h4>
+        <h4>姓名 : {{ compareData.ChildInfo[0]?.Name || "寶貝" }}</h4>
       </div>
-      <img class="doctorImg" src="../assets/imgs/doctor.png" alt="" />
+      <img class="doctorImg" src="~/assets/imgs/doctor.png" alt="" />
     </div>
 
-    <!-- Symptom analysis results -->
-    <h4 class="textResultText">以下為分類系統的自律神經分析結果</h4>
+    <h4 class="textResultText">以下為兒童指標的綜合分析結果</h4>
     <div class="resultListGroup">
-      <SymptomResult2
-        v-for="(babyData, index) in store.childResultData.ChildScore"
+      <SymptomResult2Compare
+        v-for="(item, index) in combinedScores"
         :key="index"
-        :symptomName="babyData.TypeName"
-        :symptomCheckTime="babyData.CheckTime"
-        :symptomRatio="babyData.Ratio"
-        :symptomScore="babyData.Score"
-        :symptomSerious="babyData.Serious"
-        :sex="store.childInfo.Sex"
+        :symptomName="item.TypeName"
+        :current="item.current"
+        :previous="item.previous"
+        :sex="compareData.ChildInfo?.Sex"
       />
-    </div>
-
-    <!-- Detection records -->
-    <h4
-      class="textResultText"
-      v-if="store.childResultData.ChildHistoryScore.length > 0"
-    >
-      檢測紀錄
-    </h4>
-    <div class="detectionWrap">
-      <router-link
-        class="detection"
-        v-for="(history, index) in store.childResultData.ChildHistoryScore"
-        :key="index"
-        :to="`/weeklyResultDetail2/${history[0].AID}`"
-      >
-        <div class="cGroup">
-          <img class="img" src="../assets/imgs/calendar.png" alt="" />
-        </div>
-        <h3 class="detectionDate">
-          {{ formatTimestamp3(history[0]?.CheckTime) }}
-        </h3>
-        <div class="detectionGroup">
-          <div class="scroeTotal">
-            <h5>{{ history[3]?.TypeName }}</h5>
-            <div
-              :style="{
-                color: scoreColorFn(computedScore(history[3]?.Score), sex),
-              }"
-              class="totalScore"
-            >
-              {{ history[3]?.Score }}
-            </div>
-          </div>
-          <div class="seriousDegreeGroup">
-            <h5>{{ history[0]?.TypeName }}</h5>
-            <div
-              :style="{
-                color: scoreColorFn(computedScore(history[0]?.Score), sex),
-              }"
-              class="seriousScore"
-            >
-              {{ history[0].Ratio }}
-            </div>
-          </div>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
-            viewBox="0 0 18 18"
-            fill="none"
-          >
-            <path
-              d="M5.99159 3.37719L11.4726 8.99994L5.99159 14.6227C5.89346 14.7232 5.83853 14.858 5.83853 14.9984C5.83853 15.1389 5.89346 15.2737 5.99159 15.3742C6.03925 15.4228 6.09613 15.4615 6.15891 15.4879C6.2217 15.5142 6.28911 15.5278 6.35721 15.5278C6.42531 15.5278 6.49273 15.5142 6.55551 15.4879C6.61829 15.4615 6.67518 15.4228 6.72284 15.3742L12.5548 9.39257C12.6572 9.28752 12.7145 9.14664 12.7145 8.99994C12.7145 8.85325 12.6572 8.71236 12.5548 8.60732L6.72396 2.62569C6.67627 2.57671 6.61924 2.53777 6.55625 2.51119C6.49326 2.4846 6.42558 2.4709 6.35721 2.4709C6.28884 2.4709 6.22116 2.4846 6.15817 2.51119C6.09518 2.53777 6.03816 2.57671 5.99046 2.62569C5.89234 2.72615 5.8374 2.86101 5.8374 3.00144C5.8374 3.14187 5.89234 3.27673 5.99046 3.37719L5.99159 3.37719Z"
-              fill="#666666"
-            />
-          </svg>
-        </div>
-      </router-link>
     </div>
 
     <div class="backToUserBtnGroupWeekly">
@@ -93,54 +31,116 @@
 </template>
 
 <script>
-import { ref, reactive } from "vue";
-import SymptomResult2 from "./SymptomResult2.vue";
-import { useWeeklyRecord } from "../stores/weeklyQA2";
-import { useRouter } from "vue-router";
-import { scoreColorFn, computedEmoji2, formatTimestamp } from "../fn/utils";
-import { formatTimestamp3 } from "../fn/utils";
+import { ref, onMounted } from "vue";
+import SymptomResult2Compare from "~/components/SymptomResult2Compare.vue";
+import { useRoute } from "vue-router";
+import axios from "axios";
+import TitleMenu from "~/components/TitleMenu.vue";
+
 export default {
-  components: { SymptomResult2 },
+  components: { SymptomResult2Compare, TitleMenu },
   setup() {
-    const store = useWeeklyRecord();
+    const route = useRoute();
+    const compareData = ref({});
+    const combinedScores = ref([]);
+    const loading = ref(true);
 
-    console.log(store.diffenenceObj);
+    const API_API_ANSFirstDetail = async () => {
+      const localData = JSON.parse(localStorage.getItem("userData") || "{}");
+      const { MID, Token, MAID, Mobile } = localData;
+      const AID = route.params.detail;
 
-    const router = useRouter();
+      try {
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_BB_GrowthCompare.jsp",
+          {
+            MID: String(MID),
+            Token: String(Token),
+            MAID: String(MAID),
+            Mobile: String(Mobile),
+            AID: AID,
+          }
+        );
 
-    const backToUser = () => router.push({ name: "user" });
+        if (response.status === 200) {
+          compareData.value = response.data;
 
-    const localData = localStorage.getItem("userData");
-    const parsedData = localData ? JSON.parse(localData) : null;
-    const sex = ref(parsedData?.Sex || null);
+          // 整合 ChildScore 和 preChildScore
+          const childScore = response.data.ChildScore || [];
+          const preChildScore = response.data.preChildScore || [];
 
-    const selectedType = ref("Serious");
+          const combined = childScore.map((current) => {
+            const previous = preChildScore.find(
+              (prev) => prev.Type === current.Type
+            );
+            return {
+              Type: current.Type,
+              TypeName: current.TypeName,
+              current: {
+                CheckTime: current.CheckTime,
+                Ratio: current.Ratio,
+                Score: current.Score,
+                Serious: current.Serious,
+              },
+              previous: previous
+                ? {
+                    CheckTime: previous.CheckTime,
+                    Ratio: previous.Ratio,
+                    Score: previous.Score,
+                    Serious: previous.Serious,
+                  }
+                : null,
+            };
+          });
 
-    const changeSymptomLavel = (lavel) => {
-      selectedType.value = lavel;
+          // 加入僅在 preChildScore 中存在的指標
+          preChildScore.forEach((previous) => {
+            if (!combined.find((item) => item.Type === previous.Type)) {
+              combined.push({
+                Type: previous.Type,
+                TypeName: previous.TypeName,
+                current: null,
+                previous: {
+                  CheckTime: previous.CheckTime,
+                  Ratio: previous.Ratio,
+                  Score: previous.Score,
+                  Serious: previous.Serious,
+                },
+              });
+            }
+          });
+
+          combinedScores.value = combined;
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        loading.value = false;
+      }
     };
 
-    const computedScore = (scoreStr) =>
-      parseFloat(scoreStr.replace("%", "")) || 0;
+    onMounted(() => {
+      API_API_ANSFirstDetail();
+    });
+
+    const backToUser = () => {
+      window.location.href = "/user";
+    };
 
     return {
-      store,
-      formatTimestamp,
+      compareData,
+      combinedScores,
+      loading,
       backToUser,
-      computedScore,
-      selectedType,
-      changeSymptomLavel,
-      sex,
-      computedEmoji2,
-      scoreColorFn,
-      formatTimestamp3,
     };
   },
 };
 </script>
 
 <style lang="scss">
-.resultWrap {
+.resultWrapDetail {
+  padding: 0 5% 2rem;
+  background-color: $raphael-gray-100;
   .resultTopGroup {
     display: grid;
     grid-auto-flow: column;
@@ -153,16 +153,13 @@ export default {
       padding: 12px;
       border-radius: 12px;
       box-shadow: 0px -2px 4px 0px rgba(0, 0, 0, 0.25) inset;
-      h4 {
-        font-size: 1.1rem;
-        line-height: 1.3;
-      }
+
       .subText {
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.75rem;
       }
 
       .nextSunText {
-        margin-top: 1rem;
+        margin-top: 0.75rem;
       }
 
       .resultHintText {
@@ -235,6 +232,8 @@ export default {
         display: flex;
         align-items: center;
         gap: 2px;
+        margin-bottom: 0.5rem;
+
         .pGroup {
           display: flex;
           align-items: center;
@@ -258,8 +257,7 @@ export default {
       }
       h3 {
         color: #1e1e1e;
-        font-size: 22px;
-        font-weight: 500;
+        font-size: 20px;
         letter-spacing: 0.15px;
       }
       .resultTagGroup {
@@ -278,10 +276,9 @@ export default {
       }
 
       h5 {
-        color: #666666;
+        color: #1e1e1e;
         letter-spacing: 0.1px;
-        margin-top: 1rem;
-        margin-bottom: 0.75rem;
+        margin-top: 0.75rem;
       }
       h4 {
         color: #666;
@@ -303,8 +300,7 @@ export default {
 
       button {
         background-color: transparent;
-        color: #666;
-        cursor: pointer;
+        color: #ddd;
         font-size: 1.125rem;
         width: 100%;
         border: none;
@@ -424,12 +420,12 @@ export default {
         .seriousDegreeGroup {
           display: flex;
           flex-direction: column;
-          align-items: center;
+          align-items: baseline;
           justify-content: center;
           gap: 8px;
           h5 {
             color: #666;
-            font-size: 14px;
+            font-size: 16px;
             letter-spacing: 0.1px;
             font-weight: 400;
           }
@@ -455,9 +451,8 @@ export default {
 }
 
 .backToUserBtnGroupWeekly {
+  margin-top: 1.25rem;
   width: 100%;
-  margin-top: 1.5rem;
-  padding-bottom: 4.25rem;
 }
 .backToUserBtnWeekly {
   background-color: $raphael-green-400;
