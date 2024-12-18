@@ -122,8 +122,9 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .QAList {
-  height: calc(100vh - 362px);
+  height: calc(100vh - 375px);
   overflow-y: auto;
+  @include scrollbarStyle();
   @include respond-to("phone-landscape"){
     height: calc(100vh - 100px);
   }

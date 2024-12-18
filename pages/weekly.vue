@@ -165,7 +165,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .weeklyRecord {
   background-color: $raphael-gray-100;
   display: flex;
@@ -193,39 +193,25 @@ export default {
   }
 
   .weeklyBtnGroup {
-    background-color: #f6f6f6;
+    background-color: #F6F6F6;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 0.75rem;
     max-width: 768px;
     width: 100%;
-    padding: 0.75rem 5% 4.25rem 5%;
+    padding: 0.75rem 0 4.25rem 0;
     touch-action: manipulation;
-    position: absolute;
-    bottom: 0;
-
   }
   .weeklyBtn {
-    background-color: $raphael-green-400;
-    color: #fff;
-    padding: 12px;
-    width: 100%;
-    border-radius: 8px;
-    border: none;
-    font-size: 1.125rem;
-    font-weight: 400;
-    letter-spacing: 0.5px;
-    transition: 0.25s ease;
-    padding: 8px;
-    cursor: pointer;
+    @include btnStyle($raphael-green-400,$raphael-white);
     &:disabled {
       opacity: 0.5;
     }
   }
   .preBtn {
-    background-color: #dfdfdf;
-    color: #666;
+    background-color: $raphael-gray-200;
+    color: $raphael-gray-500;
   }
   .ANSGroup{
     margin-top: 1rem;

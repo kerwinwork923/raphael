@@ -186,6 +186,7 @@ export default {
   .weeklyQAGroup {
     max-width: 768px;
     width: 100%;
+    padding: 0.75rem 0 0;
   }
 
   .subListTitle {
@@ -217,7 +218,7 @@ export default {
     }
   }
   .preBtn {
-    background-color: $raphael-gray-300;
+    background-color: $raphael-gray-200;
     color: #666;
   }
 
@@ -249,7 +250,7 @@ export default {
         .progress {
           position: absolute;
           height: 100%;
-          background: linear-gradient(90deg, #EC4F4F 0%, #65558F 50%, #1FBCB3 75%, #74BC1F 100%);
+          background: linear-gradient(90deg, #EC4F4F 0%, #65558F 100%);
           border-radius: 5px;
           transition: width 0.3s ease;
         }
