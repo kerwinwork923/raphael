@@ -8,6 +8,7 @@
       v-if="productName === '保健版'"
       :productName="productName"
       :hasDetectRecord="hasDetectRecord"
+      :todayUseRecord="todayUseRecord"
       @timer-finished="onTimerFinished"
     />
 
@@ -278,13 +279,12 @@
                 </h5>
               </div>
               <svg
-      
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"
                 height="18"
                 viewBox="0 0 18 18"
                 fill="none"
-                :style="{ opacity: item.BcAf !== '治療前' ? 1 : 0}"
+                :style="{ opacity: item.BcAf !== '治療前' ? 1 : 0 }"
               >
                 <path
                   d="M5.99159 3.37719L11.4726 8.99994L5.99159 14.6227C5.89346 14.7232 5.83853 14.858 5.83853 14.9984C5.83853 15.1389 5.89346 15.2737 5.99159 15.3742C6.03925 15.4228 6.09613 15.4615 6.15891 15.4879C6.2217 15.5142 6.28911 15.5278 6.35721 15.5278C6.42531 15.5278 6.49273 15.5142 6.55551 15.4879C6.61829 15.4615 6.67518 15.4228 6.72284 15.3742L12.5548 9.39257C12.6572 9.28752 12.7145 9.14664 12.7145 8.99994C12.7145 8.85325 12.6572 8.71236 12.5548 8.60732L6.72396 2.62569C6.67627 2.57671 6.61924 2.53777 6.55625 2.51119C6.49326 2.4846 6.42558 2.4709 6.35721 2.4709C6.28884 2.4709 6.22116 2.4846 6.15817 2.51119C6.09518 2.53777 6.03816 2.57671 5.99046 2.62569C5.89234 2.72615 5.8374 2.86101 5.8374 3.00144C5.8374 3.14187 5.89234 3.27673 5.99046 3.37719L5.99159 3.37719Z"
@@ -708,7 +708,7 @@ export default {
           border-left: 2px solid nth($colors, $i);
         }
       }
-      
+
       h3 {
         font-size: 20px;
         color: $raphael-black;
@@ -741,7 +741,7 @@ export default {
     background-color: $raphael-white;
     margin-top: 0.75rem;
     border-radius: 0.75rem;
-    padding: 0.75rem;    
+    padding: 0.75rem;
     width: 100%;
     max-width: 768px;
 
@@ -749,12 +749,12 @@ export default {
       display: grid;
       grid-auto-flow: column;
       h3 {
-        @include btnStyle($raphael-white,$raphael-gray-300);
+        @include btnStyle($raphael-white, $raphael-gray-300);
       }
       .active {
         background-color: $raphael-green-400;
         color: $raphael-white;
-        &:hover{
+        &:hover {
           background-color: $raphael-green-400;
           color: $raphael-white;
         }
@@ -769,7 +769,7 @@ export default {
       height: calc(100vh - 293px);
       overflow-y: auto;
       @include scrollbarStyle();
-      @include respond-to("phone-landscape"){
+      @include respond-to("phone-landscape") {
         height: calc(100vh - 100px);
       }
 
@@ -820,12 +820,12 @@ export default {
       .actionGroup {
         position: relative;
         display: grid;
-        gap:0.75rem;
+        gap: 0.75rem;
         margin-top: 0.75rem;
 
-        &::before{
+        &::before {
           position: absolute;
-          content: '';
+          content: "";
           box-shadow: 0px -1px 2px 0px rgba(0, 0, 0, 0.25) inset;
           width: 8px;
           height: 100%;
@@ -845,7 +845,7 @@ export default {
           background: $raphael-white;
           box-shadow: 0px -2px 3px 0px rgba(0, 0, 0, 0.25) inset;
           padding: 6px 12px;
-          margin-left:1.5rem;
+          margin-left: 1.5rem;
           gap: 8px;
           line-height: 1.3;
 
@@ -859,7 +859,7 @@ export default {
             }
           }
 
-          &::before{
+          &::before {
             position: absolute;
             content: "";
             width: 0.5rem;
@@ -868,13 +868,13 @@ export default {
             left: -1rem;
           }
         }
-        .startGroup{
-          &::before{
+        .startGroup {
+          &::before {
             background: $raphael-green-400;
           }
         }
         .pauseGroup {
-          &::before{
+          &::before {
             background: $raphael-orange-400;
           }
           span {
@@ -884,8 +884,8 @@ export default {
             letter-spacing: 0.1px;
           }
         }
-        .stopGroup{
-          &::before{
+        .stopGroup {
+          &::before {
             background: $raphael-red-300;
           }
         }
@@ -901,10 +901,10 @@ export default {
       gap: 1.5rem;
       @include scrollbarStyle();
 
-      @include respond-to("phone-landscape"){
+      @include respond-to("phone-landscape") {
         height: calc(100vh - 100px);
       }
-      
+
       .detectItem {
         width: 100%;
         margin: 0 auto;
@@ -1036,7 +1036,7 @@ export default {
         z-index: 10;
         .year {
           transform: 0.25s all ease;
-          &:hover{
+          &:hover {
             color: $raphael-green-400;
           }
         }
@@ -1072,7 +1072,7 @@ export default {
         z-index: 10;
         .month {
           transform: 0.25s all ease;
-          &:hover{
+          &:hover {
             color: $raphael-green-400;
           }
         }

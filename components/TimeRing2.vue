@@ -7,11 +7,7 @@
 
     <div class="timerButtonGroup">
       <!-- 主按鈕 (HRV檢測、暫停、繼續) -->
-      <button
-        v-if="isCounting || !isCounting"
-        :style="buttonStyle"
-        @click="toggleTimer"
-      >
+      <button :style="buttonStyle" @click="toggleTimer">
         {{ buttonText }}
       </button>
       <!-- 結束按鈕 -->
@@ -38,6 +34,10 @@ const props = defineProps({
   hasDetectRecord: {
     type: Boolean,
   },
+  todayUseRecord: {
+    type: Array,
+    default: () => [],
+  },
 });
 
 const router = useRouter();
@@ -45,29 +45,16 @@ const router = useRouter();
 const elapsedTime = ref(0); // 計時的時間（秒）
 const isCounting = ref(false); // 是否正在計時
 const isPaused = ref(false); // 是否暫停
+const startTimestamp = ref(null);
+
 // 計算按鈕文字
 const buttonText = computed(() => {
-  if (store.detectFlag === "1") {
-    return isPaused.value ? "繼續" : "暫停";
-  } else if (store.detectFlag === "2") {
-    return "HRV檢測(使用後)";
-  }
+  if (isCounting.value) return "暫停";
+  if (isPaused.value) return "繼續";
+  if (store.detectFlag === "1") return "HRV檢測(使用前)";
+  if (store.detectFlag === "2") return "HRV檢測(使用後)";
   return "HRV檢測(使用前)";
 });
-
-// 開始治療後檢測
-const startAfterCheck = async () => {
-  try {
-    console.log("啟動治療後檢測...");
-    store.detectFlag = "2";
-    store.detectUID = UID.value;
-    store.detectForm = props.productName;
-    store.showHRVAlert = true;
-    startTimer(); // 開始計時
-  } catch (error) {
-    console.error("啟動治療後檢測失敗：", error);
-  }
-};
 
 const isButtonEnabled = ref(true);
 const UID = ref(null);
@@ -138,7 +125,7 @@ const stopTimer = async () => {
   clearInterval(timerInterval.value);
   isCounting.value = false;
   isPaused.value = false;
-  isButtonEnabled.value = false;
+  isButtonEnabled.value = false; // 禁用按鈕
 
   try {
     console.log("停止計時器...");
@@ -147,7 +134,11 @@ const stopTimer = async () => {
     console.error("停止計時器失敗：", error);
   }
 
-  elapsedTime.value = 0;
+  elapsedTime.value = 0; // 重置計時器
+  console.log("計時已結束，狀態設置為完成");
+
+  // 更新狀態，防止重新計時
+  store.detectFlag = null; // 清空檢測標記，防止按鈕重新啟動
 };
 
 const apiRequest = async (url, payload) => {
@@ -162,27 +153,42 @@ const apiRequest = async (url, payload) => {
 };
 
 const toggleTimer = async () => {
-  if (buttonText.value === "HRV檢測(使用前)") {
-    console.log("開始 HRV 檢測");
-    await useStartAPI(); // 調用開始 API
-    store.detectFlag = "1";
-    store.detectUID = UID.value;
-    store.detectForm = props.productName;
-    store.showHRVAlert = true;
-    startTimer();
-  } else if (buttonText.value === "暫停") {
-    console.log("暫停計時");
-    await usePauseAPI(); // 調用暫停 API
+  if (!isCounting.value && !isPaused.value) {
+    // 開始檢測（使用前或使用後）
+    if (Array.isArray(props.todayUseRecord) && props.todayUseRecord.length > 0) {
+      // 使用後檢測
+      console.log("開始 HRV 檢測 (使用後)");
+      store.detectFlag = "2";
+      store.detectUID = props.todayUseRecord[0].UID;
+      store.detectForm = `*${props.productName}`;
+      store.showHRVAlert = true; // 顯示提醒框
+    } else {
+      // 使用前檢測
+      console.log("開始 HRV 檢測 (使用前)");
+      const response = await useStartAPI();
+      if (response?.UID) {
+        UID.value = response.UID;
+        store.detectFlag = "1";
+        store.detectUID = UID.value;
+        store.detectForm = props.productName;
+        store.showHRVAlert = true; // 顯示提醒框
+      }
+    }
+    startTimer(); // 開始計時
+  } else if (isCounting.value) {
+    // 暫停計時
+    console.log("暫停 HRV 檢測");
+    await usePauseAPI();
     pauseTimer();
-  } else if (buttonText.value === "繼續") {
-    console.log("恢復計時");
-    await usePauseEndAPI(); // 調用恢復 API
+  } else if (isPaused.value) {
+    // 恢復計時
+    console.log("恢復 HRV 檢測");
+    await usePauseEndAPI();
     resumeTimer();
-  } else if (buttonText.value === "HRV檢測(使用後)") {
-    console.log("結束 HRV 檢測");
-    stopTimer();
   }
 };
+
+
 const progressPercentage = computed(() => {
   const baseTime = 8 * 60 * 60; // 8 小時 = 28800 秒
   return Math.min((elapsedTime.value / baseTime) * 100, 100);
@@ -220,76 +226,97 @@ const API_HRV2_UID_Flag_Info = async (Flag) => {
       { MID, Token, MAID, Mobile, UID: UID.value, Flag }
     );
     if (response?.Result === "OK") {
-      console.log("成功獲取 HRV2 檢測資料狀態：", response);
+      console.log(`成功獲取 Flag=${Flag} 的 HRV 檢測資料狀態:`, response);
       return response.IsExit; // 返回 "Y" 或 "N"
     } else {
-      console.error("無法獲取 HRV2 資料狀態：", response);
+      console.error(`無法獲取 Flag=${Flag} 的 HRV 檢測資料狀態:`, response);
       return null;
     }
   } catch (error) {
-    console.error("API 調用失敗：", error);
+    console.error(`API HRV2_UID_Flag_Info 調用失敗，Flag=${Flag}：`, error);
     return null;
   }
 };
 
-const startBeforeCheck = async () => {
-  try {
-    console.log("啟動治療前檢測...");
-    store.detectFlag = "1";
-    store.detectUID = UID.value;
-    store.detectForm = props.productName;
-    store.showHRVAlert = true;
-    startTimer(); // 開始計時
-  } catch (error) {
-    console.error("啟動治療前檢測失敗：", error);
+const checkForAfterDetection = async () => {
+  if (props.hasDetectRecord === false && store.detectFlag === "1") {
+    const hasAfterData = await API_HRV2_UID_Flag_Info("2");
+    if (hasAfterData === "N") {
+      const now = Date.now();
+      const elapsedSinceStart = now - startTimestamp.value; // 開始時間戳
+      if (elapsedSinceStart > 24 * 60 * 60 * 1000) {
+        alert("請完成HRV檢測(使用後)！");
+      }
+    }
   }
 };
 
 onMounted(async () => {
-  console.log("初始化組件，檢查使用前和使用後的檢測狀態");
+  console.log("初始化組件，檢查使用前和使用後的檢測狀態並啟動必要的檢測");
 
   try {
-    // 獲取 UID 狀態
     const response = await API_MID_ProductName_UIDInfo();
 
+    // 如果有 UID 表示有未完成的檢測
     if (response?.Result === "OK" && response?.UID) {
       UID.value = response.UID; // 保存 UID
-      console.log("檢測到未完成的計時，準備接續計時");
 
-      // 計算已過時間
-      const startTime = new Date(
-        `${response.StartTime.slice(0, 4)}-${response.StartTime.slice(
-          4,
-          6
-        )}-${response.StartTime.slice(6, 8)}T${response.StartTime.slice(
-          8,
-          10
-        )}:${response.StartTime.slice(10, 12)}:${response.StartTime.slice(12)}`
-      ).getTime();
-      const now = Date.now();
-      const elapsedSeconds = Math.floor((now - startTime) / 1000);
+      // 檢查治療前資料狀態
+      const hasBefore = await API_HRV2_UID_Flag_Info("1"); // 檢查使用前檢測
+      if (hasBefore === "Y") {
+        console.log("使用前檢測已完成，準備進行使用後檢測");
+        store.detectFlag = "2"; // 設為使用後檢測狀態
 
-      elapsedTime.value = elapsedSeconds; // 更新已過時間
-      startTimer(); // 繼續計時
+        // 檢查使用後檢測
+        const hasAfter = await API_HRV2_UID_Flag_Info("2");
+        if (hasAfter === "N") {
+          console.log("使用後檢測未完成，立即啟動計時");
 
-      if (props.hasDetectRecord === false) {
-        if (hasBeforeData.value) {
-          console.log("啟動治療後檢測");
-          startAfterCheck(); // 啟動治療後檢測
+          const startTime = new Date(
+            `${response.StartTime.slice(0, 4)}-${response.StartTime.slice(
+              4,
+              6
+            )}-${response.StartTime.slice(6, 8)}T${response.StartTime.slice(
+              8,
+              10
+            )}:${response.StartTime.slice(10, 12)}:${response.StartTime.slice(
+              12
+            )}`).getTime();
+
+          const now = Date.now();
+          const elapsedTimeInMs = now - startTime;
+
+          if (elapsedTimeInMs > 24 * 60 * 60 * 1000) {
+            alert("請完成HRV檢測(使用後)！");
+          } else {
+            elapsedTime.value = Math.floor(elapsedTimeInMs / 1000); // 恢復計時
+            console.log("恢復未完成的計時");
+            startTimer(); // 啟動計時器
+          }
         } else {
-          console.log("啟動治療前檢測");
-          startBeforeCheck(); // 啟動治療前檢測
+          console.log("使用後檢測已完成，無需操作");
         }
       } else {
-        console.log("檢測前後資料均已存在，無需操作");
+        console.log("使用前檢測未完成，立即開始使用前檢測");
+        store.detectFlag = "1"; // 設為使用前檢測狀態
+        await startBeforeDetection(); // 直接啟動使用前檢測
       }
     } else {
-      console.log("未檢測到有效的 UID，初始化為未開始狀態");
+      // 如果沒有檢測記錄但 `hasDetectRecord` 為 false，初始化使用前檢測
+      if (!props.hasDetectRecord) {
+        console.log("無檢測記錄，直接啟動使用前檢測");
+        store.detectFlag = "1"; // 設置為使用前檢測狀態
+        await startBeforeDetection(); // 直接啟動使用前檢測
+      } else {
+        console.log("未檢測到有效的 UID，初始化為未開始狀態");
+      }
     }
   } catch (error) {
     console.error("初始化時發生錯誤：", error);
   }
 });
+
+
 
 const useStartAPI = async () => {
   try {
