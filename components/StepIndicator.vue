@@ -49,9 +49,9 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .subList {
-  color: #666;
+  color: $raphael-gray-500;
   margin-top: 1rem;
   font-size: 1rem;
   display: flex;

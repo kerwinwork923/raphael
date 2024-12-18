@@ -386,7 +386,7 @@ export default {
 }
 
 .detectWrap {
-  background-color: #fff;
+  background-color: $raphael-white;
   border-radius: 12px;
   margin-top: 0.75rem;
   padding: 0.75rem;
@@ -398,7 +398,7 @@ export default {
     align-items: center;
     justify-content: end;
     gap: 0.75rem;
-    padding: 0.75rem 0;
+    margin-bottom: 0.75rem;
     color: #666;
   }
   .yearSelectGroup {
@@ -471,13 +471,11 @@ export default {
         }
     }
   }
-  .detectList {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    height: calc(100vh - 381px);
-    overflow-y: auto;
+  .detectList { 
+    @include recordList(transparent,calc(100vh - 381px),0,0);
+    @include respond-to("phone-landscape"){
+      height: calc(100vh - 100px);
+    }
   }
 
   .notDetectData {
@@ -595,7 +593,7 @@ export default {
     width: 36px;
     height: 36px;
     padding: 5px 13px;
-    background: #fff;
+    background: $raphael-white;
     border: none;
     border-radius: var(--Radius-200, 8px);
     color: #666;
@@ -611,7 +609,7 @@ export default {
     }
     .activePage {
       background: var(--brand-green-400, #74bc1f);
-      color: #fff;
+      color: $raphael-white;
     }
   }
 }
@@ -648,7 +646,7 @@ export default {
     border-radius: 0.75rem;
     padding: 0.75rem;
     opacity: 1;
-    color: #fff;
+    color: $raphael-white;
     line-height: 1.2;
     overflow: hidden;
     transition: 0.15s all ease;

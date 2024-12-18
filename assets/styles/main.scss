@@ -104,6 +104,23 @@ section {
 body {
   font-family: 'Noto Sans TC';
   line-height: 1;
+
+  &::-webkit-scrollbar {
+    background-color: transparent;
+    width: 4px;
+    height: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #DFECC5;
+    border-radius: 8px;
+    border: 2px solid transparent;
+  }
+  &::-webkit-scrollbar-button {
+    display: none;
+  }
 }
 
 ol,
@@ -131,6 +148,9 @@ table {
 
 input {
   border-radius: 0;
+  &:disabled{
+    background: transparent;
+  }
 }
 
 img {

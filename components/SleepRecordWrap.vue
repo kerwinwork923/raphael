@@ -524,16 +524,26 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .sleepRecordWrap {
   margin-top: 0.75rem;
+  
+  .pleaseWrite {
+    margin: 1rem 0 0.75rem 0;
+    color: $raphael-gray-500;
+    font-size: 1rem;
+  }
   .sleepRecordList{
     height: calc(100vh - 293px);
     overflow-y: auto;
     margin-bottom: 0.75rem;
 
+    @include respond-to("phone-landscape" ){
+      height: calc(100vh - 100px);
+    }
+
     .sleepRecord {
-      background-color: #fff;
+      background-color: $raphael-white;
       margin-bottom: 0.75rem;
       padding: 0.75rem;
       border-radius: 12px;
@@ -541,7 +551,7 @@ export default {
       &>h4{
         font-size: 20px;
         font-weight: 500;
-        color: #1e1e1e;
+        color: $raphael-black;
         letter-spacing: 0.15px;
         line-height: 32.36px;
       }
@@ -558,7 +568,7 @@ export default {
         .dropListGroup {
           width: 50%;
           position: relative;
-          border-bottom:1px solid #eee;
+          border-bottom:1px solid $raphael-gray-200;
 
           .dropListText {
             position: relative;
@@ -573,7 +583,7 @@ export default {
               left: 50%;
               top: 0;
               transform: translate(-50%, 0);
-              color: #74bc1f;
+              color: $raphael-green-400;
               font-weight: bold;
             }
           }
@@ -610,7 +620,7 @@ export default {
             margin-left: 1.25rem;
           }
           .dropListTextActive {
-            color: #74bc1f !important;
+            color: $raphael-green-400 !important;
             letter-spacing: 1.25px;
             font-weight: bold;
           }
@@ -628,7 +638,7 @@ export default {
         width: 100%;
         border: none;
         outline: none;
-        border: 1px solid #666;
+        border: 1px solid $raphael-gray-500;
         border-radius: 8px;
         padding: 0.5rem 1rem;
         margin-top: 0.85rem;
@@ -644,6 +654,10 @@ export default {
         left: 2px;
       }
     }
+  }
+  .submitBtn,
+  .backToUserBtn {
+    @include btnStyle($raphael-green-400,$raphael-white);
   }
 }
 </style>

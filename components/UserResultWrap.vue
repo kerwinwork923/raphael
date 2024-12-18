@@ -391,7 +391,7 @@
         }
 
         h5 {
-          color: #ccc;
+          color: $raphael-gray-300;
           font-size: 14px;
         }
       }
@@ -408,7 +408,7 @@
   }
 
   .resultInfo {
-    background-color: #fff;
+    background-color: $raphael-white;
     padding: 12px;
     border-radius: 12px;
     box-shadow: 0px -2px 4px 0px rgba(0, 0, 0, 0.25) inset;
@@ -429,7 +429,7 @@
         font-size: 0.875rem;
         letter-spacing: 0.048px;
       span {
-        color: #ec4f4f;
+        color: $raphael-red-300;
       }
     }
     .dashDiv {
@@ -438,7 +438,7 @@
   }
 
   .firstSleepRecord {
-    background-color: #fff;
+    background-color: $raphael-white;
     border-radius: 12px;
     padding: 1rem 1rem 2rem 1rem;
 
@@ -453,7 +453,7 @@
       margin-top: 2rem;
     }
     h2 {
-      color: #1e1e1e;
+      color: $raphael-black;
       font-size: 1.5rem;
       letter-spacing: 0.5px;
 
@@ -506,7 +506,7 @@
       margin-top: 0.5rem;
       .sleepRecordListDate {
         text-align: center;
-        color: #1e1e1e;
+        color: $raphael-black;
         font-size: 20px;
         font-weight: 400;
         letter-spacing: 0.15px;
@@ -517,7 +517,7 @@
           margin-top: 0.5rem;
           display: flex;
           justify-content: space-between;
-          border-bottom: 1px solid #b3b3b3;
+          border-bottom: 1px solid $raphael-gray-400;
           padding-bottom: 0.75rem;
           h4 {
             color: $raphael-gray-500;

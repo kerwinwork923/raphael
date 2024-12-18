@@ -308,11 +308,9 @@ export default {
 <style lang="scss">
 .infoWrap {
   .infoBox {
-    background-color: #fff;
+    background-color: $raphael-white;
     border-radius: 1rem;
     padding: 1rem;
-    height: calc(100vh - 256px);
-    overflow-y: scroll;
   }
 
   .custom-select {
@@ -321,12 +319,12 @@ export default {
     appearance: none;
     background: url("../assets/imgs/arrow-down.svg") no-repeat right 10px center;
     background-size: 12px;
-    color: #999;
+    color: $raphael-gray-300;
     font-size: 1.2rem;
   }
 
   .custom-select.selected {
-    color: #1e1e1e;
+    color: $raphael-black;
   }
 
   .nameGroup,
@@ -351,8 +349,8 @@ export default {
       top: 50%;
       right: 2px;
       transform: translateY(-50%);
-      z-index: 1;
       width: 18px;
+      z-index: 1;
     }
   }
 
@@ -373,10 +371,10 @@ export default {
         padding-top: 16px;
         font-size: 1.2rem;
         width: 100%;
-        border-bottom: 1px solid #ccc;
+        border-bottom: 1px solid $raphael-gray-300;
         appearance: none;
         background-color: transparent;
-        color: #999;
+        color: $raphael-gray-500;
         font-family: Inter;
         font-size: 1.2rem;
         font-weight: 400;
@@ -385,7 +383,7 @@ export default {
         option {
         }
         &::placeholder {
-          color: #ccc;
+          color: $raphael-gray-300;
           font-family: Inter;
           font-size: 1.2rem;
           font-weight: 400;
@@ -397,7 +395,7 @@ export default {
       }
 
       .selected {
-        color: #1e1e1e;
+        color: $raphael-black;
       }
 
       .icon2 {
@@ -450,14 +448,14 @@ export default {
       padding-top: 16px;
       font-size: 1.2rem;
       width: 100%;
-      border-bottom: 1px solid #ccc;
+      border-bottom: 1px solid $raphael-gray-300;
       appearance: none;
-      color: #999;
+      color: $raphael-gray-300;
       font-family: Inter;
       font-size: 1.2rem;
 
       &::placeholder {
-        color: #ccc;
+        color: $raphael-gray-300;
         font-family: Inter;
         font-size: 1.2rem;
         font-weight: 400;
@@ -483,15 +481,15 @@ export default {
   input[type="email"] {
     outline: none;
     border: none;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid $raphael-gray-300;
     font-size: 1.2rem;
     width: 100%;
     padding-left: 36px;
     padding-bottom: 16px;
     padding-top: 16px;
-    color: #1e1e1e;
+    color: $raphael-black;
     &::placeholder {
-      color: #999;
+      color: $raphael-gray-300;
       font-family: Inter;
       font-size: 1.2rem;
       font-weight: 400;
@@ -499,24 +497,11 @@ export default {
   }
 
   .infoSendBtn {
-    background-color: $raphael-green-400;
-    border: none;
-    display: flex;
+    @include btnStyle($raphael-green-400,$raphael-white);
     margin-top: 24px;
-    padding: 0.5rem 0.75rem;
-    width: 100%;
-    border-radius: 8px;
-    color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    font-size: 1.125rem;
-    letter-spacing: 0.5px;
-    font-weight: 400;
 
     &:disabled {
-      background-color: #ccc;
+      background-color:  $raphael-gray-300;
       cursor: not-allowed;
     }
   }
@@ -525,14 +510,13 @@ export default {
 .vue-datepicker {
   width: 100%;
   border: none;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid $raphael-gray-300;
   padding: 16px;
   font-size: 1.5rem;
-  color: #666;
-  font-family: Inter, sans-serif;
+  color: $raphael-gray-500;
 
   &::placeholder {
-    color: #999;
+    color: $raphael-gray-300;
     font-weight: 400;
   }
 
@@ -542,8 +526,7 @@ export default {
 }
 
 .dp__input_wrap {
-  border-bottom: 1px solid #ccc;
-
+  border-bottom: 1px solid $raphael-gray-300;
   padding-bottom: 16px;
   padding-top: 16px;
   .dp__pointer {

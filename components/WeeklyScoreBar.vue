@@ -124,9 +124,13 @@ export default defineComponent({
 .QAList {
   height: calc(100vh - 293px);
   overflow-y: auto;
+
+  @include respond-to("phone-landscape" ){
+    height: calc(100vh - 100px);
+  }
 }
 .scoreBarGroupWrap {
-  background-color: #fff;
+  background-color: $raphael-white;
   margin-bottom: 0.75rem;
   padding: 0.75rem;
   border-radius: 12px;
@@ -134,7 +138,7 @@ export default defineComponent({
 
 .hashTag {
   margin-top: 0.75rem;
-  color: #666;
+  color: $raphael-gray-500;
   font-size: 14px;
   letter-spacing: 0.1px;
 }
@@ -142,7 +146,7 @@ export default defineComponent({
 .scrollBarTitle {
   font-size: 20px;
   font-weight: 500;
-  color: #1e1e1e;
+  color: $raphael-black;
   letter-spacing: 0.15px;
   line-height: 32.36px;
 }
@@ -157,11 +161,11 @@ export default defineComponent({
 
   .scoreBar {
     height: 100%;
-    background-color: #74bc1f;
+    background-color: $raphael-green-400;
   }
   .remainingBar {
     height: 100%;
-    background-color: #b3b3b3;
+    background-color: $raphael-gray-400;
   }
 
   .numberGroup {
@@ -176,9 +180,9 @@ export default defineComponent({
     font-size: 0.875rem;
 
     .number {
-      background-color: #b3b3b3;
+      background-color: $raphael-gray-400;
       border-radius: 50%;
-      color: #fff;
+      color: $raphael-white;
       width: 1.5rem;
       height: 1.5rem;
       display: flex;
@@ -188,7 +192,7 @@ export default defineComponent({
       transition: background-color 0.3s;
 
       &.selected {
-        background-color: #74bc1f;
+        background-color: $raphael-green-400;
       }
     }
   }
@@ -196,7 +200,7 @@ export default defineComponent({
 
 .scoreText {
   text-align: center;
-  color: #74bc1f;
+  color: $raphael-green-400;
   margin: 0.25rem 0 1rem 0;
 }
 
@@ -206,13 +210,13 @@ export default defineComponent({
   margin-top: 1rem;
   button {
     padding: 0.5rem 1rem;
-    background-color: #74bc1f;
-    color: white;
+    background-color: $raphael-green-400;
+    color: $raphael-white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     &:disabled {
-      background-color: #b3b3b3;
+      background-color: $raphael-gray-400;
       cursor: not-allowed;
     }
   }

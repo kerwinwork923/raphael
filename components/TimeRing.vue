@@ -563,7 +563,9 @@ const buttonStyle = computed(() => {
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  background-color: rgb(246, 246, 246);
+  background-color: rgb(246, 246, 246);  
+  width: 100%;
+  max-width: 768px;
 }
 
 .progress-border {

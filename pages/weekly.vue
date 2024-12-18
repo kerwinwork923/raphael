@@ -148,7 +148,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .weeklyRecord {
   background-color: $raphael-gray-100;
   display: flex;
@@ -165,17 +165,18 @@ export default {
   }
 
   .subListTitle {
-    color: #666;
+    color: $raphael-gray-500;
     font-weight: 400;
     line-height: 25.9px;
     letter-spacing: 0.5px;
     margin: 0.75rem 0 0.5rem 0;
   }
   .subListActive {
-    color: #ec4f4f;
+    color: $raphael-red-300;
   }
 
   .weeklyBtnGroup {
+    background-color: $raphael-gray-100;
     background-color: #f6f6f6;
     display: flex;
     justify-content: center;
@@ -187,25 +188,14 @@ export default {
     touch-action: manipulation;
   }
   .weeklyBtn {
-    background-color: $raphael-green-400;
-    color: #fff;
-    padding: 12px;
-    width: 100%;
-    border-radius: 8px;
-    border: none;
-    font-size: 1.125rem;
-    font-weight: 400;
-    letter-spacing: 0.5px;
-    transition: 0.25s ease;
-    padding: 8px;
-    cursor: pointer;
+    @include btnStyle($raphael-green-400,$raphael-white);
     &:disabled {
       opacity: 0.5;
     }
   }
   .preBtn {
-    background-color: #dfdfdf;
-    color: #666;
+    background-color: $raphael-gray-300;
+    color: $raphael-gray-500;
   }
   .ANSGroup{
     h4{

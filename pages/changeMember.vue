@@ -153,20 +153,9 @@ export default {
   }
 
   .logoutBtn {
-    background-color: #ec4f4f;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: none;
-    width: 100%;
+    @include btnStyle($raphael-red-300,$raphael-white);
     max-width: 768px;
-    border-radius: 8px;
-    color: #fff;
-    cursor: pointer;
-    font-size: 1.125rem;
-    letter-spacing: 0.5px;
     margin-top: 32px;
-    padding: 8px;
   }
 }
 </style>

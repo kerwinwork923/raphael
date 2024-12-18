@@ -24,26 +24,15 @@
     text-decoration: none;
   }
   .listItem {
-    font-size: 1.125rem;
-    font-weight: 400;
-    letter-spacing: 0.1px;
-    padding: 0.5rem;
-    border-radius: 6px;
-    color: $raphael-gray-500;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    &:hover {
-      background-color: $raphael-green-300;
-    }
+    @include btnStyle($raphael-gray-100,$raphael-gray-500);
   }
   .listActive {
     background-color: $raphael-green-400;
-    color: #fff;
-    transition: all 0.3s ease;
+    color: $raphael-white;
+    transition: all .3s ease;
     &:hover {
       background-color: $raphael-green-400;
-      color: #fff;
+      color: $raphael-white;
     }
   }
 }

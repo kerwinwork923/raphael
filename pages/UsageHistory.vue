@@ -1,6 +1,6 @@
 <template>
-  <TitleMenu Text="使用紀錄" link="/user" />
   <div class="usageHistoryWrap">
+    <TitleMenu Text="使用紀錄" link="/user" />
     <div class="productWrap">
       <h3 class="yourProductTitle" v-if="purchasedProducts.length > 1">
         您的產品
@@ -291,18 +291,20 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.titleMenu:deep(div) {
-  left: 1rem;
-}
-.usageHistoryWrap {
-  background-color: rgba(246, 246, 246, 1);
+.usageHistoryWrap {  
+  display: flex;
+  flex-direction: column;
+  place-items: center;
+  background-color: $raphael-gray-100;
   min-height: 100vh;
   width: 100%;
   padding: 0 1rem;
   padding-bottom: 136px;
   .productWrap {
+    width: 100%;
+    max-width: 768px;
     .yourProductTitle {
-      color: #1e1e1e;
+      color: $raphael-black;
       font-size: 20px;
       font-weight: 400;
       letter-spacing: 0.15px;
@@ -345,14 +347,14 @@ export default {
               width: 270px;
               height: 270px;
               z-index: 2;
-              background-color: #fff;
+              background-color: $raphael-white;
               border-radius: 50%;
               position: absolute;
               top: 50%;
               left: 50%;
               transform: translate(-50%, -50%);
               filter: blur(3px);
-              box-shadow: 0 0 10px rgba($color: #fff, $alpha: 0.1);
+              box-shadow: 0 0 10px rgba($color: $raphael-white, $alpha: 0.1);
             }
             .bigCircle {
               width: 265px;
@@ -382,7 +384,7 @@ export default {
           }
 
           .productName {
-            color: #1e1e1e;
+            color: $raphael-black;
             font-size: 1.5rem;
             font-style: normal;
             font-weight: 700;
@@ -421,14 +423,14 @@ export default {
               width: 150px;
               height: 150px;
               z-index: 2;
-              background-color: #fff;
+              background-color: $raphael-white;
               border-radius: 50%;
               position: absolute;
               top: 50%;
               left: 50%;
               transform: translate(-50%, -50%);
               filter: blur(3px);
-              box-shadow: 0 0 10px rgba($color: #fff, $alpha: 0.1);
+              box-shadow: 0 0 10px rgba($color: $raphael-white, $alpha: 0.1);
             }
 
             .bigCircle {
@@ -466,14 +468,14 @@ export default {
             }
           }
           .productName {
-            color: #1e1e1e;
+            color: $raphael-black;
             font-size: 1.25rem;
             font-style: normal;
             font-weight: 700;
             letter-spacing: 0.12px;
           }
           .productSubTitle {
-            color: #1e1e1e;
+            color: $raphael-black;
             font-size: 1.25rem;
             font-style: normal;
             font-weight: 700;
@@ -485,7 +487,7 @@ export default {
     }
 
     .recommendTitle {
-      color: #1e1e1e;
+      color: $raphael-black;
       font-size: 1.25rem;
       font-style: normal;
       font-weight: 400;
@@ -509,7 +511,7 @@ export default {
 
       .recommendDiv {
         width: 100%;
-        background-color: #fff;
+        background-color: $raphael-white;
         border-radius: 12px;
         padding-top: 0.75rem;
         padding: 0.75rem;
@@ -528,7 +530,7 @@ export default {
             width: 150px;
             height: 150px;
             z-index: 2;
-            background-color: #fff;
+            background-color: $raphael-white;
             border-radius: 50%;
             position: absolute;
             top: 50%;
@@ -560,7 +562,7 @@ export default {
         }
 
         .recommendName {
-          color: #1e1e1e;
+          color: $raphael-black;
           text-align: center;
           font-size: 18px;
           font-weight: 400;
@@ -603,12 +605,12 @@ export default {
           transition: all 0.2s ease;
           &:hover {
             background-color: $raphael-green-400;
-            color: #fff;
+            color: $raphael-white;
           }
         }
 
         .featureTitle {
-          color: #1e1e1e;
+          color: $raphael-black;
           font-size: 20px;
           font-style: normal;
           font-weight: 400;
@@ -619,7 +621,7 @@ export default {
           margin-top: 0.5rem;
           counter-reset: list-counter;
           li {
-            color: #1e1e1e;
+            color: $raphael-black;
             font-size: 18px;
             font-weight: 400;
             line-height: 29.124px;
@@ -642,27 +644,13 @@ export default {
   right: 0;
   margin: auto;
   width: 100%;
+  max-width: 768px;
   padding: 1rem 1rem 4.25rem 1rem;
-  background-color: #f6f6f6;
+  background-color: $raphael-gray-100;
   z-index: 99;
 
   button {
-    width: 100%;
-    background-color: $raphael-green-400;
-    color: #fff;
-    border: none;
-    padding: 0.5rem 0.75rem;
-    border-radius: 8px;
-    color: #fff;
-    font-size: 18px;
-    font-style: normal;
-    font-weight: 400;
-    letter-spacing: 0.09px;
-    cursor: pointer;    
-    transition: all 0.3s ease;
-    &:hover {
-      background-color: $raphael-green-500;
-    }
+    @include btnStyle($raphael-green-400,$raphael-white);
   }
 }
 
