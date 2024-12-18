@@ -256,14 +256,10 @@ article{
 
   & > h3 {
     font-size: 20px;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
   }
   .detectList {
-    @include recordList($raphael-white,calc(100vh - 336px),0.75rem,0.75rem);
-    @include respond-to("phone-landscape"){
-      height: calc(100vh - 100px);
-    }
-    
+    @include recordList($raphael-white,auto,0.75rem,0.75rem);    
     .notDetectData {
       position: absolute; 
       z-index: 11;
