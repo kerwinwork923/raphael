@@ -1044,6 +1044,14 @@
     margin-bottom: 1rem;
   }
 
+  
+  .scanInfo .row:nth-child(1),
+  .scanInfo .row:nth-child(4),
+  .scanInfo .row:nth-child(5),
+  .scanInfo .row:nth-child(6) {
+    display: none;
+  }
+
   .scanInfo .years {
     width: 55%;
     padding: 6px;
@@ -1216,13 +1224,14 @@
     color: #666;
     margin: 0;
     text-align: center;
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 400;
     color: #1e1e1e;
     letter-spacing: 0.5px;
   }
 
   .resultTextGroup {
+    display: none;
     background-color: #fff;
     border-radius: 12px;
     margin: 12px;
@@ -1313,7 +1322,6 @@
     background-color: #fff;
     border-radius: 12px;
     margin: 0 12px;
-    margin-top: 0.85rem;
     padding: 12px;
   }
 
