@@ -473,6 +473,7 @@ export default {
   }
   .detectList { 
     @include recordList(transparent,calc(100vh - 368px),0,0);
+    @include scrollbarStyle();
     @include respond-to("phone-landscape"){
       height: calc(100vh - 100px);
     }

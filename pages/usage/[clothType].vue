@@ -768,6 +768,7 @@ export default {
       gap: 1.5rem;
       height: calc(100vh - 293px);
       overflow-y: auto;
+      @include scrollbarStyle();
       @include respond-to("phone-landscape"){
         height: calc(100vh - 100px);
       }
@@ -898,6 +899,7 @@ export default {
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
+      @include scrollbarStyle();
 
       @include respond-to("phone-landscape"){
         height: calc(100vh - 100px);

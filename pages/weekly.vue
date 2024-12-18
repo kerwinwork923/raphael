@@ -224,8 +224,8 @@ export default {
     }
   }
   .preBtn {
-    background-color: #dfdfdf;
-    color: #666;
+    background-color: $raphael-gray-200;
+    color: $raphael-gray-500;
   }
   .ANSGroup{
     margin-top: 1rem;

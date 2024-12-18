@@ -63,25 +63,27 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .tagTimesList {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   height: calc(100vh - 293px);
-  overflow-y: auto;
+  overflow-y: auto;  
+  @include scrollbarStyle();
 
   &>.timesList {
     background-color: #fff;
     border-radius: 12px;
-    padding: 0.375rem 0.75rem;
+    padding: 0.75rem;
   }
 
   h3 {
     font-size: 20px;
-    font-weight: 400;
+    font-weight: 500;
     color: #1e1e1e;
     letter-spacing: 0.15px;
+    line-height: 32.36px;
   }
 
   .hashTag {

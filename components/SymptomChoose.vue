@@ -63,22 +63,32 @@ export default {
   border-radius: 12px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(auto-fit, 36px);
-  gap: 16px;
+  grid-template-rows: repeat(auto-fit, minmax(min-content,36px));
+  gap: 0.75rem;
   padding: 12px;
-  height: calc(100vh - 314px);
+  height: calc(100vh - 313px);
   overflow-y: auto;
+  @include scrollbarStyle();
 
   .symptomChoose {
+    position: relative;
     display: flex;
-    gap: 2px;
+    gap: 4px;
     align-items: center;
-    padding: 6px 12px;
+    padding: 0.5rem 0.75rem;
+    line-height: 29.1px;
     background-color: #eee;
     font-size: 1.125rem;
-    color: #ccc;
+    color: #666;
     border-radius: 8px;
     cursor: pointer;
+
+    &>img{
+      position: absolute;
+      left: -4px;
+      top: -2px;
+      transform: scale(0.6);
+    }
 
     &.symptomChooseActive {
       background-color: #74bc1f;

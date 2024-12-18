@@ -534,9 +534,10 @@ export default {
     font-size: 1rem;
   }
   .sleepRecordList{
-    height: calc(100vh - 293px);
+    height: calc(100vh - 283px);
     overflow-y: auto;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.75rem;    
+    @include scrollbarStyle();
 
     @include respond-to("phone-landscape" ){
       height: calc(100vh - 100px);
