@@ -8,11 +8,10 @@
       <h2>HRV 檢測</h2>
     </div>    
     <article>
-      <h3>AI智慧檢測，健康隨手掌握</h3>
+      <h3>AI人臉HRV，輕鬆追蹤健康</h3>
       <ul>
-        <li>只需<span class="point">1-2分鐘</span>，透過手機相機掃描臉部，即可運用<span class="point">FDA認證AI技術</span>分析您的生理數據(如心跳)。</li>
-        <li>醫師會根據數據了解您的自律神經狀態，提供適合您的健康建議，助您改善體質。</li>
-        <li>為確保檢測結果準確性，請於開始前<span class="point">關閉螢幕保護程式</span>，輕鬆掌控健康每一天。</li>
+        <li>智平衡健康集團運用FDA認證AI技術，推出全新人臉辨識HRV量測工具，透過手機相機掃描臉部，1-2分鐘即可快速分析生理數據（如心跳變化），評估心臟自律神經狀態，並推算生理年齡，提供簡易的健康管理方式。</li>
+        <li>人臉辨識HRV量測<span class="point">僅反應心臟的交感與副交感神經功能</span>，若您需全面了解全身五臟六腑的自律神經狀態，請依醫師建議回診進行深入檢測。每天記錄數據，輕鬆追蹤健康變化，智平衡健康集團秉持專業與創新，結合AI智慧檢測與專業團隊與您攜手邁向更健康的未來！</li>
       </ul>
     </article>
     <div class="detectWrap">
@@ -222,24 +221,26 @@ export default {
 
 article{
   display: grid;
-  gap: 0.75rem;
+  gap: 0.5rem;
 
   &>h3{
     font-size: 20px;
   }
   &>ul{
     display: grid;
+    gap:0.5rem;
     list-style-type: disc;
-    &>li{      
+
+    &>li{  
       line-height: 29.1px;
       color: $raphael-gray-500;
       font-size: 18px;
       font-style: normal;
       font-weight: 400;
       letter-spacing: 0.09px;
-      margin-left: 1.25rem;
+      margin-left: 1.5rem;
       &::marker{
-        font-size: 0.75rem;
+        font-size: 1rem;
       }
       .point{
         color: $raphael-red-300;
@@ -254,14 +255,11 @@ article{
   margin-top: 0.75rem;
 
   & > h3 {
-    display: flex;
-    align-items: center;
-    justify-content: start;
-    padding: 0 0 0.75rem 0;
-    color: $raphael-gray-500;
+    font-size: 20px;
+    margin-bottom: 0.5rem;
   }
   .detectList {
-    @include recordList($raphael-white,calc(100vh - 536px),0.75rem,0.75rem);
+    @include recordList($raphael-white,calc(100vh - 336px),0.75rem,0.75rem);
     @include respond-to("phone-landscape"){
       height: calc(100vh - 100px);
     }
