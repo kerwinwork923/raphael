@@ -45,6 +45,7 @@ const router = useRouter();
 const elapsedTime = ref(0); // 計時的時間（秒）
 const isCounting = ref(false); // 是否正在計時
 const isPaused = ref(false); // 是否暫停
+// 計算按鈕文字
 const buttonText = computed(() => {
   if (store.detectFlag === "1") {
     return isPaused.value ? "繼續" : "暫停";
@@ -54,9 +55,25 @@ const buttonText = computed(() => {
   return "HRV檢測(使用前)";
 });
 
+// 開始治療後檢測
+const startAfterCheck = async () => {
+  try {
+    console.log("啟動治療後檢測...");
+    store.detectFlag = "2";
+    store.detectUID = UID.value;
+    store.detectForm = props.productName;
+    store.showHRVAlert = true;
+    startTimer(); // 開始計時
+  } catch (error) {
+    console.error("啟動治療後檢測失敗：", error);
+  }
+};
+
 const isButtonEnabled = ref(true);
 const UID = ref(null);
 const BID = ref(null);
+
+const hasBeforeData = ref(false);
 
 import { useCommon } from "../stores/common";
 const store = useCommon();
@@ -92,17 +109,12 @@ if (!MID || !Token || !MAID || !Mobile) {
 const timerInterval = ref(null);
 
 const startTimer = () => {
-  if (timerInterval.value) clearInterval(timerInterval.value); // 清除已有計時器
-
+  if (timerInterval.value) clearInterval(timerInterval.value);
   isCounting.value = true;
   isPaused.value = false;
-  buttonText.value = "暫停";
-
   timerInterval.value = setInterval(() => {
     elapsedTime.value++;
   }, 1000);
-
-  console.log("計時開始，已過時間：", elapsedTime.value, "秒");
 };
 
 const pauseTimer = () => {
@@ -123,20 +135,19 @@ const resumeTimer = () => {
 };
 
 const stopTimer = async () => {
-  clearInterval(timerInterval.value); // 停止計時
+  clearInterval(timerInterval.value);
   isCounting.value = false;
   isPaused.value = false;
-  isButtonEnabled.value = false; // 禁用按鈕
+  isButtonEnabled.value = false;
 
   try {
+    console.log("停止計時器...");
     await useEndAPI(); // 調用結束 API
-    console.log("計時已結束，API 調用成功");
   } catch (error) {
-    console.error("結束 API 調用失敗：", error);
+    console.error("停止計時器失敗：", error);
   }
 
-  elapsedTime.value = 0; // 重置時間
-  buttonText.value = "HRV檢測(使用後)"; // 更新按鈕文字
+  elapsedTime.value = 0;
 };
 
 const apiRequest = async (url, payload) => {
@@ -202,11 +213,11 @@ const API_MID_ProductName_UIDInfo = async () => {
   }
 };
 
-const API_HRV2_UID_Flag_Info = async () => {
+const API_HRV2_UID_Flag_Info = async (Flag) => {
   try {
     const response = await apiRequest(
       "https://23700999.com:8081/HMA/API_HRV2_UID_Flag_Info.jsp",
-      { MID, Token, MAID, Mobile, UID: UID.value, Flag: store.detectFlag }
+      { MID, Token, MAID, Mobile, UID: UID.value, Flag }
     );
     if (response?.Result === "OK") {
       console.log("成功獲取 HRV2 檢測資料狀態：", response);
@@ -218,6 +229,19 @@ const API_HRV2_UID_Flag_Info = async () => {
   } catch (error) {
     console.error("API 調用失敗：", error);
     return null;
+  }
+};
+
+const startBeforeCheck = async () => {
+  try {
+    console.log("啟動治療前檢測...");
+    store.detectFlag = "1";
+    store.detectUID = UID.value;
+    store.detectForm = props.productName;
+    store.showHRVAlert = true;
+    startTimer(); // 開始計時
+  } catch (error) {
+    console.error("啟動治療前檢測失敗：", error);
   }
 };
 
@@ -248,24 +272,14 @@ onMounted(async () => {
       elapsedTime.value = elapsedSeconds; // 更新已過時間
       startTimer(); // 繼續計時
 
-      console.log("檢查 HRV2 資料狀態");
-
-      // 同時檢查 HRV2 使用前和使用後資料
-      const isExitBefore = await API_HRV2_UID_Flag_Info("1");
-      const isExitAfter = await API_HRV2_UID_Flag_Info("2");
-
-      if (isExitBefore === "N") {
-        console.log("沒有檢測前資料，執行檢測前邏輯");
-        store.detectFlag = "1"; // 設為使用前檢測狀態
-        store.detectUID = UID.value;
-        store.detectForm = props.productName;
-        store.showHRVAlert = true;
-      } else if (isExitAfter === "N") {
-        console.log("沒有檢測後資料，執行檢測後邏輯");
-        store.detectFlag = "2"; // 設為使用後檢測狀態
-        store.detectUID = UID.value;
-        store.detectForm = props.productName;
-        store.showHRVAlert = true;
+      if (props.hasDetectRecord === false) {
+        if (hasBeforeData.value) {
+          console.log("啟動治療後檢測");
+          startAfterCheck(); // 啟動治療後檢測
+        } else {
+          console.log("啟動治療前檢測");
+          startBeforeCheck(); // 啟動治療前檢測
+        }
       } else {
         console.log("檢測前後資料均已存在，無需操作");
       }
