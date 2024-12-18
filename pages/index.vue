@@ -85,11 +85,7 @@
   place-items: center;
   width: 100%;
   min-height: 100vh;
-  padding: 1rem;
-  padding-bottom: env(safe-area-inset-bottom, 50px); // 行動裝置安全區
-  @supports not (env(safe-area-inset-bottom)) {
-    padding-bottom: 50px; // 回退值，桌面或不支援的設備
-  }
+  padding: 4.25rem 1rem;
 
   .raphaelIconImgGroup {
     text-align: center;
