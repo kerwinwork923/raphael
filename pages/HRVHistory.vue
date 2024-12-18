@@ -222,6 +222,7 @@ export default {
 article{
   display: grid;
   gap: 0.5rem;
+  max-width: 768px;
 
   &>h3{
     font-size: 20px;
