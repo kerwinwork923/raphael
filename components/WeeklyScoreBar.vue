@@ -122,7 +122,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .QAList {
-  height: calc(100vh - 286px);
+  height: calc(100vh - 287px);
   overflow-y: auto;
   @include scrollbarStyle();
 
