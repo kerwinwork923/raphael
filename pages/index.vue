@@ -84,11 +84,13 @@
   flex-direction: column;
   place-items: center;
   width: 100%;
-  height: calc(100vh - env(safe-area-inset-bottom));
+  min-height: 100vh;
   padding: 1rem;
+  padding-bottom: env(safe-area-inset-bottom, 50px); // 行動裝置安全區
   @supports not (env(safe-area-inset-bottom)) {
-    height: 100vh; // 回退值
+    padding-bottom: 50px; // 回退值，桌面或不支援的設備
   }
+
   .raphaelIconImgGroup {
     text-align: center;
 
