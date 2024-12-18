@@ -42,7 +42,7 @@
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
     />
-<!-- 
+    <!-- 
     <TimeRing
       :totalTime="90"
       :product-name="productName"
