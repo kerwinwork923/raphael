@@ -261,7 +261,7 @@ article{
     color: $raphael-gray-500;
   }
   .detectList {
-    @include recordList($raphael-white,calc(100vh - 478px),0.75rem,0.75rem);
+    @include recordList($raphael-white,calc(100vh - 536px),0.75rem,0.75rem);
     @include respond-to("phone-landscape"){
       height: calc(100vh - 100px);
     }
