@@ -249,7 +249,7 @@ export default {
         .progress {
           position: absolute;
           height: 100%;
-          background-color: $raphael-purple-200;
+          background: linear-gradient(90deg, #EC4F4F 0%, #65558F 50%, #1FBCB3 75%, #74BC1F 100%);
           border-radius: 5px;
           transition: width 0.3s ease;
         }
