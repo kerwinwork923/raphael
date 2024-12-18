@@ -440,7 +440,7 @@ export default {
           }
           .value {
             color: #74bc1f;
-            text-align: center;
+            text-align: left;
             font-size: 36px;
             font-style: normal;
             font-weight: 700;
