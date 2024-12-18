@@ -28,7 +28,7 @@
         >
       </div>
 
-      <div class="ANSGroup" v-if="aa">
+      <div class="ANSGroup" v-if="store.nowState =='first'">
         <h4>自律神經自覺症狀量表</h4>
         <p>透過100種症狀的分析，全面了解您的自律神經不平衡程度。填寫量表需花費約<span>25分鐘</span>，填寫共分為三個步驟：
           <ul>
@@ -37,6 +37,26 @@
             <li>挑選<span>3-10項</span>您目前最困擾的症狀。</li>
           </ul>
         </p>
+      </div>
+
+      <div class="AnsGroup2" v-if="store.nowState =='second'">
+        <h5>請依照您今日的需求，選擇您想要的評估方式</h5>
+        <div class="chooseGroup">
+          <div class="chooseBox ">
+            <h4>症狀追蹤</h4>
+            <p>只評估上次有問題的症狀，花費5-10分鐘的時間，快速看看身體有沒有變化。</p>
+            <div class="bgImg">
+              <img src="/assets/imgs/3DMap.png" alt="">
+            </div>
+          </div>
+          <div class="chooseBox chooseBoxActive">
+            <h4>完整評估</h4>
+            <p>檢查所有可能的症狀，需花費約25分鐘的時間，全面了解自己的健康狀況。</p>
+            <div class="bgImg">
+              <img src="/assets/imgs/3DTest.png" alt="">
+            </div>
+          </div>
+        </div>
       </div>
       
       <WeeklyResult v-if="store.nowState == 'result'" />
@@ -148,7 +168,7 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .weeklyRecord {
   background-color: $raphael-gray-100;
   display: flex;
@@ -165,18 +185,17 @@ export default {
   }
 
   .subListTitle {
-    color: $raphael-gray-500;
+    color: #666;
     font-weight: 400;
     line-height: 25.9px;
     letter-spacing: 0.5px;
     margin: 0.75rem 0 0.5rem 0;
   }
   .subListActive {
-    color: $raphael-red-300;
+    color: #ec4f4f;
   }
 
   .weeklyBtnGroup {
-    background-color: $raphael-gray-100;
     background-color: #f6f6f6;
     display: flex;
     justify-content: center;
@@ -188,14 +207,25 @@ export default {
     touch-action: manipulation;
   }
   .weeklyBtn {
-    @include btnStyle($raphael-green-400,$raphael-white);
+    background-color: $raphael-green-400;
+    color: #fff;
+    padding: 12px;
+    width: 100%;
+    border-radius: 8px;
+    border: none;
+    font-size: 1.125rem;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    transition: 0.25s ease;
+    padding: 8px;
+    cursor: pointer;
     &:disabled {
       opacity: 0.5;
     }
   }
   .preBtn {
-    background-color: $raphael-gray-300;
-    color: $raphael-gray-500;
+    background-color: #dfdfdf;
+    color: #666;
   }
   .ANSGroup{
     h4{
@@ -233,6 +263,63 @@ export default {
         color: #EC4F4F;
         }
    
+  }
+  .AnsGroup2{
+    h5{
+      color:  #666;
+      font-family: "Noto Sans";
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 25.888px;
+      letter-spacing: 0.5px;
+    }
+    .chooseGroup{
+      margin-top: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: .85rem;
+      .chooseBox{
+        background-color: #fff;
+        padding: 1rem;
+        border-radius: 8px;
+        position: relative;
+        h4{
+          color:  #1E1E1E;
+          font-family: "Noto Sans";
+          font-size: 20px;
+          font-style: normal;
+          font-weight: 700;
+          line-height: 100%; 
+          letter-spacing:  0.15px;
+        }
+        p{
+          font-size: 18px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: 29.124px; 
+          letter-spacing: 0.09px;
+          margin-top: 0.25rem;
+        }
+        .bgImg{
+          position: absolute;
+          bottom: 0;
+          right: 0;
+          img{
+            width: 135px;
+          }
+        }
+      }
+      .chooseBoxActive{
+        background-color: #fff;
+        border-radius: 12px;
+        background:  #69BCB7;
+        color: #fff;
+        h4{
+          color: #fff;
+        }
+      }
+    }
   }
 }
 </style>
