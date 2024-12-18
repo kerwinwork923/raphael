@@ -6,13 +6,13 @@
     <div class="weeklyQAGroup">
       <TagList />
       <StepIndicator
-        v-if="store.nowState == 'result'"
+        v-if="store.nowState!=='first' && store.nowState == 'result'"
         :stepTexts="['填寫問卷', '結果分析']"
         :currentStep="1"
       />
 
       <StepIndicator
-        v-if="store.nowState !== 'result'"
+        v-if="store.nowState!=='first' &&  store.nowState !== 'result'"
         :stepTexts="['填寫問卷', '結果分析']"
         :currentStep="0"
       />
@@ -67,20 +67,17 @@
 
     <div
       class="weeklyBtnGroup"
-      v-if="
-        store.nowState === 'score' ||
-        store.nowState === 'times' ||
-        store.nowState === 'choose'
-      "
+      v-if="store.nowState==='first'||store.nowState === 'score' || store.nowState === 'times' || store.nowState === 'choose'"
     >
       <button
         class="weeklyBtn preBtn"
         @click="store.handlePrevStep"
         :disabled="preDisabled"
         v-if="
+          !(store.nowState === 'first') &&
           !(store.nowState === 'score' && store.currentStep === 1) &&
           !(store.nowState === 'times' && store.timesStep === 1) &&
-          !(store.nowState === 'choose' && store.timesStep === 1)
+          !(store.nowState === 'choose' && store.timesStep === 1) 
         "
       >
         {{ store.preText }}
@@ -203,8 +200,11 @@ export default {
     gap: 0.75rem;
     max-width: 768px;
     width: 100%;
-    padding: 0.75rem 0 4.25rem 0;
+    padding: 0.75rem 5% 4.25rem 5%;
     touch-action: manipulation;
+    position: absolute;
+    bottom: 0;
+
   }
   .weeklyBtn {
     background-color: $raphael-green-400;
@@ -228,6 +228,7 @@ export default {
     color: #666;
   }
   .ANSGroup{
+    margin-top: 1rem;
     h4{
       color:#1E1E1E;
       font-family: "Noto Sans";

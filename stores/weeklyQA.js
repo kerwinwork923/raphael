@@ -11,7 +11,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
     totalTimesStep: 0,
     questionsPerPage: 7,
     selectQuestionPerPage: 7,
-    nowState: "score",
+    nowState: "",
     preDisabled: true,
     nextDisabled: false,
     theLatestHistory: {},
@@ -31,7 +31,9 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
     },
 
     nextText: (state) => {
-      if (state.nowState === "score") {
+      if (state.nowState === "first") {
+        return `開始檢測`;
+      } else if (state.nowState === "score") {
         return state.currentStep + 1 > state.totalStep
           ? "下一步"
           : `下一頁(${state.currentStep + 1}/${state.totalStep})`;
@@ -62,6 +64,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
   actions: {
     // 獲取題目
     async getQues() {
+      this.nowState = "score";
       const common = useCommon();
       common.startLoading();
 
@@ -123,20 +126,32 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
       common.startLoading();
 
       const localData = localStorage.getItem("userData");
-      const { MID, Token, MAID, Mobile, Name } = localData
-        ? JSON.parse(localData)
-        : {};
-      let { Sex } = localData ? JSON.parse(localData) : {};
+      const {
+        MID,
+        Token,
+        MAID,
+        Mobile,
+        Name,
+        Birthday,
+        Mail,
+        Zone,
+        Address,
+        Sex,
+      } = localData ? JSON.parse(localData) : {};
 
-      if (Sex == "0") {
-        Sex = 1;
-      }
+      // 字段對應處理
+      const rbirth = Birthday || ""; // 映射生日
+      const Email = Mail || ""; // 映射電子郵件
+      const Area = Zone || ""; // 映射地區
+
+      // 構建答案映射
       let AnsMap = new Map();
       this.weeklyQA.forEach((question, index) => {
         AnsMap.set(`key${index + 1}`, String(question.score));
       });
 
-      const ansMapJson = JSON.stringify(Array.from(AnsMap.entries()));
+      // 將答案映射轉為 JSON 格式
+      const ansMapJson = JSON.stringify(Object.fromEntries(AnsMap));
 
       try {
         const response = await axios.post(
@@ -146,39 +161,32 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
             Token: String(Token),
             MAID: String(MAID),
             Mobile: String(Mobile),
-            name: Name,
-            rbirth: "",
-            Email: "",
-            Area: "",
-            Address: "",
+            name: String(Name),
+            rbirth: String(rbirth),
+            Email: String(Email),
+            Area: String(Area),
+            Address: String(Address || ""),
             Sex: String(Sex),
             AnsMap: ansMapJson,
           }
         );
 
         if (response.status === 200) {
-          const AID = response.data.AID;
+          console.log("API_ANSOnlineQSaveAns response:", response.data);
 
+          // 如果有返回 AID，更新本地存儲
+          const AID = response.data.AID;
           if (AID) {
-            const updatedLocalData = {
-              MID,
-              Token,
-              MAID,
-              Mobile,
-              Name,
-              Sex,
-              AID,
-            };
-            localStorage.setItem("userData", JSON.stringify(updatedLocalData));
+            const updatedData = { ...JSON.parse(localData), AID };
+            localStorage.setItem("userData", JSON.stringify(updatedData));
           }
         }
       } catch (err) {
         console.error("Error while saving answers:", err);
         common.setError(err);
-      } finally {
-        common.stopLoading();
       }
     },
+
     // 儲存題目
     async API_ANSOnlineTimesSaveTimes() {
       const common = useCommon();
@@ -296,6 +304,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
 
         if (response1.status === 200) {
           //Pinia取得歷史紀錄
+
           this.History = response1.data?.History;
           if (response1.data.AID !== "") {
             this.theLatestHistory = response1.data;
@@ -304,6 +313,8 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
             // 假如有两笔记录
             if (response1.data.History.length > 0) {
               this.theLatestHistoryPre = response1.data.History[0];
+              console.log(this.theLatestHistoryPre);
+
               const response2 = await axios.post(
                 "https://23700999.com:8081/HMA/API_ANSFirstDetail.jsp",
                 {
@@ -311,7 +322,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
                   Token: String(Token),
                   MAID: String(MAID),
                   Mobile: String(Mobile),
-                  AID: response1.data.History[0].preAID,
+                  AID: String(response1.data.History[0].preAID),
                 }
               );
 
@@ -322,6 +333,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
             await this.API_API_ANSSecond();
           } else if (response1.data.History.length > 0) {
             // 只有一个记录
+
             this.theLatestHistory = response1.data.History[0];
             const response2 = await axios.post(
               "https://23700999.com:8081/HMA/API_ANSFirstDetail.jsp",
@@ -330,7 +342,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
                 Token: String(Token),
                 MAID: String(MAID),
                 Mobile: String(Mobile),
-                AID: response1.data.History[0].preAID,
+                AID: String(response1.data.History[0].preAID),
               }
             );
             this.theLatestData = response2.data;
@@ -338,6 +350,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
 
             await this.checkTestDate();
           } else {
+            this.nowState = "first";
             await this.getQues();
           }
         }
@@ -346,6 +359,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         throw err;
       }
     },
+
     //輔助API_API_ANSFirstDetail
     async checkTestDate() {
       if (this.theLatestHistory.CheckTime) {
@@ -448,7 +462,18 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
     // 下一步按鈕處理
     async handleNextStep() {
       const common = useCommon();
-      if (this.nowState === "score") {
+      if (this.nowState === "first") {
+        try {
+          await this.getQues();
+          this.nowState = "score";
+          this.currentStep = 1; // 初始化步驟
+          this.preDisabled = true; // 第一頁禁用上一步按鈕
+          this.nextDisabled = false; // 啟用下一步按鈕
+        } catch (error) {
+          console.error("Error fetching questions:", error);
+          alert("獲取題目失敗，請稍後重試。");
+        }
+      } else if (this.nowState === "score") {
         const startIdx = (this.currentStep - 1) * this.questionsPerPage;
         const endIdx = Math.min(
           startIdx + this.questionsPerPage,
@@ -514,7 +539,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         await this.API_ANSOnlineQSaveAns();
         await this.API_ANSOnlineTimesSaveTimes();
         await this.API_ANSOnlineSolveSaveSolve();
-        location.reload();
+        // location.reload();
         // this.nowState = "result";
       }
 
