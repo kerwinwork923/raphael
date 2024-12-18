@@ -84,9 +84,11 @@
   flex-direction: column;
   place-items: center;
   width: 100%;
-  min-height: 100vh;
-  padding: 4.25rem 1rem;
-
+  height: calc(100vh - env(safe-area-inset-bottom));
+  padding: 1rem;
+  @supports not (env(safe-area-inset-bottom)) {
+    height: 100vh; // 回退值
+  }
   .raphaelIconImgGroup {
     text-align: center;
 
