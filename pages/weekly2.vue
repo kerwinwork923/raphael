@@ -20,7 +20,7 @@
 
       <div class="babyRecord">
         <div class="babyGroup">
-          <h3>{{ store.childInfo.Name || "寶貝" }}</h3>
+          <h3>{{ ChildInfo[0].Name || "寶貝" }}</h3>
           <div class="subGroup">
             <p>問卷進度</p>
             <div class="number">{{ store.babyScrollProgress }}%</div>
@@ -107,34 +107,31 @@ export default {
   setup() {
     const router = useRouter();
     const localData = localStorage.getItem("userData");
-    let MID, Token, MAID, Mobile;
+    let MID,
+      Token,
+      MAID,
+      Mobile,
+      ChildInfo = [];
 
     try {
       if (localData) {
-        ({ MID, Token, MAID, Mobile } = JSON.parse(localData));
+        // Parse localStorage data
+        ({ MID, Token, MAID, Mobile, ChildInfo = [] } = JSON.parse(localData));
       }
     } catch (e) {
       console.error("Error parsing localStorage data", e);
     }
 
+    // Redirect to home page if critical data is missing
     if (!MID || !Token || !MAID || !Mobile) {
       router.push("/");
       return;
     }
-    const store = useWeeklyRecord();
 
+    const store = useWeeklyRecord();
     const common = useCommon();
 
-    // const start = async () => {
-    //   common.startLoading();
-    //   await store.API_API_ANSFirstDetail();
-
-    //   common.stopLoading();
-    // };
-
-    // start();
-
-    // store.API_API_ANSSecond()
+    // Dynamic title based on state
     const h1Text = computed(() => {
       switch (store.nowState) {
         case "score":
@@ -148,19 +145,19 @@ export default {
       }
     });
 
+    // Handle state changes
     const resultChange = () => {
       store.nowState = "result";
     };
 
-    //進度條
+    // Progress bar reference
     const progress = ref(0);
 
     onMounted(async () => {
       try {
-        await store.getQues();
         await store.fetchResultAnalysis("");
       } catch (error) {
-        console.error("Error during getQues:", error);
+        console.error("Error during fetchResultAnalysis:", error);
       }
     });
 
@@ -169,8 +166,8 @@ export default {
       h1Text,
       common,
       resultChange,
-      useCommon,
       progress,
+      ChildInfo, // Ensure it's included in the returned data
     };
   },
 };

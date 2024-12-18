@@ -4,14 +4,14 @@
     <div class="resultTopGroup">
       <div class="resultInfo">
         <h4>
-          感謝您的使用！以下是{{ store.childInfo.Name || "寶貝" }}的最新測量结果
+          感謝您的使用！以下是{{ ChildInfo?.[0]?.Name || "寶貝" }}的最新測量結果
         </h4>
       </div>
       <img class="doctorImg" src="../assets/imgs/doctor.png" alt="" />
     </div>
 
     <!-- Symptom analysis results -->
-    <h4 class="textResultText">以下為分類系統的自律神經分析結果</h4>
+    <h4 class="textResultText">以下為兒童指標的綜合分析結果</h4>
     <div class="resultListGroup">
       <SymptomResult2
         v-for="(babyData, index) in store.childResultData.ChildScore"
@@ -21,7 +21,7 @@
         :symptomRatio="babyData.Ratio"
         :symptomScore="babyData.Score"
         :symptomSerious="babyData.Serious"
-        :sex="store.childInfo.Sex"
+        :sex="ChildInfo[0].Sex"
       />
     </div>
 
@@ -50,7 +50,10 @@
             <h5>{{ history[3]?.TypeName }}</h5>
             <div
               :style="{
-                color: scoreColorFn(computedScore(history[3]?.Score), sex),
+                color: scoreColorFn(
+                  computedScore(history[3]?.Score),
+                  ChildInfo[0].sex
+                ),
               }"
               class="totalScore"
             >
@@ -61,7 +64,10 @@
             <h5>{{ history[0]?.TypeName }}</h5>
             <div
               :style="{
-                color: scoreColorFn(computedScore(history[0]?.Score), sex),
+                color: scoreColorFn(
+                  computedScore(history[0]?.Score),
+                  ChildInfo[0].sex
+                ),
               }"
               class="seriousScore"
             >
@@ -103,21 +109,23 @@ export default {
   components: { SymptomResult2 },
   setup() {
     const store = useWeeklyRecord();
-
-    console.log(store.diffenenceObj);
-
     const router = useRouter();
 
-    const backToUser = () => router.push({ name: "user" });
-
+    // 從 localStorage 取得資料
     const localData = localStorage.getItem("userData");
-    const parsedData = localData ? JSON.parse(localData) : null;
-    const sex = ref(parsedData?.Sex || null);
+    let parsedData = {};
 
-    const selectedType = ref("Serious");
+    try {
+      parsedData = localData ? JSON.parse(localData) : {};
+    } catch (e) {
+      console.error("Error parsing localStorage data:", e);
+    }
 
-    const changeSymptomLavel = (lavel) => {
-      selectedType.value = lavel;
+    const ChildInfo = parsedData.ChildInfo || [];
+
+    // 返回會員中心的函數
+    const backToUser = () => {
+      router.push({ name: "user" });
     };
 
     const computedScore = (scoreStr) =>
@@ -125,15 +133,9 @@ export default {
 
     return {
       store,
-      formatTimestamp,
       backToUser,
       computedScore,
-      selectedType,
-      changeSymptomLavel,
-      sex,
-      computedEmoji2,
-      scoreColorFn,
-      formatTimestamp3,
+      ChildInfo,
     };
   },
 };

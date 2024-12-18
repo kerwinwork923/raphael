@@ -147,6 +147,7 @@ export default {
         : {};
 
       if (!MID || !Token || !MAID || !Mobile) {
+        localStorage.removeItem("userData");
         router.push("/");
         return;
       } else if (Name === "") {
@@ -171,6 +172,7 @@ export default {
             const newUserInfo = {
               ...existingData,
               ...data.Member,
+              ChildInfo: data.ChildInfo || [],
             };
             localStorage.setItem("userData", JSON.stringify(newUserInfo));
             userInfo.value = newUserInfo;

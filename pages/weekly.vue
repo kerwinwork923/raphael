@@ -28,6 +28,17 @@
         >
       </div>
 
+      <div class="ANSGroup" v-if="aa">
+        <h4>自律神經自覺症狀量表</h4>
+        <p>透過100種症狀的分析，全面了解您的自律神經不平衡程度。填寫量表需花費約<span>25分鐘</span>，填寫共分為三個步驟：
+          <ul>
+            <li>依<span>當下感覺逐題評估</span>，填寫每項症狀的嚴重程度。</li>
+            <li>針對困擾您的症狀，<span>填寫每週發生的頻率</span>。</li>
+            <li>挑選<span>3-10項</span>您目前最困擾的症狀。</li>
+          </ul>
+        </p>
+      </div>
+      
       <WeeklyResult v-if="store.nowState == 'result'" />
       <WeeklyScoreBar v-if="store.nowState == 'score'" />
       <TagTimesList v-if="store.nowState == 'times'" />
@@ -46,7 +57,11 @@
         class="weeklyBtn preBtn"
         @click="store.handlePrevStep"
         :disabled="preDisabled"
-        v-if="!(store.nowState === 'score' && store.currentStep === 1) && !(store.nowState === 'times' && store.timesStep === 1) && !(store.nowState === 'choose' && store.timesStep === 1)"
+        v-if="
+          !(store.nowState === 'score' && store.currentStep === 1) &&
+          !(store.nowState === 'times' && store.timesStep === 1) &&
+          !(store.nowState === 'choose' && store.timesStep === 1)
+        "
       >
         {{ store.preText }}
       </button>
@@ -161,7 +176,7 @@ export default {
   }
 
   .weeklyBtnGroup {
-    background-color: #F6F6F6;
+    background-color: #f6f6f6;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -191,6 +206,43 @@ export default {
   .preBtn {
     background-color: #dfdfdf;
     color: #666;
+  }
+  .ANSGroup{
+    h4{
+      color:#1E1E1E;
+      font-family: "Noto Sans";
+      font-size: 20px;
+      font-style: normal;
+      font-weight: bold;
+      line-height: 100%;
+      letter-spacing: var(--Title-Medium-Tracking, 0.15px);
+    }
+    p{
+      color:  #666;
+      font-size: 18px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 1.5;
+      letter-spacing: 0.09px;
+      margin-top: 0.25rem;
+    }
+    ul{
+      margin-left: 1.25rem;
+      color:  #666;
+      font-size: 18px;
+      margin-top: 0.25rem;
+
+      li{
+        list-style-type: decimal;
+        line-height: 1.5;
+        
+      }
+      
+    }
+    span{
+        color: #EC4F4F;
+        }
+   
   }
 }
 </style>

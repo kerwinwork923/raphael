@@ -14,7 +14,6 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
     nextDisabled: false, // 是否禁用下一步按钮
     theLatestData: {}, // 最新的数据
     babyScrollProgress: 0, // 进度条百分比
-    childInfo: {},
     selectQuestionPerPage: 7,
     totalQuestions: 0,
     childResultData: {},
@@ -87,21 +86,21 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
           { MID, Token, MAID, Mobile }
         );
 
-        if (response.data?.ChildQues && response.data?.ChildInfo?.[0]) {
-          const { ChildQues, ChildInfo } = response.data;
+        if (response.data?.ChildQues) {
+          const { ChildQues } = response.data;
 
-          this.childInfo = {
-            CID: ChildInfo[0].CID,
-            Name: ChildInfo[0].Name || "未命名宝贝",
-            AID: ChildInfo[0].AID || "",
-            MaxQ: ChildInfo[0].MaxQ,
-            BirthDay: ChildInfo[0].BirthDay,
-            CheckTime: ChildInfo[0].CheckTime,
-            Sex: ChildInfo[0].Sex,
-            Status: ChildInfo[0].Status,
-            ratioComplete: ChildInfo[0].ratioComplete,
-            diffDaysFromToday: ChildInfo[0].diffDaysFromToday,
-          };
+          // this.childInfo = {
+          //   CID: ChildInfo[0].CID,
+          //   Name: ChildInfo[0].Name || "未命名宝贝",
+          //   AID: ChildInfo[0].AID || "",
+          //   MaxQ: ChildInfo[0].MaxQ,
+          //   BirthDay: ChildInfo[0].BirthDay,
+          //   CheckTime: ChildInfo[0].CheckTime,
+          //   Sex: ChildInfo[0].Sex,
+          //   Status: ChildInfo[0].Status,
+          //   ratioComplete: ChildInfo[0].ratioComplete,
+          //   diffDaysFromToday: ChildInfo[0].diffDaysFromToday,
+          // };
 
           this.totalQuestions = ChildQues.length;
 
@@ -141,7 +140,7 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
       common.startLoading();
 
       const localData = JSON.parse(localStorage.getItem("userData") || "{}");
-      const { MID, Token, MAID, Mobile } = localData;
+      const { MID, Token, MAID, Mobile, ChildInfo } = localData;
       if (!MID || !Token || !MAID || !Mobile) {
         throw new Error(
           "Missing authentication data (MID, Token, MAID, or Mobile)"
@@ -166,7 +165,7 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
           Token,
           MAID,
           Mobile,
-          CID: String(this.childInfo.CID),
+          CID: String(ChildInfo[0].CID),
           MaxQ: String(this.totalQuestions), // 使用正确的总问题数
           ChildAns: answers,
         };
@@ -179,11 +178,9 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
         );
 
         // 检查响应数据中的 AID
-        if (response.data?.ChildInfo?.[0]?.AID) {
+        if (response.data) {
           const AID = response.data.ChildInfo[0].AID;
           console.log("Received AID:", AID);
-
-          // 更新到全局状态
           this.theLatestData.AID = AID;
         } else {
           console.warn("AID 未在响应中返回");
@@ -199,7 +196,7 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
     async saveChildTimes() {
       try {
         const localData = JSON.parse(localStorage.getItem("userData") || "{}");
-        const { MID, Token, MAID, Mobile } = localData;
+        const { MID, Token, MAID, Mobile, ChildInfo } = localData;
         if (!MID || !Token || !MAID || !Mobile) {
           throw new Error(
             "Missing authentication data (MID, Token, MAID, or Mobile)"
@@ -217,7 +214,7 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
             Token,
             MAID,
             Mobile,
-            CID: this.ChildInfo.CID,
+            CID: ChildInfo[0].CID,
             AID: this.theLatestData.AID || "",
             TimesData: timesPayload,
           }
@@ -231,7 +228,7 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
     async saveChildSolutions() {
       try {
         const localData = JSON.parse(localStorage.getItem("userData") || "{}");
-        const { MID, Token, MAID, Mobile } = localData;
+        const { MID, Token, MAID, Mobile, ChildInfo } = localData;
 
         if (!MID || !Token || !MAID || !Mobile) {
           throw new Error(
@@ -257,7 +254,7 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
           MAID,
           Mobile,
           AID: this.theLatestData.AID || "", // 使用最新的 AID
-          CID: this.ChildInfo.CID,
+          CID: ChildInfo[0].CID,
           SolveData: solutions,
         };
 
@@ -275,23 +272,20 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
     },
     // 結果分析 API
     async fetchResultAnalysis(AID) {
+      if (this.sortedByScore.length > 0) {
+        return;
+      }
+
       const common = useCommon();
       common.startLoading();
 
       try {
         const localData = JSON.parse(localStorage.getItem("userData") || "{}");
-        const { MID, Token, MAID, Mobile } = localData;
+        const { MID, Token, MAID, Mobile, ChildInfo } = localData;
 
         // 确保所有必要数据存在
         if (!MID || !Token || !MAID || !Mobile) {
           throw new Error("Missing required data for result analysis");
-        }
-
-        // 确保 childInfo 已初始化
-        if (!this.childInfo || !this.childInfo.CID) {
-          throw new Error(
-            "Child information (CID) is missing or not initialized."
-          );
         }
 
         const payload = {
@@ -299,7 +293,7 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
           Token,
           MAID,
           Mobile,
-          CID: this.childInfo.CID, // 使用正确的属性名
+          CID: ChildInfo[0].CID, // 使用正确的属性名
           AID: AID,
         };
 
@@ -315,7 +309,8 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
           console.log("Result Analysis Response:", response.data);
 
           // 检查 diffDaysFromToday 并根据结果更新状态或决定是否再次调用 API
-          if (Number(response.data.ChildInfo[0].diffDaysFromToday) <= 0) {
+          if (Number(response.data.ChildInfo[0].diffDaysFromToday) < 0) {
+            this.getQues();
             this.nowState = "score";
           } else {
             this.nowState = "result";
@@ -388,64 +383,6 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
 
       // 在状态切换完成后更新进度条
       this.updateProgress();
-    },
-
-    async getQues() {
-      const common = useCommon();
-      common.startLoading();
-
-      try {
-        const localData = JSON.parse(localStorage.getItem("userData") || "{}");
-        const { MID, Token, MAID, Mobile } = localData;
-
-        if (!MID || !Token || !MAID || !Mobile) {
-          throw new Error("缺少用户凭据");
-        }
-
-        const response = await axios.post(
-          "https://23700999.com:8081/HMA/API_BB_GrowthRec2.jsp",
-          { MID, Token, MAID, Mobile }
-        );
-
-        if (response.data?.ChildQues && response.data?.ChildInfo?.[0]) {
-          const { ChildQues, ChildInfo } = response.data;
-
-          this.childInfo = {
-            CID: ChildInfo[0].CID,
-            Name: ChildInfo[0].Name || "寶貝",
-            AID: ChildInfo[0].AID || "",
-            MaxQ: ChildInfo[0].MaxQ,
-            BirthDay: ChildInfo[0].BirthDay,
-            CheckTime: ChildInfo[0].CheckTime,
-            Sex: ChildInfo[0].Sex,
-            Status: ChildInfo[0].Status,
-            ratioComplete: ChildInfo[0].ratioComplete,
-            diffDaysFromToday: ChildInfo[0].diffDaysFromToday,
-          };
-
-          this.totalQuestions = ChildQues.length;
-
-          this.weeklyQA = ChildQues.map((q, index) => ({
-            id: index,
-            question: q.Question,
-            selectScore: 0, // 初始化分数
-            times: -1, // 初始化次数
-            active: false, // 初始化为未选中
-          }));
-
-          this.totalStep = Math.ceil(
-            this.weeklyQA.length / this.questionsPerPage
-          );
-
-          this.updateProgress();
-        } else {
-          throw new Error("ChildQues 或 ChildInfo 数据为空");
-        }
-      } catch (error) {
-        console.error("Error fetching questions:", error);
-      } finally {
-        common.stopLoading();
-      }
     },
 
     handlePrevStep() {
