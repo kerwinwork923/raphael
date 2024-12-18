@@ -84,8 +84,8 @@
   flex-direction: column;
   place-items: center;
   width: 100%;
-  min-height: 100vh;
-  padding: 4.25rem 1rem;
+  height: 100vh;
+  padding: 1rem;
 
   .raphaelIconImgGroup {
     text-align: center;
@@ -107,12 +107,18 @@
   }
 
   .loginGroup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     width: 100%;
     height: 100%;
     max-width: 768px;
   }
 
   .loginWrap {
+    width: 100%;
+    min-height: 509px;
     .loginBox {
       background-color: #fff;
       border-radius: 12px;
@@ -253,7 +259,7 @@
       grid-template-columns: repeat(2, 1fr);
       grid-template-rows: repeat(2, 1fr);
       gap: 1.5rem;
-      margin-top: 60px;
+      margin-top: 44px;
       .separate {
         position: relative;
         display: flex;

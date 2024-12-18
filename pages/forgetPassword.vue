@@ -33,10 +33,10 @@
         >
           取得驗證碼
         </button>
-      </div>
-      <div class="returnLogin">
+        <div class="returnLogin">
           <router-link to="/">返回</router-link>
         </div>
+      </div>
       <div class="verfifyWrap" v-if="currentStep === 'verify'">
         <div class="verificationCodeGroup">
           <input
@@ -433,10 +433,14 @@ export default {
   flex-direction: column;
   place-items: center;
   width: 100%;
-  min-height: 100vh;
-  padding: 4.25rem 1rem;
+  height: 100vh;
+  padding: 1rem;
 
   .forgetPasswordGroup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     width: 100%;
     height: 100%;
     max-width: 768px;
@@ -458,7 +462,10 @@ export default {
       text-align: center;
       color: $raphael-purple-200;
     }
-
+    .forgetPasswordWrap{
+      width: 100%;
+      min-height: 509px;
+    }
     .forgetPasswordBox {
       background-color: #fff;
       border-radius: 12px;
@@ -528,7 +535,6 @@ export default {
         opacity: 0.6;
       }
     }
-  }
   .returnLogin {
       text-align: center;
       margin-top: 1.25rem;
@@ -541,6 +547,7 @@ export default {
         text-decoration: none;
       }
     }
+  }
 
   .verfifyWrap {
     padding: 1rem;
