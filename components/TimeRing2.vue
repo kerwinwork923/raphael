@@ -395,7 +395,8 @@ onMounted(async () => {
         }
       }
     } else {
-      console.error("未檢測到有效的 CheckTime");
+      API_UIDInfo_Search12();
+      // console.error("未檢測到有效的 CheckTime");
     }
   } catch (error) {
     console.error("初始化失敗：", error);
@@ -471,6 +472,20 @@ const useEndAPI = async () => {
     console.log("結束 API 調用成功", response);
   } catch (error) {
     console.error("結束 API 調用失敗:", error);
+  }
+};
+
+const API_UIDInfo_Search12 = async () => {
+  try {
+    const response = await apiRequest(
+      "https://23700999.com:8081/HMA/API_UIDInfo_Search12.jsp",
+      { MID, Token, MAID, Mobile, ProductName: props.productName } // 確保鍵名正確
+    );
+    if (response) {
+      detectHRVAfter(response.UID);
+    }
+  } catch (err) {
+    console.log(err);
   }
 };
 
