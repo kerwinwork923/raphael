@@ -248,9 +248,15 @@ article{
   .detectItem {
     width: 100%;
     margin: 0 auto;
+    transition: 0.2s ease all;
     animation: fadeIn2 1s ease forwards;
     animation-delay: 0s;
     opacity: 0;
+
+    &:hover{
+      box-shadow: 0px 5px 10px -2px #ccc inset;
+      padding: 0 4px;
+    }
 
     @for $i from 1 through 10 {
       &:nth-child(#{$i}) {
@@ -294,6 +300,7 @@ article{
         }
 
         .detectAgeGroup {
+          display: none;
           color: $raphael-gray-500;
         }
         .detectHRVGroup {
@@ -327,9 +334,6 @@ article{
         svg {
           width: 18px;
         }
-      }
-      &:hover {
-        background-color: $raphael-gray-100;
       }
     }
   }

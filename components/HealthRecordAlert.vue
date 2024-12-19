@@ -61,6 +61,7 @@ export default {
     line-height: 1.5;
     padding-top: 0.75rem;
     overflow-y: scroll;
+    @include scrollbarStyle();
 
     .point {
       color: $raphael-red-300;

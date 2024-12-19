@@ -38,7 +38,6 @@
           </ul>
         </p>
       </div>
-
       <div class="AnsGroup2" v-if="store.nowState =='second'">
         <h5>請依照您今日的需求，選擇您想要的評估方式</h5>
         <div class="chooseGroup">
@@ -49,7 +48,7 @@
               <img src="/assets/imgs/3DMap.png" alt="">
             </div>
           </div>
-          <div class="chooseBox chooseBoxActive">
+          <div class="chooseBox">
             <h4>完整評估</h4>
             <p>檢查所有可能的症狀，需花費約25分鐘的時間，全面了解自己的健康狀況。</p>
             <div class="bgImg">
@@ -215,6 +214,7 @@ export default {
   }
   .ANSGroup{
     margin-top: 1rem;
+    margin-bottom: 0.75rem;
     h4{
       color:#1E1E1E;
       font-family: "Noto Sans";
@@ -229,64 +229,60 @@ export default {
       font-size: 18px;
       font-style: normal;
       font-weight: 400;
-      line-height: 1.5;
+      line-height: 29.1px;
       letter-spacing: 0.09px;
-      margin-top: 0.25rem;
+      margin-top: 0.5rem;
     }
     ul{
-      margin-left: 1.25rem;
+      margin-left: 1.45rem;
       color:  #666;
       font-size: 18px;
-      margin-top: 0.25rem;
-
       li{
         list-style-type: decimal;
-        line-height: 1.5;
-        
+        line-height: 29.1px;        
       }
       
     }
     span{
         color: #EC4F4F;
-        }
-   
+    }   
   }
   .AnsGroup2{
+    margin-top: 1rem;
+    margin-bottom: 0.75rem;
     h5{
       color:  #666;
-      font-family: "Noto Sans";
       font-size: 16px;
-      font-style: normal;
-      font-weight: 400;
       line-height: 25.888px;
       letter-spacing: 0.5px;
     }
     .chooseGroup{
-      margin-top: 0.5rem;
+      margin-top: 0.75rem;
       display: flex;
       flex-direction: column;
-      gap: .85rem;
+      gap: .75rem;
+
       .chooseBox{
-        background-color: #fff;
-        padding: 1rem;
-        border-radius: 8px;
         position: relative;
+        background-color: #fff;
+        cursor: pointer;
+        padding: 0.75rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
         h4{
           color:  #1E1E1E;
-          font-family: "Noto Sans";
           font-size: 20px;
-          font-style: normal;
-          font-weight: 700;
+          font-weight: 500;
           line-height: 100%; 
           letter-spacing:  0.15px;
+          margin-bottom: 0.5rem;
         }
         p{
           font-size: 18px;
           font-style: normal;
-          font-weight: 400;
           line-height: 29.124px; 
           letter-spacing: 0.09px;
-          margin-top: 0.25rem;
+          color: $raphael-gray-500;
         }
         .bgImg{
           position: absolute;
@@ -296,14 +292,13 @@ export default {
             width: 135px;
           }
         }
-      }
-      .chooseBoxActive{
-        background-color: #fff;
-        border-radius: 12px;
-        background:  #69BCB7;
-        color: #fff;
-        h4{
+
+        &:hover{
+          background:  #69BCB7;
           color: #fff;
+          h4{
+            color: #fff;
+          }
         }
       }
     }

@@ -399,7 +399,7 @@ export default {
     justify-content: end;
     gap: 0.75rem;
     margin-bottom: 0.75rem;
-    color: #666;
+    color:  $raphael-gray-500;
   }
   .yearSelectGroup {
     display: flex;
@@ -488,15 +488,20 @@ export default {
     letter-spacing: 10px;
     font-size: 1.25rem;
     white-space: nowrap;
-    color: #999;
+    color:  $raphael-gray-300;
   }
   .detectItem {
     width: 100%;
     margin: 0 auto;
     opacity: 0;
-    transition: 0.24s ease all;
+    transition: 0.2s ease all;
     animation: fadeIn2 1s ease forwards; // 設置動畫效果
     animation-delay: 0s;
+
+    &:hover{
+      box-shadow: 0px 5px 10px -2px #ccc inset;
+      padding: 0 4px;
+    }
 
     @for $i from 1 through 10 {
       &:nth-child(#{$i}) {
@@ -505,9 +510,10 @@ export default {
     }
     a {
       text-decoration: none;
-      color: #1e1e1e;
+      color:  $raphael-black;
       display: flex;
       justify-content: space-between;
+      transition: all .2s ease;
       .timeGroup {
         display: flex;
         align-items: center;
@@ -531,7 +537,7 @@ export default {
         justify-content: end;
         gap: 0.5rem;
         h4 {
-          color: #666;
+          color:  $raphael-gray-500;
           font-size: 1rem;
           font-style: normal;
           font-weight: 400;
@@ -539,10 +545,11 @@ export default {
         }
 
         .detectAgeGroup {
-          color: #666;
+          display: none;
+          color:  $raphael-gray-500;
         }
         .detectHRVGroup {
-          color: #666;
+          color:  $raphael-gray-500;
           h5 {
             span {
               display: inline-flex;
@@ -558,7 +565,7 @@ export default {
           letter-spacing: 0.5px;
           margin-top: 0.25rem;
           span {
-            color: #1e1e1e;
+            color:  $raphael-black;
             font-size: 1.5rem;
             font-style: normal;
             font-weight: 700;
@@ -573,9 +580,6 @@ export default {
           width: 18px;
         }
       }
-      &:hover {
-        background-color: #f4f4f4;
-      }
     }
   }
 }
@@ -583,7 +587,7 @@ export default {
 .paginationWrap {
   display: flex;
   justify-content: space-between;
-  color: #666;
+  color:  $raphael-gray-500;
   font-size: 18px;
   text-align: center;
   max-width: 768px;
@@ -603,7 +607,7 @@ export default {
     background: $raphael-white;
     border: none;
     border-radius: var(--Radius-200, 8px);
-    color: #666;
+    color:  $raphael-gray-500;
   }
   .paginationCenter {
     width: 50%;
