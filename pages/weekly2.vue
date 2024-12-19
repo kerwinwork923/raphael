@@ -182,7 +182,7 @@ export default {
   width: 100%;
   min-height: 100vh;
   padding: 0 1rem;
-  overflow-y: hidden;
+  
   .weeklyQAGroup {
     max-width: 768px;
     width: 100%;

@@ -10,7 +10,7 @@
 
       <div
         class="remainingBar"
-        :style="{ width: `${(3 - score) * 33.3333}%`, backgroundColor: '#b3b3b3' }"
+        :style="{ width: `${(3 - score) * 33.3333}%`, backgroundColor: '#ccc' }"
       ></div>
       <div class="numberGroup">
         <div
@@ -79,7 +79,7 @@ export default defineComponent({
   }
   .remainingBar {
     height: 100%;
-    background-color: $raphael-gray-400;
+    background-color: $raphael-gray-300;
   }
 
   .numberGroup {
@@ -94,7 +94,7 @@ export default defineComponent({
     font-size: 0.875rem;
 
     .number {
-      background-color: $raphael-gray-400;
+      background-color: $raphael-gray-300;
       border-radius: 50%;
       color: #fff;
       width: 1.5rem;

@@ -24,15 +24,14 @@
     text-decoration: none;
   }
   .listItem {
-    @include btnStyle($raphael-gray-100,$raphael-gray-500);
+    @include tabStyle();
   }
   .listActive {
-    background-color: $raphael-green-400;
-    color: $raphael-white;
+    color: $raphael-green-400;
+    border-bottom: 1px solid $raphael-green-400;
     transition: all .3s ease;
     &:hover {
-      background-color: $raphael-green-400;
-      color: $raphael-white;
+      filter: brightness(.95);
     }
   }
 }

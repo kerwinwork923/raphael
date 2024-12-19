@@ -749,14 +749,13 @@ export default {
       display: grid;
       grid-auto-flow: column;
       h3 {
-        @include btnStyle($raphael-white, $raphael-gray-300);
+        @include tabStyle();
       }
       .active {
-        background-color: $raphael-green-400;
-        color: $raphael-white;
+        border-bottom: 1px solid $raphael-green-400;
+        color: $raphael-green-400;
         &:hover {
-          background-color: $raphael-green-400;
-          color: $raphael-white;
+          filter: brightness(.95);
         }
       }
     }
