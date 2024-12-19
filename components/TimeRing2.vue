@@ -495,14 +495,40 @@ const API_UIDInfo_Search12 = async () => {
       "https://23700999.com:8081/HMA/API_UIDInfo_Search12.jsp",
       { MID, Token, MAID, Mobile, ProductName: props.productName } // 確保鍵名正確
     );
+
     if (response) {
-      if (response.Result != "NOData") {
+      if (response.Result !== "NOData") {
+        // 將 CheckTime 轉換為 Date 格式
+        const checkTime = response.CheckTime
+          ? new Date(
+              `${response.CheckTime.slice(0, 4)}-${response.CheckTime.slice(
+                4,
+                6
+              )}-${response.CheckTime.slice(6, 8)}T${response.CheckTime.slice(
+                8,
+                10
+              )}:${response.CheckTime.slice(10, 12)}:${response.CheckTime.slice(
+                12
+              )}`
+            )
+          : null;
+
+        if (checkTime) {
+          const now = new Date();
+          const timeDifference = now - checkTime; // 毫秒差
+          const hoursDifference = timeDifference / (1000 * 60 * 60); // 轉換為小時
+
+          if (hoursDifference <= 24) {
+            alert("尚未完成使用後HRV檢測");
+          }
+        }
+
         currentDetectionState.value = DetectionState.AFTER;
         detectHRVAfter(response.UID);
       }
     }
   } catch (err) {
-    console.log(err);
+    console.log("API 調用失敗：", err);
   }
 };
 
