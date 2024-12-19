@@ -611,7 +611,7 @@ export default {
     }
     
     .registerBox {
-      background-color: #fff;
+      background-color: $raphael-white;
       border-radius: 12px;
       padding: 1rem;
       margin-top: 2.25rem;
@@ -638,7 +638,7 @@ export default {
 
       .passwordAgainHintText,
       .passwordHintText {
-        color: #f00;
+        color: $raphael-red-300;
       }
     }
 
@@ -652,11 +652,11 @@ export default {
 
         padding: 1rem;
         border-radius: 12px;
-        background-color: #fff;
+        background-color: $raphael-white;
         width: 100%;
         gap: 3.5%;
         .vertifyCode {
-          background-color: #eee;
+          background-color: $raphael-gray-200;
 
           height: 3rem;
 
@@ -668,7 +668,7 @@ export default {
       }
       .verificationCodeHintText {
         font-size: 14px;
-        color: #f00;
+        color: $raphael-red-300;
         text-align: center;
         font-weight: 400;
         letter-spacing: 0.1px;
@@ -683,7 +683,7 @@ export default {
           background-color: transparent;
           border: none;
           margin-top: 44px;
-          color: #222;
+          color: $raphael-black;
           font-weight: bold;
           text-decoration: underline;
           transition: 0.15s all ease;
@@ -726,7 +726,7 @@ export default {
         appearance: none;
         width: 1.5rem;
         height: 1.5rem;
-        border: 1px solid #b3b3b3;
+        border: 1px solid $raphael-gray-400;
         border-radius: 4px;
         cursor: pointer;
         position: relative;
@@ -741,7 +741,7 @@ export default {
           top: 50%;
           left: 50%;
           transform: translate(-50%, -55%);
-          color: #fff;
+          color: $raphael-white;
           font-size: 0.75rem;
           font-weight: bold;
           font-family: "Arial", sans-serif;
@@ -750,7 +750,7 @@ export default {
 
       a {
         text-decoration: none;
-        color: #666;
+        color: $raphael-gray-500;
         font-size: 1.125rem;
         letter-spacing: 0.09px;
         font-weight: 400;
@@ -812,9 +812,9 @@ export default {
         text-align: center;
         text-decoration: none;
         border-radius: 8px;
-        border: 1px solid #1e1e1e;
+        border: 1px solid $raphael-black;
         padding: 0.5rem 0.75rem;
-        color: #666;
+        color: $raphael-gray-500;
         transition: all 0.2s ease;
 
         &:hover {

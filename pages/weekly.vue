@@ -181,18 +181,18 @@ export default {
   }
 
   .subListTitle {
-    color: #666;
+    color:$raphael-gray-500;
     font-weight: 400;
     line-height: 25.9px;
     letter-spacing: 0.5px;
     margin: 0.75rem 0 0.5rem 0;
   }
   .subListActive {
-    color: #ec4f4f;
+    color: $raphael-red-300;
   }
 
   .weeklyBtnGroup {
-    background-color: #F6F6F6;
+    background-color: $raphael-gray-100;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -216,7 +216,7 @@ export default {
     margin-top: 1rem;
     margin-bottom: 0.75rem;
     h4{
-      color:#1E1E1E;
+      color:$raphael-black;
       font-family: "Noto Sans";
       font-size: 20px;
       font-style: normal;
@@ -225,7 +225,7 @@ export default {
       letter-spacing: var(--Title-Medium-Tracking, 0.15px);
     }
     p{
-      color:  #666;
+      color: $raphael-gray-500;
       font-size: 18px;
       font-style: normal;
       font-weight: 400;
@@ -235,7 +235,7 @@ export default {
     }
     ul{
       margin-left: 1.45rem;
-      color:  #666;
+      color: $raphael-gray-500;
       font-size: 18px;
       li{
         list-style-type: decimal;
@@ -244,14 +244,14 @@ export default {
       
     }
     span{
-        color: #EC4F4F;
+        color: $raphael-red-300;
     }   
   }
   .AnsGroup2{
     margin-top: 1rem;
     margin-bottom: 0.75rem;
     h5{
-      color:  #666;
+      color: $raphael-gray-500;
       font-size: 16px;
       line-height: 25.888px;
       letter-spacing: 0.5px;
@@ -264,13 +264,13 @@ export default {
 
       .chooseBox{
         position: relative;
-        background-color: #fff;
+        background-color: $raphael-white;
         cursor: pointer;
         padding: 0.75rem;
         border-radius: 8px;
         transition: all 0.2s ease;
         h4{
-          color:  #1E1E1E;
+          color: $raphael-black;
           font-size: 20px;
           font-weight: 500;
           line-height: 100%; 
@@ -294,10 +294,10 @@ export default {
         }
 
         &:hover{
-          background:  #69BCB7;
-          color: #fff;
+          background:$raphael-cyan-400;
+          color:$raphael-white;
           h4{
-            color: #fff;
+            color:$raphael-white;
           }
         }
       }

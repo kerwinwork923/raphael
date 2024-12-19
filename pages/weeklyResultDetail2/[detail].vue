@@ -149,7 +149,7 @@ export default {
     overflow: hidden;
 
     .resultInfo {
-      background-color: #fff;
+      background-color: $raphael-white;
       padding: 12px;
       border-radius: 12px;
       box-shadow: 0px -2px 4px 0px rgba(0, 0, 0, 0.25) inset;
@@ -174,7 +174,7 @@ export default {
         color: $raphael-gray-500;
         letter-spacing: 0.048px;
         span {
-          color: #ec4f4f;
+          color: $raphael-red-300;
         }
       }
       .dashDiv {
@@ -209,19 +209,19 @@ export default {
         }
 
         h5 {
-          color: #ccc;
+          color: $raphael-gray-300;
           font-size: 14px;
         }
       }
     }
   }
   .textResultText {
-    color: #666;
+    color: $raphael-gray-500;
     margin-top: 1rem;
   }
   .resultListGroup {
     .resultList {
-      background-color: #fff;
+      background-color: $raphael-white;
       padding: 12px;
       border-radius: 12px;
       margin-top: 0.75rem;
@@ -239,7 +239,7 @@ export default {
           align-items: center;
         }
         .upIcon {
-          color: #ec4f4f;
+          color: $raphael-red-300;
           font-size: 10px;
         }
         .downIcon {
@@ -251,12 +251,12 @@ export default {
           font-size: 12px;
         }
         .titleScoreUp {
-          color: #ec4f4f;
+          color: $raphael-red-300;
           font-size: 12px;
         }
       }
       h3 {
-        color: #1e1e1e;
+        color: $raphael-black;
         font-size: 20px;
         letter-spacing: 0.15px;
       }
@@ -270,27 +270,27 @@ export default {
           background: #fef1e2;
           padding: 4px 8px;
           border-radius: 12px;
-          color: #666;
+          color: $raphael-gray-500;
           font-size: 0.875rem;
         }
       }
 
       h5 {
-        color: #1e1e1e;
+        color: $raphael-black;
         letter-spacing: 0.1px;
         margin-top: 0.75rem;
       }
       h4 {
-        color: #666;
+        color: $raphael-gray-500;
         span {
-          color: #ec4f4f;
+          color: $raphael-red-300;
         }
       }
     }
   }
 
   .symptomGroup {
-    background-color: #fff;
+    background-color: $raphael-white;
     border-radius: 12px;
     margin-top: 0.75rem;
     padding: 12px 16px;
@@ -300,7 +300,7 @@ export default {
 
       button {
         background-color: transparent;
-        color: #ddd;
+        color: $raphael-gray-300;
         font-size: 1.125rem;
         width: 100%;
         border: none;
@@ -310,15 +310,15 @@ export default {
 
         &:hover {
           background-color: $raphael-green-300;
-          color: #1e1e1e;
+          color: $raphael-black;
         }
       }
       .symptomBtnActive {
         background-color: $raphael-green-400;
-        color: #fff;
+        color: $raphael-white;
         &:hover {
           background-color: $raphael-green-400;
-          color: #fff;
+          color: $raphael-white;
         }
       }
     }
@@ -347,7 +347,7 @@ export default {
           height: 100%;
           margin-right: 4px;
           display: inline-block;
-          background: #bc581f;
+          background: $raphael-brown-400;
           border-radius: 4px;
         }
       }
@@ -361,7 +361,7 @@ export default {
           height: 100%;
           margin-right: 4px;
           display: inline-block;
-          background: #65558f;
+          background: $raphael-purple-200;
           border-radius: 4px;
         }
       }
@@ -375,14 +375,14 @@ export default {
           height: 100%;
           margin-right: 4px;
           display: inline-block;
-          background: #1fbcb3;
+          background: $raphael-cyan-400;
           border-radius: 4px;
         }
       }
     }
   }
   .detectionWrap {
-    background-color: #fff;
+    background-color: $raphael-white;
     border-radius: 12px;
 
     margin-top: 0.85rem;
@@ -424,14 +424,14 @@ export default {
           justify-content: center;
           gap: 8px;
           h5 {
-            color: #666;
+            color: $raphael-gray-500;
             font-size: 16px;
             letter-spacing: 0.1px;
             font-weight: 400;
           }
           .totalScore,
           .seriousScore {
-            color: #1e1e1e;
+            color: $raphael-black;
             font-size: 24px;
             font-weight: bold;
           }
@@ -440,7 +440,7 @@ export default {
     }
     .detectionDate {
       font-size: 20px;
-      color: #1e1e1e;
+      color: $raphael-black;
       letter-spacing: 0.15px;
     }
   }
@@ -456,7 +456,7 @@ export default {
 }
 .backToUserBtnWeekly {
   background-color: $raphael-green-400;
-  color: #fff;
+  color: $raphael-white;
   cursor: pointer;
   padding: 0.5rem 0.75rem;
   width: 100%;

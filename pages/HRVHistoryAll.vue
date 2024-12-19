@@ -499,7 +499,7 @@ export default {
     animation-delay: 0s;
 
     &:hover{
-      box-shadow: 0px 5px 10px -2px #ccc inset;
+      box-shadow: 0px 5px 10px -2px $raphael-gray-300 inset;
       padding: 0 4px;
     }
 
@@ -521,7 +521,7 @@ export default {
         .timeIcon {
           border-radius: 7px;
           padding: 6px;
-          border: 1px solid var(--brand-green-400, #74bc1f);
+          border: 1px solid $raphael-green-400;
         }
         .time {
           font-size: 20px;
@@ -574,7 +574,7 @@ export default {
           }
         }
         .redValue {
-          color: #ec4f4f;
+          color: $raphael-red-300;
         }
         svg {
           width: 18px;
@@ -603,11 +603,16 @@ export default {
   button {
     width: 36px;
     height: 36px;
+    cursor: pointer;
     padding: 5px 13px;
     background: $raphael-white;
     border: none;
     border-radius: var(--Radius-200, 8px);
     color:  $raphael-gray-500;
+    transition: all .2s ease;
+    &:hover{
+      filter: brightness(.95);
+    }
   }
   .paginationCenter {
     width: 50%;
@@ -619,7 +624,7 @@ export default {
       align-items: center;
     }
     .activePage {
-      background: var(--brand-green-400, #74bc1f);
+      background: $raphael-green-400;
       color: $raphael-white;
     }
   }
@@ -665,7 +670,7 @@ export default {
     .topTitle {
       font-weight: 400;
       font-size: 1.25rem;
-      color: #fefefe;
+      color: $raphael-gray-100;
       letter-spacing: 0.09px;
       margin-bottom: 4px;
     }

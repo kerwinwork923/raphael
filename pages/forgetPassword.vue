@@ -467,7 +467,7 @@ export default {
       min-height: 509px;
     }
     .forgetPasswordBox {
-      background-color: #fff;
+      background-color: $raphael-white;
       border-radius: 12px;
       padding: 1rem 1rem 0.2rem 1rem;
       margin-top: 2.25rem;
@@ -515,7 +515,7 @@ export default {
     .vertificationBtn,
     .resetPasswordBtn {
       background-color: $raphael-green-400;
-      color: #fff;
+      color: $raphael-white;
       padding: 0.5rem 0.75rem;
       width: 100%;
       border-radius: 8px;
@@ -540,7 +540,7 @@ export default {
       margin-top: 1.25rem;
 
       a {
-        color: #666;
+        color: $raphael-gray-500;
         font-size: 1.125rem;
         font-weight: 400;
         letter-spacing: 0.5px;
@@ -559,10 +559,10 @@ export default {
 
       padding: 1rem;
       border-radius: 12px;
-      background-color: #fff;
+      background-color: $raphael-white;
 
       .vertifyCode {
-        background-color: #eee;
+        background-color: $raphael-gray-200;
         width: 2.75rem;
         height: 2.75rem;
         border-radius: 0.5rem;
@@ -574,7 +574,7 @@ export default {
     }
     .verificationCodeHintText {
       font-size: 14px;
-      color: #f00;
+      color: $raphael-red-300;
       text-align: center;
       font-weight: 400;
       letter-spacing: 0.1px;
@@ -589,7 +589,7 @@ export default {
         background-color: transparent;
         border: none;
         margin-top: 44px;
-        color: #222;
+        color: $raphael-black;
         font-weight: bold;
         text-decoration: underline;
         transition: 0.15s all ease;
@@ -601,7 +601,7 @@ export default {
     }
   }
   .resetPasswordBox {
-    background-color: #fff;
+    background-color: $raphael-white;
     border-radius: 12px;
     padding: 1rem;
     margin-top: 2.25rem;
@@ -645,7 +645,7 @@ export default {
     }
     .passwordAgainHintText,
     .passwordHintText {
-      color: #f00;
+      color: $raphael-red-300;
     }
   }
   .resetPasswordBtn {

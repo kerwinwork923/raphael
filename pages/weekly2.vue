@@ -190,7 +190,7 @@ export default {
   }
 
   .subListTitle {
-    color: #666;
+    color: $raphael-gray-500;
     font-weight: 400;
     line-height: 25.9px;
     letter-spacing: 0.5px;
@@ -201,7 +201,7 @@ export default {
   }
 
   .weeklyBtnGroup {
-    background-color: #F6F6F6;
+    background-color: $raphael-gray-100;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -219,7 +219,7 @@ export default {
   }
   .preBtn {
     background-color: $raphael-gray-200;
-    color: #666;
+    color: $raphael-gray-500;
   }
 
   .babyRecord {
@@ -250,7 +250,7 @@ export default {
         .progress {
           position: absolute;
           height: 100%;
-          background: linear-gradient(90deg, #EC4F4F 0%, #65558F 100%);
+          background: linear-gradient(90deg, $raphael-red-300 0%, $raphael-purple-200 100%);
           border-radius: 5px;
           transition: width 0.3s ease;
         }

@@ -344,7 +344,7 @@ export default {
 
         .topText {
           font-size: 1.5rem;
-          color: #1e1e1e;
+          color: $raphael-black;
         }
 
         .score {
@@ -406,24 +406,23 @@ export default {
       grid-template-rows: repeat(3, 84px);
 
       .item {
-        background-color: #999;
         position: relative;
         border-radius: 0.75rem;
         padding: 0.75rem;
-        color: #fff;
+        color: $raphael-white;
         //暫時的樣式
         overflow: hidden;
         //暫時的樣式 end
 
         a {
-          color: #fff;
+          color: $raphael-white;
         }
         transition: 0.15s all ease;
 
         .topTitle {
           font-weight: 400;
           font-size: 1.25rem;
-          color: #fefefe;
+          color: $raphael-white;
           letter-spacing: 0.09px;
           margin-bottom: 4px;
         }
