@@ -71,29 +71,7 @@ export default {
   @include scrollbarStyle();
 
   .symptomChoose {
-    position: relative;
-    display: flex;
-    gap: 4px;
-    align-items: center;
-    padding: 0.5rem 0.75rem;
-    line-height: 29.1px;
-    background-color: #eee;
-    font-size: 1.125rem;
-    color: #666;
-    border-radius: 8px;
-    cursor: pointer;
-
-    &>img{
-      position: absolute;
-      left: -4px;
-      top: -2px;
-      transform: scale(0.6);
-    }
-
-    &.symptomChooseActive {
-      background-color: #74bc1f;
-      color: #fff;
-    }
+    @include chooseStyle(transparent,$raphael-black,$raphael-green-400);
   }
 }
 </style>

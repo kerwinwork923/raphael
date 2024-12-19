@@ -35,6 +35,60 @@
     }
 }
 
+@mixin tabStyle(){
+  background-color: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border: none;
+  color: $raphael-gray-300;
+  font-size: 1.125rem;
+  font-weight: 400;
+  padding: 0.5rem 0.75rem;
+  line-height: 100%;
+  letter-spacing: .5px;
+  transition: all 0.2s ease;
+  &:hover{
+    filter: brightness(.95);
+  }
+}
+
+@mixin chooseStyle($bgColor,$fontsColor,$activeFontsColor){
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: $bgColor;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: $fontsColor;
+  padding: 0.5rem 0.75rem;
+  line-height: 29.1px;
+  cursor: pointer;
+
+  &>img{
+    position: absolute;
+    left: -6px;
+    top: -2px;
+    transform: scale(0.6);
+  }
+
+  &:hover{
+    filter: brightness(.95);
+  }
+
+  &.symptomChooseActive {
+    color: $activeFontsColor;
+
+    &>img{
+      filter: invert(46%) sepia(74%) saturate(580%) hue-rotate(63deg) brightness(91%) contrast(89%);
+    }
+  }
+}
+
+
 @mixin alertStyle(){
   display: grid;
   gap: 1rem;
