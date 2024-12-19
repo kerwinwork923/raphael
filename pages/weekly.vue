@@ -234,12 +234,12 @@ export default {
       margin-top: 0.5rem;
     }
     ul{
-      margin-left: 1.45rem;
       color: $raphael-gray-500;
       font-size: 18px;
       li{
         list-style-type: decimal;
-        line-height: 29.1px;        
+        line-height: 29.1px;   
+        margin-left: 1.45rem;     
       }
       
     }
