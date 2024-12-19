@@ -574,7 +574,7 @@ export default {
           .dropListText {
             position: relative;
             text-align: right;
-            color: #b3b3b3;
+            color: $raphael-gray-300;
             margin: 12px 0;
             cursor: pointer;
 
