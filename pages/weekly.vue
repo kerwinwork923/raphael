@@ -251,6 +251,8 @@ export default {
    
   }
   .AnsGroup2{
+    margin-top: 1rem;
+    margin-bottom: 0.75rem;
     h5{
       color:  #666;
       font-size: 16px;
