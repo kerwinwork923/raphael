@@ -908,9 +908,13 @@ export default {
         width: 100%;
         margin: 0 auto;
         opacity: 0;
-        transition: 0.24s ease all;
+        transition: 0.2s ease all;
         animation: fadeIn2 1s ease forwards;
         animation-delay: 0s;
+        &:hover{
+          box-shadow: 0px 5px 10px -2px #ccc inset;
+          padding: 0 4px;
+        }
         .timeTextGroup {
           display: flex;
           flex-direction: column;
@@ -962,6 +966,7 @@ export default {
             }
 
             .detectAgeGroup {
+              display: none;
               color: $raphael-gray-500;
             }
             .detectHRVGroup {
@@ -995,9 +1000,6 @@ export default {
             svg {
               width: 18px;
             }
-          }
-          &:hover {
-            background-color: $raphael-gray-100;
           }
         }
       }
