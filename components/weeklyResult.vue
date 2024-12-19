@@ -580,7 +580,7 @@ export default {
         .seriousDegreeGroup {
           display: flex;
           flex-direction: column;
-          align-items: center;
+          align-items: baseline;
           justify-content: center;
           gap: 8px;
           h5 {

@@ -141,7 +141,7 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .resultWrap {
   .resultTopGroup {
     display: grid;
@@ -426,7 +426,7 @@ export default {
         .seriousDegreeGroup {
           display: flex;
           flex-direction: column;
-          align-items: center;
+          align-items: baseline;
           justify-content: center;
           gap: 8px;
           h5 {

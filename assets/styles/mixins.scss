@@ -58,7 +58,7 @@
 @mixin chooseStyle($bgColor,$fontsColor,$activeFontsColor){
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 4px;
   background: $bgColor;
   font-size: 1.25rem;
