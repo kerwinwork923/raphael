@@ -543,6 +543,12 @@ export default {
         }
         .detectHRVGroup {
           color: #666;
+          h5 {
+            span {
+              display: inline-flex;
+              min-width: 50px;    
+            }
+          }
         }
         h5 {
           color: #b3b3b3;

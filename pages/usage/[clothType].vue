@@ -966,6 +966,12 @@ export default {
             }
             .detectHRVGroup {
               color: $raphael-gray-500;
+              h5 {
+                span {
+                  display: inline-flex;
+                  min-width: 50px;    
+                }
+              }
             }
             h5 {
               color: $raphael-gray-400;
