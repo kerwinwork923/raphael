@@ -144,7 +144,7 @@ export default {
   min-height: 100vh;
   background: $raphael-gray-100;
   padding: 0 1rem;
-  padding-bottom: 34px;
+  padding-bottom: 50px;
 
   .changeMemberGroup {
     padding: 0.75rem 0 0 0;

@@ -299,7 +299,7 @@ export default {
   min-height: 100vh;
   width: 100%;
   padding: 0 1rem;
-  padding-bottom: 136px;
+  padding-bottom: 116px;
   .productWrap {
     width: 100%;
     max-width: 768px;
@@ -645,7 +645,7 @@ export default {
   margin: auto;
   width: 100%;
   max-width: 768px;
-  padding: 1rem 1rem 4.25rem 1rem;
+  padding: 1rem 1rem 3.125rem 1rem;
   background-color: $raphael-gray-100;
   z-index: 99;
 

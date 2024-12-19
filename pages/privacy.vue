@@ -170,8 +170,9 @@
         請妥善保管您的個人帳號、密碼，以防止他人蒐集並使用您的個人資料。您對
         我們所提供之個人所屬帳號、密碼負保管之責。如您未妥善保管而遭盜用或遭偽造所致之損害，我們不負任何賠償責任。使用者同意提供個人資料予智平衡健康集團根據個資法規範做為企業行銷及資料分析之用。
       </p>
-
-      <button class="backBtn" @click="goBack">返回</button>
+      <div class="privacyBtnGroup">
+        <button class="backBtn" @click="goBack">返回</button>
+      </div>
     </div>
   </div>
 </template>
@@ -184,11 +185,11 @@
   background-size: cover;
   min-height: 100vh;
   width: 100%;
-  padding-bottom: 4rem;
+  padding-bottom: 100px;
 }
 
 .privacyWrap {
-  padding-top: 4rem;
+  padding-top: 1.5rem;
   padding-left: 1.5rem;
   padding-right: 1.5rem;
   line-height: 29.124px;
@@ -223,22 +224,20 @@
     letter-spacing: 0.09px;
   }
 }
-
-.backBtn {
-  background-color: $raphael-green-400;
-  color: $raphael-white;
-  padding: 12px;
+.privacyBtnGroup{
+  position: fixed;
+  background: $raphael-white;
+  z-index: 2;
+  bottom: 0;
   width: 100%;
-  border-radius: 8px;
-  border: none;
-  font-size: 1rem;
-  font-weight: 400;
-  letter-spacing: 0.5px;
-  transition: 0.25s ease;
-  margin-top: 1.5rem;
-  cursor: pointer;
-  &:hover {
-    background-color: $raphael-green-500;
+  padding: 0 1rem;
+  padding-top: 1rem;
+  padding-bottom: 3.125rem;
+  left: 0;
+  right: 0;
+
+  .backBtn {
+    @include btnStyle($raphael-green-400,$raphael-white);
   }
 }
 </style>

@@ -534,7 +534,7 @@ export default {
     font-size: 1rem;
   }
   .sleepRecordList{
-    height: calc(100vh - 285px);
+    height: calc(100vh - 267px);
     overflow-y: auto;
     margin-bottom: 0.75rem;    
     @include scrollbarStyle();

@@ -459,7 +459,7 @@ export default {
 .backToUserBtnGroupWeekly {
   width: 100%;
   margin-top: 1.5rem;
-  padding-bottom: 4.25rem;
+  padding-bottom: 3.125rem;
 }
 .backToUserBtnWeekly {
   background-color: $raphael-green-400;

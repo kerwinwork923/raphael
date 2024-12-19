@@ -613,7 +613,7 @@ export default {
 .backToUserBtnGroupWeekly {
   width: 100%;
   margin-top: 1.5rem;
-  padding-bottom: 4.25rem;
+  padding-bottom: 3.125rem;
 }
 .backToUserBtnWeekly {
   @include btnStyle($raphael-green-400,$raphael-white);

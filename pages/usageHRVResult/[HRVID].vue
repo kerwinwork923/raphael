@@ -370,7 +370,7 @@ export default {
   background-color: #f6f6f6;
   min-height: 100vh;
   padding: 0 1rem;
-  padding-bottom: 136px;
+  padding-bottom: 116px;
   h1 {
     position: sticky;
     background: $raphael-gray-100;
@@ -498,7 +498,7 @@ export default {
     background-color: #f6f6f6;
     z-index: 99;
     padding: 1rem;
-    padding-bottom: 4.25rem;
+    padding-bottom: 3.125rem;
 
     button {
       width: 100%;

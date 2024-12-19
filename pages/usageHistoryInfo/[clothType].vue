@@ -170,7 +170,7 @@ export default {
   min-height: 100vh;
   width: 100%;
   padding: 0 1rem;
-  padding-bottom: 136px;
+  padding-bottom: 116px;
   .usageHistoryWrap{
     width: 100%;
     max-width: 768px;
@@ -215,7 +215,7 @@ export default {
   grid-auto-flow: column;
   place-items: center;
   gap: 0.75rem;
-  padding: 1rem 1rem 4.25rem 1rem;
+  padding: 1rem 1rem 3.125rem 1rem;
 
   button {
     @include btnStyle($raphael-green-400,$raphael-white);

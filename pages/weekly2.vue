@@ -208,7 +208,7 @@ export default {
     gap: 0.75rem;
     max-width: 768px;
     width: 100%;
-    padding: 0.75rem 0 4.25rem 0;
+    padding: 0.75rem 0 3.125rem 0;
     touch-action: manipulation;
   }
   .weeklyBtn {

@@ -677,7 +677,7 @@ export default {
   width: 100%;
   padding: 0 1rem;
   position: relative;
-  padding-bottom: 4.25rem;
+  padding-bottom: 3.125rem;
   place-items: center;
 
   .usageInfoGroup {
@@ -1095,7 +1095,7 @@ export default {
     background-color: #f6f6f6;
     z-index: 99;
     display: grid;
-    padding: 1rem 1rem 4.25rem 1rem;
+    padding: 1rem 1rem 3.125rem 1rem;
     gap: 16px;
     button {
       background-color: $raphael-green-400;

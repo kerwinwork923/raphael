@@ -68,7 +68,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  height: calc(100vh - 374px);
+  height: calc(100vh - 357px);
   overflow-y: auto;  
   @include scrollbarStyle();
 

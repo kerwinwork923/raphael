@@ -360,7 +360,7 @@ export default {
   width: 100%;
   min-height: 100vh;
   padding: 0 1rem;
-  padding-bottom: 66px;
+  padding-bottom: 50px;
 }
 .titleGroup {
   position: relative;
@@ -472,7 +472,7 @@ export default {
     }
   }
   .detectList { 
-    @include recordList(transparent,calc(100vh - 368px),0,0);
+    @include recordList(transparent,calc(100vh - 352px),0,0);
     @include scrollbarStyle();
     @include respond-to("phone-landscape"){
       height: calc(100vh - 100px);

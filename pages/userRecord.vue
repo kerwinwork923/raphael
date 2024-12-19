@@ -82,7 +82,7 @@ export default {
   width: 100%;
   min-height: 100vh;
   padding: 0 1rem;
-  padding-bottom: 66px;
+  padding-bottom: 50px;
   
   .userRecoreWrap{
     max-width: 768px;

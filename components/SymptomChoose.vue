@@ -66,7 +66,7 @@ export default {
   grid-template-rows: repeat(auto-fit, minmax(min-content,36px));
   gap: 0.75rem;
   padding: 12px;
-  height: calc(100vh - 313px);
+  height: calc(100vh - 295px);
   overflow-y: auto;
   @include scrollbarStyle();
 
