@@ -159,6 +159,7 @@ export default {
     border-top: 1px solid $raphael-black;
     list-style: disc;
     overflow-x: scroll;
+    @include scrollbarStyle();
     li {
       margin-left: 1.5rem;
       color: $raphael-gray-500;
