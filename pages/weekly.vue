@@ -237,8 +237,6 @@ export default {
       margin-left: 1.45rem;
       color:  #666;
       font-size: 18px;
-      margin-top: 0.25rem;
-
       li{
         list-style-type: decimal;
         line-height: 29.1px;        
@@ -247,8 +245,7 @@ export default {
     }
     span{
         color: #EC4F4F;
-        }
-   
+    }   
   }
   .AnsGroup2{
     margin-top: 1rem;
