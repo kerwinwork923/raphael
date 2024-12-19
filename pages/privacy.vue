@@ -202,7 +202,7 @@
   p {
     margin-top: 12px;
     font-size: 18px;
-    color: #666;
+    color: $raphael-gray-500;
     font-weight: 400;
     letter-spacing: 0.09px;
   }
@@ -210,7 +210,7 @@
     margin-top: 8px;
     li {
       font-size: 18px;
-      color: #666;
+      color: $raphael-gray-500;
       font-weight: 400;
       letter-spacing: 0.09px;
     }
@@ -226,7 +226,7 @@
 
 .backBtn {
   background-color: $raphael-green-400;
-  color: #fff;
+  color: $raphael-white;
   padding: 12px;
   width: 100%;
   border-radius: 8px;

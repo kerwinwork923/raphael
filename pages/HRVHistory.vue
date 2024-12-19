@@ -254,7 +254,7 @@ article{
     opacity: 0;
 
     &:hover{
-      box-shadow: 0px 5px 10px -2px #ccc inset;
+      box-shadow: 0px 5px 10px -2px $raphael-gray-300 inset;
       padding: 0 4px;
     }
 

@@ -97,20 +97,19 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .container {
-  font-family: Arial, sans-serif;
-  max-width: 400px;
+  max-width: 768px;
   margin: 20px auto;
   padding: 20px;
-  background: #fff;
+  background: $raphael-white;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .title {
   text-align: center;
-  color: #333;
+  color: $raphael-black;
   font-size: 24px;
   margin-bottom: 20px;
 }
@@ -122,7 +121,7 @@ export default {
 label {
   display: block;
   font-size: 16px;
-  color: #666;
+  color: $raphael-gray-500;
   margin-bottom: 5px;
 }
 
@@ -130,14 +129,14 @@ label {
   width: 100%;
   padding: 10px;
   font-size: 14px;
-  border: 1px solid #ccc;
+  border: 1px solid $raphael-gray-300;
   border-radius: 5px;
   box-sizing: border-box;
 }
 
 .button {
-  background-color: #90c639;
-  color: #fff;
+  background-color: $raphael-green-400;
+  color: $raphael-white;
   padding: 10px 15px;
   font-size: 16px;
   border: none;
@@ -145,16 +144,16 @@ label {
   cursor: pointer;
   text-align: center;
   width: 100%;
-}
-
-.button:hover {
-  background-color: #7aa62d;
+  transition: all .2s ease;
+  &:hover{
+    filter: brightness(.95);
+  }
 }
 
 .status,
 .send-status {
   font-size: 14px;
-  color: #333;
+  color: $raphael-black;
   margin-top: 5px;
 }
 </style>

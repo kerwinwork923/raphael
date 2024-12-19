@@ -120,7 +120,7 @@
     width: 100%;
     min-height: 509px;
     .loginBox {
-      background-color: #fff;
+      background-color: $raphael-white;
       border-radius: 12px;
       padding: 1rem;
       margin-top: 2.25rem;
@@ -179,7 +179,7 @@
         appearance: none;
         width: 1.5rem;
         height: 1.5rem;
-        border: 1px solid #b3b3b3;
+        border: 1px solid $raphael-gray-400;
         border-radius: 4px;
         cursor: pointer;
         position: relative;
@@ -195,7 +195,7 @@
           top: 50%;
           left: 50%;
           transform: translate(-50%, -55%);
-          color: #fff;
+          color: $raphael-white;
           font-size: 0.75rem;
           font-weight: bold;
           font-family: "Arial", sans-serif;
@@ -204,7 +204,7 @@
 
       a {
         text-decoration: none;
-        color: #666;
+        color: $raphael-gray-500;
         font-size: 1.25rem;
         letter-spacing: 0.09px;
         font-weight: 400;
@@ -221,7 +221,7 @@
       margin-top: 1.25rem;
 
       a {
-        color: #666;
+        color: $raphael-gray-500;
         font-size: 1.125rem;
         font-weight: 400;
         letter-spacing: 0.5px;
@@ -231,7 +231,7 @@
 
     .loginBtn {
       background-color: $raphael-green-400;
-      color: #fff;
+      color: $raphael-white;
       padding: 0.5rem 0.75rem;
       width: 100%;
       border-radius: 8px;
@@ -295,7 +295,7 @@
         color: $raphael-gray-500;
         font-size: 1.125rem;
         border-radius: 8px;
-        border: 1px solid #1e1e1e;
+        border: 1px solid $raphael-black;
         padding: 0.5rem 0.75rem;
         cursor: pointer;
         transition: all 0.2s ease;
@@ -317,9 +317,9 @@
         text-align: center;
         text-decoration: none;
         border-radius: 8px;
-        border: 1px solid #1e1e1e;
+        border: 1px solid $raphael-black;
         padding: 0.5rem 0.75rem;
-        color: #666;
+        color: $raphael-gray-500;
         transition: all 0.2s ease;
 
         &:hover {
