@@ -9,7 +9,7 @@
       :productName="productName"
       :hasDetectRecord="hasDetectRecord"
       :todayUseRecord="todayUseRecord"
-      @timer-finished="onTimerFinished"
+
     />
 
     <!-- <TimeRing
@@ -275,7 +275,7 @@
                   >ms
                 </h5>
               </div>
-              <svg
+         
               <svg                 
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"
