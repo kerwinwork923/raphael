@@ -4,7 +4,12 @@
     <div class="progress-border" :style="{ background: progressGradient }">
       <div class="content">{{ formattedTime }}</div>
     </div>
-
+    <div
+      class="completion-message"
+      v-if="currentDetectionState === DetectionState.AFTER"
+    >
+      總共使用 {{ totalUsedTime }}
+    </div>
     <div class="timerButtonGroup">
       <!-- 主按鈕 (HRV檢測、暫停、繼續) -->
       <button
@@ -67,6 +72,16 @@ const buttonText = computed(() => {
     default:
       return "未知狀態";
   }
+});
+
+const totalUsedTime = computed(() => {
+  const hours = Math.floor(elapsedTime.value / 3600);
+  const minutes = Math.floor((elapsedTime.value % 3600) / 60);
+  const seconds = elapsedTime.value % 60;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+    2,
+    "0"
+  )}:${String(seconds).padStart(2, "0")}`;
 });
 
 const isButtonEnabled = ref(true);
@@ -155,7 +170,6 @@ const stopTimer = async () => {
 
   isCounting.value = false; // 停止計時
   isPaused.value = false; // 重置暫停狀態
-  elapsedTime.value = 0; // 重置計時器時間
   isButtonEnabled.value = false; // 禁用按鈕
 
   currentDetectionState.value = DetectionState.AFTER; // 更新狀態為 AFTER
@@ -483,6 +497,7 @@ const API_UIDInfo_Search12 = async () => {
     );
     if (response) {
       if (response.Result != "NOData") {
+        currentDetectionState.value = DetectionState.AFTER;
         detectHRVAfter(response.UID);
       }
     }
