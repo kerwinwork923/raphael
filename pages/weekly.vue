@@ -30,13 +30,13 @@
 
       <div class="ANSGroup" v-if="store.nowState =='first'">
         <h4>自律神經自覺症狀量表</h4>
-        <p>透過100種症狀的分析，全面了解您的自律神經不平衡程度。填寫量表需花費約<span>25分鐘</span>，填寫共分為三個步驟：
+        <div>透過100種症狀的分析，全面了解您的自律神經不平衡程度。填寫量表需花費約<span>25分鐘</span>，填寫共分為三個步驟：
           <ul>
             <li>依<span>當下感覺逐題評估</span>，填寫每項症狀的嚴重程度。</li>
             <li>針對困擾您的症狀，<span>填寫每週發生的頻率</span>。</li>
             <li>挑選<span>3-10項</span>您目前最困擾的症狀。</li>
           </ul>
-        </p>
+        </div>
       </div>
       <div class="AnsGroup2" v-if="store.nowState =='second'">
         <h5>請依照您今日的需求，選擇您想要的評估方式</h5>
@@ -224,7 +224,7 @@ export default {
       line-height: 100%;
       letter-spacing: var(--Title-Medium-Tracking, 0.15px);
     }
-    p{
+    &>div{
       color: $raphael-gray-500;
       font-size: 18px;
       font-style: normal;
