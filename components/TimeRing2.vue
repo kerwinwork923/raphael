@@ -112,7 +112,7 @@ const startTimer = () => {
     return;
   }
 
-  isCounting.value = true;
+  isCounting.value = true; // 更新計時狀態
   isPaused.value = false;
 
   timerInterval.value = setInterval(() => {
@@ -120,6 +120,7 @@ const startTimer = () => {
     console.log("計時中，已過時間：", elapsedTime.value, "秒");
   }, 1000);
 
+  currentDetectionState.value = DetectionState.RUNNING; // 確保狀態更新為 RUNNING
   console.log("計時開始");
 };
 
@@ -149,10 +150,15 @@ const resumeTimer = () => {
 };
 
 const stopTimer = async () => {
-  clearInterval(timerInterval.value); // 停止計時
-  isCounting.value = false;
-  isPaused.value = false;
+  clearInterval(timerInterval.value); // 停止計時器
+  timerInterval.value = null; // 清空計時器引用
+
+  isCounting.value = false; // 停止計時
+  isPaused.value = false; // 重置暫停狀態
+  elapsedTime.value = 0; // 重置計時器時間
   isButtonEnabled.value = false; // 禁用按鈕
+
+  currentDetectionState.value = DetectionState.AFTER; // 更新狀態為 AFTER
 
   try {
     await useEndAPI(); // 調用結束 API
@@ -160,9 +166,6 @@ const stopTimer = async () => {
   } catch (error) {
     console.error("結束 API 調用失敗：", error);
   }
-
-  elapsedTime.value = 0; // 重置時間
-  buttonText.value = "HRV檢測(使用後)"; // 更新按鈕文字
 };
 
 const apiRequest = async (url, payload) => {
@@ -184,10 +187,11 @@ const detectHRVBefore = (UID) => {
 };
 
 const detectHRVAfter = (UID) => {
-  store.detectFlag = "1";
-  store.detectUID = UID;
-  store.detectForm = props.productName;
-  store.showHRVAlert = true;
+  store.detectFlag = "2"; // 更新為使用後檢測狀態
+  store.detectUID = UID; // 設置當前 UID
+  store.detectForm = `*${props.productName}`; // 添加產品名稱前綴
+  store.showHRVAlert = true; // 顯示檢測提示
+  console.log("使用後檢測已啟動", { UID, productName: props.productName });
 };
 
 const toggleTimer = async () => {
@@ -211,7 +215,7 @@ const toggleTimer = async () => {
           const now = Date.now();
           elapsedTime.value = Math.floor((now - startTime) / 1000); // 更新已過秒數
         }
-        startTimer(); // 启动计时器
+        startTimer(); // 啟動計時器
       } else {
         console.log("未找到 UID，創建新的 HRV 檢測");
         const response = await useStartAPI();
@@ -221,7 +225,7 @@ const toggleTimer = async () => {
           console.error("創建 UID 失敗");
         }
       }
-      currentDetectionState.value = DetectionState.RUNNING;
+      currentDetectionState.value = DetectionState.RUNNING; // 確保狀態更新
       break;
 
     case DetectionState.RUNNING:
@@ -239,7 +243,8 @@ const toggleTimer = async () => {
       break;
 
     case DetectionState.AFTER:
-      console.log("檢測已結束");
+      console.log("執行使用後檢測邏輯");
+      detectHRVAfter(UID.value); // 執行使用後檢測
       break;
 
     default:
@@ -363,14 +368,15 @@ onMounted(async () => {
           ).getTime();
 
           const now = Date.now();
-
-          // 計算兩個時間之差是否小於24小時
           const timeDifference = Math.abs(now - startTime);
 
           if (timeDifference <= 24 * 60 * 60 * 1000) {
             elapsedTime.value = Math.floor(timeDifference / 1000); // 更新已過秒數
             console.log("計算的已過時間：", elapsedTime.value, "秒");
+
+            // 啟動計時器並更新狀態
             startTimer();
+            currentDetectionState.value = DetectionState.RUNNING;
           } else {
             console.log("StartTime 超出24小時範圍");
           }
@@ -474,16 +480,17 @@ onMounted(() => {
 });
 
 const buttonStyle = computed(() => {
-  switch (buttonText.value) {
-    case "開始 HRV 檢測":
-    case "繼續":
+  switch (currentDetectionState.value) {
+    case DetectionState.BEFORE:
       return { backgroundColor: "#74BC1F", color: "#fff" }; // 綠色
-    case "暫停":
-      return { backgroundColor: "#EC4F4F", color: "#fff" }; // 紅色
-    case "HRV檢測(使用後)":
-      return { backgroundColor: "#1FBCB3", color: "#fff" }; // 藍色
+    case DetectionState.RUNNING:
+      return { backgroundColor: "#EC4F4F", color: "#fff" }; // 紅色 (暫停)
+    case DetectionState.PAUSED:
+      return { backgroundColor: "#74BC1F", color: "#fff" }; // 綠色 (繼續)
+    case DetectionState.AFTER:
+      return { backgroundColor: "#74BC1F", color: "#fff" }; // 綠色 (檢測後)
     default:
-      return {}; // 默認空樣式
+      return { backgroundColor: "#E0E0E0", color: "#000" }; // 灰色 (默認)
   }
 });
 </script>
