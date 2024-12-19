@@ -64,15 +64,15 @@
   font-size: 1.25rem;
   font-weight: 500;
   color: $fontsColor;
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 0;
   line-height: 29.1px;
   cursor: pointer;
 
   &>img{
     position: absolute;
     left: -6px;
-    top: -2px;
-    transform: scale(0.6);
+    top: -8px;
+    transform: scale(0.5);
   }
 
   &:hover{
