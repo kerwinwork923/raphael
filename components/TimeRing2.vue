@@ -482,7 +482,9 @@ const API_UIDInfo_Search12 = async () => {
       { MID, Token, MAID, Mobile, ProductName: props.productName } // 確保鍵名正確
     );
     if (response) {
-      detectHRVAfter(response.UID);
+      if (response.Result != "NOData") {
+        detectHRVAfter(response.UID);
+      }
     }
   } catch (err) {
     console.log(err);
