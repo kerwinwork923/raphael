@@ -970,6 +970,7 @@ export default {
               color: $raphael-gray-500;
             }
             .detectHRVGroup {
+              display: none;
               color: $raphael-gray-500;
               h5 {
                 span {
