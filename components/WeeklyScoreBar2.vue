@@ -27,7 +27,7 @@
               QAData.selectScore !== undefined
                 ? `${(3 - QAData.selectScore) * 33.33}%`
                 : '100%',
-            backgroundColor: '#b3b3b3',
+            backgroundColor: '#ccc',
           }"
         ></div>
         <div class="numberGroup">
@@ -165,7 +165,7 @@ export default defineComponent({
   }
   .remainingBar {
     height: 100%;
-    background-color: $raphael-gray-400;
+    background-color: $raphael-gray-300;
   }
 
   .numberGroup {
@@ -180,7 +180,7 @@ export default defineComponent({
     font-size: 0.875rem;
 
     .number {
-      background-color: $raphael-gray-400;
+      background-color: $raphael-gray-300;
       border-radius: 50%;
       color: $raphael-white;
       width: 1.5rem;
