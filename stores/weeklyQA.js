@@ -64,7 +64,6 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
   actions: {
     // 獲取題目
     async getQues() {
-      this.nowState = "score";
       const common = useCommon();
       common.startLoading();
 
@@ -351,6 +350,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
             await this.checkTestDate();
           } else {
             this.nowState = "first";
+
             await this.getQues();
           }
         }
@@ -401,10 +401,12 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
             await this.API_API_ANSSecond();
             return;
           } else {
+            this.nowState = "first";
             await this.getQues();
           }
         }
       } else {
+        this.nowState = "first";
         await this.getQues();
       }
     },
@@ -539,7 +541,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         await this.API_ANSOnlineQSaveAns();
         await this.API_ANSOnlineTimesSaveTimes();
         await this.API_ANSOnlineSolveSaveSolve();
-        // location.reload();
+        location.reload();
         // this.nowState = "result";
       }
 
