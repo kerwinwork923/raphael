@@ -24,7 +24,12 @@
       ※ 請於隔天後再使用
     </div>
 
-    <button @click="toggleTimer" :style="buttonStyle">
+    <button
+      @click="toggleTimer"
+      v-if="!hasDetectRecord"
+      :disabled="hasDetectRecord"
+      :style="buttonStyle"
+    >
       {{ buttonText }}
     </button>
   </div>
@@ -207,7 +212,6 @@ const initializeUID = async () => {
     console.error("initializeUID 發生錯誤：", error);
   }
 };
-
 
 const calculateRemainingTime = (startTime) => {
   const now = new Date();
@@ -482,7 +486,7 @@ const checkForPendingAfterDetection = async () => {
       if (UID) {
         remainingTime.value = calculateRemainingTime(checkTime);
         currentState.value = DetectionState.AFTER;
-        detectHRVAfter(UID)
+        detectHRVAfter(UID);
       }
     } else {
       console.log("未檢測到未完成的使用後檢測記錄。");
@@ -563,5 +567,21 @@ button {
 button:disabled {
   background-color: #e0e0e0;
   cursor: not-allowed;
+}
+.completion-message {
+  color: #74bc1f;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 0.09px;
+}
+
+.completion-delayMessage {
+  color: var(--warning-red-300, #ec4f4f);
+  font-size: 1rem;
+  font-style: normal;
+  font-weight: 400;
+
+  letter-spacing: 0.5px;
 }
 </style>

@@ -47,6 +47,7 @@
       v-if="productName !== '保健版'"
       :totalTime="120"
       :product-name="productName"
+      :hasDetectRecord="hasDetectRecord"
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
     />
