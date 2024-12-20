@@ -60,6 +60,8 @@ const isPaused = ref(false); // 是否暫停
 const UID = ref(""); // UID 默認為空
 const BID = ref(""); // BID 默認為空
 
+const isCheckingPending = ref(false);
+
 let timerStart = 0; // 記錄計時開始時間
 let elapsedTime = 0; // 暫停前已經過的時間
 let timerInterval = null; // 計時器
@@ -189,8 +191,11 @@ const initializeUID = async () => {
 
       console.log("檢測仍在當日內，處理邏輯...");
       if (!EndTime) {
-        currentState.value = DetectionState.RUNNING;
-        startCountdown();
+        console.log("檢測未結束，檢查狀態");
+        const isBeforeExit = await API_HRV2_UID_Flag_Info("1", UID.value);
+        if (isBeforeExit === null) {
+          console.error("无法获取 HRV2 UID 状态，跳过前测处理");
+        }
       } else {
         currentState.value = DetectionState.AFTER;
         detectHRVAfter(UID.value);
@@ -222,18 +227,12 @@ const startCountdown = () => {
       clearInterval(timerInterval);
       remainingTime.value = 0;
 
-      console.log("倒數結束，觸發使用後檢測邏輯");
-
-      // 判斷是否過了重置時間
-      if (isPastResetTime()) {
-        console.log("跨過今日5點，允許重新測試");
-        currentState.value = DetectionState.BEFORE;
-        return;
-      }
+      console.log("倒數結束，執行結束邏輯");
+      await useEndAPI(); // 呼叫 API 通知伺服器檢測結束
 
       const isAfterExit = await API_HRV2_UID_Flag_Info("2", UID.value);
       if (isAfterExit === "N") {
-        detectHRVAfter(UID.value);
+        detectHRVAfter(UID.value); // 如果檢測後未退出，觸發使用後檢測
         currentState.value = DetectionState.AFTER;
       } else {
         currentState.value = DetectionState.BEFORE; // 重置狀態
@@ -425,6 +424,9 @@ const useEndAPI = async () => {
 
 //有倒數紀錄 檢測前紀錄 但沒有檢測後紀錄
 const checkForPendingAfterDetection = async () => {
+  if (isCheckingPending.value) return; // 防止重複執行
+  isCheckingPending.value = true;
+
   try {
     const response = await apiRequest(
       "https://23700999.com:8081/HMA/API_UIDInfo_Search12.jsp",
@@ -452,6 +454,7 @@ const checkForPendingAfterDetection = async () => {
 
       console.log("檢測到未完成的使用後檢測：", { UID, CheckTime });
       if (UID) {
+        alert("尚未完成使用後HRV檢測");
         detectHRVAfter(UID);
         currentState.value = DetectionState.AFTER;
       }
@@ -460,6 +463,8 @@ const checkForPendingAfterDetection = async () => {
     }
   } catch (error) {
     console.error("檢查未完成使用後檢測時發生錯誤：", error);
+  } finally {
+    isCheckingPending.value = false;
   }
 };
 
