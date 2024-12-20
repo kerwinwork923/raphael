@@ -7,7 +7,7 @@
       </h3>
       <div class="haveProductWrap">
         <!-- 單件產品展示 -->
-        <div class="haveGroup">
+        <div class="haveGroup" v-if="purchasedProducts.length === 1">
           <div class="haveIcon">
             <img
               :src="selectedProductIndex === 0 ? checkedIcon : uncheckedIcon"
@@ -353,7 +353,6 @@ export default {
               top: 50%;
               left: 50%;
               transform: translate(-50%, -50%);
-              filter: blur(3px);
               box-shadow: 0 0 10px rgba($color: $raphael-white, $alpha: 0.1);
             }
             .bigCircle {
@@ -429,7 +428,6 @@ export default {
               top: 50%;
               left: 50%;
               transform: translate(-50%, -50%);
-              filter: blur(3px);
               box-shadow: 0 0 10px rgba($color: $raphael-white, $alpha: 0.1);
             }
 
