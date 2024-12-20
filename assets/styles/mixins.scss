@@ -16,7 +16,6 @@
 
 @mixin btnStyle($bgColor,$fontsColor){
     background-color: $bgColor;
-    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -24,6 +23,7 @@
     border: none;
     border-radius: 0.5rem;
     color: $fontsColor;
+    cursor: pointer;
     font-size: 1.125rem;
     font-weight: 400;
     padding: 0.5rem 0.75rem;
@@ -33,6 +33,28 @@
     &:hover{
       filter: brightness(.95);
     }
+}
+
+@mixin btnWithBorderStyle($borderColor,$fontsColor){
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  width: 100%;
+  border: $borderColor 1px solid;
+  border-radius: 0.5rem;
+  color: $fontsColor;
+  cursor: pointer;
+  font-size: 1.125rem;
+  font-weight: 400;
+  padding: 0.5rem 0.75rem;
+  line-height: 100%;
+  letter-spacing: .5px;
+  transition: all 0.2s ease;
+  &:hover {
+    background-color: $borderColor;
+    color: $raphael-white;
+  }
 }
 
 @mixin tabStyle(){
