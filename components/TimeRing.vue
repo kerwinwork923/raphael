@@ -250,19 +250,48 @@ const startCountdown = () => {
 
 const pauseTimer = () => {
   if (timerInterval) {
-    clearInterval(timerInterval);
-    elapsedTime += Date.now() - timerStart;
+    clearInterval(timerInterval); // 停止计时器
+    elapsedTime = Date.now() - timerStart; // 记录已用时间
+    remainingTime.value -= elapsedTime; // 更新剩余时间
     isPaused.value = true;
     isCounting.value = false;
   }
 };
 
 const resumeTimer = () => {
-  timerStart = Date.now();
-  isPaused.value = false;
-  isCounting.value = true;
-  startCountdown();
+  if (remainingTime.value > 0) {
+    timerStart = Date.now(); // 记录当前时间
+    isPaused.value = false;
+    isCounting.value = true;
+
+    timerInterval = setInterval(() => {
+      const now = Date.now();
+      const elapsed = now - timerStart; // 计算已用时间
+      remainingTime.value = Math.max(remainingTime.value - elapsed, 0); // 减去已用时间
+      timerStart = now; // 更新开始时间
+
+      if (remainingTime.value <= 0) {
+        clearInterval(timerInterval);
+        remainingTime.value = 0;
+        endCountdown(); // 处理倒计时结束逻辑
+      }
+    }, 1000);
+  }
 };
+
+const endCountdown = async () => {
+  console.log("倒计时结束，执行结束逻辑");
+  await useEndAPI(); // 调用结束 API
+  const isAfterExit = await API_HRV2_UID_Flag_Info("2", UID.value);
+  if (isAfterExit === "N") {
+    detectHRVAfter(UID.value);
+    currentState.value = DetectionState.AFTER;
+  } else {
+    currentState.value = DetectionState.BEFORE; // 重置状态
+  }
+};
+
+
 
 const resetDetectionState = () => {
   clearInterval(timerInterval);
