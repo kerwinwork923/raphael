@@ -7,7 +7,7 @@
       </h3>
       <div class="haveProductWrap">
         <!-- 單件產品展示 -->
-        <div class="haveGroup">
+        <div class="haveGroup" v-if="purchasedProducts.length === 1">
           <div class="haveIcon">
             <img
               :src="selectedProductIndex === 0 ? checkedIcon : uncheckedIcon"
