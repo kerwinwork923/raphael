@@ -183,15 +183,6 @@
           <img id="f_v_relaxation" src="images/raphael/progress1.png" alt="" />
         </div>
       </div>
-
-      <div class="healthData">
-        <h3>健康從了解開始</h3>
-        <div class="des">
-          手環數據可以提供您的健康狀態洞察。請花點時間補充您的數據資訊，讓我們幫您進一步分析。
-        </div>
-        <button class="writeBtn">開始填寫</button>
-        <img src="images/raphael/3dWatch.svg">
-      </div>
     </div>
 
     <div class="resultTextGroup">
@@ -559,9 +550,10 @@
 
   .scanInfo .row {
     display: flex;
+    flex-direction: column;
     flex-wrap: nowrap;
     width: 100%;
-    gap: 3%;
+    gap: 12px;
     margin-bottom: 0.75rem;
   }
 
@@ -631,7 +623,7 @@
 
   .scanInfo .Rhythm,
   .scanInfo .bloodPressure {
-    width: 50%;
+    /* width: 50%; */
     background-color: #fff;
     border-radius: 8px;
     border-top-style: 8px;
@@ -719,7 +711,7 @@
   .scanInfo .Rhythm .bgImg,
   .scanInfo .bloodPressure .bgImg {
     position: absolute;
-    bottom: 0;
+    bottom: -24px;
     left: 0;
     width: 100%;
   }
@@ -727,7 +719,7 @@
   .scanInfo .BO,
   .scanInfo .breathe,
   .scanInfo .pressure {
-    width: 33.333%;
+    /* width: 33.333%; */
     background-color: #fff;
     border-radius: 8px;
     position: relative;
@@ -769,7 +761,7 @@
   .scanInfo .breathe .bgImg,
   .scanInfo .pressure .bgImg {
     position: absolute;
-    bottom: 0;
+    bottom: -24px;
     left: 0;
     width: 100%;
   }
@@ -795,53 +787,7 @@
     color: #1e1e1e;
     letter-spacing: 0.5px;
   }
-
-  .healthData{    
-    position: relative;
-    display: grid;
-    gap: 0.75rem;
-    background: #fff;
-    border-radius: 0.75rem;
-    padding: 0.75rem;
-    overflow: hidden;
-  }
-
-  .healthData>h3{
-    color: #1e1e1e;
-    font-size: 1.25rem;
-  }
-  .healthData .des{
-    color: #666;
-    font-size: 1.125rem;
-    line-height: 29.1px;
-  }
-  .healthData .writeBtn{
-    background: transparent;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    border: 1px solid #74bc1f;
-    border-radius: 0.5rem;
-    color: #74bc1f;
-    font-size: 1.125rem;
-    font-weight: 400;
-    padding: 0.5rem 0.75rem;
-    line-height: 100%;
-    letter-spacing: 0.5px;
-    transition: all 0.2s ease;
-  }
-  .healthData .writeBtn:hover{
-      background:#74bc1f;
-      color: #fff;      
-  }
-  .healthData>img{
-    position: absolute;
-    right: -36px;
-    bottom: -44px;
-  } 
-
+  
   .resultTextGroup {
     display: none;
     background-color: #fff;
