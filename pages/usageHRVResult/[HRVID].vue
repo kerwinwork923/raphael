@@ -383,6 +383,7 @@ export default {
     top: 0;
   }
   .resultChartGroup {
+    display: none;
     background-color: #fff;
     border-radius: 0.5rem;
     padding: 12px;
@@ -408,6 +409,11 @@ export default {
       border-left: 2px solid var(--brand-green-400, #74bc1f);
       border-radius: 8px;
       padding: 12px;
+
+      &:nth-child(1),
+      &:nth-child(2){
+        display: none;
+      }
 
       .titleGroup {
         display: flex;
