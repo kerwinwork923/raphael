@@ -403,7 +403,6 @@ export default {
     width: max-content;
     width: 100%;
     margin-top: 0.75rem;
-    white-space: nowrap;
     .BACard {
       background-color: $raphael-white;
       border-left: 2px solid $raphael-green-400;
