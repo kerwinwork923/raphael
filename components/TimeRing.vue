@@ -277,7 +277,6 @@ const startCountdown = () => {
 
       console.log("倒數結束，檢查是否需要後續處理...");
       const flagBefore = await API_HRV2_UID_Flag_Info("1", UID.value); // 檢查使用前檢測
-      const flagAfter = await API_HRV2_UID_Flag_Info("2", UID.value); // 檢查使用後檢測
 
       if (flagBefore === "N") {
         console.log("尚未完成使用前檢測，啟動使用前檢測流程...");
@@ -464,14 +463,6 @@ const API_HRV2_UID_Flag_Info = async (Flag, UID) => {
       { MID, Token, MAID, Mobile, UID, Flag }
     );
     if (response?.Result === "OK") {
-      console.log("成功獲取 HRV2 檢測資料狀態：", response);
-      if (Flag === "1" && response.IsExit === "N") {
-        alert("尚未完成使用前HRV檢測");
-        detectHRVBefore(UID);
-      } else if (Flag === "2" && response.IsExit === "N") {
-        alert("尚未完成使用後HRV檢測");
-        detectHRVAfter(UID);
-      }
       return response.IsExit; // 返回 "Y" 或 "N"
     } else {
       console.error("無法獲取 HRV2 資料狀態：", response);
