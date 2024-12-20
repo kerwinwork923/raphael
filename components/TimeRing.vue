@@ -199,18 +199,37 @@ const initializeUID = async () => {
 
       remainingTime.value = calculateRemainingTime(startTime);
 
-      API_HRV2_UID_Flag_Info("1", response.UID);
       // 如果倒數未完成，恢復倒數
       if (remainingTime.value > 0) {
         currentState.value = DetectionState.RUNNING;
         startCountdown(); // 啟動倒數計時
+      } else {
+        // 如果倒數已過期，強制結束倒數
+        console.log("倒數時間已過期，強制結束倒數...");
+        await forceEndCountdown(response.UID);
       }
-      return; // 如果有正在進行的倒數，直接結束流程
+      return; // 如果有正在進行的倒數或已結束，直接結束流程
     }
 
     console.log("沒有未完成的倒數計時，繼續檢查後測狀態...");
   } catch (error) {
     console.error("initializeUID 發生錯誤：", error);
+  }
+};
+
+// 強制結束倒數邏輯
+const forceEndCountdown = async (UID) => {
+  try {
+    await useEndAPI(); // 調用結束 API 通知伺服器倒數完成
+    const isAfterExit = await API_HRV2_UID_Flag_Info("2", UID);
+    if (isAfterExit === "N") {
+      detectHRVAfter(UID); // 如果需要，啟動後測
+      currentState.value = DetectionState.AFTER;
+    } else {
+      currentState.value = DetectionState.BEFORE; // 重置狀態
+    }
+  } catch (error) {
+    console.error("forceEndCountdown 發生錯誤：", error);
   }
 };
 
@@ -419,10 +438,10 @@ const API_HRV2_UID_Flag_Info = async (Flag, UID) => {
     if (response?.Result === "OK") {
       console.log("成功獲取 HRV2 檢測資料狀態：", response);
       if (Flag === "1" && response.IsExit === "N") {
-        alert("尚未完成使用前HRV檢測")
+        alert("尚未完成使用前HRV檢測");
         detectHRVBefore(UID);
       } else if (Flag === "2" && response.IsExit === "N") {
-        alert("尚未完成使用後HRV檢測")
+        alert("尚未完成使用後HRV檢測");
         detectHRVAfter(UID);
       }
       return response.IsExit; // 返回 "Y" 或 "N"
