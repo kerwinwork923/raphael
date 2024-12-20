@@ -244,6 +244,14 @@
       <SympatheticRatio :sympathetic="30" :parasympathetic="70" />
     </div> -->
     <div class="healthAnalyse"></div>
+    <div class="healthData">
+      <h3>健康從了解開始</h3>
+      <div class="des">
+        手環數據可以提供您的健康狀態洞察。請花點時間補充您的數據資訊，讓我們幫您進一步分析。
+      </div>
+      <button class="writeBtn">開始填寫</button>
+      <img src="/assets/imgs/3dWatch.svg">
+    </div>
     <div class="usageBtnGroup">
       <button class="nextBtn" @click="goNext">返回</button>
     </div>
@@ -367,14 +375,14 @@ export default {
 
 <style lang="scss" scoped>
 .usageHRVResultWrap {
-  background-color: #f6f6f6;
+  background-color: $raphael-gray-100;
   min-height: 100vh;
   padding: 0 1rem;
   padding-bottom: 116px;
   h1 {
     position: sticky;
     background: $raphael-gray-100;
-    color: #000;
+    color: $raphael-black;
     text-align: center;
     font-size: 24px;
     font-weight: 400;
@@ -383,12 +391,13 @@ export default {
     top: 0;
   }
   .resultChartGroup {
-    background-color: #fff;
+    display: none;
+    background-color: $raphael-white;
     border-radius: 0.5rem;
     padding: 12px;
     h2 {
       margin-bottom: 0.75rem;
-      color: #1e1e1e;
+      color: $raphael-black;
       font-size: 20px;
       font-style: normal;
       font-weight: 400;
@@ -404,15 +413,20 @@ export default {
     margin-top: 0.75rem;
     white-space: nowrap;
     .BACard {
-      background-color: #fff;
-      border-left: 2px solid var(--brand-green-400, #74bc1f);
+      background-color: $raphael-white;
+      border-left: 2px solid $raphael-green-400;
       border-radius: 8px;
       padding: 12px;
+
+      &:nth-child(1),
+      &:nth-child(2){
+        display: none;
+      }
 
       .titleGroup {
         display: flex;
         gap: 2px;
-        color: #1e1e1e;
+        color: $raphael-black;
         font-size: 20px;
         font-style: normal;
         font-weight: 400;
@@ -430,7 +444,7 @@ export default {
         gap: 10px;
         .BA {
           .subTitle {
-            color: #666;
+            color: $raphael-gray-500;
             margin-bottom: 0.25rem;
             font-size: 16px;
             font-style: normal;
@@ -439,7 +453,7 @@ export default {
             letter-spacing: 0.5px;
           }
           .value {
-            color: #74bc1f;
+            color: $raphael-green-400;
             text-align: left;
             font-size: 36px;
             font-style: normal;
@@ -448,11 +462,11 @@ export default {
             margin-bottom: 0.25rem;
           }
           .afterValue {
-            color: #1fbcb3;
+            color: $raphael-cyan-400;
           }
 
           .unit {
-            color: #ccc;
+            color: $raphael-gray-300;
             font-size: 16px;
             font-style: normal;
             font-weight: 400;
@@ -477,12 +491,12 @@ export default {
   }
 
   .SympatheticRatioGroup {
-    background-color: #fff;
+    background-color: $raphael-white;
     border-radius: 12px;
     margin-top: 1rem;
     padding: 0.75rem 12px 0;
     h3 {
-      color: #1e1e1e;
+      color: $raphael-black;
       font-size: 20px;
       font-style: normal;
       font-weight: 400;
@@ -490,37 +504,68 @@ export default {
       margin-bottom: 0.5rem;
     }
   }
+  .healthData{    
+    position: relative;
+    display: grid;
+    gap: 0.75rem;
+    background: $raphael-white;
+    border-radius: 0.75rem;
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    overflow: hidden;
+
+    &>h3{
+      color: $raphael-black;
+      font-size: 1.25rem;
+    }
+    .des{
+      color: $raphael-gray-500;
+      font-size: 1.125rem;
+      line-height: 29.1px;
+    }
+    .writeBtn{
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      border: 1px solid $raphael-green-400;
+      border-radius: 0.5rem;
+      color: $raphael-green-400;
+      font-size: 1.125rem;
+      font-weight: 400;
+      padding: 0.5rem 0.75rem;
+      line-height: 100%;
+      letter-spacing: 0.5px;
+      transition: all 0.2s ease;
+      &:hover{
+        background:$raphael-green-400;
+        color: $raphael-white;
+      }
+    }
+    &>img{
+      position: absolute;
+      right: -36px;
+      bottom: -44px;
+    }
+  }
   .usageBtnGroup {
     position: fixed;
     bottom: 0;
     left: 0;
     width: 100%;
-    background-color: #f6f6f6;
+    background-color: $raphael-gray-100;
     z-index: 99;
     padding: 1rem;
     padding-bottom: 3.125rem;
 
     button {
-      width: 100%;
-      background-color: $raphael-green-400;
-      color: #fff;
-      border: none;
-      padding: 0.5rem 0.75rem;
-      border-radius: 8px;
-      color: #fff;
-      cursor: pointer;
-      font-size: 18px;
-      font-style: normal;
-      font-weight: 400;
-      letter-spacing: 0.09px;
-      transition: all .2s ease;
-      &:hover{
-        background-color: $raphael-green-500;
-      }
+      @include btnStyle($raphael-green-400,$raphael-white);
     }
     .preBtn {
-      background-color: #eee;
-      color: #666;
+      background-color: $raphael-gray-200;
+      color: $raphael-gray-500;
     }
     .nextBtn {
       background-color: $raphael-green-400;
