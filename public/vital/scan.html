@@ -147,7 +147,7 @@
       <div class="row">
         <div class="BO">
           <div class="titleGroup">
-            <h3 id="v_spo2">血氧</h3>
+            <h3>血氧</h3>
             <img src="images/raphael/spo2.svg" alt="" />
           </div>
           <div id="v_spo2" class="value"></div>
@@ -350,7 +350,7 @@
 }
 
 .scanInfo .HRV .value {
-  color: #74bc1f;
+  color: #74bc1f !important;
   font-size: 48px;
   font-weight: bold;
   padding: 0.25rem 0;
@@ -383,11 +383,15 @@
 
 .scanInfo .Rhythm .value,
 .scanInfo .bloodPressure .value {
-  color: #74bc1f; 
+  color: #74bc1f !important; 
   font-size: 24px;
   font-weight: 700;
   letter-spacing: 0.12px;
   margin-top: 0.5rem;
+}
+
+.text-success{
+  color: #74bc1f !important; 
 }
 
 .scanInfo .Rhythm .info,
@@ -423,7 +427,7 @@
 .scanInfo .BO .value,
 .scanInfo .breathe .value,
 .scanInfo .pressure .value {
-  color: #74bc1f; 
+  color: #74bc1f !important; 
   font-size: 24px;
   font-weight: 700;
   letter-spacing: 0.12px;
