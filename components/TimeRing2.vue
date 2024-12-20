@@ -273,7 +273,7 @@ const progressPercentage = computed(() => {
 
 const progressGradient = computed(() => {
   const percentage = progressPercentage.value;
-  return `conic-gradient(#1FBCB3 ${percentage}%, #E0E0E0 ${percentage}%)`;
+  return `conic-gradient(#74bc1f ${percentage}%, #ffffff ${percentage}%)`;
 });
 
 const API_MID_ProductName_UIDInfo = async () => {
@@ -571,8 +571,7 @@ const buttonStyle = computed(() => {
   justify-content: center;
   position: relative;
   box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.2) inset;
-  background: conic-gradient(#1fbcb3 0%, #e0e0e0 0%); /* 預設背景 */
-  transition: background 0.3s ease; /* 平滑過渡效果 */
+  transition: all 0.3s ease; /* 平滑過渡效果 */
 }
 
 .content {
