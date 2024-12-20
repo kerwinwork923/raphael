@@ -18,7 +18,19 @@
 
       <h5>2024/08/23</h5>
     </div>
-
+    <div class="titleGroup">
+      <div class="textGroup">
+        <h3 class="nameText">感謝您的使用</h3>
+      </div>
+      <div class="imgGroup">
+        <img src="../vital/images/raphael/3dWatch.svg" class="watchImg">
+        <img
+          src="images/raphael/doctor_nocomment.png"
+          class="doctorImg"
+          alt=""
+        />
+      </div>
+    </div>
     <div class="scanInfo">
       <div class="row">
         <div class="years">
@@ -499,14 +511,34 @@
     width: 100%;
   }
 
-  .finishWrap .titleGroup {
+  .finishWrap > .titleGroup {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    padding: 0 1rem;
   }
 
-  .finishWrap .textGroup {
-    width: 60%;
+  .imgGroup{
+    position: relative;
+  }
+
+  .watchImg{
+    position: absolute;
+    top: 52%;
+    left: 20px;
+    width: 18px;
+    cursor: pointer;
+  }
+
+  .doctorImg {
+    height: 150px;
+  }
+
+  .finishWrap > .titleGroup > .textGroup {
+    flex:1;
+    padding:0.75rem;
   }
 
   .finishWrap .textGroup .timeGroup {
@@ -536,7 +568,8 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    margin-top: 0.75rem;
+    margin-top: -12px;
+    margin-bottom: 0.75rem;
     padding: 0 1rem;
   }
 
@@ -550,7 +583,6 @@
 
   .scanInfo .row {
     display: flex;
-    flex-direction: column;
     flex-wrap: nowrap;
     width: 100%;
     gap: 12px;
@@ -623,7 +655,7 @@
 
   .scanInfo .Rhythm,
   .scanInfo .bloodPressure {
-    /* width: 50%; */
+    width: 50%;
     background-color: #fff;
     border-radius: 8px;
     border-top-style: 8px;
@@ -719,7 +751,7 @@
   .scanInfo .BO,
   .scanInfo .breathe,
   .scanInfo .pressure {
-    /* width: 33.333%; */
+    width: 33.333%;
     background-color: #fff;
     border-radius: 8px;
     position: relative;
