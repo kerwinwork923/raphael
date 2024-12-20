@@ -199,6 +199,7 @@ const initializeUID = async () => {
 
       remainingTime.value = calculateRemainingTime(startTime);
 
+      API_HRV2_UID_Flag_Info("1", response.UID);
       // 如果倒數未完成，恢復倒數
       if (remainingTime.value > 0) {
         currentState.value = DetectionState.RUNNING;
@@ -418,8 +419,10 @@ const API_HRV2_UID_Flag_Info = async (Flag, UID) => {
     if (response?.Result === "OK") {
       console.log("成功獲取 HRV2 檢測資料狀態：", response);
       if (Flag === "1" && response.IsExit === "N") {
+        alert("尚未完成使用前HRV檢測")
         detectHRVBefore(UID);
       } else if (Flag === "2" && response.IsExit === "N") {
+        alert("尚未完成使用後HRV檢測")
         detectHRVAfter(UID);
       }
       return response.IsExit; // 返回 "Y" 或 "N"
