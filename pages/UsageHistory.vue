@@ -51,13 +51,13 @@
             </div>
             <div class="imgGroup">
               <img :src="getImage(product)" alt="product image" />
-              <div class="circle"></div>
               <img
                 v-if="shouldShowRobot(product)"
                 class="robotImg"
                 src="/assets/imgs/clothRobot.png"
                 alt="robot image"
               />
+              <div class="circle"></div>
             </div>
             <h3 class="productName">{{ product }}</h3>
           </div>
@@ -74,13 +74,13 @@
         >
           <div class="imgGroup">
             <img :src="getImage(recommendation.name)" alt="product image" />
-            <div class="circle"></div>
             <img
               v-if="shouldShowRobot(recommendation.name)"
               class="robotImg"
               src="/assets/imgs/clothRobot.png"
               alt="robot image"
             />
+            <div class="circle"></div>
           </div>
           <h3 class="recommendName">{{ recommendation.name }}</h3>
           <div class="priceGroup">
