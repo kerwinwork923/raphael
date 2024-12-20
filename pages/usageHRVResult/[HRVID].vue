@@ -244,14 +244,6 @@
       <SympatheticRatio :sympathetic="30" :parasympathetic="70" />
     </div> -->
     <div class="healthAnalyse"></div>
-    <div class="healthData">
-      <h3>健康從了解開始</h3>
-      <div class="des">
-        手環數據可以提供您的健康狀態洞察。請花點時間補充您的數據資訊，讓我們幫您進一步分析。
-      </div>
-      <button class="writeBtn">開始填寫</button>
-      <img src="/assets/imgs/3dWatch.svg">
-    </div>
     <div class="usageBtnGroup">
       <button class="nextBtn" @click="goNext">返回</button>
     </div>
@@ -502,52 +494,6 @@ export default {
       font-weight: 400;
       letter-spacing: 0.15px;
       margin-bottom: 0.5rem;
-    }
-  }
-  .healthData{    
-    position: relative;
-    display: grid;
-    gap: 0.75rem;
-    background: $raphael-white;
-    border-radius: 0.75rem;
-    margin-top: 0.75rem;
-    padding: 0.75rem;
-    overflow: hidden;
-
-    &>h3{
-      color: $raphael-black;
-      font-size: 1.25rem;
-    }
-    .des{
-      color: $raphael-gray-500;
-      font-size: 1.125rem;
-      line-height: 29.1px;
-    }
-    .writeBtn{
-      background: transparent;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      border: 1px solid $raphael-green-400;
-      border-radius: 0.5rem;
-      color: $raphael-green-400;
-      font-size: 1.125rem;
-      font-weight: 400;
-      padding: 0.5rem 0.75rem;
-      line-height: 100%;
-      letter-spacing: 0.5px;
-      transition: all 0.2s ease;
-      &:hover{
-        background:$raphael-green-400;
-        color: $raphael-white;
-      }
-    }
-    &>img{
-      position: absolute;
-      right: -36px;
-      bottom: -44px;
     }
   }
   .usageBtnGroup {

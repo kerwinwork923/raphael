@@ -550,10 +550,11 @@
 
   .scanInfo .row {
     display: flex;
+    flex-direction: column;
     flex-wrap: nowrap;
     width: 100%;
-    gap: 3%;
-    margin-bottom: 1rem;
+    gap: 12px;
+    margin-bottom: 0.75rem;
   }
 
   .scanInfo .row:nth-child(1),
@@ -622,7 +623,7 @@
 
   .scanInfo .Rhythm,
   .scanInfo .bloodPressure {
-    width: 50%;
+    /* width: 50%; */
     background-color: #fff;
     border-radius: 8px;
     border-top-style: 8px;
@@ -710,7 +711,7 @@
   .scanInfo .Rhythm .bgImg,
   .scanInfo .bloodPressure .bgImg {
     position: absolute;
-    bottom: 0;
+    bottom: -24px;
     left: 0;
     width: 100%;
   }
@@ -718,7 +719,7 @@
   .scanInfo .BO,
   .scanInfo .breathe,
   .scanInfo .pressure {
-    width: 33.333%;
+    /* width: 33.333%; */
     background-color: #fff;
     border-radius: 8px;
     position: relative;
@@ -760,7 +761,7 @@
   .scanInfo .breathe .bgImg,
   .scanInfo .pressure .bgImg {
     position: absolute;
-    bottom: 0;
+    bottom: -24px;
     left: 0;
     width: 100%;
   }
@@ -786,7 +787,7 @@
     color: #1e1e1e;
     letter-spacing: 0.5px;
   }
-
+  
   .resultTextGroup {
     display: none;
     background-color: #fff;
@@ -805,7 +806,6 @@
     margin: 0;
     margin-top: 0.5rem;
   }
-
   .subBtnGroup {
     display: flex;
     justify-content: space-between;
