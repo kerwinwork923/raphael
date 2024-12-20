@@ -1,6 +1,19 @@
 <template>
   <div class="usageHRVResultWrap">
     <h1>結果分析</h1>
+    <div class="thxGroup">
+      <div class="textGroup">
+        <h3 class="nameText">感謝您的使用</h3>
+      </div>
+      <div class="imgGroup">
+        <img src="/assets/imgs/3dWatch.svg" class="watchImg">
+        <img
+          src="/assets/imgs/doctor_nocomment.png"
+          class="doctorImg"
+          alt=""
+        />
+      </div>
+    </div>
     <div class="resultChartGroup">
       <h2>生理年齡</h2>
       <ResultChart v-if="listBioage.length > 0" :bioageData="listBioage" />
@@ -382,6 +395,37 @@ export default {
     padding: 0.75rem 0;
     top: 0;
   }
+  .thxGroup {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    .textGroup {
+      flex:1;
+      padding:0.75rem;
+      &>h3 {
+        font-size: 1.5rem;
+        font-weight: 400;
+        margin: 0;
+      }
+    }
+    .imgGroup{
+      position: relative;
+
+      .watchImg{
+        position: absolute;
+        top: 52%;
+        left: 20px;
+        width: 18px;
+        cursor: pointer;
+      }
+
+      .doctorImg {
+        height: 150px;
+      }
+    }
+  }
   .resultChartGroup {
     display: none;
     background-color: $raphael-white;
@@ -402,12 +446,14 @@ export default {
     gap: 0.75rem;
     width: max-content;
     width: 100%;
-    margin-top: 0.75rem;
+    margin-top: -0.75rem;
     .BACard {
+      position: relative;
       background-color: $raphael-white;
       border-left: 2px solid $raphael-green-400;
       border-radius: 8px;
       padding: 12px;
+      overflow: hidden;
 
       &:nth-child(1),
       &:nth-child(2){
@@ -425,7 +471,13 @@ export default {
         letter-spacing: 0.15px;
 
         img {
-          width: 20px;
+          position: absolute;
+          width: 144px;
+          right: -24px;
+          bottom: -24px;
+          opacity: 0.2;
+          filter: grayscale(1) contrast(3);
+          mix-blend-mode: darken;
         }
       }
       .BAContent {

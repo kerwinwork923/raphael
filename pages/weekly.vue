@@ -217,7 +217,6 @@ export default {
     margin-bottom: 0.75rem;
     h4{
       color:$raphael-black;
-      font-family: "Noto Sans";
       font-size: 20px;
       font-style: normal;
       font-weight: bold;
