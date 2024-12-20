@@ -19,6 +19,11 @@
         />
       </svg>
     </div>
+    <div v-if="isUsedToday" class="completion-message">感謝您的使用</div>
+    <div v-if="isUsedToday" class="completion-delayMessage">
+      ※ 請於隔天後再使用
+    </div>
+
     <button @click="toggleTimer" :style="buttonStyle">
       {{ buttonText }}
     </button>
@@ -59,6 +64,8 @@ const isCounting = ref(false); // 是否正在計時
 const isPaused = ref(false); // 是否暫停
 const UID = ref(""); // UID 默認為空
 const BID = ref(""); // BID 默認為空
+
+const isUsedToday = ref(false);
 
 const isCheckingPending = ref(false);
 
@@ -183,13 +190,13 @@ const initializeUID = async () => {
         )}:${StartTime.slice(12, 14)}`
       );
 
-      if (isPastResetTime(startTime)) {
-        console.log("檢測時間早於重置時間，允許重新測試");
-        currentState.value = DetectionState.BEFORE;
-        return;
+      // 如果測試在今天完成，標記為已使用
+      if (!isPastResetTime(startTime)) {
+        isUsedToday.value = true; // 今天已經使用完畢
+      } else {
+        isUsedToday.value = false; // 未使用
       }
 
-      console.log("檢測仍在當日內，處理邏輯...");
       if (!EndTime) {
         console.log("檢測未結束，檢查狀態");
         const isBeforeExit = await API_HRV2_UID_Flag_Info("1", UID.value);
