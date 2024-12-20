@@ -234,12 +234,19 @@ export default {
       margin-top: 0.5rem;
     }
     ul{
+      position: relative;
       color: $raphael-gray-500;
       font-size: 18px;
+      counter-reset: list-counter;
       li{
-        list-style-type: decimal;
         line-height: 29.1px;   
-        margin-left: 1.45rem;     
+        counter-increment: list-counter;
+        padding-left: 1.125rem;
+        &::before {
+          content: counter(list-counter) ". ";
+          position: absolute;
+          left: 0;
+        } 
       }
       
     }
