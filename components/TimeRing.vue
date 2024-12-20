@@ -533,10 +533,19 @@ const checkForPendingAfterDetection = async () => {
 
       console.log("檢測到未完成的使用後檢測：", { UID, CheckTime });
       if (UID) {
-        remainingTime.value = calculateRemainingTime(checkTime);
-        currentState.value = DetectionState.AFTER;
-        alert("尚未完成使用後HRV檢測");
+        // 清除計時器
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+
+        // 重置計時狀態
+        isCounting.value = false;
+        remainingTime.value = 0;
+
+
         detectHRVAfter(UID);
+        currentState.value = DetectionState.AFTER;
       }
     } else {
       console.log("未檢測到未完成的使用後檢測記錄。");
