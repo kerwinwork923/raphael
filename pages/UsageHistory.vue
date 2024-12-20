@@ -18,7 +18,6 @@
             <div class="imgGroup">
               <img :src="getImage(purchasedProducts[0])" alt="product image" />
               <div class="circle"></div>
-              <div class="bigCircle"></div>
               <img
                 v-if="shouldShowRobot(purchasedProducts[0])"
                 class="robotImg"
@@ -53,7 +52,6 @@
             <div class="imgGroup">
               <img :src="getImage(product)" alt="product image" />
               <div class="circle"></div>
-              <div class="bigCircle"></div>
               <img
                 v-if="shouldShowRobot(product)"
                 class="robotImg"
@@ -77,7 +75,6 @@
           <div class="imgGroup">
             <img :src="getImage(recommendation.name)" alt="product image" />
             <div class="circle"></div>
-            <div class="bigCircle"></div>
             <img
               v-if="shouldShowRobot(recommendation.name)"
               class="robotImg"
@@ -344,41 +341,7 @@ export default {
             }
 
             .circle {
-              width: 270px;
-              height: 270px;
-              z-index: 2;
-              background-color: $raphael-white;
-              border-radius: 50%;
-              position: absolute;
-              top: 50%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-              box-shadow: 0 0 10px rgba($color: $raphael-white, $alpha: 0.1);
-            }
-            .bigCircle {
-              width: 265px;
-              height: 265px;
-              z-index: 1;
-              border-radius: 50%;
-              position: absolute;
-              top: 50%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-
-              background: linear-gradient(
-                135deg,
-                rgba(114, 188, 32, 0.9) 0%,
-                rgba(71, 188, 107, 0.9) 20%,
-                rgba(0, 210, 255, 0.9) 40%,
-                rgba(58, 123, 213, 0.9) 60%,
-                rgba(98, 87, 143, 0.9) 80%,
-                rgba(167, 82, 111, 0.9) 100%
-              );
-
-              background-size: 200% 200%;
-              filter: blur(2px);
-              animation: rotate 4s infinite linear,
-                aurora 10s infinite ease-in-out;
+              @include circleAnimate(270px,rgba(255,255,255,0.85),rotate 4s infinite linear);
             }
           }
 
@@ -419,42 +382,7 @@ export default {
             }
 
             .circle {
-              width: 150px;
-              height: 150px;
-              z-index: 2;
-              background-color: $raphael-white;
-              border-radius: 50%;
-              position: absolute;
-              top: 50%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-              box-shadow: 0 0 10px rgba($color: $raphael-white, $alpha: 0.1);
-            }
-
-            .bigCircle {
-              width: 145px;
-              height: 145px;
-              z-index: 1;
-              border-radius: 50%;
-              position: absolute;
-              top: 50%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-
-              background: linear-gradient(
-                135deg,
-                rgba(114, 188, 32, 0.9) 0%,
-                rgba(71, 188, 107, 0.9) 20%,
-                rgba(0, 210, 255, 0.9) 40%,
-                rgba(58, 123, 213, 0.9) 60%,
-                rgba(98, 87, 143, 0.9) 80%,
-                rgba(167, 82, 111, 0.9) 100%
-              );
-
-              background-size: 200% 200%;
-              filter: blur(2px);
-              animation: rotate 4s infinite linear,
-                aurora 10s infinite ease-in-out;
+              @include circleAnimate(160px,rgba(255,255,255,0.85),rotate 4s infinite linear);
             }
             .robotImg {
               position: absolute;
@@ -500,10 +428,10 @@ export default {
       margin-top: 0.75rem;
       .robotImg {
         position: absolute;
-        width: 176px;
-        height: auto;
+        width: 105px;
+        height: auto !important;
         bottom: 0;
-        right: 0;
+        right: 75px;
         z-index: 3;
       }
 
@@ -519,43 +447,13 @@ export default {
           place-items: center;
           gap: 0.5rem;
 
-          img {
+          &>img {
             height: 170px;
             z-index: 3;
           }
 
           .circle {
-            width: 150px;
-            height: 150px;
-            z-index: 2;
-            background-color: $raphael-white;
-            border-radius: 50%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-          }
-          .bigCircle {
-            width: 150px;
-            height: 150px;
-            z-index: 1;
-            border-radius: 50%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(1.03);
-
-            background: linear-gradient(
-              180deg,
-              rgba(114, 188, 32, 0.9) 0%,
-              rgba(71, 188, 107, 0.9) 20%,
-              rgba(0, 210, 255, 0.9) 40%,
-              rgba(58, 123, 213, 0.9) 60%,
-              rgba(98, 87, 143, 0.9) 80%,
-              rgba(167, 82, 111, 0.9) 100%
-            );
-
-            background-size: 100% 100%;
+            @include circleAnimate(160px,$raphael-white,unset);
           }
         }
 
@@ -655,17 +553,15 @@ export default {
 /* 旋轉效果 */
 @keyframes rotate {
   0% {
-    transform: translate(-50%, -50%) scale(1.03) rotate(0deg);
-    filter: brightness(1);
+    transform: scale(1.03) rotate(0deg);
     filter: brightness(1.2) blur(1px);
   }
   50% {
-    transform: translate(-50%, -50%) scale(1.05) rotate(180deg);
+    transform:scale(1.05) rotate(180deg);
     filter: brightness(1.2) blur(3px);
   }
   100% {
-    transform: translate(-50%, -50%) scale(1.03) rotate(360deg);
-    filter: brightness(1);
+    transform:scale(1.03) rotate(360deg);
     filter: brightness(1.2) blur(1px);
   }
 }

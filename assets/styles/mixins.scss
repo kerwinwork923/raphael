@@ -161,3 +161,40 @@
     display: none;
   }
 }
+
+@mixin circleAnimate($px,$beforeBgColor,$animate) {
+  position: absolute;
+  width: $px;
+  height: $px;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  transform: translate(-50%, -50%);
+  overflow: hidden;
+  &:before{
+    content: '';
+    position: absolute;
+    background: $beforeBgColor;
+    inset: 3px;
+    border-radius: 50%;
+    z-index: 1;
+  }
+
+  &:after{
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(114, 188, 32, 0.9) 0%,
+      rgba(71, 188, 107, 0.9) 20%,
+      rgba(0, 210, 255, 0.9) 40%,
+      rgba(58, 123, 213, 0.9) 60%,
+      rgba(98, 87, 143, 0.9) 80%,
+      rgba(167, 82, 111, 0.9) 100%
+    );
+    border-radius: 50%;
+    animation: $animate;
+  }
+}
