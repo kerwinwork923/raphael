@@ -19,13 +19,19 @@
         />
       </svg>
     </div>
-    <div v-if="showMessage" class="completion-message">感謝您的使用</div>
-    <div v-if="showMessage" class="completion-delayMessage">
-      ※ 請於24小時後再使用
+
+    <div v-if="hasDetectRecord" class="completion-message">感謝您的使用</div>
+    <div v-if="hasDetectRecord" class="completion-delayMessage">
+      ※ 請於隔天後再使用
     </div>
 
-    <button :style="buttonStyle" @click="toggleTimer" v-if="ThisStartBtnActive">
-      {{ isCounting ? (isPaused ? "繼續" : "暫停") : "開始" }}
+    <button
+      v-if="showButton"
+      :disabled="!isButtonEnabled"
+      :style="buttonStyle"
+      @click="toggleTimer"
+    >
+      {{ buttonText }}
     </button>
   </div>
 </template>
@@ -44,14 +50,39 @@ const props = defineProps({
   productName: {
     type: String,
   },
-  startBtnActive: {
+
+  hasDetectRecord: {
     type: Boolean,
-    default: false,
+  },
+  todayUseRecord: {
+    type: Array,
+    default: () => [],
+  },
+  hasBeforeData: {
+    type: Array,
+    default: () => [],
   },
 });
 
 // Router
 const router = useRouter();
+
+// 動態生成 localStorage 鍵名
+const getProductStorageKey = (key) => `${props.productName}_${key}`;
+
+// localStorage 操作方法
+const getLocalStorage = (key) => {
+  const item = localStorage.getItem(key);
+  return item ? JSON.parse(item) : null;
+};
+
+const setLocalStorage = (key, value) => {
+  localStorage.setItem(key, JSON.stringify(value));
+};
+
+const deleteLocalStorage = (key) => {
+  localStorage.removeItem(key);
+};
 
 // 驗證 LocalStorage 資料
 const localData = localStorage.getItem("userData");
@@ -61,34 +92,85 @@ if (!MID || !Token || !MAID || !Mobile) {
   router.push("/");
 }
 
-const ThisStartBtnActive = ref(props.startBtnActive);
 watch(
-  () => props.startBtnActive,
-  (newValue) => {
-    ThisStartBtnActive.value = newValue;
+  () => props.hasDetectRecord,
+  (newVal) => {
+    if (newVal) {
+      console.log("检测记录存在，隐藏按钮");
+      showButton.value = false; // 隐藏按钮
+    }
   }
 );
 
-const remainingTime = ref(props.totalTime);
-const isCounting = ref(false);
-const isPaused = ref(false);
-const showMessage = ref(false);
+watch(
+  () => props.todayUseRecord,
+  (newVal) => {
+    if (Array.isArray(newVal) && newVal.length > 0) {
+      const record = newVal[0];
+      UID.value = record.UID;
+      store.detectFlag = "2";
+      store.detectUID = record.UID;
+      store.detectForm = record.ProductName;
+
+      const startTimeStamp = parseTime(record.oriStartTime);
+      const elapsed = Math.floor((Date.now() - startTimeStamp) / 1000);
+      remainingTime.value = Math.max(props.totalTime - elapsed, 0);
+
+      if (remainingTime.value > 0) {
+        countdown();
+      } else {
+        remainingTime.value = 0;
+        useEndAPI();
+      }
+    }
+  }
+);
+
+const remainingTime = ref(props.totalTime); // 倒數時間
+const isCounting = ref(false); // 正在倒數
+const isPaused = ref(false); // 暫停狀態
+const isButtonEnabled = ref(true);
+
 const UID = ref(""); // 保存 UID
 const BID = ref(""); // 保存 BID
-let startTime = ref(0);
-let elapsedTime = ref(0);
+let startTime = ref(0); // 開始時間（毫秒）
+let elapsedTime = ref(0); // 已經過時間（秒）
+
+import { useCommon } from "../stores/common";
+const store = useCommon();
+
+const buttonText = computed(() => {
+  if (Array.isArray(props.todayUseRecord) && props.todayUseRecord.length > 0) {
+    return "HRV檢測(使用後)";
+  }
+  if (remainingTime.value > 0 && isCounting.value) {
+    return isPaused.value ? "繼續" : "暫停";
+  }
+  return "HRV檢測(使用前)";
+});
+
+const showButton = computed(() => {
+  if (props.hasDetectRecord) {
+    return false; // 如果已经检测完成，始终隐藏按钮
+  }
+  return true; // 其他情况根据逻辑显示
+});
 
 // 計算進度條樣式
 const progressStyle = computed(() => {
-  const progress =
-    ((props.totalTime - remainingTime.value) / props.totalTime) * 100;
+  let progress;
+  if (remainingTime.value <= 0) {
+    progress = 100; // 如果剩餘時間為0，進度條顯示100%
+  } else {
+    progress =
+      ((props.totalTime - remainingTime.value) / props.totalTime) * 100;
+  }
   return {
     background: `conic-gradient(
-        #74BC1F 0% ${progress}%, 
-        #e0e0e0 ${progress}% 100%
+        #74BC1F 0% ${progress}%,
+        #ffffff ${progress}% 100%
       )`,
-    transition:
-      isCounting.value && !isPaused.value ? "none" : "background 1s ease-out",
+    transition: "background 0.5s ease-out", // 確保平滑過渡
   };
 });
 
@@ -103,19 +185,50 @@ const formattedTime = computed(() => {
   )}:${String(seconds).padStart(2, "0")}`;
 });
 
-// 按鈕樣式
-const buttonStyle = computed(() => {
-  if (!isCounting.value) {
-    return {
-      backgroundColor: "#74bc1f",
-    };
-  }
-  return {
-    backgroundColor: isPaused.value ? "#74bc1f" : "#ec4f4f",
+// 保存計時器狀態到 localStorage
+const saveTimerState = () => {
+  const now = Date.now();
+  const timerState = {
+    remainingTime: remainingTime.value,
+    elapsedTime: elapsedTime.value,
+    startTime: isPaused.value ? null : now,
+    isPaused: isPaused.value,
+    isCounting: isCounting.value,
+    UID: UID.value,
+    BID: BID.value,
   };
-});
+  setLocalStorage(getProductStorageKey("timerState"), timerState);
+};
 
-// API Methods
+// 從 localStorage 載入計時器狀態
+const loadTimerState = () => {
+  const timerState = getLocalStorage(getProductStorageKey("timerState"));
+  if (timerState) {
+    remainingTime.value = timerState.remainingTime || props.totalTime;
+    elapsedTime.value = timerState.elapsedTime || 0;
+    startTime.value = timerState.startTime || 0;
+    isPaused.value = timerState.isPaused || false;
+    isCounting.value = timerState.isCounting || false;
+    UID.value = timerState.UID || "";
+    BID.value = timerState.BID || "";
+
+    showButton.value = true; // 確保按鈕顯示
+
+    if (isPaused.value) {
+      buttonText.value = "繼續"; // 按鈕文字設為繼續
+    } else if (startTime.value) {
+      const now = Date.now();
+      const elapsedSinceStart = (now - startTime.value) / 1000;
+      remainingTime.value = Math.max(
+        props.totalTime - elapsedTime.value - elapsedSinceStart,
+        0
+      );
+      if (remainingTime.value > 0) countdown();
+    }
+  }
+};
+
+// API 方法
 const apiRequest = async (url, payload) => {
   try {
     const response = await axios.post(url, payload);
@@ -127,62 +240,69 @@ const apiRequest = async (url, payload) => {
   }
 };
 
+const saveInitialHRVState = () => {
+  const now = Date.now();
+  setLocalStorage(getProductStorageKey("startTime"), now);
+  setLocalStorage(getProductStorageKey("UID"), UID.value);
+};
+const clearHRVState = () => {
+  deleteLocalStorage(getProductStorageKey("startTime"));
+  deleteLocalStorage(getProductStorageKey("UID"));
+};
+
 const useStartAPI = async () => {
-  const response = await apiRequest(
-    "https://23700999.com:8081/HMA/API_UseStart.jsp",
-    {
-      MID,
-      Token,
-      MAID,
-      Mobile,
-      ProductName: props.productName,
-    }
-  );
-  if (response && response.UID) {
-    UID.value = response.UID; // 儲存 UID
-  } else {
-    console.error("無法取得 UID，請檢查 API 回應");
+  try {
+    const response = await apiRequest(
+      "https://23700999.com:8081/HMA/API_UseStart.jsp",
+      { MID, Token, MAID, Mobile, ProductName: props.productName }
+    );
+    console.log("useStartAPI 回應:", response);
+    UID.value = response.UID;
+    return response;
+  } catch (error) {
+    console.error("useStartAPI 請求失敗:", error);
+    return null;
   }
 };
 
 const usePauseAPI = async () => {
-  const response = await apiRequest(
-    "https://23700999.com:8081/HMA/API_UsePauseStart.jsp",
-    {
-      MID,
-      Token,
-      MAID,
-      Mobile,
-      UID: UID.value,
+  try {
+    const response = await apiRequest(
+      "https://23700999.com:8081/HMA/API_UsePauseStart.jsp",
+      { MID, Token, MAID, Mobile, UID: UID.value }
+    );
+    if (response && response.BID) {
+      BID.value = response.BID;
+      console.log("暫停API調用成功", response);
     }
-  );
-  if (response && response.BID) {
-    BID.value = response.BID; // 儲存 BID
-  } else {
-    console.error("無法取得 BID，請檢查 API 回應");
+  } catch (error) {
+    console.error("暫停API調用失敗", error);
   }
 };
 
 const usePauseEndAPI = async () => {
   if (!BID.value) {
-    console.error("BID 不存在，無法繼續計時！");
+    console.error("無法恢復，因為 BID 不存在");
     return;
   }
-  await apiRequest("https://23700999.com:8081/HMA/API_UsePauseEnd.jsp", {
-    MID,
-    Token,
-    MAID,
-    Mobile,
-    UID: UID.value,
-    BID: BID.value,
-  });
+  try {
+    await apiRequest("https://23700999.com:8081/HMA/API_UsePauseEnd.jsp", {
+      MID,
+      Token,
+      MAID,
+      Mobile,
+      UID: UID.value,
+      BID: BID.value,
+    });
+    console.log("恢復API調用成功");
+  } catch (error) {
+    console.error("恢復API調用失敗", error);
+  }
 };
 
 const useEndAPI = async () => {
-  if (!UID.value) {
-    console.error("UID 不存在，無法結束計時！");
-    return;
-  }
+  if (!UID.value) return;
+
   await apiRequest("https://23700999.com:8081/HMA/API_UseEnd.jsp", {
     MID,
     Token,
@@ -190,165 +310,282 @@ const useEndAPI = async () => {
     Mobile,
     UID: UID.value,
   });
+
+  clearHRVState(); // 清除檢測紀錄
+  showButton.value = true; // 確保按鈕在檢測完成後顯示
 };
 
-// 方法
-const toggleTimer = () => {
-  if (isCounting.value) {
-    if (isPaused.value) {
-      resumeTimer();
-    } else {
-      pauseTimer();
-    }
-  } else {
-    startTimer();
-  }
-};
-
-const startTimer = async () => {
-  isCounting.value = true;
-  isPaused.value = false;
-  showMessage.value = false;
-  startTime.value = Date.now();
-  elapsedTime.value = 0;
-  await useStartAPI();
-  if (!UID.value) return;
-  countdown();
-  saveTimerState();
-};
-
-const pauseTimer = async () => {
-  if (!UID.value) {
-    console.error("UID 不存在，無法暫停！");
-    return;
-  }
-  isPaused.value = true;
-  elapsedTime.value = (Date.now() - startTime.value) / 1000;
-  await usePauseAPI();
-  saveTimerState();
-};
-
-const resumeTimer = async () => {
-  if (!UID.value || !BID.value) {
-    console.error("UID 或 BID 不存在，無法繼續！");
-    return;
-  }
-  isPaused.value = false;
-  // 計算剩餘時間
-  const remainingTimeSincePause = props.totalTime - elapsedTime.value;
-  startTime.value = Date.now() - (props.totalTime - remainingTimeSincePause) * 1000;  // 計算開始時間
-  await usePauseEndAPI();
-  countdown(); // 繼續倒數
-  saveTimerState();
-};
+// 計時器邏輯
 let timerInterval;
 
-let lastTime = 0;  // 儲存上一次更新的時間戳
-let deltaTime = 0; // 儲存每次更新的時間差
-
 const countdown = () => {
-  if (timerInterval) {
-    clearInterval(timerInterval);
-  }
+  if (timerInterval) clearInterval(timerInterval);
 
-  // 使用 requestAnimationFrame 每次重新計算倒計時
-  const tick = () => {
-    if (isPaused.value) return;  // 如果暫停中則不執行
+  let lastCheckTime = Date.now(); // 記錄最後檢查的時間
 
-    const now = Date.now(); // 當前時間戳
-    deltaTime = (now - lastTime) / 1000; // 計算兩次更新的時間差（秒）
-    lastTime = now; // 更新為當前時間戳
+  const tick = async () => {
+    if (isPaused.value) return; // 如果暫停則不繼續倒數
 
-    // 計算倒數剩餘時間
+    const now = Date.now();
+
+    // 每分鐘檢查一次 `isFirstHRVDetect`
+    if (now - lastCheckTime >= 60 * 1000) {
+      lastCheckTime = now;
+
+      const isFirstHRVDetect = getLocalStorage(
+        `${props.productName}_isFirstHRVDetect`
+      );
+
+      if (!isFirstHRVDetect) {
+        console.log(
+          `未檢測到 ${props.productName}_isFirstHRVDetect，清除 localStorage，禁用按鈕並彈出警告框。`
+        );
+
+        // 清除對應的 `localStorage` 數據
+        deleteLocalStorage(getProductStorageKey("UID"));
+        deleteLocalStorage(getProductStorageKey("startTime"));
+
+        // 禁用按鈕
+        isButtonEnabled.value = false;
+
+        // 彈出提示框
+        alert("尚未完成 HRV 檢測，請完成檢測後再繼續！");
+
+        // 暫停計時器
+        pauseTimer();
+
+        // 刷新頁面
+        if (!props.hasDetectRecord && props.hasBeforeData.length === 0) {
+          router.go(0);
+        }
+
+        return; // 中斷倒數
+      }
+    }
+
+    // 更新倒計時邏輯
+    const elapsedSinceStart = (now - startTime.value) / 1000;
     remainingTime.value = Math.max(
-      props.totalTime - (now - startTime.value) / 1000 - elapsedTime.value,
+      props.totalTime - elapsedTime.value - elapsedSinceStart,
       0
     );
 
-    // 更新進度條樣式
+    // 保存狀態
+    saveTimerState();
+
+    // 倒計時結束邏輯
     if (remainingTime.value <= 0) {
-      clearInterval(timerInterval); // 倒數結束時清除計時器
+      clearInterval(timerInterval);
       isCounting.value = false;
       remainingTime.value = 0;
-      showMessage.value = true;
-      useEndAPI();  // 呼叫 API 結束倒數
-      ThisStartBtnActive.value = false;
-    } else {
-      // 繼續進行倒計時
-      requestAnimationFrame(tick); // 讓動畫更新更加流暢
+
+      try {
+        await useEndAPI(); // 調用結束 API
+        console.log("倒計時結束，API 調用成功");
+        clearHRVState(); // 清理狀態
+        buttonText.value = "HRV檢測(使用前)";
+        if (!props.hasDetectRecord && props.hasBeforeData.length === 0) {
+          router.go(0);
+        }
+      } catch (error) {
+        console.error("結束 API 調用失敗：", error);
+      }
+
+      return;
     }
+
+    requestAnimationFrame(tick); // 繼續下一輪計時
   };
 
-  // 開始第一次計算
-  requestAnimationFrame(tick);
+  requestAnimationFrame(tick); // 開始計時
 };
 
+const toggleTimer = async () => {
+  if (Array.isArray(props.todayUseRecord) && props.todayUseRecord.length > 0) {
+    console.log("今日已完成檢測，顯示提示框");
+    store.detectFlag = "2";
+    store.detectUID = props.todayUseRecord[0].UID;
+    store.detectForm = `*${props.productName}`;
+    store.showHRVAlert = true;
 
-const saveTimerState = () => {
-  const state = {
-    isCounting: isCounting.value,
-    isPaused: isPaused.value,
-    remainingTime: remainingTime.value,
-    startTime: startTime.value,
-    elapsedTime: elapsedTime.value,
-    productName: props.productName,
-    UID: UID.value,
-    BID: BID.value,
-  };
-  localStorage.setItem("timerState", JSON.stringify(state));
-};
-
-const loadTimerState = () => {
-  const savedState = localStorage.getItem("timerState");
-  if (savedState) {
-    const state = JSON.parse(savedState);
-    isCounting.value = state.isCounting;
-    isPaused.value = state.isPaused;
-    remainingTime.value = state.remainingTime;
-    startTime.value = state.startTime;
-    elapsedTime.value = state.elapsedTime;
-    UID.value = state.UID;
-    BID.value = state.BID;
+    // 禁用按鈕並返回
+    isButtonEnabled.value = false;
+    return;
   }
+
+  if (buttonText.value === "HRV檢測(使用前)") {
+    console.log("檢測前開始倒數");
+    const response = await useStartAPI();
+    if (response && UID.value) {
+      store.detectFlag = "1";
+      store.detectUID = UID.value;
+      store.detectForm = props.productName;
+      store.showHRVAlert = true;
+
+      // 保存狀態並啟動計時
+      const now = Date.now();
+      setLocalStorage(getProductStorageKey("startTime"), now);
+      setLocalStorage(getProductStorageKey("UID"), UID.value);
+      startTime.value = now;
+      startTimer();
+    } else {
+      console.error("開始檢測失敗");
+    }
+    return;
+  }
+
+  if (buttonText.value === "暫停") {
+    console.log("暫停倒數");
+    await usePauseAPI();
+    pauseTimer();
+  } else if (buttonText.value === "繼續") {
+    console.log("繼續倒數");
+    await usePauseEndAPI();
+    resumeTimer();
+  }
+};
+
+const startTimer = () => {
+  isCounting.value = true;
+  isPaused.value = false;
+  startTime.value = Date.now();
+  buttonText.value = "暫停";
+  countdown();
+};
+
+const pauseTimer = () => {
+  isPaused.value = true;
+  elapsedTime.value += (Date.now() - startTime.value) / 1000;
+  startTime.value = null;
+  buttonText.value = "繼續";
+  saveTimerState(); // 保存暫停狀態
+};
+
+const resumeTimer = () => {
+  isPaused.value = false;
+  startTime.value = Date.now();
+  buttonText.value = "暫停";
+  countdown();
+  saveTimerState(); // 保存恢復狀態
 };
 
 onMounted(() => {
-  loadTimerState();
-  if (isCounting.value && !isPaused.value) {
-    countdown();
+  try {
+    const savedUID = getLocalStorage(getProductStorageKey("UID"));
+    const savedStartTime = getLocalStorage(getProductStorageKey("startTime"));
+
+    if (
+      Array.isArray(props.todayUseRecord) &&
+      props.todayUseRecord.length > 0
+    ) {
+      console.log("今日已檢測，初始化為檢測後狀態");
+      store.detectFlag = "2";
+      store.detectUID = props.todayUseRecord[0]?.UID;
+      buttonText.value = "HRV檢測(使用後)";
+      remainingTime.value = props.totalTime;
+      return;
+    }
+
+    if (savedUID) {
+      console.log("檢測到已存在的計時 UID，嘗試恢復計時");
+      UID.value = savedUID;
+
+      if (savedStartTime) {
+        startTime.value = savedStartTime;
+        const elapsed = Math.floor((Date.now() - savedStartTime) / 1000);
+        remainingTime.value = Math.max(props.totalTime - elapsed, 0);
+
+        if (remainingTime.value > 0) {
+          console.log("恢復計時，剩餘時間:", remainingTime.value);
+          isCounting.value = true;
+          countdown();
+        } else {
+          console.log("計時已完成，重置為初始狀態");
+          clearHRVState();
+          buttonText.value = "HRV檢測(使用前)";
+          remainingTime.value = props.totalTime;
+        }
+      }
+      return;
+    }
+
+    console.log("初始化為檢測前狀態");
+    store.detectFlag = "1";
+    buttonText.value = "HRV檢測(使用前)";
+    remainingTime.value = props.totalTime;
+  } catch (error) {
+    console.error("onMounted 初始化出錯:", error);
   }
+});
+
+const parseTime = (timeString) => {
+  if (
+    !timeString ||
+    typeof timeString !== "string" ||
+    timeString.length !== 14
+  ) {
+    console.error("無效的時間字符串:", timeString);
+    return Date.now(); // 或其他默認值
+  }
+
+  return new Date(
+    `${timeString.substring(0, 4)}/${timeString.substring(
+      4,
+      6
+    )}/${timeString.substring(6, 8)} ` +
+      `${timeString.substring(8, 10)}:${timeString.substring(
+        10,
+        12
+      )}:${timeString.substring(12)}`
+  ).getTime();
+};
+
+const buttonStyle = computed(() => {
+  if (!isButtonEnabled.value) {
+    return { backgroundColor: "#E0E0E0", color: "#999" }; // 禁用樣式
+  }
+  if (buttonText.value === "HRV檢測(使用前)") {
+    return { backgroundColor: "#74BC1F", color: "#fff" }; // 綠色
+  } else if (buttonText.value === "HRV檢測(使用後)") {
+    return { backgroundColor: "#74BC1F", color: "#fff" }; // 藍色，表示已完成
+  } else if (buttonText.value === "暫停") {
+    return { backgroundColor: "#EC4F4F", color: "#fff" }; // 紅色
+  } else if (buttonText.value === "繼續") {
+    return { backgroundColor: "#74BC1F", color: "#fff" }; // 綠色
+  }
+  return { backgroundColor: "#E0E0E0", color: "#fff" }; // 默認樣式
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .progress-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
-  background-color: rgb(246, 246, 246);
+  gap: 0.5rem;
+  background-color: rgb(246, 246, 246);  
+  width: 100%;
+  max-width: 768px;
 }
 
 .progress-border {
-  width: 150px;
-  height: 150px;
+  width: 210px;
+  height: 210px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.2) inset;
 }
 
 .progress-border .timeDot {
   position: absolute;
-  width: 100%;
-  height: 100%;
-  transform: scale(0.9);
 }
 
 .content {
-  width: 120px;
-  height: 120px;
+  width: 190px;
+  height: 190px;
   border-radius: 50%;
   background-color: white;
   display: flex;
@@ -360,7 +597,7 @@ onMounted(() => {
 }
 
 button {
-  padding: 10px 20px;
+  padding: 0.5rem 0.75rem;
   font-size: 1rem;
   cursor: pointer;
   color: white;
