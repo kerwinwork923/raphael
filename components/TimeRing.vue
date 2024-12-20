@@ -150,9 +150,6 @@ const progressStyle = computed(() => {
 });
 
 const formattedTime = computed(() => {
-  if (props.hasDetectRecord) {
-    return `00:00:00`;
-  }
   const totalSeconds = Math.floor(remainingTime.value / 1000);
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -206,36 +203,56 @@ const initializeUID = async () => {
         )}:${StartTime.slice(12, 14)}`
       );
 
+      const resetTime = getResetTime();
+
+      // 如果檢測時間早於重置時間
+      if (isPastResetTime(startTime)) {
+        console.log("檢測時間早於重置時間，重置為新的倒數時間");
+
+        // 清除現有的計時器
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+
+        // 重置狀態和時間
+        currentState.value = DetectionState.BEFORE;
+        remainingTime.value = props.totalTime * 1000; // 使用 props 的 `totalTime` 作為倒數時間
+        isCounting.value = false;
+
+        console.log(
+          `重置倒數時間為 ${formattedTime.value}，總時間: ${props.totalTime} 秒`
+        );
+
+        return;
+      }
+
       // 計算倒數剩餘時間
       remainingTime.value = calculateRemainingTime(startTime);
-
       console.log("初始化倒數剩餘時間:", remainingTime.value);
 
-      // 如果時間已過期，檢查是否需要強制結束
       if (remainingTime.value <= 0) {
         console.log("倒數時間已過期，檢查是否需要強制結束...");
         const flagResponse = await API_HRV2_UID_Flag_Info("1", response.UID);
         if (flagResponse === "Y") {
           console.log("檢測前流程已完成，強制結束倒數...");
           await forceEndCountdown(response.UID);
-        } else {
-          console.log("尚未完成檢測前流程，不進行其他操作");
         }
         return;
       }
 
-      // 如果剩餘時間有效，檢查是否需要啟動檢測前檢測
       const flagResponse = await API_HRV2_UID_Flag_Info("1", response.UID);
       if (flagResponse === "N") {
         console.log("尚未完成使用前檢測，啟動檢測...");
         detectHRVBefore(response.UID);
       }
 
-      // 恢復倒數計時
       currentState.value = DetectionState.RUNNING;
-      startCountdown(); // 啟動倒數計時
+      startCountdown();
     } else {
-      console.log("沒有未完成的倒數計時，繼續檢查後測狀態...");
+      console.log("沒有未完成的倒數計時，重新初始化...");
+      currentState.value = DetectionState.BEFORE;
+      remainingTime.value = props.totalTime * 1000; // 使用 props 的 `totalTime`
     }
   } catch (error) {
     console.error("initializeUID 發生錯誤：", error);
@@ -321,7 +338,7 @@ const resumeTimer = () => {
       timerStart = now; // 更新开始时间
 
       if (remainingTime.value <= 0) {
-        clearInterval(timerInterval);
+        // clearInterval(timerInterval);
         remainingTime.value = 0;
         endCountdown(); // 处理倒计时结束逻辑
       }
@@ -542,7 +559,6 @@ const checkForPendingAfterDetection = async () => {
         // 重置計時狀態
         isCounting.value = false;
         remainingTime.value = 0;
-
 
         detectHRVAfter(UID);
         currentState.value = DetectionState.AFTER;
