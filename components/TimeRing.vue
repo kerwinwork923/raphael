@@ -283,10 +283,6 @@ const startCountdown = () => {
         console.log("尚未完成使用前檢測，啟動使用前檢測流程...");
         detectHRVBefore(UID.value);
         currentState.value = DetectionState.BEFORE;
-      } else if (flagAfter === "N") {
-        console.log("尚未完成使用後檢測，啟動使用後檢測流程...");
-        detectHRVAfter(UID.value);
-        currentState.value = DetectionState.AFTER;
       } else {
         console.log("檢測流程已完成，進行結束操作...");
         await useEndAPI(); // 呼叫結束 API 通知伺服器
