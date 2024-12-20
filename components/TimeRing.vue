@@ -275,9 +275,23 @@ const startCountdown = () => {
       clearInterval(timerInterval);
       remainingTime.value = 0;
 
-      console.log("倒數結束，執行結束邏輯");
-      await useEndAPI(); // 呼叫 API 通知伺服器檢測結束
-      currentState.value = DetectionState.AFTER;
+      console.log("倒數結束，檢查是否需要後續處理...");
+      const flagBefore = await API_HRV2_UID_Flag_Info("1", UID.value); // 檢查使用前檢測
+      const flagAfter = await API_HRV2_UID_Flag_Info("2", UID.value); // 檢查使用後檢測
+
+      if (flagBefore === "N") {
+        console.log("尚未完成使用前檢測，啟動使用前檢測流程...");
+        detectHRVBefore(UID.value);
+        currentState.value = DetectionState.BEFORE;
+      } else if (flagAfter === "N") {
+        console.log("尚未完成使用後檢測，啟動使用後檢測流程...");
+        detectHRVAfter(UID.value);
+        currentState.value = DetectionState.AFTER;
+      } else {
+        console.log("檢測流程已完成，進行結束操作...");
+        await useEndAPI(); // 呼叫結束 API 通知伺服器
+        currentState.value = DetectionState.BEFORE; // 重置狀態
+      }
     }
   }, 1000);
 };
