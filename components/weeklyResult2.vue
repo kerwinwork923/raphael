@@ -304,27 +304,13 @@ export default {
       grid-auto-flow: column;
 
       button {
-        background-color: transparent;
-        color: #666;
-        cursor: pointer;
-        font-size: 1.125rem;
-        width: 100%;
-        border: none;
-        transition: 0.5s all ease;
-        border-radius: 8px;
-        padding: 0.5rem 0.75rem;
-
-        &:hover {
-          background-color: $raphael-green-300;
-          color: #1e1e1e;
-        }
+        @include tabStyle();
       }
       .symptomBtnActive {
-        background-color: $raphael-green-400;
-        color: #fff;
-        &:hover {
-          background-color: $raphael-green-400;
-          color: #fff;
+        border-bottom: 1px solid $raphael-green-400;
+        color: $raphael-green-400;
+        &:hover{
+          filter: brightness(.95);
         }
       }
     }

@@ -471,14 +471,13 @@ export default {
       grid-auto-flow: column;
 
       button {
-        @include btnStyle($raphael-white,$raphael-gray-500);
+        @include tabStyle();
       }
       .symptomBtnActive {
-        background-color: $raphael-green-400;
-        color: #fff;
-        &:hover {
-          background-color: $raphael-green-400;
-          color: #fff;
+        border-bottom: 1px solid $raphael-green-400;
+        color: $raphael-green-400;
+        &:hover{
+          filter: brightness(.95);
         }
       }
     }
