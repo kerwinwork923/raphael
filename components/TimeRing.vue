@@ -131,6 +131,12 @@ const buttonStyle = computed(() => {
 });
 
 const progressStyle = computed(() => {
+  if (props.hasDetectRecord) {
+    return {
+      background: `conic-gradient(#74BC1F 0% 100%, #74BC1F 100% 100%)`,
+      transition: "background 0.1s linear",
+    };
+  }
   const progress = Math.min(
     ((props.totalTime * 1000 - remainingTime.value) /
       (props.totalTime * 1000)) *
@@ -144,6 +150,9 @@ const progressStyle = computed(() => {
 });
 
 const formattedTime = computed(() => {
+  if (props.hasDetectRecord) {
+    return `00:00:00`;
+  }
   const totalSeconds = Math.floor(remainingTime.value / 1000);
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -486,6 +495,7 @@ const useEndAPI = async () => {
     );
     console.log("結束 API 調用成功:", response);
     localStorage.removeItem("UID"); // 移除本地存儲的 UID
+    window.location.reload();
     return response;
   } catch (error) {
     console.error("結束 API 調用失敗:", error);
@@ -527,6 +537,7 @@ const checkForPendingAfterDetection = async () => {
       if (UID) {
         remainingTime.value = calculateRemainingTime(checkTime);
         currentState.value = DetectionState.AFTER;
+        alert("尚未完成使用後HRV檢測");
         detectHRVAfter(UID);
       }
     } else {
