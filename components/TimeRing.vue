@@ -186,7 +186,7 @@ const initializeUID = async () => {
       UID.value = response.UID;
       const { StartTime } = response;
 
-      // 計算倒數剩餘時間
+      // 計算倒數起始時間
       const startTime = new Date(
         `${StartTime.slice(0, 4)}-${StartTime.slice(4, 6)}-${StartTime.slice(
           6,
@@ -197,18 +197,36 @@ const initializeUID = async () => {
         )}:${StartTime.slice(12, 14)}`
       );
 
+      const resetTime = getResetTime();
+
+      // 判斷 StartTime 是否屬於今日
+      if (startTime < resetTime) {
+        console.log("記錄屬於昨日，無需恢復倒數");
+        return;
+      }
+
+      detectHRVBefore("1", response.UID);
+
+      // 計算倒數剩餘時間
       remainingTime.value = calculateRemainingTime(startTime);
+
+      const flagResponse = await API_HRV2_UID_Flag_Info("1", response.UID);
+
+      if (flagResponse === "N") {
+        detectHRVBefore(response.UID);
+      }
 
       // 如果倒數未完成，恢復倒數
       if (remainingTime.value > 0) {
         currentState.value = DetectionState.RUNNING;
         startCountdown(); // 啟動倒數計時
       } else {
-        // 如果倒數已過期，強制結束倒數
         console.log("倒數時間已過期，強制結束倒數...");
-        await forceEndCountdown(response.UID);
+        if (flagResponse === "Y") {
+          await forceEndCountdown(response.UID);
+        }
       }
-      return; // 如果有正在進行的倒數或已結束，直接結束流程
+      return;
     }
 
     console.log("沒有未完成的倒數計時，繼續檢查後測狀態...");
