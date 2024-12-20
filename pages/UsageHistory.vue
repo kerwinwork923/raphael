@@ -365,6 +365,16 @@ export default {
           display: grid;
           place-items: center;
           gap: 0.5rem;
+          transition: 0.2s ease all;
+          animation: fadeIn2 1s ease forwards;
+          animation-delay: 0s;
+          opacity: 0;
+          
+          @for $i from 1 through 4 {
+            &:nth-child(#{$i}) {
+              animation-delay: $i * 0.07s;
+            }
+          }
 
           .haveIcon {
             width: 24px;
@@ -407,6 +417,17 @@ export default {
             font-weight: 700;
             letter-spacing: 0.12px;
             margin-top: 0.75rem;
+          }
+
+          @keyframes fadeIn2 {
+            from {
+              opacity: 0;
+              transform: translateY(10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
           }
         }
       }
@@ -488,21 +509,8 @@ export default {
         }
 
         .contactBtn {
-          border: $raphael-green-400 1px solid;
-          color: $raphael-green-400;
-          cursor: pointer;
-          width: 100%;
+          @include btnWithBorderStyle($raphael-green-400,$raphael-green-400);
           margin-top: 1rem;
-          padding: 8px;
-          border-radius: 8px;
-          background-color: transparent;
-          font-size: 18px;
-          letter-spacing: 0.09px;
-          transition: all 0.2s ease;
-          &:hover {
-            background-color: $raphael-green-400;
-            color: $raphael-white;
-          }
         }
 
         .featureTitle {
