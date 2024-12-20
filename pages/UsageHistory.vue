@@ -353,7 +353,6 @@ export default {
               top: 50%;
               left: 50%;
               transform: translate(-50%, -50%);
-              filter: blur(3px);
               box-shadow: 0 0 10px rgba($color: $raphael-white, $alpha: 0.1);
             }
             .bigCircle {
@@ -429,7 +428,6 @@ export default {
               top: 50%;
               left: 50%;
               transform: translate(-50%, -50%);
-              filter: blur(3px);
               box-shadow: 0 0 10px rgba($color: $raphael-white, $alpha: 0.1);
             }
 
