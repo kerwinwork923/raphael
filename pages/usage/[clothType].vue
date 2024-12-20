@@ -21,13 +21,11 @@
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
     /> -->
-    <!-- <TimeRing
+    <TimeRing
       v-if="productName === '紅光版' || productName === '居家治療儀'"
       :totalTime="5400"
       :product-name="productName"
       :hasDetectRecord="hasDetectRecord"
-      :todayUseRecord="todayUseRecord"
-      :hasBeforeData="hasBeforeData"
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
     />
@@ -37,20 +35,18 @@
       :totalTime="7200"
       :product-name="productName"
       :hasDetectRecord="hasDetectRecord"
-      :todayUseRecord="todayUseRecord"
-      :hasBeforeData="hasBeforeData"
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
-    /> -->
+    />
 
-    <TimeRing
+    <!-- <TimeRing
       v-if="productName !== '保健版'"
       :totalTime="120"
       :product-name="productName"
       :hasDetectRecord="hasDetectRecord"
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
-    />
+    /> -->
 
     <div class="usageInfoGroup" v-if="usageCardState === '紅光版'">
       <div class="usageInfoCard">
