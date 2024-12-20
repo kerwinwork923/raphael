@@ -341,7 +341,7 @@ export default {
             }
 
             .circle {
-              @include circleAnimate(270px,rgba(255,255,255,0.85),rotate 4s infinite linear);
+              @include circleAnimate(270px,rgba(255,255,255,0.85),1px,rotate 4s infinite linear);
             }
           }
 
@@ -392,7 +392,7 @@ export default {
             }
 
             .circle {
-              @include circleAnimate(160px,rgba(255,255,255,0.85),rotate 4s infinite linear);
+              @include circleAnimate(160px,rgba(255,255,255,0.85),1px,rotate 4s infinite linear);
             }
             .robotImg {
               position: absolute;
@@ -474,7 +474,7 @@ export default {
           }
 
           .circle {
-            @include circleAnimate(160px,$raphael-white,unset);
+            @include circleAnimate(160px,$raphael-white,0px,unset);
           }
         }
 
