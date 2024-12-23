@@ -10,7 +10,6 @@
     <article>
       <h3>AI人臉HRV，輕鬆追蹤健康</h3>
       <div class="desCard">
-        <h3>快速精準的健康檢測</h3>
         <div class="slogan">智平衡健康集團運用FDA認證AI技術，推出全新人臉辨識HRV量測工具，透過手機相機掃描臉部，1-2分鐘即可快速分析生理數據。</div>
         <ul>
           <li>心跳變化分析</li>
@@ -497,6 +496,7 @@ article{
   padding: 0.75rem 1rem 3.125rem 1rem;
   touch-action: manipulation;
   bottom: 0;
+  z-index: 1;
   .goToHRVBtn {
     @include btnStyle($raphael-green-400,$raphael-white);
   }
