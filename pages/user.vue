@@ -16,7 +16,7 @@
         </div>
         <div class="infoTextGroup">
           <div class="topText">
-            {{ userInfo?.Name }} <span v-if="userInfo?.Name">，</span>您好
+            {{ userInfo?.Name }} 您好
           </div>
           <div class="score">
             <div class="circle"></div>
@@ -332,7 +332,7 @@ export default {
       gap: 0.5rem;
 
       .imgGroup {
-        width: 70px;
+        width: 60px;
         & > img {
           width: 100%;
           height: 100%;
