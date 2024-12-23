@@ -474,7 +474,7 @@ export default {
           }
 
           .circle {
-            @include circleAnimate(160px,$raphael-white,0,0px,unset);
+            @include circleAnimate(160px,$raphael-white,1,0px,unset);
           }
         }
 
