@@ -31,11 +31,11 @@
       <div class="ANSGroup" v-if="store.nowState =='first'">
         <h4>自律神經自覺症狀量表</h4>
         <div class="desCard">
+            <div class="slogan">透過100種症狀的分析，全面了解您的自律神經不平衡程度。</div>
             <div class="time">
               <img src="/assets/imgs/clock-green.svg" >
               <div class="text">填寫量表需花費約<span>25分鐘</span></div>
             </div>
-            <div class="slogan">透過100種症狀的分析，全面了解您的自律神經不平衡程度。</div>
             <div class="hint">
               <img src="/assets/imgs/step-green.svg" >
               <div class="text">可分段填寫，進度會自動儲存</div>
