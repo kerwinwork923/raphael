@@ -9,6 +9,15 @@
     </div>    
     <article>
       <h3>AI人臉HRV，輕鬆追蹤健康</h3>
+      <div class="desCard">
+        <h3>快速精準的健康檢測</h3>
+        <div class="slogan">智平衡健康集團運用FDA認證AI技術，推出全新人臉辨識HRV量測工具，透過手機相機掃描臉部，1-2分鐘即可快速分析生理數據。</div>
+        <ul>
+          <li>心跳變化分析</li>
+          <li>自律神經評估</li>
+          <li>生理年齡推算</li>
+        </ul>
+      </div>
       <div class="stepCard">
         <div class="item">
           <div class="icon">            
@@ -46,15 +55,6 @@
             <div class="text">立即查看自律神經狀態報告</div>
           </div>
         </div>
-      </div>
-      <div class="desCard">
-        <h3>快速精準的健康檢測</h3>
-        <div class="slogan">智平衡健康集團運用FDA認證AI技術，推出全新人臉辨識HRV量測工具，透過手機相機掃描臉部，1-2分鐘即可快速分析生理數據。</div>
-        <ul>
-          <li>心跳變化分析</li>
-          <li>自律神經評估</li>
-          <li>生理年齡推算</li>
-        </ul>
       </div>
       <div class="desCard">
         <h3>重要提醒</h3>
