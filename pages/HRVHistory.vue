@@ -9,12 +9,59 @@
     </div>    
     <article>
       <h3>AI人臉HRV，輕鬆追蹤健康</h3>
-      <ul>
-        <li>智平衡健康集團運用FDA認證AI技術，推出全新人臉辨識HRV量測工具，透過手機相機掃描臉部，1-2分鐘即可快速分析生理數據（如心跳變化），評估心臟自律神經狀態，並推算生理年齡，提供簡易的健康管理方式。</li>
-        <li>人臉辨識HRV量測<span class="point">僅反應心臟的交感與副交感神經功能</span>，若您需全面了解全身五臟六腑的自律神經狀態，請依醫師建議回診進行深入檢測。每天記錄數據，輕鬆追蹤健康變化，智平衡健康集團秉持專業與創新，結合AI智慧檢測與專業團隊與您攜手邁向更健康的未來！</li>
-      </ul>
+      <div class="stepCard">
+        <div class="item">
+          <div class="icon">            
+            <img src="/assets/imgs/camera-white.svg" >
+          </div>
+          <div class="content">
+            <hgroup>
+              <sub>Step 1</sub>
+              <h3>掃描臉部</h3>
+            </hgroup>
+            <div class="text">使用手機相機，對準臉部進行掃描。</div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="icon">            
+            <img src="/assets/imgs/heartRate-white.svg" >
+          </div>
+          <div class="content">
+            <hgroup>
+              <sub>Step 2</sub>
+              <h3>AI分析</h3>
+            </hgroup>
+            <div class="text">FDA認證AI技術即時分析生理數據。</div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="icon">            
+            <img src="/assets/imgs/heartRate-white.svg" >
+          </div>
+          <div class="content">
+            <hgroup>
+              <sub>Step 3</sub>
+              <h3>獲得報告</h3>
+            </hgroup>
+            <div class="text">立即查看自律神經狀態報告</div>
+          </div>
+        </div>
+      </div>
+      <div class="desCard">
+        <h3>快速精準的健康檢測</h3>
+        <div class="slogan">智平衡健康集團運用FDA認證AI技術，推出全新人臉辨識HRV量測工具，透過手機相機掃描臉部，1-2分鐘即可快速分析生理數據。</div>
+        <ul>
+          <li>心跳變化分析</li>
+          <li>自律神經評估</li>
+          <li>生理年齡推算</li>
+        </ul>
+      </div>
+      <div class="desCard">
+        <h3>重要提醒</h3>
+        <div class="slogan">人臉辨識HRV量測<span>僅反應心臟的交感與副交感神經功能</span>，若您需全面了解全身五臟六腑的自律神經狀態，請依醫師建議回診進行深入檢測。</div>
+        <div class="slogan">每天記錄數據，輕鬆追蹤健康變化，智平衡健康集團秉持專業與創新，結合AI智慧檢測與專業團隊與您攜手邁向更健康的未來！</div>
+      </div>
     </article>
-    <button class="goToHRVBtn" @click="openHRVAlert">前往檢測</button>
     <div class="detectWrap">
       <h3>最近 10筆 檢測記錄</h3>
       <div class="detectList">
@@ -53,7 +100,10 @@
     <a href="/HRVHistoryAll" class="goToHistoryAll"
       >歷史紀錄
       <img src="../assets/imgs/historyAllArrow.svg"/>
-    </a>
+    </a>    
+    <div class="HRVBtnGroup">
+      <button class="goToHRVBtn" @click="openHRVAlert">前往檢測</button>
+    </div>
   </div>
 </template>
 <script>
@@ -165,7 +215,7 @@ export default {
   width: 100%;
   min-height: 100vh;
   padding: 0 1rem;
-  padding-bottom: 50px;
+  padding-bottom: 116px;
 }
 .titleGroup {
   position: relative;
@@ -192,32 +242,101 @@ export default {
 
 article{
   display: grid;
-  gap: 0.5rem;
+  gap: 0.75rem;
   max-width: 768px;
 
   &>h3{
     font-size: 20px;
   }
-  &>ul{
+  .stepCard{    
+    position: relative;
     display: grid;
-    gap:0.5rem;
-    list-style-type: disc;
+    gap: 0.75rem;
+    font-size: 1.125rem;
+    color: $raphael-gray-500;
+    line-height: 29.1px;
+    letter-spacing: 0.05em;
+    
+    &::after{
+      content: "";
+      position: absolute;
+      background: $raphael-white;
+      width: 4px;
+      height: 100%;
+      border-radius: 0.5rem;
+      box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.25) inset;
+      left: 15px;
+    }
 
-    &>li{  
-      line-height: 29.1px;
-      color: $raphael-gray-500;
-      font-size: 18px;
-      font-style: normal;
-      font-weight: 400;
-      letter-spacing: 0.09px;
-      margin-left: 1.5rem;
-      &::marker{
-        font-size: 1rem;
+    .item{
+      display: flex;
+      gap: 0.5rem;
+      .icon{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: $raphael-cyan-400;
+        border-radius: 50%;
+        padding: 4px;
+        height: 32px;
+        z-index: 1;
+
+        &>img{
+          min-width: 24px;
+        }
       }
-      .point{
-        color: $raphael-red-300;
+      .content{
+        display: grid;
+        background: $raphael-white;
+        border-radius: 0.5rem;
+        width: 100%;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+        &>hgroup{
+          display: flex;
+          flex-direction: column;
+          &>sub{
+            color: $raphael-cyan-400;
+            font-size: 0.813rem;
+            line-height: 100%;
+          }
+          &>h3{
+            color: $raphael-black;
+            font-size: 1.25rem;
+          }
+        }
       }
     }
+  }
+  .desCard{    
+      display: grid;
+      gap: 0.5rem;
+      background: $raphael-white;
+      color: $raphael-gray-500;
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      font-size: 1.125rem;
+      line-height: 29.1px;
+      letter-spacing: 0.05em;
+
+      &>h3{
+        font-size: 1.25rem;
+        color: $raphael-black;
+      }
+
+      .slogan{
+        &>span{
+          color:$raphael-red-300;
+        }
+      }
+
+      &>ul{
+        list-style-type: disc;
+        li{
+          margin-left: 1.5rem;
+        }
+      }
   }
 }
 
@@ -366,10 +485,20 @@ article{
     color: $raphael-red-500;
   }
 }
-
-.goToHRVBtn {
-  @include btnStyle($raphael-green-400,$raphael-white);
+.HRVBtnGroup{
+  position: fixed;
+  background-color: $raphael-white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
   max-width: 768px;
-  margin-top: 1.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem 3.125rem 1rem;
+  touch-action: manipulation;
+  bottom: 0;
+  .goToHRVBtn {
+    @include btnStyle($raphael-green-400,$raphael-white);
+  }
 }
 </style>
