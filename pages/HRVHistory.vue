@@ -36,7 +36,7 @@
         </div>
         <div class="item">
           <div class="icon">            
-            <img src="/assets/imgs/heartRate-white.svg" >
+            <img src="/assets/imgs/heartbeat-white.svg" >
           </div>
           <div class="content">
             <hgroup>
@@ -249,7 +249,7 @@ article{
     font-size: 20px;
   }
   .stepCard{    
-    position: relative;
+    position: relative;                
     display: grid;
     gap: 0.75rem;
     font-size: 1.125rem;
