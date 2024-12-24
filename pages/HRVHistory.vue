@@ -486,7 +486,7 @@ article{
 }
 .HRVBtnGroup{
   position: fixed;
-  background-color: $raphael-white;
+  background-color: $raphael-gray-100;
   display: flex;
   justify-content: center;
   align-items: center;
