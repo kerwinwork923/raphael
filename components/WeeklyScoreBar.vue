@@ -51,16 +51,30 @@ import { defineComponent, computed, watch, onMounted, ref } from "vue";
 import { useWeeklyRecord } from "~/stores/weeklyQA.js";
 
 export default defineComponent({
-  setup() {
+  props: {
+    version: {
+      type: String,
+      default: "full", // 可選 "full" 或 "tracking"
+    },
+  },
+  setup(props) {
     const store = useWeeklyRecord();
     const qaList = ref(null);
+
+    // 根據版本選擇題目數據
+    const selectedQuestions = computed(() => {
+      return props.version === "tracking"
+        ? store.filteredQuestions // 症状追踪版本
+        : store.fullQuestions; // 完整版本
+    });
 
     const currentPage = computed(() => store.currentStep);
     const questionsPerPage = 7;
 
     const paginatedQuestions = computed(() => {
-      const start = (currentPage.value - 1) * questionsPerPage;
-      const end = currentPage.value * questionsPerPage;
+      if (!store.weeklyQA.length) return []; // 如果數據未加載，返回空數組
+      const start = (store.currentStep - 1) * store.questionsPerPage;
+      const end = start + store.questionsPerPage;
       return store.weeklyQA.slice(start, end);
     });
 
@@ -69,13 +83,15 @@ export default defineComponent({
     );
 
     const setScore = (QAData, scoreValue) => {
-      const index = store.weeklyQA.indexOf(QAData);
-      if (index !== -1) {
-        store.weeklyQA[index] = {
-          ...store.weeklyQA[index],
+      const globalIndex = store.weeklyQA.findIndex((q) => q.id === QAData.id);
+      if (globalIndex !== -1) {
+        store.weeklyQA[globalIndex] = {
+          ...store.weeklyQA[globalIndex],
           selectScore: scoreValue,
           score: scoreValue,
         };
+      } else {
+        console.error("QAData not found in weeklyQA!", QAData);
       }
     };
 
@@ -86,9 +102,7 @@ export default defineComponent({
 
     const scrollToTop = () => {
       if (qaList.value) {
-    
         qaList.value.scrollTop = 0;
-
 
         const rect = qaList.value.getBoundingClientRect();
         const offsetTop = rect.top + window.scrollY;
@@ -98,6 +112,15 @@ export default defineComponent({
         });
       }
     };
+
+    // watch(
+    //   () => props.version,
+    //   (newVersion) => {
+    //     store.setVersion(newVersion); // 通知 store 切換版本
+    //     store.updateWeeklyQA(); // 確保數據更新
+    //   },
+    //   { immediate: true } // 初始化時立即執行
+    // );
 
     watch(currentPage, () => {
       scrollToTop(); // 當頁面切換時觸發滾動
@@ -126,7 +149,7 @@ export default defineComponent({
   overflow-y: auto;
   @include scrollbarStyle();
 
-  @include respond-to("phone-landscape" ){
+  @include respond-to("phone-landscape") {
     height: calc(100vh - 100px);
   }
 }

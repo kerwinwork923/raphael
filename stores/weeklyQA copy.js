@@ -5,9 +5,6 @@ import { useCommon } from "./common";
 export const useWeeklyRecord = defineStore("weeklyQA", {
   state: () => ({
     weeklyQA: [],
-    version: "tracking",
-    fullQuestions: [], // 完整的題目集合
-    filteredQuestions: [], // 症狀追蹤版本的題目集合
     currentStep: 1,
     totalStep: 0,
     timesStep: 1,
@@ -67,23 +64,6 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
   },
 
   actions: {
-    setVersion(newVersion) {
-      console.log("Setting version to:", newVersion);
-      this.version = newVersion;
-      this.updateWeeklyQA();
-    },
-
-    updateWeeklyQA() {
-      console.log("Current version:", this.version);
-      this.weeklyQA =
-        this.version === "tracking"
-          ? this.filteredQuestions
-          : this.fullQuestions;
-      this.totalStep = Math.ceil(this.weeklyQA.length / this.questionsPerPage);
-      this.currentStep = 1; // 重置當前分頁
-      console.log("Updated weeklyQA:", this.weeklyQA);
-    },
-
     // 獲取題目
     async getQues() {
       const common = useCommon();
@@ -97,47 +77,50 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
       try {
         const response = await axios.post(
           "https://23700999.com:8081/HMA/API_ANSOnlineGetQues.jsp",
-          { MID, Token, MAID, Mobile }
+          {
+            MID: String(MID),
+            Token: String(Token),
+            MAID: String(MAID),
+            Mobile: String(Mobile),
+          }
         );
 
         if (response.status === 200) {
-          const {
-            QesCategoryArray,
-            QesCategoryNameArray,
-            QuesArray,
-            QuesNeedAnswerArray,
-          } = response.data;
+          console.log(response.data);
+          const { QesCategoryArray, QesCategoryNameArray, QuesArray } =
+            response.data;
 
-          // 完整題目
-          const fullQuestions = QuesArray.map((question, index) => ({
-            id: index + 1,
+          if (!QuesArray || !Array.isArray(QuesArray)) {
+            throw new Error("QuesArray is undefined or not an array");
+          }
+
+          const combinedData = QuesArray.map((question, index) => ({
+            id: index,
             question,
             category: QesCategoryNameArray[QesCategoryArray[index]] || "",
+            categoryIndex: QesCategoryArray[index],
+            score: 0,
             selectScore: 0,
+            label: "未知",
+            times: -1,
           }));
 
-          // 症狀追蹤題目
-          const filteredQuestions = QuesNeedAnswerArray.map((id) => {
-            const questionIndex = parseInt(id, 10) - 1; // 從字符串轉數字，且題目索引從 1 開始
-            return questionIndex >= 0 && questionIndex < fullQuestions.length
-              ? fullQuestions[questionIndex]
-              : null;
-          }).filter(Boolean);
+          this.weeklyQA = combinedData;
 
-          this.fullQuestions = fullQuestions;
-          this.filteredQuestions = filteredQuestions;
+          this.totalStep = Math.ceil(
+            combinedData.length / this.questionsPerPage
+          );
 
-          // 根據當前版本更新 weeklyQA
-          this.updateWeeklyQA();
+          this.preDisabled = this.currentStep === 1;
+          this.nextDisabled = this.totalStep <= 1;
         }
       } catch (err) {
-        console.error("Error fetching questions:", err);
+        console.error("Error while fetching questions:", err);
         common.setError(err);
       } finally {
         common.stopLoading();
       }
     },
-
     // 保存答案
     async API_ANSOnlineQSaveAns() {
       const common = useCommon();
@@ -165,8 +148,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
       // 構建答案映射
       let AnsMap = new Map();
       this.weeklyQA.forEach((question, index) => {
-        const score = question.score !== undefined ? question.score : 0; // 默認值為 0
-        AnsMap.set(`key${index + 1}`, String(score));
+        AnsMap.set(`key${index + 1}`, String(question.score));
       });
 
       // 將答案映射轉為 JSON 格式
@@ -203,8 +185,6 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
       } catch (err) {
         console.error("Error while saving answers:", err);
         common.setError(err);
-      } finally {
-        common.stopLoading();
       }
     },
 
@@ -472,9 +452,6 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         throw err;
       }
     },
-
-    //症狀追蹤版本(題目越來越少)
-
     // 檢查題目是否有3題
     // checkMinimumItems() {
     //   const itemsAboveZero = this.weeklyQA.filter((q) => q.selectScore > 0);
@@ -490,9 +467,10 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
       const common = useCommon();
       if (this.nowState === "first") {
         try {
+          await this.getQues();
           this.nowState = "score";
           this.currentStep = 1; // 初始化步驟
-          this.preDisabled = true; // 禁用上一步按鈕
+          this.preDisabled = true; // 第一頁禁用上一步按鈕
           this.nextDisabled = false; // 啟用下一步按鈕
         } catch (error) {
           console.error("Error fetching questions:", error);
@@ -500,9 +478,10 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         }
       } else if (this.nowState === "second") {
         try {
+          await this.getQues();
           this.nowState = "score";
           this.currentStep = 1; // 初始化步驟
-          this.preDisabled = true; // 禁用上一步按鈕
+          this.preDisabled = true; // 第一頁禁用上一步按鈕
           this.nextDisabled = false; // 啟用下一步按鈕
         } catch (error) {
           console.error("Error fetching questions:", error);
@@ -527,15 +506,9 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
             alert("選項項目不足，請至少選擇3題");
             return false;
           }
-
-          // 初始化未設置的 times 為 -1
-          this.weeklyQA.forEach((q) => {
-            if (q.times === undefined) {
-              q.times = -1; // 保持預設值為 -1
-            }
-          });
-
+          // await this.API_ANSOnlineQSaveAns();
           this.nowState = "times";
+
           this.totalTimesStep = Math.ceil(
             this.sortedByScore.length / this.questionsPerPage
           );
