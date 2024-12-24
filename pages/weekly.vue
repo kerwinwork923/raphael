@@ -39,32 +39,36 @@
       <div class="ANSGroup" v-if="store.nowState == 'first'">
         <h4>自律神經自覺症狀量表</h4>
         <div class="desCard">
-            <div class="slogan">透過100種症狀的分析，全面了解您的自律神經不平衡程度。</div>
-            <div class="time">
-              <img src="/assets/imgs/clock-green.svg" >
-              <div class="text">填寫量表需花費約<span>25分鐘</span></div>
-            </div>
-            <div class="hint">
-              <img src="/assets/imgs/step-green.svg" >
-              <div class="text">可分段填寫，進度會自動儲存</div>
-            </div>
+          <div class="slogan">
+            透過100種症狀的分析，全面了解您的自律神經不平衡程度。
+          </div>
+          <div class="time">
+            <img src="/assets/imgs/clock-green.svg" />
+            <div class="text">填寫量表需花費約<span>25分鐘</span></div>
+          </div>
+          <div class="hint">
+            <img src="/assets/imgs/step-green.svg" />
+            <div class="text">可分段填寫，進度會自動儲存</div>
+          </div>
         </div>
         <div class="stepCard">
           <div class="item">
-            <div class="icon">            
-              <img src="/assets/imgs/brain-white.svg" >
+            <div class="icon">
+              <img src="/assets/imgs/brain-white.svg" />
             </div>
             <div class="content">
               <hgroup>
                 <sub>Step 1</sub>
                 <h3>症狀評估</h3>
               </hgroup>
-              <div class="text">依當下感覺逐題評估，填寫每項症狀的嚴重程度。</div>
+              <div class="text">
+                依當下感覺逐題評估，填寫每項症狀的嚴重程度。
+              </div>
             </div>
           </div>
           <div class="item">
-            <div class="icon">            
-              <img src="/assets/imgs/heartRate-white.svg" >
+            <div class="icon">
+              <img src="/assets/imgs/heartRate-white.svg" />
             </div>
             <div class="content">
               <hgroup>
@@ -75,8 +79,8 @@
             </div>
           </div>
           <div class="item">
-            <div class="icon">            
-              <img src="/assets/imgs/choose-white.svg" >
+            <div class="icon">
+              <img src="/assets/imgs/choose-white.svg" />
             </div>
             <div class="content">
               <hgroup>
@@ -143,9 +147,9 @@
         v-if="
           !(store.nowState === 'first') &&
           !(store.nowState === 'second') &&
+          !(store.nowState === 'choose') &&
           !(store.nowState === 'score' && store.currentStep === 1) &&
-          !(store.nowState === 'times' && store.timesStep === 1) &&
-          !(store.nowState === 'choose' && store.timesStep === 1)
+          !(store.nowState === 'times' && store.timesStep === 1)
         "
       >
         {{ store.preText }}
@@ -290,15 +294,15 @@ export default {
     overflow-y: scroll;
     @include scrollbarStyle();
 
-    h4{
-      color:$raphael-black;
+    h4 {
+      color: $raphael-black;
       font-size: 20px;
       font-style: normal;
       font-weight: bold;
       line-height: 100%;
       letter-spacing: var(--Title-Medium-Tracking, 0.15px);
     }
-    .desCard{    
+    .desCard {
       display: grid;
       gap: 0.5rem;
       background: $raphael-white;
@@ -310,22 +314,22 @@ export default {
       line-height: 29.1px;
       letter-spacing: 0.05em;
 
-      .time{
+      .time {
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        .text{
-          &>span{
+        .text {
+          & > span {
             color: $raphael-red-300;
             margin-left: 0.25rem;
           }
         }
       }
-      .hint{        
+      .hint {
         @extend .time;
       }
     }
-    .stepCard{    
+    .stepCard {
       position: relative;
       display: grid;
       gap: 0.75rem;
@@ -333,8 +337,8 @@ export default {
       color: $raphael-gray-500;
       line-height: 29.1px;
       letter-spacing: 0.05em;
-      
-      &::after{
+
+      &::after {
         content: "";
         position: absolute;
         background: $raphael-white;
@@ -345,10 +349,10 @@ export default {
         left: 15px;
       }
 
-      .item{
+      .item {
         display: flex;
         gap: 0.5rem;
-        .icon{
+        .icon {
           display: flex;
           align-items: center;
           justify-content: center;
@@ -358,11 +362,11 @@ export default {
           height: 32px;
           z-index: 1;
 
-          &>img{
+          & > img {
             min-width: 24px;
           }
         }
-        .content{
+        .content {
           display: grid;
           background: $raphael-white;
           border-radius: 0.5rem;
@@ -370,15 +374,15 @@ export default {
           gap: 0.5rem;
           padding: 0.75rem;
           box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-          &>hgroup{
+          & > hgroup {
             display: flex;
             flex-direction: column;
-            &>sub{
+            & > sub {
               color: $raphael-cyan-400;
               font-size: 0.813rem;
               line-height: 100%;
             }
-            &>h3{
+            & > h3 {
               color: $raphael-black;
               font-size: 1.25rem;
             }

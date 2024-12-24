@@ -68,20 +68,20 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
 
   actions: {
     setVersion(newVersion) {
-      console.log("Setting version to:", newVersion);
+      // console.log("Setting version to:", newVersion);
       this.version = newVersion;
       this.updateWeeklyQA();
     },
 
     updateWeeklyQA() {
-      console.log("Current version:", this.version);
+      // console.log("Current version:", this.version);
       this.weeklyQA =
         this.version === "tracking"
           ? this.filteredQuestions
           : this.fullQuestions;
       this.totalStep = Math.ceil(this.weeklyQA.length / this.questionsPerPage);
       this.currentStep = 1; // 重置當前分頁
-      console.log("Updated weeklyQA:", this.weeklyQA);
+      // console.log("Updated weeklyQA:", this.weeklyQA);
     },
 
     // 獲取題目
