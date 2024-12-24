@@ -38,13 +38,54 @@
 
       <div class="ANSGroup" v-if="store.nowState == 'first'">
         <h4>自律神經自覺症狀量表</h4>
-        <div>
-          透過100種症狀的分析，全面了解您的自律神經不平衡程度。填寫量表需花費約<span>25分鐘</span>，填寫共分為三個步驟：
-          <ul>
-            <li>依<span>當下感覺逐題評估</span>，填寫每項症狀的嚴重程度。</li>
-            <li>針對困擾您的症狀，<span>填寫每週發生的頻率</span>。</li>
-            <li>挑選<span>3-10項</span>您目前最困擾的症狀。</li>
-          </ul>
+        <div class="desCard">
+            <div class="slogan">透過100種症狀的分析，全面了解您的自律神經不平衡程度。</div>
+            <div class="time">
+              <img src="/assets/imgs/clock-green.svg" >
+              <div class="text">填寫量表需花費約<span>25分鐘</span></div>
+            </div>
+            <div class="hint">
+              <img src="/assets/imgs/step-green.svg" >
+              <div class="text">可分段填寫，進度會自動儲存</div>
+            </div>
+        </div>
+        <div class="stepCard">
+          <div class="item">
+            <div class="icon">            
+              <img src="/assets/imgs/brain-white.svg" >
+            </div>
+            <div class="content">
+              <hgroup>
+                <sub>Step 1</sub>
+                <h3>症狀評估</h3>
+              </hgroup>
+              <div class="text">依當下感覺逐題評估，填寫每項症狀的嚴重程度。</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="icon">            
+              <img src="/assets/imgs/heartRate-white.svg" >
+            </div>
+            <div class="content">
+              <hgroup>
+                <sub>Step 2</sub>
+                <h3>頻率記錄</h3>
+              </hgroup>
+              <div class="text">針對困擾您的症狀，填寫每週發生的頻率。</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="icon">            
+              <img src="/assets/imgs/choose-white.svg" >
+            </div>
+            <div class="content">
+              <hgroup>
+                <sub>Step 3</sub>
+                <h3>重點標記</h3>
+              </hgroup>
+              <div class="text">挑選 3-10項 您目前最困擾的症狀</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -243,50 +284,107 @@ export default {
   }
 
   .ANSGroup {
+    height: calc(100vh - 207px);
     margin-top: 1rem;
-    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    overflow-y: scroll;
+    @include scrollbarStyle();
 
-    h4 {
-      color: $raphael-black;
+    h4{
+      color:$raphael-black;
       font-size: 20px;
       font-style: normal;
       font-weight: bold;
       line-height: 100%;
       letter-spacing: var(--Title-Medium-Tracking, 0.15px);
     }
-
-    & > div {
+    .desCard{    
+      display: grid;
+      gap: 0.5rem;
+      background: $raphael-white;
       color: $raphael-gray-500;
       border-radius: 0.5rem;
       margin: 0.75rem 0;
       padding: 0.75rem;
       font-size: 1.125rem;
       line-height: 29.1px;
-      letter-spacing: 0.09px;
-    }
+      letter-spacing: 0.05em;
 
-    ul {
+      .time{
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        .text{
+          &>span{
+            color: $raphael-red-300;
+            margin-left: 0.25rem;
+          }
+        }
+      }
+      .hint{        
+        @extend .time;
+      }
+    }
+    .stepCard{    
       position: relative;
       display: grid;
       gap: 0.75rem;
       font-size: 1.125rem;
       color: $raphael-gray-500;
-      counter-reset: list-counter;
+      line-height: 29.1px;
+      letter-spacing: 0.05em;
+      
+      &::after{
+        content: "";
+        position: absolute;
+        background: $raphael-white;
+        width: 4px;
+        height: 100%;
+        border-radius: 0.5rem;
+        box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.25) inset;
+        left: 15px;
+      }
 
-      li {
-        line-height: 29.1px;
-        counter-increment: list-counter;
-        padding-left: 1.125rem;
-        &::before {
-          content: counter(list-counter) ". ";
-          position: absolute;
-          left: 0;
+      .item{
+        display: flex;
+        gap: 0.5rem;
+        .icon{
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: $raphael-cyan-400;
+          border-radius: 50%;
+          padding: 4px;
+          height: 32px;
+          z-index: 1;
+
+          &>img{
+            min-width: 24px;
+          }
+        }
+        .content{
+          display: grid;
+          background: $raphael-white;
+          border-radius: 0.5rem;
+          width: 100%;
+          gap: 0.5rem;
+          padding: 0.75rem;
+          box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+          &>hgroup{
+            display: flex;
+            flex-direction: column;
+            &>sub{
+              color: $raphael-cyan-400;
+              font-size: 0.813rem;
+              line-height: 100%;
+            }
+            &>h3{
+              color: $raphael-black;
+              font-size: 1.25rem;
+            }
+          }
         }
       }
-    }
-
-    span {
-      color: $raphael-red-300;
     }
   }
 
