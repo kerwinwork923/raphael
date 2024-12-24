@@ -65,8 +65,10 @@
       </div>
 
       <!-- 健康方案推薦 -->
-      <h3 class="recommendTitle">健康方案推薦</h3>
-      <div class="recommendWrap">
+      <h3 class="recommendTitle" v-if="recommendedProducts.length > 0">
+        健康方案推薦
+      </h3>
+      <div class="recommendWrap" v-if="recommendedProducts.length > 0">
         <div
           class="recommendDiv"
           v-for="(recommendation, index) in recommendedProducts"
@@ -288,7 +290,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.usageHistoryWrap {  
+.usageHistoryWrap {
   display: flex;
   flex-direction: column;
   place-items: center;
@@ -341,7 +343,13 @@ export default {
             }
 
             .circle {
-              @include circleAnimate(270px,rgba(255,255,255,0.85),0.6,1px,rotate 4s infinite linear);
+              @include circleAnimate(
+                270px,
+                rgba(255, 255, 255, 0.85),
+                0.6,
+                1px,
+                rotate 4s infinite linear
+              );
             }
           }
 
@@ -369,7 +377,7 @@ export default {
           animation: fadeIn2 1s ease forwards;
           animation-delay: 0s;
           opacity: 0;
-          
+
           @for $i from 1 through 4 {
             &:nth-child(#{$i}) {
               animation-delay: $i * 0.07s;
@@ -392,7 +400,13 @@ export default {
             }
 
             .circle {
-              @include circleAnimate(160px,rgba(255,255,255,0.85),0.6,1px,rotate 4s infinite linear);
+              @include circleAnimate(
+                160px,
+                rgba(255, 255, 255, 0.85),
+                0.6,
+                1px,
+                rotate 4s infinite linear
+              );
             }
             .robotImg {
               position: absolute;
@@ -445,7 +459,7 @@ export default {
 
     .recommendWrap {
       display: grid;
-      gap: .75rem;
+      gap: 0.75rem;
       margin-top: 0.75rem;
       .robotImg {
         position: absolute;
@@ -468,13 +482,13 @@ export default {
           place-items: center;
           gap: 0.5rem;
 
-          &>img {
+          & > img {
             height: 170px;
             z-index: 3;
           }
 
           .circle {
-            @include circleAnimate(160px,$raphael-white,1,0px,unset);
+            @include circleAnimate(160px, $raphael-white, 1, 0px, unset);
           }
         }
 
@@ -509,7 +523,7 @@ export default {
         }
 
         .contactBtn {
-          @include btnWithBorderStyle($raphael-green-400,$raphael-green-400);
+          @include btnWithBorderStyle($raphael-green-400, $raphael-green-400);
           margin-top: 1rem;
         }
 
@@ -554,7 +568,7 @@ export default {
   z-index: 99;
 
   button {
-    @include btnStyle($raphael-green-400,$raphael-white);
+    @include btnStyle($raphael-green-400, $raphael-white);
   }
 }
 
@@ -565,11 +579,11 @@ export default {
     filter: brightness(1.2) blur(1px);
   }
   50% {
-    transform:scale(1.05) rotate(180deg);
+    transform: scale(1.05) rotate(180deg);
     filter: brightness(1.2) blur(3px);
   }
   100% {
-    transform:scale(1.03) rotate(360deg);
+    transform: scale(1.03) rotate(360deg);
     filter: brightness(1.2) blur(1px);
   }
 }
