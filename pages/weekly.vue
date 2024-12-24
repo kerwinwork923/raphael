@@ -6,13 +6,21 @@
     <div class="weeklyQAGroup">
       <TagList />
       <StepIndicator
-        v-if="store.nowState!=='first' && store.nowState == 'result'"
+        v-if="
+          store.nowState !== 'first' &&
+          store.nowState !== 'second' &&
+          store.nowState == 'result'
+        "
         :stepTexts="['填寫問卷', '結果分析']"
         :currentStep="1"
       />
 
       <StepIndicator
-        v-if="store.nowState!=='first' &&  store.nowState !== 'result'"
+        v-if="
+          store.nowState !== 'first' &&
+          store.nowState !== 'second' &&
+          store.nowState !== 'result'
+        "
         :stepTexts="['填寫問卷', '結果分析']"
         :currentStep="0"
       />
@@ -28,87 +36,64 @@
         >
       </div>
 
-      <div class="ANSGroup" v-if="store.nowState =='first'">
+      <div class="ANSGroup" v-if="store.nowState == 'first'">
         <h4>自律神經自覺症狀量表</h4>
-        <div class="desCard">
-            <div class="slogan">透過100種症狀的分析，全面了解您的自律神經不平衡程度。</div>
-            <div class="time">
-              <img src="/assets/imgs/clock-green.svg" >
-              <div class="text">填寫量表需花費約<span>25分鐘</span></div>
-            </div>
-            <div class="hint">
-              <img src="/assets/imgs/step-green.svg" >
-              <div class="text">可分段填寫，進度會自動儲存</div>
-            </div>
-        </div>
-        <div class="stepCard">
-          <div class="item">
-            <div class="icon">            
-              <img src="/assets/imgs/brain-white.svg" >
-            </div>
-            <div class="content">
-              <hgroup>
-                <sub>Step 1</sub>
-                <h3>症狀評估</h3>
-              </hgroup>
-              <div class="text">依當下感覺逐題評估，填寫每項症狀的嚴重程度。</div>
-            </div>
-          </div>
-          <div class="item">
-            <div class="icon">            
-              <img src="/assets/imgs/heartRate-white.svg" >
-            </div>
-            <div class="content">
-              <hgroup>
-                <sub>Step 2</sub>
-                <h3>頻率記錄</h3>
-              </hgroup>
-              <div class="text">針對困擾您的症狀，填寫每週發生的頻率。</div>
-            </div>
-          </div>
-          <div class="item">
-            <div class="icon">            
-              <img src="/assets/imgs/choose-white.svg" >
-            </div>
-            <div class="content">
-              <hgroup>
-                <sub>Step 3</sub>
-                <h3>重點標記</h3>
-              </hgroup>
-              <div class="text">挑選 3-10項 您目前最困擾的症狀</div>
-            </div>
-          </div>
+        <div>
+          透過100種症狀的分析，全面了解您的自律神經不平衡程度。填寫量表需花費約<span>25分鐘</span>，填寫共分為三個步驟：
+          <ul>
+            <li>依<span>當下感覺逐題評估</span>，填寫每項症狀的嚴重程度。</li>
+            <li>針對困擾您的症狀，<span>填寫每週發生的頻率</span>。</li>
+            <li>挑選<span>3-10項</span>您目前最困擾的症狀。</li>
+          </ul>
         </div>
       </div>
-      <div class="AnsGroup2" v-if="store.nowState =='second'">
+
+      <div class="AnsGroup2" v-if="store.nowState == 'second'">
         <h5>請依照您今日的需求，選擇您想要的評估方式</h5>
         <div class="chooseGroup">
-          <div class="chooseBox ">
+          <div
+            class="chooseBox"
+            :class="{ active: store.version === 'tracking' }"
+            @click="store.setVersion('tracking')"
+          >
             <h4>症狀追蹤</h4>
-            <p>只評估上次有問題的症狀，花費5-10分鐘的時間，快速看看身體有沒有變化。</p>
+            <p>只評估上次有問題的症狀，花費5-10分鐘的時間。</p>
             <div class="bgImg">
-              <img src="/assets/imgs/3DMap.png" alt="">
+              <img src="/assets/imgs/3DMap.png" alt="症狀追蹤" />
             </div>
           </div>
-          <div class="chooseBox">
+          <div
+            class="chooseBox"
+            :class="{ active: store.version === 'full' }"
+            @click="store.setVersion('full')"
+          >
             <h4>完整評估</h4>
-            <p>檢查所有可能的症狀，需花費約25分鐘的時間，全面了解自己的健康狀況。</p>
+            <p>檢查所有可能的症狀，需花費約25分鐘的時間。</p>
             <div class="bgImg">
-              <img src="/assets/imgs/3DTest.png" alt="">
+              <img src="/assets/imgs/3DTest.png" alt="完整評估" />
             </div>
           </div>
         </div>
       </div>
-      
+
       <WeeklyResult v-if="store.nowState == 'result'" />
-      <WeeklyScoreBar v-if="store.nowState == 'score'" />
+      <WeeklyScoreBar
+        v-if="store.nowState == 'score'"
+        :version="activeChoice === 'symptomTracking' ? 'tracking' : 'full'"
+      />
       <TagTimesList v-if="store.nowState == 'times'" />
       <SymptomChoose v-if="store.nowState == 'choose'" />
     </div>
 
     <div
       class="weeklyBtnGroup"
-      v-if="store.nowState==='first'||store.nowState === 'score' || store.nowState === 'times' || store.nowState === 'choose'"
+      v-if="
+        store.nowState === 'first' ||
+        store.nowState === 'second' ||
+        store.nowState === 'score' ||
+        store.nowState === 'times' ||
+        store.nowState === 'choose'
+      "
     >
       <button
         class="weeklyBtn preBtn"
@@ -116,9 +101,10 @@
         :disabled="preDisabled"
         v-if="
           !(store.nowState === 'first') &&
+          !(store.nowState === 'second') &&
           !(store.nowState === 'score' && store.currentStep === 1) &&
           !(store.nowState === 'times' && store.timesStep === 1) &&
-          !(store.nowState === 'choose' && store.timesStep === 1) 
+          !(store.nowState === 'choose' && store.timesStep === 1)
         "
       >
         {{ store.preText }}
@@ -134,7 +120,7 @@
 import Navbar from "~/components/Navbar.vue";
 import TagList from "../components/TagList.vue";
 import RaphaelLoading from "~/components/RaphaelLoading.vue";
-import { ref, watch } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useWeeklyRecord } from "~/stores/weeklyQA.js";
 import WeeklyScoreBar from "~/components/WeeklyScoreBar.vue";
@@ -143,7 +129,7 @@ import SymptomChoose from "~/components/SymptomChoose.vue";
 import { useCommon } from "@/stores/common";
 import StepIndicator from "~/components/StepIndicator.vue";
 import TitleMenu from "~/components/TitleMenu.vue";
-import Detail from "./weeklyResultDetail/[detail].vue";
+
 export default {
   components: {
     Navbar,
@@ -160,31 +146,10 @@ export default {
     const localData = localStorage.getItem("userData");
     let MID, Token, MAID, Mobile;
 
-    try {
-      if (localData) {
-        ({ MID, Token, MAID, Mobile } = JSON.parse(localData));
-      }
-    } catch (e) {
-      console.error("Error parsing localStorage data", e);
-    }
-
-    if (!MID || !Token || !MAID || !Mobile) {
-      router.push("/");
-      return;
-    }
+    const activeChoice = ref("symptomTracking");
     const store = useWeeklyRecord();
     const common = useCommon();
 
-    const start = async () => {
-      common.startLoading();
-      await store.API_API_ANSFirstDetail();
-
-      common.stopLoading();
-    };
-
-    start();
-
-    // store.API_API_ANSSecond()
     const h1Text = computed(() => {
       switch (store.nowState) {
         case "score":
@@ -198,11 +163,33 @@ export default {
       }
     });
 
-    const resultChange = () => {
-      store.nowState = "result";
+    try {
+      if (localData) {
+        ({ MID, Token, MAID, Mobile } = JSON.parse(localData));
+      }
+    } catch (e) {
+      console.error("Error parsing localStorage data", e);
+    }
+
+    if (!MID || !Token || !MAID || !Mobile) {
+      router.push("/");
+      return;
+    }
+
+    const start = async () => {
+      common.startLoading();
+      await store.API_API_ANSFirstDetail();
+      common.stopLoading();
     };
 
-    return { store, h1Text, common, resultChange, useCommon };
+    start();
+
+    return {
+      store,
+      h1Text,
+      common,
+      activeChoice,
+    };
   },
 };
 </script>
@@ -224,14 +211,11 @@ export default {
   }
 
   .subListTitle {
-    color:$raphael-gray-500;
+    color: $raphael-gray-500;
     font-weight: 400;
     line-height: 25.9px;
     letter-spacing: 0.5px;
     margin: 0.75rem 0 0.5rem 0;
-  }
-  .subListActive {
-    color: $raphael-red-300;
   }
 
   .weeklyBtnGroup {
@@ -245,172 +229,125 @@ export default {
     padding: 0.75rem 0 3.125rem 0;
     touch-action: manipulation;
   }
+
   .weeklyBtn {
-    @include btnStyle($raphael-green-400,$raphael-white);
+    @include btnStyle($raphael-green-400, $raphael-white);
     &:disabled {
       opacity: 0.5;
     }
   }
+
   .preBtn {
     background-color: $raphael-gray-200;
     color: $raphael-gray-500;
   }
-  .ANSGroup{
-    height: calc(100vh - 207px);
-    margin-top: 1rem;
-    padding-bottom: 0.75rem;
-    overflow-y: scroll;
-    @include scrollbarStyle();
 
-    h4{
-      color:$raphael-black;
+  .ANSGroup {
+    margin-top: 1rem;
+    margin-bottom: 0.75rem;
+
+    h4 {
+      color: $raphael-black;
       font-size: 20px;
       font-style: normal;
       font-weight: bold;
       line-height: 100%;
       letter-spacing: var(--Title-Medium-Tracking, 0.15px);
     }
-    .desCard{    
-      display: grid;
-      gap: 0.5rem;
-      background: $raphael-white;
+
+    & > div {
       color: $raphael-gray-500;
       border-radius: 0.5rem;
       margin: 0.75rem 0;
       padding: 0.75rem;
       font-size: 1.125rem;
       line-height: 29.1px;
-      letter-spacing: 0.05em;
-
-      .time{
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        .text{
-          &>span{
-            color: $raphael-red-300;
-            margin-left: 0.25rem;
-          }
-        }
-      }
-      .hint{        
-        @extend .time;
-      }
+      letter-spacing: 0.09px;
     }
-    .stepCard{    
+
+    ul {
       position: relative;
       display: grid;
       gap: 0.75rem;
       font-size: 1.125rem;
       color: $raphael-gray-500;
-      line-height: 29.1px;
-      letter-spacing: 0.05em;
-      
-      &::after{
-        content: "";
-        position: absolute;
-        background: $raphael-white;
-        width: 4px;
-        height: 100%;
-        border-radius: 0.5rem;
-        box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.25) inset;
-        left: 15px;
-      }
+      counter-reset: list-counter;
 
-      .item{
-        display: flex;
-        gap: 0.5rem;
-        .icon{
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: $raphael-cyan-400;
-          border-radius: 50%;
-          padding: 4px;
-          height: 32px;
-          z-index: 1;
-
-          &>img{
-            min-width: 24px;
-          }
-        }
-        .content{
-          display: grid;
-          background: $raphael-white;
-          border-radius: 0.5rem;
-          width: 100%;
-          gap: 0.5rem;
-          padding: 0.75rem;
-          box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-          &>hgroup{
-            display: flex;
-            flex-direction: column;
-            &>sub{
-              color: $raphael-cyan-400;
-              font-size: 0.813rem;
-              line-height: 100%;
-            }
-            &>h3{
-              color: $raphael-black;
-              font-size: 1.25rem;
-            }
-          }
+      li {
+        line-height: 29.1px;
+        counter-increment: list-counter;
+        padding-left: 1.125rem;
+        &::before {
+          content: counter(list-counter) ". ";
+          position: absolute;
+          left: 0;
         }
       }
     }
+
+    span {
+      color: $raphael-red-300;
+    }
   }
-  .AnsGroup2{
+
+  .AnsGroup2 {
     margin-top: 1rem;
     margin-bottom: 0.75rem;
-    h5{
+
+    h5 {
       color: $raphael-gray-500;
       font-size: 16px;
       line-height: 25.888px;
       letter-spacing: 0.5px;
     }
-    .chooseGroup{
+
+    .chooseGroup {
       margin-top: 0.75rem;
       display: flex;
       flex-direction: column;
-      gap: .75rem;
+      gap: 0.75rem;
 
-      .chooseBox{
-        position: relative;
+      .chooseBox {
         background-color: $raphael-white;
         cursor: pointer;
         padding: 0.75rem;
         border-radius: 8px;
         transition: all 0.2s ease;
-        h4{
-          color: $raphael-black;
-          font-size: 20px;
-          font-weight: 500;
-          line-height: 100%; 
-          letter-spacing:  0.15px;
-          margin-bottom: 0.5rem;
-        }
-        p{
-          font-size: 18px;
-          font-style: normal;
-          line-height: 29.124px; 
-          letter-spacing: 0.09px;
-          color: $raphael-gray-500;
-        }
-        .bgImg{
+        position: relative;
+
+        .bgImg {
           position: absolute;
-          bottom: 0;
           right: 0;
-          img{
-            width: 135px;
+          bottom: 0;
+
+          img {
+            width: 125px;
           }
         }
 
-        &:hover{
-          background:$raphael-cyan-400;
-          color:$raphael-white;
-          h4{
-            color:$raphael-white;
+        &.active {
+          background-color: $raphael-cyan-400;
+          color: $raphael-white;
+
+          h4 {
+            color: $raphael-white;
           }
+
+          p {
+            color: $raphael-white;
+          }
+        }
+
+        h4 {
+          font-size: 20px;
+          font-weight: 500;
+          margin-bottom: 0.5rem;
+        }
+
+        p {
+          font-size: 18px;
+          color: $raphael-gray-500;
+          line-height: 1.5;
         }
       }
     }
