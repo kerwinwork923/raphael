@@ -5,7 +5,7 @@
     <TitleMenu Text="結果分析" link="/weekly2" :scrollToBottom="true" />
     <div class="resultTopGroup">
       <div class="resultInfo">
-        <h4>姓名 : {{ compareData.ChildInfo[0]?.Name || "寶貝" }}</h4>
+        <h4>姓名 : {{ compareData.ChildInfo?.[0]?.Name || "寶貝" }}</h4>
       </div>
       <img class="doctorImg" src="~/assets/imgs/doctor.png" alt="" />
     </div>
@@ -16,9 +16,9 @@
         v-for="(item, index) in combinedScores"
         :key="index"
         :symptomName="item.TypeName"
-        :current="item.current"
-        :previous="item.previous"
-        :sex="compareData.ChildInfo?.Sex"
+        :current="item.current || {}"
+        :previous="item.previous || {}"
+        :sex="compareData.ChildInfo?.Sex || ''"
       />
     </div>
 

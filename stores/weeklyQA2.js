@@ -359,7 +359,7 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
           this.currentStep += 1;
         } else {
           if (this.sortedByScore.length < 3) {
-            alert("请至少選擇3題目！");
+            alert("请至少选择3题目！");
             return;
           }
           this.nowState = "times";
@@ -375,16 +375,72 @@ export const useWeeklyRecord = defineStore("weeklyQA2", {
           this.nowState = "choose";
         }
       } else if (this.nowState === "choose") {
-        this.saveAllData();
-        // await this.fetchResultAnalysis("");
-        // this.nowState = "result";
-        location.reload();
+        // 保存所有數據並調用 API 判定
+        await this.saveAllData(); // 保存答案、次數和解決方案
+        await this.resetStateAndFetchResult(); // 調用判定邏輯並進入結果
+        return;
       }
 
-      // 在状态切换完成后更新进度条
+      // 更新進度條
       this.updateProgress();
     },
 
+    async resetStateAndFetchResult() {
+      const common = useCommon();
+      common.startLoading();
+
+      try {
+        // 獲取本地存儲數據
+        const localData = JSON.parse(localStorage.getItem("userData") || "{}");
+        const { MID, Token, MAID, Mobile, ChildInfo } = localData;
+
+        if (!MID || !Token || !MAID || !Mobile || !ChildInfo) {
+          throw new Error("Missing required user data");
+        }
+
+        // 組裝 API 請求參數
+        const payload = {
+          MID,
+          Token,
+          MAID,
+          Mobile,
+          CID: ChildInfo[0].CID,
+          AID: this.theLatestData.AID || "",
+        };
+
+        console.log("Calling API with payload:", payload);
+
+        // 發送 API 請求
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_BB_GrowthFirst.jsp",
+          payload
+        );
+
+        // 處理 API 響應
+        if (response.data?.ChildInfo) {
+          const diffDaysFromToday = Number(
+            response.data.ChildInfo[0].diffDaysFromToday
+          );
+
+          if (diffDaysFromToday < 0) {
+            // 如果條件未滿足，重新獲取問題數據
+            await this.getQues();
+            this.nowState = "score";
+          } else {
+            // 更新狀態為結果顯示
+            this.nowState = "result";
+            this.childResultData = response.data;
+            this.babyScrollProgress = 100; // 完成進度條
+          }
+        } else {
+          throw new Error("API response missing required data");
+        }
+      } catch (error) {
+        console.error("Error during result analysis:", error);
+      } finally {
+        common.stopLoading();
+      }
+    },
     handlePrevStep() {
       if (this.nowState === "times") {
         if (this.timesStep > 1) {

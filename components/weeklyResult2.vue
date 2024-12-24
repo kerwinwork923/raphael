@@ -136,6 +136,10 @@ export default {
       backToUser,
       computedScore,
       ChildInfo,
+      formatTimestamp3,
+      scoreColorFn,
+      computedEmoji2,
+      formatTimestamp
     };
   },
 };
