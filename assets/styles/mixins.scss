@@ -184,14 +184,14 @@
   }
 }
 
-@mixin circleAnimate($px,$beforeBgColor,$blur,$animate) {
+@mixin circleAnimate($px,$beforeBgColor,$opacity,$blur,$animate) {
   position: absolute;
   width: $px;
   height: $px;
   border-radius: 50%;
   top: 50%;
   left: 50%;
-  opacity: 0.6;
+  opacity:$opacity;
   filter: blur($blur);
   transform: translate(-50%, -50%);
   overflow: hidden;

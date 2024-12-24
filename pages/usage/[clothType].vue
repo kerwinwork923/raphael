@@ -51,21 +51,37 @@
     <div class="usageInfoGroup" v-if="usageCardState === '紅光版'">
       <div class="usageInfoCard">
         <h3>電量提示燈使用說明</h3>
-        <h4><span class="greenLight">•綠燈</span> 電量充足</h4>
-        <h4><span class="redLight">•紅燈</span> 低電量，使用完請充電四小時</h4>
-        <h4><span class="orangeLight">•橘燈閃爍</span> 使用次數剩餘3次</h4>
-        <h4>
-          <span class="orangeLight">•橘燈閃爍+1長聲嗶一次</span> 合約已到期
-        </h4>
+        <div class="item">
+          <span class="greenLight">•綠燈恆亮</span>
+          <div class="text">正常電量</div>
+        </div>
+        <div class="item">
+          <span class="greenLight">•綠燈閃爍</span>          
+          <div class="text">充電中，需充滿4小時</div>
+        </div>
+        <div class="item">
+          <span class="redLight">•紅燈恆亮</span>     
+          <div class="text">電量剩餘25% (治療完需充電)</div>          
+        </div>
+        <div class="item">
+          <span class="redLight">•紅燈閃爍</span>
+          <div class="text">電量剩餘5% (不計治療次數)</div> 
+        </div>
       </div>
       <div class="usageInfoCard">
         <h3>提示音說明</h3>
-        <h4><span class="greenLight">•開始</span> 1短聲嗶一次</h4>
-        <h4><span class="redLight">•結束</span> 低1長聲嗶一次</h4>
-        <h4>
-          <span class="orangeLight">•即將斷電 </span> 2短聲嗶三次(請盡速充電)
-        </h4>
-        <h4><span class="orangeLight">•今日已使用</span> 2短聲嗶一次</h4>
+        <div class="item">
+          <span class="greenLight">•開始</span>
+          <div class="text">1短聲</div>
+        </div>
+        <div class="item">
+          <span class="redLight">•結束</span>
+          <div class="text">長音間隔1分鐘</div>
+        </div>
+        <div class="item">
+          <span class="orangeLight">•合約到期/次數用完</span>
+          <div class="text">長音間隔1分鐘，紅綠燈交替閃爍</div>          
+        </div>
       </div>
     </div>
 
@@ -690,19 +706,18 @@ export default {
     width: 100%;
     max-width: 768px;
     margin-top: 0.75rem;
-    @include scrollbarStyle();
+    @include scrollbarStyle(); 
 
     .usageInfoCard {
       background-color: $raphael-white;
       padding: 12px;
       border-radius: 12px;
       flex-shrink: 0;
-      max-width: 324px;
+      max-width: 320px;
       color: $raphael-gray-500;
       font-size: 18px;
       font-weight: 400;
       letter-spacing: 0.09px;
-      min-height: 140px;
 
       $colors: $raphael-green-400, $raphael-cyan-400, $raphael-purple-200;
       @for $i from 1 through length($colors) {
@@ -716,17 +731,27 @@ export default {
         color: $raphael-black;
         margin-bottom: 0.75rem;
       }
-      h4 {
-        margin-top: 0.5rem;
-      }
-      .greenLight {
-        color: $raphael-green-400;
-      }
-      .redLight {
-        color: $raphael-red-300;
-      }
-      .orangeLight {
-        color: $raphael-orange-400;
+      .item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        margin-top: 0.75rem;
+        .text{
+          margin-left: 18px;
+        }
+
+        .greenLight {
+          color: $raphael-green-400;
+          white-space: nowrap;
+        }
+        .redLight {
+          color: $raphael-red-300;
+          white-space: nowrap;
+        }
+        .orangeLight {
+          color: $raphael-orange-400;
+          white-space: nowrap;
+        }
       }
       p {
         color: $raphael-gray-500;
