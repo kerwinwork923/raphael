@@ -394,6 +394,7 @@ export default {
     letter-spacing: 0.5px;
     padding: 0.75rem 0;
     top: 0;
+    z-index: 1;
   }
   .thxGroup {
     display: flex;
