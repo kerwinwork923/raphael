@@ -117,7 +117,7 @@ export default {
 
         if (response.status === 200) {
           console.log(response.data);
-          if (productName === "紅光版") {
+          if (productName === "雙效紅光調節衣") {
             videoShow.value = true;
           }
           usageHistoryInfoList.value = response.data.Product.Desc1List;
