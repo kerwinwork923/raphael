@@ -12,7 +12,7 @@
     />
 
     <!-- <TimeRing
-      v-if="productName === '保健版'"
+      v-if="productName === '神經調節衣'"
       :totalTime="21600"
       :product-name="productName"
       :hasDetectRecord="hasDetectRecord"
@@ -48,7 +48,7 @@
       @requireHRVCheck="handleHRVCheck"
     /> -->
 
-    <div class="usageInfoGroup" v-if="usageCardState === '紅光版'">
+    <div class="usageInfoGroup" v-if="usageCardState === '雙效紅光調節衣'">
       <div class="usageInfoCard">
         <h3>電量提示燈使用說明</h3>
         <div class="item">
@@ -85,7 +85,7 @@
       </div>
     </div>
 
-    <div class="usageInfoGroup" v-if="usageCardState === '保健版'">
+    <div class="usageInfoGroup" v-if="usageCardState === '神經調節衣'">
       <div class="usageInfoCard">
         <h3>量身訂製</h3>
         <p>依照您的健康狀況製作客製化調節貼片位置。</p>
@@ -115,7 +115,7 @@
       </div>
     </div>
 
-    <div class="usageInfoGroup" v-if="usageCardState === '調節衣'">
+    <div class="usageInfoGroup" v-if="usageCardState === '三效深眠衣'">
       <div class="usageInfoCard">
         <h3>非侵入性治療</h3>
         <p>
@@ -340,7 +340,7 @@ export default {
     const route = useRouter().currentRoute.value;
     const productName = decodeURIComponent(route.params.clothType);
 
-    const validName = ["調節衣", "紅光版", "保健版", "居家治療儀"];
+    const validName = ["三效深眠衣", "雙效紅光調節衣", "神經調節衣", "居家治療儀"];
 
     const redirectToHRV = ref(false);
 
