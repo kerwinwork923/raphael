@@ -6,7 +6,6 @@
         <h3 class="nameText">感謝您的使用</h3>
       </div>
       <div class="imgGroup">
-        <img src="/assets/imgs/3dWatch.svg" class="watchImg">
         <img
           src="/assets/imgs/doctor_nocomment.png"
           class="doctorImg"
@@ -413,15 +412,6 @@ export default {
     }
     .imgGroup{
       position: relative;
-
-      .watchImg{
-        position: absolute;
-        top: 52%;
-        right: 0;
-        width: 26px;
-        cursor: pointer;
-      }
-
       .doctorImg {
         height: 150px;
       }
