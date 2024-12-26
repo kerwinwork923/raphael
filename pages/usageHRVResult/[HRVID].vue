@@ -417,8 +417,8 @@ export default {
       .watchImg{
         position: absolute;
         top: 52%;
-        left: 20px;
-        width: 18px;
+        right: 0;
+        width: 26px;
         cursor: pointer;
       }
 
