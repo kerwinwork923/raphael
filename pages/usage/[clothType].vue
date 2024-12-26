@@ -256,18 +256,12 @@
           :key="index"
         >
           <!-- `/vital/detail.html?AID=` -->
-          <a
-            :href="
-              item.BcAf === '治療前'
-                ? 'javascript:void(0)'
-                : `/usageHRVResult/${item.UID}`
-            "
-          >
+          <div class="detect">
             <div class="timeGroup">
-              <div class="timeIcon">
+              <div class="timeIcon" @click="handleWatchClick(item)">
                 <img src="../../assets/imgs/detectTime.svg" alt="" />
               </div>
-              <div class="timeTextGroup">
+              <div class="timeTextGroup" @click="handleDetectClick(item)">
                 <div class="time">{{ formatTimestamp3(item.CheckTime) }}</div>
                 <div class="timeInfoText">
                   {{ item.ProductName }} {{ item.BcAf }}
@@ -310,7 +304,7 @@
                 ></path>
               </svg>
             </div>
-          </a>
+          </div>
         </div>
       </div>
     </div>
@@ -340,7 +334,12 @@ export default {
     const route = useRouter().currentRoute.value;
     const productName = decodeURIComponent(route.params.clothType);
 
-    const validName = ["三效深眠衣", "雙效紅光調節衣", "神經調節衣", "居家治療儀"];
+    const validName = [
+      "三效深眠衣",
+      "雙效紅光調節衣",
+      "神經調節衣",
+      "居家治療儀",
+    ];
 
     const redirectToHRV = ref(false);
 
@@ -646,6 +645,15 @@ export default {
 
     init();
 
+    const handleDetectClick = (item) => {
+      if (item.BcAf !== "治療前") {
+        router.push(`/usageHRVResult/${item.UID}`);
+      }
+    };
+
+    const handleWatchClick = (item) => {
+      router.push(`/healthData/${item.AID}`);
+    };
     return {
       selectedYear,
       selectedMonth,
@@ -681,7 +689,8 @@ export default {
       handleHRVCheck,
       handleHRVCompleted,
       hasDetectRecord,
-
+      handleDetectClick,
+      handleWatchClick,
       todayUseRecord,
       hasBeforeData,
     };
@@ -957,7 +966,7 @@ export default {
             animation-delay: $i * 0.07s;
           }
         }
-        a {
+        .detect {
           text-decoration: none;
           color: $raphael-black;
           display: flex;
