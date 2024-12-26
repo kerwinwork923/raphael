@@ -3,7 +3,7 @@
   <HRVAlert :showCloseButton="false" />
   <DSPRSelect :showCloseButton="false" />
   <div class="usageWrap">
-    <TitleMenu Text="使用紀錄" :link="`back`" />
+    <TitleMenu Text="使用紀錄" :link="`/UsageHistory`" />
     <TimeRing2
       v-if="productName === '神經調節衣'"
       :productName="productName"
@@ -11,6 +11,16 @@
       :todayUseRecord="todayUseRecord"
     />
 
+    <!-- <TimeRing
+      v-if="productName === '保健版'"
+      :totalTime="21600"
+      :product-name="productName"
+      :hasDetectRecord="hasDetectRecord"
+      :todayUseRecord="todayUseRecord"
+      :hasBeforeData="hasBeforeData"
+      @countdownComplete="handleCountdownComplete"
+      @requireHRVCheck="handleHRVCheck"
+    /> -->
     <TimeRing
       v-if="productName === '雙效紅光調節衣' || productName === '居家治療儀'"
       :totalTime="5400"
@@ -29,9 +39,16 @@
       @requireHRVCheck="handleHRVCheck"
     />
 
+    <!-- <TimeRing
+      v-if="productName !== '神經調節衣'"
+      :totalTime="120"
+      :product-name="productName"
+      :hasDetectRecord="hasDetectRecord"
+      @countdownComplete="handleCountdownComplete"
+      @requireHRVCheck="handleHRVCheck"
+    /> -->
 
-
-    <div class="usageInfoGroup" v-if="usageCardState === '雙效紅光調節衣'">
+    <div class="usageInfoGroup" v-if="usageCardState === '紅光版'">
       <div class="usageInfoCard">
         <h3>電量提示燈使用說明</h3>
         <div class="item">
@@ -68,14 +85,14 @@
       </div>
     </div>
 
-    <div class="usageInfoGroup" v-if="usageCardState === '神經調節衣'">
+    <div class="usageInfoGroup" v-if="usageCardState === '保健版'">
       <div class="usageInfoCard">
         <h3>量身訂製</h3>
         <p>依照您的健康狀況製作客製化調節貼片位置。</p>
       </div>
       <div class="usageInfoCard">
         <h3>持續調節</h3>
-        <p>將神經調節衣取代睡衣，每日穿著，持續調節自律神經生理機能。</p>
+        <p>將第四代穿戴調節衣取代睡衣，每日穿著，持續調節自律神經生理機能。</p>
       </div>
       <div class="usageInfoCard">
         <h3>洗滌維護</h3>
@@ -98,23 +115,23 @@
       </div>
     </div>
 
-    <div class="usageInfoGroup" v-if="usageCardState === '三效深眠衣'">
+    <div class="usageInfoGroup" v-if="usageCardState === '調節衣'">
       <div class="usageInfoCard">
         <h3>非侵入性治療</h3>
         <p>
-          這款三效深眠衣使用的是物理性治療，不涉及任何藥物，適合那些想要避免藥物副作用的患者。它依賴於專利技術的貼片，通過波頻影響神經系統​
+          這款調節衣使用的是物理性治療，不涉及任何藥物，適合那些想要避免藥物副作用的患者。它依賴於專利技術的貼片，通過波頻影響神經系統​
         </p>
       </div>
       <div class="usageInfoCard">
         <h3>針對自律神經問題設計</h3>
         <p>
-          穿戴三效深眠衣專為改善自律神經失調而設計，適用於失眠、焦慮、情緒不穩定等問題，也能幫助增強免疫系統
+          穿戴調節衣專為改善自律神經失調而設計，適用於失眠、焦慮、情緒不穩定等問題，也能幫助增強免疫系統
         </p>
       </div>
       <div class="usageInfoCard">
         <h3>適合居家使用</h3>
         <p>
-          三效深眠衣是一款設計簡單、方便的保健產品，適合在家中進行日常使用，無需到診所即可完成自律神經的調節
+          普通版穿戴調節衣是一款設計簡單、方便的保健產品，適合在家中進行日常使用，無需到診所即可完成自律神經的調節
         </p>
       </div>
     </div>
@@ -323,7 +340,7 @@ export default {
     const route = useRouter().currentRoute.value;
     const productName = decodeURIComponent(route.params.clothType);
 
-    const validName = ["三效深眠衣", "雙效紅光調節衣", "神經調節衣", "居家治療儀"];
+    const validName = ["調節衣", "紅光版", "保健版", "居家治療儀"];
 
     const redirectToHRV = ref(false);
 
