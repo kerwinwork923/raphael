@@ -48,7 +48,8 @@ const saveQRCode = async (
   cend,
   mobile,
   period,
-  showAlert
+  showAlert,
+  Chi
 ) => {
   try {
     const response = await axios.post(
@@ -61,6 +62,7 @@ const saveQRCode = async (
         End: cend,
         Mobile: mobile,
         Period: period,
+        Chi: Chi,
       }
     );
 
@@ -91,6 +93,7 @@ export default {
       cend: null,
       mobile: null,
       period: null,
+      Chi: null,
       allParams: {},
     });
 
@@ -166,6 +169,7 @@ export default {
         params.cend = searchParams.get("End");
         params.mobile = searchParams.get("Mobile");
         params.period = searchParams.get("Period");
+        params.Chi = searchParams.get("Chi");
 
         params.allParams = {};
         for (const [key, value] of searchParams.entries()) {
@@ -180,6 +184,7 @@ export default {
           params.cend,
           params.mobile,
           params.period,
+          params.Chi,
           showAlert
         );
       } catch (error) {
