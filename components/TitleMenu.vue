@@ -39,22 +39,15 @@ export default {
   },
   methods: {
     handleClick() {
-      // 检查来源页是否合法
-      const allowedReferrers = [
-        `${window.location.origin}/usageHistory`,
-        `${window.location.origin}/user`,
-      ];
-      const referrer = document.referrer;
-
       if (this.link === "back") {
-        if (!referrer || !allowedReferrers.includes(referrer)) {
-          // 如果没有来源或来源非法，跳转到默认页
-          this.$router.push("/usageHistory");
+        // 檢查是否有歷史紀錄
+        if (window.history.length > 1) {
+          this.$router.back(); // 返回上一頁
         } else {
-          this.$router.back(); // 返回上一页
+          this.$router.push("/user"); // 跳轉到默認頁
         }
       } else {
-        this.$router.push(this.link); // 导航到指定页面
+        this.$router.push(this.link); // 導航到指定頁面
       }
     },
   },
