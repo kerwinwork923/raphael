@@ -92,7 +92,7 @@
           </div>
         </div>
         <div class="imgGroup">
-          <img src="../vital/images/raphael/3dWatch.svg" class="watchImg">
+          <img src="../vital/images/raphael/3dWatch.svg" class="watchImg" />
           <img
             src="images/raphael/doctor_nocomment.png"
             class="doctorImg"
@@ -419,17 +419,6 @@
 
     console.log("Final goToUsageLink.href:", goToUsageLink?.href);
   });
-
-  //手環跳轉
-  const watchImg = document.querySelector(".watchImg");
-    watchImg.addEventListener(
-      "click",
-      () => {
-        window.location.href = `/healthData/${aidValue}`;
-      },
-      false
-    );
-    
 </script>
 <script>
   let upbioage = 0;
@@ -890,6 +879,16 @@
           const dateOnly = checkTime.split(" ")[0];
           return dateOnly;
         }
+
+        //手環跳轉
+        const watchImg = document.querySelector(".watchImg");
+        watchImg.addEventListener(
+          "click",
+          () => {
+            window.location.href = `/healthData/${HRVData.AID}`;
+          },
+          false
+        );
       }
 
       return apiResult;
@@ -1003,11 +1002,11 @@
     padding: 0 1rem;
   }
 
-  .imgGroup{
+  .imgGroup {
     position: relative;
   }
 
-  .watchImg{
+  .watchImg {
     position: absolute;
     top: 52%;
     left: 20px;
@@ -1020,10 +1019,10 @@
   }
 
   .finishWrap > .titleGroup > .textGroup {
-    flex:1;
-    padding:0.75rem;
+    flex: 1;
+    padding: 0.75rem;
   }
-  
+
   .finishWrap .textGroup .timeGroup {
     display: flex;
     align-items: center;
@@ -1072,7 +1071,6 @@
     margin-bottom: 0.75rem;
   }
 
-  
   .scanInfo .row:nth-child(1),
   .scanInfo .row:nth-child(4),
   .scanInfo .row:nth-child(5),
@@ -1313,7 +1311,7 @@
     width: 100%;
   }
   .subBtnGroup button:hover {
-      filter: brightness(0.95);    
+    filter: brightness(0.95);
   }
 
   .subBtnGroup .backToUserBtn {
@@ -1368,10 +1366,10 @@
     overflow-y: auto;
     max-height: 400px;
   }
-  .detectionWrap .detection{
+  .detectionWrap .detection {
     transition: all 0.2s ease;
   }
-  .detectionWrap .detection:hover{
+  .detectionWrap .detection:hover {
     box-shadow: 0px 5px 10px -2px #ccc inset;
   }
 
@@ -1422,17 +1420,17 @@
     color: #ec4f4f;
   }
 
-  .detectionWrap .detectionGroup .scroeTotal{
+  .detectionWrap .detectionGroup .scroeTotal {
     display: none;
   }
 
-  .detectionWrap .detectionGroup .scroeTotal .totalScore span{
+  .detectionWrap .detectionGroup .scroeTotal .totalScore span {
     display: inline-flex;
-    min-width: 68px; 
+    min-width: 68px;
   }
-  .detectionWrap .detectionGroup .seriousDegreeGroup .seriousScore span{
+  .detectionWrap .detectionGroup .seriousDegreeGroup .seriousScore span {
     display: inline-flex;
-    min-width: 50px;    
+    min-width: 50px;
   }
 
   .boxGroup {
