@@ -5,24 +5,14 @@
   <div class="usageWrap">
     <TitleMenu Text="使用紀錄" :link="`back`" />
     <TimeRing2
-      v-if="productName === '保健版'"
+      v-if="productName === '神經調節衣'"
       :productName="productName"
       :hasDetectRecord="hasDetectRecord"
       :todayUseRecord="todayUseRecord"
     />
 
-    <!-- <TimeRing
-      v-if="productName === '保健版'"
-      :totalTime="21600"
-      :product-name="productName"
-      :hasDetectRecord="hasDetectRecord"
-      :todayUseRecord="todayUseRecord"
-      :hasBeforeData="hasBeforeData"
-      @countdownComplete="handleCountdownComplete"
-      @requireHRVCheck="handleHRVCheck"
-    /> -->
     <TimeRing
-      v-if="productName === '紅光版' || productName === '居家治療儀'"
+      v-if="productName === '雙效紅光調節衣' || productName === '居家治療儀'"
       :totalTime="5400"
       :product-name="productName"
       :hasDetectRecord="hasDetectRecord"
@@ -31,7 +21,7 @@
     />
 
     <TimeRing
-      v-if="productName === '調節衣'"
+      v-if="productName === '三效深眠衣'"
       :totalTime="7200"
       :product-name="productName"
       :hasDetectRecord="hasDetectRecord"
@@ -39,16 +29,9 @@
       @requireHRVCheck="handleHRVCheck"
     />
 
-    <!-- <TimeRing
-      v-if="productName !== '保健版'"
-      :totalTime="120"
-      :product-name="productName"
-      :hasDetectRecord="hasDetectRecord"
-      @countdownComplete="handleCountdownComplete"
-      @requireHRVCheck="handleHRVCheck"
-    /> -->
 
-    <div class="usageInfoGroup" v-if="usageCardState === '紅光版'">
+
+    <div class="usageInfoGroup" v-if="usageCardState === '雙效紅光調節衣'">
       <div class="usageInfoCard">
         <h3>電量提示燈使用說明</h3>
         <div class="item">
@@ -56,16 +39,16 @@
           <div class="text">正常電量</div>
         </div>
         <div class="item">
-          <span class="greenLight">•綠燈閃爍</span>          
+          <span class="greenLight">•綠燈閃爍</span>
           <div class="text">充電中，需充滿4小時</div>
         </div>
         <div class="item">
-          <span class="redLight">•紅燈恆亮</span>     
-          <div class="text">電量剩餘25% (治療完需充電)</div>          
+          <span class="redLight">•紅燈恆亮</span>
+          <div class="text">電量剩餘25% (治療完需充電)</div>
         </div>
         <div class="item">
           <span class="redLight">•紅燈閃爍</span>
-          <div class="text">電量剩餘5% (不計治療次數)</div> 
+          <div class="text">電量剩餘5% (不計治療次數)</div>
         </div>
       </div>
       <div class="usageInfoCard">
@@ -80,12 +63,12 @@
         </div>
         <div class="item">
           <span class="orangeLight">•合約到期/次數用完</span>
-          <div class="text">長音間隔1分鐘，紅綠燈交替閃爍</div>          
+          <div class="text">長音間隔1分鐘，紅綠燈交替閃爍</div>
         </div>
       </div>
     </div>
 
-    <div class="usageInfoGroup" v-if="usageCardState === '保健版'">
+    <div class="usageInfoGroup" v-if="usageCardState === '神經調節衣'">
       <div class="usageInfoCard">
         <h3>量身訂製</h3>
         <p>依照您的健康狀況製作客製化調節貼片位置。</p>
@@ -115,7 +98,7 @@
       </div>
     </div>
 
-    <div class="usageInfoGroup" v-if="usageCardState === '調節衣'">
+    <div class="usageInfoGroup" v-if="usageCardState === '三效深眠衣'">
       <div class="usageInfoCard">
         <h3>非侵入性治療</h3>
         <p>
@@ -340,7 +323,7 @@ export default {
     const route = useRouter().currentRoute.value;
     const productName = decodeURIComponent(route.params.clothType);
 
-    const validName = ["調節衣", "紅光版", "保健版", "居家治療儀"];
+    const validName = ["三效深眠衣", "雙效紅光調節衣", "神經調節衣", "居家治療儀"];
 
     const redirectToHRV = ref(false);
 
@@ -706,7 +689,7 @@ export default {
     width: 100%;
     max-width: 768px;
     margin-top: 0.75rem;
-    @include scrollbarStyle(); 
+    @include scrollbarStyle();
 
     .usageInfoCard {
       background-color: $raphael-white;
@@ -736,7 +719,7 @@ export default {
         flex-direction: column;
         gap: 0.25rem;
         margin-top: 0.75rem;
-        .text{
+        .text {
           margin-left: 18px;
         }
 

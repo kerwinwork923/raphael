@@ -67,7 +67,7 @@ export default {
     const route = router.currentRoute.value;
     const productName = decodeURIComponent(route.params.clothType);
     const store = useCommon();
-    const validName = ["調節衣", "紅光版", "保健版", "居家治療儀"];
+    const validName = ["三效深眠衣", "雙效紅光調節衣", "神經調節衣", "居家治療儀"];
     const nextText = ref("下一步");
     if (!validName.includes(productName)) {
       window.location.href = "/usageHistory"; // If needed, you can also use router.push here

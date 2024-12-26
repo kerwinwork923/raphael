@@ -13,7 +13,7 @@
       @countdownComplete="handleCountdownComplete"
     />
 
-    <div class="usageInfoGroup" v-if="usageCardState === '紅光版'">
+    <div class="usageInfoGroup" v-if="usageCardState === '雙效紅光調節衣'">
       <div class="usageInfoCard">
         <h3>電量提示燈使用說明</h3>
         <h4><span class="greenLight">•綠燈</span> 電量充足</h4>
@@ -34,7 +34,7 @@
       </div>
     </div>
 
-    <div class="usageInfoGroup" v-if="usageCardState === '保健版'">
+    <div class="usageInfoGroup" v-if="usageCardState === '神經調節衣'">
       <div class="usageInfoCard">
         <h3 style="font-weight: 700; font-size: 20px">量身訂製</h3>
         <p>依照您的健康狀況製作客製化調節貼片位置。</p>
@@ -64,7 +64,7 @@
       </div>
     </div>
 
-    <div class="usageInfoGroup" v-if="usageCardState === '調節衣'">
+    <div class="usageInfoGroup" v-if="usageCardState === '三效深眠衣'">
       <div class="usageInfoCard">
         <h3 style="font-weight: 700; font-size: 20px">非侵入性治療</h3>
         <p>
@@ -281,7 +281,7 @@ export default {
     const route = useRouter().currentRoute.value;
     const productName = decodeURIComponent(route.params.clothType);
 
-    const validName = ["調節衣", "紅光版", "保健版", "居家治療儀"];
+    const validName = ["三效深眠衣", "雙效紅光調節衣", "神經調節衣", "居家治療儀"];
 
     const redirectToHRV = ref(false);
 

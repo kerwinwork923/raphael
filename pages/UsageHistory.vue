@@ -162,9 +162,9 @@ export default {
 
     // 產品圖片映射
     const productImages = {
-      紅光版: redLightClothes,
-      保健版: normalClothes,
-      調節衣: redLightClothes2,
+      雙效紅光調節衣: redLightClothes,
+      神經調節衣: normalClothes,
+      三效深眠衣: redLightClothes2,
       居家治療儀: redLightClothes2,
     };
 
