@@ -1,12 +1,22 @@
 <template>
   <div class="healthData">
-    <TitleMenu Text="健康數據" link="/user" />
+    <Alert
+      :showRedirectButton="false"
+      :defaultContent="alertMessage"
+      redirectTarget="/HRVHistoryAll"
+      @close="handleClose"
+      v-if="alertVisable === true"
+    />
+    <TitleMenu Text="健康數據" link="back" />
+    <h3 class="healthDataContentTitle">請輸入手環上的健康數據</h3>
     <div class="healthDataContent">
-      <h3>請輸入手環上的健康數據</h3>
       <div class="healthDataForm">
         <div class="ageGroup">
-          <img class="icon1" src="../../assets/imgs/group.svg" alt="" />
-          <select v-model="age" class="custom-select">
+          <img class="icon1" src="../../assets/imgs/healthDataAge.svg" alt="" />
+          <select
+            v-model="age"
+            :class="['custom-select', { 'has-value': isSelected }]"
+          >
             <option value="" disabled selected hidden>請選擇生理年齡</option>
             <option value="1~5">1~5歲</option>
             <option value="6~10">6~10歲</option>
@@ -31,7 +41,46 @@
           </select>
           <img class="icon2" src="../../assets/imgs/arrowDown.svg" />
         </div>
+        <div class="heartBeatGroup">
+          <img
+            class="icon1"
+            src="../../assets/imgs/healthDataHeartBeat.svg"
+            alt=""
+          />
+          <input type="text" placeholder="請輸入平均心率" v-model="heartBeat" />
+        </div>
+        <div class="heartSDNNGroup">
+          <img
+            class="icon1"
+            src="../../assets/imgs/healthDataHeartRate.svg"
+            alt=""
+          />
+          <input type="text" placeholder="請輸入您的SDNN" v-model="SDNN" />
+        </div>
+        <div class="heartRMSSDGroup">
+          <img
+            class="icon1"
+            src="../../assets/imgs/healthDataHeartRate.svg"
+            alt=""
+          />
+          <input type="text" placeholder="請輸入您的RMSSD" v-model="RMSSD" />
+        </div>
+        <div class="heartSNSGroup">
+          <img class="icon1" src="../../assets/imgs/healthDataSNS.svg" alt="" />
+          <input type="text" placeholder="請輸入您交感神經數值" v-model="SNS" />
+        </div>
+        <div class="heartPNSroup">
+          <img class="icon1" src="../../assets/imgs/healthDataPNS.svg" alt="" />
+          <input
+            type="text"
+            placeholder="請輸入您副交感神經數值"
+            v-model="PNS"
+          />
+        </div>
       </div>
+    </div>
+    <div class="healthDataBtnGroup">
+      <button @click="handleHealthData">送出</button>
     </div>
   </div>
 </template>
@@ -41,10 +90,21 @@
   background-color: $raphael-gray-100;
   height: 100vh;
   padding: 0 1rem;
+  .healthDataContentTitle {
+    color: #1e1e1e;
+    font-family: "Noto Sans";
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 100%;
+    letter-spacing: 0.15px;
+    margin-top: 1rem;
+  }
   .healthDataContent {
     background-color: $raphael-white;
     border-radius: 1rem;
     padding: 1rem;
+    margin-top: 1rem;
   }
   .custom-select {
     -webkit-appearance: none;
@@ -54,6 +114,18 @@
     background-size: 12px;
     color: $raphael-gray-300;
     font-size: 1.2rem;
+
+    padding-left: 36px;
+    padding-bottom: 12px;
+    padding-top: 16px;
+
+    &.has-value {
+      color: $raphael-black; // 選擇後變為黑色
+    }
+  }
+
+  option {
+    color: $raphael-black; // 選項字體保持非灰色
   }
   .custom-select.selected {
     color: $raphael-black;
@@ -62,6 +134,7 @@
     display: flex;
     position: relative;
     width: 100%;
+    margin-bottom: 0.5rem;
     .icon1 {
       position: absolute;
       top: 50%;
@@ -103,14 +176,172 @@
       }
     }
   }
+
+  .heartBeatGroup,
+  .heartRateGroup,
+  .heartSDNNGroup,
+  .heartRMSSDGroup,
+  .heartSNSGroup,
+  .heartPNSroup {
+    position: relative;
+    margin-bottom: 1rem;
+
+    .icon1 {
+      position: absolute;
+      top: 50%;
+      left: 2px;
+      transform: translateY(-50%);
+      z-index: 2;
+    }
+
+    .icon2 {
+      position: absolute;
+      top: 50%;
+      right: 2px;
+      transform: translateY(-50%);
+      width: 18px;
+      z-index: 1;
+    }
+  }
+
+  .healthDataBtnGroup {
+    margin-top: 1rem;
+    button {
+      background-color: $raphael-green-400;
+      border: none;
+      padding: 8px;
+      color: #fff;
+      width: 100%;
+      border-radius: 0.5rem;
+
+      font-size: 18px;
+      font-style: normal;
+      font-weight: 400;
+      letter-spacing: 0.09px;
+    }
+  }
+
+  input[type="text"],
+  input[type="password"],
+  input[type="number"],
+  input[type="email"] {
+    outline: none;
+    border: none;
+    border-bottom: 1px solid $raphael-gray-300;
+    font-size: 1.2rem;
+    width: 100%;
+    padding-left: 36px;
+    padding-bottom: 12px;
+    padding-top: 16px;
+    color: $raphael-black;
+    &::placeholder {
+      color: $raphael-gray-300;
+      font-family: Inter;
+      font-size: 1.2rem;
+      font-weight: 400;
+    }
+  }
 }
 </style>
 <script>
+import { useRouter } from "vue-router";
+import axios from "axios";
 export default {
   setup() {
     const age = ref("");
+    const isSelected = computed(() => age.value !== "");
+    const heartBeat = ref("");
+    const SDNN = ref("");
+    const RMSSD = ref("");
+    const SNS = ref("");
+    const PNS = ref("");
+
+    const alertVisable = ref(false);
+    const alertMessage = ref("");
+
+    const route = useRouter().currentRoute.value;
+    const AID = decodeURIComponent(route.params.AID);
+
+    const handleHealthData = async () => {
+      const localData = localStorage.getItem("userData");
+      if (!localData) {
+        alertVisable.value = true;
+        alertMessage.value = "用戶資料不存在，請重新登入！";
+        router.push("/");
+        return;
+      }
+
+      const { MID, Token, MAID, Mobile, Name } = JSON.parse(localData);
+      if (!MID || !Token || !MAID || !Mobile || !Name) {
+        alertVisable.value = true;
+        alertMessage.value = "用戶資料不完整，請重新登入！";
+        router.push("/");
+        return;
+      }
+
+      if (!age.value || !heartBeat.value || !SDNN.value || !RMSSD.value) {
+        alertVisable.value = true;
+        alertMessage.value = "請填寫所有必填欄位！";
+        return;
+      }
+
+      try {
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_HRV2Update.jsp",
+          {
+            MID,
+            Token,
+            MAID,
+            Mobile,
+            AID: AID || "",
+            ltage: age.value,
+            ltLF: SNS.value,
+            ltHF: PNS.value,
+            ltHR: heartBeat.value,
+            ltSDNN: SDNN.value,
+            ltRMSSD: RMSSD.value,
+          }
+        );
+
+        console.log("API Response:", response);
+
+        if (response.status === 200) {
+          alertVisable.value = true;
+          alertMessage.value =
+            "已成功接收到您的資料，這些數據將為您提供更精準的健康建議";
+        } else {
+          throw new Error("伺服器返回非預期結果。");
+        }
+      } catch (err) {
+        console.error("API Error:", err.response || err.message);
+        alertVisable.value = true;
+        alertMessage.value =
+          err.response?.data?.message || "提交資料時發生錯誤，請稍後重試。";
+      }
+    };
+
+    const handleClose = () => {
+      alertVisable.value = false;
+      const history = window.history.length;
+      if (history > 1) {
+        window.history.back();
+      } else {
+        window.location.href = "/HRVHistoryAll";
+      }
+    };
+
     return {
       age,
+      heartBeat,
+      SDNN,
+      RMSSD,
+      SNS,
+      PNS,
+      handleHealthData,
+      alertVisable,
+      alertMessage,
+      handleClose,
+      isSelected,
     };
   },
 };

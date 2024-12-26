@@ -419,6 +419,17 @@
 
     console.log("Final goToUsageLink.href:", goToUsageLink?.href);
   });
+
+  //手環跳轉
+  const watchImg = document.querySelector(".watchImg");
+    watchImg.addEventListener(
+      "click",
+      () => {
+        window.location.href = `/healthData/${aidValue}`;
+      },
+      false
+    );
+    
 </script>
 <script>
   let upbioage = 0;

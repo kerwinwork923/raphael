@@ -1,138 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>結果詳細頁</title>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>結果詳細頁</title>
-</head>
-
-<body>
-  <div id="raphaelLoading" class="raphaelLoading" 　style="display: none;">
-    <img src="images/raphael/spinner.gif" alt="Loading..." />
-  </div>
-
-  <div class="finishWrap">
-    <div class="detailHeader">
-      <img src="../vital/images/raphael/backArrow.svg" class="backIcon" />
-
-      <h5>2024/08/23</h5>
+  <body>
+    <div id="raphaelLoading" class="raphaelLoading" 　style="display: none;">
+      <img src="images/raphael/spinner.gif" alt="Loading..." />
     </div>
-    <div class="titleGroup">
-      <div class="textGroup">
-        <h3 class="nameText">感謝您的使用</h3>
-      </div>
-      <div class="imgGroup">
-        <img src="../vital/images/raphael/3dWatch.svg" class="watchImg">
-        <img
-          src="images/raphael/doctor_nocomment.png"
-          class="doctorImg"
-          alt=""
-        />
-      </div>
-    </div>
-    <div class="scanInfo">
-      <div class="row">
-        <div class="years">
-          <h3>生理年齡</h3>
-          <div class="value" id="f_v_bioage"></div>
-          <div class="info">years old</div>
-          <img src="images/raphael/HRVFace.svg" class="HRVFace" alt="" />
-        </div>
-        <div class="HRV">
-          <h3>心律變異性</h3>
-          <div id="f_v_hrv" class="value"></div>
-          <div class="info">ms</div>
-        </div>
-      </div>
 
-      <div class="row">
-        <div class="Rhythm">
-          <div class="titleGroup">
-            <h3>心率</h3>
-            <img src="images/raphael/heartBeat.svg" alt="" />
-          </div>
-          <div id="f_v_hr" class="value"></div>
-          <div class="info">bpm</div>
-          <img class="bgImg" src="images/raphael/greenChart.svg" alt="" />
-        </div>
-        <div class="bloodPressure">
-          <div class="titleGroup">
-            <h3>血壓</h3>
-            <img src="images/raphael/bloodPressure.svg" alt="" />
-          </div>
-          <div class="value">
-            <span id="f_v_sbp"></span>/<span id="f_v_dbp"></span>
-          </div>
-          <div class="info">mmHg</div>
-          <img class="bgImg" src="images/raphael/purpleChart.svg" alt="" />
-        </div>
-      </div>
-      <div class="row">
-        <div class="BO">
-          <div class="titleGroup">
-            <h3>血氧</h3>
-            <img src="images/raphael/spo2.svg" alt="" />
-          </div>
-          <div id="f_v_spo2" class="value"></div>
-          <div class="info">SpO2%</div>
-          <img class="bgImg" src="images/raphael/blueChart.svg" alt="" />
-        </div>
-        <div class="breathe">
-          <div class="titleGroup">
-            <h3>呼吸</h3>
-            <img src="images/raphael/spo2.svg" alt="" />
-          </div>
-          <div id="f_v_rr" class="value"></div>
-          <div class="info">bpm</div>
-          <img class="bgImg" src="images/raphael/brownChart.svg" alt="" />
-        </div>
-        <div class="pressure">
-          <div class="titleGroup">
-            <h3>壓力</h3>
-            <img src="images/raphael/pressure.svg" alt="" />
-          </div>
-          <div id="f_v_si" class="value"></div>
-          <div class="info">low</div>
-          <img class="bgImg" src="images/raphael/redChart.svg" alt="" />
-        </div>
-      </div>
+    <div class="finishWrap">
+      <div class="detailHeader">
+        <img src="../vital/images/raphael/backArrow.svg" class="backIcon" />
 
-      <div class="row">
-        <div class="boxGroup">
-          <div class="titleGroup">
-            <h3>交感/副交感比例</h3>
+        <h5>2024/08/23</h5>
+      </div>
+      <div class="titleGroup">
+        <div class="textGroup">
+          <h3 class="nameText">感謝您的使用</h3>
+        </div>
+        <div class="imgGroup">
+          <img src="../vital/images/raphael/3dWatch.svg" class="watchImg" />
+          <img
+            src="images/raphael/doctor_nocomment.png"
+            class="doctorImg"
+            alt=""
+          />
+        </div>
+      </div>
+      <div class="scanInfo">
+        <div class="row">
+          <div class="years">
+            <h3>生理年齡</h3>
+            <div class="value" id="f_v_bioage"></div>
+            <div class="info">years old</div>
+            <img src="images/raphael/HRVFace.svg" class="HRVFace" alt="" />
           </div>
-          <div class="boxText">
-            <div class="text-container-PLF">
-              <h4>交感神經</h4>
-              <div class="value"></div>
-            </div>
-            <div class="text-container-PHF">
-              <h4>副交感神經</h4>
-              <div class="value"></div>
-            </div>
-          </div>
-          <div class="box">
-            <div class="circle-PLF"></div>
-            <div class="circle-PHF"></div>
+          <div class="HRV">
+            <h3>心律變異性</h3>
+            <div id="f_v_hrv" class="value"></div>
+            <div class="info">ms</div>
           </div>
         </div>
-        <svg style="display: none">
-          <defs>
-            <filter id="blob">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"></feGaussianBlur>
-              <feColorMatrix in="blur" mode="matrix" values="
+
+        <div class="row">
+          <div class="Rhythm">
+            <div class="titleGroup">
+              <h3>心率</h3>
+              <img src="images/raphael/heartBeat.svg" alt="" />
+            </div>
+            <div id="f_v_hr" class="value"></div>
+            <div class="info">bpm</div>
+            <img class="bgImg" src="images/raphael/greenChart.svg" alt="" />
+          </div>
+          <div class="bloodPressure">
+            <div class="titleGroup">
+              <h3>血壓</h3>
+              <img src="images/raphael/bloodPressure.svg" alt="" />
+            </div>
+            <div class="value">
+              <span id="f_v_sbp"></span>/<span id="f_v_dbp"></span>
+            </div>
+            <div class="info">mmHg</div>
+            <img class="bgImg" src="images/raphael/purpleChart.svg" alt="" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="BO">
+            <div class="titleGroup">
+              <h3>血氧</h3>
+              <img src="images/raphael/spo2.svg" alt="" />
+            </div>
+            <div id="f_v_spo2" class="value"></div>
+            <div class="info">SpO2%</div>
+            <img class="bgImg" src="images/raphael/blueChart.svg" alt="" />
+          </div>
+          <div class="breathe">
+            <div class="titleGroup">
+              <h3>呼吸</h3>
+              <img src="images/raphael/spo2.svg" alt="" />
+            </div>
+            <div id="f_v_rr" class="value"></div>
+            <div class="info">bpm</div>
+            <img class="bgImg" src="images/raphael/brownChart.svg" alt="" />
+          </div>
+          <div class="pressure">
+            <div class="titleGroup">
+              <h3>壓力</h3>
+              <img src="images/raphael/pressure.svg" alt="" />
+            </div>
+            <div id="f_v_si" class="value"></div>
+            <div class="info">low</div>
+            <img class="bgImg" src="images/raphael/redChart.svg" alt="" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="boxGroup">
+            <div class="titleGroup">
+              <h3>交感/副交感比例</h3>
+            </div>
+            <div class="boxText">
+              <div class="text-container-PLF">
+                <h4>交感神經</h4>
+                <div class="value"></div>
+              </div>
+              <div class="text-container-PHF">
+                <h4>副交感神經</h4>
+                <div class="value"></div>
+              </div>
+            </div>
+            <div class="box">
+              <div class="circle-PLF"></div>
+              <div class="circle-PHF"></div>
+            </div>
+          </div>
+          <svg style="display: none">
+            <defs>
+              <filter id="blob">
+                <feGaussianBlur
+                  in="SourceGraphic"
+                  stdDeviation="10"
+                  result="blur"
+                ></feGaussianBlur>
+                <feColorMatrix
+                  in="blur"
+                  mode="matrix"
+                  values="
                      1 0 0 0 0
                      0 1 0 0 0
                      0 0 1 0 0
-                     0 0 0 20 -10"></feColorMatrix>
-            </filter>
-          </defs>
-        </svg>
-      </div>
+                     0 0 0 20 -10"
+                ></feColorMatrix>
+              </filter>
+            </defs>
+          </svg>
+        </div>
 
-      <!-- <div class="row">
+        <!-- <div class="row">
           <div class="nerve">
             <div class="titleGroup">
               <h3>交感神經</h3>
@@ -166,838 +173,863 @@
           </div>
         </div> -->
 
-      <div class="row">
-        <div class="progressItem Health">
-          <h3>健康力</h3>
-          <img id="f_v_health" src="images/raphael/progress1.png" alt="" />
+        <div class="row">
+          <div class="progressItem Health">
+            <h3>健康力</h3>
+            <img id="f_v_health" src="images/raphael/progress1.png" alt="" />
+          </div>
+          <div class="progressItem Sleep">
+            <h3>睡眠力</h3>
+            <img id="f_v_sleep" src="images/raphael/progress2.png" alt="" />
+          </div>
+          <div class="progressItem Metabolic">
+            <h3>代謝力</h3>
+            <img
+              id="f_v_metabolism"
+              src="images/raphael/progress3.png"
+              alt=""
+            />
+          </div>
         </div>
-        <div class="progressItem Sleep">
-          <h3>睡眠力</h3>
-          <img id="f_v_sleep" src="images/raphael/progress2.png" alt="" />
-        </div>
-        <div class="progressItem Metabolic">
-          <h3>代謝力</h3>
-          <img id="f_v_metabolism" src="images/raphael/progress3.png" alt="" />
+
+        <div class="row">
+          <div class="progressItem Balance">
+            <h3>平衡力</h3>
+            <img
+              id="f_v_equilibrium"
+              src="images/raphael/progress4.png"
+              alt=""
+            />
+          </div>
+          <div class="progressItem Active">
+            <h3>活動力</h3>
+            <img id="f_v_activity" src="images/raphael/progress5.png" alt="" />
+          </div>
+          <div class="progressItem Relax">
+            <h3>放鬆力</h3>
+            <img
+              id="f_v_relaxation"
+              src="images/raphael/progress1.png"
+              alt=""
+            />
+          </div>
         </div>
       </div>
 
-      <div class="row">
-        <div class="progressItem Balance">
-          <h3>平衡力</h3>
-          <img id="f_v_equilibrium" src="images/raphael/progress4.png" alt="" />
-        </div>
-        <div class="progressItem Active">
-          <h3>活動力</h3>
-          <img id="f_v_activity" src="images/raphael/progress5.png" alt="" />
-        </div>
-        <div class="progressItem Relax">
-          <h3>放鬆力</h3>
-          <img id="f_v_relaxation" src="images/raphael/progress1.png" alt="" />
-        </div>
+      <div class="resultTextGroup">
+        <h3>根據您的神經系統數據分析</h3>
+        <p></p>
       </div>
     </div>
+  </body>
 
-    <div class="resultTextGroup">
-      <h3>根據您的神經系統數據分析</h3>
-      <p></p>
-    </div>
-  </div>
-</body>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const aidValue = urlParams.get("AID")?.replace(/^"(.*)"$/, "$1");
 
-<script>
-  const urlParams = new URLSearchParams(window.location.search);
-  const aidValue = urlParams.get("AID")?.replace(/^"(.*)"$/, "$1");
+    //登入
+    const localData = localStorage.getItem("userData");
 
-  //登入
-  const localData = localStorage.getItem("userData");
-
-  if (!localData) {
-    console.warn("No user data found, redirecting...");
-    window.location.href = "/";
-  }
-
-  function showLoading() {
-    document.getElementById("raphaelLoading").style.display = "flex";
-  }
-
-  function hideLoading() {
-    document.getElementById("raphaelLoading").style.display = "none";
-  }
-
-  document.querySelector(".backIcon").addEventListener(
-    "click",
-    () => {
-      window.history.back();
-    },
-    false
-  );
-  const userData = JSON.parse(localStorage.getItem("userData"));
-  //
-  f_v_bioage = document.querySelector("#f_v_bioage");
-  f_v_hrv = document.querySelector("#f_v_hrv");
-  f_v_hr = document.querySelector("#f_v_hr");
-  f_v_sbp = document.querySelector("#f_v_sbp");
-  f_v_dbp = document.querySelector("#f_v_dbp");
-  f_v_spo2 = document.querySelector("#f_v_spo2");
-  f_v_rr = document.querySelector("#f_v_rr");
-  f_v_si = document.querySelector("#f_v_si");
-  // f_v_SNS = document.querySelector("#f_v_SNS");
-  // f_v_SNSDesc = document.querySelector("#f_v_SNSDesc");
-  // f_v_SNSPercent = document.querySelector("#f_v_SNSPercent");
-  // f_v_PNS = document.querySelector("#f_v_PNS");
-  // f_v_PNSDesc = document.querySelector("#f_v_PNSDesc");
-  // f_v_PNSPercent = document.querySelector("#f_v_PNSPercent");
-
-  PLFValue = document.querySelector(".text-container-PLF .value");
-  PHFValue = document.querySelector(".text-container-PHF .value");
-  let boxSize = 100;
-
-  resultTextGroupP = document.querySelector(".resultTextGroup p");
-
-  async function API_HRV2Detail() {
-    try {
-      const response = await fetch(
-        "https://23700999.com:8081/HMA/API_HRV2Detail.jsp",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            MID: userData.MID,
-            MAID: userData.MAID,
-            Token: userData.Token,
-            Mobile: userData.Mobile,
-            AID: aidValue,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("網路響應不是成功狀態");
-      }
-
-      const apiResult = await response.json();
-      return apiResult;
-    } catch (error) {
-      console.error("Fetch error:", error);
+    if (!localData) {
+      console.warn("No user data found, redirecting...");
+      window.location.href = "/";
     }
-  }
 
-  API_HRV2Detail().then((apiResult) => {
-    try {
-      showLoading();
-      if (apiResult) {
-        console.log("API 結果:", apiResult);
-        const HRVData = apiResult.HRV2Detail;
-        f_v_bioage.textContent = `${HRVData.bioage - 4}-${HRVData.bioage}`;
-        f_v_hrv.textContent = Math.round(HRVData.HRV * 10) / 10;
-        f_v_hr.textContent = HRVData.HR;
-        f_v_sbp.textContent = HRVData.SBP;
-        f_v_dbp.textContent = HRVData.DBP;
-        f_v_spo2.textContent = HRVData.SPO2;
-        f_v_rr.textContent = HRVData.rr;
-        f_v_si.textContent = HRVData.stress;
-        //   f_v_SNS.textContent = HRVData.SNS;
-        //   f_v_SNSDesc.textContent = HRVData.SNSDesc;
-        //   f_v_SNSPercent.textContent = HRVData.SNSPercent;
-        //   f_v_PNS.textContent = HRVData.PNS;
-        //   f_v_PNSDesc.textContent = HRVData.PNSDesc;
-        //   f_v_PNSPercent.textContent = HRVData.PNSPercent;
-
-        //   const SNS = Number(HRVData.SNS);
-        //   const PNS = Number(HRVData.PNS);
-
-        //   if (SNS < -2) {
-        //     document.getElementById(
-        //       "f_v_SNSImg"
-        //     ).src = `images/raphael/curve_H_98.png`;
-        //     f_v_SNSDesc.style.backgroundColor = "#EC4F4F";
-        //   } else if (SNS >= -2 && SNS < -1) {
-        //     document.getElementById(
-        //       "f_v_SNSImg"
-        //     ).src = `images/raphael/curve_H_84.png`;
-        //     f_v_SNSDesc.style.backgroundColor = "#65558F";
-        //   } else if (SNS >= -1 && SNS < 0) {
-        //     document.getElementById(
-        //       "f_v_SNSImg"
-        //     ).src = `images/raphael/curve_H_50.png`;
-        //     f_v_SNSDesc.style.backgroundColor = "#74BC1F";
-        //   } else if (SNS >= 0 && SNS < 1) {
-        //     document.getElementById(
-        //       "f_v_SNSImg"
-        //     ).src = `images/raphael/curve_L_50.png`;
-        //     f_v_SNSDesc.style.backgroundColor = "#74BC1F";
-        //   } else if (SNS >= 1 && SNS < 2) {
-        //     document.getElementById(
-        //       "f_v_SNSImg"
-        //     ).src = `images/raphael/curve_L_84.png`;
-        //     f_v_SNSDesc.style.backgroundColor = "#65558F";
-        //   } else if (SNS >= 2) {
-        //     document.getElementById(
-        //       "f_v_SNSImg"
-        //     ).src = `images/raphael/curve_L_98.png`;
-        //     f_v_SNSDesc.style.backgroundColor = "#EC4F4F";
-        //   }
-
-        //   if (PNS > 2) {
-        //     document.getElementById(
-        //       "f_v_PNSImg"
-        //     ).src = `images/raphael/curve_H_98.png`;
-        //     f_v_PNSDesc.style.backgroundColor = "#EC4F4F";
-        //   } else if (PNS <= 2 && PNS > 1) {
-        //     document.getElementById(
-        //       "f_v_PNSImg"
-        //     ).src = `images/raphael/curve_H_84.png`;
-        //     f_v_PNSDesc.style.backgroundColor = "#65558F";
-        //   } else if (PNS <= 1 && PNS > 0) {
-        //     document.getElementById(
-        //       "f_v_PNSImg"
-        //     ).src = `images/raphael/curve_H_50.png`;
-        //     f_v_PNSDesc.style.backgroundColor = "#74BC1F";
-        //   } else if (PNS <= 0 && PNS > -1) {
-        //     document.getElementById(
-        //       "f_v_PNSImg"
-        //     ).src = `images/raphael/curve_L_50.png`;
-        //     f_v_PNSDesc.style.backgroundColor = "#74BC1F";
-        //   } else if (PNS <= -1 && PNS > -2) {
-        //     document.getElementById(
-        //       "f_v_PNSImg"
-        //     ).src = `images/raphael/curve_L_84.png`;
-        //     f_v_PNSDesc.style.backgroundColor = "#65558F";
-        //   } else if (PNS <= -2) {
-        //     document.getElementById(
-        //       "f_v_PNSImg"
-        //     ).src = `images/raphael/curve_L_98.png`;
-        //     f_v_PNSDesc.style.backgroundColor = "#EC4F4F";
-        //   }
-
-        function getProgressImage(score) {
-          return `images/raphael/progress${score}.png`;
-        }
-
-        document.getElementById("f_v_health").src = getProgressImage(
-          HRVData.Health
-        );
-        document.getElementById("f_v_sleep").src = getProgressImage(
-          HRVData.Sleep
-        );
-        document.getElementById("f_v_metabolism").src = getProgressImage(
-          HRVData.Metabolism
-        );
-        document.getElementById("f_v_equilibrium").src = getProgressImage(
-          HRVData.Equilibrium
-        );
-        document.getElementById("f_v_activity").src = getProgressImage(
-          HRVData.Activity
-        );
-        document.getElementById("f_v_relaxation").src = getProgressImage(
-          HRVData.Relaxation
-        );
-
-        //交感神經 const PLF = HRVData.PLF;
-        const PLF = HRVData.PLF;
-        const roundedPLF = Math.round(PLF);
-        const PHF = 100 - roundedPLF;
-
-        let PLFBoxSize = boxSize + roundedPLF;
-        let PHFBoxSize = boxSize + PHF;
-        console.log(roundedPLF, PHF, PLFBoxSize, PHFBoxSize);
-
-        document.querySelector(
-          ".text-container-PLF"
-        ).style.width = `${PLFBoxSize}px`;
-        document.querySelector(
-          ".text-container-PHF"
-        ).style.width = `${PHFBoxSize}px`;
-        document.querySelector(".circle-PLF").style.width = `${PLFBoxSize}px`;
-        document.querySelector(
-          ".circle-PLF"
-        ).style.height = `${PLFBoxSize}px`;
-        document.querySelector(".circle-PHF").style.width = `${PHFBoxSize}px`;
-        document.querySelector(
-          ".circle-PHF"
-        ).style.height = `${PHFBoxSize}px`;
-        PLFValue.textContent = roundedPLF + "%";
-        PHFValue.textContent = PHF + "%";
-
-        resultTextGroupP.textContent = HRVData.TotalDesc;
-        let checkTime = HRVData.CheckTime;
-        let formattedDate = formatCheckDate(checkTime);
-        document.querySelector(".detailHeader h5").textContent =
-          formattedDate;
-
-        function formatCheckDate(checkTime) {
-          const dateOnly = checkTime.split(" ")[0];
-          return dateOnly;
-        }
-        function formatDate(checkTime) {
-          const dateOnly = checkTime.split(" ")[0]; // 提取日期部分
-          const [year, month, day] = dateOnly.split("/"); // 拆分年月日
-          return `${month}/${day}`; // 格式化成 "MM/DD"
-        }
-      }
-    } catch {
-    } finally {
-      hideLoading();
+    function showLoading() {
+      document.getElementById("raphaelLoading").style.display = "flex";
     }
-  });
-</script>
 
-<style>
-  * {
-    box-sizing: border-box;
-  }
+    function hideLoading() {
+      document.getElementById("raphaelLoading").style.display = "none";
+    }
 
-  body {
-    font-family: 'Noto Sans TC';
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
-  }
+    document.querySelector(".backIcon").addEventListener(
+      "click",
+      () => {
+        window.history.back();
+      },
+      false
+    );
+    const userData = JSON.parse(localStorage.getItem("userData"));
+    //
+    f_v_bioage = document.querySelector("#f_v_bioage");
+    f_v_hrv = document.querySelector("#f_v_hrv");
+    f_v_hr = document.querySelector("#f_v_hr");
+    f_v_sbp = document.querySelector("#f_v_sbp");
+    f_v_dbp = document.querySelector("#f_v_dbp");
+    f_v_spo2 = document.querySelector("#f_v_spo2");
+    f_v_rr = document.querySelector("#f_v_rr");
+    f_v_si = document.querySelector("#f_v_si");
+    // f_v_SNS = document.querySelector("#f_v_SNS");
+    // f_v_SNSDesc = document.querySelector("#f_v_SNSDesc");
+    // f_v_SNSPercent = document.querySelector("#f_v_SNSPercent");
+    // f_v_PNS = document.querySelector("#f_v_PNS");
+    // f_v_PNSDesc = document.querySelector("#f_v_PNSDesc");
+    // f_v_PNSPercent = document.querySelector("#f_v_PNSPercent");
 
-  .raphaelLoading {
-    width: 100%;
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 99;
-    background: rgba(217, 217, 217, 0.5);
-    backdrop-filter: blur(2.5px);
-  }
+    PLFValue = document.querySelector(".text-container-PLF .value");
+    PHFValue = document.querySelector(".text-container-PHF .value");
+    let boxSize = 100;
 
-  .raphaelLoading img {
-    width: 44px;
-    transform: translateY(-15%);
-  }
+    resultTextGroupP = document.querySelector(".resultTextGroup p");
 
-  .detailHeader {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    padding: 0.75rem 0;
-    max-width: 768px;
-  }
+    async function API_HRV2Detail() {
+      try {
+        const response = await fetch(
+          "https://23700999.com:8081/HMA/API_HRV2Detail.jsp",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              MID: userData.MID,
+              MAID: userData.MAID,
+              Token: userData.Token,
+              Mobile: userData.Mobile,
+              AID: aidValue,
+            }),
+          }
+        );
 
-  .detailHeader .backIcon {
-    position: absolute;
-    height: 24px;
-    left: 1rem;
-    cursor: pointer;
-  }
+        if (!response.ok) {
+          throw new Error("網路響應不是成功狀態");
+        }
 
-  .detailHeader h5 {
-    font-size: 1.5rem;
-    font-weight: 400;
-    color: #1e1e1e;
-    margin: 0;
-  }
+        const apiResult = await response.json();
+        return apiResult;
+      } catch (error) {
+        console.error("Fetch error:", error);
+      }
+    }
 
-  .finishWrap {
-    background: url("images/raphael/gradient-bg.png");
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    background-size: cover;
-    min-height: 100vh;
-    width: 100%;
-  }
+    API_HRV2Detail().then((apiResult) => {
+      try {
+        showLoading();
+        if (apiResult) {
+          console.log("API 結果:", apiResult);
+          const HRVData = apiResult.HRV2Detail;
+          f_v_bioage.textContent = `${HRVData.bioage - 4}-${HRVData.bioage}`;
+          f_v_hrv.textContent = Math.round(HRVData.HRV * 10) / 10;
+          f_v_hr.textContent = HRVData.HR;
+          f_v_sbp.textContent = HRVData.SBP;
+          f_v_dbp.textContent = HRVData.DBP;
+          f_v_spo2.textContent = HRVData.SPO2;
+          f_v_rr.textContent = HRVData.rr;
+          f_v_si.textContent = HRVData.stress;
+          //   f_v_SNS.textContent = HRVData.SNS;
+          //   f_v_SNSDesc.textContent = HRVData.SNSDesc;
+          //   f_v_SNSPercent.textContent = HRVData.SNSPercent;
+          //   f_v_PNS.textContent = HRVData.PNS;
+          //   f_v_PNSDesc.textContent = HRVData.PNSDesc;
+          //   f_v_PNSPercent.textContent = HRVData.PNSPercent;
 
-  .finishWrap {
-    width: 100%;
-  }
+          //   const SNS = Number(HRVData.SNS);
+          //   const PNS = Number(HRVData.PNS);
 
-  .finishWrap > .titleGroup {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    width: 100%;
-    padding: 0 1rem;
-  }
+          //   if (SNS < -2) {
+          //     document.getElementById(
+          //       "f_v_SNSImg"
+          //     ).src = `images/raphael/curve_H_98.png`;
+          //     f_v_SNSDesc.style.backgroundColor = "#EC4F4F";
+          //   } else if (SNS >= -2 && SNS < -1) {
+          //     document.getElementById(
+          //       "f_v_SNSImg"
+          //     ).src = `images/raphael/curve_H_84.png`;
+          //     f_v_SNSDesc.style.backgroundColor = "#65558F";
+          //   } else if (SNS >= -1 && SNS < 0) {
+          //     document.getElementById(
+          //       "f_v_SNSImg"
+          //     ).src = `images/raphael/curve_H_50.png`;
+          //     f_v_SNSDesc.style.backgroundColor = "#74BC1F";
+          //   } else if (SNS >= 0 && SNS < 1) {
+          //     document.getElementById(
+          //       "f_v_SNSImg"
+          //     ).src = `images/raphael/curve_L_50.png`;
+          //     f_v_SNSDesc.style.backgroundColor = "#74BC1F";
+          //   } else if (SNS >= 1 && SNS < 2) {
+          //     document.getElementById(
+          //       "f_v_SNSImg"
+          //     ).src = `images/raphael/curve_L_84.png`;
+          //     f_v_SNSDesc.style.backgroundColor = "#65558F";
+          //   } else if (SNS >= 2) {
+          //     document.getElementById(
+          //       "f_v_SNSImg"
+          //     ).src = `images/raphael/curve_L_98.png`;
+          //     f_v_SNSDesc.style.backgroundColor = "#EC4F4F";
+          //   }
 
-  .imgGroup{
-    position: relative;
-  }
+          //   if (PNS > 2) {
+          //     document.getElementById(
+          //       "f_v_PNSImg"
+          //     ).src = `images/raphael/curve_H_98.png`;
+          //     f_v_PNSDesc.style.backgroundColor = "#EC4F4F";
+          //   } else if (PNS <= 2 && PNS > 1) {
+          //     document.getElementById(
+          //       "f_v_PNSImg"
+          //     ).src = `images/raphael/curve_H_84.png`;
+          //     f_v_PNSDesc.style.backgroundColor = "#65558F";
+          //   } else if (PNS <= 1 && PNS > 0) {
+          //     document.getElementById(
+          //       "f_v_PNSImg"
+          //     ).src = `images/raphael/curve_H_50.png`;
+          //     f_v_PNSDesc.style.backgroundColor = "#74BC1F";
+          //   } else if (PNS <= 0 && PNS > -1) {
+          //     document.getElementById(
+          //       "f_v_PNSImg"
+          //     ).src = `images/raphael/curve_L_50.png`;
+          //     f_v_PNSDesc.style.backgroundColor = "#74BC1F";
+          //   } else if (PNS <= -1 && PNS > -2) {
+          //     document.getElementById(
+          //       "f_v_PNSImg"
+          //     ).src = `images/raphael/curve_L_84.png`;
+          //     f_v_PNSDesc.style.backgroundColor = "#65558F";
+          //   } else if (PNS <= -2) {
+          //     document.getElementById(
+          //       "f_v_PNSImg"
+          //     ).src = `images/raphael/curve_L_98.png`;
+          //     f_v_PNSDesc.style.backgroundColor = "#EC4F4F";
+          //   }
 
-  .watchImg{
-    position: absolute;
-    top: 52%;
-    left: 20px;
-    width: 18px;
-    cursor: pointer;
-  }
+          function getProgressImage(score) {
+            return `images/raphael/progress${score}.png`;
+          }
 
-  .doctorImg {
-    height: 150px;
-  }
+          document.getElementById("f_v_health").src = getProgressImage(
+            HRVData.Health
+          );
+          document.getElementById("f_v_sleep").src = getProgressImage(
+            HRVData.Sleep
+          );
+          document.getElementById("f_v_metabolism").src = getProgressImage(
+            HRVData.Metabolism
+          );
+          document.getElementById("f_v_equilibrium").src = getProgressImage(
+            HRVData.Equilibrium
+          );
+          document.getElementById("f_v_activity").src = getProgressImage(
+            HRVData.Activity
+          );
+          document.getElementById("f_v_relaxation").src = getProgressImage(
+            HRVData.Relaxation
+          );
 
-  .finishWrap > .titleGroup > .textGroup {
-    flex:1;
-    padding:0.75rem;
-  }
+          //交感神經 const PLF = HRVData.PLF;
+          const PLF = HRVData.PLF;
+          const roundedPLF = Math.round(PLF);
+          const PHF = 100 - roundedPLF;
 
-  .finishWrap .textGroup .timeGroup {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-top: 0.25rem;
-  }
+          let PLFBoxSize = boxSize + roundedPLF;
+          let PHFBoxSize = boxSize + PHF;
+          console.log(roundedPLF, PHF, PLFBoxSize, PHFBoxSize);
 
-  .finishWrap .textGroup h3 {
-    font-size: 1.5rem;
-    font-weight: 400;
-    margin: 0;
-  }
+          document.querySelector(
+            ".text-container-PLF"
+          ).style.width = `${PLFBoxSize}px`;
+          document.querySelector(
+            ".text-container-PHF"
+          ).style.width = `${PHFBoxSize}px`;
+          document.querySelector(".circle-PLF").style.width = `${PLFBoxSize}px`;
+          document.querySelector(
+            ".circle-PLF"
+          ).style.height = `${PLFBoxSize}px`;
+          document.querySelector(".circle-PHF").style.width = `${PHFBoxSize}px`;
+          document.querySelector(
+            ".circle-PHF"
+          ).style.height = `${PHFBoxSize}px`;
+          PLFValue.textContent = roundedPLF + "%";
+          PHFValue.textContent = PHF + "%";
 
-  .finishWrap .textGroup .timeGroup svg {
-    transform: translateY(-4%);
-  }
+          resultTextGroupP.textContent = HRVData.TotalDesc;
+          let checkTime = HRVData.CheckTime;
+          let formattedDate = formatCheckDate(checkTime);
+          document.querySelector(".detailHeader h5").textContent =
+            formattedDate;
 
-  .finishWrap .textGroup .timeGroup h4 {
-    font-size: 14px;
-    font-weight: 400;
-    margin: 0;
-  }
+          function formatCheckDate(checkTime) {
+            const dateOnly = checkTime.split(" ")[0];
+            return dateOnly;
+          }
+          function formatDate(checkTime) {
+            const dateOnly = checkTime.split(" ")[0]; // 提取日期部分
+            const [year, month, day] = dateOnly.split("/"); // 拆分年月日
+            return `${month}/${day}`; // 格式化成 "MM/DD"
+          }
+        }
+      } catch {
+      } finally {
+        hideLoading();
+      }
+    });
+    
+    //手環跳轉
+    const watchImg = document.querySelector(".watchImg");
+    watchImg.addEventListener(
+      "click",
+      () => {
+        window.location.href = `/healthData/${aidValue}`;
+      },
+      false
+    );
+  </script>
 
-  .scanInfo {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    margin-top: -12px;
-    margin-bottom: 0.75rem;
-    padding: 0 1rem;
-  }
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-  .scanInfo h3 {
-    font-size: 20px;
-    font-weight: 400;
-    letter-spacing: 0.15px;
-    padding: 0;
-    margin: 0;
-  }
+    body {
+      font-family: "Noto Sans TC";
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
 
-  .scanInfo .row {
-    display: flex;
-    flex-wrap: nowrap;
-    width: 100%;
-    gap: 12px;
-    margin-bottom: 0.75rem;
-  }
+    .raphaelLoading {
+      width: 100%;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99;
+      background: rgba(217, 217, 217, 0.5);
+      backdrop-filter: blur(2.5px);
+    }
 
-  .scanInfo .row:nth-child(1),
-  .scanInfo .row:nth-child(4),
-  .scanInfo .row:nth-child(5),
-  .scanInfo .row:nth-child(6) {
-    display: none;
-  }
+    .raphaelLoading img {
+      width: 44px;
+      transform: translateY(-15%);
+    }
 
-  .scanInfo .row:nth-child(2){
-    flex-direction: column;
-  }
+    .detailHeader {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 0.75rem 0;
+      max-width: 768px;
+    }
 
-  .scanInfo .years {
-    width: 55%;
-    padding: 6px;
-    border-radius: 8px;
-    background: linear-gradient(180deg,
+    .detailHeader .backIcon {
+      position: absolute;
+      height: 24px;
+      left: 1rem;
+      cursor: pointer;
+    }
+
+    .detailHeader h5 {
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: #1e1e1e;
+      margin: 0;
+    }
+
+    .finishWrap {
+      background: url("images/raphael/gradient-bg.png");
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-size: cover;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    .finishWrap {
+      width: 100%;
+    }
+
+    .finishWrap > .titleGroup {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      width: 100%;
+      padding: 0 1rem;
+    }
+
+    .imgGroup {
+      position: relative;
+    }
+
+    .watchImg {
+      position: absolute;
+      top: 52%;
+      left: 20px;
+      width: 18px;
+      cursor: pointer;
+    }
+
+    .doctorImg {
+      height: 150px;
+    }
+
+    .finishWrap > .titleGroup > .textGroup {
+      flex: 1;
+      padding: 0.75rem;
+    }
+
+    .finishWrap .textGroup .timeGroup {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 0.25rem;
+    }
+
+    .finishWrap .textGroup h3 {
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin: 0;
+    }
+
+    .finishWrap .textGroup .timeGroup svg {
+      transform: translateY(-4%);
+    }
+
+    .finishWrap .textGroup .timeGroup h4 {
+      font-size: 14px;
+      font-weight: 400;
+      margin: 0;
+    }
+
+    .scanInfo {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin-top: -12px;
+      margin-bottom: 0.75rem;
+      padding: 0 1rem;
+    }
+
+    .scanInfo h3 {
+      font-size: 20px;
+      font-weight: 400;
+      letter-spacing: 0.15px;
+      padding: 0;
+      margin: 0;
+    }
+
+    .scanInfo .row {
+      display: flex;
+      flex-wrap: nowrap;
+      width: 100%;
+      gap: 12px;
+      margin-bottom: 0.75rem;
+    }
+
+    .scanInfo .row:nth-child(1),
+    .scanInfo .row:nth-child(4),
+    .scanInfo .row:nth-child(5),
+    .scanInfo .row:nth-child(6) {
+      display: none;
+    }
+
+    .scanInfo .row:nth-child(2) {
+      flex-direction: column;
+    }
+
+    .scanInfo .years {
+      width: 55%;
+      padding: 6px;
+      border-radius: 8px;
+      background: linear-gradient(
+        180deg,
         #74bc1f 0%,
-        rgba(116, 188, 31, 0.35) 100%);
-    padding: 12px;
-    align-items: center;
-    color: #fff;
-    position: relative;
-    overflow: hidden;
-  }
+        rgba(116, 188, 31, 0.35) 100%
+      );
+      padding: 12px;
+      align-items: center;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
 
-  .scanInfo .years .value {
-    font-size: 48px;
-    font-weight: bold;
-    margin-top: 0.25rem;
-  }
+    .scanInfo .years .value {
+      font-size: 48px;
+      font-weight: bold;
+      margin-top: 0.25rem;
+    }
 
-  .scanInfo .years .info {
-    font-size: 1rem;
-    font-weight: 400;
-    letter-spacing: 0.5px;
-  }
+    .scanInfo .years .info {
+      font-size: 1rem;
+      font-weight: 400;
+      letter-spacing: 0.5px;
+    }
 
-  .scanInfo .years .HRVFace {
-    position: absolute;
-    right: -12%;
-    top: 0;
-    width: 74%;
-  }
+    .scanInfo .years .HRVFace {
+      position: absolute;
+      right: -12%;
+      top: 0;
+      width: 74%;
+    }
 
-  .scanInfo .HRV {
-    background: linear-gradient(180deg,
+    .scanInfo .HRV {
+      background: linear-gradient(
+        180deg,
         #dfecc5 0%,
-        rgba(223, 236, 197, 0.35) 100%);
-    padding: 12px;
-    border-radius: 8px;
-    width: 45%;
-  }
-
-  .scanInfo .HRV .value {
-    color: #74bc1f;
-    font-size: 48px;
-    font-weight: bold;
-    margin-top: 0.25rem;
-  }
-
-  .scanInfo .HRV .info {
-    color: #666;
-    font-size: 1rem;
-    font-weight: 400;
-    letter-spacing: 0.5px;
-    width: 45%;
-  }
-
-  .scanInfo .Rhythm,
-  .scanInfo .bloodPressure {
-    background-color: #fff;
-    border-radius: 8px;
-    border-top-style: 8px;
-    position: relative;
-    overflow: hidden;
-    padding: 12px;
-  }
-
-  .scanInfo .nerve {
-    width: 50%;
-    background-color: #fff;
-    border-radius: 8px;
-    border-top-style: 8px;
-    position: relative;
-    overflow: hidden;
-    padding: 12px;
-  }
-
-  .scanInfo .nerve .titleGroup {
-    display: flex;
-  }
-
-  .scanInfo .nerve .titleGroup img {
-    width: 20px;
-  }
-
-  .scanInfo .nerve .value {
-    color: #74bc1f;
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: 0.12px;
-    margin-top: 0.25rem;
-  }
-
-  .scanInfo .nerve .nerveImg {
-    width: 100%;
-  }
-
-  .scanInfo .nerve .subTag {
-    font-size: 12px;
-    padding: 6px;
-    /* background-color: #65558f; */
-    color: #fff;
-    display: inline-block;
-    border-radius: 4px;
-    transform: translateY(8px);
-    margin: 0;
-  }
-
-  .scanInfo .nerve h5 {
-    margin: 0;
-    padding: 0;
-    text-align: center;
-    font-size: 1rem;
-    /* color: #65558f; */
-    letter-spacing: 0.5px;
-  }
-
-  .scanInfo .Rhythm .titleGroup,
-  .scanInfo .bloodPressure .titleGroup {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .scanInfo .Rhythm .titleGroup img,
-  .scanInfo .bloodPressure .titleGroup img {
-    width: 20px;
-  }
-
-  .scanInfo .Rhythm .value,
-  .scanInfo .bloodPressure .value {
-    color: #74bc1f;
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: 0.12px;
-    margin-top: 0.5rem;
-  }
-
-  .scanInfo .Rhythm .info,
-  .scanInfo .bloodPressure .info {
-    color: #ccc;
-    letter-spacing: 0.5px;
-  }
-
-  .scanInfo .Rhythm .bgImg,
-  .scanInfo .bloodPressure .bgImg {
-    position: absolute;
-    bottom: -24px;
-    left: 0;
-    width: 100%;
-  }
-
-  .scanInfo .BO,
-  .scanInfo .breathe,
-  .scanInfo .pressure {
-    width: 33.333%;
-    background-color: #fff;
-    border-radius: 8px;
-    position: relative;
-    overflow: hidden;
-    padding: 12px;
-  }
-
-  .scanInfo .BO .titleGroup,
-  .scanInfo .breathe .titleGroup,
-  .scanInfo .pressure .titleGroup {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .scanInfo .BO .titleGroup img,
-  .scanInfo .breathe .titleGroup img,
-  .scanInfo .pressure .titleGroup img {
-    width: 20px;
-  }
-
-  .scanInfo .BO .value,
-  .scanInfo .breathe .value,
-  .scanInfo .pressure .value {
-    color: #74bc1f;
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: 0.12px;
-    margin-top: 0.5rem;
-  }
-
-  .scanInfo .BO .info,
-  .scanInfo .breathe .info,
-  .scanInfo .pressure .info {
-    color: #ccc;
-    letter-spacing: 0.5px;
-  }
-
-  .scanInfo .BO .bgImg,
-  .scanInfo .breathe .bgImg,
-  .scanInfo .pressure .bgImg {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-  }
-
-  .progressItem {
-    width: 33.3333%;
-    text-align: center;
-    background-color: #fff;
-    padding: 12px;
-  }
-
-  .progressItem img {
-    width: 100%;
-    margin-top: 0.25rem;
-  }
-
-  .textResultText {
-    color: #666;
-    margin: 0;
-    text-align: center;
-    font-size: 1.5rem;
-    font-weight: 400;
-    color: #1e1e1e;
-    letter-spacing: 0.5px;
-  }
-  
-  .resultTextGroup {
-    display: none;
-    background-color: #fff;
-    border-radius: 12px;
-    margin: 12px;
-    margin-bottom: 66px;
-    padding: 12px;
-  }
-
-  .resultTextGroup h3 {
-    margin: 0;
-    font-weight: 400;
-  }
-
-  .resultTextGroup p {
-    margin: 0;
-    margin-top: 0.5rem;
-  }
-  .subBtnGroup {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    gap: 3%;
-    margin-top: 0.75rem;
-    margin-bottom: 1.75rem;
-  }
-
-  .subBtnGroup a {
-    text-decoration: none;
-    width: 100%;
-    text-align: center;
-  }
-
-  .subBtnGroup button {
-    background-color: #74bc1f;
-    color: #fff;
-    padding: 8px;
-    width: 90%;
-    border-radius: 8px;
-    border: none;
-    font-size: 1rem;
-    font-weight: 400;
-    letter-spacing: 0.5px;
-    transition: 0.25s ease;
-    width: 100%;
-  }
-
-  .subBtnGroup .backToUserBtn {
-    background-color: #eee;
-    color: #666;
-  }
-
-  .boxGroup {
-    display: grid;
-    gap: 0.75rem;
-    background-color: #fff;
-    width: 100%;
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-  }
-
-  .boxGroup h3 {
-    color: #1e1e1e;
-  }
-
-  .box {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    grid-column: 1/2;
-    grid-row: 2;
-    filter: url(#blob);
-    width: 100%;
-    height: 200px;
-  }
-
-  .circle-PHF,
-  .circle-PLF {
-    position: relative;
-    border-radius: 50%;
-    width: 100px;
-    height: 100px;
-    filter: drop-shadow(0px 3px 5px #fff) brightness(1.06);
-  }
-
-  .boxGroup {
-    position: relative;
-    height: 100%;
-  }
-
-  .boxText {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    grid-column: 1/2;
-    grid-row: 2;
-    width: 100%;
-    height: 200px;
-    z-index: 2;
-  }
-
-  .text-container-PLF {
-    position: relative;
-    text-align: center;
-    color: #fff;
-    animation: 1.5s moveRight forwards ease-out;
-  }
-
-  .text-container-PHF {
-    position: relative;
-    text-align: center;
-    color: #fff;
-    animation: 1.75s moveLeft forwards ease-out;
-  }
-
-  .boxText h4 {
-    margin: 0;
-  }
-
-  .circle-PLF {
-    background-color: rgba(236, 79, 79, 0.75);
-    animation: 1.5s moveRight forwards ease-out;
-  }
-
-  .circle-PHF {
-    background-color: rgba(31, 188, 179, 0.75);
-    animation: 1.75s moveLeft forwards ease-out;
-  }
-
-  .text-container-PLF .value,
-  .text-container-PHF .value {
-    font-size: 24px;
-    font-style: normal;
-    font-weight: 700;
-    letter-spacing: 0.12px;
-  }
-
-  @keyframes moveLeft {
-    0% {
-      left: -50px;
+        rgba(223, 236, 197, 0.35) 100%
+      );
+      padding: 12px;
+      border-radius: 8px;
+      width: 45%;
     }
 
-    50% {
-      left: -25px;
+    .scanInfo .HRV .value {
+      color: #74bc1f;
+      font-size: 48px;
+      font-weight: bold;
+      margin-top: 0.25rem;
     }
 
-    70% {
-      left: -36px;
+    .scanInfo .HRV .info {
+      color: #666;
+      font-size: 1rem;
+      font-weight: 400;
+      letter-spacing: 0.5px;
+      width: 45%;
     }
 
-    100% {
+    .scanInfo .Rhythm,
+    .scanInfo .bloodPressure {
+      background-color: #fff;
+      border-radius: 8px;
+      border-top-style: 8px;
+      position: relative;
+      overflow: hidden;
+      padding: 12px;
+    }
+
+    .scanInfo .nerve {
+      width: 50%;
+      background-color: #fff;
+      border-radius: 8px;
+      border-top-style: 8px;
+      position: relative;
+      overflow: hidden;
+      padding: 12px;
+    }
+
+    .scanInfo .nerve .titleGroup {
+      display: flex;
+    }
+
+    .scanInfo .nerve .titleGroup img {
+      width: 20px;
+    }
+
+    .scanInfo .nerve .value {
+      color: #74bc1f;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.12px;
+      margin-top: 0.25rem;
+    }
+
+    .scanInfo .nerve .nerveImg {
+      width: 100%;
+    }
+
+    .scanInfo .nerve .subTag {
+      font-size: 12px;
+      padding: 6px;
+      /* background-color: #65558f; */
+      color: #fff;
+      display: inline-block;
+      border-radius: 4px;
+      transform: translateY(8px);
+      margin: 0;
+    }
+
+    .scanInfo .nerve h5 {
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      font-size: 1rem;
+      /* color: #65558f; */
+      letter-spacing: 0.5px;
+    }
+
+    .scanInfo .Rhythm .titleGroup,
+    .scanInfo .bloodPressure .titleGroup {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .scanInfo .Rhythm .titleGroup img,
+    .scanInfo .bloodPressure .titleGroup img {
+      width: 20px;
+    }
+
+    .scanInfo .Rhythm .value,
+    .scanInfo .bloodPressure .value {
+      color: #74bc1f;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.12px;
+      margin-top: 0.5rem;
+    }
+
+    .scanInfo .Rhythm .info,
+    .scanInfo .bloodPressure .info {
+      color: #ccc;
+      letter-spacing: 0.5px;
+    }
+
+    .scanInfo .Rhythm .bgImg,
+    .scanInfo .bloodPressure .bgImg {
+      position: absolute;
+      bottom: -24px;
       left: 0;
-    }
-  }
-
-  @keyframes moveRight {
-    0% {
-      left: 50px;
+      width: 100%;
     }
 
-    50% {
-      left: 25px;
+    .scanInfo .BO,
+    .scanInfo .breathe,
+    .scanInfo .pressure {
+      width: 33.333%;
+      background-color: #fff;
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+      padding: 12px;
     }
 
-    70% {
-      left: 36px;
+    .scanInfo .BO .titleGroup,
+    .scanInfo .breathe .titleGroup,
+    .scanInfo .pressure .titleGroup {
+      display: flex;
+      justify-content: space-between;
     }
 
-    100% {
+    .scanInfo .BO .titleGroup img,
+    .scanInfo .breathe .titleGroup img,
+    .scanInfo .pressure .titleGroup img {
+      width: 20px;
+    }
+
+    .scanInfo .BO .value,
+    .scanInfo .breathe .value,
+    .scanInfo .pressure .value {
+      color: #74bc1f;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.12px;
+      margin-top: 0.5rem;
+    }
+
+    .scanInfo .BO .info,
+    .scanInfo .breathe .info,
+    .scanInfo .pressure .info {
+      color: #ccc;
+      letter-spacing: 0.5px;
+    }
+
+    .scanInfo .BO .bgImg,
+    .scanInfo .breathe .bgImg,
+    .scanInfo .pressure .bgImg {
+      position: absolute;
+      bottom: 0;
       left: 0;
+      width: 100%;
     }
-  }
-</style>
 
+    .progressItem {
+      width: 33.3333%;
+      text-align: center;
+      background-color: #fff;
+      padding: 12px;
+    }
+
+    .progressItem img {
+      width: 100%;
+      margin-top: 0.25rem;
+    }
+
+    .textResultText {
+      color: #666;
+      margin: 0;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: #1e1e1e;
+      letter-spacing: 0.5px;
+    }
+
+    .resultTextGroup {
+      display: none;
+      background-color: #fff;
+      border-radius: 12px;
+      margin: 12px;
+      margin-bottom: 66px;
+      padding: 12px;
+    }
+
+    .resultTextGroup h3 {
+      margin: 0;
+      font-weight: 400;
+    }
+
+    .resultTextGroup p {
+      margin: 0;
+      margin-top: 0.5rem;
+    }
+    .subBtnGroup {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      gap: 3%;
+      margin-top: 0.75rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .subBtnGroup a {
+      text-decoration: none;
+      width: 100%;
+      text-align: center;
+    }
+
+    .subBtnGroup button {
+      background-color: #74bc1f;
+      color: #fff;
+      padding: 8px;
+      width: 90%;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 400;
+      letter-spacing: 0.5px;
+      transition: 0.25s ease;
+      width: 100%;
+    }
+
+    .subBtnGroup .backToUserBtn {
+      background-color: #eee;
+      color: #666;
+    }
+
+    .boxGroup {
+      display: grid;
+      gap: 0.75rem;
+      background-color: #fff;
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+    }
+
+    .boxGroup h3 {
+      color: #1e1e1e;
+    }
+
+    .box {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      grid-column: 1/2;
+      grid-row: 2;
+      filter: url(#blob);
+      width: 100%;
+      height: 200px;
+    }
+
+    .circle-PHF,
+    .circle-PLF {
+      position: relative;
+      border-radius: 50%;
+      width: 100px;
+      height: 100px;
+      filter: drop-shadow(0px 3px 5px #fff) brightness(1.06);
+    }
+
+    .boxGroup {
+      position: relative;
+      height: 100%;
+    }
+
+    .boxText {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      grid-column: 1/2;
+      grid-row: 2;
+      width: 100%;
+      height: 200px;
+      z-index: 2;
+    }
+
+    .text-container-PLF {
+      position: relative;
+      text-align: center;
+      color: #fff;
+      animation: 1.5s moveRight forwards ease-out;
+    }
+
+    .text-container-PHF {
+      position: relative;
+      text-align: center;
+      color: #fff;
+      animation: 1.75s moveLeft forwards ease-out;
+    }
+
+    .boxText h4 {
+      margin: 0;
+    }
+
+    .circle-PLF {
+      background-color: rgba(236, 79, 79, 0.75);
+      animation: 1.5s moveRight forwards ease-out;
+    }
+
+    .circle-PHF {
+      background-color: rgba(31, 188, 179, 0.75);
+      animation: 1.75s moveLeft forwards ease-out;
+    }
+
+    .text-container-PLF .value,
+    .text-container-PHF .value {
+      font-size: 24px;
+      font-style: normal;
+      font-weight: 700;
+      letter-spacing: 0.12px;
+    }
+
+    @keyframes moveLeft {
+      0% {
+        left: -50px;
+      }
+
+      50% {
+        left: -25px;
+      }
+
+      70% {
+        left: -36px;
+      }
+
+      100% {
+        left: 0;
+      }
+    }
+
+    @keyframes moveRight {
+      0% {
+        left: 50px;
+      }
+
+      50% {
+        left: 25px;
+      }
+
+      70% {
+        left: 36px;
+      }
+
+      100% {
+        left: 0;
+      }
+    }
+  </style>
 </html>
