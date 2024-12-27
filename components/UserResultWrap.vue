@@ -230,7 +230,7 @@
           <div class="sleepRecordItem">
             <h4>經濟壓力</h4>
             <h5>
-              {{ useSleepRecordData?.SleepRec?.[0]?.economicStress || "-" }}
+              {{ useSleepRecordData?.SleepRec?.[0]?.financialStress || "-" }}
             </h5>
           </div>
           <div class="sleepRecordItem">
@@ -365,7 +365,7 @@
     margin-top: 0.5rem;
     overflow: hidden;
     .doctorImg {
-      height:174px;
+      height: 174px;
     }
     .imgGroup {
       display: flex;
@@ -413,21 +413,21 @@
     border-radius: 12px;
     box-shadow: 0px -2px 4px 0px rgba(0, 0, 0, 0.25) inset;
     .subText {
-        font-size: 0.875rem;
-        margin-bottom: 0.5rem;
-      }
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+    }
 
     .resultHintText {
-        color: $raphael-green-400;
-        font-weight: 400;
-        font-size: 16px;
-        letter-spacing: 0.048px;
-        margin-bottom: 0.75rem;
+      color: $raphael-green-400;
+      font-weight: 400;
+      font-size: 16px;
+      letter-spacing: 0.048px;
+      margin-bottom: 0.75rem;
     }
 
     .severityText {
-        font-size: 0.875rem;
-        letter-spacing: 0.048px;
+      font-size: 0.875rem;
+      letter-spacing: 0.048px;
       span {
         color: $raphael-red-300;
       }
