@@ -1,4 +1,5 @@
 <template>
+  <RaphaelLoading v-if="loading" />
   <div class="healthData">
     <Alert
       :showRedirectButton="false"
@@ -246,8 +247,11 @@
 <script>
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { ref, computed, onMounted } from "vue";
+
 export default {
   setup() {
+    const router = useRouter(); // 使用路由
     const age = ref("");
     const isSelected = computed(() => age.value !== "");
     const heartBeat = ref("");
@@ -255,30 +259,70 @@ export default {
     const RMSSD = ref("");
     const SNS = ref("");
     const PNS = ref("");
+    const loading = ref(false);
 
     const alertVisable = ref(false);
     const alertMessage = ref("");
+    const AID = ref(""); // 存儲 API 的 AID
 
-    const route = useRouter().currentRoute.value;
-    const AID = decodeURIComponent(route.params.AID);
+    // 從 localStorage 取出用戶資料
+    const localData = localStorage.getItem("userData");
+    if (!localData) {
+      alertVisable.value = true;
+      alertMessage.value = "用戶資料不存在，請重新登入！";
+      router.push("/");
+      return;
+    }
 
+    const { MID, Token, MAID, Mobile, Name } = JSON.parse(localData);
+    if (!MID || !Token || !MAID || !Mobile || !Name) {
+      alertVisable.value = true;
+      alertMessage.value = "用戶資料不完整，請重新登入！";
+      router.push("/");
+      return;
+    }
+
+    // **從 API 獲取 HRV 詳情**
+    const API_HRV2Detail = async () => {
+      try {
+        loading.value = true;
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_HRV2Detail.jsp",
+          {
+            MID,
+            Token,
+            MAID,
+            Mobile,
+            AID: router.currentRoute.value.params.AID || "",
+          }
+        );
+
+        if (response.status === 200) {
+          const data = response.data?.HRV2Detail || {};
+          age.value = data.ltage || ""; // 生理年齡
+          heartBeat.value = data.HR || ""; // 平均心率
+          SDNN.value = data.SDNN || ""; // SDNN
+          RMSSD.value = data.RMSSD || ""; // RMSSD
+          SNS.value = data.SNS || ""; // 交感神經
+          PNS.value = data.PNS || ""; // 副交感神經
+        } else {
+          throw new Error("伺服器返回非預期結果。");
+        }
+      } catch (err) {
+        console.error("API Error:", err);
+        alertVisable.value = true;
+        alertMessage.value = "無法獲取健康數據，請稍後重試。";
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    onMounted(() => {
+      API_HRV2Detail(); // 初始化請求
+    });
+
+    // **提交健康數據**
     const handleHealthData = async () => {
-      const localData = localStorage.getItem("userData");
-      if (!localData) {
-        alertVisable.value = true;
-        alertMessage.value = "用戶資料不存在，請重新登入！";
-        router.push("/");
-        return;
-      }
-
-      const { MID, Token, MAID, Mobile, Name } = JSON.parse(localData);
-      if (!MID || !Token || !MAID || !Mobile || !Name) {
-        alertVisable.value = true;
-        alertMessage.value = "用戶資料不完整，請重新登入！";
-        router.push("/");
-        return;
-      }
-
       if (!age.value || !heartBeat.value || !SDNN.value || !RMSSD.value) {
         alertVisable.value = true;
         alertMessage.value = "請填寫所有必填欄位！";
@@ -293,7 +337,7 @@ export default {
             Token,
             MAID,
             Mobile,
-            AID: AID || "",
+            AID: AID.value || "",
             ltage: age.value,
             ltLF: SNS.value,
             ltHF: PNS.value,
@@ -303,31 +347,23 @@ export default {
           }
         );
 
-        console.log("API Response:", response);
-
         if (response.status === 200) {
           alertVisable.value = true;
-          alertMessage.value =
-            "已成功接收到您的資料，這些數據將為您提供更精準的健康建議";
+          alertMessage.value = "已成功提交健康數據，請繼續保持健康生活！";
         } else {
-          throw new Error("伺服器返回非預期結果。");
+          throw new Error("提交失敗，伺服器返回非預期結果。");
         }
       } catch (err) {
-        console.error("API Error:", err.response || err.message);
+        console.error("API Error:", err);
         alertVisable.value = true;
         alertMessage.value =
-          err.response?.data?.message || "提交資料時發生錯誤，請稍後重試。";
+          err.response?.data?.message || "提交數據時發生錯誤，請稍後重試。";
       }
     };
 
     const handleClose = () => {
       alertVisable.value = false;
-      const history = window.history.length;
-      if (history > 1) {
-        window.history.back();
-      } else {
-        window.location.href = "/HRVHistoryAll";
-      }
+      router.push("/HRVHistoryAll");
     };
 
     return {
@@ -342,6 +378,7 @@ export default {
       alertMessage,
       handleClose,
       isSelected,
+      loading,
     };
   },
 };
