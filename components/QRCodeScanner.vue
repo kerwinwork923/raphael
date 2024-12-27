@@ -28,14 +28,7 @@
 </template>
 
 <script>
-import {
-  ref,
-  reactive,
-  onMounted,
-  onBeforeUnmount,
-  watch,
-  nextTick,
-} from "vue";
+import { ref, reactive, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { Html5Qrcode } from "html5-qrcode";
 import axios from "axios";
 import RaphaelAlert from "./Alert.vue";
@@ -72,6 +65,7 @@ const saveQRCode = async (
       showAlert(`資料送出失敗 : ${response.data.Result}`);
     }
   } catch (err) {
+    console.error("API Error:", err);
     showAlert("資料送出失敗");
   }
 };
@@ -104,10 +98,10 @@ export default {
     };
 
     const startScanner = async () => {
-      isScannerReady.value = false; // 初始化為未就緒
+      isScannerReady.value = false;
       const qrCodeRegionId = "qr-reader";
 
-      await nextTick(); // 等待 DOM 完全渲染
+      await nextTick();
       const qrReaderElement = document.getElementById(qrCodeRegionId);
       if (!qrReaderElement) {
         console.error("qr-reader 元素未找到");
@@ -132,7 +126,7 @@ export default {
             }
           }
         );
-        isScannerReady.value = true; // 啟動成功後設為就緒
+        isScannerReady.value = true;
       } catch (err) {
         console.error("Error starting QR scanner:", err);
         showAlert("鏡頭啟動失敗，請檢查權限或重試。");
@@ -169,7 +163,9 @@ export default {
         params.cend = searchParams.get("End");
         params.mobile = searchParams.get("Mobile");
         params.period = searchParams.get("Period");
-        params.Chi = searchParams.get("Chi");
+        params.Chi = searchParams.get("Chi") || searchParams.get("chi");
+
+        console.log("Chi:", params.Chi);
 
         params.allParams = {};
         for (const [key, value] of searchParams.entries()) {
@@ -184,10 +180,11 @@ export default {
           params.cend,
           params.mobile,
           params.period,
-          params.Chi,
-          showAlert
+          showAlert,
+          params.Chi
         );
       } catch (error) {
+        console.error("Error processing QR Code:", error);
         showAlert("QR Code 內容格式錯誤，無法解析。");
       }
     };

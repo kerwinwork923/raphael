@@ -5,7 +5,7 @@
   <div class="usageWrap">
     <TitleMenu Text="使用紀錄" :link="`/UsageHistory`" />
     <TimeRing2
-      v-if="productName === '神經調節衣'"
+      v-if="productName === '三效深眠衣'"
       :productName="productName"
       :hasDetectRecord="hasDetectRecord"
       :todayUseRecord="todayUseRecord"
@@ -29,9 +29,9 @@
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
     />
-
+    
     <TimeRing
-      v-if="productName === '三效深眠衣'"
+      v-if="productName === '神經調節衣'"
       :totalTime="7200"
       :product-name="productName"
       :hasDetectRecord="hasDetectRecord"
@@ -85,7 +85,7 @@
       </div>
     </div>
 
-    <div class="usageInfoGroup" v-if="usageCardState === '神經調節衣'">
+    <div class="usageInfoGroup" v-if="usageCardState === '三效深眠衣'">
       <div class="usageInfoCard">
         <h3>量身訂製</h3>
         <p>依照您的健康狀況製作客製化調節貼片位置。</p>
@@ -114,8 +114,8 @@
         </p>
       </div>
     </div>
-
-    <div class="usageInfoGroup" v-if="usageCardState === '三效深眠衣'">
+    
+    <div class="usageInfoGroup" v-if="usageCardState === '神經調節衣'">
       <div class="usageInfoCard">
         <h3>非侵入性治療</h3>
         <p>
