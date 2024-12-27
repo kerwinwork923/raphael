@@ -1,4 +1,5 @@
 <template>
+  <RaphaelLoading v-if="loading" />
   <div class="usageHistoryWrap">
     <TitleMenu Text="使用紀錄" link="/user" />
     <div class="productWrap">
@@ -129,6 +130,7 @@ import redLightClothes2 from "@/assets/imgs/redLightClothes2.png";
 export default {
   setup() {
     // 狀態管理
+    const loading = ref(false);
     const purchasedProducts = ref([]); // 已購買的產品
     const recommendedProducts = ref([]); // 推薦的產品
     const selectedProductIndex = ref(0); // 選中的產品索引
@@ -170,6 +172,7 @@ export default {
 
     // API 請求：獲取產品與使用記錄
     const fetchProducts = async () => {
+      loading.value = true;
       try {
         const response = await axios.post(
           "https://23700999.com:8081/HMA/API_USE1.jsp",
@@ -191,6 +194,8 @@ export default {
         }
       } catch (error) {
         console.error("API 請求失敗：", error);
+      } finally {
+        loading.value = false;
       }
     };
 
@@ -284,6 +289,7 @@ export default {
       contactSupport,
       checkedIcon,
       uncheckedIcon,
+      loading,
     };
   },
 };
