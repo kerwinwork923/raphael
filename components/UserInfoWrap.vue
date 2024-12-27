@@ -76,7 +76,7 @@
           :class="{ selected: localDSPR }"
         >
           <option value="" disabled selected hidden>
-            請選擇日常收縮壓(選填)
+            請選擇血壓(選填)
           </option>
           <option value="normal">正常(120mmHg)</option>
           <option value="prehypertension">高血壓前期(120~139mmHg)</option>

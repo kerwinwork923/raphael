@@ -9,7 +9,7 @@
         alt=""
         @click="closeComponent"
       />
-      <h3>請選擇您的日常收縮壓</h3>
+      <h3>請選擇您的血壓</h3>
       <hr />
       <div class="inputGroup">
         <input

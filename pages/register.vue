@@ -23,7 +23,7 @@
             <input
               :type="passwordVisible ? 'text' : 'password'"
               v-model="password"
-              placeholder="請輸入密碼"
+              placeholder="請輸入密碼(至少8位)"
               @input="validatePassword"
             />
             <img class="icon1" src="../assets/imgs/passwordGreen.svg" alt="" />
@@ -41,7 +41,7 @@
             <input
               :type="passwordAgainVisible ? 'text' : 'password'"
               v-model="passwordAgain"
-              placeholder="再次輸入您的密碼"
+              placeholder="再次輸入您的密碼(至少8位)"
               @input="validatePasswordAgain"
             />
             <img class="icon1" src="../assets/imgs/passwordGreen.svg" alt="" />
