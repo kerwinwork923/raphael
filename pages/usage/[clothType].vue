@@ -258,10 +258,10 @@
           <!-- `/vital/detail.html?AID=` -->
           <div class="detect">
             <div class="timeGroup">
-              <div class="timeIcon" @click="handleWatchClick(item)">
+              <div class="timeIcon" @click="handleWatchClick(item)" style="cursor: pointer;">
                 <img src="../../assets/imgs/detectTime.svg" alt="" />
               </div>
-              <div class="timeTextGroup" @click="handleDetectClick(item)">
+              <div class="timeTextGroup" @click="handleDetectClick(item)" style="cursor: pointer;">
                 <div class="time">{{ formatTimestamp3(item.CheckTime) }}</div>
                 <div class="timeInfoText">
                   {{ item.ProductName }} {{ item.BcAf }}
@@ -290,7 +290,10 @@
                 height="18"
                 viewBox="0 0 18 18"
                 fill="none"
-                :style="{ opacity: item.BcAf !== '治療前' ? 1 : 0 }"
+                :style="{
+                  opacity: item.BcAf !== '治療前' ? 1 : 0,
+                  cursor: item.BcAf !== '治療前' ? 'pointer' : 'default',
+                }"
                 @click="handleDetectClick(item)"
               >
                 <path
