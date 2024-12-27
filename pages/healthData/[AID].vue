@@ -300,11 +300,11 @@ export default {
         if (response.status === 200) {
           const data = response.data?.HRV2Detail || {};
           age.value = data.ltage || ""; // 生理年齡
-          heartBeat.value = data.HR || ""; // 平均心率
-          SDNN.value = data.SDNN || ""; // SDNN
-          RMSSD.value = data.RMSSD || ""; // RMSSD
-          SNS.value = data.SNS || ""; // 交感神經
-          PNS.value = data.PNS || ""; // 副交感神經
+          heartBeat.value = data.ltHR || ""; // 平均心率
+          SDNN.value = data.ltSDNN || ""; // SDNN
+          RMSSD.value = data.ltRMSSD || ""; // RMSSD
+          SNS.value = data.ltLF || ""; // 交感神經
+          PNS.value = data.ltHF || ""; // 副交感神經
         } else {
           throw new Error("伺服器返回非預期結果。");
         }
