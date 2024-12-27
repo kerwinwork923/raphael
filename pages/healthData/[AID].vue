@@ -263,7 +263,7 @@ export default {
 
     const alertVisable = ref(false);
     const alertMessage = ref("");
-    const AID = ref(""); // 存儲 API 的 AID
+    const AID = ref(router.currentRoute.value.params.AID || "");
 
     // 從 localStorage 取出用戶資料
     const localData = localStorage.getItem("userData");
