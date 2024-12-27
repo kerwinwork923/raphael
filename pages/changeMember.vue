@@ -1,4 +1,5 @@
 <template>
+  <RaphaelLoading v-if="loading" />
   <div class="changeMemberWrap">
     <TitleMenu Text="基本資料設定" link="./user" />
     <div class="changeMemberGroup">
@@ -15,7 +16,7 @@
         @update:HRVCalTime="HRVCalTime = $event"
         phoneShow="true"
         addressShow="true"
-        timeShow = "true"
+        timeShow="true"
         @submit="addUser"
       />
     </div>
@@ -45,8 +46,11 @@ export default {
     const HRVCalTime = ref("");
     const router = useRouter();
 
+    const loading = ref(false);
+
     const addUser = async () => {
       try {
+        loading.value = true;
         const localData = localStorage.getItem("userData");
         const { MID, Token, MAID, Mobile } = localData
           ? JSON.parse(localData)
@@ -102,6 +106,8 @@ export default {
       } catch (err) {
         alert(err.message || "資料不完整");
         console.error(err);
+      } finally {
+        loading.value = false;
       }
     };
 
@@ -130,6 +136,7 @@ export default {
       addUser,
       logout,
       HRVCalTime,
+      loading,
     };
   },
 };
@@ -153,7 +160,7 @@ export default {
   }
 
   .logoutBtn {
-    @include btnStyle($raphael-red-300,$raphael-white);
+    @include btnStyle($raphael-red-300, $raphael-white);
     max-width: 768px;
     margin-top: 32px;
   }
