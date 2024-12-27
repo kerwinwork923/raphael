@@ -32,7 +32,9 @@
         </li> -->
       </ul>
 
-      <h3 class="precautionsText" v-if="precautionsList.length > 0">注意事項</h3>
+      <h3 class="precautionsText" v-if="precautionsList.length > 0">
+        注意事項
+      </h3>
       <ul class="precautionsList">
         <li v-for="(item, key) in precautionsList" :key="key">
           {{ item }}
@@ -48,7 +50,7 @@
         <li>請小心輕放</li> -->
       </ul>
     </div>
-    </div>
+  </div>
   <div class="usageHistoryInfoBtnGroup">
     <!-- <button class="preBtn" @click="goPre">上一步</button> -->
     <button class="nextBtn" @click="goNext">{{ nextText }}</button>
@@ -67,7 +69,12 @@ export default {
     const route = router.currentRoute.value;
     const productName = decodeURIComponent(route.params.clothType);
     const store = useCommon();
-    const validName = ["三效深眠衣", "雙效紅光調節衣", "神經調節衣", "居家治療儀"];
+    const validName = [
+      "三效深眠衣",
+      "雙效紅光調節衣",
+      "神經調節衣",
+      "居家治療儀",
+    ];
     const nextText = ref("下一步");
     if (!validName.includes(productName)) {
       window.location.href = "/usageHistory"; // If needed, you can also use router.push here
@@ -141,7 +148,6 @@ export default {
     const init = async () => {
       loading.value = true;
       await getProductsInfo();
-
       loading.value = false;
     };
 
@@ -171,7 +177,7 @@ export default {
   width: 100%;
   padding: 0 1rem;
   padding-bottom: 116px;
-  .usageHistoryWrap{
+  .usageHistoryWrap {
     width: 100%;
     max-width: 768px;
 
@@ -218,7 +224,7 @@ export default {
   padding: 1rem 1rem 3.125rem 1rem;
 
   button {
-    @include btnStyle($raphael-green-400,$raphael-white);
+    @include btnStyle($raphael-green-400, $raphael-white);
     max-width: 768px;
   }
   .preBtn {
