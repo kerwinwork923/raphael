@@ -252,6 +252,7 @@
       <div class="detectGroup" v-if="detectActive">
         <div
           class="detectItem"
+          :class="{ beforeTreatment: item.BcAf === '治療前' }"
           v-for="(item, index) in filteredHRVData"
           :key="index"
         >
@@ -825,8 +826,13 @@ export default {
       }
       .useList {
         opacity: 0;
+        transition:all 0.2s ease;
         animation: fadeIn2 1s ease forwards;
         animation-delay: 0s;
+        &:hover {
+          box-shadow: 0px 5px 10px -2px #ccc inset;
+          padding: 0 4px;
+        }
         .dateList {
           display: flex;
           align-items: center;
@@ -840,7 +846,7 @@ export default {
             .timeIcon {
               border-radius: 7px;
               padding: 6px;
-              border: 1px solid var(--brand-green-400, $raphael-green-400);
+              border: 1px solid $raphael-green-400;
             }
             .time {
               font-size: 20px;
@@ -951,10 +957,12 @@ export default {
         transition: 0.2s ease all;
         animation: fadeIn2 1s ease forwards;
         animation-delay: 0s;
+
         &:hover {
           box-shadow: 0px 5px 10px -2px #ccc inset;
           padding: 0 4px;
         }
+
         .timeTextGroup {
           display: flex;
           flex-direction: column;
@@ -982,7 +990,7 @@ export default {
             .timeIcon {
               border-radius: 7px;
               padding: 6px;
-              border: 1px solid var(--brand-green-400, $raphael-green-400);
+              border: 1px solid $raphael-green-400;
             }
             .time {
               font-size: 20px;
@@ -1040,6 +1048,25 @@ export default {
             }
             svg {
               width: 18px;
+            }
+          }
+        }
+      }
+
+      .beforeTreatment{
+        &:hover {
+          box-shadow: unset;
+          padding: 0;
+        }
+        .detect{
+          color: $raphael-gray-300;
+          opacity: 0.3;
+          .timeGroup{
+            .timeTextGroup{
+              cursor: unset !important;
+              .timeInfoText{
+                color: $raphael-gray-300;
+              }
             }
           }
         }
