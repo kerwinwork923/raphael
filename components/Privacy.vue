@@ -1,8 +1,8 @@
 <template>
   <transition appear mode="out-in" @after-leave="$emit('closed')">
     <div v-if="visible" class="privacy">
-      <div class="closeGroup" @click="close">
-        <img src="../assets/imgs/selectClose.svg" alt="" />
+      <div class="closeGroup" >
+        <img  @click="close" src="../assets/imgs/selectClose.svg" alt="" />
       </div>
       <div class="privacyWrap">
         <h1>服務條款與隱私權政策</h1>
