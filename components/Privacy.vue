@@ -1,8 +1,8 @@
 <template>
   <transition appear mode="out-in" @after-leave="$emit('closed')">
     <div v-if="visible" class="privacy">
-      <div class="closeGroup" >
-        <img  @click="close" src="../assets/imgs/selectClose.svg" alt="" />
+      <div class="closeGroup">
+        <img @click="close" src="../assets/imgs/selectClose.svg" alt="" />
       </div>
       <div class="privacyWrap">
         <h1>服務條款與隱私權政策</h1>
@@ -251,14 +251,15 @@ export default {
     justify-content: end;
     margin-right: 1.85rem;
     border: none;
+
     img {
       width: 1.75rem;
-      background-color: rgba(255, 255, 255, 0.8);
-      padding: 2px;
-      border-radius: 999px;
-
-      backdrop-filter: 20px;
-      border: none;
+      background-color: transparent;
+      border-radius: 50%;
+      padding: 5px;
+      filter: brightness(20);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      background-color: #000;
     }
   }
 }
