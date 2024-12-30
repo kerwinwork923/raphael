@@ -252,6 +252,7 @@
       <div class="detectGroup" v-if="detectActive">
         <div
           class="detectItem"
+          :class="{ beforeTreatment: item.BcAf === '治療前' }"
           v-for="(item, index) in filteredHRVData"
           :key="index"
         >
@@ -1056,6 +1057,12 @@ export default {
               width: 18px;
             }
           }
+        }
+      }
+      .beforeTreatment{
+        &:hover {
+          box-shadow: unset;
+          padding: 0;
         }
       }
     }
