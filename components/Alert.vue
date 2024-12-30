@@ -59,8 +59,9 @@ export default defineComponent({
 .raphaelCover {
   background: rgba(217, 217, 217, 0.5);
   backdrop-filter: blur(2.5px);
-  width: 100%;
+  width: 110%;
   height: 100%;
+  left: -5%;
   position: fixed;
   z-index: 12;
 }
