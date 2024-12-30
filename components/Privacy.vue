@@ -234,7 +234,7 @@ export default {
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(50px);
   padding-top: 1.25rem;
-  scrollbar-width: none; 
+  scrollbar-width: none;
   animation: privacySlideIn 0.5s ease-out forwards;
 
   &.v-leave-active {
@@ -242,13 +242,23 @@ export default {
   }
 
   .closeGroup {
-    position: absolute;
+    position: sticky;
     right: 1.85rem;
+    margin-left: auto;
     top: 1.25rem;
     cursor: pointer;
-
+    display: flex;
+    justify-content: end;
+    margin-right: 1.85rem;
+    border: none;
     img {
       width: 1.75rem;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 2px;
+      border-radius: 999px;
+
+      backdrop-filter: 20px;
+      border: none;
     }
   }
 }
