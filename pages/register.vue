@@ -1,5 +1,11 @@
 <template>
   <div class="register">
+    <Privacy
+      :visible="showPolicy"
+      @update:visible="showPolicy = $event"
+      @closed="handleClosed"
+    />
+
     <RaphaelLoading v-if="loading" />
     <!-- <Navbar/> -->
     <div class="registerGroup">
@@ -57,10 +63,13 @@
           </div>
         </div>
         <div class="privacyGroup">
-          <input type="checkbox" v-model="isPrivacy" id="privacyInput" />
-          <router-link to="/privacy">
-            <label>我已詳細閱讀隱私權政策</label>
-          </router-link>
+          <input
+            @click="handleShowPolicy"
+            type="checkbox"
+            v-model="isPrivacy"
+            id="privacyInput"
+          />
+          <label @click="handleShowPolicy">我已詳細閱讀隱私權政策</label>
         </div>
 
         <button
@@ -149,6 +158,7 @@ export default {
     const passwordVisible = ref(false);
     const passwordAgainVisible = ref(false);
     const loading = ref(false);
+    const showPolicy = ref(false);
 
     const mobile = ref("");
     const password = ref("");
@@ -189,6 +199,11 @@ export default {
         verifyCode();
       }
     });
+
+    const handleShowPolicy = () => {
+      showPolicy.value = true; // 打開隱私政策彈窗
+      isPrivacy.value = true;
+    };
 
     const getVerificationCode = async () => {
       if (password.value.length < 8) {
@@ -562,6 +577,8 @@ export default {
       isFormValid,
       date,
       DSPR,
+      handleShowPolicy,
+      showPolicy,
     };
   },
 };
@@ -578,7 +595,7 @@ export default {
   place-items: center;
   width: 100%;
   height: 100vh;
-  padding:1rem;
+  padding: 1rem;
 
   .registerGroup {
     display: flex;
@@ -606,10 +623,10 @@ export default {
       text-align: center;
       color: $raphael-purple-200;
     }
-    .registerWrap{
+    .registerWrap {
       width: 100%;
     }
-    
+
     .registerBox {
       background-color: $raphael-white;
       border-radius: 12px;
@@ -748,22 +765,19 @@ export default {
         }
       }
 
-      a {
+      label {
         text-decoration: none;
         color: $raphael-gray-500;
         font-size: 1.125rem;
         letter-spacing: 0.09px;
         font-weight: 400;
-
-        label {
-          cursor: pointer;
-        }
+        cursor: pointer;
       }
     }
 
     .vertificationBtn,
     .infoSendBtn {
-      @include btnStyle($raphael-green-400,$raphael-white);
+      @include btnStyle($raphael-green-400, $raphael-white);
       margin-top: 1.5rem;
       cursor: pointer;
       &:disabled {
