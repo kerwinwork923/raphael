@@ -1064,6 +1064,13 @@ export default {
           box-shadow: unset;
           padding: 0;
         }
+        .detect{
+          .timeGroup{
+            .timeTextGroup{
+              cursor: unset !important;
+            }
+          }
+        }
       }
     }
 
