@@ -252,7 +252,6 @@
       <div class="detectGroup" v-if="detectActive">
         <div
           class="detectItem"
-          :class="{ beforeTreatment: item.BcAf === '治療前' }"
           v-for="(item, index) in filteredHRVData"
           :key="index"
         >
@@ -284,6 +283,13 @@
                   >ms
                 </h5>
               </div>
+              <div 
+              class="resultText"
+              :style="{
+                opacity: item.BcAf !== '治療前' ? 1 : 0,
+                cursor: item.BcAf !== '治療前' ? 'pointer' : 'default',
+              }"
+              >分析結果</div>
 
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -1048,25 +1054,6 @@ export default {
             }
             svg {
               width: 18px;
-            }
-          }
-        }
-      }
-
-      .beforeTreatment{
-        &:hover {
-          box-shadow: unset;
-          padding: 0;
-        }
-        .detect{
-          color: $raphael-gray-300;
-          opacity: 0.3;
-          .timeGroup{
-            .timeTextGroup{
-              cursor: unset !important;
-              .timeInfoText{
-                color: $raphael-gray-300;
-              }
             }
           }
         }
