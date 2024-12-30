@@ -363,7 +363,11 @@ export default {
 
     const handleClose = () => {
       alertVisable.value = false;
-      router.push("/HRVHistoryAll");
+      if (window.history.length > 1) {
+        router.back(); // 使用 router.back() 返回上一頁
+      } else {
+        router.push("/user"); // 如果沒有上一頁，跳轉到默認頁
+      }
     };
 
     return {
