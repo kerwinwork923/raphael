@@ -51,7 +51,7 @@ export default {
   setup() {
     const store = useWeeklyRecord();
     const tagTimesList = ref(null); // 定義 tagTimesList
- 
+
     const currentPage = computed(() => store.timesStep);
     const questionsPerPage = store.selectQuestionPerPage;
 
@@ -112,12 +112,12 @@ export default {
     position: relative;
     svg {
       position: absolute;
-      right: 4%;
-      top: 55%;
-      pointer-events: none; 
+      right: 1rem;
+      top: 57.5%;
+      pointer-events: none;
     }
   }
-
+  
   h3 {
     font-size: 20px;
     font-weight: 500;
