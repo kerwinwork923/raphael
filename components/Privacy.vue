@@ -4,8 +4,8 @@
       <div class="closeGroup">
         <img @click="close" src="../assets/imgs/selectClose.svg" alt="" />
       </div>
+      <h1>服務條款與隱私權政策</h1>
       <div class="privacyWrap">
-        <h1>服務條款與隱私權政策</h1>
         <p>
           NeuroPlus神經調節家服務平台(下文簡稱"神經調節家服務平台""我們"和"我們的")
           深知隱私對您的重要性, 並會盡全力保護您的隱私。
@@ -225,8 +225,6 @@ export default {
   background-size: cover;
   height: 100%;
   width: 100%;
-  overflow-y: auto;
-  padding-bottom: 100px;
   position: fixed;
   bottom: 0;
   z-index: 99;
@@ -234,6 +232,7 @@ export default {
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(50px);
   padding-top: 1.25rem;
+  padding-bottom: 116px;
   scrollbar-width: none;
   animation: privacySlideIn 0.5s ease-out forwards;
 
@@ -242,40 +241,46 @@ export default {
   }
 
   .closeGroup {
-    position: sticky;
-    right: 1.85rem;
-    margin-left: auto;
-    top: 1.25rem;
-    cursor: pointer;
     display: flex;
-    justify-content: end;
-    margin-right: 1.85rem;
-    border: none;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    background-color: $raphael-white;
+    border-radius: 50%;
+    width: fit-content;
+    height: fit-content;
+    cursor: pointer;
+    bottom: 4.813rem;
+    left: 0;
+    right: 0;
+    margin: auto;
+    box-shadow: 0px 2px 20px 0px #DFECC5;
+    transition: all 0.2s ease;
 
     img {
-      width: 1.75rem;
-      background-color: transparent;
-      border-radius: 50%;
-      padding: 5px;
-      filter: brightness(20);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      background-color: #000;
+      padding: 6px;
+    }
+
+    &:hover{
+      box-shadow: 0px 0px 4px 0px #DFECC5;
     }
   }
-}
 
-.privacyWrap {
-  padding-top: 1.5rem;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
-  line-height: 29.124px;
-
-  h1 {
+  & h1 {
     font-weight: bold;
     font-size: 24px;
     letter-spacing: 0.5px;
     text-align: center;
   }
+}
+
+.privacyWrap {
+  height: calc(100vh - 177px);
+  margin-top: 1rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  line-height: 29.124px;
+  overflow-y: auto;
 
   p {
     margin-top: 12px;
