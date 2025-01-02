@@ -254,7 +254,7 @@ export default {
     left: 0;
     right: 0;
     margin: auto;
-    box-shadow: 0px 2px 20px 0px #DFECC5;
+    box-shadow: 0px 2px 20px 0px rgba(116, 188, 31, 0.25);
     transition: all 0.2s ease;
 
     img {
@@ -262,7 +262,7 @@ export default {
     }
 
     &:hover{
-      box-shadow: 0px 0px 4px 0px #DFECC5;
+      box-shadow: 0px 0px 4px 0px rgba(116, 188, 31, 0.25);
     }
   }
 
