@@ -476,7 +476,12 @@ export default {
         }
       }
       .item5 {
-        background-color: $raphael-brown-400;
+        background-color: $raphael-brown-400;        
+        display: grid;
+        width: 100%;
+        height: 100%;
+        place-items: center;
+        align-content: center;
         cursor: pointer;
         &:hover {
           filter: brightness(0.95);
@@ -491,7 +496,6 @@ export default {
       }
       //暫時隱藏
       .item1,
-      .item5,
       .item6 {
         display: none;
       }
@@ -500,7 +504,7 @@ export default {
 
       .item2 {
         display: grid;
-        grid-row: 1 / 4;
+        grid-row: 1 / 3;
         place-items: center;
         align-content: center;
 
