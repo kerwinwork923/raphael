@@ -376,9 +376,11 @@ export default {
     }
 
     .bannerGroup {
-      margin-top: 0.75rem;
       position: relative;
+      border-radius: 0.75rem;
       width: 100%;
+      margin-top: 0.75rem;
+      overflow: hidden;
 
       img {
         width: 100%;
