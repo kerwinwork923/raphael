@@ -45,7 +45,7 @@
       </div>
       <div class="itemsGroup">
         <div class="item item1">
-          <div class="topTitle">領取</div>
+          <div class="topTitle">獎勵</div>
           <div class="bottomTitle">積分</div>
         </div>
 
@@ -72,9 +72,9 @@
         </router-link>
 
         <div class="item item5">
-          <div class="topTitle">積分</div>
-          <div class="bottomTitle">兌換</div>
-          <img src="../assets/imgs/exchange.svg" alt="" />
+          <div class="topTitle">追蹤</div>
+          <div class="bottomTitle">合約</div>
+          <img src="../assets/imgs/contract.svg" alt="" />
         </div>
 
         <div class="item item6">
