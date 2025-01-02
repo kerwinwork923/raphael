@@ -42,7 +42,8 @@ const saveQRCode = async (
   mobile,
   period,
   showAlert,
-  Chi
+  Chi,
+  Fee
 ) => {
   try {
     const response = await axios.post(
@@ -56,6 +57,7 @@ const saveQRCode = async (
         Mobile: mobile,
         Period: period,
         Chi: Chi,
+        Fee: Fee,
       }
     );
 
@@ -88,6 +90,7 @@ export default {
       mobile: null,
       period: null,
       Chi: null,
+      Fee:null,
       allParams: {},
     });
 
@@ -164,8 +167,8 @@ export default {
         params.mobile = searchParams.get("Mobile");
         params.period = searchParams.get("Period");
         params.Chi = searchParams.get("Chi") || searchParams.get("chi");
+        params.Fee = searchParams.get("Fee") || searchParams.get("Fee");
 
-        console.log("Chi:", params.Chi);
 
         params.allParams = {};
         for (const [key, value] of searchParams.entries()) {
@@ -181,7 +184,8 @@ export default {
           params.mobile,
           params.period,
           showAlert,
-          params.Chi
+          params.Chi,
+          params.Fee
         );
       } catch (error) {
         console.error("Error processing QR Code:", error);
