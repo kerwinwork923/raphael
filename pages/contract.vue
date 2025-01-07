@@ -70,7 +70,7 @@
             <img src="../assets/imgs/contractTag.svg" alt="" />
             <!-- 如果有金額，可以放這裡 -->
             <div class="contractPrice">
-              {{ item.TotalFee ? item.TotalFee : 0 }}
+              {{ toThousands(item.TotalFee) }}
             </div>
           </div>
         </div>
@@ -274,6 +274,13 @@ export default {
       });
     });
 
+    // 將數字轉成千分號字串
+    const toThousands = (num) => {
+      if (!num) return "0";
+      // 也可先轉成數字再處理，例如: num = Number(num) || 0;
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    };
+
     return {
       // 變數與方法
       loading,
@@ -293,6 +300,7 @@ export default {
 
       // 計算屬性
       filteredContracts,
+      toThousands,
     };
   },
 };
@@ -382,6 +390,7 @@ export default {
           font-size: 18px;
           font-weight: 400;
           letter-spacing: 0.09px;
+          border-radius: 50px;
         }
       }
 
