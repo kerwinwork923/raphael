@@ -175,10 +175,10 @@ export default {
 
     // 產品選單
     const productOptions = [
-      "居家治療儀",
-      "神經調節衣",
       "雙效紅光調節衣",
       "三效深眠衣",
+      "神經調節衣",
+      "居家治療儀",
     ];
     // 狀態選單
     const stateOptions = ["進行中", "已到期"];
@@ -304,18 +304,15 @@ export default {
   min-height: 100vh;
   padding: 0 1rem 2.5rem;
   position: relative;
-  
+
   .contractTopMenu {
     display: flex;
     color: #666;
     padding: 12px;
-
     border-radius: 12px;
     background-color: #fff;
     position: sticky;
-   
     z-index: 10;
-  
     top: 6%;
 
     .contractTopMenuItem {
