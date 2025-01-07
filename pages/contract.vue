@@ -301,7 +301,7 @@ export default {
 <style lang="scss">
 .contractWrap {
   background-color: $raphael-gray-100;
-  height: 100vh;
+  min-height: 100vh;
   padding: 0 1rem;
   position: relative;
   .contractTopMenu {
@@ -311,10 +311,11 @@ export default {
 
     border-radius: 12px;
     background-color: #fff;
-    position: fixed;
+    position: sticky;
+   
     z-index: 10;
-    width: 95%;
-    left: 2.5%;
+  
+    top: 6%;
 
     .contractTopMenuItem {
       display: flex;
@@ -356,7 +357,7 @@ export default {
   }
 
   .contractContentGroup {
-    margin-top: 3.5rem;
+    margin-top: 1.5rem;
 
     .contractContent {
       background: #fff;
