@@ -15,9 +15,7 @@
           <img src="../assets/imgs/sticker.png" alt="" />
         </div>
         <div class="infoTextGroup">
-          <div class="topText">
-            {{ userInfo?.Name }} 您好
-          </div>
+          <div class="topText">{{ userInfo?.Name }} 您好</div>
           <div class="score">
             <div class="circle"></div>
             <div class="scoreText">
@@ -71,11 +69,13 @@
           </div>
         </router-link>
 
-        <div class="item item5">
-          <div class="topTitle">追蹤</div>
-          <div class="bottomTitle">合約</div>
-          <img src="../assets/imgs/contract.svg" alt="" />
-        </div>
+        <router-link to="/contract" class="item5_link">
+          <div class="item item5">
+            <div class="topTitle">追蹤</div>
+            <div class="bottomTitle">合約</div>
+            <img src="../assets/imgs/contract.svg" alt="" />
+          </div>
+        </router-link>
 
         <div class="item item6">
           <div class="topTitle">推薦</div>
@@ -476,7 +476,7 @@ export default {
         }
       }
       .item5 {
-        background-color: $raphael-brown-400;        
+        background-color: $raphael-brown-400;
         display: grid;
         width: 100%;
         height: 100%;
