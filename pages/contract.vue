@@ -332,12 +332,15 @@ export default {
     position: sticky;
     z-index: 10;
     top: 48px;
-
+    background-color: #fff;
+    padding: 12px;
+    border-radius: 8px;
     .contractTopMenuItem {
       display: flex;
       width: 50%;
       position: relative;
-      
+
+
       &:last-child{
         margin-left: 1rem;
       }
