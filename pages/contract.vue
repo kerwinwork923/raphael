@@ -302,8 +302,9 @@ export default {
 .contractWrap {
   background-color: $raphael-gray-100;
   min-height: 100vh;
-  padding: 0 1rem;
+  padding: 0 1rem 2.5rem;
   position: relative;
+  
   .contractTopMenu {
     display: flex;
     color: #666;
@@ -363,7 +364,7 @@ export default {
       background: #fff;
       padding: 12px;
       margin-top: 1rem;
-
+      border-radius: 8px;
       .contractContentTitleGroup {
         display: flex;
         justify-content: space-between;
