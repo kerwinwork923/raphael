@@ -9,7 +9,7 @@
     <!-- 篩選選單 -->
     <div class="contractTopMenu">
       <!-- 產品篩選 -->
-      <div class="contractTopMenuItem">
+      <div class="contractTopMenuItem" style="border-radius: 12px 0 0 12px">
         <div class="contractTopMenuTextBox" @click="toggleProductBox">
           <img src="/assets/imgs/filter.svg" alt="" />
           <h4>{{ selectedProduct ? selectedProduct : "所有產品" }}</h4>
@@ -29,11 +29,11 @@
             {{ prod }}
           </div>
         </div>
+        |
       </div>
-      |
 
       <!-- 狀態篩選 -->
-      <div class="contractTopMenuItem">
+      <div class="contractTopMenuItem" style="border-radius: 0 12px 12px 0">
         <div class="contractTopMenuTextBox" @click="toggleStateBox">
           <img src="/assets/imgs/filter.svg" alt="" />
           <h4>{{ selectedState ? selectedState : "所有狀態" }}</h4>
@@ -78,7 +78,19 @@
         <!-- 進度條區塊 -->
         <div class="progressGroup">
           <div class="contractProgress">
-            <div class="contractProgressTextGroup"></div>
+            <div class="contractProgressTextGroup">
+              <div
+                v-if="
+                  item.Still > 0 && item.UsedRatio > 0 && item.UsedRatio < 100
+                "
+                class="todayIcon"
+                :style="{
+                  left: item.UsedRatio + '%',
+                }"
+              >
+                今天
+              </div>
+            </div>
             <div class="contractProgressBarGroup">
               <!-- progress 寬度用 UsedRatio (例如 0 ~ 100)，Still > 0 為綠，<= 0 為紅 -->
               <div
@@ -316,17 +328,20 @@ export default {
   .contractTopMenu {
     display: flex;
     color: #666;
-    padding: 12px;
-    border-radius: 12px;
-    background-color: #fff;
+    background-color: $raphael-gray-100;
     position: sticky;
-    z-index: 10;
-    top: 6%;
+    z-index: 1;
+    top: 5%;
+    padding-top: 4%;
 
     .contractTopMenuItem {
       display: flex;
       width: 50%;
       position: relative;
+      background-color: #fff;
+      padding: 12px 0;
+
+      align-items: center;
 
       .contractTopMenuTextBox {
         display: flex;
@@ -343,7 +358,7 @@ export default {
         cursor: pointer;
         gap: 1rem;
         position: absolute;
-        top: 130%;
+        top: 92%;
         left: 0;
         background: rgba(255, 255, 255, 0.85);
         width: 95%;
@@ -397,11 +412,35 @@ export default {
       .progressGroup {
         .contractProgress {
           width: 100%;
+          position: relative;
+          .contractProgressTextGroup {
+            position: absolute;
+            top: -18px;
+            width: 100%;
+            height: 0;
+            pointer-events: none;
+
+            .todayIcon {
+              position: absolute;
+              transform: translateX(-50%);
+              white-space: nowrap;
+              color: #1fbcb3;
+              letter-spacing: 0.04px;
+              font-size: 12px;
+            }
+          }
+
+          .contractProgressBarGroup {
+            margin-top: 0.5rem;
+            border-radius: 50px;
+            background: #fff;
+            overflow: hidden;
+          }
 
           .contractProgressBarGroup {
             width: 100%;
             height: 12px;
-            margin-top: 0.5rem;
+            margin-top: 1.55rem;
             border-radius: 50px;
             background: #fff;
             box-shadow: inset 0px 1px 2px rgba(0, 0, 0, 0.25);
