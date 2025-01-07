@@ -415,18 +415,36 @@ export default {
           position: relative;
           .contractProgressTextGroup {
             position: absolute;
-            top: -18px;
+            top: -24px;
             width: 100%;
             height: 0;
             pointer-events: none;
 
             .todayIcon {
+              display: flex;
+              align-items: center;
+              justify-content: center;
               position: absolute;
+              background: $raphael-white;
+              border-radius: 50%;
               transform: translateX(-50%);
               white-space: nowrap;
-              color: #1fbcb3;
+              color: $raphael-cyan-400;
+              padding: 4px;
               letter-spacing: 0.04px;
               font-size: 12px;
+              box-shadow: 0px 2px 3px 0px rgba(223, 236, 197, 0.50);
+
+              &::after{
+                content: "";
+                position: absolute;
+                background: $raphael-white;
+                width: 7px;
+                height: 6px;
+                bottom: -6px;
+                clip-path: polygon(50% 100%, 0 0, 100% 0);
+                box-shadow: 0px 2px 3px 0px rgba(223, 236, 197, 0.5);
+              }
             }
           }
 
