@@ -330,24 +330,23 @@ export default {
     color: #666;
     background-color: $raphael-gray-100;
     position: sticky;
-    z-index: 1;
-    top: 5%;
-    padding-top: 4%;
+    z-index: 10;
+    top: 48px;
 
     .contractTopMenuItem {
       display: flex;
       width: 50%;
       position: relative;
-      background-color: #fff;
-      padding: 12px 0;
-
-      align-items: center;
+      
+      &:last-child{
+        margin-left: 1rem;
+      }
 
       .contractTopMenuTextBox {
         display: flex;
-        gap: 2px;
+        gap: 4px;
         width: 100%;
-        padding-left: 0.6rem;
+        color: $raphael-black;
         cursor: pointer;
       }
 
@@ -363,7 +362,7 @@ export default {
         background: rgba(255, 255, 255, 0.85);
         width: 95%;
         border-radius: 8px;
-        text-align: center;
+        text-align: left;
         padding: 0.75rem;
         font-size: 18px;
         max-height: 200px;
@@ -378,12 +377,10 @@ export default {
   }
 
   .contractContentGroup {
-    margin-top: 1.5rem;
-
     .contractContent {
       background: #fff;
       padding: 12px;
-      margin-top: 1rem;
+      margin-top: 0.75rem;
       border-radius: 8px;
       .contractContentTitleGroup {
         display: flex;
@@ -440,7 +437,7 @@ export default {
           .contractProgressBarGroup {
             width: 100%;
             height: 12px;
-            margin-top: 1.55rem;
+            margin-top: 1.5rem;
             border-radius: 50px;
             background: #fff;
             box-shadow: inset 0px 1px 2px rgba(0, 0, 0, 0.25);
@@ -463,6 +460,7 @@ export default {
             color: #ccc;
             font-size: 14px;
             font-weight: 400;
+            margin-bottom: 2px;
             letter-spacing: 0.048px;
           }
           h5 {
@@ -496,7 +494,7 @@ export default {
 
       .linkGroup {
         text-align: right;
-        margin-top: 0.75rem;
+        margin-top: 1.5rem;
 
         a {
           display: inline;
