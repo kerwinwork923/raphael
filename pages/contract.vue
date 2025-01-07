@@ -105,12 +105,14 @@
             :class="{ contractDayWarn2: item.Still <= 0 }"
           >
             <img
-              :src="
-                item.Still > 0
-                  ? '../assets/imgs/contractTime.svg'
-                  : '../assets/imgs/contractWarning.svg'
-              "
-              alt=""
+              v-if="item.Still > 0"
+              src="@/assets/imgs/contractTime.svg"
+              alt="contract time"
+            />
+            <img
+              v-else
+              src="@/assets/imgs/contractWarning.svg"
+              alt="contract warning"
             />
             <!-- API 的 Info 帶有「還有 XX 天」或「已到期」等文字 -->
             <h5>{{ item.Info }}</h5>
