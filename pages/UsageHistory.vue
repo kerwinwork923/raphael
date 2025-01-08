@@ -475,7 +475,7 @@ export default {
         width: 105px;
         height: auto !important;
         bottom: 0;
-        right: 21%;
+        left: 48.5%;
         z-index: 3;
       }
       p {
