@@ -86,6 +86,7 @@
             <div class="circle"></div>
           </div>
           <h3 class="recommendName">{{ recommendation.name }}</h3>
+          <p>{{ recommendation.slogan }}</p>
           <div class="priceGroup">
             <div
               class="priceItem"
@@ -164,8 +165,8 @@ export default {
 
     // 產品圖片映射
     const productImages = {
-      雙效紅光調節衣: redLightClothes,
-      神經調節衣: redLightClothes2,
+      雙效紅光活力衣: redLightClothes,
+      全效調節衣: redLightClothes2,
       三效深眠衣: normalClothes,
       居家治療儀: redLightClothes2,
     };
@@ -187,6 +188,7 @@ export default {
               name: item.ProductName,
               price: item.Desc1,
               features: item.Desc2.split("。").filter((desc) => desc),
+              slogan: item.Desc3,
             })
           );
         } else {
@@ -346,6 +348,7 @@ export default {
               bottom: 0;
               right: 0;
               z-index: 3;
+             
             }
 
             .circle {
@@ -472,8 +475,16 @@ export default {
         width: 105px;
         height: auto !important;
         bottom: 0;
-        right: 75px;
+        right: 21%;
         z-index: 3;
+      }
+      p {
+        color: #1e1e1e;
+        text-align: center;
+        font-size: 18px;
+        font-style: normal;
+        margin-top: 0.65rem;
+        letter-spacing: 0.09px;
       }
 
       .recommendDiv {

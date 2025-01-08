@@ -12,7 +12,7 @@
     />
 
     <!-- <TimeRing
-      v-if="productName === '神經調節衣'"
+      v-if="productName === '全效調節衣'"
       :totalTime="21600"
       :product-name="productName"
       :hasDetectRecord="hasDetectRecord"
@@ -22,7 +22,7 @@
       @requireHRVCheck="handleHRVCheck"
     /> -->
     <TimeRing
-      v-if="productName === '雙效紅光調節衣' || productName === '居家治療儀'"
+      v-if="productName === '雙效紅光活力衣' || productName === '居家治療儀'"
       :totalTime="5400"
       :product-name="productName"
       :hasDetectRecord="hasDetectRecord"
@@ -31,7 +31,7 @@
     />
 
     <TimeRing
-      v-if="productName === '神經調節衣'"
+      v-if="productName === '全效調節衣'"
       :totalTime="7200"
       :product-name="productName"
       :hasDetectRecord="hasDetectRecord"
@@ -40,7 +40,7 @@
     />
 
     <!-- <TimeRing
-      v-if="productName !== '神經調節衣'"
+      v-if="productName !== '全效調節衣'"
       :totalTime="120"
       :product-name="productName"
       :hasDetectRecord="hasDetectRecord"
@@ -48,7 +48,7 @@
       @requireHRVCheck="handleHRVCheck"
     /> -->
 
-    <div class="usageInfoGroup" v-if="usageCardState === '雙效紅光調節衣'">
+    <div class="usageInfoGroup" v-if="usageCardState === '雙效紅光活力衣'">
       <div class="usageInfoCard">
         <h3>電量提示燈使用說明</h3>
         <div class="item">
@@ -115,23 +115,23 @@
       </div>
     </div>
 
-    <div class="usageInfoGroup" v-if="usageCardState === '神經調節衣'">
+    <div class="usageInfoGroup" v-if="usageCardState === '全效調節衣'">
       <div class="usageInfoCard">
         <h3>非侵入性治療</h3>
         <p>
-          這款神經調節衣使用的是物理性治療，不涉及任何藥物，適合那些想要避免藥物副作用的患者。它依賴於專利技術的貼片，通過波頻影響神經系統​
+          這款全效調節衣使用的是物理性治療，不涉及任何藥物，適合那些想要避免藥物副作用的患者。它依賴於專利技術的貼片，通過波頻影響神經系統​
         </p>
       </div>
       <div class="usageInfoCard">
         <h3>針對自律神經問題設計</h3>
         <p>
-          神經調節衣專為改善自律神經失調而設計，適用於失眠、焦慮、情緒不穩定等問題，也能幫助增強免疫系統
+          全效調節衣專為改善自律神經失調而設計，適用於失眠、焦慮、情緒不穩定等問題，也能幫助增強免疫系統
         </p>
       </div>
       <div class="usageInfoCard">
         <h3>適合居家使用</h3>
         <p>
-          神經調節衣是一款設計簡單、方便的保健產品，適合在家中進行日常使用，無需到診所即可完成自律神經的調節
+          全效調節衣是一款設計簡單、方便的保健產品，適合在家中進行日常使用，無需到診所即可完成自律神經的調節
         </p>
       </div>
     </div>
@@ -348,8 +348,8 @@ export default {
 
     const validName = [
       "三效深眠衣",
-      "雙效紅光調節衣",
-      "神經調節衣",
+      "雙效紅光活力衣",
+      "全效調節衣",
       "居家治療儀",
     ];
 

@@ -63,7 +63,7 @@ export default {
   background: $raphael-gray-100;
   width: 100%;
   padding: 0.75rem 0;
-  max-width: 768px;
+
   top: 0;
   z-index: 6;
 

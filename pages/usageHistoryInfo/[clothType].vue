@@ -71,8 +71,8 @@ export default {
     const store = useCommon();
     const validName = [
       "三效深眠衣",
-      "雙效紅光調節衣",
-      "神經調節衣",
+      "雙效紅光活力衣",
+      "全效調節衣",
       "居家治療儀",
     ];
     const nextText = ref("下一步");
@@ -124,7 +124,7 @@ export default {
 
         if (response.status === 200) {
           console.log(response.data);
-          if (productName === "雙效紅光調節衣") {
+          if (productName === "雙效紅光活力衣") {
             videoShow.value = true;
           }
           usageHistoryInfoList.value = response.data.Product.Desc1List;
