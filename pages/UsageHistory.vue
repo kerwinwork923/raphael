@@ -545,6 +545,7 @@ export default {
           margin-top: 0.5rem;
           counter-reset: list-counter;
           li {
+            display: flex;
             color: $raphael-black;
             font-size: 18px;
             font-weight: 400;
