@@ -9,6 +9,7 @@
       :productName="productName"
       :hasDetectRecord="hasDetectRecord"
       :todayUseRecord="todayUseRecord"
+      :hasDetectTime="hasDetectTime"
     />
 
     <TimeRing
@@ -361,6 +362,7 @@ export default {
 
     const hasDetectRecord = ref(false);
     const hasBeforeData = ref(false);
+    const hasDetectTime = ref("00:00:00");
 
     const startBtnActive = ref(false);
     const showMessage = ref(false);
@@ -558,54 +560,23 @@ export default {
             return endTime && endTime >= resetTime; // 確保有值並且在重置時間後
           });
 
-          function parseDiffToTime(diffMs) {
-            const totalSeconds = Math.floor(diffMs / 1000);
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-            return { hours, minutes, seconds };
-          }
+          // 假設我們要取最後一筆
 
           if (useData.value.length > 0) {
-            const sortedByEndTime = [...useData.value].sort(
-              (a, b) =>
-                new Date(b.EndTime.replace(/\//g, "-")) -
-                new Date(a.EndTime.replace(/\//g, "-"))
-            );
-            const lastRecord = sortedByEndTime[0]; // 最後一次使用紀錄
-            const lastEndTime = new Date(
-              lastRecord.EndTime.replace(/\//g, "-")
-            );
-            lastEndTime.setHours(lastEndTime.getHours() + 24); // +24 小時
+            const lastRecord = useData.value[useData.value.length - 1];
+            // 取得 oriStartTime / oriEndTime (例如 "20250110140914")
+            const oriStart = lastRecord.oriStartTime;
+            const oriEnd = lastRecord.oriEndTime;
 
-            const diff = lastEndTime - new Date();
-            if (diff > 0) {
-              // 代表還沒超過 24 小時，依舊在倒數 => 傳物件
-              const { hours, minutes, seconds } = parseDiffToTime(diff);
-              hasBeforeData24.value = {
-                within24: true,
-                hours,
-                minutes,
-                seconds,
-              };
-            } else {
-              // 超過 24 小時 => 不在倒數期，給 null 或一個 within24=false
-              hasBeforeData24.value = {
-                within24: false,
-                hours: 0,
-                minutes: 0,
-                seconds: 0,
-              };
-            }
+            // 用函式計算相差秒數 → 轉成 hh:mm:ss
+            const detectTimeStr = calcOriTimeDiff(oriStart, oriEnd);
+
+            // 設置到 hasDetectTime
+            hasDetectTime.value = detectTimeStr;
           } else {
-            // 如果從沒使用紀錄 => 不在倒數期
-            hasBeforeData24.value = {
-              within24: false,
-              hours: 0,
-              minutes: 0,
-              seconds: 0,
-            };
+            hasDetectTime.value = "00:00:00";
           }
+
           console.log("當日檢測紀錄（治療前）:", hasBeforeRecord);
           console.log("當日檢測紀錄（治療後）:", hasAfterRecord);
           console.log("當日使用紀錄:", todayUseRecord.value);
@@ -616,6 +587,36 @@ export default {
         loading.value = false;
       }
     };
+
+    function calcOriTimeDiff(oriStart, oriEnd) {
+      if (!oriStart || !oriEnd) return "00:00:00";
+
+      const start = parseYMDHMS(oriStart); // 例如 "20250110140914"
+      const end = parseYMDHMS(oriEnd);
+      const diff = Math.floor((end - start) / 1000);
+      if (diff <= 0) return "00:00:00";
+
+      const hours = Math.floor(diff / 3600);
+      const minutes = Math.floor((diff % 3600) / 60);
+      const seconds = diff % 60;
+      return [
+        hours.toString().padStart(2, "0"),
+        minutes.toString().padStart(2, "0"),
+        seconds.toString().padStart(2, "0"),
+      ].join(":");
+    }
+
+    function parseYMDHMS(str) {
+      // str = "YYYYMMDDHHmmss" (14碼)
+      if (!str || str.length < 14) return new Date();
+      const yyyy = Number(str.slice(0, 4));
+      const MM = Number(str.slice(4, 6)) - 1; // 月份0-11
+      const dd = Number(str.slice(6, 8));
+      const HH = Number(str.slice(8, 10));
+      const mm = Number(str.slice(10, 12));
+      const ss = Number(str.slice(12, 14));
+      return new Date(yyyy, MM, dd, HH, mm, ss);
+    }
 
     // 計算當日重置時間（凌晨5點）
     const calculateResetTime = (now) => {
@@ -738,7 +739,7 @@ export default {
       handleWatchClick,
       todayUseRecord,
       hasBeforeData,
-      hasBeforeData24,
+      hasDetectTime,
     };
   },
 };

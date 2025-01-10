@@ -8,7 +8,7 @@
       class="completion-message"
       v-if="currentDetectionState === DetectionState.AFTER"
     >
-      總共使用 {{ totalUsedTime }}
+      總共使用 {{ hasDetectTime }}
     </div>
 
     <div class="timerButtonGroup">
@@ -40,7 +40,10 @@ const props = defineProps({
   hasDetectRecord: {
     type: Boolean,
   },
-
+  hasDetectTime: {
+    type: String,
+    default: "00:00:00",
+  },
 });
 
 const router = useRouter();
