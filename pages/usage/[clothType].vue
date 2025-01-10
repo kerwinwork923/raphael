@@ -1,26 +1,17 @@
 <template>
   <RaphaelLoading v-if="loading" />
-  <HRVAlert :showCloseButton="false" />
+  <HRVAlert :showCloseButton="true" />
   <DSPRSelect :showCloseButton="false" />
   <div class="usageWrap">
     <TitleMenu Text="使用紀錄" :link="`/UsageHistory`" />
     <TimeRing2
-      v-if="productName === '三效深眠衣'"
+      v-if="productName === '三效深眠衣' || productName === '全效調節衣'"
       :productName="productName"
       :hasDetectRecord="hasDetectRecord"
       :todayUseRecord="todayUseRecord"
+      :hasBeforeData24="hasBeforeData24"
     />
 
-    <!-- <TimeRing
-      v-if="productName === '全效調節衣'"
-      :totalTime="21600"
-      :product-name="productName"
-      :hasDetectRecord="hasDetectRecord"
-      :todayUseRecord="todayUseRecord"
-      :hasBeforeData="hasBeforeData"
-      @countdownComplete="handleCountdownComplete"
-      @requireHRVCheck="handleHRVCheck"
-    /> -->
     <TimeRing
       v-if="productName === '雙效紅光活力衣' || productName === '居家治療儀'"
       :totalTime="5400"
@@ -29,24 +20,6 @@
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
     />
-
-    <TimeRing
-      v-if="productName === '全效調節衣'"
-      :totalTime="7200"
-      :product-name="productName"
-      :hasDetectRecord="hasDetectRecord"
-      @countdownComplete="handleCountdownComplete"
-      @requireHRVCheck="handleHRVCheck"
-    />
-
-    <!-- <TimeRing
-      v-if="productName !== '全效調節衣'"
-      :totalTime="120"
-      :product-name="productName"
-      :hasDetectRecord="hasDetectRecord"
-      @countdownComplete="handleCountdownComplete"
-      @requireHRVCheck="handleHRVCheck"
-    /> -->
 
     <div class="usageInfoGroup" v-if="usageCardState === '雙效紅光活力衣'">
       <div class="usageInfoCard">
@@ -259,10 +232,18 @@
           <!-- `/vital/detail.html?AID=` -->
           <div class="detect">
             <div class="timeGroup">
-              <div class="timeIcon" @click="handleWatchClick(item)" style="cursor: pointer;">
+              <div
+                class="timeIcon"
+                @click="handleWatchClick(item)"
+                style="cursor: pointer"
+              >
                 <img src="../../assets/imgs/detectTime.svg" alt="" />
               </div>
-              <div class="timeTextGroup" @click="handleDetectClick(item)" style="cursor: pointer;">
+              <div
+                class="timeTextGroup"
+                @click="handleDetectClick(item)"
+                style="cursor: pointer"
+              >
                 <div class="time">{{ formatTimestamp3(item.CheckTime) }}</div>
                 <div class="timeInfoText">
                   {{ item.ProductName }} {{ item.BcAf }}
@@ -284,13 +265,15 @@
                   >ms
                 </h5>
               </div>
-              <div 
-              class="resultText"
-              :style="{
-                opacity: item.BcAf !== '治療前' ? 1 : 0,
-                cursor: item.BcAf !== '治療前' ? 'pointer' : 'default',
-              }"
-              >分析結果</div>
+              <div
+                class="resultText"
+                :style="{
+                  opacity: item.BcAf !== '治療前' ? 1 : 0,
+                  cursor: item.BcAf !== '治療前' ? 'pointer' : 'default',
+                }"
+              >
+                分析結果
+              </div>
 
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -382,6 +365,9 @@ export default {
 
     const startBtnActive = ref(false);
     const showMessage = ref(false);
+
+    // ★ 新增：判斷 24 小時內是否還在倒數期 (或還有紀錄)
+    const hasBeforeData24 = ref(false);
 
     const usageCardState = ref("");
     if (productName) usageCardState.value = productName;
@@ -573,6 +559,54 @@ export default {
             return endTime && endTime >= resetTime; // 確保有值並且在重置時間後
           });
 
+          function parseDiffToTime(diffMs) {
+            const totalSeconds = Math.floor(diffMs / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            return { hours, minutes, seconds };
+          }
+
+          if (useData.value.length > 0) {
+            const sortedByEndTime = [...useData.value].sort(
+              (a, b) =>
+                new Date(b.EndTime.replace(/\//g, "-")) -
+                new Date(a.EndTime.replace(/\//g, "-"))
+            );
+            const lastRecord = sortedByEndTime[0]; // 最後一次使用紀錄
+            const lastEndTime = new Date(
+              lastRecord.EndTime.replace(/\//g, "-")
+            );
+            lastEndTime.setHours(lastEndTime.getHours() + 24); // +24 小時
+
+            const diff = lastEndTime - new Date();
+            if (diff > 0) {
+              // 代表還沒超過 24 小時，依舊在倒數 => 傳物件
+              const { hours, minutes, seconds } = parseDiffToTime(diff);
+              hasBeforeData24.value = {
+                within24: true,
+                hours,
+                minutes,
+                seconds,
+              };
+            } else {
+              // 超過 24 小時 => 不在倒數期，給 null 或一個 within24=false
+              hasBeforeData24.value = {
+                within24: false,
+                hours: 0,
+                minutes: 0,
+                seconds: 0,
+              };
+            }
+          } else {
+            // 如果從沒使用紀錄 => 不在倒數期
+            hasBeforeData24.value = {
+              within24: false,
+              hours: 0,
+              minutes: 0,
+              seconds: 0,
+            };
+          }
           console.log("當日檢測紀錄（治療前）:", hasBeforeRecord);
           console.log("當日檢測紀錄（治療後）:", hasAfterRecord);
           console.log("當日使用紀錄:", todayUseRecord.value);
@@ -705,6 +739,7 @@ export default {
       handleWatchClick,
       todayUseRecord,
       hasBeforeData,
+      hasBeforeData24,
     };
   },
 };
@@ -833,7 +868,7 @@ export default {
       }
       .useList {
         opacity: 0;
-        transition:all 0.2s ease;
+        transition: all 0.2s ease;
         animation: fadeIn2 1s ease forwards;
         animation-delay: 0s;
         &:hover {
@@ -1059,14 +1094,14 @@ export default {
           }
         }
       }
-      .beforeTreatment{
+      .beforeTreatment {
         &:hover {
           box-shadow: unset;
           padding: 0;
         }
-        .detect{
-          .timeGroup{
-            .timeTextGroup{
+        .detect {
+          .timeGroup {
+            .timeTextGroup {
               cursor: unset !important;
             }
           }

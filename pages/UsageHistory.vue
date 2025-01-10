@@ -26,6 +26,11 @@
                 alt="robot image"
               />
             </div>
+            <div class="hasDetectBlock" v-if="countdownTimers[product]">
+              <h5>已完成檢測</h5>
+              <div class="hasDetectTime">{{ countdownTimers[product] }}</div>
+              <h5>後再使用</h5>
+            </div>
             <h3 class="productName">{{ purchasedProducts[0] }}</h3>
           </div>
         </div>
@@ -59,6 +64,11 @@
                 alt="robot image"
               />
               <div class="circle"></div>
+            </div>
+            <div class="hasDetectBlock" v-if="countdownTimers[product]">
+              <h5>已完成檢測</h5>
+              <div class="hasDetectTime">{{ countdownTimers[product] }}</div>
+              <h5>後再使用</h5>
             </div>
             <h3 class="productName">{{ product }}</h3>
           </div>
@@ -136,7 +146,11 @@ export default {
     const recommendedProducts = ref([]); // 推薦的產品
     const selectedProductIndex = ref(0); // 選中的產品索引
     const useRecord = ref([]); // 使用記錄
-    const hasCheckedToday = ref(false); // 判斷今日是否有檢測記錄
+
+    const countdownTimers = ref({});
+
+    const normalCountProducts = ["三效深眠衣", "全效調節衣"];
+    const countdownProducts = ["雙效紅光活力衣", "居家治療儀"];
 
     // 從 localStorage 中獲取用戶資料
     const localData = localStorage.getItem("userData");
@@ -179,10 +193,9 @@ export default {
           "https://23700999.com:8081/HMA/API_USE1.jsp",
           { MID, Token, MAID, Mobile }
         );
-
         if (response.status === 200) {
           purchasedProducts.value = response.data.PurchaseProduct;
-          useRecord.value = response.data.UseRecord; // 保存使用記錄
+          useRecord.value = response.data.UseRecord;
           recommendedProducts.value = response.data.PromoteProduct.map(
             (item) => ({
               name: item.ProductName,
@@ -199,6 +212,53 @@ export default {
       } finally {
         loading.value = false;
       }
+    };
+
+    const updateCountdown = () => {
+      const now = new Date();
+
+      // 針對「每個已購買的產品」去找使用紀錄中的最後一筆
+      purchasedProducts.value.forEach((product) => {
+        const records = useRecord.value
+          .filter((r) => r.ProductName === product)
+          // 依照結束時間做排序，找最近一次使用
+          .sort(
+            (a, b) =>
+              new Date(b.EndTime.replace(/-/g, "/")) -
+              new Date(a.EndTime.replace(/-/g, "/"))
+          );
+
+        if (records.length === 0) {
+          // 若沒有使用紀錄，代表從未用過，不用顯示倒數
+          countdownTimers.value[product] = null;
+          return;
+        }
+
+        const lastEndTime = new Date(records[0].EndTime.replace(/-/g, "/"));
+        // 這邊假設 24 小時後可再次使用
+        lastEndTime.setHours(lastEndTime.getHours() + 24);
+
+        const diff = lastEndTime - now; // 剩餘毫秒
+        if (diff <= 0) {
+          // 倒數已結束，可直接使用
+          countdownTimers.value[product] = null;
+          return;
+        }
+
+        // 計算「時：分：秒」
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+        const seconds = Math.floor((diff / 1000) % 60);
+
+        // 轉成倒數字串
+        countdownTimers.value[product] = `${String(hours).padStart(
+          2,
+          "0"
+        )}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
+          2,
+          "0"
+        )}`;
+      });
     };
 
     // 判斷指定產品是否在今日使用過（以凌晨 5 點為新的一天）
@@ -257,11 +317,11 @@ export default {
     // 開始使用產品
     const goUse = () => {
       const productName = purchasedProducts.value[selectedProductIndex.value];
-      if (hasUsedToday(productName)) {
-        window.location.href = `/usage/${productName}`;
-      } else {
-        window.location.href = `/usageHistoryInfo/${productName}`;
-      }
+      // if (hasUsedToday(productName)) {
+      //   window.location.href = `/usage/${productName}`;
+      // } else {
+      window.location.href = `/usageHistoryInfo/${productName}`;
+      // }
     };
 
     // 聯繫客服
@@ -272,7 +332,15 @@ export default {
     // 初始化邏輯
     onMounted(async () => {
       try {
+        // 1. 先抓取 API 資料
         await fetchProducts();
+        // 2. 資料抓回來後馬上初始化一次倒數
+        updateCountdown();
+
+        // 3. 若你要即時倒數，則開一個 setInterval
+        setInterval(() => {
+          updateCountdown();
+        }, 1000);
       } catch (error) {
         console.error("初始化過程中出現錯誤：", error);
       }
@@ -292,6 +360,7 @@ export default {
       checkedIcon,
       uncheckedIcon,
       loading,
+      countdownTimers,
     };
   },
 };
@@ -319,10 +388,33 @@ export default {
     }
     .haveProductWrap {
       margin-top: 0.75rem;
+      .hasDetectBlock {
+        border-radius: 8px;
+        border: 1px solid #fff;
+        background: rgba(255, 255, 255, 0.85);
+        box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.25);
+        backdrop-filter: blur(4.5px);
+        color: #ec4f4f;
+        font-family: "Noto Sans";
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 700;
+
+        letter-spacing: 0.12px;
+        padding: 12px;
+        position: absolute;
+        z-index: 10;
+        text-align: center;
+        .hasDetectTime {
+          padding: 0.35rem;
+          font-size: 1.5rem;
+        }
+      }
       .haveGroup {
         display: grid;
         place-items: center;
         gap: 0.75rem;
+
         .haveIcon {
           width: 24px;
         }
@@ -348,7 +440,6 @@ export default {
               bottom: 0;
               right: 0;
               z-index: 3;
-             
             }
 
             .circle {
