@@ -26,11 +26,11 @@
                 alt="robot image"
               />
             </div>
-            <div class="hasDetectBlock" v-if="countdownTimers[product]">
+            <!-- <div class="hasDetectBlock" v-if="countdownTimers[product]">
               <h5>已完成檢測</h5>
               <div class="hasDetectTime">{{ countdownTimers[product] }}</div>
               <h5>後再使用</h5>
-            </div>
+            </div> -->
             <h3 class="productName">{{ purchasedProducts[0] }}</h3>
           </div>
         </div>
@@ -65,11 +65,11 @@
               />
               <div class="circle"></div>
             </div>
-            <div class="hasDetectBlock" v-if="countdownTimers[product]">
+            <!-- <div class="hasDetectBlock" v-if="countdownTimers[product]">
               <h5>已完成檢測</h5>
               <div class="hasDetectTime">{{ countdownTimers[product] }}</div>
               <h5>後再使用</h5>
-            </div>
+            </div> -->
             <h3 class="productName">{{ product }}</h3>
           </div>
         </div>
@@ -214,52 +214,52 @@ export default {
       }
     };
 
-    const updateCountdown = () => {
-      const now = new Date();
+    // const updateCountdown = () => {
+    //   const now = new Date();
 
-      // 針對「每個已購買的產品」去找使用紀錄中的最後一筆
-      purchasedProducts.value.forEach((product) => {
-        const records = useRecord.value
-          .filter((r) => r.ProductName === product)
-          // 依照結束時間做排序，找最近一次使用
-          .sort(
-            (a, b) =>
-              new Date(b.EndTime.replace(/-/g, "/")) -
-              new Date(a.EndTime.replace(/-/g, "/"))
-          );
+    //   // 針對「每個已購買的產品」去找使用紀錄中的最後一筆
+    //   purchasedProducts.value.forEach((product) => {
+    //     const records = useRecord.value
+    //       .filter((r) => r.ProductName === product)
+    //       // 依照結束時間做排序，找最近一次使用
+    //       .sort(
+    //         (a, b) =>
+    //           new Date(b.EndTime.replace(/-/g, "/")) -
+    //           new Date(a.EndTime.replace(/-/g, "/"))
+    //       );
 
-        if (records.length === 0) {
-          // 若沒有使用紀錄，代表從未用過，不用顯示倒數
-          countdownTimers.value[product] = null;
-          return;
-        }
+    //     if (records.length === 0) {
+    //       // 若沒有使用紀錄，代表從未用過，不用顯示倒數
+    //       countdownTimers.value[product] = null;
+    //       return;
+    //     }
 
-        const lastEndTime = new Date(records[0].EndTime.replace(/-/g, "/"));
-        // 這邊假設 24 小時後可再次使用
-        lastEndTime.setHours(lastEndTime.getHours() + 24);
+    //     const lastEndTime = new Date(records[0].EndTime.replace(/-/g, "/"));
+    //     // 這邊假設 24 小時後可再次使用
+    //     lastEndTime.setHours(lastEndTime.getHours() + 24);
 
-        const diff = lastEndTime - now; // 剩餘毫秒
-        if (diff <= 0) {
-          // 倒數已結束，可直接使用
-          countdownTimers.value[product] = null;
-          return;
-        }
+    //     const diff = lastEndTime - now; // 剩餘毫秒
+    //     if (diff <= 0) {
+    //       // 倒數已結束，可直接使用
+    //       countdownTimers.value[product] = null;
+    //       return;
+    //     }
 
-        // 計算「時：分：秒」
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff / (1000 * 60)) % 60);
-        const seconds = Math.floor((diff / 1000) % 60);
+    //     // 計算「時：分：秒」
+    //     const hours = Math.floor(diff / (1000 * 60 * 60));
+    //     const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    //     const seconds = Math.floor((diff / 1000) % 60);
 
-        // 轉成倒數字串
-        countdownTimers.value[product] = `${String(hours).padStart(
-          2,
-          "0"
-        )}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
-          2,
-          "0"
-        )}`;
-      });
-    };
+    //     // 轉成倒數字串
+    //     countdownTimers.value[product] = `${String(hours).padStart(
+    //       2,
+    //       "0"
+    //     )}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
+    //       2,
+    //       "0"
+    //     )}`;
+    //   });
+    // };
 
     // 判斷指定產品是否在今日使用過（以凌晨 5 點為新的一天）
     const hasUsedToday = (productName) => {

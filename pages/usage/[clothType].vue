@@ -9,7 +9,6 @@
       :productName="productName"
       :hasDetectRecord="hasDetectRecord"
       :todayUseRecord="todayUseRecord"
-      :hasBeforeData24="hasBeforeData24"
     />
 
     <TimeRing

@@ -7,9 +7,7 @@
     <div
       class="completion-message"
       v-if="currentDetectionState === DetectionState.AFTER"
-    >
-      總共使用 {{ totalUsedTime }}
-    </div>
+    ></div>
 
     <div class="timerButtonGroup">
       <!-- 重新檢測 -->
@@ -17,13 +15,23 @@
         v-if="currentDetectionState === DetectionState.RUNNING"
         style="background-color: #74bc1f; padding: 8px"
         @click="API_DeleteStart"
+        :disabled="hasBeforeData24.within24"
       >
         重新檢測
       </button>
       <!-- 主按鈕 (開始或結束) -->
-      <button :style="buttonStyle" @click="toggleTimer">
+      <button
+        :style="buttonStyle"
+        @click="toggleTimer"
+        :disabled="hasBeforeData24.within24"
+      >
         {{ buttonText }}
       </button>
+    </div>
+    <div v-if="hasBeforeData24.within24" class="delay-message">
+      請於{{ hasBeforeData24.hours }}小時{{ hasBeforeData24.minutes }}分{{
+        hasBeforeData24.seconds
+      }}秒後再使用
     </div>
   </div>
 </template>
@@ -40,7 +48,10 @@ const props = defineProps({
   hasDetectRecord: {
     type: Boolean,
   },
-
+  hasBeforeData24: {
+    type: Object,
+    default: () => ({ within24: false, hours: 0, minutes: 0, seconds: 0 }),
+  },
 });
 
 const router = useRouter();
@@ -66,16 +77,6 @@ const buttonText = computed(() => {
     default:
       return "未知狀態";
   }
-});
-
-const totalUsedTime = computed(() => {
-  const hours = Math.floor(elapsedTime.value / 3600);
-  const minutes = Math.floor((elapsedTime.value % 3600) / 60);
-  const seconds = elapsedTime.value % 60;
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
-    2,
-    "0"
-  )}:${String(seconds).padStart(2, "0")}`;
 });
 
 const isButtonEnabled = ref(true);
