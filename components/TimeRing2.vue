@@ -482,7 +482,7 @@ function doReset() {
   isCounting.value = false;
   elapsedTime.value = 0;
   currentDetectionState.value = DetectionState.BEFORE;
-  UID.value = null;
+  // UID.value = null;
   console.log("已重置計時與狀態");
 }
 
