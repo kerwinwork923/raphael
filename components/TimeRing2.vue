@@ -11,7 +11,6 @@
       總共使用 {{ hasDetectTime }}
     </div>
 
-
     <div class="timerButtonGroup">
       <!-- 重新檢測 -->
       <button
@@ -220,7 +219,7 @@ const toggleTimer = async () => {
     // **移除 AFTER 狀態的分支**
     case DetectionState.AFTER:
       // 也可以手動執行使用後檢測
-      detectHRVAfter(UID.value)
+      detectHRVAfter(UID.value);
       break;
 
     default:
@@ -444,6 +443,7 @@ const API_UIDInfo_Search12 = async () => {
         }
       }
       currentDetectionState.value = DetectionState.AFTER;
+      UID.value = response.UID;
       detectHRVAfter(response.UID);
     }
   } catch (err) {
@@ -482,7 +482,7 @@ function doReset() {
   isCounting.value = false;
   elapsedTime.value = 0;
   currentDetectionState.value = DetectionState.BEFORE;
-  // UID.value = null;
+  UID.value = null;
   console.log("已重置計時與狀態");
 }
 
