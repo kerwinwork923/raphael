@@ -11,6 +11,7 @@
       總共使用 {{ hasDetectTime }}
     </div>
 
+
     <div class="timerButtonGroup">
       <!-- 重新檢測 -->
       <button
@@ -66,6 +67,8 @@ const buttonText = computed(() => {
       return "結束";
     case DetectionState.AFTER:
       return "HRV檢測(使用後)";
+
+      break;
     default:
       return "未知狀態";
   }
@@ -215,9 +218,10 @@ const toggleTimer = async () => {
       break;
 
     // **移除 AFTER 狀態的分支**
-    // case DetectionState.AFTER:
-    //   // 不再需要手動執行使用後檢測
-    //   break;
+    case DetectionState.AFTER:
+      // 也可以手動執行使用後檢測
+      detectHRVAfter(UID.value)
+      break;
 
     default:
       console.error("未知檢測狀態");
@@ -247,6 +251,8 @@ const API_MID_ProductName_UIDInfo = async () => {
         console.warn("UID 為 null，無法繼續後續操作");
         return null;
       }
+
+      // 這裡的 CheckTime 代表後端回傳的某個檢測點時間
       const now = new Date().getTime();
       const checkTime = response.CheckTime
         ? new Date(
@@ -261,17 +267,24 @@ const API_MID_ProductName_UIDInfo = async () => {
             )}`
           ).getTime()
         : null;
+
       if (checkTime) {
         const timeDifference = Math.abs(now - checkTime);
-        if (timeDifference <= 24 * 60 * 60 * 1000) {
-          console.log("CheckTime 在有效的24小時範圍內：", checkTime);
-          await API_HRV2_UID_Flag_Info("1", UIDResponse);
+
+        // ★ 新增：超過 24 小時就直接刪除舊資料，或自行定義要怎麼做
+        if (timeDifference > 24 * 60 * 60 * 1000) {
+          console.log("CheckTime 超出 24 小時範圍，直接清除舊檢測紀錄");
+          await API_DeleteStart();
+          return null; // 或 return {}; 看專案需要
         } else {
-          console.log("CheckTime 超出24小時範圍");
+          console.log("CheckTime 在有效的 24 小時範圍內：", checkTime);
+          // 若在 24 小時內，檢查一下是否完成使用前檢測
+          await API_HRV2_UID_Flag_Info("1", UIDResponse);
         }
       } else {
         console.warn("無法檢測到 CheckTime，可能需要進行其他處理");
       }
+
       return response;
     } else {
       console.error("無法獲取有效的 UID 信息：", response);
@@ -330,18 +343,25 @@ onMounted(async () => {
           ).getTime();
           const now = Date.now();
           const timeDifference = Math.abs(now - startTime);
+
           if (timeDifference <= 24 * 60 * 60 * 1000) {
+            // 沒超過 24 小時，繼續原本流程
             elapsedTime.value = Math.floor(timeDifference / 1000);
             console.log("計算的已過時間：", elapsedTime.value, "秒");
             startTimer();
             currentDetectionState.value = DetectionState.RUNNING;
           } else {
-            console.log("StartTime 超出24小時範圍");
+            // ★ 新增：超過 24 小時就直接清除/重置
+            console.log("StartTime 超出 24 小時範圍，直接清除舊檢測紀錄");
+            await API_DeleteStart();
+            // 或只呼叫 doReset() 也行
+            // doReset();
           }
         } else {
           console.log("無效的 StartTime");
         }
       } else {
+        // 沒有舊的 UID，直接創建新的
         console.warn("UID 為 null，需要創建新的檢測記錄");
         const startResponse = await useStartAPI();
         if (startResponse?.UID) {
@@ -446,7 +466,7 @@ const API_DeleteStart = async () => {
     );
     console.log("API_DeleteStart 呼叫成功", response);
 
-    // ★ 重置前端狀態
+    // 呼叫後把前端狀態也重置
     doReset();
   } catch (error) {
     console.error("API_DeleteStart 呼叫失敗:", error);
