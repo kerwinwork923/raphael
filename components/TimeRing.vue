@@ -285,6 +285,7 @@ const detectHRVAfter = (UID) => {
 };
 
 // ------------- [核心倒數函式] -------------
+// ------------- [核心倒數函式] -------------
 const startCountdown = () => {
   console.log("開始倒數，剩餘時間:", remainingTime.value);
   timerStart = Date.now();
@@ -300,32 +301,33 @@ const startCountdown = () => {
     // 若已經歸零 => 結束
     if (remainingTime.value <= 0) {
       clearInterval(timerInterval);
+      timerInterval = null;
       remainingTime.value = 0;
-      console.log("倒數結束，檢查是否需要後續處理...");
 
-      // 跟舊程式類似
-      console.log("檢測流程已完成，進行結束操作...");
+      console.log("倒數結束，進行結束操作...");
+
+      // 先呼叫 useEndAPI 通知後端「使用前流程已結束」
+
+      // ★ Step1: 先檢查使用前檢測是否真的完成 (若您要防呆)
+      const flagBefore = await API_HRV2_UID_Flag_Info("1", UID.value);
+      if (flagBefore === "N") {
+        // 未做「使用前檢測」→ 警告 & 再次觸發使用前檢測
+        // alert("尚未進行使用前HRV檢測，將重新顯示使用前檢測彈窗");
+        detectHRVBefore(UID.value);
+        currentState.value = DetectionState.BEFORE;
+        return;
+      }
+
       await useEndAPI();
-      // 結束後，再 check Flag=2
+
+      // ★ Step2: 再檢查使用後 (Flag=2)
       const isAfterExit = await API_HRV2_UID_Flag_Info("2", UID.value);
       if (isAfterExit === "N") {
-        // 未完成使用後 -> detectHRVAfter
+        // 未做「使用後」→ 直接進入使用後檢測
         detectHRVAfter(UID.value);
         currentState.value = DetectionState.AFTER;
       } else {
-        // AFTER 檢測也完成 -> 回 BEFORE
-        currentState.value = DetectionState.BEFORE;
-      }
-
-      // 檢查使用前檢測
-      const flagBefore = await API_HRV2_UID_Flag_Info("1", UID.value);
-      if (flagBefore === "N") {
-        console.log("尚未完成使用前檢測，啟動使用前檢測流程...");
-        detectHRVBefore(UID.value);
-        currentState.value = DetectionState.BEFORE;
-      } else {
-        console.log("檢測流程已完成，進行結束操作...");
-        await useEndAPI();
+        // 連使用後也做完 → 狀態重置到 BEFORE
         currentState.value = DetectionState.BEFORE;
       }
     }
@@ -341,9 +343,22 @@ const toggleTimer = async () => {
       case DetectionState.BEFORE:
         // 按下按鈕 => 建立 UID => 進入 RUNNING 倒數
         console.log("狀態：BEFORE => 開始倒數");
+        // ★ Step0: 檢查是否已做「使用前」(Flag=1)
+        const flagBefore = await API_HRV2_UID_Flag_Info("1", UID.value);
+        if (flagBefore === "N") {
+          // 代表尚未做過使用前 → 跳出提示，不做任何事
+          alert("尚未做使用前HRV檢測");
+          detectHRVBefore(UID.value);
+          return;
+        }
+
+        // ★ Step1: 若已完成使用前 → 呼叫 useStartAPI 建立新的倒數/UID
+        console.log("已完成使用前檢測，呼叫 useStartAPI() 建立新的 UID");
         const response = await useStartAPI();
         if (response?.UID) {
           detectHRVBefore(response.UID);
+          // ↑ 如果您想每次都先顯示「使用前檢測彈窗」，也可保留；若不需要可拿掉。
+
           startCountdown();
           currentState.value = DetectionState.RUNNING;
         }
@@ -400,7 +415,7 @@ const useEndAPI = async () => {
     console.log("結束 API 呼叫成功:", response);
     localStorage.removeItem("UID");
     // 可視需求決定是否 reload 或做其他處理
-    window.location.reload();
+    // window.location.reload();
     return response;
   } catch (error) {
     console.error("結束 API 呼叫失敗:", error);
