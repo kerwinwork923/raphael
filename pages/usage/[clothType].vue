@@ -14,7 +14,7 @@
 
     <TimeRing
       v-if="productName === '雙效紅光活力衣' || productName === '居家治療儀'"
-      :totalTime="5400"
+      :totalTime="150"
       :product-name="productName"
       :hasDetectRecord="hasDetectRecord"
       @countdownComplete="handleCountdownComplete"
