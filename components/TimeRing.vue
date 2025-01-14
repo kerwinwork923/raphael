@@ -104,7 +104,7 @@ const buttonStyle = computed(() => {
       return { backgroundColor: "#74BC1F", color: "#fff" };
     case DetectionState.RUNNING:
       // 紅色(結束)
-      return { backgroundColor: "#EC4F4F", color: "#fff" };
+      return { backgroundColor: "#74BC1F", color: "#fff" };
     case DetectionState.AFTER:
       // 綠色(使用後)
       return { backgroundColor: "#74BC1F", color: "#fff" };
@@ -359,6 +359,9 @@ const toggleTimer = async () => {
         }
         break;
 
+      case DetectionState.AFTER:
+        detectHRVAfter(UID.value);
+
       default:
         console.warn("未知狀態，不做任何事:", currentState.value);
     }
@@ -488,6 +491,7 @@ const checkForPendingAfterDetection = async () => {
       // 若有未完成的使用後檢測 => 直接進 AFTER 狀態
       if (rUID) {
         if (timerInterval) clearInterval(timerInterval);
+        UID.value = rUID;
         isCounting.value = false;
         remainingTime.value = 0;
         detectHRVAfter(rUID);
