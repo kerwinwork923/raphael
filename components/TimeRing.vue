@@ -21,7 +21,6 @@
     </div>
 
     <!-- 重新檢測按鈕：可在「RUNNING」或「AFTER」時顯示 -->
-
     <div v-if="hasDetectRecord" class="completion-message">感謝您的使用</div>
     <div v-if="hasDetectRecord" class="completion-delayMessage">
       ※ 請於隔天後再使用
@@ -304,6 +303,20 @@ const startCountdown = () => {
       remainingTime.value = 0;
       console.log("倒數結束，檢查是否需要後續處理...");
 
+      // 跟舊程式類似
+      console.log("檢測流程已完成，進行結束操作...");
+      await useEndAPI();
+      // 結束後，再 check Flag=2
+      const isAfterExit = await API_HRV2_UID_Flag_Info("2", UID.value);
+      if (isAfterExit === "N") {
+        // 未完成使用後 -> detectHRVAfter
+        detectHRVAfter(UID.value);
+        currentState.value = DetectionState.AFTER;
+      } else {
+        // AFTER 檢測也完成 -> 回 BEFORE
+        currentState.value = DetectionState.BEFORE;
+      }
+
       // 檢查使用前檢測
       const flagBefore = await API_HRV2_UID_Flag_Info("1", UID.value);
       if (flagBefore === "N") {
@@ -463,16 +476,15 @@ const resetDetectionState = () => {
 
 // ------------- [檢查未完成後檢測邏輯] -------------
 const checkForPendingAfterDetection = async () => {
-  if (isCheckingPending.value) return;
-  isCheckingPending.value = true;
-
   try {
     const response = await apiRequest(
       "https://23700999.com:8081/HMA/API_UIDInfo_Search12.jsp",
       { MID, Token, MAID, Mobile, ProductName: props.productName }
     );
+
     if (response && response.Result !== "NOData") {
       const { UID: rUID, CheckTime } = response;
+
       // 若有未完成的使用後檢測 => 直接進 AFTER 狀態
       if (rUID) {
         if (timerInterval) clearInterval(timerInterval);
@@ -485,7 +497,6 @@ const checkForPendingAfterDetection = async () => {
   } catch (error) {
     console.error("檢查未完成使用後檢測失敗:", error);
   } finally {
-    isCheckingPending.value = false;
   }
 };
 
@@ -493,6 +504,7 @@ const checkForPendingAfterDetection = async () => {
 onMounted(() => {
   initializeUID().then(() => {
     if (currentState.value === DetectionState.BEFORE) {
+      // 這裡呼叫 checkForPendingAfterDetection()
       checkForPendingAfterDetection();
     }
   });
