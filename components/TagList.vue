@@ -7,9 +7,9 @@
     <router-link to="/userRecord" class="listItem" active-class="listActive"
       >生活紀錄</router-link
     >
-    <router-link to="/weekly2" class="listItem" active-class="listActive"
+    <!-- <router-link to="/weekly2" class="listItem" active-class="listActive"
       >寶貝紀錄</router-link
-    >
+    > -->
     <!-- <router-link to="#" class="listItem" >寶貝紀錄</router-link> -->
   </div>
 </template>
