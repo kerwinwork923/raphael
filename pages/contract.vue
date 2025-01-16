@@ -340,8 +340,7 @@ export default {
       width: 50%;
       position: relative;
 
-
-      &:last-child{
+      &:last-child {
         margin-left: 1rem;
       }
 
@@ -433,9 +432,9 @@ export default {
               padding: 4px;
               letter-spacing: 0.04px;
               font-size: 12px;
-              box-shadow: 0px 2px 3px 0px rgba(223, 236, 197, 0.50);
+              box-shadow: 0px 2px 3px 0px rgba(223, 236, 197, 0.5);
 
-              &::after{
+              &::after {
                 content: "";
                 position: absolute;
                 background: $raphael-white;

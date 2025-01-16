@@ -13,8 +13,17 @@
     />
 
     <TimeRing
-      v-if="productName === '雙效紅光活力衣' || productName === '居家治療儀'"
-      :totalTime="180"
+      v-if="productName === '居家治療儀'"
+      :totalTime="3000"
+      :product-name="productName"
+      :hasDetectRecord="hasDetectRecord"
+      @countdownComplete="handleCountdownComplete"
+      @requireHRVCheck="handleHRVCheck"
+    />
+
+    <TimeRing
+      v-if="productName === '雙效紅光活力衣'"
+      :totalTime="5400"
       :product-name="productName"
       :hasDetectRecord="hasDetectRecord"
       @countdownComplete="handleCountdownComplete"
@@ -133,7 +142,7 @@
               :key="year"
               @click="selectYear(year)"
             >
-              {{ year }}
+              {{ year }} 
             </div>
           </div>
         </div>
