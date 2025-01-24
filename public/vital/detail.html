@@ -139,40 +139,6 @@
           </svg>
         </div>
 
-        <!-- <div class="row">
-          <div class="nerve">
-            <div class="titleGroup">
-              <h3>交感神經</h3>
-              <img src="images/raphael/nerveIcon.png " alt="" />
-            </div>
-
-            <div id="f_v_SNS" class="value"></div>
-            <div class="subTag" id="f_v_SNSDesc">中度亢奮</div>
-            <img
-              class="nerveImg"
-              id="f_v_SNSImg"
-              src="images/raphael/curve_H_98.png"
-              alt=""
-            />
-            <h5 id="f_v_SNSPercent">高於84%的人</h5>
-          </div>
-          <div class="nerve">
-            <div class="titleGroup">
-              <h3>副交感神經</h3>
-              <img src="images/raphael/nerveSubIcon.png" alt="" />
-            </div>
-            <div id="f_v_PNS" class="value"></div>
-            <div class="subTag" id="f_v_PNSDesc">極度低落</div>
-            <img
-              class="nerveImg"
-              d="f_v_PNSImg"
-              src="images/raphael/curve_H_98.png"
-              alt=""
-            />
-            <h5 id="f_v_PNSPercent">低於98%的人</h5>
-          </div>
-        </div> -->
-
         <div class="row">
           <div class="progressItem Health">
             <h3>健康力</h3>
@@ -260,18 +226,36 @@
     f_v_spo2 = document.querySelector("#f_v_spo2");
     f_v_rr = document.querySelector("#f_v_rr");
     f_v_si = document.querySelector("#f_v_si");
-    // f_v_SNS = document.querySelector("#f_v_SNS");
-    // f_v_SNSDesc = document.querySelector("#f_v_SNSDesc");
-    // f_v_SNSPercent = document.querySelector("#f_v_SNSPercent");
-    // f_v_PNS = document.querySelector("#f_v_PNS");
-    // f_v_PNSDesc = document.querySelector("#f_v_PNSDesc");
-    // f_v_PNSPercent = document.querySelector("#f_v_PNSPercent");
 
     PLFValue = document.querySelector(".text-container-PLF .value");
     PHFValue = document.querySelector(".text-container-PHF .value");
     let boxSize = 100;
 
     resultTextGroupP = document.querySelector(".resultTextGroup p");
+    //展開收合
+    document.addEventListener("DOMContentLoaded", () => {
+      // 取得「感謝您的使用」的文字節點
+      const nameText = document.querySelector(".nameText");
+      // 追蹤是否已展開
+      let isExpanded = false;
+
+      // 切換函式
+      function toggleScanInfo() {
+        isExpanded = !isExpanded; // 點擊時，在 true / false 之間切換
+        // 選取需要被切換的所有元素
+        const toggleElements = document.querySelectorAll(
+          ".scanInfo .years, .scanInfo .HRV, .scanInfo .boxGroup, .scanInfo .progressItem"
+        );
+        // 根據 isExpanded 來決定 display 屬性
+        toggleElements.forEach((el) => {
+          el.style.position= isExpanded ? "relative" : "absolute";
+          el.style.left= isExpanded ? "0" : "-9999px";
+        });
+      }
+
+      // 監聽點擊事件
+      nameText.addEventListener("click", toggleScanInfo);
+    });
 
     async function API_HRV2Detail() {
       try {
@@ -317,79 +301,6 @@
           f_v_spo2.textContent = HRVData.SPO2;
           f_v_rr.textContent = HRVData.rr;
           f_v_si.textContent = HRVData.stress;
-          //   f_v_SNS.textContent = HRVData.SNS;
-          //   f_v_SNSDesc.textContent = HRVData.SNSDesc;
-          //   f_v_SNSPercent.textContent = HRVData.SNSPercent;
-          //   f_v_PNS.textContent = HRVData.PNS;
-          //   f_v_PNSDesc.textContent = HRVData.PNSDesc;
-          //   f_v_PNSPercent.textContent = HRVData.PNSPercent;
-
-          //   const SNS = Number(HRVData.SNS);
-          //   const PNS = Number(HRVData.PNS);
-
-          //   if (SNS < -2) {
-          //     document.getElementById(
-          //       "f_v_SNSImg"
-          //     ).src = `images/raphael/curve_H_98.png`;
-          //     f_v_SNSDesc.style.backgroundColor = "#EC4F4F";
-          //   } else if (SNS >= -2 && SNS < -1) {
-          //     document.getElementById(
-          //       "f_v_SNSImg"
-          //     ).src = `images/raphael/curve_H_84.png`;
-          //     f_v_SNSDesc.style.backgroundColor = "#65558F";
-          //   } else if (SNS >= -1 && SNS < 0) {
-          //     document.getElementById(
-          //       "f_v_SNSImg"
-          //     ).src = `images/raphael/curve_H_50.png`;
-          //     f_v_SNSDesc.style.backgroundColor = "#74BC1F";
-          //   } else if (SNS >= 0 && SNS < 1) {
-          //     document.getElementById(
-          //       "f_v_SNSImg"
-          //     ).src = `images/raphael/curve_L_50.png`;
-          //     f_v_SNSDesc.style.backgroundColor = "#74BC1F";
-          //   } else if (SNS >= 1 && SNS < 2) {
-          //     document.getElementById(
-          //       "f_v_SNSImg"
-          //     ).src = `images/raphael/curve_L_84.png`;
-          //     f_v_SNSDesc.style.backgroundColor = "#65558F";
-          //   } else if (SNS >= 2) {
-          //     document.getElementById(
-          //       "f_v_SNSImg"
-          //     ).src = `images/raphael/curve_L_98.png`;
-          //     f_v_SNSDesc.style.backgroundColor = "#EC4F4F";
-          //   }
-
-          //   if (PNS > 2) {
-          //     document.getElementById(
-          //       "f_v_PNSImg"
-          //     ).src = `images/raphael/curve_H_98.png`;
-          //     f_v_PNSDesc.style.backgroundColor = "#EC4F4F";
-          //   } else if (PNS <= 2 && PNS > 1) {
-          //     document.getElementById(
-          //       "f_v_PNSImg"
-          //     ).src = `images/raphael/curve_H_84.png`;
-          //     f_v_PNSDesc.style.backgroundColor = "#65558F";
-          //   } else if (PNS <= 1 && PNS > 0) {
-          //     document.getElementById(
-          //       "f_v_PNSImg"
-          //     ).src = `images/raphael/curve_H_50.png`;
-          //     f_v_PNSDesc.style.backgroundColor = "#74BC1F";
-          //   } else if (PNS <= 0 && PNS > -1) {
-          //     document.getElementById(
-          //       "f_v_PNSImg"
-          //     ).src = `images/raphael/curve_L_50.png`;
-          //     f_v_PNSDesc.style.backgroundColor = "#74BC1F";
-          //   } else if (PNS <= -1 && PNS > -2) {
-          //     document.getElementById(
-          //       "f_v_PNSImg"
-          //     ).src = `images/raphael/curve_L_84.png`;
-          //     f_v_PNSDesc.style.backgroundColor = "#65558F";
-          //   } else if (PNS <= -2) {
-          //     document.getElementById(
-          //       "f_v_PNSImg"
-          //     ).src = `images/raphael/curve_L_98.png`;
-          //     f_v_PNSDesc.style.backgroundColor = "#EC4F4F";
-          //   }
 
           function getProgressImage(score) {
             return `images/raphael/progress${score}.png`;
@@ -416,6 +327,7 @@
 
           //交感神經 const PLF = HRVData.PLF;
           const PLF = HRVData.PLF;
+
           const roundedPLF = Math.round(PLF);
           const PHF = 100 - roundedPLF;
 
@@ -623,7 +535,8 @@
     .scanInfo .row:nth-child(4),
     .scanInfo .row:nth-child(5),
     .scanInfo .row:nth-child(6) {
-      display: none;
+      /* display: none; */
+      display: flex;
     }
 
     .scanInfo .row:nth-child(2) {
@@ -1030,6 +943,14 @@
       100% {
         left: 0;
       }
+    }
+
+    /* 暫時隱藏 */
+    .scanInfo .years,
+    .scanInfo .HRV,
+    .scanInfo .boxGroup,
+    .scanInfo .progressItem {
+      position: absolute; left: -9999px;
     }
   </style>
 </html>

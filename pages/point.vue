@@ -17,7 +17,7 @@
         <div class="shadow1"></div>
       </div>
 
-      <MemberGroup></MemberGroup>
+      <MemberGroup :showExchangeGroup="true"></MemberGroup>
 
       <div class="pointContentGroup">
         <div class="pointContentList">
@@ -53,35 +53,51 @@
           </div>
         </div>
         <div class="todayTask" v-if="activeTab === 'todayTask'">
-          <div class="todayTaskTitle">完成度 <span>4/7</span></div>
+          <div class="todayTaskSubTitle">
+            完成度 <span>{{ completedCount }}/{{ totalTaskCount }}</span>
+          </div>
+
           <div class="todayTaskItemGroup">
-            <div class="todayTaskItem">
+            <div
+              class="todayTaskItem"
+              v-for="(task, index) in taskList"
+              :key="index"
+            >
               <div class="todayTaskText">
                 <img src="/assets/imgs/todayTaskIcon.svg" alt="" />
-                使用紀錄
+                {{ task.Name }}
               </div>
               <div class="todayTaskOption">
                 <div class="todayTaskItemNumber">
-                  +5
-                  <img src="../assets/imgs/todayTaskCheck.svg" alt="" />
+                  <div v-if="task.Info == '去完成' || task.Info == '已經完成'">
+                    +{{ task.Points }}
+                  </div>
+
+                  <!-- 假設 "已經完成" 顯示一個打勾圖示 -->
+                  <img
+                    v-if="task.Info === '已經完成'"
+                    src="../assets/imgs/todayTaskCheck.svg"
+                    alt="打勾"
+                  />
                 </div>
-              </div>
-            </div>
-            <div class="todayTaskItem">
-              <div class="todayTaskText">
-                <img src="/assets/imgs/todayTaskIcon.svg" alt="" />
-                生活紀錄檢測
-              </div>
-              <div class="todayTaskOption">
-                <div class="todayTaskItemNumber">+10</div>
-                <div class="todayTaskItemButton">
-                  <button>去完成</button>
+
+                <!-- 如果任務是 "去完成" 就顯示按鈕 -->
+                <div v-if="task.Info === '去完成'" class="todayTaskItemButton">
+                  <button @click="handleTaskClick(task)">去完成</button>
                 </div>
+
+                <!-- 其他情況(比如 "還有10天才可以做" 之類) 顯示文字 -->
+                <small
+                  v-else-if="task.Info && task.Info !== '已經完成'"
+                  style="color: #ec7d7d"
+                >
+                  {{ task.Info }}
+                </small>
               </div>
             </div>
           </div>
           <div class="todayTaskHR"></div>
-          <h6>今日可獲得總積分：470</h6>
+          <h6>今日可獲得總積分：{{ dailyAvailablePoints }}</h6>
           <div class="todayProgressBar">
             <div
               class="todayProgress"
@@ -127,7 +143,12 @@
           </div>
 
           <div class="pointRecordGroup">
-            <div class="pointRecordDiv">
+            <!-- v-for 顯示 bonusRecList -->
+            <div
+              class="pointRecordDiv"
+              v-for="(item, index) in bonusRecList"
+              :key="index"
+            >
               <div class="pointRecordList">
                 <div class="imgGroup">
                   <img
@@ -137,31 +158,18 @@
                   />
                 </div>
                 <div class="pointRecordText">
-                  <h4>2025/01/01</h4>
-                  <h5>自律神經檢測完成</h5>
-                  <h6>
+                  <!-- CreateTime, Name, Info -->
+                  <h4>{{ item.CreateTime }}</h4>
+                  <h5>{{ item.Name }}</h5>
+                  <!-- Info 例如 "到期日:2026/01/20" -->
+                  <h6 v-if="item.Info">
                     <img src="../assets/imgs/detectTime3.svg" alt="" />
-                    到期日：2026/01/01
+                    {{ item.Info }}
                   </h6>
                 </div>
               </div>
-              <div class="pointRecordNumber">+10</div>
-            </div>
-            <div class="pointRecordDiv">
-              <div class="pointRecordList">
-                <div class="imgGroup">
-                  <img src="../assets/imgs/detectTime2.svg" alt="" />
-                </div>
-                <div class="pointRecordText">
-                  <h4>2024/12/01</h4>
-                  <h5>自律神經檢測完成</h5>
-                  <h6 class="pointRecordTextNot">
-                    <img src="../assets/imgs/pointWarning.svg" alt="" />
-                    已過期
-                  </h6>
-                </div>
-              </div>
-              <div class="pointRecordNumber pointRecordNumberNot">+5</div>
+              <!-- Points -->
+              <div class="pointRecordNumber">+{{ item.Points }}</div>
             </div>
           </div>
         </div>
@@ -312,11 +320,42 @@
       </div>
     </div>
   </div>
+  <div class="verificationBox">
+    <div class="verificationNumberGroup">
+      <div class="verificationNumber">08346947</div>
+    </div>
+    <h4>$1,000 現金抵用卷</h4>
+    <h5>可用於療程商品折抵</h5>
+    <div class="verificationClose">
+      <img src="/assets/imgs/pointClose.svg" alt="" />
+    </div>
+  </div>
+  <div class="couponBox">
+    <div class="couponBoxImgGroup">
+      <img src="/assets/imgs/couponGiftBig.png" alt="" />
+    </div>
+
+    <h4>$1,000 現金抵用卷</h4>
+    <h5>可用於療程商品折抵</h5>
+    <ul>
+      <li class="">兌換日期 <span>2025/01/01 10:00</span></li>
+      <li class="">兌換積分 <span>50點</span></li>
+      <li class="">可使用日 <span>2025/01/02 10:00</span></li>
+    </ul>
+    <div class="couponBoxClose">
+      <img src="/assets/imgs/pointClose.svg" alt="" />
+    </div>
+  </div>
+  <div class="pointCover"></div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from "vue";
+import { usePoint } from "@/stores/point";
+import { useRouter } from "vue-router";
+import axios from "axios";
 
+const pointStore = usePoint();
 // 當前年份和月份
 const selectedYear = ref(new Date().getFullYear());
 const selectedMonth = ref(new Date().getMonth() + 1);
@@ -329,8 +368,14 @@ const monthBoxVisible = ref(false);
 const exchangeYearBoxVisible = ref(false);
 const exchangeMonthBoxVisible = ref(false);
 
+const router = useRouter();
+
 // 活動選項控制
 const activeTab = ref("todayTask");
+
+// 定義兩個陣列/或用 ref 存放回傳的紀錄
+const bonusRecList = ref([]); // 積分紀錄
+const bonusExchangeList = ref([]); // 兌換券紀錄
 
 // 切換 Tab 函數
 function setActiveTab(tabName) {
@@ -443,6 +488,136 @@ function handleClickOutside(event) {
   }
 }
 
+//讀取 store 裡的任務陣列 (taskList)
+const taskList = computed(() => pointStore.taskList);
+
+//計算「已完成」幾個任務，以及總任務數
+//   （範例：假設 Info === "已經完成" 代表完成）
+const completedCount = computed(() => {
+  return taskList.value.filter((task) => task.Info === "已經完成").length;
+});
+const totalTaskCount = computed(() => taskList.value.length);
+
+//  動態計算「今日任務進度條」（依照你要怎麼計算都可以）
+const todayProgress = computed(() => {
+  if (totalTaskCount.value === 0) return 0;
+  return (completedCount.value / totalTaskCount.value) * 100;
+});
+
+function handleTaskClick(task) {
+  if (task.Info !== "去完成") return;
+
+  let path = "";
+  switch (task.Name) {
+    case "使用紀錄":
+      path = "/UsageHistory";
+      break;
+
+    case "自律神經檢測":
+      path = "/weekly";
+      break;
+
+    case "生活紀錄檢測":
+      path = "/userRecord";
+      break;
+
+    case "寶貝記錄檢測":
+      path = "/babyRecord";
+      break;
+
+    default:
+      // 其餘沒有對應可不動
+      return;
+  }
+
+  // 改用 window.open => 在新視窗/新分頁打開
+  window.open(path, "_blank");
+}
+
+const dailyAvailablePoints = computed(() => {
+  // 如果 store 中結構是 store.nowBonusState.Cando
+  // 就直接讀
+  return pointStore.nowBonusState?.Cando || 0;
+});
+
+async function fetchBonusRec() {
+  // 1) 取得 localStorage userData
+  const localData = localStorage.getItem("userData");
+  const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
+
+  if (!MID || !Token || !MAID || !Mobile) {
+    // 未登入或資料不完整
+    localStorage.removeItem("userData");
+    router.push("/");
+    return;
+  }
+
+  // 2) Yr、Mn：若沒選擇就給空字串
+  const yrParam = selectedYear.value ? String(selectedYear.value) : "";
+  const mnParam = selectedMonth.value
+    ? String(selectedMonth.value).padStart(2, "0")
+    : "";
+
+  try {
+    const response = await axios.post(
+      "https://23700999.com:8081/HMA/API_BonusRec.jsp",
+      {
+        MID,
+        Token,
+        MAID,
+        Mobile,
+        Yr: yrParam,
+        Mn: mnParam,
+      }
+    );
+
+    if (response.status === 200 && response.data.Result === "OK") {
+      const bonusRec = response.data.BonusRec || {};
+      // 3) 取出紀錄
+      bonusRecList.value = bonusRec.BonusRecList || [];
+      bonusExchangeList.value = bonusRec.BonusPaperList || [];
+
+      // 若後端也回傳類似 MemberGradeName, KeepGrade, upInfo... 可再 setNowBonusState
+      // pointStore.setNowBonusState(...)  或  setBonusRec(...) 由你決定
+
+      console.log("API_BonusRec data:", response.data);
+    } else {
+      console.error("API_BonusRec error:", response);
+    }
+  } catch (err) {
+    console.error("API_BonusRec catch err:", err);
+  }
+}
+
+fetchBonusRec();
+
+// 監聽年份、月份，只要變動就重新抓取資料 (僅限於當下 Tab 是 "pointRecord" 或 "exchangeRecord")
+watch([selectedYear, selectedMonth], () => {
+  if (activeTab.value === "pointRecord") {
+    fetchBonusRec();
+  }
+});
+
+// 同理，如要監聽 exchangeYear, exchangeMonth
+watch([selectedExchangeYear, selectedExchangeMonth], () => {
+  if (activeTab.value === "exchangeRecord") {
+    fetchBonusRec();
+  }
+});
+
+// 或在切換 Tab 時判斷
+watch(
+  () => activeTab.value,
+  (newTab) => {
+    if (newTab === "pointRecord") {
+      fetchBonusRec();
+    } else if (newTab === "exchangeRecord") {
+      // 可能要用 exchangeYear/month
+      fetchBonusRec();
+    }
+  }
+);
+
 onMounted(() => {
   document.addEventListener("click", handleClickOutside);
 });
@@ -460,6 +635,7 @@ onUnmounted(() => {
   .helperGroup {
     .helper {
       border-radius: 8px;
+      margin-bottom: 1rem;
       background: linear-gradient(
           0deg,
           rgba(255, 255, 255, 0) 0%,
@@ -566,6 +742,15 @@ onUnmounted(() => {
       color: #feac4a;
     }
     .todayTask {
+      .todayTaskSubTitle {
+        text-align: right;
+        padding: 0.5rem 0;
+        span {
+          color: #1fbcb3;
+          margin-left: 0.2rem;
+          letter-spacing: 6px;
+        }
+      }
       .todayTaskTitle {
         text-align: right;
         span {
@@ -595,6 +780,16 @@ onUnmounted(() => {
           gap: 4px;
           img {
             transform: translateY(22%);
+          }
+          .todayTaskItemNumber {
+            color: #74bc1f;
+            font-family: "Noto Sans";
+            font-size: 18px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 100%;
+            letter-spacing: 0.09px;
+            margin-right: 0.25rem;
           }
         }
         .todayTaskItemButton {
@@ -902,6 +1097,155 @@ onUnmounted(() => {
           font-weight: 400;
           line-height: 100%;
           letter-spacing: 0.09px;
+        }
+      }
+    }
+  }
+}
+
+.verificationBox {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  background-color: #fff;
+  z-index: 999;
+  padding: 0 0 0.75rem;
+  border-radius: 12px;
+  background: var(--shade-white, #fff);
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  max-width: 768px;
+  display: none;
+  .verificationNumberGroup {
+    border-radius: 12px;
+    width: 90%;
+    background: #fef1e2;
+    margin: 0 auto;
+    padding: 1rem;
+    margin-top: 0.75rem;
+    text-align: center;
+    .verificationNumber {
+      color: #bc581f;
+      font-family: "Noto Sans";
+      font-size: 2rem;
+      font-style: normal;
+      font-weight: 700;
+      letter-spacing: 20px;
+      margin-left: 10px;
+    }
+  }
+  h4 {
+    color: #1e1e1e;
+    font-family: "Noto Sans";
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: 0.12px;
+    text-align: center;
+    margin-top: 0.5rem;
+  }
+  h5 {
+    color: #666;
+    font-family: "Noto Sans";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    text-align: center;
+    margin-top: 0.35rem;
+  }
+}
+.verificationClose,
+.couponBoxClose {
+  border-radius: 50px;
+  background: var(--brand-green-400, #74bc1f);
+  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.25);
+  width: 2.25rem;
+  height: 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  margin-top: 1rem;
+  cursor: pointer;
+}
+.pointCover {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0%;
+  background: rgba(217, 217, 217, 0.5);
+  backdrop-filter: blur(2.5px);
+  z-index: 99;
+  display: none;
+}
+.couponBox {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 999;
+  border-radius: 12px;
+  background: var(--shade-white, #fff);
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  padding: 1rem;
+  display: none;
+  .couponBoxImgGroup {
+    text-align: center;
+    margin: 0 autos;
+    img {
+      max-width: 275px;
+      transform: translateX(3%);
+    }
+  }
+  h4 {
+    color: #1e1e1e;
+    text-align: center;
+    font-family: "Noto Sans";
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: 0.12px;
+    margin-top: 0.25rem;
+  }
+  h5 {
+    color: #666;
+    font-family: "Noto Sans";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    text-align: center;
+    margin-top: 0.35rem;
+  }
+  ul {
+    margin-top: 1rem;
+    display: flex;
+    flex-flow: column;
+    margin-left: 12.5%;
+
+    li {
+      line-height: 1.4;
+      color: #666;
+      font-family: "Noto Sans";
+      font-size: 18px;
+      font-style: normal;
+      font-weight: 400;
+      letter-spacing: 0.09px;
+      &:nth-child(1) {
+        span {
+          color: #74bc1f;
+        }
+      }
+      &:nth-child(2) {
+        span {
+          color: #ec7d7d;
+        }
+      }
+      &:nth-child(3) {
+        span {
+          color: #1fbcb3;
         }
       }
     }
