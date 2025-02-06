@@ -821,7 +821,12 @@
               <div class="cGroup">
                 <img class="img" src="images/detectTime.svg" alt="" />
               </div>
-              <h3 class="detectionDate">${formatDate(history.CheckTime)}</h3>
+              <h3 class="detectionDate">
+                <span>${formatDate(history.CheckTime)}</span>
+                <span class='detectSmallInfo'>${history.ProductName}${
+            `(${history.Flag})`
+          }</span>
+                </h3>
               <div class="detectionGroup">
                 <div class="scroeTotal">
                   <h5>生理年齡</h5>
@@ -1385,6 +1390,16 @@
     border: 2px solid #74bc1f;
     padding: 0.25rem;
     border-radius: 7px;
+  }
+
+  .detectionWrap .detectionDate {
+    display: flex;
+    flex-direction: column;
+  }
+  .detectSmallInfo {
+    color: #666;
+    font-size: 16px;
+    letter-spacing: 0.5px;
   }
 
   .detectionWrap .detection a h5 {
