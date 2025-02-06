@@ -175,6 +175,7 @@
         </div>
         <div v-else-if="activeTab === 'exchangeRecord'">
           <div class="exchangeRecordSelectGroup">
+            <!-- 選擇年份與月份的下拉選單 -->
             <div class="yearSelectGroup">
               <img src="/assets/imgs/filter.svg" alt="年份篩選" />
               <div class="monthText" @click="toggleYearBox('exchange')">
@@ -210,40 +211,41 @@
           </div>
 
           <div class="exchangeRecordGroup">
-            <div class="exchangeRecordDiv">
+            <div
+              class="exchangeRecordDiv"
+              v-for="(rec, index) in exchangeRecordList"
+              :key="index"
+            >
               <div class="exchangeRecordList">
                 <div class="imageGroup">
-                  <img src="/assets/imgs/pointExchangeGift.svg" alt="" />
+                  <img src="/assets/imgs/pointExchangeGift.svg" alt="券圖示" />
                 </div>
                 <div class="exchangeRecordText">
-                  <h4>2025/02/01</h4>
-                  <h5>$1,000 元抵用券兌換完成</h5>
-                  <h6 class="canUse">
-                    <img src="/assets/imgs/canUse.svg" alt="" />
-                    可立即使用
+                  <h4>{{ rec.CreateTime }}</h4>
+                  <h5>{{ rec.Name.replace("#", " ") }} 兌換完成</h5>
+                  <h6
+                    :class="{
+                      canUse: rec.Info.includes('可立即使用'),
+                      canUseLimit: rec.Info.includes('可使用日'),
+                    }"
+                  >
+                    <!-- 根據 Info 內容決定顯示哪個圖示 -->
+                    <img
+                      v-if="rec.Info.includes('可立即使用')"
+                      src="/assets/imgs/canUse.svg"
+                      alt=""
+                    />
+                    <img
+                      v-else-if="rec.Info.includes('可使用日')"
+                      src="/assets/imgs/canUseLimit.svg"
+                      alt=""
+                    />
+                    {{ rec.Info }}
                   </h6>
                 </div>
               </div>
               <div class="exchangeRecordListOption">
-                <button>查看</button>
-              </div>
-            </div>
-            <div class="exchangeRecordDiv">
-              <div class="exchangeRecordList">
-                <div class="imageGroup">
-                  <img src="/assets/imgs/pointExchangeGift.svg" alt="" />
-                </div>
-                <div class="exchangeRecordText">
-                  <h4>2025/01/22</h4>
-                  <h5>$1,600 元抵用券兌換完成</h5>
-                  <h6 class="canUseLimit">
-                    <img src="/assets/imgs/canUseLimit.svg" alt="" />
-                    可使用日: 2025/01/23
-                  </h6>
-                </div>
-              </div>
-              <div class="exchangeRecordListOption">
-                <button>查看</button>
+                <button @click="handleCheck(rec)">查看</button>
               </div>
             </div>
           </div>
@@ -320,70 +322,208 @@
       </div>
     </div>
   </div>
-  <div class="verificationBox">
+  <!-- 可立即使用 => verificationBox -->
+  <div class="verificationBox" v-show="verificationBoxVisible">
     <div class="verificationNumberGroup">
-      <div class="verificationNumber">08346947</div>
+      <div class="verificationNumber">
+        {{ currentCoupon.DigitalCode || "12345678" }}
+      </div>
     </div>
-    <h4>$1,000 現金抵用卷</h4>
+    <h4>{{ currentCoupon.Name.replace("#", " ") }}</h4>
     <h5>可用於療程商品折抵</h5>
-    <div class="verificationClose">
+    <div @click="closeAllModals" class="verificationClose">
       <img src="/assets/imgs/pointClose.svg" alt="" />
     </div>
   </div>
-  <div class="couponBox">
-    <div class="couponBoxImgGroup">
-      <img src="/assets/imgs/couponGiftBig.png" alt="" />
-    </div>
 
-    <h4>$1,000 現金抵用卷</h4>
+  <!-- 有可使用日 => couponBox -->
+  <div class="couponBox" v-show="couponBoxVisible">
+    <div class="couponBoxImgGroup">
+      <img src="/assets/imgs/gift.png" alt="" />
+    </div>
+    <h4>{{ currentCoupon.Name.replace("#", " ") }}</h4>
     <h5>可用於療程商品折抵</h5>
     <ul>
-      <li class="">兌換日期 <span>2025/01/01 10:00</span></li>
-      <li class="">兌換積分 <span>50點</span></li>
-      <li class="">可使用日 <span>2025/01/02 10:00</span></li>
+      <li>
+        兌換日期 <span>{{ currentCoupon.CreateTime }}</span>
+      </li>
+      <li>
+        兌換積分 <span>{{ currentCoupon.AvaPoints }}</span>
+      </li>
+      <li>
+        可使用日 <span>{{ currentCoupon.Info }}</span>
+      </li>
     </ul>
-    <div class="couponBoxClose">
+    <div class="couponBoxClose" @click="closeAllModals">
       <img src="/assets/imgs/pointClose.svg" alt="" />
     </div>
   </div>
-  <div class="pointCover"></div>
+
+  <!-- 已兌換完成 => couponBoxCompleted -->
+  <div class="couponBoxCompleted" v-show="couponBoxCompletedVisible">
+    <div class="couponBoxImgGroup">
+      <img src="/assets/imgs/gift.png" alt="" />
+    </div>
+    <h4>{{ currentCoupon.Name.replace("#", " ") }}</h4>
+    <h5>可用於療程商品折抵</h5>
+    <ul>
+      <li>
+        兌換日期 <span>{{ currentCoupon.CreateTime }}</span>
+      </li>
+      <li>
+        兌換積分 <span>{{ currentCoupon.AvaPoints }}</span>
+      </li>
+      <li>
+  已使用日 <span>{{ formatUseTime(currentCoupon.UseTime) }}</span>
+</li>
+    </ul>
+    <div class="couponBoxClose" @click="closeAllModals">
+      <img src="/assets/imgs/pointClose.svg" alt="" />
+    </div>
+  </div>
+
+  <!-- 遮罩 -->
+  <div
+    class="pointCover"
+    v-show="pointCoverVisible"
+    @click="closeAllModals"
+  ></div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from "vue";
-import { usePoint } from "@/stores/point";
+import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { usePoint } from "@/stores/point";
+
+/** ---------------------
+  其餘 template, style 已存在，此處只改動 script 區
+---------------------- **/
 
 const pointStore = usePoint();
-// 當前年份和月份
+const router = useRouter();
+
+// 切換標籤
+const activeTab = ref("todayTask");
+
+// 當前年份和月份 (for 積分紀錄)
 const selectedYear = ref(new Date().getFullYear());
 const selectedMonth = ref(new Date().getMonth() + 1);
+
+// 當前年份和月份 (for 兌換紀錄)
 const selectedExchangeYear = ref(new Date().getFullYear());
 const selectedExchangeMonth = ref(new Date().getMonth() + 1);
 
-// 控制年份和月份下拉框
+// 控制年份和月份下拉框可視
 const yearBoxVisible = ref(false);
 const monthBoxVisible = ref(false);
 const exchangeYearBoxVisible = ref(false);
 const exchangeMonthBoxVisible = ref(false);
 
-const router = useRouter();
+// 用於「積分紀錄」(API_BonusRec.jsp) 的資料
+const bonusRecList = ref([]);
+const bonusExchangeList = ref([]); // 如果你用在 "pointRecord" 頁也需要 BonusPaperList
 
-// 活動選項控制
-const activeTab = ref("todayTask");
+// 用於「兌換紀錄」(API_ExchangeRec.jsp) 的資料
+const exchangeRecordList = ref([]); // 這才是 兌換紀錄
+const bonusPaperList = ref([]); // 可兌換商品 (看需求是否要顯示)
 
-// 定義兩個陣列/或用 ref 存放回傳的紀錄
-const bonusRecList = ref([]); // 積分紀錄
-const bonusExchangeList = ref([]); // 兌換券紀錄
+const verificationBoxVisible = ref(false); // 可立即使用 => 顯示 "verificationBox"
+const couponBoxVisible = ref(false); // 有可使用日 => 顯示 "couponBox"
+const couponBoxCompletedVisible = ref(false); // 兌換完畢 => 顯示 "couponBoxCompleted"
+const pointCoverVisible = ref(false); // 灰色半透明罩層
 
-// 切換 Tab 函數
-function setActiveTab(tabName) {
-  activeTab.value = tabName;
+const localData = localStorage.getItem("userData");
+const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
+if (!MID || !Token || !MAID || !Mobile) {
+  router.push("/");
 }
 
-// 定義年份範圍
+const currentCoupon = ref({
+  DigitalCode: "",
+  AvaPoints: "",
+  Name: "",
+  CreateTime: "",
+  UseTime : ""
+  // ... 你需要的欄位
+});
+// 統一關閉所有視窗
+function closeAllModals() {
+  verificationBoxVisible.value = false;
+  couponBoxVisible.value = false;
+  couponBoxCompletedVisible.value = false;
+  pointCoverVisible.value = false;
+}
+
+/**
+ * 將 20250205152318 => 2025/02/05 15:23
+ */
+ function formatUseTime(str) {
+  if (!str) return "";
+  // 先移除所有非數字，假設後端可能會帶其他符號
+  const digits = str.replace(/\D/g, ""); // 將非數字都去掉
+
+  // 確認長度是否正好 14 碼
+  if (digits.length === 14) {
+    const year = digits.slice(0, 4);
+    const month = digits.slice(4, 6);
+    const day = digits.slice(6, 8);
+    const hour = digits.slice(8, 10);
+    const minute = digits.slice(10, 12);
+    // const second = digits.slice(12, 14);
+
+    return `${year}/${month}/${day} ${hour}:${minute}`;
+  } else {
+    // 如果不是 14 碼，就直接回傳原始內容
+    return str;
+  }
+}
+
+
+
+// 「查看」按鈕的點擊事件
+function handleCheck(rec) {
+  closeAllModals();
+
+  currentCoupon.value = {
+    DigitalCode: rec.DigitalCode,
+    AvaPoints: rec.AvaPoints,
+    Name: rec.Name,
+    CreateTime: rec.CreateTime,
+    Info: rec.Info,
+    // 轉換 UseTime
+    UseTime: formatUseTime(rec.UseTime),
+  };
+
+  // 根據 Info 顯示對應視窗...
+  if (rec.Info.includes("可立即使用")) {
+    verificationBoxVisible.value = true;
+  } else if (rec.Info.includes("可使用日")) {
+    couponBoxVisible.value = true;
+    const matched = rec.Info.split(":")[1] || "";
+    currentCoupon.value.Info = matched.trim();
+  } else {
+    couponBoxCompletedVisible.value = true;
+  }
+
+  pointCoverVisible.value = true;
+}
+
+
+// ------- tab 切換
+function setActiveTab(tabName) {
+  activeTab.value = tabName;
+  if (tabName === "exchangeRecord") {
+    // 切到「兌換紀錄」時，呼叫 fetchExchangeRec
+    fetchExchangeRec();
+  } else if (tabName === "pointRecord") {
+    fetchBonusRec();
+  }
+}
+
+// ------- 下拉相關
 const startYear = 2024;
+// 生成年份 (for 積分紀錄)
 const displayYears = computed(() => {
   const currentYear = new Date().getFullYear();
   return Array.from(
@@ -392,7 +532,7 @@ const displayYears = computed(() => {
   );
 });
 
-// 兌換紀錄年份範圍
+// 生成年份 (for 兌換紀錄)
 const exchangeDisplayYears = computed(() => {
   const currentYear = new Date().getFullYear();
   return Array.from(
@@ -401,7 +541,7 @@ const exchangeDisplayYears = computed(() => {
   );
 });
 
-// 根據年份動態生成可用月份（全月1-12）
+// 生成月份
 const allAvailableMonths = computed(() => {
   return displayYears.value.reduce((acc, year) => {
     acc[year] = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -409,15 +549,16 @@ const allAvailableMonths = computed(() => {
   }, {});
 });
 
-// 動態計算當前年份和兌換紀錄年份的可用月份
+// 該年份對應可用月份 (for 積分紀錄)
 const availableMonths = computed(() => {
   return allAvailableMonths.value[selectedYear.value] || [];
 });
+// 該年份對應可用月份 (for 兌換紀錄)
 const exchangeAvailableMonths = computed(() => {
   return allAvailableMonths.value[selectedExchangeYear.value] || [];
 });
 
-// 切換年份下拉框（通用）
+// 切換年份下拉
 function toggleYearBox(scope) {
   if (scope === "point") {
     yearBoxVisible.value = !yearBoxVisible.value;
@@ -427,22 +568,7 @@ function toggleYearBox(scope) {
     exchangeMonthBoxVisible.value = false;
   }
 }
-
-// 選擇年份（通用）
-function selectYear(year, scope) {
-  if (scope === "point") {
-    selectedYear.value = year;
-    selectedMonth.value = availableMonths.value[0] || 1;
-    yearBoxVisible.value = false;
-  } else if (scope === "exchange") {
-    selectedExchangeYear.value = year;
-    selectedExchangeMonth.value = exchangeAvailableMonths.value[0] || 1;
-    exchangeYearBoxVisible.value = false;
-  }
-  console.log(`Selected ${scope} year:`, year);
-}
-
-// 切換月份下拉框（通用）
+// 切換月份下拉
 function toggleMonthBox(scope = "point") {
   if (scope === "exchange") {
     exchangeMonthBoxVisible.value = !exchangeMonthBoxVisible.value;
@@ -453,7 +579,21 @@ function toggleMonthBox(scope = "point") {
   }
 }
 
-// 選擇月份（通用）
+// 選擇年份
+function selectYear(year, scope) {
+  if (scope === "point") {
+    selectedYear.value = year;
+    selectedMonth.value = availableMonths.value[0] || 1;
+    yearBoxVisible.value = false;
+  } else if (scope === "exchange") {
+    selectedExchangeYear.value = year;
+    selectedExchangeMonth.value = exchangeAvailableMonths.value[0] || 1;
+    exchangeYearBoxVisible.value = false;
+  }
+  console.log("Selected " + scope + " year:", year);
+}
+
+// 選擇月份
 function selectMonth(month, scope) {
   if (scope === "exchange") {
     selectedExchangeMonth.value = month;
@@ -462,10 +602,17 @@ function selectMonth(month, scope) {
     selectedMonth.value = month;
     monthBoxVisible.value = false;
   }
-  console.log(`Selected ${scope} month:`, month);
+  console.log("Selected " + scope + " month:", month);
 }
 
-// 點擊外部關閉下拉框
+function selectExchangeYear(year) {
+  selectedExchangeYear.value = year;
+  selectedExchangeMonth.value = exchangeAvailableMonths.value[0] || 1;
+  exchangeYearBoxVisible.value = false;
+  console.log("Selected exchange year:", year);
+}
+
+// 點擊外部關閉下拉
 function handleClickOutside(event) {
   const yearBox = document.querySelector(".yearBox");
   const monthBox = document.querySelector(".monthBox");
@@ -488,78 +635,15 @@ function handleClickOutside(event) {
   }
 }
 
-//讀取 store 裡的任務陣列 (taskList)
-const taskList = computed(() => pointStore.taskList);
-
-//計算「已完成」幾個任務，以及總任務數
-//   （範例：假設 Info === "已經完成" 代表完成）
-const completedCount = computed(() => {
-  return taskList.value.filter((task) => task.Info === "已經完成").length;
-});
-const totalTaskCount = computed(() => taskList.value.length);
-
-//  動態計算「今日任務進度條」（依照你要怎麼計算都可以）
-const todayProgress = computed(() => {
-  if (totalTaskCount.value === 0) return 0;
-  return (completedCount.value / totalTaskCount.value) * 100;
-});
-
-function handleTaskClick(task) {
-  if (task.Info !== "去完成") return;
-
-  let path = "";
-  switch (task.Name) {
-    case "使用紀錄":
-      path = "/UsageHistory";
-      break;
-
-    case "自律神經檢測":
-      path = "/weekly";
-      break;
-
-    case "生活紀錄檢測":
-      path = "/userRecord";
-      break;
-
-    case "寶貝記錄檢測":
-      path = "/babyRecord";
-      break;
-
-    default:
-      // 其餘沒有對應可不動
-      return;
-  }
-
-  // 改用 window.open => 在新視窗/新分頁打開
-  window.open(path, "_blank");
-}
-
-const dailyAvailablePoints = computed(() => {
-  // 如果 store 中結構是 store.nowBonusState.Cando
-  // 就直接讀
-  return pointStore.nowBonusState?.Cando || 0;
-});
-
+// ------------- 「積分紀錄」API_BonusRec
 async function fetchBonusRec() {
-  // 1) 取得 localStorage userData
-  const localData = localStorage.getItem("userData");
-  const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
-
-  if (!MID || !Token || !MAID || !Mobile) {
-    // 未登入或資料不完整
-    localStorage.removeItem("userData");
-    router.push("/");
-    return;
-  }
-
-  // 2) Yr、Mn：若沒選擇就給空字串
   const yrParam = selectedYear.value ? String(selectedYear.value) : "";
   const mnParam = selectedMonth.value
     ? String(selectedMonth.value).padStart(2, "0")
     : "";
 
   try {
-    const response = await axios.post(
+    const resp = await axios.post(
       "https://23700999.com:8081/HMA/API_BonusRec.jsp",
       {
         MID,
@@ -570,60 +654,110 @@ async function fetchBonusRec() {
         Mn: mnParam,
       }
     );
-
-    if (response.status === 200 && response.data.Result === "OK") {
-      const bonusRec = response.data.BonusRec || {};
-      // 3) 取出紀錄
+    if (resp.status === 200 && resp.data.Result === "OK") {
+      const bonusRec = resp.data.BonusRec || {};
       bonusRecList.value = bonusRec.BonusRecList || [];
       bonusExchangeList.value = bonusRec.BonusPaperList || [];
-
-      // 若後端也回傳類似 MemberGradeName, KeepGrade, upInfo... 可再 setNowBonusState
-      // pointStore.setNowBonusState(...)  或  setBonusRec(...) 由你決定
-
-      console.log("API_BonusRec data:", response.data);
+      console.log("[fetchBonusRec] => ", resp.data);
     } else {
-      console.error("API_BonusRec error:", response);
+      console.error("[fetchBonusRec] error =>", resp);
     }
   } catch (err) {
-    console.error("API_BonusRec catch err:", err);
+    console.error("[fetchBonusRec] catch =>", err);
   }
 }
 
-fetchBonusRec();
+// ------------- 「兌換紀錄」API_ExchangeRec (重點)
+// 用 axios 呼叫 API_ExchangeRec.jsp
+async function fetchExchangeRec() {
+  const mnParam = selectedExchangeMonth.value
+    ? String(selectedExchangeMonth.value).padStart(2, "0")
+    : "";
+  try {
+    const resp = await axios.post(
+      "https://23700999.com:8081/HMA/API_ExchangeRec.jsp",
+      {
+        MID,
+        Token,
+        MAID,
+        Mobile,
+        Yr: String(selectedExchangeYear.value),
+        Mn: mnParam,
+      }
+    );
+    if (resp.status === 200 && resp.data.Result === "OK") {
+      const exchRec = resp.data.ExchangeRec || {};
+      // exchRec.BonusExchangeList => 兌換紀錄
+      exchangeRecordList.value = exchRec.BonusExchangeList || [];
 
-// 監聽年份、月份，只要變動就重新抓取資料 (僅限於當下 Tab 是 "pointRecord" 或 "exchangeRecord")
+      // exchRec.BonusPaperList => 可兌換商品清單(視需求再用)
+      console.log("exchangeRecordList => ", exchangeRecordList.value);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+/** 在 mounted 時，若有需要預設去撈 */
+onMounted(() => {
+  document.addEventListener("click", handleClickOutside);
+  // 也許預設先撈一次
+  fetchBonusRec();
+  fetchExchangeRec();
+});
+onUnmounted(() => {
+  document.removeEventListener("click", handleClickOutside);
+});
+
+// ------------- 監聽: 變換「pointRecord」日期 => fetchBonusRec
 watch([selectedYear, selectedMonth], () => {
   if (activeTab.value === "pointRecord") {
     fetchBonusRec();
   }
 });
 
-// 同理，如要監聽 exchangeYear, exchangeMonth
+// ------------- 監聽: 變換「exchangeRecord」日期 => fetchExchangeRec
 watch([selectedExchangeYear, selectedExchangeMonth], () => {
   if (activeTab.value === "exchangeRecord") {
-    fetchBonusRec();
+    fetchExchangeRec();
   }
 });
 
-// 或在切換 Tab 時判斷
-watch(
-  () => activeTab.value,
-  (newTab) => {
-    if (newTab === "pointRecord") {
-      fetchBonusRec();
-    } else if (newTab === "exchangeRecord") {
-      // 可能要用 exchangeYear/month
-      fetchBonusRec();
-    }
+// ------------- 讀取 store 裡的任務 (今日任務)
+const taskList = computed(() => pointStore.taskList);
+function handleTaskClick(task) {
+  if (task.Info !== "去完成") return;
+  let path = "";
+  switch (task.Name) {
+    case "使用紀錄":
+      path = "/UsageHistory";
+      break;
+    case "自律神經檢測":
+      path = "/weekly";
+      break;
+    case "生活紀錄檢測":
+      path = "/userRecord";
+      break;
+    case "寶貝記錄檢測":
+      path = "/babyRecord";
+      break;
+    default:
+      return;
   }
-);
+  window.open(path, "_blank");
+}
 
-onMounted(() => {
-  document.addEventListener("click", handleClickOutside);
+// ------------- 今日任務計算
+const completedCount = computed(() => {
+  return taskList.value.filter((t) => t.Info === "已經完成").length;
 });
-
-onUnmounted(() => {
-  document.removeEventListener("click", handleClickOutside);
+const totalTaskCount = computed(() => taskList.value.length);
+const todayProgress = computed(() => {
+  if (!totalTaskCount.value) return 0;
+  return (completedCount.value / totalTaskCount.value) * 100;
+});
+const dailyAvailablePoints = computed(() => {
+  return pointStore.nowBonusState?.Cando || 0;
 });
 </script>
 
@@ -790,6 +924,11 @@ onUnmounted(() => {
             line-height: 100%;
             letter-spacing: 0.09px;
             margin-right: 0.25rem;
+            display: flex;
+            gap: 4px;
+            img {
+              transform: translateY(2%);
+            }
           }
         }
         .todayTaskItemButton {
@@ -1116,7 +1255,7 @@ onUnmounted(() => {
   background: var(--shade-white, #fff);
   box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
   max-width: 768px;
-  display: none;
+
   .verificationNumberGroup {
     border-radius: 12px;
     width: 90%;
@@ -1178,9 +1317,9 @@ onUnmounted(() => {
   background: rgba(217, 217, 217, 0.5);
   backdrop-filter: blur(2.5px);
   z-index: 99;
-  display: none;
 }
-.couponBox {
+.couponBox,
+.couponBoxCompleted {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -1190,12 +1329,14 @@ onUnmounted(() => {
   background: var(--shade-white, #fff);
   box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
   padding: 1rem;
-  display: none;
+  width: 90%;
+  min-height: 510px;
+  max-height: 600px;
   .couponBoxImgGroup {
     text-align: center;
     margin: 0 autos;
     img {
-      max-width: 275px;
+      width: 275px;
       transform: translateX(3%);
     }
   }
@@ -1249,6 +1390,11 @@ onUnmounted(() => {
         }
       }
     }
+  }
+}
+.couponBoxCompleted {
+  img {
+    filter: grayscale(0.98);
   }
 }
 </style>

@@ -110,88 +110,162 @@
         <button class="exchangeBtn" @click="doExchange">兌換</button>
       </div>
     </div>
+  
+    <div class="verificationBox" v-show="verificationBoxVisible">
+      <div class="verificationNumberGroup">
+        <div class="verificationNumber">
+          {{ digitalCode }}
+        </div>
+      </div>
+      <h4>{{ verificationPaperName.replace("#", " ") }}</h4>
+      <h5>可用於療程商品折抵</h5>
+      <div @click="closeAllModals" class="verificationClose">
+        <img src="../assets/imgs/pointClose.svg" alt="" />
+      </div>
+    </div>
   </div>
+
+  <!-- 遮罩 -->
+  <div
+    class="pointCover"
+    v-show="pointCoverVisible"
+    @click="closeAllModals"
+  ></div>
 </template>
 
 <script setup>
 import { ref, computed } from "vue";
 import { usePoint } from "@/stores/point";
-
-// 1) 拿到 store
+import axios from "axios";
+import { useRouter } from "vue-router";
+const router = useRouter();
 const pointStore = usePoint();
 
-// 2) 取得可兌換清單
+// 從 store 來的可兌換券列表
 const bonusPaperList = computed(() => pointStore.bonusPaperList);
 
-// 3) 控制彈窗顯示/隱藏 & 目前選擇的 coupon
+// 「兌換確認」彈窗控制
 const showExchangeBox = ref(false);
 const selectedCoupon = ref(null);
 
-/**
- * 解析字串，如 "$1,000#現金抵用卷" 或 "深眠衣#買1送1券"：
- * => { money: "$1,000", text: "現金抵用卷" }
- */
-function parseCouponName(fullName) {
-  if (!fullName) return { money: "", text: "" };
-  // 以 '#' 做切割
-  const [money, text] = fullName.split("#");
-  return { money, text };
-}
+// 「驗證碼」視窗 + 遮罩控制
+const verificationBoxVisible = ref(false); // 新增：控制驗證碼視窗顯示
+const pointCoverVisible = ref(false); // 原本就有灰色遮罩
+// 顯示用的 8 碼數字碼
+const digitalCode = ref("");
+// 驗證碼視窗中要顯示的券名稱
+const verificationPaperName = ref("");
 
-/**
- * 點擊卡片行為：
- * 若 Info = "已兌換" 或包含 "還差"，則不允許開啟彈窗(或自行決定行為)
- * 否則開啟彈窗，並記錄選擇的 coupon
- */
-function handleCouponClick(coupon) {
-  if (coupon.Info === "已兌換" || coupon.Info.includes("還差")) {
-    // 不可點擊或可彈提示
-    return;
-  }
-  selectedCoupon.value = coupon;
-  showExchangeBox.value = true;
-}
-
-/**
- * 關閉彈窗
- */
-function closeExchangeBox() {
-  showExchangeBox.value = false;
-  selectedCoupon.value = null;
-}
-
-/**
- * 從 store nowAvaPoints (e.g. "累積積分6141點") 解析數字
- */
+// 取得 store 的文字，例如： "累積積分6141點"，用 regex 轉成數字
 const currentPoints = computed(() => {
-  const str = pointStore.nowAvaPoints || ""; // "累積積分0點"
+  const str = pointStore.nowAvaPoints || "";
   const match = str.match(/\d+/);
   return match ? Number(match[0]) : 0;
 });
 
-/**
- * 剩餘積分 = 目前點數 - 選到券所需點數
- */
+// 依使用者點擊的券所需點數做計算
 const remainingPoints = computed(() => {
   if (!selectedCoupon.value) return currentPoints.value;
   const cost = Number(selectedCoupon.value.Points) || 0;
   return currentPoints.value - cost;
 });
 
-/**
- * 執行兌換
- * (此處範例: 只是 alert, 實際可呼叫 API、更新 store、並重新抓最新點數等)
- */
-function doExchange() {
-  alert(
-    `已兌換: ${parseCouponName(selectedCoupon.value.Name).money} ${
-      parseCouponName(selectedCoupon.value.Name).text
-    }`
-  );
-  // 成功後可以再次呼叫 API_Bonus() 或其它 action，刷新點數與清單
+// 檢查 localStorage 的登入資訊
+const localData = localStorage.getItem("userData");
+const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
+if (!MID || !Token || !MAID || !Mobile) {
+  router.push("/");
+}
 
-  // 關閉視窗
-  closeExchangeBox();
+// 解析如 "$1,000#現金抵用卷" => { money: "$1,000", text: "現金抵用卷" }
+function parseCouponName(fullName) {
+  if (!fullName) return { money: "", text: "" };
+  const [money, text] = fullName.split("#");
+  return { money, text };
+}
+
+/**
+ * 點擊某個兌換券卡片
+ */
+function handleCouponClick(coupon) {
+  // 若 "已兌換" 或包含 "還差"，不可點擊
+  if (coupon.Info === "已兌換" || coupon.Info.includes("還差")) return;
+
+  selectedCoupon.value = coupon;
+  showExchangeBox.value = true;
+  pointCoverVisible.value = true;
+}
+
+/**
+ * 關閉「兌換確認」彈窗
+ */
+function closeExchangeBox() {
+  showExchangeBox.value = false;
+  pointCoverVisible.value = false;
+  selectedCoupon.value = null;
+}
+
+/**
+ * 通用：關閉所有視窗（包含驗證碼、遮罩）
+ */
+function closeAllModals() {
+  verificationBoxVisible.value = false;
+  pointCoverVisible.value = false;
+  showExchangeBox.value = false;
+  selectedCoupon.value = null;
+  // 視情況是否需要清空 digitalCode, verificationPaperName
+  digitalCode.value = "";
+  verificationPaperName.value = "";
+}
+
+/**
+ * 送出「兌換」動作 => 呼叫 API_Exchange.jsp
+ */
+async function doExchange() {
+  try {
+    const requestData = {
+      MID,
+      Token,
+      MAID,
+      Mobile,
+      Points: selectedCoupon.value.Points,
+      CanUseTime: selectedCoupon.value.CanUseTime,
+      Grade: selectedCoupon.value.Grade,
+      PaperName: selectedCoupon.value.Name,
+    };
+
+    const { data } = await axios.post(
+      "https://23700999.com:8081/HMA/API_Exchange.jsp",
+      requestData
+    );
+
+    // 後端若成功 => data.Result==="OK" && data.BonusPaper.Ret==="OK"
+    if (data?.Result === "OK" && data?.BonusPaper?.Ret === "OK") {
+      // ① 先把 8 碼數字碼 及券名稱 存起來
+      digitalCode.value = data.BonusPaper.DigitalCode; // "65977461"
+      verificationPaperName.value = data.BonusPaper.PaperName; // "$1,000現金抵用卷" 或 "$1,000#現金抵用卷"
+
+      // ② 若有需要更新前台「累積積分」(NowPoints = 兌換後剩餘積分)
+      //    假設 store 有一個方法可以更新 nowAvaPoints：
+      //    e.g. "累積積分5641點"
+      const updatedPoints = data.BonusPaper.NowPoints;
+      pointStore.nowAvaPoints = `累積積分${updatedPoints}點`;
+
+      // ③ 關閉「兌換確認」彈窗
+      closeExchangeBox();
+
+      // ④ 開啟「驗證碼」視窗
+      verificationBoxVisible.value = true;
+      pointCoverVisible.value = true;
+    } else {
+      alert("兌換失敗：" + (data?.BonusPaper?.Ret || "不明原因"));
+      closeExchangeBox();
+    }
+  } catch (error) {
+    console.error(error);
+    alert("兌換時發生錯誤：" + error.message);
+    closeExchangeBox();
+  }
 }
 </script>
 
@@ -325,7 +399,7 @@ function doExchange() {
   padding: 0 5% 1.25rem;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-
+  z-index: 100;
   h3 {
     color: #74bc1f;
     font-family: "Noto Sans";
@@ -424,5 +498,67 @@ function doExchange() {
       color: #fff;
     }
   }
+}
+.verificationBox {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  background-color: #fff;
+  z-index: 999;
+  padding: 0 0 0.75rem;
+  border-radius: 12px;
+  background: var(--shade-white, #fff);
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  max-width: 768px;
+
+  .verificationNumberGroup {
+    border-radius: 12px;
+    width: 90%;
+    background: #fef1e2;
+    margin: 0 auto;
+    padding: 1rem;
+    margin-top: 0.75rem;
+    text-align: center;
+    .verificationNumber {
+      color: #bc581f;
+      font-family: "Noto Sans";
+      font-size: 2rem;
+      font-style: normal;
+      font-weight: 700;
+      letter-spacing: 20px;
+      margin-left: 10px;
+    }
+  }
+  h4 {
+    color: #1e1e1e;
+    font-family: "Noto Sans";
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: 0.12px;
+    text-align: center;
+    margin-top: 0.5rem;
+  }
+  h5 {
+    color: #666;
+    font-family: "Noto Sans";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    text-align: center;
+    margin-top: 0.35rem;
+  }
+}
+.pointCover {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0%;
+  background: rgba(217, 217, 217, 0.5);
+  backdrop-filter: blur(2.5px);
+  z-index: 99;
 }
 </style>

@@ -42,10 +42,10 @@
         />
       </div>
       <div class="itemsGroup">
-        <div class="item item1">
+        <!-- <div class="item item1">
           <div class="topTitle">獎勵</div>
           <div class="bottomTitle">積分</div>
-        </div>
+        </div> -->
 
         <div class="item item2" @click="goHRVHistory">
           <div class="topTitle">檢測</div>
@@ -82,6 +82,13 @@
           <div class="bottomTitle">親友</div>
           <img src="../assets/imgs/relationshopIcon.svg" alt="" />
         </div>
+
+        <router-link class="item item1" to="/point">
+          <div>
+            <div class="topTitle">獎勵</div>
+            <div class="bottomTitle">積分</div>
+          </div>
+        </router-link>
       </div>
       <footer class="copyrights">
         <!-- <a href="/usageHistory"></a> -->
@@ -452,7 +459,12 @@ export default {
 
       .item1 {
         background-color: $raphael-green-400;
-        filter: blur(2px);
+        grid-column: 1 / -1; // 讓 item1 佔滿整行
+        // align-self: stretch; // 讓 item1 撐滿可用高度
+        // display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
       }
       .item2 {
         background-color: $raphael-purple-200;
@@ -483,6 +495,7 @@ export default {
         place-items: center;
         align-content: center;
         cursor: pointer;
+
         &:hover {
           filter: brightness(0.95);
         }
@@ -495,7 +508,7 @@ export default {
         }
       }
       //暫時隱藏
-      .item1,
+
       .item6 {
         display: none;
       }
