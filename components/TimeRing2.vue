@@ -4,12 +4,12 @@
     <div class="progress-border" :style="{ background: progressGradient }">
       <div class="content">{{ formattedTime }}</div>
     </div>
-    <div
+    <!-- <div
       class="completion-message"
       v-if="currentDetectionState === DetectionState.AFTER"
     >
       總共使用 {{ hasDetectTime }}
-    </div>
+    </div> -->
 
     <div class="timerButtonGroup">
       <!-- 重新檢測 -->

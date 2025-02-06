@@ -53,7 +53,7 @@
               </div>
               <div class="time">
                 <h6>{{ formatTimestampMDH(item.CheckTime) }}</h6>
-                <small>{{ item?.ProductName }}({{ item?.Flag }})</small>
+                <small>{{ item?.ProductName }} {{ item?.Flag }}</small>
               </div>
             </div>
             <div class="infoGroup">
