@@ -2,8 +2,7 @@
   <div class="memberGroup">
     <!-- 會員頭像 + 等級名稱 + 維持等級提示 -->
     <div class="memberTitleGroup">
-      <div class="memberImage">
-        <!-- 顯示對應的會員等級圖示 -->
+      <div class="memberImage" v-if="levelIcon">
         <img :src="levelIcon" alt="會員等級圖示" />
       </div>
       <div class="memberTitleTextGroup">
@@ -153,7 +152,7 @@ export default {
         case "雲端會員":
           return normalImg;
         default:
-          return normalImg;
+          return null; // 這裡改成 null，不要一開始就給 normalImg
       }
     });
 

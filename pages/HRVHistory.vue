@@ -6,11 +6,13 @@
     <div class="titleGroup">
       <img src="/assets/imgs/backArrow.svg" @click="goBack" alt="" />
       <h2>HRV 檢測</h2>
-    </div>    
+    </div>
     <article>
       <h3>AI人臉HRV，輕鬆追蹤健康</h3>
       <div class="desCard">
-        <div class="slogan">智平衡健康集團運用FDA認證AI技術，推出全新人臉辨識HRV量測工具，透過手機相機掃描臉部，1-2分鐘即可快速分析生理數據。</div>
+        <div class="slogan">
+          智平衡健康集團運用FDA認證AI技術，推出全新人臉辨識HRV量測工具，透過手機相機掃描臉部，1-2分鐘即可快速分析生理數據。
+        </div>
         <ul>
           <li>心跳變化分析</li>
           <li>自律神經評估</li>
@@ -19,8 +21,8 @@
       </div>
       <div class="stepCard">
         <div class="item">
-          <div class="icon">            
-            <img src="/assets/imgs/camera-white.svg" >
+          <div class="icon">
+            <img src="/assets/imgs/camera-white.svg" />
           </div>
           <div class="content">
             <hgroup>
@@ -31,8 +33,8 @@
           </div>
         </div>
         <div class="item">
-          <div class="icon">            
-            <img src="/assets/imgs/heartRate-white.svg" >
+          <div class="icon">
+            <img src="/assets/imgs/heartRate-white.svg" />
           </div>
           <div class="content">
             <hgroup>
@@ -43,8 +45,8 @@
           </div>
         </div>
         <div class="item">
-          <div class="icon">            
-            <img src="/assets/imgs/heartbeat-white.svg" >
+          <div class="icon">
+            <img src="/assets/imgs/heartbeat-white.svg" />
           </div>
           <div class="content">
             <hgroup>
@@ -57,8 +59,12 @@
       </div>
       <div class="desCard">
         <h3>重要提醒</h3>
-        <div class="slogan">人臉辨識HRV量測<span>僅反應心臟的交感與副交感神經功能</span>，若您需全面了解全身五臟六腑的自律神經狀態，請依醫師建議回診進行深入檢測。</div>
-        <div class="slogan">每天記錄數據，輕鬆追蹤健康變化，智平衡健康集團秉持專業與創新，結合AI智慧檢測與專業團隊與您攜手邁向更健康的未來！</div>
+        <div class="slogan">
+          人臉辨識HRV量測<span>僅反應心臟的交感與副交感神經功能</span>，若您需全面了解全身五臟六腑的自律神經狀態，請依醫師建議回診進行深入檢測。
+        </div>
+        <div class="slogan">
+          每天記錄數據，輕鬆追蹤健康變化，智平衡健康集團秉持專業與創新，結合AI智慧檢測與專業團隊與您攜手邁向更健康的未來！
+        </div>
       </div>
     </article>
     <div class="detectWrap">
@@ -70,7 +76,10 @@
               <div class="timeIcon">
                 <img src="../assets/imgs/detectTime.svg" alt="" />
               </div>
-              <div class="time">{{ formatTimestampMDH(item.CheckTime) }}</div>
+              <div class="time">
+                <h6>{{ formatTimestampMDH(item.CheckTime) }}</h6>
+                <small>{{ item?.ProductName }}({{ item?.Flag }})</small>
+              </div>
             </div>
             <div class="infoGroup">
               <div class="detectAgeGroup">
@@ -87,7 +96,20 @@
                   >ms
                 </h5>
               </div>
-              <svg data-v-8f83a543="" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none"><path data-v-8f83a543="" d="M5.99159 3.37719L11.4726 8.99994L5.99159 14.6227C5.89346 14.7232 5.83853 14.858 5.83853 14.9984C5.83853 15.1389 5.89346 15.2737 5.99159 15.3742C6.03925 15.4228 6.09613 15.4615 6.15891 15.4879C6.2217 15.5142 6.28911 15.5278 6.35721 15.5278C6.42531 15.5278 6.49273 15.5142 6.55551 15.4879C6.61829 15.4615 6.67518 15.4228 6.72284 15.3742L12.5548 9.39257C12.6572 9.28752 12.7145 9.14664 12.7145 8.99994C12.7145 8.85325 12.6572 8.71236 12.5548 8.60732L6.72396 2.62569C6.67627 2.57671 6.61924 2.53777 6.55625 2.51119C6.49326 2.4846 6.42558 2.4709 6.35721 2.4709C6.28884 2.4709 6.22116 2.4846 6.15817 2.51119C6.09518 2.53777 6.03816 2.57671 5.99046 2.62569C5.89234 2.72615 5.8374 2.86101 5.8374 3.00144C5.8374 3.14187 5.89234 3.27673 5.99046 3.37719L5.99159 3.37719Z" fill="#666666"></path></svg>
+              <svg
+                data-v-8f83a543=""
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 18 18"
+                fill="none"
+              >
+                <path
+                  data-v-8f83a543=""
+                  d="M5.99159 3.37719L11.4726 8.99994L5.99159 14.6227C5.89346 14.7232 5.83853 14.858 5.83853 14.9984C5.83853 15.1389 5.89346 15.2737 5.99159 15.3742C6.03925 15.4228 6.09613 15.4615 6.15891 15.4879C6.2217 15.5142 6.28911 15.5278 6.35721 15.5278C6.42531 15.5278 6.49273 15.5142 6.55551 15.4879C6.61829 15.4615 6.67518 15.4228 6.72284 15.3742L12.5548 9.39257C12.6572 9.28752 12.7145 9.14664 12.7145 8.99994C12.7145 8.85325 12.6572 8.71236 12.5548 8.60732L6.72396 2.62569C6.67627 2.57671 6.61924 2.53777 6.55625 2.51119C6.49326 2.4846 6.42558 2.4709 6.35721 2.4709C6.28884 2.4709 6.22116 2.4846 6.15817 2.51119C6.09518 2.53777 6.03816 2.57671 5.99046 2.62569C5.89234 2.72615 5.8374 2.86101 5.8374 3.00144C5.8374 3.14187 5.89234 3.27673 5.99046 3.37719L5.99159 3.37719Z"
+                  fill="#666666"
+                ></path>
+              </svg>
             </div>
           </a>
         </div>
@@ -98,8 +120,8 @@
     </div>
     <a href="/HRVHistoryAll" class="goToHistoryAll"
       >歷史紀錄
-      <img src="../assets/imgs/historyAllArrow.svg"/>
-    </a>    
+      <img src="../assets/imgs/historyAllArrow.svg" />
+    </a>
     <div class="HRVBtnGroup">
       <button class="goToHRVBtn" @click="openHRVAlert">前往檢測</button>
     </div>
@@ -239,24 +261,24 @@ export default {
   }
 }
 
-article{
+article {
   display: grid;
   gap: 0.75rem;
   max-width: 768px;
 
-  &>h3{
+  & > h3 {
     font-size: 20px;
   }
-  .stepCard{    
-    position: relative;                
+  .stepCard {
+    position: relative;
     display: grid;
     gap: 0.75rem;
     font-size: 1.125rem;
     color: $raphael-gray-500;
     line-height: 29.1px;
     letter-spacing: 0.05em;
-    
-    &::after{
+
+    &::after {
       content: "";
       position: absolute;
       background: $raphael-white;
@@ -267,10 +289,10 @@ article{
       left: 15px;
     }
 
-    .item{
+    .item {
       display: flex;
       gap: 0.5rem;
-      .icon{
+      .icon {
         display: flex;
         align-items: center;
         justify-content: center;
@@ -280,11 +302,11 @@ article{
         height: 32px;
         z-index: 1;
 
-        &>img{
+        & > img {
           min-width: 24px;
         }
       }
-      .content{
+      .content {
         display: grid;
         background: $raphael-white;
         border-radius: 0.5rem;
@@ -292,15 +314,15 @@ article{
         gap: 0.5rem;
         padding: 0.75rem;
         box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-        &>hgroup{
+        & > hgroup {
           display: flex;
           flex-direction: column;
-          &>sub{
+          & > sub {
             color: $raphael-cyan-400;
             font-size: 0.813rem;
             line-height: 100%;
           }
-          &>h3{
+          & > h3 {
             color: $raphael-black;
             font-size: 1.25rem;
           }
@@ -308,34 +330,34 @@ article{
       }
     }
   }
-  .desCard{    
-      display: grid;
-      gap: 0.5rem;
-      background: $raphael-white;
-      color: $raphael-gray-500;
-      border-radius: 0.5rem;
-      padding: 0.75rem;
-      font-size: 1.125rem;
-      line-height: 29.1px;
-      letter-spacing: 0.05em;
+  .desCard {
+    display: grid;
+    gap: 0.5rem;
+    background: $raphael-white;
+    color: $raphael-gray-500;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    font-size: 1.125rem;
+    line-height: 29.1px;
+    letter-spacing: 0.05em;
 
-      &>h3{
-        font-size: 1.25rem;
-        color: $raphael-black;
-      }
+    & > h3 {
+      font-size: 1.25rem;
+      color: $raphael-black;
+    }
 
-      .slogan{
-        &>span{
-          color:$raphael-red-300;
-        }
+    .slogan {
+      & > span {
+        color: $raphael-red-300;
       }
+    }
 
-      &>ul{
-        list-style-type: disc;
-        li{
-          margin-left: 1.5rem;
-        }
+    & > ul {
+      list-style-type: disc;
+      li {
+        margin-left: 1.5rem;
       }
+    }
   }
 }
 
@@ -349,9 +371,9 @@ article{
     margin-bottom: 0.75rem;
   }
   .detectList {
-    @include recordList($raphael-white,auto,0.75rem,0.75rem);    
+    @include recordList($raphael-white, auto, 0.75rem, 0.75rem);
     .notDetectData {
-      position: absolute; 
+      position: absolute;
       z-index: 11;
       top: 50%;
       left: 50%;
@@ -371,7 +393,7 @@ article{
     animation-delay: 0s;
     opacity: 0;
 
-    &:hover{
+    &:hover {
       box-shadow: 0px 5px 10px -2px $raphael-gray-300 inset;
       padding: 0 4px;
     }
@@ -386,7 +408,7 @@ article{
       color: $raphael-black;
       display: flex;
       justify-content: space-between;
-      
+
       .timeGroup {
         display: flex;
         align-items: center;
@@ -401,6 +423,14 @@ article{
           font-style: normal;
           font-weight: 400;
           letter-spacing: 0.15px;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          small {
+            color: $raphael-gray-500;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+          }
         }
       }
       .infoGroup {
@@ -423,11 +453,11 @@ article{
         }
         .detectHRVGroup {
           display: none;
-          color: $raphael-gray-500;      
+          color: $raphael-gray-500;
           h5 {
             span {
               display: inline-flex;
-              min-width: 50px;    
+              min-width: 50px;
             }
           }
         }
@@ -480,11 +510,11 @@ article{
   max-width: 768px;
   margin-top: 0.75rem;
   transition: all 0.2s ease;
-  &:hover{
+  &:hover {
     color: $raphael-red-500;
   }
 }
-.HRVBtnGroup{
+.HRVBtnGroup {
   position: fixed;
   background-color: $raphael-gray-100;
   display: flex;
@@ -498,7 +528,7 @@ article{
   bottom: 0;
   z-index: 1;
   .goToHRVBtn {
-    @include btnStyle($raphael-green-400,$raphael-white);
+    @include btnStyle($raphael-green-400, $raphael-white);
   }
 }
 </style>

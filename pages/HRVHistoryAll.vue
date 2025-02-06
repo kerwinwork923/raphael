@@ -51,7 +51,10 @@
               <div class="timeIcon">
                 <img src="../assets/imgs/detectTime.svg" alt="" />
               </div>
-              <div class="time">{{ formatTimestampMDH(item.CheckTime) }}</div>
+              <div class="time">
+                <h6>{{ formatTimestampMDH(item.CheckTime) }}</h6>
+                <small>{{ item?.ProductName }}({{ item?.Flag }})</small>
+              </div>
             </div>
             <div class="infoGroup">
               <div class="detectAgeGroup">
@@ -399,7 +402,7 @@ export default {
     justify-content: end;
     gap: 0.75rem;
     margin-bottom: 0.75rem;
-    color:  $raphael-gray-500;
+    color: $raphael-gray-500;
   }
   .yearSelectGroup {
     display: flex;
@@ -428,11 +431,11 @@ export default {
       animation: 0.3s fadeIn forwards;
       z-index: 10;
       .year {
-          transform: 0.25s all ease;
-          &:hover{
-            color: $raphael-green-400;
-          }
+        transform: 0.25s all ease;
+        &:hover {
+          color: $raphael-green-400;
         }
+      }
     }
   }
   .monthSelectGroup {
@@ -464,17 +467,17 @@ export default {
       animation: 0.3s fadeIn forwards;
       z-index: 10;
       .month {
-          transform: 0.25s all ease;
-          &:hover{
-            color: $raphael-green-400;
-          }
+        transform: 0.25s all ease;
+        &:hover {
+          color: $raphael-green-400;
         }
+      }
     }
   }
-  .detectList { 
-    @include recordList(transparent,calc(100vh - 352px),0,0);
+  .detectList {
+    @include recordList(transparent, calc(100vh - 352px), 0, 0);
     @include scrollbarStyle();
-    @include respond-to("phone-landscape"){
+    @include respond-to("phone-landscape") {
       height: calc(100vh - 100px);
     }
   }
@@ -488,7 +491,7 @@ export default {
     letter-spacing: 10px;
     font-size: 1.25rem;
     white-space: nowrap;
-    color:  $raphael-gray-300;
+    color: $raphael-gray-300;
   }
   .detectItem {
     width: 100%;
@@ -498,7 +501,7 @@ export default {
     animation: fadeIn2 1s ease forwards; // 設置動畫效果
     animation-delay: 0s;
 
-    &:hover{
+    &:hover {
       box-shadow: 0px 5px 10px -2px $raphael-gray-300 inset;
       padding: 0 4px;
     }
@@ -510,10 +513,10 @@ export default {
     }
     a {
       text-decoration: none;
-      color:  $raphael-black;
+      color: $raphael-black;
       display: flex;
       justify-content: space-between;
-      transition: all .2s ease;
+      transition: all 0.2s ease;
       .timeGroup {
         display: flex;
         align-items: center;
@@ -528,6 +531,14 @@ export default {
           font-style: normal;
           font-weight: 400;
           letter-spacing: 0.15px;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          small {
+            color: $raphael-gray-500;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+          }
         }
       }
       .infoGroup {
@@ -537,7 +548,7 @@ export default {
         justify-content: end;
         gap: 0.5rem;
         h4 {
-          color:  $raphael-gray-500;
+          color: $raphael-gray-500;
           font-size: 1rem;
           font-style: normal;
           font-weight: 400;
@@ -546,15 +557,15 @@ export default {
 
         .detectAgeGroup {
           display: none;
-          color:  $raphael-gray-500;
+          color: $raphael-gray-500;
         }
         .detectHRVGroup {
           display: none;
-          color:  $raphael-gray-500;
+          color: $raphael-gray-500;
           h5 {
             span {
               display: inline-flex;
-              min-width: 50px;    
+              min-width: 50px;
             }
           }
         }
@@ -566,7 +577,7 @@ export default {
           letter-spacing: 0.5px;
           margin-top: 0.25rem;
           span {
-            color:  $raphael-black;
+            color: $raphael-black;
             font-size: 1.5rem;
             font-style: normal;
             font-weight: 700;
@@ -588,7 +599,7 @@ export default {
 .paginationWrap {
   display: flex;
   justify-content: space-between;
-  color:  $raphael-gray-500;
+  color: $raphael-gray-500;
   font-size: 18px;
   text-align: center;
   max-width: 768px;
@@ -609,10 +620,10 @@ export default {
     background: $raphael-white;
     border: none;
     border-radius: var(--Radius-200, 8px);
-    color:  $raphael-gray-500;
-    transition: all .2s ease;
-    &:hover{
-      filter: brightness(.95);
+    color: $raphael-gray-500;
+    transition: all 0.2s ease;
+    &:hover {
+      filter: brightness(0.95);
     }
   }
   .paginationCenter {

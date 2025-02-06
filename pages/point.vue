@@ -1,4 +1,5 @@
 <template>
+  <RaphaelLoading v-if="loading" />
   <div class="point">
     <TitleMenu Text="獎勵積分" link="/user"></TitleMenu>
     <div class="helperGroup">
@@ -12,9 +13,10 @@
           快來累積積分，享受更多回饋！
         </p>
         <h6>查看完整積分規則</h6>
-      </div>
-      <div class="shadowGroup">
-        <div class="shadow1"></div>
+        <div class="shadowGroup">
+          <div class="shadow1"></div>
+          <div class="shadow2"></div>
+        </div>
       </div>
 
       <MemberGroup :showExchangeGroup="true"></MemberGroup>
@@ -374,8 +376,8 @@
         兌換積分 <span>{{ currentCoupon.AvaPoints }}</span>
       </li>
       <li>
-  已使用日 <span>{{ formatUseTime(currentCoupon.UseTime) }}</span>
-</li>
+        已使用日 <span>{{ formatUseTime(currentCoupon.UseTime) }}</span>
+      </li>
     </ul>
     <div class="couponBoxClose" @click="closeAllModals">
       <img src="/assets/imgs/pointClose.svg" alt="" />
@@ -402,7 +404,7 @@ import { usePoint } from "@/stores/point";
 
 const pointStore = usePoint();
 const router = useRouter();
-
+const loading = ref(false); // 新增 loading 狀態
 // 切換標籤
 const activeTab = ref("todayTask");
 
@@ -444,7 +446,7 @@ const currentCoupon = ref({
   AvaPoints: "",
   Name: "",
   CreateTime: "",
-  UseTime : ""
+  UseTime: "",
   // ... 你需要的欄位
 });
 // 統一關閉所有視窗
@@ -458,7 +460,7 @@ function closeAllModals() {
 /**
  * 將 20250205152318 => 2025/02/05 15:23
  */
- function formatUseTime(str) {
+function formatUseTime(str) {
   if (!str) return "";
   // 先移除所有非數字，假設後端可能會帶其他符號
   const digits = str.replace(/\D/g, ""); // 將非數字都去掉
@@ -478,8 +480,6 @@ function closeAllModals() {
     return str;
   }
 }
-
-
 
 // 「查看」按鈕的點擊事件
 function handleCheck(rec) {
@@ -508,7 +508,6 @@ function handleCheck(rec) {
 
   pointCoverVisible.value = true;
 }
-
 
 // ------- tab 切換
 function setActiveTab(tabName) {
@@ -637,6 +636,7 @@ function handleClickOutside(event) {
 
 // ------------- 「積分紀錄」API_BonusRec
 async function fetchBonusRec() {
+  
   const yrParam = selectedYear.value ? String(selectedYear.value) : "";
   const mnParam = selectedMonth.value
     ? String(selectedMonth.value).padStart(2, "0")
@@ -665,11 +665,13 @@ async function fetchBonusRec() {
   } catch (err) {
     console.error("[fetchBonusRec] catch =>", err);
   }
+
 }
 
 // ------------- 「兌換紀錄」API_ExchangeRec (重點)
 // 用 axios 呼叫 API_ExchangeRec.jsp
 async function fetchExchangeRec() {
+
   const mnParam = selectedExchangeMonth.value
     ? String(selectedExchangeMonth.value).padStart(2, "0")
     : "";
@@ -696,6 +698,7 @@ async function fetchExchangeRec() {
   } catch (err) {
     console.error(err);
   }
+ 
 }
 
 /** 在 mounted 時，若有需要預設去撈 */
@@ -769,7 +772,8 @@ const dailyAvailablePoints = computed(() => {
   .helperGroup {
     .helper {
       border-radius: 8px;
-      margin-bottom: 1rem;
+      margin-bottom: 1.75rem;
+      margin-top: 0.25rem;
       background: linear-gradient(
           0deg,
           rgba(255, 255, 255, 0) 0%,
@@ -783,6 +787,7 @@ const dailyAvailablePoints = computed(() => {
       color: var(--shade-white, #fff);
       font-family: "Noto Sans";
       letter-spacing: var(--Title-Medium-Tracking, 0.15px);
+      position: relative;
       .helperTitle {
         display: flex;
         align-items: center;
@@ -815,21 +820,49 @@ const dailyAvailablePoints = computed(() => {
         font-weight: 400;
         letter-spacing: 0.1px;
       }
-    }
-    .shadowGroup {
-      .shadow1 {
-        fill: linear-gradient(
-            0deg,
-            rgba(255, 255, 255, 0.4) 0%,
-            rgba(255, 255, 255, 0.4) 100%
-          ),
-          rgba(116, 188, 31, 0.44);
-        background-blend-mode: soft-light, normal;
-        backdrop-filter: blur(20.5px);
-        background-color: rgba($color: #74bc1f70, $alpha: 1);
-        transform: translateY(-4px);
-        border-radius: 8px;
-        opacity: 0.44;
+      .shadowGroup {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        height: 20px;
+
+        .shadow1 {
+          position: absolute;
+          top: -3%;
+          left: 3%;
+          width: 94%;
+          height: 8px;
+          background: linear-gradient(
+              0deg,
+              rgba(255, 255, 255, 0) 0%,
+              rgba(255, 255, 255, 0) 100%
+            ),
+            rgba(116, 188, 31, 0.6);
+          background-blend-mode: soft-light, normal;
+          backdrop-filter: blur(45px);
+          opacity: 0.5;
+          border-radius: 0 0 8px 8px;
+          z-index: -1; /* 讓陰影跑到 .helper 背後 */
+        }
+        .shadow2 {
+          position: absolute;
+          top: 30%;
+          left: 6%;
+          width: 88%;
+          height: 8px;
+          background: linear-gradient(
+              0deg,
+              rgba(255, 255, 255, 0) 0%,
+              rgba(255, 255, 255, 0) 100%
+            ),
+            rgba(116, 188, 31, 0.6);
+          background-blend-mode: soft-light, normal;
+          backdrop-filter: blur(45px);
+          opacity: 0.25;
+          border-radius: 0 0 8px 8px;
+          z-index: -1; /* 讓陰影跑到 .helper 背後 */
+        }
       }
     }
   }
