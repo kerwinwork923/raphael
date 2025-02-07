@@ -884,7 +884,7 @@ const goToPointRules = async () => {
   .pointContentGroup {
     background-color: #fff;
     margin-top: 1rem;
-    padding: 1rem;
+    padding: 0.75rem;
 
     border-radius: 12px;
     .pointRecordDiv {
@@ -949,7 +949,7 @@ const goToPointRules = async () => {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0.5rem;
+        padding: 0.5rem 0;
         .todayTaskText {
           display: flex;
           align-items: center;
