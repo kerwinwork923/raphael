@@ -83,12 +83,12 @@
           <img src="../assets/imgs/relationshopIcon.svg" alt="" />
         </div>
 
-        <!-- <router-link class="item item1" to="/point">
+        <router-link class="item item1" to="/point">
           <div>
             <div class="topTitle">獎勵</div>
             <div class="bottomTitle">積分</div>
           </div>
-        </router-link> -->
+        </router-link>
       </div>
       <footer class="copyrights">
         <!-- <a href="/usageHistory"></a> -->
