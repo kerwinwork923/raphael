@@ -50,13 +50,14 @@
       </div>
 
       <!-- 展開/收起的內容用 v-if 或 transition -->
-
-      <div class="privilegeContent" v-if="privilegeOpen">
-        <ul>
-          <li>任務積分 * 1.2倍</li>
-          <li>消費100元換1.2倍的積分</li>
-        </ul>
-      </div>
+      <transition name="fade">
+        <div class="privilegeContent" v-if="privilegeOpen">
+          <ul>
+            <li>任務積分 * 1.2倍</li>
+            <li>消費100元換1.2倍的積分</li>
+          </ul>
+        </div>
+      </transition>
     </div>
 
     <!-- 若 showExchangeGroup => 顯示分隔線 -->
@@ -223,6 +224,7 @@ export default {
   padding: 12px 24px;
   max-width: 768px;
   margin: 0 auto;
+
   .memberTitleGroup {
     display: flex;
     align-items: center;
@@ -365,6 +367,16 @@ export default {
         width: 1rem;
       }
     }
+  }
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity 0.4s ease, transform 0.3s ease;
+  }
+
+  .fade-enter-from,
+  .fade-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
   }
 }
 </style>

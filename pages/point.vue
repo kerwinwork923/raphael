@@ -12,7 +12,7 @@
           每消費100元獲得1點積分，1點積分等於1元。會員等級越高，積分越多！
           快來累積積分，享受更多回饋！
         </p>
-        <h6 @click="goToPointRules" >查看完整積分規則</h6>
+        <h6 @click="goToPointRules">查看完整積分規則</h6>
         <div class="shadowGroup">
           <div class="shadow1"></div>
           <div class="shadow2"></div>
@@ -54,273 +54,285 @@
             積分規則
           </div>
         </div>
-        <div class="todayTask" v-if="activeTab === 'todayTask'">
-          <div class="todayTaskSubTitle">
-            完成度 <span>{{ completedCount }}/{{ totalTaskCount }}</span>
-          </div>
-
-          <div class="todayTaskItemGroup">
-            <div
-              class="todayTaskItem"
-              v-for="(task, index) in taskList"
-              :key="index"
-            >
-              <div class="todayTaskText">
-                <img src="/assets/imgs/todayTaskIcon.svg" alt="" />
-                {{ task.Name }}
+        <transition name="fade" mode="out-in">
+          <div :key="activeTab">
+            <div class="todayTask" v-if="activeTab === 'todayTask'">
+              <div class="todayTaskSubTitle">
+                完成度 <span>{{ completedCount }}/{{ totalTaskCount }}</span>
               </div>
-              <div class="todayTaskOption">
-                <div class="todayTaskItemNumber">
-                  <div v-if="task.Info == '去完成' || task.Info == '已經完成'">
-                    +{{ task.Points }}
+
+              <div class="todayTaskItemGroup">
+                <div
+                  class="todayTaskItem"
+                  v-for="(task, index) in taskList"
+                  :key="index"
+                >
+                  <div class="todayTaskText">
+                    <img src="/assets/imgs/todayTaskIcon.svg" alt="" />
+                    {{ task.Name }}
                   </div>
+                  <div class="todayTaskOption">
+                    <div class="todayTaskItemNumber">
+                      <div
+                        v-if="task.Info == '去完成' || task.Info == '已經完成'"
+                      >
+                        +{{ task.Points }}
+                      </div>
 
-                  <!-- 假設 "已經完成" 顯示一個打勾圖示 -->
-                  <img
-                    v-if="task.Info === '已經完成'"
-                    src="../assets/imgs/todayTaskCheck.svg"
-                    alt="打勾"
-                  />
+                      <!-- 假設 "已經完成" 顯示一個打勾圖示 -->
+                      <img
+                        v-if="task.Info === '已經完成'"
+                        src="../assets/imgs/todayTaskCheck.svg"
+                        alt="打勾"
+                      />
+                    </div>
+
+                    <!-- 如果任務是 "去完成" 就顯示按鈕 -->
+                    <div
+                      v-if="task.Info === '去完成'"
+                      class="todayTaskItemButton"
+                    >
+                      <button @click="handleTaskClick(task)">去完成</button>
+                    </div>
+
+                    <!-- 其他情況(比如 "還有10天才可以做" 之類) 顯示文字 -->
+                    <small
+                      v-else-if="task.Info && task.Info !== '已經完成'"
+                      style="color: #ec7d7d"
+                    >
+                      {{ task.Info }}
+                    </small>
+                  </div>
                 </div>
-
-                <!-- 如果任務是 "去完成" 就顯示按鈕 -->
-                <div v-if="task.Info === '去完成'" class="todayTaskItemButton">
-                  <button @click="handleTaskClick(task)">去完成</button>
-                </div>
-
-                <!-- 其他情況(比如 "還有10天才可以做" 之類) 顯示文字 -->
-                <small
-                  v-else-if="task.Info && task.Info !== '已經完成'"
-                  style="color: #ec7d7d"
-                >
-                  {{ task.Info }}
-                </small>
               </div>
-            </div>
-          </div>
-          <div class="todayTaskHR"></div>
-          <h6>今日可獲得總積分：{{ dailyAvailablePoints }}</h6>
-          <div class="todayProgressBar">
-            <div
-              class="todayProgress"
-              :style="{ width: todayProgress + '%' }"
-            ></div>
-          </div>
-        </div>
-
-        <div v-else-if="activeTab === 'pointRecord'">
-          <div class="pointRecordSelectGroup">
-            <div class="yearSelectGroup">
-              <img src="/assets/imgs/filter.svg" alt="年份篩選" />
-              <div class="monthText" @click="toggleYearBox('point')">
-                {{ selectedYear }}年
-              </div>
-              <div class="yearBox" v-show="yearBoxVisible">
+              <div class="todayTaskHR"></div>
+              <h6>今日可獲得總積分：{{ dailyAvailablePoints }}</h6>
+              <div class="todayProgressBar">
                 <div
-                  class="year"
-                  v-for="year in displayYears"
-                  :key="year"
-                  @click="selectYear(year, 'point')"
-                >
-                  {{ year }}
-                </div>
+                  class="todayProgress"
+                  :style="{ width: todayProgress + '%' }"
+                ></div>
               </div>
             </div>
-            <div class="monthSelectGroup">
-              <img src="/assets/imgs/filter.svg" alt="月份篩選" />
-              <div class="monthText" @click="toggleMonthBox('point')">
-                {{ selectedMonth }} 月
-              </div>
-              <div class="monthBox" v-show="monthBoxVisible">
-                <div
-                  class="month"
-                  v-for="month in availableMonths"
-                  :key="month"
-                  @click="selectMonth(month)"
-                >
-                  {{ month }} 月
-                </div>
-              </div>
-            </div>
-          </div> 
 
-          <div class="pointRecordGroup">
-            <!-- v-for 顯示 bonusRecList -->
-            <div
-              class="pointRecordDiv"
-              v-for="(item, index) in bonusRecList"
-              :key="index"
-            >
-              <div class="pointRecordList">
-                <div class="imgGroup">
-                  <img
-                    class="Time"
-                    src="../assets/imgs/detectTime2.svg"
-                    alt=""
-                  />
+            <div v-else-if="activeTab === 'pointRecord'">
+              <div class="pointRecordSelectGroup">
+                <div class="yearSelectGroup">
+                  <img src="/assets/imgs/filter.svg" alt="年份篩選" />
+                  <div class="monthText" @click="toggleYearBox('point')">
+                    {{ selectedYear }}年
+                  </div>
+                  <div class="yearBox" v-show="yearBoxVisible">
+                    <div
+                      class="year"
+                      v-for="year in displayYears"
+                      :key="year"
+                      @click="selectYear(year, 'point')"
+                    >
+                      {{ year }}
+                    </div>
+                  </div>
                 </div>
-                <div class="pointRecordText">
-                  <!-- CreateTime, Name, Info -->
-                  <h4>{{ item.CreateTime }}</h4>
-                  <h5>{{ item.Name }}</h5>
-                  <!-- Info 例如 "到期日:2026/01/20" -->
-                  <h6 v-if="item.Info">
-                    <img src="../assets/imgs/detectTime3.svg" alt="" />
-                    {{ item.Info }}
-                  </h6>
-                </div>
-              </div>
-              <!-- Points -->
-              <div class="pointRecordNumber">+{{ item.Points }}</div>
-            </div>
-          </div>
-        </div>
-        <div v-else-if="activeTab === 'exchangeRecord'">
-          <div class="exchangeRecordSelectGroup">
-            <!-- 選擇年份與月份的下拉選單 -->
-            <div class="yearSelectGroup">
-              <img src="/assets/imgs/filter.svg" alt="年份篩選" />
-              <div class="monthText" @click="toggleYearBox('exchange')">
-                {{ selectedExchangeYear }}年
-              </div>
-              <div class="yearBox" v-show="exchangeYearBoxVisible">
-                <div
-                  class="year"
-                  v-for="year in exchangeDisplayYears"
-                  :key="year"
-                  @click="selectExchangeYear(year)"
-                >
-                  {{ year }}
+                <div class="monthSelectGroup">
+                  <img src="/assets/imgs/filter.svg" alt="月份篩選" />
+                  <div class="monthText" @click="toggleMonthBox('point')">
+                    {{ selectedMonth }} 月
+                  </div>
+                  <div class="monthBox" v-show="monthBoxVisible">
+                    <div
+                      class="month"
+                      v-for="month in availableMonths"
+                      :key="month"
+                      @click="selectMonth(month)"
+                    >
+                      {{ month }} 月
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="monthSelectGroup">
-              <img src="/assets/imgs/filter.svg" alt="月份篩選" />
-              <div class="monthText" @click="toggleMonthBox('exchange')">
-                {{ selectedExchangeMonth }} 月
-              </div>
-              <div class="monthBox" v-show="exchangeMonthBoxVisible">
-                <div
-                  class="month"
-                  v-for="month in exchangeAvailableMonths"
-                  :key="month"
-                  @click="selectMonth(month, 'exchange')"
-                >
-                  {{ month }} 月
-                </div>
-              </div>
-            </div>
-          </div>
 
-          <div class="exchangeRecordGroup">
-            <div
-              class="exchangeRecordDiv"
-              v-for="(rec, index) in exchangeRecordList"
-              :key="index"
-            >
-              <div class="exchangeRecordList">
-                <div class="imageGroup">
-                  <img src="/assets/imgs/pointExchangeGift.svg" alt="券圖示" />
-                </div>
-                <div class="exchangeRecordText">
-                  <h4>{{ rec.CreateTime }}</h4>
-                  <h5>{{ rec.Name.replace("#", " ") }} 兌換完成</h5>
-                  <h6
-                    :class="{
-                      canUse: rec.Info.includes('可立即使用'),
-                      canUseLimit: rec.Info.includes('可使用日'),
-                    }"
-                  >
-                    <!-- 根據 Info 內容決定顯示哪個圖示 -->
-                    <img
-                      v-if="rec.Info.includes('可立即使用')"
-                      src="/assets/imgs/canUse.svg"
-                      alt=""
-                    />
-                    <img
-                      v-else-if="rec.Info.includes('可使用日')"
-                      src="/assets/imgs/canUseLimit.svg"
-                      alt=""
-                    />
-                    {{ rec.Info }}
-                  </h6>
+              <div class="pointRecordGroup">
+                <!-- v-for 顯示 bonusRecList -->
+                <div
+                  class="pointRecordDiv"
+                  v-for="(item, index) in bonusRecList"
+                  :key="index"
+                >
+                  <div class="pointRecordList">
+                    <div class="imgGroup">
+                      <img
+                        class="Time"
+                        src="../assets/imgs/detectTime2.svg"
+                        alt=""
+                      />
+                    </div>
+                    <div class="pointRecordText">
+                      <!-- CreateTime, Name, Info -->
+                      <h4>{{ item.CreateTime }}</h4>
+                      <h5>{{ item.Name }}</h5>
+                      <!-- Info 例如 "到期日:2026/01/20" -->
+                      <h6 v-if="item.Info">
+                        <img src="../assets/imgs/detectTime3.svg" alt="" />
+                        {{ item.Info }}
+                      </h6>
+                    </div>
+                  </div>
+                  <!-- Points -->
+                  <div class="pointRecordNumber">+{{ item.Points }}</div>
                 </div>
               </div>
-              <div class="exchangeRecordListOption">
-                <button @click="handleCheck(rec)">查看</button>
+            </div>
+            <div v-else-if="activeTab === 'exchangeRecord'">
+              <div class="exchangeRecordSelectGroup">
+                <!-- 選擇年份與月份的下拉選單 -->
+                <div class="yearSelectGroup">
+                  <img src="/assets/imgs/filter.svg" alt="年份篩選" />
+                  <div class="monthText" @click="toggleYearBox('exchange')">
+                    {{ selectedExchangeYear }}年
+                  </div>
+                  <div class="yearBox" v-show="exchangeYearBoxVisible">
+                    <div
+                      class="year"
+                      v-for="year in exchangeDisplayYears"
+                      :key="year"
+                      @click="selectExchangeYear(year)"
+                    >
+                      {{ year }}
+                    </div>
+                  </div>
+                </div>
+                <div class="monthSelectGroup">
+                  <img src="/assets/imgs/filter.svg" alt="月份篩選" />
+                  <div class="monthText" @click="toggleMonthBox('exchange')">
+                    {{ selectedExchangeMonth }} 月
+                  </div>
+                  <div class="monthBox" v-show="exchangeMonthBoxVisible">
+                    <div
+                      class="month"
+                      v-for="month in exchangeAvailableMonths"
+                      :key="month"
+                      @click="selectMonth(month, 'exchange')"
+                    >
+                      {{ month }} 月
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="exchangeRecordGroup">
+                <div
+                  class="exchangeRecordDiv"
+                  v-for="(rec, index) in exchangeRecordList"
+                  :key="index"
+                >
+                  <div class="exchangeRecordList">
+                    <div class="imageGroup">
+                      <img
+                        src="/assets/imgs/pointExchangeGift.svg"
+                        alt="券圖示"
+                      />
+                    </div>
+                    <div class="exchangeRecordText">
+                      <h4>{{ rec.CreateTime }}</h4>
+                      <h5>{{ rec.Name.replace("#", " ") }} 兌換完成</h5>
+                      <h6
+                        :class="{
+                          canUse: rec.Info.includes('可立即使用'),
+                          canUseLimit: rec.Info.includes('可使用日'),
+                        }"
+                      >
+                        <!-- 根據 Info 內容決定顯示哪個圖示 -->
+                        <img
+                          v-if="rec.Info.includes('可立即使用')"
+                          src="/assets/imgs/canUse.svg"
+                          alt=""
+                        />
+                        <img
+                          v-else-if="rec.Info.includes('可使用日')"
+                          src="/assets/imgs/canUseLimit.svg"
+                          alt=""
+                        />
+                        {{ rec.Info }}
+                      </h6>
+                    </div>
+                  </div>
+                  <div class="exchangeRecordListOption">
+                    <button @click="handleCheck(rec)">查看</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div v-else-if="activeTab === 'pointRules'">
+              <div class="pointRulesInfo">
+                <ul>
+                  <li>碎石會員：每消費100元獲得1點積分</li>
+                  <li>青銅會員：每消費100元獲得1點積分</li>
+                  <li>白銀會員：每消費100元獲得1.2點積分</li>
+                  <li>黃金會員：每消費100元獲得1.5點積分</li>
+                  <li>積分價值：1點 = 台幣1元</li>
+                  <li>使用範圍：積分僅限於此平台使用</li>
+                  <li>
+                    有效期限：積分自獲得日起<span>12個月</span>內有效，請及時使用
+                  </li>
+                </ul>
+              </div>
+              <div class="pointRulesListGroup">
+                <div class="pointRulesList">
+                  <div class="pointRulesText">
+                    <img src="/assets/imgs/todayTaskIcon.svg" alt="" />
+                    <h4>使用紀錄</h4>
+                  </div>
+                  <div class="pointRulesNumber">+5</div>
+                </div>
+              </div>
+              <div class="pointRulesListGroup">
+                <div class="pointRulesList">
+                  <div class="pointRulesText">
+                    <img src="/assets/imgs/todayTaskIcon.svg" alt="" />
+                    <h4>自律神經檢測</h4>
+                  </div>
+                  <div class="pointRulesNumber">+10</div>
+                </div>
+              </div>
+              <div class="pointRulesListGroup">
+                <div class="pointRulesList">
+                  <div class="pointRulesText">
+                    <img src="/assets/imgs/todayTaskIcon.svg" alt="" />
+                    <h4>生活紀錄檢測</h4>
+                  </div>
+                  <div class="pointRulesNumber">+10</div>
+                </div>
+              </div>
+              <div class="pointRulesListGroup">
+                <div class="pointRulesList">
+                  <div class="pointRulesText">
+                    <img src="/assets/imgs/todayTaskIcon.svg" alt="" />
+                    <h4>寶貝記錄檢測</h4>
+                  </div>
+                  <div class="pointRulesNumber">+10</div>
+                </div>
+              </div>
+              <div class="pointRulesListGroup">
+                <div class="pointRulesList">
+                  <div class="pointRulesText">
+                    <img src="/assets/imgs/todayTaskIcon.svg" alt="" />
+                    <h4>點擊分享連結並完成註冊</h4>
+                  </div>
+                  <div class="pointRulesNumber">+100</div>
+                </div>
+              </div>
+              <div class="pointRulesListGroup">
+                <div class="pointRulesList">
+                  <div class="pointRulesText">
+                    <img src="/assets/imgs/todayTaskIcon.svg" alt="" />
+                    <h4>完成分享後進行產品購買</h4>
+                  </div>
+                  <div class="pointRulesNumber">+200</div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div v-else-if="activeTab === 'pointRules'">
-          <div class="pointRulesInfo">
-            <ul>
-              <li>碎石會員：每消費100元獲得1點積分</li>
-              <li>青銅會員：每消費100元獲得1點積分</li>
-              <li>白銀會員：每消費100元獲得1.2點積分</li>
-              <li>黃金會員：每消費100元獲得1.5點積分</li>
-              <li>積分價值：1點 = 台幣1元</li>
-              <li>使用範圍：積分僅限於此平台使用</li>
-              <li>
-                有效期限：積分自獲得日起<span>12個月</span>內有效，請及時使用
-              </li>
-            </ul>
-          </div>
-          <div class="pointRulesListGroup">
-            <div class="pointRulesList">
-              <div class="pointRulesText">
-                <img src="/assets/imgs/todayTaskIcon.svg" alt="" />
-                <h4>使用紀錄</h4>
-              </div>
-              <div class="pointRulesNumber">+5</div>
-            </div>
-          </div>
-          <div class="pointRulesListGroup">
-            <div class="pointRulesList">
-              <div class="pointRulesText">
-                <img src="/assets/imgs/todayTaskIcon.svg" alt="" />
-                <h4>自律神經檢測</h4>
-              </div>
-              <div class="pointRulesNumber">+10</div>
-            </div>
-          </div>
-          <div class="pointRulesListGroup">
-            <div class="pointRulesList">
-              <div class="pointRulesText">
-                <img src="/assets/imgs/todayTaskIcon.svg" alt="" />
-                <h4>生活紀錄檢測</h4>
-              </div>
-              <div class="pointRulesNumber">+10</div>
-            </div>
-          </div>
-          <div class="pointRulesListGroup">
-            <div class="pointRulesList">
-              <div class="pointRulesText">
-                <img src="/assets/imgs/todayTaskIcon.svg" alt="" />
-                <h4>寶貝記錄檢測</h4>
-              </div>
-              <div class="pointRulesNumber">+10</div>
-            </div>
-          </div>
-          <div class="pointRulesListGroup">
-            <div class="pointRulesList">
-              <div class="pointRulesText">
-                <img src="/assets/imgs/todayTaskIcon.svg" alt="" />
-                <h4>點擊分享連結並完成註冊</h4>
-              </div>
-              <div class="pointRulesNumber">+100</div>
-            </div>
-          </div>
-          <div class="pointRulesListGroup">
-            <div class="pointRulesList">
-              <div class="pointRulesText">
-                <img src="/assets/imgs/todayTaskIcon.svg" alt="" />
-                <h4>完成分享後進行產品購買</h4>
-              </div>
-              <div class="pointRulesNumber">+200</div>
-            </div>
-          </div>
-        </div>
+        </transition>
       </div>
     </div>
   </div>
@@ -636,7 +648,6 @@ function handleClickOutside(event) {
 
 // ------------- 「積分紀錄」API_BonusRec
 async function fetchBonusRec() {
-  
   const yrParam = selectedYear.value ? String(selectedYear.value) : "";
   const mnParam = selectedMonth.value
     ? String(selectedMonth.value).padStart(2, "0")
@@ -665,13 +676,11 @@ async function fetchBonusRec() {
   } catch (err) {
     console.error("[fetchBonusRec] catch =>", err);
   }
-
 }
 
 // ------------- 「兌換紀錄」API_ExchangeRec (重點)
 // 用 axios 呼叫 API_ExchangeRec.jsp
 async function fetchExchangeRec() {
-
   const mnParam = selectedExchangeMonth.value
     ? String(selectedExchangeMonth.value).padStart(2, "0")
     : "";
@@ -698,7 +707,6 @@ async function fetchExchangeRec() {
   } catch (err) {
     console.error(err);
   }
- 
 }
 
 /** 在 mounted 時，若有需要預設去撈 */
@@ -782,6 +790,15 @@ const goToPointRules = async () => {
   background-color: #f6f6f6;
   padding: 0 5% 60px;
   min-height: 100vh;
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity 0.15s ease; /* 淡入淡出的速度、動畫曲線 */
+  }
+  .fade-enter-from,
+  .fade-leave-to {
+    opacity: 0; /* 進場前或離場後，元素透明度設為 0 */
+  }
+
   .helperGroup {
     .helper {
       border-radius: 8px;
