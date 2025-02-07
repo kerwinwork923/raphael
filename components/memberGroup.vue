@@ -221,7 +221,7 @@ export default {
 .memberGroup {
   background-color: #fff;
   border-radius: 8px;
-  padding: 12px 24px;
+  padding: 12px;
   max-width: 768px;
   margin: 0 auto;
 
@@ -261,17 +261,16 @@ export default {
   .consumingRecords {
     margin-top: 0.5rem;
     display: flex;
+    align-items: center;
     justify-content: space-between;
+    gap: 0.75rem;
     width: 100%;
     .consumingRecordsItem {
-      width: 48%;
       color: #ccc;
       font-family: "Noto Sans";
       font-size: 14px;
       letter-spacing: 0.048px;
-      line-height: 1.25;
-      padding-top: 0.5rem;
-      padding-left: 0.25rem;
+      line-height: 1.25;      
 
       .consumingRecordsNumber {
         font-size: 20px;
@@ -281,14 +280,17 @@ export default {
       .consumingRecordsItemContent {
         display: flex;
         align-items: center;
+        gap: 4px;
       }
     }
-    .consumingRecordsItem1 {
+    .consumingRecordsItem1 {      
+      flex: 1;
       .consumingRecordsNumber {
         color: #74bc1f;
       }
     }
     .consumingRecordsItem2 {
+      width: 44%;
       .consumingRecordsNumber {
         color: #1fbcb3;
       }
