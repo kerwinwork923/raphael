@@ -179,6 +179,11 @@
                   </div>
                   <!-- Points -->
                   <div class="pointRecordNumber">+{{ item.Points }}</div>
+            
+                </div>
+
+                <div class="notDetectData" v-if="bonusRecList.length === 0">
+                  尚無積分紀錄
                 </div>
               </div>
             </div>
@@ -259,6 +264,13 @@
                   <div class="exchangeRecordListOption">
                     <button @click="handleCheck(rec)">查看</button>
                   </div>
+                </div>
+
+                <div
+                  class="notDetectData"
+                  v-if="exchangeRecordList.length === 0"
+                >
+                  尚無兌換紀錄
                 </div>
               </div>
             </div>
@@ -792,7 +804,7 @@ const goToPointRules = async () => {
   min-height: 100vh;
   .fade-enter-active,
   .fade-leave-active {
-    transition: opacity 0.15s ease; /* 淡入淡出的速度、動畫曲線 */
+    transition: opacity 0.1s ease; /* 淡入淡出的速度、動畫曲線 */
   }
   .fade-enter-from,
   .fade-leave-to {
@@ -902,11 +914,16 @@ const goToPointRules = async () => {
     background-color: #fff;
     margin-top: 1rem;
     padding: 0.75rem;
-
+    position: relative;
     border-radius: 12px;
+    .pointRecordGroup{
+      position: relative;
+      min-height: 20vh;
+    }
     .pointRecordDiv {
       display: flex;
       align-items: center;
+      
     }
     .pointContentList {
       display: flex;
@@ -1186,6 +1203,8 @@ const goToPointRules = async () => {
     }
 
     .exchangeRecordGroup {
+      position: relative;
+      min-height: 20vh;
       .exchangeRecordDiv {
         display: flex;
         justify-content: space-between;
@@ -1460,5 +1479,16 @@ const goToPointRules = async () => {
   img {
     filter: grayscale(0.98);
   }
+}
+.notDetectData {
+  position: absolute;
+  z-index: 11;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  letter-spacing: 10px;
+  font-size: 1.25rem;
+  white-space: nowrap;
+  color: $raphael-gray-300;
 }
 </style>
