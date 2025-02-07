@@ -220,18 +220,24 @@ export default {
 .memberGroup {
   background-color: #fff;
   border-radius: 8px;
-  padding: 12px 5%;
-
+  padding: 12px 24px;
+  max-width: 768px;
+  margin: 0 auto;
   .memberTitleGroup {
     display: flex;
     align-items: center;
     gap: 12px;
     .memberImage {
+      width: 25%;
+      display: flex;
+      justify-content: center;
       img {
-        width: 128px;
+        width: 100%;
+        max-width: 70px;
       }
     }
     .memberTitleTextGroup {
+      width: 75%;
       h3 {
         color: #1e1e1e;
         font-family: "Noto Sans";

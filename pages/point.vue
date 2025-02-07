@@ -12,7 +12,7 @@
           每消費100元獲得1點積分，1點積分等於1元。會員等級越高，積分越多！
           快來累積積分，享受更多回饋！
         </p>
-        <h6>查看完整積分規則</h6>
+        <h6 @click="goToPointRules" >查看完整積分規則</h6>
         <div class="shadowGroup">
           <div class="shadow1"></div>
           <div class="shadow2"></div>
@@ -142,7 +142,7 @@
                 </div>
               </div>
             </div>
-          </div>
+          </div> 
 
           <div class="pointRecordGroup">
             <!-- v-for 顯示 bonusRecList -->
@@ -397,7 +397,7 @@ import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { usePoint } from "@/stores/point";
-
+import { nextTick } from "vue";
 /** ---------------------
   其餘 template, style 已存在，此處只改動 script 區
 ---------------------- **/
@@ -762,6 +762,19 @@ const todayProgress = computed(() => {
 const dailyAvailablePoints = computed(() => {
   return pointStore.nowBonusState?.Cando || 0;
 });
+
+// 讓 activeTab 切換後滾動到積分規則區域
+const goToPointRules = async () => {
+  activeTab.value = "pointRules"; // 切換 tab
+
+  await nextTick(); // 等待 DOM 更新
+
+  // 滾動到積分規則區塊
+  const pointRulesSection = document.querySelector(".pointRulesInfo");
+  if (pointRulesSection) {
+    pointRulesSection.scrollIntoView({ behavior: "smooth" });
+  }
+};
 </script>
 
 <style lang="scss">
@@ -819,6 +832,7 @@ const dailyAvailablePoints = computed(() => {
         font-style: normal;
         font-weight: 400;
         letter-spacing: 0.1px;
+        cursor: pointer;
       }
       .shadowGroup {
         position: absolute;
