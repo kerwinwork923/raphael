@@ -557,7 +557,7 @@ export default {
       font-size: 13px;
       color: $raphael-gray-500;
       text-align: center;
-      padding: 1.5rem 0;
+      padding: 0.75rem 0;
     }
   }
 }
