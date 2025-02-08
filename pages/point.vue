@@ -277,7 +277,7 @@
             <div v-else-if="activeTab === 'pointRules'">
               <div class="pointRulesInfo">
                 <ul>
-                  <li>碎石會員：每消費100元獲得1點積分</li>
+                  <li>雲端會員：每消費100元獲得1點積分</li>
                   <li>青銅會員：每消費100元獲得1點積分</li>
                   <li>白銀會員：每消費100元獲得1.2點積分</li>
                   <li>黃金會員：每消費100元獲得1.5點積分</li>
@@ -1305,12 +1305,8 @@ const goToPointRules = async () => {
           gap: 2px;
           h4 {
             color: #666;
-            font-family: "Noto Sans";
             font-size: 18px;
-            font-style: normal;
-            font-weight: 400;
             letter-spacing: 0.09px;
-            padding-top: 0.3rem;
           }
         }
         .pointRulesNumber {
