@@ -290,13 +290,12 @@ async function doExchange() {
       font-size: 20px;
       font-weight: 700;
       letter-spacing: 0.15px;
-      margin-bottom: 0.15rem;
+      margin-bottom: 0.75rem;
     }
 
     .coupon {
       position: relative;
       cursor: pointer;
-      margin-bottom: 1rem; /* 若需要留間距可加 */
 
       img {
         width: 100%;
