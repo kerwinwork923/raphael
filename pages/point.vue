@@ -988,6 +988,8 @@ const goToPointRules = async () => {
           display: flex;
           align-items: center;
           gap: 4px;
+          font-size: 1.125rem;
+          color: #666;
         }
         .todayTaskOption {
           display: flex;
