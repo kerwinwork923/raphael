@@ -87,6 +87,7 @@
           <div>
             <div class="topTitle">獎勵</div>
             <div class="bottomTitle">積分</div>
+            <img src="../assets/imgs/ticket.svg" alt="" />
           </div>
         </router-link>
       </div>
@@ -458,13 +459,20 @@ export default {
       }
 
       .item1 {
+        position: relative;
         background-color: $raphael-green-400;
-        grid-column: 1 / -1; // 讓 item1 佔滿整行
-        // align-self: stretch; // 讓 item1 撐滿可用高度
-        // display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
+        grid-column: 1 / 3; // 讓 item1 佔滿整行
+        &>div{
+          display: grid;
+          width: 100%;
+          height: 100%;
+          place-items: center;
+          align-content: center;
+          cursor: pointer;
+          &>img{
+            width: 40%;
+          }
+        }
       }
       .item2 {
         background-color: $raphael-purple-200;
