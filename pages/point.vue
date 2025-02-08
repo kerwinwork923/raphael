@@ -1027,7 +1027,7 @@ const goToPointRules = async () => {
             line-height: 100%;
             letter-spacing: 0.5px;
             cursor: pointer;
-            padding: 8px 4px;
+            padding: 7px 5px;
           }
         }
       }
