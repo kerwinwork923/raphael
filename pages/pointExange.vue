@@ -329,14 +329,12 @@ async function doExchange() {
           transform: translateY(-50%);
           h4 {
             color: #000;
-            font-family: "Noto Sans";
             font-size: 24px;
             font-weight: 700;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.5rem;
           }
           h5 {
             color: #000;
-            font-family: "Noto Sans";
             font-size: 18px;
             font-weight: 400;
             line-height: 100%;
