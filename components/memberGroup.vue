@@ -290,7 +290,7 @@ export default {
       }
     }
     .consumingRecordsItem2 {
-      width: 44%;
+      width: 40%;
       .consumingRecordsNumber {
         color: #1fbcb3;
       }
