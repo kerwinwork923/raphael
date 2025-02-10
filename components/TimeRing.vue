@@ -1,59 +1,40 @@
 <template>
   <div class="progress-container">
+    <!-- 1) 倒數進度區塊 -->
     <div class="progress-border" :style="progressStyle">
       <div class="content">{{ formattedTime }}</div>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="179"
-        height="178"
-        class="timeDot"
-        viewBox="0 0 179 178"
-        fill="none"
+    </div>
+
+    <!-- 2) 有檢測紀錄時，感謝訊息 -->
+    <div v-if="hasDetectRecord" class="completion-message">感謝您的使用</div>
+
+    <!-- 3) 兩個按鈕並排（左：主按鈕、右：放棄） -->
+    <div class="flex">
+      <!-- 只有 BEFORE 或 RUNNING 時才顯示主按鈕 -->
+      <button
+        v-if="!hasDetectRecord"
+        :disabled="hasDetectRecord"
+        :style="buttonStyle"
+        @click="toggleTimer"
       >
-        <circle
-          cx="89.333"
-          cy="89"
-          r="88.5"
-          stroke="#666"
-          stroke-dasharray="1 10"
-        />
-      </svg>
+        {{ buttonText }}
+      </button>
+
+      <!-- 放棄按鈕 (如果要 AFTER 才出現，也可加判斷) -->
+      <button class="give-up-btn" @click="handleGiveUp">放棄</button>
     </div>
 
-    <div v-if="hasDetectRecord" class="completion-message">
-      感謝您的使用
-    </div>
-
-    <!-- AFTER 狀態時，判斷是否超過 2 小時 -->
+    <!-- 4) AFTER 狀態時，判斷是否超過 2 小時 -->
     <div v-if="currentState === DetectionState.AFTER">
       <div v-if="isWithinTwoHoursAfter" class="completion-delayMessage">
         請在2小時內完成HRV檢測(使用後)
       </div>
-      <!-- 超過 2 小時 -->
       <div v-else class="completion-delayMessage">
-        已超過2小時未完成HRV檢測(使用後)，您可以選擇現在完成檢測或點擊放棄按鈕
-        <br />
-        <button
-          style="margin-top: 8px; background-color: #ec4f4f; color: #fff;"
-          @click="handleGiveUp"
-        >
-          放棄
-        </button>
+        ※已超過2小時未完成HRV檢測(使用後)<br />您可以選擇現在完成檢測或點擊放棄按鈕
       </div>
     </div>
-
-    <!-- 主按鈕：只在 BEFORE 或 RUNNING 時出現 -->
-    <button
-      v-if="!hasDetectRecord"
-      :disabled="hasDetectRecord"
-      :style="buttonStyle"
-      @click="toggleTimer"
-    >
-      {{ buttonText }}
-    </button>
   </div>
 </template>
-
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
@@ -82,7 +63,7 @@ const isWithinTwoHoursAfter = computed(() => {
   if (!afterStartTime.value) return false; // 沒有值時，預設 false
   const now = Date.now();
   const diff = now - afterStartTime.value.getTime(); // 毫秒差
-  return diff < 2 * 60 * 3 ; // 2 小時 = 7200000 毫秒
+  return diff < 2 * 60 * 3; // 2 小時 = 7200000 毫秒
 });
 
 // ------------- [Store] -------------
@@ -330,7 +311,6 @@ const handleGiveUp = async () => {
   }
 };
 
-
 // ------------- [核心倒數函式] -------------
 const startCountdown = () => {
   console.log("開始倒數，剩餘時間:", remainingTime.value);
@@ -569,7 +549,6 @@ const checkForPendingAfterDetection = async () => {
   }
 };
 
-
 // ------------- [onMounted 初始化] -------------
 onMounted(() => {
   initializeUID().then(() => {
@@ -590,6 +569,40 @@ onMounted(() => {
   background-color: rgb(246, 246, 246);
   width: 100%;
   max-width: 768px;
+}
+
+.flex {
+  display: flex;
+  gap: 1rem;
+  justify-content: center; /* 可依需求改成 space-between, flex-start, etc. */
+  margin: .5rem 0; /* 與上下區塊保持些距離 */
+}
+
+/* 放棄按鈕的自訂樣式 */
+.give-up-btn {
+  background-color: #ec4f4f;
+  color: #fff;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  cursor: pointer;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  letter-spacing: 0.09px;
+  transition: background-color 0.3s ease;
+  box-shadow: 0px -2px 3px 0px rgba(0, 0, 0, 0.25) inset;
+}
+
+.completion-delayMessage {
+  color: var(--warning-red-300, #ec4f4f);
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  max-width: 100%;
+  margin: 0 auto;
+  line-height: 1.5;
+  white-space: nowrap;
 }
 
 .progress-border {
