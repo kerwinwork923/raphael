@@ -22,8 +22,12 @@
 
     <!-- 重新檢測按鈕：可在「RUNNING」或「AFTER」時顯示 -->
     <div v-if="hasDetectRecord" class="completion-message">感謝您的使用</div>
-    <div v-if="hasDetectRecord" class="completion-delayMessage">
-      ※ 請於隔天後再使用
+    <!-- 使用後提醒：2 小時內 or 超過 2 小時 -->
+    <div v-if="currentState === DetectionState.AFTER">
+      <div v-if="isWithinTwoHoursAfter" class="completion-delayMessage">
+        請在2小時內完成HRV檢測(使用後)
+      </div>
+      <div v-else class="completion-delayMessage">※ 請於隔天後再使用</div>
     </div>
 
     <!-- 主按鈕：只在「尚未檢測」(BEFORE) 或「計時中」(RUNNING) 時出現 -->
@@ -58,6 +62,15 @@ const props = defineProps({
 });
 
 const router = useRouter();
+const afterStartTime = ref(null);
+
+// 計算是否在 2 小時內
+const isWithinTwoHoursAfter = computed(() => {
+  if (!afterStartTime.value) return false; // 沒有值時，預設 false
+  const now = Date.now();
+  const diff = now - afterStartTime.value.getTime(); // 毫秒差
+  return diff < 2 * 60 * 60 * 1000; // 2 小時 = 7200000 毫秒
+});
 
 // ------------- [Store] -------------
 import { useCommon } from "../stores/common";
@@ -285,7 +298,6 @@ const detectHRVAfter = (UID) => {
 };
 
 // ------------- [核心倒數函式] -------------
-// ------------- [核心倒數函式] -------------
 const startCountdown = () => {
   console.log("開始倒數，剩餘時間:", remainingTime.value);
   timerStart = Date.now();
@@ -502,22 +514,27 @@ const checkForPendingAfterDetection = async () => {
 
     if (response && response.Result !== "NOData") {
       const { UID: rUID, CheckTime } = response;
-
-      // 若有未完成的使用後檢測 => 直接進 AFTER 狀態
+      // 假設 CheckTime 是類似 "20231018123000" 格式
       if (rUID) {
         if (timerInterval) clearInterval(timerInterval);
         UID.value = rUID;
         isCounting.value = false;
         remainingTime.value = 0;
+
+        // ★ 關鍵：將後端回傳的 CheckTime 轉成 Date，存入 afterStartTime
+        if (CheckTime) {
+          afterStartTime.value = parseTimeString(CheckTime);
+        }
+
         detectHRVAfter(rUID);
         currentState.value = DetectionState.AFTER;
       }
     }
   } catch (error) {
     console.error("檢查未完成使用後檢測失敗:", error);
-  } finally {
   }
 };
+
 
 // ------------- [onMounted 初始化] -------------
 onMounted(() => {
