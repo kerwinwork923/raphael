@@ -1,18 +1,18 @@
 <template>
   <div class="progress-container">
-    <!-- 1) 倒數進度區塊 -->
+    <!-- 1) 倒數進度 -->
     <div class="progress-border" :style="progressStyle">
       <div class="content">{{ formattedTime }}</div>
     </div>
 
-    <!-- 2) 有檢測紀錄時，感謝訊息 -->
+    <!-- 2) 若 hasDetectRecord 為 true，顯示感謝訊息 -->
     <div v-if="hasDetectRecord" class="completion-message">感謝您的使用</div>
 
-    <!-- 3) 兩個按鈕並排（左：主按鈕、右：放棄） -->
+    <!-- 3) 主要按鈕＋放棄按鈕的容器 -->
     <div class="flex">
-      <!-- 只有 BEFORE 或 RUNNING 時才顯示主按鈕 -->
+      <!-- BEFORE / RUNNING 時出現的主按鈕 -->
       <button
-        v-if="!hasDetectRecord"
+        v-if="!hasDetectRecord && currentState !== DetectionState.AFTER"
         :disabled="hasDetectRecord"
         :style="buttonStyle"
         @click="toggleTimer"
@@ -20,8 +20,14 @@
         {{ buttonText }}
       </button>
 
-      <!-- 放棄按鈕 (如果要 AFTER 才出現，也可加判斷) -->
-      <button class="give-up-btn" @click="handleGiveUp">放棄</button>
+      <!-- 放棄按鈕：只在 AFTER 狀態出現 -->
+      <button
+        v-if="currentState === DetectionState.AFTER"
+        class="give-up-btn"
+        @click="handleGiveUp"
+      >
+        放棄
+      </button>
     </div>
 
     <!-- 4) AFTER 狀態時，判斷是否超過 2 小時 -->
@@ -30,11 +36,13 @@
         請在2小時內完成HRV檢測(使用後)
       </div>
       <div v-else class="completion-delayMessage">
-        ※已超過2小時未完成HRV檢測(使用後)<br />您可以選擇現在完成檢測或點擊放棄按鈕
+        ※已超過2小時未完成HRV檢測(使用後)<br />
+        您可以選擇現在完成檢測或點擊放棄按鈕
       </div>
     </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
