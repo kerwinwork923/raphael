@@ -20,27 +20,40 @@
       </svg>
     </div>
 
-    <!-- 重新檢測按鈕：可在「RUNNING」或「AFTER」時顯示 -->
-    <div v-if="hasDetectRecord" class="completion-message">感謝您的使用</div>
-    <!-- 使用後提醒：2 小時內 or 超過 2 小時 -->
+    <div v-if="hasDetectRecord" class="completion-message">
+      感謝您的使用
+    </div>
+
+    <!-- AFTER 狀態時，判斷是否超過 2 小時 -->
     <div v-if="currentState === DetectionState.AFTER">
       <div v-if="isWithinTwoHoursAfter" class="completion-delayMessage">
         請在2小時內完成HRV檢測(使用後)
       </div>
-      <div v-else class="completion-delayMessage">※ 請於隔天後再使用</div>
+      <!-- 超過 2 小時 -->
+      <div v-else class="completion-delayMessage">
+        已超過2小時未完成HRV檢測(使用後)，您可以選擇現在完成檢測或點擊放棄按鈕
+        <br />
+        <button
+          style="margin-top: 8px; background-color: #ec4f4f; color: #fff;"
+          @click="handleGiveUp"
+        >
+          放棄
+        </button>
+      </div>
     </div>
 
-    <!-- 主按鈕：只在「尚未檢測」(BEFORE) 或「計時中」(RUNNING) 時出現 -->
+    <!-- 主按鈕：只在 BEFORE 或 RUNNING 時出現 -->
     <button
-      @click="toggleTimer"
       v-if="!hasDetectRecord"
       :disabled="hasDetectRecord"
       :style="buttonStyle"
+      @click="toggleTimer"
     >
       {{ buttonText }}
     </button>
   </div>
 </template>
+
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
@@ -69,7 +82,7 @@ const isWithinTwoHoursAfter = computed(() => {
   if (!afterStartTime.value) return false; // 沒有值時，預設 false
   const now = Date.now();
   const diff = now - afterStartTime.value.getTime(); // 毫秒差
-  return diff < 2 * 60 * 60 * 1000; // 2 小時 = 7200000 毫秒
+  return diff < 2 * 60 * 3 ; // 2 小時 = 7200000 毫秒
 });
 
 // ------------- [Store] -------------
@@ -296,6 +309,27 @@ const detectHRVAfter = (UID) => {
   store.showHRVAlert = true;
   console.log("使用後檢測已啟動", { UID, productName: props.productName });
 };
+
+const handleGiveUp = async () => {
+  if (!window.confirm("確定要放棄本次使用後檢測嗎？")) {
+    return;
+  }
+  try {
+    // 1) 呼叫刪除檢測紀錄的 API，前後檢測資料都清除
+    //   （此處假設可用 API_DeleteStart 或其他後端提供的方法）
+    await API_DeleteStart();
+
+    // 2) 重置流程到 BEFORE 狀態
+    resetDetectionState();
+
+    // 3) 如果需要，顯示提示或跳轉頁面
+    // alert("已放棄使用後檢測，流程重置。");
+    // router.push("/somewhere");
+  } catch (error) {
+    console.error("放棄使用後檢測失敗:", error);
+  }
+};
+
 
 // ------------- [核心倒數函式] -------------
 const startCountdown = () => {
