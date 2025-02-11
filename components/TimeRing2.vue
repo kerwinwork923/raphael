@@ -11,16 +11,24 @@
     <!-- 3) BEFORE / RUNNING 狀態 => 使用前檢測 -->
     <div class="timeRing2btnGroup" v-if="currentState === DetectionState.BEFORE || currentState === DetectionState.RUNNING">
       <!-- BEFORE 狀態下：按鈕為「HRV檢測(使用前)」 -->
-      <button v-if="currentState === DetectionState.BEFORE" @click="toggleTimer" style="margin-bottom: 1rem; background-color: #74bc1f">
+      <button
+        v-if="currentState === DetectionState.BEFORE"
+        @click="toggleTimer"
+        style="margin-bottom: 1rem; background-color: #74bc1f"
+      >
         HRV檢測(使用前)
       </button>
 
       <!-- RUNNING 狀態下：按鈕顯示「結束」 -->
-      <button v-if="currentState === DetectionState.RUNNING" @click="toggleTimer" :style="buttonStyle">
+      <button
+        v-if="currentState === DetectionState.RUNNING"
+        @click="toggleTimer"
+        :style="buttonStyle"
+      >
         {{ buttonText }}
       </button>
 
-      <!-- RUNNING 狀態下：若使用前檢測狀態（detectFlag==='1'），則提供「重新檢測」按鈕 -->
+      <!-- RUNNING 狀態下：若使用前檢測狀態（detectFlag==='1'）則顯示「重新檢測」按鈕 -->
       <button
         v-if="currentState === DetectionState.RUNNING && store.detectFlag === '1'"
         class="retry-btn"
@@ -185,17 +193,15 @@ async function stopTimer() {
 async function toggleTimer() {
   switch (currentState.value) {
     case DetectionState.BEFORE:
+      // 若已存在 UID，仍呼叫 detectHRVBefore(UID.value)（以便跳出 HRV 檢測畫面）
       if (UID.value) {
-        const resp = await API_MID_ProductName_UIDInfo();
-        if (resp?.StartTime) {
-          const ms = parseTimeString(resp.StartTime).getTime();
-          startTimestamp.value = ms;
-          elapsedTime.value = Math.floor((Date.now() - ms) / 1000);
-        }
+        console.log("toggleTimer: UID 已存在，直接呼叫 detectHRVBefore");
         startTimer();
+        detectHRVBefore(UID.value);
       } else {
-        // 呼叫 useStartAPI 並儲存新 UID 至 localStorage
+        // 呼叫 useStartAPI 建立新 UID
         const newRes = await useStartAPI();
+        console.log("toggleTimer: useStartAPI 回傳", newRes);
         if (newRes?.UID) {
           UID.value = newRes.UID;
           localStorage.setItem("currentUID", newRes.UID);
@@ -206,10 +212,11 @@ async function toggleTimer() {
       }
       break;
     case DetectionState.RUNNING:
+      // 按下「結束」按鈕時
       await stopTimer();
       break;
     case DetectionState.AFTER:
-      // AFTER 狀態下不做任何事
+      // AFTER 狀態下不再處理
       break;
     default:
       console.warn("未知狀態 => 不做任何事");
@@ -218,6 +225,7 @@ async function toggleTimer() {
 
 // 4) 進入使用前檢測
 function detectHRVBefore(uidVal) {
+  console.log("進入使用前檢測，UID:", uidVal);
   store.detectFlag = "1"; // 使用前檢測
   store.detectUID = uidVal;
   store.detectForm = props.productName;
@@ -227,6 +235,7 @@ function detectHRVBefore(uidVal) {
 
 // 5) 進入使用後檢測（若需要使用後檢測，可保留此函式）
 async function detectHRVAfter(uidVal) {
+  console.log("進入使用後檢測，UID:", uidVal);
   store.detectFlag = "2"; // 使用後檢測
   store.detectUID = uidVal;
   store.detectForm = `*${props.productName}`;
@@ -255,7 +264,7 @@ async function handleGiveUp() {
   }
 }
 
-// 7) 完整重置（清除計時器、狀態、UID）
+// 7) 完整重置
 function doReset() {
   if (timerInterval) {
     clearInterval(timerInterval);
@@ -295,6 +304,7 @@ onMounted(async () => {
   }
   try {
     const resp = await API_MID_ProductName_UIDInfo();
+    console.log("onMounted: API_MID_ProductName_UIDInfo 回傳:", resp);
     if (resp) {
       if (resp.UID) {
         UID.value = resp.UID;
@@ -341,6 +351,7 @@ async function API_MID_ProductName_UIDInfo() {
       "https://23700999.com:8081/HMA/API_MID_ProductName_UIDInfo.jsp",
       { MID, Token, MAID, Mobile, ProductName: props.productName }
     );
+    console.log("API_MID_ProductName_UIDInfo 回傳:", r);
     if (r?.Result === "OK") {
       return r;
     } else {
@@ -361,6 +372,7 @@ async function API_HRV2_UID_Flag_Info(Flag, uidVal) {
       "https://23700999.com:8081/HMA/API_HRV2_UID_Flag_Info.jsp",
       { MID, Token, MAID, Mobile, UID: uidVal, Flag }
     );
+    console.log("API_HRV2_UID_Flag_Info 回傳:", r);
     if (r?.Result === "OK") {
       return r.IsExit;
     } else {
@@ -405,7 +417,7 @@ async function useEndAPI() {
       Mobile,
       UID: UID.value,
     });
-    console.log("useEndAPI =>", r);
+    console.log("useEndAPI 回傳:", r);
     return r;
   } catch (err) {
     console.error("useEndAPI => err:", err);
@@ -419,6 +431,7 @@ async function API_UIDInfo_Search12() {
       "https://23700999.com:8081/HMA/API_UIDInfo_Search12.jsp",
       { MID, Token, MAID, Mobile, ProductName: props.productName }
     );
+    console.log("API_UIDInfo_Search12 回傳:", r);
     if (r?.Result === "OK") {
       return r;
     } else {
@@ -442,7 +455,7 @@ async function API_DeleteStart() {
       "https://23700999.com:8081/HMA/API_DeleteStart.jsp",
       { MID, Token, MAID, Mobile, UID: UID.value, ProductName: props.productName }
     );
-    console.log("API_DeleteStart 呼叫成功:", response);
+    console.log("API_DeleteStart 回傳:", response);
   } catch (error) {
     console.error("API_DeleteStart 呼叫失敗:", error);
     throw error;
@@ -476,7 +489,7 @@ function parseTimeString(timeStr) {
   align-items: center;
   justify-content: center;
   position: relative;
-  box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0px 2px 4px rgba(0,0,0,0.2);
   transition: all 0.3s ease;
 }
 .content {
@@ -489,7 +502,7 @@ function parseTimeString(timeStr) {
   justify-content: center;
   font-size: 1.5rem;
   font-weight: bold;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
 }
 button {
   padding: 0.6rem 1.2rem;
@@ -501,7 +514,7 @@ button {
   font-size: 18px;
   letter-spacing: 0.09px;
   transition: background-color 0.3s ease;
-  box-shadow: inset 0px -2px 3px rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0px -2px 3px rgba(0,0,0,0.25);
 }
 button:disabled {
   background-color: #e0e0e0;
