@@ -459,7 +459,7 @@ async function useStartAPI() {
 async function useEndAPI() {
   if (!UID.value) return;
   try {
-    const r = await apiRequest("https://xxxx.com:8081/HMA/API_UseEnd.jsp", {
+    const r = await apiRequest("https://23700999.com:8081/HMA/API_UseEnd.jsp", {
       MID,
       Token,
       MAID,
