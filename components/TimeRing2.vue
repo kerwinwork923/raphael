@@ -8,38 +8,25 @@
     <!-- 2) 有檢測紀錄時，顯示提示 (可自行啟用) -->
     <!-- <div v-if="hasDetectRecord" class="completion-message">感謝您的使用</div> -->
 
-    <!-- 3) BEFORE / RUNNING 狀態 => 使用前檢測 -->
+    <!-- 3) BEFORE / RUNNING 狀態：使用前檢測 -->
     <div class="timeRing2btnGroup" v-if="currentState === DetectionState.BEFORE || currentState === DetectionState.RUNNING">
-      <!-- BEFORE 狀態下：按鈕為「HRV檢測(使用前)」 -->
-      <button
-        v-if="currentState === DetectionState.BEFORE"
-        @click="toggleTimer"
-        style="margin-bottom: 1rem; background-color: #74bc1f"
-      >
+      <!-- BEFORE 狀態下：按鈕顯示「HRV檢測(使用前)」 -->
+      <button v-if="currentState === DetectionState.BEFORE" @click="toggleTimer" style="margin-bottom: 1rem; background-color: #74bc1f">
         HRV檢測(使用前)
       </button>
 
       <!-- RUNNING 狀態下：按鈕顯示「結束」 -->
-      <button
-        v-if="currentState === DetectionState.RUNNING"
-        @click="toggleTimer"
-        :style="buttonStyle"
-      >
+      <button v-if="currentState === DetectionState.RUNNING" @click="toggleTimer" :style="buttonStyle">
         {{ buttonText }}
       </button>
 
-      <!-- RUNNING 狀態下：若使用前檢測狀態（detectFlag==='1'）則顯示「重新檢測」按鈕 -->
-      <button
-        v-if="currentState === DetectionState.RUNNING && store.detectFlag === '1'"
-        class="retry-btn"
-        style="margin-bottom: 1rem"
-        @click="resetAndRetest"
-      >
+      <!-- RUNNING 狀態下：若 detectFlag 為 '1' 則顯示「重新檢測」按鈕 -->
+      <button v-if="currentState === DetectionState.RUNNING && store.detectFlag === '1'" class="retry-btn" style="margin-bottom: 1rem" @click="resetAndRetest">
         重新檢測
       </button>
     </div>
 
-    <!-- 4) AFTER 狀態：這裡僅供參考，可根據需求刪除 -->
+    <!-- 4) AFTER 狀態（此區塊僅供參考，可根據需求調整） -->
     <div v-if="currentState === DetectionState.AFTER" class="hrv-after-btn-group">
       <div v-if="!hasOver30Mins" style="text-align: center">
         <button class="hrv-after-btn" @click="detectHRVAfter(UID.value)">
@@ -166,7 +153,7 @@ function startTimer() {
   }, 1000);
 }
 
-// 2) 停止計時（只檢查使用前完成即可結束）
+// 2) 停止計時（只檢查使用前是否完成即可結束）
 async function stopTimer() {
   if (timerInterval) {
     clearInterval(timerInterval);
@@ -193,13 +180,12 @@ async function stopTimer() {
 async function toggleTimer() {
   switch (currentState.value) {
     case DetectionState.BEFORE:
-      // 若已存在 UID，仍呼叫 detectHRVBefore(UID.value)（以便跳出 HRV 檢測畫面）
       if (UID.value) {
-        console.log("toggleTimer: UID 已存在，直接呼叫 detectHRVBefore");
-        startTimer();
+        console.log("toggleTimer: UID 已存在，呼叫 detectHRVBefore，UID =", UID.value);
+        // 已存在 UID，直接顯示使用前檢測
         detectHRVBefore(UID.value);
       } else {
-        // 呼叫 useStartAPI 建立新 UID
+        console.log("toggleTimer: UID 不存在，呼叫 useStartAPI");
         const newRes = await useStartAPI();
         console.log("toggleTimer: useStartAPI 回傳", newRes);
         if (newRes?.UID) {
@@ -212,11 +198,10 @@ async function toggleTimer() {
       }
       break;
     case DetectionState.RUNNING:
-      // 按下「結束」按鈕時
       await stopTimer();
       break;
     case DetectionState.AFTER:
-      // AFTER 狀態下不再處理
+      // AFTER 狀態下不做任何事
       break;
     default:
       console.warn("未知狀態 => 不做任何事");
@@ -226,17 +211,19 @@ async function toggleTimer() {
 // 4) 進入使用前檢測
 function detectHRVBefore(uidVal) {
   console.log("進入使用前檢測，UID:", uidVal);
-  store.detectFlag = "1"; // 使用前檢測
+  store.detectFlag = "1";
   store.detectUID = uidVal;
   store.detectForm = props.productName;
   store.showHRVAlert = true;
+  // 可根據需求顯示檢測介面（例如彈窗或 iFrame）
+  // 此處同時啟動計時（若需要）
   startTimer();
 }
 
-// 5) 進入使用後檢測（若需要使用後檢測，可保留此函式）
+// 5) 進入使用後檢測（若需要）
 async function detectHRVAfter(uidVal) {
   console.log("進入使用後檢測，UID:", uidVal);
-  store.detectFlag = "2"; // 使用後檢測
+  store.detectFlag = "2";
   store.detectUID = uidVal;
   store.detectForm = `*${props.productName}`;
   store.showHRVAlert = true;
@@ -321,6 +308,7 @@ onMounted(async () => {
         } else {
           console.log("StartTime 超過24hr => 清除舊紀錄");
           await API_DeleteStart();
+          currentState.value = DetectionState.BEFORE;
         }
       } else {
         currentState.value = DetectionState.BEFORE;
