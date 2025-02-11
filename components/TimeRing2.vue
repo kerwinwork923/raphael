@@ -10,7 +10,7 @@
       感謝您的使用
     </div>
 
-    <!-- 3) BEFORE / RUNNING 狀態 => 可以做「使用前檢測」 -->
+    <!-- 3) BEFORE / RUNNING 狀態 => 使用前檢測 -->
     <div
       class="timeRing2btnGroup"
       v-if="currentState === DetectionState.BEFORE || currentState === DetectionState.RUNNING"
@@ -19,19 +19,12 @@
       <button
         v-if="currentState === DetectionState.BEFORE"
         @click="toggleTimer"
-        style="margin-bottom: 1rem"
+        style="margin-bottom: 1rem;background-color: #74BC1F;"
       >
-        開始使用前檢測
+        HRV檢測(使用前)
       </button>
 
-      <!-- BEFORE 狀態下: 「重新檢測」按鈕 (重置並重新開始) -->
-      <button
-        v-if="currentState === DetectionState.BEFORE"
-        class="retry-btn"
-        @click="resetAndRetest"
-      >
-        重新檢測
-      </button>
+      <!-- (原本 BEFORE 狀態的「重新檢測」按鈕，已移除/註解) -->
 
       <!-- RUNNING 狀態下: 「結束」按鈕 -->
       <button
@@ -42,9 +35,9 @@
         {{ buttonText }}
       </button>
 
-      <!-- RUNNING 狀態下: 「重新檢測」按鈕 (重置並重新開始) -->
+      <!-- RUNNING 狀態下: 只有使用前 (detectFlag='1') 時才顯示「重新檢測」按鈕 -->
       <button
-        v-if="currentState === DetectionState.RUNNING"
+        v-if="currentState === DetectionState.RUNNING && store.detectFlag === '1'"
         class="retry-btn"
         style="margin-bottom: 1rem"
         @click="resetAndRetest"
@@ -313,7 +306,7 @@ function doReset() {
 
 /**
  * 8) resetAndRetest => 重新檢測 (刪除舊紀錄 + 重置 + 再次開始使用前檢測)
- * - BEFORE / RUNNING 狀態下皆可觸發
+ * - 只在 RUNNING 狀態、且使用前 (store.detectFlag='1') 時可見
  */
 async function resetAndRetest() {
   if (UID.value) {
@@ -399,8 +392,6 @@ async function API_MID_ProductName_UIDInfo() {
       "https://23700999.com:8081/HMA/API_MID_ProductName_UIDInfo.jsp",
       { MID, Token, MAID, Mobile, ProductName: props.productName }
     );
-    // r.Result === "OK" => 可能有 UID => r.UID / r.StartTime
-    // r.Result === "NOData" => 沒有任何資料
     if (r?.Result === "OK") {
       return r;
     } else {
@@ -615,6 +606,7 @@ button:disabled {
   flex-direction: column;
   align-items: center;
 }
+
 /* 重新檢測按鈕 */
 .retry-btn {
   background-color: #74bc1f;
