@@ -1,22 +1,43 @@
 <template>
   <div class="progress-container">
-    <!-- 1) 正數計時 + 進度圓圈：使用 progressStyle 顯示累計時間比例 -->
+    <!-- 1) 正數計時 + 進度圓圈 -->
     <div class="progress-border" :style="progressStyle">
       <div class="content">{{ formattedTime }}</div>
     </div>
 
-    <!-- 2) 若 hasDetectRecord 為 true，顯示感謝訊息 -->
+    <!-- 2) 有檢測紀錄時，顯示提示 -->
     <div v-if="hasDetectRecord" class="completion-message">感謝您的使用</div>
 
-    <!-- 3) 使用後狀態時，依是否在2小時內顯示不同文案 -->
-    <div v-if="currentState === DetectionState.AFTER">
-      <div v-if="isWithinTwoHoursAfter" class="completion-delayMessage">
-        請在2小時內完成HRV檢測(使用後)
+    <!-- 3) AFTER 狀態 -->
+    <div
+      class="hrv-after-btn-group"
+      v-if="currentState === DetectionState.AFTER"
+    >
+      <!-- (a) 30 分鐘內：顯示 1 按鈕 + 提示 -->
+      <div v-if="isWithinThirtyMinsAfter">
+        <button class="hrv-after-btn" @click="detectHRVAfter(UID.value)">
+          HRV檢測(使用後)
+        </button>
+        <div class="completion-delayMessage">
+          請在30分鐘內完成HRV檢測(使用後)
+        </div>
       </div>
-      <div v-else class="completion-delayMessage">※ 請於隔天後再使用</div>
+
+      <!-- (b) 超過 30 分鐘：兩個按鈕並排 + 提示文字在下方 -->
+      <div v-else>
+        <div class="button-row">
+          <button class="hrv-after-btn" @click="detectHRVAfter(UID.value)">
+            HRV檢測(使用後)
+          </button>
+          <button class="give-up-btn" @click="handleGiveUp">放棄</button>
+        </div>
+        <div class="completion-delayMessage">
+          已超過30分鐘未完成HRV檢測(使用後)，您可以選擇現在完成檢測或點擊放棄按鈕
+        </div>
+      </div>
     </div>
 
-    <!-- 4) 主按鈕：只在 BEFORE / RUNNING 狀態出現；AFTER 狀態就不顯示此按鈕 -->
+    <!-- 4) BEFORE 或 RUNNING 才顯示主按鈕；AFTER 不顯示 -->
     <button
       v-if="!hasDetectRecord && currentState !== DetectionState.AFTER"
       :disabled="hasDetectRecord"
@@ -34,7 +55,7 @@ import axios from "axios";
 import { useRouter } from "vue-router";
 import { useCommon } from "../stores/common";
 
-/* ---------------------- [Props] ---------------------- */
+/* ------------------ [Props] ------------------ */
 const props = defineProps({
   totalTime: { type: Number, default: 3600 },
   productName: { type: String, default: "" },
@@ -44,7 +65,7 @@ const props = defineProps({
 const router = useRouter();
 const store = useCommon();
 
-/* ---------------------- [狀態枚舉 & 核心變數] ---------------------- */
+/* ------------------ [狀態枚舉] ------------------ */
 const DetectionState = {
   BEFORE: "before",
   RUNNING: "running",
@@ -52,24 +73,23 @@ const DetectionState = {
 };
 
 const currentState = ref(DetectionState.BEFORE);
+const remainingTime = ref(props.totalTime * 1000); // 保留不使用
 
-// 保留 remainingTime（原程式有，但此處用不到）
-const remainingTime = ref(props.totalTime * 1000);
+/* ------------------ [正數計時：elapsedTime + startTimestamp] ------------------ */
+const elapsedTime = ref(0);
+const startTimestamp = ref(null);
+const isCounting = ref(false);
 
-/* ---------- 正數計時：elapsedTime / startTimestamp ---------- */
-const elapsedTime = ref(0); // 已經過「秒」
-const startTimestamp = ref(null); // 開始計時的毫秒時間戳
-const isCounting = ref(false); // 是否正在計時
-
-/* ---------------------- [使用後] 2 小時判斷 ---------------------- */
+/* ------------------ [AFTER 狀態] 30 分鐘判斷 ------------------ */
 const afterStartTime = ref(null);
-const isWithinTwoHoursAfter = computed(() => {
+const isWithinThirtyMinsAfter = computed(() => {
   if (!afterStartTime.value) return false;
   const diff = Date.now() - afterStartTime.value.getTime();
-  return diff < 2 * 60 * 60 * 1000; // 2 小時
+  // 30 分鐘 (1800000 ms)
+  return diff < 60;
 });
 
-/* ---------------------- [按鈕文字 & 樣式] ---------------------- */
+/* ------------------ [按鈕文字 & 樣式] ------------------ */
 const buttonText = computed(() => {
   switch (currentState.value) {
     case DetectionState.BEFORE:
@@ -77,6 +97,7 @@ const buttonText = computed(() => {
     case DetectionState.RUNNING:
       return "結束";
     case DetectionState.AFTER:
+      // AFTER 狀態不顯示此主按鈕
       return "HRV檢測(使用後)";
     default:
       return "未知狀態";
@@ -85,30 +106,26 @@ const buttonText = computed(() => {
 
 const buttonStyle = computed(() => {
   switch (currentState.value) {
-    case DetectionState.BEFORE: // 綠色
-      return { backgroundColor: "#74BC1F", color: "#fff" };
-    case DetectionState.RUNNING: // 藍色
-      return { backgroundColor: "#1FBCB3", color: "#fff" };
-    case DetectionState.AFTER: // 綠色
-      return { backgroundColor: "#74BC1F", color: "#fff" };
+    case DetectionState.BEFORE:
+      return { backgroundColor: "#74BC1F", color: "#fff" }; // 綠色
+    case DetectionState.RUNNING:
+      return { backgroundColor: "#1FBCB3", color: "#fff" }; // 藍色
+    case DetectionState.AFTER:
+      return { backgroundColor: "#74BC1F", color: "#fff" }; // 綠色(但不顯示)
     default:
       return { backgroundColor: "#E0E0E0", color: "#000" };
   }
 });
 
-/* ---------------------- [顯示用時間: HH:MM:SS] ---------------------- */
+/* ------------------ [顯示用時間 (HH:MM:SS)] ------------------ */
 const formattedTime = computed(() => {
-  const hours = Math.floor(elapsedTime.value / 3600);
-  const minutes = Math.floor((elapsedTime.value % 3600) / 60);
-  const seconds = elapsedTime.value % 60;
-  return [
-    hours.toString().padStart(2, "0"),
-    minutes.toString().padStart(2, "0"),
-    seconds.toString().padStart(2, "0"),
-  ].join(":");
+  const h = Math.floor(elapsedTime.value / 3600);
+  const m = Math.floor((elapsedTime.value % 3600) / 60);
+  const s = elapsedTime.value % 60;
+  return [h, m, s].map((val) => String(val).padStart(2, "0")).join(":");
 });
 
-/* ---------------------- [進度圈樣式: conic-gradient] ---------------------- */
+/* ------------------ [conic-gradient] ------------------ */
 const progressStyle = computed(() => {
   const ratio = Math.min(elapsedTime.value / props.totalTime, 1);
   const percent = (ratio * 100).toFixed(2);
@@ -118,7 +135,7 @@ const progressStyle = computed(() => {
   };
 });
 
-/* ---------------------- [LocalStorage 檢查] ---------------------- */
+/* ------------------ [LocalStorage] ------------------ */
 const localData = localStorage.getItem("userData");
 const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
 if (!MID || !Token || !MAID || !Mobile) {
@@ -126,17 +143,17 @@ if (!MID || !Token || !MAID || !Mobile) {
   router.push("/");
 }
 
-/* ---------------------- [UID, BID & Timer] ---------------------- */
+/* ------------------ [UID, BID & Timer] ------------------ */
 const UID = ref(null);
 const BID = ref(null);
 let timerInterval = null;
 
 /* ---------------------------------------------------
-   1) startTimer: 正數計時
+   startTimer: 正數計時
 --------------------------------------------------- */
 function startTimer() {
   if (timerInterval) {
-    console.log("計時器已啟動中，無需重複開始");
+    console.log("計時器已經在運行中，不重複開始");
     return;
   }
   if (!startTimestamp.value) {
@@ -152,7 +169,7 @@ function startTimer() {
 }
 
 /* ---------------------------------------------------
-   2) stopTimer: 結束計時 => 進入 AFTER
+   stopTimer: 結束 => AFTER
 --------------------------------------------------- */
 async function stopTimer() {
   if (timerInterval) {
@@ -162,57 +179,44 @@ async function stopTimer() {
   isCounting.value = false;
   console.log("計時結束");
 
-  // ★ 檢查使用前是否完成
+  // 檢查使用前是否完成
   const isExitValue = await API_HRV2_UID_Flag_Info("1", UID.value);
   if (isExitValue === "N") {
-    // ※ 尚未完成「使用前」 => 彈出使用前檢測
     alert("尚未完成使用前檢測，無法結束！");
-    detectHRVBefore(UID.value); // ★ 新增：再次呼叫使用前檢測
+    detectHRVBefore(UID.value);
     return;
   }
 
-  // 已完成 => 進入 AFTER + 呼叫使用前結束 API + 觸發使用後
+  // 使用前完成 => 進入 AFTER
   currentState.value = DetectionState.AFTER;
   try {
     await useEndAPI();
     detectHRVAfter(UID.value);
   } catch (error) {
-    console.error("結束 API 呼叫失敗:", error);
+    console.error("結束 API 失敗:", error);
   }
 }
 
 /* ---------------------------------------------------
-   3) 切換按鈕 toggleTimer
-   BEFORE => RUNNING => AFTER
+   toggleTimer: BEFORE => RUNNING => AFTER
 --------------------------------------------------- */
 async function toggleTimer() {
   switch (currentState.value) {
     case DetectionState.BEFORE:
       if (UID.value) {
         console.log("已有 UID => 從後端時間開始 HRV 檢測");
-        const response = await API_MID_ProductName_UIDInfo();
-        if (response?.StartTime) {
-          const startTime = new Date(
-            `${response.StartTime.slice(0, 4)}-${response.StartTime.slice(
-              4,
-              6
-            )}-${response.StartTime.slice(6, 8)}T${response.StartTime.slice(
-              8,
-              10
-            )}:${response.StartTime.slice(10, 12)}:${response.StartTime.slice(
-              12
-            )}`
-          ).getTime();
-
+        const resp = await API_MID_ProductName_UIDInfo();
+        if (resp?.StartTime) {
+          const startTime = parseTimeString(resp.StartTime).getTime();
           startTimestamp.value = startTime;
           elapsedTime.value = Math.floor((Date.now() - startTime) / 1000);
         }
         startTimer();
       } else {
-        console.log("未找到 UID => 建立新的 HRV 檢測");
-        const newResponse = await useStartAPI();
-        if (newResponse?.UID) {
-          detectHRVBefore(newResponse.UID);
+        console.log("無 UID => 建立新的");
+        const newRes = await useStartAPI();
+        if (newRes?.UID) {
+          detectHRVBefore(newRes.UID);
         } else {
           console.error("創建 UID 失敗");
         }
@@ -220,7 +224,7 @@ async function toggleTimer() {
       break;
 
     case DetectionState.RUNNING:
-      console.log("結束 HRV 檢測 => AFTER");
+      console.log("結束 => AFTER");
       await stopTimer();
       break;
 
@@ -234,7 +238,7 @@ async function toggleTimer() {
 }
 
 /* ---------------------------------------------------
-   4) detectHRVBefore / detectHRVAfter
+   detectHRVBefore / detectHRVAfter
 --------------------------------------------------- */
 function detectHRVBefore(uidVal) {
   store.detectFlag = "1";
@@ -250,11 +254,25 @@ function detectHRVAfter(uidVal) {
   store.detectForm = `*${props.productName}`;
   store.showHRVAlert = true;
   afterStartTime.value = new Date();
-  console.log("使用後檢測已啟動 => UID:", uidVal);
+  console.log("使用後檢測(30分鐘) => UID:", uidVal);
 }
 
 /* ---------------------------------------------------
-   5) 重置流程 doReset
+   handleGiveUp: 放棄按鈕
+--------------------------------------------------- */
+async function handleGiveUp() {
+  if (!window.confirm("確定要放棄本次使用後檢測嗎？")) return;
+  try {
+    await API_DeleteStart(); // 刪除檢測紀錄
+    doReset(); // 回到 BEFORE
+    alert("已放棄使用後檢測，流程重置。");
+  } catch (error) {
+    console.error("放棄檢測失敗:", error);
+  }
+}
+
+/* ---------------------------------------------------
+   doReset: 重置
 --------------------------------------------------- */
 function doReset() {
   if (timerInterval) {
@@ -266,32 +284,21 @@ function doReset() {
   startTimestamp.value = null;
   currentState.value = DetectionState.BEFORE;
   UID.value = null;
-  console.log("已重置計時與狀態 => BEFORE");
+  console.log("已重置 => BEFORE");
 }
 
 /* ---------------------------------------------------
-   6) onMounted: 進入組件 => 初始化
+   onMounted: 初始化
 --------------------------------------------------- */
 onMounted(async () => {
   BID.value = null;
   try {
-    const response = await API_MID_ProductName_UIDInfo();
-    if (response) {
-      UID.value = response.UID;
+    const resp = await API_MID_ProductName_UIDInfo();
+    if (resp) {
+      UID.value = resp.UID;
       if (UID.value) {
-        console.log("成功獲取 UID:", UID.value);
-        if (response.StartTime) {
-          const startTime = new Date(
-            `${response.StartTime.slice(0, 4)}-${response.StartTime.slice(
-              4,
-              6
-            )}-${response.StartTime.slice(6, 8)}T${response.StartTime.slice(
-              8,
-              10
-            )}:${response.StartTime.slice(10, 12)}:${response.StartTime.slice(
-              12
-            )}`
-          ).getTime();
+        if (resp.StartTime) {
+          const startTime = parseTimeString(resp.StartTime).getTime();
           const now = Date.now();
           const diff = now - startTime;
 
@@ -305,30 +312,29 @@ onMounted(async () => {
             await API_DeleteStart();
           }
         } else {
-          console.log("StartTime 不存在 => 可能尚未開始計時");
+          console.log("StartTime 不存在 => 尚未開始計時");
         }
       } else {
         console.warn("無舊 UID => 建立新的");
-        const newRes = await useStartAPI();
-        if (newRes?.UID) {
-          UID.value = newRes.UID;
+        const newUIDRes = await useStartAPI();
+        if (newUIDRes?.UID) {
+          UID.value = newUIDRes.UID;
           detectHRVBefore(UID.value);
         } else {
           console.error("無法建立新 UID");
         }
       }
     } else {
-      // 若後端回傳沒有資料 => 檢查是否尚未完成使用後
+      // 後端回傳無資料 => 檢查是否 AFTER 狀態
       API_UIDInfo_Search12();
     }
   } catch (error) {
-    console.error("初始化失敗：", error);
+    console.error("初始化失敗:", error);
   }
-  console.log("組件初始化完成 => BID = null");
 });
 
 /* ---------------------------------------------------
-   7) API 方法: 全部保留
+   7) API: 不省略
 --------------------------------------------------- */
 async function apiRequest(url, payload) {
   try {
@@ -346,7 +352,6 @@ async function API_MID_ProductName_UIDInfo() {
       { MID, Token, MAID, Mobile, ProductName: props.productName }
     );
     if (resp?.Result === "OK") {
-      console.log("成功獲取 UID 資訊:", resp);
       return resp;
     } else {
       console.error("無法獲取有效 UID:", resp);
@@ -366,7 +371,6 @@ async function API_HRV2_UID_Flag_Info(Flag, uidVal) {
       { MID, Token, MAID, Mobile, UID: uidVal, Flag }
     );
     if (resp?.Result === "OK") {
-      console.log("成功獲取 HRV2 狀態:", resp);
       return resp.IsExit; // "Y" or "N"
     } else {
       console.error("HRV2 狀態取得失敗:", resp);
@@ -429,6 +433,7 @@ async function API_UIDInfo_Search12() {
 }
 
 async function API_DeleteStart() {
+  if (!UID.value) return;
   try {
     const resp = await apiRequest(
       "https://23700999.com:8081/HMA/API_DeleteStart.jsp",
@@ -441,17 +446,17 @@ async function API_DeleteStart() {
         ProductName: props.productName,
       }
     );
-    console.log("API_DeleteStart 成功:", resp);
-    doReset();
+    console.log("API_DeleteStart 呼叫成功:", resp);
+    // 刪除「檢測紀錄」，保留「使用紀錄」
   } catch (error) {
     console.error("API_DeleteStart 失敗:", error);
+    throw error;
   }
 }
 
-/* ---------------------------------------------------
-   8) 時間字串解析函式 (若需要)
---------------------------------------------------- */
+/* ---------- parseTimeString ---------- */
 function parseTimeString(timeStr) {
+  // e.g. '20231018123000' => '2023-10-18T12:30:00'
   return new Date(
     `${timeStr.slice(0, 4)}-${timeStr.slice(4, 6)}-${timeStr.slice(
       6,
@@ -470,18 +475,10 @@ function parseTimeString(timeStr) {
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  background-color: rgb(246, 246, 246);
-}
-
-.progress-container .delay-message {
-  color: #ec4f4f;
-  text-align: justify;
-  font-family: "Noto Sans";
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 150%;
-  letter-spacing: 0.5px;
+  background-color: #f6f6f6;
+  width: 100%;
+  max-width: 768px;
+  padding: 1rem;
 }
 
 .progress-border {
@@ -492,15 +489,15 @@ function parseTimeString(timeStr) {
   align-items: center;
   justify-content: center;
   position: relative;
-  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.2) inset;
-  transition: all 0.3s ease; /* 平滑過渡效果 */
+  box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
 }
 
 .content {
   width: 190px;
   height: 190px;
   border-radius: 50%;
-  background-color: white;
+  background-color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -510,16 +507,16 @@ function parseTimeString(timeStr) {
 }
 
 button {
-  padding: 10px 20px;
+  padding: 0.6rem 1.2rem;
   font-size: 1rem;
   cursor: pointer;
-  color: white;
+  color: #fff;
   border: none;
   border-radius: 8px;
   font-size: 18px;
   letter-spacing: 0.09px;
   transition: background-color 0.3s ease;
-  box-shadow: 0px -2px 3px 0px rgba(0, 0, 0, 0.25) inset;
+  box-shadow: inset 0px -2px 3px rgba(0, 0, 0, 0.25);
 }
 
 button:disabled {
@@ -527,28 +524,44 @@ button:disabled {
   cursor: not-allowed;
 }
 
+.hrv-after-btn {
+  background-color: #74bc1f;
+  margin-bottom: 0.5rem;
+}
+
+.give-up-btn {
+  background-color: #ec4f4f;
+  margin-bottom: 0.5rem;
+  margin-left: 0.5rem;
+}
+
 .completion-message {
   color: #74bc1f;
   font-size: 18px;
-  font-style: normal;
   font-weight: 400;
   letter-spacing: 0.09px;
+  margin-bottom: 0.5rem;
 }
 
 .completion-delayMessage {
-  color: var(--warning-red-300, #ec4f4f);
+  color: #ec4f4f;
   font-size: 1rem;
-  font-style: normal;
   font-weight: 400;
   letter-spacing: 0.5px;
+  line-height: 1.5;
+  text-align: center;
+  margin-top: 0.5rem;
 }
 
-.timerButtonGroup {
+.button-row {
   display: flex;
-  gap: 8px;
+  justify-content: center; /* 按需要可改 space-between */
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
 }
-
-.timerButtonGroup button:disabled {
-  background-color: #d0d0d0 !important;
+.hrv-after-btn-group {
+  display: flex;
+  text-align: center;
+  justify-content: center;
 }
 </style>
