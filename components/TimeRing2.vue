@@ -5,33 +5,22 @@
       <div class="content">{{ formattedTime }}</div>
     </div>
 
-    <!-- 2) 有檢測紀錄時，顯示提示 -->
+    <!-- 2) 有檢測紀錄時，顯示提示 (可自行啟用) -->
     <!-- <div v-if="hasDetectRecord" class="completion-message">感謝您的使用</div> -->
 
     <!-- 3) BEFORE / RUNNING 狀態 => 使用前檢測 -->
-    <div
-      class="timeRing2btnGroup"
-      v-if="currentState === DetectionState.BEFORE || currentState === DetectionState.RUNNING"
-    >
-      <!-- BEFORE 狀態下: 「開始使用前檢測」按鈕 -->
-      <button
-        v-if="currentState === DetectionState.BEFORE"
-        @click="toggleTimer"
-        style="margin-bottom: 1rem; background-color: #74bc1f"
-      >
+    <div class="timeRing2btnGroup" v-if="currentState === DetectionState.BEFORE || currentState === DetectionState.RUNNING">
+      <!-- BEFORE 狀態下：按鈕為「HRV檢測(使用前)」 -->
+      <button v-if="currentState === DetectionState.BEFORE" @click="toggleTimer" style="margin-bottom: 1rem; background-color: #74bc1f">
         HRV檢測(使用前)
       </button>
 
-      <!-- RUNNING 狀態下: 「結束」按鈕 -->
-      <button
-        v-if="currentState === DetectionState.RUNNING"
-        @click="toggleTimer"
-        :style="buttonStyle"
-      >
+      <!-- RUNNING 狀態下：按鈕顯示「結束」 -->
+      <button v-if="currentState === DetectionState.RUNNING" @click="toggleTimer" :style="buttonStyle">
         {{ buttonText }}
       </button>
 
-      <!-- RUNNING 狀態下: 只有使用前 (detectFlag='1') 時才顯示「重新檢測」按鈕 -->
+      <!-- RUNNING 狀態下：若使用前檢測狀態（detectFlag==='1'），則提供「重新檢測」按鈕 -->
       <button
         v-if="currentState === DetectionState.RUNNING && store.detectFlag === '1'"
         class="retry-btn"
@@ -42,7 +31,7 @@
       </button>
     </div>
 
-    <!-- 4) AFTER 狀態：依是否逾30分鐘顯示不同 UI -->
+    <!-- 4) AFTER 狀態：這裡僅供參考，可根據需求刪除 -->
     <div v-if="currentState === DetectionState.AFTER" class="hrv-after-btn-group">
       <div v-if="!hasOver30Mins" style="text-align: center">
         <button class="hrv-after-btn" @click="detectHRVAfter(UID.value)">
@@ -75,8 +64,8 @@ import { useCommon } from "../stores/common";
 
 // ------------------ [Props] ------------------
 const props = defineProps({
-  totalTime: { type: Number, default: 3600 }, // 預設總時長 (秒)
-  productName: { type: String, default: "" }, // 產品名稱
+  totalTime: { type: Number, default: 3600 }, // 預設總時長（秒）
+  productName: { type: String, default: "" },   // 產品名稱
   hasDetectRecord: { type: Boolean, default: false },
 });
 
@@ -86,7 +75,7 @@ const store = useCommon();
 // [Enum 狀態]
 const DetectionState = {
   BEFORE: "before",   // 使用前
-  RUNNING: "running", // 計時中 (未結束)
+  RUNNING: "running", // 計時中（尚未結束）
   AFTER: "after",     // 使用後（已結束）
 };
 
@@ -113,17 +102,17 @@ const buttonText = computed(() => {
 const buttonStyle = computed(() => {
   switch (currentState.value) {
     case DetectionState.BEFORE:
-      return { backgroundColor: "#74BC1F", color: "#fff" };
+      return { backgroundColor: "#74bc1f", color: "#fff" };
     case DetectionState.RUNNING:
       return { backgroundColor: "#1FBCB3", color: "#fff" };
     case DetectionState.AFTER:
-      return { backgroundColor: "#74BC1F", color: "#fff" };
+      return { backgroundColor: "#74bc1f", color: "#fff" };
     default:
       return { backgroundColor: "#E0E0E0", color: "#000" };
   }
 });
 
-// 時間格式與漸層
+// 時間格式化與漸層
 const formattedTime = computed(() => {
   const h = Math.floor(elapsedTime.value / 3600);
   const m = Math.floor((elapsedTime.value % 3600) / 60);
@@ -134,12 +123,12 @@ const progressStyle = computed(() => {
   const ratio = Math.min(elapsedTime.value / props.totalTime, 1);
   const percent = (ratio * 100).toFixed(2);
   return {
-    background: `conic-gradient(#74BC1F 0% ${percent}%, #ffffff ${percent}% 100%)`,
+    background: `conic-gradient(#74bc1f 0% ${percent}%, #ffffff ${percent}% 100%)`,
     transition: "background 0.1s linear",
   };
 });
 
-// LocalStorage 驗證與初始化參數
+// LocalStorage 驗證（userData 必須存在）
 const localData = localStorage.getItem("userData");
 const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
 if (!MID || !Token || !MAID || !Mobile) {
@@ -147,7 +136,7 @@ if (!MID || !Token || !MAID || !Mobile) {
   router.push("/");
 }
 
-// UID 儲存與計時器
+// UID 與計時器
 const UID = ref(null);
 let timerInterval = null;
 
@@ -220,7 +209,7 @@ async function toggleTimer() {
       await stopTimer();
       break;
     case DetectionState.AFTER:
-      // AFTER 狀態下不再處理
+      // AFTER 狀態下不做任何事
       break;
     default:
       console.warn("未知狀態 => 不做任何事");
@@ -236,7 +225,7 @@ function detectHRVBefore(uidVal) {
   startTimer();
 }
 
-// 5) 進入使用後檢測
+// 5) 進入使用後檢測（若需要使用後檢測，可保留此函式）
 async function detectHRVAfter(uidVal) {
   store.detectFlag = "2"; // 使用後檢測
   store.detectUID = uidVal;
@@ -254,7 +243,7 @@ async function detectHRVAfter(uidVal) {
   }
 }
 
-// 6) 放棄使用後檢測（刪除檢測紀錄 + 重置）
+// 6) 放棄使用後檢測（如有需要）
 async function handleGiveUp() {
   if (!window.confirm("確定要放棄本次使用後檢測嗎？")) return;
   try {
@@ -266,7 +255,7 @@ async function handleGiveUp() {
   }
 }
 
-// 7) 完整重置
+// 7) 完整重置（清除計時器、狀態、UID）
 function doReset() {
   if (timerInterval) {
     clearInterval(timerInterval);
@@ -460,7 +449,7 @@ async function API_DeleteStart() {
   }
 }
 
-// 解析後端時間字串，例："20250211145046" => new Date("2025-02-11T14:50:46")
+// 解析後端時間字串，例如："20250211145046" => new Date("2025-02-11T14:50:46")
 function parseTimeString(timeStr) {
   return new Date(
     `${timeStr.slice(0, 4)}-${timeStr.slice(4, 6)}-${timeStr.slice(6, 8)}T${timeStr.slice(8, 10)}:${timeStr.slice(10, 12)}:${timeStr.slice(12, 14)}`
