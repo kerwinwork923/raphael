@@ -938,6 +938,10 @@ const goToPointRules = async () => {
         font-weight: 400;
         line-height: 100%;
         letter-spacing: 0.09px;
+        transition: all .2s ease;
+        &:hover{
+          color: #74bc1f;
+        }
       }
       .pointContentListItemActive {
         color: #74bc1f;
@@ -947,7 +951,6 @@ const goToPointRules = async () => {
     }
     .pointRecordNumber {
       color: #74bc1f;
-      font-family: "Noto Sans";
       font-size: 16px;
       font-style: normal;
       font-weight: 400;
@@ -1028,6 +1031,12 @@ const goToPointRules = async () => {
             letter-spacing: 0.5px;
             cursor: pointer;
             padding: 7px 5px;
+            transition: all .2s ease;
+
+            &:hover{
+              background-color: $raphael-cyan-400;
+              color: $raphael-white;
+            }
           }
         }
       }
@@ -1166,12 +1175,11 @@ const goToPointRules = async () => {
         .pointRecordText {
           h4 {
             color: #1e1e1e;
-            font-family: "Noto Sans";
             font-size: 20px;
             font-style: normal;
             font-weight: 400;
             letter-spacing: 0.15px;
-            margin-bottom: 0.15rem;
+            margin-bottom: 0.5rem;
           }
           h5 {
             color: #666;
@@ -1180,7 +1188,7 @@ const goToPointRules = async () => {
             font-style: normal;
             font-weight: 400;
             letter-spacing: 0.5px;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.5rem;
           }
           h6 {
             color: var(--primary-orange-400, #feac4a);
@@ -1233,7 +1241,7 @@ const goToPointRules = async () => {
               font-weight: 400;
               line-height: 100%;
               letter-spacing: 0.5px;
-              margin-top: 0.2rem;
+              margin-top: 0.5rem;
             }
             h6 {
               font-family: "Noto Sans";
@@ -1241,7 +1249,7 @@ const goToPointRules = async () => {
               font-style: normal;
               font-weight: 400;
               letter-spacing: 0.1px;
-              margin-top: 0.2rem;
+              margin-top: 0.5rem;
             }
             .canUse {
               color: #1fbcb3;
@@ -1275,7 +1283,6 @@ const goToPointRules = async () => {
       padding: 8px;
       border-radius: 8px;
       color: #666;
-      font-family: "Noto Sans";
       font-size: 16px;
       font-style: normal;
       font-weight: 400;
