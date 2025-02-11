@@ -56,6 +56,7 @@
     >
       <!-- (a) 未超過30分鐘 => 只顯示「使用後檢測」 -->
       <div v-if="!hasOver30Mins">
+        <!-- 這裡可直接刪除 -->
         <button class="hrv-after-btn" @click="detectHRVAfter(UID.value)">
           HRV檢測(使用後)
         </button>
@@ -66,6 +67,7 @@
 
       <!-- (b) 逾30分鐘 => 多一個「放棄」按鈕 -->
       <div v-else>
+        <!-- 同樣可直接刪除 -->
         <div class="button-row">
           <button class="hrv-after-btn" @click="detectHRVAfter(UID.value)">
             HRV檢測(使用後)
@@ -189,8 +191,7 @@ function startTimer() {
   }, 1000);
 }
 
-// 2) stopTimer => 停止計時，但要同時檢查「使用前」&「使用後」都做完才算真正結束
-// 2) stopTimer => 停止計時，但要同時檢查「使用前」是否完成 + 呼叫 API_UIDInfo_Search12() 看「使用後」有沒有做
+// 2) stopTimer => 停止計時，但只檢查「使用前」是否完成即可結束
 async function stopTimer() {
   // 清除計時器
   if (timerInterval) {
@@ -198,64 +199,31 @@ async function stopTimer() {
     timerInterval = null;
   }
   isCounting.value = false;
-  console.log("計時結束 => 檢查使用前是否完成 + 使用後是否有資料");
+  console.log("計時結束 => 檢查使用前是否完成即可結束");
 
   // 1) 檢查使用前(Flag=1)是否已完成
   const isExitBefore = await API_HRV2_UID_Flag_Info("1", UID.value);
   if (isExitBefore === "N") {
     alert("尚未完成使用前檢測，無法結束！");
-    detectHRVBefore(UID.value); // 彈窗 or iFrame 進行使用前檢測
+    detectHRVBefore(UID.value);
     return;
   }
 
-  // 2) 再檢查「使用後」是否已做
-  //    這裡示範使用 API_UIDInfo_Search12()，看後端 Status 或其他欄位有無做「使用後」。
-  try {
-    const data = await API_UIDInfo_Search12(); // 傳 productName 取得狀態
-    if (!data) {
-      // 後端回傳 NOData => 可能啥都沒做 => 直接判定使用後沒做
-
-      detectHRVAfter(UID.value);
-      return;
-    }
-    // 若 data 有回傳 => 根據你的後端回傳欄位來判斷是否「使用後」真的完成
-    // e.g. data.Result === "OK" && data.Status === "N" => 表示未做使用後
-    if (data.Result === "OK" && data.Status === "N") {
-      alert("尚未做使用後檢測，請先完成！");
-      detectHRVAfter(UID.value);
-      return;
-    }
-
-    // ----
-    // ※ 或者你也可以改用 API_HRV2_UID_Flag_Info("2", UID.value) 來判斷
-    // const isExitAfter = await API_HRV2_UID_Flag_Info("2", UID.value);
-    // if (isExitAfter === "N") {
-    //   alert("尚未完成使用後檢測，無法結束！");
-    //   detectHRVAfter(UID.value);
-    //   return;
-    // }
-    // ----
-  } catch (err) {
-    console.error("檢查使用後檢測(API_UIDInfo_Search12)失敗:", err);
-    alert("檢查使用後檢測發生錯誤，無法結束！");
-    return;
-  }
-
-  // 3) 如果「使用前」與「使用後」都 OK => 才真正結束 => 切 AFTER & useEndAPI
+  // 2) 使用前已完成 => 直接結束 => 切 AFTER & useEndAPI
   currentState.value = DetectionState.AFTER;
   try {
     await useEndAPI();
-    console.log("已完成前後檢測 => 正式結束");
+    console.log("使用前檢測已完成 => 正式結束");
   } catch (err) {
     console.error("useEndAPI 失敗:", err);
   }
 }
 
-// 3) toggleTimer => 根據目前 state，決定下一步 (start/stop/after)
+// 3) toggleTimer => 根據目前 state，決定下一步 (start/stop)
 async function toggleTimer() {
   switch (currentState.value) {
     case DetectionState.BEFORE:
-      // 若已有 UID => 先去後端查是否已有 StartTime，若有則同步
+      // 若已有 UID => 查 StartTime
       if (UID.value) {
         const resp = await API_MID_ProductName_UIDInfo();
         if (resp?.StartTime) {
@@ -265,7 +233,7 @@ async function toggleTimer() {
         }
         startTimer();
       } else {
-        // 若無 UID => 先呼叫 API_UseStart，並自動開啟使用前檢測
+        // 無 UID => 呼叫 useStartAPI
         const newRes = await useStartAPI();
         if (newRes?.UID) {
           detectHRVBefore(newRes.UID);
@@ -276,12 +244,13 @@ async function toggleTimer() {
       break;
 
     case DetectionState.RUNNING:
+      // 按下結束
       await stopTimer();
       break;
 
     case DetectionState.AFTER:
-      // AFTER 狀態下 => 直接進入使用後檢測 (如按主按鈕)
-      detectHRVAfter(UID.value);
+      // 如果不想再做使用後 => 什麼也不做，或直接 return
+      // console.log("AFTER 狀態 => 不做任何事");
       break;
 
     default:
