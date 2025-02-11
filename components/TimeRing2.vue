@@ -55,7 +55,7 @@
       class="hrv-after-btn-group"
     >
       <!-- (a) 未超過30分鐘 => 只顯示「使用後檢測」 -->
-      <div v-if="!hasOver30Mins">
+      <div v-if="!hasOver30Mins" style="text-align: center;">
         <!-- 這裡可直接刪除 -->
         <button class="hrv-after-btn" @click="detectHRVAfter(UID.value)">
           HRV檢測(使用後)
