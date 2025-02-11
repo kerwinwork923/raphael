@@ -190,6 +190,7 @@ function startTimer() {
 }
 
 // 2) stopTimer => 停止計時，但要同時檢查「使用前」&「使用後」都做完才算真正結束
+// 2) stopTimer => 停止計時，但要同時檢查「使用前」是否完成 + 呼叫 API_UIDInfo_Search12() 看「使用後」有沒有做
 async function stopTimer() {
   // 清除計時器
   if (timerInterval) {
@@ -197,25 +198,50 @@ async function stopTimer() {
     timerInterval = null;
   }
   isCounting.value = false;
-  console.log("計時結束 => 檢查使用前是否完成");
+  console.log("計時結束 => 檢查使用前是否完成 + 使用後是否有資料");
 
   // 1) 檢查使用前(Flag=1)是否已完成
   const isExitBefore = await API_HRV2_UID_Flag_Info("1", UID.value);
   if (isExitBefore === "N") {
     alert("尚未完成使用前檢測，無法結束！");
-    detectHRVBefore(UID.value);
+    detectHRVBefore(UID.value); // 彈窗 or iFrame 進行使用前檢測
     return;
   }
 
-  // 2) 若使用前已完成，再檢查使用後(Flag=2)是否完成
-  const isExitAfter = await API_HRV2_UID_Flag_Info("2", UID.value);
-  if (isExitAfter === "N") {
-    alert("尚未完成使用後檢測，無法結束！");
-    detectHRVAfter(UID.value);
+  // 2) 再檢查「使用後」是否已做
+  //    這裡示範使用 API_UIDInfo_Search12()，看後端 Status 或其他欄位有無做「使用後」。
+  try {
+    const data = await API_UIDInfo_Search12(); // 傳 productName 取得狀態
+    if (!data) {
+      // 後端回傳 NOData => 可能啥都沒做 => 直接判定使用後沒做
+      alert("尚未做使用後檢測 (後端無資料)！");
+      detectHRVAfter(UID.value);
+      return;
+    }
+    // 若 data 有回傳 => 根據你的後端回傳欄位來判斷是否「使用後」真的完成
+    // e.g. data.Result === "OK" && data.Status === "N" => 表示未做使用後
+    if (data.Result === "OK" && data.Status === "N") {
+      alert("尚未做使用後檢測，請先完成！");
+      detectHRVAfter(UID.value);
+      return;
+    }
+
+    // ----
+    // ※ 或者你也可以改用 API_HRV2_UID_Flag_Info("2", UID.value) 來判斷
+    // const isExitAfter = await API_HRV2_UID_Flag_Info("2", UID.value);
+    // if (isExitAfter === "N") {
+    //   alert("尚未完成使用後檢測，無法結束！");
+    //   detectHRVAfter(UID.value);
+    //   return;
+    // }
+    // ----
+  } catch (err) {
+    console.error("檢查使用後檢測(API_UIDInfo_Search12)失敗:", err);
+    alert("檢查使用後檢測發生錯誤，無法結束！");
     return;
   }
 
-  // 3) 使用前 + 使用後 都已完成 => 才真正結束 => 切 AFTER & useEndAPI
+  // 3) 如果「使用前」與「使用後」都 OK => 才真正結束 => 切 AFTER & useEndAPI
   currentState.value = DetectionState.AFTER;
   try {
     await useEndAPI();
@@ -224,7 +250,6 @@ async function stopTimer() {
     console.error("useEndAPI 失敗:", err);
   }
 }
-
 
 // 3) toggleTimer => 根據目前 state，決定下一步 (start/stop/after)
 async function toggleTimer() {
