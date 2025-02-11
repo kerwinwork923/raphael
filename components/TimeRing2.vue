@@ -11,17 +11,30 @@
     <!-- 3) BEFORE / RUNNING 狀態：使用前檢測 -->
     <div class="timeRing2btnGroup" v-if="currentState === DetectionState.BEFORE || currentState === DetectionState.RUNNING">
       <!-- BEFORE 狀態下：按鈕顯示「HRV檢測(使用前)」 -->
-      <button v-if="currentState === DetectionState.BEFORE" @click="toggleTimer" style="margin-bottom: 1rem; background-color: #74bc1f">
+      <button
+        v-if="currentState === DetectionState.BEFORE"
+        @click="toggleTimer"
+        style="margin-bottom: 1rem; background-color: #74bc1f"
+      >
         HRV檢測(使用前)
       </button>
 
       <!-- RUNNING 狀態下：按鈕顯示「結束」 -->
-      <button v-if="currentState === DetectionState.RUNNING" @click="toggleTimer" :style="buttonStyle">
+      <button
+        v-if="currentState === DetectionState.RUNNING"
+        @click="toggleTimer"
+        :style="buttonStyle"
+      >
         {{ buttonText }}
       </button>
 
       <!-- RUNNING 狀態下：若 detectFlag 為 '1' 則顯示「重新檢測」按鈕 -->
-      <button v-if="currentState === DetectionState.RUNNING && store.detectFlag === '1'" class="retry-btn" style="margin-bottom: 1rem" @click="resetAndRetest">
+      <button
+        v-if="currentState === DetectionState.RUNNING && store.detectFlag === '1'"
+        class="retry-btn"
+        style="margin-bottom: 1rem"
+        @click="resetAndRetest"
+      >
         重新檢測
       </button>
     </div>
@@ -153,24 +166,36 @@ function startTimer() {
   }, 1000);
 }
 
-// 2) 停止計時（只檢查使用前是否完成即可結束）
+// 2) 停止計時（必須檢查使用前及使用後檢測均完成才允許結束）
 async function stopTimer() {
   if (timerInterval) {
     clearInterval(timerInterval);
     timerInterval = null;
   }
   isCounting.value = false;
-  console.log("計時結束 => 檢查使用前是否完成");
+  console.log("計時結束 => 檢查使用前及使用後是否完成");
+  
+  // 檢查使用前檢測是否完成（Flag = "1"）
   const isExitBefore = await API_HRV2_UID_Flag_Info("1", UID.value);
   if (isExitBefore === "N") {
     alert("尚未完成使用前檢測，無法結束！");
     detectHRVBefore(UID.value);
     return;
   }
+  
+  // 檢查使用後檢測是否完成（Flag = "2"）
+  const isExitAfter = await API_HRV2_UID_Flag_Info("2", UID.value);
+  if (isExitAfter === "N") {
+    alert("尚未完成使用後檢測，無法結束！");
+    detectHRVAfter(UID.value);
+    return;
+  }
+  
+  // 兩者皆完成，進行結束操作
   currentState.value = DetectionState.AFTER;
   try {
     await useEndAPI();
-    console.log("使用前檢測已完成 => 正式結束");
+    console.log("使用前與使用後檢測均完成，正式結束");
   } catch (err) {
     console.error("useEndAPI 失敗:", err);
   }
@@ -181,8 +206,7 @@ async function toggleTimer() {
   switch (currentState.value) {
     case DetectionState.BEFORE:
       if (UID.value) {
-        console.log("toggleTimer: UID 已存在，呼叫 detectHRVBefore，UID =", UID.value);
-        // 已存在 UID，直接顯示使用前檢測
+        console.log("toggleTimer: UID 已存在，直接呼叫 detectHRVBefore, UID =", UID.value);
         detectHRVBefore(UID.value);
       } else {
         console.log("toggleTimer: UID 不存在，呼叫 useStartAPI");
@@ -201,7 +225,7 @@ async function toggleTimer() {
       await stopTimer();
       break;
     case DetectionState.AFTER:
-      // AFTER 狀態下不做任何事
+      // AFTER 狀態下不處理
       break;
     default:
       console.warn("未知狀態 => 不做任何事");
@@ -215,12 +239,11 @@ function detectHRVBefore(uidVal) {
   store.detectUID = uidVal;
   store.detectForm = props.productName;
   store.showHRVAlert = true;
-  // 可根據需求顯示檢測介面（例如彈窗或 iFrame）
-  // 此處同時啟動計時（若需要）
+  // 此處顯示使用前檢測介面（例如彈窗或 iframe）
   startTimer();
 }
 
-// 5) 進入使用後檢測（若需要）
+// 5) 進入使用後檢測
 async function detectHRVAfter(uidVal) {
   console.log("進入使用後檢測，UID:", uidVal);
   store.detectFlag = "2";
@@ -239,7 +262,7 @@ async function detectHRVAfter(uidVal) {
   }
 }
 
-// 6) 放棄使用後檢測（如有需要）
+// 6) 放棄使用後檢測（若需要）
 async function handleGiveUp() {
   if (!window.confirm("確定要放棄本次使用後檢測嗎？")) return;
   try {
@@ -282,7 +305,7 @@ async function resetAndRetest() {
 }
 
 // --------------------- [onMounted] ---------------------
-// 先嘗試從 localStorage 還原 UID，再進行初始化查詢
+// 優先從 localStorage 還原 UID，再進行 API 初始化查詢
 onMounted(async () => {
   const storedUID = localStorage.getItem("currentUID");
   if (storedUID) {
@@ -296,6 +319,12 @@ onMounted(async () => {
       if (resp.UID) {
         UID.value = resp.UID;
         localStorage.setItem("currentUID", resp.UID);
+      } else {
+        // 若後端回傳中無 UID，但 localStorage 有，則保持該 UID
+        if (UID.value) {
+          console.log("後端回傳中無 UID，但從 localStorage 還原 UID:", UID.value);
+          currentState.value = DetectionState.AFTER;
+        }
       }
       if (resp.StartTime) {
         const startMS = parseTimeString(resp.StartTime).getTime();
@@ -303,8 +332,11 @@ onMounted(async () => {
         if (diff <= 24 * 60 * 60 * 1000) {
           startTimestamp.value = startMS;
           elapsedTime.value = Math.floor(diff / 1000);
-          startTimer();
-          currentState.value = DetectionState.RUNNING;
+          // 若狀態尚未變成 AFTER，則啟動計時並設定狀態為 RUNNING
+          if (currentState.value !== DetectionState.AFTER) {
+            startTimer();
+            currentState.value = DetectionState.RUNNING;
+          }
         } else {
           console.log("StartTime 超過24hr => 清除舊紀錄");
           await API_DeleteStart();
