@@ -1,16 +1,16 @@
 <template>
   <div class="progress-container">
-    <!-- 1) 倒數進度 -->
+    <!-- 倒數進度 -->
     <div class="progress-border" :style="progressStyle">
       <div class="content">{{ formattedTime }}</div>
     </div>
 
-    <!-- 2) 若 hasDetectRecord 為 true，顯示感謝訊息 -->
+    <!-- 若 hasDetectRecord => 顯示感謝訊息 -->
     <div v-if="hasDetectRecord" class="completion-message">感謝您的使用</div>
 
-    <!-- 3) 主要按鈕＋放棄按鈕的容器 -->
+    <!-- 按鈕列 -->
     <div class="flex">
-      <!-- BEFORE / RUNNING 時出現的主按鈕 -->
+      <!-- (A) BEFORE / RUNNING：只顯示「開始/重新檢測」 -->
       <button
         v-if="!hasDetectRecord && currentState !== DetectionState.AFTER"
         :disabled="hasDetectRecord"
@@ -20,17 +20,22 @@
         {{ buttonText }}
       </button>
 
-      <!-- 放棄按鈕：只在 AFTER 狀態出現 -->
-      <button
-        v-if="currentState === DetectionState.AFTER"
-        class="give-up-btn"
-        @click="handleGiveUp"
-      >
-        放棄
-      </button>
+      <!-- (B) AFTER：同時顯示「HRV檢測(使用後)」與「放棄」兩個按鈕 -->
+      <template v-if="currentState === DetectionState.AFTER">
+        <button
+          :style="buttonStyle"
+          @click="toggleTimer"
+        >
+          <!-- AFTER 狀態下，buttonText 會是 "HRV檢測(使用後)" -->
+          {{ buttonText }}
+        </button>
+        <button class="give-up-btn" @click="handleGiveUp">
+          放棄
+        </button>
+      </template>
     </div>
 
-    <!-- 4) AFTER 狀態時，判斷是否超過 2 小時 -->
+    <!-- AFTER 狀態時的提示文字 -->
     <div v-if="currentState === DetectionState.AFTER">
       <div v-if="isWithinTwoHoursAfter" class="completion-delayMessage">
         請在2小時內完成HRV檢測(使用後)
@@ -42,6 +47,8 @@
     </div>
   </div>
 </template>
+
+
 
 
 <script setup>
