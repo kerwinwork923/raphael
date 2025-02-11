@@ -78,7 +78,7 @@ const isWithinTwoHoursAfter = computed(() => {
   if (!afterStartTime.value) return false; // 沒有值時，預設 false
   const now = Date.now();
   const diff = now - afterStartTime.value.getTime(); // 毫秒差
-  return diff < 2 * 60 * 3; // 2 小時 = 7200000 毫秒
+  return diff < 2 * 60 * 60 * 1000;
 });
 
 // ------------- [Store] -------------

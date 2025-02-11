@@ -283,18 +283,11 @@ export default {
         : {};
 
       if (countdownTime.value > 0) {
-        if (enteredCode == A5Digit) {
-          await API_doExamAuth();
-          verificationTitle.value = "輸入基本資料";
-          currentStep.value = "info";
-          verificationCodes.value = ["", "", "", "", ""];
-        } else {
-          verificationCodes.value = ["", "", "", "", ""];
-          nextTick(() => {
-            verificationInput.value[0]?.focus();
-          });
-          alert("驗證碼錯誤");
-        }
+        await API_doExamAuth();
+        // verificationTitle.value = "輸入基本資料";
+        // currentStep.value = "info";
+        // verificationInputs.value[0].focus();
+        // verificationCodes.value = ["", "", "", "", ""];
       } else {
         verificationCodes.value = ["", "", "", "", ""];
         nextTick(() => {
@@ -332,7 +325,7 @@ export default {
 
         if (response.status === 200) {
           const data = response.data;
-          if (data.Result === true) {
+          if (data.PASS === "OK") {
             const localData = localStorage.getItem("userData");
             const updatedData = {
               ...JSON.parse(localData),
@@ -342,8 +335,9 @@ export default {
             verificationTitle.value = "輸入基本資料";
             currentStep.value = "info";
           } else {
+            alert("驗證碼錯誤");
+            verificationInput.value[0]?.focus();
             verificationCodes.value = ["", "", "", "", ""];
-            verificationInputs.value[0].focus();
           }
         }
       } catch (error) {
