@@ -6,7 +6,7 @@
     </div>
 
     <!-- 2) 有檢測紀錄時，顯示提示 -->
-    <div v-if="hasDetectRecord" class="completion-message">感謝您的使用</div>
+    <!-- <div v-if="hasDetectRecord" class="completion-message">感謝您的使用</div> -->
 
     <!-- 3) BEFORE / RUNNING 狀態 => 使用前檢測 -->
     <div
@@ -214,7 +214,7 @@ async function stopTimer() {
     const data = await API_UIDInfo_Search12(); // 傳 productName 取得狀態
     if (!data) {
       // 後端回傳 NOData => 可能啥都沒做 => 直接判定使用後沒做
-      alert("尚未做使用後檢測 (後端無資料)！");
+
       detectHRVAfter(UID.value);
       return;
     }
@@ -490,7 +490,7 @@ async function useStartAPI() {
 async function useEndAPI() {
   if (!UID.value) return;
   try {
-    const r = await apiRequest("https://23700999.com:8081/HMA/API_UseEnd.jsp", {
+    const r = await apiRequest("https://xxxx.com:8081/HMA/API_UseEnd.jsp", {
       MID,
       Token,
       MAID,
