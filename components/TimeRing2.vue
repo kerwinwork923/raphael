@@ -6,20 +6,21 @@
     </div>
 
     <!-- 2) 有檢測紀錄時，顯示提示 -->
-    <div v-if="hasDetectRecord" class="completion-message">
-      感謝您的使用
-    </div>
+    <div v-if="hasDetectRecord" class="completion-message">感謝您的使用</div>
 
     <!-- 3) BEFORE / RUNNING 狀態 => 使用前檢測 -->
     <div
       class="timeRing2btnGroup"
-      v-if="currentState === DetectionState.BEFORE || currentState === DetectionState.RUNNING"
+      v-if="
+        currentState === DetectionState.BEFORE ||
+        currentState === DetectionState.RUNNING
+      "
     >
       <!-- BEFORE 狀態下: 「開始使用前檢測」按鈕 -->
       <button
         v-if="currentState === DetectionState.BEFORE"
         @click="toggleTimer"
-        style="margin-bottom: 1rem;background-color: #74BC1F;"
+        style="margin-bottom: 1rem; background-color: #74bc1f"
       >
         HRV檢測(使用前)
       </button>
@@ -37,7 +38,9 @@
 
       <!-- RUNNING 狀態下: 只有使用前 (detectFlag='1') 時才顯示「重新檢測」按鈕 -->
       <button
-        v-if="currentState === DetectionState.RUNNING && store.detectFlag === '1'"
+        v-if="
+          currentState === DetectionState.RUNNING && store.detectFlag === '1'
+        "
         class="retry-btn"
         style="margin-bottom: 1rem"
         @click="resetAndRetest"
@@ -47,7 +50,10 @@
     </div>
 
     <!-- 4) AFTER 狀態：依是否逾 30 分鐘 (hasOver30Mins) 顯示不同 UI -->
-    <div v-if="currentState === DetectionState.AFTER" class="hrv-after-btn-group">
+    <div
+      v-if="currentState === DetectionState.AFTER"
+      class="hrv-after-btn-group"
+    >
       <!-- (a) 未超過30分鐘 => 只顯示「使用後檢測」 -->
       <div v-if="!hasOver30Mins">
         <button class="hrv-after-btn" @click="detectHRVAfter(UID.value)">
@@ -82,8 +88,8 @@ import { useCommon } from "../stores/common";
 
 // ------------------ [Props] ------------------
 const props = defineProps({
-  totalTime: { type: Number, default: 3600 },   // 預設總時長 (秒)
-  productName: { type: String, default: "" },   // 產品名稱
+  totalTime: { type: Number, default: 3600 }, // 預設總時長 (秒)
+  productName: { type: String, default: "" }, // 產品名稱
   hasDetectRecord: { type: Boolean, default: false },
 });
 
@@ -92,9 +98,9 @@ const store = useCommon();
 
 // [Enum 狀態]
 const DetectionState = {
-  BEFORE: "before",   // 使用前
+  BEFORE: "before", // 使用前
   RUNNING: "running", // 計時中(也算使用前還沒結束)
-  AFTER: "after",     // 使用後
+  AFTER: "after", // 使用後
 };
 
 // [核心狀態]
@@ -139,7 +145,7 @@ const formattedTime = computed(() => {
   const h = Math.floor(elapsedTime.value / 3600);
   const m = Math.floor((elapsedTime.value % 3600) / 60);
   const s = elapsedTime.value % 60;
-  return [h, m, s].map(val => String(val).padStart(2, "0")).join(":");
+  return [h, m, s].map((val) => String(val).padStart(2, "0")).join(":");
 });
 
 // 圓圈漸層顯示 (根據當前 elapsedTime 與 totalTime 比例)
@@ -164,7 +170,6 @@ if (!MID || !Token || !MAID || !Mobile) {
 const UID = ref(null);
 let timerInterval = null;
 
-
 // --------------------- [核心函式] ---------------------
 // 1) startTimer => 開始正數計時
 function startTimer() {
@@ -184,8 +189,9 @@ function startTimer() {
   }, 1000);
 }
 
-// 2) stopTimer => 停止計時，嘗試切到 AFTER
+// 2) stopTimer => 停止計時，但要同時檢查「使用前」&「使用後」都做完才算真正結束
 async function stopTimer() {
+  // 清除計時器
   if (timerInterval) {
     clearInterval(timerInterval);
     timerInterval = null;
@@ -193,23 +199,32 @@ async function stopTimer() {
   isCounting.value = false;
   console.log("計時結束 => 檢查使用前是否完成");
 
-  // 檢查使用前檢測是否已完成
-  const isExitValue = await API_HRV2_UID_Flag_Info("1", UID.value);
-  if (isExitValue === "N") {
+  // 1) 檢查使用前(Flag=1)是否已完成
+  const isExitBefore = await API_HRV2_UID_Flag_Info("1", UID.value);
+  if (isExitBefore === "N") {
     alert("尚未完成使用前檢測，無法結束！");
     detectHRVBefore(UID.value);
     return;
   }
 
-  // 若使用前檢測已完成 => 切換到 AFTER
+  // 2) 若使用前已完成，再檢查使用後(Flag=2)是否完成
+  const isExitAfter = await API_HRV2_UID_Flag_Info("2", UID.value);
+  if (isExitAfter === "N") {
+    alert("尚未完成使用後檢測，無法結束！");
+    detectHRVAfter(UID.value);
+    return;
+  }
+
+  // 3) 使用前 + 使用後 都已完成 => 才真正結束 => 切 AFTER & useEndAPI
   currentState.value = DetectionState.AFTER;
   try {
-    await useEndAPI();           // 呼叫後端標記結束
-    detectHRVAfter(UID.value);   // 提示使用後檢測
+    await useEndAPI();
+    console.log("已完成前後檢測 => 正式結束");
   } catch (err) {
     console.error("useEndAPI 失敗:", err);
   }
 }
+
 
 // 3) toggleTimer => 根據目前 state，決定下一步 (start/stop/after)
 async function toggleTimer() {
@@ -251,7 +266,7 @@ async function toggleTimer() {
 
 // 4) detectHRVBefore => 進入使用前檢測 (彈窗 or iframe)，並開始計時
 function detectHRVBefore(uidVal) {
-  store.detectFlag = "1";          // Flag=1 => 使用前
+  store.detectFlag = "1"; // Flag=1 => 使用前
   store.detectUID = uidVal;
   store.detectForm = props.productName;
   store.showHRVAlert = true;
@@ -260,7 +275,7 @@ function detectHRVBefore(uidVal) {
 
 // 5) detectHRVAfter => 進入使用後檢測 (彈窗 or iframe)
 async function detectHRVAfter(uidVal) {
-  store.detectFlag = "2";          // Flag=2 => 使用後
+  store.detectFlag = "2"; // Flag=2 => 使用後
   store.detectUID = uidVal;
   store.detectForm = `*${props.productName}`;
   store.showHRVAlert = true;
@@ -355,7 +370,9 @@ onMounted(async () => {
         }
       } else {
         // 有 resp 但無 UID => 可能已經結束 => AFTER
-        console.warn("API_MID_ProductName_UIDInfo => 無 UID => 嘗試 AFTER 狀態");
+        console.warn(
+          "API_MID_ProductName_UIDInfo => 無 UID => 嘗試 AFTER 狀態"
+        );
         const data = await API_UIDInfo_Search12();
         if (data?.Status === "Y") {
           hasOver30Mins.value = true;
@@ -373,7 +390,6 @@ onMounted(async () => {
     console.error("初始化失敗:", err);
   }
 });
-
 
 // --------------------- [API 區域] ---------------------
 async function apiRequest(url, payload) {
@@ -449,10 +465,13 @@ async function useStartAPI() {
 async function useEndAPI() {
   if (!UID.value) return;
   try {
-    const r = await apiRequest(
-      "https://23700999.com:8081/HMA/API_UseEnd.jsp",
-      { MID, Token, MAID, Mobile, UID: UID.value }
-    );
+    const r = await apiRequest("https://23700999.com:8081/HMA/API_UseEnd.jsp", {
+      MID,
+      Token,
+      MAID,
+      Mobile,
+      UID: UID.value,
+    });
     console.log("useEndAPI =>", r);
     return r;
   } catch (err) {
@@ -507,7 +526,13 @@ async function API_DeleteStart() {
 // 解析後端時間字串 => "20250211145046" => new Date("2025-02-11T14:50:46")
 function parseTimeString(timeStr) {
   return new Date(
-    `${timeStr.slice(0, 4)}-${timeStr.slice(4, 6)}-${timeStr.slice(6, 8)}T${timeStr.slice(8, 10)}:${timeStr.slice(10, 12)}:${timeStr.slice(12, 14)}`
+    `${timeStr.slice(0, 4)}-${timeStr.slice(4, 6)}-${timeStr.slice(
+      6,
+      8
+    )}T${timeStr.slice(8, 10)}:${timeStr.slice(10, 12)}:${timeStr.slice(
+      12,
+      14
+    )}`
   );
 }
 </script>
