@@ -25,8 +25,6 @@
         HRV檢測(使用前)
       </button>
 
-      <!-- (原本 BEFORE 狀態的「重新檢測」按鈕，已移除/註解) -->
-
       <!-- RUNNING 狀態下: 「結束」按鈕 -->
       <button
         v-if="currentState === DetectionState.RUNNING"
@@ -38,9 +36,7 @@
 
       <!-- RUNNING 狀態下: 只有使用前 (detectFlag='1') 時才顯示「重新檢測」按鈕 -->
       <button
-        v-if="
-          currentState === DetectionState.RUNNING && store.detectFlag === '1'
-        "
+        v-if="currentState === DetectionState.RUNNING && store.detectFlag === '1'"
         class="retry-btn"
         style="margin-bottom: 1rem"
         @click="resetAndRetest"
@@ -56,7 +52,6 @@
     >
       <!-- (a) 未超過30分鐘 => 只顯示「使用後檢測」 -->
       <div v-if="!hasOver30Mins" style="text-align: center;">
-        <!-- 這裡可直接刪除 -->
         <button class="hrv-after-btn" @click="detectHRVAfter(UID.value)">
           HRV檢測(使用後)
         </button>
@@ -67,7 +62,6 @@
 
       <!-- (b) 逾30分鐘 => 多一個「放棄」按鈕 -->
       <div v-else>
-        <!-- 同樣可直接刪除 -->
         <div class="button-row">
           <button class="hrv-after-btn" @click="detectHRVAfter(UID.value)">
             HRV檢測(使用後)
@@ -102,7 +96,7 @@ const store = useCommon();
 const DetectionState = {
   BEFORE: "before", // 使用前
   RUNNING: "running", // 計時中(也算使用前還沒結束)
-  AFTER: "after", // 使用後
+  AFTER: "after",   // 使用後
 };
 
 // [核心狀態]
@@ -209,7 +203,7 @@ async function stopTimer() {
     return;
   }
 
-  // 2) 使用前已完成 => 直接結束 => 切 AFTER & useEndAPI
+  // 2) 使用前已完成 => 直接結束 => 切換狀態為 AFTER 並呼叫 useEndAPI
   currentState.value = DetectionState.AFTER;
   try {
     await useEndAPI();
@@ -233,7 +227,7 @@ async function toggleTimer() {
         }
         startTimer();
       } else {
-        // 無 UID => 呼叫 useStartAPI
+        // 無 UID => 呼叫 useStartAPI 建立新 UID
         const newRes = await useStartAPI();
         if (newRes?.UID) {
           detectHRVBefore(newRes.UID);
@@ -249,8 +243,7 @@ async function toggleTimer() {
       break;
 
     case DetectionState.AFTER:
-      // 如果不想再做使用後 => 什麼也不做，或直接 return
-      // console.log("AFTER 狀態 => 不做任何事");
+      // AFTER 狀態下不做任何事
       break;
 
     default:
@@ -260,7 +253,15 @@ async function toggleTimer() {
 
 // 4) detectHRVBefore => 進入使用前檢測 (彈窗 or iframe)，並開始計時
 function detectHRVBefore(uidVal) {
-  store.detectFlag = "1"; // Flag=1 => 使用前
+  // 若已存在 startTimestamp，先判斷與當前時間的差距是否超過 2 小時
+  if (startTimestamp.value) {
+    const diff = Date.now() - startTimestamp.value;
+    if (diff > 2 * 60 * 60 * 1000) {
+      console.log("API 的時間超過 2 小時，不進行使用前 HRV 檢測");
+      return; // 超過 2 小時則不進行檢測
+    }
+  }
+  store.detectFlag = "1"; // Flag=1 代表使用前檢測
   store.detectUID = uidVal;
   store.detectForm = props.productName;
   store.showHRVAlert = true;
@@ -269,7 +270,7 @@ function detectHRVBefore(uidVal) {
 
 // 5) detectHRVAfter => 進入使用後檢測 (彈窗 or iframe)
 async function detectHRVAfter(uidVal) {
-  store.detectFlag = "2"; // Flag=2 => 使用後
+  store.detectFlag = "2"; // Flag=2 代表使用後檢測
   store.detectUID = uidVal;
   store.detectForm = `*${props.productName}`;
   store.showHRVAlert = true;
@@ -287,7 +288,7 @@ async function detectHRVAfter(uidVal) {
   }
 }
 
-// 6) handleGiveUp => 放棄使用後檢測 => 刪除檢測紀錄 + 重置
+// 6) handleGiveUp => 放棄使用後檢測 => 刪除檢測紀錄 + 重置流程
 async function handleGiveUp() {
   if (!window.confirm("確定要放棄本次使用後檢測嗎？")) return;
   try {
@@ -299,7 +300,7 @@ async function handleGiveUp() {
   }
 }
 
-// 7) doReset => 完整重置 (清除計時器 & 狀態 & UID)
+// 7) doReset => 完整重置 (清除計時器、狀態與 UID)
 function doReset() {
   if (timerInterval) {
     clearInterval(timerInterval);
@@ -315,7 +316,7 @@ function doReset() {
 
 /**
  * 8) resetAndRetest => 重新檢測 (刪除舊紀錄 + 重置 + 再次開始使用前檢測)
- * - 只在 RUNNING 狀態、且使用前 (store.detectFlag='1') 時可見
+ * - 只在 RUNNING 狀態且使用前 (store.detectFlag === '1') 時可見
  */
 async function resetAndRetest() {
   if (UID.value) {
@@ -328,7 +329,7 @@ async function resetAndRetest() {
   }
   // 前端重置
   doReset();
-  // 再次進入流程 (會建立新UID並開始計時)
+  // 再次進入流程 (會建立新 UID 並開始計時)
   toggleTimer();
 }
 
@@ -338,35 +339,38 @@ onMounted(async () => {
     const resp = await API_MID_ProductName_UIDInfo();
 
     if (resp) {
-      // 若後端回傳 OK => 代表有某些紀錄 (或 UID)
+      // 若後端回傳 OK 代表有紀錄 (或 UID)
       UID.value = resp.UID;
 
       if (UID.value) {
-        // 有 UID => 判斷 StartTime
+        // 有 UID，判斷 StartTime
         if (resp.StartTime) {
-          // 有 StartTime => 計算是否還在 24 小時內
           const startMS = parseTimeString(resp.StartTime).getTime();
           const diff = Date.now() - startMS;
+          // 若 API 的 StartTime 超過 2 小時，則不進行 HRV 檢測
+          if (diff > 2 * 60 * 60 * 1000) {
+            console.log("API 的 StartTime 超過 2 小時，不進行 HRV 檢測");
+            currentState.value = DetectionState.AFTER;
+            return;
+          }
+          // 在 24 小時內且小於 2 小時時，同步計時並進入 RUNNING 狀態
           if (diff <= 24 * 60 * 60 * 1000) {
-            // 24 小時內 => 同步時間、直接進入 RUNNING
             startTimestamp.value = startMS;
             elapsedTime.value = Math.floor(diff / 1000);
             startTimer();
             currentState.value = DetectionState.RUNNING;
           } else {
-            console.log("StartTime 超過24hr => 清除舊紀錄");
+            console.log("StartTime 超過 24 小時 => 清除舊紀錄");
             await API_DeleteStart();
           }
         } else {
-          // 沒有 StartTime => 還沒開始 => BEFORE
+          // 沒有 StartTime 則表示尚未開始檢測
           console.log("沒有 StartTime => 保持 BEFORE 狀態");
           currentState.value = DetectionState.BEFORE;
         }
       } else {
-        // 有 resp 但無 UID => 可能已經結束 => AFTER
-        console.warn(
-          "API_MID_ProductName_UIDInfo => 無 UID => 嘗試 AFTER 狀態"
-        );
+        // 有 resp 但無 UID，可能檢測已結束，嘗試進入 AFTER 狀態
+        console.warn("API_MID_ProductName_UIDInfo => 無 UID => 嘗試 AFTER 狀態");
         const data = await API_UIDInfo_Search12();
         if (data?.Status === "Y") {
           hasOver30Mins.value = true;
@@ -376,7 +380,7 @@ onMounted(async () => {
         currentState.value = DetectionState.AFTER;
       }
     } else {
-      // 後端回傳 NOData => BEFORE
+      // 後端回傳無資料，保持 BEFORE 狀態
       console.log("後端回傳 NOData => BEFORE");
       currentState.value = DetectionState.BEFORE;
     }
@@ -414,7 +418,7 @@ async function API_MID_ProductName_UIDInfo() {
   }
 }
 
-// B) 檢查使用前/後 Flag => "1" or "2"
+// B) 檢查使用前/後 Flag ("1" 或 "2")
 async function API_HRV2_UID_Flag_Info(Flag, uidVal) {
   if (!uidVal) return null;
   try {
@@ -422,7 +426,7 @@ async function API_HRV2_UID_Flag_Info(Flag, uidVal) {
       "https://23700999.com:8081/HMA/API_HRV2_UID_Flag_Info.jsp",
       { MID, Token, MAID, Mobile, UID: uidVal, Flag }
     );
-    // r.Result === "OK" => r.IsExit => "Y" or "N"
+    // 若 r.Result === "OK"，r.IsExit 為 "Y" 或 "N"
     if (r?.Result === "OK") {
       return r.IsExit;
     } else {
@@ -435,7 +439,7 @@ async function API_HRV2_UID_Flag_Info(Flag, uidVal) {
   }
 }
 
-// C) 建立使用前 => UseStart (回傳新 UID)
+// C) 建立使用前紀錄 (UseStart)，回傳新 UID
 async function useStartAPI() {
   try {
     const r = await apiRequest(
@@ -455,7 +459,7 @@ async function useStartAPI() {
   }
 }
 
-// D) 結束 => AFTER
+// D) 結束使用前 (UseEnd)，切換到 AFTER
 async function useEndAPI() {
   if (!UID.value) return;
   try {
@@ -473,7 +477,7 @@ async function useEndAPI() {
   }
 }
 
-// E) 判斷是否逾30分鐘 => e.g. r.Status="Y" or "N"
+// E) 判斷是否逾30分鐘 (API_UIDInfo_Search12)
 async function API_UIDInfo_Search12() {
   try {
     const r = await apiRequest(
@@ -481,7 +485,7 @@ async function API_UIDInfo_Search12() {
       { MID, Token, MAID, Mobile, ProductName: props.productName }
     );
     if (r?.Result === "OK") {
-      return r; // e.g. { Status: "Y" }
+      return r; // 例如回傳 { Status: "Y" }
     } else {
       console.log("API_UIDInfo_Search12 => NOData or fail:", r);
       return null;
@@ -492,7 +496,7 @@ async function API_UIDInfo_Search12() {
   }
 }
 
-// F) 刪除檢測紀錄 => 保留使用紀錄 (API_DeleteStart)
+// F) 刪除檢測紀錄 (API_DeleteStart)
 async function API_DeleteStart() {
   if (!UID.value) {
     console.log("尚無 UID，不需呼叫 API_DeleteStart");
@@ -517,7 +521,7 @@ async function API_DeleteStart() {
   }
 }
 
-// 解析後端時間字串 => "20250211145046" => new Date("2025-02-11T14:50:46")
+// 解析後端時間字串 (例如 "20250211145046") 轉為 Date 物件
 function parseTimeString(timeStr) {
   return new Date(
     `${timeStr.slice(0, 4)}-${timeStr.slice(4, 6)}-${timeStr.slice(
