@@ -1,6 +1,7 @@
 <template>
    <div class="babyRecord">
-    <TitleMenu Text="健康紀錄" link="/user" />
+      <TitleMenu Text="健康紀錄" link="/user" />
+      
    </div>
  
 </template>

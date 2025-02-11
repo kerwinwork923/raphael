@@ -375,7 +375,6 @@ async function doExchange() {
           top: 75%;
           left: 72%;
           color: rgba(0, 0, 0, 0.3);
-          font-family: "Noto Sans";
           font-size: 12px;
           font-weight: 400;
         }
