@@ -8,19 +8,18 @@
     <div class="timerButtonGroup">
       <!-- 當超時時，只顯示「放棄」和「結束」 -->
       <template v-if="isExpired">
-  <div class="expired-options">
-    <button
-      style="background-color: #74bc1f"
-      @click="detectHRVAfter(UID)"
-    >
-      HRV檢測(使用後)
-    </button>
-    <button style="background-color: #ec4f4f" @click="handleAbandon">
-      放棄
-    </button>
-  </div>
-</template>
-
+        <div class="expired-options">
+          <button
+            style="background-color: #74bc1f"
+            @click="detectHRVAfter(UID)"
+          >
+            HRV檢測(使用後)
+          </button>
+          <button style="background-color: #ec4f4f" @click="handleAbandon">
+            放棄
+          </button>
+        </div>
+      </template>
 
       <!-- 當 **沒有** 超時時 -->
       <template v-else>
@@ -264,8 +263,6 @@ const toggleTimer = async () => {
   }
 };
 
-
-
 // 確認結束時間
 const confirmEndTime = async () => {
   if (!selectedEndTime.value) {
@@ -279,16 +276,27 @@ const confirmEndTime = async () => {
   try {
     await useEndAPI(formattedEndTime);
 
-    showTimePickerModal.value = false; // 關閉彈窗
-    isExpired.value = false; // 不再顯示超時狀態
-    currentDetectionState.value = DetectionState.AFTER;
-    hasAbandoned.value = true; // 標記已放棄
+    // ✅ 正確關閉時間選擇彈窗
+    showTimePickerModal.value = false;
 
-    console.log("檢測已手動結束");
+    // ✅ 確保 `isExpired` 不會影響 UI
+    isExpired.value = false;
+
+    // ✅ **不設 `currentDetectionState` 為 `AFTER`，改為 `BEFORE`**
+    currentDetectionState.value = DetectionState.BEFORE;
+
+    // ✅ **確保 `hasAbandoned` 為 `true`，讓邏輯知道用戶已放棄**
+    hasAbandoned.value = true;
+
+    // ✅ **清空 `UID`，避免影響 `detectHRVAfter` 的邏輯**
+    UID.value = null;
+
+    console.log("用戶選擇了結束時間，狀態回到檢測前 (BEFORE)");
   } catch (error) {
     console.error("結束檢測時發生錯誤:", error);
   }
 };
+
 const closeModal = () => {
   showTimePickerModal.value = false;
   hasAbandoned.value = false;
@@ -632,18 +640,35 @@ onMounted(async () => {
 });
 
 const handleAbandon = () => {
-  console.log("用戶選擇放棄，彈出選擇結束時間的視窗");
-  hasAbandoned.value = true; // ✅ 標記用戶已放棄
-  showTimePickerModal.value = true; // ✅ 彈出時間選擇
-  isExpired.value = false;
-  currentDetectionState.value = DetectionState.BEFORE;
+  console.log("用戶選擇放棄，顯示時間選擇彈窗");
 
-  // ✅ 確保不會再查詢 API_UIDInfo_Search12
-  API_UIDInfo_Search12 = async () => {
-    console.log("用戶已放棄，跳過 API_UIDInfo_Search12");
-    return;
-  };
+  // ✅ 停止計時器
+  if (timerInterval.value) {
+    clearInterval(timerInterval.value);
+    timerInterval.value = null;
+  }
+
+  // ✅ 清除所有計時相關變數
+  elapsedTime.value = 0;
+  startTimestamp.value = null;
+  isCounting.value = false;
+  hasAbandoned.value = true; // ✅ 標記為已放棄
+
+  // ✅ 直接跳回「檢查前」狀態
+  currentDetectionState.value = DetectionState.BEFORE;
+  
+  // ✅ **避免 UI 顯示 HRV 檢測(使用後)**
+  isExpired.value = false;
+
+  // ✅ 清除 `UID`，避免觸發 HRV 使用後檢測
+  UID.value = null;
+
+  // ✅ 顯示「時間選擇」彈窗
+  showTimePickerModal.value = true;
+
+  console.log("已重置為檢查前狀態，並顯示時間選擇彈窗");
 };
+
 
 
 </script>
