@@ -5,20 +5,28 @@
       <div class="content">{{ formattedTime }}</div>
     </div>
 
-    <!-- 超時提示 -->
-    <div v-if="isExpired" class="completion-delayMessage">
-      已超過12小時，您可以選擇結束檢測或點擊放棄按鈕
-    </div>
-
     <div class="timerButtonGroup">
       <!-- 當超時時，只顯示「放棄」和「結束」 -->
       <template v-if="isExpired">
-        <button style="background-color: #ec4f4f" @click="handleAbandon">
-          放棄
-        </button>
-        <button style="background-color: #1fbcb3" @click="handleComplete">
-          結束
-        </button>
+        <div class="expired-options">
+          <button
+            style="background-color: #74bc1f"
+            @click="detectHRVAfter(UID)"
+          >
+            HRV檢測(使用後)
+          </button>
+          <!-- 如果沒有結束時間，才顯示「結束」按鈕 -->
+          <button
+            v-if="!hasEndTime"
+            style="background-color: #1fbcb3"
+            @click="handleComplete"
+          >
+            結束
+          </button>
+          <button style="background-color: #ec4f4f" @click="handleAbandon">
+            放棄
+          </button>
+        </div>
       </template>
 
       <!-- 當 **沒有** 超時時 -->
@@ -315,40 +323,32 @@ const formatDateTime = (dateTime) => {
 const handleComplete = async () => {
   console.log("正在處理結束邏輯...");
 
-  // 1️⃣ 先檢查「使用前檢測」是否已完成
-  const isExitValue = await API_HRV2_UID_Flag_Info("1", UID.value);
-  if (isExitValue === "N") {
-    alert("尚未完成使用前檢測，無法結束！");
-    return;
-  }
-
-  // 2️⃣ 停止計時器
+  // 1️⃣ 停止計時器
   if (timerInterval.value) {
     clearInterval(timerInterval.value);
     timerInterval.value = null;
   }
   isCounting.value = false;
 
-  // 3️⃣ 取得當前時間作為結束時間 (yyyyMMddHHmmss 格式)
+  // 2️⃣ 取得當前時間作為結束時間 (yyyyMMddHHmmss 格式)
   const now = new Date();
   const formattedEndTime = formatDateTime(now);
 
   try {
-    // 4️⃣ 調用 API，更新結束時間
+    // 3️⃣ 調用 API，更新結束時間
     await useEndAPI(formattedEndTime);
     console.log("結束 API 調用成功");
 
-    // 5️⃣ 更新 UI 狀態
+    // 4️⃣ 更新 UI 狀態
     currentDetectionState.value = DetectionState.AFTER;
     isExpired.value = false;
 
-    // 6️⃣ 進入使用後檢測流程
+    // 5️⃣ 進入使用後檢測流程
     detectHRVAfter(UID.value);
   } catch (error) {
     console.error("結束 API 調用失敗:", error);
   }
 };
-
 
 // ---------------------------------------------------
 // 封裝呼叫後端 API
@@ -498,12 +498,15 @@ const useEndAPI = async (endTime = "") => {
   }
 };
 
+const hasEndTime = ref(false); // 新增狀態來判斷是否有結束時間
+
 const API_UIDInfo_Search12 = async () => {
   try {
     const response = await apiRequest(
       "https://23700999.com:8081/HMA/API_UIDInfo_Search12.jsp",
       { MID, Token, MAID, Mobile, ProductName: props.productName }
     );
+
     if (response && response.Result !== "NOData") {
       const checkTime = response.CheckTime
         ? new Date(
@@ -518,17 +521,38 @@ const API_UIDInfo_Search12 = async () => {
             )}`
           )
         : null;
+
       if (checkTime) {
         const now = new Date();
         const timeDifference = now - checkTime;
         const hoursDifference = timeDifference / (1000 * 60 * 60);
-        if (hoursDifference <= 24) {
-          alert("尚未完成使用後HRV檢測");
+        const hasCompletedAfter = response.IsExit; // "N" 表示未完成
+        hasEndTime.value = response.EndTime ? true : false; // 判斷是否有結束時間
+
+        if (hoursDifference <= 0.01) {
+          // **未超過 12 小時，檢查是否完成使用後 HRV 檢測**
+          detectHRVAfter(response.UID);
+          if (hasCompletedAfter === "N") {
+            console.log(
+              "未超過 12 小時，尚未完成使用後 HRV 檢測，顯示提醒視窗"
+            );
+            alert("尚未完成使用後 HRV 檢測，請立即進行檢測！");
+         
+            return;
+          }
+        } else {
+          // **超過 12 小時，標記為 isExpired，但不彈出視窗**
+          console.log("已超過 12 小時，不彈出視窗，只變更 UI 狀態");
+          isExpired.value = true;
+          currentDetectionState.value = DetectionState.AFTER;
+          UID.value = response.UID;
+     
         }
       }
-      currentDetectionState.value = DetectionState.AFTER;
+
+      // **如果已完成 HRV 檢測，則正常進行 HRV 使用後檢測**
+      console.log("使用後 HRV 檢測已完成，正常顯示『HRV檢測(使用後)』按鈕");
       UID.value = response.UID;
-      detectHRVAfter(response.UID);
     }
   } catch (err) {
     console.log("API 調用失敗：", err);
@@ -765,5 +789,11 @@ button:disabled {
   padding: 5px 10px;
   border: none;
   cursor: pointer;
+}
+.expired-options {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
 }
 </style>
