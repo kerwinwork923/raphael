@@ -4,26 +4,44 @@
     <div class="progress-border" :style="{ background: progressGradient }">
       <div class="content">{{ formattedTime }}</div>
     </div>
-    <!-- <div
-      class="completion-message"
-      v-if="currentDetectionState === DetectionState.AFTER"
-    >
-      總共使用 {{ hasDetectTime }}
-    </div> -->
+
+    <!-- 超時提示 -->
+    <div v-if="isExpired" class="completion-delayMessage">
+      已超過12小時，您可以選擇結束檢測或點擊放棄按鈕
+    </div>
 
     <div class="timerButtonGroup">
-      <!-- 重新檢測 -->
-      <button
-        v-if="currentDetectionState === DetectionState.RUNNING"
-        style="background-color: #74bc1f; padding: 8px"
-        @click="API_DeleteStart"
-      >
-        重新檢測
-      </button>
-      <!-- 主按鈕 (開始或結束) -->
-      <button :style="buttonStyle" @click="toggleTimer">
-        {{ buttonText }}
-      </button>
+      <!-- 當超時時，只顯示「放棄」和「結束」 -->
+      <template v-if="isExpired">
+        <button style="background-color: #ec4f4f" @click="handleAbandon">
+          放棄
+        </button>
+        <button style="background-color: #1fbcb3" @click="handleComplete">
+          結束
+        </button>
+      </template>
+
+      <!-- 當 **沒有** 超時時 -->
+      <template v-else>
+        <button
+          v-if="currentDetectionState === DetectionState.RUNNING"
+          style="background-color: #74bc1f; padding: 8px"
+          @click="API_DeleteStart"
+        >
+          重新檢測
+        </button>
+
+        <button :style="buttonStyle" @click="toggleTimer">
+          {{ buttonText }}
+        </button>
+      </template>
+    </div>
+
+    <!-- 選擇結束時間 (放棄時顯示) -->
+    <div v-if="showTimePicker" class="TimeRingForgetBox">
+      <label>選擇結束時間:</label>
+      <input type="datetime-local" v-model="selectedEndTime" />
+      <button @click="confirmEndTime">確認</button>
     </div>
   </div>
 </template>
@@ -57,12 +75,12 @@ const elapsedTime = ref(0); // 用來顯示：已經經過多少「秒」
 const startTimestamp = ref(null); // 「開始計時」的時間戳 (ms)
 
 // 控制計時狀態 ( 是否在計時中 )
-const isCounting = ref(false); 
+const isCounting = ref(false);
 
 const DetectionState = {
   BEFORE: "before", // 檢測前
   RUNNING: "running", // 計時中
-  AFTER: "after",     // 檢測後
+  AFTER: "after", // 檢測後
 };
 const currentDetectionState = ref(DetectionState.BEFORE);
 
@@ -98,6 +116,12 @@ const UID = ref(null);
 const BID = ref(null);
 import { useCommon } from "../stores/common";
 const store = useCommon();
+
+const isExpired = ref(null);
+const showTimePicker = ref(false);
+const selectedEndTime = ref(null);
+
+const hasAbandoned = ref(false); // 標記是否已放棄檢測
 
 // 按鈕樣式
 const buttonStyle = computed(() => {
@@ -211,9 +235,11 @@ const toggleTimer = async () => {
           // 先把後端的 StartTime 轉成毫秒
           const startTime = new Date(
             `${response.StartTime.slice(0, 4)}-${response.StartTime.slice(
-              4, 6
+              4,
+              6
             )}-${response.StartTime.slice(6, 8)}T${response.StartTime.slice(
-              8, 10
+              8,
+              10
             )}:${response.StartTime.slice(10, 12)}:${response.StartTime.slice(
               12
             )}`
@@ -250,6 +276,47 @@ const toggleTimer = async () => {
   }
 };
 
+// 確認結束時間
+const confirmEndTime = async () => {
+  if (!selectedEndTime.value) {
+    alert("請選擇結束時間");
+    return;
+  }
+
+  // 轉換 `selectedEndTime` 成 API 需要的格式 `yyyyMMddHHmmss`
+  const formattedEndTime = formatDateTime(selectedEndTime.value);
+  console.log("選擇的結束時間:", formattedEndTime);
+
+  try {
+    await useEndAPI(formattedEndTime);
+
+    showTimePicker.value = false; // 隱藏時間選擇
+    isExpired.value = false; // 不再顯示超時狀態
+    currentDetectionState.value = DetectionState.AFTER; // 更新狀態
+    hasAbandoned.value = true; // 確保重新檢測不再顯示
+
+    console.log("檢測已手動結束");
+  } catch (error) {
+    console.error("結束檢測時發生錯誤:", error);
+  }
+};
+
+// 轉換 `datetime-local` 值為 `yyyyMMddHHmmss` 格式
+const formatDateTime = (dateTime) => {
+  const date = new Date(dateTime);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+  return `${year}${month}${day}${hours}${minutes}${seconds}`;
+};
+
+const handleComplete = async () => {
+  detectHRVAfter(UID.value);
+};
+
 // ---------------------------------------------------
 // 封裝呼叫後端 API
 // ---------------------------------------------------
@@ -268,45 +335,59 @@ const API_MID_ProductName_UIDInfo = async () => {
       "https://23700999.com:8081/HMA/API_MID_ProductName_UIDInfo.jsp",
       { MID, Token, MAID, Mobile, ProductName: props.productName }
     );
-    if (response?.Result === "OK") {
-      console.log("成功獲取 UID 信息：", response);
-      const UIDResponse = response.UID;
-      if (!UIDResponse) {
-        console.warn("UID 為 null，無法繼續後續操作");
-        return null;
-      }
 
-      const now = Date.now();
-      const checkTime = response.CheckTime
-        ? new Date(
-            `${response.CheckTime.slice(0, 4)}-${response.CheckTime.slice(
-              4, 6
-            )}-${response.CheckTime.slice(6, 8)}T${response.CheckTime.slice(
-              8, 10
-            )}:${response.CheckTime.slice(10, 12)}:${response.CheckTime.slice(
-              12
-            )}`
-          ).getTime()
-        : null;
-
-      if (checkTime) {
-        const timeDifference = Math.abs(now - checkTime);
-        if (timeDifference > 24 * 60 * 60 * 1000) {
-          console.log("CheckTime 超出 24 小時範圍，直接清除舊檢測紀錄");
-          await API_DeleteStart();
-          return null;
-        } else {
-          console.log("CheckTime 在有效的 24 小時範圍內：", checkTime);
-          await API_HRV2_UID_Flag_Info("1", UIDResponse);
-        }
-      } else {
-        console.warn("無法檢測到 CheckTime，可能需要進行其他處理");
-      }
-      return response;
-    } else {
+    if (response?.Result !== "OK") {
       console.error("無法獲取有效的 UID 信息：", response);
       return null;
     }
+
+    console.log("成功獲取 UID 信息：", response);
+
+    const UIDResponse = response.UID;
+    if (!UIDResponse) {
+      console.warn("UID 為 null，無法繼續後續操作");
+      return null;
+    }
+
+    // 取得後端提供的 CheckTime (格式: YYYYMMDDHHMMSS)
+    const checkTime = response.CheckTime
+      ? new Date(
+          `${response.CheckTime.slice(0, 4)}-${response.CheckTime.slice(
+            4,
+            6
+          )}-${response.CheckTime.slice(6, 8)}T${response.CheckTime.slice(
+            8,
+            10
+          )}:${response.CheckTime.slice(10, 12)}:${response.CheckTime.slice(
+            12
+          )}`
+        ).getTime()
+      : null;
+
+    if (!checkTime) {
+      console.warn("無法檢測到 CheckTime，可能需要進行其他處理");
+      return null;
+    }
+
+    const now = Date.now();
+    const timeDifference = now - checkTime;
+    const expiredLimit = 12; // 12 小時
+
+    // 判斷是否超過 12 小時
+    if (timeDifference > expiredLimit) {
+      console.log("CheckTime 超過 12 小時，進入超時狀態");
+      isExpired.value = true;
+      currentDetectionState.value = DetectionState.AFTER; // 設定為檢測後狀態
+    } else {
+      console.log("CheckTime 在 12 小時內，正常進行 HRV 檢測");
+      startTimestamp.value = checkTime;
+      elapsedTime.value = Math.floor(timeDifference / 1000);
+      startTimer();
+      currentDetectionState.value = DetectionState.RUNNING;
+      isExpired.value = false;
+    }
+
+    return response;
   } catch (error) {
     console.error("API 調用失敗：", error);
     return null;
@@ -358,15 +439,25 @@ const useStartAPI = async () => {
   }
 };
 
-const useEndAPI = async () => {
+const useEndAPI = async (endTime = "") => {
   if (!UID.value) {
     console.error("無法結束，因為 UID 不存在");
     return;
   }
+
+  const payload = {
+    MID,
+    Token,
+    MAID,
+    Mobile,
+    UID: UID.value,
+    EndTime: endTime || "", // 若沒有選擇時間則傳空字串
+  };
+
   try {
     const response = await apiRequest(
       "https://23700999.com:8081/HMA/API_UseEnd.jsp",
-      { MID, Token, MAID, Mobile, UID: UID.value }
+      payload
     );
     console.log("結束 API 調用成功", response);
   } catch (error) {
@@ -384,9 +475,11 @@ const API_UIDInfo_Search12 = async () => {
       const checkTime = response.CheckTime
         ? new Date(
             `${response.CheckTime.slice(0, 4)}-${response.CheckTime.slice(
-              4, 6
+              4,
+              6
             )}-${response.CheckTime.slice(6, 8)}T${response.CheckTime.slice(
-              8, 10
+              8,
+              10
             )}:${response.CheckTime.slice(10, 12)}:${response.CheckTime.slice(
               12
             )}`
@@ -463,9 +556,11 @@ onMounted(async () => {
           // 轉成毫秒
           const startTime = new Date(
             `${response.StartTime.slice(0, 4)}-${response.StartTime.slice(
-              4, 6
+              4,
+              6
             )}-${response.StartTime.slice(6, 8)}T${response.StartTime.slice(
-              8, 10
+              8,
+              10
             )}:${response.StartTime.slice(10, 12)}:${response.StartTime.slice(
               12
             )}`
@@ -513,6 +608,12 @@ onMounted(async () => {
 
   console.log("組件初始化完成，BID 初始化為 null");
 });
+
+const handleAbandon = () => {
+  console.log("放棄檢測，請選擇結束時間");
+  showTimePicker.value = true; // 顯示時間選擇 UI
+  hasAbandoned.value = true; // 設定已放棄
+};
 </script>
 
 <style scoped>
@@ -601,5 +702,35 @@ button:disabled {
 
 .timerButtonGroup button:disabled {
   background-color: #d0d0d0 !important;
+}
+
+.completion-delayMessage {
+  color: #ec4f4f;
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.timerButtonGroup {
+  display: flex;
+  gap: 8px;
+}
+
+.TimeRingForgetBox {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.TimeRingForgetBox input {
+  margin: 5px;
+}
+
+.TimeRingForgetBox button {
+  background-color: #74bc1f;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  cursor: pointer;
 }
 </style>
