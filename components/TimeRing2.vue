@@ -190,6 +190,19 @@ const stopTimer = async () => {
   isCounting.value = false;
   console.log("計時結束");
 
+  // 🔍 重新檢查 UID
+  if (!UID.value) {
+    console.log("UID 不存在，從後端重新獲取 UID");
+    const response = await API_MID_ProductName_UIDInfo();
+    if (response?.UID) {
+      UID.value = response.UID;
+    } else {
+      console.error("無法獲取有效的 UID，請重新檢測");
+      alert("無法結束，因為 UID 不存在，請重新檢測");
+      return;
+    }
+  }
+
   const isExitValue = await API_HRV2_UID_Flag_Info("1", UID.value);
   if (isExitValue === "N") {
     alert("尚未完成使用前檢測，無法結束！");
@@ -202,7 +215,6 @@ const stopTimer = async () => {
     const now = new Date();
     const formattedEndTime = formatDateTime(now);
     
-    // ✅ 確保傳入 `UID` 和 `EndTime`
     await useEndAPI(UID.value, formattedEndTime);
     console.log("計時已結束，API 調用成功");
 
@@ -211,6 +223,7 @@ const stopTimer = async () => {
     console.error("結束 API 調用失敗：", error);
   }
 };
+
 
 
 // ---------- 使用前/使用後檢測邏輯 ----------
@@ -270,25 +283,29 @@ const confirmEndTime = async () => {
     return;
   }
 
+  // 🔍 重新檢查 UID
+  if (!UID.value) {
+    console.log("UID 不存在，從後端重新獲取 UID");
+    const response = await API_MID_ProductName_UIDInfo();
+    if (response?.UID) {
+      UID.value = response.UID;
+    } else {
+      console.error("無法獲取有效的 UID，請重新檢測");
+      alert("無法結束，因為 UID 不存在，請重新檢測");
+      return;
+    }
+  }
+
   const formattedEndTime = formatDateTime(selectedEndTime.value);
   console.log("選擇的結束時間:", formattedEndTime);
 
   try {
-    await useEndAPI(formattedEndTime);
+    await useEndAPI(UID.value, formattedEndTime);
 
-    // ✅ 正確關閉時間選擇彈窗
     showTimePickerModal.value = false;
-
-    // ✅ 確保 `isExpired` 不會影響 UI
     isExpired.value = false;
-
-    // ✅ **不設 `currentDetectionState` 為 `AFTER`，改為 `BEFORE`**
     currentDetectionState.value = DetectionState.BEFORE;
-
-    // ✅ **確保 `hasAbandoned` 為 `true`，讓邏輯知道用戶已放棄**
     hasAbandoned.value = true;
-
-    // ✅ **清空 `UID`，避免影響 `detectHRVAfter` 的邏輯**
     UID.value = null;
 
     console.log("用戶選擇了結束時間，狀態回到檢測前 (BEFORE)");
@@ -296,6 +313,7 @@ const confirmEndTime = async () => {
     console.error("結束檢測時發生錯誤:", error);
   }
 };
+
 
 const closeModal = () => {
   showTimePickerModal.value = false;
@@ -652,26 +670,31 @@ const handleAbandon = async () => {
     timerInterval.value = null;
   }
 
+  // 🔍 重新檢查 UID
   if (!UID.value) {
-    console.warn("無法執行結束 API，因為 UID 為 null");
-    return;
+    console.log("UID 不存在，從後端重新獲取 UID");
+    const response = await API_MID_ProductName_UIDInfo();
+    if (response?.UID) {
+      UID.value = response.UID;
+    } else {
+      console.error("無法獲取有效的 UID，請重新檢測");
+      alert("無法結束，因為 UID 不存在，請重新檢測");
+      return;
+    }
   }
 
   const now = new Date();
   const formattedEndTime = formatDateTime(now);
 
   try {
-    // ✅ 確保 `UID` 和所有參數都有傳遞
     await useEndAPI(UID.value, formattedEndTime);
     console.log(`用戶放棄，已執行結束 API，UID: ${UID.value}, EndTime: ${formattedEndTime}`);
 
     elapsedTime.value = 0;
     startTimestamp.value = null;
     isCounting.value = false;
-
     hasAbandoned.value = true;
     currentDetectionState.value = DetectionState.BEFORE;
-
     isExpired.value = false;
     UID.value = null;
 
@@ -680,6 +703,7 @@ const handleAbandon = async () => {
     console.error("用戶放棄時執行結束 API 失敗:", error);
   }
 };
+
 
 
 
