@@ -190,28 +190,28 @@ const stopTimer = async () => {
   isCounting.value = false;
   console.log("計時結束");
 
-  // ★ 新增：先檢查「使用前檢測是否真的完成」
   const isExitValue = await API_HRV2_UID_Flag_Info("1", UID.value);
   if (isExitValue === "N") {
-    // 尚未完成使用前檢測，給使用者提示
     alert("尚未完成使用前檢測，無法結束！");
     return;
   }
 
-  // 先更新狀態為 AFTER
   currentDetectionState.value = DetectionState.AFTER;
 
   try {
-    // 調用結束 API
-    await useEndAPI();
+    const now = new Date();
+    const formattedEndTime = formatDateTime(now);
+    
+    // ✅ 確保傳入 `UID` 和 `EndTime`
+    await useEndAPI(UID.value, formattedEndTime);
     console.log("計時已結束，API 調用成功");
 
-    // 結束後，直接進入使用後檢測邏輯
     detectHRVAfter(UID.value);
   } catch (error) {
     console.error("結束 API 調用失敗：", error);
   }
 };
+
 
 // ---------- 使用前/使用後檢測邏輯 ----------
 const detectHRVBefore = (UIDVal) => {
@@ -466,8 +466,8 @@ const useStartAPI = async () => {
   }
 };
 
-const useEndAPI = async (endTime = "") => {
-  if (!UID.value) {
+const useEndAPI = async (UIDVal, endTime = "") => {
+  if (!UIDVal) {
     console.error("無法結束，因為 UID 不存在");
     return;
   }
@@ -476,15 +476,21 @@ const useEndAPI = async (endTime = "") => {
     const response = await axios.post(
       "https://23700999.com:8081/HMA/API_UseEnd.jsp",
       {
-        UID: UID.value,
-        EndTime: endTime || "",
+        MID: MID,       // ✅ 加上 MID
+        Token: Token,   // ✅ 加上 Token
+        MAID: MAID,     // ✅ 加上 MAID
+        Mobile: Mobile, // ✅ 加上 Mobile
+        UID: UIDVal,    // ✅ 傳入 UID
+        EndTime: endTime || "", // ✅ 傳入結束時間 (如果沒有則為空)
       }
     );
-    console.log("結束 API 調用成功", response);
+    console.log(`結束 API 調用成功，UID: ${UIDVal}, EndTime: ${endTime}`, response);
   } catch (error) {
     console.error("結束 API 調用失敗:", error);
   }
 };
+
+
 
 const hasEndTime = ref(false); // 新增狀態來判斷是否有結束時間
 
@@ -638,35 +644,46 @@ onMounted(async () => {
   }
 });
 
-const handleAbandon = () => {
-  console.log("用戶選擇放棄，顯示時間選擇彈窗");
+const handleAbandon = async () => {
+  console.log("用戶選擇放棄，執行結束 API");
 
-  // ✅ 停止計時器
   if (timerInterval.value) {
     clearInterval(timerInterval.value);
     timerInterval.value = null;
   }
 
-  // ✅ 清除所有計時相關變數
-  elapsedTime.value = 0;
-  startTimestamp.value = null;
-  isCounting.value = false;
-  hasAbandoned.value = true; // ✅ 標記為已放棄
+  if (!UID.value) {
+    console.warn("無法執行結束 API，因為 UID 為 null");
+    return;
+  }
 
-  // ✅ 直接跳回「檢查前」狀態
-  currentDetectionState.value = DetectionState.BEFORE;
+  const now = new Date();
+  const formattedEndTime = formatDateTime(now);
 
-  // ✅ **避免 UI 顯示 HRV 檢測(使用後)**
-  isExpired.value = false;
+  try {
+    // ✅ 確保 `UID` 和所有參數都有傳遞
+    await useEndAPI(UID.value, formattedEndTime);
+    console.log(`用戶放棄，已執行結束 API，UID: ${UID.value}, EndTime: ${formattedEndTime}`);
 
-  // ✅ 清除 `UID`，避免觸發 HRV 使用後檢測
-  UID.value = null;
+    elapsedTime.value = 0;
+    startTimestamp.value = null;
+    isCounting.value = false;
 
-  // ✅ 顯示「時間選擇」彈窗
-  showTimePickerModal.value = true;
+    hasAbandoned.value = true;
+    currentDetectionState.value = DetectionState.BEFORE;
 
-  console.log("已重置為檢查前狀態，並顯示時間選擇彈窗");
+    isExpired.value = false;
+    UID.value = null;
+
+    console.log("用戶已放棄，狀態回到檢測前 (BEFORE)");
+  } catch (error) {
+    console.error("用戶放棄時執行結束 API 失敗:", error);
+  }
 };
+
+
+
+
 </script>
 
 <style scoped>
