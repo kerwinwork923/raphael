@@ -312,10 +312,36 @@ const formatDateTime = (dateTime) => {
   const seconds = String(date.getSeconds()).padStart(2, "0");
   return `${year}${month}${day}${hours}${minutes}${seconds}`;
 };
-
 const handleComplete = async () => {
-  detectHRVAfter(UID.value);
+  console.log("正在處理結束邏輯...");
+
+  // 1️⃣ 停止計時器
+  if (timerInterval.value) {
+    clearInterval(timerInterval.value);
+    timerInterval.value = null;
+  }
+  isCounting.value = false;
+
+  // 2️⃣ 取得當前時間作為結束時間 (yyyyMMddHHmmss 格式)
+  const now = new Date();
+  const formattedEndTime = formatDateTime(now);
+
+  try {
+    // 3️⃣ 調用 API，更新結束時間
+    await useEndAPI(formattedEndTime);
+    console.log("結束 API 調用成功");
+
+    // 4️⃣ 更新 UI 狀態
+    currentDetectionState.value = DetectionState.AFTER;
+    isExpired.value = false;
+
+    // 5️⃣ 進入使用後檢測流程
+    detectHRVAfter(UID.value);
+  } catch (error) {
+    console.error("結束 API 調用失敗:", error);
+  }
 };
+
 
 // ---------------------------------------------------
 // 封裝呼叫後端 API
