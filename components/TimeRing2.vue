@@ -521,7 +521,7 @@ const API_UIDInfo_Search12 = async () => {
         const hoursDifference = timeDifference / (1000 * 60 * 60);
         const hasCompletedAfter = response.IsExit; // "N" 表示未完成
 
-        if (hoursDifference >= 12) {
+        if (hoursDifference <= 12) {
           if (hasCompletedAfter === "N") {
             console.log("未完成 HRV 使用後檢測，請立即進行");
             alert("尚未完成使用後 HRV 檢測，請立即進行！");
@@ -543,7 +543,6 @@ const API_UIDInfo_Search12 = async () => {
     console.log("API 調用失敗：", err);
   }
 };
-
 
 const API_DeleteStart = async () => {
   try {
@@ -656,7 +655,7 @@ const handleAbandon = () => {
 
   // ✅ 直接跳回「檢查前」狀態
   currentDetectionState.value = DetectionState.BEFORE;
-  
+
   // ✅ **避免 UI 顯示 HRV 檢測(使用後)**
   isExpired.value = false;
 
@@ -668,9 +667,6 @@ const handleAbandon = () => {
 
   console.log("已重置為檢查前狀態，並顯示時間選擇彈窗");
 };
-
-
-
 </script>
 
 <style scoped>
