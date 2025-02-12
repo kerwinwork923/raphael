@@ -15,6 +15,14 @@
           >
             HRV檢測(使用後)
           </button>
+          <!-- 如果沒有結束時間，才顯示「結束」按鈕 -->
+          <button
+            v-if="!hasEndTime"
+            style="background-color: #1fbcb3"
+            @click="handleComplete"
+          >
+            結束
+          </button>
           <button style="background-color: #ec4f4f" @click="handleAbandon">
             放棄
           </button>
@@ -37,16 +45,11 @@
       </template>
     </div>
 
-    <!-- 選擇結束時間的 Modal -->
-    <div v-if="showTimePickerModal" class="modal-overlay">
-      <div class="modal-content">
-        <h3>選擇結束時間</h3>
-        <input type="datetime-local" v-model="selectedEndTime" />
-        <div class="modal-buttons">
-          <button class="confirm-btn" @click="confirmEndTime">確認</button>
-          <button class="cancel-btn" @click="closeModal">取消</button>
-        </div>
-      </div>
+    <!-- 選擇結束時間 (放棄時顯示) -->
+    <div v-if="showTimePicker" class="TimeRingForgetBox">
+      <label>選擇結束時間:</label>
+      <input type="datetime-local" v-model="selectedEndTime" />
+      <button @click="confirmEndTime">確認</button>
     </div>
   </div>
 </template>
@@ -78,7 +81,7 @@ const router = useRouter();
 // ---------------------------------------------------
 const elapsedTime = ref(0); // 用來顯示：已經經過多少「秒」
 const startTimestamp = ref(null); // 「開始計時」的時間戳 (ms)
-const showTimePickerModal = ref(false); // 控制彈窗顯示
+
 // 控制計時狀態 ( 是否在計時中 )
 const isCounting = ref(false);
 
@@ -190,51 +193,37 @@ const stopTimer = async () => {
   isCounting.value = false;
   console.log("計時結束");
 
-  // 🔍 重新檢查 UID
-  if (!UID.value) {
-    console.log("UID 不存在，從後端重新獲取 UID");
-    const response = await API_MID_ProductName_UIDInfo();
-    if (response?.UID) {
-      UID.value = response.UID;
-    } else {
-      console.error("無法獲取有效的 UID，請重新檢測");
-      alert("無法結束，因為 UID 不存在，請重新檢測");
-      return;
-    }
-  }
-
+  // ★ 新增：先檢查「使用前檢測是否真的完成」
   const isExitValue = await API_HRV2_UID_Flag_Info("1", UID.value);
   if (isExitValue === "N") {
+    // 尚未完成使用前檢測，給使用者提示
     alert("尚未完成使用前檢測，無法結束！");
     return;
   }
 
+  // 先更新狀態為 AFTER
   currentDetectionState.value = DetectionState.AFTER;
 
   try {
-    const now = new Date();
-    const formattedEndTime = formatDateTime(now);
-    
-    await useEndAPI(UID.value, formattedEndTime);
+    // 調用結束 API
+    await useEndAPI();
     console.log("計時已結束，API 調用成功");
 
+    // 結束後，直接進入使用後檢測邏輯
     detectHRVAfter(UID.value);
   } catch (error) {
     console.error("結束 API 調用失敗：", error);
   }
 };
 
-
-
 // ---------- 使用前/使用後檢測邏輯 ----------
 const detectHRVBefore = (UIDVal) => {
-  store.detectFlag = "1"; // 設定為前測
+  store.detectFlag = "1";
   store.detectUID = UIDVal;
   store.detectForm = props.productName;
   store.showHRVAlert = true;
-  startTimer(); // 🟢 開啟計時
+  startTimer();
 };
-
 const detectHRVAfter = (UIDVal) => {
   store.detectFlag = "2";
   store.detectUID = UIDVal;
@@ -248,14 +237,32 @@ const toggleTimer = async () => {
   switch (currentDetectionState.value) {
     case DetectionState.BEFORE:
       if (UID.value) {
-        console.log("已有 UID，開始 HRV 檢測");
-        detectHRVBefore(UID.value); // ✅ 直接觸發 HRV 前測
+        console.log("已有 UID，從 API 時間開始 HRV 檢測");
+        const response = await API_MID_ProductName_UIDInfo();
+        if (response?.StartTime) {
+          // 先把後端的 StartTime 轉成毫秒
+          const startTime = new Date(
+            `${response.StartTime.slice(0, 4)}-${response.StartTime.slice(
+              4,
+              6
+            )}-${response.StartTime.slice(6, 8)}T${response.StartTime.slice(
+              8,
+              10
+            )}:${response.StartTime.slice(10, 12)}:${response.StartTime.slice(
+              12
+            )}`
+          ).getTime();
+
+          // 這裡同時更新 startTimestamp + elapsedTime
+          startTimestamp.value = startTime;
+          elapsedTime.value = Math.floor((Date.now() - startTime) / 1000);
+        }
+        startTimer();
       } else {
         console.log("未找到 UID，創建新的 HRV 檢測");
         const response = await useStartAPI();
         if (response?.UID) {
-          UID.value = response.UID;
-          detectHRVBefore(response.UID); // ✅ 確保創建後觸發 HRV 前測
+          detectHRVBefore(response.UID);
         } else {
           console.error("創建 UID 失敗");
         }
@@ -268,6 +275,7 @@ const toggleTimer = async () => {
       break;
 
     case DetectionState.AFTER:
+      // 也可以手動執行使用後檢測
       detectHRVAfter(UID.value);
       break;
 
@@ -283,45 +291,25 @@ const confirmEndTime = async () => {
     return;
   }
 
-  // 🔍 重新檢查 UID
-  if (!UID.value) {
-    console.log("UID 不存在，從後端重新獲取 UID");
-    const response = await API_MID_ProductName_UIDInfo();
-    if (response?.UID) {
-      UID.value = response.UID;
-    } else {
-      console.error("無法獲取有效的 UID，請重新檢測");
-      alert("無法結束，因為 UID 不存在，請重新檢測");
-      return;
-    }
-  }
-
+  // 轉換 `selectedEndTime` 成 API 需要的格式 `yyyyMMddHHmmss`
   const formattedEndTime = formatDateTime(selectedEndTime.value);
   console.log("選擇的結束時間:", formattedEndTime);
 
   try {
-    await useEndAPI(UID.value, formattedEndTime);
+    await useEndAPI(formattedEndTime);
 
-    showTimePickerModal.value = false;
-    isExpired.value = false;
-    currentDetectionState.value = DetectionState.BEFORE;
-    hasAbandoned.value = true;
-    UID.value = null;
+    showTimePicker.value = false; // 隱藏時間選擇
+    isExpired.value = false; // 不再顯示超時狀態
+    currentDetectionState.value = DetectionState.AFTER; // 更新狀態
+    hasAbandoned.value = true; // 確保重新檢測不再顯示
 
-    console.log("用戶選擇了結束時間，狀態回到檢測前 (BEFORE)");
+    console.log("檢測已手動結束");
   } catch (error) {
     console.error("結束檢測時發生錯誤:", error);
   }
 };
 
-
-const closeModal = () => {
-  showTimePickerModal.value = false;
-  hasAbandoned.value = false;
-};
-
 // 轉換 `datetime-local` 值為 `yyyyMMddHHmmss` 格式
-// 轉換日期格式
 const formatDateTime = (dateTime) => {
   const date = new Date(dateTime);
   const year = date.getFullYear();
@@ -484,31 +472,31 @@ const useStartAPI = async () => {
   }
 };
 
-const useEndAPI = async (UIDVal, endTime = "") => {
-  if (!UIDVal) {
+const useEndAPI = async (endTime = "") => {
+  if (!UID.value) {
     console.error("無法結束，因為 UID 不存在");
     return;
   }
 
+  const payload = {
+    MID,
+    Token,
+    MAID,
+    Mobile,
+    UID: UID.value,
+    EndTime: endTime || "", // 若沒有選擇時間則傳空字串
+  };
+
   try {
-    const response = await axios.post(
+    const response = await apiRequest(
       "https://23700999.com:8081/HMA/API_UseEnd.jsp",
-      {
-        MID: MID,       // ✅ 加上 MID
-        Token: Token,   // ✅ 加上 Token
-        MAID: MAID,     // ✅ 加上 MAID
-        Mobile: Mobile, // ✅ 加上 Mobile
-        UID: UIDVal,    // ✅ 傳入 UID
-        EndTime: endTime || "", // ✅ 傳入結束時間 (如果沒有則為空)
-      }
+      payload
     );
-    console.log(`結束 API 調用成功，UID: ${UIDVal}, EndTime: ${endTime}`, response);
+    console.log("結束 API 調用成功", response);
   } catch (error) {
     console.error("結束 API 調用失敗:", error);
   }
 };
-
-
 
 const hasEndTime = ref(false); // 新增狀態來判斷是否有結束時間
 
@@ -568,6 +556,7 @@ const API_UIDInfo_Search12 = async () => {
   }
 };
 
+
 const API_DeleteStart = async () => {
   try {
     const response = await apiRequest(
@@ -615,35 +604,32 @@ onMounted(async () => {
     if (response) {
       UID.value = response.UID;
       if (UID.value) {
-        console.log("成功獲取有效的 UID：", UID.value);
-        if (response.StartTime) {
-          const startTime = new Date(
-            `${response.StartTime.slice(0, 4)}-${response.StartTime.slice(
-              4,
-              6
-            )}-${response.StartTime.slice(6, 8)}T${response.StartTime.slice(
-              8,
-              10
-            )}:${response.StartTime.slice(10, 12)}:${response.StartTime.slice(
-              12
-            )}`
-          ).getTime();
+        console.log("✅ 成功獲取有效的 UID：", UID.value);
 
-          const now = Date.now();
-          const timeDifference = Math.abs(now - startTime);
+        // 🔍 確認 HRV 前測是否完成
+        const isBeforeTestCompleted = await API_HRV2_UID_Flag_Info("1", UID.value);
+        console.log("🔎 HRV 前測紀錄:", isBeforeTestCompleted);
 
-          if (timeDifference <= 24 * 60 * 60 * 1000) {
-            startTimestamp.value = startTime;
-            elapsedTime.value = Math.floor(timeDifference / 1000);
-            startTimer();
-            currentDetectionState.value = DetectionState.RUNNING;
-          } else {
-            console.log("StartTime 超過 24 小時，清除舊紀錄");
-            await API_DeleteStart();
-          }
+        if (isBeforeTestCompleted === "Y") {
+          console.log("✅ HRV 前測已完成，進入 RUNNING 狀態");
+          currentDetectionState.value = DetectionState.RUNNING;
+          startTimer();
+        } else {
+          console.log("⚠️ HRV 前測未完成，回到 BEFORE 狀態");
+          currentDetectionState.value = DetectionState.BEFORE;
         }
+
+        // 🔍 確認 HRV 後測是否完成
+        const isAfterTestCompleted = await API_HRV2_UID_Flag_Info("2", UID.value);
+        console.log("🔎 HRV 後測紀錄:", isAfterTestCompleted);
+
+        if (isAfterTestCompleted === "Y") {
+          console.log("✅ HRV 後測已完成，進入 AFTER 狀態");
+          currentDetectionState.value = DetectionState.AFTER;
+        }
+
       } else {
-        console.warn("無舊 UID，可能需要創建新的檢測記錄");
+        console.warn("⚠️ 無舊 UID，創建新的檢測記錄");
         const startResponse = await useStartAPI();
         if (startResponse?.UID) {
           UID.value = startResponse.UID;
@@ -651,62 +637,20 @@ onMounted(async () => {
         }
       }
     } else {
-      if (!hasAbandoned.value) {
-        API_UIDInfo_Search12();
-      } else {
-        console.log("用戶已放棄，不自動檢查 API_UIDInfo_Search12");
-      }
+      console.warn("❌ 無法獲取使用者資料");
     }
   } catch (error) {
-    console.error("初始化失敗：", error);
+    console.error("❌ 初始化失敗：", error);
   }
 });
 
-const handleAbandon = async () => {
-  console.log("用戶選擇放棄，執行結束 API");
-
-  if (timerInterval.value) {
-    clearInterval(timerInterval.value);
-    timerInterval.value = null;
-  }
-
-  // 🔍 重新檢查 UID
-  if (!UID.value) {
-    console.log("UID 不存在，從後端重新獲取 UID");
-    const response = await API_MID_ProductName_UIDInfo();
-    if (response?.UID) {
-      UID.value = response.UID;
-    } else {
-      console.error("無法獲取有效的 UID，請重新檢測");
-      alert("無法結束，因為 UID 不存在，請重新檢測");
-      return;
-    }
-  }
-
-  const now = new Date();
-  const formattedEndTime = formatDateTime(now);
-
-  try {
-    await useEndAPI(UID.value, formattedEndTime);
-    console.log(`用戶放棄，已執行結束 API，UID: ${UID.value}, EndTime: ${formattedEndTime}`);
-
-    elapsedTime.value = 0;
-    startTimestamp.value = null;
-    isCounting.value = false;
-    hasAbandoned.value = true;
-    currentDetectionState.value = DetectionState.BEFORE;
-    isExpired.value = false;
-    UID.value = null;
-
-    console.log("用戶已放棄，狀態回到檢測前 (BEFORE)");
-  } catch (error) {
-    console.error("用戶放棄時執行結束 API 失敗:", error);
-  }
+const handleAbandon = () => {
+  console.log("用戶選擇放棄，不做 HRV 使用後檢測");
+  hasAbandoned.value = true; // 標記用戶選擇放棄
+  showTimePicker.value = true; // 顯示時間選擇 UI，但不強制 HRV 檢測
+  isExpired.value = false; // 隱藏超時狀態
+  currentDetectionState.value = DetectionState.BEFORE; // 重置狀態，確保 HRV 檢測不會被觸發
 };
-
-
-
-
 
 </script>
 
@@ -832,54 +776,5 @@ button:disabled {
   gap: 8px;
   align-items: center;
   justify-content: center;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-
-.modal-content {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  text-align: center;
-}
-
-.modal-content h3 {
-  margin-bottom: 10px;
-}
-
-.modal-buttons {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
-}
-
-.confirm-btn {
-  background-color: #74bc1f;
-  color: white;
-  padding: 8px 15px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.cancel-btn {
-  background-color: #ec4f4f;
-  color: white;
-  padding: 8px 15px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
 }
 </style>
