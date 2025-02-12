@@ -315,27 +315,34 @@ const formatDateTime = (dateTime) => {
 const handleComplete = async () => {
   console.log("正在處理結束邏輯...");
 
-  // 1️⃣ 停止計時器
+  // 1️⃣ 先檢查「使用前檢測」是否已完成
+  const isExitValue = await API_HRV2_UID_Flag_Info("1", UID.value);
+  if (isExitValue === "N") {
+    alert("尚未完成使用前檢測，無法結束！");
+    return;
+  }
+
+  // 2️⃣ 停止計時器
   if (timerInterval.value) {
     clearInterval(timerInterval.value);
     timerInterval.value = null;
   }
   isCounting.value = false;
 
-  // 2️⃣ 取得當前時間作為結束時間 (yyyyMMddHHmmss 格式)
+  // 3️⃣ 取得當前時間作為結束時間 (yyyyMMddHHmmss 格式)
   const now = new Date();
   const formattedEndTime = formatDateTime(now);
 
   try {
-    // 3️⃣ 調用 API，更新結束時間
+    // 4️⃣ 調用 API，更新結束時間
     await useEndAPI(formattedEndTime);
     console.log("結束 API 調用成功");
 
-    // 4️⃣ 更新 UI 狀態
+    // 5️⃣ 更新 UI 狀態
     currentDetectionState.value = DetectionState.AFTER;
     isExpired.value = false;
 
-    // 5️⃣ 進入使用後檢測流程
+    // 6️⃣ 進入使用後檢測流程
     detectHRVAfter(UID.value);
   } catch (error) {
     console.error("結束 API 調用失敗:", error);
