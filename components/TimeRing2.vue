@@ -501,6 +501,11 @@ const useEndAPI = async (endTime = "") => {
 const hasEndTime = ref(false); // 新增狀態來判斷是否有結束時間
 
 const API_UIDInfo_Search12 = async () => {
+  if (hasAbandoned.value) {
+    console.log("用戶已放棄，不執行 API_UIDInfo_Search12");
+    return;
+  }
+
   try {
     const response = await apiRequest(
       "https://23700999.com:8081/HMA/API_UIDInfo_Search12.jsp",
@@ -527,30 +532,22 @@ const API_UIDInfo_Search12 = async () => {
         const timeDifference = now - checkTime;
         const hoursDifference = timeDifference / (1000 * 60 * 60);
         const hasCompletedAfter = response.IsExit; // "N" 表示未完成
-        hasEndTime.value = response.EndTime ? true : false; // 判斷是否有結束時間
 
-        if (hoursDifference <= 0.01) {
-          // **未超過 12 小時，檢查是否完成使用後 HRV 檢測**
-          detectHRVAfter(response.UID);
+        if (hoursDifference <= 12) {
           if (hasCompletedAfter === "N") {
-            console.log(
-              "未超過 12 小時，尚未完成使用後 HRV 檢測，顯示提醒視窗"
-            );
-            alert("尚未完成使用後 HRV 檢測，請立即進行檢測！");
-         
+            console.log("未完成 HRV 使用後檢測，請立即進行");
+            alert("尚未完成使用後 HRV 檢測，請立即進行！");
+            detectHRVAfter(response.UID);
             return;
           }
         } else {
-          // **超過 12 小時，標記為 isExpired，但不彈出視窗**
-          console.log("已超過 12 小時，不彈出視窗，只變更 UI 狀態");
+          console.log("超過 12 小時，UI 標記為超時，但不強制 HRV 檢測");
           isExpired.value = true;
           currentDetectionState.value = DetectionState.AFTER;
           UID.value = response.UID;
-     
         }
       }
 
-      // **如果已完成 HRV 檢測，則正常進行 HRV 使用後檢測**
       console.log("使用後 HRV 檢測已完成，正常顯示『HRV檢測(使用後)』按鈕");
       UID.value = response.UID;
     }
@@ -558,6 +555,7 @@ const API_UIDInfo_Search12 = async () => {
     console.log("API 調用失敗：", err);
   }
 };
+
 
 const API_DeleteStart = async () => {
   try {
@@ -667,10 +665,13 @@ onMounted(async () => {
 });
 
 const handleAbandon = () => {
-  console.log("放棄檢測，請選擇結束時間");
-  showTimePicker.value = true; // 顯示時間選擇 UI
-  hasAbandoned.value = true; // 設定已放棄
+  console.log("用戶選擇放棄，不做 HRV 使用後檢測");
+  hasAbandoned.value = true; // 標記用戶選擇放棄
+  showTimePicker.value = true; // 顯示時間選擇 UI，但不強制 HRV 檢測
+  isExpired.value = false; // 隱藏超時狀態
+  currentDetectionState.value = DetectionState.BEFORE; // 重置狀態，確保 HRV 檢測不會被觸發
 };
+
 </script>
 
 <style scoped>
