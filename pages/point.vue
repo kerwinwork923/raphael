@@ -1070,6 +1070,7 @@ const goToPointRules = async () => {
         font-weight: 400;
         letter-spacing: 0.5px;
         margin: 1rem 0;
+        margin-bottom: 0.5rem;
       }
     }
 
