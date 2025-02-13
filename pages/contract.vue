@@ -390,7 +390,7 @@ export default {
 
         h3 {
           color: #1e1e1e;
-          font-family: "Noto Sans";
+          
           font-size: 20px;
           font-weight: 700;
           letter-spacing: 0.15px;

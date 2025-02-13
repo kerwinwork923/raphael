@@ -827,7 +827,7 @@ const goToPointRules = async () => {
       padding: 10px 12px;
       color: #fff;
       color: var(--shade-white, #fff);
-      font-family: "Noto Sans";
+      
       letter-spacing: var(--Title-Medium-Tracking, 0.15px);
       position: relative;
       .helperTitle {
@@ -835,7 +835,7 @@ const goToPointRules = async () => {
         align-items: center;
         gap: 4px;
         color: var(--shade-white, #fff);
-        font-family: "Noto Sans";
+        
         font-size: 20px;
         font-style: normal;
         font-weight: 400;
@@ -844,7 +844,7 @@ const goToPointRules = async () => {
       }
       p {
         color: var(--shade-white, #fff);
-        font-family: "Noto Sans";
+        
         font-size: 20px;
         font-style: normal;
         font-weight: 700;
@@ -856,7 +856,7 @@ const goToPointRules = async () => {
         margin-top: 0.5rem;
         color: var(--shade-white, #fff);
         text-align: center;
-        font-family: "Noto Sans";
+        
         font-size: 14px;
         font-style: normal;
         font-weight: 400;
@@ -932,7 +932,7 @@ const goToPointRules = async () => {
       .pointContentListItem {
         cursor: pointer;
         color: #eee;
-        font-family: "Noto Sans";
+        
         font-size: 18px;
         font-style: normal;
         font-weight: 400;
@@ -974,7 +974,7 @@ const goToPointRules = async () => {
         span {
           color: #1fbcb3;
           text-align: center;
-          font-family: "Noto Sans";
+          
           font-size: 16px;
           font-style: normal;
           font-weight: 400;
@@ -1003,7 +1003,7 @@ const goToPointRules = async () => {
           }
           .todayTaskItemNumber {
             color: #74bc1f;
-            font-family: "Noto Sans";
+            
             font-size: 18px;
             font-style: normal;
             font-weight: 400;
@@ -1023,7 +1023,7 @@ const goToPointRules = async () => {
             background-color: transparent;
             border-radius: 8px;
             border: 1px solid;
-            font-family: "Noto Sans";
+            
             font-size: 16px;
             font-style: normal;
             font-weight: 400;
@@ -1064,7 +1064,7 @@ const goToPointRules = async () => {
       }
       h6 {
         color: #1fbcb3;
-        font-family: "Noto Sans";
+        
         font-size: 16px;
         font-style: normal;
         font-weight: 400;
@@ -1183,7 +1183,7 @@ const goToPointRules = async () => {
           }
           h5 {
             color: #666;
-            font-family: "Noto Sans";
+            
             font-size: 16px;
             font-style: normal;
             font-weight: 400;
@@ -1192,7 +1192,7 @@ const goToPointRules = async () => {
           }
           h6 {
             color: var(--primary-orange-400, #feac4a);
-            font-family: "Noto Sans";
+            
             font-size: 14px;
             font-style: normal;
             font-weight: 400;
@@ -1226,7 +1226,7 @@ const goToPointRules = async () => {
           .exchangeRecordText {
             h4 {
               color: #1e1e1e;
-              font-family: "Noto Sans";
+              
               font-size: 20px;
               font-style: normal;
               font-weight: 400;
@@ -1235,7 +1235,7 @@ const goToPointRules = async () => {
             }
             h5 {
               color: #666;
-              font-family: "Noto Sans";
+              
               font-size: 16px;
               font-style: normal;
               font-weight: 400;
@@ -1244,7 +1244,7 @@ const goToPointRules = async () => {
               margin-top: 0.5rem;
             }
             h6 {
-              font-family: "Noto Sans";
+              
               font-size: 14px;
               font-style: normal;
               font-weight: 400;
@@ -1266,7 +1266,7 @@ const goToPointRules = async () => {
             border: none;
             background-color: transparent;
             color: $raphael-green-400;
-            font-family: "Noto Sans";
+            
             font-size: 16px;
             font-style: normal;
             font-weight: 400;
@@ -1318,7 +1318,7 @@ const goToPointRules = async () => {
         }
         .pointRulesNumber {
           color: #74bc1f;
-          font-family: "Noto Sans";
+          
           font-size: 18px;
           font-style: normal;
           font-weight: 400;
@@ -1354,7 +1354,7 @@ const goToPointRules = async () => {
     text-align: center;
     .verificationNumber {
       color: #bc581f;
-      font-family: "Noto Sans";
+      
       font-size: 2rem;
       font-style: normal;
       font-weight: 700;
@@ -1364,7 +1364,7 @@ const goToPointRules = async () => {
   }
   h4 {
     color: #1e1e1e;
-    font-family: "Noto Sans";
+    
     font-size: 24px;
     font-style: normal;
     font-weight: 700;
@@ -1374,7 +1374,7 @@ const goToPointRules = async () => {
   }
   h5 {
     color: #666;
-    font-family: "Noto Sans";
+    
     font-size: 16px;
     font-style: normal;
     font-weight: 400;
@@ -1431,7 +1431,7 @@ const goToPointRules = async () => {
   h4 {
     color: #1e1e1e;
     text-align: center;
-    font-family: "Noto Sans";
+    
     font-size: 24px;
     font-style: normal;
     font-weight: 700;
@@ -1440,7 +1440,7 @@ const goToPointRules = async () => {
   }
   h5 {
     color: #666;
-    font-family: "Noto Sans";
+    
     font-size: 16px;
     font-style: normal;
     font-weight: 400;
@@ -1457,7 +1457,7 @@ const goToPointRules = async () => {
     li {
       line-height: 1.4;
       color: #666;
-      font-family: "Noto Sans";
+      
       font-size: 18px;
       font-style: normal;
       font-weight: 400;

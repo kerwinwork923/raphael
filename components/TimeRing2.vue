@@ -805,7 +805,7 @@ const handleAbandon = async () => {
 .progress-container .delay-message {
   color: #ec4f4f;
   text-align: justify;
-  font-family: "Noto Sans";
+  
   font-size: 16px;
   font-style: normal;
   font-weight: 400;

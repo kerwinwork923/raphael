@@ -454,7 +454,7 @@ export default {
     }
 
     h1 {
-      font-family: "Noto Sans";
+      
       font-size: 1.5rem;
       font-weight: 400;
       letter-spacing: 0.5px;
