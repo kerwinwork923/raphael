@@ -1,10 +1,12 @@
 <template>
   <div class="progress-container">
+    <!-- 動態進度圓圈 -->
     <div class="progress-border" :style="{ background: progressGradient }">
       <div class="content">{{ formattedTime }}</div>
     </div>
 
     <div class="timerButtonGroup">
+      <!-- 當超時時，只顯示「放棄」和「結束」 -->
       <template v-if="isExpired">
         <div class="expired-options">
           <button
@@ -13,6 +15,7 @@
           >
             HRV檢測(使用後)
           </button>
+          <!-- ✅ 根據 hasEndTime 來決定是否顯示「結束」 -->
           <button
             v-if="!hasEndTime"
             style="background-color: #1fbcb3"
@@ -26,12 +29,12 @@
         </div>
       </template>
 
+      <!-- 當 **沒有** 超時時 -->
       <template v-else>
-        <!-- ✅ 重新檢測：新增確認框 -->
         <button
           v-if="currentDetectionState === DetectionState.RUNNING"
           style="background-color: #74bc1f; padding: 8px"
-          @click="confirmRestart"
+          @click="API_DeleteStart"
         >
           重新檢測
         </button>
@@ -42,6 +45,7 @@
       </template>
     </div>
 
+    <!-- 選擇結束時間 (放棄時顯示) -->
     <div v-if="showTimePicker" class="TimeRingForgetBox">
       <label>選擇結束時間:</label>
       <input type="datetime-local" v-model="selectedEndTime" />
@@ -103,27 +107,17 @@ const buttonText = computed(() => {
 
 // 顯示用時間格式，例如 "01:05:09"
 const formattedTime = computed(() => {
-  if (elapsedTime.value < 0) {
-    return "00:00:00"; // 直接歸零，避免 -1:-1:-1
-  }
-
   const hours = Math.floor(elapsedTime.value / 3600);
   const minutes = Math.floor((elapsedTime.value % 3600) / 60);
   const seconds = elapsedTime.value % 60;
-
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+    2,
+    "0"
+  )}:${String(seconds).padStart(2, "0")}`;
 });
-
 
 // 是否可點擊按鈕
 const isButtonEnabled = ref(true);
-
-// 重新檢測前確認
-const confirmRestart = () => {
-  if (confirm("確定要重新檢測嗎？這將會清除當前檢測進度！")) {
-    API_DeleteStart();
-  }
-};
 
 // UID / BID / Store ...
 const UID = ref(null);
@@ -176,10 +170,7 @@ const startTimer = () => {
     return;
   }
 
-  console.log(
-    "🚀 計時開始，startTimestamp =",
-    new Date(startTimestamp.value).toLocaleString()
-  );
+  console.log("🚀 計時開始，startTimestamp =", new Date(startTimestamp.value).toLocaleString());
 
   // **⚠️ 修正 UI 狀態異常**
   if (currentDetectionState.value !== DetectionState.RUNNING) {
@@ -193,6 +184,7 @@ const startTimer = () => {
     console.log("⏳ 計時中，已過時間：", elapsedTime.value, "秒");
   }, 1000);
 };
+
 
 // ---------------------- stopTimer ----------------------
 const stopTimer = async () => {
@@ -232,13 +224,8 @@ const detectHRVBefore = (UIDVal) => {
   store.detectUID = UIDVal;
   store.detectForm = props.productName;
   store.showHRVAlert = true;
-
-  // 🔥 **重設 startTimestamp，確保計時器正確啟動**
-  startTimestamp.value = Date.now();
-  elapsedTime.value = 0; // 確保計時不會出錯
   startTimer();
 };
-
 const detectHRVAfter = (UIDVal) => {
   store.detectFlag = "2";
   store.detectUID = UIDVal;
@@ -403,24 +390,14 @@ const API_MID_ProductName_UIDInfo = async () => {
     if (response.StartTime) {
       // ✅ 解析 StartTime
       const startTime = new Date(
-        `${response.StartTime.slice(0, 4)}-${response.StartTime.slice(
-          4,
-          6
-        )}-${response.StartTime.slice(6, 8)}T${response.StartTime.slice(
-          8,
-          10
-        )}:${response.StartTime.slice(10, 12)}:${response.StartTime.slice(12)}`
+        `${response.StartTime.slice(0, 4)}-${response.StartTime.slice(4, 6)}-${response.StartTime.slice(6, 8)}T${response.StartTime.slice(8, 10)}:${response.StartTime.slice(10, 12)}:${response.StartTime.slice(12)}`
       ).getTime();
 
       startTimestamp.value = startTime;
       const now = Date.now();
       elapsedTime.value = Math.floor((now - startTime) / 1000);
-
-      console.log(
-        `⏳ StartTime 設定為: ${new Date(
-          startTimestamp.value
-        ).toLocaleString()}`
-      );
+      
+      console.log(`⏳ StartTime 設定為: ${new Date(startTimestamp.value).toLocaleString()}`);
       console.log(`⏳ 經過時間計算結果: ${elapsedTime.value} 秒`);
 
       return response;
@@ -432,6 +409,7 @@ const API_MID_ProductName_UIDInfo = async () => {
   }
   return null;
 };
+
 
 const API_HRV2_UID_Flag_Info = async (Flag, UIDVal) => {
   if (!UIDVal) {
@@ -624,10 +602,7 @@ onMounted(async () => {
         console.log("✅ 成功獲取有效的 UID：", UID.value);
 
         // 🔍 確認 HRV 前測是否完成
-        const isBeforeTestCompleted = await API_HRV2_UID_Flag_Info(
-          "1",
-          UID.value
-        );
+        const isBeforeTestCompleted = await API_HRV2_UID_Flag_Info("1", UID.value);
         console.log("🔎 HRV 前測紀錄:", isBeforeTestCompleted);
 
         if (isBeforeTestCompleted === "Y") {
@@ -640,10 +615,7 @@ onMounted(async () => {
         }
 
         // 🔍 確認 HRV 後測是否完成
-        const isAfterTestCompleted = await API_HRV2_UID_Flag_Info(
-          "2",
-          UID.value
-        );
+        const isAfterTestCompleted = await API_HRV2_UID_Flag_Info("2", UID.value);
         console.log("🔎 HRV 後測紀錄:", isAfterTestCompleted);
 
         if (isAfterTestCompleted === "Y") {
@@ -656,25 +628,13 @@ onMounted(async () => {
           console.log("⏳ 獲取 StartTime，恢復計時...");
 
           startTimestamp.value = new Date(
-            `${response.StartTime.slice(0, 4)}-${response.StartTime.slice(
-              4,
-              6
-            )}-${response.StartTime.slice(6, 8)}T${response.StartTime.slice(
-              8,
-              10
-            )}:${response.StartTime.slice(10, 12)}:${response.StartTime.slice(
-              12
-            )}`
+            `${response.StartTime.slice(0, 4)}-${response.StartTime.slice(4, 6)}-${response.StartTime.slice(6, 8)}T${response.StartTime.slice(8, 10)}:${response.StartTime.slice(10, 12)}:${response.StartTime.slice(12)}`
           ).getTime();
 
           const now = Date.now();
           elapsedTime.value = Math.floor((now - startTimestamp.value) / 1000);
-
-          console.log(
-            `⏳ StartTime 設定為: ${new Date(
-              startTimestamp.value
-            ).toLocaleString()}`
-          );
+          
+          console.log(`⏳ StartTime 設定為: ${new Date(startTimestamp.value).toLocaleString()}`);
           console.log(`⏳ 計時器恢復，已過時間: ${elapsedTime.value} 秒`);
 
           // **⚠️ 修正 UI 異常**
