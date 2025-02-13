@@ -78,6 +78,35 @@
             v-model="PNS"
           />
         </div>
+
+        <div class="heartCommonGroup">
+          <img class="icon1" src="../../assets/imgs/healthDataR.svg" alt="" />
+          <input
+            type="text"
+            placeholder="選擇您的血壓計測量手"
+            v-model="BPHand"
+          />
+        </div>
+        <div class="heartCommonGroup">
+          <img class="icon1" src="../../assets/imgs/healthDataR.svg" alt="" />
+          <input
+            type="text"
+            placeholder="請輸入您的血壓計收縮壓"
+            v-model="MSBP"
+          />
+        </div>
+        <div class="heartCommonGroup">
+          <img class="icon1" src="../../assets/imgs/healthDataR.svg" alt="" />
+          <input
+            type="text"
+            placeholder="請輸入您的血壓計舒張壓"
+            v-model="MDBP"
+          />
+        </div>
+        <div class="heartCommonGroup">
+          <img class="icon1" src="../../assets/imgs/healthDataR.svg" alt="" />
+          <input type="text" placeholder="請輸入您的血壓計心率" v-model="MHR" />
+        </div>
       </div>
     </div>
     <div class="healthDataBtnGroup">
@@ -183,7 +212,8 @@
   .heartSDNNGroup,
   .heartRMSSDGroup,
   .heartSNSGroup,
-  .heartPNSroup {
+  .heartPNSroup,
+  .heartCommonGroup {
     position: relative;
     margin-bottom: 1rem;
 
@@ -259,6 +289,11 @@ export default {
     const RMSSD = ref("");
     const SNS = ref("");
     const PNS = ref("");
+    const BPHand = ref(""); // 左右手
+    const MSBP = ref(""); // 機器收縮壓
+    const MDBP = ref(""); // 機器舒張壓
+    const MHR = ref(""); // 機器心跳
+
     const loading = ref(false);
 
     const alertVisable = ref(false);
@@ -297,14 +332,22 @@ export default {
           }
         );
 
+        console.log("API 回傳的 HRV 數據:", response.data);
+
         if (response.status === 200) {
           const data = response.data?.HRV2Detail || {};
-          age.value = data.ltage || ""; // 生理年齡
-          heartBeat.value = data.ltHR || ""; // 平均心率
-          SDNN.value = data.ltSDNN || ""; // SDNN
-          RMSSD.value = data.ltRMSSD || ""; // RMSSD
-          SNS.value = data.ltLF || ""; // 交感神經
-          PNS.value = data.ltHF || ""; // 副交感神經
+          age.value = data.ltage || "";
+          heartBeat.value = data.ltHR || "";
+          SDNN.value = data.ltSDNN || "";
+          RMSSD.value = data.ltRMSSD || "";
+          SNS.value = data.ltLF || "";
+          PNS.value = data.ltHF || "";
+
+          // 確保這 4 個欄位有值
+          BPHand.value = data.BPHand || "";
+          MSBP.value = data.MSBP || "";
+          MDBP.value = data.MDBP || "";
+          MHR.value = data.MHR || "";
         } else {
           throw new Error("伺服器返回非預期結果。");
         }
@@ -344,6 +387,10 @@ export default {
             ltHR: heartBeat.value,
             ltSDNN: SDNN.value,
             ltRMSSD: RMSSD.value,
+            BPHand: BPHand.value,
+            MSBP: MSBP.value,
+            MDBP: MDBP.value,
+            MHR: MHR.value,
           }
         );
 
@@ -383,6 +430,10 @@ export default {
       handleClose,
       isSelected,
       loading,
+      BPHand,
+      MSBP,
+      MDBP,
+      MHR,
     };
   },
 };
