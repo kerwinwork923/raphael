@@ -285,6 +285,7 @@ console.log("Store狀態:", pointStore.privillage);
         display: flex;
         align-items: center;
         gap: 4px;
+        white-space: nowrap;
       }
     }
     .consumingRecordsItem1 {
