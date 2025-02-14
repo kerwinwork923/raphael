@@ -395,7 +395,7 @@ export default {
         box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.25);
         backdrop-filter: blur(4.5px);
         color: #ec4f4f;
-        font-family: "Noto Sans";
+        
         font-size: 16px;
         font-style: normal;
         font-weight: 700;

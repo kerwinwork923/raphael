@@ -286,7 +286,7 @@ async function doExchange() {
 
     h3 {
       color: #1e1e1e;
-      font-family: "Noto Sans";
+      
       font-size: 20px;
       font-weight: 700;
       letter-spacing: 0.15px;
@@ -398,7 +398,7 @@ async function doExchange() {
   z-index: 100;
   h3 {
     color: #74bc1f;
-    font-family: "Noto Sans";
+    
     font-size: 24px;
     font-weight: 700;
     text-align: center;
@@ -416,7 +416,7 @@ async function doExchange() {
   }
   h4 {
     color: #1e1e1e;
-    font-family: "Noto Sans";
+    
     font-size: 24px;
     font-weight: 700;
     text-align: center;
@@ -428,7 +428,7 @@ async function doExchange() {
     margin-top: 0.35rem;
     small {
       color: #666;
-      font-family: "Noto Sans";
+      
       font-size: 16px;
       font-weight: 400;
     }
@@ -436,7 +436,7 @@ async function doExchange() {
       margin-top: 1.25rem;
       li {
         color: #666;
-        font-family: "Noto Sans";
+        
         font-size: 18px;
         font-weight: 400;
         line-height: 150%;
@@ -467,7 +467,7 @@ async function doExchange() {
     }
     h5 {
       color: #bc581f;
-      font-family: "Noto Sans";
+      
       font-size: 18px;
       font-weight: 400;
     }
@@ -484,7 +484,7 @@ async function doExchange() {
       border: none;
       border-radius: 8px;
       color: #666;
-      font-family: "Noto Sans";
+      
       font-size: 18px;
       font-weight: 400;
       cursor: pointer;
@@ -519,7 +519,7 @@ async function doExchange() {
     text-align: center;
     .verificationNumber {
       color: #bc581f;
-      font-family: "Noto Sans";
+      
       font-size: 2rem;
       font-style: normal;
       font-weight: 700;
@@ -529,7 +529,7 @@ async function doExchange() {
   }
   h4 {
     color: #1e1e1e;
-    font-family: "Noto Sans";
+    
     font-size: 24px;
     font-style: normal;
     font-weight: 700;
@@ -539,7 +539,7 @@ async function doExchange() {
   }
   h5 {
     color: #666;
-    font-family: "Noto Sans";
+    
     font-size: 16px;
     font-style: normal;
     font-weight: 400;

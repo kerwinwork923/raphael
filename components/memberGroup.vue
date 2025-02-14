@@ -246,7 +246,7 @@ console.log("Store狀態:", pointStore.privillage);
       width: 75%;
       h3 {
         color: #1e1e1e;
-        font-family: "Noto Sans";
+        
         font-size: 20px;
         font-weight: 700;
         letter-spacing: 0.15px;
@@ -254,7 +254,7 @@ console.log("Store狀態:", pointStore.privillage);
       p {
         color: #666;
         margin-top: 0.25rem;
-        font-family: "Noto Sans";
+        
         font-size: 16px;
         font-weight: 400;
         line-height: 25.888px;
@@ -271,7 +271,7 @@ console.log("Store狀態:", pointStore.privillage);
     width: 100%;
     .consumingRecordsItem {
       color: #ccc;
-      font-family: "Noto Sans";
+      
       font-size: 14px;
       letter-spacing: 0.048px;
       line-height: 1.25;
@@ -285,6 +285,7 @@ console.log("Store狀態:", pointStore.privillage);
         display: flex;
         align-items: center;
         gap: 4px;
+        white-space: nowrap;
       }
     }
     .consumingRecordsItem1 {

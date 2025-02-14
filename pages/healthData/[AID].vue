@@ -122,7 +122,7 @@
   padding: 0 1rem;
   .healthDataContentTitle {
     color: #1e1e1e;
-    font-family: "Noto Sans";
+    
     font-size: 20px;
     font-style: normal;
     font-weight: 400;
