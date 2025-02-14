@@ -570,7 +570,7 @@ const API_UIDInfo_Search12 = async () => {
         const timeDifference = now - checkTime;
         const hoursDifference = timeDifference / (1000 * 60 * 60);
 
-        if (hoursDifference > 12) {
+        if (hoursDifference < 12) {
           console.log("⚠️ 超過 12 小時，設定 isExpired 為 true");
           isExpired.value = true;
         } else {
