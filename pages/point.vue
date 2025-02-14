@@ -841,6 +841,7 @@ const goToPointRules = async () => {
         font-weight: 400;
         line-height: 100%; /* 20px */
         letter-spacing: var(--Title-Medium-Tracking, 0.15px);
+        margin-bottom: 1rem;
       }
       p {
         color: var(--shade-white, #fff);
@@ -853,7 +854,7 @@ const goToPointRules = async () => {
       }
       h6 {
         text-align: center;
-        margin-top: 0.5rem;
+        margin-top: 0.75rem;
         color: var(--shade-white, #fff);
         text-align: center;
         
