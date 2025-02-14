@@ -70,10 +70,14 @@
         </div>
       </div>
 
-      <div class="babyInfoGroup">
+      <div class="babyInfoGroup" v-for="index in 3" :key="index">
         <h4>新增寶貝基本資料</h4>
         <div class="babyInfo">
-          <small>#1</small>
+          <div class="babyInfoOption">
+            <small>#1</small>
+            <img src="/assets/imgs/trash.svg" alt="" />
+          </div>
+
           <div class="babyRecordInfoInput">
             <img
               class="icon1"
@@ -82,28 +86,57 @@
             />
             <input type="text" placeholder="請輸入寶貝姓名" />
           </div>
+          <h6 v-if="a">此欄位沒有填寫到喔</h6>
           <div class="babyRecordInfoInput">
             <img class="icon1" src="../assets/imgs/babyRecordS.svg" alt="" />
             <div class="ageGroup">
               <select
                 v-model="age"
-                :class="['custom-select', { 'has-value': isSelected }]"
+                :class="['custom-select', { 'has-value': age !== '' }]"
               >
-                <option value="" disabled selected hidden>
-                  請選擇生理年齡
-                </option>
-                <option value="0">男性</option>
-                <option value="1">女性</option>
+                <option value="" disabled hidden>請選擇生理年齡</option>
+                <option value="male">男性</option>
+                <option value="female">女性</option>
               </select>
               <img class="icon2" src="../assets/imgs/arrowDown.svg" />
             </div>
           </div>
-
+          <h6 v-if="a">此欄位沒有填寫到喔</h6>
           <div class="babyRecordInfoInput">
             <img class="icon1" src="../assets/imgs/babyRecordFace.png" alt="" />
             <input type="text" placeholder="請輸入寶貝姓名" />
           </div>
+          <h6 v-if="a">此欄位沒有填寫到喔</h6>
         </div>
+      </div>
+      <div class="babyInfoAdd">
+        繼續新增寶貝基本資料
+        <span><img src="/assets/imgs/babyInfoAdd.svg" alt="" /></span>
+      </div>
+
+      <div
+        class="weeklyBtnGroup"
+        v-if="
+          store.nowState === 'score' ||
+          store.nowState === 'times' ||
+          store.nowState === 'choose'
+        "
+      >
+        <button
+          class="weeklyBtn preBtn"
+          @click="store.handlePrevStep"
+          :disabled="preDisabled"
+          v-if="
+            !(store.nowState === 'score' && store.currentStep === 1) &&
+            !(store.nowState === 'times' && store.timesStep === 1) &&
+            !(store.nowState === 'choose' && store.timesStep === 1)
+          "
+        >
+          {{ store.preText }}
+        </button>
+        <button class="weeklyBtn" @click="store.handleNextStep">
+          {{ store.nextText }}
+        </button>
       </div>
     </div>
   </div>
@@ -112,11 +145,12 @@
 <script>
 import TitleMenu from "~/components/TitleMenu.vue";
 import { useCommon } from "@/stores/common";
+import { ref } from "vue";
 export default {
   setup() {
     const store = useWeeklyRecord();
     const common = useCommon();
-
+    const age = ref("");
     const h1Text = computed(() => {
       switch (store.nowState) {
         case "score":
@@ -129,7 +163,7 @@ export default {
           return "健康紀錄";
       }
     });
-    return { h1Text };
+    return { h1Text, age, store, common };
   },
 };
 </script>
@@ -268,12 +302,36 @@ export default {
     padding: 12px;
     border-radius: 12px;
     background-color: #fff;
+    margin-bottom: 0.75rem;
+  }
+  .babyInfoOption {
+    display: flex;
+    justify-content: space-between;
+    small {
+      color: #b3b3b3;
+    }
+    img {
+      cursor: pointer;
+    }
+  }
+  h6 {
+    color: #ff0000;
+    font-size: 12px;
   }
 }
+.babyInfoAdd {
+  display: flex;
+  align-items: center;
+  color: #ec4f4f;
+  gap: 2px;
 
+  img {
+    width: 0.85rem;
+  }
+}
 .babyRecordInfoInput {
   position: relative;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 
   .icon1 {
     position: absolute;
@@ -323,16 +381,23 @@ export default {
     appearance: none;
     background: url("../assets/imgs/arrow-down.svg") no-repeat right 10px center;
     background-size: 12px;
-    color: $raphael-gray-300;
     font-size: 1.2rem;
-
     padding-left: 36px;
     padding-bottom: 12px;
     padding-top: 16px;
+    width: 100%;
+    border: none;
+    outline: none;
+    border-bottom: 1px solid $raphael-gray-300;
+    color: $raphael-gray-300; // 預設顏色為灰色
 
     &.has-value {
-      color: $raphael-black; // 選擇後變為黑色
+      color: $raphael-black !important; // 選擇後變為黑色
     }
+  }
+
+  .custom-select.selected {
+    color: $raphael-black;
   }
 }
 </style>
