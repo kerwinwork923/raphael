@@ -103,17 +103,20 @@ const buttonText = computed(() => {
 
 // 顯示用時間格式，例如 "01:05:09"
 const formattedTime = computed(() => {
-  if (elapsedTime.value < 0) {
-    return "00:00:00"; // 直接歸零，避免 -1:-1:-1
+  // **確保 elapsedTime 為 0 時顯示 "00:00:00"**
+  if (!elapsedTime.value || elapsedTime.value <= 0) {
+    return "00:00:00";
   }
 
   const hours = Math.floor(elapsedTime.value / 3600);
   const minutes = Math.floor((elapsedTime.value % 3600) / 60);
   const seconds = elapsedTime.value % 60;
 
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+    2,
+    "0"
+  )}:${String(seconds).padStart(2, "0")}`;
 });
-
 
 // 是否可點擊按鈕
 const isButtonEnabled = ref(true);
@@ -238,10 +241,6 @@ const stopTimer = async () => {
   }
 };
 
-
-
-
-
 // ---------- 使用前/使用後檢測邏輯 ----------
 const detectHRVBefore = (UIDVal) => {
   store.detectFlag = "1";
@@ -270,24 +269,29 @@ const toggleTimer = async () => {
       if (UID.value) {
         console.log("已有 UID，從 API 時間開始 HRV 檢測");
         const response = await API_MID_ProductName_UIDInfo();
+        
         if (response?.StartTime) {
-          // 先把後端的 StartTime 轉成毫秒
+          console.log("✅ API 取得 StartTime:", response.StartTime);
+
           const startTime = new Date(
             `${response.StartTime.slice(0, 4)}-${response.StartTime.slice(
-              4,
-              6
+              4, 6
             )}-${response.StartTime.slice(6, 8)}T${response.StartTime.slice(
-              8,
-              10
+              8, 10
             )}:${response.StartTime.slice(10, 12)}:${response.StartTime.slice(
               12
             )}`
           ).getTime();
 
-          // 這裡同時更新 startTimestamp + elapsedTime
           startTimestamp.value = startTime;
           elapsedTime.value = Math.floor((Date.now() - startTime) / 1000);
+
+          console.log("🚀 `startTimestamp` 設定成功:", startTimestamp.value);
+        } else {
+          console.error("❌ 無法取得 StartTime，無法啟動計時器");
+          return;
         }
+
         startTimer();
       } else {
         console.log("未找到 UID，創建新的 HRV 檢測");
@@ -295,25 +299,26 @@ const toggleTimer = async () => {
         if (response?.UID) {
           detectHRVBefore(response.UID);
         } else {
-          console.error("創建 UID 失敗");
+          console.error("❌ 創建 UID 失敗");
         }
       }
       break;
 
     case DetectionState.RUNNING:
-      console.log("結束 HRV 檢測");
+      console.log("🛑 結束 HRV 檢測");
       await stopTimer();
       break;
 
     case DetectionState.AFTER:
-      // 也可以手動執行使用後檢測
+      console.log("⚡ 進行 HRV 使用後檢測");
       detectHRVAfter(UID.value);
       break;
 
     default:
-      console.error("未知檢測狀態");
+      console.error("❓ 未知檢測狀態");
   }
 };
+
 
 // 確認結束時間
 const confirmEndTime = async () => {
@@ -526,7 +531,7 @@ const hasEndTime = ref(false); // 新增狀態來判斷是否有結束時間
 //有 開始 結束時間 有ProductName條件   有檢測前資料  無檢測後資料  最新UID資料
 const API_UIDInfo_Search12 = async () => {
   if (hasAbandoned.value) {
-    console.log("用戶已放棄，不執行 API_UIDInfo_Search12");
+    console.log("🚫 用戶已放棄，不執行 API_UIDInfo_Search12");
     return;
   }
 
@@ -539,6 +544,23 @@ const API_UIDInfo_Search12 = async () => {
     if (response && response.Result !== "NOData") {
       UID.value = response.UID;
       console.log("🔍 取得 UID:", UID.value);
+
+      // 🔍 **檢查 State，避免繼續執行**
+      if (response.State === "1") {
+        console.log("🚫 使用者已放棄檢測 (State=1)，停止後續流程");
+        
+        // ✅ **標記已放棄**
+        hasAbandoned.value = true;
+
+        // ✅ **確保時間歸零**
+        elapsedTime.value = 0;
+        startTimestamp.value = null;
+
+        // ✅ **更新 UI 狀態**
+        currentDetectionState.value = DetectionState.BEFORE;
+
+        return; // **❌ 直接停止，不再執行後續 API**
+      }
 
       // 🔍 檢查 HRV 後測是否完成 (IsExit: "N" 代表未完成)
       if (response.IsExit === "N") {
@@ -570,7 +592,7 @@ const API_UIDInfo_Search12 = async () => {
         const timeDifference = now - checkTime;
         const hoursDifference = timeDifference / (1000 * 60 * 60);
 
-        if (hoursDifference < 12) {
+        if (hoursDifference >= 0) {
           console.log("⚠️ 超過 12 小時，設定 isExpired 為 true");
           isExpired.value = true;
         } else {
@@ -583,7 +605,7 @@ const API_UIDInfo_Search12 = async () => {
       hasEndTime.value = true;
       console.log("✅ 已完成 HRV 使用後檢測，不再顯示『結束』按鈕");
     } else {
-      console.log("❌ 沒有找到對應的數據，可能未進行測試");
+      console.log("❌ API_UIDInfo_Search12 沒有找到對應的數據，可能未進行測試");
     }
   } catch (err) {
     console.log("❌ API_UIDInfo_Search12 調用失敗:", err);
@@ -640,17 +662,30 @@ onMounted(async () => {
     if (response) {
       UID.value = response.UID;
 
-      // **1️⃣ 判斷 State 是否為 1（已放棄）**
+      // 1️⃣ 判斷 State 是否為 1（已放棄）
       if (response.State === "1") {
         console.log("🚫 使用者已放棄檢測 (State=1)，停止後續流程");
+
+        // ✅ **標記已放棄**
         hasAbandoned.value = true;
-        return; // **停止所有檢測流程**
+
+        // ✅ **確保時間歸零**
+        elapsedTime.value = 0;
+        startTimestamp.value = null;
+
+        // ✅ **更新 UI 狀態**
+        currentDetectionState.value = DetectionState.BEFORE;
+
+        return; // ❌ **直接停止，不再執行 `API_UIDInfo_Search12()`**
       }
 
       console.log("✅ 成功獲取有效的 UID：", UID.value);
 
-      // **2️⃣ 確認 HRV 前測是否完成**
-      const isBeforeTestCompleted = await API_HRV2_UID_Flag_Info("1", UID.value);
+      // 2️⃣ 確認 HRV 前測是否完成
+      const isBeforeTestCompleted = await API_HRV2_UID_Flag_Info(
+        "1",
+        UID.value
+      );
       console.log("🔎 HRV 前測紀錄:", isBeforeTestCompleted);
 
       if (isBeforeTestCompleted === "Y") {
@@ -662,7 +697,7 @@ onMounted(async () => {
         currentDetectionState.value = DetectionState.BEFORE;
       }
 
-      // **3️⃣ 確認 HRV 後測是否完成**
+      // 3️⃣ 確認 HRV 後測是否完成
       const isAfterTestCompleted = await API_HRV2_UID_Flag_Info("2", UID.value);
       console.log("🔎 HRV 後測紀錄:", isAfterTestCompleted);
 
@@ -671,21 +706,31 @@ onMounted(async () => {
         currentDetectionState.value = DetectionState.AFTER;
       }
 
-      // **4️⃣ 設定計時器**
+      // 4️⃣ 設定計時器
       if (response.StartTime) {
         console.log("⏳ 獲取 StartTime，恢復計時...");
-
         startTimestamp.value = new Date(
-          `${response.StartTime.slice(0, 4)}-${response.StartTime.slice(4, 6)}-${response.StartTime.slice(6, 8)}T${response.StartTime.slice(8, 10)}:${response.StartTime.slice(10, 12)}:${response.StartTime.slice(12)}`
+          `${response.StartTime.slice(0, 4)}-${response.StartTime.slice(
+            4,
+            6
+          )}-${response.StartTime.slice(6, 8)}T${response.StartTime.slice(
+            8,
+            10
+          )}:${response.StartTime.slice(10, 12)}:${response.StartTime.slice(
+            12
+          )}`
         ).getTime();
 
         const now = Date.now();
         elapsedTime.value = Math.floor((now - startTimestamp.value) / 1000);
 
-        console.log(`⏳ StartTime 設定為: ${new Date(startTimestamp.value).toLocaleString()}`);
+        console.log(
+          `⏳ StartTime 設定為: ${new Date(
+            startTimestamp.value
+          ).toLocaleString()}`
+        );
         console.log(`⏳ 計時器恢復，已過時間: ${elapsedTime.value} 秒`);
 
-        // **⚠️ 修正 UI 異常**
         if (elapsedTime.value > 0) {
           console.log("🔄 自動切換至 RUNNING 狀態");
           currentDetectionState.value = DetectionState.RUNNING;
@@ -695,7 +740,65 @@ onMounted(async () => {
         console.warn("⚠️ StartTime 不存在，計時器將從 0 開始");
       }
     } else {
-      console.warn("❌ 無法獲取使用者資料");
+      console.warn("❌ 無法獲取使用者資料，檢查 API_UIDInfo_Search12()");
+
+      // 🔍 **當 `NoData` 時，執行額外檢查**
+      const search12Response = await API_UIDInfo_Search12();
+
+      if (search12Response && search12Response.StartTime) {
+        console.log("⏳ API_UIDInfo_Search12() 取得 StartTime，恢復計時...");
+        startTimestamp.value = new Date(
+          `${search12Response.StartTime.slice(
+            0,
+            4
+          )}-${search12Response.StartTime.slice(
+            4,
+            6
+          )}-${search12Response.StartTime.slice(
+            6,
+            8
+          )}T${search12Response.StartTime.slice(
+            8,
+            10
+          )}:${search12Response.StartTime.slice(
+            10,
+            12
+          )}:${search12Response.StartTime.slice(12)}`
+        ).getTime();
+
+        const now = Date.now();
+        elapsedTime.value = Math.floor((now - startTimestamp.value) / 1000);
+
+        console.log(
+          `⏳ StartTime 設定為: ${new Date(
+            startTimestamp.value
+          ).toLocaleString()}`
+        );
+        console.log(`⏳ 計時器恢復，已過時間: ${elapsedTime.value} 秒`);
+
+        if (elapsedTime.value > 0) {
+          console.log("🔄 自動切換至 RUNNING 狀態");
+          currentDetectionState.value = DetectionState.RUNNING;
+          startTimer();
+        }
+      } else {
+        console.warn(
+          "⚠️ API_UIDInfo_Search12() 也無資料，使用 `hasDetectTime` 預設值"
+        );
+
+        if (props.hasDetectTime && props.hasDetectTime !== "00:00:00") {
+          console.log(`🕒 使用預設時間: ${props.hasDetectTime}`);
+
+          const timeParts = props.hasDetectTime.split(":").map(Number);
+          elapsedTime.value =
+            timeParts[0] * 3600 + timeParts[1] * 60 + timeParts[2];
+
+          console.log(`✅ 轉換後 elapsedTime: ${elapsedTime.value} 秒`);
+        } else {
+          console.warn("❌ 無法取得時間資訊，顯示 `00:00:00`");
+          elapsedTime.value = 0;
+        }
+      }
     }
   } catch (error) {
     console.error("❌ 初始化失敗：", error);
@@ -703,39 +806,51 @@ onMounted(async () => {
 });
 
 const handleAbandon = async () => {
-    console.log("🚨 用戶選擇放棄，設定 State=1 並結束測試");
+  console.log("🚨 用戶選擇放棄，設定 State=1 並結束測試");
 
-    if (!UID.value) {
-        console.warn("⚠️ 無法執行放棄，因為 UID 為空");
-        return;
+  if (!UID.value) {
+    console.warn("⚠️ 無法執行放棄，因為 UID 為空");
+    return;
+  }
+
+  try {
+    // 🟢 設定 State 為 1，代表使用者已放棄
+    await apiRequest("https://23700999.com:8081/HMA/API_UIDState.jsp", {
+      MID,
+      Token,
+      MAID,
+      Mobile,
+      UID: UID.value,
+      State: "1",
+    });
+
+    console.log("✅ 已成功設定 State=1");
+
+    // 🟢 **確保計時器停止**
+    if (timerInterval.value) {
+      clearInterval(timerInterval.value);
+      timerInterval.value = null;
     }
+    isCounting.value = false;
 
-    try {
-        // 🟢 設定 State 為 1，代表使用者已放棄
-        await apiRequest("https://23700999.com:8081/HMA/API_UIDState.jsp", {
-            MID,
-            Token,
-            MAID,
-            Mobile,
-            UID: UID.value,
-            State: "1",
-        });
+    // 🟢 **確保時間重置**
+    elapsedTime.value = 0;
+    startTimestamp.value = null;
 
-        console.log("✅ 已成功設定 State=1");
+    // ✅ **更新 UI 狀態**
+    currentDetectionState.value = DetectionState.BEFORE;
+    isExpired.value = false;
+    UID.value = null;
+    hasAbandoned.value = true;
 
-        // 🟢 結束測試
-        await useEndAPI();
+    console.log("⏹ 時鐘已重置為 00:00:00");
 
-        // 🟢 更新 UI 狀態
-        hasAbandoned.value = true;
-        currentDetectionState.value = DetectionState.BEFORE;
-        isExpired.value = false;
-        UID.value = null;
+    // ✅ **強制 UI 更新**
+    await nextTick();
 
-        console.log("✅ 用戶選擇放棄，測試已結束");
-    } catch (error) {
-        console.error("❌ 放棄失敗:", error);
-    }
+  } catch (error) {
+    console.error("❌ 放棄失敗:", error);
+  }
 };
 
 </script>
@@ -752,7 +867,7 @@ const handleAbandon = async () => {
 .progress-container .delay-message {
   color: #ec4f4f;
   text-align: justify;
-  
+
   font-size: 16px;
   font-style: normal;
   font-weight: 400;
