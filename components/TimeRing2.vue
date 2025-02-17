@@ -567,7 +567,8 @@ const API_UIDInfo_Search12 = async () => {
       if (checkTime) {
         const now = new Date();
         const hoursDifference = (now - checkTime) / (1000 * 60 * 60);
-        if (hoursDifference > 24) {
+        if (hoursDifference > 0.1) {
+          alert("asd")
           console.log("超過 24 小時，不進行後續判斷");
           return; // 超過 24 小時就跳出
         }
