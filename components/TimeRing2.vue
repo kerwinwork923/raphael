@@ -5,7 +5,7 @@
     </div>
 
     <div class="timerButtonGroup">
-      <template v-if="isExpired">
+      <template v-if="isExpired && !hasAbandoned">
         <div class="expired-options">
           <button
             style="background-color: #74bc1f"
@@ -533,11 +533,6 @@ const hasEndTime = ref(false); // 新增狀態來判斷是否有結束時間
 
 //有 開始 結束時間 有ProductName條件   有檢測前資料  無檢測後資料  最新UID資料
 const API_UIDInfo_Search12 = async () => {
-  // if (hasAbandoned.value) {
-  //   console.log("用戶已放棄，不執行 API_UIDInfo_Search12");
-  //   return;
-  // }
-
   try {
     const response = await apiRequest(
       "https://23700999.com:8081/HMA/API_UIDInfo_Search12.jsp",
@@ -545,59 +540,55 @@ const API_UIDInfo_Search12 = async () => {
     );
 
     if (response && response.Result !== "NOData") {
+      // 先取出並檢查 CheckTime 是否存在
+      const checkTime = response.CheckTime
+        ? new Date(
+            `${response.CheckTime.slice(0, 4)}-${response.CheckTime.slice(4, 6)}-${response.CheckTime.slice(6, 8)}T${response.CheckTime.slice(8, 10)}:${response.CheckTime.slice(10, 12)}:${response.CheckTime.slice(12)}`
+          )
+        : null;
+      if (checkTime) {
+        const now = new Date();
+        const hoursDifference = (now - checkTime) / (1000 * 60 * 60);
+        if (hoursDifference > 24) {
+          console.log("超過 24 小時，不進行後續判斷");
+          return; // 超過 24 小時就跳出，不再處理後續邏輯
+        }
+      }
+
+      // 接著檢查是否放棄（State 為 "1"）
       if (response.State === "1") {
         console.log("使用者已放棄檢測，正在重置計時與狀態");
         doReset();
-        // 如果你希望讓使用者能夠再次開始，則需要確保放棄的標記被清除
-        hasAbandoned.value = false;
-        // 不要 return，讓後續初始化繼續執行
+        hasAbandoned.value = false; // 如果希望允許重新開始，可清除放棄標記
+        return;
       }
-      UID.value = response.UID;
 
+      // 如果不是放棄狀態，繼續後續邏輯：
+      UID.value = response.UID;
       console.log("🔍 取得 UID:", UID.value);
 
-      // 🔍 檢查 HRV 後測是否完成 (IsExit: "N" 代表未完成)
+      // 檢查 HRV 後測是否完成 (IsExit: "N" 代表未完成)
       if (response.IsExit === "N") {
         isExpired.value = true;
         console.log("⚠️ 未完成 HRV 使用後檢測，請立即進行");
         alert("尚未完成使用後 HRV 檢測，請立即進行！");
-        // detectHRVAfter(response.UID);
-
         return;
       }
-
       console.log("✅ HRV 使用後檢測已完成");
 
-      // 🔍 確認時間是否超過 12 小時
-      const checkTime = response.CheckTime
-        ? new Date(
-            `${response.CheckTime.slice(0, 4)}-${response.CheckTime.slice(
-              4,
-              6
-            )}-${response.CheckTime.slice(6, 8)}T${response.CheckTime.slice(
-              8,
-              10
-            )}:${response.CheckTime.slice(10, 12)}:${response.CheckTime.slice(
-              12
-            )}`
-          )
-        : null;
-
+      // 根據時間差（12 小時的門檻）來設定 isExpired
       if (checkTime) {
         const now = new Date();
-        const timeDifference = now - checkTime;
-        const hoursDifference = timeDifference / (1000 * 60 * 60);
-
+        const hoursDifference = (now - checkTime) / (1000 * 60 * 60);
         if (hoursDifference < 12) {
-          console.log("⚠️ 超過 12 小時，設定 isExpired 為 true");
+          console.log("少於 12 小時，設定 isExpired 為 true");
           isExpired.value = true;
         } else {
-          console.log("✅ 未超過 12 小時，不顯示超時狀態");
+          console.log("介於 12 至 24 小時，不顯示超時狀態");
           isExpired.value = false;
         }
       }
-
-      // ✅ **隱藏結束按鈕**
+      // 設定 hasEndTime
       hasEndTime.value = true;
       console.log("✅ 已完成 HRV 使用後檢測，不再顯示『結束』按鈕");
     } else {
@@ -607,6 +598,7 @@ const API_UIDInfo_Search12 = async () => {
     console.log("❌ API_UIDInfo_Search12 調用失敗:", err);
   }
 };
+
 
 const API_DeleteStart = async () => {
   try {
