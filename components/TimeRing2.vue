@@ -103,14 +103,14 @@ const buttonText = computed(() => {
 
 // 顯示用時間格式，例如 "01:05:09"
 const formattedTime = computed(() => {
-  if (elapsedTime.value <= 0) {
-    return "00:00:00"; // 確保放棄後顯示 00:00:00
+  // 如果目前沒有在計時，但上次測試有持續時間，就顯示上次的持續時間
+  if (elapsedTime.value <= 0 && lastDuration.value) {
+    return lastDuration.value;
   }
-
+  // 否則正常計算 elapsedTime 格式
   const hours = Math.floor(elapsedTime.value / 3600);
   const minutes = Math.floor((elapsedTime.value % 3600) / 60);
   const seconds = elapsedTime.value % 60;
-
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
     2,
     "0"
@@ -531,6 +531,26 @@ const useEndAPI = async (endTime = "") => {
 
 const hasEndTime = ref(false); // 新增狀態來判斷是否有結束時間
 
+const lastDuration = ref(null);
+
+const parseDateTime = (dtStr) => {
+  return new Date(
+    `${dtStr.slice(0, 4)}-${dtStr.slice(4, 6)}-${dtStr.slice(
+      6,
+      8
+    )}T${dtStr.slice(8, 10)}:${dtStr.slice(10, 12)}:${dtStr.slice(12)}`
+  );
+};
+
+const formatSeconds = (sec) => {
+  const hrs = Math.floor(sec / 3600);
+  const mins = Math.floor((sec % 3600) / 60);
+  const secs = sec % 60;
+  return `${String(hrs).padStart(2, "0")}:${String(mins).padStart(
+    2,
+    "0"
+  )}:${String(secs).padStart(2, "0")}`;
+};
 //有 開始 結束時間 有ProductName條件   有檢測前資料  無檢測後資料  最新UID資料
 const API_UIDInfo_Search12 = async () => {
   try {
@@ -542,32 +562,30 @@ const API_UIDInfo_Search12 = async () => {
     if (response && response.Result !== "NOData") {
       // 先取出並檢查 CheckTime 是否存在
       const checkTime = response.CheckTime
-        ? new Date(
-            `${response.CheckTime.slice(0, 4)}-${response.CheckTime.slice(4, 6)}-${response.CheckTime.slice(6, 8)}T${response.CheckTime.slice(8, 10)}:${response.CheckTime.slice(10, 12)}:${response.CheckTime.slice(12)}`
-          )
+        ? parseDateTime(response.CheckTime)
         : null;
       if (checkTime) {
         const now = new Date();
         const hoursDifference = (now - checkTime) / (1000 * 60 * 60);
         if (hoursDifference > 24) {
           console.log("超過 24 小時，不進行後續判斷");
-          return; // 超過 24 小時就跳出，不再處理後續邏輯
+          return; // 超過 24 小時就跳出
         }
       }
 
-      // 接著檢查是否放棄（State 為 "1"）
+      // 檢查是否放棄（State 為 "1"）
       if (response.State === "1") {
         console.log("使用者已放棄檢測，正在重置計時與狀態");
         doReset();
-        hasAbandoned.value = false; // 如果希望允許重新開始，可清除放棄標記
+        hasAbandoned.value = false;
         return;
       }
 
-      // 如果不是放棄狀態，繼續後續邏輯：
+      // 設定 UID
       UID.value = response.UID;
       console.log("🔍 取得 UID:", UID.value);
 
-      // 檢查 HRV 後測是否完成 (IsExit: "N" 代表未完成)
+      // 檢查 HRV 後測是否完成
       if (response.IsExit === "N") {
         isExpired.value = true;
         console.log("⚠️ 未完成 HRV 使用後檢測，請立即進行");
@@ -576,7 +594,16 @@ const API_UIDInfo_Search12 = async () => {
       }
       console.log("✅ HRV 使用後檢測已完成");
 
-      // 根據時間差（12 小時的門檻）來設定 isExpired
+      // 如果有 StartTime 與 EndTime，計算上次測試持續時間
+      if (response.StartTime && response.EndTime) {
+        const startDate = parseDateTime(response.StartTime);
+        const endDate = parseDateTime(response.EndTime);
+        const diffSec = Math.floor((endDate - startDate) / 1000);
+        lastDuration.value = formatSeconds(diffSec);
+        console.log("上次測試持續時間:", lastDuration.value);
+      }
+
+      // 根據 CheckTime 計算 isExpired（以 12 小時為門檻）
       if (checkTime) {
         const now = new Date();
         const hoursDifference = (now - checkTime) / (1000 * 60 * 60);
@@ -588,6 +615,7 @@ const API_UIDInfo_Search12 = async () => {
           isExpired.value = false;
         }
       }
+
       // 設定 hasEndTime
       hasEndTime.value = true;
       console.log("✅ 已完成 HRV 使用後檢測，不再顯示『結束』按鈕");
@@ -598,7 +626,6 @@ const API_UIDInfo_Search12 = async () => {
     console.log("❌ API_UIDInfo_Search12 調用失敗:", err);
   }
 };
-
 
 const API_DeleteStart = async () => {
   try {
@@ -780,7 +807,6 @@ const handleAbandon = async () => {
   }
 
   try {
-    // 🟢 設定 State 為 1，代表使用者已放棄
     await apiRequest("https://23700999.com:8081/HMA/API_UIDState.jsp", {
       MID,
       Token,
@@ -792,19 +818,20 @@ const handleAbandon = async () => {
 
     console.log("✅ 已成功設定 State=1");
 
-    // 🟢 確保計時器停止
     if (timerInterval.value) {
       clearInterval(timerInterval.value);
       timerInterval.value = null;
     }
     isCounting.value = false;
 
-    // 🟢 **重置時間**
-    elapsedTime.value = 0; // 設為 0
-    startTimestamp.value = null; // 確保計時器不會重新啟動
+    // 重置時間
+    elapsedTime.value = 0;
+    startTimestamp.value = null;
+    lastDuration.value = null; // 新增這一行
+
     console.log("⏹ 時鐘已重置為 00:00:00");
 
-    // 🟢 **更新 UI 狀態**
+    // 更新 UI 狀態
     hasAbandoned.value = true;
     currentDetectionState.value = DetectionState.BEFORE;
     isExpired.value = false;
@@ -815,6 +842,7 @@ const handleAbandon = async () => {
     console.error("❌ 放棄失敗:", error);
   }
 };
+
 </script>
 
 <style scoped>
