@@ -802,6 +802,7 @@ const goToPointRules = async () => {
   background-color: #f6f6f6;
   padding: 0 5% 60px;
   min-height: 100vh;
+  
   .fade-enter-active,
   .fade-leave-active {
     transition: opacity 0.1s ease; /* 淡入淡出的速度、動畫曲線 */
@@ -812,10 +813,15 @@ const goToPointRules = async () => {
   }
 
   .helperGroup {
+    max-width: 768px;
+    margin: 0 auto;
     .helper {
       border-radius: 8px;
+      margin: 0 auto;
       margin-bottom: 1.75rem;
       margin-top: 0.25rem;
+      max-width: 768px;
+   
       background: linear-gradient(
           0deg,
           rgba(255, 255, 255, 0) 0%,
@@ -830,6 +836,7 @@ const goToPointRules = async () => {
       
       letter-spacing: var(--Title-Medium-Tracking, 0.15px);
       position: relative;
+      
       .helperTitle {
         display: flex;
         align-items: center;

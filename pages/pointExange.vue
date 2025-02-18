@@ -49,9 +49,12 @@
             </div>
 
             <!-- 若 coupon.Info 包含 "還差" 就顯示提示(可自由調整是否顯示 small) -->
-            <small v-if="coupon.Info.includes('還差')">
-              {{ coupon.Info }}
-            </small>
+            <div class="couponSmallInfoGroup">
+              <small>有效期限 : {{ coupon.Period }} 個月 </small>
+              <small v-if="coupon.Info.includes('還差')">
+                {{ coupon.Info }}
+              </small>
+            </div>
           </div>
         </div>
       </div>
@@ -110,7 +113,7 @@
         <button class="exchangeBtn" @click="doExchange">兌換</button>
       </div>
     </div>
-  
+
     <div class="verificationBox" v-show="verificationBoxVisible">
       <div class="verificationNumberGroup">
         <div class="verificationNumber">
@@ -232,6 +235,8 @@ async function doExchange() {
       CanUseTime: selectedCoupon.value.CanUseTime,
       Grade: selectedCoupon.value.Grade,
       PaperName: selectedCoupon.value.Name,
+      Period: selectedCoupon.value.Period,
+      DMoney: selectedCoupon.value.DMoney,
     };
 
     const { data } = await axios.post(
@@ -286,7 +291,7 @@ async function doExchange() {
 
     h3 {
       color: #1e1e1e;
-      
+
       font-size: 20px;
       font-weight: 700;
       letter-spacing: 0.15px;
@@ -324,7 +329,7 @@ async function doExchange() {
         }
         .couponText {
           position: absolute;
-          top: 50%;
+          top: 45%;
           left: 42.5%;
           transform: translateY(-50%);
           h4 {
@@ -342,7 +347,7 @@ async function doExchange() {
         }
         .couponOption {
           position: absolute;
-          top: 50%;
+          top: 45%;
           left: 72%;
           transform: translateY(-50%);
           color: #1fbcb3;
@@ -370,13 +375,17 @@ async function doExchange() {
           color: #666; /*或其他顏色*/
           border: none;
         }
-        small {
+        .couponSmallInfoGroup {
+          display: flex;
           position: absolute;
           top: 75%;
-          left: 72%;
+          left: 42%;
           color: rgba(0, 0, 0, 0.3);
           font-size: 12px;
           font-weight: 400;
+          gap: 0.5rem;
+        }
+        small {
         }
       }
     }
@@ -398,7 +407,7 @@ async function doExchange() {
   z-index: 100;
   h3 {
     color: #74bc1f;
-    
+
     font-size: 24px;
     font-weight: 700;
     text-align: center;
@@ -416,7 +425,7 @@ async function doExchange() {
   }
   h4 {
     color: #1e1e1e;
-    
+
     font-size: 24px;
     font-weight: 700;
     text-align: center;
@@ -428,7 +437,7 @@ async function doExchange() {
     margin-top: 0.35rem;
     small {
       color: #666;
-      
+
       font-size: 16px;
       font-weight: 400;
     }
@@ -436,7 +445,7 @@ async function doExchange() {
       margin-top: 1.25rem;
       li {
         color: #666;
-        
+
         font-size: 18px;
         font-weight: 400;
         line-height: 150%;
@@ -467,7 +476,7 @@ async function doExchange() {
     }
     h5 {
       color: #bc581f;
-      
+
       font-size: 18px;
       font-weight: 400;
     }
@@ -484,7 +493,7 @@ async function doExchange() {
       border: none;
       border-radius: 8px;
       color: #666;
-      
+
       font-size: 18px;
       font-weight: 400;
       cursor: pointer;
@@ -519,7 +528,7 @@ async function doExchange() {
     text-align: center;
     .verificationNumber {
       color: #bc581f;
-      
+
       font-size: 2rem;
       font-style: normal;
       font-weight: 700;
@@ -529,7 +538,7 @@ async function doExchange() {
   }
   h4 {
     color: #1e1e1e;
-    
+
     font-size: 24px;
     font-style: normal;
     font-weight: 700;
@@ -539,7 +548,7 @@ async function doExchange() {
   }
   h5 {
     color: #666;
-    
+
     font-size: 16px;
     font-style: normal;
     font-weight: 400;
