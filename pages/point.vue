@@ -1450,14 +1450,15 @@ const goToPointRules = async () => {
   }
   ul {
     margin-top: 1rem;
-    display: flex;
-    flex-flow: column;
-    margin-left: 12.5%;
+    display: grid;
+    justify-content: center;
 
     li {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
       line-height: 1.4;
-      color: #666;
-      
+      color: #666;      
       font-size: 18px;
       font-style: normal;
       font-weight: 400;
