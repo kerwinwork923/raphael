@@ -349,12 +349,10 @@
     </div>
   </div>
   <!-- 可立即使用 => verificationBox -->
-  <div class="verificationBox" v-show="verificationBoxVisible">
-    <div class="verificationNumberGroup">
-      <div class="verificationNumber">
-        {{ currentCoupon.DigitalCode || "12345678" }}
-      </div>
-    </div>
+  <div class="verificationBox" v-show="verificationBoxVisible">    
+    <div class="verificationNumber">
+      {{ currentCoupon.DigitalCode || "12345678" }}
+    </div> 
     <h4>{{ currentCoupon.Name.replace("#", " ") }}</h4>
     <h5>可用於療程商品折抵</h5>
     <div @click="closeAllModals" class="verificationClose">
@@ -1347,39 +1345,32 @@ const goToPointRules = async () => {
   width: 90%;
   background-color: #fff;
   z-index: 999;
-  padding: 0 0 0.75rem;
+  padding: 0.75rem;
   border-radius: 12px;
   background: var(--shade-white, #fff);
   box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
   max-width: 768px;
-
-  .verificationNumberGroup {
-    border-radius: 12px;
-    width: 90%;
+  .verificationNumber {
     background: #fef1e2;
-    margin: 0 auto;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 1rem;
-    margin-top: 0.75rem;
-    text-align: center;
-    .verificationNumber {
-      color: #bc581f;
-      
-      font-size: 2rem;
-      font-style: normal;
-      font-weight: 700;
-      letter-spacing: 20px;
-      margin-left: 10px;
-    }
+    font-size: 2rem;
+    font-weight: bold;
+    color: #bc581f;
+    letter-spacing: 18px;
   }
+  
   h4 {
     color: #1e1e1e;
-    
     font-size: 24px;
     font-style: normal;
     font-weight: 700;
     letter-spacing: 0.12px;
     text-align: center;
-    margin-top: 0.5rem;
+    margin-top: 0.75rem;
   }
   h5 {
     color: #666;

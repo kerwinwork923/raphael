@@ -45,6 +45,9 @@
             <div class="couponOption">
               <!-- coupon.Points 表示需要多少點才能換 -->
               <h4>{{ coupon.Points }}點</h4>
+              <small v-if="coupon.Info.includes('兌換')">
+                {{ coupon.Info }}
+              </small>
               <!-- coupon.Info =>  "兌換" / "已兌換" / "還差 XXX 點" -->
             </div>
 
@@ -357,8 +360,18 @@ async function doExchange() {
           text-align: center;
           line-height: 1.2;
           h4 {
-            color: #74bc1f;
+            color: #1fbcb3;
           }
+        }
+        .couponSmallInfoGroup {
+          display: flex;
+          position: absolute;
+          top: 75%;
+          left: 42%;
+          color: rgba(0, 0, 0, 0.3);
+          font-size: 12px;
+          font-weight: 400;
+          gap: 0.5rem;
         }
       }
     }
@@ -374,6 +387,9 @@ async function doExchange() {
         .couponOption {
           color: #666; /*或其他顏色*/
           border: none;
+          h4{
+            color: #74bc1f;
+          }
         }
         .couponSmallInfoGroup {
           display: flex;
@@ -441,11 +457,14 @@ async function doExchange() {
       font-size: 16px;
       font-weight: 400;
     }
-    ul {
+    ul {        
+      display: grid;
+      justify-content: center;
       margin-top: 1.25rem;
       li {
+        display: flex;
+        gap: 0.5rem;
         color: #666;
-
         font-size: 18px;
         font-weight: 400;
         line-height: 150%;
@@ -470,6 +489,7 @@ async function doExchange() {
       list-style: outside;
       margin-top: 0.5rem;
       li {
+        color: #666;
         margin-left: 1.5rem;
         line-height: 1.5;
       }
@@ -489,7 +509,7 @@ async function doExchange() {
     margin-top: 1.25rem;
     button {
       width: 48%;
-      padding: 8px 12px;
+      padding: 5px 12px;
       border: none;
       border-radius: 8px;
       color: #666;
@@ -512,39 +532,32 @@ async function doExchange() {
   width: 90%;
   background-color: #fff;
   z-index: 999;
-  padding: 0 0 0.75rem;
+  padding: 0.75rem;
   border-radius: 12px;
   background: var(--shade-white, #fff);
   box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
   max-width: 768px;
 
-  .verificationNumberGroup {
-    border-radius: 12px;
-    width: 90%;
-    background: #fef1e2;
-    margin: 0 auto;
-    padding: 1rem;
-    margin-top: 0.75rem;
-    text-align: center;
-    .verificationNumber {
-      color: #bc581f;
-
+  .verificationNumber {
+      background: #fef1e2;
+      border-radius: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
       font-size: 2rem;
-      font-style: normal;
-      font-weight: 700;
-      letter-spacing: 20px;
-      margin-left: 10px;
+      font-weight: bold;
+      color: #bc581f;
+      letter-spacing: 18px;
     }
-  }
   h4 {
     color: #1e1e1e;
-
     font-size: 24px;
     font-style: normal;
     font-weight: 700;
     letter-spacing: 0.12px;
     text-align: center;
-    margin-top: 0.5rem;
+    margin-top: 0.75rem;
   }
   h5 {
     color: #666;
