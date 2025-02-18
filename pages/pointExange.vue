@@ -332,7 +332,7 @@ async function doExchange() {
         }
         .couponText {
           position: absolute;
-          top: 45%;
+          top: 40%;
           left: 42.5%;
           transform: translateY(-50%);
           h4 {
@@ -350,7 +350,7 @@ async function doExchange() {
         }
         .couponOption {
           position: absolute;
-          top: 45%;
+          top: 40%;
           left: 72%;
           transform: translateY(-50%);
           color: #1fbcb3;
@@ -366,7 +366,7 @@ async function doExchange() {
         .couponSmallInfoGroup {
           display: flex;
           position: absolute;
-          top: 75%;
+          top: 70%;
           left: 42%;
           color: rgba(0, 0, 0, 0.3);
           font-size: 12px;
@@ -394,7 +394,7 @@ async function doExchange() {
         .couponSmallInfoGroup {
           display: flex;
           position: absolute;
-          top: 75%;
+          top: 70%;
           left: 42%;
           color: rgba(0, 0, 0, 0.3);
           font-size: 12px;
