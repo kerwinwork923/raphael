@@ -13,11 +13,16 @@
         />
       </div>
     </div>
+
+    <!-- 生理年齡圖表(如需要) -->
     <div class="resultChartGroup">
       <h2>生理年齡</h2>
       <ResultChart v-if="listBioage.length > 0" :bioageData="listBioage" />
     </div>
+
+    <!-- 整體結果卡片區 -->
     <div class="BAGroup">
+      <!-- 生理年齡 -->
       <div class="BACard">
         <div class="titleGroup">
           <img src="/assets/imgs/HRVFaceSmall.svg" alt="" />
@@ -27,10 +32,15 @@
           <div class="BA">
             <div class="subTitle">使用前</div>
             <div class="value">
-              {{ HRVBeforeData?.bioage - 5 }}~{{ HRVBeforeData?.bioage }}
+              <!-- 若 bioage 存在才顯示區間，否則顯示 '-' -->
+              {{ HRVBeforeData?.bioage != null 
+                ? `${HRVBeforeData.bioage - 5}~${HRVBeforeData.bioage}` 
+                : '-' 
+              }}
             </div>
             <div class="unit">years old</div>
           </div>
+          <!-- 中間箭頭 -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="17"
@@ -46,13 +56,17 @@
           <div class="BA">
             <div class="subTitle">使用後</div>
             <div class="value afterValue">
-              {{ HRVAfterData?.bioage - 5 }}~{{ HRVAfterData?.bioage }}
+              {{ HRVAfterData?.bioage != null
+                ? `${HRVAfterData.bioage - 5}~${HRVAfterData.bioage}`
+                : '-'
+              }}
             </div>
             <div class="unit">years old</div>
           </div>
         </div>
       </div>
 
+      <!-- 心律變異性 -->
       <div class="BACard BACardS">
         <div class="titleGroup">
           <img src="/assets/imgs/heartRateSmall.svg" alt="" />
@@ -62,10 +76,14 @@
           <div class="BA">
             <div class="subTitle">使用前</div>
             <div class="value">
-              {{ Math.round(HRVBeforeData?.HRV * 10) / 10 }}
+              {{ HRVBeforeData?.HRV != null 
+                ? (Math.round(HRVBeforeData.HRV * 10) / 10) 
+                : '-' 
+              }}
             </div>
             <div class="unit">ms</div>
           </div>
+          <!-- 中間箭頭 -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="17"
@@ -81,13 +99,17 @@
           <div class="BA">
             <div class="subTitle">使用後</div>
             <div class="value afterValue">
-              {{ Math.round(HRVAfterData?.HRV * 10) / 10 }}
+              {{ HRVAfterData?.HRV != null
+                ? (Math.round(HRVAfterData.HRV * 10) / 10)
+                : '-'
+              }}
             </div>
             <div class="unit">ms</div>
           </div>
         </div>
       </div>
 
+      <!-- 心率 -->
       <div class="BACard BACardS">
         <div class="titleGroup">
           <img src="/assets/imgs/heartBeatSmall.svg" alt="" />
@@ -96,9 +118,12 @@
         <div class="BAContent">
           <div class="BA">
             <div class="subTitle">使用前</div>
-            <div class="value">{{ HRVBeforeData?.HR }}</div>
+            <div class="value">
+              {{ HRVBeforeData?.HR ?? '-' }}
+            </div>
             <div class="unit">bpm</div>
           </div>
+          <!-- 中間箭頭 -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="17"
@@ -113,12 +138,15 @@
           </svg>
           <div class="BA">
             <div class="subTitle">使用後</div>
-            <div class="value afterValue">{{ HRVAfterData?.HR }}</div>
+            <div class="value afterValue">
+              {{ HRVAfterData?.HR ?? '-' }}
+            </div>
             <div class="unit">bpm</div>
           </div>
         </div>
       </div>
 
+      <!-- 血壓 -->
       <div class="BACard">
         <div class="titleGroup">
           <img src="/assets/imgs/bloodPressure.svg" alt="" />
@@ -128,10 +156,15 @@
           <div class="BA">
             <div class="subTitle">使用前</div>
             <div class="value">
-              {{ HRVBeforeData?.SBP }}/{{ HRVBeforeData?.DBP }}
+              {{ 
+                (HRVBeforeData?.SBP != null && HRVBeforeData?.DBP != null)
+                  ? `${HRVBeforeData.SBP}/${HRVBeforeData.DBP}`
+                  : '-'
+              }}
             </div>
             <div class="unit">mmHg</div>
           </div>
+          <!-- 中間箭頭 -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="17"
@@ -147,13 +180,18 @@
           <div class="BA">
             <div class="subTitle">使用後</div>
             <div class="value afterValue">
-              {{ HRVAfterData?.SBP }}/{{ HRVAfterData?.DBP }}
+              {{ 
+                (HRVAfterData?.SBP != null && HRVAfterData?.DBP != null)
+                  ? `${HRVAfterData.SBP}/${HRVAfterData.DBP}`
+                  : '-'
+              }}
             </div>
             <div class="unit">mmHg</div>
           </div>
         </div>
       </div>
 
+      <!-- 血氧 -->
       <div class="BACard BACardS">
         <div class="titleGroup">
           <img src="/assets/imgs/spo2Small.svg" alt="" />
@@ -162,9 +200,12 @@
         <div class="BAContent">
           <div class="BA">
             <div class="subTitle">使用前</div>
-            <div class="value">{{ HRVBeforeData?.SPO2 }}</div>
+            <div class="value">
+              {{ HRVBeforeData?.SPO2 ?? '-' }}
+            </div>
             <div class="unit">SpO2%</div>
           </div>
+          <!-- 中間箭頭 -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="17"
@@ -179,12 +220,15 @@
           </svg>
           <div class="BA">
             <div class="subTitle">使用後</div>
-            <div class="value afterValue">{{ HRVAfterData?.SPO2 }}</div>
+            <div class="value afterValue">
+              {{ HRVAfterData?.SPO2 ?? '-' }}
+            </div>
             <div class="unit">SpO2%</div>
           </div>
         </div>
       </div>
 
+      <!-- 呼吸 -->
       <div class="BACard BACardS">
         <div class="titleGroup">
           <img src="/assets/imgs/breathSmall.svg" alt="" />
@@ -193,9 +237,12 @@
         <div class="BAContent">
           <div class="BA">
             <div class="subTitle">使用前</div>
-            <div class="value">{{ HRVBeforeData?.rr }}</div>
+            <div class="value">
+              {{ HRVBeforeData?.rr ?? '-' }}
+            </div>
             <div class="unit">bpm</div>
           </div>
+          <!-- 中間箭頭 -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="17"
@@ -210,12 +257,15 @@
           </svg>
           <div class="BA">
             <div class="subTitle">使用後</div>
-            <div class="value afterValue">{{ HRVAfterData?.rr }}</div>
+            <div class="value afterValue">
+              {{ HRVAfterData?.rr ?? '-' }}
+            </div>
             <div class="unit">bpm</div>
           </div>
         </div>
       </div>
 
+      <!-- 壓力 -->
       <div class="BACard BACardS">
         <div class="titleGroup">
           <img src="/assets/imgs/pressureSmall.svg" alt="" />
@@ -224,9 +274,12 @@
         <div class="BAContent">
           <div class="BA">
             <div class="subTitle">使用前</div>
-            <div class="value">{{ HRVBeforeData?.stress }}</div>
+            <div class="value">
+              {{ HRVBeforeData?.stress ?? '-' }}
+            </div>
             <div class="unit"></div>
           </div>
+          <!-- 中間箭頭 -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="17"
@@ -241,26 +294,33 @@
           </svg>
           <div class="BA">
             <div class="subTitle">使用後</div>
-            <div class="value afterValue">{{ HRVAfterData?.stress }}</div>
+            <div class="value afterValue">
+              {{ HRVAfterData?.stress ?? '-' }}
+            </div>
             <div class="unit"></div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- <div class="SympatheticRatioGroup">
+    <!-- 交感/副交感比例 (若未使用可刪除) -->
+    <!--
+    <div class="SympatheticRatioGroup">
       <h3>交感/副交感比例</h3>
       <h4>使用前</h4>
       <SympatheticRatio :sympathetic="90" :parasympathetic="10" />
       <h4>使用後</h4>
       <SympatheticRatio :sympathetic="30" :parasympathetic="70" />
-    </div> -->
+    </div>
+    -->
+
     <div class="healthAnalyse"></div>
     <div class="usageBtnGroup">
       <button class="nextBtn" @click="goNext">返回</button>
     </div>
   </div>
 </template>
+
 
 <script>
 import ResultChart from "~/components/ResultChart.vue";

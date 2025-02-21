@@ -274,16 +274,21 @@
                   >ms
                 </h5>
               </div>
-              <div
-                class="resultText"
-                :style="{
+              <!-- :style="{
                   opacity: item.BcAf !== '治療前' ? 1 : 0,
                   cursor: item.BcAf !== '治療前' ? 'pointer' : 'default',
-                }"
+                }" -->
+              <div
+                class="resultText"
+    
               >
                 分析結果
               </div>
 
+              <!-- :style="{
+                  opacity: item.BcAf !== '治療前' ? 1 : 0,
+                  cursor: item.BcAf !== '治療前' ? 'pointer' : 'default',
+                }" -->
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"
@@ -291,8 +296,7 @@
                 viewBox="0 0 18 18"
                 fill="none"
                 :style="{
-                  opacity: item.BcAf !== '治療前' ? 1 : 0,
-                  cursor: item.BcAf !== '治療前' ? 'pointer' : 'default',
+                  cursor:'pointer' ,
                 }"
                 @click="handleDetectClick(item)"
               >
@@ -701,9 +705,10 @@ export default {
     init();
 
     const handleDetectClick = (item) => {
-      if (item.BcAf !== "治療前") {
-        router.push(`/usageHRVResult/${item.UID}`);
-      }
+      router.push(`/usageHRVResult/${item.UID}`);
+      // if (item.BcAf !== "治療前") {
+      
+      // }
     };
 
     const handleWatchClick = (item) => {
