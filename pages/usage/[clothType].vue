@@ -1,6 +1,6 @@
 <template>
   <RaphaelLoading v-if="loading" />
-  <HRVAlert :showCloseButton="true" />
+  <HRVAlertForUse :showCloseButton="true" />
   <DSPRSelect :showCloseButton="false" />
   <div class="usageWrap">
     <TitleMenu Text="使用紀錄" :link="`/UsageHistory`" />

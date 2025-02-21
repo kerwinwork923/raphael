@@ -9,10 +9,12 @@ export const useCommon = defineStore('common', () => {
   const error = ref(null);
   const showDSPRSelect = ref(false);
   const showHRVAlert = ref(false);
-
+  const showHRVForUseAlert = ref(false);
   const detectUID = ref("");
   const detectFlag = ref("")
   const detectForm  = ref("")
+
+  const HRVAlertTitle = ref("HRV量測")
   // 设置 loading 状态
   const setLoading = (status) => {
     isLoading.value = status;
@@ -47,6 +49,8 @@ export const useCommon = defineStore('common', () => {
     closeHRVAlert,
     detectUID,
     detectFlag,
-    detectForm
+    detectForm,
+    HRVAlertTitle,
+    showHRVForUseAlert
   };
 });

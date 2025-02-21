@@ -40,10 +40,8 @@ export const usePoint = defineStore("point", () => {
     nowAvaPoints,
     upInfo,
     keepGrade,
-
     // 新增：把 privillage 也 return 出去
     privillage,
-
     setNowBonusState
   };
 });

@@ -146,8 +146,26 @@
 import TitleMenu from "~/components/TitleMenu.vue";
 import { useCommon } from "@/stores/common";
 import { ref } from "vue";
+import axios from "axios";
 export default {
   setup() {
+    const localData = localStorage.getItem("userData");
+    let MID, Token, MAID, Mobile;
+    try {
+      if (localData) {
+        // Parse localStorage data
+        ({ MID, Token, MAID, Mobile, ChildInfo = [] } = JSON.parse(localData));
+      }
+    } catch (e) {
+      console.error("Error parsing localStorage data", e);
+    }
+
+    // Redirect to home page if critical data is missing
+    if (!MID || !Token || !MAID || !Mobile) {
+      router.push("/");
+      return;
+    }
+
     const store = useWeeklyRecord();
     const common = useCommon();
     const age = ref("");
@@ -163,6 +181,50 @@ export default {
           return "健康紀錄";
       }
     });
+    //檢查有無小孩 檢查 AID 及 CID response "ChildAnsFirstInfo":[{"AID":"","CID":""}]
+    const API_PreGrowth = async () => {
+      try {
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_Growth.jsp",
+          {
+            MID,
+            Token,
+            MAID,
+            Mobile,
+          }
+        );
+
+        if (response.status === 200) {
+          console.log(response.data);
+        } else {
+        }
+      } catch (err) {
+      } finally {
+      }
+    };
+    //新增小孩
+    const API_Growth = async () => {
+      try {
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_Growth.jsp",
+          {
+            MID,
+            Token,
+            MAID,
+            Mobile,
+          }
+        );
+
+        if (response.status === 200) {
+          console.log(response.data);
+        } else {
+        }
+      } catch (err) {
+      } finally {
+      }
+    };
+
+    API_PreGrowth();
     return { h1Text, age, store, common };
   },
 };

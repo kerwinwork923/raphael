@@ -81,6 +81,8 @@
 
       <div class="exchangeBoxText">
         <small>可用於療程商品折抵</small>
+        <h6>有效期限 : {{ formatDate(selectedCoupon.CanUseTime) }}+6個月</h6>
+
         <ul>
           <!-- 目前積分 -->
           <li>
@@ -128,6 +130,8 @@
       <div @click="closeAllModals" class="verificationClose">
         <img src="../assets/imgs/pointClose.svg" alt="" />
       </div>
+
+      <h6>結帳時向諮詢師出示此畫面 即可折抵消費。</h6>
     </div>
   </div>
 
@@ -275,6 +279,14 @@ async function doExchange() {
     closeExchangeBox();
   }
 }
+
+function formatDate(yyyymmdd) {
+  if (!yyyymmdd) return "";
+  return `${yyyymmdd.slice(0, 4)}/${yyyymmdd.slice(4, 6)}/${yyyymmdd.slice(
+    6,
+    8
+  )}`;
+}
 </script>
 
 <style lang="scss">
@@ -387,7 +399,7 @@ async function doExchange() {
         .couponOption {
           color: #666; /*或其他顏色*/
           border: none;
-          h4{
+          h4 {
             color: #74bc1f;
           }
         }
@@ -451,13 +463,20 @@ async function doExchange() {
   .exchangeBoxText {
     text-align: center;
     margin-top: 0.35rem;
+    h6 {
+      letter-spacing: 0.4%;
+      font-weight: 400;
+      margin-top: 0.25rem;
+      font-size: 12px;
+      color: #0000004d;
+    }
     small {
       color: #666;
 
       font-size: 16px;
       font-weight: 400;
     }
-    ul {        
+    ul {
       display: grid;
       justify-content: center;
       margin-top: 1.25rem;
@@ -533,23 +552,37 @@ async function doExchange() {
   background-color: #fff;
   z-index: 999;
   padding: 0.75rem;
+  padding-bottom: 2rem;
   border-radius: 12px;
   background: var(--shade-white, #fff);
   box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
   max-width: 768px;
-
+  .verificationClose {
+    position: absolute;
+    bottom: 5%;
+    cursor: pointer;
+    background-color: #74BC1F;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
   .verificationNumber {
-      background: #fef1e2;
-      border-radius: 0.75rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-      font-size: 2rem;
-      font-weight: bold;
-      color: #bc581f;
-      letter-spacing: 18px;
-    }
+    background: #fef1e2;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #bc581f;
+    letter-spacing: 18px;
+  }
   h4 {
     color: #1e1e1e;
     font-size: 24px;
@@ -568,6 +601,17 @@ async function doExchange() {
     letter-spacing: 0.5px;
     text-align: center;
     margin-top: 0.35rem;
+  }
+  h6 {
+    font-weight: 700;
+    color: #74bc1f;
+    text-align: center;
+    font-size: 24px;
+    border-top: 2px solid;
+    border-bottom: 2px solid;
+    padding: 10px 0;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
   }
 }
 .pointCover {
