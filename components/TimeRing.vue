@@ -6,15 +6,16 @@
     </div>
 
     <!-- 已有檢測紀錄時，顯示感謝訊息 -->
-    <div v-if="hasDetectRecord" class="completion-message">感謝您的使用</div>
+    <!-- <div v-if="hasDetectRecord" class="completion-message">感謝您的使用</div> -->
 
     <!-- 按鈕群組 -->
     <div class="flex">
       <!-- BEFORE / RUNNING 狀態才顯示主要按鈕 -->
+      <!-- :disabled="hasDetectRecord" -->
       <button
-        v-if="!hasDetectRecord && currentState !== DetectionState.AFTER"
+        v-if="currentState !== DetectionState.AFTER"
         :style="buttonStyle"
-        :disabled="hasDetectRecord"
+     
         @click="toggleTimer"
       >
         {{ buttonText }}
@@ -104,12 +105,12 @@ const buttonStyle = computed(() => {
 
 // ============ [倒數圈的「漸層進度」] ============
 const progressStyle = computed(() => {
-  if (props.hasDetectRecord) {
-    return {
-      background: `conic-gradient(#74BC1F 0% 100%, #74BC1F 100% 100%)`,
-      transition: "background 0.1s linear",
-    };
-  }
+  // if (props.hasDetectRecord) {
+  //   return {
+  //     background: `conic-gradient(#74BC1F 0% 100%, #74BC1F 100% 100%)`,
+  //     transition: "background 0.1s linear",
+  //   };
+  // }
   const used = props.totalTime * 1000 - remainingTime.value;
   const progress = Math.min((used / (props.totalTime * 1000)) * 100, 100);
   return {
@@ -356,7 +357,7 @@ const API_UIDInfo_Search12 = async () => {
       // 設定 UID
       UID.value = response.UID;
       console.log("🔍 取得 UID:", UID.value);
-      remainingTime.value = 0; 
+      remainingTime.value = 0;
       detectHRVAfter(UID.value);
     } else {
       console.log("❌ 沒有找到對應的數據，可能未進行測試");
