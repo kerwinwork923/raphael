@@ -278,7 +278,15 @@
                   opacity: item.BcAf !== '治療前' ? 1 : 0,
                   cursor: item.BcAf !== '治療前' ? 'pointer' : 'default',
                 }" -->
-              <div class="resultText">分析結果</div>
+              <div
+                class="resultText"
+                :style="{
+                  cursor: 'pointer',
+                }"
+                @click="handleDetectClick(item)"
+              >
+                分析結果
+              </div>
 
               <!-- :style="{
                   opacity: item.BcAf !== '治療前' ? 1 : 0,

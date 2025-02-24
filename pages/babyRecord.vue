@@ -70,7 +70,7 @@
         </div>
       </div>
 
-      <div class="babyInfoGroup" v-for="index in 3" :key="index">
+      <div class="babyInfoGroup" >
         <h4>新增寶貝基本資料</h4>
         <div class="babyInfo">
           <div class="babyInfoOption">
