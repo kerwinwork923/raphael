@@ -135,6 +135,8 @@
     border-radius: 1rem;
     padding: 1rem;
     margin-top: 1rem;
+    height: calc(100vh - 217px);
+    overflow-y: scroll;
   }
   .custom-select {
     -webkit-appearance: none;
