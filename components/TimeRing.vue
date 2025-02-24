@@ -356,7 +356,7 @@ const API_UIDInfo_Search12 = async () => {
       // 設定 UID
       UID.value = response.UID;
       console.log("🔍 取得 UID:", UID.value);
-
+      remainingTime.value = 0; 
       detectHRVAfter(UID.value);
     } else {
       console.log("❌ 沒有找到對應的數據，可能未進行測試");
