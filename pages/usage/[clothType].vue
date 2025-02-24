@@ -14,7 +14,7 @@
 
     <TimeRing
       v-if="productName === '居家治療儀'"
-      :totalTime="3000"
+      :totalTime="100"
       :product-name="productName"
       :hasDetectRecord="hasDetectRecord"
       @countdownComplete="handleCountdownComplete"
@@ -142,7 +142,7 @@
               :key="year"
               @click="selectYear(year)"
             >
-              {{ year }} 
+              {{ year }}
             </div>
           </div>
         </div>
@@ -278,12 +278,7 @@
                   opacity: item.BcAf !== '治療前' ? 1 : 0,
                   cursor: item.BcAf !== '治療前' ? 'pointer' : 'default',
                 }" -->
-              <div
-                class="resultText"
-    
-              >
-                分析結果
-              </div>
+              <div class="resultText">分析結果</div>
 
               <!-- :style="{
                   opacity: item.BcAf !== '治療前' ? 1 : 0,
@@ -296,7 +291,7 @@
                 viewBox="0 0 18 18"
                 fill="none"
                 :style="{
-                  cursor:'pointer' ,
+                  cursor: 'pointer',
                 }"
                 @click="handleDetectClick(item)"
               >
@@ -707,7 +702,7 @@ export default {
     const handleDetectClick = (item) => {
       router.push(`/usageHRVResult/${item.UID}`);
       // if (item.BcAf !== "治療前") {
-      
+
       // }
     };
 
