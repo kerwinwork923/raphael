@@ -924,7 +924,8 @@ const goToPointRules = async () => {
     border-radius: 12px;
     .pointRecordGroup{
       position: relative;
-      min-height: 20vh;
+      height: calc(100vh - 544px);
+      overflow-y: scroll;
     }
     .pointRecordDiv {
       display: flex;
@@ -1221,7 +1222,8 @@ const goToPointRules = async () => {
 
     .exchangeRecordGroup {
       position: relative;
-      min-height: 20vh;
+      height: calc(100vh - 544px);
+      overflow-y: scroll;
       .exchangeRecordDiv {
         display: flex;
         justify-content: space-between;
