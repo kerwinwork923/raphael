@@ -328,13 +328,13 @@ export default {
   .contractTopMenu {
     display: flex;
     color: #666;
-    background-color: $raphael-gray-100;
+    background-color: rgba(255, 255, 255, 0.8);
     position: sticky;
     z-index: 10;
     top: 48px;
-    background-color: #fff;
     padding: 12px;
     border-radius: 8px;
+    backdrop-filter: blur(10px);
     .contractTopMenuItem {
       display: flex;
       width: 50%;
