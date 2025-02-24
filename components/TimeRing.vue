@@ -330,7 +330,7 @@ const API_UIDInfo_Search12 = async () => {
         MAID,
         Mobile,
         ProductName: props.productName,
-        BeforeHRVDetect: "N",
+        BeforeHRVDetect: "Y",
       }
     );
 
