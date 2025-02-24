@@ -298,29 +298,73 @@ function startCountdown() {
       timerInterval = null;
       isCounting.value = false;
 
-      // 檢查「使用前」是否做完
-      const beforeFlag = await API_HRV2_UID_Flag_Info("1", UID.value);
-      if (beforeFlag === "N") {
-        const data = await API_UIDInfo(UIDVal);
-        if (data.BeforeHRVAbandon !== "Y") {
-          detectHRVBefore(UIDVal);
-        }
-        // currentState.value = DetectionState.BEFORE;
-        return;
-      }
-
       // 結束 + 檢查後測
       await useEndAPI();
-      const afterFlag = await API_HRV2_UID_Flag_Info("2", UID.value);
-      if (afterFlag === "N") {
-        currentState.value = DetectionState.AFTER;
-        detectHRVAfter(UID.value);
-      } else {
-        resetDetectionState();
-      }
+      detectHRVAfter(UID.value);
+      // const afterFlag = await API_HRV2_UID_Flag_Info("2", UID.value);
+      // if (afterFlag === "N") {
+      //   currentState.value = DetectionState.AFTER;
+      //   detectHRVAfter(UID.value);
+      // } else {
+      //   resetDetectionState();
+      // }
     }
   }, 1000);
 }
+const parseDateTime = (dtStr) => {
+  return new Date(
+    `${dtStr.slice(0, 4)}-${dtStr.slice(4, 6)}-${dtStr.slice(
+      6,
+      8
+    )}T${dtStr.slice(8, 10)}:${dtStr.slice(10, 12)}:${dtStr.slice(12)}`
+  );
+};
+
+const API_UIDInfo_Search12 = async () => {
+  try {
+    const response = await apiRequest(
+      "https://23700999.com:8081/HMA/API_UIDInfo_Search12.jsp",
+      {
+        MID,
+        Token,
+        MAID,
+        Mobile,
+        ProductName: props.productName,
+        BeforeHRVDetect: "N",
+      }
+    );
+
+    if (response && response.Result !== "NOData") {
+      if (response.AfterHRVAbandon === "Y") {
+        return;
+      }
+
+      // 先取出並檢查 CheckTime 是否存在
+      const checkTime = response.CheckTime
+        ? parseDateTime(response.CheckTime)
+        : null;
+
+      if (checkTime) {
+        const now = new Date();
+        const hoursDifference = (now - checkTime) / (1000 * 60 * 60);
+        if (hoursDifference > 24) {
+          console.log("超過 24 小時，不進行後續判斷");
+          return;
+        }
+      }
+
+      // 設定 UID
+      UID.value = response.UID;
+      console.log("🔍 取得 UID:", UID.value);
+
+      detectHRVAfter(UID.value);
+    } else {
+      console.log("❌ 沒有找到對應的數據，可能未進行測試");
+    }
+  } catch (err) {
+    console.log("❌ API_UIDInfo_Search12 調用失敗:", err);
+  }
+};
 
 // ---------------- [主要按鈕邏輯] ----------------
 async function toggleTimer() {
@@ -410,6 +454,8 @@ onMounted(async () => {
       }
 
       // 若後端UID有值但無StartTime => 視同還沒正式開始 => 保持 BEFORE
+    } else {
+      await API_UIDInfo_Search12();
     }
     // else => 沒有 UID => 什麼都不做，保持 BEFORE
   } catch (error) {
