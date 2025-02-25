@@ -15,8 +15,8 @@
       <button
         v-if="currentState !== DetectionState.AFTER"
         :style="buttonStyle"
-     
         @click="toggleTimer"
+        :disabled="isButtonDisabled"
       >
         {{ buttonText }}
       </button>
@@ -74,6 +74,8 @@ const currentState = ref(DetectionState.BEFORE);
 const remainingTime = ref(props.totalTime * 1000);
 const isCounting = ref(false);
 const UID = ref("");
+// 新增一個用於防止連點的布林變數
+const isButtonDisabled = ref(false);
 let timerInterval = null;
 let lastTick = 0;
 
@@ -331,7 +333,7 @@ const API_UIDInfo_Search12 = async () => {
         MAID,
         Mobile,
         ProductName: props.productName,
-        BeforeHRVDetect: "Y",
+        BeforeHRVDetect: "N",
       }
     );
 
@@ -369,43 +371,49 @@ const API_UIDInfo_Search12 = async () => {
 
 // ---------------- [主要按鈕邏輯] ----------------
 async function toggleTimer() {
-  console.log("按鈕點擊 => 狀態:", currentState.value);
-  switch (currentState.value) {
-    case DetectionState.BEFORE: {
-      // Step 1: 若尚未有 UID => 先產生 UID
-      if (!UID.value) {
-        const res = await useStartAPI();
-        if (res?.UID) {
-          UID.value = res.UID;
-        } else {
-          console.error("無法建立 UID，無法繼續");
-          return;
+  if (isButtonDisabled.value) return;
+  isButtonDisabled.value = true;
+  try {
+    console.log("按鈕點擊 => 狀態:", currentState.value);
+    switch (currentState.value) {
+      case DetectionState.BEFORE: {
+        // Step 1: 若尚未有 UID => 先產生 UID
+        if (!UID.value) {
+          const res = await useStartAPI();
+          if (res?.UID) {
+            UID.value = res.UID;
+          } else {
+            console.error("無法建立 UID，無法繼續");
+            return;
+          }
         }
+        // Step 2: 直接呼叫「使用前檢測」彈窗
+        detectHRVBefore(UID.value);
+        // （選擇性）這邊「不」立即 startCountdown，等使用者做完前測後再開始
+        // 若想直接開始，您可以在這裡呼叫 startCountdown()
+        break;
       }
-      // Step 2: 直接呼叫「使用前檢測」彈窗
-      detectHRVBefore(UID.value);
-      // （選擇性）這邊「不」立即 startCountdown，等使用者做完前測後再開始
-      // 若想直接開始，您可以在這裡呼叫 startCountdown()
-      break;
-    }
 
-    case DetectionState.RUNNING: {
-      // => 重新檢測
-      if (confirm("確定要重新檢測嗎？這會清除本次倒數記錄。")) {
-        await API_DeleteStart();
-        resetDetectionState();
+      case DetectionState.RUNNING: {
+        // => 重新檢測
+        if (confirm("確定要重新檢測嗎？這會清除本次倒數記錄。")) {
+          await API_DeleteStart();
+          resetDetectionState();
+        }
+        break;
       }
-      break;
-    }
 
-    case DetectionState.AFTER: {
-      // => 使用後檢測
-      detectHRVAfter(UID.value);
-      break;
-    }
+      case DetectionState.AFTER: {
+        // => 使用後檢測
+        detectHRVAfter(UID.value);
+        break;
+      }
 
-    default:
-      console.warn("未知狀態:", currentState.value);
+      default:
+        console.warn("未知狀態:", currentState.value);
+    }
+  } finally {
+    isButtonDisabled.value = false;
   }
 }
 

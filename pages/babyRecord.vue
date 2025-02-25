@@ -1,119 +1,138 @@
 <template>
   <div class="babyRecord">
     <TitleMenu Text="健康紀錄" link="/user" />
-    <div class="babyRecordGroup">
-      <TagList />
-      <!--v-if="store.nowState == 'first'"  -->
-      <div class="ANSGroup" v-if="false">
-        <h4>寶貝紀錄量表</h4>
-        <div class="desCard">
-          <div class="slogan">
-            寶貝紀錄幫助醫師了解孩子的成長以利做最有效率的調整，涵蓋專注力、情緒、動作與語言發展等指標
-          </div>
-          <ul>
-            <li>掌握孩子的成長狀況</li>
-            <li>早期發現問題並提供支持</li>
-            <li>記錄每個階段的點滴變化</li>
-          </ul>
+
+    <!--v-if="store.nowState == 'first'"  -->
+    <div class="ANSGroup" v-if="false">
+      <h4>寶貝紀錄量表</h4>
+      <div class="desCard">
+        <div class="slogan">
+          寶貝紀錄幫助醫師了解孩子的成長以利做最有效率的調整，涵蓋專注力、情緒、動作與語言發展等指標
         </div>
-        <div class="stepCard">
-          <div class="item">
-            <div class="icon">
-              <img src="/assets/imgs/brain-white.svg" />
-            </div>
-            <div class="content">
-              <hgroup>
-                <sub>Step 1</sub>
-                <h3>六大指標</h3>
-              </hgroup>
-              <div class="text">
-                請先選擇以下六個指標，以便我們更精確地了解您的需求
-              </div>
+        <ul>
+          <li>掌握孩子的成長狀況</li>
+          <li>早期發現問題並提供支持</li>
+          <li>記錄每個階段的點滴變化</li>
+        </ul>
+      </div>
+      <div class="stepCard">
+        <div class="item">
+          <div class="icon">
+            <img src="/assets/imgs/brain-white.svg" />
+          </div>
+          <div class="content">
+            <hgroup>
+              <sub>Step 1</sub>
+              <h3>六大指標</h3>
+            </hgroup>
+            <div class="text">
+              請先選擇以下六個指標，以便我們更精確地了解您的需求
             </div>
           </div>
-          <div class="item">
-            <div class="icon">
-              <img src="/assets/imgs/heartRate-white.svg" />
-            </div>
-            <div class="content">
-              <hgroup>
-                <sub>Step 2</sub>
-                <h3>症狀評估</h3>
-              </hgroup>
-              <div class="text">依當下感覺逐題評估，填寫每項症狀的嚴重程度</div>
-            </div>
+        </div>
+        <div class="item">
+          <div class="icon">
+            <img src="/assets/imgs/heartRate-white.svg" />
           </div>
-          <div class="item">
-            <div class="icon">
-              <img src="/assets/imgs/choose-white.svg" />
-            </div>
-            <div class="content">
-              <hgroup>
-                <sub>Step 3</sub>
-                <h3>頻率記錄</h3>
-              </hgroup>
-              <div class="text">針對困擾您的症狀，填寫每週發生的頻率</div>
-            </div>
+          <div class="content">
+            <hgroup>
+              <sub>Step 2</sub>
+              <h3>症狀評估</h3>
+            </hgroup>
+            <div class="text">依當下感覺逐題評估，填寫每項症狀的嚴重程度</div>
           </div>
-          <div class="item">
-            <div class="icon">
-              <img src="/assets/imgs/brain-white.svg" />
-            </div>
-            <div class="content">
-              <hgroup>
-                <sub>Step 4</sub>
-                <h3>重點標記</h3>
-              </hgroup>
-              <div class="text">挑選 3-10項 您目前最困擾的症狀</div>
-            </div>
+        </div>
+        <div class="item">
+          <div class="icon">
+            <img src="/assets/imgs/choose-white.svg" />
+          </div>
+          <div class="content">
+            <hgroup>
+              <sub>Step 3</sub>
+              <h3>頻率記錄</h3>
+            </hgroup>
+            <div class="text">針對困擾您的症狀，填寫每週發生的頻率</div>
+          </div>
+        </div>
+        <div class="item">
+          <div class="icon">
+            <img src="/assets/imgs/brain-white.svg" />
+          </div>
+          <div class="content">
+            <hgroup>
+              <sub>Step 4</sub>
+              <h3>重點標記</h3>
+            </hgroup>
+            <div class="text">挑選 3-10項 您目前最困擾的症狀</div>
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="babyInfoGroup" >
+    <div class="babyRecordGroup">
+      <div class="babyInfoGroup">
         <h4>新增寶貝基本資料</h4>
-        <div class="babyInfo">
+        <!-- 使用 v-for 渲染每筆寶貝資料 -->
+        <div class="babyInfo" v-for="(baby, index) in babyInfos" :key="index">
           <div class="babyInfoOption">
-            <small>#1</small>
-            <img src="/assets/imgs/trash.svg" alt="" />
+            <small>#{{ index + 1 }}</small>
+            <img
+              src="/assets/imgs/trash.svg"
+              alt="刪除"
+              @click="removeBaby(index)"
+            />
           </div>
-
+          <!-- 寶貝姓名 -->
           <div class="babyRecordInfoInput">
             <img
               class="icon1"
               src="../assets/imgs/babyRecordMember.svg"
-              alt=""
+              alt="寶貝姓名"
             />
-            <input type="text" placeholder="請輸入寶貝姓名" />
+            <input
+              type="text"
+              v-model="baby.name"
+              placeholder="請輸入寶貝姓名"
+            />
           </div>
-          <h6 v-if="a">此欄位沒有填寫到喔</h6>
+          <!-- 性別欄位 -->
           <div class="babyRecordInfoInput">
-            <img class="icon1" src="../assets/imgs/babyRecordS.svg" alt="" />
-            <div class="ageGroup">
-              <select
-                v-model="age"
-                :class="['custom-select', { 'has-value': age !== '' }]"
-              >
-                <option value="" disabled hidden>請選擇生理年齡</option>
-                <option value="male">男性</option>
-                <option value="female">女性</option>
-              </select>
-              <img class="icon2" src="../assets/imgs/arrowDown.svg" />
-            </div>
+            <img
+              class="icon1"
+              src="../assets/imgs/babyRecordS.svg"
+              alt="性別"
+            />
+            <select v-model="baby.gender" class="custom-select">
+              <option value="" disabled hidden>請選擇性別</option>
+              <option value="male">男性</option>
+              <option value="female">女性</option>
+            </select>
           </div>
-          <h6 v-if="a">此欄位沒有填寫到喔</h6>
+          <!-- 生日欄位 -->
           <div class="babyRecordInfoInput">
-            <img class="icon1" src="../assets/imgs/babyRecordFace.png" alt="" />
-            <input type="text" placeholder="請輸入寶貝姓名" />
+            <img
+              class="icon1"
+              src="../assets/imgs/babyRecordFace.png"
+              alt="生日"
+            />
+            <input
+              type="date"
+              v-model="baby.birthDate"
+              placeholder="請選擇生日"
+            />
           </div>
-          <h6 v-if="a">此欄位沒有填寫到喔</h6>
         </div>
       </div>
-      <div class="babyInfoAdd">
+
+      <div class="babyInfoAdd" @click="addBabyInfo">
         繼續新增寶貝基本資料
-        <span><img src="/assets/imgs/babyInfoAdd.svg" alt="" /></span>
+        <span><img src="/assets/imgs/babyInfoAdd.svg" alt="新增" /></span>
       </div>
 
+      <!-- 一次儲存所有寶貝資料 -->
+      <button class="saveAllBtn" @click="updateAllBabyInfo">儲存</button>
+
+      <!-- 其他步驟按鈕 -->
       <div
         class="weeklyBtnGroup"
         v-if="
@@ -144,23 +163,24 @@
 
 <script>
 import TitleMenu from "~/components/TitleMenu.vue";
-import { useCommon } from "@/stores/common";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import axios from "axios";
+
 export default {
   setup() {
+    const babyInfos = ref([{ name: "", gender: "", birthDate: "" }]);
+
+    // 讀取 localStorage 取得必要資訊
     const localData = localStorage.getItem("userData");
     let MID, Token, MAID, Mobile;
     try {
       if (localData) {
-        // Parse localStorage data
-        ({ MID, Token, MAID, Mobile, ChildInfo = [] } = JSON.parse(localData));
+        ({ MID, Token, MAID, Mobile } = JSON.parse(localData));
       }
     } catch (e) {
       console.error("Error parsing localStorage data", e);
     }
 
-    // Redirect to home page if critical data is missing
     if (!MID || !Token || !MAID || !Mobile) {
       router.push("/");
       return;
@@ -181,28 +201,62 @@ export default {
           return "健康紀錄";
       }
     });
-    //檢查有無小孩 檢查 AID 及 CID response "ChildAnsFirstInfo":[{"AID":"","CID":""}]
-    const API_PreGrowth = async () => {
+
+    // 新增寶貝資料
+    const addBabyInfo = () => {
+      babyInfos.value.push({ name: "", gender: "", birthDate: "" });
+    };
+
+    // 刪除寶貝資料
+    const removeBaby = (index) => {
+      if (babyInfos.value.length > 1) {
+        babyInfos.value.splice(index, 1);
+      }
+    };
+
+    // 一次更新所有寶貝資料，依照 API 格式送出 Child 陣列
+    const updateAllBabyInfo = async () => {
+      // 過濾掉不完整的資料
+      const validBabies = babyInfos.value.filter(
+        (baby) => baby.name && baby.gender && baby.birthDate
+      );
+
+      if (validBabies.length === 0) {
+        alert("請至少填寫一筆完整的寶貝資料再儲存！");
+        return;
+      }
+
+      // 轉換性別：male => "1", female => "2"
+      const children = validBabies.map((baby) => ({
+        Name: baby.name,
+        Sex: baby.gender === "male" ? "1" : baby.gender === "female" ? "2" : "",
+        BirthDay: baby.birthDate,
+      }));
+
       try {
         const response = await axios.post(
-          "https://23700999.com:8081/HMA/API_Growth.jsp",
+          "https://23700999.com:8081/HMA/API_ChildSave.jsp",
           {
             MID,
-            Token,
             MAID,
+            Token,
             Mobile,
+            Child: children,
           }
         );
 
-        if (response.status === 200) {
-          console.log(response.data);
+        if (response.data.Result === "OK") {
+          alert("所有寶貝資料更新成功！");
         } else {
+          alert("部分資料更新失敗，請稍後再試！");
         }
       } catch (err) {
-      } finally {
+        console.error("API 錯誤：", err);
+        alert("系統錯誤，請稍後再試！");
       }
     };
-    //新增小孩
+
+    // 呼叫 API_Growth 進行資料初始化（如有需要）
     const API_Growth = async () => {
       try {
         const response = await axios.post(
@@ -214,18 +268,26 @@ export default {
             Mobile,
           }
         );
-
         if (response.status === 200) {
           console.log(response.data);
-        } else {
         }
       } catch (err) {
-      } finally {
+        console.error(err);
       }
     };
 
-    API_PreGrowth();
-    return { h1Text, age, store, common };
+    API_Growth();
+
+    return {
+      h1Text,
+      age,
+      store,
+      common,
+      babyInfos,
+      addBabyInfo,
+      removeBaby,
+      updateAllBabyInfo,
+    };
   },
 };
 </script>
@@ -239,6 +301,19 @@ export default {
   width: 100%;
   min-height: 100vh;
   padding: 0 1rem;
+  .saveAllBtn {
+    border-radius: var(--sds-size-radius-200);
+    background: var(--brand-green-400, #74bc1f);
+    display: flex;
+    width: 361px;
+    padding: var(--sds-size-space-200) var(--sds-size-space-300);
+    justify-content: center;
+    align-items: center;
+    border: none;
+    color: #fff;
+    padding: .25rem;
+    
+  }
 }
 .ANSGroup {
   height: calc(100vh - 207px);
@@ -386,7 +461,7 @@ export default {
   align-items: center;
   color: #ec4f4f;
   gap: 2px;
-
+  cursor: pointer;
   img {
     width: 0.85rem;
   }
@@ -420,7 +495,8 @@ export default {
   input[type="text"],
   input[type="password"],
   input[type="number"],
-  input[type="email"] {
+  input[type="email"],
+  input[type="date"] {
     outline: none;
     border: none;
     border-bottom: 1px solid $raphael-gray-300;
