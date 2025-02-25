@@ -865,7 +865,7 @@ export default {
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
-      height: calc(100vh - 293px);
+      height: calc(100vh - 549px);
       overflow-y: auto;
       @include scrollbarStyle();
       @include respond-to("phone-landscape") {
@@ -998,7 +998,7 @@ export default {
 
     .detectGroup {
       overflow-y: auto;
-      height: calc(100vh - 293px);
+      height: calc(100vh - 549px);
       position: relative;
       display: flex;
       flex-direction: column;

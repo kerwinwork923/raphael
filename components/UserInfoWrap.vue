@@ -310,7 +310,9 @@ export default {
   .infoBox {
     background-color: $raphael-white;
     border-radius: 1rem;
+    height: calc(100vh - 235px);
     padding: 1rem;
+    overflow-y: scroll;
   }
 
   .custom-select {
