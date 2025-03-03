@@ -7,9 +7,9 @@
 
     <!-- 已有檢測紀錄時，顯示感謝訊息 -->
     <div v-if="hasTodayRecord" class="completion-message">感謝您的使用</div>
-
+    <!-- v-if="!hasTodayRecord" -->
     <!-- 按鈕群組 -->
-    <div class="flex" v-if="!hasTodayRecord">
+    <div class="flex" >
       <!-- BEFORE / RUNNING 狀態才顯示主要按鈕 -->
       <button
         v-if="currentState !== DetectionState.AFTER"
