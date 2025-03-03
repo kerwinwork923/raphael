@@ -10,7 +10,7 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
     filteredQuestions: [], // 症狀追蹤版本的題目集合
     currentStep: 1,
     totalStep: 0,
-    timesStep: 1,
+    timesStep: 1, 
     totalTimesStep: 0,
     questionsPerPage: 7,
     selectQuestionPerPage: 7,
@@ -523,8 +523,8 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
           this.currentStep += 1;
         } else {
           const itemsAboveZero = this.weeklyQA.filter((q) => q.selectScore > 0);
-          if (itemsAboveZero.length < 3) {
-            alert("選項項目不足，請至少選擇3題");
+          if (itemsAboveZero.length < 1) {
+            alert("選項項目不足，請至少選擇1題");
             return false;
           }
 

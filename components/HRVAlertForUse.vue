@@ -12,7 +12,7 @@
 
     <ul>
       <li>
-        測量時間<span class="point">約2分鐘</span
+        測量時間<span class="point">約1分鐘</span
         >。測量時請保持安靜與穩定，避免晃動、交談、憋氣或深呼吸。
       </li>
       <li>
