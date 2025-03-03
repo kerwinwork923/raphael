@@ -39,7 +39,7 @@
 
       <!-- 「確定」按鈕 → 帶參數 "confirm" -->
       <button class="HRVAlertBtn" @click="convertAndSaveUserData('confirm')">
-        確定
+        前往檢測
       </button>
     </div>
   </div>
