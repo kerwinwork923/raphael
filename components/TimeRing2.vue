@@ -77,6 +77,8 @@ const props = defineProps({
 
 const router = useRouter();
 
+const isButtonDisabled = ref(false);
+
 // ---------------------------------------------------
 // 1) elapsedTime: 維持顯示「已經過幾秒」
 // 2) startTimestamp: 用來記錄「開始計時當下的毫秒數」
@@ -261,61 +263,67 @@ const detectHRVAfter = (UIDVal) => {
 
 // ---------- 切換按鈕行為 ----------
 const toggleTimer = async () => {
-  switch (currentDetectionState.value) {
-    case DetectionState.BEFORE:
-      if (!UID.value) {
-        const response = await useStartAPI();
-        if (response?.UID) {
-          detectHRVBefore(response.UID);
-          startTimestamp.value = Date.now(); // ⬅️ 確保 `startTimestamp` 被設置
-          startTimer();
-        } else {
-          console.error("創建 UID 失敗");
-        }
-      } else {
-        console.log("已有 UID，從 API 時間開始 HRV 檢測");
-        const response = await API_MID_ProductName_UIDInfo();
-        if (response?.StartTime) {
-          startTimestamp.value = new Date(
-            `${response.StartTime.slice(0, 4)}-${response.StartTime.slice(
-              4,
-              6
-            )}-${response.StartTime.slice(6, 8)}T${response.StartTime.slice(
-              8,
-              10
-            )}:${response.StartTime.slice(10, 12)}:${response.StartTime.slice(
-              12
-            )}`
-          ).getTime();
-          elapsedTime.value = Math.floor(
-            (Date.now() - startTimestamp.value) / 1000
-          );
-        } else {
-          startTimestamp.value = Date.now(); // ⬅️ 這裡也手動設置
-          console.warn("舊的 UID 可能已失效，創建新的 UID");
-          const newResponse = await useStartAPI();
-          if (newResponse?.UID) {
-            detectHRVBefore(newResponse.UID);
+  if (isButtonDisabled.value) return;
+  isButtonDisabled.value = true;
+  try {
+    switch (currentDetectionState.value) {
+      case DetectionState.BEFORE:
+        if (!UID.value) {
+          const response = await useStartAPI();
+          if (response?.UID) {
+            detectHRVBefore(response.UID);
+            startTimestamp.value = Date.now(); // ⬅️ 確保 `startTimestamp` 被設置
+            startTimer();
           } else {
             console.error("創建 UID 失敗");
-            return;
           }
+        } else {
+          console.log("已有 UID，從 API 時間開始 HRV 檢測");
+          const response = await API_MID_ProductName_UIDInfo();
+          if (response?.StartTime) {
+            startTimestamp.value = new Date(
+              `${response.StartTime.slice(0, 4)}-${response.StartTime.slice(
+                4,
+                6
+              )}-${response.StartTime.slice(6, 8)}T${response.StartTime.slice(
+                8,
+                10
+              )}:${response.StartTime.slice(10, 12)}:${response.StartTime.slice(
+                12
+              )}`
+            ).getTime();
+            elapsedTime.value = Math.floor(
+              (Date.now() - startTimestamp.value) / 1000
+            );
+          } else {
+            startTimestamp.value = Date.now(); // ⬅️ 這裡也手動設置
+            console.warn("舊的 UID 可能已失效，創建新的 UID");
+            const newResponse = await useStartAPI();
+            if (newResponse?.UID) {
+              detectHRVBefore(newResponse.UID);
+            } else {
+              console.error("創建 UID 失敗");
+              return;
+            }
+          }
+          startTimer();
         }
-        startTimer();
-      }
-      break;
+        break;
 
-    case DetectionState.RUNNING:
-      console.log("結束 HRV 檢測");
-      await stopTimer();
-      break;
+      case DetectionState.RUNNING:
+        console.log("結束 HRV 檢測");
+        await stopTimer();
+        break;
 
-    case DetectionState.AFTER:
-      detectHRVAfter(UID.value);
-      break;
+      case DetectionState.AFTER:
+        detectHRVAfter(UID.value);
+        break;
 
-    default:
-      console.error("未知檢測狀態");
+      default:
+        console.error("未知檢測狀態");
+    }
+  } finally {
+    isButtonDisabled.value = false;
   }
 };
 
@@ -623,7 +631,7 @@ const API_UIDInfo_Search12 = async () => {
         const endDate = parseDateTime(response.EndTime);
         const diffSec = Math.floor((endDate - startDate) / 1000);
         lastDuration.value = formatSeconds(diffSec);
-        detectHRVAfter(UID.value)
+        detectHRVAfter(UID.value);
         console.log("上次測試持續時間:", lastDuration.value);
       }
 

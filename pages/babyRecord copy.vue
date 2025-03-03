@@ -169,13 +169,13 @@
     </div>
 
     <!-- 若後端已有寶貝資料 => 顯示問卷進度 -->
-    <div class="babyRecordQAGroup" v-else>
+    <div class="babyRecordQAGroup" v-if="babyStore.babyAPIData.length > 0">
       <div class="babyProgressGroup">
         <div
+          class="babyProgressCard"
           v-for="child in babyStore.babyAPIData"
           :key="child.CID"
           :class="{ active: child.CID === babyStore.selectedChildID }"
-          class="babyProgressCard"
           @click="onClickChild(child.CID)"
         >
           <div class="babyProgressTitle">
@@ -195,46 +195,46 @@
           <div class="babyProgress"></div>
         </div>
       </div>
+    </div>
 
-      <!-- 指標選擇區（選好指標後，按「開始測驗」）-->
-      <div class="babyAnsTypeGroup" v-if="hasSelectedChild">
-        <p>請挑選幾個指標，讓我們更了解您的需求。</p>
+    <!-- 指標選擇區（選好指標後，按「開始測驗」）-->
+    <div class="babyAnsTypeGroup" v-if="hasSelectedChild">
+      <p>請挑選幾個指標，讓我們更了解您的需求。</p>
 
+      <div
+        class="babyAnsTypeInfoGroup"
+        v-if="ansTypes && Object.keys(ansTypes).length > 0"
+      >
         <div
-          class="babyAnsTypeInfoGroup"
-          v-if="ansTypes && Object.keys(ansTypes).length > 0"
+          v-for="(description, key) in ansTypes"
+          :key="key"
+          class="babyAnsTypeCard"
+          :class="{ babyAnsTypeCardSelected: isTypeSelected(key) }"
+          @click="onToggleAnsType(key)"
         >
-          <div
-            v-for="(description, key) in ansTypes"
-            :key="key"
-            class="babyAnsTypeCard"
-            :class="{ babyAnsTypeCardSelected: isTypeSelected(key) }"
-            @click="onToggleAnsType(key)"
-          >
-            <img
-              :src="isTypeSelected(key) ? babyTypeCheck : babyTypePlus"
-              alt="選擇圖示"
-            />
-            <h3>{{ key }}</h3>
-            <p>{{ description }}</p>
-          </div>
-        </div>
-        <p v-else>載入中...</p>
-
-        <!-- 如果已有題目則顯示 QAList -->
-        <div v-if="curChildData && isQAStage">
-          <p>以下問題的困擾程度</p>
-          <!-- 綁定 ref 以便在外層呼叫 goNextPage 等函式 -->
-          <QAList ref="qaListRef" :questions="curChildData.childQuestions" />
+          <img
+            :src="isTypeSelected(key) ? babyTypeCheck : babyTypePlus"
+            alt="選擇圖示"
+          />
+          <h3>{{ key }}</h3>
+          <p>{{ description }}</p>
         </div>
       </div>
+      <p v-else>載入中...</p>
 
-      <!-- 共有按鈕(示範) -->
-      <div class="babyRerordBtnGroup">
-        <button class="babyRerordCommonBtn" @click="onCommonBtnClick">
-          {{ commonBtnLabel }}
-        </button>
+      <!-- 如果已有題目則顯示 QAList -->
+      <div v-if="curChildData && curChildData.childQuestions.length > 0">
+        <p>以下問題的困擾程度</p>
+        <QAList :questions="curChildData.childQuestions" />
       </div>
+    </div>
+
+    <!-- 共有按鈕(示範) -->
+    <div class="babyRerordBtnGroup">
+      <!-- 按下開始測驗 => onFetchQuestions -->
+      <button class="babyRerordCommonBtn" @click="onFetchQuestions">
+        開始測驗
+      </button>
     </div>
   </div>
 </template>
@@ -248,6 +248,7 @@ import { useRouter } from "vue-router";
 import { useBabyStore } from "~/stores/useBabyStore";
 import QAList from "~/components/QAList.vue";
 
+// 圖示(對/加)請自行確定路徑
 import babyTypeCheck from "@/assets/imgs/babyRecord/babyTypeCheck.svg";
 import babyTypePlus from "@/assets/imgs/babyRecord/babyTypePlus.svg";
 
@@ -256,138 +257,45 @@ export default {
   components: {
     TitleMenu,
     VueDatePicker,
-    QAList,
+    QAList
   },
   setup() {
     const router = useRouter();
     const babyStore = useBabyStore();
 
-    // 讀取 localStorage
+    // 從 localStorage 驗證
     const localData = localStorage.getItem("userData");
     const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
 
     if (!MID || !Token || !MAID || !Mobile) {
+      localStorage.removeItem("userData");
       router.push("/");
       return;
     }
 
+    // 新增寶貝相關 State
+    const babyInfos = ref([{ name: "", gender: "", birthDate: null }]);
     const showBabyCover = ref(false);
     const showBabyAlert = ref(false);
-    const babyInfos = ref([{ name: "", gender: "", birthDate: null }]);
 
+    // 進頁面後先取寶貝清單
     onMounted(() => {
       babyStore.fetchGrowth();
     });
 
-    /** 取得目前小孩資料 */
-    const curChildData = computed(() => {
-      const cid = babyStore.selectedChildID;
-      return babyStore.childRecords[cid];
-    });
-
-    /** 是否有選到 child */
-    const hasSelectedChild = computed(() => !!babyStore.selectedChildID);
-
-    /** 指標資料 */
-    const ansTypes = computed(() => {
-      if (!curChildData.value?.growthRec) return null;
-      return curChildData.value.growthRec.ChildAnsAllType || null;
-    });
-
-    /** 判斷是否進入「答題階段」: 有題目 => isQAStage=true */
-    const isQAStage = computed(() => {
-      return curChildData.value?.childQuestions?.length > 0;
-    });
-
-    /** 切換指標 */
-    function isTypeSelected(key) {
-      if (!curChildData.value) return false;
-      return curChildData.value.selectedAnsTypes.has(key);
-    }
-
-    function onToggleAnsType(key) {
-      if (!babyStore.selectedChildID) return;
-      babyStore.toggleAnsType(babyStore.selectedChildID, key);
-    }
-
-    /** 選擇小孩 */
-    function onClickChild(cid) {
-      babyStore.selectedChildID = cid;
-      babyStore.fetchGrowthRecord(cid);
-    }
-
-    /** 按鈕 label：
-     * - 若尚未抓題目 => "開始測驗"
-     * - 若已有題目 => "下一頁 (當前/總)"
-     */
-    const commonBtnLabel = computed(() => {
-      if (!isQAStage.value) {
-        return "開始測驗";
-      } else {
-        // 取得 QAList 內的 currentPage / totalPages
-        // 若 QAList 預設匯出 computed，需跟 QAList 溝通
-        const qaListCmp = qaListRef.value;
-        if (!qaListCmp) return "下一頁"; // 保底
-
-        const current = qaListCmp.currentPage;
-        const total = qaListCmp.totalPages;
-        return `下一頁 (${current}/${total})`;
-      }
-    });
-
-    /** 按鈕點擊邏輯 */
-    function onCommonBtnClick() {
-      if (!isQAStage.value) {
-        // 還沒題目 => 抓題目
-        onFetchQuestions();
-      } else {
-        // 已經在答題 => 叫 QAList goNextPage()
-        const qaListCmp = qaListRef.value;
-        if (qaListCmp) {
-          // 檢查是否可下一頁
-          if (!qaListCmp.canGoNext) {
-            alert("本頁題目尚未填完喔");
-            return;
-          }
-          // 若還沒到最後一頁 => goNextPage
-          if (qaListCmp.currentPage < qaListCmp.totalPages) {
-            qaListCmp.goNextPage();
-          } else {
-            // 這裡是最後一頁 => 可考慮「提交」或「完成」
-            alert("✅ 全部填寫完成，可以提交了！");
-            // TODO: 呼叫後端提交邏輯...
-          }
-        }
-      }
-    }
-
-    /** 呼叫 fetchChildQuestions 抓題目 */
-    async function onFetchQuestions() {
-      const cid = babyStore.selectedChildID;
-      if (!cid) {
-        alert("請先選擇要測驗的寶貝");
-        return;
-      }
-      const selectedSet = babyStore.childRecords[cid]?.selectedAnsTypes;
-      if (!selectedSet || selectedSet.size === 0) {
-        alert("請至少選擇一個指標");
-        return;
-      }
-      await babyStore.fetchChildQuestions(cid);
-    }
-
-    /** 新增 / 移除 寶貝資料 */
+    /** 新增 baby 資料表單 */
     function addBabyInfo() {
       babyInfos.value.push({ name: "", gender: "", birthDate: null });
     }
 
-    function removeBaby(idx) {
+    /** 刪除 baby 資料表單 */
+    function removeBaby(index) {
       if (babyInfos.value.length > 1) {
-        babyInfos.value.splice(idx, 1);
+        babyInfos.value.splice(index, 1);
       }
     }
 
-    /** 檢查必填 => 顯示確認視窗 */
+    /** 檢查必填 => show Alert */
     function checkAndShowBabyAlert() {
       for (const baby of babyInfos.value) {
         if (!baby.name || !baby.gender || !baby.birthDate) {
@@ -399,12 +307,13 @@ export default {
       showBabyAlert.value = true;
     }
 
+    /** 關閉提示 */
     function closeBabyAlert() {
       showBabyAlert.value = false;
       showBabyCover.value = false;
     }
 
-    /** 送 API_ChildSave */
+    /** 送資料給 API_ChildSave.jsp */
     async function submitBabyData() {
       try {
         if (babyInfos.value.length === 0) {
@@ -441,45 +350,105 @@ export default {
       }
     }
 
-    /** 取用 QAList 的 ref => 以便在外層呼叫 goNextPage() */
-    const qaListRef = ref(null);
+    /** 取得當前 selectedChildID 的資料 */
+    const curChildData = computed(() => {
+      const cid = babyStore.selectedChildID;
+      return babyStore.childRecords[cid];
+    });
+
+    /** 取指標對應資料 */
+    const ansTypes = computed(() => {
+      if (!curChildData.value?.growthRec) return null;
+      return curChildData.value.growthRec.ChildAnsAllType || null;
+    });
+
+    /** 是否已選 child */
+    const hasSelectedChild = computed(() => !!babyStore.selectedChildID);
+
+    /** 檢查指標是否選取 */
+    function isTypeSelected(key) {
+      if (!curChildData.value) return false;
+      return curChildData.value.selectedAnsTypes.has(key);
+    }
+
+    /** 點小孩卡 => 選擇寶貝 & 拉詳細資訊 */
+    function onClickChild(cid) {
+      babyStore.selectedChildID = cid;
+      babyStore.fetchGrowthRecord(cid);
+    }
+
+    /** 點指標 */
+    function onToggleAnsType(key) {
+      if (!babyStore.selectedChildID) return;
+      babyStore.toggleAnsType(babyStore.selectedChildID, key);
+    }
+
+    /** 送參數給 API_GrowthRec2.jsp */
+    async function onFetchQuestions() {
+      const cid = babyStore.selectedChildID;
+      if (!cid) {
+        alert("請先選擇要測驗的寶貝");
+        return;
+      }
+      // 檢查是否至少選一個指標
+      const selectedSet = babyStore.childRecords[cid].selectedAnsTypes;
+      if (!selectedSet || selectedSet.size === 0) {
+        alert("請至少選擇一個大項目以繼續");
+        return;
+      }
+      // 呼叫 store
+      await babyStore.fetchChildQuestions(cid);
+    }
+
+    /** 格式化日期：YYYY-MM-DD */
+    function formatDateToYYYYMMDD(date) {
+      if (!date) return "";
+      const d = new Date(date);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    }
+    /** VueDatePicker 的顯示格式 */
+    function formatDate(date) {
+      if (!date) return "";
+      const d = new Date(date);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
 
     return {
-      // data
+      babyStore,
+      // state
       showBabyCover,
       showBabyAlert,
       babyInfos,
+      // icons
       babyTypeCheck,
       babyTypePlus,
 
-      // store
-      babyStore,
-
       // computed
       curChildData,
-      hasSelectedChild,
       ansTypes,
-      isQAStage,
-      commonBtnLabel,
+      hasSelectedChild,
 
       // methods
-      isTypeSelected,
-      onToggleAnsType,
-      onClickChild,
-      onCommonBtnClick,
-      onFetchQuestions,
       addBabyInfo,
       removeBaby,
       checkAndShowBabyAlert,
       closeBabyAlert,
       submitBabyData,
-
-      // QAList ref
-      qaListRef,
+      isTypeSelected,
+      onClickChild,
+      onToggleAnsType,
+      onFetchQuestions,
+      // utils
+      formatDate,
     };
   },
 };
 </script>
+
+
 <style lang="scss">
 .babyRecord {
   background-color: $raphael-gray-100;
@@ -498,8 +467,10 @@ export default {
       border: none;
       background-color: none;
       width: 100%;
+
       outline: none;
       border: none;
+
       font-size: 1.2rem;
 
       &::placeholder {
@@ -509,6 +480,7 @@ export default {
         font-weight: 400;
       }
     }
+
     svg {
       display: none;
     }
@@ -519,16 +491,18 @@ export default {
     background: var(--brand-green-400, #74bc1f);
     display: flex;
     width: 361px;
-    padding: 0.5rem;
+    padding: var(--sds-size-space-200) var(--sds-size-space-300);
+    justify-content: center;
+    align-items: center;
     border: none;
     color: #fff;
+    padding: 0.5rem;
     border-radius: 8px;
     font-size: 1rem;
     letter-spacing: 0.5px;
     cursor: pointer;
     margin-top: 1rem;
   }
-
   .babyAlert {
     position: absolute;
     left: 50%;
@@ -547,7 +521,9 @@ export default {
     .babyAlertBtnGroup {
       display: flex;
       justify-content: center;
+
       border-top: 1px solid var(--shade-gray-300, #ccc);
+
       .babyAlertBtn {
         background-color: transparent;
         border: none;
@@ -569,7 +545,6 @@ export default {
       }
     }
   }
-
   .babyCover {
     width: 100%;
     height: 100%;
@@ -579,13 +554,12 @@ export default {
     z-index: 99;
   }
 }
-
 .ANSGroup {
   height: calc(100vh - 207px);
   margin-top: 1rem;
   padding-bottom: 0.75rem;
   overflow-y: scroll;
-  // 若有自訂 scrollbar 請自行加入 mixin
+  @include scrollbarStyle();
 
   h4 {
     color: $raphael-black;
@@ -593,7 +567,7 @@ export default {
     font-style: normal;
     font-weight: bold;
     line-height: 100%;
-    letter-spacing: 0.15px;
+    letter-spacing: var(--Title-Medium-Tracking, 0.15px);
   }
   .desCard {
     display: grid;
@@ -606,6 +580,21 @@ export default {
     font-size: 1.125rem;
     line-height: 29.1px;
     letter-spacing: 0.05em;
+
+    .time {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      .text {
+        & > span {
+          color: $raphael-red-300;
+          margin-left: 0.25rem;
+        }
+      }
+    }
+    .hint {
+      @extend .time;
+    }
   }
   .stepCard {
     position: relative;
@@ -615,6 +604,7 @@ export default {
     color: $raphael-gray-500;
     line-height: 29.1px;
     letter-spacing: 0.05em;
+
     &::after {
       content: "";
       position: absolute;
@@ -625,6 +615,7 @@ export default {
       box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.25) inset;
       left: 15px;
     }
+
     .item {
       display: flex;
       gap: 0.5rem;
@@ -637,6 +628,7 @@ export default {
         padding: 4px;
         height: 32px;
         z-index: 1;
+
         & > img {
           min-width: 24px;
         }
@@ -649,13 +641,28 @@ export default {
         gap: 0.5rem;
         padding: 0.75rem;
         box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+        & > hgroup {
+          display: flex;
+          flex-direction: column;
+          & > sub {
+            color: $raphael-cyan-400;
+            font-size: 0.813rem;
+            line-height: 100%;
+          }
+          & > h3 {
+            color: $raphael-black;
+            font-size: 1.25rem;
+          }
+        }
       }
     }
   }
-}
-
-.babyRecordGroup {
-  /* 依需求自行加樣式 */
+  ul {
+    list-style: outside;
+    margin-left: 1.75rem;
+    li {
+    }
+  }
 }
 
 .babyInfoGroup {
@@ -683,8 +690,11 @@ export default {
       cursor: pointer;
     }
   }
+  h6 {
+    color: #ff0000;
+    font-size: 12px;
+  }
 }
-
 .babyInfoAdd {
   display: flex;
   align-items: center;
@@ -695,10 +705,10 @@ export default {
     width: 0.85rem;
   }
 }
-
 .babyRecordInfoInput {
   position: relative;
   margin-bottom: 0.5rem;
+
   .icon1 {
     position: absolute;
     top: 50%;
@@ -706,12 +716,26 @@ export default {
     transform: translateY(-50%);
     z-index: 2;
   }
+
+  .icon2 {
+    position: absolute;
+    top: 50%;
+    right: 2px;
+    transform: translateY(-50%);
+    width: 18px;
+    z-index: 1;
+  }
+
   img {
     width: 24px;
     height: 24px;
   }
+
   input[type="text"],
-  select {
+  input[type="password"],
+  input[type="number"],
+  input[type="email"],
+  input[type="date"] {
     outline: none;
     border: none;
     border-bottom: 1px solid $raphael-gray-300;
@@ -728,40 +752,78 @@ export default {
       font-weight: 400;
     }
   }
-}
+  .custom-select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: url("../assets/imgs/arrow-down.svg") no-repeat right 10px center;
+    background-size: 12px;
+    font-size: 1.2rem;
+    padding-left: 36px;
+    padding-bottom: 12px;
+    padding-top: 16px;
+    width: 100%;
+    border: none;
+    outline: none;
+    border-bottom: 1px solid $raphael-gray-300;
+    color: $raphael-gray-300; // 預設顏色為灰色
 
-.babyRecordQAGroup {
-  /* 依需求自行加樣式 */
-}
+    &.has-value {
+      color: $raphael-black !important; // 選擇後變為黑色
+    }
+  }
 
+  .custom-select.selected {
+    color: $raphael-black;
+  }
+}
 .babyProgressGroup {
   display: flex;
   gap: 12px;
   max-width: 400px;
   overflow-x: auto;
-  padding-bottom: 2px;
-  scroll-snap-type: x mandatory;
-  /* 自行加 scrollbar 樣式 */
+  padding-bottom: 2px; // 增加滑動區域，避免 scrollbar 遮擋
+  scroll-snap-type: x mandatory; // 讓每個 card 吸附對齊
+  scrollbar-width: thin; // Firefox 滑動條變細
+  scrollbar-color: #ccc transparent; // Firefox 設定顏色
+
+  &::-webkit-scrollbar {
+    height: 6px; // 控制高度
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
   .babyProgressCard {
     background-color: #fff;
     border-radius: 8px;
     min-width: 160px;
     padding: 12px;
     cursor: pointer;
-    scroll-snap-align: start;
+    scroll-snap-align: start; // 讓 item 對齊
+
     &:hover {
-      transform: scale(1.05);
+      transform: scale(1.05); // 滑鼠移上去放大一點
       transition: 0.2s ease-in-out;
     }
+
     .babyProgressTitle {
       display: flex;
       align-items: center;
       gap: 4px;
+
       h4 {
         color: var(--shade-black, #1e1e1e);
         font-size: 20px;
-        letter-spacing: 0.15px;
+        letter-spacing: var(--Title-Medium-Tracking, 0.15px);
       }
+
       .babyProgressState {
         width: 12px;
         height: 12px;
@@ -772,11 +834,13 @@ export default {
         background-color: #74bc1f;
       }
     }
+
     .babyProgressText {
       margin-top: 0.5rem;
       display: flex;
       justify-content: space-between;
     }
+
     .babyProgress {
       width: 100%;
       height: 4px;
@@ -785,6 +849,7 @@ export default {
       margin-top: 8px;
       position: relative;
       overflow: hidden;
+
       &::before {
         content: "";
         position: absolute;
@@ -803,13 +868,14 @@ export default {
     font-size: 16px;
     font-style: normal;
     font-weight: 400;
-    line-height: 100%;
+    line-height: 100%; /* 16px */
     letter-spacing: 0.5px;
   }
   .babyAnsTypeInfoGroup {
     display: flex;
     flex-wrap: wrap;
     gap: 2%;
+
     justify-content: space-between;
     margin-top: 0.5rem;
     .babyAnsTypeCard {
@@ -818,6 +884,7 @@ export default {
       border-radius: 0.5rem;
       padding: 8px 12px;
       border: 1px solid var(--shade-gray-300, #ccc);
+      background: var(--shade-white, #fff);
       box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
       margin-bottom: 0.75rem;
       cursor: pointer;
@@ -838,28 +905,31 @@ export default {
       box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
     }
   }
+ 
 }
 
 .babyRerordBtnGroup {
-  background-color: $raphael-gray-100;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.75rem;
-  max-width: 768px;
-  width: 100%;
-  padding: 0.75rem 0 3.125rem 0;
-  touch-action: manipulation;
-  .babyRerordCommonBtn {
-    background-color: $raphael-green-400;
+    background-color: $raphael-gray-100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem;
+    max-width: 768px;
     width: 100%;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-    &:disabled {
-      opacity: 0.5;
+    padding: 0.75rem 0 3.125rem 0;
+    touch-action: manipulation;
+   
+    .babyRerordCommonBtn {
+      background-color: $raphael-green-400;
+      width: 100%;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+      p12
+      &:disabled {
+        opacity: 0.5;
+      }
     }
   }
-}
 </style>
