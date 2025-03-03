@@ -14,7 +14,7 @@
 
     <TimeRing
       v-if="productName === '居家治療儀'"
-      :totalTime="100"
+      :totalTime="3000"
       :product-name="productName"
       :hasTodayRecord="hasTodayRecord"
       @countdownComplete="handleCountdownComplete"
