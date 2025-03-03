@@ -6,12 +6,11 @@
     </div>
 
     <!-- 已有檢測紀錄時，顯示感謝訊息 -->
-    <!-- <div v-if="hasDetectRecord" class="completion-message">感謝您的使用</div> -->
+    <div v-if="hasTodayRecord" class="completion-message">感謝您的使用</div>
 
     <!-- 按鈕群組 -->
-    <div class="flex">
+    <div class="flex" v-if="!hasTodayRecord">
       <!-- BEFORE / RUNNING 狀態才顯示主要按鈕 -->
-      <!-- :disabled="hasDetectRecord" -->
       <button
         v-if="currentState !== DetectionState.AFTER"
         :style="buttonStyle"
@@ -48,10 +47,9 @@ const props = defineProps({
     type: String,
     default: "",
   },
-  /** 是否已經有完整檢測記錄 (例如已完成前後測) */
-  hasDetectRecord: {
-    type: Boolean,
-    default: false,
+  hasTodayRecord: {
+    type: String,
+    default: 3000,
   },
 });
 
@@ -107,12 +105,6 @@ const buttonStyle = computed(() => {
 
 // ============ [倒數圈的「漸層進度」] ============
 const progressStyle = computed(() => {
-  // if (props.hasDetectRecord) {
-  //   return {
-  //     background: `conic-gradient(#74BC1F 0% 100%, #74BC1F 100% 100%)`,
-  //     transition: "background 0.1s linear",
-  //   };
-  // }
   const used = props.totalTime * 1000 - remainingTime.value;
   const progress = Math.min((used / (props.totalTime * 1000)) * 100, 100);
   return {

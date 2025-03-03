@@ -16,7 +16,7 @@
       v-if="productName === '居家治療儀'"
       :totalTime="100"
       :product-name="productName"
-      :hasDetectRecord="hasDetectRecord"
+      :hasTodayRecord="hasTodayRecord"
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
     />
@@ -25,7 +25,7 @@
       v-if="productName === '雙效紅光活力衣'"
       :totalTime="5400"
       :product-name="productName"
-      :hasDetectRecord="hasDetectRecord"
+      :hasTodayRecord="hasTodayRecord"
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
     />
@@ -635,14 +635,32 @@ export default {
     }
 
     // 計算當日重置時間（凌晨5點）
-    const calculateResetTime = (now) => {
+    const calculateResetTime = () => {
+      const now = new Date();
       const resetTime = new Date(now);
-      resetTime.setHours(5, 0, 0, 0);
+      resetTime.setHours(5, 0, 0, 0); // 設定當日 5:00 AM 為重置時間
       if (now < resetTime) {
-        resetTime.setDate(resetTime.getDate() - 1); // 如果當前時間在5點之前，重置時間設為前一天
+        resetTime.setDate(resetTime.getDate() - 1); // 若當前時間小於 5:00 AM，則往前一天
       }
       return resetTime;
     };
+
+    const hasTodayRecord = computed(() => {
+      if (!Array.isArray(detectData.value)) return false;
+
+      const resetTime = calculateResetTime();
+
+      // 過濾當日（5點為基準）的檢測紀錄
+      const todayDetectRecords = detectData.value.filter((record) => {
+        const checkTime = record?.CheckTime
+          ? new Date(record.CheckTime.replace(/\//g, "-"))
+          : null;
+        return checkTime && checkTime >= resetTime; // 確保時間在今日 5:00 AM 之後
+      });
+
+      // 只要當日有檢測紀錄就算 true
+      return todayDetectRecords.length > 0;
+    });
 
     // 定時每分鐘檢查一次
     const scheduleNextCheck = () => {
@@ -757,6 +775,7 @@ export default {
       todayUseRecord,
       hasBeforeData,
       hasDetectTime,
+      hasTodayRecord
     };
   },
 };
