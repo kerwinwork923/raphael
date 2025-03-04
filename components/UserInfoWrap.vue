@@ -63,6 +63,7 @@
           select-text="確定"
           :max-date="new Date()"
           :placeholder="'請選擇您的生日'"
+          teleport="body"
           no-today
         />
       </div>
@@ -75,9 +76,7 @@
           class="custom-select"
           :class="{ selected: localDSPR }"
         >
-          <option value="" disabled selected hidden>
-            請選擇血壓(選填)
-          </option>
+          <option value="" disabled selected hidden>請選擇血壓(選填)</option>
           <option value="normal">正常(120mmHg)</option>
           <option value="prehypertension">高血壓前期(120~139mmHg)</option>
           <option value="hypertension">高血壓(>=140mmHg)</option>
@@ -307,13 +306,12 @@ export default {
 
 <style lang="scss">
 .infoWrap {
-
   .infoBox {
     background-color: $raphael-white;
     border-radius: 1rem;
     height: calc(100vh - 235px);
     padding: 1rem;
- 
+    overflow-y: scroll;
   }
 
   .custom-select {
@@ -329,7 +327,9 @@ export default {
   .custom-select.selected {
     color: $raphael-black;
   }
-
+  .dp__instance_calendar {
+    z-index: 1000;
+  }
   .nameGroup,
   .heightGroup,
   .weightGroup,
@@ -338,7 +338,7 @@ export default {
   .emailGroup {
     position: relative;
     margin-bottom: 1rem;
-
+    z-index: 1000;
     .icon1 {
       position: absolute;
       top: 50%;
@@ -420,7 +420,6 @@ export default {
 
   .dateGroup {
     display: flex;
-    z-index: 1000;
   }
 
   .groupGroup,
@@ -501,11 +500,11 @@ export default {
   }
 
   .infoSendBtn {
-    @include btnStyle($raphael-green-400,$raphael-white);
+    @include btnStyle($raphael-green-400, $raphael-white);
     margin-top: 24px;
 
     &:disabled {
-      background-color:  $raphael-gray-300;
+      background-color: $raphael-gray-300;
       cursor: not-allowed;
     }
   }
