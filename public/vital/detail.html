@@ -57,7 +57,7 @@
           </div>
           <div class="bloodPressure">
             <div class="titleGroup">
-              <h3>血壓</h3>
+              <h3>血壓 <span>血壓值為演算法估計值，個人效正模式優化中...</span></h3>
               <img src="images/raphael/bloodPressure.svg" alt="" />
             </div>
             <div class="value">
@@ -243,8 +243,9 @@
       function toggleScanInfo() {
         isExpanded = !isExpanded; // 點擊時，在 true / false 之間切換
         // 選取需要被切換的所有元素
+        // , .scanInfo .progressItem
         const toggleElements = document.querySelectorAll(
-          ".scanInfo .years, .scanInfo .HRV, .scanInfo .boxGroup, .scanInfo .progressItem"
+          ".scanInfo .years, .scanInfo .HRV, .scanInfo .boxGroup"
         );
         // 根據 isExpanded 來決定 display 屬性
         toggleElements.forEach((el) => {
@@ -460,6 +461,13 @@
       gap: 16px;
       width: 100%;
       padding: 0 1rem;
+    }
+
+    .titleGroup span {
+     font-size: 12px;
+     color: #74bc1f;
+     margin-left: 0.35rem;
+     letter-spacing: .5px;
     }
 
     .imgGroup {
@@ -944,12 +952,12 @@
         left: 0;
       }
     }
-
+    /*, .scanInfo .progressItem  */
     /* 暫時隱藏 */
     .scanInfo .years,
     .scanInfo .HRV,
-    .scanInfo .boxGroup,
-    .scanInfo .progressItem {
+    .scanInfo .boxGroup
+    {
       position: absolute; left: -9999px;
     }
   </style>
