@@ -81,11 +81,11 @@ let lastTick = 0;
 const buttonText = computed(() => {
   switch (currentState.value) {
     case DetectionState.BEFORE:
-      return "開始 HRV 檢測";
+      return "開始穿衣";
     case DetectionState.RUNNING:
-      return "重新檢測";
+      return "重新穿衣";
     case DetectionState.AFTER:
-      return "HRV檢測(使用後)";
+      return "結束穿衣";
     default:
       return "未知狀態";
   }

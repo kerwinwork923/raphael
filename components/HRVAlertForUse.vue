@@ -34,7 +34,7 @@
         class="HRVAlertBtn HRVAlertBtnAbandon"
         @click="convertAndSaveUserData('abandon')"
       >
-        放棄
+        放棄檢測
       </button>
 
       <!-- 「確定」按鈕 → 帶參數 "confirm" -->
@@ -181,7 +181,7 @@ export default {
     // 只示範「放棄」部分
     // 其餘部分(如計時、會員檢查)維持原本邏輯
     const handleAbandon = async () => {
-      const isSure = confirm("確定要放棄嗎？");
+      const isSure = confirm("確定要放棄檢測嗎？");
       if (!isSure) return;
 
       // 根據 detectFlag 判斷要放棄前測 or 後測

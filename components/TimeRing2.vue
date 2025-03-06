@@ -34,14 +34,14 @@
         <!-- 重新檢測 (RUNNING 狀態才顯示) -->
         <button
           v-if="currentDetectionState === DetectionState.RUNNING"
-          style="background-color: #74bc1f; padding: 8px"
+          style="background-color: #74bc1f"
           @click="confirmRestart"
         >
-          重新檢測
+          重新穿衣
         </button>
 
         <!-- 根據 currentDetectionState 切換開始/結束/使用後檢測等按鈕文字 -->
-        <button :style="buttonStyle" @click="toggleTimer">
+        <button :style="buttonStyle " @click="toggleTimer">
           {{ buttonText }}
         </button>
       </template>
@@ -99,9 +99,9 @@ const currentDetectionState = ref(DetectionState.BEFORE);
 const buttonText = computed(() => {
   switch (currentDetectionState.value) {
     case DetectionState.BEFORE:
-      return "開始 HRV 檢測";
+      return "開始穿衣";
     case DetectionState.RUNNING:
-      return "結束";
+      return "結束穿衣";
     case DetectionState.AFTER:
       return "HRV檢測(使用後)";
     default:
@@ -891,7 +891,7 @@ button:disabled {
 
 .timerButtonGroup {
   display: flex;
-  gap: 8px;
+  gap: 16px;
 }
 
 .timerButtonGroup button:disabled {
