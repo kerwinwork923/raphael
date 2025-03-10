@@ -57,13 +57,14 @@
           </div>
           <div class="bloodPressure">
             <div class="titleGroup">
-              <h3>血壓 <span>血壓值為演算法估計值，個人效正模式優化中...</span></h3>
+              <h3>血壓</h3>
               <img src="images/raphael/bloodPressure.svg" alt="" />
             </div>
             <div class="value">
               <span id="f_v_sbp"></span>/<span id="f_v_dbp"></span>
             </div>
             <div class="info">mmHg</div>
+            <div class="waiting">血壓值為演算法估計值，個人效正模式優化中...</div>
             <img class="bgImg" src="images/raphael/purpleChart.svg" alt="" />
           </div>
         </div>
@@ -463,11 +464,11 @@
       padding: 0 1rem;
     }
 
-    .titleGroup span {
+    .waiting {
      font-size: 12px;
      color: #74bc1f;
-     margin-left: 0.35rem;
      letter-spacing: .5px;
+     margin-top: .5rem;
     }
 
     .imgGroup {

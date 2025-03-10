@@ -132,11 +132,11 @@
            
               <img src="images/raphael/bloodPressure.svg" alt="" />
             </div>
-            <span class="bloodPressureSub">血壓值為演算法估計值，個人效正模式優化中...</span>
             <div class="value">
               <span id="f_v_sbp"></span>/<span id="f_v_dbp"></span>
             </div>
             <div class="info">mmHg</div>
+            <span class="waiting">血壓值為演算法估計值，個人效正模式優化中...</span>
             <img class="bgImg" src="images/raphael/purpleChart.svg" alt="" />
           </div>
         </div>
@@ -1533,12 +1533,12 @@
   }
 
   
-  .bloodPressureSub {
-     font-size: 12px;
-     color: #74bc1f;
-    
-     letter-spacing: .5px;
-    }
+  .waiting {
+    font-size: 12px;
+    color: #74bc1f;
+    margin-top: 0.5rem;
+    letter-spacing: .5px;
+  }
 
   @keyframes moveLeft {
     0% {
