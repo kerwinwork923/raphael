@@ -189,6 +189,7 @@
             <div class="unit">mmHg</div>
           </div>
         </div>
+        <span class="waiting">血壓值為演算法估計值，個人效正模式優化中...</span>
       </div>
 
       <!-- 血氧 -->
@@ -571,6 +572,13 @@ export default {
         &>svg{
           transform: scale(2);
         }
+      }
+
+      .waiting {
+        font-size: 12px;
+        color: #74bc1f;
+        margin-top: 0.5rem;
+        letter-spacing: .5px;
       }
 
       @for $i from 1 through 4 {
