@@ -1,12 +1,8 @@
 <template>
   <div class="babyRecord">
-    <!-- 頁面標題 -->
     <TitleMenu Text="健康紀錄" link="/user" />
 
-    <!-- 視覺上的標題（可自行調整） -->
-    <div class="babyRecordTitle"></div>
-
-    <!-- 遮罩 & Alert -->
+    <!-- 遮罩 + Alert (新增寶貝)-->
     <div class="babyCover" v-if="showBabyCover"></div>
     <div class="babyAlert" v-if="showBabyAlert">
       <h5>
@@ -23,243 +19,160 @@
       </div>
     </div>
 
-    <!-- (1) 尚無小孩：顯示量表簡介 or 新增寶貝表單 -->
-    <div v-if="babyStore.babyAPIData.length < 1">
-      <!-- 量表簡介（若尚未點擊「前往檢測」 => showAddBabyForm 為 false） -->
-      <div class="ANSGroup" v-if="!showAddBabyForm">
-        <h4>寶貝紀錄量表</h4>
-        <div class="desCard">
-          <div class="slogan">
-            寶貝紀錄幫助醫師了解孩子的成長以利做最有效率的調整，
-            涵蓋專注力、情緒、動作與語言發展等指標
-          </div>
-          <ul>
-            <li>掌握孩子的成長狀況</li>
-            <li>早期發現問題並提供支持</li>
-            <li>記錄每個階段的點滴變化</li>
-          </ul>
-        </div>
+    <!-- (A) 無小孩 => 顯示寶貝簡介 or 新增表單 -->
+    <template v-if="!hasChild">
+      <BabyIntro v-if="!showAddBabyForm" />
 
-        <div class="stepCard">
-          <div class="item">
-            <div class="icon">
-              <img src="/assets/imgs/brain-white.svg" />
-            </div>
-            <div class="content">
-              <hgroup>
-                <sub>Step 1</sub>
-                <h3>六大指標</h3>
-              </hgroup>
-              <div class="text">
-                請先選擇以下六個指標，以便我們更精確地了解您的需求
-              </div>
-            </div>
-          </div>
-          <div class="item">
-            <div class="icon">
-              <img src="/assets/imgs/heartRate-white.svg" />
-            </div>
-            <div class="content">
-              <hgroup>
-                <sub>Step 2</sub>
-                <h3>症狀評估</h3>
-              </hgroup>
-              <div class="text">依當下感覺逐題評估，填寫每項症狀的嚴重程度</div>
-            </div>
-          </div>
-          <div class="item">
-            <div class="icon">
-              <img src="/assets/imgs/choose-white.svg" />
-            </div>
-            <div class="content">
-              <hgroup>
-                <sub>Step 3</sub>
-                <h3>頻率記錄</h3>
-              </hgroup>
-              <div class="text">針對困擾您的症狀，填寫每週發生的頻率</div>
-            </div>
-          </div>
-          <div class="item">
-            <div class="icon">
-              <img src="/assets/imgs/brain-white.svg" />
-            </div>
-            <div class="content">
-              <hgroup>
-                <sub>Step 4</sub>
-                <h3>重點標記</h3>
-              </hgroup>
-              <div class="text">挑選 3-10項 您目前最困擾的症狀</div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <!-- 新增寶貝表單 -->
+      <BabyCreateForm
+        v-else
+        :babyInfos="babyInfos"
+        @addBaby="addBabyInfo"
+        @removeBaby="removeBaby"
+      />
 
-      <!-- 新增寶貝資料表單：showAddBabyForm === true 時顯示 -->
-      <div class="babyRecordGroup" v-if="showAddBabyForm">
-        <div class="babyInfoGroup">
-          <h4>新增寶貝基本資料</h4>
-          <div class="babyInfo" v-for="(baby, index) in babyInfos" :key="index">
-            <div class="babyInfoOption">
-              <small>#{{ index + 1 }}</small>
-              <img
-                src="/assets/imgs/trash.svg"
-                alt="刪除"
-                @click="removeBaby(index)"
-              />
-            </div>
-            <div class="babyRecordInfoInput">
-              <img
-                class="icon1"
-                src="../assets/imgs/babyRecordMember.svg"
-                alt="寶貝姓名"
-              />
-              <input
-                type="text"
-                v-model="baby.name"
-                placeholder="請輸入寶貝姓名"
-              />
-            </div>
-            <div class="babyRecordInfoInput">
-              <img
-                class="icon1"
-                src="../assets/imgs/babyRecordS.svg"
-                alt="性別"
-              />
-              <select
-                v-model="baby.gender"
-                class="custom-select"
-                :class="{ selected: baby.gender }"
-              >
-                <option value="" disabled hidden>請選擇性別</option>
-                <option value="male">男性</option>
-                <option value="female">女性</option>
-              </select>
-            </div>
-            <div class="babyRecordInfoInput">
-              <img
-                class="icon1"
-                src="../assets/imgs/babyRecordFace.png"
-                alt="生日"
-              />
-              <VueDatePicker
-                v-model="baby.birthDate"
-                :format="formatDate"
-                :locale="'zh-TW'"
-                :enable-time-picker="false"
-                cancel-text="取消"
-                select-text="確定"
-                :max-date="new Date()"
-                :placeholder="'請選擇寶貝的生日'"
-                no-today
-                class="date-picker"
-              />
-            </div>
-          </div>
-        </div>
-        <div class="babyInfoAdd" @click="addBabyInfo">
-          繼續新增寶貝基本資料
-          <span><img src="/assets/imgs/babyInfoAdd.svg" alt="新增" /></span>
-        </div>
-      </div>
-
-      <!-- (最後) 按鈕：前往檢測 (第一次 => 開表單, 第二次 => 送資料) -->
+      <!-- 單一按鈕 -->
       <div class="babyRerordBtnGroup">
-        <button class="babyRerordCommonBtn" @click="onNoChildBtnClick">
-          前往檢測
+        <button
+          class="babyRerordCommonBtn"
+          :disabled="isDisableCommonBtn"
+          :style="commonButtonStyle"
+          @click="onCommonButtonClick"
+        >
+          {{ commonButtonLabel }}
         </button>
       </div>
-    </div>
+    </template>
 
-    <!-- (2) 若後端已有寶貝資料 => 顯示問卷進度 + 指標 + QA + 次數 -->
-    <div class="babyRecordQAGroup" v-else>
-      <!-- 寶貝進度清單 (可切換) -->
-      <div class="babyProgressGroup">
-        <div
-          v-for="child in babyStore.babyAPIData"
-          :key="child.CID"
-          :class="{ active: child.CID === babyStore.selectedChildID }"
-          class="babyProgressCard"
-          @click="onClickChild(child.CID)"
-        >
-          <div class="babyProgressTitle">
-            <div
-              class="babyProgressState"
-              :class="{
-                babyProgressStateActive:
-                  child.CID === babyStore.selectedChildID,
-              }"
-            ></div>
-            <h4>{{ child.Name }}</h4>
-          </div>
-          <div class="babyProgressText">
-            <h5>問卷進度</h5>
-            <h6>{{ child.ratioComplete }}%</h6>
-          </div>
-          <div class="babyProgress"></div>
-        </div>
-      </div>
+    <!-- (B) 有小孩 => flowStage: indicator / qa / times -->
+    <template v-else>
+      <!-- 寶貝列表進度 (上方 Tab) -->
+      <BabyProgress
+        :babyList="babyStore.babyAPIData"
+        :selectedChildID="babyStore.selectedChildID"
+        @selectChild="onClickChild"
+      />
 
-      <!-- 指標選擇：在「尚未進 QA」且「尚未顯示次數」時顯示 -->
-      <div
-        class="babyAnsTypeGroup"
-        v-if="curChildData && curChildData.flowStage === 'indicator'"
-      >
-        <p>請挑選幾個指標，讓我們更了解您的需求。</p>
-
-        <div
-          class="babyAnsTypeInfoGroup"
-          v-if="ansTypes && Object.keys(ansTypes).length > 0"
-        >
-          <div
-            v-for="(description, key) in ansTypes"
-            :key="key"
-            class="babyAnsTypeCard"
-            :class="{ babyAnsTypeCardSelected: isTypeSelected(key) }"
-            @click="onToggleAnsType(key)"
-          >
-            <img
-              :src="isTypeSelected(key) ? babyTypeCheck : babyTypePlus"
-              alt="選擇圖示"
-            />
-            <h3>{{ key }}</h3>
-            <p>{{ description }}</p>
-          </div>
-        </div>
-        <p v-else>載入中...</p>
-
-        <!-- 顯示「前往檢測」按鈕 -->
-        <div class="babyRerordBtnGroup">
-          <button class="babyRerordCommonBtn" @click="onFetchQuestions">
-            前往檢測
-          </button>
-        </div>
-      </div>
-
-      <!-- (A) 已進入答題階段 => QAList (一頁7題) -->
-      <div v-if="curChildData && curChildData.flowStage === 'qa'">
-        <p>以下問題的困擾程度</p>
-        <!-- 顯示 QAList (請自行確認 QAList 裡也要有對應 canGoNext 的邏輯) -->
-        <QAList ref="qaListRef" :questions="curChildData.childQuestions" />
-
-        <!-- 按鈕：下一頁 or 提交 -->
+      <!-- 指標階段 -->
+      <div v-if="curChildData?.flowStage === 'indicator'">
+        <!-- 1) 指標選擇元件 -->
+        <IndicatorSelect :ansTypes="ansTypes" :curChildData="curChildData" />
+        <!-- 2) 下方按鈕群組 (單一按鈕) -->
         <div class="babyRerordBtnGroup">
           <button
             class="babyRerordCommonBtn"
-            :disabled="!canClickNext"
-            :style="{ backgroundColor: canClickNext ? '#74bc1f' : 'gray' }"
-            @click="onCommonBtnClick"
+            :disabled="isDisableCommonBtn"
+            @click="onCommonButtonClick"
           >
-            {{ commonBtnLabel }}
+            {{ commonButtonLabel }}
           </button>
         </div>
       </div>
 
-      <!-- (B) 進入「次數」階段 => TimesSelect -->
-      <TimesSelect
-        v-if="curChildData && curChildData.flowStage === 'times'"
-        :childTimesQues="curChildData?.childTimesQues || []"
-      />
-    </div>
+      <!-- QA階段 -->
+      <div v-else-if="curChildData?.flowStage === 'qa'">
+        <p>以下問題的困擾程度</p>
+        <!-- 傳入 currentPage (來自 store 的 curChildData.value.currentPage) -->
+        <QAList
+          ref="qaListRef"
+          :questions="curChildData.childQuestions"
+          :MID="MID"
+          :MAID="MAID"
+          :Token="Token"
+          :Mobile="Mobile"
+          :CID="babyStore.selectedChildID"
+          :currentPage="curChildData.currentPage"
+          @update-page="(val) => (curChildData.currentPage = val)"
+          @go-times="onGoTimes"
+        />
+
+        <!-- (C) QA分頁控制按鈕群組：上一頁 / 下一頁 or 下一步 -->
+        <div
+          class="babyRerordBtnGroup"
+          :class="{ 'double-btn': hasTwoButtons }"
+        >
+          <!-- 左邊 => 上一頁 (x/x)，若第1頁則不顯示 -->
+          <button
+            v-if="currentPage > 1"
+            class="babyRerordCommonBtn babyRerordPrevBtn"
+            @click="onPrevPageClick"
+          >
+            上一頁 ({{ currentPage }}/{{ totalPages }})
+          </button>
+
+          <!-- 右邊 => 下一頁 / 下一步 -->
+          <button
+            class="babyRerordCommonBtn"
+            :disabled="isDisableNextBtn"
+            @click="onNextPageClick"
+          >
+            {{ nextButtonLabel }}
+          </button>
+        </div>
+      </div>
+
+      <!-- 次數階段 -->
+      <div v-else-if="curChildData?.flowStage === 'times'">
+        <h3>以下問題上週發生幾次</h3>
+
+        <!-- 次數列表: 顯示當前頁 timesDisplayedQuestions -->
+        <TimesSelect
+          :timesQuestions="timesDisplayedQuestions"
+          :indexOnThisPage="timesStartIndex"
+        />
+
+        <!-- 分頁按鈕群組：上一頁 / 下一頁 or 完成 -->
+        <div
+          class="babyRerordBtnGroup"
+          :class="{ 'double-btn': timesCurrentPage > 1 }"
+        >
+          <!-- 上一頁 (x/x) -->
+          <button
+            v-if="timesCurrentPage > 1"
+            class="babyRerordCommonBtn babyRerordPrevBtn"
+            @click="onTimesPrevPage"
+          >
+            上一頁 ({{ timesCurrentPage }}/{{ timesTotalPages }})
+          </button>
+
+          <!-- 右邊 => 下一頁 / 完成 -->
+          <button
+            class="babyRerordCommonBtn"
+            :disabled="!isTimesPageFilled"
+            @click="onTimesNextClick"
+          >
+            {{ timesNextButtonLabel }}
+          </button>
+        </div>
+      </div>
+
+      <!-- 最想解決階段 -->
+      <div v-else-if="curChildData?.flowStage === 'priority'">
+        <h3>
+          下列為您目前覺得困擾的症狀，請從中選擇最多10個目前最想解決的症狀
+        </h3>
+        <SolvePrioritySelect
+          :symptoms="curChildData.childTimesQues"
+          @selection-changed="onPrioritySelectionChanged"
+        />
+
+        <div class="babyRerordBtnGroup">
+          <button
+            class="babyRerordCommonBtn"
+            :disabled="selectedPriorityCount === 0"
+            :style="priorityButtonStyle"
+            @click="onPrioritySubmit"
+          >
+            看報告
+          </button>
+        </div>
+      </div>
+
+      <div v-else-if="curChildData?.flowStage === 'result'">
+        <!-- 直接使用新元件 BabyReportResult -->
+        <BabyReportResult :reportData="curChildData?.reportData" />
+      </div>
+    </template>
   </div>
 </template>
 
@@ -268,126 +181,315 @@ import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 
-// 自行替換你自己專案的路徑
-import TitleMenu from "~/components/TitleMenu.vue";
-import VueDatePicker from "@vuepic/vue-datepicker";
-import QAList from "~/components/QAList.vue";
-import TimesSelect from "~/components/TimesSelect.vue";
-
-// 選擇/勾選圖示
-import babyTypeCheck from "@/assets/imgs/babyRecord/babyTypeCheck.svg";
-import babyTypePlus from "@/assets/imgs/babyRecord/babyTypePlus.svg";
-
-// Pinia store
-import { useBabyStore } from "~/stores/useBabyStore";
+import TitleMenu from "@/components/TitleMenu.vue";
+import BabyIntro from "@/components/babyRecord/BabyIntro.vue";
+import BabyCreateForm from "@/components/babyRecord/BabyCreateForm.vue";
+import BabyProgress from "@/components/babyRecord/BabyProgress.vue";
+import IndicatorSelect from "@/components/babyRecord/IndicatorSelect.vue";
+import QAList from "@/components/QAList.vue";
+import TimesSelect from "@/components/TimesSelect.vue";
+import SolvePrioritySelect from "@/components/babyRecord/SolvePrioritySelect.vue";
+import BabyReportResult from "@/components/babyRecord/BabyReportResult.vue"
+import { useBabyStore } from "@/stores/useBabyStore";
 
 export default {
-  name: "babyRecord",
+  name: "BabyRecord",
   components: {
     TitleMenu,
-    VueDatePicker,
+    BabyIntro,
+    BabyCreateForm,
+    BabyProgress,
+    IndicatorSelect,
     QAList,
     TimesSelect,
+    SolvePrioritySelect,
+    BabyReportResult
   },
   setup() {
     const router = useRouter();
     const babyStore = useBabyStore();
 
-    // 從 localStorage 取會員資料
+    // 驗證登入
     const localData = localStorage.getItem("userData");
     const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
-
-    // 未登入 => 導回首頁
     if (!MID || !Token || !MAID || !Mobile) {
       router.push("/");
     }
+
+    // 進入畫面後，抓寶貝列表
+    onMounted(() => {
+      babyStore.fetchGrowth();
+    });
 
     // UI 狀態
     const showBabyCover = ref(false);
     const showBabyAlert = ref(false);
     const showAddBabyForm = ref(false);
-    const showTimesStage = ref(false); // 是否顯示「次數」頁
 
-    // 新增寶貝的暫存
+    // 寶貝表單
     const babyInfos = ref([{ name: "", gender: "", birthDate: null }]);
+    const qaListRef = ref(null); // 操作 QAList 分頁
 
-    // 取得 QAList ref
-    const qaListRef = ref(null);
-
-    // 進入頁面 => 取得所有寶貝資料
-    onMounted(() => {
-      babyStore.fetchGrowth();
-    });
-
-    // 目前所選寶貝詳細
+    // pinia store 資料
+    const hasChild = computed(() => babyStore.babyAPIData.length > 0); // 是否有寶貝
     const curChildData = computed(() => {
       const cid = babyStore.selectedChildID;
       return babyStore.childRecords[cid];
     });
-    const hasSelectedChild = computed(() => !!babyStore.selectedChildID);
 
-    // 後端返回的指標
     const ansTypes = computed(() => {
-      if (!curChildData.value?.growthRec) return null;
-      return curChildData.value.growthRec.ChildAnsAllType || null;
+      return curChildData.value?.growthRec?.ChildAnsAllType || null;
     });
 
-    // 是否已經在 QA 階段
-    const isQAStage = computed(() => {
-      return (curChildData.value?.childQuestions?.length || 0) > 0;
-    });
-
-    // 分頁
+    // ========== QA 分頁相關 ==========
     const currentPage = computed(() => qaListRef.value?.currentPage || 1);
     const totalPages = computed(() => qaListRef.value?.totalPages || 1);
+    // 判斷本頁是否都填完
+    const isPageFilled = computed(() => qaListRef.value?.isPageFilled);
 
-    // 按鈕文字
-    const commonBtnLabel = computed(() => {
-      if (!isQAStage.value && !showTimesStage.value) {
-        return "前往檢測";
-      } else if (showTimesStage.value) {
-        return "次數填寫中";
-      } else {
-        // 已在 QA
-        if (currentPage.value < totalPages.value) {
-          return `下一頁 (${currentPage.value}/${totalPages.value})`;
-        } else {
-          return `下一步 (${currentPage.value}/${totalPages.value})`;
-        }
-      }
+    // ========== times 分頁相關 ==========
+    const timesCurrentPage = ref(1);
+    const pageSize = 7;
+
+    const timesQuestions = computed(
+      () => curChildData.value?.childTimesQues || []
+    );
+
+    // 總頁數
+    const timesTotalPages = computed(() => {
+      if (!timesQuestions.value.length) return 1;
+      return Math.ceil(timesQuestions.value.length / pageSize);
+    });
+    // 目前頁面的起始 index
+    const timesStartIndex = computed(
+      () => (timesCurrentPage.value - 1) * pageSize
+    );
+    // 切出當前頁的 7 題
+    const timesDisplayedQuestions = computed(() => {
+      const start = timesStartIndex.value;
+      const end = start + pageSize;
+      return timesQuestions.value.slice(start, end);
     });
 
-    // 是否可點下一頁
-    const canClickNext = computed(() => {
-      if (!qaListRef.value) return false;
-      return qaListRef.value.canGoNext; // QAList 裏頭自行管理
+    // 是否填完本頁
+    const isTimesPageFilled = computed(() => {
+      return timesDisplayedQuestions.value.every((q) => q.selectScore !== "");
     });
 
-    // ─────────────────────────────────────────────
-    // (A) 沒有小孩 => 新增寶貝
-    // ─────────────────────────────────────────────
-    function onNoChildBtnClick() {
-      // 第一次點 => 顯示表單
-      if (!showAddBabyForm.value) {
-        showAddBabyForm.value = true;
-        return;
+    // 上一頁
+    function onTimesPrevPage() {
+      if (timesCurrentPage.value > 1) {
+        timesCurrentPage.value--;
       }
-      // 第二次 => 檢查並送資料
-      checkAndShowBabyAlert();
     }
 
+    // 右邊按鈕顯示文字：若還有下一頁 => 「下一頁」，最後一頁 => 「完成」
+    const timesNextButtonLabel = computed(() => {
+      if (timesCurrentPage.value < timesTotalPages.value) {
+        return `下一頁 (${timesCurrentPage.value}/${timesTotalPages.value})`;
+      } else {
+        return `完成 (${timesCurrentPage.value}/${timesTotalPages.value})`;
+      }
+    });
+
+    // 點擊「下一頁 / 完成」
+    async function onTimesNextClick() {
+      if (!isTimesPageFilled.value) {
+        alert("請先填完本頁次數");
+        return;
+      }
+
+      if (timesCurrentPage.value < timesTotalPages.value) {
+        timesCurrentPage.value++;
+      } else {
+        // ★ 已到最後一頁 => 送 API_ChildAnsTimesSave 後，再呼叫 API_GrowthSolve
+        const cid = babyStore.selectedChildID;
+        const aid = curChildData.value.growthRec?.CIDChildAnsLast?.AID || "";
+
+        const requestDataTimes = {
+          MID,
+          MAID,
+          Token,
+          Mobile,
+          CID: cid,
+          AID: aid,
+          ChildAnsTimes: curChildData.value.childTimesQues.map((q) => ({
+            QueSeq: q.id,
+            QueTimesAns: q.selectScore,
+          })),
+        };
+
+        try {
+          // 1) 先送出次數
+          const responseTimes = await axios.post(
+            "https://23700999.com:8081/HMA/API_ChildAnsTimesSave.jsp",
+            requestDataTimes
+          );
+          if (responseTimes.data.Result !== "OK") {
+            alert("次數答案送出失敗：" + responseTimes.data.Message);
+            return;
+          }
+
+          // 2) 再呼叫分析 API => API_GrowthSolve
+          const requestDataSolve = {
+            MID,
+            MAID,
+            Token,
+            Mobile,
+            CID: cid,
+            AID: aid,
+          };
+          const responseSolve = await axios.post(
+            "https://23700999.com:8081/HMA/API_GrowthSolve.jsp",
+            requestDataSolve
+          );
+
+          if (responseSolve.data.Result === "OK") {
+            alert("次數答案已成功送出並取得分析結果！");
+
+            // **重點**：把 API_GrowthSolve 回傳的 ChildAns 放到 pinia 裡
+            if (Array.isArray(responseSolve.data.ChildAns)) {
+              babyStore.childRecords[cid].childTimesQues =
+                responseSolve.data.ChildAns.map((q) => {
+                  return {
+                    id: q.QueSeq,
+                    question: q.Question,
+                    selectScore:  "",
+                    answers: [
+                      q.AnswerName_0,
+                      q.AnswerName_1,
+                      q.AnswerName_2,
+                      q.AnswerName_3,
+                    ],
+                    Type: q.Type,
+                    TypeName: q.TypeName,
+                    // 如果你希望在最想解決階段預設都沒被選，就自行加個 selected: false
+                    selected: false,
+                  };
+                });
+            }
+
+            // 3) 切換到最想解決階段
+            curChildData.value.flowStage = "priority";
+          } else {
+            alert("取得分析結果失敗：" + responseSolve.data.Message);
+          }
+        } catch (error) {
+          console.error("送出或取得分析發生錯誤", error);
+          alert("伺服器錯誤，請稍後再試！");
+        }
+      }
+    }
+
+    // 上一頁
+    function onPrevPageClick() {
+      qaListRef.value?.goPrevPage();
+    }
+    // 下一頁 / 下一步
+    async function onNextPageClick() {
+      if (!qaListRef.value.isPageFilled) {
+        alert("請先填完題目");
+        return;
+      }
+      if (qaListRef.value.currentPage < qaListRef.value.totalPages) {
+        qaListRef.value.goNextPage();
+      } else {
+        // 最後一頁 => 同時呼叫
+        await qaListRef.value.submitAllAnswers();
+        // flowStage => 'times' or ...
+      }
+    }
+
+    // 按鈕文字
+    const nextButtonLabel = computed(() => {
+      if (currentPage.value < totalPages.value) {
+        return `下一頁 (${currentPage.value}/${totalPages.value})`;
+      } else {
+        return `下一步 (${currentPage.value}/${totalPages.value})`;
+      }
+    });
+    // 是否 disable 下一頁
+    const isDisableNextBtn = computed(() => !isPageFilled.value);
+    // 是否有兩顆按鈕
+    const hasTwoButtons = computed(() => currentPage.value > 1);
+
+    // 提交 QA => 進入 times
+    async function submitChildAnswers() {
+      const cid = babyStore.selectedChildID;
+      if (!cid) return;
+      // ...可做 API 送出
+      curChildData.value.flowStage = "times";
+    }
+
+    // ========== 其他階段：單一按鈕 ==========
+    const commonButtonLabel = computed(() => {
+      // A) 如果沒有寶貝
+      if (!hasChild.value) {
+        return showAddBabyForm.value ? "送出寶貝" : "前往檢測";
+      }
+      // B) 有寶貝
+      const stage = curChildData.value?.flowStage;
+      if (stage === "indicator") return "前往檢測";
+      if (stage === "times") return "次數填寫中";
+      return "下一步";
+    });
+    // 是否禁用單一按鈕
+    const isDisableCommonBtn = computed(() => {
+      // times 階段可禁用
+      if (curChildData.value?.flowStage === "times") return true;
+      return false;
+    });
+    // 單一按鈕行為
+    async function onCommonButtonClick() {
+      const stage = curChildData.value?.flowStage;
+
+      if (stage === "times") {
+        if (!isTimesAllFilled.value) {
+          alert("請先填寫所有次數問題");
+          return;
+        }
+
+        console.log("✅ 次數填寫完成，準備送出或進入下一階段");
+        return;
+      }
+
+      if (!hasChild.value) {
+        if (!showAddBabyForm.value) {
+          showAddBabyForm.value = true;
+        } else {
+          checkAndShowBabyAlert();
+        }
+      } else {
+        if (stage === "indicator") {
+          const selectedSet = curChildData.value.selectedAnsTypes;
+
+          // 防呆：檢查是否至少選擇了一個大項目
+          if (!selectedSet || selectedSet.size === 0) {
+            alert("請至少選擇一個大項目以繼續");
+            return;
+          }
+
+          // 如果有選擇指標，繼續下一步
+          await babyStore.fetchChildQuestions(babyStore.selectedChildID);
+        } else if (stage === "times") {
+          alert("現在是次數階段，正在填寫中...");
+        }
+      }
+    }
+
+    // ========== 新增寶貝表單行為 ==========
     function addBabyInfo() {
       babyInfos.value.push({ name: "", gender: "", birthDate: null });
     }
-    function removeBaby(i) {
+    function removeBaby(idx) {
       if (babyInfos.value.length > 1) {
-        babyInfos.value.splice(i, 1);
+        babyInfos.value.splice(idx, 1);
       }
     }
     function checkAndShowBabyAlert() {
       for (const b of babyInfos.value) {
         if (!b.name || !b.gender || !b.birthDate) {
-          alert("請完整填寫所有寶貝資料！");
+          alert("請完整填寫所有寶貝資料");
           return;
         }
       }
@@ -399,13 +501,18 @@ export default {
       showBabyAlert.value = false;
     }
     async function submitBabyData() {
-      // 送新增寶貝 API
       try {
         if (babyInfos.value.length === 0) {
           alert("請至少新增一筆寶貝資料");
           return;
         }
-        const req = {
+        for (const b of babyInfos.value) {
+          if (!b.name || !b.gender || !b.birthDate) {
+            alert("請完整填寫所有寶貝資料！");
+            return;
+          }
+        }
+        const requestData = {
           MID,
           Token,
           MAID,
@@ -416,248 +523,269 @@ export default {
             BirthDay: formatDateToYYYYMMDD(b.birthDate),
           })),
         };
-        console.log("API_ChildSave.jsp =>", req);
+        console.log("📤 API_ChildSave 請求", requestData);
 
-        // 這裡替換成自己的後端API
-        const res = await axios.post(
+        const response = await axios.post(
           "https://23700999.com:8081/HMA/API_ChildSave.jsp",
-          req
+          requestData
         );
-        if (res.data.Result === "OK") {
-          showBabyCover.value = false;
-          showBabyAlert.value = false;
-          // 重新取得寶貝清單 => 就能顯示新寶貝
+        console.log("📩 API_ChildSave 回應", response.data);
+
+        if (response.data.Result === "OK") {
+          alert("✅ 新增寶貝成功！");
+          closeBabyAlert();
           await babyStore.fetchGrowth();
+          showAddBabyForm.value = false;
         } else {
-          alert("❌ 新增寶貝失敗：" + res.data.Message);
+          alert("❌ 新增寶貝失敗：" + response.data.Message);
         }
-      } catch (err) {
-        console.error("submitBabyData error:", err);
+      } catch (error) {
+        console.error("🚨 submitBabyData 錯誤", error);
+        alert("❌ 伺服器錯誤，請稍後再試！");
       }
     }
 
-    // ─────────────────────────────────────────────
-    // (B) 有小孩 => 指標 / QA / 次數
-    // ─────────────────────────────────────────────
-    function onClickChild(cid) {
-      showTimesStage.value = false; // 每次切換時，都先回到普通狀態
-      babyStore.selectedChildID = cid;
-      babyStore.fetchGrowthRecord(cid);
-    }
-
-    // 指標選擇
-    function isTypeSelected(key) {
-      if (!curChildData.value) return false;
-      return curChildData.value.selectedAnsTypes.has(key);
-    }
-    function onToggleAnsType(key) {
-      const cid = babyStore.selectedChildID;
-      if (!cid) return;
-      babyStore.toggleAnsType(cid, key);
-    }
-
-    // 進入 QA
-    async function onFetchQuestions() {
-      const cid = babyStore.selectedChildID;
-      if (!cid) {
-        alert("尚未選擇寶貝");
-        return;
-      }
-      const set = babyStore.childRecords[cid]?.selectedAnsTypes;
-      if (!set || set.size === 0) {
-        alert("請至少選擇一個指標");
-        return;
-      }
-      await babyStore.fetchChildQuestions(cid);
-    }
-
-    // QA 裏的按鈕(下一頁 or 提交)
-    async function onCommonBtnClick() {
-      // 若還沒 QA => 先進QA
-      if (!isQAStage.value) {
-        onFetchQuestions();
-      } else {
-        // QA中 => 分頁 or 最後一頁 => 提交
-        if (currentPage.value < totalPages.value) {
-          qaListRef.value.goNextPage();
-        } else {
-          // 最後一頁 => 提交
-          await submitChildAnswers();
-          // 再取次數 => showTimesStage
-          const cid = babyStore.selectedChildID;
-          const AID = curChildData.value?.growthRec?.CIDChildAnsLast?.AID || "";
-          if (cid) {
-            await babyStore.fetchGrowthRecTimes(cid, AID);
-            showTimesStage.value = true;
-          }
-        }
-      }
-    }
-
-    async function submitChildAnswers() {
-      const cid = babyStore.selectedChildID;
-      const record = babyStore.childRecords[cid];
-      if (!record) return;
-
-      // 組裝 API 需要的 ChildAns 格式
-      const ChildAns = record.childQuestions.map((q) => ({
-        QueSeq: q.id,
-        QueAns: String(q.selectScore),
-      }));
-
-      const AID = record.growthRec?.CIDChildAnsLast?.AID || "";
-      const FirstSecond = AID ? "Second" : "First";
-
-      const req = {
-        MID,
-        Token,
-        MAID,
-        Mobile,
-        CID: cid,
-        AID,
-        FirstSecond,
-        ChildAns,
-      };
-
-      console.log("API_ChildAnsSave.jsp =>", req);
-
-      try {
-        const { data } = await axios.post(
-          "https://23700999.com:8081/HMA/API_ChildAnsSave.jsp",
-          req
-        );
-
-        if (data.Result === "OK") {
-          alert("✅ 完成提交！");
-
-          // 取得「次數填寫」數據並存入 Pinia
-          await babyStore.fetchGrowthRecTimes(cid, AID);
-
-          // 顯示次數填寫畫面
-          showTimesStage.value = true;
-        } else {
-          alert("❌ 提交失敗：" + data.Message);
-        }
-      } catch (err) {
-        console.error("submitChildAnswers error:", err);
-      }
-    }
-
-    // 日期格式 => YYYYMMDD
-    function formatDateToYYYYMMDD(d) {
-      if (!d) return "";
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth() + 1).padStart(2, "0");
-      const dd = String(d.getDate()).padStart(2, "0");
-      return `${yyyy}${mm}${dd}`;
-    }
-
-    // VueDatePicker 的顯示格式
-    const formatDate = (date) => {
+    // ========== 其他輔助 ==========
+    function formatDateToYYYYMMDD(date) {
       if (!date) return "";
       const yyyy = date.getFullYear();
       const mm = String(date.getMonth() + 1).padStart(2, "0");
       const dd = String(date.getDate()).padStart(2, "0");
-      return `${yyyy}-${mm}-${dd}`;
-    };
+      return `${yyyy}${mm}${dd}`;
+    }
+    function onClickChild(cid) {
+      babyStore.selectedChildID = cid;
+      babyStore.fetchGrowthRecord(cid);
+    }
+
+    function onGoTimes(data) {
+      // 確保 `data.ChildAns` 存在，並且是陣列
+      if (!data.ChildAns || !Array.isArray(data.ChildAns)) {
+        console.error("❌ API 回應格式錯誤，沒有 ChildAns 陣列", data);
+        return;
+      }
+
+      // 解析 `ChildAns`，轉成 `childTimesQues`
+      babyStore.childRecords[babyStore.selectedChildID].childTimesQues =
+        data.ChildAns.map((q) => ({
+          id: q.QueSeq,
+          question: q.Question,
+          selectScore: "",
+          answers: [
+            q.AnswerName_0,
+            q.AnswerName_1,
+            q.AnswerName_2,
+            q.AnswerName_3,
+          ],
+          Type: q.Type,
+          TypeName: q.TypeName,
+        }));
+
+      // 切換 flowStage 到 "times"
+      babyStore.childRecords[babyStore.selectedChildID].flowStage = "times";
+
+      console.log(
+        "✅ 已切換到次數頁，題目:",
+        babyStore.childRecords[babyStore.selectedChildID].childTimesQues
+      );
+    }
+
+    // 在 setup() 內
+    const isTimesAllFilled = computed(() => {
+      if (curChildData.value?.flowStage === "times") {
+        const arr = curChildData.value.childTimesQues || [];
+        // 若有任何一題的 `selectScore` 是 `""` (空值)，則返回 `false`
+        return arr.every((q) => q.selectScore !== "");
+      }
+      return true; // 不是 times 階段，按鈕不受影響
+    });
+
+    // 按鈕的背景顏色
+    const commonButtonStyle = computed(() => {
+      // 如果 isDisableCommonBtn => 背景灰色
+      return {
+        backgroundColor: isDisableCommonBtn.value ? "#bdbdbd" : "#74bc1f",
+      };
+    });
+
+    //最想解決
+    const selectedPriorityCount = ref(0);
+    // 接收元件回傳選擇數量的變化
+    function onPrioritySelectionChanged(count) {
+      selectedPriorityCount.value = count;
+    }
+
+    // 動態按鈕顏色
+    const priorityButtonStyle = computed(() => ({
+      backgroundColor: selectedPriorityCount.value > 0 ? "#74bc1f" : "#bdbdbd",
+    }));
+
+    // 最後提交選擇
+    // 最後提交選擇 => 「看報告」按鈕
+    async function onPrioritySubmit() {
+      if (selectedPriorityCount.value === 0) {
+        alert("請至少選擇一項最想解決的問題！");
+        return;
+      }
+
+      const cid = babyStore.selectedChildID;
+      const record = babyStore.childRecords[cid];
+      const aid = record.growthRec?.CIDChildAnsLast?.AID || "";
+
+      // 1) API_ChildAnsSolveSave => 將「最想解決的問題」送到後端
+      //    假設您要傳遞 'selectedPriority' (Set形式) 的題目清單
+      const requestDataSolve = {
+        MID,
+        MAID,
+        Token,
+        Mobile,
+        CID: cid,
+        AID: aid,
+        ChildAnsSolve: [...record.selectedPriority].map((queSeq) => ({
+          QueSeq: queSeq, // 您在 selectedPriority 存的題目 id
+        })),
+      };
+
+      try {
+        const resSolve = await axios.post(
+          "https://23700999.com:8081/HMA/API_ChildAnsSolveSave.jsp",
+          requestDataSolve
+        );
+        if (resSolve.data.Result !== "OK") {
+          alert("API_ChildAnsSolveSave 失敗：" + resSolve.data.Message);
+          return;
+        }
+        alert("最想解決的問題已送出！");
+
+        // 2) API_GrowthCompare => 拿報告分析
+        const requestDataCompare = {
+          MID,
+          MAID,
+          Token,
+          Mobile,
+          CID: cid,
+          AID: aid,
+        };
+        const resCompare = await axios.post(
+          "https://23700999.com:8081/HMA/API_GrowthCompare.jsp",
+          requestDataCompare
+        );
+        if (resCompare.data.Result !== "OK") {
+          alert("API_GrowthCompare 失敗：" + resCompare.data.Message);
+          return;
+        }
+        // 將完整回傳塞進 pinia
+        babyStore.childRecords[cid].reportData = resCompare.data;
+
+        // 4) 切換 flowStage => "result"
+        record.flowStage = "result";
+      } catch (error) {
+        console.error("onPrioritySubmit error:", error);
+        alert("伺服器錯誤，請稍後再試！");
+      }
+    }
 
     return {
       babyStore,
 
+      // UI
       showBabyCover,
       showBabyAlert,
       showAddBabyForm,
-      showTimesStage,
       babyInfos,
       qaListRef,
 
+      // 計算值
+      hasChild,
       curChildData,
-      hasSelectedChild,
       ansTypes,
-      isQAStage,
+
+      // QA 分頁
       currentPage,
       totalPages,
-      commonBtnLabel,
-      canClickNext,
+      isPageFilled,
+      nextButtonLabel,
+      isDisableNextBtn,
+      hasTwoButtons,
 
-      onNoChildBtnClick,
-      closeBabyAlert,
-      submitBabyData,
-      addBabyInfo,
-      removeBaby,
-      onClickChild,
-      isTypeSelected,
-      onToggleAnsType,
-      onFetchQuestions,
-      onCommonBtnClick,
+      // QA 分頁方法
+      onPrevPageClick,
+      onNextPageClick,
       submitChildAnswers,
 
+      // 其他階段按鈕
+      commonButtonLabel,
+      onCommonButtonClick,
+      isDisableCommonBtn,
+
+      // 新增寶貝
+      addBabyInfo,
+      removeBaby,
+      checkAndShowBabyAlert,
+      closeBabyAlert,
+      submitBabyData,
       formatDateToYYYYMMDD,
-      formatDate,
-      babyTypeCheck,
-      babyTypePlus,
+
+      // 切換寶貝
+      onClickChild,
+      onGoTimes,
+      isTimesAllFilled,
+      commonButtonStyle,
+
+      // 次數階段相關
+      timesCurrentPage, // ✅ 補上
+      timesTotalPages, // ✅ 補上
+      timesStartIndex, // ✅ 補上
+      timesDisplayedQuestions, // 你已經有 return，這部分沒問題
+      isTimesPageFilled, // ✅ 補上
+      timesQuestions, // ✅ 補上
+
+      // 次數階段的按鈕
+      timesNextButtonLabel,
+      onTimesPrevPage,
+      onTimesNextClick,
+
+      selectedPriorityCount,
+      onPrioritySelectionChanged,
+      priorityButtonStyle,
+      onPrioritySubmit,
     };
   },
 };
 </script>
 
-
 <style lang="scss">
 .babyRecord {
-  background-color: #f5f5f5; /* 原本 $raphael-gray-100 */
+  background-color: #f5f5f5;
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
   min-height: 100vh;
+  width: 100%;
   padding: 0 1rem;
-  position: relative; /* 讓 .babyAlert 可以絕對定位在中間 */
-
-  .dp__input_wrap {
-    border-bottom: 1px solid #cccccc; /* 原 $raphael-gray-300 */
-    padding: 0.6rem 0;
-
-    .dp__pointer {
-      border: none;
-      background-color: transparent;
-      width: 100%;
-      outline: none;
-      font-size: 1.2rem;
-
-      &::placeholder {
-        color: #aaa;
-        font-family: Inter, sans-serif;
-        font-size: 1.2rem;
-        font-weight: 400;
-      }
-    }
-    svg {
-      display: none;
-    }
-  }
+  position: relative;
 
   .babyCover {
+    position: fixed;
     width: 100%;
     height: 100%;
-    position: fixed;
     background: rgba(217, 217, 217, 0.5);
     backdrop-filter: blur(2.5px);
     top: 0;
     left: 0;
     z-index: 99;
   }
-
   .babyAlert {
     position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
     z-index: 100;
-    background-color: #ffffff; /* 原 $raphael-white */
+    background-color: #fff;
     width: 60%;
     text-align: center;
     border-radius: 14px;
-    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 
     h5 {
       line-height: 1.5;
@@ -668,6 +796,7 @@ export default {
       display: flex;
       justify-content: center;
       border-top: 1px solid #ccc;
+
       .babyAlertBtn {
         background-color: transparent;
         border: none;
@@ -675,302 +804,19 @@ export default {
         padding: 0.75rem;
         cursor: pointer;
         color: #ccc;
-        text-align: center;
-        font-family: "Noto Sans", sans-serif;
         font-size: 16px;
-        font-weight: 400;
-        line-height: 100%; /* 16px */
         letter-spacing: 0.5px;
       }
       .babyAlertBtnRight {
-        color: #74bc1f; /* 原 var(--brand-green-400) */
+        color: #74bc1f;
         border-left: 1px solid #ccc;
       }
     }
   }
 }
 
-/* 量表簡介 (ANSGroup) */
-.ANSGroup {
-  height: calc(100vh - 207px);
-  margin-top: 1rem;
-  padding-bottom: 0.75rem;
-  overflow-y: auto;
-
-  h4 {
-    color: #000000; /* 原 $raphael-black */
-    font-size: 20px;
-    font-weight: bold;
-    line-height: 1;
-    letter-spacing: 0.15px;
-    margin: 0;
-  }
-  .desCard {
-    display: grid;
-    gap: 0.5rem;
-    background: #ffffff; /* $raphael-white */
-    color: #666666; /* $raphael-gray-500 */
-    border-radius: 0.5rem;
-    margin: 0.75rem 0;
-    padding: 0.75rem;
-    font-size: 1.125rem;
-    line-height: 1.4;
-    letter-spacing: 0.05em;
-  }
-  .stepCard {
-    position: relative;
-    display: grid;
-    gap: 0.75rem;
-    font-size: 1.125rem;
-    color: #666666; /* $raphael-gray-500 */
-    line-height: 1.4;
-    letter-spacing: 0.05em;
-
-    &::after {
-      content: "";
-      position: absolute;
-      background: #ffffff; /* $raphael-white */
-      width: 4px;
-      height: 100%;
-      border-radius: 0.5rem;
-      box-shadow: inset 0px 0px 2px 0px rgba(0, 0, 0, 0.25);
-      left: 15px;
-    }
-    .item {
-      display: flex;
-      gap: 0.5rem;
-      .icon {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #00bcd4; /* $raphael-cyan-400 */
-        border-radius: 50%;
-        padding: 4px;
-        height: 32px;
-        min-width: 32px;
-        z-index: 1;
-        img {
-          width: 24px;
-          height: 24px;
-        }
-      }
-      .content {
-        display: grid;
-        background: #ffffff;
-        border-radius: 0.5rem;
-        width: 100%;
-        gap: 0.5rem;
-        padding: 0.75rem;
-        box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-      }
-    }
-  }
-}
-
-/* 新增寶貝表單 */
-.babyRecordGroup {
-  width: 100%;
-}
-
-.babyInfoGroup {
-  h4 {
-    color: #666666; /* #666 or $raphael-gray-500, 看需求 */
-    font-size: 1rem;
-    letter-spacing: 0.5px;
-    font-weight: 400;
-    margin-bottom: 0.6rem;
-    margin-top: 0.25rem;
-  }
-  .babyInfo {
-    padding: 12px;
-    border-radius: 12px;
-    background-color: #ffffff;
-    margin-bottom: 0.75rem;
-  }
-  .babyInfoOption {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
-    small {
-      color: #b3b3b3;
-    }
-    img {
-      cursor: pointer;
-    }
-  }
-}
-
-/* 右下角「繼續新增寶貝」 */
-.babyInfoAdd {
-  display: flex;
-  align-items: center;
-  color: #ec4f4f;
-  gap: 2px;
-  cursor: pointer;
-  img {
-    width: 0.85rem;
-  }
-}
-
-/* 輸入框 */
-.babyRecordInfoInput {
-  position: relative;
-  margin-bottom: 0.5rem;
-
-  .icon1 {
-    position: absolute;
-    top: 50%;
-    left: 2px;
-    transform: translateY(-50%);
-    z-index: 2;
-    width: 24px;
-    height: 24px;
-  }
-  input[type="text"],
-  select {
-    outline: none;
-    border: none;
-    border-bottom: 1px solid #cccccc;
-    font-size: 1.2rem;
-    width: 100%;
-    padding-left: 36px;
-    padding-bottom: 12px;
-    padding-top: 16px;
-    color: #000000;
-    &::placeholder {
-      color: #cccccc;
-      font-family: Inter, sans-serif;
-      font-size: 1.2rem;
-      font-weight: 400;
-    }
-  }
-}
-
-/* 問卷區塊 */
-.babyRecordQAGroup {
-  width: 100%;
-}
-
-/* 寶貝進度清單 (水平捲) */
-.babyProgressGroup {
-  display: flex;
-  gap: 12px;
-  max-width: 400px;
-  overflow-x: auto;
-  padding-bottom: 2px;
-  scroll-snap-type: x mandatory;
-
-  .babyProgressCard {
-    background-color: #ffffff;
-    border-radius: 8px;
-    min-width: 160px;
-    padding: 12px;
-    cursor: pointer;
-    scroll-snap-align: start;
-    &:hover {
-      transform: scale(1.05);
-      transition: 0.2s ease-in-out;
-    }
-
-    .babyProgressTitle {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      h4 {
-        color: #1e1e1e; /* var(--shade-black) */
-        font-size: 20px;
-        letter-spacing: 0.15px;
-        margin: 0;
-      }
-      .babyProgressState {
-        width: 12px;
-        height: 12px;
-        background-color: #eeeeee;
-        border-radius: 999px;
-      }
-      .babyProgressStateActive {
-        background-color: #74bc1f;
-      }
-    }
-    .babyProgressText {
-      margin-top: 0.5rem;
-      display: flex;
-      justify-content: space-between;
-      h5,
-      h6 {
-        margin: 0;
-      }
-    }
-    .babyProgress {
-      width: 100%;
-      height: 4px;
-      background-color: #e0e0e0;
-      border-radius: 4px;
-      margin-top: 8px;
-      position: relative;
-      overflow: hidden;
-      &::before {
-        content: "";
-        position: absolute;
-        height: 100%;
-        width: 100%;
-        background-color: #65558f;
-        border-radius: 4px;
-      }
-    }
-  }
-}
-
-/* 指標選擇區 */
-.babyAnsTypeGroup {
-  p {
-    color: #666666; /* 原 var(--shade-gray-500) */
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 1;
-    letter-spacing: 0.5px;
-    margin: 0;
-    margin-top: 1rem;
-  }
-  .babyAnsTypeInfoGroup {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2%;
-    justify-content: space-between;
-    margin-top: 0.5rem;
-
-    .babyAnsTypeCard {
-      width: 48%;
-      background-color: #ffffff;
-      border-radius: 0.5rem;
-      padding: 8px 12px;
-      border: 1px solid #cccccc;
-      box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-      margin-bottom: 0.75rem;
-      cursor: pointer;
-      h3 {
-        font-weight: bold;
-        margin: 0.25rem 0 0 0;
-      }
-      p {
-        margin-top: 0.5rem;
-        margin-bottom: 0;
-        line-height: 1.3;
-      }
-    }
-    .babyAnsTypeCardSelected {
-      color: #74bc1f;
-      p {
-        color: #74bc1f;
-      }
-      box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-    }
-  }
-}
-
 /* 下方按鈕 */
 .babyRerordBtnGroup {
-  background-color: #f5f5f5;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -978,28 +824,36 @@ export default {
   max-width: 768px;
   width: 100%;
   padding: 0.75rem 0 3.125rem 0;
-  touch-action: manipulation;
 
   .babyRerordCommonBtn {
     background-color: #74bc1f;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
+    width: 100%; // 預設 100% (單一按鈕)
     border: none;
     border-radius: 0.5rem;
-    color: #ffffff;
+    color: #fff;
     cursor: pointer;
     font-size: 1.125rem;
     font-weight: 400;
     padding: 0.5rem 0.75rem;
-    line-height: 1;
-    letter-spacing: 0.5px;
     transition: all 0.2s ease;
 
     &:disabled {
       opacity: 0.5;
+      cursor: not-allowed;
     }
+  }
+
+  /* QA階段：有兩顆按鈕時 => 各 50% */
+  &.double-btn .babyRerordCommonBtn {
+    width: 50%;
+  }
+
+  .babyRerordPrevBtn {
+    background: #eee;
+    color: #333;
   }
 }
 </style>

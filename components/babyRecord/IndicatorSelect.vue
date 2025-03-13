@@ -23,11 +23,6 @@
     </div>
     <p v-else>載入中...</p>
 
-    <div class="babyRerordBtnGroup">
-      <button class="babyRerordCommonBtn" @click="fetchQuestions">
-        前往檢測
-      </button>
-    </div>
   </div>
 </template>
 
@@ -41,7 +36,6 @@ export default {
     ansTypes: { type: Object, default: () => ({}) },
     curChildData: { type: Object, default: null },
   },
-  emits: ["fetchQuestions"],
   setup(props, { emit }) {
     function isTypeSelected(key) {
       return props.curChildData?.selectedAnsTypes.has(key);
@@ -54,13 +48,10 @@ export default {
         else set.add(key);
       }
     }
-    function fetchQuestions() {
-      emit("fetchQuestions");
-    }
+
     return {
       isTypeSelected,
       toggle,
-      fetchQuestions,
       babyTypeCheck,
       babyTypePlus,
     };

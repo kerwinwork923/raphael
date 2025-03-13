@@ -63,7 +63,7 @@
 
         <router-link to="/UsageHistory" class="item4_link">
           <div class="item item4">
-            <div class="topTitle">使用</div>
+            <div class="topTitle">穿衣</div>
             <div class="bottomTitle">紀錄</div>
             <img src="../assets/imgs/clothIcon.svg" alt="" />
           </div>
@@ -71,7 +71,7 @@
 
         <router-link to="/contract" class="item5_link">
           <div class="item item5">
-            <div class="topTitle">追蹤</div>
+            <div class="topTitle">我的</div>
             <div class="bottomTitle">合約</div>
             <img src="../assets/imgs/contract.svg" alt="" />
           </div>

@@ -1256,6 +1256,8 @@ export default {
       background-color: $raphael-green-400;
     }
   }
+
+  
 }
 
 @keyframes fadeIn {

@@ -50,8 +50,6 @@
       <span><img src="/assets/imgs/babyInfoAdd.svg" alt="新增" /></span>
     </div>
 
-    <!-- 如果你有想直接在此提交，也可加個按鈕 -->
-    <button @click="checkBaby">送出(或檢查)</button>
   </div>
 </template>
 
@@ -68,7 +66,7 @@ export default {
       default: () => [],
     },
   },
-  emits: ["addBaby", "removeBaby", "checkBaby"],
+  emits: ["addBaby", "removeBaby"],
   setup(props, { emit }) {
     function addOneMoreBaby() {
       emit("addBaby");
@@ -76,9 +74,7 @@ export default {
     function remove(idx) {
       emit("removeBaby", idx);
     }
-    function checkBaby() {
-      emit("checkBaby");
-    }
+
     function formatDate(date) {
       if (!date) return "";
       const yyyy = date.getFullYear();
@@ -89,7 +85,7 @@ export default {
     return {
       addOneMoreBaby,
       remove,
-      checkBaby,
+
       formatDate,
     };
   },
