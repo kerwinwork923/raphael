@@ -8,24 +8,23 @@
           <img src="/assets/imgs/trash.svg" alt="刪除" @click="remove(index)" />
         </div>
 
+        <!-- 姓名 -->
         <div class="babyRecordInfoInput">
-          <img
-            class="icon1"
-            src="/assets/imgs/babyRecordMember.svg"
-            alt="姓名"
-          />
+          <img class="icon1" src="/assets/imgs/babyRecordMember.svg" alt="姓名" />
           <input type="text" v-model="baby.name" placeholder="請輸入寶貝姓名" />
         </div>
 
+        <!-- 性別 -->
         <div class="babyRecordInfoInput">
           <img class="icon1" src="/assets/imgs/babyRecordS.svg" alt="性別" />
-          <select v-model="baby.gender">
+          <select v-model="baby.gender" required>
             <option value="" disabled hidden>請選擇性別</option>
             <option value="male">男性</option>
             <option value="female">女性</option>
           </select>
         </div>
 
+        <!-- 生日 -->
         <div class="babyRecordInfoInput">
           <img class="icon1" src="/assets/imgs/babyRecordFace.png" alt="生日" />
           <VueDatePicker
@@ -38,23 +37,23 @@
             :max-date="new Date()"
             :placeholder="'請選擇寶貝的生日'"
             no-today
-            class="date-picker"
+            class="date-picker no-icon"
           />
         </div>
       </div>
     </div>
 
-    <!-- 底下按鈕（繼續新增 或送出）可放這裡，也可放在外層 -->
+    <!-- 繼續新增 -->
     <div class="babyInfoAdd" @click="addOneMoreBaby">
       繼續新增寶貝基本資料
       <span><img src="/assets/imgs/babyInfoAdd.svg" alt="新增" /></span>
     </div>
-
   </div>
 </template>
 
 <script>
 import VueDatePicker from "@vuepic/vue-datepicker";
+
 export default {
   name: "BabyCreateForm",
   components: {
@@ -82,10 +81,10 @@ export default {
       const dd = String(date.getDate()).padStart(2, "0");
       return `${yyyy}-${mm}-${dd}`;
     }
+    
     return {
       addOneMoreBaby,
       remove,
-
       formatDate,
     };
   },
@@ -93,13 +92,15 @@ export default {
 </script>
 
 <style lang="scss">
-/* 新增寶貝表單 */
+/* === 主容器 === */
 .babyRecordGroup {
   width: 100%;
+  padding-bottom: 1rem;
 }
+
 .babyInfoGroup {
   h4 {
-    color: #666666; /* #666 or $raphael-gray-500, 看需求 */
+    color: #666666;
     font-size: 1rem;
     letter-spacing: 0.5px;
     font-weight: 400;
@@ -125,7 +126,7 @@ export default {
   }
 }
 
-/* 右下角「繼續新增寶貝」 */
+/* === 繼續新增按鈕 === */
 .babyInfoAdd {
   display: flex;
   align-items: center;
@@ -137,7 +138,7 @@ export default {
   }
 }
 
-/* 輸入框 */
+/* === 輸入框樣式 === */
 .babyRecordInfoInput {
   position: relative;
   margin-bottom: 0.5rem;
@@ -151,6 +152,7 @@ export default {
     width: 24px;
     height: 24px;
   }
+
   input[type="text"],
   select {
     outline: none;
@@ -162,6 +164,7 @@ export default {
     padding-bottom: 12px;
     padding-top: 16px;
     color: #000000;
+
     &::placeholder {
       color: #cccccc;
       font-family: Inter, sans-serif;
@@ -169,7 +172,63 @@ export default {
       font-weight: 400;
     }
   }
+
+  /* 預設 select 顏色為淺灰 */
+  select {
+    color: #cccccc;
+  }
+
+  /* 當選擇性別後，文字變黑 */
+  select:valid {
+    color: #000000;
+  }
 }
 
+/* === 日期選擇器樣式 === */
+.date-picker {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #cccccc;
+  background: transparent;
+  font-size: 1.2rem;
+  color: #000000;
+  padding-left: 36px;
+  padding-bottom: 12px;
+  padding-top: 16px;
 
+  /* 隱藏 VueDatePicker 內建 icon */
+  .dp__input_icon {
+    display: none !important;
+  }
+
+  /* 清除 VueDatePicker 預設邊框、陰影 */
+  .dp__input_wrap {
+    border: none !important;
+    background: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* 設置與一般輸入框相同的樣式 */
+  .dp__input {
+    border: none !important;
+    font-size: 1.2rem;
+    width: 100%;
+    padding: 0;
+    color: #000000;
+    background: none !important;
+    box-shadow: none !important;
+  }
+
+  /* placeholder 樣式 */
+  .dp__input::placeholder {
+    color: #cccccc !important;
+  }
+
+  /* 隱藏選擇器的額外樣式 */
+  .dp__menu {
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
 </style>

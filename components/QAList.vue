@@ -1,6 +1,5 @@
 <template>
-
-  <div class="QAList">
+  <div ref="qaListRef" class="QAList">
     <div
       class="scoreBarGroupWrap"
       v-for="(qItem, idx) in displayedQuestions"
@@ -28,7 +27,6 @@
         ></div>
 
         <div class="numberGroup">
-          <!-- 依 0~3 迭代，顯示對應的答案選項 -->
           <div
             v-for="(answer, scoreVal) in qItem.answers"
             :key="scoreVal"
@@ -45,20 +43,19 @@
 </template>
 
 <script>
-import { ref, computed, defineExpose, watch, onMounted } from "vue";
+import { ref, computed, defineExpose, watch, nextTick } from "vue";
 import axios from "axios";
 
 export default {
   name: "QAList",
   props: {
-    // 從上層傳入「題目陣列」與「CID」(寶貝ID)。
     questions: {
       type: Array,
       default: () => [],
     },
     CID: {
       type: String,
-      default: "", // 從外層 (BabyRecord) 傳下來
+      default: "",
     },
     currentPage: {
       type: Number,
@@ -71,19 +68,17 @@ export default {
   },
   emits: ["update-page"],
   setup(props, { emit }) {
-    // ============ 1) 從 localStorage 取出 MID, Token, MAID, Mobile ============
+    // 綁定 QAList 容器
+    const qaListRef = ref(null);
+
+    // 讀取使用者資料
     const localData = localStorage.getItem("userData");
-    // 若 localData 有值則解析，否則給空 {}
     const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
 
-    // ============ 2) 分頁控制 ============
+    // 分頁控制
     const localCurrentPage = ref(props.currentPage);
-    const totalPages = computed(() =>
-      Math.ceil(props.questions.length / props.pageSize)
-    );
-    const pageStartIndex = computed(
-      () => (localCurrentPage.value - 1) * props.pageSize
-    );
+    const totalPages = computed(() => Math.ceil(props.questions.length / props.pageSize));
+    const pageStartIndex = computed(() => (localCurrentPage.value - 1) * props.pageSize);
 
     // 取得本頁題目
     const displayedQuestions = computed(() => {
@@ -91,125 +86,114 @@ export default {
       const end = start + props.pageSize;
       return props.questions.slice(start, end).map((item) => {
         if (item.selectedScore === undefined) {
-          item.selectedScore = 0; // 預設0分
+          item.selectedScore = 0;
         }
         return item;
       });
     });
 
-    // ============ 3) 點擊分數 =============
+    // 點擊選擇分數
     function onClickScore(qItem, scoreVal) {
-      qItem.selectedScore = String(scoreVal); // ✅ 轉為字串
+      qItem.selectedScore = String(scoreVal);
     }
 
     function getAnswerText(scoreVal, answers) {
       return answers && answers[scoreVal] ? answers[scoreVal] : "未知";
     }
 
-    // 是否填完本頁
     const isPageFilled = computed(() => {
-      return displayedQuestions.value.every(
-        (q) => q.selectedScore !== undefined
-      );
+      return displayedQuestions.value.every((q) => q.selectedScore !== undefined);
     });
 
-    // ============ 4) 翻頁 ============
+    // 滾動回到頂部
+    function scrollToTop() {
+      nextTick(() => {
+        if (qaListRef.value) {
+          qaListRef.value.scrollTop = 0;
+        }
+      });
+    }
+
+    // 翻頁控制
     function goNextPage() {
       if (localCurrentPage.value < totalPages.value) {
         localCurrentPage.value++;
+        scrollToTop(); // 翻頁後滾回頂部
       }
     }
+
     function goPrevPage() {
       if (localCurrentPage.value > 1) {
         localCurrentPage.value--;
+        scrollToTop(); // 翻頁後滾回頂部
       }
     }
 
-    // 頁碼改變 => 通知外層
-    watch(
-      () => localCurrentPage.value,
-      (val) => {
-        emit("update-page", val);
-      }
-    );
+    // 監聽頁碼變化，通知父層
+    watch(() => localCurrentPage.value, (val) => {
+      emit("update-page", val);
+    });
 
-    // ============ 5) 同時呼叫 2 API：API_ChildAnsTimesSave + API_GrowthRecTimes.jsp  ============
+    // 送出答案
     async function submitAllAnswers() {
-  try {
-    // (A) 準備傳參數
-    const ansArray = props.questions.map((q) => ({
-      QueSeq: q.id,
-      QueAns: String(q.selectedScore), // 0~3
-    }));
+      try {
+        const ansArray = props.questions.map((q) => ({
+          QueSeq: q.id,
+          QueAns: String(q.selectedScore),
+        }));
 
-    const reqAnsSave = {
-      MID,
-      Token,
-      MAID,
-      Mobile,
-      CID: props.CID,
-      ChildAns: ansArray,
-    };
+        const reqAnsSave = {
+          MID,
+          Token,
+          MAID,
+          Mobile,
+          CID: props.CID,
+          ChildAns: ansArray,
+        };
 
-    console.log("🚀 送出 API_ChildAnsSave", reqAnsSave);
-    const resAnsSave = await axios.post(
-      "https://23700999.com:8081/HMA/API_ChildAnsSave.jsp",
-      reqAnsSave
-    );
-    console.log("✅ 收到 API_ChildAnsSave 回應", resAnsSave.data);
+        console.log("🚀 送出 API_ChildAnsSave", reqAnsSave);
+        const resAnsSave = await axios.post(
+          "https://23700999.com:8081/HMA/API_ChildAnsSave.jsp",
+          reqAnsSave
+        );
+        console.log("✅ 收到 API_ChildAnsSave 回應", resAnsSave.data);
 
-    if (resAnsSave.data.Result !== "OK") {
-      alert("❌ API_ChildAnsSave 失敗：" + resAnsSave.data.Message);
-      return;
+        if (resAnsSave.data.Result !== "OK") {
+          alert("❌ API_ChildAnsSave 失敗：" + resAnsSave.data.Message);
+          return;
+        }
+
+        const { ChildInfo, ChildAns } = resAnsSave.data;
+        const childInfo = ChildInfo.find((child) => child.CID === props.CID);
+        const AID = childInfo?.AID || "";
+
+        const reqGrowthRecTimes = {
+          MID,
+          Token,
+          MAID,
+          Mobile,
+          CID: props.CID,
+          AID,
+        };
+
+        console.log("🚀 送出 API_GrowthRecTimes", reqGrowthRecTimes);
+        const resGrowthRecTimes = await axios.post(
+          "https://23700999.com:8081/HMA/API_GrowthRecTimes.jsp",
+          reqGrowthRecTimes
+        );
+        console.log("✅ 收到 API_GrowthRecTimes 回應", resGrowthRecTimes.data);
+
+        if (resGrowthRecTimes.data.Result !== "OK") {
+          alert("❌ API_GrowthRecTimes 失敗：" + resGrowthRecTimes.data.Message);
+          return;
+        }
+
+        emit("go-times", resGrowthRecTimes.data);
+      } catch (err) {
+        console.error("❌ 提交失敗", err);
+      }
     }
 
-    // (B) 後端回傳的資料
-    // 例如 ChildInfo, Member, ChildAns 等
-    const { ChildInfo, ChildAns, Result } = resAnsSave.data;
-
-    // 取出當前寶貝的 AID (若需要繼續呼叫 GrowthRecTimes)
-    const childInfo = ChildInfo.find((child) => child.CID === props.CID);
-    const AID = childInfo?.AID || "";
-
-    // (C) 如果要再呼叫 API_GrowthRecTimes (後端另一支API)
-    // 否則，你也可以直接使用 resAnsSave.data.ChildAns 作為「次數」題目
-    const reqGrowthRecTimes = {
-      MID,
-      Token,
-      MAID,
-      Mobile,
-      CID: props.CID,
-      AID, 
-    };
-    console.log("🚀 送出 API_GrowthRecTimes", reqGrowthRecTimes);
-    const resGrowthRecTimes = await axios.post(
-      "https://23700999.com:8081/HMA/API_GrowthRecTimes.jsp",
-      reqGrowthRecTimes
-    );
-    console.log("✅ 收到 API_GrowthRecTimes 回應", resGrowthRecTimes.data);
-
-    if (resGrowthRecTimes.data.Result !== "OK") {
-      alert("❌ API_GrowthRecTimes 失敗：" + resGrowthRecTimes.data.Message);
-      return;
-    }
-
-    // (D) 把後端回傳的資料放到 store / 或本地
-    // 例如：
-    // babyStore.childRecords[props.CID].childTimesQues = resGrowthRecTimes.data.ChildAns.map(...)
-
-    // (E) 切換到 times 頁
-    // 建議父層 (BabyRecord) 才能修改 flowStage
-    // 所以可以 emit 到父層，讓父層去更新 flowStage
-    emit("go-times", resGrowthRecTimes.data);
-
-
-  } catch (err) {
-    console.error("❌ 提交失敗", err);
-  }
-}
-
-
-    // ============ 6) defineExpose 讓外層可呼叫 ============
     defineExpose({
       currentPage: localCurrentPage,
       totalPages,
@@ -220,12 +204,12 @@ export default {
     });
 
     return {
+      qaListRef, // 綁定滾動容器
       localCurrentPage,
       totalPages,
       pageStartIndex,
       displayedQuestions,
       isPageFilled,
-
       onClickScore,
       getAnswerText,
       goNextPage,
@@ -235,6 +219,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped lang="scss">
 .QAList {

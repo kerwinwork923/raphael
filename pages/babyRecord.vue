@@ -35,7 +35,7 @@
         @selectChild="onClickChild"
       />
 
-      <!-- chooseVersion (大於二次 & diffDaysFromToday<=0) -->
+      <!-- chooseVersion (若大於一次 & diffDaysFromToday>0 => 未到可再次測) -->
       <div
         class="chooseVersion"
         v-if="curChildData?.flowStage === 'chooseVersion'"
@@ -77,7 +77,6 @@
         class="historyView"
         v-else-if="curChildData?.flowStage === 'historyView'"
       >
-     
         <div class="historyViewGroup">
           <!-- 年份和月份選擇框 -->
           <div class="detectSelectGroup">
@@ -146,7 +145,7 @@
         <!-- 返回按鈕 -->
         <div class="babyRerordBtnGroup">
           <button class="babyRerordCommonBtn" @click="goBackToHistory">
-            返回紀錄
+            返回
           </button>
         </div>
       </div>
@@ -273,7 +272,6 @@ import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 
-// 載入你的Loading元件
 import RaphaelLoading from "@/components/RaphaelLoading.vue";
 import TitleMenu from "@/components/TitleMenu.vue";
 import TagList from "@/components/TagList.vue";
@@ -326,12 +324,14 @@ export default {
           babyStore.babyAPIData.forEach((child) => {
             const cid = child.CID;
             const rec = babyStore.childRecords[cid];
-            // 初次 or 大於一次
+            // 若沒填過 => indicator；否則 chooseVersion / historyView
             if (!child.ChildANSTime) {
               rec.flowStage = "indicator";
+              babyStore.fetchGrowthRecord(cid);
             } else {
               if (Number(child.diffDaysFromToday) > 0) {
                 rec.flowStage = "historyView";
+                // 呼叫 API_GrowthFirst 去拿「上次/本次資料 + 歷史」
                 babyStore.fetchGrowthFirst(cid);
               } else {
                 rec.flowStage = "chooseVersion";
@@ -358,14 +358,17 @@ export default {
 
     function onCommonButtonClick() {
       if (!hasChild.value) {
+        // 無小孩
         if (!showAddBabyForm.value) {
           showAddBabyForm.value = true;
         } else {
           checkAndShowBabyAlert();
         }
       } else {
+        // 有小孩
         const stage = curChildData.value?.flowStage;
         if (stage === "indicator") {
+          // 先檢查是否有 fetchGrowthRecord 取到指標
           const cid = babyStore.selectedChildID;
           const set = curChildData.value?.selectedAnsTypes;
           if (!set || set.size === 0) {
@@ -414,6 +417,8 @@ export default {
       showBabyCover.value = false;
       showBabyAlert.value = false;
     }
+
+    // 按「送出寶貝」
     async function submitBabyData() {
       try {
         for (const b of babyInfos.value) {
@@ -423,6 +428,7 @@ export default {
           }
         }
         isLoading.value = true;
+
         const req = {
           MID,
           Token,
@@ -439,10 +445,11 @@ export default {
           req
         );
         if (resp.data.Result === "OK") {
-          alert("新增寶貝成功");
+          // 關閉新增寶貝視窗
           showBabyAlert.value = false;
           showBabyCover.value = false;
           showAddBabyForm.value = false;
+          // 再抓一次寶貝清單 => 就可以看到新寶貝
           await babyStore.fetchGrowth();
         } else {
           alert("新增寶貝失敗：" + resp.data.Message);
@@ -455,7 +462,7 @@ export default {
       }
     }
 
-    // ========== chooseVersion ==========
+    // chooseVersion
     function setVersion(val) {
       curChildData.value.version = val;
     }
@@ -466,6 +473,7 @@ export default {
       }
       const cid = babyStore.selectedChildID;
       isLoading.value = true;
+      // **重要：先去撈 API_GrowthRec，取得指標 (ChildAnsAllType)**
       await babyStore.fetchGrowthRecord(cid);
       isLoading.value = false;
       curChildData.value.flowStage = "indicator";
@@ -475,7 +483,7 @@ export default {
       return babyStore.childRecords[cid]?.growthRec?.ChildAnsAllType || {};
     });
 
-    // QA 分頁
+    // QA
     const qaListRef = ref(null);
     const currentPage = computed(() => qaListRef.value?.currentPage || 1);
     const totalPages = computed(() => qaListRef.value?.totalPages || 1);
@@ -492,7 +500,7 @@ export default {
       if (qaListRef.value.currentPage < qaListRef.value.totalPages) {
         qaListRef.value.goNextPage();
       } else {
-        qaListRef.value.submitAllAnswers(); // -> onGoTimes
+        qaListRef.value.submitAllAnswers(); // => onGoTimes
       }
     }
     const nextButtonLabel = computed(() => {
@@ -510,7 +518,6 @@ export default {
       if (currentInfo?.AID) {
         babyStore.childRecords[cid].AID = currentInfo.AID;
       }
-      // 將後端回傳的 ChildAns => times
       babyStore.childRecords[cid].childTimesQues = data.ChildAns.map((q) => ({
         id: q.QueSeq,
         question: q.Question,
@@ -527,7 +534,7 @@ export default {
       babyStore.childRecords[cid].flowStage = "times";
     }
 
-    // times 分頁
+    // times
     const timesCurrentPage = ref(1);
     const pageSize = 7;
     const timesQuestions = computed(
@@ -644,7 +651,6 @@ export default {
     const priorityButtonStyle = computed(() => ({
       backgroundColor: selectedPriorityCount.value > 0 ? "#74bc1f" : "#bdbdbd",
     }));
-
     async function onPrioritySubmit() {
       if (selectedPriorityCount.value === 0) {
         alert("至少選一項");
@@ -681,7 +687,6 @@ export default {
       rec.flowStage = "result";
       isLoading.value = false;
     }
-
     async function saveSolveData() {
       const cid = babyStore.selectedChildID;
       const rec = babyStore.childRecords[cid];
@@ -733,8 +738,20 @@ export default {
     }
 
     // 返回紀錄
-    function goBackToHistory() {
-      curChildData.value.flowStage = "historyView";
+    async function goBackToHistory() {
+      const cid = babyStore.selectedChildID;
+      if (!cid) return;
+
+      isLoading.value = true; // 開啟載入狀態
+
+      try {
+        await babyStore.fetchGrowthFirst(cid); // 重新請求最新歷史紀錄
+        curChildData.value.flowStage = "historyView"; // 切換回歷史紀錄畫面
+      } catch (error) {
+        console.error("獲取歷史紀錄失敗:", error);
+      } finally {
+        isLoading.value = false; // 關閉載入狀態
+      }
     }
 
     // 工具
@@ -769,7 +786,6 @@ export default {
     const selectedMonth = ref(new Date().getMonth() + 1);
     const yearBoxVisible = ref(false);
     const monthBoxVisible = ref(false);
-
     function toggleYearBox() {
       yearBoxVisible.value = !yearBoxVisible.value;
       if (yearBoxVisible.value) monthBoxVisible.value = false;
@@ -788,7 +804,9 @@ export default {
     }
 
     const currentYear = new Date().getFullYear();
-    const rawHistoryList = computed(() => curChildData.value?.reportData?.History || []);
+    const rawHistoryList = computed(
+      () => curChildData.value?.reportData?.History || []
+    );
     const displayYears = computed(() => {
       const yearsSet = new Set();
       rawHistoryList.value.flat().forEach((item) => {
@@ -855,8 +873,10 @@ export default {
       checkAndShowBabyAlert,
       closeBabyAlert,
       submitBabyData,
+
       setVersion,
       onChooseVersionNext,
+      ansTypes,
 
       // QA
       qaListRef,
@@ -910,15 +930,10 @@ export default {
       rawHistoryList,
       filteredHistoryList,
       onClickHistoryItem,
-
-      // PINIA store getters
-      ansTypes,
     };
   },
 };
 </script>
-
-
 
 <style lang="scss">
 .babyRecord {
@@ -944,7 +959,7 @@ export default {
     z-index: 99;
   }
   .babyAlert {
-    position: absolute;
+    position: fixed;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
@@ -989,7 +1004,7 @@ export default {
   justify-content: center;
   align-items: center;
   gap: 0.75rem;
-  max-width: 768px;
+
   width: 100%;
   // padding: 0.75rem 0 3.125rem 0;
   position: fixed;
@@ -1102,7 +1117,7 @@ export default {
 
 .historyView {
   width: 100%;
-  margin-top: .75rem;
+  margin-top: 0.75rem;
 }
 .historyViewGroup {
   background-color: #fff;

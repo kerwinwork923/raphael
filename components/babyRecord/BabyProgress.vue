@@ -45,7 +45,7 @@ export default {
 .babyProgressGroup {
   display: flex;
   gap: 12px;
-  max-width: 400px;
+  max-width: 100%;
   overflow-x: auto;
   padding-bottom: 2px;
   scroll-snap-type: x mandatory;

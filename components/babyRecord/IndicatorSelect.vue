@@ -2,27 +2,20 @@
   <div class="babyAnsTypeGroup">
     <p>請挑選幾個指標，讓我們更了解您的需求。</p>
 
-    <div
-      class="babyAnsTypeInfoGroup"
-      v-if="ansTypes && Object.keys(ansTypes).length > 0"
-    >
+    <div v-if="ansTypes && Object.keys(ansTypes).length > 0" class="babyAnsTypeInfoGroup">
       <div
         v-for="(description, key) in ansTypes"
         :key="key"
         class="babyAnsTypeCard"
         :class="{ babyAnsTypeCardSelected: isTypeSelected(key) }"
-        @click="toggle(key)"
+        @click="toggleSelect(key)"
       >
-        <img
-          :src="isTypeSelected(key) ? babyTypeCheck : babyTypePlus"
-          alt="icon"
-        />
+        <img :src="isTypeSelected(key) ? babyTypeCheck : babyTypePlus" alt="icon"/>
         <h3>{{ key }}</h3>
         <p>{{ description }}</p>
       </div>
     </div>
-    <p v-else>載入中...</p>
-
+    <p v-else></p>
   </div>
 </template>
 
@@ -36,22 +29,19 @@ export default {
     ansTypes: { type: Object, default: () => ({}) },
     curChildData: { type: Object, default: null },
   },
-  setup(props, { emit }) {
+  setup(props) {
     function isTypeSelected(key) {
       return props.curChildData?.selectedAnsTypes.has(key);
     }
-    function toggle(key) {
-      // 這裡你可以直接修改 store，或在父層處理
-      if (props.curChildData) {
-        const set = props.curChildData.selectedAnsTypes;
-        if (set.has(key)) set.delete(key);
-        else set.add(key);
-      }
+    function toggleSelect(key) {
+      const set = props.curChildData?.selectedAnsTypes;
+      if (!set) return;
+      if (set.has(key)) set.delete(key);
+      else set.add(key);
     }
-
     return {
       isTypeSelected,
-      toggle,
+      toggleSelect,
       babyTypeCheck,
       babyTypePlus,
     };
@@ -62,6 +52,7 @@ export default {
 <style lang="scss">
 /* 指標選擇區 */
 .babyAnsTypeGroup {
+  margin-bottom: 1rem;
   p {
     color: #666666; /* 原 var(--shade-gray-500) */
     font-size: 16px;
@@ -70,6 +61,7 @@ export default {
     letter-spacing: 0.5px;
     margin: 0;
     margin-top: 1rem;
+
   }
   .babyAnsTypeInfoGroup {
     display: flex;

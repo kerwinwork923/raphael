@@ -1,5 +1,5 @@
 <template>
-  <div class="tagTimesList">
+  <div ref="timesListRef" class="tagTimesList">
     <div class="timesList" v-for="(q, index) in timesQuestions" :key="q.id">
       <h4>{{ indexOnThisPage + index + 1 }}. {{ q.question }}</h4>
       <div class="selectWrapper">
@@ -7,13 +7,8 @@
           v-model="q.selectScore"
           :style="{ color: q.selectScore ? '#74bc1f' : '#ccc' }"
         >
-          <!-- 預設不選時用 disabled/hidden -->
           <option value="" disabled hidden>請選擇次數</option>
-          <option
-            v-for="opt in scoreOptions"
-            :key="opt.value"
-            :value="opt.value"
-          >
+          <option v-for="opt in scoreOptions" :key="opt.value" :value="opt.value">
             {{ opt.label }}
           </option>
         </select>
@@ -23,6 +18,8 @@
 </template>
 
 <script>
+import { ref, watch, nextTick } from "vue";
+
 export default {
   name: "TimesSelect",
   props: {
@@ -30,15 +27,20 @@ export default {
       type: Array,
       default: () => [],
     },
-    // 父層傳入的這頁起始索引用來顯示題號
     indexOnThisPage: {
       type: Number,
       default: 0,
     },
+    currentPage: {
+      type: Number,
+      default: 1,
+    },
   },
-  setup() {
-    // 舉例：後端可能想收 0,1,2,3,4
-    // label 只是給使用者看；value 才是送後端的資料
+  setup(props) {
+    // 綁定 timesListRef 容器
+    const timesListRef = ref(null);
+
+    // 選項
     const scoreOptions = [
       { value: "0", label: "0 次" },
       { value: "1", label: "1 次" },
@@ -46,12 +48,30 @@ export default {
       { value: "3", label: "3~4 次" },
       { value: "4", label: ">5 次" },
     ];
+
+    // 滾動回到頂部
+    function scrollToTop() {
+      nextTick(() => {
+        if (timesListRef.value) {
+          timesListRef.value.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    }
+
+    // 監聽翻頁變化時滾動到頂部
+    watch(() => props.currentPage, () => {
+      scrollToTop();
+    });
+
     return {
+      timesListRef,
       scoreOptions,
+      scrollToTop,
     };
   },
 };
 </script>
+
 
 <style scoped lang="scss">
 .tagTimesList {
