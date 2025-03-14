@@ -5,7 +5,7 @@
       <div class="resultInfo">
         <!-- (本次) -->
         <div v-if="latestScore">
-          <h5 class="subText">(本次){{ latestScore.CheckTime }}</h5>
+          <h5 class="subText">(本次){{ removeTime(latestScore.CheckTime) }}</h5>
 
           <div class="severity">
             <div class="imgGroup">
@@ -39,7 +39,7 @@
 
         <!-- (前次) -->
         <h5 class="subText nextSunText" v-if="previousScore">
-          (前次){{ previousScore.CheckTime }}
+          (前次){{ removeTime(previousScore.CheckTime) }}
         </h5>
         <div class="severity" v-if="previousScore">
           <div class="imgGroup">
@@ -192,11 +192,6 @@
         </div>
       </div>
     </div>
-
-    <!-- (6) 返回按鈕 -->
-    <div class="backToUserBtnGroupWeekly">
-      <button class="backToUserBtnWeekly" @click="goHome">返回會員中心</button>
-    </div>
   </div>
 </template>
 
@@ -273,6 +268,16 @@ export default {
       // 範例：router.push(`/weeklyResultDetail/${item.AID}`)
     }
 
+    const removeTime = (timestampStr) => {
+      if (typeof timestampStr !== "string") {
+        console.error("Invalid timestamp:", timestampStr);
+        return "";
+      }
+      // 分割字串，取第一個部分
+      const parts = timestampStr.split(" ");
+      return parts[0] || "";
+    };
+
     return {
       latestChildScore,
       previousChildScore,
@@ -294,6 +299,7 @@ export default {
       // 工具方法
       scoreColorFn,
       computedEmoji2,
+      removeTime
     };
   },
 };
@@ -302,6 +308,7 @@ export default {
 <style lang="scss">
 .resultWrap {
   /* 上方：本次+前次 */
+  margin-bottom:1rem;
   .resultTopGroup {
     display: flex;
     align-items: flex-start;
@@ -312,7 +319,7 @@ export default {
       padding: 12px;
       border-radius: 12px;
       box-shadow: 0px -2px 4px 0px rgba(0, 0, 0, 0.25) inset;
-
+      margin-top: 12px;
       .subText {
         margin-bottom: 0.5rem;
       }

@@ -4,6 +4,7 @@
 
   <div class="babyRecord">
     <TitleMenu Text="健康紀錄" link="/user" />
+    <TagList />
 
     <!-- (A) 無小孩 => 顯示引導 / 新增寶貝 -->
     <template v-if="!hasChild">
@@ -76,7 +77,7 @@
         class="historyView"
         v-else-if="curChildData?.flowStage === 'historyView'"
       >
-        <h3>檢測紀錄</h3>
+     
         <div class="historyViewGroup">
           <!-- 年份和月份選擇框 -->
           <div class="detectSelectGroup">
@@ -141,8 +142,13 @@
 
       <!-- result (顯示本次/前次/歷史) -->
       <div v-else-if="curChildData?.flowStage === 'result'">
-        <h3>檢測結果</h3>
         <BabyReportResult :reportData="curChildData.reportData" />
+        <!-- 返回按鈕 -->
+        <div class="babyRerordBtnGroup">
+          <button class="babyRerordCommonBtn" @click="goBackToHistory">
+            返回紀錄
+          </button>
+        </div>
       </div>
 
       <!-- indicator (第一次 or 剛選完版本) -->
@@ -160,7 +166,7 @@
       </div>
 
       <!-- QA (問卷) -->
-      <div v-else-if="curChildData?.flowStage === 'qa'">
+      <div class="babyQAGroup" v-else-if="curChildData?.flowStage === 'qa'">
         <p>以下問題的困擾程度</p>
         <QAList
           ref="qaListRef"
@@ -192,7 +198,10 @@
       </div>
 
       <!-- times (次數) -->
-      <div v-else-if="curChildData?.flowStage === 'times'">
+      <div
+        class="babyTimesGroup"
+        v-else-if="curChildData?.flowStage === 'times'"
+      >
         <h3>以下問題上週發生幾次</h3>
         <TimesSelect
           :timesQuestions="timesDisplayedQuestions"
@@ -220,7 +229,10 @@
       </div>
 
       <!-- priority (最想解決) -->
-      <div v-else-if="curChildData?.flowStage === 'priority'">
+      <div
+        class="babyPriority"
+        v-else-if="curChildData?.flowStage === 'priority'"
+      >
         <h3>請從中選擇最多10個 目前最想解決的症狀</h3>
         <SolvePrioritySelect
           :symptoms="curChildData.childTimesQues"
@@ -263,8 +275,8 @@ import axios from "axios";
 
 // 載入你的Loading元件
 import RaphaelLoading from "@/components/RaphaelLoading.vue";
-
 import TitleMenu from "@/components/TitleMenu.vue";
+import TagList from "@/components/TagList.vue";
 import BabyIntro from "@/components/babyRecord/BabyIntro.vue";
 import BabyCreateForm from "@/components/babyRecord/BabyCreateForm.vue";
 import BabyProgress from "@/components/babyRecord/BabyProgress.vue";
@@ -279,9 +291,9 @@ import { useBabyStore } from "@/stores/useBabyStore";
 export default {
   name: "BabyRecord",
   components: {
-    // 註冊 Loading 元件
     RaphaelLoading,
     TitleMenu,
+    TagList,
     BabyIntro,
     BabyCreateForm,
     BabyProgress,
@@ -295,50 +307,44 @@ export default {
     const router = useRouter();
     const babyStore = useBabyStore();
 
-    // 用來控制 Loading 顯示/隱藏
+    // Loading
     const isLoading = ref(false);
 
-    // 驗證登入
+    // 檢查登入
     const localData = localStorage.getItem("userData");
     const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
     if (!MID || !Token || !MAID || !Mobile) {
       router.push("/");
     }
 
-    // 進入畫面 => 先拿寶貝清單
+    // 進入畫面 => 先抓寶貝
     onMounted(() => {
-      isLoading.value = true; // 開始載入
+      isLoading.value = true;
       babyStore
         .fetchGrowth()
         .then(() => {
-          // (1) 拿到寶貝清單後，判斷每個寶貝要進哪個 flowStage
           babyStore.babyAPIData.forEach((child) => {
             const cid = child.CID;
             const rec = babyStore.childRecords[cid];
-
-            // 如果沒填過 => indicator
+            // 初次 or 大於一次
             if (!child.ChildANSTime) {
               rec.flowStage = "indicator";
             } else {
-              // 大於一次 => chooseVersion or historyView
-              if (Number(child.diffDaysFromToday) < 0) {
-                // 未到可再次測 => 直接看「歷史紀錄」
+              if (Number(child.diffDaysFromToday) > 0) {
                 rec.flowStage = "historyView";
-                // 直接呼叫 API_GrowthFirst.jsp 撈最新資料
                 babyStore.fetchGrowthFirst(cid);
               } else {
-                // 已到可再次測 => chooseVersion
                 rec.flowStage = "chooseVersion";
               }
             }
           });
         })
         .finally(() => {
-          isLoading.value = false; // 載入結束
+          isLoading.value = false;
         });
     });
 
-    // 當前寶貝
+    // 取得當前寶貝
     const hasChild = computed(() => babyStore.babyAPIData.length > 0);
     const curChildData = computed(
       () => babyStore.childRecords[babyStore.selectedChildID]
@@ -352,14 +358,12 @@ export default {
 
     function onCommonButtonClick() {
       if (!hasChild.value) {
-        // 無小孩 => 跳轉「新增寶貝」
         if (!showAddBabyForm.value) {
           showAddBabyForm.value = true;
         } else {
           checkAndShowBabyAlert();
         }
       } else {
-        // 若已有小孩 => 有些流程需叫 API
         const stage = curChildData.value?.flowStage;
         if (stage === "indicator") {
           const cid = babyStore.selectedChildID;
@@ -368,14 +372,10 @@ export default {
             alert("請至少選一個指標");
             return;
           }
-          // 顯示 Loading，呼叫 API
           isLoading.value = true;
-          babyStore
-            .fetchChildQuestions(cid)
-            .finally(() => {
-              // 取得完題目後關掉 Loading
-              isLoading.value = false;
-            });
+          babyStore.fetchChildQuestions(cid).finally(() => {
+            isLoading.value = false;
+          });
         }
       }
     }
@@ -389,8 +389,7 @@ export default {
       return "下一步";
     });
     const isDisableCommonBtn = computed(() => {
-      if (curChildData.value?.flowStage === "times") return true;
-      return false;
+      return curChildData.value?.flowStage === "times";
     });
 
     function addBabyInfo() {
@@ -423,9 +422,7 @@ export default {
             return;
           }
         }
-        // 開啟 Loading
         isLoading.value = true;
-
         const req = {
           MID,
           Token,
@@ -446,7 +443,6 @@ export default {
           showBabyAlert.value = false;
           showBabyCover.value = false;
           showAddBabyForm.value = false;
-          // 重新抓寶貝清單
           await babyStore.fetchGrowth();
         } else {
           alert("新增寶貝失敗：" + resp.data.Message);
@@ -455,7 +451,6 @@ export default {
         console.error(err);
         alert("伺服器錯誤");
       } finally {
-        // 關掉 Loading
         isLoading.value = false;
       }
     }
@@ -470,11 +465,9 @@ export default {
         return;
       }
       const cid = babyStore.selectedChildID;
-      // 顯示 Loading，等待 API
       isLoading.value = true;
-      await babyStore.fetchGrowthRecord(cid).finally(() => {
-        isLoading.value = false;
-      });
+      await babyStore.fetchGrowthRecord(cid);
+      isLoading.value = false;
       curChildData.value.flowStage = "indicator";
     }
     const ansTypes = computed(() => {
@@ -482,7 +475,7 @@ export default {
       return babyStore.childRecords[cid]?.growthRec?.ChildAnsAllType || {};
     });
 
-    // ========== QA 分頁 ==========
+    // QA 分頁
     const qaListRef = ref(null);
     const currentPage = computed(() => qaListRef.value?.currentPage || 1);
     const totalPages = computed(() => qaListRef.value?.totalPages || 1);
@@ -499,27 +492,25 @@ export default {
       if (qaListRef.value.currentPage < qaListRef.value.totalPages) {
         qaListRef.value.goNextPage();
       } else {
-        // 送題目 -> 次數
-        qaListRef.value.submitAllAnswers();
+        qaListRef.value.submitAllAnswers(); // -> onGoTimes
       }
     }
     const nextButtonLabel = computed(() => {
       if (currentPage.value < totalPages.value) {
         return `下一頁 (${currentPage.value}/${totalPages.value})`;
-      } else {
-        return `下一步 (${currentPage.value}/${totalPages.value})`;
       }
+      return `下一步 (${currentPage.value}/${totalPages.value})`;
     });
     const isDisableNextBtn = computed(() => !isPageFilled.value);
     const hasTwoButtons = computed(() => currentPage.value > 1);
 
     function onGoTimes(data) {
-      // 獲取 QA 結果後，進入 times 流程
       const cid = babyStore.selectedChildID;
       const currentInfo = data.ChildInfo?.find((x) => x.CID === cid);
       if (currentInfo?.AID) {
         babyStore.childRecords[cid].AID = currentInfo.AID;
       }
+      // 將後端回傳的 ChildAns => times
       babyStore.childRecords[cid].childTimesQues = data.ChildAns.map((q) => ({
         id: q.QueSeq,
         question: q.Question,
@@ -536,7 +527,7 @@ export default {
       babyStore.childRecords[cid].flowStage = "times";
     }
 
-    // ========== times 分頁 ==========
+    // times 分頁
     const timesCurrentPage = ref(1);
     const pageSize = 7;
     const timesQuestions = computed(
@@ -564,9 +555,8 @@ export default {
     const timesNextButtonLabel = computed(() => {
       if (timesCurrentPage.value < timesTotalPages.value) {
         return `下一頁 (${timesCurrentPage.value}/${timesTotalPages.value})`;
-      } else {
-        return `下一步`;
       }
+      return `下一步`;
     });
     async function onTimesNextClick() {
       if (!isTimesPageFilled.value) {
@@ -576,12 +566,11 @@ export default {
       if (timesCurrentPage.value < timesTotalPages.value) {
         timesCurrentPage.value++;
       } else {
-        // 送次數 -> GrowthSolve -> priority
+        // 送次數 => priority
         isLoading.value = true;
         await saveTimesData();
         await submitGrowthSolve();
         isLoading.value = false;
-
         curChildData.value.flowStage = "priority";
       }
     }
@@ -623,7 +612,7 @@ export default {
       const cid = babyStore.selectedChildID;
       const rec = babyStore.childRecords[cid];
       if (!rec.AID) {
-        alert("無法送出 Solve，缺 AID");
+        alert("缺少 AID");
         return;
       }
       try {
@@ -643,11 +632,11 @@ export default {
           alert("送出解決方案失敗：" + resp.data.Message);
         }
       } catch (err) {
-        console.error("submitGrowthSolve error:", err);
+        console.error(err);
       }
     }
 
-    // ========== priority ==========
+    // priority
     const selectedPriorityCount = ref(0);
     function onPrioritySelectionChanged(count) {
       selectedPriorityCount.value = count;
@@ -669,8 +658,6 @@ export default {
         isLoading.value = false;
         return;
       }
-
-      // 先更新最新紀錄（GrowthFirst）
       await babyStore.fetchGrowthFirst(cid);
 
       const rec = babyStore.childRecords[cid];
@@ -681,7 +668,6 @@ export default {
         return;
       }
 
-      // 找到前一次 AID
       let preAID = "";
       const historyGroups = rec.reportData?.History || [];
       const groupIndex = historyGroups.findIndex(
@@ -691,7 +677,6 @@ export default {
         preAID = historyGroups[groupIndex + 1][0]?.AID || "";
       }
 
-      // 呼叫 Compare
       await babyStore.fetchGrowthCompare(cid, AID, preAID);
       rec.flowStage = "result";
       isLoading.value = false;
@@ -729,7 +714,7 @@ export default {
           return false;
         }
       } catch (err) {
-        console.error("saveSolveData error:", err);
+        console.error(err);
         alert("儲存想解決的症狀錯誤");
         return false;
       }
@@ -747,15 +732,39 @@ export default {
       }
     }
 
+    // 返回紀錄
+    function goBackToHistory() {
+      curChildData.value.flowStage = "historyView";
+    }
+
+    // 工具
     function formatDateToYYYYMMDD(date) {
       const y = date.getFullYear();
       const m = String(date.getMonth() + 1).padStart(2, "0");
       const d = String(date.getDate()).padStart(2, "0");
       return `${y}${m}${d}`;
     }
+    function formatCheckTime(str) {
+      if (!str) return "";
+      const M = Number(str.slice(5, 7));
+      const D = Number(str.slice(8, 10));
+      const hm = str.slice(11, 16);
+      return `${M}/${D} ${hm}`;
+    }
+    function parseCheckTime(str) {
+      if (!str) return null;
+      const [datePart, timePart] = str.split(" ");
+      if (!datePart) return null;
+      const [yy, mm, dd] = datePart.split("/");
+      return {
+        year: Number(yy),
+        month: Number(mm),
+        day: Number(dd),
+        timeStr: timePart || "",
+      };
+    }
 
-    // ========== 以下為 historyView 的「年份 & 月份」篩選 + 顯示 ==========
-
+    // 年/月篩選
     const selectedYear = ref(new Date().getFullYear());
     const selectedMonth = ref(new Date().getMonth() + 1);
     const yearBoxVisible = ref(false);
@@ -779,9 +788,7 @@ export default {
     }
 
     const currentYear = new Date().getFullYear();
-    const rawHistoryList = computed(() => {
-      return curChildData.value?.reportData?.History || [];
-    });
+    const rawHistoryList = computed(() => curChildData.value?.reportData?.History || []);
     const displayYears = computed(() => {
       const yearsSet = new Set();
       rawHistoryList.value.flat().forEach((item) => {
@@ -794,7 +801,6 @@ export default {
       });
       return Array.from(yearsSet).sort((a, b) => b - a);
     });
-
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
     const filteredHistoryList = computed(() => {
       return rawHistoryList.value.flat().filter((item) => {
@@ -812,7 +818,6 @@ export default {
       const cid = babyStore.selectedChildID;
       const groups = curChildData.value?.reportData?.History || [];
       let preAID = "";
-
       const groupIndex = groups.findIndex((group) =>
         group.some(
           (item) =>
@@ -822,62 +827,36 @@ export default {
       if (groupIndex >= 0 && groupIndex < groups.length - 1) {
         preAID = groups[groupIndex + 1][0]?.AID || "";
       }
-
       isLoading.value = true;
       await babyStore.fetchGrowthCompare(cid, histItem.AID, preAID);
       isLoading.value = false;
-
       curChildData.value.flowStage = "result";
     }
 
-    function formatCheckTime(str) {
-      if (!str) return "";
-      const M = Number(str.slice(5, 7));
-      const D = Number(str.slice(8, 10));
-      const hm = str.slice(11, 16);
-      return `${M}/${D} ${hm}`;
-    }
-
-    function parseCheckTime(str) {
-      if (!str) return null;
-      const [datePart, timePart] = str.split(" ");
-      if (!datePart) return null;
-      const [yy, mm, dd] = datePart.split("/");
-      return {
-        year: Number(yy),
-        month: Number(mm),
-        day: Number(dd),
-        timeStr: timePart || "",
-      };
-    }
-
     return {
-      // Loading
-      isLoading,
-
+      // store
       babyStore,
-      hasChild,
       curChildData,
 
+      // states
+      isLoading,
+      hasChild,
+      babyInfos,
       showBabyCover,
       showBabyAlert,
       showAddBabyForm,
-      babyInfos,
 
+      // methods
       onCommonButtonClick,
       commonButtonLabel,
       isDisableCommonBtn,
-
       addBabyInfo,
       removeBaby,
       checkAndShowBabyAlert,
       closeBabyAlert,
       submitBabyData,
-
-      // chooseVersion
       setVersion,
       onChooseVersionNext,
-      ansTypes,
 
       // QA
       qaListRef,
@@ -904,14 +883,19 @@ export default {
       // priority
       selectedPriorityCount,
       onPrioritySelectionChanged,
-      onPrioritySubmit,
       priorityButtonStyle,
+      onPrioritySubmit,
 
-      // 切換寶貝
+      // switch baby
       onClickChild,
-      formatDateToYYYYMMDD,
+      goBackToHistory,
 
-      // historyView 年月篩選
+      // utils
+      formatDateToYYYYMMDD,
+      formatCheckTime,
+      parseCheckTime,
+
+      // history
       selectedYear,
       selectedMonth,
       yearBoxVisible,
@@ -926,13 +910,13 @@ export default {
       rawHistoryList,
       filteredHistoryList,
       onClickHistoryItem,
-      formatCheckTime,
-      parseCheckTime,
+
+      // PINIA store getters
+      ansTypes,
     };
   },
 };
 </script>
-
 
 
 
@@ -946,6 +930,7 @@ export default {
 
   width: 100%;
   padding: 0 1rem;
+  padding-bottom: 4rem;
   position: relative;
 
   .babyCover {
@@ -1006,14 +991,20 @@ export default {
   gap: 0.75rem;
   max-width: 768px;
   width: 100%;
-  padding: 0.75rem 0 3.125rem 0;
+  // padding: 0.75rem 0 3.125rem 0;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  padding-bottom: 1rem;
+  padding-top: 0.75rem;
+  background-color: #f5f5f5;
 
   .babyRerordCommonBtn {
     background-color: #74bc1f;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%; // 預設 100% (單一按鈕)
+    width: 90%; // 預設 100% (單一按鈕)
     border: none;
     border-radius: 0.5rem;
     color: #fff;
@@ -1029,9 +1020,8 @@ export default {
     }
   }
 
-  /* QA階段：有兩顆按鈕時 => 各 50% */
   &.double-btn .babyRerordCommonBtn {
-    width: 50%;
+    width: 45%;
   }
 
   .babyRerordPrevBtn {
@@ -1043,7 +1033,14 @@ export default {
 .chooseVersion {
   margin-top: 1rem;
   margin-bottom: 0.75rem;
+  h3 {
+    color: var(--shade-gray-500, #666);
 
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+  }
   h5 {
     color: $raphael-gray-500;
     font-size: 16px;
@@ -1105,6 +1102,7 @@ export default {
 
 .historyView {
   width: 100%;
+  margin-top: .75rem;
 }
 .historyViewGroup {
   background-color: #fff;
@@ -1221,6 +1219,45 @@ export default {
         }
       }
     }
+  }
+}
+.babyQAGroup {
+  p {
+    padding-top: 0.25rem;
+    padding-bottom: 0.5rem;
+    color: var(--shade-gray-500, #666);
+
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+
+    letter-spacing: 0.5px;
+  }
+}
+.babyTimesGroup {
+  h3 {
+    padding-top: 0.5rem;
+
+    color: var(--shade-gray-500, #666);
+
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+
+    letter-spacing: 0.5px;
+  }
+}
+.babyPriority {
+  h3 {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    color: var(--shade-gray-500, #666);
+
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+
+    letter-spacing: 0.5px;
   }
 }
 </style>

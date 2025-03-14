@@ -49,7 +49,7 @@ export default {
   overflow-x: auto;
   padding-bottom: 2px;
   scroll-snap-type: x mandatory;
-
+  margin-top: .5rem;
   .babyProgressCard {
     background-color: #ffffff;
     border-radius: 8px;
@@ -90,6 +90,12 @@ export default {
       h6 {
         margin: 0;
       }
+      h5{
+        color: var(--shade-gray-500, #666);
+      }
+      h6{
+        color: var(--secondary-purple-200, #65558F);
+      }
     }
     .babyProgress {
       width: 100%;
@@ -107,6 +113,7 @@ export default {
         background-color: #65558f;
         border-radius: 4px;
       }
+     
     }
   }
 }

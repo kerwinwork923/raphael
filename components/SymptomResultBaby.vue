@@ -15,11 +15,11 @@
       </div>
     </div>
 
-    <div class="resultTagGroup">
+    <!-- <div class="resultTagGroup">
       <div class="resultTag" v-for="item in symptomSolve || []" :key="item">
         {{ item }}
       </div>
-    </div>
+    </div> -->
 
     <h5>(本次){{ formatTimestamp(theLatestHistory.CheckTime || "") }}</h5>
     <ProgressBar2

@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, reactive } from "vue";
+import { ref, reactive, watch } from "vue";
 import axios from "axios";
 
 export const useBabyStore = defineStore("babyStore", () => {
@@ -8,7 +8,7 @@ export const useBabyStore = defineStore("babyStore", () => {
    *   isFetched: false,             // 是否已抓過成長紀錄
    *   flowStage: "",                // 畫面階段 chooseVersion / indicator / qa / times / priority / result / ...
    *   version: "tracking" | "full", // 指標的問卷模式
-   *   growthRec: null,             // API_GrowthRec 回傳
+   *   growthRec: null,              // API_GrowthRec 回傳
    *   selectedAnsTypes: new Set(),  // 使用者勾選的指標
    *   childQuestions: [],           // QA 題目
    *   childTimesQues: [],           // 次數 題目
@@ -17,9 +17,34 @@ export const useBabyStore = defineStore("babyStore", () => {
    *   AID: null,                   // 後端指派的檢測批次 ID
    * }
    */
-  const babyAPIData = ref([]); // API_Growth 回傳的寶貝清單
-  const selectedChildID = ref(""); // 當前操作中的寶貝
-  const childRecords = reactive({}); // 以 CID 為 key，存各寶貝的流程/資料
+  const babyAPIData = ref([]);           // API_Growth 回傳的寶貝清單
+  const selectedChildID = ref("");       // 當前操作中的寶貝
+  const childRecords = reactive({});     // 以 CID 為 key，存各寶貝的流程/資料
+
+  // ★★★ STEP1: 嘗試從 localStorage 先載入 childRecords ★★★
+  const localChildRecords = localStorage.getItem("babyStore_childRecords");
+  if (localChildRecords) {
+    try {
+      const parsed = JSON.parse(localChildRecords);
+      // 反序列化「Set」類型資料
+      // 因為 JSON.parse 會把 Set 變成陣列
+      // 這裡以 key: selectedAnsTypes / selectedPriority 做為示例
+      Object.keys(parsed).forEach((cid) => {
+        const obj = parsed[cid];
+        // 反序列化 selectedAnsTypes
+        if (Array.isArray(obj.selectedAnsTypes)) {
+          obj.selectedAnsTypes = new Set(obj.selectedAnsTypes);
+        }
+        // 反序列化 selectedPriority
+        if (Array.isArray(obj.selectedPriority)) {
+          obj.selectedPriority = new Set(obj.selectedPriority);
+        }
+      });
+      Object.assign(childRecords, parsed);
+    } catch (e) {
+      console.error("LocalStorage parse error:", e);
+    }
+  }
 
   // 嘗試從 localStorage 拿 MID/Token/MAID/Mobile
   let MID, Token, MAID, Mobile;
@@ -84,7 +109,6 @@ export const useBabyStore = defineStore("babyStore", () => {
   }
 
   // =========== (2) API_GrowthFirst ===========
-  // 拿到「本次/前次」 + 「歷史紀錄清單」
   async function fetchGrowthFirst(cid) {
     if (!cid) return;
     try {
@@ -94,7 +118,6 @@ export const useBabyStore = defineStore("babyStore", () => {
         req
       );
       if (data.Result === "OK") {
-        // 將本次 (CurData) / 前次 (PreData) / 歷史 (ChildHistoryScore) 統一下存到 reportData
         childRecords[cid].reportData = {
           Data: data.Recent?.CurData || null,
           PreData: data.Recent?.PreData || null,
@@ -110,7 +133,6 @@ export const useBabyStore = defineStore("babyStore", () => {
   }
 
   // =========== (3) API_GrowthCompare ===========
-  // 用來顯示「本次 vs 前次」檢測結果
   async function fetchGrowthCompare(cid, AID, preAID = "") {
     if (!cid || !AID) return;
     try {
@@ -134,7 +156,6 @@ export const useBabyStore = defineStore("babyStore", () => {
   }
 
   // =========== (4) API_GrowthRec ===========
-  // 拿到成長紀錄 -> childAnsAllType (哪些指標可選)
   async function fetchGrowthRecord(cid) {
     if (!cid) return;
     try {
@@ -180,7 +201,7 @@ export const useBabyStore = defineStore("babyStore", () => {
   }
 
   // =========== (6) API_GrowthRec2 ===========
-  // 拿「QA問卷」(依照使用者勾的指標 + version=Short or Complete)
+  // 拿「QA問卷」（依照使用者勾的指標 + version=Short or Complete）
   async function fetchChildQuestions(cid) {
     if (!cid) return;
     const rec = childRecords[cid];
@@ -234,7 +255,6 @@ export const useBabyStore = defineStore("babyStore", () => {
   }
 
   // =========== (7) API_GrowthRecTimes ===========
-  // 拿「次數」題目
   async function fetchGrowthRecTimes(cid, AID) {
     if (!cid) return;
     try {
@@ -279,6 +299,23 @@ export const useBabyStore = defineStore("babyStore", () => {
       console.error(err);
     }
   }
+
+  // ★★★ STEP2: 監聽 childRecords，有變動就存到 localStorage ★★★
+  watch(
+    () => childRecords,
+    (val) => {
+      // 需要將 Set 轉為 Array 以便 JSON.stringify
+      const objToStore = {};
+      Object.keys(val).forEach((cid) => {
+        const copy = { ...val[cid] };
+        copy.selectedAnsTypes = Array.from(copy.selectedAnsTypes || []);
+        copy.selectedPriority = Array.from(copy.selectedPriority || []);
+        objToStore[cid] = copy;
+      });
+      localStorage.setItem("babyStore_childRecords", JSON.stringify(objToStore));
+    },
+    { deep: true }
+  );
 
   return {
     babyAPIData,

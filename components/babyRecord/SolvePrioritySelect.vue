@@ -16,7 +16,7 @@
 
 <script>
 import { ref, computed, watchEffect } from "vue";
-import activeIcon from "@/assets/imgs/check.svg";
+import activeIcon from "@/assets/imgs/check.svg"; // 這裡請確保有綠色的勾勾圖片
 import inactiveIcon from "@/assets/imgs/plus.svg";
 import { useBabyStore } from "@/stores/useBabyStore";
 
@@ -72,7 +72,6 @@ export default {
 };
 </script>
 
-
 <style lang="scss" scoped>
 .solvePriorityBox {
   background-color: #fff;
@@ -81,7 +80,6 @@ export default {
   grid-template-columns: repeat(2, 1fr);
   gap: 0.75rem;
   padding: 12px;
- 
   overflow-y: auto;
 
   .priorityItem {
@@ -89,9 +87,9 @@ export default {
     align-items: center;
     padding: 8px;
     border-radius: 8px;
-  
     cursor: pointer;
     transition: all 0.2s;
+    border: 1px solid #ccc; /* 預設邊框顏色 */
 
     img {
       margin-right: 8px;
@@ -99,10 +97,21 @@ export default {
       height: 24px;
     }
 
+    h3 {
+      font-size: 16px;
+      color: #333; /* 預設顏色 */
+      transition: color 0.2s;
+    }
+
+    /* 選擇時的樣式 */
     &.active {
       background-color: #74bc1f;
       color: #fff;
       border-color: #74bc1f;
+
+      h3 {
+        color: #fff;
+      }
     }
   }
 }
