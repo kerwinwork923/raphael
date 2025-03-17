@@ -4,8 +4,6 @@
   <DSPRSelect :showCloseButton="false" />
   <div class="usageWrap">
     <TitleMenu Text="使用紀錄" :link="`/UsageHistory`" />
-
-    <!-- 根據產品類型顯示對應 TimeRing 或卡片 (原程式保留) -->
     <TimeRing2
       v-if="productName === '三效深眠衣' || productName === '全效調節衣'"
       :productName="productName"
@@ -13,6 +11,7 @@
       :todayUseRecord="todayUseRecord"
       :hasDetectTime="hasDetectTime"
     />
+
     <TimeRing
       v-if="productName === '居家治療儀'"
       :totalTime="3000"
@@ -21,6 +20,7 @@
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
     />
+
     <TimeRing
       v-if="productName === '雙效紅光活力衣'"
       :totalTime="5400"
@@ -30,7 +30,6 @@
       @requireHRVCheck="handleHRVCheck"
     />
 
-    <!-- 以下為四種產品的說明卡片，保留原邏輯 -->
     <div class="usageInfoGroup" v-if="usageCardState === '雙效紅光活力衣'">
       <div class="usageInfoCard">
         <h3>電量提示燈使用說明</h3>
@@ -102,7 +101,7 @@
       <div class="usageInfoCard">
         <h3>非侵入性治療</h3>
         <p>
-          這款全效調節衣使用的是物理性治療，不涉及任何藥物，適合那些想要避免藥物副作用的患者。它依賴於專利技術的貼片，通過波頻影響神經系統
+          這款全效調節衣使用的是物理性治療，不涉及任何藥物，適合那些想要避免藥物副作用的患者。它依賴於專利技術的貼片，通過波頻影響神經系統​
         </p>
       </div>
       <div class="usageInfoCard">
@@ -119,8 +118,17 @@
       </div>
     </div>
 
-    <!-- 年份&月份篩選 -->
     <div class="usageRecord">
+      <div class="usageRecordTitleGroup">
+        <h3 :class="{ active: useActive }" @click="changeUseActive">
+          使用紀錄
+        </h3>
+        <h3 :class="{ active: detectActive }" @click="changeDetectActive">
+          檢測紀錄
+        </h3>
+      </div>
+
+      <!-- 年份和月份選擇框 -->
       <div class="detectSelectGroup">
         <div class="yearSelectGroup">
           <img src="/assets/imgs/filter.svg" alt="年份篩選" />
@@ -156,13 +164,81 @@
         </div>
       </div>
 
-      <!-- integrationGroup: 顯示「檢測紀錄 + 總使用時間」 -->
-      <div class="integrationGroup">
+      <div class="useGroup" v-if="useActive">
+        <div
+          class="useList"
+          v-for="item in filteredUsage"
+          :key="item.StartTime"
+        >
+          <div class="dateList" @click="selectDate(item)">
+            <div class="timeGroup">
+              <div class="timeIcon">
+                <img src="../../assets/imgs/detectTime.svg" alt="" />
+              </div>
+              <div class="time">{{ formatTimestamp3(item?.StartTime) }}</div>
+            </div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 18 18"
+              fill="none"
+              :style="{
+                transform:
+                  selectedDate === item.StartTime
+                    ? 'rotate(90deg)'
+                    : 'rotate(0deg)',
+                transition: 'transform 0.3s ease',
+              }"
+            >
+              <path
+                data-v-8f83a543=""
+                d="M5.99159 3.37719L11.4726 8.99994L5.99159 14.6227C5.89346 14.7232 5.83853 14.858 5.83853 14.9984C5.83853 15.1389 5.89346 15.2737 5.99159 15.3742C6.03925 15.4228 6.09613 15.4615 6.15891 15.4879C6.2217 15.5142 6.28911 15.5278 6.35721 15.5278C6.42531 15.5278 6.49273 15.5142 6.55551 15.4879C6.61829 15.4615 6.67518 15.4228 6.72284 15.3742L12.5548 9.39257C12.6572 9.28752 12.7145 9.14664 12.7145 8.99994C12.7145 8.85325 12.6572 8.71236 12.5548 8.60732L6.72396 2.62569C6.67627 2.57671 6.61924 2.53777 6.55625 2.51119C6.49326 2.4846 6.42558 2.4709 6.35721 2.4709C6.28884 2.4709 6.22116 2.4846 6.15817 2.51119C6.09518 2.53777 6.03816 2.57671 5.99046 2.62569C5.89234 2.72615 5.8374 2.86101 5.8374 3.00144C5.8374 3.14187 5.89234 3.27673 5.99046 3.37719L5.99159 3.37719Z"
+                fill="#666666"
+              ></path>
+            </svg>
+          </div>
+
+          <div class="actionGroup" v-if="selectedDate === item.StartTime">
+            <div class="startGroup">
+              <img src="/assets/imgs/play.svg" alt="" />
+              <div class="actionContent">
+                <h4>開始時間</h4>
+                <p>{{ formatTimestamp3(item?.StartTime) }}</p>
+              </div>
+            </div>
+            <div class="pauseGroup" v-if="item.Pause && item.Pause.length > 0">
+              <img src="/assets/imgs/pause.svg" alt="" />
+              <div class="actionContent">
+                <h4>暫停時間</h4>
+                <p v-for="pause in item.Pause" :key="pause.PauseStart">
+                  {{ formatTimestamp3(pause?.PauseStart) }} -
+                  {{ formatTimestamp3(pause?.PauseEnd) }}
+                  <span> ({{ pause?.minutesDifference }})分鐘 </span>
+                </p>
+              </div>
+            </div>
+            <div class="stopGroup">
+              <img src="/assets/imgs/stop.svg" alt="" />
+              <div class="actionContent">
+                <h4>結束時間</h4>
+                <p>{{ formatTimestamp3(item?.EndTime) }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="notDetectData" v-if="useData?.length === 0">無檢測資料</div>
+      </div>
+
+      <div class="detectGroup" v-if="detectActive">
         <div
           class="detectItem"
-          v-for="(item, index) in filteredIntegration"
+          :class="{ beforeTreatment: item.BcAf === '治療前' }"
+          v-for="(item, index) in filteredHRVData"
           :key="index"
         >
+          <!-- `/vital/detail.html?AID=` -->
           <div class="detect">
             <div class="timeGroup">
               <div
@@ -177,33 +253,64 @@
                 @click="handleDetectClick(item)"
                 style="cursor: pointer"
               >
-                <!-- 檢測時間 CheckTime -->
                 <div class="time">{{ formatTimestamp3(item.CheckTime) }}</div>
-                <!-- 顯示合併後的 totalUsedMin (總共使用 xx 分鐘) -->
                 <div class="timeInfoText">
-                  總共使用 {{ item.totalUsedMin }} 分鐘
+                  {{ item.ProductName }} {{ item.BcAf }}
                 </div>
               </div>
             </div>
             <div class="infoGroup">
+              <div class="detectAgeGroup">
+                <h4>生理年齡</h4>
+                <h5>
+                  <span>{{ item.bioage }}</span
+                  >歲
+                </h5>
+              </div>
+              <div class="detectHRVGroup">
+                <h4>HRV</h4>
+                <h5>
+                  <span>{{ Math.round(item.HRV * 10) / 10 }}</span
+                  >ms
+                </h5>
+              </div>
+              <!-- :style="{
+                  opacity: item.BcAf !== '治療前' ? 1 : 0,
+                  cursor: item.BcAf !== '治療前' ? 'pointer' : 'default',
+                }" -->
               <div
                 class="resultText"
-                :style="{ cursor: 'pointer' }"
+                :style="{
+                  cursor: 'pointer',
+                }"
                 @click="handleDetectClick(item)"
               >
                 分析結果
               </div>
+
+              <!-- :style="{
+                  opacity: item.BcAf !== '治療前' ? 1 : 0,
+                  cursor: item.BcAf !== '治療前' ? 'pointer' : 'default',
+                }" -->
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"
                 height="18"
                 viewBox="0 0 18 18"
                 fill="none"
-                :style="{ cursor: 'pointer' }"
+                :style="{
+                  cursor: 'pointer',
+                }"
                 @click="handleDetectClick(item)"
               >
                 <path
-                  d="M5.99159 3.37719L11.4726 8.99994L5.99159 14.6227C5.89346 14.7232 5.83853 14.858 5.83853 14.9984C5.83853 15.1389 5.89346 15.2737 5.99159 15.3742C6.03925 15.4228 6.09613 15.4615 6.15891 15.4879C6.2217 15.5142 6.28911 15.5278 6.35721 15.5278C6.42531 15.5278 6.49273 15.5142 6.55551 15.4879C6.61829 15.4615 6.67518 15.4228 6.72284 15.3742L12.5548 9.39257C12.6572 9.28752 12.7145 9.14664 12.7145 8.99994C12.7145 8.85325 12.6572 8.71236 12.5548 8.60732L6.72396 2.62569C6.67627 2.57671 6.61924 2.53777 6.55625 2.51119C6.49326 2.4846 6.42558 2.4709 6.35721 2.4709C6.28884 2.4709 6.22116 2.4846 6.15817 2.51119C6.09518 2.53777 6.03816 2.57671 5.99046 2.62569C5.89234 2.72615 5.8374 2.86101 5.8374 3.00144C5.8374 3.14187 5.89234 3.27673 5.99046 3.37719Z"
+                  d="M5.99159 3.37719L11.4726 8.99994L5.99159 14.6227C5.89346 14.7232 5.83853 14.858 5.83853 14.9984C5.83853 15.1389 5.89346 15.2737 5.99159 15.3742C6.03925 15.4228 6.09613 15.4615 6.15891 15.4879C6.2217 15.5142 6.28911 15.5278 6.35721 15.5278C6.42531 15.5278 6.49273 15.5142 6.55551 15.4879C6.61829 15.4615 6.67518 15.4228 6.72284 15.3742L12.5548 9.39257C12.6572 9.28752 12.7145 9.14664 12.7145 8.99994C12.7145 8.85325 12.6572 8.71236 12.5548 8.60732L6.72396 2.62569C6.67627 2.57671 6.61924 2.53777 6.55625 2.51119C6.49326 2.4846 6.42558 2.4709 6.35721 2.4709C6.28884 2.4709 6.22116 2.4846 6.15817 2.51119C6.09518 2.53777 6.03816 2.57671 5.99046 2.62569C5.89234 2.72615 5.8374 2.86101 5.8374 3.00144C5.8374 3.14187 5.89234 3.27673 5.99046 3.37719L5.99159 3.37719Z"
+                  fill="$raphael-gray-500666"
+                />
+                :style="{ opacity: item.BcAf !== '治療前' ? 1 : 0}">
+                <path
+                  data-v-8f83a543=""
+                  d="M5.99159 3.37719L11.4726 8.99994L5.99159 14.6227C5.89346 14.7232 5.83853 14.858 5.83853 14.9984C5.83853 15.1389 5.89346 15.2737 5.99159 15.3742C6.03925 15.4228 6.09613 15.4615 6.15891 15.4879C6.2217 15.5142 6.28911 15.5278 6.35721 15.5278C6.42531 15.5278 6.49273 15.5142 6.55551 15.4879C6.61829 15.4615 6.67518 15.4228 6.72284 15.3742L12.5548 9.39257C12.6572 9.28752 12.7145 9.14664 12.7145 8.99994C12.7145 8.85325 12.6572 8.71236 12.5548 8.60732L6.72396 2.62569C6.67627 2.57671 6.61924 2.53777 6.55625 2.51119C6.49326 2.4846 6.42558 2.4709 6.35721 2.4709C6.28884 2.4709 6.22116 2.4846 6.15817 2.51119C6.09518 2.53777 6.03816 2.57671 5.99046 2.62569C5.89234 2.72615 5.8374 2.86101 5.8374 3.00144C5.8374 3.14187 5.89234 3.27673 5.99046 3.37719L5.99159 3.37719Z"
                   fill="#666666"
                 ></path>
               </svg>
@@ -211,147 +318,94 @@
           </div>
         </div>
       </div>
-
-      <!-- 若沒有任何整合資料就顯示「無檢測資料」 -->
-      <div class="notDetectData" v-if="filteredIntegration.length === 0">
-        無檢測資料
-      </div>
     </div>
-    <!-- 底部按鈕可自行決定是否保留
-    <div class="usageBtnGroup">
-      <button class="preBtn" @click="goPre">返回產品頁面</button>
+    <!-- <div class="usageBtnGroup">
+      <button class="preBtn" @click="goPre">返回產品頁面</button> 
       <button class="nextBtn" @click="goNext">{{ goNextText }}</button>
-    </div>
-    -->
+    </div> -->
   </div>
 </template>
 
 <script>
-import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
-import RaphaelLoading from "../components/RaphaelLoading";
 import TitleMenu from "@/components/TitleMenu.vue";
 import TimeRing from "@/components/TimeRing.vue";
-// 若有其他元件 (TimeRing2 / HRVAlertForUse / DSPRSelect) 也可引入
-import TimeRing2 from "@/components/TimeRing2.vue";
-import DSPRSelect from "@/components/DSPRSelect.vue";
-import HRVAlertForUse from "@/components/HRVAlertForUse.vue";
+import { formatTimestampMDH, formatTimestamp3 } from "~/fn/utils";
+import axios from "axios";
+import { ref, computed, onMounted } from "vue";
+import RaphaelLoading from "../components/RaphaelLoading";
 import { useCommon } from "../stores/common";
-
-/** 將 YYYYMMDDHHmmss 字串轉為 Date */
-function parseYMDHMS(str) {
-  if (!str || str.length < 14) return null;
-  const yyyy = Number(str.slice(0, 4));
-  const MM = Number(str.slice(4, 6)) - 1;
-  const dd = Number(str.slice(6, 8));
-  const HH = Number(str.slice(8, 10));
-  const mm = Number(str.slice(10, 12));
-  const ss = Number(str.slice(12, 14));
-  return new Date(yyyy, MM, dd, HH, mm, ss);
-}
-
-
-function formatTimestamp3(inputStr) {
-  if (!inputStr) return "";
-
-  let dateObj;
-  
-  // 如果是 YYYY/MM/DD HH:mm 格式，直接 new Date
-  if (inputStr.includes("/")) {
-    dateObj = new Date(inputStr);
-  } 
-  // 如果是 YYYYMMDDHHmmss 格式，解析並轉換
-  else if (inputStr.length === 14) {
-    const yyyy = Number(inputStr.slice(0, 4));
-    const MM = Number(inputStr.slice(4, 6)) - 1; // 月份從 0 開始
-    const dd = Number(inputStr.slice(6, 8));
-    const HH = Number(inputStr.slice(8, 10));
-    const mm = Number(inputStr.slice(10, 12));
-    dateObj = new Date(yyyy, MM, dd, HH, mm);
-  } else {
-    return inputStr; // 如果格式不符，直接回傳原始值
-  }
-
-  if (!dateObj || isNaN(dateObj.getTime())) return inputStr;
-
-  // 轉換成 M/D HH:mm 格式
-  const M = dateObj.getMonth() + 1; // 月份從 0 開始，需要 +1
-  const D = dateObj.getDate();
-  const HH = String(dateObj.getHours()).padStart(2, "0");
-  const mm = String(dateObj.getMinutes()).padStart(2, "0");
-
-  return `${M}/${D} ${HH}:${mm}`;
-}
-
-
-
-/** 計算指定時間為當日重置時間 (凌晨 5 點) */
-function calculateResetTime() {
-  const now = new Date();
-  const resetTime = new Date(now);
-  resetTime.setHours(5, 0, 0, 0);
-  if (now < resetTime) {
-    resetTime.setDate(resetTime.getDate() - 1);
-  }
-  return resetTime;
-}
-
 export default {
-  name: "UsageHistoryView",
+  components: { RaphaelLoading, TitleMenu, TimeRing },
   components: {
-    RaphaelLoading,
     TitleMenu,
     TimeRing,
-    TimeRing2,
-    DSPRSelect,
-    HRVAlertForUse,
   },
   setup() {
-    const router = useRouter();
+    const route = useRouter().currentRoute.value;
+    const productName = decodeURIComponent(route.params.clothType);
+
+    const validName = [
+      "三效深眠衣",
+      "雙效紅光活力衣",
+      "全效調節衣",
+      "居家治療儀",
+    ];
+
+    const redirectToHRV = ref(false);
+
     const store = useCommon();
 
-    // 從路由參數抓取產品名稱
-    const productName = decodeURIComponent(
-      router.currentRoute.value.params.clothType || ""
-    );
-    const validName = ["三效深眠衣", "雙效紅光活力衣", "全效調節衣", "居家治療儀"];
+    const handleCountdownComplete = () => {
+      startBtnActive.value = true;
+      goNextText.value = "返回產品頁面";
+    };
+
+    const goNextText = ref("");
+
     if (!validName.includes(productName)) {
-      router.push("/usageHistory");
+      window.location.href = "/usageHistory";
     }
 
-    // 資料
-    const useData = ref([]);       // 使用紀錄
-    const detectData = ref([]);    // 檢測紀錄 (HRV2Record)
-    const loading = ref(false);
-
-    // UI / 狀態
-    const usageCardState = ref(productName);
-    const hasDetectRecord = ref(false);
-    const hasBeforeData = ref(false);
-    const hasDetectTime = ref("00:00:00");
-    const todayUseRecord = ref([]);
-    const showMessage = ref(false);
-    const goNextText = ref("返回產品頁面");
-
-    // 時間篩選
     const selectedYear = ref(new Date().getFullYear());
     const selectedMonth = ref(new Date().getMonth() + 1);
     const yearBoxVisible = ref(false);
     const monthBoxVisible = ref(false);
+    const selectedDate = ref(null);
+    const useData = ref([]);
+    const detectData = ref([]);
+    const loading = ref(false);
 
-    // 選單
+    const hasDetectRecord = ref(false);
+    const hasBeforeData = ref(false);
+    const hasDetectTime = ref("00:00:00");
+
+    const startBtnActive = ref(false);
+    const showMessage = ref(false);
+
+    // ★ 新增：判斷 24 小時內是否還在倒數期 (或還有紀錄)
+    const hasBeforeData24 = ref(false);
+
+    const usageCardState = ref("");
+    if (productName) usageCardState.value = productName;
+
+    const useActive = ref(true);
+    const detectActive = ref(false);
+
+    const todayUseRecord = ref(null);
+
     const months = Array.from({ length: 12 }, (_, i) => i + 1).reverse();
     const displayYears = computed(() => {
       const currentYear = new Date().getFullYear();
       const startYear = 2024;
       const years = [];
-      for (let y = startYear; y <= currentYear; y++) {
-        years.push(y);
+      for (let year = startYear; year <= currentYear; year++) {
+        years.push(year);
       }
       return years;
     });
 
+    const router = useRouter();
     function toggleYearBox() {
       yearBoxVisible.value = !yearBoxVisible.value;
       monthBoxVisible.value = false;
@@ -364,171 +418,324 @@ export default {
       selectedYear.value = year;
       yearBoxVisible.value = false;
     }
+
     function selectMonth(month) {
       selectedMonth.value = month;
       monthBoxVisible.value = false;
     }
 
-    // 取得資料：API_UseStart_Data
-    async function getStart() {
-      try {
-        loading.value = true;
-        // 這裡示範從 localStorage 取 token, MID, MAID ...
-        // 實際使用可依你自己的方式
-        const localData = localStorage.getItem("userData");
-        if (!localData) {
-          router.push("/");
-          return;
-        }
-        const { MID, Token, MAID, Mobile } = JSON.parse(localData);
+    function changeUseActive() {
+      useActive.value = true;
+      detectActive.value = false;
+    }
 
-        // 向後端請求資料
-        const response = await axios.post(
-          "https://23700999.com:8081/HMA/API_UseStart_Data.jsp",
-          {
-            MID,
-            Token,
-            MAID,
-            Mobile,
-          }
-        );
-        if (response.status === 200 && response.data) {
-          // 取出使用 & 檢測紀錄
-          const records = response.data?.UseRecord || [];
-          const hrvRecords = response.data?.HRV2Record || [];
+    function changeDetectActive() {
+      useActive.value = false;
+      detectActive.value = true;
+    }
 
-          // 過濾對應的產品名稱
-          useData.value = records.filter((r) => r.ProductName === productName);
-          detectData.value = hrvRecords.filter(
-            (r) => r.ProductName === productName
-          );
-
-          // 判斷當日 (5am為界) 是否有治療前/後紀錄
-          const resetTime = calculateResetTime();
-          const todayDetectRecords = detectData.value.filter((d) => {
-            const checkTime = d?.CheckTime
-              ? new Date(d.CheckTime.replace(/\//g, "-"))
-              : null;
-            return checkTime && checkTime >= resetTime;
-          });
-          // 檢查是否同時存在 治療前 & 治療後
-          const hasBeforeRecordFlag = todayDetectRecords.some(
-            (r) => r.BcAf === "治療前"
-          );
-          const hasAfterRecordFlag = todayDetectRecords.some(
-            (r) => r.BcAf === "治療後"
-          );
-          hasDetectRecord.value = hasBeforeRecordFlag && hasAfterRecordFlag;
-
-          // 過濾當日的使用紀錄
-          todayUseRecord.value = useData.value.filter((r) => {
-            const et = r?.EndTime
-              ? new Date(r.EndTime.replace(/\//g, "-"))
-              : null;
-            return et && et >= resetTime;
-          });
-
-          // 假設你想顯示「最後一筆使用紀錄」的總時長
-          if (useData.value.length > 0) {
-            const lastRecord = useData.value[useData.value.length - 1];
-            const s = parseYMDHMS(lastRecord.oriStartTime);
-            const e = parseYMDHMS(lastRecord.oriEndTime);
-            if (s && e && e > s) {
-              const diffSec = Math.floor((e - s) / 1000);
-              const hh = String(Math.floor(diffSec / 3600)).padStart(2, "0");
-              const mm = String(
-                Math.floor((diffSec % 3600) / 60)
-              ).padStart(2, "0");
-              const ss = String(diffSec % 60).padStart(2, "0");
-              hasDetectTime.value = `${hh}:${mm}:${ss}`;
-            }
-          }
-        }
-      } catch (err) {
-        console.error("Error in getStart:", err);
-      } finally {
-        loading.value = false;
+    function selectDate(item) {
+      if (item.StartTime === selectedDate.value) {
+        selectedDate.value = null;
+      } else {
+        selectedDate.value = item.StartTime;
       }
     }
 
-    // 將檢測紀錄 + 使用紀錄 以 UID 做合併，並計算「總使用分鐘」
-    const integrationData = computed(() => {
-      if (!detectData.value.length) return [];
-      return detectData.value.map((det) => {
-        // 找到所有同 UID 的使用紀錄
-        const matchedUsage = useData.value.filter(
-          (usage) => usage.UID === det.UID
-        );
-        // 累加總使用時間 (分鐘)
-        let totalMin = 0;
-        matchedUsage.forEach((u) => {
-          const start = parseYMDHMS(u.oriStartTime);
-          const end = parseYMDHMS(u.oriEndTime);
-          if (start && end && end > start) {
-            totalMin += (end - start) / 60000; // 毫秒 -> 分鐘
-          }
-        });
-        return {
-          ...det,
-          totalUsedMin: Math.round(totalMin), // 四捨五入
-        };
-      });
-    });
-
-    // 根據「年份 / 月份」篩選顯示
-    const filteredIntegration = computed(() => {
-      return integrationData.value.filter((item) => {
-        if (!item.CheckTime) return false;
-        const date = new Date(item.CheckTime.replace(/\//g, "-"));
-        return (
-          date.getFullYear() === selectedYear.value &&
-          date.getMonth() + 1 === selectedMonth.value
-        );
-      });
-    });
-
-    // 事件
-    function handleDetectClick(item) {
-      // 點擊「分析結果」或時間文字 -> 進入檢測結果頁
-      router.push(`/usageHRVResult/${item.UID}`);
-    }
-    function handleWatchClick(item) {
-      // 點擊圖示 -> 進入健康數據頁
-      router.push(`/healthData/${item.AID}`);
-    }
-    function handleCountdownComplete() {
-      goNextText.value = "返回產品頁面";
-    }
-    function handleHRVCheck() {
-      store.showHRVAlert = true;
-    }
-
-    // 其他按鈕
-    function goPre() {
+    const goPre = () => {
+      // router.push(`/usageHistoryInfo/${productName}`);
       window.history.back();
-    }
-    function goNext() {
-      router.push("/usageHistory");
-    }
+    };
 
-    // onMounted 初始化
-    onMounted(() => {
-      getStart();
+    // if (startBtnActive.value) {
+    goNextText.value = "返回產品頁面";
+    // } else {
+    //   goNextText.value = "HRV檢測";
+    // }
+
+    watch(useData, () => {
+      // 當 useData 改變時，重新計算 filteredUsage
+      console.log("Data updated:", useData.value);
     });
 
-    return {
-      // 資料 / 狀態
-      productName,
-      usageCardState,
-      loading,
-      hasDetectRecord,
-      hasBeforeData,
-      hasDetectTime,
-      todayUseRecord,
-      showMessage,
-      goNextText,
+    watch(
+      () => startBtnActive.value,
+      (newValue) => {
+        goNextText.value = "返回產品頁面";
 
-      // 篩選
+        //  else {
+        //   goNextText.value = "HRV檢測";
+        // }
+      },
+      { immediate: true }
+    );
+    console.log(useData[0]);
+
+    // const goNext = () => {
+    //   if (  redirectToHRV.value) {
+    //     // 设置 detectFlag
+    //     const uid = detectData.value.find(
+    //       (record) => record.BcAf === "治療前"
+    //     )?.UID;
+
+    //     store.detectFlag = "2";
+    //     if (uid) {
+    //       // 更新 Pinia store 並顯示提示框
+    //       store.detectFlag = "2";
+    //       store.detectUID = uid;
+    //       store.detectForm = productName;
+    //       store.showHRVAlert = true; // 顯示提示框
+    //       console.log("HRV 提示框已啟動，UID:", uid);
+    //     } else {
+    //       console.warn("未找到有效的 UID，請檢查檢測記錄");
+    //     }
+    //   } else {
+    //     router.push("/usageHistory");
+    //   }
+    // };
+
+    const goNext = () => {
+      router.push("/usageHistory");
+    };
+
+    const handleHRVCheck = () => {
+      store.showHRVAlert = true; // 顯示 HRVAlert
+    };
+
+    const handleHRVCompleted = () => {
+      store.showHRVAlert = false; // 隱藏 HRVAlert
+    };
+
+    const localData = localStorage.getItem("userData");
+    const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
+
+    if (!MID || !Token || !MAID || !Mobile) {
+      router.push("/");
+      return;
+    }
+
+    const getStart = async () => {
+      try {
+        loading.value = true;
+        const response = await axios.post(
+          "https://23700999.com:8081/HMA/API_UseStart_Data.jsp",
+          {
+            MID: MID,
+            Token: Token,
+            MAID: MAID,
+            Mobile: Mobile,
+          }
+        );
+
+        if (response.status === 200) {
+          const records = response.data?.UseRecord || [];
+          const hrvRecords = response.data?.HRV2Record || [];
+
+          // 過濾出與產品名稱匹配的使用與檢測紀錄
+          useData.value = Array.isArray(records)
+            ? records.filter((record) => record.ProductName === productName)
+            : [];
+
+          detectData.value = Array.isArray(hrvRecords)
+            ? hrvRecords.filter((record) => record.ProductName === productName)
+            : [];
+
+          // 計算當日重置時間（凌晨5點）
+          const resetTime = calculateResetTime(new Date());
+
+          // 過濾當日（5點為基準）的檢測紀錄
+          const todayDetectRecords = Array.isArray(detectData.value)
+            ? detectData.value.filter((record) => {
+                const checkTime = record?.CheckTime
+                  ? new Date(record.CheckTime.replace(/\//g, "-"))
+                  : null;
+                return checkTime && checkTime >= resetTime; // 檢查是否為當天紀錄
+              })
+            : [];
+
+          // 判斷是否同時存在「治療前」和「治療後」的紀錄
+          const hasBeforeRecord = todayDetectRecords.some(
+            (record) => record?.BcAf === "治療前"
+          );
+          hasBeforeData.value = todayDetectRecords.filter(
+            (record) => record?.BcAf === "治療前"
+          );
+
+          const hasAfterRecord = todayDetectRecords.some(
+            (record) => record?.BcAf === "治療後"
+          );
+
+          // 更新 hasDetectRecord 值
+          hasDetectRecord.value = hasBeforeRecord && hasAfterRecord;
+
+          // 過濾當日的使用記錄（以凌晨5點為基準）
+          todayUseRecord.value = useData.value.filter((record) => {
+            const endTime = record?.EndTime
+              ? new Date(record.EndTime.replace(/\//g, "-"))
+              : null;
+            return endTime && endTime >= resetTime; // 確保有值並且在重置時間後
+          });
+
+          // 假設我們要取最後一筆
+
+          if (useData.value.length > 0) {
+            const lastRecord = useData.value[useData.value.length - 1];
+            // 取得 oriStartTime / oriEndTime (例如 "20250110140914")
+            const oriStart = lastRecord.oriStartTime;
+            const oriEnd = lastRecord.oriEndTime;
+
+            // 用函式計算相差秒數 → 轉成 hh:mm:ss
+            const detectTimeStr = calcOriTimeDiff(oriStart, oriEnd);
+
+            // 設置到 hasDetectTime
+            hasDetectTime.value = detectTimeStr;
+          } else {
+            hasDetectTime.value = "00:00:00";
+          }
+
+          console.log("當日檢測紀錄（治療前）:", hasBeforeRecord);
+          console.log("當日檢測紀錄（治療後）:", hasAfterRecord);
+          console.log("當日使用紀錄:", todayUseRecord.value);
+        }
+      } catch (error) {
+        console.error("Error in getStart:", error);
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    function calcOriTimeDiff(oriStart, oriEnd) {
+      if (!oriStart || !oriEnd) return "00:00:00";
+
+      const start = parseYMDHMS(oriStart); // 例如 "20250110140914"
+      const end = parseYMDHMS(oriEnd);
+      const diff = Math.floor((end - start) / 1000);
+      if (diff <= 0) return "00:00:00";
+
+      const hours = Math.floor(diff / 3600);
+      const minutes = Math.floor((diff % 3600) / 60);
+      const seconds = diff % 60;
+      return [
+        hours.toString().padStart(2, "0"),
+        minutes.toString().padStart(2, "0"),
+        seconds.toString().padStart(2, "0"),
+      ].join(":");
+    }
+
+    function parseYMDHMS(str) {
+      // str = "YYYYMMDDHHmmss" (14碼)
+      if (!str || str.length < 14) return new Date();
+      const yyyy = Number(str.slice(0, 4));
+      const MM = Number(str.slice(4, 6)) - 1; // 月份0-11
+      const dd = Number(str.slice(6, 8));
+      const HH = Number(str.slice(8, 10));
+      const mm = Number(str.slice(10, 12));
+      const ss = Number(str.slice(12, 14));
+      return new Date(yyyy, MM, dd, HH, mm, ss);
+    }
+
+    // 計算當日重置時間（凌晨5點）
+    const calculateResetTime = () => {
+      const now = new Date();
+      const resetTime = new Date(now);
+      resetTime.setHours(5, 0, 0, 0); // 設定當日 5:00 AM 為重置時間
+      if (now < resetTime) {
+        resetTime.setDate(resetTime.getDate() - 1); // 若當前時間小於 5:00 AM，則往前一天
+      }
+      return resetTime;
+    };
+
+    const hasTodayRecord = computed(() => {
+      if (!Array.isArray(detectData.value)) return false;
+
+      const resetTime = calculateResetTime();
+
+      // 過濾當日（5點為基準）的檢測紀錄
+      const todayDetectRecords = detectData.value.filter((record) => {
+        const checkTime = record?.CheckTime
+          ? new Date(record.CheckTime.replace(/\//g, "-"))
+          : null;
+        return checkTime && checkTime >= resetTime; // 確保時間在今日 5:00 AM 之後
+      });
+
+      // 只要當日有檢測紀錄就算 true
+      return todayDetectRecords.length > 0;
+    });
+
+    // 定時每分鐘檢查一次
+    const scheduleNextCheck = () => {
+      const now = new Date();
+      const nextReset = new Date();
+      nextReset.setHours(5, 0, 0, 0);
+      if (now >= nextReset) {
+        nextReset.setDate(nextReset.getDate() + 1);
+      }
+
+      const delay = nextReset - now; // 下次检查的延迟时间
+      setTimeout(() => {
+        // checkResetTime();
+        scheduleNextCheck();
+      }, delay);
+    };
+
+    // 在組件加載時初始化檢查
+    // checkResetTime();
+
+    const updateBeforeDetect = () => {
+      // const resetTime = calculateResetTime(new Date());
+      // const todayDetectRecords = detectData.value.filter((record) => {
+      //   const checkTime = new Date(record.CheckTime.replace(/\//g, "-"));
+      //   return checkTime >= resetTime;
+      // });
+      // hasBeforeDetect.value = todayDetectRecords.some(
+      //   (record) => record.BcAf === "治療前"
+      // );
+    };
+
+    const init = async () => {
+      await getStart();
+      // checkResetTime();
+      updateBeforeDetect();
+    };
+
+    onMounted(() => {
+      init(); // 執行初始化
+    });
+
+    const filteredHRVData = computed(() => {
+      if (!Array.isArray(detectData.value)) return [];
+      return detectData.value.filter((item) => {
+        const itemDate = new Date(item.CheckTime);
+        return (
+          itemDate.getFullYear() === selectedYear.value &&
+          itemDate.getMonth() + 1 === selectedMonth.value
+        );
+      });
+    });
+
+    const filteredUsage = computed(() => {
+      return useData.value.filter((item) => {
+        const itemDate = new Date(item.StartTime);
+        return (
+          itemDate.getFullYear() === selectedYear.value &&
+          itemDate.getMonth() + 1 === selectedMonth.value
+        );
+      });
+    });
+
+    init();
+
+    const handleDetectClick = (item) => {
+      router.push(`/usageHRVResult/${item.UID}`);
+      // if (item.BcAf !== "治療前") {
+
+      // }
+    };
+
+    const handleWatchClick = (item) => {
+      router.push(`/healthData/${item.AID}`);
+    };
+    return {
       selectedYear,
       selectedMonth,
       yearBoxVisible,
@@ -539,26 +746,40 @@ export default {
       toggleMonthBox,
       selectYear,
       selectMonth,
-
-      // 合併後列表
-      filteredIntegration,
-
-      // 方法
-      handleDetectClick,
-      handleWatchClick,
-      handleCountdownComplete,
-      handleHRVCheck,
+      useActive,
+      detectActive,
+      changeUseActive,
+      changeDetectActive,
       goPre,
       goNext,
-
-      // Utils
+      getStart,
+      usageCardState,
+      useData,
       formatTimestamp3,
+      selectedDate,
+      selectDate,
+      productName,
+      loading,
+      startBtnActive,
+      showMessage,
+      detectData,
+      filteredHRVData,
+      filteredUsage,
+      goNextText,
+      handleCountdownComplete,
+      handleHRVCheck,
+      handleHRVCompleted,
+      hasDetectRecord,
+      handleDetectClick,
+      handleWatchClick,
+      todayUseRecord,
+      hasBeforeData,
+      hasDetectTime,
+      hasTodayRecord
     };
   },
 };
 </script>
-
-
 
 <style lang="scss" scoped>
 .usageWrap {
@@ -924,108 +1145,6 @@ export default {
       }
     }
 
-    .integrationGroup{
-      overflow-y: auto;
-      height: calc(100vh - 549px);
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-      @include scrollbarStyle();
-
-      @include respond-to("phone-landscape") {
-        height: calc(100vh - 100px);
-      }
-      .detectItem {
-        width: 100%;
-        margin: 0 auto;
-        opacity: 0;
-        transition: 0.2s ease all;
-        animation: fadeIn2 1s ease forwards;
-        animation-delay: 0s;
-
-        &:hover {
-          box-shadow: 0px 5px 10px -2px #ccc inset;
-          padding: 0 4px;
-        }
-
-        .timeTextGroup {
-          display: flex;
-          flex-direction: column;
-          line-height: 1.35;
-          .timeInfoText {
-            color: $raphael-gray-500;
-            font-size: 16px;
-            letter-spacing: 0.5px;
-          }
-        }
-        @for $i from 1 through 10 {
-          &:nth-child(#{$i}) {
-            animation-delay: $i * 0.07s;
-          }
-        }
-        .detect {
-          text-decoration: none;
-          color: $raphael-black;
-          display: flex;
-          justify-content: space-between;
-          .timeGroup {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            .timeIcon {
-              border-radius: 7px;
-              padding: 6px;
-              border: 1px solid $raphael-green-400;
-            }
-            .time {
-              font-size: 20px;
-              font-style: normal;
-              font-weight: 400;
-              letter-spacing: 0.15px;
-            }
-          }
-          .infoGroup {
-            display: flex;
-            align-items: center;
-            white-space: nowrap;
-            justify-content: end;
-            gap: 0.5rem;
-            h4 {
-              color: $raphael-gray-500;
-              font-size: 1rem;
-              font-style: normal;
-              font-weight: 400;
-              letter-spacing: 0.5px;
-            }
-
-            h5 {
-              color: $raphael-gray-400;
-              font-size: 1rem;
-              font-style: normal;
-              font-weight: 400;
-              letter-spacing: 0.5px;
-              margin-top: 0.25rem;
-              span {
-                color: $raphael-black;
-                font-size: 1.5rem;
-                font-style: normal;
-                font-weight: 700;
-                letter-spacing: 0.12px;
-                margin-right: 0.25rem;
-              }
-            }
-            .redValue {
-              color: $raphael-red-500;
-            }
-            svg {
-              width: 18px;
-            }
-          }
-        }
-      }
-    }
-
     .detectSelectGroup {
       display: flex;
       align-items: center;
@@ -1137,6 +1256,8 @@ export default {
       background-color: $raphael-green-400;
     }
   }
+
+  
 }
 
 @keyframes fadeIn {
