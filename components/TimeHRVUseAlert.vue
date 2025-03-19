@@ -104,6 +104,23 @@ const submitData = () => {
     return;
   }
 
+  // 取得目前時間
+  const now = new Date();
+
+  // 解析使用者選擇的日期與時間
+  const [hour, minute] = startTime.value.split(":").map(Number);
+  const selectedDate = new Date(localDate.value);
+  selectedDate.setHours(hour, minute, 0);
+
+  // **判斷使用者選擇的時間是否在未來**
+  if (selectedDate > now) {
+    alert("開始時間不能超過當前時間，請重新選擇！");
+    return;
+  }
+
+  // 確保結束時間不為未來
+  endTime.value = startTime.value;
+
   // 回傳給父元件
   emit("submit", {
     date: localDate.value,
@@ -189,14 +206,13 @@ const submitData = () => {
   margin-left: 0.25rem;
   color: var(--shade-gray-400, #b3b3b3);
   transition: color 0.3s ease-in-out;
-  display: block; 
+  display: block;
 }
 
 /* 當有選擇時間後，變色 */
 .HRVUseTimeGroup span.selected {
   color: var(--brand-green-400, #010101);
-  letter-spacing:.5px;
-
+  letter-spacing: 0.5px;
 }
 
 .HRVUseTimeGroup img {
