@@ -45,7 +45,7 @@
     <!-- 動態結束時間顯示 -->
     <!-- 當 date 與 endTime 都有值才顯示 -->
     <h6 class="timeHRVUseAlertSubHint" v-if="localDate && endTime">
-      ※ 結束時間為：{{ localDate }} {{ endTime }}
+      ※ 您選擇的開始時間：{{ localDate }} {{ endTime }}
     </h6>
   </div>
 </template>
