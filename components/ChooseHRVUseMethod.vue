@@ -1,37 +1,84 @@
 <template>
-    <div class="cover"></div>
-    <div class="chooseHRVUseMethod">
-      <h6>請選擇</h6>
-      <div class="hrvMethodGroup">
-        <div class="hrvMethod" @click="selectMethod('before')">
-          <img src="../assets/imgs/hrvUsageResult/hrvBefore.png" alt="" />
-          <h3>穿衣前檢測</h3>
-        </div>
-        <div class="hrvMethod" @click="selectMethod('after')">
-          <img src="../assets/imgs/hrvUsageResult/hrvAfter.png" alt="" />
-          <h3>穿衣後檢測</h3>
-          <small>補測</small>
+  <div class="cover"></div>
+
+  <transition name="fade">
+    <div v-if="!loading">
+    
+      <RaphaelLoading v-if="loading" />
+      <div class="chooseHRVUseMethod">
+        <h6>請選擇</h6>
+        <div class="hrvMethodGroup">
+          <div class="hrvMethod" @click="selectMethod('before')">
+            <img src="../assets/imgs/hrvUsageResult/hrvBefore.png" alt="" />
+            <h3>穿衣前檢測</h3>
+          </div>
+          <div class="hrvMethod" @click="selectMethod('after')">
+            <img src="../assets/imgs/hrvUsageResult/hrvAfter.png" alt="" />
+            <h3>穿衣後檢測</h3>
+            <small>補測</small>
+          </div>
         </div>
       </div>
     </div>
-  </template>
+  </transition>
+</template>
+
   
   <script setup>
-  import { defineEmits } from "vue";
+  import { ref, onMounted, defineEmits } from "vue";
+  import RaphaelLoading from "@/components/RaphaelLoading.vue";
   
   const emit = defineEmits(["selectHRVMethod"]);
+  const loading = ref(true); // 預設為 true，先顯示 loading
+  
+  // 監聽圖片載入
+  const checkImagesLoaded = () => {
+    const images = document.querySelectorAll(".chooseHRVUseMethod img");
+    let loadedCount = 0;
+  
+    images.forEach((img) => {
+      if (img.complete) {
+        loadedCount++;
+      } else {
+        img.onload = () => {
+          loadedCount++;
+          if (loadedCount === images.length) {
+            loading.value = false; // 所有圖片載入完畢，隱藏 loading
+          }
+        };
+        img.onerror = () => {
+          console.warn(`圖片載入失敗: ${img.src}`);
+          loadedCount++;
+          if (loadedCount === images.length) {
+            loading.value = false;
+          }
+        };
+      }
+    });
+  
+    // 如果所有圖片都已經載入完，直接隱藏 loading
+    if (loadedCount === images.length) {
+      loading.value = false;
+    }
+  };
+  
+  // **確保組件掛載後開始檢測圖片載入狀態**
+  onMounted(() => {
+    checkImagesLoaded();
+  });
   
   const selectMethod = (method) => {
     emit("selectHRVMethod", method);
   };
   </script>
   
+  
 
 <style scoped>
 .cover {
   background: rgba(217, 217, 217, 0.5);
   backdrop-filter: blur(2.5px);
-  z-index: 98;
+  z-index: 111;
 }
 .chooseHRVUseMethod {
   border-radius: 12px;
@@ -39,7 +86,7 @@
   box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
   padding: 14px 12px;
   position: fixed;
-  z-index: 99;
+  z-index: 120;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -90,5 +137,12 @@
     color:#fff;
     letter-spacing: 1px;
     font-weight: bold;
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.15s ease-in-out;
+}
+
+.fade-enter-from, .fade-leave-to {
+  opacity: 0.1;
 }
 </style>

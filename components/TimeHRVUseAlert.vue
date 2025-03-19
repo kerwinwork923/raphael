@@ -142,6 +142,8 @@ const submitData = () => {
   top: 50%;
   transform: translate(-50%, -50%);
   width: 90%;
+  min-width:375px;
+  max-width:100%;
   text-align: center;
 }
 
@@ -199,6 +201,8 @@ const submitData = () => {
   align-items: center;
   cursor: pointer;
   margin-bottom: 12px;
+
+
 }
 
 .HRVUseTimeGroup span {
