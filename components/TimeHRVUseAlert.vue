@@ -176,7 +176,8 @@ const submitData = () => {
   position: relative;
   padding: 8px 10px;
   border-bottom: 1px solid #b3b3b3;
-
+  width: 100%; /* 確保全區塊可點 */
+  min-height: 44px; /* 提高可點擊範圍 */
   display: flex;
   align-items: center;
   cursor: pointer;
@@ -188,6 +189,7 @@ const submitData = () => {
   margin-left: 0.25rem;
   color: var(--shade-gray-400, #b3b3b3);
   transition: color 0.3s ease-in-out;
+  display: block; 
 }
 
 /* 當有選擇時間後，變色 */
