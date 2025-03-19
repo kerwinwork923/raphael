@@ -1,4 +1,16 @@
 <template>
+  <ChooseHRVUseMethod
+    v-if="chooseHRVUseMethodShow"
+    @selectHRVMethod="handleHRVMethod"
+  />
+
+  <TimeHRVUseAlert
+    v-if="timeHRVUseAlertShow"
+    v-model:startTime="selectedTime"
+    v-model:localDate="selectedDate"
+    @submit="onTimeAlertSubmit"
+  />
+
   <div class="progress-container">
     <!-- ====== 計時圈 ====== -->
     <div class="progress-border" :style="{ background: progressGradient }">
@@ -32,16 +44,16 @@
       <!-- 否則顯示【重新檢測】或【開始/結束/使用後檢測】 -->
       <template v-else>
         <!-- 重新檢測 (RUNNING 狀態才顯示) -->
-        <button
+        <!-- <button
           v-if="currentDetectionState === DetectionState.RUNNING"
           style="background-color: #74bc1f"
           @click="confirmRestart"
         >
-          重新穿衣
-        </button>
+          重新紀錄
+        </button> -->
 
         <!-- 根據 currentDetectionState 切換開始/結束/使用後檢測等按鈕文字 -->
-        <button :style="buttonStyle " @click="toggleTimer">
+        <button :style="buttonStyle" @click="toggleTimer">
           {{ buttonText }}
         </button>
       </template>
@@ -79,6 +91,8 @@ const router = useRouter();
 
 const isButtonDisabled = ref(false);
 
+const timeHRVUseAlertShow = ref(false);
+
 // ---------------------------------------------------
 // 1) elapsedTime: 維持顯示「已經過幾秒」
 // 2) startTimestamp: 用來記錄「開始計時當下的毫秒數」
@@ -99,9 +113,9 @@ const currentDetectionState = ref(DetectionState.BEFORE);
 const buttonText = computed(() => {
   switch (currentDetectionState.value) {
     case DetectionState.BEFORE:
-      return "開始穿衣";
+      return "開始紀錄";
     case DetectionState.RUNNING:
-      return "結束穿衣";
+      return "結束紀錄";
     case DetectionState.AFTER:
       return "HRV檢測(使用後)";
     default:
@@ -136,11 +150,14 @@ const confirmRestart = () => {
 const UID = ref(null);
 const BID = ref(null);
 import { useCommon } from "../stores/common";
+import { uid } from "chart.js/helpers";
 const store = useCommon();
 
 const isExpired = ref(null);
 const showTimePicker = ref(false);
 const selectedEndTime = ref(null);
+
+const chooseHRVUseMethodShow = ref(false);
 
 // 按鈕樣式
 const buttonStyle = computed(() => {
@@ -200,7 +217,7 @@ const startTimer = () => {
 };
 
 // ---------------------- stopTimer ----------------------
-const stopTimer = async () => {
+const stopTimer = async (goDetectHRVAfter) => {
   console.log("⏹ 停止計時器，準備檢查是否可以結束");
 
   // **🔹 確保計時器停止**
@@ -237,7 +254,9 @@ const stopTimer = async () => {
     console.log("✅ 計時已結束，API 調用成功");
 
     // **🔹 進入使用後檢測邏輯**
-    detectHRVAfter(UID.value);
+    if (goDetectHRVAfter != false) {
+      detectHRVAfter(UID.value);
+    }
   } catch (error) {
     console.error("❌ 結束 API 調用失敗：", error);
   }
@@ -271,7 +290,10 @@ const toggleTimer = async () => {
         if (!UID.value) {
           const response = await useStartAPI();
           if (response?.UID) {
-            detectHRVBefore(response.UID);
+            // detectHRVBefore(response.UID);
+
+            chooseHRVUseMethodShow.value = true;
+
             startTimestamp.value = Date.now(); // ⬅️ 確保 `startTimestamp` 被設置
             startTimer();
           } else {
@@ -497,7 +519,10 @@ const API_HRV2_UID_Flag_Info = async (Flag, UIDVal) => {
       if (Flag === "1") {
         if (isExit === "N") {
           if (data.BeforeHRVAbandon !== "Y") {
-            detectHRVBefore(UIDVal);
+            chooseHRVUseMethodShow.value = true;
+            handleHRVMethod();
+
+            // detectHRVBefore(UIDVal);
           }
         }
       }
@@ -684,6 +709,81 @@ function doReset() {
   console.log("已重置計時與狀態");
 }
 
+const handleHRVMethod = async (method) => {
+  if (method === "before") {
+    detectHRVBefore(UID.value);
+  } else if (method === "after") {
+  
+
+    // 確認 UID 是否存在
+    if (!UID.value) {
+      console.error("❌ UID 不存在，無法進行結束邏輯");
+      return;
+    }
+
+    // 呼叫原本的 stopTimer()，結束計時並執行使用後檢測
+    await stopTimer(false);
+    chooseHRVUseMethodShow.value = false;
+    timeHRVUseAlertShow.value = true;
+  }
+};
+// ----------- 關鍵：當子層按「送出」後，先改開始時間，再進行後測 -----------
+const onTimeAlertSubmit = async ({ date, startTime, endTime }) => {
+  try {
+    // 1) 將日期與時間組合成「yyyyMMddHHmmss」格式
+    //    這裡你可以改成你想要的處理方式
+    const fullStartDateTime = new Date(`${date} ${startTime}`);
+    const y = fullStartDateTime.getFullYear();
+    const M = String(fullStartDateTime.getMonth() + 1).padStart(2, "0");
+    const d = String(fullStartDateTime.getDate()).padStart(2, "0");
+    const hh = String(fullStartDateTime.getHours()).padStart(2, "0");
+    const mm = String(fullStartDateTime.getMinutes()).padStart(2, "0");
+    const ss = String(fullStartDateTime.getSeconds()).padStart(2, "0");
+    const formattedStartTime = `${y}${M}${d}${hh}${mm}${ss}`;
+
+    console.log("欲設定的開始時間:", formattedStartTime);
+
+    // 2) 呼叫 API_UIDStartEndTime.jsp，更新開始時間
+    await updateStartTimeAPI(formattedStartTime);
+
+    // 3) 更新成功後，就可以關掉這個彈窗，並進行後測
+    timeHRVUseAlertShow.value = false;
+
+    // 4) 跳轉到 HRV 後測邏輯
+    detectHRVAfter(UID.value);
+  } catch (err) {
+    console.error("更新開始時間失敗：", err);
+  }
+};
+
+// ----------- 封裝呼叫 API_UIDStartEndTime.jsp -----------
+const updateStartTimeAPI = async (formattedStartTime) => {
+  // 注意：此處範例只示意要傳什麼參數給後端，你可依實際需求調整
+  const payload = {
+    MID,
+    Token,
+    MAID,
+    Mobile,
+    UID: UID.value,
+    StartTime: formattedStartTime,
+  };
+  try {
+    const { data } = await axios.post(
+      "https://23700999.com:8081/HMA/API_UIDStartEndTime.jsp",
+      payload
+    );
+    // 假設後端回傳 { Result: 'OK', ... } 就代表成功
+    if (data?.Result === "OK") {
+      console.log("開始時間更新成功：", data);
+    } else {
+      throw new Error(JSON.stringify(data));
+    }
+  } catch (err) {
+    console.error("API_UIDStartEndTime 呼叫失敗", err);
+    throw err;
+  }
+};
+
 // ---------------------- onMounted ----------------------
 onMounted(async () => {
   BID.value = null;
@@ -757,7 +857,7 @@ onMounted(async () => {
         console.warn("⚠️ StartTime 不存在，計時器將從 0 開始");
       }
     } else {
-      console.warn("❌ 無法獲取使用者資料，檢查 API_UIDInfo_Search12()");
+      console.warn("❌ 無法獲取使用者資料，檢查 API_ UIDInfo_Search12()");
 
       // 🔍 **當 `NoData` 時，執行額外檢查**
       const search12Response = await API_UIDInfo_Search12();
@@ -822,7 +922,6 @@ onMounted(async () => {
 .progress-container .delay-message {
   color: #ec4f4f;
   text-align: justify;
-
   font-size: 16px;
   font-style: normal;
   font-weight: 400;
@@ -932,5 +1031,6 @@ button:disabled {
   gap: 8px;
   align-items: center;
   justify-content: center;
+  letter-spacing: 0.15px;
 }
 </style>

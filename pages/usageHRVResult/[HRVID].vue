@@ -27,15 +27,18 @@
         <div class="resultHint"></div>
       </div>
       <div class="hintContentGroup">
+        <!-- 開始時間 -->
         <div class="hintContent">
           <div class="hintContentIcon">
             <img src="../../assets/imgs/hrvUsageResult/play.svg" alt="" />
           </div>
           <div class="hintText">
             <h5>開始時間</h5>
-            {{ formatTime(startTime) }}
+            {{ formatTime(startTime) || "-" }}
           </div>
         </div>
+
+        <!-- (使用前)HRV檢測 -->
         <div class="hintContent">
           <div class="hintContentIcon">
             <img
@@ -45,18 +48,22 @@
           </div>
           <div class="hintText">
             <h5>(使用前)HRV檢測</h5>
-            {{ formatTime(beforeHRVTime) }}
+            {{ beforeHRVTime || "-" }}
           </div>
         </div>
+
+        <!-- 結束時間 -->
         <div class="hintContent">
           <div class="hintContentIcon">
             <img src="../../assets/imgs/hrvUsageResult/stop.svg" alt="" />
           </div>
           <div class="hintText">
             <h5>結束時間</h5>
-            {{ formatTime(endTime) }}
+            {{ formatTime(endTime) || "-" }}
           </div>
         </div>
+
+        <!-- (使用後)HRV檢測 -->
         <div class="hintContent">
           <div class="hintContentIcon">
             <img
@@ -66,7 +73,7 @@
           </div>
           <div class="hintText">
             <h5>(使用後)HRV檢測</h5>
-            {{ formatTime(afterHRVTime) }}
+            {{ afterHRVTime || "-" }}
           </div>
         </div>
       </div>
@@ -86,7 +93,6 @@
           <div class="BA">
             <div class="subTitle">使用前</div>
             <div class="value">
-              <!-- 若 bioage 存在才顯示區間，否則顯示 '-' -->
               {{
                 HRVBeforeData?.bioage != null
                   ? `${HRVBeforeData.bioage - 5}~${HRVBeforeData.bioage}`
@@ -95,6 +101,7 @@
             </div>
             <div class="unit">years old</div>
           </div>
+          <!-- 箭頭 -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="17"
@@ -103,7 +110,7 @@
             fill="none"
           >
             <path
-              d="M16.8536 4.35355C17.0488 4.15829 17.0488 3.84171 16.8536 3.64645L13.6716 0.464466C13.4763 0.269204 13.1597 0.269204 12.9645 0.464466C12.7692 0.659728 12.7692 0.976311 12.9645 1.17157L15.7929 4L12.9645 6.82843C12.7692 7.02369 12.7692 7.34027 12.9645 7.53553C13.1597 7.7308 13.4763 7.7308 13.6716 7.53553L16.8536 4.35355ZM0.5 4.5H16.5V3.5H0.5V4.5Z"
+              d="M16.8536 4.35355C17.0488 4.15829 17.0488 3.84171 16.8536 3.64645L13.6716 0.464466C13.4763 0.269204 13.1597 0.269204 12.9645 0.464466C12.7692 0.659728 12.7692 0.976311 12.9645 1.17157L15.7929 4 12.9645 6.82843C12.7692 7.02369 12.7692 7.34027 12.9645 7.53553C13.1597 7.7308 13.4763 7.7308 13.6716 7.53553L16.8536 4.35355ZM0.5 4.5H16.5V3.5H0.5V4.5Z"
               fill="#666666"
             />
           </svg>
@@ -139,6 +146,7 @@
             </div>
             <div class="unit">ms</div>
           </div>
+          <!-- 箭頭 -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="17"
@@ -147,7 +155,7 @@
             fill="none"
           >
             <path
-              d="M16.8536 4.35355C17.0488 4.15829 17.0488 3.84171 16.8536 3.64645L13.6716 0.464466C13.4763 0.269204 13.1597 0.269204 12.9645 0.464466C12.7692 0.659728 12.7692 0.976311 12.9645 1.17157L15.7929 4L12.9645 6.82843C12.7692 7.02369 12.7692 7.34027 12.9645 7.53553C13.1597 7.7308 13.4763 7.7308 13.6716 7.53553L16.8536 4.35355ZM0.5 4.5H16.5V3.5H0.5V4.5Z"
+              d="M16.8536 4.35355C17.0488 4.15829 17.0488 3.84171 16.8536 3.64645L13.6716 0.464466C13.4763 0.269204 13.1597 0.269204 12.9645 0.464466C12.7692 0.659728 12.7692 0.976311 12.9645 1.17157L15.7929 4 12.9645 6.82843C12.7692 7.02369 12.7692 7.34027 12.9645 7.53553C13.1597 7.7308 13.4763 7.7308 13.6716 7.53553L16.8536 4.35355ZM0.5 4.5H16.5V3.5H0.5V4.5Z"
               fill="#666666"
             />
           </svg>
@@ -179,6 +187,7 @@
             </div>
             <div class="unit">bpm</div>
           </div>
+          <!-- 箭頭 -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="17"
@@ -187,7 +196,7 @@
             fill="none"
           >
             <path
-              d="M16.8536 4.35355C17.0488 4.15829 17.0488 3.84171 16.8536 3.64645L13.6716 0.464466C13.4763 0.269204 13.1597 0.269204 12.9645 0.464466C12.7692 0.659728 12.7692 0.976311 12.9645 1.17157L15.7929 4L12.9645 6.82843C12.7692 7.02369 12.7692 7.34027 12.9645 7.53553C13.1597 7.7308 13.4763 7.7308 13.6716 7.53553L16.8536 4.35355ZM0.5 4.5H16.5V3.5H0.5V4.5Z"
+              d="M16.8536 4.35355C17.0488 4.15829 17.0488 3.84171 16.8536 3.64645L13.6716 0.464466C13.4763 0.269204 13.1597 0.269204 12.9645 0.464466C12.7692 0.659728 12.7692 0.976311 12.9645 1.17157L15.7929 4 12.9645 6.82843C12.7692 7.02369 12.7692 7.34027 12.9645 7.53553C13.1597 7.7308 13.4763 7.7308 13.6716 7.53553L16.8536 4.35355ZM0.5 4.5H16.5V3.5H0.5V4.5Z"
               fill="#666666"
             />
           </svg>
@@ -219,6 +228,7 @@
             </div>
             <div class="unit">mmHg</div>
           </div>
+          <!-- 箭頭 -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="17"
@@ -227,7 +237,7 @@
             fill="none"
           >
             <path
-              d="M16.8536 4.35355C17.0488 4.15829 17.0488 3.84171 16.8536 3.64645L13.6716 0.464466C13.4763 0.269204 13.1597 0.269204 12.9645 0.464466C12.7692 0.659728 12.7692 0.976311 12.9645 1.17157L15.7929 4L12.9645 6.82843C12.7692 7.02369 12.7692 7.34027 12.9645 7.53553C13.1597 7.7308 13.4763 7.7308 13.6716 7.53553L16.8536 4.35355ZM0.5 4.5H16.5V3.5H0.5V4.5Z"
+              d="M16.8536 4.35355C17.0488 4.15829 17.0488 3.84171 16.8536 3.64645L13.6716 0.464466C13.4763 0.269204 13.1597 0.269204 12.9645 0.464466C12.7692 0.659728 12.7692 0.976311 12.9645 1.17157L15.7929 4 12.9645 6.82843C12.7692 7.02369 12.7692 7.34027 12.9645 7.53553C13.1597 7.7308 13.4763 7.7308 13.6716 7.53553L16.8536 4.35355ZM0.5 4.5H16.5V3.5H0.5V4.5Z"
               fill="#666666"
             />
           </svg>
@@ -260,6 +270,7 @@
             </div>
             <div class="unit">SpO2%</div>
           </div>
+          <!-- 箭頭 -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="17"
@@ -268,7 +279,7 @@
             fill="none"
           >
             <path
-              d="M16.8536 4.35355C17.0488 4.15829 17.0488 3.84171 16.8536 3.64645L13.6716 0.464466C13.4763 0.269204 13.1597 0.269204 12.9645 0.464466C12.7692 0.659728 12.7692 0.976311 12.9645 1.17157L15.7929 4L12.9645 6.82843C12.7692 7.02369 12.7692 7.34027 12.9645 7.53553C13.1597 7.7308 13.4763 7.7308 13.6716 7.53553L16.8536 4.35355ZM0.5 4.5H16.5V3.5H0.5V4.5Z"
+              d="M16.8536 4.35355C17.0488 4.15829 17.0488 3.84171 16.8536 3.64645L13.6716 0.464466C13.4763 0.269204 13.1597 0.269204 12.9645 0.464466C12.7692 0.659728 12.7692 0.976311 12.9645 1.17157L15.7929 4 12.9645 6.82843C12.7692 7.02369 12.7692 7.34027 12.9645 7.53553C13.1597 7.7308 13.4763 7.7308 13.6716 7.53553L16.8536 4.35355ZM0.5 4.5H16.5V3.5H0.5V4.5Z"
               fill="#666666"
             />
           </svg>
@@ -296,6 +307,7 @@
             </div>
             <div class="unit">bpm</div>
           </div>
+          <!-- 箭頭 -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="17"
@@ -304,7 +316,7 @@
             fill="none"
           >
             <path
-              d="M16.8536 4.35355C17.0488 4.15829 17.0488 3.84171 16.8536 3.64645L13.6716 0.464466C13.4763 0.269204 13.1597 0.269204 12.9645 0.464466C12.7692 0.659728 12.7692 0.976311 12.9645 1.17157L15.7929 4L12.9645 6.82843C12.7692 7.02369 12.7692 7.34027 12.9645 7.53553C13.1597 7.7308 13.4763 7.7308 13.6716 7.53553L16.8536 4.35355ZM0.5 4.5H16.5V3.5H0.5V4.5Z"
+              d="M16.8536 4.35355C17.0488 4.15829 17.0488 3.84171 16.8536 3.64645L13.6716 0.464466C13.4763 0.269204 13.1597 0.269204 12.9645 0.464466C12.7692 0.659728 12.7692 0.976311 12.9645 1.17157L15.7929 4 12.9645 6.82843C12.7692 7.02369 12.7692 7.34027 12.9645 7.53553C13.1597 7.7308 13.4763 7.7308 13.6716 7.53553L16.8536 4.35355ZM0.5 4.5H16.5V3.5H0.5V4.5Z"
               fill="#666666"
             />
           </svg>
@@ -330,11 +342,11 @@
             <div class="value">
               {{ HRVBeforeData?.stress ?? "-" }}
             </div>
-
             <div class="pressureLevel">
               {{ getPressureLevel(HRVBeforeData?.stress) }}
             </div>
           </div>
+          <!-- 箭頭 -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="17"
@@ -343,7 +355,7 @@
             fill="none"
           >
             <path
-              d="M16.8536 4.35355C17.0488 4.15829 17.0488 3.84171 16.8536 3.64645L13.6716 0.464466C13.4763 0.269204 13.1597 0.269204 12.9645 0.464466C12.7692 0.659728 12.7692 0.976311 12.9645 1.17157L15.7929 4L12.9645 6.82843C12.7692 7.02369 12.7692 7.34027 12.9645 7.53553C13.1597 7.7308 13.4763 7.7308 13.6716 7.53553L16.8536 4.35355ZM0.5 4.5H16.5V3.5H0.5V4.5Z"
+              d="M16.8536 4.35355C17.0488 4.15829 17.0488 3.84171 16.8536 3.64645L13.6716 0.464466C13.4763 0.269204 13.1597 0.269204 12.9645 0.464466C12.7692 0.659728 12.7692 0.976311 12.9645 1.17157L15.7929 4 12.9645 6.82843C12.7692 7.02369 12.7692 7.34027 12.9645 7.53553C13.1597 7.7308 13.4763 7.7308 13.6716 7.53553L16.8536 4.35355ZM0.5 4.5H16.5V3.5H0.5V4.5Z"
               fill="#666666"
             />
           </svg>
@@ -352,7 +364,6 @@
             <div class="value afterValue">
               {{ HRVAfterData?.stress ?? "-" }}
             </div>
-
             <div class="pressureLevel">
               {{ getPressureLevel(HRVAfterData?.stress) }}
             </div>
@@ -374,7 +385,7 @@ import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import ResultChart from "~/components/ResultChart.vue";
 
-/** 解析 YYYYMMDDHHmmss 為 Date */
+/** 解析 YYYYMMDDHHmmss => Date */
 function parseYMDHMS(str) {
   if (!str || str.length < 14) return null;
   const yyyy = Number(str.slice(0, 4));
@@ -385,14 +396,14 @@ function parseYMDHMS(str) {
   return new Date(yyyy, MM, dd, HH, mm);
 }
 
-/** 將 Date 轉成 YYYY/M/D HH:mm (月份、日期不補零) */
+/** 將 Date => 'YYYY/M/D HH:mm' (月份/日期不補零, 時分補零) */
 function formatMDHM(dateObj) {
   if (!dateObj || isNaN(dateObj.getTime())) return "-";
   const YYYY = dateObj.getFullYear();
-  const M = dateObj.getMonth() + 1; // 不補零
-  const D = dateObj.getDate(); // 不補零
-  const HH = String(dateObj.getHours()).padStart(2, "0"); // 補零
-  const mm = String(dateObj.getMinutes()).padStart(2, "0"); // 補零
+  const M = dateObj.getMonth() + 1;
+  const D = dateObj.getDate();
+  const HH = String(dateObj.getHours()).padStart(2, "0");
+  const mm = String(dateObj.getMinutes()).padStart(2, "0");
   return `${YYYY}/${M}/${D} ${HH}:${mm}`;
 }
 
@@ -404,28 +415,34 @@ export default {
   setup() {
     const router = useRouter();
     const route = useRoute();
-    const productName = ref("")
-    // 時間
-    const startTime = ref(""); // 開始時間 (API_UIDInfo)
-    const endTime = ref(""); // 結束時間 (API_UIDInfo)
-    const beforeHRVTime = ref(""); // (使用前)HRV檢測時間
-    const afterHRVTime = ref(""); // (使用後)HRV檢測時間
+
+    // (API_UIDInfo.jsp) 取得開始/結束時間
+    const startTime = ref("");
+    const endTime = ref("");
+
+    // (API_HRV2UseAf_Compare) 取得 (使用前)HRV & (使用後)HRV
+    const beforeHRVTime = ref("");
+    const afterHRVTime = ref("");
     const totalUsedMin = ref(0);
 
     // 健康數據
-    const HRVBeforeData = ref(null); // 使用前 (BcUse)
-    const HRVAfterData = ref(null); // 使用後 (AfUse)
+    const HRVBeforeData = ref(null);
+    const HRVAfterData = ref(null);
 
     // 生理年齡圖表
     const listBioage = ref([]);
 
+    // 產品名稱 (用於返回按鈕)
+    const productName = ref("");
+
+    // 路由參數 UID
+    const UID = route.params.HRVID;
+
+    // 取出 localStorage
     const localData = localStorage.getItem("userData");
     const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
 
-    // 路由參數 (UID)
-    const UID = route.params.HRVID;
-
-    // 取得 API_UIDInfo.jsp
+    // 1. 先 call API_UIDInfo => 拿到 StartTime & EndTime
     async function fetchUIDInfo() {
       try {
         const resp = await fetch(
@@ -433,44 +450,22 @@ export default {
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              MID,
-              Token,
-              MAID,
-              Mobile,
-              UID,
-            }),
+            body: JSON.stringify({ MID, Token, MAID, Mobile, UID }),
           }
         );
         const data = await resp.json();
         if (data.Result === "OK") {
-          // 串接開始/結束時間
           startTime.value = data.StartTime;
           endTime.value = data.EndTime;
-
-          // 預設將 data.CheckTime 當作 (使用前)HRV檢測時間
-          beforeHRVTime.value = data.CheckTime || "";
-
-          // 計算總使用分鐘
-          totalUsedMin.value = calcUsedMin(startTime.value, endTime.value);
-
-          // 獲得產品名稱
-          productName.value = data.ProductName
+          totalUsedMin.value = calcUsedMin(data.StartTime, data.EndTime);
+          productName.value = data.ProductName || "";
         }
       } catch (error) {
         console.error("fetchUIDInfo error:", error);
       }
     }
 
-    // 計算 (EndTime - StartTime) / 60000
-    function calcUsedMin(s, e) {
-      const startDate = parseYMDHMS(s);
-      const endDate = parseYMDHMS(e);
-      if (!startDate || !endDate || endDate < startDate) return 0;
-      return Math.round((endDate - startDate) / 60000);
-    }
-
-    // 取得 API_HRV2UseAf_Compare.jsp
+    // 2. 再 call API_HRV2UseAf_Compare => 拿 (使用前/後)HRV 時間 + 健康數據
     async function fetchHRVCompare() {
       try {
         const resp = await fetch(
@@ -478,25 +473,20 @@ export default {
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              MID,
-              Token,
-              MAID,
-              Mobile,
-              UID,
-            }),
+            body: JSON.stringify({ MID, Token, MAID, Mobile, UID }),
           }
         );
         const data = await resp.json();
         if (data.Result === "OK") {
-          // 使用前 (BcUse) / 使用後 (AfUse)
+          // 使用前 (BcUse) & 使用後 (AfUse)
           HRVBeforeData.value = data.HRV2.BcUse;
           HRVAfterData.value = data.HRV2.AfUse;
 
-          // 另外, afterHRVTime 就用 AfUse.CheckTime
+          // (使用前)/(使用後) 檢測時間
+          beforeHRVTime.value = data.HRV2?.BcUse?.CheckTime || "";
           afterHRVTime.value = data.HRV2?.AfUse?.CheckTime || "";
 
-          // 生理年齡折線圖 data.HRV2.listBioage
+          // 生理年齡圖表
           listBioage.value = data.HRV2.listBioage || [];
         }
       } catch (error) {
@@ -504,27 +494,36 @@ export default {
       }
     }
 
-    // 用於模板顯示的時間字串
-    function formatTime(str) {
-      const dateObj = parseYMDHMS(str);
-      return formatMDHM(dateObj);
+    // 計算 (EndTime - StartTime) => 分鐘
+    function calcUsedMin(s, e) {
+      const sDate = parseYMDHMS(s);
+      const eDate = parseYMDHMS(e);
+      if (!sDate || !eDate || eDate < sDate) return 0;
+      return Math.round((eDate - sDate) / 60000);
     }
 
+    // 顯示用: 'YYYY/M/D HH:mm'
+    function formatTime(str) {
+      const dt = parseYMDHMS(str);
+      return formatMDHM(dt);
+    }
+
+    // 點擊返回 => 帶 productName 回到 usage/xxx
     function goNext() {
-      router.push(`/usage/${productName.value}`); // 返回上一頁
+      router.push(`/usage/${productName.value}`);
+    }
+
+    // 壓力判斷
+    function getPressureLevel(stress) {
+      if (stress === "低") return "low";
+      if (stress === "中") return "middle";
+      if (stress === "高") return "high";
+      return "";
     }
 
     onMounted(async () => {
-      // 同時呼叫
       await Promise.all([fetchUIDInfo(), fetchHRVCompare()]);
     });
-
-    // 壓力等級判斷
-    function getPressureLevel(stress) {
-      if (stress == "低") return "low";
-      else if (stress == "中") return "middle";
-      else if (stress == "高") return "high";
-    }
 
     return {
       startTime,
@@ -532,12 +531,13 @@ export default {
       beforeHRVTime,
       afterHRVTime,
       totalUsedMin,
-
       HRVBeforeData,
       HRVAfterData,
       listBioage,
+      productName,
 
       formatTime,
+      calcUsedMin,
       goNext,
       getPressureLevel,
     };

@@ -81,11 +81,11 @@ let lastTick = 0;
 const buttonText = computed(() => {
   switch (currentState.value) {
     case DetectionState.BEFORE:
-      return "開始穿衣";
+      return "開始紀錄";
     case DetectionState.RUNNING:
-      return "重新穿衣";
+      return "重新紀錄";
     case DetectionState.AFTER:
-      return "結束穿衣";
+      return "結束紀錄";
     default:
       return "未知狀態";
   }

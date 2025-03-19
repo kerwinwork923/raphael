@@ -2,14 +2,16 @@
   <RaphaelLoading v-if="loading" />
   <HRVAlertForUse :showCloseButton="true" />
   <DSPRSelect :showCloseButton="false" />
+
   <div class="usageWrap">
+    <!-- 頁面標題 -->
     <TitleMenu Text="使用紀錄" :link="`/UsageHistory`" />
 
-    <!-- 根據產品類型顯示對應 TimeRing 或卡片 (原程式保留) -->
+    <!-- 根據產品類型顯示對應 TimeRing 或卡片 (保留原程式邏輯) -->
     <TimeRing2
       v-if="productName === '三效深眠衣' || productName === '全效調節衣'"
       :productName="productName"
-      :hasDetectRecord="hasDetectRecord"
+      :hasDetectRecord="false"
       :todayUseRecord="todayUseRecord"
       :hasDetectTime="hasDetectTime"
     />
@@ -17,7 +19,7 @@
       v-if="productName === '居家治療儀'"
       :totalTime="3000"
       :product-name="productName"
-      :hasTodayRecord="hasTodayRecord"
+      :hasTodayRecord="false"
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
     />
@@ -25,12 +27,12 @@
       v-if="productName === '雙效紅光活力衣'"
       :totalTime="5400"
       :product-name="productName"
-      :hasTodayRecord="hasTodayRecord"
+      :hasTodayRecord="false"
       @countdownComplete="handleCountdownComplete"
       @requireHRVCheck="handleHRVCheck"
     />
 
-    <!-- 以下為四種產品的說明卡片，保留原邏輯 -->
+    <!-- 以下為四種產品的說明卡片 (原邏輯) -->
     <div class="usageInfoGroup" v-if="usageCardState === '雙效紅光活力衣'">
       <div class="usageInfoCard">
         <h3>電量提示燈使用說明</h3>
@@ -119,7 +121,7 @@
       </div>
     </div>
 
-    <!-- 年份&月份篩選 -->
+    <!-- 篩選：年份&月份 -->
     <div class="usageRecord">
       <div class="detectSelectGroup">
         <div class="yearSelectGroup">
@@ -156,36 +158,32 @@
         </div>
       </div>
 
-      <!-- integrationGroup: 顯示「檢測紀錄 + 總使用時間」 -->
+      <!-- 顯示「UseRecord」的使用紀錄 (不再依賴 HRV2Record) -->
       <div class="integrationGroup">
         <div
           class="detectItem"
-          v-for="(item, index) in filteredIntegration"
-          :key="index"
+          v-for="(item, idx) in filteredUseList"
+          :key="idx"
         >
           <div class="detect">
             <div class="timeGroup">
-              <div
-                class="timeIcon"
-                @click="handleWatchClick(item)"
-                style="cursor: pointer"
-              >
+              <div class="timeIcon">
                 <img src="../../assets/imgs/detectTime.svg" alt="" />
               </div>
-              <div
-                class="timeTextGroup"
-                @click="handleDetectClick(item)"
-                style="cursor: pointer"
-              >
-                <!-- 檢測時間 CheckTime -->
-                <div class="time">{{ formatTimestamp3(item.CheckTime) }}</div>
-                <!-- 顯示合併後的 totalUsedMin (總共使用 xx 分鐘) -->
+              <div class="timeTextGroup">
+                <!-- 開始&結束時間 -->
+                <div class="time">
+                  {{ formatTimestamp3(item.oriStartTime) }}
+                </div>
+                
+                <!-- 總共使用多久 (分鐘) -->
                 <div class="timeInfoText">
-                  總共使用 {{ item.totalUsedMin }} 分鐘
+                  總共使用 {{ calcUsedMinutes(item) }} 分鐘
                 </div>
               </div>
             </div>
             <div class="infoGroup">
+              <!-- 若需要更多按鈕/事件可自行添加 -->
               <div
                 class="resultText"
                 :style="{ cursor: 'pointer' }"
@@ -212,34 +210,28 @@
         </div>
       </div>
 
-      <!-- 若沒有任何整合資料就顯示「無檢測資料」 -->
-      <div class="notDetectData" v-if="filteredIntegration.length === 0">
+      <!-- 若沒有任何使用紀錄則顯示「無檢測資料」 -->
+      <div class="notDetectData" v-if="filteredUseList.length === 0">
         無檢測資料
       </div>
     </div>
-    <!-- 底部按鈕可自行決定是否保留
-    <div class="usageBtnGroup">
-      <button class="preBtn" @click="goPre">返回產品頁面</button>
-      <button class="nextBtn" @click="goNext">{{ goNextText }}</button>
-    </div>
-    -->
   </div>
 </template>
 
 <script>
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-import RaphaelLoading from "../components/RaphaelLoading";
+
 import TitleMenu from "@/components/TitleMenu.vue";
 import TimeRing from "@/components/TimeRing.vue";
-// 若有其他元件 (TimeRing2 / HRVAlertForUse / DSPRSelect) 也可引入
 import TimeRing2 from "@/components/TimeRing2.vue";
 import DSPRSelect from "@/components/DSPRSelect.vue";
 import HRVAlertForUse from "@/components/HRVAlertForUse.vue";
+import RaphaelLoading from "@/components/RaphaelLoading";
 import { useCommon } from "../stores/common";
 
-/** 將 YYYYMMDDHHmmss 字串轉為 Date */
+/** 解析 YYYYMMDDHHmmss => Date */
 function parseYMDHMS(str) {
   if (!str || str.length < 14) return null;
   const yyyy = Number(str.slice(0, 4));
@@ -251,106 +243,81 @@ function parseYMDHMS(str) {
   return new Date(yyyy, MM, dd, HH, mm, ss);
 }
 
-
+/** 轉成 M/D HH:mm */
 function formatTimestamp3(inputStr) {
   if (!inputStr) return "";
+  // 若包含 "/" 表示已是「YYYY/MM/DD HH:mm」或類似格式 => 原樣顯示
+  if (inputStr.includes("/")) return inputStr;
 
-  let dateObj;
-  
-  // 如果是 YYYY/MM/DD HH:mm 格式，直接 new Date
-  if (inputStr.includes("/")) {
-    dateObj = new Date(inputStr);
-  } 
-  // 如果是 YYYYMMDDHHmmss 格式，解析並轉換
-  else if (inputStr.length === 14) {
-    const yyyy = Number(inputStr.slice(0, 4));
-    const MM = Number(inputStr.slice(4, 6)) - 1; // 月份從 0 開始
-    const dd = Number(inputStr.slice(6, 8));
-    const HH = Number(inputStr.slice(8, 10));
-    const mm = Number(inputStr.slice(10, 12));
-    dateObj = new Date(yyyy, MM, dd, HH, mm);
-  } else {
-    return inputStr; // 如果格式不符，直接回傳原始值
-  }
-
-  if (!dateObj || isNaN(dateObj.getTime())) return inputStr;
-
-  // 轉換成 M/D HH:mm 格式
-  const M = dateObj.getMonth() + 1; // 月份從 0 開始，需要 +1
+  // 否則視為 YYYYMMDDHHmmss => 轉成「M/D HH:mm」
+  if (inputStr.length < 12) return inputStr; // 可能格式不符
+  const yyyy = Number(inputStr.slice(0, 4));
+  const MM = Number(inputStr.slice(4, 6)) - 1;
+  const dd = Number(inputStr.slice(6, 8));
+  const HH = Number(inputStr.slice(8, 10));
+  const mm = Number(inputStr.slice(10, 12));
+  const dateObj = new Date(yyyy, MM, dd, HH, mm);
+  if (isNaN(dateObj.getTime())) return inputStr;
+  const M = dateObj.getMonth() + 1;
   const D = dateObj.getDate();
-  const HH = String(dateObj.getHours()).padStart(2, "0");
-  const mm = String(dateObj.getMinutes()).padStart(2, "0");
-
-  return `${M}/${D} ${HH}:${mm}`;
-}
-
-
-
-/** 計算指定時間為當日重置時間 (凌晨 5 點) */
-function calculateResetTime() {
-  const now = new Date();
-  const resetTime = new Date(now);
-  resetTime.setHours(5, 0, 0, 0);
-  if (now < resetTime) {
-    resetTime.setDate(resetTime.getDate() - 1);
-  }
-  return resetTime;
+  const hStr = String(dateObj.getHours()).padStart(2, "0");
+  const mStr = String(dateObj.getMinutes()).padStart(2, "0");
+  return `${M}/${D} ${hStr}:${mStr}`;
 }
 
 export default {
   name: "UsageHistoryView",
   components: {
-    RaphaelLoading,
     TitleMenu,
     TimeRing,
     TimeRing2,
     DSPRSelect,
     HRVAlertForUse,
+    RaphaelLoading,
   },
   setup() {
     const router = useRouter();
     const store = useCommon();
 
-    // 從路由參數抓取產品名稱
+    // 產品名稱 (路由)
     const productName = decodeURIComponent(
       router.currentRoute.value.params.clothType || ""
     );
-    const validName = ["三效深眠衣", "雙效紅光活力衣", "全效調節衣", "居家治療儀"];
+    const validName = [
+      "三效深眠衣",
+      "雙效紅光活力衣",
+      "全效調節衣",
+      "居家治療儀",
+    ];
     if (!validName.includes(productName)) {
       router.push("/usageHistory");
     }
 
-    // 資料
-    const useData = ref([]);       // 使用紀錄
-    const detectData = ref([]);    // 檢測紀錄 (HRV2Record)
     const loading = ref(false);
-
-    // UI / 狀態
     const usageCardState = ref(productName);
-    const hasDetectRecord = ref(false);
-    const hasBeforeData = ref(false);
-    const hasDetectTime = ref("00:00:00");
-    const todayUseRecord = ref([]);
-    const showMessage = ref(false);
-    const goNextText = ref("返回產品頁面");
 
-    // 時間篩選
+    // 取得後端資料(UseRecord)
+    const useData = ref([]); // 舊: UseRecord
+
+    // UI 狀態(若需要)
+    const hasDetectTime = ref("00:00:00");
+    const todayUseRecord = ref([]); // 當日使用紀錄
+
+    // 篩選: 年/月
     const selectedYear = ref(new Date().getFullYear());
     const selectedMonth = ref(new Date().getMonth() + 1);
     const yearBoxVisible = ref(false);
     const monthBoxVisible = ref(false);
 
-    // 選單
-    const months = Array.from({ length: 12 }, (_, i) => i + 1).reverse();
+    // 從 2024 到今年
     const displayYears = computed(() => {
-      const currentYear = new Date().getFullYear();
-      const startYear = 2024;
-      const years = [];
-      for (let y = startYear; y <= currentYear; y++) {
-        years.push(y);
-      }
-      return years;
+      const nowY = new Date().getFullYear();
+      const arr = [];
+      for (let y = 2024; y <= nowY; y++) arr.push(y);
+      return arr;
     });
+    // 12 ~ 1 月
+    const months = Array.from({ length: 12 }, (_, i) => i + 1).reverse();
 
     function toggleYearBox() {
       yearBoxVisible.value = !yearBoxVisible.value;
@@ -360,205 +327,136 @@ export default {
       monthBoxVisible.value = !monthBoxVisible.value;
       yearBoxVisible.value = false;
     }
-    function selectYear(year) {
-      selectedYear.value = year;
+    function selectYear(y) {
+      selectedYear.value = y;
       yearBoxVisible.value = false;
     }
-    function selectMonth(month) {
-      selectedMonth.value = month;
+    function selectMonth(m) {
+      selectedMonth.value = m;
       monthBoxVisible.value = false;
     }
 
-    // 取得資料：API_UseStart_Data
-    async function getStart() {
+    // 請求 API_UseStart_Data.jsp => 取 UseRecord => 過濾 productName
+    async function getUseRecord() {
       try {
         loading.value = true;
-        // 這裡示範從 localStorage 取 token, MID, MAID ...
-        // 實際使用可依你自己的方式
         const localData = localStorage.getItem("userData");
         if (!localData) {
           router.push("/");
           return;
         }
         const { MID, Token, MAID, Mobile } = JSON.parse(localData);
-
-        // 向後端請求資料
-        const response = await axios.post(
+        const resp = await axios.post(
           "https://23700999.com:8081/HMA/API_UseStart_Data.jsp",
-          {
-            MID,
-            Token,
-            MAID,
-            Mobile,
-          }
+          { MID, Token, MAID, Mobile }
         );
-        if (response.status === 200 && response.data) {
-          // 取出使用 & 檢測紀錄
-          const records = response.data?.UseRecord || [];
-          const hrvRecords = response.data?.HRV2Record || [];
+        if (resp.status === 200 && resp.data?.UseRecord) {
+          const rawList = resp.data.UseRecord;
+          // 過濾同產品
+          const filtered = rawList.filter((r) => r.ProductName === productName);
+          useData.value = filtered;
 
-          // 過濾對應的產品名稱
-          useData.value = records.filter((r) => r.ProductName === productName);
-          detectData.value = hrvRecords.filter(
-            (r) => r.ProductName === productName
-          );
-
-          // 判斷當日 (5am為界) 是否有治療前/後紀錄
-          const resetTime = calculateResetTime();
-          const todayDetectRecords = detectData.value.filter((d) => {
-            const checkTime = d?.CheckTime
-              ? new Date(d.CheckTime.replace(/\//g, "-"))
-              : null;
-            return checkTime && checkTime >= resetTime;
-          });
-          // 檢查是否同時存在 治療前 & 治療後
-          const hasBeforeRecordFlag = todayDetectRecords.some(
-            (r) => r.BcAf === "治療前"
-          );
-          const hasAfterRecordFlag = todayDetectRecords.some(
-            (r) => r.BcAf === "治療後"
-          );
-          hasDetectRecord.value = hasBeforeRecordFlag && hasAfterRecordFlag;
-
-          // 過濾當日的使用紀錄
-          todayUseRecord.value = useData.value.filter((r) => {
-            const et = r?.EndTime
-              ? new Date(r.EndTime.replace(/\//g, "-"))
-              : null;
-            return et && et >= resetTime;
-          });
-
-          // 假設你想顯示「最後一筆使用紀錄」的總時長
-          if (useData.value.length > 0) {
-            const lastRecord = useData.value[useData.value.length - 1];
-            const s = parseYMDHMS(lastRecord.oriStartTime);
-            const e = parseYMDHMS(lastRecord.oriEndTime);
+          // 計算最後一筆使用時長 => hasDetectTime (僅供 UI 顯示)
+          if (filtered.length > 0) {
+            const lastOne = filtered[filtered.length - 1];
+            const s = parseYMDHMS(lastOne.oriStartTime);
+            const e = parseYMDHMS(lastOne.oriEndTime);
             if (s && e && e > s) {
               const diffSec = Math.floor((e - s) / 1000);
               const hh = String(Math.floor(diffSec / 3600)).padStart(2, "0");
-              const mm = String(
-                Math.floor((diffSec % 3600) / 60)
-              ).padStart(2, "0");
+              const mm = String(Math.floor((diffSec % 3600) / 60)).padStart(
+                2,
+                "0"
+              );
               const ss = String(diffSec % 60).padStart(2, "0");
               hasDetectTime.value = `${hh}:${mm}:${ss}`;
             }
           }
+
+          // 當日 (5am 為界) 的使用紀錄
+          const now = new Date();
+          const resetTime = new Date();
+          resetTime.setHours(5, 0, 0, 0);
+          if (now < resetTime) {
+            resetTime.setDate(resetTime.getDate() - 1);
+          }
+          todayUseRecord.value = filtered.filter((r) => {
+            const endDt = new Date(r.EndTime.replace(/\//g, "-"));
+            return endDt >= resetTime;
+          });
         }
-      } catch (err) {
-        console.error("Error in getStart:", err);
+      } catch (error) {
+        console.error("getUseRecord error:", error);
       } finally {
         loading.value = false;
       }
     }
 
-    // 將檢測紀錄 + 使用紀錄 以 UID 做合併，並計算「總使用分鐘」
-    const integrationData = computed(() => {
-      if (!detectData.value.length) return [];
-      return detectData.value.map((det) => {
-        // 找到所有同 UID 的使用紀錄
-        const matchedUsage = useData.value.filter(
-          (usage) => usage.UID === det.UID
-        );
-        // 累加總使用時間 (分鐘)
-        let totalMin = 0;
-        matchedUsage.forEach((u) => {
-          const start = parseYMDHMS(u.oriStartTime);
-          const end = parseYMDHMS(u.oriEndTime);
-          if (start && end && end > start) {
-            totalMin += (end - start) / 60000; // 毫秒 -> 分鐘
-          }
-        });
-        return {
-          ...det,
-          totalUsedMin: Math.round(totalMin), // 四捨五入
-        };
-      });
-    });
+    // 計算單筆使用時長(分鐘)
+    function calcUsedMinutes(item) {
+      const start = parseYMDHMS(item.oriStartTime);
+      const end = parseYMDHMS(item.oriEndTime);
+      if (!start || !end || end <= start) return 0;
+      return Math.round((end - start) / 60000);
+    }
 
-    // 根據「年份 / 月份」篩選顯示
-    const filteredIntegration = computed(() => {
-      return integrationData.value.filter((item) => {
-        if (!item.CheckTime) return false;
-        const date = new Date(item.CheckTime.replace(/\//g, "-"));
+    // 篩選當前年/月 => 顯示
+    const filteredUseList = computed(() => {
+      return useData.value.filter((item) => {
+        // 依「開始時間」的年/月 判斷
+        const dt = parseYMDHMS(item.oriStartTime);
+        if (!dt || isNaN(dt.getTime())) return false;
         return (
-          date.getFullYear() === selectedYear.value &&
-          date.getMonth() + 1 === selectedMonth.value
+          dt.getFullYear() === selectedYear.value &&
+          dt.getMonth() + 1 === selectedMonth.value
         );
       });
     });
 
-    // 事件
+    // 事件(留空或自訂)
+    function handleCountdownComplete() {}
+    function handleHRVCheck() {}
+
+    onMounted(() => {
+      getUseRecord();
+    });
+
     function handleDetectClick(item) {
-      // 點擊「分析結果」或時間文字 -> 進入檢測結果頁
+      // 進入檢測結果頁
       router.push(`/usageHRVResult/${item.UID}`);
     }
-    function handleWatchClick(item) {
-      // 點擊圖示 -> 進入健康數據頁
-      router.push(`/healthData/${item.AID}`);
-    }
-    function handleCountdownComplete() {
-      goNextText.value = "返回產品頁面";
-    }
-    function handleHRVCheck() {
-      store.showHRVAlert = true;
-    }
-
-    // 其他按鈕
-    function goPre() {
-      window.history.back();
-    }
-    function goNext() {
-      router.push("/usageHistory");
-    }
-
-    // onMounted 初始化
-    onMounted(() => {
-      getStart();
-    });
 
     return {
-      // 資料 / 狀態
+      loading,
       productName,
       usageCardState,
-      loading,
-      hasDetectRecord,
-      hasBeforeData,
+
+      // for TimeRing2
       hasDetectTime,
       todayUseRecord,
-      showMessage,
-      goNextText,
 
       // 篩選
       selectedYear,
       selectedMonth,
       yearBoxVisible,
       monthBoxVisible,
-      months,
       displayYears,
+      months,
       toggleYearBox,
       toggleMonthBox,
       selectYear,
       selectMonth,
 
-      // 合併後列表
-      filteredIntegration,
-
-      // 方法
-      handleDetectClick,
-      handleWatchClick,
-      handleCountdownComplete,
-      handleHRVCheck,
-      goPre,
-      goNext,
-
-      // Utils
+      // 使用紀錄
+      useData,
+      filteredUseList,
+      calcUsedMinutes,
       formatTimestamp3,
+      handleDetectClick
     };
   },
 };
 </script>
-
-
 
 <style lang="scss" scoped>
 .usageWrap {
@@ -924,7 +822,7 @@ export default {
       }
     }
 
-    .integrationGroup{
+    .integrationGroup {
       overflow-y: auto;
       height: calc(100vh - 549px);
       position: relative;
@@ -936,6 +834,19 @@ export default {
       @include respond-to("phone-landscape") {
         height: calc(100vh - 100px);
       }
+
+      .notDetectData {
+        position: absolute;
+        z-index: 1;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        letter-spacing: 10px;
+        font-size: 1.25rem;
+        white-space: nowrap;
+        color: $raphael-gray-500;
+      }
+
       .detectItem {
         width: 100%;
         margin: 0 auto;
@@ -972,7 +883,7 @@ export default {
           .timeGroup {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 8px;
             .timeIcon {
               border-radius: 7px;
               padding: 6px;
