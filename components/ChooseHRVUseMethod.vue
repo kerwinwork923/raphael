@@ -24,54 +24,59 @@
 </template>
 
   
-  <script setup>
-  import { ref, onMounted, defineEmits } from "vue";
-  import RaphaelLoading from "@/components/RaphaelLoading.vue";
-  
-  const emit = defineEmits(["selectHRVMethod"]);
-  const loading = ref(true); // 預設為 true，先顯示 loading
-  
-  // 監聽圖片載入
-  const checkImagesLoaded = () => {
-    const images = document.querySelectorAll(".chooseHRVUseMethod img");
-    let loadedCount = 0;
-  
-    images.forEach((img) => {
-      if (img.complete) {
+<script setup>
+import { ref, onMounted, defineEmits } from "vue";
+import RaphaelLoading from "@/components/RaphaelLoading.vue";
+
+const emit = defineEmits(["selectHRVMethod"]);
+const loading = ref(true); // 預設為 true，先顯示 loading
+
+// 監聽圖片載入
+const checkImagesLoaded = () => {
+  const images = document.querySelectorAll(".chooseHRVUseMethod img");
+  let loadedCount = 0;
+
+  images.forEach((img) => {
+    if (img.complete) {
+      loadedCount++;
+    } else {
+      img.onload = () => {
         loadedCount++;
-      } else {
-        img.onload = () => {
-          loadedCount++;
-          if (loadedCount === images.length) {
-            loading.value = false; // 所有圖片載入完畢，隱藏 loading
-          }
-        };
-        img.onerror = () => {
-          console.warn(`圖片載入失敗: ${img.src}`);
-          loadedCount++;
-          if (loadedCount === images.length) {
+        if (loadedCount === images.length) {
+          setTimeout(() => {
+            loading.value = false; // 加入延遲，使過渡更順暢
+          }, 300);
+        }
+      };
+      img.onerror = () => {
+        console.warn(`圖片載入失敗: ${img.src}`);
+        loadedCount++;
+        if (loadedCount === images.length) {
+          setTimeout(() => {
             loading.value = false;
-          }
-        };
-      }
-    });
-  
-    // 如果所有圖片都已經載入完，直接隱藏 loading
-    if (loadedCount === images.length) {
-      loading.value = false;
+          }, 300);
+        }
+      };
     }
-  };
-  
-  // **確保組件掛載後開始檢測圖片載入狀態**
-  onMounted(() => {
-    checkImagesLoaded();
   });
-  
-  const selectMethod = (method) => {
-    emit("selectHRVMethod", method);
-  };
-  </script>
-  
+
+  if (loadedCount === images.length) {
+    setTimeout(() => {
+      loading.value = false;
+    }, 300);
+  }
+};
+
+// **確保組件掛載後開始檢測圖片載入狀態**
+onMounted(() => {
+  checkImagesLoaded();
+});
+
+const selectMethod = (method) => {
+  emit("selectHRVMethod", method);
+};
+</script>
+
   
 
 <style scoped>

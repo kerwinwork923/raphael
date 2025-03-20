@@ -7,7 +7,7 @@
         您的產品
       </h3>
       <div class="haveProductWrap">
-        <!-- 單件產品展示 -->
+        <!-- ============== 單件產品展示 ============== -->
         <div class="haveGroup" v-if="purchasedProducts.length === 1">
           <div class="haveIcon">
             <img
@@ -26,16 +26,12 @@
                 alt="robot image"
               />
             </div>
-            <!-- <div class="hasDetectBlock" v-if="countdownTimers[product]">
-              <h5>已完成檢測</h5>
-              <div class="hasDetectTime">{{ countdownTimers[product] }}</div>
-              <h5>後再使用</h5>
-            </div> -->
             <h3 class="productName">{{ purchasedProducts[0] }}</h3>
+            <h6>上次使用 : {{ getLastUsedString(purchasedProducts[0]) }}</h6>
           </div>
         </div>
 
-        <!-- 多件產品展示 -->
+        <!-- ============== 多件產品展示 ============== -->
         <div class="haveGroup2" v-if="purchasedProducts.length > 1">
           <div
             class="haveProduct"
@@ -65,61 +61,113 @@
               />
               <div class="circle"></div>
             </div>
-            <!-- <div class="hasDetectBlock" v-if="countdownTimers[product]">
-              <h5>已完成檢測</h5>
-              <div class="hasDetectTime">{{ countdownTimers[product] }}</div>
-              <h5>後再使用</h5>
-            </div> -->
             <h3 class="productName">{{ product }}</h3>
+            <h6>上次使用 : {{ getLastUsedString(product) }}</h6>
           </div>
         </div>
       </div>
 
-      <!-- 健康方案推薦 -->
-      <h3 class="recommendTitle" v-if="recommendedProducts.length > 0">
+      <!-- ============== 健康方案推薦（若未買滿 4 件，且有推薦資料） ============== -->
+      <h3
+        class="recommendTitle"
+        v-if="purchasedProducts.length < 4 && recommendedProducts.length > 0"
+      >
         健康方案推薦
-      </h3>
-      <div class="recommendWrap" v-if="recommendedProducts.length > 0">
-        <div
-          class="recommendDiv"
-          v-for="(recommendation, index) in recommendedProducts"
-          :key="index"
-        >
-          <div class="imgGroup">
-            <img :src="getImage(recommendation.name)" alt="product image" />
-            <img
-              v-if="shouldShowRobot(recommendation.name)"
-              class="robotImg"
-              src="/assets/imgs/clothRobot.png"
-              alt="robot image"
+
+        <!-- 左右箭頭（只有多筆推薦才顯示） -->
+        <span v-if="recommendedProducts.length > 1">
+          <!-- 左箭頭 -->
+          <svg
+            @click.stop="prevRecommend"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="25"
+            viewBox="0 0 24 25"
+            fill="none"
+          >
+            <path
+              d="M16.011 5.04146L8.70297 12.5385L16.011 20.0355C16.1418 20.1694 16.2151 20.3492 16.2151 20.5365C16.2151 20.7237 16.1418 20.9035 16.011 21.0375C15.9474 21.1023 15.8716 21.1538 15.7879 21.189C15.7042 21.2242 15.6143 21.2423 15.5235 21.2423C15.4327 21.2423 15.3428 21.2242 15.2591 21.189C15.1754 21.1538 15.0995 21.1023 15.036 21.0375L7.25997 13.062C7.12345 12.9219 7.04705 12.734 7.04705 12.5385C7.04705 12.3429 7.12345 12.155 7.25997 12.015L15.0345 4.03946C15.0981 3.97414 15.1741 3.92223 15.2581 3.88678C15.3421 3.85134 15.4323 3.83307 15.5235 3.83307C15.6146 3.83307 15.7049 3.85134 15.7889 3.88678C15.8728 3.92223 15.9489 3.97414 16.0125 4.03946C16.1433 4.17341 16.2166 4.35322 16.2166 4.54046C16.2166 4.7277 16.1433 4.90751 16.0125 5.04146H16.011Z"
+              fill="#1E1E1E"
             />
-            <div class="circle"></div>
-          </div>
-          <h3 class="recommendName">{{ recommendation.name }}</h3>
-          <p>{{ recommendation.slogan }}</p>
-          <div class="priceGroup">
-            <div
-              class="priceItem"
-              v-for="(price, index) in parsePrices(recommendation.price)"
-              :key="index"
-            >
-              <span class="priceValue">{{ price.value }}</span>
-              <span class="pricePeriod">/{{ price.period }}</span>
-            </div>
-          </div>
-          <button class="contactBtn" @click="contactSupport">聯絡客服</button>
-          <div class="featureTitle">產品特色</div>
-          <ul class="featureListGroup">
-            <li
-              v-for="(feature, index) in recommendation.features"
-              :key="index"
-            >
-              {{ feature }}
-            </li>
-          </ul>
+          </svg>
+
+          <!-- 右箭頭 -->
+          <svg
+            @click.stop="nextRecommend"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="25"
+            viewBox="0 0 24 25"
+            fill="none"
+          >
+            <path
+              d="M7.98903 5.04146L15.297 12.5385L7.98903 20.0355C7.85819 20.1694 7.78495 20.3492 7.78495 20.5365C7.78495 20.7237 7.85819 20.9035 7.98903 21.0375C8.05257 21.1023 8.12842 21.1538 8.21213 21.189C8.29584 21.2242 8.38573 21.2423 8.47653 21.2423C8.56733 21.2423 8.65721 21.2242 8.74092 21.189C8.82463 21.1538 8.90048 21.1023 8.96403 21.0375L16.74 13.062C16.8765 12.9219 16.953 12.734 16.953 12.5385C16.953 12.3429 16.8765 12.155 16.74 12.015L8.96553 4.03946C8.90193 3.97414 8.8259 3.92223 8.74191 3.88678C8.65792 3.85134 8.56769 3.83307 8.47653 3.83307C8.38537 3.83307 8.29513 3.85134 8.21114 3.88678C8.12715 3.92223 8.05112 3.97414 7.98753 4.03946C7.85669 4.17341 7.78345 4.35322 7.78345 4.54046C7.78345 4.7277 7.85669 4.90751 7.98753 5.04146H7.98903Z"
+              fill="#1E1E1E"
+            />
+          </svg>
+        </span>
+      </h3>
+
+<!-- 輪播容器：只顯示當前索引的推薦產品 -->
+<div
+  class="recommendWrap"
+  v-if="purchasedProducts.length < 4 && recommendedProducts.length > 0"
+>
+  <transition name="fade" mode="out-in">
+    <div
+      class="recommendDiv"
+      :key="currentRecommendIndex"
+      v-if="recommendedProducts[currentRecommendIndex]"
+    >
+      <!-- 目前顯示的推薦產品 -->
+      <div class="imgGroup">
+        <img
+          :src="getImage(recommendedProducts[currentRecommendIndex].name)"
+          alt="product image"
+        />
+        <img
+          v-if="
+            shouldShowRobot(recommendedProducts[currentRecommendIndex].name)
+          "
+          class="robotImg"
+          src="/assets/imgs/clothRobot.png"
+          alt="robot image"
+        />
+        <div class="circle"></div>
+      </div>
+      <h3 class="recommendName">
+        {{ recommendedProducts[currentRecommendIndex].name }}
+      </h3>
+      <p>{{ recommendedProducts[currentRecommendIndex].slogan }}</p>
+      <div class="priceGroup">
+        <div
+          class="priceItem"
+          v-for="(price, idx) in parsePrices(
+            recommendedProducts[currentRecommendIndex].price
+          )"
+          :key="idx"
+        >
+          <span class="priceValue">{{ price.value }}</span>
+          <span class="pricePeriod">/{{ price.period }}</span>
         </div>
       </div>
+      <button class="contactBtn" @click="contactSupport">聯絡客服</button>
+      <div class="featureTitle">產品特色</div>
+      <ul class="featureListGroup">
+        <li
+          v-for="(feature, idx) in recommendedProducts[currentRecommendIndex].features"
+          :key="idx"
+        >
+          {{ feature }}
+        </li>
+      </ul>
     </div>
+  </transition>
+</div>
+
+    </div>
+
+    <!-- 底部按鈕 -->
     <div class="optionWrap">
       <button @click="goUse" v-if="purchasedProducts.length >= 1">
         開始使用
@@ -129,63 +177,56 @@
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 import axios from "axios";
 
+// 假設這些已存在的圖檔
 import checkedIcon from "@/assets/imgs/haveCheck.png";
 import uncheckedIcon from "@/assets/imgs/usageUnCheck.png";
 import redLightClothes from "@/assets/imgs/redLightClothes.png";
 import normalClothes from "@/assets/imgs/normalClothes.png";
 import redLightClothes2 from "@/assets/imgs/redLightClothes2.png";
 
+// 例如有個 RaphaelLoading
+import RaphaelLoading from "@/components/RaphaelLoading.vue";
+// 例如有個 TitleMenu
+import TitleMenu from "@/components/TitleMenu.vue";
+
 export default {
+  components: { RaphaelLoading, TitleMenu },
   setup() {
-    // 狀態管理
     const loading = ref(false);
-    const purchasedProducts = ref([]); // 已購買的產品
+
+    const purchasedProducts = ref([]);   // 已購買的產品
     const recommendedProducts = ref([]); // 推薦的產品
-    const selectedProductIndex = ref(0); // 選中的產品索引
-    const useRecord = ref([]); // 使用記錄
+    const useRecord = ref([]);           // 使用紀錄
 
-    const countdownTimers = ref({});
+    const selectedProductIndex = ref(0); // 點擊哪個產品
 
-    const normalCountProducts = ["三效深眠衣", "全效調節衣"];
-    const countdownProducts = ["雙效紅光活力衣", "居家治療儀"];
+    // 輪播索引 & 計時器
+    const currentRecommendIndex = ref(0);
+    let autoPlayTimer = null;
 
-    // 從 localStorage 中獲取用戶資料
+    // 取出 userData
     const localData = localStorage.getItem("userData");
-    let userData = null;
+    let userData = localData ? JSON.parse(localData) : null;
 
-    try {
-      userData = localData ? JSON.parse(localData) : null;
-    } catch (error) {
-      console.error("localStorage userData 解析失敗：", error);
-    }
-
-    // 驗證用戶資料完整性
-    if (
-      !userData ||
-      !userData.MID ||
-      !userData.Token ||
-      !userData.MAID ||
-      !userData.Mobile
-    ) {
-      console.warn("必要的用戶資料缺失，重定向至首頁");
+    if (!userData || !userData.MID) {
+      // 如果沒有 userData 就導回首頁
       window.location.href = "/";
       return;
     }
-
     const { MID, Token, MAID, Mobile } = userData;
 
-    // 產品圖片映射
+    // 產品圖片對應
     const productImages = {
-      雙效紅光活力衣: redLightClothes,
-      全效調節衣: redLightClothes2,
-      三效深眠衣: normalClothes,
-      居家治療儀: redLightClothes2,
+      "雙效紅光活力衣": redLightClothes,
+      "全效調節衣": redLightClothes2,
+      "三效深眠衣": normalClothes,
+      "居家治療儀": redLightClothes2,
     };
 
-    // API 請求：獲取產品與使用記錄
+    // ------------------ API 抓取資料 ------------------
     const fetchProducts = async () => {
       loading.value = true;
       try {
@@ -193,178 +234,152 @@ export default {
           "https://23700999.com:8081/HMA/API_USE1.jsp",
           { MID, Token, MAID, Mobile }
         );
-        if (response.status === 200) {
-          purchasedProducts.value = response.data.PurchaseProduct;
-          useRecord.value = response.data.UseRecord;
-          recommendedProducts.value = response.data.PromoteProduct.map(
-            (item) => ({
-              name: item.ProductName,
-              price: item.Desc1,
-              features: item.Desc2.split("。").filter((desc) => desc),
-              slogan: item.Desc3,
-            })
-          );
+        if (response.status === 200 && response.data) {
+          purchasedProducts.value = response.data.PurchaseProduct || [];
+          useRecord.value = response.data.UseRecord || [];
+
+          // 將 PromoteProduct 轉成 recommendedProducts
+          const promoteArr = response.data.PromoteProduct || [];
+          recommendedProducts.value = promoteArr.map(item => ({
+            name: item.ProductName,
+            price: item.Desc1,
+            features: item.Desc2.split("。").filter(desc => desc),
+            slogan: item.Desc3,
+          }));
         } else {
           console.error("獲取產品資料失敗", response.data);
         }
-      } catch (error) {
-        console.error("API 請求失敗：", error);
+      } catch (err) {
+        console.error("API 請求失敗：", err);
       } finally {
         loading.value = false;
       }
     };
 
-    // const updateCountdown = () => {
-    //   const now = new Date();
-
-    //   // 針對「每個已購買的產品」去找使用紀錄中的最後一筆
-    //   purchasedProducts.value.forEach((product) => {
-    //     const records = useRecord.value
-    //       .filter((r) => r.ProductName === product)
-    //       // 依照結束時間做排序，找最近一次使用
-    //       .sort(
-    //         (a, b) =>
-    //           new Date(b.EndTime.replace(/-/g, "/")) -
-    //           new Date(a.EndTime.replace(/-/g, "/"))
-    //       );
-
-    //     if (records.length === 0) {
-    //       // 若沒有使用紀錄，代表從未用過，不用顯示倒數
-    //       countdownTimers.value[product] = null;
-    //       return;
-    //     }
-
-    //     const lastEndTime = new Date(records[0].EndTime.replace(/-/g, "/"));
-    //     // 這邊假設 24 小時後可再次使用
-    //     lastEndTime.setHours(lastEndTime.getHours() + 24);
-
-    //     const diff = lastEndTime - now; // 剩餘毫秒
-    //     if (diff <= 0) {
-    //       // 倒數已結束，可直接使用
-    //       countdownTimers.value[product] = null;
-    //       return;
-    //     }
-
-    //     // 計算「時：分：秒」
-    //     const hours = Math.floor(diff / (1000 * 60 * 60));
-    //     const minutes = Math.floor((diff / (1000 * 60)) % 60);
-    //     const seconds = Math.floor((diff / 1000) % 60);
-
-    //     // 轉成倒數字串
-    //     countdownTimers.value[product] = `${String(hours).padStart(
-    //       2,
-    //       "0"
-    //     )}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
-    //       2,
-    //       "0"
-    //     )}`;
-    //   });
-    // };
-
-    // 判斷指定產品是否在今日使用過（以凌晨 5 點為新的一天）
-    const hasUsedToday = (productName) => {
-      const now = new Date();
-
-      // 計算今天 5:00 的時間點
-      const today5AM = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        5,
-        0,
-        0
-      );
-
-      // 如果現在時間早於今天的 5:00，則視為昨天
-      if (now < today5AM) {
-        today5AM.setDate(today5AM.getDate() - 1);
-      }
-
-      // 計算明天 4:59:59 的時間點
-      const tomorrow5AM = new Date(today5AM);
-      tomorrow5AM.setDate(tomorrow5AM.getDate() + 1);
-
-      // 檢查使用記錄是否符合條件
-      return useRecord.value.some((record) => {
-        const recordTime = new Date(record.StartTime.replace(/-/g, "/")); // 確保日期格式正確
-        return (
-          record.ProductName === productName &&
-          recordTime >= today5AM &&
-          recordTime < tomorrow5AM
-        );
-      });
+    // -------------- getImage & shouldShowRobot --------------
+    const getImage = (productName) => {
+      return productImages[productName] || normalClothes;
+    };
+    const shouldShowRobot = (productName) => {
+      return productName === "居家治療儀";
     };
 
-    // 獲取產品圖片
-    const getImage = (productName) => productImages[productName];
-
-    // 判斷是否顯示機器人圖標
-    const shouldShowRobot = (productName) => productName === "居家治療儀";
-
-    // 解析產品價格格式
+    // -------------- 解析產品價格 --------------
     const parsePrices = (priceString) => {
-      return priceString.split(";").map((price) => {
-        const [value, period] = price.trim().split("/");
-        return { value: value.trim(), period: period ? period.trim() : "" };
+      if (!priceString) return [];
+      return priceString.split(";").map(part => {
+        const [val, per] = part.trim().split("/");
+        return { value: val.trim(), period: per ? per.trim() : "" };
       });
     };
 
-    // 選擇產品
+    // -------------- 產品切換 --------------
     const selectProduct = (index) => {
       selectedProductIndex.value = index;
     };
 
-    // 開始使用產品
+    // -------------- 開始使用產品 --------------
     const goUse = () => {
       const productName = purchasedProducts.value[selectedProductIndex.value];
-      // if (hasUsedToday(productName)) {
-      //   window.location.href = `/usage/${productName}`;
-      // } else {
+      // 此處你可根據需求檢查 hasUsedToday(productName) ...
       window.location.href = `/usageHistoryInfo/${productName}`;
-      // }
     };
 
-    // 聯繫客服
+    // -------------- 聯繫客服 --------------
     const contactSupport = () => {
       window.location.href = "tel:0800000760";
     };
 
-    // 初始化邏輯
-    onMounted(async () => {
-      try {
-        // 1. 先抓取 API 資料
-        await fetchProducts();
-        // 2. 資料抓回來後馬上初始化一次倒數
-        updateCountdown();
+    // -------------- 上次使用：僅示範回傳字樣 --------------
+    function getLastUsedString(productName) {
+      // 這裡可依你的需求處理 UseRecord
+      // 簡單示範固定回傳「昨日」
+      return "昨日";
+    }
 
-        // 3. 若你要即時倒數，則開一個 setInterval
-        setInterval(() => {
-          updateCountdown();
-        }, 1000);
-      } catch (error) {
-        console.error("初始化過程中出現錯誤：", error);
+    // -------------- 輪播功能：手動 & 自動 --------------
+    const prevRecommend = () => {
+      if (recommendedProducts.value.length <= 1) return;
+      currentRecommendIndex.value =
+        (currentRecommendIndex.value - 1 + recommendedProducts.value.length)
+        % recommendedProducts.value.length;
+      resetAutoPlay();
+    };
+
+    const nextRecommend = () => {
+      if (recommendedProducts.value.length <= 1) return;
+      currentRecommendIndex.value =
+        (currentRecommendIndex.value + 1) % recommendedProducts.value.length;
+      resetAutoPlay();
+    };
+
+    const startAutoPlay = () => {
+      stopAutoPlay();
+      if (recommendedProducts.value.length > 1) {
+        autoPlayTimer = setInterval(() => {
+          nextRecommend();
+        }, 7000); // 7 秒切換一次
+      }
+    };
+
+    const stopAutoPlay = () => {
+      if (autoPlayTimer) {
+        clearInterval(autoPlayTimer);
+        autoPlayTimer = null;
+      }
+    };
+
+    const resetAutoPlay = () => {
+      stopAutoPlay();
+      startAutoPlay();
+    };
+
+    // ------------------ onMounted ------------------
+    onMounted(async () => {
+      await fetchProducts();
+
+      // 若產品未滿4 & 有多筆推薦 => 啟動自動輪播
+      if (purchasedProducts.value.length < 4 && recommendedProducts.value.length > 1) {
+        startAutoPlay();
       }
     });
 
-    // 返回值
+    // ------------------ onBeforeUnmount ------------------
+    onBeforeUnmount(() => {
+      stopAutoPlay();
+    });
+
     return {
+      loading,
       purchasedProducts,
       recommendedProducts,
+      useRecord,
+
       selectedProductIndex,
+      getLastUsedString,
+
+      // 輪播
+      currentRecommendIndex,
+      prevRecommend,
+      nextRecommend,
+
+      // 其他
       getImage,
       shouldShowRobot,
       parsePrices,
       selectProduct,
       goUse,
       contactSupport,
+
+      // ICON
       checkedIcon,
-      uncheckedIcon,
-      loading,
-      countdownTimers,
+      uncheckedIcon
     };
   },
 };
 </script>
+
+
 
 <style lang="scss" scoped>
 .usageHistoryWrap {
@@ -395,7 +410,7 @@ export default {
         box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.25);
         backdrop-filter: blur(4.5px);
         color: #ec4f4f;
-        
+
         font-size: 16px;
         font-style: normal;
         font-weight: 700;
@@ -460,6 +475,14 @@ export default {
             font-weight: 700;
             letter-spacing: 0.12px;
           }
+        }
+        h6 {
+          color: var(--shade-gray-500, #666);
+          font-size: 16px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: 100%;
+          letter-spacing: 0.5px;
         }
       }
 
@@ -544,6 +567,15 @@ export default {
             }
           }
         }
+
+        h6 {
+          color: var(--shade-gray-500, #666);
+          font-size: 16px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: 100%;
+          letter-spacing: 0.5px;
+        }
       }
     }
 
@@ -555,12 +587,18 @@ export default {
       line-height: 100%;
       letter-spacing: 0.15px;
       padding-top: 1rem;
+      display: flex;
+      justify-content: space-between;
+      span {
+        cursor: pointer;
+      }
     }
 
     .recommendWrap {
       display: grid;
       gap: 0.75rem;
       margin-top: 0.75rem;
+      min-height: 400px; 
       .robotImg {
         position: absolute;
         width: 105px;
@@ -741,5 +779,13 @@ export default {
       0 0 6px rgba(58, 123, 213, 0.5), 0 0 4px rgba(98, 87, 143, 0.5),
       0 0 2px rgba(167, 82, 111, 0.5);
   }
+  
+  
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
 }
 </style>
