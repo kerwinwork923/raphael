@@ -1,7 +1,6 @@
 <template>
   <RaphaelLoading v-if="loading" />
   <div class="usageHistoryWrap">
-
     <TitleMenu Text="使用紀錄" link="/user" />
     <ChangeUsageTags></ChangeUsageTags>
     <div class="productWrap">
@@ -297,9 +296,45 @@ export default {
 
     // -------------- 上次使用：僅示範回傳字樣 --------------
     function getLastUsedString(productName) {
-      // 這裡可依你的需求處理 UseRecord
-      // 簡單示範固定回傳「昨日」
-      return "昨日";
+      // 1) 過濾出屬於該 `productName` 的所有使用紀錄
+      const records = useRecord.value.filter(
+        (r) => r.ProductName === productName
+      );
+      if (records.length === 0) {
+        // 若無紀錄，顯示「尚未使用」
+        return "尚未使用";
+      }
+
+      // 2) 找出最晚 (最新) 的 EndTime，並轉換成時間戳 (ms)
+      let lastUsedTimestamp = 0;
+      records.forEach((record) => {
+        // "2025/03/20 17:46" 之類的格式 → 轉成可用的時間戳
+        const endTimeMs = new Date(record.EndTime.replace(/-/g, "/")).getTime();
+        if (endTimeMs > lastUsedTimestamp) {
+          lastUsedTimestamp = endTimeMs;
+        }
+      });
+
+      // 3) 與目前時間做比較
+      const now = Date.now();
+      const diffMs = now - lastUsedTimestamp;
+
+      // 如果仍比現在時間晚，視為「尚未使用」或其它判斷
+      if (diffMs < 0) {
+        return "尚未使用";
+      }
+
+      // 4) 轉換成「天數」差
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+      // 5) 根據天數差決定回傳字串
+      if (diffDays === 0) {
+        return "今日";
+      } else if (diffDays === 1) {
+        return "昨日";
+      } else {
+        return `${diffDays} 日前`;
+      }
     }
 
     // -------------- 輪播功能：手動 & 自動 --------------
