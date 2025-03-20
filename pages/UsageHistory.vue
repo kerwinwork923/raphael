@@ -1,7 +1,9 @@
 <template>
   <RaphaelLoading v-if="loading" />
   <div class="usageHistoryWrap">
+
     <TitleMenu Text="使用紀錄" link="/user" />
+    <ChangeUsageTags></ChangeUsageTags>
     <div class="productWrap">
       <h3 class="yourProductTitle" v-if="purchasedProducts.length > 1">
         您的產品
@@ -108,63 +110,66 @@
         </span>
       </h3>
 
-<!-- 輪播容器：只顯示當前索引的推薦產品 -->
-<div
-  class="recommendWrap"
-  v-if="purchasedProducts.length < 4 && recommendedProducts.length > 0"
->
-  <transition name="fade" mode="out-in">
-    <div
-      class="recommendDiv"
-      :key="currentRecommendIndex"
-      v-if="recommendedProducts[currentRecommendIndex]"
-    >
-      <!-- 目前顯示的推薦產品 -->
-      <div class="imgGroup">
-        <img
-          :src="getImage(recommendedProducts[currentRecommendIndex].name)"
-          alt="product image"
-        />
-        <img
-          v-if="
-            shouldShowRobot(recommendedProducts[currentRecommendIndex].name)
-          "
-          class="robotImg"
-          src="/assets/imgs/clothRobot.png"
-          alt="robot image"
-        />
-        <div class="circle"></div>
+      <!-- 輪播容器：只顯示當前索引的推薦產品 -->
+      <div
+        class="recommendWrap"
+        v-if="purchasedProducts.length < 4 && recommendedProducts.length > 0"
+      >
+        <transition name="fade" mode="out-in">
+          <div
+            class="recommendDiv"
+            :key="currentRecommendIndex"
+            v-if="recommendedProducts[currentRecommendIndex]"
+          >
+            <!-- 目前顯示的推薦產品 -->
+            <div class="imgGroup">
+              <img
+                :src="getImage(recommendedProducts[currentRecommendIndex].name)"
+                alt="product image"
+              />
+              <img
+                v-if="
+                  shouldShowRobot(
+                    recommendedProducts[currentRecommendIndex].name
+                  )
+                "
+                class="robotImg"
+                src="/assets/imgs/clothRobot.png"
+                alt="robot image"
+              />
+              <div class="circle"></div>
+            </div>
+            <h3 class="recommendName">
+              {{ recommendedProducts[currentRecommendIndex].name }}
+            </h3>
+            <p>{{ recommendedProducts[currentRecommendIndex].slogan }}</p>
+            <div class="priceGroup">
+              <div
+                class="priceItem"
+                v-for="(price, idx) in parsePrices(
+                  recommendedProducts[currentRecommendIndex].price
+                )"
+                :key="idx"
+              >
+                <span class="priceValue">{{ price.value }}</span>
+                <span class="pricePeriod">/{{ price.period }}</span>
+              </div>
+            </div>
+            <button class="contactBtn" @click="contactSupport">聯絡客服</button>
+            <div class="featureTitle">產品特色</div>
+            <ul class="featureListGroup">
+              <li
+                v-for="(feature, idx) in recommendedProducts[
+                  currentRecommendIndex
+                ].features"
+                :key="idx"
+              >
+                {{ feature }}
+              </li>
+            </ul>
+          </div>
+        </transition>
       </div>
-      <h3 class="recommendName">
-        {{ recommendedProducts[currentRecommendIndex].name }}
-      </h3>
-      <p>{{ recommendedProducts[currentRecommendIndex].slogan }}</p>
-      <div class="priceGroup">
-        <div
-          class="priceItem"
-          v-for="(price, idx) in parsePrices(
-            recommendedProducts[currentRecommendIndex].price
-          )"
-          :key="idx"
-        >
-          <span class="priceValue">{{ price.value }}</span>
-          <span class="pricePeriod">/{{ price.period }}</span>
-        </div>
-      </div>
-      <button class="contactBtn" @click="contactSupport">聯絡客服</button>
-      <div class="featureTitle">產品特色</div>
-      <ul class="featureListGroup">
-        <li
-          v-for="(feature, idx) in recommendedProducts[currentRecommendIndex].features"
-          :key="idx"
-        >
-          {{ feature }}
-        </li>
-      </ul>
-    </div>
-  </transition>
-</div>
-
     </div>
 
     <!-- 底部按鈕 -->
@@ -197,9 +202,9 @@ export default {
   setup() {
     const loading = ref(false);
 
-    const purchasedProducts = ref([]);   // 已購買的產品
+    const purchasedProducts = ref([]); // 已購買的產品
     const recommendedProducts = ref([]); // 推薦的產品
-    const useRecord = ref([]);           // 使用紀錄
+    const useRecord = ref([]); // 使用紀錄
 
     const selectedProductIndex = ref(0); // 點擊哪個產品
 
@@ -220,10 +225,10 @@ export default {
 
     // 產品圖片對應
     const productImages = {
-      "雙效紅光活力衣": redLightClothes,
-      "全效調節衣": redLightClothes2,
-      "三效深眠衣": normalClothes,
-      "居家治療儀": redLightClothes2,
+      雙效紅光活力衣: redLightClothes,
+      全效調節衣: redLightClothes2,
+      三效深眠衣: normalClothes,
+      居家治療儀: redLightClothes2,
     };
 
     // ------------------ API 抓取資料 ------------------
@@ -240,10 +245,10 @@ export default {
 
           // 將 PromoteProduct 轉成 recommendedProducts
           const promoteArr = response.data.PromoteProduct || [];
-          recommendedProducts.value = promoteArr.map(item => ({
+          recommendedProducts.value = promoteArr.map((item) => ({
             name: item.ProductName,
             price: item.Desc1,
-            features: item.Desc2.split("。").filter(desc => desc),
+            features: item.Desc2.split("。").filter((desc) => desc),
             slogan: item.Desc3,
           }));
         } else {
@@ -267,7 +272,7 @@ export default {
     // -------------- 解析產品價格 --------------
     const parsePrices = (priceString) => {
       if (!priceString) return [];
-      return priceString.split(";").map(part => {
+      return priceString.split(";").map((part) => {
         const [val, per] = part.trim().split("/");
         return { value: val.trim(), period: per ? per.trim() : "" };
       });
@@ -301,8 +306,8 @@ export default {
     const prevRecommend = () => {
       if (recommendedProducts.value.length <= 1) return;
       currentRecommendIndex.value =
-        (currentRecommendIndex.value - 1 + recommendedProducts.value.length)
-        % recommendedProducts.value.length;
+        (currentRecommendIndex.value - 1 + recommendedProducts.value.length) %
+        recommendedProducts.value.length;
       resetAutoPlay();
     };
 
@@ -339,7 +344,10 @@ export default {
       await fetchProducts();
 
       // 若產品未滿4 & 有多筆推薦 => 啟動自動輪播
-      if (purchasedProducts.value.length < 4 && recommendedProducts.value.length > 1) {
+      if (
+        purchasedProducts.value.length < 4 &&
+        recommendedProducts.value.length > 1
+      ) {
         startAutoPlay();
       }
     });
@@ -373,13 +381,11 @@ export default {
 
       // ICON
       checkedIcon,
-      uncheckedIcon
+      uncheckedIcon,
     };
   },
 };
 </script>
-
-
 
 <style lang="scss" scoped>
 .usageHistoryWrap {
@@ -598,7 +604,7 @@ export default {
       display: grid;
       gap: 0.75rem;
       margin-top: 0.75rem;
-      min-height: 400px; 
+      min-height: 400px;
       .robotImg {
         position: absolute;
         width: 105px;
@@ -779,13 +785,13 @@ export default {
       0 0 6px rgba(58, 123, 213, 0.5), 0 0 4px rgba(98, 87, 143, 0.5),
       0 0 2px rgba(167, 82, 111, 0.5);
   }
-  
-  
 }
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.5s ease;
 }
-.fade-enter-from, .fade-leave-to {
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
 }
 </style>

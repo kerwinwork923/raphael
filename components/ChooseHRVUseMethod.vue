@@ -2,8 +2,8 @@
   <div class="cover"></div>
 
   <transition name="fade">
-    <div v-if="!loading">
     
+    <div v-if="!loading">
       <RaphaelLoading v-if="loading" />
       <div class="chooseHRVUseMethod">
         <h6>請選擇</h6>
@@ -20,6 +20,7 @@
         </div>
       </div>
     </div>
+
   </transition>
 </template>
 

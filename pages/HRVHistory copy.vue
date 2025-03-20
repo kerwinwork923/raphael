@@ -2,19 +2,14 @@
   <HRVAlert />
   <RaphaelLoading v-if="loading" />
   <DSPRSelect />
-
   <div class="HRVHistory">
     <div class="titleGroup">
       <img src="/assets/imgs/backArrow.svg" @click="goBack" alt="" />
-      <h2>使用紀錄</h2>
+      <h2>HRV 檢測</h2>
     </div>
-    <ChangeUsageTags/>
-    
-    <img style="margin-top: .75rem;" src="../assets/imgs/HRVBanner.png" alt="">
-    <article style="margin-top: .75rem;" >
-      <!-- <h3>AI人臉HRV，輕鬆追蹤健康</h3> -->
+    <article>
+      <h3>AI人臉HRV，輕鬆追蹤健康</h3>
       <div class="desCard">
-        <h3>快速精準的健康檢測</h3>
         <div class="slogan">
           智平衡健康集團運用FDA認證AI技術，推出全新人臉辨識HRV量測工具，透過手機相機掃描臉部，1-2分鐘即可快速分析生理數據。
         </div>
@@ -231,7 +226,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .HRVHistory {
-  background-color: $raphael-gray-100;
+  background: url("../assets/imgs/gradient-bg.png");
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-size: cover;

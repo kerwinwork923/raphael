@@ -46,12 +46,12 @@
           <div class="topTitle">獎勵</div>
           <div class="bottomTitle">積分</div>
         </div> -->
-
+<!-- 
         <div class="item item2" @click="goHRVHistory">
           <div class="topTitle">檢測</div>
           <div class="bottomTitle">HRV</div>
           <img src="../assets/imgs/faceIcon.svg" alt="" />
-        </div>
+        </div> -->
 
         <div @click="showHealthRecordAlert" class="item3_link">
           <div class="item item3">
@@ -546,7 +546,7 @@ export default {
       }
 
       .item4_link {
-        grid-row: 2/4;
+        grid-row: 1/2;
 
         @include respond-to("tablet") {
         }
