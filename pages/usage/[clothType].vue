@@ -175,7 +175,7 @@
                 <div class="time">
                   {{ formatTimestamp3(item.oriStartTime) }}
                 </div>
-                
+
                 <!-- 總共使用多久 (分鐘) -->
                 <div class="timeInfoText">
                   總共使用 {{ calcUsedMinutes(item) }} 分鐘
@@ -452,7 +452,7 @@ export default {
       filteredUseList,
       calcUsedMinutes,
       formatTimestamp3,
-      handleDetectClick
+      handleDetectClick,
     };
   },
 };
@@ -540,7 +540,7 @@ export default {
     padding: 0.75rem;
     width: 100%;
     max-width: 768px;
-
+    position: relative;
     .usageRecordTitleGroup {
       display: grid;
       grid-auto-flow: column;
@@ -555,7 +555,18 @@ export default {
         }
       }
     }
+    .notDetectData {
+        position: absolute;
+        z-index: 11;
+        top: 60%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        letter-spacing: 10px;
+        font-size: 1.25rem;
+        white-space: nowrap;
+        color: $raphael-gray-300;
 
+      }
     .useGroup {
       position: relative;
       display: flex;
@@ -568,17 +579,7 @@ export default {
         height: calc(100vh - 100px);
       }
 
-      .notDetectData {
-        position: absolute;
-        z-index: 1;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        letter-spacing: 10px;
-        font-size: 1.25rem;
-        white-space: nowrap;
-        color: $raphael-gray-500;
-      }
+ 
       .useList {
         opacity: 0;
         transition: all 0.2s ease;
@@ -829,23 +830,14 @@ export default {
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
+      position: relative;
       @include scrollbarStyle();
 
       @include respond-to("phone-landscape") {
         height: calc(100vh - 100px);
       }
 
-      .notDetectData {
-        position: absolute;
-        z-index: 1;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        letter-spacing: 10px;
-        font-size: 1.25rem;
-        white-space: nowrap;
-        color: $raphael-gray-500;
-      }
+   
 
       .detectItem {
         width: 100%;
