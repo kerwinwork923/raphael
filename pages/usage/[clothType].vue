@@ -170,7 +170,7 @@
               <!-- 🔸 watchClick：點擊「左側圖示」 -> `handleWatchClick` -->
               <div
                 class="timeIcon"
-                @click="handleWatchClick(item.UID)"
+           
                 style="cursor: pointer"
               >
                 <img
@@ -680,11 +680,11 @@ export default {
             .resultText {
               color: var(--shade-gray-500, #666);
 
-font-size: 16px;
-font-style: normal;
-font-weight: 400;
+              font-size: 16px;
+              font-style: normal;
+              font-weight: 400;
 
-letter-spacing: 0.5px;
+              letter-spacing: 0.5px;
             }
             svg {
               width: 18px;

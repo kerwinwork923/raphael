@@ -44,6 +44,7 @@
             <img
               src="../../assets/imgs/hrvUsageResult/hrvResultFace.svg"
               alt=""
+              @click="handleWatchClick(HRVBeforeData)"
             />
           </div>
           <div class="hintText">
@@ -69,6 +70,7 @@
             <img
               src="../../assets/imgs/hrvUsageResult/hrvResultFace.svg"
               alt=""
+              @click="handleWatchClick(HRVAfterData)"
             />
           </div>
           <div class="hintText">
@@ -521,9 +523,21 @@ export default {
       return "";
     }
 
+    // 頁面載入
     onMounted(async () => {
       await Promise.all([fetchUIDInfo(), fetchHRVCompare()]);
     });
+
+    // 點擊查看某筆檢測資料
+    function handleWatchClick(dataItem) {
+      console.log("你點擊了：", dataItem);
+      // 假設要帶 AID 去「健康數據」詳細頁：
+      if (dataItem && dataItem.AID) {
+        router.push(`/healthData/${dataItem.AID}`);
+      } else {
+        alert("沒有檢測資料可查看");
+      }
+    }
 
     return {
       startTime,
@@ -540,6 +554,7 @@ export default {
       calcUsedMin,
       goNext,
       getPressureLevel,
+      handleWatchClick,
     };
   },
 };
@@ -580,7 +595,7 @@ export default {
         font-size: 24px;
         font-style: normal;
         font-weight: 700;
-        line-height: 100%; /* 24px */
+        line-height: 100%;
         letter-spacing: var(--Body-Large-Tracking, 0.5px);
       }
     }
@@ -609,14 +624,11 @@ export default {
     display: grid;
     grid-template-columns: repeat(2, fr);
     gap: 0.75rem;
-    width: max-content;
     width: 100%;
     margin-top: -0.75rem;
     h2 {
       color: #000;
-
       font-size: 20px;
-
       letter-spacing: var(--Title-Medium-Tracking, 0.15px);
     }
     .pressureLevel {
@@ -639,8 +651,9 @@ export default {
       &:nth-child(2) {
         display: none;
       }
+      &:nth-child(3),
+      &:nth-child(4),
       &:nth-child(5) {
-        // 假設血壓是第 4 個卡片
         grid-column: span 2; // 讓它跨 2 格
       }
 
@@ -691,7 +704,6 @@ export default {
           .afterValue {
             color: $raphael-cyan-400;
           }
-
           .unit {
             color: $raphael-gray-300;
             font-size: 16px;
@@ -705,39 +717,18 @@ export default {
           transform: scale(2);
         }
       }
-
       .waiting {
         font-size: 12px;
         color: #74bc1f;
         margin-top: 0.5rem;
         letter-spacing: 0.5px;
       }
-
-      @for $i from 1 through 4 {
-        &:nth-child(#{$i}) {
-          grid-column: 1/3;
-        }
-      }
     }
     .BACardS {
-      // width: 160px;
+      /* 需就視窗大小適度調整或補充樣式 */
     }
   }
 
-  .SympatheticRatioGroup {
-    background-color: $raphael-white;
-    border-radius: 12px;
-    margin-top: 1rem;
-    padding: 0.75rem 12px 0;
-    h3 {
-      color: $raphael-black;
-      font-size: 20px;
-      font-style: normal;
-      font-weight: 400;
-      letter-spacing: 0.15px;
-      margin-bottom: 0.5rem;
-    }
-  }
   .usageBtnGroup {
     position: fixed;
     bottom: 0;
@@ -748,15 +739,8 @@ export default {
     padding: 1rem;
     padding-bottom: 3.125rem;
 
-    button {
-      @include btnStyle($raphael-green-400, $raphael-white);
-    }
-    .preBtn {
-      background-color: $raphael-gray-200;
-      color: $raphael-gray-500;
-    }
     .nextBtn {
-      background-color: $raphael-green-400;
+      @include btnStyle($raphael-green-400, $raphael-white);
     }
   }
   .resultTimeGroup {
@@ -766,7 +750,6 @@ export default {
 
     .leftHintGroup {
       width: 0.5rem;
-
       border-radius: 50px;
       background: var(--shade-white, #fff);
       box-shadow: 0px -1px 2px 0px rgba(0, 0, 0, 0.25) inset;
@@ -778,7 +761,6 @@ export default {
         width: 8px;
         height: 8px;
         transform: rotate(-90deg);
-
         border-radius: 50%;
         &:nth-child(1) {
           background-color: #74bc1f;
@@ -807,14 +789,12 @@ export default {
       width: 100%;
       background-color: #fff;
       border-radius: 12px;
-      background: var(--shade-white, #fff);
       box-shadow: 0px -2px 3px 0px rgba(0, 0, 0, 0.25) inset;
       gap: 0.25rem;
       .hintText {
         display: flex;
         flex-direction: column;
         color: var(--shade-gray-500, #666);
-
         font-size: 20px;
         font-style: normal;
         font-weight: 400;

@@ -8,10 +8,14 @@
       <img src="/assets/imgs/backArrow.svg" @click="goBack" alt="" />
       <h2>使用紀錄</h2>
     </div>
-    <ChangeUsageTags/>
-    
-    <img style="margin-top: .75rem;" src="../assets/imgs/HRVBanner.png" alt="">
-    <article style="margin-top: .75rem;" >
+    <ChangeUsageTags />
+
+    <img
+      style="margin-top: 0.75rem"
+      src="../assets/imgs/HRVBanner.png"
+      alt=""
+    />
+    <article style="margin-top: 0.75rem">
       <!-- <h3>AI人臉HRV，輕鬆追蹤健康</h3> -->
       <div class="desCard">
         <h3>快速精準的健康檢測</h3>
@@ -73,7 +77,32 @@
       </div>
     </article>
     <div class="detectWrap">
-      <h3>最近 10筆 檢測記錄</h3>
+      <div class="detectWrapTitleGroup">
+        <h3>最近 10筆 檢測記錄</h3>
+        <a href="/HRVHistoryAll" class="goToHistoryAll"
+          >歷史紀錄
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="17"
+            viewBox="0 0 16 17"
+            fill="none"
+          >
+            <path
+              d="M13.3334 8.43848L9.33337 12.4385L13.3334 8.43848ZM13.3334 8.43848L9.33337 4.43848L13.3334 8.43848ZM13.3334 8.43848L6.33337 8.43848L13.3334 8.43848ZM2.66671 8.43848L4.33338 8.43848L2.66671 8.43848Z"
+              fill="#1FBCB3"
+            />
+            <path
+              d="M13.3334 8.43848L9.33337 12.4385M13.3334 8.43848L9.33337 4.43848M13.3334 8.43848L6.33337 8.43848M2.66671 8.43848L4.33337 8.43848"
+              stroke="#1FBCB3"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </a>
+      </div>
+
       <div class="detectList">
         <div class="detectItem" v-for="item in limitedHRVData" :key="item.AID">
           <a :href="`/vital/detail.html?AID=${item.AID}`">
@@ -123,10 +152,7 @@
         </div>
       </div>
     </div>
-    <a href="/HRVHistoryAll" class="goToHistoryAll"
-      >歷史紀錄
-      <img src="../assets/imgs/historyAllArrow.svg" />
-    </a>
+
     <div class="HRVBtnGroup">
       <button class="goToHRVBtn" @click="openHRVAlert">前往檢測</button>
     </div>
@@ -370,11 +396,44 @@ article {
   width: 100%;
   max-width: 768px;
   margin-top: 1.5rem;
-
-  & > h3 {
-    font-size: 20px;
+  .detectWrapTitleGroup {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
     margin-bottom: 0.75rem;
+
+    h3 {
+      color: var(--shade-black, #1e1e1e);
+      /* 拿掉 width: 50% 與 text-align: center; */
+      font-size: 20px;
+      font-style: normal;
+      font-weight: 400;
+      letter-spacing: var(--Title-Medium-Tracking, 0.15px);
+      margin: 0; // 可以視需要調整
+      display: block;
+      width: 100%;
+    }
+    a {
+      color: var(--Secondary-default, #1fbcb3);
+   
+
+      font-size: 18px;
+      font-style: normal;
+      font-weight: 400;
+      letter-spacing: 0.09px;
+      width: 40%;
+      
+      display: flex;
+      align-items: center;
+      justify-content: end;
+      gap: 4px;
+      margin: 0;
+
+      margin-top: 0.75rem;
+      transition: all 0.2s ease;
+    }
   }
+
   .detectList {
     @include recordList($raphael-white, auto, 0.75rem, 0.75rem);
     .notDetectData {
@@ -408,6 +467,7 @@ article {
         animation-delay: $i * 0.07s;
       }
     }
+
     a {
       text-decoration: none;
       color: $raphael-black;
@@ -504,21 +564,6 @@ article {
   }
 }
 
-.goToHistoryAll {
-  color: $raphael-red-300;
-  text-align: center;
-  font-size: 18px;
-  font-style: normal;
-  font-weight: 400;
-  letter-spacing: 0.09px;
-  width: 100%;
-  max-width: 768px;
-  margin-top: 0.75rem;
-  transition: all 0.2s ease;
-  &:hover {
-    color: $raphael-red-500;
-  }
-}
 .HRVBtnGroup {
   position: fixed;
   background-color: $raphael-gray-100;
