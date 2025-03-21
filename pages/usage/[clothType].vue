@@ -32,7 +32,7 @@
       @requireHRVCheck="handleHRVCheck"
     />
 
-    <!-- 以下為四種產品的說明卡片 (原邏輯) -->
+    <!-- 四種產品的說明卡片 (原邏輯) -->
     <div class="usageInfoGroup" v-if="usageCardState === '雙效紅光活力衣'">
       <div class="usageInfoCard">
         <h3>電量提示燈使用說明</h3>
@@ -158,7 +158,7 @@
         </div>
       </div>
 
-      <!-- 顯示「UseRecord」的使用紀錄 (不再依賴 HRV2Record) -->
+      <!-- 顯示「UseRecord」的使用紀錄  (不再依賴 HRV2Record) -->
       <div class="integrationGroup">
         <div
           class="detectItem"
@@ -167,8 +167,16 @@
         >
           <div class="detect">
             <div class="timeGroup">
-              <div class="timeIcon">
-                <img src="../../assets/imgs/detectTime.svg" alt="" />
+              <!-- 🔸 watchClick：點擊「左側圖示」 -> `handleWatchClick` -->
+              <div
+                class="timeIcon"
+                @click="handleWatchClick(item.UID)"
+                style="cursor: pointer"
+              >
+                <img
+                  src="../../assets/imgs/detectTime.svg"
+                  alt="查看健康數據"
+                />
               </div>
               <div class="timeTextGroup">
                 <!-- 開始&結束時間 -->
@@ -183,7 +191,7 @@
               </div>
             </div>
             <div class="infoGroup">
-              <!-- 若需要更多按鈕/事件可自行添加 -->
+              <!-- 🔸 detectClick：點擊「分析結果」 -> 路由 / usageHRVResult/... -->
               <div
                 class="resultText"
                 :style="{ cursor: 'pointer' }"
@@ -296,12 +304,12 @@ export default {
     const loading = ref(false);
     const usageCardState = ref(productName);
 
-    // 取得後端資料(UseRecord)
-    const useData = ref([]); // 舊: UseRecord
+    // UseRecord
+    const useData = ref([]);
 
-    // UI 狀態(若需要)
+    // UI 顯示的狀態
     const hasDetectTime = ref("00:00:00");
-    const todayUseRecord = ref([]); // 當日使用紀錄
+    const todayUseRecord = ref([]);
 
     // 篩選: 年/月
     const selectedYear = ref(new Date().getFullYear());
@@ -316,7 +324,7 @@ export default {
       for (let y = 2024; y <= nowY; y++) arr.push(y);
       return arr;
     });
-    // 12 ~ 1 月
+    // 12~1
     const months = Array.from({ length: 12 }, (_, i) => i + 1).reverse();
 
     function toggleYearBox() {
@@ -336,7 +344,7 @@ export default {
       monthBoxVisible.value = false;
     }
 
-    // 請求 API_UseStart_Data.jsp => 取 UseRecord => 過濾 productName
+    // 請求 API_UseStart_Data.jsp => 過濾 productName
     async function getUseRecord() {
       try {
         loading.value = true;
@@ -373,7 +381,7 @@ export default {
             }
           }
 
-          // 當日 (5am 為界) 的使用紀錄
+          // 當日 (5am 為界) 使用紀錄
           const now = new Date();
           const resetTime = new Date();
           resetTime.setHours(5, 0, 0, 0);
@@ -403,7 +411,6 @@ export default {
     // 篩選當前年/月 => 顯示
     const filteredUseList = computed(() => {
       return useData.value.filter((item) => {
-        // 依「開始時間」的年/月 判斷
         const dt = parseYMDHMS(item.oriStartTime);
         if (!dt || isNaN(dt.getTime())) return false;
         return (
@@ -413,7 +420,19 @@ export default {
       });
     });
 
-    // 事件(留空或自訂)
+    // 「分析結果」按鈕
+    function handleDetectClick(item) {
+      // 進入檢測結果頁
+      router.push(`/usageHRVResult/${item.UID}`);
+    }
+
+    // 「左側小錶」圖示 => 查看健康數據
+    function handleWatchClick(item) {
+      // 進入健康數據頁
+      router.push(`/healthData/${item}`);
+    }
+
+    // dummy
     function handleCountdownComplete() {}
     function handleHRVCheck() {}
 
@@ -421,17 +440,12 @@ export default {
       getUseRecord();
     });
 
-    function handleDetectClick(item) {
-      // 進入檢測結果頁
-      router.push(`/usageHRVResult/${item.UID}`);
-    }
-
     return {
       loading,
       productName,
       usageCardState,
 
-      // for TimeRing2
+      // TimeRing2 需要
       hasDetectTime,
       todayUseRecord,
 
@@ -447,12 +461,19 @@ export default {
       selectYear,
       selectMonth,
 
-      // 使用紀錄
+      // 主要資料
       useData,
       filteredUseList,
       calcUsedMinutes,
       formatTimestamp3,
+
+      // 按鈕/圖示事件
       handleDetectClick,
+      handleWatchClick,
+
+      // 可保留以防有其它地方用
+      handleCountdownComplete,
+      handleHRVCheck,
     };
   },
 };
@@ -471,7 +492,6 @@ export default {
     display: flex;
     gap: 0.75rem;
     overflow-x: auto;
-    width: max-content;
     width: 100%;
     max-width: 768px;
     margin-top: 0.75rem;
@@ -533,6 +553,7 @@ export default {
       }
     }
   }
+
   .usageRecord {
     background-color: $raphael-white;
     margin-top: 0.75rem;
@@ -541,393 +562,6 @@ export default {
     width: 100%;
     max-width: 768px;
     position: relative;
-    .usageRecordTitleGroup {
-      display: grid;
-      grid-auto-flow: column;
-      h3 {
-        @include tabStyle();
-      }
-      .active {
-        border-bottom: 1px solid $raphael-green-400;
-        color: $raphael-green-400;
-        &:hover {
-          filter: brightness(0.95);
-        }
-      }
-    }
-    .notDetectData {
-        position: absolute;
-        z-index: 11;
-        top: 60%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        letter-spacing: 10px;
-        font-size: 1.25rem;
-        white-space: nowrap;
-        color: $raphael-gray-300;
-
-      }
-    .useGroup {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-      height: calc(100vh - 549px);
-      overflow-y: auto;
-      @include scrollbarStyle();
-      @include respond-to("phone-landscape") {
-        height: calc(100vh - 100px);
-      }
-
- 
-      .useList {
-        opacity: 0;
-        transition: all 0.2s ease;
-        animation: fadeIn2 1s ease forwards;
-        animation-delay: 0s;
-        &:hover {
-          box-shadow: 0px 5px 10px -2px #ccc inset;
-          padding: 0 4px;
-        }
-        .dateList {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          cursor: pointer;
-
-          .timeGroup {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            .timeIcon {
-              border-radius: 7px;
-              padding: 6px;
-              border: 1px solid $raphael-green-400;
-            }
-            .time {
-              font-size: 20px;
-              font-style: normal;
-              font-weight: 400;
-              letter-spacing: 0.15px;
-            }
-          }
-        }
-        @for $i from 1 through 10 {
-          &:nth-child(#{$i}) {
-            animation-delay: $i * 0.07s;
-          }
-        }
-      }
-      .actionGroup {
-        position: relative;
-        display: grid;
-        gap: 0.75rem;
-        margin-top: 0.75rem;
-
-        &::before {
-          position: absolute;
-          content: "";
-          box-shadow: 0px -1px 2px 0px rgba(0, 0, 0, 0.25) inset;
-          width: 8px;
-          height: 100%;
-          border-radius: 0.75rem;
-          left: 0.5rem;
-        }
-
-        .startGroup,
-        .pauseGroup,
-        .stopGroup {
-          position: relative;
-          opacity: 0;
-          animation: fadeIn2 0.5s ease forwards;
-          display: flex;
-          align-items: center;
-          border-radius: 12px;
-          background: $raphael-white;
-          box-shadow: 0px -2px 3px 0px rgba(0, 0, 0, 0.25) inset;
-          padding: 6px 12px;
-          margin-left: 1.5rem;
-          gap: 8px;
-          line-height: 1.3;
-
-          .actionContent {
-            color: $raphael-gray-500;
-            font-size: 18px;
-            font-weight: 400;
-            letter-spacing: 0.09px;
-            h4 {
-              font-size: 20px;
-            }
-          }
-
-          &::before {
-            position: absolute;
-            content: "";
-            width: 0.5rem;
-            height: 0.5rem;
-            border-radius: 50%;
-            left: -1rem;
-          }
-        }
-        .startGroup {
-          &::before {
-            background: $raphael-green-400;
-          }
-        }
-        .pauseGroup {
-          &::before {
-            background: $raphael-orange-400;
-          }
-          span {
-            color: $raphael-gray-300;
-            text-align: center;
-            font-size: 14px;
-            letter-spacing: 0.1px;
-          }
-        }
-        .stopGroup {
-          &::before {
-            background: $raphael-red-300;
-          }
-        }
-      }
-    }
-
-    .detectGroup {
-      overflow-y: auto;
-      height: calc(100vh - 549px);
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-      @include scrollbarStyle();
-
-      @include respond-to("phone-landscape") {
-        height: calc(100vh - 100px);
-      }
-
-      .detectItem {
-        width: 100%;
-        margin: 0 auto;
-        opacity: 0;
-        transition: 0.2s ease all;
-        animation: fadeIn2 1s ease forwards;
-        animation-delay: 0s;
-
-        &:hover {
-          box-shadow: 0px 5px 10px -2px #ccc inset;
-          padding: 0 4px;
-        }
-
-        .timeTextGroup {
-          display: flex;
-          flex-direction: column;
-          line-height: 1.35;
-          .timeInfoText {
-            color: $raphael-gray-500;
-            font-size: 16px;
-            letter-spacing: 0.5px;
-          }
-        }
-        @for $i from 1 through 10 {
-          &:nth-child(#{$i}) {
-            animation-delay: $i * 0.07s;
-          }
-        }
-        .detect {
-          text-decoration: none;
-          color: $raphael-black;
-          display: flex;
-          justify-content: space-between;
-          .timeGroup {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            .timeIcon {
-              border-radius: 7px;
-              padding: 6px;
-              border: 1px solid $raphael-green-400;
-            }
-            .time {
-              font-size: 20px;
-              font-style: normal;
-              font-weight: 400;
-              letter-spacing: 0.15px;
-            }
-          }
-          .infoGroup {
-            display: flex;
-            align-items: center;
-            white-space: nowrap;
-            justify-content: end;
-            gap: 0.5rem;
-            h4 {
-              color: $raphael-gray-500;
-              font-size: 1rem;
-              font-style: normal;
-              font-weight: 400;
-              letter-spacing: 0.5px;
-            }
-
-            .detectAgeGroup {
-              display: none;
-              color: $raphael-gray-500;
-            }
-            .detectHRVGroup {
-              display: none;
-              color: $raphael-gray-500;
-              h5 {
-                span {
-                  display: inline-flex;
-                  min-width: 50px;
-                }
-              }
-            }
-            h5 {
-              color: $raphael-gray-400;
-              font-size: 1rem;
-              font-style: normal;
-              font-weight: 400;
-              letter-spacing: 0.5px;
-              margin-top: 0.25rem;
-              span {
-                color: $raphael-black;
-                font-size: 1.5rem;
-                font-style: normal;
-                font-weight: 700;
-                letter-spacing: 0.12px;
-                margin-right: 0.25rem;
-              }
-            }
-            .redValue {
-              color: $raphael-red-500;
-            }
-            svg {
-              width: 18px;
-            }
-          }
-        }
-      }
-      .beforeTreatment {
-        &:hover {
-          box-shadow: unset;
-          padding: 0;
-        }
-        .detect {
-          .timeGroup {
-            .timeTextGroup {
-              cursor: unset !important;
-            }
-          }
-        }
-      }
-    }
-
-    .integrationGroup {
-      overflow-y: auto;
-      height: calc(100vh - 549px);
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-      position: relative;
-      @include scrollbarStyle();
-
-      @include respond-to("phone-landscape") {
-        height: calc(100vh - 100px);
-      }
-
-   
-
-      .detectItem {
-        width: 100%;
-        margin: 0 auto;
-        opacity: 0;
-        transition: 0.2s ease all;
-        animation: fadeIn2 1s ease forwards;
-        animation-delay: 0s;
-
-        &:hover {
-          box-shadow: 0px 5px 10px -2px #ccc inset;
-          padding: 0 4px;
-        }
-
-        .timeTextGroup {
-          display: flex;
-          flex-direction: column;
-          line-height: 1.35;
-          .timeInfoText {
-            color: $raphael-gray-500;
-            font-size: 16px;
-            letter-spacing: 0.5px;
-          }
-        }
-        @for $i from 1 through 10 {
-          &:nth-child(#{$i}) {
-            animation-delay: $i * 0.07s;
-          }
-        }
-        .detect {
-          text-decoration: none;
-          color: $raphael-black;
-          display: flex;
-          justify-content: space-between;
-          .timeGroup {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            .timeIcon {
-              border-radius: 7px;
-              padding: 6px;
-              border: 1px solid $raphael-green-400;
-            }
-            .time {
-              font-size: 20px;
-              font-style: normal;
-              font-weight: 400;
-              letter-spacing: 0.15px;
-            }
-          }
-          .infoGroup {
-            display: flex;
-            align-items: center;
-            white-space: nowrap;
-            justify-content: end;
-            gap: 0.5rem;
-            h4 {
-              color: $raphael-gray-500;
-              font-size: 1rem;
-              font-style: normal;
-              font-weight: 400;
-              letter-spacing: 0.5px;
-            }
-
-            h5 {
-              color: $raphael-gray-400;
-              font-size: 1rem;
-              font-style: normal;
-              font-weight: 400;
-              letter-spacing: 0.5px;
-              margin-top: 0.25rem;
-              span {
-                color: $raphael-black;
-                font-size: 1.5rem;
-                font-style: normal;
-                font-weight: 700;
-                letter-spacing: 0.12px;
-                margin-right: 0.25rem;
-              }
-            }
-            .redValue {
-              color: $raphael-red-500;
-            }
-            svg {
-              width: 18px;
-            }
-          }
-        }
-      }
-    }
 
     .detectSelectGroup {
       display: flex;
@@ -938,116 +572,151 @@ export default {
       color: $raphael-gray-500;
       margin-top: 0.25rem;
     }
-
-    .yearSelectGroup {
-      display: flex;
-      align-items: center;
-      gap: 2px;
-      position: relative;
-      cursor: pointer;
-      .yearBox {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        position: absolute;
-        top: 100%;
-        right: 0;
-        background: rgba(255, 255, 255, 0.85);
-        width: 200%;
-        border-radius: 8px;
-        text-align: center;
-        padding: 0.75rem;
-        font-size: 18px;
-        max-height: 200px;
-        backdrop-filter: blur(6px);
-        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
-        overflow-y: auto;
-        transform: 0.25s all ease;
-        animation: 0.3s fadeIn forwards;
-        z-index: 10;
-        .year {
-          transform: 0.25s all ease;
-          &:hover {
-            color: $raphael-green-400;
-          }
-        }
-      }
-    }
+    .yearSelectGroup,
     .monthSelectGroup {
       display: flex;
       align-items: center;
       gap: 2px;
       position: relative;
       cursor: pointer;
+    }
+    .yearBox,
+    .monthBox {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: rgba(255, 255, 255, 0.85);
+      width: 200%;
+      border-radius: 8px;
+      text-align: center;
+      padding: 0.75rem;
+      font-size: 18px;
+      max-height: 200px;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+      overflow-y: auto;
+      transform: 0.25s all ease;
+      animation: 0.3s fadeIn forwards;
+      z-index: 10;
 
-      .monthBox {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        position: absolute;
-        top: 100%;
-        right: 0;
-        background: rgba(255, 255, 255, 0.85);
-        width: 200%;
-        border-radius: 8px;
-        text-align: center;
-        padding: 0.75rem;
-        font-size: 18px;
-        max-height: 200px;
-        backdrop-filter: blur(6px);
-        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
-        overflow-y: auto;
+      .year,
+      .month {
         transform: 0.25s all ease;
-        opacity: 0;
-        animation: 0.3s fadeIn forwards;
-        z-index: 10;
-        .month {
-          transform: 0.25s all ease;
-          &:hover {
-            color: $raphael-green-400;
-          }
+        &:hover {
+          color: $raphael-green-400;
         }
       }
     }
-  }
-  .usageBtnGroup {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: #f6f6f6;
-    z-index: 99;
-    display: grid;
-    padding: 1rem 1rem 3.125rem 1rem;
-    gap: 16px;
-    button {
-      background-color: $raphael-green-400;
-      color: $raphael-white;
-      border: none;
-      padding: 8px;
-      border-radius: 8px;
-      color: $raphael-white;
-      font-size: 18px;
-      font-style: normal;
-      font-weight: 400;
-      letter-spacing: 0.09px;
-    }
-    .preBtn {
-      background-color: $raphael-gray-200;
-      color: $raphael-gray-500;
-    }
-    .nextBtn {
-      background-color: $raphael-green-400;
-    }
-  }
-}
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
+    .integrationGroup {
+      overflow-y: auto;
+      height: calc(100vh - 549px);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      @include scrollbarStyle();
+      position: relative;
+
+      @include respond-to("phone-landscape") {
+        height: calc(100vh - 100px);
+      }
+
+      .detectItem {
+        width: 100%;
+        margin: 0 auto;
+        opacity: 0;
+        transition: 0.2s ease all;
+        animation: fadeIn2 1s ease forwards;
+        animation-delay: 0s;
+
+        &:hover {
+          box-shadow: 0px 5px 10px -2px #ccc inset;
+          padding: 0 4px;
+        }
+
+        .detect {
+          text-decoration: none;
+          color: $raphael-black;
+          display: flex;
+          justify-content: space-between;
+
+          .timeGroup {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            .timeIcon {
+              border-radius: 7px;
+              padding: 6px;
+              border: 1px solid $raphael-green-400;
+            }
+            .time {
+              font-size: 20px;
+              font-style: normal;
+              font-weight: 400;
+              letter-spacing: 0.15px;
+            }
+          }
+          .timeTextGroup {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.35;
+            .timeInfoText {
+              color: $raphael-gray-500;
+              font-size: 16px;
+              letter-spacing: 0.5px;
+            }
+          }
+          .infoGroup {
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            justify-content: end;
+            gap: 0.5rem;
+
+            .resultText {
+              color: var(--shade-gray-500, #666);
+
+font-size: 16px;
+font-style: normal;
+font-weight: 400;
+
+letter-spacing: 0.5px;
+            }
+            svg {
+              width: 18px;
+            }
+          }
+        }
+      }
+
+      .notDetectData {
+        position: absolute;
+        z-index: 11;
+        top: 60%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        letter-spacing: 10px;
+        font-size: 1.25rem;
+        white-space: nowrap;
+        color: $raphael-gray-300;
+      }
+    }
+
+    .notDetectData {
+      position: absolute;
+      z-index: 11;
+      top: 60%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      letter-spacing: 10px;
+      font-size: 1.25rem;
+      white-space: nowrap;
+      color: $raphael-gray-300;
+    }
   }
 }
 
@@ -1059,6 +728,15 @@ export default {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 </style>
