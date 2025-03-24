@@ -483,11 +483,14 @@ export default {
   }
 
   .notDetectData {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: inherit;
     letter-spacing: 10px;
     font-size: 1.25rem;
     white-space: nowrap;
     color: $raphael-gray-300;
-    text-align: center;
   }
   .detectItem {
     width: 100%;

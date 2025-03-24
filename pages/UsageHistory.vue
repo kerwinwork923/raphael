@@ -632,6 +632,8 @@ export default {
       justify-content: space-between;
       span {
         cursor: pointer;
+        display: flex;
+        gap: 1rem;
       }
     }
 

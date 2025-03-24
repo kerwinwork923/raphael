@@ -216,11 +216,10 @@
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- 若沒有任何使用紀錄則顯示「無檢測資料」 -->
-      <div class="notDetectData" v-if="filteredUseList.length === 0">
-        無檢測資料
+        <!-- 若沒有任何使用紀錄則顯示「無檢測資料」 -->
+        <div class="notDetectData" v-if="filteredUseList.length === 0">
+          無檢測資料
+        </div>
       </div>
     </div>
   </div>
@@ -692,26 +691,17 @@ export default {
           }
         }
       }
-
-      .notDetectData {
-        position: absolute;
-        z-index: 11;
-        top: 60%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        letter-spacing: 10px;
-        font-size: 1.25rem;
-        white-space: nowrap;
-        color: $raphael-gray-300;
-      }
     }
 
     .notDetectData {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: inherit;
       letter-spacing: 10px;
       font-size: 1.25rem;
       white-space: nowrap;
       color: $raphael-gray-300;
-      text-align: center;
     }
   }
 }
