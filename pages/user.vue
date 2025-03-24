@@ -440,12 +440,12 @@ export default {
 
           img{
             background: rgba(254, 172, 74, 0.7);
-            width: 100%;
+            width: 75%;
             height: 100px;
             border-radius: 0 0 8px 8px;
             padding: 0.5rem;
             top: 0;
-            box-shadow: 0 2px 5px #ccc;
+            box-shadow: inset 0 -4px 8px rgba(254, 172, 74, 1);
           }
 
           &:hover{
@@ -467,17 +467,17 @@ export default {
 
           .topTitle,
           .bottomTitle{
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
           }
 
           img{
             background: rgba(31, 188, 179 , .7);
-            width: 100%;
+            width: 50%;
             height: 60px;
             border-radius: 0 0 8px 8px;
             padding: 0.5rem;
             top: 0;
-            box-shadow: 0 2px 5px #ccc;
+            box-shadow: inset 0 -4px 8px rgba(31, 188, 179 , 1);
           }
 
           &:hover{
@@ -496,18 +496,18 @@ export default {
           justify-content: end;
 
           .bottomTitle{
-            margin-right: 0.25rem;
+            margin-right: 0.75rem;
           }
 
           img{
             background: rgba(188, 88, 31,.7);
-            width: 32%;
-            height: 100%;
+            width: 50px;
+            height: 55%;
             border-radius: 0 8px 8px 0;
             padding: 0.5rem;
-            top: 0;
+            top: 16px;
             left: 0;
-            box-shadow: 0 2px 5px #ccc;
+            box-shadow:  inset 0 -4px 8px rgba(188, 88, 31,1);
           }
 
           &:hover{
