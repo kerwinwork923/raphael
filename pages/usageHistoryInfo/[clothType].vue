@@ -3,7 +3,7 @@
   <DSPRSelect />
   <RaphaelLoading v-if="loading" />
   <div class="usageHistoryInfoWrap">
-    <TitleMenu Text="使用紀錄" link="/usageHistory" />
+    <TitleMenu Text="穿衣紀錄" link="/usageHistory" />
     <div class="usageHistoryWrap">
       <h3>產品使用說明</h3>
       <video

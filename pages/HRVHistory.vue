@@ -6,7 +6,7 @@
   <div class="HRVHistory">
     <div class="titleGroup">
       <img src="/assets/imgs/backArrow.svg" @click="goBack" alt="" />
-      <h2>使用紀錄</h2>
+      <h2>穿衣紀錄</h2>
     </div>
     <ChangeUsageTags />
 

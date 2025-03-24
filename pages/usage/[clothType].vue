@@ -5,7 +5,7 @@
 
   <div class="usageWrap">
     <!-- 頁面標題 -->
-    <TitleMenu Text="使用紀錄" :link="`/UsageHistory`" />
+    <TitleMenu Text="穿衣紀錄" :link="`/UsageHistory`" />
 
     <!-- 根據產品類型顯示對應 TimeRing 或卡片 (保留原程式邏輯) -->
     <TimeRing2

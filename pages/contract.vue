@@ -4,7 +4,7 @@
 
   <!-- 主要容器：當 loading 結束後才顯示 -->
   <div v-else class="contractWrap">
-    <TitleMenu Text="追蹤合約" link="/user" />
+    <TitleMenu Text="我的合約" link="/user" />
 
     <!-- 篩選選單 -->
     <div class="contractTopMenu">

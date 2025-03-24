@@ -1,7 +1,7 @@
 <template>
   <RaphaelLoading v-if="loading" />
   <div class="usageHistoryWrap">
-    <TitleMenu Text="使用紀錄" link="/user" />
+    <TitleMenu Text="穿衣紀錄" link="/user" />
     <ChangeUsageTags></ChangeUsageTags>
     <div class="productWrap">
       <h3 class="yourProductTitle" v-if="purchasedProducts.length > 1">
