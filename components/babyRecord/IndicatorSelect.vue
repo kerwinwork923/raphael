@@ -81,6 +81,7 @@ export default {
       cursor: pointer;
       h3 {
         font-weight: bold;
+        font-size: 1.25rem;
         margin: 0.25rem 0 0 0;
       }
       p {

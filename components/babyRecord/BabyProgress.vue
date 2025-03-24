@@ -45,7 +45,7 @@ export default {
 .babyProgressGroup {
   display: flex;
   gap: 12px;
-  max-width: 100%;
+  width: 100%;
   overflow-x: auto;
   padding-bottom: 2px;
   scroll-snap-type: x mandatory;
@@ -54,6 +54,7 @@ export default {
     background-color: #ffffff;
     border-radius: 8px;
     min-width: 160px;
+    width: 100%;
     padding: 12px;
     cursor: pointer;
     scroll-snap-align: start;
