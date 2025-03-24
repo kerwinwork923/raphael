@@ -1011,13 +1011,11 @@ export default {
   gap: 0.75rem;
 
   width: 100%;
-  // padding: 0.75rem 0 3.125rem 0;
   position: fixed;
   bottom: 0;
   left: 0;
   padding-bottom: 1rem;
   padding-top: 0.75rem;
-  background-color: #f5f5f5;
 
   .babyRerordCommonBtn {
     background-color: #74bc1f;
