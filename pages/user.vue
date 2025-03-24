@@ -414,7 +414,7 @@ export default {
         justify-content: center;
         height: 100%;
         position: relative;
-        background: $raphael-white;
+        background: rgba(255, 255, 255,.5);
         border-radius: 0.75rem;
         color: $raphael-gray-500;
         cursor: pointer;
