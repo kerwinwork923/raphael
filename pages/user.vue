@@ -533,6 +533,9 @@ export default {
         }
       }
       .item3_link {
+        
+        grid-column: 2;
+        grid-row: 1 / 3;
         @include respond-to("tablet") {
         }
 
@@ -546,7 +549,7 @@ export default {
       }
 
       .item4_link {
-        grid-row: 1/2;
+        grid-row: 1/4;
 
         @include respond-to("tablet") {
         }
