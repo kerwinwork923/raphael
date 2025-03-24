@@ -707,15 +707,11 @@ export default {
     }
 
     .notDetectData {
-      position: absolute;
-      z-index: 11;
-      top: 60%;
-      left: 50%;
-      transform: translate(-50%, -50%);
       letter-spacing: 10px;
       font-size: 1.25rem;
       white-space: nowrap;
       color: $raphael-gray-300;
+      text-align: center;
     }
   }
 }

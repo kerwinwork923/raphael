@@ -437,15 +437,11 @@ article {
   .detectList {
     @include recordList($raphael-white, auto, 0.75rem, 0.75rem);
     .notDetectData {
-      position: absolute;
-      z-index: 11;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
       letter-spacing: 10px;
       font-size: 1.25rem;
       white-space: nowrap;
       color: $raphael-gray-500;
+      text-align: center;
     }
   }
 

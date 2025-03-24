@@ -49,7 +49,7 @@ const gotoUsageHistory = () => {
 .changeUsageTag {
   width: 50%;
   color: var(--shade-gray-500, #666);
-  font-size: 16px;
+  font-size: 1.125rem;
   font-style: normal;
   font-weight: 400;
   line-height: 100%;
