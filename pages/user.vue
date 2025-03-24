@@ -53,35 +53,29 @@
           <img src="../assets/imgs/faceIcon.svg" alt="" />
         </div> -->
 
-        <div @click="showHealthRecordAlert" class="item3_link">
-          <div class="item item3">
-            <div class="topTitle">健康</div>
-            <div class="bottomTitle">紀錄</div>
-            <img src="../assets/imgs/noteIcon.svg" alt="" />
-          </div>
-        </div>
-
-        <router-link to="/UsageHistory" class="item4_link">
-          <div class="item item4">
+        <router-link to="/UsageHistory" class="item">          
             <div class="topTitle">穿衣</div>
             <div class="bottomTitle">紀錄</div>
-            <img src="../assets/imgs/clothIcon.svg" alt="" />
-          </div>
+            <img src="../assets/imgs/clothIcon.svg" alt="" />          
         </router-link>
 
-        <router-link to="/contract" class="item5_link">
-          <div class="item item5">
+        <div @click="showHealthRecordAlert" class="item">          
+            <div class="topTitle">健康</div>
+            <div class="bottomTitle">紀錄</div>
+            <img src="../assets/imgs/noteIcon.svg" alt="" />          
+        </div>
+
+        <router-link to="/contract" class="item">          
             <div class="topTitle">我的</div>
             <div class="bottomTitle">合約</div>
-            <img src="../assets/imgs/contract.svg" alt="" />
-          </div>
+            <img src="../assets/imgs/contract.svg" alt="" />          
         </router-link>
 
-        <div class="item item6">
+        <!-- <div class="item item6">
           <div class="topTitle">推薦</div>
           <div class="bottomTitle">親友</div>
           <img src="../assets/imgs/relationshopIcon.svg" alt="" />
-        </div>
+        </div> -->
 
         <!-- <router-link class="item item1" to="/point">
           <div>
@@ -411,155 +405,119 @@ export default {
       display: grid;
       margin-top: 0.75rem;
       grid-template-columns: repeat(2, 1fr);
-      gap: 0.75rem;
-      //暫時的樣式
       grid-template-rows: repeat(3, 84px);
+      gap: 0.75rem;
 
       .item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
         position: relative;
+        background: $raphael-white;
         border-radius: 0.75rem;
+        color: $raphael-gray-500;
+        cursor: pointer;
+        font-size: 2rem;
         padding: 0.75rem;
-        color: $raphael-white;
-        //暫時的樣式
         overflow: hidden;
-        //暫時的樣式 end
-
-        a {
-          color: $raphael-white;
-        }
         transition: 0.15s all ease;
-
-        .topTitle {
-          font-weight: 400;
-          font-size: 1.25rem;
-          color: $raphael-white;
-          letter-spacing: 0.09px;
-          margin-bottom: 4px;
-        }
-
-        .bottomTitle {
-          font-size: 2.25rem;
-          font-weight: bold;
-          letter-spacing: 0.09px;
-
-          @include respond-to("tablet") {
-            font-size: 3rem;
-          }
-        }
-
+        box-shadow: 0px 2px 12px #AFDDC0;
         img {
           position: absolute;
-          width: 100%;
-          opacity: 0.1;
-          filter: blur(2px);
+          transition: 0.15s all ease;
+        }
+        &:first-child{
+          border: 2px solid rgba(254, 172, 74 ,.7);
+          color: $raphael-orange-400;
+          grid-row: 1 / 4;
+          align-items: end;
 
-          @include respond-to("tablet") {
+          .topTitle,
+          .bottomTitle{
+            margin-bottom: 4rem;
+          }
+
+          img{
+            background: rgba(254, 172, 74, 0.7);
+            width: 100%;
+            height: 100px;
+            border-radius: 0 0 8px 8px;
+            padding: 0.5rem;
+            top: 0;
+            box-shadow: 0 2px 5px #ccc;
+          }
+
+          &:hover{
+            border: 2px solid rgba(254, 172, 74 ,1);
+            color: $raphael-orange-500;
+
+            &>img{
+              background: rgba(254, 172, 74 ,1);
+            }
           }
         }
-      }
+        &:nth-child(2){
+          border: 2px solid rgba(31, 188, 179 , .7);
+          color: $raphael-cyan-400;
+          grid-column: 2;
+          grid-row: 1/3;
+          align-items: end;
+          font-size: 1.75rem;
 
-      .item1 {
-        position: relative;
-        background-color: $raphael-green-400;
-        grid-column: 1 / 3; // 讓 item1 佔滿整行
-        &>div{
-          display: grid;
-          width: 100%;
-          height: 100%;
-          place-items: center;
-          align-content: center;
-          cursor: pointer;
-          &>img{
-            width: 40%;
+          .topTitle,
+          .bottomTitle{
+            margin-bottom: 2rem;
+          }
+
+          img{
+            background: rgba(31, 188, 179 , .7);
+            width: 100%;
+            height: 60px;
+            border-radius: 0 0 8px 8px;
+            padding: 0.5rem;
+            top: 0;
+            box-shadow: 0 2px 5px #ccc;
+          }
+
+          &:hover{
+            border: 2px solid rgba(31, 188, 179 , 1);
+            color: $raphael-cyan-500;
+
+            &>img{
+              background: rgba(31, 188, 179 , 1);
+            }
           }
         }
-      }
-      .item2 {
-        background-color: $raphael-purple-200;
-        cursor: pointer;
-        &:hover {
-          filter: brightness(0.95);
-        }
-      }
-      .item3 {
-        background-color: $raphael-cyan-400;
-        cursor: pointer;
-        &:hover {
-          filter: brightness(0.95);
-        }
-      }
-      .item4 {
-        background-color: $raphael-orange-400;
-        cursor: pointer;
-        &:hover {
-          filter: brightness(0.95);
-        }
-      }
-      .item5 {
-        background-color: $raphael-brown-400;
-        display: grid;
-        width: 100%;
-        height: 100%;
-        place-items: center;
-        align-content: center;
-        cursor: pointer;
+        &:last-child{
+          border: 2px solid rgba(188, 88, 31,.7);
+          color: $raphael-brown-400;
+          font-size: 1.25rem;
+          justify-content: end;
 
-        &:hover {
-          filter: brightness(0.95);
-        }
-      }
-      .item6 {
-        background-color: $raphael-gray-300;
-        cursor: pointer;
-        &:hover {
-          filter: brightness(0.95);
-        }
-      }
-      //暫時隱藏
+          .bottomTitle{
+            margin-right: 0.25rem;
+          }
 
-      .item6 {
-        display: none;
-      }
+          img{
+            background: rgba(188, 88, 31,.7);
+            width: 32%;
+            height: 100%;
+            border-radius: 0 8px 8px 0;
+            padding: 0.5rem;
+            top: 0;
+            left: 0;
+            box-shadow: 0 2px 5px #ccc;
+          }
 
-      //暫時的樣式
+          &:hover{
+            border: 2px solid rgba(188, 88, 31,1);
+            color: $raphael-brown-500;
 
-      .item2 {
-        display: grid;
-        grid-row: 1 / 3;
-        place-items: center;
-        align-content: center;
-
-        @include respond-to("tablet") {
-        }
-      }
-      .item3_link {
-        
-        grid-column: 2;
-        grid-row: 1 / 3;
-        @include respond-to("tablet") {
-        }
-
-        .item3 {
-          display: grid;
-          width: 100%;
-          height: 100%;
-          place-items: center;
-          align-content: center;
-        }
-      }
-
-      .item4_link {
-        grid-row: 1/4;
-
-        @include respond-to("tablet") {
-        }
-
-        .item4 {
-          display: grid;
-          width: 100%;
-          height: 100%;
-          place-items: center;
-          align-content: center;
+            &>img{
+              background: rgba(188, 88, 31,1);
+            }
+          }
         }
       }
     }
