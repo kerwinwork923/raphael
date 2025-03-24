@@ -49,7 +49,7 @@ export default {
   overflow-x: auto;
   padding-bottom: 2px;
   scroll-snap-type: x mandatory;
-  margin-top: .5rem;
+  margin-top: 1rem;
   .babyProgressCard {
     background-color: #ffffff;
     border-radius: 8px;

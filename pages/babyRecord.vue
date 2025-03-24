@@ -948,6 +948,11 @@ export default {
   padding-bottom: 4rem;
   position: relative;
 
+  .tagList{
+    margin-top: 12px;
+    width: 100%;
+  }
+
   .babyCover {
     position: fixed;
     width: 100%;
