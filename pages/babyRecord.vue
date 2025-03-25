@@ -1296,6 +1296,16 @@ export default {
   }
 }
 .babyQAGroup {
+  
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 243px);
+
+  .QAList{
+    flex: 1;
+    height: 0;
+  }
+
   p {
     padding-top: 0.25rem;
     padding-bottom: 0.5rem;
