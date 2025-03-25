@@ -67,16 +67,19 @@ export default {
     }
   }
   .babyProgressCard {
-    background-color: #ffffff;
+    background-color: $raphael-white;
     border-radius: 8px;
     min-width: 160px;
     width: 100%;
     padding: 12px;
     cursor: pointer;
     scroll-snap-align: start;
-    &:hover {
-      transform: scale(1.05);
-      transition: 0.2s ease-in-out;
+    &:hover:not(.active) {
+      .babyProgressTitle{
+        .babyProgressState{
+          background-color: $raphael-gray-400;
+        }
+      }
     }
 
     .babyProgressTitle {
@@ -94,6 +97,7 @@ export default {
         height: 12px;
         background-color: #eeeeee;
         border-radius: 999px;
+        transition: all .2s ease;
       }
       .babyProgressStateActive {
         background-color: #74bc1f;

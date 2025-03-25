@@ -52,7 +52,6 @@ export default {
 <style lang="scss">
 /* 指標選擇區 */
 .babyAnsTypeGroup {
-  margin-bottom: 1rem;
   p {
     color: #666666; /* 原 var(--shade-gray-500) */
     font-size: 16px;
@@ -60,24 +59,22 @@ export default {
     line-height: 1;
     letter-spacing: 0.5px;
     margin: 0;
-    margin-top: 1rem;
-
+    margin-bottom: 0.5rem;
   }
   .babyAnsTypeInfoGroup {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2%;
-    justify-content: space-between;
-    margin-top: 0.5rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    height: calc(100vh - 325px);
+    overflow-y: auto;
+    padding-bottom: 0.75rem;
 
     .babyAnsTypeCard {
-      width: 48%;
-      background-color: #ffffff;
+      background-color: $raphael-white;
       border-radius: 0.5rem;
       padding: 8px 12px;
       border: 1px solid #cccccc;
       box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-      margin-bottom: 0.75rem;
       cursor: pointer;
       h3 {
         font-weight: bold;

@@ -151,7 +151,7 @@
       </div>
 
       <!-- indicator (第一次 or 剛選完版本) -->
-      <div v-else-if="curChildData?.flowStage === 'indicator'">
+      <div v-else-if="curChildData?.flowStage === 'indicator'" class="babyRecordWrap">
         <IndicatorSelect :ansTypes="ansTypes" :curChildData="curChildData" />
         <div class="babyRerordBtnGroup">
           <button
@@ -997,10 +997,9 @@ export default {
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-
   width: 100%;
   padding: 0 1rem;
-  padding-bottom: 4rem;
+  padding-bottom: 50px;
   position: relative;
 
   .tagList {
@@ -1058,33 +1057,35 @@ export default {
   }
 }
 
+.babyRecordWrap{
+  margin-top: 0.75rem;
+}
+
 /* 下方按鈕 */
 .babyRerordBtnGroup {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 0.75rem;
-
   width: 100%;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  padding-bottom: 1rem;
   padding-top: 0.75rem;
 
   .babyRerordCommonBtn {
-    background-color: #74bc1f;
+
+    background-color: $raphael-green-400;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 90%; // 預設 100% (單一按鈕)
+    width: 100%;
     border: none;
     border-radius: 0.5rem;
-    color: #fff;
+    color: $raphael-white;
     cursor: pointer;
     font-size: 1.125rem;
     font-weight: 400;
     padding: 0.5rem 0.75rem;
+    line-height: 100%;
+    letter-spacing: 0.5px;
     transition: all 0.2s ease;
 
     &:disabled {
