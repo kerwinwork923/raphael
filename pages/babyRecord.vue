@@ -317,40 +317,48 @@ export default {
 
     // 進入畫面 => 先抓寶貝
     onMounted(() => {
-      isLoading.value = true;
-      babyStore
-        .fetchGrowth()
-        .then(() => {
-          babyStore.babyAPIData.forEach((child) => {
-            const cid = child.CID;
-            const rec = babyStore.childRecords[cid];
-            // 若沒填過 => indicator；否則 chooseVersion / historyView
-            if (!child.ChildANSTime) {
+      babyStore.fetchGrowth().then(() => {
+        babyStore.babyAPIData.forEach((child) => {
+          const cid = child.CID;
+          const rec = babyStore.childRecords[cid];
+
+          // 如果從未檢測過 => flowStage=indicator
+          if (!child.ChildANSTime) {
+            if (!rec.flowStage) {
               rec.flowStage = "indicator";
-              babyStore.fetchGrowthRecord(cid);
+            }
+            babyStore.fetchGrowthRecord(cid);
+          } else {
+            // 已檢測過 => 判斷 diffDaysFromToday
+            const daysDiff = Number(child.diffDaysFromToday) || 0;
+            if (daysDiff > 0) {
+              // 還沒到下次可測時間 => historyView
+              rec.flowStage = "historyView";
+              // if (!rec.flowStage) {
+              //   rec.flowStage = "historyView";
+              // }
+              babyStore.fetchGrowthFirst(cid);
             } else {
-              if (Number(child.diffDaysFromToday) > 0) {
-                rec.flowStage = "historyView";
-                // 呼叫 API_GrowthFirst 去拿「上次/本次資料 + 歷史」
-                babyStore.fetchGrowthFirst(cid);
-              } else {
+              // daysDiff <= 0 => 可以檢測 => chooseVersion
+              if (!rec.flowStage) {
                 rec.flowStage = "chooseVersion";
               }
+              // 這裡是否再提早 fetch 上次紀錄依需求調整
             }
-          });
-        })
-        .finally(() => {
-          isLoading.value = false;
+          }
         });
+      });
     });
 
-    // 取得當前寶貝
+    // 當前是否有小孩
     const hasChild = computed(() => babyStore.babyAPIData.length > 0);
+
+    // 取得當前寶貝 childRecords
     const curChildData = computed(
       () => babyStore.childRecords[babyStore.selectedChildID]
     );
 
-    // ====== 新增寶貝 ======
+    // ====== 無小孩：BabyIntro / BabyCreateForm ======
     const showBabyCover = ref(false);
     const showBabyAlert = ref(false);
     const showAddBabyForm = ref(false);
@@ -368,7 +376,6 @@ export default {
         // 有小孩
         const stage = curChildData.value?.flowStage;
         if (stage === "indicator") {
-          // 先檢查是否有 fetchGrowthRecord 取到指標
           const cid = babyStore.selectedChildID;
           const set = curChildData.value?.selectedAnsTypes;
           if (!set || set.size === 0) {
@@ -418,7 +425,6 @@ export default {
       showBabyAlert.value = false;
     }
 
-    // 按「送出寶貝」
     async function submitBabyData() {
       try {
         for (const b of babyInfos.value) {
@@ -428,7 +434,6 @@ export default {
           }
         }
         isLoading.value = true;
-
         const req = {
           MID,
           Token,
@@ -444,13 +449,27 @@ export default {
           "https://23700999.com:8081/HMA/API_ChildSave.jsp",
           req
         );
+
         if (resp.data.Result === "OK") {
-          // 關閉新增寶貝視窗
+          // 關閉彈窗
           showBabyAlert.value = false;
           showBabyCover.value = false;
           showAddBabyForm.value = false;
-          // 再抓一次寶貝清單 => 就可以看到新寶貝
+
+          // 再抓一次寶貝清單
           await babyStore.fetchGrowth();
+
+          // 預設選剛新增的那位 (最後一位)
+          if (babyStore.babyAPIData.length > 0) {
+            const newChild =
+              babyStore.babyAPIData[babyStore.babyAPIData.length - 1];
+            babyStore.selectedChildID = newChild.CID;
+            await babyStore.fetchGrowthRecord(newChild.CID);
+
+            // 讓 flowStage 進入指標階段
+            const rec = babyStore.childRecords[newChild.CID];
+            rec.flowStage = "indicator";
+          }
         } else {
           alert("新增寶貝失敗：" + resp.data.Message);
         }
@@ -462,7 +481,7 @@ export default {
       }
     }
 
-    // chooseVersion
+    // ====== chooseVersion ======
     function setVersion(val) {
       curChildData.value.version = val;
     }
@@ -473,7 +492,6 @@ export default {
       }
       const cid = babyStore.selectedChildID;
       isLoading.value = true;
-      // **重要：先去撈 API_GrowthRec，取得指標 (ChildAnsAllType)**
       await babyStore.fetchGrowthRecord(cid);
       isLoading.value = false;
       curChildData.value.flowStage = "indicator";
@@ -483,7 +501,7 @@ export default {
       return babyStore.childRecords[cid]?.growthRec?.ChildAnsAllType || {};
     });
 
-    // QA
+    // ====== QA ======
     const qaListRef = ref(null);
     const currentPage = computed(() => qaListRef.value?.currentPage || 1);
     const totalPages = computed(() => qaListRef.value?.totalPages || 1);
@@ -522,19 +540,14 @@ export default {
         id: q.QueSeq,
         question: q.Question,
         selectScore: "",
-        answers: [
-          q.AnswerName_0,
-          q.AnswerName_1,
-          q.AnswerName_2,
-          q.AnswerName_3,
-        ],
+        answers: [q.AnswerName_0, q.AnswerName_1, q.AnswerName_2, q.AnswerName_3],
         Type: q.Type,
         TypeName: q.TypeName,
       }));
       babyStore.childRecords[cid].flowStage = "times";
     }
 
-    // times
+    // ====== times ======
     const timesCurrentPage = ref(1);
     const pageSize = 7;
     const timesQuestions = computed(
@@ -643,7 +656,7 @@ export default {
       }
     }
 
-    // priority
+    // ====== priority ======
     const selectedPriorityCount = ref(0);
     function onPrioritySelectionChanged(count) {
       selectedPriorityCount.value = count;
@@ -729,28 +742,37 @@ export default {
     function onClickChild(cid) {
       babyStore.selectedChildID = cid;
       const rec = babyStore.childRecords[cid];
-      if (rec.flowStage === "historyView") {
-        isLoading.value = true;
-        babyStore.fetchGrowthFirst(cid).finally(() => {
-          isLoading.value = false;
-        });
+
+      // 若從未檢測過 => indicator
+      const childData = babyStore.babyAPIData.find((b) => b.CID === cid);
+      if (childData && !childData.ChildANSTime) {
+        if (!rec.flowStage) {
+          rec.flowStage = "indicator";
+          if (!rec.growthRec) {
+            isLoading.value = true;
+            babyStore.fetchGrowthRecord(cid).finally(() => {
+              isLoading.value = false;
+            });
+          }
+        }
+      } else {
+        // 大於一次 (已檢測過) => 依照diffDaysFromToday或資料流程自行判斷
+        // ...
       }
     }
 
-    // 返回紀錄
+    // result 返回歷史紀錄
     async function goBackToHistory() {
       const cid = babyStore.selectedChildID;
       if (!cid) return;
-
-      isLoading.value = true; // 開啟載入狀態
-
+      isLoading.value = true;
       try {
-        await babyStore.fetchGrowthFirst(cid); // 重新請求最新歷史紀錄
-        curChildData.value.flowStage = "historyView"; // 切換回歷史紀錄畫面
+        await babyStore.fetchGrowthFirst(cid);
+        curChildData.value.flowStage = "historyView";
       } catch (error) {
         console.error("獲取歷史紀錄失敗:", error);
       } finally {
-        isLoading.value = false; // 關閉載入狀態
+        isLoading.value = false;
       }
     }
 
@@ -781,7 +803,7 @@ export default {
       };
     }
 
-    // 年/月篩選
+    // 歷史篩選
     const selectedYear = ref(new Date().getFullYear());
     const selectedMonth = ref(new Date().getMonth() + 1);
     const yearBoxVisible = ref(false);
@@ -934,6 +956,7 @@ export default {
   },
 };
 </script>
+
 
 <style lang="scss">
 .babyRecord {

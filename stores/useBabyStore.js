@@ -53,7 +53,7 @@ export const useBabyStore = defineStore("babyStore", () => {
     }
   }
 
-  // 指標文字 -> 後端對應
+  // 指標文字 -> 後端對應 (自行對應需求可再擴充)
   const indicatorMap = {
     注意力指標: "1",
     好動指標: "2",
@@ -92,7 +92,7 @@ export const useBabyStore = defineStore("babyStore", () => {
             };
           }
         });
-        // 預設選擇第一位
+        // 預設選第一位
         if (babyAPIData.value.length > 0) {
           selectedChildID.value = babyAPIData.value[0].CID;
         }
@@ -177,7 +177,7 @@ export const useBabyStore = defineStore("babyStore", () => {
       );
       if (data.Result === "OK") {
         childRecords[cid].isFetched = true;
-        childRecords[cid].growthRec = data; // 這裡面含 ChildAnsAllType 即指標
+        childRecords[cid].growthRec = data; // 這裡面含 ChildAnsAllType (指標)
       } else {
         console.warn("API_GrowthRec fail:", data.Message);
       }
@@ -186,7 +186,7 @@ export const useBabyStore = defineStore("babyStore", () => {
     }
   }
 
-  // =========== (5) 勾選指標 =============
+  // =========== (5) 勾選指標 ===========
   function toggleAnsType(cid, typeName) {
     if (!childRecords[cid]) return;
     const set = childRecords[cid].selectedAnsTypes;
@@ -197,12 +197,12 @@ export const useBabyStore = defineStore("babyStore", () => {
     }
   }
 
-  // =========== (6) API_GrowthRec2 ===========
+  // =========== (6) API_GrowthRec2 (取得 QA 題目) ===========
   async function fetchChildQuestions(cid) {
     if (!cid) return;
     const rec = childRecords[cid];
     const AID = rec.growthRec?.CIDChildAnsLast?.AID || "";
-    const FirstSecond = AID ? "Second" : "First";
+    const FirstSecond = AID ? "Second" : "First"; // 第一次 or 第二次
     const ShortComplete = rec.version === "tracking" ? "Short" : "Complete";
 
     const selectedNumbers = [...rec.selectedAnsTypes]
@@ -250,7 +250,7 @@ export const useBabyStore = defineStore("babyStore", () => {
     }
   }
 
-  // =========== (7) API_GrowthRecTimes ===========
+  // =========== (7) API_GrowthRecTimes (若需要單獨取得「次數題目」) ===========
   async function fetchGrowthRecTimes(cid, AID) {
     if (!cid) return;
     try {
@@ -296,7 +296,7 @@ export const useBabyStore = defineStore("babyStore", () => {
     }
   }
 
-  // 監聽 childRecords，存到 localStorage
+  // 監聽 childRecords，存入 localStorage (深層監聽)
   watch(
     () => childRecords,
     (val) => {

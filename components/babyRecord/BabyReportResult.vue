@@ -4,6 +4,7 @@
     <div class="resultTopGroup">
       <div class="resultInfo">
         <!-- (本次) -->
+
         <div v-if="latestScore">
           <h5 class="subText">(本次){{ removeTime(latestScore.CheckTime) }}</h5>
 
@@ -214,6 +215,7 @@ export default {
       default: () => ({}),
     },
   },
+
   setup(props) {
     // 1) 取代舊的 ChildScore / preChildScore => Data / PreData
     const latestChildScore = computed(() => props.reportData?.Data || []);
@@ -238,7 +240,7 @@ export default {
         lightList.value.length > 0
       );
     });
-
+   
     // 4) 檢測紀錄
     const historyList = computed(() => props.reportData?.History || []);
 
