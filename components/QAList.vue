@@ -12,7 +12,7 @@
 
       <!-- 顯示當前選擇的答案文字 -->
       <div class="scoreText">
-        當前選擇：{{ getAnswerText(qItem.selectedScore, qItem.answers) }}
+        {{ getAnswerText(qItem.selectedScore, qItem.answers) }}
       </div>
 
       <!-- 進度條 -->
