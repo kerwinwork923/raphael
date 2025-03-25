@@ -83,9 +83,9 @@ export default {
   overflow-y: auto;
 
   h4 {
-    color: #000000; /* 原 $raphael-black */
+    color: $raphael-black; 
     font-size: 20px;
-    font-weight: bold;
+    font-weight: 500;
     line-height: 1;
     letter-spacing: 0.15px;
     margin: 0;
@@ -93,8 +93,8 @@ export default {
   .desCard {
     display: grid;
     gap: 0.5rem;
-    background: #ffffff; /* $raphael-white */
-    color: #666666; /* $raphael-gray-500 */
+    background: $raphael-white;
+    color: $raphael-gray-500;
     border-radius: 0.5rem;
     margin: 0.75rem 0;
     padding: 0.75rem;
@@ -107,14 +107,14 @@ export default {
     display: grid;
     gap: 0.75rem;
     font-size: 1.125rem;
-    color: #666666; /* $raphael-gray-500 */
+    color: $raphael-gray-500; /* $raphael-gray-500 */
     line-height: 1.4;
     letter-spacing: 0.05em;
 
     &::after {
       content: "";
       position: absolute;
-      background: #ffffff; /* $raphael-white */
+      background: $raphael-white;
       width: 4px;
       height: 100%;
       border-radius: 0.5rem;
@@ -128,7 +128,7 @@ export default {
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #00bcd4; /* $raphael-cyan-400 */
+        background: $raphael-cyan-400; 
         border-radius: 50%;
         padding: 4px;
         height: 32px;
@@ -147,6 +147,19 @@ export default {
         gap: 0.5rem;
         padding: 0.75rem;
         box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+        & > hgroup {
+          display: flex;
+          flex-direction: column;
+          & > sub {
+            color: $raphael-cyan-400;
+            font-size: 0.813rem;
+            line-height: 100%;
+          }
+          & > h3 {
+            color: $raphael-black;
+            font-size: 1.25rem;
+          }
+        }
       }
     }
   }
