@@ -158,6 +158,9 @@ export default {
     outline: none;
     border: none;
     border-bottom: 1px solid #cccccc;
+    appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
     font-size: 1.2rem;
     width: 100%;
     padding-left: 36px;
