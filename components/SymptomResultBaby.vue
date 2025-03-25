@@ -37,23 +37,22 @@
       </span>
     </h4>
 
-    <div class="nextGroup" >
-      <h5>(前次){{ formatTimestamp(theLatestHistoryPre?.CheckTime || "") }}</h5>
-      <ProgressBar2
-        :score="computedScore(symptomPreRatio)"
-        :emojiSrc="computedEmoji2(computedScore(symptomPreRatio))"
-      />
-      <h4>
-        嚴重程度 :
-        <span
-          :style="{
-            color: scoreColorFn(computedScore(symptomPreRatio), sex),
-          }"
-        >
-          {{ symptomPreRatio }}({{ symptomPreDesc }})
-        </span>
-      </h4>
-    </div>
+  <!-- 修改：加上 v-if -->
+<div class="nextGroup" 
+     v-if="theLatestHistoryPre && theLatestHistoryPre.CheckTime">
+  <h5>(前次){{ formatTimestamp(theLatestHistoryPre.CheckTime) }}</h5>
+  <ProgressBar2
+    :score="computedScore(symptomPreRatio)"
+    :emojiSrc="computedEmoji2(computedScore(symptomPreRatio))"
+  />
+  <h4>
+    嚴重程度 :
+    <span :style="{ color: scoreColorFn(computedScore(symptomPreRatio), sex) }">
+      {{ symptomPreRatio }}({{ symptomPreDesc }})
+    </span>
+  </h4>
+</div>
+
   </div>
 
 </template>

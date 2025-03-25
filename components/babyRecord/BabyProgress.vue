@@ -8,11 +8,18 @@
       @click="select(child.CID)"
     >
       <div class="babyProgressTitle">
-        <div
-          class="babyProgressState"
-          :class="{ babyProgressStateActive: child.CID === selectedChildID }"
-        ></div>
-        <h4>{{ child.Name }}</h4>
+        <div class="babyProgressTitleLeft">
+          <div
+            class="babyProgressState"
+            :class="{ babyProgressStateActive: child.CID === selectedChildID }"
+          ></div>
+          <h4>{{ child.Name }}</h4>
+        </div>
+        <img
+          v-if="child.ratioComplete == 100"
+          src="../../assets/imgs/babyRecord/babyCompleted.svg"
+          alt="已完成"
+        />
       </div>
       <div class="babyProgressText">
         <h5>問卷進度</h5>
@@ -50,6 +57,15 @@ export default {
   padding-bottom: 2px;
   scroll-snap-type: x mandatory;
   margin-top: 1rem;
+  .babyProgressTitle {
+    display: flex;
+    justify-content: space-between;
+    .babyProgressTitleLeft {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+  }
   .babyProgressCard {
     background-color: #ffffff;
     border-radius: 8px;
@@ -91,11 +107,11 @@ export default {
       h6 {
         margin: 0;
       }
-      h5{
+      h5 {
         color: var(--shade-gray-500, #666);
       }
-      h6{
-        color: var(--secondary-purple-200, #65558F);
+      h6 {
+        color: var(--secondary-purple-200, #65558f);
       }
     }
     .babyProgress {
@@ -114,7 +130,6 @@ export default {
         background-color: #65558f;
         border-radius: 4px;
       }
-     
     }
   }
 }

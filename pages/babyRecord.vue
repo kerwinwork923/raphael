@@ -540,7 +540,12 @@ export default {
         id: q.QueSeq,
         question: q.Question,
         selectScore: "",
-        answers: [q.AnswerName_0, q.AnswerName_1, q.AnswerName_2, q.AnswerName_3],
+        answers: [
+          q.AnswerName_0,
+          q.AnswerName_1,
+          q.AnswerName_2,
+          q.AnswerName_3,
+        ],
         Type: q.Type,
         TypeName: q.TypeName,
       }));
@@ -843,14 +848,42 @@ export default {
     });
     const months = Array.from({ length: 12 }, (_, i) => i + 1);
     const filteredHistoryList = computed(() => {
-      return rawHistoryList.value.flat().filter((item) => {
+      const daySet = new Set();
+
+      // 依 CheckTime 從晚到早排序 (確保第一個出現的是最新)
+      const sorted = rawHistoryList.value
+        .flat()
+        .filter((item) => {
+          const parsed = parseCheckTime(item.CheckTime);
+          if (!parsed) return false;
+          return (
+            parsed.year === selectedYear.value &&
+            parsed.month === selectedMonth.value
+          );
+        })
+        // 依 "YYYY/MM/DD HH:mm" 做字串比較也行，但最好轉成 Date 比較
+        .sort((a, b) => {
+          const dateA = new Date(a.CheckTime);
+          const dateB = new Date(b.CheckTime);
+          return dateB - dateA; // 時間新的在前面
+        });
+
+      // 接著只留下第一筆同一天的紀錄 (也就是 "該天最新的一筆")
+      const filtered = sorted.filter((item) => {
         const parsed = parseCheckTime(item.CheckTime);
-        if (!parsed) return false;
-        return (
-          parsed.year === selectedYear.value &&
-          parsed.month === selectedMonth.value
-        );
+        const dateKey = `${parsed.year}-${String(parsed.month).padStart(
+          2,
+          "0"
+        )}-${String(parsed.day).padStart(2, "0")}`;
+        if (daySet.has(dateKey)) {
+          return false;
+        } else {
+          daySet.add(dateKey);
+          return true;
+        }
       });
+
+      return filtered;
     });
 
     async function onClickHistoryItem(histItem) {
@@ -957,7 +990,6 @@ export default {
 };
 </script>
 
-
 <style lang="scss">
 .babyRecord {
   background-color: #f5f5f5;
@@ -971,7 +1003,7 @@ export default {
   padding-bottom: 4rem;
   position: relative;
 
-  .tagList{
+  .tagList {
     margin-top: 12px;
     width: 100%;
   }
