@@ -10,7 +10,11 @@
 
         <!-- 姓名 -->
         <div class="babyRecordInfoInput">
-          <img class="icon1" src="/assets/imgs/babyRecordMember.svg" alt="姓名" />
+          <img
+            class="icon1"
+            src="/assets/imgs/babyRecordMember.svg"
+            alt="姓名"
+          />
           <input type="text" v-model="baby.name" placeholder="請輸入寶貝姓名" />
         </div>
 
@@ -81,7 +85,7 @@ export default {
       const dd = String(date.getDate()).padStart(2, "0");
       return `${yyyy}-${mm}-${dd}`;
     }
-    
+
     return {
       addOneMoreBaby,
       remove,
@@ -159,15 +163,15 @@ export default {
     border: none;
     border-bottom: 1px solid #cccccc;
     appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
     font-size: 1.2rem;
     width: 100%;
     padding-left: 36px;
     padding-bottom: 12px;
     padding-top: 16px;
     color: #000000;
-
+    background: transparent;
     &::placeholder {
       color: #cccccc;
       font-family: Inter, sans-serif;
