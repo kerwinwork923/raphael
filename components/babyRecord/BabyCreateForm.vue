@@ -50,7 +50,7 @@
     <!-- 繼續新增 -->
     <div class="babyInfoAdd" @click="addOneMoreBaby">
       繼續新增寶貝基本資料
-      <span><img src="/assets/imgs/babyInfoAdd.svg" alt="新增" /></span>
+      <img src="/assets/imgs/babyInfoAdd.svg" alt="新增" />
     </div>
   </div>
 </template>
@@ -134,11 +134,12 @@ export default {
 .babyInfoAdd {
   display: flex;
   align-items: center;
+  justify-content: center;
   color: #ec4f4f;
-  gap: 2px;
+  gap: 4px;
   cursor: pointer;
   img {
-    width: 0.85rem;
+    width: 1.25rem;
   }
 }
 
