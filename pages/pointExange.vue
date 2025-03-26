@@ -108,7 +108,7 @@
       <div class="exangeUseInfo">
         <h5>使用須知</h5>
         <ul>
-          <li>黃金會員可立即使用 QR Code 進行使用或下次使用</li>
+          <li>鈦金會員可立即使用 QR Code 進行使用或下次使用</li>
           <li>其他會員僅可下次使用</li>
           <li>兌換後無法更改使用方式，請謹慎選擇</li>
         </ul>

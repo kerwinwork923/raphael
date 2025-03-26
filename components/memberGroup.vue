@@ -85,7 +85,7 @@ import { usePoint } from "@/stores/point";
 
 // 圖檔 import
 import normalImg from "@/assets/imgs/normal.svg";
-import copperImg from "@/assets/imgs/copper.svg";
+import titaniumImg from "@/assets/imgs/titanium.svg";
 import silverImg from "@/assets/imgs/silver.svg";
 import goldImg from "@/assets/imgs/gold.svg";
 
@@ -136,12 +136,12 @@ export default {
     // 根據等級名稱對應圖片
     const levelIcon = computed(() => {
       switch (memberGradeName.value) {
-        case "黃金會員":
+        case "鈦金會員":
+          return titaniumImg;
+        case "金卡會員":
           return goldImg;
-        case "白銀會員":
+        case "銀卡會員":
           return silverImg;
-        case "青銅會員":
-          return copperImg;
         case "雲端會員":
           return normalImg;
         default:
