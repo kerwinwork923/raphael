@@ -85,7 +85,7 @@ import { usePoint } from "@/stores/point";
 
 // 圖檔 import
 import normalImg from "@/assets/imgs/normal.svg";
-import copperImg from "@/assets/imgs/copper.svg";
+import titaniumImg from "@/assets/imgs/titanium.svg";
 import silverImg from "@/assets/imgs/silver.svg";
 import goldImg from "@/assets/imgs/gold.svg";
 
@@ -137,7 +137,7 @@ export default {
     const levelIcon = computed(() => {
       switch (memberGradeName.value) {
         case "鈦金會員":
-          return copperImg;
+          return titaniumImg;
         case "金卡會員":
           return goldImg;
         case "銀卡會員":
