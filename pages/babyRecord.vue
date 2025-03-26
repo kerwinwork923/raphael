@@ -28,12 +28,46 @@
 
     <!-- (B) 有小孩 => 依 flowStage 切換各階段 -->
     <template v-else>
+      <h6 v-if="!showAddBabyFormInHasChild" @click="onAddNewBabyClick">
+        繼續新增寶貝基本資料
+        <img src="../assets/imgs/babyRecord/babyTypeAdd.svg" alt="" />
+      </h6>
+
       <!-- 寶貝列表，可切換寶貝 -->
       <BabyProgress
         :babyList="babyStore.babyAPIData"
         :selectedChildID="babyStore.selectedChildID"
         @selectChild="onClickChild"
       />
+
+      <div v-if="showAddBabyFormInHasChild">
+        <!-- BabyRecord.vue 裡 -->
+        <BabyCreateForm
+          :babyInfos="newBabyInfos"
+          :existingOffset="babyStore.babyAPIData.length"
+          @addBaby="
+            () => newBabyInfos.push({ name: '', gender: '', birthDate: null })
+          "
+          @removeBaby="
+            (idx) => {
+              if (newBabyInfos.length > 1) newBabyInfos.splice(idx, 1);
+            }
+          "
+        />
+
+        <!-- 下方按鈕區: 送出 or 取消 -->
+        <div class="babyRerordBtnGroup">
+          <button
+            class="babyRerordCommonBtn babyRerordPrevBtn"
+            @click="showAddBabyFormInHasChild = false"
+          >
+            取消
+          </button>
+          <button class="babyRerordCommonBtn" @click="submitNewBabyData">
+            儲存
+          </button>
+        </div>
+      </div>
 
       <!-- chooseVersion (若大於一次 & diffDaysFromToday>0 => 未到可再次測) -->
       <div
@@ -151,7 +185,10 @@
       </div>
 
       <!-- indicator (第一次 or 剛選完版本) -->
-      <div v-else-if="curChildData?.flowStage === 'indicator'" class="babyRecordWrap">
+      <div
+        v-else-if="curChildData?.flowStage === 'indicator'"
+        class="babyRecordWrap"
+      >
         <IndicatorSelect :ansTypes="ansTypes" :curChildData="curChildData" />
         <div class="babyRerordBtnGroup">
           <button
@@ -304,6 +341,77 @@ export default {
   setup() {
     const router = useRouter();
     const babyStore = useBabyStore();
+
+    const showAddBabyFormInHasChild = ref(false);
+    const newBabyInfos = ref([{ name: "", gender: "", birthDate: null }]);
+
+    function onAddNewBabyClick() {
+      // 重置表單
+      newBabyInfos.value = [{ name: "", gender: "", birthDate: null }];
+      // 顯示表單
+      showAddBabyFormInHasChild.value = true;
+    }
+
+    // +++ 方法：在有小孩時送出「新增」的寶貝
+    async function submitNewBabyData() {
+      try {
+        // 簡單檢查必填
+        for (const b of newBabyInfos.value) {
+          if (!b.name || !b.gender || !b.birthDate) {
+            alert("請完整填寫寶貝資料");
+            return;
+          }
+        }
+        isLoading.value = true;
+
+        // 組 request
+        const req = {
+          MID,
+          Token,
+          MAID,
+          Mobile,
+          Child: newBabyInfos.value.map((b) => ({
+            Name: b.name,
+            Sex: b.gender === "male" ? "1" : "2",
+            BirthDay: formatDateToYYYYMMDD(b.birthDate),
+          })),
+        };
+
+        const resp = await axios.post(
+          "https://23700999.com:8081/HMA/API_ChildSave.jsp",
+          req
+        );
+        if (resp.data.Result === "OK") {
+          showBabyAlert.value = false;
+          showBabyCover.value = false;
+
+          // 關掉「有小孩新增寶貝」的表單
+          showAddBabyFormInHasChild.value = false;
+
+          // 重新抓寶貝清單
+          await babyStore.fetchGrowth();
+
+          // 您可以選擇自動切到剛新增的寶貝
+          if (babyStore.babyAPIData.length > 0) {
+            const newChild =
+              babyStore.babyAPIData[babyStore.babyAPIData.length - 1];
+            babyStore.selectedChildID = newChild.CID;
+            await babyStore.fetchGrowthRecord(newChild.CID);
+
+            // (b) flowStage= "indicator" (或您想要的階段)
+            const rec = babyStore.childRecords[newChild.CID];
+            rec.flowStage = "indicator";
+          }
+        } else {
+          alert("新增寶貝失敗：" + resp.data.Message);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("伺服器錯誤");
+      } finally {
+        isLoading.value = false;
+      }
+    }
 
     // Loading
     const isLoading = ref(false);
@@ -985,6 +1093,10 @@ export default {
       rawHistoryList,
       filteredHistoryList,
       onClickHistoryItem,
+      showAddBabyFormInHasChild,
+      newBabyInfos,
+      onAddNewBabyClick,
+      submitNewBabyData,
     };
   },
 };
@@ -1001,7 +1113,20 @@ export default {
   padding: 0 1rem;
   padding-bottom: 50px;
   position: relative;
+  h6 {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    gap: 4px;
+    color: var(--warning-red-300, #ec4f4f);
 
+    font-family: "Noto Sans TC";
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    margin-top: 0.5rem;
+    cursor: pointer;
+  }
   .tagList {
     margin-top: 12px;
     width: 100%;
@@ -1057,7 +1182,7 @@ export default {
   }
 }
 
-.babyRecordWrap{
+.babyRecordWrap {
   margin-top: 0.75rem;
 }
 
@@ -1071,7 +1196,6 @@ export default {
   padding-top: 0.75rem;
 
   .babyRerordCommonBtn {
-
     background-color: $raphael-green-400;
     display: flex;
     align-items: center;
@@ -1296,12 +1420,11 @@ export default {
   }
 }
 .babyQAGroup {
-  
   display: flex;
   flex-direction: column;
   height: calc(100vh - 243px);
 
-  .QAList{
+  .QAList {
     flex: 1;
     height: 0;
   }

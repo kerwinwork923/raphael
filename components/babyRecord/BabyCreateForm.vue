@@ -4,7 +4,7 @@
       <h4>新增寶貝基本資料</h4>
       <div class="babyInfo" v-for="(baby, index) in babyInfos" :key="index">
         <div class="babyInfoOption">
-          <small>#{{ index + 1 }}</small>
+          <small>#{{ existingOffset + index + 1 }}</small>
           <img src="/assets/imgs/trash.svg" alt="刪除" @click="remove(index)" />
         </div>
 
@@ -49,7 +49,7 @@
 
     <!-- 繼續新增 -->
     <div class="babyInfoAdd" @click="addOneMoreBaby">
-      繼續新增寶貝基本資料
+      繼續新增寶貝
       <img src="/assets/imgs/babyInfoAdd.svg" alt="新增" />
     </div>
   </div>
@@ -67,6 +67,10 @@ export default {
     babyInfos: {
       type: Array,
       default: () => [],
+    },
+    existingOffset: {
+      type: Number,
+      default: 0, // 表示目前已有幾位寶貝
     },
   },
   emits: ["addBaby", "removeBaby"],
