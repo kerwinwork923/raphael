@@ -136,12 +136,12 @@ export default {
     // 根據等級名稱對應圖片
     const levelIcon = computed(() => {
       switch (memberGradeName.value) {
-        case "黃金會員":
-          return goldImg;
-        case "白銀會員":
-          return silverImg;
-        case "青銅會員":
+        case "鈦金會員":
           return copperImg;
+        case "金卡會員":
+          return goldImg;
+        case "銀卡會員":
+          return silverImg;
         case "雲端會員":
           return normalImg;
         default:
