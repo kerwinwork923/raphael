@@ -29,7 +29,7 @@
     <!-- (B) 有小孩 => 依 flowStage 切換各階段 -->
     <template v-else>
       <h6 v-if="!showAddBabyFormInHasChild" @click="onAddNewBabyClick">
-        繼續新增寶貝基本資料
+        新增寶貝
         <img src="../assets/imgs/babyRecord/babyTypeAdd.svg" alt="" />
       </h6>
 
@@ -40,7 +40,7 @@
         @selectChild="onClickChild"
       />
 
-      <div v-if="showAddBabyFormInHasChild">
+      <div v-if="showAddBabyFormInHasChild" class="babyCreateForm">
         <!-- BabyRecord.vue 裡 -->
         <BabyCreateForm
           :babyInfos="newBabyInfos"
@@ -1124,7 +1124,9 @@ export default {
     font-size: 14px;
     font-style: normal;
     font-weight: 400;
-    margin-top: 0.5rem;
+    margin: auto;
+    margin-right: 0;
+    margin-top: 1rem;
     cursor: pointer;
   }
   .tagList {
@@ -1193,7 +1195,7 @@ export default {
   align-items: center;
   gap: 0.75rem;
   width: 100%;
-  padding-top: 0.75rem;
+  padding-top: 1rem;
 
   .babyRerordCommonBtn {
     background-color: $raphael-green-400;
@@ -1422,7 +1424,7 @@ export default {
 .babyQAGroup {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 243px);
+  height: calc(100vh - 268px);
 
   .QAList {
     flex: 1;

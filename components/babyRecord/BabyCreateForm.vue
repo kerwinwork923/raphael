@@ -100,13 +100,24 @@ export default {
 </script>
 
 <style lang="scss">
+.babyCreateForm{  
+  position: relative;
+  width: 100%;
+  border-radius: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 1rem;
+  box-shadow: inset 0px 4px 8px rgba(0, 0, 0, .25);
+}
+
 /* === 主容器 === */
 .babyRecordGroup {
   width: 100%;
-  padding-bottom: 1rem;
 }
 
 .babyInfoGroup {
+  max-height: 500px;
+  overflow: auto;
+  @include scrollbarStyle();
   h4 {
     color: #666666;
     font-size: 1rem;

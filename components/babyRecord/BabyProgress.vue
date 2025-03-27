@@ -56,7 +56,7 @@ export default {
   overflow-x: auto;
   padding-bottom: 2px;
   scroll-snap-type: x mandatory;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
   .babyProgressTitle {
     display: flex;
     justify-content: space-between;
