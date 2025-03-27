@@ -1266,10 +1266,6 @@ export default {
     }
   }
 
-  &.double-btn .babyRerordCommonBtn {
-    width: 45%;
-  }
-
   .babyRerordPrevBtn {
     background: #eee;
     color: #333;
@@ -1501,6 +1497,10 @@ export default {
 
     letter-spacing: 0.5px;
   }
+
+  .tagTimesList{
+    height: calc(100vh - 354px);
+  }
 }
 .babyPriority {
   h3 {
@@ -1513,6 +1513,9 @@ export default {
     font-weight: 400;
 
     letter-spacing: 0.5px;
+  }
+  .solvePriorityBox{
+    height: calc(100vh - 354px);
   }
 }
 </style>
