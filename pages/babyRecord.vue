@@ -1169,7 +1169,7 @@ export default {
     font-size: 14px;
     font-style: normal;
     font-weight: 400;
-    margin: auto;
+
     margin-right: 0;
     margin-top: 1rem;
     cursor: pointer;
