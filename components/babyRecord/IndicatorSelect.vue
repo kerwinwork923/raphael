@@ -65,7 +65,7 @@ export default {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
-    height: calc(100vh - 325px);
+    height: calc(100vh - 350px);
     overflow-y: auto;
     padding-bottom: 0.75rem;
 
