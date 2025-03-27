@@ -38,6 +38,7 @@
         :babyList="babyStore.babyAPIData"
         :selectedChildID="babyStore.selectedChildID"
         @selectChild="onClickChild"
+        @editChild="onEditChild" 
       />
 
       <div v-if="showAddBabyFormInHasChild">
@@ -301,6 +302,14 @@
         </button>
       </div>
     </div>
+    <BabyEditAlert
+      :show="showEditAlert"
+      :cid="editChildData.CID"
+      :name="editChildData.name"
+      :gender="editChildData.gender"
+      :birthDate="editChildData.birthDate"
+      @close="showEditAlert = false"
+    />
   </div>
 </template>
 
@@ -320,7 +329,7 @@ import QAList from "@/components/QAList.vue";
 import TimesSelect from "@/components/TimesSelect.vue";
 import SolvePrioritySelect from "@/components/babyRecord/SolvePrioritySelect.vue";
 import BabyReportResult from "@/components/babyRecord/BabyReportResult.vue";
-
+import BabyEditAlert from "@/components/babyRecord/BabyEditAlert.vue";
 import { useBabyStore } from "@/stores/useBabyStore";
 
 export default {
@@ -337,6 +346,7 @@ export default {
     TimesSelect,
     SolvePrioritySelect,
     BabyReportResult,
+    BabyEditAlert,
   },
   setup() {
     const router = useRouter();
@@ -344,6 +354,38 @@ export default {
 
     const showAddBabyFormInHasChild = ref(false);
     const newBabyInfos = ref([{ name: "", gender: "", birthDate: null }]);
+    const showEditAlert = ref(false);
+    const editChildData = ref({
+      CID: "",
+      name: "",
+      gender: "", // 'male' / 'female'
+      birthDate: null, // Date 物件
+    });
+
+    function onEditChild(child) {
+      // 打開編輯視窗
+
+      showEditAlert.value = true;
+
+      // 將 child 資料放進 editChildData
+      editChildData.value.CID = child.CID || "";
+      editChildData.value.name = child.Name || "";
+      // 後端 Sex="1"/"2" 時，可自行轉成 'male'/'female'
+      // 但 child 可能沒有 Sex, 需自行檢查
+      editChildData.value.gender =
+        child.Sex === "1" ? "male" : child.Sex === "2" ? "female" : "";
+
+      // 若後端 BirthDay= 'YYYYMMDD'
+      if (child.BirthDay?.length === 8) {
+        const y = Number(child.BirthDay.slice(0, 4));
+        const m = Number(child.BirthDay.slice(4, 6));
+        const d = Number(child.BirthDay.slice(6, 8));
+        editChildData.value.birthDate = new Date(y, m - 1, d);
+      } else {
+        editChildData.value.birthDate = null;
+      }
+    }
+
 
     function onAddNewBabyClick() {
       // 重置表單
@@ -1097,6 +1139,9 @@ export default {
       newBabyInfos,
       onAddNewBabyClick,
       submitNewBabyData,
+      showEditAlert,
+      editChildData,
+      onEditChild
     };
   },
 };

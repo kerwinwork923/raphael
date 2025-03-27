@@ -296,6 +296,52 @@ export const useBabyStore = defineStore("babyStore", () => {
     }
   }
 
+  async function modifyChild(cid, name, sex, birthDay) {
+    // 先從 localStorage 或全域取得使用者憑證
+    let MID, Token, MAID, Mobile;
+    const localData = localStorage.getItem("userData");
+    if (localData) {
+      const parsed = JSON.parse(localData);
+      MID = parsed.MID;
+      Token = parsed.Token;
+      MAID = parsed.MAID;
+      Mobile = parsed.Mobile;
+    }
+
+    if (!MID || !Token || !MAID || !Mobile) {
+      console.error("尚未登入，無法修改寶貝資料");
+      return { success: false, message: "尚未登入" };
+    }
+
+    try {
+      const reqBody = {
+        MID,
+        MAID,
+        Token,
+        Mobile,
+        CID: cid,
+        Name: name,
+        Sex: sex, // '1' or '2'
+        BirthDay: birthDay, // 'YYYYMMDD'
+      };
+      const resp = await axios.post(
+        "https://23700999.com:8081/HMA/API_ModifyChild.jsp",
+        reqBody
+      );
+      if (resp.data.Result === "OK") {
+        // 可視需求：再重新 fetch 一次整體寶貝清單，確保資料同步
+        await fetchGrowth();
+
+        return { success: true };
+      } else {
+        return { success: false, message: resp.data.Message };
+      }
+    } catch (err) {
+      console.error("modifyChild error:", err);
+      return { success: false, message: "系統或網路錯誤" };
+    }
+  }
+
   // 監聽 childRecords，存入 localStorage (深層監聽)
   watch(
     () => childRecords,
@@ -307,7 +353,10 @@ export const useBabyStore = defineStore("babyStore", () => {
         copy.selectedPriority = Array.from(copy.selectedPriority || []);
         objToStore[cid] = copy;
       });
-      localStorage.setItem("babyStore_childRecords", JSON.stringify(objToStore));
+      localStorage.setItem(
+        "babyStore_childRecords",
+        JSON.stringify(objToStore)
+      );
     },
     { deep: true }
   );
@@ -325,5 +374,6 @@ export const useBabyStore = defineStore("babyStore", () => {
     toggleAnsType,
     fetchChildQuestions,
     fetchGrowthRecTimes,
+    modifyChild
   };
 });
