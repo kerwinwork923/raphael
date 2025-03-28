@@ -39,6 +39,9 @@
         :enable-time-picker="false"
         placeholder="請選擇寶貝的生日"
         class="date-picker no-icon"
+        cancel-text="取消"
+        select-text="確定"
+        no-today
       />
     </div>
 
@@ -156,7 +159,7 @@ export default {
   width: 90%;
   max-width: 400px;
   z-index: 99;
-    
+
   .babyEditAlertCloseWrap {
     text-align: right;
 
@@ -186,7 +189,6 @@ export default {
       height: 20px;
       margin-right: 6px;
     }
-
   }
   .babyEditAlertBtn {
     width: 100%;

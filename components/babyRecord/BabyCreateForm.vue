@@ -34,13 +34,14 @@
           <VueDatePicker
             v-model="baby.birthDate"
             :format="formatDate"
-            :locale="'zh-TW'"
+            locale="zh-TW"
             :enable-time-picker="false"
             cancel-text="取消"
             select-text="確定"
             :max-date="new Date()"
             :placeholder="'請選擇寶貝的生日'"
             no-today
+            teleport="body"
             class="date-picker no-icon"
           />
         </div>
@@ -100,13 +101,13 @@ export default {
 </script>
 
 <style lang="scss">
-.babyCreateForm{  
+.babyCreateForm {
   position: relative;
   width: 100%;
   border-radius: 0.5rem;
   margin-top: 0.5rem;
   padding: 1rem;
-  box-shadow: inset 0px 4px 8px rgba(0, 0, 0, .25);
+  box-shadow: inset 0px 4px 8px rgba(0, 0, 0, 0.25);
 }
 
 /* === 主容器 === */
