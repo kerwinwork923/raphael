@@ -66,8 +66,8 @@
         </div>
 
         <router-link to="/contract" class="item">          
-            <div class="topTitle">我的</div>
-            <div class="bottomTitle">合約</div>
+            <div class="topTitle">合約</div>
+            <div class="bottomTitle">|請假</div>
             <img src="../assets/imgs/contract.svg" alt="" />          
         </router-link>
 
