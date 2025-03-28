@@ -310,7 +310,9 @@ export default {
 <style lang="scss">
 .resultWrap {
   /* 上方：本次+前次 */
-  margin-bottom:1rem;
+  height: calc(100vh - 312px);
+  overflow: scroll;
+  @include scrollbarStyle();
   .resultTopGroup {
     display: flex;
     align-items: flex-start;

@@ -1158,7 +1158,8 @@ export default {
   padding: 0 1rem;
   padding-bottom: 50px;
   position: relative;
-  h6 {
+  
+  &>h6 {
     display: flex;
     align-items: center;
     justify-content: start;
@@ -1169,7 +1170,7 @@ export default {
     font-size: 14px;
     font-style: normal;
     font-weight: 400;
-
+    margin-left: auto;
     margin-right: 0;
     margin-top: 1rem;
     cursor: pointer;
@@ -1263,10 +1264,6 @@ export default {
       opacity: 0.5;
       cursor: not-allowed;
     }
-  }
-
-  &.double-btn .babyRerordCommonBtn {
-    width: 45%;
   }
 
   .babyRerordPrevBtn {
@@ -1500,6 +1497,10 @@ export default {
 
     letter-spacing: 0.5px;
   }
+
+  .tagTimesList{
+    height: calc(100vh - 354px);
+  }
 }
 .babyPriority {
   h3 {
@@ -1512,6 +1513,9 @@ export default {
     font-weight: 400;
 
     letter-spacing: 0.5px;
+  }
+  .solvePriorityBox{
+    height: calc(100vh - 354px);
   }
 }
 </style>

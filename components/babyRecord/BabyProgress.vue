@@ -81,7 +81,6 @@ export default {
   padding-bottom: 2px;
   scroll-snap-type: x mandatory;
   margin-top: 0.5rem;
-  width: 95%;
   max-width: 400px;
 
   .babyProgressDiffDay {
