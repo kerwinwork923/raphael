@@ -432,18 +432,19 @@ export default {
         &:first-child {
           border: 2px solid rgba(254, 172, 74, 0.7);
           color: $raphael-orange-400;
-          grid-row: 1 / 4;
+          grid-row: 1 / 3;
           align-items: end;
+          font-size: 1.75rem;
 
           .topTitle,
           .bottomTitle {
-            margin-bottom: 4rem;
+            margin-bottom: 2.5rem;
           }
 
           img {
             background: rgba(254, 172, 74, 0.7);
-            width: 75%;
-            height: 100px;
+            width: 50%;
+            height: 60px;
             border-radius: 0 0 8px 8px;
             padding: 0.5rem;
             top: 0;
@@ -463,7 +464,7 @@ export default {
           border: 2px solid rgba(31, 188, 179, 0.7);
           color: $raphael-cyan-400;
           grid-column: 2;
-          grid-row: 1/3;
+          grid-row: 2/4;
           align-items: end;
           font-size: 1.75rem;
 
@@ -496,6 +497,8 @@ export default {
           color: $raphael-brown-400;
           font-size: 1.25rem;
           justify-content: end;
+          grid-column: 2 / 3;
+          grid-row: 1;
 
           .bottomTitle {
             margin-right: 0.75rem;
@@ -522,29 +525,32 @@ export default {
           }
         }
         &:nth-child(4) {
-          grid-column: 1;
+          border: 2px solid rgba(101, 85, 143,.7);
+          color: $raphael-purple-200;
+          font-size: 1.25rem;
+          justify-content: end;
 
-          align-items: end;
-          font-size: 1.75rem;
-          color: #65558f;
-          .topTitle,
           .bottomTitle {
-            margin-bottom: 2.5rem;
+            margin-right: 0.75rem;
           }
 
           img {
-            background: var(--Tertiary-default, #65558f);
-            width: 100%;
-            height: 40px;
-            border-radius: 0 0 8px 8px;
+            background: rgba(101, 85, 143,.7);
+            width: 50px;
+            height: 55%;
+            border-radius: 0 8px 8px 0;
             padding: 0.5rem;
-            right: 0;
-            bottom: 0;
+            top: 16px;
+            left: 0;
+            box-shadow: inset 0 -4px 8px rgba(101, 85, 143,1);
           }
 
           &:hover {
+            border: 2px solid rgba(101, 85, 143,1);
+            color: $raphael-purple-200;
+
             & > img {
-            
+              background: rgba(101, 85, 143,1);
             }
           }
         }
