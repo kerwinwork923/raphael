@@ -179,17 +179,17 @@ export default {
             localStorage.setItem("userData", JSON.stringify(newUserInfo));
             userInfo.value = newUserInfo;
           } else {
-            alert("取得會員資料失敗");
+            
             localStorage.removeItem("userData");
             router.push("/");
           }
         } else {
-          alert("取得會員資料失敗");
+          
           localStorage.removeItem("userData");
           router.push("/");
         }
       } catch (err) {
-        alert("取得會員資料失敗");
+        
       } finally {
         setTimeout(() => {
           loading.value = false;
