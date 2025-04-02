@@ -46,31 +46,36 @@
           <div class="topTitle">獎勵</div>
           <div class="bottomTitle">積分</div>
         </div> -->
-<!-- 
+        <!-- 
         <div class="item item2" @click="goHRVHistory">
           <div class="topTitle">檢測</div>
           <div class="bottomTitle">HRV</div>
           <img src="../assets/imgs/faceIcon.svg" alt="" />
         </div> -->
 
-        <router-link to="/UsageHistory" class="item">          
-            <div class="topTitle">穿衣</div>
-            <div class="bottomTitle">紀錄</div>
-            <img src="../assets/imgs/clothIcon.svg" alt="" />          
+        <router-link to="/UsageHistory" class="item">
+          <div class="topTitle">穿衣</div>
+          <div class="bottomTitle">紀錄</div>
+          <img src="../assets/imgs/clothIcon.svg" alt="" />
         </router-link>
 
-        <div @click="showHealthRecordAlert" class="item">          
-            <div class="topTitle">健康</div>
-            <div class="bottomTitle">紀錄</div>
-            <img src="../assets/imgs/noteIcon.svg" alt="" />          
+        <div @click="showHealthRecordAlert" class="item">
+          <div class="topTitle">健康</div>
+          <div class="bottomTitle">紀錄</div>
+          <img src="../assets/imgs/noteIcon.svg" alt="" />
         </div>
 
-        <router-link to="/contract" class="item">          
-            <div class="topTitle">合約</div>
-            <div class="bottomTitle">|請假</div>
-            <img src="../assets/imgs/contract.svg" alt="" />          
+        <router-link to="/contract" class="item">
+          <div class="topTitle">合約</div>
+          <div class="bottomTitle">|請假</div>
+          <img src="../assets/imgs/contract.svg" alt="" />
         </router-link>
 
+        <router-link to="/package" class="item">
+          <div class="topTitle">包裹</div>
+          <div class="bottomTitle">查詢</div>
+          <img src="../assets/imgs/logistics.svg" alt="" />
+        </router-link>
         <!-- <div class="item item6">
           <div class="topTitle">推薦</div>
           <div class="bottomTitle">親友</div>
@@ -179,17 +184,14 @@ export default {
             localStorage.setItem("userData", JSON.stringify(newUserInfo));
             userInfo.value = newUserInfo;
           } else {
-            
             localStorage.removeItem("userData");
             router.push("/");
           }
         } else {
-          
           localStorage.removeItem("userData");
           router.push("/");
         }
       } catch (err) {
-        
       } finally {
         setTimeout(() => {
           loading.value = false;
@@ -414,7 +416,7 @@ export default {
         justify-content: center;
         height: 100%;
         position: relative;
-        background: rgba(255, 255, 255,.5);
+        background: rgba(255, 255, 255, 0.5);
         border-radius: 0.75rem;
         color: $raphael-gray-500;
         cursor: pointer;
@@ -422,23 +424,23 @@ export default {
         padding: 0.75rem;
         overflow: hidden;
         transition: 0.15s all ease;
-        box-shadow: 0px 2px 12px #AFDDC0;
+        box-shadow: 0px 2px 12px #afddc0;
         img {
           position: absolute;
           transition: 0.15s all ease;
         }
-        &:first-child{
-          border: 2px solid rgba(254, 172, 74 ,.7);
+        &:first-child {
+          border: 2px solid rgba(254, 172, 74, 0.7);
           color: $raphael-orange-400;
           grid-row: 1 / 4;
           align-items: end;
 
           .topTitle,
-          .bottomTitle{
+          .bottomTitle {
             margin-bottom: 4rem;
           }
 
-          img{
+          img {
             background: rgba(254, 172, 74, 0.7);
             width: 75%;
             height: 100px;
@@ -448,17 +450,17 @@ export default {
             box-shadow: inset 0 -4px 8px rgba(254, 172, 74, 1);
           }
 
-          &:hover{
-            border: 2px solid rgba(254, 172, 74 ,1);
+          &:hover {
+            border: 2px solid rgba(254, 172, 74, 1);
             color: $raphael-orange-500;
 
-            &>img{
-              background: rgba(254, 172, 74 ,1);
+            & > img {
+              background: rgba(254, 172, 74, 1);
             }
           }
         }
-        &:nth-child(2){
-          border: 2px solid rgba(31, 188, 179 , .7);
+        &:nth-child(2) {
+          border: 2px solid rgba(31, 188, 179, 0.7);
           color: $raphael-cyan-400;
           grid-column: 2;
           grid-row: 1/3;
@@ -466,56 +468,83 @@ export default {
           font-size: 1.75rem;
 
           .topTitle,
-          .bottomTitle{
+          .bottomTitle {
             margin-bottom: 2.5rem;
           }
 
-          img{
-            background: rgba(31, 188, 179 , .7);
+          img {
+            background: rgba(31, 188, 179, 0.7);
             width: 50%;
             height: 60px;
             border-radius: 0 0 8px 8px;
             padding: 0.5rem;
             top: 0;
-            box-shadow: inset 0 -4px 8px rgba(31, 188, 179 , 1);
+            box-shadow: inset 0 -4px 8px rgba(31, 188, 179, 1);
           }
 
-          &:hover{
-            border: 2px solid rgba(31, 188, 179 , 1);
+          &:hover {
+            border: 2px solid rgba(31, 188, 179, 1);
             color: $raphael-cyan-500;
 
-            &>img{
-              background: rgba(31, 188, 179 , 1);
+            & > img {
+              background: rgba(31, 188, 179, 1);
             }
           }
         }
-        &:last-child{
-          border: 2px solid rgba(188, 88, 31,.7);
+        &:nth-child(3) {
+          border: 2px solid rgba(188, 88, 31, 0.7);
           color: $raphael-brown-400;
           font-size: 1.25rem;
           justify-content: end;
 
-          .bottomTitle{
+          .bottomTitle {
             margin-right: 0.75rem;
           }
 
-          img{
-            background: rgba(188, 88, 31,.7);
+          img {
+            background: rgba(188, 88, 31, 0.7);
             width: 50px;
             height: 55%;
             border-radius: 0 8px 8px 0;
             padding: 0.5rem;
             top: 16px;
             left: 0;
-            box-shadow:  inset 0 -4px 8px rgba(188, 88, 31,1);
+            box-shadow: inset 0 -4px 8px rgba(188, 88, 31, 1);
           }
 
-          &:hover{
-            border: 2px solid rgba(188, 88, 31,1);
+          &:hover {
+            border: 2px solid rgba(188, 88, 31, 1);
             color: $raphael-brown-500;
 
-            &>img{
-              background: rgba(188, 88, 31,1);
+            & > img {
+              background: rgba(188, 88, 31, 1);
+            }
+          }
+        }
+        &:nth-child(4) {
+          grid-column: 1;
+
+          align-items: end;
+          font-size: 1.75rem;
+          color: #65558f;
+          .topTitle,
+          .bottomTitle {
+            margin-bottom: 2.5rem;
+          }
+
+          img {
+            background: var(--Tertiary-default, #65558f);
+            width: 100%;
+            height: 40px;
+            border-radius: 0 0 8px 8px;
+            padding: 0.5rem;
+            right: 0;
+            bottom: 0;
+          }
+
+          &:hover {
+            & > img {
+            
             }
           }
         }
