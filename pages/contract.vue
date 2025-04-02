@@ -5,7 +5,124 @@
   <!-- 主要容器：當 loading 結束後才顯示 -->
   <div v-else class="contractWrap">
     <TitleMenu Text="我的合約" link="/user" />
+    <div class="leaveLimitAlert" v-if="false">
+      <p>
+        您已超過請假天數(5天)<br />
+        請立即聯絡諮詢師0800 000 760
+      </p>
 
+      <div class="leaveLimitAlertBtnGroup">
+        <div class="leaveLimitAlertCloseBtn">關閉</div>
+        <div class="leaveLimitAlertContactBtn">立即聯絡</div>
+      </div>
+    </div>
+    <div class="leaveRecordAlert" v-if="false">
+      <h3>請假紀錄</h3>
+      <div class="leaveRecordAlertHR"></div>
+
+      <div class="leaveRecordAlertOptionGroup">
+        <div class="optionCloseBtn">關閉</div>
+        <div class="optionAgainBtn">再次申請</div>
+      </div>
+      <div class="searchGroup">
+        <img src="../assets/imgs/leaveRecordSearch.svg" alt="" />
+        <h4>查詢請假日期或區間</h4>
+      </div>
+      <h5>剩下<span>4天</span>可以請</h5>
+      <div class="leaveListGroup">
+        <div class="leaveListTag">#5</div>
+        <div class="leaveList1">
+          <h6>請假日期</h6>
+
+          <div class="leaveList1Content">
+            <div>2024/10/10</div>
+            <div>2024/10/10</div>
+          </div>
+        </div>
+        <div class="leaveList2">
+          <h6>請假天數</h6>
+          <div class="leaveList1Content">
+            <div>2</div>
+          </div>
+        </div>
+        <div class="leaveList3">
+          <h6>請假原因</h6>
+          <div class="leaveList1Content">
+            <div>原因原因原因原因原因原因原因原因原因原因原因原因原因</div>
+          </div>
+        </div>
+        <hr />
+      </div>
+      <div class="leaveListGroup">
+        <div class="leaveListTag">#4</div>
+        <div class="leaveList1">
+          <h6>請假日期</h6>
+          <div class="leaveList1Content">
+            <div>2024/10/10</div>
+            <div>2024/10/10</div>
+          </div>
+        </div>
+        <div class="leaveList2">
+          <h6>請假天數</h6>
+          <div class="leaveList1Content">
+            <div>2</div>
+          </div>
+        </div>
+        <div class="leaveList3">
+          <h6>請假原因</h6>
+          <div class="leaveList1Content">
+            <div>原因原因原因原因原因原因原因原因原因原因原因原因原因</div>
+          </div>
+        </div>
+        <hr />
+      </div>
+    </div>
+    <div class="leaveApplicationAlert" v-if="false">
+      <h3>請假申請</h3>
+      <div class="leaveApplicationAlertHR"></div>
+      <h4>請假日期</h4>
+      <VueDatePicker
+        v-model="selectedDates"
+        multi-dates
+        no-today
+        teleport="body"
+        cancel-text="取消"
+        select-text="確定"
+        :locale="'zh-TW'"
+        :enable-time-picker="false"
+        @update:modelValue="handleDateChange"
+      />
+
+      <div class="leaveDates">
+        <img src="../assets/imgs/date.svg" alt="" />
+        <div class="leaveDateGroup">
+          <!-- 用 v-for 來顯示多選到的所有日期 -->
+          <div
+            class="leaveDate"
+            v-for="(dateVal, idx) in selectedDates"
+            :key="idx"
+          >
+            {{ formatDate(dateVal) }}
+          </div>
+        </div>
+      </div>
+      <hr />
+
+      <div class="limitError" v-if="selectedDates.length > 5">
+        一個月最多請五天
+      </div>
+      <h4>請假原因</h4>
+      <textarea name="" id=""></textarea>
+      <p class="contractStart">合約起訖日 2025/05/05~2025/06/05</p>
+      <p class="contractEnd">合約到期日：2025/07/10</p>
+      <p>請假申請天數：{{ selectedDates.length }} 天</p>
+      <p>剩餘請假天數：{{ 5 - selectedDates.length }} 天</p>
+
+      <div class="leaveApplicationAlertBtnGroup">
+        <div class="leaveApplicationAlertBackBtn">返回</div>
+        <div class="leaveApplicationAlertSumbitBtn">送出</div>
+      </div>
+    </div>
     <!-- 篩選選單 -->
     <div class="contractTopMenu">
       <!-- 產品篩選 -->
@@ -66,6 +183,8 @@
         <!-- 合約標題、價格區 -->
         <div class="contractContentTitleGroup">
           <h3>{{ item.ProductName }}</h3>
+          <!-- 若 PdfFileName 不為空，就顯示查看連結，並另開視窗 -->
+
           <div class="contractContentTitleTag">
             <img src="../assets/imgs/contractTag.svg" alt="" />
             <!-- 如果有金額，可以放這裡 -->
@@ -73,6 +192,30 @@
               {{ toThousands(item.TotalFee) }}
             </div>
           </div>
+        </div>
+        <div class="linkGroup">
+          <a
+            v-if="item.PdfFileName"
+            :href="item.PdfFileName"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            查看內容
+            <span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="15"
+                height="15"
+                viewBox="0 0 18 18"
+                fill="#74BC1F"
+              >
+                <path
+                  d="M6.65764 3.75271L12.7476 10.0002L6.65764 16.2477C6.54862 16.3593 6.48758 16.5092 6.48758 16.6652C6.48758 16.8212 6.54862 16.9711 6.65764 17.0827C6.7106 17.1368 6.77381 17.1797 6.84356 17.209C6.91332 17.2383 6.98823 17.2534 7.06389 17.2534C7.13956 17.2534 7.21447 17.2383 7.28422 17.209C7.35398 17.1797 7.41719 17.1368 7.47014 17.0827L13.9501 10.4365C14.0639 10.3197 14.1276 10.1632 14.1276 10.0002C14.1276 9.83722 14.0639 9.68068 13.9501 9.56396L7.47139 2.91771C7.4184 2.86328 7.35504 2.82002 7.28505 2.79048C7.21506 2.76094 7.13986 2.74572 7.06389 2.74572C6.98793 2.74572 6.91273 2.76094 6.84274 2.79048C6.77275 2.82002 6.70939 2.86328 6.65639 2.91771C6.54737 3.02933 6.48633 3.17917 6.48633 3.33521C6.48633 3.49124 6.54737 3.64109 6.65639 3.75271L6.65764 3.75271Z"
+                  fill="#74BC1F"
+                />
+              </svg>
+            </span>
+          </a>
         </div>
 
         <!-- 進度條區塊 -->
@@ -136,30 +279,14 @@
           </div>
         </div>
 
-        <!-- 若 PdfFileName 不為空，就顯示查看連結，並另開視窗 -->
-        <div class="linkGroup">
-          <a
-            v-if="item.PdfFileName"
-            :href="item.PdfFileName"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            查看內容
-            <span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="15"
-                height="15"
-                viewBox="0 0 18 18"
-                fill="#74BC1F"
-              >
-                <path
-                  d="M6.65764 3.75271L12.7476 10.0002L6.65764 16.2477C6.54862 16.3593 6.48758 16.5092 6.48758 16.6652C6.48758 16.8212 6.54862 16.9711 6.65764 17.0827C6.7106 17.1368 6.77381 17.1797 6.84356 17.209C6.91332 17.2383 6.98823 17.2534 7.06389 17.2534C7.13956 17.2534 7.21447 17.2383 7.28422 17.209C7.35398 17.1797 7.41719 17.1368 7.47014 17.0827L13.9501 10.4365C14.0639 10.3197 14.1276 10.1632 14.1276 10.0002C14.1276 9.83722 14.0639 9.68068 13.9501 9.56396L7.47139 2.91771C7.4184 2.86328 7.35504 2.82002 7.28505 2.79048C7.21506 2.76094 7.13986 2.74572 7.06389 2.74572C6.98793 2.74572 6.91273 2.76094 6.84274 2.79048C6.77275 2.82002 6.70939 2.86328 6.65639 2.91771C6.54737 3.02933 6.48633 3.17917 6.48633 3.33521C6.48633 3.49124 6.54737 3.64109 6.65639 3.75271L6.65764 3.75271Z"
-                  fill="#74BC1F"
-                />
-              </svg>
-            </span>
-          </a>
+        <!-- 請假區塊 -->
+        <div class="leaveGroup">
+          <div class="leaveRecordBtn">
+            <img src="../assets/imgs/leaveRecord.svg" alt="" /> 請假紀錄
+          </div>
+          <div class="leaveApplication">
+            <img src="../assets/imgs/leaveApplication.svg" alt="" /> 請假申請
+          </div>
         </div>
       </div>
     </div>
@@ -184,6 +311,17 @@ export default {
     const stateBoxVisible = ref(false);
     const contractList = ref([]);
     const loading = ref(false);
+
+    const selectedDates = ref([]);
+    // 如果需要日期格式化，可寫個小函式
+    const formatDate = (dateObj) => {
+      if (!dateObj) return "";
+      const date = new Date(dateObj);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0"); // 補0
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}/${month}/${day}`;
+    };
 
     // 產品選單
     const productOptions = [
@@ -293,6 +431,16 @@ export default {
       return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     };
 
+    const handleDateChange = (newDates) => {
+  if (newDates.length > 5) {
+    // 限制最多只能選五個
+    selectedDates.value = newDates.slice(0, 5);
+    alert("最多只能請五天假！");
+  } else {
+    selectedDates.value = newDates;
+  }
+};
+
     return {
       // 變數與方法
       loading,
@@ -313,6 +461,9 @@ export default {
       // 計算屬性
       filteredContracts,
       toThousands,
+      selectedDates,
+      formatDate,
+      handleDateChange
     };
   },
 };
@@ -335,6 +486,7 @@ export default {
     padding: 12px;
     border-radius: 8px;
     backdrop-filter: blur(10px);
+
     .contractTopMenuItem {
       display: flex;
       width: 50%;
@@ -384,13 +536,14 @@ export default {
       padding: 12px;
       margin-top: 0.75rem;
       border-radius: 8px;
+
       .contractContentTitleGroup {
         display: flex;
         justify-content: space-between;
 
         h3 {
           color: #1e1e1e;
-          
+
           font-size: 20px;
           font-weight: 700;
           letter-spacing: 0.15px;
@@ -412,6 +565,7 @@ export default {
         .contractProgress {
           width: 100%;
           position: relative;
+
           .contractProgressTextGroup {
             position: absolute;
             top: -24px;
@@ -462,6 +616,7 @@ export default {
             background: #fff;
             box-shadow: inset 0px 1px 2px rgba(0, 0, 0, 0.25);
             overflow: hidden;
+
             .contractProgressBar {
               height: 100%;
             }
@@ -513,9 +668,8 @@ export default {
       }
 
       .linkGroup {
-        text-align: right;
-        margin-top: 1.5rem;
-
+        margin-top: 0.3rem;
+        margin-bottom: 1.75rem;
         a {
           display: inline;
           color: #74bc1f;
@@ -525,6 +679,286 @@ export default {
           text-decoration: none;
         }
       }
+      .leaveGroup {
+        display: flex;
+        justify-content: center;
+        gap: 0.75rem;
+        margin-top: 1rem;
+        .leaveRecordBtn {
+          padding: 8px 12px;
+          border-radius: var(--sds-size-radius-200);
+          background: var(--Neutral-200, #eee);
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          cursor: pointer;
+          img {
+            transform: translate(0, 10%);
+          }
+          color: var(--Neutral-500, #544b4b);
+
+          font-size: 18px;
+
+          font-weight: 400;
+
+          letter-spacing: 0.09px;
+        }
+        .leaveApplication {
+          padding: 8px 12px;
+          border-radius: var(--sds-size-radius-200);
+
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+
+          background: var(--Primary-default, #74bc1f);
+          cursor: pointer;
+          img {
+            transform: translate(0, 10%);
+          }
+
+          font-size: 18px;
+
+          font-weight: 400;
+          color: #fff;
+          letter-spacing: 0.09px;
+        }
+      }
+    }
+  }
+  .leaveRecordAlert {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    height: 90%;
+    width: 90%;
+    z-index: 99;
+    border-radius: 12px;
+    padding: 12px;
+    h5 {
+      color: var(--Color-Shade-500, #666);
+      text-align: right;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+      letter-spacing: 0.5px;
+      margin-top: 0.5rem;
+      span {
+        color: var(--Color-Blue-400, #1fbcb3);
+      }
+    }
+    h3 {
+      color: #74bc1f;
+      font-size: 24px;
+      font-style: normal;
+      font-weight: 700;
+      letter-spacing: 0.12px;
+      text-align: center;
+      margin-bottom: 0.75rem;
+    }
+    .leaveRecordAlertHR {
+      width: 100%;
+      height: 1px;
+      background-color: #666;
+    }
+  }
+
+  .leaveRecordAlertOptionGroup {
+    position: fixed;
+    width: 100%;
+    display: flex;
+    bottom: 5%;
+    justify-content: center;
+    gap: 8px;
+    left: 0;
+    .optionCloseBtn {
+      text-align: center;
+      background: var(--Neutral-200, #eee);
+      width: 45%;
+      padding: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .optionAgainBtn {
+      text-align: center;
+      border-radius: var(--sds-size-radius-200);
+      background: var(--Primary-default, #74bc1f);
+      width: 45%;
+      padding: 8px;
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  }
+  .searchGroup {
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    gap: 2px;
+    margin-top: 1.5rem;
+  }
+  .leaveListGroup {
+    margin-top: 0.75rem;
+  }
+  .leaveListTag {
+    color: var(--Neutral-black, #1e1e1e);
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: var(--Title-Medium-Tracking, 0.15px);
+    margin-bottom: 0.5rem;
+  }
+  .leaveList1 {
+    display: flex;
+    margin-bottom: 0.5rem;
+    h6 {
+      width: 50%;
+    }
+    .leaveList1Content {
+      color: #74bc1f;
+      line-height: 1.2;
+    }
+  }
+  .leaveList2 {
+    display: flex;
+    margin-bottom: 0.5rem;
+    h6 {
+      width: 50%;
+    }
+    .leaveList1Content {
+      color: #74bc1f;
+      line-height: 1.2;
+    }
+  }
+  .leaveList3 {
+    display: flex;
+    h6 {
+      width: 50%;
+    }
+    .leaveList1Content {
+      color: #74bc1f;
+      line-height: 1.2;
+      width: 50%;
+    }
+  }
+  .leaveListHR {
+    height: 1px;
+    color: #1e1e1e;
+    width: 100%;
+  }
+  .leaveLimitAlert {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 112;
+    background-color: #fff;
+    border-radius: 12px;
+    width: 60%;
+    min-height: 140px;
+    border-radius: 14px;
+    background: #fbfbfb;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+
+    p {
+      margin-top: 2rem;
+      text-align: center;
+      line-height: 1.35;
+    }
+    .leaveLimitAlertBtnGroup {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      border-top: 1px solid #ccc;
+
+      .leaveLimitAlertCloseBtn {
+        width: 50%;
+        text-align: center;
+        padding: 0.5rem;
+        border-right: 1px solid #ccc;
+        color: #ccc;
+      }
+      .leaveLimitAlertContactBtn {
+        width: 50%;
+        text-align: center;
+        padding: 0.5rem;
+        color: var(--Primary-default, #74bc1f);
+      }
+    }
+  }
+  .leaveApplicationAlert {
+    width: 90%;
+    position: fixed;
+    height: 80%;
+    background-color: #fff;
+    z-index: 99;
+    padding: 12px;
+
+    h3 {
+      text-align: center;
+      color: #74bc1f;
+      font-family: "Noto Sans";
+      font-size: 24px;
+      font-style: normal;
+      font-weight: 700;
+      letter-spacing: 0.12px;
+    }
+    .leaveApplicationAlertHR {
+      width: 100%;
+      height: 1px;
+      background-color: #666;
+      margin-top: 0.5rem;
+    }
+    .leaveDates {
+      display: flex;
+      align-items: start;
+      gap: 8px;
+      margin-top: 0.25rem;
+    }
+    h4 {
+      color: var(--Color-Green-400, #74bc1f);
+      margin-top: 0.75rem;
+      font-size: 18px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 100%; /* 18px */
+      letter-spacing: 2.7px;
+    }
+    .limitError {
+      color: #f00;
+      text-align: justify;
+
+      font-size: 12px;
+      font-style: normal;
+      font-weight: 400;
+      margin-top: 0.5rem;
+      letter-spacing: 0.048px;
+    }
+    p {
+      color: var(--Neutral-500, #666);
+      font-size: 18px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 100%; /* 18px */
+      letter-spacing: 2.7px;
+    }
+  }
+  .leaveApplicationAlertBtnGroup {
+    display: flex;
+    justify-content: center;
+    .leaveApplicationAlertBackBtn {
+      width: 50%;
+      text-align: center;
+    }
+    .leaveApplicationAlertSumbitBtn {
+      width: 50%;
+      text-align: center;
     }
   }
 }
