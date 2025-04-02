@@ -4,7 +4,8 @@
 
   <!-- 主要容器：當 loading 結束後才顯示 -->
   <div v-else class="contractWrap">
-    <TitleMenu Text="我的合約" link="/user" />
+    <TitleMenu Text="合約|請假" link="/user" />
+
     <div class="leaveLimitAlert" v-if="false">
       <p>
         您已超過請假天數(5天)<br />
