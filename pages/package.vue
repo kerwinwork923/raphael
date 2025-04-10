@@ -32,7 +32,7 @@
     <div class="notPackageWrap" v-else-if="hasLoaded">
       <div class="notPackageGroup">
         <img src="../assets/imgs/notPackageImg.png" alt="" />
-        <p>您的包裹還在路上？不妨先看看這些為您精選的健康方案</p>
+        <p>沒有包裹？不妨先看看這些為您精選的健康方案</p>
       </div>
 
       <!-- 推薦商品區 -->

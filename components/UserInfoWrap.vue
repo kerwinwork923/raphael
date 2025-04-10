@@ -542,9 +542,6 @@ export default {
     display: none;
   }
 }
-.leaveApplicationAlertBtnGroup{
-  display: flex;
-  display: none !important;
-}
+
 
 </style>
