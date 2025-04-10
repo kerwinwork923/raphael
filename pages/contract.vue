@@ -57,33 +57,35 @@
       </div>
 
       <!-- 單筆合約的請假紀錄 -->
-      <div
-        class="leaveListGroup"
-        v-for="(record, idx) in singleHolidayRecord"
-        :key="idx"
-      >
-        <div class="leaveListTag">#{{ idx + 1 }}</div>
+      <div class="leaveListWrap">
+        <div
+          class="leaveListGroup"
+          v-for="(record, idx) in singleHolidayRecord"
+          :key="idx"
+        >
+          <div class="leaveListTag">#{{ idx + 1 }}</div>
 
-        <div class="leaveList1">
-          <h6>請假日期</h6>
-          <div class="leaveList1Content">
-            <!-- record.Dates = ["20250410","20250502", ...] -->
-            <div v-for="(d, dIndex) in record.Dates" :key="dIndex">
-              {{ d }}
+          <div class="leaveList1">
+            <h6>請假日期</h6>
+            <div class="leaveList1Content">
+              <!-- record.Dates = ["20250410","20250502", ...] -->
+              <div v-for="(d, dIndex) in record.Dates" :key="dIndex">
+                {{ d }}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="leaveList2">
-          <h6>請假天數</h6>
-          <div class="leaveList1Content">{{ record.HolidayDays }}</div>
-        </div>
+          <div class="leaveList2">
+            <h6>請假天數</h6>
+            <div class="leaveList1Content">{{ record.HolidayDays }}</div>
+          </div>
 
-        <div class="leaveList3">
-          <h6>請假原因</h6>
-          <div class="leaveList1Content">{{ record.HolidayNote }}</div>
+          <div class="leaveList3">
+            <h6>請假原因</h6>
+            <div class="leaveList1Content">{{ record.HolidayNote }}</div>
+          </div>
+          <hr />
         </div>
-        <hr />
       </div>
     </div>
 
@@ -123,8 +125,8 @@
       </div>
       <hr />
 
-      <div class="limitError" v-if="selectedDates.length > 5">
-        一個月最多請五天
+      <div class="limitError" v-if="selectedDates.length > 10">
+        超過請假天數
       </div>
       <h4>請假原因</h4>
       <textarea
@@ -726,7 +728,7 @@ export default {
       // 一個月(含下個月)加起來最多10天 (範例)
       if (newDates.length > 10) {
         selectedDates.value = newDates.slice(0, 10);
-        alert("已超過可請假天數上限 (10天)");
+        alert("已超過可請假天數");
       } else {
         selectedDates.value = newDates;
       }
@@ -977,7 +979,7 @@ export default {
   min-height: 100vh;
   padding: 0 1rem 2.5rem;
   position: relative;
-  
+
   .historyDateRangePicker {
   }
   .contractCover {
@@ -1001,7 +1003,7 @@ export default {
     padding: 6px;
     border-radius: 8px;
     backdrop-filter: blur(1px);
-    h4{
+    h4 {
       color: #666;
     }
     .contractTopMenuItem {
@@ -1010,7 +1012,7 @@ export default {
       &:last-child {
         margin-left: 1rem;
       }
-    
+
       .contractTopMenuTextBox {
         display: flex;
         gap: 2px;
@@ -1018,7 +1020,6 @@ export default {
         color: $raphael-black;
         cursor: pointer;
       }
-
 
       .productBox,
       .stateBox {
@@ -1146,7 +1147,7 @@ export default {
         display: flex;
         justify-content: space-between;
         margin-top: 0.75rem;
-   
+
         .startTimeGroup,
         .endTimeGroup {
           h6 {
@@ -1272,6 +1273,10 @@ export default {
     z-index: 99;
     border-radius: 12px;
     padding: 12px;
+    .leaveListWrap {
+      max-height: 80%;
+      overflow-y: auto;
+    }
     h5 {
       color: var(--Color-Shade-500, #666);
       text-align: right;
@@ -1308,6 +1313,7 @@ export default {
     justify-content: center;
     gap: 8px;
     left: 0;
+
     .optionCloseBtn {
       text-align: center;
       background: var(--Neutral-200, #eee);
@@ -1432,7 +1438,7 @@ export default {
     background-color: #fff;
     z-index: 99;
     padding: 12px;
-
+    border-radius: 12px;
     h3 {
       text-align: center;
       color: #74bc1f;
@@ -1455,6 +1461,8 @@ export default {
       margin-top: 0.5rem;
 
       cursor: pointer;
+      max-height: 100px;
+      overflow: auto;
     }
     h4 {
       color: var(--Color-Green-400, #74bc1f);
