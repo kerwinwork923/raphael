@@ -245,7 +245,7 @@
               <span><!-- svg icon... --></span>
             </a>
           </div>
-          <main :class="{ contractEnd: item.Still <= 0 }">
+          <main :class="{ contractEndMain: item.Still <= 0 }">
             <div class="contractDayGroup">
               <div class="startTimeGroup">
                 <h6>合約開始</h6>
@@ -1004,7 +1004,7 @@ export default {
     top: 48px;
     padding: 6px;
     border-radius: 8px;
-    backdrop-filter: blur(1px);
+    backdrop-filter: blur(4px);
     h4 {
       color: #666;
     }
@@ -1209,7 +1209,7 @@ export default {
         }
       }
 
-      .contractEnd {
+      .contractEndMain {
         border: 1px solid #ec4f4f;
         .progressGroup {
           .contractProgress {
@@ -1291,6 +1291,7 @@ export default {
     z-index: 99;
     border-radius: 12px;
     padding: 12px;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
     .leaveListWrap {
       max-height: 80%;
       overflow-y: auto;
@@ -1334,19 +1335,9 @@ export default {
 
     .optionCloseBtn {
       text-align: center;
-      background: var(--Neutral-200, #eee);
+      background: $raphael-gray-200;
       width: 90%;
       padding: 8px;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    .optionAgainBtn {
-      text-align: center;
-      border-radius: var(--sds-size-radius-200);
-      background: var(--Primary-default, #74bc1f);
-      width: 45%;
-      padding: 8px;
-      color: #fff;
       border-radius: 8px;
       cursor: pointer;
     }
@@ -1457,6 +1448,8 @@ export default {
     z-index: 99;
     padding: 12px;
     border-radius: 12px;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+
     h3 {
       text-align: center;
       color: #74bc1f;
@@ -1484,7 +1477,7 @@ export default {
     }
     h4 {
       color: var(--Color-Green-400, #74bc1f);
-      margin-top: 0.75rem;
+      margin-top: 1rem;
       font-size: 18px;
       font-style: normal;
       font-weight: 400;
@@ -1660,13 +1653,14 @@ export default {
   .noResizeTextarea {
     resize: none;
     width: 100%;
-    height: 120px !important;
-    margin-top: 1rem;
+    height: 120px;
+    margin-top: 0.5rem;
     border: none;
     border-radius: 4px;
     border: 1px solid var(--Neutral-400, #b3b3b3);
     padding: 0.5rem;
     font-size: 18px;
+    resize: none;
   }
 }
 </style>
