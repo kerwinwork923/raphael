@@ -245,64 +245,66 @@
               <span><!-- svg icon... --></span>
             </a>
           </div>
+          <main :class="{ contractEnd: item.Still <= 0 }">
+            <div class="contractDayGroup">
+              <div class="startTimeGroup">
+                <h6>合約開始</h6>
+                <h5>{{ item.RentStart }}</h5>
+              </div>
+              <div class="endTimeGroup">
+                <h6>合約結束</h6>
+                <h5>{{ item.RentEnd }}</h5>
+              </div>
+              <div class="rentFinishGroup" v-if="item.RentFinish">
+                <h6>合約到期</h6>
+                <h5>{{ item.RentFinish }}</h5>
+              </div>
+            </div>
 
-          <div class="contractDayGroup">
-            <div class="startTimeGroup">
-              <h6>合約開始</h6>
-              <h5>{{ item.RentStart }}</h5>
-            </div>
-            <div class="endTimeGroup">
-              <h6>合約結束</h6>
-              <h5>{{ item.RentEnd }}</h5>
-            </div>
-            <div class="rentFinishGroup" v-if="item.RentFinish">
-              <h6>合約到期</h6>
-              <h5>{{ item.RentFinish }}</h5>
-            </div>
-          </div>
-
-          <div class="progressGroup">
-            <div class="contractProgress">
-              <div class="contractProgressTextGroup">
-                <div
-                  v-if="
-                    item.Still > 0 && item.UsedRatio > 0 && item.UsedRatio < 100
-                  "
-                  class="todayIcon"
-                  :style="{ left: item.UsedRatio + '%' }"
-                >
-                  今天
+            <div class="progressGroup">
+              <div class="contractProgress">
+                <div class="contractProgressTextGroup">
+                  <div
+                    v-if="
+                      item.Still > 0 &&
+                      item.UsedRatio > 0 &&
+                      item.UsedRatio < 100
+                    "
+                    class="todayIcon"
+                    :style="{ left: item.UsedRatio + '%' }"
+                  >
+                    今天
+                  </div>
+                </div>
+                <div class="contractProgressBarGroup">
+                  <div
+                    class="contractProgressBar"
+                    :style="{
+                      width: item.UsedRatio + '%',
+                      backgroundColor: item.Still > 0 ? '#1FBCB3' : '#EC4F4F',
+                    }"
+                  ></div>
                 </div>
               </div>
-              <div class="contractProgressBarGroup">
-                <div
-                  class="contractProgressBar"
-                  :style="{
-                    width: item.UsedRatio + '%',
-                    backgroundColor: item.Still > 0 ? '#1FBCB3' : '#EC4F4F',
-                  }"
-                ></div>
-              </div>
             </div>
-          </div>
 
-          <div
-            class="contractDayWarn"
-            :class="{ contractDayWarn2: item.Still <= 0 }"
-          >
-            <img
-              v-if="item.Still > 0"
-              src="@/assets/imgs/contractTime.svg"
-              alt="contract time"
-            />
-            <img
-              v-else
-              src="@/assets/imgs/contractWarning.svg"
-              alt="contract warning"
-            />
-            <h5>{{ item.Info }}</h5>
-          </div>
-
+            <div
+              class="contractDayWarn"
+              :class="{ contractDayWarn2: item.Still <= 0 }"
+            >
+              <img
+                v-if="item.Still > 0"
+                src="@/assets/imgs/contractTime.svg"
+                alt="contract time"
+              />
+              <img
+                v-else
+                src="@/assets/imgs/contractWarning.svg"
+                alt="contract warning"
+              />
+              <h5>{{ item.Info }}</h5>
+            </div>
+          </main>
           <div class="leaveGroup">
             <!-- 點請假紀錄 -> call API /api/fr/HolidayRec -->
             <div class="leaveRecordBtn" @click="getSingleHolidayRecord(item)">
@@ -1079,126 +1081,142 @@ export default {
         }
       }
 
-      .progressGroup {
-        margin-top: 0.25rem;
-        .contractProgress {
-          width: 100%;
-          position: relative;
-
-          .contractProgressTextGroup {
-            position: absolute;
-            top: -24px;
+      & > main {
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+        border: 1px solid #1fbcb3;
+        .progressGroup {
+          margin-top: 0.25rem;
+          .contractProgress {
             width: 100%;
-            height: 0;
-            pointer-events: none;
+            position: relative;
 
-            .todayIcon {
-              display: flex;
-              align-items: center;
-              justify-content: center;
+            .contractProgressTextGroup {
               position: absolute;
-              background: $raphael-white;
-              border-radius: 50%;
-              transform: translateX(-50%);
-              white-space: nowrap;
-              color: $raphael-cyan-400;
-              padding: 4px;
-              letter-spacing: 0.04px;
-              font-size: 12px;
-              box-shadow: 0px 2px 3px 0px rgba(223, 236, 197, 0.5);
+              top: -24px;
+              width: 100%;
+              height: 0;
+              pointer-events: none;
 
-              &::after {
-                content: "";
+              .todayIcon {
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 position: absolute;
                 background: $raphael-white;
-                width: 7px;
-                height: 6px;
-                bottom: -6px;
-                clip-path: polygon(50% 100%, 0 0, 100% 0);
+                border-radius: 50%;
+                transform: translateX(-50%);
+                white-space: nowrap;
+                color: $raphael-cyan-400;
+                padding: 4px;
+                letter-spacing: 0.04px;
+                font-size: 12px;
                 box-shadow: 0px 2px 3px 0px rgba(223, 236, 197, 0.5);
+
+                &::after {
+                  content: "";
+                  position: absolute;
+                  background: $raphael-white;
+                  width: 7px;
+                  height: 6px;
+                  bottom: -6px;
+                  clip-path: polygon(50% 100%, 0 0, 100% 0);
+                  box-shadow: 0px 2px 3px 0px rgba(223, 236, 197, 0.5);
+                }
+              }
+            }
+
+            .contractProgressBarGroup {
+              margin-top: 0.5rem;
+              border-radius: 50px;
+              background: #fff;
+              overflow: hidden;
+            }
+
+            .contractProgressBarGroup {
+              width: 100%;
+              height: 12px;
+              margin-top: 1.5rem;
+              border-radius: 50px;
+              background: #fff;
+              box-shadow: inset 0px 1px 2px rgba(0, 0, 0, 0.25);
+              overflow: hidden;
+
+              .contractProgressBar {
+                height: 100%;
               }
             }
           }
+        }
 
-          .contractProgressBarGroup {
-            margin-top: 0.5rem;
-            border-radius: 50px;
-            background: #fff;
-            overflow: hidden;
+        .contractDayGroup {
+          display: flex;
+          justify-content: space-between;
+          margin-top: 0.75rem;
+
+          .startTimeGroup,
+          .endTimeGroup {
+            h6 {
+              color: #ccc;
+              font-size: 14px;
+              font-weight: 400;
+              margin-bottom: 2px;
+              letter-spacing: 0.048px;
+            }
+            h5 {
+              color: #1e1e1e;
+              font-size: 16px;
+              font-weight: 400;
+              letter-spacing: 0.5px;
+            }
           }
-
-          .contractProgressBarGroup {
-            width: 100%;
-            height: 12px;
-            margin-top: 1.5rem;
-            border-radius: 50px;
-            background: #fff;
-            box-shadow: inset 0px 1px 2px rgba(0, 0, 0, 0.25);
-            overflow: hidden;
-
-            .contractProgressBar {
-              height: 100%;
+          .rentFinishGroup {
+            h6 {
+              color: #ec4f4f;
+              font-size: 14px;
+              font-weight: 400;
+              margin-bottom: 2px;
+              letter-spacing: 0.048px;
+            }
+            h5 {
+              color: #1e1e1e;
+              font-size: 16px;
+              font-weight: 400;
+              letter-spacing: 0.5px;
             }
           }
         }
-      }
-
-      .contractDayGroup {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 0.75rem;
-
-        .startTimeGroup,
-        .endTimeGroup {
-          h6 {
-            color: #ccc;
-            font-size: 14px;
-            font-weight: 400;
-            margin-bottom: 2px;
-            letter-spacing: 0.048px;
-          }
-          h5 {
-            color: #1e1e1e;
-            font-size: 16px;
-            font-weight: 400;
-            letter-spacing: 0.5px;
-          }
+        .contractDayWarn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-top: 0.5rem;
+          gap: 4px;
+          border-radius: 4px;
+          border: 1px solid #1fbcb3;
+          background: rgba(31, 188, 179, 0.1);
+          color: #1fbcb3;
+          font-size: 16px;
+          font-weight: 400;
+          letter-spacing: 0.5px;
+          padding: 8px;
         }
-        .rentFinishGroup {
-          h6 {
-            color: #ec4f4f;
-            font-size: 14px;
-            font-weight: 400;
-            margin-bottom: 2px;
-            letter-spacing: 0.048px;
-          }
-          h5 {
-            color: #1e1e1e;
-            font-size: 16px;
-            font-weight: 400;
-            letter-spacing: 0.5px;
-          }
-        }
-      }
-      .contractDayWarn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-top: 0.5rem;
-        gap: 4px;
-        border-radius: 4px;
-        border: 1px solid #1fbcb3;
-        background: rgba(31, 188, 179, 0.1);
-        color: #1fbcb3;
-        font-size: 16px;
-        font-weight: 400;
-        letter-spacing: 0.5px;
-        padding: 8px;
 
-        &.contractDayWarn2 {
+        .contractDayWarn2 {
           border-color: #ec4f4f;
           background: rgba(236, 79, 79, 0.1);
           color: #ec4f4f;
+        }
+      }
+
+      .contractEnd {
+        border: 1px solid #ec4f4f;
+        .progressGroup {
+          .contractProgress {
+            .contractProgressBarGroup {
+              margin-top: 0.5rem;
+            }
+          }
         }
       }
       .linkGroup {
