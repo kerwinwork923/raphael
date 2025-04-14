@@ -241,7 +241,7 @@
               target="_blank"
               rel="noopener noreferrer"
             >
-              查看內容
+              查看合約
               <span><!-- svg icon... --></span>
             </a>
           </div>
