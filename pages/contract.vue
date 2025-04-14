@@ -1626,8 +1626,9 @@ export default {
     .leaveHistoryRecordSubTitle {
       text-align: right;
       margin-top: 0.5rem;
+      color: $raphael-gray-500;
       span {
-        color: var(--Color-Blue-400, #1fbcb3);
+        color: $raphael-cyan-400;
       }
     }
     .leaveHistoryRecordContentGroup {
