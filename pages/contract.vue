@@ -1011,7 +1011,6 @@ export default {
     top: 48px;
     padding: 6px;
     border-radius: 8px;
-    backdrop-filter: blur(4px);
     h4 {
       color: #666;
     }
