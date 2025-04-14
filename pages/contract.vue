@@ -79,6 +79,10 @@
           </div>
           <hr />
         </div>
+
+        <div class="notDetectData" v-if="singleHolidayRecord.length === 0">
+          無請假資料
+        </div>
       </div>
 
       <div class="leaveRecordAlertOptionGroup">
@@ -1302,6 +1306,16 @@ export default {
       flex: 1;
       height: 0;
       overflow-y: auto;
+      .notDetectData {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        letter-spacing: 10px;
+        font-size: 1.25rem;
+        white-space: nowrap;
+        color: $raphael-gray-500;
+      }
     }
     h5 {
       color: var(--Color-Shade-500, #666);
