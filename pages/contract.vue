@@ -48,13 +48,6 @@
     <!-- 單筆請假紀錄彈窗 -->
     <div class="leaveRecordAlert" v-if="leaveRecordAlertShow">
       <h3>請假紀錄</h3>
-      <div class="leaveRecordAlertHR"></div>
-
-      <div class="leaveRecordAlertOptionGroup">
-        <div class="optionCloseBtn" @click="leaveRecordAlertShow = false">
-          關閉
-        </div>
-      </div>
 
       <!-- 單筆合約的請假紀錄 -->
       <div class="leaveListWrap">
@@ -85,6 +78,12 @@
             <div class="leaveList1Content">{{ record.HolidayNote }}</div>
           </div>
           <hr />
+        </div>
+      </div>
+
+      <div class="leaveRecordAlertOptionGroup">
+        <div class="optionCloseBtn" @click="leaveRecordAlertShow = false">
+          關閉
         </div>
       </div>
     </div>
@@ -135,7 +134,11 @@
         placeholder="請簡短說明..."
       ></textarea>
 
-      <p>合約起迄日：{{ contractStart }} ~ {{ contractEnd }}</p>
+      <p>
+        合約起迄日：<span class="contractStartToEnd"
+          >{{ contractStart }} ~ {{ contractEnd }}</span
+        >
+      </p>
       <p>合約到期日：{{ contractExpire }}</p>
 
       <p>請假申請天數：{{ selectedDates.length }} 天</p>
@@ -148,7 +151,7 @@
           :key="idx"
           class="monthRemainItem"
         >
-          {{ mItem.monthLabel }}:{{ mItem.canDays }}天
+          {{ mItem.canDays }}天({{ mItem.monthLabel }})
         </span>
       </p>
 
@@ -1286,14 +1289,18 @@ export default {
     top: 50%;
     transform: translate(-50%, -50%);
     background-color: #fff;
-    height: 90%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: 74%;
     width: 90%;
     z-index: 99;
     border-radius: 12px;
     padding: 12px;
     box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
     .leaveListWrap {
-      max-height: 80%;
+      flex: 1;
+      height: 0;
       overflow-y: auto;
     }
     h5 {
@@ -1315,28 +1322,22 @@ export default {
       font-weight: 700;
       letter-spacing: 0.12px;
       text-align: center;
-      margin-bottom: 0.75rem;
-    }
-    .leaveRecordAlertHR {
-      width: 100%;
-      height: 1px;
-      background-color: #666;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid $raphael-gray-500;
     }
   }
 
   .leaveRecordAlertOptionGroup {
-    position: fixed;
     width: 100%;
     display: flex;
-    bottom: 5%;
     justify-content: center;
     gap: 8px;
-    left: 0;
 
     .optionCloseBtn {
       text-align: center;
       background: $raphael-gray-200;
-      width: 90%;
+      color: $raphael-gray-500;
+      width: 100%;
       padding: 8px;
       border-radius: 8px;
       cursor: pointer;
@@ -1443,7 +1444,7 @@ export default {
   .leaveApplicationAlert {
     width: 90%;
     position: fixed;
-    min-height: 70%;
+    height: 74%;
     background-color: #fff;
     z-index: 99;
     padding: 12px;
@@ -1502,6 +1503,23 @@ export default {
       line-height: 100%; /* 18px */
       letter-spacing: 2.7px;
       line-height: 1.75;
+
+      .contractStartToEnd {
+        display: flex;
+        line-height: normal;
+      }
+
+      .monthRemainItem {
+        position: relative;
+        &:last-child {
+          margin-left: 6px;
+          &::before {
+            content: "、";
+            position: absolute;
+            left: -16px;
+          }
+        }
+      }
     }
   }
   .leaveApplicationAlertBtnGroup {
@@ -1517,7 +1535,8 @@ export default {
       text-align: center;
       background-color: #8e6363;
       border-radius: var(--sds-size-radius-200);
-      background: var(--Neutral-300, #ccc);
+      background: $raphael-gray-200;
+      color: $raphael-gray-500;
       padding: 8px 12px;
       border-radius: 8px;
       letter-spacing: 0.09px;
