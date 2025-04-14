@@ -42,10 +42,6 @@
         />
       </div>
       <div class="itemsGroup">
-        <!-- <div class="item item1">
-          <div class="topTitle">獎勵</div>
-          <div class="bottomTitle">積分</div>
-        </div> -->
         <!-- 
         <div class="item item2" @click="goHRVHistory">
           <div class="topTitle">檢測</div>
@@ -81,14 +77,12 @@
           <div class="bottomTitle">親友</div>
           <img src="../assets/imgs/relationshopIcon.svg" alt="" />
         </div> -->
-
-        <router-link class="item item1" to="/point">
-          <div>
-            <div class="topTitle">獎勵</div>
-            <div class="bottomTitle">積分</div>
-            <img src="../assets/imgs/ticket.svg" alt="" />
-          </div>
-        </router-link>
+       
+        <!-- <router-link to="/point" class="item">
+          <div class="topTitle">獎勵</div>
+          <div class="bottomTitle">積分</div>
+          <img src="../assets/imgs/ticket.svg" alt="" />
+        </router-link> -->
       </div>
       <footer class="copyrights">
         <!-- <a href="/usageHistory"></a> -->
@@ -551,6 +545,36 @@ export default {
 
             & > img {
               background: rgba(101, 85, 143,1);
+            }
+          }
+        }
+        &:nth-child(5) {
+          border: 2px solid rgba(116, 188, 31,.7);
+          color: $raphael-green-400;
+          font-size: 1.25rem;
+          justify-content: end;
+
+          .bottomTitle {
+            margin-right: 0.75rem;
+          }
+
+          img {
+            background: rgba(116, 188, 31,.7);
+            width: 50px;
+            height: 55%;
+            border-radius: 0 8px 8px 0;
+            padding: 0.5rem;
+            top: 10px;
+            left: 0;
+            box-shadow: inset 0 -4px 8px rgba(116, 188, 31,1);
+          }
+
+          &:hover {
+            border: 2px solid rgba(116, 188, 31,1);
+            color: $raphael-purple-200;
+
+            & > img {
+              background: rgba(116, 188, 31,1);
             }
           }
         }
