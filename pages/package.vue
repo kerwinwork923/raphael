@@ -1,7 +1,7 @@
 <template>
   <RaphaelLoading v-if="loading" />
-  <TitleMenu Text="包裹查詢" link="/user" />
   <div class="packageWrap">
+    <TitleMenu Text="包裹查詢" link="/user" />
     <!-- 當 hasPackage 為 true 時，顯示包裹清單 -->
     <div class="packageGroup" v-if="hasPackage">
       <h3>您所有的包裹編號</h3>
@@ -257,7 +257,7 @@ async function fetchPackageList() {
         MID,
         Token,
         MAID,
-        Mobile ,
+        Mobile,
       }
     );
 
@@ -421,10 +421,19 @@ onBeforeUnmount(() => {
     }
   }
   .notPackageWrap {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
     .notPackageGroup {
       padding: 12px;
       border-radius: 12px;
       background: var(--primary-orange-100, #fef1e2);
+    }
+
+    .recommend {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
 
     img {
@@ -443,7 +452,6 @@ onBeforeUnmount(() => {
   .recommendWrap {
     display: grid;
     gap: 0.75rem;
-    margin-top: 0.75rem;
     min-height: 400px;
     .robotImg {
       position: absolute;
@@ -466,7 +474,6 @@ onBeforeUnmount(() => {
       width: 100%;
       background-color: $raphael-white;
       border-radius: 12px;
-      padding-top: 0.75rem;
       padding: 0.75rem;
       .imgGroup {
         position: relative;
@@ -552,7 +559,6 @@ onBeforeUnmount(() => {
     font-weight: 400;
     line-height: 100%;
     letter-spacing: 0.15px;
-    padding-top: 1rem;
     display: flex;
     justify-content: space-between;
     span {
