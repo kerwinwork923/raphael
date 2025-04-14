@@ -54,7 +54,7 @@
             >
               <path
                 d="M16.011 5.04146L8.70297 12.5385L16.011 20.0355C16.1418 20.1694 16.2151 20.3492 16.2151 20.5365C16.2151 20.7237 16.1418 20.9035 16.011 21.0375C15.9474 21.1023 15.8716 21.1538 15.7879 21.189C15.7042 21.2242 15.6143 21.2423 15.5235 21.2423C15.4327 21.2423 15.3428 21.2242 15.2591 21.189C15.1754 21.1538 15.0995 21.1023 15.036 21.0375L7.25997 13.062C7.12345 12.9219 7.04705 12.734 7.04705 12.5385C7.04705 12.3429 7.12345 12.155 7.25997 12.015L15.0345 4.03946C15.0981 3.97414 15.1741 3.92223 15.2581 3.88678C15.3421 3.85134 15.4323 3.83307 15.5235 3.83307C15.6146 3.83307 15.7049 3.85134 15.7889 3.88678C15.8728 3.92223 15.9489 3.97414 16.0125 4.03946C16.1433 4.17341 16.2166 4.35322 16.2166 4.54046C16.2166 4.7277 16.1433 4.90751 16.0125 5.04146H16.011Z"
-                fill="#1E1E1E"
+                fill="$raphael-black"
               />
             </svg>
             <!-- 右箭頭 -->
@@ -68,7 +68,7 @@
             >
               <path
                 d="M7.98903 5.04146L15.297 12.5385L7.98903 20.0355C7.85819 20.1694 7.78495 20.3492 7.78495 20.5365C7.78495 20.7237 7.85819 20.9035 7.98903 21.0375C8.05257 21.1023 8.12842 21.1538 8.21213 21.189C8.29584 21.2242 8.38573 21.2423 8.47653 21.2423C8.56733 21.2423 8.65721 21.2242 8.74092 21.189C8.82463 21.1538 8.90048 21.1023 8.96403 21.0375L16.74 13.062C16.8765 12.9219 16.953 12.734 16.953 12.5385C16.953 12.3429 16.8765 12.155 16.74 12.015L8.96553 4.03946C8.90193 3.97414 8.8259 3.92223 8.74191 3.88678C8.65792 3.85134 8.56769 3.83307 8.47653 3.83307C8.38537 3.83307 8.29513 3.85134 8.21114 3.88678C8.12715 3.92223 8.05112 3.97414 7.98753 4.03946C7.85669 4.17341 7.78345 4.35322 7.78345 4.54046C7.78345 4.7277 7.85669 4.90751 7.98753 5.04146H7.98903Z"
-                fill="#1E1E1E"
+                fill="$raphael-black"
               />
             </svg>
           </span>
@@ -349,15 +349,15 @@ onBeforeUnmount(() => {
 
 <style lang="scss">
 .packageWrap {
-  background-color: #f6f6f6;
+  background-color: $raphael-gray-100;
   padding: 0 5% 60px;
   min-height: 100vh;
   .packageGroup {
     border-radius: 12px;
-    background: var(--primary-orange-100, #fef1e2);
+    background: $raphael-orange-200;
     padding: 12px;
     h3 {
-      color: var(--shade-black, #1e1e1e);
+      color: $raphael-black;
       font-family: "Noto Sans";
       font-size: 20px;
       font-style: normal;
@@ -366,7 +366,7 @@ onBeforeUnmount(() => {
       letter-spacing: var(--Title-Medium-Tracking, 0.15px);
     }
     p {
-      color: var(--primary-brown-400, #bc581f);
+      color: $raphael-brown-400;
 
       font-size: 18px;
       font-style: normal;
@@ -376,7 +376,7 @@ onBeforeUnmount(() => {
     }
     .package {
       border-radius: 8px;
-      background: var(--shade-white, #fff);
+      background: $raphael-white;
       padding: 12px;
       margin: 0.85rem 0;
       cursor: pointer;
@@ -384,7 +384,7 @@ onBeforeUnmount(() => {
         display: flex;
         justify-content: space-between;
         h4 {
-          color: var(--shade-black, #1e1e1e);
+          color: $raphael-black;
           font-size: 20px;
           font-style: normal;
           font-weight: 400;
@@ -392,7 +392,7 @@ onBeforeUnmount(() => {
         }
       }
       .packageNumber {
-        color: var(--brand-green-400, #74bc1f);
+        color: $raphael-green-400;
 
         font-size: 24px;
         font-style: normal;
@@ -402,7 +402,7 @@ onBeforeUnmount(() => {
         margin-top: 0.35rem;
       }
       h5 {
-        color: var(--shade-gray-300, #ccc);
+        color: $raphael-gray-300;
         font-size: 16px;
         font-style: normal;
         font-weight: 400;
@@ -411,7 +411,7 @@ onBeforeUnmount(() => {
         margin-top: 0.5rem;
       }
       h6 {
-        color: var(--shade-gray-300, #ccc);
+        color: $raphael-gray-300;
         font-size: 12px;
         font-style: normal;
         font-weight: 400;
@@ -427,7 +427,7 @@ onBeforeUnmount(() => {
     .notPackageGroup {
       padding: 12px;
       border-radius: 12px;
-      background: var(--primary-orange-100, #fef1e2);
+      background: $raphael-orange-200;
     }
 
     .recommend {
@@ -440,7 +440,7 @@ onBeforeUnmount(() => {
       border-radius: 8px;
     }
     p {
-      color: #1e1e1e;
+      color: $raphael-black;
       font-family: "Noto Sans";
       font-size: 20px;
       font-style: normal;
@@ -462,7 +462,7 @@ onBeforeUnmount(() => {
       z-index: 3;
     }
     p {
-      color: #1e1e1e;
+      color: $raphael-black;
       text-align: center;
       font-size: 18px;
       font-style: normal;
