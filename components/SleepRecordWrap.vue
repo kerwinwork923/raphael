@@ -3,7 +3,7 @@
     <h5 class="pleaseWrite">請填寫以下問題</h5>
     <div class="sleepRecordList">
       <div class="sleepRecord">
-        <h4>1.幾點上床</h4>
+        <h4>1.您通常幾點上床睡覺？</h4>
         <div class="sleepInputGroup">
           <div class="selectGroup1">
             <img class="timeIcon" src="../assets/imgs/time.svg" alt="" />
@@ -45,14 +45,14 @@
       </div>
 
       <div class="sleepRecord">
-        <h4>2.需要躺多久才入睡</h4>
+        <h4>2.您需要多長時間才能入睡？</h4>
         <div class="sleepInputGroup">
           <TimePicker currentTimeMode="layTime" placeholder="請選擇入睡時間" />
         </div>
       </div>
 
       <div class="sleepRecord">
-        <h4>3.幾點起床</h4>
+        <h4>3.您通常幾點醒來？</h4>
         <div class="sleepInputGroup">
           <div class="selectGroup1">
             <img class="timeIcon" src="../assets/imgs/time.svg" alt="" />
@@ -94,17 +94,49 @@
       </div>
 
       <div class="sleepRecord">
-        <h4>4.實際睡眠時間</h4>
+        <h4>4.您通常幾點離開床</h4>
         <div class="sleepInputGroup">
-          <TimePicker
-            currentTimeMode="sleepTime"
-            placeholder="請選擇深沉睡眠時間"
-          />
+          <div class="selectGroup1">
+            <img class="timeIcon" src="../assets/imgs/time.svg" alt="" />
+            <div class="dropListGroup">
+              <div class="dropListText" @click="toggleDropdown('3')">
+                點
+                <div class="dropListHour">{{ leaveBedTimeHour || "" }}</div>
+              </div>
+
+              <div class="dropList" v-if="showDropdown3">
+                <div
+                  class="list"
+                  v-for="(hour, index) in hours"
+                  :key="index"
+                  @click="selectTime('leaveBedTimeHour', hour)"
+                >
+                  {{ hour }}
+                </div>
+              </div>
+            </div>
+            <div class="dropListGroup">
+              <div class="dropListText" @click="toggleDropdown('3_2')">
+                分
+                <div class="dropListMinute">{{ leaveBedTimeMinute || "" }}</div>
+              </div>
+              <div class="dropList" v-if="showDropdown3_2">
+                <div
+                  class="list"
+                  v-for="(minute, index) in minutes"
+                  :key="index"
+                  @click="selectTime('leaveBedTimeMinute', minute)"
+                >
+                  {{ minute }}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       <div class="sleepRecord">
-        <h4>5.睡眠中斷次數</h4>
+        <h4>5.一晚醒來幾次？</h4>
         <div class="sleepInputGroup">
           <div class="sleepInputGroup">
             <div class="selectGroup1" @click="toggleDropdown('5')">
@@ -141,7 +173,7 @@
       </div>
 
       <div class="sleepRecord">
-        <h4>6.特殊飲食次數(應酬、聚餐 etc...)</h4>
+        <h4>7.近兩週，您有幾次聚餐或應酬?</h4>
         <div class="sleepInputGroup">
           <div class="sleepInputGroup">
             <div class="selectGroup1" @click="toggleDropdown('6')">
@@ -150,7 +182,8 @@
                 <div class="dropListText">
                   <div
                     :class="{
-                      dropListTextActive: useSleepRecordData.specialDiet != null,
+                      dropListTextActive:
+                        useSleepRecordData.specialDiet != null,
                     }"
                   >
                     {{
@@ -178,7 +211,7 @@
       </div>
 
       <div class="sleepRecord">
-        <h4>7.藥物輔助情形</h4>
+        <h4>8.近兩週，您有使用助眠藥物嗎？</h4>
         <div class="sleepInputGroup">
           <div class="sleepInputGroup">
             <div class="selectGroup1" @click="toggleDropdown('7')">
@@ -215,7 +248,7 @@
       </div>
 
       <div class="sleepRecord">
-        <h4>8.自覺睡眠品質</h4>
+        <h4>9.近兩週，您覺得睡眠品質如何？</h4>
         <ScoreBar
           :options="useSleepRecordData.sleepQualityOptions"
           property="sleepProperty"
@@ -223,7 +256,7 @@
       </div>
 
       <div class="sleepRecord">
-        <h4>9.白天情緒狀態</h4>
+        <h4>10.白天心情如何?</h4>
         <ScoreBar
           :options="useSleepRecordData.dayEmotionOptions"
           property="emotionalState"
@@ -231,7 +264,7 @@
       </div>
 
       <div class="sleepRecord">
-        <h4>10.白天體力、專注力、記憶力</h4>
+        <h4>11.白天感覺體力、專注力、記憶力如何?</h4>
         <ScoreBar
           :options="useSleepRecordData.dayStateOptions"
           property="physicalStrength"
@@ -239,7 +272,7 @@
       </div>
 
       <div class="sleepRecord">
-        <h4>11.白天嗜睡程度</h4>
+        <h4>12.白天會不會想睡覺?</h4>
         <ScoreBar
           :options="useSleepRecordData.daySleepOptions"
           property="dayTimeSleepiness"
@@ -247,7 +280,7 @@
       </div>
 
       <div class="sleepRecord">
-        <h4>12.工作壓力、變動 (含升遷、離職、工作轉換)</h4>
+        <h4>13.近兩週,您覺得工作有受到影響嗎？</h4>
         <ScoreBar
           :options="useSleepRecordData.defaultOptions"
           property="workStress"
@@ -255,7 +288,7 @@
       </div>
 
       <div class="sleepRecord">
-        <h4>13.親密關係壓力 (含結婚、爭吵、離婚等)</h4>
+        <h4>14.近兩週,您與身邊重要的人相處時還順利嗎？</h4>
         <ScoreBar
           :options="useSleepRecordData.defaultOptions"
           property="relationshipStress"
@@ -263,7 +296,7 @@
       </div>
 
       <div class="sleepRecord">
-        <h4>14.自身或家人健康狀況壓力</h4>
+        <h4>15.近兩週,您或家人的健康狀況對您的生活影響如何？</h4>
         <ScoreBar
           :options="useSleepRecordData.defaultOptions"
           property="healthStress"
@@ -271,7 +304,7 @@
       </div>
 
       <div class="sleepRecord">
-        <h4>15.生活型態變動壓力 (含飲食習慣調整、強迫運動等)</h4>
+        <h4>16.近兩週,您的生活習慣調整（如飲食、運動）您適應得如何？</h4>
         <ScoreBar
           :options="useSleepRecordData.defaultOptions"
           property="lifestyleChangeStress"
@@ -279,7 +312,7 @@
       </div>
 
       <div class="sleepRecord">
-        <h4>16.經濟壓力 (含常態性支出或突發性支出)</h4>
+        <h4>17.近兩週,您的經濟狀況有壓力嗎？</h4>
         <ScoreBar
           :options="useSleepRecordData.defaultOptions"
           property="financialStress"
@@ -287,7 +320,7 @@
       </div>
 
       <div class="sleepRecord">
-        <h4>17.壓力事件紀錄</h4>
+        <h4>18.最近有讓您壓力大的事件嗎？</h4>
         <div class="sleepInputGroup">
           <textarea
             name=""
@@ -324,11 +357,16 @@ export default {
     const bedTimeMinute = ref();
     const getupTimeHour = ref();
     const getupTimeMinute = ref();
+    const leaveBedTimeHour = ref();
+    const leaveBedTimeMinute = ref();
 
     const showDropdown1 = ref(false);
     const showDropdown1_2 = ref(false);
     const showDropdown2 = ref(false);
     const showDropdown2_2 = ref(false);
+    const showDropdown3 = ref(false);
+    const showDropdown3_2 = ref(false);
+
     const showDropdown5 = ref(false);
     const showDropdown6 = ref(false);
     const showDropdown7 = ref(false);
@@ -347,9 +385,9 @@ export default {
       String(i * 15).padStart(2, "0")
     );
 
-    const sleepBreaks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const sleepBreaks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,">10"];
     // const peeTimes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    const specialDiets = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const specialDiets = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,">10"];
     const medhelps = [0, 1, 2, 3, 4, 5, 6, 7];
 
     watch([bedTimeHour, bedTimeMinute], ([newHour, newMinute]) => {
@@ -370,6 +408,15 @@ export default {
       }
     });
 
+    watch([leaveBedTimeHour, leaveBedTimeMinute], ([newHour, newMinute]) => {
+      if (newHour !== undefined && newMinute !== undefined) {
+        const leaveTime = `${String(newHour).padStart(2, "0")}:${String(
+          newMinute
+        ).padStart(2, "0")}`;
+        useSleepRecordData.leaveTime = leaveTime;
+      }
+    });
+
     const closeAllSelect = (currentDropdown) => {
       showDropdown1.value =
         currentDropdown === "1" ? !showDropdown1.value : false;
@@ -379,6 +426,10 @@ export default {
         currentDropdown === "2" ? !showDropdown2.value : false;
       showDropdown2_2.value =
         currentDropdown === "2_2" ? !showDropdown2_2.value : false;
+      showDropdown3.value =
+        currentDropdown === "3" ? !showDropdown3.value : false;
+      showDropdown3_2.value =
+        currentDropdown === "3_2" ? !showDropdown3_2.value : false;
       showDropdown5.value =
         currentDropdown === "5" ? !showDropdown5.value : false;
       showDropdown6.value =
@@ -406,6 +457,15 @@ export default {
           getupTimeMinute.value = value;
           showDropdown2_2.value = false;
         },
+        leaveBedTimeHour: () => {
+          leaveBedTimeHour.value = value;
+          showDropdown3.value = false;
+        },
+        leaveBedTimeMinute: () => {
+          leaveBedTimeMinute.value = value;
+          showDropdown3_2.value = false;
+        },
+
         sleepBreak: () => {
           useSleepRecordData.sleepBreak = value;
         },
@@ -429,34 +489,33 @@ export default {
     // 切換下拉選單顯示狀態
     const toggleDropdown = (dropdown) => {
       switch (dropdown) {
-        case "1": {
+        case "1":
           closeAllSelect("1");
           break;
-        }
-        case "1_2": {
+        case "1_2":
           closeAllSelect("1_2");
           break;
-        }
-        case "2": {
+        case "2":
           closeAllSelect("2");
           break;
-        }
-        case "2_2": {
+        case "2_2":
           closeAllSelect("2_2");
           break;
-        }
-        case "5": {
+        case "3":
+          closeAllSelect("3");
+          break;
+        case "3_2":
+          closeAllSelect("3_2");
+          break;
+        case "5":
           closeAllSelect("5");
           break;
-        }
-        case "6": {
+        case "6":
           closeAllSelect("6");
           break;
-        }
-        case "7": {
+        case "7":
           closeAllSelect("7");
           break;
-        }
       }
     };
 
@@ -511,6 +570,8 @@ export default {
       showDropdown5,
       showDropdown6,
       showDropdown7,
+      showDropdown3,
+      showDropdown3_2,
       firstTest,
       closeAllSelect,
       hours,
@@ -519,6 +580,8 @@ export default {
       specialDiets,
       medhelps,
       isSubmitting,
+      leaveBedTimeHour,
+      leaveBedTimeMinute,
     };
   },
 };
@@ -527,19 +590,19 @@ export default {
 <style lang="scss" scoped>
 .sleepRecordWrap {
   margin-top: 0.75rem;
-  
+
   .pleaseWrite {
     margin: 1rem 0 0.75rem 0;
     color: $raphael-gray-500;
     font-size: 1rem;
   }
-  .sleepRecordList{
+  .sleepRecordList {
     height: calc(100vh - 267px);
     overflow-y: auto;
-    margin-bottom: 0.75rem;    
+    margin-bottom: 0.75rem;
     @include scrollbarStyle();
 
-    @include respond-to("phone-landscape" ){
+    @include respond-to("phone-landscape") {
       height: calc(100vh - 100px);
     }
 
@@ -549,7 +612,7 @@ export default {
       padding: 0.75rem;
       border-radius: 12px;
 
-      &>h4{
+      & > h4 {
         font-size: 20px;
         font-weight: 500;
         color: $raphael-black;
@@ -569,7 +632,7 @@ export default {
         .dropListGroup {
           width: 50%;
           position: relative;
-          border-bottom:1px solid $raphael-gray-200;
+          border-bottom: 1px solid $raphael-gray-200;
 
           .dropListText {
             position: relative;
@@ -605,7 +668,8 @@ export default {
             color: $raphael-gray-500;
             padding: 0.25rem 0;
             max-height: 200px;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16),
+              0 3px 6px rgba(0, 0, 0, 0.23);
             overflow-y: scroll;
 
             .list {
@@ -658,7 +722,7 @@ export default {
   }
   .submitBtn,
   .backToUserBtn {
-    @include btnStyle($raphael-green-400,$raphael-white);
+    @include btnStyle($raphael-green-400, $raphael-white);
   }
 }
 </style>

@@ -473,6 +473,7 @@ export default {
       login,
       installPWA,
       localMessagingToken, // 用於顯示推播 token
+    
     };
   },
 };

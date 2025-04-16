@@ -41,6 +41,11 @@
             </div>
           </div>
 
+          <ProgressBar
+            :score="useSleepRecordData.SleepRec?.[0]?.Score"
+            :colorProp="scoreColorFn(useSleepRecordData.SleepRec?.[0]?.Score, 0)"
+          />
+
           <!-- <ProgressBar
             :score="useSleepRecordData.SleepRec?.[0]?.Score"
             :colorProp="scoreSleepColorFn(useSleepRecordData.SleepRec?.[0]?.Score)"
@@ -550,6 +555,7 @@ import {
 import { useSleepRecordStore } from "../stores/sleepRecord";
 import { useRouter } from "vue-router";
 import RaphaelLoading from "../components/RaphaelLoading";
+import { scoreColorFn} from "../fn/utils";
 export default defineComponent({
   components: {
     RaphaelLoading,
@@ -584,6 +590,7 @@ export default defineComponent({
       scoreSleepColorFn,
       computedSleepEmoji,
       formatTimestamp,
+      scoreColorFn
     };
   },
 });

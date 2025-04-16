@@ -130,7 +130,7 @@ export default {
       if (detectFlag) {
         redirectUrl += `?UID=${detectUID}&flag=${detectFlag}&form=${detectForm}`;
       }
-
+      
       window.location.href = redirectUrl;
     };
 

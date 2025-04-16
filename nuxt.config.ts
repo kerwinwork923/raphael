@@ -18,6 +18,11 @@ export default defineNuxtConfig({
       ],
     },
   },
+  nitro: {
+    prerender: {
+      routes: ['/']
+    }
+  },
   ssr: false,
   modules: [
     "@pinia/nuxt",
