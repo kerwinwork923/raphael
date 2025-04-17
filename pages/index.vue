@@ -97,7 +97,6 @@
   }
 
   h1 {
-    
     font-size: 1.5rem;
     font-weight: 400;
     letter-spacing: 0.5px;
@@ -350,7 +349,7 @@ export default {
     const passwordVisible = ref(false);
     const router = useRouter();
     const localMessagingToken = ref(""); // firebase 儲存取得的推播 token
-    
+
     const isIOS =
       /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isStandalone =
@@ -382,8 +381,12 @@ export default {
           localStorage.setItem("userData", JSON.stringify(response.data));
 
           // 取得firebase推播 token
-          await requestPermission();
-          localMessagingToken.value = messagingToken.value;
+          try {
+            await requestPermission();
+            localMessagingToken.value = messagingToken.value;
+          } catch (e) {
+            console.warn("Firebase 推播權限失敗", e);
+          }
           //alert(localMessagingToken.value);
           console.log("取得的推播 Token:", localMessagingToken.value);
           console.log("取得的MAID:", response.data.MAID.trim());
@@ -473,7 +476,6 @@ export default {
       login,
       installPWA,
       localMessagingToken, // 用於顯示推播 token
-    
     };
   },
 };

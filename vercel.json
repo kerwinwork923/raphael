@@ -1,16 +1,6 @@
 {
-    "redirects": [
-      {
-        "source": "/",
-        "has": [
-          {
-            "type": "host",
-            "value": "raphael-5.vercel.app"
-          }
-        ],
-        "destination": "https://www.neuroplus.com.tw/",
-        "permanent": true
-      }
+    "rewrites": [
+      { "source": "/(.*)", "destination": "/index.html" }
     ]
   }
   
