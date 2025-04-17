@@ -331,7 +331,7 @@
 }
 </style>
 
-<script>
+<!-- <script>
 import { ref, onMounted } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
@@ -444,14 +444,16 @@ export default {
     };
 
     onMounted(() => {
-      window.addEventListener("beforeinstallprompt", (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-      });
-
-      window.addEventListener("appinstalled", () => {
-        console.log("PWA 已成功安裝");
-      });
+      try {
+        if (
+          window.matchMedia?.("(display-mode: standalone)")?.matches ||
+          window.navigator?.standalone
+        ) {
+          console.log("App 是以 PWA 模式執行");
+        }
+      } catch (e) {
+        console.warn("PWA 檢查錯誤", e);
+      }
     });
 
     const localData = localStorage.getItem("userData");
@@ -479,4 +481,4 @@ export default {
     };
   },
 };
-</script>
+</script> -->
