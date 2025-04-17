@@ -4,7 +4,7 @@
     <div class="loginGroup">
       <div class="raphaelIconImgGroup">
         <img class="raphaelIcon" src="../assets/imgs/raphael.svg" alt="" />
-        <!-- <h1>{{ verificationTitle }}</h1> -->
+        <h1>{{ verificationTitle }}</h1>
       </div>
       <div class="loginWrap">
         <div class="loginBox">
@@ -340,8 +340,6 @@ import RaphaelLoading from "../components/RaphaelLoading";
 import eyesCloseGreen from "../assets/imgs/eyesCloseGreen.svg";
 import eyesOpenGreen from "../assets/imgs/eyesOpenGreen.svg";
 import { requestPermission, messagingToken } from "../fn/firebaseMessaging"; //firebase
- 
-
 
 export default {
   setup() {
@@ -352,8 +350,7 @@ export default {
     const passwordVisible = ref(false);
     const router = useRouter();
     const localMessagingToken = ref(""); // firebase 儲存取得的推播 token
-
-    window.location.href="https://google.com"
+    
     const isIOS =
       /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isStandalone =
