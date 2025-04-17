@@ -1,8 +1,9 @@
 export default defineNuxtConfig({
   compatibilityDate: "2024-04-03",
   devtools: { enabled: true },
+  ssr: false, // 使用 SPA 模式
   app: {
-    baseURL: "/",
+    baseURL: "/", // 保持乾淨 URL，不用 # 也不改動
     head: {
       meta: [
         {
@@ -13,17 +14,16 @@ export default defineNuxtConfig({
       link: [
         {
           rel: "manifest",
-          href: "/manifest.webmanifest", // 添加 manifest 文件的鏈接
+          href: "/manifest.webmanifest",
         },
       ],
     },
   },
   nitro: {
     prerender: {
-      routes: ['/']
-    }
+      routes: ["/"], // 確保根路徑會預渲染
+    },
   },
-  ssr: false,
   modules: [
     "@pinia/nuxt",
     "@vite-pwa/nuxt",
@@ -31,18 +31,18 @@ export default defineNuxtConfig({
   pwa: {
     registerType: "autoUpdate",
     workbox: {
-      cleanupOutdatedCaches: true, // 自動清除舊緩存
+      cleanupOutdatedCaches: true,
     },
     manifest: {
       name: "NeuroPlus神經調節家",
-      id: "/",
       short_name: "NeuroPlus",
+      id: "/",
+      start_url: "/",       // ✅ 改為明確指定 "/"
+      scope: "/",           // ✅ 改為明確指定 "/"
       theme_color: "transparent",
       background_color: "#ffffff",
-      display: "standalone",  
+      display: "standalone",
       lang: "zh-TW",
-      start_url: ".", // 更改為 "." 以靈活處理路徑
-      scope: ".", // 更改為 "." 以靈活處理路徑
       icons: [
         {
           src: "/icon-192x192.png",
@@ -65,7 +65,7 @@ export default defineNuxtConfig({
       ],
     },
     devOptions: {
-      enabled: false, // 在開發環境中禁用 PWA 快取
+      enabled: false,
     },
   },
   vite: {
