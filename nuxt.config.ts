@@ -2,6 +2,7 @@ export default defineNuxtConfig({
   compatibilityDate: "2024-04-03",
   ssr: false, // 使用 SPA 模式
   devtools: { enabled: true },
+ 
   nitro: {
     preset: "vercel", // ✅ 加上這行強制對應 vercel
     prerender: {
