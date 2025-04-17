@@ -4,7 +4,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
  
   nitro: {
-    preset: "vercel", // ✅ 加上這行強制對應 vercel
+    preset: 'vercel-static', // ✅ 這一行最關鍵！
     prerender: {
       routes: ["/"] // 可保留，生成首頁
     }
