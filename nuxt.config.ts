@@ -4,14 +4,14 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   nitro: {
-    preset: "vercel-static", // ✅ 靜態輸出
+    preset: 'vercel-static', // ✅ 這一行最關鍵
     prerender: {
-      routes: ["/"], // 保留首頁
+      routes: ["/"], // 可保留首頁
     },
   },
 
   app: {
-    baseURL: "", // 使用乾淨路徑，不用 hash 模式
+    baseURL: "", // 不使用 hash 模式，保持乾淨路徑
     head: {
       meta: [
         {
@@ -19,17 +19,60 @@ export default defineNuxtConfig({
           content: "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no",
         },
       ],
-      // ❌ 拿掉 manifest（非必要，避免多餘資源）
-      link: [],
+      link: [
+        {
+          rel: "manifest",
+          href: "/manifest.webmanifest",
+        },
+      ],
     },
   },
 
   modules: [
     "@pinia/nuxt",
-    // ❌ 拿掉 "@vite-pwa/nuxt"
+    "@vite-pwa/nuxt",
   ],
 
-  // ❌ 完全移除 pwa 設定
+  pwa: {
+    registerType: "autoUpdate",
+    workbox: {
+      cleanupOutdatedCaches: true,
+    },
+    manifest: {
+      name: "NeuroPlus神經調節家",
+      short_name: "NeuroPlus",
+      id: "/",
+      start_url: "/", // ✅ 避免 iOS PWA 開啟錯誤
+      scope: "/",
+      display: "standalone",
+      theme_color: "transparent",
+      background_color: "#ffffff",
+      lang: "zh-TW",
+      icons: [
+        {
+          src: "/icon-192x192.png",
+          sizes: "192x192",
+          type: "image/png",
+        },
+        {
+          src: "/icon-512x512.png",
+          sizes: "512x512",
+          type: "image/png",
+        },
+      ],
+      screenshots: [
+        {
+          src: "/screenshot1.png",
+          sizes: "1080x1920",
+          type: "image/png",
+          form_factor: "narrow",
+        },
+      ],
+    },
+    devOptions: {
+      enabled: false,
+    },
+  },
 
   vite: {
     css: {
