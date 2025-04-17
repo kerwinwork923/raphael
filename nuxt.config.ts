@@ -2,20 +2,21 @@ export default defineNuxtConfig({
   compatibilityDate: "2024-04-03",
   ssr: false, // 使用 SPA 模式
   devtools: { enabled: true },
- 
+
   nitro: {
-    preset: 'vercel-static', // ✅ 這一行最關鍵！
+    preset: 'vercel-static', // ✅ 這一行最關鍵
     prerender: {
-      routes: ["/"] // 可保留，生成首頁
-    }
+      routes: ["/"], // 可保留首頁
+    },
   },
+
   app: {
-    baseURL: "/", // 保持乾淨 URL，不用 hash
+    baseURL: "", // 不使用 hash 模式，保持乾淨路徑
     head: {
       meta: [
         {
           name: "viewport",
-          content: "width=device-width, initial-scale=1.0, maximum-scale=1.0 ,user-scalable=no",
+          content: "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no",
         },
       ],
       link: [
@@ -26,10 +27,12 @@ export default defineNuxtConfig({
       ],
     },
   },
+
   modules: [
     "@pinia/nuxt",
     "@vite-pwa/nuxt",
   ],
+
   pwa: {
     registerType: "autoUpdate",
     workbox: {
@@ -39,11 +42,11 @@ export default defineNuxtConfig({
       name: "NeuroPlus神經調節家",
       short_name: "NeuroPlus",
       id: "/",
-      start_url: "/", // ✅ iOS 正常開啟
+      start_url: "/", // ✅ 避免 iOS PWA 開啟錯誤
       scope: "/",
+      display: "standalone",
       theme_color: "transparent",
       background_color: "#ffffff",
-      display: "standalone",
       lang: "zh-TW",
       icons: [
         {
@@ -70,6 +73,7 @@ export default defineNuxtConfig({
       enabled: false,
     },
   },
+
   vite: {
     css: {
       preprocessorOptions: {
