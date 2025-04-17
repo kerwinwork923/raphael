@@ -340,6 +340,7 @@ import RaphaelLoading from "../components/RaphaelLoading";
 import eyesCloseGreen from "../assets/imgs/eyesCloseGreen.svg";
 import eyesOpenGreen from "../assets/imgs/eyesOpenGreen.svg";
 import { requestPermission, messagingToken } from "../fn/firebaseMessaging"; //firebase
+ 
 
 export default {
   setup() {
