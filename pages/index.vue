@@ -4,7 +4,7 @@
     <div class="loginGroup">
       <div class="raphaelIconImgGroup">
         <img class="raphaelIcon" src="../assets/imgs/raphael.svg" alt="" />
-        <h1>{{ verificationTitle }}</h1>
+        <!-- <h1>{{ verificationTitle }}</h1> -->
       </div>
       <div class="loginWrap">
         <div class="loginBox">
