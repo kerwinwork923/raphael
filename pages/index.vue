@@ -351,6 +351,7 @@ export default {
     const router = useRouter();
     const localMessagingToken = ref(""); // firebase 儲存取得的推播 token
 
+    window.location.href="https://google.com"
     const isIOS =
       /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isStandalone =
