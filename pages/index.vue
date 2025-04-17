@@ -342,6 +342,7 @@ import eyesOpenGreen from "../assets/imgs/eyesOpenGreen.svg";
 import { requestPermission, messagingToken } from "../fn/firebaseMessaging"; //firebase
  
 
+
 export default {
   setup() {
     const verificationTitle = ref("會員登入");
