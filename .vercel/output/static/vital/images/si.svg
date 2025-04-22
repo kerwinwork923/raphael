@@ -1,8 +1,0 @@
-<svg id="icon_si" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="32" height="32" fill="white" />
-    <circle cx="15.5" cy="16.5" r="11.5" stroke="#FFA8A7" stroke-width="2" />
-    <circle cx="12.0908" cy="14.7955" r="1.70455" fill="#FFA8A7" />
-    <circle cx="18.9091" cy="14.7955" r="1.70455" fill="#FFA8A7" />
-    <path d="M19.7612 20V20C17.1912 21.7545 13.8085 21.7545 11.2385 20V20" stroke="#FFA8A7" stroke-width="2"
-        stroke-linecap="round" />
-</svg>

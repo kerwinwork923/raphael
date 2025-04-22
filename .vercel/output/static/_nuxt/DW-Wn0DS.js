@@ -1,1 +1,0 @@
-import"./D70xjexz.js";const e=""+new URL("clothRobot.B7J6PmA3.png",import.meta.url).href,o=""+new URL("redLightClothes.Bfb-N5ye.png",import.meta.url).href,r=""+new URL("redLightClothes2.B4E_OGx_.png",import.meta.url).href,h=""+new URL("normalClothes.CHKYJDdG.png",import.meta.url).href;export{e as _,r as a,h as n,o as r};
