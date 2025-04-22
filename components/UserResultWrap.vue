@@ -9,10 +9,11 @@
               : useSleepRecordData.SleepRecCond + "天"
           }}後再進行檢測
         </div>
+
         <h5 class="subText">
           (本次){{
             useSleepRecordData?.SleepRec?.length > 0
-              ? formatTimestamp(useSleepRecordData.SleepRec[0].CheckTime)
+              ? formatCheckTime2(useSleepRecordData.SleepRec[0].CheckTime)
               : "No data available"
           }}
         </h5>
@@ -43,7 +44,9 @@
 
           <ProgressBar
             :score="useSleepRecordData.SleepRec?.[0]?.Score"
-            :colorProp="scoreColorFn(useSleepRecordData.SleepRec?.[0]?.Score, 0)"
+            :colorProp="
+              scoreColorFn(useSleepRecordData.SleepRec?.[0]?.Score, 0)
+            "
           />
 
           <!-- <ProgressBar
@@ -65,8 +68,8 @@
         </div> -->
         <h5 class="subText" v-if="useSleepRecordData?.SleepRec?.[1]">
           (前次){{
-            useSleepRecordData?.SleepRec?.length > 0
-              ? formatTimestamp(useSleepRecordData.SleepRec[1].CheckTime)
+            useSleepRecordData?.SleepRec?.length > 1
+              ? formatCheckTime2(useSleepRecordData.SleepRec[1].CheckTime)
               : "No data available"
           }}
         </h5>
@@ -76,6 +79,7 @@
               :src="computedSleepEmoji(useSleepRecordData.SleepRec?.[1]?.Score)"
               alt=""
             />
+
             <div class="scoreText">
               <div
                 class="score"
@@ -105,249 +109,189 @@
             >
           </h6> -->
         </div>
+        <ProgressBar
+          :score="useSleepRecordData.SleepRec?.[1]?.Score"
+          :colorProp="scoreColorFn(useSleepRecordData.SleepRec?.[0]?.Score, 0)"
+        />
       </div>
       <img class="doctorImg" src="../assets/imgs/doctor.png" alt="" />
     </div>
 
-    <div class="firstSleepRecord">
-      <h2>檢測紀錄</h2>
-      <!-- <div class="emojiGroup">
-        <div class="firstScore">
-          <div class="firstScoreTitle">
-            <h3>第一次檢測分數</h3>
-          </div>
-          <div class="emojiBox">
-            <img
-              :src="computedSleepEmoji(useSleepRecordData.SleepRec?.[0]?.Score)"
-              alt="Emotion Emoji"
-            />
-            <div class="score">
-              {{ useSleepRecordData.SleepRec?.[0]?.Score ?? "---" }}
-            </div>
-          </div>
-        </div>
-        <div class="secScore">
-          <div class="firstScoreTitle">
-            <h3>第二次檢測分數</h3>
-          </div>
-          <div class="emojiBox">
-            <img
-              :src="computedSleepEmoji(useSleepRecordData.SleepRec?.[1]?.Score)"
-              alt="Emotion Emoji"
-            />
-            <div class="score">
-              {{ useSleepRecordData.SleepRec?.[1]?.Score ?? "---" }}
-            </div>
-          </div>
-        </div>
-      </div> -->
-      <div class="sleepRecordListGroup">
-        <h5 class="sleepRecordListDate">
-          {{
-            useSleepRecordData.SleepRec?.[0]?.CheckTime
-              ? formatCheckTime(useSleepRecordData.SleepRec[0].CheckTime)
-              : ""
-          }}
+    <div class="sleepDetectResultWrap">
+      <h6>以下為您的睡眠分析結果</h6>
+      <div
+        class="sleepDetectResultDIV"
+        v-if="useSleepRecordData?.SleepRec?.[0]"
+      >
+        <h3>睡眠周期</h3>
+        <h5>
+          (本次){{ formatTimestamp(useSleepRecordData.SleepRec[0]?.CheckTime) }}
         </h5>
-        <div class="sleepRecordList">
-          <div
-            class="sleepRecordItem"
-            v-for="(record, index) in useSleepRecordData.SleepRec"
-            :key="index"
-          >
-            <h4>上床時間</h4>
-            <h5>{{ record?.bedTime || "-" }}</h5>
-          </div>
-          <div class="sleepRecordItem">
+        <section>
+          <div class="sleepDetectItem">
             <h4>入睡時間</h4>
+            <p>
+              {{ useSleepRecordData.SleepRec[0]?.bedTime || "" }}
+              <span>{{
+                getAmPm(useSleepRecordData.SleepRec[0]?.bedTime)
+              }}</span>
+            </p>
+          </div>
+          <div class="sleepDetectItem">
+            <h4>離床時間</h4>
+            <p>
+              {{ useSleepRecordData.SleepRec[0]?.getupTime || "" }}
+              <span>{{
+                getAmPm(useSleepRecordData.SleepRec[0]?.getupTime)
+              }}</span>
+            </p>
+          </div>
+          <div class="sleepDetectItem">
+            <h4>睡眠時長</h4>
+            <p>
+              {{ useSleepRecordData.SleepRec[0]?.ccSleepExact || "" }}
+            </p>
             <h5>
-              {{ useSleepRecordData?.SleepRec?.[0]?.LayTimeToSleep || "-" }}
+              醒來次數 :
+              {{ useSleepRecordData.SleepRec[0]?.SleepBreak ?? "未填寫" }}
             </h5>
           </div>
-          <div class="sleepRecordItem">
-            <h4>起床時間</h4>
-            <h5>{{ useSleepRecordData?.SleepRec?.[0]?.getupTime || "-" }}</h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>深層睡眠時間</h4>
-            <h5>{{ useSleepRecordData?.SleepRec?.[0]?.SleepTime || "-" }}</h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>睡眠中斷次數</h4>
-            <h5>{{ useSleepRecordData?.SleepRec?.[0]?.SleepBreak || "-" }}</h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>特殊飲食次數</h4>
-            <h5>{{ useSleepRecordData?.SleepRec?.[0]?.SpecialDiet || "-" }}</h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>藥物輔助天數</h4>
-            <h5>{{ useSleepRecordData?.SleepRec?.[0]?.MedHelp || "-" }}</h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>自覺睡覺品質</h4>
-            <h5>
-              {{ useSleepRecordData?.SleepRec?.[0]?.SleepProperty || "-" }}
-            </h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>白天情緒狀態</h4>
-            <h5>
-              {{ useSleepRecordData?.SleepRec?.[0]?.emotionalState || "-" }}
-            </h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>白天體力、專注力、記憶力</h4>
-            <h5>
-              {{ useSleepRecordData?.SleepRec?.[0]?.physicalStrength || "-" }}
-            </h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>白天嗜睡程度</h4>
-            <h5>
-              {{ useSleepRecordData?.SleepRec?.[0]?.daytimeSleepiness || "-" }}
-            </h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>工作壓力、變動</h4>
-            <h5>{{ useSleepRecordData?.SleepRec?.[0]?.workStress || "-" }}</h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>輕密關係壓力</h4>
-            <h5>
-              {{ useSleepRecordData?.SleepRec?.[0]?.relationshipStress || "-" }}
-            </h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>自身或家人健康狀況壓力</h4>
-            <h5>
-              {{ useSleepRecordData?.SleepRec?.[0]?.healthStress || "-" }}
-            </h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>生活型態變動壓力</h4>
-            <h5>
-              {{
-                useSleepRecordData?.SleepRec?.[0]?.lifestyleChangeStress || "-"
-              }}
-            </h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>經濟壓力</h4>
-            <h5>
-              {{ useSleepRecordData?.SleepRec?.[0]?.financialStress || "-" }}
-            </h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>壓力事件紀錄</h4>
-            <h5>
-              {{ useSleepRecordData?.SleepRec?.[0]?.OtherPressureEvent || "-" }}
-            </h5>
-          </div>
+        </section>
+
+        <div v-if="useSleepRecordData?.SleepRec?.[1]" >
+          <h5>
+            (前次){{
+              formatTimestamp(useSleepRecordData.SleepRec[1]?.CheckTime)
+            }}
+          </h5>
+          <section>
+            <div class="sleepDetectItem">
+              <h4>入睡時間</h4>
+              <p>
+                {{ useSleepRecordData.SleepRec[1]?.bedTime || "" }}
+                <span>{{
+                  getAmPm(useSleepRecordData.SleepRec[1]?.bedTime)
+                }}</span>
+              </p>
+            </div>
+            <div class="sleepDetectItem">
+              <h4>離床時間</h4>
+              <p>
+                {{ useSleepRecordData.SleepRec[1]?.getupTime || "" }}
+                <span>{{
+                  getAmPm(useSleepRecordData.SleepRec[1]?.getupTime)
+                }}</span>
+              </p>
+            </div>
+            <div class="sleepDetectItem">
+              <h4>睡眠時長</h4>
+              <p>
+                {{ useSleepRecordData.SleepRec[1]?.ccSleepExact || "" }}
+              </p>
+              <h5>
+                醒來次數 :
+                {{ useSleepRecordData.SleepRec[1]?.SleepBreak ?? "未填寫" }}
+              </h5>
+            </div>
+          </section>
         </div>
       </div>
-    </div>
 
-    <div class="firstSleepRecord" v-if="useSleepRecordData?.SleepRec?.[1]">
-      <div class="sleepRecordListGroup">
-        <h5 class="sleepRecordListDate">
-          {{
-            useSleepRecordData?.SleepRec?.[1]?.CheckTime
-              ? formatCheckTime(useSleepRecordData?.SleepRec?.[1].CheckTime)
-              : ""
-          }}
+      <!-- 身心指數 -->
+      <div
+        class="sleepDetectResultList"
+        v-if="useSleepRecordData?.SleepRec?.[0]"
+      >
+        <div class="titleGroup">
+          <h3>身心指數</h3>
+        </div>
+        <h5>
+          (本次){{ formatTimestamp(useSleepRecordData.SleepRec[0]?.CheckTime) }}
         </h5>
-        <div class="sleepRecordList">
-          <div class="sleepRecordItem">
-            <h4>上床時間</h4>
-            <h5>{{ useSleepRecordData?.SleepRec?.[1]?.bedTime || "-" }}</h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>入睡時間</h4>
-            <h5>
-              {{ useSleepRecordData?.SleepRec?.[1]?.LayTimeToSleep || "-" }}
-            </h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>起床時間</h4>
-            <h5>{{ useSleepRecordData?.SleepRec?.[1]?.getupTime || "-" }}</h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>深層睡眠時間</h4>
-            <h5>{{ useSleepRecordData?.SleepRec?.[1]?.SleepTime || "-" }}</h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>睡眠中斷次數</h4>
-            <h5>{{ useSleepRecordData?.SleepRec?.[1]?.SleepBreak || "-" }}</h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>特殊飲食次數</h4>
-            <h5>{{ useSleepRecordData?.SleepRec?.[1]?.SpecialDiet || "-" }}</h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>藥物輔助天數</h4>
-            <h5>{{ useSleepRecordData?.SleepRec?.[1]?.MedHelp || "-" }}</h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>自覺睡覺品質</h4>
-            <h5>
-              {{ useSleepRecordData?.SleepRec?.[1]?.SleepProperty || "-" }}
-            </h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>白天情緒狀態</h4>
-            <h5>
-              {{ useSleepRecordData?.SleepRec?.[1]?.emotionalState || "-" }}
-            </h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>白天體力、專注力、記憶力</h4>
-            <h5>
-              {{ useSleepRecordData?.SleepRec?.[1]?.physicalStrength || "-" }}
-            </h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>白天嗜睡程度</h4>
-            <h5>
-              {{ useSleepRecordData?.SleepRec?.[1]?.daytimeSleepiness || "-" }}
-            </h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>工作壓力、變動</h4>
-            <h5>{{ useSleepRecordData?.SleepRec?.[1]?.workStress || "-" }}</h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>輕密關係壓力</h4>
-            <h5>
-              {{ useSleepRecordData?.SleepRec?.[1]?.relationshipStress || "-" }}
-            </h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>自身或家人健康狀況壓力</h4>
-            <h5>
-              {{ useSleepRecordData?.SleepRec?.[1]?.healthStress || "-" }}
-            </h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>生活型態變動壓力</h4>
-            <h5>
-              {{
-                useSleepRecordData?.SleepRec?.[1]?.lifestyleChangeStress || "-"
-              }}
-            </h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>經濟壓力</h4>
-            <h5>
-              {{ useSleepRecordData?.SleepRec?.[1]?.economicStress || "-" }}
-            </h5>
-          </div>
-          <div class="sleepRecordItem">
-            <h4>壓力事件紀錄</h4>
-            <h5>
-              {{ useSleepRecordData?.SleepRec?.[1]?.OtherPressureEvent || "-" }}
-            </h5>
-          </div>
+        <ProgressBar2
+          :score="useSleepRecordData.SleepRec[0]?.HMindexRatio"
+          :emojiSrc="computedEmoji2(useSleepRecordData.SleepRec[0]?.HMindexRatio)"
+        />
+        <h4>
+          嚴重程度 :
+          <span
+            :style="{
+              color: scoreColorFn(useSleepRecordData.SleepRec[0]?.HMindexRatio, 0),
+            }"
+          >
+            {{ useSleepRecordData.SleepRec[0]?.HMindexRatio }}%
+          </span>
+        </h4>
+
+        <div class="nextGroup" v-if="useSleepRecordData?.SleepRec?.[1]">
+          <h5>
+            (前次){{
+              formatTimestamp(useSleepRecordData.SleepRec[1]?.CheckTime)
+            }}
+          </h5>
+          <ProgressBar2
+            :score="useSleepRecordData.SleepRec[1]?.HMindexRatio"
+            :emojiSrc="computedEmoji2(useSleepRecordData.SleepRec[1]?.HMindexRatio)"
+          />
+          <h4>
+            嚴重程度 :
+            <span
+              :style="{
+                color: scoreColorFn(useSleepRecordData.SleepRec[1]?.HMindexRatio, 0),
+              }"
+            >
+              {{ useSleepRecordData.SleepRec[1]?.HMindexRatio }}%
+            </span>
+          </h4>
+        </div>
+      </div>
+
+      <!-- 壓力指數（這邊以示意用途，也取 Score，實際請看 API 是否分開欄位） -->
+      <div
+        class="sleepDetectResultList"
+        v-if="useSleepRecordData?.SleepRec?.[0]"
+      >
+        <div class="titleGroup">
+          <h3>壓力指數</h3>
+        </div>
+        <h5>
+          (本次){{ formatTimestamp(useSleepRecordData.SleepRec[0]?.CheckTime) }}
+        </h5>
+        <ProgressBar2
+          :score="useSleepRecordData.SleepRec[0]?.PressureindexRatio"
+          :emojiSrc="computedEmoji2(useSleepRecordData.SleepRec[0]?.PressureindexRatio)"
+        />
+        <h4>
+          嚴重程度 :
+          <span
+            :style="{
+              color: scoreColorFn(useSleepRecordData.SleepRec[0]?.PressureindexRatio, 1), // 第二個參數改為 1 假設壓力類別
+            }"
+          >
+            {{ useSleepRecordData.SleepRec[0]?.PressureindexRatio }}%
+          </span>
+        </h4>
+
+        <div class="nextGroup" v-if="useSleepRecordData?.SleepRec?.[1]">
+          <h5>
+            (前次){{
+              formatTimestamp(useSleepRecordData.SleepRec[1]?.CheckTime)
+            }}
+          </h5>
+          <ProgressBar2
+            :score="useSleepRecordData.SleepRec[1]?.PressureindexRatio"
+            :emojiSrc="computedEmoji2(useSleepRecordData.SleepRec[1]?.PressureindexRatio)"
+          />
+          <h4>
+            嚴重程度 :
+            <span
+              :style="{
+                color: scoreColorFn(useSleepRecordData.SleepRec[1]?.PressureindexRatio, 1),
+              }"
+            >
+              {{ useSleepRecordData.SleepRec[1]?.PressureindexRatio }}%
+            </span>
+          </h4>
         </div>
       </div>
     </div>
@@ -442,104 +386,103 @@
     }
   }
 
-  .firstSleepRecord {
-    background-color: $raphael-white;
-    border-radius: 12px;
-    padding: 1rem 1rem 2rem 1rem;
-
-    animation: fade 0.5s forwards ease;
-    animation-delay: 0.5s;
-    opacity: 0;
-    margin-bottom: 0.5rem;
+  h6 {
+    color: #666;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0.5px;
     margin-top: 0.75rem;
-    @include respond-to("tablet") {
-      width: 100%;
-      transform: translateY(0%);
-      margin-top: 2rem;
-    }
-    h2 {
-      color: $raphael-black;
-      font-size: 1.5rem;
-      letter-spacing: 0.5px;
+  }
 
-      text-align: center;
+  .sleepDetectResultWrap {
+    h6 {
+      margin-bottom: 0.75rem;
     }
-    .emojiGroup {
-      display: flex;
-      justify-content: center;
-      gap: 10%;
-      .emojiBox {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 3%;
-        img {
-          width: 36px;
-          height: 36px;
-        }
-      }
+    .sleepDetectResultDIV {
+      background-color: #fff;
+      padding: 1rem;
+      border-radius: 8px;
+
       h3 {
-        color: $raphael-gray-500;
+        color: var(--Neutral-black, #1e1e1e);
+        font-size: 20px;
+        font-style: normal;
+        font-weight: 400;
+        letter-spacing: var(--Title-Medium-Tracking, 0.15px);
       }
-      .firstScore,
-      .secScore {
-        margin-top: 1rem;
-        .emojiBox {
-          margin-top: 0.5rem;
+      h5 {
+        color: var(--Neutral-black, #1e1e1e);
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 400;
+        letter-spacing: 0.5px;
+        margin-top: 0.5rem;
+        margin-bottom: 0.4rem;
+      }
+      section {
+        display: flex;
+        justify-content: space-between;
+        h4 {
+          color: var(--Neutral-500, #666);
+
+          font-size: 16px;
+          font-style: normal;
+          font-weight: 400;
+          letter-spacing: 0.5px;
+        }
+        p {
+          color: var(--Neutral-300, #ccc);
+          font-size: 16px;
+          font-style: normal;
+          letter-spacing: 0.5px;
         }
       }
-      .firstScore {
-        .score {
-          font-size: 2rem;
-          font-weight: bold;
-          letter-spacing: 0.09px;
-          color: $raphael-purple-200;
+      .sleepDetectItem {
+        margin-top: 0.25rem;
+        p {
+          color: var(--Neutral-black, #1e1e1e);
+
+          font-size: 24px;
+          font-style: normal;
+          font-weight: 700;
+
+          letter-spacing: 0.12px;
+          margin-top: 0.2rem;
+          span {
+            color: var(--Neutral-300, #ccc);
+
+            font-size: 16px;
+            font-style: normal;
+            font-weight: 400;
+
+            letter-spacing: 0.5px;
+          }
         }
-      }
-      .secScore {
-        .score {
-          font-size: 2.25rem;
-          font-weight: bold;
-          color: $raphael-cyan-400;
-          letter-spacing: 0.09px;
-          white-space: nowrap;
+        h5 {
+          margin-top: 0.25rem;
+          
         }
       }
     }
+  }
 
-    .sleepRecordListGroup {
-      margin-top: 0.5rem;
-      .sleepRecordListDate {
-        text-align: center;
-        color: $raphael-black;
-        font-size: 20px;
-        font-weight: 400;
-        letter-spacing: 0.15px;
-      }
-      .sleepRecordList {
-        margin-top: 0.75rem;
-        .sleepRecordItem {
-          margin-top: 0.5rem;
-          display: flex;
-          justify-content: space-between;
-          border-bottom: 1px solid $raphael-gray-400;
-          padding-bottom: 0.75rem;
-          h4 {
-            color: $raphael-gray-500;
-            font-size: 1rem;
-            font-weight: 400;
-            letter-spacing: 0.5px;
-            width: 40%;
-            white-space: nowrap;
-          }
-          h5 {
-            color: $raphael-green-400;
-            width: 60%;
-            display: flex;
-            justify-content: end;
-          }
-        }
-      }
+  .sleepDetectResultList {
+    background-color: #fff;
+    margin-top: 1rem;
+    padding: 12px;
+    border-radius: 8px;
+   
+    .titleGroup {
+      color: var(--Neutral-black, #1e1e1e);
+      font-size: 20px;
+      font-style: normal;
+      font-weight: 400;
+      letter-spacing: var(--Title-Medium-Tracking, 0.15px);
+    }
+    h5 {
+      margin-top: 1rem;
+      margin-bottom:1rem;
     }
   }
 }
@@ -547,15 +490,13 @@
 
 <script>
 import { defineComponent } from "@vue/composition-api";
-import {
-  scoreSleepColorFn,
-  computedSleepEmoji,
-  formatTimestamp,
-} from "../fn/utils";
+import { scoreSleepColorFn, computedSleepEmoji } from "../fn/utils";
 import { useSleepRecordStore } from "../stores/sleepRecord";
 import { useRouter } from "vue-router";
 import RaphaelLoading from "../components/RaphaelLoading";
-import { scoreColorFn} from "../fn/utils";
+import { scoreColorFn, computedEmoji2 } from "../fn/utils";
+
+import {} from "../fn/utils";
 export default defineComponent({
   components: {
     RaphaelLoading,
@@ -570,27 +511,49 @@ export default defineComponent({
     感謝您使用我們的系統請等待<span>${SleepRecCond.value}天</span>後再進行第二次檢測
     `);
 
+    console.log(useSleepRecordData);
+
     const backToUser = () => {
       router.push({ name: "user" });
     };
 
-    const formatCheckTime = (timeString) => {
-      const year = timeString.substring(0, 4);
-      const month = timeString.substring(4, 6);
-      const day = timeString.substring(6, 8);
+    const formatCheckTime2 = (timestamp) => {
+      if (!timestamp || timestamp.length !== 14) return "--";
+      const year = timestamp.slice(0, 4);
+      const month = timestamp.slice(4, 6);
+      const day = timestamp.slice(6, 8);
+      const hour = timestamp.slice(8, 10);
+      const minute = timestamp.slice(10, 12);
+      return `${year}/${month}/${day} ${hour}:${minute}`;
+    };
 
-      // Return formatted date as MM/DD (remove leading zeros from month and day)
-      return `${parseInt(month)}/${parseInt(day)}`;
+    const formatTimestamp = (timestamp) => {
+      if (!timestamp || timestamp.length !== 14) return "--";
+      const year = timestamp.slice(0, 4);
+      const month = timestamp.slice(4, 6);
+      const day = timestamp.slice(6, 8);
+      const hour = timestamp.slice(8, 10);
+      const minute = timestamp.slice(10, 12);
+      return `${year}/${month}/${day} ${hour}:${minute}`;
+    };
+
+    const getAmPm = (timeStr) => {
+      if (!timeStr || typeof timeStr !== "string") return "";
+      const hour = parseInt(timeStr.split(":")[0], 10);
+      if (isNaN(hour)) return "";
+      return hour >= 12 ? "pm" : "am";
     };
 
     return {
       useSleepRecordData,
-      formatCheckTime,
       backToUser,
       scoreSleepColorFn,
       computedSleepEmoji,
+      formatCheckTime2,
+      scoreColorFn,
       formatTimestamp,
-      scoreColorFn
+      computedEmoji2,
+      getAmPm,
     };
   },
 });

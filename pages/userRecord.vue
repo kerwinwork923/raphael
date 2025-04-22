@@ -25,6 +25,7 @@
       <SleepRecordWrap v-if="useSleepRecordData.sleepState === 'sleepRecord'" />
       <UserResultWrap v-if="useSleepRecordData.sleepState === 'sleepResult'" />
     </div>
+    
   </div>
 </template>
 

@@ -172,6 +172,19 @@
         </div>
       </div>
 
+      <!-- 6. 醒來後多久再入睡？ -->
+      <div class="sleepRecord">
+        <h4>6.醒來後多久再入睡？</h4>
+        <div class="sleepInputGroup">
+          <!-- 用 TimePicker2；可跟第 2 題一樣也用 TimePicker -->
+          <TimePicker
+            currentTimeMode="sleepAgainTime"
+            placeholder="請選擇時間"
+            @update="(val) => (useSleepRecordData.SleepAgainTime = val)"
+          />
+        </div>
+      </div>
+
       <div class="sleepRecord">
         <h4>7.近兩週，您有幾次聚餐或應酬?</h4>
         <div class="sleepInputGroup">
@@ -368,6 +381,8 @@ export default {
     const showDropdown3_2 = ref(false);
 
     const showDropdown5 = ref(false);
+    const showDropdown5_2 = ref(false);
+
     const showDropdown6 = ref(false);
     const showDropdown7 = ref(false);
 
@@ -385,9 +400,10 @@ export default {
       String(i * 15).padStart(2, "0")
     );
 
-    const sleepBreaks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,">10"];
+    const sleepBreaks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ">10"];
     // const peeTimes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    const specialDiets = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,">10"];
+    const specialDiets = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ">10"];
+    const sleepAgains = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ">10"];
     const medhelps = [0, 1, 2, 3, 4, 5, 6, 7];
 
     watch([bedTimeHour, bedTimeMinute], ([newHour, newMinute]) => {
@@ -432,6 +448,8 @@ export default {
         currentDropdown === "3_2" ? !showDropdown3_2.value : false;
       showDropdown5.value =
         currentDropdown === "5" ? !showDropdown5.value : false;
+      showDropdown5_2.value =
+        currentDropdown === "5_2" ? !showDropdown5_2.value : false;
       showDropdown6.value =
         currentDropdown === "6" ? !showDropdown6.value : false;
       showDropdown7.value =
@@ -464,6 +482,11 @@ export default {
         leaveBedTimeMinute: () => {
           leaveBedTimeMinute.value = value;
           showDropdown3_2.value = false;
+        },
+
+        sleepAgainTime: () => {
+          useSleepRecordData.SleepAgainTime = value;
+          showDropdown5_2.value = false;
         },
 
         sleepBreak: () => {
@@ -510,6 +533,9 @@ export default {
         case "5":
           closeAllSelect("5");
           break;
+        case "5_2":
+          closeAllSelect("5_2");
+          break;
         case "6":
           closeAllSelect("6");
           break;
@@ -545,7 +571,6 @@ export default {
       isSubmitting.value = true;
       try {
         await useSleepRecordData.saveSleepRecord();
-
         // 在儲存成功後直接重整頁面
         location.reload();
       } catch (err) {
@@ -568,6 +593,7 @@ export default {
       showDropdown2,
       showDropdown2_2,
       showDropdown5,
+      showDropdown5_2,
       showDropdown6,
       showDropdown7,
       showDropdown3,
@@ -582,6 +608,7 @@ export default {
       isSubmitting,
       leaveBedTimeHour,
       leaveBedTimeMinute,
+      sleepAgains,
     };
   },
 };
