@@ -158,7 +158,7 @@
           </div>
         </section>
 
-        <div v-if="useSleepRecordData?.SleepRec?.[1]" >
+        <div v-if="useSleepRecordData?.SleepRec?.[1]">
           <h5>
             (前次){{
               formatTimestamp(useSleepRecordData.SleepRec[1]?.CheckTime)
@@ -210,13 +210,18 @@
         </h5>
         <ProgressBar2
           :score="useSleepRecordData.SleepRec[0]?.HMindexRatio"
-          :emojiSrc="computedEmoji2(useSleepRecordData.SleepRec[0]?.HMindexRatio)"
+          :emojiSrc="
+            computedEmoji2(useSleepRecordData.SleepRec[0]?.HMindexRatio)
+          "
         />
         <h4>
           嚴重程度 :
           <span
             :style="{
-              color: scoreColorFn(useSleepRecordData.SleepRec[0]?.HMindexRatio, 0),
+              color: scoreColorFn(
+                useSleepRecordData.SleepRec[0]?.HMindexRatio,
+                0
+              ),
             }"
           >
             {{ useSleepRecordData.SleepRec[0]?.HMindexRatio }}%
@@ -231,13 +236,18 @@
           </h5>
           <ProgressBar2
             :score="useSleepRecordData.SleepRec[1]?.HMindexRatio"
-            :emojiSrc="computedEmoji2(useSleepRecordData.SleepRec[1]?.HMindexRatio)"
+            :emojiSrc="
+              computedEmoji2(useSleepRecordData.SleepRec[1]?.HMindexRatio)
+            "
           />
           <h4>
             嚴重程度 :
             <span
               :style="{
-                color: scoreColorFn(useSleepRecordData.SleepRec[1]?.HMindexRatio, 0),
+                color: scoreColorFn(
+                  useSleepRecordData.SleepRec[1]?.HMindexRatio,
+                  0
+                ),
               }"
             >
               {{ useSleepRecordData.SleepRec[1]?.HMindexRatio }}%
@@ -259,13 +269,18 @@
         </h5>
         <ProgressBar2
           :score="useSleepRecordData.SleepRec[0]?.PressureindexRatio"
-          :emojiSrc="computedEmoji2(useSleepRecordData.SleepRec[0]?.PressureindexRatio)"
+          :emojiSrc="
+            computedEmoji2(useSleepRecordData.SleepRec[0]?.PressureindexRatio)
+          "
         />
         <h4>
           嚴重程度 :
           <span
             :style="{
-              color: scoreColorFn(useSleepRecordData.SleepRec[0]?.PressureindexRatio, 1), // 第二個參數改為 1 假設壓力類別
+              color: scoreColorFn(
+                useSleepRecordData.SleepRec[0]?.PressureindexRatio,
+                1
+              ), // 第二個參數改為 1 假設壓力類別
             }"
           >
             {{ useSleepRecordData.SleepRec[0]?.PressureindexRatio }}%
@@ -280,13 +295,18 @@
           </h5>
           <ProgressBar2
             :score="useSleepRecordData.SleepRec[1]?.PressureindexRatio"
-            :emojiSrc="computedEmoji2(useSleepRecordData.SleepRec[1]?.PressureindexRatio)"
+            :emojiSrc="
+              computedEmoji2(useSleepRecordData.SleepRec[1]?.PressureindexRatio)
+            "
           />
           <h4>
             嚴重程度 :
             <span
               :style="{
-                color: scoreColorFn(useSleepRecordData.SleepRec[1]?.PressureindexRatio, 1),
+                color: scoreColorFn(
+                  useSleepRecordData.SleepRec[1]?.PressureindexRatio,
+                  1
+                ),
               }"
             >
               {{ useSleepRecordData.SleepRec[1]?.PressureindexRatio }}%
@@ -461,7 +481,6 @@
         }
         h5 {
           margin-top: 0.25rem;
-          
         }
       }
     }
@@ -472,7 +491,7 @@
     margin-top: 1rem;
     padding: 12px;
     border-radius: 8px;
-   
+
     .titleGroup {
       color: var(--Neutral-black, #1e1e1e);
       font-size: 20px;
@@ -482,7 +501,7 @@
     }
     h5 {
       margin-top: 1rem;
-      margin-bottom:1rem;
+      margin-bottom: 1rem;
     }
   }
 }
