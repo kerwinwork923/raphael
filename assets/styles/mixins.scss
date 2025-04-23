@@ -1,18 +1,35 @@
 @mixin respond-to($breakpoint) {
-  @if $breakpoint == "tablet" {
+  @if $breakpoint == "xl" {
+    @media (max-width: 1440px) {
+      @content;
+    }
+  } @else if $breakpoint == "lg" {
+    @media (max-width: 1024px) {
+      @content;
+    }
+  } @else if $breakpoint == "md" {
+    @media (max-width: 768px) {
+      @content;
+    }
+  } @else if $breakpoint == "sm" {
+    @media (max-width: 375px) {
+      @content;
+    }
+  } @else if $breakpoint == "tablet-up" {
     @media (min-width: 768px) {
       @content;
     }
-  }@else if $breakpoint == "desktop" {
+  } @else if $breakpoint == "desktop-up" {
     @media (min-width: 1024px) {
       @content;
     }
-  }@else if $breakpoint == "phone-landscape" {
+  } @else if $breakpoint == "phone-landscape" {
     @media (orientation: landscape) and (max-height: 480px) {
       @content;
     }
   }
 }
+
 
 @mixin btnStyle($bgColor,$fontsColor){
     background-color: $bgColor;
