@@ -78,11 +78,11 @@
           <img src="../assets/imgs/relationshopIcon.svg" alt="" />
         </div> -->
        
-        <!-- <router-link to="/point" class="item">
+        <router-link to="/point" class="item">
           <div class="topTitle">獎勵</div>
           <div class="bottomTitle">積分</div>
           <img src="../assets/imgs/ticket.svg" alt="" />
-        </router-link> -->
+        </router-link>
       </div>
       <footer class="copyrights">
         <!-- <a href="/usageHistory"></a> -->

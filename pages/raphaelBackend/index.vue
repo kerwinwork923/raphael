@@ -1,4 +1,26 @@
 <template>
+  <div class="loginPageAlert" v-if="false">
+    <div class="loginPageAlertBox">
+      <h4>帳號或密碼錯誤喔~</h4>
+      <div class="loginPageAlertClose">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <path
+            d="M18 6L6 18M6 6L18 18"
+            stroke="#B1C0D8"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </div>
+    </div>
+  </div>
   <div class="loginPage">
     <div class="loginLeft">
       <div class="logoGroup">
@@ -6,7 +28,7 @@
         <h1>Neuro-Plus+</h1>
       </div>
 
-      <div class="loginForm">
+      <div class="loginForm" v-if="false">
         <div class="inputGroup">
           <input v-model="username" type="text" placeholder="請輸入帳號" />
           <img src="/assets/imgs/backend/user.svg" class="icon user-icon" />
@@ -40,10 +62,76 @@
         <button class="loginBtn" @click="login">登入</button>
       </div>
 
+      <div class="loginForm backendChangePassword" >
+        <h3>首次登入請修改密碼</h3>
+        <div class="inputGroup">
+          <input v-model="Cusername" type="text" placeholder="請輸入帳號" />
+          <img src="/assets/imgs/backend/user.svg" class="icon user-icon" />
+        </div>
+
+        <div class="inputGroup">
+          <input
+            v-model="Cpassword"
+            :type="passwordVisible ? 'text' : 'password'"
+            placeholder="請輸入舊密碼"
+          />
+          <img
+            class="icon lock-icon"
+            src="/assets/imgs/backend/password-lock.svg"
+          />
+          <img
+            class="icon eye-icon"
+            @click="togglePassword"
+            :src="passwordVisible ? eyeOpen : eyeClosed"
+          />
+        </div>
+
+        <div class="inputGroup">
+          <input
+            v-model="Cpassword"
+            :type="passwordVisible ? 'text' : 'password'"
+            placeholder="請輸入新密碼"
+          />
+          <img
+            class="icon lock-icon"
+            src="/assets/imgs/backend/password-lock.svg"
+          />
+          <img
+            class="icon eye-icon"
+            @click="togglePassword"
+            :src="passwordVisible ? eyeOpen : eyeClosed"
+          />
+       
+        </div>
+        <!-- <small>密碼長度不夠喔</small> -->
+        
+        
+        <div class="inputGroup">
+          <input
+            v-model="Cpassword"
+            :type="passwordVisible ? 'text' : 'password'"
+            placeholder="請再次輸入新密碼"
+          />
+          <img
+            class="icon lock-icon"
+            src="/assets/imgs/backend/password-lock.svg"
+          />
+          <img
+            class="icon eye-icon"
+            @click="togglePassword"
+            :src="passwordVisible ? eyeOpen : eyeClosed"
+          />
+        </div>
+        <small>密碼長度不夠喔</small>
+        <!-- <button class="loginBtn" @click="login">登入</button> -->
+        <button class="loginBtn" >送出後請使用新密碼登入</button>
+      </div>
+
       <footer class="loginFooter">
         © 2024 智平衡健康事業股份有限公司<br />
         all rights reserved.
       </footer>
+
     </div>
 
     <div class="loginRight">
@@ -76,6 +164,57 @@ const login = () => {
 </script>
 
 <style lang="scss" scoped>
+.loginPageAlert {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  left: 0;
+  top: 0;
+  background: rgba(177, 192, 216, 0.25);
+  z-index: 100;
+  .loginPageAlertBox {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 300px;
+    transform: translate(-50%, -50%);
+    border-radius: var(--Radius-r-20, 20px);
+    border: 3px solid var(--Primary-default, #1ba39b);
+    background: var(--neutral-white-opacity-30, rgba(255, 255, 255, 0.3));
+    box-shadow: 0px 2px 20px 0px
+      var(--primary-400-opacity-25, rgba(27, 163, 155, 0.25));
+    backdrop-filter: blur(25px);
+    padding: 1.25rem;
+    h4 {
+      padding: 2rem;
+      background-color: #fff;
+      color: var(--Primary-300, #6d8ab6);
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+      letter-spacing: 0.5px;
+      border-radius: 20px;
+      text-align: center;
+      line-height: 1.5;
+    }
+  }
+  .loginPageAlertClose {
+    text-align: center;
+    margin-top: 1rem;
+    svg {
+      border-radius: var(--Radius-r-20, 20px);
+
+      background: var(--neutral-white-opacity-30, rgba(255, 255, 255, 0.3));
+      box-shadow: 0px 2px 20px 0px
+        var(--primary-400-opacity-25, rgba(27, 163, 155, 0.25));
+      backdrop-filter: blur(25px);
+      width: 24px;
+      height: 24px;
+      padding: 0.2rem;
+      cursor: pointer;
+    }
+  }
+}
 .loginPage {
   display: flex;
   height: 100vh;
@@ -218,6 +357,19 @@ const login = () => {
         cursor: pointer;
         height: 40px;
         padding: var(--Padding-p-9, 9px) var(--Padding-p-12, 12px);
+      }
+    }
+
+    .backendChangePassword {
+      padding: 0.5rem 1rem 1rem;
+      h3 {
+        color: #2d3047;
+        text-align: center;
+        font-size: 24px;
+        font-style: normal;
+        font-weight: 700;
+        letter-spacing: 0.12px;
+        margin-bottom: 1.25rem;
       }
     }
 
