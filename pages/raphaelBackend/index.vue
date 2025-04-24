@@ -62,7 +62,7 @@
         <button class="loginBtn" @click="login">登入</button>
       </div>
 
-      <div class="loginForm backendChangePassword" >
+      <div class="loginForm backendChangePassword">
         <h3>首次登入請修改密碼</h3>
         <div class="inputGroup">
           <input v-model="Cusername" type="text" placeholder="請輸入帳號" />
@@ -101,11 +101,9 @@
             @click="togglePassword"
             :src="passwordVisible ? eyeOpen : eyeClosed"
           />
-       
         </div>
-        <!-- <small>密碼長度不夠喔</small> -->
-        
-        
+        <small class="inputHint">密碼長度不夠喔</small>
+
         <div class="inputGroup">
           <input
             v-model="Cpassword"
@@ -122,16 +120,15 @@
             :src="passwordVisible ? eyeOpen : eyeClosed"
           />
         </div>
-        <small>密碼長度不夠喔</small>
+        <small class="inputHint">密碼長度不夠喔</small>
         <!-- <button class="loginBtn" @click="login">登入</button> -->
-        <button class="loginBtn" >送出後請使用新密碼登入</button>
+        <button class="loginBtn">送出後請使用新密碼登入</button>
       </div>
 
       <footer class="loginFooter">
         © 2024 智平衡健康事業股份有限公司<br />
         all rights reserved.
       </footer>
-
     </div>
 
     <div class="loginRight">
@@ -280,7 +277,7 @@ const login = () => {
 
       .inputGroup {
         position: relative;
-        margin-bottom: 1rem;
+        margin-top: 1rem;
 
         input {
           width: 100%;
@@ -360,6 +357,17 @@ const login = () => {
       }
     }
 
+    .inputHint {
+      display: block;
+      padding: 0;
+      margin: 0;
+      color: var(--Warning-default, #ec4f4f);
+      font-size: 12px;
+      letter-spacing: 0.048px;
+      margin-top: 0.25rem;
+      height: 3px;
+    }
+
     .backendChangePassword {
       padding: 0.5rem 1rem 1rem;
       h3 {
@@ -370,6 +378,9 @@ const login = () => {
         font-weight: 700;
         letter-spacing: 0.12px;
         margin-bottom: 1.25rem;
+      }
+      .loginBtn{
+        margin-top: 1.25rem;
       }
     }
 
