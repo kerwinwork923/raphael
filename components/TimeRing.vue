@@ -9,10 +9,11 @@
     <div v-if="hasTodayRecord" class="completion-message">感謝您的使用</div>
 
     <!-- 按鈕群組 -->
-    <div class="flex" v-if="!hasTodayRecord" >
+    <div class="flex" v-if="!hasTodayRecord">
       <!-- BEFORE / RUNNING 狀態才顯示主要按鈕 -->
+      <!-- 僅 BEFORE 狀態顯示按鈕（隱藏 RUNNING） -->
       <button
-        v-if="currentState !== DetectionState.AFTER"
+        v-if="currentState === DetectionState.BEFORE"
         :style="buttonStyle"
         @click="toggleTimer"
         :disabled="isButtonDisabled"
