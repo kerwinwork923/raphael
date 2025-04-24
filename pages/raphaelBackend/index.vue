@@ -288,7 +288,7 @@ const login = () => {
         margin-top: 1rem;
 
         @include respond-to(phone-landscape) {
-          margin-top: 0.75rem;
+          margin-top: 6px;
         }
 
         input {
@@ -371,7 +371,7 @@ const login = () => {
         font-size: 16px;
         cursor: pointer;
         height: 40px;
-        padding: var(--Padding-p-9, 9px) var(--Padding-p-12, 12px);
+        padding: 0.5rem 0.75rem;
       }
     }
 
@@ -404,7 +404,9 @@ const login = () => {
       .loginBtn {
         margin-top: 1.5rem;
         @include respond-to(phone-landscape) {
-          margin-top: 0.5rem;
+          margin-top: 0.75rem;
+          height: auto;
+          padding: 0.25rem 0.75rem;
         }
       }
     }
