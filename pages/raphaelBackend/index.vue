@@ -213,7 +213,7 @@ const login = () => {
 }
 .loginPage {
   display: flex;
-  height: 100vh;
+  height: 100dvh;
   .logoGroup {
     img {
       @include respond-to(xl) {
@@ -428,7 +428,7 @@ const login = () => {
     position: relative;
     display: grid;
     place-items: center;
-    height: 100vh;
+    height: 100dvh;
 
     @include respond-to(lg) {
       place-items: baseline;
