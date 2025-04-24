@@ -267,15 +267,16 @@ const login = () => {
     }
 
     .loginForm {
-      max-width: 320px;
+      width: 100%;
+      max-width: 361px;
       flex-shrink: 0; // ✅ 避免壓縮變形
-
       border-radius: 8px;
       border: 1px solid #b1c0d8;
       background: #fff;
       backdrop-filter: blur(4px);
       padding: 1rem;
-      @include respond-to(xl) {
+
+      @include respond-to(sm) {
         max-width: 90%;
       }
 
