@@ -28,7 +28,7 @@
         <h1>Neuro-Plus+</h1>
       </div>
 
-      <div class="loginForm" v-if="false">
+      <div class="loginForm">
         <div class="inputGroup">
           <input v-model="username" type="text" placeholder="請輸入帳號" />
           <img src="/assets/imgs/backend/user.svg" class="icon user-icon" />
@@ -62,8 +62,8 @@
         <button class="loginBtn" @click="login">登入</button>
       </div>
 
-      <div class="loginForm backendChangePassword">
-        <h3>首次登入請修改密碼</h3>
+      <div class="loginForm backendChangePassword" v-if="false">
+        <h3>{{ true ? "首次登入請修改密碼" : "重設密碼" }}</h3>
         <div class="inputGroup">
           <input v-model="Cusername" type="text" placeholder="請輸入帳號" />
           <img src="/assets/imgs/backend/user.svg" class="icon user-icon" />
@@ -332,6 +332,7 @@ const login = () => {
         font-size: 14px;
         margin-bottom: 1.5rem;
         align-items: center;
+        margin-top: 0.75rem;
         .forgotLink {
           color: var(--Neutral-500, #666);
 
@@ -340,7 +341,11 @@ const login = () => {
           font-weight: 400;
 
           letter-spacing: 2.7px;
+          @include respond-to(phone-landscape) {
+          font-size: 1rem;
+          }
         }
+
         label {
           color: var(--Neutral-500, #666);
           font-family: "Noto Sans";
@@ -351,6 +356,10 @@ const login = () => {
           display: flex;
           align-items: center;
           gap: 4px;
+          @include respond-to(phone-landscape) {
+            font-size: 1rem;
+            gap: 2px;
+          }
           cursor: pointer;
           input {
             width: 20px;
@@ -359,6 +368,7 @@ const login = () => {
 
             border: 1px solid #b1c0d8;
             cursor: pointer;
+          
           }
         }
       }
