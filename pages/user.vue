@@ -77,7 +77,7 @@
           <div class="bottomTitle">親友</div>
           <img src="../assets/imgs/relationshopIcon.svg" alt="" />
         </div> -->
-       
+
         <router-link to="/point" class="item">
           <div class="topTitle">獎勵</div>
           <div class="bottomTitle">積分</div>
@@ -458,22 +458,22 @@ export default {
           border: 2px solid rgba(31, 188, 179, 0.7);
           color: $raphael-cyan-400;
           grid-column: 2;
-          grid-row: 2/4;
-          align-items: end;
-          font-size: 1.75rem;
+          grid-row: 2/3;
+          justify-content: end;
+          font-size: 1.25rem;
 
-          .topTitle,
           .bottomTitle {
-            margin-bottom: 2.5rem;
+            margin-right: 1.25rem;
           }
 
           img {
             background: rgba(31, 188, 179, 0.7);
-            width: 50%;
-            height: 60px;
-            border-radius: 0 0 8px 8px;
+            width: 50px;
+            height: 55%;
+            border-radius: 0 8px 8px 0;
             padding: 0.5rem;
-            top: 0;
+            top: 16px;
+            left: 0;
             box-shadow: inset 0 -4px 8px rgba(31, 188, 179, 1);
           }
 
@@ -495,7 +495,7 @@ export default {
           grid-row: 1;
 
           .bottomTitle {
-            margin-right: 0.75rem;
+            margin-right: 1.25rem;
           }
 
           img {
@@ -519,62 +519,62 @@ export default {
           }
         }
         &:nth-child(4) {
-          border: 2px solid rgba(101, 85, 143,.7);
+          border: 2px solid rgba(101, 85, 143, 0.7);
           color: $raphael-purple-200;
           font-size: 1.25rem;
           justify-content: end;
 
           .bottomTitle {
-            margin-right: 0.75rem;
+            margin-right: 1.25rem;
           }
 
           img {
-            background: rgba(101, 85, 143,.7);
+            background: rgba(101, 85, 143, 0.7);
             width: 50px;
             height: 55%;
             border-radius: 0 8px 8px 0;
             padding: 0.5rem;
             top: 16px;
             left: 0;
-            box-shadow: inset 0 -4px 8px rgba(101, 85, 143,1);
+            box-shadow: inset 0 -4px 8px rgba(101, 85, 143, 1);
           }
 
           &:hover {
-            border: 2px solid rgba(101, 85, 143,1);
+            border: 2px solid rgba(101, 85, 143, 1);
             color: $raphael-purple-200;
 
             & > img {
-              background: rgba(101, 85, 143,1);
+              background: rgba(101, 85, 143, 1);
             }
           }
         }
         &:nth-child(5) {
-          border: 2px solid rgba(116, 188, 31,.7);
+          border: 2px solid rgba(116, 188, 31, 0.7);
           color: $raphael-green-400;
           font-size: 1.25rem;
           justify-content: end;
 
           .bottomTitle {
-            margin-right: 0.75rem;
+            margin-right: 1.25rem;
           }
 
           img {
-            background: rgba(116, 188, 31,.7);
+            background: rgba(116, 188, 31, 0.7);
             width: 50px;
             height: 55%;
             border-radius: 0 8px 8px 0;
             padding: 0.5rem;
-            top: 10px;
+            top: 16px;
             left: 0;
-            box-shadow: inset 0 -4px 8px rgba(116, 188, 31,1);
+            box-shadow: inset 0 -4px 8px rgba(116, 188, 31, 1);
           }
 
           &:hover {
-            border: 2px solid rgba(116, 188, 31,1);
+            border: 2px solid rgba(116, 188, 31, 1);
             color: $raphael-purple-200;
 
             & > img {
-              background: rgba(116, 188, 31,1);
+              background: rgba(116, 188, 31, 1);
             }
           }
         }
