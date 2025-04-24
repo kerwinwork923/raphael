@@ -126,8 +126,7 @@
       </div>
 
       <footer class="loginFooter">
-        © 2024 智平衡健康事業股份有限公司<br />
-        all rights reserved.
+        © 2024 智平衡健康事業股份有限公司 all rights reserved.
       </footer>
     </div>
 
@@ -240,6 +239,7 @@ const login = () => {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: 1.5rem;
     overflow: hidden; // ✅ 避免內容撐出
     z-index: 99;
     @include respond-to(lg) {
@@ -250,16 +250,20 @@ const login = () => {
       height: auto;
       position: absolute;
       bottom: 0;
-      padding: 1rem 0 0.75rem;
+      padding: 1rem 0;
       width: 100%;
       min-height: 40%;
+      gap: 1.25rem;
     }
+    @include respond-to(phone-landscape) {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.25rem;
+      padding: 0.5rem;
+    }
+
     .logoGroup {
       text-align: center;
-      margin-bottom: 2rem;
-      @include respond-to(xl) {
-        margin-bottom: 0.75rem;
-      }
     }
 
     .loginForm {
@@ -275,9 +279,17 @@ const login = () => {
         max-width: 90%;
       }
 
+      @include respond-to(phone-landscape) {
+        padding: 0.75rem;
+      }
+
       .inputGroup {
         position: relative;
         margin-top: 1rem;
+
+        @include respond-to(phone-landscape) {
+          margin-top: 0.75rem;
+        }
 
         input {
           width: 100%;
@@ -285,12 +297,18 @@ const login = () => {
           font-size: 16px;
           border: 1px solid #ccc;
           border-radius: 8px;
+          @include respond-to(phone-landscape) {
+            padding: 8px 36px;
+          }
         }
 
         .icon {
           position: absolute;
           top: 50%;
           transform: translateY(-50%);
+          @include respond-to(phone-landscape) {
+            height: 20px;
+          }
         }
 
         .user-icon {
@@ -365,11 +383,11 @@ const login = () => {
       font-size: 12px;
       letter-spacing: 0.048px;
       margin-top: 0.25rem;
-      height: 3px;
+      height: auto;
+      line-height: normal;
     }
 
     .backendChangePassword {
-      padding: 0.5rem 1rem 1rem;
       h3 {
         color: #2d3047;
         text-align: center;
@@ -377,20 +395,28 @@ const login = () => {
         font-style: normal;
         font-weight: 700;
         letter-spacing: 0.12px;
-        margin-bottom: 1.25rem;
+        margin-bottom: 1.5rem;
+        @include respond-to(phone-landscape) {
+          font-size: 1.25rem;
+          margin-bottom: 0.5rem;
+        }
       }
-      .loginBtn{
-        margin-top: 1.25rem;
+      .loginBtn {
+        margin-top: 1.5rem;
+        @include respond-to(phone-landscape) {
+          margin-top: 0.5rem;
+        }
       }
     }
 
     .loginFooter {
-      margin-top: 2rem;
       font-size: 12px;
       text-align: center;
       color: #999;
-      @include respond-to(xl) {
-        margin-top: 0.75rem;
+      margin: 0 1rem;
+      @include respond-to(phone-landscape) {
+        margin: 0;
+        grid-column: 1/3;
       }
     }
   }
@@ -400,19 +426,17 @@ const login = () => {
     background: #f0f7f9 url("/assets/imgs/backend/background.png") no-repeat
       center / cover;
     position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
+    display: grid;
+    place-items: center;
     height: 100vh;
+
     @include respond-to(lg) {
-      position: absolute;
-      left: 0;
-      top: 0;
-      max-height: 100%;
-      width: 100%;
+      place-items: baseline;
+      justify-content: center;
     }
+
     img {
+      min-height: 320px;
       max-height: 100%;
     }
 
