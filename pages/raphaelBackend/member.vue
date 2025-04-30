@@ -113,17 +113,26 @@
           <div class="cell phone">{{ member.phone }}</div>
 
           <div class="cell product">
-            <p class="chip chip--success">已使用 {{ member.usageDays }} 天</p>
-            <p class="chip chip--danger">剩餘 {{ member.remainingDays }} 天</p>
+            <div class="cellProduct">
+              <p class="chip chip--success">已使用 {{ member.usageDays }} 天</p>
+              <p class="chip chip--danger">
+                剩餘 {{ member.remainingDays }} 天
+              </p>
+            </div>
+
             <p class="sub">{{ member.product }}</p>
           </div>
 
           <div class="cell health">
             <p>HRV {{ member.hrv }} ms</p>
             <p>{{ member.ans }}</p>
+            <p>生活自律 79分</p>
             <p class="chip chip--warning" v-if="member.isAbnormal">
-              自律神經快提醒
+              已超時,請盡快提醒
             </p>
+            <button class="healthBtn">
+              <img src="/assets/imgs/backend/send.svg" alt="" /> 立即推播
+            </button>
           </div>
 
           <div class="cell reg-date">
@@ -132,20 +141,26 @@
 
           <div class="cell action">
             <div class="tagsGroup">
-              <div class="cellTag">忠誠用戶</div>
-              <div class="cellTag">解約</div>
+              <div class="cellTag cellTagSuccess">忠誠用戶</div>
+              <!-- <div class="cellTag cellTagWarning">偶爾使用</div> -->
+              <div class="cellTag cellTag2">
+                <img src="/assets/imgs/backend/heartCrack.svg" alt="" />解約
+              </div>
+              <!-- <div class="cellTag cellTag2"><img src="/assets/imgs/backend/highRisk.svg" alt="">高風險</div> -->
+              <!-- <div class="cellTag cellTag2"><img src="/assets/imgs/backend/archive.svg" alt="">未歸還</div> -->
+              <!-- <div class="cellTag cellTag2"><img src="/assets/imgs/backend/aoke.svg" alt="">奧客</div> -->
             </div>
           </div>
 
           <div class="goInfo">
-            <img src="/assets/imgs/backend/goNext.svg" alt="">
+            <img src="/assets/imgs/backend/goNext.svg" alt="" />
           </div>
-          
         </div>
-      </section>
-      <!-- pagination -->
+
+
+              <!-- pagination -->
       <nav class="pagination">
-        <button class="btn-page" :disabled="page === 1" @click="gotoPage(1)">
+        <button class="btn-page " :disabled="page === 1" @click="gotoPage(1)">
           &lt;&lt;
         </button>
         <button class="btn-page" :disabled="page === 1" @click="prevPage">
@@ -154,7 +169,7 @@
         <button
           v-for="p in totalPages"
           :key="p"
-          class="btn-page"
+          class="btn-page btn-page-number"
           :class="{ active: page === p }"
           @click="gotoPage(p)"
         >
@@ -175,6 +190,8 @@
           &gt;&gt;
         </button>
       </nav>
+      </section>
+
     </main>
   </div>
 </template>
@@ -266,7 +283,6 @@ function viewDetail(id: number) {
   console.log("view detail of", id);
 }
 
-
 // options for filters (could come from API)
 const productOptions = [
   { label: "保健版", value: "health" },
@@ -342,6 +358,28 @@ const statusOptions = [
         font-weight: 400;
         line-height: 140%;
       }
+    }
+  }
+  .healthBtn {
+    border-radius: 6px;
+    border: none;
+    background: var(--Primary-200, #b1c0d8);
+    color: var(--Primary-100, #f5f7fa);
+    font-family: "Noto Sans";
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 400;
+    margin: 0 auto;
+    cursor: pointer;
+    letter-spacing: 2px;
+    padding: 0.25rem 0.5rem;
+    display: flex;
+    align-items: center;
+
+    gap: 4px;
+    margin-top: 0.25rem;
+    img {
+      width: 14px;
     }
   }
   .toolbar {
@@ -471,8 +509,8 @@ const statusOptions = [
       var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
     .table-row {
       display: grid;
-      
-      grid-template-columns: 100px 60px 60px 100px 120px 120px 200px 1fr;
+
+      grid-template-columns: 100px 60px 60px 100px 160px 120px 200px 1fr;
       position: relative;
       gap: 2px;
       align-items: center;
@@ -487,7 +525,6 @@ const statusOptions = [
         text-align: center;
       }
       .cell {
-        
         color: var(--Neutral-500, #666);
         text-align: center;
         width: auto;
@@ -510,13 +547,29 @@ const statusOptions = [
             font-size: 1rem;
             font-style: normal;
             font-weight: 400;
-            line-height: 100%; /* 20px */
+
             letter-spacing: var(--Title-Medium-Tracking, 0.15px);
 
             border-radius: 4px;
             border: 1px solid var(--Primary-default, #1ba39b);
             background: var(--primary-400-opacity-10, rgba(27, 163, 155, 0.1));
             padding: 0.5rem;
+          }
+          .cellTagWarning {
+            border: 1px solid var(--Warning-default, #ec4f4f);
+            background: var(--warning-300-opacity-10, rgba(236, 79, 79, 0.1));
+            color: var(--Warning-default, #ec4f4f);
+          }
+          .cellTag2 {
+            border: 1px solid var(--Neutral-300, #ccc);
+            background: var(--Neutral-200, #eee);
+            color: var(--Neutral-300, #ccc);
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            img {
+              width: 1rem;
+            }
           }
         }
 
@@ -526,6 +579,13 @@ const statusOptions = [
           //  line-height: 18px;
           font-size: 16px;
         }
+        .cellProduct {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          margin-bottom: 0.25rem;
+        }
         &.action {
           display: flex;
           align-items: center;
@@ -534,13 +594,13 @@ const statusOptions = [
           text-align: right;
         }
       }
-      .goInfo{
-         position: absolute;
-         top: 50%;
+      .goInfo {
+        position: absolute;
+        top: 50%;
 
-         right: 12px;
-         transform: translateY(-50%);
-         cursor: pointer;
+        right: 12px;
+        transform: translateY(-50%);
+        cursor: pointer;
       }
     }
     .chip {
@@ -552,15 +612,20 @@ const statusOptions = [
       &--success {
         background: rgba($chip-success, 0.1);
         color: $chip-success;
+        border: 1px solid $chip-success;
       }
       &--danger {
         background: rgba($chip-danger, 0.1);
         color: $chip-danger;
+        border: 1px solid $chip-danger;
       }
-      &--warning {
-        background: rgba($chip-warning, 0.1);
-        color: $chip-warning;
-      }
+    }
+    .chip--warning {
+      overflow: hidden;
+      color: var(--Warning-default, #ec4f4f);
+      font-style: normal;
+      font-weight: 400;
+      letter-spacing: var(--Title-Medium-Tracking, 0.15px);
     }
   }
 
@@ -568,24 +633,33 @@ const statusOptions = [
     display: flex;
     justify-content: center;
     gap: 4px;
-    margin-top: 24px;
+    margin-top: 12px;
+    margin-bottom: 24px;
     .btn-page {
       padding: 6px 10px;
       min-width: 32px;
-      border: 1px solid $border;
+    
       border-radius: 4px;
-      background: white;
+
+      background-color: transparent;
       cursor: pointer;
+      border: none;
       &.active {
-        background: $primary;
+        background: $chip-success;
         color: white;
-        border-color: $primary;
+        border-color: $chip-success;
       }
       &:disabled {
         opacity: 0.4;
         cursor: not-allowed;
       }
     }
+
+    .btn-page-number{
+   
+      background: white;
+    }
+   
   }
 }
 </style>
