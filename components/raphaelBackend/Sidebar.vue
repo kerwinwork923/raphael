@@ -42,7 +42,7 @@
           </div>
         </div>
   
-        <button class="logout" @click="$emit('logout')">
+        <button class="logout" @click="handleLogout">
           <img src="/assets/imgs/backend/backendLogout.svg" alt="登出" />
           登出
         </button>
@@ -63,6 +63,17 @@
   function set(key) {
     emit('update:modelValue', key);
   }
+
+  function handleLogout() {
+  // 清除 localStorage 的 backendToken
+  localStorage.removeItem("backendToken");
+
+  console.log("清除 localStorage backendToken 完成，登出");
+
+  // 登出後跳轉頁面
+  window.location.href = "/raphaelBackend";
+}
+
   </script>
   
   <style scoped lang="scss">
