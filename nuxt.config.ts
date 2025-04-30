@@ -82,6 +82,7 @@ export default defineNuxtConfig({
             @import "@/assets/styles/variables.scss";
             @import "@/assets/styles/mixins.scss";
             @import "@/assets/styles/animations";
+             @import "@/assets/styles/backend";
           `,
         },
       },

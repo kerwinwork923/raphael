@@ -1,128 +1,178 @@
 <template>
-  <div class="loginPageAlert" v-if="false">
-    <div class="loginPageAlertBox">
-      <h4>帳號或密碼錯誤喔~</h4>
-      <div class="loginPageAlertClose">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-        >
-          <path
-            d="M18 6L6 18M6 6L18 18"
-            stroke="#B1C0D8"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </div>
-    </div>
-  </div>
+  <!-- 共用 Alert ---------------------------------------------------- -->
+  <BaseAlert :show="showAlert" :message="alertMsg" @close="showAlert = false" />
+
   <div class="loginPage">
     <div class="loginLeft">
+      <!-- LOGO -------------------------------------------------------- -->
       <div class="logoGroup">
         <img src="/assets/imgs/backend/Subtract.svg" alt="" />
         <h1>Neuro-Plus+</h1>
       </div>
 
-      <div class="loginForm">
+      <!-- ① 一般登入 -------------------------------------------------- -->
+      <div class="loginForm" v-if="step === 'login'">
+        <!-- 帳號 -->
         <div class="inputGroup">
           <input v-model="username" type="text" placeholder="請輸入帳號" />
           <img src="/assets/imgs/backend/user.svg" class="icon user-icon" />
         </div>
-
+        <!-- 密碼 -->
         <div class="inputGroup">
           <input
-            v-model="password"
             :type="passwordVisible ? 'text' : 'password'"
+            v-model="password"
             placeholder="請輸入密碼"
           />
           <img
-            class="icon lock-icon"
             src="/assets/imgs/backend/password-lock.svg"
+            class="icon lock-icon"
           />
           <img
             class="icon eye-icon"
-            @click="togglePassword"
             :src="passwordVisible ? eyeOpen : eyeClosed"
+            @click="passwordVisible = !passwordVisible"
           />
         </div>
 
         <div class="optionGroup">
-          <label>
-            <input type="checkbox" v-model="rememberMe" />
-            記住帳號
-          </label>
-          <a href="#" class="forgotLink">忘記密碼？</a>
+          <label><input type="checkbox" v-model="rememberMe" /> 記住帳號</label>
+          <a class="forgotLink" @click="step = 'reset'">忘記密碼？</a>
         </div>
 
         <button class="loginBtn" @click="login">登入</button>
       </div>
 
-      <div class="loginForm backendChangePassword" v-if="false">
-        <h3>{{ true ? "首次登入請修改密碼" : "重設密碼" }}</h3>
+      <!-- ② 首次登入改密碼 ------------------------------------------- -->
+      <div class="loginForm backendChangePassword" v-if="step === 'first'">
+        <h3>首次登入請修改密碼</h3>
+
+        <!-- 帳號 (disabled) -->
         <div class="inputGroup">
-          <input v-model="Cusername" type="text" placeholder="請輸入帳號" />
+          <input :value="username" disabled />
           <img src="/assets/imgs/backend/user.svg" class="icon user-icon" />
         </div>
 
+        <!-- 舊 / 新 / 再次輸入新密碼 -->
         <div class="inputGroup">
           <input
-            v-model="Cpassword"
-            :type="passwordVisible ? 'text' : 'password'"
-            placeholder="請輸入舊密碼"
+            :type="eye.firstOld ? 'text' : 'password'"
+            v-model="oldPwd"
+            placeholder="舊密碼"
           />
           <img
-            class="icon lock-icon"
             src="/assets/imgs/backend/password-lock.svg"
+            class="icon lock-icon"
           />
           <img
             class="icon eye-icon"
-            @click="togglePassword"
-            :src="passwordVisible ? eyeOpen : eyeClosed"
+            :src="eye.firstOld ? eyeOpen : eyeClosed"
+            @click="toggleEye('firstOld')"
           />
         </div>
 
         <div class="inputGroup">
           <input
-            v-model="Cpassword"
-            :type="passwordVisible ? 'text' : 'password'"
-            placeholder="請輸入新密碼"
+            :type="eye.firstNew ? 'text' : 'password'"
+            v-model="newPwd"
+            placeholder="新密碼"
           />
           <img
-            class="icon lock-icon"
             src="/assets/imgs/backend/password-lock.svg"
+            class="icon lock-icon"
           />
           <img
             class="icon eye-icon"
-            @click="togglePassword"
-            :src="passwordVisible ? eyeOpen : eyeClosed"
+            :src="eye.firstNew ? eyeOpen : eyeClosed"
+            @click="toggleEye('firstNew')"
           />
         </div>
-        <small class="inputHint">密碼長度不夠喔</small>
 
         <div class="inputGroup">
           <input
-            v-model="Cpassword"
-            :type="passwordVisible ? 'text' : 'password'"
-            placeholder="請再次輸入新密碼"
+            :type="eye.firstNew2 ? 'text' : 'password'"
+            v-model="newPwd2"
+            placeholder="再次輸入新密碼"
           />
           <img
-            class="icon lock-icon"
             src="/assets/imgs/backend/password-lock.svg"
+            class="icon lock-icon"
           />
           <img
             class="icon eye-icon"
-            @click="togglePassword"
-            :src="passwordVisible ? eyeOpen : eyeClosed"
+            :src="eye.firstNew2 ? eyeOpen : eyeClosed"
+            @click="toggleEye('firstNew2')"
           />
         </div>
-        <small class="inputHint">密碼長度不夠喔</small>
-        <!-- <button class="loginBtn" @click="login">登入</button> -->
-        <button class="loginBtn">送出後請使用新密碼登入</button>
+
+        <button class="loginBtn" @click="firstChange">
+          送出後請使用新密碼登入
+        </button>
+      </div>
+
+      <!-- ③ 重設密碼 -------------------------------------------------- -->
+      <div class="loginForm backendChangePassword" v-if="step === 'reset'">
+        <h3>重設密碼</h3>
+
+        <div class="inputGroup">
+          <input v-model="resetAcc" placeholder="請輸入帳號" />
+          <img src="/assets/imgs/backend/user.svg" class="icon user-icon" />
+        </div>
+        <!-- 
+        <div class="inputGroup">
+          <input
+            :type="eye.resetOld ? 'text' : 'password'"
+            v-model="resetOld"
+            placeholder="舊密碼"
+          />
+          <img
+            src="/assets/imgs/backend/password-lock.svg"
+            class="icon lock-icon"
+          />
+          <img
+            class="icon eye-icon"
+            :src="eye.resetOld ? eyeOpen : eyeClosed"
+            @click="toggleEye('resetOld')"
+          />
+        </div> -->
+
+        <div class="inputGroup">
+          <input
+            :type="eye.resetNew ? 'text' : 'password'"
+            v-model="resetNew"
+            placeholder="新密碼"
+          />
+          <img
+            src="/assets/imgs/backend/password-lock.svg"
+            class="icon lock-icon"
+          />
+          <img
+            class="icon eye-icon"
+            :src="eye.resetNew ? eyeOpen : eyeClosed"
+            @click="toggleEye('resetNew')"
+          />
+        </div>
+
+        <div class="inputGroup">
+          <input
+            :type="eye.resetNew2 ? 'text' : 'password'"
+            v-model="resetNew2"
+            placeholder="再次輸入新密碼"
+          />
+          <img
+            src="/assets/imgs/backend/password-lock.svg"
+            class="icon lock-icon"
+          />
+          <img
+            class="icon eye-icon"
+            :src="eye.resetNew2 ? eyeOpen : eyeClosed"
+            @click="toggleEye('resetNew2')"
+          />
+        </div>
+
+        <button class="loginBtn" @click="resetPwd">
+          送出後請使用新密碼登入
+        </button>
       </div>
 
       <footer class="loginFooter">
@@ -130,6 +180,7 @@
       </footer>
     </div>
 
+    <!-- 右側形象圖 -->
     <div class="loginRight">
       <img src="/assets/imgs/backend/people.png" alt="" />
     </div>
@@ -137,80 +188,193 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-
+import { ref, watch, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import BaseAlert from "@/components/raphaelBackend/BaseAlert.vue";
 import eyeOpen from "@/assets/imgs/backend/eye.svg";
 import eyeClosed from "@/assets/imgs/backend/eye-closed.svg";
 
-const username = ref("");
+/* ================= 基本 reactive =================== */
+const router = useRouter();
+const step = ref("login"); // login | first | reset
+
+const username = ref(localStorage.getItem("rememberID") || "");
 const password = ref("");
-const rememberMe = ref(false);
+const rememberMe = ref(!!username.value);
 const passwordVisible = ref(false);
 
-const togglePassword = () => {
-  passwordVisible.value = !passwordVisible.value;
+const eye = ref({});
+const toggleEye = (k) => (eye.value[k] = !eye.value[k]);
+
+/* ================ Alert 共用 ======================== */
+const showAlert = ref(false);
+const alertMsg = ref("");
+const fireAlert = (msg) => {
+  alertMsg.value = msg;
+  showAlert.value = true;
 };
 
-const login = () => {
-  // 登入邏輯
-  console.log("帳號：", username.value);
-  console.log("密碼：", password.value);
-  console.log("記住帳號：", rememberMe.value);
+/* ================ 其他表單欄位 ====================== */
+const oldPwd = ref(""); // 首次登入－舊密碼
+const newPwd = ref("");
+const newPwd2 = ref("");
+
+const resetAcc = ref(""); // 重設密碼
+const resetOld = ref("");
+const resetNew = ref("");
+const resetNew2 = ref("");
+
+/* ================ 工具函式 ========================== */
+const isEmpty = (...v) => v.some((s) => !s || !s.trim());
+const tooShort = (v, n = 6) => v.length < n;
+
+/* ================ 「記住帳號」欄位監聽 ============== */
+watch(rememberMe, (val) => {
+  if (val) localStorage.setItem("rememberID", username.value);
+  else localStorage.removeItem("rememberID");
+});
+watch(username, (val) => {
+  if (rememberMe.value) localStorage.setItem("rememberID", val);
+});
+
+/* ================ 登入 ============================= */
+const login = async () => {
+  if (isEmpty(username.value, password.value)) {
+    fireAlert("請輸入帳號與密碼");
+    return;
+  }
+  if (tooShort(password.value)) {
+    fireAlert("密碼需至少 6 碼");
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      "https://23700999.com:8081/HMA/API_AdminLogin.jsp",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          AdminID: username.value,
+          Password: password.value,
+        }),
+      }
+    );
+    const r = await res.json();
+
+    if (r.Result === "OK") {
+      /* -------- ✅ 把 Token 記住 -------- */
+      if (rememberMe.value) {
+        localStorage.setItem("backendToken", r.Token); // 永久記住
+        localStorage.setItem("rememberID", username.value);
+      } else {
+        sessionStorage.setItem("backendToken", r.Token);
+      }
+      router.push("/raphaelBackend/member");
+    } else if (r.Result === "First") {
+      step.value = "first";
+      oldPwd.value = password.value;
+    } else {
+      fireAlert("帳號或密碼錯誤喔~");
+    }
+  } catch {
+    fireAlert("伺服器錯誤，請稍後再試");
+  }
 };
+
+/* ================ 首次登入改密碼 ==================== */
+const firstChange = async () => {
+  if (isEmpty(oldPwd.value, newPwd.value, newPwd2.value)) {
+    fireAlert("所有欄位皆為必填");
+    return;
+  }
+  if (tooShort(newPwd.value)) {
+    fireAlert("新密碼需至少 6 碼");
+    return;
+  }
+  if (newPwd.value !== newPwd2.value) {
+    fireAlert("兩次輸入的新密碼不一致");
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      "https://23700999.com:8081/HMA/API_FirstAdminLogin.jsp",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          AdminID: username.value,
+          Password: oldPwd.value,
+          NewPassword: newPwd.value,
+        }),
+      }
+    );
+    const r = await res.json();
+    if (r.Result === "OK") {
+      fireAlert("密碼修改完成，請重新登入");
+      step.value = "login";
+      password.value = "";
+    } else {
+      fireAlert("修改失敗：" + r.Result);
+    }
+  } catch {
+    fireAlert("伺服器錯誤");
+  }
+};
+
+/* ================ 重設密碼 ========================== */
+const resetPwd = async () => {
+  if (
+    isEmpty(resetAcc.value, resetNew.value, resetNew2.value)
+  ) {
+    fireAlert("所有欄位皆為必填");
+    return;
+  }
+  if (tooShort(resetNew.value)) {
+    fireAlert("新密碼需至少 6 碼");
+    return;
+  }
+  if (resetNew.value !== resetNew2.value) {
+    fireAlert("兩次輸入的新密碼不一致");
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      "https://23700999.com:8081/HMA/API_AdminModifyPassword.jsp",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          AdminID: resetAcc.value,
+          NewPassword: resetNew.value,
+        }),
+      }
+    );
+    const r = await res.json();
+    if (r.Result === "OK") {
+      fireAlert("重設成功，請使用新密碼登入");
+      step.value = "login";
+    } else {
+      fireAlert("重設失敗：" + r.Result);
+    }
+  } catch {
+    fireAlert("伺服器錯誤");
+  }
+};
+
+onMounted(() => {
+  const token =
+    localStorage.getItem("backendToken") ||
+    sessionStorage.getItem("backendToken");
+  if (token) {
+    router.push("/raphaelBackend/member");
+  }
+});
 </script>
 
 <style lang="scss" scoped>
-.loginPageAlert {
-  width: 100%;
-  height: 100%;
-  position: fixed;
-  left: 0;
-  top: 0;
-  background: rgba(177, 192, 216, 0.25);
-  z-index: 100;
-  .loginPageAlertBox {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    min-width: 300px;
-    transform: translate(-50%, -50%);
-    border-radius: var(--Radius-r-20, 20px);
-    border: 3px solid var(--Primary-default, #1ba39b);
-    background: var(--neutral-white-opacity-30, rgba(255, 255, 255, 0.3));
-    box-shadow: 0px 2px 20px 0px
-      var(--primary-400-opacity-25, rgba(27, 163, 155, 0.25));
-    backdrop-filter: blur(25px);
-    padding: 1.25rem;
-    h4 {
-      padding: 2rem;
-      background-color: #fff;
-      color: var(--Primary-300, #6d8ab6);
-      font-size: 16px;
-      font-style: normal;
-      font-weight: 400;
-      letter-spacing: 0.5px;
-      border-radius: 20px;
-      text-align: center;
-      line-height: 1.5;
-    }
-  }
-  .loginPageAlertClose {
-    text-align: center;
-    margin-top: 1rem;
-    svg {
-      border-radius: var(--Radius-r-20, 20px);
-
-      background: var(--neutral-white-opacity-30, rgba(255, 255, 255, 0.3));
-      box-shadow: 0px 2px 20px 0px
-        var(--primary-400-opacity-25, rgba(27, 163, 155, 0.25));
-      backdrop-filter: blur(25px);
-      width: 24px;
-      height: 24px;
-      padding: 0.2rem;
-      cursor: pointer;
-    }
-  }
-}
 .loginPage {
   display: flex;
   height: 100dvh;
@@ -335,14 +499,14 @@ const login = () => {
         margin-top: 0.75rem;
         .forgotLink {
           color: var(--Neutral-500, #666);
-
+          cursor: pointer;
           font-size: 18px;
           font-style: normal;
           font-weight: 400;
 
           letter-spacing: 2.7px;
           @include respond-to(phone-landscape) {
-          font-size: 1rem;
+            font-size: 1rem;
           }
         }
 
@@ -368,7 +532,6 @@ const login = () => {
 
             border: 1px solid #b1c0d8;
             cursor: pointer;
-          
           }
         }
       }
@@ -383,6 +546,7 @@ const login = () => {
         cursor: pointer;
         height: 40px;
         padding: 0.5rem 0.75rem;
+        letter-spacing: 2.7px;
       }
     }
 
