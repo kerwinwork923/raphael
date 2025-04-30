@@ -265,15 +265,7 @@ function viewDetail(id: number) {
   // TODO: navigate to detail page
   console.log("view detail of", id);
 }
-function handleLogout() {
-  // 清除 localStorage 的 backendToken
-  localStorage.removeItem("backendToken");
 
-  console.log("清除 localStorage backendToken 完成，登出");
-
-  // 登出後跳轉頁面
-  window.location.href = "/raphaelBackend";
-}
 
 // options for filters (could come from API)
 const productOptions = [
