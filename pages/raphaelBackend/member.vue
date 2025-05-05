@@ -32,11 +32,13 @@
 
           <div class="toolbarTime-wrapper">
             <VueDatePicker
-              class="toolbarTime"
               v-model="dateRange"
               range
+              :enable-time-picker="false"
+              :format="'yyyy/MM/dd'"
+              :min-date="minDate"
+              placeholder="註冊日期區間"
               prepend-icon="i-calendar"
-              placeholder="註冊時間查詢"
             />
           </div>
           <div class="selectWrapper">
@@ -113,13 +115,12 @@
           <div class="cell phone">{{ member.phone }}</div>
 
           <div class="cell product">
-            <div class="cellProduct">
+            <div class="cellProduct" v-if="member.product">
               <p class="chip chip--success">已使用 {{ member.usageDays }} 天</p>
               <p class="chip chip--danger">
                 剩餘 {{ member.remainingDays }} 天
               </p>
             </div>
-
             <p class="sub">{{ member.product }}</p>
           </div>
 
@@ -141,11 +142,17 @@
 
           <div class="cell action">
             <div class="tagsGroup">
-              <div class="cellTag cellTagSuccess">忠誠用戶</div>
-              <!-- <div class="cellTag cellTagWarning">偶爾使用</div> -->
-              <div class="cellTag cellTag2">
-                <img src="/assets/imgs/backend/heartCrack.svg" alt="" />解約
+              <div
+                v-if="member.memType && member.product"
+                class="cellTag cellTagSuccess"
+              >
+                {{ member.memType }}
               </div>
+
+              <!-- <div class="cellTag cellTagWarning">偶爾使用</div> -->
+              <!-- <div class="cellTag cellTag2">
+                <img src="/assets/imgs/backend/heartCrack.svg" alt="" />解約
+              </div> -->
               <!-- <div class="cellTag cellTag2"><img src="/assets/imgs/backend/highRisk.svg" alt="">高風險</div> -->
               <!-- <div class="cellTag cellTag2"><img src="/assets/imgs/backend/archive.svg" alt="">未歸還</div> -->
               <!-- <div class="cellTag cellTag2"><img src="/assets/imgs/backend/aoke.svg" alt="">奧客</div> -->
@@ -157,143 +164,229 @@
           </div>
         </div>
 
-
-              <!-- pagination -->
-      <nav class="pagination">
-        <button class="btn-page " :disabled="page === 1" @click="gotoPage(1)">
-          &lt;&lt;
-        </button>
-        <button class="btn-page" :disabled="page === 1" @click="prevPage">
-          &lt;
-        </button>
-        <button
-          v-for="p in totalPages"
-          :key="p"
-          class="btn-page btn-page-number"
-          :class="{ active: page === p }"
-          @click="gotoPage(p)"
-        >
-          {{ p }}
-        </button>
-        <button
-          class="btn-page"
-          :disabled="page === totalPages"
-          @click="nextPage"
-        >
-          &gt;
-        </button>
-        <button
-          class="btn-page"
-          :disabled="page === totalPages"
-          @click="gotoPage(totalPages)"
-        >
-          &gt;&gt;
-        </button>
-      </nav>
+        <!-- pagination -->
+        <nav class="pagination">
+          <button class="btn-page" :disabled="page === 1" @click="gotoPage(1)">
+            &lt;&lt;
+          </button>
+          <button class="btn-page" :disabled="page === 1" @click="prevPage">
+            &lt;
+          </button>
+          <button
+            v-for="p in totalPages"
+            :key="p"
+            class="btn-page btn-page-number"
+            :class="{ active: page === p }"
+            @click="gotoPage(p)"
+          >
+            {{ p }}
+          </button>
+          <button
+            class="btn-page"
+            :disabled="page === totalPages"
+            @click="nextPage"
+          >
+            &gt;
+          </button>
+          <button
+            class="btn-page"
+            :disabled="page === totalPages"
+            @click="gotoPage(totalPages)"
+          >
+            &gt;&gt;
+          </button>
+        </nav>
       </section>
-
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import Sidebar from "/components/raphaelBackend/Sidebar.vue";
-// ─────────────── State ───────────────
-const activeMenu = ref<"member" | "push" | "points" | "account">("member");
+
+/* ---------- 型別 ---------- */
+interface MemberRaw {
+  MID: string;
+  Name: string;
+  Birthday: string;
+  Mobile: string;
+  GradeName: string;
+  HRV: string;
+  DSPR: string;
+  memType: string;
+  TDate: string;
+  HomeOrder: { ProductName: string; Used: string; Still: string }[];
+}
+interface Member {
+  id: string;
+  name: string;
+  birthday: string;
+  phone: string;
+  level: string;
+  product: string;
+  usageDays: number;
+  remainingDays: number;
+  hrv: string;
+  ans: string;
+  isAbnormal: boolean;
+  registerDate: string;
+  memType: string;
+}
+
+/* ---------- reactive state ---------- */
 const keyword = ref("");
-const dateRange = ref<[Date | null, Date | null]>([null, null]);
+const dateRange = ref<Date[] | null>(null); // ← null 才不會預設 1970
+const minDate = new Date(2024, 0, 1);
 const productFilter = ref("");
 const statusFilter = ref("");
 const page = ref(1);
 const pageSize = 10;
 const members = ref<Member[]>([]);
-const lastUpdated = ref("2024/11/7 上午10:48");
+const lastUpdated = ref("");
 
-// demo types
-type Member = {
-  id: number;
-  name: string;
-  level: string;
-  birthday: string;
-  phone: string;
-  product: string;
-  usageDays: number;
-  remainingDays: number;
-  hrv: number;
-  ans: string;
-  isAbnormal: boolean;
-  registerDate: string;
-};
+/* ---------- 產品 / 狀態選項 ---------- */
+const productOptions = [
+  { label: "雙效紅光活力衣", value: "雙效紅光活力衣" },
+  { label: "三效深眠衣", value: "三效深眠衣" },
+  { label: "全效調節衣", value: "全效調節衣" },
+  { label: "居家治療儀", value: "居家治療儀" },
+];
+const statusOptions = [
+  "忠誠用戶",
+  "當前活躍",
+  "經常使用",
+  "正常使用",
+  "偶爾使用",
+  "待關注",
+  "解約",
+  "高風險",
+  "未歸還",
+  "退費",
+  "奧客",
+].map((v) => ({ label: v, value: v }));
 
-// sample data – replace with API fetch
-function loadMembers() {
-  members.value = Array.from({ length: 25 }).map((_, i) => ({
-    id: i + 1,
-    name: "Steven Yeh",
-    level: "黃金",
-    birthday: "880101",
-    phone: "0912345678",
-    product: "第四代穿戴式調節衣 (保健版)",
-    usageDays: 7,
-    remainingDays: 20,
-    hrv: 75,
-    ans: "自律神經 85 分",
-    isAbnormal: i % 3 === 0,
-    registerDate: "2024/10/10 10:00",
-  }));
+/* ---------- 取會員資料 ---------- */
+onMounted(fetchMembers);
+watch([keyword, productFilter, statusFilter, dateRange], fetchMembers); // 條件變動就重新抓一次
+
+async function fetchMembers() {
+  try {
+    const token =
+      localStorage.getItem("backendToken") ||
+      sessionStorage.getItem("backendToken");
+    const adminID =
+      localStorage.getItem("adminID") || sessionStorage.getItem("adminID");
+    if (!token || !adminID) throw new Error("缺少 token 或 adminID");
+
+    const body = {
+      AdminID: adminID,
+      Token: token,
+      Keyword: keyword.value,
+      StartDate: "", // 目前後端不用日期篩選
+      EndDate: "",
+      ProductName: productFilter.value,
+      memType: statusFilter.value,
+    };
+
+    const res = await fetch("https://23700999.com:8081/HMA/API_Home.jsp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error(res.statusText);
+    const { MemberList }: { MemberList: MemberRaw[] } = await res.json();
+
+    members.value = MemberList.map((r) => {
+      const order = r.HomeOrder?.[0] ?? {};
+      const fmt = r.TDate.includes("/")
+        ? r.TDate
+        : `${r.TDate.slice(0, 4)}/${r.TDate.slice(4, 6)}/${r.TDate.slice(
+            6,
+            8
+          )}`;
+      return {
+        id: r.MID,
+        name: r.Name,
+        birthday: r.Birthday,
+        phone: r.Mobile,
+        level: r.GradeName,
+        product: order.ProductName ?? "",
+        usageDays: Number(order.Used ?? 0),
+        remainingDays: Number(order.Still ?? 0),
+        hrv: r.HRV,
+        ans: r.DSPR,
+        isAbnormal: Number(r.HRV) < 40,
+        registerDate: fmt,
+        memType: r.memType,
+      };
+    });
+
+    lastUpdated.value = new Date().toLocaleString("zh-TW");
+    page.value = 1;
+  } catch (e) {
+    console.error("讀取 MemberList 失敗：", e);
+  }
 }
 
-onMounted(loadMembers);
-
-// ─────────────── Computed ───────────────
-const total = computed(() => members.value.length);
-const totalPages = computed(() => Math.ceil(total.value / pageSize));
+/* ---------- 前端篩選 / 分頁 ---------- */
 const filteredMembers = computed(() => {
-  let data = [...members.value];
-  if (keyword.value) {
-    data = data.filter((m) => m.name.includes(keyword.value));
-  }
-  // TODO: add more filters here
-  return data;
+  return members.value.filter((m) => {
+    /* 關鍵字 */
+    const kw = keyword.value.trim();
+    const hit =
+      !kw || [m.name, m.phone, m.birthday].some((v) => v.includes(kw));
+
+    /* 產品 / 狀態 */
+    const prodOk = !productFilter.value || m.product === productFilter.value;
+    const statusOk = !statusFilter.value || m.memType === statusFilter.value;
+
+    /* 日期 */
+    let dateOk = true;
+    if (
+      Array.isArray(dateRange.value) &&
+      dateRange.value[0] &&
+      dateRange.value[1]
+    ) {
+      const [start, end] = dateRange.value;
+      const regDate = new Date(m.registerDate.replace(/-/g, "/"));
+      dateOk = regDate >= start && regDate <= end;
+    }
+
+    return hit && prodOk && statusOk && dateOk;
+  });
 });
+
+const total = computed(() => filteredMembers.value.length);
+const totalPages = computed(() => Math.ceil(total.value / pageSize));
 const paginatedMembers = computed(() => {
   const start = (page.value - 1) * pageSize;
   return filteredMembers.value.slice(start, start + pageSize);
 });
 
-// ─────────────── Methods ───────────────
-function refreshData() {
-  // TODO: fetch new data
-  lastUpdated.value = new Date().toLocaleString("zh-TW");
+/* ---------- 分頁切換 ---------- */
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 function gotoPage(p: number) {
   page.value = p;
+  scrollToTop();
 }
 function prevPage() {
   if (page.value > 1) page.value--;
+  scrollToTop();
 }
 function nextPage() {
   if (page.value < totalPages.value) page.value++;
-}
-function viewDetail(id: number) {
-  // TODO: navigate to detail page
-  console.log("view detail of", id);
+  scrollToTop();
 }
 
-// options for filters (could come from API)
-const productOptions = [
-  { label: "保健版", value: "health" },
-  { label: "紅光版", value: "red" },
-  { label: "虹光版", value: "optical" },
-];
-const statusOptions = [
-  { label: "正常使用", value: "normal" },
-  { label: "待關注", value: "warning" },
-  { label: "偶爾使用", value: "occasion" },
-];
+/* ---------- 手動刷新 ---------- */
+function refreshData() {
+  fetchMembers();
+}
 </script>
 
 <style scoped lang="scss">
@@ -323,7 +416,6 @@ const statusOptions = [
       .count {
         color: var(--Primary-200, #b1c0d8);
         text-align: center;
-
         font-size: 20px;
         font-style: normal;
         font-weight: 700;
@@ -365,7 +457,6 @@ const statusOptions = [
     border: none;
     background: var(--Primary-200, #b1c0d8);
     color: var(--Primary-100, #f5f7fa);
-    font-family: "Noto Sans";
     font-size: 1rem;
     font-style: normal;
     font-weight: 400;
@@ -375,13 +466,13 @@ const statusOptions = [
     padding: 0.25rem 0.5rem;
     display: flex;
     align-items: center;
-
     gap: 4px;
     margin-top: 0.25rem;
     img {
       width: 14px;
     }
   }
+
   .toolbar {
     display: flex;
     justify-content: flex-end;
@@ -510,7 +601,7 @@ const statusOptions = [
     .table-row {
       display: grid;
 
-      grid-template-columns: 100px 60px 60px 100px 160px 120px 200px 1fr;
+      grid-template-columns: 0.75fr 0.75fr 0.75fr 0.75fr 1.5fr 1fr 1fr 1fr;
       position: relative;
       gap: 2px;
       align-items: center;
@@ -572,7 +663,9 @@ const statusOptions = [
             }
           }
         }
-
+        &.product {
+          margin: 0 auto;
+        }
         &.product,
         &.health {
           //  font-size: 12px;
@@ -638,7 +731,7 @@ const statusOptions = [
     .btn-page {
       padding: 6px 10px;
       min-width: 32px;
-    
+
       border-radius: 4px;
 
       background-color: transparent;
@@ -655,11 +748,9 @@ const statusOptions = [
       }
     }
 
-    .btn-page-number{
-   
+    .btn-page-number {
       background: white;
     }
-   
   }
 }
 </style>

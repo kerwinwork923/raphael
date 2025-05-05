@@ -1,89 +1,99 @@
 <template>
-  <aside class="sidebar">
-    <!-- logo -------------------------------------------------------- -->
+  <aside class="sidebar" :class="{ collapsed }">
+    <!-- ─────────── logo ─────────── -->
     <div class="logo">
-      <img src="/assets/imgs/backend/Subtract.svg" alt="Neuro-Plus+" />
-      <h1>Neuro-Plus+</h1>
+      <img src="/assets/imgs/backend/Subtract.svg" alt="Neuro‑Plus+" />
+      <h1 v-show="!collapsed">Neuro-Plus+</h1>
     </div>
 
-    <div class="sidebarHR" />
+    <!-- ─────────── 收合按鈕 ─────────── -->
+    <div class="sidebarHRWrap">
+      <div class="sidebarHR" />
+      <img
+        src="/assets/imgs/backend/slideIcon.svg"
+        :class="{ rotate: collapsed }"
+        @click="toggleCollapse"
+      />
+    </div>
 
-    <!-- navigation -------------------------------------------------- -->
+    <!-- ─────────── menu ─────────── -->
     <nav class="menu">
       <ul>
         <li :class="{ active: modelValue === 'member' }" @click="set('member')">
-          <img src="/assets/imgs/backend/member.svg" alt="會員清單" />
-          <span>會員清單</span>
+          <img src="/assets/imgs/backend/member.svg" />
+          <span v-show="!collapsed">會員清單</span>
         </li>
         <li :class="{ active: modelValue === 'push' }" @click="set('push')">
-          <img src="/assets/imgs/backend/push.svg" alt="推播設定" />
-          <span>推播設定</span>
+          <img src="/assets/imgs/backend/push.svg" />
+          <span v-show="!collapsed">推播設定</span>
         </li>
         <li :class="{ active: modelValue === 'points' }" @click="set('points')">
-          <img src="/assets/imgs/backend/point.svg" alt="積分管理" />
-          <span>積分管理</span>
+          <img src="/assets/imgs/backend/point.svg" />
+          <span v-show="!collapsed">積分管理</span>
         </li>
         <li
           :class="{ active: modelValue === 'account' }"
           @click="set('account')"
         >
-          <img src="/assets/imgs/backend/account.svg" alt="帳號管理" />
-          <span>帳號管理</span>
+          <img src="/assets/imgs/backend/account.svg" />
+          <span v-show="!collapsed">帳號管理</span>
         </li>
       </ul>
     </nav>
 
     <div class="sidebarHR" />
 
-    <!-- user summary & logout --------------------------------------- -->
+    <!-- ─────── user summary ＆ logout ─────── -->
     <div class="sidebar-user">
       <div class="avatar">
-        <img src="/assets/imgs/backend/user.svg" alt="avatar" />
-        <div class="info">
-          <p class="name">Steven Yeh</p>
-          <p class="role">數位專員</p>
+        <img v-show="!collapsed" src="/assets/imgs/backend/user.svg" />
+        <div class="info" v-show="!collapsed">
+          <p class="name">{{ userName || "載入中…" }}</p>
+          <p class="role">{{ roleName }}</p>
         </div>
       </div>
 
       <button class="logout" @click="handleLogout">
-        <img src="/assets/imgs/backend/backendLogout.svg" alt="登出" />
-        登出
+        <img src="/assets/imgs/backend/backendLogout.svg" />
+        <span v-show="!collapsed">登出</span>
       </button>
     </div>
   </aside>
 </template>
 
 <script setup>
-// 不用 TypeScript，直接以 JS 寫法
-const props = defineProps({
-  modelValue: {
-    type: String,
-    default: "member",
-  },
-});
+import { ref, onMounted } from "vue";
+
+/* ---------- props / emits ---------- */
+const props = defineProps({ modelValue: { type: String, default: "member" } });
 const emit = defineEmits(["update:modelValue", "logout"]);
+const set = (key) => emit("update:modelValue", key);
 
-function set(key) {
-  emit("update:modelValue", key);
-}
+/* ---------- 折疊狀態 ---------- */
+const collapsed = ref(false);
+const toggleCollapse = () => (collapsed.value = !collapsed.value);
 
+/* ---------- 使用者資訊 ---------- */
+const userName = ref("");
+const roleName = ref("");
+
+onMounted(() => {
+  userName.value = localStorage.getItem("adminID");
+});
+
+/* ---------- 登出 ---------- */
 function handleLogout() {
-  // 清除 localStorage 的 backendToken
   localStorage.removeItem("backendToken");
-  sessionStorage.clear(); // ← 清掉工作階段
-  console.log("清除 localStorage backendToken 完成，登出");
-
-  // 登出後跳轉頁面
+  sessionStorage.clear();
   window.location.href = "/raphaelBackend";
 }
 </script>
 
 <style scoped lang="scss">
-$primary: #1d7ffa;
 $chip-success: #1ba39b;
 $border: #e5e9f2;
-$gray-600: #8a94a6;
 
+/* ─────────── 基本樣式 ─────────── */
 .sidebar {
   width: 240px;
   background: #fff;
@@ -91,98 +101,106 @@ $gray-600: #8a94a6;
   flex-direction: column;
   padding: 24px 16px;
   border-right: 1px solid $border;
+  transition: width 0.25s ease; /* 平滑收合 */
 
+  /* 文字區塊淡入淡出 */
+  h1,
+  .menu span,
+  .sidebar-user .info,
+  .logout span {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .sidebar-user {
+    margin-top: 0.5rem;
+  }
+
+  /* ====== 收合狀態 ====== */
+  &.collapsed {
+    width: 72px;
+
+    h1,
+    .menu span,
+    .sidebar-user .info,
+    .logout span {
+      opacity: 0;
+      transform: scale(0.8);
+      pointer-events: none;
+    }
+  }
+
+  /* -------- 內容原有樣式 (節錄重要部分) -------- */
   .logo {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 6px;
     margin-bottom: 1rem;
-
+    img {
+      width: 40px;
+    }
     h1 {
       color: #2d3047;
       font-size: 24px;
       font-weight: 700;
       line-height: 1;
-      letter-spacing: 0.12px;
-    }
-    img {
-      width: 40px;
+      white-space: nowrap;
     }
   }
 
   .sidebarHR {
     width: 100%;
     height: 1px;
-    background-color: #b1c0d8;
+    background: #b1c0d8;
   }
 
   .menu {
     flex: 1;
     margin-top: 0.75rem;
-
-    ul {
-      padding: 0;
-      margin: 0;
-      list-style: none;
-
-      li {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 12px;
-        border-radius: 6px;
-        margin-top: 3px;
-        cursor: pointer;
-        color: #2d3047;
-        transition: background 0.2s;
-
+    li {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      margin-top: 3px;
+      color: #2d3047;
+      cursor: pointer;
+      transition: background 0.2s;
+      img {
+        width: 20px;
+        height: 20px;
+      }
+      &.active,
+      &:hover {
+        background: $chip-success;
+        color: #fff;
+        font-weight: 600;
         img {
-          width: 20px;
-          height: 20px;
-        }
-
-        &.active,
-        &:hover {
-          background: $chip-success;
-          color: #fff;
-          font-weight: 600;
-
-          img {
-            filter: brightness(0) invert(1);
-          }
+          filter: brightness(0) invert(1);
         }
       }
     }
   }
 
   .sidebar-user {
-    margin-top: 0.5rem;
-
     .avatar {
       display: flex;
       align-items: center;
       gap: 4px;
-
       img {
         border-radius: 50%;
         background: #f5f7fa;
         padding: 2px;
       }
-
-      .info {
-        .name {
-          color: #2d3047;
-          font-size: 18px;
-          line-height: 1.25;
-        }
-        .role {
-          color: #ccc;
-          font-size: 14px;
-        }
+      .name {
+        color: #2d3047;
+        font-size: 18px;
+      }
+      .role {
+        color: #ccc;
+        font-size: 14px;
       }
     }
-
     .logout {
       margin-top: 12px;
       width: 100%;
@@ -192,16 +210,33 @@ $gray-600: #8a94a6;
       border-radius: 6px;
       color: #f5f7fa;
       font-size: 18px;
-      letter-spacing: 2.7px;
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 4px;
       cursor: pointer;
-
       img {
         width: 20px;
       }
+    }
+  }
+
+  /* -------- 收合按鈕 -------- */
+  .sidebarHRWrap {
+    position: relative;
+    img {
+      position: absolute;
+      top: 0;
+      right: -15%;
+      transform: translateY(-50%);
+      padding: 6px;
+      border-radius: 50%;
+      background: #fff;
+      cursor: pointer;
+      transition: transform 0.25s ease;
+    }
+    img.rotate {
+      transform: translateY(-50%) rotate(180deg);
     }
   }
 }

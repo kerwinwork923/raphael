@@ -202,7 +202,7 @@ const username = ref(localStorage.getItem("rememberID") || "");
 const password = ref("");
 const rememberMe = ref(!!username.value);
 const passwordVisible = ref(false);
-
+  
 const eye = ref({});
 const toggleEye = (k) => (eye.value[k] = !eye.value[k]);
 
@@ -266,9 +266,11 @@ const login = async () => {
       /* -------- ✅ 把 Token 記住 -------- */
       if (rememberMe.value) {
         localStorage.setItem("backendToken", r.Token); // 永久記住
+        localStorage.setItem("adminID", username.value);
         localStorage.setItem("rememberID", username.value);
       } else {
         sessionStorage.setItem("backendToken", r.Token);
+        sessionStorage.setItem("adminID", username.value);
       }
       router.push("/raphaelBackend/member");
     } else if (r.Result === "First") {
@@ -312,11 +314,15 @@ const firstChange = async () => {
     );
     const r = await res.json();
     if (r.Result === "OK") {
-      fireAlert("密碼修改完成，請重新登入");
-      step.value = "login";
-      password.value = "";
-    } else {
-      fireAlert("修改失敗：" + r.Result);
+      if (rememberMe.value) {
+        localStorage.setItem("backendToken", r.Token);
+        localStorage.setItem("rememberID", username.value);
+        localStorage.setItem("adminID", username.value); // ✅ 儲存 AdminID
+      } else {
+        sessionStorage.setItem("backendToken", r.Token);
+        sessionStorage.setItem("adminID", username.value); // ✅ 儲存 AdminID
+      }
+      router.push("/raphaelBackend/member");
     }
   } catch {
     fireAlert("伺服器錯誤");
@@ -325,9 +331,7 @@ const firstChange = async () => {
 
 /* ================ 重設密碼 ========================== */
 const resetPwd = async () => {
-  if (
-    isEmpty(resetAcc.value, resetNew.value, resetNew2.value)
-  ) {
+  if (isEmpty(resetAcc.value, resetNew.value, resetNew2.value)) {
     fireAlert("所有欄位皆為必填");
     return;
   }
