@@ -91,7 +91,7 @@ defineEmits(["close"]);
   margin: auto;
   margin-top: 1rem;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.3);
+  background: #fff;
   box-shadow: 0px 2px 20px rgba(27, 163, 155, 0.25);
   -webkit-backdrop-filter: blur(25px);
   backdrop-filter: blur(25px);
