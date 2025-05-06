@@ -4,7 +4,13 @@
       <div class="loginPageAlertBox">
         <h4>{{ message }}</h4>
         <div class="loginPageAlertClose" @click="$emit('close')">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
             <path
               d="M18 6L6 18M6 6L18 18"
               stroke="#B1C0D8"
@@ -24,21 +30,24 @@ defineProps({
   show: Boolean,
   message: {
     type: String,
-    default: "帳號或密碼錯誤喔~"
-  }
-})
-defineEmits(["close"])
+    default: "帳號或密碼錯誤喔~",
+  },
+});
+defineEmits(["close"]);
 </script>
 
 <style scoped>
 /* 淡入淡出動畫 */
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.3s ease;
 }
-.fade-enter-from, .fade-leave-to {
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
 }
-.fade-enter-to, .fade-leave-from {
+.fade-enter-to,
+.fade-leave-from {
   opacity: 1;
 }
 
@@ -78,18 +87,24 @@ defineEmits(["close"])
 }
 
 .loginPageAlertClose {
-  text-align: center;
+  width: fit-content;
+  margin: auto;
   margin-top: 1rem;
-}
-
-.loginPageAlertClose svg {
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.3);
   box-shadow: 0px 2px 20px rgba(27, 163, 155, 0.25);
+  -webkit-backdrop-filter: blur(25px);
   backdrop-filter: blur(25px);
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: all 0.2s ease;
+  &:hover {
+    box-shadow: inset 0px 2px 6px rgba(27, 163, 155, 0.25);
+  }
+}
+
+.loginPageAlertClose svg {
   width: 24px;
   height: 24px;
-  padding: 0.2rem;
-  cursor: pointer;
 }
 </style>
