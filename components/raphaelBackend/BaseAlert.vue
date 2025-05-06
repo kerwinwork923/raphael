@@ -73,18 +73,19 @@ defineEmits(["close"]);
   box-shadow: 0px 2px 20px rgba(27, 163, 155, 0.25);
   backdrop-filter: blur(25px);
   padding: 1.25rem;
+
+  h4 {
+    padding: 2rem;
+    background-color: #fff;
+    color: #6d8ab6;
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    border-radius: 20px;
+    text-align: center;
+  }
 }
 
-.loginPageAlertBox h4 {
-  padding: 2rem;
-  background-color: #fff;
-  color: #6d8ab6;
-  font-size: 16px;
-  font-weight: 400;
-  letter-spacing: 0.5px;
-  border-radius: 20px;
-  text-align: center;
-}
 
 .loginPageAlertClose {
   width: fit-content;
@@ -101,10 +102,10 @@ defineEmits(["close"]);
   &:hover {
     box-shadow: inset 0px 2px 6px rgba(27, 163, 155, 0.25);
   }
-}
 
-.loginPageAlertClose svg {
-  width: 24px;
-  height: 24px;
+  svg {
+    width: 24px;
+    height: 24px;
+  }
 }
 </style>
