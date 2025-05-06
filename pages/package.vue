@@ -349,6 +349,9 @@ onBeforeUnmount(() => {
 
 <style lang="scss">
 .packageWrap {
+  display: flex;
+  flex-direction: column;
+  place-items: center;
   background-color: $raphael-gray-100;
   padding: 0 5% 60px;
   min-height: 100vh;
@@ -356,6 +359,7 @@ onBeforeUnmount(() => {
     border-radius: 12px;
     background: $raphael-orange-200;
     padding: 12px;
+    max-width: 768px;
     h3 {
       color: $raphael-black;
       font-family: "Noto Sans";
@@ -424,6 +428,7 @@ onBeforeUnmount(() => {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    max-width: 768px;
     .notPackageGroup {
       padding: 12px;
       border-radius: 12px;
