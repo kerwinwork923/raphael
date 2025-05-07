@@ -514,8 +514,8 @@ onMounted(() => {
           font-style: normal;
           font-weight: 400;
           letter-spacing: 2.7px;
-          transition: all .2s ease;
-          &:hover{
+          transition: all 0.2s ease;
+          &:hover {
             color: #1cb0a8;
           }
           @include respond-to(phone-landscape) {
@@ -562,7 +562,7 @@ onMounted(() => {
         letter-spacing: 2.7px;
         transition: all 0.2s ease;
         &:hover {
-          background-color: #00877F;
+          background-color: #00877f;
         }
       }
     }
@@ -630,8 +630,13 @@ onMounted(() => {
     }
 
     img {
-      min-height: 320px;
-      max-height: 100%;
+      object-fit: cover;
+      width: 100%;
+      height: inherit;
+
+      @include respond-to(sm) {
+        max-height: 70%;
+      }
     }
 
     .slogan {
