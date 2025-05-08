@@ -202,7 +202,7 @@ const username = ref(localStorage.getItem("rememberID") || "");
 const password = ref("");
 const rememberMe = ref(!!username.value);
 const passwordVisible = ref(false);
-  
+
 const eye = ref({});
 const toggleEye = (k) => (eye.value[k] = !eye.value[k]);
 
@@ -464,8 +464,14 @@ onMounted(() => {
           width: 100%;
           padding: 12px 40px 12px 36px;
           font-size: 16px;
-          border: 1px solid #ccc;
+          border: 1px solid $primary-200;
           border-radius: 8px;
+          transition: all 0.2s ease;
+          &:focus,
+          &:active {
+            border: unset;
+            box-shadow: 0px 2px 20px rgba(177, 192, 216, 0.5);
+          }
           @include respond-to(phone-landscape) {
             padding: 8px 36px;
           }
@@ -507,8 +513,11 @@ onMounted(() => {
           font-size: 18px;
           font-style: normal;
           font-weight: 400;
-
           letter-spacing: 2.7px;
+          transition: all 0.2s ease;
+          &:hover {
+            color: #1cb0a8;
+          }
           @include respond-to(phone-landscape) {
             font-size: 1rem;
           }
@@ -532,7 +541,7 @@ onMounted(() => {
           input {
             width: 20px;
             height: 20px;
-            border-radius: var(--Radius-r-8, 8px);
+            border-radius: 0.5rem;
 
             border: 1px solid #b1c0d8;
             cursor: pointer;
@@ -551,6 +560,10 @@ onMounted(() => {
         height: 40px;
         padding: 0.5rem 0.75rem;
         letter-spacing: 2.7px;
+        transition: all 0.2s ease;
+        &:hover {
+          background-color: #00877f;
+        }
       }
     }
 
@@ -617,8 +630,13 @@ onMounted(() => {
     }
 
     img {
-      min-height: 320px;
-      max-height: 100%;
+      object-fit: cover;
+      width: 100%;
+      height: inherit;
+
+      @include respond-to(sm) {
+        max-height: 70%;
+      }
     }
 
     .slogan {
