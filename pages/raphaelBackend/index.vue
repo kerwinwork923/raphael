@@ -313,21 +313,25 @@ const firstChange = async () => {
       }
     );
     const r = await res.json();
+
     if (r.Result === "OK") {
       if (rememberMe.value) {
         localStorage.setItem("backendToken", r.Token);
         localStorage.setItem("rememberID", username.value);
-        localStorage.setItem("adminID", username.value); // ✅ 儲存 AdminID
+        localStorage.setItem("adminID", username.value);
       } else {
         sessionStorage.setItem("backendToken", r.Token);
-        sessionStorage.setItem("adminID", username.value); // ✅ 儲存 AdminID
+        sessionStorage.setItem("adminID", username.value);
       }
       router.push("/raphaelBackend/member");
+    } else {
+      fireAlert("修改失敗：" + (r?.Message || r?.Result || "未知錯誤"));
     }
   } catch {
     fireAlert("伺服器錯誤");
   }
 };
+
 
 /* ================ 重設密碼 ========================== */
 const resetPwd = async () => {
