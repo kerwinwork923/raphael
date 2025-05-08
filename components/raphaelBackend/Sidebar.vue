@@ -1,5 +1,6 @@
 <template>
-  <aside class="sidebar" :class="{ collapsed }">
+  <div class="RWDCover" v-show="showCover" @click="toggleCollapse"></div>
+  <aside class="sidebar" :class="[{ collapsed }, { open: showCover }]">
     <!-- ─────────── logo ─────────── -->
     <div class="logo">
       <img src="/assets/imgs/backend/Subtract.svg" alt="Neuro‑Plus+" />
@@ -48,7 +49,7 @@
       <div class="avatar">
         <img v-show="!collapsed" src="/assets/imgs/backend/user.svg" />
         <div class="info" v-show="!collapsed">
-          <p class="name">{{ userName || "載入中…" }}</p>
+          <p class="name">{{ userName || "" }}</p>
           <p class="role">{{ roleName }}</p>
         </div>
       </div>
@@ -58,30 +59,54 @@
         <span v-show="!collapsed">登出</span>
       </button>
     </div>
+    
   </aside>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 
-/* ---------- props / emits ---------- */
+// props / emits
 const props = defineProps({ modelValue: { type: String, default: "member" } });
 const emit = defineEmits(["update:modelValue", "logout"]);
 const set = (key) => emit("update:modelValue", key);
 
-/* ---------- 折疊狀態 ---------- */
+// 折疊狀態
 const collapsed = ref(false);
 const toggleCollapse = () => (collapsed.value = !collapsed.value);
 
-/* ---------- 使用者資訊 ---------- */
+// 使用者資訊
 const userName = ref("");
 const roleName = ref("");
 
+// 裝置判斷 & 遮罩
+const isMobile = ref(false);
+const showCover = computed(() => isMobile.value && !collapsed.value);
+
+// 畫面尺寸監聽
+function handleResize() {
+  isMobile.value = window.innerWidth <= 1024;
+
+
+}
+
+// 掛載與卸載監聽
 onMounted(() => {
-  userName.value = localStorage.getItem("adminID");
+  userName.value =
+    localStorage.getItem("adminID") ||
+    sessionStorage.getItem("adminID") ||
+    "";
+
+  // 初始化裝置狀態
+  isMobile.value = window.innerWidth <= 1024;
+  collapsed.value = !isMobile.value ? false : false; // ✅ 手機預設展開
+
+  window.addEventListener("resize", handleResize);
 });
 
-/* ---------- 登出 ---------- */
+onUnmounted(() => window.removeEventListener("resize", handleResize));
+
+// 登出
 function handleLogout() {
   localStorage.removeItem("backendToken");
   sessionStorage.clear();
@@ -92,7 +117,13 @@ function handleLogout() {
 <style scoped lang="scss">
 $chip-success: #1ba39b;
 $border: #e5e9f2;
-
+.RWDCover {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 98;
+}
 /* ─────────── 基本樣式 ─────────── */
 .sidebar {
   width: 240px;
@@ -102,22 +133,11 @@ $border: #e5e9f2;
   padding: 24px 16px;
   border-right: 1px solid $border;
   transition: width 0.25s ease; /* 平滑收合 */
-
-  /* 文字區塊淡入淡出 */
-  h1,
-  .menu span,
-  .sidebar-user .info,
-  .logout span {
-    transition: opacity 0.2s ease, transform 0.2s ease;
-  }
-  .sidebar-user {
-    margin-top: 0.5rem;
-  }
-
-  /* ====== 收合狀態 ====== */
+  
   &.collapsed {
     width: 72px;
 
+    /* 文字、icon 淡出（這段以前就有） */
     h1,
     .menu span,
     .sidebar-user .info,
@@ -127,117 +147,161 @@ $border: #e5e9f2;
       pointer-events: none;
     }
   }
+  @include respond-to("xl") {
+    width: 180px;
+  }
+  @include respond-to("lg") {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    z-index: 99;
 
-  /* -------- 內容原有樣式 (節錄重要部分) -------- */
-  .logo {
+    /* 一律 240px；用 translateX 進出畫面 */
+    width: 240px !important;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+
+    &.open {
+      /* showCover = true 時會加上 .open */
+      transform: translateX(0);
+    }
+  }
+}
+/* 文字區塊淡入淡出 */
+h1,
+.menu span,
+.sidebar-user .info,
+.logout span {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.sidebar-user {
+  margin-top: 0.5rem;
+}
+
+/* ====== 收合狀態 ====== */
+
+/* -------- 內容原有樣式 (節錄重要部分) -------- */
+.logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 1rem;
+  img {
+    width: 40px;
+    @include respond-to("xl") {
+      width: 34px;
+    }
+  }
+  h1 {
+    color: #2d3047;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    @include respond-to("xl") {
+      font-size: 1.25rem;
+    }
+  }
+}
+
+.sidebarHR {
+  width: 100%;
+  height: 1px;
+  background: #b1c0d8;
+}
+
+.menu {
+  flex: 1;
+  margin-top: 0.75rem;
+  li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    margin-top: 3px;
+    color: #2d3047;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+    @include respond-to("xl") {
+      font-size: 1rem;
+    }
+    img {
+      width: 20px;
+      height: 20px;
+    }
+    &.active,
+    &:hover {
+      background: $chip-success;
+      color: #fff;
+      font-weight: 600;
+      img {
+        filter: brightness(0) invert(1);
+      }
+    }
+  }
+}
+
+.sidebar-user {
+  .avatar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    img {
+      border-radius: 50%;
+      background: #f5f7fa;
+      padding: 2px;
+    }
+    .name {
+      color: #2d3047;
+      font-size: 18px;
+    }
+    .role {
+      color: #ccc;
+      font-size: 14px;
+    }
+  }
+  .logout {
+    margin-top: 12px;
+    width: 100%;
+    padding: 9px 12px;
+    background: #ec4f4f;
+    border: none;
+    border-radius: 6px;
+    color: #f5f7fa;
+    font-size: 18px;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 6px;
-    margin-bottom: 1rem;
+    gap: 4px;
+    white-space: nowrap;
+    cursor: pointer;
     img {
-      width: 40px;
-    }
-    h1 {
-      color: #2d3047;
-      font-size: 24px;
-      font-weight: 700;
-      line-height: 1;
-      white-space: nowrap;
+      width: 20px;
     }
   }
+}
 
-  .sidebarHR {
-    width: 100%;
-    height: 1px;
-    background: #b1c0d8;
+/* -------- 收合按鈕 -------- */
+.sidebarHRWrap {
+  position: relative;
+  img {
+    position: absolute;
+    top: 0;
+    right: -15%;
+    transform: translateY(-50%);
+    padding: 6px;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+    transition: transform 0.25s ease;
   }
-
-  .menu {
-    flex: 1;
-    margin-top: 0.75rem;
-    li {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 6px;
-      margin-top: 3px;
-      color: #2d3047;
-      cursor: pointer;
-      transition: background 0.2s;
-      img {
-        width: 20px;
-        height: 20px;
-      }
-      &.active,
-      &:hover {
-        background: $chip-success;
-        color: #fff;
-        font-weight: 600;
-        img {
-          filter: brightness(0) invert(1);
-        }
-      }
-    }
-  }
-
-  .sidebar-user {
-    .avatar {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      img {
-        border-radius: 50%;
-        background: #f5f7fa;
-        padding: 2px;
-      }
-      .name {
-        color: #2d3047;
-        font-size: 18px;
-      }
-      .role {
-        color: #ccc;
-        font-size: 14px;
-      }
-    }
-    .logout {
-      margin-top: 12px;
-      width: 100%;
-      padding: 9px 12px;
-      background: #ec4f4f;
-      border: none;
-      border-radius: 6px;
-      color: #f5f7fa;
-      font-size: 18px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 4px;
-      cursor: pointer;
-      img {
-        width: 20px;
-      }
-    }
-  }
-
-  /* -------- 收合按鈕 -------- */
-  .sidebarHRWrap {
-    position: relative;
-    img {
-      position: absolute;
-      top: 0;
-      right: -15%;
-      transform: translateY(-50%);
-      padding: 6px;
-      border-radius: 50%;
-      background: #fff;
-      cursor: pointer;
-      transition: transform 0.25s ease;
-    }
-    img.rotate {
-      transform: translateY(-50%) rotate(180deg);
-    }
+  img.rotate {
+    transform: translateY(-50%) rotate(180deg);
   }
 }
 </style>

@@ -114,26 +114,43 @@
           <div class="cell birth">{{ member.birthday }}</div>
           <div class="cell phone">{{ member.phone }}</div>
 
-          <div class="cell product">
-            <div class="cellProduct" v-if="member.product">
-              <p class="chip chip--success">已使用 {{ member.usageDays }} 天</p>
-              <p class="chip chip--danger">
+          <!-- 產品欄位 ― 永遠保留格子，不讓 grid 塌掉 -->
+          <div
+            class="cell product"
+            :class="{ 'no-data': !(member.usageDays || member.remainingDays) }"
+          >
+            <!-- 有天數才顯示 chip -->
+            <div
+              class="cellProduct"
+              v-show="member.usageDays || member.remainingDays"
+            >
+              <p class="chip chip--success" v-if="member.usageDays">
+                已使用 {{ member.usageDays }} 天
+              </p>
+              <p class="chip chip--danger" v-if="member.remainingDays">
                 剩餘 {{ member.remainingDays }} 天
               </p>
             </div>
+            <!-- 產品名稱 -->
             <p class="sub">{{ member.product }}</p>
           </div>
 
+          <!-- 健康指標欄：分數只有有值才顯示 -->
           <div class="cell health">
-            <p>HRV {{ member.hrv }} ms</p>
-            <p>{{ member.ans }}</p>
-            <p>生活自律 79分</p>
-            <p class="chip chip--warning" v-if="member.isAbnormal">
-              已超時,請盡快提醒
+            <p v-if="member.hrv">HRV {{ member.hrv }} ms</p>
+            <p v-if="member.totalScore !== null">
+              自律神經 {{ member.totalScore }} 分
             </p>
-            <button class="healthBtn">
-              <img src="/assets/imgs/backend/send.svg" alt="" /> 立即推播
-            </button>
+            <p v-if="member.score !== null">生活自律 {{ member.score }} 分</p>
+
+            <div class="chipWrap">
+              <p class="chip chip--warning" v-if="member.isAbnormal">
+                已超時,請盡快提醒
+              </p>
+              <button class="healthBtn">
+                <img src="/assets/imgs/backend/send.svg" alt="" /> 立即推播
+              </button>
+            </div>
           </div>
 
           <div class="cell reg-date">
@@ -218,6 +235,8 @@ interface MemberRaw {
   DSPR: string;
   memType: string;
   TDate: string;
+  score: string;
+  totalScore: string;
   HomeOrder: { ProductName: string; Used: string; Still: string }[];
 }
 interface Member {
@@ -234,6 +253,8 @@ interface Member {
   isAbnormal: boolean;
   registerDate: string;
   memType: string;
+  score: string;
+  totalScore: String;
 }
 
 /* ---------- reactive state ---------- */
@@ -270,6 +291,7 @@ const statusOptions = [
 
 /* ---------- 取會員資料 ---------- */
 onMounted(fetchMembers);
+
 watch([keyword, productFilter, statusFilter, dateRange], fetchMembers); // 條件變動就重新抓一次
 
 async function fetchMembers() {
@@ -321,6 +343,8 @@ async function fetchMembers() {
         isAbnormal: Number(r.HRV) < 40,
         registerDate: fmt,
         memType: r.memType,
+        score: r.Score ? Number(r.Score) : null,
+        totalScore: r.TotalScore ? Number(r.TotalScore) : null,
       };
     });
 
@@ -404,12 +428,18 @@ function refreshData() {
   padding: 32px 28px;
   overflow-y: auto;
 
+  @include respond-to("xl") {
+    padding: 16px 16px;
+  }
+
   .page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
-
+    @include respond-to("sm") {
+      flex-wrap: wrap;
+    }
     .title {
       font-size: 24px;
       font-weight: 700;
@@ -428,7 +458,11 @@ function refreshData() {
       display: flex;
       align-items: center;
       gap: 16px;
-
+      @include respond-to("lg") {
+        gap: 6px;
+        margin-top: 0.5rem;
+        width: 100%;
+      }
       .btn.refresh {
         // @include button;
         background-color: $primary-200;
@@ -441,6 +475,10 @@ function refreshData() {
         letter-spacing: 0.25px;
         border-radius: 6px;
         cursor: pointer;
+        @include respond-to("lg") {
+          font-size: 1rem;
+          padding: 0.25rem 0.5rem;
+        }
       }
       .updated-time {
         font-size: 12px;
@@ -452,6 +490,7 @@ function refreshData() {
       }
     }
   }
+
   .healthBtn {
     border-radius: 6px;
     border: none;
@@ -468,6 +507,10 @@ function refreshData() {
     align-items: center;
     gap: 4px;
     margin-top: 0.25rem;
+    @include respond-to("lg") {
+      margin: 0;
+      margin-top: 0.25rem;
+    }
     img {
       width: 14px;
     }
@@ -483,12 +526,27 @@ function refreshData() {
       display: flex;
       justify-content: flex-end;
       gap: 16px;
+
       width: 100%;
       flex-wrap: wrap;
+      @include respond-to("xl") {
+        gap: 8px;
+        flex-wrap: nowrap;
+      }
+      @include respond-to("sm") {
+        flex-wrap: wrap;
+        justify-content: space-between;
+      }
     }
 
     .search-wrapper {
       position: relative;
+      @include respond-to("lg") {
+        width: 25%;
+      }
+      @include respond-to("sm") {
+        width: 48%;
+      }
       img {
         width: 1.25rem;
         position: absolute;
@@ -502,6 +560,7 @@ function refreshData() {
     .search {
       padding: 8px 12px;
       border: none;
+      width: 100%;
       border-radius: var(--Radius-r-50, 50px);
       background: var(--Neutral-white, #fff);
       box-shadow: 0px 2px 20px 0px
@@ -510,7 +569,12 @@ function refreshData() {
 
     .toolbarTime-wrapper {
       position: relative;
-
+      @include respond-to("lg") {
+        width: 25%;
+      }
+      @include respond-to("sm") {
+        width: 48%;
+      }
       /* 重點: 用 :deep() 才能選到 VueDatePicker 的內部元素 */
       :deep(.dp__pointer) {
         padding: 0; // 例如你想把 pointer 的 padding 清掉
@@ -566,6 +630,12 @@ function refreshData() {
     .selectWrapper {
       position: relative;
       min-width: 12%;
+      @include respond-to("lg") {
+        width: 25%;
+      }
+      @include respond-to("sm") {
+        width: 48%;
+      }
       img {
         position: absolute;
         top: 50%;
@@ -602,6 +672,45 @@ function refreshData() {
       display: grid;
 
       grid-template-columns: 0.75fr 0.75fr 0.75fr 0.75fr 1.5fr 1fr 1fr 1fr;
+      @include respond-to("xl") {
+        grid-template-columns: 0.75fr 1fr 0.75fr 0.75fr 1.5fr 1.5fr 1fr;
+      }
+
+      @include respond-to("lg") {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 16px;
+        gap: 8px;
+        border-bottom: 1px solid $border;
+        position: relative;
+
+        .cell {
+          display: flex;
+          justify-content: space-between;
+          width: 100%;
+          text-align: left;
+
+          &::before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: #2d3047;
+          }
+        }
+
+        .goInfo {
+          position: absolute;
+          top: 16px;
+          right: 16px;
+          transform: none;
+        }
+      }
+
+      .reg-date {
+        @include respond-to("xl") {
+          display: none;
+        }
+      }
       position: relative;
       gap: 2px;
       align-items: center;
@@ -614,6 +723,9 @@ function refreshData() {
         white-space: nowrap;
         color: var(--Primary-600, #2d3047);
         text-align: center;
+        @include respond-to("lg") {
+          display: none;
+        }
       }
       .cell {
         color: var(--Neutral-500, #666);
@@ -646,6 +758,7 @@ function refreshData() {
             background: var(--primary-400-opacity-10, rgba(27, 163, 155, 0.1));
             padding: 0.5rem;
           }
+
           .cellTagWarning {
             border: 1px solid var(--Warning-default, #ec4f4f);
             background: var(--warning-300-opacity-10, rgba(236, 79, 79, 0.1));
@@ -665,6 +778,29 @@ function refreshData() {
         }
         &.product {
           margin: 0 auto;
+          @include respond-to("xl") {
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 8px;
+          }
+          @include respond-to("lg") {
+            text-align: left;
+            margin: 0;
+          }
+        }
+        &.no-data {
+          padding: 0;
+          display: none;
+        }
+        &.health {
+          @include respond-to("lg") {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+            p {
+              line-height: 1.25;
+            }
+          }
         }
         &.product,
         &.health {
@@ -676,8 +812,16 @@ function refreshData() {
           display: flex;
           align-items: center;
           gap: 8px;
-
           margin-bottom: 0.25rem;
+          @include respond-to("xl") {
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 0;
+          }
+          @include respond-to("lg") {
+            padding: 0;
+            margin: 0;
+          }
         }
         &.action {
           display: flex;
@@ -685,6 +829,15 @@ function refreshData() {
         }
         &.action {
           text-align: right;
+        }
+        &.reg-date {
+          @include respond-to("xl") {
+            display: none;
+          }
+        }
+        .chip--success,
+        .chip--danger {
+          padding: 2px;
         }
       }
       .goInfo {
@@ -719,6 +872,11 @@ function refreshData() {
       font-style: normal;
       font-weight: 400;
       letter-spacing: var(--Title-Medium-Tracking, 0.15px);
+      @include respond-to("lg") {
+        margin: 0;
+        margin-top: 0.25rem;
+        padding: 0;
+      }
     }
   }
 
