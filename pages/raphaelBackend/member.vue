@@ -110,10 +110,12 @@
             :key="member.id"
             class="table-row"
           >
-            <div class="cell name">{{ member.name }}</div>
-            <div class="cell level">{{ member.level }}</div>
-            <div class="cell birth">{{ member.birthday }}</div>
-            <div class="cell phone">{{ member.phone }}</div>
+            <div class="cell name" data-label="會員名稱">{{ member.name }}</div>
+            <div class="cell level" data-label="等級">{{ member.level }}</div>
+            <div class="cell birth" data-label="生日">
+              {{ member.birthday }}
+            </div>
+            <div class="cell phone" data-label="電話">{{ member.phone }}</div>
 
             <!-- 產品欄位 ― 永遠保留格子，不讓 grid 塌掉 -->
             <div
@@ -121,6 +123,7 @@
               :class="{
                 'no-data': !(member.usageDays || member.remainingDays),
               }"
+              data-label="產品資訊"
             >
               <!-- 產品名稱 -->
               <p class="sub">{{ member.product }}</p>
@@ -139,7 +142,7 @@
             </div>
 
             <!-- 健康指標欄：分數只有有值才顯示 -->
-            <div class="cell health">
+            <div class="cell health" data-label="健康指數">
               <p v-if="member.hrv">HRV {{ member.hrv }} ms</p>
               <p v-if="member.totalScore !== null">
                 自律神經 {{ member.totalScore }} 分
@@ -156,7 +159,7 @@
               </div>
             </div>
 
-            <div class="cell reg-date">
+            <div class="cell reg-date" data-label="註冊時間">
               <p>{{ member.registerDate }}</p>
             </div>
 
@@ -443,12 +446,16 @@ function refreshData() {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
     @include respond-to("sm") {
       flex-wrap: wrap;
     }
     .title {
       font-size: 24px;
       font-weight: 700;
+      white-space: nowrap;
+      word-break: keep-all;
+
       .count {
         color: var(--Primary-200, #b1c0d8);
         text-align: center;
@@ -656,10 +663,10 @@ function refreshData() {
         width: 16px;
       }
       .selectWrapperIcon1 {
-        left: 7%;
+        left: 8px;
       }
       .selectWrapperIcon2 {
-        right: 7%;
+        right: 8px;
       }
     }
 
@@ -702,31 +709,11 @@ function refreshData() {
         flex-direction: column;
         align-items: flex-start;
         padding: 16px;
-        gap: 8px;
+        gap: 0.75rem;
         border-bottom: 1px solid $border;
         position: relative;
-
-        .cell {
-          display: flex;
-          justify-content: space-between;
-          width: 100%;
-          text-align: left;
-
-          &::before {
-            content: attr(data-label);
-            font-weight: 600;
-            color: #2d3047;
-          }
-        }
-
-        .goInfo {
-          position: absolute;
-          top: 16px;
-          right: 16px;
-          transform: none;
-        }
       }
-      
+
       @include respond-to("xl") {
         grid-template-columns: 0.75fr 1fr 0.75fr 0.75fr 1.5fr 1.5fr 1fr;
       }
@@ -760,6 +747,32 @@ function refreshData() {
         line-height: 100%; /* 20px */
         letter-spacing: var(--Title-Medium-Tracking, 0.15px);
 
+        @include respond-to("lg") {
+          display: flex;
+          justify-content: space-between;
+          flex-direction: column;
+          gap: 0.25rem;
+          width: 100%;
+          text-align: left;
+          font-weight: 600;
+          font-size: 1.5rem;
+          color: #2d3047;
+
+          &::before {
+            content: attr(data-label);
+            font-size: 1rem;
+            font-weight: normal;
+            color: $Neutral-500;
+          }
+        }
+
+        &.name {
+          @include respond-to("lg") {
+            &::before {
+              display: none;
+            }
+          }
+        }
         .tagsGroup {
           display: flex;
           justify-content: center;
@@ -838,7 +851,7 @@ function refreshData() {
           gap: 8px;
           @include respond-to("xl") {
             flex-wrap: wrap;
-            justify-content: center;
+            justify-content: flex-start;
             margin: 0;
           }
           @include respond-to("lg") {
@@ -849,9 +862,7 @@ function refreshData() {
         &.action {
           display: flex;
           align-items: center;
-        }
-        &.action {
-          text-align: right;
+          width: auto;
         }
         &.reg-date {
           @include respond-to("xl") {
@@ -866,10 +877,12 @@ function refreshData() {
       .goInfo {
         position: absolute;
         top: 50%;
-
         right: 12px;
         transform: translateY(-50%);
         cursor: pointer;
+        @include respond-to("lg") {
+          top: 29px;
+        }
       }
     }
     .chip {
