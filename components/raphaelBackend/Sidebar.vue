@@ -222,7 +222,7 @@ h1,
     gap: 6px;
     padding: 6px 12px;
     border-radius: 6px;
-    margin-top: 3px;
+    margin-top: 1.5rem;
     color: #2d3047;
     cursor: pointer;
     transition: background 0.2s;
@@ -268,7 +268,7 @@ h1,
   .logout {
     margin-top: 12px;
     width: 100%;
-    padding: 9px 12px;
+    padding: 3px 12px;
     background: #ec4f4f;
     border: none;
     border-radius: 6px;
@@ -280,8 +280,12 @@ h1,
     gap: 4px;
     white-space: nowrap;
     cursor: pointer;
+    transition: all .2s ease;
     img {
       width: 20px;
+    }
+    &:hover{
+      background-color: $red-500;
     }
   }
 }
@@ -292,7 +296,7 @@ h1,
   img {
     position: absolute;
     top: 0;
-    right: -15%;
+    right: -32px;
     transform: translateY(-50%);
     padding: 6px;
     border-radius: 50%;

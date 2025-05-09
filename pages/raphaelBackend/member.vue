@@ -104,80 +104,84 @@
         </div>
 
         <!-- data rows -->
-        <div
-          v-for="member in paginatedMembers"
-          :key="member.id"
-          class="table-row"
-        >
-          <div class="cell name">{{ member.name }}</div>
-          <div class="cell level">{{ member.level }}</div>
-          <div class="cell birth">{{ member.birthday }}</div>
-          <div class="cell phone">{{ member.phone }}</div>
-
-          <!-- 產品欄位 ― 永遠保留格子，不讓 grid 塌掉 -->
+        <div class="table-list">
           <div
-            class="cell product"
-            :class="{ 'no-data': !(member.usageDays || member.remainingDays) }"
+            v-for="member in paginatedMembers"
+            :key="member.id"
+            class="table-row"
           >
-            <!-- 有天數才顯示 chip -->
+            <div class="cell name">{{ member.name }}</div>
+            <div class="cell level">{{ member.level }}</div>
+            <div class="cell birth">{{ member.birthday }}</div>
+            <div class="cell phone">{{ member.phone }}</div>
+
+            <!-- 產品欄位 ― 永遠保留格子，不讓 grid 塌掉 -->
             <div
-              class="cellProduct"
-              v-show="member.usageDays || member.remainingDays"
+              class="cell product"
+              :class="{
+                'no-data': !(member.usageDays || member.remainingDays),
+              }"
             >
-              <p class="chip chip--success" v-if="member.usageDays">
-                已使用 {{ member.usageDays }} 天
-              </p>
-              <p class="chip chip--danger" v-if="member.remainingDays">
-                剩餘 {{ member.remainingDays }} 天
-              </p>
-            </div>
-            <!-- 產品名稱 -->
-            <p class="sub">{{ member.product }}</p>
-          </div>
-
-          <!-- 健康指標欄：分數只有有值才顯示 -->
-          <div class="cell health">
-            <p v-if="member.hrv">HRV {{ member.hrv }} ms</p>
-            <p v-if="member.totalScore !== null">
-              自律神經 {{ member.totalScore }} 分
-            </p>
-            <p v-if="member.score !== null">生活自律 {{ member.score }} 分</p>
-
-            <div class="chipWrap">
-              <p class="chip chip--warning" v-if="member.isAbnormal">
-                已超時,請盡快提醒
-              </p>
-              <button class="healthBtn">
-                <img src="/assets/imgs/backend/send.svg" alt="" /> 立即推播
-              </button>
-            </div>
-          </div>
-
-          <div class="cell reg-date">
-            <p>{{ member.registerDate }}</p>
-          </div>
-
-          <div class="cell action">
-            <div class="tagsGroup">
+              <!-- 產品名稱 -->
+              <p class="sub">{{ member.product }}</p>
+              <!-- 有天數才顯示 chip -->
               <div
-                v-if="member.memType && member.product"
-                class="cellTag cellTagSuccess"
+                class="cellProduct"
+                v-show="member.usageDays || member.remainingDays"
               >
-                {{ member.memType }}
+                <p class="chip chip--success" v-if="member.usageDays">
+                  已使用 {{ member.usageDays }} 天
+                </p>
+                <p class="chip chip--danger" v-if="member.remainingDays">
+                  剩餘 {{ member.remainingDays }} 天
+                </p>
               </div>
+            </div>
 
-              <!-- <div class="cellTag cellTagWarning">偶爾使用</div> -->
-              <!-- <div class="cellTag cellTag2">
+            <!-- 健康指標欄：分數只有有值才顯示 -->
+            <div class="cell health">
+              <p v-if="member.hrv">HRV {{ member.hrv }} ms</p>
+              <p v-if="member.totalScore !== null">
+                自律神經 {{ member.totalScore }} 分
+              </p>
+              <p v-if="member.score !== null">生活自律 {{ member.score }} 分</p>
+
+              <div class="chipWrap">
+                <p class="chip chip--warning" v-if="member.isAbnormal">
+                  已超時,請盡快提醒
+                </p>
+                <button class="healthBtn">
+                  <img src="/assets/imgs/backend/send.svg" alt="" /> 立即推播
+                </button>
+              </div>
+            </div>
+
+            <div class="cell reg-date">
+              <p>{{ member.registerDate }}</p>
+            </div>
+
+            <div class="cell action">
+              <div class="tagsGroup">
+                <div
+                  v-if="member.memType && member.product"
+                  class="cellTag cellTagSuccess"
+                >
+                  {{ member.memType }}
+                </div>
+
+                <!-- <div class="cellTag cellTagWarning">偶爾使用</div> -->
+                <!-- <div class="cellTag cellTag2">
                 <img src="/assets/imgs/backend/heartCrack.svg" alt="" />解約
               </div> -->
-              <!-- <div class="cellTag cellTag2"><img src="/assets/imgs/backend/highRisk.svg" alt="">高風險</div> -->
-              <!-- <div class="cellTag cellTag2"><img src="/assets/imgs/backend/archive.svg" alt="">未歸還</div> -->
-              <!-- <div class="cellTag cellTag2"><img src="/assets/imgs/backend/aoke.svg" alt="">奧客</div> -->
+                <!-- <div class="cellTag cellTag2"><img src="/assets/imgs/backend/highRisk.svg" alt="">高風險</div> -->
+                <!-- <div class="cellTag cellTag2"><img src="/assets/imgs/backend/archive.svg" alt="">未歸還</div> -->
+                <!-- <div class="cellTag cellTag2"><img src="/assets/imgs/backend/aoke.svg" alt="">奧客</div> -->
+              </div>
             </div>
-          </div>
 
-          <div class="goInfo">
-            <img src="/assets/imgs/backend/goNext.svg" alt="" />
+            <div class="goInfo">
+              <img src="/assets/imgs/backend/goNext.svg" alt="" />
+            </div>
           </div>
         </div>
 
@@ -424,8 +428,11 @@ function refreshData() {
 
 /* ─────────────── Main Content ─────────────── */
 .content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
   flex: 1;
-  padding: 32px 28px;
+  padding: 1rem;
   overflow-y: auto;
 
   @include respond-to("xl") {
@@ -436,7 +443,6 @@ function refreshData() {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
     @include respond-to("sm") {
       flex-wrap: wrap;
     }
@@ -475,6 +481,10 @@ function refreshData() {
         letter-spacing: 0.25px;
         border-radius: 6px;
         cursor: pointer;
+        transition: all 0.2s ease;
+        &:hover {
+          background-color: $primary-300;
+        }
         @include respond-to("lg") {
           font-size: 1rem;
           padding: 0.25rem 0.5rem;
@@ -494,8 +504,8 @@ function refreshData() {
   .healthBtn {
     border-radius: 6px;
     border: none;
-    background: var(--Primary-200, #b1c0d8);
-    color: var(--Primary-100, #f5f7fa);
+    background: $primary-200;
+    color: $primary-100;
     font-size: 1rem;
     font-style: normal;
     font-weight: 400;
@@ -507,6 +517,10 @@ function refreshData() {
     align-items: center;
     gap: 4px;
     margin-top: 0.25rem;
+    transition: all 0.2s ease;
+    &:hover {
+      background-color: $primary-300;
+    }
     @include respond-to("lg") {
       margin: 0;
       margin-top: 0.25rem;
@@ -519,7 +533,6 @@ function refreshData() {
   .toolbar {
     display: flex;
     justify-content: flex-end;
-    margin-bottom: 16px;
     width: 100%;
 
     .toolbar-inner {
@@ -661,6 +674,9 @@ function refreshData() {
   }
 
   .member-table {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
     border: 1px solid $border;
     border-radius: 8px;
     overflow: hidden;
@@ -668,13 +684,18 @@ function refreshData() {
     background: var(--Neutral-white, #fff);
     box-shadow: 0px 2px 20px 0px
       var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
+    .table-list {
+      display: grid;
+      flex: 1;
+      height: 0;
+      overflow: hidden;
+      overflow-y: scroll;
+      @include scrollbarStyle();
+    }
     .table-row {
       display: grid;
 
       grid-template-columns: 0.75fr 0.75fr 0.75fr 0.75fr 1.5fr 1fr 1fr 1fr;
-      @include respond-to("xl") {
-        grid-template-columns: 0.75fr 1fr 0.75fr 0.75fr 1.5fr 1.5fr 1fr;
-      }
 
       @include respond-to("lg") {
         display: flex;
@@ -705,6 +726,10 @@ function refreshData() {
           transform: none;
         }
       }
+      
+      @include respond-to("xl") {
+        grid-template-columns: 0.75fr 1fr 0.75fr 0.75fr 1.5fr 1.5fr 1fr;
+      }
 
       .reg-date {
         @include respond-to("xl") {
@@ -714,7 +739,7 @@ function refreshData() {
       position: relative;
       gap: 2px;
       align-items: center;
-      padding: 16px 16px;
+      padding: 13px 16px;
       & + .table-row {
         border-top: 1px solid $border;
       }
@@ -722,14 +747,12 @@ function refreshData() {
         font-weight: 600;
         white-space: nowrap;
         color: var(--Primary-600, #2d3047);
-        text-align: center;
         @include respond-to("lg") {
           display: none;
         }
       }
       .cell {
-        color: var(--Neutral-500, #666);
-        text-align: center;
+        color: $Neutral-500;
         width: auto;
         font-size: 1rem;
         font-style: normal;
@@ -777,12 +800,11 @@ function refreshData() {
           }
         }
         &.product {
+          width: 100%;
           margin: 0 auto;
-          @include respond-to("xl") {
-            display: flex;
-            flex-direction: column-reverse;
-            gap: 8px;
-          }
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
           @include respond-to("lg") {
             text-align: left;
             margin: 0;
@@ -790,9 +812,11 @@ function refreshData() {
         }
         &.no-data {
           padding: 0;
-          display: none;
         }
         &.health {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
           @include respond-to("lg") {
             display: flex;
             flex-direction: column;
@@ -812,7 +836,6 @@ function refreshData() {
           display: flex;
           align-items: center;
           gap: 8px;
-          margin-bottom: 0.25rem;
           @include respond-to("xl") {
             flex-wrap: wrap;
             justify-content: center;
@@ -837,7 +860,7 @@ function refreshData() {
         }
         .chip--success,
         .chip--danger {
-          padding: 2px;
+          padding: 4px;
         }
       }
       .goInfo {
@@ -853,7 +876,7 @@ function refreshData() {
       display: inline-block;
       padding: 2px 6px;
       border-radius: 4px;
-      font-size: 12px;
+      font-size: 1rem;
       line-height: 16px;
       &--success {
         background: rgba($chip-success, 0.1);
@@ -865,6 +888,9 @@ function refreshData() {
         color: $chip-danger;
         border: 1px solid $chip-danger;
       }
+    }
+    .chipWrap {
+      display: none;
     }
     .chip--warning {
       overflow: hidden;
