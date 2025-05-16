@@ -118,7 +118,7 @@
     </div>
 
     <div class="sleepDetectResultWrap">
-      <h6>以下為您的睡眠分析結果</h6>
+      <h6>以下為您的睡眠分析結果，僅供醫師參考，不具診斷功能．</h6>
       <div
         class="sleepDetectResultDIV"
         v-if="useSleepRecordData?.SleepRec?.[0]"
