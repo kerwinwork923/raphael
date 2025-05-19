@@ -2,7 +2,6 @@
   <div class="scoreBarGroupWrap">
     <div class="scoreText">{{ getScoreText(score) }}</div>
     <div class="scoreBarGroup">
-
       <div
         class="scoreBar"
         :style="{ width: `${score * 33.3333}%`, backgroundColor: '#74bc1f' }"
@@ -56,7 +55,10 @@ export default defineComponent({
     };
 
     const getScoreText = (scoreValue) => {
-      return props.options[scoreValue]?.label || "";
+      if (!Array.isArray(props.options)) return "";
+      const index = Number(scoreValue);
+      if (isNaN(index) || index < 0 || index >= props.options.length) return "";
+      return props.options[index]?.label || "";
     };
 
     return { score, setScore, getScoreText };

@@ -15,6 +15,10 @@ const VIEW_FINISH_SYN = "f_v_syn"; //交感佔比%
 const VIEW_FINISH_ANS_INDEX_SNS = "f_v_ans_index_sns";
 const VIEW_FINISH_ANS_INDEX_PNS = "f_v_ans_index_pns";
 
+const VIEW_FINISH_CARDIOVASCULAR_AGE = "f_v_cardiovascular_age";
+const VIEW_FINISH_CARDIOVASCULAR_BMI = "f_v_cardiovascular_bmi";
+
+
 const VIEW_FINISH_CANVAS_SP = "f_spower_canvas";
 const VIEW_FINISH_ACTIVITY = "f_v_activity";
 const VIEW_FINISH_EQUILIBRIUM = "f_v_equilibrium";
@@ -109,7 +113,12 @@ const InitFinish = () => {
     ans_index_sns_id: VIEW_FINISH_ANS_INDEX_SNS,
     ans_index_pns_id: VIEW_FINISH_ANS_INDEX_PNS,
   });
-
+  
+  _finish_vital_result_printer.setCardiovascularElement({
+    cardiovascular_age_id: VIEW_FINISH_CARDIOVASCULAR_AGE,
+    cardiovascular_bmi_id: VIEW_FINISH_CARDIOVASCULAR_BMI
+  });
+  
   // _finish_spower_chart = new SPowerChart(
   //   document.getElementById(VIEW_FINISH_CANVAS_SP).getContext("2d")
   // );
@@ -226,6 +235,8 @@ const InitFinish = () => {
     si: result.si,
     ans_index_sns: result.ANSIndex.SNS,
     ans_index_pns: result.ANSIndex.PNS,
+	cardiovascular_age: result.cardiovascular_age,
+    cardiovascular_bmi: result.cardiovascular_bmi,
     hr_valid: result.signal_quality.hr_hrv > 0.7,
     bp_valid: result.signal_quality.bp > 0.6,
     rr_valid: result.signal_quality.resp > 0.7,

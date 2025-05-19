@@ -28,7 +28,9 @@ class VitalResultPrinter {
     this._cholesterol_element = null;
     this._cholesterol_risk_element = null;
     this._cholesterol_range_element = null;
-
+    this._cardiovascular_age_element = null;
+    this._cardiovascular_bmi_element = null;
+	
     this._last_hr = -1;
     this._last_hrv = -1;
     this._last_bioage = -1;
@@ -50,6 +52,8 @@ class VitalResultPrinter {
     this._last_cholesterol = -1;
     this._last_cholesterol_risk = -1;
     this._last_cholesterol_range = "";
+	this._last_cardiovascular_age = -1;
+    this._last_cardiovascular_bmi = -1;
   }
 
   setDefaultElement({ hr_id, hrv_id, sbp_id, dbp_id, rr_id, spo2_id, si_id, bioage_id,ba2_id,ba4_id, syn_id }) {
@@ -156,6 +160,18 @@ class VitalResultPrinter {
     this._last_cholesterol_range = "";
   }
 
+  setCardiovascularElement({ cardiovascular_age_id, cardiovascular_bmi_id }) {
+    if (typeof cardiovascular_age_id === "string") {
+      this._cardiovascular_age_element = document.getElementById(cardiovascular_age_id);
+    }
+    if (typeof cardiovascular_bmi_id === "string") {
+      this._cardiovascular_bmi_element = document.getElementById(cardiovascular_bmi_id);
+    }
+    this._last_cardiovascular_age = -1;
+    this._last_cardiovascular_bmi = -1;
+  }
+
+
   reset() {
     let default_value = "--";
 
@@ -186,6 +202,8 @@ class VitalResultPrinter {
     this._setValue(this._cholesterol_element, default_value);
     this._setValue(this._cholesterol_risk_element, default_value);
     this._setValue(this._cholesterol_range_element, default_value);
+    this._setValue(this._cardiovascular_age_element, default_value);
+    this._setValue(this._cardiovascular_bmi_element, default_value);
 
     this._last_hr = -1;
     this._last_hrv = -1;
@@ -210,7 +228,7 @@ class VitalResultPrinter {
     this._last_cholesterol_range = "";
   }
 
-  update({ hr, hrv, sbp, dbp, rr, spo2, si, ans_index_sns, ans_index_pns, wellness, hba1c, hba1c_risk, hba1c_range, hemoglobin, cholesterol, cholesterol_risk, cholesterol_range, hr_valid, bp_valid, rr_valid, spo2_valid, bioage, ba2, ba4,syn}) {
+  update({ hr, hrv, sbp, dbp, rr, spo2, si, ans_index_sns, ans_index_pns, wellness, hba1c, hba1c_risk, hba1c_range, hemoglobin, cholesterol, cholesterol_risk, cholesterol_range,cardiovascular_age, cardiovascular_bmi, hr_valid, bp_valid, rr_valid, spo2_valid, bioage, ba2, ba4,syn}) {
     this._updateHR(hr, hr_valid);
     this._updateHRV(hrv);
     this._updateBIOAGE(bioage);
@@ -231,6 +249,8 @@ class VitalResultPrinter {
     this._updateCholesterol(cholesterol);
     this._updateCholesterolRisk(cholesterol_risk);
     this._updateCholesterolRange(cholesterol_range);
+	this._updateCardiovascularAge(cardiovascular_age);
+    this._updateCardiovascularBMI(cardiovascular_bmi);
   }
 
   _setValue(element, value) {
@@ -412,6 +432,21 @@ class VitalResultPrinter {
       } else if (cholesterol_range === "CHOLESTEROL_INVALID") {
         this._cholesterol_range_element.innerHTML = "Invalid";
       }
+	}
+  }
+
+  _updateCardiovascularAge(cardiovascular_age) {
+    if (typeof cardiovascular_age === "number" && cardiovascular_age >= 0 && this._last_cardiovascular_age != cardiovascular_age) {
+      this._last_cardiovascular_age = cardiovascular_age;
+      this._setValue(this._cardiovascular_age_element, cardiovascular_age);
+    }
+  }
+
+  _updateCardiovascularBMI(cardiovascular_bmi) {
+    if (typeof cardiovascular_bmi === "number" && cardiovascular_bmi >= 0 && this._last_cardiovascular_bmi != cardiovascular_bmi) {
+      this._last_cardiovascular_bmi = cardiovascular_bmi;
+      this._setValue(this._cardiovascular_bmi_element, cardiovascular_bmi);
+   
     }
   }
 

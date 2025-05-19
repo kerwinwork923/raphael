@@ -4,7 +4,7 @@ const FHVitalsSDK = {
   /**
    * SDK version.
    */
-  version: "5.7.11",
+  version: "5.8.3-Raphael",
 
   /**
    * Initialize the SDK.
@@ -39,66 +39,99 @@ const FHVitalsSDK = {
    *                         - ASSETS_FOLDER_LOAD_FAILED: assets folder load failed
    * 
    * @var result = { 
-   *      hr,              // Current heart rate value. (50-180)
-   *      hrv,             // Current heart rate variability value.
-   *      sbp,             // Current SBP value. (90-160)
-   *      dbp,             // Current DBP value. (50-100)
-   *      spo2,            // Current SpO2 value. (90-99)
-   *      rr,              // Current respiratory rate value. (0-120)
-   *      si,              // Current stress index.
+   *      hr,                           // Current heart rate value. (50-180)
+   *      hrv,                          // Current heart rate variability value.
+   *      sbp,                          // Current SBP value. (90-160)
+   *      dbp,                          // Current DBP value. (50-100)
+   *      spo2,                         // Current SpO2 value. (90-99)
+   *      rr,                           // Current respiratory rate value. (0-120)
+   *      si,                           // Current stress index. (0 – 600)
    *      hrv_indices : {
-   *        HF,            // Current ln(HF). (0-3000)
-   *        LF,            // Current ln(LF). (0-3000)
-   *        LF_HF_RATIO,   // Current LF/HF. (0-20)
-   *        MEAN_RR,       // Current MEAN RRI. (0-2)
-   *        PHF,           // Current HF%. (0-100)
-   *        PLF,           // Current LF%. (0-100)
-   *        RMSSD,         // Current RMSSD. (0-600)
-   *        RRIV,          // Current RRIV. (0-100)
-   *        SDNN,          // Current SDNN. (0-400)
-   *        SD1,           // Current SD1. (0-2)
-   *        SD2,           // Current SD2. (0-2)
-   *        SDNNI,         // 
-   *      },
-   *      activity,        // Current health index. (0-5)
-   *      equilibrium,     // Current health index. (0-5)
-   *      health,          // Current health index. (0-5)
-   *      metabolism,      // Current health index. (0-5)
-   *      relaxation,      // Current health index. (0-5)
-   *      sleep,           // Current health index. (0-5)
-   *      ANSIndex : {
-   *        PNS,           // Current ANS index. (-2-2)
-   *        SNS            // Current ANS index. (-2-2)
-   *      },
-   *      PRQ,             // Current pulse respiratory quotient.
-   *      frame_id,        // Frame count that the server receives during the measurement.
-   *      face_loss,       // Frame count that not detected face during the measurement.
-   *      image_quality: {
-   *        brightness,    // Image quality score. (range: 0-1), good quality with score > 0.7
-   *        contrast,      // Image quality score. (range: 0-1), good quality with score > 0.7
-   *        motion         // Image quality score. (range: 0-1), good quality with score > 0.9 (The score can be affected by user motion or image noise. This variable is optional for tuning "experiment" based upon testing environment.)
-   *      },
-   *      signal_quality: {
-   *        hr_hrv,        // Signal quality score. (range: 0-1), good quality with score > 0.7
-   *        bp,            // Signal quality score. (range: 0-1), good quality with score > 0.6
-   *        resp,          // Signal quality score. (range: 0-1), good quality with score > 0.7
-   *        spo2           // Signal quality score. (range: 0-1), good quality with score > 0.9
+   *        HF,                         // Current ln(HF). (0-3000)
+   *        LF,                         // Current ln(LF). (0-3000)
+   *        LF_HF_RATIO,                // Current LF/HF. (0-20)
+   *        MEAN_RR,                    // Current MEAN RRI. (0-2)
+   *        PHF,                        // Current HF%. (0-100)
+   *        PLF,                        // Current LF%. (0-100)
+   *        RMSSD,                      // Current RMSSD. (0-600)
+   *        RRIV,                       // Current RRIV. (0-100)
+   *        SDNN,                       // Current SDNN. (0-400)
+   *        SD1,                        // Current SD1. (0-2)
+   *        SD2,                        // Current SD2. (0-2)
+   *        SDNNI,                      // Current SDNNI. (0 - 150)
    *      },
    * 
-   *      // Available in future release
+   *      check_feature_buffer_for_hrv, // Check the usage of feature buffer for measuring HRV indices.
+   *                                    //   - After the buffer is fully used (returns 1), the following HRV indices are valid, including HRV, Stress, and Radar.
+   * 
+   *      activity,                     // Current health index. (0-5)
+   *      equilibrium,                  // Current health index. (0-5)
+   *      health,                       // Current health index. (0-5)
+   *      metabolism,                   // Current health index. (0-5)
+   *      relaxation,                   // Current health index. (0-5)
+   *      sleep,                        // Current health index. (0-5)
+   *      ANSIndex : {
+   *        PNS,                        // Current ANS index. (-2-2)
+   *        SNS                         // Current ANS index. (-2-2)
+   *      },
+   *      PRQ,                          // Current pulse respiratory quotient.
+   *      frame_id,                     // Frame count that the server receives during the measurement.
+   *      face_loss,                    // Frame count that not detected face during the measurement.
+   *      image_quality: {
+   *        brightness,                 // Image quality score. (range: 0-1)
+   *                                    //   - good quality with score > 0.7
+   * 
+   *        contrast,                   // Image quality score. (range: 0-1)
+   *                                    //   - good quality with score > 0.7
+   * 
+   *        motion                      // Image quality score. (range: 0-1) 
+   *                                    //   - good quality with score > 0.9
+   *                                    //   - This can be affected by user motion or image noise.
+   *      },
+   *      signal_quality: {
+   *        hr_hrv,                     // Signal quality score. (range: 0-1)
+   *                                    //   - good quality with score > 0.7
+   * 
+   *        bp,                         // Signal quality score. (range: 0-1)
+   *                                    //   - good quality with score > 0.6
+   * 
+   *        resp,                       // Signal quality score. (range: 0-1) 
+   *                                    //   - good quality with score > 0.7 (Bad: < 0.5, Good: 0.5-0.8, Awesome: > 0.8)
+   * 
+   *        spo2                        // Signal quality score. (range: 0-1)
+   *                                    //   - good quality with score > 0.9
+   *      },
    *      HbA1c: {
-   *        value,         // Current HbA1c value. (4.0–7.0)
-   *        risk,          // Current HbA1c risk percentage. (0-100)
-   *        range          // Current HbA1c range, consists of two numbers, one is lower bound and the other is the upper one.
-   *      },
-   *      hemoglobin,      // Current hemoglobin value. (10.5–16.0)
+   *        value,                      // Current HbA1c value. (4.0–7.0)
+   *        risk,                       // Current HbA1c risk percentage. (0-100)
+   *        range                       // Current HbA1c range, consists of two numbers, one is lower bound and the other is the upper one.
+   *      hemoglobin,                   // Current hemoglobin value. (10.5–16.0)
    *      cholesterol: {
-   *        value,         // Current total cholesterol value. (120–245)
-   *        risk,          // Current total cholesterol risk percentage. (0-100)
-   *        range          // Current total cholesterol range. (CHOLESTEROL_NORMAL, CHOLESTEROL_BORDERLINE, CHOLESTEROL_HIGH, CHOLESTEROL_INVALID)
+   *        value,                      // Current total cholesterol value. (120–245)
+   *        risk,                       // Current total cholesterol risk percentage. (0-100)
+   *        range                       // Current total cholesterol range. (CHOLESTEROL_NORMAL, CHOLESTEROL_BORDERLINE, CHOLESTEROL_HIGH, CHOLESTEROL_INVALID)
    *      },
-   *      wellness_score,  // Current wellness score. (1-10)
-   *      scanning_status  // Current status of the measurement. ("", "Motion", "FaceLoss")
+   *      wellness_score,               // Current wellness score. (1-10)
+   *      shock_index,                  // Current shock index. (0.25 – 2.00)
+   *      cardiovascular_age,           // Current cardiovascular age. (0 – 99)
+   *      cardiovascular_bmi,           // Current cardiovascular BMI. (0 – 49)
+   * 
+   *      afib,                         // Current AFib status. (FAILED, NSR, AFIB)
+   *                                    //   - Please notice, that when image_quality.motion < 0.9 or signal_quality.hr_hrv < 0.5, the reliability of the AFib status is affected by user movement.
+   * 
+   *      wrong_input_group_risk,       // The risk score of choosing wrong blood pressure group. (0 - 1)
+   *                                    //   - The score is supported only for blood pressure mode "binary". 
+   *                                    //   - For example, a score of 0.13 means a 13% probability that it is wrong to choose the current blood pressure group.
+   * 
+   *      reach_max_sbp,                // The internal SBP estimation is outside the reliable range of 90 to 180 mmHg.
+   *                                    //   - true: outside the reliable range
+   *                                    //   - false: within the reliable range
+   * 
+   *      reach_max_bdp,                // The internal DBP estimation is outside the reliable range of 65 to 110 mmHg.
+   *                                    //   - true: outside the reliable range
+   *                                    //   - false: within the reliable range
+   * 
+   *      scanning_status               // Current status of the measurement. ("", "Motion", "FaceLoss")
    * }
    */
   init: ({ on_result, on_event, config }) => FHVitals.init({ on_result, on_event, config }),
@@ -107,7 +140,7 @@ const FHVitalsSDK = {
    * Start the camera preview.
    * 
    * @param {String} canvas_id   Canvas ID from HTML
-   * @param {String} facing_mode Camera facing mode, "user" (front) or "environment" (back)
+   * @param {String} facing_mode Camera facing mode, "user" or "environment"
    * 
    * @returns {Promise}   result object, { error: ERROR_CODE }
    *                       - ERROR_CODE

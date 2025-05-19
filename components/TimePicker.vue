@@ -24,7 +24,14 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import {
+  ref,
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  watch,
+  defineEmits,
+} from "vue";
 import { useSleepRecordStore } from "../stores/sleepRecord";
 
 export default {
@@ -43,26 +50,34 @@ export default {
       default: "請選擇時間",
     },
   },
-  setup(props) {
+  setup(props, { emit }) {
     const sleepStore = useSleepRecordStore();
     const showDropdown = ref(false);
-    const selectedTime = ref(props.modelValue); // 初始化為 props 的值
+    const selectedTime = ref(props.modelValue);
     const timePicker = ref(null); // 定義 timePicker
 
+    /* 父層 v-model 改變時同步到內部 */
+    watch(
+      () => props.modelValue,
+      (v) => {
+        if (v !== selectedTime.value) selectedTime.value = v;
+      }
+    );
     const toggleDropdown = () => {
       showDropdown.value = !showDropdown.value;
     };
 
     const selectTime = (time) => {
       selectedTime.value = time;
-
+      emit("update:modelValue", time);
       // 根據傳來的 currentTimeMode 更新對應的 Pinia store 值
       if (props.currentTimeMode === "layTime") {
         sleepStore.layTimeToSleep = time; // 更新 layTimeToSleep
       } else if (props.currentTimeMode === "sleepTime") {
-        sleepStore.sleepTime = time; // 更新 sleepTime
+        sleepStore.sleepTime = time;
+      } else if (props.currentTimeMode === "sleepAgainTime") {
+        sleepStore.SleepAgainTime = time; // 更新 SleepAgainTime
       }
-
       showDropdown.value = false; // 關閉下拉選單
     };
 
@@ -107,8 +122,8 @@ export default {
 <style scoped lang="scss">
 .time-picker {
   position: relative;
-  width: 100%;  
-  border-bottom:1px solid #eee;
+  width: 100%;
+  border-bottom: 1px solid #eee;
 }
 
 .time-display {
@@ -125,7 +140,7 @@ export default {
   color: #ccc;
 }
 
-.picked-text{
+.picked-text {
   color: $raphael-green-400 !important;
   letter-spacing: 1.25px;
   font-weight: bold;
@@ -143,7 +158,7 @@ export default {
   z-index: 10;
   width: 100%;
   max-height: 200px;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
   overflow-y: auto;
 }
 

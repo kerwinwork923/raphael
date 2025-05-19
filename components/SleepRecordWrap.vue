@@ -294,42 +294,27 @@
 
       <div class="sleepRecord">
         <h4>13.近兩週,您覺得工作有受到影響嗎？</h4>
-        <ScoreBar
-          :options="useSleepRecordData.defaultOptions"
-          property="workStress"
-        />
+        <ScoreBar :options="useSleepRecordData.workStressOptions" property="workStress" />
       </div>
 
       <div class="sleepRecord">
         <h4>14.近兩週,您與身邊重要的人相處時還順利嗎？</h4>
-        <ScoreBar
-          :options="useSleepRecordData.defaultOptions"
-          property="relationshipStress"
-        />
+        <ScoreBar :options="useSleepRecordData.relationshipStressOptions" property="relationshipStress" />
       </div>
 
       <div class="sleepRecord">
         <h4>15.近兩週,您或家人的健康狀況對您的生活影響如何？</h4>
-        <ScoreBar
-          :options="useSleepRecordData.defaultOptions"
-          property="healthStress"
-        />
+        <ScoreBar :options="useSleepRecordData.healthStressOptions" property="healthStress" />
       </div>
 
       <div class="sleepRecord">
         <h4>16.近兩週,您的生活習慣調整（如飲食、運動）您適應得如何？</h4>
-        <ScoreBar
-          :options="useSleepRecordData.defaultOptions"
-          property="lifestyleChangeStress"
-        />
+        <ScoreBar :options="useSleepRecordData.lifestyleChangeStressOptions" property="lifestyleChangeStress" />
       </div>
 
       <div class="sleepRecord">
         <h4>17.近兩週,您的經濟狀況有壓力嗎？</h4>
-        <ScoreBar
-          :options="useSleepRecordData.defaultOptions"
-          property="financialStress"
-        />
+        <ScoreBar :options="useSleepRecordData.financialStressOptions" property="financialStress" />
       </div>
 
       <div class="sleepRecord">
