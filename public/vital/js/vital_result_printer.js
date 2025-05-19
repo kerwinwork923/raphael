@@ -30,7 +30,7 @@ class VitalResultPrinter {
     this._cholesterol_range_element = null;
     this._cardiovascular_age_element = null;
     this._cardiovascular_bmi_element = null;
-	
+
     this._last_hr = -1;
     this._last_hrv = -1;
     this._last_bioage = -1;
@@ -52,11 +52,23 @@ class VitalResultPrinter {
     this._last_cholesterol = -1;
     this._last_cholesterol_risk = -1;
     this._last_cholesterol_range = "";
-	this._last_cardiovascular_age = -1;
+    this._last_cardiovascular_age = -1;
     this._last_cardiovascular_bmi = -1;
   }
 
-  setDefaultElement({ hr_id, hrv_id, sbp_id, dbp_id, rr_id, spo2_id, si_id, bioage_id,ba2_id,ba4_id, syn_id }) {
+  setDefaultElement({
+    hr_id,
+    hrv_id,
+    sbp_id,
+    dbp_id,
+    rr_id,
+    spo2_id,
+    si_id,
+    bioage_id,
+    ba2_id,
+    ba4_id,
+    syn_id,
+  }) {
     if (typeof hr_id === "string") {
       this._hr_element = document.getElementById(hr_id);
     }
@@ -78,7 +90,7 @@ class VitalResultPrinter {
     if (typeof si_id === "string") {
       this._si_name_element = document.getElementById(si_id);
     }
-   
+
     if (typeof bioage_id === "string") {
       this._bioage_element = document.getElementById(bioage_id);
     }
@@ -102,7 +114,6 @@ class VitalResultPrinter {
     this._last_rr = -1;
     this._last_spo2 = -1;
     this._last_si = -1;
-    
   }
 
   setAnsIndexElement({ ans_index_sns_id, ans_index_pns_id }) {
@@ -145,15 +156,21 @@ class VitalResultPrinter {
     this._last_hemoglobin = -1;
   }
 
-  setCholesterolElement({ cholesterol_id, cholesterol_risk_id, cholesterol_range_id }) {
+  setCholesterolElement({
+    cholesterol_id,
+    cholesterol_risk_id,
+    cholesterol_range_id,
+  }) {
     if (typeof cholesterol_id === "string") {
       this._cholesterol_element = document.getElementById(cholesterol_id);
     }
     if (typeof cholesterol_risk_id === "string") {
-      this._cholesterol_risk_element = document.getElementById(cholesterol_risk_id);
+      this._cholesterol_risk_element =
+        document.getElementById(cholesterol_risk_id);
     }
     if (typeof cholesterol_range_id === "string") {
-      this._cholesterol_range_element = document.getElementById(cholesterol_range_id);
+      this._cholesterol_range_element =
+        document.getElementById(cholesterol_range_id);
     }
     this._last_cholesterol = -1;
     this._last_cholesterol_risk = -1;
@@ -162,15 +179,18 @@ class VitalResultPrinter {
 
   setCardiovascularElement({ cardiovascular_age_id, cardiovascular_bmi_id }) {
     if (typeof cardiovascular_age_id === "string") {
-      this._cardiovascular_age_element = document.getElementById(cardiovascular_age_id);
+      this._cardiovascular_age_element = document.getElementById(
+        cardiovascular_age_id
+      );
     }
     if (typeof cardiovascular_bmi_id === "string") {
-      this._cardiovascular_bmi_element = document.getElementById(cardiovascular_bmi_id);
+      this._cardiovascular_bmi_element = document.getElementById(
+        cardiovascular_bmi_id
+      );
     }
     this._last_cardiovascular_age = -1;
     this._last_cardiovascular_bmi = -1;
   }
-
 
   reset() {
     let default_value = "--";
@@ -228,7 +248,35 @@ class VitalResultPrinter {
     this._last_cholesterol_range = "";
   }
 
-  update({ hr, hrv, sbp, dbp, rr, spo2, si, ans_index_sns, ans_index_pns, wellness, hba1c, hba1c_risk, hba1c_range, hemoglobin, cholesterol, cholesterol_risk, cholesterol_range,cardiovascular_age, cardiovascular_bmi, hr_valid, bp_valid, rr_valid, spo2_valid, bioage, ba2, ba4,syn}) {
+  update({
+    hr,
+    hrv,
+    sbp,
+    dbp,
+    rr,
+    spo2,
+    si,
+    ans_index_sns,
+    ans_index_pns,
+    wellness,
+    hba1c,
+    hba1c_risk,
+    hba1c_range,
+    hemoglobin,
+    cholesterol,
+    cholesterol_risk,
+    cholesterol_range,
+    cardiovascular_age,
+    cardiovascular_bmi,
+    hr_valid,
+    bp_valid,
+    rr_valid,
+    spo2_valid,
+    bioage,
+    ba2,
+    ba4,
+    syn,
+  }) {
     this._updateHR(hr, hr_valid);
     this._updateHRV(hrv);
     this._updateBIOAGE(bioage);
@@ -249,13 +297,13 @@ class VitalResultPrinter {
     this._updateCholesterol(cholesterol);
     this._updateCholesterolRisk(cholesterol_risk);
     this._updateCholesterolRange(cholesterol_range);
-	this._updateCardiovascularAge(cardiovascular_age);
+    this._updateCardiovascularAge(cardiovascular_age);
     this._updateCardiovascularBMI(cardiovascular_bmi);
   }
 
   _setValue(element, value) {
     if (element != null) {
-      element.innerHTML = (value);
+      element.innerHTML = value;
     }
   }
 
@@ -275,31 +323,51 @@ class VitalResultPrinter {
   }
 
   _updateBIOAGE(bioage) {
-    if (typeof bioage === "number" && bioage> 4 && bioage<100 && this._last_bioage != bioage) {
+    if (
+      typeof bioage === "number" &&
+      bioage > 4 &&
+      bioage < 100 &&
+      this._last_bioage != bioage
+    ) {
       this._last_bioage = bioage;
-      let showage=(Math.round(bioage)-5)+"-"+Math.round(bioage);
+      let showage = Math.round(bioage) - 5 + "-" + Math.round(bioage);
       this._setValue(this._bioage_element, showage);
     }
   }
   _updateBA2(ba2) {
-    if (typeof ba2 === "number" && ba2 > 4 && ba2 < 100 && this._last_ba2 != ba2) {
+    if (
+      typeof ba2 === "number" &&
+      ba2 > 4 &&
+      ba2 < 100 &&
+      this._last_ba2 != ba2
+    ) {
       this._last_ba2 = ba2;
-      let showage2=(Math.round(ba2)-5)+"-"+Math.round(ba2);
+      let showage2 = Math.round(ba2) - 5 + "-" + Math.round(ba2);
       this._setValue(this._ba2_element, showage2);
     }
   }
   _updateBA4(ba4) {
-    if (typeof ba4 === "number" && ba4 > 4  && ba4 < 100 && this._last_ba4 != ba4) {
+    if (
+      typeof ba4 === "number" &&
+      ba4 > 4 &&
+      ba4 < 100 &&
+      this._last_ba4 != ba4
+    ) {
       this._last_ba4 = ba4;
-      let showage4=(Math.round(ba4)-5)+"-"+Math.round(ba4);
+      let showage4 = Math.round(ba4) - 5 + "-" + Math.round(ba4);
       this._setValue(this._ba4_element, showage4);
     }
   }
 
   _updateSYN(syn) {
-    if (typeof syn=== "number" && syn > 0  && syn < 100 && this._last_syn != syn) {
+    if (
+      typeof syn === "number" &&
+      syn > 0 &&
+      syn < 100 &&
+      this._last_syn != syn
+    ) {
       this._last_syn = syn;
-      let showagesyn=(Math.round(syn));
+      let showagesyn = Math.round(syn);
       this._setValue(this._syn_element, showagesyn);
     }
   }
@@ -339,7 +407,12 @@ class VitalResultPrinter {
   }
 
   _updateStressIndex(si) {
-    if (this._si_name_element != null && typeof si === "number" && si != null && this._last_si != si) {
+    if (
+      this._si_name_element != null &&
+      typeof si === "number" &&
+      si != null &&
+      this._last_si != si
+    ) {
       this._last_si = si;
       if (si < 0) {
         this._si_name_element.innerHTML = "---";
@@ -358,21 +431,32 @@ class VitalResultPrinter {
   }
 
   _updateANSIndexSNS(ans_index_sns) {
-    if (typeof ans_index_sns === "number" && this._last_ans_index_sns != ans_index_sns) {
+    if (
+      typeof ans_index_sns === "number" &&
+      this._last_ans_index_sns != ans_index_sns
+    ) {
       this._last_ans_index_sns = ans_index_sns;
       this._setValue(this._ans_index_sns_element, ans_index_sns);
     }
   }
 
   _updateANSIndexPNS(ans_index_pns) {
-    if (typeof ans_index_pns === "number" && ans_index_pns > 0 && this._last_ans_index_pns != ans_index_pns) {
+    if (
+      typeof ans_index_pns === "number" &&
+      ans_index_pns > 0 &&
+      this._last_ans_index_pns != ans_index_pns
+    ) {
       this._last_ans_index_pns = ans_index_pns;
       this._setValue(this._ans_index_pns_element, ans_index_pns);
     }
   }
 
   _updateWellness(wellness) {
-    if (typeof wellness === "number" && wellness > 0 && this._last_wellness != wellness) {
+    if (
+      typeof wellness === "number" &&
+      wellness > 0 &&
+      this._last_wellness != wellness
+    ) {
       this._last_wellness = wellness;
       this._setValue(this._wellness_element, wellness);
     }
@@ -386,7 +470,11 @@ class VitalResultPrinter {
   }
 
   _updateHbA1cRisk(hba1c_risk) {
-    if (typeof hba1c_risk === "number" && hba1c_risk >= 0 && this._last_hba1c_risk != hba1c_risk) {
+    if (
+      typeof hba1c_risk === "number" &&
+      hba1c_risk >= 0 &&
+      this._last_hba1c_risk != hba1c_risk
+    ) {
       this._last_hba1c_risk = hba1c_risk;
       this._setValue(this._hba1c_risk_element, hba1c_risk);
     }
@@ -395,33 +483,53 @@ class VitalResultPrinter {
   _updateHbA1cRange(hba1c_range) {
     if (Array.isArray(hba1c_range) && hba1c_range.length == 2) {
       this._last_hba1c_range = hba1c_range;
-      this._setValue(this._hba1c_range_element, `${hba1c_range[0]}-${hba1c_range[1]}`);
+      this._setValue(
+        this._hba1c_range_element,
+        `${hba1c_range[0]}-${hba1c_range[1]}`
+      );
     }
   }
 
   _updateHemoglobin(hemoglobin) {
-    if (typeof hemoglobin === "number" && hemoglobin > 0 && this._last_hemoglobin != hemoglobin) {
+    if (
+      typeof hemoglobin === "number" &&
+      hemoglobin > 0 &&
+      this._last_hemoglobin != hemoglobin
+    ) {
       this._last_hemoglobin = hemoglobin;
       this._setValue(this._hemoglobin_element, hemoglobin);
     }
   }
 
   _updateCholesterol(cholesterol) {
-    if (typeof cholesterol === "number" && cholesterol > 0 && this._last_cholesterol != cholesterol) {
+    if (
+      typeof cholesterol === "number" &&
+      cholesterol > 0 &&
+      this._last_cholesterol != cholesterol
+    ) {
       this._last_cholesterol = cholesterol;
       this._setValue(this._cholesterol_element, cholesterol);
     }
   }
 
   _updateCholesterolRisk(cholesterol_risk) {
-    if (typeof cholesterol_risk === "number" && cholesterol_risk >= 0 && this._last_cholesterol_risk != cholesterol_risk) {
+    if (
+      typeof cholesterol_risk === "number" &&
+      cholesterol_risk >= 0 &&
+      this._last_cholesterol_risk != cholesterol_risk
+    ) {
       this._last_cholesterol_risk = cholesterol_risk;
       this._setValue(this._cholesterol_risk_element, cholesterol_risk);
     }
   }
 
   _updateCholesterolRange(cholesterol_range) {
-    if (this._cholesterol_range_element != null && typeof cholesterol_range === "string" && cholesterol_range != "" && this._last_cholesterol_range != cholesterol_range) {
+    if (
+      this._cholesterol_range_element != null &&
+      typeof cholesterol_range === "string" &&
+      cholesterol_range != "" &&
+      this._last_cholesterol_range != cholesterol_range
+    ) {
       this._last_cholesterol_range = cholesterol_range;
       if (cholesterol_range === "CHOLESTEROL_NORMAL") {
         this._cholesterol_range_element.innerHTML = "Normal";
@@ -432,21 +540,32 @@ class VitalResultPrinter {
       } else if (cholesterol_range === "CHOLESTEROL_INVALID") {
         this._cholesterol_range_element.innerHTML = "Invalid";
       }
-	}
+    }
   }
 
   _updateCardiovascularAge(cardiovascular_age) {
-    if (typeof cardiovascular_age === "number" && cardiovascular_age >= 0 && this._last_cardiovascular_age != cardiovascular_age) {
+    console.log("Updating cardiovascular_age:", cardiovascular_age);
+    if (this._cardiovascular_age_element == null) {
+      console.warn("Element for cardiovascular_age not found!");
+    }
+    if (
+      typeof cardiovascular_age === "number" &&
+      cardiovascular_age >= 0 &&
+      this._last_cardiovascular_age != cardiovascular_age
+    ) {
       this._last_cardiovascular_age = cardiovascular_age;
       this._setValue(this._cardiovascular_age_element, cardiovascular_age);
     }
   }
 
   _updateCardiovascularBMI(cardiovascular_bmi) {
-    if (typeof cardiovascular_bmi === "number" && cardiovascular_bmi >= 0 && this._last_cardiovascular_bmi != cardiovascular_bmi) {
+    if (
+      typeof cardiovascular_bmi === "number" &&
+      cardiovascular_bmi >= 0 &&
+      this._last_cardiovascular_bmi != cardiovascular_bmi
+    ) {
       this._last_cardiovascular_bmi = cardiovascular_bmi;
       this._setValue(this._cardiovascular_bmi_element, cardiovascular_bmi);
-   
     }
   }
 
@@ -454,8 +573,7 @@ class VitalResultPrinter {
     if (typeof toggle == "boolean" && toggle) {
       element.classList.add("text-success");
       element.classList.remove("text-dark");
-    }
-    else {
+    } else {
       element.classList.add("text-dark");
       element.classList.remove("text-success");
     }
