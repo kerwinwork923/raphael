@@ -225,8 +225,8 @@ const OnResult = (result) => {
       rr: result.rr,
       spo2: result.spo2,
       si: result.si,
-      cardiovascular_age: result.cardiovascular_age ?? SDNNage, // 依實際欄位
-      cardiovascular_bmi: result.cardiovascular_bmi ?? calcBMI(...),
+      cardiovascular_age : result.cardiovascular_age,
+      cardiovascular_bmi : result.cardiovascular_bmi,
       hr_valid: result.signal_quality.hr_hrv > 0.7,
       bp_valid: result.signal_quality.bp > 0.6,
       rr_valid: result.signal_quality.resp > 0.7,
