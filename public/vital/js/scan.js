@@ -161,7 +161,7 @@ const OnResult = (result) => {
     parseInt(proc) + "%";
 
   console.log(proc, result.scanning_status);
-
+  console.log(result)
   nHRV.push([
     result.hrv_indices.HF,
     result.hrv_indices.LF,
@@ -232,6 +232,7 @@ const OnResult = (result) => {
       rr_valid: result.signal_quality.resp > 0.7,
       spo2_valid: result.signal_quality.spo2 > 0.9,
       bioage: SDNNage,
+
       ba2:
         (1.22998789167383e-5 * Math.pow(result.hrv_indices.HF, 2) -
           0.00285801868585652 * result.hrv_indices.HF * result.hr -
@@ -270,9 +271,8 @@ const OnResult = (result) => {
     sessionStorage.setItem("result", JSON.stringify(result));
     sessionStorage.setItem("Age", JSON.stringify(nArray));
     sessionStorage.setItem("rHRV", JSON.stringify(nHRV));
-       // 如果 SDK 沒有回傳就自己算
-   result.cardiovascular_age =
-     result.cardiovascular_age ?? SDNNage;
+
+
    result.cardiovascular_bmi =
      result.cardiovascular_bmi ?? calcBMI(infodata.height, infodata.weight);
 
