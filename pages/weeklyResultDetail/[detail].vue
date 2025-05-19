@@ -85,7 +85,7 @@
       <img class="doctorImg" src="~/assets/imgs/doctor.png" alt="" />
     </div>
 
-    <h4 class="textResultText">以下為分類系統的自律神經分析結果</h4>
+    <h4 class="textResultText">以下為分類系統的自律神經分析結果，僅供醫師參考，不具診斷功能．</h4>
     <div class="resultListGroup">
       <SymptomResult
         v-for="(symptom, index) in symptoms"
