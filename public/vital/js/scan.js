@@ -18,6 +18,8 @@ const VIEW_SCAN_BIOAGE = "v_bioage"; //生理年齡
 const VIEW_SCAN_BA2 = "v_ba2"; //生理年齡
 const VIEW_SCAN_BA4 = "v_ba4"; //生理年齡
 const VIEW_SCAN_SYN = "v_syn"; //交感佔比%
+const VIEW_SCAN_CARDIO_AGE = "v_cardiovascular_age"; //新年齡
+const VIEW_SCAN_CARDIO_BMI = "v_cardiovascular_bmi"; //新BMI
 
 const VIEW_SCAN_CANVAS_LIVE = "live_canvas";
 const VIEW_SCAN_IMAGE_MASK = "scan_live_mask";
@@ -223,6 +225,8 @@ const OnResult = (result) => {
       rr: result.rr,
       spo2: result.spo2,
       si: result.si,
+      cardiovascular_age: result.cardiovascular_age ?? SDNNage, // 依實際欄位
+      cardiovascular_bmi: result.cardiovascular_bmi ?? calcBMI(...),
       hr_valid: result.signal_quality.hr_hrv > 0.7,
       bp_valid: result.signal_quality.bp > 0.6,
       rr_valid: result.signal_quality.resp > 0.7,
@@ -266,6 +270,12 @@ const OnResult = (result) => {
     sessionStorage.setItem("result", JSON.stringify(result));
     sessionStorage.setItem("Age", JSON.stringify(nArray));
     sessionStorage.setItem("rHRV", JSON.stringify(nHRV));
+       // 如果 SDK 沒有回傳就自己算
+   result.cardiovascular_age =
+     result.cardiovascular_age ?? SDNNage;
+   result.cardiovascular_bmi =
+     result.cardiovascular_bmi ?? calcBMI(infodata.height, infodata.weight);
+
     document.removeEventListener("visibilitychange", OnVisibilityChange);
     StoptMeasuring("finish.html");
   }
@@ -414,6 +424,10 @@ document.addEventListener("DOMContentLoaded", () => {
     ba4_id: VIEW_SCAN_BA4,
     syn_id: VIEW_SCAN_SYN,
   });
+  _scan_vital_result_printer.setCardiovascularElement({
+    cardiovascular_age_id: VIEW_SCAN_CARDIO_AGE,
+    cardiovascular_bmi_id: VIEW_SCAN_CARDIO_BMI,
+  });
   _scan_vital_result_printer.reset();
 
   document.getElementById(VIEW_S_CANCEL).onclick = () =>
@@ -430,3 +444,10 @@ function getUrlParams() {
   const form = params.get("form") || "";
   return { UID, flag, form };
 }
+
+_finish_vital_result_printer.update({
+ 
+  cardiovascular_age : result.cardiovascular_age,
+  cardiovascular_bmi : result.cardiovascular_bmi,
+
+});

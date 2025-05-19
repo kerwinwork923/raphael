@@ -68,6 +68,10 @@
 
         <div class="value">92.4%</div>
         <h4>重度失調</h4>
+        <div class="tagsGroup">
+          <div class="tag">想解決的症狀</div>
+          <div class="tag">想解決的症狀</div>
+        </div>
       </div>
       <div class="AutonomicNerveAlertContent3Card">
         <div class="AutonomicNerveAlertContent3Title">
@@ -80,6 +84,10 @@
 
         <div class="value">9.4%</div>
         <h4>輕度失調</h4>
+        <div class="tagsGroup">
+          <div class="tag">想解決的症狀</div>
+          <div class="tag">想解決的症狀</div>
+        </div>
       </div>
       <div class="AutonomicNerveAlertContent3Card">
         <div class="AutonomicNerveAlertContent3Title">
@@ -91,19 +99,27 @@
         </div>
 
         <div class="value">92.4%</div>
-        <h4>重度失調</h4>
+        <h4>中度失調</h4>
+        <div class="tagsGroup">
+          <div class="tag">想解決的症狀</div>
+          <div class="tag">想解決的症狀</div>
+        </div>
       </div>
       <div class="AutonomicNerveAlertContent3Card">
         <div class="AutonomicNerveAlertContent3Title">
-          <h3>精神系統</h3>
-          <small class="up">
-            <img src="/assets/imgs/backend/up.svg" alt="" />
+          <h3>感官系統</h3>
+          <small class="down">
+            <img src="/assets/imgs/backend/down.svg" alt="" />
             10.5%
           </small>
         </div>
 
-        <div class="value">92.4%</div>
-        <h4>重度失調</h4>
+        <div class="value">50.3%</div>
+        <h4>中度失調</h4>
+        <div class="tagsGroup">
+          <div class="tag">想解決的症狀</div>
+          <div class="tag">想解決的症狀</div>
+        </div>
       </div>
     </div>
   </div>
@@ -309,12 +325,14 @@
   .AutonomicNerveAlertContent3Group {
     display: flex;
     flex-wrap: wrap;
+    justify-content: space-between;
     .AutonomicNerveAlertContent3Card {
-      width: 50%;
+      width: 49%;
       border-radius: 20px;
       background: var(--Neutral-white, #fff);
       box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
       padding: 1rem;
+      margin-top: .5rem;
       .AutonomicNerveAlertContent3Title {
         display: flex;
         justify-content: space-between;
@@ -329,6 +347,7 @@
           line-height: 100%; /* 20px */
           letter-spacing: var(--Title-Medium-Tracking, 0.15px);
         }
+
         small {
           display: flex;
           align-items: center;
@@ -342,6 +361,20 @@
         .up {
           color: var(--Warning-default, #ec4f4f);
         }
+        .down {
+          color: var(--Warning-default, #74bc1f);
+        }
+      }
+      h4 {
+        color: var(--Primary-200, #b1c0d8);
+
+        /* Typography/small-r-14 */
+        font-family: "Noto Sans";
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 400;
+        letter-spacing: 0.1px;
+        margin-top: 0.25rem;
       }
       .value {
         color: var(--Primary-600, #2d3047);
@@ -350,6 +383,23 @@
         font-weight: 700;
         letter-spacing: 0.12px;
         margin-top: 0.5rem;
+      }
+      .tagsGroup {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin-top: 0.25rem;
+        .tag {
+          width: 49%;
+          color: var(--Primary-default, #1ba39b);
+          border-radius: 50px;
+          border: 1px solid var(--Primary-default, #1ba39b);
+          background: var(--primary-400-opacity-10, rgba(27, 163, 155, 0.1));
+          padding: 0.25rem;
+          font-size: 14px;
+          text-align: center;
+
+        }
       }
     }
   }
