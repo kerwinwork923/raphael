@@ -321,23 +321,11 @@ const OnEvent = (x) => {
   }
 };
 
+
 const StartMeasuring = () => {
-  let user = JSON.parse(sessionStorage.getItem("data") || "{}");
-
-  const payload = {
-    height: Number(user.height),
-    weight: Number(user.weight),
-    sex: Number(user.sex),
-    age: Number(user.age),
-    bp_mode: user.bp_mode,
-    bp_group: user.bp_group,
-    virtual_id: user.virtual_id,
-  };
-
-  // 這一行就是 alert 整個 payload 給你看
-  alert(`Start Measuring Payload:\n${JSON.stringify(payload, null, 2)}`);
-
-  FHVitalsSDK.startMeasuring(payload).then((result) => {
+  let user = JSON.parse(sessionStorage.getItem("data"));
+  console.log(user);
+  FHVitalsSDK.startMeasuring(user).then((result) => {
     if (result.error == ERROR_CODE.NONE) {
       show(VIEW_SCAN_PROGRESS);
       show(VIEW_SCAN_PROGRESS_VALUE);
@@ -350,23 +338,6 @@ const StartMeasuring = () => {
     }
   });
 };
-
-// const StartMeasuring = () => {
-//   let user = JSON.parse(sessionStorage.getItem("data"));
-//   console.log(user);
-//   FHVitalsSDK.startMeasuring(user).then((result) => {
-//     if (result.error == ERROR_CODE.NONE) {
-//       show(VIEW_SCAN_PROGRESS);
-//       show(VIEW_SCAN_PROGRESS_VALUE);
-//       hide(VIEW_SCAN_P_HINT);
-//       document.getElementById(VIEW_SCANNING_STATUS).innerHTML = "";
-//       document.getElementById(VIEW_SCAN_PROGRESS_VALUE).innerHTML = "0%";
-//     } else {
-//       alert(`start measuring failed, reason=${result.error}`);
-//       StoptMeasuring("/user");
-//     }
-//   });
-// };
 const StoptMeasuring = (html_page) => {
   const { UID, flag, form } = getUrlParams();
 

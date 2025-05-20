@@ -6,8 +6,8 @@
       <h4>Contract History</h4>
     </div>
     <div class="lifeDetectAlertTitleHR"></div>
-        <div class="lifeDetectAlertTitleContent1Group">
-      <div class="lifeDetectAlertTitleContent1TitleGroup">
+    <div class="lifeDetectAlertContent1Group">
+      <div class="lifeDetectAlertContent1TitleGroup">
         <h5>總分</h5>
         <h6>
           <img src="/assets/imgs/backend/down.svg" alt="" />
@@ -17,6 +17,41 @@
       <h3>85</h3>
       <h4>83.5%(嚴重失調)</h4>
       <ProgressBar3 :score="100" />
+    </div>
+    <div class="lifeDetectAlertContent2Group">
+      <h3>睡眠周期</h3>
+      <div class="lifeDetectAlertContent2">
+        <div class="">
+          <h4>
+            入睡時間
+            <span>
+              <img src="/assets/imgs/backend/down.svg" alt="" />
+              120min
+            </span>
+          </h4>
+          <div class="time">00:30 <span>p.m</span></div>
+        </div>
+        <div class="">
+          <h4>
+            入睡時間
+            <span class="down">
+              <img src="/assets/imgs/backend/up.svg" alt="" />
+              120min
+            </span>
+          </h4>
+          <div class="time">00:30 <span>p.m</span></div>
+        </div>
+        <div class="">
+          <h4>
+            入睡時間
+            <span>
+              <img src="/assets/imgs/backend/down.svg" alt="" />
+              120min
+            </span>
+          </h4>
+          <div class="time">00:30 <span>p.m</span></div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -97,6 +132,102 @@
     background: var(--Primary-200, #b1c0d8);
     width: 100%;
     height: 1px;
+  }
+  .lifeDetectAlertContent1Group {
+    margin-top: 0.5rem;
+    border-radius: 20px;
+    background: var(--Neutral-white, #fff);
+    box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
+    padding: 1rem;
+    .lifeDetectAlertContent1TitleGroup {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    h5 {
+      color: var(--Primary-600, #2d3047);
+
+      font-size: 20px;
+      font-style: normal;
+      font-weight: 400;
+
+      letter-spacing: var(--Title-Medium-Tracking, 0.15px);
+    }
+    h6 {
+      color: var(--Secondary-default, #74bc1f);
+      text-align: center;
+
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .AutonomicNerveAlertContent1TitleGroup {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+    h3 {
+      color: var(--Primary-600, #2d3047);
+      font-family: "Noto Sans";
+      font-size: 24px;
+      font-style: normal;
+      font-weight: 700;
+      line-height: 100%; /* 24px */
+      letter-spacing: 0.12px;
+      margin-top: 0.25rem;
+    }
+    h4 {
+      color: var(--Primary-200, #b1c0d8);
+
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+
+      letter-spacing: 0.1px;
+    }
+  }
+  .lifeDetectAlertContent2Group {
+    margin-top: 0.5rem;
+    border-radius: 20px;
+    background: var(--Neutral-white, #fff);
+    box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
+    padding: 1rem;
+    h3 {
+      color: var(--Primary-600, #2d3047);
+      font-size: 20px;
+      font-style: normal;
+      font-weight: 400;
+      letter-spacing: var(--Title-Medium-Tracking, 0.15px);
+    }
+    .lifeDetectAlertContent2 {
+      display: flex;
+      justify-content: space-between;
+      div {
+        h4 {
+          color: var(--Primary-200, #b1c0d8);
+          text-align: center;
+          font-size: 16px;
+          font-style: normal;
+          font-weight: 400;
+          letter-spacing: 0.5px;
+          span {
+            color: var(--Secondary-default, #74bc1f);
+            text-align: center;
+            font-family: "Noto Sans";
+            font-size: 12px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 100%; /* 12px */
+            letter-spacing: 0.048px;
+          }
+        }
+      }
+    }
   }
 }
 </style>
