@@ -19,7 +19,7 @@ const VIEW_SCAN_BA2 = "v_ba2"; //生理年齡
 const VIEW_SCAN_BA4 = "v_ba4"; //生理年齡
 const VIEW_SCAN_SYN = "v_syn"; //交感佔比%
 const VIEW_SCAN_CARDIO_AGE = "v_cardiovascular_age"; //新年齡
-const VIEW_SCAN_CARDIO_BMI = "v_cardiovascular_bmi"; //新BMI
+const VIEW_SCAN_CARDIO_BMI = "v_cardiovascular_bmi"; //BMI
 
 const VIEW_SCAN_CANVAS_LIVE = "live_canvas";
 const VIEW_SCAN_IMAGE_MASK = "scan_live_mask";

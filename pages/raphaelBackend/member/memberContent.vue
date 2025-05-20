@@ -3,7 +3,8 @@
     <Sidebar />
     <ContractUserAlert v-if="false" />
     <HRVUserAlertAlert v-if="false" />
-    <AutonomicNerveAlert/>
+    <AutonomicNerveAlert v-if="false" />
+    <LifeDetectAlert />
     <div class="memberInfoContent">
       <div class="memberInfoTitle">
         <h3>Steven Yeh</h3>
@@ -521,6 +522,7 @@ import ContractUserAlert from "/components/raphaelBackend/ContractUserAlert";
 
 import HRVUserAlertAlert from "/components/raphaelBackend/HRVUserAlert";
 import AutonomicNerveAlert from "/components/raphaelBackend/AutonomicNerve";
+import LifeDetectAlert from "~/components/raphaelBackend/LifeDetectAlert";
 const user = { name: "Steven Yeh" };
 
 const usageRecords = ref([
