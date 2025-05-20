@@ -32,6 +32,18 @@
       </div>
       <div class="scanInfo">
         <div class="row">
+          <div class="years2">
+            <h3>生理年齡</h3>
+            <div class="value" id="f_v_year"></div>
+            <div class="info">years old</div>
+          </div>
+          <div class="BMI">
+            <h3>BMI</h3>
+            <div id="f_v_bmi" class="value"></div>
+          </div>
+        </div>
+
+        <div class="row">
           <div class="years">
             <h3>生理年齡</h3>
             <div class="value" id="f_v_bioage"></div>
@@ -64,7 +76,9 @@
               <span id="f_v_sbp"></span>/<span id="f_v_dbp"></span>
             </div>
             <div class="info">mmHg</div>
-            <div class="waiting">血壓值為演算法估計值，個人效正模式優化中...</div>
+            <div class="waiting">
+              血壓值為演算法估計值，個人效正模式優化中...
+            </div>
             <img class="bgImg" src="images/raphael/purpleChart.svg" alt="" />
           </div>
         </div>
@@ -220,6 +234,8 @@
     const userData = JSON.parse(localStorage.getItem("userData"));
     //
     f_v_bioage = document.querySelector("#f_v_bioage");
+    f_v_year = document.querySelector("#f_v_year");
+    f_v_bio = document.querySelector("#f_v_bio");
     f_v_hrv = document.querySelector("#f_v_hrv");
     f_v_hr = document.querySelector("#f_v_hr");
     f_v_sbp = document.querySelector("#f_v_sbp");
@@ -250,8 +266,8 @@
         );
         // 根據 isExpanded 來決定 display 屬性
         toggleElements.forEach((el) => {
-          el.style.position= isExpanded ? "relative" : "absolute";
-          el.style.left= isExpanded ? "0" : "-9999px";
+          el.style.position = isExpanded ? "relative" : "absolute";
+          el.style.left = isExpanded ? "0" : "-9999px";
         });
       }
 
@@ -296,6 +312,8 @@
           console.log("API 結果:", apiResult);
           const HRVData = apiResult.HRV2Detail;
           f_v_bioage.textContent = `${HRVData.bioage - 4}-${HRVData.bioage}`;
+          f_v_year.textContent = HRVData.FH_AGE;
+          f_v_bmi.textContent = HRVData.FH_BMI;
           f_v_hrv.textContent = Math.round(HRVData.HRV * 10) / 10;
           f_v_hr.textContent = HRVData.HR;
           f_v_sbp.textContent = HRVData.SBP;
@@ -465,10 +483,10 @@
     }
 
     .waiting {
-     font-size: 12px;
-     color: #74bc1f;
-     letter-spacing: .5px;
-     margin-top: .5rem;
+      font-size: 12px;
+      color: #74bc1f;
+      letter-spacing: 0.5px;
+      margin-top: 0.5rem;
     }
 
     .imgGroup {
@@ -540,7 +558,7 @@
       margin-bottom: 0.75rem;
     }
 
-    .scanInfo .row:nth-child(1),
+    .scanInfo .row:nth-child(2),
     .scanInfo .row:nth-child(4),
     .scanInfo .row:nth-child(5),
     .scanInfo .row:nth-child(6) {
@@ -548,11 +566,12 @@
       display: flex;
     }
 
-    .scanInfo .row:nth-child(2) {
+    .scanInfo .row:nth-child(3) {
       flex-direction: column;
     }
 
-    .scanInfo .years {
+    .scanInfo .years,
+    .scanInfo .years2 {
       width: 55%;
       padding: 6px;
       border-radius: 8px;
@@ -568,13 +587,15 @@
       overflow: hidden;
     }
 
-    .scanInfo .years .value {
-      font-size: 48px;
+    .scanInfo .years .value,
+    .scanInfo .years2 .value {
+      font-size: 48px !important;
       font-weight: bold;
       margin-top: 0.25rem;
     }
 
-    .scanInfo .years .info {
+    .scanInfo .years .info,
+    .scanInfo .years2 .value {
       font-size: 1rem;
       font-weight: 400;
       letter-spacing: 0.5px;
@@ -587,7 +608,8 @@
       width: 74%;
     }
 
-    .scanInfo .HRV {
+    .scanInfo .HRV,
+    .scanInfo .BMI {
       background: linear-gradient(
         180deg,
         #dfecc5 0%,
@@ -598,14 +620,16 @@
       width: 45%;
     }
 
-    .scanInfo .HRV .value {
+    .scanInfo .HRV .value,
+    .scanInfo .BMI {
       color: #74bc1f;
-      font-size: 48px;
+      font-size: 48px !important;
       font-weight: bold;
       margin-top: 0.25rem;
     }
 
-    .scanInfo .HRV .info {
+    .scanInfo .HRV .info,
+    .scanInfo .BMI {
       color: #666;
       font-size: 1rem;
       font-weight: 400;
@@ -957,9 +981,9 @@
     /* 暫時隱藏 */
     .scanInfo .years,
     .scanInfo .HRV,
-    .scanInfo .boxGroup
-    {
-      position: absolute; left: -9999px;
+    .scanInfo .boxGroup {
+      position: absolute;
+      left: -9999px;
     }
   </style>
 </html>

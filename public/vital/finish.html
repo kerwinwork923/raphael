@@ -115,21 +115,6 @@
             <div class="info">ms</div>
           </div>
         </div>
-        <div class="row">
-          <!-- 心血管年齡 -->
-          <div class="cardioAge">
-            <h3>心血管年齡</h3>
-            <div id="f_v_cardiovascular_age" class="value"></div>
-            <div class="info">yrs</div>
-          </div>
-
-          <!-- 心血管 BMI -->
-          <div class="cardioBMI">
-            <h3>心血管 BMI</h3>
-            <div id="f_v_cardiovascular_bmi" class="value"></div>
-            <div class="info">kg/m²</div>
-          </div>
-        </div>
 
         <div class="row">
           <div class="Rhythm">
@@ -155,6 +140,19 @@
               >血壓值為演算法估計值，個人效正模式優化中...</span
             >
             <img class="bgImg" src="images/raphael/purpleChart.svg" alt="" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="cardioAge">
+            <h3>年齡</h3>
+            <div id="f_v_cardiovascular_age" class="value"></div>
+            <div class="info">yrs</div>
+          </div>
+
+          <div class="cardioBMI">
+            <h3>BMI</h3>
+            <div id="f_v_cardiovascular_bmi" class="value"></div>
+            <div class="info">kg/m²</div>
           </div>
         </div>
         <div class="row">
@@ -556,6 +554,9 @@
   nameText = document.querySelector(".nameText");
   PLFValue = document.querySelector(".text-container-PLF .value");
   PHFValue = document.querySelector(".text-container-PHF .value");
+
+
+
   let boxSize = 100;
 
   // 從本地儲存中獲取 userData
@@ -771,6 +772,8 @@
         f_v_spo2.textContent = HRVData.SPO2;
         f_v_rr.textContent = HRVData.rr;
         f_v_si.textContent = HRVData.stress;
+        document.querySelector("#f_v_cardiovascular_age").textContent = HRVData.FH_AGE || "--";
+        document.querySelector("#f_v_cardiovascular_bmi").textContent = HRVData.FH_BMI || "--";
         const PLF = HRVData.PLF;
         const roundedPLF = Math.round(PLF);
         const PHF = 100 - roundedPLF;
@@ -1259,6 +1262,41 @@
     bottom: 0;
     left: 0;
     width: 100%;
+  }
+
+  .scanInfo .cardioAge,
+  .scanInfo .cardioBMI {
+    width: 50%;
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 12px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  .scanInfo .cardioAge h3,
+  .scanInfo .cardioBMI h3 {
+    font-size: 20px;
+    font-weight: 400;
+    margin: 0;
+    color: #333;
+  }
+
+  .scanInfo .cardioAge .value,
+  .scanInfo .cardioBMI .value {
+    color: #74bc1f;
+    font-size: 48px;
+    font-weight: 700;
+    margin-top: 0.25rem;
+  }
+
+  .scanInfo .cardioAge .info,
+  .scanInfo .cardioBMI .info {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #999;
+    letter-spacing: 0.5px;
   }
 
   .progressItem {
