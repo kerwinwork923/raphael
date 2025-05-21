@@ -10,7 +10,7 @@
       <img class="doctorImg" src="~/assets/imgs/doctor.png" alt="" />
     </div>
 
-    <h4 class="textResultText">以下為兒童指標的綜合分析結果</h4>
+    <h4 class="textResultText">以下為兒童指標的綜合分析結果，僅供醫師參考，不具診斷功能．</h4>
     <div class="resultListGroup">
       <SymptomResult2Compare
         v-for="(item, index) in combinedScores"
