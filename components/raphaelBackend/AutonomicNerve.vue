@@ -231,7 +231,59 @@
   overflow-y: auto;
   scrollbar-gutter: stable;
   box-sizing: border-box;
- 
+  // 自訂 scrollbar 樣式（Webkit）
+  &::-webkit-scrollbar {
+    width: 12px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #878787;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: #848484;
+  }
+  .AutonomicNerveAlertTitleGroup {
+    text-align: center;
+    margin-bottom: 0.75rem;
+    .HRVUserAlertHR {
+      background: var(--Primary-200, #b1c0d8);
+      width: 100%;
+      height: 1px;
+    }
+    img {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 9.8px;
+      border: 1px solid var(--Primary-default, #1ba39b);
+      padding: 2px 4px;
+    }
+    h3 {
+      color: var(--Primary-600, #2d3047);
+      font-size: var(--Text-font-size-24, 20px);
+      font-style: normal;
+      font-weight: 700;
+      letter-spacing: 0.12px;
+    }
+    h4 {
+      margin-top: 0.15rem;
+      color: var(--Primary-default, #1ba39b);
+      font-family: "Noto Sans";
+      font-size: var(--Text-font-size-18, 18px);
+      font-style: normal;
+      font-weight: 400;
+      letter-spacing: 0.09px;
+    }
+  }
+  .AutonomicNerveAlertTitleHR {
+    background: var(--Primary-200, #b1c0d8);
+    width: 100%;
+    height: 1px;
+  }
   .AutonomicNerveAlertContent1Group {
     margin-top: 0.5rem;
     border-radius: 20px;

@@ -1,193 +1,224 @@
 <template>
   <div class="memberInfo">
     <Sidebar />
+
+    <!-- ───── 系統警示（保留） ───── -->
     <ContractUserAlert v-if="false" />
     <HRVUserAlertAlert v-if="false" />
     <AutonomicNerveAlert v-if="false" />
-    <LifeDetectAlert />
+    <LifeDetectAlert v-if="false" />
+    <BabyRecordAlert v-if="false" />
+
+    <!-- ───── 主要內容 ───── -->
     <div class="memberInfoContent">
+      <!-- 標題列 -->
       <div class="memberInfoTitle">
-        <h3>Steven Yeh</h3>
+        <h3>{{ member?.Name ?? "—" }}</h3>
         <div class="optionGroup">
-          <button>
-            <img src="/assets/imgs/backend/back.svg" alt="" />返回
+          <button @click="goBack">
+            <img src="/assets/imgs/backend/back.svg" alt />返回
           </button>
-          <button class="btn refresh">資料更新</button>
-          <span class="updated-time">最後更新: xxxxxxxxxxx</span>
+
+          <button class="btn refresh" @click="refresh">資料更新</button>
+          <span class="updated-time">最後更新: {{ lastUpdated || "—" }}</span>
         </div>
       </div>
+
+      <!-- 卡片群 -->
       <div class="memberInfoCardWrap">
+        <!-- █ 基本資料 + 合約 ------------------------------------------------ -->
         <div class="memberInfoRow">
           <div class="memberInfoCardGroup">
+            <!-- 基本資料 -->
             <div class="memberInfoCard2">
               <h3>基本資料</h3>
-              <h5>黃金會員</h5>
+              <h5>{{ member?.GradeName || "—" }}</h5>
+
               <div class="memberInfoList">
                 <div class="memberInfoListTitle">
-                  <img src="/assets/imgs/backend/birthday.svg" alt="" />
-                  生日
+                  <img src="/assets/imgs/backend/birthday.svg" alt />生日
                 </div>
-                <div class="memberInfoListContent">770101</div>
+                <div class="memberInfoListContent">
+                  {{ member?.Birthday || "—" }}
+                </div>
               </div>
+
               <div class="memberInfoList">
                 <div class="memberInfoListTitle">
-                  <img src="/assets/imgs/backend/phone.svg" alt="" />
-                  電話
+                  <img src="/assets/imgs/backend/phone.svg" alt />電話
                 </div>
-                <div class="memberInfoListContent">0912-345-678</div>
+                <div class="memberInfoListContent">
+                  {{ member?.Mobile || "—" }}
+                </div>
               </div>
+
               <div class="memberInfoList">
                 <div class="memberInfoListTitle">
-                  <img src="/assets/imgs/backend/time.svg" alt="" />
-                  註冊時間
+                  <img src="/assets/imgs/backend/time.svg" alt />註冊時間
                 </div>
-                <div class="memberInfoListContent">2024/10/10 12:00</div>
+                <div class="memberInfoListContent">
+                  {{ member?.CheckTime || "—" }}
+                </div>
               </div>
+
               <div class="memberInfoTagsGroup">
-                <div class="memberInfoTag">忠誠用戶</div>
-                <div class="memberInfoTag">
-                  <img src="/assets/imgs/backend/heartCrack.svg" alt="" />解約
+                <div class="memberInfoTag" v-if="member?.memType">
+                  {{ member.memType }}
                 </div>
               </div>
             </div>
+
+            <!-- 合約 (沒有資料也要顯示空殼) -->
             <div class="memberInfoCard2">
-              <h3>第四代穿戴式調節衣(紅光版)</h3>
-              <h5>目前合約</h5>
-              <div class="memberInfoList">
-                <div class="memberInfoListTitle">
-                  <img src="/assets/imgs/backend/time.svg" alt="" />
-                  開始時間
+              <template v-if="currentOrder">
+                <h3>{{ currentOrder.ProductName }}</h3>
+                <h5>目前合約</h5>
+
+                <div class="memberInfoList">
+                  <div class="memberInfoListTitle">
+                    <img src="/assets/imgs/backend/time.svg" alt />開始時間
+                  </div>
+                  <div class="memberInfoListContent">
+                    {{ currentOrder.RentStart }}
+                  </div>
                 </div>
-                <div class="memberInfoListContent">2024/10/10</div>
-              </div>
-              <div class="memberInfoList">
-                <div class="memberInfoListTitle">
-                  <img src="/assets/imgs/backend/time.svg" alt="" />
-                  結束時間
+                <div class="memberInfoList">
+                  <div class="memberInfoListTitle">
+                    <img src="/assets/imgs/backend/time.svg" alt />結束時間
+                  </div>
+                  <div class="memberInfoListContent">
+                    {{ currentOrder.RentEnd }}
+                  </div>
                 </div>
-                <div class="memberInfoListContent">2034/10/10</div>
-              </div>
-              <div class="memberInfoWarning">合約已於</div>
-              <h6>2024/11/01 到期</h6>
-              <div class="memberInfoWarning">
-                目前尚未續約，請確認是否續約以恢復服務。
-              </div>
-              <div class="memberInfoTagsGroup">
-                <div class="memberInfoTag">忠誠用戶</div>
-                <div class="memberInfoTag">
-                  <img src="/assets/imgs/backend/heartCrack.svg" alt="" />解約
+
+                <div class="memberInfoWarning" v-if="isExpired">
+                  合約已於
+                  <h6>{{ currentOrder.RentEnd }} 到期</h6>
+                  <div class="memberInfoWarning">
+                    目前尚未續約，請確認是否續約以恢復服務。
+                  </div>
                 </div>
-              </div>
+              </template>
+              <template v-else>
+                <h3>—</h3>
+                <h5>目前合約</h5>
+                <p style="text-align: center; padding: 8px 0">尚無合約資料</p>
+              </template>
+
               <button class="consumptionBtn">
-                <img src="/assets/imgs/backend/time2.svg" alt="" />消費紀錄
+                <img src="/assets/imgs/backend/time2.svg" alt />消費紀錄
               </button>
             </div>
           </div>
+
+          <!-- █ 使用紀錄查詢 ------------------------------------------------- -->
           <div class="memberInfoCard">
             <h3>使用紀錄查詢</h3>
             <div class="memberInfoTitleGroup">
-              <small>已使用 100 次</small>
+              <small>已使用 {{ totalHome }} 次</small>
               <VueDatePicker
+                v-model="homeDateRange"
                 range
                 class="memberInfoDate1"
                 :enable-time-picker="false"
-                :format="'yyyy/MM/dd'"
-                placeholder="註冊日期區間"
+                format="yyyy/MM/dd"
+                placeholder="使用日期區間"
                 prepend-icon="i-calendar"
               />
             </div>
+
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
                 <div class="memberInfoTableTitleItem">APP 使用日期</div>
                 <div class="memberInfoTableTitleItem">APP 結束日期</div>
                 <div class="memberInfoTableTitleItem">間隔天數</div>
               </div>
-              <div class="memberInfoTableHR"></div>
-              <div class="memberInfoTableRow">
-                <div class="memberInfoTableRowItem">2024/10/10 12:00</div>
-                <div class="memberInfoTableRowItem">2024/10/11 12:00</div>
-                <div class="memberInfoTableRowItem">1天</div>
-              </div>
-              <div class="memberInfoTableRow">
-                <div class="memberInfoTableRowItem">2024/10/10 12:00</div>
-                <div class="memberInfoTableRowItem">2024/10/11 12:00</div>
-                <div class="memberInfoTableRowItem">1天</div>
-              </div>
-              <div class="memberInfoTableRow">
-                <div class="memberInfoTableRowItem">2024/10/10 12:00</div>
-                <div class="memberInfoTableRowItem">2024/10/11 12:00</div>
-                <div class="memberInfoTableRowItem">1天</div>
-              </div>
-              <div class="memberInfoTableRow">
-                <div class="memberInfoTableRowItem">2024/10/10 12:00</div>
-                <div class="memberInfoTableRowItem">2024/10/11 12:00</div>
-                <div class="memberInfoTableRowItem">1天</div>
-              </div>
-              <div class="memberInfoTableRow">
-                <div class="memberInfoTableRowItem">2024/10/10 12:00</div>
-                <div class="memberInfoTableRowItem">2024/10/11 12:00</div>
-                <div class="memberInfoTableRowItem">1天</div>
-              </div>
-              <div class="memberInfoTableRow">
-                <div class="memberInfoTableRowItem">2024/10/10 12:00</div>
-                <div class="memberInfoTableRowItem">2024/10/11 12:00</div>
-                <div class="memberInfoTableRowItem">1天</div>
+              <div class="memberInfoTableHR" />
+
+              <template v-if="paginatedHome.length">
+                <div
+                  class="memberInfoTableRow"
+                  v-for="row in paginatedHome"
+                  :key="row.StartTime"
+                >
+                  <div class="memberInfoTableRowItem">{{ row.StartTime }}</div>
+                  <div class="memberInfoTableRowItem">{{ row.EndTime }}</div>
+                  <div class="memberInfoTableRowItem">
+                    {{ row.Interval }} 天
+                  </div>
+                </div>
+              </template>
+              <div class="memberInfoTableRow" v-else>
+                <div class="memberInfoTableRowItem" style="width: 100%">
+                  尚無資料
+                </div>
               </div>
             </div>
-            <nav class="pagination">
+
+            <!-- 分頁 10/頁 -->
+            <nav class="pagination" v-if="totalHome">
               <button
                 class="btn-page"
-                :disabled="page === 1"
-                @click="gotoPage(1)"
+                :disabled="pageHome === 1"
+                @click="gotoHome(1)"
               >
                 &lt;&lt;
               </button>
-              <button class="btn-page" :disabled="page === 1" @click="prevPage">
+              <button
+                class="btn-page"
+                :disabled="pageHome === 1"
+                @click="prevHome"
+              >
                 &lt;
               </button>
               <button
-                v-for="p in totalPages"
-                :key="p"
                 class="btn-page btn-page-number"
-                :class="{ active: page === p }"
-                @click="gotoPage(p)"
+                v-for="p in pageNumberList"
+                :key="p"
+                :class="{ active: pageHome === p }"
+                :disabled="p === '...'"
+                @click="typeof p === 'number' && gotoHome(p)"
               >
                 {{ p }}
               </button>
               <button
                 class="btn-page"
-                :disabled="page === totalPages"
-                @click="nextPage"
+                :disabled="pageHome === totalPagesHome"
+                @click="nextHome"
               >
                 &gt;
               </button>
               <button
                 class="btn-page"
-                :disabled="page === totalPages"
-                @click="gotoPage(totalPages)"
+                :disabled="pageHome === totalPagesHome"
+                @click="gotoHome(totalPagesHome)"
               >
                 &gt;&gt;
               </button>
             </nav>
           </div>
+
+          <!-- 使用紀錄分析 -->
           <div class="memberInfoCard">
             <h3>使用紀錄分析</h3>
-            <UsageAnalysisChart :usage-data="usageRecords" />
+            <UsageAnalysisChart :usage-data="filteredHomeForChart" />
           </div>
         </div>
+
+        <!-- █ HRV ----------------------------------------------------------- -->
         <div class="memberInfoRow">
           <div class="memberInfoCard w-half">
             <h3>HRV檢測紀錄查詢</h3>
             <div class="memberInfoTitleGroup">
-              <small>已使用 100 次</small>
+              <small>共 {{ totalHRV }} 筆</small>
               <VueDatePicker
+                v-model="hrvRange"
                 range
                 :enable-time-picker="false"
-                :format="'yyyy/MM/dd'"
-                placeholder="註冊日期區間"
-                prepend-icon="i-calendar"
+                format="yyyy/MM/dd"
               />
             </div>
+
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
                 <div class="memberInfoTableTitleItem">檢測時間</div>
@@ -195,315 +226,375 @@
                 <div class="memberInfoTableTitleItem">HRV</div>
                 <div class="memberInfoTableTitleItem">間隔天數</div>
               </div>
-              <div class="memberInfoTableHR"></div>
-              <div class="memberInfoTableRow">
-                <div class="memberInfoTableRowItem">2024/10/10 12:00</div>
-                <div class="memberInfoTableRowItem">85</div>
-                <div class="memberInfoTableRowItem">嚴重失調</div>
-                <div class="memberInfoTableRowItem">1天</div>
-                <img src="/assets/imgs/backend/goNext.svg" alt="" />
-              </div>
-              <div class="memberInfoTableRow">
-                <div class="memberInfoTableRowItem">2024/10/10 12:00</div>
-                <div class="memberInfoTableRowItem">85</div>
-                <div class="memberInfoTableRowItem">嚴重失調</div>
-                <div class="memberInfoTableRowItem">1天</div>
-                <img src="/assets/imgs/backend/goNext.svg" alt="" />
+              <div class="memberInfoTableHR" />
+
+              <template v-if="paginatedHRV.length">
+                <div
+                  class="memberInfoTableRow"
+                  v-for="h in paginatedHRV"
+                  :key="h.CheckTime"
+                >
+                  <div class="memberInfoTableRowItem">{{ h.CheckTime }}</div>
+                  <div class="memberInfoTableRowItem">{{ h.bioage }}</div>
+                  <div class="memberInfoTableRowItem">{{ h.HRV }}</div>
+                  <div class="memberInfoTableRowItem">
+                    {{ h.diffDays || "—" }}
+                  </div>
+                  <img src="/assets/imgs/backend/goNext.svg" alt />
+                </div>
+              </template>
+              <div class="memberInfoTableRow" v-else>
+                <div class="memberInfoTableRowItem" style="width: 100%">
+                  尚無資料
+                </div>
               </div>
             </div>
-            <nav class="pagination">
+
+            <!-- 分頁 4/頁 -->
+            <nav class="pagination" v-if="totalHRV">
               <button
                 class="btn-page"
-                :disabled="page === 1"
-                @click="gotoPage(1)"
+                :disabled="pageHRV === 1"
+                @click="gotoHRV(1)"
               >
                 &lt;&lt;
               </button>
-              <button class="btn-page" :disabled="page === 1" @click="prevPage">
+              <button
+                class="btn-page"
+                :disabled="pageHRV === 1"
+                @click="prevHRV"
+              >
                 &lt;
               </button>
               <button
-                v-for="p in totalPages"
-                :key="p"
                 class="btn-page btn-page-number"
-                :class="{ active: page === p }"
-                @click="gotoPage(p)"
+                v-for="p in pageNumberListHRV"
+                :key="p"
+                :class="{ active: pageHRV === p }"
+                @click="gotoHRV(p)"
               >
                 {{ p }}
               </button>
               <button
                 class="btn-page"
-                :disabled="page === totalPages"
-                @click="nextPage"
+                :disabled="pageHRV === totalPagesHRV"
+                @click="nextHRV"
               >
                 &gt;
               </button>
               <button
                 class="btn-page"
-                :disabled="page === totalPages"
-                @click="gotoPage(totalPages)"
+                :disabled="pageHRV === totalPagesHRV"
+                @click="gotoHRV(totalPagesHRV)"
               >
                 &gt;&gt;
               </button>
             </nav>
           </div>
+
           <div class="memberInfoCard w-half">
             <h3>HRV檢測紀錄分析</h3>
             <AnalysisChart
-              :records="dataRecords"
-              primary-key="bioAge"
-              secondary-key="score"
+              :records="hrvRecords"
+              :range="hrvRange"
+              date-key="CheckTime"
+              primary-key="bioage"
+              secondary-key="HRV"
               primary-label="生理年齡"
-              secondary-label="檢測分數"
+              secondary-label="HRV"
             />
           </div>
         </div>
+
+        <!-- █ 自律神經 ------------------------------------------------------- -->
         <div class="memberInfoRow">
           <div class="memberInfoCard w-half">
             <h3>自律神經檢測紀錄查詢</h3>
             <div class="memberInfoTitleGroup">
-              <small>已使用 100 次</small>
+              <small>共 {{ totalANS }} 筆</small>
               <VueDatePicker
+                v-model="ansRange"
                 range
                 :enable-time-picker="false"
-                :format="'yyyy/MM/dd'"
-                placeholder="註冊日期區間"
-                prepend-icon="i-calendar"
+                format="yyyy/MM/dd"
               />
             </div>
+
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
                 <div class="memberInfoTableTitleItem">檢測時間</div>
                 <div class="memberInfoTableTitleItem">分數</div>
                 <div class="memberInfoTableTitleItem">嚴重程度</div>
-                <div class="memberInfoTableTitleItem">間隔天數</div>
+                <div class="memberInfoTableTitleItem">天數差</div>
               </div>
-              <div class="memberInfoTableHR"></div>
-              <div class="memberInfoTableRow">
-                <div class="memberInfoTableRowItem">2024/10/10 12:00</div>
-                <div class="memberInfoTableRowItem">85</div>
-                <div class="memberInfoTableRowItem">嚴重失調</div>
-                <div class="memberInfoTableRowItem">1天</div>
-                <img src="/assets/imgs/backend/goNext.svg" alt="" />
-              </div>
-              <div class="memberInfoTableRow">
-                <div class="memberInfoTableRowItem">2024/10/10 12:00</div>
-                <div class="memberInfoTableRowItem">85</div>
-                <div class="memberInfoTableRowItem">嚴重失調</div>
-                <div class="memberInfoTableRowItem">1天</div>
-                <img src="/assets/imgs/backend/goNext.svg" alt="" />
+              <div class="memberInfoTableHR" />
+
+              <template v-if="paginatedANS.length">
+                <div
+                  class="memberInfoTableRow"
+                  v-for="a in paginatedANS"
+                  :key="a.CheckTime"
+                >
+                  <div class="memberInfoTableRowItem">{{ a.CheckTime }}</div>
+                  <div class="memberInfoTableRowItem">{{ a.Score ?? "—" }}</div>
+                  <div class="memberInfoTableRowItem">{{ a.Level ?? "—" }}</div>
+                  <div class="memberInfoTableRowItem">
+                    {{ a.diffDays ?? "—" }}
+                  </div>
+                  <img src="/assets/imgs/backend/goNext.svg" alt />
+                </div>
+              </template>
+              <div class="memberInfoTableRow" v-else>
+                <div class="memberInfoTableRowItem" style="width: 100%">
+                  尚無資料
+                </div>
               </div>
             </div>
-            <nav class="pagination">
+
+            <nav class="pagination" v-if="totalANS">
               <button
                 class="btn-page"
-                :disabled="page === 1"
-                @click="gotoPage(1)"
+                :disabled="pageANS === 1"
+                @click="goto(pageANS, 1)"
               >
                 &lt;&lt;
               </button>
-              <button class="btn-page" :disabled="page === 1" @click="prevPage">
+              <button
+                class="btn-page"
+                :disabled="pageANS === 1"
+                @click="prev(pageANS)"
+              >
                 &lt;
               </button>
               <button
-                v-for="p in totalPages"
-                :key="p"
                 class="btn-page btn-page-number"
-                :class="{ active: page === p }"
-                @click="gotoPage(p)"
+                v-for="p in totalPagesANS"
+                :key="p"
+                :class="{ active: pageANS === p }"
+                @click="goto(pageANS, p)"
               >
                 {{ p }}
               </button>
               <button
                 class="btn-page"
-                :disabled="page === totalPages"
-                @click="nextPage"
+                :disabled="pageANS === totalPagesANS"
+                @click="next(pageANS, totalPagesANS)"
               >
                 &gt;
               </button>
               <button
                 class="btn-page"
-                :disabled="page === totalPages"
-                @click="gotoPage(totalPages)"
+                :disabled="pageANS === totalPagesANS"
+                @click="goto(pageANS, totalPagesANS)"
               >
                 &gt;&gt;
               </button>
             </nav>
           </div>
+
           <div class="memberInfoCard w-half">
-            <h3>自律神經檢測錄分析</h3>
+            <h3>自律神經檢測紀錄分析</h3>
             <AnalysisChart
-              :records="dataRecords"
-              primary-key="bioAge"
-              secondary-key="score"
-              primary-label="生理年齡"
-              secondary-label="檢測分數"
+              :records="ansRecords"
+              date-key="CheckTime"
+              primary-key="TotalScore"
+              primary-label="檢測分數"
             />
           </div>
         </div>
+
+        <!-- █ 生活檢測 ------------------------------------------------------- -->
         <div class="memberInfoRow">
           <div class="memberInfoCard w-half">
             <h3>生活檢測紀錄查詢</h3>
             <div class="memberInfoTitleGroup">
-              <small>已使用 100 次</small>
+              <small>共 {{ totalLife }} 筆</small>
               <VueDatePicker
                 range
+                v-model="lifeRange"
                 :enable-time-picker="false"
-                :format="'yyyy/MM/dd'"
-                placeholder="註冊日期區間"
-                prepend-icon="i-calendar"
+                format="yyyy/MM/dd"
               />
             </div>
+
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
                 <div class="memberInfoTableTitleItem">檢測時間</div>
                 <div class="memberInfoTableTitleItem">分數</div>
                 <div class="memberInfoTableTitleItem">生活品質</div>
-                <div class="memberInfoTableTitleItem">間隔天數</div>
+                <div class="memberInfoTableTitleItem">天數差</div>
               </div>
-              <div class="memberInfoTableHR"></div>
-              <div class="memberInfoTableRow">
-                <div class="memberInfoTableRowItem">2024/10/10 12:00</div>
-                <div class="memberInfoTableRowItem">5</div>
-                <div class="memberInfoTableRowItem">不良睡眠</div>
-                <div class="memberInfoTableRowItem">1天</div>
-                <img src="/assets/imgs/backend/goNext.svg" alt="" />
-              </div>
-              <div class="memberInfoTableRow">
-                <div class="memberInfoTableRowItem">2024/10/10 12:00</div>
-                <div class="memberInfoTableRowItem">5</div>
-                <div class="memberInfoTableRowItem">不良睡眠</div>
-                <div class="memberInfoTableRowItem">1天</div>
-                <img src="/assets/imgs/backend/goNext.svg" alt="" />
+              <div class="memberInfoTableHR" />
+
+              <template v-if="paginatedLife.length">
+                <div
+                  class="memberInfoTableRow"
+                  v-for="l in paginatedLife"
+                  :key="l.CheckTime"
+                >
+                  <div class="memberInfoTableRowItem">{{ l.CheckTime }}</div>
+                  <div class="memberInfoTableRowItem">{{ l.Score ?? "—" }}</div>
+                  <div class="memberInfoTableRowItem">
+                    {{ l.Quality ?? "—" }}
+                  </div>
+                  <div class="memberInfoTableRowItem">
+                    {{ l.diffDays ?? "—" }}
+                  </div>
+                  <img src="/assets/imgs/backend/goNext.svg" alt />
+                </div>
+              </template>
+              <div class="memberInfoTableRow" v-else>
+                <div class="memberInfoTableRowItem" style="width: 100%">
+                  尚無資料
+                </div>
               </div>
             </div>
-            <nav class="pagination">
+
+            <nav class="pagination" v-if="totalLife">
               <button
                 class="btn-page"
-                :disabled="page === 1"
-                @click="gotoPage(1)"
+                :disabled="pageLife === 1"
+                @click="goto(pageLife, 1)"
               >
                 &lt;&lt;
               </button>
-              <button class="btn-page" :disabled="page === 1" @click="prevPage">
+              <button
+                class="btn-page"
+                :disabled="pageLife === 1"
+                @click="prev(pageLife)"
+              >
                 &lt;
               </button>
               <button
-                v-for="p in totalPages"
-                :key="p"
                 class="btn-page btn-page-number"
-                :class="{ active: page === p }"
-                @click="gotoPage(p)"
+                v-for="p in totalPagesLife"
+                :key="p"
+                :class="{ active: pageLife === p }"
+                @click="goto(pageLife, p)"
               >
                 {{ p }}
               </button>
               <button
                 class="btn-page"
-                :disabled="page === totalPages"
-                @click="nextPage"
+                :disabled="pageLife === totalPagesLife"
+                @click="next(pageLife, totalPagesLife)"
               >
                 &gt;
               </button>
               <button
                 class="btn-page"
-                :disabled="page === totalPages"
-                @click="gotoPage(totalPages)"
+                :disabled="pageLife === totalPagesLife"
+                @click="goto(pageLife, totalPagesLife)"
               >
                 &gt;&gt;
               </button>
             </nav>
           </div>
+
           <div class="memberInfoCard w-half">
             <h3>生活檢測紀錄分析</h3>
             <AnalysisChart
-              :records="dataRecords"
-              primary-key="bioAge"
-              secondary-key="score"
-              primary-label="生理年齡"
-              secondary-label="檢測分數"
+              :records="lifeRecords"
+              date-key="CheckTime"
+              primary-key="Score"
+              primary-label="檢測分數"
             />
           </div>
         </div>
+
+        <!-- █ 寶貝檢測 ------------------------------------------------------- -->
         <div class="memberInfoRow">
           <div class="memberInfoCard w-half">
             <h3>寶貝檢測紀錄查詢</h3>
             <div class="memberInfoTitleGroup">
-              <small>已使用 100 次</small>
+              <small>共 {{ totalChild }} 筆</small>
               <VueDatePicker
                 range
+                v-model="babyRange"
                 :enable-time-picker="false"
-                :format="'yyyy/MM/dd'"
-                placeholder="註冊日期區間"
-                prepend-icon="i-calendar"
+                format="yyyy/MM/dd"
               />
             </div>
+
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
                 <div class="memberInfoTableTitleItem">檢測時間</div>
                 <div class="memberInfoTableTitleItem">分數</div>
                 <div class="memberInfoTableTitleItem">嚴重程度</div>
-                <div class="memberInfoTableTitleItem">間隔天數</div>
+                <div class="memberInfoTableTitleItem">天數差</div>
               </div>
-              <div class="memberInfoTableHR"></div>
-              <div class="memberInfoTableRow">
-                <div class="memberInfoTableRowItem">2024/10/10 12:00</div>
-                <div class="memberInfoTableRowItem">5</div>
-                <div class="memberInfoTableRowItem">嚴重失調</div>
-                <div class="memberInfoTableRowItem">1天</div>
-                <img src="/assets/imgs/backend/goNext.svg" alt="" />
-              </div>
-              <div class="memberInfoTableRow">
-                <div class="memberInfoTableRowItem">2024/10/10 12:00</div>
-                <div class="memberInfoTableRowItem">5</div>
-                <div class="memberInfoTableRowItem">嚴重失調</div>
-                <div class="memberInfoTableRowItem">1天</div>
-                <img src="/assets/imgs/backend/goNext.svg" alt="" />
+              <div class="memberInfoTableHR" />
+
+              <template v-if="paginatedChild.length">
+                <div
+                  class="memberInfoTableRow"
+                  v-for="c in paginatedChild"
+                  :key="c.CheckTime"
+                >
+                  <div class="memberInfoTableRowItem">{{ c.CheckTime }}</div>
+                  <div class="memberInfoTableRowItem">{{ c.Score ?? "—" }}</div>
+                  <div class="memberInfoTableRowItem">{{ c.Level ?? "—" }}</div>
+                  <div class="memberInfoTableRowItem">
+                    {{ c.diffDays ?? "—" }}
+                  </div>
+                  <img src="/assets/imgs/backend/goNext.svg" alt />
+                </div>
+              </template>
+              <div class="memberInfoTableRow" v-else>
+                <div class="memberInfoTableRowItem" style="width: 100%">
+                  尚無資料
+                </div>
               </div>
             </div>
-            <nav class="pagination">
+
+            <nav class="pagination" v-if="totalChild">
               <button
                 class="btn-page"
-                :disabled="page === 1"
-                @click="gotoPage(1)"
+                :disabled="pageChild === 1"
+                @click="goto(pageChild, 1)"
               >
                 &lt;&lt;
               </button>
-              <button class="btn-page" :disabled="page === 1" @click="prevPage">
+              <button
+                class="btn-page"
+                :disabled="pageChild === 1"
+                @click="prev(pageChild)"
+              >
                 &lt;
               </button>
               <button
-                v-for="p in totalPages"
-                :key="p"
                 class="btn-page btn-page-number"
-                :class="{ active: page === p }"
-                @click="gotoPage(p)"
+                v-for="p in totalPagesChild"
+                :key="p"
+                :class="{ active: pageChild === p }"
+                @click="goto(pageChild, p)"
               >
                 {{ p }}
               </button>
               <button
                 class="btn-page"
-                :disabled="page === totalPages"
-                @click="nextPage"
+                :disabled="pageChild === totalPagesChild"
+                @click="next(pageChild, totalPagesChild)"
               >
                 &gt;
               </button>
               <button
                 class="btn-page"
-                :disabled="page === totalPages"
-                @click="gotoPage(totalPages)"
+                :disabled="pageChild === totalPagesChild"
+                @click="goto(pageChild, totalPagesChild)"
               >
                 &gt;&gt;
               </button>
             </nav>
           </div>
+
           <div class="memberInfoCard w-half">
             <h3>寶貝檢測紀錄分析</h3>
             <AnalysisChart
-              :records="dataRecords"
-              primary-key="bioAge"
-              secondary-key="score"
-              primary-label="生理年齡"
-              secondary-label="檢測分數"
+              :records="childANS"
+              date-key="CheckTime"
+              primary-key="Score"
+              primary-label="檢測分數"
             />
           </div>
         </div>
@@ -513,34 +604,345 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { defineComponent } from "@vue/composition-api";
-import Sidebar from "/components/raphaelBackend/Sidebar.vue";
-import AnalysisChart from "/components/raphaelBackend/AnalysisChart.vue";
-import UsageAnalysisChart from "/components/raphaelBackend/UsageAnalysisChart";
-import ContractUserAlert from "/components/raphaelBackend/ContractUserAlert";
+import { ref, computed, watch, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import VueDatePicker from "@vuepic/vue-datepicker";
 
-import HRVUserAlertAlert from "/components/raphaelBackend/HRVUserAlert";
-import AutonomicNerveAlert from "/components/raphaelBackend/AutonomicNerve";
-import LifeDetectAlert from "~/components/raphaelBackend/LifeDetectAlert";
-const user = { name: "Steven Yeh" };
+import Sidebar from "~/components/raphaelBackend/Sidebar.vue";
+import UsageAnalysisChart from "~/components/raphaelBackend/UsageAnalysisChart.vue";
+import AnalysisChart from "~/components/raphaelBackend/AnalysisChart.vue";
+import ContractUserAlert from "~/components/raphaelBackend/ContractUserAlert.vue";
+import HRVUserAlertAlert from "~/components/raphaelBackend/HRVUserAlert.vue";
+import AutonomicNerveAlert from "~/components/raphaelBackend/AutonomicNerve.vue";
+import LifeDetectAlert from "~/components/raphaelBackend/LifeDetectAlert.vue";
+import BabyRecordAlert from "~/components/raphaelBackend/BabyRecordAlert.vue";
 
-const usageRecords = ref([
-  { date: "2024/10/01", start: "13:05", end: "14:00" },
-  { date: "2024/10/02", start: "13:30", end: "13:50" },
-  { date: "2024/10/03", start: "13:45", end: "14:20" },
-  { date: "2024/10/04", start: "13:55", end: "15:00" },
-  { date: "2024/10/05", start: "14:05", end: "15:10" },
-  { date: "2024/10/06", start: "14:20", end: "14:45" },
-]);
-const dataRecords = ref([
-  { date: "2024/10/01", score: 19, bioAge: 12 },
-  { date: "2024/10/02", score: 18, bioAge: 14 },
-  { date: "2024/10/03", score: 22, bioAge: 15 },
-  { date: "2024/10/04", score: 28, bioAge: 16 },
-  { date: "2024/10/05", score: 27, bioAge: 17 },
-  { date: "2024/10/06", score: 23, bioAge: 18 },
-]);
+/* ---------- 型別 ---------- */
+type ApiMember = {
+  Name: string;
+  Birthday: string;
+  Mobile: string;
+  GradeName: string;
+  memType: string;
+  CheckTime: string;
+};
+type ApiOrder = { ProductName: string; RentStart: string; RentEnd: string };
+
+/* ---------- Utils ---------- */
+function getAuth() {
+  return {
+    token:
+      localStorage.getItem("backendToken") ??
+      sessionStorage.getItem("backendToken"),
+    admin: localStorage.getItem("adminID") ?? sessionStorage.getItem("adminID"),
+    sel: JSON.parse(localStorage.getItem("selectedMember") ?? "{}") as {
+      MID?: string;
+      Mobile?: string;
+    },
+  };
+}
+
+/* ---------- refs ---------- */
+const homeDateRange = ref<Date[] | null>(null);
+const homeChartDateRange = ref<Date[] | null>(null);
+
+const member = ref<ApiMember | null>(null);
+const currentOrder = ref<ApiOrder | null>(null);
+const lastUpdated = ref("");
+
+const homeOrders = ref<any[]>([]);
+const hrvRecords = ref<any[]>([]);
+const ansRecords = ref<any[]>([]);
+const lifeRecords = ref<any[]>([]);
+const childANS = ref<any[]>([]);
+
+const hrvRange = ref<Date[] | null>(null);
+const ansRange = ref<Date[] | null>(null);
+const lifeRange = ref<Date[] | null>(null);
+const babyRange = ref<Date[] | null>(null);
+
+/* ---------- paging helpers ---------- */
+const PAGE_MAIN = 4;
+const PAGE_SUB = 4;
+
+const pageNumberList = computed(() => {
+  const total = totalPagesHome.value;
+  const current = pageHome.value;
+  const maxButtons = 5;
+  const pages: number[] = [];
+
+  if (total <= maxButtons) {
+    for (let i = 1; i <= total; i++) pages.push(i);
+  } else {
+    let start = Math.max(1, current - Math.floor(maxButtons / 2));
+    let end = start + maxButtons - 1;
+
+    if (end > total) {
+      end = total;
+      start = total - maxButtons + 1;
+    }
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+  }
+
+  return pages;
+});
+
+const filteredHome = computed(() => {
+  if (!homeDateRange.value || homeDateRange.value.length < 2)
+    return homeOrders.value;
+  const [from, to] = homeDateRange.value;
+  const start = from.getTime(),
+    end = to.getTime();
+  return homeOrders.value.filter((r) => {
+    const ms = Date.parse(r.StartTime.replace(/\//g, "-"));
+    return ms >= start && ms <= end;
+  });
+});
+
+const filteredHomeForChart = computed(() => {
+  if (!homeChartDateRange.value || homeChartDateRange.value.length < 2)
+    return homeOrders.value;
+
+  const [from, to] = homeChartDateRange.value;
+  const start = from.getTime();
+  const end = to.getTime();
+
+  return homeOrders.value.filter((r) => {
+    const ms = Date.parse(r.StartTime.replace(/\//g, "-"));
+    return ms >= start && ms <= end;
+  });
+});
+
+/* 使用紀錄 */
+const pageHome = ref(1);
+
+const totalHome = computed(() => filteredHome.value.length);
+
+const totalPagesHome = computed(() =>
+  Math.max(1, Math.ceil(totalHome.value / PAGE_MAIN))
+);
+const paginatedHome = computed(() => {
+  const s = (pageHome.value - 1) * PAGE_MAIN;
+  return filteredHome.value.slice(s, s + PAGE_MAIN);
+});
+
+// 使用紀錄專用
+function gotoHome(p: number) {
+  pageHome.value = p;
+}
+function prevHome() {
+  if (pageHome.value > 1) pageHome.value--;
+}
+function nextHome() {
+  if (pageHome.value < totalPagesHome.value) pageHome.value++;
+}
+
+/* HRV */
+const pageHRV = ref(1);
+/* 以 HRV 為例，其餘四個區塊做相同調整 ---------------------------- */
+const totalHRV = computed(() => filteredHRV.value.length);
+
+const totalPagesHRV = computed(() =>
+  Math.max(1, Math.ceil(totalHRV.value / PAGE_SUB))
+);
+const paginatedHRV = computed(() => {
+  const s = (pageHRV.value - 1) * PAGE_SUB;
+  return filteredHRV.value.slice(s, s + PAGE_SUB);
+});
+
+/* ANS */
+const pageANS = ref(1);
+const totalANS = computed(() => ansRecords.value.length);
+const totalPagesANS = computed(() =>
+  Math.max(1, Math.ceil(totalANS.value / PAGE_SUB))
+);
+const paginatedANS = computed(() => {
+  const s = (pageANS.value - 1) * PAGE_SUB;
+  return ansRecords.value.slice(s, s + PAGE_SUB);
+});
+
+/* LIFE */
+const pageLife = ref(1);
+const totalLife = computed(() => lifeRecords.value.length);
+const totalPagesLife = computed(() =>
+  Math.max(1, Math.ceil(totalLife.value / PAGE_SUB))
+);
+const paginatedLife = computed(() => {
+  const s = (pageLife.value - 1) * PAGE_SUB;
+  return lifeRecords.value.slice(s, s + PAGE_SUB);
+});
+
+/* CHILD */
+const pageChild = ref(1);
+const totalChild = computed(() => childANS.value.length);
+const totalPagesChild = computed(() =>
+  Math.max(1, Math.ceil(totalChild.value / PAGE_SUB))
+);
+const paginatedChild = computed(() => {
+  const s = (pageChild.value - 1) * PAGE_SUB;
+  return childANS.value.slice(s, s + PAGE_SUB);
+});
+
+function gotoHRV(p: number) {
+  pageHRV.value = p;
+}
+function prevHRV() {
+  if (pageHRV.value > 1) pageHRV.value--;
+}
+function nextHRV() {
+  if (pageHRV.value < totalPagesHRV.value) pageHRV.value++;
+}
+
+/* ---------- API ---------- */
+async function fetchBasic() {
+  const { token, admin, sel } = getAuth();
+  if (!token || !admin || !sel.MID) return;
+  const r = await fetch("https://23700999.com:8081/HMA/API_MemberDetail.jsp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      AdminID: admin,
+      Token: token,
+      MID: sel.MID,
+      Mobile: sel.Mobile ?? "",
+    }),
+  });
+  const j = await r.json();
+  if (j.Result !== "OK") return;
+  member.value = j.MemberDetail.Member;
+  currentOrder.value = j.MemberDetail.NowOrderList?.[0] ?? null;
+  lastUpdated.value = new Date().toLocaleString("zh-TW");
+}
+
+async function fetchExtras() {
+  const { token, admin, sel } = getAuth();
+  if (!token || !admin || !sel.MID) return;
+
+  // 👉 一律帶空字串，後端就會給「全部資料」
+  const empty = { StartDate: "", EndDate: "" };
+
+  const post = (url: string, extra = empty) =>
+    fetch(`https://23700999.com:8081/HMA/${url}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        AdminID: admin,
+        Token: token,
+        MID: sel.MID,
+        Mobile: sel.Mobile ?? "",
+        ...extra,
+      }),
+    }).then((r) => r.json());
+
+  const [useRes, hrvRes, ansRes, lifeRes, babyRes] = await Promise.all([
+    post("API_MemberUseRecord.jsp"),
+    post("API_MemberHRV2.jsp"),
+    post("API_MemberANS.jsp"),
+    post("API_MemberSleepRec.jsp"),
+    post("API_MemberChildANS.jsp", { CID: "" }),
+  ]);
+
+  homeOrders.value = useRes?.MemberUseRecode?.UseRecodeList ?? [];
+  hrvRecords.value = hrvRes?.MemberHRV2?.HRV2List ?? [];
+  ansRecords.value = ansRes?.MemberANS?.ANSList ?? [];
+  lifeRecords.value = lifeRes?.MemberSleepRec?.SleepRecList ?? [];
+  childANS.value = babyRes?.MemberChildANS?.ChildScore ?? [];
+}
+
+/* ---------- 共用範本 ---------- */
+const makeFiltered = <T>(
+  src: Ref<T[]>,
+  range: Ref<Date[] | null>,
+  dateKey: keyof T // 欄位名稱，如 'CheckTime'
+) =>
+  computed(() => {
+    if (!range.value || range.value.length < 2) return src.value;
+    const [from, to] = range.value;
+    const start = from.getTime();
+    const end = to.getTime();
+    return src.value.filter((r: any) => {
+      const ms = Date.parse(
+        (r[dateKey] as string).split(" ")[0].replace(/\//g, "-")
+      );
+      return ms >= start && ms <= end;
+    });
+  });
+
+/* ---------- 各列表 ---------- */
+/* 列表：依 range 過濾 ------------------------------------- */
+const filteredHRV = makeFiltered(hrvRecords, hrvRange, "CheckTime");
+const filteredANS = makeFiltered(ansRecords, ansRange, "CheckTime");
+const filteredLife = makeFiltered(lifeRecords, lifeRange, "CheckTime");
+const filteredChild = makeFiltered(childANS, babyRange, "CheckTime");
+
+/* 圖表：只要原始陣列 (完整) ------------------------------ */
+const chartHRV = computed(() => hrvRecords.value); // 全部資料
+const chartANS = computed(() => ansRecords.value);
+const chartLife = computed(() => lifeRecords.value);
+const chartChild = computed(() => childANS.value);
+
+/* ---------- watch & lifecycle ---------- */
+watch(homeDateRange, () => {
+  pageHome.value = 1;
+});
+
+function pageButtons(total: number, current: number, max = 5) {
+  const pages: number[] = [];
+  if (total <= max) {
+    for (let i = 1; i <= total; i++) pages.push(i);
+  } else {
+    let start = Math.max(1, current - Math.floor(max / 2));
+    let end = start + max - 1;
+    if (end > total) {
+      end = total;
+      start = total - max + 1;
+    }
+    for (let i = start; i <= end; i++) pages.push(i);
+  }
+  return pages;
+}
+
+const pageNumberListHRV = computed(() =>
+  pageButtons(totalPagesHRV.value, pageHRV.value)
+);
+const pageNumberListANS = computed(() =>
+  pageButtons(totalPagesANS.value, pageANS.value)
+);
+const pageNumberListLife = computed(() =>
+  pageButtons(totalPagesLife.value, pageLife.value)
+);
+const pageNumberListChild = computed(() =>
+  pageButtons(totalPagesChild.value, pageChild.value)
+);
+
+onMounted(() => {
+  fetchBasic();
+  fetchExtras();
+});
+
+/* ---------- 分頁操作 ---------- */
+function goto(refVar: Ref<number>, p: number) {
+  refVar.value = p;
+}
+function prev(refVar: Ref<number>) {
+  if (refVar.value > 1) refVar.value--;
+}
+function next(refVar: Ref<number>, totalPages: number) {
+  if (refVar.value < totalPages) refVar.value++;
+}
+
+/* ---------- 其他 ---------- */
+const router = useRouter();
+function refresh() {
+  fetchBasic();
+  fetchExtras();
+}
+function goBack() {
+  window.location.href = "/raphaelBackend/member";
+}
 </script>
 
 <style scoped lang="scss">
@@ -606,16 +1008,13 @@ const dataRecords = ref([
       .memberInfoRow {
         width: 100%;
         display: flex;
-
         gap: 12px;
         margin-top: 1rem;
         h3 {
           color: var(--Primary-600, #2d3047);
           font-family: "Noto Sans";
           font-size: var(--Text-font-size-24, 20px);
-
           font-weight: bold;
-
           letter-spacing: 0.12px;
           margin-bottom: 0.75rem;
         }
@@ -638,9 +1037,14 @@ const dataRecords = ref([
 
         .memberInfoCard {
           padding: 1rem;
-
           background-color: #fff;
           border-radius: 20px;
+          position: relative;
+          .pagination {
+            max-width: 100%;
+            flex-wrap: wrap;
+            overflow: hidden;
+          }
         }
 
         .memberInfoList {

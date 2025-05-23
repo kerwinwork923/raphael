@@ -182,8 +182,13 @@
               </div>
             </div>
 
-            <div class="goInfo">
-              <img src="/assets/imgs/backend/goNext.svg" alt="" />
+            <div
+              class="goInfo"
+              @click="handleGoInfo(member)"
+              role="button"
+              tabindex="0"
+            >
+              <img src="/assets/imgs/backend/goNext.svg" alt="詳細" />
             </div>
           </div>
         </div>
@@ -230,7 +235,7 @@ import { ref, computed, onMounted, watch } from "vue";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import Sidebar from "/components/raphaelBackend/Sidebar.vue";
-
+import { useRouter } from "vue-router";
 /* ---------- 型別 ---------- */
 interface MemberRaw {
   MID: string;
@@ -274,6 +279,8 @@ const page = ref(1);
 const pageSize = 10;
 const members = ref<Member[]>([]);
 const lastUpdated = ref("");
+
+const router = useRouter();
 
 /* ---------- 產品 / 狀態選項 ---------- */
 const productOptions = [
@@ -360,6 +367,17 @@ async function fetchMembers() {
   } catch (e) {
     console.error("讀取 MemberList 失敗：", e);
   }
+}
+
+function handleGoInfo(m: Member) {
+  // ① 存資料（想存哪裡就換哪裡）
+  localStorage.setItem(
+    "selectedMember",
+    JSON.stringify({ MID: m.id, Mobile: m.phone })
+  );
+
+  // ② 跳轉（這裡假設你有一條 name = 'memberDetail' 的路由）
+ router.push(`/raphaelBackend/member/memberContent`);
 }
 
 /* ---------- 前端篩選 / 分頁 ---------- */

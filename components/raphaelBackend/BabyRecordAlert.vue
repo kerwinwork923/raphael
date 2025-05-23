@@ -1,13 +1,13 @@
 <template>
-  <div class="lifeDetectAlert">
-    <div class="lifeDetectAlertTitleGroup">
+  <div class="babyRecordAlert">
+    <div class="babyRecordAlertTitleGroup">
       <img src="/assets/imgs/backend/Subtract.svg" alt="" />
-      <h3>Steven Yeh</h3>
-      <h4>Contract History</h4>
+      <h3>2024/10/10 12:00</h3>
+      <h4>Detection Time</h4>
     </div>
-    <div class="lifeDetectAlertTitleHR"></div>
-    <div class="lifeDetectAlertContent1Group">
-      <div class="lifeDetectAlertContent1TitleGroup">
+    <div class="babyRecordAlertTitleHR"></div>
+    <div class="babyRecordAlertContent1Group">
+      <div class="babyRecordAlertContent1TitleGroup">
         <h5>總分</h5>
         <h6>
           <img src="/assets/imgs/backend/down.svg" alt="" />
@@ -18,55 +18,66 @@
       <h4>83.5%(嚴重失調)</h4>
       <ProgressBar3 :score="100" />
     </div>
-    <div class="lifeDetectAlertContent2Group">
-      <h3>睡眠周期</h3>
-      <div class="lifeDetectAlertContent2">
-        <div class="">
-          <h4>
-            入睡時間
-            <span class="down">
-              <img src="/assets/imgs/backend/down.svg" alt="" />
-              120min
-            </span>
-          </h4>
-          <div class="time">00:30 <span>p.m</span></div>
+
+    <div class="babyRecordAlertContent3Group">
+
+      <div class="babyRecordAlertContent3">
+        <div class="babyRecordAlertContentTitle">
+          <h3>粗大動作</h3>
+          <div class="scoreGroup down">
+            <h6>12.3%</h6>
+            <img src="/assets/imgs/backend/down.svg" alt="" />
+          </div>
         </div>
-        <div class="">
-          <h4>
-            睡眠時長
-            <span class="up">
-              <img src="/assets/imgs/backend/up.svg" alt="" />
-              60min
-            </span>
-          </h4>
-          <div class="time">00:30 <span>p.m</span></div>
-        </div>
-        <div class="">
-          <h4>
-            離床時間
-            <span class="down">
-              <img src="/assets/imgs/backend/down.svg" alt="" />
-              120min
-            </span>
-          </h4>
-          <div class="time">00:30 <span>p.m</span></div>
-        </div>
+        <div class="value">10.5%</div>
+        <small>優秀表現</small>
       </div>
-    </div>
-    <div class="lifeDetectAlertContent3Group">
-      <div class="lifeDetectAlertContent3">
-        <div class="lifeDetectAlertContentTitle">
-          <h3>身心指數</h3>
-          <div class="scoreGroup">
+      <div class="babyRecordAlertContent3">
+        <div class="babyRecordAlertContentTitle">
+          <h3>精細動作</h3>
+          <div class="scoreGroup up">
+            <h6>4.5%</h6>
+            <img src="/assets/imgs/backend/up.svg" alt="" />
+          </div>
+        </div>
+        <div class="value">50.3%</div>
+        <small>基礎能力</small>
+      </div>
+      <div class="babyRecordAlertContent3">
+        <div class="babyRecordAlertContentTitle">
+          <h3>語言認知</h3>
+          <div class="scoreGroup down">
+            <h6>40.3%</h6>
+            <img src="/assets/imgs/backend/down.svg" alt="" />
+          </div>
+        </div>
+        <div class="value">50.3%</div>
+        <small>需要加強</small>
+      </div>
+      <div class="babyRecordAlertContent3">
+        <div class="babyRecordAlertContentTitle">
+          <h3>注意力</h3>
+          <div class="scoreGroup down">
+            <h6>32.5%</h6>
+            <img src="/assets/imgs/backend/down.svg" alt="" />
+          </div>
+        </div>
+        <div class="value">20.3%</div>
+        <small>基礎能力</small>
+      </div>
+      <div class="babyRecordAlertContent3">
+        <div class="babyRecordAlertContentTitle">
+          <h3>好動指標</h3>
+          <div class="scoreGroup up">
             <h6>10.5%</h6>
             <img src="/assets/imgs/backend/up.svg" alt="" />
           </div>
         </div>
-        <div class="value">9.3%</div>
-        <small>不佳狀態</small>
+        <div class="value">10.3%</div>
+        <small>需要加強</small>
       </div>
-      <div class="lifeDetectAlertContent3">
-        <div class="lifeDetectAlertContentTitle">
+      <div class="babyRecordAlertContent3">
+        <div class="babyRecordAlertContentTitle">
           <h3>壓力指數</h3>
           <div class="scoreGroup down">
             <h6>10.5%</h6>
@@ -74,10 +85,10 @@
           </div>
         </div>
         <div class="value">50.3%</div>
-        <small>極度壓力</small>
+        <small>優秀表現</small>
       </div>
     </div>
-    <div class="lifeDetectAlertClose">
+    <div class="babyRecordAlertClose">
       <img src="/assets/imgs/backend/close.svg" alt="" />
     </div>
   </div>
@@ -86,7 +97,7 @@
 <script setup></script>
 
 <style scoped lang="scss">
-.lifeDetectAlert {
+.babyRecordAlert {
   position: fixed;
 
   width: 80%;
@@ -123,7 +134,7 @@
   &::-webkit-scrollbar-thumb:hover {
     background-color: #848484;
   }
-  .lifeDetectAlertTitleGroup {
+  .babyRecordAlertTitleGroup {
     text-align: center;
     margin-bottom: 0.75rem;
     .HRVUserAlertHR {
@@ -155,18 +166,18 @@
       letter-spacing: 0.09px;
     }
   }
-  .lifeDetectAlertTitleHR {
+  .babyRecordAlertTitleHR {
     background: var(--Primary-200, #b1c0d8);
     width: 100%;
     height: 1px;
   }
-  .lifeDetectAlertContent1Group {
+  .babyRecordAlertContent1Group {
     margin-top: 0.5rem;
     border-radius: 20px;
     background: var(--Neutral-white, #fff);
     box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
     padding: 1rem;
-    .lifeDetectAlertContent1TitleGroup {
+    .babyRecordAlertContent1TitleGroup {
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -218,75 +229,12 @@
       letter-spacing: 0.1px;
     }
   }
-  .lifeDetectAlertContent2Group {
-    margin-top: 0.5rem;
-    border-radius: 20px;
-    background: var(--Neutral-white, #fff);
-    box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
-    padding: 1rem;
-    h3 {
-      color: var(--Primary-600, #2d3047);
-      font-size: 20px;
-      font-style: normal;
-      font-weight: 400;
-      letter-spacing: var(--Title-Medium-Tracking, 0.15px);
-    }
-    .lifeDetectAlertContent2 {
-      display: flex;
-      justify-content: space-between;
-      div {
-        margin-top: 0.5rem;
-        h4 {
-          color: var(--Primary-200, #b1c0d8);
-          text-align: center;
-          font-size: 16px;
-          font-style: normal;
-          font-weight: 400;
-          letter-spacing: 0.5px;
-          span {
-            color: var(--Secondary-default, #74bc1f);
-            text-align: center;
-            font-family: "Noto Sans";
-            font-size: 12px;
-            font-style: normal;
-            font-weight: 400;
-            line-height: 100%; /* 12px */
-            letter-spacing: 0.048px;
-          }
-          .up {
-            color: var(--Warning-default, #ec4f4f);
-          }
-        }
-      }
-      .time {
-        margin-top: 0.15rem;
-        color: var(--Primary-600, #2d3047);
 
-        font-size: 24px;
-        font-style: normal;
-        font-weight: 700;
-        line-height: 100%; /* 24px */
-        letter-spacing: 0.12px;
-        span {
-          color: var(--Primary-200, #b1c0d8);
-          text-align: center;
-
-          /* Typography/small-r-14 */
-          font-family: "Noto Sans";
-          font-size: 14px;
-          font-style: normal;
-          font-weight: 400;
-          line-height: 100%; /* 14px */
-          letter-spacing: 0.1px;
-        }
-      }
-    }
-  }
-  .lifeDetectAlertContent3Group {
+  .babyRecordAlertContent3Group {
     display: flex;
     justify-content: space-between;
-
-    .lifeDetectAlertContent3 {
+    flex-wrap: wrap;
+    .babyRecordAlertContent3 {
       background-color: #fff;
       margin-top: 0.5rem;
       border-radius: 20px;
@@ -295,7 +243,7 @@
       padding: 1rem;
       width: 49%;
     }
-    .lifeDetectAlertContentTitle {
+    .babyRecordAlertContentTitle {
       display: flex;
       justify-content: space-between;
       color: var(--Warning-default, #ec4f4f);
@@ -337,12 +285,15 @@
       font-style: normal;
       font-weight: 400;
       letter-spacing: 0.1px;
-      
     }
   }
-  .lifeDetectAlertClose {
+  .babyRecordAlertContent3:nth-last-child(1):nth-child(odd) {
+  width: 100%;
+}
+
+  .babyRecordAlertClose {
     text-align: center;
-    margin-top: .5rem;
+    margin-top: 0.5rem;
     cursor: pointer;
     img {
       padding: 4px;
