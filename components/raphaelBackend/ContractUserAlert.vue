@@ -1,58 +1,135 @@
 <template>
   <div class="ContractUserAlert">
+    <!-- 標題 -->
     <div class="ContractUserAlertTitleGroup">
       <img src="/assets/imgs/backend/Subtract.svg" alt="" />
-      <h3>Steven Yeh</h3>
+      <h3>{{ memberName }}</h3>
       <h4>Contract History</h4>
     </div>
-    <div class="ContractUserAlertHR"></div>
+
+    <div class="ContractUserAlertHR" />
+
+    <!-- 小計 + 篩選 -->
     <div class="ContractUserAlertSubTitleGroup">
       <div class="ContractUserAlertSubTitle">
-        <h6>總消費金額 100,000,000 <span> 共 3 個合約</span></h6>
+        <h6>
+          總消費金額 {{ totalAmount.toLocaleString() }}
+          <span>　共 {{ totalCount }} 個合約</span>
+        </h6>
       </div>
       <VueDatePicker
+        v-model="range"
         range
-        class="ContractUserAlertSubDate"
         :enable-time-picker="false"
-        :format="'yyyy/MM/dd'"
-        placeholder="註冊日期區間"
+        format="yyyy/MM/dd"
+        placeholder="合約日期區間"
         prepend-icon="i-calendar"
+        class="ContractUserAlertSubDate"
       />
     </div>
-    <div class="ContractUserAlertProgressGroup">
+
+    <!-- 年度進度條 (範例) -->
+    <div
+      v-for="(grp, idx) in yearlyGroup"
+      :key="idx"
+      class="ContractUserAlertProgressGroup"
+    >
       <div class="ContractUserAlertProgressTitle">
-        <h5>2024</h5>
-        <h6>7個合約</h6>
+        <h5>{{ grp.year }}</h5>
+        <h6>{{ grp.list.length }} 個合約</h6>
       </div>
-      <!-- 加入進度條 -->
+
       <div class="progress-bar">
-        <div class="progress-bar-inner" :style="{ width: '30%' }"></div>
-      </div>
-      <div class="more">
-        查看更多
-        <img src="/assets/imgs/backend/dropdown2.svg" alt="" />
+        <div class="progress-bar-inner" :style="{ width: grp.percent + '%' }" />
       </div>
     </div>
-    <div class="ContractUserAlertContent" v-for="i in 3" :key="i">
-      <h3>居家治療儀</h3>
+
+    <!-- 每筆合約 -->
+    <div
+      v-for="c in filtered"
+      :key="c.RentStart + c.ProductName"
+      class="ContractUserAlertContent"
+    >
+      <h3>{{ c.ProductName }}</h3>
+
       <div class="ContractUserAlertContentList">
         <h4><img src="/assets/imgs/backend/money.svg" alt="" />消費金額</h4>
-        <h5>90,000</h5>
+        <h5>{{ (c.Amount ?? 0).toLocaleString() }}</h5>
       </div>
+
       <div class="ContractUserAlertContentList">
         <h4><img src="/assets/imgs/backend/time.svg" alt="" />開始時間</h4>
-        <h5>2024/10/10 12:00</h5>
+        <h5>{{ c.RentStart }}</h5>
       </div>
+
       <div class="ContractUserAlertContentList">
         <h4><img src="/assets/imgs/backend/time.svg" alt="" />結束時間</h4>
-        <h5>2025/10/10 12:00</h5>
+        <h5>{{ c.RentEnd }}</h5>
       </div>
     </div>
+
+    <!-- 關閉 -->
     <div class="closeBtnGroup">
-      <img class="closeBtn" src="/assets/imgs/backend/close.svg" alt="" />
+      <img
+        class="closeBtn"
+        src="/assets/imgs/backend/close.svg"
+        alt=""
+        @click="$emit('close')"
+      />
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+import { ref, computed } from "vue";
+import VueDatePicker from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
+
+const props = defineProps<{
+  contracts: {
+    ProductName: string;
+    RentStart: string;
+    RentEnd: string;
+    Amount?: number;
+  }[];
+  memberName: string;
+}>();
+defineEmits(["close"]);
+
+const range = ref<Date[] | null>(null);
+
+/* 依日期範圍過濾 */
+const filtered = computed(() => {
+  if (!range.value || range.value.length < 2) return props.contracts;
+  const [from, to] = range.value;
+  const start = from.getTime(),
+    end = to.getTime();
+  return props.contracts.filter((c) => {
+    const ms = Date.parse(c.RentStart.replace(/\//g, "-"));
+    return ms >= start && ms <= end;
+  });
+});
+
+/* 小計 */
+const totalAmount = computed(() =>
+  filtered.value.reduce((s, c) => s + (c.Amount ?? 0), 0)
+);
+const totalCount = computed(() => filtered.value.length);
+
+/* 年度統計 (做個進度條示範) */
+const yearlyGroup = computed(() => {
+  const map: Record<string, number> = {};
+  filtered.value.forEach((c) => {
+    const year = c.RentStart.slice(0, 4);
+    map[year] = (map[year] ?? 0) + 1;
+  });
+  return Object.entries(map).map(([y, cnt]) => ({
+    year: y,
+    list: new Array(cnt),
+    percent: (cnt / filtered.value.length) * 100,
+  }));
+});
+</script>
 
 <style scope lang="scss">
 .ContractUserAlert {
@@ -61,7 +138,8 @@
   max-width: 1000px;
   left: 50%;
   top: 50%;
-  max-height: 90%;
+  height: 90%;
+
   transform: translate(-50%, -50%);
 
   border-radius: var(--Radius-r-20, 20px);
@@ -130,8 +208,11 @@
     margin-top: 0.5rem;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
     .ContractUserAlertSubTitle {
       display: flex;
+      flex: 1;
     }
     .ContractUserAlertSubDate {
       width: 40%;
@@ -253,6 +334,9 @@
   .closeBtnGroup {
     text-align: center;
     margin-top: 0.5rem;
+    position: absolute;
+    bottom: 2%;
+    left: 50%;
     .closeBtn {
       border-radius: var(--Radius-r-50, 50px);
       background: var(--Neutral-white, #fff);

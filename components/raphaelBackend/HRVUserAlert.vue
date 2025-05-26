@@ -10,37 +10,37 @@
     <div class="HRVUserAlertContent1">
       <div class="HRVUserAlertContent1Card">
         <h3>生理年齡</h3>
-        <div class="value">5-9</div>
+        <div class="value">{{ age }}</div>
         <div class="info">years old</div>
       </div>
       <div class="HRVUserAlertContent1Card">
         <h3>HRV</h3>
-        <div class="value">53.8</div>
+        <div class="value">{{ hrv }}</div>
         <div class="info">ms</div>
       </div>
       <div class="HRVUserAlertContent1Card">
-        <h3>心率</h3>
-        <div class="value">82</div>
+        <h3>心律變異性</h3>
+        <div class="value">{{ hr }}</div>
         <div class="info">bpm</div>
       </div>
       <div class="HRVUserAlertContent1Card">
         <h3>血壓</h3>
-        <div class="value">110/67</div>
-        <div class="info">mmH/g</div>
+        <div class="value">{{ bp }}</div>
+        <div class="info">mmHg</div>
       </div>
       <div class="HRVUserAlertContent1Card">
         <h3>血氧</h3>
-        <div class="value">98</div>
-        <div class="info">SpO2%</div>
+        <div class="value">{{ spo2 }}</div>
+        <div class="info">SpO₂%</div>
       </div>
       <div class="HRVUserAlertContent1Card">
         <h3>呼吸</h3>
-        <div class="value">24</div>
+        <div class="value">{{ rr }}</div>
         <div class="info">bpm</div>
       </div>
       <div class="HRVUserAlertContent1Card">
         <h3>壓力</h3>
-        <div class="value">低</div>
+        <div class="value">{{ stressLvl }}</div>
         <div class="info">low</div>
       </div>
     </div>
@@ -49,82 +49,158 @@
         <h3>交感/副交感比例</h3>
       </div>
       <div class="percent-group">
-        <span class="sym">33%</span>
-        <span class="parasym">68%</span>
+        <span class="sym">{{ plfPercent }}%</span>
+        <span class="parasym">{{ phfPercent }}%</span>
       </div>
+
       <div class="bar">
-        <div class="bar-fill" :style="{ width: '32%' }"></div>
+        <div class="sym-fill" :style="{ width: plfPercent + '%' }"></div>
+        <div class="parasym-fill" :style="{ width: phfPercent + '%' }"></div>
       </div>
+
       <div class="legend">
         <span class="dot sym-dot"></span> 交感神經
         <span class="dot parasym-dot"></span> 副交感神經
       </div>
     </div>
     <div class="HRVUserAlertContent3">
-      <h3>生理年齡</h3>
+      <h3>其他健康數據分析</h3>
       <div class="HRVUserAlertContent3Group">
         <div class="HRVUserAlertContent3Content">
           <div class="HRVUserAlertContent3ContentTitle">
             <img src="/assets/imgs/backend/target.svg" alt="" />
             健康力
           </div>
-          <div class="HRVUserAlertContent3ContentValue">5.0</div>
-          <div class="HRVUserAlertContent3ContentTag good">Good</div>
+          <div class="HRVUserAlertContent3ContentValue">{{ Health }}</div>
+          <div class="HRVUserAlertContent3ContentTag good">
+            {{ getTagText(Health) }}
+          </div>
         </div>
         <div class="HRVUserAlertContent3Content">
           <div class="HRVUserAlertContent3ContentTitle">
             <img src="/assets/imgs/backend/target.svg" alt="" />
             睡眠力
           </div>
-          <div class="HRVUserAlertContent3ContentValue">5.0</div>
-          <div class="HRVUserAlertContent3ContentTag good">Good</div>
+          <div class="HRVUserAlertContent3ContentValue">{{ Sleep }}</div>
+          <div class="HRVUserAlertContent3ContentTag good">
+            {{ getTagText(Sleep) }}
+          </div>
         </div>
         <div class="HRVUserAlertContent3Content">
           <div class="HRVUserAlertContent3ContentTitle">
             <img src="/assets/imgs/backend/target.svg" alt="" />
             代謝力
           </div>
-          <div class="HRVUserAlertContent3ContentValue">4.0</div>
-          <div class="HRVUserAlertContent3ContentTag Normal">Normal</div>
+          <div class="HRVUserAlertContent3ContentValue">{{ Metabolism }}</div>
+          <div class="HRVUserAlertContent3ContentTag Normal">
+            {{ getTagText(Metabolism) }}
+          </div>
         </div>
         <div class="HRVUserAlertContent3Content">
           <div class="HRVUserAlertContent3ContentTitle">
             <img src="/assets/imgs/backend/target.svg" alt="" />
             平衡力
           </div>
-          <div class="HRVUserAlertContent3ContentValue">3.0</div>
-          <div class="HRVUserAlertContent3ContentTag Normal">Normal</div>
+          <div class="HRVUserAlertContent3ContentValue">{{ Equilibrium }}</div>
+          <div class="HRVUserAlertContent3ContentTag Normal">
+            {{ getTagText(Equilibrium) }}
+          </div>
         </div>
         <div class="HRVUserAlertContent3Content">
           <div class="HRVUserAlertContent3ContentTitle">
             <img src="/assets/imgs/backend/target.svg" alt="" />
             活動力
           </div>
-          <div class="HRVUserAlertContent3ContentValue">2.0</div>
-          <div class="HRVUserAlertContent3ContentTag Poor">Poor</div>
+          <div class="HRVUserAlertContent3ContentValue">{{ Activity }}</div>
+          <div class="HRVUserAlertContent3ContentTag Poor">
+            {{ getTagText(Activity) }}
+          </div>
         </div>
         <div class="HRVUserAlertContent3Content">
           <div class="HRVUserAlertContent3ContentTitle">
             <img src="/assets/imgs/backend/target.svg" alt="" />
             放鬆力
           </div>
-          <div class="HRVUserAlertContent3ContentValue">1.0</div>
-          <div class="HRVUserAlertContent3ContentTag Poor">Poor</div>
+          <div class="HRVUserAlertContent3ContentValue">{{ Relaxation }}</div>
+          <div class="HRVUserAlertContent3ContentTag Poor">
+            {{ getTagText(Relaxatio) }}
+          </div>
         </div>
       </div>
     </div>
     <div class="HRVUserAlertContent4">
       <h3>根據您的神經系統數據分析</h3>
       <p>
-        您的 LF/HF 比值小於
-        0.5，顯示副交感神經過度活躍，身體處於嚴重放鬆狀態，可能導致血壓過低、心跳過慢、頭暈乏力等症狀。建議增加活動量、避免久坐或久躺，適量攝取咖啡因，並維持規律作息。警示：若出現持續頭暈、胸悶或昏厥，請立即就醫，避免潛在的心血管風險。
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Quo incidunt
+        dicta quos consequuntur expedita quibusdam placeat voluptatibus
+        consequatur quod nesciunt? Dolorem tempore illum laudantium aperiam
+        facere inventore! Pariatur, quam illum?
       </p>
     </div>
   </div>
-  <div class="HRVUserAlertClose">
-    <img src="/assets/imgs/backend/close.svg" alt="" />
+  <div class="HRVUserAlertClose" @click="$emit('close')">
+    <img src="/assets/imgs/backend/close.svg" alt="關閉" />
   </div>
 </template>
+<script setup lang="ts">
+/* ---------- props ---------- */
+const props = defineProps<{
+  record: any; // 直接整筆 HRV 紀錄
+}>();
+defineEmits(["close"]);
+
+/* ---------- 小工具 ---------- */
+const toInt = (v: any) => (v === "" ? "—" : parseInt(v, 10));
+
+/* ---------- 映射 ---------- */
+const age = computed(() => toInt(props.record?.bioage));
+const hrv = computed(() => toInt(props.record?.HRV));
+
+const hr = computed(() => toInt(props.record?.HR));
+const Activity = computed(() => toInt(props.record?.Activity));
+const Equilibrium = computed(() => toInt(props.record?.Equilibrium));
+const Health = computed(() => toInt(props.record?.Health));
+const Metabolism = computed(() => toInt(props.record?.Metabolism));
+const Relaxation = computed(() => toInt(props.record?.Relaxation));
+const Sleep = computed(() => toInt(props.record?.Sleep));
+
+const bp = computed(() =>
+  props.record?.SBP && props.record?.DBP
+    ? `${props.record.SBP}/${props.record.DBP}`
+    : "—"
+);
+const spo2 = computed(() => toInt(props.record?.SPO2));
+const rr = computed(() => toInt(props.record?.rr));
+const stressLvl = computed(() => props.record?.stress ?? "—");
+
+const plf = computed(() => Number(props.record?.PLF ?? 0));
+const phf = computed(() => Number(props.record?.PHF ?? 0));
+
+// 避免總和為 0（會 NaN）
+const totalPower = computed(() => plf.value + phf.value || 1);
+
+// 百分比（比例條 + 百分比文字）
+const plfPercent = computed(() =>
+  ((plf.value / totalPower.value) * 100).toFixed(0)
+);
+const phfPercent = computed(() =>
+  ((phf.value / totalPower.value) * 100).toFixed(0)
+);
+
+const getTagClass = (value: number) => {
+  if (value >= 5) return "good";
+  if (value >= 3) return "Normal";
+  return "Poor";
+};
+
+const getTagText = (value: number) => {
+  if (value >= 5) return "Good";
+  if (value >= 3) return "Normal";
+  return "Poor";
+};
+
+const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 → 0 % – 100 %
+</script>
 
 <style scoped lang="scss">
 .HRVUserAlert {
@@ -268,19 +344,23 @@
       }
     }
     .bar {
+      position: relative;
+      display: flex;
       height: 14px;
       border-radius: 10px;
       overflow: hidden;
-      background: var(
-        --gradient-common,
-        linear-gradient(90deg, #ec4f4f 0%, #1ba39b 100%)
-      );
-      position: relative;
+      background: #e0e0e0; // 背景底色（也可移除）
 
-      .bar-fill {
+      .sym-fill {
+        background: #ec4f4f;
         height: 100%;
-        width: 100%;
-        background: transparent;
+        transition: width 0.3s ease;
+      }
+
+      .parasym-fill {
+        background: #1ba39b;
+        height: 100%;
+        transition: width 0.3s ease;
       }
     }
 

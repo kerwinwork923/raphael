@@ -2,9 +2,19 @@
   <div class="memberInfo">
     <Sidebar />
 
-    <!-- ───── 系統警示（保留） ───── -->
-    <ContractUserAlert v-if="false" />
-    <HRVUserAlertAlert v-if="false" />
+    <!-- ───── 彈窗 ───── -->
+    <ContractUserAlert
+      v-if="showContract"
+      :contracts="contractList"
+      :member-name="member?.Name ?? ''"
+      @close="closeContract"
+    />
+    <HRVUserAlertAlert
+      v-if="showHRV"
+      :record="selectedHRV"
+      @close="closeHRV"
+    />
+
     <AutonomicNerveAlert v-if="false" />
     <LifeDetectAlert v-if="false" />
     <BabyRecordAlert v-if="false" />
@@ -105,7 +115,7 @@
                 <p style="text-align: center; padding: 8px 0">尚無合約資料</p>
               </template>
 
-              <button class="consumptionBtn">
+              <button class="consumptionBtn" @click="openContract">
                 <img src="/assets/imgs/backend/time2.svg" alt />消費紀錄
               </button>
             </div>
@@ -240,7 +250,13 @@
                   <div class="memberInfoTableRowItem">
                     {{ h.diffDays || "—" }}
                   </div>
-                  <img src="/assets/imgs/backend/goNext.svg" alt />
+
+                  <img
+                    src="/assets/imgs/backend/goNext.svg"
+                    alt="detail"
+                    style="cursor: pointer"
+                    @click="openHRV(h)"
+                  />
                 </div>
               </template>
               <div class="memberInfoTableRow" v-else>
@@ -642,6 +658,9 @@ function getAuth() {
   };
 }
 
+const showContract = ref(false);
+const contractList = ref<any[]>([]);
+
 /* ---------- refs ---------- */
 const homeDateRange = ref<Date[] | null>(null);
 const homeChartDateRange = ref<Date[] | null>(null);
@@ -649,6 +668,8 @@ const homeChartDateRange = ref<Date[] | null>(null);
 const member = ref<ApiMember | null>(null);
 const currentOrder = ref<ApiOrder | null>(null);
 const lastUpdated = ref("");
+const showHRV = ref(false);
+const selectedHRV = ref<any>(null);
 
 const homeOrders = ref<any[]>([]);
 const hrvRecords = ref<any[]>([]);
@@ -852,6 +873,14 @@ async function fetchExtras() {
   childANS.value = babyRes?.MemberChildANS?.ChildScore ?? [];
 }
 
+function openHRV(rec: any) {
+  selectedHRV.value = rec;   // 把整筆傳給 Alert
+  showHRV.value = true;
+}
+function closeHRV() {
+  showHRV.value = false;
+}
+
 /* ---------- 共用範本 ---------- */
 const makeFiltered = <T>(
   src: Ref<T[]>,
@@ -932,6 +961,16 @@ function prev(refVar: Ref<number>) {
 }
 function next(refVar: Ref<number>, totalPages: number) {
   if (refVar.value < totalPages) refVar.value++;
+}
+
+function openContract() {
+  // 這裡示範直接用 currentOrder，也可以改呼叫 API 取得完整歷史
+  contractList.value = currentOrder.value ? [currentOrder.value] : [];
+  showContract.value = true;
+}
+
+function closeContract() {
+  showContract.value = false;
 }
 
 /* ---------- 其他 ---------- */
