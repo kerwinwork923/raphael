@@ -2,21 +2,21 @@
   <div class="AutonomicNerveAlert">
     <div class="AutonomicNerveAlertTitleGroup">
       <img src="/assets/imgs/backend/Subtract.svg" alt="" />
-      <h3>Steven Yeh</h3>
-      <h4>Contract History</h4>
+      <h3>{{ formatDateTime(props.record?.CheckTime) }}</h3>
+      <h4>自律神經檢測紀錄</h4>
     </div>
     <div class="AutonomicNerveAlertTitleHR"></div>
     <div class="AutonomicNerveAlertContent1Group">
       <div class="AutonomicNerveAlertContent1TitleGroup">
         <h5>總分</h5>
         <h6>
-          <img src="/assets/imgs/backend/down.svg" alt="" />
-          45.2%
+          <img :src="props.record?.DiffRatio?.startsWith('-') ? '/assets/imgs/backend/down.svg' : '/assets/imgs/backend/up.svg'" alt="" />
+          {{ props.record?.DiffRatio ?? '—' }}
         </h6>
       </div>
-      <h3>85</h3>
-      <h4>83.5%(嚴重失調)</h4>
-      <ProgressBar3 :score="100" />
+      <h3>{{ props.record?.TotalScore ?? '—' }}</h3>
+      <h4>{{ props.record?.TotalDesc ?? '—' }}</h4>
+      <ProgressBar3 :score="parseInt(props.record?.TotalRatio ?? '0')" />
     </div>
     <div class="AutonomicNerveAlertContent2Group">
       <h3>想解決的症狀</h3>
@@ -24,34 +24,27 @@
         <div class="AutonomicNerveAlertItem">
           <h5>今次選擇了</h5>
           <div class="AutonomicNerveAlertTags">
-            <div class="AutonomicNerveAlertTag">想解決的症狀</div>
-            <div class="AutonomicNerveAlertTag">想解決的症狀</div>
-            <div class="AutonomicNerveAlertTag">想解決的症狀</div>
-            <div class="AutonomicNerveAlertTag">想解決的症狀</div>
-            <div class="AutonomicNerveAlertTag">想解決的症狀</div>
-            <div class="AutonomicNerveAlertTag">想解決的症狀</div>
-            <div class="AutonomicNerveAlertTag">想解決的症狀</div>
-            <div class="AutonomicNerveAlertTag">想解決的症狀</div>
-            <div class="AutonomicNerveAlertTag">想解決的症狀</div>
-            <div class="AutonomicNerveAlertTag">想解決的症狀</div>
+            <div v-for="(symptom, index) in props.record?.SolveTheSameList" :key="index" class="AutonomicNerveAlertTag">
+              {{ symptom }}
+            </div>
           </div>
         </div>
 
         <div class="AutonomicNerveAlertItem">
           <h5>與前次相比減少了</h5>
           <div class="AutonomicNerveAlertTags">
-            <div class="AutonomicNerveAlertTag">想解決的症狀</div>
-            <div class="AutonomicNerveAlertTag">想解決的症狀</div>
-            <div class="AutonomicNerveAlertTag">想解決的症狀</div>
+            <div v-for="(symptom, index) in props.record?.SolveSubtractList" :key="index" class="AutonomicNerveAlertTag">
+              {{ symptom }}
+            </div>
           </div>
         </div>
 
         <div class="AutonomicNerveAlertItem">
           <h5>與前次相比新增了</h5>
           <div class="AutonomicNerveAlertTags">
-            <div class="AutonomicNerveAlertTag">想解決的症狀</div>
-            <div class="AutonomicNerveAlertTag">想解決的症狀</div>
-            <div class="AutonomicNerveAlertTag">想解決的症狀</div>
+            <div v-for="(symptom, index) in props.record?.SolveAddList" :key="index" class="AutonomicNerveAlertTag">
+              {{ symptom }}
+            </div>
           </div>
         </div>
       </div>
@@ -60,154 +53,270 @@
       <div class="AutonomicNerveAlertContent3Card">
         <div class="AutonomicNerveAlertContent3Title">
           <h3>精神系統</h3>
-          <small class="up">
-            <img src="/assets/imgs/backend/up.svg" alt="" />
-            10.5%
+          <small :class="props.record?.C1Difference?.startsWith('-') ? 'down' : 'up'">
+            <img :src="props.record?.C1Difference?.startsWith('-') ? '/assets/imgs/backend/down.svg' : '/assets/imgs/backend/up.svg'" alt="" />
+            {{ props.record?.C1Difference ?? '—' }}
           </small>
         </div>
 
-        <div class="value">92.4%</div>
-        <h4>重度失調</h4>
+        <div class="value">{{ props.record?.C1Ratio ?? '—' }}</div>
+        <h4>{{ props.record?.C1Desc ?? '—' }}</h4>
         <div class="tagsGroup">
-          <div class="tag">想解決的症狀</div>
-          <div class="tag">想解決的症狀</div>
+          <div v-for="(symptom, index) in props.record?.C1Solve" :key="index" class="tag">
+            {{ symptom }}
+          </div>
         </div>
       </div>
       <div class="AutonomicNerveAlertContent3Card">
         <div class="AutonomicNerveAlertContent3Title">
           <h3>神經系統</h3>
-          <small class="up">
-            <img src="/assets/imgs/backend/up.svg" alt="" />
-            10.5%
+          <small :class="props.record?.C2Difference?.startsWith('-') ? 'down' : 'up'">
+            <img :src="props.record?.C2Difference?.startsWith('-') ? '/assets/imgs/backend/down.svg' : '/assets/imgs/backend/up.svg'" alt="" />
+            {{ props.record?.C2Difference ?? '—' }}
           </small>
         </div>
 
-        <div class="value">9.4%</div>
-        <h4>輕度失調</h4>
+        <div class="value">{{ props.record?.C2Ratio ?? '—' }}</div>
+        <h4>{{ props.record?.C2Desc ?? '—' }}</h4>
         <div class="tagsGroup">
-          <div class="tag">想解決的症狀</div>
-          <div class="tag">想解決的症狀</div>
+          <div v-for="(symptom, index) in props.record?.C2Solve" :key="index" class="tag">
+            {{ symptom }}
+          </div>
         </div>
       </div>
       <div class="AutonomicNerveAlertContent3Card">
         <div class="AutonomicNerveAlertContent3Title">
           <h3>血液循環系統</h3>
-          <small class="down">
-            <img src="/assets/imgs/backend/down.svg" alt="" />
-            65.2%
+          <small :class="props.record?.C3Difference?.startsWith('-') ? 'down' : 'up'">
+            <img :src="props.record?.C3Difference?.startsWith('-') ? '/assets/imgs/backend/down.svg' : '/assets/imgs/backend/up.svg'" alt="" />
+            {{ props.record?.C3Difference ?? '—' }}
           </small>
         </div>
 
-        <div class="value">92.4%</div>
-        <h4>中度失調</h4>
+        <div class="value">{{ props.record?.C3Ratio ?? '—' }}</div>
+        <h4>{{ props.record?.C3Desc ?? '—' }}</h4>
         <div class="tagsGroup">
-          <div class="tag">想解決的症狀</div>
-          <div class="tag">想解決的症狀</div>
+          <div v-for="(symptom, index) in props.record?.C3Solve" :key="index" class="tag">
+            {{ symptom }}
+          </div>
         </div>
       </div>
       <div class="AutonomicNerveAlertContent3Card">
         <div class="AutonomicNerveAlertContent3Title">
           <h3>感官系統</h3>
-          <small class="down">
-            <img src="/assets/imgs/backend/down.svg" alt="" />
-            10.5%
+          <small :class="props.record?.C4Difference?.startsWith('-') ? 'down' : 'up'">
+            <img :src="props.record?.C4Difference?.startsWith('-') ? '/assets/imgs/backend/down.svg' : '/assets/imgs/backend/up.svg'" alt="" />
+            {{ props.record?.C4Difference ?? '—' }}
           </small>
         </div>
 
-        <div class="value">50.3%</div>
-        <h4>中度失調</h4>
+        <div class="value">{{ props.record?.C4Ratio ?? '—' }}</div>
+        <h4>{{ props.record?.C4Desc ?? '—' }}</h4>
         <div class="tagsGroup">
-          <div class="tag">想解決的症狀</div>
-          <div class="tag">想解決的症狀</div>
+          <div v-for="(symptom, index) in props.record?.C4Solve" :key="index" class="tag">
+            {{ symptom }}
+          </div>
         </div>
       </div>
       <div class="AutonomicNerveAlertContent3Card">
         <div class="AutonomicNerveAlertContent3Title">
           <h3>心肺系統</h3>
-          <small class="up">
-            <img src="/assets/imgs/backend/up.svg" alt="" />
-            10.5%
+          <small :class="props.record?.C5Difference?.startsWith('-') ? 'down' : 'up'">
+            <img :src="props.record?.C5Difference?.startsWith('-') ? '/assets/imgs/backend/down.svg' : '/assets/imgs/backend/up.svg'" alt="" />
+            {{ props.record?.C5Difference ?? '—' }}
           </small>
         </div>
 
-        <div class="value">92.4%</div>
-        <h4>重度失調</h4>
+        <div class="value">{{ props.record?.C5Ratio ?? '—' }}</div>
+        <h4>{{ props.record?.C5Desc ?? '—' }}</h4>
         <div class="tagsGroup">
-          <div class="tag">想解決的症狀</div>
-          <div class="tag">想解決的症狀</div>
+          <div v-for="(symptom, index) in props.record?.C5Solve" :key="index" class="tag">
+            {{ symptom }}
+          </div>
         </div>
       </div>
       <div class="AutonomicNerveAlertContent3Card">
         <div class="AutonomicNerveAlertContent3Title">
           <h3>過敏免疫系統</h3>
-          <small class="up">
-            <img src="/assets/imgs/backend/up.svg" alt="" />
-            10.5%
+          <small :class="props.record?.C6Difference?.startsWith('-') ? 'down' : 'up'">
+            <img :src="props.record?.C6Difference?.startsWith('-') ? '/assets/imgs/backend/down.svg' : '/assets/imgs/backend/up.svg'" alt="" />
+            {{ props.record?.C6Difference ?? '—' }}
           </small>
         </div>
 
-        <div class="value">9.4%</div>
-        <h4>輕度失調</h4>
+        <div class="value">{{ props.record?.C6Ratio ?? '—' }}</div>
+        <h4>{{ props.record?.C6Desc ?? '—' }}</h4>
         <div class="tagsGroup">
-          <div class="tag">想解決的症狀</div>
-          <div class="tag">想解決的症狀</div>
+          <div v-for="(symptom, index) in props.record?.C6Solve" :key="index" class="tag">
+            {{ symptom }}
+          </div>
         </div>
       </div>
       <div class="AutonomicNerveAlertContent3Card">
         <div class="AutonomicNerveAlertContent3Title">
           <h3>腸胃系統</h3>
-          <small class="down">
-            <img src="/assets/imgs/backend/down.svg" alt="" />
-            65.2%
+          <small :class="props.record?.C7Difference?.startsWith('-') ? 'down' : 'up'">
+            <img :src="props.record?.C7Difference?.startsWith('-') ? '/assets/imgs/backend/down.svg' : '/assets/imgs/backend/up.svg'" alt="" />
+            {{ props.record?.C7Difference ?? '—' }}
           </small>
         </div>
 
-        <div class="value">92.4%</div>
-        <h4>中度失調</h4>
+        <div class="value">{{ props.record?.C7Ratio ?? '—' }}</div>
+        <h4>{{ props.record?.C7Desc ?? '—' }}</h4>
         <div class="tagsGroup">
-          <div class="tag">想解決的症狀</div>
-          <div class="tag">想解決的症狀</div>
+          <div v-for="(symptom, index) in props.record?.C7Solve" :key="index" class="tag">
+            {{ symptom }}
+          </div>
         </div>
       </div>
       <div class="AutonomicNerveAlertContent3Card">
         <div class="AutonomicNerveAlertContent3Title">
           <h3>泌尿生殖系統</h3>
-          <small class="down">
-            <img src="/assets/imgs/backend/down.svg" alt="" />
-            10.5%
+          <small :class="props.record?.C8Difference?.startsWith('-') ? 'down' : 'up'">
+            <img :src="props.record?.C8Difference?.startsWith('-') ? '/assets/imgs/backend/down.svg' : '/assets/imgs/backend/up.svg'" alt="" />
+            {{ props.record?.C8Difference ?? '—' }}
           </small>
         </div>
 
-        <div class="value">50.3%</div>
-        <h4>中度失調</h4>
+        <div class="value">{{ props.record?.C8Ratio ?? '—' }}</div>
+        <h4>{{ props.record?.C8Desc ?? '—' }}</h4>
         <div class="tagsGroup">
-          <div class="tag">想解決的症狀</div>
-          <div class="tag">想解決的症狀</div>
+          <div v-for="(symptom, index) in props.record?.C8Solve" :key="index" class="tag">
+            {{ symptom }}
+          </div>
         </div>
       </div>
       <div class="AutonomicNerveAlertContent3Card">
         <div class="AutonomicNerveAlertContent3Title">
-          <h3>泌尿生殖系統</h3>
-          <small class="down">
-            <img src="/assets/imgs/backend/down.svg" alt="" />
-            10.5%
+          <h3>血液循環系統</h3>
+          <small :class="props.record?.C9Difference?.startsWith('-') ? 'down' : 'up'">
+            <img :src="props.record?.C9Difference?.startsWith('-') ? '/assets/imgs/backend/down.svg' : '/assets/imgs/backend/up.svg'" alt="" />
+            {{ props.record?.C9Difference ?? '—' }}
           </small>
         </div>
 
-        <div class="value">50.3%</div>
-        <h4>中度失調</h4>
+        <div class="value">{{ props.record?.C9Ratio ?? '—' }}</div>
+        <h4>{{ props.record?.C9Desc ?? '—' }}</h4>
         <div class="tagsGroup">
-          <div class="tag">想解決的症狀</div>
-          <div class="tag">想解決的症狀</div>
+          <div v-for="(symptom, index) in props.record?.C9Solve" :key="index" class="tag">
+            {{ symptom }}
+          </div>
         </div>
       </div>
     </div>
   </div>
-  <div class="HRVUserAlertClose">
+  <div class="HRVUserAlertClose" @click="$emit('close')">
     <img src="/assets/imgs/backend/close.svg" alt="" />
   </div>
 </template>
-<script setup></script>
+
+<script setup lang="ts">
+import { defineProps, defineEmits } from 'vue';
+import ProgressBar3 from '../ProgressBar3.vue';
+
+const formatDateTime = (str: string) => {
+  if (!str || str.length !== 14) return str;
+  const year = str.slice(0, 4);
+  const month = str.slice(4, 6);
+  const day = str.slice(6, 8);
+  const hour = str.slice(8, 10);
+  const min = str.slice(10, 12);
+  return `${year}/${month}/${day} ${hour}:${min}`;
+};
+
+const props = defineProps<{ 
+  record: {
+    TotalScore?: string;
+    TotalDesc?: string;
+    TotalRatio?: string;
+    DiffScore?: string;
+    DiffRatio?: string;
+    CheckTime?: string;
+    preTotalScore?: string;
+    preTotalDesc?: string;
+    preTotalRatio?: string;
+    preCheckTime?: string;
+    SolveTheSameList?: string[];
+    SolveAddList?: string[];
+    SolveSubtractList?: string[];
+    C1Score?: string;
+    C1Desc?: string;
+    C1Ratio?: string;
+    C1Solve?: string[];
+    preC1Score?: string;
+    preC1Desc?: string;
+    preC1Ratio?: string;
+    C1Difference?: string;
+    C2Score?: string;
+    C2Desc?: string;
+    C2Ratio?: string;
+    C2Solve?: string[];
+    preC2Score?: string;
+    preC2Desc?: string;
+    preC2Ratio?: string;
+    C2Difference?: string;
+    C3Score?: string;
+    C3Desc?: string;
+    C3Ratio?: string;
+    C3Solve?: string[];
+    preC3Score?: string;
+    preC3Desc?: string;
+    preC3Ratio?: string;
+    C3Difference?: string;
+    C4Score?: string;
+    C4Desc?: string;
+    C4Ratio?: string;
+    C4Solve?: string[];
+    preC4Score?: string;
+    preC4Desc?: string;
+    preC4Ratio?: string;
+    C4Difference?: string;
+    C5Score?: string;
+    C5Desc?: string;
+    C5Ratio?: string;
+    C5Solve?: string[];
+    preC5Score?: string;
+    preC5Desc?: string;
+    preC5Ratio?: string;
+    C5Difference?: string;
+    C6Score?: string;
+    C6Desc?: string;
+    C6Ratio?: string;
+    C6Solve?: string[];
+    preC6Score?: string;
+    preC6Desc?: string;
+    preC6Ratio?: string;
+    C6Difference?: string;
+    C7Score?: string;
+    C7Desc?: string;
+    C7Ratio?: string;
+    C7Solve?: string[];
+    preC7Score?: string;
+    preC7Desc?: string;
+    preC7Ratio?: string;
+    C7Difference?: string;
+    C8Score?: string;
+    C8Desc?: string;
+    C8Ratio?: string;
+    C8Solve?: string[];
+    preC8Score?: string;
+    preC8Desc?: string;
+    preC8Ratio?: string;
+    C8Difference?: string;
+    C9Score?: string;
+    C9Desc?: string;
+    C9Ratio?: string;
+    C9Solve?: string[];
+    preC9Score?: string;
+    preC9Desc?: string;
+    preC9Ratio?: string;
+    C9Difference?: string;
+  } 
+}>();
+
+
+defineEmits(['close']);
+</script>
 
 <style scoped lang="scss">
 .AutonomicNerveAlert {
@@ -471,7 +580,7 @@
         display: flex;
         flex-wrap: wrap;
         justify-content: space-between;
-        margin-top: 0.25rem;
+        margin-top: 0.5rem;
         .tag {
           width: 49%;
           color: var(--Primary-default, #1ba39b);
@@ -481,6 +590,7 @@
           padding: 0.25rem;
           font-size: 14px;
           text-align: center;
+        margin-bottom: 0.5rem;
         }
       }
     }

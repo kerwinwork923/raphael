@@ -2,8 +2,8 @@
   <div class="lifeDetectAlert">
     <div class="lifeDetectAlertTitleGroup">
       <img src="/assets/imgs/backend/Subtract.svg" alt="" />
-      <h3>Steven Yeh</h3>
-      <h4>Contract History</h4>
+      <h3>{{ props.record?.CheckTime ?? '—' }}</h3>
+      <h4>{{ props.record?.SleepProperty ?? '—' }}</h4>
     </div>
     <div class="lifeDetectAlertTitleHR"></div>
     <div class="lifeDetectAlertContent1Group">
@@ -11,45 +11,45 @@
         <h5>總分</h5>
         <h6>
           <img src="/assets/imgs/backend/down.svg" alt="" />
-          45.2%
+          {{ props.record?.HMindexRatio ?? '—' }}%
         </h6>
       </div>
-      <h3>85</h3>
-      <h4>83.5%(嚴重失調)</h4>
-      <ProgressBar3 :score="100" />
+      <h3>{{ props.record?.Score ?? '—' }}</h3>
+      <h4>{{ props.record?.HMindexDesc ?? '—' }}</h4>
+      <ProgressBar3 :score="parseInt(props.record?.HMindexRatio ?? '0')" />
     </div>
     <div class="lifeDetectAlertContent2Group">
       <h3>睡眠周期</h3>
       <div class="lifeDetectAlertContent2">
-        <div class="">
+        <div>
           <h4>
             入睡時間
             <span class="down">
               <img src="/assets/imgs/backend/down.svg" alt="" />
-              120min
+              {{ props.record?.LayTimeToSleep ?? '—' }}
             </span>
           </h4>
-          <div class="time">00:30 <span>p.m</span></div>
+          <div class="time">{{ props.record?.bedTime ?? '—' }}</div>
         </div>
-        <div class="">
+        <div>
           <h4>
             睡眠時長
             <span class="up">
               <img src="/assets/imgs/backend/up.svg" alt="" />
-              60min
+              {{ props.record?.ccSleepExact ?? '—' }}
             </span>
           </h4>
-          <div class="time">00:30 <span>p.m</span></div>
+          <div class="time">{{ props.record?.ccSleepTime ?? '—' }}</div>
         </div>
-        <div class="">
+        <div>
           <h4>
             離床時間
             <span class="down">
               <img src="/assets/imgs/backend/down.svg" alt="" />
-              120min
+              {{ props.record?.SleepBreak ?? '—' }}min
             </span>
           </h4>
-          <div class="time">00:30 <span>p.m</span></div>
+          <div class="time">{{ props.record?.leaveTime ?? '—' }}</div>
         </div>
       </div>
     </div>
@@ -58,32 +58,35 @@
         <div class="lifeDetectAlertContentTitle">
           <h3>身心指數</h3>
           <div class="scoreGroup">
-            <h6>10.5%</h6>
+            <h6>{{ props.record?.HMindexRatio ?? '—' }}%</h6>
             <img src="/assets/imgs/backend/up.svg" alt="" />
           </div>
         </div>
-        <div class="value">9.3%</div>
-        <small>不佳狀態</small>
+        <div class="value">{{ props.record?.HMindex ?? '—' }}</div>
+        <small>{{ props.record?.HMindexDesc ?? '—' }}</small>
       </div>
       <div class="lifeDetectAlertContent3">
         <div class="lifeDetectAlertContentTitle">
           <h3>壓力指數</h3>
           <div class="scoreGroup down">
-            <h6>10.5%</h6>
+            <h6>{{ props.record?.PressureindexRatio ?? '—' }}%</h6>
             <img src="/assets/imgs/backend/down.svg" alt="" />
           </div>
         </div>
-        <div class="value">50.3%</div>
-        <small>極度壓力</small>
+        <div class="value">{{ props.record?.Pressureindex ?? '—' }}</div>
+        <small>{{ props.record?.PressureindexDesc ?? '—' }}</small>
       </div>
     </div>
-    <div class="lifeDetectAlertClose">
+    <div class="lifeDetectAlertClose" @click="$emit('close')">
       <img src="/assets/imgs/backend/close.svg" alt="" />
     </div>
   </div>
 </template>
 
-<script setup></script>
+<script setup lang="ts">
+const props = defineProps<{ record: any }>();
+defineEmits(['close']);
+</script>
 
 <style scoped lang="scss">
 .lifeDetectAlert {
@@ -354,3 +357,5 @@
   }
 }
 </style>
+
+<LifeDetectAlert v-if="showLife" :record="selectedLife" @close="closeLife" />

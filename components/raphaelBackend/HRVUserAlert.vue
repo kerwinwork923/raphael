@@ -41,7 +41,7 @@
       <div class="HRVUserAlertContent1Card">
         <h3>壓力</h3>
         <div class="value">{{ stressLvl }}</div>
-        <div class="info">low</div>
+        <div class="info">{{ getPressureLevel(stressLvl) }}</div>
       </div>
     </div>
     <div class="HRVUserAlertContent2">
@@ -151,6 +151,14 @@ defineEmits(["close"]);
 
 /* ---------- 小工具 ---------- */
 const toInt = (v: any) => (v === "" ? "—" : parseInt(v, 10));
+
+// 壓力等級轉換
+const getPressureLevel = (stress: string | undefined) => {
+  if (stress === "低") return "low";
+  if (stress === "平") return "middle";
+  if (stress === "高") return "high";
+  return "—";
+};
 
 /* ---------- 映射 ---------- */
 const age = computed(() => toInt(props.record?.bioage));

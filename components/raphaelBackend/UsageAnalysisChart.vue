@@ -162,17 +162,34 @@ onUnmounted(() => chart.value && chart.value.destroy());
 watch([() => props.usageData, range], build);
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .usage-chart {
   width: 100%;
-  height: 280px; /* 固定高度避免撐大 */
+  height: 340px; /* 固定高度避免撐大 */
   position: relative; /* 讓 Chart.js 100% × 100% 正常貼齊 */
+  @include respond-to("xl") {
+    height: 280px;
+  }
+  @include respond-to("sm") {
+    height: 200px;
+  }
 }
 .toolbar {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
+
+  
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translateY(-100%);
+    @include respond-to("sm") {
+      position: relative;
+      transform: translateY(0);
+    }
+ 
 }
 .search {
   border: 1px solid #b1c0d8;

@@ -1,6 +1,5 @@
 <template>
   <div class="ContractUserAlert">
-    <!-- 標題 -->
     <div class="ContractUserAlertTitleGroup">
       <img src="/assets/imgs/backend/Subtract.svg" alt="" />
       <h3>{{ memberName }}</h3>
@@ -54,7 +53,7 @@
 
       <div class="ContractUserAlertContentList">
         <h4><img src="/assets/imgs/backend/money.svg" alt="" />消費金額</h4>
-        <h5>{{ (c.Amount ?? 0).toLocaleString() }}</h5>
+        <h5>{{ (c.TotalFee ?? 0).toLocaleString() }}</h5>
       </div>
 
       <div class="ContractUserAlertContentList">
@@ -90,7 +89,9 @@ const props = defineProps<{
     ProductName: string;
     RentStart: string;
     RentEnd: string;
-    Amount?: number;
+    TotalFee?: string;
+    Used?: string;
+    Still?: string;
   }[];
   memberName: string;
 }>();
@@ -112,7 +113,7 @@ const filtered = computed(() => {
 
 /* 小計 */
 const totalAmount = computed(() =>
-  filtered.value.reduce((s, c) => s + (c.Amount ?? 0), 0)
+  filtered.value.reduce((s, c) => s + (Number(c.TotalFee) ?? 0), 0)
 );
 const totalCount = computed(() => filtered.value.length);
 

@@ -7,14 +7,14 @@
       <!-- page header -->
       <header class="page-header">
         <h2 class="title">
-          會員清單 <span class="count">({{ total }}人)</span>
+          會員清單 <span class="count">({{ store.total }}人)</span>
         </h2>
         <div class="meta">
           <button class="btn refresh" @click="refreshData">
             <i class="i-refresh"></i>
             資料更新
           </button>
-          <span class="updated-time">最後更新: {{ lastUpdated }}</span>
+          <span class="updated-time">最後更新: {{ store.lastUpdated }}</span>
         </div>
       </header>
       <!-- toolbar / filters -->
@@ -22,23 +22,25 @@
         <div class="toolbar-inner">
           <div class="search-wrapper">
             <input
-              v-model="keyword"
+              v-model="store.keyword"
               class="search"
               type="text"
               placeholder="請輸入關鍵字"
+              @input="store.setKeyword($event.target.value)"
             />
             <img src="/assets/imgs/backend/search.svg" alt="" />
           </div>
 
           <div class="toolbarTime-wrapper">
             <VueDatePicker
-              v-model="dateRange"
+              v-model="store.dateRange"
               range
               :enable-time-picker="false"
               :format="'yyyy/MM/dd'"
-              :min-date="minDate"
+              :min-date="new Date(2024, 0, 1)"
               placeholder="註冊日期區間"
               prepend-icon="i-calendar"
+              @update:model-value="store.setDateRange"
             />
           </div>
           <div class="selectWrapper">
@@ -47,7 +49,10 @@
               src="/assets/imgs/backend/filter.svg"
               alt=""
             />
-            <select v-model="productFilter">
+            <select 
+              v-model="store.productFilter"
+              @change="store.setProductFilter($event.target.value)"
+            >
               <option value="">產品篩選</option>
               <option
                 v-for="product in productOptions"
@@ -70,7 +75,10 @@
               src="/assets/imgs/backend/filter.svg"
               alt=""
             />
-            <select v-model="statusFilter">
+            <select 
+              v-model="store.statusFilter"
+              @change="store.setStatusFilter($event.target.value)"
+            >
               <option value="">用戶狀態</option>
               <option
                 v-for="status in statusOptions"
@@ -100,13 +108,12 @@
           <div class="product">產品資訊</div>
           <div class="health">健康指標</div>
           <div class="reg-date">註冊時間</div>
-          <!-- <div class="cell action"></div> -->
         </div>
 
         <!-- data rows -->
         <div class="table-list">
           <div
-            v-for="member in paginatedMembers"
+            v-for="member in store.paginatedMembers"
             :key="member.id"
             class="table-row"
           >
@@ -171,14 +178,6 @@
                 >
                   {{ member.memType }}
                 </div>
-
-                <!-- <div class="cellTag cellTagWarning">偶爾使用</div> -->
-                <!-- <div class="cellTag cellTag2">
-                <img src="/assets/imgs/backend/heartCrack.svg" alt="" />解約
-              </div> -->
-                <!-- <div class="cellTag cellTag2"><img src="/assets/imgs/backend/highRisk.svg" alt="">高風險</div> -->
-                <!-- <div class="cellTag cellTag2"><img src="/assets/imgs/backend/archive.svg" alt="">未歸還</div> -->
-                <!-- <div class="cellTag cellTag2"><img src="/assets/imgs/backend/aoke.svg" alt="">奧客</div> -->
               </div>
             </div>
 
@@ -195,32 +194,32 @@
 
         <!-- pagination -->
         <nav class="pagination">
-          <button class="btn-page" :disabled="page === 1" @click="gotoPage(1)">
+          <button class="btn-page" :disabled="store.page === 1" @click="store.gotoPage(1)">
             &lt;&lt;
           </button>
-          <button class="btn-page" :disabled="page === 1" @click="prevPage">
+          <button class="btn-page" :disabled="store.page === 1" @click="store.prevPage">
             &lt;
           </button>
           <button
-            v-for="p in totalPages"
+            v-for="p in store.totalPages"
             :key="p"
             class="btn-page btn-page-number"
-            :class="{ active: page === p }"
-            @click="gotoPage(p)"
+            :class="{ active: store.page === p }"
+            @click="store.gotoPage(p)"
           >
             {{ p }}
           </button>
           <button
             class="btn-page"
-            :disabled="page === totalPages"
-            @click="nextPage"
+            :disabled="store.page === store.totalPages"
+            @click="store.nextPage"
           >
             &gt;
           </button>
           <button
             class="btn-page"
-            :disabled="page === totalPages"
-            @click="gotoPage(totalPages)"
+            :disabled="store.page === store.totalPages"
+            @click="store.gotoPage(store.totalPages)"
           >
             &gt;&gt;
           </button>
@@ -231,56 +230,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
+import { onMounted } from "vue";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import Sidebar from "/components/raphaelBackend/Sidebar.vue";
 import { useRouter } from "vue-router";
-/* ---------- 型別 ---------- */
-interface MemberRaw {
-  MID: string;
-  Name: string;
-  Birthday: string;
-  Mobile: string;
-  GradeName: string;
-  HRV: string;
-  DSPR: string;
-  memType: string;
-  TDate: string;
-  score: string;
-  totalScore: string;
-  HomeOrder: { ProductName: string; Used: string; Still: string }[];
-}
-interface Member {
-  id: string;
-  name: string;
-  birthday: string;
-  phone: string;
-  level: string;
-  product: string;
-  usageDays: number;
-  remainingDays: number;
-  hrv: string;
-  ans: string;
-  isAbnormal: boolean;
-  registerDate: string;
-  memType: string;
-  score: string;
-  totalScore: String;
-}
-
-/* ---------- reactive state ---------- */
-const keyword = ref("");
-const dateRange = ref<Date[] | null>(null); // ← null 才不會預設 1970
-const minDate = new Date(2024, 0, 1);
-const productFilter = ref("");
-const statusFilter = ref("");
-const page = ref(1);
-const pageSize = 10;
-const members = ref<Member[]>([]);
-const lastUpdated = ref("");
+import { useMemberListStore } from "~/stores/useMemberListStore";
 
 const router = useRouter();
+const store = useMemberListStore();
 
 /* ---------- 產品 / 狀態選項 ---------- */
 const productOptions = [
@@ -304,137 +262,26 @@ const statusOptions = [
 ].map((v) => ({ label: v, value: v }));
 
 /* ---------- 取會員資料 ---------- */
-onMounted(fetchMembers);
+onMounted(() => {
+  store.fetchMembers();
+});
 
-watch([keyword, productFilter, statusFilter, dateRange], fetchMembers); // 條件變動就重新抓一次
-
-async function fetchMembers() {
-  try {
-    const token =
-      localStorage.getItem("backendToken") ||
-      sessionStorage.getItem("backendToken");
-    const adminID =
-      localStorage.getItem("adminID") || sessionStorage.getItem("adminID");
-    if (!token || !adminID) throw new Error("缺少 token 或 adminID");
-
-    const body = {
-      AdminID: adminID,
-      Token: token,
-      Keyword: keyword.value,
-      StartDate: "", // 目前後端不用日期篩選
-      EndDate: "",
-      ProductName: productFilter.value,
-      memType: statusFilter.value,
-    };
-
-    const res = await fetch("https://23700999.com:8081/HMA/API_Home.jsp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) throw new Error(res.statusText);
-    const { MemberList }: { MemberList: MemberRaw[] } = await res.json();
-
-    members.value = MemberList.map((r) => {
-      const order = r.HomeOrder?.[0] ?? {};
-      const fmt = r.TDate.includes("/")
-        ? r.TDate
-        : `${r.TDate.slice(0, 4)}/${r.TDate.slice(4, 6)}/${r.TDate.slice(
-            6,
-            8
-          )}`;
-      return {
-        id: r.MID,
-        name: r.Name,
-        birthday: r.Birthday,
-        phone: r.Mobile,
-        level: r.GradeName,
-        product: order.ProductName ?? "",
-        usageDays: Number(order.Used ?? 0),
-        remainingDays: Number(order.Still ?? 0),
-        hrv: r.HRV,
-        ans: r.DSPR,
-        isAbnormal: Number(r.HRV) < 40,
-        registerDate: fmt,
-        memType: r.memType,
-        score: r.Score ? Number(r.Score) : null,
-        totalScore: r.TotalScore ? Number(r.TotalScore) : null,
-      };
-    });
-
-    lastUpdated.value = new Date().toLocaleString("zh-TW");
-    page.value = 1;
-  } catch (e) {
-    console.error("讀取 MemberList 失敗：", e);
-  }
-}
-
-function handleGoInfo(m: Member) {
-  // ① 存資料（想存哪裡就換哪裡）
+function handleGoInfo(m: any) {
   localStorage.setItem(
     "selectedMember",
     JSON.stringify({ MID: m.id, Mobile: m.phone })
   );
-
-  // ② 跳轉（這裡假設你有一條 name = 'memberDetail' 的路由）
- router.push(`/raphaelBackend/member/memberContent`);
-}
-
-/* ---------- 前端篩選 / 分頁 ---------- */
-const filteredMembers = computed(() => {
-  return members.value.filter((m) => {
-    /* 關鍵字 */
-    const kw = keyword.value.trim();
-    const hit =
-      !kw || [m.name, m.phone, m.birthday].some((v) => v.includes(kw));
-
-    /* 產品 / 狀態 */
-    const prodOk = !productFilter.value || m.product === productFilter.value;
-    const statusOk = !statusFilter.value || m.memType === statusFilter.value;
-
-    /* 日期 */
-    let dateOk = true;
-    if (
-      Array.isArray(dateRange.value) &&
-      dateRange.value[0] &&
-      dateRange.value[1]
-    ) {
-      const [start, end] = dateRange.value;
-      const regDate = new Date(m.registerDate.replace(/-/g, "/"));
-      dateOk = regDate >= start && regDate <= end;
-    }
-
-    return hit && prodOk && statusOk && dateOk;
-  });
-});
-
-const total = computed(() => filteredMembers.value.length);
-const totalPages = computed(() => Math.ceil(total.value / pageSize));
-const paginatedMembers = computed(() => {
-  const start = (page.value - 1) * pageSize;
-  return filteredMembers.value.slice(start, start + pageSize);
-});
-
-/* ---------- 分頁切換 ---------- */
-function scrollToTop() {
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
-function gotoPage(p: number) {
-  page.value = p;
-  scrollToTop();
-}
-function prevPage() {
-  if (page.value > 1) page.value--;
-  scrollToTop();
-}
-function nextPage() {
-  if (page.value < totalPages.value) page.value++;
-  scrollToTop();
+  router.push(`/raphaelBackend/member/memberContent`);
 }
 
 /* ---------- 手動刷新 ---------- */
 function refreshData() {
-  fetchMembers();
+  store.clear();
+  store.fetchMembers();
+}
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 </script>
 

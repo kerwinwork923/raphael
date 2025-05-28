@@ -2,99 +2,149 @@
   <div class="babyRecordAlert">
     <div class="babyRecordAlertTitleGroup">
       <img src="/assets/imgs/backend/Subtract.svg" alt="" />
-      <h3>2024/10/10 12:00</h3>
-      <h4>Detection Time</h4>
+      <h3>{{ mainDetail?.CheckTime || '—' }}</h3>
+      <h4>檢測時間</h4>
     </div>
     <div class="babyRecordAlertTitleHR"></div>
-    <div class="babyRecordAlertContent1Group">
+    <div class="babyRecordAlertContent1Group" v-if="mainDetail">
       <div class="babyRecordAlertContent1TitleGroup">
-        <h5>總分</h5>
+        <h5>全部總分</h5>
         <h6>
           <img src="/assets/imgs/backend/down.svg" alt="" />
-          45.2%
+          {{ mainDetail.ALL_Ratio }}%
         </h6>
       </div>
-      <h3>85</h3>
-      <h4>83.5%(嚴重失調)</h4>
-      <ProgressBar3 :score="100" />
+      <h3>{{ mainDetail.ALL_Score }}</h3>
+      <h4>{{ mainDetail.ALL_Ratio }}% ({{ mainDetail.ALL_Serious }})</h4>
     </div>
-
     <div class="babyRecordAlertContent3Group">
-
-      <div class="babyRecordAlertContent3">
+      <div
+        class="babyRecordAlertContent3"
+        v-for="item in detailList"
+        :key="item.Type"
+      >
         <div class="babyRecordAlertContentTitle">
-          <h3>粗大動作</h3>
-          <div class="scoreGroup down">
-            <h6>12.3%</h6>
-            <img src="/assets/imgs/backend/down.svg" alt="" />
+          <h3>{{ item.TypeName }}</h3>
+          <div class="scoreGroup" :class="{ up: Number(item.Diff) > 0, down: Number(item.Diff) <= 0 }">
+            <h6>{{ item.Diff }}%</h6>
+            <img :src="Number(item.Diff) > 0 ? '/assets/imgs/backend/up.svg' : '/assets/imgs/backend/down.svg'" alt="" />
           </div>
         </div>
-        <div class="value">10.5%</div>
-        <small>優秀表現</small>
-      </div>
-      <div class="babyRecordAlertContent3">
-        <div class="babyRecordAlertContentTitle">
-          <h3>精細動作</h3>
-          <div class="scoreGroup up">
-            <h6>4.5%</h6>
-            <img src="/assets/imgs/backend/up.svg" alt="" />
-          </div>
-        </div>
-        <div class="value">50.3%</div>
-        <small>基礎能力</small>
-      </div>
-      <div class="babyRecordAlertContent3">
-        <div class="babyRecordAlertContentTitle">
-          <h3>語言認知</h3>
-          <div class="scoreGroup down">
-            <h6>40.3%</h6>
-            <img src="/assets/imgs/backend/down.svg" alt="" />
-          </div>
-        </div>
-        <div class="value">50.3%</div>
-        <small>需要加強</small>
-      </div>
-      <div class="babyRecordAlertContent3">
-        <div class="babyRecordAlertContentTitle">
-          <h3>注意力</h3>
-          <div class="scoreGroup down">
-            <h6>32.5%</h6>
-            <img src="/assets/imgs/backend/down.svg" alt="" />
-          </div>
-        </div>
-        <div class="value">20.3%</div>
-        <small>基礎能力</small>
-      </div>
-      <div class="babyRecordAlertContent3">
-        <div class="babyRecordAlertContentTitle">
-          <h3>好動指標</h3>
-          <div class="scoreGroup up">
-            <h6>10.5%</h6>
-            <img src="/assets/imgs/backend/up.svg" alt="" />
-          </div>
-        </div>
-        <div class="value">10.3%</div>
-        <small>需要加強</small>
-      </div>
-      <div class="babyRecordAlertContent3">
-        <div class="babyRecordAlertContentTitle">
-          <h3>壓力指數</h3>
-          <div class="scoreGroup down">
-            <h6>10.5%</h6>
-            <img src="/assets/imgs/backend/down.svg" alt="" />
-          </div>
-        </div>
-        <div class="value">50.3%</div>
-        <small>優秀表現</small>
+        <div class="value">{{ item.Ratio }}%</div>
+        <small>{{ item.Serious }}</small>
       </div>
     </div>
-    <div class="babyRecordAlertClose">
+    <div class="babyRecordAlertClose" @click="emit('close')">
       <img src="/assets/imgs/backend/close.svg" alt="" />
     </div>
   </div>
 </template>
 
-<script setup></script>
+<script setup lang="ts">
+import { ref, watch, onMounted, onUnmounted, nextTick, computed } from "vue";
+import VueDatePicker from "@vuepic/vue-datepicker";
+import { Chart } from "chart.js";
+
+const props = defineProps<{ record: any }>();
+const emit = defineEmits(['close']);
+
+// 取出主資料（用第一筆即可，因為 ALL_Score/ALL_Ratio/ALL_Serious 都一樣）
+const detailList = props.record?.ChildANSDetailList || [];
+const mainDetail = detailList.length > 0 ? detailList[0] : null;
+
+const canvas = ref<HTMLCanvasElement | null>(null);
+let chart: Chart | null = null;
+
+const dateRange = ref<Date[] | null>(null);
+
+const filteredRecords = computed(() => {
+  if (!dateRange.value || dateRange.value.length < 2) return detailList;
+  const [from, to] = dateRange.value;
+  const start = from.getTime();
+  const end = to.getTime();
+  return detailList.filter((item) => {
+    const ms = Date.parse(item.CheckTime.replace(/\//g, "-"));
+    return ms >= start && ms <= end;
+  });
+});
+
+const mmdd = (raw: string) => {
+  if (!raw || typeof raw !== "string") return "";
+  if (!raw.includes("/")) return raw;
+  const datePart = raw.split(" ")[0];
+  const parts = datePart.split("/");
+  if (parts.length === 3) {
+    const [_, m, d] = parts;
+    return `${(m ?? "").padStart(2, "0")}/${(d ?? "").padStart(2, "0")}`;
+  }
+  return raw;
+};
+
+function build() {
+  if (!canvas.value) return;
+  const sorted = [...filteredRecords.value].sort(
+    (a, b) => new Date(a.CheckTime).getTime() - new Date(b.CheckTime).getTime()
+  );
+  const labels = sorted.map((r) => mmdd(r.CheckTime));
+  const scores = sorted.map((r) => Number(r.ALL_Score));
+  const ratios = sorted.map((r) => Number(r.ALL_Ratio));
+  const serious = sorted.map((r) => r.ALL_Serious);
+
+  const maxScore = Math.max(...scores, 200);
+  const yMax = maxScore < 200 ? 200 : Math.ceil(maxScore * 1.1 / 10) * 10;
+
+  chart?.destroy();
+  const ctx = canvas.value.getContext("2d")!;
+  chart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "總分",
+          data: scores,
+          borderColor: "#1ba39b",
+          backgroundColor: "#1ba39b",
+          tension: 0.3,
+          pointRadius: 5,
+          fill: false,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: "bottom" },
+        tooltip: {
+          callbacks: {
+            label: function (context: any) {
+              const idx = context.dataIndex;
+              let label = `總分: ${scores[idx]}`;
+              if (ratios[idx] !== undefined) label += `，百分比: ${ratios[idx]}%`;
+              if (serious[idx]) label += `，表現: ${serious[idx]}`;
+              return label;
+            },
+          },
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: yMax,
+        },
+      },
+    },
+  });
+}
+
+onMounted(async () => {
+  await nextTick();
+  build();
+});
+onUnmounted(() => chart?.destroy());
+watch([() => detailList, dateRange], build, { deep: true });
+</script>
 
 <style scoped lang="scss">
 .babyRecordAlert {

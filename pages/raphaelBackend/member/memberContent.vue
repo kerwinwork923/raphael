@@ -1,5 +1,9 @@
 <template>
-  <div class="memberInfo">
+  <div v-if="loading" class="loading-mask">
+    <div class="loading-spinner"></div>
+    <div>載入中，請稍候...</div>
+  </div>
+  <div v-else class="memberInfo">
     <Sidebar />
 
     <!-- ───── 彈窗 ───── -->
@@ -9,28 +13,40 @@
       :member-name="member?.Name ?? ''"
       @close="closeContract"
     />
-    <HRVUserAlertAlert
-      v-if="showHRV"
-      :record="selectedHRV"
-      @close="closeHRV"
-    />
+    <HRVUserAlertAlert v-if="showHRV" :record="selectedHRV" @close="closeHRV" />
 
-    <AutonomicNerveAlert v-if="false" />
-    <LifeDetectAlert v-if="false" />
-    <BabyRecordAlert v-if="false" />
+    <AutonomicNerveAlert
+      v-if="showANS"
+      :record="selectedANS"
+      @close="closeANS"
+    />
+    <LifeDetectAlert
+      v-if="showLife"
+      :record="selectedLife"
+      @close="closeLife"
+    />
+    <BabyRecordAlert
+      v-if="showBaby"
+      :record="selectedBaby"
+      @close="closeBaby"
+    />
 
     <!-- ───── 主要內容 ───── -->
     <div class="memberInfoContent">
       <!-- 標題列 -->
       <div class="memberInfoTitle">
-        <h3>{{ member?.Name ?? "—" }}</h3>
+        <!-- <h3>{{ member?.Name ?? "—" }}</h3> -->
+        <h3>{{ member?.Name ?? "—" }}</h3> 
         <div class="optionGroup">
-          <button @click="goBack">
+          <h3 class="memberNameRWD">{{ member?.Name ?? "—" }}</h3>
+          <button class="goBackBtn" @click="goBack">
             <img src="/assets/imgs/backend/back.svg" alt />返回
           </button>
 
-          <button class="btn refresh" @click="refresh">資料更新</button>
-          <span class="updated-time">最後更新: {{ lastUpdated || "—" }}</span>
+          <div class="rwdW100">
+            <button class="btn refresh" @click="refresh">資料更新</button>
+            <span class="updated-time">最後更新: {{ lastUpdated || "—" }}</span>
+          </div>
         </div>
       </div>
 
@@ -38,7 +54,7 @@
       <div class="memberInfoCardWrap">
         <!-- █ 基本資料 + 合約 ------------------------------------------------ -->
         <div class="memberInfoRow">
-          <div class="memberInfoCardGroup">
+          <div class="memberInfoCardGroup memberInfoCardGroupW50">
             <!-- 基本資料 -->
             <div class="memberInfoCard2">
               <h3>基本資料</h3>
@@ -108,6 +124,14 @@
                     目前尚未續約，請確認是否續約以恢復服務。
                   </div>
                 </div>
+                <div class="memberInfoWarningTagsGroup">
+                  <div class="memberInfoWarningTag used">
+                    已使用 {{ currentOrder.Used || 0 }} 天
+                  </div>
+                  <div class="memberInfoWarningTag remain">
+                    剩餘 {{ currentOrder.Still || 0 }} 天
+                  </div>
+                </div>
               </template>
               <template v-else>
                 <h3>—</h3>
@@ -122,20 +146,21 @@
           </div>
 
           <!-- █ 使用紀錄查詢 ------------------------------------------------- -->
-          <div class="memberInfoCard">
-            <h3>使用紀錄查詢</h3>
+          <div class="memberInfoCard memberInfoCardGroupW50">
             <div class="memberInfoTitleGroup">
+              <h3>使用紀錄查詢</h3>
               <small>已使用 {{ totalHome }} 次</small>
-              <VueDatePicker
-                v-model="homeDateRange"
-                range
-                class="memberInfoDate1"
-                :enable-time-picker="false"
-                format="yyyy/MM/dd"
-                placeholder="使用日期區間"
-                prepend-icon="i-calendar"
-              />
             </div>
+            <VueDatePicker
+              v-model="homeDateRange"
+              range
+              class="memberInfoDate1"
+              :enable-time-picker="false"
+              format="yyyy/MM/dd"
+              placeholder="使用日期區間"
+              prepend-icon="i-calendar"
+               teleport="body"
+            />
 
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
@@ -149,12 +174,12 @@
                 <div
                   class="memberInfoTableRow"
                   v-for="row in paginatedHome"
-                  :key="row.StartTime"
+                  :key="row.UID"
                 >
                   <div class="memberInfoTableRowItem">{{ row.StartTime }}</div>
                   <div class="memberInfoTableRowItem">{{ row.EndTime }}</div>
                   <div class="memberInfoTableRowItem">
-                    {{ row.Interval }} 天
+                    {{ row.diffDays || "—" }} 天
                   </div>
                 </div>
               </template>
@@ -209,7 +234,7 @@
           </div>
 
           <!-- 使用紀錄分析 -->
-          <div class="memberInfoCard">
+          <div class="memberInfoCard memberInfoCardGroupW100">
             <h3>使用紀錄分析</h3>
             <UsageAnalysisChart :usage-data="filteredHomeForChart" />
           </div>
@@ -218,17 +243,20 @@
         <!-- █ HRV ----------------------------------------------------------- -->
         <div class="memberInfoRow">
           <div class="memberInfoCard w-half">
-            <h3>HRV檢測紀錄查詢</h3>
-            <div class="memberInfoTitleGroup">
-              <small>共 {{ totalHRV }} 筆</small>
-              <VueDatePicker
-                v-model="hrvRange"
-                range
-                :enable-time-picker="false"
-                format="yyyy/MM/dd"
-              />
+            <div class="memberInfoTitleWrap">
+              <h3>HRV檢測紀錄查詢</h3>
+              <div class="memberInfoTitleGroup">
+                <small>共 {{ totalHRV }} 筆</small>
+                <VueDatePicker
+                  v-model="hrvRange"
+                  placeholder="使用日期區間"
+                  range
+                  :enable-time-picker="false"
+                  format="yyyy/MM/dd"
+                  teleport="body"
+                />
+              </div>
             </div>
-
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
                 <div class="memberInfoTableTitleItem">檢測時間</div>
@@ -325,15 +353,19 @@
         <!-- █ 自律神經 ------------------------------------------------------- -->
         <div class="memberInfoRow">
           <div class="memberInfoCard w-half">
-            <h3>自律神經檢測紀錄查詢</h3>
-            <div class="memberInfoTitleGroup">
-              <small>共 {{ totalANS }} 筆</small>
-              <VueDatePicker
-                v-model="ansRange"
-                range
-                :enable-time-picker="false"
-                format="yyyy/MM/dd"
-              />
+            <div class="memberInfoTitleWrap">
+              <h3>自律神經檢測紀錄查詢</h3>
+              <div class="memberInfoTitleGroup">
+                <small>共 {{ totalANS }} 筆</small>
+                <VueDatePicker
+                  v-model="ansRange"
+                  placeholder="使用日期區間"
+                  range
+                  :enable-time-picker="false"
+                  format="yyyy/MM/dd"
+                  teleport="body"
+                />
+              </div>
             </div>
 
             <div class="memberInfoTable">
@@ -341,7 +373,7 @@
                 <div class="memberInfoTableTitleItem">檢測時間</div>
                 <div class="memberInfoTableTitleItem">分數</div>
                 <div class="memberInfoTableTitleItem">嚴重程度</div>
-                <div class="memberInfoTableTitleItem">天數差</div>
+                <div class="memberInfoTableTitleItem">間隔天數</div>
               </div>
               <div class="memberInfoTableHR" />
 
@@ -352,12 +384,21 @@
                   :key="a.CheckTime"
                 >
                   <div class="memberInfoTableRowItem">{{ a.CheckTime }}</div>
-                  <div class="memberInfoTableRowItem">{{ a.Score ?? "—" }}</div>
-                  <div class="memberInfoTableRowItem">{{ a.Level ?? "—" }}</div>
+                  <div class="memberInfoTableRowItem">
+                    {{ a.TotalScore ?? "—" }}
+                  </div>
+                  <div class="memberInfoTableRowItem">
+                    {{ a.TotalDesc ?? "—" }}
+                  </div>
                   <div class="memberInfoTableRowItem">
                     {{ a.diffDays ?? "—" }}
                   </div>
-                  <img src="/assets/imgs/backend/goNext.svg" alt />
+                  <img
+                    src="/assets/imgs/backend/goNext.svg"
+                    alt="detail"
+                    style="cursor: pointer"
+                    @click="openANS(a)"
+                  />
                 </div>
               </template>
               <div class="memberInfoTableRow" v-else>
@@ -371,37 +412,37 @@
               <button
                 class="btn-page"
                 :disabled="pageANS === 1"
-                @click="goto(pageANS, 1)"
+                @click="pageANS = 1"
               >
                 &lt;&lt;
               </button>
               <button
                 class="btn-page"
                 :disabled="pageANS === 1"
-                @click="prev(pageANS)"
+                @click="pageANS--"
               >
                 &lt;
               </button>
               <button
                 class="btn-page btn-page-number"
-                v-for="p in totalPagesANS"
+                v-for="p in pageNumberListANS"
                 :key="p"
                 :class="{ active: pageANS === p }"
-                @click="goto(pageANS, p)"
+                @click="pageANS = p"
               >
                 {{ p }}
               </button>
               <button
                 class="btn-page"
                 :disabled="pageANS === totalPagesANS"
-                @click="next(pageANS, totalPagesANS)"
+                @click="pageANS++"
               >
                 &gt;
               </button>
               <button
                 class="btn-page"
                 :disabled="pageANS === totalPagesANS"
-                @click="goto(pageANS, totalPagesANS)"
+                @click="pageANS = totalPagesANS"
               >
                 &gt;&gt;
               </button>
@@ -422,23 +463,27 @@
         <!-- █ 生活檢測 ------------------------------------------------------- -->
         <div class="memberInfoRow">
           <div class="memberInfoCard w-half">
-            <h3>生活檢測紀錄查詢</h3>
-            <div class="memberInfoTitleGroup">
-              <small>共 {{ totalLife }} 筆</small>
-              <VueDatePicker
-                range
-                v-model="lifeRange"
-                :enable-time-picker="false"
-                format="yyyy/MM/dd"
-              />
+            <div class="memberInfoTitleWrap">
+              <h3>生活檢測紀錄查詢</h3>
+              <div class="memberInfoTitleGroup">
+                <small>共 {{ totalLife }} 筆</small>
+                <VueDatePicker
+                  range
+                  placeholder="使用日期區間"
+                  v-model="lifeRange"
+                  :enable-time-picker="false"
+                  format="yyyy/MM/dd"
+                  teleport="body"
+                />
+              </div>
             </div>
 
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
                 <div class="memberInfoTableTitleItem">檢測時間</div>
                 <div class="memberInfoTableTitleItem">分數</div>
-                <div class="memberInfoTableTitleItem">生活品質</div>
-                <div class="memberInfoTableTitleItem">天數差</div>
+                <div class="memberInfoTableTitleItem">睡眠品質</div>
+                <div class="memberInfoTableTitleItem">間隔天數</div>
               </div>
               <div class="memberInfoTableHR" />
 
@@ -451,12 +496,17 @@
                   <div class="memberInfoTableRowItem">{{ l.CheckTime }}</div>
                   <div class="memberInfoTableRowItem">{{ l.Score ?? "—" }}</div>
                   <div class="memberInfoTableRowItem">
-                    {{ l.Quality ?? "—" }}
+                    {{ l.daytimeSleepiness ?? "—" }}
                   </div>
                   <div class="memberInfoTableRowItem">
                     {{ l.diffDays ?? "—" }}
                   </div>
-                  <img src="/assets/imgs/backend/goNext.svg" alt />
+                  <img
+                    src="/assets/imgs/backend/goNext.svg"
+                    alt="detail"
+                    style="cursor: pointer"
+                    @click="openLife(l)"
+                  />
                 </div>
               </template>
               <div class="memberInfoTableRow" v-else>
@@ -470,37 +520,37 @@
               <button
                 class="btn-page"
                 :disabled="pageLife === 1"
-                @click="goto(pageLife, 1)"
+                @click="pageLife = 1"
               >
                 &lt;&lt;
               </button>
               <button
                 class="btn-page"
                 :disabled="pageLife === 1"
-                @click="prev(pageLife)"
+                @click="pageLife--"
               >
                 &lt;
               </button>
               <button
                 class="btn-page btn-page-number"
-                v-for="p in totalPagesLife"
+                v-for="p in pageNumberListLife"
                 :key="p"
                 :class="{ active: pageLife === p }"
-                @click="goto(pageLife, p)"
+                @click="pageLife = p"
               >
                 {{ p }}
               </button>
               <button
                 class="btn-page"
                 :disabled="pageLife === totalPagesLife"
-                @click="next(pageLife, totalPagesLife)"
+                @click="pageLife++"
               >
                 &gt;
               </button>
               <button
                 class="btn-page"
                 :disabled="pageLife === totalPagesLife"
-                @click="goto(pageLife, totalPagesLife)"
+                @click="pageLife = totalPagesLife"
               >
                 &gt;&gt;
               </button>
@@ -521,39 +571,49 @@
         <!-- █ 寶貝檢測 ------------------------------------------------------- -->
         <div class="memberInfoRow">
           <div class="memberInfoCard w-half">
-            <h3>寶貝檢測紀錄查詢</h3>
-            <div class="memberInfoTitleGroup">
-              <small>共 {{ totalChild }} 筆</small>
-              <VueDatePicker
-                range
-                v-model="babyRange"
-                :enable-time-picker="false"
-                format="yyyy/MM/dd"
-              />
+            <div class="memberInfoTitleWrap">
+              <h3>寶貝檢測紀錄查詢</h3>
+              <div class="memberInfoTitleGroup">
+                <small>共 {{ totalChild }} 筆</small>
+                <VueDatePicker
+                  range
+                  v-model="babyRange"
+                  placeholder="使用日期區間"
+                  :enable-time-picker="false"
+                  format="yyyy/MM/dd"
+                  teleport="body"
+                />
+              </div>
             </div>
-
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
                 <div class="memberInfoTableTitleItem">檢測時間</div>
                 <div class="memberInfoTableTitleItem">分數</div>
                 <div class="memberInfoTableTitleItem">嚴重程度</div>
-                <div class="memberInfoTableTitleItem">天數差</div>
+                <div class="memberInfoTableTitleItem">間隔天數</div>
               </div>
               <div class="memberInfoTableHR" />
 
               <template v-if="paginatedChild.length">
                 <div
-                  class="memberInfoTableRow"
-                  v-for="c in paginatedChild"
-                  :key="c.CheckTime"
+                  class="memberInfoTableRow baby-row"
+                  v-for="baby in paginatedChild"
+                  :key="baby.AID"
                 >
-                  <div class="memberInfoTableRowItem">{{ c.CheckTime }}</div>
-                  <div class="memberInfoTableRowItem">{{ c.Score ?? "—" }}</div>
-                  <div class="memberInfoTableRowItem">{{ c.Level ?? "—" }}</div>
+                  <div class="memberInfoTableRowItem">{{ baby.CheckTime }}</div>
+                  <div class="memberInfoTableRowItem">{{ baby.ALL_Score }}</div>
                   <div class="memberInfoTableRowItem">
-                    {{ c.diffDays ?? "—" }}
+                    {{ baby.ALL_Serious }}
                   </div>
-                  <img src="/assets/imgs/backend/goNext.svg" alt />
+                  <div class="memberInfoTableRowItem">
+                    {{ baby.diffDays ?? "—" }}
+                  </div>
+                  <img
+                    src="/assets/imgs/backend/goNext.svg"
+                    alt="detail"
+                    style="cursor: pointer"
+                    @click.stop="openBaby(baby)"
+                  />
                 </div>
               </template>
               <div class="memberInfoTableRow" v-else>
@@ -567,37 +627,37 @@
               <button
                 class="btn-page"
                 :disabled="pageChild === 1"
-                @click="goto(pageChild, 1)"
+                @click="pageChild = 1"
               >
                 &lt;&lt;
               </button>
               <button
                 class="btn-page"
                 :disabled="pageChild === 1"
-                @click="prev(pageChild)"
+                @click="pageChild--"
               >
                 &lt;
               </button>
               <button
                 class="btn-page btn-page-number"
-                v-for="p in totalPagesChild"
+                v-for="p in pageNumberListChild"
                 :key="p"
                 :class="{ active: pageChild === p }"
-                @click="goto(pageChild, p)"
+                @click="pageChild = p"
               >
                 {{ p }}
               </button>
               <button
                 class="btn-page"
                 :disabled="pageChild === totalPagesChild"
-                @click="next(pageChild, totalPagesChild)"
+                @click="pageChild++"
               >
                 &gt;
               </button>
               <button
                 class="btn-page"
                 :disabled="pageChild === totalPagesChild"
-                @click="goto(pageChild, totalPagesChild)"
+                @click="pageChild = totalPagesChild"
               >
                 &gt;&gt;
               </button>
@@ -606,23 +666,21 @@
 
           <div class="memberInfoCard w-half">
             <h3>寶貝檢測紀錄分析</h3>
-            <AnalysisChart
-              :records="childANS"
-              date-key="CheckTime"
-              primary-key="Score"
-              primary-label="檢測分數"
-            />
+            <BabyScoreChart :records="filteredChild" />
           </div>
         </div>
       </div>
     </div>
+    <div>{{ homeDateRange }}</div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import VueDatePicker from "@vuepic/vue-datepicker";
+import { useMemberStore } from "~/stores/useMemberStore";
+import { storeToRefs } from "pinia";
 
 import Sidebar from "~/components/raphaelBackend/Sidebar.vue";
 import UsageAnalysisChart from "~/components/raphaelBackend/UsageAnalysisChart.vue";
@@ -632,6 +690,10 @@ import HRVUserAlertAlert from "~/components/raphaelBackend/HRVUserAlert.vue";
 import AutonomicNerveAlert from "~/components/raphaelBackend/AutonomicNerve.vue";
 import LifeDetectAlert from "~/components/raphaelBackend/LifeDetectAlert.vue";
 import BabyRecordAlert from "~/components/raphaelBackend/BabyRecordAlert.vue";
+import BabyScoreChart from "~/components/raphaelBackend/BabyScoreChart.vue";
+
+const router = useRouter();
+const route = useRoute();
 
 /* ---------- 型別 ---------- */
 type ApiMember = {
@@ -658,6 +720,19 @@ function getAuth() {
   };
 }
 
+const memberStore = useMemberStore();
+const {
+  member,
+  currentOrder,
+  lastUpdated,
+  hrvRecords,
+  ansRecords,
+  lifeRecords,
+  childANS,
+  homeOrders,
+  hasFetched,
+} = storeToRefs(memberStore);
+
 const showContract = ref(false);
 const contractList = ref<any[]>([]);
 
@@ -665,17 +740,8 @@ const contractList = ref<any[]>([]);
 const homeDateRange = ref<Date[] | null>(null);
 const homeChartDateRange = ref<Date[] | null>(null);
 
-const member = ref<ApiMember | null>(null);
-const currentOrder = ref<ApiOrder | null>(null);
-const lastUpdated = ref("");
 const showHRV = ref(false);
 const selectedHRV = ref<any>(null);
-
-const homeOrders = ref<any[]>([]);
-const hrvRecords = ref<any[]>([]);
-const ansRecords = ref<any[]>([]);
-const lifeRecords = ref<any[]>([]);
-const childANS = ref<any[]>([]);
 
 const hrvRange = ref<Date[] | null>(null);
 const ansRange = ref<Date[] | null>(null);
@@ -747,6 +813,7 @@ const totalPagesHome = computed(() =>
 );
 const paginatedHome = computed(() => {
   const s = (pageHome.value - 1) * PAGE_MAIN;
+  console.log("filteredHome", filteredHome.value);
   return filteredHome.value.slice(s, s + PAGE_MAIN);
 });
 
@@ -838,43 +905,8 @@ async function fetchBasic() {
   lastUpdated.value = new Date().toLocaleString("zh-TW");
 }
 
-async function fetchExtras() {
-  const { token, admin, sel } = getAuth();
-  if (!token || !admin || !sel.MID) return;
-
-  // 👉 一律帶空字串，後端就會給「全部資料」
-  const empty = { StartDate: "", EndDate: "" };
-
-  const post = (url: string, extra = empty) =>
-    fetch(`https://23700999.com:8081/HMA/${url}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        AdminID: admin,
-        Token: token,
-        MID: sel.MID,
-        Mobile: sel.Mobile ?? "",
-        ...extra,
-      }),
-    }).then((r) => r.json());
-
-  const [useRes, hrvRes, ansRes, lifeRes, babyRes] = await Promise.all([
-    post("API_MemberUseRecord.jsp"),
-    post("API_MemberHRV2.jsp"),
-    post("API_MemberANS.jsp"),
-    post("API_MemberSleepRec.jsp"),
-    post("API_MemberChildANS.jsp", { CID: "" }),
-  ]);
-
-  homeOrders.value = useRes?.MemberUseRecode?.UseRecodeList ?? [];
-  hrvRecords.value = hrvRes?.MemberHRV2?.HRV2List ?? [];
-  ansRecords.value = ansRes?.MemberANS?.ANSList ?? [];
-  lifeRecords.value = lifeRes?.MemberSleepRec?.SleepRecList ?? [];
-  childANS.value = babyRes?.MemberChildANS?.ChildScore ?? [];
-}
-
 function openHRV(rec: any) {
-  selectedHRV.value = rec;   // 把整筆傳給 Alert
+  selectedHRV.value = rec; // 把整筆傳給 Alert
   showHRV.value = true;
 }
 function closeHRV() {
@@ -947,10 +979,18 @@ const pageNumberListChild = computed(() =>
   pageButtons(totalPagesChild.value, pageChild.value)
 );
 
-onMounted(() => {
-  fetchBasic();
-  fetchExtras();
-});
+const loading = ref(false);
+
+watch(
+  () => route.query,
+  async () => {
+    loading.value = true;
+    memberStore.clear();
+    await memberStore.fetchAll(getAuth());
+    loading.value = false;
+  },
+  { deep: true, immediate: true }
+);
 
 /* ---------- 分頁操作 ---------- */
 function goto(refVar: Ref<number>, p: number) {
@@ -974,14 +1014,161 @@ function closeContract() {
 }
 
 /* ---------- 其他 ---------- */
-const router = useRouter();
 function refresh() {
-  fetchBasic();
-  fetchExtras();
+  memberStore.clear();
+  memberStore.fetchAll(getAuth());
 }
 function goBack() {
-  window.location.href = "/raphaelBackend/member";
+  router.push("/raphaelBackend/member");
 }
+
+const showANS = ref(false);
+const selectedANS = ref<any>(null);
+
+async function fetchANSDetail(a: any) {
+  const { token, admin, sel } = getAuth();
+  if (!token || !admin || !sel.MID) return null;
+
+  // 取得本次 AID
+  const AID = a.AID;
+
+  // 找出前一筆記錄
+  let preAID = "";
+  const sortedList = ansRecords.value
+    .slice()
+    .sort(
+      (x, y) =>
+        new Date(y.CheckTime).getTime() - new Date(x.CheckTime).getTime()
+    );
+
+  // 找到當前記錄的索引
+  const currentIndex = sortedList.findIndex((item) => item.AID === AID);
+
+  // 如果找到當前記錄，且不是第一筆，則取前一筆的 AID
+  if (currentIndex !== -1 && currentIndex < sortedList.length - 1) {
+    preAID = sortedList[currentIndex + 1].AID;
+  }
+
+  console.log("Current AID:", AID);
+  console.log("Previous AID:", preAID);
+  console.log(
+    "All records:",
+    sortedList.map((item) => ({
+      AID: item.AID,
+      CheckTime: item.CheckTime,
+    }))
+  );
+
+  const res = await fetch(
+    "https://23700999.com:8081/HMA/API_Home_ANSDetail.jsp",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        AdminID: admin,
+        Token: token,
+        MID: sel.MID,
+        Mobile: sel.Mobile ?? "",
+        AID,
+        preAID,
+      }),
+    }
+  );
+  return await res.json();
+}
+
+async function openANS(ans: any) {
+  const detail = await fetchANSDetail(ans);
+  if (detail && detail.Result === "OK") {
+    selectedANS.value = detail;
+    showANS.value = true;
+  } else {
+    alert("取得自律神經詳細資料失敗");
+  }
+}
+function closeANS() {
+  showANS.value = false;
+}
+
+const showLife = ref(false);
+const selectedLife = ref<any>(null);
+
+function openLife(life: any) {
+  selectedLife.value = life;
+  showLife.value = true;
+}
+function closeLife() {
+  showLife.value = false;
+}
+
+const showBaby = ref(false);
+const selectedBaby = ref<any>(null);
+
+async function fetchChildANSDetail(baby: any) {
+  const { token, admin, sel } = getAuth();
+  if (!token || !admin || !sel.MID) return null;
+
+  const AID = baby.AID;
+  const CID = baby.CID;
+
+  let preAID = "";
+  const sortedList = childANS.value
+    .slice()
+    .sort(
+      (x, y) =>
+        new Date(y.CheckTime).getTime() - new Date(x.CheckTime).getTime()
+    );
+  const currentIndex = sortedList.findIndex((item) => item.AID === AID);
+  if (currentIndex !== -1 && currentIndex < sortedList.length - 1) {
+    preAID = sortedList[currentIndex + 1].AID;
+  }
+
+  const res = await fetch(
+    "https://23700999.com:8081/HMA/API_Home_ChildANSDetail.jsp",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        AdminID: admin,
+        Token: token,
+        MID: sel.MID,
+        Mobile: sel.Mobile ?? "",
+        CID,
+        AID,
+        preAID,
+      }),
+    }
+  );
+  return await res.json();
+}
+
+async function openBaby(baby: any) {
+  const detail = await fetchChildANSDetail(baby);
+  if (detail && detail.Result === "OK") {
+    selectedBaby.value = detail;
+    showBaby.value = true;
+  } else {
+    alert("取得寶貝詳細資料失敗");
+  }
+}
+function closeBaby() {
+  showBaby.value = false;
+}
+
+const props = defineProps<{ record: any }>();
+defineEmits(["close"]);
+
+const mmdd = (raw: string) => {
+  if (!raw || typeof raw !== "string") return "";
+  if (!raw.includes("/")) return raw; // 非日期直接顯示
+  const datePart = raw.split(" ")[0];
+  const parts = datePart.split("/");
+  if (parts.length === 3) {
+    const [_, m, d] = parts;
+    return `${m.padStart(2, "0")}/${d.padStart(2, "0")}`;
+  }
+  return raw;
+};
 </script>
 
 <style scoped lang="scss">
@@ -992,22 +1179,59 @@ function goBack() {
   gap: 1%;
 
   .w-half {
-    width: 49% !important;
+    width: 49%;
+    @include respond-to("xl") {
+      width: 100%;
+    }
   }
   .memberInfoContent {
     padding: 24px;
 
-    width: 84%;
+    width: 90%;
     margin: 0 auto;
-
+    @include respond-to("md") {
+      width: 100%;
+    }
     .memberInfoTitle {
       width: 100%;
       display: flex;
       justify-content: space-between;
+      .memberNameRWD {
+        display: none;
+      }
+      @include respond-to("sm") {
+        flex-wrap: wrap;
+        h3{
+          display: none;
+        }
+        .memberNameRWD {
+          display: block;
+        }
+      }
+  
       .optionGroup {
         display: flex;
         align-items: center;
         gap: 8px;
+        position: relative;
+
+        @include respond-to("sm") {
+          flex-wrap: wrap;
+          justify-content: space-between;
+          width: 100%;
+          
+        }
+        .rwdW100 {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          @include respond-to("sm") {
+            width: 100%;
+            justify-content: flex-end;
+            justify-content: space-between;
+          }
+        }
+
         button {
           display: flex;
           gap: 4px;
@@ -1047,8 +1271,13 @@ function goBack() {
       .memberInfoRow {
         width: 100%;
         display: flex;
+        justify-content: space-between;
         gap: 12px;
         margin-top: 1rem;
+        @include respond-to("xl") {
+          display: flex;
+          flex-wrap: wrap;
+        }
         h3 {
           color: var(--Primary-600, #2d3047);
           font-family: "Noto Sans";
@@ -1074,16 +1303,61 @@ function goBack() {
           padding: 0.25rem 0;
         }
 
+        .memberInfoWarningTagsGroup {
+          display: flex;
+          gap: 8px;
+          margin: 8px 0 0 0;
+
+          .memberInfoWarningTag {
+            border-radius: 50px;
+            padding: 4px 12px;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--Primary-default, #1ba39b);
+            text-align: center;
+            font-family: "Noto Sans";
+            font-size: var(--Text-font-size-18, 18px);
+            font-style: normal;
+            font-weight: 400;
+            line-height: 100%; /* 18px */
+            letter-spacing: 0.09px;
+            border-radius: 50px;
+            border: 1px solid var(--Primary-default, #1ba39b);
+            background: var(--primary-400-opacity-10, rgba(27, 163, 155, 0.1));
+            padding: 8px;
+            &.used {
+            }
+            &.remain {
+              background: #fff4f4;
+              color: #ec4f4f;
+
+              border: 1px solid var(--Warning-default, #ec4f4f);
+              background: var(--warning-300-opacity-10, rgba(236, 79, 79, 0.1));
+            }
+          }
+        }
+
         .memberInfoCard {
           padding: 1rem;
           background-color: #fff;
           border-radius: 20px;
           position: relative;
+
+          @include respond-to("xl") {
+            min-height: 300px;
+          }
+          @include respond-to("sm") {
+            min-height: 400px;
+          }
           .pagination {
             max-width: 100%;
             flex-wrap: wrap;
             overflow: hidden;
           }
+          @include respond-to("md") {
+            width: 100% !important;
+          }
+      
         }
 
         .memberInfoList {
@@ -1109,6 +1383,7 @@ function goBack() {
           align-items: center;
           gap: 8px;
           margin-top: 1rem;
+
           .memberInfoTag {
             border-radius: 50px;
             border: 1px solid var(--Primary-default, #1ba39b);
@@ -1148,32 +1423,58 @@ function goBack() {
           margin-top: 0.75rem;
           cursor: pointer;
         }
+        .memberInfoTitleWrap {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          @include respond-to("sm") {
+            flex-wrap: wrap;
+            justify-content: space-between;
+            width: 100%;
+          }
+        }
         .memberInfoTitleGroup {
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 8px;
-          margin-bottom: 0.75rem;
           small {
             white-space: nowrap;
           }
           .memberInfoDate1 {
             width: 60%;
           }
+     
         }
       }
       .memberInfoCardGroup {
         display: flex;
         flex-direction: column;
 
-        width: 29%;
+        width: 33%;
         gap: 12px;
         justify-content: space-between;
+
         .memberInfoCard2 {
           padding: 1rem;
           width: 100%;
           border-radius: 20px;
           background-color: #fff;
+        }
+        @include respond-to("md") {
+          width: 100% !important;
+       
+        }
+      }
+      .memberInfoCardGroupW50 {
+        @include respond-to("xl") {
+          width: 49%;
+        }
+    
+      }
+      .memberInfoCardGroupW100 {
+        @include respond-to("xl") {
+          width: 100%;
         }
       }
     }
@@ -1186,6 +1487,10 @@ function goBack() {
       letter-spacing: 0.5px;
     }
     .memberInfoTable {
+      margin-top: 0.75rem;
+      @include respond-to("xl") {
+        margin-top: 1.5rem;
+      }
       .memberInfoTableTitle {
         display: flex;
         white-space: nowrap;
@@ -1221,17 +1526,19 @@ function goBack() {
     display: flex;
     justify-content: center;
     gap: 4px;
-    margin-top: 4px;
-    margin-bottom: 24px;
+
+    bottom: 1rem;
+    left: 50%;
+
+    width: 100%;
     .btn-page {
       padding: 6px 10px;
       min-width: 32px;
-
       border-radius: 4px;
-
       background-color: transparent;
       cursor: pointer;
       border: none;
+
       &.active {
         background: $chip-success;
         color: white;
@@ -1245,6 +1552,35 @@ function goBack() {
 
     .btn-page-number {
       background: white;
+    }
+  }
+
+}
+
+.loading-mask {
+  position: fixed;
+  z-index: 9999;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  .loading-spinner {
+    border: 6px solid #eee;
+    border-top: 6px solid #1ba39b;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+  }
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
     }
   }
 }
