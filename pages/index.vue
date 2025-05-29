@@ -1,10 +1,11 @@
 <template>
   <div class="login">
+    <h1 class="visually-hidden">NeuroPlus神經調節家</h1>
     <RaphaelLoading v-if="loading" />
     <div class="loginGroup">
       <div class="raphaelIconImgGroup">
-        <img class="raphaelIcon" src="../assets/imgs/raphael.svg" alt="" />
-        <h1>{{ verificationTitle }}</h1>
+        <img class="raphaelIcon" src="../assets/imgs/raphael.svg" alt="NeuroPlus神經調節家 Logo" />
+        <h3>{{ verificationTitle }}</h3>
       </div>
       <div class="loginWrap">
         <div class="loginBox">
@@ -96,7 +97,7 @@
     }
   }
 
-  h1 {
+  h3 {
     font-size: 1.5rem;
     font-weight: 400;
     letter-spacing: 0.5px;
@@ -327,6 +328,18 @@
         }
       }
     }
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 }
 </style>
