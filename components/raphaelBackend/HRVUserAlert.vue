@@ -285,19 +285,30 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
     justify-content: space-between;
     gap: 8px;
     margin-top: 0.75rem;
+    @include respond-to("md") {
+      flex-wrap: wrap;
+     
+    }
     .HRVUserAlertContent1Card {
       border-radius: var(--Radius-r-20, 20px);
       background: var(--Neutral-white, #fff);
       box-shadow: 0px 2px 20px 0px
         var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
       padding: 0.75rem;
-
+      @include respond-to("md") {
+      width: 48%;
+     
+    }
       h3 {
         color: var(--Primary-600, #2d3047);
         font-size: var(--Text-font-size-20, 20px);
         font-style: normal;
         font-weight: 400;
         letter-spacing: 0.1px;
+        @include respond-to("md") {
+          font-size: 1rem;
+         
+        }
       }
       .value {
         color: var(--Primary-600, #2d3047);
@@ -415,6 +426,9 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
     .HRVUserAlertContent3Group {
       display: flex;
       justify-content: space-between;
+      @include respond-to("md") {
+        flex-wrap: wrap;
+      }
 
       .HRVUserAlertContent3ContentTitle {
         display: flex;

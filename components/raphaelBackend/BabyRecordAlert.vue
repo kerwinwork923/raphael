@@ -284,6 +284,9 @@ watch([() => detailList, dateRange], build, { deep: true });
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
+    @include respond-to("md") {
+      flex-direction: column;
+    }
     .babyRecordAlertContent3 {
       background-color: #fff;
       margin-top: 0.5rem;
@@ -292,6 +295,9 @@ watch([() => detailList, dateRange], build, { deep: true });
       box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
       padding: 1rem;
       width: 49%;
+      @include respond-to("md") {
+        width: 100%;
+      }
     }
     .babyRecordAlertContentTitle {
       display: flex;

@@ -86,8 +86,9 @@ const showCover = computed(() => isMobile.value && !collapsed.value);
 // 畫面尺寸監聽
 function handleResize() {
   isMobile.value = window.innerWidth <= 1024;
-
-
+  if (isMobile.value) {
+    collapsed.value = true; // 手機自動收合
+  }
 }
 
 // 掛載與卸載監聽
@@ -99,7 +100,7 @@ onMounted(() => {
 
   // 初始化裝置狀態
   isMobile.value = window.innerWidth <= 1024;
-  collapsed.value = !isMobile.value ? false : false; // ✅ 手機預設展開
+  collapsed.value = isMobile.value ? true : false; // 手機預設收合
 
   window.addEventListener("resize", handleResize);
 });

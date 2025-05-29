@@ -5,7 +5,7 @@
   </div>
   <div v-else class="memberInfo">
     <Sidebar />
-
+    <div class="memberAlertCover" v-if="isAnyAlertOpen"></div>
     <!-- ───── 彈窗 ───── -->
     <ContractUserAlert
       v-if="showContract"
@@ -36,7 +36,7 @@
       <!-- 標題列 -->
       <div class="memberInfoTitle">
         <!-- <h3>{{ member?.Name ?? "—" }}</h3> -->
-        <h3>{{ member?.Name ?? "—" }}</h3> 
+        <h3>{{ member?.Name ?? "—" }}</h3>
         <div class="optionGroup">
           <h3 class="memberNameRWD">{{ member?.Name ?? "—" }}</h3>
           <button class="goBackBtn" @click="goBack">
@@ -159,7 +159,7 @@
               format="yyyy/MM/dd"
               placeholder="使用日期區間"
               prepend-icon="i-calendar"
-               teleport="body"
+              teleport="body"
             />
 
             <div class="memberInfoTable">
@@ -676,7 +676,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import { useMemberStore } from "~/stores/useMemberStore";
@@ -752,30 +752,23 @@ const babyRange = ref<Date[] | null>(null);
 const PAGE_MAIN = 4;
 const PAGE_SUB = 4;
 
-const pageNumberList = computed(() => {
-  const total = totalPagesHome.value;
-  const current = pageHome.value;
-  const maxButtons = 5;
-  const pages: number[] = [];
+const maxButtons = ref(5);
 
-  if (total <= maxButtons) {
-    for (let i = 1; i <= total; i++) pages.push(i);
-  } else {
-    let start = Math.max(1, current - Math.floor(maxButtons / 2));
-    let end = start + maxButtons - 1;
+function handleResize() {
+  maxButtons.value = window.innerWidth <= 480 ? 3 : 5; // 480px 以下顯示 3 個
+}
 
-    if (end > total) {
-      end = total;
-      start = total - maxButtons + 1;
-    }
-
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-  }
-
-  return pages;
+onMounted(() => {
+  handleResize();
+  window.addEventListener("resize", handleResize);
 });
+onUnmounted(() => {
+  window.removeEventListener("resize", handleResize);
+});
+
+const pageNumberList = computed(() =>
+  pageButtons(totalPagesHome.value, pageHome.value, maxButtons.value)
+);
 
 const filteredHome = computed(() => {
   if (!homeDateRange.value || homeDateRange.value.length < 2)
@@ -950,7 +943,7 @@ watch(homeDateRange, () => {
   pageHome.value = 1;
 });
 
-function pageButtons(total: number, current: number, max = 5) {
+function pageButtons(total: number, current: number, max = maxButtons.value) {
   const pages: number[] = [];
   if (total <= max) {
     for (let i = 1; i <= total; i++) pages.push(i);
@@ -967,16 +960,16 @@ function pageButtons(total: number, current: number, max = 5) {
 }
 
 const pageNumberListHRV = computed(() =>
-  pageButtons(totalPagesHRV.value, pageHRV.value)
+  pageButtons(totalPagesHRV.value, pageHRV.value, maxButtons.value)
 );
 const pageNumberListANS = computed(() =>
-  pageButtons(totalPagesANS.value, pageANS.value)
+  pageButtons(totalPagesANS.value, pageANS.value, maxButtons.value)
 );
 const pageNumberListLife = computed(() =>
-  pageButtons(totalPagesLife.value, pageLife.value)
+  pageButtons(totalPagesLife.value, pageLife.value, maxButtons.value)
 );
 const pageNumberListChild = computed(() =>
-  pageButtons(totalPagesChild.value, pageChild.value)
+  pageButtons(totalPagesChild.value, pageChild.value, maxButtons.value)
 );
 
 const loading = ref(false);
@@ -1169,6 +1162,14 @@ const mmdd = (raw: string) => {
   }
   return raw;
 };
+
+const isAnyAlertOpen = computed(() => {
+  return showContract.value || 
+         showHRV.value || 
+         showANS.value || 
+         showLife.value || 
+         showBaby.value;
+});
 </script>
 
 <style scoped lang="scss">
@@ -1177,7 +1178,15 @@ const mmdd = (raw: string) => {
   min-height: 100vh;
   background: $primary-100;
   gap: 1%;
-
+  .memberAlertCover {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background: rgba(177, 192, 216, 0.25);
+    z-index: 100;
+  }
   .w-half {
     width: 49%;
     @include respond-to("xl") {
@@ -1201,14 +1210,14 @@ const mmdd = (raw: string) => {
       }
       @include respond-to("sm") {
         flex-wrap: wrap;
-        h3{
+        h3 {
           display: none;
         }
         .memberNameRWD {
           display: block;
         }
       }
-  
+
       .optionGroup {
         display: flex;
         align-items: center;
@@ -1219,7 +1228,6 @@ const mmdd = (raw: string) => {
           flex-wrap: wrap;
           justify-content: space-between;
           width: 100%;
-          
         }
         .rwdW100 {
           display: flex;
@@ -1357,7 +1365,6 @@ const mmdd = (raw: string) => {
           @include respond-to("md") {
             width: 100% !important;
           }
-      
         }
 
         .memberInfoList {
@@ -1444,7 +1451,6 @@ const mmdd = (raw: string) => {
           .memberInfoDate1 {
             width: 60%;
           }
-     
         }
       }
       .memberInfoCardGroup {
@@ -1463,14 +1469,12 @@ const mmdd = (raw: string) => {
         }
         @include respond-to("md") {
           width: 100% !important;
-       
         }
       }
       .memberInfoCardGroupW50 {
         @include respond-to("xl") {
           width: 49%;
         }
-    
       }
       .memberInfoCardGroupW100 {
         @include respond-to("xl") {
@@ -1538,7 +1542,7 @@ const mmdd = (raw: string) => {
       background-color: transparent;
       cursor: pointer;
       border: none;
-
+      color: #2d3047;
       &.active {
         background: $chip-success;
         color: white;
@@ -1554,7 +1558,6 @@ const mmdd = (raw: string) => {
       background: white;
     }
   }
-
 }
 
 .loading-mask {

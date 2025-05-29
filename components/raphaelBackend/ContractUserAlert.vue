@@ -211,15 +211,33 @@ const yearlyGroup = computed(() => {
     align-items: center;
     flex-wrap: wrap;
     gap: 8px;
+
+    @include respond-to("md") {
+      width: 100%;
+    }
+
     .ContractUserAlertSubTitle {
       display: flex;
       flex: 1;
+      @include respond-to("md") {
+        h6{
+          display: flex;
+ justify-content: space-between;
+          width: 100%;
+      }
+       
+       
+      }
+   
     }
     .ContractUserAlertSubDate {
       width: 40%;
       border-radius: var(--Radius-r-50, 50px);
       background: var(--Neutral-white, #fff);
       box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
+      @include respond-to("md") {
+        width: 100%;
+      }
     }
   }
   .ContractUserAlertProgressGroup {

@@ -237,11 +237,17 @@ defineEmits(['close']);
     .lifeDetectAlertContent2 {
       display: flex;
       justify-content: space-between;
+      @include respond-to("md") {
+       flex-wrap: wrap;
+      }
       div {
         margin-top: 0.5rem;
         h4 {
           color: var(--Primary-200, #b1c0d8);
           text-align: center;
+          @include respond-to("md") {
+            text-align: left;
+          }
           font-size: 16px;
           font-style: normal;
           font-weight: 400;
@@ -288,7 +294,9 @@ defineEmits(['close']);
   .lifeDetectAlertContent3Group {
     display: flex;
     justify-content: space-between;
-
+    @include respond-to("md") {
+      flex-direction: column;
+    }
     .lifeDetectAlertContent3 {
       background-color: #fff;
       margin-top: 0.5rem;
@@ -297,6 +305,9 @@ defineEmits(['close']);
       box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
       padding: 1rem;
       width: 49%;
+      @include respond-to("md") {
+        width: 100%;
+      }
     }
     .lifeDetectAlertContentTitle {
       display: flex;
