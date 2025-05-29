@@ -671,7 +671,7 @@
         </div>
       </div>
     </div>
-    <div>{{ homeDateRange }}</div>
+  
   </div>
 </template>
 

@@ -167,6 +167,14 @@ import DSPRSelect from "../components/DSPRSelect.vue";
 import axios from "axios";
 import { useCommon } from "../stores/common";
 import { useUserData } from "~/fn/api";
+import { useSeo } from '~/composables/useSeo'
+
+useSeo({
+  title: 'HRV 檢測',
+  description: '使用 NeuroPlus 的 AI 人臉辨識技術進行 HRV 檢測，快速分析自律神經狀態，追蹤健康變化。',
+  url: 'https://neuroplus.com.tw/hrv-history'
+})
+
 export default {
   components: { RaphaelLoading, HRVAlert, DSPRSelect },
   setup() {
