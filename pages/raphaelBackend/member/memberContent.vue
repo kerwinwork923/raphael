@@ -691,9 +691,16 @@ import AutonomicNerveAlert from "~/components/raphaelBackend/AutonomicNerve.vue"
 import LifeDetectAlert from "~/components/raphaelBackend/LifeDetectAlert.vue";
 import BabyRecordAlert from "~/components/raphaelBackend/BabyRecordAlert.vue";
 import BabyScoreChart from "~/components/raphaelBackend/BabyScoreChart.vue";
-
+import { useSeo } from "~/composables/useSeo";
 const router = useRouter();
 const route = useRoute();
+
+useSeo({
+  title: "",
+  description:
+    "NeuroPlus神經調節家提供專業的自律神經檢測服務，運用FDA認證AI技術，透過人臉辨識快速分析HRV數據，幫助您了解自律神經狀態。",
+  url: "https://neuroplus.com.tw",
+});
 
 /* ---------- 型別 ---------- */
 type ApiMember = {

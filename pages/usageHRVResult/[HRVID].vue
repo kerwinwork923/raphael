@@ -386,6 +386,14 @@
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import ResultChart from "~/components/ResultChart.vue";
+import { useSeo } from "~/composables/useSeo";
+
+useSeo({
+  title: "",
+  description:
+    "NeuroPlus神經調節家提供專業的自律神經檢測服務，運用FDA認證AI技術，透過人臉辨識快速分析HRV數據，幫助您了解自律神經狀態。",
+  url: "https://neuroplus.com.tw",
+});
 
 /** 解析 YYYYMMDDHHmmss => Date */
 function parseYMDHMS(str) {

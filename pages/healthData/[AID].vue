@@ -280,9 +280,16 @@
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { ref, computed, onMounted } from "vue";
+import { useSeo } from "~/composables/useSeo";
 
 export default {
   setup() {
+    useSeo({
+      title: "",
+      description:
+        "NeuroPlus神經調節家提供專業的自律神經檢測服務，運用FDA認證AI技術，透過人臉辨識快速分析HRV數據，幫助您了解自律神經狀態。",
+      url: "https://neuroplus.com.tw",
+    });
     const router = useRouter(); // 使用路由
     const age = ref("");
     const isSelected = computed(() => age.value !== "");

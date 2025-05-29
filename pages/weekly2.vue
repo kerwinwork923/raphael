@@ -92,7 +92,14 @@ import SymptomChoose2 from "~/components/SymptomChoose2.vue";
 import { useCommon } from "@/stores/common";
 import StepIndicator from "~/components/StepIndicator.vue";
 import TitleMenu from "~/components/TitleMenu.vue";
+import { useSeo } from "~/composables/useSeo";
 
+useSeo({
+  title: "",
+  description:
+    "NeuroPlus神經調節家提供專業的自律神經檢測服務，運用FDA認證AI技術，透過人臉辨識快速分析HRV數據，幫助您了解自律神經狀態。",
+  url: "https://neuroplus.com.tw",
+});
 export default {
   components: {
     Navbar,

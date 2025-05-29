@@ -25,7 +25,6 @@
       <SleepRecordWrap v-if="useSleepRecordData.sleepState === 'sleepRecord'" />
       <UserResultWrap v-if="useSleepRecordData.sleepState === 'sleepResult'" />
     </div>
-    
   </div>
 </template>
 
@@ -43,6 +42,7 @@ import TagList from "../components/TagList.vue";
 import sleepRecordWrap from "~/components/SleepRecordWrap.vue";
 import { useSleepRecordStore } from "../stores/sleepRecord";
 import UserResultWrap from "~/components/UserInfoWrap.vue";
+import { useSeo } from "~/composables/useSeo";
 export default {
   components: {
     RaphaelLoading,
@@ -50,9 +50,17 @@ export default {
     sleepRecordWrap,
     UserResultWrap,
     TitleMenu,
+    useSeo
   },
   setup() {
     const useSleepRecordData = useSleepRecordStore();
+
+    useSeo({
+      title: "",
+      description:
+        "NeuroPlus神經調節家提供專業的自律神經檢測服務，運用FDA認證AI技術，透過人臉辨識快速分析HRV數據，幫助您了解自律神經狀態。",
+      url: "https://neuroplus.com.tw",
+    });
 
     const loading = ref(false);
     const cc = async () => {
@@ -84,8 +92,8 @@ export default {
   min-height: 100vh;
   padding: 0 1rem;
   padding-bottom: 50px;
-  
-  .userRecoreWrap{
+
+  .userRecoreWrap {
     max-width: 768px;
     width: 100%;
     padding-top: 0.75rem;
@@ -93,7 +101,7 @@ export default {
 }
 .submitBtn,
 .backToUserBtn {
-  @include btnStyle($raphael-green-400,$raphael-white);
+  @include btnStyle($raphael-green-400, $raphael-white);
 }
 
 .backToUserBtnGroup {

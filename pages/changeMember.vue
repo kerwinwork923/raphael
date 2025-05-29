@@ -30,9 +30,10 @@ import UserInfoForm from "../components/UserInfoWrap.vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import { ref } from "vue";
+import { useSeo } from "~/composables/useSeo";
 
 export default {
-  components: { UserInfoForm, TitleMenu },
+  components: { UserInfoForm, TitleMenu, useSeo },
   setup() {
     const name = ref("");
     const height = ref("");
@@ -47,6 +48,13 @@ export default {
     const router = useRouter();
 
     const loading = ref(false);
+
+    useSeo({
+      title: "",
+      description:
+        "NeuroPlus神經調節家提供專業的自律神經檢測服務，運用FDA認證AI技術，透過人臉辨識快速分析HRV數據，幫助您了解自律神經狀態。",
+      url: "https://neuroplus.com.tw",
+    });
 
     const addUser = async () => {
       try {

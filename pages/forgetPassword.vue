@@ -126,11 +126,13 @@ import RaphaelLoading from "../components/RaphaelLoading";
 import eyesCloseGreen from "../assets/imgs/eyesCloseGreen.svg";
 import eyesOpenGreen from "../assets/imgs/eyesOpenGreen.svg";
 import axios from "axios";
+import { useSeo } from "~/composables/useSeo";
 
 import Alert from "../components/Alert.vue";
 export default {
   components: {
     Alert,
+    useSeo
   },
   setup() {
     const loading = ref(false);
@@ -155,6 +157,13 @@ export default {
     const passwordAgain = ref("");
     const passwordError = ref("");
     const passwordAgainError = ref("");
+
+    useSeo({
+      title: "",
+      description:
+        "NeuroPlus神經調節家提供專業的自律神經檢測服務，運用FDA認證AI技術，透過人臉辨識快速分析HRV數據，幫助您了解自律神經狀態。",
+      url: "https://neuroplus.com.tw",
+    });
 
     watch(verificationCodes, (newCodes) => {
       if (newCodes.every((code) => code !== "")) {

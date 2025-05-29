@@ -419,9 +419,17 @@ import { useRouter } from "vue-router";
 import axios from "axios";
 import { usePoint } from "@/stores/point";
 import { nextTick } from "vue";
+import { useSeo } from "~/composables/useSeo";
 /** ---------------------
   其餘 template, style 已存在，此處只改動 script 區
 ---------------------- **/
+
+useSeo({
+  title: "",
+  description:
+    "NeuroPlus神經調節家提供專業的自律神經檢測服務，運用FDA認證AI技術，透過人臉辨識快速分析HRV數據，幫助您了解自律神經狀態。",
+  url: "https://neuroplus.com.tw",
+});
 
 const pointStore = usePoint();
 const router = useRouter();

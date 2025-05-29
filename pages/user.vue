@@ -93,6 +93,14 @@
 </template>
 
 <script>
+import { useSeo } from "~/composables/useSeo";
+
+useSeo({
+  title: "",
+  description:
+    "NeuroPlus神經調節家提供專業的自律神經檢測服務，運用FDA認證AI技術，透過人臉辨識快速分析HRV數據，幫助您了解自律神經狀態。",
+  url: "https://neuroplus.com.tw",
+});
 import { onMounted, ref, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import Navbar from "../components/Navbar";
@@ -107,6 +115,7 @@ import banner1 from "@/assets/imgs/banner-1.png";
 import banner2 from "@/assets/imgs/banner-2.png";
 
 import QRCodeScanner from "~/components/QRCodeScanner.vue";
+
 
 export default {
   components: {
@@ -289,6 +298,12 @@ export default {
       const currentYear = new Date().getFullYear();
       return currentYear - (1911 + year); // Adjust for ROC year format
     };
+
+    useSeo({
+      title: '會員中心',
+      description: 'NeuroPlus會員中心，查看您的健康數據、檢測記錄和個人資訊，隨時掌握自律神經狀態。',
+      url: 'https://neuroplus.com.tw/user'
+    })
 
     return {
       loading,

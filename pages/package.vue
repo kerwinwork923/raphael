@@ -145,6 +145,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import axios from "axios";
+import { useSeo } from "~/composables/useSeo";
 
 const loading = ref(false);
 const hasLoaded = ref(false);
@@ -156,6 +157,13 @@ import TitleMenu from "@/components/TitleMenu.vue";
 import redLightClothes from "@/assets/imgs/redLightClothes.png";
 import redLightClothes2 from "@/assets/imgs/redLightClothes2.png";
 import normalClothes from "@/assets/imgs/normalClothes.png";
+
+useSeo({
+  title: "",
+  description:
+    "NeuroPlus神經調節家提供專業的自律神經檢測服務，運用FDA認證AI技術，透過人臉辨識快速分析HRV數據，幫助您了解自律神經狀態。",
+  url: "https://neuroplus.com.tw",
+});
 
 // ------------------ 這邊放「取得會員資訊」的邏輯 (示例) ------------------
 const localData = localStorage.getItem("userData");

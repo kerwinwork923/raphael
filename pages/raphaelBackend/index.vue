@@ -193,6 +193,15 @@ import { useRouter } from "vue-router";
 import BaseAlert from "@/components/raphaelBackend/BaseAlert.vue";
 import eyeOpen from "@/assets/imgs/backend/eye.svg";
 import eyeClosed from "@/assets/imgs/backend/eye-closed.svg";
+import { useSeo } from "~/composables/useSeo";
+
+useSeo({
+  title: "",
+  description:
+    "NeuroPlus神經調節家提供專業的自律神經檢測服務，運用FDA認證AI技術，透過人臉辨識快速分析HRV數據，幫助您了解自律神經狀態。",
+  url: "https://neuroplus.com.tw",
+});
+
 
 /* ================= 基本 reactive =================== */
 const router = useRouter();

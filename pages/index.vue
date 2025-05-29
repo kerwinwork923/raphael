@@ -331,7 +331,16 @@
 }
 </style>
 
-<script>
+<script setup>
+import { useSeo } from "~/composables/useSeo";
+
+useSeo({
+  title: "",
+  description:
+    "NeuroPlus神經調節家提供專業的自律神經檢測服務，運用FDA認證AI技術，透過人臉辨識快速分析HRV數據，幫助您了解自律神經狀態。",
+  url: "https://neuroplus.com.tw",
+});
+
 import { ref, onMounted } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
@@ -340,145 +349,124 @@ import eyesCloseGreen from "../assets/imgs/eyesCloseGreen.svg";
 import eyesOpenGreen from "../assets/imgs/eyesOpenGreen.svg";
 import { requestPermission, messagingToken } from "../fn/firebaseMessaging"; //firebase
 
-export default {
-  setup() {
-    const verificationTitle = ref("會員登入");
-    const loading = ref(false);
-    const mobile = ref("");
-    const password = ref("");
-    const passwordVisible = ref(false);
-    const router = useRouter();
-    const localMessagingToken = ref(""); // firebase 儲存取得的推播 token
+const verificationTitle = ref("會員登入");
+const loading = ref(false);
+const mobile = ref("");
+const password = ref("");
+const passwordVisible = ref(false);
+const router = useRouter();
+const localMessagingToken = ref(""); // firebase 儲存取得的推播 token
 
-    const isIOS =
-      /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    const isStandalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      window.navigator.standalone;
-    let deferredPrompt = null;
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const isStandalone =
+  window.matchMedia("(display-mode: standalone)").matches ||
+  window.navigator.standalone;
+let deferredPrompt = null;
 
-    const togglePasswordVisibility = () => {
-      passwordVisible.value = !passwordVisible.value;
-    };
+const togglePasswordVisibility = () => {
+  passwordVisible.value = !passwordVisible.value;
+};
 
-    const login = async () => {
-      loading.value = true;
-      try {
-        const response = await axios.post(
-          "https://23700999.com:8081/HMA/API_AA1.jsp",
-          {
-            Mobile: mobile.value,
-            Password: password.value,
-          }
-        );
-
-        if (
-          response.status === 200 &&
-          response.data.Token.trim() &&
-          response.data.MAID.trim()
-        ) {
-          console.log("登入成功:", response.data);
-          localStorage.setItem("userData", JSON.stringify(response.data));
-
-          // 取得firebase推播 token
-          try {
-            await requestPermission();
-            localMessagingToken.value = messagingToken.value;
-          } catch (e) {
-            console.warn("Firebase 推播權限失敗", e);
-          }
-          //alert(localMessagingToken.value);
-          console.log("取得的推播 Token:", localMessagingToken.value);
-          console.log("取得的MAID:", response.data.MAID.trim());
-
-          savePushKey(response.data.MAID.trim(), messagingToken.value);
-
-          router.push({ name: "user" });
-        } else {
-          alert(`登入失敗 : ${response.data.Result}`);
-        }
-      } catch (err) {
-        alert("登入失敗，請檢查手機號碼和密碼。");
-      } finally {
-        loading.value = false;
+const login = async () => {
+  loading.value = true;
+  try {
+    const response = await axios.post(
+      "https://23700999.com:8081/HMA/API_AA1.jsp",
+      {
+        Mobile: mobile.value,
+        Password: password.value,
       }
-    };
+    );
 
-    const savePushKey = async (loadMAID, loadPushkey) => {
+    if (
+      response.status === 200 &&
+      response.data.Token.trim() &&
+      response.data.MAID.trim()
+    ) {
+      console.log("登入成功:", response.data);
+      localStorage.setItem("userData", JSON.stringify(response.data));
+
+      // 取得firebase推播 token
       try {
-        const response = await axios.post(
-          "https://23700999.com:8081/HMA/API_PushKey.jsp",
-          {
-            MAID: loadMAID,
-            PushKey: loadPushkey,
-          }
-        );
-
-        if (response.status === 200) {
-          console.log("存儲Pushkey成功:", response.data);
-        } else {
-          alert(`存儲Pushkey失敗 : ${response.data.Result}`);
-        }
-      } catch (err) {
-        alert("存儲Pushkey失敗");
-      }
-    };
-
-    const installPWA = async () => {
-      if (isIOS && !isStandalone) {
-        // 提示 iOS 用戶如何安裝 PWA
-        alert("在瀏覽器中點擊分享按鈕，然後選擇『加入主畫面』以安裝 APP。");
-      } else if (deferredPrompt) {
-        // 顯示 Android 和桌機瀏覽器的安裝提示
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === "accepted") {
-          console.log("用戶已安裝");
-        } else {
-          console.log("用戶取消安裝");
-        }
-        deferredPrompt = null;
-      } else {
-        alert("您的裝置已支援安裝或已安裝，若無法安裝請檢查瀏覽器設置。");
-      }
-    };
-
-    onMounted(() => {
-      try {
-        if (
-          window.matchMedia?.("(display-mode: standalone)")?.matches ||
-          window.navigator?.standalone
-        ) {
-          console.log("App 是以 PWA 模式執行");
-        }
+        await requestPermission();
+        localMessagingToken.value = messagingToken.value;
       } catch (e) {
-        console.warn("PWA 檢查錯誤", e);
+        console.warn("Firebase 推播權限失敗", e);
       }
-    });
+      //alert(localMessagingToken.value);
+      console.log("取得的推播 Token:", localMessagingToken.value);
+      console.log("取得的MAID:", response.data.MAID.trim());
 
+      savePushKey(response.data.MAID.trim(), messagingToken.value);
+
+      router.push({ name: "user" });
+    } else {
+      alert(`登入失敗 : ${response.data.Result}`);
+    }
+  } catch (err) {
+    alert("登入失敗，請檢查手機號碼和密碼。");
+  } finally {
+    loading.value = false;
+  }
+};
+
+const savePushKey = async (loadMAID, loadPushkey) => {
+  try {
+    const response = await axios.post(
+      "https://23700999.com:8081/HMA/API_PushKey.jsp",
+      {
+        MAID: loadMAID,
+        PushKey: loadPushkey,
+      }
+    );
+
+    if (response.status === 200) {
+      console.log("存儲Pushkey成功:", response.data);
+    } else {
+      alert(`存儲Pushkey失敗 : ${response.data.Result}`);
+    }
+  } catch (err) {
+    alert("存儲Pushkey失敗");
+  }
+};
+
+const installPWA = async () => {
+  if (isIOS && !isStandalone) {
+    // 提示 iOS 用戶如何安裝 PWA
+    alert("在瀏覽器中點擊分享按鈕，然後選擇『加入主畫面』以安裝 APP。");
+  } else if (deferredPrompt) {
+    // 顯示 Android 和桌機瀏覽器的安裝提示
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === "accepted") {
+      console.log("用戶已安裝");
+    } else {
+      console.log("用戶取消安裝");
+    }
+    deferredPrompt = null;
+  } else {
+    alert("您的裝置已支援安裝或已安裝，若無法安裝請檢查瀏覽器設置。");
+  }
+};
+
+onMounted(() => {
+  try {
+    if (
+      window.matchMedia?.("(display-mode: standalone)")?.matches ||
+      window.navigator?.standalone
+    ) {
+      console.log("App 是以 PWA 模式執行");
+    }
+
+    // 檢查用戶資料並進行路由跳轉
     const localData = localStorage.getItem("userData");
-    const { MID, Token, MAID, Mobile, Name } = localData
-      ? JSON.parse(localData)
-      : {};
+    const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
 
     if (MID || Token || MAID || Mobile) {
       router.push("/user");
-      return;
     }
-
-    return {
-      verificationTitle,
-      passwordVisible,
-      togglePasswordVisibility,
-      eyesCloseGreen,
-      eyesOpenGreen,
-      loading,
-      mobile,
-      password,
-      login,
-      installPWA,
-      localMessagingToken, // 用於顯示推播 token
-    };
-  },
-};
+  } catch (e) {
+    console.warn("PWA 檢查錯誤", e);
+  }
+});
 </script>

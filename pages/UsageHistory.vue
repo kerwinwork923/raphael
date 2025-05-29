@@ -196,9 +196,19 @@ import RaphaelLoading from "@/components/RaphaelLoading.vue";
 // 例如有個 TitleMenu
 import TitleMenu from "@/components/TitleMenu.vue";
 
+import { useSeo } from "~/composables/useSeo";
+
+
+
 export default {
-  components: { RaphaelLoading, TitleMenu },
+  components: { RaphaelLoading, TitleMenu,useSeo },
   setup() {
+    useSeo({
+  title: "",
+  description:
+    "NeuroPlus神經調節家提供專業的自律神經檢測服務，運用FDA認證AI技術，透過人臉辨識快速分析HRV數據，幫助您了解自律神經狀態。",
+  url: "https://neuroplus.com.tw",
+});
     const loading = ref(false);
 
     const purchasedProducts = ref([]); // 已購買的產品

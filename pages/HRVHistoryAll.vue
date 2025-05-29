@@ -158,9 +158,16 @@ import RaphaelLoading from "../components/RaphaelLoading";
 import DSPRSelect from "../components/DSPRSelect.vue";
 import { useCommon } from "../stores/common";
 import { useUserData } from "~/fn/api";
+import { useSeo } from "~/composables/useSeo";
 export default {
-  components: { RaphaelLoading, HRVAlert, DSPRSelect },
+  components: { RaphaelLoading, HRVAlert, DSPRSelect ,useSeo},
   setup() {
+    useSeo({
+      title: "",
+      description:
+        "NeuroPlus神經調節家提供專業的自律神經檢測服務，運用FDA認證AI技術，透過人臉辨識快速分析HRV數據，幫助您了解自律神經狀態。",
+      url: "https://neuroplus.com.tw",
+    });
     const HRVData = ref([]);
     const router = useRouter();
     const userData = JSON.parse(localStorage.getItem("userData"));

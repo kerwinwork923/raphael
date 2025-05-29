@@ -150,10 +150,17 @@ import Navbar from "../components/Navbar";
 import { useRouter } from "vue-router";
 
 import UserInfoForm from "../components/UserInfoWrap.vue";
+import { useSeo } from "~/composables/useSeo";
 
 export default {
-  components: { Navbar, UserInfoForm },
+  components: { Navbar, UserInfoForm,useSeo },
   setup() {
+    useSeo({
+      title: "",
+      description:
+        "NeuroPlus神經調節家提供專業的自律神經檢測服務，運用FDA認證AI技術，透過人臉辨識快速分析HRV數據，幫助您了解自律神經狀態。",
+      url: "https://neuroplus.com.tw",
+    });
     const router = useRouter();
     const passwordVisible = ref(false);
     const passwordAgainVisible = ref(false);

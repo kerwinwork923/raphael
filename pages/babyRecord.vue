@@ -331,7 +331,7 @@ import SolvePrioritySelect from "@/components/babyRecord/SolvePrioritySelect.vue
 import BabyReportResult from "@/components/babyRecord/BabyReportResult.vue";
 import BabyEditAlert from "@/components/babyRecord/BabyEditAlert.vue";
 import { useBabyStore } from "@/stores/useBabyStore";
-
+import { useSeo } from "~/composables/useSeo";
 export default {
   name: "BabyRecord",
   components: {
@@ -347,6 +347,7 @@ export default {
     SolvePrioritySelect,
     BabyReportResult,
     BabyEditAlert,
+    useSeo,
   },
   setup() {
     const router = useRouter();
@@ -362,6 +363,12 @@ export default {
       birthDate: null, // Date 物件
     });
 
+    useSeo({
+      title: "",
+      description:
+        "NeuroPlus神經調節家提供專業的自律神經檢測服務，運用FDA認證AI技術，透過人臉辨識快速分析HRV數據，幫助您了解自律神經狀態。",
+      url: "https://neuroplus.com.tw",
+    });
     function onEditChild(child) {
       // 打開編輯視窗
 

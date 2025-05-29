@@ -237,6 +237,7 @@ import DSPRSelect from "@/components/DSPRSelect.vue";
 import HRVAlertForUse from "@/components/HRVAlertForUse.vue";
 import RaphaelLoading from "@/components/RaphaelLoading";
 import { useCommon } from "../stores/common";
+import { useSeo } from "~/composables/useSeo";
 
 /** 解析 YYYYMMDDHHmmss => Date */
 function parseYMDHMS(str) {
@@ -281,8 +282,15 @@ export default {
     DSPRSelect,
     HRVAlertForUse,
     RaphaelLoading,
+    useSeo,
   },
   setup() {
+    useSeo({
+      title: "",
+      description:
+        "NeuroPlus神經調節家提供專業的自律神經檢測服務，運用FDA認證AI技術，透過人臉辨識快速分析HRV數據，幫助您了解自律神經狀態。",
+      url: "https://neuroplus.com.tw",
+    });
     const router = useRouter();
     const store = useCommon();
 
