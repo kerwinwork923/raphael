@@ -1,6 +1,6 @@
 <template>
   <div class="changeUsageTags">
-    <div
+    <!-- <div
       class="changeUsageTag"
       :class="{ changeUsageTagActive: currentPath === '/UsageHistory' }"
       @click="gotoUsageHistory"
@@ -13,7 +13,7 @@
       @click="gotoHRVHistory"
     >
       HRV檢測
-    </div>
+    </div> -->
   </div>
 </template>
 

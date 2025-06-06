@@ -1,18 +1,49 @@
 <template>
   <div class="cartTitleBar">
-    <img class="goBack" src="/assets/imgs/goBack.svg" alt="返回" />
+    <img 
+      class="goBack" 
+      src="/assets/imgs/goBack.svg" 
+      alt="返回" 
+      @click="handleGoBack"
+    />
     <h2>{{ title }}</h2>
-    <img class="cart" src="/assets/imgs/cart.svg" alt="購物車" />
+    <img 
+      v-if="showCart" 
+      class="cart" 
+      src="/assets/imgs/cart.svg" 
+      alt="購物車" 
+      @click="router.push('/cart/cartList')"
+    />
   </div>
 </template>
 
 <script setup>
-defineProps({
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const props = defineProps({
   title: {
     type: String,
     default: "智慧商城"
+  },
+  showCart: {
+    type: Boolean,
+    default: true
+  },
+  backPath: {
+    type: String,
+    default: ''
   }
 });
+
+const handleGoBack = () => {
+  if (props.backPath) {
+    router.push(props.backPath);
+  } else {
+    router.back();
+  }
+};
 </script>
 
 <style scoped lang="scss">

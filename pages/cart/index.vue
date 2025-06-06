@@ -1,6 +1,6 @@
 <template>
   <div class="cartWrap">
-    <CartTitleBar />
+    <CartTitleBar title="商品列表" :showCart="true" backPath="/user" />
     <div class="cartContentGroup">
       <div class="cartContentItem" v-for="item in cartItems" :key="item.id">
         <img :src="item.img" :alt="item.name" />
@@ -125,7 +125,7 @@ const cartItems = ref([
       border-radius: var(--Radius-r-8, 8px);
       border: 1px solid var(--Secondary-default, #1fbcb3);
       background: var(--secondary-400-opacity-10, rgba(31, 188, 179, 0.1));
-      margin-top: .5rem;
+      margin-top: 0.5rem;
     }
   }
 }
