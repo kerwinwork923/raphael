@@ -15,9 +15,9 @@
       </svg>
     </div>
 
-    <h1>
+    <h2>
       {{ Text }}
-    </h1>
+    </h2>
   </div>
 </template>
 
@@ -72,7 +72,7 @@ export default {
     left: 0;
     cursor: pointer;
   }
-  h1 {
+  h2 {
     font-size: 1.5rem;
     letter-spacing: 0.5px;
     color: #1e1e1e;
