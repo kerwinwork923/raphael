@@ -6,7 +6,7 @@
       </router-link>
     </div>
     <div class="optionGroup">
-      <img class="cartIcon" src="../assets/imgs/cart.svg" alt="" />
+      <!-- <img class="cartIcon" src="../assets/imgs/cart.svg" alt="" /> -->
        <!--<img class="alertIcon" src="../assets/imgs/alert.svg" alt="" />-->
       <a href="/ChangeMember">
         <img class="settingIcon" src="../assets/imgs/setting.svg" alt="" />
