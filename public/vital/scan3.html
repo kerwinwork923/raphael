@@ -858,9 +858,10 @@
               );
         
               try {
-                const data = await res.json();
-                console.log("API 原始回傳資料:", data); // Debug log
-
+                const gdata = await res.json();
+                console.log("API 原始回傳資料:", gdata); // Debug log
+                const data=JSON.parse(gdata);
+                console.log("API 原始回傳資料after parse:", data); // Debug log
                 // 統一安全解析
                 const hbr = num(data.hbr?.[0]);
                 const hrv = data.hrv?.[0] || {};
@@ -893,9 +894,9 @@
                 // 自律神經平衡
                 let balanceSymbol = "❓";
                 if (lf_hf !== null && !isNaN(lf_hf)) {
-                  if (lf_hf > 2.5) balanceSymbol = "🧠 焦躁（交感極高）";
+                  if (lf_hf > 2) balanceSymbol = "🧠 焦躁（交感極高）";
                   else if (lf_hf > 1.5) balanceSymbol = "😱 緊繃";
-                  else if (lf_hf >= 0.8) balanceSymbol = "😌 穩定";
+                  else if (lf_hf >= 1) balanceSymbol = "😌 穩定";
                   else if (lf_hf >= 0.5) balanceSymbol = "🐱 微放鬆";
                   else balanceSymbol = "🐈 深度放鬆";
                 }
@@ -914,20 +915,29 @@
                 let moodSymbol = "🚧";
                 if (hbr && rr && LF && HF) {
                   let moodScore = 0;
-                  if (hbr > 90) moodScore += 2;
-                  else if (hbr > 80) moodScore += 1;
-                  if (rr > 18) moodScore += 2;
-                  else if (rr > 15) moodScore += 1;
+                  if (hbr > 90) moodScore += 5;
+                  else if (hbr > 80) moodScore += 4;
+                  else if (hbr > 70) moodScore += 3;
+                  else if (hbr > 60) moodScore += 2;
+                  else moodScore += 1;
+
+                  if (rr > 18) moodScore += 5;
+                  else if (rr > 15) moodScore += 4;
+                  else if (rr > 12) moodScore += 3;
+                  else if (rr > 10) moodScore += 2;
+                  else moodScore += 1;
+
                   const lf_hf_ratio = LF / HF;
-                  if (lf_hf_ratio > 2.5) moodScore += 2;
-                  else if (lf_hf_ratio > 1.5) moodScore += 1;
-                  else if (lf_hf_ratio < 0.5) moodScore -= 2;
-                  else if (lf_hf_ratio < 0.8) moodScore -= 1;
-                  if (moodScore >= 4) moodSymbol = "🔥 高度焦躁";
-                  else if (moodScore >= 2) moodSymbol = "😠 緊繃";
-                  else if (moodScore === 0 || moodScore === 1)
-                    moodSymbol = "💪 專注";
-                  else if (moodScore <= -1) moodSymbol = "😌 微放鬆";
+                  if (lf_hf_ratio > 2) moodScore += 5;
+                  else if (lf_hf_ratio > 1.5) moodScore += 4;
+                  else if (lf_hf_ratio > 1) moodScore += 3;
+                  else if (lf_hf_ratio > 0.5) moodScore += 2;
+                  else moodScore += 1;
+
+                  if (moodScore >= 14) moodSymbol = "🔥 高度焦躁";
+                  else if (moodScore >= 12) moodSymbol = "😠 緊繃";
+                  else if (moodScore >=9) moodSymbol = "💪 專注";
+                  else if (moodScore >=5) moodSymbol = "😌 微放鬆";
                   else moodSymbol = "😴 沉靜";
                 }
 
