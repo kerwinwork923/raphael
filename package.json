@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "nuxt dev",
-    "build": "nuxi generate",       
-    "generate": "nuxi generate",     
+    "build": "nuxi generate",
+    "generate": "nuxi generate",
     "preview": "nuxi preview",
     "postinstall": "nuxi prepare",
     "test": "jest"
@@ -13,6 +13,7 @@
   "dependencies": {
     "@pinia/nuxt": "^0.5.4",
     "@vite-pwa/nuxt": "^0.10.5",
+    "@vladmandic/face-api": "^1.7.15",
     "@vuepic/vue-datepicker": "^9.0.3",
     "axios": "^1.7.7",
     "chart.js": "^4.4.7",

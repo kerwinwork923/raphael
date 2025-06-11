@@ -136,113 +136,18 @@
     </div>
 
     <div class="row justify-content-center my-4">
-      <div id="gauge-container" style="display: flex; flex-wrap: wrap; justify-content: space-around; width: 100%;">
-        <div id="gauge-balance" style="width: 200px; height: 200px;"></div>
-        <div id="gauge-fatigue" style="width: 200px; height: 200px;"></div>
-        <div id="gauge-mood" style="width: 200px; height: 200px;"></div>
-        <div id="gauge-pressure" style="width: 200px; height: 200px;"></div>
-      </div>
-    </div>
-
-    <div class="scanInfo">
-      <div class="row">
-        <div class="years">
-          <h3>生理年齡</h3>
-          <div class="value" id="v_bioage"></div>
-          <div class="info">years old</div>
-          <img src="images/raphael/HRVFace.svg" class="HRVFace" alt="" />
-        </div>
-        <div class="HRV">
-          <h3 >心律變異性</h3>
-          <div id="v_hrv" class="value"></div>
-          <div class="info">ms</div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="Rhythm">
-          <div class="titleGroup">
-            <h3 >心率</h3>
-            <img src="images/raphael/heartBeat.svg" alt="" />
-          </div>
-          <div id="v_hr" class="value"></div>
-          <div class="info">bpm</div>
-          <img class="bgImg" src="images/raphael/greenChart.svg" alt="" />
-        </div>
-        <div class="bloodPressure">
-          <div class="titleGroup">
-            <h3>血壓</h3>
-            <img src="images/raphael/bloodPressure.svg" alt="" />
-          </div>
-          <div class="value"><span id="v_sbp"></span><span id="v_dbp"></span></div>
-          <div class="info">mmHg</div>
-          <img class="bgImg" src="images/raphael/purpleChart.svg" alt="" />
-        </div>
-      </div>
-      <div class="row">
-        <div class="BO">
-          <div class="titleGroup">
-            <h3>血氧</h3>
-            <img src="images/raphael/spo2.svg" alt="" />
-          </div>
-          <div id="v_spo2" class="value"></div>
-          <div class="info">%</div>
-          <img class="bgImg" src="images/raphael/blueChart.svg" alt="" />
-        </div>
-        <div class="breathe">
-          <div class="titleGroup">
-            <h3 >呼吸</h3>
-            <img src="images/raphael/spo2.svg" alt="" />
-          </div>
-          <div id="v_rr" class="value"></div>
-          <div class="info">bpm</div>
-          <img class="bgImg" src="images/raphael/brownChart.svg" alt="" />
-        </div>
-        <div class="pressure">
-          <div class="titleGroup">
-            <h3 >壓力</h3>
-            <img src="images/raphael/pressure.svg" alt="" />
-          </div>
-          <div id="v_si" class="value"></div>
-          <!-- <div class="info">low</div> -->
-          <img class="bgImg" src="images/raphael/redChart.svg" alt="" />
-        </div>
+      <div id="gauge-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; max-width: 500px; margin: 0 auto;">
+        <div id="gauge-balance" style="width: 100%; aspect-ratio: 1;"></div>
+        <div id="gauge-fatigue" style="width: 100%; aspect-ratio: 1;"></div>
+        <div id="gauge-mood" style="width: 100%; aspect-ratio: 1;"></div>
+        <div id="gauge-pressure" style="width: 100%; aspect-ratio: 1;"></div>
       </div>
     </div>
 
 
-    <div class="row justify-content-md-center mx-1">
-      <!-- Bio Age -->
-      <div class="col-6 col-md-4 col-xxl-2 px-3 opH">
-        <div class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white " style="height: 80px">
-          <div class="col-5 m-auto p-0">
-           <p class="text-start text-dark m-auto mx-1" style="font-size:small">HR,SDNN<BR>生理年齡y/o</p>
-          </div>
-         <div class="col-5 px-0 m-auto">
-          <p id="v_bioage" class="text-center text-dark fs-6 m-0">--</p>
-         </div>
-         <div class="col-2 m-auto p-0">
-            <img class="bi m-auto d-block" src="images/hrv.svg" width="24" height="24" />
-            <p class="text-center text-muted m-auto" style="font-size: 9px">ms</p>
-         </div>
-        </div>
-      </div>
-      <!-- Bio Age -->
-      <div class="col-6 col-md-4 col-xxl-2 px-3 opH">
-        <div class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white " style="height: 80px">
-          <div class="col-5 m-auto p-0">
-           <p class="text-start text-dark m-auto mx-1" style="font-size:small">文獻生理年齡<BR>y/o</p>
-          </div>
-         <div class="col-5 px-0 m-auto">
-          <p id="v_bioage" class="text-center text-dark fs-6 m-0">--</p>
-         </div>
-         <div class="col-2 m-auto p-0">
-            <img class="bi m-auto d-block" src="images/hrv.svg" width="24" height="24" />
-            <p class="text-center text-muted m-auto" style="font-size: 9px">ms</p>
-         </div>
-        </div>
-      </div>
-    </div>
+
+
+
   </div>
 
   <img id="s_cancel" class="bi d-block" src="images/back.svg" width="20" height="20" alt="" />
@@ -311,176 +216,13 @@
   padding: 48px 5% 0;
 }
 
-.scanInfo {
-  display: flex;
-  margin-top: 10px;
-  flex-wrap: wrap;
-  justify-content: space-between;
-}
 
-.scanInfo h3 {
-  font-size: 20px;
-  font-weight: 400;
-  letter-spacing: 0.15px;
-  padding: 0;
-  margin: 0;
-}
-
-.scanInfo .row {
-  display: flex;
-  flex-wrap: nowrap;
-  width: 100%;
-  gap: 3%;
-  margin-bottom: 1rem;
-}
-
-.scanInfo .row:nth-child(1){
-    display: none;
-}
-
-.scanInfo .years {
-  width: 55%;
-  padding: 6px;
-  border-radius: 8px;
-  background: linear-gradient(
-    180deg,
-    #74bc1f 0%,
-    rgba(116, 188, 31, 0.35) 100%
-  );
-  padding: 12px;
-  align-items: center;
-  color: #fff;
-  position: relative;
-  overflow: hidden;
-}
-
-.scanInfo .years .value {
-  font-size: 48px;
-  font-weight: bold;
-  padding: 0.25rem 0;
-}
-
-.scanInfo .years .info {
-  font-size: 1rem;
-  font-weight: 400;
-  letter-spacing: 0.5px;
-}
-
-.scanInfo .years .HRVFace {
-  position: absolute;
-  right: -22%;
-  top: 0;
-}
-
-.scanInfo .HRV {
-  background: linear-gradient(
-    180deg,
-    #dfecc5 0%,
-    rgba(223, 236, 197, 0.35) 100%
-  );
-  padding: 12px;
-  border-radius: 8px;
-  width: 45%;
-}
-
-.scanInfo .HRV .value {
-  color: #74bc1f !important;
-  font-size: 48px;
-  font-weight: bold;
-  padding: 0.25rem 0;
-}
-
-.scanInfo .HRV .info {
-  color: #666;
-  font-size: 1rem;
-  font-weight: 400;
-  letter-spacing: 0.5px;
-  width: 45%;
-}
-
-.scanInfo .Rhythm,
-.scanInfo .bloodPressure {
-  width: 50%;
-  background-color: #fff;
-  border-radius: 8px;
-  border-top-style: 8px;
-  position: relative;
-  overflow: hidden;
-  padding: 12px;
-}
-
-.scanInfo .Rhythm .titleGroup,
-.scanInfo .bloodPressure .titleGroup {
-  display: flex;
-  justify-content: space-between;
-}
-
-.scanInfo .Rhythm .value,
-.scanInfo .bloodPressure .value {
-  color: #74bc1f !important; 
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: 0.12px;
-  margin-top: 0.5rem;
-}
 
 .text-success{
   color: #74bc1f !important; 
 }
 
-.scanInfo .Rhythm .info,
-.scanInfo .bloodPressure .info {
-  color: #ccc;
-  letter-spacing: 0.5px;
-}
 
-.scanInfo .Rhythm .bgImg,
-.scanInfo .bloodPressure .bgImg {
-  position: absolute;
-  bottom: 0%;
-}
-
-.scanInfo .BO,
-.scanInfo .breathe,
-.scanInfo .pressure {
-  width: 33.333%;
-  background-color: #fff;
-  border-radius: 8px;
-  position: relative;
-  overflow: hidden;
-  padding: 12px;
-}
-
-.scanInfo .BO .titleGroup,
-.scanInfo .breathe .titleGroup,
-.scanInfo .pressure .titleGroup {
-  display: flex;
-  justify-content: space-between;
-}
-
-.scanInfo .BO .value,
-.scanInfo .breathe .value,
-.scanInfo .pressure .value {
-  color: #74bc1f !important; 
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: 0.12px;
-  margin-top: 0.5rem;
-}
-
-.scanInfo .BO .info,
-.scanInfo .breathe .info,
-.scanInfo .pressure .info {
-  color: #ccc;
-  letter-spacing: 0.5px;
-}
-
-.scanInfo .BO .bgImg,
-.scanInfo .breathe .bgImg,
-.scanInfo .pressure .bgImg {
-  position: absolute;
-  bottom: 0%;
-}
 
 #s_cancel{
   display: none !important;
@@ -674,14 +416,22 @@ video {
     try {
         const data = JSON.parse(jsonString);
         alert(data);
-        const hbr = data.hbr?.[0] || '--';
+        const hbr = data.hbr?.[0] ? Number(data.hbr[0]) : null;
         const hrv = data.hrv?.[0] || {};
-        const sbp = data.ica?.[0]?.SBP || '--';
-        const dbp = data.ica?.[0]?.DBP || '--';
-        const spo2 = data.sp?.[0] || '--';
-        const rr = data.rr?.[0] || '--';
-        const af = data.af?.[0] || '--';
-        const fa = data.fa?.[0] || '--';
+        const sdnn = hrv["SDNN"] !== undefined ? Number(hrv["SDNN"]) : null;
+        const LF = hrv["LF"] !== undefined ? Number(hrv["LF"]) : null;
+        const HF = hrv["HF"] !== undefined ? Number(hrv["HF"]) : null;
+        let lf_hf = hrv["LF/HF"];
+        if ((!lf_hf || lf_hf === "--") && LF && HF) {
+          lf_hf = LF / HF;
+        }
+        lf_hf = Number(lf_hf) || null;
+        const sbp = data.ica?.[0]?.SBP !== undefined ? Number(data.ica[0].SBP) : null;
+        const dbp = data.ica?.[0]?.DBP !== undefined ? Number(data.ica[0].DBP) : null;
+        const spo2 = data.sp?.[0] || "--";
+        const rr = data.rr?.[0] !== undefined ? Number(data.rr[0]) : null;
+        const af = data.af?.[0] || "--";
+        const fa = data.fa?.[0] || "--";
 
         const resultText = `
             心率: ${hbr} bpm<br>
@@ -708,20 +458,40 @@ video {
 
   function showEmotionResult(jsonString){
      // 判斷：自律神經平衡狀態 (LF/HF)
-    // alert("jsonString="+jsonString);
+     console.log('原始回傳資料：', jsonString);
      const data = JSON.parse(jsonString);
-     //alert("emotiondata="+data);
-     const hbr = data.hbr?.[0] || '--';
+     console.log('解析後的資料：', data);
+     
+     const hbr = data.hbr?.[0] ? Number(data.hbr[0]) : null;
      const hrv = data.hrv?.[0] || {};
-     const sbp = data.ica?.[0]?.SBP || '--';
-     const dbp = data.ica?.[0]?.DBP || '--';
-     const spo2 = data.sp?.[0] || '--';
-     const rr = data.rr?.[0] || '--';
-     const af = data.af?.[0] || '--';
-     const fa = data.fa?.[0] || '--';  
-     const sdnn= hrv.SDNN;
-     const lf_hf = data.lf_hf_ratio?.[0] || '--';  
- 
+     const sdnn = hrv["SDNN"] !== undefined ? Number(hrv["SDNN"]) : null;
+     const LF = hrv["LF"] !== undefined ? Number(hrv["LF"]) : null;
+     const HF = hrv["HF"] !== undefined ? Number(hrv["HF"]) : null;
+     let lf_hf = hrv["LF/HF"];
+     if ((!lf_hf || lf_hf === "--") && LF && HF) {
+       lf_hf = LF / HF;
+     }
+     lf_hf = Number(lf_hf) || null;
+     const sbp = data.ica?.[0]?.SBP !== undefined ? Number(data.ica[0].SBP) : null;
+     const dbp = data.ica?.[0]?.DBP !== undefined ? Number(data.ica[0].DBP) : null;
+     const spo2 = data.sp?.[0] || "--";
+     const rr = data.rr?.[0] !== undefined ? Number(data.rr[0]) : null;
+     const af = data.af?.[0] || "--";
+     const fa = data.fa?.[0] || "--";  
+
+     console.log('解析後的各項數值：', {
+       hbr,
+       hrv,
+       sbp,
+       dbp,
+       spo2,
+       rr,
+       af,
+       fa,
+       sdnn,
+       lf_hf
+     });
+
        let balanceSymbol = '❓';
        if (lf_hf !== null) {
         if (lf_hf > 2.5) balanceSymbol = '🧠 焦躁（交感極高）';
@@ -771,42 +541,68 @@ video {
                  else pressureSymbol = '💦 洩氣氣球';
              }
 
-              // 組合回饋語句區塊：可加入 logsElement 或單獨 block 顯示
-               const semanticBlock = `<hr><strong>個人化身心回饋摘要：</strong><br>
+              // 顯示語意摘要
+              const semanticBlock = `<hr><strong>個人化身心回饋摘要：</strong><br>
                    🐱 自律神經平衡狀態：${balanceSymbol}<br>
                    🧑🏻 生理疲勞程度：${fatigueSymbol}<br>
                    🧠 心情指北針：${moodSymbol}<br>
-                   🎈 血壓氣球狀態：${pressureSymbol}<br>
-                `;
+                   🎈 血壓氣球狀態：${pressureSymbol}<br>`;
 
-              logsElement.innerHTML += semanticBlock;
+              // 檢測報告格式化
+              const reportBlock = `<hr><strong>檢測報告：</strong><br>
+                   心率: ${hbr !== null && !isNaN(hbr) ? hbr + " bpm" : "--"}<br>
+                   RMSSD: ${hrv.RMSSD !== undefined && hrv.RMSSD !== null ? hrv.RMSSD + " ms" : "--"}<br>
+                   SDNN: ${sdnn !== null && !isNaN(sdnn) ? sdnn + " ms" : "--"}<br>
+                   LF: ${hrv.LF !== null && !isNaN(hrv.LF) ? hrv.LF : "--"}<br>
+                   HF: ${hrv.HF !== null && !isNaN(hrv.HF) ? hrv.HF : "--"}<br>
+                   LF/HF: ${lf_hf !== null && !isNaN(lf_hf) ? lf_hf.toFixed(2) : "--"}<br>
+                   血壓: ${sbp !== null && dbp !== null ? sbp + "/" + dbp + " mmHg" : "--"}<br>
+                   血氧: ${spo2 !== undefined && spo2 !== null && spo2 !== "--" ? spo2 + "%" : "--"}<br>
+                   呼吸頻率: ${rr !== null && !isNaN(rr) ? rr + " 次/分鐘" : "--"}<br>
+                   心房顫動 (AF): ${af !== undefined && af !== null && af !== "--" ? af : "--"}<br>
+                   表情分析 (FA): ${fa !== undefined && fa !== null && fa !== "--" ? fa : "--"}<br>
+                   `;
+
+              // 顯示到 logs
+              document.getElementById("logs").innerHTML = semanticBlock + reportBlock;
                if (window.ej) {
                     function createGauge(id, value, label, icon) {
                       new ej.circulargauge.CircularGauge({
-                        width: '200px',
-                        height: '200px',
-                        axes: [{radius: '90%',minimum: 0,maximum: 5,
-                        pointers: [{value,radius: '65%',color: '#6366f1',pointerWidth: 10,cap: { radius: 8, color: '#333' },needleTail: { length: '15%' },animation: { enable: true, duration: 1000 }}],  
-                        ranges: [
-                                     { start: 1, end: 2, color: '#f87171' },
-                                     { start: 2, end: 3, color: '#fbbf24' },
-                                     { start: 3, end: 4, color: '#34d399' },
-                                     { start: 4, end: 5, color: '#22d3ee' }
-                                         ],
-                               majorTicks: { interval: 1, height: 10, color: '#999' },
-                               minorTicks: { interval: 0.5, height: 5 },
-                               labelStyle: { font: { size: '12px' } },
-                               annotations: [
-                                  {
-                                    content: `<div style='font-size:14px;font-weight:bold;text-align:center;'>${icon}<br>${label}</div>`,
-                                    angle: 90,
-                                    radius: '130%',
-                                    zIndex: '1'
-                                   }
-                                ]
-                              }]
-                     }).appendTo(`#${id}`);
-                   }
+                        width: '100%',
+                        height: '100%',
+                        background: 'transparent',
+                        axes: [{
+                          radius: '90%',
+                          minimum: 0,
+                          maximum: 5,
+                          background: 'transparent',
+                          pointers: [{
+                            value,
+                            radius: '65%',
+                            color: '#6366f1',
+                            pointerWidth: 10,
+                            cap: { radius: 8, color: '#333' },
+                            needleTail: { length: '15%' },
+                            animation: { enable: true, duration: 1000 }
+                          }],
+                          ranges: [
+                            { start: 1, end: 2, color: '#f87171' },
+                            { start: 2, end: 3, color: '#fbbf24' },
+                            { start: 3, end: 4, color: '#34d399' },
+                            { start: 4, end: 5, color: '#22d3ee' }
+                          ],
+                          majorTicks: { interval: 1, height: 10, color: '#999' },
+                          minorTicks: { interval: 0.5, height: 5 },
+                          labelStyle: { font: { size: '12px', color: '#fff' } },
+                          annotations: [{
+                            content: `<div style='font-size:14px;font-weight:bold;text-align:center;color:#fff;'>${icon}<br>${label}</div>`,
+                            angle: 90,
+                            radius: '130%',
+                            zIndex: '1'
+                          }]
+                        }]
+                      }).appendTo(`#${id}`);
+                    }
 
                   // 對應級數數值化（1~5）
                   const balanceScore = lf_hf > 2.5 ? 1 : lf_hf > 1.5 ? 2 : lf_hf >= 0.8 ? 3 : lf_hf >= 0.5 ? 4 : 5;

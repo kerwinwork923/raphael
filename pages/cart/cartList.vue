@@ -1,6 +1,7 @@
 <template>
   <div class="cartListWrap">
-    <CartTitleBar title="購物車" />
+    <CartTitleBar title="購物車" :showCart="true"
+    backPath="/cart"/>
 
     <div class="cartListContentWrap">
       <div class="cartListContent">
