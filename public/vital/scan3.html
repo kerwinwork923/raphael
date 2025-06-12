@@ -29,7 +29,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
+  
     }
 
     /* 主背景色改為 #050709 */
@@ -431,6 +431,9 @@
       border-radius: 4px;
       overflow: hidden;
     }
+    .progress-text{
+      color:#8fd92f; font-size:1.8rem; min-width:90px; text-align:right; font-family:Orbitron; font-weight:900; letter-spacing:2px;
+    }
 
     .progress-fill {
       height: 100%;
@@ -467,7 +470,7 @@
     }
 
     /* 取代倒數模糊遮罩，讓中央橢圓清楚、外圍模糊全程顯示 */
-    .face-blur-mask {
+    /* .face-blur-mask {
       position: absolute;
       inset: 0;
       z-index: 0;
@@ -478,7 +481,31 @@
       display: block;
       -webkit-mask-image: radial-gradient(ellipse 100px 125px at 50% 50%, transparent 99px, black 100px);
       mask-image: radial-gradient(ellipse 100px 125px at 50% 50%, transparent 99px, black 100px);
-    }
+    } */
+     /* --- 只貼你要改 / 新增的部分 --- */
+.face-blur-mask {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.25);
+  opacity: 1;
+
+  /* ↓ 用 4 個 CSS 變數描述橢圓中心與半徑 */
+  --cx: 50%;
+  --cy: 50%;
+  --rx: 100px;
+  --ry: 125px;
+
+  /* 把變數餵進 radial-gradient 做遮罩 */
+  -webkit-mask-image: radial-gradient(ellipse var(--rx) var(--ry) at var(--cx) var(--cy),
+                                      transparent 98%, black 100%);
+  mask-image: radial-gradient(ellipse var(--rx) var(--ry) at var(--cx) var(--cy),
+                              transparent 98%, black 100%);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
 
     .HRVFirstCover {
       background-color: #050709;
@@ -653,6 +680,76 @@
     .face-guide-tip.show {
       display: block;
     }
+
+    /* ---------- Responsive ---------- */
+    @media screen and (max-width: 1024px) {
+      .ai-scanner-system {
+        width: 70vw;
+   
+        min-height: 400px;
+
+      }
+      .face-guide {
+        width: 180px;
+        height: 220px;
+      }
+
+    }
+
+    @media screen and (max-width: 576px) {
+      .ai-scanner-system {
+        width: 80vw;
+        min-height: 60vh;
+
+
+      }
+      .face-guide {
+        width: 180px;
+        height: 220px;
+      }
+
+      .system-title{
+        text-align: center;
+        font-size: 1.25rem;
+        
+      }
+      .progress-text{
+        font-size: 1.25rem;
+        min-width: 0px;
+      }
+
+      /* .video-container {
+        top: 24px;
+        left: 0;
+        right: 0;
+        bottom: 40px;
+      }
+      .progress-section {
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 36px;
+        padding: 2px;
+      }
+      .face-guide {
+        width: 48px;
+        height: 60px;
+      }
+      .face-guide-tip {
+        font-size: 9px;
+        top: calc(50% + 28px);
+      }
+      .action-tip {
+        min-width: 40px;
+        padding: 2px 2px;
+        font-size: 0.7rem;
+      }
+      .countdown {
+        font-size: 28px;
+      } */
+    }
+
+
   </style>
 </head>
 
@@ -705,11 +802,12 @@
 
       <!-- Progress + metrics -->
       <div class="progress-section">
-        <div style="flex: 1; display: flex; align-items: center; justify-content: flex-end;">
-          <div
-            style="color:#8fd92f; font-size:1.8rem; min-width:90px; text-align:right; font-family:Orbitron; font-weight:900; letter-spacing:2px;">
-            {{ Math.round(progress) }}%</div>
-        </div>
+      
+          <div class="progress-text"
+            >
+            {{ Math.round(progress) }}%
+          </div>
+  
         <div class="progress-bar">
           <div class="progress-fill" :style="{width:progress+'%'}"></div>
         </div>
@@ -1197,6 +1295,34 @@
         cover.addEventListener("click", closeCover);
       }
     });
+    function syncMaskToGuide() {
+  const guide = document.querySelector('.face-guide');
+  const mask  = document.querySelector('.face-blur-mask');
+  const box   = document.querySelector('.video-container');
+  if (!guide || !mask || !box) return;
+
+  /* 取 .face-guide 與 .video-container 的絕對座標 */
+  const g = guide.getBoundingClientRect();
+  const b = box.getBoundingClientRect();
+
+  /* 以 video-container 為基準，把中心點換算成百分比 */
+  const cx = ((g.left + g.width  / 2) - b.left) / b.width  * 100;
+  const cy = ((g.top  + g.height / 2) - b.top ) / b.height * 100;
+
+  /* 半徑直接用像素（精準貼合） */
+  mask.style.setProperty('--cx', cx + '%');
+  mask.style.setProperty('--cy', cy + '%');
+  mask.style.setProperty('--rx', (g.width  / 2) + 'px');
+  mask.style.setProperty('--ry', (g.height / 2) + 'px');
+}
+
+/* 用 requestAnimationFrame 持續同步（效能比 setInterval 好） */
+function loop() {
+  syncMaskToGuide();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
   </script>
 </body>
 
