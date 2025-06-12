@@ -1,0 +1,34 @@
+.face-blur-mask {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+  opacity: 1;
+  display: block;
+  -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, transparent 40%, black 41%);
+  mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, transparent 40%, black 41%);
+}
+
+/* RWD 調整 */
+@media screen and (max-width: 1024px) {
+  .face-blur-mask {
+    -webkit-mask-image: radial-gradient(ellipse 55% 55% at 50% 50%, transparent 45%, black 46%);
+    mask-image: radial-gradient(ellipse 55% 55% at 50% 50%, transparent 45%, black 46%);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .face-blur-mask {
+    -webkit-mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, transparent 50%, black 51%);
+    mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, transparent 50%, black 51%);
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .face-blur-mask {
+    -webkit-mask-image: radial-gradient(ellipse 65% 65% at 50% 50%, transparent 55%, black 56%);
+    mask-image: radial-gradient(ellipse 65% 65% at 50% 50%, transparent 55%, black 56%);
+  }
+} 
