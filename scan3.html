@@ -32,3 +32,40 @@
     mask-image: radial-gradient(ellipse 65% 65% at 50% 50%, transparent 55%, black 56%);
   }
 } 
+
+// 顯示到 logs
+// document.getElementById("logs").innerHTML =
+//   semanticBlock + reportBlock;
+aiAnalysing.value = false; // 分析完畢自動隱藏
+
+// 取得 userData
+const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+
+// 組合 HRV3Save 參數
+const hrv3Payload = {
+  MID: userData.MID || "",
+  MAID: userData.MAID || "",
+  Token: userData.Token || "",
+  Mobile: userData.Mobile || "",
+  UID: userData.UID || "", // 若沒有 UID 就傳 ""
+  HRVCalTime: userData.HRVCalTime || "",
+  Flag: "", // 依需求填 "1"、"2"、"3" 或 ""
+  hbr: hbr?.toString() || "",
+  rmssd: hrv.RMSSD?.toString() || "",
+  sdnn: sdnn?.toString() || "",
+  lf: LF?.toString() || "",
+  hf: HF?.toString() || "",
+  lf_hf: lf_hf?.toString() || "",
+  sbp: sbp?.toString() || "",
+  dbp: dbp?.toString() || "",
+  spo2: spo2?.toString() || "",
+  af: af?.toString() || "",
+  rr: rr?.toString() || "",
+  fa: fa?.toString() || ""
+};
+
+// 呼叫 HRV3Save API
+await saveHRV3ToServer(hrv3Payload);
+
+// 直接跳轉到結果頁
+window.location.href = "/vital/finish.html"; 

@@ -1,0 +1,28 @@
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // ...原本的程式碼...
+
+    // HRV3 API 參數
+    const hrv3Params = {
+      MID: "1",
+      Token: "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
+      MAID: "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
+      Mobile: "0968324056"
+    };
+
+    // 呼叫 HRV3 API
+    fetch("https://23700999.com:8081/HMA/api/fr/HRV3", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(hrv3Params),
+    })
+      .then(res => res.json())
+      .then(data => {
+        console.log("HRV3 API 回傳：", data);
+        // 你可以在這裡處理資料，或顯示在畫面上
+      })
+      .catch(err => {
+        console.error("HRV3 API 錯誤：", err);
+      });
+  });
+</script> 

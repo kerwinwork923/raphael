@@ -1155,7 +1155,6 @@
 
               // 呼叫 HRV3Save API
               await saveHRV3ToServer(hrv3Payload);
-              window.location.href = "/vital/finish.html"; 
             } catch (e) {
               aiAnalysing.value = false;
               console.error("解析錯誤:", e);
