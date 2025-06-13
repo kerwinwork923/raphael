@@ -1,483 +1,493 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NeuroPlus AI 人臉掃描系統 v2.0</title>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NeuroPlus AI 人臉掃描系統 v2.0</title>
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/material.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
 
-  <!-- Libraries -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/material.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
+    <!-- ★ Green Sci-Fi Style -->
+    <style>
+      /* ---------- Base ---------- */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-  <!-- ★ Green Sci-Fi Style -->
-  <style>
-    /* ---------- Base ---------- */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+      body {
+        font-family: "Orbitron", monospace;
+        background: radial-gradient(ellipse at center, #1a2e0a 0%, #000 100%);
+        color: #1fbcb3;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
 
-    body {
-      font-family: "Orbitron", monospace;
-      background: radial-gradient(ellipse at center, #1a2e0a 0%, #000 100%);
-      color: #1fbcb3;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      /* 主背景色改為 #050709 */
+      body {
+        background: #050709 !important;
+      }
 
-    }
-
-    /* 主背景色改為 #050709 */
-    body {
-      background: #050709 !important;
-    }
-
-    /* ---------- Scanner shell ---------- */
-    .ai-scanner-system {
-      position: relative;
-      width: 800px;
-      height: 600px;
-      background: linear-gradient(135deg,
+      /* ---------- Scanner shell ---------- */
+      .ai-scanner-system {
+        position: relative;
+        width: 800px;
+        height: 600px;
+        background: linear-gradient(
+          135deg,
           rgba(31, 188, 179, 0.1),
-          rgba(31, 188, 179, 0.05));
-      border: 2px solid #1fbcb3;
-      border-radius: 20px;
-      box-shadow: 0 0 50px rgba(31, 188, 179, 0.3),
-        inset 0 0 50px rgba(31, 188, 179, 0.1);
-      backdrop-filter: blur(10px);
-      overflow: hidden;
-    }
+          rgba(31, 188, 179, 0.05)
+        );
+        border: 2px solid #1fbcb3;
+        border-radius: 20px;
+        box-shadow: 0 0 50px rgba(31, 188, 179, 0.3),
+          inset 0 0 50px rgba(31, 188, 179, 0.1);
+        backdrop-filter: blur(10px);
+        overflow: hidden;
+      }
 
-    /* ---------- Header ---------- */
-    .scanner-header {
-      position: absolute;
-      inset: 0 0 auto 0;
-      height: 60px;
-      background: linear-gradient(90deg,
+      /* ---------- Header ---------- */
+      .scanner-header {
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 60px;
+        background: linear-gradient(
+          90deg,
           rgba(31, 188, 179, 0.2),
-          rgba(31, 188, 179, 0.1));
-      border-bottom: 1px solid rgba(31, 188, 179, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 30px;
-      z-index: 10;
-    }
-
-    .system-title {
-      font-size: 24px;
-      font-weight: 900;
-      letter-spacing: 2px;
-      text-shadow: 0 0 10px #1fbcb3;
-    }
-
-    .status-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: #1fbcb3;
-      box-shadow: 0 0 15px #1fbcb3;
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-
-      0%,
-      100% {
-        transform: scale(1);
+          rgba(31, 188, 179, 0.1)
+        );
+        border-bottom: 1px solid rgba(31, 188, 179, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 30px;
+        z-index: 10;
       }
 
-      50% {
-        transform: scale(1.2);
-      }
-    }
-
-    /* ---------- Video ---------- */
-    .video-container {
-      position: absolute;
-      top: 60px;
-      left: 20px;
-      right: 20px;
-      bottom: 120px;
-      border-radius: 15px;
-      overflow: hidden;
-      background: #000;
-    }
-
-    video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    /* ---------- Overlay (beam / grid / crosshair / speed lines) ---------- */
-    .scanning-overlay {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-    }
-
-    .scan-grid {
-      position: absolute;
-      inset: 0;
-      background-image: linear-gradient(rgba(31, 188, 179, 0.08) 1px,
-          transparent 1px),
-        linear-gradient(90deg, rgba(31, 188, 179, 0.08) 1px, transparent 1px);
-      background-size: 25px 25px;
-      animation: gridFlow 8s linear infinite;
-    }
-
-    @keyframes gridFlow {
-      0% {
-        transform: translate(0, 0);
+      .system-title {
+        font-size: 24px;
+        font-weight: 900;
+        letter-spacing: 2px;
+        text-shadow: 0 0 10px #1fbcb3;
       }
 
-      100% {
-        transform: translate(25px, 25px);
-      }
-    }
-
-    .scan-beam {
-      position: absolute;
-      width: 100%;
-      height: 4px;
-      left: 0;
-      top: 0;
-      background: linear-gradient(90deg,
-          transparent,
-          rgba(31, 188, 179, 0.6) 30%,
-          #fff 50%,
-          rgba(31, 188, 179, 0.6) 70%,
-          transparent);
-      box-shadow: 0 0 20px rgba(31, 188, 179, 0.6),
-        0 0 40px rgba(31, 188, 179, 0.4);
-      animation: scanBeam 3s ease-in-out infinite;
-    }
-
-    @keyframes scanBeam {
-      0% {
-        top: 0;
+      .status-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #1fbcb3;
+        box-shadow: 0 0 15px #1fbcb3;
+        animation: pulse 2s ease-in-out infinite;
       }
 
-      100% {
-        top: calc(100% - 4px);
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+
+        50% {
+          transform: scale(1.2);
+        }
       }
-    }
 
-    .horizontal-scan {
-      display: none;
-      position: absolute;
-      width: 4px;
-      height: 100%;
-      left: 0;
-      top: 50%;
-      background: linear-gradient(0deg,
-          transparent,
-          rgba(31, 188, 179, 0.6) 30%,
-          #fff 50%,
-          rgba(31, 188, 179, 0.6) 70%,
-          transparent);
-      box-shadow: 0 0 15px rgba(31, 188, 179, 0.6),
-        0 0 30px rgba(31, 188, 179, 0.4);
-      animation: horizontalScan 3s ease-in-out infinite 1s;
-    }
+      /* ---------- Video ---------- */
+      .video-container {
+        position: absolute;
+        top: 60px;
+        left: 20px;
+        right: 20px;
+        bottom: 120px;
+        border-radius: 15px;
+        overflow: hidden;
+        background: #000;
+      }
 
-    @keyframes horizontalScan {
-      0% {
+      video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      /* ---------- Overlay (beam / grid / crosshair / speed lines) ---------- */
+      .scanning-overlay {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      .scan-grid {
+        position: absolute;
+        inset: 0;
+        background-image: linear-gradient(
+            rgba(31, 188, 179, 0.08) 1px,
+            transparent 1px
+          ),
+          linear-gradient(90deg, rgba(31, 188, 179, 0.08) 1px, transparent 1px);
+        background-size: 25px 25px;
+        animation: gridFlow 8s linear infinite;
+      }
+
+      @keyframes gridFlow {
+        0% {
+          transform: translate(0, 0);
+        }
+
+        100% {
+          transform: translate(25px, 25px);
+        }
+      }
+
+      .scan-beam {
+        position: absolute;
+        width: 100%;
+        height: 4px;
         left: 0;
+        top: 0;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(31, 188, 179, 0.6) 30%,
+          #fff 50%,
+          rgba(31, 188, 179, 0.6) 70%,
+          transparent
+        );
+        box-shadow: 0 0 20px rgba(31, 188, 179, 0.6),
+          0 0 40px rgba(31, 188, 179, 0.4);
+        animation: scanBeam 3s ease-in-out infinite;
       }
 
-      100% {
-        left: calc(100% - 4px);
-      }
-    }
+      @keyframes scanBeam {
+        0% {
+          top: 0;
+        }
 
-    .laser-crosshair {
-      position: absolute;
-      width: 60px;
-      height: 60px;
-      border: 2px solid rgba(255, 0, 100, 0.8);
-      border-radius: 50%;
-      animation: crosshairMove 4s ease-in-out infinite;
-    }
-
-    .laser-crosshair::before,
-    .laser-crosshair::after {
-      content: "";
-      position: absolute;
-      background: rgba(255, 0, 100, 0.8);
-    }
-
-    .laser-crosshair::before {
-      width: 20px;
-      height: 2px;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    .laser-crosshair::after {
-      width: 2px;
-      height: 20px;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    @keyframes crosshairMove {
-
-      0%,
-      100% {
-        top: 15%;
-        left: 15%;
+        100% {
+          top: calc(100% - 4px);
+        }
       }
 
-      25% {
-        top: 15%;
-        left: 75%;
+      .horizontal-scan {
+        display: none;
+        position: absolute;
+        width: 4px;
+        height: 100%;
+        left: 0;
+        top: 50%;
+        background: linear-gradient(
+          0deg,
+          transparent,
+          rgba(31, 188, 179, 0.6) 30%,
+          #fff 50%,
+          rgba(31, 188, 179, 0.6) 70%,
+          transparent
+        );
+        box-shadow: 0 0 15px rgba(31, 188, 179, 0.6),
+          0 0 30px rgba(31, 188, 179, 0.4);
+        animation: horizontalScan 3s ease-in-out infinite 1s;
       }
 
-      50% {
-        top: 75%;
-        left: 75%;
+      @keyframes horizontalScan {
+        0% {
+          left: 0;
+        }
+
+        100% {
+          left: calc(100% - 4px);
+        }
       }
 
-      75% {
-        top: 75%;
-        left: 15%;
+      .laser-crosshair {
+        position: absolute;
+        width: 60px;
+        height: 60px;
+        border: 2px solid rgba(255, 0, 100, 0.8);
+        border-radius: 50%;
+        animation: crosshairMove 4s ease-in-out infinite;
       }
-    }
 
-    .speed-lines {
-      position: absolute;
-      inset: 0;
-      overflow: hidden;
-    }
+      .laser-crosshair::before,
+      .laser-crosshair::after {
+        content: "";
+        position: absolute;
+        background: rgba(255, 0, 100, 0.8);
+      }
 
-    .speed-line {
-      position: absolute;
-      height: 2px;
-      background: linear-gradient(90deg,
+      .laser-crosshair::before {
+        width: 20px;
+        height: 2px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .laser-crosshair::after {
+        width: 2px;
+        height: 20px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      @keyframes crosshairMove {
+        0%,
+        100% {
+          top: 15%;
+          left: 15%;
+        }
+
+        25% {
+          top: 15%;
+          left: 75%;
+        }
+
+        50% {
+          top: 75%;
+          left: 75%;
+        }
+
+        75% {
+          top: 75%;
+          left: 15%;
+        }
+      }
+
+      .speed-lines {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+
+      .speed-line {
+        position: absolute;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
           transparent,
           rgba(31, 188, 179, 0.7) 50%,
-          transparent);
-      animation: speed 0.8s linear infinite;
-    }
-
-    @keyframes speed {
-      0% {
-        left: -100%;
-        opacity: 0;
+          transparent
+        );
+        animation: speed 0.8s linear infinite;
       }
 
-      50% {
-        opacity: 1;
+      @keyframes speed {
+        0% {
+          left: -100%;
+          opacity: 0;
+        }
+
+        50% {
+          opacity: 1;
+        }
+
+        100% {
+          left: 100%;
+          opacity: 0;
+        }
       }
 
-      100% {
-        left: 100%;
-        opacity: 0;
-      }
-    }
-
-    /* ---------- Face guide ---------- */
-    .face-guide {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 200px;
-      height: 250px;
-      transform: translate(-50%, -50%);
-      border: 2px solid rgba(31, 188, 179, 0.5);
-      /* border-radius: 50%/60% 60% 40% 40%; */
-      border-radius: 50%;
-      background: rgba(31, 188, 179, 0.03);
-      animation: guideGlow 4s ease-in-out infinite;
-    }
-
-    @keyframes guideGlow {
-
-      0%,
-      100% {
-        box-shadow: 0 0 15px rgba(31, 188, 179, 0.2);
+      /* ---------- Face guide ---------- */
+      .face-guide {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 200px;
+        height: 250px;
+        transform: translate(-50%, -50%);
+        border: 2px solid rgba(31, 188, 179, 0.5);
+        /* border-radius: 50%/60% 60% 40% 40%; */
+        border-radius: 50%;
+        background: rgba(31, 188, 179, 0.03);
+        animation: guideGlow 4s ease-in-out infinite;
       }
 
-      50% {
-        box-shadow: 0 0 30px rgba(31, 188, 179, 0.4);
-      }
-    }
+      @keyframes guideGlow {
+        0%,
+        100% {
+          box-shadow: 0 0 15px rgba(31, 188, 179, 0.2);
+        }
 
-    /* ---------- Dummy face box ---------- */
-    .face-detection-box {
-      position: absolute;
-      border: 3px solid #ff6b00;
-      border-radius: 12px;
-      background: rgba(255, 107, 0, 0.08);
-      animation: facePulse 2.5s ease-in-out infinite;
-    }
-
-    @keyframes facePulse {
-
-      0%,
-      100% {
-        box-shadow: 0 0 25px rgba(255, 107, 0, 0.4);
+        50% {
+          box-shadow: 0 0 30px rgba(31, 188, 179, 0.4);
+        }
       }
 
-      50% {
-        box-shadow: 0 0 40px rgba(255, 107, 0, 0.7);
-      }
-    }
-
-    .face-corner {
-      position: absolute;
-      width: 30px;
-      height: 30px;
-      border: 4px solid #1fbcb3;
-      animation: cornerGlow 2s ease-in-out infinite;
-    }
-
-    .face-corner.tl {
-      top: -4px;
-      left: -4px;
-      border-right: none;
-      border-bottom: none;
-      border-top-left-radius: 12px;
-    }
-
-    .face-corner.tr {
-      top: -4px;
-      right: -4px;
-      border-left: none;
-      border-bottom: none;
-      border-top-right-radius: 12px;
-    }
-
-    .face-corner.bl {
-      bottom: -4px;
-      left: -4px;
-      border-right: none;
-      border-top: none;
-      border-bottom-left-radius: 12px;
-    }
-
-    .face-corner.br {
-      bottom: -4px;
-      right: -4px;
-      border-left: none;
-      border-top: none;
-      border-bottom-right-radius: 12px;
-    }
-
-    @keyframes cornerGlow {
-
-      0%,
-      100% {
-        box-shadow: 0 0 10px #1fbcb3;
+      /* ---------- Dummy face box ---------- */
+      .face-detection-box {
+        position: absolute;
+        border: 3px solid #ff6b00;
+        border-radius: 12px;
+        background: rgba(255, 107, 0, 0.08);
+        animation: facePulse 2.5s ease-in-out infinite;
       }
 
-      50% {
-        box-shadow: 0 0 20px #1fbcb3;
-      }
-    }
+      @keyframes facePulse {
+        0%,
+        100% {
+          box-shadow: 0 0 25px rgba(255, 107, 0, 0.4);
+        }
 
-    .face-data {
-      position: absolute;
-      bottom: -50px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: linear-gradient(135deg,
+        50% {
+          box-shadow: 0 0 40px rgba(255, 107, 0, 0.7);
+        }
+      }
+
+      .face-corner {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        border: 4px solid #1fbcb3;
+        animation: cornerGlow 2s ease-in-out infinite;
+      }
+
+      .face-corner.tl {
+        top: -4px;
+        left: -4px;
+        border-right: none;
+        border-bottom: none;
+        border-top-left-radius: 12px;
+      }
+
+      .face-corner.tr {
+        top: -4px;
+        right: -4px;
+        border-left: none;
+        border-bottom: none;
+        border-top-right-radius: 12px;
+      }
+
+      .face-corner.bl {
+        bottom: -4px;
+        left: -4px;
+        border-right: none;
+        border-top: none;
+        border-bottom-left-radius: 12px;
+      }
+
+      .face-corner.br {
+        bottom: -4px;
+        right: -4px;
+        border-left: none;
+        border-top: none;
+        border-bottom-right-radius: 12px;
+      }
+
+      @keyframes cornerGlow {
+        0%,
+        100% {
+          box-shadow: 0 0 10px #1fbcb3;
+        }
+
+        50% {
+          box-shadow: 0 0 20px #1fbcb3;
+        }
+      }
+
+      .face-data {
+        position: absolute;
+        bottom: -50px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(
+          135deg,
           rgba(31, 188, 179, 0.95),
-          rgba(140, 217, 47, 0.95));
-      padding: 8px 15px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
+          rgba(140, 217, 47, 0.95)
+        );
+        padding: 8px 15px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
 
-    /* ---------- Progress & metrics ---------- */
-    .progress-section {
-      position: absolute;
-      left: 20px;
-      right: 20px;
-      bottom: 20px;
-      height: 80px;
-      background: rgba(31, 188, 179, 0.1);
-      border: 1px solid rgba(31, 188, 179, 0.3);
-      border-radius: 10px;
-      padding: 15px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
+      /* ---------- Progress & metrics ---------- */
+      .progress-section {
+        position: absolute;
+        left: 20px;
+        right: 20px;
+        bottom: 20px;
+        height: 80px;
+        background: rgba(31, 188, 179, 0.1);
+        border: 1px solid rgba(31, 188, 179, 0.3);
+        border-radius: 10px;
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
 
-    .progress-label {
-      font-weight: 700;
-      color: #1fbcb3;
-      margin-bottom: 6px;
-      text-shadow: 0 0 5px #1fbcb3;
-    }
+      .progress-label {
+        font-weight: 700;
+        color: #1fbcb3;
+        margin-bottom: 6px;
+        text-shadow: 0 0 5px #1fbcb3;
+      }
 
-    .progress-bar {
-      width: 100%;
-      height: 8px;
-      background: rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(31, 188, 179, 0.3);
-      border-radius: 4px;
-      overflow: hidden;
-    }
+      .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(31, 188, 179, 0.3);
+        border-radius: 4px;
+        overflow: hidden;
+      }
 
-    .progress-text {
-      color: #1fbcb3;
-      font-size: 1.8rem;
-      min-width: 90px;
-      text-align: right;
-      font-family: Orbitron;
-      font-weight: 900;
-      letter-spacing: 2px;
-    }
+      .progress-text {
+        color: #1fbcb3;
+        font-size: 1.8rem;
+        min-width: 90px;
+        text-align: right;
+        font-family: Orbitron;
+        font-weight: 900;
+        letter-spacing: 2px;
+      }
 
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #1fbcb3, #1fbcb3);
-    }
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #1fbcb3, #1fbcb3);
+      }
 
-    .ai-metrics {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      min-width: 200px;
-      font-size: 12px;
-      color: rgba(31, 188, 179, 0.7);
-    }
+      .ai-metrics {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        min-width: 200px;
+        font-size: 12px;
+        color: rgba(31, 188, 179, 0.7);
+      }
 
-    .metric-value {
-      color: #1fbcb3;
-      font-weight: 700;
-    }
+      .metric-value {
+        color: #1fbcb3;
+        font-weight: 700;
+      }
 
-    /* 倒數動畫 */
-    .countdown {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 96px;
-      font-weight: 900;
-      color: #1fbcb3;
-      text-shadow: 0 0 20px #1fbcb3;
-      background: rgba(0, 0, 0, 0.4);
-      z-index: 20;
-    }
+      /* 倒數動畫 */
+      .countdown {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 96px;
+        font-weight: 900;
+        color: #1fbcb3;
+        text-shadow: 0 0 20px #1fbcb3;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 20;
+      }
 
-    /* 取代倒數模糊遮罩，讓中央橢圓清楚、外圍模糊全程顯示 */
-    /* .face-blur-mask {
+      /* 取代倒數模糊遮罩，讓中央橢圓清楚、外圍模糊全程顯示 */
+      /* .face-blur-mask {
       position: absolute;
       inset: 0;
       z-index: 0;
@@ -489,318 +499,327 @@
       -webkit-mask-image: radial-gradient(ellipse 100px 125px at 50% 50%, transparent 99px, black 100px);
       mask-image: radial-gradient(ellipse 100px 125px at 50% 50%, transparent 99px, black 100px);
     } */
-    /* --- 只貼你要改 / 新增的部分 --- */
-    .face-blur-mask {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      backdrop-filter: blur(10px);
-      background: rgba(0, 0, 0, 0.25);
-      opacity: 1;
-
-      /* ↓ 用 4 個 CSS 變數描述橢圓中心與半徑 */
-      --cx: 50%;
-      --cy: 50%;
-      --rx: 100px;
-      --ry: 125px;
-
-      /* 把變數餵進 radial-gradient 做遮罩 */
-      -webkit-mask-image: radial-gradient(ellipse var(--rx) var(--ry) at var(--cx) var(--cy),
-          transparent 98%, black 100%);
-      mask-image: radial-gradient(ellipse var(--rx) var(--ry) at var(--cx) var(--cy),
-          transparent 98%, black 100%);
-      -webkit-mask-repeat: no-repeat;
-      mask-repeat: no-repeat;
-    }
-
-
-    .HRVFirstCover {
-      background-color: #050709;
-      width: 100%;
-      height: 100%;
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-    }
-
-    .HRVFirstCover img {
-      max-width: 175px;
-    }
-
-    .HRVFirstCover ul {
-      list-style: disc;
-      padding: 0;
-      margin: 0;
-      color: #fff;
-      display: flex;
-      width: 80%;
-      flex-direction: column;
-
-      justify-content: center;
-      margin-left: 1.25rem;
-    }
-
-    .HRVFirstCover ul li {
-      margin-bottom: 10px;
-      color: #fff;
-      font-size: 1.5rem;
-    }
-
-    .HRVFirstCover ul li span {
-      color: #ec4f4f;
-    }
-
-    /* 遮罩動畫 */
-    .HRVFirstCover.fadeOut {
-      animation: hrvcoverFadeOut 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
-
-    @keyframes hrvcoverFadeOut {
-      0% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-
-      100% {
-        opacity: 0;
-        transform: translateY(-80px) scale(0.98);
+      /* --- 只貼你要改 / 新增的部分 --- */
+      .face-blur-mask {
+        position: absolute;
+        inset: 0;
         pointer-events: none;
-      }
-    }
+        backdrop-filter: blur(10px);
+        background: rgba(0, 0, 0, 0.25);
+        opacity: 1;
 
-    .action-tip {
-      position: relative;
-      background: #050709;
-      border-radius: 12px;
-      box-shadow: 0 0 12px #1fbcb344;
-      transition: background 0.3s;
-      justify-content: flex-start;
-      align-items: center;
-      display: flex;
-      min-height: 80px;
-      min-width: 220px;
-      padding: 10px 20px;
-      border: 2px solid var(--Primary-default, #1fbcb3);
-    }
+        /* ↓ 用 4 個 CSS 變數描述橢圓中心與半徑 */
+        --cx: 50%;
+        --cy: 50%;
+        --rx: 100px;
+        --ry: 125px;
 
-    .tip-text {
-      font-size: 1.5rem;
-      color: #1fbcb3;
-      white-space: nowrap;
-      text-shadow: 0px 0px 2px var(--Primary-100, #fcfff7);
-      font-weight: 700;
-      letter-spacing: 2.4px;
-      margin-left: 10px;
-      transition: opacity 0.5s;
-    }
-
-    .tip-text.left-align {
-      text-align: left;
-      margin-left: 0;
-      width: 100%;
-      display: block;
-    }
-
-    .startBtn {
-      cursor: pointer;
-      transition: opacity 0.5s;
-
-      &:hover {
-        text-shadow: rgb(31, 188, 179) 0px 0px 24px;
-      }
-    }
-
-    .fade-enter-active,
-    .fade-leave-active,
-    .fade-enter-from,
-    .fade-leave-to,
-    .fade-enter-to,
-    .fade-leave-from {
-      /* 不再有動畫 */
-    }
-
-    .AIAnalysisCover {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: #050709;
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-    }
-
-    .AIAnalysisCover img {
-      max-width: 175px;
-    }
-
-    .AIAnalysisCover-title {
-      font-size: 1.5rem;
-      color: #1fbcb3;
-      white-space: nowrap;
-      text-shadow: 0px 0px 2px var(--Primary-100, #fcfff7);
-      font-weight: 700;
-      letter-spacing: 2.4px;
-      margin-left: 10px;
-      transition: opacity 0.5s;
-    }
-
-    .AIAnalysisCover-progress {
-      width: 100%;
-      height: 10px;
-      background-color: #1fbcb3;
-      border-radius: 5px;
-    }
-
-    .AIAnalysisCover-progress-bar {
-      width: 0%;
-      height: 100%;
-      background-color: #1fbcb3;
-      border-radius: 5px;
-      transition: width 0.5s;
-    }
-
-    .AIAnalysisCover-loading {
-      max-width: 175px;
-    }
-
-    [v-cloak] {
-      display: none !important;
-    }
-
-    .face-guide-tip {
-      position: absolute;
-      left: 50%;
-      top: calc(50% + 140px);
-      /* 根據 face-guide 位置微調 */
-      transform: translateX(-50%);
-      font-size: 16px;
-      font-weight: 700;
-      color: #1fbcb3;
-      text-shadow: 0 0 8px #050709;
-      white-space: nowrap;
-      z-index: 30;
-      pointer-events: none;
-      display: none;
-    }
-
-    .face-guide-tip.show {
-      display: block;
-    }
-
-    /* ---------- Responsive ---------- */
-    @media screen and (max-width: 1024px) {
-      .ai-scanner-system {
-        width: 70vw;
-
-        min-height: 400px;
-
+        /* 把變數餵進 radial-gradient 做遮罩 */
+        -webkit-mask-image: radial-gradient(
+          ellipse var(--rx) var(--ry) at var(--cx) var(--cy),
+          transparent 98%,
+          black 100%
+        );
+        mask-image: radial-gradient(
+          ellipse var(--rx) var(--ry) at var(--cx) var(--cy),
+          transparent 98%,
+          black 100%
+        );
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
       }
 
-      .face-guide {
-        width: 180px;
-        height: 220px;
+      .HRVFirstCover {
+        background-color: #050709;
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
       }
 
-    }
-
-    @media screen and (max-width: 576px) {
-      .ai-scanner-system {
-        width: 80vw;
-        min-height: 60vh;
-
-
+      .HRVFirstCover img {
+        max-width: 175px;
       }
 
-      .face-guide {
-        width: 180px;
-        height: 220px;
+      .HRVFirstCover ul {
+        list-style: disc;
+        padding: 0;
+        margin: 0;
+        color: #fff;
+        display: flex;
+        width: 80%;
+        flex-direction: column;
+
+        justify-content: center;
+        margin-left: 1.25rem;
       }
 
-      .system-title {
-        text-align: center;
-        font-size: 1.25rem;
-
+      .HRVFirstCover ul li {
+        margin-bottom: 10px;
+        color: #fff;
+        font-size: 1.5rem;
       }
 
-      .progress-text {
-        font-size: 1.25rem;
-        min-width: 0px;
+      .HRVFirstCover ul li span {
+        color: #ec4f4f;
       }
-    }
-  </style>
-</head>
 
-<body>
-  <div class="HRVFirstCover" id="hrvFirstCover">
-    <img src="images/new/ball.gif" alt="開始檢測" id="start" @click="startBtnClick"
-      :style="{cursor: scanning ? 'not-allowed' : 'pointer', opacity: scanning ? 0.5 : 1, width: '80px', height: '80px'}"
-      :disabled="scanning" />
-    <ul>
-      <li>準備好後，<span>請點擊任意地方開始量測</span>。</li>
-      <li>
-        系統將在倒數
-        <span>3 秒</span>後開始偵測，請讓臉部完整對準畫面並保持不動。
-      </li>
-      <li><span>量測時間約 15 秒</span>，完成後將顯示檢測結果。</li>
-      <li>感謝您的配合！</li>
-    </ul>
-  </div>
-  <div id="app" v-cloak>
-    <div class="ai-scanner-system">
-      <!-- Header -->
-      <div class="scanner-header">
-        <div class="system-title">AI FACE SCANNER v2.0</div>
-      </div>
+      /* 遮罩動畫 */
+      .HRVFirstCover.fadeOut {
+        animation: hrvcoverFadeOut 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
 
-      <!-- Video -->
-      <div class="video-container">
-        <video ref="videoElement" autoplay muted playsinline></video>
-        <div class="face-blur-mask"></div>
-        <div class="face-guide"></div>
-        <div class="face-guide-tip" :class="{ show: showFaceGuideTip }" style="z-index:30">
-          請將臉部對準中央橢圓區域
-        </div>
-        <div class="countdown" v-show="counting">{{ countingSec }}</div>
+      @keyframes hrvcoverFadeOut {
+        0% {
+          opacity: 1;
+          transform: translateY(0);
+        }
 
-        <!-- Overlay -->
-        <div class="scanning-overlay">
-          <div class="scan-grid"></div>
-          <div class="scan-beam" v-if="scanning"></div>
-          <div class="horizontal-scan" v-if="scanning"></div>
-          <!-- <div class="laser-crosshair" v-if="scanning"></div> -->
-          <div class="speed-lines" id="speedLines"></div>
-        </div>
+        100% {
+          opacity: 0;
+          transform: translateY(-80px) scale(0.98);
+          pointer-events: none;
+        }
+      }
 
-        <!-- Progress bar -->
-        <div id="progress-bar-container">
-          <div id="progress-bar-fill"></div>
-        </div>
-      </div>
+      .action-tip {
+        position: relative;
+        background: #050709;
+        border-radius: 12px;
+        box-shadow: 0 0 12px #1fbcb344;
+        transition: background 0.3s;
+        justify-content: flex-start;
+        align-items: center;
+        display: flex;
+        min-height: 80px;
+        min-width: 220px;
+        padding: 10px 20px;
+        border: 2px solid var(--Primary-default, #1fbcb3);
+      }
 
-      <!-- Progress + metrics -->
-      <div class="progress-section">
+      .tip-text {
+        font-size: 1.5rem;
+        color: #1fbcb3;
+        white-space: nowrap;
+        text-shadow: 0px 0px 2px var(--Primary-100, #fcfff7);
+        font-weight: 700;
+        letter-spacing: 2.4px;
+        margin-left: 10px;
+        transition: opacity 0.5s;
+      }
 
-        <div class="progress-text">
-          {{ Math.round(progress) }}%
-        </div>
+      .tip-text.left-align {
+        text-align: left;
+        margin-left: 0;
+        width: 100%;
+        display: block;
+      }
 
-        <div class="progress-bar">
-          <div class="progress-fill" :style="{width:progress+'%'}"></div>
-        </div>
-      </div>
+      .startBtn {
+        cursor: pointer;
+        transition: opacity 0.5s;
+
+        &:hover {
+          text-shadow: rgb(31, 188, 179) 0px 0px 24px;
+        }
+      }
+
+      .fade-enter-active,
+      .fade-leave-active,
+      .fade-enter-from,
+      .fade-leave-to,
+      .fade-enter-to,
+      .fade-leave-from {
+        /* 不再有動畫 */
+      }
+
+      .AIAnalysisCover {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #050709;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+
+      .AIAnalysisCover img {
+        max-width: 175px;
+      }
+
+      .AIAnalysisCover-title {
+        font-size: 1.5rem;
+        color: #1fbcb3;
+        white-space: nowrap;
+        text-shadow: 0px 0px 2px var(--Primary-100, #fcfff7);
+        font-weight: 700;
+        letter-spacing: 2.4px;
+        margin-left: 10px;
+        transition: opacity 0.5s;
+      }
+
+      .AIAnalysisCover-progress {
+        width: 100%;
+        height: 10px;
+        background-color: #1fbcb3;
+        border-radius: 5px;
+      }
+
+      .AIAnalysisCover-progress-bar {
+        width: 0%;
+        height: 100%;
+        background-color: #1fbcb3;
+        border-radius: 5px;
+        transition: width 0.5s;
+      }
+
+      .AIAnalysisCover-loading {
+        max-width: 175px;
+      }
+
+      [v-cloak] {
+        display: none !important;
+      }
+
+      .face-guide-tip {
+        position: absolute;
+        left: 50%;
+        top: calc(50% + 140px);
+        /* 根據 face-guide 位置微調 */
+        transform: translateX(-50%);
+        font-size: 16px;
+        font-weight: 700;
+        color: #1fbcb3;
+        text-shadow: 0 0 8px #050709;
+        white-space: nowrap;
+        z-index: 30;
+        pointer-events: none;
+        display: none;
+      }
+
+      .face-guide-tip.show {
+        display: block;
+      }
+
+      /* ---------- Responsive ---------- */
+      @media screen and (max-width: 1024px) {
+        .ai-scanner-system {
+          width: 70vw;
+
+          min-height: 400px;
+        }
+
+        .face-guide {
+          width: 180px;
+          height: 220px;
+        }
+      }
+
+      @media screen and (max-width: 576px) {
+        .ai-scanner-system {
+          width: 80vw;
+          min-height: 60vh;
+        }
+
+        .face-guide {
+          width: 180px;
+          height: 220px;
+        }
+
+        .system-title {
+          text-align: center;
+          font-size: 1.25rem;
+        }
+
+        .progress-text {
+          font-size: 1.25rem;
+          min-width: 0px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="HRVFirstCover" id="hrvFirstCover">
+      <img
+        src="images/new/ball.gif"
+        alt="開始檢測"
+        id="start"
+        @click="startBtnClick"
+        :style="{cursor: scanning ? 'not-allowed' : 'pointer', opacity: scanning ? 0.5 : 1, width: '80px', height: '80px'}"
+        :disabled="scanning"
+      />
+      <ul>
+        <li>準備好後，<span>請點擊任意地方開始量測</span>。</li>
+        <li>
+          系統將在倒數
+          <span>3 秒</span>後開始偵測，請讓臉部完整對準畫面並保持不動。
+        </li>
+        <li><span>量測時間約 15 秒</span>，完成後將顯示檢測結果。</li>
+        <li>感謝您的配合！</li>
+      </ul>
     </div>
+    <div id="app" v-cloak>
+      <div class="ai-scanner-system">
+        <!-- Header -->
+        <div class="scanner-header">
+          <div class="system-title">AI FACE SCANNER v2.0</div>
+        </div>
 
-    <!-- 操作 -->
-    <div id="action-tip" :class="['action-tip', { fade: tipFading }]" style="
+        <!-- Video -->
+        <div class="video-container">
+          <video ref="videoElement" autoplay muted playsinline></video>
+          <div class="face-blur-mask"></div>
+          <div class="face-guide"></div>
+          <div
+            class="face-guide-tip"
+            :class="{ show: showFaceGuideTip }"
+            style="z-index: 30"
+          >
+            請將臉部對準中央橢圓區域
+          </div>
+          <div class="countdown" v-show="counting">{{ countingSec }}</div>
+
+          <!-- Overlay -->
+          <div class="scanning-overlay">
+            <div class="scan-grid"></div>
+            <div class="scan-beam" v-if="scanning"></div>
+            <div class="horizontal-scan" v-if="scanning"></div>
+            <!-- <div class="laser-crosshair" v-if="scanning"></div> -->
+            <div class="speed-lines" id="speedLines"></div>
+          </div>
+
+          <!-- Progress bar -->
+          <div id="progress-bar-container">
+            <div id="progress-bar-fill"></div>
+          </div>
+        </div>
+
+        <!-- Progress + metrics -->
+        <div class="progress-section">
+          <div class="progress-text">{{ Math.round(progress) }}%</div>
+
+          <div class="progress-bar">
+            <div class="progress-fill" :style="{width:progress+'%'}"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 操作 -->
+      <div
+        id="action-tip"
+        :class="['action-tip', { fade: tipFading }]"
+        style="
           margin-top: 20px;
           display: flex;
           flex-direction: row;
@@ -814,539 +833,567 @@
           min-width: 220px;
           background: #050709;
           justify-content: flex-start;
-        " @click="startBtnClick">
-      <img src="images/new/ball.gif" alt="開始檢測" id="start"
-        :style="{cursor: scanning ? 'not-allowed' : 'pointer', opacity: scanning ? 0.5 : 1, width: '80px', height: '80px', background: 'none', boxShadow: 'none', border: 'none', marginRight: '16px'}"
-        :disabled="scanning" />
-      <p v-if="!counting && !scanning" class="tip-text left-align startBtn">開始量測</p>
-      <p v-else-if="counting" class="tip-text left-align">倒數完即開始...</p>
-      <p v-else-if="scanning" class="tip-text left-align">請盡量保持不動</p>
+        "
+        @click="startBtnClick"
+      >
+        <img
+          src="images/new/ball.gif"
+          alt="開始檢測"
+          id="start"
+          :style="{cursor: scanning ? 'not-allowed' : 'pointer', opacity: scanning ? 0.5 : 1, width: '80px', height: '80px', background: 'none', boxShadow: 'none', border: 'none', marginRight: '16px'}"
+          :disabled="scanning"
+        />
+        <p v-if="!counting && !scanning" class="tip-text left-align startBtn">
+          開始量測
+        </p>
+        <p v-else-if="counting" class="tip-text left-align">倒數完即開始...</p>
+        <p v-else-if="scanning" class="tip-text left-align">請盡量保持不動</p>
+      </div>
+      <!-- AI 分析中遮罩 -->
+      <div v-if="aiAnalysing" class="AIAnalysisCover">
+        <img
+          src="images/new/ball.gif"
+          alt="AI 分析中..."
+          class="AIAnalysisCover-loading"
+        />
+        <div class="AIAnalysisCover-title">AI 分析中...</div>
+      </div>
     </div>
-    <!-- AI 分析中遮罩 -->
-    <div v-if="aiAnalysing" class="AIAnalysisCover">
-      <img src="images/new/ball.gif" alt="AI 分析中..." class="AIAnalysisCover-loading" />
-      <div class="AIAnalysisCover-title">AI 分析中...</div>
-    </div>
-  </div>
 
-  <!-- SyncFusion -->
-  <script src="https://cdn.syncfusion.com/ej2/dist/ej2.min.js"></script>
+    <!-- SyncFusion -->
+    <script src="https://cdn.syncfusion.com/ej2/dist/ej2.min.js"></script>
 
-  <!-- Main Logic -->
-  <script>
-    const { createApp, ref, onMounted, onUnmounted, watch, computed } = Vue;
-    createApp({
-      setup() {
-        /* Refs */
-        const videoElement = ref(null),
-          scanning = ref(false),
-          faces = ref([]),
-          progress = ref(0);
-        const nn = ref(0),
-          fps = ref(0),
-          acc = ref(0),
-          remain = ref(15);
-        const countdownElement = ref(null);
-        const logs = ref("");
-        const metrics = ref("");
-        let userData = {};
-        let mediaRecorder = null;
-        let recordedChunks = [];
-        let scanInt = null;
-        let metricInt = null;
-        let stream = null;
-        let faceDetectTimer = null;
-        let hasRecorded = false;
-        let elapsedMs = 0;
-        const counting = ref(false);
-        const countingSec = ref(3);
-        const tipFading = ref(false);
-        const aiAnalysing = ref(false);
-        const aiProgress = ref(0);
-        const showFaceGuideTip = ref(false);
+    <!-- Main Logic -->
+    <script>
+      const { createApp, ref, onMounted, onUnmounted, watch, computed } = Vue;
+      createApp({
+        setup() {
+          /* Refs */
+          const videoElement = ref(null),
+            scanning = ref(false),
+            faces = ref([]),
+            progress = ref(0);
+          const nn = ref(0),
+            fps = ref(0),
+            acc = ref(0),
+            remain = ref(15);
+          const countdownElement = ref(null);
+          const logs = ref("");
+          const metrics = ref("");
+          let userData = {};
+          let mediaRecorder = null;
+          let recordedChunks = [];
+          let scanInt = null;
+          let metricInt = null;
+          let stream = null;
+          let faceDetectTimer = null;
+          let hasRecorded = false;
+          let elapsedMs = 0;
+          const counting = ref(false);
+          const countingSec = ref(3);
+          const tipFading = ref(false);
+          const aiAnalysing = ref(false);
+          const aiProgress = ref(0);
+          const showFaceGuideTip = ref(false);
 
-        // 頁面一載入就自動開啟鏡頭
-        onMounted(async () => {
-          await initCamera();
-          // 產生速度線動畫
-          const speedLines = document.getElementById("speedLines");
-          if (speedLines && speedLines.children.length === 0) {
-            for (let i = 0; i < 8; i++) {
-              const line = document.createElement("div");
-              line.className = "speed-line";
-              line.style.top = `${i * 60}px`;
-              line.style.width = `${Math.random() * 200 + 100}px`;
-              line.style.animationDelay = `${(Math.random() * 0.8).toFixed(2)}s`;
-              line.style.animationDuration = `${(Math.random() * 0.4 + 0.6).toFixed(2)}s`;
-              speedLines.appendChild(line);
-            }
-          }
-        });
-
-        // 驗證 userData
-        function checkUserData() {
-          try {
-            const str = localStorage.getItem("userData");
-            if (!str) throw new Error("localStorage 缺少 userData");
-            userData = JSON.parse(str);
-            if (!userData.Mobile || !userData.Height || !userData.Weight)
-              throw new Error("userData 格式不完整");
-          } catch (err) {
-            alert("讀取使用者資料失敗，請重新登入");
-            document.getElementById(
-              "logs"
-            ).innerHTML = `<p style='color:red;'>錯誤：${err.message}</p>`;
-            throw err;
-          }
-        }
-
-        // 初始化相機
-        async function initCamera() {
-          try {
-            stream = await navigator.mediaDevices.getUserMedia({
-              video: { facingMode: "user" },
-              audio: true,
-            });
-            videoElement.value.srcObject = stream;
-            mediaRecorder = new MediaRecorder(stream);
-            mediaRecorder.ondataavailable = (e) =>
-              e.data.size > 0 && recordedChunks.push(e.data);
-            mediaRecorder.onstop = onRecordStop;
-          } catch (err) {
-            alert("無法啟動相機/麥克風");
-          }
-        }
-
-        // 安全數值轉換
-        function num(x) {
-          if (x === undefined || x === null || x === '--') return null;
-          const n = Number(x);
-          return isNaN(n) ? null : n;
-        }
-
-        // 倒數動畫（只用 Vue 版）
-        function startCountdown(sec, cb) {
-          if (counting.value) return;
-          counting.value = true;
-          countingSec.value = sec;
-          const t = setInterval(() => {
-            countingSec.value--;
-            if (countingSec.value < 0) {
-              clearInterval(t);
-              counting.value = false;
-              cb();
-            }
-          }, 1000);
-        }
-
-        // 錄影結束
-        async function onRecordStop() {
-          aiAnalysing.value = true;
-          const blob = new Blob(recordedChunks, { type: "video/webm" });
-          const reader = new FileReader();
-          reader.onloadend = () => sendToAPI(reader.result.split(",")[1]);
-          reader.readAsDataURL(blob);
-          if (stream) stream.getTracks().forEach((t) => t.stop());
-        }
-
-        // 上傳 API
-        async function sendToAPI(base64) {
-          const payload = {
-            uuid: userData.Mobile,
-            height: userData.Height,
-            weight: userData.Weight,
-            content: base64,
-          };
-          try {
-            document.getElementById("logs").innerText = "AI 分析中...";
-            const res = await fetch(
-              "https://face.zconai.com/api/v1.0/measure/",
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
+          // 頁面一載入就自動開啟鏡頭
+          onMounted(async () => {
+            await initCamera();
+            // 產生速度線動畫
+            const speedLines = document.getElementById("speedLines");
+            if (speedLines && speedLines.children.length === 0) {
+              for (let i = 0; i < 8; i++) {
+                const line = document.createElement("div");
+                line.className = "speed-line";
+                line.style.top = `${i * 60}px`;
+                line.style.width = `${Math.random() * 200 + 100}px`;
+                line.style.animationDelay = `${(Math.random() * 0.8).toFixed(
+                  2
+                )}s`;
+                line.style.animationDuration = `${(
+                  Math.random() * 0.4 +
+                  0.6
+                ).toFixed(2)}s`;
+                speedLines.appendChild(line);
               }
-            );
+            }
+          });
 
+          // 驗證 userData
+          function checkUserData() {
             try {
-              const gdata = await res.json();
-              console.log("API 原始回傳資料:", gdata); // Debug log
-              const data = JSON.parse(gdata);
-              console.log("API 原始回傳資料after parse:", data); // Debug log
-              // 統一安全解析
-              const hbr = num(data.hbr?.[0]);
-              const hrv = data.hrv?.[0] || {};
-              const sdnn = num(hrv.SDNN);
-              const LF = num(hrv.LF);
-              const HF = num(hrv.HF);
-              let lf_hf = num(hrv["LF/HF"]);
-              if (lf_hf === null && LF && HF) lf_hf = LF / HF;
-              const sbp = num(data.ica?.[0]?.SBP);
-              const dbp = num(data.ica?.[0]?.DBP);
-              const spo2 = data.sp?.[0] || "--";
-              const rr = num(data.rr?.[0]);
-              const af = data.af?.[0] || "--";
-              const fa = data.fa?.[0] || "--";
+              const str = localStorage.getItem("userData");
+              if (!str) throw new Error("localStorage 缺少 userData");
+              userData = JSON.parse(str);
+              if (!userData.Mobile || !userData.Height || !userData.Weight)
+                throw new Error("userData 格式不完整");
+            } catch (err) {
+              alert("讀取使用者資料失敗，請重新登入");
+              throw err;
+            }
+          }
 
-              console.log("處理後的數值:", {
-                hbr,
-                sdnn,
-                LF,
-                HF,
-                lf_hf,
-                sbp,
-                dbp,
-                spo2,
-                rr,
-                af,
-                fa,
-              }); // Debug log
+          // 初始化相機
+          async function initCamera() {
+            try {
+              stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "user" },
+                audio: true,
+              });
+              videoElement.value.srcObject = stream;
+              mediaRecorder = new MediaRecorder(stream);
+              mediaRecorder.ondataavailable = (e) =>
+                e.data.size > 0 && recordedChunks.push(e.data);
+              mediaRecorder.onstop = onRecordStop;
+            } catch (err) {
+              alert("無法啟動相機/麥克風");
+            }
+          }
 
-              // 自律神經平衡
-              let balanceSymbol = "❓";
-              if (lf_hf !== null && !isNaN(lf_hf)) {
-                if (lf_hf > 2) balanceSymbol = "🧠 焦躁（交感極高）";
-                else if (lf_hf > 1.5) balanceSymbol = "😱 緊繃";
-                else if (lf_hf >= 1) balanceSymbol = "😌 穩定";
-                else if (lf_hf >= 0.5) balanceSymbol = "🐱 微放鬆";
-                else balanceSymbol = "🐈 深度放鬆";
+          // 安全數值轉換
+          function num(x) {
+            if (x === undefined || x === null || x === "--") return null;
+            const n = Number(x);
+            return isNaN(n) ? null : n;
+          }
+
+          // 倒數動畫（只用 Vue 版）
+          function startCountdown(sec, cb) {
+            if (counting.value) return;
+            counting.value = true;
+            countingSec.value = sec;
+            const t = setInterval(() => {
+              countingSec.value--;
+              if (countingSec.value < 0) {
+                clearInterval(t);
+                counting.value = false;
+                cb();
               }
+            }, 1000);
+          }
 
-              // 生理疲勞
-              let fatigueSymbol = "❓";
-              if (sdnn !== null && !isNaN(sdnn)) {
-                if (sdnn < 20) fatigueSymbol = "💀 非常疲憊";
-                else if (sdnn < 30) fatigueSymbol = "😪 疲勞";
-                else if (sdnn < 50) fatigueSymbol = "😐 普通";
-                else if (sdnn < 70) fatigueSymbol = "🥳 有精神";
-                else fatigueSymbol = "💪 精力充沛";
-              }
+          // 錄影結束
+          async function onRecordStop() {
+            aiAnalysing.value = true;
+            const blob = new Blob(recordedChunks, { type: "video/webm" });
+            const reader = new FileReader();
+            reader.onloadend = () => sendToAPI(reader.result.split(",")[1]);
+            reader.readAsDataURL(blob);
+            if (stream) stream.getTracks().forEach((t) => t.stop());
+          }
 
-              // 心情指北針
-              let moodSymbol = "🚧";
-              if (hbr && rr && LF && HF) {
-                let moodScore = 0;
-                if (hbr > 90) moodScore += 5;
-                else if (hbr > 80) moodScore += 4;
-                else if (hbr > 70) moodScore += 3;
-                else if (hbr > 60) moodScore += 2;
-                else moodScore += 1;
+          // 上傳 API
+          async function sendToAPI(base64) {
+            const payload = {
+              uuid: userData.Mobile,
+              height: userData.Height,
+              weight: userData.Weight,
+              content: base64,
+            };
+            try {
+              const res = await fetch(
+                "https://face.zconai.com/api/v1.0/measure/",
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(payload),
+                }
+              );
 
-                if (rr > 18) moodScore += 5;
-                else if (rr > 15) moodScore += 4;
-                else if (rr > 12) moodScore += 3;
-                else if (rr > 10) moodScore += 2;
-                else moodScore += 1;
+              try {
+                const gdata = await res.json();
+                console.log("API 原始回傳資料:", gdata); // Debug log
+                const data = JSON.parse(gdata);
+                console.log("API 原始回傳資料after parse:", data); // Debug log
+                // 統一安全解析
+                const hbr = num(data.hbr?.[0]);
+                const hrv = data.hrv?.[0] || {};
+                const sdnn = num(hrv.SDNN);
+                const LF = num(hrv.LF);
+                const HF = num(hrv.HF);
+                let lf_hf = num(hrv["LF/HF"]);
+                if (lf_hf === null && LF && HF) lf_hf = LF / HF;
+                const sbp = num(data.ica?.[0]?.SBP);
+                const dbp = num(data.ica?.[0]?.DBP);
+                const spo2 = data.sp?.[0] || "--";
+                const rr = num(data.rr?.[0]);
+                const af = data.af?.[0] || "--";
+                const fa = data.fa?.[0] || "--";
 
-                const lf_hf_ratio = LF / HF;
-                if (lf_hf_ratio > 2) moodScore += 5;
-                else if (lf_hf_ratio > 1.5) moodScore += 4;
-                else if (lf_hf_ratio > 1) moodScore += 3;
-                else if (lf_hf_ratio > 0.5) moodScore += 2;
-                else moodScore += 1;
+                console.log("處理後的數值:", {
+                  hbr,
+                  sdnn,
+                  LF,
+                  HF,
+                  lf_hf,
+                  sbp,
+                  dbp,
+                  spo2,
+                  rr,
+                  af,
+                  fa,
+                }); // Debug log
 
-                if (moodScore >= 14) moodSymbol = "🔥 高度焦躁";
-                else if (moodScore >= 12) moodSymbol = "😠 緊繃";
-                else if (moodScore >= 9) moodSymbol = "💪 專注";
-                else if (moodScore >= 5) moodSymbol = "😌 微放鬆";
-                else moodSymbol = "😴 沉靜";
-              }
+                // 自律神經平衡
+                let balanceSymbol = "❓";
+                if (lf_hf !== null && !isNaN(lf_hf)) {
+                  if (lf_hf > 2) balanceSymbol = "🧠 焦躁（交感極高）";
+                  else if (lf_hf > 1.5) balanceSymbol = "😱 緊繃";
+                  else if (lf_hf >= 1) balanceSymbol = "😌 穩定";
+                  else if (lf_hf >= 0.5) balanceSymbol = "🐱 微放鬆";
+                  else balanceSymbol = "🐈 深度放鬆";
+                }
 
-              // 血壓氣球
-              let pressureSymbol = "❓";
-              if (sbp !== null && dbp !== null) {
-                if (sbp > 145 || dbp > 95) pressureSymbol = "💥 高張氣球";
-                else if (sbp >= 130 || dbp >= 85)
-                  pressureSymbol = "💨 偏高氣球";
-                else if (sbp >= 110 && sbp <= 129 && dbp >= 70 && dbp <= 84)
-                  pressureSymbol = "🎈 穩定氣球";
-                else if (sbp >= 95 && dbp >= 60)
-                  pressureSymbol = "💧 微低氣球";
-                else pressureSymbol = "💦 洩氣氣球";
-              }
+                // 生理疲勞
+                let fatigueSymbol = "❓";
+                if (sdnn !== null && !isNaN(sdnn)) {
+                  if (sdnn < 20) fatigueSymbol = "💀 非常疲憊";
+                  else if (sdnn < 30) fatigueSymbol = "😪 疲勞";
+                  else if (sdnn < 50) fatigueSymbol = "😐 普通";
+                  else if (sdnn < 70) fatigueSymbol = "🥳 有精神";
+                  else fatigueSymbol = "💪 精力充沛";
+                }
 
-              // 顯示語意摘要
-              const semanticBlock = `<hr><strong>個人化身心回饋摘要：</strong><br>
+                // 心情指北針
+                let moodSymbol = "🚧";
+                if (hbr && rr && LF && HF) {
+                  let moodScore = 0;
+                  if (hbr > 90) moodScore += 5;
+                  else if (hbr > 80) moodScore += 4;
+                  else if (hbr > 70) moodScore += 3;
+                  else if (hbr > 60) moodScore += 2;
+                  else moodScore += 1;
+
+                  if (rr > 18) moodScore += 5;
+                  else if (rr > 15) moodScore += 4;
+                  else if (rr > 12) moodScore += 3;
+                  else if (rr > 10) moodScore += 2;
+                  else moodScore += 1;
+
+                  const lf_hf_ratio = LF / HF;
+                  if (lf_hf_ratio > 2) moodScore += 5;
+                  else if (lf_hf_ratio > 1.5) moodScore += 4;
+                  else if (lf_hf_ratio > 1) moodScore += 3;
+                  else if (lf_hf_ratio > 0.5) moodScore += 2;
+                  else moodScore += 1;
+
+                  if (moodScore >= 14) moodSymbol = "🔥 高度焦躁";
+                  else if (moodScore >= 12) moodSymbol = "😠 緊繃";
+                  else if (moodScore >= 9) moodSymbol = "💪 專注";
+                  else if (moodScore >= 5) moodSymbol = "😌 微放鬆";
+                  else moodSymbol = "😴 沉靜";
+                }
+
+                // 血壓氣球
+                let pressureSymbol = "❓";
+                if (sbp !== null && dbp !== null) {
+                  if (sbp > 145 || dbp > 95) pressureSymbol = "💥 高張氣球";
+                  else if (sbp >= 130 || dbp >= 85)
+                    pressureSymbol = "💨 偏高氣球";
+                  else if (sbp >= 110 && sbp <= 129 && dbp >= 70 && dbp <= 84)
+                    pressureSymbol = "🎈 穩定氣球";
+                  else if (sbp >= 95 && dbp >= 60)
+                    pressureSymbol = "💧 微低氣球";
+                  else pressureSymbol = "💦 洩氣氣球";
+                }
+
+                // 顯示語意摘要
+                const semanticBlock = `<hr><strong>個人化身心回饋摘要：</strong><br>
                    🐱 自律神經平衡狀態：${balanceSymbol}<br>
                    🧑🏻 生理疲勞程度：${fatigueSymbol}<br>
                    🧠 心情指北針：${moodSymbol}<br>
                    🎈 血壓氣球狀態：${pressureSymbol}<br>`;
 
-              // 檢測報告格式化
-              const reportBlock = `<hr><strong>檢測報告：</strong><br>
+                // 檢測報告格式化
+                const reportBlock = `<hr><strong>檢測報告：</strong><br>
                   心率: ${hbr !== null && !isNaN(hbr) ? hbr + " bpm" : "--"}<br>
-                  RMSSD: ${hrv.RMSSD !== undefined && hrv.RMSSD !== null
-                  ? hrv.RMSSD + " ms"
-                  : "--"
-                }<br>
-                  SDNN: ${sdnn !== null && !isNaN(sdnn) ? sdnn + " ms" : "--"
-                }<br>
+                  RMSSD: ${
+                    hrv.RMSSD !== undefined && hrv.RMSSD !== null
+                      ? hrv.RMSSD + " ms"
+                      : "--"
+                  }<br>
+                  SDNN: ${
+                    sdnn !== null && !isNaN(sdnn) ? sdnn + " ms" : "--"
+                  }<br>
                   LF: ${LF !== null && !isNaN(LF) ? LF : "--"}<br>
                   HF: ${HF !== null && !isNaN(HF) ? HF : "--"}<br>
-                  LF/HF: ${lf_hf !== null && !isNaN(lf_hf) ? lf_hf.toFixed(2) : "--"
-                }<br>
-                  血壓: ${sbp !== null && dbp !== null
-                  ? sbp + "/" + dbp + " mmHg"
-                  : "--"
-                }<br>
-                  血氧: ${spo2 !== undefined && spo2 !== null && spo2 !== "--"
-                  ? spo2 + "%"
-                  : "--"
-                }<br>
-                  呼吸頻率: ${rr !== null && !isNaN(rr) ? rr + " 次/分鐘" : "--"
-                }<br>
-                  心房顫動 (AF): ${af !== undefined && af !== null && af !== "--" ? af : "--"
-                }<br>
-                  表情分析 (FA): ${fa !== undefined && fa !== null && fa !== "--" ? fa : "--"
-                }<br>`;
+                  LF/HF: ${
+                    lf_hf !== null && !isNaN(lf_hf) ? lf_hf.toFixed(2) : "--"
+                  }<br>
+                  血壓: ${
+                    sbp !== null && dbp !== null
+                      ? sbp + "/" + dbp + " mmHg"
+                      : "--"
+                  }<br>
+                  血氧: ${
+                    spo2 !== undefined && spo2 !== null && spo2 !== "--"
+                      ? spo2 + "%"
+                      : "--"
+                  }<br>
+                  呼吸頻率: ${
+                    rr !== null && !isNaN(rr) ? rr + " 次/分鐘" : "--"
+                  }<br>
+                  心房顫動 (AF): ${
+                    af !== undefined && af !== null && af !== "--" ? af : "--"
+                  }<br>
+                  表情分析 (FA): ${
+                    fa !== undefined && fa !== null && fa !== "--" ? fa : "--"
+                  }<br>`;
 
-              // 顯示到 logs
-              document.getElementById("logs").innerHTML =
-                semanticBlock + reportBlock;
-              aiAnalysing.value = false; // 分析完畢自動隱藏
+                // 顯示到 logs
+                // document.getElementById("logs").innerText =
+                //   semanticBlock + reportBlock;
+                aiAnalysing.value = false; // 分析完畢自動隱藏
 
-              // 取得 userData
-              const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+                // 取得 userData
+                const userData = JSON.parse(
+                  localStorage.getItem("userData") || "{}"
+                );
 
-              // 組合 HRV3Save 參數
-              const hrv3Payload = {
-                MID: userData.MID || "",
-                MAID: userData.MAID || "",
-                Token: userData.Token || "",
-                Mobile: userData.Mobile || "",
-                UID: userData.UID || "", // 若沒有 UID 就傳 ""
-                HRVCalTime: userData.HRVCalTime || "",
-                Flag: "", // 依需求填 "1"、"2"、"3" 或 ""
-                hbr: hbr?.toString() || "",
-                rmssd: hrv.RMSSD?.toString() || "",
-                sdnn: sdnn?.toString() || "",
-                lf: LF?.toString() || "",
-                hf: HF?.toString() || "",
-                lf_hf: lf_hf?.toString() || "",
-                sbp: sbp?.toString() || "",
-                dbp: dbp?.toString() || "",
-                spo2: spo2?.toString() || "",
-                af: af?.toString() || "",
-                rr: rr?.toString() || "",
-                fa: fa?.toString() || ""
-              };
+                // 組合 HRV3Save 參數
+                const hrv3Payload = {
+                  MID: userData.MID || "",
+                  MAID: userData.MAID || "",
+                  Token: userData.Token || "",
+                  Mobile: userData.Mobile || "",
+                  UID: userData.UID || "", // 若沒有 UID 就傳 ""
+                  HRVCalTime: userData.HRVCalTime || "",
+                  Flag: "", // 依需求填 "1"、"2"、"3" 或 ""
+                  hbr: hbr?.toString() || "",
+                  rmssd: hrv.RMSSD?.toString() || "",
+                  sdnn: sdnn?.toString() || "",
+                  lf: LF?.toString() || "",
+                  hf: HF?.toString() || "",
+                  lf_hf: lf_hf?.toString() || "",
+                  sbp: sbp?.toString() || "",
+                  dbp: dbp?.toString() || "",
+                  spo2: spo2?.toString() || "",
+                  af: af?.toString() || "",
+                  rr: rr?.toString() || "",
+                  fa: fa?.toString() || "",
+                };
 
-              // 呼叫 HRV3Save API
-              await saveHRV3ToServer(hrv3Payload);
-              window.location.href = "/vital/finish.html";
-            } catch (e) {
+                // 呼叫 HRV3Save API
+                const saveResult = await saveHRV3ToServer(hrv3Payload);
+                if (saveResult && saveResult.AID) {
+                  window.location.href = `/vital/finish.html?AID=${encodeURIComponent(saveResult.AID)}`;
+                } else {
+                  window.location.href = "/vital/finish.html";
+                }
+
+              } catch (e) {
+                aiAnalysing.value = false;
+                console.error("解析錯誤:", e);
+              }
+            } catch (err) {
               aiAnalysing.value = false;
-              console.error("解析錯誤:", e);
-              document.getElementById("logs").innerText =
-                "解析結果時發生錯誤：" + e.message;
+              console.error("API 錯誤:", err);
+              alert(err.message);
             }
-          } catch (err) {
-            aiAnalysing.value = false;
-            console.error("API 錯誤:", err);
-            alert(err.message);
           }
-        }
 
-        // 開始錄影
-        function startRecording() {
-          recordedChunks = [];
-          mediaRecorder.start();
-          scanning.value = true;
-          progress.value = 0;
-          remain.value = 15;
-          let percent = 0;
-          scanInt = setInterval(() => {
-            if (mediaRecorder.state === "recording") {
-              elapsedMs += 200;
-              percent = Math.min(100, (elapsedMs / 15000) * 100);
-              progress.value = percent;
-              remain.value = Math.max(
-                0,
-                Math.ceil(((100 - percent) * 15) / 100)
-              );
-              if (percent >= 100) {
-                clearInterval(scanInt);
-                mediaRecorder.stop();
-                scanning.value = false;
-                hasRecorded = true;
+          // 開始錄影
+          function startRecording() {
+            recordedChunks = [];
+            mediaRecorder.start();
+            scanning.value = true;
+            progress.value = 0;
+            remain.value = 15;
+            let percent = 0;
+            scanInt = setInterval(() => {
+              if (mediaRecorder.state === "recording") {
+                elapsedMs += 200;
+                percent = Math.min(100, (elapsedMs / 15000) * 100);
+                progress.value = percent;
+                remain.value = Math.max(
+                  0,
+                  Math.ceil(((100 - percent) * 15) / 100)
+                );
+                if (percent >= 100) {
+                  clearInterval(scanInt);
+                  mediaRecorder.stop();
+                  scanning.value = false;
+                  hasRecorded = true;
+                }
               }
-            }
-          }, 200);
-          startMetrics();
-        }
+            }, 200);
+            startMetrics();
+          }
 
-        // 指標動畫
-        function startMetrics() {
-          if (metricInt) clearInterval(metricInt);
-          metricInt = setInterval(() => {
-            nn.value = Math.floor(Math.random() * 20) + 80;
-            fps.value = Math.floor(Math.random() * 10) + 25;
-            acc.value = Math.floor(Math.random() * 5) + 95;
-          }, 500);
-        }
-
-        // 啟動人臉偵測
-        async function startFaceDetection() {
-          const options = new faceapi.TinyFaceDetectorOptions();
-          let faceInside = false;
-          faceDetectTimer = setInterval(async () => {
-            if (hasRecorded) return;
-            const detection = await faceapi.detectSingleFace(
-              videoElement.value,
-              options
-            );
-            if (detection) {
-              const box = detection.box;
-              faces.value = [
-                {
-                  x: box.x,
-                  y: box.y,
-                  w: box.width,
-                  h: box.height,
-                  c: detection.score,
-                },
-              ];
-              const cx = box.x + box.width / 2;
-              const cy = box.y + box.height / 2;
-              const inside = cx > 192 && cx < 448 && cy > 120 && cy < 360;
-              if (mediaRecorder && mediaRecorder.state === 'paused') {
-                showFaceGuideTip.value = true;
-              } else {
-                showFaceGuideTip.value = false;
-              }
-              if (
-                inside &&
-                !scanning.value &&
-                mediaRecorder.state === "inactive"
-              ) {
-                faceInside = true;
-                startCountdown(3, () => {
-                  if (mediaRecorder.state === "inactive" && !hasRecorded) {
-                    startRecording();
-                  }
-                });
-              } else if (!inside && mediaRecorder.state === "recording") {
-                faceInside = false;
-                mediaRecorder.pause();
-              } else if (inside && mediaRecorder.state === "paused") {
-                mediaRecorder.resume();
-              }
-            } else {
-              faces.value = [];
-              showFaceGuideTip.value = false;
-              if (mediaRecorder && mediaRecorder.state === "recording") {
-                mediaRecorder.pause();
-              }
-            }
-          }, 300);
-        }
-
-        // 按鈕觸發
-        async function startBtnClick() {
-          checkUserData();
-          await initCamera();
-          await faceapi.nets.tinyFaceDetector.loadFromUri(
-            "https://justadudewhohacks.github.io/face-api.js/models"
-          );
-          startFaceDetection();
-        }
-
-        // 監控狀態自動觸發淡入淡出動畫
-        watch(
-          [counting, scanning],
-          ([newCounting, newScanning], [oldCounting, oldScanning]) => {
-            tipFading.value = true;
-            setTimeout(() => {
-              tipFading.value = false;
+          // 指標動畫
+          function startMetrics() {
+            if (metricInt) clearInterval(metricInt);
+            metricInt = setInterval(() => {
+              nn.value = Math.floor(Math.random() * 20) + 80;
+              fps.value = Math.floor(Math.random() * 10) + 25;
+              acc.value = Math.floor(Math.random() * 5) + 95;
             }, 500);
           }
-        );
 
-        onUnmounted(() => {
-          if (stream) stream.getTracks().forEach((t) => t.stop());
-          if (metricInt) clearInterval(metricInt);
-          if (scanInt) clearInterval(scanInt);
-          if (faceDetectTimer) clearInterval(faceDetectTimer);
-        });
+          // 啟動人臉偵測
+          async function startFaceDetection() {
+            const options = new faceapi.TinyFaceDetectorOptions();
+            let faceInside = false;
+            faceDetectTimer = setInterval(async () => {
+              if (hasRecorded) return;
+              const detection = await faceapi.detectSingleFace(
+                videoElement.value,
+                options
+              );
+              if (detection) {
+                const box = detection.box;
+                faces.value = [
+                  {
+                    x: box.x,
+                    y: box.y,
+                    w: box.width,
+                    h: box.height,
+                    c: detection.score,
+                  },
+                ];
+                const cx = box.x + box.width / 2;
+                const cy = box.y + box.height / 2;
+                const inside = cx > 192 && cx < 448 && cy > 120 && cy < 360;
+                if (mediaRecorder && mediaRecorder.state === "paused") {
+                  showFaceGuideTip.value = true;
+                } else {
+                  showFaceGuideTip.value = false;
+                }
+                if (
+                  inside &&
+                  !scanning.value &&
+                  mediaRecorder.state === "inactive"
+                ) {
+                  faceInside = true;
+                  startCountdown(3, () => {
+                    if (mediaRecorder.state === "inactive" && !hasRecorded) {
+                      startRecording();
+                    }
+                  });
+                } else if (!inside && mediaRecorder.state === "recording") {
+                  faceInside = false;
+                  mediaRecorder.pause();
+                } else if (inside && mediaRecorder.state === "paused") {
+                  mediaRecorder.resume();
+                }
+              } else {
+                faces.value = [];
+                showFaceGuideTip.value = false;
+                if (mediaRecorder && mediaRecorder.state === "recording") {
+                  mediaRecorder.pause();
+                }
+              }
+            }, 300);
+          }
 
-        return {
-          videoElement,
-          scanning,
-          faces,
-          progress,
-          nn,
-          fps,
-          acc,
-          remain,
-          counting,
-          countingSec,
-          startBtnClick,
-          tipFading,
-          aiAnalysing,
-          aiProgress,
-          showFaceGuideTip,
-        };
-      },
-    }).mount("#app");
+          // 按鈕觸發
+          async function startBtnClick() {
+            checkUserData();
+            await initCamera();
+            await faceapi.nets.tinyFaceDetector.loadFromUri(
+              "https://justadudewhohacks.github.io/face-api.js/models"
+            );
+            startFaceDetection();
+          }
 
-    // 首頁遮罩動畫
-    window.addEventListener("DOMContentLoaded", () => {
-      const cover = document.getElementById("hrvFirstCover");
-      if (cover) {
-        const closeCover = () => {
-          cover.classList.add("fadeOut");
-          setTimeout(() => {
-            cover.style.display = "none";
-          }, 700);
-          cover.removeEventListener("click", closeCover);
-        };
-        cover.addEventListener("click", closeCover);
+          // 監控狀態自動觸發淡入淡出動畫
+          watch(
+            [counting, scanning],
+            ([newCounting, newScanning], [oldCounting, oldScanning]) => {
+              tipFading.value = true;
+              setTimeout(() => {
+                tipFading.value = false;
+              }, 500);
+            }
+          );
+
+          onUnmounted(() => {
+            if (stream) stream.getTracks().forEach((t) => t.stop());
+            if (metricInt) clearInterval(metricInt);
+            if (scanInt) clearInterval(scanInt);
+            if (faceDetectTimer) clearInterval(faceDetectTimer);
+          });
+
+          return {
+            videoElement,
+            scanning,
+            faces,
+            progress,
+            nn,
+            fps,
+            acc,
+            remain,
+            counting,
+            countingSec,
+            startBtnClick,
+            tipFading,
+            aiAnalysing,
+            aiProgress,
+            showFaceGuideTip,
+          };
+        },
+      }).mount("#app");
+
+      // 首頁遮罩動畫
+      window.addEventListener("DOMContentLoaded", () => {
+        const cover = document.getElementById("hrvFirstCover");
+        if (cover) {
+          const closeCover = () => {
+            cover.classList.add("fadeOut");
+            setTimeout(() => {
+              cover.style.display = "none";
+            }, 700);
+            cover.removeEventListener("click", closeCover);
+          };
+          cover.addEventListener("click", closeCover);
+        }
+      });
+      function syncMaskToGuide() {
+        const guide = document.querySelector(".face-guide");
+        const mask = document.querySelector(".face-blur-mask");
+        const box = document.querySelector(".video-container");
+        if (!guide || !mask || !box) return;
+
+        /* 取 .face-guide 與 .video-container 的絕對座標 */
+        const g = guide.getBoundingClientRect();
+        const b = box.getBoundingClientRect();
+
+        /* 以 video-container 為基準，把中心點換算成百分比 */
+        const cx = ((g.left + g.width / 2 - b.left) / b.width) * 100;
+        const cy = ((g.top + g.height / 2 - b.top) / b.height) * 100;
+
+        /* 半徑直接用像素（精準貼合） */
+        mask.style.setProperty("--cx", cx + "%");
+        mask.style.setProperty("--cy", cy + "%");
+        mask.style.setProperty("--rx", g.width / 2 + "px");
+        mask.style.setProperty("--ry", g.height / 2 + "px");
       }
-    });
-    function syncMaskToGuide() {
-      const guide = document.querySelector('.face-guide');
-      const mask = document.querySelector('.face-blur-mask');
-      const box = document.querySelector('.video-container');
-      if (!guide || !mask || !box) return;
 
-      /* 取 .face-guide 與 .video-container 的絕對座標 */
-      const g = guide.getBoundingClientRect();
-      const b = box.getBoundingClientRect();
-
-      /* 以 video-container 為基準，把中心點換算成百分比 */
-      const cx = ((g.left + g.width / 2) - b.left) / b.width * 100;
-      const cy = ((g.top + g.height / 2) - b.top) / b.height * 100;
-
-      /* 半徑直接用像素（精準貼合） */
-      mask.style.setProperty('--cx', cx + '%');
-      mask.style.setProperty('--cy', cy + '%');
-      mask.style.setProperty('--rx', (g.width / 2) + 'px');
-      mask.style.setProperty('--ry', (g.height / 2) + 'px');
-    }
-
-    /* 用 requestAnimationFrame 持續同步（效能比 setInterval 好） */
-    function loop() {
-      syncMaskToGuide();
+      /* 用 requestAnimationFrame 持續同步（效能比 setInterval 好） */
+      function loop() {
+        syncMaskToGuide();
+        requestAnimationFrame(loop);
+      }
       requestAnimationFrame(loop);
-    }
-    requestAnimationFrame(loop);
 
-    async function saveHRV3ToServer(data) {
-      try {
-        const res = await fetch("https://23700999.com:8081/HMA/api/fr/HRV3Save", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
-        const result = await res.json();
-        console.log("HRV3Save 回傳：", result);
-        // 可依需求處理 result
-      } catch (err) {
-        console.error("HRV3Save API 錯誤：", err);
+      async function saveHRV3ToServer(data) {
+        try {
+          const res = await fetch(
+            "https://23700999.com:8081/HMA/api/fr/HRV3Save",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(data),
+            }
+          );
+          const result = await res.json();
+          console.log("HRV3Save 回傳：", result);
+          return result;
+        } catch (err) {
+          console.error("HRV3Save API 錯誤：", err);
+          return null;
+        }
       }
-    }
-
-  </script>
-</body>
-
+    </script>
+  </body>
 </html>

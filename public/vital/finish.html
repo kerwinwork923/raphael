@@ -120,7 +120,7 @@
         <a href="/user">
           <button class="backToUserBtn">會員中心</button>
         </a>
-        <a href="/vital/scan.html">
+        <a href="/vital/scan3.html">
           <button class="backToDetect">重新檢測</button>
         </a>
       </div>
@@ -178,16 +178,21 @@
 
     let userData = {};
     userData = JSON.parse(localStorage.getItem("userData"));
+    
+    // 從 URL 獲取 AID
+    const aid = urlParams.get("AID");
+
     // HRV3 API 參數
     const hrv3Params = {
       MID: userData.MID,
       Token: userData.Token,
       MAID: userData.MAID,
-      Mobile: userData.Mobile
+      Mobile: userData.Mobile,
+      AID: aid || "" // 加入 AID 參數
     };
 
     // 呼叫 HRV3 API
-    fetch("https://23700999.com:8081/HMA/api/fr/HRV3", {
+    fetch("https://23700999.com:8081/HMA/api/fr/HRV3Detail", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(hrv3Params),
@@ -195,7 +200,137 @@
       .then(res => res.json())
       .then(data => {
         console.log("HRV3 API 回傳：", data);
-        // 你可以在這裡處理資料，或顯示在畫面上
+        
+        // 計算各項指標
+        const lf_hf = parseFloat(data.lf_hf);
+        const sdnn = parseFloat(data.sdnn);
+        const hbr = parseInt(data.hbr);
+        const rr = parseInt(data.rr);
+        const lf = parseFloat(data.lf);
+        const hf = parseFloat(data.hf);
+        const sbp = parseInt(data.sbp);
+        const dbp = parseInt(data.dbp);
+
+        // 自律神經平衡 (A)
+        let balanceScore = 3; // 預設中等
+        let balanceSymbol = "😌 穩定";
+        if (lf_hf > 2) {
+          balanceScore = 5;
+          balanceSymbol = "🧠 焦躁（交感極高）";
+        } else if (lf_hf > 1.5) {
+          balanceScore = 4;
+          balanceSymbol = "😱 緊繃";
+        } else if (lf_hf >= 1) {
+          balanceScore = 3;
+          balanceSymbol = "😌 穩定";
+        } else if (lf_hf >= 0.5) {
+          balanceScore = 2;
+          balanceSymbol = "🐱 微放鬆";
+        } else {
+          balanceScore = 1;
+          balanceSymbol = "🐈 深度放鬆";
+        }
+
+        // 生理疲勞 (B)
+        let fatigueScore = 3; // 預設中等
+        let fatigueSymbol = "😐 普通";
+        if (sdnn < 20) {
+          fatigueScore = 5;
+          fatigueSymbol = "💀 非常疲憊";
+        } else if (sdnn < 30) {
+          fatigueScore = 4;
+          fatigueSymbol = "😪 疲勞";
+        } else if (sdnn < 50) {
+          fatigueScore = 3;
+          fatigueSymbol = "😐 普通";
+        } else if (sdnn < 70) {
+          fatigueScore = 2;
+          fatigueSymbol = "🥳 有精神";
+        } else {
+          fatigueScore = 1;
+          fatigueSymbol = "💪 精力充沛";
+        }
+
+        // 心情指北針 (C)
+        let moodScore = 3; // 預設中等
+        let moodSymbol = "💪 專注";
+        if (hbr && rr && lf && hf) {
+          let score = 0;
+          if (hbr > 90) score += 5;
+          else if (hbr > 80) score += 4;
+          else if (hbr > 70) score += 3;
+          else if (hbr > 60) score += 2;
+          else score += 1;
+
+          if (rr > 18) score += 5;
+          else if (rr > 15) score += 4;
+          else if (rr > 12) score += 3;
+          else if (rr > 10) score += 2;
+          else score += 1;
+
+          const lf_hf_ratio = lf / hf;
+          if (lf_hf_ratio > 2) score += 5;
+          else if (lf_hf_ratio > 1.5) score += 4;
+          else if (lf_hf_ratio > 1) score += 3;
+          else if (lf_hf_ratio > 0.5) score += 2;
+          else score += 1;
+
+          if (score >= 14) {
+            moodScore = 5;
+            moodSymbol = "🔥 高度焦躁";
+          } else if (score >= 12) {
+            moodScore = 4;
+            moodSymbol = "😠 緊繃";
+          } else if (score >= 9) {
+            moodScore = 3;
+            moodSymbol = "💪 專注";
+          } else if (score >= 5) {
+            moodScore = 2;
+            moodSymbol = "😌 微放鬆";
+          } else {
+            moodScore = 1;
+            moodSymbol = "😴 沉靜";
+          }
+        }
+
+        // 血壓氣球 (D)
+        let pressureScore = 3; // 預設中等
+        let pressureSymbol = "🎈 穩定氣球";
+        if (sbp > 145 || dbp > 95) {
+          pressureScore = 5;
+          pressureSymbol = "💥 高張氣球";
+        } else if (sbp >= 130 || dbp >= 85) {
+          pressureScore = 4;
+          pressureSymbol = "💨 偏高氣球";
+        } else if (sbp >= 110 && sbp <= 129 && dbp >= 70 && dbp <= 84) {
+          pressureScore = 3;
+          pressureSymbol = "🎈 穩定氣球";
+        } else if (sbp >= 95 && dbp >= 60) {
+          pressureScore = 2;
+          pressureSymbol = "💧 微低氣球";
+        } else {
+          pressureScore = 1;
+          pressureSymbol = "💦 洩氣氣球";
+        }
+
+        // 更新圖片
+        const row = document.querySelector('.scanInfo .row');
+        row.innerHTML = `
+          <img src="images/tinified/A${balanceScore}.png" alt="自律神經平衡" />
+          <img src="images/tinified/B${fatigueScore}.png" alt="生理疲勞" />
+          <img src="images/tinified/C${moodScore}.png" alt="心情指北針" />
+          <img src="images/tinified/D${pressureScore}.png" alt="血壓氣球" />
+        `;
+
+        // 更新個人化建議
+        const suggestions = document.querySelector('.personalizedSuggestions p');
+        suggestions.textContent = `
+          您的 LF/HF 比值為 ${lf_hf.toFixed(2)}，${balanceSymbol}。
+          生理疲勞程度：${fatigueSymbol}。
+          心情狀態：${moodSymbol}。
+          血壓狀態：${pressureSymbol}。
+        `;
+
       })
       .catch(err => {
         console.error("HRV3 API 錯誤：", err);

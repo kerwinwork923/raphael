@@ -37,6 +37,7 @@
       </div>
       <div class="payMethodHR"></div>
     </div>
+    
   </div>
 </template>
 
