@@ -24,12 +24,12 @@
     body {
       font-family: "Orbitron", monospace;
       background: radial-gradient(ellipse at center, #1a2e0a 0%, #000 100%);
-      color: #74bc1f;
+      color: #1fbcb3;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-  
+
     }
 
     /* 主背景色改為 #050709 */
@@ -43,12 +43,12 @@
       width: 800px;
       height: 600px;
       background: linear-gradient(135deg,
-          rgba(116, 188, 31, 0.1),
-          rgba(116, 188, 31, 0.05));
-      border: 2px solid #74bc1f;
+          rgba(31, 188, 179, 0.1),
+          rgba(31, 188, 179, 0.05));
+      border: 2px solid #1fbcb3;
       border-radius: 20px;
-      box-shadow: 0 0 50px rgba(116, 188, 31, 0.3),
-        inset 0 0 50px rgba(116, 188, 31, 0.1);
+      box-shadow: 0 0 50px rgba(31, 188, 179, 0.3),
+        inset 0 0 50px rgba(31, 188, 179, 0.1);
       backdrop-filter: blur(10px);
       overflow: hidden;
     }
@@ -59,9 +59,9 @@
       inset: 0 0 auto 0;
       height: 60px;
       background: linear-gradient(90deg,
-          rgba(116, 188, 31, 0.2),
-          rgba(116, 188, 31, 0.1));
-      border-bottom: 1px solid rgba(116, 188, 31, 0.5);
+          rgba(31, 188, 179, 0.2),
+          rgba(31, 188, 179, 0.1));
+      border-bottom: 1px solid rgba(31, 188, 179, 0.5);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -73,15 +73,15 @@
       font-size: 24px;
       font-weight: 900;
       letter-spacing: 2px;
-      text-shadow: 0 0 10px #74bc1f;
+      text-shadow: 0 0 10px #1fbcb3;
     }
 
     .status-dot {
       width: 12px;
       height: 12px;
       border-radius: 50%;
-      background: #74bc1f;
-      box-shadow: 0 0 15px #74bc1f;
+      background: #1fbcb3;
+      box-shadow: 0 0 15px #1fbcb3;
       animation: pulse 2s ease-in-out infinite;
     }
 
@@ -125,9 +125,9 @@
     .scan-grid {
       position: absolute;
       inset: 0;
-      background-image: linear-gradient(rgba(116, 188, 31, 0.08) 1px,
+      background-image: linear-gradient(rgba(31, 188, 179, 0.08) 1px,
           transparent 1px),
-        linear-gradient(90deg, rgba(116, 188, 31, 0.08) 1px, transparent 1px);
+        linear-gradient(90deg, rgba(31, 188, 179, 0.08) 1px, transparent 1px);
       background-size: 25px 25px;
       animation: gridFlow 8s linear infinite;
     }
@@ -150,12 +150,12 @@
       top: 0;
       background: linear-gradient(90deg,
           transparent,
-          rgba(116, 188, 31, 0.6) 30%,
+          rgba(31, 188, 179, 0.6) 30%,
           #fff 50%,
-          rgba(116, 188, 31, 0.6) 70%,
+          rgba(31, 188, 179, 0.6) 70%,
           transparent);
-      box-shadow: 0 0 20px rgba(116, 188, 31, 0.6),
-        0 0 40px rgba(116, 188, 31, 0.4);
+      box-shadow: 0 0 20px rgba(31, 188, 179, 0.6),
+        0 0 40px rgba(31, 188, 179, 0.4);
       animation: scanBeam 3s ease-in-out infinite;
     }
 
@@ -178,12 +178,12 @@
       top: 50%;
       background: linear-gradient(0deg,
           transparent,
-          rgba(116, 188, 31, 0.6) 30%,
+          rgba(31, 188, 179, 0.6) 30%,
           #fff 50%,
-          rgba(116, 188, 31, 0.6) 70%,
+          rgba(31, 188, 179, 0.6) 70%,
           transparent);
-      box-shadow: 0 0 15px rgba(116, 188, 31, 0.6),
-        0 0 30px rgba(116, 188, 31, 0.4);
+      box-shadow: 0 0 15px rgba(31, 188, 179, 0.6),
+        0 0 30px rgba(31, 188, 179, 0.4);
       animation: horizontalScan 3s ease-in-out infinite 1s;
     }
 
@@ -264,7 +264,7 @@
       height: 2px;
       background: linear-gradient(90deg,
           transparent,
-          rgba(116, 188, 31, 0.7) 50%,
+          rgba(31, 188, 179, 0.7) 50%,
           transparent);
       animation: speed 0.8s linear infinite;
     }
@@ -293,10 +293,10 @@
       width: 200px;
       height: 250px;
       transform: translate(-50%, -50%);
-      border: 2px solid rgba(116, 188, 31, 0.5);
+      border: 2px solid rgba(31, 188, 179, 0.5);
       /* border-radius: 50%/60% 60% 40% 40%; */
       border-radius: 50%;
-      background: rgba(116, 188, 31, 0.03);
+      background: rgba(31, 188, 179, 0.03);
       animation: guideGlow 4s ease-in-out infinite;
     }
 
@@ -304,11 +304,11 @@
 
       0%,
       100% {
-        box-shadow: 0 0 15px rgba(116, 188, 31, 0.2);
+        box-shadow: 0 0 15px rgba(31, 188, 179, 0.2);
       }
 
       50% {
-        box-shadow: 0 0 30px rgba(116, 188, 31, 0.4);
+        box-shadow: 0 0 30px rgba(31, 188, 179, 0.4);
       }
     }
 
@@ -337,7 +337,7 @@
       position: absolute;
       width: 30px;
       height: 30px;
-      border: 4px solid #74bc1f;
+      border: 4px solid #1fbcb3;
       animation: cornerGlow 2s ease-in-out infinite;
     }
 
@@ -377,11 +377,11 @@
 
       0%,
       100% {
-        box-shadow: 0 0 10px #74bc1f;
+        box-shadow: 0 0 10px #1fbcb3;
       }
 
       50% {
-        box-shadow: 0 0 20px #8fd92f;
+        box-shadow: 0 0 20px #1fbcb3;
       }
     }
 
@@ -391,7 +391,7 @@
       left: 50%;
       transform: translateX(-50%);
       background: linear-gradient(135deg,
-          rgba(116, 188, 31, 0.95),
+          rgba(31, 188, 179, 0.95),
           rgba(140, 217, 47, 0.95));
       padding: 8px 15px;
       border-radius: 8px;
@@ -407,8 +407,8 @@
       right: 20px;
       bottom: 20px;
       height: 80px;
-      background: rgba(116, 188, 31, 0.1);
-      border: 1px solid rgba(116, 188, 31, 0.3);
+      background: rgba(31, 188, 179, 0.1);
+      border: 1px solid rgba(31, 188, 179, 0.3);
       border-radius: 10px;
       padding: 15px;
       display: flex;
@@ -418,26 +418,33 @@
 
     .progress-label {
       font-weight: 700;
-      color: #74bc1f;
+      color: #1fbcb3;
       margin-bottom: 6px;
-      text-shadow: 0 0 5px #74bc1f;
+      text-shadow: 0 0 5px #1fbcb3;
     }
 
     .progress-bar {
       width: 100%;
       height: 8px;
       background: rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(116, 188, 31, 0.3);
+      border: 1px solid rgba(31, 188, 179, 0.3);
       border-radius: 4px;
       overflow: hidden;
     }
-    .progress-text{
-      color:#8fd92f; font-size:1.8rem; min-width:90px; text-align:right; font-family:Orbitron; font-weight:900; letter-spacing:2px;
+
+    .progress-text {
+      color: #1fbcb3;
+      font-size: 1.8rem;
+      min-width: 90px;
+      text-align: right;
+      font-family: Orbitron;
+      font-weight: 900;
+      letter-spacing: 2px;
     }
 
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, #74bc1f, #8fd92f);
+      background: linear-gradient(90deg, #1fbcb3, #1fbcb3);
     }
 
     .ai-metrics {
@@ -446,11 +453,11 @@
       gap: 5px;
       min-width: 200px;
       font-size: 12px;
-      color: rgba(116, 188, 31, 0.7);
+      color: rgba(31, 188, 179, 0.7);
     }
 
     .metric-value {
-      color: #74bc1f;
+      color: #1fbcb3;
       font-weight: 700;
     }
 
@@ -463,8 +470,8 @@
       justify-content: center;
       font-size: 96px;
       font-weight: 900;
-      color: #74bc1f;
-      text-shadow: 0 0 20px #74bc1f;
+      color: #1fbcb3;
+      text-shadow: 0 0 20px #1fbcb3;
       background: rgba(0, 0, 0, 0.4);
       z-index: 20;
     }
@@ -482,29 +489,29 @@
       -webkit-mask-image: radial-gradient(ellipse 100px 125px at 50% 50%, transparent 99px, black 100px);
       mask-image: radial-gradient(ellipse 100px 125px at 50% 50%, transparent 99px, black 100px);
     } */
-     /* --- 只貼你要改 / 新增的部分 --- */
-.face-blur-mask {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  backdrop-filter: blur(10px);
-  background: rgba(0, 0, 0, 0.25);
-  opacity: 1;
+    /* --- 只貼你要改 / 新增的部分 --- */
+    .face-blur-mask {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      backdrop-filter: blur(10px);
+      background: rgba(0, 0, 0, 0.25);
+      opacity: 1;
 
-  /* ↓ 用 4 個 CSS 變數描述橢圓中心與半徑 */
-  --cx: 50%;
-  --cy: 50%;
-  --rx: 100px;
-  --ry: 125px;
+      /* ↓ 用 4 個 CSS 變數描述橢圓中心與半徑 */
+      --cx: 50%;
+      --cy: 50%;
+      --rx: 100px;
+      --ry: 125px;
 
-  /* 把變數餵進 radial-gradient 做遮罩 */
-  -webkit-mask-image: radial-gradient(ellipse var(--rx) var(--ry) at var(--cx) var(--cy),
-                                      transparent 98%, black 100%);
-  mask-image: radial-gradient(ellipse var(--rx) var(--ry) at var(--cx) var(--cy),
-                              transparent 98%, black 100%);
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-}
+      /* 把變數餵進 radial-gradient 做遮罩 */
+      -webkit-mask-image: radial-gradient(ellipse var(--rx) var(--ry) at var(--cx) var(--cy),
+          transparent 98%, black 100%);
+      mask-image: radial-gradient(ellipse var(--rx) var(--ry) at var(--cx) var(--cy),
+          transparent 98%, black 100%);
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+    }
 
 
     .HRVFirstCover {
@@ -570,7 +577,7 @@
       position: relative;
       background: #050709;
       border-radius: 12px;
-      box-shadow: 0 0 12px #74bc1f44;
+      box-shadow: 0 0 12px #1fbcb344;
       transition: background 0.3s;
       justify-content: flex-start;
       align-items: center;
@@ -578,13 +585,12 @@
       min-height: 80px;
       min-width: 220px;
       padding: 10px 20px;
-      border: 2px solid var(--Primary-default, #74bc1f);
+      border: 2px solid var(--Primary-default, #1fbcb3);
     }
 
     .tip-text {
-
       font-size: 1.5rem;
-      color: #74bc1f;
+      color: #1fbcb3;
       white-space: nowrap;
       text-shadow: 0px 0px 2px var(--Primary-100, #fcfff7);
       font-weight: 700;
@@ -598,6 +604,15 @@
       margin-left: 0;
       width: 100%;
       display: block;
+    }
+
+    .startBtn {
+      cursor: pointer;
+      transition: opacity 0.5s;
+
+      &:hover {
+        text-shadow: rgb(31, 188, 179) 0px 0px 24px;
+      }
     }
 
     .fade-enter-active,
@@ -629,7 +644,7 @@
 
     .AIAnalysisCover-title {
       font-size: 1.5rem;
-      color: #74bc1f;
+      color: #1fbcb3;
       white-space: nowrap;
       text-shadow: 0px 0px 2px var(--Primary-100, #fcfff7);
       font-weight: 700;
@@ -641,14 +656,14 @@
     .AIAnalysisCover-progress {
       width: 100%;
       height: 10px;
-      background-color: #74bc1f;
+      background-color: #1fbcb3;
       border-radius: 5px;
     }
 
     .AIAnalysisCover-progress-bar {
       width: 0%;
       height: 100%;
-      background-color: #74bc1f;
+      background-color: #1fbcb3;
       border-radius: 5px;
       transition: width 0.5s;
     }
@@ -669,7 +684,7 @@
       transform: translateX(-50%);
       font-size: 16px;
       font-weight: 700;
-      color: #74bc1f;
+      color: #1fbcb3;
       text-shadow: 0 0 8px #050709;
       white-space: nowrap;
       z-index: 30;
@@ -685,10 +700,11 @@
     @media screen and (max-width: 1024px) {
       .ai-scanner-system {
         width: 70vw;
-   
+
         min-height: 400px;
 
       }
+
       .face-guide {
         width: 180px;
         height: 220px;
@@ -703,53 +719,23 @@
 
 
       }
+
       .face-guide {
         width: 180px;
         height: 220px;
       }
 
-      .system-title{
+      .system-title {
         text-align: center;
         font-size: 1.25rem;
-        
+
       }
-      .progress-text{
+
+      .progress-text {
         font-size: 1.25rem;
         min-width: 0px;
       }
-
-      /* .video-container {
-        top: 24px;
-        left: 0;
-        right: 0;
-        bottom: 40px;
-      }
-      .progress-section {
-        left: 0;
-        right: 0;
-        bottom: 0;
-        height: 36px;
-        padding: 2px;
-      }
-      .face-guide {
-        width: 48px;
-        height: 60px;
-      }
-      .face-guide-tip {
-        font-size: 9px;
-        top: calc(50% + 28px);
-      }
-      .action-tip {
-        min-width: 40px;
-        padding: 2px 2px;
-        font-size: 0.7rem;
-      }
-      .countdown {
-        font-size: 28px;
-      } */
     }
-
-
   </style>
 </head>
 
@@ -759,7 +745,7 @@
       :style="{cursor: scanning ? 'not-allowed' : 'pointer', opacity: scanning ? 0.5 : 1, width: '80px', height: '80px'}"
       :disabled="scanning" />
     <ul>
-      <li>準備好後，<span>請點擊上方按鈕開始量測</span>。</li>
+      <li>準備好後，<span>請點擊任意地方開始量測</span>。</li>
       <li>
         系統將在倒數
         <span>3 秒</span>後開始偵測，請讓臉部完整對準畫面並保持不動。
@@ -802,12 +788,11 @@
 
       <!-- Progress + metrics -->
       <div class="progress-section">
-      
-          <div class="progress-text"
-            >
-            {{ Math.round(progress) }}%
-          </div>
-  
+
+        <div class="progress-text">
+          {{ Math.round(progress) }}%
+        </div>
+
         <div class="progress-bar">
           <div class="progress-fill" :style="{width:progress+'%'}"></div>
         </div>
@@ -820,10 +805,10 @@
           display: flex;
           flex-direction: row;
           align-items: center;
-          border: 2px solid var(--Primary-default, #74bc1f);
+          border: 2px solid var(--Primary-default, #1fbcb3);
           border-radius: var(--Radius-r-8, 8px);
           background: #050709;
-          box-shadow: 0px 0px 12px 0px #74bc1f;
+          box-shadow: 0px 0px 12px 0px #1fbcb3;
           padding: 10px 20px;
           min-height: 80px;
           min-width: 220px;
@@ -833,17 +818,10 @@
       <img src="images/new/ball.gif" alt="開始檢測" id="start"
         :style="{cursor: scanning ? 'not-allowed' : 'pointer', opacity: scanning ? 0.5 : 1, width: '80px', height: '80px', background: 'none', boxShadow: 'none', border: 'none', marginRight: '16px'}"
         :disabled="scanning" />
-      <p v-if="!counting && !scanning" class="tip-text left-align">開始量測</p>
+      <p v-if="!counting && !scanning" class="tip-text left-align startBtn">開始量測</p>
       <p v-else-if="counting" class="tip-text left-align">倒數完即開始...</p>
       <p v-else-if="scanning" class="tip-text left-align">請盡量保持不動</p>
     </div>
-    <div id="metrics"></div>
-    <div id="logs" style="
-          margin-top: 8px;
-          max-width: 360px;
-          font-size: 0.8rem;
-          color: #8fd92f;
-        "></div>
     <!-- AI 分析中遮罩 -->
     <div v-if="aiAnalysing" class="AIAnalysisCover">
       <img src="images/new/ball.gif" alt="AI 分析中..." class="AIAnalysisCover-loading" />
@@ -1155,7 +1133,7 @@
 
               // 呼叫 HRV3Save API
               await saveHRV3ToServer(hrv3Payload);
-              window.location.href = "/vital/finish.html"; 
+              window.location.href = "/vital/finish.html";
             } catch (e) {
               aiAnalysing.value = false;
               console.error("解析錯誤:", e);
@@ -1326,47 +1304,47 @@
       }
     });
     function syncMaskToGuide() {
-  const guide = document.querySelector('.face-guide');
-  const mask  = document.querySelector('.face-blur-mask');
-  const box   = document.querySelector('.video-container');
-  if (!guide || !mask || !box) return;
+      const guide = document.querySelector('.face-guide');
+      const mask = document.querySelector('.face-blur-mask');
+      const box = document.querySelector('.video-container');
+      if (!guide || !mask || !box) return;
 
-  /* 取 .face-guide 與 .video-container 的絕對座標 */
-  const g = guide.getBoundingClientRect();
-  const b = box.getBoundingClientRect();
+      /* 取 .face-guide 與 .video-container 的絕對座標 */
+      const g = guide.getBoundingClientRect();
+      const b = box.getBoundingClientRect();
 
-  /* 以 video-container 為基準，把中心點換算成百分比 */
-  const cx = ((g.left + g.width  / 2) - b.left) / b.width  * 100;
-  const cy = ((g.top  + g.height / 2) - b.top ) / b.height * 100;
+      /* 以 video-container 為基準，把中心點換算成百分比 */
+      const cx = ((g.left + g.width / 2) - b.left) / b.width * 100;
+      const cy = ((g.top + g.height / 2) - b.top) / b.height * 100;
 
-  /* 半徑直接用像素（精準貼合） */
-  mask.style.setProperty('--cx', cx + '%');
-  mask.style.setProperty('--cy', cy + '%');
-  mask.style.setProperty('--rx', (g.width  / 2) + 'px');
-  mask.style.setProperty('--ry', (g.height / 2) + 'px');
-}
+      /* 半徑直接用像素（精準貼合） */
+      mask.style.setProperty('--cx', cx + '%');
+      mask.style.setProperty('--cy', cy + '%');
+      mask.style.setProperty('--rx', (g.width / 2) + 'px');
+      mask.style.setProperty('--ry', (g.height / 2) + 'px');
+    }
 
-/* 用 requestAnimationFrame 持續同步（效能比 setInterval 好） */
-function loop() {
-  syncMaskToGuide();
-  requestAnimationFrame(loop);
-}
-requestAnimationFrame(loop);
+    /* 用 requestAnimationFrame 持續同步（效能比 setInterval 好） */
+    function loop() {
+      syncMaskToGuide();
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
 
-async function saveHRV3ToServer(data) {
-  try {
-    const res = await fetch("https://23700999.com:8081/HMA/api/fr/HRV3Save", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-    const result = await res.json();
-    console.log("HRV3Save 回傳：", result);
-    // 可依需求處理 result
-  } catch (err) {
-    console.error("HRV3Save API 錯誤：", err);
-  }
-}
+    async function saveHRV3ToServer(data) {
+      try {
+        const res = await fetch("https://23700999.com:8081/HMA/api/fr/HRV3Save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        const result = await res.json();
+        console.log("HRV3Save 回傳：", result);
+        // 可依需求處理 result
+      } catch (err) {
+        console.error("HRV3Save API 錯誤：", err);
+      }
+    }
 
   </script>
 </body>
