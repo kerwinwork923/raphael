@@ -1132,9 +1132,9 @@
               // 呼叫 HRV3Save API
               const saveResult = await saveHRV3ToServer(hrv3Payload);
               if (saveResult && saveResult.AID) {
-                window.location.href = `/vital/finish.html?AID=${encodeURIComponent(saveResult.AID)}`;
+                window.location.href = `/Finish.html?AID=${encodeURIComponent(saveResult.AID)}`;
               } else {
-                window.location.href = "/vital/finish.html";
+                window.location.href = "/Finish.html";
               }
 
             } catch (e) {
