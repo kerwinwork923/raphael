@@ -1,6 +1,5 @@
 <template>
   <div class="HRVTest">
-    <Navbar />
     <div class="scanWrap">
       <!-- 初始遮罩 -->
       <div class="HRVFirstCover" id="hrvFirstCover" v-if="!isStarted">
@@ -13,7 +12,6 @@
             cursor: scanning ? 'not-allowed' : 'pointer',
             opacity: scanning ? 0.5 : 1,
             width: '80px',
-            height: '80px'
           }"
           :disabled="scanning"
         />
@@ -32,6 +30,7 @@
       <div class="ai-scanner-system" v-show="isStarted">
         <div class="scanner-header">
           <div class="system-title">AI FACE SCANNER v2.0</div>
+          <button type="button" class="returnBtn">返回</button>
         </div>
 
         <div class="video-container">
@@ -60,7 +59,7 @@
         <div class="progress-section">
           <div class="progress-text">{{ Math.round(progress) }}%</div>
           <div class="progress-bar">
-            <div class="progress-fill" :style="{width: progress + '%'}"></div>
+            <div class="progress-fill" :style="{ width: progress + '%' }"></div>
           </div>
         </div>
       </div>
@@ -84,7 +83,7 @@
             background: 'none',
             boxShadow: 'none',
             border: 'none',
-            marginRight: '16px'
+            marginRight: '16px',
           }"
           :disabled="scanning"
         />
@@ -109,69 +108,71 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
-import * as faceapi from '@vladmandic/face-api'
-import Navbar from '../components/Navbar.vue'
+import { ref, onMounted, onUnmounted, watch } from "vue";
+import * as faceapi from "@vladmandic/face-api";
+import Navbar from "../components/Navbar.vue";
 
 // Refs
-const videoElement = ref(null)
-const scanning = ref(false)
-const faces = ref([])
-const progress = ref(0)
-const nn = ref(0)
-const fps = ref(0)
-const acc = ref(0)
-const remain = ref(15)
-const logs = ref("")
-const metrics = ref("")
-const isStarted = ref(false)
-const counting = ref(false)
-const countingSec = ref(3)
-const tipFading = ref(false)
-const aiAnalysing = ref(false)
-const aiProgress = ref(0)
-const showFaceGuideTip = ref(false)
+const videoElement = ref(null);
+const scanning = ref(false);
+const faces = ref([]);
+const progress = ref(0);
+const nn = ref(0);
+const fps = ref(0);
+const acc = ref(0);
+const remain = ref(15);
+const logs = ref("");
+const metrics = ref("");
+const isStarted = ref(false);
+const counting = ref(false);
+const countingSec = ref(3);
+const tipFading = ref(false);
+const aiAnalysing = ref(false);
+const aiProgress = ref(0);
+const showFaceGuideTip = ref(false);
 
 // 變數
-let userData = {}
-let mediaRecorder = null
-let recordedChunks = []
-let scanInt = null
-let metricInt = null
-let stream = null
-let faceDetectTimer = null
-let hasRecorded = false
-let elapsedMs = 0
+let userData = {};
+let mediaRecorder = null;
+let recordedChunks = [];
+let scanInt = null;
+let metricInt = null;
+let stream = null;
+let faceDetectTimer = null;
+let hasRecorded = false;
+let elapsedMs = 0;
 
 // 頁面一載入就自動開啟鏡頭
 onMounted(async () => {
-  await initCamera()
+  await initCamera();
   // 產生速度線動畫
-  const speedLines = document.querySelector(".speedLines")
+  const speedLines = document.querySelector(".speedLines");
   if (speedLines && speedLines.children.length === 0) {
     for (let i = 0; i < 8; i++) {
-      const line = document.createElement("div")
-      line.className = "speed-line"
-      line.style.top = `${i * 60}px`
-      line.style.width = `${Math.random() * 200 + 100}px`
-      line.style.animationDelay = `${(Math.random() * 0.8).toFixed(2)}s`
-      line.style.animationDuration = `${(Math.random() * 0.4 + 0.6).toFixed(2)}s`
-      speedLines.appendChild(line)
+      const line = document.createElement("div");
+      line.className = "speed-line";
+      line.style.top = `${i * 60}px`;
+      line.style.width = `${Math.random() * 200 + 100}px`;
+      line.style.animationDelay = `${(Math.random() * 0.8).toFixed(2)}s`;
+      line.style.animationDuration = `${(Math.random() * 0.4 + 0.6).toFixed(
+        2
+      )}s`;
+      speedLines.appendChild(line);
     }
   }
-})
+});
 
 // 驗證 userData
 function checkUserData() {
   try {
-    const str = localStorage.getItem("userData")
-    if (!str) throw new Error("localStorage 缺少 userData")
-    userData = JSON.parse(str)
+    const str = localStorage.getItem("userData");
+    if (!str) throw new Error("localStorage 缺少 userData");
+    userData = JSON.parse(str);
     if (!userData.Mobile || !userData.Height || !userData.Weight)
-      throw new Error("userData 格式不完整")
+      throw new Error("userData 格式不完整");
   } catch (err) {
-    alert("讀取使用者資料失敗，請重新登入")
-    throw err
+    alert("讀取使用者資料失敗，請重新登入");
+    throw err;
   }
 }
 
@@ -181,47 +182,47 @@ async function initCamera() {
     stream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: "user" },
       audio: true,
-    })
-    videoElement.value.srcObject = stream
-    mediaRecorder = new MediaRecorder(stream)
+    });
+    videoElement.value.srcObject = stream;
+    mediaRecorder = new MediaRecorder(stream);
     mediaRecorder.ondataavailable = (e) =>
-      e.data.size > 0 && recordedChunks.push(e.data)
-    mediaRecorder.onstop = onRecordStop
+      e.data.size > 0 && recordedChunks.push(e.data);
+    mediaRecorder.onstop = onRecordStop;
   } catch (err) {
-    alert("無法啟動相機/麥克風")
+    alert("無法啟動相機/麥克風");
   }
 }
 
 // 安全數值轉換
 function num(x) {
-  if (x === undefined || x === null || x === "--") return null
-  const n = Number(x)
-  return isNaN(n) ? null : n
+  if (x === undefined || x === null || x === "--") return null;
+  const n = Number(x);
+  return isNaN(n) ? null : n;
 }
 
 // 倒數動畫
 function startCountdown(sec, cb) {
-  if (counting.value) return
-  counting.value = true
-  countingSec.value = sec
+  if (counting.value) return;
+  counting.value = true;
+  countingSec.value = sec;
   const t = setInterval(() => {
-    countingSec.value--
+    countingSec.value--;
     if (countingSec.value < 0) {
-      clearInterval(t)
-      counting.value = false
-      cb()
+      clearInterval(t);
+      counting.value = false;
+      cb();
     }
-  }, 1000)
+  }, 1000);
 }
 
 // 錄影結束
 async function onRecordStop() {
-  aiAnalysing.value = true
-  const blob = new Blob(recordedChunks, { type: "video/webm" })
-  const reader = new FileReader()
-  reader.onloadend = () => sendToAPI(reader.result.split(",")[1])
-  reader.readAsDataURL(blob)
-  if (stream) stream.getTracks().forEach((t) => t.stop())
+  aiAnalysing.value = true;
+  const blob = new Blob(recordedChunks, { type: "video/webm" });
+  const reader = new FileReader();
+  reader.onloadend = () => sendToAPI(reader.result.split(",")[1]);
+  reader.readAsDataURL(blob);
+  if (stream) stream.getTracks().forEach((t) => t.stop());
 }
 
 // 上傳 API
@@ -231,40 +232,37 @@ async function sendToAPI(base64) {
     height: userData.Height,
     weight: userData.Weight,
     content: base64,
-  }
+  };
   try {
-    const res = await fetch(
-      "https://face.zconai.com/api/v1.0/measure/",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      }
-    )
+    const res = await fetch("https://face.zconai.com/api/v1.0/measure/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
 
     try {
-      const gdata = await res.json()
-      console.log("API 原始回傳資料:", gdata)
-      const data = JSON.parse(gdata)
-      console.log("API 原始回傳資料after parse:", data)
-      
+      const gdata = await res.json();
+      console.log("API 原始回傳資料:", gdata);
+      const data = JSON.parse(gdata);
+      console.log("API 原始回傳資料after parse:", data);
+
       // 統一安全解析
-      const hbr = num(data.hbr?.[0])
-      const hrv = data.hrv?.[0] || {}
-      const sdnn = num(hrv.SDNN)
-      const LF = num(hrv.LF)
-      const HF = num(hrv.HF)
-      let lf_hf = num(hrv["LF/HF"])
-      if (lf_hf === null && LF && HF) lf_hf = LF / HF
-      const sbp = num(data.ica?.[0]?.SBP)
-      const dbp = num(data.ica?.[0]?.DBP)
-      const spo2 = data.sp?.[0] || "--"
-      const rr = num(data.rr?.[0])
-      const af = data.af?.[0] || "--"
-      const fa = data.fa?.[0] || "--"
+      const hbr = num(data.hbr?.[0]);
+      const hrv = data.hrv?.[0] || {};
+      const sdnn = num(hrv.SDNN);
+      const LF = num(hrv.LF);
+      const HF = num(hrv.HF);
+      let lf_hf = num(hrv["LF/HF"]);
+      if (lf_hf === null && LF && HF) lf_hf = LF / HF;
+      const sbp = num(data.ica?.[0]?.SBP);
+      const dbp = num(data.ica?.[0]?.DBP);
+      const spo2 = data.sp?.[0] || "--";
+      const rr = num(data.rr?.[0]);
+      const af = data.af?.[0] || "--";
+      const fa = data.fa?.[0] || "--";
 
       // 取得 userData
-      const userData = JSON.parse(localStorage.getItem("userData") || "{}")
+      const userData = JSON.parse(localStorage.getItem("userData") || "{}");
 
       // 組合 HRV3Save 參數
       const hrv3Payload = {
@@ -287,74 +285,73 @@ async function sendToAPI(base64) {
         af: af?.toString() || "",
         rr: rr?.toString() || "",
         fa: fa?.toString() || "",
-      }
+      };
 
       // 呼叫 HRV3Save API
-      const saveResult = await saveHRV3ToServer(hrv3Payload)
+      const saveResult = await saveHRV3ToServer(hrv3Payload);
       if (saveResult && saveResult.AID) {
-        navigateTo(`/Finish?AID=${saveResult.AID}`)
+        navigateTo(`/Finish?AID=${saveResult.AID}`);
       } else {
-        navigateTo('/Finish')
+        navigateTo("/Finish");
       }
-
     } catch (e) {
-      aiAnalysing.value = false
-      console.error("解析錯誤:", e)
+      aiAnalysing.value = false;
+      console.error("解析錯誤:", e);
     }
   } catch (err) {
-    aiAnalysing.value = false
-    console.error("API 錯誤:", err)
-    alert(err.message)
+    aiAnalysing.value = false;
+    console.error("API 錯誤:", err);
+    alert(err.message);
   }
 }
 
 // 開始錄影
 function startRecording() {
-  recordedChunks = []
-  mediaRecorder.start()
-  scanning.value = true
-  progress.value = 0
-  remain.value = 15
-  let percent = 0
+  recordedChunks = [];
+  mediaRecorder.start();
+  scanning.value = true;
+  progress.value = 0;
+  remain.value = 15;
+  let percent = 0;
   scanInt = setInterval(() => {
     if (mediaRecorder.state === "recording") {
-      elapsedMs += 200
-      percent = Math.min(100, (elapsedMs / 15000) * 100)
-      progress.value = percent
-      remain.value = Math.max(0, Math.ceil(((100 - percent) * 15) / 100))
+      elapsedMs += 200;
+      percent = Math.min(100, (elapsedMs / 15000) * 100);
+      progress.value = percent;
+      remain.value = Math.max(0, Math.ceil(((100 - percent) * 15) / 100));
       if (percent >= 100) {
-        clearInterval(scanInt)
-        mediaRecorder.stop()
-        scanning.value = false
-        hasRecorded = true
+        clearInterval(scanInt);
+        mediaRecorder.stop();
+        scanning.value = false;
+        hasRecorded = true;
       }
     }
-  }, 200)
-  startMetrics()
+  }, 200);
+  startMetrics();
 }
 
 // 指標動畫
 function startMetrics() {
-  if (metricInt) clearInterval(metricInt)
+  if (metricInt) clearInterval(metricInt);
   metricInt = setInterval(() => {
-    nn.value = Math.floor(Math.random() * 20) + 80
-    fps.value = Math.floor(Math.random() * 10) + 25
-    acc.value = Math.floor(Math.random() * 5) + 95
-  }, 500)
+    nn.value = Math.floor(Math.random() * 20) + 80;
+    fps.value = Math.floor(Math.random() * 10) + 25;
+    acc.value = Math.floor(Math.random() * 5) + 95;
+  }, 500);
 }
 
 // 啟動人臉偵測
 async function startFaceDetection() {
-  const options = new faceapi.TinyFaceDetectorOptions()
-  let faceInside = false
+  const options = new faceapi.TinyFaceDetectorOptions();
+  let faceInside = false;
   faceDetectTimer = setInterval(async () => {
-    if (hasRecorded) return
+    if (hasRecorded) return;
     const detection = await faceapi.detectSingleFace(
       videoElement.value,
       options
-    )
+    );
     if (detection) {
-      const box = detection.box
+      const box = detection.box;
       faces.value = [
         {
           x: box.x,
@@ -363,66 +360,66 @@ async function startFaceDetection() {
           h: box.height,
           c: detection.score,
         },
-      ]
-      const cx = box.x + box.width / 2
-      const cy = box.y + box.height / 2
-      const inside = cx > 192 && cx < 448 && cy > 120 && cy < 360
+      ];
+      const cx = box.x + box.width / 2;
+      const cy = box.y + box.height / 2;
+      const inside = cx > 192 && cx < 448 && cy > 120 && cy < 360;
       if (mediaRecorder && mediaRecorder.state === "paused") {
-        showFaceGuideTip.value = true
+        showFaceGuideTip.value = true;
       } else {
-        showFaceGuideTip.value = false
+        showFaceGuideTip.value = false;
       }
       if (inside && !scanning.value && mediaRecorder.state === "inactive") {
-        faceInside = true
+        faceInside = true;
         startCountdown(3, () => {
           if (mediaRecorder.state === "inactive" && !hasRecorded) {
-            startRecording()
+            startRecording();
           }
-        })
+        });
       } else if (!inside && mediaRecorder.state === "recording") {
-        faceInside = false
-        mediaRecorder.pause()
+        faceInside = false;
+        mediaRecorder.pause();
       } else if (inside && mediaRecorder.state === "paused") {
-        mediaRecorder.resume()
+        mediaRecorder.resume();
       }
     } else {
-      faces.value = []
-      showFaceGuideTip.value = false
+      faces.value = [];
+      showFaceGuideTip.value = false;
       if (mediaRecorder && mediaRecorder.state === "recording") {
-        mediaRecorder.pause()
+        mediaRecorder.pause();
       }
     }
-  }, 300)
+  }, 300);
 }
 
 // 按鈕觸發
 async function startBtnClick() {
-  isStarted.value = true
-  checkUserData()
-  await initCamera()
+  isStarted.value = true;
+  checkUserData();
+  await initCamera();
   await faceapi.nets.tinyFaceDetector.loadFromUri(
     "https://justadudewhohacks.github.io/face-api.js/models"
-  )
-  startFaceDetection()
+  );
+  startFaceDetection();
 }
 
 // 監控狀態自動觸發淡入淡出動畫
 watch(
   [counting, scanning],
   ([newCounting, newScanning], [oldCounting, oldScanning]) => {
-    tipFading.value = true
+    tipFading.value = true;
     setTimeout(() => {
-      tipFading.value = false
-    }, 500)
+      tipFading.value = false;
+    }, 500);
   }
-)
+);
 
 onUnmounted(() => {
-  if (stream) stream.getTracks().forEach((t) => t.stop())
-  if (metricInt) clearInterval(metricInt)
-  if (scanInt) clearInterval(scanInt)
-  if (faceDetectTimer) clearInterval(faceDetectTimer)
-})
+  if (stream) stream.getTracks().forEach((t) => t.stop());
+  if (metricInt) clearInterval(metricInt);
+  if (scanInt) clearInterval(scanInt);
+  if (faceDetectTimer) clearInterval(faceDetectTimer);
+});
 
 async function saveHRV3ToServer(data) {
   try {
@@ -430,13 +427,13 @@ async function saveHRV3ToServer(data) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
-    })
-    const result = await res.json()
-    console.log("HRV3Save 回傳：", result)
-    return result
+    });
+    const result = await res.json();
+    console.log("HRV3Save 回傳：", result);
+    return result;
   } catch (err) {
-    console.error("HRV3Save API 錯誤：", err)
-    return null
+    console.error("HRV3Save API 錯誤：", err);
+    return null;
   }
 }
 </script>
@@ -463,7 +460,11 @@ $transition-duration: 0.3s;
 }
 
 @mixin gradient-background {
-  background: linear-gradient(135deg, rgba($primary-color, 0.1), rgba($primary-color, 0.05));
+  background: linear-gradient(
+    135deg,
+    rgba($primary-color, 0.1),
+    rgba($primary-color, 0.05)
+  );
 }
 
 @mixin glow-effect {
@@ -508,12 +509,28 @@ $transition-duration: 0.3s;
 .scanner-header {
   position: absolute;
   inset: 0 0 auto 0;
-  background: linear-gradient(90deg, rgba($primary-color, 0.2), rgba($primary-color, 0.1));
+  background: linear-gradient(
+    90deg,
+    rgba($primary-color, 0.2),
+    rgba($primary-color, 0.1)
+  );
   border-bottom: 1px solid rgba($primary-color, 0.5);
   @include flex-center;
   justify-content: space-between;
-  padding: 16px 30px;
+  padding: 1rem;
   z-index: 10;
+  .returnBtn {
+    background:  rgba($primary-color, 0.75);
+    border: none;
+    color: $text-color;
+    border-radius: 8px;
+    padding: 2px 8px;
+    cursor: pointer;
+    transition: all ease 0.2s;
+    &:hover {
+      box-shadow: 0 0 6px 0px $primary-color;
+    }
+  }
 }
 
 .system-title {
@@ -602,8 +619,10 @@ $transition-duration: 0.3s;
 .scan-grid {
   position: absolute;
   inset: 0;
-  background-image: 
-    linear-gradient(rgba($primary-color, 0.08) 1px, transparent 1px),
+  background-image: linear-gradient(
+      rgba($primary-color, 0.08) 1px,
+      transparent 1px
+    ),
     linear-gradient(90deg, rgba($primary-color, 0.08) 1px, transparent 1px);
   background-size: 25px 25px;
   animation: gridFlow 8s linear infinite;
@@ -789,7 +808,8 @@ $transition-duration: 0.3s;
 
 // 動畫定義
 @keyframes guideGlow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 15px rgba($primary-color, 0.2);
   }
   50% {
