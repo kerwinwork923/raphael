@@ -79,7 +79,6 @@
             cursor: scanning ? 'not-allowed' : 'pointer',
             opacity: scanning ? 0.5 : 1,
             width: '80px',
-            height: '80px',
             background: 'none',
             boxShadow: 'none',
             border: 'none',
@@ -491,6 +490,7 @@ $transition-duration: 0.3s;
   padding: 1rem;
   display: grid;
   grid-template-rows: 1fr min-content;
+  gap:1rem;
 }
 
 .ai-scanner-system {
@@ -736,7 +736,6 @@ $transition-duration: 0.3s;
   min-width: 220px;
   padding: 10px 20px;
   border: 2px solid $primary-color;
-  margin-top: 20px;
 }
 
 .tip-text {
@@ -847,30 +846,7 @@ $transition-duration: 0.3s;
   }
 }
 
-// 響應式設計
-@media screen and (max-width: 1024px) {
-  .ai-scanner-system {
-    width: 70vw;
-    min-height: 400px;
-  }
-
-  .face-guide {
-    width: 180px;
-    height: 220px;
-  }
-}
-
 @media screen and (max-width: 576px) {
-  .ai-scanner-system {
-    width: 80vw;
-    min-height: 60vh;
-  }
-
-  .face-guide {
-    width: 180px;
-    height: 220px;
-  }
-
   .system-title {
     text-align: center;
     font-size: 1.25rem;
@@ -879,6 +855,18 @@ $transition-duration: 0.3s;
   .progress-text {
     font-size: 1.25rem;
     min-width: 0px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 480px) {
+  .scanWrap{
+    grid-auto-flow: column;
+    grid-template-columns: 1fr min-content;
+    grid-template-rows: auto;
+  }
+  .action-tip{
+    flex-direction: column;
+    justify-content: center;
   }
 }
 </style>
