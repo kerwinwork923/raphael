@@ -125,7 +125,7 @@ export default {
       const detectUID = store.detectUID;
       const detectFlag = store.detectFlag;
       const detectForm = store.detectForm;
-      let redirectUrl = "/vital/scan.html";
+      let redirectUrl = "/HRV";
 
       if (detectFlag) {
         redirectUrl += `?UID=${detectUID}&flag=${detectFlag}&form=${detectForm}`;

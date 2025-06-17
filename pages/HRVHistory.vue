@@ -105,7 +105,7 @@
 
       <div class="detectList">
         <div class="detectItem" v-for="item in limitedHRVData" :key="item.AID">
-          <a :href="`/vital/detail.html?AID=${item.AID}`">
+          <a :href="`/Finish?AID=${item.AID}&Version=Detail`">
             <div class="timeGroup">
               <div class="timeIcon">
                 <img src="../assets/imgs/detectTime.svg" alt="" />
@@ -190,7 +190,7 @@ export default {
       try {
         loading.value = true;
         const response = await fetch(
-          "https://23700999.com:8081/HMA/API_HRV2.jsp",
+          "https://23700999.com:8081/HMA/api/fr/HRV3",
           {
             method: "POST",
             headers: {
@@ -207,7 +207,7 @@ export default {
 
         if (response.ok) {
           const data = await response.json();
-          HRVData.value = data.HRV2;
+          HRVData.value = data.RetHRV3;
         } else {
           console.error("Response not OK", response.status);
         }

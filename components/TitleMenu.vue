@@ -60,7 +60,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: $raphael-gray-100;
+  // background: $raphael-gray-100;
   width: 100%;
   padding: 0.75rem 0;
 
