@@ -186,7 +186,7 @@
 
                 <!-- 總共使用多久 (分鐘) -->
                 <div class="timeInfoText">
-                  總共使用 {{ calcUsedMinutes(item) }} 分鐘
+                  總共使用 {{ calcUsedMinutes(item) }}
                 </div>
               </div>
             </div>
@@ -231,7 +231,7 @@ import { useRouter } from "vue-router";
 import axios from "axios";
 
 import TitleMenu from "@/components/TitleMenu.vue";
-import TimeRing from "@/components/TimeRing.vue";
+import TimeRing from "~/components/TimeRing0616.vue";
 import TimeRing2 from "@/components/TimeRing2.vue";
 import DSPRSelect from "@/components/DSPRSelect.vue";
 import HRVAlertForUse from "@/components/HRVAlertForUse.vue";
@@ -412,7 +412,14 @@ export default {
       const start = parseYMDHMS(item.oriStartTime);
       const end = parseYMDHMS(item.oriEndTime);
       if (!start || !end || end <= start) return 0;
-      return Math.round((end - start) / 60000);
+      const totalMinutes = Math.round((end - start) / 60000);
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      
+      if (hours > 0) {
+        return `${hours}小時${minutes}分鐘`;
+      }
+      return `${minutes}分鐘`;
     }
 
     // 篩選當前年/月 => 顯示

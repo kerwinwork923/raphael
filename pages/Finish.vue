@@ -38,7 +38,7 @@
           </svg>
           <h4>{{ currentDate }}</h4>
         </div>
-      </div>
+      </div>  
       <div class="imgGroup">
         <a :href="`/healthData/${route.query.AID}`">
           <img src="@/assets/imgs/3dWatch.svg" class="watchImg" />
@@ -71,7 +71,7 @@
 
 
 
-    <div class="subBtnGroup" v-if="!isFormMode && route.query.Version !== 'Detail'">
+    <div class="subBtnGroup" v-if="!hasUID && route.query.Version !== 'Detail'">
       <router-link to="/HRVHistoryAll">
         <button class="backToUserBtn">HRV歷史紀錄</button>
       </router-link>
@@ -80,9 +80,9 @@
       </router-link>
     </div>
 
-    <div class="subBtnGroup2" v-if="isFormMode">
-      <router-link :to="usageLink">
-        <button class="backToUserBtn2">{{ buttonText }}</button>
+    <div class="subBtnGroup2" v-if="hasUID">
+      <router-link :to="`/usageHRVResult/${uid}`">
+        <button class="backToUserBtn2">看報告</button>
       </router-link>
     </div>
   </div>
@@ -103,9 +103,8 @@ const moodScore = ref(3);
 const pressureScore = ref(3);
 const personalizedSuggestion = ref("");
 const analysisResult = ref("");
-const isFormMode = ref(false);
-const buttonText = ref("前往使用紀錄");
-const usageLink = ref("");
+const hasUID = ref(false);
+const uid = ref("");
 const isLoading = ref(false);
 
 // 路由相關
@@ -158,6 +157,12 @@ const fetchHRVData = async () => {
 
     const data = await response.json();
     console.log("HRV3 API 回傳：", data);
+
+    // 檢查是否有 UID
+    if (data.UID) {
+      hasUID.value = true;
+      uid.value = data.UID;
+    }
 
     // 計算各項指標
     const lf_hf = parseFloat(data.lf_hf);
@@ -328,21 +333,7 @@ onMounted(() => {
   }
   currentDate.value = formattedDate.value;
 
-  // 檢查是否為表單模式
-  const form = route.query.form;
-  if (form) {
-    isFormMode.value = true;
-    const hasAsterisk = form.includes("*");
-    const uid = route.query.UID;
 
-    if (hasAsterisk) {
-      buttonText.value = "看報告";
-      usageLink.value = `/usageHRVResult/${uid}`;
-    } else {
-      localStorage.setItem(`${form}_isFirstHRVDetect`, true);
-      usageLink.value = `/usage/${form}`;
-    }
-  }
 
   fetchHRVData();
 });

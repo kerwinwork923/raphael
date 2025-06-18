@@ -1,4 +1,5 @@
 <template>
+  <RaphaelLoading v-if="loading" />
   <div class="cover"></div>
   <div class="timeHRVUseAlert">
     <h3>請填寫開始穿衣的時間</h3>
@@ -6,7 +7,14 @@
 
     <!-- 日期選擇 -->
     <div class="HRVUseDateGroup">
-      <img class="icon1" src="../assets/imgs/date.svg" alt="日期選擇" />
+      <div class="icon-wrapper" :class="{ 'is-loading': !isDateIconLoaded }">
+        <img 
+          class="icon1" 
+          src="../assets/imgs/date.svg" 
+          alt="日期選擇" 
+          @load="isDateIconLoaded = true"
+        />
+      </div>
       <VueDatePicker
         v-model="localDate"
         model-type="format"
@@ -26,7 +34,14 @@
 
     <!-- 時間選擇（用區塊點擊觸發） -->
     <div class="HRVUseTimeGroup" @click="openTimePicker">
-      <img class="icon1" src="../assets/imgs/detectTime.svg" alt="時間選擇" />
+      <div class="icon-wrapper" :class="{ 'is-loading': !isTimeIconLoaded }">
+        <img 
+          class="icon1" 
+          src="../assets/imgs/detectTime.svg" 
+          alt="時間選擇" 
+          @load="isTimeIconLoaded = true"
+        />
+      </div>
       <span v-if="!startTime">請選擇開始穿衣的時間</span>
       <span :class="{ selected: startTime }">
         {{ startTime ? startTime : "" }}
@@ -61,6 +76,10 @@ const emit = defineEmits(["update:startTime", "update:localDate", "submit"]);
 const localDate = ref("");
 const startTime = ref("");
 const endTime = ref("");
+
+// 圖片載入狀態
+const isDateIconLoaded = ref(false);
+const isTimeIconLoaded = ref(false);
 
 // 當 VueDatePicker 的 model-value 更新時，通知父元件
 const updateDate = () => {
@@ -177,6 +196,43 @@ const submitData = () => {
   padding-left: 0; /* 可以配合上面設定一起調整 */
 }
 
+.icon-wrapper {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-wrapper.is-loading::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #74bc1f;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.icon-wrapper img {
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.icon-wrapper:not(.is-loading) img {
+  opacity: 1;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 .HRVUseDateGroup img {
   position: absolute;
   left: 3%;
@@ -185,10 +241,12 @@ const submitData = () => {
   transform: translateY(-50%);
   width: 22px;
   height: 22px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.HRVUseDateGroup :deep(.dp__input_icon) {
-  display: none;
+.HRVUseDateGroup:not(.is-loading) img {
+  opacity: 1;
 }
 
 .HRVUseTimeGroup {
@@ -201,8 +259,6 @@ const submitData = () => {
   align-items: center;
   cursor: pointer;
   margin-bottom: 12px;
-
-
 }
 
 .HRVUseTimeGroup span {

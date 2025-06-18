@@ -170,7 +170,7 @@ export default {
       const detectFlag = store.detectFlag; // "1"=前測, "2"=後測
       const detectForm = store.detectForm;
 
-      let redirectUrl = "/vital/scan.html";
+      let redirectUrl = "/HRV";
       if (detectFlag) {
         redirectUrl += `?UID=${detectUID}&flag=${detectFlag}&form=${detectForm}`;
       }

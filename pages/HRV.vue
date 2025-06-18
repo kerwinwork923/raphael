@@ -2,12 +2,11 @@
   <div class="HRVTest">
     <div class="scanWrap">
       <!-- 初始遮罩 -->
-      <div class="HRVFirstCover" id="hrvFirstCover" v-if="!isStarted">
+      <div class="HRVFirstCover" id="hrvFirstCover" v-if="!isStarted" @click="startBtnClick">
         <img
           src="/vital/images/new/ball.gif"
           alt="開始檢測"
           id="start"
-          @click="startBtnClick"
           :style="{
             cursor: scanning ? 'not-allowed' : 'pointer',
             opacity: scanning ? 0.5 : 1,
@@ -30,7 +29,7 @@
       <div class="ai-scanner-system" v-show="isStarted">
         <div class="scanner-header">
           <div class="system-title">AI FACE SCANNER v2.0</div>
-          <button type="button" class="returnBtn">返回</button>
+          <button type="button" class="returnBtn" @click="goBack">返回</button>
         </div>
 
         <div class="video-container">
@@ -110,8 +109,10 @@
 import { ref, onMounted, onUnmounted, watch } from "vue";
 import * as faceapi from "@vladmandic/face-api";
 import Navbar from "../components/Navbar.vue";
+import { useRoute } from 'vue-router';
 
 // Refs
+const route = useRoute();
 const videoElement = ref(null);
 const scanning = ref(false);
 const faces = ref([]);
@@ -173,6 +174,14 @@ function checkUserData() {
     alert("讀取使用者資料失敗，請重新登入");
     throw err;
   }
+}
+
+// 從 URL 獲取參數
+function getUrlParams() {
+  const uid = route.query.UID || "";
+  const flag = route.query.flag || "";
+  const form = route.query.form || "";
+  return { uid, flag, form };
 }
 
 // 初始化相機
@@ -269,7 +278,7 @@ async function sendToAPI(base64) {
         MAID: userData.MAID || "",
         Token: userData.Token || "",
         Mobile: userData.Mobile || "",
-        UID: userData.UID || "",
+        UID: "",
         HRVCalTime: userData.HRVCalTime || "",
         Flag: "",
         hbr: hbr?.toString() || "",
@@ -339,6 +348,11 @@ function startMetrics() {
   }, 500);
 }
 
+// 返回上一頁
+function goBack() {
+  window.history.back();
+}
+
 // 啟動人臉偵測
 async function startFaceDetection() {
   const options = new faceapi.TinyFaceDetectorOptions();
@@ -368,7 +382,7 @@ async function startFaceDetection() {
       } else {
         showFaceGuideTip.value = false;
       }
-      if (inside && !scanning.value && mediaRecorder.state === "inactive") {
+      if (inside && !scanning.value && mediaRecorder.state === "inactive" && !hasRecorded) {
         faceInside = true;
         startCountdown(3, () => {
           if (mediaRecorder.state === "inactive" && !hasRecorded) {
@@ -393,6 +407,7 @@ async function startFaceDetection() {
 
 // 按鈕觸發
 async function startBtnClick() {
+  if (scanning.value) return;
   isStarted.value = true;
   checkUserData();
   await initCamera();
@@ -422,10 +437,17 @@ onUnmounted(() => {
 
 async function saveHRV3ToServer(data) {
   try {
+    const { uid, flag } = getUrlParams();
+    const payload = {
+      ...data,
+      UID: uid,
+      Flag: flag
+    };
+
     const res = await fetch("https://23700999.com:8081/HMA/api/fr/HRV3Save", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      body: JSON.stringify(payload),
     });
     const result = await res.json();
     console.log("HRV3Save 回傳：", result);
@@ -693,9 +715,11 @@ $transition-duration: 0.3s;
   @include flex-column;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 
   img {
     max-width: 175px;
+    pointer-events: none;
   }
 
   ul {
@@ -707,6 +731,7 @@ $transition-duration: 0.3s;
     width: 80%;
     justify-content: center;
     margin-left: 1.25rem;
+    pointer-events: none;
 
     li {
       margin-bottom: 10px;
@@ -717,10 +742,6 @@ $transition-duration: 0.3s;
         color: $error-color;
       }
     }
-  }
-
-  &.fadeOut {
-    animation: hrvcoverFadeOut 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 }
 
