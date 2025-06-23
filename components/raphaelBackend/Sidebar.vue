@@ -59,7 +59,6 @@
         <span v-show="!collapsed">登出</span>
       </button>
     </div>
-    
   </aside>
 </template>
 
@@ -94,9 +93,7 @@ function handleResize() {
 // 掛載與卸載監聽
 onMounted(() => {
   userName.value =
-    localStorage.getItem("adminID") ||
-    sessionStorage.getItem("adminID") ||
-    "";
+    localStorage.getItem("adminID") || sessionStorage.getItem("adminID") || "";
 
   // 初始化裝置狀態
   isMobile.value = window.innerWidth <= 1024;
@@ -134,7 +131,7 @@ $border: #e5e9f2;
   padding: 24px 16px;
   border-right: 1px solid $border;
   transition: width 0.25s ease; /* 平滑收合 */
-  
+
   &.collapsed {
     width: 72px;
 
@@ -281,11 +278,11 @@ h1,
     gap: 4px;
     white-space: nowrap;
     cursor: pointer;
-    transition: all .2s ease;
+    transition: all 0.2s ease;
     img {
       width: 20px;
     }
-    &:hover{
+    &:hover {
       background-color: $red-500;
     }
   }
@@ -304,12 +301,16 @@ h1,
     background: #fff;
     cursor: pointer;
     transition: all 0.25s ease;
-    &:hover{
+    &:hover {
       box-shadow: 0px 0px 6px 0px $primary-200;
     }
   }
   img.rotate {
     transform: translateY(-50%) rotate(180deg);
+    @include respond-to("lg") {
+      top: -30px;
+      right: -64px;
+    }
   }
 }
 </style>

@@ -1220,6 +1220,9 @@ const isAnyAlertOpen = computed(() => {
       .memberNameRWD {
         display: none;
       }
+      @include respond-to("lg") {
+        padding-left:36px;
+      }
       @include respond-to("sm") {
         flex-wrap: wrap;
         h3 {
