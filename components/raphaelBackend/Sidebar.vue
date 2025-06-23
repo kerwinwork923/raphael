@@ -124,6 +124,9 @@ $border: #e5e9f2;
 }
 /* ─────────── 基本樣式 ─────────── */
 .sidebar {
+  height: 100vh;
+  position: sticky;
+  top: 0;
   width: 240px;
   background: #fff;
   display: flex;
@@ -218,7 +221,7 @@ h1,
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 12px;
+    padding: 6px 8px;
     border-radius: 6px;
     margin-top: 1.5rem;
     color: #2d3047;
@@ -266,7 +269,7 @@ h1,
   .logout {
     margin-top: 12px;
     width: 100%;
-    padding: 3px 12px;
+    padding: 3px 8px;
     background: #ec4f4f;
     border: none;
     border-radius: 6px;
