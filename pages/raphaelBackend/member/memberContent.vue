@@ -1221,7 +1221,7 @@ const isAnyAlertOpen = computed(() => {
         display: none;
       }
       @include respond-to("lg") {
-        padding-left:36px;
+        padding-left: 36px;
       }
       @include respond-to("sm") {
         flex-wrap: wrap;
@@ -1304,18 +1304,18 @@ const isAnyAlertOpen = computed(() => {
         h3 {
           color: var(--Primary-600, #2d3047);
           font-family: "Noto Sans";
-          font-size: var(--Text-font-size-24, 20px);
-          font-weight: bold;
+          font-size: 1.5rem;
+          font-weight: 500;
           letter-spacing: 0.12px;
-          margin-bottom: 0.75rem;
+          margin-bottom: 1.5rem;
         }
         h5 {
           color: var(--Primary-300, #6d8ab6);
-          font-size: var(--Text-font-size-18, 18px);
+          font-size: 1.125rem;
           font-style: normal;
           font-weight: 400;
           letter-spacing: 0.09px;
-          margin-bottom: 0.25rem;
+          margin-bottom: 1rem;
         }
         .memberInfoWarning {
           color: var(--Warning-default, #ec4f4f);
@@ -1387,11 +1387,15 @@ const isAnyAlertOpen = computed(() => {
           align-items: center;
           justify-content: space-between;
           color: var(--Primary-200, #b1c0d8);
-          font-size: var(--Text-font-size-18, 18px);
+          font-size: 1.125rem;
           font-style: normal;
           font-weight: 400;
           letter-spacing: 0.09px;
-          line-height: 1.5;
+          margin-bottom: 1rem;
+
+          &:last-child{
+            margin-bottom:0;
+          }
 
           img {
             transform: translateY(3px);
@@ -1404,7 +1408,7 @@ const isAnyAlertOpen = computed(() => {
           display: flex;
           align-items: center;
           gap: 8px;
-          margin-top: 1rem;
+          margin-top: 1.5rem;
 
           .memberInfoTag {
             border-radius: 50px;
