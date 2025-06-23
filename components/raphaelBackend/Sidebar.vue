@@ -303,7 +303,10 @@ h1,
     border-radius: 50%;
     background: #fff;
     cursor: pointer;
-    transition: transform 0.25s ease;
+    transition: all 0.25s ease;
+    &:hover{
+      box-shadow: 0px 0px 6px 0px $primary-200;
+    }
   }
   img.rotate {
     transform: translateY(-50%) rotate(180deg);

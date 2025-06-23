@@ -49,7 +49,7 @@
               src="/assets/imgs/backend/filter.svg"
               alt=""
             />
-            <select 
+            <select
               v-model="store.productFilter"
               @change="store.setProductFilter($event.target.value)"
             >
@@ -75,7 +75,7 @@
               src="/assets/imgs/backend/filter.svg"
               alt=""
             />
-            <select 
+            <select
               v-model="store.statusFilter"
               @change="store.setStatusFilter($event.target.value)"
             >
@@ -194,10 +194,18 @@
 
         <!-- pagination -->
         <nav class="pagination">
-          <button class="btn-page" :disabled="store.page === 1" @click="store.gotoPage(1)">
+          <button
+            class="btn-page"
+            :disabled="store.page === 1"
+            @click="store.gotoPage(1)"
+          >
             &lt;&lt;
           </button>
-          <button class="btn-page" :disabled="store.page === 1" @click="store.prevPage">
+          <button
+            class="btn-page"
+            :disabled="store.page === 1"
+            @click="store.prevPage"
+          >
             &lt;
           </button>
           <button
@@ -574,8 +582,11 @@ function scrollToTop() {
     }
     .table-row {
       display: grid;
-
       grid-template-columns: 0.75fr 0.75fr 0.75fr 0.75fr 1.5fr 1fr 1fr 1fr;
+      position: relative;
+      gap: 2px;
+      align-items: center;
+      padding: 13px 16px;
 
       @include respond-to("lg") {
         display: flex;
@@ -596,10 +607,7 @@ function scrollToTop() {
           display: none;
         }
       }
-      position: relative;
-      gap: 2px;
-      align-items: center;
-      padding: 13px 16px;
+
       & + .table-row {
         border-top: 1px solid $border;
       }
@@ -753,6 +761,11 @@ function scrollToTop() {
         right: 12px;
         transform: translateY(-50%);
         cursor: pointer;
+        transition: all 0.25s ease;
+        &:hover {
+          border-radius: 50%;
+          box-shadow: inset 0px 2px 6px -1px $primary-200;
+        }
         @include respond-to("lg") {
           top: 29px;
         }

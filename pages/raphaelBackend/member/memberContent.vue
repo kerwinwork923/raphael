@@ -671,7 +671,6 @@
         </div>
       </div>
     </div>
-  
   </div>
 </template>
 
@@ -1171,11 +1170,13 @@ const mmdd = (raw: string) => {
 };
 
 const isAnyAlertOpen = computed(() => {
-  return showContract.value || 
-         showHRV.value || 
-         showANS.value || 
-         showLife.value || 
-         showBaby.value;
+  return (
+    showContract.value ||
+    showHRV.value ||
+    showANS.value ||
+    showLife.value ||
+    showBaby.value
+  );
 });
 </script>
 
@@ -1195,16 +1196,20 @@ const isAnyAlertOpen = computed(() => {
     z-index: 100;
   }
   .w-half {
-    width: 49%;
+    flex: 1;
     @include respond-to("xl") {
+      flex: unset;
       width: 100%;
     }
   }
   .memberInfoContent {
-    padding: 24px;
-
-    width: 90%;
+    padding: 1rem;
+    padding-left: 0;
+    width: 100%;
     margin: 0 auto;
+    @include respond-to("lg") {
+      padding-left: 1rem;
+    }
     @include respond-to("md") {
       width: 100%;
     }
@@ -1287,7 +1292,7 @@ const isAnyAlertOpen = computed(() => {
         width: 100%;
         display: flex;
         justify-content: space-between;
-        gap: 12px;
+        gap: 1rem;
         margin-top: 1rem;
         @include respond-to("xl") {
           display: flex;
@@ -1463,8 +1468,8 @@ const isAnyAlertOpen = computed(() => {
       .memberInfoCardGroup {
         display: flex;
         flex-direction: column;
-
-        width: 33%;
+        flex: 1;
+        min-width: 290px;
         gap: 12px;
         justify-content: space-between;
 
@@ -1479,12 +1484,14 @@ const isAnyAlertOpen = computed(() => {
         }
       }
       .memberInfoCardGroupW50 {
+        flex: 1;
         @include respond-to("xl") {
-          width: 49%;
         }
       }
       .memberInfoCardGroupW100 {
+        flex: 1;
         @include respond-to("xl") {
+          flex: unset;
           width: 100%;
         }
       }
