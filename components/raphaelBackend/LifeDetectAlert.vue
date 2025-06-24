@@ -3,7 +3,8 @@
     <div class="lifeDetectAlertTitleGroup">
       <img src="/assets/imgs/backend/Subtract.svg" alt="" />
       <h3>{{ props.record?.CheckTime ?? "—" }}</h3>
-      <h4>{{ props.record?.SleepProperty ?? "—" }}</h4>
+      <!-- <h4>{{ props.record?.SleepProperty ?? "—" }}</h4> -->
+      <h4>生活檢測紀錄</h4>      
     </div>
     <div class="lifeDetectAlertTitleHR"></div>
     <div class="lifeDetectAlertContent1Group">
@@ -106,7 +107,7 @@ defineEmits(["close"]);
     var(--primary-400-opacity-25, rgba(27, 163, 155, 0.25));
   backdrop-filter: blur(25px);
   z-index: 100;
-  padding: 1rem 2.5%;
+  padding: 1rem;
   overflow-y: auto;
   scrollbar-gutter: stable;
   box-sizing: border-box;
