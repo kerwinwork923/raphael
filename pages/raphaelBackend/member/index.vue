@@ -338,7 +338,7 @@ function scrollToTop() {
       word-break: keep-all;
 
       .count {
-        color: var(--Primary-200, #b1c0d8);
+        color: $primary-200;
         text-align: center;
         font-size: 20px;
         font-style: normal;
@@ -466,6 +466,11 @@ function scrollToTop() {
       background: var(--Neutral-white, #fff);
       box-shadow: 0px 2px 20px 0px
         var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
+      transition: all ease 0.2s;
+
+      &:hover {
+        box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
+      }
     }
 
     .toolbarTime-wrapper {
@@ -498,6 +503,11 @@ function scrollToTop() {
         box-shadow: 0px 2px 20px rgba(177, 192, 216, 0.25);
         border: none;
         font-size: 14px;
+        transition: all ease 0.2s;
+
+        &:hover {
+          box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
+        }
       }
 
       img {
@@ -526,6 +536,10 @@ function scrollToTop() {
       background: var(--Neutral-white, #fff);
       box-shadow: 0px 2px 20px 0px
         var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
+      transition: all ease 0.2s;
+      &:hover {
+        box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
+      }
     }
 
     .selectWrapper {
@@ -587,6 +601,12 @@ function scrollToTop() {
       gap: 2px;
       align-items: center;
       padding: 13px 16px;
+      color: $Neutral-500;
+      transition: all ease 0.2s;
+
+      &:hover {
+        color: $chip-success;
+      }
 
       @include respond-to("lg") {
         display: flex;
@@ -620,7 +640,6 @@ function scrollToTop() {
         }
       }
       .cell {
-        color: $Neutral-500;
         width: auto;
         font-size: 1rem;
         font-style: normal;

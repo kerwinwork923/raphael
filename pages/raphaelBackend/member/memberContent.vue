@@ -1386,16 +1386,12 @@ const isAnyAlertOpen = computed(() => {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          color: var(--Primary-200, #b1c0d8);
+          color: $primary-200;
           font-size: 1.125rem;
           font-style: normal;
           font-weight: 400;
           letter-spacing: 0.09px;
           margin-bottom: 1rem;
-
-          &:last-child{
-            margin-bottom:0;
-          }
 
           img {
             transform: translateY(3px);
@@ -1504,7 +1500,7 @@ const isAnyAlertOpen = computed(() => {
       }
     }
     small {
-      color: var(--Primary-200, #b1c0d8);
+      color: $primary-200;
       font-family: "Noto Sans";
       font-size: 16px;
       font-style: normal;
