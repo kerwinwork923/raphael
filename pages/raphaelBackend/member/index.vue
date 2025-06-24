@@ -328,6 +328,9 @@ function scrollToTop() {
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
+    @include respond-to("lg") {
+      padding-left: 36px;
+    }
     @include respond-to("sm") {
       flex-wrap: wrap;
     }
