@@ -1386,7 +1386,7 @@ const isAnyAlertOpen = computed(() => {
 
           img {
             transform: translateY(3px);
-            margin-right:4px;
+            margin-right: 4px;
           }
           .memberInfoListContent {
             color: var(--Primary-600, #2d3047);
@@ -1435,12 +1435,12 @@ const isAnyAlertOpen = computed(() => {
           border-radius: 6px;
           margin-top: 0.75rem;
           cursor: pointer;
-          transition: all ese .2s;
+          transition: all ese 0.2s;
 
-          &:hover{
+          &:hover {
             background: $chip-success;
-            color:#fff;
-            &>img{
+            color: #fff;
+            & > img {
               filter: brightness(10);
             }
           }
@@ -1524,6 +1524,7 @@ const isAnyAlertOpen = computed(() => {
       letter-spacing: 0.5px;
     }
     .memberInfoTable {
+      flex: 1;
       margin-top: 0.75rem;
       @include respond-to("xl") {
         margin-top: 1.5rem;
@@ -1547,6 +1548,11 @@ const isAnyAlertOpen = computed(() => {
         display: flex;
         align-items: center;
         position: relative;
+        color:#666;
+
+        &:hover{
+          color: $chip-success;
+        }
         img {
           position: absolute;
           right: 0;
@@ -1559,7 +1565,7 @@ const isAnyAlertOpen = computed(() => {
         .memberInfoTableRowItem {
           width: 33.3333%;
           text-align: center;
-          padding: 0.75rem;
+          padding: 1rem;
         }
       }
     }
