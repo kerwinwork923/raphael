@@ -1386,6 +1386,7 @@ const isAnyAlertOpen = computed(() => {
 
           img {
             transform: translateY(3px);
+            margin-right:4px;
           }
           .memberInfoListContent {
             color: var(--Primary-600, #2d3047);
@@ -1409,7 +1410,7 @@ const isAnyAlertOpen = computed(() => {
             font-weight: 400;
             line-height: 100%; /* 18px */
             letter-spacing: 0.09px;
-            padding: 8px;
+            padding: 4px 8px;
 
             img {
               width: 1rem;
