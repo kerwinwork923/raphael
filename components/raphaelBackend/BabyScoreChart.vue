@@ -68,7 +68,7 @@ function build() {
   const serious = sorted.map((r) => r.ALL_Serious);
 
   const maxScore = Math.max(...scores, 200);
-  const yMax = maxScore < 200 ? 200 : Math.ceil(maxScore * 1.1 / 10) * 10;
+  const yMax = maxScore < 200 ? 200 : Math.ceil((maxScore * 1.1) / 10) * 10;
 
   chart?.destroy();
   const ctx = canvas.value.getContext("2d")!;
@@ -98,7 +98,8 @@ function build() {
             label: function (context: any) {
               const idx = context.dataIndex;
               let label = `總分: ${scores[idx]}`;
-              if (ratios[idx] !== undefined) label += `，百分比: ${ratios[idx]}%`;
+              if (ratios[idx] !== undefined)
+                label += `，百分比: ${ratios[idx]}%`;
               if (serious[idx]) label += `，表現: ${serious[idx]}`;
               return label;
             },
@@ -126,10 +127,12 @@ watch([() => props.records, dateRange], build, { deep: true });
 <style scoped lang="scss">
 .baby-score-chart {
   width: 100%;
-  height: 320px;
+  height: 280px;
   position: relative;
+  padding-top: 1.5rem;
   @include respond-to("sm") {
-    height: 200px;
+    height: 320px;
+    padding-top: 1rem;
   }
   .toolbar {
     display: flex;
@@ -143,10 +146,24 @@ watch([() => props.records, dateRange], build, { deep: true });
       position: relative;
       transform: translateY(0);
     }
+    :deep(.dp__input) {
+      padding-top: 0; // 改 input padding
+      padding-bottom: 0; // 改 input padding
+      border-radius: 50px;
+      background: #fff;
+      box-shadow: 0px 2px 12px -2px rgba(177, 192, 216, 0.5);
+      border: none;
+      font-size: 14px;
+      transition: all ease 0.2s;
+
+      &:hover {
+        box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
+      }
+    }
   }
   .chart-canvas {
     width: 100% !important;
     height: 100% !important;
   }
 }
-</style> 
+</style>

@@ -172,7 +172,8 @@ watch(() => props.records, build, { deep: true });
   position: relative;
   padding-top: 1.5rem;
   @include respond-to("sm") {
-    height: 200px;
+    height: 320px;
+    padding-top: 1rem;
   }
   :deep(.dp__input) {
     padding-top: 0; // 改 input padding
@@ -207,6 +208,7 @@ watch(() => props.records, build, { deep: true });
   @include respond-to("sm") {
     position: relative;
     transform: translateY(0);
+    margin-bottom: 1.5rem;
   }
 }
 </style>

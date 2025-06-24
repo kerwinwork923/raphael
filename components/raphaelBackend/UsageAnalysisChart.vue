@@ -165,14 +165,17 @@ watch([() => props.usageData, range], build);
 <style lang="scss" scoped>
 .usage-chart {
   width: 100%;
-  height: 340px; /* 固定高度避免撐大 */
+  flex:1;
+  // height: 340px; /* 固定高度避免撐大 */
   position: relative; /* 讓 Chart.js 100% × 100% 正常貼齊 */
   padding-top: 1.5rem;
   @include respond-to("xl") {
+    flex:unset;
     height: 280px;
   }
   @include respond-to("sm") {
-    height: 200px;
+    height: 320px;
+    padding-top:1rem;
   }
 }
 .toolbar {
@@ -186,6 +189,7 @@ watch([() => props.usageData, range], build);
   @include respond-to("sm") {
     position: relative;
     transform: translateY(0);
+    margin-bottom: 1.5rem;
   }
 
   :deep(.dp__input) {

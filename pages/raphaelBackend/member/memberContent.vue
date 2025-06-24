@@ -1360,6 +1360,8 @@ const isAnyAlertOpen = computed(() => {
         }
 
         .memberInfoCard {
+          display: flex;
+          flex-direction: column;
           padding: 1rem;
           background-color: #fff;
           border-radius: 20px;
@@ -1455,6 +1457,7 @@ const isAnyAlertOpen = computed(() => {
             flex-wrap: wrap;
             justify-content: space-between;
             width: 100%;
+            margin-bottom: 0;
           }
         }
         .memberInfoTitleGroup {
