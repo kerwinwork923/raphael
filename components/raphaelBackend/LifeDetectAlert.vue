@@ -2,8 +2,8 @@
   <div class="lifeDetectAlert">
     <div class="lifeDetectAlertTitleGroup">
       <img src="/assets/imgs/backend/Subtract.svg" alt="" />
-      <h3>{{ props.record?.CheckTime ?? '—' }}</h3>
-      <h4>{{ props.record?.SleepProperty ?? '—' }}</h4>
+      <h3>{{ props.record?.CheckTime ?? "—" }}</h3>
+      <h4>{{ props.record?.SleepProperty ?? "—" }}</h4>
     </div>
     <div class="lifeDetectAlertTitleHR"></div>
     <div class="lifeDetectAlertContent1Group">
@@ -11,11 +11,11 @@
         <h5>總分</h5>
         <h6>
           <img src="/assets/imgs/backend/down.svg" alt="" />
-          {{ props.record?.HMindexRatio ?? '—' }}%
+          {{ props.record?.HMindexRatio ?? "—" }}%
         </h6>
       </div>
-      <h3>{{ props.record?.Score ?? '—' }}</h3>
-      <h4>{{ props.record?.HMindexDesc ?? '—' }}</h4>
+      <h3>{{ props.record?.Score ?? "—" }}</h3>
+      <h4>{{ props.record?.HMindexDesc ?? "—" }}</h4>
       <ProgressBar3 :score="parseInt(props.record?.HMindexRatio ?? '0')" />
     </div>
     <div class="lifeDetectAlertContent2Group">
@@ -26,30 +26,30 @@
             入睡時間
             <span class="down">
               <img src="/assets/imgs/backend/down.svg" alt="" />
-              {{ props.record?.LayTimeToSleep ?? '—' }}
+              {{ props.record?.LayTimeToSleep ?? "—" }}
             </span>
           </h4>
-          <div class="time">{{ props.record?.bedTime ?? '—' }}</div>
+          <div class="time">{{ props.record?.bedTime ?? "—" }}</div>
         </div>
         <div>
           <h4>
             睡眠時長
             <span class="up">
               <img src="/assets/imgs/backend/up.svg" alt="" />
-              {{ props.record?.ccSleepExact ?? '—' }}
+              {{ props.record?.ccSleepExact ?? "—" }}
             </span>
           </h4>
-          <div class="time">{{ props.record?.ccSleepTime ?? '—' }}</div>
+          <div class="time">{{ props.record?.ccSleepTime ?? "—" }}</div>
         </div>
         <div>
           <h4>
             離床時間
             <span class="down">
               <img src="/assets/imgs/backend/down.svg" alt="" />
-              {{ props.record?.SleepBreak ?? '—' }}min
+              {{ props.record?.SleepBreak ?? "—" }}min
             </span>
           </h4>
-          <div class="time">{{ props.record?.leaveTime ?? '—' }}</div>
+          <div class="time">{{ props.record?.leaveTime ?? "—" }}</div>
         </div>
       </div>
     </div>
@@ -58,23 +58,23 @@
         <div class="lifeDetectAlertContentTitle">
           <h3>身心指數</h3>
           <div class="scoreGroup">
-            <h6>{{ props.record?.HMindexRatio ?? '—' }}%</h6>
+            <h6>{{ props.record?.HMindexRatio ?? "—" }}%</h6>
             <img src="/assets/imgs/backend/up.svg" alt="" />
           </div>
         </div>
-        <div class="value">{{ props.record?.HMindex ?? '—' }}</div>
-        <small>{{ props.record?.HMindexDesc ?? '—' }}</small>
+        <div class="value">{{ props.record?.HMindex ?? "—" }}</div>
+        <small>{{ props.record?.HMindexDesc ?? "—" }}</small>
       </div>
       <div class="lifeDetectAlertContent3">
         <div class="lifeDetectAlertContentTitle">
           <h3>壓力指數</h3>
           <div class="scoreGroup down">
-            <h6>{{ props.record?.PressureindexRatio ?? '—' }}%</h6>
+            <h6>{{ props.record?.PressureindexRatio ?? "—" }}%</h6>
             <img src="/assets/imgs/backend/down.svg" alt="" />
           </div>
         </div>
-        <div class="value">{{ props.record?.Pressureindex ?? '—' }}</div>
-        <small>{{ props.record?.PressureindexDesc ?? '—' }}</small>
+        <div class="value">{{ props.record?.Pressureindex ?? "—" }}</div>
+        <small>{{ props.record?.PressureindexDesc ?? "—" }}</small>
       </div>
     </div>
     <div class="lifeDetectAlertClose" @click="$emit('close')">
@@ -85,7 +85,7 @@
 
 <script setup lang="ts">
 const props = defineProps<{ record: any }>();
-defineEmits(['close']);
+defineEmits(["close"]);
 </script>
 
 <style scoped lang="scss">
@@ -238,7 +238,7 @@ defineEmits(['close']);
       display: flex;
       justify-content: space-between;
       @include respond-to("md") {
-       flex-wrap: wrap;
+        flex-wrap: wrap;
       }
       div {
         margin-top: 0.5rem;
@@ -351,12 +351,11 @@ defineEmits(['close']);
       font-style: normal;
       font-weight: 400;
       letter-spacing: 0.1px;
-      
     }
   }
   .lifeDetectAlertClose {
     text-align: center;
-    margin-top: .5rem;
+    margin-top: 0.5rem;
     cursor: pointer;
     img {
       padding: 4px;
@@ -364,6 +363,10 @@ defineEmits(['close']);
       background: var(--Neutral-white, #fff);
       box-shadow: 0px 2px 20px 0px
         var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
+
+      &:hover {
+        box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
+      }
     }
   }
 }

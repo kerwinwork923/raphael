@@ -5,7 +5,6 @@
   </div>
   <div v-else class="memberInfo">
     <Sidebar />
-    <div class="memberAlertCover" v-if="isAnyAlertOpen"></div>
     <!-- ───── 彈窗 ───── -->
     <ContractUserAlert
       v-if="showContract"
@@ -1187,15 +1186,6 @@ const isAnyAlertOpen = computed(() => {
   min-height: 100vh;
   background: $primary-100;
   gap: 1%;
-  .memberAlertCover {
-    width: 100%;
-    height: 100%;
-    position: fixed;
-    left: 0;
-    top: 0;
-    background: rgba(177, 192, 216, 0.25);
-    z-index: 100;
-  }
   .w-half {
     flex: 1;
     @include respond-to("xl") {
@@ -1444,6 +1434,15 @@ const isAnyAlertOpen = computed(() => {
           border-radius: 6px;
           margin-top: 0.75rem;
           cursor: pointer;
+          transition: all ese .2s;
+
+          &:hover{
+            background: $chip-success;
+            color:#fff;
+            &>img{
+              filter: brightness(10);
+            }
+          }
         }
         .memberInfoTitleWrap {
           display: flex;
@@ -1550,6 +1549,11 @@ const isAnyAlertOpen = computed(() => {
         img {
           position: absolute;
           right: 0;
+          transition: all 0.25s ease;
+          &:hover {
+            border-radius: 50%;
+            box-shadow: inset 0px 2px 6px -1px $primary-200;
+          }
         }
         .memberInfoTableRowItem {
           width: 33.3333%;
