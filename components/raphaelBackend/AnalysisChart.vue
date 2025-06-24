@@ -9,7 +9,7 @@
         format="yyyy/MM/dd"
         placeholder="選擇日期區間"
         prepend-icon="i-calendar"
-         teleport="body"
+        teleport="body"
       />
     </div>
 
@@ -170,10 +170,24 @@ watch(() => props.records, build, { deep: true });
   width: 100%;
   height: 280px;
   position: relative;
+  padding-top: 1.5rem;
   @include respond-to("sm") {
     height: 200px;
   }
-  
+  :deep(.dp__input) {
+    padding-top: 0; // 改 input padding
+    padding-bottom: 0; // 改 input padding
+    border-radius: 50px;
+    background: #fff;
+    box-shadow: 0px 2px 12px -2px rgba(177, 192, 216, 0.5);
+    border: none;
+    font-size: 14px;
+    transition: all ease 0.2s;
+
+    &:hover {
+      box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
+    }
+  }
 }
 .chart-canvas {
   width: 100% !important;
@@ -186,14 +200,13 @@ watch(() => props.records, build, { deep: true });
   gap: 8px;
   margin-bottom: 12px;
 
-    position: absolute;
-    top: 0;
-    right: 0;
-    transform: translateY(-100%);
-    @include respond-to("sm") {
-      position: relative;
-      transform: translateY(0);
-    }
- 
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translateY(-100%);
+  @include respond-to("sm") {
+    position: relative;
+    transform: translateY(0);
+  }
 }
 </style>

@@ -167,6 +167,7 @@ watch([() => props.usageData, range], build);
   width: 100%;
   height: 340px; /* 固定高度避免撐大 */
   position: relative; /* 讓 Chart.js 100% × 100% 正常貼齊 */
+  padding-top: 1.5rem;
   @include respond-to("xl") {
     height: 280px;
   }
@@ -178,18 +179,29 @@ watch([() => props.usageData, range], build);
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 12px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translateY(-100%);
+  @include respond-to("sm") {
+    position: relative;
+    transform: translateY(0);
+  }
 
-  
-    position: absolute;
-    top: 0;
-    right: 0;
-    transform: translateY(-100%);
-    @include respond-to("sm") {
-      position: relative;
-      transform: translateY(0);
+  :deep(.dp__input) {
+    padding-top: 0; // 改 input padding
+    padding-bottom: 0; // 改 input padding
+    border-radius: 50px;
+    background: #fff;
+    box-shadow: 0px 2px 12px -2px rgba(177, 192, 216, 0.5);
+    border: none;
+    font-size: 14px;
+    transition: all ease 0.2s;
+
+    &:hover {
+      box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
     }
- 
+  }
 }
 .search {
   border: 1px solid #b1c0d8;

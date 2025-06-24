@@ -147,20 +147,21 @@
 
           <!-- █ 使用紀錄查詢 ------------------------------------------------- -->
           <div class="memberInfoCard memberInfoCardGroupW50">
-            <div class="memberInfoTitleGroup">
+            <div class="memberInfoTitleWrap">
               <h3>使用紀錄查詢</h3>
-              <small>已使用 {{ totalHome }} 次</small>
+              <div class="memberInfoTitleGroup">
+                <small>已使用 {{ totalHome }} 次</small>
+                <VueDatePicker
+                  v-model="homeDateRange"
+                  range
+                  :enable-time-picker="false"
+                  format="yyyy/MM/dd"
+                  placeholder="使用日期區間"
+                  prepend-icon="i-calendar"
+                  teleport="body"
+                />
+              </div>
             </div>
-            <VueDatePicker
-              v-model="homeDateRange"
-              range
-              class="memberInfoDate1"
-              :enable-time-picker="false"
-              format="yyyy/MM/dd"
-              placeholder="使用日期區間"
-              prepend-icon="i-calendar"
-              teleport="body"
-            />
 
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
@@ -1303,11 +1304,9 @@ const isAnyAlertOpen = computed(() => {
         }
         h3 {
           color: var(--Primary-600, #2d3047);
-          font-family: "Noto Sans";
           font-size: 1.5rem;
           font-weight: 500;
           letter-spacing: 0.12px;
-          margin-bottom: 1.5rem;
         }
         h5 {
           color: var(--Primary-300, #6d8ab6);
@@ -1315,7 +1314,7 @@ const isAnyAlertOpen = computed(() => {
           font-style: normal;
           font-weight: 400;
           letter-spacing: 0.09px;
-          margin-bottom: 1rem;
+          margin: 1.5rem 0 1rem 0;
         }
         .memberInfoWarning {
           color: var(--Warning-default, #ec4f4f);
@@ -1338,7 +1337,7 @@ const isAnyAlertOpen = computed(() => {
             font-weight: 500;
             color: var(--Primary-default, #1ba39b);
             text-align: center;
-            font-family: "Noto Sans";
+
             font-size: var(--Text-font-size-18, 18px);
             font-style: normal;
             font-weight: 400;
@@ -1412,7 +1411,7 @@ const isAnyAlertOpen = computed(() => {
             background: var(--primary-400-opacity-10, rgba(27, 163, 155, 0.1));
             color: var(--Primary-default, #1ba39b);
             text-align: center;
-            font-family: "Noto Sans";
+
             font-size: var(--Text-font-size-18, 18px);
             font-style: normal;
             font-weight: 400;
@@ -1429,7 +1428,6 @@ const isAnyAlertOpen = computed(() => {
           width: 100%;
           padding: 6px 8px;
           color: var(--Primary-default, #1ba39b);
-
           font-size: var(--Text-font-size-18, 18px);
           font-style: normal;
           font-weight: 400;
@@ -1449,6 +1447,10 @@ const isAnyAlertOpen = computed(() => {
           display: flex;
           justify-content: space-between;
           align-items: center;
+          flex-wrap: wrap;
+          margin-bottom: 1.5rem;
+          gap: 0.5rem;
+
           @include respond-to("sm") {
             flex-wrap: wrap;
             justify-content: space-between;
@@ -1463,8 +1465,19 @@ const isAnyAlertOpen = computed(() => {
           small {
             white-space: nowrap;
           }
-          .memberInfoDate1 {
-            width: 60%;
+          :deep(.dp__input) {
+            padding-top: 0; // 改 input padding
+            padding-bottom: 0; // 改 input padding
+            border-radius: 50px;
+            background: #fff;
+            box-shadow: 0px 2px 12px -2px rgba(177, 192, 216, 0.5);
+            border: none;
+            font-size: 14px;
+            transition: all ease 0.2s;
+
+            &:hover {
+              box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
+            }
           }
         }
       }
@@ -1501,7 +1514,7 @@ const isAnyAlertOpen = computed(() => {
     }
     small {
       color: $primary-200;
-      font-family: "Noto Sans";
+
       font-size: 16px;
       font-style: normal;
       font-weight: 400;
