@@ -53,7 +53,7 @@
               v-model="store.productFilter"
               @change="store.setProductFilter($event.target.value)"
             >
-              <option value="">產品篩選</option>
+              <option value="">全部產品</option>
               <option
                 v-for="product in productOptions"
                 :key="product.value"
@@ -79,7 +79,7 @@
               v-model="store.statusFilter"
               @change="store.setStatusFilter($event.target.value)"
             >
-              <option value="">用戶狀態</option>
+              <option value="">全部狀態</option>
               <option
                 v-for="status in statusOptions"
                 :key="status.value"
