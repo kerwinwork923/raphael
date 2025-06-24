@@ -1356,6 +1356,7 @@ const isAnyAlertOpen = computed(() => {
           background-color: #fff;
           border-radius: 20px;
           position: relative;
+          box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
 
           @include respond-to("xl") {
             min-height: 300px;
@@ -1497,6 +1498,7 @@ const isAnyAlertOpen = computed(() => {
           width: 100%;
           border-radius: 20px;
           background-color: #fff;
+          box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
         }
         @include respond-to("md") {
           width: 100% !important;
@@ -1548,9 +1550,9 @@ const isAnyAlertOpen = computed(() => {
         display: flex;
         align-items: center;
         position: relative;
-        color:#666;
+        color: #666;
 
-        &:hover{
+        &:hover {
           color: $chip-success;
         }
         img {

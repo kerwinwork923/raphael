@@ -137,9 +137,9 @@
         facere inventore! Pariatur, quam illum?
       </p>
     </div>
-  </div>
-  <div class="HRVUserAlertClose" @click="$emit('close')">
-    <img src="/assets/imgs/backend/close.svg" alt="關閉" />
+    <div class="HRVUserAlertClose" @click="$emit('close')">
+      <img src="/assets/imgs/backend/close.svg" alt="關閉" />
+    </div>
   </div>
 </template>
 <script setup lang="ts">
@@ -227,7 +227,7 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
     var(--primary-400-opacity-25, rgba(27, 163, 155, 0.25));
   backdrop-filter: blur(25px);
   z-index: 100;
-  padding: 1rem 2.5%;
+  padding: 1rem;
   overflow-y: auto;
   scrollbar-gutter: stable;
   box-sizing: border-box;
@@ -287,7 +287,6 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
     margin-top: 0.75rem;
     @include respond-to("md") {
       flex-wrap: wrap;
-     
     }
     .HRVUserAlertContent1Card {
       border-radius: var(--Radius-r-20, 20px);
@@ -295,10 +294,13 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
       box-shadow: 0px 2px 20px 0px
         var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
       padding: 0.75rem;
+      width: 100%;
       @include respond-to("md") {
-      width: 48%;
-     
-    }
+        width: 48%;
+      }
+      @include respond-to("sm") {
+        width: 100%;
+      }
       h3 {
         color: var(--Primary-600, #2d3047);
         font-size: var(--Text-font-size-20, 20px);
@@ -307,7 +309,6 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
         letter-spacing: 0.1px;
         @include respond-to("md") {
           font-size: 1rem;
-         
         }
       }
       .value {
@@ -426,10 +427,18 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
     .HRVUserAlertContent3Group {
       display: flex;
       justify-content: space-between;
-      @include respond-to("md") {
-        flex-wrap: wrap;
+      flex-wrap: wrap;
+      gap: 1rem;
+      .HRVUserAlertContent3Content {
+        flex: 1;
+        @include respond-to("lg") {
+          flex: unset;
+          width: 48%;
+        }
+        @include respond-to("md") {
+          width: 100%;
+        }
       }
-
       .HRVUserAlertContent3ContentTitle {
         display: flex;
         gap: 2px;
@@ -501,20 +510,24 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
       margin-top: 0.5rem;
     }
   }
-}
-.HRVUserAlertClose {
-  position: fixed;
-  bottom: 2.5%;
-  left: 50%;
-  transform: translate(-50%);
-  z-index: 101;
-  img {
-    border-radius: var(--Radius-r-50, 50px);
-    background: var(--Neutral-white, #fff);
-    box-shadow: 0px 2px 20px 0px
-      var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
-    padding: 0.25rem;
-    cursor: pointer;
+  .HRVUserAlertClose {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    z-index: 101;
+    img {
+      border-radius: var(--Radius-r-50, 50px);
+      background: var(--Neutral-white, #fff);
+      box-shadow: 0px 2px 20px 0px
+        var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
+      padding: 0.25rem;
+      cursor: pointer;
+      &:hover {
+        box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
+      }
+    }
   }
 }
 </style>
