@@ -591,6 +591,7 @@ function scrollToTop() {
       var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
     .table-list {
       display: grid;
+      grid-template-rows: repeat(auto-fill, minmax(min-content, 91px));
       flex: 1;
       height: 0;
       overflow: hidden;
