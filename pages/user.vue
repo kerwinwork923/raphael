@@ -116,7 +116,6 @@ import banner2 from "@/assets/imgs/banner-2.png";
 
 import QRCodeScanner from "~/components/QRCodeScanner.vue";
 
-
 export default {
   components: {
     Navbar,
@@ -300,10 +299,11 @@ export default {
     };
 
     useSeo({
-      title: '會員中心',
-      description: 'NeuroPlus會員中心，查看您的健康數據、檢測記錄和個人資訊，隨時掌握自律神經狀態。',
-      url: 'https://neuroplus.com.tw/user'
-    })
+      title: "會員中心",
+      description:
+        "NeuroPlus會員中心，查看您的健康數據、檢測記錄和個人資訊，隨時掌握自律神經狀態。",
+      url: "https://neuroplus.com.tw/user",
+    });
 
     return {
       loading,
@@ -385,6 +385,10 @@ export default {
             }
           }
         }
+      }
+      // 移除qrcode
+      .qrCode {
+        display: none;
       }
     }
 

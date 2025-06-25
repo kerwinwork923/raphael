@@ -220,21 +220,31 @@ const yearlyGroup = computed(() => {
       display: flex;
       flex: 1;
       @include respond-to("md") {
-        h6{
+        h6 {
           display: flex;
- justify-content: space-between;
+          justify-content: space-between;
           width: 100%;
+        }
       }
-       
-       
-      }
-   
     }
     .ContractUserAlertSubDate {
       width: 40%;
       border-radius: var(--Radius-r-50, 50px);
       background: var(--Neutral-white, #fff);
       box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
+
+      .dp__input {
+        border-radius: 50px;
+        background: #fff;
+        box-shadow: 0px 2px 12px -2px rgba(177, 192, 216, 0.5);
+        border: none;
+        font-size: 14px;
+        transition: all ease 0.2s;
+
+        &:hover {
+          box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
+        }
+      }
       @include respond-to("md") {
         width: 100%;
       }
@@ -363,6 +373,9 @@ const yearlyGroup = computed(() => {
         var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
       padding: 0.25rem;
       cursor: pointer;
+      &:hover {
+        box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
+      }
     }
   }
 }

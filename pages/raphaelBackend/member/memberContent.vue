@@ -5,7 +5,6 @@
   </div>
   <div v-else class="memberInfo">
     <Sidebar />
-    <div class="memberAlertCover" v-if="isAnyAlertOpen"></div>
     <!-- ───── 彈窗 ───── -->
     <ContractUserAlert
       v-if="showContract"
@@ -147,20 +146,21 @@
 
           <!-- █ 使用紀錄查詢 ------------------------------------------------- -->
           <div class="memberInfoCard memberInfoCardGroupW50">
-            <div class="memberInfoTitleGroup">
+            <div class="memberInfoTitleWrap">
               <h3>使用紀錄查詢</h3>
-              <small>已使用 {{ totalHome }} 次</small>
+              <div class="memberInfoTitleGroup">
+                <small>已使用 {{ totalHome }} 次</small>
+                <VueDatePicker
+                  v-model="homeDateRange"
+                  range
+                  :enable-time-picker="false"
+                  format="yyyy/MM/dd"
+                  placeholder="使用日期區間"
+                  prepend-icon="i-calendar"
+                  teleport="body"
+                />
+              </div>
             </div>
-            <VueDatePicker
-              v-model="homeDateRange"
-              range
-              class="memberInfoDate1"
-              :enable-time-picker="false"
-              format="yyyy/MM/dd"
-              placeholder="使用日期區間"
-              prepend-icon="i-calendar"
-              teleport="body"
-            />
 
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
@@ -671,7 +671,6 @@
         </div>
       </div>
     </div>
-  
   </div>
 </template>
 
@@ -1171,11 +1170,13 @@ const mmdd = (raw: string) => {
 };
 
 const isAnyAlertOpen = computed(() => {
-  return showContract.value || 
-         showHRV.value || 
-         showANS.value || 
-         showLife.value || 
-         showBaby.value;
+  return (
+    showContract.value ||
+    showHRV.value ||
+    showANS.value ||
+    showLife.value ||
+    showBaby.value
+  );
 });
 </script>
 
@@ -1185,26 +1186,21 @@ const isAnyAlertOpen = computed(() => {
   min-height: 100vh;
   background: $primary-100;
   gap: 1%;
-  .memberAlertCover {
-    width: 100%;
-    height: 100%;
-    position: fixed;
-    left: 0;
-    top: 0;
-    background: rgba(177, 192, 216, 0.25);
-    z-index: 100;
-  }
   .w-half {
-    width: 49%;
+    flex: 1;
     @include respond-to("xl") {
+      flex: unset;
       width: 100%;
     }
   }
   .memberInfoContent {
-    padding: 24px;
-
-    width: 90%;
+    padding: 1rem;
+    padding-left: 0;
+    width: 100%;
     margin: 0 auto;
+    @include respond-to("lg") {
+      padding-left: 1rem;
+    }
     @include respond-to("md") {
       width: 100%;
     }
@@ -1214,6 +1210,9 @@ const isAnyAlertOpen = computed(() => {
       justify-content: space-between;
       .memberNameRWD {
         display: none;
+      }
+      @include respond-to("lg") {
+        padding-left: 36px;
       }
       @include respond-to("sm") {
         flex-wrap: wrap;
@@ -1287,7 +1286,7 @@ const isAnyAlertOpen = computed(() => {
         width: 100%;
         display: flex;
         justify-content: space-between;
-        gap: 12px;
+        gap: 1rem;
         margin-top: 1rem;
         @include respond-to("xl") {
           display: flex;
@@ -1295,19 +1294,17 @@ const isAnyAlertOpen = computed(() => {
         }
         h3 {
           color: var(--Primary-600, #2d3047);
-          font-family: "Noto Sans";
-          font-size: var(--Text-font-size-24, 20px);
-          font-weight: bold;
+          font-size: 1.5rem;
+          font-weight: 500;
           letter-spacing: 0.12px;
-          margin-bottom: 0.75rem;
         }
         h5 {
           color: var(--Primary-300, #6d8ab6);
-          font-size: var(--Text-font-size-18, 18px);
+          font-size: 1.125rem;
           font-style: normal;
           font-weight: 400;
           letter-spacing: 0.09px;
-          margin-bottom: 0.25rem;
+          margin: 1.5rem 0 1rem 0;
         }
         .memberInfoWarning {
           color: var(--Warning-default, #ec4f4f);
@@ -1330,7 +1327,7 @@ const isAnyAlertOpen = computed(() => {
             font-weight: 500;
             color: var(--Primary-default, #1ba39b);
             text-align: center;
-            font-family: "Noto Sans";
+
             font-size: var(--Text-font-size-18, 18px);
             font-style: normal;
             font-weight: 400;
@@ -1353,10 +1350,13 @@ const isAnyAlertOpen = computed(() => {
         }
 
         .memberInfoCard {
+          display: flex;
+          flex-direction: column;
           padding: 1rem;
           background-color: #fff;
           border-radius: 20px;
           position: relative;
+          box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
 
           @include respond-to("xl") {
             min-height: 300px;
@@ -1378,15 +1378,16 @@ const isAnyAlertOpen = computed(() => {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          color: var(--Primary-200, #b1c0d8);
-          font-size: var(--Text-font-size-18, 18px);
+          color: $primary-200;
+          font-size: 1.125rem;
           font-style: normal;
           font-weight: 400;
           letter-spacing: 0.09px;
-          line-height: 1.5;
+          margin-bottom: 1rem;
 
           img {
             transform: translateY(3px);
+            margin-right: 4px;
           }
           .memberInfoListContent {
             color: var(--Primary-600, #2d3047);
@@ -1396,7 +1397,7 @@ const isAnyAlertOpen = computed(() => {
           display: flex;
           align-items: center;
           gap: 8px;
-          margin-top: 1rem;
+          margin-top: 1.5rem;
 
           .memberInfoTag {
             border-radius: 50px;
@@ -1404,13 +1405,13 @@ const isAnyAlertOpen = computed(() => {
             background: var(--primary-400-opacity-10, rgba(27, 163, 155, 0.1));
             color: var(--Primary-default, #1ba39b);
             text-align: center;
-            font-family: "Noto Sans";
+
             font-size: var(--Text-font-size-18, 18px);
             font-style: normal;
             font-weight: 400;
             line-height: 100%; /* 18px */
             letter-spacing: 0.09px;
-            padding: 8px;
+            padding: 4px 8px;
 
             img {
               width: 1rem;
@@ -1421,7 +1422,6 @@ const isAnyAlertOpen = computed(() => {
           width: 100%;
           padding: 6px 8px;
           color: var(--Primary-default, #1ba39b);
-
           font-size: var(--Text-font-size-18, 18px);
           font-style: normal;
           font-weight: 400;
@@ -1436,15 +1436,29 @@ const isAnyAlertOpen = computed(() => {
           border-radius: 6px;
           margin-top: 0.75rem;
           cursor: pointer;
+          transition: all ese 0.2s;
+
+          &:hover {
+            background: $chip-success;
+            color: #fff;
+            & > img {
+              filter: brightness(10);
+            }
+          }
         }
         .memberInfoTitleWrap {
           display: flex;
           justify-content: space-between;
           align-items: center;
+          flex-wrap: wrap;
+          margin-bottom: 1.5rem;
+          gap: 0.5rem;
+
           @include respond-to("sm") {
             flex-wrap: wrap;
             justify-content: space-between;
             width: 100%;
+            margin-bottom: 0;
           }
         }
         .memberInfoTitleGroup {
@@ -1455,16 +1469,27 @@ const isAnyAlertOpen = computed(() => {
           small {
             white-space: nowrap;
           }
-          .memberInfoDate1 {
-            width: 60%;
+          :deep(.dp__input) {
+            padding-top: 0; // 改 input padding
+            padding-bottom: 0; // 改 input padding
+            border-radius: 50px;
+            background: #fff;
+            box-shadow: 0px 2px 12px -2px rgba(177, 192, 216, 0.5);
+            border: none;
+            font-size: 14px;
+            transition: all ease 0.2s;
+
+            &:hover {
+              box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
+            }
           }
         }
       }
       .memberInfoCardGroup {
         display: flex;
         flex-direction: column;
-
-        width: 33%;
+        flex: 1;
+        min-width: 290px;
         gap: 12px;
         justify-content: space-between;
 
@@ -1473,31 +1498,35 @@ const isAnyAlertOpen = computed(() => {
           width: 100%;
           border-radius: 20px;
           background-color: #fff;
+          box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
         }
         @include respond-to("md") {
           width: 100% !important;
         }
       }
       .memberInfoCardGroupW50 {
+        flex: 1;
         @include respond-to("xl") {
-          width: 49%;
         }
       }
       .memberInfoCardGroupW100 {
+        flex: 1;
         @include respond-to("xl") {
+          flex: unset;
           width: 100%;
         }
       }
     }
     small {
-      color: var(--Primary-200, #b1c0d8);
-      font-family: "Noto Sans";
+      color: $primary-200;
+
       font-size: 16px;
       font-style: normal;
       font-weight: 400;
       letter-spacing: 0.5px;
     }
     .memberInfoTable {
+      flex: 1;
       margin-top: 0.75rem;
       @include respond-to("xl") {
         margin-top: 1.5rem;
@@ -1521,14 +1550,24 @@ const isAnyAlertOpen = computed(() => {
         display: flex;
         align-items: center;
         position: relative;
+        color: #666;
+
+        &:hover {
+          color: $chip-success;
+        }
         img {
           position: absolute;
           right: 0;
+          transition: all 0.25s ease;
+          &:hover {
+            border-radius: 50%;
+            box-shadow: inset 0px 2px 6px -1px $primary-200;
+          }
         }
         .memberInfoTableRowItem {
           width: 33.3333%;
           text-align: center;
-          padding: 0.75rem;
+          padding: 1rem;
         }
       }
     }

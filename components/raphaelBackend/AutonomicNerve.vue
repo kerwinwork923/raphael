@@ -340,9 +340,9 @@
         </div>
       </div>
     </div>
-  </div>
-  <div class="HRVUserAlertClose" @click="$emit('close')">
-    <img src="/assets/imgs/backend/close.svg" alt="" />
+    <div class="HRVUserAlertClose" @click="$emit('close')">
+      <img src="/assets/imgs/backend/close.svg" alt="" />
+    </div>
   </div>
 </template>
 
@@ -471,7 +471,7 @@ defineEmits(["close"]);
     var(--primary-400-opacity-25, rgba(27, 163, 155, 0.25));
   backdrop-filter: blur(25px);
   z-index: 100;
-  padding: 1rem 2.5%;
+  padding: 1rem;
   overflow-y: auto;
   scrollbar-gutter: stable;
   box-sizing: border-box;
@@ -746,10 +746,11 @@ defineEmits(["close"]);
     }
   }
   .HRVUserAlertClose {
-    position: fixed;
-    bottom: 2.5%;
-    left: 50%;
-    transform: translate(-50%);
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
     z-index: 101;
 
     img {
@@ -759,23 +760,10 @@ defineEmits(["close"]);
         var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
       padding: 0.25rem;
       cursor: pointer;
+      &:hover {
+        box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
+      }
     }
-  }
-}
-.HRVUserAlertClose {
-  position: fixed;
-  bottom: 2.5%;
-  left: 50%;
-  transform: translate(-50%);
-  z-index: 101;
-
-  img {
-    border-radius: var(--Radius-r-50, 50px);
-    background: var(--Neutral-white, #fff);
-    box-shadow: 0px 2px 20px 0px
-      var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
-    padding: 0.25rem;
-    cursor: pointer;
   }
 }
 </style>

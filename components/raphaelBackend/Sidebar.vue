@@ -59,7 +59,6 @@
         <span v-show="!collapsed">登出</span>
       </button>
     </div>
-    
   </aside>
 </template>
 
@@ -94,9 +93,7 @@ function handleResize() {
 // 掛載與卸載監聽
 onMounted(() => {
   userName.value =
-    localStorage.getItem("adminID") ||
-    sessionStorage.getItem("adminID") ||
-    "";
+    localStorage.getItem("adminID") || sessionStorage.getItem("adminID") || "";
 
   // 初始化裝置狀態
   isMobile.value = window.innerWidth <= 1024;
@@ -127,6 +124,9 @@ $border: #e5e9f2;
 }
 /* ─────────── 基本樣式 ─────────── */
 .sidebar {
+  height: 100vh;
+  position: sticky;
+  top: 0;
   width: 240px;
   background: #fff;
   display: flex;
@@ -134,7 +134,7 @@ $border: #e5e9f2;
   padding: 24px 16px;
   border-right: 1px solid $border;
   transition: width 0.25s ease; /* 平滑收合 */
-  
+
   &.collapsed {
     width: 72px;
 
@@ -221,7 +221,7 @@ h1,
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 12px;
+    padding: 6px 8px;
     border-radius: 6px;
     margin-top: 1.5rem;
     color: #2d3047;
@@ -269,7 +269,7 @@ h1,
   .logout {
     margin-top: 12px;
     width: 100%;
-    padding: 3px 12px;
+    padding: 3px 8px;
     background: #ec4f4f;
     border: none;
     border-radius: 6px;
@@ -281,11 +281,11 @@ h1,
     gap: 4px;
     white-space: nowrap;
     cursor: pointer;
-    transition: all .2s ease;
+    transition: all 0.2s ease;
     img {
       width: 20px;
     }
-    &:hover{
+    &:hover {
       background-color: $red-500;
     }
   }
@@ -303,10 +303,17 @@ h1,
     border-radius: 50%;
     background: #fff;
     cursor: pointer;
-    transition: transform 0.25s ease;
+    transition: all 0.25s ease;
+    &:hover {
+      box-shadow: 0px 0px 6px 0px $primary-200;
+    }
   }
   img.rotate {
     transform: translateY(-50%) rotate(180deg);
+    @include respond-to("lg") {
+      top: -30px;
+      right: -64px;
+    }
   }
 }
 </style>

@@ -49,11 +49,11 @@
               src="/assets/imgs/backend/filter.svg"
               alt=""
             />
-            <select 
+            <select
               v-model="store.productFilter"
               @change="store.setProductFilter($event.target.value)"
             >
-              <option value="">產品篩選</option>
+              <option value="">全部產品</option>
               <option
                 v-for="product in productOptions"
                 :key="product.value"
@@ -75,11 +75,11 @@
               src="/assets/imgs/backend/filter.svg"
               alt=""
             />
-            <select 
+            <select
               v-model="store.statusFilter"
               @change="store.setStatusFilter($event.target.value)"
             >
-              <option value="">用戶狀態</option>
+              <option value="">全部狀態</option>
               <option
                 v-for="status in statusOptions"
                 :key="status.value"
@@ -194,10 +194,18 @@
 
         <!-- pagination -->
         <nav class="pagination">
-          <button class="btn-page" :disabled="store.page === 1" @click="store.gotoPage(1)">
+          <button
+            class="btn-page"
+            :disabled="store.page === 1"
+            @click="store.gotoPage(1)"
+          >
             &lt;&lt;
           </button>
-          <button class="btn-page" :disabled="store.page === 1" @click="store.prevPage">
+          <button
+            class="btn-page"
+            :disabled="store.page === 1"
+            @click="store.prevPage"
+          >
             &lt;
           </button>
           <button
@@ -320,6 +328,9 @@ function scrollToTop() {
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
+    @include respond-to("lg") {
+      padding-left: 36px;
+    }
     @include respond-to("sm") {
       flex-wrap: wrap;
     }
@@ -330,7 +341,7 @@ function scrollToTop() {
       word-break: keep-all;
 
       .count {
-        color: var(--Primary-200, #b1c0d8);
+        color: $primary-200;
         text-align: center;
         font-size: 20px;
         font-style: normal;
@@ -458,6 +469,11 @@ function scrollToTop() {
       background: var(--Neutral-white, #fff);
       box-shadow: 0px 2px 20px 0px
         var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
+      transition: all ease 0.2s;
+
+      &:hover {
+        box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
+      }
     }
 
     .toolbarTime-wrapper {
@@ -490,6 +506,11 @@ function scrollToTop() {
         box-shadow: 0px 2px 20px rgba(177, 192, 216, 0.25);
         border: none;
         font-size: 14px;
+        transition: all ease 0.2s;
+
+        &:hover {
+          box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
+        }
       }
 
       img {
@@ -518,6 +539,10 @@ function scrollToTop() {
       background: var(--Neutral-white, #fff);
       box-shadow: 0px 2px 20px 0px
         var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
+      transition: all ease 0.2s;
+      &:hover {
+        box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
+      }
     }
 
     .selectWrapper {
@@ -566,6 +591,7 @@ function scrollToTop() {
       var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
     .table-list {
       display: grid;
+      grid-template-rows: repeat(auto-fill, minmax(min-content, 91px));
       flex: 1;
       height: 0;
       overflow: hidden;
@@ -574,8 +600,17 @@ function scrollToTop() {
     }
     .table-row {
       display: grid;
-
       grid-template-columns: 0.75fr 0.75fr 0.75fr 0.75fr 1.5fr 1fr 1fr 1fr;
+      position: relative;
+      gap: 2px;
+      align-items: center;
+      padding: 13px 16px;
+      color: $Neutral-500;
+      transition: all ease 0.2s;
+
+      &:hover {
+        color: $chip-success;
+      }
 
       @include respond-to("lg") {
         display: flex;
@@ -596,10 +631,7 @@ function scrollToTop() {
           display: none;
         }
       }
-      position: relative;
-      gap: 2px;
-      align-items: center;
-      padding: 13px 16px;
+
       & + .table-row {
         border-top: 1px solid $border;
       }
@@ -612,7 +644,6 @@ function scrollToTop() {
         }
       }
       .cell {
-        color: $Neutral-500;
         width: auto;
         font-size: 1rem;
         font-style: normal;
@@ -753,6 +784,11 @@ function scrollToTop() {
         right: 12px;
         transform: translateY(-50%);
         cursor: pointer;
+        transition: all 0.25s ease;
+        &:hover {
+          border-radius: 50%;
+          box-shadow: inset 0px 2px 6px -1px $primary-200;
+        }
         @include respond-to("lg") {
           top: 29px;
         }
