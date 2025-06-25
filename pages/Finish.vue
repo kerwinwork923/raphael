@@ -85,7 +85,13 @@
       </router-link>
     </div>
 
-    <div class="subBtnGroup2" v-if="hasUID">
+    <div class="subBtnGroup2" v-if="hasUID && Flag==='1'">
+      <router-link :to="`/usage/${ProductName}`">
+        <button class="backToUserBtn2">返回穿衣紀錄</button>
+      </router-link>
+    </div>
+
+    <div class="subBtnGroup2" v-if="hasUID && Flag==='2'">
       <router-link :to="`/usageHRVResult/${uid}`">
         <button class="backToUserBtn2">看報告</button>
       </router-link>
@@ -109,6 +115,8 @@ const pressureScore = ref(3);
 const personalizedSuggestion = ref("");
 const analysisResult = ref("");
 const hasUID = ref(false);
+const Flag = ref("");
+const ProductName = ref("");
 const uid = ref("");
 const isLoading = ref(false);
 
@@ -167,6 +175,8 @@ const fetchHRVData = async () => {
     if (data.UID) {
       hasUID.value = true;
       uid.value = data.UID;
+      Flag.value = data.Flag;
+      ProductName.value = data.ProductName;
     }
 
     // 計算各項指標
