@@ -1,66 +1,45 @@
 <template>
   <div class="cartListWrap">
-    <CartTitleBar title="購物車" :showCart="true"
-    backPath="/cart"/>
+    <CartTitleBar title="購物車" :showCart="true" backPath="/cart" />
 
     <div class="cartListContentWrap">
-      <div class="cartListContent">
-        <input type="checkbox" />
-        <div class="cartContentGroup">
-          <img src="~/assets/imgs/cart/test1.png" alt="" />
-          <div class="cartContentGroupText">
-            <h3>方案一</h3>
-            <h6>NT$9,999</h6>
-            <small>剩下 10 件</small>
-          </div>
-          <div class="addCartAlertOptionGroup">
-            <div class="addCartAlertOptionGroupInput">
-              <button
-                class="qtyBtn"
-                @click="decreaseQty"
-                :disabled="quantity <= 1"
-              >
-                -
-              </button>
-              <span class="qtyNum">{{ quantity }}</span>
-              <button
-                class="qtyBtn"
-                @click="increaseQty"
-                :disabled="quantity >= 100"
-              >
-                +
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="deleteBtn">
-          <img src="~/assets/imgs/cart/delete.svg" alt="刪除" />
-        </div>
+      <div class="noCartList" v-if="cartList.length === 0">
+        <img src="~/assets/imgs/cart/angel.png" alt="購物車" />
+        <h3>購物車空空的</h3>
+        <button @click="goToHome">再逛逛</button>
       </div>
-      <div class="cartListContent">
-        <input type="checkbox" />
+      <div
+        class="cartListContent"
+        v-else
+        v-for="item in cartList"
+        :key="item.ProductID"
+      >
+        <input
+          type="checkbox"
+          v-model="item.selected"
+          @change="updateSelection"
+        />
         <div class="cartContentGroup">
-          <img src="~/assets/imgs/cart/test1.png" alt="" />
+          <img :src="item.Picture" :alt="item.ProductName" />
           <div class="cartContentGroupText">
-            <h3>方案一</h3>
-            <h6>NT$9,999</h6>
-            <small>剩下 10 件</small>
+            <h3>{{ item.ProductName }}</h3>
+            <h6>NT${{ item.Price }}</h6>
+            <small>數量: {{ item.Qty }}</small>
           </div>
           <div class="addCartAlertOptionGroup">
             <div class="addCartAlertOptionGroupInput">
               <button
                 class="qtyBtn"
-                @click="decreaseQty"
-                :disabled="quantity <= 1"
+                @click="decreaseQty(item)"
+                :disabled="item.Qty <= 1"
               >
                 -
               </button>
-              <span class="qtyNum">{{ quantity }}</span>
+              <span class="qtyNum">{{ item.Qty }}</span>
               <button
                 class="qtyBtn"
-                @click="increaseQty"
-                :disabled="quantity >= 100"
+                @click="increaseQty(item)"
+                :disabled="item.Qty >= 100"
               >
                 +
               </button>
@@ -68,105 +47,206 @@
           </div>
         </div>
 
-        <div class="deleteBtn">
-          <img src="~/assets/imgs/cart/delete.svg" alt="刪除" />
-        </div>
-      </div>
-      <div class="cartListContent">
-        <input type="checkbox" />
-        <div class="cartContentGroup">
-          <img src="~/assets/imgs/cart/test1.png" alt="" />
-          <div class="cartContentGroupText">
-            <h3>方案一</h3>
-            <h6>NT$9,999</h6>
-            <small>剩下 10 件</small>
-          </div>
-          <div class="addCartAlertOptionGroup">
-            <div class="addCartAlertOptionGroupInput">
-              <button
-                class="qtyBtn"
-                @click="decreaseQty"
-                :disabled="quantity <= 1"
-              >
-                -
-              </button>
-              <span class="qtyNum">{{ quantity }}</span>
-              <button
-                class="qtyBtn"
-                @click="increaseQty"
-                :disabled="quantity >= 100"
-              >
-                +
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="deleteBtn">
-          <img src="~/assets/imgs/cart/delete.svg" alt="刪除" />
-        </div>
-      </div>
-      <div class="cartListContent">
-        <input type="checkbox" />
-        <div class="cartContentGroup">
-          <img src="~/assets/imgs/cart/test1.png" alt="" />
-          <div class="cartContentGroupText">
-            <h3>方案一</h3>
-            <h6>NT$9,999</h6>
-            <small>剩下 10 件</small>
-          </div>
-          <div class="addCartAlertOptionGroup">
-            <div class="addCartAlertOptionGroupInput">
-              <button
-                class="qtyBtn"
-                @click="decreaseQty"
-                :disabled="quantity <= 1"
-              >
-                -
-              </button>
-              <span class="qtyNum">{{ quantity }}</span>
-              <button
-                class="qtyBtn"
-                @click="increaseQty"
-                :disabled="quantity >= 100"
-              >
-                +
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="deleteBtn">
+        <div class="deleteBtn" @click="deleteItem(item.ProductID)">
           <img src="~/assets/imgs/cart/delete.svg" alt="刪除" />
         </div>
       </div>
     </div>
 
-    <div class="cartListFooter">
+    <div class="cartListFooter" v-if="cartList.length > 0">
       <div class="cartListFooterContent1">
-        <input type="checkbox" />
+        <input type="checkbox" v-model="selectAll" @change="toggleSelectAll" />
         <label for="">全選</label>
       </div>
       <div class="cartListFooterContent2">
-        <h5>總計 NT$39,996</h5>
-        <button>去買單</button>
+        <h5>總計 NT${{ totalAmount }}</h5>
+        <button @click="checkout">去買單</button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+const router = useRouter();
+import { ref, computed, onMounted } from "vue";
 import CartTitleBar from "~/components/cart/CartTitleBar.vue";
 
+const userData = JSON.parse(localStorage.getItem("userData"));
 const cartList = ref([]);
-const quantity = ref(1);
-const decreaseQty = () => {
-  quantity.value--;
+const selectAll = ref(false);
+
+const fetchCartList = async () => {
+  try {
+    const { data } = await useFetch(
+      "https://23700999.com:8081/HMA/api/fr/maGetCart",
+      {
+        method: "POST",
+        body: {
+          MID: userData.MID,
+          Token: userData.Token,
+          MAID: userData.MAID,
+          Mobile: userData.Mobile,
+          Lang: "zhtw",
+        },
+      }
+    );
+
+    if (data.value?.Result === "OK" && data.value?.RetMaCart) {
+      cartList.value = data.value.RetMaCart.map((item) => ({
+        ...item,
+        selected: false,
+      }));
+    }
+  } catch (error) {
+    console.error("獲取購物車列表失敗：", error);
+  }
 };
-const increaseQty = () => {
-  quantity.value++;
+
+const updateCartItem = async (productId, newQty) => {
+  try {
+    const { data } = await useFetch(
+      "https://23700999.com:8081/HMA/api/fr/maCart",
+      {
+        method: "POST",
+        body: {
+          MID: userData.MID,
+          Token: userData.Token,
+          MAID: userData.MAID,
+          Mobile: userData.Mobile,
+          Lang: "zhtw",
+          Cart: [
+            {
+              ProductID: productId,
+              Qty: newQty.toString(),
+            },
+          ],
+        },
+      }
+    );
+
+    if (data.value?.Result === "OK") {
+      await fetchCartList(); // 重新獲取購物車資料
+    }
+  } catch (error) {
+    console.error("更新購物車失敗：", error);
+  }
 };
+
+const deleteCartItem = async (productId) => {
+  try {
+    const { data } = await useFetch(
+      "https://23700999.com:8081/HMA/api/fr/maCartDelete",
+      {
+        method: "POST",
+        body: {
+          MID: userData.MID,
+          Token: userData.Token,
+          MAID: userData.MAID,
+          Mobile: userData.Mobile,
+          Lang: "zhtw",
+          ProductID: [productId],
+        },
+      }
+    );
+
+    if (data.value?.Result === "OK") {
+      await fetchCartList(); // 重新獲取購物車資料
+    }
+  } catch (error) {
+    console.error("刪除商品失敗：", error);
+  }
+};
+
+const deleteSelectedItems = async () => {
+  const selectedItems = cartList.value.filter((item) => item.selected);
+  if (selectedItems.length === 0) {
+    alert("請選擇要刪除的商品");
+    return;
+  }
+
+  if (confirm(`確定要刪除選中的 ${selectedItems.length} 項商品嗎？`)) {
+    try {
+      const productIds = selectedItems.map((item) => item.ProductID);
+      const { data } = await useFetch(
+        "https://23700999.com:8081/HMA/api/fr/maCartDelete",
+        {
+          method: "POST",
+          body: {
+            MID: userData.MID,
+            Token: userData.Token,
+            MAID: userData.MAID,
+            Mobile: userData.Mobile,
+            Lang: "zhtw",
+            ProductID: productIds,
+          },
+        }
+      );
+
+      if (data.value?.Result === "OK") {
+        await fetchCartList(); // 重新獲取購物車資料
+        selectAll.value = false; // 重置全選狀態
+      }
+    } catch (error) {
+      console.error("批量刪除商品失敗：", error);
+    }
+  }
+};
+
+const decreaseQty = (item) => {
+  if (item.Qty > 1) {
+    updateCartItem(item.ProductID, parseInt(item.Qty) - 1);
+  }
+};
+
+const increaseQty = (item) => {
+  if (item.Qty < 100) {
+    updateCartItem(item.ProductID, parseInt(item.Qty) + 1);
+  }
+};
+
+const deleteItem = (productId) => {
+  if (confirm("確定要刪除此商品嗎？")) {
+    deleteCartItem(productId);
+  }
+};
+
+const goToHome = () => {
+  router.push("/cart");
+};
+
+const updateSelection = () => {
+  const selectedCount = cartList.value.filter((item) => item.selected).length;
+  selectAll.value =
+    selectedCount === cartList.value.length && cartList.value.length > 0;
+};
+
+const toggleSelectAll = () => {
+  cartList.value.forEach((item) => {
+    item.selected = selectAll.value;
+  });
+};
+
+const checkout = () => {
+  const selectedItems = cartList.value.filter((item) => item.selected);
+  if (selectedItems.length === 0) {
+    alert("請選擇要購買的商品");
+    return;
+  }
+  router.push("/cart/pay");
+  // 這裡可以跳轉到結帳頁面
+  console.log("跳轉到結帳頁面", selectedItems);
+};
+
+const totalAmount = computed(() => {
+  return cartList.value
+    .filter((item) => item.selected)
+    .reduce((total, item) => total + parseInt(item.Amount), 0)
+    .toLocaleString();
+});
+
+onMounted(() => {
+  fetchCartList();
+});
 </script>
 
 <style scoped lang="scss">
@@ -178,6 +258,42 @@ const increaseQty = () => {
   flex-direction: column;
   place-items: center;
   padding: 0 2.5% 72px;
+  .noCartList {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 1rem;
+    width: 100%;
+    height: 80vh;
+    img {
+      width: 160px;
+      height: 160px;
+    }
+    h3 {
+      color: #000;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 100%;
+      letter-spacing: 2.4px;
+    }
+    button {
+      background: #74bc1f;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+      letter-spacing: 0.09px;
+      border-radius: 8px;
+      cursor: pointer;
+      padding: 8px 12px;
+    }
+  }
   .cartListContentWrap {
     width: 100%;
     margin-top: 1rem;
@@ -191,7 +307,7 @@ const increaseQty = () => {
     width: 100%;
     border-radius: 8px;
     margin-bottom: 1rem;
- 
+
     input[type="checkbox"] {
       width: 24px;
       height: 24px;
@@ -206,7 +322,7 @@ const increaseQty = () => {
       display: flex;
       flex-direction: column;
       gap: 0.25rem;
-      margin-right: .5rem;
+      margin-right: 0.5rem;
       h3 {
         color: var(--Neutral-black, #1e1e1e);
 
@@ -274,6 +390,17 @@ const increaseQty = () => {
         font-weight: 400;
         line-height: 100%; /* 18px */
         letter-spacing: 0.09px;
+      }
+      .deleteSelectedBtn {
+        background: #ec4f4f;
+        border: none;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 400;
+        border-radius: 4px;
+        cursor: pointer;
+        padding: 4px 8px;
+        margin-left: 0.5rem;
       }
     }
     .cartListFooterContent2 {

@@ -1,49 +1,161 @@
 <template>
   <div class="invoiceTypeWrap">
-    <CartTitleBar title="發票類型" />
+    <CartTitleBar title="發票類型" backPath="/cart/pay" />
     <h5>發票類型</h5>
     <div class="invoiceTypeGroup">
       <div class="invoiceType">
         <div class="invoiceTypeRadioGroup">
-          <input type="radio" name="invoiceType" id="invoiceType1" />
+          <input 
+            type="radio" 
+            name="invoiceType" 
+            id="invoiceType1"
+            value="1"
+            v-model="selectedInvoiceId"
+          />
           <label for="invoiceType1">
             <h4>電子發票</h4>
-            <p>電子發票</p>
+            <p>{{ getInvoiceContent('電子發票') || '未填寫' }}</p>
           </label>
         </div>
-        <img src="~/assets/imgs/cart/goNext.svg" alt="" />
+        <img 
+          @click="router.push('/cart/invoiceSelect1')" 
+          src="~/assets/imgs/cart/goNext.svg" 
+          alt="" 
+        />
       </div>
 
       <div class="invoiceType">
         <div class="invoiceTypeRadioGroup">
-          <input type="radio" name="invoiceType" id="invoiceType2" />
+          <input 
+            type="radio" 
+            name="invoiceType" 
+            id="invoiceType2"
+            value="2"
+            v-model="selectedInvoiceId"
+          />
           <label for="invoiceType2">
             <h4>載具</h4>
-            <p>未填寫</p>
+            <p>{{ getInvoiceContent('載具') || '未填寫' }}</p>
           </label>
         </div>
-        <img src="~/assets/imgs/cart/goNext.svg" alt="" />
+        <img 
+          @click="router.push('/cart/invoiceSelect2')" 
+          src="~/assets/imgs/cart/goNext.svg" 
+          alt="" 
+        />
       </div>
 
       <div class="invoiceType">
         <div class="invoiceTypeRadioGroup">
-          <input type="radio" name="invoiceType" id="invoiceType3" />
+          <input 
+            type="radio" 
+            name="invoiceType" 
+            id="invoiceType3"
+            value="3"
+            v-model="selectedInvoiceId"
+          />
           <label for="invoiceType3">
             <h4>三聯式發票</h4>
-            <p>未填寫</p>
+            <p>{{ getInvoiceContent('三聯式發票') || '未填寫' }}</p>
           </label>
         </div>
-
-        <img src="~/assets/imgs/cart/goNext.svg" alt="" />
+        <img 
+          @click="router.push('/cart/invoiceSelect3')" 
+          src="~/assets/imgs/cart/goNext.svg" 
+          alt="" 
+        />
       </div>
-  
     </div>
     <div class="btnGroup">
-      <button>確認</button>
+      <button @click="confirmInvoice">確認</button>
     </div>
   </div>
 </template>
-<script setup></script>
+
+<script setup>
+import { ref, onMounted } from "vue";
+import CartTitleBar from "~/components/cart/CartTitleBar.vue";
+import { useCheckoutStore } from '~/stores/checkout';
+
+const router = useRouter();
+const userData = JSON.parse(localStorage.getItem("userData"));
+const invoiceList = ref([]);
+const selectedInvoiceId = ref("1"); // 預設選擇電子發票
+const checkoutStore = useCheckoutStore();
+
+const getRelated = async function() {
+  try {
+    const { data } = await useFetch("https://23700999.com:8081/HMA/api/fr/maGetRelated", {
+      method: "POST",
+      body: {
+        MID: userData.MID,
+        Token: userData.Token,
+        MAID: userData.MAID,
+        Mobile: userData.Mobile,
+        Lang: "zhtw",
+      },
+    });
+
+    if (data.value?.Result === "OK" && data.value?.MInvoiceList) {
+      invoiceList.value = data.value.MInvoiceList;
+      
+      // 如果有發票，優先選擇 Pinia 中的發票
+      if (checkoutStore.selectedInvoiceId && invoiceList.value.length > 0) {
+        const selectedInvoice = invoiceList.value.find(inv => 
+          String(inv.AID) === String(checkoutStore.selectedInvoiceId)
+        );
+        if (selectedInvoice) {
+          const typeMap = {
+            "電子發票": "1",
+            "載具": "2", 
+            "三聯式發票": "3",
+          };
+          selectedInvoiceId.value = typeMap[selectedInvoice.Desc22] || "1";
+        }
+      }
+    }
+  } catch (error) {
+    console.error("獲取發票資料失敗：", error);
+  }
+};
+
+const getInvoiceContent = (desc) => {
+  const invoice = invoiceList.value.find(invoice => invoice.Desc22 === desc);
+  return invoice ? invoice.Content : null;
+};
+
+const confirmInvoice = () => {
+  if (!selectedInvoiceId.value) {
+    alert("請選擇發票類型");
+    return;
+  }
+
+  const typeMap = {
+    "1": "電子發票",
+    "2": "載具",
+    "3": "三聯式發票",
+  };
+
+  const selectedTypeName = typeMap[selectedInvoiceId.value];
+
+  const invoiceDataFromApi = invoiceList.value.find(
+    (invoice) => invoice.Desc22 === selectedTypeName
+  );
+
+  if (invoiceDataFromApi && invoiceDataFromApi.AID) {
+    checkoutStore.setSelectedInvoice(invoiceDataFromApi.AID);
+    console.log("已儲存的發票AID至Pinia：", invoiceDataFromApi.AID);
+    router.back();
+  } else {
+    alert(`請先點擊右方箭頭，設定您的「${selectedTypeName}」資訊。`);
+  }
+};
+
+onMounted(() => {
+  getRelated();
+});
+</script>
+
 <style lang="scss" scoped>
 .invoiceTypeWrap {
   background-color: #f6f6f6;

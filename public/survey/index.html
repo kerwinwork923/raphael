@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>睡眠 × 腸胃節奏探索心理測驗</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+        background-color: #f8fbfa;
+      }
+      .question {
+        display: none;
+      }
+      .question.active {
+        display: block;
+      }
+      .result {
+        display: none;
+      }
+      .progress-bar {
+        transition: width 0.5s ease;
+        max-width: 100%;
+      }
+      .option-btn {
+        transition: all 0.3s ease;
+      }
+      .option-btn:hover {
+        transform: translateY(-2px);
+      }
+      .option-btn.selected {
+        background-color: #5cf1f6;
+        color: white;
+      }
+    </style>
+  </head>
+
+  <body class="min-h-screen">
+    <div class="container max-w-3xl mx-auto px-4 py-8">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-green-800 mb-2">
+          睡眠 × 腸胃節奏探索心理測驗
+        </h1>
+        <p class="text-lg text-green-600 italic">
+          你的身體不是有病，而是節奏亂了
+        </p>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="w-full bg-gray-200 rounded-full h-2.5 mb-8">
+        <div
+          id="progress-bar"
+          class="progress-bar bg-green-600 h-2.5 rounded-full"
+          style="width: 0%"
+        ></div>
+      </div>
+
+      <!-- Start Screen -->
+      <div id="start-screen" class="bg-white p-6 rounded-xl shadow-md">
+        <div class="text-center">
+          <h2 class="text-xl font-bold text-green-700 mb-4">測驗目標</h2>
+          <p class="mb-6">
+            透過日常語感的提問，引導你發現自身睡眠與腸胃失衡的節奏型態，並對應適合的調節方案。
+          </p>
+
+          <div class="mb-6 bg-green-50 p-4 rounded-lg">
+            <h3 class="font-bold text-green-700 mb-2">節奏型分類（共6型）</h3>
+            <div class="grid grid-cols-2 gap-3 text-left">
+              <div class="flex items-center">
+                <span class="text-xl mr-2">🐢</span>
+                慵懶型｜身體慢、胃慢、睡也慢
+              </div>
+              <div class="flex items-center">
+                <span class="text-xl mr-2">🦊</span>
+                焦慮型｜神經緊、腸易動、腦轉不停
+              </div>
+              <div class="flex items-center">
+                <span class="text-xl mr-2">🐠</span> 感官型｜太多刺激收不回來
+              </div>
+              <div class="flex items-center">
+                <span class="text-xl mr-2">🐧</span> 依賴型｜需要陪伴才能穩定
+              </div>
+              <div class="flex items-center">
+                <span class="text-xl mr-2">🐍</span>
+                過激型｜吃了就脹、躺下就胃酸
+              </div>
+              <div class="flex items-center">
+                <span class="text-xl mr-2">🐇</span>
+                斷續型｜醒醒睡睡，肚子也跟著翻
+              </div>
+            </div>
+          </div>
+
+          <p class="text-sm text-gray-600 mb-6">
+            📎 小提醒：請選擇「最常發生」或「最接近你狀況」的選項
+          </p>
+          <button
+            id="start-btn"
+            class="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50 shadow-md"
+          >
+            開始測驗
+          </button>
+        </div>
+      </div>
+
+      <!-- Questions -->
+      <div id="questions-container">
+        <!-- Question 1 -->
+        <div id="q1" class="question bg-white p-6 rounded-xl shadow-md">
+          <h2 class="text-xl font-bold text-green-700 mb-4">
+            Q1｜你晚上通常怎麼開始進入放鬆？
+          </h2>
+          <div class="space-y-3">
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="turtle"
+            >
+              A. 什麼都先做完，自然會累
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="fox"
+            >
+              B. 開始焦慮明天的事，腦袋停不下來
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="fish"
+            >
+              C. 點香氛、開音樂幫自己收尾
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="penguin"
+            >
+              D. 滑手機或聽朋友語音聊天
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="neutral"
+            >
+              E. 不確定／好像都沒有
+            </button>
+          </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div id="q2" class="question bg-white p-6 rounded-xl shadow-md">
+          <h2 class="text-xl font-bold text-green-700 mb-4">
+            Q2｜你入睡時最容易遇到什麼狀況？
+          </h2>
+          <div class="space-y-3">
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="turtle"
+            >
+              A. 躺下很久才慢慢入睡
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="fox"
+            >
+              B. 一關燈就心跳加快、腦中想很多
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="fish"
+            >
+              C. 明明很累，卻覺得哪裡還不對勁
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="penguin"
+            >
+              D. 一定要有背景聲音或訊息陪伴才安心
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="neutral"
+            >
+              E. 不確定／沒有明顯困擾
+            </button>
+          </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div id="q3" class="question bg-white p-6 rounded-xl shadow-md">
+          <h2 class="text-xl font-bold text-green-700 mb-4">
+            Q3｜你在壓力大時，腸胃比較有感的是？
+          </h2>
+          <div class="space-y-3">
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="turtle"
+            >
+              A. 胃會悶悶的、沒胃口
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="fox"
+            >
+              B. 肚子敏感、會腹鳴或拉肚子
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="snake"
+            >
+              C. 胃酸感上來、甚至噁心
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="penguin"
+            >
+              D. 想吃東西安撫自己
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="neutral"
+            >
+              E. 不太確定／沒特別感覺
+            </button>
+          </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div id="q4" class="question bg-white p-6 rounded-xl shadow-md">
+          <h2 class="text-xl font-bold text-green-700 mb-4">
+            Q4｜你對「排便節奏」的感覺？
+          </h2>
+          <div class="space-y-3">
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="turtle"
+            >
+              A. 有點慢，時好時壞
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="fox"
+            >
+              B. 緊張時會亂掉
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="fish"
+            >
+              C. 吃得精緻才會順
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="rabbit"
+            >
+              D. 常常早上趕出門，亂中解決
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="neutral"
+            >
+              E. 沒有特別感覺／不一定
+            </button>
+          </div>
+        </div>
+
+        <!-- Question 5 -->
+        <div id="q5" class="question bg-white p-6 rounded-xl shadow-md">
+          <h2 class="text-xl font-bold text-green-700 mb-4">
+            Q5｜你的睡眠中斷情形是？
+          </h2>
+          <div class="space-y-3">
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="turtle"
+            >
+              A. 偶爾醒，但多半睡得穩
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="fox"
+            >
+              B. 容易被聲音驚醒，醒後很難再睡
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="fish"
+            >
+              C. 睡到一半會熱醒或覺得不舒服
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="rabbit"
+            >
+              D. 常醒來好幾次，有時配合腸胃不適
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="neutral"
+            >
+              E. 不會中斷，睡得很好
+            </button>
+          </div>
+        </div>
+
+        <!-- Question 6 -->
+        <div id="q6" class="question bg-white p-6 rounded-xl shadow-md">
+          <h2 class="text-xl font-bold text-green-700 mb-4">
+            Q6｜你起床後身體的第一反應？
+          </h2>
+          <div class="space-y-3">
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="turtle"
+            >
+              A. 身體沉重，像還沒開機
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="snake"
+            >
+              B. 胃口差，或早上容易噁心
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="fox"
+            >
+              C. 情緒不穩，覺得被打擾
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="penguin"
+            >
+              D. 馬上查看手機，看訊息才能動起來
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="neutral"
+            >
+              E. 每天狀況不一定，很隨機
+            </button>
+          </div>
+        </div>
+
+        <!-- Question 7 -->
+        <div id="q7" class="question bg-white p-6 rounded-xl shadow-md">
+          <h2 class="text-xl font-bold text-green-700 mb-4">
+            Q7｜如果可以有一種自然方式幫你調整，你希望它能…？
+          </h2>
+          <div class="space-y-3">
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="turtle"
+            >
+              A. 幫助整體節奏慢慢歸位
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="fox"
+            >
+              B. 給我安全感與內在穩定
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="fish"
+            >
+              C. 用舒服感覺讓我收回身體注意力
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="penguin"
+            >
+              D. 像朋友一樣陪著我睡著與消化
+            </button>
+            <button
+              class="option-btn w-full text-left p-4 bg-green-50 hover:bg-green-100 rounded-lg"
+              data-type="neutral"
+            >
+              E. 只要能幫我穩下來，不拘方式
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="results-container">
+        <!-- 慵懶型 -->
+        <div
+          id="turtle-result"
+          class="result bg-white p-6 rounded-xl shadow-md"
+        >
+          <div class="text-center mb-6">
+            <div class="text-6xl mb-4">🐢</div>
+            <h2 class="text-2xl font-bold text-green-800">
+              你的節奏型態：慵懶型
+            </h2>
+            <p class="text-lg text-green-600">身體慢、胃慢、睡也慢</p>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold text-lg text-green-700 mb-2">你的特質</h3>
+            <p class="mb-4">
+              你的身體系統運作節奏偏慢，需要較長時間才能進入狀態，無論是入睡還是消化系統都需要足夠的時間準備。
+            </p>
+            <p>你可能常常感到：</p>
+            <ul class="list-disc pl-5 space-y-1 mb-4">
+              <li>躺下後需要很長時間才能入睡</li>
+              <li>胃部消化緩慢，有時會有悶脹感</li>
+              <li>早上醒來需要較長時間才能完全清醒</li>
+              <li>生活節奏被打亂時，身體適應較慢</li>
+            </ul>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold text-lg text-green-700 mb-2">調節建議</h3>
+            <p class="mb-2">針對你的慢熱型體質，我們建議：</p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li>睡前2小時開始逐步放鬆準備</li>
+              <li>規律的作息時間，幫助身體建立穩定節奏</li>
+              <li>溫和的腹部按摩，促進消化系統活動</li>
+              <li>選擇易消化的晚餐，避免睡前消化負擔</li>
+            </ul>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold text-lg text-green-700 mb-2">後續可能風險</h3>
+            <p class="mb-2">
+              你不是懶，而是整個人彷彿慢了一拍。醒來覺得沒醒、吃東西沒胃口、連睡也拖很久。你累，但卻沒有真正的恢復，這不是你個性慢，而是生理節奏失控。<br />🔮
+              你的「身體內時鐘」是不是已經錯亂？進一步測出你的節奏拖延程度，找出為什麼你的能量總是充不飽、放不出。點擊【深入分析】，解鎖你專屬的節奏對應建議。<br />若不及時調整，將長期處於「慢性能量虧損」狀態，導致代謝變慢、情緒低落、生活效率下滑，甚至可能發展為：
+            </p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li>慢性疲勞症候群(CFS)或甲狀腺功能低下症</li>
+            </ul>
+          </div>
+
+          <div class="text-center">
+            <button
+              id="turtle-more-btn"
+              class="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50 shadow-md"
+            >
+              深入分析
+            </button>
+          </div>
+        </div>
+
+        <!-- 焦慮型 -->
+        <div id="fox-result" class="result bg-white p-6 rounded-xl shadow-md">
+          <div class="text-center mb-6">
+            <div class="text-6xl mb-4">🦊</div>
+            <h2 class="text-2xl font-bold text-green-800">
+              你的節奏型態：焦慮型
+            </h2>
+            <p class="text-lg text-green-600">神經緊、腸易動、腦轉不停</p>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold text-lg text-green-700 mb-2">你的特質</h3>
+            <p class="mb-4">
+              你的神經系統和腸道反應敏感，容易受到壓力和情緒的影響，導致睡眠和消化問題相互影響。
+            </p>
+            <p>你可能常常感到：</p>
+            <ul class="list-disc pl-5 space-y-1 mb-4">
+              <li>入睡困難，腦中思緒紛飛</li>
+              <li>壓力大時容易腹瀉或腸胃不適</li>
+              <li>對環境變化敏感，容易被驚醒</li>
+              <li>情緒波動會直接影響腸胃感受</li>
+            </ul>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold text-lg text-green-700 mb-2">調節建議</h3>
+            <p class="mb-2">針對你的焦慮型體質，我們建議：</p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li>建立睡前冥想或深呼吸的習慣</li>
+              <li>避免刺激性食物和咖啡因</li>
+              <li>規律的輕度運動，幫助釋放壓力</li>
+              <li>嘗試腸-腦軸調節的益生菌補充</li>
+            </ul>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold text-lg text-green-700 mb-2">後續可能風險</h3>
+            <p class="mb-2">
+              你其實想靜下來，但腦袋不停轉、胃裡翻騰、身體緊繃，連關燈都成了一場煎熬。你不是想太多，是神經真的過載了。<br />🔮
+              是什麼讓你「停不下來」？來測測你的神經緊張指數，找出你的焦慮型睡眠與消化模式，揭開你睡不著的根本原因。點擊【深入分析】，解鎖你專屬的節奏對應建議。<br />長期處在高張力狀態，將導致失眠惡化、自律神經混亂、腸胃過敏，並可能演變成：
+            </p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li>焦慮症、腸躁症、甚至憂鬱症</li>
+            </ul>
+          </div>
+
+          <div class="text-center">
+            <button
+              id="fox-more-btn"
+              class="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50 shadow-md"
+            >
+              深入分析
+            </button>
+          </div>
+        </div>
+
+        <!-- 感官型 -->
+        <div id="fish-result" class="result bg-white p-6 rounded-xl shadow-md">
+          <div class="text-center mb-6">
+            <div class="text-6xl mb-4">🐠</div>
+            <h2 class="text-2xl font-bold text-green-800">
+              你的節奏型態：感官型
+            </h2>
+            <p class="text-lg text-green-600">太多刺激收不回來</p>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold text-lg text-green-700 mb-2">你的特質</h3>
+            <p class="mb-4">
+              你對環境和身體感受特別敏銳，容易受到外界刺激影響，需要特定的環境條件才能放鬆。
+            </p>
+            <p>你可能常常感到：</p>
+            <ul class="list-disc pl-5 space-y-1 mb-4">
+              <li>對光線、聲音、溫度變化特別敏感</li>
+              <li>對食物口感和味道有強烈偏好</li>
+              <li>睡眠環境需要特別調整才舒適</li>
+              <li>身體不適感較為明顯且持久</li>
+            </ul>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold text-lg text-green-700 mb-2">調節建議</h3>
+            <p class="mb-2">針對你的感官型體質，我們建議：</p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li>創造理想的睡眠環境（溫度、光線、聲音）</li>
+              <li>使用舒適的寢具和衣物材質</li>
+              <li>嘗試感官減壓技巧，如香氛療法</li>
+              <li>選擇溫和且易消化的食物</li>
+            </ul>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold text-lg text-green-700 mb-2">後續可能風險</h3>
+            <p class="mb-2">
+              你的一天像在跑高速公路，腦袋高速轉、情緒不斷跳動，等到該停下時，卻發現神經剎車壞了，收不回來。你不是不累，是累得太緊繃。<br />🔮
+              測測你的「神經剎車力」，看看你是否已進入過度刺激狀態，找出如何讓你的節奏降速、找回晚上的安定感。點擊【深入分析】，解鎖你專屬的節奏對應建議。<br />若長期刺激過度，神經調節將逐步崩解，容易產生睡眠障礙、暴飲暴食、內分泌失調，並可能導致：
+            </p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li>高壓型心律不整、交感神經亢進、自律神經失調</li>
+            </ul>
+          </div>
+
+          <div class="text-center">
+            <button
+              id="fish-more-btn"
+              class="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50 shadow-md"
+            >
+              深入分析
+            </button>
+          </div>
+        </div>
+
+        <!-- 依賴型 -->
+        <div
+          id="penguin-result"
+          class="result bg-white p-6 rounded-xl shadow-md"
+        >
+          <div class="text-center mb-6">
+            <div class="text-6xl mb-4">🐧</div>
+            <h2 class="text-2xl font-bold text-green-800">
+              你的節奏型態：依賴型
+            </h2>
+            <p class="text-lg text-green-600">需要陪伴才能穩定</p>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold text-lg text-green-700 mb-2">你的特質</h3>
+            <p class="mb-4">
+              你的身心狀態與社交連結和外部刺激有強烈關聯，需要某種形式的陪伴或刺激才能感到安心。
+            </p>
+            <p>你可能常常感到：</p>
+            <ul class="list-disc pl-5 space-y-1 mb-4">
+              <li>獨處時難以入睡或感到不安</li>
+              <li>需要背景聲音或光線才能放鬆</li>
+              <li>情緒波動會直接影響食慾</li>
+              <li>社交活動後更容易消化和休息</li>
+            </ul>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold text-lg text-green-700 mb-2">調節建議</h3>
+            <p class="mb-2">針對你的依賴型體質，我們建議：</p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li>建立固定的睡前儀式，創造安全感</li>
+              <li>使用白噪音或輕柔音樂輔助入睡</li>
+              <li>嘗試抱枕或重力毯增加安心感</li>
+              <li>規律的社交活動，滿足連結需求</li>
+            </ul>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold text-lg text-green-700 mb-2">後續可能風險</h3>
+            <p class="mb-2">
+              你不是不能睡，而是沒有「特定條件」就無法入睡。每晚都要依賴藥物、背景音或儀式，才能進入夢鄉，像被某種模式綁架了。<br />🔮
+              你的睡眠，是自然的，還是條件反射？來揭開你的「睡眠依賴命盤」，幫你找回真正的自癒睡眠能力。點擊【深入分析】，解鎖你專屬的節奏對應建議。<br />持續依賴外部助眠手段，將削弱大腦自主調節能力，導致日後失眠加劇、白天嗜睡、夜晚更難入眠，嚴重甚至可能引發：
+            </p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li>藥物依賴症、原發性失眠症</li>
+            </ul>
+          </div>
+
+          <div class="text-center">
+            <button
+              id="penguin-more-btn"
+              class="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50 shadow-md"
+            >
+              深入分析
+            </button>
+          </div>
+        </div>
+
+        <!-- 過激型 -->
+        <div id="snake-result" class="result bg-white p-6 rounded-xl shadow-md">
+          <div class="text-center mb-6">
+            <div class="text-6xl mb-4">🐍</div>
+            <h2 class="text-2xl font-bold text-green-800">
+              你的節奏型態：過激型
+            </h2>
+            <p class="text-lg text-green-600">吃了就脹、躺下就胃酸</p>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold text-lg text-green-700 mb-2">你的特質</h3>
+            <p class="mb-4">
+              你的消化系統反應強烈，特別是在休息時，容易出現胃酸逆流或消化不適的情況。
+            </p>
+            <p>你可能常常感到：</p>
+            <ul class="list-disc pl-5 space-y-1 mb-4">
+              <li>躺下後胃部不適或胃酸感增加</li>
+              <li>進食後容易有脹氣或不消化感</li>
+              <li>早晨起床時胃部不適或噁心</li>
+              <li>壓力大時胃部症狀明顯加重</li>
+            </ul>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold text-lg text-green-700 mb-2">調節建議</h3>
+            <p class="mb-2">針對你的過激型體質，我們建議：</p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li>睡前避免進食，至少保持3小時間隔</li>
+              <li>睡眠時略微抬高上半身</li>
+              <li>選擇溫和不刺激的食物</li>
+              <li>嘗試腸胃舒緩的草本茶或補充劑</li>
+            </ul>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold text-lg text-green-700 mb-2">後續可能風險</h3>
+            <p class="mb-2">
+              你可能吃得不多，但總是腸胃脹脹的。晚上躺平，胃酸就像火山一樣翻湧，這不是吃太快，而是節奏錯配讓胃無法跟上休息。<br />🔮
+              快來檢視你的「消化與休息節奏圖譜」，讓我們幫你分析你的腸胃是否正處於過勞緊繃，導致消化排空功能停滯。點擊【深入分析】，解鎖你專屬的節奏對應建議。<br />若忽視調整，胃腸系統長期受損，將導致消化吸收不良、睡眠品質下降，甚至引發：
+            </p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li>胃食道逆流、慢性胃炎、十二指腸潰瘍</li>
+            </ul>
+          </div>
+
+          <div class="text-center">
+            <button
+              id="snake-more-btn"
+              class="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50 shadow-md"
+            >
+              深入分析
+            </button>
+          </div>
+        </div>
+
+        <!-- 斷續型 -->
+        <div
+          id="rabbit-result"
+          class="result bg-white p-6 rounded-xl shadow-md"
+        >
+          <div class="text-center mb-6">
+            <div class="text-6xl mb-4">🐇</div>
+            <h2 class="text-2xl font-bold text-green-800">
+              你的節奏型態：斷續型
+            </h2>
+            <p class="text-lg text-green-600">醒醒睡睡，肚子也跟著翻</p>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold text-lg text-green-700 mb-2">你的特質</h3>
+            <p class="mb-4">
+              你的睡眠和消化節奏都呈現斷斷續續的模式，兩者常相互影響，形成一個不穩定的循環。
+            </p>
+            <p>你可能常常感到：</p>
+            <ul class="list-disc pl-5 space-y-1 mb-4">
+              <li>夜間頻繁醒來，難以持續深睡</li>
+              <li>腸胃活動不規律，排便時間不固定</li>
+              <li>半夜醒來時常伴隨腸胃不適</li>
+              <li>作息不規律時，症狀更加明顯</li>
+            </ul>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold text-lg text-green-700 mb-2">調節建議</h3>
+            <p class="mb-2">針對你的斷續型體質，我們建議：</p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li>建立極其規律的作息和飲食時間</li>
+              <li>避免睡前大量飲水</li>
+              <li>嘗試腸道菌群調節，穩定消化節奏</li>
+              <li>睡前溫和的伸展或瑜伽，幫助身心放鬆</li>
+            </ul>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold text-lg text-green-700 mb-2">後續可能風險</h3>
+            <p class="mb-2">
+              你每晚都在「睡與醒之間」漂浮，醒好幾次也不覺得奇怪，甚至肚子也時不時不安分。這樣的夜晚，讓你即使躺了8小時也像沒睡。<br />🔮
+              揭開你的「睡眠破碎度報告」，深入解析你的夜間斷續與腸胃訊號的雙重干擾來源，讓你重新打造深層休息模式。點擊【深入分析】，解鎖你專屬的節奏對應建議。<br />長期睡眠斷續將導致大腦缺乏修復機會、情緒失控、記憶力下降，甚至誘發：
+            </p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li>睡眠呼吸中止症、自律神經障礙、早期代謝症候群</li>
+            </ul>
+          </div>
+
+          <div class="text-center">
+            <button
+              id="rabbit-more-btn"
+              class="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50 shadow-md"
+            >
+              深入分析
+            </button>
+          </div>
+        </div>
+
+        <!-- 中性型 -->
+        <div
+          id="neutral-result"
+          class="result bg-white p-6 rounded-xl shadow-md"
+        >
+          <div class="text-center mb-6">
+            <div class="text-6xl mb-4">🌀</div>
+            <h2 class="text-2xl font-bold text-green-800">
+              你的節奏型態：混合型
+            </h2>
+            <p class="text-lg text-green-600">多元變化，需要更多觀察</p>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold text-lg text-green-700 mb-2">你的特質</h3>
+            <p class="mb-4">
+              你的身體節奏較為多變，可能會根據環境、壓力和生活習慣而有不同表現，需要更細緻的觀察。
+            </p>
+            <p>你可能常常感到：</p>
+            <ul class="list-disc pl-5 space-y-1 mb-4">
+              <li>睡眠和消化狀況時好時壞</li>
+              <li>難以找到明確的規律或模式</li>
+              <li>對外部因素的反應不太一致</li>
+              <li>需要更多時間觀察身體反應</li>
+            </ul>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold text-lg text-green-700 mb-2">調節建議</h3>
+            <p class="mb-2">針對你的混合型體質，我們建議：</p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li>嘗試記錄睡眠和飲食日誌，找出潛在模式</li>
+              <li>建立基本的生活規律，觀察身體反應</li>
+              <li>嘗試溫和的全方位調節方案，包括飲食、運動和放鬆</li>
+              <li>定期檢視身體狀態，調整適合的方法</li>
+            </ul>
+          </div>
+
+          <div class="text-center">
+            <button
+              id="neutral-more-btn"
+              class="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50 shadow-md"
+            >
+              深入分析
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 加入會員 Modal -->
+      <div
+        id="member-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50"
+      >
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative">
+          <!-- 關閉按鈕 -->
+          <button
+            id="close-member-modal"
+            class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl"
+          >
+            &times;
+          </button>
+          <h2 class="text-xl font-bold text-green-700 mb-4">會員資料填寫</h2>
+          <div id="member-form" class="space-y-4">
+            <!-- 行動電話 -->
+            <div>
+              <label class="block font-medium mb-1 text-sm">行動電話</label>
+
+              <input
+                type="tel"
+                id="phone"
+                class="w-full border rounded-lg px-3 py-2 text-sm"
+                placeholder="例如：0912345678"
+              />
+              <!-- 密碼 -->
+               <label class="block font-medium mb-1 text-sm mt-2">密碼</label>
+              <input
+                type="password"
+                id="password"
+                class="w-full border rounded-lg px-3 py-2 text-sm"
+                placeholder="請輸入密碼"
+              />
+              <!-- 驗證碼 -->
+              <button
+                type="button"
+                id="verify-phone-btn"
+                class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 text-sm mt-2 w-full"
+              >
+                驗證
+              </button>
+              <label for="key" class="block font-medium mb-1 text-sm mt-2">輸入驗證碼</label>
+              <input
+                type="text"
+                id="key"
+                class="w-full border rounded-lg px-3 py-2 text-sm"
+                placeholder="驗證碼"
+              />
+            </div>
+
+            <!-- 下一步 -->
+            <div class="text-center pt-4">
+              <button
+                type="button"
+                id="next-step-btn"
+                class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 w-full"
+                disabled
+              >
+                下一步
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 會員註冊 Step 1 -->
+      <div
+        id="member-modal-step1"
+        class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50"
+      >
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative">
+          <button
+            id="close-member-modal-step1"
+            class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl"
+          >
+            &times;
+          </button>
+          <h2 class="text-xl font-bold text-green-700 mb-4">會員註冊</h2>
+          <div id="member-form-step1" class="space-y-4">
+            <div>
+              <label class="block font-medium mb-1 text-sm">行動電話</label>
+              <input
+                type="tel"
+                id="phone-step1"
+                class="w-full border rounded-lg px-3 py-2 text-sm"
+                placeholder="例如：0912345678"
+              />
+            </div>
+            <div>
+              <label class="block font-medium mb-1 text-sm">密碼</label>
+              <input
+                type="password"
+                id="password-step1"
+                class="w-full border rounded-lg px-3 py-2 text-sm"
+                placeholder="請輸入密碼"
+              />
+            </div>
+            <div class="flex gap-2">
+              <input 
+                type="text" 
+                id="verify-code-step1" 
+                class="w-full border rounded-lg px-3 py-2 text-sm" 
+                placeholder="驗證碼" 
+                style="display:none;" 
+              />
+              <button type="button" id="send-verify-btn-step1" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm">發送驗證碼</button>
+            </div>
+            <button type="button" id="next-step-btn-step1" class="bg-gray-400 text-white px-6 py-2 rounded-lg w-full" disabled>下一步</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 會員註冊 Step 2 -->
+      <div
+        id="member-modal-step2"
+        class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50"
+      >
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative">
+
+          <h2 class="text-xl font-bold text-green-700 mb-4">會員資料填寫</h2>
+          <div id="member-form-step2" class="space-y-4">
+            <div>
+              <label class="block font-medium mb-1 text-sm">姓名</label>
+              <input
+                type="text"
+                id="name-step2"
+                class="w-full border rounded-lg px-3 py-2 text-sm"
+                placeholder="請輸入您的姓名"
+              />
+            </div>
+            <div>
+              <label class="block font-medium mb-1 text-sm">性別</label>
+              <select
+                id="gender-step2"
+                class="w-full border rounded-lg px-3 py-2 text-sm"
+              >
+                <option value="">請選擇</option>
+                <option value="male">生理男</option>
+                <option value="female">生理女</option>
+              </select>
+            </div>
+            <div class="text-center pt-4">
+              <button
+                type="button"
+                id="submit-profile-btn"
+                class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 w-full"
+              >
+                送出資料
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Variables
+        let currentQuestion = 0;
+        const totalQuestions = 7;
+        const typeCount = {
+          turtle: 0,
+          fox: 0,
+          fish: 0,
+          penguin: 0,
+          snake: 0,
+          rabbit: 0,
+          neutral: 0,
+        };
+
+        // Elements - 統一獲取所有 DOM 元素
+        const startScreen = document.getElementById("start-screen");
+        const startBtn = document.getElementById("start-btn");
+        const questionsContainer = document.getElementById("questions-container");
+        const questions = document.querySelectorAll(".question");
+        const progressBar = document.getElementById("progress-bar");
+        const resultsContainer = document.getElementById("results-container");
+        const results = document.querySelectorAll(".result");
+        const reportModal = document.getElementById("report-modal");
+        const closeModal = document.getElementById("close-modal");
+        const modalContent = document.getElementById("modal-content");
+        const contactBtn = document.getElementById("contact-btn");
+        const UUID = getOrCreateVisitorID();
+        
+        // 會員相關元素
+        const memberModal = document.getElementById("member-modal");
+        const closeModalBtn = document.getElementById("close-member-modal");
+        const verifyPhoneBtn = document.getElementById("verify-phone-btn");
+        const form = document.getElementById("member-form");
+        
+        // Step 1 元素
+        const memberModalStep1 = document.getElementById("member-modal-step1");
+        const closeModalBtnStep1 = document.getElementById("close-member-modal-step1");
+        const sendVerifyBtnStep1 = document.getElementById("send-verify-btn-step1");
+        const phoneInputStep1 = document.getElementById("phone-step1");
+        const passwordInputStep1 = document.getElementById("password-step1");
+        const verifyCodeInputStep1 = document.getElementById("verify-code-step1");
+        const nextStepBtnStep1 = document.getElementById("next-step-btn-step1");
+        
+        // Step 2 元素
+        const memberModalStep2 = document.getElementById("member-modal-step2");
+       
+        const memberFormStep2 = document.getElementById("member-form-step2");
+        const nameInputStep2 = document.getElementById("name-step2");
+        const genderInputStep2 = document.getElementById("gender-step2");
+        const submitProfileBtn = document.getElementById("submit-profile-btn");
+        
+        // 第一個會員 modal 元素
+        const nextStepBtn = document.getElementById("next-step-btn");
+        const phoneInput = document.getElementById("phone");
+        const passwordInput = document.getElementById("password");
+        const keyInput = document.getElementById("key");
+        
+        let dominantType = "neutral";
+        let userSession = null;
+
+        // More buttons for each result
+        const moreButtons = [
+          document.getElementById("turtle-more-btn"),
+          document.getElementById("fox-more-btn"),
+          document.getElementById("fish-more-btn"),
+          document.getElementById("penguin-more-btn"),
+          document.getElementById("snake-more-btn"),
+          document.getElementById("rabbit-more-btn"),
+          document.getElementById("neutral-more-btn"),
+        ];
+
+        // 狀態暫存
+        let tempPhone = "";
+        let tempPassword = "";
+        let verifyCode = "";
+        let verifyPassed = false;
+
+        // 事件監聽器設定
+        setupEventListeners();
+
+        // 初始化按鈕狀態
+        if (nextStepBtn) {
+          nextStepBtn.disabled = true;
+          nextStepBtn.style.background = "#9ca3af"; // gray-400
+          nextStepBtn.style.color = "#fff";
+        }
+        
+        if (nextStepBtnStep1) {
+          nextStepBtnStep1.disabled = true;
+          nextStepBtnStep1.style.background = "#9ca3af"; // gray-400
+          nextStepBtnStep1.style.color = "#fff";
+        }
+
+        // Start the quiz
+        startBtn.addEventListener("click", function () {
+          startScreen.style.display = "none";
+          questions[0].classList.add("active");
+          updateProgressBar();
+        });
+
+        // Handle option selection
+        document.querySelectorAll(".option-btn").forEach((button) => {
+          button.addEventListener("click", function () {
+            // Clear previous selection in this question
+            const currentQuestionEl = this.closest(".question");
+            currentQuestionEl.querySelectorAll(".option-btn").forEach((btn) => {
+              btn.classList.remove("selected");
+            });
+            const UUID = getOrCreateVisitorID();
+            console.log("UUID:", UUID);
+            // Mark this option as selected
+            this.classList.add("selected");
+
+            // Record the type
+            const type = this.getAttribute("data-type");
+            typeCount[type]++;
+
+            // Move to next question or show results
+            setTimeout(() => {
+              currentQuestionEl.classList.remove("active");
+              currentQuestion++;
+
+              if (currentQuestion < totalQuestions) {
+                questions[currentQuestion].classList.add("active");
+              } else {
+                showResults();
+              }
+
+              updateProgressBar();
+            }, 300);
+          });
+        });
+
+        // Update progress bar
+        function updateProgressBar() {
+          const progress = Math.min((currentQuestion / totalQuestions) * 100, 100);
+          progressBar.style.width = `${progress}%`;
+        }
+
+        // Show results
+        function showResults() {
+          questionsContainer.style.display = "none";
+          resultsContainer.style.display = "block";
+
+          // Find the most common type
+          let maxCount = 0;
+          let timestamp = new Date().toISOString();
+
+          for (const type in typeCount) {
+            if (typeCount[type] > maxCount) {
+              maxCount = typeCount[type];
+              dominantType = type;
+            }
+          }
+
+          // 簡單問卷 API 參數
+          const SSurveyParams = {
+            UUID: UUID.toString || "",
+            Type: dominantType.toString || "",
+            Timestamp: timestamp.toString,
+            TypeCount: typeCount.toString,
+            UserAgent: navigator.userAgent.toString,
+          };
+
+          console.log("傳送資料：", JSON.stringify(SSurveyParams));
+          // 呼叫 SSurvey API 寫入資料庫
+          fetch("https://23700999.com:8081/HMA/api/fr/Ssurvey", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(SSurveyParams),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              console.log("簡單問卷 API 回傳：", data);
+            });
+
+          // Show the corresponding result
+          document.getElementById(`${dominantType}-result`).style.display = "block";
+        }
+
+        // Modal functionality
+        moreButtons.forEach((btn) => {
+          if (btn) {
+            btn.addEventListener("click", function () {
+              const type = this.id.split("-")[0];
+              memberModal.classList.remove("hidden");
+            });
+          }
+        });
+
+        if (closeModal) {
+          closeModal.addEventListener("click", function () {
+            reportModal.classList.add("hidden");
+          });
+        }
+
+        contactBtn.addEventListener("click", function () {
+          alert("感謝您的興趣！專業顧問將會與您聯繫。");
+          reportModal.classList.add("hidden");
+        });
+
+        // 設定所有事件監聽器
+        function setupEventListeners() {
+          // 第一個會員 modal 關閉
+          if (closeModalBtn) {
+            closeModalBtn.addEventListener("click", () => {
+              memberModal.classList.add("hidden");
+            });
+          }
+
+          // Step 1 關閉
+          if (closeModalBtnStep1) {
+            closeModalBtnStep1.addEventListener("click", () => {
+              memberModalStep1.classList.add("hidden");
+            });
+          }
+
+
+
+          // 第一個會員 modal 驗證
+          if (verifyPhoneBtn) {
+            verifyPhoneBtn.addEventListener("click", async () => {
+              const phone = phoneInput.value.trim();
+              const password = passwordInput.value.trim();
+              
+              // 防呆檢查
+              if (!phone) {
+                alert("請輸入手機號碼");
+                return;
+              }
+              if (!/^09\d{8}$/.test(phone)) {
+                alert("請輸入正確的手機號碼格式");
+                return;
+              }
+              if (!password) {
+                alert("請輸入密碼");
+                return;
+              }
+              if (password.length < 8) {
+                alert("密碼需至少8位");
+                return;
+              }
+              
+              // 暫時禁用按鈕防止重複點擊
+              verifyPhoneBtn.disabled = true;
+              verifyPhoneBtn.textContent = "發送中...";
+              
+              try {
+                const result = await getVerifyCode(phone, password);
+                if (result) {
+                  alert("驗證碼已發送，請查收！");
+                  // userSession 已在 getVerifyCode 中設定
+                }
+              } catch (e) {
+                alert("API 錯誤：" + e.message);
+              } finally {
+                // 重置按鈕狀態
+                verifyPhoneBtn.disabled = false;
+                verifyPhoneBtn.textContent = "驗證";
+              }
+            });
+          }
+
+          // 第一個會員 modal 下一步
+          if (nextStepBtn) {
+            nextStepBtn.addEventListener("click", async (e) => {
+              const code = keyInput.value.trim();
+              
+              // 防呆檢查
+              if (!code) {
+                alert("請輸入驗證碼");
+                return;
+              }
+              if (!/^[0-9]{5}$/.test(code)) {
+                alert("請輸入5位數驗證碼");
+                return;
+              }
+              
+              // 檢查 userSession 是否存在
+              if (!userSession || !userSession.MID || !userSession.Token || !userSession.MAID || !userSession.Mobile) {
+                alert("請先取得驗證碼");
+                return;
+              }
+              
+              // 暫時禁用按鈕防止重複點擊
+              nextStepBtn.disabled = true;
+              nextStepBtn.textContent = "驗證中...";
+              
+              try {
+                const result = await verifyCodeAPI(userSession, code);
+                if(result && result.PASS === "OK") {
+                  // 驗證成功，切換到填寫會員資料畫面
+                  memberModal.classList.add("hidden");
+                  memberModalStep2.classList.remove("hidden");
+                } else {
+                  alert("驗證碼錯誤");
+                }
+              } catch (error) {
+                alert("驗證碼輸入錯誤：" + error.message);
+              } finally {
+                // 重置按鈕狀態
+                nextStepBtn.disabled = false;
+                nextStepBtn.textContent = "下一步";
+              }
+            });
+          }
+
+          // Step 1 下一步
+          if (nextStepBtnStep1) {
+            nextStepBtnStep1.addEventListener("click", async () => {
+              if (!userSession) {
+                alert("請先取得驗證碼");
+                return;
+              }
+              const code = verifyCodeInputStep1.value;
+              if (!/^[0-9]{5}$/.test(code)) {
+                alert("請輸入5位數驗證碼");
+                return;
+              }
+              
+              // 暫時禁用按鈕防止重複點擊
+              nextStepBtnStep1.disabled = true;
+              nextStepBtnStep1.textContent = "驗證中...";
+              
+              const codeArr = code.split("");
+              try {
+                const res = await fetch("https://23700999.com:8081/HMA/API_doExamAuth.jsp", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    ...userSession,
+                    D1: codeArr[0],
+                    D2: codeArr[1],
+                    D3: codeArr[2],
+                    D4: codeArr[3],
+                    D5: codeArr[4]
+                  })
+                });
+                const data = await res.json();
+                console.log("驗證碼API回傳：", data); // 加入除錯訊息
+                
+                // 修正驗證邏輯：需要同時檢查 PASS 和 Result
+                if (data.Result === "OK" && data.PASS === "OK") {
+                  // 驗證成功，切換到第二步
+                  memberModalStep1.classList.add("hidden");
+                  memberModalStep2.classList.remove("hidden");
+                  // 重置按鈕狀態
+                  nextStepBtnStep1.disabled = false;
+                  nextStepBtnStep1.textContent = "下一步";
+                } else {
+                  // 驗證失敗
+                  const errorMessage = data.Message || (data.PASS === "NOTOK" ? "驗證碼錯誤" : "驗證失敗");
+                  alert(errorMessage);
+                  verifyCodeInputStep1.value = "";
+                  nextStepBtnStep1.disabled = false;
+                  nextStepBtnStep1.textContent = "下一步";
+                }
+              } catch (e) {
+                alert("API 錯誤：" + e.message);
+                nextStepBtnStep1.disabled = false;
+                nextStepBtnStep1.textContent = "下一步";
+              }
+            });
+          }
+
+          // Step 2 送出資料
+          if (submitProfileBtn) {
+            submitProfileBtn.addEventListener("click", async () => {
+              if (submitProfileBtn.disabled) return;
+              
+              // 防呆檢查
+              const name = nameInputStep2.value.trim();
+              const gender = genderInputStep2.value;
+              
+              if (!name) {
+                alert("請輸入姓名");
+                return;
+              }
+              if (name.length < 2) {
+                alert("姓名至少需要2個字");
+                return;
+              }
+              if (!gender) {
+                alert("請選擇性別");
+                return;
+              }
+              
+              // 檢查 userSession 是否存在
+              if (!userSession || !userSession.MID || !userSession.Token || !userSession.MAID || !userSession.Mobile) {
+                alert("會員資料不完整，請重新驗證");
+                return;
+              }
+              
+              // 禁用按鈕防止重複點擊
+              submitProfileBtn.disabled = true;
+              submitProfileBtn.textContent = "送出中...";
+              
+              // 只傳送必要的資料，移除假的資料
+              const profile = {
+                Name: name,
+                Sex: gender === "male" ? "1" : "2"
+              };
+              
+              console.log("AA5 API 傳送資料：", {
+                ...userSession,
+                ...profile
+              });
+              
+              try {
+                const res = await fetch("https://23700999.com:8081/HMA/API_AA5.jsp", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    ...userSession,
+                    ...profile,
+                    Height: "",
+                    Weight: "",
+                    Birthday: "",
+                    DSPR: "",
+                    HRVCalTime: ""
+                  })
+                });
+                const data = await res.json();
+                console.log("AA5 API 回傳：", data);
+                
+                if (data.Result === "OK") {
+
+                  memberModalStep2.classList.add("hidden");
+                  
+                  // 可以跳轉到其他頁面或關閉
+                  window.location.href = "/survey/csurvey.html";
+                } else {
+                  alert(data.Message || "註冊失敗");
+                  submitProfileBtn.disabled = false;
+                  submitProfileBtn.textContent = "送出資料";
+                }
+              } catch (e) {
+                console.error("AA5 API 錯誤：", e);
+                alert("API 錯誤：" + e.message);
+                submitProfileBtn.disabled = false;
+                submitProfileBtn.textContent = "送出資料";
+              }
+            });
+          }
+
+          // 發送驗證碼
+          if (sendVerifyBtnStep1) {
+            sendVerifyBtnStep1.addEventListener("click", async () => {
+              const phone = phoneInputStep1.value.trim();
+              const password = passwordInputStep1.value.trim();
+              
+              // 防呆檢查
+              if (!phone) {
+                alert("請輸入手機號碼");
+                return;
+              }
+              if (!/^09\d{8}$/.test(phone)) {
+                alert("請輸入正確的手機號碼格式（例：0912345678）");
+                return;
+              }
+              if (!password) {
+                alert("請輸入密碼");
+                return;
+              }
+              if (password.length < 8) {
+                alert("密碼需至少8位");
+                return;
+              }
+              
+              sendVerifyBtnStep1.disabled = true;
+              sendVerifyBtnStep1.textContent = "發送中...";
+              sendVerifyBtnStep1.style.background = "#ccc";
+              
+              try {
+                const result = await getVerifyCode(phone, password);
+                if (result) {
+                  alert("驗證碼已發送，請查收！");
+                  verifyCodeInputStep1.style.display = "";
+                  sendVerifyBtnStep1.textContent = "重新發送";
+                  sendVerifyBtnStep1.disabled = false;
+                  sendVerifyBtnStep1.style.background = "#16a34a";
+                }
+              } catch (e) {
+                alert("API 錯誤：" + e.message);
+                sendVerifyBtnStep1.disabled = false;
+                sendVerifyBtnStep1.textContent = "發送驗證碼";
+                sendVerifyBtnStep1.style.background = "#16a34a";
+                verifyCodeInputStep1.style.display = "none";
+              }
+            });
+          }
+        }
+
+        // API 函數
+        async function getVerifyCode(mobile, password) {
+          const res = await fetch("https://23700999.com:8081/HMA/API_AA3.jsp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              Mobile: mobile,
+              Password: password
+            })
+          });
+          const text = await res.text();
+          let data = {};
+          try {
+            data = JSON.parse(text);
+          } catch {
+            throw new Error("API 回傳格式錯誤");
+          }
+          if (data.Result === "OK") {
+            // 設定 userSession
+            userSession = {
+              MID: data.MID,
+              Token: data.Token,
+              MAID: data.MAID,
+              Mobile: data.Mobile
+            };
+            
+            // 啟用第一個會員 modal 的下一步按鈕
+            if (nextStepBtn) {
+              nextStepBtn.disabled = false;
+              nextStepBtn.style.background = "#16a34a";
+              nextStepBtn.style.color = "#fff";
+            }
+            
+            // 啟用 Step 1 的下一步按鈕
+            if (nextStepBtnStep1) {
+              nextStepBtnStep1.disabled = false;
+              nextStepBtnStep1.style.background = "#16a34a";
+              nextStepBtnStep1.style.color = "#fff";
+            }
+            
+            // 儲存後續需要的資訊
+            return {
+              MID: data.MID,
+              Token: data.Token,
+              MAID: data.MAID,
+              Mobile: data.Mobile,
+              A5Digit: data.A5Digit, // 驗證碼
+              startTime: data.startTime
+            };
+          } else {
+            alert(data.Result || "取得驗證碼失敗");
+          }
+        }
+
+        async function verifyCodeAPI({ MID, Token, MAID, Mobile }, code) {
+          // 驗證碼需分成 D1~D5
+          const codeArr = code.split("");
+          const body = {
+            MID, Token, MAID, Mobile,
+            D1: codeArr[0], D2: codeArr[1], D3: codeArr[2], D4: codeArr[3], D5: codeArr[4]
+          };
+          const res = await fetch("https://23700999.com:8081/HMA/API_doExamAuth.jsp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+          });
+          const data = await res.json();
+          console.log("verifyCodeAPI 回傳：", data); // 加入除錯訊息
+          
+          if (data.Result === "OK" && data.PASS === "OK") {
+            return data; // 驗證成功
+          } else {
+            throw new Error(data.Message || (data.PASS === "NOTOK" ? "驗證碼錯誤" : "驗證失敗"));
+          }
+        }
+
+        async function submitProfile({ MID, Token, MAID, Mobile }, profile) {
+          // profile: { Name, Sex }
+          const body = {
+            MID, Token, MAID, Mobile,
+            ...profile
+          };
+          console.log("submitProfile 傳送資料：", body);
+          
+          const res = await fetch("https://23700999.com:8081/HMA/API_AA5.jsp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+          });
+          const data = await res.json();
+          console.log("submitProfile 回傳：", data);
+          
+          if (data.Result === "OK") {
+            return data;
+          } else {
+            throw new Error(data.Message || "註冊失敗");
+          }
+        }
+
+        // 工具函數
+        function getOrCreateVisitorID() {
+          const name = "wisebalanceID";
+          const existing = document.cookie
+            .split("; ")
+            .find((row) => row.startsWith(name + "="))
+            ?.split("=")[1];
+
+          if (existing) return existing;
+
+          const newID = crypto.randomUUID();
+          document.cookie = `${name}=${newID}; path=/; max-age=31536000`; // 儲存 1 年
+          return newID;
+        }
+      });
+    </script>
+
+    <script>
+      (function () {
+        function c() {
+          var b = a.contentDocument || a.contentWindow.document;
+          if (b) {
+            var d = b.createElement("script");
+            d.innerHTML =
+              "window.__CF$cv$params={r:'9509647f2214073c',t:'MTc1MDA2NzMxOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+            b.getElementsByTagName("head")[0].appendChild(d);
+          }
+        }
+        if (document.body) {
+          var a = document.createElement("iframe");
+          a.height = 1;
+          a.width = 1;
+          a.style.position = "absolute";
+          a.style.top = 0;
+          a.style.left = 0;
+          a.style.border = "none";
+          a.style.visibility = "hidden";
+          document.body.appendChild(a);
+          if ("loading" !== document.readyState) c();
+          else if (window.addEventListener)
+            document.addEventListener("DOMContentLoaded", c);
+          else {
+            var e = document.onreadystatechange || function () {};
+            document.onreadystatechange = function (b) {
+              e(b);
+              "loading" !== document.readyState &&
+                ((document.onreadystatechange = e), c());
+            };
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>

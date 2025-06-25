@@ -1,10 +1,10 @@
 <template>
-  <div class="addCartAlert" v-if="false">
+  <div class="addCartAlert" v-if="showAddCartAlert">
     <div class="addCartAlertTitleGroup">
-      <img src="/assets/imgs/cart/test1.png" alt="" />
+      <img :src="productData?.FPicture" :alt="productData?.ProductName" />
       <div class="textGroup">
-        <h2>方案一</h2>
-        <h6>NT$9,999</h6>
+        <h2>{{ productData?.ProductName }}</h2>
+        <h6>NT${{ productData?.Price }}</h6>
       </div>
     </div>
     <div class="addCartAlertHR"></div>
@@ -21,19 +21,19 @@
       </div>
     </div>
     <div class="addAlertBtnGroup">
-      <button>加入購物車</button>
+      <button @click="addToCart">加入購物車</button>
     </div>
 
-    <div class="closeBtn">
+    <div class="closeBtn" @click="closeAddCartAlert">
       <img src="/assets/imgs/close.svg" alt="" />
     </div>
   </div>
-  <div class="buyCartAlert" v-if="false">
+  <div class="buyCartAlert" v-if="showBuyCartAlert">
     <div class="addCartAlertTitleGroup">
-      <img src="/assets/imgs/cart/test1.png" alt="" />
+      <img :src="productData?.FPicture" :alt="productData?.ProductName" />
       <div class="textGroup">
-        <h2>方案一</h2>
-        <h6>NT$9,999</h6>
+        <h2>{{ productData?.ProductName }}</h2>
+        <h6>NT${{ productData?.Price }}</h6>
       </div>
     </div>
     <div class="addCartAlertHR"></div>
@@ -50,10 +50,10 @@
       </div>
     </div>
     <div class="addAlertBtnGroup">
-      <button class="buyBtn">立即購買</button>
+      <button class="buyBtn" @click="buyNow">立即購買</button>
     </div>
 
-    <div class="closeBtn">
+    <div class="closeBtn" @click="closeBuyCartAlert">
       <img src="/assets/imgs/close.svg" alt="" />
     </div>
   </div>
@@ -62,65 +62,165 @@
     <CartTitleBar />
     <div class="productCartContentGroup">
       <div class="productCartContent">
-        <img src="~/assets/imgs/cart/test1.png" alt="" />
-        <h2>方案一</h2>
-        <h6>NT$9,999</h6>
-        <small>剩下 10 件</small>
+        <img :src="productData?.FPicture" :alt="productData?.ProductName" />
+        <h2>{{ productData?.ProductName }}</h2>
+        <h6>NT${{ productData?.Price }}</h6>
+        <small>剩下 {{ productData?.Remaining }} 件</small>
       </div>
       <div class="productCartContent">
-        <h3>配送貨或其他資訊</h3>
-        <p>黑貓宅配</p>
+        <h3>配送方式</h3>
+        <p>{{ productData?.DeliverName }}</p>
       </div>
       <div class="productCartContent">
         <h3>付款方式</h3>
-        <p>黑貓宅配</p>
+        <p>{{ productData?.PayName }}</p>
       </div>
       <div class="productCartContent">
         <h3>退換貨政策</h3>
         <ul>
-          <li>本商品適用7天鑑賞期</li>
-          <li>商品需保持全新狀態（未經使用、無污損、包裝完整含所有配件）</li>
+          <li>{{ productData?.ReturnPolicyName }}</li>
         </ul>
       </div>
       <div class="productCartContent">
         <h3>商品特色</h3>
-        <p>
-          內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容內容
-        </p>
+        <p>{{ productData?.Feature }}</p>
       </div>
       <div class="productCartContent">
         <h3>商品詳情</h3>
-        <p>詳細內容</p>
+        <p>{{ productData?.DDesc }}</p>
         <div class="productCartContentImgGroup">
-          <img src="~/assets/imgs/cart/test1.png" alt="" />
-          <img src="~/assets/imgs/cart/test1_1.png" alt="" />
+          <img :src="productData?.DPicture" :alt="productData?.ProductName" />
         </div>
       </div>
     </div>
     <div class="productOptionGroup">
-      <button>加入購物車</button>
-      <button>立即購買</button>
+      <button @click="showAddCart">加入購物車</button>
+      <button @click="showBuyNow">立即購買</button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { ref, onMounted } from "vue";
+import CartTitleBar from "~/components/cart/CartTitleBar.vue";
 
-const props = defineProps({
-  item: {
-    type: Object,
-    required: true,
-  },
-});
-
+const route = useRoute();
+const router = useRouter();
+const userData = JSON.parse(localStorage.getItem("userData"));
+const productId = route.params.item;
+const productData = ref(null);
 const quantity = ref(1);
+const showAddCartAlert = ref(false);
+const showBuyCartAlert = ref(false);
+
+const fetchProductDetail = async () => {
+  try {
+    const { data } = await useFetch("https://23700999.com:8081/HMA/api/fr/maSingleProduct", {
+      method: "POST",
+      body: {
+        MID: userData.MID,
+        Token: userData.Token,
+        MAID: userData.MAID,
+        Mobile: userData.Mobile,
+        Lang: "zhtw",
+        ProductID: productId,
+      },
+    });
+
+    if (data.value?.Result === "OK" && data.value?.RetMaSingleProduct) {
+      productData.value = data.value.RetMaSingleProduct;
+    }
+  } catch (error) {
+    console.error("獲取商品詳情失敗：", error);
+  }
+};
+
+const addToCart = async () => {
+  try {
+    const { data } = await useFetch("https://23700999.com:8081/HMA/api/fr/maCart", {
+      method: "POST",
+      body: {
+        MID: userData.MID,
+        Token: userData.Token,
+        MAID: userData.MAID,
+        Mobile: userData.Mobile,
+        Lang: "zhtw",
+        Cart: [
+          {
+            ProductID: productId,
+            Qty: quantity.value.toString(),
+          },
+        ],
+      },
+    });
+
+    if (data.value?.Result === "OK") {
+      console.log("成功加入購物車");
+      closeAddCartAlert();
+    }
+  } catch (error) {
+    console.error("加入購物車失敗：", error);
+  }
+};
+
+const buyNow = async () => {
+  try {
+    const { data } = await useFetch("https://23700999.com:8081/HMA/api/fr/maCart", {
+      method: "POST",
+      body: {
+        MID: userData.MID,
+        Token: userData.Token,
+        MAID: userData.MAID,
+        Mobile: userData.Mobile,
+        Lang: "zhtw",
+        Cart: [
+          {
+            ProductID: productId,
+            Qty: quantity.value.toString(),
+          },
+        ],
+      },
+    });
+
+    if (data.value?.Result === "OK") {
+      console.log("成功加入購物車");
+      router.push("/cart/cartList");
+    }
+  } catch (error) {
+    console.error("立即購買失敗：", error);
+  }
+};
+
+const showAddCart = () => {
+  showAddCartAlert.value = true;
+};
+
+const showBuyNow = () => {
+  showBuyCartAlert.value = true;
+};
+
+const closeAddCartAlert = () => {
+  showAddCartAlert.value = false;
+  quantity.value = 1;
+};
+
+const closeBuyCartAlert = () => {
+  showBuyCartAlert.value = false;
+  quantity.value = 1;
+};
+
 const decreaseQty = () => {
   if (quantity.value > 1) quantity.value--;
 };
+
 const increaseQty = () => {
   if (quantity.value < 100) quantity.value++;
 };
+
+onMounted(() => {
+  fetchProductDetail();
+});
 </script>
 
 <style scoped lang="scss">
@@ -132,6 +232,9 @@ const increaseQty = () => {
   flex-direction: column;
   place-items: center;
   padding: 0 2.5% 72px;
+  .productCartContentGroup{
+    width: 100%;
+  }
   .productCartContent {
     width: 100%;
     margin-top: 1rem;

@@ -1,7 +1,7 @@
 <template>
   <div class="addAddressWrap">
-    <CartTitleBar title="新增地址" />
-    <h5>聯繫</h5>
+    <CartTitleBar title="新增地址" backPath="/cart/payMethod" />
+    <h5>收件人</h5>
     <div class="addAddressGroup1">
       <div class="nameGroup">
         <img class="icon1" src="/assets/imgs/user.svg" alt="" />
@@ -13,8 +13,8 @@
       </div>
       <div class="phoneGroup">
         <img class="icon1" src="/assets/imgs/phone.svg" alt="" />
-        <input type="text" :value="phone" disabled />
-        <img class="icon2" src="/assets/imgs/noWrap.svg" alt="" />
+        <input type="text" v-model="phone"  />
+     
       </div>
     </div>
     <h5>寄送地址</h5>
@@ -56,21 +56,59 @@
       </div>
     </div>
     <div class="btnGroup">
-      <button>確認</button>
+      <button @click="addresseeAddress">確認</button>
     </div>
   </div>
 </template>
 <script setup>
 import { ref, onMounted } from "vue";
+const router = useRouter();
 
+const userData = JSON.parse(localStorage.getItem("userData"));
 // 地址相關資料
 const citiesData = ref([]);
 const selectedCity = ref("");
 const selectedArea = ref("");
 const filteredAreas = ref([]);
 const inputAddress = ref("");
-const localName = ref("");
-const phone = ref("");
+const localName = ref(userData.Name);
+const phone = ref(userData.Mobile);
+
+
+const addressee = async function(){
+  const res = await useFetch("https://23700999.com:8081/HMA/api/fr/maNewCName", {
+    method: "POST",
+    body: {
+      MID: userData.MID,
+      Token: userData.Token,
+      MAID: userData.MAID,
+      Mobile: userData.Mobile,
+      RName : localName.value, 
+      RMobile : phone.value  ,
+      Address : selectedCity.value + selectedArea.value + inputAddress.value,
+    },
+  });
+}
+
+
+const addresseeAddress = async function(){
+
+  if(!selectedCity.value){
+    alert("請選擇縣市");
+    return;
+  }
+  if(!selectedArea.value){
+    alert("請選擇鄉鎮地區");
+    return;
+  }
+  if(!inputAddress.value){
+    alert("請輸入地址");
+    return;
+  }
+  await addressee();
+  router.push("/cart/payMethod");
+
+}
 
 // 載入城市資料
 onMounted(async () => {

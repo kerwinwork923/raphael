@@ -1,20 +1,53 @@
 <template>
-  <div class="invoiceSelect1Wrap">
-    <CartTitleBar title="編輯載具" />
+  <div class="invoiceSelect1Wrap" >
+    <CartTitleBar title="編輯載具" href="/cart/invoiceType" />
     <h5>請輸入您常用的載具號碼</h5>
     <div class="invoiceSelect2InputGroup">
       <div class="invoiceGroup">
         <img class="icon1" src="/assets/imgs/cart/cloudy.svg" alt="" />
-        <input type="text" placeholder="請輸入載具號碼" />
+        <input type="text" v-model="invoiceContent" placeholder="請輸入載具號碼" />
       </div>
     </div>
     <div class="btnGroup">
-      <button>提交</button>
+      <button @click="submit">提交</button>
     </div>
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+const router = useRouter();
+const invoiceContent = ref("");
+const userData = JSON.parse(localStorage.getItem("userData"));
+const setInvoice = async function(){
+  const res = await useFetch("https://23700999.com:8081/HMA/api/fr/maSetInvoice", {
+    method: "POST",
+    body: {
+      MID: userData.MID,
+      Token: userData.Token,
+      MAID: userData.MAID,
+      Mobile: userData.Mobile,
+      Lang: "zhtw",
+      InvoiceID : "2", // 1:電子發票2.載具3.三聯式發票
+      Content : invoiceContent.value,
+    },
+  });
+}
+
+const submit = async function(){
+ // 載具格式以「/」開頭，共8碼（包含符號）
+ if(!invoiceContent.value.startsWith("/")){
+    alert("載具格式錯誤");
+    return;
+  }
+  if(invoiceContent.value.length !== 8){
+    alert("載具號碼長度錯誤");
+    return;
+  }
+
+  await setInvoice();
+  router.push("/cart/invoiceType");
+}
+</script>
 <style lang="scss" scoped>
 .invoiceSelect1Wrap {
   background-color: #f6f6f6;

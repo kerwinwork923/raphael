@@ -2,13 +2,15 @@
   <div class="cartWrap">
     <CartTitleBar title="商品列表" :showCart="true" backPath="/user" />
     <div class="cartContentGroup">
-      <div class="cartContentItem" v-for="item in cartItems" :key="item.id">
-        <img :src="item.img" :alt="item.name" />
-        <h3>{{ item.name }}</h3>
-        <h6>NT$1000</h6>
-        <small>剩下100件</small>
-        <div class="cartContentItemTag">7天保障</div>
-      </div>
+    
+      <a :href="`/cart/product${item.ProductID}?`" class="cartContentItem" v-for="item in cartItems" :key="item.ProductID">
+        <img :src="item.FPicture" :alt="item.ProductName" />
+        <h3>{{ item.ProductName }}</h3>
+        <h6>NT${{ item.Price }}</h6>
+        <small>{{ item.DeliverName }}</small>
+        <div class="cartContentItemTag">{{ item.Label }}</div>
+      </a>
+ 
     </div>
   </div>
 </template>
@@ -16,10 +18,7 @@
 <script setup>
 import { useSeo } from "~/composables/useSeo";
 import { ref } from "vue";
-import test1 from "~/assets/imgs/cart/test1.png";
-import test2 from "~/assets/imgs/cart/test2.png";
-import test3 from "~/assets/imgs/cart/test3.png";
-import test4 from "~/assets/imgs/cart/test4.png";
+
 import CartTitleBar from "~/components/cart/CartTitleBar.vue";
 
 useSeo({
@@ -29,28 +28,33 @@ useSeo({
   url: "https://neuroplus.com.tw/cart",
 });
 
-const cartItems = ref([
-  {
-    id: 1,
-    name: "方案一",
-    img: test1,
-  },
-  {
-    id: 2,
-    name: "方案二",
-    img: test2,
-  },
-  {
-    id: 3,
-    name: "方案三",
-    img: test3,
-  },
-  {
-    id: 4,
-    name: "方案四",
-    img: test4,
-  },
-]);
+const userData = JSON.parse(localStorage.getItem("userData"));
+const cartItems = ref([]);
+
+const fetchProductList = async () => {
+  try {
+    const { data } = await useFetch("https://23700999.com:8081/HMA/api/fr/maProduct", {
+      method: "POST",
+      body: {
+        MID: userData.MID,
+        Token: userData.Token,
+        MAID: userData.MAID,
+        Mobile: userData.Mobile,
+        Lang: "zhtw",
+      },
+    });
+    
+    if (data.value?.Result === "OK" && data.value?.RetMaProduct) {
+      cartItems.value = data.value.RetMaProduct;
+    }
+  } catch (error) {
+    console.error("獲取商品列表失敗：", error);
+  }
+};
+
+onMounted(() => {
+  fetchProductList();
+});
 </script>
 
 <style scoped lang="scss">

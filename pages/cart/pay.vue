@@ -1,55 +1,55 @@
 <template>
   <div class="payWrap">
     <Privacy :visible="showPrivacy" @update:visible="showPrivacy = $event" />
-    <CartTitleBar title="結帳" />
+    <CartTitleBar title="結帳" backPath="/cart/cartList" :showCart="false"/>
     <div class="payContentWrap">
       <div class="payContent">
-        <div class="seleteItem">
+        <div class="seleteItem" v-for="item in cartList" :key="item.ProductID">
           <div class="seleteItemGroup1">
-            <img src="~/assets/imgs/cart/test1.png" alt="" />
+            <img :src="item.Picture" :alt="item.ProductName" />
             <div class="seleteItemGroup1Text">
-              <h3>方案一</h3>
-              <h6>NT$9,999</h6>
+              <h3>{{ item.ProductName }}</h3>
+              <h6>NT${{ item.Price }}</h6>
             </div>
           </div>
-          <div class="seleteItemGroup2">x1</div>
-        </div>
-        <div class="seleteItem">
-          <div class="seleteItemGroup1">
-            <img src="~/assets/imgs/cart/test1.png" alt="" />
-            <div class="seleteItemGroup1Text">
-              <h3>方案一</h3>
-              <h6>NT$9,999</h6>
-            </div>
-          </div>
-          <div class="seleteItemGroup2">x1</div>
+          <div class="seleteItemGroup2">x{{ item.Qty }}</div>
         </div>
         <div class="payContentHR"></div>
         <div class="sendMethod">
           <h5>寄送方式</h5>
-          <h6>查看更多 <img src="~/assets/imgs/cart/goNext.svg" alt="" /></h6>
+          <h6 @click="router.push('/cart/payMethod')">查看更多 <img src="~/assets/imgs/cart/goNext.svg" alt="" /></h6>
         </div>
-        <div class="sendContnet">
+        <div class="sendContnet" v-if="selectedAddress && deliverList.length > 0">
+          <div class="sendContnetTitle">
+            <h5>{{ deliverList[0].Name }}</h5>
+            <small>運費 NT$100</small>
+          </div>
+          <p>預計 3~5 個工作天</p>
+          <p>{{ selectedAddress.Address }}</p>
+          <p>{{ selectedAddress.RName }}．{{ selectedAddress.RMobile }}</p>
+        </div>
+        <div class="sendContnet" v-else @click="router.push('/cart/payMethod')">
           <div class="sendContnetTitle">
             <h5>黑貓宅配</h5>
             <small>運費 NT$100</small>
           </div>
-          <p>預計 3~5 個工作天</p>
-          <p>100 台北市中正區忠孝西路一段66號30樓</p>
-          <p>王先生．0912 345 678</p>
+          <p>請新增寄送地址</p>
         </div>
+
         <div class="payContentHR"></div>
         <div class="totalPriceGroup">
-          <h4>2個商品</h4>
-          <h5>NT$9,999</h5>
+          <h4>{{ productCount }}個商品</h4>
+          <h5>NT${{ totalAmount }}</h5>
         </div>
       </div>
       <div class="payContent">
         <h3>付款方式</h3>
-        <h5>
+        <!-- 前端固定線上付款 -->
+        <h5 >
           <img src="/assets/imgs/cart/cash.svg" alt="" />
           線上付款
         </h5>
+
       </div>
       <div class="payContent">
         <h3>付款詳情</h3>
@@ -59,7 +59,7 @@
         </div>
         <div class="totalPayGroup">
           <h5>訂單總金額</h5>
-          <h6>NT$19,998</h6>
+          <h6>NT${{ totalAmount }}</h6>
         </div>
       </div>
       <div class="payContent">
@@ -72,13 +72,14 @@
       <div class="payContent">
         <div class="payContentTitleGroup">
           <h3>發票類型</h3>
-          <h6>查看更多 <img src="~/assets/imgs/cart/goNext.svg" alt="" /></h6>
+          <h6 @click="router.push('/cart/invoiceType')">查看更多 <img src="~/assets/imgs/cart/goNext.svg" alt="" /></h6>
         </div>
-        <h5>電子發票 xxxxxx@gmail.com</h5>
+        <h5 v-if="selectedInvoice">{{ selectedInvoice.Desc22 }} {{ selectedInvoice.Content }}</h5>
+        <h5 v-else @click="router.push('/cart/invoiceType')" style="cursor: pointer">請選擇發票類型</h5>
       </div>
       <div class="payContent payContentCheckout">
-        <div class="allPrice">總付款金額 NT$19,998</div>
-        <button>結帳</button>
+        <div class="allPrice">總付款金額 NT${{ finalTotal }}</div>
+        <button @click="checkout">結帳</button>
       </div>
       <div class="privacyGroup">
         結帳完成視為已同意
@@ -89,9 +90,250 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import CartTitleBar from "~/components/cart/CartTitleBar.vue";
 import Privacy from "~/components/Privacy.vue";
+import { useCheckoutStore } from "~/stores/checkout";
+
+const router = useRouter();
+const route = useRoute();
+const checkoutStore = useCheckoutStore();
+const userData = JSON.parse(localStorage.getItem("userData"));
+
+if (!userData) {
+  router.push("/user");
+}
+const cartList = ref([]);
+const totalAmount = ref(0);
+const shippingFee = ref(100); // 假設運費
+
+const payList = ref([]);
+const deliverList = ref([]);
+const returnPolicyList = ref([]);
+const crNameList = ref([]);
+const mInvoiceList = ref([]);
+
+const selectedAddress = ref(null);
+const selectedInvoice = ref(null);
+const selectedPayment = ref(null);
+
+const updateSelectedItems = () => {
+  console.log("更新選擇項目，Pinia 地址ID:", checkoutStore.selectedAddressId);
+  console.log("更新選擇項目，Pinia 發票ID:", checkoutStore.selectedInvoiceId);
+  
+  // 寄送方式：如果 Pinia 有值就用 Pinia 的，否則用最新的地址
+  if (checkoutStore.selectedAddressId && crNameList.value.length > 0) {
+    selectedAddress.value = crNameList.value.find((addr) => 
+      String(addr.AID) === String(checkoutStore.selectedAddressId)
+    );
+    console.log("找到選擇的地址:", selectedAddress.value);
+  } else if (crNameList.value.length > 0) {
+    const sortedAddresses = crNameList.value.sort((a, b) => 
+      new Date(b.CheckTime) - new Date(a.CheckTime)
+    );
+    selectedAddress.value = sortedAddresses[0];
+    console.log("使用預設地址:", selectedAddress.value);
+  }
+
+  // 付款方式：使用 PayList 的第一個
+  if (payList.value.length > 0) {
+    selectedPayment.value = payList.value[0];
+  }
+
+  // 發票：如果 Pinia 有值就用 Pinia 的，否則用 MInvoiceList 的第一個
+  if (checkoutStore.selectedInvoiceId && mInvoiceList.value.length > 0) {
+    selectedInvoice.value = mInvoiceList.value.find((inv) => 
+      String(inv.AID) === String(checkoutStore.selectedInvoiceId)
+    );
+    console.log("找到選擇的發票:", selectedInvoice.value);
+  } else if (mInvoiceList.value.length > 0) {
+    selectedInvoice.value = mInvoiceList.value[0];
+    console.log("使用預設發票:", selectedInvoice.value);
+  }
+};
+
+const fetchCartList = async () => {
+  try {
+    const { data } = await useFetch("https://23700999.com:8081/HMA/api/fr/maGetCart", {
+      method: "POST",
+      body: {
+        MID: userData.MID,
+        Token: userData.Token,
+        MAID: userData.MAID,
+        Mobile: userData.Mobile,
+        Lang: "zhtw",
+      },
+    });
+
+
+    if (data.value?.Result === "OK") {
+      const result = data.value;
+      console.log("購物車資料獲取完成:", result);
+      if (result.RetMaCart.length === 0) {
+        router.push("/cart");
+      }
+      cartList.value = result.RetMaCart || [];
+
+      totalAmount.value = result.TotalAmount || 0;
+
+      console.log("購物車資料獲取完成:", cartList.value);
+    }
+  } catch (error) {
+    console.error("獲取購物車列表失敗：", error);
+  }
+};
+
+const fetchRelatedData = async () => {
+  try {
+    const { data } = await useFetch("https://23700999.com:8081/HMA/api/fr/maGetRelated", {
+      method: "POST",
+      body: {
+        MID: userData.MID,
+        Token: userData.Token,
+        MAID: userData.MAID,
+        Mobile: userData.Mobile,
+        Lang: "zhtw",
+      },
+    });
+
+    if (data.value?.Result === "OK") {
+      const result = data.value;
+      payList.value = result.PayList || [];
+      deliverList.value = result.DeliverList || [];
+      returnPolicyList.value = result.ReturnPolicyList || [];
+      crNameList.value = result.CRNameList || [];
+      mInvoiceList.value = result.MInvoiceList || [];
+
+      console.log("相關資料獲取完成，地址列表:", crNameList.value);
+      console.log("相關資料獲取完成，發票列表:", mInvoiceList.value);
+      
+      updateSelectedItems();
+    }
+  } catch (error) {
+    console.error("獲取相關資料失敗：", error);
+  }
+};
+
+const loadAllData = async () => {
+  await Promise.all([
+    fetchCartList(),
+    fetchRelatedData()
+  ]);
+};
+
+// 監聽 Pinia store 的變化
+watch(() => [checkoutStore.selectedAddressId, checkoutStore.selectedInvoiceId], () => {
+  console.log("Pinia store 變化 detected");
+  if (crNameList.value.length > 0 || mInvoiceList.value.length > 0) {
+    updateSelectedItems();
+  }
+}, { immediate: true });
+
+// 監聽路由變化，當返回此頁面時重新獲取資料
+watch(() => route.path, (newPath) => {
+  if (newPath === '/cart/pay') {
+    console.log("返回結帳頁面，重新獲取資料");
+    loadAllData();
+  }
+});
+
+const productCount = computed(() => {
+  return cartList.value.reduce((total, item) => total + parseInt(item.Qty, 10), 0);
+});
+
+const finalTotal = computed(() => {
+  return (parseInt(totalAmount.value, 10) || 0) + shippingFee.value;
+});
+
+const checkout = async () => {
+  try {
+    // 檢查必要資料
+    if (!selectedAddress.value) {
+      alert("請選擇寄送地址");
+      return;
+    }
+
+    if (!selectedInvoice.value) {
+      alert("請選擇發票類型");
+      return;
+    }
+
+    // 準備購物車資料
+    const cartData = cartList.value.map(item => ({
+      ProductID: item.ProductID,
+      Qty: item.Qty
+    }));
+
+    // 準備結帳資料
+    const checkoutData = {
+      MID: userData.MID,
+      Token: userData.Token,
+      MAID: userData.MAID,
+      Mobile: userData.Mobile,
+      Lang: "zhtw",
+      Cart: cartData,
+      freight: shippingFee.value.toString(),
+      DeliverType: deliverList.value[0]?.Type || "1",
+      PayType: payList.value[0]?.Type || "1",
+      ReturnPolicyType: returnPolicyList.value[0]?.Type || "1",
+      InvoiceID: selectedInvoice.value.InvoiceID,
+      RName: selectedAddress.value.RName,
+      RMobile: selectedAddress.value.RMobile,
+      Address: selectedAddress.value.Address
+    };
+
+    console.log("結帳資料:", checkoutData);
+
+    const { data } = await useFetch("https://23700999.com:8081/HMA/api/fr/maCheckoutCart", {
+      method: "POST",
+      body: checkoutData,
+    });
+
+    if (data.value?.Result === "OK") {
+      console.log("結帳成功:", data.value);
+      
+      // 處理綠界金流表單
+      // if (data.value.htmlForm) {
+      //   // 解碼 HTML 表單
+      //   const decodedHtml = decodeURIComponent(data.value.htmlForm);
+      //   console.log("解碼後的 HTML 表單:", decodedHtml);
+        
+      //   // 創建一個臨時的 div 來放置表單
+      //   const tempDiv = document.createElement('div');
+      //   tempDiv.innerHTML = decodedHtml;
+      //   tempDiv.style.display = 'none';
+        
+      //   // 將表單添加到頁面
+      //   document.body.appendChild(tempDiv);
+        
+      //   // 找到表單並自動提交
+      //   const form = tempDiv.querySelector('form');
+      //   if (form) {
+      //     console.log("找到付款表單，準備提交");
+      //     form.submit();
+      //   } else {
+      //     console.error("未找到付款表單");
+      //     alert("付款表單載入失敗");
+      //   }
+      // } else {
+      //   alert("結帳成功！");
+      //   router.push("/cart/Finish");
+      // }
+    } else {
+      console.error("結帳失敗:", data.value);
+      alert(`結帳失敗: ${data.value?.Message || "未知錯誤"}`);
+    }
+  } catch (error) {
+    console.error("結帳時發生錯誤：", error);
+    alert("結帳時發生錯誤，請稍後再試");
+  }
+};
+
+onMounted(() => {
+  console.log("結帳頁面 mounted");
+  loadAllData();
+});
 
 const showPrivacy = ref(false);
 </script>
@@ -369,3 +611,4 @@ const showPrivacy = ref(false);
   }
 }
 </style>
+

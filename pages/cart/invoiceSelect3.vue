@@ -1,20 +1,50 @@
 <template>
-  <div class="invoiceSelect1Wrap">
-    <CartTitleBar title="編輯三聯式發票" />
+  <div class="invoiceSelect1Wrap" >
+    <CartTitleBar title="編輯三聯式發票" href="/cart/invoiceType" />
     <h5>請輸入您常用的信箱</h5>
     <div class="invoiceSelect3InputGroup">
       <div class="invoiceGroup">
         <img class="icon1" src="/assets/imgs/mail.svg" alt="" />
-        <input type="email" placeholder="請輸入信箱" />
+        <input type="email" v-model="invoiceContent" placeholder="請輸入信箱" />
       </div>
     </div>
     <div class="btnGroup">
-      <button>提交</button>
+      <button @click="submit">提交</button>
     </div>
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+const router = useRouter();
+const invoiceContent = ref("");
+const userData = JSON.parse(localStorage.getItem("userData"));
+const setInvoice = async function(){
+  const res = await useFetch("https://23700999.com:8081/HMA/api/fr/maSetInvoice", {
+    method: "POST",
+    body: {
+      MID: userData.MID,
+      Token: userData.Token,
+      MAID: userData.MAID,
+      Mobile: userData.Mobile,
+      Lang: "zhtw",
+      InvoiceID : "3", // 1:電子發票2.載具3.三聯式發票
+      Content : invoiceContent.value,
+    },
+  });
+}
+const submit = async function(){
+  if(!invoiceContent.value){
+    alert("請輸入信箱");
+    return;
+  }
+  if(!invoiceContent.value.includes("@")){
+    alert("請輸入正確的信箱");
+    return;
+  }
+  await setInvoice();
+  router.push("/cart/invoiceType");
+}
+</script>
 <style lang="scss" scoped>
 .invoiceSelect1Wrap {
   background-color: #f6f6f6;

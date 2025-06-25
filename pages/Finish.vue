@@ -1,7 +1,10 @@
 <template>
   <RaphaelLoading v-if="isLoading" />
   <div class="finishWrap">
-    <Navbar v-if="route.query.Version !== 'Detail'" />
+    <div class="finishGroup">
+
+
+   <Navbar v-if="route.query.Version !== 'Detail'" /> 
     <div
       class="finishTitleMenu"
       v-if="route.query.Version === 'Detail'"
@@ -71,7 +74,9 @@
 
 
 
-    <div class="subBtnGroup" v-if="!hasUID && route.query.Version !== 'Detail'">
+
+  </div>
+  <div class="subBtnGroup" v-if="!hasUID && route.query.Version !== 'Detail'">
       <router-link to="/HRVHistoryAll">
         <button class="backToUserBtn">HRV歷史紀錄</button>
       </router-link>
@@ -367,7 +372,10 @@ $border-radius: 12px;
   background-size: cover;
   min-height: 100vh;
   width: 100%;
-
+  .finishGroup{
+    max-width: 976px;
+    margin: 0 auto;
+  }
   padding-bottom: 116px;
 }
 
