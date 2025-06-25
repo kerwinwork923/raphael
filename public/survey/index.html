@@ -1090,14 +1090,24 @@
 
           // 簡單問卷 API 參數
           const SSurveyParams = {
-            UUID: UUID.toString || "",
-            Type: dominantType.toString || "",
-            Timestamp: timestamp.toString,
-            TypeCount: typeCount.toString,
-            UserAgent: navigator.userAgent.toString,
+            UUID: String(UUID || ""),
+            Type: String(dominantType || ""),
+            Timestamp: String(timestamp || ""),
+            TypeCount: JSON.stringify(typeCount || {}),
+            UserAgent: String(navigator.userAgent || ""),
           };
 
+          // 除錯訊息
+          console.log("原始資料：", {
+            UUID: UUID,
+            Type: dominantType,
+            Timestamp: timestamp,
+            TypeCount: typeCount,
+            UserAgent: navigator.userAgent
+          });
+          console.log("轉換後資料：", SSurveyParams);
           console.log("傳送資料：", JSON.stringify(SSurveyParams));
+          
           // 呼叫 SSurvey API 寫入資料庫
           fetch("https://23700999.com:8081/HMA/api/fr/Ssurvey", {
             method: "POST",
@@ -1107,6 +1117,9 @@
             .then((res) => res.json())
             .then((data) => {
               console.log("簡單問卷 API 回傳：", data);
+            })
+            .catch((error) => {
+              console.error("簡單問卷 API 錯誤：", error);
             });
 
           // Show the corresponding result
