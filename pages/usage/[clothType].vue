@@ -168,11 +168,7 @@
           <div class="detect">
             <div class="timeGroup">
               <!-- 🔸 watchClick：點擊「左側圖示」 -> `handleWatchClick` -->
-              <div
-                class="timeIcon"
-           
-                style="cursor: pointer"
-              >
+              <div class="timeIcon" style="cursor: pointer">
                 <img
                   src="../../assets/imgs/detectTime.svg"
                   alt="查看健康數據"
@@ -196,6 +192,7 @@
                 class="resultText"
                 :style="{ cursor: 'pointer' }"
                 @click="handleDetectClick(item)"
+                v-if="item.FlagState === 'completed'"
               >
                 分析結果
               </div>
@@ -207,6 +204,7 @@
                 fill="none"
                 :style="{ cursor: 'pointer' }"
                 @click="handleDetectClick(item)"
+                v-if="item.FlagState === 'completed'"
               >
                 <path
                   d="M5.99159 3.37719L11.4726 8.99994L5.99159 14.6227C5.89346 14.7232 5.83853 14.858 5.83853 14.9984C5.83853 15.1389 5.89346 15.2737 5.99159 15.3742C6.03925 15.4228 6.09613 15.4615 6.15891 15.4879C6.2217 15.5142 6.28911 15.5278 6.35721 15.5278C6.42531 15.5278 6.49273 15.5142 6.55551 15.4879C6.61829 15.4615 6.67518 15.4228 6.72284 15.3742L12.5548 9.39257C12.6572 9.28752 12.7145 9.14664 12.7145 8.99994C12.7145 8.85325 12.6572 8.71236 12.5548 8.60732L6.72396 2.62569C6.67627 2.57671 6.61924 2.53777 6.55625 2.51119C6.49326 2.4846 6.42558 2.4709 6.35721 2.4709C6.28884 2.4709 6.22116 2.4846 6.15817 2.51119C6.09518 2.53777 6.03816 2.57671 5.99046 2.62569C5.89234 2.72615 5.8374 2.86101 5.8374 3.00144C5.8374 3.14187 5.89234 3.27673 5.99046 3.37719Z"
@@ -415,7 +413,7 @@ export default {
       const totalMinutes = Math.round((end - start) / 60000);
       const hours = Math.floor(totalMinutes / 60);
       const minutes = totalMinutes % 60;
-      
+
       if (hours > 0) {
         return `${hours}小時${minutes}分鐘`;
       }
@@ -436,8 +434,10 @@ export default {
 
     // 「分析結果」按鈕
     function handleDetectClick(item) {
-      // 進入檢測結果頁
-      router.push(`/usageHRVResult/${item.UID}`);
+   
+        router.push(`/usageHRVResult/${item.UID}`);
+  
+
     }
 
     // 「左側小錶」圖示 => 查看健康數據
