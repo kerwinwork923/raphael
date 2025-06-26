@@ -959,7 +959,7 @@
         const closeModal = document.getElementById("close-modal");
         const modalContent = document.getElementById("modal-content");
         const contactBtn = document.getElementById("contact-btn");
-        const UUID = getOrCreateVisitorID();
+        const UUID = getOrCreateVisitorID(); // 將 UUID 定義為全域變數
         
         // 會員相關元素
         const memberModal = document.getElementById("member-modal");
@@ -1041,8 +1041,6 @@
             currentQuestionEl.querySelectorAll(".option-btn").forEach((btn) => {
               btn.classList.remove("selected");
             });
-            const UUID = getOrCreateVisitorID();
-            console.log("UUID:", UUID);
             // Mark this option as selected
             this.classList.add("selected");
 
@@ -1287,6 +1285,11 @@
                 const data = await res.json();
                 console.log("驗證碼API回傳：", data); // 加入除錯訊息
                 
+                // 詳細除錯訊息
+                console.log("data.Result:", data.Result, "類型:", typeof data.Result);
+                console.log("data.PASS:", data.PASS, "類型:", typeof data.PASS);
+                console.log("判斷條件:", data.Result === "OK" && data.PASS === "OK");
+                
                 // 修正驗證邏輯：需要同時檢查 PASS 和 Result
                 if (data.Result === "OK" && data.PASS === "OK") {
                   // 驗證成功，切換到第二步
@@ -1372,6 +1375,50 @@
                 console.log("AA5 API 回傳：", data);
                 
                 if (data.Result === "OK") {
+                  // 註冊成功後，調用 surveymapping API 進行 UUID 綁定
+                  try {
+                    const surveyMappingParams = {
+                      MID: userSession.MID,
+                      Token: userSession.Token,
+                      MAID: userSession.MAID,
+                      Mobile: userSession.Mobile,
+                      Lang: "zhtw", // 繁體中文
+                      UUID: UUID // 從 getOrCreateVisitorID() 獲得的 UUID
+                    };
+                    
+                    console.log("SurveyMapping API 傳送資料：", surveyMappingParams);
+                    
+                    const mappingRes = await fetch("https://23700999.com:8081/HMA/api/fr/surveymapping", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(surveyMappingParams)
+                    });
+                    
+                    const mappingData = await mappingRes.json();
+                    console.log("SurveyMapping API 回傳：", mappingData);
+                    
+                    if (mappingData.Result === "OK") {
+                      console.log("UUID 與會員資料綁定成功");
+                    } else {
+                      console.warn("UUID 綁定失敗：", mappingData.Message || "未知錯誤");
+                    }
+                  } catch (mappingError) {
+                    console.error("SurveyMapping API 錯誤：", mappingError);
+                    // 不阻擋主要流程，只記錄錯誤
+                  }
+                  
+                  // 將會員資料存到 localStorage 供 csurvey.html 使用
+                  const userData = {
+                    MID: userSession.MID,
+                    Token: userSession.Token,
+                    MAID: userSession.MAID,
+                    Mobile: userSession.Mobile,
+                    Name: name,
+                    Sex: gender === "male" ? "1" : "2"
+                  };
+                  
+                  localStorage.setItem("userData", JSON.stringify(userData));
+                  console.log("會員資料已儲存到 localStorage：", userData);
 
                   memberModalStep2.classList.add("hidden");
                   

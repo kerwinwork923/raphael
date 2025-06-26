@@ -201,7 +201,7 @@
                 width="18"
                 height="18"
                 viewBox="0 0 18 18"
-                fill="none"
+                fill="none" 
                 :style="{ cursor: 'pointer' }"
                 @click="handleDetectClick(item)"
                 v-if="item.FlagState === 'completed'"

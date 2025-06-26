@@ -1422,59 +1422,60 @@ function handleRadioButtonClick(event) {
      let userData = {};
      userData = JSON.parse(localStorage.getItem("userData"));  
       // 複雜問卷 API 參數
+      //幫我都轉成字串
      const CSurveyParams = {
-       // MID: userData.MID || "",
-       // Token: userData.Token || "",
-       // Mobile: userData.Mobile || "",
-        SleepqualityScore:sleepqualityScore,  //睡眠品質分數
-        Sleepquality:sleepquality,   //睡眠品質
-        Sleeplatency:sleeplatency,  //睡眠潛伏期
-        Sleepduration:psleepduration, //睡眠時數
-        Sleepefficiency:sleepefficiency, //睡眠效率
-        SleepDifficulty:sleepDifficulty,  //睡眠困擾
-        SleepMedicineScore:SleepMedicineScore,  //安眠藥物使用
-        Daytimedisability:daytimedisability,   //日間活動失能
-        ConstipationScore:constipationScore,  //功能性便秘分數
-        StressScore:stressScore,  //目前壓力狀態分數
-        AnsScore:ansScore,   //目前焦慮狀態分數
-        NeedDoctor:needDoctor, //需要轉介醫師
+       MID: userData?.MID || "",
+       Token: userData?.Token || "",
+       Mobile: userData?.Mobile || "",
+        SleepqualityScore:sleepqualityScore.toString(),  //睡眠品質分數
+        Sleepquality:sleepquality.toString(),   //睡眠品質
+        Sleeplatency:sleeplatency.toString(),  //睡眠潛伏期
+        Sleepduration:psleepduration.toString(), //睡眠時數
+        Sleepefficiency:sleepefficiency.toString(), //睡眠效率
+        SleepDifficulty:sleepDifficulty.toString(),  //睡眠困擾
+        SleepMedicineScore:SleepMedicineScore.toString(),  //安眠藥物使用
+        Daytimedisability:daytimedisability.toString(),   //日間活動失能
+        ConstipationScore:constipationScore.toString(),  //功能性便秘分數
+        StressScore:stressScore.toString(),  //目前壓力狀態分數
+        AnsScore:ansScore.toString(),   //目前焦慮狀態分數
+        NeedDoctor:needDoctor.toString(), //需要轉介醫師
         SelectMeds: selectedMeds.join("，"), //選取的藥物
-        Q1:pst,
-        Q2:getValueForQuestion("fall_asleep_time"),
-        Q3:psleepduration,
-        Q4:getValueForQuestion("sleep_difficulty"),
-        Q5:getValueForQuestion("wake_up_night"),
-        Q5a:nightwakeDetail,
-        Q6:getValueForQuestion("bathroom_wake"),
-        Q6a:bathroomDetail,
-        Q7:getValueForQuestion("snooze_wake"),
-        Q8:getValueForQuestion("nightmare_wake"),
-        Q9:getValueForQuestion("pain_wake"),
-        Q10:SleepMedicineScore,
-        Q11:getValueForQuestion("daytime_sleepiness"),
-        Q12:getValueForQuestion("daytime_nopower"),
-        q13:sleepqualityScore,
-        Q14:getValueForQuestion("constipation_effort"),
-        Q15:getValueForQuestion("constipation_hard"),
-        Q16:getValueForQuestion("constipation_incomplete"),
-        Q17:getValueForQuestion("constipation_frequency"),
-        Q18:getValueForQuestion("constipation_distension"),
-        Q19:getValueForQuestion("stress_control"),
-        Q20:getValueForQuestion("stress_overwhelm"),
-        Q21:getValueForQuestion("stress_plan"),
-        Q22:getValueForQuestion("stress_daily"),
-        Q23:getValueForQuestion("ans_dry_mouth"),
-        Q24:getValueForQuestion("ans_breathing"),
-        Q25:getValueForQuestion("ans_fear"),
-        Q26:getValueForQuestion("ans_trembling"),
-        Q27:getValueForQuestion("ans_worry"),
-        Q28:getValueForQuestion("ans_restless"),
-        Q29:getValueForQuestion("ans_heart")
+        Q1:pst.toString(),
+        Q2:getValueForQuestion("fall_asleep_time").toString(),
+        Q3:psleepduration.toString(),
+        Q4:getValueForQuestion("sleep_difficulty").toString(),
+        Q5:getValueForQuestion("wake_up_night").toString(),
+        Q5a:nightwakeDetail.toString(),
+        Q6:getValueForQuestion("bathroom_wake").toString(),
+        Q6a:bathroomDetail.toString(),
+        Q7:getValueForQuestion("snooze_wake").toString(),
+        Q8:getValueForQuestion("nightmare_wake").toString(),
+        Q9:getValueForQuestion("pain_wake").toString(),
+        Q10:SleepMedicineScore.toString(),
+        Q11:getValueForQuestion("daytime_sleepiness").toString(),
+        Q12:getValueForQuestion("daytime_nopower").toString(),
+        q13:sleepqualityScore.toString(),
+        Q14:getValueForQuestion("constipation_effort").toString(),
+        Q15:getValueForQuestion("constipation_hard").toString(),
+        Q16:getValueForQuestion("constipation_incomplete").toString(),
+        Q17:getValueForQuestion("constipation_frequency").toString(),
+        Q18:getValueForQuestion("constipation_distension").toString(),
+        Q19:getValueForQuestion("stress_control").toString(),
+        Q20:getValueForQuestion("stress_overwhelm").toString(),
+        Q21:getValueForQuestion("stress_plan").toString(),
+        Q22:getValueForQuestion("stress_daily").toString(),
+        Q23:getValueForQuestion("ans_dry_mouth").toString(),
+        Q24:getValueForQuestion("ans_breathing").toString(),
+        Q25:getValueForQuestion("ans_fear").toString(),
+        Q26:getValueForQuestion("ans_trembling").toString(),
+        Q27:getValueForQuestion("ans_worry").toString(),
+        Q28:getValueForQuestion("ans_restless").toString(),
+        Q29:getValueForQuestion("ans_heart").toString()
       };
       
       console.log("傳送資料：", JSON.stringify(CSurveyParams));
     // 呼叫 CSurvey API 寫入資料庫
-    /*fetch("https://23700999.com:8081/HMA/api/fr/CSurvey", {
+    fetch("https://23700999.com:8081/HMA/api/fr/CSurveyParams", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(CSurveyParams),
@@ -1482,7 +1483,10 @@ function handleRadioButtonClick(event) {
       .then(res => res.json())
       .then(data => {
         console.log("複雜問卷 API 回傳：", data);
-      */  
+      })
+      .catch(error => {
+        console.error("複雜問卷 API 錯誤：", error);
+      });
 
 
       const result = rhythmTypes[type] || {
