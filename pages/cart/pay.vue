@@ -294,32 +294,32 @@ const checkout = async () => {
       console.log("結帳成功:", data.value);
       
       // 處理綠界金流表單
-      // if (data.value.htmlForm) {
-      //   // 解碼 HTML 表單
-      //   const decodedHtml = decodeURIComponent(data.value.htmlForm);
-      //   console.log("解碼後的 HTML 表單:", decodedHtml);
+      if (data.value.htmlForm) {
+        // 解碼 HTML 表單
+        const decodedHtml = decodeURIComponent(data.value.htmlForm);
+        console.log("解碼後的 HTML 表單:", decodedHtml);
         
-      //   // 創建一個臨時的 div 來放置表單
-      //   const tempDiv = document.createElement('div');
-      //   tempDiv.innerHTML = decodedHtml;
-      //   tempDiv.style.display = 'none';
+        // 創建一個臨時的 div 來放置表單
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = decodedHtml;
+        tempDiv.style.display = 'none';
         
-      //   // 將表單添加到頁面
-      //   document.body.appendChild(tempDiv);
+        // 將表單添加到頁面
+        document.body.appendChild(tempDiv);
         
-      //   // 找到表單並自動提交
-      //   const form = tempDiv.querySelector('form');
-      //   if (form) {
-      //     console.log("找到付款表單，準備提交");
-      //     form.submit();
-      //   } else {
-      //     console.error("未找到付款表單");
-      //     alert("付款表單載入失敗");
-      //   }
-      // } else {
-      //   alert("結帳成功！");
-      //   router.push("/cart/Finish");
-      // }
+        // 找到表單並自動提交
+        const form = tempDiv.querySelector('form');
+        if (form) {
+          console.log("找到付款表單，準備提交");
+          form.submit();
+        } else {
+          console.error("未找到付款表單");
+          alert("付款表單載入失敗");
+        }
+      } else {
+        alert("結帳成功！");
+        router.push("/cart/Finish");
+      }
     } else {
       console.error("結帳失敗:", data.value);
       alert(`結帳失敗: ${data.value?.Message || "未知錯誤"}`);
