@@ -92,9 +92,9 @@
     <div class="detailDataGroup" v-if="improvement">
       <div class="detailDataTitleGroup">
         <h3>詳細數據比對</h3>
-        <img 
-          src="/assets/imgs/arrowGo.svg" 
-          alt="" 
+        <img
+          src="/assets/imgs/arrowGo.svg"
+          alt=""
           @click="toggleDetail"
           :style="{ transform: arrowRotation }"
         />
@@ -108,7 +108,9 @@
             </div>
             <div class="detailDataInnerGroup2">
               <div class="useBeforeGroup">
-                <div class="useValue">{{ improvement.beforeScores.balance }}</div>
+                <div class="useValue">
+                  {{ improvement.beforeScores.balance }}
+                </div>
                 <small>使用前</small>
               </div>
               <svg
@@ -124,7 +126,9 @@
                 />
               </svg>
               <div class="useBeforeGroup">
-                <div class="useValue">{{ improvement.afterScores.balance }}</div>
+                <div class="useValue">
+                  {{ improvement.afterScores.balance }}
+                </div>
                 <small>使用後</small>
               </div>
             </div>
@@ -137,7 +141,9 @@
             </div>
             <div class="detailDataInnerGroup2">
               <div class="useBeforeGroup">
-                <div class="useValue">{{ improvement.beforeScores.fatigue }}</div>
+                <div class="useValue">
+                  {{ improvement.beforeScores.fatigue }}
+                </div>
                 <small>使用前</small>
               </div>
               <svg
@@ -153,7 +159,9 @@
                 />
               </svg>
               <div class="useBeforeGroup">
-                <div class="useValue">{{ improvement.afterScores.fatigue }}</div>
+                <div class="useValue">
+                  {{ improvement.afterScores.fatigue }}
+                </div>
                 <small>使用後</small>
               </div>
             </div>
@@ -193,7 +201,9 @@
             </div>
             <div class="detailDataInnerGroup2">
               <div class="useBeforeGroup">
-                <div class="useValue">{{ improvement.beforeScores.pressure }}</div>
+                <div class="useValue">
+                  {{ improvement.beforeScores.pressure }}
+                </div>
                 <small>使用前</small>
               </div>
               <svg
@@ -209,7 +219,9 @@
                 />
               </svg>
               <div class="useBeforeGroup">
-                <div class="useValue">{{ improvement.afterScores.pressure }}</div>
+                <div class="useValue">
+                  {{ improvement.afterScores.pressure }}
+                </div>
                 <small>使用後</small>
               </div>
             </div>
@@ -304,7 +316,7 @@ export default {
       if (!data) return 0;
 
       switch (type) {
-        case 'balance': // 自律神經平衡
+        case "balance": // 自律神經平衡
           const lf_hf = parseFloat(data.lf_hf);
           if (lf_hf > 2) return 5;
           if (lf_hf > 1.5) return 4;
@@ -312,7 +324,7 @@ export default {
           if (lf_hf >= 0.5) return 2;
           return 1;
 
-        case 'fatigue': // 生理疲勞
+        case "fatigue": // 生理疲勞
           const sdnn = parseFloat(data.sdnn);
           if (sdnn < 20) return 5;
           if (sdnn < 30) return 4;
@@ -320,14 +332,14 @@ export default {
           if (sdnn < 70) return 2;
           return 1;
 
-        case 'mood': // 心情指北針
+        case "mood": // 心情指北針
           const hbr = parseInt(data.hbr);
           const rr = parseInt(data.rr);
           const lf = parseFloat(data.lf);
           const hf = parseFloat(data.hf);
-          
+
           if (!hbr || !rr || !lf || !hf) return 0;
-          
+
           let score = 0;
           if (hbr > 90) score += 5;
           else if (hbr > 80) score += 4;
@@ -354,7 +366,7 @@ export default {
           if (score >= 5) return 2;
           return 1;
 
-        case 'pressure': // 血壓氣球
+        case "pressure": // 血壓氣球
           const sbp = parseInt(data.sbp);
           const dbp = parseInt(data.dbp);
           if (sbp > 145 || dbp > 95) return 5;
@@ -373,30 +385,30 @@ export default {
       if (!HRVBeforeData.value || !HRVAfterData.value) return null;
 
       const beforeScores = {
-        balance: calculateScore(HRVBeforeData.value, 'balance'),
-        fatigue: calculateScore(HRVBeforeData.value, 'fatigue'),
-        mood: calculateScore(HRVBeforeData.value, 'mood'),
-        pressure: calculateScore(HRVBeforeData.value, 'pressure')
+        balance: calculateScore(HRVBeforeData.value, "balance"),
+        fatigue: calculateScore(HRVBeforeData.value, "fatigue"),
+        mood: calculateScore(HRVBeforeData.value, "mood"),
+        pressure: calculateScore(HRVBeforeData.value, "pressure"),
       };
 
       const afterScores = {
-        balance: calculateScore(HRVAfterData.value, 'balance'),
-        fatigue: calculateScore(HRVAfterData.value, 'fatigue'),
-        mood: calculateScore(HRVAfterData.value, 'mood'),
-        pressure: calculateScore(HRVAfterData.value, 'pressure')
+        balance: calculateScore(HRVAfterData.value, "balance"),
+        fatigue: calculateScore(HRVAfterData.value, "fatigue"),
+        mood: calculateScore(HRVAfterData.value, "mood"),
+        pressure: calculateScore(HRVAfterData.value, "pressure"),
       };
 
       const improvements = {
         balance: afterScores.balance - beforeScores.balance,
         fatigue: afterScores.fatigue - beforeScores.fatigue,
         mood: afterScores.mood - beforeScores.mood,
-        pressure: afterScores.pressure - beforeScores.pressure
+        pressure: afterScores.pressure - beforeScores.pressure,
       };
 
       return {
         beforeScores,
         afterScores,
-        improvements
+        improvements,
       };
     };
 
@@ -535,7 +547,9 @@ export default {
     // 計算屬性
     const improvement = computed(() => calculateImprovement());
     const advice = computed(() => generateAdvice());
-    const arrowRotation = computed(() => isDetailVisible.value ? 'rotate(90deg)' : 'rotate(0deg)');
+    const arrowRotation = computed(() =>
+      isDetailVisible.value ? "rotate(90deg)" : "rotate(0deg)"
+    );
 
     return {
       startTime,
@@ -640,7 +654,7 @@ export default {
   .resultTimeGroup {
     display: flex;
     gap: 2.5%;
-    margin-bottom: 0.75rem;
+    margin-bottom: 1.5rem;
 
     .leftHintGroup {
       width: 0.5rem;
@@ -674,17 +688,21 @@ export default {
       width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 0.75rem;
     }
     .hintContent {
       display: flex;
       align-items: center;
       padding: 6px 12px;
       width: 100%;
-      background-color: #fff;
       border-radius: 12px;
-      box-shadow: 0px -2px 3px 0px rgba(0, 0, 0, 0.25) inset;
+      border: 1px solid var(--Neutral-white, #fff);
+      background: rgba(255, 255, 255, 0.1);
+      box-shadow: 0px 0px 12px 0px var(--Neutral-white, #fff) inset,
+        0px 0px 6px 0px rgba(0, 0, 0, 0.08);
+      backdrop-filter: blur(4px);
       gap: 0.25rem;
+
       .hintText {
         display: flex;
         flex-direction: column;
@@ -733,19 +751,19 @@ export default {
     }
   }
   .detailDataGroup {
-    margin-top: 0.75rem;
+    margin-top: 1.5rem;
     border-radius: 12px;
     border: 1px solid var(--Neutral-white, #fff);
     background: rgba(255, 255, 255, 0.1);
     box-shadow: 0px 0px 12px 0px var(--Neutral-white, #fff) inset,
       0px 0px 6px 0px rgba(0, 0, 0, 0.08);
-    backdrop-filter: blur(2px);
+    backdrop-filter: blur(4px);
     padding: 1rem;
     .detailDataTitleGroup {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.75rem;
       img {
         transition: transform 0.3s ease;
         cursor: pointer;
@@ -760,7 +778,15 @@ export default {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 0.25rem;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 0.5rem;
+      box-shadow: 0px 0px 12px 0px var(--Neutral-white, #fff) inset,
+        0px 0px 6px 0px rgba(0, 0, 0, 0.08);
+      &:last-child {
+        margin-bottom: 0;
+      }
       .detailDataInnerGroup1 {
         display: flex;
         align-items: center;
@@ -837,20 +863,20 @@ export default {
     }
   }
   .personalizedAdviceGroup {
-    margin-top: 0.75rem;
+    margin-top: 1.5rem;
     border-radius: 12px;
     border: 1px solid var(--Neutral-white, #fff);
     background: rgba(255, 255, 255, 0.1);
     box-shadow: 0px 0px 12px 0px var(--Neutral-white, #fff) inset,
       0px 0px 6px 0px rgba(0, 0, 0, 0.08);
-    backdrop-filter: blur(2px);
+    backdrop-filter: blur(4px);
     padding: 1rem;
     h3 {
       color: var(--Neutral-black, #1e1e1e);
       font-size: 20px;
       font-style: normal;
       font-weight: 400;
-      line-height: 100%; 
+      line-height: 100%;
       margin-bottom: 0.25rem;
       letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
     }
