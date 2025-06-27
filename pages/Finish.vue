@@ -229,7 +229,7 @@ const updateScores = (lf_hf, sdnn, hbr, rr, lf, hf, sbp, dbp) => {
     else if (rr > 10) score += 2;
     else score += 1;
 
-    const lf_hf_ratio = lf / hf;
+    const lf_hf_ratio = lf / hf;  
     if (lf_hf_ratio > 2) score += 5;
     else if (lf_hf_ratio > 1.5) score += 4;
     else if (lf_hf_ratio > 1) score += 3;

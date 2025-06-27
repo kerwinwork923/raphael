@@ -13,6 +13,18 @@ export const useCheckoutStore = defineStore('checkout', {
      * @type {string | null}
      */
     selectedInvoiceId: null,
+
+    /**
+     * Selected cart items for checkout.
+     * @type {Array}
+     */
+    selectedCartItems: [],
+
+    /**
+     * Total amount of selected items.
+     * @type {number}
+     */
+    selectedTotalAmount: 0,
   }),
   actions: {
     /**
@@ -29,6 +41,32 @@ export const useCheckoutStore = defineStore('checkout', {
      */
     setSelectedInvoice(invoiceId) {
       this.selectedInvoiceId = invoiceId
+    },
+
+    /**
+     * Sets the selected cart items for checkout.
+     * @param {Array} items The selected cart items.
+     */
+    setSelectedCartItems(items) {
+      this.selectedCartItems = items
+    },
+
+    /**
+     * Sets the total amount of selected items.
+     * @param {number} amount The total amount.
+     */
+    setSelectedTotalAmount(amount) {
+      this.selectedTotalAmount = amount
+    },
+
+    /**
+     * Clears all checkout data.
+     */
+    clearCheckoutData() {
+      this.selectedAddressId = null
+      this.selectedInvoiceId = null
+      this.selectedCartItems = []
+      this.selectedTotalAmount = 0
     },
   },
   persist: true,

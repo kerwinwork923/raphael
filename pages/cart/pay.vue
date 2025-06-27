@@ -39,7 +39,7 @@
         <div class="payContentHR"></div>
         <div class="totalPriceGroup">
           <h4>{{ productCount }}個商品</h4>
-          <h5>NT${{ totalAmount }}</h5>
+          <h5>NT${{ formattedTotalAmount }}</h5>
         </div>
       </div>
       <div class="payContent">
@@ -59,7 +59,7 @@
         </div>
         <div class="totalPayGroup">
           <h5>訂單總金額</h5>
-          <h6>NT${{ totalAmount }}</h6>
+          <h6>NT${{ formattedTotalAmount }}</h6>
         </div>
       </div>
       <div class="payContent">
@@ -118,6 +118,25 @@ const selectedAddress = ref(null);
 const selectedInvoice = ref(null);
 const selectedPayment = ref(null);
 
+// 從 Pinia 獲取選中的商品資料
+const loadSelectedCartItems = () => {
+  if (checkoutStore.selectedCartItems.length === 0) {
+    console.log("沒有選中的商品，跳轉回購物車");
+    router.push("/cart/cartList");
+    return;
+  }
+  
+  cartList.value = checkoutStore.selectedCartItems;
+  totalAmount.value = checkoutStore.selectedTotalAmount;
+  
+  console.log("從 Pinia 載入選中商品:", cartList.value);
+  console.log("總金額:", totalAmount.value);
+  console.log("商品詳細資訊:");
+  cartList.value.forEach(item => {
+    console.log(`商品: ${item.ProductName}, 單價: ${item.Price}, 數量: ${item.Qty}, 小計: ${item.Amount}`);
+  });
+};
+
 const updateSelectedItems = () => {
   console.log("更新選擇項目，Pinia 地址ID:", checkoutStore.selectedAddressId);
   console.log("更新選擇項目，Pinia 發票ID:", checkoutStore.selectedInvoiceId);
@@ -153,37 +172,6 @@ const updateSelectedItems = () => {
   }
 };
 
-const fetchCartList = async () => {
-  try {
-    const { data } = await useFetch("https://23700999.com:8081/HMA/api/fr/maGetCart", {
-      method: "POST",
-      body: {
-        MID: userData.MID,
-        Token: userData.Token,
-        MAID: userData.MAID,
-        Mobile: userData.Mobile,
-        Lang: "zhtw",
-      },
-    });
-
-
-    if (data.value?.Result === "OK") {
-      const result = data.value;
-      console.log("購物車資料獲取完成:", result);
-      if (result.RetMaCart.length === 0) {
-        router.push("/cart");
-      }
-      cartList.value = result.RetMaCart || [];
-
-      totalAmount.value = result.TotalAmount || 0;
-
-      console.log("購物車資料獲取完成:", cartList.value);
-    }
-  } catch (error) {
-    console.error("獲取購物車列表失敗：", error);
-  }
-};
-
 const fetchRelatedData = async () => {
   try {
     const { data } = await useFetch("https://23700999.com:8081/HMA/api/fr/maGetRelated", {
@@ -216,10 +204,11 @@ const fetchRelatedData = async () => {
 };
 
 const loadAllData = async () => {
-  await Promise.all([
-    fetchCartList(),
-    fetchRelatedData()
-  ]);
+  // 先載入選中的商品資料
+  loadSelectedCartItems();
+  
+  // 然後獲取相關資料（地址、發票等）
+  await fetchRelatedData();
 };
 
 // 監聽 Pinia store 的變化
@@ -233,7 +222,7 @@ watch(() => [checkoutStore.selectedAddressId, checkoutStore.selectedInvoiceId], 
 // 監聽路由變化，當返回此頁面時重新獲取資料
 watch(() => route.path, (newPath) => {
   if (newPath === '/cart/pay') {
-    console.log("返回結帳頁面，重新獲取資料");
+    console.log("返回結帳頁面，重新載入資料");
     loadAllData();
   }
 });
@@ -242,8 +231,15 @@ const productCount = computed(() => {
   return cartList.value.reduce((total, item) => total + parseInt(item.Qty, 10), 0);
 });
 
+const formattedTotalAmount = computed(() => {
+  return parseInt(totalAmount.value, 10).toLocaleString();
+});
+
 const finalTotal = computed(() => {
-  return (parseInt(totalAmount.value, 10) || 0) + shippingFee.value;
+  const subtotal = parseInt(totalAmount.value, 10) || 0;
+  const total = subtotal + shippingFee.value;
+  console.log(`計算最終總額: 商品總額 ${subtotal} + 運費 ${shippingFee.value} = ${total}`);
+  return total.toLocaleString();
 });
 
 const checkout = async () => {
@@ -293,6 +289,9 @@ const checkout = async () => {
     if (data.value?.Result === "OK") {
       console.log("結帳成功:", data.value);
       
+      // 清除 Pinia 中的選中商品資料
+      checkoutStore.clearCheckoutData();
+      
       // 處理綠界金流表單
       if (data.value.htmlForm) {
         // 解碼 HTML 表單
@@ -316,7 +315,8 @@ const checkout = async () => {
           console.error("未找到付款表單");
           alert("付款表單載入失敗");
         }
-      } else {
+      } 
+      else {
         alert("結帳成功！");
         router.push("/cart/Finish");
       }

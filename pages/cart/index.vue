@@ -1,5 +1,6 @@
 <template>
   <div class="cartWrap">
+    <RaphaelLoading v-if="loading" />
     <CartTitleBar title="商品列表" :showCart="true" backPath="/user" />
     <div class="cartContentGroup">
     
@@ -10,6 +11,7 @@
         <small>{{ item.DeliverName }}</small>
         <div class="cartContentItemTag">{{ item.Label }}</div>
       </a>
+      
  
     </div>
   </div>
@@ -20,6 +22,7 @@ import { useSeo } from "~/composables/useSeo";
 import { ref } from "vue";
 
 import CartTitleBar from "~/components/cart/CartTitleBar.vue";
+import RaphaelLoading from "~/components/RaphaelLoading.vue";
 
 useSeo({
   title: "智慧商城 - NeuroPlus神經調節家",
@@ -30,9 +33,11 @@ useSeo({
 
 const userData = JSON.parse(localStorage.getItem("userData"));
 const cartItems = ref([]);
+const loading = ref(true);
 
 const fetchProductList = async () => {
   try {
+    loading.value = true;
     const { data } = await useFetch("https://23700999.com:8081/HMA/api/fr/maProduct", {
       method: "POST",
       body: {
@@ -49,6 +54,8 @@ const fetchProductList = async () => {
     }
   } catch (error) {
     console.error("獲取商品列表失敗：", error);
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -74,15 +81,24 @@ onMounted(() => {
   justify-content: space-between;
   flex-wrap: wrap;
   margin-top: 1rem;
+  @include respond-to("tablet-up") {
+    max-width: 1440px;
+  }
   .cartContentItem {
     width: 48%;
     background-color: #fff;
     border-radius: 8px;
     padding: 1rem;
     margin-bottom: 1rem;
+    @include respond-to("tablet-up") {
+      width: 32.3%;
+    }
     img {
       height: 220px;
       width: 100%;
+      @include respond-to("tablet-up") {
+        height: 300px;
+      }
     }
     h3 {
       color: var(--Neutral-black, #1e1e1e);

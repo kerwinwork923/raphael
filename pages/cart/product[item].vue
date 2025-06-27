@@ -1,4 +1,6 @@
 <template>
+  
+  
   <div class="addCartAlert" v-if="showAddCartAlert">
     <div class="addCartAlertTitleGroup">
       <img :src="productData?.FPicture" :alt="productData?.ProductName" />
@@ -57,8 +59,8 @@
       <img src="/assets/imgs/close.svg" alt="" />
     </div>
   </div>
-
-  <div class="productCartWrap">
+  <RaphaelLoading v-if="loading" />
+  <div class="productCartWrap" v-else>
     <CartTitleBar />
     <div class="productCartContentGroup">
       <div class="productCartContent">
@@ -104,6 +106,7 @@
 import { useRoute, useRouter } from "vue-router";
 import { ref, onMounted } from "vue";
 import CartTitleBar from "~/components/cart/CartTitleBar.vue";
+import RaphaelLoading from "~/components/RaphaelLoading.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -113,47 +116,58 @@ const productData = ref(null);
 const quantity = ref(1);
 const showAddCartAlert = ref(false);
 const showBuyCartAlert = ref(false);
+const loading = ref(true);
 
 const fetchProductDetail = async () => {
   try {
-    const { data } = await useFetch("https://23700999.com:8081/HMA/api/fr/maSingleProduct", {
-      method: "POST",
-      body: {
-        MID: userData.MID,
-        Token: userData.Token,
-        MAID: userData.MAID,
-        Mobile: userData.Mobile,
-        Lang: "zhtw",
-        ProductID: productId,
-      },
-    });
+    loading.value = true;
+    const { data } = await useFetch(
+      "https://23700999.com:8081/HMA/api/fr/maSingleProduct",
+      {
+        method: "POST",
+        body: {
+          MID: userData.MID,
+          Token: userData.Token,
+          MAID: userData.MAID,
+          Mobile: userData.Mobile,
+          Lang: "zhtw",
+          ProductID: productId,
+        },
+      }
+    );
 
     if (data.value?.Result === "OK" && data.value?.RetMaSingleProduct) {
       productData.value = data.value.RetMaSingleProduct;
     }
   } catch (error) {
     console.error("獲取商品詳情失敗：", error);
+  } finally {
+    loading.value = false;
   }
 };
 
 const addToCart = async () => {
   try {
-    const { data } = await useFetch("https://23700999.com:8081/HMA/api/fr/maCart", {
-      method: "POST",
-      body: {
-        MID: userData.MID,
-        Token: userData.Token,
-        MAID: userData.MAID,
-        Mobile: userData.Mobile,
-        Lang: "zhtw",
-        Cart: [
-          {
-            ProductID: productId,
-            Qty: quantity.value.toString(),
-          },
-        ],
-      },
-    });
+    loading.value = true;
+    const { data } = await useFetch(
+      "https://23700999.com:8081/HMA/api/fr/maCartAdd",
+      {
+        method: "POST",
+        body: {
+          MID: userData.MID,
+          Token: userData.Token,
+          MAID: userData.MAID,
+          Mobile: userData.Mobile,
+          Lang: "zhtw",
+          Cart: [
+            {
+              ProductID: productId,
+              Qty: quantity.value.toString(),
+            },
+          ],
+        },
+      }
+    );
 
     if (data.value?.Result === "OK") {
       console.log("成功加入購物車");
@@ -161,27 +175,33 @@ const addToCart = async () => {
     }
   } catch (error) {
     console.error("加入購物車失敗：", error);
+  } finally {
+    loading.value = false;
   }
 };
 
 const buyNow = async () => {
   try {
-    const { data } = await useFetch("https://23700999.com:8081/HMA/api/fr/maCart", {
-      method: "POST",
-      body: {
-        MID: userData.MID,
-        Token: userData.Token,
-        MAID: userData.MAID,
-        Mobile: userData.Mobile,
-        Lang: "zhtw",
-        Cart: [
-          {
-            ProductID: productId,
-            Qty: quantity.value.toString(),
-          },
-        ],
-      },
-    });
+    loading.value = true;
+    const { data } = await useFetch(
+      "https://23700999.com:8081/HMA/api/fr/maCartAdd",
+      {
+        method: "POST",
+        body: {
+          MID: userData.MID,
+          Token: userData.Token,
+          MAID: userData.MAID,
+          Mobile: userData.Mobile,
+          Lang: "zhtw",
+          Cart: [
+            {
+              ProductID: productId,
+              Qty: quantity.value.toString(),
+            },
+          ],
+        },
+      }
+    );
 
     if (data.value?.Result === "OK") {
       console.log("成功加入購物車");
@@ -189,6 +209,8 @@ const buyNow = async () => {
     }
   } catch (error) {
     console.error("立即購買失敗：", error);
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -232,8 +254,13 @@ onMounted(() => {
   flex-direction: column;
   place-items: center;
   padding: 0 2.5% 72px;
-  .productCartContentGroup{
+
+  .productCartContentGroup {
     width: 100%;
+    @include respond-to("tablet-up") {
+      max-width: 1440px;
+      margin-bottom: 10px;
+    }
   }
   .productCartContent {
     width: 100%;
@@ -313,7 +340,7 @@ onMounted(() => {
     }
     .productCartContentImgGroup {
       img {
-        margin-top: .5rem;
+        margin-top: 0.5rem;
       }
     }
   }

@@ -1,5 +1,6 @@
 <template>
-  <div class="cartListWrap">
+  <RaphaelLoading v-if="loading" />
+  <div class="cartListWrap" v-else>
     <CartTitleBar title="購物車" :showCart="true" backPath="/cart" />
 
     <div class="cartListContentWrap">
@@ -67,16 +68,22 @@
 </template>
 
 <script setup>
-const router = useRouter();
 import { ref, computed, onMounted } from "vue";
 import CartTitleBar from "~/components/cart/CartTitleBar.vue";
+import RaphaelLoading from "~/components/RaphaelLoading.vue";
+import { useCheckoutStore } from "~/stores/checkout";
+
+const router = useRouter();
+const checkoutStore = useCheckoutStore();
 
 const userData = JSON.parse(localStorage.getItem("userData"));
 const cartList = ref([]);
 const selectAll = ref(false);
+const loading = ref(true);
 
 const fetchCartList = async () => {
   try {
+    loading.value = true;
     const { data } = await useFetch(
       "https://23700999.com:8081/HMA/api/fr/maGetCart",
       {
@@ -99,11 +106,14 @@ const fetchCartList = async () => {
     }
   } catch (error) {
     console.error("獲取購物車列表失敗：", error);
+  } finally {
+    loading.value = false;
   }
 };
 
 const updateCartItem = async (productId, newQty) => {
   try {
+    loading.value = true;
     const { data } = await useFetch(
       "https://23700999.com:8081/HMA/api/fr/maCart",
       {
@@ -125,15 +135,23 @@ const updateCartItem = async (productId, newQty) => {
     );
 
     if (data.value?.Result === "OK") {
-      await fetchCartList(); // 重新獲取購物車資料
+      // 直接更新本地資料，不重新獲取整個列表
+      const item = cartList.value.find(item => item.ProductID === productId);
+      if (item) {
+        item.Qty = newQty;
+        item.Amount = (parseInt(item.Price) * newQty).toString();
+      }
     }
   } catch (error) {
     console.error("更新購物車失敗：", error);
+  } finally {
+    loading.value = false;
   }
 };
 
 const deleteCartItem = async (productId) => {
   try {
+    loading.value = true;
     const { data } = await useFetch(
       "https://23700999.com:8081/HMA/api/fr/maCartDelete",
       {
@@ -150,10 +168,13 @@ const deleteCartItem = async (productId) => {
     );
 
     if (data.value?.Result === "OK") {
-      await fetchCartList(); // 重新獲取購物車資料
+      // 直接從本地列表中移除，不重新獲取整個列表
+      cartList.value = cartList.value.filter(item => item.ProductID !== productId);
     }
   } catch (error) {
     console.error("刪除商品失敗：", error);
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -166,6 +187,7 @@ const deleteSelectedItems = async () => {
 
   if (confirm(`確定要刪除選中的 ${selectedItems.length} 項商品嗎？`)) {
     try {
+      loading.value = true;
       const productIds = selectedItems.map((item) => item.ProductID);
       const { data } = await useFetch(
         "https://23700999.com:8081/HMA/api/fr/maCartDelete",
@@ -183,11 +205,14 @@ const deleteSelectedItems = async () => {
       );
 
       if (data.value?.Result === "OK") {
-        await fetchCartList(); // 重新獲取購物車資料
+        // 直接從本地列表中移除選中的商品，不重新獲取整個列表
+        cartList.value = cartList.value.filter(item => !item.selected);
         selectAll.value = false; // 重置全選狀態
       }
     } catch (error) {
       console.error("批量刪除商品失敗：", error);
+    } finally {
+      loading.value = false;
     }
   }
 };
@@ -232,9 +257,20 @@ const checkout = () => {
     alert("請選擇要購買的商品");
     return;
   }
+  
+  // 將選中的商品存到 Pinia store
+  checkoutStore.setSelectedCartItems(selectedItems);
+  
+  // 計算正確的總金額（移除千分位符號）
+  const calculatedTotal = cartList.value
+    .filter((item) => item.selected)
+    .reduce((total, item) => total + parseInt(item.Amount), 0);
+  
+  checkoutStore.setSelectedTotalAmount(calculatedTotal);
+  
   router.push("/cart/pay");
-  // 這裡可以跳轉到結帳頁面
   console.log("跳轉到結帳頁面", selectedItems);
+  console.log("總金額:", calculatedTotal);
 };
 
 const totalAmount = computed(() => {
