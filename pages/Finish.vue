@@ -2,81 +2,71 @@
   <RaphaelLoading v-if="isLoading" />
   <div class="finishWrap">
     <div class="finishGroup">
-
-
-   <Navbar v-if="route.query.Version !== 'Detail'" /> 
-    <div
-      class="finishTitleMenu"
-      v-if="route.query.Version === 'Detail'"
-      :Text="currentDate"
-    >
-      <div class="backIcon" @click="goBack">
-        <img src="/assets/imgs/backArrow.svg" alt="back" />
-      </div>
-      <h2>{{ currentDate }}</h2>
-    </div>
-    <div class="titleGroup">
-      <div class="textGroup">
-        <h3 class="nameText">{{ userName }}，您好</h3>
-        <div class="timeGroup" >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="14"
-            height="14"
-            viewBox="0 0 14 14"
-            fill="none"
-          >
-            <path
-              d="M7 13C10.3137 13 13 10.3137 13 7C13 3.68629 10.3137 1 7 1C3.68629 1 1 3.68629 1 7C1 10.3137 3.68629 13 7 13Z"
-              stroke="#666666"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M6.33325 4.33334V7.66668H9.66659"
-              stroke="#666666"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-          <h4>{{ currentDate }}</h4>
+      <Navbar v-if="route.query.Version !== 'Detail'" />
+      <div
+        class="finishTitleMenu"
+        v-if="route.query.Version === 'Detail'"
+        :Text="currentDate"
+      >
+        <div class="backIcon" @click="goBack">
+          <img src="/assets/imgs/backArrow.svg" alt="back" />
         </div>
-      </div>  
-      <div class="imgGroup">
-        <a :href="`/healthData/${route.query.AID}`">
-          <img src="@/assets/imgs/3dWatch.svg" class="watchImg" />
-        </a>
-       
-        <img
-          src="@/assets/imgs/doctor_nocomment.png"
-          class="doctorImg"
-          alt=""
-        />
+        <h2>{{ currentDate }}</h2>
+      </div>
+      <div class="titleGroup">
+        <div class="textGroup">
+          <h3 class="nameText">{{ userName }}，您好</h3>
+          <div class="timeGroup">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+            >
+              <path
+                d="M7 13C10.3137 13 13 10.3137 13 7C13 3.68629 10.3137 1 7 1C3.68629 1 1 3.68629 1 7C1 10.3137 3.68629 13 7 13Z"
+                stroke="#666666"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M6.33325 4.33334V7.66668H9.66659"
+                stroke="#666666"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <h4>{{ currentDate }}</h4>
+          </div>
+        </div>
+        <div class="imgGroup">
+          <a :href="`/healthData/${route.query.AID}`">
+            <img src="@/assets/imgs/3dWatch.svg" class="watchImg" />
+          </a>
+
+          <img
+            src="@/assets/imgs/doctor_nocomment.png"
+            class="doctorImg"
+            alt=""
+          />
+        </div>
+      </div>
+
+      <div class="scanInfo">
+        <div class="row">
+          <img :src="getImagePath('A', balanceScore)" alt="自律神經平衡" />
+          <img :src="getImagePath('B', fatigueScore)" alt="生理疲勞" />
+          <img :src="getImagePath('C', moodScore)" alt="心情指北針" />
+          <img :src="getImagePath('D', pressureScore)" alt="血壓氣球" />
+        </div>
+        <div class="personalizedSuggestions">
+          <h3>個人化建議</h3>
+          <p>{{ personalizedSuggestion }}</p>
+        </div>
       </div>
     </div>
-
-    <div class="scanInfo">
-      <div class="row">
-        <img :src="getImagePath('A', balanceScore)" alt="自律神經平衡" />
-        <img :src="getImagePath('B', fatigueScore)" alt="生理疲勞" />
-        <img :src="getImagePath('C', moodScore)" alt="心情指北針" />
-        <img :src="getImagePath('D', pressureScore)" alt="血壓氣球" />
-      </div>
-      <div class="personalizedSuggestions">
-        <h3>個人化建議</h3>
-        <p>{{ personalizedSuggestion }}</p>
-      </div>
-      <div class="resultTextGroup">
-      <h3>根據您的神經系統數據分析</h3>
-      <p>{{ analysisResult }}</p>
-    </div>
-    </div>
-
-
-
-
-  </div>
-  <div class="subBtnGroup" v-if="!hasUID && route.query.Version !== 'Detail'">
+    <div class="subBtnGroup" v-if="!hasUID && route.query.Version !== 'Detail'">
       <router-link to="/HRVHistoryAll">
         <button class="backToUserBtn">HRV歷史紀錄</button>
       </router-link>
@@ -85,13 +75,13 @@
       </router-link>
     </div>
 
-    <div class="subBtnGroup2" v-if="hasUID && Flag==='1'">
+    <div class="subBtnGroup2" v-if="hasUID && Flag === '1'">
       <router-link :to="`/usage/${ProductName}`">
         <button class="backToUserBtn2">返回穿衣紀錄</button>
       </router-link>
     </div>
 
-    <div class="subBtnGroup2" v-if="hasUID && Flag==='2'">
+    <div class="subBtnGroup2" v-if="hasUID && Flag === '2'">
       <router-link :to="`/usageHRVResult/${uid}`">
         <button class="backToUserBtn2">看報告</button>
       </router-link>
@@ -103,7 +93,6 @@
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Navbar from "../components/Navbar.vue";
-
 
 // 狀態變數
 const userName = ref("");
@@ -122,8 +111,7 @@ const isLoading = ref(false);
 
 // 路由相關
 const route = useRoute();
-const router  = useRouter();
-
+const router = useRouter();
 
 // 計算屬性
 const formattedDate = computed(() => {
@@ -338,7 +326,7 @@ const updateSuggestions = (lf_hf, sdnn, hbr, rr, lf, hf, sbp, dbp) => {
 
 const goBack = () => {
   router.go(-1);
-}
+};
 
 // 生命週期鉤子
 onMounted(() => {
@@ -347,8 +335,6 @@ onMounted(() => {
     userName.value = userData.Name;
   }
   currentDate.value = formattedDate.value;
-
-
 
   fetchHRVData();
 });
@@ -382,7 +368,7 @@ $border-radius: 12px;
   background-size: cover;
   min-height: 100vh;
   width: 100%;
-  .finishGroup{
+  .finishGroup {
     max-width: 976px;
     margin: 0 auto;
   }
@@ -470,6 +456,10 @@ $border-radius: 12px;
   .row {
     @include flex-between;
 
+    img {
+      backdrop-filter: blur(4px);
+    }
+
     @media screen and (max-width: 768px) {
       flex-wrap: wrap;
 
@@ -486,7 +476,7 @@ $border-radius: 12px;
   border: 1px solid $white;
   background: rgba(255, 255, 255, 0.1);
   box-shadow: 0px 0px 12px 0px $white inset, 0px 0px 6px 0px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(4px);
   margin-top: 0.75rem;
   padding: 1rem;
   margin-bottom: 0.75rem;
@@ -506,31 +496,6 @@ $border-radius: 12px;
     margin: 0;
     letter-spacing: 0.09px;
     white-space: pre-line;
-    line-height: 1.6;
-  }
-}
-
-.resultTextGroup {
-  background-color: $white;
-  border-radius: $border-radius;
-
-  padding: 1rem;
-
-
-  h3 {
-    color: $text-color;
-    font-size: 20px;
-    font-weight: 400;
-    margin: 0 0 0.5rem 0;
-    letter-spacing: 0.15px;
-  }
-
-  p {
-    color: $text-color;
-    font-size: 16px;
-    font-weight: 400;
-    margin: 0;
-    letter-spacing: 0.09px;
     line-height: 1.6;
   }
 }
