@@ -22,7 +22,6 @@
         <div class="sendContnet" v-if="selectedAddress && deliverList.length > 0">
           <div class="sendContnetTitle">
             <h5>{{ deliverList[0].Name }}</h5>
-            <small>運費 NT$100</small>
           </div>
           <p>預計 3~5 個工作天</p>
           <p>{{ selectedAddress.Address }}</p>
@@ -31,7 +30,6 @@
         <div class="sendContnet" v-else @click="router.push('/cart/payMethod')">
           <div class="sendContnetTitle">
             <h5>黑貓宅配</h5>
-            <small>運費 NT$100</small>
           </div>
           <p>請新增寄送地址</p>
         </div>
@@ -53,10 +51,10 @@
       </div>
       <div class="payContent">
         <h3>付款詳情</h3>
-        <div class="sendPayGroup">
+        <!-- <div class="sendPayGroup">
           <h5>運費</h5>
           <h6>NT$100</h6>
-        </div>
+        </div> -->
         <div class="totalPayGroup">
           <h5>訂單總金額</h5>
           <h6>NT${{ formattedTotalAmount }}</h6>
@@ -106,7 +104,6 @@ if (!userData) {
 }
 const cartList = ref([]);
 const totalAmount = ref(0);
-const shippingFee = ref(100); // 假設運費
 
 const payList = ref([]);
 const deliverList = ref([]);
@@ -237,8 +234,8 @@ const formattedTotalAmount = computed(() => {
 
 const finalTotal = computed(() => {
   const subtotal = parseInt(totalAmount.value, 10) || 0;
-  const total = subtotal + shippingFee.value;
-  console.log(`計算最終總額: 商品總額 ${subtotal} + 運費 ${shippingFee.value} = ${total}`);
+  const total = subtotal ;
+  console.log(`計算最終總額: 商品總額 ${subtotal}  = ${total}`);
   return total.toLocaleString();
 });
 
@@ -269,7 +266,7 @@ const checkout = async () => {
       Mobile: userData.Mobile,
       Lang: "zhtw",
       Cart: cartData,
-      freight: shippingFee.value.toString(),
+      freight: "0",
       DeliverType: deliverList.value[0]?.Type || "1",
       PayType: payList.value[0]?.Type || "1",
       ReturnPolicyType: returnPolicyList.value[0]?.Type || "1",
@@ -440,15 +437,6 @@ const showPrivacy = ref(false);
         h5 {
           font-size: 1rem;
           font-weight: 700;
-        }
-        small {
-          color: var(--Neutral-500, #666);
-
-          font-size: var(--Text-font-size-14, 14px);
-          font-style: normal;
-          font-weight: 400;
-          line-height: 150%; /* 21px */
-          letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
         }
       }
       p {
