@@ -9,6 +9,9 @@
       alt=""
     />
     <h3>智平衡健康集團提醒事項</h3>
+    <div class="disclaimer">
+      數據僅供健康參考，無醫療診斷效力，請勿自行解讀或調藥，應諮詢醫師
+    </div>
     <ul>
       <li>
         智平衡AI穿戴紀錄系統透過非接觸式人臉HRV量測（rPPG），推估使用者自律神經、疲勞、血管壓力與心情緊繃狀態，並提供即時個人化健康建議。
@@ -17,7 +20,8 @@
         系統同步紀錄保健衣穿戴時間與頻率，協助醫師掌握身體變化，優化刺激點配置。所蒐集數據亦將用於AI模型持續優化，使系統更精準。
       </li>
       <li>
-        測量僅需<span class="point">20秒</span>，請保持穩定、安靜、全程臉部入鏡。數據僅供健康參考，無醫療診斷效力，請勿自行解讀或調藥，應諮詢醫師。
+        測量僅需<span class="point">20秒</span
+        >，請保持穩定、安靜、全程臉部入鏡。
       </li>
     </ul>
     <button class="HRVAlertBtn" @click="convertAndSaveUserData">確定</button>
@@ -128,7 +132,7 @@ export default {
       if (detectFlag) {
         redirectUrl += `?UID=${detectUID}&flag=${detectFlag}&form=${detectForm}`;
       }
-      
+
       window.location.href = redirectUrl;
     };
 
@@ -146,15 +150,23 @@ export default {
   @include coverbg();
 }
 .HRVAlert {
-
   @include alertStyle();
 
+  .disclaimer {
+    font-size: 1.5rem;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid $raphael-red-300;
+    color: $raphael-red-300;
+    text-align: justify;
+    line-height: 1.3em;
+  }
+
   ul {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 0.75rem;
-    height: 45vh;
-    padding-top: 0.75rem;
-    border-top: 1px solid $raphael-black;
+    max-height: 40vh;
     list-style: disc;
     overflow-x: scroll;
     @include scrollbarStyle();
@@ -173,7 +185,7 @@ export default {
     }
   }
   .HRVAlertBtn {
-    @include btnStyle($raphael-green-400,$raphael-white);
+    @include btnStyle($raphael-green-400, $raphael-white);
   }
 }
 </style>

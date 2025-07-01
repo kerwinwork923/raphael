@@ -1,29 +1,41 @@
 @mixin respond-to($breakpoint) {
-  @if $breakpoint == "xl" {
+  @if $breakpoint=="xl" {
     @media (max-width: 1440px) {
       @content;
     }
-  } @else if $breakpoint == "lg" {
+  }
+
+  @else if $breakpoint=="lg" {
     @media (max-width: 1024px) {
       @content;
     }
-  } @else if $breakpoint == "md" {
+  }
+
+  @else if $breakpoint=="md" {
     @media (max-width: 768px) {
       @content;
     }
-  } @else if $breakpoint == "sm" {
+  }
+
+  @else if $breakpoint=="sm" {
     @media (max-width: 480px) {
       @content;
     }
-  } @else if $breakpoint == "tablet-up" {
+  }
+
+  @else if $breakpoint=="tablet-up" {
     @media (min-width: 768px) {
       @content;
     }
-  } @else if $breakpoint == "desktop-up" {
+  }
+
+  @else if $breakpoint=="desktop-up" {
     @media (min-width: 1024px) {
       @content;
     }
-  } @else if $breakpoint == "phone-landscape" {
+  }
+
+  @else if $breakpoint=="phone-landscape" {
     @media (orientation: landscape) and (max-height: 480px) {
       @content;
     }
@@ -31,28 +43,30 @@
 }
 
 
-@mixin btnStyle($bgColor,$fontsColor){
-    background-color: $bgColor;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    border: none;
-    border-radius: 0.5rem;
-    color: $fontsColor;
-    cursor: pointer;
-    font-size: 1.125rem;
-    font-weight: 400;
-    padding: 0.5rem 0.75rem;
-    line-height: 100%;
-    letter-spacing: .5px;
-    transition: all 0.2s ease;
-    &:hover{
-      filter: brightness(.95);
-    }
+@mixin btnStyle($bgColor, $fontsColor) {
+  background-color: $bgColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border: none;
+  border-radius: 0.5rem;
+  color: $fontsColor;
+  cursor: pointer;
+  font-size: 1.125rem;
+  font-weight: 400;
+  padding: 0.5rem 0.75rem;
+  line-height: 100%;
+  letter-spacing: .5px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    -webkit-filter: brightness(.95);
+    filter: brightness(.95);
+  }
 }
 
-@mixin btnWithBorderStyle($borderColor,$fontsColor){
+@mixin btnWithBorderStyle($borderColor, $fontsColor) {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -68,13 +82,14 @@
   line-height: 100%;
   letter-spacing: .5px;
   transition: all 0.2s ease;
+
   &:hover {
     background-color: $borderColor;
     color: $raphael-white;
   }
 }
 
-@mixin tabStyle(){
+@mixin tabStyle() {
   background-color: transparent;
   cursor: pointer;
   display: flex;
@@ -89,12 +104,14 @@
   line-height: 100%;
   letter-spacing: .5px;
   transition: all 0.2s ease;
-  &:hover{
+
+  &:hover {
+    -webkit-filter: brightness(.95);
     filter: brightness(.95);
   }
 }
 
-@mixin chooseStyle($bgColor,$fontsColor,$activeFontsColor){
+@mixin chooseStyle($bgColor, $fontsColor, $activeFontsColor) {
   position: relative;
   display: flex;
   align-items: baseline;
@@ -107,28 +124,30 @@
   line-height: 29.1px;
   cursor: pointer;
 
-  &>img{
+  &>img {
     position: absolute;
     left: -6px;
     top: -8px;
     transform: scale(0.5);
   }
 
-  &:hover{
+  &:hover {
+    -webkit-filter: brightness(.95);
     filter: brightness(.95);
   }
 
   &.symptomChooseActive {
     color: $activeFontsColor;
 
-    &>img{
+    &>img {
+      -webkit-filter: invert(46%) sepia(74%) saturate(580%) hue-rotate(63deg) brightness(91%) contrast(89%);
       filter: invert(46%) sepia(74%) saturate(580%) hue-rotate(63deg) brightness(91%) contrast(89%);
     }
   }
 }
 
 
-@mixin alertStyle(){
+@mixin alertStyle() {
   display: grid;
   gap: 1rem;
   position: fixed;
@@ -142,7 +161,7 @@
   box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
   transform: translate(-50%, -50%);
   z-index: 1000;
-  
+
   .HRVAlertClose {
     width: 1.5rem;
     height: 1.5rem;
@@ -156,21 +175,24 @@
     font-weight: bold;
     letter-spacing: 0.12px;
     font-size: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #1e1e1e;
   }
 }
 
-@mixin coverbg(){
-    position: fixed;
-    left: 0;
-    top: 0;  
-    background: rgba(217, 217, 217, 0.5);
-    width: 100%;
-    height: 100vh;
-    backdrop-filter: blur(2.5px);  
-    z-index: 99;
+@mixin coverbg() {
+  position: fixed;
+  left: 0;
+  top: 0;
+  background: rgba(217, 217, 217, 0.5);
+  width: 100%;
+  height: 100vh;
+  -webkit-backdrop-filter: blur(2.5px);
+  backdrop-filter: blur(2.5px);
+  z-index: 99;
 }
 
-@mixin recordList($bgColor,$height,$radius,$padding){
+@mixin recordList($bgColor, $height, $radius, $padding) {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -182,38 +204,42 @@
   overflow-y: auto;
 }
 
-@mixin scrollbarStyle(){
+@mixin scrollbarStyle() {
   &::-webkit-scrollbar {
     background-color: transparent;
     width: 4px;
     height: 4px;
   }
+
   &::-webkit-scrollbar-track {
     background-color: transparent;
   }
+
   &::-webkit-scrollbar-thumb {
     background-color: #DFECC5;
     border-radius: 8px;
     border: 2px solid transparent;
   }
+
   &::-webkit-scrollbar-button {
     display: none;
   }
 }
 
-@mixin circleAnimate($px,$beforeBgColor,$opacity,$blur,$animate) {
+@mixin circleAnimate($px, $beforeBgColor, $opacity, $blur, $animate) {
   position: absolute;
   width: $px;
   height: $px;
   border-radius: 50%;
   top: 50%;
   left: 50%;
-  opacity:$opacity;
+  opacity: $opacity;
+  -webkit-filter: blur($blur);
   filter: blur($blur);
   transform: translate(-50%, -50%);
   overflow: hidden;
 
-  &:before{
+  &:before {
     content: '';
     position: absolute;
     background: $beforeBgColor;
@@ -222,20 +248,19 @@
     z-index: 1;
   }
 
-  &:after{
+  &:after {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-      135deg,
-      rgba(114, 188, 32, 0.9) 0%,
-      rgba(71, 188, 107, 0.9) 20%,
-      rgba(0, 210, 255, 0.9) 40%,
-      rgba(58, 123, 213, 0.9) 60%,
-      rgba(98, 87, 143, 0.9) 80%,
-      rgba(167, 82, 111, 0.9) 100%
-    );
+    background: linear-gradient(135deg,
+        rgba(114, 188, 32, 0.9) 0%,
+        rgba(71, 188, 107, 0.9) 20%,
+        rgba(0, 210, 255, 0.9) 40%,
+        rgba(58, 123, 213, 0.9) 60%,
+        rgba(98, 87, 143, 0.9) 80%,
+        rgba(167, 82, 111, 0.9) 100%);
     border-radius: 50%;
+    -webkit-animation: $animate;
     animation: $animate;
   }
 }
