@@ -86,7 +86,6 @@
             background: 'none',
             boxShadow: 'none',
             border: 'none',
-            marginRight: '16px',
           }"
           :disabled="scanning"
         />
@@ -786,9 +785,10 @@ $transition-duration: 0.3s;
   transition: background $transition-duration;
   @include flex-center;
   justify-content: flex-start;
+  gap:1rem;
   min-height: 80px;
   min-width: 220px;
-  padding: 10px 20px;
+  padding: 0 20px;
   border: 2px solid $primary-color;
 }
 
