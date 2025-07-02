@@ -50,7 +50,6 @@
     .recommendation-card {
       transition: all 0.3s ease;
       transform: translateY(0);
-      width: 100%;
     }
     .recommendation-card:hover {
       transform: translateY(-5px);
@@ -828,75 +827,11 @@
         reminder: "恢復身體的自然節奏需要時間和耐心。請將調整視為一段自我療癒的旅程，而非立即見效的治療。嘗試每天進行溫和的活動，如散步或伸展，即使只有短短10分鐘也能幫助激活身體系統。相信您的身體有自我修復的能力，只需要適當的支持和時間。",
       },
     };
-    
-    const products = {};
-    
-    async function getProducts() {
-      try {
-        const userData = JSON.parse(localStorage.getItem("userData"));
-        const params = {
-          MID: userData.MID,
-          Token: userData.Token,
-          MAID: userData.MAID,
-          Mobile: userData.Mobile,
-          Lang: "zhtw"
-        };
-        const res = await fetch("https://23700999.com:8081/HMA/api/fr/maProduct", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(params)
-        });
-        const data = await res.json();
-        if (data.Result === "OK" && Array.isArray(data.RetMaProduct)) {
-          // 處理產品資料
-          return data.RetMaProduct;
-        } else {
-          alert("取得產品資料失敗");
-          return [];
-        }
-      } catch (e) {
-        alert("API 錯誤：" + e.message);
-        return [];
-      }
-    }
-
-    // 建立全域產品對照表，供 showResults 使用
-    window.productMap = {};
-    window.typeToProductId = {
-      '1': '1',
-      '2': '2',
-      '3': '3',
-      '4': '4',
-      '5': '5',
-      '1+': '6',
-      '2+': '7',
-      '3+': '8',
-      '4+': '9',
-      '5+': '10',
-      '0+': '11'
-    };
-
-    getProducts().then(products => {
-      // 將產品資料存入全域變數，供 showResults 使用
-      products.forEach(product => {
-        window.productMap[product.ProductID] = product;
-      });
-      console.log('產品資料已載入:', window.productMap);
-    });
-    
 
     // 問卷狀態與控制相關功能
     let currentQuestionIndex = 0;
     let answers = {};
     let totalQuestions = 0;
-    let type = "";//問卷類型
-    let constipationScore = 0; //功能性便秘
-    let nightUrinationScore =0;//第4c題
-    let midWakeScore = 0;//第4b題
-    let SleepMedicineScore=0;//安眠藥物使用
-    let SleepLatencyScore=0;//睡眠潛伏期分數
-    let lightSleepScore = 0; //睡眠困擾
-
 
     questionnaire.forEach((section) => {
       totalQuestions += section.questions.length;
@@ -933,18 +868,9 @@
     function initQuestionnaire() {
       currentQuestionIndex = 0;
       answers = {};
-      getCSurveyParams();
       renderQuestion();
       updateProgressBar();
     }
-
-    function restartQuestionnaire() {
-      currentQuestionIndex = 0;
-      answers = {};
-      renderQuestion();
-      updateProgressBar();
-    }
-
 
     function renderQuestion() {
         // 找出目前所在的題組與題目
@@ -1296,7 +1222,6 @@ function handleRadioButtonClick(event) {
         renderQuestion();
         updateProgressBar();
       } else {
-        loadparms();
         showResults();
       }
     }
@@ -1336,106 +1261,33 @@ function handleRadioButtonClick(event) {
       progressBar.style.width = `${progress}%`;
     }
 
-    function calculatetype(){
-      if ((SleepLatencyScore >= 2||SleepMedicineScore>=1)&&(midWakeScore >= 2 && nightUrinationScore <= 1)) { //難以入睡 (睡眠潛伏期大於等於2，或是5題大於等於1)，且睡眠易中斷 (4b題大於等於2，且4C題小於等於1)
-        type = "5";
-      } else if ((SleepLatencyScore >= 2||SleepMedicineScore>=1)&&(nightUrinationScore >= 2)) { //難以入睡 (睡眠潛伏期大於等於2，或是5題大於等於1)，且夜尿頻繁( 4c題大於等於2)
-        type = "4";
-      } else if(SleepLatencyScore >= 2||SleepMedicineScore>=1) { //睡眠潛伏期大於等於2，或是5題大於等於1
-        type = "1";
-      } else if (midWakeScore >= 2 && nightUrinationScore <= 1) { //4b題大於等於2，且4C題小於等於1
-        type = "3";
-      } else if (nightUrinationScore >= 2) {//( 4c題大於等於2
-        type = "2";
-      } else {
-        const scores = [
-          { type: "1", score: SleepLatencyScore },
-          { type: "2", score: nightUrinationScore },
-          { type: "3", score: lightSleepScore },
-          { type: "4", score: SleepMedicineScore },
-          { type: "5", score: midWakeScore },
-        ];
-
-        scores.sort((a, b) => b.score - a.score);
-        type = scores[0].score > 0 ? scores[0].type : "5";
-      }
-
-      if (constipationScore >= 7) { //有便祕
-        type += "+";
-      }
-
-    }
-
-    function getCSurveyParams(){  
-      // 呼叫 CSurvey API 讀取資料庫
-      const userData = JSON.parse(localStorage.getItem("userData"));
-      console.log("userData:"+userData.MID);
-      console.log("userData2:"+userData.MAID);
-      console.log("userData3:"+userData.Token);
-      console.log("userData4:"+userData.Mobile);
-      fetch("https://23700999.com:8081/HMA/api/fr/getCSurveyParams", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                MID: userData?.MID || "",
-                MAID: userData?.MAID || "",
-                Token: userData?.Token || "",
-                Mobile: userData?.Mobile || "",
-              }),
-            })
-            .then((res) => res.json())
-            .then((data) => {
-                   console.log("讀取複雜問卷資料 API 回傳：", data);
-                   if (data) {
-                    // 填入類型
-                       constipationScore = data.ConstipationScore; //功能性便秘
-                       nightUrinationScore =data.Q6;//第4c題
-                       midWakeScore = data.Q5;//第4b題
-                       SleepMedicineScore=data.Q10;//安眠藥物使用
-                       SleepLatencyScore+=data.Q2;//睡眠潛伏期分數
-                       SleepLatencyScore+=data.Q4;//睡眠潛伏期分數
-                       lightSleepScore+=data.Q5;
-                       lightSleepScore+=data.Q6;
-                       lightSleepScore+=data.Q7;
-                       lightSleepScore+=data.Q8;
-                       lightSleepScore+=data.Q9;
-                       showResults();
-                   }
-            })
-            .catch((error) => {
-              console.error("讀取複雜問卷資料 API 錯誤：", error);
-            });
-    }
-
-    function loadparms(){
+    function showResults() {
+      let SleepLatencyScore = 0;//睡眠潛伏期分數
       let sleeplatency=0;//睡眠潛伏期
+      let lightSleepScore = 0; //睡眠困擾
       let sleepDifficulty=0;//睡眠困擾
       let daytimeScore=0; //日間活動失能
+      let SleepMedicineScore = 0;//安眠藥物使用
       let daytimedisability=0;//日間活動失能
+      let constipationScore = 0; //功能性便秘
       let stressScore=0; //目前壓力狀態
       let ansScore=0; //目前焦慮狀態
       let showconstipation="";
       let showstress="";
       let showANS="";
+      let nightUrinationScore = getValueForQuestion("bathroom_wake");//第4c題
+      let midWakeScore = getValueForQuestion("wake_up_night");//第4b題
       let needDoctor=false;//需要醫師進一步介入
       let sleepefficiency=0; //睡眠效率
+      let psleepduration=getValueForQuestion("sleep_duration"); //第三題 睡眠時數
+      let pst=getValueForQuestion("sleep_time"); //第一題
       let sleepquality=0;//睡眠品質
-      let bathroomDetail = answers["bathroom_frequency_detail"] || 0;//第4c2題
-      let nightwakeDetail = answers["wake_up_night_detail"] || 0;//第4b2題
-      let selectedMeds = getSelectedCheckboxLabels("medication");
-      let bathroomDetailLabel = getLabelByValue("bathroom_frequency_detail", bathroomDetail);
-      let nightwakeDetailLabel = getLabelByValue("wake_up_night_detail",nightwakeDetail);
-
-      nightUrinationScore = getValueForQuestion("bathroom_wake");//第4c題
-      midWakeScore = getValueForQuestion("wake_up_night");//第4b題
-      psleepduration=getValueForQuestion("sleep_duration"); //第三題 睡眠時數
-      pst=getValueForQuestion("sleep_time"); //第一題 
-      sleepqualityScore=getValueForQuestion("sleep_quality_slider");//睡眠品質0-10分
-
+      let sleepqualityScore=getValueForQuestion("sleep_quality_slider");//睡眠品質0-10分
       if(sleepqualityScore<=2){sleepquality=3;}
       else if(sleepqualityScore<=5&&sleepqualityScore>=3){sleepquality=2;}
       else if(sleepqualityScore<=8&&sleepqualityScore>=6){sleepquality=1;}
       
+
       //計算睡眠效率
       if((psleepduration==1&&pst==0)||(psleepduration==2&&pst==1)||(psleepduration==3&&pst==2)){
         sleepefficiency=1;
@@ -1511,6 +1363,13 @@ function handleRadioButtonClick(event) {
         needDoctor=true;
       }
 
+      let bathroomDetail = answers["bathroom_frequency_detail"] || 0;//第4c2題
+      let nightwakeDetail = answers["wake_up_night_detail"] || 0;//第4b2題
+      let selectedMeds = getSelectedCheckboxLabels("medication");
+      let bathroomDetailLabel = getLabelByValue("bathroom_frequency_detail", bathroomDetail);
+      let nightwakeDetailLabel = getLabelByValue("wake_up_night_detail",nightwakeDetail);
+
+      
       console.log('睡眠品質=', sleepquality);
       console.log('睡眠品質分數=', sleepqualityScore);
       console.log('睡眠潛伏期=', sleeplatency);
@@ -1529,16 +1388,45 @@ function handleRadioButtonClick(event) {
       console.log('半夜醒來次數=', nightwakeDetailLabel);
       console.log('半夜夜尿次數=', bathroomDetailLabel);
       console.log("選取的藥物：", selectedMeds.join("，"));
-  
+
+
+      
+      let type = "";
+        if ((SleepLatencyScore >= 2||SleepMedicineScore>=1)&&(midWakeScore >= 2 && nightUrinationScore <= 1)) { //難以入睡 (睡眠潛伏期大於等於2，或是5題大於等於1)，且睡眠易中斷 (4b題大於等於2，且4C題小於等於1)
+        type = "5";
+      } else if ((SleepLatencyScore >= 2||SleepMedicineScore>=1)&&(nightUrinationScore >= 2)) { //難以入睡 (睡眠潛伏期大於等於2，或是5題大於等於1)，且夜尿頻繁( 4c題大於等於2)
+        type = "4";
+      } else if(SleepLatencyScore >= 2||SleepMedicineScore>=1) { //睡眠潛伏期大於等於2，或是5題大於等於1
+        type = "1";
+      } else if (midWakeScore >= 2 && nightUrinationScore <= 1) { //4b題大於等於2，且4C題小於等於1
+        type = "3";
+      } else if (nightUrinationScore >= 2) {//( 4c題大於等於2
+        type = "2";
+      } else {
+        const scores = [
+          { type: "1", score: SleepLatencyScore },
+          { type: "2", score: nightUrinationScore },
+          { type: "3", score: lightSleepScore },
+          { type: "4", score: SleepMedicineScore },
+          { type: "5", score: midWakeScore },
+        ];
+
+        scores.sort((a, b) => b.score - a.score);
+        type = scores[0].score > 0 ? scores[0].type : "5";
+      }
+
+      if (constipationScore >= 7) { //有便祕
+        type += "+";
+      }
+      
      let userData = {};
      userData = JSON.parse(localStorage.getItem("userData"));  
       // 複雜問卷 API 參數
       //幫我都轉成字串
      const CSurveyParams = {
-        MID: userData?.MID || "",
-        MAID: userData?.MAID || "",
-        Token: userData?.Token || "",
-        Mobile: userData?.Mobile || "",
+       MID: userData?.MID || "",
+       Token: userData?.Token || "",
+       Mobile: userData?.Mobile || "",
         SleepqualityScore:sleepqualityScore.toString(),  //睡眠品質分數
         Sleepquality:sleepquality.toString(),   //睡眠品質
         Sleeplatency:sleeplatency.toString(),  //睡眠潛伏期
@@ -1566,7 +1454,7 @@ function handleRadioButtonClick(event) {
         Q10:SleepMedicineScore.toString(),
         Q11:getValueForQuestion("daytime_sleepiness").toString(),
         Q12:getValueForQuestion("daytime_nopower").toString(),
-        Q13:sleepqualityScore.toString(),
+        q13:sleepqualityScore.toString(),
         Q14:getValueForQuestion("constipation_effort").toString(),
         Q15:getValueForQuestion("constipation_hard").toString(),
         Q16:getValueForQuestion("constipation_incomplete").toString(),
@@ -1600,10 +1488,7 @@ function handleRadioButtonClick(event) {
         console.error("複雜問卷 API 錯誤：", error);
       });
 
-    }
 
-    function showResults() {
-      calculatetype();
       const result = rhythmTypes[type] || {
         name: "整體功能趨於正常",
         emoji: "❓",
@@ -1654,18 +1539,14 @@ function handleRadioButtonClick(event) {
       `;
 
       result.recommendations.forEach((category, index) => {
-        
         resultHTML += `
           <div class="category-content ${index === 0 ? "active" : ""}" data-category="${index}">
-        `;  
-        resultHTML += `
-            <div class="flex flex-col gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         `;
-
 
         category.items.forEach((item) => {
           resultHTML += `
-            <div class="recommendation-card ${category.color} w-full rounded-lg p-4 shadow-sm box-border">
+            <div class="recommendation-card ${category.color} rounded-lg p-4 shadow-sm">
               <div class="recommendation-icon ${category.iconColor}">${category.icon}</div>
               <p class="text-green-700">${item}</p>
             </div>
@@ -1674,19 +1555,8 @@ function handleRadioButtonClick(event) {
 
         resultHTML += `
             </div>
-        `;
-           // 如果是產品建議，就插產品卡片（可針對不同型態顯示不同商品）
-           if (category.category === "產品建議") {
-             const productId = window.typeToProductId[type];
-             if (window.productMap[productId]) {
-               resultHTML += renderProductCardById(productId);
-             }
-        }
-        resultHTML += `  
           </div>
         `;
-
-
       });
 
       resultHTML += `
@@ -1728,29 +1598,6 @@ function handleRadioButtonClick(event) {
         resultCard.classList.add("show");
       }, 100);
     }
-
-    function renderProductCardById(productId) {
-      const p = window.productMap[productId];
-      if (!p) return "";
-      return `
-        <div class="flex flex-col md:flex-row items-center bg-white rounded-xl shadow-lg p-4 my-4 border border-green-200 cursor-pointer"
-             onclick="window.location.href='/cart/product${p.ProductID}'">
-          <img src="${p.FPicture}" alt="${p.ProductName}" class="w-32 h-32 object-contain rounded-lg mr-6 mb-3 md:mb-0" />
-          <div class="flex-1">
-            <h4 class="text-lg font-bold text-green-800 mb-2">${p.ProductName}</h4>
-            <p class="text-gray-700 mb-2">${p.Feature}</p>
-            <div class="mb-2 text-green-700 font-semibold">
-              NT$${p.Price} 
-              <span class="text-gray-400 line-through text-base font-normal">原價NT$${Math.round(p.Price/0.7)}</span>
-            </div>
-            <button class="inline-block px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold text-center mt-2 transition">
-              立即選購
-            </button>
-          </div>
-        </div>
-      `;
-    }
-
 
     function getValueForQuestion(questionId) {
       for (const section of questionnaire) {
@@ -1817,21 +1664,14 @@ function handleRadioButtonClick(event) {
       resultsDiv.classList.add("hidden");
       questionnaireDiv.classList.remove("hidden");
       resultCard.classList.remove("show");
-      restartQuestionnaire();
+      initQuestionnaire();
     }
-
 
     prevBtn.addEventListener("click", prevQuestion);
     nextBtn.addEventListener("click", nextQuestion);
     restartBtn.addEventListener("click", restart);
 
     initQuestionnaire();
-
-    let productMap = {};
-    fetchMaProduct().then(map => {
-      productMap = map;
-      // 問卷結束時再呼叫 showResults()
-    });
   </script>
 </body>
 </html>

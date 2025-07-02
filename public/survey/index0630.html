@@ -782,7 +782,9 @@
         id="member-modal"
         class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50"
       >
-        <div class="bg-white rounded-xl shadow-xl w-[90%] max-w-md p-6 relative ">
+        <div
+          class="bg-white rounded-xl shadow-xl w-[90%] max-w-md p-6 relative"
+        >
           <!-- 關閉按鈕 -->
           <button
             id="close-member-modal"
@@ -803,7 +805,7 @@
                 placeholder="例如：0912345678"
               />
               <!-- 密碼 -->
-               <label class="block font-medium mb-1 text-sm mt-2">密碼</label>
+              <label class="block font-medium mb-1 text-sm mt-2">密碼</label>
               <input
                 type="password"
                 id="password"
@@ -815,7 +817,7 @@
                 <button
                   type="button"
                   id="forgot-password-link"
-                   class="hidden text-green-600 hover:text-green-800 text-xs underline"
+                  class="hidden text-green-600 hover:text-green-800 text-xs underline"
                 >
                   忘記密碼？
                 </button>
@@ -828,7 +830,9 @@
               >
                 驗證
               </button>
-              <label for="key" class="block font-medium mb-1 text-sm mt-2">輸入驗證碼</label>
+              <label for="key" class="block font-medium mb-1 text-sm mt-2"
+                >輸入驗證碼</label
+              >
               <input
                 type="text"
                 id="key"
@@ -857,7 +861,9 @@
         id="member-modal-step1"
         class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50"
       >
-        <div class="bg-white rounded-xl shadow-xl w-[90%] max-w-md p-6 relative">
+        <div
+          class="bg-white rounded-xl shadow-xl w-[90%] max-w-md p-6 relative"
+        >
           <button
             id="close-member-modal-step1"
             class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl"
@@ -895,16 +901,29 @@
               </div>
             </div>
             <div class="flex gap-2">
-              <input 
-                type="text" 
-                id="verify-code-step1" 
-                class="w-full border rounded-lg px-3 py-2 text-sm" 
-                placeholder="驗證碼" 
-                style="display:none;" 
+              <input
+                type="text"
+                id="verify-code-step1"
+                class="w-full border rounded-lg px-3 py-2 text-sm"
+                placeholder="驗證碼"
+                style="display: none"
               />
-              <button type="button" id="send-verify-btn-step1" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm">發送驗證碼</button>
+              <button
+                type="button"
+                id="send-verify-btn-step1"
+                class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 text-sm"
+              >
+                發送驗證碼
+              </button>
             </div>
-            <button type="button" id="next-step-btn-step1" class="bg-gray-400 text-white px-6 py-2 rounded-lg w-full" disabled>下一步</button>
+            <button
+              type="button"
+              id="next-step-btn-step1"
+              class="bg-gray-400 text-white px-6 py-2 rounded-lg w-full"
+              disabled
+            >
+              下一步
+            </button>
           </div>
         </div>
       </div>
@@ -914,8 +933,9 @@
         id="member-modal-step2"
         class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50"
       >
-        <div class="bg-white rounded-xl shadow-xl w-[90%] max-w-md p-6 relative">
-
+        <div
+          class="bg-white rounded-xl shadow-xl w-[90%] max-w-md p-6 relative"
+        >
           <h2 class="text-xl font-bold text-green-700 mb-4">會員資料填寫</h2>
           <div id="member-form-step2" class="space-y-4">
             <div>
@@ -1065,7 +1085,9 @@
         // Elements - 統一獲取所有 DOM 元素
         const startScreen = document.getElementById("start-screen");
         const startBtn = document.getElementById("start-btn");
-        const questionsContainer = document.getElementById("questions-container");
+        const questionsContainer = document.getElementById(
+          "questions-container"
+        );
         const questions = document.querySelectorAll(".question");
         const progressBar = document.getElementById("progress-bar");
         const resultsContainer = document.getElementById("results-container");
@@ -1073,88 +1095,42 @@
         const reportModal = document.getElementById("report-modal");
         const closeModal = document.getElementById("close-modal");
         const modalContent = document.getElementById("modal-content");
-        //const contactBtn = document.getElementById("contact-btn");
+        const contactBtn = document.getElementById("contact-btn");
         const UUID = getOrCreateVisitorID(); // 將 UUID 定義為全域變數
 
-        const getSSurveyParams = {UUID: String(UUID || ""),};
-
-        // 呼叫 SSurvey API 讀取資料庫
-        fetch("https://23700999.com:8081/HMA/api/fr/getSSurveyParams", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(getSSurveyParams),
-          })
-            .then((res) => res.text())
-            .then((txt) => {
-              try {
-                   const data = JSON.parse(txt);
-                   console.log("讀取簡單問卷資料 API 回傳：", data);
-                   // 判斷 data 有內容，直接顯示結果
-              // 假設 API 回傳的格式像 { Type: "fox", TypeCount: {turtle:1, fox:5,...} ... }
-                if (data && data.Type) {
-                // 填入類型
-                   dominantType = data.Type;
-
-                  // 這裡可以把數據寫回 typeCount，如果 API 有回傳
-                     if (data.TypeCount) {
-                            try {
-                                 let countObj = data.TypeCount;
-                                 // 如果 TypeCount 是字串 JSON，要 parse
-                                if (typeof countObj === "string") countObj = JSON.parse(countObj);
-                                Object.assign(typeCount, countObj);
-                                } catch(e) {}
-                                 }
-
-                              // 直接顯示對應結果
-                              showResults(true);
-                              // 隱藏 start screen、問卷等
-                              startScreen.style.display = "none";
-                               questionsContainer.style.display = "none";
-                               // 直接 return，不再跑問卷
-                               return;
-                              }
-                      // 沒有結果，正常顯示 start screen
-                      startScreen.style.display = "block";
-
-                   } catch (e) {
-                       console.error('API回傳不是JSON:', txt);
-                  }
-            
-            })
-            .catch((error) => {
-              console.error("讀取簡單問卷資料 API 錯誤：", error);
-            });
-
-        
         // 會員相關元素
         const memberModal = document.getElementById("member-modal");
         const closeModalBtn = document.getElementById("close-member-modal");
         const verifyPhoneBtn = document.getElementById("verify-phone-btn");
         const form = document.getElementById("member-form");
-        
+
         // Step 1 元素
         const memberModalStep1 = document.getElementById("member-modal-step1");
-        const closeModalBtnStep1 = document.getElementById("close-member-modal-step1");
-        const sendVerifyBtnStep1 = document.getElementById("send-verify-btn-step1");
+        const closeModalBtnStep1 = document.getElementById(
+          "close-member-modal-step1"
+        );
+        const sendVerifyBtnStep1 = document.getElementById(
+          "send-verify-btn-step1"
+        );
         const phoneInputStep1 = document.getElementById("phone-step1");
         const passwordInputStep1 = document.getElementById("password-step1");
-        const verifyCodeInputStep1 = document.getElementById("verify-code-step1");
+        const verifyCodeInputStep1 =
+          document.getElementById("verify-code-step1");
         const nextStepBtnStep1 = document.getElementById("next-step-btn-step1");
-        
+
         // Step 2 元素
         const memberModalStep2 = document.getElementById("member-modal-step2");
-       
         const memberFormStep2 = document.getElementById("member-form-step2");
         const nameInputStep2 = document.getElementById("name-step2");
         const genderInputStep2 = document.getElementById("gender-step2");
         const submitProfileBtn = document.getElementById("submit-profile-btn");
-        
+
         // 第一個會員 modal 元素
         const nextStepBtn = document.getElementById("next-step-btn");
         const phoneInput = document.getElementById("phone");
         const passwordInput = document.getElementById("password");
         const keyInput = document.getElementById("key");
-        
+
         // 忘記密碼相關元素
         const forgotPasswordModal = document.getElementById("forgot-password-modal");
         const closeForgotPasswordModal = document.getElementById("close-forgot-password-modal");
@@ -1165,7 +1141,7 @@
         const forgotVerifyCodeInput = document.getElementById("forgot-verify-code");
         const newPasswordInput = document.getElementById("new-password");
         const confirmNewPasswordInput = document.getElementById("confirm-new-password");
-        
+
         let dominantType = "neutral";
         let userSession = null;
 
@@ -1195,7 +1171,7 @@
           nextStepBtn.style.background = "#9ca3af"; // gray-400
           nextStepBtn.style.color = "#fff";
         }
-        
+
         if (nextStepBtnStep1) {
           nextStepBtnStep1.disabled = true;
           nextStepBtnStep1.style.background = "#9ca3af"; // gray-400
@@ -1242,12 +1218,15 @@
 
         // Update progress bar
         function updateProgressBar() {
-          const progress = Math.min((currentQuestion / totalQuestions) * 100, 100);
+          const progress = Math.min(
+            (currentQuestion / totalQuestions) * 100,
+            100
+          );
           progressBar.style.width = `${progress}%`;
         }
 
         // Show results
-        function showResults(isFromDB = false) {
+        function showResults() {
           questionsContainer.style.display = "none";
           resultsContainer.style.display = "block";
 
@@ -1277,28 +1256,28 @@
             Type: dominantType,
             Timestamp: timestamp,
             TypeCount: typeCount,
-            UserAgent: navigator.userAgent
+            UserAgent: navigator.userAgent,
           });
           console.log("轉換後資料：", SSurveyParams);
           console.log("傳送資料：", JSON.stringify(SSurveyParams));
-          
-          if (!isFromDB) {
+
           // 呼叫 SSurvey API 寫入資料庫
-            fetch("https://23700999.com:8081/HMA/api/fr/Ssurvey", {
+          fetch("https://23700999.com:8081/HMA/api/fr/Ssurvey", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(SSurveyParams),
-            })
+          })
             .then((res) => res.json())
             .then((data) => {
               console.log("簡單問卷 API 回傳：", data);
-             })
+            })
             .catch((error) => {
               console.error("簡單問卷 API 錯誤：", error);
-             });
-          }
+            });
+
           // Show the corresponding result
-          document.getElementById(`${dominantType}-result`).style.display = "block";
+          document.getElementById(`${dominantType}-result`).style.display =
+            "block";
         }
 
         // Modal functionality
@@ -1317,10 +1296,10 @@
           });
         }
 
-        /*contactBtn.addEventListener("click", function () {
+        contactBtn.addEventListener("click", function () {
           alert("感謝您的興趣！專業顧問將會與您聯繫。");
           reportModal.classList.add("hidden");
-        });*/
+        });
 
         // 設定所有事件監聽器
         function setupEventListeners() {
@@ -1339,9 +1318,13 @@
           }
 
           // 忘記密碼連結事件監聽器
-          const forgotPasswordLink = document.getElementById("forgot-password-link");
-          const forgotPasswordLinkStep1 = document.getElementById("forgot-password-link-step1");
-          
+          const forgotPasswordLink = document.getElementById(
+            "forgot-password-link"
+          );
+          const forgotPasswordLinkStep1 = document.getElementById(
+            "forgot-password-link-step1"
+          );
+
           if (forgotPasswordLink) {
             forgotPasswordLink.addEventListener("click", () => {
               memberModal.classList.add("hidden");
@@ -1351,7 +1334,7 @@
               }
             });
           }
-          
+
           if (forgotPasswordLinkStep1) {
             forgotPasswordLinkStep1.addEventListener("click", () => {
               memberModalStep1.classList.add("hidden");
@@ -1367,7 +1350,7 @@
             verifyPhoneBtn.addEventListener("click", async () => {
               const phone = phoneInput.value.trim();
               const password = passwordInput.value.trim();
-              
+
               // 防呆檢查
               if (!phone) {
                 alert("請輸入手機號碼");
@@ -1385,11 +1368,11 @@
                 alert("密碼需至少8位");
                 return;
               }
-              
+
               // 暫時禁用按鈕防止重複點擊
               verifyPhoneBtn.disabled = true;
               verifyPhoneBtn.textContent = "發送中...";
-              
+
               try {
                 const result = await getVerifyCode(phone, password);
                 if (result) {
@@ -1410,7 +1393,7 @@
           if (nextStepBtn) {
             nextStepBtn.addEventListener("click", async (e) => {
               const code = keyInput.value.trim();
-              
+
               // 防呆檢查
               if (!code) {
                 alert("請輸入驗證碼");
@@ -1420,20 +1403,26 @@
                 alert("請輸入5位數驗證碼");
                 return;
               }
-              
+
               // 檢查 userSession 是否存在
-              if (!userSession || !userSession.MID || !userSession.Token || !userSession.MAID || !userSession.Mobile) {
+              if (
+                !userSession ||
+                !userSession.MID ||
+                !userSession.Token ||
+                !userSession.MAID ||
+                !userSession.Mobile
+              ) {
                 alert("請先取得驗證碼");
                 return;
               }
-              
+
               // 暫時禁用按鈕防止重複點擊
               nextStepBtn.disabled = true;
               nextStepBtn.textContent = "驗證中...";
-              
+
               try {
                 const result = await verifyCodeAPI(userSession, code);
-                if(result && result.PASS === "OK") {
+                if (result && result.PASS === "OK") {
                   // 驗證成功，切換到填寫會員資料畫面
                   memberModal.classList.add("hidden");
                   memberModalStep2.classList.remove("hidden");
@@ -1462,33 +1451,44 @@
                 alert("請輸入5位數驗證碼");
                 return;
               }
-              
+
               // 暫時禁用按鈕防止重複點擊
               nextStepBtnStep1.disabled = true;
               nextStepBtnStep1.textContent = "驗證中...";
-              
+
               const codeArr = code.split("");
               try {
-                const res = await fetch("https://23700999.com:8081/HMA/API_doExamAuth.jsp", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    ...userSession,
-                    D1: codeArr[0],
-                    D2: codeArr[1],
-                    D3: codeArr[2],
-                    D4: codeArr[3],
-                    D5: codeArr[4]
-                  })
-                });
+                const res = await fetch(
+                  "https://23700999.com:8081/HMA/API_doExamAuth.jsp",
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      ...userSession,
+                      D1: codeArr[0],
+                      D2: codeArr[1],
+                      D3: codeArr[2],
+                      D4: codeArr[3],
+                      D5: codeArr[4],
+                    }),
+                  }
+                );
                 const data = await res.json();
                 console.log("驗證碼API回傳：", data); // 加入除錯訊息
-                
+
                 // 詳細除錯訊息
-                console.log("data.Result:", data.Result, "類型:", typeof data.Result);
+                console.log(
+                  "data.Result:",
+                  data.Result,
+                  "類型:",
+                  typeof data.Result
+                );
                 console.log("data.PASS:", data.PASS, "類型:", typeof data.PASS);
-                console.log("判斷條件:", data.Result === "OK" && data.PASS === "OK");
-                
+                console.log(
+                  "判斷條件:",
+                  data.Result === "OK" && data.PASS === "OK"
+                );
+
                 // 修正驗證邏輯：需要同時檢查 PASS 和 Result
                 if (data.Result === "OK" && data.PASS === "OK") {
                   // 驗證成功，切換到第二步
@@ -1499,7 +1499,9 @@
                   nextStepBtnStep1.textContent = "下一步";
                 } else {
                   // 驗證失敗
-                  const errorMessage = data.Message || (data.PASS === "NOTOK" ? "驗證碼錯誤" : "驗證失敗");
+                  const errorMessage =
+                    data.Message ||
+                    (data.PASS === "NOTOK" ? "驗證碼錯誤" : "驗證失敗");
                   alert(errorMessage);
                   verifyCodeInputStep1.value = "";
                   nextStepBtnStep1.disabled = false;
@@ -1517,11 +1519,11 @@
           if (submitProfileBtn) {
             submitProfileBtn.addEventListener("click", async () => {
               if (submitProfileBtn.disabled) return;
-              
+
               // 防呆檢查
               const name = nameInputStep2.value.trim();
               const gender = genderInputStep2.value;
-              
+
               if (!name) {
                 alert("請輸入姓名");
                 return;
@@ -1534,45 +1536,54 @@
                 alert("請選擇性別");
                 return;
               }
-              
+
               // 檢查 userSession 是否存在
-              if (!userSession || !userSession.MID || !userSession.Token || !userSession.MAID || !userSession.Mobile) {
+              if (
+                !userSession ||
+                !userSession.MID ||
+                !userSession.Token ||
+                !userSession.MAID ||
+                !userSession.Mobile
+              ) {
                 alert("會員資料不完整，請重新驗證");
                 return;
               }
-              
+
               // 禁用按鈕防止重複點擊
               submitProfileBtn.disabled = true;
               submitProfileBtn.textContent = "送出中...";
-              
+
               // 只傳送必要的資料，移除假的資料
               const profile = {
                 Name: name,
-                Sex: gender === "male" ? "1" : "2"
+                Sex: gender === "male" ? "1" : "2",
               };
-              
+
               console.log("AA5 API 傳送資料：", {
                 ...userSession,
-                ...profile
+                ...profile,
               });
-              
+
               try {
-                const res = await fetch("https://23700999.com:8081/HMA/API_AA5.jsp", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    ...userSession,
-                    ...profile,
-                    Height: "",
-                    Weight: "",
-                    Birthday: "",
-                    DSPR: "",
-                    HRVCalTime: ""
-                  })
-                });
+                const res = await fetch(
+                  "https://23700999.com:8081/HMA/API_AA5.jsp",
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      ...userSession,
+                      ...profile,
+                      Height: "",
+                      Weight: "",
+                      Birthday: "",
+                      DSPR: "",
+                      HRVCalTime: "",
+                    }),
+                  }
+                );
                 const data = await res.json();
                 console.log("AA5 API 回傳：", data);
-                
+
                 if (data.Result === "OK") {
                   // 註冊成功後，調用 surveymapping API 進行 UUID 綁定
                   try {
@@ -1582,30 +1593,39 @@
                       MAID: userSession.MAID,
                       Mobile: userSession.Mobile,
                       Lang: "zhtw", // 繁體中文
-                      UUID: UUID // 從 getOrCreateVisitorID() 獲得的 UUID
+                      UUID: UUID, // 從 getOrCreateVisitorID() 獲得的 UUID
                     };
-                    
-                    console.log("SurveyMapping API 傳送資料：", surveyMappingParams);
-                    
-                    const mappingRes = await fetch("https://23700999.com:8081/HMA/api/fr/surveymapping", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify(surveyMappingParams)
-                    });
-                    
+
+                    console.log(
+                      "SurveyMapping API 傳送資料：",
+                      surveyMappingParams
+                    );
+
+                    const mappingRes = await fetch(
+                      "https://23700999.com:8081/HMA/api/fr/surveymapping",
+                      {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(surveyMappingParams),
+                      }
+                    );
+
                     const mappingData = await mappingRes.json();
                     console.log("SurveyMapping API 回傳：", mappingData);
-                    
+
                     if (mappingData.Result === "OK") {
                       console.log("UUID 與會員資料綁定成功");
                     } else {
-                      console.warn("UUID 綁定失敗：", mappingData.Message || "未知錯誤");
+                      console.warn(
+                        "UUID 綁定失敗：",
+                        mappingData.Message || "未知錯誤"
+                      );
                     }
                   } catch (mappingError) {
                     console.error("SurveyMapping API 錯誤：", mappingError);
                     // 不阻擋主要流程，只記錄錯誤
                   }
-                  
+
                   // 將會員資料存到 localStorage 供 csurvey.html 使用
                   const userData = {
                     MID: userSession.MID,
@@ -1613,14 +1633,14 @@
                     MAID: userSession.MAID,
                     Mobile: userSession.Mobile,
                     Name: name,
-                    Sex: gender === "male" ? "1" : "2"
+                    Sex: gender === "male" ? "1" : "2",
                   };
-                  
+
                   localStorage.setItem("userData", JSON.stringify(userData));
                   console.log("會員資料已儲存到 localStorage：", userData);
 
                   memberModalStep2.classList.add("hidden");
-                  
+
                   // 可以跳轉到其他頁面或關閉
                   window.location.href = "/survey/csurvey.html";
                 } else {
@@ -1642,7 +1662,7 @@
             sendVerifyBtnStep1.addEventListener("click", async () => {
               const phone = phoneInputStep1.value.trim();
               const password = passwordInputStep1.value.trim();
-              
+
               // 防呆檢查
               if (!phone) {
                 alert("請輸入手機號碼");
@@ -1660,11 +1680,11 @@
                 alert("密碼需至少8位");
                 return;
               }
-              
+
               sendVerifyBtnStep1.disabled = true;
               sendVerifyBtnStep1.textContent = "發送中...";
               sendVerifyBtnStep1.style.background = "#ccc";
-              
+
               try {
                 const result = await getVerifyCode(phone, password);
                 if (result) {
@@ -1748,7 +1768,7 @@
               try {
                 const result = await verifyForgotPasswordCode(forgotPhoneInput.value.trim(), code, window.forgotPasswordMID);
                 if (result) {
-           
+                  alert("驗證成功！");
                   // 切換到步驟3
                   document.getElementById("forgot-password-step2").classList.add("hidden");
                   document.getElementById("forgot-password-step3").classList.remove("hidden");
@@ -1787,7 +1807,7 @@
               try {
                 const result = await changePassword(forgotPhoneInput.value.trim(), newPassword, window.forgotPasswordMID);
                 if (result) {
-                  alert("密碼修改成功！請再嘗試驗證ˋ");
+                  alert("密碼修改成功！");
                   forgotPasswordModal.classList.add("hidden");
                   resetForgotPasswordForm();
                   
@@ -1800,7 +1820,7 @@
                     }
                   } catch (loginErr) {
                     console.error("自動登入失敗:", loginErr);
-                
+                    alert("密碼修改成功，請重新登入。");
                   }
                 }
               } catch (e) {
@@ -1813,17 +1833,27 @@
           }
         }
 
-        // 重置忘記密碼表單
-        function resetForgotPasswordForm() {
-          if (forgotPhoneInput) forgotPhoneInput.value = "";
-          if (forgotVerifyCodeInput) forgotVerifyCodeInput.value = "";
-          if (newPasswordInput) newPasswordInput.value = "";
-          if (confirmNewPasswordInput) confirmNewPasswordInput.value = "";
+        function showForgotPasswordOption() {
+          // 只做一次顯示（避免重複跑）
+          const forgotPasswordLink = document.getElementById("forgot-password-link");
+          const forgotPasswordLinkStep1 = document.getElementById("forgot-password-link-step1");
           
-          // 重置步驟
-          document.getElementById("forgot-password-step1").classList.remove("hidden");
-          document.getElementById("forgot-password-step2").classList.add("hidden");
-          document.getElementById("forgot-password-step3").classList.add("hidden");
+          if (forgotPasswordLink) {
+            forgotPasswordLink.classList.remove("hidden");
+          }
+          if (forgotPasswordLinkStep1) {
+            forgotPasswordLinkStep1.classList.remove("hidden");
+          }
+        }
+
+        // 如果想要直接打開忘記密碼 modal：
+        function openForgotPasswordModal(presetPhone = "") {
+          memberModal.classList.add("hidden"); // 關閉登入 modal
+          memberModalStep1.classList.add("hidden");
+          forgotPasswordModal.classList.remove("hidden");
+          if (presetPhone) {
+            forgotPhoneInput.value = presetPhone;
+          }
         }
 
         // API 函數
@@ -1833,8 +1863,8 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               Mobile: mobile,
-              Password: password
-            })
+              Password: password,
+            }),
           });
           const text = await res.text();
           let data = {};
@@ -1849,23 +1879,23 @@
               MID: data.MID,
               Token: data.Token,
               MAID: data.MAID,
-              Mobile: data.Mobile
+              Mobile: data.Mobile,
             };
-            
+
             // 啟用第一個會員 modal 的下一步按鈕
             if (nextStepBtn) {
               nextStepBtn.disabled = false;
               nextStepBtn.style.background = "#16a34a";
               nextStepBtn.style.color = "#fff";
             }
-            
+
             // 啟用 Step 1 的下一步按鈕
             if (nextStepBtnStep1) {
               nextStepBtnStep1.disabled = false;
               nextStepBtnStep1.style.background = "#16a34a";
               nextStepBtnStep1.style.color = "#fff";
             }
-            
+
             // 儲存後續需要的資訊
             return {
               MID: data.MID,
@@ -1873,82 +1903,81 @@
               MAID: data.MAID,
               Mobile: data.Mobile,
               A5Digit: data.A5Digit, // 驗證碼
-              startTime: data.startTime
+              startTime: data.startTime,
             };
           } else {
             // 檢查是否為「此手機號碼已經註冊」的錯誤
             if (data.Result && data.Result.includes("已經註冊")) {
               console.log("檢測到手機號碼已註冊，嘗試自動登入...");
-              
+
               // 自動調用登入 API
               try {
-                const loginResponse = await fetch("https://23700999.com:8081/HMA/API_AA1.jsp", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    Mobile: mobile,
-                    Password: password
-                  })
-                });
-                
+                const loginResponse = await fetch(
+                  "https://23700999.com:8081/HMA/API_AA1.jsp",
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      Mobile: mobile,
+                      Password: password,
+                    }),
+                  }
+                );
+
                 const loginData = await loginResponse.json();
                 console.log("自動登入 API 回應:", loginData);
-                
-                if (loginData.Result === "OK" && loginData.Token && loginData.MID) {
+
+                if (
+                  loginData.Result === "OK" &&
+                  loginData.Token &&
+                  loginData.MID
+                ) {
                   console.log("自動登入成功:", loginData);
-                  
+
                   // 儲存 surveyUserData 到 localStorage
                   const surveyUserData = {
                     MID: loginData.MID,
                     Token: loginData.Token,
                     MAID: loginData.MAID,
                     Mobile: loginData.Mobile,
-                    Result: loginData.Result
+                    Result: loginData.Result,
                   };
-                  
-                  localStorage.setItem("surveyUserData", JSON.stringify(surveyUserData));
-                  localStorage.setItem("userData", JSON.stringify(surveyUserData));
-                  
-                  
-                  
+
+                  localStorage.setItem(
+                    "surveyUserData",
+                    JSON.stringify(surveyUserData)
+                  );
+                  localStorage.setItem(
+                    "userData",
+                    JSON.stringify(surveyUserData)
+                  );
+
+                  alert("此手機號碼已註冊，已自動登入成功！");
+
                   // 關閉所有 modal
                   if (memberModal) memberModal.classList.add("hidden");
-                  if (memberModalStep1) memberModalStep1.classList.add("hidden");
-                  if (memberModalStep2) memberModalStep2.classList.add("hidden");
-                  
+                  if (memberModalStep1)
+                    memberModalStep1.classList.add("hidden");
+                  if (memberModalStep2)
+                    memberModalStep2.classList.add("hidden");
+
                   // 跳轉到 csurvey.html
                   window.location.href = "/survey/csurvey.html";
                   return;
                 } else {
                   alert(`自動登入失敗: ${loginData.Result || "未知錯誤"}`);
-                  showForgotPasswordOption();
                 }
               } catch (loginErr) {
-                
                 console.error("自動登入失敗:", loginErr);
                 alert("此手機號碼已註冊，但自動登入失敗，請使用登入功能。");
               }
             } else if (data.Result && data.Result.includes("密碼不正確")) {
               // 不自動顯示忘記密碼選項，讓用戶主動點擊
               alert("密碼不正確，請檢查密碼或點擊忘記密碼");
-            
+              showForgotPasswordOption();
             } else {
               alert(data.Result || "取得驗證碼失敗");
             }
-          }
-        }
-        function showForgotPasswordOption() {
-          // 只做一次顯示（避免重複跑）
-          const forgotPasswordLink = document.getElementById("forgot-password-link");
-          const forgotPasswordLinkStep1 = document.getElementById("forgot-password-link-step1");
-          
-          if (forgotPasswordLink) {
-            console.log("forgotPasswordLink", forgotPasswordLink);
-            forgotPasswordLink.classList.remove("hidden");
-          }
-          if (forgotPasswordLinkStep1) {
-            console.log("forgotPasswordLinkStep1", forgotPasswordLinkStep1);
-            forgotPasswordLinkStep1.classList.remove("hidden");
           }
         }
 
@@ -1956,139 +1985,60 @@
           // 驗證碼需分成 D1~D5
           const codeArr = code.split("");
           const body = {
-            MID, Token, MAID, Mobile,
-            D1: codeArr[0], D2: codeArr[1], D3: codeArr[2], D4: codeArr[3], D5: codeArr[4]
+            MID,
+            Token,
+            MAID,
+            Mobile,
+            D1: codeArr[0],
+            D2: codeArr[1],
+            D3: codeArr[2],
+            D4: codeArr[3],
+            D5: codeArr[4],
           };
-          const res = await fetch("https://23700999.com:8081/HMA/API_doExamAuth.jsp", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body)
-          });
+          const res = await fetch(
+            "https://23700999.com:8081/HMA/API_doExamAuth.jsp",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(body),
+            }
+          );
           const data = await res.json();
           console.log("verifyCodeAPI 回傳：", data); // 加入除錯訊息
-          
+
           if (data.Result === "OK" && data.PASS === "OK") {
             return data; // 驗證成功
           } else {
-            throw new Error(data.Message || (data.PASS === "NOTOK" ? "驗證碼錯誤" : "驗證失敗"));
+            throw new Error(
+              data.Message ||
+                (data.PASS === "NOTOK" ? "驗證碼錯誤" : "驗證失敗")
+            );
           }
         }
 
         async function submitProfile({ MID, Token, MAID, Mobile }, profile) {
           // profile: { Name, Sex }
           const body = {
-            MID, Token, MAID, Mobile,
-            ...profile
+            MID,
+            Token,
+            MAID,
+            Mobile,
+            ...profile,
           };
           console.log("submitProfile 傳送資料：", body);
-          
+
           const res = await fetch("https://23700999.com:8081/HMA/API_AA5.jsp", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body)
+            body: JSON.stringify(body),
           });
           const data = await res.json();
           console.log("submitProfile 回傳：", data);
-          
+
           if (data.Result === "OK") {
             return data;
           } else {
             throw new Error(data.Message || "註冊失敗");
-          }
-        }
-
-        // 忘記密碼相關 API 函數
-        async function sendForgotPasswordVerifyCode(mobile) {
-          const res = await fetch("https://23700999.com:8081/HMA/API_ForgetPassword.jsp", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              Mobile: mobile
-            })
-          });
-          const data = await res.json();
-          console.log("sendForgotPasswordVerifyCode 回傳：", data);
-          
-          if (data.Result === "OK") {
-            return data; // 回傳包含 MID 的資料
-          } else {
-            throw new Error(data.Message || "發送驗證碼失敗");
-          }
-        }
-
-        async function verifyForgotPasswordCode(mobile, code, mid) {
-          const codeArr = code.split("");
-          const res = await fetch("https://23700999.com:8081/HMA/API_doExamAuthPassword.jsp", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              Mobile: mobile,
-              MID: mid, // 加入 MID
-              D1: codeArr[0],
-              D2: codeArr[1],
-              D3: codeArr[2],
-              D4: codeArr[3],
-              D5: codeArr[4]
-            })
-          });
-          const data = await res.json();
-          console.log("verifyForgotPasswordCode 回傳：", data);
-          
-          if (data.Result === "OK" && data.PASS === "OK") {
-            return data;
-          } else {
-            throw new Error(data.Message || "驗證碼錯誤");
-          }
-        }
-
-        async function changePassword(mobile, newPassword, mid) {
-          const res = await fetch("https://23700999.com:8081/HMA/API_ChangePassword.jsp", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              MID: mid,
-              Mobile: mobile,
-              Password: newPassword
-            })
-          });
-          const data = await res.json();
-          console.log("changePassword 回傳：", data);
-          
-          if (data.Result === "OK") {
-            return data;
-          } else {
-            throw new Error(data.Message || "修改密碼失敗");
-          }
-        }
-
-        async function autoLogin(mobile, password) {
-          const res = await fetch("https://23700999.com:8081/HMA/API_AA1.jsp", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              Mobile: mobile,
-              Password: password
-            })
-          });
-          const data = await res.json();
-          console.log("autoLogin 回傳：", data);
-          
-          if (data.Result === "OK" && data.Token && data.MID) {
-            // 儲存 surveyUserData 到 localStorage
-            const surveyUserData = {
-              MID: data.MID,
-              Token: data.Token,
-              MAID: data.MAID,
-              Mobile: data.Mobile,
-              Result: data.Result
-            };
-            
-            localStorage.setItem("surveyUserData", JSON.stringify(surveyUserData));
-            localStorage.setItem("userData", JSON.stringify(surveyUserData));
-            
-            return data;
-          } else {
-            throw new Error(data.Result || "自動登入失敗");
           }
         }
 
@@ -2105,6 +2055,92 @@
           const newID = crypto.randomUUID();
           document.cookie = `${name}=${newID}; path=/; max-age=31536000`; // 儲存 1 年
           return newID;
+        }
+
+        // 忘記密碼相關 API 函數
+        async function sendForgotPasswordVerifyCode(mobile) {
+          const res = await fetch(
+            "https://23700999.com:8081/HMA/API_ForgetPassword.jsp",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                Mobile: mobile,
+              }),
+            }
+          );
+          const data = await res.json();
+          console.log("sendForgotPasswordVerifyCode 回傳：", data);
+
+          if (data.Result === "OK") {
+            return data; // 回傳包含 MID 的資料
+          } else {
+            throw new Error(data.Message || "發送驗證碼失敗");
+          }
+        }
+
+        async function verifyForgotPasswordCode(mobile, code, mid) {
+          const codeArr = code.split("");
+          const res = await fetch(
+            "https://23700999.com:8081/HMA/API_doExamAuthPassword.jsp",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                Mobile: mobile,
+                MID: mid, // 加入 MID
+                D1: codeArr[0],
+                D2: codeArr[1],
+                D3: codeArr[2],
+                D4: codeArr[3],
+                D5: codeArr[4],
+              }),
+            }
+          );
+          const data = await res.json();
+          console.log("verifyForgotPasswordCode 回傳：", data);
+
+          if (data.Result === "OK" && data.PASS === "OK") {
+            return data;
+          } else {
+            throw new Error(data.Message || "驗證碼錯誤");
+          }
+        }
+
+        // 重置忘記密碼表單
+        function resetForgotPasswordForm() {
+          if (forgotPhoneInput) forgotPhoneInput.value = "";
+          if (forgotVerifyCodeInput) forgotVerifyCodeInput.value = "";
+          if (newPasswordInput) newPasswordInput.value = "";
+          if (confirmNewPasswordInput) confirmNewPasswordInput.value = "";
+          
+          // 重置步驟
+          document.getElementById("forgot-password-step1").classList.remove("hidden");
+          document.getElementById("forgot-password-step2").classList.add("hidden");
+          document.getElementById("forgot-password-step3").classList.add("hidden");
+        }
+
+        async function changePassword(mobile, newPassword, mid) {
+          const res = await fetch(
+            "https://23700999.com:8081/HMA/API_ChangePassword.jsp",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                MID: mid,
+                Mobile: mobile,
+                Password: newPassword,
+              }),
+            }
+          );
+          const data = await res.json();
+          console.log("changePassword 回傳：", data);
+
+          if (data.Result === "OK") {
+            return data;
+          } else {
+            throw new Error(data.Message || "修改密碼失敗");
+          }
         }
       });
     </script>
