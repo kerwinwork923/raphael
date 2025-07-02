@@ -2,7 +2,12 @@
   <div class="HRVTest">
     <div class="scanWrap">
       <!-- 初始遮罩 -->
-      <div class="HRVFirstCover" id="hrvFirstCover" v-if="!isStarted" @click="startBtnClick">
+      <div
+        class="HRVFirstCover"
+        id="hrvFirstCover"
+        v-if="!isStarted"
+        @click="startBtnClick"
+      >
         <img
           src="/vital/images/new/ball.gif"
           alt="開始檢測"
@@ -15,14 +20,14 @@
           :disabled="scanning"
         />
         <ul>
-          <li>準備好後，<span>請點擊任意地方開始量測</span>。</li>
           <li>
-            系統將在倒數
-            <span>3 秒</span>後開始偵測，請讓臉部完整對準畫面並保持不動。
+            系統將在倒數<span> 3秒 </span
+            >後開始偵測，請讓臉部完整對準畫面並保持不動。
           </li>
-          <li><span>量測時間約 15 秒</span>，完成後將顯示檢測結果。</li>
+          <li><span>量測時間約 15秒</span>，完成後將顯示檢測結果。</li>
           <li>感謝您的配合！</li>
         </ul>
+        <button type="button">點擊開始體驗</button>
       </div>
 
       <!-- 掃描系統 -->
@@ -81,7 +86,6 @@
             background: 'none',
             boxShadow: 'none',
             border: 'none',
-            marginRight: '16px',
           }"
           :disabled="scanning"
         />
@@ -109,7 +113,7 @@
 import { ref, onMounted, onUnmounted, watch } from "vue";
 import * as faceapi from "@vladmandic/face-api";
 import Navbar from "../components/Navbar.vue";
-import { useRoute } from 'vue-router';
+import { useRoute } from "vue-router";
 
 // Refs
 const route = useRoute();
@@ -382,7 +386,12 @@ async function startFaceDetection() {
       } else {
         showFaceGuideTip.value = false;
       }
-      if (inside && !scanning.value && mediaRecorder.state === "inactive" && !hasRecorded) {
+      if (
+        inside &&
+        !scanning.value &&
+        mediaRecorder.state === "inactive" &&
+        !hasRecorded
+      ) {
         faceInside = true;
         startCountdown(3, () => {
           if (mediaRecorder.state === "inactive" && !hasRecorded) {
@@ -441,7 +450,7 @@ async function saveHRV3ToServer(data) {
     const payload = {
       ...data,
       UID: uid,
-      Flag: flag
+      Flag: flag,
     };
 
     const res = await fetch("https://23700999.com:8081/HMA/api/fr/HRV3Save", {
@@ -512,7 +521,7 @@ $transition-duration: 0.3s;
   padding: 1rem;
   display: grid;
   grid-template-rows: 1fr min-content;
-  gap:1rem;
+  gap: 1rem;
 }
 
 .ai-scanner-system {
@@ -542,7 +551,7 @@ $transition-duration: 0.3s;
   padding: 1rem;
   z-index: 10;
   .returnBtn {
-    background:  rgba($primary-color, 0.75);
+    background: rgba($primary-color, 0.75);
     border: none;
     color: $text-color;
     border-radius: 8px;
@@ -715,6 +724,7 @@ $transition-duration: 0.3s;
   @include flex-column;
   align-items: center;
   justify-content: center;
+  gap: 1.5rem;
   cursor: pointer;
 
   img {
@@ -737,10 +747,32 @@ $transition-duration: 0.3s;
       margin-bottom: 10px;
       color: $text-color;
       font-size: 1.5rem;
+      line-height: 1.3em;
+      text-align: justify;
 
       span {
         color: $error-color;
       }
+    }
+  }
+
+  & > button {
+    background: rgba(31, 188, 179, 0.4);
+    border: 1px solid $raphael-cyan-400;
+    border-radius: 0.5rem;
+    color: $raphael-cyan-400;
+    cursor: pointer;
+    font-size: 1.5rem;
+    font-weight: bold;
+    width: 80%;
+    padding: 0.5rem 0.75rem;
+    letter-spacing: 3px;
+    transition: all ease 0.2s;
+  }
+
+  &:hover {
+    & > button {
+      text-shadow: 0px 0px 4px #fcfff7;
     }
   }
 }
@@ -753,9 +785,10 @@ $transition-duration: 0.3s;
   transition: background $transition-duration;
   @include flex-center;
   justify-content: flex-start;
+  gap:1rem;
   min-height: 80px;
   min-width: 220px;
-  padding: 10px 20px;
+  padding: 0 20px;
   border: 2px solid $primary-color;
 }
 
@@ -880,12 +913,12 @@ $transition-duration: 0.3s;
 }
 
 @media (orientation: landscape) and (max-height: 480px) {
-  .scanWrap{
+  .scanWrap {
     grid-auto-flow: column;
     grid-template-columns: 1fr min-content;
     grid-template-rows: auto;
   }
-  .action-tip{
+  .action-tip {
     flex-direction: column;
     justify-content: center;
   }

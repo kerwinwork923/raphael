@@ -28,53 +28,6 @@
           <li>生理年齡推算</li>
         </ul>
       </div>
-      <div class="stepCard">
-        <div class="item">
-          <div class="icon">
-            <img src="/assets/imgs/camera-white.svg" />
-          </div>
-          <div class="content">
-            <hgroup>
-              <sub>Step 1</sub>
-              <h3>掃描臉部</h3>
-            </hgroup>
-            <div class="text">使用手機相機，對準臉部進行掃描。</div>
-          </div>
-        </div>
-        <div class="item">
-          <div class="icon">
-            <img src="/assets/imgs/heartRate-white.svg" />
-          </div>
-          <div class="content">
-            <hgroup>
-              <sub>Step 2</sub>
-              <h3>AI分析</h3>
-            </hgroup>
-            <div class="text">FDA認證AI技術即時分析生理數據。</div>
-          </div>
-        </div>
-        <div class="item">
-          <div class="icon">
-            <img src="/assets/imgs/heartbeat-white.svg" />
-          </div>
-          <div class="content">
-            <hgroup>
-              <sub>Step 3</sub>
-              <h3>獲得報告</h3>
-            </hgroup>
-            <div class="text">立即查看自律神經狀態報告</div>
-          </div>
-        </div>
-      </div>
-      <div class="desCard">
-        <h3>重要提醒</h3>
-        <div class="slogan">
-          人臉辨識HRV量測<span>僅反應心臟的交感與副交感神經功能</span>，若您需全面了解全身五臟六腑的自律神經狀態，請依醫師建議回診進行深入檢測。
-        </div>
-        <div class="slogan">
-          每天記錄數據，輕鬆追蹤健康變化，智平衡健康集團秉持專業與創新，結合AI智慧檢測與專業團隊與您攜手邁向更健康的未來！
-        </div>
-      </div>
     </article>
     <div class="detectWrap">
       <div class="detectWrapTitleGroup">
@@ -307,67 +260,6 @@ article {
 
   & > h3 {
     font-size: 20px;
-  }
-  .stepCard {
-    position: relative;
-    display: grid;
-    gap: 0.75rem;
-    font-size: 1.125rem;
-    color: $raphael-gray-500;
-    line-height: 29.1px;
-    letter-spacing: 0.05em;
-
-    &::after {
-      content: "";
-      position: absolute;
-      background: $raphael-white;
-      width: 4px;
-      height: 100%;
-      border-radius: 0.5rem;
-      box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.25) inset;
-      left: 15px;
-    }
-
-    .item {
-      display: flex;
-      gap: 0.5rem;
-      .icon {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: $raphael-cyan-400;
-        border-radius: 50%;
-        padding: 4px;
-        height: 32px;
-        z-index: 1;
-
-        & > img {
-          min-width: 24px;
-        }
-      }
-      .content {
-        display: grid;
-        background: $raphael-white;
-        border-radius: 0.5rem;
-        width: 100%;
-        gap: 0.5rem;
-        padding: 0.75rem;
-        box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-        & > hgroup {
-          display: flex;
-          flex-direction: column;
-          & > sub {
-            color: $raphael-cyan-400;
-            font-size: 0.813rem;
-            line-height: 100%;
-          }
-          & > h3 {
-            color: $raphael-black;
-            font-size: 1.25rem;
-          }
-        }
-      }
-    }
   }
   .desCard {
     display: grid;
