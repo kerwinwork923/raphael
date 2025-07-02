@@ -1,6 +1,4 @@
 <template>
-  
-  
   <div class="addCartAlert" v-if="showAddCartAlert">
     <div class="addCartAlertTitleGroup">
       <img :src="productData?.FPicture" :alt="productData?.ProductName" />
@@ -254,34 +252,37 @@ onMounted(() => {
   flex-direction: column;
   place-items: center;
   padding: 0 2.5% 72px;
+  gap: 1rem;
+
+  .cartTitleBar{
+    max-width: 1440px;
+  }
 
   .productCartContentGroup {
     width: 100%;
-    @include respond-to("tablet-up") {
-      max-width: 1440px;
-      margin-bottom: 10px;
-    }
+    max-width: 1440px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
   .productCartContent {
     width: 100%;
-    margin-top: 1rem;
     padding: 12px;
     border-radius: 8px;
-    background: var(--Neutral-white, #fff);
+    background: $raphael-white;
     h2 {
-      color: var(--Neutral-black, #1e1e1e);
-
-      font-size: var(--Text-font-size-20, 20px);
+      color: $raphael-black;
+      font-size: 1.25rem;
       font-style: normal;
       font-weight: 700;
       line-height: 100%;
-      letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
+      letter-spacing: 0.15px;
       margin-top: 0.5rem;
     }
     h6 {
-      color: var(--Primary-default, #74bc1f);
+      color: $raphael-green-400;
       margin-top: 0.4rem;
-      font-size: var(--Text-font-size-16, 16px);
+      font-size: 1rem;
       font-style: normal;
       font-weight: 700;
       line-height: 100%;
@@ -289,10 +290,10 @@ onMounted(() => {
       margin-bottom: 0.5rem;
     }
     small {
-      color: var(--Neutral-400, #b3b3b3);
+      color: $raphael-gray-400;
       text-align: center;
 
-      font-size: var(--Text-font-size-16, 16px);
+      font-size: 1rem;
 
       font-weight: 400;
 
@@ -301,21 +302,19 @@ onMounted(() => {
     }
 
     h3 {
-      color: var(--Neutral-black, #1e1e1e);
-
-      font-size: var(--Text-font-size-16, 16px);
+      color: $raphael-black;
+      font-size: 1rem;
       font-style: normal;
       font-weight: 700;
-      letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
+      letter-spacing: 0.15px;
     }
     p {
-      color: var(--Neutral-500, #666);
-
-      font-size: var(--Text-font-size-16, 16px);
+      color: $raphael-gray-500;
+      font-size: 1rem;
       font-style: normal;
       font-weight: 400;
       line-height: 150%;
-      letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
+      letter-spacing: 0.15px;
       margin-top: 0.25rem;
     }
     ul {
@@ -333,10 +332,11 @@ onMounted(() => {
       }
     }
     img {
-      height: 225px;
+      height: auto;
       width: 100%;
       object-fit: cover;
       border-radius: 8px;
+      margin-bottom: 0.5rem;
     }
     .productCartContentImgGroup {
       img {
@@ -349,7 +349,8 @@ onMounted(() => {
     position: fixed;
     bottom: 0;
     width: 100%;
-    padding: 1rem;
+    max-width: 1440px;
+    padding: 1rem 0;
     background-color: #f6f6f6;
     gap: 1rem;
     margin-top: 1rem;
