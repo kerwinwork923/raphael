@@ -350,7 +350,7 @@ onMounted(() => {
     bottom: 0;
     width: 100%;
     max-width: 1440px;
-    padding: 1rem 0;
+    padding: 1rem;
     background-color: #f6f6f6;
     gap: 1rem;
     margin-top: 1rem;
