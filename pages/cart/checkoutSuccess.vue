@@ -12,6 +12,7 @@
       <!-- 錯誤狀態 -->
       <div v-else-if="error" class="errorBox">
         <p>{{ error }}</p>
+        <p class="redirectMsg">即將跳轉到訂單查詢頁面...</p>
         <button @click="fetchOrderDetails" class="retryBtn">重新載入</button>
       </div>
 
@@ -86,10 +87,11 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import CartTitleBar from "~/components/cart/CartTitleBar.vue";
 
 const route = useRoute();
+const router = useRouter();
 const orderDetails = ref({});
 const isLoading = ref(true);
 const error = ref(null);
@@ -102,6 +104,10 @@ const fetchOrderDetails = async () => {
     console.error('未找到 SALEID');
     error.value = '未找到訂單資訊';
     isLoading.value = false;
+    // 跳轉到訂單查詢頁面
+    setTimeout(() => {
+      router.push('/orderQuery');
+    }, 2000);
     return;
   }
   
@@ -149,10 +155,18 @@ const fetchOrderDetails = async () => {
     } else {
       console.error('獲取訂單詳情失敗:', data.value?.Message);
       error.value = data.value?.Message || '獲取訂單詳情失敗';
+      // 跳轉到訂單查詢頁面
+      setTimeout(() => {
+        router.push('/orderQuery');
+      }, 3000);
     }
   } catch (err) {
     console.error('獲取訂單詳情時發生錯誤:', err);
     error.value = '獲取訂單詳情時發生錯誤';
+    // 跳轉到訂單查詢頁面
+    setTimeout(() => {
+      router.push('/orderQuery');
+    }, 3000);
   } finally {
     isLoading.value = false;
   }
@@ -344,6 +358,12 @@ onMounted(() => {
     color: #ec4f4f;
     font-size: 0.9rem;
     margin-bottom: 1rem;
+  }
+
+  .redirectMsg {
+    color: #666 !important;
+    font-size: 0.8rem !important;
+    margin-bottom: 0.5rem !important;
   }
 
   .retryBtn {
