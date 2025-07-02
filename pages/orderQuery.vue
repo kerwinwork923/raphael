@@ -199,7 +199,7 @@ import { ref } from "vue";
         display: flex;
         justify-content: space-between;
         align-items: center;
-      
+        
       }
     }
   }

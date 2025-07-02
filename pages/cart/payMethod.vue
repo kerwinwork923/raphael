@@ -7,7 +7,7 @@
     </div>
     <div class="payMethodGroup">
       <div class="payMethodTitle">
-        <h4>{{ deliverInfo?.Name || '黑貓宅配' }}</h4>
+        <h4>{{ deliverInfo?.Name || '宅配' }}</h4>
         <h5>免運費</h5>
       </div>
       <p>預計送達時間 5月20日~5月25日</p>

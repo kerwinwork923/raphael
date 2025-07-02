@@ -12,7 +12,7 @@
         <img :src="item.FPicture" :alt="item.ProductName" />
         <h3>{{ item.ProductName }}</h3>
         <h6>NT${{ item.Price }}</h6>
-        <small>{{ item.DeliverName }}</small>
+        <small>剩餘{{ item.Remaining }}件</small>
         <div class="cartContentItemTag">{{ item.Label }}</div>
       </a>
     </div>

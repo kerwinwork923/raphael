@@ -29,7 +29,7 @@
         </div>
         <div class="sendContnet" v-else @click="router.push('/cart/payMethod')">
           <div class="sendContnetTitle">
-            <h5>黑貓宅配</h5>
+            <h5>宅配</h5>
           </div>
           <p>請新增寄送地址</p>
         </div>
@@ -286,6 +286,12 @@ const checkout = async () => {
     if (data.value?.Result === "OK") {
       console.log("結帳成功:", data.value);
       
+      // 儲存 SALEID 到 localStorage
+      if (data.value.SALEID) {
+        localStorage.setItem('checkoutSALEID', data.value.SALEID);
+        console.log("已儲存 SALEID:", data.value.SALEID);
+      }
+      
       // 清除 Pinia 中的選中商品資料
       checkoutStore.clearCheckoutData();
       
@@ -315,7 +321,9 @@ const checkout = async () => {
       } 
       else {
         alert("結帳成功！");
-        router.push("/cart/Finish");
+        // 清除 SALEID，因為已經跳轉到成功頁面
+        localStorage.removeItem('checkoutSALEID');
+        router.push("/cart/checkoutSuccess");
       }
     } else {
       console.error("結帳失敗:", data.value);

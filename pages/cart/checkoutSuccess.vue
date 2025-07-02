@@ -3,68 +3,83 @@
     <CartTitleBar title="付款詳情" backPath="/cart" />
 
     <div class="contentWrap">
-      <div class="infoBox thankYouBox">
-        感謝您的購買，請繼續填寫個人化資訊，以便我們開始製作衣服!
+      <!-- 載入狀態 -->
+      <div v-if="isLoading" class="loadingBox">
+        <div class="loadingSpinner"></div>
+        <p>載入訂單詳情中...</p>
       </div>
 
-      <div class="infoBox">
-        <h4>寄送方式</h4>
-        <p>{{ orderDetails.DeliverType }}</p>
+      <!-- 錯誤狀態 -->
+      <div v-else-if="error" class="errorBox">
+        <p>{{ error }}</p>
+        <button @click="fetchOrderDetails" class="retryBtn">重新載入</button>
       </div>
 
-      <div class="infoBox">
-        <h4>收件資訊</h4>
-        <p>{{ orderDetails.RName }}．{{ orderDetails.RMobile }}</p>
-        <p>{{ orderDetails.Address }}</p>
-      </div>
+      <!-- 正常內容 -->
+      <template v-else>
+        <div class="infoBox thankYouBox">
+          感謝您的購買，請繼續填寫個人化資訊，以便我們開始製作衣服!
+        </div>
 
-      <div class="infoBox productBox">
-        <div
-          v-for="item in orderDetails.ProductList"
-          :key="item.ProductID"
-          class="productItem"
-        >
-          <img :src="item.Picture" :alt="item.ProductName" />
-          <div class="productInfo">
-            <h4>{{ item.ProductName }}</h4>
-            <h5>NT${{ item.Price }}</h5>
-            <button class="personalizeBtn">請完成個人化資訊填寫 ></button>
+        <div class="infoBox">
+          <h4>寄送方式</h4>
+          <p>{{ orderDetails.DeliverType }}</p>
+        </div>
+
+        <div class="infoBox">
+          <h4>收件資訊</h4>
+          <p>{{ orderDetails.RName }}．{{ orderDetails.RMobile }}</p>
+          <p>{{ orderDetails.Address }}</p>
+        </div>
+
+        <div class="infoBox productBox">
+          <div
+            v-for="item in orderDetails.ProductList"
+            :key="item.ProductID"
+            class="productItem"
+          >
+            <img :src="item.Picture" :alt="item.ProductName" />
+            <div class="productInfo">
+              <h4>{{ item.ProductName }}</h4>
+              <h5>NT${{ item.Price }}</h5>
+              <button class="personalizeBtn">請完成個人化資訊填寫 ></button>
+            </div>
+            <span class="quantity">x{{ item.Qty }}</span>
           </div>
-          <span class="quantity">x{{ item.Qty }}</span>
-        </div>
-        <div class="summary">
-          <div class="summaryRow">
-            <span>運費</span>
-            <span>NT${{ orderDetails.freight }}</span>
+          <div class="summary">
+            <div class="summaryRow">
+              <span>運費</span>
+              <span>NT${{ orderDetails.freight }}</span>
+            </div>
+            <div class="summaryRow total">
+              <span>訂單總金額</span>
+              <span>NT${{ orderDetails.TotalAmount }}</span>
+            </div>
           </div>
-          <div class="summaryRow total">
-            <span>訂單總金額</span>
-            <span>NT${{ orderDetails.TotalAmount }}</span>
-          </div>
         </div>
-      </div>
 
-      <div class="infoBox orderDetailsBox">
-        <div class="detailRow">
-          <span>訂單編號</span>
-          <span class="copyable">
-            {{ orderDetails.OrderNo }}
-            <!-- <img src="~/assets/imgs/cart/copy.svg" alt="copy" @click="copy(orderDetails.OrderNo)" /> -->
-          </span>
+        <div class="infoBox orderDetailsBox">
+          <div class="detailRow">
+            <span>訂單編號</span>
+            <span class="copyable">
+              {{ orderDetails.OrderNo }}
+              <!-- <img src="~/assets/imgs/cart/copy.svg" alt="copy" @click="copy(orderDetails.OrderNo)" /> -->
+            </span>
+          </div>
+          <div class="detailRow">
+            <span>付款方式</span>
+            <span>{{ orderDetails.PayType }}</span>
+          </div>
+          <div class="detailRow">
+            <span>訂單成立時間</span>
+            <span>{{ orderDetails.OrderTime }}</span>
+          </div>
+          <div class="detailRow">
+            <span>發票類型</span>
+            <span>{{ orderDetails.InvoiceType }}</span>
+          </div>
         </div>
-        <div class="detailRow">
-          <span>付款方式</span>
-          <span>{{ orderDetails.PayType }}</span>
-        </div>
-        <div class="detailRow">
-          <span>訂單成立時間</span>
-          <span>{{ orderDetails.OrderTime }}</span>
-        </div>
-        <div class="detailRow">
-          <span>發票類型</span>
-          <span>{{ orderDetails.InvoiceType }}</span>
-        </div>
-      </div>
+      </template>
     </div>
   </div>
 </template>
@@ -76,32 +91,72 @@ import CartTitleBar from "~/components/cart/CartTitleBar.vue";
 
 const route = useRoute();
 const orderDetails = ref({});
+const isLoading = ref(true);
+const error = ref(null);
 const userData = JSON.parse(localStorage.getItem("userData"));
 
-// const fetchOrderDetails = async () => {
-//   const orderId = route.query.id; // 假設訂單 ID 在 query params
-//   try {
-//     const { data } = await useFetch('YOUR_ORDER_DETAILS_API_ENDPOINT', {
-//       method: 'POST',
-//       body: {
-//         OrderID: orderId,
-//         MID: userData.MID,
-//         Token: userData.Token,
-//         MAID: userData.MAID,
-//         Mobile: userData.Mobile,
-//         Lang: 'zhtw',
-//       },
-//     });
+const fetchOrderDetails = async () => {
+  const saleId = localStorage.getItem('checkoutSALEID');
+  
+  if (!saleId) {
+    console.error('未找到 SALEID');
+    error.value = '未找到訂單資訊';
+    isLoading.value = false;
+    return;
+  }
+  
+  try {
+    isLoading.value = true;
+    error.value = null;
+    
+    const { data } = await useFetch('https://23700999.com:8081/HMA/api/fr/maSaleSingle', {
+      method: 'POST',
+      body: {
+        MID: userData.MID,
+        Token: userData.Token,
+        MAID: userData.MAID,
+        Mobile: userData.Mobile,
+        Lang: 'zhtw',
+        SALEID: saleId,
+      },
+    });
 
-//     if (data.value && data.value.Result === 'OK') {
-//       orderDetails.value = data.value.OrderData;
-//     } else {
-//       console.error('Failed to fetch order details:', data.value?.Message);
-//     }
-//   } catch (error) {
-//     console.error('Error fetching order details:', error);
-//   }
-// };
+    if (data.value && data.value.Result === 'OK') {
+      const saleData = data.value.Sale;
+      orderDetails.value = {
+        DeliverType: saleData.DeliverTypeName,
+        RName: saleData.RName,
+        RMobile: saleData.RMobile,
+        Address: saleData.Address,
+        ProductList: saleData.ItemList.map(item => ({
+          ProductID: item.ProductID,
+          ProductName: item.ProductName,
+          Price: parseInt(item.Price).toLocaleString(),
+          Qty: item.Qty,
+          Picture: `https://fastly.picsum.photos/id/${Math.floor(Math.random() * 1000)}/200/200.jpg?hmac=placeholder`, // 暫時使用隨機圖片
+        })),
+        freight: saleData.freight,
+        TotalAmount: parseInt(saleData.TotalAmount).toLocaleString(),
+        OrderNo: saleData.SID,
+        PayType: saleData.PayTypeName,
+        OrderTime: saleData.CheckTime,
+        InvoiceType: saleData.InvoiceIDName,
+      };
+      
+      console.log('訂單詳情獲取成功:', orderDetails.value);
+      // 成功獲取資料後清除 SALEID
+      localStorage.removeItem('checkoutSALEID');
+    } else {
+      console.error('獲取訂單詳情失敗:', data.value?.Message);
+      error.value = data.value?.Message || '獲取訂單詳情失敗';
+    }
+  } catch (err) {
+    console.error('獲取訂單詳情時發生錯誤:', err);
+    error.value = '獲取訂單詳情時發生錯誤';
+  } finally {
+    isLoading.value = false;
+  }
+};
 
 const copy = (text) => {
   navigator.clipboard
@@ -115,39 +170,7 @@ const copy = (text) => {
 };
 
 onMounted(() => {
-  // fetchOrderDetails();
-
-  // 以下為假資料，請替換為 API 獲取的真實資料
-  orderDetails.value = {
-    DeliverType: "黑貓宅配",
-    RName: "王先生",
-    RMobile: "0912 345 678",
-    Address: "100 台北市中正區忠孝西路一段66號30樓",
-    ProductList: [
-      {
-        ProductID: "1",
-        ProductName: "方案一",
-        Price: "9,999",
-        Qty: "1",
-        Picture:
-          "https://fastly.picsum.photos/id/292/200/200.jpg?hmac=r-jS_cv0sY62AnW7d_yAn5I5lIqH2I3r-QoZw4Tto2s",
-      },
-      {
-        ProductID: "2",
-        ProductName: "方案二",
-        Price: "9,999",
-        Qty: "1",
-        Picture:
-          "https://fastly.picsum.photos/id/450/200/200.jpg?hmac=3-3jTz1p4m_60z5v2vJ2tD3jX9y2yJu63Vj0FjF22lE",
-      },
-    ],
-    freight: "0",
-    TotalAmount: "19,998",
-    OrderNo: "123456789ABCDE",
-    PayType: "線上付款",
-    OrderTime: "2025/05/20 12:00",
-    InvoiceType: "電子發票",
-  };
+  fetchOrderDetails();
 });
 </script>
 
@@ -284,5 +307,62 @@ onMounted(() => {
       }
     }
   }
+}
+
+.loadingBox {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  margin-bottom: 0.75rem;
+
+  .loadingSpinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #74bc1f;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+  }
+
+  p {
+    color: #666;
+    font-size: 0.9rem;
+  }
+}
+
+.errorBox {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  margin-bottom: 0.75rem;
+  border: 1px solid #ec4f4f;
+
+  p {
+    color: #ec4f4f;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .retryBtn {
+    background-color: #74bc1f;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+
+    &:hover {
+      background-color: #65a31b;
+    }
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>
