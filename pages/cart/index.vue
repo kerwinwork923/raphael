@@ -3,16 +3,18 @@
     <RaphaelLoading v-if="loading" />
     <CartTitleBar title="商品列表" :showCart="true" backPath="/user" />
     <div class="cartContentGroup">
-    
-      <a :href="`/cart/product${item.ProductID}?`" class="cartContentItem" v-for="item in cartItems" :key="item.ProductID">
+      <a
+        :href="`/cart/product${item.ProductID}?`"
+        class="cartContentItem"
+        v-for="item in cartItems"
+        :key="item.ProductID"
+      >
         <img :src="item.FPicture" :alt="item.ProductName" />
         <h3>{{ item.ProductName }}</h3>
         <h6>NT${{ item.Price }}</h6>
         <small>{{ item.DeliverName }}</small>
         <div class="cartContentItemTag">{{ item.Label }}</div>
       </a>
-      
- 
     </div>
   </div>
 </template>
@@ -38,17 +40,20 @@ const loading = ref(true);
 const fetchProductList = async () => {
   try {
     loading.value = true;
-    const { data } = await useFetch("https://23700999.com:8081/HMA/api/fr/maProduct", {
-      method: "POST",
-      body: {
-        MID: userData.MID,
-        Token: userData.Token,
-        MAID: userData.MAID,
-        Mobile: userData.Mobile,
-        Lang: "zhtw",
-      },
-    });
-    
+    const { data } = await useFetch(
+      "https://23700999.com:8081/HMA/api/fr/maProduct",
+      {
+        method: "POST",
+        body: {
+          MID: userData.MID,
+          Token: userData.Token,
+          MAID: userData.MAID,
+          Mobile: userData.Mobile,
+          Lang: "zhtw",
+        },
+      }
+    );
+
     if (data.value?.Result === "OK" && data.value?.RetMaProduct) {
       cartItems.value = data.value.RetMaProduct;
     }
@@ -72,80 +77,75 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   place-items: center;
+  gap: 1rem;
   padding: 0 2.5%;
-}
-
-.cartContentGroup {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  margin-top: 1rem;
-  @include respond-to("tablet-up") {
+  .cartTitleBar {
     max-width: 1440px;
   }
-  .cartContentItem {
-    width: 48%;
-    background-color: #fff;
-    border-radius: 8px;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    @include respond-to("tablet-up") {
-      width: 32.3%;
-    }
-    img {
-      height: 220px;
-      width: 100%;
-      @include respond-to("tablet-up") {
-        height: 300px;
+
+  .cartContentGroup {
+    width: 100%;
+    max-width: 1440px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(341px, 1fr));
+    gap: 1.5rem;
+    padding-bottom: 1.5rem;
+
+    .cartContentItem {
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: all ease 0.2s;
+
+      &:hover {
+        box-shadow: 0px 0px 12px #ddd;
       }
-    }
-    h3 {
-      color: var(--Neutral-black, #1e1e1e);
-      font-family: "Noto Sans";
-      font-size: var(--Text-font-size-20, 20px);
-      font-style: normal;
-      font-weight: 700;
-      line-height: 100%;
-      letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
-      margin-top: 0.5rem;
-    }
-    h6 {
-      color: var(--Primary-default, #74bc1f);
-      margin-top: 0.4rem;
-      font-size: var(--Text-font-size-16, 16px);
-      font-style: normal;
-      font-weight: 700;
-      line-height: 100%;
-      letter-spacing: 0.08px;
-      margin-bottom: 0.5rem;
-    }
-    small {
-      color: var(--Neutral-400, #b3b3b3);
-      text-align: center;
 
-      font-size: var(--Text-font-size-16, 16px);
-
-      font-weight: 400;
-
-      letter-spacing: 0.08px;
-      margin-bottom: 1rem;
-    }
-    .cartContentItemTag {
-      color: var(--Secondary-default, #1fbcb3);
-      display: block;
-      width: fit-content;
-      padding: 4px 8px;
-      font-family: "Noto Sans";
-      font-size: var(--Text-font-size-12, 12px);
-      font-style: normal;
-      font-weight: 400;
-      line-height: 100%; /* 12px */
-      letter-spacing: 0.06px;
-      border-radius: var(--Radius-r-8, 8px);
-      border: 1px solid var(--Secondary-default, #1fbcb3);
-      background: var(--secondary-400-opacity-10, rgba(31, 188, 179, 0.1));
-      margin-top: 0.5rem;
+      img {
+        border-radius: 0.5rem;
+        height: 49dvh;
+        width: 100%;
+        object-fit: cover;
+        margin-bottom: 0.5rem;
+      }
+      h3 {
+        color: $raphael-black;
+        font-size: 1.25rem;
+        font-weight: 700;
+        line-height: 100%;
+        letter-spacing: 0.15px;
+      }
+      h6 {
+        color: $raphael-green-400;
+        font-size: 1rem;
+        font-style: normal;
+        font-weight: 700;
+        line-height: 100%;
+        letter-spacing: 0.08px;
+      }
+      small {
+        color: $raphael-gray-400;
+        font-size: 1rem;
+        font-weight: 400;
+        letter-spacing: 0.08px;
+      }
+      .cartContentItemTag {
+        color: $raphael-cyan-400;
+        width: fit-content;
+        padding: 4px 8px;
+        font-size: 0.75rem;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 100%; /* 12px */
+        letter-spacing: 0.06px;
+        border-radius: 0.5rem;
+        border: 1px solid $raphael-cyan-400;
+        background: rgba(31, 188, 179, 0.1);
+        margin-top: 0.5rem;
+      }
     }
   }
 }
