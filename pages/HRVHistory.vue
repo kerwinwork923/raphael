@@ -18,15 +18,22 @@
     <article style="margin-top: 0.75rem">
       <!-- <h3>AI人臉HRV，輕鬆追蹤健康</h3> -->
       <div class="desCard">
-        <h3>快速精準的健康檢測</h3>
+        <h3>20 秒掌握身體自律神經平衡性</h3>
         <div class="slogan">
-          智平衡健康集團運用FDA認證AI技術，推出全新人臉辨識HRV量測工具，透過手機相機掃描臉部，1-2分鐘即可快速分析生理數據。
+          智平衡健康集團運用非接觸式人臉 HRV
+          量測技術(rPPG)，打造全新智慧健康追蹤體驗。只需 20
+          秒安靜凝視鏡頭，無需接觸，即可快速推估您的：
         </div>
         <ul>
-          <li>心跳變化分析</li>
-          <li>自律神經評估</li>
-          <li>生理年齡推算</li>
+          <li>自律神經平衡性</li>
+          <li>身體疲勞程度</li>
+          <li>血管壓力狀態</li>
+          <li>心情緊繃指數</li>
         </ul>
+        <div class="slogan">
+          系統將根據您的當下狀態，提供即時個人化建議，並同步記錄穿戴產品的使用時間與頻率，幫助專業團隊優化您個人化穿戴產品。所有資料將用於
+          AI 模型持續學習與優化，使未來建議更加精準有效。
+        </div>
       </div>
     </article>
     <div class="detectWrap">
@@ -120,13 +127,14 @@ import DSPRSelect from "../components/DSPRSelect.vue";
 import axios from "axios";
 import { useCommon } from "../stores/common";
 import { useUserData } from "~/fn/api";
-import { useSeo } from '~/composables/useSeo'
+import { useSeo } from "~/composables/useSeo";
 
 useSeo({
-  title: 'HRV 檢測',
-  description: '使用 NeuroPlus 的 AI 人臉辨識技術進行 HRV 檢測，快速分析自律神經狀態，追蹤健康變化。',
-  url: 'https://neuroplus.com.tw/hrv-history'
-})
+  title: "HRV 檢測",
+  description:
+    "使用 NeuroPlus 的 AI 人臉辨識技術進行 HRV 檢測，快速分析自律神經狀態，追蹤健康變化。",
+  url: "https://neuroplus.com.tw/hrv-history",
+});
 
 export default {
   components: { RaphaelLoading, HRVAlert, DSPRSelect },
@@ -315,14 +323,13 @@ article {
     }
     a {
       color: var(--Secondary-default, #1fbcb3);
-   
 
       font-size: 18px;
       font-style: normal;
       font-weight: 400;
       letter-spacing: 0.09px;
       width: 40%;
-      
+
       display: flex;
       align-items: center;
       justify-content: end;
