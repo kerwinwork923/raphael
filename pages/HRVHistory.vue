@@ -237,6 +237,9 @@ export default {
   min-height: 100vh;
   padding: 0 1rem;
   padding-bottom: 116px;
+  .changeUsageTags{
+    max-width: 768px;
+  }
 }
 .titleGroup {
   position: relative;
