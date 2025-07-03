@@ -81,13 +81,13 @@
       </div>
     </div>
     <!-- 改善區塊 -->
-    <div class="improveGroup" v-if="improvement">
+    <!-- <div class="improveGroup" v-if="improvement">
       <img src="@/assets/imgs/hrvUsageResult/star.png" alt="" />
       <div class="improveTextGroup">
         <h3>自律神經改善了</h3>
         <p>使用後各項指標都有明顯改善，建議持續使用以維持良好狀態。</p>
       </div>
-    </div>
+    </div> -->
     <!-- 詳細數據比對區塊 -->
     <div class="detailDataGroup" v-if="improvement">
       <div class="detailDataTitleGroup">
@@ -414,41 +414,11 @@ export default {
 
     // 生成改善建議
     const generateAdvice = () => {
-      const improvement = calculateImprovement();
-      if (!improvement) return "無法生成建議";
-
-      const advice = [];
-      const { improvements, beforeScores, afterScores } = improvement;
-
-      // 自律神經平衡建議
-      if (improvements.balance > 0) {
-        advice.push("自律神經平衡有所改善，建議繼續保持現有的生活習慣。");
-      } else if (improvements.balance < 0) {
-        advice.push("自律神經平衡略有下降，建議增加放鬆活動和規律作息。");
+      // 直接使用 AfUse 的 Desc 欄位
+      if (HRVAfterData.value && HRVAfterData.value.Desc) {
+        return HRVAfterData.value.Desc;
       }
-
-      // 生理疲勞建議
-      if (improvements.fatigue > 0) {
-        advice.push("生理疲勞程度降低，建議維持現有的運動和休息習慣。");
-      } else if (improvements.fatigue < 0) {
-        advice.push("生理疲勞程度增加，建議適當增加休息時間，避免過度勞累。");
-      }
-
-      // 心情指北針建議
-      if (improvements.mood > 0) {
-        advice.push("心情狀態改善，建議保持積極樂觀的心態。");
-      } else if (improvements.mood < 0) {
-        advice.push("心情狀態略有波動，建議進行適當的壓力紓解活動。");
-      }
-
-      // 血壓建議
-      if (improvements.pressure > 0) {
-        advice.push("血壓狀態改善，建議繼續保持健康的生活方式。");
-      } else if (improvements.pressure < 0) {
-        advice.push("血壓狀態略有變化，建議注意飲食控制和規律運動。");
-      }
-
-      return advice.join("\n");
+      return "無法生成建議";
     };
 
     // 1. 先 call API_UIDInfo => 拿到 StartTime & EndTime
