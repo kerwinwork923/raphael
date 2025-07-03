@@ -39,7 +39,7 @@
 
         <div class="video-container">
           <video ref="videoElement" autoplay muted playsinline></video>
-          <div class="face-blur-mask"></div>
+          <div class="face-blur-mask" :class="{ active: showBlurMask }"></div>
           <div class="face-guide"></div>
           <div
             class="face-guide-tip"
@@ -134,6 +134,7 @@ const tipFading = ref(false);
 const aiAnalysing = ref(false);
 const aiProgress = ref(0);
 const showFaceGuideTip = ref(false);
+const showBlurMask = ref(false);
 
 // 變數
 let userData = {};
@@ -345,6 +346,7 @@ function startRecording() {
   scanning.value = true;
   progress.value = 0;
   remain.value = 15;
+  showBlurMask.value = false; // 開始掃描時隱藏模糊遮罩
   let percent = 0;
   scanInt = setInterval(() => {
     if (mediaRecorder.state === "recording") {
@@ -421,11 +423,40 @@ async function startFaceDetection() {
       ];
       const cx = box.x + box.width / 2;
       const cy = box.y + box.height / 2;
-      const inside = cx > 192 && cx < 448 && cy > 120 && cy < 360;
+      
+      // 動態計算掃描範圍，與視覺掃描框對齊
+      const videoWidth = videoElement.value.videoWidth || 640;
+      const videoHeight = videoElement.value.videoHeight || 480;
+      const containerWidth = videoElement.value.offsetWidth;
+      const containerHeight = videoElement.value.offsetHeight;
+      
+      // 掃描框的實際尺寸（與 CSS 中的 .face-guide 對應）
+      const guideWidth = 200;
+      const guideHeight = 250;
+      
+      // 計算掃描框在視訊中的實際位置
+      const guideLeft = (containerWidth - guideWidth) / 2;
+      const guideTop = (containerHeight - guideHeight) / 2;
+      const guideRight = guideLeft + guideWidth;
+      const guideBottom = guideTop + guideHeight;
+      
+      // 將視訊座標轉換為容器座標
+      const scaleX = containerWidth / videoWidth;
+      const scaleY = containerHeight / videoHeight;
+      const scaledCx = cx * scaleX;
+      const scaledCy = cy * scaleY;
+      
+      // 檢查臉部是否在掃描框內
+      const inside = scaledCx >= guideLeft && scaledCx <= guideRight && 
+                     scaledCy >= guideTop && scaledCy <= guideBottom;
+      
+      // 控制模糊遮罩和提示的顯示
       if (mediaRecorder && mediaRecorder.state === "paused") {
         showFaceGuideTip.value = true;
+        showBlurMask.value = true;
       } else {
         showFaceGuideTip.value = false;
+        showBlurMask.value = !inside; // 臉部不在掃描框內時顯示模糊遮罩
       }
       if (
         inside &&
@@ -448,6 +479,7 @@ async function startFaceDetection() {
     } else {
       faces.value = [];
       showFaceGuideTip.value = false;
+      showBlurMask.value = true; // 沒有偵測到臉部時顯示模糊遮罩
       if (mediaRecorder && mediaRecorder.state === "recording") {
         mediaRecorder.pause();
       }
@@ -643,6 +675,7 @@ $transition-duration: 0.3s;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transform: scaleX(-1); /* 水平翻轉鏡頭 */
   }
 }
 
@@ -652,23 +685,31 @@ $transition-duration: 0.3s;
   pointer-events: none;
   backdrop-filter: blur(10px);
   background: rgba(0, 0, 0, 0.25);
-  opacity: 1;
+  opacity: 0; /* 預設隱藏模糊遮罩 */
   --cx: 50%;
   --cy: 50%;
   --rx: 100px;
   --ry: 125px;
+  transform: scaleX(-1); /* 跟著視訊翻轉 */
   -webkit-mask-image: radial-gradient(
     ellipse var(--rx) var(--ry) at var(--cx) var(--cy),
+    transparent 0%,
     transparent 98%,
     black 100%
   );
   mask-image: radial-gradient(
     ellipse var(--rx) var(--ry) at var(--cx) var(--cy),
+    transparent 0%,
     transparent 98%,
     black 100%
   );
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
+  transition: opacity 0.3s ease;
+  
+  &.active {
+    opacity: 1;
+  }
 }
 
 .face-guide {
@@ -677,7 +718,7 @@ $transition-duration: 0.3s;
   left: 50%;
   width: 200px;
   height: 250px;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) scaleX(-1); /* 跟著視訊翻轉 */
   border: 2px solid rgba($primary-color, 0.5);
   border-radius: 50%;
   background: rgba($primary-color, 0.03);
@@ -697,11 +738,14 @@ $transition-duration: 0.3s;
   z-index: 30;
   pointer-events: none;
   display: none;
+  text-align: center;
+  transform-origin: center center;
 
   &.show {
     display: block;
   }
 }
+
 
 .scanning-overlay {
   position: absolute;
@@ -719,6 +763,7 @@ $transition-duration: 0.3s;
     linear-gradient(90deg, rgba($primary-color, 0.08) 1px, transparent 1px);
   background-size: 25px 25px;
   animation: gridFlow 8s linear infinite;
+  transform: scaleX(-1); /* 跟著視訊翻轉 */
 }
 
 .scan-beam {
@@ -738,6 +783,7 @@ $transition-duration: 0.3s;
   box-shadow: 0 0 20px rgba($primary-color, 0.6),
     0 0 40px rgba($primary-color, 0.4);
   animation: scanBeam 3s ease-in-out infinite;
+  transform: scaleX(-1); /* 跟著視訊翻轉 */
 }
 
 .progress-section {
