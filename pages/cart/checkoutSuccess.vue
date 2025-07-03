@@ -39,7 +39,7 @@
             :key="item.ProductID"
             class="productItem"
           >
-            <img :src="item.Picture" :alt="item.ProductName" />
+            <img :src="item.FPicture" :alt="item.ProductName" />
             <div class="productInfo">
               <h4>{{ item.ProductName }}</h4>
               <h5>NT${{ item.Price }}</h5>
