@@ -179,7 +179,11 @@ const fetchHRVData = async () => {
 
     // 更新分數和建議
     updateScores(lf_hf, sdnn, hbr, rr, lf, hf, sbp, dbp);
-    updateSuggestions(lf_hf, sdnn, hbr, rr, lf, hf, sbp, dbp);
+    
+    // 直接使用 API 回傳的 Desc 作為個人化建議
+    if (data.Desc) {
+      personalizedSuggestion.value = data.Desc;
+    }
   } catch (error) {
     console.error("HRV3 API 錯誤：", error);
   } finally {
@@ -240,89 +244,7 @@ const updateScores = (lf_hf, sdnn, hbr, rr, lf, hf, sbp, dbp) => {
   else pressureScore.value = 1;
 };
 
-const updateSuggestions = (lf_hf, sdnn, hbr, rr, lf, hf, sbp, dbp) => {
-  const suggestions = [];
 
-  // 自律神經平衡建議
-  if (lf_hf > 2) {
-    suggestions.push(
-      "您的自律神經平衡顯示交感神經過度活躍，建議：\n1. 進行深呼吸練習\n2. 嘗試冥想或正念練習\n3. 避免過度刺激的活動\n4. 保持規律作息"
-    );
-  } else if (lf_hf > 1.5) {
-    suggestions.push(
-      "您的自律神經平衡顯示交感神經較為活躍，建議：\n1. 適度運動放鬆\n2. 保持充足睡眠\n3. 避免過度疲勞"
-    );
-  } else if (lf_hf >= 1) {
-    suggestions.push(
-      "您的自律神經平衡狀態良好，建議：\n1. 維持現有的生活習慣\n2. 保持規律運動\n3. 注意壓力管理"
-    );
-  } else if (lf_hf >= 0.5) {
-    suggestions.push(
-      "您的自律神經平衡顯示副交感神經較為活躍，建議：\n1. 適度增加運動量\n2. 保持活力作息\n3. 注意營養均衡"
-    );
-  } else {
-    suggestions.push(
-      "您的自律神經平衡顯示副交感神經過度活躍，建議：\n1. 增加有氧運動\n2. 保持規律作息\n3. 注意營養攝取"
-    );
-  }
-
-  // 生理疲勞建議
-  if (sdnn < 20) {
-    suggestions.push(
-      "\n您的生理疲勞程度較高，建議：\n1. 充分休息\n2. 避免過度勞累\n3. 保持規律作息\n4. 注意營養補充"
-    );
-  } else if (sdnn < 30) {
-    suggestions.push(
-      "\n您的生理疲勞程度中等，建議：\n1. 適度休息\n2. 保持規律運動\n3. 注意作息時間"
-    );
-  } else {
-    suggestions.push(
-      "\n您的生理疲勞程度正常，建議：\n1. 維持現有作息\n2. 保持規律運動\n3. 注意壓力管理"
-    );
-  }
-
-  // 血壓建議
-  if (sbp > 145 || dbp > 95) {
-    suggestions.push(
-      "\n您的血壓偏高，建議：\n1. 控制飲食，減少鹽分攝取\n2. 規律運動\n3. 定期監測血壓\n4. 必要時諮詢醫師"
-    );
-  } else if (sbp >= 130 || dbp >= 85) {
-    suggestions.push(
-      "\n您的血壓略高，建議：\n1. 注意飲食控制\n2. 保持適度運動\n3. 定期量測血壓"
-    );
-  } else if (sbp >= 110 && sbp <= 129 && dbp >= 70 && dbp <= 84) {
-    suggestions.push(
-      "\n您的血壓正常，建議：\n1. 維持健康生活習慣\n2. 保持規律運動\n3. 定期監測血壓"
-    );
-  } else if (sbp >= 95 && dbp >= 60) {
-    suggestions.push(
-      "\n您的血壓略低，建議：\n1. 注意營養攝取\n2. 適度運動增加活力\n3. 必要時諮詢醫師"
-    );
-  } else {
-    suggestions.push(
-      "\n您的血壓偏低，建議：\n1. 增加營養攝取\n2. 適度運動增加活力\n3. 必要時諮詢醫師"
-    );
-  }
-
-  // 心情指北針建議
-  if (moodScore.value >= 4) {
-    suggestions.push(
-      "\n您的心情狀態較為緊張，建議：\n1. 進行放鬆練習\n2. 保持充足睡眠\n3. 適度運動紓壓"
-    );
-  } else if (moodScore.value >= 3) {
-    suggestions.push(
-      "\n您的心情狀態穩定，建議：\n1. 維持現有生活習慣\n2. 保持規律運動\n3. 注意壓力管理"
-    );
-  } else {
-    suggestions.push(
-      "\n您的心情狀態良好，建議：\n1. 保持現有生活習慣\n2. 持續規律運動\n3. 維持良好作息"
-    );
-  }
-
-  personalizedSuggestion.value = suggestions.join("");
-  analysisResult.value =
-    "根據您的檢測結果，我們為您提供了以上個人化建議。請根據建議調整生活習慣，定期進行檢測以追蹤改善情況。";
-};
 
 const goBack = () => {
   router.go(-1);
