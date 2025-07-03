@@ -15,7 +15,7 @@
       </div>
       <div class="titleGroup">
         <div class="textGroup">
-          <h3 class="nameText">{{ userName }}，您好</h3>
+          <h3 class="nameText" @click="toggleHideDetail">{{ userName }}，您好</h3>
           <div class="timeGroup">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -64,6 +64,49 @@
           <h3>個人化建議</h3>
           <p>{{ personalizedSuggestion }}</p>
         </div>
+        <div class="hideDetailWrap" v-if="showHideDetail">
+          <div class="hideDetailItem">
+            <h4>SBP(收縮壓)</h4>
+            <p>{{ hrvData.sbp || '--' }}</p>
+          </div>
+          <div class="hideDetailItem">
+            <h4>DBP(舒張壓)</h4>
+            <p>{{ hrvData.dbp || '--' }}</p>
+          </div>
+          <div class="hideDetailItem">
+            <h4>hbr(心率)</h4>
+            <p>{{ hrvData.hbr || '--' }}</p>
+          </div>
+          <div class="hideDetailItem">
+            <h4>rr (呼吸)</h4>
+            <p>{{ hrvData.rr || '--' }}</p>
+          </div>
+          <div class="hideDetailItem">
+            <h4>SDNN</h4>
+            <p>{{ hrvData.sdnn || '--' }}</p>
+          </div>
+          <div class="hideDetailItem">
+            <h4>lf_hf (LF/HF)</h4>
+            <p>{{ hrvData.lf_hf || '--' }}</p>
+          </div>
+          
+          <div class="hideDetailItem">
+            <h4>spo2(血氧)</h4>
+            <p>{{ hrvData.spo2 || '--' }}</p>
+          </div>
+          <div class="hideDetailItem">
+            <h4>RMSSD</h4>
+            <p>{{ hrvData.rmssd || '--' }}</p>
+          </div>
+          <div class="hideDetailItem">
+            <h4>af</h4>
+            <p>{{ hrvData.af || '--' }}</p>
+          </div>
+          <div class="hideDetailItem">
+            <h4>fa(疲勞)</h4>
+            <p>{{ hrvData.fa || '--' }}</p>
+          </div>
+        </div>
       </div>
     </div>
     <div class="subBtnGroup" v-if="!hasUID && route.query.Version !== 'Detail'">
@@ -108,6 +151,8 @@ const Flag = ref("");
 const ProductName = ref("");
 const uid = ref("");
 const isLoading = ref(false);
+const showHideDetail = ref(false);
+const hrvData = ref({});
 
 // 路由相關
 const route = useRoute();
@@ -158,6 +203,9 @@ const fetchHRVData = async () => {
 
     const data = await response.json();
     console.log("HRV3 API 回傳：", data);
+
+    // 儲存 HRV 資料
+    hrvData.value = data;
 
     // 檢查是否有 UID
     if (data.UID) {
@@ -244,7 +292,9 @@ const updateScores = (lf_hf, sdnn, hbr, rr, lf, hf, sbp, dbp) => {
   else pressureScore.value = 1;
 };
 
-
+const toggleHideDetail = () => {
+  showHideDetail.value = !showHideDetail.value;
+};
 
 const goBack = () => {
   router.go(-1);
@@ -352,6 +402,13 @@ $border-radius: 12px;
     font-size: 1.5rem;
     font-weight: 400;
     margin: 0;
+    
+    &.nameText {
+      cursor: pointer;
+      transition: color 0.2s ease;
+      
+
+    }
   }
 }
 
@@ -388,6 +445,32 @@ $border-radius: 12px;
       img {
         width: 49%;
       }
+    }
+  }
+  .hideDetailWrap{
+
+    .hideDetailItem{
+      @include flex-between;
+      gap: 16px;
+      width: 100%;
+      padding: 0 1rem;  
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+      border-radius: 12px;
+      margin-bottom: 0.75rem;
+      background-color: #f0f0f0;
+      &:nth-child(2n){
+        background-color: #dbeaff;
+      }
+      h4{
+        color: #000000;
+        letter-spacing: 0.15px;
+      }
+      p{
+        color: #000000;
+        letter-spacing: 0.09px;
+      }
+     
     }
   }
 }
