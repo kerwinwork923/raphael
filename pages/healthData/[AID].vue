@@ -327,11 +327,11 @@ export default {
     }
 
     // **從 API 獲取 HRV 詳情**
-    const API_HRV2Detail = async () => {
+    const API_HRV3Detail = async () => {
       try {
         loading.value = true;
         const response = await axios.post(
-          "https://23700999.com:8081/HMA/API_HRV2Detail.jsp",
+          "https://23700999.com:8081/HMA/api/fr/HRV3Detail",
           {
             MID,
             Token,
@@ -344,7 +344,7 @@ export default {
         console.log("API 回傳的 HRV 數據:", response.data);
 
         if (response.status === 200) {
-          const data = response.data?.HRV2Detail || {};
+          const data = response.data|| {};
           age.value = data.ltage || "";
           heartBeat.value = data.ltHR || "";
           SDNN.value = data.ltSDNN || "";
@@ -370,7 +370,7 @@ export default {
     };
 
     onMounted(() => {
-      API_HRV2Detail(); // 初始化請求
+      API_HRV3Detail(); // 初始化請求
     });
 
     // **提交健康數據**
@@ -383,7 +383,7 @@ export default {
 
       try {
         const response = await axios.post(
-          "https://23700999.com:8081/HMA/API_HRV2Update.jsp",
+          "https://23700999.com:8081/HMA/api/fr/HRV3Update",
           {
             MID,
             Token,

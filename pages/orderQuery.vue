@@ -10,29 +10,29 @@
       </ul>
     </div> -->
     <div class="orderQueryContent">
-      <div class="orderQueryItem" v-for="i in 10" :key="i">
+      <div class="orderQueryItem" v-for="order in orderList" :key="order.SID">
         <div class="orderQueryItemTitle">
-          <h3>訂單編號 : 1234567890</h3>
-          <small>未製作</small>
+          <h3>訂單編號 : {{ order.SID }}</h3>
+          <small>{{ getOrderStatus(order.Status) }}</small>
         </div>
-        <div class="orderQueryItemMainGroup">
+        <div class="orderQueryItemMainGroup" v-for="item in order.ItemList" :key="item.AID">
           <div class="orderQueryItemMain1">
-            <img src="/assets/imgs/3DMap.png" alt="產品圖" />
+            <img :src="item.DPicture" :alt="item.ProductName" />
             <div class="orderQueryItemMain1Text">
-              <h3>產品名稱</h3>
-              <h5>NT$100</h5>
+              <h3>{{ item.ProductName }}</h3>
+              <h5>NT${{ item.Price }}</h5>
             </div>
           </div>
           <div class="orderQueryItemMain2">
-            <h5>x1</h5>
+            <h5>x{{ item.Qty }}</h5>
           </div>
         </div>
         <div class="orderQueryHR"></div>
-        <div class="orderQueryItemPrice">訂單金額 : NT$100</div>
+        <div class="orderQueryItemPrice">訂單金額 : NT${{ order.TotalAmount }}</div>
         <div class="orderQueryHR"></div>
         <div class="orderStateTag">
           <h3>
-            請先填寫個人化資訊才會開始製作
+            {{ getOrderStatusText(order.Status) }}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="18"
@@ -56,6 +56,63 @@
 <script setup>
 import TitleMenu from "~/components/TitleMenu.vue";
 import { ref } from "vue";
+
+const userData = JSON.parse(localStorage.getItem("userData"));
+const orderList = ref([]);
+
+const getOrderQuery = async function() {
+  try {
+    const { data } = await useFetch("https://23700999.com:8081/HMA/api/fr/maSale", {
+      method: "POST",
+      body: {
+        MID: userData.MID,
+        Token: userData.Token,
+        MAID: userData.MAID,
+        Mobile: userData.Mobile,
+        Lang: "zhtw",
+      },
+    });
+
+    if (data.value?.Result === "OK") {
+      orderList.value = data.value.SaleList || [];
+      console.log("訂單資料:", orderList.value);
+    }
+  } catch (error) {
+    console.error("獲取相關資料失敗：", error);
+  }
+};
+
+// 取得訂單狀態文字
+const getOrderStatus = (status) => {
+  switch (status) {
+    case "Y":
+      return "已確認";
+    case "N":
+      return "未確認";
+    case "C":
+      return "已取消";
+    default:
+      return "處理中";
+  }
+};
+
+// 取得訂單狀態詳細說明
+const getOrderStatusText = (status) => {
+  switch (status) {
+    case "Y":
+      return "訂單已確認，正在處理中";
+    case "N":
+      return "請先填寫個人化資訊才會開始製作";
+    case "C":
+      return "訂單已取消";
+    default:
+      return "訂單處理中";
+  }
+};
+
+onMounted(() => {
+  getOrderQuery();
+});
 </script>
 
 <style lang="scss" scoped>
