@@ -230,11 +230,32 @@ function startCountdown(sec, cb) {
 // 錄影結束
 async function onRecordStop() {
   aiAnalysing.value = true;
+  
+  // 立即關閉錄影和相機
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    try {
+      mediaRecorder.stop();
+    } catch (e) {
+      console.log('MediaRecorder 已經停止');
+    }
+  }
+  
+  if (stream) {
+    stream.getTracks().forEach((track) => {
+      track.stop();
+    });
+    stream = null;
+  }
+  
+  // 清除 video 元素
+  if (videoElement.value) {
+    videoElement.value.srcObject = null;
+  }
+  
   const blob = new Blob(recordedChunks, { type: "video/webm" });
   const reader = new FileReader();
   reader.onloadend = () => sendToAPI(reader.result.split(",")[1]);
   reader.readAsDataURL(blob);
-  if (stream) stream.getTracks().forEach((t) => t.stop());
 }
 
 // 上傳 API
@@ -354,6 +375,26 @@ function startMetrics() {
 
 // 返回上一頁
 function goBack() {
+  // 關閉相機和錄影
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    try {
+      mediaRecorder.stop();
+    } catch (e) {
+      console.log('MediaRecorder 已經停止');
+    }
+  }
+  
+  if (stream) {
+    stream.getTracks().forEach((track) => {
+      track.stop();
+    });
+    stream = null;
+  }
+  
+  if (videoElement.value) {
+    videoElement.value.srcObject = null;
+  }
+  
   window.history.back();
 }
 
@@ -438,7 +479,28 @@ watch(
 );
 
 onUnmounted(() => {
-  if (stream) stream.getTracks().forEach((t) => t.stop());
+  // 關閉所有相機和錄影資源
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    try {
+      mediaRecorder.stop();
+    } catch (e) {
+      console.log('MediaRecorder 已經停止');
+    }
+  }
+  
+  if (stream) {
+    stream.getTracks().forEach((track) => {
+      track.stop();
+    });
+    stream = null;
+  }
+  
+  // 清除 video 元素
+  if (videoElement.value) {
+    videoElement.value.srcObject = null;
+  }
+  
+  // 清除所有計時器
   if (metricInt) clearInterval(metricInt);
   if (scanInt) clearInterval(scanInt);
   if (faceDetectTimer) clearInterval(faceDetectTimer);
