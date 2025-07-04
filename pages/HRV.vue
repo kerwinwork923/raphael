@@ -154,29 +154,29 @@ const { forceStopAllMedia } = useMediaCleanup();
 // 頁面可見性變化處理
 const handleVisibilityChange = async () => {
   if (document.hidden) {
-    console.log('頁面進入背景，停止錄影和相機');
-    
+    console.log("頁面進入背景，停止錄影和相機");
+
     // 通知 Service Worker
-    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
       navigator.serviceWorker.controller.postMessage({
-        type: 'VISIBILITY_CHANGE',
-        hidden: true
+        type: "VISIBILITY_CHANGE",
+        hidden: true,
       });
     }
-    
+
     // 使用穩定的停止方法關閉錄影
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
       await stopRecorder(mediaRecorder);
     }
-    
+
     // 使用強力媒體清理工具
     forceStopAllMedia();
-    
+
     // 清除所有計時器
     if (metricInt) clearInterval(metricInt);
     if (scanInt) clearInterval(scanInt);
     if (faceDetectTimer) clearInterval(faceDetectTimer);
-    
+
     // 重置狀態
     scanning.value = false;
     counting.value = false;
@@ -185,11 +185,11 @@ const handleVisibilityChange = async () => {
     progress.value = 0;
     elapsedMs = 0;
     hasRecorded = false;
-    
+
     // 清除本地變數
     mediaRecorder = null;
     stream = null;
-    
+
     // 清除 video 元素
     if (videoElement.value) {
       videoElement.value.srcObject = null;
@@ -199,31 +199,34 @@ const handleVisibilityChange = async () => {
 
 // 處理 Service Worker 訊息
 const handleServiceWorkerMessage = async (event) => {
-  if (event.data && event.data.type === 'STOP_RECORDING') {
-    console.log('收到 Service Worker 停止錄影指令:', event.data.reason);
+  if (event.data && event.data.type === "STOP_RECORDING") {
+    console.log("收到 Service Worker 停止錄影指令:", event.data.reason);
     await handleVisibilityChange();
   }
 };
 
 // 處理強制關閉媒體事件
 const handleForceStopMedia = async (event) => {
-  console.log('收到強制關閉媒體事件:', event.detail);
+  console.log("收到強制關閉媒體事件:", event.detail);
   await handleVisibilityChange();
 };
 
 // 頁面一載入就自動開啟鏡頭
 onMounted(async () => {
   // 添加頁面可見性變化監聽器
-  document.addEventListener('visibilitychange', handleVisibilityChange);
-  
+  document.addEventListener("visibilitychange", handleVisibilityChange);
+
   // 添加 Service Worker 訊息監聽器
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('message', handleServiceWorkerMessage);
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.addEventListener(
+      "message",
+      handleServiceWorkerMessage
+    );
   }
-  
+
   // 添加強制關閉媒體事件監聽器
-  window.addEventListener('force-stop-media', handleForceStopMedia);
-  
+  window.addEventListener("force-stop-media", handleForceStopMedia);
+
   await initCamera();
   // 產生速度線動畫
   const speedLines = document.querySelector(".speedLines");
@@ -268,11 +271,11 @@ function getUrlParams() {
 async function initCamera() {
   try {
     // 如果已經在錄影，不要重複初始化
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-      console.log('MediaRecorder 已在錄影中，跳過初始化');
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+      console.log("MediaRecorder 已在錄影中，跳過初始化");
       return;
     }
-    
+
     stream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: "user" },
       audio: true,
@@ -312,7 +315,7 @@ function startCountdown(sec, cb) {
 // 錄影結束
 async function onRecordStop() {
   aiAnalysing.value = true;
-  
+
   // 先把資料取完
   const blob = new Blob(recordedChunks, { type: "video/webm" });
   recordedChunks = [];
@@ -330,24 +333,24 @@ async function onRecordStop() {
     });
     stream = null;
   }
-  
+
   // 清除 video 元素
   if (videoElement.value) {
     videoElement.value.srcObject = null;
   }
-  
+
   // 清除所有計時器
   if (metricInt) clearInterval(metricInt);
   if (scanInt) clearInterval(scanInt);
   if (faceDetectTimer) clearInterval(faceDetectTimer);
-  
+
   // 重置狀態
   isStarted.value = false;
   elapsedMs = 0;
-  
+
   // 清除本地變數
   mediaRecorder = null;
-  
+
   // 送 API
   const reader = new FileReader();
   reader.onloadend = () => sendToAPI(reader.result.split(",")[1]);
@@ -419,9 +422,9 @@ async function sendToAPI(base64) {
       // 呼叫 HRV3Save API
       const saveResult = await saveHRV3ToServer(hrv3Payload);
       if (saveResult && saveResult.AID) {
-        navigateTo(`/Finish?AID=${saveResult.AID}`);
+        window.location.href = `/Finish?AID=${saveResult.AID}`;
       } else {
-        navigateTo("/Finish");
+        window.location.href = "/Finish";
       }
     } catch (e) {
       aiAnalysing.value = false;
@@ -437,17 +440,17 @@ async function sendToAPI(base64) {
 // 穩定的停止錄影器函數
 function stopRecorder(recorder) {
   return new Promise((resolve) => {
-    if (!recorder || recorder.state === 'inactive') {
+    if (!recorder || recorder.state === "inactive") {
       resolve();
       return;
     }
-    
+
     const handleStop = () => {
-      recorder.removeEventListener('stop', handleStop);
+      recorder.removeEventListener("stop", handleStop);
       resolve();
     };
-    
-    recorder.addEventListener('stop', handleStop, { once: true });
+
+    recorder.addEventListener("stop", handleStop, { once: true });
     recorder.stop();
   });
 }
@@ -492,21 +495,21 @@ function startMetrics() {
 // 返回上一頁
 async function goBack() {
   // 使用穩定的停止方法
-  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+  if (mediaRecorder && mediaRecorder.state !== "inactive") {
     await stopRecorder(mediaRecorder);
   }
-  
+
   if (stream) {
     stream.getTracks().forEach((track) => {
       track.stop();
     });
     stream = null;
   }
-  
+
   if (videoElement.value) {
     videoElement.value.srcObject = null;
   }
-  
+
   window.history.back();
 }
 
@@ -533,33 +536,36 @@ async function startFaceDetection() {
       ];
       const cx = box.x + box.width / 2;
       const cy = box.y + box.height / 2;
-      
+
       // 動態計算掃描範圍，與視覺掃描框對齊
       const videoWidth = videoElement.value.videoWidth || 640;
       const videoHeight = videoElement.value.videoHeight || 480;
       const containerWidth = videoElement.value.offsetWidth;
       const containerHeight = videoElement.value.offsetHeight;
-      
+
       // 掃描框的實際尺寸（與 CSS 中的 .face-guide 對應）
       const guideWidth = 200;
       const guideHeight = 250;
-      
+
       // 計算掃描框在視訊中的實際位置
       const guideLeft = (containerWidth - guideWidth) / 2;
       const guideTop = (containerHeight - guideHeight) / 2;
       const guideRight = guideLeft + guideWidth;
       const guideBottom = guideTop + guideHeight;
-      
+
       // 將視訊座標轉換為容器座標
       const scaleX = containerWidth / videoWidth;
       const scaleY = containerHeight / videoHeight;
       const scaledCx = cx * scaleX;
       const scaledCy = cy * scaleY;
-      
+
       // 檢查臉部是否在掃描框內
-      const inside = scaledCx >= guideLeft && scaledCx <= guideRight && 
-                     scaledCy >= guideTop && scaledCy <= guideBottom;
-      
+      const inside =
+        scaledCx >= guideLeft &&
+        scaledCx <= guideRight &&
+        scaledCy >= guideTop &&
+        scaledCy <= guideBottom;
+
       // 控制模糊遮罩和提示的顯示
       if (mediaRecorder && mediaRecorder.state === "paused") {
         showFaceGuideTip.value = true;
@@ -622,33 +628,36 @@ watch(
 
 onUnmounted(async () => {
   // 移除頁面可見性變化監聽器
-  document.removeEventListener('visibilitychange', handleVisibilityChange);
-  
+  document.removeEventListener("visibilitychange", handleVisibilityChange);
+
   // 移除 Service Worker 訊息監聽器
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.removeEventListener('message', handleServiceWorkerMessage);
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.removeEventListener(
+      "message",
+      handleServiceWorkerMessage
+    );
   }
-  
+
   // 移除強制關閉媒體事件監聽器
-  window.removeEventListener('force-stop-media', handleForceStopMedia);
-  
+  window.removeEventListener("force-stop-media", handleForceStopMedia);
+
   // 使用穩定的停止方法關閉錄影
-  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+  if (mediaRecorder && mediaRecorder.state !== "inactive") {
     await stopRecorder(mediaRecorder);
   }
-  
+
   if (stream) {
     stream.getTracks().forEach((track) => {
       track.stop();
     });
     stream = null;
   }
-  
+
   // 清除 video 元素
   if (videoElement.value) {
     videoElement.value.srcObject = null;
   }
-  
+
   // 清除所有計時器
   if (metricInt) clearInterval(metricInt);
   if (scanInt) clearInterval(scanInt);
@@ -823,7 +832,7 @@ $transition-duration: 0.3s;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   transition: opacity 0.3s ease;
-  
+
   &.active {
     opacity: 1;
   }
@@ -862,7 +871,6 @@ $transition-duration: 0.3s;
     display: block;
   }
 }
-
 
 .scanning-overlay {
   position: absolute;
@@ -1010,7 +1018,7 @@ $transition-duration: 0.3s;
   transition: background $transition-duration;
   @include flex-center;
   justify-content: flex-start;
-  gap:1rem;
+  gap: 1rem;
   min-height: 80px;
   min-width: 220px;
   padding: 0 20px;
