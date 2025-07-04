@@ -139,7 +139,6 @@ import Navbar from "../components/Navbar.vue";
 
 // 狀態變數
 const userName = ref("");
-const currentDate = ref("");
 const balanceScore = ref(3);
 const fatigueScore = ref(3);
 const moodScore = ref(3);
@@ -159,7 +158,15 @@ const route = useRoute();
 const router = useRouter();
 
 // 計算屬性
-const formattedDate = computed(() => {
+const currentDate = computed(() => {
+  if (hrvData.value.CheckTime) {
+    // 從 API 的 CheckTime 格式 "2025/07/03 17:13" 提取日期部分
+    const checkTime = hrvData.value.CheckTime;
+    const datePart = checkTime.split(' ')[0]; // 取得 "2025/07/03" 部分
+    return datePart;
+  }
+  
+  // 如果沒有 API 資料，使用當前日期作為備用
   const now = new Date();
   return `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(
     2,
@@ -306,7 +313,6 @@ onMounted(() => {
   if (userData?.Name) {
     userName.value = userData.Name;
   }
-  currentDate.value = formattedDate.value;
 
   fetchHRVData();
 });
