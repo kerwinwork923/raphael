@@ -10,12 +10,25 @@
       </ul>
     </div> -->
     <div class="orderQueryContent">
-      <div class="orderQueryItem" v-for="order in orderList" :key="order.SID">
+      <div
+        class="orderQueryItem"
+        v-for="order in orderList"
+        :key="order.SID"
+        @click="handleOrderClick(order)"
+      >
         <div class="orderQueryItemTitle">
-          <h3>訂單編號 : {{ order.SID }}</h3>
-          <small>{{ getOrderStatus(order.Status) }}</small>
+          <h3>
+            訂單編號：<span class="order-id">{{ order.SID }}</span>
+          </h3>
+          <small :class="getOrderStage(order).type">{{
+            getOrderStage(order).status
+          }}</small>
         </div>
-        <div class="orderQueryItemMainGroup" v-for="item in order.ItemList" :key="item.AID">
+        <div
+          class="orderQueryItemMainGroup"
+          v-for="item in order.ItemList"
+          :key="item.AID"
+        >
           <div class="orderQueryItemMain1">
             <img :src="item.DPicture" :alt="item.ProductName" />
             <div class="orderQueryItemMain1Text">
@@ -28,25 +41,13 @@
           </div>
         </div>
         <div class="orderQueryHR"></div>
-        <div class="orderQueryItemPrice">訂單金額 : NT${{ order.TotalAmount }}</div>
+        <div class="orderQueryItemPrice">
+          訂單金額 NT${{ order.TotalAmount }}
+        </div>
         <div class="orderQueryHR"></div>
-        <div class="orderStateTag">
-          <h3>
-            {{ getOrderStatusText(order.Status) }}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 18 18"
-              fill="none"
-            >
-              <path
-                d="M6.33752 3.00146C6.33752 2.99161 6.34139 2.98215 6.34827 2.9751L6.34924 2.97412C6.35026 2.97317 6.35187 2.97271 6.35315 2.97217C6.35445 2.97166 6.35566 2.97122 6.35706 2.97119C6.35864 2.97119 6.36048 2.97155 6.36194 2.97217C6.36327 2.97275 6.3648 2.9731 6.36584 2.97412V2.9751L12.1969 8.95654C12.2081 8.9681 12.2144 8.98342 12.2145 8.99951C12.2145 9.01579 12.2082 9.03179 12.1969 9.04346L6.36487 15.0249C6.36396 15.0257 6.36304 15.0264 6.36194 15.0269C6.36048 15.0275 6.35864 15.0278 6.35706 15.0278C6.35569 15.0278 6.35442 15.0273 6.35315 15.0269C6.35171 15.0262 6.34937 15.026 6.34827 15.0249C6.34171 15.0179 6.33852 15.0081 6.3385 14.9985C6.3385 14.9887 6.34243 14.9792 6.34924 14.9722H6.35022L11.8307 9.34912L12.1705 8.99951L11.8307 8.65088L6.35022 3.02783L6.34631 3.0249C6.34089 3.01821 6.33753 3.01014 6.33752 3.00146Z"
-                fill="#EC4F4F"
-                stroke="#EC4F4F"
-              />
-            </svg>
-          </h3>
+
+        <div class="order-tip" v-if="getOrderStage(order).tip">
+          {{ getOrderStage(order).tip }}
         </div>
       </div>
     </div>
@@ -60,18 +61,21 @@ import { ref } from "vue";
 const userData = JSON.parse(localStorage.getItem("userData"));
 const orderList = ref([]);
 
-const getOrderQuery = async function() {
+const getOrderQuery = async function () {
   try {
-    const { data } = await useFetch("https://23700999.com:8081/HMA/api/fr/maSale", {
-      method: "POST",
-      body: {
-        MID: userData.MID,
-        Token: userData.Token,
-        MAID: userData.MAID,
-        Mobile: userData.Mobile,
-        Lang: "zhtw",
-      },
-    });
+    const { data } = await useFetch(
+      "https://23700999.com:8081/HMA/api/fr/maSale",
+      {
+        method: "POST",
+        body: {
+          MID: userData.MID,
+          Token: userData.Token,
+          MAID: userData.MAID,
+          Mobile: userData.Mobile,
+          Lang: "zhtw",
+        },
+      }
+    );
 
     if (data.value?.Result === "OK") {
       orderList.value = data.value.SaleList || [];
@@ -83,30 +87,99 @@ const getOrderQuery = async function() {
 };
 
 // 取得訂單狀態文字
-const getOrderStatus = (status) => {
-  switch (status) {
-    case "Y":
-      return "已確認";
-    case "N":
-      return "未確認";
-    case "C":
-      return "已取消";
-    default:
-      return "處理中";
+const getOrderStatus = (order) => {
+  // 檢查付款狀態
+  if (order.RtnCode === "1" && order.RtnMsg === "paid") {
+    return "已付款";
+  } else if (order.RtnCode === "" || order.RtnMsg === "") {
+    return "待付款";
+  } else {
+    return "付款失敗";
   }
 };
 
 // 取得訂單狀態詳細說明
-const getOrderStatusText = (status) => {
-  switch (status) {
-    case "Y":
-      return "訂單已確認，正在處理中";
-    case "N":
-      return "請先填寫個人化資訊才會開始製作";
-    case "C":
-      return "訂單已取消";
-    default:
-      return "訂單處理中";
+const getOrderStatusText = (order) => {
+  // 檢查付款狀態
+  if (order.RtnCode === "1" && order.RtnMsg === "paid") {
+    return "訂單已付款，正在處理中";
+  } else if (order.RtnCode === "" || order.RtnMsg === "") {
+    return "請先完成付款才會開始製作";
+  } else {
+    return "付款失敗，請重新付款";
+  }
+};
+
+// 取得訂單狀態 CSS 類別
+const getOrderStatusClass = (order) => {
+  // 檢查付款狀態
+  if (order.RtnCode === "1" && order.RtnMsg === "paid") {
+    return "paid";
+  } else if (order.RtnCode === "" || order.RtnMsg === "") {
+    return "pending";
+  } else {
+    return "failed";
+  }
+};
+
+// 假設 order 物件有 PersonalInfoFilled, ShipStatus, ReturnStatus 等欄位
+const getOrderStage = (order) => {
+  // 未付款
+  if (order.RtnCode !== "1" || order.RtnMsg !== "paid") {
+    return {
+      status: "未付款",
+      tip: "尚未收到您的付款，請確認付款狀態",
+      type: "unpaid",
+    };
+  }
+  // 已付款但未填個資
+  if (
+    order.RtnCode === "1" &&
+    order.RtnMsg === "paid" &&
+    !order.PersonalInfoFilled
+  ) {
+    return {
+      status: "未製作",
+      tip: "請先填寫個人化資訊才會開始製作",
+      type: "unfilled",
+    };
+  }
+  // 已申請退貨
+  if (order.ReturnStatus === "申請退貨" || order.ReturnStatus === "已退貨") {
+    return { status: "已退貨", tip: "已申請退貨", type: "returned" };
+  }
+  // 已出貨
+  if (order.ShipStatus === "已出貨" || order.ReceiveStatus === "已收貨") {
+    return { status: "已完成", tip: "訂單已完成", type: "done" };
+  }
+  // 已付款且已填個資，尚未出貨
+  if (
+    order.RtnCode === "1" &&
+    order.RtnMsg === "paid" &&
+    order.PersonalInfoFilled
+  ) {
+    // 計算預計送達日
+    const dayjs = require("dayjs");
+    const estimate = dayjs(order.CheckTime).add(5, "day").format("M月D日");
+    return {
+      status: "待收貨",
+      tip: `預計送達時間 ${estimate}`,
+      type: "shipping",
+    };
+  }
+  // 預設
+  return { status: "處理中", tip: "", type: "processing" };
+};
+
+const handleOrderClick = (order) => {
+  const stage = getOrderStage(order);
+  if (stage.type === "unfilled") {
+    alert("請先填寫個人化資訊才會開始製作！");
+    // 可導向個資填寫頁
+    // router.push(`/personalize/${order.SID}`);
+  } else {
+    // 跳轉訂單詳細頁
+    router.push(`/orderDetail/${order.SID}`);
   }
 };
 
@@ -221,6 +294,18 @@ onMounted(() => {
           font-weight: 400;
           line-height: 150%; /* 24px */
           letter-spacing: 0.15px;
+
+          &.paid {
+            color: var(--Primary-default, #74bc1f);
+          }
+
+          &.pending {
+            color: var(--Warning-default, #ec4f4f);
+          }
+
+          &.failed {
+            color: #ff6b6b;
+          }
         }
       }
     }
@@ -252,14 +337,57 @@ onMounted(() => {
       line-height: 150%; /* 24px */
       letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
       padding: 8px;
-      h3{
+
+      &.paid {
+        background: rgba(116, 188, 31, 0.1);
+        color: var(--Primary-default, #74bc1f);
+      }
+
+      &.pending {
+        background: var(--warning-300-opacity-10, rgba(236, 79, 79, 0.1));
+        color: var(--Warning-default, #ec4f4f);
+      }
+
+      &.failed {
+        background: rgba(255, 107, 107, 0.1);
+        color: #ff6b6b;
+      }
+
+      h3 {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        
       }
     }
   }
+}
+
+small.unpaid {
+  color: #ec4f4f;
+}
+small.unfilled {
+  color: #ec4f4f;
+}
+small.shipping {
+  color: #74bc1f;
+}
+small.done {
+  color: #74bc1f;
+}
+small.returned {
+  color: #ec4f4f;
+}
+.order-tip {
+  margin-top: 8px;
+  color: var(--Warning-default, #ec4f4f);
+  background-color: #fff0f0;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: var(--Text-font-size-16, 16px);
+  font-style: normal;
+  font-weight: 700;
+
+  letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
 }
 </style>
 

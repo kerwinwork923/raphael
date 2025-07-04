@@ -64,7 +64,7 @@
             <span>訂單編號</span>
             <span class="copyable">
               {{ orderDetails.OrderNo }}
-              <!-- <img src="~/assets/imgs/cart/copy.svg" alt="copy" @click="copy(orderDetails.OrderNo)" /> -->
+               <img src="~/assets/imgs/cart/copy.svg" alt="copy" @click="copy(orderDetails.OrderNo)" />   
             </span>
           </div>
           <div class="detailRow">
@@ -80,6 +80,11 @@
             <span>{{ orderDetails.InvoiceType }}</span>
           </div>
         </div>
+
+        <div class="infoBox">
+          
+        </div>
+
       </template>
     </div>
   </div>
@@ -239,8 +244,8 @@ onMounted(() => {
     padding: 0 0.5rem;
 
     img {
-      width: 60px;
-      height: 60px;
+      width: 80px;
+      height: 80px;
       border-radius: 8px;
       object-fit: cover;
     }

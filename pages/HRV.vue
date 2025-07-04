@@ -147,8 +147,81 @@ let faceDetectTimer = null;
 let hasRecorded = false;
 let elapsedMs = 0;
 
+// 頁面可見性變化處理
+const handleVisibilityChange = () => {
+  if (document.hidden) {
+    console.log('頁面進入背景，停止錄影和相機');
+    
+    // 通知 Service Worker
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: 'VISIBILITY_CHANGE',
+        hidden: true
+      });
+    }
+    
+    // 停止錄影
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      try {
+        mediaRecorder.stop();
+      } catch (e) {
+        console.log('MediaRecorder 已經停止');
+      }
+    }
+    
+    // 停止相機
+    if (stream) {
+      stream.getTracks().forEach((track) => {
+        track.stop();
+      });
+      stream = null;
+    }
+    
+    // 清除 video 元素
+    if (videoElement.value) {
+      videoElement.value.srcObject = null;
+    }
+    
+    // 清除所有計時器
+    if (metricInt) clearInterval(metricInt);
+    if (scanInt) clearInterval(scanInt);
+    if (faceDetectTimer) clearInterval(faceDetectTimer);
+    
+    // 重置狀態
+    scanning.value = false;
+    counting.value = false;
+    isStarted.value = false;
+    aiAnalysing.value = false;
+    progress.value = 0;
+    elapsedMs = 0;
+    hasRecorded = false;
+    
+    // 使用全域 PWA 工具停止所有媒體
+    const { $pwaUtils } = useNuxtApp();
+    if ($pwaUtils) {
+      $pwaUtils.stopAllMedia();
+    }
+  }
+};
+
+// 處理 Service Worker 訊息
+const handleServiceWorkerMessage = (event) => {
+  if (event.data && event.data.type === 'STOP_RECORDING') {
+    console.log('收到 Service Worker 停止錄影指令:', event.data.reason);
+    handleVisibilityChange();
+  }
+};
+
 // 頁面一載入就自動開啟鏡頭
 onMounted(async () => {
+  // 添加頁面可見性變化監聽器
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+  
+  // 添加 Service Worker 訊息監聽器
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', handleServiceWorkerMessage);
+  }
+  
   await initCamera();
   // 產生速度線動畫
   const speedLines = document.querySelector(".speedLines");
@@ -511,6 +584,14 @@ watch(
 );
 
 onUnmounted(() => {
+  // 移除頁面可見性變化監聽器
+  document.removeEventListener('visibilitychange', handleVisibilityChange);
+  
+  // 移除 Service Worker 訊息監聽器
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.removeEventListener('message', handleServiceWorkerMessage);
+  }
+  
   // 關閉所有相機和錄影資源
   if (mediaRecorder && mediaRecorder.state !== 'inactive') {
     try {
