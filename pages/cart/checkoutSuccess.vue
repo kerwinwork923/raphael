@@ -139,7 +139,7 @@ const fetchOrderDetails = async () => {
           ProductName: item.ProductName,
           Price: parseInt(item.Price).toLocaleString(),
           Qty: item.Qty,
-          Picture: `https://fastly.picsum.photos/id/${Math.floor(Math.random() * 1000)}/200/200.jpg?hmac=placeholder`, // 暫時使用隨機圖片
+          DPicture: item.DPicture, // 使用 API 回傳的圖片路徑
         })),
         freight: saleData.freight,
         TotalAmount: parseInt(saleData.TotalAmount).toLocaleString(),
