@@ -1499,7 +1499,7 @@ function handleRadioButtonClick(event) {
       else{showANS="極重度焦慮";}
 
       //判斷是否需要醫師介入
-      if(ansScore>=10||getValueForQuestion("ans_fear")>1||answers.length>=1){
+      if(ansScore>=10||getValueForQuestion("ans_fear")>=1||answers.length>=1){
         needDoctor=true;
       }
 
