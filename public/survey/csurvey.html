@@ -1347,18 +1347,10 @@ function handleRadioButtonClick(event) {
         type = "3";
       } else if (nightUrinationScore >= 2) {//( 4c題大於等於2
         type = "2";
-      } else {
-        const scores = [
-          { type: "1", score: SleepLatencyScore },
-          { type: "2", score: nightUrinationScore },
-          { type: "3", score: lightSleepScore },
-          { type: "4", score: SleepMedicineScore },
-          { type: "5", score: midWakeScore },
-        ];
-
-        scores.sort((a, b) => b.score - a.score);
-        type = scores[0].score > 0 ? scores[0].type : "5";
-      }
+        } else {
+        
+          type = "0";
+        }
 
       if (constipationScore >= 7) { //有便祕
         type += "+";
