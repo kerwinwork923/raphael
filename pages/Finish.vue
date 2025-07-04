@@ -136,6 +136,7 @@
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Navbar from "../components/Navbar.vue";
+import { useMediaCleanup } from "../composables/useMediaCleanup";
 
 // 狀態變數
 const userName = ref("");
@@ -307,11 +308,41 @@ const goBack = () => {
   router.go(-1);
 };
 
+// 使用媒體清理工具
+const { forceStopAllMedia } = useMediaCleanup();
+
 // 生命週期鉤子
 onMounted(() => {
   const userData = JSON.parse(localStorage.getItem("userData"));
   if (userData?.Name) {
     userName.value = userData.Name;
+  }
+
+  // 使用全域媒體清理工具
+  const { $globalMediaCleanup } = useNuxtApp();
+  if ($globalMediaCleanup) {
+    console.log('Finish 頁面：使用全域媒體清理工具');
+    
+    // 立即強制關閉所有媒體流
+    $globalMediaCleanup.forceStopAllMedia();
+    
+    // 延遲再次執行，確保完全關閉
+    setTimeout(() => {
+      $globalMediaCleanup.forceStopAllMedia();
+    }, 100);
+    
+    // 再延遲一次，以防萬一
+    setTimeout(() => {
+      $globalMediaCleanup.forceStopAllMedia();
+    }, 500);
+    
+    // 觸發全域強制清理事件
+    $globalMediaCleanup.triggerForceCleanup();
+  } else {
+    // 備用方案：使用本地媒體清理工具
+    forceStopAllMedia();
+    setTimeout(() => forceStopAllMedia(), 100);
+    setTimeout(() => forceStopAllMedia(), 500);
   }
 
   fetchHRVData();

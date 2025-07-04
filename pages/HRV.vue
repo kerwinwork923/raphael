@@ -114,6 +114,7 @@ import { ref, onMounted, onUnmounted, watch } from "vue";
 import * as faceapi from "@vladmandic/face-api";
 import Navbar from "../components/Navbar.vue";
 import { useRoute } from "vue-router";
+import { useMediaCleanup } from "../composables/useMediaCleanup";
 
 // Refs
 const route = useRoute();
@@ -147,6 +148,9 @@ let faceDetectTimer = null;
 let hasRecorded = false;
 let elapsedMs = 0;
 
+// 使用媒體清理工具
+const { forceStopAllMedia } = useMediaCleanup();
+
 // 頁面可見性變化處理
 const handleVisibilityChange = () => {
   if (document.hidden) {
@@ -160,27 +164,8 @@ const handleVisibilityChange = () => {
       });
     }
     
-    // 停止錄影
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-      try {
-        mediaRecorder.stop();
-      } catch (e) {
-        console.log('MediaRecorder 已經停止');
-      }
-    }
-    
-    // 停止相機
-    if (stream) {
-      stream.getTracks().forEach((track) => {
-        track.stop();
-      });
-      stream = null;
-    }
-    
-    // 清除 video 元素
-    if (videoElement.value) {
-      videoElement.value.srcObject = null;
-    }
+    // 使用強力媒體清理工具
+    forceStopAllMedia();
     
     // 清除所有計時器
     if (metricInt) clearInterval(metricInt);
@@ -196,10 +181,13 @@ const handleVisibilityChange = () => {
     elapsedMs = 0;
     hasRecorded = false;
     
-    // 使用全域 PWA 工具停止所有媒體
-    const { $pwaUtils } = useNuxtApp();
-    if ($pwaUtils) {
-      $pwaUtils.stopAllMedia();
+    // 清除本地變數
+    mediaRecorder = null;
+    stream = null;
+    
+    // 清除 video 元素
+    if (videoElement.value) {
+      videoElement.value.srcObject = null;
     }
   }
 };
@@ -212,6 +200,12 @@ const handleServiceWorkerMessage = (event) => {
   }
 };
 
+// 處理強制關閉媒體事件
+const handleForceStopMedia = (event) => {
+  console.log('收到強制關閉媒體事件:', event.detail);
+  handleVisibilityChange();
+};
+
 // 頁面一載入就自動開啟鏡頭
 onMounted(async () => {
   // 添加頁面可見性變化監聽器
@@ -221,6 +215,9 @@ onMounted(async () => {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('message', handleServiceWorkerMessage);
   }
+  
+  // 添加強制關閉媒體事件監聽器
+  window.addEventListener('force-stop-media', handleForceStopMedia);
   
   await initCamera();
   // 產生速度線動畫
@@ -591,6 +588,9 @@ onUnmounted(() => {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.removeEventListener('message', handleServiceWorkerMessage);
   }
+  
+  // 移除強制關閉媒體事件監聽器
+  window.removeEventListener('force-stop-media', handleForceStopMedia);
   
   // 關閉所有相機和錄影資源
   if (mediaRecorder && mediaRecorder.state !== 'inactive') {
