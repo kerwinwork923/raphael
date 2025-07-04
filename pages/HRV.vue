@@ -152,7 +152,7 @@ let elapsedMs = 0;
 const { forceStopAllMedia } = useMediaCleanup();
 
 // 頁面可見性變化處理
-const handleVisibilityChange = () => {
+const handleVisibilityChange = async () => {
   if (document.hidden) {
     console.log('頁面進入背景，停止錄影和相機');
     
@@ -162,6 +162,11 @@ const handleVisibilityChange = () => {
         type: 'VISIBILITY_CHANGE',
         hidden: true
       });
+    }
+    
+    // 使用穩定的停止方法關閉錄影
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      await stopRecorder(mediaRecorder);
     }
     
     // 使用強力媒體清理工具
@@ -193,17 +198,17 @@ const handleVisibilityChange = () => {
 };
 
 // 處理 Service Worker 訊息
-const handleServiceWorkerMessage = (event) => {
+const handleServiceWorkerMessage = async (event) => {
   if (event.data && event.data.type === 'STOP_RECORDING') {
     console.log('收到 Service Worker 停止錄影指令:', event.data.reason);
-    handleVisibilityChange();
+    await handleVisibilityChange();
   }
 };
 
 // 處理強制關閉媒體事件
-const handleForceStopMedia = (event) => {
+const handleForceStopMedia = async (event) => {
   console.log('收到強制關閉媒體事件:', event.detail);
-  handleVisibilityChange();
+  await handleVisibilityChange();
 };
 
 // 頁面一載入就自動開啟鏡頭
@@ -262,6 +267,12 @@ function getUrlParams() {
 // 初始化相機
 async function initCamera() {
   try {
+    // 如果已經在錄影，不要重複初始化
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      console.log('MediaRecorder 已在錄影中，跳過初始化');
+      return;
+    }
+    
     stream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: "user" },
       audio: true,
@@ -302,15 +313,17 @@ function startCountdown(sec, cb) {
 async function onRecordStop() {
   aiAnalysing.value = true;
   
-  // 立即關閉錄影和相機
-  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-    try {
-      mediaRecorder.stop();
-    } catch (e) {
-      console.log('MediaRecorder 已經停止');
-    }
-  }
-  
+  // 先把資料取完
+  const blob = new Blob(recordedChunks, { type: "video/webm" });
+  recordedChunks = [];
+
+  // 清掉進度 / UI
+  scanning.value = false;
+  counting.value = false;
+  progress.value = 100;
+  hasRecorded = true;
+
+  // 關閉攝影機
   if (stream) {
     stream.getTracks().forEach((track) => {
       track.stop();
@@ -323,7 +336,19 @@ async function onRecordStop() {
     videoElement.value.srcObject = null;
   }
   
-  const blob = new Blob(recordedChunks, { type: "video/webm" });
+  // 清除所有計時器
+  if (metricInt) clearInterval(metricInt);
+  if (scanInt) clearInterval(scanInt);
+  if (faceDetectTimer) clearInterval(faceDetectTimer);
+  
+  // 重置狀態
+  isStarted.value = false;
+  elapsedMs = 0;
+  
+  // 清除本地變數
+  mediaRecorder = null;
+  
+  // 送 API
   const reader = new FileReader();
   reader.onloadend = () => sendToAPI(reader.result.split(",")[1]);
   reader.readAsDataURL(blob);
@@ -409,8 +434,26 @@ async function sendToAPI(base64) {
   }
 }
 
+// 穩定的停止錄影器函數
+function stopRecorder(recorder) {
+  return new Promise((resolve) => {
+    if (!recorder || recorder.state === 'inactive') {
+      resolve();
+      return;
+    }
+    
+    const handleStop = () => {
+      recorder.removeEventListener('stop', handleStop);
+      resolve();
+    };
+    
+    recorder.addEventListener('stop', handleStop, { once: true });
+    recorder.stop();
+  });
+}
+
 // 開始錄影
-function startRecording() {
+async function startRecording() {
   recordedChunks = [];
   mediaRecorder.start();
   scanning.value = true;
@@ -418,7 +461,7 @@ function startRecording() {
   remain.value = 15;
   showBlurMask.value = false; // 開始掃描時隱藏模糊遮罩
   let percent = 0;
-  scanInt = setInterval(() => {
+  scanInt = setInterval(async () => {
     if (mediaRecorder.state === "recording") {
       elapsedMs += 200;
       percent = Math.min(100, (elapsedMs / 15000) * 100);
@@ -426,7 +469,8 @@ function startRecording() {
       remain.value = Math.max(0, Math.ceil(((100 - percent) * 15) / 100));
       if (percent >= 100) {
         clearInterval(scanInt);
-        mediaRecorder.stop();
+        // 使用穩定的停止方法
+        await stopRecorder(mediaRecorder);
         scanning.value = false;
         hasRecorded = true;
       }
@@ -446,14 +490,10 @@ function startMetrics() {
 }
 
 // 返回上一頁
-function goBack() {
-  // 關閉相機和錄影
+async function goBack() {
+  // 使用穩定的停止方法
   if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-    try {
-      mediaRecorder.stop();
-    } catch (e) {
-      console.log('MediaRecorder 已經停止');
-    }
+    await stopRecorder(mediaRecorder);
   }
   
   if (stream) {
@@ -580,7 +620,7 @@ watch(
   }
 );
 
-onUnmounted(() => {
+onUnmounted(async () => {
   // 移除頁面可見性變化監聽器
   document.removeEventListener('visibilitychange', handleVisibilityChange);
   
@@ -592,13 +632,9 @@ onUnmounted(() => {
   // 移除強制關閉媒體事件監聽器
   window.removeEventListener('force-stop-media', handleForceStopMedia);
   
-  // 關閉所有相機和錄影資源
+  // 使用穩定的停止方法關閉錄影
   if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-    try {
-      mediaRecorder.stop();
-    } catch (e) {
-      console.log('MediaRecorder 已經停止');
-    }
+    await stopRecorder(mediaRecorder);
   }
   
   if (stream) {
