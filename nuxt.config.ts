@@ -75,6 +75,10 @@ export default defineNuxtConfig({
     workbox: {
       cleanupOutdatedCaches: true,
     },
+    // 禁用自動生成的 Service Worker，使用自定義的
+    strategies: 'injectManifest',
+    srcDir: 'public',
+    filename: 'sw-custom.js',
     manifest: {
       name: "NeuroPlus神經調節家",
       short_name: "NeuroPlus",

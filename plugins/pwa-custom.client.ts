@@ -1,17 +1,6 @@
 export default defineNuxtPlugin(() => {
   // 只在客戶端執行
   if (process.client) {
-    // 註冊自定義 Service Worker
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw-custom.js')
-        .then((registration) => {
-          console.log('自定義 Service Worker 註冊成功:', registration);
-        })
-        .catch((error) => {
-          console.error('自定義 Service Worker 註冊失敗:', error);
-        });
-    }
-
     // 全域頁面可見性處理
     const handleGlobalVisibilityChange = () => {
       if (document.hidden) {

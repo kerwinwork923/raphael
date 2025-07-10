@@ -1,4 +1,30 @@
 // 自定義 Service Worker 處理 PWA 背景執行
+import { precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching';
+import { registerRoute, NavigationRoute } from 'workbox-routing';
+
+// 預快取所有資源
+precacheAndRoute(self.__WB_MANIFEST);
+
+// 處理導航請求
+const fileExtensionRegexp = new RegExp('/[^/?]+\\.[^/]+$');
+registerRoute(
+  // 檢查請求是否為導航請求
+  ({ request }) => {
+    if (request.mode !== 'navigate') {
+      return false;
+    }
+    if (request.method !== 'GET') {
+      return false;
+    }
+    if (request.headers.get('accept')?.includes('text/html')) {
+      return false;
+    }
+    return !fileExtensionRegexp.test(request.url);
+  },
+  createHandlerBoundToURL('/index.html')
+);
+
+// 自定義事件處理
 self.addEventListener('install', (event) => {
   console.log('Service Worker 安裝中...');
   self.skipWaiting();
@@ -24,17 +50,5 @@ self.addEventListener('message', (event) => {
         });
       });
     }
-  }
-});
-
-// 處理 PWA 啟動
-self.addEventListener('fetch', (event) => {
-  // 確保 PWA 能正常載入
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        return caches.match('/');
-      })
-    );
   }
 }); 
