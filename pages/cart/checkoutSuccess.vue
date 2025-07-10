@@ -64,7 +64,7 @@
             <span>訂單編號</span>
             <span class="copyable">
               {{ orderDetails.OrderNo }}
-               <img src="~/assets/imgs/cart/copy.svg" alt="copy" @click="copy(orderDetails.OrderNo)" />   
+               <!-- <img src="~/assets/imgs/cart/copy.svg" alt="copy" @click="copy(orderDetails.OrderNo)" />    -->
             </span>
           </div>
           <div class="detailRow">
