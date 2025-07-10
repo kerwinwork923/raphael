@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>個人化資訊測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background: #74bc1f;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #5a8f18;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f8ff;
+            border-radius: 4px;
+        }
+        .error {
+            color: #f44336;
+            background: #ffebee;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>個人化資訊計算測試</h1>
+    
+    <div class="form-group">
+        <label for="gender">性別:</label>
+        <select id="gender">
+            <option value="">請選擇性別</option>
+            <option value="male">男生</option>
+            <option value="female">女生</option>
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label for="height">身高 (公分):</label>
+        <input type="number" id="height" placeholder="例如：170">
+    </div>
+    
+    <div class="form-group">
+        <label for="weight">體重 (公斤):</label>
+        <input type="number" id="weight" placeholder="例如：55">
+    </div>
+    
+    <div class="form-group">
+        <label for="customSize">尺寸:</label>
+        <select id="customSize">
+            <option value="">請選擇尺寸</option>
+            <option value="XS">XS</option>
+            <option value="S">S</option>
+            <option value="M">M</option>
+            <option value="L">L</option>
+            <option value="XL">XL</option>
+            <option value="2L">2L</option>
+        </select>
+    </div>
+    
+    <button onclick="calculateLength()">計算領口到肚臍距離</button>
+    
+    <div id="result" class="result" style="display: none;"></div>
+    
+    <script>
+        const zphShirtLengths = {
+            "XS": 65,
+            "S": 67,
+            "M": 69,
+            "L": 71,
+            "XL": 73,
+            "2L": 75
+        };
+
+        function calculateLength() {
+            const gender = document.getElementById('gender').value;
+            const height = parseFloat(document.getElementById('height').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            const size = document.getElementById('customSize').value;
+            const resultDiv = document.getElementById('result');
+
+            if (!gender || isNaN(height) || isNaN(weight) || !size) {
+                resultDiv.innerHTML = '<div class="error">請正確輸入所有欄位</div>';
+                resultDiv.style.display = 'block';
+                return;
+            }
+
+            // 基礎上半身長度估算
+            let shoulderToHip = 0;
+            if (gender === 'male') {
+                shoulderToHip = height * 0.275 + weight * 0.10;
+            } else {
+                shoulderToHip = height * 0.265 + weight * 0.12;
+            }
+
+            // 智平衡衣長微調上半身長度（以M為基準69cm）
+            const targetShirtLength = zphShirtLengths[size] || 69;
+            const adjustment = (targetShirtLength - 69) * 0.15;
+            const adjustedShoulderToHip = shoulderToHip + adjustment;
+
+            // 肚臍到領口距離 = 上半身長度 × 0.75
+            const navelToNeck = adjustedShoulderToHip * 0.75;
+            
+            // 限制在合理範圍內 (23-52公分)
+            const finalNeckToNavel = Math.max(23, Math.min(52, Math.round(navelToNeck * 10) / 10));
+            
+            const isOutOfRange = finalNeckToNavel < 23 || finalNeckToNavel > 52;
+
+            let resultHTML = `
+                <h3>計算結果:</h3>
+                <p><strong>您的智平衡衣長為：</strong>${targetShirtLength} 公分</p>
+                <p><strong>預估肩膀至胯部長度（含衣長修正）：</strong>約 ${adjustedShoulderToHip.toFixed(1)} 公分</p>
+                <p><strong>肚臍到領口距離（75%）：</strong>約 ${finalNeckToNavel.toFixed(1)} 公分</p>
+            `;
+            
+            if (isOutOfRange) {
+                resultHTML += '<div class="error">超出合理範圍(23-52cm)，請確認是否正確</div>';
+            } else {
+                resultHTML += '<p style="color: green;"><strong>✓ 數值在合理範圍內</strong></p>';
+            }
+
+            resultDiv.innerHTML = resultHTML;
+            resultDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html> 

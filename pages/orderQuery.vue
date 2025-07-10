@@ -1,6 +1,11 @@
 <template>
   <div class="orderQueryWrap">
     <TitleMenu Text="訂單查詢" link="/user" />
+    <QuesionBox 
+      v-if="showQuestionBox" 
+      :orderData="selectedOrder" 
+      @close="showQuestionBox = false"
+    />
     <!-- <div class="orderStateList">
       <ul>
         <li class="orderStateActive">訂單查詢</li>
@@ -60,6 +65,9 @@ import { ref } from "vue";
 
 const userData = JSON.parse(localStorage.getItem("userData"));
 const orderList = ref([]);
+const recheckoutLoading = ref(false);
+const showQuestionBox = ref(false);
+const selectedOrder = ref(null);
 
 const getOrderQuery = async function () {
   try {
@@ -86,10 +94,90 @@ const getOrderQuery = async function () {
   }
 };
 
+// 重新結帳功能
+const handleRecheckout = async (order) => {
+  if (recheckoutLoading.value) return;
+  
+  recheckoutLoading.value = true;
+  
+  try {
+    const { data } = await useFetch(
+      "https://23700999.com:8081/HMA/api/fr/maReCheckoutCart",
+      {
+        method: "POST",
+        body: {
+          MID: userData.MID,
+          Token: userData.Token,
+          MAID: userData.MAID,
+          Mobile: userData.Mobile,
+          SALEID: order.SID,
+        },
+      }
+    );
+
+    if (data.value?.Result === "OK") {
+      // 儲存新的 SALEID 到 localStorage，這樣 checkoutSuccess.vue 就能獲取到
+      if (data.value.SALEID) {
+        localStorage.setItem('checkoutSALEID', data.value.SALEID);
+        console.log("已儲存新的 SALEID:", data.value.SALEID);
+      }
+      
+      // 解析 HTML 表單並直接提交
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(data.value.htmlForm, 'text/html');
+      const form = doc.querySelector('form');
+      
+      if (form) {
+        // 創建一個臨時表單並提交
+        const tempForm = document.createElement('form');
+        tempForm.method = form.method;
+        tempForm.action = form.action;
+        tempForm.style.display = 'none';
+        
+        // 複製所有 input 元素
+        const inputs = form.querySelectorAll('input');
+        inputs.forEach(input => {
+          const newInput = document.createElement('input');
+          newInput.type = input.type;
+          newInput.name = input.name;
+          newInput.value = input.value;
+          tempForm.appendChild(newInput);
+        });
+        
+        document.body.appendChild(tempForm);
+        tempForm.submit();
+        
+        // 清理臨時表單
+        setTimeout(() => {
+          document.body.removeChild(tempForm);
+        }, 100);
+      } else {
+        alert('重新結帳失敗，請稍後再試');
+      }
+    } else {
+      alert('重新結帳失敗，請稍後再試');
+    }
+  } catch (error) {
+    console.error("重新結帳失敗：", error);
+    alert('重新結帳失敗，請稍後再試');
+  } finally {
+    recheckoutLoading.value = false;
+  }
+};
+
+// 檢查是否已付款的輔助函數
+const isOrderPaid = (order) => {
+  return order.RtnCode === "1" && (
+    order.RtnMsg === "paid" || 
+    order.RtnMsg === "交易成功" ||
+    order.RtnMsg === "SUCCESS"
+  );
+};
+
 // 取得訂單狀態文字
 const getOrderStatus = (order) => {
   // 檢查付款狀態
-  if (order.RtnCode === "1" && order.RtnMsg === "paid") {
+  if (isOrderPaid(order)) {
     return "已付款";
   } else if (order.RtnCode === "" || order.RtnMsg === "") {
     return "待付款";
@@ -101,7 +189,7 @@ const getOrderStatus = (order) => {
 // 取得訂單狀態詳細說明
 const getOrderStatusText = (order) => {
   // 檢查付款狀態
-  if (order.RtnCode === "1" && order.RtnMsg === "paid") {
+  if (isOrderPaid(order)) {
     return "訂單已付款，正在處理中";
   } else if (order.RtnCode === "" || order.RtnMsg === "") {
     return "請先完成付款才會開始製作";
@@ -113,7 +201,7 @@ const getOrderStatusText = (order) => {
 // 取得訂單狀態 CSS 類別
 const getOrderStatusClass = (order) => {
   // 檢查付款狀態
-  if (order.RtnCode === "1" && order.RtnMsg === "paid") {
+  if (isOrderPaid(order)) {
     return "paid";
   } else if (order.RtnCode === "" || order.RtnMsg === "") {
     return "pending";
@@ -124,63 +212,89 @@ const getOrderStatusClass = (order) => {
 
 // 假設 order 物件有 PersonalInfoFilled, ShipStatus, ReturnStatus 等欄位
 const getOrderStage = (order) => {
+  // 檢查是否已付款 - 支援多種已付款狀態
+  const isPaid = order.RtnCode === "1" && (
+    order.RtnMsg === "paid" || 
+    order.RtnMsg === "交易成功" ||
+    order.RtnMsg === "SUCCESS"
+  );
+  
   // 未付款
-  if (order.RtnCode !== "1" || order.RtnMsg !== "paid") {
+  if (!isPaid) {
     return {
       status: "未付款",
-      tip: "尚未收到您的付款，請確認付款狀態",
+      tip: "尚未收到您的付款，請重新付款",
       type: "unpaid",
     };
   }
+  
   // 已付款但未填個資
-  if (
-    order.RtnCode === "1" &&
-    order.RtnMsg === "paid" &&
-    !order.PersonalInfoFilled
-  ) {
-    return {
-      status: "未製作",
-      tip: "請先填寫個人化資訊才會開始製作",
-      type: "unfilled",
-    };
+  if (isPaid) {
+    // 檢查是否有商品需要填寫個人化資料
+    const hasUnfilledItems = order.ItemList && order.ItemList.some(item => {
+      return !item.PdtSize || !item.Weight || !item.BodySize || !item.Height
+    })
+    
+    if (hasUnfilledItems) {
+      return {
+        status: "未製作",
+        tip: "請先填寫個人化資訊才會開始製作",
+        type: "unfilled",
+      };
+    }
   }
+  
   // 已申請退貨
   if (order.ReturnStatus === "申請退貨" || order.ReturnStatus === "已退貨") {
     return { status: "已退貨", tip: "已申請退貨", type: "returned" };
   }
+  
   // 已出貨
   if (order.ShipStatus === "已出貨" || order.ReceiveStatus === "已收貨") {
     return { status: "已完成", tip: "訂單已完成", type: "done" };
   }
+  
   // 已付款且已填個資，尚未出貨
-  if (
-    order.RtnCode === "1" &&
-    order.RtnMsg === "paid" &&
-    order.PersonalInfoFilled
-  ) {
-    // 計算預計送達日
-    const dayjs = require("dayjs");
-    const estimate = dayjs(order.CheckTime).add(5, "day").format("M月D日");
-    return {
-      status: "待收貨",
-      tip: `預計送達時間 ${estimate}`,
-      type: "shipping",
-    };
+  if (isPaid) {
+    // 檢查是否所有商品都已填寫個人化資料
+    const allItemsFilled = order.ItemList && order.ItemList.every(item => {
+      return item.PdtSize && item.Weight && item.BodySize && item.Height
+    })
+    
+    if (allItemsFilled) {
+      // 計算預計送達日
+      const dayjs = require("dayjs");
+      const estimate = dayjs(order.CheckTime).add(5, "day").format("M月D日");
+      return {
+        status: "待收貨",
+        tip: `預計送達時間 ${estimate}`,
+        type: "shipping",
+      };
+    }
   }
+  
   // 預設
   return { status: "處理中", tip: "", type: "processing" };
 };
 
 const handleOrderClick = (order) => {
   const stage = getOrderStage(order);
-  if (stage.type === "unfilled") {
-    alert("請先填寫個人化資訊才會開始製作！");
-    // 可導向個資填寫頁
-    // router.push(`/personalize/${order.SID}`);
-  } else {
-    // 跳轉訂單詳細頁
-    router.push(`/orderDetail/${order.SID}`);
+  
+  // 未付款訂單直接觸發重新結帳
+  if (stage.type === "unpaid") {
+    handleRecheckout(order);
+    return;
   }
+  
+  // 未製作訂單顯示個人化資料填寫視窗
+  if (stage.type === "unfilled") {
+    selectedOrder.value = order;
+    showQuestionBox.value = true;
+    return;
+  }
+  
+  // 其他訂單跳轉到訂單詳細頁
+  router.push(`/orderDetail/${order.SID}`);
 };
 
 onMounted(() => {
@@ -388,6 +502,16 @@ small.returned {
   font-weight: 700;
 
   letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
+}
+
+.orderQueryItem {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
 }
 </style>
 

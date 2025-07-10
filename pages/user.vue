@@ -67,9 +67,9 @@
           <img src="../assets/imgs/contract.svg" alt="" />
         </router-link>
 
-        <router-link to="/package" class="item">
-          <div class="topTitle">包裹</div>
-          <div class="bottomTitle">查詢</div>
+        <router-link to="/orderQuery" class="item">
+          <div class="topTitle">診所</div>
+          <div class="bottomTitle">訂單</div>
           <img src="../assets/imgs/logistics.svg" alt="" />
         </router-link>
         <!-- <div class="item item6">

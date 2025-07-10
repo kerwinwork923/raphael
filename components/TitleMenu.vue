@@ -1,5 +1,5 @@
 <template>
-  <div class="titleMenu">
+  <div :class="['titleMenu', positionType]">
     <div @click="handleClick">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -35,6 +35,11 @@ export default {
     scrollToBottom: {
       type: Boolean, // 决定是否返回后滚动到底部
       default: false,
+    },
+    positionType: {
+      type: String,
+      default: 'sticky',
+      validator: value => ['sticky', 'fixed', 'absolute'].includes(value),
     },
   },
   methods: {
@@ -77,6 +82,21 @@ export default {
     letter-spacing: 0.5px;
     color: #1e1e1e;
     letter-spacing: 1px;
+  }
+  &.sticky {
+    position: sticky;
+  }
+
+  &.fixed {
+    position: fixed;
+  }
+
+  &.absolute {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 6;
   }
 }
 </style>
