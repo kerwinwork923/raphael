@@ -258,12 +258,16 @@ const checkout = async () => {
       Qty: item.Qty
     }));
 
+    // 從 localStorage 讀取 CSAID（複雜問卷 AID）
+    const CSAID = localStorage.getItem('CSAID') || "";
+    
     // 準備結帳資料
     const checkoutData = {
       MID: userData.MID,
       Token: userData.Token,
       MAID: userData.MAID,
       Mobile: userData.Mobile,
+      CSAID: CSAID, // 複雜問卷 API AID，沒有就空白
       Lang: "zhtw",
       Cart: cartData,
       freight: "0",
@@ -285,7 +289,7 @@ const checkout = async () => {
 
     if (data.value?.Result === "OK") {
       console.log("結帳成功:", data.value);
-      
+      localStorage.removeItem('CSAID');
       // 儲存 SALEID 到 localStorage
       if (data.value.SALEID) {
         localStorage.setItem('checkoutSALEID', data.value.SALEID);
@@ -313,6 +317,8 @@ const checkout = async () => {
         const form = tempDiv.querySelector('form');
         if (form) {
           console.log("找到付款表單，準備提交");
+          // 清除 CSAID，因為已經跳轉到付款頁面
+          localStorage.removeItem('CSAID');
           form.submit();
         } else {
           console.error("未找到付款表單");
@@ -321,8 +327,9 @@ const checkout = async () => {
       } 
       else {
         alert("結帳成功！");
-        // 清除 SALEID，因為已經跳轉到成功頁面
+        // 清除 SALEID 和 CSAID，因為已經跳轉到成功頁面
         localStorage.removeItem('checkoutSALEID');
+        localStorage.removeItem('CSAID');
         router.push("/cart/checkoutSuccess");
       }
     } else {

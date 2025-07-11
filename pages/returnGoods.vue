@@ -318,11 +318,8 @@ import TitleMenu from "@/components/TitleMenu.vue";
     background-color: $raphael-gray-100;
     z-index: 99;
     color: var(--Neutral-white, #fff);
-
     font-size: 18px;
     font-style: normal;
-
-
     letter-spacing: 0.09px;
     width: 100%;
     button {

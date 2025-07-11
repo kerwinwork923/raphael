@@ -1,28 +1,7 @@
 // 自定義 Service Worker 處理 PWA 背景執行
-import { precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching';
-import { registerRoute, NavigationRoute } from 'workbox-routing';
+// 簡化版本，不使用 workbox 模組
 
-// 預快取所有資源
-precacheAndRoute(self.__WB_MANIFEST);
-
-// 處理導航請求
-const fileExtensionRegexp = new RegExp('/[^/?]+\\.[^/]+$');
-registerRoute(
-  // 檢查請求是否為導航請求
-  ({ request }) => {
-    if (request.mode !== 'navigate') {
-      return false;
-    }
-    if (request.method !== 'GET') {
-      return false;
-    }
-    if (request.headers.get('accept')?.includes('text/html')) {
-      return false;
-    }
-    return !fileExtensionRegexp.test(request.url);
-  },
-  createHandlerBoundToURL('/index.html')
-);
+// 自定義事件處理
 
 // 自定義事件處理
 self.addEventListener('install', (event) => {

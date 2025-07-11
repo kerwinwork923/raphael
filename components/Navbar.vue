@@ -6,9 +6,9 @@
       </router-link>
     </div>
     <div class="optionGroup">
-      <router-link to="/cart/cartList">
+      <!-- <router-link to="/cart/cartList">
         <img class="cartIcon" src="../assets/imgs/cart.svg" alt="" />
-      </router-link>
+      </router-link> -->
       <!--<img class="alertIcon" src="../assets/imgs/alert.svg" alt="" />-->
 
       <a href="/ChangeMember">
