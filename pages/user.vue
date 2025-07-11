@@ -31,7 +31,7 @@
           />
         </div>
       </div>
-      <div class="bannerGroup">
+      <!-- <div class="bannerGroup">
         <img class="imgHide" src="../assets//imgs/banner-1.png" alt="" />
         <img
           v-for="(slide, index) in slides"
@@ -40,6 +40,9 @@
           :src="slide"
           alt=""
         />
+      </div> -->
+      <div class="bannerGroup2">
+        <img @click="goCart" src="../assets/imgs/shoppingMall.png" alt="" />
       </div>
       <div class="itemsGroup">
         <!-- 
@@ -147,6 +150,10 @@ export default {
 
     const hideHealthRecordAlert = () => {
       isHealthRecordAlertActive.value = false;
+    };
+
+    const goCart = () => {
+      router.push("/cart");
     };
 
     const getUserData = async () => {
@@ -317,6 +324,7 @@ export default {
       isHealthRecordAlertActive,
       showHealthRecordAlert,
       hideHealthRecordAlert,
+      goCart,
     };
   },
 };
@@ -413,6 +421,15 @@ export default {
       }
       .active {
         opacity: 1;
+      }
+    }
+
+    .bannerGroup2 {
+      width: 100%;
+      margin-top: 0.75rem;
+      img {
+        max-width: 100%;
+        height: auto;
       }
     }
 
