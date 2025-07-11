@@ -418,8 +418,9 @@ onMounted(() => {
     display: flex;
     justify-content: space-between; /* 左右節點貼邊，中間自動等距 */
     align-items: center;
-    width: 89%;
-    margin: 32px 0 8px;
+    width: 80%;
+  
+    margin: 32px auto;
 
     /* 底線 */
     &::before {
