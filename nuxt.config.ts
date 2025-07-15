@@ -54,10 +54,6 @@ export default defineNuxtConfig({
       ],
       link: [
         {
-          rel: "manifest",
-          href: "/manifest.webmanifest",
-        },
-        {
           rel: "canonical",
           href: "https://neuroplus.com.tw",
         },
@@ -67,53 +63,7 @@ export default defineNuxtConfig({
 
   modules: [
     "@pinia/nuxt",
-    "@vite-pwa/nuxt",
   ],
-
-  pwa: {
-    registerType: "autoUpdate",
-    workbox: {
-      cleanupOutdatedCaches: true,
-    },
-    // 禁用自動生成的 Service Worker，使用自定義的
-    strategies: 'injectManifest',
-    srcDir: 'public',
-    filename: 'sw-custom.js',
-    manifest: {
-      name: "NeuroPlus神經調節家",
-      short_name: "NeuroPlus",
-      id: "/",
-      start_url: "/", // ✅ 避免 iOS PWA 開啟錯誤
-      scope: "/",
-      display: "standalone",
-      theme_color: "transparent",
-      background_color: "#ffffff",
-      lang: "zh-TW",
-      icons: [
-        {
-          src: "/icon-192x192.png",
-          sizes: "192x192",
-          type: "image/png",
-        },
-        {
-          src: "/icon-512x512.png",
-          sizes: "512x512",
-          type: "image/png",
-        },
-      ],
-      screenshots: [
-        {
-          src: "/screenshot1.png",
-          sizes: "1080x1920",
-          type: "image/png",
-          form_factor: "narrow",
-        },
-      ],
-    },
-    devOptions: {
-      enabled: false,
-    },
-  },
 
   vite: {
     css: {
