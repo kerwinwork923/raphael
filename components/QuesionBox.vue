@@ -75,7 +75,8 @@ const goToPersonalize = (item) => {
   const params = {
     saleId: props.orderData.SID,
     productId: item.ProductID,
-    aid: item.AID
+    aid: item.AID,
+    csAid: props.orderData.CSAID // 加入 CSAID 參數
   }
   
   // 使用 query 參數傳遞資料

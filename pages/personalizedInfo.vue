@@ -1,6 +1,6 @@
 <template>
   <div class="personalized-info">
-    <TitleMenu Text="個人化設定" positionType="absolute" />
+    <TitleMenu Text="個人化設定" positionType="absolute" :link="'/orderQuery'" />
     <!-- 步驟條 -->
     <div class="step-bar">
       <!-- 動態進度線 -->
@@ -47,26 +47,28 @@
           {{ size }}
         </button>
       </div>
-      <div v-if="selectedSize" class="selected-size-info">
-        <div class="selected-size-title">{{ selectedSize }} 尺寸</div>
-        <div class="selected-size-divider"></div>
-        <div class="selected-size-detail">
-          <div class="size-col">
-            <div class="label">肩寬</div>
-            <div class="value">{{ selectedSizeObj.shoulder }}</div>
-          </div>
-          <div class="vertical-divider"></div>
-          <div class="size-col">
-            <div class="label">胸寬</div>
-            <div class="value">{{ selectedSizeObj.chest }}</div>
-          </div>
-          <div class="vertical-divider"></div>
-          <div class="size-col">
-            <div class="label">衣長</div>
-            <div class="value">{{ selectedSizeObj.length }}</div>
+      <Transition name="fade" mode="out-in">
+        <div v-if="selectedSize" class="selected-size-info" key="selected-size">
+          <div class="selected-size-title">{{ selectedSize }} 尺寸</div>
+          <div class="selected-size-divider"></div>
+          <div class="selected-size-detail">
+            <div class="size-col">
+              <div class="label">肩寬</div>
+              <div class="value">{{ selectedSizeObj.shoulder }}</div>
+            </div>
+            <div class="vertical-divider"></div>
+            <div class="size-col">
+              <div class="label">胸寬</div>
+              <div class="value">{{ selectedSizeObj.chest }}</div>
+            </div>
+            <div class="vertical-divider"></div>
+            <div class="size-col">
+              <div class="label">衣長</div>
+              <div class="value">{{ selectedSizeObj.length }}</div>
+            </div>
           </div>
         </div>
-      </div>
+      </Transition>
       <div class="size-table-wrap">
         <div class="table-title">完整尺寸對照表</div>
         <div class="table-desc">胸寬為英吋，其餘為公分</div>
@@ -90,7 +92,16 @@
         </table>
         <div class="measure-title">量測方式</div>
         <div class="measure-desc">請拿捲尺測量「肩寬、胸寬、衣長」</div>
-        <img src="/assets/imgs/measure1.png" class="measure-img" />
+        <div class="img-container">
+          <RaphaelLoading v-if="!imageLoaded.measure1" />
+          <img 
+            src="/assets/imgs/measure1.png" 
+            class="measure-img" 
+            :class="{ 'loaded': imageLoaded.measure1 }"
+            @load="imageLoaded.measure1 = true"
+            @error="handleImageError('measure1')"
+          />
+        </div>
       </div>
       <div class="btn-group">
         <button
@@ -162,7 +173,16 @@
       <div class="measureWrap">
         <div class="measure-title">量測方式</div>
         <div class="measure-desc">從頭頂到腳底的距離以及體重計</div>
-        <img src="/assets/imgs/measure2.png" class="measure-img" />
+        <div class="img-container">
+          <RaphaelLoading v-if="!imageLoaded.measure2" />
+          <img 
+            src="/assets/imgs/measure2.png" 
+            class="measure-img" 
+            :class="{ 'loaded': imageLoaded.measure2 }"
+            @load="imageLoaded.measure2 = true"
+            @error="handleImageError('measure2')"
+          />
+        </div>
       </div>
 
       <div class="btn-group">
@@ -211,11 +231,20 @@
       <div class="measureWrap">
         <div class="measure-title">量測方法</div>
         <div class="measure-desc">系統已根據您的身高、體重、性別和尺寸自動計算，您也可以手動調整</div>
-        <img src="/assets/imgs/measure3.png" class="measure-img" />
+        <div class="img-container">
+          <RaphaelLoading v-if="!imageLoaded.measure3" />
+          <img 
+            src="/assets/imgs/measure3.png" 
+            class="measure-img" 
+            :class="{ 'loaded': imageLoaded.measure3 }"
+            @load="imageLoaded.measure3 = true"
+            @error="handleImageError('measure3')"
+          />
+        </div>
         <div class="btn-group">
           <button class="prev-btn" @click="prevStep">上一步</button>
-          <button class="next-btn" @click="submit" :disabled="!neckToNavel || isOutOfRange">
-            提交
+          <button class="next-btn" @click="submit" :disabled="!neckToNavel || isOutOfRange || isSubmitting">
+            {{ isSubmitting ? '提交中...' : '提交' }}
           </button>
         </div>
       </div>
@@ -226,6 +255,8 @@
 <script setup>
 import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import axios from "axios";
+import RaphaelLoading from "~/components/RaphaelLoading.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -234,6 +265,17 @@ const router = useRouter();
 const saleId = ref("");
 const productId = ref("");
 const aid = ref("");
+const csAid = ref("");
+
+// 新增載入狀態
+const isSubmitting = ref(false);
+
+// 圖片載入狀態
+const imageLoaded = ref({
+  measure1: false,
+  measure2: false,
+  measure3: false
+});
 
 const steps = ["選擇性別尺寸", "身高體重", "身材比例"];
 const currentStep = ref(0);
@@ -368,24 +410,92 @@ function nextStep() {
 function prevStep() {
   if (currentStep.value > 0) currentStep.value--;
 }
-function submit() {
-  // 儲存個人化資料
-  savePersonalizedData();
-  
-  // 送出表單
-  console.log("提交個人化資料:", {
-    saleId: saleId.value,
-    productId: productId.value,
-    aid: aid.value,
-    gender: selectedGender.value,
-    size: selectedSize.value,
-    height: height.value,
-    weight: weight.value,
-    neckToNavel: neckToNavel.value,
-  });
 
-  // TODO: 這裡需要調用 API 提交個人化資料
-  alert("已提交！");
+// 串接後端API儲存個人化資料
+async function submit() {
+  if (isSubmitting.value) return;
+
+  // 驗證必填
+  if (!selectedGender.value || !selectedSize.value || !height.value || !weight.value || !neckToNavel.value) {
+    alert("請填寫所有必填欄位");
+    return;
+  }
+  // 驗證數值
+  const heightNum = parseFloat(height.value);
+  const weightNum = parseFloat(weight.value);
+  const neckToNavelNum = parseFloat(neckToNavel.value);
+  if (isNaN(heightNum) || isNaN(weightNum) || isNaN(neckToNavelNum)) {
+    alert("請輸入有效的數值");
+    return;
+  }
+  if (isOutOfRange.value) {
+    alert("請確認身材比例數值在合理範圍內");
+    return;
+  }
+
+  isSubmitting.value = true;
+  try {
+    // 取得登入資訊
+    const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+    if (!userData.MID || !userData.Token || !userData.MAID || !userData.Mobile) {
+      alert("請先登入");
+      router.push("/");
+      return;
+    }
+
+    // 組API資料
+    const requestData = {
+      MID: userData.MID,
+      Token: userData.Token,
+      MAID: userData.MAID,
+      Mobile: userData.Mobile,
+      Lang: "zhtw",
+      CSAID: csAid.value,
+      SALEID: saleId.value,
+      ProductID: productId.value,
+      PdtSize: selectedSize.value,
+      Height: height.value.toString(),
+      Weight: weight.value.toString(),
+      BodySize: neckToNavel.value.toString()
+    };
+
+    // 呼叫API
+    const response = await axios.post(
+      "https://23700999.com:8081/HMA/api/fr/maSetProductInfo",
+      requestData,
+      { timeout: 10000, headers: { "Content-Type": "application/json" } }
+    );
+
+    if (response.data && response.data.Result === "OK") {
+      savePersonalizedData();
+      alert("個人化資料已成功儲存！");
+      router.push("/orderQuery");
+    } else {
+      const errorMessage = response.data?.Message || "儲存失敗，請稍後再試";
+      alert(errorMessage);
+    }
+  } catch (error) {
+    if (error.code === "ECONNABORTED") {
+      alert("請求超時，請檢查網路連線後再試");
+    } else if (error.response) {
+      if (error.response.status === 401) {
+        alert("登入已過期，請重新登入");
+        router.push("/");
+      } else {
+        alert("伺服器錯誤，請稍後再試");
+      }
+    } else {
+      alert("網路連線錯誤，請檢查網路後再試");
+    }
+  } finally {
+    isSubmitting.value = false;
+  }
+}
+
+// 處理圖片載入錯誤
+function handleImageError(imageName) {
+  console.error(`圖片載入失敗: ${imageName}`);
+  imageLoaded.value[imageName] = true;
 }
 
 onMounted(() => {
@@ -393,12 +503,21 @@ onMounted(() => {
   saleId.value = route.query.saleId || "";
   productId.value = route.query.productId || "";
   aid.value = route.query.aid || "";
-
+  csAid.value = route.query.csAid || "";
   console.log("個人化資訊頁面參數:", {
     saleId: saleId.value,
     productId: productId.value,
     aid: aid.value,
+    csAid: csAid.value
   });
+
+  // 檢查必要參數
+  if (!saleId.value || !productId.value) {
+    console.error("缺少必要參數:", { saleId: saleId.value, productId: productId.value });
+    alert("缺少必要參數，請重新進入頁面");
+    router.push("/orderQuery");
+    return;
+  }
 
   // 載入已儲存的個人化資料
   loadPersonalizedData();
@@ -412,6 +531,7 @@ onMounted(() => {
   width: 100%;
   place-items: center;
   padding: 42px 5% 72px;
+  position: relative;
 
   .step-bar {
     position: relative;
@@ -713,10 +833,38 @@ onMounted(() => {
       margin-top: 0.35rem;
       letter-spacing: 0.07px;
     }
+    .img-container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 120px;
+      margin-bottom: 12px;
+      
+      // 調整 RaphaelLoading 在容器中的樣式
+      :deep(.raphaelLoading) {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        min-height: 120px;
+        background: rgba(217, 217, 217, 0.3);
+        backdrop-filter: blur(2px);
+        border-radius: 8px;
+      }
+    }
+
+
+
     .measure-img {
       display: block;
-      margin: 0 auto 12px auto;
+      margin: 0 auto;
       max-width: 160px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      
+      &.loaded {
+        opacity: 1;
+      }
     }
     .btn-group {
       display: flex;
@@ -732,6 +880,8 @@ onMounted(() => {
       padding: 1rem 1rem 3.125rem 1rem;
       background-color: $raphael-gray-100;
       z-index: 99;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
       .prev-btn,
       .next-btn {
         flex: 1;
@@ -741,19 +891,32 @@ onMounted(() => {
         font-size: 16px;
         border: none;
         cursor: pointer;
-        transition: background 0.2s;
+        transition: all 0.3s ease;
+        font-weight: 500;
       }
       .prev-btn {
         background: #f5f5f5;
         color: #666;
+        &:hover {
+          background: #e0e0e0;
+        }
       }
       .next-btn {
         background: #74bc1f;
         color: #fff;
+        transition: all 0.3s ease;
         &:disabled {
           background: #c8e6c9;
           color: #fff;
           cursor: not-allowed;
+          transform: none;
+        }
+        &:not(:disabled):hover {
+          background: #5a9a16;
+          transform: translateY(-1px);
+        }
+        &:not(:disabled):active {
+          transform: translateY(0);
         }
       }
     }
@@ -765,6 +928,7 @@ onMounted(() => {
     margin-bottom: 12px;
     text-align: center;
     box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    animation: slideInUp 0.3s ease-out;
     .selected-size-title {
       color: #74bc1f;
       font-weight: bold;
@@ -807,5 +971,35 @@ onMounted(() => {
       }
     }
   }
+}
+
+// 動畫定義
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
+// Fade 過渡動畫
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 </style>
