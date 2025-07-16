@@ -869,6 +869,7 @@ small.processing {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+  
   .orderStateBlockBlockTag {
     
     padding: 8px 0;
