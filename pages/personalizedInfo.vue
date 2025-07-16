@@ -468,7 +468,6 @@ async function submit() {
 
     if (response.data && response.data.Result === "OK") {
       savePersonalizedData();
-      alert("個人化資料已成功儲存！");
       router.push("/orderQuery");
     } else {
       const errorMessage = response.data?.Message || "儲存失敗，請稍後再試";

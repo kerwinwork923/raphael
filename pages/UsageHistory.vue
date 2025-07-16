@@ -190,6 +190,7 @@ import uncheckedIcon from "@/assets/imgs/usageUnCheck.png";
 import redLightClothes from "@/assets/imgs/redLightClothes.png";
 import normalClothes from "@/assets/imgs/normalClothes.png";
 import redLightClothes2 from "@/assets/imgs/redLightClothes2.png";
+import normalClothesV5 from "@/assets/imgs/normalClothesV5.png";
 
 // 例如有個 RaphaelLoading
 import RaphaelLoading from "@/components/RaphaelLoading.vue";
@@ -238,6 +239,7 @@ export default {
       全效調節衣: redLightClothes2,
       三效深眠衣: normalClothes,
       居家治療儀: redLightClothes2,
+      護您穩深眠衣: normalClothesV5,
     };
 
     // ------------------ API 抓取資料 ------------------

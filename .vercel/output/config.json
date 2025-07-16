@@ -1,0 +1,181 @@
+{
+  "version": 3,
+  "overrides": {
+    "Finish/index.html": {
+      "path": "Finish"
+    },
+    "user/index.html": {
+      "path": "user"
+    },
+    "HRV/index.html": {
+      "path": "HRV"
+    },
+    "point/index.html": {
+      "path": "point"
+    },
+    "package/index.html": {
+      "path": "package"
+    },
+    "privacy/index.html": {
+      "path": "privacy"
+    },
+    "qrcoder/index.html": {
+      "path": "qrcoder"
+    },
+    "weekly/index.html": {
+      "path": "weekly"
+    },
+    "contract/index.html": {
+      "path": "contract"
+    },
+    "pwa-test/index.html": {
+      "path": "pwa-test"
+    },
+    "weekly2/index.html": {
+      "path": "weekly2"
+    },
+    "HRVHistory/index.html": {
+      "path": "HRVHistory"
+    },
+    "babyRecord/index.html": {
+      "path": "babyRecord"
+    },
+    "register/index.html": {
+      "path": "register"
+    },
+    "cart/index.html": {
+      "path": "cart"
+    },
+    "bluetooth/index.html": {
+      "path": "bluetooth"
+    },
+    "orderQuery/index.html": {
+      "path": "orderQuery"
+    },
+    "orderDetail/index.html": {
+      "path": "orderDetail"
+    },
+    "userRecord/index.html": {
+      "path": "userRecord"
+    },
+    "cart/cartList/index.html": {
+      "path": "cart/cartList"
+    },
+    "pointExange/index.html": {
+      "path": "pointExange"
+    },
+    "changeMember/index.html": {
+      "path": "changeMember"
+    },
+    "returnGoods/index.html": {
+      "path": "returnGoods"
+    },
+    "contract copy/index.html": {
+      "path": "contract copy"
+    },
+    "UsageHistory/index.html": {
+      "path": "UsageHistory"
+    },
+    "cart/payMethod/index.html": {
+      "path": "cart/payMethod"
+    },
+    "HRVHistoryAll/index.html": {
+      "path": "HRVHistoryAll"
+    },
+    "babyRecord copy/index.html": {
+      "path": "babyRecord copy"
+    },
+    "personalizedInfo/index.html": {
+      "path": "personalizedInfo"
+    },
+    "cart/addAddress/index.html": {
+      "path": "cart/addAddress"
+    },
+    "forgetPassword/index.html": {
+      "path": "forgetPassword"
+    },
+    "cart/invoiceSelect1/index.html": {
+      "path": "cart/invoiceSelect1"
+    },
+    "HRVHistory copy/index.html": {
+      "path": "HRVHistory copy"
+    },
+    "cart/invoiceType/index.html": {
+      "path": "cart/invoiceType"
+    },
+    "cart/invoiceSelect3/index.html": {
+      "path": "cart/invoiceSelect3"
+    },
+    "cart/invoiceSelect2/index.html": {
+      "path": "cart/invoiceSelect2"
+    },
+    "cart/checkoutSuccess/index.html": {
+      "path": "cart/checkoutSuccess"
+    },
+    "raphaelBackend/index.html": {
+      "path": "raphaelBackend"
+    },
+    "raphaelBackend/member/index.html": {
+      "path": "raphaelBackend/member"
+    },
+    "raphaelBackend/member/memberContent/index.html": {
+      "path": "raphaelBackend/member/memberContent"
+    },
+    "index.html": {
+      "path": ""
+    },
+    "usage0606/clothTypeCopy/index.html": {
+      "path": "usage0606/clothTypeCopy"
+    },
+    "usage/clothTypeCopy/index.html": {
+      "path": "usage/clothTypeCopy"
+    },
+    "cart/pay/index.html": {
+      "path": "cart/pay"
+    }
+  },
+  "routes": [
+    {
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      },
+      "src": "/_nuxt/builds/meta/(.*)"
+    },
+    {
+      "headers": {
+        "cache-control": "public, max-age=1, immutable"
+      },
+      "src": "/_nuxt/builds/(.*)"
+    },
+    {
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      },
+      "src": "/_nuxt/(.*)"
+    },
+    {
+      "src": "/_nuxt/builds/meta(.*)",
+      "headers": {
+        "cache-control": "public,max-age=31536000,immutable"
+      },
+      "continue": true
+    },
+    {
+      "src": "/_nuxt/builds(.*)",
+      "headers": {
+        "cache-control": "public,max-age=31536000,immutable"
+      },
+      "continue": true
+    },
+    {
+      "src": "/_nuxt(.*)",
+      "headers": {
+        "cache-control": "public,max-age=31536000,immutable"
+      },
+      "continue": true
+    },
+    {
+      "handle": "filesystem"
+    }
+  ]
+}

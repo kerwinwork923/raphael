@@ -152,10 +152,6 @@ export default {
       isHealthRecordAlertActive.value = false;
     };
 
-    const goCart = () => {
-      router.push("/cart");
-    };
-
     const getUserData = async () => {
       const localData = localStorage.getItem("userData");
       const { MID, Token, MAID, Mobile, Name } = localData
@@ -324,7 +320,6 @@ export default {
       isHealthRecordAlertActive,
       showHealthRecordAlert,
       hideHealthRecordAlert,
-      goCart,
     };
   },
 };
@@ -607,7 +602,7 @@ export default {
 
           &:hover {
             border: 2px solid rgba(116, 188, 31, 1);
-            color: $raphael-purple-200;
+            color: rgba(116, 188, 31, 0.7);
 
             & > img {
               background: rgba(116, 188, 31, 1);

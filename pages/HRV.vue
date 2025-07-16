@@ -24,7 +24,7 @@
             系統將在倒數<span> 3秒 </span
             >後開始偵測，請讓臉部完整對準畫面並保持不動。
           </li>
-          <li><span>量測時間約 15秒</span>，完成後將顯示檢測結果。</li>
+          <li><span>量測時間約 25秒</span>，完成後將顯示檢測結果。</li>
           <li>感謝您的配合！</li>
         </ul>
         <button type="button">點擊開始體驗</button>
@@ -125,7 +125,7 @@ const progress = ref(0);
 const nn = ref(0);
 const fps = ref(0);
 const acc = ref(0);
-const remain = ref(15);
+const remain = ref(25);
 const logs = ref("");
 const metrics = ref("");
 const isStarted = ref(false);
@@ -461,15 +461,15 @@ async function startRecording() {
   mediaRecorder.start();
   scanning.value = true;
   progress.value = 0;
-  remain.value = 15;
+  remain.value = 25;
   showBlurMask.value = false; // 開始掃描時隱藏模糊遮罩
   let percent = 0;
   scanInt = setInterval(async () => {
     if (mediaRecorder.state === "recording") {
       elapsedMs += 200;
-      percent = Math.min(100, (elapsedMs / 15000) * 100);
+      percent = Math.min(100, (elapsedMs / 25000) * 100);
       progress.value = percent;
-      remain.value = Math.max(0, Math.ceil(((100 - percent) * 15) / 100));
+      remain.value = Math.max(0, Math.ceil(((100 - percent) * 25) / 100));
       if (percent >= 100) {
         clearInterval(scanInt);
         // 使用穩定的停止方法

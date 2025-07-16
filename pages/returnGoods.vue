@@ -1,6 +1,6 @@
 <template>
   <div class="returnGoodsWrap">
-    <TitleMenu Text="退貨申請" />
+    <TitleMenu Text="退貨申請" link="back" />
     <h3>選擇退貨原因</h3>
     <div class="returnGoodsBlocks">
       <div class="returnGoodsBlock">

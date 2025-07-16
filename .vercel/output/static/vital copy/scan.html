@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset='utf-8' />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>NeuroPlus 自律神經HRV檢測</title>
+  <link href="css/my.css" rel="stylesheet" />
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/process_bar.css" rel="stylesheet">
+
+  <style>
+    .a-ellipsis {
+      text-overflow: ellipsis;
+      padding-right: 0px;
+      padding-left: 0px;
+      width: 200px;
+      max-width: 200px;
+      display: block;
+      overflow: hidden;
+      white-space: nowrap
+    }
+
+    .auto_table {
+      width: 100%;
+      margin-bottom: 0px
+    }
+
+    @media only screen and (min-width: 768px) {
+
+      /* For desktop: */
+      .auto_table {
+        width: 210px;
+        margin-bottom: 0px
+      }
+
+      .a-ellipsis {
+        text-overflow: ellipsis;
+        padding-right: 0px;
+        padding-left: 0px;
+        width: 200px;
+        max-width: 200px;
+        display: block;
+        overflow: hidden;
+        white-space: nowrap
+      }
+    }
+  </style>
+
+  <script src="js/vital_result_printer.js"></script>
+  <script src="js/camera.js"></script>
+  <script src="js/fhvitals/fhvitals_sdk.js"></script>
+</head>
+
+
+
+<body>
+  <!-- Navbar -->
+   <div class="scanWrap">
+  <div class="raphaelNavbar">
+    <div class="logoGroup">
+      <a to="/user">
+        <img src="images/raphael/neuro-plus.svg" alt="" />
+      </a>
+ 
+    </div>
+    <div class="optionGroup">
+      <!-- <img class="cartIcon" src="images/raphael/cart.svg" alt="" />
+      <img class="alertIcon" src="images/raphael/alert.svg" alt="" />
+      <img class="settingIcon" src="images/raphael/setting.svg" alt="" /> -->
+    </div>
+  </div>
+
+
+
+  <div class="container-fluid p-0 ">
+    <div class="row justify-content-center mx-1">
+      <div class="col-auto d-flex justify-content-center" style="position:relative">
+        <canvas id='live_canvas'></canvas>
+
+        <div style="position: absolute;bottom: 15px;right: 15px">
+          <image id="live_rect" src="images/live_rect_landscape.svg"></image>
+        </div>
+
+        <div style="position: absolute;bottom: 15px;right: 15px" id="progress_scan">
+          <div class="progress green" style="width: 80px; height: 80px">
+            <span class="progress-left">
+              <span id="progress_left" className="progress-bar"></span>
+            </span>
+            <span class="progress-right">
+              <span id="progress_right" className="progress-bar"></span>
+            </span>
+            <div class="progress-value" id="progress_value">0%</div>
+          </div>
+        </div>
+
+        <div class="text-secondary text-center text-break font-weight-bold"
+          style="position: absolute;bottom: 85px;width: 80%;font-size: small">
+          <h2 id="scanning_status"></h2>
+        </div>
+
+        <div class="text-white text-center text-break font-weight-bold"
+          style="position: absolute;bottom: 15px;width: 80%;font-size: small" id="scan_p_hint">
+          <p>請將您的臉放置於圓形中<br>檢測中請盡量不要晃動
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+
+    <div class="scanInfo">
+      <div class="row">
+        <div class="years">
+          <h3>生理年齡</h3>
+          <div class="value" id="v_bioage"></div>
+          <div class="info">years old</div>
+          <img src="images/raphael/HRVFace.svg" class="HRVFace" alt="" />
+        </div>
+        <div class="HRV">
+          <h3 >心律變異性</h3>
+          <div id="v_hrv" class="value"></div>
+          <div class="info">ms</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="Rhythm">
+          <div class="titleGroup">
+            <h3 >心率</h3>
+            <img src="images/raphael/heartBeat.svg" alt="" />
+          </div>
+          <div id="v_hr" class="value"></div>
+          <div class="info">bpm</div>
+          <img class="bgImg" src="images/raphael/greenChart.svg" alt="" />
+        </div>
+        <div class="bloodPressure">
+          <div class="titleGroup">
+            <h3>血壓</h3>
+            <img src="images/raphael/bloodPressure.svg" alt="" />
+          </div>
+          <div class="value"><span id="v_sbp"></span><span id="v_dbp"></span></div>
+          <div class="info">mmHg</div>
+          <img class="bgImg" src="images/raphael/purpleChart.svg" alt="" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="BO">
+          <div class="titleGroup">
+            <h3>血氧</h3>
+            <img src="images/raphael/spo2.svg" alt="" />
+          </div>
+          <div id="v_spo2" class="value"></div>
+          <div class="info">%</div>
+          <img class="bgImg" src="images/raphael/blueChart.svg" alt="" />
+        </div>
+        <div class="breathe">
+          <div class="titleGroup">
+            <h3 >呼吸</h3>
+            <img src="images/raphael/spo2.svg" alt="" />
+          </div>
+          <div id="v_rr" class="value"></div>
+          <div class="info">bpm</div>
+          <img class="bgImg" src="images/raphael/brownChart.svg" alt="" />
+        </div>
+        <div class="pressure">
+          <div class="titleGroup">
+            <h3 >壓力</h3>
+            <img src="images/raphael/pressure.svg" alt="" />
+          </div>
+          <div id="v_si" class="value"></div>
+          <!-- <div class="info">low</div> -->
+          <img class="bgImg" src="images/raphael/redChart.svg" alt="" />
+        </div>
+      </div>
+    </div>
+
+
+    <div class="row justify-content-md-center mx-1">
+      <!-- Bio Age -->
+      <div class="col-6 col-md-4 col-xxl-2 px-3 opH">
+        <div class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white " style="height: 80px">
+          <div class="col-5 m-auto p-0">
+           <p class="text-start text-dark m-auto mx-1" style="font-size:small">HR,SDNN<BR>生理年齡y/o</p>
+          </div>
+         <div class="col-5 px-0 m-auto">
+          <p id="v_bioage" class="text-center text-dark fs-6 m-0">--</p>
+         </div>
+         <div class="col-2 m-auto p-0">
+            <img class="bi m-auto d-block" src="images/hrv.svg" width="24" height="24" />
+            <p class="text-center text-muted m-auto" style="font-size: 9px">ms</p>
+         </div>
+        </div>
+      </div>
+      <!-- Bio Age -->
+      <div class="col-6 col-md-4 col-xxl-2 px-3 opH">
+        <div class="row ps-1 pe-1 border rounded shadow-sm position-relative bg-white " style="height: 80px">
+          <div class="col-5 m-auto p-0">
+           <p class="text-start text-dark m-auto mx-1" style="font-size:small">文獻生理年齡<BR>y/o</p>
+          </div>
+         <div class="col-5 px-0 m-auto">
+          <p id="v_bioage" class="text-center text-dark fs-6 m-0">--</p>
+         </div>
+         <div class="col-2 m-auto p-0">
+            <img class="bi m-auto d-block" src="images/hrv.svg" width="24" height="24" />
+            <p class="text-center text-muted m-auto" style="font-size: 9px">ms</p>
+         </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <img id="s_cancel" class="bi d-block" src="images/back.svg" width="20" height="20" alt="" />
+    <script src="js/tools.js"></script>
+    <script src="js/scan.js"></script>
+</body>
+
+</html>
+
+<style>
+  body {
+  margin: 0;
+}
+
+.raphaelNavbar {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 5px 1rem;
+  display: flex;
+  width: 100%;
+  z-index: 999;
+  align-items: center;
+  max-width: 768px;
+  height: 50px;
+}
+
+#opH{
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  z-index: -111;
+}
+
+.opH {
+  height: 0;
+  opacity: 0;
+  position: absolute;
+  z-index: -111;
+}
+
+.raphaelNavbar .logoGroup {
+  width: 65%;
+}
+
+.raphaelNavbar .optionGroup {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2px;
+  width: 35%;
+  margin-right: auto;
+}
+
+.raphaelNavbar .optionGroup img {
+  cursor: pointer;
+}
+
+.scanWrap {
+  background: url("images/raphael/gradient-bg.png");
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  min-height: 100vh;
+  width: 100%;
+  padding: 48px 5% 0;
+}
+
+.scanInfo {
+  display: flex;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.scanInfo h3 {
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 0.15px;
+  padding: 0;
+  margin: 0;
+}
+
+.scanInfo .row {
+  display: flex;
+  flex-wrap: nowrap;
+  width: 100%;
+  gap: 3%;
+  margin-bottom: 1rem;
+}
+
+.scanInfo .row:nth-child(1){
+    display: none;
+}
+
+.scanInfo .years {
+  width: 55%;
+  padding: 6px;
+  border-radius: 8px;
+  background: linear-gradient(
+    180deg,
+    #74bc1f 0%,
+    rgba(116, 188, 31, 0.35) 100%
+  );
+  padding: 12px;
+  align-items: center;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.scanInfo .years .value {
+  font-size: 48px;
+  font-weight: bold;
+  padding: 0.25rem 0;
+}
+
+.scanInfo .years .info {
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+.scanInfo .years .HRVFace {
+  position: absolute;
+  right: -22%;
+  top: 0;
+}
+
+.scanInfo .HRV {
+  background: linear-gradient(
+    180deg,
+    #dfecc5 0%,
+    rgba(223, 236, 197, 0.35) 100%
+  );
+  padding: 12px;
+  border-radius: 8px;
+  width: 45%;
+}
+
+.scanInfo .HRV .value {
+  color: #74bc1f !important;
+  font-size: 48px;
+  font-weight: bold;
+  padding: 0.25rem 0;
+}
+
+.scanInfo .HRV .info {
+  color: #666;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  width: 45%;
+}
+
+.scanInfo .Rhythm,
+.scanInfo .bloodPressure {
+  width: 50%;
+  background-color: #fff;
+  border-radius: 8px;
+  border-top-style: 8px;
+  position: relative;
+  overflow: hidden;
+  padding: 12px;
+}
+
+.scanInfo .Rhythm .titleGroup,
+.scanInfo .bloodPressure .titleGroup {
+  display: flex;
+  justify-content: space-between;
+}
+
+.scanInfo .Rhythm .value,
+.scanInfo .bloodPressure .value {
+  color: #74bc1f !important; 
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.12px;
+  margin-top: 0.5rem;
+}
+
+.text-success{
+  color: #74bc1f !important; 
+}
+
+.scanInfo .Rhythm .info,
+.scanInfo .bloodPressure .info {
+  color: #ccc;
+  letter-spacing: 0.5px;
+}
+
+.scanInfo .Rhythm .bgImg,
+.scanInfo .bloodPressure .bgImg {
+  position: absolute;
+  bottom: 0%;
+}
+
+.scanInfo .BO,
+.scanInfo .breathe,
+.scanInfo .pressure {
+  width: 33.333%;
+  background-color: #fff;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  padding: 12px;
+}
+
+.scanInfo .BO .titleGroup,
+.scanInfo .breathe .titleGroup,
+.scanInfo .pressure .titleGroup {
+  display: flex;
+  justify-content: space-between;
+}
+
+.scanInfo .BO .value,
+.scanInfo .breathe .value,
+.scanInfo .pressure .value {
+  color: #74bc1f !important; 
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.12px;
+  margin-top: 0.5rem;
+}
+
+.scanInfo .BO .info,
+.scanInfo .breathe .info,
+.scanInfo .pressure .info {
+  color: #ccc;
+  letter-spacing: 0.5px;
+}
+
+.scanInfo .BO .bgImg,
+.scanInfo .breathe .bgImg,
+.scanInfo .pressure .bgImg {
+  position: absolute;
+  bottom: 0%;
+}
+
+#s_cancel{
+  display: none !important;
+}
+
+</style>

@@ -870,6 +870,7 @@ small.processing {
   align-items: center;
   margin-bottom: 1rem;
   .orderStateBlockBlockTag {
+    
     padding: 8px 0;
     color: var(--Neutral-500, #666);
     font-size: 18px;
