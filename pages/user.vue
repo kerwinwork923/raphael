@@ -113,6 +113,7 @@ import HRVAlert from "~/components/HRVAlert.vue";
 import HealthRecordAlert from "~/components/HealthRecordAlert.vue";
 import axios from "axios";
 import { useCommon } from "../stores/common";
+
 //圖片
 import banner1 from "@/assets/imgs/banner-1.png";
 import banner2 from "@/assets/imgs/banner-2.png";
@@ -134,6 +135,7 @@ export default {
     const userInfo = ref(null);
     const currentSlide = ref(0);
     const slides = ref([banner1, banner2]);
+
 
     const qrcodeShow = ref(false);
     const store = useCommon();
@@ -202,6 +204,11 @@ export default {
           loading.value = false;
         }, 300);
       }
+    };
+
+    const goCart = () => {
+
+      router.push("/cart");
     };
 
     getUserData();
@@ -320,6 +327,7 @@ export default {
       isHealthRecordAlertActive,
       showHealthRecordAlert,
       hideHealthRecordAlert,
+      goCart,
     };
   },
 };
