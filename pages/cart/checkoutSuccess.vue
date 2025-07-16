@@ -19,7 +19,7 @@
       <!-- 正常內容 -->
       <template v-else>
         <div class="infoBox thankYouBox">
-          感謝您的購買，請繼續填寫個人化資訊，以便我們開始製作衣服!
+          感謝您的購買！
         </div>
 
         <div class="infoBox">
@@ -43,7 +43,6 @@
             <div class="productInfo">
               <h4>{{ item.ProductName }}</h4>
               <h5>NT${{ item.Price }}</h5>
-              <button class="personalizeBtn">請完成個人化資訊填寫 ></button>
             </div>
             <span class="quantity">x{{ item.Qty }}</span>
           </div>
@@ -81,8 +80,18 @@
           </div>
         </div>
 
-        <div class="infoBox">
-          
+        <!-- 退換貨政策 -->
+        <div class="infoBox policyBox">
+          <h4>退換貨政策</h4>
+          <ul>
+            <li>本商品適用7天鑑賞期</li>
+            <li>商品需保持全新狀態 (未使用、無污損、包裝完整含所有配件)</li>
+          </ul>
+        </div>
+
+        <!-- 底部按鈕 -->
+        <div class="bottomButton">
+          <button @click="goToOrderQuery" class="returnBtn">返回訂單查詢</button>
         </div>
 
       </template>
@@ -177,6 +186,10 @@ const fetchOrderDetails = async () => {
   }
 };
 
+const goToOrderQuery = () => {
+  router.push('/orderQuery');
+};
+
 const copy = (text) => {
   navigator.clipboard
     .writeText(text)
@@ -207,6 +220,7 @@ onMounted(() => {
 .contentWrap {
   padding: 0 2.5%;
   margin-top: 1rem;
+  width: 100%;
 }
 
 .infoBox {
@@ -258,16 +272,6 @@ onMounted(() => {
         color: #74bc1f;
         font-size: 1rem;
         font-weight: 700;
-      }
-      .personalizeBtn {
-        font-size: 0.8rem;
-        border: 1px solid #1fbcb3;
-        color: #1fbcb3;
-        background: none;
-        border-radius: 20px;
-        padding: 0.25rem 0.75rem;
-        cursor: pointer;
-        margin-top: 0.5rem;
       }
     }
     .quantity {
@@ -324,6 +328,66 @@ onMounted(() => {
         width: 16px;
         height: 16px;
       }
+    }
+  }
+}
+
+.policyBox {
+  h4 {
+    margin-bottom: 0.75rem;
+  }
+  
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    
+    li {
+      color: #666;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-bottom: 0.5rem;
+      padding-left: 1rem;
+      position: relative;
+      
+      &:before {
+        content: "•";
+        position: absolute;
+        left: 0;
+        color: #74bc1f;
+      }
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+.bottomButton {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  padding: 1rem 2.5%;
+  border-top: 1px solid #e5e5e5;
+  z-index: 100;
+  
+  .returnBtn {
+    width: 100%;
+    background-color: #74bc1f;
+    color: #fff;
+    border: none;
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    
+    &:hover {
+      background-color: #65a31b;
     }
   }
 }
