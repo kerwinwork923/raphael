@@ -1,7 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /api/
-Disallow: /admin/
-Disallow: /backend/
-
-Sitemap: https://neuroplus.com.tw/sitemap.xml

@@ -1,1 +1,0 @@
-import{_ as o}from"./BLV86yeK.js";import{_ as n}from"./DlAUqK2U.js";import{v as t,x as r,A as c}from"./HfdH-K36.js";import"./xsH4HHeE.js";import"./dOA9az_O.js";const s={components:{QRCodeScanner:o}};function _(a,p,m,d,i,f){const e=o;return r(),t("div",null,[c(e)])}const v=n(s,[["render",_]]);export{v as default};
