@@ -91,7 +91,7 @@
 
         <!-- 底部按鈕 -->
         <div class="bottomButton">
-          <button @click="goToOrderQuery" class="returnBtn">返回訂單查詢</button>
+          <button @click="goToOrderQuery" class="returnBtn">繼續填寫資料</button>
         </div>
 
       </template>
