@@ -138,7 +138,7 @@ const updateCartItem = async (productId, newQty) => {
       // 直接更新本地資料，不重新獲取整個列表
       const item = cartList.value.find(item => item.ProductID === productId);
       if (item) {
-        item.Qty = newQty;
+        item.Qty = newQty.toString(); // 保持為字串格式
         item.Amount = (parseInt(item.Price) * newQty).toString();
       }
     }
