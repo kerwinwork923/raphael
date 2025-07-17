@@ -1414,20 +1414,20 @@
 
       function calculatetype() {
         if (
-          (SleepLatencyScore >= 2 || SleepMedicineScore >= 1) &&
+          (SleepinDifficulty >= 2 || SleepMedicineScore >= 1) &&
           midWakeScore >= 2 &&
           nightUrinationScore <= 1
         ) {
-          //難以入睡 (睡眠潛伏期大於等於2，或是5題大於等於1)，且睡眠易中斷 (4b題大於等於2，且4C題小於等於1)
+          //難以入睡 (4a題大於等於2，或是5題大於等於2)，且睡眠易中斷 (4b題大於等於2，且4C題小於等於1)
           type = "5";
         } else if (
-          (SleepLatencyScore >= 2 || SleepMedicineScore >= 1) &&
+          (SleepinDifficulty >= 2 || SleepMedicineScore >= 2) &&
           nightUrinationScore >= 2
         ) {
-          //難以入睡 (睡眠潛伏期大於等於2，或是5題大於等於1)，且夜尿頻繁( 4c題大於等於2)
+          //難以入睡 (4a題大於等於2，或是5題大於等於1)，且夜尿頻繁( 4c題大於等於2)
           type = "4";
-        } else if (SleepLatencyScore >= 2 || SleepMedicineScore >= 1) {
-          //睡眠潛伏期大於等於2，或是5題大於等於1
+        } else if (SleepinDifficulty >= 2 || SleepMedicineScore >= 2) {
+          //4a題大於等於2，或是5題大於等於2
           type = "1";
         } else if (midWakeScore >= 2 && nightUrinationScore <= 1) {
           //4b題大於等於2，且4C題小於等於1
@@ -1468,8 +1468,18 @@
             if (data) {
               // 填入類型
               constipationScore = data.ConstipationScore; //功能性便秘
-              nightUrinationScore = data.Q6; //第4c題
-              midWakeScore = data.Q5; //第4b題
+              let nightUrinationMidScore=data.Q6+data.Q6a;
+              let midWakeMidSore=data.Q5+data.Q5a;
+              if(nightUrinationMidScore>=6){nightUrinationScore = 3;} //第4c題
+              else if(nightUrinationMidScore>=4 && nightUrinationMidScore<=5){nightUrinationScore = 2;}
+              else if(nightUrinationMidScore>=2 && nightUrinationMidScore<=3){nightUrinationScore = 1;}
+              else{nightUrinationScore = 0;}
+              if(midWakeMidSore>=6){midWakeScore = 3;} //第4b題
+              else if(midWakeMidSore>=4 && midWakeMidSore<=5){midWakeScore = 2;}
+              else if(midWakeMidSore>=2 && midWakeMidSore<=3){midWakeScore = 1;}
+              else{midWakeScore = 0;}
+              SleepinDifficulty= data.Q4; //第4題
+
               SleepMedicineScore = data.Q10; //安眠藥物使用
               SleepLatencyScore += data.Q2; //睡眠潛伏期分數
               SleepLatencyScore += data.Q4; //睡眠潛伏期分數
@@ -1536,9 +1546,23 @@
           "wake_up_night_detail",
           nightwakeDetail
         );
+        
+        //2025.7.17改規則
+        let S4c=getValueForQuestion("bathroom_wake"); //第4c題
+        let nightUrinationMidScore=S4c+bathroomDetail;
+        if(nightUrinationMidScore>=6){nightUrinationScore = 3;}
+        else if(nightUrinationMidScore>=4 && nightUrinationMidScore<=5){nightUrinationScore = 2;}
+        else if(nightUrinationMidScore>=2 && nightUrinationMidScore<=3){nightUrinationScore = 1;}
+        else{nightUrinationScore = 0;}
+        let S4b = getValueForQuestion("wake_up_night"); //第4b題
+        let midWakeMidSore=S4b+nightwakeDetail;
+        if(midWakeMidSore>=6){midWakeScore = 3;}
+        else if(midWakeMidSore>=4 && midWakeMidSore<=5){midWakeScore = 2;}
+        else if(midWakeMidSore>=2 && midWakeMidSore<=3){midWakeScore = 1;}
+        else{midWakeScore = 0;}
+        let SleepinDifficulty= getValueForQuestion("sleep_difficulty"); //第4a題
+       
 
-        nightUrinationScore = getValueForQuestion("bathroom_wake"); //第4c題
-        midWakeScore = getValueForQuestion("wake_up_night"); //第4b題
         psleepduration = getValueForQuestion("sleep_duration"); //第三題 睡眠時數
         pst = getValueForQuestion("sleep_time"); //第一題
         sleepqualityScore = getValueForQuestion("sleep_quality_slider"); //睡眠品質0-10分
