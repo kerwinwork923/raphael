@@ -346,6 +346,7 @@ export default {
   place-items: center;
 
   .userGroup {
+    width: 100%;
     max-width: 768px;
     padding: 0 1rem;
     padding-top: 0.75rem;
@@ -431,9 +432,11 @@ export default {
       width: 100%;
       margin-top: 0.75rem;
       img {
+        width: 100%;
         max-width: 100%;
         height: auto;
       }
+      cursor: pointer;
     }
 
     .itemsGroup {

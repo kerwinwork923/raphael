@@ -1,6 +1,10 @@
 <template>
   <div class="personalized-info">
-    <TitleMenu Text="個人化設定" positionType="absolute" :link="'/orderQuery'" />
+    <TitleMenu
+      Text="個人化設定"
+      positionType="absolute"
+      :link="'/orderQuery'"
+    />
     <!-- 步驟條 -->
     <div class="step-bar">
       <!-- 動態進度線 -->
@@ -94,10 +98,10 @@
         <div class="measure-desc">請拿捲尺測量「肩寬、胸寬、衣長」</div>
         <div class="img-container">
           <RaphaelLoading v-if="!imageLoaded.measure1" />
-          <img 
-            src="/assets/imgs/measure1.png" 
-            class="measure-img" 
-            :class="{ 'loaded': imageLoaded.measure1 }"
+          <img
+            src="/assets/imgs/measure1.png"
+            class="measure-img"
+            :class="{ loaded: imageLoaded.measure1 }"
             @load="imageLoaded.measure1 = true"
             @error="handleImageError('measure1')"
           />
@@ -144,6 +148,12 @@
                 d="M12.9368 4.49997C12.9368 5.16301 12.6734 5.79889 12.2045 6.26774C11.7357 6.73658 11.0998 6.99997 10.4368 6.99997C9.77374 6.99997 9.13785 6.73658 8.66901 6.26774C8.20017 5.79889 7.93678 5.16301 7.93678 4.49997C7.93678 3.83693 8.20017 3.20104 8.66901 2.7322C9.13785 2.26336 9.77374 1.99997 10.4368 1.99997C11.0998 1.99997 11.7357 2.26336 12.2045 2.7322C12.6734 3.20104 12.9368 3.83693 12.9368 4.49997ZM11.9368 4.49997C11.9368 4.89779 11.7787 5.27932 11.4974 5.56063C11.2161 5.84193 10.8346 5.99997 10.4368 5.99997C10.039 5.99997 9.65742 5.84193 9.37612 5.56063C9.09481 5.27932 8.93678 4.89779 8.93678 4.49997C8.93678 4.10214 9.09481 3.72061 9.37612 3.43931C9.65742 3.158 10.039 2.99997 10.4368 2.99997C10.8346 2.99997 11.2161 3.158 11.4974 3.43931C11.7787 3.72061 11.9368 4.10214 11.9368 4.49997ZM12.3933 22C12.0189 22 11.658 21.86 11.3816 21.6075C11.1051 21.3551 10.9331 21.0083 10.8993 20.6355L10.5233 16.5H10.3498L9.97378 20.6355C9.96578 20.7252 9.94972 20.8141 9.92578 20.901C9.83808 21.2171 9.64918 21.4957 9.38802 21.6942C9.12685 21.8927 8.80781 22.0001 8.47978 22H8.43678C8.03895 22 7.65742 21.8419 7.37612 21.5606C7.09481 21.2793 6.93678 20.8978 6.93678 20.5V16.1035C6.69455 15.9229 6.49637 15.6898 6.35712 15.4217C6.21787 15.1536 6.14117 14.8575 6.13278 14.5555L6.00078 9.79697C5.99281 9.51111 6.04624 9.22687 6.15745 8.96342C6.26867 8.69996 6.43509 8.46342 6.64549 8.26975C6.85589 8.07607 7.10538 7.92977 7.37713 7.84071C7.64887 7.75165 7.93656 7.7219 8.22078 7.75347L10.2158 7.97547C10.3631 7.99147 10.5104 7.99147 10.6578 7.97547L12.5878 7.76047C12.8767 7.72833 13.1691 7.75956 13.4447 7.85197C13.7203 7.94439 13.9725 8.09576 14.1836 8.29556C14.3947 8.49537 14.5597 8.73879 14.6672 9.00888C14.7747 9.27897 14.8219 9.56924 14.8058 9.85947L14.5418 14.611C14.5138 15.113 14.2978 15.5861 13.9368 15.936V20.5C13.9368 20.8978 13.7787 21.2793 13.4974 21.5606C13.2161 21.8419 12.8346 22 12.4368 22H12.3933ZM7.93678 16.1035C7.93678 15.9478 7.90044 15.7943 7.83064 15.6551C7.76085 15.516 7.65954 15.3951 7.53478 15.302C7.4135 15.2117 7.31428 15.0951 7.24456 14.961C7.17485 14.8268 7.13646 14.6786 7.13228 14.5275L7.00028 9.76947C6.99626 9.62652 7.02294 9.48437 7.07854 9.35261C7.13413 9.22085 7.21733 9.10255 7.32254 9.00569C7.42774 8.90883 7.5525 8.83565 7.68839 8.79111C7.82428 8.74656 7.96814 8.73168 8.11028 8.74747L10.1053 8.96947C10.3253 8.99397 10.5478 8.99397 10.7683 8.96947L12.6983 8.75447C12.8428 8.73839 12.989 8.75402 13.1269 8.80025C13.2647 8.84649 13.3908 8.92222 13.4964 9.02218C13.602 9.12213 13.6845 9.24391 13.7382 9.37901C13.7918 9.51412 13.8154 9.65931 13.8073 9.80447L13.5433 14.5555C13.5293 14.8065 13.4213 15.043 13.2408 15.218C13.1446 15.3112 13.0681 15.4228 13.0159 15.5461C12.9637 15.6695 12.9368 15.802 12.9368 15.936V20.5C12.9368 20.6326 12.8841 20.7598 12.7903 20.8535C12.6966 20.9473 12.5694 21 12.4368 21H12.3933C12.2685 21 12.1481 20.9533 12.056 20.8691C11.9638 20.7849 11.9065 20.6693 11.8953 20.545L11.5193 16.4095C11.4968 16.1608 11.3822 15.9296 11.1979 15.7612C11.0135 15.5928 10.7729 15.4995 10.5233 15.4995H10.3498C10.1001 15.4995 9.85951 15.5928 9.6752 15.7612C9.4909 15.9296 9.37624 16.1608 9.35378 16.4095L8.97778 20.545C8.96655 20.6692 8.90929 20.7847 8.81725 20.8689C8.7252 20.9531 8.60501 20.9999 8.48028 21H8.43678C8.30417 21 8.17699 20.9473 8.08322 20.8535C7.98945 20.7598 7.93678 20.6326 7.93678 20.5V16.1035Z"
                 fill="#74BC1F"
               />
+              <path
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M12.9368 4.49997C12.9368 5.16301 12.6734 5.79889 12.2045 6.26774C11.7357 6.73658 11.0998 6.99997 10.4368 6.99997C9.77374 6.99997 9.13785 6.73658 8.66901 6.26774C8.20017 5.79889 7.93678 5.16301 7.93678 4.49997C7.93678 3.83693 8.20017 3.20104 8.66901 2.7322C9.13785 2.26336 9.77374 1.99997 10.4368 1.99997C11.0998 1.99997 11.7357 2.26336 12.2045 2.7322C12.6734 3.20104 12.9368 3.83693 12.9368 4.49997ZM11.9368 4.49997C11.9368 4.89779 11.7787 5.27932 11.4974 5.56063C11.2161 5.84193 10.8346 5.99997 10.4368 5.99997C10.039 5.99997 9.65742 5.84193 9.37612 5.56063C9.09481 5.27932 8.93678 4.89779 8.93678 4.49997C8.93678 4.10214 9.09481 3.72061 9.37612 3.43931C9.65742 3.158 10.039 2.99997 10.4368 2.99997C10.8346 2.99997 11.2161 3.158 11.4974 3.43931C11.7787 3.72061 11.9368 4.10214 11.9368 4.49997ZM12.3933 22C12.0189 22 11.658 21.86 11.3816 21.6075C11.1051 21.3551 10.9331 21.0083 10.8993 20.6355L10.5233 16.5H10.3498L9.97378 20.6355C9.96578 20.7252 9.94972 20.8141 9.92578 20.901C9.83808 21.2171 9.64918 21.4957 9.38802 21.6942C9.12685 21.8927 8.80781 22.0001 8.47978 22H8.43678C8.03895 22 7.65742 21.8419 7.37612 21.5606C7.09481 21.2793 6.93678 20.8978 6.93678 20.5V16.1035C6.69455 15.9229 6.49637 15.6898 6.35712 15.4217C6.21787 15.1536 6.14117 14.8575 6.13278 14.5555L6.00078 9.79697C5.99281 9.51111 6.04624 9.22687 6.15745 8.96342C6.26867 8.69996 6.43509 8.46342 6.64549 8.26975C6.85589 8.07607 7.10538 7.92977 7.37713 7.84071C7.64887 7.75165 7.93656 7.7219 8.22078 7.75347L10.2158 7.97547C10.3631 7.99147 10.5104 7.99147 10.6578 7.97547L12.5878 7.76047C12.8767 7.72833 13.1691 7.75956 13.4447 7.85197C13.7203 7.94439 13.9725 8.09576 14.1836 8.29556C14.3947 8.49537 14.5597 8.73879 14.6672 9.00888C14.7747 9.27897 14.8219 9.56924 14.8058 9.85947L14.5418 14.611C14.5138 15.113 14.2978 15.5861 13.9368 15.936V20.5C13.9368 20.8978 13.7787 21.2793 13.4974 21.5606C13.2161 21.8419 12.8346 22 12.4368 22H12.3933ZM7.93678 16.1035C7.93678 15.9478 7.90044 15.7943 7.83064 15.6551C7.76085 15.516 7.65954 15.3951 7.53478 15.302C7.4135 15.2117 7.31428 15.0951 7.24456 14.961C7.17485 14.8268 7.13646 14.6786 7.13228 14.5275L7.00028 9.76947C6.99626 9.62652 7.02294 9.48437 7.07854 9.35261C7.13413 9.22085 7.21733 9.10255 7.32254 9.00569C7.42774 8.90883 7.5525 8.83565 7.68839 8.79111C7.82428 8.74656 7.96814 8.73168 8.11028 8.74747L10.1053 8.96947C10.3253 8.99397 10.5478 8.99397 10.7683 8.96947L12.6983 8.75447C12.8428 8.73839 12.989 8.75402 13.1269 8.80025C13.2647 8.84649 13.3908 8.92222 13.4964 9.02218C13.602 9.12213 13.6845 9.24391 13.7382 9.37901C13.7918 9.51412 13.8154 9.65931 13.8073 9.80447L13.5433 14.5555C13.5293 14.8065 13.4213 15.043 13.2408 15.218C13.1446 15.3112 13.0681 15.4228 13.0159 15.5461C12.9637 15.6695 12.9368 15.802 12.9368 15.936V20.5C12.9368 20.6326 12.8841 20.7598 12.7903 20.8535C12.6966 20.9473 12.5694 21 12.4368 21H12.3933C12.2685 21 12.1481 20.9533 12.056 20.8691C11.9638 20.7849 11.9065 20.6693 11.8953 20.545L11.5193 16.4095C11.4968 16.1608 11.3822 15.9296 11.1979 15.7612C11.0135 15.5928 10.7729 15.4995 10.5233 15.4995H10.3498C10.1001 15.4995 9.85951 15.5928 9.6752 15.7612C9.4909 15.9296 9.37624 16.1608 9.35378 16.4095L8.97778 20.545C8.96655 20.6692 8.90929 20.7847 8.81725 20.8689C8.7252 20.9531 8.60501 20.9999 8.48028 21H8.43678C8.30417 21 8.17699 20.9473 8.08322 20.8535C7.98945 20.7598 7.93678 20.6326 7.93678 20.5V16.1035Z"
+                fill="#74BC1F"
+              />
             </svg>
             <input v-model="height" type="number" placeholder="例如：170" />
           </div>
@@ -175,10 +185,10 @@
         <div class="measure-desc">從頭頂到腳底的距離以及體重計</div>
         <div class="img-container">
           <RaphaelLoading v-if="!imageLoaded.measure2" />
-          <img 
-            src="/assets/imgs/measure2.png" 
-            class="measure-img" 
-            :class="{ 'loaded': imageLoaded.measure2 }"
+          <img
+            src="/assets/imgs/measure2.png"
+            class="measure-img"
+            :class="{ loaded: imageLoaded.measure2 }"
             @load="imageLoaded.measure2 = true"
             @error="handleImageError('measure2')"
           />
@@ -202,11 +212,9 @@
       <h2>領口到肚臍距離</h2>
       <div class="formWrap">
         <div class="form-group">
-          <label
-            >領口到肚臍距離(公分)<span class="required"
-              >*</span
-            ></label
-          >
+          <!-- 新增：常駐提示 -->
+
+          <label> 領口到肚臍距離(公分)<span class="required">*</span> </label>
           <div class="inputWrap">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -220,31 +228,42 @@
                 fill="#74BC1F"
               />
             </svg>
-            <input class="inputStep3" v-model="neckToNavel" type="number" placeholder="" />
+            <input
+              class="inputStep3"
+              v-model="neckToNavel"
+              type="number"
+              placeholder=""
+            />
+          </div>
+          <div class="info-msg">
+            系統已根據您的身高、體重、性別和尺寸自動計算，您也可以手動調整
+            <br>
+            <span  v-if="isOutOfRange">超出合理範圍(23-52cm)，請確認是否正確</span>
           </div>
 
-          <div v-if="isOutOfRange" class="error-msg">
-            超出合理範圍(23-52cm)，請確認是否正確
-          </div>
         </div>
       </div>
       <div class="measureWrap">
         <div class="measure-title">量測方法</div>
-        <div class="measure-desc">系統已根據您的身高、體重、性別和尺寸自動計算，您也可以手動調整</div>
+        <div class="measure-desc">從領口中心點到肚臍的垂直距離</div>
         <div class="img-container">
           <RaphaelLoading v-if="!imageLoaded.measure3" />
-          <img 
-            src="/assets/imgs/measure3.png" 
-            class="measure-img" 
-            :class="{ 'loaded': imageLoaded.measure3 }"
+          <img
+            src="/assets/imgs/measure3.png"
+            class="measure-img"
+            :class="{ loaded: imageLoaded.measure3 }"
             @load="imageLoaded.measure3 = true"
             @error="handleImageError('measure3')"
           />
         </div>
         <div class="btn-group">
           <button class="prev-btn" @click="prevStep">上一步</button>
-          <button class="next-btn" @click="submit" :disabled="!neckToNavel || isOutOfRange || isSubmitting">
-            {{ isSubmitting ? '提交中...' : '提交' }}
+          <button
+            class="next-btn"
+            @click="submit"
+            :disabled="!neckToNavel || isOutOfRange || isSubmitting"
+          >
+            {{ isSubmitting ? "提交中..." : "提交" }}
           </button>
         </div>
       </div>
@@ -274,7 +293,7 @@ const isSubmitting = ref(false);
 const imageLoaded = ref({
   measure1: false,
   measure2: false,
-  measure3: false
+  measure3: false,
 });
 
 const steps = ["選擇性別尺寸", "身高體重", "身材比例"];
@@ -308,17 +327,22 @@ const neckToNavel = ref(36);
 
 // 智平衡衣長對照表
 const zphShirtLengths = {
-  "XS": 65,
-  "S": 67,
-  "M": 69,
-  "L": 71,
-  "XL": 73,
-  "2L": 75
+  XS: 65,
+  S: 67,
+  M: 69,
+  L: 71,
+  XL: 73,
+  "2L": 75,
 };
 
 // 計算領口到肚臍距離
 function calculateNeckToNavel() {
-  if (!selectedGender.value || !height.value || !weight.value || !selectedSize.value) {
+  if (
+    !selectedGender.value ||
+    !height.value ||
+    !weight.value ||
+    !selectedSize.value
+  ) {
     return;
   }
 
@@ -331,8 +355,8 @@ function calculateNeckToNavel() {
 
   // 基礎上半身長度估算
   let shoulderToHip = 0;
-  if (selectedGender.value === 'male') {
-    shoulderToHip = heightNum * 0.275 + weightNum * 0.10;
+  if (selectedGender.value === "male") {
+    shoulderToHip = heightNum * 0.275 + weightNum * 0.1;
   } else {
     shoulderToHip = heightNum * 0.265 + weightNum * 0.12;
   }
@@ -344,9 +368,12 @@ function calculateNeckToNavel() {
 
   // 肚臍到領口距離 = 上半身長度 × 0.75
   const calculatedNeckToNavel = adjustedShoulderToHip * 0.75;
-  
+
   // 限制在合理範圍內 (23-52公分)
-  neckToNavel.value = Math.max(23, Math.min(52, Math.round(calculatedNeckToNavel * 10) / 10));
+  neckToNavel.value = Math.max(
+    23,
+    Math.min(52, Math.round(calculatedNeckToNavel * 10) / 10)
+  );
 }
 
 // 檢查是否超出合理範圍
@@ -363,11 +390,14 @@ function savePersonalizedData() {
     height: height.value,
     weight: weight.value,
     neckToNavel: neckToNavel.value,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
 
   // 只儲存到當前 saleId 的 localStorage，保持資料獨立
-  localStorage.setItem(`personalized_${saleId.value}`, JSON.stringify(personalizedData));
+  localStorage.setItem(
+    `personalized_${saleId.value}`,
+    JSON.stringify(personalizedData)
+  );
 }
 
 // 載入已儲存的個人化資料
@@ -416,7 +446,13 @@ async function submit() {
   if (isSubmitting.value) return;
 
   // 驗證必填
-  if (!selectedGender.value || !selectedSize.value || !height.value || !weight.value || !neckToNavel.value) {
+  if (
+    !selectedGender.value ||
+    !selectedSize.value ||
+    !height.value ||
+    !weight.value ||
+    !neckToNavel.value
+  ) {
     alert("請填寫所有必填欄位");
     return;
   }
@@ -437,7 +473,12 @@ async function submit() {
   try {
     // 取得登入資訊
     const userData = JSON.parse(localStorage.getItem("userData") || "{}");
-    if (!userData.MID || !userData.Token || !userData.MAID || !userData.Mobile) {
+    if (
+      !userData.MID ||
+      !userData.Token ||
+      !userData.MAID ||
+      !userData.Mobile
+    ) {
       alert("請先登入");
       router.push("/");
       return;
@@ -456,7 +497,7 @@ async function submit() {
       PdtSize: selectedSize.value,
       Height: height.value.toString(),
       Weight: weight.value.toString(),
-      BodySize: neckToNavel.value.toString()
+      BodySize: neckToNavel.value.toString(),
     };
 
     // 呼叫API
@@ -507,12 +548,15 @@ onMounted(() => {
     saleId: saleId.value,
     productId: productId.value,
     aid: aid.value,
-    csAid: csAid.value
+    csAid: csAid.value,
   });
 
   // 檢查必要參數
   if (!saleId.value || !productId.value) {
-    console.error("缺少必要參數:", { saleId: saleId.value, productId: productId.value });
+    console.error("缺少必要參數:", {
+      saleId: saleId.value,
+      productId: productId.value,
+    });
     alert("缺少必要參數，請重新進入頁面");
     router.push("/orderQuery");
     return;
@@ -538,7 +582,7 @@ onMounted(() => {
     justify-content: space-between; /* 左右節點貼邊，中間自動等距 */
     align-items: center;
     width: 80%;
-  
+
     margin: 32px auto;
 
     /* 底線 */
@@ -728,7 +772,7 @@ onMounted(() => {
         color: #666;
         font-size: 13px;
         text-align: center;
-        margin-bottom: 8px;
+        margin-bottom: 12px;
       }
       .measure-img {
         display: block;
@@ -751,8 +795,8 @@ onMounted(() => {
         top: 50%;
         transform: translateY(-50%);
       }
-      .inputStep3{
-        color: var(--Primary-default, #74BC1F);
+      .inputStep3 {
+        color: var(--Primary-default, #74bc1f);
         padding-left: 32px;
       }
     }
@@ -839,7 +883,7 @@ onMounted(() => {
       align-items: center;
       min-height: 120px;
       margin-bottom: 12px;
-      
+
       // 調整 RaphaelLoading 在容器中的樣式
       :deep(.raphaelLoading) {
         position: absolute;
@@ -852,15 +896,13 @@ onMounted(() => {
       }
     }
 
-
-
     .measure-img {
       display: block;
       margin: 0 auto;
       max-width: 160px;
       opacity: 0;
       transition: opacity 0.3s ease;
-      
+
       &.loaded {
         opacity: 1;
       }
@@ -875,7 +917,7 @@ onMounted(() => {
       right: 0;
       margin: auto;
       width: 100%;
-      max-width: 768px;
+
       padding: 1rem 1rem 3.125rem 1rem;
       background-color: $raphael-gray-100;
       z-index: 99;
@@ -984,8 +1026,6 @@ onMounted(() => {
   }
 }
 
-
-
 // Fade 過渡動畫
 .fade-enter-active,
 .fade-leave-active {
@@ -1000,5 +1040,19 @@ onMounted(() => {
 .fade-leave-to {
   opacity: 0;
   transform: translateY(-10px);
+}
+
+.info-msg {
+color: var(--Warning-default, #EC4F4F);
+font-family: "Noto Sans";
+font-size: var(--Text-font-size-16, 16px);
+font-style: normal;
+font-weight: 700;
+line-height: 150%; /* 24px */
+letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  border-radius: var(--Radius-r-8, 8px);
+background: var(--warning-300-opacity-10, rgba(236, 79, 79, 0.10));
 }
 </style>
