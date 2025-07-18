@@ -452,7 +452,7 @@ export default {
       margin-top: 1.5rem;
       grid-template-columns: repeat(3, 1fr);
       place-items: center;
-      gap: 1.5rem;
+      gap: 0.5rem;
 
       .item {
         background: rgba(255, 255, 255, 0.75);
@@ -468,7 +468,8 @@ export default {
         transition: all ease 0.2s;
 
         &:hover {
-          box-shadow: inset 0px 0px 0px $raphael-green-400,0px 0px 10px $raphael-green-400;
+          box-shadow: inset 0px 0px 0px $raphael-green-400,
+            0px 0px 10px $raphael-green-400;
         }
 
         & > img {
