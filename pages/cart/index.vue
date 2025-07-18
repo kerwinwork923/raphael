@@ -91,6 +91,10 @@ onMounted(() => {
     gap: 1.5rem;
     padding-bottom: 1.5rem;
 
+    @include respond-to("sm") {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
     .cartContentItem {
       background-color: #fff;
       border-radius: 8px;
@@ -110,6 +114,9 @@ onMounted(() => {
         width: 100%;
         object-fit: cover;
         margin-bottom: 0.5rem;
+        @include respond-to("sm") {
+          height: 20dvh;
+        }
       }
       h3 {
         color: $raphael-black;

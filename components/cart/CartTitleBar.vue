@@ -1,40 +1,41 @@
 <template>
   <div class="cartTitleBar">
-    <img 
-      class="goBack" 
-      src="/assets/imgs/goBack.svg" 
-      alt="返回" 
+    <img
+      class="goBack"
+      src="/assets/imgs/goBack.svg"
+      alt="返回"
       @click="handleGoBack"
     />
     <h2>{{ title }}</h2>
-    <img 
-      v-if="showCart" 
-      class="cart" 
-      src="/assets/imgs/cart.svg" 
-      alt="購物車" 
+    <img
+      v-if="showCart"
+      class="cart"
+      src="/assets/imgs/cart.svg"
+      alt="購物車"
       @click="router.push('/cart/cartList')"
     />
+    <img class="packageSearch" src="/assets/imgs/packageSearch.svg" />
   </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
+import { useRouter } from "vue-router";
 
 const router = useRouter();
 
 const props = defineProps({
   title: {
     type: String,
-    default: "智慧商城"
+    default: "智慧商城",
   },
   showCart: {
     type: Boolean,
-    default: true
+    default: true,
   },
   backPath: {
     type: String,
-    default: ''
-  }
+    default: "",
+  },
 });
 
 const handleGoBack = () => {
@@ -61,7 +62,10 @@ const handleGoBack = () => {
     left: 0;
   }
   .cart {
-    right: 0;
+    right: 40px;
+  }
+  .packageSearch{
+    right:0;
   }
   h2 {
     color: #000;
@@ -73,5 +77,5 @@ const handleGoBack = () => {
     line-height: 100%;
     letter-spacing: var(--Static-Body-Large-Tracking, 0.5px);
   }
-}</style>
-
+}
+</style>

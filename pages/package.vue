@@ -1,7 +1,7 @@
 <template>
   <RaphaelLoading v-if="loading" />
   <div class="packageWrap">
-    <TitleMenu Text="包裹查詢" link="/user" />
+    <TitleMenu Text="診所訂單" link="/user" />
     <!-- 當 hasPackage 為 true 時，顯示包裹清單 -->
     <div class="packageGroup" v-if="hasPackage">
       <h3>您所有的包裹編號</h3>

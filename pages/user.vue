@@ -31,7 +31,7 @@
           />
         </div>
       </div>
-      <!-- <div class="bannerGroup">
+      <div class="bannerGroup">
         <img class="imgHide" src="../assets//imgs/banner-1.png" alt="" />
         <img
           v-for="(slide, index) in slides"
@@ -40,10 +40,10 @@
           :src="slide"
           alt=""
         />
-      </div> -->
-      <div class="bannerGroup2">
-        <img @click="goCart" src="../assets/imgs/shoppingMall.png" alt="" />
       </div>
+      <!-- <div class="bannerGroup2">
+        <img @click="goCart" src="../assets/imgs/shoppingMall.png" alt="" />
+      </div> -->
       <div class="itemsGroup">
         <!-- 
         <div class="item item2" @click="goHRVHistory">
@@ -53,39 +53,49 @@
         </div> -->
 
         <router-link to="/UsageHistory" class="item">
-          <div class="topTitle">穿衣</div>
-          <div class="bottomTitle">紀錄</div>
           <img src="../assets/imgs/clothIcon.svg" alt="" />
+          <div class="title">穿衣紀錄</div>
         </router-link>
 
         <div @click="showHealthRecordAlert" class="item">
-          <div class="topTitle">健康</div>
-          <div class="bottomTitle">紀錄</div>
           <img src="../assets/imgs/noteIcon.svg" alt="" />
+          <div class="title">健康紀錄</div>
         </div>
 
-        <router-link to="/contract" class="item">
-          <div class="topTitle">合約</div>
-          <div class="bottomTitle">|請假</div>
-          <img src="../assets/imgs/contract.svg" alt="" />
-        </router-link>
-
-        <router-link to="/orderQuery" class="item">
-          <div class="topTitle">診所</div>
-          <div class="bottomTitle">訂單</div>
-          <img src="../assets/imgs/logistics.svg" alt="" />
-        </router-link>
-        <!-- <div class="item item6">
-          <div class="topTitle">推薦</div>
-          <div class="bottomTitle">親友</div>
-          <img src="../assets/imgs/relationshopIcon.svg" alt="" />
-        </div> -->
-
         <router-link to="/point" class="item">
-          <div class="topTitle">獎勵</div>
-          <div class="bottomTitle">積分</div>
           <img src="../assets/imgs/ticket.svg" alt="" />
+          <div class="title">獎勵積分</div>
         </router-link>
+
+        <router-link to="/cart" class="item">
+          <img src="../assets/imgs/ecommerce.svg" alt="" />
+          <div class="title">智慧商城</div>
+        </router-link>
+
+        <router-link class="item">
+          <img src="../assets/imgs/magicIcon.svg" alt="" />
+          <div class="title">專屬推薦</div>
+        </router-link>
+
+        <router-link to="/package" class="item">
+          <img src="../assets/imgs/logistics.svg" alt="" />
+          <div class="title">診所訂單</div>
+        </router-link>
+
+        <router-link to="/contract" class="item">
+          <img src="../assets/imgs/contract.svg" alt="" />
+          <div class="title">合約|請假</div>
+        </router-link>
+
+        <!-- <router-link class="item">
+          <img src="../assets/imgs/serviceIcon.svg" alt="" />
+          <div class="title">線上客服</div>
+        </router-link> -->
+
+        <!-- <router-link class="item">
+          <img src="../assets/imgs/relationshopIcon.svg" alt="" />
+          <div class="title">推薦親友</div>
+        </router-link> -->
       </div>
       <footer class="copyrights">
         <!-- <a href="/usageHistory"></a> -->
@@ -135,7 +145,6 @@ export default {
     const userInfo = ref(null);
     const currentSlide = ref(0);
     const slides = ref([banner1, banner2]);
-
 
     const qrcodeShow = ref(false);
     const store = useCommon();
@@ -207,7 +216,6 @@ export default {
     };
 
     const goCart = () => {
-
       router.push("/cart");
     };
 
@@ -441,183 +449,47 @@ export default {
 
     .itemsGroup {
       display: grid;
-      margin-top: 0.75rem;
-      grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: repeat(3, 84px);
-      gap: 0.75rem;
+      margin-top: 1.5rem;
+      grid-template-columns: repeat(3, 1fr);
+      place-items: center;
+      gap: 1.5rem;
 
       .item {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-        position: relative;
-        background: rgba(255, 255, 255, 0.5);
-        border-radius: 0.75rem;
-        color: $raphael-gray-500;
+        background: rgba(255, 255, 255, 0.75);
+        border-radius: 20px;
+        box-shadow: inset 0px 0px 3px $raphael-green-400;
         cursor: pointer;
-        font-size: 2rem;
-        padding: 0.75rem;
-        overflow: hidden;
-        transition: 0.15s all ease;
-        box-shadow: 0px 2px 12px #afddc0;
-        img {
-          position: absolute;
-          transition: 0.15s all ease;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: center;
+        width: 100%;
+        padding: 0.75rem 0.25rem;
+        transition: all ease 0.2s;
+
+        &:hover {
+          box-shadow: inset 0px 0px 0px $raphael-green-400,0px 0px 10px $raphael-green-400;
         }
-        &:first-child {
-          border: 2px solid rgba(254, 172, 74, 0.7);
-          color: $raphael-orange-400;
-          grid-row: 1 / 3;
-          align-items: end;
-          font-size: 1.75rem;
 
-          .topTitle,
-          .bottomTitle {
-            margin-bottom: 2.5rem;
-          }
-
-          img {
-            background: rgba(254, 172, 74, 0.7);
-            width: 50%;
-            height: 60px;
-            border-radius: 0 0 8px 8px;
-            padding: 0.5rem;
-            top: 0;
-            box-shadow: inset 0 -4px 8px rgba(254, 172, 74, 1);
-          }
-
-          &:hover {
-            border: 2px solid rgba(254, 172, 74, 1);
-            color: $raphael-orange-500;
-
-            & > img {
-              background: rgba(254, 172, 74, 1);
-            }
-          }
+        & > img {
+          background: $raphael-orange-400;
+          border-radius: 50%;
+          padding: 0.5rem;
         }
-        &:nth-child(2) {
-          border: 2px solid rgba(31, 188, 179, 0.7);
-          color: $raphael-cyan-400;
-          grid-column: 2;
-          grid-row: 2/3;
-          justify-content: end;
+
+        & > .title {
+          color: $raphael-black;
           font-size: 1.25rem;
-
-          .bottomTitle {
-            margin-right: 1.25rem;
-          }
-
-          img {
-            background: rgba(31, 188, 179, 0.7);
-            width: 50px;
-            height: 55%;
-            border-radius: 0 8px 8px 0;
-            padding: 0.5rem;
-            top: 16px;
-            left: 0;
-            box-shadow: inset 0 -4px 8px rgba(31, 188, 179, 1);
-          }
-
-          &:hover {
-            border: 2px solid rgba(31, 188, 179, 1);
-            color: $raphael-cyan-500;
-
-            & > img {
-              background: rgba(31, 188, 179, 1);
-            }
+          font-weight: bold;
+        }
+        &:nth-child(n + 4):nth-child(-n + 6) {
+          & > img {
+            background: $raphael-purple-200;
           }
         }
-        &:nth-child(3) {
-          border: 2px solid rgba(188, 88, 31, 0.7);
-          color: $raphael-brown-400;
-          font-size: 1.25rem;
-          justify-content: end;
-          grid-column: 2 / 3;
-          grid-row: 1;
-
-          .bottomTitle {
-            margin-right: 1.25rem;
-          }
-
-          img {
-            background: rgba(188, 88, 31, 0.7);
-            width: 50px;
-            height: 55%;
-            border-radius: 0 8px 8px 0;
-            padding: 0.5rem;
-            top: 16px;
-            left: 0;
-            box-shadow: inset 0 -4px 8px rgba(188, 88, 31, 1);
-          }
-
-          &:hover {
-            border: 2px solid rgba(188, 88, 31, 1);
-            color: $raphael-brown-500;
-
-            & > img {
-              background: rgba(188, 88, 31, 1);
-            }
-          }
-        }
-        &:nth-child(4) {
-          border: 2px solid rgba(101, 85, 143, 0.7);
-          color: $raphael-purple-200;
-          font-size: 1.25rem;
-          justify-content: end;
-
-          .bottomTitle {
-            margin-right: 1.25rem;
-          }
-
-          img {
-            background: rgba(101, 85, 143, 0.7);
-            width: 50px;
-            height: 55%;
-            border-radius: 0 8px 8px 0;
-            padding: 0.5rem;
-            top: 16px;
-            left: 0;
-            box-shadow: inset 0 -4px 8px rgba(101, 85, 143, 1);
-          }
-
-          &:hover {
-            border: 2px solid rgba(101, 85, 143, 1);
-            color: $raphael-purple-200;
-
-            & > img {
-              background: rgba(101, 85, 143, 1);
-            }
-          }
-        }
-        &:nth-child(5) {
-          border: 2px solid rgba(116, 188, 31, 0.7);
-          color: $raphael-green-400;
-          font-size: 1.25rem;
-          justify-content: end;
-
-          .bottomTitle {
-            margin-right: 1.25rem;
-          }
-
-          img {
-            background: rgba(116, 188, 31, 0.7);
-            width: 50px;
-            height: 55%;
-            border-radius: 0 8px 8px 0;
-            padding: 0.5rem;
-            top: 16px;
-            left: 0;
-            box-shadow: inset 0 -4px 8px rgba(116, 188, 31, 1);
-          }
-
-          &:hover {
-            border: 2px solid rgba(116, 188, 31, 1);
-            color: rgba(116, 188, 31, 0.7);
-
-            & > img {
-              background: rgba(116, 188, 31, 1);
-            }
+        &:nth-child(n + 7) {
+          & > img {
+            background: $raphael-cyan-400;
           }
         }
       }
@@ -627,7 +499,7 @@ export default {
       font-size: 13px;
       color: $raphael-gray-500;
       text-align: center;
-      padding: 0.75rem 0;
+      padding: 1.5rem 0;
     }
   }
 }
