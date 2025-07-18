@@ -14,7 +14,7 @@
       alt="購物車"
       @click="router.push('/cart/cartList')"
     />
-    <img class="packageSearch" src="/assets/imgs/packageSearch.svg" />
+    <img class="packageSearch" src="/assets/imgs/packageSearch.svg" @click="router.push('/orderQuery')" />
   </div>
 </template>
 

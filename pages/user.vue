@@ -72,10 +72,10 @@
           <div class="title">智慧商城</div>
         </router-link>
 
-        <router-link class="item">
+        <!-- <router-link to="/survey" class="item">
           <img src="../assets/imgs/magicIcon.svg" alt="" />
           <div class="title">專屬推薦</div>
-        </router-link>
+        </router-link> -->
 
         <router-link to="/package" class="item">
           <img src="../assets/imgs/logistics.svg" alt="" />

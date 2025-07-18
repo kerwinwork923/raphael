@@ -2,7 +2,7 @@
   <div class="orderQueryWrap">
     <TitleMenu
       :Text="orderList.length === 0 ? '訂單追蹤' : '訂單查詢'"
-      link="/user"
+      link="/cart"
     />
     <QuesionBox
       v-if="showQuestionBox"
@@ -542,30 +542,38 @@ const getOrderStage = (order) => {
       });
 
     if (allItemsFilled) {
-      // 找到最晚填寫個人化資料的時間
-      const latestCheckTime = order.ItemList.reduce((latest, item) => {
-        if (item.PdtSize && item.Weight && item.BodySize && item.Height) {
-          // 解析 CheckTime 格式：20250714155739 -> 2025/07/14 15:57:39
-          const year = item.CheckTime.substring(0, 4);
-          const month = item.CheckTime.substring(4, 6);
-          const day = item.CheckTime.substring(6, 8);
-          const hour = item.CheckTime.substring(8, 10);
-          const minute = item.CheckTime.substring(10, 12);
-          const second = item.CheckTime.substring(12, 14);
+      // 使用 A1State 作為個人化資訊完成時間
+      let personalInfoTime = new Date(0);
+      
+      if (order.A1State) {
+        // 解析 A1State 格式：2025/07/16 17:25 -> 2025/07/16 17:25
+        personalInfoTime = new Date(order.A1State.replace(/\//g, "-"));
+      } else {
+        // 如果沒有 A1State，則使用最晚填寫個人化資料的時間作為備用
+        personalInfoTime = order.ItemList.reduce((latest, item) => {
+          if (item.PdtSize && item.Weight && item.BodySize && item.Height) {
+            // 解析 CheckTime 格式：20250714155739 -> 2025/07/14 15:57:39
+            const year = item.CheckTime.substring(0, 4);
+            const month = item.CheckTime.substring(4, 6);
+            const day = item.CheckTime.substring(6, 8);
+            const hour = item.CheckTime.substring(8, 10);
+            const minute = item.CheckTime.substring(10, 12);
+            const second = item.CheckTime.substring(12, 14);
 
-          const itemCheckTime = new Date(
-            `${year}/${month}/${day} ${hour}:${minute}:${second}`
-          );
-          return itemCheckTime > latest ? itemCheckTime : latest;
-        }
-        return latest;
-      }, new Date(0));
+            const itemCheckTime = new Date(
+              `${year}/${month}/${day} ${hour}:${minute}:${second}`
+            );
+            return itemCheckTime > latest ? itemCheckTime : latest;
+          }
+          return latest;
+        }, new Date(0));
+      }
 
-      // 計算預計送達日（最晚填完日期+7個工作天）
-      const estimateEndDate = addWorkDays(latestCheckTime, 7);
+      // 計算預計送達日（個人化資訊完成時間+7個工作天）
+      const estimateEndDate = addWorkDays(personalInfoTime, 7);
 
-      // 計算開始日期（通常為填完後的下一個工作日）
-      const estimateStartDate = addWorkDays(latestCheckTime, 1);
+      // 計算開始日期（通常為完成後的下一個工作日）
+      const estimateStartDate = addWorkDays(personalInfoTime, 1);
 
       const startDateStr = formatDate(estimateStartDate);
       const endDateStr = formatDate(estimateEndDate);
