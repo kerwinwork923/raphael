@@ -897,6 +897,7 @@
       let constipationScore = 0; //功能性便秘
       let nightUrinationScore = 0; //第4c題
       let midWakeScore = 0; //第4b題
+      let SleepinDifficulty = 0; //第4a題 難以入睡
       let SleepMedicineScore = 0; //安眠藥物使用
       let SleepLatencyScore = 0; //睡眠潛伏期分數
       let lightSleepScore = 0; //睡眠困擾
@@ -1560,7 +1561,7 @@
         else if(midWakeMidSore>=4 && midWakeMidSore<=5){midWakeScore = 2;}
         else if(midWakeMidSore>=2 && midWakeMidSore<=3){midWakeScore = 1;}
         else{midWakeScore = 0;}
-        let SleepinDifficulty= getValueForQuestion("sleep_difficulty"); //第4a題
+        SleepinDifficulty = getValueForQuestion("sleep_difficulty"); //第4a題
        
 
         psleepduration = getValueForQuestion("sleep_duration"); //第三題 睡眠時數
