@@ -22,34 +22,37 @@
         />
         <div class="cartContentGroup">
           <img :src="item.Picture" :alt="item.ProductName" />
-          <div class="cartContentGroupText">
-            <h3>{{ item.ProductName }}</h3>
-            <h6>NT${{ item.Price }}</h6>
-            <small>數量: {{ item.Qty }}</small>
-          </div>
-          <div class="addCartAlertOptionGroup">
-            <div class="addCartAlertOptionGroupInput">
-              <button
-                class="qtyBtn"
-                @click="decreaseQty(item)"
-                :disabled="item.Qty <= 1"
-              >
-                -
-              </button>
-              <span class="qtyNum">{{ item.Qty }}</span>
-              <button
-                class="qtyBtn"
-                @click="increaseQty(item)"
-                :disabled="item.Qty >= 100"
-              >
-                +
-              </button>
+          <div class="cartArticle">
+            <div class="cartContentGroupText">
+              <h3>{{ item.ProductName }}</h3>
+              <div class="deleteBtn" @click="deleteItem(item.ProductID)">
+                <img src="~/assets/imgs/cart/delete.svg" alt="刪除" />
+              </div>
+            </div>
+            <div class="addCartAlertOptionGroup">
+              <div class="addCartAlertText">
+                <h6>NT${{ item.Price }}</h6>
+                <small>數量: {{ item.Qty }}</small>
+              </div>
+              <div class="addCartAlertOptionGroupInput">
+                <button
+                  class="qtyBtn"
+                  @click="decreaseQty(item)"
+                  :disabled="item.Qty <= 1"
+                >
+                  -
+                </button>
+                <span class="qtyNum">{{ item.Qty }}</span>
+                <button
+                  class="qtyBtn"
+                  @click="increaseQty(item)"
+                  :disabled="item.Qty >= 100"
+                >
+                  +
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-
-        <div class="deleteBtn" @click="deleteItem(item.ProductID)">
-          <img src="~/assets/imgs/cart/delete.svg" alt="刪除" />
         </div>
       </div>
     </div>
@@ -136,7 +139,7 @@ const updateCartItem = async (productId, newQty) => {
 
     if (data.value?.Result === "OK") {
       // 直接更新本地資料，不重新獲取整個列表
-      const item = cartList.value.find(item => item.ProductID === productId);
+      const item = cartList.value.find((item) => item.ProductID === productId);
       if (item) {
         item.Qty = newQty.toString(); // 保持為字串格式
         item.Amount = (parseInt(item.Price) * newQty).toString();
@@ -169,7 +172,9 @@ const deleteCartItem = async (productId) => {
 
     if (data.value?.Result === "OK") {
       // 直接從本地列表中移除，不重新獲取整個列表
-      cartList.value = cartList.value.filter(item => item.ProductID !== productId);
+      cartList.value = cartList.value.filter(
+        (item) => item.ProductID !== productId
+      );
     }
   } catch (error) {
     console.error("刪除商品失敗：", error);
@@ -206,7 +211,7 @@ const deleteSelectedItems = async () => {
 
       if (data.value?.Result === "OK") {
         // 直接從本地列表中移除選中的商品，不重新獲取整個列表
-        cartList.value = cartList.value.filter(item => !item.selected);
+        cartList.value = cartList.value.filter((item) => !item.selected);
         selectAll.value = false; // 重置全選狀態
       }
     } catch (error) {
@@ -257,17 +262,17 @@ const checkout = () => {
     alert("請選擇要購買的商品");
     return;
   }
-  
+
   // 將選中的商品存到 Pinia store
   checkoutStore.setSelectedCartItems(selectedItems);
-  
+
   // 計算正確的總金額（移除千分位符號）
   const calculatedTotal = cartList.value
     .filter((item) => item.selected)
     .reduce((total, item) => total + parseInt(item.Amount), 0);
-  
+
   checkoutStore.setSelectedTotalAmount(calculatedTotal);
-  
+
   router.push("/cart/pay");
   console.log("跳轉到結帳頁面", selectedItems);
   console.log("總金額:", calculatedTotal);
@@ -349,53 +354,111 @@ onMounted(() => {
       height: 24px;
       margin-right: 1rem;
     }
-    img {
-      width: 80px;
-      height: 80px;
-      border-radius: 8px;
-    }
-    .cartContentGroupText {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-      margin-right: 0.5rem;
-      h3 {
-        color: var(--Neutral-black, #1e1e1e);
 
-        font-size: var(--Text-font-size-16, 16px);
-        font-style: normal;
-        font-weight: 700;
-        font-size: 20px;
-      }
-      h6 {
-        color: var(--Primary-default, #74bc1f);
-
-        font-size: var(--Text-font-size-16, 16px);
-        font-style: normal;
-        font-weight: 700;
-      }
-      small {
-        color: var(--Neutral-400, #b3b3b3);
-
-        font-size: var(--Text-font-size-16, 16px);
-        font-style: normal;
-        font-weight: 400;
-        letter-spacing: 0.08px;
-      }
-    }
     .cartContentGroup {
       display: flex;
-      align-items: end;
-      gap: 0.5rem;
+      align-items: center;
+      gap: 1rem;
+      width: 100%;
+      height: 100%;
+
+      img {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+      }
+
+      .cartArticle {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
+
+        .cartContentGroupText {
+          display: flex;
+          gap: 0.25rem;
+          align-items: center;
+          justify-content: space-between;
+
+          h3 {
+            color: var(--Neutral-black, #1e1e1e);
+            font-size: var(--Text-font-size-16, 16px);
+            font-style: normal;
+            font-weight: 700;
+            font-size: 20px;
+          }
+        }
+
+        .addCartAlertOptionGroup {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+
+          .addCartAlertText {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            h6 {
+              color: var(--Primary-default, #74bc1f);
+
+              font-size: var(--Text-font-size-16, 16px);
+              font-style: normal;
+              font-weight: 700;
+            }
+            small {
+              color: var(--Neutral-400, #b3b3b3);
+
+              font-size: var(--Text-font-size-16, 16px);
+              font-style: normal;
+              font-weight: 400;
+              letter-spacing: 0.08px;
+            }
+          }
+          .addCartAlertOptionGroupInput {
+            display: flex;
+            align-items: end;
+            background: #ddeacf;
+            border-radius: 8px;
+
+            .qtyBtn {
+              background: #ddeacf;
+              color: #65a31b;
+              border: none;
+              border-radius: 12px;
+              width: 36px;
+              height: 28px;
+              font-size: 1rem;
+              font-weight: bold;
+              cursor: pointer;
+              transition: all 0.2s;
+              &:hover:enabled {
+                background: #ddeacf;
+              }
+              &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+              }
+            }
+            .qtyNum {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 36px;
+              height: 28px;
+              text-align: center;
+              font-size: 1rem;
+              font-weight: 700;
+              color: #65a31b;
+              background: transparent;
+            }
+          }
+        }
+      }
     }
     .deleteBtn {
-      position: absolute;
-      right: 2.5%;
-      top: 30%;
       img {
         width: 24px;
         height: 24px;
-
         cursor: pointer;
       }
     }
@@ -464,45 +527,6 @@ onMounted(() => {
         padding: 8px 12px;
       }
     }
-  }
-}
-.addCartAlertOptionGroupInput {
-  display: flex;
-  align-items: center;
-  background: #ddeacf;
-  border-radius: 8px;
-  padding: 2px 8px;
-  width: fit-content;
-  width: 100px;
-  .qtyBtn {
-    background: #ddeacf;
-    color: #65a31b;
-    border: none;
-    border-radius: 12px;
-    width: 32px;
-    height: 32px;
-    font-size: 1rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.2s;
-    &:hover:enabled {
-      background: #ddeacf;
-    }
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
-  .qtyNum {
-    display: inline-block;
-    width: 32px;
-    text-align: center;
-    font-size: 1rem;
-    font-weight: 700;
-    color: #65a31b;
-    background: transparent;
-    margin: 0 4px;
-    line-height: 32px;
   }
 }
 </style>
