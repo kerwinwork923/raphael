@@ -59,17 +59,17 @@
 
         <div @click="showHealthRecordAlert" class="item">
           <img src="../assets/imgs/noteIcon.svg" alt="" />
-          <div class="title">健康紀錄</div>
+          <div class="title">健康自評</div>
         </div>
 
         <router-link to="/point" class="item">
           <img src="../assets/imgs/ticket.svg" alt="" />
-          <div class="title">獎勵積分</div>
+          <div class="title">我的積分</div>
         </router-link>
 
         <router-link to="/cart" class="item">
           <img src="../assets/imgs/ecommerce.svg" alt="" />
-          <div class="title">智慧商城</div>
+          <div class="title">健康好物</div>
         </router-link>
 
         <!-- <router-link to="/survey" class="item">
@@ -79,7 +79,7 @@
 
         <router-link to="/package" class="item">
           <img src="../assets/imgs/logistics.svg" alt="" />
-          <div class="title">診所訂單</div>
+          <div class="title">診所寄貨</div>
         </router-link>
 
         <router-link to="/contract" class="item">
