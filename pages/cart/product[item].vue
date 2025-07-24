@@ -254,7 +254,7 @@ onMounted(() => {
   padding: 0 2.5% 72px;
   gap: 1rem;
 
-  .cartTitleBar{
+  .cartTitleBar {
     max-width: 1440px;
   }
 
@@ -464,15 +464,14 @@ onMounted(() => {
   align-items: center;
   background: #ddeacf;
   border-radius: 8px;
-  padding: 2px 8px;
   width: fit-content;
   .qtyBtn {
     background: #ddeacf;
     color: #65a31b;
     border: none;
     border-radius: 12px;
-    width: 32px;
-    height: 32px;
+    width: 44px;
+    height: 36px;
     font-size: 1rem;
     font-weight: bold;
     cursor: pointer;
@@ -486,15 +485,16 @@ onMounted(() => {
     }
   }
   .qtyNum {
-    display: inline-block;
-    width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 36px;
     text-align: center;
     font-size: 1rem;
     font-weight: 700;
     color: #65a31b;
     background: transparent;
-    margin: 0 4px;
-    line-height: 32px;
   }
 }
 </style>
