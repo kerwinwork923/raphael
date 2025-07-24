@@ -5,97 +5,27 @@
     <!-- ─────────────── Main Content ─────────────── -->
     <main class="content">
       <!-- page header -->
-      <header class="page-header">
-        <h2 class="title">
-          會員清單 <span class="count">({{ store.total }}人)</span>
-        </h2>
-        <div class="meta">
-          <button class="btn refresh" @click="refreshData">
-            <i class="i-refresh"></i>
-            資料更新
-          </button>
-          <span class="updated-time">最後更新: {{ store.lastUpdated }}</span>
-        </div>
-      </header>
+      <DataUpdateHeader
+        title="會員清單"
+        :count="store.total"
+        count-unit="人"
+        :last-updated="store.lastUpdated"
+        @refresh="refreshData"
+      />
       <!-- toolbar / filters -->
-      <section class="toolbar">
-        <div class="toolbar-inner">
-          <div class="search-wrapper">
-            <input
-              v-model="store.keyword"
-              class="search"
-              type="text"
-              placeholder="請輸入關鍵字"
-              @input="store.setKeyword($event.target.value)"
-            />
-            <img src="/assets/imgs/backend/search.svg" alt="" />
-          </div>
-
-          <div class="toolbarTime-wrapper">
-            <VueDatePicker
-              v-model="store.dateRange"
-              range
-              :enable-time-picker="false"
-              :format="'yyyy/MM/dd'"
-              :min-date="new Date(2024, 0, 1)"
-              placeholder="註冊日期區間"
-              prepend-icon="i-calendar"
-              @update:model-value="store.setDateRange"
-            />
-          </div>
-          <div class="selectWrapper">
-            <img
-              class="selectWrapperIcon1"
-              src="/assets/imgs/backend/filter.svg"
-              alt=""
-            />
-            <select
-              v-model="store.productFilter"
-              @change="store.setProductFilter($event.target.value)"
-            >
-              <option value="">全部產品</option>
-              <option
-                v-for="product in productOptions"
-                :key="product.value"
-                :value="product.value"
-              >
-                {{ product.label }}
-              </option>
-            </select>
-            <img
-              class="selectWrapperIcon2"
-              src="/assets/imgs/backend/dropdown.svg"
-              alt=""
-            />
-          </div>
-
-          <div class="selectWrapper">
-            <img
-              class="selectWrapperIcon1"
-              src="/assets/imgs/backend/filter.svg"
-              alt=""
-            />
-            <select
-              v-model="store.statusFilter"
-              @change="store.setStatusFilter($event.target.value)"
-            >
-              <option value="">全部狀態</option>
-              <option
-                v-for="status in statusOptions"
-                :key="status.value"
-                :value="status.value"
-              >
-                {{ status.label }}
-              </option>
-            </select>
-            <img
-              class="selectWrapperIcon2"
-              src="/assets/imgs/backend/dropdown.svg"
-              alt=""
-            />
-          </div>
-        </div>
-      </section>
+      <FilterToolbar
+        v-model:search-value="store.keyword"
+        v-model:date-value="store.dateRange"
+        v-model:product-value="store.productFilter"
+        v-model:status-value="store.statusFilter"
+        :product-options="productOptions"
+        :status-options="statusOptions"
+        date-placeholder="註冊日期區間"
+        @search="store.setKeyword"
+        @date-change="store.setDateRange"
+        @product-change="store.setProductFilter"
+        @status-change="store.setStatusFilter"
+      />
 
       <!-- data table -->
       <section class="member-table">
@@ -239,9 +169,9 @@
 
 <script setup lang="ts">
 import { onMounted } from "vue";
-import VueDatePicker from "@vuepic/vue-datepicker";
-import "@vuepic/vue-datepicker/dist/main.css";
 import Sidebar from "/components/raphaelBackend/Sidebar.vue";
+import FilterToolbar from "/components/raphaelBackend/FilterToolbar.vue";
+import DataUpdateHeader from "/components/raphaelBackend/DataUpdateHeader.vue";
 import { useRouter } from "vue-router";
 import { useMemberListStore } from "~/stores/useMemberListStore";
 import { useSeo } from "~/composables/useSeo";
@@ -323,74 +253,7 @@ function scrollToTop() {
     padding: 16px 16px;
   }
 
-  .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    @include respond-to("lg") {
-      padding-left: 36px;
-    }
-    @include respond-to("sm") {
-      flex-wrap: wrap;
-    }
-    .title {
-      font-size: 24px;
-      font-weight: 700;
-      white-space: nowrap;
-      word-break: keep-all;
 
-      .count {
-        color: $primary-200;
-        text-align: center;
-        font-size: 20px;
-        font-style: normal;
-        font-weight: 700;
-        line-height: 100%; /* 20px */
-        letter-spacing: var(--Title-Medium-Tracking, 0.15px);
-      }
-    }
-
-    .meta {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      @include respond-to("lg") {
-        gap: 6px;
-        margin-top: 0.5rem;
-        width: 100%;
-      }
-      .btn.refresh {
-        // @include button;
-        background-color: $primary-200;
-        border: none;
-        color: var(--Primary-100, #f5f7fa);
-        font-size: var(--Text-font-size-18, 18px);
-        font-style: normal;
-        font-weight: 400;
-        padding: 0.25rem 0.5rem;
-        letter-spacing: 0.25px;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        &:hover {
-          background-color: $primary-300;
-        }
-        @include respond-to("lg") {
-          font-size: 1rem;
-          padding: 0.25rem 0.5rem;
-        }
-      }
-      .updated-time {
-        font-size: 12px;
-        color: $Neutral-500;
-        font-size: 16px;
-        font-style: normal;
-        font-weight: 400;
-        line-height: 140%;
-      }
-    }
-  }
 
   .healthBtn {
     border-radius: 6px;
@@ -421,162 +284,7 @@ function scrollToTop() {
     }
   }
 
-  .toolbar {
-    display: flex;
-    justify-content: flex-end;
-    width: 100%;
 
-    .toolbar-inner {
-      display: flex;
-      justify-content: flex-end;
-      gap: 16px;
-
-      width: 100%;
-      flex-wrap: wrap;
-      @include respond-to("xl") {
-        gap: 8px;
-        flex-wrap: nowrap;
-      }
-      @include respond-to("sm") {
-        flex-wrap: wrap;
-        justify-content: space-between;
-      }
-    }
-
-    .search-wrapper {
-      position: relative;
-      @include respond-to("lg") {
-        width: 25%;
-      }
-      @include respond-to("sm") {
-        width: 48%;
-      }
-      img {
-        width: 1.25rem;
-        position: absolute;
-        right: 5%;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 19px;
-      }
-    }
-
-    .search {
-      padding: 8px 12px;
-      border: none;
-      width: 100%;
-      border-radius: var(--Radius-r-50, 50px);
-      background: var(--Neutral-white, #fff);
-      box-shadow: 0px 2px 20px 0px
-        var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
-      transition: all ease 0.2s;
-
-      &:hover {
-        box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
-      }
-    }
-
-    .toolbarTime-wrapper {
-      position: relative;
-      @include respond-to("lg") {
-        width: 25%;
-      }
-      @include respond-to("sm") {
-        width: 48%;
-      }
-      /* 重點: 用 :deep() 才能選到 VueDatePicker 的內部元素 */
-      :deep(.dp__pointer) {
-        padding: 0; // 例如你想把 pointer 的 padding 清掉
-      }
-
-      :deep(.dp__input_icon) {
-        color: $chip-success;
-
-        right: auto; /* 關掉右邊 */
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 2;
-      }
-
-      :deep(.dp__input) {
-        padding: 4px 32px; // 改 input padding
-        border-radius: 50px;
-        background: #fff;
-        box-shadow: 0px 2px 20px rgba(177, 192, 216, 0.25);
-        border: none;
-        font-size: 14px;
-        transition: all ease 0.2s;
-
-        &:hover {
-          box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
-        }
-      }
-
-      img {
-        position: absolute;
-        right: 10%;
-        top: 50%;
-        transform: translateY(-50%);
-      }
-    }
-
-    select {
-      padding: 0.5rem 1.75rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      background-color: #fff;
-      background-size: 12px;
-      appearance: none; // ✅ 移除預設樣式
-      -webkit-appearance: none; // ✅ Safari
-      -moz-appearance: none; // ✅ Firefox
-      background-image: none;
-      color: var(--Neutral-500, #666);
-      cursor: pointer;
-      width: 100%;
-      border: none;
-      border-radius: var(--Radius-r-50, 50px);
-      background: var(--Neutral-white, #fff);
-      box-shadow: 0px 2px 20px 0px
-        var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
-      transition: all ease 0.2s;
-      &:hover {
-        box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
-      }
-    }
-
-    .selectWrapper {
-      position: relative;
-      min-width: 12%;
-      @include respond-to("lg") {
-        width: 25%;
-      }
-      @include respond-to("sm") {
-        width: 48%;
-      }
-      img {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 16px;
-      }
-      .selectWrapperIcon1 {
-        left: 8px;
-      }
-      .selectWrapperIcon2 {
-        right: 8px;
-      }
-    }
-
-    .toolbarTime {
-      flex: 1 1 240px; // ✅ 可縮放、設定基準
-      min-width: 200px;
-      max-width: 100%;
-    }
-  }
-
-  .toolbarTime {
-  }
 
   .member-table {
     display: flex;

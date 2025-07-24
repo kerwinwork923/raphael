@@ -1,6 +1,6 @@
 <template>
   <div class="returnGoodsConfirmWrap">
-    <TitleMenu Text="確認退貨資訊" link="back"  />
+    <TitleMenu Text="確認退貨資訊" link="back" />
 
     <!-- 退貨訂單資訊 -->
     <div class="orderInfoSection">
@@ -105,7 +105,7 @@ function submitApplication() {
     background: #fff;
     border-radius: 8px;
     padding: 1rem;
-    margin-bottom: .75rem;
+    margin-bottom: 0.75rem;
 
     .orderNumber {
       color: var(--Primary-hover, #65a31b);
@@ -164,7 +164,7 @@ function submitApplication() {
     background: #fff;
     border-radius: 8px;
     padding: 1rem;
-    margin-bottom: .75rem;
+    margin-bottom: 0.75rem;
     .sectionTitle {
       color: var(--Neutral-black, #1e1e1e);
 
@@ -264,22 +264,22 @@ function submitApplication() {
           border-bottom: none;
         }
         .refundLabel {
-            color: var(--Neutral-500, #666);
+          color: var(--Neutral-500, #666);
 
-font-size: var(--Text-font-size-16, 16px);
-font-style: normal;
-font-weight: 400;
+          font-size: var(--Text-font-size-16, 16px);
+          font-style: normal;
+          font-weight: 400;
 
-letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
+          letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
         }
         .refundLabelRed {
-            color: var(--Primary-hover, #EC4F4F);
+          color: var(--Primary-hover, #ec4f4f);
         }
         .refundValue {
           font-size: 16px;
           color: #666;
           &.refundAmount {
-            color: #EC4F4F;
+            color: #ec4f4f;
             font-weight: 700;
           }
         }
@@ -288,9 +288,9 @@ letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
   }
   .section2 {
     border-radius: var(--Radius-r-8, 8px);
-border: 1px solid var(--Primary-hover, #65A31B);
-background: var(--Primary-100, #FCFFF7);
-}
+    border: 1px solid var(--Primary-hover, #65a31b);
+    background: var(--Primary-100, #fcfff7);
+  }
   .submitButton {
     position: fixed;
     bottom: 0;
@@ -304,7 +304,7 @@ background: var(--Primary-100, #FCFFF7);
     z-index: 99;
     button {
       width: 100%;
-      padding: .5rem;
+      padding: 0.5rem;
       background: #74bc1f;
       color: #fff;
       border: none;
