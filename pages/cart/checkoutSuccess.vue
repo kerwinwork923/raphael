@@ -112,7 +112,7 @@
         <!-- 底部按鈕 -->
         <div class="bottomButton">
           <button @click="goToOrderQuery" class="returnBtn">
-            返回訂單查詢
+            訂單查詢
           </button>
         </div>
 
