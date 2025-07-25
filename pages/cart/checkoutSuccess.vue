@@ -19,7 +19,7 @@
       <!-- 正常內容 -->
       <template v-else>
         <!-- 個人化資訊提示 -->
-        <div v-if="hasUnfilledItems" class="infoBox personalizationBox">
+        <div v-if="hasUnfilledItems" class="infoBox personalizationBox" @click="showPersonalizationModal">
           <div class="personalizationContent">
             <div class="personalizationIcon">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -28,7 +28,7 @@
             </div>
             <div class="personalizationText">
               <h4>請先填寫個人化資訊才會開始製作</h4>
-              <p>點擊下方按鈕開始填寫個人化資料</p>
+              <p>點擊此處開始填寫個人化資料</p>
             </div>
             <div class="personalizationArrow">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -111,11 +111,8 @@
 
         <!-- 底部按鈕 -->
         <div class="bottomButton">
-          <button v-if="hasUnfilledItems" @click="showPersonalizationModal" class="personalizationBtn">
-            填寫個人化資料
-          </button>
           <button @click="goToOrderQuery" class="returnBtn">
-            {{ hasUnfilledItems ? '稍後填寫' : '繼續填寫資料' }}
+            返回訂單查詢
           </button>
         </div>
 
@@ -300,6 +297,18 @@ onMounted(() => {
 .personalizationBox {
   background: linear-gradient(135deg, #fff5f5 0%, #fef2f2 100%);
   border: 1px solid #fecaca;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(236, 79, 79, 0.15);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
   
   .personalizationContent {
     display: flex;
@@ -486,27 +495,11 @@ onMounted(() => {
   border-top: 1px solid #e5e5e5;
   z-index: 100;
   display: flex;
-  gap: 0.75rem;
-  
-  .personalizationBtn {
-    flex: 1;
-    background-color: #ec4f4f;
-    color: #fff;
-    border: none;
-    padding: 1rem;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    
-    &:hover {
-      background-color: #dc2626;
-    }
-  }
+  justify-content: center;
   
   .returnBtn {
-    flex: 1;
+    width: 100%;
+    max-width: 300px;
     background-color: #74bc1f;
     color: #fff;
     border: none;

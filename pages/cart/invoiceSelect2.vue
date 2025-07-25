@@ -9,7 +9,9 @@
       </div>
     </div>
     <div class="btnGroup">
-      <button @click="submit">提交</button>
+      <button @click="submit" :disabled="isLoading">
+        {{ isLoading ? '提交中...' : '提交' }}
+      </button>
     </div>
   </div>
 </template>
@@ -17,25 +19,39 @@
 <script setup>
 const router = useRouter();
 const invoiceContent = ref("");
+const isLoading = ref(false);
 const userData = JSON.parse(localStorage.getItem("userData"));
 const setInvoice = async function(){
-  const res = await useFetch("https://23700999.com:8081/HMA/api/fr/maSetInvoice", {
-    method: "POST",
-    body: {
-      MID: userData.MID,
-      Token: userData.Token,
-      MAID: userData.MAID,
-      Mobile: userData.Mobile,
-      Lang: "zhtw",
-      InvoiceID : "2", // 1:電子發票2.載具3.三聯式發票
-      Content : invoiceContent.value,
-    },
-  });
+  try {
+    const { data } = await useFetch("https://23700999.com:8081/HMA/api/fr/maSetInvoice", {
+      method: "POST",
+      body: {
+        MID: userData.MID,
+        Token: userData.Token,
+        MAID: userData.MAID,
+        Mobile: userData.Mobile,
+        Lang: "zhtw",
+        InvoiceID : "2", // 1:電子發票2.載具3.三聯式發票
+        Content : invoiceContent.value,
+      },
+    });
+    
+    if (data.value?.Result === "OK") {
+      return true;
+    } else {
+      alert("設定載具失敗，請稍後再試");
+      return false;
+    }
+  } catch (error) {
+    console.error("設定載具錯誤：", error);
+    alert("設定載具失敗，請稍後再試");
+    return false;
+  }
 }
 
 const submit = async function(){
- // 載具格式以「/」開頭，共8碼（包含符號）
- if(!invoiceContent.value.startsWith("/")){
+  // 載具格式以「/」開頭，共8碼（包含符號）
+  if(!invoiceContent.value.startsWith("/")){
     alert("載具格式錯誤");
     return;
   }
@@ -44,8 +60,15 @@ const submit = async function(){
     return;
   }
 
-  await setInvoice();
-  router.push("/cart/invoiceType");
+  isLoading.value = true;
+  try {
+    const success = await setInvoice();
+    if (success) {
+      router.push("/cart/invoiceType");
+    }
+  } finally {
+    isLoading.value = false;
+  }
 }
 </script>
 <style lang="scss" scoped>
@@ -136,6 +159,11 @@ const submit = async function(){
 
       background: var(--Primary-default, #74bc1f);
       cursor: pointer;
+      
+      &:disabled {
+        background: var(--Neutral-300, #ccc);
+        cursor: not-allowed;
+      }
     }
   }
 }

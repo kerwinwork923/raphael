@@ -96,8 +96,11 @@ const getRelated = async function() {
       },
     });
 
+    console.log("API 回應資料：", data.value);
+
     if (data.value?.Result === "OK" && data.value?.MInvoiceList) {
       invoiceList.value = data.value.MInvoiceList;
+      console.log("設定發票列表：", invoiceList.value);
       
       // 如果有發票，優先選擇 Pinia 中的發票
       if (checkoutStore.selectedInvoiceId && invoiceList.value.length > 0) {
@@ -111,8 +114,11 @@ const getRelated = async function() {
             "三聯式發票": "3",
           };
           selectedInvoiceId.value = typeMap[selectedInvoice.Desc22] || "1";
+          console.log("根據 Pinia 選擇發票類型：", selectedInvoiceId.value);
         }
       }
+    } else {
+      console.log("API 回應不正確或沒有發票資料");
     }
   } catch (error) {
     console.error("獲取發票資料失敗：", error);
@@ -124,7 +130,7 @@ const getInvoiceContent = (desc) => {
   return invoice ? invoice.Content : null;
 };
 
-const confirmInvoice = () => {
+const confirmInvoice = async () => {
   if (!selectedInvoiceId.value) {
     alert("請選擇發票類型");
     return;
@@ -138,15 +144,31 @@ const confirmInvoice = () => {
 
   const selectedTypeName = typeMap[selectedInvoiceId.value];
 
-  const invoiceDataFromApi = invoiceList.value.find(
+  console.log("選擇的發票類型：", selectedTypeName);
+  console.log("當前發票列表：", invoiceList.value);
+
+  // 先檢查現有的發票資料
+  let invoiceDataFromApi = invoiceList.value.find(
     (invoice) => invoice.Desc22 === selectedTypeName
   );
+
+  // 如果沒有找到，重新獲取資料
+  if (!invoiceDataFromApi) {
+    console.log("未找到發票資料，重新獲取...");
+    await getRelated();
+    invoiceDataFromApi = invoiceList.value.find(
+      (invoice) => invoice.Desc22 === selectedTypeName
+    );
+  }
+
+  console.log("找到的發票資料：", invoiceDataFromApi);
 
   if (invoiceDataFromApi && invoiceDataFromApi.AID) {
     checkoutStore.setSelectedInvoice(invoiceDataFromApi.AID);
     console.log("已儲存的發票AID至Pinia：", invoiceDataFromApi.AID);
-    router.back();
+    router.push("/cart/pay");
   } else {
+    console.log("發票資料不完整，顯示錯誤訊息");
     alert(`請先點擊右方箭頭，設定您的「${selectedTypeName}」資訊。`);
   }
 };
