@@ -21,11 +21,11 @@
         <!-- 個人化資訊提示 -->
         <div v-if="hasUnfilledItems" class="infoBox personalizationBox" @click="showPersonalizationModal">
           <div class="personalizationContent">
-            <div class="personalizationIcon">
+            <!-- <div class="personalizationIcon">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm1 15h-2v-2h2v2zm0-4h-2V5h2v6z" fill="#EC4F4F"/>
               </svg>
-            </div>
+            </div> -->
             <div class="personalizationText">
               <h4>請先填寫個人化資訊才會開始製作</h4>
               <p>點擊此處開始填寫個人化資料</p>
