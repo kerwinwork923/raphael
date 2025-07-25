@@ -18,6 +18,26 @@
 
       <!-- 正常內容 -->
       <template v-else>
+        <!-- 個人化資訊提示 -->
+        <div v-if="hasUnfilledItems" class="infoBox personalizationBox">
+          <div class="personalizationContent">
+            <div class="personalizationIcon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zm1 15h-2v-2h2v2zm0-4h-2V5h2v6z" fill="#EC4F4F"/>
+              </svg>
+            </div>
+            <div class="personalizationText">
+              <h4>請先填寫個人化資訊才會開始製作</h4>
+              <p>點擊下方按鈕開始填寫個人化資料</p>
+            </div>
+            <div class="personalizationArrow">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M6 12l4-4-4-4" stroke="#EC4F4F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
         <div class="infoBox thankYouBox">
           感謝您的購買！
         </div>
@@ -91,25 +111,48 @@
 
         <!-- 底部按鈕 -->
         <div class="bottomButton">
-          <button @click="goToOrderQuery" class="returnBtn">繼續填寫資料</button>
+          <button v-if="hasUnfilledItems" @click="showPersonalizationModal" class="personalizationBtn">
+            填寫個人化資料
+          </button>
+          <button @click="goToOrderQuery" class="returnBtn">
+            {{ hasUnfilledItems ? '稍後填寫' : '繼續填寫資料' }}
+          </button>
         </div>
 
+        <!-- 個人化資料填寫模態框 -->
+        <QuesionBox 
+          v-if="showModal" 
+          :orderData="orderData" 
+          @close="closeModal"
+        />
       </template>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import CartTitleBar from "~/components/cart/CartTitleBar.vue";
+import QuesionBox from "~/components/QuesionBox.vue";
 
 const route = useRoute();
 const router = useRouter();
 const orderDetails = ref({});
+const orderData = ref({});
 const isLoading = ref(true);
 const error = ref(null);
+const showModal = ref(false);
 const userData = JSON.parse(localStorage.getItem("userData"));
+
+// 計算是否有未填寫個人化資料的商品
+const hasUnfilledItems = computed(() => {
+  if (!orderData.value?.ItemList) return false;
+  
+  return orderData.value.ItemList.some(item => {
+    return !item.PdtSize || !item.Weight || !item.BodySize || !item.Height;
+  });
+});
 
 const fetchOrderDetails = async () => {
   const saleId = localStorage.getItem('checkoutSALEID');
@@ -143,6 +186,10 @@ const fetchOrderDetails = async () => {
 
     if (data.value && data.value.Result === 'OK') {
       const saleData = data.value.Sale;
+      
+      // 儲存完整的訂單資料供 QuesionBox 使用
+      orderData.value = saleData;
+      
       orderDetails.value = {
         DeliverType: saleData.DeliverTypeName,
         RName: saleData.RName,
@@ -184,6 +231,14 @@ const fetchOrderDetails = async () => {
   } finally {
     isLoading.value = false;
   }
+};
+
+const showPersonalizationModal = () => {
+  showModal.value = true;
+};
+
+const closeModal = () => {
+  showModal.value = false;
 };
 
 const goToOrderQuery = () => {
@@ -238,6 +293,63 @@ onMounted(() => {
   p {
     font-size: 0.9rem;
     color: #666;
+  }
+}
+
+// 個人化資訊提示樣式
+.personalizationBox {
+  background: linear-gradient(135deg, #fff5f5 0%, #fef2f2 100%);
+  border: 1px solid #fecaca;
+  
+  .personalizationContent {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    
+    .personalizationIcon {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      background: rgba(236, 79, 79, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .personalizationText {
+      flex-grow: 1;
+      
+      h4 {
+        color: #dc2626;
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+      }
+      
+      p {
+        color: #991b1b;
+        font-size: 0.85rem;
+        margin: 0;
+      }
+    }
+    
+    .personalizationArrow {
+      flex-shrink: 0;
+      animation: bounce 2s infinite;
+    }
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateX(0);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(3px);
   }
 }
 
@@ -373,9 +485,28 @@ onMounted(() => {
   padding: 1rem 2.5%;
   border-top: 1px solid #e5e5e5;
   z-index: 100;
+  display: flex;
+  gap: 0.75rem;
+  
+  .personalizationBtn {
+    flex: 1;
+    background-color: #ec4f4f;
+    color: #fff;
+    border: none;
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    
+    &:hover {
+      background-color: #dc2626;
+    }
+  }
   
   .returnBtn {
-    width: 100%;
+    flex: 1;
     background-color: #74bc1f;
     color: #fff;
     border: none;
