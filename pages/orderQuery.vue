@@ -763,7 +763,7 @@ onMounted(() => {
           letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
         }
         small {
-          color: var(--Warning-default, #ec4f4f);
+          color: $raphael-red-300;
 
           font-size: var(--Margin-m-16, 16px);
           font-style: normal;
@@ -776,7 +776,7 @@ onMounted(() => {
           }
 
           &.pending {
-            color: var(--Warning-default, #ec4f4f);
+            color: $raphael-red-300;
           }
 
           &.failed {
@@ -794,7 +794,7 @@ onMounted(() => {
 
     .orderQueryItemPrice {
       text-align: right;
-      color: var(--Warning-default, #ec4f4f);
+      color: $raphael-red-300;
 
       font-size: 1.125rem
       font-style: normal;
@@ -805,7 +805,7 @@ onMounted(() => {
     .orderStateTag {
       border-radius: var(--Radius-r-8, 8px);
       background: var(--warning-300-opacity-10, rgba(236, 79, 79, 0.1));
-      color: var(--Warning-default, #ec4f4f);
+      color: $raphael-red-300;
       font-family: "Noto Sans";
       font-size: 1rem;
       font-style: normal;
@@ -821,7 +821,7 @@ onMounted(() => {
 
       &.pending {
         background: var(--warning-300-opacity-10, rgba(236, 79, 79, 0.1));
-        color: var(--Warning-default, #ec4f4f);
+        color: $raphael-red-300;
       }
 
       &.failed {
@@ -858,7 +858,7 @@ small.processing {
 }
 .order-tip {
   margin-top: 8px;
-  color: var(--Warning-default, #ec4f4f);
+  color: $raphael-red-300;
   background-color: #fff0f0;
   border-radius: 8px;
   padding: 12px;

@@ -581,7 +581,7 @@ onMounted(() => {
       display: block;
       padding: 0;
       margin: 0;
-      color: var(--Warning-default, #ec4f4f);
+      color: $raphael-red-300;
       font-size: 12px;
       letter-spacing: 0.048px;
       margin-top: 0.25rem;

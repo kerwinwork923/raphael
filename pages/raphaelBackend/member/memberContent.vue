@@ -1273,7 +1273,7 @@ const isAnyAlertOpen = computed(() => {
         }
       }
       h3 {
-        color: var(--Primary-600, #2d3047);
+        color: $primary-600;
         text-align: center;
         font-size: 32px;
         font-style: normal;
@@ -1293,7 +1293,7 @@ const isAnyAlertOpen = computed(() => {
           flex-wrap: wrap;
         }
         h3 {
-          color: var(--Primary-600, #2d3047);
+          color: $primary-600;
           font-size: 1.5rem;
           font-weight: 500;
           letter-spacing: 0.12px;
@@ -1307,7 +1307,7 @@ const isAnyAlertOpen = computed(() => {
           margin: 1.5rem 0 1rem 0;
         }
         .memberInfoWarning {
-          color: var(--Warning-default, #ec4f4f);
+          color: $raphael-red-300;
           font-size: 1.125rem
           font-style: normal;
           font-weight: 400;
@@ -1343,7 +1343,7 @@ const isAnyAlertOpen = computed(() => {
               background: #fff4f4;
               color: #ec4f4f;
 
-              border: 1px solid var(--Warning-default, #ec4f4f);
+              border: 1px solid $raphael-red-300;
               background: var(--warning-300-opacity-10, rgba(236, 79, 79, 0.1));
             }
           }
@@ -1390,7 +1390,7 @@ const isAnyAlertOpen = computed(() => {
             margin-right: 4px;
           }
           .memberInfoListContent {
-            color: var(--Primary-600, #2d3047);
+            color: $primary-600;
           }
         }
         .memberInfoTagsGroup {

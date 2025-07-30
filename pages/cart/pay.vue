@@ -562,7 +562,7 @@ const showPrivacy = ref(false);
       align-items: center;
       justify-content: space-between;
       h5 {
-        color: var(--Warning-default, #ec4f4f);
+        color: $raphael-red-300;
 
         font-size: 1rem;
         font-style: normal;
@@ -571,7 +571,7 @@ const showPrivacy = ref(false);
         letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
       }
       h6 {
-        color: var(--Warning-default, #ec4f4f);
+        color: $raphael-red-300;
 
         font-size: 1rem;
         font-style: normal;
@@ -618,7 +618,7 @@ const showPrivacy = ref(false);
     justify-content: end;
     gap: 0.35rem;
     .allPrice {
-      color: var(--Warning-default, #ec4f4f);
+      color: $raphael-red-300;
       font-size: var(--Text-font-size-14, 14px);
       font-style: normal;
       font-weight: 700;

@@ -133,7 +133,7 @@ const emit = defineEmits(["close"]);
   }
   h3 {
     color: var(--Neutral-black, #1e1e1e);
-    font-size: var(--Text-font-size-20, 20px);
+    font-size: 1.25rem;
     font-style: normal;
     font-weight: 700;
     text-align: center;
@@ -191,7 +191,7 @@ const emit = defineEmits(["close"]);
         padding: 8px 12px;
         border-radius: 8px;
         background: var(--Primary-default, #74bc1f);
-        color: var(--Neutral-white, #fff);
+        color: $raphael-white;
         font-size: 18px;
         font-style: normal;
         font-weight: 400;

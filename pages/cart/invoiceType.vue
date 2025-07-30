@@ -238,7 +238,7 @@ onMounted(() => {
       appearance: none;
       border-radius: 50%;
       border: 1px solid var(--Neutral-300, #ccc);
-      background: var(--Neutral-white, #fff);
+      background: $raphael-white;
       cursor: pointer;
     }
     input:checked {

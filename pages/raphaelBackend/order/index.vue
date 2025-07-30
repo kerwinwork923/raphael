@@ -67,7 +67,6 @@
               </span>
             </div>
 
-
             <div
               class="goInfo"
               @click="handleGoInfo(order)"
@@ -143,8 +142,6 @@ const lastUpdated = ref("2025/01/27 14:30");
 // 分頁相關
 const currentPage = ref(1);
 const pageSize = ref(10);
-
-
 
 // 訂單介面定義
 interface Order {
@@ -301,15 +298,11 @@ const getStatusClass = (status: string) => {
   return statusMap[status] || "status-default";
 };
 
-
-
 const handleGoInfo = (order: Order) => {
   console.log("點擊了 goNext 圖標", order);
   // 導航到訂單詳情頁面
   router.push(`/raphaelBackend/order/${order.id}`);
 };
-
-
 
 // 分頁方法
 const gotoPage = (page: number) => {
@@ -366,7 +359,7 @@ onMounted(() => {
     border-radius: 8px;
     overflow: hidden;
     border-radius: 20px;
-    background: var(--Neutral-white, #fff);
+    background: $raphael-white;
     box-shadow: 0px 2px 20px 0px
       var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
     .table-list {
@@ -408,7 +401,7 @@ onMounted(() => {
       &.table-header {
         font-weight: 600;
         white-space: nowrap;
-        color: var(--Primary-600, #2d3047);
+        color: $primary-600;
         @include respond-to("lg") {
           display: none;
         }

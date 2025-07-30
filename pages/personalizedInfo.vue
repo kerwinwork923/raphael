@@ -676,7 +676,7 @@ onMounted(() => {
         transition: border 0.2s, color 0.2s;
         border-radius: 8px;
         border: 1px solid var(--Neutral-300, #ccc);
-        background: var(--Neutral-white, #fff);
+        background: $raphael-white;
         box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
         margin-bottom: 0.75rem;
         &.selected,
@@ -705,7 +705,7 @@ onMounted(() => {
         transition: border 0.2s, color 0.2s;
         border-radius: 8px;
         border: 1px solid var(--Neutral-300, #ccc);
-        background: var(--Neutral-white, #fff);
+        background: $raphael-white;
         box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
         margin-bottom: 0.75rem;
         &.selected,
@@ -1044,7 +1044,7 @@ onMounted(() => {
 }
 
 .info-msg {
-color: var(--Warning-default, #EC4F4F);
+color: $raphael-red-300;
 font-family: "Noto Sans";
 font-size: 1rem;
 font-style: normal;

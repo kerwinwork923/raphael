@@ -873,7 +873,7 @@ onMounted(() => {
         .product-name {
           color: var(--Neutral-black, #1e1e1e);
 
-          font-size: var(--Text-font-size-20, 20px);
+          font-size: 1.25rem;
           font-style: normal;
           font-weight: 700;
 
@@ -912,7 +912,7 @@ onMounted(() => {
       }
     }
     .section-error-return {
-      color: var(--Warning-default, #ec4f4f);
+      color: $raphael-red-300;
       font-size: 1rem;
       font-style: normal;
       font-weight: 400;
@@ -931,7 +931,7 @@ onMounted(() => {
   }
   .returnGoodsGroup {
     text-align: center;
-    color: var(--Warning-default, #ec4f4f);
+    color: $raphael-red-300;
     font-size: 1rem;
     font-style: normal;
     font-weight: 400;

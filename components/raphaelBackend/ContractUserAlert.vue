@@ -143,7 +143,7 @@ const yearlyGroup = computed(() => {
 
   transform: translate(-50%, -50%);
 
-  border-radius: var(--Radius-r-20, 20px);
+  border-radius: 20px;
   border: 3px solid var(--Primary-default, #1ba39b);
   background: var(--neutral-white-opacity-30, rgba(255, 255, 255, 0.3));
   box-shadow: 0px 2px 20px 0px
@@ -188,7 +188,7 @@ const yearlyGroup = computed(() => {
       padding: 2px 4px;
     }
     h3 {
-      color: var(--Primary-600, #2d3047);
+      color: $primary-600;
       font-size: var(--Text-font-size-24, 20px);
       font-style: normal;
       font-weight: 700;
@@ -230,7 +230,7 @@ const yearlyGroup = computed(() => {
     .ContractUserAlertSubDate {
       width: 40%;
       border-radius: var(--Radius-r-50, 50px);
-      background: var(--Neutral-white, #fff);
+      background: $raphael-white;
       box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
 
       .dp__input {
@@ -264,7 +264,7 @@ const yearlyGroup = computed(() => {
       margin-bottom: 8px;
 
       h5 {
-        color: var(--Primary-600, #2d3047);
+        color: $primary-600;
         font-size: 1.125rem
         font-style: normal;
         font-weight: 400;
@@ -291,7 +291,7 @@ const yearlyGroup = computed(() => {
       overflow: hidden;
       margin-bottom: 10px;
       border-radius: 50px;
-      background: var(--Neutral-white, #fff);
+      background: $raphael-white;
       box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.25) inset;
     }
 
@@ -326,14 +326,14 @@ const yearlyGroup = computed(() => {
     }
   }
   .ContractUserAlertContent {
-    border-radius: var(--Radius-r-20, 20px);
-    background: var(--Neutral-white, #fff);
+    border-radius: 20px;
+    background: $raphael-white;
     box-shadow: 0px 2px 20px 0px
       var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
     padding: 0.5rem 1rem;
     margin-top: 0.75rem;
     h3 {
-      color: var(--Primary-600, #2d3047);
+      color: $primary-600;
 
       font-size: var(--Text-font-size-24, 20px);
       font-style: normal;
@@ -368,7 +368,7 @@ const yearlyGroup = computed(() => {
     left: 50%;
     .closeBtn {
       border-radius: var(--Radius-r-50, 50px);
-      background: var(--Neutral-white, #fff);
+      background: $raphael-white;
       box-shadow: 0px 2px 20px 0px
         var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
       padding: 0.25rem;

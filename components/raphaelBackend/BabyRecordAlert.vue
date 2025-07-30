@@ -168,7 +168,7 @@ watch([() => detailList, dateRange], build, { deep: true });
   max-height: 85%;
   transform: translate(-50%, -50%);
 
-  border-radius: var(--Radius-r-20, 20px);
+  border-radius: 20px;
   border: 3px solid var(--Primary-default, #1ba39b);
   background: var(--neutral-white-opacity-30, rgba(255, 255, 255, 0.3));
   box-shadow: 0px 2px 20px 0px
@@ -211,7 +211,7 @@ watch([() => detailList, dateRange], build, { deep: true });
       padding: 2px 4px;
     }
     h3 {
-      color: var(--Primary-600, #2d3047);
+      color: $primary-600;
       font-size: var(--Text-font-size-24, 20px);
       font-style: normal;
       font-weight: 700;
@@ -235,7 +235,7 @@ watch([() => detailList, dateRange], build, { deep: true });
   .babyRecordAlertContent1Group {
     margin-top: 0.5rem;
     border-radius: 20px;
-    background: var(--Neutral-white, #fff);
+    background: $raphael-white;
     box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
     padding: 1rem;
     .babyRecordAlertContent1TitleGroup {
@@ -244,7 +244,7 @@ watch([() => detailList, dateRange], build, { deep: true });
       align-items: center;
     }
     h5 {
-      color: var(--Primary-600, #2d3047);
+      color: $primary-600;
 
       font-size: 20px;
       font-style: normal;
@@ -271,7 +271,7 @@ watch([() => detailList, dateRange], build, { deep: true });
       margin-bottom: 0.5rem;
     }
     h3 {
-      color: var(--Primary-600, #2d3047);
+      color: $primary-600;
       font-family: "Noto Sans";
       font-size: 24px;
       font-style: normal;
@@ -302,7 +302,7 @@ watch([() => detailList, dateRange], build, { deep: true });
       background-color: #fff;
       margin-top: 0.5rem;
       border-radius: 20px;
-      background: var(--Neutral-white, #fff);
+      background: $raphael-white;
       box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
       padding: 1rem;
       width: 49%;
@@ -313,7 +313,7 @@ watch([() => detailList, dateRange], build, { deep: true });
     .babyRecordAlertContentTitle {
       display: flex;
       justify-content: space-between;
-      color: var(--Warning-default, #ec4f4f);
+      color: $raphael-red-300;
       text-align: center;
       font-family: "Noto Sans";
       font-size: 16px;
@@ -322,7 +322,7 @@ watch([() => detailList, dateRange], build, { deep: true });
       letter-spacing: 0.5px;
     }
     h3 {
-      color: var(--Primary-600, #2d3047);
+      color: $primary-600;
       font-family: "Noto Sans";
       font-size: 20px;
       font-style: normal;
@@ -338,7 +338,7 @@ watch([() => detailList, dateRange], build, { deep: true });
       color: #74bc1f;
     }
     .value {
-      color: var(--Primary-600, #2d3047);
+      color: $primary-600;
       font-size: 24px;
       font-style: normal;
       font-weight: 700;
@@ -365,7 +365,7 @@ watch([() => detailList, dateRange], build, { deep: true });
     img {
       padding: 4px;
       border-radius: var(--Radius-r-50, 50px);
-      background: var(--Neutral-white, #fff);
+      background: $raphael-white;
       box-shadow: 0px 2px 20px 0px
         var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
     }

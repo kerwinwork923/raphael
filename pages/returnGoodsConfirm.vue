@@ -134,7 +134,7 @@ function submitApplication() {
         .productName {
           color: var(--Neutral-black, #1e1e1e);
 
-          font-size: var(--Text-font-size-20, 20px);
+          font-size: 1.25rem;
           font-style: normal;
           font-weight: 700;
 

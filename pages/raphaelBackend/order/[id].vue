@@ -377,7 +377,7 @@ onMounted(() => {
     border-radius: 12px;
 
     h1 {
-      color: var(--Primary-600, #2d3047);
+      color: $primary-600;
       font-size: 36px;
       font-style: normal;
       font-weight: 700;
@@ -435,7 +435,7 @@ onMounted(() => {
     border-radius: 8px;
     overflow: hidden;
     border-radius: 20px;
-    background: var(--Neutral-white, #fff);
+    background: $raphael-white;
     box-shadow: 0px 2px 20px 0px
       var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
 
@@ -480,7 +480,7 @@ onMounted(() => {
       &.table-header {
         font-weight: 600;
         white-space: nowrap;
-        color: var(--Primary-600, #2d3047);
+        color: $primary-600;
         @include respond-to("lg") {
           display: none;
         }
@@ -555,8 +555,8 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  border-radius: var(--Radius-r-20, 20px);
-  background: var(--Neutral-white, #fff);
+  border-radius: 20px;
+  background: $raphael-white;
   box-shadow: -1px 0px 20px 0px
     var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
   margin: 1rem;
@@ -587,7 +587,7 @@ onMounted(() => {
       width: 300px;
     }
     @include respond-to("lg") {
-      background: var(--Neutral-white, #fff);
+      background: $raphael-white;
       box-shadow: -1px 0px 20px 0px
         var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
 
@@ -641,8 +641,8 @@ onMounted(() => {
     @include scrollbarStyle();
 
     .orderBarInfo {
-      border-radius: var(--Radius-r-20, 20px);
-      background: var(--Neutral-white, #fff);
+      border-radius: 20px;
+      background: $raphael-white;
       box-shadow: 0px 2px 20px 0px
         var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
       padding: 1rem;
@@ -661,8 +661,8 @@ onMounted(() => {
     }
 
     h3 {
-      color: var(--Primary-600, #2d3047);
-      font-size: var(--Text-font-size-24, 24px);
+      color: $primary-600;
+      font-size: 1.5rem;
       font-style: normal;
       font-weight: 400;
       letter-spacing: 0.12px;
@@ -692,7 +692,7 @@ onMounted(() => {
       }
 
       .orderBarInfoItemValue {
-        color: var(--Primary-600, #2d3047);
+        color: $primary-600;
         font-size: 1.125rem;
         font-style: normal;
         font-weight: 400;
@@ -700,7 +700,7 @@ onMounted(() => {
         word-break: break-all;
 
         &.orderBarInfoItemValueRed {
-          color: #ec4f4f;
+          color: $raphael-red-300;
         }
       }
     }
@@ -711,17 +711,17 @@ onMounted(() => {
       margin-bottom: 0.5rem;
 
       .orderBarInfoItemTitle {
-        color: var(--Warning-default, #ec4f4f);
-        font-size: var(--Text-font-size-20, 20px);
+        color: $raphael-red-300;
+        font-size: 1.25rem;
         font-style: normal;
         font-weight: 400;
         letter-spacing: 0.1px;
       }
 
       .orderBarInfoItemValue {
-        color: var(--Warning-default, #ec4f4f);
+        color: $raphael-red-300;
         text-align: right;
-        font-size: var(--Text-font-size-20, 20px);
+        font-size: 1.25rem;
         font-style: normal;
         font-weight: 700;
         letter-spacing: 0.1px;
@@ -729,7 +729,7 @@ onMounted(() => {
     }
 
     .orderBarInfoContent {
-      color: var(--Primary-600, #2d3047);
+      color: $primary-600;
       font-size: 1rem;
       line-height: 1.5;
     }

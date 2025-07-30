@@ -63,7 +63,7 @@ const handleRefresh = () => {
     align-items: center;
     white-space: nowrap;
     gap: 8px;
-    color: var(--Primary-600, #2d3047);
+    color: $primary-600;
     text-align: center;
 
     font-size: 36px;

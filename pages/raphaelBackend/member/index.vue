@@ -290,7 +290,7 @@ function scrollToTop() {
     border-radius: 8px;
     overflow: hidden;
     border-radius: 20px;
-    background: var(--Neutral-white, #fff);
+    background: $raphael-white;
     box-shadow: 0px 2px 20px 0px
       var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
     .table-list {
@@ -342,7 +342,7 @@ function scrollToTop() {
       &.table-header {
         font-weight: 600;
         white-space: nowrap;
-        color: var(--Primary-600, #2d3047);
+        color: $primary-600;
         @include respond-to("lg") {
           display: none;
         }
@@ -404,9 +404,9 @@ function scrollToTop() {
           }
 
           .cellTagWarning {
-            border: 1px solid var(--Warning-default, #ec4f4f);
+            border: 1px solid $raphael-red-300;
             background: var(--warning-300-opacity-10, rgba(236, 79, 79, 0.1));
-            color: var(--Warning-default, #ec4f4f);
+            color: $raphael-red-300;
           }
           .cellTag2 {
             border: 1px solid var(--Neutral-300, #ccc);
@@ -520,7 +520,7 @@ function scrollToTop() {
     }
     .chip--warning {
       overflow: hidden;
-      color: var(--Warning-default, #ec4f4f);
+      color: $raphael-red-300;
       font-style: normal;
       font-weight: 400;
       letter-spacing: var(--Title-Medium-Tracking, 0.15px);

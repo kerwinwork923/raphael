@@ -215,7 +215,7 @@ const handleStatusChange = (event: Event) => {
     border: none;
     width: 100%;
     border-radius: var(--Radius-r-50, 50px);
-    background: var(--Neutral-white, #fff);
+    background: $raphael-white;
     box-shadow: 0px 2px 20px 0px
       var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
     transition: all ease 0.2s;
@@ -286,7 +286,7 @@ const handleStatusChange = (event: Event) => {
     width: 100%;
     border: none;
     border-radius: var(--Radius-r-50, 50px);
-    background: var(--Neutral-white, #fff);
+    background: $raphael-white;
     box-shadow: 0px 2px 20px 0px
       var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
     transition: all ease 0.2s;

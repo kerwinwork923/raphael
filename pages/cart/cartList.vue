@@ -507,7 +507,7 @@ onMounted(() => {
       align-items: center;
       gap: 0.5rem;
       h5 {
-        color: var(--Warning-default, #ec4f4f);
+        color: $raphael-red-300;
         text-align: center;
         font-size: var(16px);
         font-style: normal;
@@ -517,7 +517,7 @@ onMounted(() => {
       button {
         background: var(--Primary-default, #74bc1f);
         border: none;
-        color: var(--Neutral-white, #fff);
+        color: $raphael-white;
         font-size: 18px;
         font-style: normal;
         font-weight: 400;

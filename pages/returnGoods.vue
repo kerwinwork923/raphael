@@ -295,7 +295,7 @@ import TitleMenu from "@/components/TitleMenu.vue";
       border-radius: 8px;
 
       border: 1px solid var(--Neutral-300, #ccc);
-      background: var(--Neutral-white, #fff);
+      background: $raphael-white;
       box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
       transition: all 0.3s ease;
       padding: 0.5rem;
@@ -370,7 +370,7 @@ import TitleMenu from "@/components/TitleMenu.vue";
     padding: 1rem 1rem 3.125rem 1rem;
     background-color: $raphael-gray-100;
     z-index: 99;
-    color: var(--Neutral-white, #fff);
+    color: $raphael-white;
     font-size: 18px;
     font-style: normal;
     letter-spacing: 0.09px;

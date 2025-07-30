@@ -666,9 +666,9 @@ export default {
       padding: 6px 12px;
       width: 100%;
       border-radius: 12px;
-      border: 1px solid var(--Neutral-white, #fff);
+      border: 1px solid $raphael-white;
       background: rgba(255, 255, 255, 0.1);
-      box-shadow: 0px 0px 12px 0px var(--Neutral-white, #fff) inset,
+      box-shadow: 0px 0px 12px 0px $raphael-white inset,
         0px 0px 6px 0px rgba(0, 0, 0, 0.08);
       backdrop-filter: blur(4px);
       gap: 0.25rem;
@@ -723,9 +723,9 @@ export default {
   .detailDataGroup {
     margin-top: 1.5rem;
     border-radius: 12px;
-    border: 1px solid var(--Neutral-white, #fff);
+    border: 1px solid $raphael-white;
     background: rgba(255, 255, 255, 0.1);
-    box-shadow: 0px 0px 12px 0px var(--Neutral-white, #fff) inset,
+    box-shadow: 0px 0px 12px 0px $raphael-white inset,
       0px 0px 6px 0px rgba(0, 0, 0, 0.08);
     backdrop-filter: blur(4px);
     padding: 1rem;
@@ -752,7 +752,7 @@ export default {
       padding: 0.5rem;
       background: rgba(255, 255, 255, 0.5);
       border-radius: 0.5rem;
-      box-shadow: 0px 0px 12px 0px var(--Neutral-white, #fff) inset,
+      box-shadow: 0px 0px 12px 0px $raphael-white inset,
         0px 0px 6px 0px rgba(0, 0, 0, 0.08);
       &:last-child {
         margin-bottom: 0;
@@ -835,9 +835,9 @@ export default {
   .personalizedAdviceGroup {
     margin-top: 1.5rem;
     border-radius: 12px;
-    border: 1px solid var(--Neutral-white, #fff);
+    border: 1px solid $raphael-white;
     background: rgba(255, 255, 255, 0.1);
-    box-shadow: 0px 0px 12px 0px var(--Neutral-white, #fff) inset,
+    box-shadow: 0px 0px 12px 0px $raphael-white inset,
       0px 0px 6px 0px rgba(0, 0, 0, 0.08);
     backdrop-filter: blur(4px);
     padding: 1rem;

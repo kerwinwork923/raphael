@@ -100,7 +100,7 @@ defineEmits(["close"]);
   max-height: 85%;
   transform: translate(-50%, -50%);
 
-  border-radius: var(--Radius-r-20, 20px);
+  border-radius: 20px;
   border: 3px solid var(--Primary-default, #1ba39b);
   background: var(--neutral-white-opacity-30, rgba(255, 255, 255, 0.3));
   box-shadow: 0px 2px 20px 0px
@@ -143,7 +143,7 @@ defineEmits(["close"]);
       padding: 2px 4px;
     }
     h3 {
-      color: var(--Primary-600, #2d3047);
+      color: $primary-600;
       font-size: var(--Text-font-size-24, 20px);
       font-style: normal;
       font-weight: 700;
@@ -167,7 +167,7 @@ defineEmits(["close"]);
   .lifeDetectAlertContent1Group {
     margin-top: 0.5rem;
     border-radius: 20px;
-    background: var(--Neutral-white, #fff);
+    background: $raphael-white;
     box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
     padding: 1rem;
     .lifeDetectAlertContent1TitleGroup {
@@ -176,7 +176,7 @@ defineEmits(["close"]);
       align-items: center;
     }
     h5 {
-      color: var(--Primary-600, #2d3047);
+      color: $primary-600;
 
       font-size: 20px;
       font-style: normal;
@@ -203,7 +203,7 @@ defineEmits(["close"]);
       margin-bottom: 0.5rem;
     }
     h3 {
-      color: var(--Primary-600, #2d3047);
+      color: $primary-600;
       font-family: "Noto Sans";
       font-size: 24px;
       font-style: normal;
@@ -225,11 +225,11 @@ defineEmits(["close"]);
   .lifeDetectAlertContent2Group {
     margin-top: 0.5rem;
     border-radius: 20px;
-    background: var(--Neutral-white, #fff);
+    background: $raphael-white;
     box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
     padding: 1rem;
     h3 {
-      color: var(--Primary-600, #2d3047);
+      color: $primary-600;
       font-size: 20px;
       font-style: normal;
       font-weight: 400;
@@ -264,13 +264,13 @@ defineEmits(["close"]);
             letter-spacing: 0.048px;
           }
           .up {
-            color: var(--Warning-default, #ec4f4f);
+            color: $raphael-red-300;
           }
         }
       }
       .time {
         margin-top: 0.15rem;
-        color: var(--Primary-600, #2d3047);
+        color: $primary-600;
 
         font-size: 24px;
         font-style: normal;
@@ -302,7 +302,7 @@ defineEmits(["close"]);
       background-color: #fff;
       margin-top: 0.5rem;
       border-radius: 20px;
-      background: var(--Neutral-white, #fff);
+      background: $raphael-white;
       box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
       padding: 1rem;
       width: 49%;
@@ -313,7 +313,7 @@ defineEmits(["close"]);
     .lifeDetectAlertContentTitle {
       display: flex;
       justify-content: space-between;
-      color: var(--Warning-default, #ec4f4f);
+      color: $raphael-red-300;
       text-align: center;
       font-family: "Noto Sans";
       font-size: 16px;
@@ -322,7 +322,7 @@ defineEmits(["close"]);
       letter-spacing: 0.5px;
     }
     h3 {
-      color: var(--Primary-600, #2d3047);
+      color: $primary-600;
       font-family: "Noto Sans";
       font-size: 20px;
       font-style: normal;
@@ -338,7 +338,7 @@ defineEmits(["close"]);
       color: #74bc1f;
     }
     .value {
-      color: var(--Primary-600, #2d3047);
+      color: $primary-600;
       font-size: 24px;
       font-style: normal;
       font-weight: 700;
@@ -361,7 +361,7 @@ defineEmits(["close"]);
     img {
       padding: 4px;
       border-radius: var(--Radius-r-50, 50px);
-      background: var(--Neutral-white, #fff);
+      background: $raphael-white;
       box-shadow: 0px 2px 20px 0px
         var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
 

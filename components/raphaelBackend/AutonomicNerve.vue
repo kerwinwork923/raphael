@@ -464,7 +464,7 @@ defineEmits(["close"]);
   max-height: 85%;
   transform: translate(-50%, -50%);
 
-  border-radius: var(--Radius-r-20, 20px);
+  border-radius: 20px;
   border: 3px solid var(--Primary-default, #1ba39b);
   background: var(--neutral-white-opacity-30, rgba(255, 255, 255, 0.3));
   box-shadow: 0px 2px 20px 0px
@@ -507,7 +507,7 @@ defineEmits(["close"]);
       padding: 2px 4px;
     }
     h3 {
-      color: var(--Primary-600, #2d3047);
+      color: $primary-600;
       font-size: var(--Text-font-size-24, 20px);
       font-style: normal;
       font-weight: 700;
@@ -531,11 +531,11 @@ defineEmits(["close"]);
   .AutonomicNerveAlertContent1Group {
     margin-top: 0.5rem;
     border-radius: 20px;
-    background: var(--Neutral-white, #fff);
+    background: $raphael-white;
     box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
     padding: 1rem;
     h5 {
-      color: var(--Primary-600, #2d3047);
+      color: $primary-600;
 
       font-size: 20px;
       font-style: normal;
@@ -562,7 +562,7 @@ defineEmits(["close"]);
       margin-bottom: 0.5rem;
     }
     h3 {
-      color: var(--Primary-600, #2d3047);
+      color: $primary-600;
       font-family: "Noto Sans";
       font-size: 24px;
       font-style: normal;
@@ -583,7 +583,7 @@ defineEmits(["close"]);
   .AutonomicNerveAlertContent2Group {
     margin-top: 0.5rem;
     border-radius: 20px;
-    background: var(--Neutral-white, #fff);
+    background: $raphael-white;
     box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
     padding: 1rem;
 
@@ -668,7 +668,7 @@ defineEmits(["close"]);
         width: 100%;
       }
       border-radius: 20px;
-      background: var(--Neutral-white, #fff);
+      background: $raphael-white;
       box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
       padding: 1rem;
       margin-top: 0.5rem;
@@ -676,7 +676,7 @@ defineEmits(["close"]);
         display: flex;
         justify-content: space-between;
         h3 {
-          color: var(--Primary-600, #2d3047);
+          color: $primary-600;
 
           /* Typography/medium-r-20 */
           font-family: "Noto Sans";
@@ -698,7 +698,7 @@ defineEmits(["close"]);
           letter-spacing: 0.5px;
         }
         .up {
-          color: var(--Warning-default, #ec4f4f);
+          color: $raphael-red-300;
         }
         .down {
           color: var(--Warning-default, #74bc1f);
@@ -716,7 +716,7 @@ defineEmits(["close"]);
         margin-top: 0.25rem;
       }
       .value {
-        color: var(--Primary-600, #2d3047);
+        color: $primary-600;
         font-size: 20px;
         font-style: normal;
         font-weight: 700;
@@ -755,7 +755,7 @@ defineEmits(["close"]);
 
     img {
       border-radius: var(--Radius-r-50, 50px);
-      background: var(--Neutral-white, #fff);
+      background: $raphael-white;
       box-shadow: 0px 2px 20px 0px
         var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
       padding: 0.25rem;

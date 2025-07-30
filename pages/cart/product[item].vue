@@ -378,8 +378,8 @@ onMounted(() => {
   z-index: 100;
   min-height: 220px;
   width: 100%;
-  border-radius: var(--Radius-r-20, 20px) var(--Radius-r-20, 20px) 0 0;
-  background: var(--Neutral-white, #fff);
+  border-radius: 20px 20px 0 0;
+  background: $raphael-white;
   box-shadow: 0px -4px 12px 0px rgba(0, 0, 0, 0.25);
   padding: 1rem;
   .closeBtn {

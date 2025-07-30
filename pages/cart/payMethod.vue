@@ -185,7 +185,7 @@ onMounted(() => {
       letter-spacing: 0.5px;
     }
     h6 {
-      color: var(--Warning-default, #ec4f4f);
+      color: $raphael-red-300;
       text-align: center;
 
       font-size: var(--Text-font-size-14, 14px);
@@ -242,7 +242,7 @@ onMounted(() => {
       appearance: none;
       border-radius: 50%;
       border: 1px solid var(--Neutral-300, #ccc);
-      background: var(--Neutral-white, #fff);
+      background: $raphael-white;
     }
     input:checked {
       border: 1px solid var(--Primary-default, #74bc1f);
