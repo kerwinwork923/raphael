@@ -457,7 +457,7 @@ onMounted(() => {
         transition: all 0.25s ease;
         &:hover {
           border-radius: 50%;
-          box-shadow: inset 0px 2px 6px -1px $raphael-cyan-500;
+          box-shadow: inset 0px 2px 6px -1px $primary-200;
         }
         @include respond-to("lg") {
           top: 29px;
@@ -469,7 +469,7 @@ onMounted(() => {
   .status-tag {
     display: inline-block;
     padding: 4px 12px;
-    border-radius: 20px;
+    border-radius: 4px;
     font-size: 12px;
     font-weight: 500;
     text-align: center;

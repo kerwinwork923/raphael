@@ -105,23 +105,29 @@
       </div>
       <div v-else class="orderQueryContent">
         <div class="orderStateBlock">
-          <div 
+          <div
             class="orderStateBlockBlockTag"
-            :class="{ orderStateBlockBlockTagActive: currentStatus === 'processing' }"
+            :class="{
+              orderStateBlockBlockTagActive: currentStatus === 'processing',
+            }"
             @click="switchStatus('processing')"
           >
             訂單處理中
           </div>
-          <div 
+          <div
             class="orderStateBlockBlockTag"
-            :class="{ orderStateBlockBlockTagActive: currentStatus === 'shipped' }"
+            :class="{
+              orderStateBlockBlockTagActive: currentStatus === 'shipped',
+            }"
             @click="switchStatus('shipped')"
           >
             已出貨
           </div>
-          <div 
+          <div
             class="orderStateBlockBlockTag"
-            :class="{ orderStateBlockBlockTagActive: currentStatus === 'returned' }"
+            :class="{
+              orderStateBlockBlockTagActive: currentStatus === 'returned',
+            }"
             @click="switchStatus('returned')"
           >
             已退貨
@@ -165,8 +171,11 @@
           <div class="orderQueryHR"></div>
 
           <!-- 已出貨狀態的特殊顯示 -->
-          <div 
-            v-if="getOrderStage(order).type === 'done' && currentStatus === 'shipped'"
+          <div
+            v-if="
+              getOrderStage(order).type === 'done' &&
+              currentStatus === 'shipped'
+            "
             class="shipped-info"
           >
             <div class="shipped-tip">
@@ -187,8 +196,11 @@
           </div>
 
           <!-- 已退貨狀態的特殊顯示 -->
-          <div 
-            v-if="getOrderStage(order).type === 'returned' && currentStatus === 'returned'"
+          <div
+            v-if="
+              getOrderStage(order).type === 'returned' &&
+              currentStatus === 'returned'
+            "
             class="returned-info"
           >
             <div class="returned-tip">
@@ -216,7 +228,7 @@
             {{ getOrderStage(order).tip }}
           </div>
         </div>
-        
+
         <!-- 空狀態顯示 -->
         <div v-if="filteredOrderList.length === 0" class="empty-state">
           <div class="empty-state-content">
@@ -243,7 +255,7 @@ const recheckoutLoading = ref(false);
 const showQuestionBox = ref(false);
 const selectedOrder = ref(null);
 const loading = ref(true);
-const currentStatus = ref('processing'); // 當前選中的狀態
+const currentStatus = ref("processing"); // 當前選中的狀態
 
 // 假資料，實際可用 API
 const recommendedProducts = ref([]);
@@ -525,10 +537,12 @@ const getOrderStage = (order) => {
   }
 
   // 已出貨 - 檢查多種可能的出貨狀態
-  if (order.ShipStatus === "已出貨" || 
-      order.ReceiveStatus === "已收貨" || 
-      order.StateName === "已出貨" ||
-      order.State === "2") {
+  if (
+    order.ShipStatus === "已出貨" ||
+    order.ReceiveStatus === "已收貨" ||
+    order.StateName === "已出貨" ||
+    order.State === "2"
+  ) {
     return { status: "已出貨", tip: "訂單已出貨", type: "done" };
   }
 
@@ -544,7 +558,7 @@ const getOrderStage = (order) => {
     if (allItemsFilled) {
       // 使用 A1State 作為個人化資訊完成時間
       let personalInfoTime = new Date(0);
-      
+
       if (order.A1State) {
         // 解析 A1State 格式：2025/07/16 17:25 -> 2025/07/16 17:25
         personalInfoTime = new Date(order.A1State.replace(/\//g, "-"));
@@ -598,20 +612,20 @@ const switchStatus = (status) => {
 // 根據當前狀態過濾訂單
 const filteredOrderList = computed(() => {
   if (!orderList.value.length) return [];
-  
-  return orderList.value.filter(order => {
+
+  return orderList.value.filter((order) => {
     const stage = getOrderStage(order);
-    
+
     switch (currentStatus.value) {
-      case 'processing':
+      case "processing":
         // 訂單處理中：未付款、未製作、製作中
-        return ['unpaid', 'unfilled', 'shipping'].includes(stage.type);
-      case 'shipped':
+        return ["unpaid", "unfilled", "shipping"].includes(stage.type);
+      case "shipped":
         // 已出貨：已完成
-        return stage.type === 'done';
-      case 'returned':
+        return stage.type === "done";
+      case "returned":
         // 已退貨：已退貨
-        return stage.type === 'returned';
+        return stage.type === "returned";
       default:
         return true;
     }
@@ -669,7 +683,7 @@ onMounted(() => {
       width: 100%;
 
       li {
-        color: var(--Neutral-500, #666);
+        color: $raphael-gray-500;
         font-size: 18px;
         font-style: normal;
         font-weight: 400;
@@ -720,7 +734,7 @@ onMounted(() => {
       }
     }
     .orderQueryItemMain2 {
-      color: var(--Neutral-500, #666);
+      color: $raphael-gray-500;
       text-align: center;
       font-family: "Noto Sans";
       font-size: 12px;
@@ -742,7 +756,7 @@ onMounted(() => {
         h3 {
           color: var(--Primary-hover, #65a31b);
 
-          font-size: var(--Text-font-size-18, 18px);
+          font-size: 1.125rem
           font-style: normal;
           font-weight: 700;
 
@@ -782,7 +796,7 @@ onMounted(() => {
       text-align: right;
       color: var(--Warning-default, #ec4f4f);
 
-      font-size: var(--Text-font-size-18, 18px);
+      font-size: 1.125rem
       font-style: normal;
       font-weight: 700;
 
@@ -793,7 +807,7 @@ onMounted(() => {
       background: var(--warning-300-opacity-10, rgba(236, 79, 79, 0.1));
       color: var(--Warning-default, #ec4f4f);
       font-family: "Noto Sans";
-      font-size: var(--Text-font-size-16, 16px);
+      font-size: 1rem;
       font-style: normal;
       font-weight: 700;
       line-height: 150%; /* 24px */
@@ -848,7 +862,7 @@ small.processing {
   background-color: #fff0f0;
   border-radius: 8px;
   padding: 12px;
-  font-size: var(--Text-font-size-16, 16px);
+  font-size: 1rem;
   font-style: normal;
   font-weight: 700;
   letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
@@ -877,17 +891,17 @@ small.processing {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
-  
+
   .orderStateBlockBlockTag {
-    
+
     padding: 8px 0;
-    color: var(--Neutral-500, #666);
+    color: $raphael-gray-500;
     font-size: 18px;
     font-weight: 400;
     letter-spacing: 0.09px;
     cursor: pointer;
     transition: color 0.3s ease;
-    
+
     &:hover {
       color: #74bc1f;
     }
@@ -901,7 +915,7 @@ small.processing {
 // 已出貨狀態樣式
 .shipped-info {
   margin-top: 8px;
-  
+
   .shipped-tip {
     display: flex;
     align-items: center;
@@ -913,7 +927,7 @@ small.processing {
     font-size: 16px;
     font-weight: 700;
     letter-spacing: 0.15px;
-    
+
     svg {
       cursor: pointer;
     }
@@ -923,7 +937,7 @@ small.processing {
 // 已退貨狀態樣式
 .returned-info {
   margin-top: 8px;
-  
+
   .returned-tip {
     display: flex;
     align-items: center;
@@ -935,7 +949,7 @@ small.processing {
     font-size: 16px;
     font-weight: 700;
     letter-spacing: 0.15px;
-    
+
     svg {
       cursor: pointer;
     }
@@ -946,7 +960,7 @@ small.processing {
 .empty-state {
   width: 100%;
   margin-top: 2rem;
-  
+
   .empty-state-content {
     display: flex;
     flex-direction: column;
@@ -954,13 +968,13 @@ small.processing {
     background: #fff;
     border-radius: 8px;
     padding: 2rem 0;
-    
+
     img {
       width: 160px;
       height: 160px;
       margin-bottom: 1rem;
     }
-    
+
     h3 {
       color: #000;
       font-size: 18px;

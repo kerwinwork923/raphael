@@ -1,5 +1,5 @@
 <template>
-  <div class="invoiceSelect1Wrap" >
+  <div class="invoiceSelect1Wrap">
     <CartTitleBar title="編輯電子發票" href="/cart/invoiceType" />
     <h5>請輸入您常用的信箱</h5>
     <div class="invoiceSelect1InputGroup">
@@ -9,10 +9,10 @@
       </div>
     </div>
     <div class="btnGroup">
-        <button @click="submit" :disabled="isLoading">
-          {{ isLoading ? '提交中...' : '提交' }}
-        </button>
-      </div>
+      <button @click="submit" :disabled="isLoading">
+        {{ isLoading ? "提交中..." : "提交" }}
+      </button>
+    </div>
   </div>
 </template>
 
@@ -21,9 +21,11 @@ const router = useRouter();
 const email = ref("");
 const isLoading = ref(false);
 const userData = JSON.parse(localStorage.getItem("userData"));
-  const setInvoice = async function(){
-    try {
-      const { data } = await useFetch("https://23700999.com:8081/HMA/api/fr/maSetInvoice", {
+const setInvoice = async function () {
+  try {
+    const { data } = await useFetch(
+      "https://23700999.com:8081/HMA/api/fr/maSetInvoice",
+      {
         method: "POST",
         body: {
           MID: userData.MID,
@@ -31,46 +33,46 @@ const userData = JSON.parse(localStorage.getItem("userData"));
           MAID: userData.MAID,
           Mobile: userData.Mobile,
           Lang: "zhtw",
-          InvoiceID : "1", // 1:電子發票2.載具3.三聯式發票
-          Content : email.value,
+          InvoiceID: "1", // 1:電子發票2.載具3.三聯式發票
+          Content: email.value,
         },
-      });
-      
-      if (data.value?.Result === "OK") {
-        return true;
-      } else {
-        alert("設定發票失敗，請稍後再試");
-        return false;
       }
-    } catch (error) {
-      console.error("設定發票錯誤：", error);
+    );
+
+    if (data.value?.Result === "OK") {
+      return true;
+    } else {
       alert("設定發票失敗，請稍後再試");
       return false;
     }
+  } catch (error) {
+    console.error("設定發票錯誤：", error);
+    alert("設定發票失敗，請稍後再試");
+    return false;
   }
-  
-  const submit = async function(){
-    //email防呆
-    if(!email.value){
-      alert("請輸入您的信箱");
-      return;
-    }
-    if(!email.value.includes("@")){
-      alert("請輸入正確的信箱");
-      return;
-    }
-    
-    isLoading.value = true;
-    try {
-      const success = await setInvoice();
-      if (success) {
-        router.push("/cart/invoiceType");
-      }
-    } finally {
-      isLoading.value = false;
-    }
+};
+
+const submit = async function () {
+  //email防呆
+  if (!email.value) {
+    alert("請輸入您的信箱");
+    return;
+  }
+  if (!email.value.includes("@")) {
+    alert("請輸入正確的信箱");
+    return;
   }
 
+  isLoading.value = true;
+  try {
+    const success = await setInvoice();
+    if (success) {
+      router.push("/cart/invoiceType");
+    }
+  } finally {
+    isLoading.value = false;
+  }
+};
 </script>
 <style lang="scss" scoped>
 .invoiceSelect1Wrap {
@@ -89,8 +91,8 @@ const userData = JSON.parse(localStorage.getItem("userData"));
     border-radius: 10px;
   }
   h5 {
-    color: var(--Neutral-500, #666);
-  
+    color: $raphael-gray-500;
+
     margin-top: 1rem;
     font-size: 16px;
     font-style: normal;
@@ -159,13 +161,12 @@ const userData = JSON.parse(localStorage.getItem("userData"));
 
       background: var(--Primary-default, #74bc1f);
       cursor: pointer;
-      
+
       &:disabled {
         background: var(--Neutral-300, #ccc);
         cursor: not-allowed;
       }
     }
   }
-
 }
 </style>

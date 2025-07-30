@@ -320,9 +320,9 @@ onMounted(() => {
     ul {
       margin-top: 0.25rem;
       li {
-        color: var(--Neutral-500, #666);
+        color: $raphael-gray-500;
 
-        font-size: var(--Text-font-size-16, 16px);
+        font-size: 1rem;
         font-style: normal;
         font-weight: 400;
         line-height: 150%;
@@ -426,7 +426,7 @@ onMounted(() => {
     justify-content: space-between;
     align-items: center;
     h6 {
-      color: var(--Neutral-500, #666);
+      color: $raphael-gray-500;
       text-align: center;
       font-family: "Noto Sans";
       font-size: 16px;

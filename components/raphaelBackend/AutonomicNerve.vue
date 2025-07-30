@@ -495,7 +495,7 @@ defineEmits(["close"]);
     text-align: center;
     margin-bottom: 0.75rem;
     .HRVUserAlertHR {
-      background: var(--Primary-200, #b1c0d8);
+      background: $primary-200;
       width: 100%;
       height: 1px;
     }
@@ -517,14 +517,14 @@ defineEmits(["close"]);
       margin-top: 0.15rem;
       color: var(--Primary-default, #1ba39b);
       font-family: "Noto Sans";
-      font-size: var(--Text-font-size-18, 18px);
+      font-size: 1.125rem
       font-style: normal;
       font-weight: 400;
       letter-spacing: 0.09px;
     }
   }
   .AutonomicNerveAlertTitleHR {
-    background: var(--Primary-200, #b1c0d8);
+    background: $primary-200;
     width: 100%;
     height: 1px;
   }
@@ -571,7 +571,7 @@ defineEmits(["close"]);
       letter-spacing: 0.12px;
     }
     h4 {
-      color: var(--Primary-200, #b1c0d8);
+      color: $primary-200
 
       font-size: 14px;
       font-style: normal;
@@ -596,7 +596,7 @@ defineEmits(["close"]);
         flex-wrap: wrap;
       }
       h5 {
-        color: var(--Primary-200, #b1c0d8);
+        color: $primary-200
         font-family: "Noto Sans";
         font-size: 14px;
         font-style: normal;
@@ -705,7 +705,7 @@ defineEmits(["close"]);
         }
       }
       h4 {
-        color: var(--Primary-200, #b1c0d8);
+        color: $primary-200
 
         /* Typography/small-r-14 */
         font-family: "Noto Sans";

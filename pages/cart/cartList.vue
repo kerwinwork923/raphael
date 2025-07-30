@@ -382,7 +382,7 @@ onMounted(() => {
 
           h3 {
             color: var(--Neutral-black, #1e1e1e);
-            font-size: var(--Text-font-size-16, 16px);
+            font-size: 1rem;
             font-style: normal;
             font-weight: 700;
             font-size: 20px;
@@ -401,14 +401,14 @@ onMounted(() => {
             h6 {
               color: var(--Primary-default, #74bc1f);
 
-              font-size: var(--Text-font-size-16, 16px);
+              font-size: 1rem;
               font-style: normal;
               font-weight: 700;
             }
             small {
               color: var(--Neutral-400, #b3b3b3);
 
-              font-size: var(--Text-font-size-16, 16px);
+              font-size: 1rem;
               font-style: normal;
               font-weight: 400;
               letter-spacing: 0.08px;
@@ -482,7 +482,7 @@ onMounted(() => {
         height: 24px;
       }
       label {
-        color: var(--Neutral-500, #666);
+        color: $raphael-gray-500;
 
         font-size: 18px;
         font-style: normal;

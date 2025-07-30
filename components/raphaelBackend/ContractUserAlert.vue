@@ -172,7 +172,7 @@ const yearlyGroup = computed(() => {
   }
 
   .ContractUserAlertHR {
-    background: var(--Primary-200, #b1c0d8);
+    background: $primary-200;
     width: 100%;
     height: 1px;
   }
@@ -198,7 +198,7 @@ const yearlyGroup = computed(() => {
       margin-top: 0.15rem;
       color: var(--Primary-default, #1ba39b);
       font-family: "Noto Sans";
-      font-size: var(--Text-font-size-18, 18px);
+      font-size: 1.125rem
       font-style: normal;
       font-weight: 400;
       letter-spacing: 0.09px;
@@ -265,7 +265,7 @@ const yearlyGroup = computed(() => {
 
       h5 {
         color: var(--Primary-600, #2d3047);
-        font-size: var(--Text-font-size-18, 18px);
+        font-size: 1.125rem
         font-style: normal;
         font-weight: 400;
         line-height: 100%; /* 18px */
@@ -275,7 +275,7 @@ const yearlyGroup = computed(() => {
         color: var(--Primary-default, #1ba39b);
         text-align: center;
 
-        font-size: var(--Text-font-size-18, 18px);
+        font-size: 1.125rem
         font-style: normal;
         font-weight: 400;
 
@@ -305,12 +305,12 @@ const yearlyGroup = computed(() => {
     .more {
       color: var(--Primary-300, #6d8ab6);
 
-      font-size: var(--Text-font-size-18, 18px);
+      font-size: 1.125rem
       font-style: normal;
       font-weight: 400;
 
       letter-spacing: 0.09px;
-      font-size: var(--Text-font-size-18, 18px);
+      font-size: 1.125rem
       font-style: normal;
       font-weight: 400;
       letter-spacing: 0.09px;
@@ -350,9 +350,9 @@ const yearlyGroup = computed(() => {
         display: flex;
         align-items: center;
         gap: 4px;
-        color: var(--Primary-200, #b1c0d8);
+        color: $primary-200
 
-        font-size: var(--Text-font-size-18, 18px);
+        font-size: 1.125rem
         font-style: normal;
         font-weight: 400;
         line-height: 100%; /* 18px */

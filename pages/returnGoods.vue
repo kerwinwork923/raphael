@@ -256,7 +256,6 @@
     <h3>詳細原因</h3>
     <div class="returnReason">
       <textarea name="" id="" placeholder="請描述一下原因"> </textarea>
-    
     </div>
     <div class="returnReasonBtn">
       <button>提交申請</button>
@@ -272,7 +271,7 @@ import TitleMenu from "@/components/TitleMenu.vue";
   min-height: 100vh;
   padding: 0 2.5% 72px;
   h3 {
-    color: var(--Neutral-500, #666);
+    color: $raphael-gray-500;
     font-size: 16px;
     font-style: normal;
     font-weight: 400;
@@ -317,9 +316,9 @@ import TitleMenu from "@/components/TitleMenu.vue";
         }
       }
       h4 {
-        color: var(--Neutral-500, #666);
+        color: $raphael-gray-500;
         width: 100%;
-        font-size: var(--Text-font-size-16, 16px);
+        font-size: 1rem;
         font-style: normal;
         font-weight: 400;
 
@@ -359,7 +358,6 @@ import TitleMenu from "@/components/TitleMenu.vue";
         font-size: 16px;
       }
     }
-
   }
   .returnReasonBtn {
     position: fixed;

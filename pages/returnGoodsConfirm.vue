@@ -110,7 +110,7 @@ function submitApplication() {
     .orderNumber {
       color: var(--Primary-hover, #65a31b);
 
-      font-size: var(--Text-font-size-18, 18px);
+      font-size: 1.125rem
       font-style: normal;
       font-weight: 700;
 
@@ -144,7 +144,7 @@ function submitApplication() {
           color: var(--Primary-default, #74bc1f);
 
           margin-top: 0.15rem;
-          font-size: var(--Text-font-size-16, 16px);
+          font-size: 1rem;
           font-style: normal;
           font-weight: 700;
           line-height: 100%; /* 16px */
@@ -168,7 +168,7 @@ function submitApplication() {
     .sectionTitle {
       color: var(--Neutral-black, #1e1e1e);
 
-      font-size: var(--Text-font-size-16, 16px);
+      font-size: 1rem;
       font-style: normal;
       font-weight: 700;
       margin-bottom: 0.5rem;
@@ -182,7 +182,7 @@ function submitApplication() {
       .infoTitle {
         color: var(--Neutral-black, #1e1e1e);
 
-        font-size: var(--Text-font-size-16, 16px);
+        font-size: 1rem;
         font-style: normal;
         font-weight: 700;
         line-height: 100%; /* 16px */
@@ -190,9 +190,9 @@ function submitApplication() {
         margin-bottom: 0.25rem;
       }
       .infoContent {
-        color: var(--Neutral-500, #666);
+        color: $raphael-gray-500;
 
-        font-size: var(--Text-font-size-16, 16px);
+        font-size: 1rem;
         font-style: normal;
         font-weight: 400;
         line-height: 125%; /* 24px */
@@ -204,18 +204,18 @@ function submitApplication() {
     }
     .returnReason {
       .reasonText {
-        color: var(--Neutral-500, #666);
+        color: $raphael-gray-500;
 
-        font-size: var(--Text-font-size-16, 16px);
+        font-size: 1rem;
         font-style: normal;
         font-weight: 400;
 
         letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
       }
       .reasonDetail {
-        color: var(--Neutral-500, #666);
+        color: $raphael-gray-500;
 
-        font-size: var(--Text-font-size-16, 16px);
+        font-size: 1rem;
         font-style: normal;
         font-weight: 400;
         margin-top: 0.3rem;
@@ -235,18 +235,18 @@ function submitApplication() {
       justify-content: space-between;
       align-items: center;
       .methodLabel {
-        color: var(--Neutral-500, #666);
+        color: $raphael-gray-500;
 
-        font-size: var(--Text-font-size-16, 16px);
+        font-size: 1rem;
         font-style: normal;
         font-weight: 400;
 
         letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
       }
       .methodValue {
-        color: var(--Neutral-500, #666);
+        color: $raphael-gray-500;
 
-        font-size: var(--Text-font-size-16, 16px);
+        font-size: 1rem;
         font-style: normal;
         font-weight: 400;
 
@@ -264,16 +264,16 @@ function submitApplication() {
           border-bottom: none;
         }
         .refundLabel {
-          color: var(--Neutral-500, #666);
+          color: $raphael-gray-500;
 
-          font-size: var(--Text-font-size-16, 16px);
+          font-size: 1rem;
           font-style: normal;
           font-weight: 400;
 
           letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
         }
         .refundLabelRed {
-          color: var(--Primary-hover, #ec4f4f);
+          color: $raphael-red-500;
         }
         .refundValue {
           font-size: 16px;

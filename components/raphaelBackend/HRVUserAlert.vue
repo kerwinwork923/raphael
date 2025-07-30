@@ -269,14 +269,14 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
       margin-top: 0.15rem;
       color: var(--Primary-default, #1ba39b);
       font-family: "Noto Sans";
-      font-size: var(--Text-font-size-18, 18px);
+      font-size: 1.125rem
       font-style: normal;
       font-weight: 400;
       letter-spacing: 0.09px;
     }
   }
   .HRVUserAlertHR {
-    background: var(--Primary-200, #b1c0d8);
+    background: $primary-200;
     width: 100%;
     height: 1px;
   }
@@ -321,7 +321,7 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
         letter-spacing: 0.12px;
       }
       .info {
-        color: var(--Primary-200, #b1c0d8);
+        color: $primary-200
 
         font-size: var(--Text-font-size-14, 14px);
         font-style: normal;
@@ -442,7 +442,7 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
       .HRVUserAlertContent3ContentTitle {
         display: flex;
         gap: 2px;
-        color: var(--Primary-200, #b1c0d8);
+        color: $primary-200
         text-align: center;
         font-size: var(--Text-font-size-20, 18px);
         font-style: normal;
@@ -463,7 +463,7 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
         border: 1px solid var(--Secondary-default, #74bc1f);
         background: var(--secondary-400-opacity-10, rgba(116, 188, 31, 0.1));
         color: var(--Secondary-default, #74bc1f);
-        font-size: var(--Text-font-size-16, 16px);
+        font-size: 1rem;
         font-style: normal;
         font-weight: 400;
         letter-spacing: 0.08px;
@@ -502,7 +502,7 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
     p {
       color: var(--Primary-300, #6d8ab6);
       font-family: "Noto Sans";
-      font-size: var(--Text-font-size-16, 16px);
+      font-size: 1rem;
       font-style: normal;
       font-weight: 400;
       line-height: var(--lineHeight-line-height-16, 25.888px); /* 161.8% */

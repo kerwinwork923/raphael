@@ -13,8 +13,7 @@
       </div>
       <div class="phoneGroup">
         <img class="icon1" src="/assets/imgs/phone.svg" alt="" />
-        <input type="text" v-model="phone"  />
-     
+        <input type="text" v-model="phone" />
       </div>
     </div>
     <h5>寄送地址</h5>
@@ -74,41 +73,40 @@ const inputAddress = ref("");
 const localName = ref(userData.Name);
 const phone = ref(userData.Mobile);
 
+const addressee = async function () {
+  const res = await useFetch(
+    "https://23700999.com:8081/HMA/api/fr/maNewCName",
+    {
+      method: "POST",
+      body: {
+        MID: userData.MID,
+        Token: userData.Token,
+        MAID: userData.MAID,
+        Mobile: userData.Mobile,
+        RName: localName.value,
+        RMobile: phone.value,
+        Address: selectedCity.value + selectedArea.value + inputAddress.value,
+      },
+    }
+  );
+};
 
-const addressee = async function(){
-  const res = await useFetch("https://23700999.com:8081/HMA/api/fr/maNewCName", {
-    method: "POST",
-    body: {
-      MID: userData.MID,
-      Token: userData.Token,
-      MAID: userData.MAID,
-      Mobile: userData.Mobile,
-      RName : localName.value, 
-      RMobile : phone.value  ,
-      Address : selectedCity.value + selectedArea.value + inputAddress.value,
-    },
-  });
-}
-
-
-const addresseeAddress = async function(){
-
-  if(!selectedCity.value){
+const addresseeAddress = async function () {
+  if (!selectedCity.value) {
     alert("請選擇縣市");
     return;
   }
-  if(!selectedArea.value){
+  if (!selectedArea.value) {
     alert("請選擇鄉鎮地區");
     return;
   }
-  if(!inputAddress.value){
+  if (!inputAddress.value) {
     alert("請輸入地址");
     return;
   }
   await addressee();
   router.push("/cart/payMethod");
-
-}
+};
 
 // 載入城市資料
 onMounted(async () => {
@@ -166,7 +164,7 @@ function updateAreas() {
     }
   }
   h5 {
-    color: var(--Neutral-500, #666);
+    color: $raphael-gray-500;
 
     font-size: 16px;
     font-style: normal;

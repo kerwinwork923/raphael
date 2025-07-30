@@ -1,16 +1,20 @@
 <template>
-  <div class="invoiceSelect1Wrap" >
+  <div class="invoiceSelect1Wrap">
     <CartTitleBar title="編輯載具" href="/cart/invoiceType" />
     <h5>請輸入您常用的載具號碼</h5>
     <div class="invoiceSelect2InputGroup">
       <div class="invoiceGroup">
         <img class="icon1" src="/assets/imgs/cart/cloudy.svg" alt="" />
-        <input type="text" v-model="invoiceContent" placeholder="請輸入載具號碼" />
+        <input
+          type="text"
+          v-model="invoiceContent"
+          placeholder="請輸入載具號碼"
+        />
       </div>
     </div>
     <div class="btnGroup">
       <button @click="submit" :disabled="isLoading">
-        {{ isLoading ? '提交中...' : '提交' }}
+        {{ isLoading ? "提交中..." : "提交" }}
       </button>
     </div>
   </div>
@@ -21,21 +25,24 @@ const router = useRouter();
 const invoiceContent = ref("");
 const isLoading = ref(false);
 const userData = JSON.parse(localStorage.getItem("userData"));
-const setInvoice = async function(){
+const setInvoice = async function () {
   try {
-    const { data } = await useFetch("https://23700999.com:8081/HMA/api/fr/maSetInvoice", {
-      method: "POST",
-      body: {
-        MID: userData.MID,
-        Token: userData.Token,
-        MAID: userData.MAID,
-        Mobile: userData.Mobile,
-        Lang: "zhtw",
-        InvoiceID : "2", // 1:電子發票2.載具3.三聯式發票
-        Content : invoiceContent.value,
-      },
-    });
-    
+    const { data } = await useFetch(
+      "https://23700999.com:8081/HMA/api/fr/maSetInvoice",
+      {
+        method: "POST",
+        body: {
+          MID: userData.MID,
+          Token: userData.Token,
+          MAID: userData.MAID,
+          Mobile: userData.Mobile,
+          Lang: "zhtw",
+          InvoiceID: "2", // 1:電子發票2.載具3.三聯式發票
+          Content: invoiceContent.value,
+        },
+      }
+    );
+
     if (data.value?.Result === "OK") {
       return true;
     } else {
@@ -47,15 +54,15 @@ const setInvoice = async function(){
     alert("設定載具失敗，請稍後再試");
     return false;
   }
-}
+};
 
-const submit = async function(){
+const submit = async function () {
   // 載具格式以「/」開頭，共8碼（包含符號）
-  if(!invoiceContent.value.startsWith("/")){
+  if (!invoiceContent.value.startsWith("/")) {
     alert("載具格式錯誤");
     return;
   }
-  if(invoiceContent.value.length !== 8){
+  if (invoiceContent.value.length !== 8) {
     alert("載具號碼長度錯誤");
     return;
   }
@@ -69,7 +76,7 @@ const submit = async function(){
   } finally {
     isLoading.value = false;
   }
-}
+};
 </script>
 <style lang="scss" scoped>
 .invoiceSelect1Wrap {
@@ -80,7 +87,7 @@ const submit = async function(){
   flex-direction: column;
 
   padding: 0 2.5% 72px;
-  
+
   .invoiceSelect2InputGroup {
     width: 100%;
     margin-top: 0.75rem;
@@ -89,7 +96,7 @@ const submit = async function(){
     border-radius: 10px;
   }
   h5 {
-    color: var(--Neutral-500, #666);
+    color: $raphael-gray-500;
 
     margin-top: 1rem;
     font-size: 16px;
@@ -159,7 +166,7 @@ const submit = async function(){
 
       background: var(--Primary-default, #74bc1f);
       cursor: pointer;
-      
+
       &:disabled {
         background: var(--Neutral-300, #ccc);
         cursor: not-allowed;

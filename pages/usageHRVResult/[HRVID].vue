@@ -711,7 +711,7 @@ export default {
         letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
       }
       p {
-        color: var(--Neutral-500, #666);
+        color: $raphael-gray-500;
         font-size: 16px;
         font-style: normal;
         font-weight: 400;

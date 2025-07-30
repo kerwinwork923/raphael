@@ -253,8 +253,6 @@ function scrollToTop() {
     padding: 16px 16px;
   }
 
-
-
   .healthBtn {
     border-radius: 6px;
     border: none;
@@ -284,8 +282,6 @@ function scrollToTop() {
     }
   }
 
-
-
   .member-table {
     display: flex;
     flex-direction: column;
@@ -313,7 +309,7 @@ function scrollToTop() {
       gap: 2px;
       align-items: center;
       padding: 13px 16px;
-      color: $Neutral-500;
+      color: $raphael-gray-500;
       transition: all ease 0.2s;
 
       &:hover {
@@ -374,7 +370,7 @@ function scrollToTop() {
             content: attr(data-label);
             font-size: 1rem;
             font-weight: normal;
-            color: $Neutral-500;
+            color: $raphael-gray-500;
           }
         }
 

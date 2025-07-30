@@ -2,7 +2,7 @@
   <div class="babyRecordAlert">
     <div class="babyRecordAlertTitleGroup">
       <img src="/assets/imgs/backend/Subtract.svg" alt="" />
-      <h3>{{ mainDetail?.CheckTime || '—' }}</h3>
+      <h3>{{ mainDetail?.CheckTime || "—" }}</h3>
       <h4>檢測時間</h4>
     </div>
     <div class="babyRecordAlertTitleHR"></div>
@@ -25,9 +25,19 @@
       >
         <div class="babyRecordAlertContentTitle">
           <h3>{{ item.TypeName }}</h3>
-          <div class="scoreGroup" :class="{ up: Number(item.Diff) > 0, down: Number(item.Diff) <= 0 }">
+          <div
+            class="scoreGroup"
+            :class="{ up: Number(item.Diff) > 0, down: Number(item.Diff) <= 0 }"
+          >
             <h6>{{ item.Diff }}%</h6>
-            <img :src="Number(item.Diff) > 0 ? '/assets/imgs/backend/up.svg' : '/assets/imgs/backend/down.svg'" alt="" />
+            <img
+              :src="
+                Number(item.Diff) > 0
+                  ? '/assets/imgs/backend/up.svg'
+                  : '/assets/imgs/backend/down.svg'
+              "
+              alt=""
+            />
           </div>
         </div>
         <div class="value">{{ item.Ratio }}%</div>
@@ -46,7 +56,7 @@ import VueDatePicker from "@vuepic/vue-datepicker";
 import { Chart } from "chart.js";
 
 const props = defineProps<{ record: any }>();
-const emit = defineEmits(['close']);
+const emit = defineEmits(["close"]);
 
 // 取出主資料（用第一筆即可，因為 ALL_Score/ALL_Ratio/ALL_Serious 都一樣）
 const detailList = props.record?.ChildANSDetailList || [];
@@ -91,7 +101,7 @@ function build() {
   const serious = sorted.map((r) => r.ALL_Serious);
 
   const maxScore = Math.max(...scores, 200);
-  const yMax = maxScore < 200 ? 200 : Math.ceil(maxScore * 1.1 / 10) * 10;
+  const yMax = maxScore < 200 ? 200 : Math.ceil((maxScore * 1.1) / 10) * 10;
 
   chart?.destroy();
   const ctx = canvas.value.getContext("2d")!;
@@ -121,7 +131,8 @@ function build() {
             label: function (context: any) {
               const idx = context.dataIndex;
               let label = `總分: ${scores[idx]}`;
-              if (ratios[idx] !== undefined) label += `，百分比: ${ratios[idx]}%`;
+              if (ratios[idx] !== undefined)
+                label += `，百分比: ${ratios[idx]}%`;
               if (serious[idx]) label += `，表現: ${serious[idx]}`;
               return label;
             },
@@ -188,7 +199,7 @@ watch([() => detailList, dateRange], build, { deep: true });
     text-align: center;
     margin-bottom: 0.75rem;
     .HRVUserAlertHR {
-      background: var(--Primary-200, #b1c0d8);
+      background: $primary-200;
       width: 100%;
       height: 1px;
     }
@@ -210,14 +221,14 @@ watch([() => detailList, dateRange], build, { deep: true });
       margin-top: 0.15rem;
       color: var(--Primary-default, #1ba39b);
       font-family: "Noto Sans";
-      font-size: var(--Text-font-size-18, 18px);
+      font-size: 1.125rem
       font-style: normal;
       font-weight: 400;
       letter-spacing: 0.09px;
     }
   }
   .babyRecordAlertTitleHR {
-    background: var(--Primary-200, #b1c0d8);
+    background: $primary-200;
     width: 100%;
     height: 1px;
   }
@@ -270,7 +281,7 @@ watch([() => detailList, dateRange], build, { deep: true });
       margin-top: 0.25rem;
     }
     h4 {
-      color: var(--Primary-200, #b1c0d8);
+      color: $primary-200
 
       font-size: 14px;
       font-style: normal;
@@ -335,7 +346,7 @@ watch([() => detailList, dateRange], build, { deep: true });
       margin-top: 0.5rem;
     }
     small {
-      color: var(--Primary-200, #b1c0d8);
+      color: $primary-200
       font-family: "Noto Sans";
       font-size: 14px;
       font-style: normal;

@@ -17,7 +17,6 @@
         <!-- 預計送達時間 -->
         <div class="delivery-estimate" v-if="shouldShowDeliveryEstimate">
           {{ deliveryEstimateText }}
-   
         </div>
 
         <div class="order-status-alert" v-if="currentStep >= 3">
@@ -521,7 +520,7 @@ const deliveryEstimateText = computed(() => {
 
   // 使用 A1State 作為個人化資訊完成時間
   let personalInfoTime = new Date(0);
-  
+
   if (orderData.value.A1State) {
     // 解析 A1State 格式：2025/07/16 17:25 -> 2025/07/16 17:25
     personalInfoTime = new Date(orderData.value.A1State.replace(/\//g, "-"));
@@ -620,7 +619,6 @@ onMounted(() => {
   }
 
   .delivery-estimate {
-
     background-color: #ddeacf;
     color: #65a31b;
     border-radius: 8px;
@@ -659,13 +657,13 @@ onMounted(() => {
       @include respond-to("md") {
         width: 85%;
       }
-      
+
       margin: 0 auto;
       display: flex;
       justify-content: space-between;
       position: relative;
       margin-bottom: 8px;
-    
+
       // 底線
       &::before {
         content: "";
@@ -700,7 +698,6 @@ onMounted(() => {
         align-items: center;
         z-index: 2;
         min-width: 0;
-       
 
         .circle {
           width: 16px;
@@ -772,7 +769,7 @@ onMounted(() => {
     width: 100%;
     .section-title {
       color: var(--Neutral-black, #1e1e1e);
-      font-size: var(--Text-font-size-16, 16px);
+      font-size: 1rem;
       font-style: normal;
       font-weight: 700;
       letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
@@ -784,10 +781,10 @@ onMounted(() => {
       align-items: center;
 
       .section-content {
-        color: var(--Neutral-500, #666);
+        color: $raphael-gray-500;
         text-align: center;
 
-        font-size: var(--Text-font-size-16, 16px);
+        font-size: 1rem;
         font-style: normal;
         font-weight: 400;
 
@@ -810,7 +807,7 @@ onMounted(() => {
         justify-content: space-between;
         align-items: center;
         .section-content-between-title {
-          color: var(--Neutral-500, #666);
+          color: $raphael-gray-500;
         }
       }
     }
@@ -823,7 +820,7 @@ onMounted(() => {
       .info-title {
         color: var(--Neutral-black, #1e1e1e);
 
-        font-size: var(--Text-font-size-16, 16px);
+        font-size: 1rem;
         font-style: normal;
         font-weight: 700;
 
@@ -842,9 +839,9 @@ onMounted(() => {
       }
       .info-content {
         color: #666;
-        color: var(--Neutral-500, #666);
+        color: $raphael-gray-500;
 
-        font-size: var(--Text-font-size-16, 16px);
+        font-size: 1rem;
         font-style: normal;
         font-weight: 400;
         font-size: 16px;
@@ -885,7 +882,7 @@ onMounted(() => {
         .product-price {
           color: var(--Primary-default, #74bc1f);
 
-          font-size: var(--Text-font-size-16, 16px);
+          font-size: 1rem;
           font-style: normal;
           font-weight: 700;
           margin-top: 0.15rem;
@@ -897,9 +894,9 @@ onMounted(() => {
       }
     }
     .order-total {
-      color: var(--Neutral-500, #666);
+      color: $raphael-gray-500;
 
-      font-size: var(--Text-font-size-16, 16px);
+      font-size: 1rem;
       font-style: normal;
       font-weight: 400;
 
@@ -916,7 +913,7 @@ onMounted(() => {
     }
     .section-error-return {
       color: var(--Warning-default, #ec4f4f);
-      font-size: var(--Text-font-size-16, 16px);
+      font-size: 1rem;
       font-style: normal;
       font-weight: 400;
       letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
@@ -935,7 +932,7 @@ onMounted(() => {
   .returnGoodsGroup {
     text-align: center;
     color: var(--Warning-default, #ec4f4f);
-    font-size: var(--Text-font-size-16, 16px);
+    font-size: 1rem;
     font-style: normal;
     font-weight: 400;
 

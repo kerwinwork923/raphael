@@ -141,10 +141,14 @@
       <p>請假申請天數：{{ selectedDates.length }} 天</p>
       <p>剩餘請假天數：{{ 5 - selectedDates.length }} 天</p>
 
-
       <div class="leaveApplicationAlertBtnGroup">
         <div class="leaveApplicationAlertBackBtn">返回</div>
-        <div class="leaveApplicationAlertSumbitBtn" @click="submitLeaveApplication">送出</div>
+        <div
+          class="leaveApplicationAlertSumbitBtn"
+          @click="submitLeaveApplication"
+        >
+          送出
+        </div>
       </div>
     </div>
 
@@ -1021,10 +1025,9 @@ export default {
       display: flex;
       align-items: start;
       gap: 8px;
-      margin-top: .5rem;
+      margin-top: 0.5rem;
 
       cursor: pointer;
-
     }
     h4 {
       color: var(--Color-Green-400, #74bc1f);
@@ -1046,7 +1049,7 @@ export default {
       letter-spacing: 0.048px;
     }
     p {
-      color: var(--Neutral-500, #666);
+      color: $raphael-gray-500;
       font-size: 18px;
       font-style: normal;
       font-weight: 400;
@@ -1092,7 +1095,7 @@ export default {
     h2 {
       width: 50%;
       text-align: center;
-      color: var(--Neutral-500, #666);
+      color: $raphael-gray-500;
       font-size: 16px;
       font-style: normal;
       font-weight: 400;
@@ -1145,7 +1148,7 @@ export default {
           z-index: 10;
         }
         h4 {
-          color: var(--Neutral-500, #666);
+          color: $raphael-gray-500;
           text-align: center;
           font-size: 16px;
           font-style: normal;

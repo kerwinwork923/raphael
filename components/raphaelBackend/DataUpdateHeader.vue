@@ -51,17 +51,18 @@ const handleRefresh = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
   gap: 1rem;
 
   @include respond-to("lg") {
     padding-left: 36px;
   }
 
-  @include respond-to("sm") {
-    flex-wrap: wrap;
-  }
-
   .title {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    gap: 8px;
     color: var(--Primary-600, #2d3047);
     text-align: center;
 
@@ -71,8 +72,12 @@ const handleRefresh = () => {
 
     letter-spacing: 0.09px;
 
+    @include respond-to("md") {
+      font-size: 24px;
+    }
+
     .count {
-      color: var(--Primary-200, #b1c0d8);
+      color: $primary-200;
       text-align: center;
       font-size: 20px;
       font-style: normal;
@@ -86,22 +91,16 @@ const handleRefresh = () => {
   .meta {
     display: flex;
     align-items: center;
-    gap: 16px;
-
-    @include respond-to("lg") {
-      gap: 6px;
-      margin-top: 0.5rem;
-      width: 100%;
-    }
+    gap: 8px;
 
     .btn.refresh {
       border-radius: 6px;
-      background: var(--Primary-200, #b1c0d8);
-      padding: 9px 12px;
+      background: $primary-200;
+      padding: 5px 12px;
       border: none;
       color: var(--Primary-100, #f5f7fa);
       cursor: pointer;
-      font-size: var(--Text-font-size-18, 18px);
+      font-size: 1.125rem;
       font-style: normal;
       font-weight: 400;
       letter-spacing: 2.7px;
@@ -125,7 +124,7 @@ const handleRefresh = () => {
 
       @include respond-to("lg") {
         font-size: 1rem;
-        padding: 0.25rem 0.5rem;
+        padding: 0.25rem;
       }
 
       .i-refresh {
@@ -140,7 +139,7 @@ const handleRefresh = () => {
 
     .updated-time {
       font-size: 12px;
-      color: $Neutral-500;
+      color: $raphael-gray-500;
       font-size: 16px;
       font-style: normal;
       font-weight: 400;
