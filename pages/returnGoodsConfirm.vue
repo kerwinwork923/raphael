@@ -109,8 +109,7 @@ function submitApplication() {
 
     .orderNumber {
       color: var(--Primary-hover, #65a31b);
-
-      font-size: 1.125rem
+      font-size: 1.125rem;
       font-style: normal;
       font-weight: 700;
 

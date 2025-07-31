@@ -536,7 +536,7 @@ onMounted(() => {
         label {
           color: $raphael-gray-500;
           font-family: "Noto Sans";
-          font-size: 1.125rem
+          font-size: 1.125rem;
           font-style: normal;
           font-weight: 400;
           letter-spacing: 2.7px;

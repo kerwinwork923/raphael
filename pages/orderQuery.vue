@@ -755,11 +755,9 @@ onMounted(() => {
         justify-content: space-between;
         h3 {
           color: var(--Primary-hover, #65a31b);
-
-          font-size: 1.125rem
+          font-size: 1.125rem;
           font-style: normal;
           font-weight: 700;
-
           letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
         }
         small {
@@ -795,11 +793,9 @@ onMounted(() => {
     .orderQueryItemPrice {
       text-align: right;
       color: $raphael-red-300;
-
-      font-size: 1.125rem
+      font-size: 1.125rem;
       font-style: normal;
       font-weight: 700;
-
       letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
     }
     .orderStateTag {
