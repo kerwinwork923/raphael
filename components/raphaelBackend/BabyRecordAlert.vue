@@ -221,7 +221,7 @@ watch([() => detailList, dateRange], build, { deep: true });
       margin-top: 0.15rem;
       color: var(--Primary-default, #1ba39b);
       font-family: "Noto Sans";
-      font-size: 1.125rem
+      font-size: 1.125rem;
       font-style: normal;
       font-weight: 400;
       letter-spacing: 0.09px;
@@ -281,7 +281,7 @@ watch([() => detailList, dateRange], build, { deep: true });
       margin-top: 0.25rem;
     }
     h4 {
-      color: $primary-200
+      color: $primary-200;
 
       font-size: 14px;
       font-style: normal;
@@ -346,7 +346,7 @@ watch([() => detailList, dateRange], build, { deep: true });
       margin-top: 0.5rem;
     }
     small {
-      color: $primary-200
+      color: $primary-200;
       font-family: "Noto Sans";
       font-size: 14px;
       font-style: normal;

@@ -269,7 +269,7 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
       margin-top: 0.15rem;
       color: var(--Primary-default, #1ba39b);
       font-family: "Noto Sans";
-      font-size: 1.125rem
+      font-size: 1.125rem;
       font-style: normal;
       font-weight: 400;
       letter-spacing: 0.09px;
@@ -321,7 +321,7 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
         letter-spacing: 0.12px;
       }
       .info {
-        color: $primary-200
+        color: $primary-200;
 
         font-size: var(--Text-font-size-14, 14px);
         font-style: normal;
@@ -442,7 +442,7 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
       .HRVUserAlertContent3ContentTitle {
         display: flex;
         gap: 2px;
-        color: $primary-200
+        color: $primary-200;
         text-align: center;
         font-size: var(--Text-font-size-20, 18px);
         font-style: normal;

@@ -517,7 +517,7 @@ defineEmits(["close"]);
       margin-top: 0.15rem;
       color: var(--Primary-default, #1ba39b);
       font-family: "Noto Sans";
-      font-size: 1.125rem
+      font-size: 1.125rem;
       font-style: normal;
       font-weight: 400;
       letter-spacing: 0.09px;
@@ -571,7 +571,7 @@ defineEmits(["close"]);
       letter-spacing: 0.12px;
     }
     h4 {
-      color: $primary-200
+      color: $primary-200;
 
       font-size: 14px;
       font-style: normal;
@@ -596,7 +596,7 @@ defineEmits(["close"]);
         flex-wrap: wrap;
       }
       h5 {
-        color: $primary-200
+        color: $primary-200;
         font-family: "Noto Sans";
         font-size: 14px;
         font-style: normal;
@@ -705,7 +705,7 @@ defineEmits(["close"]);
         }
       }
       h4 {
-        color: $primary-200
+        color: $primary-200;
 
         /* Typography/small-r-14 */
         font-family: "Noto Sans";

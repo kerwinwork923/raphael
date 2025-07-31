@@ -1255,7 +1255,7 @@ const isAnyAlertOpen = computed(() => {
           background-color: $primary-200;
           border: none;
           color: var(--Primary-100, #f5f7fa);
-          font-size: 1.125rem
+          font-size: 1.125rem;
           font-style: normal;
           font-weight: 400;
           padding: 0.25rem 0.5rem;
@@ -1308,7 +1308,7 @@ const isAnyAlertOpen = computed(() => {
         }
         .memberInfoWarning {
           color: $raphael-red-300;
-          font-size: 1.125rem
+          font-size: 1.125rem;
           font-style: normal;
           font-weight: 400;
           letter-spacing: 0.09px;
@@ -1328,7 +1328,7 @@ const isAnyAlertOpen = computed(() => {
             color: var(--Primary-default, #1ba39b);
             text-align: center;
 
-            font-size: 1.125rem
+            font-size: 1.125rem;
             font-style: normal;
             font-weight: 400;
             line-height: 100%; /* 18px */
@@ -1406,7 +1406,7 @@ const isAnyAlertOpen = computed(() => {
             color: var(--Primary-default, #1ba39b);
             text-align: center;
 
-            font-size: 1.125rem
+            font-size: 1.125rem;
             font-style: normal;
             font-weight: 400;
             line-height: 100%; /* 18px */
@@ -1422,7 +1422,7 @@ const isAnyAlertOpen = computed(() => {
           width: 100%;
           padding: 6px 8px;
           color: var(--Primary-default, #1ba39b);
-          font-size: 1.125rem
+          font-size: 1.125rem;
           font-style: normal;
           font-weight: 400;
           line-height: 100%; /* 18px */

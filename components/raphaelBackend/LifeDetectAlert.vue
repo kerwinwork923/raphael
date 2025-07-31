@@ -153,7 +153,7 @@ defineEmits(["close"]);
       margin-top: 0.15rem;
       color: var(--Primary-default, #1ba39b);
       font-family: "Noto Sans";
-      font-size: 1.125rem
+      font-size: 1.125rem;
       font-style: normal;
       font-weight: 400;
       letter-spacing: 0.09px;
@@ -213,7 +213,7 @@ defineEmits(["close"]);
       margin-top: 0.25rem;
     }
     h4 {
-      color: $primary-200
+      color: $primary-200;
 
       font-size: 14px;
       font-style: normal;
@@ -244,7 +244,7 @@ defineEmits(["close"]);
       div {
         margin-top: 0.5rem;
         h4 {
-          color: $primary-200
+          color: $primary-200;
           text-align: center;
           @include respond-to("md") {
             text-align: left;
@@ -278,7 +278,7 @@ defineEmits(["close"]);
         line-height: 100%; /* 24px */
         letter-spacing: 0.12px;
         span {
-          color: $primary-200
+          color: $primary-200;
           text-align: center;
 
           /* Typography/small-r-14 */
@@ -346,7 +346,7 @@ defineEmits(["close"]);
       margin-top: 0.5rem;
     }
     small {
-      color: $primary-200
+      color: $primary-200;
       font-family: "Noto Sans";
       font-size: 14px;
       font-style: normal;
