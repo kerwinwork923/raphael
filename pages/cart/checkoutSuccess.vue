@@ -41,7 +41,7 @@
         <div class="infoBox thankYouBox">
           感謝您的購買！
         </div>
-
+        
         <div class="infoBox">
           <h4>寄送方式</h4>
           <p>{{ orderDetails.DeliverType }}</p>

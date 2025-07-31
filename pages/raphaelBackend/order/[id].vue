@@ -17,45 +17,54 @@
 
       <!-- order items table -->
       <section class="order-items-table">
-        <!-- header row -->
-        <div class="table-row table-header">
-          <div class="product-name">商品名稱</div>
-          <div class="product-price">商品價格</div>
-          <div class="quantity">購買數量</div>
-          <div class="size">商品尺寸</div>
-          <div class="height-weight">身高體重</div>
-          <div class="body-size">身材尺寸</div>
-          <div class="progress">目前進度</div>
+        <!-- Loading 效果 -->
+        <div v-if="loading" class="loading-container">
+          <div class="loading-spinner"></div>
+          <p>載入中...</p>
         </div>
 
-        <!-- data rows -->
-        <div class="table-list">
-          <div v-for="item in orderItems" :key="item.id" class="table-row">
-            <div class="cell product-name" data-label="商品名稱">
-              {{ item.productName }}
-            </div>
-            <div class="cell product-price" data-label="商品價格">
-              ${{ item.price.toLocaleString() }}
-            </div>
-            <div class="cell quantity" data-label="購買數量">
-              {{ item.quantity }}
-            </div>
-            <div class="cell size" data-label="商品尺寸">
-              {{ item.size || "---" }}
-            </div>
-            <div class="cell height-weight" data-label="身高體重">
-              {{ item.heightWeight || "---" }}
-            </div>
-            <div class="cell body-size" data-label="身材尺寸">
-              {{ item.bodySize || "---" }}
-            </div>
-            <div class="cell progress" data-label="目前進度">
-              <span class="status-tag" :class="getStatusClass(item.status)">
-                {{ item.status }}
-              </span>
+        <!-- 內容區域 -->
+        <template v-else>
+          <!-- header row -->
+          <div class="table-row table-header">
+            <div class="product-name">商品名稱</div>
+            <div class="product-price">商品價格</div>
+            <div class="quantity">購買數量</div>
+            <div class="size">商品尺寸</div>
+            <div class="height-weight">身高體重</div>
+            <div class="body-size">身材尺寸</div>
+            <div class="progress">目前進度</div>
+          </div>
+
+          <!-- data rows -->
+          <div class="table-list">
+            <div v-for="item in orderItems" :key="item.ProductID" class="table-row">
+              <div class="cell product-name" data-label="商品名稱">
+                {{ item.ProductName }}
+              </div>
+              <div class="cell product-price" data-label="商品價格">
+                ${{ parseInt(item.Amount).toLocaleString() }}
+              </div>
+              <div class="cell quantity" data-label="購買數量">
+                {{ item.Qty }}
+              </div>
+              <div class="cell size" data-label="商品尺寸">
+                {{ item.PdtSize || "---" }}
+              </div>
+              <div class="cell height-weight" data-label="身高體重">
+                {{ item.Height && item.Weight ? `${item.Height}cm, ${item.Weight}kg` : "---" }}
+              </div>
+              <div class="cell body-size" data-label="身材尺寸">
+                {{ item.BodySize || "---" }}
+              </div>
+              <div class="cell progress" data-label="目前進度">
+                <span class="status-tag" :class="getStatusClass(item.State)">
+                  {{ item.StateName }}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+        </template>
       </section>
     </main>
 
@@ -95,7 +104,7 @@
             訂單狀態
           </div>
           <div class="orderBarInfoItemValue orderBarInfoItemValueRed">
-            待製作
+            {{ orderInfo?.StateName || "載入中..." }}
           </div>
         </div>
         <div class="orderBarInfoItem">
@@ -103,21 +112,21 @@
             <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
             訂單編號
           </div>
-          <div class="orderBarInfoItemValue">#{{ orderId }}</div>
+          <div class="orderBarInfoItemValue">#{{ orderInfo?.SID || orderId }}</div>
         </div>
         <div class="orderBarInfoItem">
           <div class="orderBarInfoItemTitle">
             <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
             成立時間
           </div>
-          <div class="orderBarInfoItemValue">2025/12/12 12:12</div>
+          <div class="orderBarInfoItemValue">{{ orderInfo?.CheckTime || "載入中..." }}</div>
         </div>
         <div class="orderBarInfoItem">
           <div class="orderBarInfoItemTitle">
             <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
             發票類型
           </div>
-          <div class="orderBarInfoItemValue">電子發票</div>
+          <div class="orderBarInfoItemValue">{{ orderInfo?.InvoiceIDName || "載入中..." }}</div>
         </div>
       </div>
 
@@ -132,21 +141,28 @@
             <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
             姓名
           </div>
-          <div class="orderBarInfoItemValue">王先生</div>
+          <div class="orderBarInfoItemValue">{{ orderInfo?.RName || "載入中..." }}</div>
         </div>
         <div class="orderBarInfoItem">
           <div class="orderBarInfoItemTitle">
             <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
             電話
           </div>
-          <div class="orderBarInfoItemValue">0912345678</div>
+          <div class="orderBarInfoItemValue">{{ orderInfo?.RMobile || "載入中..." }}</div>
         </div>
         <div class="orderBarInfoItem">
           <div class="orderBarInfoItemTitle">
             <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
-            信箱
+            付款方式
           </div>
-          <div class="orderBarInfoItemValue">raphael@gmail.com</div>
+          <div class="orderBarInfoItemValue">{{ orderInfo?.PayTypeName || "載入中..." }}</div>
+        </div>
+        <div class="orderBarInfoItem">
+          <div class="orderBarInfoItemTitle">
+            <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
+            運費
+          </div>
+          <div class="orderBarInfoItemValue">${{ orderInfo?.freight || "0" }}</div>
         </div>
       </div>
 
@@ -161,7 +177,7 @@
             <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
             商品總數
           </div>
-          <div class="orderBarInfoItemValue">{{ orderItems.length }}</div>
+          <div class="orderBarInfoItemValue">{{ orderInfo?.CNT || orderItems.length }}</div>
         </div>
         <div class="orderBarInfoHR"></div>
         <div class="orderBarInfoItem2">
@@ -173,13 +189,13 @@
       </div>
 
       <div
-        v-show="orderBarExpanded"
+        v-show="orderBarExpanded && orderInfo?.BackReason"
         class="orderBarInfo orderBarInfo--fade"
         style="animation-delay: 0.4s"
       >
         <h3>退貨原因</h3>
         <div class="orderBarInfoContent">
-          原因原因原因原因原因原因原因原因原因原因原因原因原因原因原因原因原因原因原因原因原因原因原因原因
+          {{ orderInfo?.BackReason || "無退貨原因" }}
         </div>
       </div>
 
@@ -192,10 +208,19 @@
         <div class="orderBarInfoItem">
           <div class="orderBarInfoItemTitle">
             <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
+            配送方式
+          </div>
+          <div class="orderBarInfoItemValue">
+            {{ orderInfo?.DeliverTypeName || "載入中..." }}
+          </div>
+        </div>
+        <div class="orderBarInfoItem">
+          <div class="orderBarInfoItemTitle">
+            <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
             收件地址
           </div>
           <div class="orderBarInfoItemValue">
-            100 台北市中正區忠孝西路一段66號30樓
+            {{ orderInfo?.Address || "載入中..." }}
           </div>
         </div>
       </div>
@@ -207,6 +232,7 @@
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Sidebar from "@/components/raphaelBackend/Sidebar.vue";
+import axios from "axios";
 
 const route = useRoute();
 const router = useRouter();
@@ -218,111 +244,109 @@ const orderId = route.params.id as string;
 const showOrderBar = ref(true);
 const orderBarExpanded = ref(false);
 
+// 響應式數據
+const loading = ref(false);
+const orderInfo = ref<OrderInfo | null>(null);
+const orderItems = ref<OrderItem[]>([]);
+
+// 從 localStorage 獲取認證資訊
+const token = ref(localStorage.getItem("backendToken") || sessionStorage.getItem("backendToken"));
+const adminID = ref(localStorage.getItem("adminID") || sessionStorage.getItem("adminID"));
+
 // 訂單商品介面定義
 interface OrderItem {
-  id: number;
-  productName: string;
-  price: number;
-  quantity: number;
-  size?: string;
-  heightWeight?: string;
-  bodySize?: string;
-  status: string;
+  ProductID: string;
+  ProductName: string;
+  Qty: string;
+  PdtSize: string;
+  Height: string;
+  Weight: string;
+  BodySize: string;
+  State: string;
+  StateName: string;
+  Amount: string;
+  Price: string;
+  Name: string;
 }
 
-// 模擬訂單商品數據
-const orderItems = ref<OrderItem[]>([
-  {
-    id: 1,
-    productName: "護您穩1型(XXXXX)",
-    price: 38000,
-    quantity: 1,
-    size: "L",
-    heightWeight: "170cm, 50kg",
-    bodySize: "35cm",
-    status: "未付款",
-  },
-  {
-    id: 2,
-    productName: "護您穩1型(XXXXX)",
-    price: 38000,
-    quantity: 1,
-    size: "L",
-    heightWeight: "170cm, 50kg",
-    bodySize: "35cm",
-    status: "個人化資訊",
-  },
-  {
-    id: 3,
-    productName: "護您穩1型(XXXXX)",
-    price: 38000,
-    quantity: 1,
-    size: "L",
-    heightWeight: "170cm, 50kg",
-    bodySize: "35cm",
-    status: "醫師處理中",
-  },
-  {
-    id: 4,
-    productName: "保健食品",
-    price: 38000,
-    quantity: 1,
-    status: "待製作",
-  },
-  {
-    id: 5,
-    productName: "保健食品",
-    price: 38000,
-    quantity: 1,
-    status: "製作中",
-  },
-  {
-    id: 6,
-    productName: "保健食品",
-    price: 38000,
-    quantity: 1,
-    status: "待出貨",
-  },
-  {
-    id: 7,
-    productName: "保健食品",
-    price: 38000,
-    quantity: 1,
-    status: "已出貨",
-  },
-  {
-    id: 8,
-    productName: "保健食品",
-    price: 38000,
-    quantity: 1,
-    status: "退貨申請",
-  },
-]);
+// 訂單資訊介面定義
+interface OrderInfo {
+  State: string;
+  StateName: string;
+  SID: string;
+  CheckTime: string;
+  InvoiceID: string;
+  InvoiceIDName: string;
+  RName: string;
+  RMobile: string;
+  CNT: string;
+  TotalAmount: string;
+  Address: string;
+  Mobile: string;
+  PayTypeName: string;
+  DeliverTypeName: string;
+  freight: string;
+  BackReason: string;
+}
+
+// 模擬訂單商品數據 (備用)
+const mockOrderItems = ref<OrderItem[]>([]);
 
 // 計算總金額
 const totalAmount = computed(() => {
-  return orderItems.value.reduce(
-    (total: number, item: OrderItem) => total + item.price * item.quantity,
-    0
-  );
+  if (orderInfo.value) {
+    return parseInt(orderInfo.value.TotalAmount);
+  }
+  return 0;
 });
 
 // 狀態顏色配置
 const getStatusClass = (status: string) => {
   const statusMap: Record<string, string> = {
-    未付款: "status-red",
-    個人化資訊: "status-red",
-    醫師處理中: "status-red",
-    待製作: "status-red",
-    製作中: "status-green",
-    待出貨: "status-green",
-    已出貨: "status-blue",
-    退貨申請: "status-red",
-    退貨處理: "status-red",
-    退貨完成: "status-red",
-    退款完成: "status-red",
+    "0": "status-red",      // 未付款
+    "1": "status-green",    // 個人化資訊
+    "3": "status-red",      // 待製作
+    "4": "status-green",    // 製作中
+    "5": "status-green",    // 待出貨
+    "6": "status-blue",     // 已出貨
+    "7": "status-blue",     // 已簽收
+    "8": "status-red",      // 退貨申請
+    "9": "status-red",      // 退貨處理
+    "A": "status-red",      // 退貨完成
+    "B": "status-red",      // 退款完成
   };
   return statusMap[status] || "status-default";
+};
+
+// API 載入訂單詳細資料
+const loadOrderDetail = async () => {
+  loading.value = true;
+  
+  try {
+    const response = await axios.post("https://23700999.com:8081/HMA/api/bk/SaleItemQry", {
+      AdminID: adminID.value,
+      Token: token.value,
+      SALEID: orderId
+    });
+
+    console.log("訂單詳細 API 回應:", response.data);
+    
+    if (response.status === 200 && response.data.Result === "OK") {
+      const apiData = response.data;
+      orderInfo.value = apiData.Sale;
+      orderItems.value = apiData.SaleItem || [];
+    } else {
+      console.error("載入訂單詳細失敗");
+      // 如果 API 失敗，使用模擬數據
+      orderItems.value = mockOrderItems.value;
+    }
+  } catch (error) {
+    console.error("載入訂單詳細時發生錯誤:", error);
+    // 如果 API 失敗，使用模擬數據
+    orderItems.value = mockOrderItems.value;
+  } finally {
+    loading.value = false;
+  }
 };
 
 // 返回上一頁
@@ -341,6 +365,7 @@ const collapseOrderBar = () => {
 
 onMounted(() => {
   console.log("訂單詳情頁面載入，訂單ID:", orderId);
+  loadOrderDetail();
 });
 </script>
 
@@ -442,6 +467,31 @@ onMounted(() => {
     background: var(--Neutral-white, #fff);
     box-shadow: 0px 2px 20px 0px
       var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
+
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+      min-height: 300px;
+
+      .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid $raphael-gray-200;
+        border-top: 4px solid $raphael-cyan-500;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 1rem;
+      }
+
+      p {
+        color: $raphael-gray-500;
+        font-size: 1rem;
+        margin: 0;
+      }
+    }
 
     .table-list {
       display: grid;
@@ -586,7 +636,7 @@ onMounted(() => {
   &.orderBar--expanded {
     width: 340px;
     @include respond-to("xl") {
-      width: 300px;
+      width: 320px;
     }
     @include respond-to("lg") {
       background: var(--Neutral-white, #fff);
@@ -748,5 +798,10 @@ onMounted(() => {
   to {
     opacity: 1;
   }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>

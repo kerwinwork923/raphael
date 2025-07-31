@@ -9,7 +9,7 @@
     <div class="meta">
       <button class="btn refresh" @click="handleRefresh" :disabled="isLoading">
         <i class="i-refresh" :class="{ rotating: isLoading }"></i>
-        <img src="/assets/imgs/backend/back.svg" alt="" />
+       
         {{ refreshButtonText }}
       </button>
       <span class="updated-time">最後更新: {{ lastUpdated }}</span>
@@ -53,9 +53,7 @@ const handleRefresh = () => {
   align-items: center;
   gap: 1rem;
 
-  @include respond-to("lg") {
-    padding-left: 36px;
-  }
+
 
   @include respond-to("sm") {
     flex-wrap: wrap;
@@ -70,7 +68,9 @@ const handleRefresh = () => {
     font-weight: 700;
 
     letter-spacing: 0.09px;
-
+    @include respond-to("lg") {
+    padding-left: 36px;
+  }
     .count {
       color: var(--Primary-200, #b1c0d8);
       text-align: center;
@@ -90,7 +90,7 @@ const handleRefresh = () => {
 
     @include respond-to("lg") {
       gap: 6px;
-      margin-top: 0.5rem;
+  
       width: 100%;
     }
 
@@ -108,7 +108,7 @@ const handleRefresh = () => {
       display: flex;
       align-items: center;
       gap: 0.3rem;
-
+      white-space: nowrap;
       img {
         width: 16px;
         height: 16px;
