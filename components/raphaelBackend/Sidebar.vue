@@ -597,7 +597,7 @@ h1,
     transform: translateY(-50%) rotate(180deg);
     
     @include respond-to("lg") {
-      top: -30px;
+      top: -34px;
       right: -64px;
     }
   }

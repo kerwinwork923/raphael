@@ -11,7 +11,6 @@
         <button class="back-btn" @click="goBack">
           <img src="/assets/imgs/backend/back.svg" alt="" />
           <h6>返回</h6>
-          
         </button>
       </div>
 
@@ -92,16 +91,21 @@
           @click="collapseOrderBar"
         />
       </div>
-      <div
-        v-show="orderBarExpanded"
-        class="orderBarInfo orderBarInfo--fade"
-        style="animation-delay: 0.1s"
-      >
-        <h3>訂單資訊</h3>
-        <div class="orderBarInfoItem">
-          <div class="orderBarInfoItemTitle">
-            <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
-            訂單狀態
+      <div class="orderBarContent">
+        <div
+          v-show="orderBarExpanded"
+          class="orderBarInfo orderBarInfo--fade"
+          style="animation-delay: 0.1s"
+        >
+          <h3>訂單資訊</h3>
+          <div class="orderBarInfoItem">
+            <div class="orderBarInfoItemTitle">
+              <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
+              訂單狀態
+            </div>
+            <div class="orderBarInfoItemValue orderBarInfoItemValueRed">
+              待製作
+            </div>
           </div>
           <div class="orderBarInfoItemValue orderBarInfoItemValueRed">
             {{ orderInfo?.StateName || "載入中..." }}
@@ -130,16 +134,18 @@
         </div>
       </div>
 
-      <div
-        v-show="orderBarExpanded"
-        class="orderBarInfo orderBarInfo--fade"
-        style="animation-delay: 0.2s"
-      >
-        <h3>基本資料</h3>
-        <div class="orderBarInfoItem">
-          <div class="orderBarInfoItemTitle">
-            <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
-            姓名
+        <div
+          v-show="orderBarExpanded"
+          class="orderBarInfo orderBarInfo--fade"
+          style="animation-delay: 0.2s"
+        >
+          <h3>基本資料</h3>
+          <div class="orderBarInfoItem">
+            <div class="orderBarInfoItemTitle">
+              <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
+              姓名
+            </div>
+            <div class="orderBarInfoItemValue">王先生</div>
           </div>
           <div class="orderBarInfoItemValue">{{ orderInfo?.RName || "載入中..." }}</div>
         </div>
@@ -164,18 +170,19 @@
           </div>
           <div class="orderBarInfoItemValue">${{ orderInfo?.freight || "0" }}</div>
         </div>
-      </div>
 
-      <div
-        v-show="orderBarExpanded"
-        class="orderBarInfo orderBarInfo--fade"
-        style="animation-delay: 0.3s"
-      >
-        <h3>商品資訊</h3>
-        <div class="orderBarInfoItem">
-          <div class="orderBarInfoItemTitle">
-            <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
-            商品總數
+        <div
+          v-show="orderBarExpanded"
+          class="orderBarInfo orderBarInfo--fade"
+          style="animation-delay: 0.3s"
+        >
+          <h3>商品資訊</h3>
+          <div class="orderBarInfoItem">
+            <div class="orderBarInfoItemTitle">
+              <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
+              商品總數
+            </div>
+            <div class="orderBarInfoItemValue">{{ orderItems.length }}</div>
           </div>
           <div class="orderBarInfoItemValue">{{ orderInfo?.CNT || orderItems.length }}</div>
         </div>
@@ -186,7 +193,6 @@
             ${{ totalAmount.toLocaleString() }}
           </div>
         </div>
-      </div>
 
       <div
         v-show="orderBarExpanded && orderInfo?.BackReason"
@@ -385,7 +391,7 @@ onMounted(() => {
   flex-direction: column;
   gap: 1rem;
   flex: 1;
-  padding: 1rem ;
+  padding: 1rem;
   overflow-y: auto;
 
   @include respond-to("xl") {
@@ -399,31 +405,28 @@ onMounted(() => {
 
     background: $raphael-gray-100;
     border-radius: 12px;
-    margin-bottom: 1rem;
 
-    
     h1 {
-      color: var(--Primary-600, #2d3047);
+      color: $primary-600;
       font-size: 36px;
       font-style: normal;
       font-weight: 700;
       letter-spacing: 0.09px;
       margin: 0;
       @include respond-to("lg") {
+        font-size: 24px;
         margin-left: 36px;
-       
       }
-        
     }
-    
+
     .back-btn {
       border-radius: 6px;
-      background: var(--Primary-200, #b1c0d8);
+      background: $primary-200;
       padding: 9px 12px;
       border: none;
       color: var(--Primary-100, #f5f7fa);
       cursor: pointer;
-      font-size: var(--Text-font-size-18, 18px);
+      font-size: 1.125rem;
       font-style: normal;
       font-weight: 400;
       letter-spacing: 2.7px;
@@ -431,24 +434,22 @@ onMounted(() => {
       align-items: center;
       gap: 0.3rem;
       transition: all ease 0.2s;
-      
+
       @include respond-to("lg") {
-        position: fixed;
-        right: 60px;
-        top: 24px;
+        margin-right: 36px;
         z-index: 999;
       }
-      
+
       h6 {
         @include respond-to("lg") {
           display: none;
         }
       }
-  
+
       &:hover {
         background: $primary-300;
       }
-      
+
       img {
         width: 16px;
         height: 16px;
@@ -464,7 +465,7 @@ onMounted(() => {
     border-radius: 8px;
     overflow: hidden;
     border-radius: 20px;
-    background: var(--Neutral-white, #fff);
+    background: $raphael-white;
     box-shadow: 0px 2px 20px 0px
       var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
 
@@ -534,7 +535,7 @@ onMounted(() => {
       &.table-header {
         font-weight: 600;
         white-space: nowrap;
-        color: var(--Primary-600, #2d3047);
+        color: $primary-600;
         @include respond-to("lg") {
           display: none;
         }
@@ -573,7 +574,7 @@ onMounted(() => {
   .status-tag {
     display: inline-block;
     padding: 4px 12px;
-    border-radius: 20px;
+    border-radius: 4px;
     font-size: 12px;
     font-weight: 500;
     text-align: center;
@@ -606,14 +607,16 @@ onMounted(() => {
 }
 
 .orderBar {
-  padding: 16px;
-  border-radius: var(--Radius-r-20, 20px);
-  background: var(--Neutral-white, #fff);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  border-radius: 20px;
+  background: $raphael-white;
   box-shadow: -1px 0px 20px 0px
     var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  margin-right: 1rem;
+  margin: 1rem;
+  margin-left: 0;
+  padding: 1rem 0.5rem;
   width: 54px;
   opacity: 1;
   transform: translateY(0);
@@ -634,28 +637,31 @@ onMounted(() => {
   }
 
   &.orderBar--expanded {
-    width: 340px;
+    width: 380px;
     @include respond-to("xl") {
       width: 320px;
     }
     @include respond-to("lg") {
-      background: var(--Neutral-white, #fff);
+      background: $raphael-white;
       box-shadow: -1px 0px 20px 0px
         var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
-        
-        width: 100%;
-        height: 100%;
-        top: 0;
-        right: 0;
-        z-index: 999;
-        margin: 0;
-   
-        border-radius: 0;
-        overflow-y: scroll;
+
+      width: 100%;
+      height: 100%;
+      top: 0;
+      right: 0;
+      z-index: 999;
+      margin: 0;
+
+      border-radius: 0;
+      overflow-y: scroll;
     }
   }
 
   .orderBarImg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
     position: relative;
     height: 24px;
@@ -670,101 +676,118 @@ onMounted(() => {
         top: 0;
         right: 0;
       }
+      &.orderBarImgButton {
+        @include respond-to("lg") {
+          top: -11px;
+          right: -4px;
+        }
+      }
     }
   }
 
-  .orderBarInfo {
-    border-radius: var(--Radius-r-20, 20px);
-    background: var(--Neutral-white, #fff);
-    box-shadow: 0px 2px 20px 0px
-      var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
-    padding: 16px 16px 8px 16px;
-    margin-top: 0.5rem;
-    margin-bottom: 1rem;
-    opacity: 0;
-    transform: translateY(20px);
+  .orderBarContent {
+    display: grid;
+    gap: 1.5rem;
+    flex: 1;
+    height: 0;
+    padding: 0.5rem;
+    overflow: hidden;
+    overflow-y: scroll;
+    @include scrollbarStyle();
 
-    &.orderBarInfo--fade {
-      animation: fadeInUp 0.4s ease-out forwards;
+    .orderBarInfo {
+      border-radius: 20px;
+      background: $raphael-white;
+      box-shadow: 0px 2px 20px 0px
+        var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
+      padding: 1rem;
+      opacity: 0;
+      transform: translateY(20px);
+
+      &.orderBarInfo--fade {
+        animation: fadeInUp 0.4s ease-out forwards;
+      }
+
+      .orderBarInfoHR {
+        height: 1px;
+        background: #b1c0d8;
+        margin-bottom: 0.25rem;
+      }
     }
 
-    .orderBarInfoHR {
-      height: 1px;
-      background: #b1c0d8;
-      margin-bottom: 0.25rem;
-    }
-  }
-
-  h3 {
-    color: var(--Primary-600, #2d3047);
-    font-size: var(--Text-font-size-24, 24px);
-    font-style: normal;
-    font-weight: 400;
-    letter-spacing: 0.12px;
-    margin-bottom: 1rem;
-  }
-
-  .orderBarInfoItem {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
-
-    .orderBarInfoItemTitle {
-      color: var(--Primary-200, #b1c0d8);
-      font-size: var(--Text-font-size-18, 18px);
+    h3 {
+      color: $primary-600;
+      font-size: 1.5rem;
       font-style: normal;
       font-weight: 400;
-      letter-spacing: 0.09px;
+      letter-spacing: 0.12px;
+      margin-bottom: 1rem;
+    }
+
+    .orderBarInfoItem {
+      display: grid;
+      grid-auto-flow: column;
+      margin-bottom: 0.5rem;
+      gap: 0.5rem;
+      grid-template-columns: repeat(2, 1fr);
+
+      .orderBarInfoItemTitle {
+        color: $primary-200;
+        font-size: 1.125rem;
+        font-style: normal;
+        font-weight: 400;
+        letter-spacing: 0.09px;
+        display: flex;
+        align-items: center;
+        gap: 0.1rem;
+
+        img {
+          transform: scale(0.8) translateY(2px);
+        }
+      }
+
+      .orderBarInfoItemValue {
+        color: $primary-600;
+        font-size: 1.125rem;
+        font-style: normal;
+        font-weight: 400;
+        letter-spacing: 0.09px;
+        word-break: break-all;
+
+        &.orderBarInfoItemValueRed {
+          color: $raphael-red-300;
+        }
+      }
+    }
+
+    .orderBarInfoItem2 {
       display: flex;
-      align-items: center;
-      gap: 0.1rem;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
 
-      img {
-        transform: scale(0.8) translateY(2px);
+      .orderBarInfoItemTitle {
+        color: $raphael-red-300;
+        font-size: 1.25rem;
+        font-style: normal;
+        font-weight: 400;
+        letter-spacing: 0.1px;
+      }
+
+      .orderBarInfoItemValue {
+        color: $raphael-red-300;
+        text-align: right;
+        font-size: 1.25rem;
+        font-style: normal;
+        font-weight: 700;
+        letter-spacing: 0.1px;
       }
     }
 
-    .orderBarInfoItemValue {
-      color: var(--Primary-600, #2d3047);
-      font-size: var(--Text-font-size-18, 18px);
-      font-style: normal;
-      font-weight: 400;
-      letter-spacing: 0.09px;
-      max-width: 60%;
-
-      &.orderBarInfoItemValueRed {
-        color: #ec4f4f;
-      }
+    .orderBarInfoContent {
+      color: $primary-600;
+      font-size: 1rem;
+      line-height: 1.5;
     }
-  }
-
-  .orderBarInfoItem2 {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
-
-    .orderBarInfoItemTitle {
-      color: var(--Warning-default, #ec4f4f);
-      font-size: var(--Text-font-size-20, 20px);
-      font-style: normal;
-      font-weight: 400;
-      letter-spacing: 0.1px;
-    }
-
-    .orderBarInfoItemValue {
-      color: var(--Warning-default, #ec4f4f);
-      text-align: right;
-      font-size: var(--Text-font-size-20, 20px);
-      font-style: normal;
-      font-weight: 700;
-      letter-spacing: 0.1px;
-    }
-  }
-
-  .orderBarInfoContent {
-    color: var(--Primary-600, #2d3047);
-    font-size: var(--Text-font-size-16, 16px);
-    line-height: 1.5;
   }
 }
 

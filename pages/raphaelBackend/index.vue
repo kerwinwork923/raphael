@@ -202,7 +202,6 @@ useSeo({
   url: "https://neuroplus.com.tw",
 });
 
-
 /* ================= 基本 reactive =================== */
 const router = useRouter();
 const step = ref("login"); // login | first | reset
@@ -519,7 +518,7 @@ onMounted(() => {
         align-items: center;
         margin-top: 0.75rem;
         .forgotLink {
-          color: var(--Neutral-500, #666);
+          color: $raphael-gray-500;
           cursor: pointer;
           font-size: 18px;
           font-style: normal;
@@ -535,9 +534,9 @@ onMounted(() => {
         }
 
         label {
-          color: var(--Neutral-500, #666);
+          color: $raphael-gray-500;
           font-family: "Noto Sans";
-          font-size: var(--Text-font-size-18, 18px);
+          font-size: 1.125rem
           font-style: normal;
           font-weight: 400;
           letter-spacing: 2.7px;
@@ -582,7 +581,7 @@ onMounted(() => {
       display: block;
       padding: 0;
       margin: 0;
-      color: var(--Warning-default, #ec4f4f);
+      color: $raphael-red-300;
       font-size: 12px;
       letter-spacing: 0.048px;
       margin-top: 0.25rem;

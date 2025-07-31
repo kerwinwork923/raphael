@@ -237,10 +237,11 @@
           </div>
           <div class="info-msg">
             系統已根據您的身高、體重、性別和尺寸自動計算，您也可以手動調整
-            <br>
-            <span  v-if="isOutOfRange">超出合理範圍(23-52cm)，請確認是否正確</span>
+            <br />
+            <span v-if="isOutOfRange"
+              >超出合理範圍(23-52cm)，請確認是否正確</span
+            >
           </div>
-
         </div>
       </div>
       <div class="measureWrap">
@@ -675,7 +676,7 @@ onMounted(() => {
         transition: border 0.2s, color 0.2s;
         border-radius: 8px;
         border: 1px solid var(--Neutral-300, #ccc);
-        background: var(--Neutral-white, #fff);
+        background: $raphael-white;
         box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
         margin-bottom: 0.75rem;
         &.selected,
@@ -704,7 +705,7 @@ onMounted(() => {
         transition: border 0.2s, color 0.2s;
         border-radius: 8px;
         border: 1px solid var(--Neutral-300, #ccc);
-        background: var(--Neutral-white, #fff);
+        background: $raphael-white;
         box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
         margin-bottom: 0.75rem;
         &.selected,
@@ -733,7 +734,7 @@ onMounted(() => {
         letter-spacing: 0.1px;
       }
       .table-desc {
-        color: var(--Neutral-500, #666);
+        color: $raphael-gray-500;
         text-align: center;
         font-size: 14px;
         font-style: normal;
@@ -750,7 +751,7 @@ onMounted(() => {
         td {
           padding: 4px 8px;
           text-align: center;
-          color: var(--Neutral-500, #666);
+          color: $raphael-gray-500;
           font-size: 16px;
           font-style: normal;
           font-weight: 400;
@@ -813,7 +814,7 @@ onMounted(() => {
         margin-left: 2px;
       }
       label {
-        color: var(--Neutral-500, #666);
+        color: $raphael-gray-500;
         font-size: 18px;
         font-style: normal;
         font-weight: 400;
@@ -867,7 +868,7 @@ onMounted(() => {
       letter-spacing: 0.1px;
     }
     .measure-desc {
-      color: var(--Neutral-500, #666);
+      color: $raphael-gray-500;
       text-align: center;
 
       font-size: 14px;
@@ -992,10 +993,10 @@ onMounted(() => {
         display: flex;
         flex-direction: column;
         align-items: center;
-        color: var(--Neutral-500, #666);
+        color: $raphael-gray-500;
         text-align: center;
 
-        font-size: var(--Text-font-size-18, 18px);
+        font-size: 1.125rem
         font-style: normal;
         font-weight: 400;
         line-height: 100%; /* 18px */
@@ -1043,9 +1044,9 @@ onMounted(() => {
 }
 
 .info-msg {
-color: var(--Warning-default, #EC4F4F);
+color: $raphael-red-300;
 font-family: "Noto Sans";
-font-size: var(--Text-font-size-16, 16px);
+font-size: 1rem;
 font-style: normal;
 font-weight: 700;
 line-height: 150%; /* 24px */

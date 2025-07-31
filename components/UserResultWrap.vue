@@ -444,7 +444,7 @@
         display: flex;
         justify-content: space-between;
         h4 {
-          color: var(--Neutral-500, #666);
+          color: $raphael-gray-500;
 
           font-size: 16px;
           font-style: normal;

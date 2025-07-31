@@ -484,7 +484,7 @@ onUnmounted(() => {
     border-radius: 8px;
     overflow: hidden;
     border-radius: 20px;
-    background: var(--Neutral-white, #fff);
+    background: $raphael-white;
     box-shadow: 0px 2px 20px 0px
       var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
     .table-list {
@@ -526,7 +526,7 @@ onUnmounted(() => {
       &.table-header {
         font-weight: 600;
         white-space: nowrap;
-        color: var(--Primary-600, #2d3047);
+        color: $primary-600;
         @include respond-to("lg") {
           display: none;
         }
@@ -575,7 +575,7 @@ onUnmounted(() => {
         transition: all 0.25s ease;
         &:hover {
           border-radius: 50%;
-          box-shadow: inset 0px 2px 6px -1px $raphael-cyan-500;
+          box-shadow: inset 0px 2px 6px -1px $primary-200;
         }
         @include respond-to("lg") {
           top: 29px;
@@ -587,7 +587,7 @@ onUnmounted(() => {
   .status-tag {
     display: inline-block;
     padding: 4px 12px;
-    border-radius: 20px;
+    border-radius: 4px;
     font-size: 12px;
     font-weight: 500;
     text-align: center;

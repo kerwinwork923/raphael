@@ -1,85 +1,77 @@
 <template>
   <section class="toolbar">
-    <div class="toolbar-inner">
-      <!-- 搜尋欄位 -->
-      <div v-if="showSearch" class="search-wrapper">
-        <input
-          :value="searchValue"
-          class="search"
-          type="text"
-          :placeholder="searchPlaceholder"
-          @input="handleSearchInput"
-        />
-        <img src="/assets/imgs/backend/search.svg" alt="" />
-      </div>
+    <!-- 搜尋欄位 -->
+    <div v-if="showSearch" class="search-wrapper">
+      <input
+        :value="searchValue"
+        class="search"
+        type="text"
+        :placeholder="searchPlaceholder"
+        @input="handleSearchInput"
+      />
+      <img src="/assets/imgs/backend/search.svg" alt="" />
+    </div>
 
-      <!-- 日期選擇器 -->
-      <div v-if="showDatePicker" class="toolbarTime-wrapper">
-        <VueDatePicker
-          :model-value="dateValue"
-          range
-          :enable-time-picker="false"
-          :format="'yyyy/MM/dd'"
-          :min-date="minDate"
-          :placeholder="datePlaceholder"
-          prepend-icon="i-calendar"
-          @update:model-value="handleDateChange"
-        />
-      </div>
+    <!-- 日期選擇器 -->
+    <div v-if="showDatePicker" class="toolbarTime-wrapper">
+      <VueDatePicker
+        :model-value="dateValue"
+        range
+        :enable-time-picker="false"
+        :format="'yyyy/MM/dd'"
+        :min-date="minDate"
+        :placeholder="datePlaceholder"
+        prepend-icon="i-calendar"
+        @update:model-value="handleDateChange"
+      />
+    </div>
 
-      <!-- 產品篩選 -->
-      <div v-if="showProductFilter" class="selectWrapper">
-        <img
-          class="selectWrapperIcon1"
-          src="/assets/imgs/backend/filter.svg"
-          alt=""
-        />
-        <select
-          :value="productValue"
-          @change="handleProductChange"
+    <!-- 產品篩選 -->
+    <div v-if="showProductFilter" class="selectWrapper">
+      <img
+        class="selectWrapperIcon1"
+        src="/assets/imgs/backend/filter.svg"
+        alt=""
+      />
+      <select :value="productValue" @change="handleProductChange">
+        <option value="">{{ productPlaceholder }}</option>
+        <option
+          v-for="product in productOptions"
+          :key="product.value"
+          :value="product.value"
         >
-          <option value="">{{ productPlaceholder }}</option>
-          <option
-            v-for="product in productOptions"
-            :key="product.value"
-            :value="product.value"
-          >
-            {{ product.label }}
-          </option>
-        </select>
-        <img
-          class="selectWrapperIcon2"
-          src="/assets/imgs/backend/dropdown.svg"
-          alt=""
-        />
-      </div>
+          {{ product.label }}
+        </option>
+      </select>
+      <img
+        class="selectWrapperIcon2"
+        src="/assets/imgs/backend/dropdown.svg"
+        alt=""
+      />
+    </div>
 
-      <!-- 狀態篩選 -->
-      <div v-if="showStatusFilter" class="selectWrapper">
-        <img
-          class="selectWrapperIcon1"
-          src="/assets/imgs/backend/filter.svg"
-          alt=""
-        />
-        <select
-          :value="statusValue"
-          @change="handleStatusChange"
+    <!-- 狀態篩選 -->
+    <div v-if="showStatusFilter" class="selectWrapper">
+      <img
+        class="selectWrapperIcon1"
+        src="/assets/imgs/backend/filter.svg"
+        alt=""
+      />
+      <select :value="statusValue" @change="handleStatusChange">
+        <option value="">{{ statusPlaceholder }}</option>
+        <option
+          v-for="status in statusOptions"
+          :key="status.value"
+          :value="status.value"
         >
-          <option value="">{{ statusPlaceholder }}</option>
-          <option
-            v-for="status in statusOptions"
-            :key="status.value"
-            :value="status.value"
-          >
-            {{ status.label }}
-          </option>
-        </select>
-        <img
-          class="selectWrapperIcon2"
-          src="/assets/imgs/backend/dropdown.svg"
-          alt=""
-        />
-      </div>
+          {{ status.label }}
+        </option>
+      </select>
+      <img
+        class="selectWrapperIcon2"
+        src="/assets/imgs/backend/dropdown.svg"
+        alt=""
+      />
     </div>
   </section>
 </template>
@@ -99,21 +91,21 @@ interface Props {
   showDatePicker?: boolean;
   showProductFilter?: boolean;
   showStatusFilter?: boolean;
-  
+
   // 搜尋相關
   searchValue?: string;
   searchPlaceholder?: string;
-  
+
   // 日期相關
   dateValue?: any;
   datePlaceholder?: string;
   minDate?: Date;
-  
+
   // 產品篩選相關
   productValue?: string;
   productPlaceholder?: string;
   productOptions?: FilterOption[];
-  
+
   // 狀態篩選相關
   statusValue?: string;
   statusPlaceholder?: string;
@@ -121,14 +113,14 @@ interface Props {
 }
 
 interface Emits {
-  (e: 'update:searchValue', value: string): void;
-  (e: 'update:dateValue', value: any): void;
-  (e: 'update:productValue', value: string): void;
-  (e: 'update:statusValue', value: string): void;
-  (e: 'search', value: string): void;
-  (e: 'dateChange', value: any): void;
-  (e: 'productChange', value: string): void;
-  (e: 'statusChange', value: string): void;
+  (e: "update:searchValue", value: string): void;
+  (e: "update:dateValue", value: any): void;
+  (e: "update:productValue", value: string): void;
+  (e: "update:statusValue", value: string): void;
+  (e: "search", value: string): void;
+  (e: "dateChange", value: any): void;
+  (e: "productChange", value: string): void;
+  (e: "statusChange", value: string): void;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -136,17 +128,17 @@ const props = withDefaults(defineProps<Props>(), {
   showDatePicker: true,
   showProductFilter: true,
   showStatusFilter: true,
-  searchValue: '',
-  searchPlaceholder: '請輸入關鍵字',
+  searchValue: "",
+  searchPlaceholder: "請輸入關鍵字",
   dateValue: null,
-  datePlaceholder: '日期查詢',
+  datePlaceholder: "日期查詢",
   minDate: () => new Date(2024, 0, 1),
-  productValue: '',
-  productPlaceholder: '商品篩選',
+  productValue: "",
+  productPlaceholder: "商品篩選",
   productOptions: () => [],
-  statusValue: '',
-  statusPlaceholder: '狀態篩選',
-  statusOptions: () => []
+  statusValue: "",
+  statusPlaceholder: "狀態篩選",
+  statusOptions: () => [],
 });
 
 const emit = defineEmits<Emits>();
@@ -155,23 +147,23 @@ const emit = defineEmits<Emits>();
 const handleSearchInput = (event: Event) => {
   const target = event.target as HTMLInputElement;
   if (target) {
-    emit('update:searchValue', target.value);
-    emit('search', target.value);
+    emit("update:searchValue", target.value);
+    emit("search", target.value);
   }
 };
 
 // 處理日期變更
 const handleDateChange = (value: any) => {
-  emit('update:dateValue', value);
-  emit('dateChange', value);
+  emit("update:dateValue", value);
+  emit("dateChange", value);
 };
 
 // 處理產品篩選變更
 const handleProductChange = (event: Event) => {
   const target = event.target as HTMLSelectElement;
   if (target) {
-    emit('update:productValue', target.value);
-    emit('productChange', target.value);
+    emit("update:productValue", target.value);
+    emit("productChange", target.value);
   }
 };
 
@@ -179,8 +171,8 @@ const handleProductChange = (event: Event) => {
 const handleStatusChange = (event: Event) => {
   const target = event.target as HTMLSelectElement;
   if (target) {
-    emit('update:statusValue', target.value);
-    emit('statusChange', target.value);
+    emit("update:statusValue", target.value);
+    emit("statusChange", target.value);
   }
 };
 </script>
@@ -189,41 +181,28 @@ const handleStatusChange = (event: Event) => {
 .toolbar {
   display: flex;
   justify-content: flex-end;
+  gap: 1rem;
   width: 100%;
 
-  .toolbar-inner {
-    display: flex;
-    justify-content: flex-end;
-    gap: 16px;
-    width: 100%;
+  @include respond-to("md") {
+    justify-content: center;
     flex-wrap: wrap;
-    
-    @include respond-to("xl") {
-      gap: 8px;
-      flex-wrap: nowrap;
-    }
-    
-    @include respond-to("sm") {
-      flex-wrap: wrap;
-      justify-content: space-between;
-    }
+    gap: 0.5rem;
   }
 
   .search-wrapper {
     position: relative;
-    
-    @include respond-to("lg") {
-      width: 25%;
+    min-width: 10dvw;
+
+    @include respond-to("md") {
+      width: 100%;
+      min-width: auto;
     }
-    
-    @include respond-to("sm") {
-      width: 48%;
-    }
-    
+
     img {
       width: 1.25rem;
       position: absolute;
-      right: 5%;
+      left: 10px;
       top: 50%;
       transform: translateY(-50%);
       width: 19px;
@@ -232,10 +211,11 @@ const handleStatusChange = (event: Event) => {
 
   .search {
     padding: 8px 12px;
+    padding-left: 36px;
     border: none;
     width: 100%;
     border-radius: var(--Radius-r-50, 50px);
-    background: var(--Neutral-white, #fff);
+    background: $raphael-white;
     box-shadow: 0px 2px 20px 0px
       var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
     transition: all ease 0.2s;
@@ -247,15 +227,13 @@ const handleStatusChange = (event: Event) => {
 
   .toolbarTime-wrapper {
     position: relative;
-    
-    @include respond-to("lg") {
-      width: 25%;
+    min-width: 10dvw;
+
+    @include respond-to("md") {
+      width: 100%;
+      min-width: auto;
     }
-    
-    @include respond-to("sm") {
-      width: 48%;
-    }
-    
+
     /* 重點: 用 :deep() 才能選到 VueDatePicker 的內部元素 */
     :deep(.dp__pointer) {
       padding: 0;
@@ -271,7 +249,8 @@ const handleStatusChange = (event: Event) => {
     }
 
     :deep(.dp__input) {
-      padding: 4px 32px;
+      padding: 3.5px 12px;
+      padding-left: 36px;
       border-radius: 50px;
       background: #fff;
       box-shadow: 0px 2px 20px rgba(177, 192, 216, 0.25);
@@ -293,7 +272,7 @@ const handleStatusChange = (event: Event) => {
   }
 
   select {
-    padding: 0.5rem 1.75rem;
+    padding: 0.5rem 2rem;
     border: 1px solid #ccc;
     border-radius: 6px;
     background-color: #fff;
@@ -302,16 +281,16 @@ const handleStatusChange = (event: Event) => {
     -webkit-appearance: none;
     -moz-appearance: none;
     background-image: none;
-    color: var(--Neutral-500, #666);
+    color: $raphael-gray-500;
     cursor: pointer;
     width: 100%;
     border: none;
     border-radius: var(--Radius-r-50, 50px);
-    background: var(--Neutral-white, #fff);
+    background: $raphael-white;
     box-shadow: 0px 2px 20px 0px
       var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
     transition: all ease 0.2s;
-    
+
     &:hover {
       box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
     }
@@ -319,31 +298,27 @@ const handleStatusChange = (event: Event) => {
 
   .selectWrapper {
     position: relative;
-    min-width: 12%;
- 
-    @include respond-to("lg") {
-      width: 25%;
+    min-width: 10dvw;
+
+    @include respond-to("md") {
+      width: 100%;
+      min-width: auto;
     }
-    
-    @include respond-to("sm") {
-      width: 48%;
-      margin-left: auto;
-    }
-    
+
     img {
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
       width: 16px;
     }
-    
+
     .selectWrapperIcon1 {
       left: 8px;
     }
-    
+
     .selectWrapperIcon2 {
       right: 8px;
     }
   }
 }
-</style> 
+</style>

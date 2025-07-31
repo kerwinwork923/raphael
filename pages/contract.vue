@@ -1517,7 +1517,7 @@ export default {
       letter-spacing: 0.048px;
     }
     p {
-      color: var(--Neutral-500, #666);
+      color: $raphael-gray-500;
       font-size: 18px;
       font-style: normal;
       font-weight: 400;
@@ -1581,7 +1581,7 @@ export default {
     h2 {
       width: 50%;
       text-align: center;
-      color: var(--Neutral-500, #666);
+      color: $raphael-gray-500;
       font-size: 16px;
       font-style: normal;
       font-weight: 400;
@@ -1635,7 +1635,7 @@ export default {
           z-index: 10;
         }
         h4 {
-          color: var(--Neutral-500, #666);
+          color: $raphael-gray-500;
           text-align: center;
           font-size: 16px;
           font-style: normal;

@@ -3,11 +3,13 @@
     <CartTitleBar title="寄送方式" backPath="/cart/pay" />
     <div class="payMethodTitleGroup">
       <h5>支援物流</h5>
-      <h6 @click="router.push('/cart/addAddress')">新增地址 <img src="~/assets/imgs/cart/goNextRed.svg" alt="" /></h6>
+      <h6 @click="router.push('/cart/addAddress')">
+        新增地址 <img src="~/assets/imgs/cart/goNextRed.svg" alt="" />
+      </h6>
     </div>
     <div class="payMethodGroup">
       <div class="payMethodTitle">
-        <h4>{{ deliverInfo?.Name || '宅配' }}</h4>
+        <h4>{{ deliverInfo?.Name || "宅配" }}</h4>
         <h5>免運費</h5>
       </div>
       <p>預計送達時間 5月20日~5月25日</p>
@@ -30,11 +32,10 @@
             <img src="~/assets/imgs/cart/delete.svg" alt="" />
           </div>
         </div>
-
       </template>
       <div class="payMethodHR" v-if="addressList.length > 0"></div>
     </div>
-    
+
     <div class="btnGroup" v-if="addressList.length > 0">
       <button @click="confirmAddress">確認</button>
     </div>
@@ -44,7 +45,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import CartTitleBar from "~/components/cart/CartTitleBar.vue";
-import { useCheckoutStore } from '~/stores/checkout';
+import { useCheckoutStore } from "~/stores/checkout";
 
 const router = useRouter();
 const userData = JSON.parse(localStorage.getItem("userData"));
@@ -53,18 +54,21 @@ const deliverInfo = ref(null);
 const selectedAddressId = ref("");
 const checkoutStore = useCheckoutStore();
 
-const getmaGetRelated = async function() {
+const getmaGetRelated = async function () {
   try {
-    const { data } = await useFetch("https://23700999.com:8081/HMA/api/fr/maGetRelated", {
-      method: "POST",
-      body: {
-        MID: userData.MID,
-        Token: userData.Token,
-        MAID: userData.MAID,
-        Mobile: userData.Mobile,
-        Lang: "zhtw",
-      },
-    });
+    const { data } = await useFetch(
+      "https://23700999.com:8081/HMA/api/fr/maGetRelated",
+      {
+        method: "POST",
+        body: {
+          MID: userData.MID,
+          Token: userData.Token,
+          MAID: userData.MAID,
+          Mobile: userData.Mobile,
+          Lang: "zhtw",
+        },
+      }
+    );
 
     if (data.value?.Result === "OK") {
       // 獲取收件人地址列表
@@ -79,7 +83,7 @@ const getmaGetRelated = async function() {
           }
         }
       }
-      
+
       // 獲取配送方式資訊
       if (data.value?.DeliverList && data.value.DeliverList.length > 0) {
         deliverInfo.value = data.value.DeliverList[0];
@@ -126,7 +130,7 @@ const confirmAddress = () => {
     alert("請選擇收件地址");
     return;
   }
-  
+
   checkoutStore.setSelectedAddress(selectedAddressId.value);
   console.log("已儲存的地址AID至Pinia：", selectedAddressId.value);
   router.push("/cart/pay");
@@ -155,7 +159,7 @@ onMounted(() => {
     border-radius: 8px;
     padding: 0.75rem;
     p {
-      color: var(--Neutral-500, #666);
+      color: $raphael-gray-500;
 
       font-size: var(--Text-font-size-14, 14px);
       font-style: normal;
@@ -173,7 +177,7 @@ onMounted(() => {
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
     h5 {
-      color: var(--Neutral-500, #666);
+      color: $raphael-gray-500;
       text-align: center;
       font-size: 16px;
       font-style: normal;
@@ -181,7 +185,7 @@ onMounted(() => {
       letter-spacing: 0.5px;
     }
     h6 {
-      color: var(--Warning-default, #ec4f4f);
+      color: $raphael-red-300;
       text-align: center;
 
       font-size: var(--Text-font-size-14, 14px);
@@ -208,14 +212,14 @@ onMounted(() => {
     h4 {
       color: var(--Neutral-black, #1e1e1e);
 
-      font-size: var(--Text-font-size-16, 16px);
+      font-size: 1rem;
       font-style: normal;
       font-weight: 700;
       line-height: 100%; /* 16px */
       letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
     }
     h5 {
-      color: var(--Neutral-500, #666);
+      color: $raphael-gray-500;
 
       font-size: var(--Text-font-size-14, 14px);
       font-style: normal;
@@ -229,7 +233,7 @@ onMounted(() => {
     align-items: center;
     gap: 0.5rem;
 
-    label{
+    label {
       width: 100%;
     }
     input {
@@ -238,7 +242,7 @@ onMounted(() => {
       appearance: none;
       border-radius: 50%;
       border: 1px solid var(--Neutral-300, #ccc);
-      background: var(--Neutral-white, #fff);
+      background: $raphael-white;
     }
     input:checked {
       border: 1px solid var(--Primary-default, #74bc1f);
@@ -252,23 +256,23 @@ onMounted(() => {
       h4 {
         color: var(--Neutral-black, #1e1e1e);
 
-        font-size: var(--Text-font-size-16, 16px);
+        font-size: 1rem;
         font-style: normal;
         font-weight: 700;
         line-height: 100%;
         letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
       }
       h5 {
-        color: var(--Neutral-500, #666);
+        color: $raphael-gray-500;
 
-        font-size: var(--Text-font-size-16, 16px);
+        font-size: 1rem;
         font-style: normal;
         font-weight: 400;
         line-height: 100%; /* 24px */
         letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
       }
     }
-    .delete{
+    .delete {
       cursor: pointer;
       width: 26px;
     }

@@ -256,7 +256,6 @@
     <h3>詳細原因</h3>
     <div class="returnReason">
       <textarea name="" id="" placeholder="請描述一下原因"> </textarea>
-    
     </div>
     <div class="returnReasonBtn">
       <button>提交申請</button>
@@ -272,7 +271,7 @@ import TitleMenu from "@/components/TitleMenu.vue";
   min-height: 100vh;
   padding: 0 2.5% 72px;
   h3 {
-    color: var(--Neutral-500, #666);
+    color: $raphael-gray-500;
     font-size: 16px;
     font-style: normal;
     font-weight: 400;
@@ -296,7 +295,7 @@ import TitleMenu from "@/components/TitleMenu.vue";
       border-radius: 8px;
 
       border: 1px solid var(--Neutral-300, #ccc);
-      background: var(--Neutral-white, #fff);
+      background: $raphael-white;
       box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
       transition: all 0.3s ease;
       padding: 0.5rem;
@@ -317,9 +316,9 @@ import TitleMenu from "@/components/TitleMenu.vue";
         }
       }
       h4 {
-        color: var(--Neutral-500, #666);
+        color: $raphael-gray-500;
         width: 100%;
-        font-size: var(--Text-font-size-16, 16px);
+        font-size: 1rem;
         font-style: normal;
         font-weight: 400;
 
@@ -359,7 +358,6 @@ import TitleMenu from "@/components/TitleMenu.vue";
         font-size: 16px;
       }
     }
-
   }
   .returnReasonBtn {
     position: fixed;
@@ -372,7 +370,7 @@ import TitleMenu from "@/components/TitleMenu.vue";
     padding: 1rem 1rem 3.125rem 1rem;
     background-color: $raphael-gray-100;
     z-index: 99;
-    color: var(--Neutral-white, #fff);
+    color: $raphael-white;
     font-size: 18px;
     font-style: normal;
     letter-spacing: 0.09px;

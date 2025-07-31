@@ -220,7 +220,7 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
   max-height: 85%;
   transform: translate(-50%, -50%);
 
-  border-radius: var(--Radius-r-20, 20px);
+  border-radius: 20px;
   border: 3px solid var(--Primary-default, #1ba39b);
   background: var(--neutral-white-opacity-30, rgba(255, 255, 255, 0.3));
   box-shadow: 0px 2px 20px 0px
@@ -259,7 +259,7 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
       padding: 2px 4px;
     }
     h3 {
-      color: var(--Primary-600, #2d3047);
+      color: $primary-600;
       font-size: var(--Text-font-size-24, 20px);
       font-style: normal;
       font-weight: 700;
@@ -269,14 +269,14 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
       margin-top: 0.15rem;
       color: var(--Primary-default, #1ba39b);
       font-family: "Noto Sans";
-      font-size: var(--Text-font-size-18, 18px);
+      font-size: 1.125rem
       font-style: normal;
       font-weight: 400;
       letter-spacing: 0.09px;
     }
   }
   .HRVUserAlertHR {
-    background: var(--Primary-200, #b1c0d8);
+    background: $primary-200;
     width: 100%;
     height: 1px;
   }
@@ -289,8 +289,8 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
       flex-wrap: wrap;
     }
     .HRVUserAlertContent1Card {
-      border-radius: var(--Radius-r-20, 20px);
-      background: var(--Neutral-white, #fff);
+      border-radius: 20px;
+      background: $raphael-white;
       box-shadow: 0px 2px 20px 0px
         var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
       padding: 0.75rem;
@@ -302,8 +302,8 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
         width: 100%;
       }
       h3 {
-        color: var(--Primary-600, #2d3047);
-        font-size: var(--Text-font-size-20, 20px);
+        color: $primary-600;
+        font-size: 1.25rem;
         font-style: normal;
         font-weight: 400;
         letter-spacing: 0.1px;
@@ -312,16 +312,16 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
         }
       }
       .value {
-        color: var(--Primary-600, #2d3047);
+        color: $primary-600;
         margin-top: 0.5rem;
-        font-size: var(--Text-font-size-24, 24px);
+        font-size: 1.5rem;
         font-style: normal;
         font-weight: 700;
 
         letter-spacing: 0.12px;
       }
       .info {
-        color: var(--Primary-200, #b1c0d8);
+        color: $primary-200
 
         font-size: var(--Text-font-size-14, 14px);
         font-style: normal;
@@ -409,16 +409,16 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
     }
   }
   .HRVUserAlertContent3 {
-    border-radius: var(--Radius-r-20, 20px);
-    background: var(--Neutral-white, #fff);
+    border-radius: 20px;
+    background: $raphael-white;
     box-shadow: 0px 2px 20px 0px
       var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
     padding: 1rem;
     margin-top: 1rem;
     h3 {
-      color: var(--Primary-600, #2d3047);
+      color: $primary-600;
 
-      font-size: var(--Text-font-size-20, 20px);
+      font-size: 1.25rem;
       font-style: normal;
       font-weight: 400;
       line-height: 100%; /* 20px */
@@ -442,7 +442,7 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
       .HRVUserAlertContent3ContentTitle {
         display: flex;
         gap: 2px;
-        color: var(--Primary-200, #b1c0d8);
+        color: $primary-200
         text-align: center;
         font-size: var(--Text-font-size-20, 18px);
         font-style: normal;
@@ -451,8 +451,8 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
         margin-top: 0.5rem;
       }
       .HRVUserAlertContent3ContentValue {
-        color: var(--Primary-600, #2d3047);
-        font-size: var(--Text-font-size-24, 24px);
+        color: $primary-600;
+        font-size: 1.5rem;
         font-style: normal;
         font-weight: 700;
         letter-spacing: 0.12px;
@@ -463,7 +463,7 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
         border: 1px solid var(--Secondary-default, #74bc1f);
         background: var(--secondary-400-opacity-10, rgba(116, 188, 31, 0.1));
         color: var(--Secondary-default, #74bc1f);
-        font-size: var(--Text-font-size-16, 16px);
+        font-size: 1rem;
         font-style: normal;
         font-weight: 400;
         letter-spacing: 0.08px;
@@ -485,15 +485,15 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
   }
   .HRVUserAlertContent4 {
     padding: 1rem;
-    border-radius: var(--Radius-r-20, 20px);
-    background: var(--Neutral-white, #fff);
+    border-radius: 20px;
+    background: $raphael-white;
     box-shadow: 0px 2px 20px 0px
       var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
     margin-top: 1rem;
     h3 {
-      color: var(--Primary-600, #2d3047);
+      color: $primary-600;
       font-family: "Noto Sans";
-      font-size: var(--Text-font-size-20, 20px);
+      font-size: 1.25rem;
       font-style: normal;
       font-weight: 400;
 
@@ -502,7 +502,7 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
     p {
       color: var(--Primary-300, #6d8ab6);
       font-family: "Noto Sans";
-      font-size: var(--Text-font-size-16, 16px);
+      font-size: 1rem;
       font-style: normal;
       font-weight: 400;
       line-height: var(--lineHeight-line-height-16, 25.888px); /* 161.8% */
@@ -519,7 +519,7 @@ const snsRatio = computed(() => Math.abs(props.record?.SNS ?? 0) * 100); // 0~1 
     z-index: 101;
     img {
       border-radius: var(--Radius-r-50, 50px);
-      background: var(--Neutral-white, #fff);
+      background: $raphael-white;
       box-shadow: 0px 2px 20px 0px
         var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
       padding: 0.25rem;

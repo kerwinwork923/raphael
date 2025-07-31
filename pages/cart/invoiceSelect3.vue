@@ -1,5 +1,5 @@
 <template>
-  <div class="invoiceSelect1Wrap" >
+  <div class="invoiceSelect1Wrap">
     <CartTitleBar title="編輯三聯式發票" href="/cart/invoiceType" />
     <h5>請輸入您常用的信箱</h5>
     <div class="invoiceSelect3InputGroup">
@@ -10,7 +10,7 @@
     </div>
     <div class="btnGroup">
       <button @click="submit" :disabled="isLoading">
-        {{ isLoading ? '提交中...' : '提交' }}
+        {{ isLoading ? "提交中..." : "提交" }}
       </button>
     </div>
   </div>
@@ -21,21 +21,24 @@ const router = useRouter();
 const invoiceContent = ref("");
 const isLoading = ref(false);
 const userData = JSON.parse(localStorage.getItem("userData"));
-const setInvoice = async function(){
+const setInvoice = async function () {
   try {
-    const { data } = await useFetch("https://23700999.com:8081/HMA/api/fr/maSetInvoice", {
-      method: "POST",
-      body: {
-        MID: userData.MID,
-        Token: userData.Token,
-        MAID: userData.MAID,
-        Mobile: userData.Mobile,
-        Lang: "zhtw",
-        InvoiceID : "3", // 1:電子發票2.載具3.三聯式發票
-        Content : invoiceContent.value,
-      },
-    });
-    
+    const { data } = await useFetch(
+      "https://23700999.com:8081/HMA/api/fr/maSetInvoice",
+      {
+        method: "POST",
+        body: {
+          MID: userData.MID,
+          Token: userData.Token,
+          MAID: userData.MAID,
+          Mobile: userData.Mobile,
+          Lang: "zhtw",
+          InvoiceID: "3", // 1:電子發票2.載具3.三聯式發票
+          Content: invoiceContent.value,
+        },
+      }
+    );
+
     if (data.value?.Result === "OK") {
       return true;
     } else {
@@ -47,18 +50,18 @@ const setInvoice = async function(){
     alert("設定三聯式發票失敗，請稍後再試");
     return false;
   }
-}
+};
 
-const submit = async function(){
-  if(!invoiceContent.value){
+const submit = async function () {
+  if (!invoiceContent.value) {
     alert("請輸入信箱");
     return;
   }
-  if(!invoiceContent.value.includes("@")){
+  if (!invoiceContent.value.includes("@")) {
     alert("請輸入正確的信箱");
     return;
   }
-  
+
   isLoading.value = true;
   try {
     const success = await setInvoice();
@@ -68,7 +71,7 @@ const submit = async function(){
   } finally {
     isLoading.value = false;
   }
-}
+};
 </script>
 <style lang="scss" scoped>
 .invoiceSelect1Wrap {
@@ -79,7 +82,7 @@ const submit = async function(){
   flex-direction: column;
 
   padding: 0 2.5% 72px;
-  
+
   .invoiceSelect3InputGroup {
     width: 100%;
     margin-top: 0.75rem;
@@ -88,7 +91,7 @@ const submit = async function(){
     border-radius: 10px;
   }
   h5 {
-    color: var(--Neutral-500, #666);
+    color: $raphael-gray-500;
 
     margin-top: 1rem;
     font-size: 16px;
@@ -158,7 +161,7 @@ const submit = async function(){
 
       background: var(--Primary-default, #74bc1f);
       cursor: pointer;
-      
+
       &:disabled {
         background: var(--Neutral-300, #ccc);
         cursor: not-allowed;

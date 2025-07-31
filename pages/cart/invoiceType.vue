@@ -5,64 +5,64 @@
     <div class="invoiceTypeGroup">
       <div class="invoiceType">
         <div class="invoiceTypeRadioGroup">
-          <input 
-            type="radio" 
-            name="invoiceType" 
+          <input
+            type="radio"
+            name="invoiceType"
             id="invoiceType1"
             value="1"
             v-model="selectedInvoiceId"
           />
           <label for="invoiceType1">
             <h4>電子發票</h4>
-            <p>{{ getInvoiceContent('電子發票') || '未填寫' }}</p>
+            <p>{{ getInvoiceContent("電子發票") || "未填寫" }}</p>
           </label>
         </div>
-        <img 
-          @click="router.push('/cart/invoiceSelect1')" 
-          src="~/assets/imgs/cart/goNext.svg" 
-          alt="" 
+        <img
+          @click="router.push('/cart/invoiceSelect1')"
+          src="~/assets/imgs/cart/goNext.svg"
+          alt=""
         />
       </div>
 
       <div class="invoiceType">
         <div class="invoiceTypeRadioGroup">
-          <input 
-            type="radio" 
-            name="invoiceType" 
+          <input
+            type="radio"
+            name="invoiceType"
             id="invoiceType2"
             value="2"
             v-model="selectedInvoiceId"
           />
           <label for="invoiceType2">
             <h4>載具</h4>
-            <p>{{ getInvoiceContent('載具') || '未填寫' }}</p>
+            <p>{{ getInvoiceContent("載具") || "未填寫" }}</p>
           </label>
         </div>
-        <img 
-          @click="router.push('/cart/invoiceSelect2')" 
-          src="~/assets/imgs/cart/goNext.svg" 
-          alt="" 
+        <img
+          @click="router.push('/cart/invoiceSelect2')"
+          src="~/assets/imgs/cart/goNext.svg"
+          alt=""
         />
       </div>
 
       <div class="invoiceType">
         <div class="invoiceTypeRadioGroup">
-          <input 
-            type="radio" 
-            name="invoiceType" 
+          <input
+            type="radio"
+            name="invoiceType"
             id="invoiceType3"
             value="3"
             v-model="selectedInvoiceId"
           />
           <label for="invoiceType3">
             <h4>三聯式發票</h4>
-            <p>{{ getInvoiceContent('三聯式發票') || '未填寫' }}</p>
+            <p>{{ getInvoiceContent("三聯式發票") || "未填寫" }}</p>
           </label>
         </div>
-        <img 
-          @click="router.push('/cart/invoiceSelect3')" 
-          src="~/assets/imgs/cart/goNext.svg" 
-          alt="" 
+        <img
+          @click="router.push('/cart/invoiceSelect3')"
+          src="~/assets/imgs/cart/goNext.svg"
+          alt=""
         />
       </div>
     </div>
@@ -75,7 +75,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import CartTitleBar from "~/components/cart/CartTitleBar.vue";
-import { useCheckoutStore } from '~/stores/checkout';
+import { useCheckoutStore } from "~/stores/checkout";
 
 const router = useRouter();
 const userData = JSON.parse(localStorage.getItem("userData"));
@@ -83,35 +83,38 @@ const invoiceList = ref([]);
 const selectedInvoiceId = ref("1"); // 預設選擇電子發票
 const checkoutStore = useCheckoutStore();
 
-const getRelated = async function() {
+const getRelated = async function () {
   try {
-    const { data } = await useFetch("https://23700999.com:8081/HMA/api/fr/maGetRelated", {
-      method: "POST",
-      body: {
-        MID: userData.MID,
-        Token: userData.Token,
-        MAID: userData.MAID,
-        Mobile: userData.Mobile,
-        Lang: "zhtw",
-      },
-    });
+    const { data } = await useFetch(
+      "https://23700999.com:8081/HMA/api/fr/maGetRelated",
+      {
+        method: "POST",
+        body: {
+          MID: userData.MID,
+          Token: userData.Token,
+          MAID: userData.MAID,
+          Mobile: userData.Mobile,
+          Lang: "zhtw",
+        },
+      }
+    );
 
     console.log("API 回應資料：", data.value);
 
     if (data.value?.Result === "OK" && data.value?.MInvoiceList) {
       invoiceList.value = data.value.MInvoiceList;
       console.log("設定發票列表：", invoiceList.value);
-      
+
       // 如果有發票，優先選擇 Pinia 中的發票
       if (checkoutStore.selectedInvoiceId && invoiceList.value.length > 0) {
-        const selectedInvoice = invoiceList.value.find(inv => 
-          String(inv.AID) === String(checkoutStore.selectedInvoiceId)
+        const selectedInvoice = invoiceList.value.find(
+          (inv) => String(inv.AID) === String(checkoutStore.selectedInvoiceId)
         );
         if (selectedInvoice) {
           const typeMap = {
-            "電子發票": "1",
-            "載具": "2", 
-            "三聯式發票": "3",
+            電子發票: "1",
+            載具: "2",
+            三聯式發票: "3",
           };
           selectedInvoiceId.value = typeMap[selectedInvoice.Desc22] || "1";
           console.log("根據 Pinia 選擇發票類型：", selectedInvoiceId.value);
@@ -126,7 +129,7 @@ const getRelated = async function() {
 };
 
 const getInvoiceContent = (desc) => {
-  const invoice = invoiceList.value.find(invoice => invoice.Desc22 === desc);
+  const invoice = invoiceList.value.find((invoice) => invoice.Desc22 === desc);
   return invoice ? invoice.Content : null;
 };
 
@@ -137,9 +140,9 @@ const confirmInvoice = async () => {
   }
 
   const typeMap = {
-    "1": "電子發票",
-    "2": "載具",
-    "3": "三聯式發票",
+    1: "電子發票",
+    2: "載具",
+    3: "三聯式發票",
   };
 
   const selectedTypeName = typeMap[selectedInvoiceId.value];
@@ -207,7 +210,7 @@ onMounted(() => {
     }
   }
   h5 {
-    color: var(--Neutral-500, #666);
+    color: $raphael-gray-500;
 
     font-size: 16px;
     font-style: normal;
@@ -235,7 +238,7 @@ onMounted(() => {
       appearance: none;
       border-radius: 50%;
       border: 1px solid var(--Neutral-300, #ccc);
-      background: var(--Neutral-white, #fff);
+      background: $raphael-white;
       cursor: pointer;
     }
     input:checked {
@@ -251,16 +254,16 @@ onMounted(() => {
       h4 {
         color: var(--Neutral-black, #1e1e1e);
 
-        font-size: var(--Text-font-size-16, 16px);
+        font-size: 1rem;
         font-style: normal;
         font-weight: 700;
         line-height: 100%;
         letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
       }
       p {
-        color: var(--Neutral-500, #666);
+        color: $raphael-gray-500;
         font-family: "Noto Sans";
-        font-size: var(--Text-font-size-16, 16px);
+        font-size: 1rem;
         font-style: normal;
         font-weight: 400;
         line-height: 150%; /* 24px */
@@ -283,6 +286,5 @@ onMounted(() => {
       gap: 0.5rem;
     }
   }
-
 }
 </style>

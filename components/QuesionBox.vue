@@ -1,5 +1,5 @@
 <template>
-    <div class="quesionBoxCover" @click="closeModal"></div>
+  <div class="quesionBoxCover" @click="closeModal"></div>
   <div class="quesionBox">
     <div class="topImage">
       <svg
@@ -27,13 +27,15 @@
         />
       </svg>
     </div>
-    <h3>還有 <span>{{ unfilledItems.length }}份</span> 資料需要填寫</h3>
+    <h3>
+      還有 <span>{{ unfilledItems.length }}份</span> 資料需要填寫
+    </h3>
     <h5>每件客製化商品都需要獨立的個人化資料</h5>
     <div class="quesionBoxHR"></div>
     <div class="quesionProducts">
-      <div 
-        class="quesionProductItem" 
-        v-for="item in unfilledItems" 
+      <div
+        class="quesionProductItem"
+        v-for="item in unfilledItems"
         :key="item.AID"
       >
         <div class="quesionProductItemInfo">
@@ -47,28 +49,28 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed } from "vue";
+import { useRouter } from "vue-router";
 
-const router = useRouter()
+const router = useRouter();
 
 // 接收 props
 const props = defineProps({
   orderData: {
     type: Object,
-    required: true
-  }
-})
+    required: true,
+  },
+});
 
 // 計算需要填寫資料的商品
 const unfilledItems = computed(() => {
-  if (!props.orderData?.ItemList) return []
-  
-  return props.orderData.ItemList.filter(item => {
+  if (!props.orderData?.ItemList) return [];
+
+  return props.orderData.ItemList.filter((item) => {
     // 檢查是否已填寫個人化資料
-    return !item.PdtSize || !item.Weight || !item.BodySize || !item.Height
-  })
-})
+    return !item.PdtSize || !item.Weight || !item.BodySize || !item.Height;
+  });
+});
 
 // 跳轉到個人化資訊頁面
 const goToPersonalize = (item) => {
@@ -76,23 +78,23 @@ const goToPersonalize = (item) => {
     saleId: props.orderData.SID,
     productId: item.ProductID,
     aid: item.AID,
-    csAid: props.orderData.CSAID // 加入 CSAID 參數
-  }
-  
+    csAid: props.orderData.CSAID, // 加入 CSAID 參數
+  };
+
   // 使用 query 參數傳遞資料
   router.push({
-    path: '/personalizedInfo',
-    query: params
-  })
-}
+    path: "/personalizedInfo",
+    query: params,
+  });
+};
 
 // 關閉模態框
 const closeModal = () => {
   // 發送事件給父組件
-  emit('close')
-}
+  emit("close");
+};
 
-const emit = defineEmits(['close'])
+const emit = defineEmits(["close"]);
 </script>
 
 <style lang="scss" scoped>
@@ -102,7 +104,7 @@ const emit = defineEmits(['close'])
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(217, 217, 217, 0.50);
+  background: rgba(217, 217, 217, 0.5);
   backdrop-filter: blur(2.5px);
   z-index: 999;
 }
@@ -131,7 +133,7 @@ const emit = defineEmits(['close'])
   }
   h3 {
     color: var(--Neutral-black, #1e1e1e);
-    font-size: var(--Text-font-size-20, 20px);
+    font-size: 1.25rem;
     font-style: normal;
     font-weight: 700;
     text-align: center;
@@ -142,9 +144,9 @@ const emit = defineEmits(['close'])
     margin-top: 0.5rem;
   }
   h5 {
-    color: var(--Neutral-500, #666);
+    color: $raphael-gray-500;
     text-align: center;
-    font-size: var(--Text-font-size-16, 16px);
+    font-size: 1rem;
     font-style: normal;
     font-weight: 400;
     margin-top: 0.35rem;
@@ -169,14 +171,14 @@ const emit = defineEmits(['close'])
       .quesionProductItemInfo {
         h4 {
           color: var(--Neutral-black, #1e1e1e);
-          font-size: var(--Text-font-size-16, 16px);
+          font-size: 1rem;
           font-style: normal;
           font-weight: 700;
           letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
         }
         p {
-          color: var(--Neutral-500, #666);
-          font-size: var(--Text-font-size-16, 16px);
+          color: $raphael-gray-500;
+          font-size: 1rem;
           font-style: normal;
           font-weight: 400;
           letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
@@ -189,7 +191,7 @@ const emit = defineEmits(['close'])
         padding: 8px 12px;
         border-radius: 8px;
         background: var(--Primary-default, #74bc1f);
-        color: var(--Neutral-white, #fff);
+        color: $raphael-white;
         font-size: 18px;
         font-style: normal;
         font-weight: 400;
