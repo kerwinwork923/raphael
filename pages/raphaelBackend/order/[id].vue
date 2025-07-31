@@ -706,7 +706,6 @@ onMounted(() => {
       top: 0;
       opacity: 0;
       animation: fadeIn 0.3s ease-out 0.3s forwards;
-
       &.orderBarImgClose {
         top: 0;
         right: 0;
@@ -749,6 +748,7 @@ onMounted(() => {
         height: 1px;
         background: #b1c0d8;
         margin-bottom: 0.25rem;
+        
       }
     }
 
@@ -767,6 +767,7 @@ onMounted(() => {
       margin-bottom: 0.5rem;
       gap: 0.5rem;
       grid-template-columns: repeat(2, 1fr);
+      
 
       .orderBarInfoItemTitle {
         color: $primary-200;
@@ -775,11 +776,14 @@ onMounted(() => {
         font-weight: 400;
         letter-spacing: 0.09px;
         display: flex;
-        align-items: center;
+   
         gap: 0.1rem;
+
 
         img {
           transform: scale(0.8) translateY(2px);
+          height: 20px;
+     
         }
       }
 
@@ -790,7 +794,7 @@ onMounted(() => {
         font-weight: 400;
         letter-spacing: 0.09px;
         word-break: break-all;
-
+        margin-left: auto;
         &.orderBarInfoItemValueRed {
           color: $raphael-red-300;
         }
