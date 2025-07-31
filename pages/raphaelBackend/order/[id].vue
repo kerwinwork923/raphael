@@ -92,6 +92,48 @@
         />
       </div>
       <div class="orderBarContent">
+        <!-- 未展開時顯示的基本資訊 -->
+        <div class="orderBarInfo" v-show="!orderBarExpanded">
+          <div class="orderBarInfoItem">
+            <div class="orderBarInfoItemTitle">
+              <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
+              訂單狀態
+            </div>
+            <div class="orderBarInfoItemValue orderBarInfoItemValueRed">
+              {{ orderInfo?.StateName || "載入中..." }}
+            </div>
+          </div>
+          <div class="orderBarInfoItem">
+            <div class="orderBarInfoItemTitle">
+              <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
+              訂單編號
+            </div>
+            <div class="orderBarInfoItemValue">#{{ orderInfo?.SID || orderId }}</div>
+          </div>
+          <div class="orderBarInfoItem">
+            <div class="orderBarInfoItemTitle">
+              <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
+              成立時間
+            </div>
+            <div class="orderBarInfoItemValue">{{ orderInfo?.CheckTime || "載入中..." }}</div>
+          </div>
+          <div class="orderBarInfoItem">
+            <div class="orderBarInfoItemTitle">
+              <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
+              發票類型
+            </div>
+            <div class="orderBarInfoItemValue">{{ orderInfo?.InvoiceIDName || "載入中..." }}</div>
+          </div>
+          <div class="orderBarInfoHR"></div>
+          <div class="orderBarInfoItem2">
+            <div class="orderBarInfoItemTitle">總金額</div>
+            <div class="orderBarInfoItemValue">
+              ${{ totalAmount.toLocaleString() }}
+            </div>
+          </div>
+        </div>
+
+        <!-- 展開時顯示的完整資訊 -->
         <div
           v-show="orderBarExpanded"
           class="orderBarInfo orderBarInfo--fade"
@@ -104,35 +146,31 @@
               訂單狀態
             </div>
             <div class="orderBarInfoItemValue orderBarInfoItemValueRed">
-              待製作
+              {{ orderInfo?.StateName || "載入中..." }}
             </div>
           </div>
-          <div class="orderBarInfoItemValue orderBarInfoItemValueRed">
-            {{ orderInfo?.StateName || "載入中..." }}
+          <div class="orderBarInfoItem">
+            <div class="orderBarInfoItemTitle">
+              <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
+              訂單編號
+            </div>
+            <div class="orderBarInfoItemValue">#{{ orderInfo?.SID || orderId }}</div>
+          </div>
+          <div class="orderBarInfoItem">
+            <div class="orderBarInfoItemTitle">
+              <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
+              成立時間
+            </div>
+            <div class="orderBarInfoItemValue">{{ orderInfo?.CheckTime || "載入中..." }}</div>
+          </div>
+          <div class="orderBarInfoItem">
+            <div class="orderBarInfoItemTitle">
+              <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
+              發票類型
+            </div>
+            <div class="orderBarInfoItemValue">{{ orderInfo?.InvoiceIDName || "載入中..." }}</div>
           </div>
         </div>
-        <div class="orderBarInfoItem">
-          <div class="orderBarInfoItemTitle">
-            <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
-            訂單編號
-          </div>
-          <div class="orderBarInfoItemValue">#{{ orderInfo?.SID || orderId }}</div>
-        </div>
-        <div class="orderBarInfoItem">
-          <div class="orderBarInfoItemTitle">
-            <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
-            成立時間
-          </div>
-          <div class="orderBarInfoItemValue">{{ orderInfo?.CheckTime || "載入中..." }}</div>
-        </div>
-        <div class="orderBarInfoItem">
-          <div class="orderBarInfoItemTitle">
-            <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
-            發票類型
-          </div>
-          <div class="orderBarInfoItemValue">{{ orderInfo?.InvoiceIDName || "載入中..." }}</div>
-        </div>
-      </div>
 
         <div
           v-show="orderBarExpanded"
@@ -145,30 +183,22 @@
               <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
               姓名
             </div>
-            <div class="orderBarInfoItemValue">王先生</div>
+            <div class="orderBarInfoItemValue">{{ orderInfo?.RName || "載入中..." }}</div>
           </div>
-          <div class="orderBarInfoItemValue">{{ orderInfo?.RName || "載入中..." }}</div>
-        </div>
-        <div class="orderBarInfoItem">
-          <div class="orderBarInfoItemTitle">
-            <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
-            電話
+          <div class="orderBarInfoItem">
+            <div class="orderBarInfoItemTitle">
+              <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
+              電話
+            </div>
+            <div class="orderBarInfoItemValue">{{ orderInfo?.RMobile || "載入中..." }}</div>
           </div>
-          <div class="orderBarInfoItemValue">{{ orderInfo?.RMobile || "載入中..." }}</div>
-        </div>
-        <div class="orderBarInfoItem">
-          <div class="orderBarInfoItemTitle">
-            <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
-            付款方式
+          <div class="orderBarInfoItem">
+            <div class="orderBarInfoItemTitle">
+              <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
+              付款方式
+            </div>
+            <div class="orderBarInfoItemValue">{{ orderInfo?.PayTypeName || "載入中..." }}</div>
           </div>
-          <div class="orderBarInfoItemValue">{{ orderInfo?.PayTypeName || "載入中..." }}</div>
-        </div>
-        <div class="orderBarInfoItem">
-          <div class="orderBarInfoItemTitle">
-            <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
-            運費
-          </div>
-          <div class="orderBarInfoItemValue">${{ orderInfo?.freight || "0" }}</div>
         </div>
 
         <div
@@ -182,51 +212,51 @@
               <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
               商品總數
             </div>
-            <div class="orderBarInfoItemValue">{{ orderItems.length }}</div>
+            <div class="orderBarInfoItemValue">{{ orderInfo?.CNT || orderItems.length }}</div>
           </div>
-          <div class="orderBarInfoItemValue">{{ orderInfo?.CNT || orderItems.length }}</div>
-        </div>
-        <div class="orderBarInfoHR"></div>
-        <div class="orderBarInfoItem2">
-          <div class="orderBarInfoItemTitle">總金額</div>
-          <div class="orderBarInfoItemValue">
-            ${{ totalAmount.toLocaleString() }}
+          <div class="orderBarInfoHR"></div>
+          <div class="orderBarInfoItem2">
+            <div class="orderBarInfoItemTitle">總金額</div>
+            <div class="orderBarInfoItemValue">
+              ${{ totalAmount.toLocaleString() }}
+            </div>
           </div>
         </div>
 
-      <div
-        v-show="orderBarExpanded && orderInfo?.BackReason"
-        class="orderBarInfo orderBarInfo--fade"
-        style="animation-delay: 0.4s"
-      >
-        <h3>退貨原因</h3>
-        <div class="orderBarInfoContent">
-          {{ orderInfo?.BackReason || "無退貨原因" }}
+        <div
+          v-show="orderBarExpanded && orderInfo?.BackReason"
+          class="orderBarInfo orderBarInfo--fade"
+          style="animation-delay: 0.4s"
+        >
+          <h3>退貨原因</h3>
+          <div class="orderBarInfoContent">
+            {{ orderInfo?.BackReason || "無退貨原因" }}
+          </div>
         </div>
-      </div>
 
-      <div
-        v-show="orderBarExpanded"
-        class="orderBarInfo orderBarInfo--fade"
-        style="animation-delay: 0.5s"
-      >
-        <h3>配送資訊</h3>
-        <div class="orderBarInfoItem">
-          <div class="orderBarInfoItemTitle">
-            <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
-            配送方式
+        <div
+          v-show="orderBarExpanded"
+          class="orderBarInfo orderBarInfo--fade"
+          style="animation-delay: 0.5s"
+        >
+          <h3>配送資訊</h3>
+          <div class="orderBarInfoItem">
+            <div class="orderBarInfoItemTitle">
+              <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
+              配送方式
+            </div>
+            <div class="orderBarInfoItemValue">
+              {{ orderInfo?.DeliverTypeName || "載入中..." }}
+            </div>
           </div>
-          <div class="orderBarInfoItemValue">
-            {{ orderInfo?.DeliverTypeName || "載入中..." }}
-          </div>
-        </div>
-        <div class="orderBarInfoItem">
-          <div class="orderBarInfoItemTitle">
-            <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
-            收件地址
-          </div>
-          <div class="orderBarInfoItemValue">
-            {{ orderInfo?.Address || "載入中..." }}
+          <div class="orderBarInfoItem">
+            <div class="orderBarInfoItemTitle">
+              <img src="/assets/imgs/backend/orderBarInfoIcon.svg" />
+              收件地址
+            </div>
+            <div class="orderBarInfoItemValue">
+              {{ orderInfo?.Address || "載入中..." }}
+            </div>
           </div>
         </div>
       </div>
@@ -658,6 +688,11 @@ onMounted(() => {
     }
   }
 
+  // 未展開時隱藏內容
+  &:not(.orderBar--expanded) .orderBarContent {
+    display: none;
+  }
+
   .orderBarImg {
     display: flex;
     align-items: center;
@@ -701,10 +736,12 @@ onMounted(() => {
       box-shadow: 0px 2px 20px 0px
         var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
       padding: 1rem;
-      opacity: 0;
-      transform: translateY(20px);
+      opacity: 1;
+      transform: translateY(0);
 
       &.orderBarInfo--fade {
+        opacity: 0;
+        transform: translateY(20px);
         animation: fadeInUp 0.4s ease-out forwards;
       }
 
