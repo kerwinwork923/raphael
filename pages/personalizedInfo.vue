@@ -996,7 +996,7 @@ onMounted(() => {
         color: $raphael-gray-500;
         text-align: center;
 
-        font-size: 1.125rem
+        font-size: 1.125rem;
         font-style: normal;
         font-weight: 400;
         line-height: 100%; /* 18px */

@@ -282,11 +282,9 @@ watch([() => detailList, dateRange], build, { deep: true });
     }
     h4 {
       color: $primary-200;
-
       font-size: 14px;
       font-style: normal;
       font-weight: 400;
-
       letter-spacing: 0.1px;
     }
   }
