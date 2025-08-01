@@ -139,7 +139,7 @@ const orderDetails = ref({});
 const orderData = ref({});
 const isLoading = ref(true);
 const error = ref(null);
-const showModal = ref(false);
+const showModal = ref(true); // 預設顯示 QuesionBox
 const userData = JSON.parse(localStorage.getItem("userData"));
 
 // 計算是否有未填寫個人化資料的商品
