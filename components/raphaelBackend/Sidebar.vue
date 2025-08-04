@@ -55,6 +55,23 @@
           <img src="/assets/imgs/backend/order.svg" alt="訂單管理" />
           <span v-show="!collapsed">訂單管理</span>
         </li>
+        <li 
+          :class="{ 
+            active: currentPage === 'production',
+            'has-focus': focusedItem === 'production' 
+          }" 
+          @click="handleMenuClick({ key: 'production', path: '/raphaelBackend/production' })"
+          @mouseenter="handleMouseEnter('production')"
+          @mouseleave="handleMouseLeave"
+          @focus="handleFocus('production')"
+          @blur="handleBlur"
+          tabindex="0"
+          role="menuitem"
+          aria-label="生產管理"
+        >
+          <img src="/assets/imgs/backend/production.svg" alt="生產管理" />
+          <span v-show="!collapsed">生產管理</span>
+        </li>
         <!-- <li 
           :class="{ 
             active: currentPage === 'push',
@@ -197,6 +214,10 @@ watch(() => route.path, (newPath: string) => {
     currentPage.value = 'order';
     emit('update:modelValue', 'order');
     emit('page-change', 'order');
+  } else if (newPath.includes('/production')) {
+    currentPage.value = 'production';
+    emit('update:modelValue', 'production');
+    emit('page-change', 'production');
   } else if (newPath.includes('/push')) {
     currentPage.value = 'push';
     emit('update:modelValue', 'push');
