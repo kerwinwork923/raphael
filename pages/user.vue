@@ -12,7 +12,7 @@
     <div class="userGroup">
       <div class="userInfo">
         <div class="imgGroup">
-          <img src="../assets/imgs/sticker.png" alt="" />
+          <img src="../assets/imgs/sticker.png" alt="" @click="goToSticker" />
         </div>
         <div class="infoTextGroup">
           <div class="topText">{{ userInfo?.Name }} 您好</div>
@@ -161,6 +161,10 @@ export default {
 
     const hideHealthRecordAlert = () => {
       isHealthRecordAlertActive.value = false;
+    };
+
+    const goToSticker = () => {
+      router.push("/robot");
     };
 
     const getUserData = async () => {
@@ -336,6 +340,7 @@ export default {
       showHealthRecordAlert,
       hideHealthRecordAlert,
       goCart,
+      goToSticker,
     };
   },
 };
