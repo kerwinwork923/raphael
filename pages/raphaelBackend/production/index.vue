@@ -56,7 +56,7 @@
           </div>
           
           <!-- 資料列表 -->
-          <!-- <template v-else>
+          <template v-else>
             <div
               v-for="item in paginatedData"
               :key="item.id"
@@ -102,7 +102,7 @@
                 </div>
               </div>
             </div>
-          </template> -->
+          </template>
         </div>
 
         <!-- pagination -->
