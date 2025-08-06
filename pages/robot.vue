@@ -473,7 +473,14 @@ body {
       <p class="instruction-text">
         {{ isListening ? '正在聆聽中，請說話...' : '點擊麥克風開始對話' }}
       </p>
+      <select v-model="selectedVoiceName">
+       <option v-for="v in voiceList" :key="v.name" :value="v.name">
+          {{ v.name }}
+       </option>
+     </select>
     </div>
+    
+    
 
     <!-- 對話記錄區域 -->
     <div class="conversation-history">
@@ -545,6 +552,23 @@ const UUID = getOrCreateVisitorID(); // 將 UUID 定義為全域變數
 // 語音識別和合成實例
 let recognitionRef = null
 let synthRef = null
+
+const selectedVoiceName = ref("")
+const voiceList = ref([])
+
+onMounted(() => {
+  const loadVoices = () => {
+    voiceList.value = speechSynthesis.getVoices()
+  }
+
+  if (speechSynthesis.getVoices().length === 0) {
+    speechSynthesis.onvoiceschanged = loadVoices
+  } else {
+    loadVoices()
+  }
+})
+
+
 
 // 初始化語音識別
 const initSpeechRecognition = () => {
@@ -639,7 +663,7 @@ const handleSpeechEnd = async (transcript) => {
       } catch (err) {
         botResponse = '⚠️ 無法解析伺服器回應。'; 
        }
-
+    
     const newConversation = {
       id: Date.now(),
       user: transcript,
@@ -653,6 +677,7 @@ const handleSpeechEnd = async (transcript) => {
   } catch (error) {
       console.error('API調用錯誤:', error);
       const errorResponse = '抱歉，服務暫時無法使用，請稍後再試。';
+      
       const errorConversation = {
           id: Date.now(),
           user: transcript,
@@ -669,13 +694,16 @@ const handleSpeechEnd = async (transcript) => {
 const speakText = (text) => {
   if (!synthRef || !process.client) return
 
-  synthRef.cancel()
-  const utterance = new SpeechSynthesisUtterance(text)
-  utterance.lang = 'zh-TW'
-  
-  const voices = speechSynthesis.getVoices();
-  utterance.voice = voices.find(voice =>  voice.name.includes("Google 國語（臺灣）") || voice.name.includes("Ting-Ting"));
-  
+  const speak = () => {
+    synthRef.cancel()
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.lang = 'zh-TW'
+
+    const voices = speechSynthesis.getVoices()
+    utterance.voice = voices.find(v =>
+      v.name.includes("Google 國語") || v.name.includes("Ting-Ting")
+    )
+
   utterance.rate = 0.9;
   utterance.pitch = 0.85;
 
@@ -691,8 +719,20 @@ const speakText = (text) => {
     isSpeaking.value = false;
     isLoading.value = false; 
   }
-
+  console.log("🗣 準備播放文字:", text)
+  console.log("🗣 找到語音：", utterance.voice?.name)
   synthRef.speak(utterance)
+}
+ // ⏳ 如果語音尚未載入，先等一下
+ if (speechSynthesis.getVoices().length === 0) {
+    speechSynthesis.onvoiceschanged = () => {
+      speak()
+    }
+  } else {
+    speak()
+  }
+
+
 }
 
 // 停止語音播放
