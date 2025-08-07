@@ -2,6 +2,79 @@
   <!-- 共用 Alert -->
   <BaseAlert :show="showAlert" :message="alertMsg" @close="showAlert = false" />
 
+  <!-- 開始製作確認彈窗 -->
+  <transition name="fade">
+    <div v-if="showStartModal" class="modal-overlay" @click="closeStartModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-body">
+          <div class="modal-text">
+            <div class="time-info">{{ startTime }} 開始製作</div>
+            <div class="instruction">製作完成後</div>
+            <div class="instruction">請點擊"製作完成"按鈕前往出貨</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="close-btn" @click="closeStartModal">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <path
+                d="M18 6L6 18M6 6L18 18"
+                stroke="#B1C0D8"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </transition>
+
+  <!-- 製作完成確認彈窗 -->
+  <transition name="fade">
+    <div v-if="showCompleteModal" class="modal-overlay" @click="closeCompleteModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-body">
+          <div class="modal-text">
+            <div class="time-info">{{ completeTime }} 製作完成</div>
+            <div class="instruction">點擊下方按鈕前往出貨</div>
+            <div class="instruction">或關閉繼續製作</div>
+          </div>
+          <div class="action-buttons">
+            <button class="shipping-btn" @click="goToShipping">
+              前往物流管理出貨
+            </button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="close-btn" @click="closeCompleteModal">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <path
+                d="M18 6L6 18M6 6L18 18"
+                stroke="#B1C0D8"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </transition>
+
   <div class="dashboard">
     <Sidebar />
 
@@ -195,10 +268,13 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import BaseAlert from '@/components/raphaelBackend/BaseAlert.vue'
 import Sidebar from '@/components/raphaelBackend/Sidebar.vue'
 import DataUpdateHeader from '@/components/raphaelBackend/DataUpdateHeader.vue'
 import FilterToolbar from '@/components/raphaelBackend/FilterToolbar.vue'
+
+const router = useRouter()
 
 // 響應式資料
 const searchKeyword = ref('')
@@ -222,6 +298,13 @@ const fireAlert = (msg) => {
 // 最後更新時間
 const lastUpdated = ref(new Date().toLocaleString('zh-TW'))
 
+// 彈窗控制
+const showStartModal = ref(false)
+const showCompleteModal = ref(false)
+const startTime = ref('')
+const completeTime = ref('')
+const currentItemId = ref(null)
+
 // 篩選選項
 const productOptions = [
   { label: "護您穩1型", value: "護您穩1型" },
@@ -230,6 +313,7 @@ const productOptions = [
 ]
 
 const statusOptions = [
+  { label: "全部狀態", value: "" },
   { label: "待製作", value: "待製作" },
   { label: "製作中", value: "製作中" },
   { label: "製作完成", value: "製作完成" }
@@ -361,20 +445,62 @@ const changePage = (page) => {
   }
 }
 
+// 開始製作
 const startProduction = (id) => {
-  const item = productionData.value.find(item => item.id === id)
-  if (item) {
-    item.status = '製作中'
-    fireAlert('已開始製作')
-  }
+  currentItemId.value = id
+  startTime.value = new Date().toLocaleString('zh-TW', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).replace(/\//g, '/')
+  
+  showStartModal.value = true
 }
 
-const completeProduction = (id) => {
-  const item = productionData.value.find(item => item.id === id)
+// 關閉開始製作彈窗
+const closeStartModal = () => {
+  showStartModal.value = false
+  // 實際更新狀態
+  const item = productionData.value.find(item => item.id === currentItemId.value)
   if (item) {
-    item.status = '製作完成'
-    fireAlert('製作已完成')
+    item.status = '製作中'
   }
+  currentItemId.value = null
+}
+
+// 製作完成
+const completeProduction = (id) => {
+  currentItemId.value = id
+  completeTime.value = new Date().toLocaleString('zh-TW', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).replace(/\//g, '/')
+  
+  showCompleteModal.value = true
+}
+
+// 關閉製作完成彈窗
+const closeCompleteModal = () => {
+  showCompleteModal.value = false
+  // 從生產管理頁面移除該筆資料
+  const index = productionData.value.findIndex(item => item.id === currentItemId.value)
+  if (index !== -1) {
+    productionData.value.splice(index, 1)
+  }
+  currentItemId.value = null
+}
+
+// 前往物流管理出貨
+const goToShipping = () => {
+  // 這裡可以導航到物流管理頁面
+  // router.push('/raphaelBackend/shipping')
+  fireAlert('即將前往物流管理頁面')
+  closeCompleteModal()
 }
 
 const refreshData = () => {
@@ -425,6 +551,124 @@ onMounted(() => {
 <style scoped lang="scss">
 @import "~/assets/styles/variables.scss";
 @import "~/assets/styles/mixins.scss";
+
+// 淡入淡出動畫
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
+}
+
+// 彈窗樣式
+.modal-overlay {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  left: 0;
+  top: 0;
+  background: rgba(177, 192, 216, 0.25);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  position: relative;
+  min-width: 300px;
+  max-width: 400px;
+  width: 90%;
+  border-radius: 20px;
+  border: 3px solid #1ba39b;
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: 0px 2px 20px rgba(27, 163, 155, 0.25);
+  backdrop-filter: blur(25px);
+  padding: 1.25rem;
+}
+
+.modal-body {
+  padding: 2rem;
+  background-color: #fff;
+  color: #6d8ab6;
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  border-radius: 20px;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.modal-text {
+  .time-info {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2d3047;
+    margin-bottom: 12px;
+  }
+  
+  .instruction {
+    font-size: 16px;
+    color: #6d8ab6;
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  
+  .shipping-btn {
+    background: #1ba39b;
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.5px;
+    
+    &:hover {
+      background: #00877f;
+    }
+  }
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: center;
+  
+  .close-btn {
+    width: fit-content;
+    margin: auto;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0px 2px 20px rgba(27, 163, 155, 0.25);
+    backdrop-filter: blur(25px);
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      box-shadow: inset 0px 2px 6px rgba(27, 163, 155, 0.25);
+    }
+    
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+}
 
 .dashboard {
   display: flex;
