@@ -474,7 +474,11 @@ body {
         {{ isListening ? '正在聆聽中，請說話...' : '點擊麥克風開始對話' }}
       </p>
       <select v-model="selectedVoiceName">
-       <option v-for="v in voiceList" :key="v.name" :value="v.name">
+        <option
+            v-for="v in voiceList.filter(voice => voice.lang?.toLowerCase().includes('zh-tw'))"
+                  :key="v.name"
+                   :value="v.name"
+            >
           {{ v.name }}
        </option>
      </select>
