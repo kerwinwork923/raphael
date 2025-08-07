@@ -478,6 +478,7 @@ body {
           {{ v.name }}
        </option>
      </select>
+     <button @click="testVoice">🔊 試聽</button>
     </div>
     
     
@@ -568,6 +569,16 @@ onMounted(() => {
   }
 })
 
+// 語音試聽函數
+const testVoice = () => {
+  const text = "你好，我是你的語音助手";
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'zh-TW';
+  utterance.voice = speechSynthesis.getVoices().find(v => v.name === selectedVoiceName.value);
+  utterance.rate = 0.9;
+  utterance.pitch = 0.85;
+  synthRef.speak(utterance);
+};
 
 
 // 初始化語音識別
