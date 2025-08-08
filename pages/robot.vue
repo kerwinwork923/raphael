@@ -422,7 +422,8 @@
       </select>
       <button class="test-voice-btn" @click="testVoice">🔊 試聽</button>
     </div>
-
+ 
+    
 
     <!-- 當前語音輸入顯示 -->
    <!-- ✅ 統一的 transcript 顯示邏輯 -->
