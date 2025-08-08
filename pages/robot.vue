@@ -1,546 +1,552 @@
-<style lang="scss">
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
+<style scoped>
+.chat-wrapper {
+  background: #f1f5f9;
+  padding: 12px;
+  padding-bottom: 100px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-.app-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #4c1d95 0%, #1e3a8a 50%, #312e81 100%);
-  display: flex;
-  flex-direction: column;
   position: relative;
-}
-
-.top-decoration {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 128px;
-  background: linear-gradient(to bottom, rgba(255,255,255,0.1), transparent);
-}
-
-.main-content {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  padding-top: 32px;
-  padding: 0 16px;
-  position: relative;
-  z-index: 10;
 }
 
-.avatar-container {
-  position: relative;
-  margin-bottom: 32px;
-}
-
-.avatar-outer {
-  width: 256px;
-  height: 256px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #f472b6, #a855f7, #6366f1);
-  padding: 4px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-}
-
-.avatar-inner {
+.top-header {
   width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #fce7f3, #e9d5ff);
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.avatar-face {
-  position: relative;
-  width: 192px;
-  height: 192px;
-}
-
-.face-base {
-  position: absolute;
-  inset: 16px;
-  background: linear-gradient(to bottom, #fce7f3, #fbcfe8);
-  border-radius: 50%;
-}
-
-.hair {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, #92400e, #d97706);
-  border-radius: 50%;
-}
-
-.eyes {
-  position: absolute;
-  top: 64px;
-}
-
-.eye-left {
-  position: absolute;
-  left: 56px;
-  width: 16px;
-  height: 24px;
+  padding: 8px 12px;
   background: white;
-  border-radius: 50%;
 }
 
-.eye-right {
-  position: absolute;
-  right: 56px;
-  width: 16px;
-  height: 24px;
-  background: white;
-  border-radius: 50%;
-}
-
-.pupil-left {
-  position: absolute;
-  top: 72px;
-  left: 64px;
-  width: 8px;
-  height: 12px;
-  background: #1f2937;
-  border-radius: 50%;
-}
-
-.pupil-right {
-  position: absolute;
-  top: 72px;
-  right: 64px;
-  width: 8px;
-  height: 12px;
-  background: #1f2937;
-  border-radius: 50%;
-}
-
-.mouth {
-  position: absolute;
-  bottom: 64px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 24px;
-  height: 12px;
-  background: #f472b6;
-  border-radius: 50%;
-}
-
-.blush-left {
-  position: absolute;
-  top: 80px;
-  left: 40px;
-  width: 24px;
-  height: 16px;
-  background: #fbb6ce;
-  border-radius: 50%;
-  opacity: 0.6;
-}
-
-.blush-right {
-  position: absolute;
-  top: 80px;
-  right: 40px;
-  width: 24px;
-  height: 16px;
-  background: #fbb6ce;
-  border-radius: 50%;
-  opacity: 0.6;
-}
-
-.speaking-indicator {
-  position: absolute;
-  bottom: -16px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 4px;
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  background: white;
-  border-radius: 50%;
-  animation: bounce 1.4s infinite ease-in-out;
-}
-
-.dot:nth-child(1) { animation-delay: -0.32s; }
-.dot:nth-child(2) { animation-delay: -0.16s; }
-.dot:nth-child(3) { animation-delay: 0s; }
-
-@keyframes bounce {
-  0%, 80%, 100% { transform: scale(0); }
-  40% { transform: scale(1); }
-}
-
-.transcript-display {
-  margin-bottom: 24px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  min-height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  max-width: 384px;
-  width: 100%;
-}
-
-.loading-indicator {
+.left-info {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: white;
 }
 
-.spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid white;
-  border-top: 2px solid transparent;
+.avatar {
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  object-fit: cover;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.username {
+  color: #4ade80;
+  font-weight: 600;
 }
 
-.transcript-text {
-  color: white;
-  text-align: center;
+.chat-log {
+  font-size: 14px;
+  color: #6b7280;
 }
 
-.controls {
+.chat-bubble {
+  background: white;
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin: 16px 0;
+  width: 90%;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.character-section {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.character-image {
+  width: 220px;
+  max-width: 80%;
+  border-radius: 16px;
+  object-fit: cover;
+}
+
+.volume-icon {
+  position: absolute;
+  top: 12px;
+  right: 18%;
+  background: white;
+  border-radius: 50%;
+  padding: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.input-bar {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 32px;
+  background: white;
+  border-radius: 30px;
+  padding: 10px 16px;
+  width: 90%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin: 16px 0;
+}
+
+.text-input {
+  flex: 1;
+  border: none;
+  font-size: 16px;
+  outline: none;
+  background: transparent;
 }
 
 .mic-button {
-  position: relative;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  transition: all 0.3s ease;
-  transform: scale(1);
-  cursor: pointer;
-}
-
-.mic-button:hover {
-  transform: scale(1.05);
-}
-
-.mic-button.listening {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-}
-
-.mic-button.not-listening {
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-}
-
-.mic-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.pulse-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: #ef4444;
-  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
-  opacity: 0.75;
-}
-
-@keyframes ping {
-  75%, 100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-
-.stop-button {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #f97316, #ea580c);
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.stop-button:hover {
-  background: linear-gradient(135deg, #ea580c, #dc2626);
-}
-
-.instruction-text {
-  color: rgba(255, 255, 255, 0.8);
-  text-align: center;
-  margin-bottom: 24px;
-  max-width: 384px;
-}
-
-.conversation-history {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  max-height: 384px;
-  overflow-y: auto;
-}
-
-.history-content {
-  padding: 16px;
-}
-
-.history-title {
+  background: #22c55e;
   color: white;
-  font-weight: 600;
-  margin-bottom: 16px;
-  text-align: center;
-}
-
-.no-conversations {
-  color: rgba(255, 255, 255, 0.6);
-  text-align: center;
-  padding: 32px 0;
-}
-
-.conversation-item {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  padding: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  margin-bottom: 16px;
-}
-
-.conversation-user {
-  margin-bottom: 8px;
-}
-
-.conversation-bot {
-  margin-bottom: 8px;
-}
-
-.speaker-label {
-  font-weight: 500;
-}
-
-.user-label {
-  color: #93c5fd;
-}
-
-.bot-label {
-  color: #f9a8d4;
-}
-
-.message-text {
-  color: white;
-  margin-top: 4px;
-}
-
-.timestamp {
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 12px;
-  text-align: right;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  cursor: pointer;
 }
 
 .bottom-nav {
-  background: rgba(255, 255, 255, 0.95);
-  padding: 16px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 8px 0 12px;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .nav-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  text-decoration: none;
-  color: #6b7280;
   font-size: 12px;
-  transition: color 0.3s ease;
+  color: #6b7280;
 }
 
 .nav-item.active {
-  color: #10b981;
-}
-
-.nav-item:hover {
-  color: #374151;
+  color: #22c55e;
 }
 
 .nav-icon {
   width: 24px;
   height: 24px;
+  margin-bottom: 2px;
 }
+
+.voice-modal {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 280px;
+  height: 200px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.voice-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.voice-wave {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  animation: pulse-wave 1.6s infinite ease-in-out;
+}
+
+.voice-text {
+  margin-top: 16px;
+  font-size: 16px;
+  color: #111827;
+  font-weight: 600;
+}
+
+@keyframes pulse-wave {
+  0%, 100% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+.transcript-text {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #4b5563;
+  max-width: 80%;
+  text-align: center;
+  word-break: break-word;
+}
+
+.chat-history {
+  width: 90%;
+  margin-top: 12px;
+}
+
+.chat-message {
+  margin-bottom: 12px;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  max-width: 80%;
+}
+
+.message.bot {
+  align-self: flex-start;
+}
+
+.message.user {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.bubble {
+  padding: 12px 16px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  font-size: 15px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.message.bot .bubble {
+  background: white;
+  color: #111827;
+  border-bottom-left-radius: 4px;
+}
+
+.message.user .bubble {
+  background: #4ade80;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.time {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.send-button {
+  background: #4ade80;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  margin-left: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: background 0.3s ease;
+}
+
+.send-button:hover {
+  background: #22c55e;
+}
+
+.send-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #4b5563;
+  font-size: 14px;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(34, 197, 94, 0.3);
+  border-top-color: #22c55e;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 8px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+
+
+.stop-button {
+  background-color: #ef4444;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.stop-button:hover {
+  background-color: #dc2626;
+}
+
+.pulse-ring {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  border: 2px solid rgba(34, 197, 94, 0.5);
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+  top: -4px;
+  left: -4px;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0.6;
+  }
+}
+
+.alert-dialog {
+  position: fixed;
+  top: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 20px 24px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  z-index: 999;
+  width: 280px;
+  text-align: center;
+}
+
+.alert-content p {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.alert-content ul {
+  padding-left: 16px;
+  font-size: 14px;
+  color: #4b5563;
+  text-align: left;
+  margin-bottom: 16px;
+}
+
+.alert-button {
+  background-color: #22c55e;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
 </style>
 
 <template>
-  <div class="app-container">
-    <div class="top-decoration"></div>
-    
-    <div class="main-content">
-      <!-- 美女人像區域 -->
-      <div class="avatar-container">
-        <div class="avatar-outer">
-          <div class="avatar-inner">
-            <div class="avatar-face">
-              <div class="hair"></div>
-              <div class="face-base"></div>
-              <div class="eyes">
-                <div class="eye-left"></div>
-                <div class="eye-right"></div>
-              </div>
-              <div class="pupil-left"></div>
-              <div class="pupil-right"></div>
-              <div class="mouth"></div>
-              <div class="blush-left"></div>
-              <div class="blush-right"></div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- 說話指示器 -->
-        <div v-if="isListening || isSpeaking" class="speaking-indicator">
-          <div class="dot"></div>
-          <div class="dot"></div>
-          <div class="dot"></div>
-        </div>
+  <div class="chat-wrapper">
+    <!-- 頂部欄 -->
+    <header class="top-header">
+      <div class="left-info">
+        <img class="avatar" src="/assets/imgs/character.png" alt="avatar" />
+        <span class="username">如夢</span>
       </div>
+      <div class="chat-log">聊天紀錄</div>
+    </header>
 
-      <!-- 當前語音輸入顯示 -->
-      <div v-if="currentTranscript || isLoading" class="transcript-display">
-        <div v-if="isLoading" class="loading-indicator">
-          <div class="spinner"></div>
-          <span>正在思考...</span>
-        </div>
-        <p v-else class="transcript-text">{{ currentTranscript }}</p>
-      </div>
-
-      <!-- 語音控制按鈕 -->
-      <div class="controls">
-        <button 
-          @click="toggleListening"
-          :disabled="isLoading"
-          :class="['mic-button', isListening ? 'listening' : 'not-listening']"
-        >
-          <MicOff v-if="isListening" :size="32" color="white" />
-          <Mic v-else :size="32" color="white" />
-          
-          <div v-if="isListening" class="pulse-ring"></div>
-        </button>
-
-        <button 
-          v-if="isSpeaking"
-          @click="stopSpeaking"
-          class="stop-button"
-        >
-          <VolumeX :size="24" color="white" />
-        </button>
-      </div>
-
-      <!-- 使用說明 -->
-      <p class="instruction-text">
-        {{ isListening ? '正在聆聽中，請說話...' : '點擊麥克風開始對話' }}
-      </p>
-      <select v-model="selectedVoiceName">
-        <option
-            v-for="v in voiceList.filter(voice => voice.lang?.toLowerCase().includes('zh-tw'))"
-                  :key="v.name"
-                   :value="v.name"
-            >
-          {{ v.name }}
-       </option>
-     </select>
-     <button @click="testVoice">🔊 試聽</button>
-    </div>
-    
-    
-
-    <!-- 對話記錄區域 -->
-    <div class="conversation-history">
-      <div class="history-content">
-        <h3 class="history-title">對話記錄</h3>
-        
-        <div v-if="conversations.length === 0" class="no-conversations">
-          還沒有對話記錄
-        </div>
-        
-        <div v-else>
-          <div 
-            v-for="conv in conversations" 
-            :key="conv.id" 
-            class="conversation-item"
-          >
-            <div class="conversation-user">
-              <span class="speaker-label user-label">您:</span>
-              <p class="message-text">{{ conv.user }}</p>
-            </div>
-            <div class="conversation-bot">
-              <span class="speaker-label bot-label">助手:</span>
-              <p class="message-text">{{ conv.bot }}</p>
-            </div>
-            <p class="timestamp">{{ conv.timestamp }}</p>
-          </div>
-        </div>
-      </div>
+    <!-- 對話氣泡 -->
+    <div class="chat-bubble">
+      嗨～～有什麼我可以幫助的，寶貝~
     </div>
 
-    <!-- 底部導航 -->
-    <div class="bottom-nav">
-      <NuxtLink to="/" class="nav-item active">
-        <Home class="nav-icon" />
-        <span>首頁</span>
-      </NuxtLink>
-      <NuxtLink to="/UsageHistory" class="nav-item">
-        <Heart class="nav-icon" />
-        <span>穿衣紀錄</span>
-      </NuxtLink>
-      <NuxtLink to="/cart" class="nav-item">
-        <ShoppingBag class="nav-icon" />
-        <span>健康好物</span>
-      </NuxtLink>
-      <NuxtLink to="/services" class="nav-item">
-        <Monitor class="nav-icon" />
-        <span>我的服務</span>
-      </NuxtLink>
-      <NuxtLink to="/ChangeMember" class="nav-item">
-        <User class="nav-icon" />
-        <span>會員</span>
-      </NuxtLink>
+    <!-- 角色形象圖 -->
+    <div class="character-section">
+      <img src="/assets/imgs/character.png" class="character-image" alt="角色全身照" />
+    </div>
+
+    <!-- 語音控制 -->
+    <!--<div class="voice-controls">
+      <select class="voice-select" v-model="selectedVoiceName">
+        <option value="">選擇語音</option>
+        <option v-for="voice in voices" :key="voice.name" :value="voice.name">
+          {{ voice.name }}
+        </option>
+      </select>
+      <button class="test-voice-btn" @click="testVoice">🔊 試聽</button>
+    </div>-->
+
+
+    <!-- 當前語音輸入顯示 -->
+   <!-- ✅ 統一的 transcript 顯示邏輯 -->
+   <transition name="fade">
+     <div v-if="currentTranscript || isLoading || isListening" class="transcript-display">
+ 
+        <div v-if="currentTranscript || isLoading || isListening" class="transcript-display">
+           <div v-if="isLoading" class="loading-indicator">
+             <div class="spinner"></div>
+            <span>正在思考...</span>
+          </div>
+          <p v-else-if="currentTranscript" class="transcript-text">{{ currentTranscript }}</p>
+          <p v-else-if="isListening" class="transcript-text">請開始說話</p>
+        </div>
+      </div>
+    </transition>
+    
+    <!-- ✅ 在語音控制區塊加入停止播放按鈕 -->
+<div class="controls">
+  <!-- 錄音按鈕 -->
+  <button 
+    @click="toggleListening"
+    :disabled="isLoading"
+    :class="['mic-button', isListening ? 'listening' : 'not-listening']"
+  >
+    <MicOff v-if="isListening" :size="32" color="white" />
+    <Mic v-else :size="32" color="white" />
+    <div v-if="isListening" class="pulse-ring"></div>
+  </button>
+
+  <!-- 停止語音播放按鈕 -->
+  <button 
+    v-if="isSpeaking"
+    @click="stopSpeaking"
+    class="stop-button"
+  >
+    <VolumeX :size="24" color="white" />
+  </button>
+</div>
+    
+    
+    
+    <!-- 輸入欄位 -->
+    <div class="input-bar">
+      <input v-model="textInput" class="text-input" placeholder="請輸入文字" @keypress.enter="handleManualInput" />
+      <button class="send-button" @click="handleManualInput">
+          <img src="/assets/imgs/breathe.svg" alt="送出" class="send-icon" />
+      </button>
+      <button class="mic-button" @click="toggleListening">
+        <span v-if="isLoading" class="loading-spinner"></span>
+        <span v-else>{{ isListening ? '🛑' : '🎤' }}</span>
+      </button>
+    </div>
+
+<!-- 聊天紀錄 -->
+<div class="chat-history">
+  <div v-for="item in conversations" :key="item.id" class="chat-message">
+    <!-- Bot 回覆 -->
+    <div class="message bot">
+      <div class="bubble">{{ item.bot }}</div>
+      <div class="time">{{ item.timestamp.split(' ')[1] }}</div>
+    </div>
+    <!-- User 訊息 -->
+    <div class="message user">
+      <div class="bubble">{{ item.user }}</div>
+      <div class="time">{{ item.timestamp.split(' ')[1] }}</div>
     </div>
   </div>
+</div>
+
+
+
+    <!-- 導航列 -->
+    <nav class="bottom-nav">
+      <div class="nav-item ">
+        <div class="nav-icon">🏠</div>
+        <span>我的服務</span>
+      </div>
+      <div class="nav-item ">
+        <div class="nav-icon">👗</div>
+        <span>穿衣紀錄</span>
+      </div>
+      <div class="nav-item active">
+        <div class="nav-icon">🏠</div>
+        <span>首頁</span>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">🛍️</div>
+        <span>健康好物</span>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">👤</div>
+        <span>會員</span>
+      </div>
+    </nav>
+  </div>
+
+<!-- 錄音提示彈窗 -->
+<div v-if="isListening" class="voice-modal">
+  <div class="voice-content">
+    <img src="/assets/imgs/voicewave.png" alt="音波圖" class="voice-wave" />
+    <p class="voice-text">請開始說話</p>
+    <p v-if="currentTranscript" class="transcript-text">{{ currentTranscript }}</p>
+  </div>
+</div>
+
+<!-- 🔔 撥放語音錯誤提示視窗 -->
+<transition name="fade">
+  <div v-if="showAudioError" class="alert-dialog">
+    <div class="alert-content">
+      <p>📢 您的裝置無法撥放聲音，請檢查：</p>
+      <ul>
+        <li>🔇 是否靜音模式</li>
+        <li>🌐 是否支援中文語音撥放</li>
+      </ul>
+      <button @click="showAudioError = false" class="alert-button">我知道了</button>
+    </div>
+  </div>
+</transition>
+
+
 </template>
+
+
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
@@ -553,7 +559,16 @@ const conversations = ref([])
 const currentTranscript = ref('')
 const isSpeaking = ref(false)
 const UUID = getOrCreateVisitorID(); // 將 UUID 定義為全域變數
-	
+const textInput = ref('')
+const transcriptText = ref('')
+const showAudioError = ref(false) // 控制是否顯示錯誤視窗
+let playbackConfirmed = false;
+const isManuallyStopped = ref(false)
+
+
+
+
+
 // 語音識別和合成實例
 let recognitionRef = null
 let synthRef = null
@@ -705,11 +720,16 @@ const handleSpeechEnd = async (transcript) => {
       }
     }
 
+
+
+
 // 語音播放文字
 const speakText = (text) => {
   if (!synthRef || !process.client) return
 
   const speak = () => {
+    isManuallyStopped.value = false
+    playbackConfirmed = false
     synthRef.cancel()
     const utterance = new SpeechSynthesisUtterance(text)
     utterance.lang = 'zh-TW'
@@ -723,6 +743,7 @@ const speakText = (text) => {
   utterance.pitch = 0.85;
 
   utterance.onstart = () => {
+    playbackConfirmed = true
     isSpeaking.value = true
   }
   utterance.onend = () => {
@@ -730,13 +751,33 @@ const speakText = (text) => {
     isLoading.value = false; 
 
   }
-  utterance.onerror = () => {
+  utterance.onerror = (e) => {
     isSpeaking.value = false;
     isLoading.value = false; 
+    if (!isManuallyStopped.value) {
+    showAudioError.value = true
   }
+    console.error("語音播放失敗", e)
+  }
+
+  try {
+      synthRef.speak(utterance)
+
+      // 🧪 1 秒後檢查是否仍為 silent 狀態
+      setTimeout(() => {
+      if (!playbackConfirmed && !isManuallyStopped.value && isSpeaking.value === false) {
+        showAudioError.value = true;
+        console.warn("裝置無法正常撥放語音");
+      }
+    }, 1500);  // 建議縮短到 1.5 秒即可感知
+
+    } catch (err) {
+      console.error("語音撥放錯誤", err)
+      showAudioError.value = true
+    }
+
   console.log("🗣 準備播放文字:", text)
   console.log("🗣 找到語音：", utterance.voice?.name)
-  synthRef.speak(utterance)
 }
  // ⏳ 如果語音尚未載入，先等一下
  if (speechSynthesis.getVoices().length === 0) {
@@ -753,8 +794,10 @@ const speakText = (text) => {
 // 停止語音播放
 const stopSpeaking = () => {
   if (synthRef && process.client) {
+    isManuallyStopped.value = true  
     synthRef.cancel()
     isSpeaking.value = false
+    console.log("🔴 使用者手動停止播放")
   }
 }
 
@@ -780,6 +823,66 @@ useHead({
     { name: 'description', content: '智能語音對話助手應用' }
   ]
 })
+
+const handleManualInput = async () => {
+  const input = textInput.value.trim();
+  if (!input) return;
+
+  isLoading.value = true;
+  currentTranscript.value = '';
+  textInput.value = '';
+
+  try {
+    const response = await fetch("https://aiwisebalance.com/webhook/rag_response", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chatInput: input,
+        sessionId: UUID,
+        timestamp: new Date().toISOString()
+      })
+    });
+
+    const text = await response.text();
+    let botResponse = '';
+
+    try {
+      const data = JSON.parse(text);
+      botResponse = data?.result || data?.response || data?.message || '⚠️ AI 沒有提供內容。';
+    } catch (err) {
+      botResponse = '⚠️ 無法解析伺服器回應。';
+    }
+
+    const newConversation = {
+      id: Date.now(),
+      user: input,
+      bot: botResponse,
+      timestamp: new Date().toLocaleString('zh-TW')
+    };
+
+    conversations.value.unshift(newConversation);
+    //speakText(botResponse);
+
+  } catch (error) {
+    console.error('API調用錯誤:', error);
+
+    const errorResponse = '抱歉，服務暫時無法使用，請稍後再試。';
+    const errorConversation = {
+      id: Date.now(),
+      user: input,
+      bot: errorResponse,
+      timestamp: new Date().toLocaleString('zh-TW')
+    };
+
+    conversations.value.unshift(errorConversation);
+    //peakText(errorResponse);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+
+
 
 // 工具函數
 function getOrCreateVisitorID() {
