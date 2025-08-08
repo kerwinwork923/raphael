@@ -413,7 +413,7 @@
     </div>
 
     <!-- 語音控制 -->
-    <!--<div class="voice-controls">
+    <div class="voice-controls">
       <select class="voice-select" v-model="selectedVoiceName">
         <option value="">選擇語音</option>
         <option v-for="voice in voices" :key="voice.name" :value="voice.name">
@@ -421,7 +421,7 @@
         </option>
       </select>
       <button class="test-voice-btn" @click="testVoice">🔊 試聽</button>
-    </div>-->
+    </div>
 
 
     <!-- 當前語音輸入顯示 -->
