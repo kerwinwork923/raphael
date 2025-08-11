@@ -413,17 +413,20 @@
     </div>
 
     <!-- 語音控制 -->
-    <div class="voice-controls">
-      <select class="voice-select" v-model="selectedVoiceName">
-        <option value="">選擇語音</option>
-        <option v-for="voice in voices" :key="voice.name" :value="voice.name">
-          {{ voice.name }}
-        </option>
-      </select>
-      <button class="test-voice-btn" @click="testVoice">🔊 試聽</button>
-    </div>
- 
-    
+  <div class="voice-controls">
+     <select class="voice-select" v-model="selectedVoiceName">
+       <option value="">選擇語音</option>
+        <option
+         v-for="voice in voiceList"
+          :key="voice.name + voice.lang"
+           :value="voice.name"
+        >
+          {{ voice.name }} ({{ voice.lang }})
+          </option>
+        </select>
+       <button class="test-voice-btn" @click="testVoice">🔊 試聽</button>
+      </div>
+
 
     <!-- 當前語音輸入顯示 -->
    <!-- ✅ 統一的 transcript 顯示邏輯 -->
@@ -591,13 +594,20 @@ onMounted(() => {
 
 // 語音試聽函數
 const testVoice = () => {
-  const text = "你好，我是你的語音助手";
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'zh-TW';
-  utterance.voice = speechSynthesis.getVoices().find(v => v.name === selectedVoiceName.value);
-  utterance.rate = 0.9;
-  utterance.pitch = 0.85;
-  synthRef.speak(utterance);
+  if (!synthRef) return
+  const text = '你好，我是你的語音助手'
+  const u = new SpeechSynthesisUtterance(text)
+  u.lang = 'zh-TW'
+  u.voice = pickVoice(selectedVoiceName.value || 'Mei-Jia')
+  u.rate = 0.95
+  u.pitch = 0.95
+  try {
+    if (synthRef.paused) synthRef.resume()
+    synthRef.speak(u)
+  } catch (e) {
+    console.error('試聽失敗', e)
+    showAudioError.value = true
+  }
 };
 
 
@@ -721,27 +731,62 @@ const handleSpeechEnd = async (transcript) => {
       }
     }
 
+    const pickVoice = (namePref) => {
+  const all = speechSynthesis.getVoices()
+  if (!all || all.length === 0) return null
 
+  // 1. 使用者手選優先
+  if (selectedVoiceName.value) {
+    const v = all.find(v => v.name === selectedVoiceName.value)
+    if (v) return v
+  }
+
+  // 2. 常見名稱優先
+  const preferNames = [
+    namePref,              // 呼叫端給的偏好
+    'Google 國語',         // Android/Chrome
+    'Ting-Ting',           // macOS/iOS 中文（大陸）
+    'Mei-Jia'              // iOS/macOS 繁中（台灣）
+  ].filter(Boolean)
+  for (const n of preferNames) {
+    const v = all.find(v => v.name && v.name.includes(n))
+    if (v) return v
+  }
+
+  // 3. 語系匹配 zh-TW > zh-Hant-TW > zh
+  const byLang = all.find(v => v.lang === 'zh-TW')
+    || all.find(v => v.lang === 'zh-Hant-TW')
+    || all.find(v => v.lang?.startsWith('zh'))
+  return byLang || all[0]
+}
 
 
 // 語音播放文字
 const speakText = (text) => {
-  if (!synthRef || !process.client) return
+  if (!synthRef || !text?.trim()) return
 
   const speak = () => {
     isManuallyStopped.value = false
     playbackConfirmed = false
+     // 先清空佇列
     synthRef.cancel()
     const utterance = new SpeechSynthesisUtterance(text)
     utterance.lang = 'zh-TW'
+    utterance.voice = pickVoice()
+    utterance.rate = 0.9;
+    utterance.pitch = 0.85;
+    utterance.volume = 1;
 
-    const voices = speechSynthesis.getVoices()
-    utterance.voice = voices.find(v =>
-      v.name.includes("Google 國語") || v.name.includes("Ting-Ting")
-    )
+  // 🔧 iOS resume hack：播放前後都嘗試喚醒
+  const resumeHack = setInterval(() => {
+      if (!synthRef) return
+      if (synthRef.paused) synthRef.resume()
+      if (!synthRef.speaking) {
+        // 若開始說話了，就清掉
+        clearInterval(resumeHack)
+      }
+    }, 200)
 
-  utterance.rate = 0.9;
-  utterance.pitch = 0.85;
 
   utterance.onstart = () => {
     playbackConfirmed = true
@@ -750,11 +795,12 @@ const speakText = (text) => {
   utterance.onend = () => {
     isSpeaking.value = false;
     isLoading.value = false; 
-
+    clearInterval(resumeHack);
   }
   utterance.onerror = (e) => {
     isSpeaking.value = false;
     isLoading.value = false; 
+    clearInterval(resumeHack);
     if (!isManuallyStopped.value) {
     showAudioError.value = true
   }
@@ -762,11 +808,12 @@ const speakText = (text) => {
   }
 
   try {
+      if (synthRef.paused) synthRef.resume()
       synthRef.speak(utterance)
 
       // 🧪 1 秒後檢查是否仍為 silent 狀態
       setTimeout(() => {
-      if (!playbackConfirmed && !isManuallyStopped.value && isSpeaking.value === false) {
+       if (!playbackConfirmed && !isManuallyStopped.value && !synthRef.speaking) {
         showAudioError.value = true;
         console.warn("裝置無法正常撥放語音");
       }
@@ -782,9 +829,7 @@ const speakText = (text) => {
 }
  // ⏳ 如果語音尚未載入，先等一下
  if (speechSynthesis.getVoices().length === 0) {
-    speechSynthesis.onvoiceschanged = () => {
-      speak()
-    }
+      speechSynthesis.onvoiceschanged = () => speak()
   } else {
     speak()
   }
@@ -795,16 +840,44 @@ const speakText = (text) => {
 // 停止語音播放
 const stopSpeaking = () => {
   if (synthRef && process.client) {
-    isManuallyStopped.value = true  
+    isManuallyStopped.value = true
+    showAudioError.value = false  // ✅ 手動停止不顯示錯誤視窗
     synthRef.cancel()
     isSpeaking.value = false
-    console.log("🔴 使用者手動停止播放")
   }
 }
 
 // 組件掛載時初始化
 onMounted(() => {
+ // 先綁定 synthRef
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    synthRef = window.speechSynthesis
+  }
   initSpeechRecognition()
+
+  const loadVoices = () => {
+    voiceList.value = speechSynthesis.getVoices()
+  }
+  // iOS: 有時需要先 speak 一下才會載入 voices
+  const ensureVoicesReady = () => {
+    loadVoices()
+    if (voiceList.value.length === 0) {
+      const tmp = new SpeechSynthesisUtterance(' ')
+      tmp.volume = 0 // 靜音暖機
+      tmp.rate = 1
+      tmp.onend = () => {
+        setTimeout(loadVoices, 100)
+      }
+      synthRef.speak(tmp)
+    }
+  }
+  if (speechSynthesis.getVoices().length === 0) {
+    speechSynthesis.onvoiceschanged = ensureVoicesReady
+    // 保險：也主動試一次
+    ensureVoicesReady()
+  } else {
+    loadVoices()
+  }
 })
 
 // 組件卸載時清理
