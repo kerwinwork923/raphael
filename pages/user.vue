@@ -67,10 +67,10 @@
           <div class="title">我的積分</div>
         </router-link>
 
-        <router-link to="/cart" class="item">
+        <!-- <router-link to="/cart" class="item">
           <img src="../assets/imgs/ecommerce.svg" alt="" />
           <div class="title">健康好物</div>
-        </router-link>
+        </router-link> -->
 
         <!-- <router-link to="/survey" class="item">
           <img src="../assets/imgs/magicIcon.svg" alt="" />
