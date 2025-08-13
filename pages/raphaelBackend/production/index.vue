@@ -83,21 +83,24 @@
       <!-- page header -->
       <DataUpdateHeader
         title="生產管理"
-        :count="totalRecords"
+        :count="store.total"
         count-unit="筆"
-        :last-updated="lastUpdated"
+        :last-updated="store.lastUpdated"
+        :is-loading="store.loading"
         @refresh="refreshData"
       />
+      
+
 
       <!-- toolbar / filters -->
       <FilterToolbar
-        v-model:search-value="searchKeyword"
-        v-model:status-value="statusFilter"
+        v-model:search-value="store.keyword"
+        v-model:status-value="store.statusFilter"
         :status-options="statusOptions"
         status-placeholder="狀態篩選"
         :show-product-filter="true"
         :show-date-picker="false"
-        :product-options="productOptions"
+        :product-options="store.productOptions"
         product-placeholder="商品篩選"
         @search="handleSearch"
         @status-change="handleStatusFilter"
@@ -119,56 +122,64 @@
         <!-- data rows -->
         <div class="table-list">
           <!-- 載入中狀態 -->
-          <div v-if="loading" class="loading-state" style="text-align: center; padding: 40px;">
-            <div style="color: #666;">載入中...</div>
+          <div v-if="store.loading" class="loading-state" style="text-align: center; padding: 40px;">
+            <div style="color: #666;">
+              <div style="margin-bottom: 10px;">載入中...</div>
+              <div style="font-size: 12px; color: #999;">正在取得生產資料</div>
+            </div>
           </div>
           
           <!-- 無資料狀態 -->
-          <div v-else-if="paginatedData.length === 0" class="empty-state" style="text-align: center; padding: 40px;">
-            <div style="color: #666;">沒有找到符合條件的生產項目</div>
+          <div v-else-if="store.paginatedData.length === 0" class="empty-state" style="text-align: center; padding: 40px;">
+            <div style="color: #666;">
+              <div style="margin-bottom: 10px;">沒有找到符合條件的生產項目</div>
+              <div style="font-size: 12px; color: #999;">請嘗試調整搜尋條件或篩選器</div>
+            </div>
           </div>
           
           <!-- 資料列表 -->
           <template v-else>
             <div
-              v-for="item in paginatedData"
-              :key="item.id"
+              v-for="item in store.paginatedData"
+              :key="item.SID"
               class="table-row"
             >
               <div class="cell order-number" data-label="訂單編號">
-                {{ item.orderNumber }}
+                #{{ item.SID }}
               </div>
               <div class="cell customer-name" data-label="訂購姓名">
-                {{ item.customerName }}
+                {{ item.Name }}
               </div>
               <div class="cell product-name" data-label="商品名稱">
-                {{ item.productName }}
+                {{ item.ProductName }}
               </div>
               <div class="cell product-size" data-label="商品尺寸">
-                {{ item.productSize }}
+                {{ item.PdtSize }}
               </div>
               <div class="cell body-proportion" data-label="身材比例">
-                {{ item.bodyProportion }}
+                {{ item.BodySize }}
               </div>
               <div class="cell status" data-label="目前進度">
                 <div class="statusGroup">
                   <span 
                     class="status-tag"
-                    :class="getStatusClass(item.status)"
+                    :class="store.getStatusClass(item.State)"
                   >
-                    {{ item.status }}
+                    {{ store.statusCodeMap[item.State] || item.StateName }}
                   </span>
                   <button 
-                    v-if="item.status === '待製作'"
+                    v-if="item.State === '1' || item.State === '3'"
                     class="actionBtn startBtn"
-                    @click="startProduction(item.id)"
+                    @click="startProduction(item.SID)"
+                    :title="`開始製作訂單 #${item.SID} (${item.StateName})`"
                   >
                     開始製作
                   </button>
                   <button 
-                    v-else-if="item.status === '製作中'"
+                    v-else-if="item.State === '4'"
                     class="actionBtn completeBtn"
-                    @click="completeProduction(item.id)"
+                    @click="completeProduction(item.SID)"
+                    :title="`製作完成訂單 #${item.SID}`"
                   >
                     製作完成
                   </button>
@@ -179,30 +190,30 @@
         </div>
 
         <!-- pagination -->
-        <nav class="pagination" v-if="totalPages > 1">
+        <nav class="pagination" v-if="store.totalPages > 1">
           <button
             class="btn-page"
-            :disabled="currentPage === 1"
-            @click="changePage(1)"
+            :disabled="store.page === 1"
+            @click="store.gotoPage(1)"
           >
             &lt;&lt;
           </button>
           <button
             class="btn-page"
-            :disabled="currentPage === 1"
-            @click="changePage(currentPage - 1)"
+            :disabled="store.page === 1"
+            @click="store.prevPage"
           >
             &lt;
           </button>
           
           <!-- 顯示頁碼 -->
-          <template v-if="totalPages <= maxVisiblePages">
+          <template v-if="store.totalPages <= maxVisiblePages">
             <button
-              v-for="p in totalPages"
+              v-for="p in store.totalPages"
               :key="p"
               class="btn-page btn-page-number"
-              :class="{ active: currentPage === p }"
-              @click="changePage(p)"
+              :class="{ active: store.page === p }"
+              @click="store.gotoPage(p)"
             >
               {{ p }}
             </button>
@@ -213,50 +224,50 @@
             <!-- 第一頁 -->
             <button
               class="btn-page btn-page-number"
-              :class="{ active: currentPage === 1 }"
-              @click="changePage(1)"
+              :class="{ active: store.page === 1 }"
+              @click="store.gotoPage(1)"
             >
               1
             </button>
             
             <!-- 省略號 -->
-            <span v-if="currentPage > getEllipsisThreshold()" class="pagination-ellipsis">...</span>
+            <span v-if="store.page > getEllipsisThreshold()" class="pagination-ellipsis">...</span>
             
             <!-- 中間頁碼 -->
             <button
               v-for="p in getVisiblePages()"
               :key="p"
               class="btn-page btn-page-number"
-              :class="{ active: currentPage === p }"
-              @click="changePage(p)"
+              :class="{ active: store.page === p }"
+              @click="store.gotoPage(p)"
             >
               {{ p }}
             </button>
             
             <!-- 省略號 -->
-            <span v-if="currentPage < totalPages - getEllipsisThreshold()" class="pagination-ellipsis">...</span>
+            <span v-if="store.page < store.totalPages - getEllipsisThreshold()" class="pagination-ellipsis">...</span>
             
             <!-- 最後一頁 -->
             <button
               class="btn-page btn-page-number"
-              :class="{ active: currentPage === totalPages }"
-              @click="changePage(totalPages)"
+              :class="{ active: store.page === store.totalPages }"
+              @click="store.gotoPage(store.totalPages)"
             >
-              {{ totalPages }}
+              {{ store.totalPages }}
             </button>
           </template>
           
           <button
             class="btn-page"
-            :disabled="currentPage === totalPages"
-            @click="changePage(currentPage + 1)"
+            :disabled="store.page === store.totalPages"
+            @click="store.nextPage"
           >
             &gt;
           </button>
           <button
             class="btn-page"
-            :disabled="currentPage === totalPages"
-            @click="changePage(totalPages)"
+            :disabled="store.page === store.totalPages"
+            @click="store.gotoPage(store.totalPages)"
           >
             &gt;&gt;
           </button>
@@ -267,22 +278,16 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import BaseAlert from '@/components/raphaelBackend/BaseAlert.vue'
 import Sidebar from '@/components/raphaelBackend/Sidebar.vue'
 import DataUpdateHeader from '@/components/raphaelBackend/DataUpdateHeader.vue'
 import FilterToolbar from '@/components/raphaelBackend/FilterToolbar.vue'
+import { useProductionStore } from '~/stores/useProductionStore'
 
 const router = useRouter()
-
-// 響應式資料
-const searchKeyword = ref('')
-const productFilter = ref('')
-const statusFilter = ref('')
-const currentPage = ref(1)
-const itemsPerPage = ref(10)
-const loading = ref(false)
+const store = useProductionStore()
 
 // 分頁設定
 const maxVisiblePages = ref(7)
@@ -295,204 +300,123 @@ const fireAlert = (msg) => {
   showAlert.value = true
 }
 
-// 最後更新時間
-const lastUpdated = ref(new Date().toLocaleString('zh-TW'))
-
 // 彈窗控制
 const showStartModal = ref(false)
 const showCompleteModal = ref(false)
 const startTime = ref('')
 const completeTime = ref('')
-const currentItemId = ref(null)
+const currentItemSID = ref(null)
 
 // 篩選選項
-const productOptions = [
-  { label: "護您穩1型", value: "護您穩1型" },
-  { label: "護您穩2型", value: "護您穩2型" },
-  { label: "護您穩3型", value: "護您穩3型" }
-]
-
 const statusOptions = [
-  { label: "全部狀態", value: "" },
-  { label: "待製作", value: "待製作" },
-  { label: "製作中", value: "製作中" },
-  { label: "製作完成", value: "製作完成" }
+
+  { label: "個人化資訊", value: "1" },
+  { label: "待製作", value: "3" },
+  { label: "製作中", value: "4" }
 ]
-
-// 模擬資料 - 將訂購姓名拆分為訂單編號和客戶姓名
-const productionData = ref([
-  {
-    id: 1,
-    orderNumber: '#00000001',
-    customerName: '王先生',
-    productName: '護您穩1型(XXXXX) L',
-    productSize: '35cm',
-    bodyProportion: '35cm',
-    status: '待製作'
-  },
-  {
-    id: 2,
-    orderNumber: '#00000002',
-    customerName: '李小姐',
-    productName: '護您穩1型(XXXXX) M',
-    productSize: '32cm',
-    bodyProportion: '32cm',
-    status: '製作中'
-  },
-  {
-    id: 3,
-    orderNumber: '#00000003',
-    customerName: '張先生',
-    productName: '護您穩1型(XXXXX) L',
-    productSize: '35cm',
-    bodyProportion: '35cm',
-    status: '製作中'
-  },
-  {
-    id: 4,
-    orderNumber: '#00000004',
-    customerName: '陳小姐',
-    productName: '護您穩1型(XXXXX) S',
-    productSize: '30cm',
-    bodyProportion: '30cm',
-    status: '製作中'
-  },
-  {
-    id: 5,
-    orderNumber: '#00000005',
-    customerName: '林先生',
-    productName: '護您穩1型(XXXXX) L',
-    productSize: '35cm',
-    bodyProportion: '35cm',
-    status: '製作中'
-  }
-])
-
-// 篩選後的資料
-const filteredData = computed(() => {
-  let filtered = productionData.value
-
-  // 關鍵字搜尋
-  if (searchKeyword.value) {
-    filtered = filtered.filter(item => 
-      item.orderNumber.includes(searchKeyword.value) ||
-      item.customerName.includes(searchKeyword.value) ||
-      item.productName.includes(searchKeyword.value)
-    )
-  }
-
-  // 商品篩選
-  if (productFilter.value) {
-    filtered = filtered.filter(item => 
-      item.productName.includes(productFilter.value)
-    )
-  }
-
-  // 狀態篩選
-  if (statusFilter.value) {
-    filtered = filtered.filter(item => 
-      item.status === statusFilter.value
-    )
-  }
-
-  return filtered
-})
-
-// 分頁計算
-const totalRecords = computed(() => filteredData.value.length)
-const totalPages = computed(() => Math.ceil(totalRecords.value / itemsPerPage.value))
-const startIndex = computed(() => (currentPage.value - 1) * itemsPerPage.value)
-const endIndex = computed(() => Math.min(startIndex.value + itemsPerPage.value, totalRecords.value))
-
-// 當前頁面資料
-const paginatedData = computed(() => {
-  return filteredData.value.slice(startIndex.value, endIndex.value)
-})
-
-// 狀態樣式
-const getStatusClass = (status) => {
-  switch (status) {
-    case '待製作':
-      return 'status-red'
-    case '製作中':
-      return 'status-green'
-    case '製作完成':
-      return 'status-blue'
-    default:
-      return 'status-default'
-  }
-}
 
 // 事件處理
 const handleSearch = (value) => {
-  searchKeyword.value = value
-  currentPage.value = 1
+  store.setKeyword(value)
+  store.fetchProductionData()
 }
 
 const handleProductFilter = (value) => {
-  productFilter.value = value
-  currentPage.value = 1
+  store.setProductFilter(value)
+  store.fetchProductionData()
 }
 
 const handleStatusFilter = (value) => {
-  statusFilter.value = value
-  currentPage.value = 1
-}
-
-const changePage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page
-  }
+  store.setStatusFilter(value)
+  store.fetchProductionData()
 }
 
 // 開始製作
-const startProduction = (id) => {
-  currentItemId.value = id
-  startTime.value = new Date().toLocaleString('zh-TW', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).replace(/\//g, '/')
-  
-  showStartModal.value = true
+const startProduction = async (sid) => {
+  try {
+    // 找到對應的項目以獲取 ProductID
+    const item = store.productionData.find(item => item.SID === sid)
+    if (!item) {
+      fireAlert("找不到對應的訂單資料")
+      return
+    }
+
+    // 調用開始製作 API
+    const success = await store.startProductionAPI(sid, item.ProductID)
+    
+    if (success) {
+      // API 成功後更新前端狀態
+      store.updateProductionStatus(sid, "4")
+      
+      // 顯示開始製作彈窗
+      currentItemSID.value = sid
+      startTime.value = new Date().toLocaleString('zh-TW', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).replace(/\//g, '/')
+      
+      showStartModal.value = true
+    } else {
+      fireAlert("開始製作失敗，請稍後再試")
+    }
+  } catch (error) {
+    console.error("開始製作時發生錯誤:", error)
+    fireAlert("開始製作失敗，請稍後再試")
+  }
+}
+
+
+
+// 製作完成
+const completeProduction = async (sid) => {
+  try {
+    // 找到對應的項目以獲取 ProductID
+    const item = store.productionData.find(item => item.SID === sid)
+    if (!item) {
+      fireAlert("找不到對應的訂單資料")
+      return
+    }
+
+    // 調用製作完成 API
+    const success = await store.completeProductionAPI(sid, item.ProductID)
+    
+    if (success) {
+      // API 成功後從列表中移除該筆資料
+      store.removeProductionItem(sid)
+      
+      // 顯示製作完成彈窗
+      currentItemSID.value = sid
+      completeTime.value = new Date().toLocaleString('zh-TW', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).replace(/\//g, '/')
+      
+      showCompleteModal.value = true
+    } else {
+      fireAlert("製作完成失敗，請稍後再試")
+    }
+  } catch (error) {
+    console.error("製作完成時發生錯誤:", error)
+    fireAlert("製作完成失敗，請稍後再試")
+  }
 }
 
 // 關閉開始製作彈窗
 const closeStartModal = () => {
   showStartModal.value = false
-  // 實際更新狀態
-  const item = productionData.value.find(item => item.id === currentItemId.value)
-  if (item) {
-    item.status = '製作中'
-  }
-  currentItemId.value = null
-}
-
-// 製作完成
-const completeProduction = (id) => {
-  currentItemId.value = id
-  completeTime.value = new Date().toLocaleString('zh-TW', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).replace(/\//g, '/')
-  
-  showCompleteModal.value = true
+  currentItemSID.value = null
 }
 
 // 關閉製作完成彈窗
 const closeCompleteModal = () => {
   showCompleteModal.value = false
-  // 從生產管理頁面移除該筆資料
-  const index = productionData.value.findIndex(item => item.id === currentItemId.value)
-  if (index !== -1) {
-    productionData.value.splice(index, 1)
-  }
-  currentItemId.value = null
+  currentItemSID.value = null
 }
 
 // 前往物流管理出貨
@@ -504,12 +428,56 @@ const goToShipping = () => {
 }
 
 const refreshData = () => {
-  loading.value = true
-  // 模擬載入
-  setTimeout(() => {
-    lastUpdated.value = new Date().toLocaleString('zh-TW')
-    loading.value = false
-  }, 1000)
+  try {
+    store.fetchProductionData()
+  } catch (error) {
+    console.error("重新載入資料時發生錯誤:", error)
+    fireAlert("重新載入資料失敗，請稍後再試")
+  }
+}
+
+// 統計函數
+const getStartableCount = () => {
+  return store.filteredData.filter(item => item.State === '1' || item.State === '3').length
+}
+
+const getInProgressCount = () => {
+  return store.filteredData.filter(item => item.State === '4').length
+}
+
+// 快速篩選狀態
+const quickFilterType = ref('')
+
+// 快速篩選函數
+const quickFilterStartable = () => {
+  if (quickFilterType.value === 'startable') {
+    quickFilterType.value = ''
+    store.setStatusFilter('')
+  } else {
+    quickFilterType.value = 'startable'
+    store.setStatusFilter('1,3') // 個人化資訊和待製作
+  }
+}
+
+const quickFilterInProgress = () => {
+  if (quickFilterType.value === 'inProgress') {
+    quickFilterType.value = ''
+    store.setStatusFilter('')
+  } else {
+    quickFilterType.value = 'inProgress'
+    store.setStatusFilter('4') // 製作中
+  }
+}
+
+const isQuickFilterActive = (type) => {
+  return quickFilterType.value === type
+}
+
+const clearAllFilters = () => {
+  quickFilterType.value = ''
+  store.setStatusFilter('')
+  store.setKeyword('')
+  store.setProductFilter('')
 }
 
 // 分頁工具函數
@@ -522,18 +490,18 @@ const getVisiblePages = () => {
   const threshold = getEllipsisThreshold()
   const maxVisible = maxVisiblePages.value
   
-  if (currentPage.value <= threshold + 1) {
-    for (let i = 2; i <= Math.min(maxVisible - 1, totalPages.value - 1); i++) {
+  if (store.page <= threshold + 1) {
+    for (let i = 2; i <= Math.min(maxVisible - 1, store.totalPages - 1); i++) {
       pages.push(i)
     }
-  } else if (currentPage.value >= totalPages.value - threshold) {
-    const start = Math.max(2, totalPages.value - maxVisible + 2)
-    for (let i = start; i <= totalPages.value - 1; i++) {
+  } else if (store.page >= store.totalPages - threshold) {
+    const start = Math.max(2, store.totalPages - maxVisible + 2)
+    for (let i = start; i <= store.totalPages - 1; i++) {
       pages.push(i)
     }
   } else {
-    const start = Math.max(2, currentPage.value - 1)
-    const end = Math.min(totalPages.value - 1, currentPage.value + 1)
+    const start = Math.max(2, store.page - 1)
+    const end = Math.min(store.totalPages - 1, store.page + 1)
     for (let i = start; i <= end; i++) {
       pages.push(i)
     }
@@ -544,7 +512,8 @@ const getVisiblePages = () => {
 
 // 生命週期
 onMounted(() => {
-  // 可以在這裡載入實際資料
+  store.fetchProductionData()
+  store.fetchProductOptions()
 })
 </script>
 
@@ -688,6 +657,8 @@ onMounted(() => {
   @include respond-to("xl") {
     padding: 16px 16px;
   }
+
+
 
   .production-table {
     display: flex;

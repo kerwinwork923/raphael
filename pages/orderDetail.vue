@@ -19,9 +19,9 @@
           {{ deliveryEstimateText }}
         </div>
 
-        <div class="order-status-alert" v-if="currentStep >= 3">
+        <!-- <div class="order-status-alert" v-if="currentStep >= 3">
           狀態如果為「製作中」即無法修改個人化資訊
-        </div>
+        </div> -->
         <div class="step-bar">
           <!-- 進度線 -->
           <div
