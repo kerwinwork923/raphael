@@ -1,7 +1,7 @@
 <template>
   
   <div class="raphaelLoading">
-    <img src="../assets/imgs/spinner.gif" alt="" />
+    <img src="/assets/imgs/spinner.gif" alt="" />
   </div>
 
   

@@ -5,31 +5,41 @@
       <div class="avatar-container">
         <img
           class="avatar"
-          src="/assets/imgs/robot/doctor.png"
+          :src="doctorPng"
           alt="角色頭像"
         />
       </div>
       <div class="character-name-btn">
         <span>角色姓名</span>
 
-        <img src="/assets/imgs/robot/recycle.svg" alt="刷新" />
+        <img :src="recycleSvg" alt="刷新" />
       </div>
     </div>
 
     <!-- 初始對話氣泡 -->
     <div class="greeting-bubble">
-      嗨~~有什麼需要幫您
+      <div v-if="isLoading" class="loading-indicator">
+        <div class="spinner"></div>
+        <span>正在思考...</span>
+      </div>
+      <div v-else-if="latestResponse" class="latest-response">
+        {{ latestResponse }}
+      </div>
+      <div v-else class="greeting-text">
+        嗨~~有什麼需要幫您
+      </div>
       <button class="volume-control" @click="toggleVolume">
-        <span>🔊</span>
+        <img :src="volumeSvg" alt="音量" />
       </button>
     </div>
 
     <!-- AI角色形象區域 -->
     <div class="character-section">
       <img
-        src="/assets/imgs/robot/doctor.png"
+        :src="characterImageSrc"
         class="character-image"
         alt="AI角色"
+        @click="handleCharacterClick"
       />
     </div>
 
@@ -37,7 +47,7 @@
     <transition name="slide-up">
       <div v-if="showVoiceControls" class="voice-control-bar">
         <button class="control-btn history-btn" @click="showHistory">
-          <img src="/assets/imgs/robot/time.svg" alt="歷史紀錄" />
+          <img :src="timeSvg" alt="歷史紀錄" />
         </button>
         <button
           class="control-btn mic-btn"
@@ -45,12 +55,12 @@
           @click="toggleListening"
           :disabled="isLoading"
         >
-          <img src="/assets/imgs/robot/sound.svg" alt="語音" />
+          <img :src="soundSvg" alt="語音" />
 
           <div v-if="isListening" class="pulse-ring"></div>
         </button>
         <button class="control-btn text-btn" @click="toggleTextInput">
-          <img src="/assets/imgs/robot/keyboard.svg" alt="文字" />
+          <img :src="keyboardSvg" alt="文字" />
         </button>
       </div>
     </transition>
@@ -76,126 +86,35 @@
     <!-- 當前語音輸入顯示 -->
     <transition name="fade">
       <div
-        v-if="currentTranscript || isLoading || isListening"
+        v-if="currentTranscript || isListening"
         class="transcript-display"
       >
-        <div v-if="isLoading" class="loading-indicator">
-          <div class="spinner"></div>
-          <span>正在思考...</span>
-        </div>
-        <p v-else-if="currentTranscript" class="transcript-text">
+        <p v-if="currentTranscript" class="transcript-text">
           {{ currentTranscript }}
         </p>
         <p v-else-if="isListening" class="transcript-text">請開始說話</p>
       </div>
     </transition>
 
-    <!-- 聊天歷史記錄 -->
-    <div class="chat-history">
-      <div v-for="item in conversations" :key="item.id" class="chat-message">
-        <!-- Bot 回覆 -->
-        <div class="message bot">
-          <div class="bubble">{{ item.bot }}</div>
-          <div class="time">{{ item.timestamp.split(" ")[1] }}</div>
-        </div>
-        <!-- User 訊息 -->
-        <div class="message user">
-          <div class="bubble">{{ item.user }}</div>
-          <div class="time">{{ item.timestamp.split(" ")[1] }}</div>
-        </div>
-      </div>
-    </div>
-
     <!-- 底部導航列 -->
-    <nav class="bottom-nav">
-      <div
-        class="nav-item"
-        :class="{ active: activeTab === 'services' }"
-        @click="setActiveTab('services')"
-      >
-        <div class="nav-icon">
-          <img
-            v-if="activeTab === 'services'"
-            src="/assets/imgs/robot/home-active.svg"
-            alt="我的服務"
-          />
-          <img v-else src="/assets/imgs/robot/home.svg" alt="我的服務" />
-        </div>
-        <span>我的服務</span>
-      </div>
-      <div
-        class="nav-item"
-        :class="{ active: activeTab === 'record' }"
-        @click="setActiveTab('record')"
-      >
-        <div class="nav-icon">
-          <img
-            v-if="activeTab === 'record'"
-            src="/assets/imgs/robot/cloth-active.svg"
-            alt="我的服務"
-          />
-          <img v-else src="/assets/imgs/robot/cloth.svg" alt="我的服務" />
-        </div>
-        <span>穿衣紀錄</span>
-      </div>
-      <div
-        class="nav-item"
-        :class="{ active: activeTab === 'home' }"
-        @click="setActiveTab('home')"
-      >
-        <div class="nav-icon">
-          <img
-            v-if="activeTab === 'home'"
-            src="/assets/imgs/robot/home-active.svg"
-            alt="首頁"
-          />
-          <img v-else src="/assets/imgs/robot/home.svg" alt="首頁" />
-        </div>
-        <span>首頁</span>
-      </div>
-      <div
-        class="nav-item"
-        :class="{ active: activeTab === 'shop' }"
-        @click="setActiveTab('shop')"
-      >
-        <div class="nav-icon">
-          <img
-            v-if="activeTab === 'shop'"
-            src="/assets/imgs/robot/market-active.svg"
-            alt="我的服務"
-          />
-          <img v-else src="/assets/imgs/robot/market.svg" alt="我的服務" />
-        </div>
-        <span>健康好物</span>
-      </div>
-      <div
-        class="nav-item"
-        :class="{ active: activeTab === 'member' }"
-        @click="setActiveTab('member')"
-      >
-        <div class="nav-icon">
-          <img
-            v-if="activeTab === 'member'"
-            src="/assets/imgs/robot/member-active.svg"
-            alt="我的服務"
-          />
-          <img v-else src="/assets/imgs/robot/member.svg" alt="我的服務" />
-        </div>
-        <span>會員</span>
-      </div>
-    </nav>
+    <BottomNav />
+
+
 
     <!-- 錄音提示彈窗 -->
     <transition name="fade">
-      <div v-if="isListening" class="voice-modal">
-        <div class="voice-content">
+      <div v-if="isListening || showVoiceError" class="voice-modal" @click="closeVoiceModal">
+        <div class="voice-content" @click.stop>
           <img
-            src="/assets/imgs/voicewave.png"
+            :src="voiceModalImageSrc"
             alt="音波圖"
             class="voice-wave"
+            @click="handleVoiceModalClick"
           />
-          <p class="voice-text">請開始說話</p>
-          <p v-if="currentTranscript" class="transcript-text">
+          <p v-if="showVoiceError" class="voice-error-text">
+            聽不太清楚，請再試一次
+          </p>
+          <p v-else-if="currentTranscript" class="transcript-text">
             {{ currentTranscript }}
           </p>
         </div>
@@ -211,7 +130,7 @@
             <li>🔇 是否靜音模式</li>
             <li>🌐 是否支援中文語音撥放</li>
           </ul>
-          <button @click="showAudioError = false" class="alert-button">
+          <button @click="closeAudioError" class="alert-button">
             我知道了
           </button>
         </div>
@@ -335,6 +254,43 @@
   position: relative;
 
   min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.greeting-bubble .loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #4a5568;
+  font-size: 14px;
+
+  .spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(34, 197, 94, 0.3);
+    border-top-color: #22c55e;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 8px;
+  }
+}
+
+.greeting-bubble .latest-response {
+  font-size: 16px;
+  line-height: 1.5;
+  color: #2d3748;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+.greeting-bubble .greeting-text {
+  font-size: 16px;
+  line-height: 1.5;
+  color: #2d3748;
 }
 
 .volume-control {
@@ -344,7 +300,7 @@
   height: 40px;
   position: absolute;
   right: 0;
-  top: 100%;
+  top: 110%;
 
   cursor: pointer;
 
@@ -378,8 +334,8 @@
   flex: 1;
 
   .character-image {
-    img {
-    }
+    width: 100%;
+    height: auto;
   }
 }
 
@@ -553,24 +509,6 @@
   padding: 0 20px;
   margin-bottom: 20px;
 
-  .loading-indicator {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: #4a5568;
-    font-size: 14px;
-
-    .spinner {
-      width: 24px;
-      height: 24px;
-      border: 3px solid rgba(34, 197, 94, 0.3);
-      border-top-color: #22c55e;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 8px;
-    }
-  }
-
   .transcript-text {
     text-align: center;
     font-size: 16px;
@@ -592,116 +530,19 @@
   }
 }
 
-/* 聊天歷史 */
-.chat-history {
-  width: 100%;
-  padding: 0 20px;
-  margin-top: 20px;
-
-  .chat-message {
-    margin-bottom: 20px;
-
-    .message {
-      display: flex;
-      flex-direction: column;
-      max-width: 85%;
-
-      &.bot {
-        align-self: flex-start;
-
-        .bubble {
-          background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
-          color: #2d3748;
-          border-bottom-left-radius: 8px;
-          box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
-            -6px -6px 12px rgba(255, 255, 255, 0.8);
-          border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-      }
-
-      &.user {
-        align-self: flex-end;
-        align-items: flex-end;
-
-        .bubble {
-          background: linear-gradient(145deg, #22c55e, #16a34a);
-          color: white;
-          border-bottom-right-radius: 8px;
-          box-shadow: 6px 6px 12px rgba(34, 197, 94, 0.3),
-            -6px -6px 12px rgba(255, 255, 255, 0.8);
-        }
-      }
-
-      .bubble {
-        padding: 14px 18px;
-        border-radius: 20px;
-        font-size: 15px;
-        line-height: 1.4;
-        word-break: break-word;
-      }
-
-      .time {
-        font-size: 12px;
-        color: #718096;
-        margin-top: 6px;
-      }
-    }
-  }
-}
-
-/* 底部導航 */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  padding: 16px 0 24px;
-  box-shadow: 0 -8px 16px rgba(163, 177, 198, 0.6),
-    0 8px 16px rgba(255, 255, 255, 0.8);
-  border-top: 1px solid rgba(255, 255, 255, 0.3);
-
-  .nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-size: 12px;
-    color: #4a5568;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    padding: 8px 12px;
-    border-radius: 15px;
-
-    &.active {
-      color: #74bc1f;
-      font-weight: bold;
-    }
-
-    .nav-icon {
-      font-size: 22px;
-      margin-bottom: 4px;
-    }
-  }
-}
-
 /* 語音模態框 */
 .voice-modal {
   position: fixed;
-  bottom: 200px;
+  bottom: 0;
   left: 50%;
+
   transform: translateX(-50%);
-  width: 300px;
-  height: 220px;
-  border-radius: 30px;
-  background: linear-gradient(
-    145deg,
-    rgba(224, 229, 236, 0.95),
-    rgba(240, 244, 248, 0.95)
-  );
-  backdrop-filter: blur(12px);
+  width: 100%;
+  height: 375px;
+  border-radius: 51px 51px 0 0;
+
+  background: rgba(245, 247, 250, 0.1);
+  backdrop-filter: blur(22px);
   box-shadow: 12px 12px 24px rgba(163, 177, 198, 0.6),
     -12px -12px 24px rgba(255, 255, 255, 0.8);
   display: flex;
@@ -727,6 +568,22 @@
       font-size: 16px;
       color: #2d3748;
       font-weight: 600;
+    }
+
+    .voice-error-text {
+      margin-top: 16px;
+      font-size: 16px;
+      color: #e53e3e;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .transcript-text {
+      margin-top: 16px;
+      font-size: 16px;
+      color: #2d3748;
+      font-weight: 600;
+      text-align: center;
     }
   }
 }
@@ -1007,16 +864,16 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed, nextTick } from "vue";
-import {
-  Mic,
-  MicOff,
-  VolumeX,
-  Home,
-  Heart,
-  ShoppingBag,
-  Monitor,
-  User,
-} from "lucide-vue-next";
+import { useHead } from "#app";
+import BottomNav from "~/components/BottomNav.vue";
+import doctorPng from '~/assets/imgs/robot/doctor.png';
+import recycleSvg from '~/assets/imgs/robot/recycle.svg';
+import timeSvg from '~/assets/imgs/robot/time.svg';
+import soundSvg from '~/assets/imgs/robot/sound.svg';
+import keyboardSvg from '~/assets/imgs/robot/keyboard.svg';
+import assistantSoundGif from '~/assets/imgs/robot/assistantSound.gif';
+import assistantDefaultGif from '~/assets/imgs/robot/assistantDefault.gif';
+import volumeSvg from '~/assets/imgs/robot/volume.svg';
 
 // 響應式狀態
 const isListening = ref(false);
@@ -1031,8 +888,13 @@ const showVoiceControls = ref(false);
 const showAudioError = ref(false);
 const isManuallyStopped = ref(false);
 const showHistoryPage = ref(false);
-const activeTab = ref("home");
+const showVoiceError = ref(false);
+const characterImageSrc = ref(doctorPng); // 角色圖片路徑
+const voiceModalImageSrc = ref(assistantSoundGif); // 語音模態框圖片路徑
+const textInputRef = ref(null); // 添加文字輸入框的 ref
+const latestResponse = ref(""); // 最新回覆
 let playbackConfirmed = false;
+let voiceTimeout = null; // 語音識別超時計時器
 
 // 語音識別和合成實例
 let recognitionRef = null;
@@ -1064,43 +926,110 @@ const formatDate = (dateStr) => {
 
 // 設置活動標籤
 const setActiveTab = (tab) => {
-  activeTab.value = tab;
-  localStorage.setItem("activeTab", tab);
-
-  // 如果點擊首頁，顯示語音控制
-  if (tab === "home") {
-    showVoiceControls.value = true;
-  } else {
-    showVoiceControls.value = false;
+  if (process.client) {
+    // 如果點擊首頁，顯示語音控制
+    if (tab === "home") {
+      showVoiceControls.value = true;
+    } else {
+      showVoiceControls.value = false;
+    }
   }
 };
 
 // 顯示歷史記錄
 const showHistory = () => {
-  showHistoryPage.value = true;
+  if (process.client) {
+    showHistoryPage.value = true;
+  }
 };
 
 // 關閉歷史記錄
 const closeHistory = () => {
-  showHistoryPage.value = false;
+  if (process.client) {
+    showHistoryPage.value = false;
+  }
+};
+
+// 處理角色圖片點擊
+const handleCharacterClick = () => {
+  // 可以添加其他點擊處理邏輯
+};
+
+// 關閉語音模態框
+const closeVoiceModal = () => {
+  if (isListening.value) {
+    if (process.client) {
+      recognitionRef?.stop();
+    }
+    if (process.client) {
+      isListening.value = false;
+    }
+  }
+  if (process.client) {
+    showVoiceError.value = false;
+    currentTranscript.value = "";
+    // 重置語音模態框圖片
+    voiceModalImageSrc.value = assistantSoundGif;
+  }
+  // 清除超時計時器
+  if (voiceTimeout) {
+    clearTimeout(voiceTimeout);
+    voiceTimeout = null;
+  }
+};
+
+// 處理語音模態框圖片點擊
+const handleVoiceModalClick = () => {
+  if (showVoiceError.value && process.client) {
+    showVoiceError.value = false;
+    // 重新開始語音識別
+    if (recognitionRef) {
+      currentTranscript.value = "";
+      // 切換回音波圖片
+      voiceModalImageSrc.value = assistantSoundGif;
+      recognitionRef.start();
+      isListening.value = true;
+      // 重新設置3秒超時
+      startVoiceTimeout();
+    }
+  }
+};
+
+// 開始語音識別超時計時器
+const startVoiceTimeout = () => {
+  if (voiceTimeout) {
+    clearTimeout(voiceTimeout);
+  }
+  voiceTimeout = setTimeout(() => {
+    if (isListening.value && !currentTranscript.value.trim()) {
+      showVoiceError.value = true;
+      // 切換到預設圖片
+      voiceModalImageSrc.value = assistantDefaultGif;
+      if (process.client) {
+        recognitionRef?.stop();
+        isListening.value = false;
+      }
+    }
+  }, 3000); // 3秒超時
 };
 
 // 切換文字輸入
 const toggleTextInput = () => {
-  showTextInput.value = !showTextInput.value;
-  if (showTextInput.value) {
-    nextTick(() => {
-      // 在手機上聚焦輸入框會自動彈出鍵盤
-      if (textInputRef.value) {
-        textInputRef.value.focus();
-      }
-    });
+  if (process.client) {
+    showTextInput.value = !showTextInput.value;
+    if (showTextInput.value) {
+      nextTick(() => {
+        if (textInputRef.value) {
+          textInputRef.value.focus();
+        }
+      });
+    }
   }
 };
 
 // 初始化語音識別
 const initSpeechRecognition = () => {
-  if (process.client) {
+  if (process.client && typeof window !== 'undefined') {
     if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
       const SpeechRecognition =
         window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1115,21 +1044,58 @@ const initSpeechRecognition = () => {
           .map((result) => result.transcript)
           .join("");
 
-        currentTranscript.value = transcript;
+        if (process.client) {
+          currentTranscript.value = transcript;
+        }
 
         if (event.results[0].isFinal) {
+          // 清除超時計時器
+          if (voiceTimeout) {
+            clearTimeout(voiceTimeout);
+            voiceTimeout = null;
+          }
           handleSpeechEnd(transcript);
         }
       };
 
       recognitionRef.onerror = (event) => {
-        console.error("語音識別錯誤:", event.error);
-        isListening.value = false;
-        currentTranscript.value = "";
+        if (process.client) {
+          console.error("語音識別錯誤:", event.error);
+        }
+        if (process.client) {
+          isListening.value = false;
+          currentTranscript.value = "";
+        }
+        
+        // 清除超時計時器
+        if (voiceTimeout) {
+          clearTimeout(voiceTimeout);
+          voiceTimeout = null;
+        }
+        
+        // 如果是沒有語音輸入的錯誤，顯示錯誤提示
+        if ((event.error === 'no-speech' || event.error === 'audio-capture') && process.client) {
+          showVoiceError.value = true;
+          // 切換到預設圖片
+          voiceModalImageSrc.value = assistantDefaultGif;
+        }
       };
 
       recognitionRef.onend = () => {
-        isListening.value = false;
+        if (process.client) {
+          isListening.value = false;
+          // 如果沒有語音輸入且沒有轉錄內容，顯示錯誤提示
+          if (!currentTranscript.value.trim()) {
+            showVoiceError.value = true;
+            // 切換到預設圖片
+            voiceModalImageSrc.value = assistantDefaultGif;
+          }
+        }
+        // 清除超時計時器
+        if (voiceTimeout) {
+          clearTimeout(voiceTimeout);
+          voiceTimeout = null;
+        }
       };
     }
 
@@ -1143,18 +1109,33 @@ const initSpeechRecognition = () => {
 // 開始/停止語音識別
 const toggleListening = () => {
   if (!recognitionRef) {
-    alert("您的瀏覽器不支援語音識別功能");
+    if (process.client && typeof window !== 'undefined') {
+      alert("您的瀏覽器不支援語音識別功能");
+    }
     return;
   }
 
   if (isListening.value) {
-    recognitionRef.stop();
-    isListening.value = false;
-    currentTranscript.value = "";
+    if (process.client) {
+      recognitionRef.stop();
+    }
+    if (process.client) {
+      isListening.value = false;
+      currentTranscript.value = "";
+    }
+    // 清除超時計時器
+    if (voiceTimeout) {
+      clearTimeout(voiceTimeout);
+      voiceTimeout = null;
+    }
   } else {
-    currentTranscript.value = "";
-    recognitionRef.start();
-    isListening.value = true;
+    if (process.client) {
+      currentTranscript.value = "";
+      recognitionRef.start();
+      isListening.value = true;
+      // 開始3秒超時計時器
+      startVoiceTimeout();
+    }
   }
 };
 
@@ -1162,8 +1143,10 @@ const toggleListening = () => {
 const handleSpeechEnd = async (transcript) => {
   if (!transcript.trim()) return;
 
-  isLoading.value = true;
-  currentTranscript.value = "";
+  if (process.client) {
+    isLoading.value = true;
+    currentTranscript.value = "";
+  }
 
   try {
     const response = await fetch(
@@ -1180,7 +1163,9 @@ const handleSpeechEnd = async (transcript) => {
     );
 
     const text = await response.text();
-    console.log("🔥 回傳原始內容：", text);
+    if (process.client) {
+      console.log("🔥 回傳原始內容：", text);
+    }
     let botResponse = "";
 
     try {
@@ -1203,9 +1188,16 @@ const handleSpeechEnd = async (transcript) => {
 
     conversations.value.unshift(newConversation);
     saveConversations();
-    speakText(botResponse);
+    
+    // 更新最新回覆
+    if (process.client) {
+      latestResponse.value = botResponse;
+      speakText(botResponse);
+    }
   } catch (error) {
-    console.error("API調用錯誤:", error);
+    if (process.client) {
+      console.error("API調用錯誤:", error);
+    }
     const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
 
     const errorConversation = {
@@ -1217,15 +1209,22 @@ const handleSpeechEnd = async (transcript) => {
 
     conversations.value.unshift(errorConversation);
     saveConversations();
-    speakText(errorResponse);
+    
+    // 更新最新回覆
+    if (process.client) {
+      latestResponse.value = errorResponse;
+      speakText(errorResponse);
+    }
   }
 };
 
 // 語音播放文字
 const speakText = (text) => {
-  if (!synthRef || !text?.trim()) return;
+  if (!synthRef || !text?.trim() || !process.client) return;
 
   const speak = () => {
+    if (!process.client) return;
+    
     isManuallyStopped.value = false;
     playbackConfirmed = false;
     synthRef.cancel();
@@ -1237,7 +1236,7 @@ const speakText = (text) => {
     utterance.volume = 1;
 
     const resumeHack = setInterval(() => {
-      if (!synthRef) return;
+      if (!synthRef || !process.client) return;
       if (synthRef.paused) synthRef.resume();
       if (!synthRef.speaking) {
         clearInterval(resumeHack);
@@ -1245,58 +1244,72 @@ const speakText = (text) => {
     }, 200);
 
     utterance.onstart = () => {
+      if (!process.client) return;
+      
       playbackConfirmed = true;
       isSpeaking.value = true;
     };
 
     utterance.onend = () => {
-      isSpeaking.value = false;
-      isLoading.value = false;
+      if (process.client) {
+        isSpeaking.value = false;
+        isLoading.value = false;
+      }
       clearInterval(resumeHack);
     };
 
     utterance.onerror = (e) => {
-      isSpeaking.value = false;
-      isLoading.value = false;
-      clearInterval(resumeHack);
-      if (!isManuallyStopped.value) {
-        showAudioError.value = true;
+      if (process.client) {
+        isSpeaking.value = false;
+        isLoading.value = false;
+        if (!isManuallyStopped.value) {
+          showAudioError.value = true;
+        }
+        console.error("語音播放失敗", e);
       }
-      console.error("語音播放失敗", e);
+      clearInterval(resumeHack);
     };
 
     try {
-      if (synthRef.paused) synthRef.resume();
-      synthRef.speak(utterance);
+      if (process.client) {
+        if (synthRef.paused) synthRef.resume();
+        synthRef.speak(utterance);
+      }
 
-      setTimeout(() => {
-        if (
-          !playbackConfirmed &&
-          !isManuallyStopped.value &&
-          !synthRef.speaking
-        ) {
-          showAudioError.value = true;
-          console.warn("裝置無法正常撥放語音");
-        }
-      }, 1500);
+      if (process.client) {
+        setTimeout(() => {
+          if (
+            !playbackConfirmed &&
+            !isManuallyStopped.value &&
+            !synthRef.speaking
+          ) {
+            showAudioError.value = true;
+            console.warn("裝置無法正常撥放語音");
+          }
+        }, 1500);
+      }
     } catch (err) {
-      console.error("語音撥放錯誤", err);
-      showAudioError.value = true;
+      if (process.client) {
+        console.error("語音撥放錯誤", err);
+        showAudioError.value = true;
+      }
     }
 
-    console.log("🗣 準備播放文字:", text);
+    if (process.client) {
+      console.log("🗣 準備播放文字:", text);
+    }
   };
 
-  if (speechSynthesis.getVoices().length === 0) {
-    speechSynthesis.onvoiceschanged = () => speak();
-  } else {
+  if (process.client && synthRef && synthRef.getVoices().length === 0) {
+    synthRef.onvoiceschanged = () => speak();
+  } else if (process.client) {
     speak();
   }
 };
 
 // 停止語音播放
 const stopSpeaking = () => {
-  if (synthRef && process.client) {
+  if (synthRef && process.client && typeof window !== 'undefined') {
     isManuallyStopped.value = true;
     showAudioError.value = false;
     synthRef.cancel();
@@ -1306,7 +1319,16 @@ const stopSpeaking = () => {
 
 // 切換音量控制
 const toggleVolume = () => {
-  console.log("切換音量控制");
+  if (process.client) {
+    console.log("切換音量控制");
+  }
+};
+
+// 關閉音頻錯誤提示
+const closeAudioError = () => {
+  if (process.client) {
+    showAudioError.value = false;
+  }
 };
 
 // 手動輸入處理
@@ -1314,9 +1336,11 @@ const handleManualInput = async () => {
   const input = textInput.value.trim();
   if (!input) return;
 
-  isLoading.value = true;
-  currentTranscript.value = "";
-  textInput.value = "";
+  if (process.client) {
+    isLoading.value = true;
+    currentTranscript.value = "";
+    textInput.value = "";
+  }
 
   try {
     const response = await fetch(
@@ -1355,9 +1379,16 @@ const handleManualInput = async () => {
 
     conversations.value.unshift(newConversation);
     saveConversations();
-    speakText(botResponse);
+    
+    // 更新最新回覆
+    if (process.client) {
+      latestResponse.value = botResponse;
+      speakText(botResponse);
+    }
   } catch (error) {
-    console.error("API調用錯誤:", error);
+    if (process.client) {
+      console.error("API調用錯誤:", error);
+    }
     const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
     const errorConversation = {
       id: Date.now(),
@@ -1367,9 +1398,16 @@ const handleManualInput = async () => {
     };
     conversations.value.unshift(errorConversation);
     saveConversations();
-    speakText(errorResponse);
+    
+    // 更新最新回覆
+    if (process.client) {
+      latestResponse.value = errorResponse;
+      speakText(errorResponse);
+    }
   } finally {
-    isLoading.value = false;
+    if (process.client) {
+      isLoading.value = false;
+    }
   }
 };
 
@@ -1390,8 +1428,14 @@ const loadConversations = () => {
     if (saved) {
       try {
         conversations.value = JSON.parse(saved);
+        // 載入最新回覆
+        if (conversations.value.length > 0) {
+          latestResponse.value = conversations.value[0].bot;
+        }
       } catch (e) {
-        console.error("載入對話記錄失敗:", e);
+        if (process.client) {
+          console.error("載入對話記錄失敗:", e);
+        }
       }
     }
   }
@@ -1399,31 +1443,29 @@ const loadConversations = () => {
 
 // 組件掛載時初始化
 onMounted(() => {
-  if (typeof window !== "undefined" && "speechSynthesis" in window) {
+  if (process.client && typeof window !== "undefined" && "speechSynthesis" in window) {
     synthRef = window.speechSynthesis;
   }
   initSpeechRecognition();
   loadConversations();
 
-  // 載入活動標籤
-  const savedTab = localStorage.getItem("activeTab");
-  if (savedTab) {
-    activeTab.value = savedTab;
-  }
-
   // 如果當前是首頁，顯示語音控制
-  if (activeTab.value === "home") {
+  if (process.client) {
     showVoiceControls.value = true;
   }
 });
 
 // 組件卸載時清理
 onUnmounted(() => {
-  if (recognitionRef) {
+  if (process.client && recognitionRef) {
     recognitionRef.stop();
   }
-  if (synthRef) {
+  if (process.client && synthRef) {
     synthRef.cancel();
+  }
+  // 清除超時計時器
+  if (voiceTimeout) {
+    clearTimeout(voiceTimeout);
   }
 });
 
@@ -1435,6 +1477,8 @@ useHead({
 
 // 工具函數
 function getOrCreateVisitorID() {
+  if (typeof document === 'undefined') return 'default-session-id';
+  
   const name = "WBSID";
   const existing = document.cookie
     .split("; ")
