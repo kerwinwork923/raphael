@@ -3,11 +3,7 @@
     <!-- 聊天頭部 -->
     <div class="chat-header">
       <div class="avatar-container">
-        <img
-          class="avatar"
-          :src="doctorPng"
-          alt="角色頭像"
-        />
+        <img class="avatar" :src="doctorPng" alt="角色頭像" />
       </div>
       <div class="character-name-btn">
         <span>角色姓名</span>
@@ -25,9 +21,7 @@
       <div v-else-if="latestResponse" class="latest-response">
         {{ latestResponse }}
       </div>
-      <div v-else class="greeting-text">
-        嗨~~有什麼需要幫您
-      </div>
+      <div v-else class="greeting-text">嗨~~有什麼需要幫您</div>
       <button class="volume-control" @click="toggleVolume">
         <img :src="volumeSvg" alt="音量" />
       </button>
@@ -85,10 +79,7 @@
 
     <!-- 當前語音輸入顯示 -->
     <transition name="fade">
-      <div
-        v-if="currentTranscript || isListening"
-        class="transcript-display"
-      >
+      <div v-if="currentTranscript || isListening" class="transcript-display">
         <p v-if="currentTranscript" class="transcript-text">
           {{ currentTranscript }}
         </p>
@@ -99,11 +90,13 @@
     <!-- 底部導航列 -->
     <BottomNav />
 
-
-
     <!-- 錄音提示彈窗 -->
     <transition name="fade">
-      <div v-if="isListening || showVoiceError" class="voice-modal" @click="closeVoiceModal">
+      <div
+        v-if="isListening || showVoiceError"
+        class="voice-modal"
+        @click="closeVoiceModal"
+      >
         <div class="voice-content" @click.stop>
           <img
             :src="voiceModalImageSrc"
@@ -141,35 +134,146 @@
     <transition name="slide-left">
       <div v-if="showHistoryPage" class="history-page">
         <div class="history-header">
-          <button class="back-btn" @click="closeHistory">
-            <span>←</span>
-          </button>
-          <h2>聊天紀錄</h2>
-          <div class="header-actions">
-            <button class="search-btn">🔍</button>
-            <button class="calendar-btn">📅</button>
+          <img
+            src="/assets/imgs/backArrow.svg"
+            @click="closeHistory"
+            alt="返回"
+            class="back-arrow"
+          />
+
+          <!-- 絕對置中的標題 -->
+          <div class="title-center">
+            <transition name="fade">
+              <h2 v-if="!showSearch" class="history-title">聊天紀錄</h2>
+            </transition>
           </div>
+
+          <!-- 右側圖示群（固定寬度佔位）-->
+          <div class="right-icons">
+            <transition name="fade">
+              <img
+                v-if="!showSearch"
+                :src="searchSvg"
+                alt="搜尋"
+                @click="toggleSearch"
+                class="search-icon"
+              />
+            </transition>
+            <img :src="calendarSvg" alt="日曆" class="calendar-icon" />
+          </div>
+
+          <!-- 搜尋欄位（覆蓋整列）-->
+          <transition name="slide-search">
+            <div v-if="showSearch" class="search-container">
+              <img :src="searchSvg" alt="搜尋" class="search-input-icon" />
+              <input
+                v-model="searchQuery"
+                @input="performSearch"
+                @keyup.enter="performSearch"
+                type="text"
+                placeholder="搜尋對話內容"
+                class="search-input"
+                ref="searchInputRef"
+              />
+              <img
+                src="/assets/imgs/close.svg"
+                alt="關閉"
+                @click="toggleSearch"
+                class="close-search-icon"
+              />
+            </div>
+          </transition>
         </div>
 
         <div class="history-content">
-          <div
-            v-for="(group, date) in groupedHistory"
-            :key="date"
-            class="history-group"
-          >
-            <div class="date-separator">{{ formatDate(date) }}</div>
-            <div v-for="item in group" :key="item.id" class="history-message">
-              <div class="message bot">
-                <div class="avatar">🤖</div>
-                <div class="bubble">{{ item.bot }}</div>
-                <div class="time">{{ item.timestamp.split(" ")[1] }}</div>
-              </div>
-              <div class="message user">
-                <div class="bubble">{{ item.user }}</div>
-                <div class="time">{{ item.timestamp.split(" ")[1] }}</div>
+          <!-- 一般歷史記錄 -->
+          <transition name="fade">
+            <div v-if="!showSearch || searchQuery === ''" class="history-list">
+              <div
+                v-for="(group, date) in groupedHistory"
+                :key="date"
+                class="history-group"
+              >
+                <div class="date-separator">{{ formatDate(date) }}</div>
+                <div
+                  v-for="item in group"
+                  :key="item.id"
+                  class="history-message"
+                  :id="`message-${item.id}`"
+                >
+                  <div class="message bot">
+                    <div class="avatar">
+                      <img :src="doctorPng" alt="角色頭像" />
+                    </div>
+                    <div class="bubble">
+                      {{ item.bot }}
+                      <div class="time">{{ formatTime(item.timestamp) }}</div>
+                    </div>
+                  </div>
+                  <div class="message user">
+                    <div class="bubble">
+                      {{ item.user }}
+                      <div class="time">{{ formatTime(item.timestamp) }}</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          </transition>
+
+          <!-- 搜尋結果 -->
+          <transition name="fade">
+            <div
+              v-if="showSearch && searchQuery && searchResults.length > 0"
+              class="search-results"
+            >
+              <div class="search-results-header">
+                <span>總共 {{ searchResults.length }}筆</span>
+              </div>
+              <div
+                v-for="result in searchResults"
+                :key="result.id"
+                class="search-result-item"
+                @click="scrollToMessage(result.id)"
+              >
+                <div class="result-content">
+                  <div class="result-title">
+                    <span class="user-name">{{ result.userName || '用戶' }}</span>
+                    <span class="result-date">{{ formatDate(result.timestamp.split(' ')[0]) }}</span>
+                  </div>
+                  <div class="result-messages">
+                    <div class="message-preview bot-message">
+                      <div class="avatar">
+                        <img :src="doctorPng" alt="角色頭像" />
+                      </div>
+                      <div class="bubble">
+                        <span v-html="highlightKeyword(result.bot, searchQuery)"></span>
+                        <div class="time">{{ formatTime(result.timestamp) }}</div>
+                      </div>
+                    </div>
+                    <div class="message-preview user-message">
+                      <div class="bubble">
+                        <span v-html="highlightKeyword(result.user, searchQuery)"></span>
+                        <div class="time">{{ formatTime(result.timestamp) }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </transition>
+
+          <!-- 無搜尋結果 -->
+          <transition name="fade">
+            <div
+              v-if="showSearch && searchQuery && searchResults.length === 0"
+              class="no-results"
+            >
+              <div class="no-results-content">
+                <span>沒有找到相關對話</span>
+              </div>
+            </div>
+          </transition>
         </div>
       </div>
     </transition>
@@ -571,11 +675,16 @@
     }
 
     .voice-error-text {
-      margin-top: 16px;
-      font-size: 16px;
-      color: #e53e3e;
-      font-weight: 600;
+      color: var(--Neutral-black, #1e1e1e);
       text-align: center;
+      font-family: "Noto Sans";
+      font-size: var(--Text-font-size-20, 20px);
+      font-style: normal;
+      font-weight: 700;
+      line-height: normal;
+      text-transform: lowercase;
+      position: absolute;
+      bottom: 27%;
     }
 
     .transcript-text {
@@ -689,64 +798,160 @@
   flex-direction: column;
 
   .history-header {
+    position: relative;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     padding: 20px;
-    background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 4px 12px rgba(163, 177, 198, 0.6),
-      0 -4px 12px rgba(255, 255, 255, 0.8);
 
-    .back-btn {
-      background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
-      border: none;
-      font-size: 24px;
-      color: #4a5568;
+    gap: 10px;
+
+    .back-arrow {
+      width: 24px;
+      height: 24px;
       cursor: pointer;
-      padding: 12px;
-      border-radius: 12px;
       transition: all 0.3s ease;
-      box-shadow: 4px 4px 8px rgba(163, 177, 198, 0.6),
-        -4px -4px 8px rgba(255, 255, 255, 0.8);
 
       &:hover {
-        transform: translateY(-2px);
-        box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
-          -6px -6px 12px rgba(255, 255, 255, 0.8);
+        transform: scale(1.1);
       }
     }
 
-    h2 {
+    .title-center {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    .history-title {
       font-size: 20px;
       font-weight: 600;
       color: #2d3748;
       margin: 0;
+      pointer-events: auto;
     }
 
-    .header-actions {
-      display: flex;
+    .right-icons {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
       gap: 10px;
+      min-width: 56px;
     }
 
-    .search-btn,
-    .calendar-btn {
-      background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
-      border: none;
-      font-size: 20px;
-      color: #4a5568;
+    .search-icon {
+      width: 24px;
+      height: 24px;
       cursor: pointer;
-      padding: 12px;
-      border-radius: 12px;
       transition: all 0.3s ease;
-      box-shadow: 4px 4px 8px rgba(163, 177, 198, 0.6),
-        -4px -4px 8px rgba(255, 255, 255, 0.8);
 
       &:hover {
-        transform: translateY(-2px);
-        box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
-          -6px -6px 12px rgba(255, 255, 255, 0.8);
+        transform: scale(1.1);
       }
+    }
+
+    .calendar-icon {
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+  }
+
+  /* 搜尋容器 */
+  .search-container {
+    position: absolute;
+    inset: 8px 12px auto 20px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+
+
+    padding: 12px 16px;
+    border-radius: var(--Radius-r-16, 16px);
+    background: var(--Secondary-100, #F5F7FA);
+    box-shadow: -4px -4px 6px 0 var(--Neutral-white, #FFF) inset, 4px 4px 6px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.40)) inset;
+    transform-origin: right center;
+    
+    .search-input-icon {
+      width: 20px;
+      height: 20px;
+      margin-right: 12px;
+      opacity: 1;
+    }
+
+    .search-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-size: 16px;
+      color: #2d3748;
+      outline: none;
+
+      &::placeholder {
+        color: #718096;
+      }
+    }
+
+    .clear-search-icon {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    .close-search-icon {
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      opacity: 1;
+      margin-left: 12px;
+
+      &:hover {
+        opacity: 1;
+        transform: scale(1.1);
+      }
+    }
+  }
+
+  /* 搜尋結果 */
+  .search-results {
+    .search-results-header {
+      padding: 16px 20px;
+      text-align: center;
+      font-size: 14px;
+      color: #718096;
+      background: rgba(255, 255, 255, 0.5);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .search-result-item {
+      margin-bottom: 20px;
+    }
+  }
+
+  /* 無搜尋結果 */
+  .no-results {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+
+    .no-results-content {
+      text-align: center;
+      color: #718096;
+      font-size: 16px;
     }
   }
 
@@ -765,11 +970,9 @@
         color: #718096;
         margin-bottom: 20px;
         padding: 8px 16px;
-        background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
-        border-radius: 20px;
-        box-shadow: 4px 4px 8px rgba(163, 177, 198, 0.6),
-          -4px -4px 8px rgba(255, 255, 255, 0.8);
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: var(--Radius-r-20, 20px);
+        background: var(--Secondary-100, #F5F7FA);
+        box-shadow: 0 0 6px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.40));
         display: inline-block;
         margin-left: 50%;
         transform: translateX(-50%);
@@ -789,27 +992,32 @@
             .avatar {
               width: 36px;
               height: 36px;
-              background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
-              border-radius: 50%;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              font-size: 18px;
-              color: #22c55e;
-              box-shadow: 4px 4px 8px rgba(163, 177, 198, 0.6),
-                -4px -4px 8px rgba(255, 255, 255, 0.8);
+
+              margin-top: auto;
+              transform: translateY(20px);
+              //跟人物頭像一樣
+              overflow: hidden;
+              border-radius: 20px;
+              background: var(--Neutral-white, #fff);
+              box-shadow: 0 6px 6px 0
+                var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
               border: 1px solid rgba(255, 255, 255, 0.3);
               margin-right: 12px;
               flex-shrink: 0;
+              margin-top: auto;
+              transform: translateY(20px);
+              overflow: hidden;
+              border-radius: 20px;
             }
 
             .bubble {
               background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
               color: #2d3748;
-              border-bottom-left-radius: 8px;
-              box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
-                -6px -6px 12px rgba(255, 255, 255, 0.8);
-              border: 1px solid rgba(255, 255, 255, 0.3);
+              border-radius: var(--Radius-r-20, 20px) var(--Radius-r-20, 20px)
+                var(--Radius-r-20, 20px) 0;
+              background: var(--Neutral-white, #fff);
+              box-shadow: 0 6px 6px 0
+                var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
               max-width: 70%;
             }
           }
@@ -818,29 +1026,38 @@
             justify-content: flex-end;
 
             .bubble {
-              background: linear-gradient(145deg, #22c55e, #16a34a);
+              border-radius: var(--Radius-r-20, 20px) 0 var(--Radius-r-20, 20px)
+                var(--Radius-r-20, 20px);
+              background: var(--Primary-default, #74bc1f);
+              box-shadow: 6px 6px 12px 0
+                var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
               color: white;
-              border-bottom-right-radius: 8px;
-              box-shadow: 6px 6px 12px rgba(34, 197, 94, 0.3),
-                -6px -6px 12px rgba(255, 255, 255, 0.8);
-              max-width: 70%;
+              width: 250px;
+              
+            }
+       
+            .time {
+              color: white;
             }
           }
 
           .bubble {
-            padding: 14px 18px;
+            padding: 14px 18px 28px 18px;
             border-radius: 20px;
             font-size: 15px;
             line-height: 1.4;
             word-break: break-word;
             position: relative;
+       
           }
 
           .time {
-            font-size: 12px;
+            font-size: 11px;
             color: #718096;
-            margin-top: 6px;
-            text-align: right;
+            position: absolute;
+            bottom: 8px;
+            right: 12px;
+            opacity: 0.8;
           }
         }
       }
@@ -848,17 +1065,204 @@
   }
 }
 
-.slide-left-enter-active,
+/* 搜尋圖標淡入淡出動畫 */
+.slide-search-icon-enter-active,
+.slide-search-icon-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.slide-search-icon-enter-from,
+.slide-search-icon-leave-to {
+  opacity: 0;
+}
+
+/* 搜尋框滑出動畫 */
+.slide-search-enter-active {
+  transition: all 0.5s ease;
+  transition-delay: 0.2s;
+}
+
+.slide-search-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-search-enter-from {
+  transform: scaleX(0);
+  opacity: 0;
+}
+
+.slide-search-leave-to {
+  transform: scaleX(0);
+  opacity: 0;
+}
+
+/* 左滑動畫 */
+.slide-left-enter-active {
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
 .slide-left-leave-active {
-  transition: transform 0.3s ease-in-out;
+  transition: all 0.3s cubic-bezier(0.55, 0.055, 0.675, 0.19);
 }
 
 .slide-left-enter-from {
   transform: translateX(100%);
+  opacity: 0;
 }
 
 .slide-left-leave-to {
-  transform: translateX(-100%);
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+/* 搜尋結果樣式 */
+.search-results {
+  .search-results-header {
+    padding: 16px 20px;
+    text-align: center;
+    font-size: 14px;
+    color: #718096;
+    background: rgba(255, 255, 255, 0.5);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .search-result-item {
+    margin: 12px 20px;
+    padding: 16px;
+    border-radius: 16px;
+    background: var(--Secondary-100, #F5F7FA);
+    box-shadow: -4px -4px 6px 0 var(--Neutral-white, #FFF) inset, 
+                4px 4px 6px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.40)) inset;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: -6px -6px 8px 0 var(--Neutral-white, #FFF) inset, 
+                  6px 6px 8px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.40)) inset;
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: -2px -2px 4px 0 var(--Neutral-white, #FFF) inset, 
+                  2px 2px 4px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.40)) inset;
+    }
+
+    .result-content {
+      .result-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(177, 192, 216, 0.2);
+
+        .user-name {
+          font-size: 14px;
+          font-weight: 600;
+          color: #2d3748;
+        }
+
+        .result-date {
+          font-size: 12px;
+          color: #718096;
+        }
+      }
+
+      .result-messages {
+        .message-preview {
+          display: flex;
+          align-items: flex-start;
+          margin-bottom: 8px;
+
+          &.bot-message {
+            justify-content: flex-start;
+
+            .avatar {
+              width: 28px;
+              height: 28px;
+              border-radius: 14px;
+              overflow: hidden;
+              margin-right: 8px;
+              flex-shrink: 0;
+              background: var(--Neutral-white, #fff);
+              box-shadow: 0 2px 4px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+              border: 1px solid rgba(255, 255, 255, 0.3);
+
+              img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+              }
+            }
+
+            .bubble {
+              background: var(--Neutral-white, #fff);
+              color: #2d3748;
+              border-radius: 12px 12px 12px 0;
+              box-shadow: 0 2px 4px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+              max-width: 80%;
+              padding: 8px 12px 20px 12px;
+              font-size: 13px;
+              line-height: 1.3;
+              position: relative;
+            }
+          }
+
+          &.user-message {
+            justify-content: flex-end;
+
+            .bubble {
+              border-radius: 12px 0 12px 12px;
+              background: var(--Primary-default, #74bc1f);
+              box-shadow: 2px 2px 4px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+              color: white;
+              max-width: 80%;
+              padding: 8px 12px 20px 12px;
+              font-size: 13px;
+              line-height: 1.3;
+              position: relative;
+
+              .time {
+                color: rgba(255, 255, 255, 0.8);
+              }
+            }
+          }
+
+          .time {
+            font-size: 10px;
+            color: #718096;
+            position: absolute;
+            bottom: 4px;
+            right: 8px;
+            opacity: 0.8;
+          }
+        }
+      }
+    }
+  }
+}
+
+/* 關鍵字高亮 */
+.highlight {
+  background: linear-gradient(120deg, #ffd700 0%, #ffed4e 100%);
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-weight: 600;
+  color: #1a202c;
+  box-shadow: 0 1px 2px rgba(255, 215, 0, 0.3);
+}
+
+/* 淡入淡出動畫 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
 
@@ -866,14 +1270,16 @@
 import { ref, onMounted, onUnmounted, computed, nextTick } from "vue";
 import { useHead } from "#app";
 import BottomNav from "~/components/BottomNav.vue";
-import doctorPng from '~/assets/imgs/robot/doctor.png';
-import recycleSvg from '~/assets/imgs/robot/recycle.svg';
-import timeSvg from '~/assets/imgs/robot/time.svg';
-import soundSvg from '~/assets/imgs/robot/sound.svg';
-import keyboardSvg from '~/assets/imgs/robot/keyboard.svg';
-import assistantSoundGif from '~/assets/imgs/robot/assistantSound.gif';
-import assistantDefaultGif from '~/assets/imgs/robot/assistantDefault.gif';
-import volumeSvg from '~/assets/imgs/robot/volume.svg';
+import doctorPng from "~/assets/imgs/robot/doctor.png";
+import recycleSvg from "~/assets/imgs/robot/recycle.svg";
+import timeSvg from "~/assets/imgs/robot/time.svg";
+import soundSvg from "~/assets/imgs/robot/sound.svg";
+import keyboardSvg from "~/assets/imgs/robot/keyboard.svg";
+import assistantSoundGif from "~/assets/imgs/robot/assistantSound.gif";
+import assistantDefaultGif from "~/assets/imgs/robot/assistantDefault.gif";
+import volumeSvg from "~/assets/imgs/robot/volume.svg";
+import searchSvg from "~/assets/imgs/robot/search.svg";
+import calendarSvg from "~/assets/imgs/robot/calendar.svg";
 
 // 響應式狀態
 const isListening = ref(false);
@@ -892,7 +1298,11 @@ const showVoiceError = ref(false);
 const characterImageSrc = ref(doctorPng); // 角色圖片路徑
 const voiceModalImageSrc = ref(assistantSoundGif); // 語音模態框圖片路徑
 const textInputRef = ref(null); // 添加文字輸入框的 ref
+const searchInputRef = ref(null); // 添加搜尋輸入框的 ref
 const latestResponse = ref(""); // 最新回覆
+const showSearch = ref(false); // 搜尋功能開關
+const searchQuery = ref(""); // 搜尋關鍵字
+const searchResults = ref([]); // 搜尋結果
 let playbackConfirmed = false;
 let voiceTimeout = null; // 語音識別超時計時器
 
@@ -924,6 +1334,13 @@ const formatDate = (dateStr) => {
   return `${year}/${month}/${day} (${weekday})`;
 };
 
+// 格式化時間（只顯示時:分）
+const formatTime = (timestamp) => {
+  const timeStr = timestamp.split(" ")[1];
+  const [hours, minutes] = timeStr.split(":");
+  return `${hours}:${minutes}`;
+};
+
 // 設置活動標籤
 const setActiveTab = (tab) => {
   if (process.client) {
@@ -947,6 +1364,70 @@ const showHistory = () => {
 const closeHistory = () => {
   if (process.client) {
     showHistoryPage.value = false;
+    showSearch.value = false;
+    searchQuery.value = "";
+    searchResults.value = [];
+  }
+};
+
+// 切換搜尋功能
+const toggleSearch = () => {
+  if (process.client) {
+    if (!showSearch.value) {
+      // 開啟搜尋
+      showSearch.value = true;
+      // 延遲聚焦，等待動畫完成
+      setTimeout(() => {
+        if (searchInputRef.value) {
+          searchInputRef.value.focus();
+        }
+      }, 700);
+    } else {
+      // 關閉搜尋
+      searchQuery.value = "";
+      searchResults.value = [];
+      showSearch.value = false;
+    }
+  }
+};
+
+// 執行搜尋
+const performSearch = () => {
+  if (!searchQuery.value.trim()) {
+    searchResults.value = [];
+    return;
+  }
+
+  const query = searchQuery.value.toLowerCase();
+  const results = [];
+
+  conversations.value.forEach((conversation) => {
+    const userMatch = conversation.user.toLowerCase().includes(query);
+    const botMatch = conversation.bot.toLowerCase().includes(query);
+
+    if (userMatch || botMatch) {
+      results.push({
+        ...conversation,
+        matchType: userMatch ? "user" : "bot",
+        matchText: userMatch ? conversation.user : conversation.bot,
+        userName: "用戶", // 可以根據需要設置用戶名稱
+      });
+    }
+  });
+
+  // 按日期降冪排列（最新的在上面）
+  searchResults.value = results.sort((a, b) => {
+    const dateA = new Date(a.timestamp);
+    const dateB = new Date(b.timestamp);
+    return dateB - dateA;
+  });
+};
+
+// 清除搜尋（保留函數以備將來使用）
+const clearSearch = () => {
+  if (process.client) {
+    searchQuery.value = "";
+    searchResults.value = [];
   }
 };
 
@@ -1010,7 +1491,7 @@ const startVoiceTimeout = () => {
         isListening.value = false;
       }
     }
-  }, 3000); // 3秒超時
+  }, 5000); // 5秒超時
 };
 
 // 切換文字輸入
@@ -1029,7 +1510,7 @@ const toggleTextInput = () => {
 
 // 初始化語音識別
 const initSpeechRecognition = () => {
-  if (process.client && typeof window !== 'undefined') {
+  if (process.client && typeof window !== "undefined") {
     if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
       const SpeechRecognition =
         window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1066,15 +1547,18 @@ const initSpeechRecognition = () => {
           isListening.value = false;
           currentTranscript.value = "";
         }
-        
+
         // 清除超時計時器
         if (voiceTimeout) {
           clearTimeout(voiceTimeout);
           voiceTimeout = null;
         }
-        
+
         // 如果是沒有語音輸入的錯誤，顯示錯誤提示
-        if ((event.error === 'no-speech' || event.error === 'audio-capture') && process.client) {
+        if (
+          (event.error === "no-speech" || event.error === "audio-capture") &&
+          process.client
+        ) {
           showVoiceError.value = true;
           // 切換到預設圖片
           voiceModalImageSrc.value = assistantDefaultGif;
@@ -1109,7 +1593,7 @@ const initSpeechRecognition = () => {
 // 開始/停止語音識別
 const toggleListening = () => {
   if (!recognitionRef) {
-    if (process.client && typeof window !== 'undefined') {
+    if (process.client && typeof window !== "undefined") {
       alert("您的瀏覽器不支援語音識別功能");
     }
     return;
@@ -1188,7 +1672,7 @@ const handleSpeechEnd = async (transcript) => {
 
     conversations.value.unshift(newConversation);
     saveConversations();
-    
+
     // 更新最新回覆
     if (process.client) {
       latestResponse.value = botResponse;
@@ -1209,7 +1693,7 @@ const handleSpeechEnd = async (transcript) => {
 
     conversations.value.unshift(errorConversation);
     saveConversations();
-    
+
     // 更新最新回覆
     if (process.client) {
       latestResponse.value = errorResponse;
@@ -1224,7 +1708,7 @@ const speakText = (text) => {
 
   const speak = () => {
     if (!process.client) return;
-    
+
     isManuallyStopped.value = false;
     playbackConfirmed = false;
     synthRef.cancel();
@@ -1245,7 +1729,7 @@ const speakText = (text) => {
 
     utterance.onstart = () => {
       if (!process.client) return;
-      
+
       playbackConfirmed = true;
       isSpeaking.value = true;
     };
@@ -1309,7 +1793,7 @@ const speakText = (text) => {
 
 // 停止語音播放
 const stopSpeaking = () => {
-  if (synthRef && process.client && typeof window !== 'undefined') {
+  if (synthRef && process.client && typeof window !== "undefined") {
     isManuallyStopped.value = true;
     showAudioError.value = false;
     synthRef.cancel();
@@ -1379,7 +1863,7 @@ const handleManualInput = async () => {
 
     conversations.value.unshift(newConversation);
     saveConversations();
-    
+
     // 更新最新回覆
     if (process.client) {
       latestResponse.value = botResponse;
@@ -1398,7 +1882,7 @@ const handleManualInput = async () => {
     };
     conversations.value.unshift(errorConversation);
     saveConversations();
-    
+
     // 更新最新回覆
     if (process.client) {
       latestResponse.value = errorResponse;
@@ -1443,7 +1927,11 @@ const loadConversations = () => {
 
 // 組件掛載時初始化
 onMounted(() => {
-  if (process.client && typeof window !== "undefined" && "speechSynthesis" in window) {
+  if (
+    process.client &&
+    typeof window !== "undefined" &&
+    "speechSynthesis" in window
+  ) {
     synthRef = window.speechSynthesis;
   }
   initSpeechRecognition();
@@ -1477,8 +1965,8 @@ useHead({
 
 // 工具函數
 function getOrCreateVisitorID() {
-  if (typeof document === 'undefined') return 'default-session-id';
-  
+  if (typeof document === "undefined") return "default-session-id";
+
   const name = "WBSID";
   const existing = document.cookie
     .split("; ")
@@ -1491,4 +1979,41 @@ function getOrCreateVisitorID() {
   document.cookie = `${name}=${newID}; path=/; max-age=31536000`;
   return newID;
 }
+
+// 搜尋結果跳轉
+const scrollToMessage = (id) => {
+  // 關閉搜尋
+  showSearch.value = false;
+  searchQuery.value = "";
+  searchResults.value = [];
+  
+  // 等待動畫完成後跳轉
+  setTimeout(() => {
+    const messageElement = document.getElementById(`message-${id}`);
+    if (messageElement) {
+      messageElement.scrollIntoView({ 
+        behavior: "smooth",
+        block: "center"
+      });
+      
+      // 添加高亮效果
+      messageElement.style.backgroundColor = "rgba(116, 188, 31, 0.1)";
+      messageElement.style.borderRadius = "12px";
+      messageElement.style.transition = "background-color 0.3s ease";
+      
+      // 3秒後移除高亮
+      setTimeout(() => {
+        messageElement.style.backgroundColor = "";
+        messageElement.style.borderRadius = "";
+      }, 3000);
+    }
+  }, 300);
+};
+
+// 關鍵字高亮
+const highlightKeyword = (text, keyword) => {
+  if (!keyword) return text;
+  const regex = new RegExp(`(${keyword})`, "gi");
+  return text.replace(regex, '<span class="highlight">$1</span>');
+};
 </script>
