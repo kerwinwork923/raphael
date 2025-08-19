@@ -3,13 +3,16 @@
     <!-- 聊天頭部 -->
     <div class="chat-header">
       <div class="avatar-container">
-        <img class="avatar" src="/assets/imgs/robot/doctor.png" alt="角色頭像" />
+        <img
+          class="avatar"
+          src="/assets/imgs/robot/doctor.png"
+          alt="角色頭像"
+        />
       </div>
       <div class="character-name-btn">
         <span>角色姓名</span>
-       
-          <img src="/assets/imgs/robot/recycle.svg" alt="刷新">
-      
+
+        <img src="/assets/imgs/robot/recycle.svg" alt="刷新" />
       </div>
     </div>
 
@@ -23,29 +26,31 @@
 
     <!-- AI角色形象區域 -->
     <div class="character-section">
-      <img src="/assets/imgs/robot/doctor.png" class="character-image" alt="AI角色" />
+      <img
+        src="/assets/imgs/robot/doctor.png"
+        class="character-image"
+        alt="AI角色"
+      />
     </div>
 
     <!-- 語音控制區域 - 從下方彈出 -->
     <transition name="slide-up">
       <div v-if="showVoiceControls" class="voice-control-bar">
         <button class="control-btn history-btn" @click="showHistory">
-          <img src="/assets/imgs/robot/time.svg" alt="歷史紀錄">
+          <img src="/assets/imgs/robot/time.svg" alt="歷史紀錄" />
         </button>
-        <button 
+        <button
           class="control-btn mic-btn"
-          :class="{ 'listening': isListening }"
+          :class="{ listening: isListening }"
           @click="toggleListening"
           :disabled="isLoading"
         >
-        
-    
-            <img src="/assets/imgs/robot/sound.svg" alt="語音">
-    
+          <img src="/assets/imgs/robot/sound.svg" alt="語音" />
+
           <div v-if="isListening" class="pulse-ring"></div>
         </button>
         <button class="control-btn text-btn" @click="toggleTextInput">
-         <img src="/assets/imgs/robot/keyboard.svg" alt="文字">
+          <img src="/assets/imgs/robot/keyboard.svg" alt="文字" />
         </button>
       </div>
     </transition>
@@ -54,10 +59,10 @@
     <transition name="slide-up">
       <div v-if="showTextInput" class="text-input-section">
         <div class="input-container">
-          <input 
-            v-model="textInput" 
-            class="text-input" 
-            placeholder="請輸入文字" 
+          <input
+            v-model="textInput"
+            class="text-input"
+            placeholder="請輸入文字"
             @keypress.enter="handleManualInput"
             ref="textInputRef"
           />
@@ -70,12 +75,17 @@
 
     <!-- 當前語音輸入顯示 -->
     <transition name="fade">
-      <div v-if="currentTranscript || isLoading || isListening" class="transcript-display">
+      <div
+        v-if="currentTranscript || isLoading || isListening"
+        class="transcript-display"
+      >
         <div v-if="isLoading" class="loading-indicator">
           <div class="spinner"></div>
           <span>正在思考...</span>
         </div>
-        <p v-else-if="currentTranscript" class="transcript-text">{{ currentTranscript }}</p>
+        <p v-else-if="currentTranscript" class="transcript-text">
+          {{ currentTranscript }}
+        </p>
         <p v-else-if="isListening" class="transcript-text">請開始說話</p>
       </div>
     </transition>
@@ -86,49 +96,89 @@
         <!-- Bot 回覆 -->
         <div class="message bot">
           <div class="bubble">{{ item.bot }}</div>
-          <div class="time">{{ item.timestamp.split(' ')[1] }}</div>
+          <div class="time">{{ item.timestamp.split(" ")[1] }}</div>
         </div>
         <!-- User 訊息 -->
         <div class="message user">
           <div class="bubble">{{ item.user }}</div>
-          <div class="time">{{ item.timestamp.split(' ')[1] }}</div>
+          <div class="time">{{ item.timestamp.split(" ")[1] }}</div>
         </div>
       </div>
     </div>
 
     <!-- 底部導航列 -->
     <nav class="bottom-nav">
-      <div class="nav-item" :class="{ active: activeTab === 'services' }" @click="setActiveTab('services')">
+      <div
+        class="nav-item"
+        :class="{ active: activeTab === 'services' }"
+        @click="setActiveTab('services')"
+      >
         <div class="nav-icon">
-          <img v-if="activeTab === 'services'" src="/assets/imgs/robot/home-active.svg" alt="我的服務" />
+          <img
+            v-if="activeTab === 'services'"
+            src="/assets/imgs/robot/home-active.svg"
+            alt="我的服務"
+          />
           <img v-else src="/assets/imgs/robot/home.svg" alt="我的服務" />
         </div>
         <span>我的服務</span>
       </div>
-      <div class="nav-item" :class="{ active: activeTab === 'record' }" @click="setActiveTab('record')">
+      <div
+        class="nav-item"
+        :class="{ active: activeTab === 'record' }"
+        @click="setActiveTab('record')"
+      >
         <div class="nav-icon">
-          <img v-if="activeTab === 'record'" src="/assets/imgs/robot/cloth-active.svg" alt="我的服務" />
+          <img
+            v-if="activeTab === 'record'"
+            src="/assets/imgs/robot/cloth-active.svg"
+            alt="我的服務"
+          />
           <img v-else src="/assets/imgs/robot/cloth.svg" alt="我的服務" />
         </div>
         <span>穿衣紀錄</span>
       </div>
-      <div class="nav-item" :class="{ active: activeTab === 'home' }" @click="setActiveTab('home')">
+      <div
+        class="nav-item"
+        :class="{ active: activeTab === 'home' }"
+        @click="setActiveTab('home')"
+      >
         <div class="nav-icon">
-          <img v-if="activeTab === 'home'" src="/assets/imgs/robot/home-active.svg" alt="首頁" />
+          <img
+            v-if="activeTab === 'home'"
+            src="/assets/imgs/robot/home-active.svg"
+            alt="首頁"
+          />
           <img v-else src="/assets/imgs/robot/home.svg" alt="首頁" />
         </div>
         <span>首頁</span>
       </div>
-      <div class="nav-item" :class="{ active: activeTab === 'shop' }" @click="setActiveTab('shop')">
+      <div
+        class="nav-item"
+        :class="{ active: activeTab === 'shop' }"
+        @click="setActiveTab('shop')"
+      >
         <div class="nav-icon">
-          <img v-if="activeTab === 'shop'" src="/assets/imgs/robot/market-active.svg" alt="我的服務" />
+          <img
+            v-if="activeTab === 'shop'"
+            src="/assets/imgs/robot/market-active.svg"
+            alt="我的服務"
+          />
           <img v-else src="/assets/imgs/robot/market.svg" alt="我的服務" />
         </div>
         <span>健康好物</span>
       </div>
-      <div class="nav-item" :class="{ active: activeTab === 'member' }" @click="setActiveTab('member')">
+      <div
+        class="nav-item"
+        :class="{ active: activeTab === 'member' }"
+        @click="setActiveTab('member')"
+      >
         <div class="nav-icon">
-          <img v-if="activeTab === 'member'" src="/assets/imgs/robot/member-active.svg" alt="我的服務" />
+          <img
+            v-if="activeTab === 'member'"
+            src="/assets/imgs/robot/member-active.svg"
+            alt="我的服務"
+          />
           <img v-else src="/assets/imgs/robot/member.svg" alt="我的服務" />
         </div>
         <span>會員</span>
@@ -139,9 +189,15 @@
     <transition name="fade">
       <div v-if="isListening" class="voice-modal">
         <div class="voice-content">
-          <img src="/assets/imgs/voicewave.png" alt="音波圖" class="voice-wave" />
+          <img
+            src="/assets/imgs/voicewave.png"
+            alt="音波圖"
+            class="voice-wave"
+          />
           <p class="voice-text">請開始說話</p>
-          <p v-if="currentTranscript" class="transcript-text">{{ currentTranscript }}</p>
+          <p v-if="currentTranscript" class="transcript-text">
+            {{ currentTranscript }}
+          </p>
         </div>
       </div>
     </transition>
@@ -155,7 +211,9 @@
             <li>🔇 是否靜音模式</li>
             <li>🌐 是否支援中文語音撥放</li>
           </ul>
-          <button @click="showAudioError = false" class="alert-button">我知道了</button>
+          <button @click="showAudioError = false" class="alert-button">
+            我知道了
+          </button>
         </div>
       </div>
     </transition>
@@ -173,19 +231,23 @@
             <button class="calendar-btn">📅</button>
           </div>
         </div>
-        
+
         <div class="history-content">
-          <div v-for="(group, date) in groupedHistory" :key="date" class="history-group">
+          <div
+            v-for="(group, date) in groupedHistory"
+            :key="date"
+            class="history-group"
+          >
             <div class="date-separator">{{ formatDate(date) }}</div>
             <div v-for="item in group" :key="item.id" class="history-message">
               <div class="message bot">
                 <div class="avatar">🤖</div>
                 <div class="bubble">{{ item.bot }}</div>
-                <div class="time">{{ item.timestamp.split(' ')[1] }}</div>
+                <div class="time">{{ item.timestamp.split(" ")[1] }}</div>
               </div>
               <div class="message user">
                 <div class="bubble">{{ item.user }}</div>
-                <div class="time">{{ item.timestamp.split(' ')[1] }}</div>
+                <div class="time">{{ item.timestamp.split(" ")[1] }}</div>
               </div>
             </div>
           </div>
@@ -316,10 +378,8 @@
   flex: 1;
 
   .character-image {
-    img{
-      
+    img {
     }
-  
   }
 }
 
@@ -335,15 +395,13 @@
   gap: 20px;
   padding: 4px 16px;
   border-radius: var(--Radius-r-50, 50px);
-  background: rgba(255, 255, 255, 0.6);     
-  -webkit-backdrop-filter: blur(22px);       
+  background: rgba(255, 255, 255, 0.6);
+  -webkit-backdrop-filter: blur(22px);
   backdrop-filter: blur(22px);
-  border: 1px solid var(--Neutral-white, #FFF);
+  border: 1px solid var(--Neutral-white, #fff);
   border-radius: 50px;
- 
-  z-index: 10;
 
-  
+  z-index: 10;
 
   .control-btn {
     background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
@@ -358,7 +416,8 @@
     font-size: 20px;
     transition: all 0.3s ease;
     position: relative;
-    box-shadow: 0 0 12px 0 var(--Neutral-white, #FFF), 6px 6px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.40));
+    box-shadow: 0 0 12px 0 var(--Neutral-white, #fff),
+      6px 6px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
     border: 1px solid rgba(255, 255, 255, 0.2);
 
     &:hover {
@@ -374,25 +433,28 @@
     }
 
     &.mic-btn {
-      background: linear-gradient(90deg, var(--primary-400-opacity-70, rgba(116, 188, 31, 0.70)) 0%, var(--Primary-default, #74BC1F) 100%);
-
+      background: linear-gradient(
+        90deg,
+        var(--primary-400-opacity-70, rgba(116, 188, 31, 0.7)) 0%,
+        var(--Primary-default, #74bc1f) 100%
+      );
 
       color: white;
       width: 60px;
       height: 60px;
       font-size: 26px;
 
-
       &.listening {
-        background: linear-gradient(90deg, var(--primary-400-opacity-70, rgba(116, 188, 31, 0.70)) 0%, var(--Primary-default, #74BC1F) 100%);
-
+        background: linear-gradient(
+          90deg,
+          var(--primary-400-opacity-70, rgba(116, 188, 31, 0.7)) 0%,
+          var(--Primary-default, #74bc1f) 100%
+        );
 
         color: white;
         width: 70px;
         height: 70px;
         font-size: 26px;
-
-
       }
     }
   }
@@ -429,6 +491,12 @@
   width: 100%;
   padding: 0 20px;
   margin-bottom: 20px;
+  position: fixed;
+  bottom: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  z-index: 10;
 
   .input-container {
     display: flex;
@@ -595,7 +663,6 @@
   box-shadow: 0 -8px 16px rgba(163, 177, 198, 0.6),
     0 8px 16px rgba(255, 255, 255, 0.8);
   border-top: 1px solid rgba(255, 255, 255, 0.3);
-  
 
   .nav-item {
     display: flex;
@@ -608,10 +675,8 @@
     padding: 8px 12px;
     border-radius: 15px;
 
-
-
     &.active {
-      color: #74BC1F;
+      color: #74bc1f;
       font-weight: bold;
     }
 
@@ -773,8 +838,7 @@
     padding: 20px;
     background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 
-      0 4px 12px rgba(163, 177, 198, 0.6),
+    box-shadow: 0 4px 12px rgba(163, 177, 198, 0.6),
       0 -4px 12px rgba(255, 255, 255, 0.8);
 
     .back-btn {
@@ -786,14 +850,12 @@
       padding: 12px;
       border-radius: 12px;
       transition: all 0.3s ease;
-      box-shadow: 
-        4px 4px 8px rgba(163, 177, 198, 0.6),
+      box-shadow: 4px 4px 8px rgba(163, 177, 198, 0.6),
         -4px -4px 8px rgba(255, 255, 255, 0.8);
 
       &:hover {
         transform: translateY(-2px);
-        box-shadow: 
-          6px 6px 12px rgba(163, 177, 198, 0.6),
+        box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
           -6px -6px 12px rgba(255, 255, 255, 0.8);
       }
     }
@@ -820,14 +882,12 @@
       padding: 12px;
       border-radius: 12px;
       transition: all 0.3s ease;
-      box-shadow: 
-        4px 4px 8px rgba(163, 177, 198, 0.6),
+      box-shadow: 4px 4px 8px rgba(163, 177, 198, 0.6),
         -4px -4px 8px rgba(255, 255, 255, 0.8);
 
       &:hover {
         transform: translateY(-2px);
-        box-shadow: 
-          6px 6px 12px rgba(163, 177, 198, 0.6),
+        box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
           -6px -6px 12px rgba(255, 255, 255, 0.8);
       }
     }
@@ -850,8 +910,7 @@
         padding: 8px 16px;
         background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
         border-radius: 20px;
-        box-shadow: 
-          4px 4px 8px rgba(163, 177, 198, 0.6),
+        box-shadow: 4px 4px 8px rgba(163, 177, 198, 0.6),
           -4px -4px 8px rgba(255, 255, 255, 0.8);
         border: 1px solid rgba(255, 255, 255, 0.3);
         display: inline-block;
@@ -880,8 +939,7 @@
               align-items: center;
               font-size: 18px;
               color: #22c55e;
-              box-shadow: 
-                4px 4px 8px rgba(163, 177, 198, 0.6),
+              box-shadow: 4px 4px 8px rgba(163, 177, 198, 0.6),
                 -4px -4px 8px rgba(255, 255, 255, 0.8);
               border: 1px solid rgba(255, 255, 255, 0.3);
               margin-right: 12px;
@@ -892,8 +950,7 @@
               background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
               color: #2d3748;
               border-bottom-left-radius: 8px;
-              box-shadow: 
-                6px 6px 12px rgba(163, 177, 198, 0.6),
+              box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
                 -6px -6px 12px rgba(255, 255, 255, 0.8);
               border: 1px solid rgba(255, 255, 255, 0.3);
               max-width: 70%;
@@ -907,8 +964,7 @@
               background: linear-gradient(145deg, #22c55e, #16a34a);
               color: white;
               border-bottom-right-radius: 8px;
-              box-shadow: 
-                6px 6px 12px rgba(34, 197, 94, 0.3),
+              box-shadow: 6px 6px 12px rgba(34, 197, 94, 0.3),
                 -6px -6px 12px rgba(255, 255, 255, 0.8);
               max-width: 70%;
             }
@@ -947,427 +1003,448 @@
 .slide-left-leave-to {
   transform: translateX(-100%);
 }
-
 </style>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
-import { Mic, MicOff, VolumeX, Home, Heart, ShoppingBag, Monitor, User } from 'lucide-vue-next'
+import { ref, onMounted, onUnmounted, computed, nextTick } from "vue";
+import {
+  Mic,
+  MicOff,
+  VolumeX,
+  Home,
+  Heart,
+  ShoppingBag,
+  Monitor,
+  User,
+} from "lucide-vue-next";
 
 // 響應式狀態
-const isListening = ref(false)
-const isLoading = ref(false)
-const conversations = ref([])
-const currentTranscript = ref('')
-const isSpeaking = ref(false)
-const UUID = getOrCreateVisitorID()
-const textInput = ref('')
-const showTextInput = ref(false)
-const showVoiceControls = ref(false)
-const showAudioError = ref(false)
-const isManuallyStopped = ref(false)
-const showHistoryPage = ref(false)
-const activeTab = ref('home')
-let playbackConfirmed = false
+const isListening = ref(false);
+const isLoading = ref(false);
+const conversations = ref([]);
+const currentTranscript = ref("");
+const isSpeaking = ref(false);
+const UUID = getOrCreateVisitorID();
+const textInput = ref("");
+const showTextInput = ref(false);
+const showVoiceControls = ref(false);
+const showAudioError = ref(false);
+const isManuallyStopped = ref(false);
+const showHistoryPage = ref(false);
+const activeTab = ref("home");
+let playbackConfirmed = false;
 
 // 語音識別和合成實例
-let recognitionRef = null
-let synthRef = null
+let recognitionRef = null;
+let synthRef = null;
 
 // 計算屬性：按日期分組的歷史記錄
 const groupedHistory = computed(() => {
-  const groups = {}
-  conversations.value.forEach(item => {
-    const date = item.timestamp.split(' ')[0]
+  const groups = {};
+  conversations.value.forEach((item) => {
+    const date = item.timestamp.split(" ")[0];
     if (!groups[date]) {
-      groups[date] = []
+      groups[date] = [];
     }
-    groups[date].push(item)
-  })
-  return groups
-})
+    groups[date].push(item);
+  });
+  return groups;
+});
 
 // 格式化日期
 const formatDate = (dateStr) => {
-  const date = new Date(dateStr)
-  const weekdays = ['日', '一', '二', '三', '四', '五', '六']
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  const weekday = weekdays[date.getDay()]
-  return `${year}/${month}/${day} (${weekday})`
-}
+  const date = new Date(dateStr);
+  const weekdays = ["日", "一", "二", "三", "四", "五", "六"];
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const weekday = weekdays[date.getDay()];
+  return `${year}/${month}/${day} (${weekday})`;
+};
 
 // 設置活動標籤
 const setActiveTab = (tab) => {
-  activeTab.value = tab
-  localStorage.setItem('activeTab', tab)
-  
+  activeTab.value = tab;
+  localStorage.setItem("activeTab", tab);
+
   // 如果點擊首頁，顯示語音控制
-  if (tab === 'home') {
-    showVoiceControls.value = true
+  if (tab === "home") {
+    showVoiceControls.value = true;
   } else {
-    showVoiceControls.value = false
+    showVoiceControls.value = false;
   }
-}
+};
 
 // 顯示歷史記錄
 const showHistory = () => {
-  showHistoryPage.value = true
-}
+  showHistoryPage.value = true;
+};
 
 // 關閉歷史記錄
 const closeHistory = () => {
-  showHistoryPage.value = false
-}
+  showHistoryPage.value = false;
+};
 
 // 切換文字輸入
 const toggleTextInput = () => {
-  showTextInput.value = !showTextInput.value
+  showTextInput.value = !showTextInput.value;
   if (showTextInput.value) {
     nextTick(() => {
       // 在手機上聚焦輸入框會自動彈出鍵盤
       if (textInputRef.value) {
-        textInputRef.value.focus()
+        textInputRef.value.focus();
       }
-    })
+    });
   }
-}
+};
 
 // 初始化語音識別
 const initSpeechRecognition = () => {
   if (process.client) {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-      recognitionRef = new SpeechRecognition()
-      recognitionRef.continuous = false
-      recognitionRef.interimResults = true
-      recognitionRef.lang = 'zh-TW'
+    if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+      const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef = new SpeechRecognition();
+      recognitionRef.continuous = false;
+      recognitionRef.interimResults = true;
+      recognitionRef.lang = "zh-TW";
 
       recognitionRef.onresult = (event) => {
         const transcript = Array.from(event.results)
-          .map(result => result[0])
-          .map(result => result.transcript)
-          .join('')
-        
-        currentTranscript.value = transcript
-        
+          .map((result) => result[0])
+          .map((result) => result.transcript)
+          .join("");
+
+        currentTranscript.value = transcript;
+
         if (event.results[0].isFinal) {
-          handleSpeechEnd(transcript)
+          handleSpeechEnd(transcript);
         }
-      }
+      };
 
       recognitionRef.onerror = (event) => {
-        console.error('語音識別錯誤:', event.error)
-        isListening.value = false
-        currentTranscript.value = ''
-      }
+        console.error("語音識別錯誤:", event.error);
+        isListening.value = false;
+        currentTranscript.value = "";
+      };
 
       recognitionRef.onend = () => {
-        isListening.value = false
-      }
+        isListening.value = false;
+      };
     }
 
     // 初始化語音合成
-    if ('speechSynthesis' in window) {
-      synthRef = window.speechSynthesis
+    if ("speechSynthesis" in window) {
+      synthRef = window.speechSynthesis;
     }
   }
-}
+};
 
 // 開始/停止語音識別
 const toggleListening = () => {
   if (!recognitionRef) {
-    alert('您的瀏覽器不支援語音識別功能')
-    return
+    alert("您的瀏覽器不支援語音識別功能");
+    return;
   }
 
   if (isListening.value) {
-    recognitionRef.stop()
-    isListening.value = false
-    currentTranscript.value = ''
+    recognitionRef.stop();
+    isListening.value = false;
+    currentTranscript.value = "";
   } else {
-    currentTranscript.value = ''
-    recognitionRef.start()
-    isListening.value = true
+    currentTranscript.value = "";
+    recognitionRef.start();
+    isListening.value = true;
   }
-}
+};
 
 // 處理語音輸入結束
 const handleSpeechEnd = async (transcript) => {
-  if (!transcript.trim()) return
+  if (!transcript.trim()) return;
 
-  isLoading.value = true
-  currentTranscript.value = ''
+  isLoading.value = true;
+  currentTranscript.value = "";
 
   try {
-    const response = await fetch("https://aiwisebalance.com/webhook/rag_response", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chatInput: transcript,
-        sessionId: UUID,
-        timestamp: new Date().toISOString()
-      })
-    })
+    const response = await fetch(
+      "https://aiwisebalance.com/webhook/rag_response",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chatInput: transcript,
+          sessionId: UUID,
+          timestamp: new Date().toISOString(),
+        }),
+      }
+    );
 
-    const text = await response.text()
-    console.log("🔥 回傳原始內容：", text)
-    let botResponse = ''
+    const text = await response.text();
+    console.log("🔥 回傳原始內容：", text);
+    let botResponse = "";
 
     try {
-      const data = JSON.parse(text)
+      const data = JSON.parse(text);
       if (data?.result || data?.response || data?.message) {
-        botResponse = data.result || data.response || data.message
+        botResponse = data.result || data.response || data.message;
       } else {
-        botResponse = '⚠️ AI 沒有提供內容。'
+        botResponse = "⚠️ AI 沒有提供內容。";
       }
     } catch (err) {
-      botResponse = '⚠️ 無法解析伺服器回應。'
+      botResponse = "⚠️ 無法解析伺服器回應。";
     }
 
     const newConversation = {
       id: Date.now(),
       user: transcript,
       bot: botResponse,
-      timestamp: new Date().toLocaleString('zh-TW')
-    }
+      timestamp: new Date().toLocaleString("zh-TW"),
+    };
 
-    conversations.value.unshift(newConversation)
-    saveConversations()
-    speakText(botResponse)
-
+    conversations.value.unshift(newConversation);
+    saveConversations();
+    speakText(botResponse);
   } catch (error) {
-    console.error('API調用錯誤:', error)
-    const errorResponse = '抱歉，服務暫時無法使用，請稍後再試。'
-    
+    console.error("API調用錯誤:", error);
+    const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
+
     const errorConversation = {
       id: Date.now(),
       user: transcript,
       bot: errorResponse,
-      timestamp: new Date().toLocaleString('zh-TW')
-    }
+      timestamp: new Date().toLocaleString("zh-TW"),
+    };
 
-    conversations.value.unshift(errorConversation)
-    saveConversations()
-    speakText(errorResponse)
+    conversations.value.unshift(errorConversation);
+    saveConversations();
+    speakText(errorResponse);
   }
-}
+};
 
 // 語音播放文字
 const speakText = (text) => {
-  if (!synthRef || !text?.trim()) return
+  if (!synthRef || !text?.trim()) return;
 
   const speak = () => {
-    isManuallyStopped.value = false
-    playbackConfirmed = false
-    synthRef.cancel()
-    
-    const utterance = new SpeechSynthesisUtterance(text)
-    utterance.lang = 'zh-TW'
-    utterance.rate = 0.9
-    utterance.pitch = 0.85
-    utterance.volume = 1
+    isManuallyStopped.value = false;
+    playbackConfirmed = false;
+    synthRef.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "zh-TW";
+    utterance.rate = 0.9;
+    utterance.pitch = 0.85;
+    utterance.volume = 1;
 
     const resumeHack = setInterval(() => {
-      if (!synthRef) return
-      if (synthRef.paused) synthRef.resume()
+      if (!synthRef) return;
+      if (synthRef.paused) synthRef.resume();
       if (!synthRef.speaking) {
-        clearInterval(resumeHack)
+        clearInterval(resumeHack);
       }
-    }, 200)
+    }, 200);
 
     utterance.onstart = () => {
-      playbackConfirmed = true
-      isSpeaking.value = true
-    }
-    
+      playbackConfirmed = true;
+      isSpeaking.value = true;
+    };
+
     utterance.onend = () => {
-      isSpeaking.value = false
-      isLoading.value = false
-      clearInterval(resumeHack)
-    }
-    
+      isSpeaking.value = false;
+      isLoading.value = false;
+      clearInterval(resumeHack);
+    };
+
     utterance.onerror = (e) => {
-      isSpeaking.value = false
-      isLoading.value = false
-      clearInterval(resumeHack)
+      isSpeaking.value = false;
+      isLoading.value = false;
+      clearInterval(resumeHack);
       if (!isManuallyStopped.value) {
-        showAudioError.value = true
+        showAudioError.value = true;
       }
-      console.error("語音播放失敗", e)
-    }
+      console.error("語音播放失敗", e);
+    };
 
     try {
-      if (synthRef.paused) synthRef.resume()
-      synthRef.speak(utterance)
+      if (synthRef.paused) synthRef.resume();
+      synthRef.speak(utterance);
 
       setTimeout(() => {
-        if (!playbackConfirmed && !isManuallyStopped.value && !synthRef.speaking) {
-          showAudioError.value = true
-          console.warn("裝置無法正常撥放語音")
+        if (
+          !playbackConfirmed &&
+          !isManuallyStopped.value &&
+          !synthRef.speaking
+        ) {
+          showAudioError.value = true;
+          console.warn("裝置無法正常撥放語音");
         }
-      }, 1500)
-
+      }, 1500);
     } catch (err) {
-      console.error("語音撥放錯誤", err)
-      showAudioError.value = true
+      console.error("語音撥放錯誤", err);
+      showAudioError.value = true;
     }
 
-    console.log("🗣 準備播放文字:", text)
-  }
+    console.log("🗣 準備播放文字:", text);
+  };
 
   if (speechSynthesis.getVoices().length === 0) {
-    speechSynthesis.onvoiceschanged = () => speak()
+    speechSynthesis.onvoiceschanged = () => speak();
   } else {
-    speak()
+    speak();
   }
-}
+};
 
 // 停止語音播放
 const stopSpeaking = () => {
   if (synthRef && process.client) {
-    isManuallyStopped.value = true
-    showAudioError.value = false
-    synthRef.cancel()
-    isSpeaking.value = false
+    isManuallyStopped.value = true;
+    showAudioError.value = false;
+    synthRef.cancel();
+    isSpeaking.value = false;
   }
-}
+};
 
 // 切換音量控制
 const toggleVolume = () => {
-  console.log('切換音量控制')
-}
+  console.log("切換音量控制");
+};
 
 // 手動輸入處理
 const handleManualInput = async () => {
-  const input = textInput.value.trim()
-  if (!input) return
+  const input = textInput.value.trim();
+  if (!input) return;
 
-  isLoading.value = true
-  currentTranscript.value = ''
-  textInput.value = ''
+  isLoading.value = true;
+  currentTranscript.value = "";
+  textInput.value = "";
 
   try {
-    const response = await fetch("https://aiwisebalance.com/webhook/rag_response", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chatInput: input,
-        sessionId: UUID,
-        timestamp: new Date().toISOString()
-      })
-    })
+    const response = await fetch(
+      "https://aiwisebalance.com/webhook/rag_response",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chatInput: input,
+          sessionId: UUID,
+          timestamp: new Date().toISOString(),
+        }),
+      }
+    );
 
-    const text = await response.text()
-    let botResponse = ''
+    const text = await response.text();
+    let botResponse = "";
 
     try {
-      const data = JSON.parse(text)
-      botResponse = data?.result || data?.response || data?.message || '⚠️ AI 沒有提供內容。'
+      const data = JSON.parse(text);
+      botResponse =
+        data?.result ||
+        data?.response ||
+        data?.message ||
+        "⚠️ AI 沒有提供內容。";
     } catch (err) {
-      botResponse = '⚠️ 無法解析伺服器回應。'
+      botResponse = "⚠️ 無法解析伺服器回應。";
     }
 
     const newConversation = {
       id: Date.now(),
       user: input,
       bot: botResponse,
-      timestamp: new Date().toLocaleString('zh-TW')
-    }
+      timestamp: new Date().toLocaleString("zh-TW"),
+    };
 
-    conversations.value.unshift(newConversation)
-    saveConversations()
-    speakText(botResponse)
-
+    conversations.value.unshift(newConversation);
+    saveConversations();
+    speakText(botResponse);
   } catch (error) {
-    console.error('API調用錯誤:', error)
-    const errorResponse = '抱歉，服務暫時無法使用，請稍後再試。'
+    console.error("API調用錯誤:", error);
+    const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
     const errorConversation = {
       id: Date.now(),
       user: input,
       bot: errorResponse,
-      timestamp: new Date().toLocaleString('zh-TW')
-    }
-    conversations.value.unshift(errorConversation)
-    saveConversations()
-    speakText(errorResponse)
+      timestamp: new Date().toLocaleString("zh-TW"),
+    };
+    conversations.value.unshift(errorConversation);
+    saveConversations();
+    speakText(errorResponse);
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 
 // 本地儲存對話記錄
 const saveConversations = () => {
   if (process.client) {
-    localStorage.setItem('chatConversations', JSON.stringify(conversations.value))
+    localStorage.setItem(
+      "chatConversations",
+      JSON.stringify(conversations.value)
+    );
   }
-}
+};
 
 // 載入本地對話記錄
 const loadConversations = () => {
   if (process.client) {
-    const saved = localStorage.getItem('chatConversations')
+    const saved = localStorage.getItem("chatConversations");
     if (saved) {
       try {
-        conversations.value = JSON.parse(saved)
+        conversations.value = JSON.parse(saved);
       } catch (e) {
-        console.error('載入對話記錄失敗:', e)
+        console.error("載入對話記錄失敗:", e);
       }
     }
   }
-}
+};
 
 // 組件掛載時初始化
 onMounted(() => {
-  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-    synthRef = window.speechSynthesis
+  if (typeof window !== "undefined" && "speechSynthesis" in window) {
+    synthRef = window.speechSynthesis;
   }
-  initSpeechRecognition()
-  loadConversations()
-  
+  initSpeechRecognition();
+  loadConversations();
+
   // 載入活動標籤
-  const savedTab = localStorage.getItem('activeTab')
+  const savedTab = localStorage.getItem("activeTab");
   if (savedTab) {
-    activeTab.value = savedTab
+    activeTab.value = savedTab;
   }
-  
+
   // 如果當前是首頁，顯示語音控制
-  if (activeTab.value === 'home') {
-    showVoiceControls.value = true
+  if (activeTab.value === "home") {
+    showVoiceControls.value = true;
   }
-})
+});
 
 // 組件卸載時清理
 onUnmounted(() => {
   if (recognitionRef) {
-    recognitionRef.stop()
+    recognitionRef.stop();
   }
   if (synthRef) {
-    synthRef.cancel()
+    synthRef.cancel();
   }
-})
+});
 
 // SEO
 useHead({
-  title: '語音對話App',
-  meta: [
-    { name: 'description', content: '智能語音對話助手應用' }
-  ]
-})
+  title: "語音對話App",
+  meta: [{ name: "description", content: "智能語音對話助手應用" }],
+});
 
 // 工具函數
 function getOrCreateVisitorID() {
-  const name = "WBSID"
+  const name = "WBSID";
   const existing = document.cookie
     .split("; ")
     .find((row) => row.startsWith(name + "="))
-    ?.split("=")[1]
+    ?.split("=")[1];
 
-  if (existing) return existing
+  if (existing) return existing;
 
-  const newID = crypto.randomUUID()
-  document.cookie = `${name}=${newID}; path=/; max-age=31536000`
-  return newID
+  const newID = crypto.randomUUID();
+  document.cookie = `${name}=${newID}; path=/; max-age=31536000`;
+  return newID;
 }
 </script>
