@@ -140,7 +140,7 @@
           <!-- 彈窗頭部 -->
           <div class="character-modal-header">
             <img
-              src="/_nuxt/assets/imgs/backArrow.svg"
+              src="/assets/imgs/backArrow.svg"
               @click="closeCharacterModal"
               alt="返回"
               class="back-arrow"
@@ -262,7 +262,7 @@
                 ref="searchInputRef"
               />
               <img
-                src="/_nuxt/assets/imgs/close.svg"
+                src="/assets/imgs/close.svg"
                 alt="關閉"
                 @click="toggleSearch"
                 class="close-search-icon"
@@ -426,7 +426,7 @@
           <div class="calendar-header">
             <h3 class="calendar-title">選擇日期</h3>
             <img
-              src="/_nuxt/assets/imgs/close.svg"
+              src="/assets/imgs/close.svg"
               alt="關閉"
               @click="toggleCalendar"
               class="calendar-close"
@@ -2075,7 +2075,7 @@ const searchResults = ref([]); // 搜尋結果
 // 角色選擇相關狀態
 const showCharacterSelection = ref(false); // 顯示角色選擇彈窗
 const isStyleExpanded = ref(false); // 造型是否展開
-const expandStylesIcon = ref("/_nuxt/assets/imgs/arrowDown.svg"); // 展開圖標
+
 
 // 角色命名相關狀態
 const showNameInput = ref(false); // 顯示名稱輸入彈窗
