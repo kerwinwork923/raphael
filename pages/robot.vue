@@ -1,5 +1,5 @@
 <template>
-  <div class="chat-wrapper" >
+  <div class="chat-wrapper">
     <!-- 聊天頭部 -->
     <div class="chat-header">
       <div class="avatar-container" @click="showCharacterModal">
@@ -58,28 +58,37 @@
       </div>
     </transition>
 
-<!-- 文字輸入區域 -->
-<transition name="slide-up">
-  <div
-    v-if="showTextInput && !isListening && !showVoiceError"
-    class="text-input-section"
-    v-click-outside="closeTextInput"
-  >
-    <div class="input-container" @click.stop>
-      <input
-        v-model="textInput"
-        class="text-input"
-        placeholder="請輸入文字"
-        @keypress.enter="handleManualInput"
-        ref="textInputRef"
-      />
-      <button class="send-btn" @click="textInput.trim() ? handleManualInput() : toggleListening()">
-        <img :src="textInput.trim() ? '/_nuxt/assets/imgs/robot/send.svg' : soundSvg" :alt="textInput.trim() ? '送出' : '語音'" />
-      </button>
-    </div>
-  </div>
-</transition>
-
+    <!-- 文字輸入區域 -->
+    <transition name="slide-up">
+      <div
+        v-if="showTextInput && !isListening && !showVoiceError"
+        class="text-input-section"
+        v-click-outside="closeTextInput"
+      >
+        <div class="input-container" @click.stop>
+          <input
+            v-model="textInput"
+            class="text-input"
+            placeholder="請輸入文字"
+            @keypress.enter="handleManualInput"
+            ref="textInputRef"
+          />
+          <button
+            class="send-btn"
+            @click="textInput.trim() ? handleManualInput() : toggleListening()"
+          >
+            <img
+              :src="
+                textInput.trim()
+                  ? '/_nuxt/assets/imgs/robot/send.svg'
+                  : soundSvg
+              "
+              :alt="textInput.trim() ? '送出' : '語音'"
+            />
+          </button>
+        </div>
+      </div>
+    </transition>
 
     <!-- 當前語音輸入顯示 -->
     <transition name="fade">
@@ -96,11 +105,7 @@
 
     <!-- 錄音提示彈窗 -->
     <transition name="fade">
-      <div
-        v-if="isListening || showVoiceError"
-        class="voice-modal"
-       
-      >
+      <div v-if="isListening || showVoiceError" class="voice-modal">
         <div class="voice-content" @click.stop>
           <img
             :src="voiceModalImageSrc"
@@ -114,11 +119,14 @@
           <p v-else-if="currentTranscript" class="transcript-text">
             {{ currentTranscript }}
           </p>
-          <div class="voiceModelClose" v-if="!isListening" @click="closeVoiceModal">
+          <div
+            class="voiceModelClose"
+            v-if="!isListening"
+            @click="closeVoiceModal"
+          >
             <div class="voiceModelImg">
               <img src="/assets/imgs/robot/close_red.svg" alt="關閉" />
             </div>
-           
           </div>
         </div>
       </div>
@@ -829,7 +837,7 @@
     border: 1px solid rgba(255, 255, 255, 0.3);
   }
 }
-.voiceModelClose{
+.voiceModelClose {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
@@ -837,18 +845,21 @@
 
   padding: 4px;
   border-radius: var(--Radius-r-50, 50px);
-background: var(--Secondary-100, #F5F7FA);
-box-shadow: 0 2px 8px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.40));
-margin-top: 8px;
+  background: var(--Secondary-100, #f5f7fa);
+  box-shadow: 0 2px 8px 0
+    var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+  margin-top: 8px;
 
-.voiceModelImg{
-  width: 30px;
-  height: 30px;
-  border: 1px solid var(--Warning-default, #EC4F4F);
-  border-radius: 50%;
-  padding: 2px;
-  display: flex;align-items: center;justify-content: center;
-}
+  .voiceModelImg {
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--Warning-default, #ec4f4f);
+    border-radius: 50%;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 @keyframes spin {
@@ -882,14 +893,12 @@ margin-top: 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    
 
     .voice-wave {
       width: 90px;
       height: 90px;
       object-fit: contain;
       animation: pulse-wave 1.6s infinite ease-in-out;
-     
     }
 
     .voice-text {
@@ -2597,9 +2606,7 @@ const closeHistory = () => {
 };
 
 const closeTextInput = () => {
- 
-    showTextInput.value = false;
- 
+  showTextInput.value = false;
 };
 
 // 處理歷史記錄滾動事件
@@ -3095,13 +3102,12 @@ const handleSpeechEnd = async (transcript) => {
     }
 
     const newConversation = {
-  id: Date.now(),
-  user: input, 
-  bot: botResponse,
-  timestamp: now.toLocaleString("zh-TW"),
-  dateKey: toDateKey(now),
-};
-
+      id: Date.now(),
+      user: input,
+      bot: botResponse,
+      timestamp: now.toLocaleString("zh-TW"),
+      dateKey: toDateKey(now),
+    };
 
     conversations.value.push(newConversation);
     saveConversations();
@@ -3434,13 +3440,16 @@ onMounted(() => {
   loadConversations();
   loadSavedCharacter();
 
+  isMuted.value = false;
+  localStorage.removeItem("isMuted"); // 可選：順便清掉舊紀錄
+
   // 載入靜音狀態
-  if (process.client) {
-    const savedMuted = localStorage.getItem("isMuted");
-    if (savedMuted !== null) {
-      isMuted.value = JSON.parse(savedMuted);
-    }
-  }
+  // if (process.client) {
+  //   const savedMuted = localStorage.getItem("isMuted");
+  //   if (savedMuted !== null) {
+  //     isMuted.value = JSON.parse(savedMuted);
+  //   }
+  // }
 
   // 如果當前是首頁，顯示語音控制
   if (process.client) {
