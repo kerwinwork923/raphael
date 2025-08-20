@@ -80,7 +80,7 @@
             <img
               :src="
                 textInput.trim()
-                  ? '/_nuxt/assets/imgs/robot/send.svg'
+                  ? '/assets/imgs/robot/send.svg'
                   : soundSvg
               "
               :alt="textInput.trim() ? '送出' : '語音'"
