@@ -3440,16 +3440,13 @@ onMounted(() => {
   loadConversations();
   loadSavedCharacter();
 
-  isMuted.value = false;
-  localStorage.removeItem("isMuted"); // 可選：順便清掉舊紀錄
-
   // 載入靜音狀態
-  // if (process.client) {
-  //   const savedMuted = localStorage.getItem("isMuted");
-  //   if (savedMuted !== null) {
-  //     isMuted.value = JSON.parse(savedMuted);
-  //   }
-  // }
+  if (process.client) {
+    const savedMuted = localStorage.getItem("isMuted");
+    if (savedMuted !== null) {
+      isMuted.value = JSON.parse(savedMuted);
+    }
+  }
 
   // 如果當前是首頁，顯示語音控制
   if (process.client) {
