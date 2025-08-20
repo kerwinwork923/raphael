@@ -1,14 +1,14 @@
 <template>
-  <div class="chat-wrapper">
+  <div class="chat-wrapper" >
     <!-- 聊天頭部 -->
     <div class="chat-header">
       <div class="avatar-container" @click="showCharacterModal">
         <img class="avatar" :src="currentCharacter.avatar" alt="角色頭像" />
       </div>
-             <div class="character-name-btn" @click="showCharacterModal">
-         <span>{{ currentCharacter.customName || currentCharacter.name }}</span>
-         <img :src="recycleSvg" alt="刷新" />
-       </div>
+      <div class="character-name-btn" @click="showCharacterModal">
+        <span>{{ currentCharacter.customName || currentCharacter.name }}</span>
+        <img :src="recycleSvg" alt="刷新" />
+      </div>
     </div>
 
     <!-- 初始對話氣泡 -->
@@ -58,23 +58,28 @@
       </div>
     </transition>
 
-    <!-- 文字輸入區域 -->
-    <transition name="slide-up">
-      <div v-if="showTextInput" class="text-input-section">
-        <div class="input-container">
-          <input
-            v-model="textInput"
-            class="text-input"
-            placeholder="請輸入文字"
-            @keypress.enter="handleManualInput"
-            ref="textInputRef"
-          />
-          <button class="send-btn" @click="handleManualInput">
-            <span>📤</span>
-          </button>
-        </div>
-      </div>
-    </transition>
+<!-- 文字輸入區域 -->
+<transition name="slide-up">
+  <div
+    v-if="showTextInput && !isListening && !showVoiceError"
+    class="text-input-section"
+    v-click-outside="closeTextInput"
+  >
+    <div class="input-container" @click.stop>
+      <input
+        v-model="textInput"
+        class="text-input"
+        placeholder="請輸入文字"
+        @keypress.enter="handleManualInput"
+        ref="textInputRef"
+      />
+      <button class="send-btn" @click="textInput.trim() ? handleManualInput() : toggleListening()">
+        <img :src="textInput.trim() ? '/_nuxt/assets/imgs/robot/send.svg' : soundSvg" :alt="textInput.trim() ? '送出' : '語音'" />
+      </button>
+    </div>
+  </div>
+</transition>
+
 
     <!-- 當前語音輸入顯示 -->
     <transition name="fade">
@@ -94,7 +99,7 @@
       <div
         v-if="isListening || showVoiceError"
         class="voice-modal"
-        @click="closeVoiceModal"
+       
       >
         <div class="voice-content" @click.stop>
           <img
@@ -109,6 +114,12 @@
           <p v-else-if="currentTranscript" class="transcript-text">
             {{ currentTranscript }}
           </p>
+          <div class="voiceModelClose" v-if="!isListening" @click="closeVoiceModal">
+            <div class="voiceModelImg">
+              <img src="/assets/imgs/robot/close_red.svg" alt="關閉" />
+            </div>
+           
+          </div>
         </div>
       </div>
     </transition>
@@ -245,7 +256,12 @@
                 class="search-icon"
               />
             </transition>
-            <img :src="calendarSvg" alt="日曆" class="calendar-icon" @click="toggleCalendar" />
+            <img
+              :src="calendarSvg"
+              alt="日曆"
+              class="calendar-icon"
+              @click="toggleCalendar"
+            />
           </div>
 
           <!-- 搜尋欄位（覆蓋整列）-->
@@ -271,14 +287,11 @@
           </transition>
         </div>
 
-        <div class="history-content" ref="historyScrollContainer" @scroll="handleHistoryScroll">
-          <!-- Sticky 日期標籤 -->
-          <transition name="fade">
-            <div v-if="showStickyHeader && stickyDateHeader" class="sticky-date-header">
-              {{ stickyDateHeader }}
-            </div>
-          </transition>
-          
+        <div
+          class="history-content"
+          ref="historyScrollContainer"
+          @scroll="handleHistoryScroll"
+        >
           <!-- 載入更舊訊息指示器 -->
           <transition name="fade">
             <div v-if="isLoadingOlderMessages" class="loading-older-messages">
@@ -286,7 +299,7 @@
               <span>載入更舊的訊息...</span>
             </div>
           </transition>
-          
+
           <!-- 一般歷史記錄 -->
           <transition name="fade">
             <div v-if="!showSearch || searchQuery === ''" class="history-list">
@@ -302,18 +315,20 @@
                   class="history-message"
                   :id="`message-${item.id}`"
                 >
+                  <div class="message user">
+                    <div class="bubble">
+                      {{ item.user }}
+                      <div class="time">{{ formatTime(item.timestamp) }}</div>
+                    </div>
+                  </div>
+
                   <div class="message bot">
                     <div class="avatar">
                       <img :src="currentCharacter.avatar" alt="角色頭像" />
                     </div>
+
                     <div class="bubble">
                       {{ item.bot }}
-                      <div class="time">{{ formatTime(item.timestamp) }}</div>
-                    </div>
-                  </div>
-                  <div class="message user">
-                    <div class="bubble">
-                      {{ item.user }}
                       <div class="time">{{ formatTime(item.timestamp) }}</div>
                     </div>
                   </div>
@@ -347,6 +362,16 @@
                     }}</span>
                   </div>
                   <div class="result-messages">
+                    <div class="message-preview user-message">
+                      <div class="bubble">
+                        <span
+                          v-html="highlightKeyword(result.user, searchQuery)"
+                        ></span>
+                        <div class="time">
+                          {{ formatTime(result.timestamp) }}
+                        </div>
+                      </div>
+                    </div>
                     <div class="message-preview bot-message">
                       <div class="avatar">
                         <img :src="currentCharacter.avatar" alt="角色頭像" />
@@ -354,16 +379,6 @@
                       <div class="bubble">
                         <span
                           v-html="highlightKeyword(result.bot, searchQuery)"
-                        ></span>
-                        <div class="time">
-                          {{ formatTime(result.timestamp) }}
-                        </div>
-                      </div>
-                    </div>
-                    <div class="message-preview user-message">
-                      <div class="bubble">
-                        <span
-                          v-html="highlightKeyword(result.user, searchQuery)"
                         ></span>
                         <div class="time">
                           {{ formatTime(result.timestamp) }}
@@ -393,7 +408,11 @@
 
     <!-- 角色名稱輸入彈窗 -->
     <transition name="fade">
-      <div v-if="showNameInput" class="name-input-overlay" @click="closeNameInput">
+      <div
+        v-if="showNameInput"
+        class="name-input-overlay"
+        @click="closeNameInput"
+      >
         <div class="name-input-modal" @click.stop>
           <h3 class="name-input-title">幫角色取一個名字吧</h3>
           <input
@@ -420,7 +439,7 @@
     </transition>
 
     <!-- 日曆選擇彈窗 -->
-    <transition name="fade">
+    <transition name="calendar-expand">
       <div v-if="showCalendar" class="calendar-overlay" @click="toggleCalendar">
         <div class="calendar-modal" @click.stop>
           <div class="calendar-header">
@@ -433,18 +452,21 @@
             />
           </div>
           <div class="calendar-content">
-            <div class="calendar-dates">
-              <div
-                v-for="date in calendarDatesWithHistory"
-                :key="date"
-                class="calendar-date-item"
-                :class="{ selected: selectedDate === date }"
-                @click="selectCalendarDate(date)"
-              >
-                {{ formatDate(date) }}
-              </div>
-            </div>
-            <div v-if="calendarDatesWithHistory.length === 0" class="no-dates">
+            <VueDatePicker
+              v-model="selectedDates"
+              multi-dates
+              teleport="body"
+              cancel-text="取消"
+              select-text="確定"
+              :locale="'zh-TW'"
+              no-today
+              :enable-time-picker="false"
+              @update:modelValue="handleDateChange"
+              :disabled-dates="isDateDisabled"
+              class="calendar-datepicker"
+            />
+
+            <div v-if="calendarDateKeySet.size === 0" class="no-dates">
               暫無聊天記錄
             </div>
           </div>
@@ -532,6 +554,8 @@
   position: relative;
 
   min-height: 120px;
+  max-height: 250px;
+
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -579,7 +603,7 @@
   position: absolute;
   right: 0;
   top: 110%;
-
+  z-index: 2;
   cursor: pointer;
 
   transition: all 0.3s ease;
@@ -726,7 +750,7 @@
   padding: 0 20px;
   margin-bottom: 20px;
   position: fixed;
-  bottom: 15%;
+  bottom: 27.5%;
   left: 50%;
   transform: translateX(-50%);
   width: 90%;
@@ -735,12 +759,11 @@
   .input-container {
     display: flex;
     align-items: center;
-    background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
-    border-radius: 30px;
-    padding: 16px 20px;
-    box-shadow: 8px 8px 16px rgba(163, 177, 198, 0.6),
-      -8px -8px 16px rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: var(--Radius-r-20, 20px);
+    border: 1px solid var(--Neutral-white, #fff);
+    background: rgba(245, 247, 250, 0.65);
+    backdrop-filter: blur(22px);
+    padding: 8px 16px;
 
     .text-input {
       flex: 1;
@@ -757,8 +780,6 @@
     }
 
     .send-btn {
-      background: linear-gradient(145deg, #22c55e, #16a34a);
-      border: none;
       border-radius: 50%;
       width: 45px;
       height: 45px;
@@ -768,8 +789,15 @@
       cursor: pointer;
       color: white;
       font-size: 18px;
-      box-shadow: 4px 4px 8px rgba(34, 197, 94, 0.3),
-        -4px -4px 8px rgba(255, 255, 255, 0.8);
+      border-radius: var(--Radius-r-50, 50px);
+      background: linear-gradient(
+        90deg,
+        var(--primary-400-opacity-70, rgba(116, 188, 31, 0.7)) 0%,
+        var(--Primary-default, #74bc1f) 100%
+      );
+      box-shadow: 0 2px 8px 0
+        var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+      border: none;
       transition: all 0.3s ease;
 
       &:hover {
@@ -800,6 +828,27 @@
     max-width: 300px;
     border: 1px solid rgba(255, 255, 255, 0.3);
   }
+}
+.voiceModelClose{
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 12.5%;
+
+  padding: 4px;
+  border-radius: var(--Radius-r-50, 50px);
+background: var(--Secondary-100, #F5F7FA);
+box-shadow: 0 2px 8px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.40));
+margin-top: 8px;
+
+.voiceModelImg{
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--Warning-default, #EC4F4F);
+  border-radius: 50%;
+  padding: 2px;
+  display: flex;align-items: center;justify-content: center;
+}
 }
 
 @keyframes spin {
@@ -833,12 +882,14 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    
 
     .voice-wave {
       width: 90px;
       height: 90px;
       object-fit: contain;
       animation: pulse-wave 1.6s infinite ease-in-out;
+     
     }
 
     .voice-text {
@@ -1236,22 +1287,6 @@
         }
       }
     }
-  }
-
-  // Sticky 日期標籤
-  .sticky-date-header {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    padding: 12px 20px;
-    text-align: center;
-    font-size: 14px;
-    color: #718096;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    margin: 0 -20px 20px -20px;
   }
 
   // 載入更舊訊息指示器
@@ -1878,7 +1913,11 @@
       }
 
       &.name-input-confirm {
-        background: linear-gradient(145deg, var(--Primary-default, #74bc1f), #5a9a17);
+        background: linear-gradient(
+          145deg,
+          var(--Primary-default, #74bc1f),
+          #5a9a17
+        );
         color: white;
         box-shadow: 4px 4px 8px rgba(116, 188, 31, 0.3),
           -4px -4px 8px rgba(255, 255, 255, 0.8);
@@ -1906,6 +1945,28 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+// 日曆展開動畫
+.calendar-expand-enter-active,
+.calendar-expand-leave-active {
+  transition: all 0.3s ease;
+}
+
+.calendar-expand-enter-from {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.calendar-expand-leave-to {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.calendar-expand-enter-to,
+.calendar-expand-leave-from {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .calendar-modal {
@@ -1949,35 +2010,54 @@
   }
 
   .calendar-content {
-    .calendar-dates {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+    .calendar-datepicker {
+      width: 100%;
 
-      .calendar-date-item {
-        padding: 12px 16px;
-        border-radius: 12px;
+      :deep(.dp__main) {
         background: var(--Secondary-100, #f5f7fa);
+        border-radius: 12px;
         box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6),
           inset -4px -4px 8px rgba(255, 255, 255, 0.8);
-        font-size: 14px;
-        color: #2d3748;
-        cursor: pointer;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+
+      :deep(.dp__calendar_header) {
+        background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
+        border-radius: 8px 8px 0 0;
+      }
+
+      :deep(.dp__calendar) {
+        background: transparent;
+      }
+
+      :deep(.dp__cell_inner) {
+        background: var(--Secondary-100, #f5f7fa);
+        border-radius: 8px;
         transition: all 0.3s ease;
-        text-align: center;
 
-        &:hover {
-          transform: translateY(-2px);
-          box-shadow: 4px 4px 8px rgba(163, 177, 198, 0.6),
-            -4px -4px 8px rgba(255, 255, 255, 0.8);
-        }
-
-        &.selected {
-          background: linear-gradient(145deg, var(--Primary-default, #74bc1f), #5a9a17);
+        &:hover:not(.dp__disabled) {
+          background: linear-gradient(
+            145deg,
+            var(--Primary-default, #74bc1f),
+            #5a9a17
+          );
           color: white;
-          box-shadow: 4px 4px 8px rgba(116, 188, 31, 0.3),
-            -4px -4px 8px rgba(255, 255, 255, 0.8);
+          transform: translateY(-1px);
         }
+      }
+
+      :deep(.dp__active) {
+        background: linear-gradient(
+          145deg,
+          var(--Primary-default, #74bc1f),
+          #5a9a17
+        ) !important;
+        color: white !important;
+      }
+
+      :deep(.dp__disabled) {
+        opacity: 0.3;
+        cursor: not-allowed;
       }
     }
 
@@ -1995,6 +2075,8 @@
 import { ref, onMounted, onUnmounted, computed, nextTick } from "vue";
 import { useHead } from "#app";
 import BottomNav from "~/components/BottomNav.vue";
+import VueDatePicker from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
 // 移除import，改用動態路徑
 import recycleSvg from "~/assets/imgs/robot/recycle.svg";
 import timeSvg from "~/assets/imgs/robot/time.svg";
@@ -2076,7 +2158,6 @@ const searchResults = ref([]); // 搜尋結果
 const showCharacterSelection = ref(false); // 顯示角色選擇彈窗
 const isStyleExpanded = ref(false); // 造型是否展開
 
-
 // 角色命名相關狀態
 const showNameInput = ref(false); // 顯示名稱輸入彈窗
 const characterNameInput = ref(""); // 角色名稱輸入
@@ -2086,8 +2167,7 @@ const nameInputError = ref(""); // 名稱輸入錯誤訊息
 const historyScrollContainer = ref(null);
 const isScrolling = ref(false);
 const scrollTimeout = ref(null);
-const stickyDateHeader = ref("");
-const showStickyHeader = ref(false);
+
 const isLoadingOlderMessages = ref(false);
 const hasMoreMessages = ref(true);
 const currentPage = ref(1);
@@ -2095,8 +2175,10 @@ const messagesPerPage = ref(20);
 
 // 日曆相關
 const showCalendar = ref(false);
-const selectedDate = ref(null);
+const selectedDates = ref([]);
 const calendarDatesWithHistory = ref([]);
+const today = new Date();
+const endOfNextMonth = new Date(today.getFullYear(), today.getMonth() + 2, 0);
 
 // 角色數據
 const currentCharacter = ref({
@@ -2110,8 +2192,8 @@ const currentCharacter = ref({
   voiceSettings: {
     rate: 0.9,
     pitch: 0.85,
-    volume: 1
-  }
+    volume: 1,
+  },
 });
 
 const availableCharacters = ref([
@@ -2125,7 +2207,7 @@ const availableCharacters = ref([
     voiceSettings: {
       rate: 0.9,
       pitch: 0.85,
-      volume: 1
+      volume: 1,
     },
     styles: [
       { id: 1, thumbnail: doctor, fullImage: doctor },
@@ -2146,7 +2228,7 @@ const availableCharacters = ref([
     voiceSettings: {
       rate: 0.95,
       pitch: 0.9,
-      volume: 1
+      volume: 1,
     },
     styles: [
       { id: 1, thumbnail: girl1_1, fullImage: girl1_1 },
@@ -2164,7 +2246,7 @@ const availableCharacters = ref([
     voiceSettings: {
       rate: 0.9,
       pitch: 0.8,
-      volume: 1
+      volume: 1,
     },
     styles: [
       { id: 1, thumbnail: girl2_1, fullImage: girl2_1 },
@@ -2181,7 +2263,7 @@ const availableCharacters = ref([
     voiceSettings: {
       rate: 0.95,
       pitch: 0.85,
-      volume: 1
+      volume: 1,
     },
     styles: [
       { id: 1, thumbnail: girl3_1, fullImage: girl3_1 },
@@ -2198,7 +2280,7 @@ const availableCharacters = ref([
     voiceSettings: {
       rate: 0.9,
       pitch: 0.9,
-      volume: 1
+      volume: 1,
     },
     styles: [
       { id: 1, thumbnail: girl4_1, fullImage: girl4_1 },
@@ -2215,7 +2297,7 @@ const availableCharacters = ref([
     voiceSettings: {
       rate: 0.95,
       pitch: 0.8,
-      volume: 1
+      volume: 1,
     },
     styles: [
       { id: 1, thumbnail: girl5_1, fullImage: girl5_1 },
@@ -2232,7 +2314,7 @@ const availableCharacters = ref([
     voiceSettings: {
       rate: 0.85,
       pitch: 0.7,
-      volume: 1
+      volume: 1,
     },
     styles: [
       { id: 1, thumbnail: man1_1, fullImage: man1_1 },
@@ -2249,7 +2331,7 @@ const availableCharacters = ref([
     voiceSettings: {
       rate: 0.9,
       pitch: 0.75,
-      volume: 1
+      volume: 1,
     },
     styles: [
       { id: 1, thumbnail: man2_1, fullImage: man2_1 },
@@ -2266,7 +2348,7 @@ const availableCharacters = ref([
     voiceSettings: {
       rate: 0.85,
       pitch: 0.8,
-      volume: 1
+      volume: 1,
     },
     styles: [
       { id: 1, thumbnail: man3_1, fullImage: man3_1 },
@@ -2284,7 +2366,7 @@ const availableCharacters = ref([
     voiceSettings: {
       rate: 0.9,
       pitch: 0.7,
-      volume: 1
+      volume: 1,
     },
     styles: [
       { id: 1, thumbnail: man4_1, fullImage: man4_1 },
@@ -2301,7 +2383,7 @@ const availableCharacters = ref([
     voiceSettings: {
       rate: 0.85,
       pitch: 0.75,
-      volume: 1
+      volume: 1,
     },
     styles: [
       { id: 1, thumbnail: man5_1, fullImage: man5_1 },
@@ -2318,7 +2400,7 @@ const availableCharacters = ref([
     voiceSettings: {
       rate: 0.9,
       pitch: 0.8,
-      volume: 1
+      volume: 1,
     },
     styles: [
       { id: 1, thumbnail: man6_1, fullImage: man6_1 },
@@ -2336,7 +2418,7 @@ const availableCharacters = ref([
     voiceSettings: {
       rate: 1.1,
       pitch: 1.2,
-      volume: 1
+      volume: 1,
     },
     styles: [
       { id: 1, thumbnail: pet1_1, fullImage: pet1_1 },
@@ -2353,7 +2435,7 @@ const availableCharacters = ref([
     voiceSettings: {
       rate: 1.0,
       pitch: 1.1,
-      volume: 1
+      volume: 1,
     },
     styles: [
       { id: 1, thumbnail: pet2_1, fullImage: pet2_1 },
@@ -2370,7 +2452,7 @@ const availableCharacters = ref([
     voiceSettings: {
       rate: 1.2,
       pitch: 1.3,
-      volume: 1
+      volume: 1,
     },
     styles: [
       { id: 1, thumbnail: pet3_1, fullImage: pet3_1 },
@@ -2387,7 +2469,7 @@ const availableCharacters = ref([
     voiceSettings: {
       rate: 1.0,
       pitch: 1.0,
-      volume: 1
+      volume: 1,
     },
     styles: [
       { id: 1, thumbnail: pet4_1, fullImage: pet4_1 },
@@ -2417,13 +2499,20 @@ let synthRef = null;
 // 計算屬性：按日期分組的歷史記錄（升冪排列，最舊的在前面）
 const groupedHistory = computed(() => {
   const groups = {};
-  
+
   // 計算要顯示的對話數量（分頁）- 從最新的開始顯示
   const totalMessages = conversations.value.length;
-  const startIndex = Math.max(0, totalMessages - (currentPage.value * messagesPerPage.value));
-  const endIndex = totalMessages - ((currentPage.value - 1) * messagesPerPage.value);
-  const displayedConversations = conversations.value.slice(startIndex, endIndex);
-  
+  const startIndex = Math.max(
+    0,
+    totalMessages - currentPage.value * messagesPerPage.value
+  );
+  const endIndex =
+    totalMessages - (currentPage.value - 1) * messagesPerPage.value;
+  const displayedConversations = conversations.value.slice(
+    startIndex,
+    endIndex
+  );
+
   displayedConversations.forEach((item) => {
     const date = item.timestamp.split(" ")[0];
     if (!groups[date]) {
@@ -2431,24 +2520,20 @@ const groupedHistory = computed(() => {
     }
     groups[date].push(item);
   });
-  
-  // 對每個日期組內的對話按時間排序（最舊的在前面）
-  Object.keys(groups).forEach(date => {
-    groups[date].sort((a, b) => {
-      const timeA = new Date(a.timestamp);
-      const timeB = new Date(b.timestamp);
-      return timeA - timeB;
-    });
+
+  // 對每個日期組內的對話按時間排序（最新的在前面）
+  Object.keys(groups).forEach((date) => {
+    groups[date].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
   });
-  
+
   // 按日期升冪排序（最舊的日期在前面）
   const sortedGroups = {};
   Object.keys(groups)
     .sort((a, b) => new Date(a) - new Date(b))
-    .forEach(date => {
+    .forEach((date) => {
       sortedGroups[date] = groups[date];
     });
-  
+
   return sortedGroups;
 });
 
@@ -2489,7 +2574,7 @@ const showHistory = () => {
     // 重置分頁狀態
     currentPage.value = 1;
     hasMoreMessages.value = conversations.value.length > messagesPerPage.value;
-    
+
     // 等待頁面渲染完成後滾動到底部
     nextTick(() => {
       setTimeout(() => {
@@ -2508,65 +2593,71 @@ const closeHistory = () => {
     searchResults.value = [];
     // 重置分頁和滾動狀態
     currentPage.value = 1;
-    showStickyHeader.value = false;
-    stickyDateHeader.value = "";
   }
+};
+
+const closeTextInput = () => {
+ 
+    showTextInput.value = false;
+ 
 };
 
 // 處理歷史記錄滾動事件
 const handleHistoryScroll = () => {
   if (!historyScrollContainer.value) return;
-  
+
   const container = historyScrollContainer.value;
   const scrollTop = container.scrollTop;
   const scrollHeight = container.scrollHeight;
   const clientHeight = container.clientHeight;
-  
+
   // 檢查是否滾動到頂部（載入更舊訊息）
-  if (scrollTop < 100 && !isLoadingOlderMessages.value && hasMoreMessages.value) {
+  if (
+    scrollTop < 100 &&
+    !isLoadingOlderMessages.value &&
+    hasMoreMessages.value
+  ) {
     loadOlderMessages();
   }
-  
+
   // 更新 sticky header
   updateStickyHeader();
-  
+
   // 設置滾動狀態
   isScrolling.value = true;
-  showStickyHeader.value = true;
-  
+
   // 清除之前的計時器
   if (scrollTimeout.value) {
     clearTimeout(scrollTimeout.value);
   }
-  
+
   // 設置新的計時器（1.5秒後隱藏 sticky header）
   scrollTimeout.value = setTimeout(() => {
     isScrolling.value = false;
-    showStickyHeader.value = false;
   }, 1500);
 };
 
 // 載入更舊的訊息
 const loadOlderMessages = () => {
   if (isLoadingOlderMessages.value || !hasMoreMessages.value) return;
-  
+
   isLoadingOlderMessages.value = true;
-  
+
   // 模擬載入延遲
   setTimeout(() => {
     const oldPage = currentPage.value;
     currentPage.value++;
-    
+
     // 檢查是否還有更多訊息
     const totalMessages = conversations.value.length;
     const currentMessages = currentPage.value * messagesPerPage.value;
-    
+
     if (currentMessages >= totalMessages) {
       hasMoreMessages.value = false;
     }
-    
+
     isLoadingOlderMessages.value = false;
-    
+
     // 保持滾動位置
     nextTick(() => {
       if (historyScrollContainer.value) {
@@ -2583,27 +2674,23 @@ const loadOlderMessages = () => {
 // 更新 sticky header 日期
 const updateStickyHeader = () => {
   if (!historyScrollContainer.value) return;
-  
+
   const container = historyScrollContainer.value;
   const scrollTop = container.scrollTop;
-  
+
   // 找到當前可見的第一個日期分隔器
-  const dateSeparators = container.querySelectorAll('.date-separator');
+  const dateSeparators = container.querySelectorAll(".date-separator");
   let currentDate = "";
-  
+
   for (let i = 0; i < dateSeparators.length; i++) {
     const separator = dateSeparators[i];
     const rect = separator.getBoundingClientRect();
     const containerRect = container.getBoundingClientRect();
-    
+
     if (rect.top >= containerRect.top) {
       currentDate = separator.textContent;
       break;
     }
-  }
-  
-  if (currentDate && currentDate !== stickyDateHeader.value) {
-    stickyDateHeader.value = currentDate;
   }
 };
 
@@ -2630,47 +2717,68 @@ const toggleCalendar = () => {
 // 載入日曆中有聊天記錄的日期
 const loadCalendarDates = () => {
   if (process.client) {
-    const dates = new Set();
-    conversations.value.forEach(conversation => {
-      const date = conversation.timestamp.split(" ")[0];
-      dates.add(date);
+    // 清空現有數據
+    calendarDateKeySet.value.clear();
+
+    // 從對話記錄中提取日期
+    conversations.value.forEach((conversation) => {
+      const dateKey = toDateKey(conversation.timestamp);
+      calendarDateKeySet.value.add(dateKey);
     });
-    calendarDatesWithHistory.value = Array.from(dates).sort();
+
+    // 更新 calendarDatesWithHistory 以保持向後兼容
+    calendarDatesWithHistory.value = Array.from(
+      calendarDateKeySet.value
+    ).sort();
+
+    console.log("載入的日期:", Array.from(calendarDateKeySet.value));
   }
 };
 
-// 選擇日曆日期
-const selectCalendarDate = (date) => {
-  if (process.client) {
-    selectedDate.value = date;
-    showCalendar.value = false;
-    
+// 處理日期選擇變更
+const handleDateChange = (dates) => {
+  if (process.client && dates && dates.length > 0) {
+    const selectedDate = dates[0];
+    const dateStr = selectedDate.toISOString().split("T")[0];
+
     // 找到該日期的訊息並滾動到位置
-    const targetMessage = conversations.value.find(conversation => 
-      conversation.timestamp.startsWith(date)
+    const targetMessage = conversations.value.find((conversation) =>
+      conversation.timestamp.startsWith(dateStr)
     );
-    
+
     if (targetMessage) {
       // 計算該訊息應該在哪一頁
-      const messageIndex = conversations.value.findIndex(c => c.id === targetMessage.id);
+      const messageIndex = conversations.value.findIndex(
+        (c) => c.id === targetMessage.id
+      );
       const targetPage = Math.floor(messageIndex / messagesPerPage.value) + 1;
-      
+
       if (targetPage !== currentPage.value) {
         currentPage.value = targetPage;
       }
-      
+
       // 滾動到該訊息
       nextTick(() => {
-        const messageElement = document.getElementById(`message-${targetMessage.id}`);
+        const messageElement = document.getElementById(
+          `message-${targetMessage.id}`
+        );
         if (messageElement) {
           messageElement.scrollIntoView({
             behavior: "smooth",
-            block: "start"
+            block: "start",
           });
         }
       });
     }
+
+    showCalendar.value = false;
   }
+};
+
+// 檢查日期是否有聊天記錄
+const isDateDisabled = (date) => {
+  const dateStr = date.toISOString().split("T")[0];
+  return !calendarDateKeySet.value.has(dateStr);
 };
 
 // 切換搜尋功能
@@ -2910,7 +3018,10 @@ const toggleListening = () => {
   if (!recognitionRef) {
     if (process.client && typeof window !== "undefined") {
       // 檢查是否為 HTTPS 或 localhost
-      if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+      if (
+        window.location.protocol !== "https:" &&
+        window.location.hostname !== "localhost"
+      ) {
         alert("語音功能需要 HTTPS 連接，請使用安全連接");
         return;
       }
@@ -2984,11 +3095,13 @@ const handleSpeechEnd = async (transcript) => {
     }
 
     const newConversation = {
-      id: Date.now(),
-      user: transcript,
-      bot: botResponse,
-      timestamp: new Date().toLocaleString("zh-TW"),
-    };
+  id: Date.now(),
+  user: input, 
+  bot: botResponse,
+  timestamp: now.toLocaleString("zh-TW"),
+  dateKey: toDateKey(now),
+};
+
 
     conversations.value.push(newConversation);
     saveConversations();
@@ -3035,17 +3148,32 @@ const speakText = (text) => {
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "zh-TW";
-    
+
     // 使用角色的自定義聲音設置
     const voiceSettings = currentCharacter.value.voiceSettings || {
       rate: 0.9,
       pitch: 0.85,
-      volume: 1
+      volume: 1,
     };
-    
+
     utterance.rate = voiceSettings.rate;
     utterance.pitch = voiceSettings.pitch;
     utterance.volume = voiceSettings.volume;
+
+    // iOS 預熱機制：先播放一個無聲的語音來激活 TTS
+    if (process.client && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+      const warmupUtterance = new SpeechSynthesisUtterance("");
+      warmupUtterance.lang = "zh-TW";
+      warmupUtterance.volume = 0;
+      synthRef.speak(warmupUtterance);
+
+      // 延遲一下再播放真正的語音
+      setTimeout(() => {
+        synthRef.speak(utterance);
+      }, 100);
+    } else {
+      synthRef.speak(utterance);
+    }
 
     const resumeHack = setInterval(() => {
       if (!synthRef || !process.client) return;
@@ -3134,16 +3262,23 @@ const toggleVolume = () => {
   if (process.client) {
     // 切換靜音狀態
     isMuted.value = !isMuted.value;
-    
+
     // 如果當前正在播放語音，立即停止
     if (synthRef && synthRef.speaking) {
       synthRef.cancel();
     }
-    
+
     // 保存靜音狀態到本地存儲
     localStorage.setItem("isMuted", JSON.stringify(isMuted.value));
-    
+
     console.log("音量控制切換:", isMuted.value ? "靜音" : "開啟");
+
+    // 如果從靜音切換到開啟，播放測試音
+    if (!isMuted.value) {
+      setTimeout(() => {
+        speakText("語音功能已開啟");
+      }, 500);
+    }
   }
 };
 
@@ -3193,11 +3328,13 @@ const handleManualInput = async () => {
       botResponse = "⚠️ 無法解析伺服器回應。";
     }
 
+    const now = new Date();
     const newConversation = {
       id: Date.now(),
-      user: input,
+      user: transcript, // 或 input（在 handleManualInput）
       bot: botResponse,
-      timestamp: new Date().toLocaleString("zh-TW"),
+      timestamp: now.toLocaleString("zh-TW"),
+      dateKey: toDateKey(now), // ★ 新增：快取日期key
     };
 
     conversations.value.push(newConversation);
@@ -3241,6 +3378,8 @@ const saveConversations = () => {
       "chatConversations",
       JSON.stringify(conversations.value)
     );
+    // 更新日曆數據
+    loadCalendarDates();
   }
 };
 
@@ -3253,8 +3392,11 @@ const loadConversations = () => {
         conversations.value = JSON.parse(saved);
         // 載入最新回覆
         if (conversations.value.length > 0) {
-          latestResponse.value = conversations.value[conversations.value.length - 1].bot;
+          latestResponse.value =
+            conversations.value[conversations.value.length - 1].bot;
         }
+        // 載入日曆數據
+        loadCalendarDates();
       } catch (e) {
         if (process.client) {
           console.error("載入對話記錄失敗:", e);
@@ -3272,11 +3414,26 @@ onMounted(() => {
     "speechSynthesis" in window
   ) {
     synthRef = window.speechSynthesis;
+
+    // 檢查語音合成支援
+    if (synthRef.getVoices().length === 0) {
+      synthRef.onvoiceschanged = () => {
+        const voices = synthRef.getVoices();
+        const chineseVoice = voices.find(
+          (voice) => voice.lang.includes("zh") || voice.lang.includes("cmn")
+        );
+        console.log(
+          "可用語音:",
+          voices.map((v) => `${v.name} (${v.lang})`)
+        );
+        console.log("中文語音:", chineseVoice);
+      };
+    }
   }
   initSpeechRecognition();
   loadConversations();
   loadSavedCharacter();
-  
+
   // 載入靜音狀態
   if (process.client) {
     const savedMuted = localStorage.getItem("isMuted");
@@ -3300,15 +3457,15 @@ const loadSavedCharacter = () => {
       try {
         const parsedCharacters = JSON.parse(savedCharacters);
         // 合併保存的數據與默認數據
-        availableCharacters.value = availableCharacters.value.map(char => {
-          const savedChar = parsedCharacters.find(c => c.id === char.id);
+        availableCharacters.value = availableCharacters.value.map((char) => {
+          const savedChar = parsedCharacters.find((c) => c.id === char.id);
           return savedChar ? { ...char, ...savedChar } : char;
         });
       } catch (e) {
         console.error("載入角色列表失敗:", e);
       }
     }
-    
+
     // 載入當前選擇的角色
     const saved = localStorage.getItem("selectedCharacter");
     if (saved) {
@@ -3318,10 +3475,13 @@ const loadSavedCharacter = () => {
           (c) => c.id === savedCharacter.id
         );
         if (foundCharacter) {
-          currentCharacter.value = { 
+          currentCharacter.value = {
             ...foundCharacter,
             ...savedCharacter,
-            customName: savedCharacter.customName || foundCharacter.customName || foundCharacter.displayName
+            customName:
+              savedCharacter.customName ||
+              foundCharacter.customName ||
+              foundCharacter.displayName,
           };
           characterImageSrc.value = savedCharacter.fullImage;
         }
@@ -3437,8 +3597,8 @@ const selectCharacter = (character) => {
       voiceSettings: character.voiceSettings || {
         rate: 0.9,
         pitch: 0.85,
-        volume: 1
-      }
+        volume: 1,
+      },
     };
     isStyleExpanded.value = false; // 切換角色時收起造型選擇
 
@@ -3472,7 +3632,10 @@ const confirmCharacterSelection = () => {
       JSON.stringify(currentCharacter.value)
     );
     // 可以添加成功提示或其他確認邏輯
-    console.log("角色選擇已確認:", currentCharacter.value.customName || currentCharacter.value.displayName);
+    console.log(
+      "角色選擇已確認:",
+      currentCharacter.value.customName || currentCharacter.value.displayName
+    );
     console.log("當前頭貼:", currentCharacter.value.avatar);
   }
 };
@@ -3480,7 +3643,8 @@ const confirmCharacterSelection = () => {
 // 角色名稱編輯相關函數
 const showNameInputModal = () => {
   if (process.client) {
-    characterNameInput.value = currentCharacter.value.customName || currentCharacter.value.displayName;
+    characterNameInput.value =
+      currentCharacter.value.customName || currentCharacter.value.displayName;
     nameInputError.value = "";
     showNameInput.value = true;
     nextTick(() => {
@@ -3502,28 +3666,28 @@ const closeNameInput = () => {
 const confirmNameInput = () => {
   if (process.client) {
     const name = characterNameInput.value.trim();
-    
+
     if (!name) {
       nameInputError.value = "角色不能沒有名字喔";
       return;
     }
-    
+
     if (name.length > 10) {
       nameInputError.value = "名字不能超過10個字";
       return;
     }
-    
+
     // 更新當前角色的自定義名稱
     currentCharacter.value.customName = name;
-    
+
     // 更新可用角色列表中的對應角色
     const characterIndex = availableCharacters.value.findIndex(
-      c => c.id === currentCharacter.value.id
+      (c) => c.id === currentCharacter.value.id
     );
     if (characterIndex !== -1) {
       availableCharacters.value[characterIndex].customName = name;
     }
-    
+
     // 保存到本地存儲
     localStorage.setItem(
       "selectedCharacter",
@@ -3533,9 +3697,34 @@ const confirmNameInput = () => {
       "availableCharacters",
       JSON.stringify(availableCharacters.value)
     );
-    
+
     closeNameInput();
     console.log("角色名稱已更新:", name);
   }
 };
+
+// --- 日期工具：統一成 YYYY-MM-DD ---
+const toDateKey = (input) => {
+  if (input instanceof Date) return input.toISOString().slice(0, 10);
+  // input 可能是 "2025/8/20 下午 2:20:33" → 取前半段日期、轉成 YYYY-MM-DD
+  const first = String(input).split(" ")[0]; // 2025/8/20
+  const [y, m, d] = first.split("/");
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${String(y).padStart(4, "0")}-${pad(m)}-${pad(d)}`;
+};
+
+// 有紀錄的日期集合（Set，比 array 包含查詢快）
+const calendarDateKeySet = ref(new Set());
+
+// 動態區間（可選）
+const minHistoryDate = computed(() => {
+  const arr = Array.from(calendarDateKeySet.value);
+  if (!arr.length) return undefined;
+  return new Date(arr.sort()[0]); // 最早
+});
+const maxHistoryDate = computed(() => {
+  const arr = Array.from(calendarDateKeySet.value);
+  if (!arr.length) return undefined;
+  return new Date(arr.sort().slice(-1)[0]); // 最晚
+});
 </script>
