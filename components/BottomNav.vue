@@ -8,10 +8,10 @@
       <div class="nav-icon">
         <img
           v-if="activeTab === 'services'"
-          src="/assets/imgs/robot/home-active.svg"
+          src="/assets/imgs/robot/service-active.svg"
           alt="我的服務"
         />
-        <img v-else src="/assets/imgs/robot/home.svg" alt="我的服務" />
+        <img v-else src="/assets/imgs/robot/service.svg" alt="我的服務" />
       </div>
       <span>我的服務</span>
     </div>

@@ -2,14 +2,13 @@
   <div class="chat-wrapper">
     <!-- 聊天頭部 -->
     <div class="chat-header">
-      <div class="avatar-container">
-        <img class="avatar" :src="doctorPng" alt="角色頭像" />
+      <div class="avatar-container" @click="showCharacterModal">
+        <img class="avatar" :src="currentCharacter.avatar" alt="角色頭像" />
       </div>
-      <div class="character-name-btn">
-        <span>角色姓名</span>
-
-        <img :src="recycleSvg" alt="刷新" />
-      </div>
+             <div class="character-name-btn" @click="showCharacterModal">
+         <span>{{ currentCharacter.customName || currentCharacter.name }}</span>
+         <img :src="recycleSvg" alt="刷新" />
+       </div>
     </div>
 
     <!-- 初始對話氣泡 -->
@@ -23,7 +22,7 @@
       </div>
       <div v-else class="greeting-text">嗨~~有什麼需要幫您</div>
       <button class="volume-control" @click="toggleVolume">
-        <img :src="volumeSvg" alt="音量" />
+        <img :src="isMuted ? mutedSvg : volumeSvg" alt="音量" />
       </button>
     </div>
 
@@ -130,12 +129,99 @@
       </div>
     </transition>
 
+    <!-- 角色選擇彈窗 -->
+    <transition name="fade">
+      <div
+        v-if="showCharacterSelection"
+        class="character-modal-overlay"
+        @click="closeCharacterModal"
+      >
+        <div class="character-modal" @click.stop>
+          <!-- 彈窗頭部 -->
+          <div class="character-modal-header">
+            <img
+              src="/_nuxt/assets/imgs/backArrow.svg"
+              @click="closeCharacterModal"
+              alt="返回"
+              class="back-arrow"
+            />
+            <h2 class="modal-title">切換角色</h2>
+          </div>
+
+          <!-- 當前選擇角色標籤 -->
+          <div class="current-character-tag">
+            <span
+              >{{ currentCharacter.customName || currentCharacter.displayName }}
+              <img
+                src="/assets/imgs/robot/edit_green.svg"
+                alt="編輯"
+                class="edit-icon"
+                @click="showNameInputModal"
+              />
+            </span>
+          </div>
+
+          <!-- 主要角色展示區域 -->
+          <div class="main-character-area">
+            <div class="character-display">
+              <img
+                :src="currentCharacter.fullImage"
+                alt="角色形象"
+                class="character-full-image"
+              />
+            </div>
+
+            <!-- 右側造型選擇 -->
+            <div class="style-selector">
+              <div class="style-header">
+                <span>更換造型</span>
+              </div>
+
+              <div class="style-grid" :class="{ expanded: isStyleExpanded }">
+                <div
+                  v-for="style in visibleStyles"
+                  :key="style.id"
+                  class="style-item"
+                  :class="{ active: currentCharacter.styleId === style.id }"
+                  @click="selectStyle(style)"
+                >
+                  <img :src="style.thumbnail" alt="造型" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 確定按鈕 -->
+          <button class="confirm-btn" @click="confirmCharacterSelection">
+            確定
+          </button>
+
+          <!-- 底部角色切換區域 -->
+          <div class="character-switch-area">
+            <div class="character-scroll-container">
+              <div
+                v-for="character in availableCharacters"
+                :key="character.id"
+                class="character-option"
+                :class="{ selected: currentCharacter.id === character.id }"
+                @click="selectCharacter(character)"
+              >
+                <div class="character-circle">
+                  <img :src="character.avatar" alt="角色" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+
     <!-- 歷史紀錄頁面 -->
     <transition name="slide-left">
       <div v-if="showHistoryPage" class="history-page">
         <div class="history-header">
           <img
-            src="/assets/imgs/backArrow.svg"
+            src="/_nuxt/assets/imgs/backArrow.svg"
             @click="closeHistory"
             alt="返回"
             class="back-arrow"
@@ -159,7 +245,7 @@
                 class="search-icon"
               />
             </transition>
-            <img :src="calendarSvg" alt="日曆" class="calendar-icon" />
+            <img :src="calendarSvg" alt="日曆" class="calendar-icon" @click="toggleCalendar" />
           </div>
 
           <!-- 搜尋欄位（覆蓋整列）-->
@@ -176,7 +262,7 @@
                 ref="searchInputRef"
               />
               <img
-                src="/assets/imgs/close.svg"
+                src="/_nuxt/assets/imgs/close.svg"
                 alt="關閉"
                 @click="toggleSearch"
                 class="close-search-icon"
@@ -185,7 +271,22 @@
           </transition>
         </div>
 
-        <div class="history-content">
+        <div class="history-content" ref="historyScrollContainer" @scroll="handleHistoryScroll">
+          <!-- Sticky 日期標籤 -->
+          <transition name="fade">
+            <div v-if="showStickyHeader && stickyDateHeader" class="sticky-date-header">
+              {{ stickyDateHeader }}
+            </div>
+          </transition>
+          
+          <!-- 載入更舊訊息指示器 -->
+          <transition name="fade">
+            <div v-if="isLoadingOlderMessages" class="loading-older-messages">
+              <div class="spinner"></div>
+              <span>載入更舊的訊息...</span>
+            </div>
+          </transition>
+          
           <!-- 一般歷史記錄 -->
           <transition name="fade">
             <div v-if="!showSearch || searchQuery === ''" class="history-list">
@@ -203,7 +304,7 @@
                 >
                   <div class="message bot">
                     <div class="avatar">
-                      <img :src="doctorPng" alt="角色頭像" />
+                      <img :src="currentCharacter.avatar" alt="角色頭像" />
                     </div>
                     <div class="bubble">
                       {{ item.bot }}
@@ -238,23 +339,35 @@
               >
                 <div class="result-content">
                   <div class="result-title">
-                    <span class="user-name">{{ result.userName || '用戶' }}</span>
-                    <span class="result-date">{{ formatDate(result.timestamp.split(' ')[0]) }}</span>
+                    <span class="user-name">{{
+                      result.userName || "用戶"
+                    }}</span>
+                    <span class="result-date">{{
+                      formatDate(result.timestamp.split(" ")[0])
+                    }}</span>
                   </div>
                   <div class="result-messages">
                     <div class="message-preview bot-message">
                       <div class="avatar">
-                        <img :src="doctorPng" alt="角色頭像" />
+                        <img :src="currentCharacter.avatar" alt="角色頭像" />
                       </div>
                       <div class="bubble">
-                        <span v-html="highlightKeyword(result.bot, searchQuery)"></span>
-                        <div class="time">{{ formatTime(result.timestamp) }}</div>
+                        <span
+                          v-html="highlightKeyword(result.bot, searchQuery)"
+                        ></span>
+                        <div class="time">
+                          {{ formatTime(result.timestamp) }}
+                        </div>
                       </div>
                     </div>
                     <div class="message-preview user-message">
                       <div class="bubble">
-                        <span v-html="highlightKeyword(result.user, searchQuery)"></span>
-                        <div class="time">{{ formatTime(result.timestamp) }}</div>
+                        <span
+                          v-html="highlightKeyword(result.user, searchQuery)"
+                        ></span>
+                        <div class="time">
+                          {{ formatTime(result.timestamp) }}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -274,6 +387,67 @@
               </div>
             </div>
           </transition>
+        </div>
+      </div>
+    </transition>
+
+    <!-- 角色名稱輸入彈窗 -->
+    <transition name="fade">
+      <div v-if="showNameInput" class="name-input-overlay" @click="closeNameInput">
+        <div class="name-input-modal" @click.stop>
+          <h3 class="name-input-title">幫角色取一個名字吧</h3>
+          <input
+            v-model="characterNameInput"
+            type="text"
+            class="name-input-field"
+            placeholder="請輸入角色名稱"
+            @keyup.enter="confirmNameInput"
+            ref="nameInputRef"
+          />
+          <div v-if="nameInputError" class="name-input-error">
+            {{ nameInputError }}
+          </div>
+          <div class="name-input-buttons">
+            <button class="name-input-cancel" @click="closeNameInput">
+              取消
+            </button>
+            <button class="name-input-confirm" @click="confirmNameInput">
+              確定
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <!-- 日曆選擇彈窗 -->
+    <transition name="fade">
+      <div v-if="showCalendar" class="calendar-overlay" @click="toggleCalendar">
+        <div class="calendar-modal" @click.stop>
+          <div class="calendar-header">
+            <h3 class="calendar-title">選擇日期</h3>
+            <img
+              src="/_nuxt/assets/imgs/close.svg"
+              alt="關閉"
+              @click="toggleCalendar"
+              class="calendar-close"
+            />
+          </div>
+          <div class="calendar-content">
+            <div class="calendar-dates">
+              <div
+                v-for="date in calendarDatesWithHistory"
+                :key="date"
+                class="calendar-date-item"
+                :class="{ selected: selectedDate === date }"
+                @click="selectCalendarDate(date)"
+              >
+                {{ formatDate(date) }}
+              </div>
+            </div>
+            <div v-if="calendarDatesWithHistory.length === 0" class="no-dates">
+              暫無聊天記錄
+            </div>
+          </div>
         </div>
       </div>
     </transition>
@@ -871,13 +1045,14 @@
     display: flex;
     align-items: center;
 
-
     padding: 12px 16px;
     border-radius: var(--Radius-r-16, 16px);
-    background: var(--Secondary-100, #F5F7FA);
-    box-shadow: -4px -4px 6px 0 var(--Neutral-white, #FFF) inset, 4px 4px 6px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.40)) inset;
+    background: var(--Secondary-100, #f5f7fa);
+    box-shadow: -4px -4px 6px 0 var(--Neutral-white, #fff) inset,
+      4px 4px 6px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4))
+        inset;
     transform-origin: right center;
-    
+
     .search-input-icon {
       width: 20px;
       height: 20px;
@@ -971,8 +1146,9 @@
         margin-bottom: 20px;
         padding: 8px 16px;
         border-radius: var(--Radius-r-20, 20px);
-        background: var(--Secondary-100, #F5F7FA);
-        box-shadow: 0 0 6px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.40));
+        background: var(--Secondary-100, #f5f7fa);
+        box-shadow: 0 0 6px 0
+          var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
         display: inline-block;
         margin-left: 50%;
         transform: translateX(-50%);
@@ -1033,9 +1209,8 @@
                 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
               color: white;
               width: 250px;
-              
             }
-       
+
             .time {
               color: white;
             }
@@ -1048,7 +1223,6 @@
             line-height: 1.4;
             word-break: break-word;
             position: relative;
-       
           }
 
           .time {
@@ -1061,6 +1235,42 @@
           }
         }
       }
+    }
+  }
+
+  // Sticky 日期標籤
+  .sticky-date-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 12px 20px;
+    text-align: center;
+    font-size: 14px;
+    color: #718096;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin: 0 -20px 20px -20px;
+  }
+
+  // 載入更舊訊息指示器
+  .loading-older-messages {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: #718096;
+    font-size: 14px;
+    gap: 8px;
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #e2e8f0;
+      border-top: 2px solid #74bc1f;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
     }
   }
 }
@@ -1130,23 +1340,26 @@
     margin: 12px 20px;
     padding: 16px;
     border-radius: 16px;
-    background: var(--Secondary-100, #F5F7FA);
-    box-shadow: -4px -4px 6px 0 var(--Neutral-white, #FFF) inset, 
-                4px 4px 6px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.40)) inset;
+    background: var(--Secondary-100, #f5f7fa);
+    box-shadow: -4px -4px 6px 0 var(--Neutral-white, #fff) inset,
+      4px 4px 6px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4))
+        inset;
     cursor: pointer;
     transition: all 0.3s ease;
     border: 1px solid rgba(255, 255, 255, 0.3);
 
     &:hover {
       transform: translateY(-2px);
-      box-shadow: -6px -6px 8px 0 var(--Neutral-white, #FFF) inset, 
-                  6px 6px 8px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.40)) inset;
+      box-shadow: -6px -6px 8px 0 var(--Neutral-white, #fff) inset,
+        6px 6px 8px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4))
+          inset;
     }
 
     &:active {
       transform: translateY(0);
-      box-shadow: -2px -2px 4px 0 var(--Neutral-white, #FFF) inset, 
-                  2px 2px 4px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.40)) inset;
+      box-shadow: -2px -2px 4px 0 var(--Neutral-white, #fff) inset,
+        2px 2px 4px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4))
+          inset;
     }
 
     .result-content {
@@ -1187,7 +1400,8 @@
               margin-right: 8px;
               flex-shrink: 0;
               background: var(--Neutral-white, #fff);
-              box-shadow: 0 2px 4px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+              box-shadow: 0 2px 4px 0
+                var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
               border: 1px solid rgba(255, 255, 255, 0.3);
 
               img {
@@ -1201,7 +1415,8 @@
               background: var(--Neutral-white, #fff);
               color: #2d3748;
               border-radius: 12px 12px 12px 0;
-              box-shadow: 0 2px 4px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+              box-shadow: 0 2px 4px 0
+                var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
               max-width: 80%;
               padding: 8px 12px 20px 12px;
               font-size: 13px;
@@ -1216,7 +1431,8 @@
             .bubble {
               border-radius: 12px 0 12px 12px;
               background: var(--Primary-default, #74bc1f);
-              box-shadow: 2px 2px 4px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+              box-shadow: 2px 2px 4px 0
+                var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
               color: white;
               max-width: 80%;
               padding: 8px 12px 20px 12px;
@@ -1254,6 +1470,317 @@
   box-shadow: 0 1px 2px rgba(255, 215, 0, 0.3);
 }
 
+/* 角色選擇彈窗樣式 */
+.character-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.character-modal {
+  width: 100%;
+
+  height: 100%;
+  background: linear-gradient(135deg, #e0e5ec 0%, #f0f4f8 100%);
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+
+  .character-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    border-bottom: 1px solid rgba(177, 192, 216, 0.2);
+
+    .back-arrow {
+      position: absolute;
+      left: 20px;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2d3748;
+      margin: 0;
+    }
+  }
+
+  .current-character-tag {
+    padding: 12px 20px;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    span {
+      display: inline-block;
+      padding: 4px 16px 6px;
+      border-radius: var(--Radius-r-50, 50px);
+      background: var(--Secondary-100, #f5f7fa);
+      box-shadow: -6px -6px 12px 0 var(--Neutral-white, #fff),
+        6px 6px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+      color: var(--Primary-default, #74bc1f);
+
+      font-size: var(--Text-font-size-18, 18px);
+      font-style: normal;
+      font-weight: 400;
+
+      letter-spacing: 2.7px;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+  }
+
+  .main-character-area {
+    flex: 1;
+    display: flex;
+    padding: 16px;
+    gap: 2px;
+    position: relative;
+    .character-display {
+      flex: 1;
+      display: flex;
+      align-items: start;
+
+      .character-full-image {
+        height: auto;
+
+        object-fit: contain;
+        border-radius: 12px;
+      }
+    }
+
+    .style-selector {
+      position: absolute;
+      right: 2.5%;
+      top: 0;
+      padding-bottom: 0.5rem;
+      width: 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-radius: var(--Radius-r-8, 8px);
+      background: var(--Secondary-100, #f5f7fa);
+      box-shadow: -6px -6px 12px 0 var(--Neutral-white, #fff),
+        6px 6px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+      height: auto;
+      max-height: 480px;
+      .style-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        gap: 8px;
+
+        span {
+          color: #4a5568;
+          text-align: center;
+          font-weight: 500;
+          color: var(--Neutral-black, #1e1e1e);
+          margin-top: 0.5rem;
+          font-size: var(--Text-font-size-14, 14px);
+          font-style: normal;
+          font-weight: 400;
+
+          letter-spacing: 2.1px;
+        }
+
+        .expand-icon {
+          width: 20px;
+          height: 20px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          filter: opacity(0.7);
+
+          &:hover {
+            filter: opacity(1);
+            transform: scale(1.1);
+          }
+
+          &.rotated {
+            transform: rotate(180deg);
+          }
+        }
+      }
+
+      .style-grid {
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+        gap: 8px;
+
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+
+        .style-item {
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+
+          cursor: pointer;
+          transition: all 0.3s ease;
+          background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
+          box-shadow: 4px 4px 8px rgba(163, 177, 198, 0.6),
+            -4px -4px 8px rgba(255, 255, 255, 0.8);
+          border: 2px solid transparent;
+          margin: 0.5rem 0.5rem 0;
+
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
+              -6px -6px 12px rgba(255, 255, 255, 0.8);
+          }
+
+          &.active {
+            border-color: var(--Primary-default, #74bc1f);
+            box-shadow: 0 0 8px rgba(116, 188, 31, 0.4),
+              4px 4px 8px rgba(163, 177, 198, 0.6),
+              -4px -4px 8px rgba(255, 255, 255, 0.8);
+          }
+
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top;
+          }
+        }
+      }
+    }
+  }
+
+  .confirm-btn {
+    position: absolute;
+    bottom: 18%;
+    left: 50%;
+    transform: translateX(-50%);
+
+    padding: 4px 24px;
+
+    color: var(--Neutral-white, #fff);
+
+    font-size: var(--Text-font-size-18, 18px);
+    font-style: normal;
+    font-weight: 400;
+
+    letter-spacing: 2.7px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: var(--Radius-r-50, 50px);
+    background: linear-gradient(
+      90deg,
+      var(--primary-400-opacity-70, rgba(116, 188, 31, 0.7)) 0%,
+      var(--Primary-default, #74bc1f) 100%
+    );
+    box-shadow: -6px -6px 12px 0 var(--Neutral-white, #fff),
+      6px 6px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 8px 8px 16px rgba(116, 188, 31, 0.3),
+        -8px -8px 16px rgba(255, 255, 255, 0.8);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: inset 4px 4px 8px rgba(90, 154, 23, 0.6),
+        inset -4px -4px 8px rgba(139, 219, 43, 0.6);
+    }
+  }
+
+  .character-switch-area {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px 0;
+    border-top: 1px solid rgba(177, 192, 216, 0.2);
+    border-radius: 20px 20px 0 0;
+    background: var(--Secondary-100, #f5f7fa);
+    box-shadow: -6px -6px 12px 0 var(--Neutral-white, #fff),
+      6px 6px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+
+    .character-scroll-container {
+      display: flex;
+      gap: 16px;
+      padding: 0 20px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+
+      /* 隱藏滾動條但保持功能 */
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE and Edge */
+      &::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Opera */
+      }
+
+      /* 確保顯示3.2個角色的比例 */
+      .character-option {
+        flex: 0 0 calc(100% / 3.2);
+        min-width: calc(100% / 3.2);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        justify-content: center;
+
+        .character-circle {
+          width: 100px;
+          height: 100px;
+          border-radius: 50%;
+          overflow: hidden;
+          background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
+          box-shadow: 4px 4px 8px rgba(163, 177, 198, 0.6),
+            -4px -4px 8px rgba(255, 255, 255, 0.8);
+          border: 3px solid transparent;
+          transition: all 0.3s ease;
+
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top;
+          }
+        }
+
+        &:hover .character-circle {
+          transform: translateY(-2px);
+          box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
+            -6px -6px 12px rgba(255, 255, 255, 0.8);
+        }
+
+        &.selected .character-circle {
+          border-color: var(--Primary-default, #74bc1f);
+          box-shadow: 0 0 12px rgba(116, 188, 31, 0.4),
+            4px 4px 8px rgba(163, 177, 198, 0.6),
+            -4px -4px 8px rgba(255, 255, 255, 0.8);
+        }
+      }
+    }
+  }
+}
+
 /* 淡入淡出動畫 */
 .fade-enter-active,
 .fade-leave-active {
@@ -1264,13 +1791,211 @@
 .fade-leave-to {
   opacity: 0;
 }
+
+/* 角色名稱輸入彈窗樣式 */
+.name-input-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  z-index: 3000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.name-input-modal {
+  background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
+  padding: 24px;
+  border-radius: 20px;
+  box-shadow: 12px 12px 24px rgba(163, 177, 198, 0.6),
+    -12px -12px 24px rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  width: 90%;
+  max-width: 320px;
+  text-align: center;
+
+  .name-input-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0 0 20px 0;
+  }
+
+  .name-input-field {
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 12px;
+    background: var(--Secondary-100, #f5f7fa);
+    box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6),
+      inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+    font-size: 16px;
+    color: #2d3748;
+    outline: none;
+    margin-bottom: 16px;
+
+    &::placeholder {
+      color: #718096;
+    }
+  }
+
+  .name-input-error {
+    color: #e53e3e;
+    font-size: 14px;
+    margin-bottom: 16px;
+    min-height: 20px;
+  }
+
+  .name-input-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &.name-input-cancel {
+        background: var(--Secondary-100, #f5f7fa);
+        color: #718096;
+        box-shadow: 4px 4px 8px rgba(163, 177, 198, 0.6),
+          -4px -4px 8px rgba(255, 255, 255, 0.8);
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
+            -6px -6px 12px rgba(255, 255, 255, 0.8);
+        }
+      }
+
+      &.name-input-confirm {
+        background: linear-gradient(145deg, var(--Primary-default, #74bc1f), #5a9a17);
+        color: white;
+        box-shadow: 4px 4px 8px rgba(116, 188, 31, 0.3),
+          -4px -4px 8px rgba(255, 255, 255, 0.8);
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 6px 6px 12px rgba(116, 188, 31, 0.3),
+            -6px -6px 12px rgba(255, 255, 255, 0.8);
+        }
+      }
+    }
+  }
+}
+
+// 日曆選擇彈窗樣式
+.calendar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  z-index: 3000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.calendar-modal {
+  background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
+  padding: 24px;
+  border-radius: 20px;
+  box-shadow: 12px 12px 24px rgba(163, 177, 198, 0.6),
+    -12px -12px 24px rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  width: 90%;
+  max-width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+
+  .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+
+    .calendar-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2d3748;
+      margin: 0;
+    }
+
+    .calendar-close {
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.3s ease;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  .calendar-content {
+    .calendar-dates {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+
+      .calendar-date-item {
+        padding: 12px 16px;
+        border-radius: 12px;
+        background: var(--Secondary-100, #f5f7fa);
+        box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6),
+          inset -4px -4px 8px rgba(255, 255, 255, 0.8);
+        font-size: 14px;
+        color: #2d3748;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 4px 4px 8px rgba(163, 177, 198, 0.6),
+            -4px -4px 8px rgba(255, 255, 255, 0.8);
+        }
+
+        &.selected {
+          background: linear-gradient(145deg, var(--Primary-default, #74bc1f), #5a9a17);
+          color: white;
+          box-shadow: 4px 4px 8px rgba(116, 188, 31, 0.3),
+            -4px -4px 8px rgba(255, 255, 255, 0.8);
+        }
+      }
+    }
+
+    .no-dates {
+      text-align: center;
+      color: #718096;
+      font-size: 14px;
+      padding: 20px;
+    }
+  }
+}
 </style>
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed, nextTick } from "vue";
 import { useHead } from "#app";
 import BottomNav from "~/components/BottomNav.vue";
-import doctorPng from "~/assets/imgs/robot/doctor.png";
+// 移除import，改用動態路徑
 import recycleSvg from "~/assets/imgs/robot/recycle.svg";
 import timeSvg from "~/assets/imgs/robot/time.svg";
 import soundSvg from "~/assets/imgs/robot/sound.svg";
@@ -1278,6 +2003,7 @@ import keyboardSvg from "~/assets/imgs/robot/keyboard.svg";
 import assistantSoundGif from "~/assets/imgs/robot/assistantSound.gif";
 import assistantDefaultGif from "~/assets/imgs/robot/assistantDefault.gif";
 import volumeSvg from "~/assets/imgs/robot/volume.svg";
+import mutedSvg from "~/assets/imgs/robot/muted.svg";
 import searchSvg from "~/assets/imgs/robot/search.svg";
 import calendarSvg from "~/assets/imgs/robot/calendar.svg";
 
@@ -1287,6 +2013,7 @@ const isLoading = ref(false);
 const conversations = ref([]);
 const currentTranscript = ref("");
 const isSpeaking = ref(false);
+const isMuted = ref(false); // 靜音狀態
 const UUID = getOrCreateVisitorID();
 const textInput = ref("");
 const showTextInput = ref(false);
@@ -1295,14 +2022,391 @@ const showAudioError = ref(false);
 const isManuallyStopped = ref(false);
 const showHistoryPage = ref(false);
 const showVoiceError = ref(false);
-const characterImageSrc = ref(doctorPng); // 角色圖片路徑
+import doctor from "~/assets/imgs/robot/character/doctor.png";
+import doctor2 from "~/assets/imgs/robot/character/doctor2.png";
+import doctor3 from "~/assets/imgs/robot/character/doctor3.png";
+import doctor4 from "~/assets/imgs/robot/character/doctor4.png";
+import doctor5 from "~/assets/imgs/robot/character/doctor5.png";
+import doctor6 from "~/assets/imgs/robot/character/doctor6.png";
+import girl1_1 from "~/assets/imgs/robot/character/girl1_1.png";
+import girl1_2 from "~/assets/imgs/robot/character/girl1_2.png";
+import girl1_3 from "~/assets/imgs/robot/character/girl1_3.png";
+import girl2_1 from "~/assets/imgs/robot/character/girl2_1.png";
+import girl2_2 from "~/assets/imgs/robot/character/girl2_2.png";
+import girl3_1 from "~/assets/imgs/robot/character/girl3_1.png";
+import girl3_2 from "~/assets/imgs/robot/character/girl3_2.png";
+import girl4_1 from "~/assets/imgs/robot/character/girl4_1.png";
+import girl4_2 from "~/assets/imgs/robot/character/girl4_2.png";
+import girl5_1 from "~/assets/imgs/robot/character/girl5_1.png";
+import girl5_2 from "~/assets/imgs/robot/character/girl5_2.png";
+import man1_1 from "~/assets/imgs/robot/character/man1_1.png";
+import man1_2 from "~/assets/imgs/robot/character/man1_2.png";
+import man2_1 from "~/assets/imgs/robot/character/man2_1.png";
+import man2_2 from "~/assets/imgs/robot/character/man2_2.png";
+import man3_1 from "~/assets/imgs/robot/character/man3_1.png";
+import man3_2 from "~/assets/imgs/robot/character/man3_2.png";
+import man3_3 from "~/assets/imgs/robot/character/man3_3.png";
+import man4_1 from "~/assets/imgs/robot/character/man4_1.png";
+import man4_2 from "~/assets/imgs/robot/character/man4_2.png";
+import man5_1 from "~/assets/imgs/robot/character/man5_1.png";
+import man5_2 from "~/assets/imgs/robot/character/man5_2.png";
+import man6_1 from "~/assets/imgs/robot/character/man6_1.png";
+import man6_2 from "~/assets/imgs/robot/character/man6_2.png";
+import pet1_1 from "~/assets/imgs/robot/character/pet1_1.png";
+import pet1_2 from "~/assets/imgs/robot/character/pet1_2.png";
+import pet2_1 from "~/assets/imgs/robot/character/pet2_1.png";
+import pet2_2 from "~/assets/imgs/robot/character/pet2_2.png";
+import pet3_1 from "~/assets/imgs/robot/character/pet3_1.png";
+import pet3_2 from "~/assets/imgs/robot/character/pet3_2.png";
+import pet4_1 from "~/assets/imgs/robot/character/pet4_1.png";
+import pet4_2 from "~/assets/imgs/robot/character/pet4_2.png";
+
+const characterImageSrc = ref(doctor);
+
 const voiceModalImageSrc = ref(assistantSoundGif); // 語音模態框圖片路徑
 const textInputRef = ref(null); // 添加文字輸入框的 ref
 const searchInputRef = ref(null); // 添加搜尋輸入框的 ref
+const nameInputRef = ref(null); // 添加名稱輸入框的 ref
 const latestResponse = ref(""); // 最新回覆
 const showSearch = ref(false); // 搜尋功能開關
 const searchQuery = ref(""); // 搜尋關鍵字
 const searchResults = ref([]); // 搜尋結果
+
+// 角色選擇相關狀態
+const showCharacterSelection = ref(false); // 顯示角色選擇彈窗
+const isStyleExpanded = ref(false); // 造型是否展開
+const expandStylesIcon = ref("/_nuxt/assets/imgs/arrowDown.svg"); // 展開圖標
+
+// 角色命名相關狀態
+const showNameInput = ref(false); // 顯示名稱輸入彈窗
+const characterNameInput = ref(""); // 角色名稱輸入
+const nameInputError = ref(""); // 名稱輸入錯誤訊息
+
+// 新增：聊天歷史改進相關變數
+const historyScrollContainer = ref(null);
+const isScrolling = ref(false);
+const scrollTimeout = ref(null);
+const stickyDateHeader = ref("");
+const showStickyHeader = ref(false);
+const isLoadingOlderMessages = ref(false);
+const hasMoreMessages = ref(true);
+const currentPage = ref(1);
+const messagesPerPage = ref(20);
+
+// 日曆相關
+const showCalendar = ref(false);
+const selectedDate = ref(null);
+const calendarDatesWithHistory = ref([]);
+
+// 角色數據
+const currentCharacter = ref({
+  id: 1,
+  name: "芷澄",
+  displayName: "芷澄",
+  avatar: doctor,
+  fullImage: doctor,
+  styleId: 1,
+  customName: "芷澄", // 自定義名稱
+  voiceSettings: {
+    rate: 0.9,
+    pitch: 0.85,
+    volume: 1
+  }
+});
+
+const availableCharacters = ref([
+  {
+    id: 1,
+    name: "芷澄",
+    displayName: "芷澄",
+    avatar: doctor,
+    fullImage: doctor,
+    customName: "芷澄",
+    voiceSettings: {
+      rate: 0.9,
+      pitch: 0.85,
+      volume: 1
+    },
+    styles: [
+      { id: 1, thumbnail: doctor, fullImage: doctor },
+      { id: 2, thumbnail: doctor2, fullImage: doctor2 },
+      { id: 3, thumbnail: doctor3, fullImage: doctor3 },
+      { id: 4, thumbnail: doctor4, fullImage: doctor4 },
+      { id: 5, thumbnail: doctor5, fullImage: doctor5 },
+      { id: 6, thumbnail: doctor6, fullImage: doctor6 },
+    ],
+  },
+  {
+    id: 2,
+    name: "蕾紗",
+    displayName: "蕾紗",
+    avatar: girl1_1,
+    fullImage: girl1_1,
+    customName: "蕾紗",
+    voiceSettings: {
+      rate: 0.95,
+      pitch: 0.9,
+      volume: 1
+    },
+    styles: [
+      { id: 1, thumbnail: girl1_1, fullImage: girl1_1 },
+      { id: 2, thumbnail: girl1_2, fullImage: girl1_2 },
+      { id: 3, thumbnail: girl1_3, fullImage: girl1_3 },
+    ],
+  },
+  {
+    id: 3,
+    name: "沁瑤",
+    displayName: "沁瑤",
+    avatar: girl2_1,
+    fullImage: girl2_1,
+    customName: "沁瑤",
+    voiceSettings: {
+      rate: 0.9,
+      pitch: 0.8,
+      volume: 1
+    },
+    styles: [
+      { id: 1, thumbnail: girl2_1, fullImage: girl2_1 },
+      { id: 2, thumbnail: girl2_2, fullImage: girl2_2 },
+    ],
+  },
+  {
+    id: 4,
+    name: "晴婕",
+    displayName: "晴婕",
+    avatar: girl3_1,
+    fullImage: girl3_1,
+    customName: "晴婕",
+    voiceSettings: {
+      rate: 0.95,
+      pitch: 0.85,
+      volume: 1
+    },
+    styles: [
+      { id: 1, thumbnail: girl3_1, fullImage: girl3_1 },
+      { id: 2, thumbnail: girl3_2, fullImage: girl3_2 },
+    ],
+  },
+  {
+    id: 5,
+    name: "芮欣",
+    displayName: "芮欣",
+    avatar: girl4_1,
+    fullImage: girl4_1,
+    customName: "芮欣",
+    voiceSettings: {
+      rate: 0.9,
+      pitch: 0.9,
+      volume: 1
+    },
+    styles: [
+      { id: 1, thumbnail: girl4_1, fullImage: girl4_1 },
+      { id: 2, thumbnail: girl4_2, fullImage: girl4_2 },
+    ],
+  },
+  {
+    id: 6,
+    name: "語彤",
+    displayName: "語彤",
+    avatar: girl5_1,
+    fullImage: girl5_1,
+    customName: "語彤",
+    voiceSettings: {
+      rate: 0.95,
+      pitch: 0.8,
+      volume: 1
+    },
+    styles: [
+      { id: 1, thumbnail: girl5_1, fullImage: girl5_1 },
+      { id: 2, thumbnail: girl5_2, fullImage: girl5_2 },
+    ],
+  },
+  {
+    id: 7,
+    name: "澤昊",
+    displayName: "澤昊",
+    avatar: man1_1,
+    fullImage: man1_1,
+    customName: "澤昊",
+    voiceSettings: {
+      rate: 0.85,
+      pitch: 0.7,
+      volume: 1
+    },
+    styles: [
+      { id: 1, thumbnail: man1_1, fullImage: man1_1 },
+      { id: 2, thumbnail: man1_2, fullImage: man1_2 },
+    ],
+  },
+  {
+    id: 8,
+    name: "亦辰",
+    displayName: "亦辰",
+    avatar: man2_1,
+    fullImage: man2_1,
+    customName: "亦辰",
+    voiceSettings: {
+      rate: 0.9,
+      pitch: 0.75,
+      volume: 1
+    },
+    styles: [
+      { id: 1, thumbnail: man2_1, fullImage: man2_1 },
+      { id: 2, thumbnail: man2_2, fullImage: man2_2 },
+    ],
+  },
+  {
+    id: 9,
+    name: "曜宸",
+    displayName: "曜宸",
+    avatar: man3_1,
+    fullImage: man3_1,
+    customName: "曜宸",
+    voiceSettings: {
+      rate: 0.85,
+      pitch: 0.8,
+      volume: 1
+    },
+    styles: [
+      { id: 1, thumbnail: man3_1, fullImage: man3_1 },
+      { id: 2, thumbnail: man3_2, fullImage: man3_2 },
+      { id: 3, thumbnail: man3_3, fullImage: man3_3 },
+    ],
+  },
+  {
+    id: 10,
+    name: "霖澤",
+    displayName: "霖澤",
+    avatar: man4_1,
+    fullImage: man4_1,
+    customName: "霖澤",
+    voiceSettings: {
+      rate: 0.9,
+      pitch: 0.7,
+      volume: 1
+    },
+    styles: [
+      { id: 1, thumbnail: man4_1, fullImage: man4_1 },
+      { id: 2, thumbnail: man4_2, fullImage: man4_2 },
+    ],
+  },
+  {
+    id: 11,
+    name: "承睿",
+    displayName: "承睿",
+    avatar: man5_1,
+    fullImage: man5_1,
+    customName: "承睿",
+    voiceSettings: {
+      rate: 0.85,
+      pitch: 0.75,
+      volume: 1
+    },
+    styles: [
+      { id: 1, thumbnail: man5_1, fullImage: man5_1 },
+      { id: 2, thumbnail: man5_2, fullImage: man5_2 },
+    ],
+  },
+  {
+    id: 12,
+    name: "柏瀚",
+    displayName: "柏瀚",
+    avatar: man6_1,
+    fullImage: man6_1,
+    customName: "柏瀚",
+    voiceSettings: {
+      rate: 0.9,
+      pitch: 0.8,
+      volume: 1
+    },
+    styles: [
+      { id: 1, thumbnail: man6_1, fullImage: man6_1 },
+      { id: 2, thumbnail: man6_2, fullImage: man6_2 },
+    ],
+  },
+
+  {
+    id: 13,
+    name: "檸檬",
+    displayName: "檸檬",
+    avatar: pet1_1,
+    fullImage: pet1_1,
+    customName: "檸檬",
+    voiceSettings: {
+      rate: 1.1,
+      pitch: 1.2,
+      volume: 1
+    },
+    styles: [
+      { id: 1, thumbnail: pet1_1, fullImage: pet1_1 },
+      { id: 2, thumbnail: pet1_2, fullImage: pet1_2 },
+    ],
+  },
+  {
+    id: 14,
+    name: "芒果",
+    displayName: "芒果",
+    avatar: pet2_1,
+    fullImage: pet2_1,
+    customName: "芒果",
+    voiceSettings: {
+      rate: 1.0,
+      pitch: 1.1,
+      volume: 1
+    },
+    styles: [
+      { id: 1, thumbnail: pet2_1, fullImage: pet2_1 },
+      { id: 2, thumbnail: pet2_2, fullImage: pet2_2 },
+    ],
+  },
+  {
+    id: 15,
+    name: "喵喵",
+    displayName: "喵喵",
+    avatar: pet3_1,
+    fullImage: pet3_1,
+    customName: "喵喵",
+    voiceSettings: {
+      rate: 1.2,
+      pitch: 1.3,
+      volume: 1
+    },
+    styles: [
+      { id: 1, thumbnail: pet3_1, fullImage: pet3_1 },
+      { id: 2, thumbnail: pet3_2, fullImage: pet3_2 },
+    ],
+  },
+  {
+    id: 16,
+    name: "光羽",
+    displayName: "光羽",
+    avatar: pet4_1,
+    fullImage: pet4_1,
+    customName: "光羽",
+    voiceSettings: {
+      rate: 1.0,
+      pitch: 1.0,
+      volume: 1
+    },
+    styles: [
+      { id: 1, thumbnail: pet4_1, fullImage: pet4_1 },
+      { id: 2, thumbnail: pet4_2, fullImage: pet4_2 },
+    ],
+  },
+]);
+
+// 計算屬性：當前可見的造型
+const visibleStyles = computed(() => {
+  const character = availableCharacters.value.find(
+    (c) => c.id === currentCharacter.value.id
+  );
+  if (!character) return [];
+
+  // 全部展開
+  return character.styles;
+});
+
 let playbackConfirmed = false;
 let voiceTimeout = null; // 語音識別超時計時器
 
@@ -1310,17 +2414,42 @@ let voiceTimeout = null; // 語音識別超時計時器
 let recognitionRef = null;
 let synthRef = null;
 
-// 計算屬性：按日期分組的歷史記錄
+// 計算屬性：按日期分組的歷史記錄（升冪排列，最舊的在前面）
 const groupedHistory = computed(() => {
   const groups = {};
-  conversations.value.forEach((item) => {
+  
+  // 計算要顯示的對話數量（分頁）- 從最新的開始顯示
+  const totalMessages = conversations.value.length;
+  const startIndex = Math.max(0, totalMessages - (currentPage.value * messagesPerPage.value));
+  const endIndex = totalMessages - ((currentPage.value - 1) * messagesPerPage.value);
+  const displayedConversations = conversations.value.slice(startIndex, endIndex);
+  
+  displayedConversations.forEach((item) => {
     const date = item.timestamp.split(" ")[0];
     if (!groups[date]) {
       groups[date] = [];
     }
     groups[date].push(item);
   });
-  return groups;
+  
+  // 對每個日期組內的對話按時間排序（最舊的在前面）
+  Object.keys(groups).forEach(date => {
+    groups[date].sort((a, b) => {
+      const timeA = new Date(a.timestamp);
+      const timeB = new Date(b.timestamp);
+      return timeA - timeB;
+    });
+  });
+  
+  // 按日期升冪排序（最舊的日期在前面）
+  const sortedGroups = {};
+  Object.keys(groups)
+    .sort((a, b) => new Date(a) - new Date(b))
+    .forEach(date => {
+      sortedGroups[date] = groups[date];
+    });
+  
+  return sortedGroups;
 });
 
 // 格式化日期
@@ -1357,6 +2486,16 @@ const setActiveTab = (tab) => {
 const showHistory = () => {
   if (process.client) {
     showHistoryPage.value = true;
+    // 重置分頁狀態
+    currentPage.value = 1;
+    hasMoreMessages.value = conversations.value.length > messagesPerPage.value;
+    
+    // 等待頁面渲染完成後滾動到底部
+    nextTick(() => {
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+    });
   }
 };
 
@@ -1367,6 +2506,170 @@ const closeHistory = () => {
     showSearch.value = false;
     searchQuery.value = "";
     searchResults.value = [];
+    // 重置分頁和滾動狀態
+    currentPage.value = 1;
+    showStickyHeader.value = false;
+    stickyDateHeader.value = "";
+  }
+};
+
+// 處理歷史記錄滾動事件
+const handleHistoryScroll = () => {
+  if (!historyScrollContainer.value) return;
+  
+  const container = historyScrollContainer.value;
+  const scrollTop = container.scrollTop;
+  const scrollHeight = container.scrollHeight;
+  const clientHeight = container.clientHeight;
+  
+  // 檢查是否滾動到頂部（載入更舊訊息）
+  if (scrollTop < 100 && !isLoadingOlderMessages.value && hasMoreMessages.value) {
+    loadOlderMessages();
+  }
+  
+  // 更新 sticky header
+  updateStickyHeader();
+  
+  // 設置滾動狀態
+  isScrolling.value = true;
+  showStickyHeader.value = true;
+  
+  // 清除之前的計時器
+  if (scrollTimeout.value) {
+    clearTimeout(scrollTimeout.value);
+  }
+  
+  // 設置新的計時器（1.5秒後隱藏 sticky header）
+  scrollTimeout.value = setTimeout(() => {
+    isScrolling.value = false;
+    showStickyHeader.value = false;
+  }, 1500);
+};
+
+// 載入更舊的訊息
+const loadOlderMessages = () => {
+  if (isLoadingOlderMessages.value || !hasMoreMessages.value) return;
+  
+  isLoadingOlderMessages.value = true;
+  
+  // 模擬載入延遲
+  setTimeout(() => {
+    const oldPage = currentPage.value;
+    currentPage.value++;
+    
+    // 檢查是否還有更多訊息
+    const totalMessages = conversations.value.length;
+    const currentMessages = currentPage.value * messagesPerPage.value;
+    
+    if (currentMessages >= totalMessages) {
+      hasMoreMessages.value = false;
+    }
+    
+    isLoadingOlderMessages.value = false;
+    
+    // 保持滾動位置
+    nextTick(() => {
+      if (historyScrollContainer.value) {
+        const container = historyScrollContainer.value;
+        const newScrollHeight = container.scrollHeight;
+        const oldScrollHeight = container.scrollHeight;
+        const scrollDiff = newScrollHeight - oldScrollHeight;
+        container.scrollTop = scrollDiff;
+      }
+    });
+  }, 500);
+};
+
+// 更新 sticky header 日期
+const updateStickyHeader = () => {
+  if (!historyScrollContainer.value) return;
+  
+  const container = historyScrollContainer.value;
+  const scrollTop = container.scrollTop;
+  
+  // 找到當前可見的第一個日期分隔器
+  const dateSeparators = container.querySelectorAll('.date-separator');
+  let currentDate = "";
+  
+  for (let i = 0; i < dateSeparators.length; i++) {
+    const separator = dateSeparators[i];
+    const rect = separator.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    
+    if (rect.top >= containerRect.top) {
+      currentDate = separator.textContent;
+      break;
+    }
+  }
+  
+  if (currentDate && currentDate !== stickyDateHeader.value) {
+    stickyDateHeader.value = currentDate;
+  }
+};
+
+// 自動滾動到底部
+const scrollToBottom = () => {
+  nextTick(() => {
+    if (historyScrollContainer.value) {
+      const container = historyScrollContainer.value;
+      container.scrollTop = container.scrollHeight;
+    }
+  });
+};
+
+// 切換日曆顯示
+const toggleCalendar = () => {
+  if (process.client) {
+    showCalendar.value = !showCalendar.value;
+    if (showCalendar.value) {
+      loadCalendarDates();
+    }
+  }
+};
+
+// 載入日曆中有聊天記錄的日期
+const loadCalendarDates = () => {
+  if (process.client) {
+    const dates = new Set();
+    conversations.value.forEach(conversation => {
+      const date = conversation.timestamp.split(" ")[0];
+      dates.add(date);
+    });
+    calendarDatesWithHistory.value = Array.from(dates).sort();
+  }
+};
+
+// 選擇日曆日期
+const selectCalendarDate = (date) => {
+  if (process.client) {
+    selectedDate.value = date;
+    showCalendar.value = false;
+    
+    // 找到該日期的訊息並滾動到位置
+    const targetMessage = conversations.value.find(conversation => 
+      conversation.timestamp.startsWith(date)
+    );
+    
+    if (targetMessage) {
+      // 計算該訊息應該在哪一頁
+      const messageIndex = conversations.value.findIndex(c => c.id === targetMessage.id);
+      const targetPage = Math.floor(messageIndex / messagesPerPage.value) + 1;
+      
+      if (targetPage !== currentPage.value) {
+        currentPage.value = targetPage;
+      }
+      
+      // 滾動到該訊息
+      nextTick(() => {
+        const messageElement = document.getElementById(`message-${targetMessage.id}`);
+        if (messageElement) {
+          messageElement.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
+        }
+      });
+    }
   }
 };
 
@@ -1554,14 +2857,26 @@ const initSpeechRecognition = () => {
           voiceTimeout = null;
         }
 
-        // 如果是沒有語音輸入的錯誤，顯示錯誤提示
-        if (
-          (event.error === "no-speech" || event.error === "audio-capture") &&
-          process.client
-        ) {
-          showVoiceError.value = true;
-          // 切換到預設圖片
-          voiceModalImageSrc.value = assistantDefaultGif;
+        // 處理不同的錯誤類型
+        if (process.client) {
+          switch (event.error) {
+            case "not-allowed":
+              alert("請允許麥克風權限以使用語音功能");
+              break;
+            case "no-speech":
+            case "audio-capture":
+              showVoiceError.value = true;
+              voiceModalImageSrc.value = assistantDefaultGif;
+              break;
+            case "network":
+              alert("網路連接問題，請檢查網路後重試");
+              break;
+            default:
+              if (event.error !== "aborted") {
+                showVoiceError.value = true;
+                voiceModalImageSrc.value = assistantDefaultGif;
+              }
+          }
         }
       };
 
@@ -1594,6 +2909,11 @@ const initSpeechRecognition = () => {
 const toggleListening = () => {
   if (!recognitionRef) {
     if (process.client && typeof window !== "undefined") {
+      // 檢查是否為 HTTPS 或 localhost
+      if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+        alert("語音功能需要 HTTPS 連接，請使用安全連接");
+        return;
+      }
       alert("您的瀏覽器不支援語音識別功能");
     }
     return;
@@ -1670,7 +2990,7 @@ const handleSpeechEnd = async (transcript) => {
       timestamp: new Date().toLocaleString("zh-TW"),
     };
 
-    conversations.value.unshift(newConversation);
+    conversations.value.push(newConversation);
     saveConversations();
 
     // 更新最新回覆
@@ -1691,7 +3011,7 @@ const handleSpeechEnd = async (transcript) => {
       timestamp: new Date().toLocaleString("zh-TW"),
     };
 
-    conversations.value.unshift(errorConversation);
+    conversations.value.push(errorConversation);
     saveConversations();
 
     // 更新最新回覆
@@ -1704,7 +3024,7 @@ const handleSpeechEnd = async (transcript) => {
 
 // 語音播放文字
 const speakText = (text) => {
-  if (!synthRef || !text?.trim() || !process.client) return;
+  if (!synthRef || !text?.trim() || !process.client || isMuted.value) return;
 
   const speak = () => {
     if (!process.client) return;
@@ -1715,9 +3035,17 @@ const speakText = (text) => {
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "zh-TW";
-    utterance.rate = 0.9;
-    utterance.pitch = 0.85;
-    utterance.volume = 1;
+    
+    // 使用角色的自定義聲音設置
+    const voiceSettings = currentCharacter.value.voiceSettings || {
+      rate: 0.9,
+      pitch: 0.85,
+      volume: 1
+    };
+    
+    utterance.rate = voiceSettings.rate;
+    utterance.pitch = voiceSettings.pitch;
+    utterance.volume = voiceSettings.volume;
 
     const resumeHack = setInterval(() => {
       if (!synthRef || !process.client) return;
@@ -1804,7 +3132,18 @@ const stopSpeaking = () => {
 // 切換音量控制
 const toggleVolume = () => {
   if (process.client) {
-    console.log("切換音量控制");
+    // 切換靜音狀態
+    isMuted.value = !isMuted.value;
+    
+    // 如果當前正在播放語音，立即停止
+    if (synthRef && synthRef.speaking) {
+      synthRef.cancel();
+    }
+    
+    // 保存靜音狀態到本地存儲
+    localStorage.setItem("isMuted", JSON.stringify(isMuted.value));
+    
+    console.log("音量控制切換:", isMuted.value ? "靜音" : "開啟");
   }
 };
 
@@ -1861,7 +3200,7 @@ const handleManualInput = async () => {
       timestamp: new Date().toLocaleString("zh-TW"),
     };
 
-    conversations.value.unshift(newConversation);
+    conversations.value.push(newConversation);
     saveConversations();
 
     // 更新最新回覆
@@ -1880,7 +3219,7 @@ const handleManualInput = async () => {
       bot: errorResponse,
       timestamp: new Date().toLocaleString("zh-TW"),
     };
-    conversations.value.unshift(errorConversation);
+    conversations.value.push(errorConversation);
     saveConversations();
 
     // 更新最新回覆
@@ -1914,7 +3253,7 @@ const loadConversations = () => {
         conversations.value = JSON.parse(saved);
         // 載入最新回覆
         if (conversations.value.length > 0) {
-          latestResponse.value = conversations.value[0].bot;
+          latestResponse.value = conversations.value[conversations.value.length - 1].bot;
         }
       } catch (e) {
         if (process.client) {
@@ -1936,12 +3275,62 @@ onMounted(() => {
   }
   initSpeechRecognition();
   loadConversations();
+  loadSavedCharacter();
+  
+  // 載入靜音狀態
+  if (process.client) {
+    const savedMuted = localStorage.getItem("isMuted");
+    if (savedMuted !== null) {
+      isMuted.value = JSON.parse(savedMuted);
+    }
+  }
 
   // 如果當前是首頁，顯示語音控制
   if (process.client) {
     showVoiceControls.value = true;
   }
 });
+
+// 載入保存的角色選擇
+const loadSavedCharacter = () => {
+  if (process.client) {
+    // 載入可用角色列表
+    const savedCharacters = localStorage.getItem("availableCharacters");
+    if (savedCharacters) {
+      try {
+        const parsedCharacters = JSON.parse(savedCharacters);
+        // 合併保存的數據與默認數據
+        availableCharacters.value = availableCharacters.value.map(char => {
+          const savedChar = parsedCharacters.find(c => c.id === char.id);
+          return savedChar ? { ...char, ...savedChar } : char;
+        });
+      } catch (e) {
+        console.error("載入角色列表失敗:", e);
+      }
+    }
+    
+    // 載入當前選擇的角色
+    const saved = localStorage.getItem("selectedCharacter");
+    if (saved) {
+      try {
+        const savedCharacter = JSON.parse(saved);
+        const foundCharacter = availableCharacters.value.find(
+          (c) => c.id === savedCharacter.id
+        );
+        if (foundCharacter) {
+          currentCharacter.value = { 
+            ...foundCharacter,
+            ...savedCharacter,
+            customName: savedCharacter.customName || foundCharacter.customName || foundCharacter.displayName
+          };
+          characterImageSrc.value = savedCharacter.fullImage;
+        }
+      } catch (e) {
+        console.error("載入角色選擇失敗:", e);
+      }
+    }
+  }
+};
 
 // 組件卸載時清理
 onUnmounted(() => {
@@ -1986,21 +3375,21 @@ const scrollToMessage = (id) => {
   showSearch.value = false;
   searchQuery.value = "";
   searchResults.value = [];
-  
+
   // 等待動畫完成後跳轉
   setTimeout(() => {
     const messageElement = document.getElementById(`message-${id}`);
     if (messageElement) {
-      messageElement.scrollIntoView({ 
+      messageElement.scrollIntoView({
         behavior: "smooth",
-        block: "center"
+        block: "center",
       });
-      
+
       // 添加高亮效果
       messageElement.style.backgroundColor = "rgba(116, 188, 31, 0.1)";
       messageElement.style.borderRadius = "12px";
       messageElement.style.transition = "background-color 0.3s ease";
-      
+
       // 3秒後移除高亮
       setTimeout(() => {
         messageElement.style.backgroundColor = "";
@@ -2015,5 +3404,138 @@ const highlightKeyword = (text, keyword) => {
   if (!keyword) return text;
   const regex = new RegExp(`(${keyword})`, "gi");
   return text.replace(regex, '<span class="highlight">$1</span>');
+};
+
+// 角色選擇相關函數
+const showCharacterModal = () => {
+  if (process.client) {
+    showCharacterSelection.value = true;
+  }
+};
+
+const closeCharacterModal = () => {
+  if (process.client) {
+    showCharacterSelection.value = false;
+    isStyleExpanded.value = false;
+  }
+};
+
+const toggleStyleExpansion = () => {
+  if (process.client) {
+    isStyleExpanded.value = !isStyleExpanded.value;
+  }
+};
+
+const selectCharacter = (character) => {
+  if (process.client) {
+    currentCharacter.value = {
+      ...character,
+      styleId: 1, // 默認選擇第一個造型
+      avatar: character.styles[0]?.thumbnail || character.avatar, // 更新頭貼為第一個樣式的縮圖
+      fullImage: character.styles[0]?.fullImage || character.fullImage,
+      customName: character.customName || character.displayName,
+      voiceSettings: character.voiceSettings || {
+        rate: 0.9,
+        pitch: 0.85,
+        volume: 1
+      }
+    };
+    isStyleExpanded.value = false; // 切換角色時收起造型選擇
+
+    // 更新角色圖片路徑
+    characterImageSrc.value =
+      character.styles[0]?.fullImage || character.fullImage;
+
+    console.log("已選擇角色:", character.customName || character.displayName);
+  }
+};
+
+const selectStyle = (style) => {
+  if (process.client) {
+    currentCharacter.value.styleId = style.id;
+    currentCharacter.value.avatar = style.thumbnail; // 更新頭貼為選中樣式的縮圖
+    currentCharacter.value.fullImage = style.fullImage;
+    // 即時更新角色圖片
+    characterImageSrc.value = style.fullImage;
+  }
+};
+
+const confirmCharacterSelection = () => {
+  if (process.client) {
+    // 更新角色圖片路徑
+    characterImageSrc.value = currentCharacter.value.fullImage;
+    // 關閉彈窗
+    closeCharacterModal();
+    // 保存到本地存儲
+    localStorage.setItem(
+      "selectedCharacter",
+      JSON.stringify(currentCharacter.value)
+    );
+    // 可以添加成功提示或其他確認邏輯
+    console.log("角色選擇已確認:", currentCharacter.value.customName || currentCharacter.value.displayName);
+    console.log("當前頭貼:", currentCharacter.value.avatar);
+  }
+};
+
+// 角色名稱編輯相關函數
+const showNameInputModal = () => {
+  if (process.client) {
+    characterNameInput.value = currentCharacter.value.customName || currentCharacter.value.displayName;
+    nameInputError.value = "";
+    showNameInput.value = true;
+    nextTick(() => {
+      if (nameInputRef.value) {
+        nameInputRef.value.focus();
+      }
+    });
+  }
+};
+
+const closeNameInput = () => {
+  if (process.client) {
+    showNameInput.value = false;
+    characterNameInput.value = "";
+    nameInputError.value = "";
+  }
+};
+
+const confirmNameInput = () => {
+  if (process.client) {
+    const name = characterNameInput.value.trim();
+    
+    if (!name) {
+      nameInputError.value = "角色不能沒有名字喔";
+      return;
+    }
+    
+    if (name.length > 10) {
+      nameInputError.value = "名字不能超過10個字";
+      return;
+    }
+    
+    // 更新當前角色的自定義名稱
+    currentCharacter.value.customName = name;
+    
+    // 更新可用角色列表中的對應角色
+    const characterIndex = availableCharacters.value.findIndex(
+      c => c.id === currentCharacter.value.id
+    );
+    if (characterIndex !== -1) {
+      availableCharacters.value[characterIndex].customName = name;
+    }
+    
+    // 保存到本地存儲
+    localStorage.setItem(
+      "selectedCharacter",
+      JSON.stringify(currentCharacter.value)
+    );
+    localStorage.setItem(
+      "availableCharacters",
+      JSON.stringify(availableCharacters.value)
+    );
+    
+    closeNameInput();
+    console.log("角色名稱已更新:", name);
+  }
 };
 </script>
