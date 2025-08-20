@@ -221,7 +221,7 @@
       <div v-if="showHistoryPage" class="history-page">
         <div class="history-header">
           <img
-            src="/_nuxt/assets/imgs/backArrow.svg"
+            src="/assets/imgs/backArrow.svg"
             @click="closeHistory"
             alt="返回"
             class="back-arrow"
