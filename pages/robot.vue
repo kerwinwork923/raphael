@@ -1199,6 +1199,9 @@
     overflow-y: auto;
     padding: 20px;
     background: transparent;
+    min-height: 0;                      /* 讓 flex 子項可以縮、才捲得動 */
+  -webkit-overflow-scrolling: touch;  /* iOS 慣性捲動 */
+  touch-action: pan-y;                /* 明確允許垂直捲動 */
 
     .history-group {
       margin-bottom: 30px;
