@@ -1539,7 +1539,8 @@
 .character-modal {
   width: 100%;
 
-  height: 100%;
+  height: 100dvh;
+
   background: linear-gradient(135deg, #e0e5ec 0%, #f0f4f8 100%);
 
   display: flex;
@@ -1605,6 +1606,10 @@
 
   .main-character-area {
     flex: 1;
+    min-height: 0; /* ★ 關鍵：沒有這行 iOS 常常不捲 */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
     display: flex;
     padding: 16px;
     gap: 2px;
@@ -1676,6 +1681,9 @@
       }
 
       .style-grid {
+        overflow-y: auto;        /* 改這個 */
+  max-height: 420px;       /* 或 calc(100dvh - 已佔空間) 視實際需求 */
+  -webkit-overflow-scrolling: touch;
         display: grid;
         grid-template-columns: repeat(1, 1fr);
         gap: 8px;
