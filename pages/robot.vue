@@ -18,7 +18,7 @@
         <span>正在思考...</span>
       </div>
       <div v-else-if="latestResponse" class="latest-response">
-        {{ latestResponse }}
+        {{ latestResponse }} {{ latestResponse }} {{ latestResponse }} {{ latestResponse }} {{ latestResponse }}
       </div>
       <div v-else class="greeting-text">嗨~~有什麼需要幫您</div>
       <button class="volume-control" @click="toggleVolume">
@@ -592,6 +592,10 @@
   color: #2d3748;
   word-break: break-word;
   max-width: 100%;
+  overflow-y: auto;
+  max-height: 120px;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 .greeting-bubble .greeting-text {
