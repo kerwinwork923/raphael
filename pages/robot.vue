@@ -78,7 +78,7 @@
             @click="textInput.trim() ? handleManualInput() : toggleListening()"
           >
             <img
-              :src="textInput.trim() ? '/assets/imgs/robot/send.svg' : soundSvg"
+              :src="textInput.trim() ? sendSvg : soundSvg"
               :alt="textInput.trim() ? '送出' : '語音'"
             />
           </button>
@@ -2140,6 +2140,8 @@ import volumeSvg from "~/assets/imgs/robot/volume.svg";
 import mutedSvg from "~/assets/imgs/robot/muted.svg";
 import searchSvg from "~/assets/imgs/robot/search.svg";
 import calendarSvg from "~/assets/imgs/robot/calendar.svg";
+import sendSvg from "~/assets/imgs/robot/send.svg";
+
 
 // 響應式狀態
 const isListening = ref(false);
