@@ -2142,7 +2142,9 @@ import searchSvg from "~/assets/imgs/robot/search.svg";
 import calendarSvg from "~/assets/imgs/robot/calendar.svg";
 import sendSvg from "~/assets/imgs/robot/send.svg";
 
-
+// ====== 新增：你的 n8n TTS webhook（需回傳 audio/wav 二進位檔）======
+const TTS_WEBHOOK_URL = "https://aiwisebalance.com/webhook/oss-gpt" 
+const voicegender= "female";
 // 響應式狀態
 const isListening = ref(false);
 const isLoading = ref(false);
@@ -2571,6 +2573,19 @@ let voiceTimeout = null; // 語音識別超時計時器
 // 語音識別和合成實例
 let recognitionRef = null;
 let synthRef = null;
+// ====== 新增：全域 Audio，集中管理播放與停止 ======
+let player = null
+let currentObjectUrl = null
+function ensurePlayer() {
+  if (!player) player = new Audio()
+  return player
+}
+function revokeObjectUrl() {
+  if (currentObjectUrl) {
+    URL.revokeObjectURL(currentObjectUrl)
+    currentObjectUrl = null
+  }
+}
 
 // 計算屬性：按日期分組的歷史記錄（升冪排列，最舊的在前面）
 const groupedHistory = computed(() => {
@@ -3154,6 +3169,61 @@ const initSpeechRecognition = () => {
   }
 };
 
+/** 一次呼叫 n8n，取得回覆文字（X-Answer header）+ 取得音檔 Blob 並播放 */
+async function fetchTTSAndPlayAndReturnText(userText, extra = {}) {
+  let res
+  try {
+    res = await fetch(TTS_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chatInput: userText,     // 你要給 n8n 的輸入
+        sessionId: UUID,
+        voicegender: voicegender,
+        timestamp: new Date().toISOString(),
+        pitch_semitones: 1.5 
+      })
+    })
+  } catch (e) {
+    showAudioError.value = true
+    throw e
+  }
+
+  if (!res.ok) {
+    showAudioError.value = true
+    throw new Error(`TTS webhook failed: ${res.status}`)
+  }
+
+  // 1) 拿回覆文字（在 X-Answer）
+  const headerText = res.headers.get('x-answer') || ''
+  const answerText = decodeURIComponent(headerText)
+
+  // 2) 讀音檔並播放
+  const blob = await res.blob() // audio/wav
+  const url = URL.createObjectURL(blob)
+  const audio = ensurePlayer()
+  try { audio.pause() } catch {}
+  revokeObjectUrl()
+  audio.src = url
+  currentObjectUrl = url
+
+  audio.onplay = () => { isSpeaking.value = true }
+  audio.onended = () => { isSpeaking.value = false; revokeObjectUrl() }
+  audio.onerror = () => { isSpeaking.value = false; showAudioError.value = true; revokeObjectUrl() }
+
+  try {
+    await audio.play()
+  } catch (e) { // iOS 需要使用者手勢觸發
+    showAudioError.value = true
+    throw e
+  }
+
+  return answerText
+}
+
+
+
+
 // 開始/停止語音識別
 const toggleListening = () => {
   if (!recognitionRef) {
@@ -3197,90 +3267,35 @@ const toggleListening = () => {
 
 // 處理語音輸入結束
 const handleSpeechEnd = async (transcript) => {
-  if (!transcript.trim()) return;
-
-  if (process.client) {
-    isLoading.value = true;
-    currentTranscript.value = "";
-  }
+  if (!transcript.trim()) return
+  isLoading.value = true
+  currentTranscript.value = ''
 
   try {
-    const response = await fetch(
-      "https://aiwisebalance.com/webhook/rag_response",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chatInput: transcript,
-          sessionId: UUID,
-          timestamp: new Date().toISOString(),
-        }),
-      }
-    );
+    // 一次拿回覆 + 播音檔
+    const botResponse = await fetchTTSAndPlayAndReturnText(transcript, { pitch_semitones: 1.5 })
 
-    const text = await response.text();
-    if (process.client) {
-      console.log("🔥 回傳原始內容：", text);
-    }
-    let botResponse = "";
-
-    try {
-      const data = JSON.parse(text);
-      if (data?.result || data?.response || data?.message) {
-        botResponse = data.result || data.response || data.message;
-      } else {
-        botResponse = "⚠️ AI 沒有提供內容。";
-      }
-    } catch (err) {
-      botResponse = "⚠️ 無法解析伺服器回應。";
-    }
-
-    const now = new Date();
     const newConversation = {
       id: Date.now(),
-      user: transcript,                 // ← 這裡才用 transcript
-      bot: botResponse,
-      timestamp: now.toLocaleString("zh-TW"),
-      dateKey: toDateKey(now),
-    };
-
-    conversations.value.push(newConversation);
-    saveConversations();
-
-    // 更新最新回覆
-    if (process.client) {
-      latestResponse.value = botResponse;
-      speakText(botResponse);
+      user: transcript,
+      bot: botResponse || '（沒有回覆文字）',
+      timestamp: new Date().toLocaleString('zh-TW')
     }
+    conversations.value.unshift(newConversation)
+
   } catch (error) {
-    if (process.client) {
-      console.error("API調用錯誤:", error);
-    }
-    const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
-
-    const now = new Date();
-    const errorConversation = {
+    console.error('API 調用錯誤:', error)
+    const errorResponse = '抱歉，服務暫時無法使用，請稍後再試。'
+    conversations.value.unshift({
       id: Date.now(),
       user: transcript,
       bot: errorResponse,
-      timestamp: now.toLocaleString("zh-TW"),
-      dateKey: toDateKey(now),
-    };
-
-    conversations.value.push(errorConversation);
-    saveConversations();
-
-    // 更新最新回覆
-    if (process.client) {
-      latestResponse.value = errorResponse;
-      speakText(errorResponse);
-    }
+      timestamp: new Date().toLocaleString('zh-TW')
+    })
   } finally {
-    if (process.client) {
-      isLoading.value = false;
-    }
+    isLoading.value = false
   }
-};
+}
 
 // 語音播放文字
 const speakText = (text) => {
@@ -3396,13 +3411,17 @@ const speakText = (text) => {
 
 // 停止語音播放
 const stopSpeaking = () => {
-  if (synthRef && process.client && typeof window !== "undefined") {
-    isManuallyStopped.value = true;
-    showAudioError.value = false;
-    synthRef.cancel();
-    isSpeaking.value = false;
-  }
-};
+ /* if (synthRef && process.client) {
+    isManuallyStopped.value = true
+    showAudioError.value = false  // ✅ 手動停止不顯示錯誤視窗
+    synthRef.cancel()
+    isSpeaking.value = false
+  }*/
+  const a = ensurePlayer()
+  try { a.pause(); a.currentTime = 0 } catch {}
+  isSpeaking.value = false
+  revokeObjectUrl()
+}
 
 // 切換音量控制
 const toggleVolume = () => {
@@ -3436,89 +3455,37 @@ const closeAudioError = () => {
   }
 };
 
-// 手動輸入處理
 const handleManualInput = async () => {
   const input = textInput.value.trim();
   if (!input) return;
 
-  if (process.client) {
-    isLoading.value = true;
-    currentTranscript.value = "";
-    textInput.value = "";
-  }
+  isLoading.value = true;
+  currentTranscript.value = '';
+  textInput.value = '';
 
   try {
-    const response = await fetch(
-      "https://aiwisebalance.com/webhook/rag_response",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chatInput: input,
-          sessionId: UUID,
-          timestamp: new Date().toISOString(),
-        }),
-      }
-    );
+    const botResponse = await fetchTTSAndPlayAndReturnText(input, { pitch_semitones: 1.5 })
 
-    const text = await response.text();
-    let botResponse = "";
-
-    try {
-      const data = JSON.parse(text);
-      botResponse =
-        data?.result ||
-        data?.response ||
-        data?.message ||
-        "⚠️ AI 沒有提供內容。";
-    } catch (err) {
-      botResponse = "⚠️ 無法解析伺服器回應。";
-    }
-
-    const now = new Date();
-    const newConversation = {
+    conversations.value.unshift({
       id: Date.now(),
-      user: input,                      // ← 修正
-      bot: botResponse,
-      timestamp: now.toLocaleString("zh-TW"),
-      dateKey: toDateKey(now),          // ← 一致化
-    };
-
-    conversations.value.push(newConversation);
-    saveConversations();
-
-    // 更新最新回覆
-    if (process.client) {
-      latestResponse.value = botResponse;
-      speakText(botResponse);
-    }
+      user: input,
+      bot: botResponse || '（沒有回覆文字）',
+      timestamp: new Date().toLocaleString('zh-TW')
+    })
   } catch (error) {
-    if (process.client) {
-      console.error("API調用錯誤:", error);
-    }
-    const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
-    const now = new Date();
-    const errorConversation = {
+    console.error('API 調用錯誤:', error)
+    const errorResponse = '抱歉，服務暫時無法使用，請稍後再試。'
+    conversations.value.unshift({
       id: Date.now(),
       user: input,
       bot: errorResponse,
-      timestamp: now.toLocaleString("zh-TW"),
-      dateKey: toDateKey(now),
-    };
-    conversations.value.push(errorConversation);
-    saveConversations();
-
-    // 更新最新回覆
-    if (process.client) {
-      latestResponse.value = errorResponse;
-      speakText(errorResponse);
-    }
+      timestamp: new Date().toLocaleString('zh-TW')
+    })
   } finally {
-    if (process.client) {
-      isLoading.value = false;
-    }
+    isLoading.value = false
   }
-};
+}
+
 
 // 本地儲存對話記錄
 const saveConversations = () => {
@@ -3574,7 +3541,7 @@ const loadConversations = () => {
 
 // 組件掛載時初始化
 onMounted(() => {
-  if (
+  /*if (
     process.client &&
     typeof window !== "undefined" &&
     "speechSynthesis" in window
@@ -3595,7 +3562,7 @@ onMounted(() => {
         console.log("中文語音:", chineseVoice);
       };
     }
-  }
+  }*/
   initSpeechRecognition();
   loadConversations();
   loadSavedCharacter();
@@ -3674,12 +3641,12 @@ const loadSavedCharacter = () => {
 
 // 組件卸載時清理
 onUnmounted(() => {
-  if (process.client && recognitionRef) {
+  if (recognitionRef) {
     recognitionRef.stop();
   }
-  if (process.client && synthRef) {
-    synthRef.cancel();
-  }
+  if (player) { try { player.pause() } catch {} }
+  revokeObjectUrl()
+  //if (process.client && synthRef) {synthRef.cancel();}
   // 清除超時計時器
   if (voiceTimeout) {
     clearTimeout(voiceTimeout);
