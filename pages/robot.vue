@@ -2617,9 +2617,9 @@ const groupedHistory = computed(() => {
   });
 
   // 對每個日期組內的對話按時間排序（最新的在前面）
-  Object.keys(groups).forEach((date) => {
-    groups[date].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-  });
+   Object.keys(groups).forEach((date) => {
+   groups[date].sort((a, b) => (a.ts ?? 0) - (b.ts ?? 0)); // 當日內：舊→新
+ });
 
   // 按日期升冪排序（最舊的日期在前面）
   const sortedGroups = {};
@@ -3279,23 +3279,56 @@ const handleSpeechEnd = async (transcript) => {
     // 一次拿回覆 + 播音檔
     const botResponse = await fetchTTSAndPlayAndReturnText(transcript, { pitch_semitones: 1.5 })
 
-    const newConversation = {
-      id: Date.now(),
-      user: transcript,
-      bot: botResponse || '（沒有回覆文字）',
-      timestamp: new Date().toLocaleString('zh-TW')
+     const nowTs = Date.now();
+ const newConversation = {
+   id: nowTs,
+   ts: nowTs, // ★ 之後一律用這個排序/顯示
+   user: transcript, // 或 input
+   bot: botResponse || '（沒有回覆文字）',
+   timestamp: new Date().toLocaleString('zh-TW'), // 只做備註/除錯
+   dateKey: toDateKey(new Date(nowTs))
+ }
+ conversations.value.push(newConversation); // ★ 改用 push，保持陣列「舊→新」
+    latestResponse.value = botResponse || '（沒有回覆文字）';
+    saveConversations();
+    
+    // 如果當前在歷史記錄頁面，確保新訊息可見
+    if (showHistoryPage.value) {
+      // 重置到第一頁以顯示最新訊息
+      currentPage.value = 1;
+      // 滾動到最新訊息
+      nextTick(() => {
+        setTimeout(() => {
+          scrollToBottom();
+        }, 100);
+      });
     }
-    conversations.value.unshift(newConversation)
+    
+    console.log('語音輸入處理完成:', newConversation);
 
   } catch (error) {
     console.error('API 調用錯誤:', error)
     const errorResponse = '抱歉，服務暫時無法使用，請稍後再試。'
-    conversations.value.unshift({
+    const errorConversation = {
       id: Date.now(),
       user: transcript,
       bot: errorResponse,
-      timestamp: new Date().toLocaleString('zh-TW')
-    })
+      timestamp: new Date().toLocaleString('zh-TW'),
+      dateKey: toDateKey(new Date())
+    }
+    conversations.value.unshift(errorConversation);
+    latestResponse.value = errorResponse;
+    saveConversations();
+    
+    // 如果當前在歷史記錄頁面，確保新訊息可見
+    if (showHistoryPage.value) {
+      currentPage.value = 1;
+      nextTick(() => {
+        setTimeout(() => {
+          scrollToBottom();
+        }, 100);
+      });
+    }
   } finally {
     isLoading.value = false
   }
@@ -3470,21 +3503,56 @@ const handleManualInput = async () => {
   try {
     const botResponse = await fetchTTSAndPlayAndReturnText(input, { pitch_semitones: 1.5 })
 
-    conversations.value.unshift({
-      id: Date.now(),
-      user: input,
-      bot: botResponse || '（沒有回覆文字）',
-      timestamp: new Date().toLocaleString('zh-TW')
-    })
+    const nowTs = Date.now();
+ const newConversation = {
+   id: nowTs,
+   ts: nowTs, // ★ 之後一律用這個排序/顯示
+   user: transcript, // 或 input
+   bot: botResponse || '（沒有回覆文字）',
+   timestamp: new Date().toLocaleString('zh-TW'), // 只做備註/除錯
+   dateKey: toDateKey(new Date(nowTs))
+ }
+ conversations.value.push(newConversation); // ★ 改用 push，保持陣列「舊→新」
+    latestResponse.value = botResponse || '（沒有回覆文字）';
+    saveConversations();
+    
+    // 如果當前在歷史記錄頁面，確保新訊息可見
+    if (showHistoryPage.value) {
+      // 重置到第一頁以顯示最新訊息
+      currentPage.value = 1;
+      // 滾動到最新訊息
+      nextTick(() => {
+        setTimeout(() => {
+          scrollToBottom();
+        }, 100);
+      });
+    }
+    
+    console.log('文字輸入處理完成:', newConversation);
   } catch (error) {
     console.error('API 調用錯誤:', error)
     const errorResponse = '抱歉，服務暫時無法使用，請稍後再試。'
-    conversations.value.unshift({
+    const errorConversation = {
       id: Date.now(),
       user: input,
       bot: errorResponse,
-      timestamp: new Date().toLocaleString('zh-TW')
-    })
+      timestamp: new Date().toLocaleString('zh-TW'),
+      dateKey: toDateKey(new Date())
+    }
+    
+    conversations.value.unshift(errorConversation);
+    latestResponse.value = errorResponse;
+    saveConversations();
+    
+    // 如果當前在歷史記錄頁面，確保新訊息可見
+    if (showHistoryPage.value) {
+      currentPage.value = 1;
+      nextTick(() => {
+        setTimeout(() => {
+          scrollToBottom();
+        }, 100);
+      });
+    }
   } finally {
     isLoading.value = false
   }
@@ -3513,13 +3581,19 @@ const loadConversations = () => {
         console.log("載入原始對話記錄:", raw);
         
         // 統一補上 dateKey
-        conversations.value = raw.map((c) => ({
-          ...c,
-          dateKey: c.dateKey || toDateKey(c.timestamp),
-        }));
+               conversations.value = raw.map((c) => {
+         const ts = c.ts ?? c.id ?? Date.now(); // 舊資料沒有 ts，就用 id（你本來就用 Date.now() 當 id）
+         return {
+           ...c,
+           ts,
+           dateKey: c.dateKey || toDateKey(new Date(ts)),
+         };
+       }).sort((a, b) => a.ts - b.ts); // 保證陣列舊→新
+
+       latestResponse.value = conversations.value[conversations.value.length - 1]?.bot || "";
         
         console.log("處理後的對話記錄:", conversations.value);
-        latestResponse.value = conversations.value.at(-1)?.bot || "";
+        
         loadCalendarDates();
         
         // 初始化日曆顯示月份為最新有記錄的月份
