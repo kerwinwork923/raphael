@@ -78,11 +78,7 @@
             @click="textInput.trim() ? handleManualInput() : toggleListening()"
           >
             <img
-              :src="
-                textInput.trim()
-                  ? '/assets/imgs/robot/send.svg'
-                  : soundSvg
-              "
+              :src="textInput.trim() ? '/assets/imgs/robot/send.svg' : soundSvg"
               :alt="textInput.trim() ? '送出' : '語音'"
             />
           </button>
@@ -168,14 +164,13 @@
           </div>
 
           <!-- 當前選擇角色標籤 -->
-          <div class="current-character-tag">
+          <div class="current-character-tag" @click="showNameInputModal">
             <span
               >{{ currentCharacter.customName || currentCharacter.displayName }}
               <img
                 src="/assets/imgs/robot/edit_green.svg"
                 alt="編輯"
                 class="edit-icon"
-                @click="showNameInputModal"
               />
             </span>
           </div>
@@ -1027,7 +1022,7 @@
   width: 100%;
   height: 100%;
   background: linear-gradient(135deg, #e0e5ec 0%, #f0f4f8 100%);
-  z-index: 1000;
+  z-index: 1001;
   display: flex;
   flex-direction: column;
 
@@ -1843,7 +1838,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(50, 50, 50, 0.01);
   backdrop-filter: blur(8px);
   z-index: 3000;
   display: flex;
@@ -1852,20 +1847,26 @@
 }
 
 .name-input-modal {
-  background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
   padding: 24px;
   border-radius: 20px;
-  box-shadow: 12px 12px 24px rgba(163, 177, 198, 0.6),
-    -12px -12px 24px rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--Radius-r-20, 20px);
+  background: rgba(245, 247, 250, 0.65);
+  box-shadow: -6px -6px 12px 0 var(--Neutral-white, #fff),
+    6px 6px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+  backdrop-filter: blur(22px);
   width: 90%;
   max-width: 320px;
   text-align: center;
 
   .name-input-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #2d3748;
+    color: var(--Neutral-black, #1e1e1e);
+    text-align: center;
+
+    font-size: var(--Text-font-size-24, 20px);
+    font-style: normal;
+    font-weight: 700;
+    line-height: 100%; /* 24px */
+    letter-spacing: 0.12px;
     margin: 0 0 20px 0;
   }
 
@@ -1873,12 +1874,19 @@
     width: 100%;
     padding: 12px 16px;
     border: none;
-    border-radius: 12px;
-    background: var(--Secondary-100, #f5f7fa);
-    box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6),
-      inset -4px -4px 8px rgba(255, 255, 255, 0.8);
-    font-size: 16px;
-    color: #2d3748;
+    border-radius: var(--Radius-r-50, 50px);
+background: var(--Secondary-100, #F5F7FA);
+box-shadow: -6px -6px 12px 0 var(--Neutral-white, #FFF) inset, 6px 6px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.40)) inset;
+
+    overflow: hidden;
+    color: var(--Neutral-black, #1e1e1e);
+    text-overflow: ellipsis;
+
+    font-size: var(--Text-font-size-18, 18px);
+    font-style: normal;
+    font-weight: 700;
+
+    letter-spacing: 2.7px;
     outline: none;
     margin-bottom: 16px;
 
@@ -1909,27 +1917,40 @@
       transition: all 0.3s ease;
 
       &.name-input-cancel {
-        background: var(--Secondary-100, #f5f7fa);
         color: #718096;
-        box-shadow: 4px 4px 8px rgba(163, 177, 198, 0.6),
-          -4px -4px 8px rgba(255, 255, 255, 0.8);
+        border-radius: var(--Radius-r-50, 50px);
+        color: var(--Primary-default, #74bc1f);
 
+        font-size: var(--Text-font-size-18, 18px);
+        font-style: normal;
+        font-weight: 400;
+
+        letter-spacing: 2.7px;
+        background: none;
         &:hover {
           transform: translateY(-2px);
-          box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
-            -6px -6px 12px rgba(255, 255, 255, 0.8);
         }
       }
 
       &.name-input-confirm {
+        border-radius: var(--Radius-r-50, 50px);
         background: linear-gradient(
-          145deg,
-          var(--Primary-default, #74bc1f),
-          #5a9a17
+          90deg,
+          var(--primary-400-opacity-70, rgba(116, 188, 31, 0.7)) 0%,
+          var(--Primary-default, #74bc1f) 100%
         );
-        color: white;
-        box-shadow: 4px 4px 8px rgba(116, 188, 31, 0.3),
-          -4px -4px 8px rgba(255, 255, 255, 0.8);
+        box-shadow: 0 1px 12px 0
+            var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4)),
+          6px 6px 12px 0
+            var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+
+        color: var(--Neutral-white, #fff);
+
+        font-size: var(--Text-font-size-18, 18px);
+        font-style: normal;
+        font-weight: 400;
+
+        letter-spacing: 2.7px;
 
         &:hover {
           transform: translateY(-2px);
