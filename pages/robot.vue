@@ -1682,7 +1682,7 @@
 
       .style-grid {
         overflow-y: auto;        /* 改這個 */
-  max-height: 420px;       /* 或 calc(100dvh - 已佔空間) 視實際需求 */
+
   -webkit-overflow-scrolling: touch;
         display: grid;
         grid-template-columns: repeat(1, 1fr);
