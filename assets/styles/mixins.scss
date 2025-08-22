@@ -192,7 +192,7 @@
   z-index: 99;
 }
 
-@mixin blurOverlay($px:4px) {
+@mixin blurOverlay() {
   position: fixed;
   top: 0;
   left: 0;
@@ -202,8 +202,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  -webkit-backdrop-filter: blur($px);
-  backdrop-filter: blur($px);
+  background: rgba(0,0,0,.1);
 }
 
 @mixin recordList($bgColor, $height, $radius, $padding) {
