@@ -361,7 +361,9 @@
                       result.userName || "用戶"
                     }}</span>
                     <span class="result-date">{{
-                      formatDate(result.dateKey || result.timestamp.split(" ")[0])
+                      formatDate(
+                        result.dateKey || result.timestamp.split(" ")[0]
+                      )
                     }}</span>
                   </div>
                   <div class="result-messages">
@@ -483,89 +485,103 @@
 
 <style lang="scss" scoped>
 .chat-wrapper {
-  background: linear-gradient(135deg, #e0e5ec 0%, #f0f4f8 100%);
-  min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   position: relative;
+  min-height: 100vh;
+  font-family: "Noto Sans";
+  padding-top: 1rem;
+  overflow: hidden;
 
-  padding-bottom: 100px;
-  padding: 0 5%;
+  &::before {
+    content: " ";
+    position: absolute;
+    background: rgba(245, 247, 250, 0.45);
+    backdrop-filter: blur(200px);
+    width: 100%;
+    height: 100%;
+    top: 0;
+    z-index: -1;
+  }
+
+  &::after {
+    content: " ";
+    position: absolute;
+    background: rgba(27, 163, 155, 0.35);
+    width: 140dvw;
+    height: 140dvw;
+    top: 15%;
+    left: 0;
+    border-radius: 50%;
+    z-index: -2;
+  }
 }
 
 /* 聊天頭部 */
 .chat-header {
   width: 100%;
   display: flex;
-
   align-items: center;
-
-  background: transparent;
   position: relative;
   gap: 10px;
-  padding-top: 1.25rem;
+  padding: 0 1rem;
+
   .avatar-container {
     width: 40px;
     height: 40px;
+    border: 1px solid $raphael-green-400;
+    cursor: pointer;
 
-    border-radius: 50%;
-    box-shadow: 8px 8px 16px rgba(163, 177, 198, 0.6),
-      -8px -8px 16px rgba(255, 255, 255, 0.8);
-
-    border: 1px solid #74bc1f;
+    @include neumorphismOuter($radius: 50%, $padding: 0);
+    transition: all 0.3s ease;
     overflow: hidden;
-    img {
-      transform: scale(1.5) translateY(10px);
+    &:hover,
+    &:active {
+      @include neumorphismOuter(
+        $radius: 50%,
+        $padding: 0,
+        $x: 0,
+        $y: 0,
+        $blur: 6px
+      );
     }
   }
 
   .character-name-btn {
     color: #4a5568;
-    padding: 10px 16px;
-    color: var(--Primary-default, #74bc1f);
+    color: $raphael-green-400;
     font-family: "Noto Sans";
-    font-size: var(--Text-font-size-18, 18px);
+    font-size: 18px;
     font-style: normal;
     font-weight: 400;
-
     letter-spacing: 2.7px;
-
-    border-radius: var(--Radius-r-50, 50px);
-    background: var(--Secondary-100, #f5f7fa);
-    box-shadow: -6px -6px 12px 0 var(--Neutral-white, #fff),
-      6px 6px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+    cursor: pointer;
+    @include neumorphismOuter($radius: 50px, $padding: 11px 16px);
     display: flex;
     align-items: center;
     gap: 2px;
+    transition: all 0.3s ease;
+
+    &:hover,
+    &:active {
+      @include neumorphismOuter(
+        $radius: 50px,
+        $padding: 11px 16px,
+        $x: 0,
+        $y: 0,
+        $blur: 6px
+      );
+    }
   }
 }
 
 /* 問候氣泡 */
 .greeting-bubble {
-  background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
-
-  padding: 16px;
-  margin-top: 1rem;
-  font-size: 16px;
-  line-height: 1.5;
-  color: #2d3748;
-  width: 100%;
-
-  max-width: none;
-  align-self: center;
-  border-radius: 20px;
-  background: var(--Secondary-100, #f5f7fa);
-  box-shadow: -6px -6px 12px 0 var(--Neutral-white, #fff),
-    6px 6px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
   position: relative;
-
-  min-height: 120px;
-  max-height: 250px;
-
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
+  justify-content: flex-start;
+  align-items: baseline;
+  margin-top: 1rem;
+  padding: 0 1rem;
 }
 
 .greeting-bubble .loading-indicator {
@@ -602,36 +618,36 @@
   font-size: 16px;
   line-height: 1.5;
   color: #2d3748;
+  width: 100%;
+  height: 120px;
+  text-align: justify;
+  @include neumorphismOuter();
+  overflow: hidden;
+  overflow-y: scroll;
+  @include scrollbarStyle();
 }
 
 .volume-control {
   border: none;
-  border-radius: 50%;
   width: 40px;
   height: 40px;
   position: absolute;
-  right: 0;
-  top: 110%;
+  right: 16px;
+  bottom: -56px;
   z-index: 2;
   cursor: pointer;
-
   transition: all 0.3s ease;
+  @include neumorphismOuter($radius: 50%, $padding: 0);
 
-  border-radius: var(--Radius-r-50, 50px);
-  background: var(--Secondary-100, #f5f7fa);
-  box-shadow: -6px -6px 12px 0 var(--Neutral-white, #fff),
-    6px 6px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
-      -6px -6px 12px rgba(255, 255, 255, 0.8);
-  }
-
+  &:hover,
   &:active {
-    box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6),
-      inset -4px -4px 8px rgba(255, 255, 255, 0.8);
-    transform: translateY(0);
+    @include neumorphismOuter(
+      $radius: 50%,
+      $padding: 0,
+      $x: 0,
+      $y: 0,
+      $blur: 6px
+    );
   }
 }
 
@@ -641,81 +657,77 @@
   width: 100%;
   display: flex;
   justify-content: center;
-
   flex: 1;
 
   .character-image {
-    width: 100%;
-    height: auto;
+    height: 100%;
   }
 }
 
 /* 語音控制欄 - 絕對定位擬態設計 */
 .voice-control-bar {
   position: fixed;
-  bottom: 18%;
+  bottom: 124px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 20px;
-  padding: 4px 16px;
-  border-radius: var(--Radius-r-50, 50px);
-  background: rgba(255, 255, 255, 0.6);
-  -webkit-backdrop-filter: blur(22px);
-  backdrop-filter: blur(22px);
-  border: 1px solid var(--Neutral-white, #fff);
-  border-radius: 50px;
-
+  @include liquidGlass();
   z-index: 10;
 
   .control-btn {
-    background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
-    border: none;
-    border-radius: 50%;
-    width: 44px;
-    height: 44px;
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
+    border: none;
+    width: 44px;
+    height: 44px;
     cursor: pointer;
-    font-size: 20px;
     transition: all 0.3s ease;
-    position: relative;
-    box-shadow: 0 0 12px 0 var(--Neutral-white, #fff),
-      6px 6px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    @include neumorphismOuter($radius: 50%, $padding: 0);
 
-    &:hover {
-      box-shadow: 2px 2px 4px rgba(163, 177, 198, 0.6),
-        -2px -2px 4px rgba(255, 255, 255, 0.8);
-      transform: translateY(-2px);
-    }
-
+    &:hover,
     &:active {
-      box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6),
-        inset -4px -4px 8px rgba(255, 255, 255, 0.8);
-      transform: translateY(0);
+      @include neumorphismOuter(
+        $radius: 50%,
+        $padding: 0,
+        $x: 0,
+        $y: 0,
+        $blur: 6px
+      );
     }
 
     &.mic-btn {
-      background: linear-gradient(
-        90deg,
-        var(--primary-400-opacity-70, rgba(116, 188, 31, 0.7)) 0%,
-        var(--Primary-default, #74bc1f) 100%
+      @include neumorphismOuter(
+        $bgColor: $raphael-green-400,
+        $radius: 50%,
+        $padding: 0
       );
 
-      color: white;
       width: 60px;
       height: 60px;
-      font-size: 26px;
+      transition: all 0.3s ease;
+
+      &:hover,
+      &:active {
+        @include neumorphismOuter(
+          $bgColor: $raphael-green-500,
+          $radius: 50%,
+          $padding: 0,
+          $x: 0,
+          $y: 0,
+          $blur: 6px
+        );
+      }
 
       &.listening {
         background: linear-gradient(
           90deg,
           var(--primary-400-opacity-70, rgba(116, 188, 31, 0.7)) 0%,
-          var(--Primary-default, #74bc1f) 100%
+          $raphael-green-400 100%
         );
 
         color: white;
@@ -802,7 +814,7 @@
       background: linear-gradient(
         90deg,
         var(--primary-400-opacity-70, rgba(116, 188, 31, 0.7)) 0%,
-        var(--Primary-default, #74bc1f) 100%
+        $raphael-green-400 100%
       );
       box-shadow: 0 2px 8px 0
         var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
@@ -1031,13 +1043,13 @@
   z-index: 1001;
   display: flex;
   flex-direction: column;
-  inset: 0;                /* 取代 top/left/width/height */
-  height: 100dvh;          /* 行動版更準確 */
-  min-height: 0;                 /* ★ 沒這行 iOS 常常不滾動 */
-  overflow: hidden;        /* 避免背景頁跟著捲 */
+  inset: 0; /* 取代 top/left/width/height */
+  height: 100dvh; /* 行動版更準確 */
+  min-height: 0; /* ★ 沒這行 iOS 常常不滾動 */
+  overflow: hidden; /* 避免背景頁跟著捲 */
   -webkit-overflow-scrolling: touch; /* ★ iOS 慣性滾動 */
-  overscroll-behavior: contain;      /* 防止把滾動帶到外層 */
-  touch-action: pan-y;               /* 明確允許垂直捲動 */
+  overscroll-behavior: contain; /* 防止把滾動帶到外層 */
+  touch-action: pan-y; /* 明確允許垂直捲動 */
 
   .history-header {
     position: relative;
@@ -1203,9 +1215,9 @@
     overflow-y: auto;
     padding: 20px;
     background: transparent;
-    min-height: 0;                      /* 讓 flex 子項可以縮、才捲得動 */
-  -webkit-overflow-scrolling: touch;  /* iOS 慣性捲動 */
-  touch-action: pan-y;                /* 明確允許垂直捲動 */
+    min-height: 0; /* 讓 flex 子項可以縮、才捲得動 */
+    -webkit-overflow-scrolling: touch; /* iOS 慣性捲動 */
+    touch-action: pan-y; /* 明確允許垂直捲動 */
 
     .history-group {
       margin-bottom: 30px;
@@ -1275,7 +1287,7 @@
             .bubble {
               border-radius: var(--Radius-r-20, 20px) 0 var(--Radius-r-20, 20px)
                 var(--Radius-r-20, 20px);
-              background: var(--Primary-default, #74bc1f);
+              background: $raphael-green-400;
               box-shadow: 6px 6px 12px 0
                 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
               color: white;
@@ -1485,7 +1497,7 @@
 
             .bubble {
               border-radius: 12px 0 12px 12px;
-              background: var(--Primary-default, #74bc1f);
+              background: $raphael-green-400;
               box-shadow: 2px 2px 4px 0
                 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
               color: white;
@@ -1595,9 +1607,9 @@
       background: var(--Secondary-100, #f5f7fa);
       box-shadow: -6px -6px 12px 0 var(--Neutral-white, #fff),
         6px 6px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
-      color: var(--Primary-default, #74bc1f);
+      color: $raphael-green-400;
 
-      font-size: var(--Text-font-size-18, 18px);
+      font-size: 18px;
       font-style: normal;
       font-weight: 400;
 
@@ -1611,9 +1623,9 @@
   .main-character-area {
     flex: 1;
     min-height: 0; /* ★ 關鍵：沒有這行 iOS 常常不捲 */
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-y;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
     display: flex;
     padding: 16px;
     gap: 2px;
@@ -1685,9 +1697,9 @@
       }
 
       .style-grid {
-        overflow-y: auto;        /* 改這個 */
+        overflow-y: auto; /* 改這個 */
 
-  -webkit-overflow-scrolling: touch;
+        -webkit-overflow-scrolling: touch;
         display: grid;
         grid-template-columns: repeat(1, 1fr);
         gap: 8px;
@@ -1715,7 +1727,7 @@
           }
 
           &.active {
-            border-color: var(--Primary-default, #74bc1f);
+            border-color: $raphael-green-400;
             box-shadow: 0 0 8px rgba(116, 188, 31, 0.4),
               4px 4px 8px rgba(163, 177, 198, 0.6),
               -4px -4px 8px rgba(255, 255, 255, 0.8);
@@ -1742,7 +1754,7 @@
 
     color: var(--Neutral-white, #fff);
 
-    font-size: var(--Text-font-size-18, 18px);
+    font-size: 18px;
     font-style: normal;
     font-weight: 400;
 
@@ -1754,7 +1766,7 @@
     background: linear-gradient(
       90deg,
       var(--primary-400-opacity-70, rgba(116, 188, 31, 0.7)) 0%,
-      var(--Primary-default, #74bc1f) 100%
+      $raphael-green-400 100%
     );
     box-shadow: -6px -6px 12px 0 var(--Neutral-white, #fff),
       6px 6px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
@@ -1834,7 +1846,7 @@
         }
 
         &.selected .character-circle {
-          border-color: var(--Primary-default, #74bc1f);
+          border-color: $raphael-green-400;
           box-shadow: 0 0 12px rgba(116, 188, 31, 0.4),
             4px 4px 8px rgba(163, 177, 198, 0.6),
             -4px -4px 8px rgba(255, 255, 255, 0.8);
@@ -1908,7 +1920,7 @@
     color: var(--Neutral-black, #1e1e1e);
     text-overflow: ellipsis;
 
-    font-size: var(--Text-font-size-18, 18px);
+    font-size: 18px;
     font-style: normal;
     font-weight: 700;
 
@@ -1945,9 +1957,9 @@
       &.name-input-cancel {
         color: #718096;
         border-radius: var(--Radius-r-50, 50px);
-        color: var(--Primary-default, #74bc1f);
+        color: $raphael-green-400;
 
-        font-size: var(--Text-font-size-18, 18px);
+        font-size: 18px;
         font-style: normal;
         font-weight: 400;
 
@@ -1963,7 +1975,7 @@
         background: linear-gradient(
           90deg,
           var(--primary-400-opacity-70, rgba(116, 188, 31, 0.7)) 0%,
-          var(--Primary-default, #74bc1f) 100%
+          $raphael-green-400 100%
         );
         box-shadow: 0 1px 12px 0
             var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4)),
@@ -1972,7 +1984,7 @@
 
         color: var(--Neutral-white, #fff);
 
-        font-size: var(--Text-font-size-18, 18px);
+        font-size: 18px;
         font-style: normal;
         font-weight: 400;
 
@@ -2092,11 +2104,7 @@
         transition: all 0.3s ease;
 
         &:hover:not(.dp__disabled) {
-          background: linear-gradient(
-            145deg,
-            var(--Primary-default, #74bc1f),
-            #5a9a17
-          );
+          background: linear-gradient(145deg, $raphael-green-400, #5a9a17);
           color: white;
           transform: translateY(-1px);
         }
@@ -2105,7 +2113,7 @@
       :deep(.dp__active) {
         background: linear-gradient(
           145deg,
-          var(--Primary-default, #74bc1f),
+          $raphael-green-400,
           #5a9a17
         ) !important;
         color: white !important;
@@ -2147,8 +2155,8 @@ import calendarSvg from "~/assets/imgs/robot/calendar.svg";
 import sendSvg from "~/assets/imgs/robot/send.svg";
 
 // ====== 新增：你的 n8n TTS webhook（需回傳 audio/wav 二進位檔）======
-const TTS_WEBHOOK_URL = "https://aiwisebalance.com/webhook/oss-gpt" 
-const voicegender= "female";
+const TTS_WEBHOOK_URL = "https://aiwisebalance.com/webhook/oss-gpt";
+const voicegender = "female";
 // 響應式狀態
 const isListening = ref(false);
 const isLoading = ref(false);
@@ -2247,18 +2255,32 @@ const visibleYear = ref(new Date().getFullYear());
 // 當月有紀錄的日期清單（Set<YYYY-MM-DD> → 只保留當月）
 const monthDateKeySet = computed(() => {
   const set = new Set();
-  console.log(`計算當月日期集合 - 當前顯示: ${visibleYear.value}/${visibleMonth.value + 1}`);
+  console.log(
+    `計算當月日期集合 - 當前顯示: ${visibleYear.value}/${
+      visibleMonth.value + 1
+    }`
+  );
   console.log(`所有可用日期:`, Array.from(calendarDateKeySet.value));
-  
+
   calendarDateKeySet.value.forEach((key) => {
     const d = new Date(key + "T00:00:00");
-    console.log(`檢查日期 ${key}: ${d.getFullYear()}-${d.getMonth() + 1} vs ${visibleYear.value}-${visibleMonth.value + 1}`);
-    if (d.getFullYear() === visibleYear.value && d.getMonth() === visibleMonth.value) {
+    console.log(
+      `檢查日期 ${key}: ${d.getFullYear()}-${d.getMonth() + 1} vs ${
+        visibleYear.value
+      }-${visibleMonth.value + 1}`
+    );
+    if (
+      d.getFullYear() === visibleYear.value &&
+      d.getMonth() === visibleMonth.value
+    ) {
       set.add(key);
       console.log(`✓ 添加日期 ${key} 到當月集合`);
     }
   });
-  console.log(`當月 ${visibleYear.value}/${visibleMonth.value + 1} 可用日期:`, Array.from(set));
+  console.log(
+    `當月 ${visibleYear.value}/${visibleMonth.value + 1} 可用日期:`,
+    Array.from(set)
+  );
   return set;
 });
 
@@ -2578,16 +2600,16 @@ let voiceTimeout = null; // 語音識別超時計時器
 let recognitionRef = null;
 let synthRef = null;
 // ====== 新增：全域 Audio，集中管理播放與停止 ======
-let player = null
-let currentObjectUrl = null
+let player = null;
+let currentObjectUrl = null;
 function ensurePlayer() {
-  if (!player) player = new Audio()
-  return player
+  if (!player) player = new Audio();
+  return player;
 }
 function revokeObjectUrl() {
   if (currentObjectUrl) {
-    URL.revokeObjectURL(currentObjectUrl)
-    currentObjectUrl = null
+    URL.revokeObjectURL(currentObjectUrl);
+    currentObjectUrl = null;
   }
 }
 
@@ -2617,9 +2639,9 @@ const groupedHistory = computed(() => {
   });
 
   // 對每個日期組內的對話按時間排序（最新的在前面）
-   Object.keys(groups).forEach((date) => {
-   groups[date].sort((a, b) => (a.ts ?? 0) - (b.ts ?? 0)); // 當日內：舊→新
- });
+  Object.keys(groups).forEach((date) => {
+    groups[date].sort((a, b) => (a.ts ?? 0) - (b.ts ?? 0)); // 當日內：舊→新
+  });
 
   // 按日期升冪排序（最舊的日期在前面）
   const sortedGroups = {};
@@ -2641,7 +2663,7 @@ const formatDate = (dateStr) => {
     const weekdays = ["日", "一", "二", "三", "四", "五", "六"];
     return `${y}/${m}/${d} (${weekdays[dt.getDay()]})`;
   }
-  
+
   // 原有的 YYYY/MM/DD 格式
   const date = new Date(dateStr);
   const weekdays = ["日", "一", "二", "三", "四", "五", "六"];
@@ -2812,7 +2834,7 @@ const toggleCalendar = () => {
     showCalendar.value = !showCalendar.value;
     if (showCalendar.value) {
       loadCalendarDates(); // 更新所有有紀錄的日期
-      
+
       // 設定日曆顯示的月份為最新有記錄的月份
       if (maxHistoryDate.value) {
         visibleMonth.value = maxHistoryDate.value.getMonth();
@@ -2822,8 +2844,10 @@ const toggleCalendar = () => {
         visibleMonth.value = now.getMonth();
         visibleYear.value = now.getFullYear();
       }
-      
-      console.log(`日曆開啟，顯示月份: ${visibleYear.value}/${visibleMonth.value + 1}`);
+
+      console.log(
+        `日曆開啟，顯示月份: ${visibleYear.value}/${visibleMonth.value + 1}`
+      );
     }
   }
 };
@@ -2851,11 +2875,14 @@ const loadCalendarDates = () => {
     ).sort();
 
     console.log("載入的日期:", Array.from(calendarDateKeySet.value));
-    console.log("對話記錄:", conversations.value.map(c => ({ 
-      id: c.id, 
-      timestamp: c.timestamp, 
-      dateKey: c.dateKey || toDateKey(c.timestamp) 
-    })));
+    console.log(
+      "對話記錄:",
+      conversations.value.map((c) => ({
+        id: c.id,
+        timestamp: c.timestamp,
+        dateKey: c.dateKey || toDateKey(c.timestamp),
+      }))
+    );
   }
 };
 
@@ -2868,7 +2895,7 @@ const ensureDateVisible = (dateKey) => {
     const cDateKey = c.dateKey || toDateKey(c.timestamp);
     return cDateKey === dateKey;
   });
-  
+
   if (firstIndex === -1) {
     console.log(`找不到日期 ${dateKey} 的對話記錄`);
     return null;
@@ -2876,19 +2903,26 @@ const ensureDateVisible = (dateKey) => {
 
   // 簡化分頁計算：確保該訊息在當前顯示範圍內
   const total = conversations.value.length;
-  const startIndex = Math.max(0, total - currentPage.value * messagesPerPage.value);
+  const startIndex = Math.max(
+    0,
+    total - currentPage.value * messagesPerPage.value
+  );
   const endIndex = total;
-  
+
   // 如果該訊息不在當前顯示範圍內，調整分頁
   if (firstIndex < startIndex || firstIndex >= endIndex) {
     // 計算需要顯示多少頁才能包含該訊息
     const messagesFromEnd = total - firstIndex;
     const requiredPages = Math.ceil(messagesFromEnd / messagesPerPage.value);
     currentPage.value = requiredPages;
-    console.log(`調整分頁到第 ${currentPage.value} 頁以顯示日期 ${dateKey} 的訊息`);
+    console.log(
+      `調整分頁到第 ${currentPage.value} 頁以顯示日期 ${dateKey} 的訊息`
+    );
   }
-  
-  console.log(`找到日期 ${dateKey} 的第一則訊息 ID: ${conversations.value[firstIndex]?.id}`);
+
+  console.log(
+    `找到日期 ${dateKey} 的第一則訊息 ID: ${conversations.value[firstIndex]?.id}`
+  );
   return conversations.value[firstIndex]?.id || null;
 };
 
@@ -2930,7 +2964,10 @@ const isDateDisabledForMonth = (date) => {
   const key = toDateKey(date);
   // 限制：僅允許該月有紀錄的日期（monthDateKeySet）
   const isDisabled = !monthDateKeySet.value.has(key);
-  console.log(`日期 ${key} 是否被停用: ${isDisabled}, 當月可用日期:`, Array.from(monthDateKeySet.value));
+  console.log(
+    `日期 ${key} 是否被停用: ${isDisabled}, 當月可用日期:`,
+    Array.from(monthDateKeySet.value)
+  );
   return isDisabled;
 };
 
@@ -3175,58 +3212,67 @@ const initSpeechRecognition = () => {
 
 /** 一次呼叫 n8n，取得回覆文字（X-Answer header）+ 取得音檔 Blob 並播放 */
 async function fetchTTSAndPlayAndReturnText(userText, extra = {}) {
-  let res
+  let res;
   try {
     res = await fetch(TTS_WEBHOOK_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        chatInput: userText,     // 你要給 n8n 的輸入
+        chatInput: userText, // 你要給 n8n 的輸入
         sessionId: UUID,
         voicegender: voicegender,
         timestamp: new Date().toISOString(),
-        pitch_semitones: 1.5 
-      })
-    })
+        pitch_semitones: 1.5,
+      }),
+    });
   } catch (e) {
-    showAudioError.value = true
-    throw e
+    showAudioError.value = true;
+    throw e;
   }
 
   if (!res.ok) {
-    showAudioError.value = true
-    throw new Error(`TTS webhook failed: ${res.status}`)
+    showAudioError.value = true;
+    throw new Error(`TTS webhook failed: ${res.status}`);
   }
 
   // 1) 拿回覆文字（在 X-Answer）
-  const headerText = res.headers.get('x-answer') || ''
-  const answerText = decodeURIComponent(headerText)
+  const headerText = res.headers.get("x-answer") || "";
+  const answerText = decodeURIComponent(headerText);
 
   // 2) 讀音檔並播放
-  const blob = await res.blob() // audio/wav
-  const url = URL.createObjectURL(blob)
-  const audio = ensurePlayer()
-  try { audio.pause() } catch {}
-  revokeObjectUrl()
-  audio.src = url
-  currentObjectUrl = url
+  const blob = await res.blob(); // audio/wav
+  const url = URL.createObjectURL(blob);
+  const audio = ensurePlayer();
+  try {
+    audio.pause();
+  } catch {}
+  revokeObjectUrl();
+  audio.src = url;
+  currentObjectUrl = url;
 
-  audio.onplay = () => { isSpeaking.value = true }
-  audio.onended = () => { isSpeaking.value = false; revokeObjectUrl() }
-  audio.onerror = () => { isSpeaking.value = false; showAudioError.value = true; revokeObjectUrl() }
+  audio.onplay = () => {
+    isSpeaking.value = true;
+  };
+  audio.onended = () => {
+    isSpeaking.value = false;
+    revokeObjectUrl();
+  };
+  audio.onerror = () => {
+    isSpeaking.value = false;
+    showAudioError.value = true;
+    revokeObjectUrl();
+  };
 
   try {
-    await audio.play()
-  } catch (e) { // iOS 需要使用者手勢觸發
-    showAudioError.value = true
-    throw e
+    await audio.play();
+  } catch (e) {
+    // iOS 需要使用者手勢觸發
+    showAudioError.value = true;
+    throw e;
   }
 
-  return answerText
+  return answerText;
 }
-
-
-
 
 // 開始/停止語音識別
 const toggleListening = () => {
@@ -3271,27 +3317,29 @@ const toggleListening = () => {
 
 // 處理語音輸入結束
 const handleSpeechEnd = async (transcript) => {
-  if (!transcript.trim()) return
-  isLoading.value = true
-  currentTranscript.value = ''
+  if (!transcript.trim()) return;
+  isLoading.value = true;
+  currentTranscript.value = "";
 
   try {
     // 一次拿回覆 + 播音檔
-    const botResponse = await fetchTTSAndPlayAndReturnText(transcript, { pitch_semitones: 1.5 })
+    const botResponse = await fetchTTSAndPlayAndReturnText(transcript, {
+      pitch_semitones: 1.5,
+    });
 
-     const nowTs = Date.now();
-     const newConversation = {
-  id: nowTs,
-  ts: nowTs,
-  user: transcript, // ← 修正這裡
-  bot: botResponse || '（沒有回覆文字）',
-  timestamp: new Date().toLocaleString('zh-TW'),
-  dateKey: toDateKey(new Date(nowTs))
-}
- conversations.value.push(newConversation); // ★ 改用 push，保持陣列「舊→新」
-    latestResponse.value = botResponse || '（沒有回覆文字）';
+    const nowTs = Date.now();
+    const newConversation = {
+      id: nowTs,
+      ts: nowTs,
+      user: transcript, // ← 修正這裡
+      bot: botResponse || "（沒有回覆文字）",
+      timestamp: new Date().toLocaleString("zh-TW"),
+      dateKey: toDateKey(new Date(nowTs)),
+    };
+    conversations.value.push(newConversation); // ★ 改用 push，保持陣列「舊→新」
+    latestResponse.value = botResponse || "（沒有回覆文字）";
     saveConversations();
-    
+
     // 如果當前在歷史記錄頁面，確保新訊息可見
     if (showHistoryPage.value) {
       // 重置到第一頁以顯示最新訊息
@@ -3303,23 +3351,22 @@ const handleSpeechEnd = async (transcript) => {
         }, 100);
       });
     }
-    
-    console.log('語音輸入處理完成:', newConversation);
 
+    console.log("語音輸入處理完成:", newConversation);
   } catch (error) {
-    console.error('API 調用錯誤:', error)
-    const errorResponse = '抱歉，服務暫時無法使用，請稍後再試。'
+    console.error("API 調用錯誤:", error);
+    const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
     const errorConversation = {
       id: Date.now(),
       user: transcript,
       bot: errorResponse,
-      timestamp: new Date().toLocaleString('zh-TW'),
-      dateKey: toDateKey(new Date())
-    }
+      timestamp: new Date().toLocaleString("zh-TW"),
+      dateKey: toDateKey(new Date()),
+    };
     conversations.value.unshift(errorConversation);
     latestResponse.value = errorResponse;
     saveConversations();
-    
+
     // 如果當前在歷史記錄頁面，確保新訊息可見
     if (showHistoryPage.value) {
       currentPage.value = 1;
@@ -3330,9 +3377,9 @@ const handleSpeechEnd = async (transcript) => {
       });
     }
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 
 // 語音播放文字
 const speakText = (text) => {
@@ -3448,17 +3495,20 @@ const speakText = (text) => {
 
 // 停止語音播放
 const stopSpeaking = () => {
- /* if (synthRef && process.client) {
+  /* if (synthRef && process.client) {
     isManuallyStopped.value = true
     showAudioError.value = false  // ✅ 手動停止不顯示錯誤視窗
     synthRef.cancel()
     isSpeaking.value = false
   }*/
-  const a = ensurePlayer()
-  try { a.pause(); a.currentTime = 0 } catch {}
-  isSpeaking.value = false
-  revokeObjectUrl()
-}
+  const a = ensurePlayer();
+  try {
+    a.pause();
+    a.currentTime = 0;
+  } catch {}
+  isSpeaking.value = false;
+  revokeObjectUrl();
+};
 
 // 切換音量控制
 const toggleVolume = () => {
@@ -3497,25 +3547,27 @@ const handleManualInput = async () => {
   if (!input) return;
 
   isLoading.value = true;
-  currentTranscript.value = '';
-  textInput.value = '';
+  currentTranscript.value = "";
+  textInput.value = "";
 
   try {
-    const botResponse = await fetchTTSAndPlayAndReturnText(input, { pitch_semitones: 1.5 })
+    const botResponse = await fetchTTSAndPlayAndReturnText(input, {
+      pitch_semitones: 1.5,
+    });
 
     const nowTs = Date.now();
     const newConversation = {
-  id: nowTs,
-  ts: nowTs,
-  user: input, // ← 修正這裡
-  bot: botResponse || '（沒有回覆文字）',
-  timestamp: new Date().toLocaleString('zh-TW'),
-  dateKey: toDateKey(new Date(nowTs))
-}
- conversations.value.push(newConversation); // ★ 改用 push，保持陣列「舊→新」
-    latestResponse.value = botResponse || '（沒有回覆文字）';
+      id: nowTs,
+      ts: nowTs,
+      user: input, // ← 修正這裡
+      bot: botResponse || "（沒有回覆文字）",
+      timestamp: new Date().toLocaleString("zh-TW"),
+      dateKey: toDateKey(new Date(nowTs)),
+    };
+    conversations.value.push(newConversation); // ★ 改用 push，保持陣列「舊→新」
+    latestResponse.value = botResponse || "（沒有回覆文字）";
     saveConversations();
-    
+
     // 如果當前在歷史記錄頁面，確保新訊息可見
     if (showHistoryPage.value) {
       // 重置到第一頁以顯示最新訊息
@@ -3527,23 +3579,23 @@ const handleManualInput = async () => {
         }, 100);
       });
     }
-    
-    console.log('文字輸入處理完成:', newConversation);
+
+    console.log("文字輸入處理完成:", newConversation);
   } catch (error) {
-    console.error('API 調用錯誤:', error)
-    const errorResponse = '抱歉，服務暫時無法使用，請稍後再試。'
+    console.error("API 調用錯誤:", error);
+    const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
     const errorConversation = {
       id: Date.now(),
       user: input,
       bot: errorResponse,
-      timestamp: new Date().toLocaleString('zh-TW'),
-      dateKey: toDateKey(new Date())
-    }
-    
+      timestamp: new Date().toLocaleString("zh-TW"),
+      dateKey: toDateKey(new Date()),
+    };
+
     conversations.value.unshift(errorConversation);
     latestResponse.value = errorResponse;
     saveConversations();
-    
+
     // 如果當前在歷史記錄頁面，確保新訊息可見
     if (showHistoryPage.value) {
       currentPage.value = 1;
@@ -3554,10 +3606,9 @@ const handleManualInput = async () => {
       });
     }
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
-
+};
 
 // 本地儲存對話記錄
 const saveConversations = () => {
@@ -3579,23 +3630,26 @@ const loadConversations = () => {
       try {
         const raw = JSON.parse(saved);
         console.log("載入原始對話記錄:", raw);
-        
-        // 統一補上 dateKey
-               conversations.value = raw.map((c) => {
-         const ts = c.ts ?? c.id ?? Date.now(); // 舊資料沒有 ts，就用 id（你本來就用 Date.now() 當 id）
-         return {
-           ...c,
-           ts,
-           dateKey: c.dateKey || toDateKey(new Date(ts)),
-         };
-       }).sort((a, b) => a.ts - b.ts); // 保證陣列舊→新
 
-       latestResponse.value = conversations.value[conversations.value.length - 1]?.bot || "";
-        
+        // 統一補上 dateKey
+        conversations.value = raw
+          .map((c) => {
+            const ts = c.ts ?? c.id ?? Date.now(); // 舊資料沒有 ts，就用 id（你本來就用 Date.now() 當 id）
+            return {
+              ...c,
+              ts,
+              dateKey: c.dateKey || toDateKey(new Date(ts)),
+            };
+          })
+          .sort((a, b) => a.ts - b.ts); // 保證陣列舊→新
+
+        latestResponse.value =
+          conversations.value[conversations.value.length - 1]?.bot || "";
+
         console.log("處理後的對話記錄:", conversations.value);
-        
+
         loadCalendarDates();
-        
+
         // 初始化日曆顯示月份為最新有記錄的月份
         if (conversations.value.length > 0) {
           // 使用 nextTick 確保 calendarDateKeySet 已更新
@@ -3604,7 +3658,11 @@ const loadConversations = () => {
             if (latestDate) {
               visibleMonth.value = latestDate.getMonth();
               visibleYear.value = latestDate.getFullYear();
-              console.log(`初始化日曆顯示月份: ${visibleYear.value}/${visibleMonth.value + 1}`);
+              console.log(
+                `初始化日曆顯示月份: ${visibleYear.value}/${
+                  visibleMonth.value + 1
+                }`
+              );
             }
           });
         }
@@ -3657,7 +3715,7 @@ onMounted(() => {
   if (process.client) {
     showVoiceControls.value = true;
   }
-  
+
   // 添加調試函數到全局
   if (process.client) {
     window.debugCalendar = () => {
@@ -3722,8 +3780,12 @@ onUnmounted(() => {
   if (recognitionRef) {
     recognitionRef.stop();
   }
-  if (player) { try { player.pause() } catch {} }
-  revokeObjectUrl()
+  if (player) {
+    try {
+      player.pause();
+    } catch {}
+  }
+  revokeObjectUrl();
   //if (process.client && synthRef) {synthRef.cancel();}
   // 清除超時計時器
   if (voiceTimeout) {

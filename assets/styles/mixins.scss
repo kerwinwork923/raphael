@@ -269,5 +269,14 @@
   background: $bgColor;
   border-radius: $radius;
   padding: $padding;
-  box-shadow: $x $y $blur 0px $color;
+  box-shadow: $x $y $blur 0 $color;
+}
+
+@mixin liquidGlass() {
+  background: rgba(245, 247, 250, 0.65);
+  border-radius: 50px;
+  border: 1px solid $raphael-white;
+  padding: 4px 16px;
+  -webkit-backdrop-filter: blur(44px);
+  backdrop-filter: blur(44px);
 }
