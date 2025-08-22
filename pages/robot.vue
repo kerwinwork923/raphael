@@ -3280,14 +3280,14 @@ const handleSpeechEnd = async (transcript) => {
     const botResponse = await fetchTTSAndPlayAndReturnText(transcript, { pitch_semitones: 1.5 })
 
      const nowTs = Date.now();
- const newConversation = {
-   id: nowTs,
-   ts: nowTs, // ★ 之後一律用這個排序/顯示
-   user: transcript, // 或 input
-   bot: botResponse || '（沒有回覆文字）',
-   timestamp: new Date().toLocaleString('zh-TW'), // 只做備註/除錯
-   dateKey: toDateKey(new Date(nowTs))
- }
+     const newConversation = {
+  id: nowTs,
+  ts: nowTs,
+  user: transcript, // ← 修正這裡
+  bot: botResponse || '（沒有回覆文字）',
+  timestamp: new Date().toLocaleString('zh-TW'),
+  dateKey: toDateKey(new Date(nowTs))
+}
  conversations.value.push(newConversation); // ★ 改用 push，保持陣列「舊→新」
     latestResponse.value = botResponse || '（沒有回覆文字）';
     saveConversations();
@@ -3504,14 +3504,14 @@ const handleManualInput = async () => {
     const botResponse = await fetchTTSAndPlayAndReturnText(input, { pitch_semitones: 1.5 })
 
     const nowTs = Date.now();
- const newConversation = {
-   id: nowTs,
-   ts: nowTs, // ★ 之後一律用這個排序/顯示
-   user: transcript, // 或 input
-   bot: botResponse || '（沒有回覆文字）',
-   timestamp: new Date().toLocaleString('zh-TW'), // 只做備註/除錯
-   dateKey: toDateKey(new Date(nowTs))
- }
+    const newConversation = {
+  id: nowTs,
+  ts: nowTs,
+  user: input, // ← 修正這裡
+  bot: botResponse || '（沒有回覆文字）',
+  timestamp: new Date().toLocaleString('zh-TW'),
+  dateKey: toDateKey(new Date(nowTs))
+}
  conversations.value.push(newConversation); // ★ 改用 push，保持陣列「舊→新」
     latestResponse.value = botResponse || '（沒有回覆文字）';
     saveConversations();
