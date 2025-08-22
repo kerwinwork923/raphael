@@ -751,23 +751,17 @@
 /* 文字輸入區域 */
 .text-input-section {
   width: 100%;
-  padding: 0 20px;
-  margin-bottom: 20px;
+  padding: 0 16px;
   position: fixed;
-  bottom: 27.5%;
+  bottom: 211px;
   left: 50%;
   transform: translateX(-50%);
-  width: 90%;
   z-index: 10;
 
   .input-container {
     display: flex;
     align-items: center;
-    border-radius: var(--Radius-r-20, 20px);
-    border: 1px solid $raphael-white;
-    background: rgba(245, 247, 250, 0.65);
-    backdrop-filter: blur(22px);
-    padding: 8px 16px;
+    @include liquidGlass($radius: 20px);
 
     .text-input {
       flex: 1;
@@ -775,7 +769,7 @@
       font-size: 16px;
       outline: none;
       background: transparent;
-      padding: 0 16px;
+      padding-right: 16px;
       color: #2d3748;
 
       &::placeholder {
