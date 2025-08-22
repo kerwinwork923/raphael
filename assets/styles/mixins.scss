@@ -202,7 +202,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(0,0,0,.25s);
+  background: rgba(245, 247, 250, 0.1);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
 }
 
 @mixin recordList($bgColor, $height, $radius, $padding) {
@@ -278,7 +280,7 @@
   }
 }
 
-@mixin neumorphismOuter($bgColor:#F5F7FA, $radius:20px, $padding:16px, $x:6px, $y:6px, $blur:12px, $color:rgba(177, 192, 216, 0.7)) {
+@mixin neumorphismOuter($bgColor:#F5F7FA, $radius:20px, $padding:16px, $x:2px, $y:4px, $blur:12px, $color:rgba(177, 192, 216, 0.7)) {
   background: $bgColor;
   border-radius: $radius;
   padding: $padding;
