@@ -485,6 +485,8 @@
 
 <style lang="scss" scoped>
 .chat-wrapper {
+  display: flex;
+  flex-direction: column;
   position: relative;
   min-height: 100vh;
   font-family: "Noto Sans";
@@ -533,6 +535,7 @@
     @include neumorphismOuter($radius: 50%, $padding: 0);
     transition: all 0.3s ease;
     overflow: hidden;
+
     &:hover,
     &:active {
       @include neumorphismOuter(
@@ -543,6 +546,7 @@
         $blur: 6px
       );
     }
+    
   }
 
   .character-name-btn {
@@ -658,9 +662,10 @@
   display: flex;
   justify-content: center;
   flex: 1;
+  padding-bottom: 97px;
 
   .character-image {
-    height: 100%;
+    object-fit: cover;
   }
 }
 
