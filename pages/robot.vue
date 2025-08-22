@@ -487,7 +487,7 @@
 .chat-wrapper {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100dvh;
   font-family: "Noto Sans";
   padding-top: 1rem;
   overflow: hidden;
@@ -642,6 +642,7 @@
   display: flex;
   justify-content: center;
   flex: 1;
+  height: 0;
   padding-bottom: 97px;
 
   .character-image {
@@ -753,11 +754,13 @@
 /* 文字輸入區域 */
 .text-input-section {
   width: 100%;
-  padding: 0 16px;
+  padding: 0 20px;
+  margin-bottom: 20px;
   position: fixed;
   bottom: 27.5%;
   left: 50%;
   transform: translateX(-50%);
+  width: 90%;
   z-index: 10;
 
   .input-container {
@@ -775,7 +778,7 @@
       font-size: 16px;
       outline: none;
       background: transparent;
-      padding-right: 16px;
+      padding: 0 16px;
       color: #2d3748;
 
       &::placeholder {
@@ -1629,7 +1632,6 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap:1rem;
       height: 192px;
       @include neumorphismOuter($radius: 8px, $padding: 8px);
 
@@ -1674,7 +1676,7 @@
       .style-grid {
         display: grid;
         grid-template-columns: repeat(1, 1fr);
-        gap: 1rem;
+        gap: 8px;
         overflow: hidden;
         overflow-y: auto; /* 改這個 */
         -webkit-overflow-scrolling: touch;
@@ -1688,6 +1690,7 @@
           height: 60px;
           cursor: pointer;
           border: none;
+          margin: 0.5rem 0.5rem 0;
           overflow: hidden;
           transition: all 0.3s ease;
 
