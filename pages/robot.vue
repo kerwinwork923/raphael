@@ -753,7 +753,7 @@
   width: 100%;
   padding: 0 16px;
   position: fixed;
-  bottom: 211px;
+  bottom: 219px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
@@ -761,7 +761,7 @@
   .input-container {
     display: flex;
     align-items: center;
-    @include liquidGlass($radius: 20px);
+    @include liquidGlass($radius: 20px, $padding: 8px 16px);
 
     .text-input {
       flex: 1;
@@ -1071,7 +1071,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: flex-end;
-      gap: 10px;
+      gap: 16px;
       min-width: 56px;
     }
 
@@ -1830,8 +1830,6 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(50, 50, 50, 0.01);
-  backdrop-filter: blur(8px);
   z-index: 3000;
   display: flex;
   justify-content: center;
@@ -1839,15 +1837,10 @@
 }
 
 .name-input-modal {
-  padding: 24px;
-  border-radius: 20px;
-  border-radius: var(--Radius-r-20, 20px);
-  background: rgba(245, 247, 250, 0.65);
-  box-shadow: -6px -6px 12px 0 $raphael-white,
-    6px 6px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
-  backdrop-filter: blur(22px);
+  @include neumorphismOuter($bgColor: rgba(245, 247, 250, 0.65));
+  backdrop-filter: blur(44px);
   width: 90%;
-  max-width: 320px;
+  max-width: 361px;
   text-align: center;
 
   .name-input-title {
@@ -1864,14 +1857,8 @@
 
   .name-input-field {
     width: 100%;
-    padding: 12px 16px;
+    @include neumorphismOuter($radius: 50px, $padding: 10px 12px);
     border: none;
-    border-radius: var(--Radius-r-50, 50px);
-    background: var(--Secondary-100, #f5f7fa);
-    box-shadow: -6px -6px 12px 0 $raphael-white inset,
-      6px 6px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4))
-        inset;
-
     overflow: hidden;
     color: $raphael-black;
     text-overflow: ellipsis;
