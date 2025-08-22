@@ -1825,17 +1825,7 @@
 
 /* 角色名稱輸入彈窗樣式 */
 .name-input-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 3000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(4px);
+  @include blurOverlay();
 }
 
 .name-input-modal {
