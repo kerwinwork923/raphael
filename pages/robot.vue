@@ -569,8 +569,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: #4a5568;
-  font-size: 14px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #2d3748;
+  width: 100%;
+  height: 120px;
+  text-align: justify;
   @include neumorphismOuter();
 
   .spinner {
