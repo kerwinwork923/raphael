@@ -140,6 +140,7 @@ onMounted(() => {
   grid-auto-flow: column;
   grid-template-columns: repeat(5, 1fr);
   padding: 12px 0;
+  padding-bottom: 24px;
   border-top: 1px solid $raphael-white;
 
   .nav-item {
@@ -150,7 +151,7 @@ onMounted(() => {
     color: #4a5568;
     cursor: pointer;
     transition: all 0.3s ease;
-    padding: 8px 12px;
+    padding: 8px;
     border-radius: 15px;
 
     &.active {
