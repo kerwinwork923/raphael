@@ -546,7 +546,6 @@
         $blur: 6px
       );
     }
-    
   }
 
   .character-name-btn {
@@ -632,6 +631,9 @@
 }
 
 .volume-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: none;
   width: 40px;
   height: 40px;
