@@ -635,14 +635,15 @@
 /* 角色形象區域 */
 .character-section {
   position: relative;
-  width: 100%;
   display: flex;
   justify-content: center;
   flex: 1;
+  width: 100%;
   height: 0;
   padding-bottom: 97px;
 
   .character-image {
+    height: 100%;
     object-fit: cover;
   }
 }
@@ -842,7 +843,7 @@
   &:active {
     @include neumorphismOuter(
       $radius: 50%,
-      $padding: 0,
+      $padding: 4px,
       $x: 0,
       $y: 0,
       $blur: 6px
