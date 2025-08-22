@@ -487,7 +487,7 @@
 .chat-wrapper {
   display: flex;
   flex-direction: column;
-  height: 100dvh;
+  min-height: 100vh;
   font-family: "Noto Sans";
   padding-top: 1rem;
   overflow: hidden;
@@ -642,7 +642,6 @@
   display: flex;
   justify-content: center;
   flex: 1;
-  height: 0;
   padding-bottom: 97px;
 
   .character-image {
