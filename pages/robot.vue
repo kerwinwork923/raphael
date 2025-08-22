@@ -587,12 +587,13 @@
   font-size: 16px;
   line-height: 1.5;
   color: #2d3748;
-  word-break: break-word;
-  max-width: 100%;
-  overflow-y: auto;
-  max-height: 120px;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-y;
+  width: 100%;
+  height: 120px;
+  text-align: justify;
+  @include neumorphismOuter();
+  overflow: hidden;
+  overflow-y: scroll;
+  @include scrollbarStyle();
 }
 
 .greeting-bubble .greeting-text {
