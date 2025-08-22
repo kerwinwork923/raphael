@@ -571,6 +571,7 @@
   align-items: center;
   color: #4a5568;
   font-size: 14px;
+  @include neumorphismOuter();
 
   .spinner {
     width: 24px;
