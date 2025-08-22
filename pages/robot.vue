@@ -110,7 +110,7 @@
             @click="handleVoiceModalClick"
           />
           <p v-if="showVoiceError" class="voice-error-text">
-            聽不太清楚，請再試一次
+            聽不太清楚，點擊再試一次
           </p>
           <p v-else-if="currentTranscript" class="transcript-text">
             {{ currentTranscript }}
@@ -487,7 +487,7 @@
 .chat-wrapper {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
   font-family: "Noto Sans";
   padding-top: 1rem;
   overflow: hidden;
@@ -602,16 +602,7 @@
 }
 
 .greeting-bubble .greeting-text {
-  font-size: 16px;
-  line-height: 1.5;
-  color: #2d3748;
-  width: 100%;
-  height: 120px;
-  text-align: justify;
-  @include neumorphismOuter();
-  overflow: hidden;
-  overflow-y: scroll;
-  @include scrollbarStyle();
+  @extend .latest-response;
 }
 
 .volume-control {
@@ -648,6 +639,7 @@
   display: flex;
   justify-content: center;
   flex: 1;
+  height: 0;
   padding-bottom: 97px;
 
   .character-image {
@@ -715,24 +707,23 @@
       }
 
       &.listening {
-        background: linear-gradient(
-          90deg,
-          var(--primary-400-opacity-70, rgba(116, 188, 31, 0.7)) 0%,
-          $raphael-green-400 100%
+        @include neumorphismOuter(
+          $bgColor: $raphael-green-400,
+          $radius: 50%,
+          $padding: 0
         );
 
-        color: white;
-        width: 70px;
-        height: 70px;
-        font-size: 26px;
+        width: 60px;
+        height: 60px;
+        transition: all 0.3s ease;
       }
     }
   }
 
   .pulse-ring {
     position: absolute;
-    width: 80px;
-    height: 80px;
+    width: 70px;
+    height: 70px;
     border: 2px solid rgba(239, 68, 68, 0.4);
     border-radius: 50%;
     animation: pulse 1.5s infinite;
@@ -823,6 +814,7 @@
 
 /* 轉錄顯示 */
 .transcript-display {
+  display: none; //暫時不顯示
   width: 100%;
   padding: 0 20px;
   margin-bottom: 20px;
@@ -842,17 +834,20 @@
   }
 }
 .voiceModelClose {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 12.5%;
+  @include neumorphismOuter($radius: 50%, $padding: 4px);
+  margin-top: 44px;
+  transition: all 0.3s ease;
 
-  padding: 4px;
-  border-radius: var(--Radius-r-50, 50px);
-  background: var(--Secondary-100, #f5f7fa);
-  box-shadow: 0 2px 8px 0
-    var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
-  margin-top: 8px;
+  &:hover,
+  &:active {
+    @include neumorphismOuter(
+      $radius: 50%,
+      $padding: 0,
+      $x: 0,
+      $y: 0,
+      $blur: 6px
+    );
+  }
 
   .voiceModelImg {
     width: 30px;
@@ -874,6 +869,9 @@
 
 /* 語音模態框 */
 .voice-modal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   position: fixed;
   bottom: 0;
   left: 50%;
@@ -881,22 +879,24 @@
   transform: translateX(-50%);
   width: 100%;
   height: 375px;
-  border-radius: 51px 51px 0 0;
 
   background: rgba(245, 247, 250, 0.1);
   backdrop-filter: blur(22px);
-  box-shadow: 12px 12px 24px rgba(163, 177, 198, 0.6),
-    -12px -12px 24px rgba(255, 255, 255, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
   z-index: 100;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  @include neumorphismOuter(
+    $bgColor: rgba(245, 247, 250, 0.1),
+    $radius: 50px 50px 0 0,
+    $x: 0,
+    $y: -2px,
+    $blur: 12px,
+    $color: $raphael-white
+  );
 
   .voice-content {
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 12px;
 
     .voice-wave {
       width: 90px;
@@ -913,16 +913,11 @@
     }
 
     .voice-error-text {
-      color: var(--Neutral-black, #1e1e1e);
+      color: $raphael-black;
       text-align: center;
-      font-family: "Noto Sans";
-      font-size: var(--Text-font-size-20, 20px);
-      font-style: normal;
-      font-weight: 700;
-      line-height: normal;
+      font-size: 20px;
+      font-weight: 600;
       text-transform: lowercase;
-      position: absolute;
-      bottom: 27%;
     }
 
     .transcript-text {
@@ -1633,11 +1628,11 @@
       position: absolute;
       right: 16px;
       top: 0;
-      width: 90px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      height: 192px;
+      width: 90px;
+      height: 220px;
       @include neumorphismOuter($radius: 8px, $padding: 8px);
 
       .style-header {
@@ -1651,7 +1646,7 @@
           color: #4a5568;
           text-align: center;
           font-weight: 500;
-          color: var(--Neutral-black, #1e1e1e);
+          color: $raphael-black;
           margin-top: 0.5rem;
           font-size: var(--Text-font-size-14, 14px);
           font-style: normal;
@@ -1767,7 +1762,7 @@
     .character-scroll-container {
       display: grid;
       grid-auto-flow: column;
-      gap: 16px;
+      gap: 8px;
       @include neumorphismOuter();
       overflow-x: auto;
       scroll-behavior: smooth;
@@ -1861,7 +1856,7 @@
   text-align: center;
 
   .name-input-title {
-    color: var(--Neutral-black, #1e1e1e);
+    color: $raphael-black;
     text-align: center;
 
     font-size: var(--Text-font-size-24, 20px);
@@ -1883,7 +1878,7 @@
         inset;
 
     overflow: hidden;
-    color: var(--Neutral-black, #1e1e1e);
+    color: $raphael-black;
     text-overflow: ellipsis;
 
     font-size: 18px;
