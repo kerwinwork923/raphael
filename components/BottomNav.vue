@@ -79,51 +79,54 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, onMounted, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
-const route = useRoute()
-const router = useRouter()
+const route = useRoute();
+const router = useRouter();
 
-const activeTab = ref('home')
+const activeTab = ref("home");
 
 // 根據當前路由設置活動標籤
 const setActiveTabFromRoute = () => {
-  const path = route.path
+  const path = route.path;
   switch (path) {
-    case '/service':
-      activeTab.value = 'services'
-      break
-    case '/UsageHistory':
-      activeTab.value = 'record'
-      break
-    case '/robot':
-      activeTab.value = 'home'
-      break
-    case '/cart':
-      activeTab.value = 'shop'
-      break
-    case '/member':
-      activeTab.value = 'member'
-      break
+    case "/service":
+      activeTab.value = "services";
+      break;
+    case "/UsageHistory":
+      activeTab.value = "record";
+      break;
+    case "/robot":
+      activeTab.value = "home";
+      break;
+    case "/cart":
+      activeTab.value = "shop";
+      break;
+    case "/member":
+      activeTab.value = "member";
+      break;
     default:
-      activeTab.value = 'home'
+      activeTab.value = "home";
   }
-}
+};
 
 // 導航到指定頁面
 const navigateTo = (path) => {
-  router.push(path)
-}
+  router.push(path);
+};
 
 // 監聽路由變化
-watch(() => route.path, () => {
-  setActiveTabFromRoute()
-})
+watch(
+  () => route.path,
+  () => {
+    setActiveTabFromRoute();
+  }
+);
 
 onMounted(() => {
-  setActiveTabFromRoute()
-})
+  setActiveTabFromRoute();
+});
 </script>
 
 <style lang="scss" scoped>
@@ -132,15 +135,12 @@ onMounted(() => {
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  padding: 16px 0 24px;
-  box-shadow: 
-    0 -8px 16px rgba(163, 177, 198, 0.6),
-    0 8px 16px rgba(255, 255, 255, 0.8);
-  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  background: #F5F7FA;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: repeat(5, 1fr);
+  padding: 12px 0;
+  border-top: 1px solid $raphael-white;
 
   .nav-item {
     display: flex;
@@ -161,7 +161,7 @@ onMounted(() => {
     .nav-icon {
       font-size: 22px;
       margin-bottom: 4px;
-      
+
       img {
         width: 24px;
         height: 24px;
@@ -170,4 +170,4 @@ onMounted(() => {
     }
   }
 }
-</style> 
+</style>

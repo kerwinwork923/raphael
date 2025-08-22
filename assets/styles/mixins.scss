@@ -264,3 +264,10 @@
     animation: $animate;
   }
 }
+
+@mixin neumorphismOuter($bgColor:#F5F7FA, $radius:20px, $padding:16px, $x:6px, $y:6px, $blur:12px, $color:rgba(177, 192, 216, 0.7)) {
+  background: $bgColor;
+  border-radius: $radius;
+  padding: $padding;
+  box-shadow: $x $y $blur 0px $color;
+}
