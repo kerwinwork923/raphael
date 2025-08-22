@@ -487,34 +487,12 @@
 .chat-wrapper {
   display: flex;
   flex-direction: column;
-  position: relative;
   min-height: 100vh;
   font-family: "Noto Sans";
   padding-top: 1rem;
   overflow: hidden;
 
-  &::before {
-    content: " ";
-    position: absolute;
-    background: rgba(245, 247, 250, 0.45);
-    backdrop-filter: blur(200px);
-    width: 100%;
-    height: 100%;
-    top: 0;
-    z-index: -1;
-  }
-
-  &::after {
-    content: " ";
-    position: absolute;
-    background: rgba(27, 163, 155, 0.35);
-    width: 140dvw;
-    height: 140dvw;
-    top: 15%;
-    left: 0;
-    border-radius: 50%;
-    z-index: -2;
-  }
+  @include gradientBg();
 }
 
 /* 聊天頭部 */
@@ -788,7 +766,7 @@
     display: flex;
     align-items: center;
     border-radius: var(--Radius-r-20, 20px);
-    border: 1px solid var(--Neutral-white, #fff);
+    border: 1px solid $raphael-white;
     background: rgba(245, 247, 250, 0.65);
     backdrop-filter: blur(22px);
     padding: 8px 16px;
@@ -1135,7 +1113,7 @@
     padding: 12px 16px;
     border-radius: var(--Radius-r-16, 16px);
     background: var(--Secondary-100, #f5f7fa);
-    box-shadow: -4px -4px 6px 0 var(--Neutral-white, #fff) inset,
+    box-shadow: -4px -4px 6px 0 $raphael-white inset,
       4px 4px 6px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4))
         inset;
     transform-origin: right center;
@@ -1264,7 +1242,7 @@
               //跟人物頭像一樣
               overflow: hidden;
               border-radius: 20px;
-              background: var(--Neutral-white, #fff);
+              background: $raphael-white;
               box-shadow: 0 6px 6px 0
                 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
               border: 1px solid rgba(255, 255, 255, 0.3);
@@ -1281,7 +1259,7 @@
               color: #2d3748;
               border-radius: var(--Radius-r-20, 20px) var(--Radius-r-20, 20px)
                 var(--Radius-r-20, 20px) 0;
-              background: var(--Neutral-white, #fff);
+              background: $raphael-white;
               box-shadow: 0 6px 6px 0
                 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
               max-width: 70%;
@@ -1415,7 +1393,7 @@
     padding: 16px;
     border-radius: 16px;
     background: var(--Secondary-100, #f5f7fa);
-    box-shadow: -4px -4px 6px 0 var(--Neutral-white, #fff) inset,
+    box-shadow: -4px -4px 6px 0 $raphael-white inset,
       4px 4px 6px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4))
         inset;
     cursor: pointer;
@@ -1424,14 +1402,14 @@
 
     &:hover {
       transform: translateY(-2px);
-      box-shadow: -6px -6px 8px 0 var(--Neutral-white, #fff) inset,
+      box-shadow: -6px -6px 8px 0 $raphael-white inset,
         6px 6px 8px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4))
           inset;
     }
 
     &:active {
       transform: translateY(0);
-      box-shadow: -2px -2px 4px 0 var(--Neutral-white, #fff) inset,
+      box-shadow: -2px -2px 4px 0 $raphael-white inset,
         2px 2px 4px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4))
           inset;
     }
@@ -1473,7 +1451,7 @@
               overflow: hidden;
               margin-right: 8px;
               flex-shrink: 0;
-              background: var(--Neutral-white, #fff);
+              background: $raphael-white;
               box-shadow: 0 2px 4px 0
                 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
               border: 1px solid rgba(255, 255, 255, 0.3);
@@ -1486,7 +1464,7 @@
             }
 
             .bubble {
-              background: var(--Neutral-white, #fff);
+              background: $raphael-white;
               color: #2d3748;
               border-radius: 12px 12px 12px 0;
               box-shadow: 0 2px 4px 0
@@ -1551,8 +1529,6 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(8px);
   z-index: 2000;
   display: flex;
   justify-content: center;
@@ -1561,23 +1537,18 @@
 
 .character-modal {
   width: 100%;
-
   height: 100dvh;
-
-  background: linear-gradient(135deg, #e0e5ec 0%, #f0f4f8 100%);
-
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  @include gradientBg();
 
   .character-modal-header {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 16px;
     position: relative;
-    border-bottom: 1px solid rgba(177, 192, 216, 0.2);
 
     .back-arrow {
       position: absolute;
@@ -1593,78 +1564,76 @@
     }
 
     .modal-title {
-      font-size: 18px;
-      font-weight: 600;
+      font-size: 24px;
       color: #2d3748;
       margin: 0;
     }
   }
 
   .current-character-tag {
-    padding: 12px 20px;
-
+    padding: 16px 16px 24px 16px;
     display: flex;
     align-items: center;
     gap: 10px;
     justify-content: center;
+
     span {
       display: inline-block;
-      padding: 4px 16px 6px;
-      border-radius: var(--Radius-r-50, 50px);
-      background: var(--Secondary-100, #f5f7fa);
-      box-shadow: -6px -6px 12px 0 var(--Neutral-white, #fff),
-        6px 6px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+      cursor: pointer;
       color: $raphael-green-400;
-
+      width: 160px;
       font-size: 18px;
-      font-style: normal;
-      font-weight: 400;
-
       letter-spacing: 2.7px;
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 2px;
+      transition: all 0.3s ease;
+      @include neumorphismOuter($radius: 50px, $padding: 12px 16px);
+
+      &:hover,
+      &:active {
+        @include neumorphismOuter(
+          $radius: 50px,
+          $padding: 12px 16px,
+          $x: 0,
+          $y: 0,
+          $blur: 6px
+        );
+      }
     }
   }
 
   .main-character-area {
     flex: 1;
     min-height: 0; /* ★ 關鍵：沒有這行 iOS 常常不捲 */
-    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
-    display: flex;
-    padding: 16px;
-    gap: 2px;
     position: relative;
+
     .character-display {
-      flex: 1;
+      height: 100%;
       display: flex;
-      align-items: start;
+      align-items: center;
+      justify-content: center;
 
       .character-full-image {
-        height: auto;
-
-        object-fit: contain;
-        border-radius: 12px;
+        object-fit: cover;
+        height: 100%;
       }
     }
 
     .style-selector {
       position: absolute;
-      right: 2.5%;
+      right: 16px;
       top: 0;
-      padding-bottom: 0.5rem;
-      width: 80px;
+      width: 90px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      border-radius: var(--Radius-r-8, 8px);
-      background: var(--Secondary-100, #f5f7fa);
-      box-shadow: -6px -6px 12px 0 var(--Neutral-white, #fff),
-        6px 6px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
-      height: auto;
-      max-height: 480px;
+      height: 192px;
+      @include neumorphismOuter($radius: 8px, $padding: 8px);
+
       .style-header {
         display: flex;
         flex-direction: column;
@@ -1704,47 +1673,48 @@
       }
 
       .style-grid {
-        overflow-y: auto; /* 改這個 */
-
-        -webkit-overflow-scrolling: touch;
         display: grid;
         grid-template-columns: repeat(1, 1fr);
         gap: 8px;
-
         overflow: hidden;
+        overflow-y: auto; /* 改這個 */
+        -webkit-overflow-scrolling: touch;
         transition: max-height 0.3s ease;
+        @include scrollbarStyle();
 
         .style-item {
+          background: rgba(31, 188, 179, 0.2);
+          border-radius: 50%;
           width: 60px;
           height: 60px;
-          border-radius: 50%;
-
           cursor: pointer;
-          transition: all 0.3s ease;
-          background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
-          box-shadow: 4px 4px 8px rgba(163, 177, 198, 0.6),
-            -4px -4px 8px rgba(255, 255, 255, 0.8);
-          border: 2px solid transparent;
+          border: none;
           margin: 0.5rem 0.5rem 0;
+          overflow: hidden;
+          transition: all 0.3s ease;
 
-          &:hover {
-            transform: translateY(-2px);
-            box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
-              -6px -6px 12px rgba(255, 255, 255, 0.8);
-          }
-
-          &.active {
-            border-color: $raphael-green-400;
-            box-shadow: 0 0 8px rgba(116, 188, 31, 0.4),
-              4px 4px 8px rgba(163, 177, 198, 0.6),
-              -4px -4px 8px rgba(255, 255, 255, 0.8);
+          &:hover,
+          &:active {
+            background: rgba(31, 188, 179, 0.7);
           }
 
           img {
             width: 100%;
-            height: 100%;
             object-fit: cover;
-            object-position: top;
+          }
+        }
+
+        .active {
+          border: 2px solid $raphael-green-400;
+          @include neumorphismOuter($radius: 50%, $padding: 0, $x: 0, $y: 1px);
+          &:hover,
+          &:active {
+            @include neumorphismOuter(
+              $radius: 50%,
+              $padding: 0,
+              $x: 0,
+              $y: 1px
+            );
           }
         }
       }
@@ -1753,60 +1723,46 @@
 
   .confirm-btn {
     position: absolute;
-    bottom: 18%;
+    bottom: 224px;
     left: 50%;
-    transform: translateX(-50%);
-
-    padding: 4px 24px;
-
-    color: var(--Neutral-white, #fff);
-
+    width: 110px;
+    color: $raphael-white;
     font-size: 18px;
-    font-style: normal;
-    font-weight: 400;
-
     letter-spacing: 2.7px;
     border: none;
     cursor: pointer;
-    transition: all 0.3s ease;
-    border-radius: var(--Radius-r-50, 50px);
-    background: linear-gradient(
-      90deg,
-      var(--primary-400-opacity-70, rgba(116, 188, 31, 0.7)) 0%,
-      $raphael-green-400 100%
+
+    @include neumorphismOuter(
+      $bgColor: $raphael-green-400,
+      $radius: 50px,
+      $padding: 8px 16px
     );
-    box-shadow: -6px -6px 12px 0 var(--Neutral-white, #fff),
-      6px 6px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
 
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 8px 8px 16px rgba(116, 188, 31, 0.3),
-        -8px -8px 16px rgba(255, 255, 255, 0.8);
-    }
-
+    transform: translateX(-50%);
+    transition: all 0.3s ease;
+    &:hover,
     &:active {
-      transform: translateY(0);
-      box-shadow: inset 4px 4px 8px rgba(90, 154, 23, 0.6),
-        inset -4px -4px 8px rgba(139, 219, 43, 0.6);
+      @include neumorphismOuter(
+        $bgColor: $raphael-green-500,
+        $radius: 50px,
+        $padding: 8px 16px,
+        $x: 0,
+        $y: 1px
+      );
     }
   }
 
   .character-switch-area {
-    position: absolute;
-    bottom: 0;
-    left: 0;
+    position: relative;
     width: 100%;
-    padding: 20px 0;
-    border-top: 1px solid rgba(177, 192, 216, 0.2);
-    border-radius: 20px 20px 0 0;
-    background: var(--Secondary-100, #f5f7fa);
-    box-shadow: -6px -6px 12px 0 var(--Neutral-white, #fff),
-      6px 6px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+    margin-bottom: 66px;
+    padding: 0 1rem;
 
     .character-scroll-container {
-      display: flex;
+      display: grid;
+      grid-auto-flow: column;
       gap: 16px;
-      padding: 0 20px;
+      @include neumorphismOuter();
       overflow-x: auto;
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
@@ -1820,43 +1776,40 @@
 
       /* 確保顯示3.2個角色的比例 */
       .character-option {
-        flex: 0 0 calc(100% / 3.2);
-        min-width: calc(100% / 3.2);
         cursor: pointer;
         transition: all 0.3s ease;
-        display: flex;
-        justify-content: center;
+        width: 100px;
+        height: 100px;
 
         .character-circle {
-          width: 100px;
-          height: 100px;
+          background: rgba(31, 188, 179, 0.2);
           border-radius: 50%;
+          height: 100px;
           overflow: hidden;
-          background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
-          box-shadow: 4px 4px 8px rgba(163, 177, 198, 0.6),
-            -4px -4px 8px rgba(255, 255, 255, 0.8);
-          border: 3px solid transparent;
           transition: all 0.3s ease;
 
           img {
             width: 100%;
-            height: 100%;
             object-fit: cover;
-            object-position: top;
+          }
+          &:hover,
+          &:active {
+            background: rgba(31, 188, 179, 0.7);
           }
         }
 
-        &:hover .character-circle {
-          transform: translateY(-2px);
-          box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
-            -6px -6px 12px rgba(255, 255, 255, 0.8);
-        }
-
         &.selected .character-circle {
-          border-color: $raphael-green-400;
-          box-shadow: 0 0 12px rgba(116, 188, 31, 0.4),
-            4px 4px 8px rgba(163, 177, 198, 0.6),
-            -4px -4px 8px rgba(255, 255, 255, 0.8);
+          border: 2px solid $raphael-green-400;
+          @include neumorphismOuter($radius: 50%, $padding: 0, $x: 0, $y: 1px);
+          &:hover,
+          &:active {
+            @include neumorphismOuter(
+              $radius: 50%,
+              $padding: 0,
+              $x: 0,
+              $y: 1px
+            );
+          }
         }
       }
     }
@@ -1894,7 +1847,7 @@
   border-radius: 20px;
   border-radius: var(--Radius-r-20, 20px);
   background: rgba(245, 247, 250, 0.65);
-  box-shadow: -6px -6px 12px 0 var(--Neutral-white, #fff),
+  box-shadow: -6px -6px 12px 0 $raphael-white,
     6px 6px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
   backdrop-filter: blur(22px);
   width: 90%;
@@ -1919,7 +1872,7 @@
     border: none;
     border-radius: var(--Radius-r-50, 50px);
     background: var(--Secondary-100, #f5f7fa);
-    box-shadow: -6px -6px 12px 0 var(--Neutral-white, #fff) inset,
+    box-shadow: -6px -6px 12px 0 $raphael-white inset,
       6px 6px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4))
         inset;
 
@@ -1989,7 +1942,7 @@
           6px 6px 12px 0
             var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
 
-        color: var(--Neutral-white, #fff);
+        color: $raphael-white;
 
         font-size: 18px;
         font-style: normal;
