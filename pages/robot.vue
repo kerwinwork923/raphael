@@ -110,7 +110,7 @@
             @click="handleVoiceModalClick"
           />
           <p v-if="showVoiceError" class="voice-error-text">
-            聽不太清楚，點擊再試一次
+            聽不太清楚，請點擊再試一次
           </p>
           <p v-else-if="currentTranscript" class="transcript-text">
             {{ currentTranscript }}
@@ -894,8 +894,8 @@
     gap: 12px;
 
     .voice-wave {
-      width: 90px;
-      height: 90px;
+      width: 115px;
+      height: 115px;
       object-fit: contain;
       animation: pulse-wave 1.6s infinite ease-in-out;
     }
