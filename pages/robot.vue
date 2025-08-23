@@ -1101,17 +1101,14 @@
   /* 搜尋容器 */
   .search-container {
     position: absolute;
-    inset: 8px 12px auto 20px;
-    z-index: 2;
     display: flex;
     align-items: center;
-
-    padding: 12px 16px;
-    border-radius: var(--Radius-r-16, 16px);
-    background: var(--Secondary-100, #f5f7fa);
-    box-shadow: -4px -4px 6px 0 $raphael-white inset,
-      4px 4px 6px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4))
-        inset;
+    @include neumorphismOuter($radius: 50px, $padding: 8px);
+    width: -webkit-fill-available;
+    left: 0;
+    right: 0;
+    margin: 0 16px;
+    z-index: 2;
     transform-origin: right center;
 
     .search-input-icon {
@@ -1251,13 +1248,8 @@
             }
 
             .bubble {
-              background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
+              @include neumorphismOuter($radius: 20px 20px 20px 0);
               color: #2d3748;
-              border-radius: var(--Radius-r-20, 20px) var(--Radius-r-20, 20px)
-                var(--Radius-r-20, 20px) 0;
-              background: $raphael-white;
-              box-shadow: 0 6px 6px 0
-                var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
               max-width: 70%;
             }
           }
@@ -1266,11 +1258,10 @@
             justify-content: flex-end;
 
             .bubble {
-              border-radius: var(--Radius-r-20, 20px) 0 var(--Radius-r-20, 20px)
-                var(--Radius-r-20, 20px);
-              background: $raphael-green-400;
-              box-shadow: 6px 6px 12px 0
-                var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+              @include neumorphismOuter(
+                $bgColor: $raphael-green-400,
+                $radius: 20px 0 20px 20px
+              );
               color: white;
               width: 250px;
             }
@@ -1937,17 +1928,7 @@
 
 // 日曆選擇彈窗樣式
 .calendar-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(8px);
-  z-index: 3000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  @include blurOverlay();
 }
 
 // 日曆展開動畫
@@ -1973,12 +1954,7 @@
 }
 
 .calendar-modal {
-  background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
-  padding: 24px;
-  border-radius: 20px;
-  box-shadow: 12px 12px 24px rgba(163, 177, 198, 0.6),
-    -12px -12px 24px rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  @include neumorphismOuter($bgColor: rgba(245, 247, 250, 0.65));
   width: 90%;
   max-width: 400px;
   max-height: 80vh;
@@ -1988,9 +1964,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    margin-bottom: 24px;
 
     .calendar-title {
       font-size: 18px;
