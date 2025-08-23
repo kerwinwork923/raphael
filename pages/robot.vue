@@ -845,11 +845,9 @@
   }
 
   .voiceModelImg {
-    width: 30px;
-    height: 30px;
     border: 1px solid var(--Warning-default, #ec4f4f);
     border-radius: 50%;
-    padding: 2px;
+    padding: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
