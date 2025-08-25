@@ -1225,11 +1225,7 @@
         font-size: 14px;
         color: #718096;
         margin-bottom: 20px;
-        padding: 8px 16px;
-        border-radius: var(--Radius-r-20, 20px);
-        background: var(--Secondary-100, #f5f7fa);
-        box-shadow: 0 0 6px 0
-          var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+        @include neumorphismOuter($radius:20px,$padding: 8px 16px,$x:0,$y:0,$blur:6px);
         display: inline-block;
         margin-left: 50%;
         transform: translateX(-50%);
@@ -1249,25 +1245,20 @@
             .avatar {
               width: 36px;
               height: 36px;
-
-              margin-top: auto;
               transform: translateY(20px);
               //跟人物頭像一樣
-              overflow: hidden;
-              border-radius: 20px;
-              background: $raphael-white;
-              box-shadow: 0 6px 6px 0
-                var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
-              border: 1px solid rgba(255, 255, 255, 0.3);
               margin-right: 12px;
               flex-shrink: 0;
               margin-top: auto;
               transform: translateY(20px);
+              @include neumorphismOuter($radius: 50%, $padding: 0);
               overflow: hidden;
-              border-radius: 20px;
             }
 
             .bubble {
+              display: flex;
+              flex-direction: column;
+              gap:8px;
               @include neumorphismOuter($radius: 20px 20px 20px 0);
               color: #2d3748;
               max-width: 70%;
@@ -1278,6 +1269,11 @@
             justify-content: flex-end;
 
             .bubble {
+              
+              display: flex;
+              flex-direction: column;
+              gap:8px;
+
               @include neumorphismOuter(
                 $bgColor: $raphael-green-400,
                 $radius: 20px 0 20px 20px
@@ -1303,9 +1299,7 @@
           .time {
             font-size: 11px;
             color: #718096;
-            position: absolute;
-            bottom: 8px;
-            right: 12px;
+            align-self:flex-end;
             opacity: 0.8;
           }
         }
