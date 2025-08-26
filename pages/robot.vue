@@ -395,9 +395,8 @@
               v-if="showSearch && searchQuery && searchResults.length === 0"
               class="no-results"
             >
-              <div class="no-results-content">
-                <span>沒有找到相關對話</span>
-              </div>
+              <img src="/assets/imgs/robot/mascotPhone.png" />
+              <span>沒有找到相關對話</span>
             </div>
           </transition>
         </div>
@@ -1174,15 +1173,14 @@
   /* 無搜尋結果 */
   .no-results {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    height: 200px;
-
-    .no-results-content {
-      text-align: center;
-      color: #718096;
-      font-size: 16px;
-    }
+    justify-content: center;
+    gap: 8px;
+    font-size: 24px;
+    font-weight: bold;
+    height: 100%;
+    @include neumorphismOuter();
   }
 
   .history-content {
@@ -1228,7 +1226,6 @@
             .avatar {
               width: 36px;
               height: 36px;
-              transform: translateY(20px);
               //跟人物頭像一樣
               margin-right: 12px;
               flex-shrink: 0;
@@ -1378,7 +1375,7 @@
     flex-direction: column;
     gap: 1rem;
     overflow-y: auto;
-    padding:8px;
+    padding: 8px;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
     .search-result-item {
@@ -1417,16 +1414,6 @@
       }
     }
   }
-}
-
-/* 關鍵字高亮 */
-.highlight {
-  background: linear-gradient(120deg, #ffd700 0%, #ffed4e 100%);
-  padding: 2px 4px;
-  border-radius: 4px;
-  font-weight: 600;
-  color: #1a202c;
-  box-shadow: 0 1px 2px rgba(255, 215, 0, 0.3);
 }
 
 /* 角色選擇彈窗樣式 */
@@ -1792,6 +1779,7 @@
     justify-content: center;
 
     button {
+      width: 110px;
       padding: 10px 20px;
       border: none;
       border-radius: 12px;
@@ -1812,34 +1800,31 @@
         letter-spacing: 2.7px;
         background: none;
         &:hover {
-          transform: translateY(-2px);
+          color: $raphael-green-500;
         }
       }
 
       &.name-input-confirm {
-        border-radius: var(--Radius-r-50, 50px);
-        background: linear-gradient(
-          90deg,
-          var(--primary-400-opacity-70, rgba(116, 188, 31, 0.7)) 0%,
-          $raphael-green-400 100%
+        @include neumorphismOuter(
+          $bgColor: $raphael-green-400,
+          $radius: 50px,
+          $padding: 10px 20px
         );
-        box-shadow: 0 1px 12px 0
-            var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4)),
-          6px 6px 12px 0
-            var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
-
         color: $raphael-white;
-
         font-size: 18px;
         font-style: normal;
         font-weight: 400;
-
         letter-spacing: 2.7px;
 
         &:hover {
-          transform: translateY(-2px);
-          box-shadow: 6px 6px 12px rgba(116, 188, 31, 0.3),
-            -6px -6px 12px rgba(255, 255, 255, 0.8);
+          @include neumorphismOuter(
+            $bgColor: $raphael-green-500,
+            $radius: 50px,
+            $padding: 10px 20px,
+            $x: 0,
+            $y: 0,
+            $blur: 6px
+          );
         }
       }
     }
