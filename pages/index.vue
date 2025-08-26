@@ -205,16 +205,13 @@
 
 <style lang="scss" scoped>
 .loginAndRegister {
-  background: url("../assets/imgs/background.png");
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-size: cover;
   display: flex;
   flex-direction: column;
   place-items: center;
   width: 100%;
   min-height: 100vh;
   padding: 1rem;
+  @include gradientBg();
 
   .loginRegisterWrap {
     display: flex;
