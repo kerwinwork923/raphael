@@ -2,7 +2,6 @@
   <div class="infoWrap">
     <div class="infoBox">
       <!-- 姓名輸入 -->
-      <label for="name">姓名</label>
       <div class="nameGroup">
         <img class="icon1" src="../assets/imgs/user.svg" alt="" />
         <input
@@ -13,7 +12,6 @@
       </div>
 
       <!-- 電話欄位 不可選 -->
-      <label for="phone" v-if="phoneShow">電話</label>
       <div class="phoneGroup" v-if="phoneShow">
         <img class="icon1" src="../assets/imgs/phone.svg" alt="" />
         <input type="text" :value="phone" disabled />
@@ -21,28 +19,24 @@
       </div>
 
       <!-- 信箱輸入 -->
-      <label for="email" v-if="emailShow">信箱</label>
       <div class="emailGroup" v-if="emailShow">
         <img class="icon1" src="../assets/imgs/mail.svg" alt="" />
         <input type="email" placeholder="請輸入您的信箱" />
       </div>
 
       <!-- 身高輸入 -->
-      <label for="height">身高</label>
       <div class="heightGroup">
         <img class="icon1" src="../assets/imgs/height.svg" alt="" />
         <input type="text" placeholder="請輸入您的身高" v-model="localHeight" />
       </div>
 
       <!-- 體重輸入 -->
-      <label for="weight">體重</label>
       <div class="weightGroup">
         <img class="icon1" src="../assets/imgs/weight.svg" alt="" />
         <input type="text" placeholder="請輸入您的體重" v-model="localWeight" />
       </div>
 
       <!-- 性別選擇 -->
-      <label for="sex">性別</label>
       <div class="groupGroup">
         <img class="icon1" src="../assets/imgs/group.svg" alt="" />
         <select
@@ -58,7 +52,6 @@
       </div>
 
       <!-- 生日選擇 -->
-      <label for="date">生日</label>
       <div class="dateGroup">
         <img class="icon1" src="../assets/imgs/date.svg" alt="" />
         <VueDatePicker
@@ -76,7 +69,6 @@
       </div>
 
       <!-- 日常收縮壓選擇 -->
-      <label for="DSPR">血壓</label>
       <div class="DSPR">
         <img class="icon1" src="../assets/imgs/DSPR.svg" alt="" />
         <select
@@ -93,7 +85,6 @@
       </div>
 
       <!-- 檢測時間 -->
-      <label for="detectTime" v-if="timeShow">檢測時間</label>
       <div class="detectTime" v-if="timeShow">
         <img class="icon1" src="../assets/imgs/detectTime.svg" alt="" />
         <select
@@ -111,7 +102,6 @@
       </div>
 
       <!-- 地址 -->
-      <label for="address" v-if="addressShow">地址</label>
       <div class="addressGroup" v-if="addressShow">
         <div class="city">
           <select
@@ -317,13 +307,11 @@ export default {
 <style lang="scss">
 .infoWrap {
   .infoBox {
-    margin-top: 0.75rem;
+    background-color: $raphael-white;
     border-radius: 1rem;
-    height: calc(100vh - 300px);
-    // height: 62.6vh;
-
+    height: calc(100vh - 235px);
+    padding: 1rem;
     overflow-y: scroll;
-    padding: 1rem 0;
   }
 
   .custom-select {
@@ -334,10 +322,6 @@ export default {
     background-size: 12px;
     color: $raphael-gray-300;
     font-size: 1.2rem;
-    border-radius: var(--Radius-r-50, 50px);
-    background: var(--Secondary-100, #f5f7fa);
-    box-shadow: 2px 4px 12px 0
-      var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
   }
 
   .custom-select.selected {
@@ -345,18 +329,6 @@ export default {
   }
   .dp__instance_calendar {
     z-index: 1000;
-  }
-  label {
-    color: var(--Neutral-500, #666);
-
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 400;
-
-    letter-spacing: 0.5px;
-    display: block;
-    margin-bottom: 0.5rem;
-    margin-left: 0.25rem;
   }
   .nameGroup,
   .heightGroup,
@@ -367,11 +339,10 @@ export default {
     position: relative;
     margin-bottom: 1rem;
     z-index: 1000;
-
     .icon1 {
       position: absolute;
       top: 50%;
-      left: 16px;
+      left: 2px;
       transform: translateY(-50%);
       z-index: 2;
     }
@@ -379,7 +350,7 @@ export default {
     .icon2 {
       position: absolute;
       top: 50%;
-      right: 16px;
+      right: 2px;
       transform: translateY(-50%);
       width: 18px;
       z-index: 1;
@@ -433,7 +404,7 @@ export default {
       .icon2 {
         position: absolute;
         top: 50%;
-        right: 16px;
+        right: 2px;
         transform: translateY(-50%);
         z-index: 1;
         width: 18px;
@@ -454,20 +425,20 @@ export default {
   .groupGroup,
   .DSPR,
   .detectTime {
+    display: flex;
     position: relative;
     width: 100%;
-
     .icon1 {
       position: absolute;
       top: 50%;
-      left: 16px;
+      left: 2px;
       transform: translateY(-50%);
       z-index: 2;
     }
     .icon2 {
       position: absolute;
       top: 50%;
-      right: 16px;
+      right: 2px;
       transform: translateY(-50%);
       z-index: 1;
       width: 18px;
@@ -475,10 +446,10 @@ export default {
     select {
       outline: none;
       border: none;
-      padding-left: 2.75rem;
+      padding-left: 36px;
       padding-bottom: 16px;
       padding-top: 16px;
-
+      font-size: 1.2rem;
       width: 100%;
       border-bottom: 1px solid $raphael-gray-300;
       appearance: none;
@@ -516,14 +487,10 @@ export default {
     border-bottom: 1px solid $raphael-gray-300;
     font-size: 1.2rem;
     width: 100%;
-    padding-left: 2.75rem;
+    padding-left: 36px;
     padding-bottom: 16px;
     padding-top: 16px;
     color: $raphael-black;
-    border-radius: var(--Radius-r-50, 50px);
-    background: var(--Secondary-100, #f5f7fa);
-    box-shadow: 2px 4px 12px 0
-      var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
     &::placeholder {
       color: $raphael-gray-300;
       font-family: Inter;
@@ -557,33 +524,24 @@ export default {
   }
 
   .vue-datepicker-input {
-    padding-left: 2.75rem;
+    padding-left: 36px;
   }
 }
 
 .dp__input_wrap {
-
- 
-
-
+  border-bottom: 1px solid $raphael-gray-300;
+  padding-bottom: 16px;
+  padding-top: 16px;
   .dp__pointer {
     border: none;
     background-color: none;
     width: 100%;
     font-size: 1.25rem;
-
-    border-radius: var(--Radius-r-50, 50px);
-    background: var(--Secondary-100, #f5f7fa);
-    box-shadow: 2px 4px 12px 0
-      var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
-    padding: 1rem 0 1rem 2.75rem;
-    &::placeholder {
-      color: $raphael-gray-400;
-      font-weight: 400;
-    }
   }
   svg {
     display: none;
   }
 }
+
+
 </style>
