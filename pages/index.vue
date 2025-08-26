@@ -298,6 +298,9 @@
         top: 50%;
         left: 16px;
         transform: translateY(-51%);
+        width: 20px;
+        height: 20px;
+        z-index: 1;
       }
 
       .icon2 {
@@ -306,6 +309,9 @@
         right: 16px;
         transform: translateY(-51%);
         cursor: pointer;
+        width: 20px;
+        height: 20px;
+        z-index: 1;
       }
     }
 
@@ -324,6 +330,16 @@
       letter-spacing: 2.7px;
       padding: 1rem;
       padding-left: 2.75rem;
+      padding-right: 3rem; /* 為右側圖示預留空間 */
+      width: 100%;
+      box-sizing: border-box;
+      min-width: 0; /* 在 flex 容器時避免擠壓出界 */
+
+      &::placeholder {
+        font-size: 18px;
+        font-weight: 400;
+    
+      }
     }
 
     .forgetPasswordGroup {
@@ -389,6 +405,9 @@
           top: 50%;
           left: 16px;
           transform: translateY(-51%);
+          width: 20px;
+          height: 20px;
+          z-index: 1;
         }
 
         .icon2 {
@@ -397,6 +416,9 @@
           right: 16px;
           transform: translateY(-51%);
           cursor: pointer;
+          width: 20px;
+          height: 20px;
+          z-index: 1;
         }
       }
 
@@ -489,30 +511,33 @@ text-decoration: none;
       }
     }
 
-    input[type="text"],
-    input[type="tel"],
-    input[type="password"],
-    input[type="number"] {
-      outline: none;
-      border: none;
-      background-color: transparent;
-      color: #74bc1f;
-      font-family: "Noto Sans";
-      font-size: 18px;
-      font-style: normal;
-      font-weight: 400;
-      line-height: 100%;
-      letter-spacing: 2.7px;
-      padding: 1rem;
-      padding-left: 2.75rem;
-      width: 100%;
+         input[type="text"],
+     input[type="tel"],
+     input[type="password"],
+     input[type="number"] {
+       outline: none;
+       border: none;
+       background-color: transparent;
+       color: #74bc1f;
+       font-family: "Noto Sans";
+       font-size: 18px;
+       font-style: normal;
+       font-weight: 400;
+       line-height: 100%;
+       letter-spacing: 2.7px;
+       padding: 1rem;
+       padding-left: 2.75rem;
+       padding-right: 3rem; /* 為右側圖示預留空間 */
+       width: 100%;
+       box-sizing: border-box;
+       min-width: 0; /* 在 flex 容器時避免擠壓出界 */
 
-      &::placeholder {
-        font-family: "Noto Sans";
-        font-size: 18px;
-        font-weight: 400;
-      }
-    }
+       &::placeholder {
+         font-family: "Noto Sans";
+         font-size: 18px;
+         font-weight: 400;
+       }
+     }
 
     .privacyGroup {
       display: flex;
@@ -644,6 +669,69 @@ text-decoration: none;
     letter-spacing: 3.6px;
     margin-top: 1rem;
 
+  }
+}
+
+/* 手機版響應式優化 */
+@media (max-width: 768px) {
+  .loginAndRegister {
+    .loginGroup {
+      padding-top: 5vh; /* 手機版減少上方間距 */
+    }
+    
+    .loginWrap,
+    .registerWrap {
+      .phoneGroup,
+      .passwordGroup,
+      .passwordAgainGroup {
+        input[type="text"],
+        input[type="tel"],
+        input[type="password"],
+        input[type="number"] {
+          padding-right: 3.5rem; /* 手機版多留一點右側空間 */
+          font-size: 16px; /* 手機版避免縮放 */
+        }
+        
+        .icon1,
+        .icon2 {
+          width: 18px;
+          height: 18px;
+        }
+        
+        .icon2 {
+          right: 12px; /* 手機版調整右側圖示位置 */
+        }
+      }
+    }
+  }
+}
+
+/* 超小螢幕優化 */
+@media (max-width: 375px) {
+  .loginAndRegister {
+    .loginWrap,
+    .registerWrap {
+      .phoneGroup,
+      .passwordGroup,
+      .passwordAgainGroup {
+        input[type="text"],
+        input[type="tel"],
+        input[type="password"],
+        input[type="number"] {
+          padding-right: 4rem; /* 超小螢幕再多留空間 */
+        }
+        
+        .icon1,
+        .icon2 {
+          width: 16px;
+          height: 16px;
+        }
+        
+        .icon2 {
+          right: 8px; /* 超小螢幕調整圖示位置 */
+        }
+      }
+    }
   }
 }
 </style>
