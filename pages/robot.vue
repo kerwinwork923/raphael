@@ -132,10 +132,10 @@
     <transition name="fade">
       <div v-if="showAudioError" class="alert-dialog">
         <div class="alert-content">
-          <p>📢 您的裝置無法撥放聲音，請檢查：</p>
+          <p>您的裝置無法撥放聲音請檢查</p>
           <ul>
-            <li>🔇 是否靜音模式</li>
-            <li>🌐 是否支援中文語音撥放</li>
+            <li>是否靜音模式</li>
+            <li>是否支援中文語音撥放</li>
           </ul>
           <button @click="closeAudioError" class="alert-button">
             我知道了
@@ -349,47 +349,40 @@
               <div class="search-results-header">
                 <span>總共 {{ searchResults.length }}筆</span>
               </div>
-              <div
-                v-for="result in searchResults"
-                :key="result.id"
-                class="search-result-item"
-                @click="scrollToMessage(result.id)"
-              >
-                <div class="result-content">
-                  <div class="result-title">
-                    <span class="user-name">{{
-                      result.userName || "用戶"
-                    }}</span>
+              <div class="searchList">
+                <div
+                  v-for="result in searchResults"
+                  :key="result.id"
+                  class="search-result-item"
+                  @click="scrollToMessage(result.id)"
+                >
+                  <div class="bubble">
+                    <div class="content">
+                      <span class="user-name">{{
+                        result.userName || "用戶"
+                      }}</span>
+                      <span
+                        v-html="highlightKeyword(result.user, searchQuery)"
+                      ></span>
+                    </div>
                     <span class="result-date">{{
                       formatDate(
                         result.dateKey || result.timestamp.split(" ")[0]
                       )
                     }}</span>
                   </div>
-                  <div class="result-messages">
-                    <div class="message-preview user-message">
-                      <div class="bubble">
-                        <span
-                          v-html="highlightKeyword(result.user, searchQuery)"
-                        ></span>
-                        <div class="time">
-                          {{ formatTime(result.timestamp) }}
-                        </div>
-                      </div>
+                  <div class="bubble">
+                    <div class="content">
+                      <span class="bot-name">{{ currentCharacter.name }}</span>
+                      <span
+                        v-html="highlightKeyword(result.bot, searchQuery)"
+                      ></span>
                     </div>
-                    <div class="message-preview bot-message">
-                      <div class="avatar">
-                        <img :src="currentCharacter.avatar" alt="角色頭像" />
-                      </div>
-                      <div class="bubble">
-                        <span
-                          v-html="highlightKeyword(result.bot, searchQuery)"
-                        ></span>
-                        <div class="time">
-                          {{ formatTime(result.timestamp) }}
-                        </div>
-                      </div>
-                    </div>
+                    <span class="result-date">{{
+                      formatDate(
+                        result.dateKey || result.timestamp.split(" ")[0]
+                      )
+                    }}</span>
                   </div>
                 </div>
               </div>
@@ -488,7 +481,7 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  font-family: "Noto Sans";
+  font-family: "Noto Sans TC";
   padding-top: 1rem;
   overflow: hidden;
 
@@ -785,23 +778,26 @@
       justify-content: center;
       align-items: center;
       cursor: pointer;
-      color: white;
+      color: $raphael-white;
       font-size: 18px;
-      border-radius: var(--Radius-r-50, 50px);
-      background: linear-gradient(
-        90deg,
-        var(--primary-400-opacity-70, rgba(116, 188, 31, 0.7)) 0%,
-        $raphael-green-400 100%
+      @include neumorphismOuter(
+        $bgColor: $raphael-green-400,
+        $radius: 50px,
+        $padding: 0
       );
-      box-shadow: 0 2px 8px 0
-        var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
       border: none;
       transition: all 0.3s ease;
 
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 6px 6px 12px rgba(34, 197, 94, 0.3),
-          -6px -6px 12px rgba(255, 255, 255, 0.8);
+      &:hover,
+      &:active {
+        @include neumorphismOuter(
+          $bgColor: $raphael-green-500,
+          $radius: 50%,
+          $padding: 0,
+          $x: 0,
+          $y: 0,
+          $blur: 6px
+        );
       }
     }
   }
@@ -818,14 +814,10 @@
     text-align: center;
     font-size: 16px;
     color: #2d3748;
+    @include neumorphismOuter();
     background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
-    padding: 16px 24px;
-    border-radius: 25px;
-    box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
-      -6px -6px 12px rgba(255, 255, 255, 0.8);
     margin: 0 auto;
     max-width: 300px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
   }
 }
 .voiceModelClose {
@@ -940,50 +932,73 @@
   position: fixed;
   top: 30%;
   left: 50%;
+  width: 251px;
   transform: translateX(-50%);
-  background: linear-gradient(145deg, #e0e5ec, #f0f4f8);
-  padding: 28px;
-  border-radius: 20px;
-  box-shadow: 12px 12px 24px rgba(163, 177, 198, 0.6),
-    -12px -12px 24px rgba(255, 255, 255, 0.8);
+  @include neumorphismOuter($bgColor: rgba(255, 255, 255, 0.65));
+  -webkit-backdrop-filter: blur(50px);
+  backdrop-filter: blur(50px);
   z-index: 999;
-  width: 300px;
-  text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.3);
 
   .alert-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+
     p {
-      font-size: 16px;
+      font-size: 20px;
       font-weight: 600;
+      line-height: 24px;
       color: #2d3748;
-      margin-bottom: 16px;
     }
 
     ul {
-      padding-left: 24px;
-      font-size: 14px;
+      display: flex;
+      flex-direction: column;
+      align-self: start;
+      gap: 8px;
+      font-size: 18px;
       color: #4a5568;
-      text-align: left;
-      margin-bottom: 24px;
+      padding-left: 24px;
+      list-style: disc;
     }
 
     .alert-button {
-      background: linear-gradient(145deg, #22c55e, #16a34a);
-      color: white;
+      color: $raphael-white;
       border: none;
-      padding: 12px 24px;
-      border-radius: 12px;
       cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      box-shadow: 4px 4px 8px rgba(34, 197, 94, 0.3),
-        -4px -4px 8px rgba(255, 255, 255, 0.8);
+      font-size: 18px;
+      width: 110px;
+      margin-top: 16px;
+
+      @include neumorphismOuter(
+        $bgColor:
+          linear-gradient(
+            90deg,
+            var(--primary-400-opacity-40, rgba(116, 188, 31, 0.4)) 0%,
+            var(--primary-400-opacity-70, rgba(116, 188, 31, 0.7)) 100%
+          ),
+        $radius: 50px,
+        $padding: 11px 16px
+      );
+
       transition: all 0.3s ease;
 
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 6px 6px 12px rgba(34, 197, 94, 0.3),
-          -6px -6px 12px rgba(255, 255, 255, 0.8);
+      &:hover,
+      &:active {
+        @include neumorphismOuter(
+          $bgColor:
+            linear-gradient(
+              90deg,
+              var(--primary-400-opacity-70, rgba(116, 188, 31, 0.7)) 0%,
+              var(--Primary-default, #74bc1f) 100%
+            ),
+          $radius: 50px,
+          $padding: 11px 16px,
+          $x: 0,
+          $y: 0,
+          $blur: 6px
+        );
       }
     }
   }
@@ -1156,22 +1171,6 @@
     }
   }
 
-  /* 搜尋結果 */
-  .search-results {
-    .search-results-header {
-      padding: 16px 20px;
-      text-align: center;
-      font-size: 14px;
-      color: #718096;
-      background: rgba(255, 255, 255, 0.5);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-    }
-
-    .search-result-item {
-      margin-bottom: 20px;
-    }
-  }
-
   /* 無搜尋結果 */
   .no-results {
     display: flex;
@@ -1203,11 +1202,13 @@
         font-size: 14px;
         color: #718096;
         margin-bottom: 20px;
-        padding: 8px 16px;
-        border-radius: var(--Radius-r-20, 20px);
-        background: var(--Secondary-100, #f5f7fa);
-        box-shadow: 0 0 6px 0
-          var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+        @include neumorphismOuter(
+          $radius: 20px,
+          $padding: 8px 16px,
+          $x: 0,
+          $y: 0,
+          $blur: 6px
+        );
         display: inline-block;
         margin-left: 50%;
         transform: translateX(-50%);
@@ -1227,25 +1228,20 @@
             .avatar {
               width: 36px;
               height: 36px;
-
-              margin-top: auto;
               transform: translateY(20px);
               //跟人物頭像一樣
-              overflow: hidden;
-              border-radius: 20px;
-              background: $raphael-white;
-              box-shadow: 0 6px 6px 0
-                var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
-              border: 1px solid rgba(255, 255, 255, 0.3);
               margin-right: 12px;
               flex-shrink: 0;
               margin-top: auto;
               transform: translateY(20px);
+              @include neumorphismOuter($radius: 50%, $padding: 0);
               overflow: hidden;
-              border-radius: 20px;
             }
 
             .bubble {
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
               @include neumorphismOuter($radius: 20px 20px 20px 0);
               color: #2d3748;
               max-width: 70%;
@@ -1256,16 +1252,20 @@
             justify-content: flex-end;
 
             .bubble {
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
+
               @include neumorphismOuter(
                 $bgColor: $raphael-green-400,
                 $radius: 20px 0 20px 20px
               );
-              color: white;
+              color: $raphael-white;
               width: 250px;
             }
 
             .time {
-              color: white;
+              color: $raphael-white;
             }
           }
 
@@ -1281,9 +1281,7 @@
           .time {
             font-size: 11px;
             color: #718096;
-            position: absolute;
-            bottom: 8px;
-            right: 12px;
+            align-self: flex-end;
             opacity: 0.8;
           }
         }
@@ -1364,133 +1362,57 @@
 
 /* 搜尋結果樣式 */
 .search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+
   .search-results-header {
-    padding: 16px 20px;
-    text-align: center;
-    font-size: 14px;
+    align-self: flex-end;
+    font-size: 18px;
     color: #718096;
-    background: rgba(255, 255, 255, 0.5);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
   }
 
-  .search-result-item {
-    margin: 12px 20px;
-    padding: 16px;
-    border-radius: 16px;
-    background: var(--Secondary-100, #f5f7fa);
-    box-shadow: -4px -4px 6px 0 $raphael-white inset,
-      4px 4px 6px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4))
-        inset;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+  .searchList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow-y: auto;
+    padding:8px;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    .search-result-item {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      cursor: pointer;
 
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: -6px -6px 8px 0 $raphael-white inset,
-        6px 6px 8px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4))
-          inset;
-    }
-
-    &:active {
-      transform: translateY(0);
-      box-shadow: -2px -2px 4px 0 $raphael-white inset,
-        2px 2px 4px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4))
-          inset;
-    }
-
-    .result-content {
-      .result-title {
+      .bubble {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        margin-bottom: 12px;
-        padding-bottom: 8px;
-        border-bottom: 1px solid rgba(177, 192, 216, 0.2);
-
-        .user-name {
-          font-size: 14px;
-          font-weight: 600;
-          color: #2d3748;
-        }
-
-        .result-date {
-          font-size: 12px;
-          color: #718096;
-        }
-      }
-
-      .result-messages {
-        .message-preview {
+        justify-content: space-between;
+        gap: 16px;
+        @include neumorphismOuter();
+        .content {
           display: flex;
-          align-items: flex-start;
-          margin-bottom: 8px;
-
-          &.bot-message {
-            justify-content: flex-start;
-
-            .avatar {
-              width: 28px;
-              height: 28px;
-              border-radius: 14px;
-              overflow: hidden;
-              margin-right: 8px;
-              flex-shrink: 0;
-              background: $raphael-white;
-              box-shadow: 0 2px 4px 0
-                var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
-              border: 1px solid rgba(255, 255, 255, 0.3);
-
-              img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-              }
-            }
-
-            .bubble {
-              background: $raphael-white;
-              color: #2d3748;
-              border-radius: 12px 12px 12px 0;
-              box-shadow: 0 2px 4px 0
-                var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
-              max-width: 80%;
-              padding: 8px 12px 20px 12px;
-              font-size: 13px;
-              line-height: 1.3;
-              position: relative;
-            }
+          flex-direction: column;
+          gap: 16px;
+          .user-name,
+          .bot-name {
+            color: #b1c0d8;
+            font-size: 18px;
           }
-
-          &.user-message {
-            justify-content: flex-end;
-
-            .bubble {
-              border-radius: 12px 0 12px 12px;
-              background: $raphael-green-400;
-              box-shadow: 2px 2px 4px 0
-                var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
-              color: white;
-              max-width: 80%;
-              padding: 8px 12px 20px 12px;
-              font-size: 13px;
-              line-height: 1.3;
-              position: relative;
-
-              .time {
-                color: rgba(255, 255, 255, 0.8);
-              }
-            }
+          & > span {
+            font-size: 16px;
+            line-height: 15px;
+            letter-spacing: 1px;
           }
-
-          .time {
-            font-size: 10px;
-            color: #718096;
-            position: absolute;
-            bottom: 4px;
-            right: 8px;
-            opacity: 0.8;
-          }
+        }
+        .result-date {
+          color: #b1c0d8;
+          font-size: 14px;
+          word-break: keep-all;
+          white-space: nowrap;
         }
       }
     }
@@ -2012,7 +1934,7 @@
 
         &:hover:not(.dp__disabled) {
           background: linear-gradient(145deg, $raphael-green-400, #5a9a17);
-          color: white;
+          color: $raphael-white;
           transform: translateY(-1px);
         }
       }
@@ -3757,7 +3679,10 @@ const scrollToMessage = (id) => {
 const highlightKeyword = (text, keyword) => {
   if (!keyword) return text;
   const regex = new RegExp(`(${keyword})`, "gi");
-  return text.replace(regex, '<span class="highlight">$1</span>');
+  return text.replace(
+    regex,
+    '<span class="highlight" style="color:#74bc1f">$1</span>'
+  );
 };
 
 // 角色選擇相關函數
