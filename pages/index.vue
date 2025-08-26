@@ -612,6 +612,67 @@
     margin-top: 1rem;
   }
 }
+@media (max-width: 768px) {
+  .loginAndRegister {
+    .loginGroup {
+      padding-top: 5vh; /* 手機版減少上方間距 */
+    }
+    
+    .loginWrap,
+    .registerWrap {
+      .phoneGroup,
+      .passwordGroup,
+      .passwordAgainGroup {
+        input[type="text"],
+        input[type="tel"],
+        input[type="password"],
+        input[type="number"] {
+          padding-right: 3.5rem; /* 手機版多留一點右側空間 */
+          font-size: 16px; /* 手機版避免縮放 */
+        }
+        
+        .icon1,
+        .icon2 {
+          width: 18px;
+          height: 18px;
+        }
+        
+        .icon2 {
+          right: 12px; /* 手機版調整右側圖示位置 */
+        }
+      }
+    }
+  }
+}
+
+/* 超小螢幕優化 */
+@media (max-width: 375px) {
+  .loginAndRegister {
+    .loginWrap,
+    .registerWrap {
+      .phoneGroup,
+      .passwordGroup,
+      .passwordAgainGroup {
+        input[type="text"],
+        input[type="tel"],
+        input[type="password"],
+        input[type="number"] {
+          padding-right: 4rem; /* 超小螢幕再多留空間 */
+        }
+        
+        .icon1,
+        .icon2 {
+          width: 16px;
+          height: 16px;
+        }
+        
+        .icon2 {
+          right: 8px; /* 超小螢幕調整圖示位置 */
+        }
+      }
+    }
+  }
+}
 </style>
 
 <script setup>
