@@ -349,47 +349,40 @@
               <div class="search-results-header">
                 <span>總共 {{ searchResults.length }}筆</span>
               </div>
-              <div
-                v-for="result in searchResults"
-                :key="result.id"
-                class="search-result-item"
-                @click="scrollToMessage(result.id)"
-              >
-                <div class="result-content">
-                  <div class="result-title">
-                    <span class="user-name">{{
-                      result.userName || "用戶"
-                    }}</span>
+              <div class="searchList">
+                <div
+                  v-for="result in searchResults"
+                  :key="result.id"
+                  class="search-result-item"
+                  @click="scrollToMessage(result.id)"
+                >
+                  <div class="bubble">
+                    <div class="content">
+                      <span class="user-name">{{
+                        result.userName || "用戶"
+                      }}</span>
+                      <span
+                        v-html="highlightKeyword(result.user, searchQuery)"
+                      ></span>
+                    </div>
                     <span class="result-date">{{
                       formatDate(
                         result.dateKey || result.timestamp.split(" ")[0]
                       )
                     }}</span>
                   </div>
-                  <div class="result-messages">
-                    <div class="message-preview user-message">
-                      <div class="bubble">
-                        <span
-                          v-html="highlightKeyword(result.user, searchQuery)"
-                        ></span>
-                        <div class="time">
-                          {{ formatTime(result.timestamp) }}
-                        </div>
-                      </div>
+                  <div class="bubble">
+                    <div class="content">
+                      <span class="bot-name">{{ currentCharacter.name }}</span>
+                      <span
+                        v-html="highlightKeyword(result.bot, searchQuery)"
+                      ></span>
                     </div>
-                    <div class="message-preview bot-message">
-                      <div class="avatar">
-                        <img :src="currentCharacter.avatar" alt="角色頭像" />
-                      </div>
-                      <div class="bubble">
-                        <span
-                          v-html="highlightKeyword(result.bot, searchQuery)"
-                        ></span>
-                        <div class="time">
-                          {{ formatTime(result.timestamp) }}
-                        </div>
-                      </div>
-                    </div>
+                    <span class="result-date">{{
+                      formatDate(
+                        result.dateKey || result.timestamp.split(" ")[0]
+                      )
+                    }}</span>
                   </div>
                 </div>
               </div>
@@ -488,7 +481,7 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  font-family: "Noto Sans";
+  font-family: "Noto Sans TC";
   padding-top: 1rem;
   overflow: hidden;
 
@@ -1178,22 +1171,6 @@
     }
   }
 
-  /* 搜尋結果 */
-  .search-results {
-    .search-results-header {
-      padding: 16px 20px;
-      text-align: center;
-      font-size: 14px;
-      color: #718096;
-      background: rgba(255, 255, 255, 0.5);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-    }
-
-    .search-result-item {
-      margin-bottom: 20px;
-    }
-  }
-
   /* 無搜尋結果 */
   .no-results {
     display: flex;
@@ -1225,7 +1202,13 @@
         font-size: 14px;
         color: #718096;
         margin-bottom: 20px;
-        @include neumorphismOuter($radius:20px,$padding: 8px 16px,$x:0,$y:0,$blur:6px);
+        @include neumorphismOuter(
+          $radius: 20px,
+          $padding: 8px 16px,
+          $x: 0,
+          $y: 0,
+          $blur: 6px
+        );
         display: inline-block;
         margin-left: 50%;
         transform: translateX(-50%);
@@ -1258,7 +1241,7 @@
             .bubble {
               display: flex;
               flex-direction: column;
-              gap:8px;
+              gap: 8px;
               @include neumorphismOuter($radius: 20px 20px 20px 0);
               color: #2d3748;
               max-width: 70%;
@@ -1269,10 +1252,9 @@
             justify-content: flex-end;
 
             .bubble {
-              
               display: flex;
               flex-direction: column;
-              gap:8px;
+              gap: 8px;
 
               @include neumorphismOuter(
                 $bgColor: $raphael-green-400,
@@ -1299,7 +1281,7 @@
           .time {
             font-size: 11px;
             color: #718096;
-            align-self:flex-end;
+            align-self: flex-end;
             opacity: 0.8;
           }
         }
@@ -1380,133 +1362,57 @@
 
 /* 搜尋結果樣式 */
 .search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+
   .search-results-header {
-    padding: 16px 20px;
-    text-align: center;
-    font-size: 14px;
+    align-self: flex-end;
+    font-size: 18px;
     color: #718096;
-    background: rgba(255, 255, 255, 0.5);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
   }
 
-  .search-result-item {
-    margin: 12px 20px;
-    padding: 16px;
-    border-radius: 16px;
-    background: var(--Secondary-100, #f5f7fa);
-    box-shadow: -4px -4px 6px 0 $raphael-white inset,
-      4px 4px 6px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4))
-        inset;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+  .searchList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow-y: auto;
+    padding:8px;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    .search-result-item {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      cursor: pointer;
 
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: -6px -6px 8px 0 $raphael-white inset,
-        6px 6px 8px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4))
-          inset;
-    }
-
-    &:active {
-      transform: translateY(0);
-      box-shadow: -2px -2px 4px 0 $raphael-white inset,
-        2px 2px 4px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4))
-          inset;
-    }
-
-    .result-content {
-      .result-title {
+      .bubble {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        margin-bottom: 12px;
-        padding-bottom: 8px;
-        border-bottom: 1px solid rgba(177, 192, 216, 0.2);
-
-        .user-name {
-          font-size: 14px;
-          font-weight: 600;
-          color: #2d3748;
-        }
-
-        .result-date {
-          font-size: 12px;
-          color: #718096;
-        }
-      }
-
-      .result-messages {
-        .message-preview {
+        justify-content: space-between;
+        gap: 16px;
+        @include neumorphismOuter();
+        .content {
           display: flex;
-          align-items: flex-start;
-          margin-bottom: 8px;
-
-          &.bot-message {
-            justify-content: flex-start;
-
-            .avatar {
-              width: 28px;
-              height: 28px;
-              border-radius: 14px;
-              overflow: hidden;
-              margin-right: 8px;
-              flex-shrink: 0;
-              background: $raphael-white;
-              box-shadow: 0 2px 4px 0
-                var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
-              border: 1px solid rgba(255, 255, 255, 0.3);
-
-              img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-              }
-            }
-
-            .bubble {
-              background: $raphael-white;
-              color: #2d3748;
-              border-radius: 12px 12px 12px 0;
-              box-shadow: 0 2px 4px 0
-                var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
-              max-width: 80%;
-              padding: 8px 12px 20px 12px;
-              font-size: 13px;
-              line-height: 1.3;
-              position: relative;
-            }
+          flex-direction: column;
+          gap: 16px;
+          .user-name,
+          .bot-name {
+            color: #b1c0d8;
+            font-size: 18px;
           }
-
-          &.user-message {
-            justify-content: flex-end;
-
-            .bubble {
-              border-radius: 12px 0 12px 12px;
-              background: $raphael-green-400;
-              box-shadow: 2px 2px 4px 0
-                var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
-              color: $raphael-white;
-              max-width: 80%;
-              padding: 8px 12px 20px 12px;
-              font-size: 13px;
-              line-height: 1.3;
-              position: relative;
-
-              .time {
-                color: rgba(255, 255, 255, 0.8);
-              }
-            }
+          & > span {
+            font-size: 16px;
+            line-height: 15px;
+            letter-spacing: 1px;
           }
-
-          .time {
-            font-size: 10px;
-            color: #718096;
-            position: absolute;
-            bottom: 4px;
-            right: 8px;
-            opacity: 0.8;
-          }
+        }
+        .result-date {
+          color: #b1c0d8;
+          font-size: 14px;
+          word-break: keep-all;
+          white-space: nowrap;
         }
       }
     }
@@ -3773,7 +3679,10 @@ const scrollToMessage = (id) => {
 const highlightKeyword = (text, keyword) => {
   if (!keyword) return text;
   const regex = new RegExp(`(${keyword})`, "gi");
-  return text.replace(regex, '<span class="highlight">$1</span>');
+  return text.replace(
+    regex,
+    '<span class="highlight" style="color:#74bc1f">$1</span>'
+  );
 };
 
 // 角色選擇相關函數
