@@ -324,6 +324,11 @@
         line-height: 22px;
         flex: 1;
         width: 100%;
+      
+        &::placeholder{
+         font-size: 18px; 
+        }
+        
       }
     }
 
