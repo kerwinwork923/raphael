@@ -13,7 +13,13 @@
       </div>
 
       <!-- 登入/註冊切換 -->
-      <div class="loginRegisterWrap" v-if="currentMode === 'login' || currentMode === 'register' && currentStep !== 'info'">
+      <div
+        class="loginRegisterWrap"
+        v-if="
+          currentMode === 'login' ||
+          (currentMode === 'register' && currentStep !== 'info')
+        "
+      >
         <div
           class="loginRegisterItem"
           :class="{ loginRegisterItemActive: currentMode === 'login' }"
@@ -34,21 +40,21 @@
       <div class="loginWrap" v-if="currentMode === 'login'">
         <div class="loginBox">
           <div class="phoneGroup">
+            <img class="icon1" src="../assets/imgs/phoneGreen.svg" alt="" />
             <input
               type="tel"
               v-model="mobile"
               placeholder="請輸入您的手機號碼"
             />
-            <img class="icon1" src="../assets/imgs/phoneGreen.svg" alt="" />
           </div>
           <div class="passwordGroup">
+            <img class="icon1" src="../assets/imgs/passwordGreen.svg" alt="" />
             <input
               :type="passwordVisible ? 'text' : 'password'"
               v-model="password"
               placeholder="請輸入密碼(至少8位)"
               @input="validatePassword"
             />
-            <img class="icon1" src="../assets/imgs/passwordGreen.svg" alt="" />
             <img
               class="icon2"
               :src="passwordVisible ? eyesOpenGreen : eyesCloseGreen"
@@ -76,22 +82,22 @@
         <!-- 註冊第一步：基本資料 -->
         <div class="registerBox" v-if="currentStep === 'register'">
           <div class="phoneGroup">
+            <img class="icon1" src="../assets/imgs/phoneGreen.svg" alt="" />
             <input
               type="tel"
               v-model="mobile"
               placeholder="請輸入您的手機號碼"
             />
-            <img class="icon1" src="../assets/imgs/phoneGreen.svg" alt="" />
           </div>
 
           <div class="passwordGroup">
+            <img class="icon1" src="../assets/imgs/passwordGreen.svg" alt="" />
             <input
               :type="passwordVisible ? 'text' : 'password'"
               v-model="password"
               placeholder="請輸入密碼(至少8位)"
               @input="validatePassword"
             />
-            <img class="icon1" src="../assets/imgs/passwordGreen.svg" alt="" />
             <img
               class="icon2"
               :src="passwordVisible ? eyesOpenGreen : eyesCloseGreen"
@@ -104,13 +110,13 @@
           </div>
 
           <div class="passwordAgainGroup">
+            <img class="icon1" src="../assets/imgs/passwordGreen.svg" alt="" />
             <input
               :type="passwordAgainVisible ? 'text' : 'password'"
               v-model="passwordAgain"
               placeholder="再次輸入您的密碼(至少8位)"
               @input="validatePasswordAgain"
             />
-            <img class="icon1" src="../assets/imgs/passwordGreen.svg" alt="" />
             <img
               class="icon2"
               :src="passwordAgainVisible ? eyesOpenGreen : eyesCloseGreen"
@@ -160,7 +166,7 @@
               inputmode="numeric"
             />
           </div>
-          <div  class="verificationCodeHintText">
+          <div class="verificationCodeHintText">
             <template v-if="typeof countdownTime === 'number'">
               驗證碼已傳送至您的裝置，請輸入驗證碼
               <br />
@@ -191,7 +197,6 @@
             @update:DSPR="DSPR = $event"
             @submit="addUser"
           />
-         
         </div>
       </div>
     </div>
@@ -216,17 +221,14 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    border-radius: 50px;
-    background: #f5f7fa;
-    box-shadow: 2px 4px 12px 0 rgba(177, 192, 216, 0.7);
     color: #74bc1f;
     font-family: "Noto Sans";
     font-size: 18px;
     font-style: normal;
     font-weight: 400;
     letter-spacing: 2.7px;
-    margin-top: 1.25rem;
-    padding: 0.5rem 0.75rem;
+    margin-bottom: 20px;
+    @include neumorphismOuter($radius: 50px, $padding: 0.5rem 0.75rem);
 
     .loginRegisterItem {
       width: 100%;
@@ -267,6 +269,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
+    gap: 24px;
     width: 100%;
     height: 100%;
     max-width: 768px;
@@ -279,72 +282,53 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+    gap: 24px;
 
     .loginBox {
-      margin-top: 1.25rem;
-    }
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom:20px;
 
-    .phoneGroup,
-    .passwordGroup,
-    .passwordAgainGroup {
-      position: relative;
-      margin-bottom: 1rem;
-      border-radius: 50px;
-      background: #f5f7fa;
-      box-shadow: 2px 4px 12px 0 rgba(177, 192, 216, 0.4);
+      .phoneGroup,
+      .passwordGroup,
+      .passwordAgainGroup {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        position: relative;
+        @include neumorphismOuter($radius: 50px, $padding: 12px 10px);
 
-      .icon1 {
-        position: absolute;
-        top: 50%;
-        left: 16px;
-        transform: translateY(-51%);
-        width: 20px;
-        height: 20px;
-        z-index: 1;
+        .icon2 {
+          cursor: pointer;
+          transition: all 0.2s ease;
+          &:hover,
+          &:active {
+            transform: scale(1.1);
+          }
+        }
       }
 
-      .icon2 {
-        position: absolute;
-        top: 50%;
-        right: 16px;
-        transform: translateY(-51%);
-        cursor: pointer;
-        width: 20px;
-        height: 20px;
-        z-index: 1;
-      }
-    }
-
-    input[type="text"],
-    input[type="tel"],
-    input[type="password"] {
-      outline: none;
-      border: none;
-      background-color: transparent;
-      color: #74bc1f;
-      font-family: "Noto Sans";
-      font-size: 18px;
-      font-style: normal;
-      font-weight: 400;
-      line-height: 100%; /* 18px */
-      letter-spacing: 2.7px;
-      padding: 1rem;
-      padding-left: 2.75rem;
-      padding-right: 3rem; /* 為右側圖示預留空間 */
-      width: 100%;
-      box-sizing: border-box;
-      min-width: 0; /* 在 flex 容器時避免擠壓出界 */
-
-      &::placeholder {
+      input[type="text"],
+      input[type="tel"],
+      input[type="password"] {
+        outline: none;
+        border: none;
+        background-color: transparent;
+        color: #74bc1f;
+        font-family: "Noto Sans";
         font-size: 18px;
+        font-style: normal;
         font-weight: 400;
-    
+        letter-spacing: 2.7px;
+        line-height: 22px;
+        flex: 1;
+        width: 100%;
       }
     }
 
     .forgetPasswordGroup {
       text-align: center;
-      margin-top: 1.25rem;
 
       a {
         color: $raphael-gray-500;
@@ -357,18 +341,14 @@
 
     .loginBtn {
       color: $raphael-white;
-      padding: 0.5rem 0.75rem;
       width: 100%;
       border: none;
       font-size: 1.125rem;
       font-weight: 400;
       letter-spacing: 0.5px;
       transition: 0.25s ease;
-      margin-top: 1.5rem;
       cursor: pointer;
-      border-radius: 50px;
-      background: #f5f7fa;
-      box-shadow: 2px 4px 12px 0 rgba(177, 192, 216, 0.7);
+      @include neumorphismOuter($radius: 50px, $padding: 8px 12px);
       color: #74bc1f;
 
       &:disabled {
@@ -386,39 +366,30 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+    gap: 24px;
 
     .registerBox {
-      margin-top: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom:20px;
 
       .phoneGroup,
       .passwordGroup,
       .passwordAgainGroup {
         position: relative;
-        margin-bottom: 1rem;
-        border-radius: var(--Radius-r-50, 50px);
-        background: var(--Secondary-100, #f5f7fa);
-        box-shadow: 2px 4px 12px 0
-          var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
-
-        .icon1 {
-          position: absolute;
-          top: 50%;
-          left: 16px;
-          transform: translateY(-51%);
-          width: 20px;
-          height: 20px;
-          z-index: 1;
-        }
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        @include neumorphismOuter($radius: 50px, $padding: 12px 10px);
 
         .icon2 {
-          position: absolute;
-          top: 50%;
-          right: 16px;
-          transform: translateY(-51%);
           cursor: pointer;
-          width: 20px;
-          height: 20px;
-          z-index: 1;
+          transition: all 0.2s ease;
+          &:hover,
+          &:active {
+            transform: scale(1.1);
+          }
         }
       }
 
@@ -481,26 +452,26 @@
           border: none;
           margin-top: 44px;
 
-          color: var(--Primary-default, #74BC1F);
+          color: var(--Primary-default, #74bc1f);
 
-font-size: var(--Text-font-size-18, 18px);
-font-style: normal;
-font-weight: 400;
+          font-size: 18px;
+          font-style: normal;
+          font-weight: 400;
 
-letter-spacing: 2.7px;
+          letter-spacing: 2.7px;
 
           transition: 0.15s all ease;
           cursor: pointer;
-       
+
           width: 100%;
           text-align: center;
           padding: 0.5rem 0;
           border-radius: var(--Radius-r-50, 50px);
-background: var(--Secondary-100, #F5F7FA);
-box-shadow: 2px 4px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.70));
-color: #74bc1f;
-text-decoration: none;
-
+          background: var(--Secondary-100, #f5f7fa);
+          box-shadow: 2px 4px 12px 0
+            var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
+          color: #74bc1f;
+          text-decoration: none;
 
           &:disabled {
             color: $raphael-gray-500;
@@ -511,26 +482,21 @@ text-decoration: none;
       }
     }
 
-         input[type="text"],
-     input[type="tel"],
-     input[type="password"],
-     input[type="number"] {
-       outline: none;
-       border: none;
-       background-color: transparent;
-       color: #74bc1f;
-       font-family: "Noto Sans";
-       font-size: 18px;
-       font-style: normal;
-       font-weight: 400;
-       line-height: 100%;
-       letter-spacing: 2.7px;
-       padding: 1rem;
-       padding-left: 2.75rem;
-       padding-right: 3rem; /* 為右側圖示預留空間 */
-       width: 100%;
-       box-sizing: border-box;
-       min-width: 0; /* 在 flex 容器時避免擠壓出界 */
+    input[type="text"],
+    input[type="tel"],
+    input[type="password"],
+    input[type="number"] {
+      outline: none;
+      border: none;
+      background-color: transparent;
+      color: #74bc1f;
+      font-family: "Noto Sans";
+      font-size: 18px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 22px;
+      letter-spacing: 2.7px;
+      width: 100%;
 
        &::placeholder {
          font-family: "Noto Sans";
@@ -542,36 +508,24 @@ text-decoration: none;
     .privacyGroup {
       display: flex;
       align-items: center;
-      color: var(--Neutral-500, #666);
+      gap: 8px;
+      position: relative;
+      color: #666;
 
-      font-size: var(--Text-font-size-18, 18px);
+      font-size: 18px;
       font-style: normal;
       font-weight: 400;
 
       letter-spacing: 2.7px;
-      position: relative;
-      margin-top: 0.5rem;
-      margin-bottom: 0.25rem;
 
       input {
         appearance: none;
         display: flex;
         width: 32px;
         height: 32px;
-        padding: var(--Padding-p-12, 12px);
-        justify-content: center;
-        align-items: center;
-        gap: 4px;
-        border-radius: 8px;
-        border: none;
-        border-radius: var(--Radius-r-8, 8px);
-        background: var(--Secondary-100, #f5f7fa);
-        box-shadow: 2px 4px 12px 0
-          var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
-        position: absolute;
-        top: 50%;
-        left: 0%;
-        transform: translate(0%, -55%);
+        margin: 0;
+        @include neumorphismOuter($radius: 8px, $padding: 0);
+
         &:checked {
           background-color: $raphael-green-400;
           border: none;
@@ -586,9 +540,8 @@ text-decoration: none;
           box-shadow: 2px 4px 12px 0 rgba(177, 192, 216, 0.7);
           //打勾
           content: "✓";
-
           color: $raphael-white;
-          font-size: 0.75rem;
+          font-size: 1rem;
           font-weight: bold;
           font-family: "Arial", sans-serif;
         }
@@ -610,32 +563,21 @@ text-decoration: none;
         letter-spacing: 0.09px;
         font-weight: 400;
         cursor: pointer;
-        margin-left: 8px;
-        padding-left: 2.25rem;
       }
     }
 
     .vertificationBtn {
-      @include btnStyle($raphael-green-400, $raphael-white);
-      margin-top: 2rem;
-      cursor: pointer;
-      width: 100%;
-      border-radius: 50px;
-
-      border-radius: var(--Radius-r-50, 50px);
-      background: #f5f7fa;
-      box-shadow: 2px 4px 12px 0 rgba(177, 192, 216, 0.7);
-      color: #74bc1f;
-      padding: 1rem 0.75rem;
+      color: $raphael-white;
       width: 100%;
       border: none;
       font-size: 1.125rem;
       font-weight: 400;
       letter-spacing: 0.5px;
       transition: 0.25s ease;
-      margin-top: 1.5rem;
       cursor: pointer;
-      border-radius: 50px;
+      @include neumorphismOuter($radius: 50px, $padding: 8px 12px);
+      color: #74bc1f;
+
       &:disabled {
         color: #ccc;
         cursor: not-allowed;
@@ -659,8 +601,8 @@ text-decoration: none;
   flex: 1;
   display: flex;
   flex-direction: column;
-  h2{
-    color: var(--Primary-default, #74BC1F);
+  h2 {
+    color: var(--Primary-default, #74bc1f);
     text-align: center;
     font-size: var(--Text-h2, 24px);
     font-style: normal;
@@ -668,11 +610,8 @@ text-decoration: none;
 
     letter-spacing: 3.6px;
     margin-top: 1rem;
-
   }
 }
-
-/* 手機版響應式優化 */
 @media (max-width: 768px) {
   .loginAndRegister {
     .loginGroup {
