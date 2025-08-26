@@ -694,12 +694,12 @@ text-decoration: none;
         
         .icon1,
         .icon2 {
-          width: 18px;
-          height: 18px;
+          width: 20px;
+          height: 20px;
         }
         
         .icon2 {
-          right: 12px; /* 手機版調整右側圖示位置 */
+          right: 16px; /* 手機版調整右側圖示位置 */
         }
       }
     }
@@ -723,8 +723,8 @@ text-decoration: none;
         
         .icon1,
         .icon2 {
-          width: 16px;
-          height: 16px;
+          width: 20px;
+          height: 20px;
         }
         
         .icon2 {
