@@ -743,6 +743,9 @@ const login = async () => {
 
       savePushKey(response.data.MAID.trim(), messagingToken.value);
 
+      // 取得完整的用戶資料並更新 localStorage
+      await getUserData(response.data);
+
       router.push({ name: "robot" });
     } else {
       alert(`登入失敗 : ${response.data.Result}`);
@@ -771,6 +774,43 @@ const savePushKey = async (loadMAID, loadPushkey) => {
     }
   } catch (err) {
     alert("存儲Pushkey失敗");
+  }
+};
+
+// 取得完整的用戶資料
+const getUserData = async (loginData) => {
+  try {
+    const { MID, Token, MAID, Mobile } = loginData;
+
+    const response = await axios.post(
+      "https://23700999.com:8081/HMA/API_AA6.jsp",
+      {
+        MID,
+        Token,
+        MAID,
+        Mobile,
+      }
+    );
+
+    if (response.status === 200) {
+      const data = response.data;
+      if (data.Result === "OK" && data.Member) {
+        const existingData = loginData;
+        const newUserInfo = {
+          ...existingData,
+          ...data.Member,
+          ChildInfo: data.ChildInfo || [],
+        };
+        localStorage.setItem("userData", JSON.stringify(newUserInfo));
+        console.log("用戶資料更新成功:", newUserInfo);
+      } else {
+        console.warn("取得用戶資料失敗:", data.Result);
+      }
+    } else {
+      console.warn("取得用戶資料 API 請求失敗");
+    }
+  } catch (err) {
+    console.error("取得用戶資料時發生錯誤:", err);
   }
 };
 
@@ -1058,7 +1098,7 @@ const addUser = async () => {
     );
 
     if (response.status === 200) {
-      router.push("/robot");
+      // router.push("/robot");
       console.log(response.data);
     }
   } catch (err) {
@@ -1099,7 +1139,7 @@ onMounted(() => {
     const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
 
     if (MID || Token || MAID || Mobile) {
-      router.push("/robot");
+      // router.push("/robot");
     }
 
     // 初始化驗證碼輸入框

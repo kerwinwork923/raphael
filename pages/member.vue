@@ -5,8 +5,8 @@
         <img src="../assets/imgs/robot/character/pet4_3.png" alt="" />
       </div>
       <div class="memberTopRight">
-        <h3>陳女士 您好</h3>
-        <div class="memberTopPoint">目前積分 : 1200</div>
+        <h3>{{ userDataObj.Name }} 您好</h3>
+        <div class="memberTopPoint">目前積分 : {{ userDataObj.point }}</div>
       </div>
     </div>
     <div class="memberCenter">
@@ -33,6 +33,10 @@
 <script setup>
 import BottomNav from "~/components/BottomNav.vue";
 import { useRouter } from "vue-router";
+
+const userData = localStorage.getItem("userData");
+const userDataObj = JSON.parse(userData);
+console.log(userDataObj);
 
 const router = useRouter();
 
