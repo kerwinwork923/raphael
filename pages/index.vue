@@ -413,11 +413,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 0.5rem;
-        border-radius: var(--Radius-r-50, 50px);
-        background: var(--Secondary-100, #f5f7fa);
-        box-shadow: 2px 4px 12px 0
-          var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+        @include neumorphismOuter($radius:50px,$padding:0.5rem);
         width: 100%;
 
         .vertifyCode {
