@@ -205,16 +205,14 @@
 
 <style lang="scss" scoped>
 .loginAndRegister {
-  background: url("../assets/imgs/background.png");
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-size: cover;
   display: flex;
   flex-direction: column;
   place-items: center;
   width: 100%;
-  min-height: 100vh;
+  height: 100dvh;
   padding: 1rem;
+  overflow: hidden;
+  @include gradientBg();
 
   .loginRegisterWrap {
     display: flex;
@@ -222,7 +220,7 @@
     justify-content: center;
     width: 100%;
     color: #74bc1f;
-    font-family: "Noto Sans";
+    
     font-size: 18px;
     font-style: normal;
     font-weight: 400;
@@ -268,17 +266,16 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     gap: 24px;
     width: 100%;
     height: 100%;
     max-width: 768px;
-    padding-top: 10vh;
   }
 
   .loginWrap {
     width: 100%;
-    min-height: 400px;
+    min-height: 318px;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -316,7 +313,7 @@
         border: none;
         background-color: transparent;
         color: #74bc1f;
-        font-family: "Noto Sans";
+        
         font-size: 18px;
         font-style: normal;
         font-weight: 400;
@@ -367,10 +364,10 @@
   // 註冊相關樣式
   .registerWrap {
     width: 100%;
-    min-height: 400px;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+    min-height: 318px;
     gap: 24px;
 
     .registerBox {
@@ -416,11 +413,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 0.5rem;
-        border-radius: var(--Radius-r-50, 50px);
-        background: var(--Secondary-100, #f5f7fa);
-        box-shadow: 2px 4px 12px 0
-          var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+        @include neumorphismOuter($radius:50px,$padding:0.5rem);
         width: 100%;
 
         .vertifyCode {
@@ -494,8 +487,7 @@
       outline: none;
       border: none;
       background-color: transparent;
-      color: #74bc1f;
-      font-family: "Noto Sans";
+      color: #74bc1f;      
       font-size: 18px;
       font-style: normal;
       font-weight: 400;
@@ -504,7 +496,7 @@
       width: 100%;
 
        &::placeholder {
-         font-family: "Noto Sans";
+         
          font-size: 18px;
          font-weight: 400;
        }
@@ -615,67 +607,6 @@
 
     letter-spacing: 3.6px;
     margin-top: 1rem;
-  }
-}
-@media (max-width: 768px) {
-  .loginAndRegister {
-    .loginGroup {
-      padding-top: 5vh; /* 手機版減少上方間距 */
-    }
-    
-    .loginWrap,
-    .registerWrap {
-      .phoneGroup,
-      .passwordGroup,
-      .passwordAgainGroup {
-        input[type="text"],
-        input[type="tel"],
-        input[type="password"],
-        input[type="number"] {
-          padding-right: 3.5rem; /* 手機版多留一點右側空間 */
-          font-size: 16px; /* 手機版避免縮放 */
-        }
-        
-        .icon1,
-        .icon2 {
-          width: 20px;
-          height: 20px;
-        }
-        
-        .icon2 {
-          right: 16px; /* 手機版調整右側圖示位置 */
-        }
-      }
-    }
-  }
-}
-
-/* 超小螢幕優化 */
-@media (max-width: 375px) {
-  .loginAndRegister {
-    .loginWrap,
-    .registerWrap {
-      .phoneGroup,
-      .passwordGroup,
-      .passwordAgainGroup {
-        input[type="text"],
-        input[type="tel"],
-        input[type="password"],
-        input[type="number"] {
-          padding-right: 4rem; /* 超小螢幕再多留空間 */
-        }
-        
-        .icon1,
-        .icon2 {
-          width: 20px;
-          height: 20px;
-        }
-        
-        .icon2 {
-          right: 8px; /* 超小螢幕調整圖示位置 */
-        }
-      }
-    }
   }
 }
 </style>
