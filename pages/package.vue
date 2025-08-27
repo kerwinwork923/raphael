@@ -1,7 +1,7 @@
 <template>
   <RaphaelLoading v-if="loading" />
   <div class="packageWrap">
-    <TitleMenu Text="診所訂單" link="/user" />
+    <TitleMenu Text="診所訂單" link="/member" />
     <!-- 當 hasPackage 為 true 時，顯示包裹清單 -->
     <div class="packageGroup" v-if="hasPackage">
       <h3>您所有的包裹編號</h3>
@@ -140,13 +140,14 @@
       </div>
     </div>
   </div>
+  <BottomNav />
 </template>
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import axios from "axios";
 import { useSeo } from "~/composables/useSeo";
-
+import BottomNav from "@/components/BottomNav.vue";
 const loading = ref(false);
 const hasLoaded = ref(false);
 
@@ -361,7 +362,7 @@ onBeforeUnmount(() => {
   flex-direction: column;
   place-items: center;
   background-color: $raphael-gray-100;
-  padding: 0 5% 60px;
+  padding: 0 1rem 116px 1rem;
   min-height: 100vh;
   .packageGroup {
     border-radius: 12px;

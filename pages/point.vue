@@ -1,7 +1,7 @@
 <template>
   <RaphaelLoading v-if="loading" />
   <div class="point">
-    <TitleMenu Text="獎勵積分" link="/user"></TitleMenu>
+    <TitleMenu Text="獎勵積分" link="/member"></TitleMenu>
     <div class="helperGroup">
       <div class="helper">
         <div class="helperTitle">
@@ -346,6 +346,7 @@
         </transition>
       </div>
     </div>
+    <BottomNav />
   </div>
   <!-- 可立即使用 => verificationBox -->
   <div class="verificationBox" v-show="verificationBoxVisible">    
@@ -420,6 +421,7 @@ import axios from "axios";
 import { usePoint } from "@/stores/point";
 import { nextTick } from "vue";
 import { useSeo } from "~/composables/useSeo";
+import BottomNav from "@/components/BottomNav.vue";
 /** ---------------------
   其餘 template, style 已存在，此處只改動 script 區
 ---------------------- **/
