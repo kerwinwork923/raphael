@@ -1,6 +1,6 @@
 <template>
   <nav class="bottom-nav">
-    <div
+    <!-- <div
       class="nav-item"
       :class="{ active: activeTab === 'services' }"
       @click="navigateTo('/service')"
@@ -14,7 +14,7 @@
         <img v-else src="/assets/imgs/robot/service.svg" alt="我的服務" />
       </div>
       <span>我的服務</span>
-    </div>
+    </div> -->
     <div
       class="nav-item"
       :class="{ active: activeTab === 'record' }"
@@ -45,7 +45,7 @@
       </div>
       <span>首頁</span>
     </div>
-    <div
+    <!-- <div
       class="nav-item"
       :class="{ active: activeTab === 'shop' }"
       @click="navigateTo('/cart')"
@@ -59,7 +59,7 @@
         <img v-else src="/assets/imgs/robot/market.svg" alt="健康好物" />
       </div>
       <span>健康好物</span>
-    </div>
+    </div> -->
     <div
       class="nav-item"
       :class="{ active: activeTab === 'member' }"
@@ -138,10 +138,11 @@ onMounted(() => {
   background: #F5F7FA;
   display: grid;
   grid-auto-flow: column;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   padding: 12px 0;
   padding-bottom: 24px;
   border-top: 1px solid $raphael-white;
+  z-index: 100;
 
   .nav-item {
     display: flex;
