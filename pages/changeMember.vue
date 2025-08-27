@@ -108,8 +108,24 @@ export default {
         );
 
         if (response.status === 200) {
+          // 更新 localStorage 中的用戶資料
+          const updatedUserData = {
+            ...JSON.parse(localData),
+            Name: name.value,
+            Height: height.value,
+            Weight: weight.value,
+            Sex: sex.value,
+            Birthday: birthday,
+            DSPR: DSPR.value || "",
+            City: city.value,
+            Zone: area.value,
+            Address: address.value,
+            HRVCalTime: HRVCalTime.value,
+          };
+          localStorage.setItem("userData", JSON.stringify(updatedUserData));
+          
           router.push("/user");
-          console.log(response.data);
+          console.log("資料更新成功:", response.data);
         }
       } catch (err) {
         alert(err.message || "資料不完整");
