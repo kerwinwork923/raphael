@@ -211,6 +211,7 @@
   width: 100%;
   height: 100dvh;
   padding: 1rem;
+  overflow: hidden;
   @include gradientBg();
 
   .loginRegisterWrap {
