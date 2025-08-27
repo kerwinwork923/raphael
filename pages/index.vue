@@ -1099,7 +1099,7 @@ onMounted(() => {
     const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
 
     if (MID || Token || MAID || Mobile) {
-      router.push("/user");
+      router.push("/robot");
     }
 
     // 初始化驗證碼輸入框
