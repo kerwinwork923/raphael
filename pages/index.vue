@@ -743,7 +743,7 @@ const login = async () => {
 
       savePushKey(response.data.MAID.trim(), messagingToken.value);
 
-      router.push({ name: "user" });
+      router.push({ name: "robot" });
     } else {
       alert(`登入失敗 : ${response.data.Result}`);
     }
