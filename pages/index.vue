@@ -1058,7 +1058,7 @@ const addUser = async () => {
     );
 
     if (response.status === 200) {
-      router.push("/user");
+      router.push("/robot");
       console.log(response.data);
     }
   } catch (err) {

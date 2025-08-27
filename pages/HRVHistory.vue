@@ -4,10 +4,7 @@
   <DSPRSelect />
 
   <div class="HRVHistory">
-    <div class="titleGroup">
-      <img src="/assets/imgs/backArrow.svg" @click="goBack" alt="" />
-      <h2>穿衣紀錄</h2>
-    </div>
+
     <ChangeUsageTags />
 
     <img
@@ -112,7 +109,7 @@
         </div>
       </div>
     </div>
-
+    <BottomNav />
     <div class="HRVBtnGroup">
       <button class="goToHRVBtn" @click="openHRVAlert">前往檢測</button>
     </div>
@@ -128,7 +125,7 @@ import axios from "axios";
 import { useCommon } from "../stores/common";
 import { useUserData } from "~/fn/api";
 import { useSeo } from "~/composables/useSeo";
-
+import BottomNav from "@/components/BottomNav.vue";
 useSeo({
   title: "HRV 檢測",
   description:
@@ -137,7 +134,7 @@ useSeo({
 });
 
 export default {
-  components: { RaphaelLoading, HRVAlert, DSPRSelect },
+  components: { RaphaelLoading, HRVAlert, DSPRSelect, BottomNav },
   setup() {
     const router = useRouter();
     const HRVData = ref([]);
@@ -235,8 +232,8 @@ export default {
   place-items: center;
   width: 100%;
   min-height: 100vh;
-  padding: 0 1rem;
-  padding-bottom: 116px;
+  padding: 1rem 1rem 116px 1rem;
+ 
   .changeUsageTags{
     max-width: 768px;
   }
@@ -484,7 +481,7 @@ article {
   width: 100%;
   padding: 0.75rem 1rem 3.125rem 1rem;
   touch-action: manipulation;
-  bottom: 0;
+  bottom: 54px;
   z-index: 1;
   .goToHRVBtn {
     @include btnStyle($raphael-green-400, $raphael-white);

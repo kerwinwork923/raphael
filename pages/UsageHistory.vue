@@ -1,7 +1,7 @@
 <template>
   <RaphaelLoading v-if="loading" />
   <div class="usageHistoryWrap">
-    <TitleMenu Text="穿衣紀錄" link="/robot" />
+ 
     <ChangeUsageTags></ChangeUsageTags>
     <div class="productWrap">
       <h3 class="yourProductTitle" v-if="purchasedProducts.length > 1">
@@ -444,8 +444,8 @@ export default {
   background-color: $raphael-gray-100;
   min-height: 100vh;
   width: 100%;
-  padding: 0 1rem;
-  padding-bottom: 116px;
+  padding: 1rem 1rem 200px 1rem;
+ 
   .productWrap {
     width: 100%;
     max-width: 768px;
