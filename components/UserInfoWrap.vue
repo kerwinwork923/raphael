@@ -316,14 +316,14 @@ export default {
 
 <style lang="scss">
 .infoWrap {
-  .infoBox {
-    margin-top: 0.75rem;
-    border-radius: 1rem;
-    height: calc(100vh - 300px);
-    // height: 62.6vh;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  height: 100%;
 
+  .infoBox {
+    height: 100%;
     overflow-y: scroll;
-    padding: 1rem 0;
   }
 
   .custom-select {
@@ -333,21 +333,22 @@ export default {
     background: url("../assets/imgs/arrow-down.svg") no-repeat right 10px center;
     background-size: 12px;
     color: $raphael-gray-300;
-    font-size: 1.2rem;
-    border-radius: var(--Radius-r-50, 50px);
-    background: var(--Secondary-100, #f5f7fa);
-    box-shadow: 2px 4px 12px 0
-      var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 2.7px;
+    line-height: 22px;
+    flex: 1;
+    width: 100%;
   }
 
   .custom-select.selected {
-    color: $raphael-black;
+    color: $raphael-green-400;
   }
   .dp__instance_calendar {
     z-index: 1000;
   }
   label {
-    color: var(--Neutral-500, #666);
+    color: $raphael-gray-500;
 
     font-size: 16px;
     font-style: normal;
@@ -364,25 +365,27 @@ export default {
   .dateGroup,
   .phoneGroup,
   .emailGroup {
+    display: flex;
+    align-items: center;
+    gap: 4px;
     position: relative;
-    margin-bottom: 1rem;
+    margin-bottom: 16px;
+    @include neumorphismOuter($radius: 50px, $padding: 12px 10px);
     z-index: 1000;
 
-    .icon1 {
-      position: absolute;
-      top: 50%;
-      left: 16px;
-      transform: translateY(-50%);
-      z-index: 2;
+    .icon1,
+    .icon2 {
+      width: 24px;
+      height: 24px;
     }
 
     .icon2 {
-      position: absolute;
-      top: 50%;
-      right: 16px;
-      transform: translateY(-50%);
-      width: 18px;
-      z-index: 1;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      &:hover,
+      &:active {
+        transform: scale(1.1);
+      }
     }
   }
 
@@ -430,6 +433,12 @@ export default {
         color: $raphael-black;
       }
 
+      .icon1,
+      .icon2 {
+        width: 24px;
+        height: 24px;
+      }
+
       .icon2 {
         position: absolute;
         top: 50%;
@@ -454,37 +463,39 @@ export default {
   .groupGroup,
   .DSPR,
   .detectTime {
+    display: flex;
+    align-items: center;
+    gap: 4px;
     position: relative;
-    width: 100%;
-
-    .icon1 {
-      position: absolute;
-      top: 50%;
-      left: 16px;
-      transform: translateY(-50%);
-      z-index: 2;
+    margin-bottom: 16px;
+    @include neumorphismOuter($radius: 50px, $padding: 12px 10px);
+    .icon1,
+    .icon2 {
+      width: 24px;
+      height: 24px;
     }
     .icon2 {
-      position: absolute;
-      top: 50%;
-      right: 16px;
-      transform: translateY(-50%);
-      z-index: 1;
-      width: 18px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      &:hover,
+      &:active {
+        transform: scale(1.1);
+      }
     }
+
     select {
       outline: none;
       border: none;
-      padding-left: 2.75rem;
-      padding-bottom: 16px;
-      padding-top: 16px;
-
       width: 100%;
-      border-bottom: 1px solid $raphael-gray-300;
       appearance: none;
       color: $raphael-gray-300;
-      font-family: Inter;
-      font-size: 1.2rem;
+      font-size: 18px;
+      font-style: normal;
+      font-weight: 400;
+      letter-spacing: 2.7px;
+      line-height: 22px;
+      flex: 1;
+      width: 100%;
 
       &::placeholder {
         color: $raphael-gray-300;
@@ -513,32 +524,48 @@ export default {
   input[type="email"] {
     outline: none;
     border: none;
-    border-bottom: 1px solid $raphael-gray-300;
-    font-size: 1.2rem;
+    background-color: transparent;
+    color: #74bc1f;
+
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 2.7px;
+    line-height: 22px;
+    flex: 1;
     width: 100%;
-    padding-left: 2.75rem;
-    padding-bottom: 16px;
-    padding-top: 16px;
-    color: $raphael-black;
-    border-radius: var(--Radius-r-50, 50px);
-    background: var(--Secondary-100, #f5f7fa);
-    box-shadow: 2px 4px 12px 0
-      var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+
     &::placeholder {
-      color: $raphael-gray-300;
-      font-family: Inter;
-      font-size: 1.2rem;
-      font-weight: 400;
+      font-size: 18px;
     }
   }
 
   .infoSendBtn {
-    @include btnStyle($raphael-green-400, $raphael-white);
-    margin-top: 24px;
+    color: $raphael-green-400;
+    width: 100%;
+    border: none;
+    font-size: 1.125rem;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    transition: 0.25s ease;
+    cursor: pointer;
+    @include neumorphismOuter($radius: 50px, $padding: 8px 12px);
+
+    &:hover,
+    &:active {
+      @include neumorphismOuter(
+        $radius: 50px,
+        $padding: 8px 12px,
+        $x: 0,
+        $y: 0,
+        $blur: 6px
+      );
+    }
 
     &:disabled {
-      background-color: $raphael-gray-300;
+      color: $raphael-gray-300;
       cursor: not-allowed;
+      opacity: 0.6;
     }
   }
 }
@@ -562,21 +589,15 @@ export default {
 }
 
 .dp__input_wrap {
-
- 
-
-
   .dp__pointer {
     border: none;
     background-color: none;
     width: 100%;
-    font-size: 1.25rem;
+    font-size: 18px;
+    background: #f5f7fa;
+    color: $raphael-green-400;
+    padding: 0;
 
-    border-radius: var(--Radius-r-50, 50px);
-    background: var(--Secondary-100, #f5f7fa);
-    box-shadow: 2px 4px 12px 0
-      var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
-    padding: 1rem 0 1rem 2.75rem;
     &::placeholder {
       color: $raphael-gray-400;
       font-weight: 400;
