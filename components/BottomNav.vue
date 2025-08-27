@@ -94,7 +94,8 @@ const setActiveTabFromRoute = () => {
     case "/service":
       activeTab.value = "services";
       break;
-    case "/UsageHistory":
+    case "/UsageHistory" :
+      case "/HRVHistory":
       activeTab.value = "record";
       break;
     case "/robot":
@@ -104,6 +105,8 @@ const setActiveTabFromRoute = () => {
       activeTab.value = "shop";
       break;
     case "/member":
+      case "/point":
+      case "/package":
       activeTab.value = "member";
       break;
     default:
