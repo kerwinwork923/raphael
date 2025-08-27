@@ -185,8 +185,7 @@
         </div>
 
         <!-- 基本資料表單 -->
-        <!-- <div class="UserInfoFormWrap" v-if="currentStep === 'info'"> -->
-        <div class="UserInfoFormWrap">
+        <div class="UserInfoFormWrap" v-if="currentStep === 'info'">
           <h2>請輸入基本資料</h2>
           <UserInfoForm
             @update:name="name = $event"
