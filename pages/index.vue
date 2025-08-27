@@ -220,7 +220,7 @@
     justify-content: center;
     width: 100%;
     color: #74bc1f;
-    
+
     font-size: 18px;
     font-style: normal;
     font-weight: 400;
@@ -238,9 +238,7 @@
     }
 
     .loginRegisterItemActive {
-      border-radius: 50px;
-      background: #f5f7fa;
-      box-shadow: 2px 4px 12px 0 rgba(177, 192, 216, 0.7) inset;
+      @include neumorphismInset($radius:50px,$padding: 0.5rem 0);
     }
   }
 
@@ -285,7 +283,7 @@
       display: flex;
       flex-direction: column;
       gap: 16px;
-      margin-bottom:20px;
+      margin-bottom: 20px;
 
       .phoneGroup,
       .passwordGroup,
@@ -313,7 +311,7 @@
         border: none;
         background-color: transparent;
         color: #74bc1f;
-        
+
         font-size: 18px;
         font-style: normal;
         font-weight: 400;
@@ -321,11 +319,10 @@
         line-height: 22px;
         flex: 1;
         width: 100%;
-      
-        &::placeholder{
-         font-size: 18px; 
+
+        &::placeholder {
+          font-size: 18px;
         }
-        
       }
     }
 
@@ -374,7 +371,7 @@
       display: flex;
       flex-direction: column;
       gap: 16px;
-      margin-bottom:20px;
+      margin-bottom: 20px;
 
       .phoneGroup,
       .passwordGroup,
@@ -413,7 +410,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        @include neumorphismOuter($radius:50px,$padding:0.5rem);
+        @include neumorphismOuter($radius: 50px, $padding: 0.5rem);
         width: 100%;
 
         .vertifyCode {
@@ -449,25 +446,16 @@
           background-color: transparent;
           border: none;
           margin-top: 44px;
-
           color: var(--Primary-default, #74bc1f);
-
           font-size: 18px;
           font-style: normal;
           font-weight: 400;
-
           letter-spacing: 2.7px;
-
           transition: 0.15s all ease;
           cursor: pointer;
-
           width: 100%;
           text-align: center;
-          padding: 0.5rem 0;
-          border-radius: var(--Radius-r-50, 50px);
-          background: var(--Secondary-100, #f5f7fa);
-          box-shadow: 2px 4px 12px 0
-            var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
+          @include neumorphismOuter($radius: 50px, $padding: 0.5rem 0);
           color: #74bc1f;
           text-decoration: none;
 
@@ -487,7 +475,7 @@
       outline: none;
       border: none;
       background-color: transparent;
-      color: #74bc1f;      
+      color: #74bc1f;
       font-size: 18px;
       font-style: normal;
       font-weight: 400;
@@ -495,12 +483,11 @@
       letter-spacing: 2.7px;
       width: 100%;
 
-       &::placeholder {
-         
-         font-size: 18px;
-         font-weight: 400;
-       }
-     }
+      &::placeholder {
+        font-size: 18px;
+        font-weight: 400;
+      }
+    }
 
     .privacyGroup {
       display: flex;
@@ -524,23 +511,20 @@
         @include neumorphismOuter($radius: 8px, $padding: 0);
 
         &:checked {
-          background-color: $raphael-green-400;
-          border: none;
           display: flex;
           justify-content: center;
           align-items: center;
           gap: 4px;
-          border-radius: 8px;
           border: none;
-          border-radius: var(--Radius-r-8, 8px);
-          background: #74bc1f;
-          box-shadow: 2px 4px 12px 0 rgba(177, 192, 216, 0.7);
           //打勾
           content: "✓";
           color: $raphael-white;
           font-size: 1rem;
-          font-weight: bold;
-          font-family: "Arial", sans-serif;
+          @include neumorphismOuter(
+            $bgColor: #74bc1f,
+            $radius: 8px,
+            $padding: 0
+          );
         }
 
         &:checked::before {
