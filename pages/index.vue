@@ -794,15 +794,14 @@ const getUserData = async (loginData) => {
 
     if (response.status === 200) {
       const data = response.data;
-      if (data.Result === "OK" && data.Member) {
-        const existingData = loginData;
-        const newUserInfo = {
-          ...existingData,
-          ...data.Member,
-          ChildInfo: data.ChildInfo || [],
+      if (data.Result === "OK") {
+        // 直接儲存整個 API 回傳的資料
+        const userData = {
+          ...loginData,
+          ...data
         };
-        localStorage.setItem("userData", JSON.stringify(newUserInfo));
-        console.log("用戶資料更新成功:", newUserInfo);
+        localStorage.setItem("userData", JSON.stringify(userData));
+        console.log("用戶資料更新成功:", userData);
       } else {
         console.warn("取得用戶資料失敗:", data.Result);
       }

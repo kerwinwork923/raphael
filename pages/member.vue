@@ -5,8 +5,8 @@
         <img src="../assets/imgs/robot/character/pet4_3.png" alt="" />
       </div>
       <div class="memberTopRight">
-        <h3>{{ userDataObj.Name }} 您好</h3>
-        <div class="memberTopPoint">目前積分 : {{ userDataObj.point }}</div>
+        <h3>{{ userDataObj.Member.Name }} 您好</h3>
+        <div class="memberTopPoint">目前積分 : {{ userDataObj.NowAvaPoints }}</div>
       </div>
     </div>
     <div class="memberCenter">
