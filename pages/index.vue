@@ -187,7 +187,6 @@
         <!-- 基本資料表單 -->
         <div class="UserInfoFormWrap" v-if="currentStep === 'info'">
           <h2>請輸入基本資料</h2>
-          <div class="mtDIv"></div>
           <UserInfoForm
             @update:name="name = $event"
             @update:height="height = $event"
@@ -207,7 +206,8 @@
 .loginAndRegister {
   display: flex;
   flex-direction: column;
-  place-items: center;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100dvh;
   padding: 1rem;
@@ -238,7 +238,7 @@
     }
 
     .loginRegisterItemActive {
-      @include neumorphismInset($radius:50px,$padding: 0.5rem 0);
+      @include neumorphismInset($radius: 50px, $padding: 0.5rem 0);
     }
   }
 
@@ -264,16 +264,15 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 24px;
     width: 100%;
-    height: 100%;
+    height: 71.2vh;
     max-width: 768px;
   }
 
   .loginWrap {
     width: 100%;
-    min-height: 318px;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -293,7 +292,11 @@
         gap: 4px;
         position: relative;
         @include neumorphismOuter($radius: 50px, $padding: 12px 10px);
-
+        .icon1,
+        .icon2 {
+          width: 24px;
+          height: 24px;
+        }
         .icon2 {
           cursor: pointer;
           transition: all 0.2s ease;
@@ -351,9 +354,20 @@
       color: #74bc1f;
 
       &:disabled {
-        color: #ccc;
+        color: $raphael-gray-300;
         cursor: not-allowed;
         opacity: 0.6;
+      }
+
+      &:hover,
+      &:active {
+        @include neumorphismOuter(
+          $radius: 50px,
+          $padding: 8px 12px,
+          $x: 0,
+          $y: 0,
+          $blur: 6px
+        );
       }
     }
   }
@@ -364,8 +378,9 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    min-height: 318px;
     gap: 24px;
+    flex: 1;
+    min-height: 0;
 
     .registerBox {
       display: flex;
@@ -381,7 +396,11 @@
         align-items: center;
         gap: 4px;
         @include neumorphismOuter($radius: 50px, $padding: 12px 10px);
-
+        .icon1,
+        .icon2 {
+          width: 24px;
+          height: 24px;
+        }
         .icon2 {
           cursor: pointer;
           transition: all 0.2s ease;
@@ -403,24 +422,24 @@
     }
 
     .verfifyWrap {
-      margin-top: 1.5rem;
-      padding: 0.25rem;
-
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
       .verificationCodeGroup {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        @include neumorphismOuter($radius: 50px, $padding: 0.5rem);
+        gap: 8px;
+        @include neumorphismOuter($radius: 50px, $padding: 10px 16px);
         width: 100%;
 
         .vertifyCode {
-          height: 3rem;
-          padding: 0;
-          border-radius: 0.5rem;
+          padding: 2px 0;
           border: none;
+          border-bottom: 1px solid #b1c0d8;
           cursor: text;
           text-align: center;
-          font-size: 18px;
+          font-size: 20px;
           font-weight: bold;
           outline: none;
           width: 100%;
@@ -433,9 +452,7 @@
         text-align: center;
         font-weight: 400;
         letter-spacing: 0.1px;
-        margin-top: 12px;
         line-height: 22.652px;
-        margin-bottom: 12px;
       }
 
       .reSendTextGroup {
@@ -443,10 +460,7 @@
 
         .reSendText {
           outline: none;
-          background-color: transparent;
           border: none;
-          margin-top: 44px;
-          color: var(--Primary-default, #74bc1f);
           font-size: 18px;
           font-style: normal;
           font-weight: 400;
@@ -460,9 +474,19 @@
           text-decoration: none;
 
           &:disabled {
-            color: $raphael-gray-500;
-            text-decoration: none;
+            color: $raphael-gray-300;
             cursor: not-allowed;
+            opacity: 0.6;
+          }
+          &:hover,
+          &:active {
+            @include neumorphismOuter(
+              $radius: 50px,
+              $padding: 0.5rem 0,
+              $x: 0,
+              $y: 0,
+              $blur: 6px
+            );
           }
         }
       }
@@ -560,37 +584,39 @@
       color: #74bc1f;
 
       &:disabled {
-        color: #ccc;
+        color: $raphael-gray-300;
         cursor: not-allowed;
         opacity: 0.6;
+      }
+      &:hover,
+      &:active {
+        @include neumorphismOuter(
+          $radius: 50px,
+          $padding: 8px 12px,
+          $x: 0,
+          $y: 0,
+          $blur: 6px
+        );
       }
     }
   }
 }
 
-.mbDiv {
-  margin-bottom: 1rem;
-}
-
-.mtDIv {
-  margin-top: 0.5rem;
-}
-
 .UserInfoFormWrap {
   padding-top: 0;
   width: 100%;
+  height: 100%;
   flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 24px;
   h2 {
-    color: var(--Primary-default, #74bc1f);
+    color: $raphael-green-400;
     text-align: center;
-    font-size: var(--Text-h2, 24px);
+    font-size: 24px;
     font-style: normal;
     font-weight: 700;
-
     letter-spacing: 3.6px;
-    margin-top: 1rem;
   }
 }
 </style>
@@ -746,7 +772,7 @@ const login = async () => {
       // 取得完整的用戶資料並更新 localStorage
       await getUserData(response.data);
 
-      router.push({ name: "robot" });
+      router.push({ name: "user" });
     } else {
       alert(`登入失敗 : ${response.data.Result}`);
     }
@@ -798,7 +824,7 @@ const getUserData = async (loginData) => {
         // 直接儲存整個 API 回傳的資料
         const userData = {
           ...loginData,
-          ...data
+          ...data,
         };
         localStorage.setItem("userData", JSON.stringify(userData));
         console.log("用戶資料更新成功:", userData);
@@ -1097,7 +1123,7 @@ const addUser = async () => {
     );
 
     if (response.status === 200) {
-      // router.push("/robot");
+      router.push("/robot");
       console.log(response.data);
     }
   } catch (err) {
