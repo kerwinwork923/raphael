@@ -205,7 +205,7 @@ export default {
   position: fixed;
   bottom: 0;
   z-index: 99;
-  @include neumorphismOuter($bgColor: rgba(245, 247, 250, 0.2), $radius: 50px);
+  @include neumorphismOuter($bgColor: rgba(245, 247, 250, 0.2), $radius: 50px,$x:0px,$y:-6px);
   backdrop-filter: blur(50px);
   padding-bottom: 100px;
   scrollbar-width: none;
