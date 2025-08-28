@@ -20,7 +20,7 @@
         @submit="addUser"
       />
     </div>
-    <button class="logoutBtn" @click="logout">登出</button>
+    
   </div>
 </template>
 
@@ -135,10 +135,7 @@ export default {
       }
     };
 
-    const logout = () => {
-      localStorage.removeItem("userData");
-      router.push("/");
-    };
+ 
 
     const localData = localStorage.getItem("userData");
     const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
@@ -158,7 +155,7 @@ export default {
       area,
       address,
       addUser,
-      logout,
+   
       HRVCalTime,
       loading,
     };
@@ -183,10 +180,6 @@ export default {
     max-width: 768px;
   }
 
-  .logoutBtn {
-    @include btnStyle($raphael-red-300, $raphael-white);
-    max-width: 768px;
-    margin-top: 32px;
-  }
+
 }
 </style>
