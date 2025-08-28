@@ -772,7 +772,7 @@ const login = async () => {
       // 取得完整的用戶資料並更新 localStorage
       await getUserData(response.data);
 
-      router.push({ name: "user" });
+      router.push({ name: "robot" });
     } else {
       alert(`登入失敗 : ${response.data.Result}`);
     }
@@ -1164,7 +1164,7 @@ onMounted(() => {
     const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
 
     if (MID || Token || MAID || Mobile) {
-      // router.push("/robot");
+       router.push("/robot");
     }
 
     // 初始化驗證碼輸入框
