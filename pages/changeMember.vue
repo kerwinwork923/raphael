@@ -1,7 +1,7 @@
 <template>
   <RaphaelLoading v-if="loading" />
   <div class="changeMemberWrap">
-    <TitleMenu Text="基本資料設定" link="./user" />
+    <TitleMenu Text="基本資料設定" link="/member" />
     <div class="changeMemberGroup">
       <UserInfoForm
         @update:name="name = $event"
@@ -124,7 +124,7 @@ export default {
           };
           localStorage.setItem("userData", JSON.stringify(updatedUserData));
           
-          router.push("/user");
+          router.push("/member");
           console.log("資料更新成功:", response.data);
         }
       } catch (err) {
@@ -172,11 +172,11 @@ export default {
   flex-direction: column;
   place-items: center;
   width: 100%;
+  max-width: 100%;
   min-height: 100vh;
-  background: $raphael-gray-100;
   padding: 0 1rem;
   padding-bottom: 50px;
-
+  @include gradientBg();
   .changeMemberGroup {
     padding: 0.75rem 0 0 0;
     width: 100%;

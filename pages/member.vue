@@ -5,9 +5,9 @@
         <img src="../assets/imgs/robot/character/pet4_3.png" alt="" />
       </div>
       <div class="memberTopRight">
-        <h3>{{ userDataObj.Member.Name }} 您好</h3>
+        <h3>{{ userDataObj?.Member.Name }} 您好</h3>
         <div class="memberTopPoint">
-          目前積分 : {{ userDataObj.NowAvaPoints }}
+          目前積分 : {{ userDataObj?.NowAvaPoints }}
         </div>
       </div>
     </div>
@@ -29,7 +29,7 @@
     </div>
 
     <div class="memberListGroup">
-      <div class="memberListItem">
+      <div class="memberListItem" @click="goToChangeMember">
         <div class="memberListLeft">
           <img src="../assets/imgs/member/setting.svg" alt="" />
           <h3>基本資料</h3>
@@ -76,7 +76,7 @@ const userDataObj = JSON.parse(userData);
 console.log(userDataObj);
 
 const router = useRouter();
-if (!userDataObj.Member) {
+if (!userDataObj?.Member) {
   localStorage.removeItem("userData");
   router.push("/");
 }
@@ -94,6 +94,10 @@ const logout = () => {
 
 const deleteBtn = () => {
   console.log("刪除帳號");
+};
+
+const goToChangeMember = () => {
+  router.push("/changeMember");
 };
 </script>
 

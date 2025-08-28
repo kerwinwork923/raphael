@@ -439,9 +439,11 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  align-items: stretch;
   width: 100%;
   height: 100dvh;
-  padding: 1rem;
+
+
   overflow: hidden;
   @include gradientBg();
 
@@ -452,7 +454,7 @@ export default {
     justify-content: center;
     width: 100%;
     height: 100%;
-  
+   
 
     .raphaelIconImgGroup {
       text-align: center;
@@ -475,6 +477,7 @@ export default {
     .forgetPasswordWrap {
       width: 100%;
       min-height: 509px;
+      
     }
     .forgetPasswordBox {
       border-radius: 12px;
@@ -644,12 +647,18 @@ export default {
         }
       }
     }
+    .resetPasswordWrap{
+      width: 100%;
+      max-width: 768px;
+      padding: 0 1.5rem;
+    }
   .resetPasswordBox {
 
     border-radius: 12px;
    width: 100%;
     margin-top: 2.25rem;
     margin-bottom: 1.5rem;
+    
     .phoneGroup,
     .passwordGroup,
     .passwordAgainGroup {
@@ -658,13 +667,13 @@ export default {
       .icon1 {
         position: absolute;
         top: 50%;
-        left: 2px;
+        left: 16px;
         transform: translateY(-50%);
       }
       .icon2 {
         position: absolute;
         top: 50%;
-        right: 2px;
+        right: 16px;
         transform: translateY(-50%);
         cursor: pointer;
       }
@@ -684,6 +693,7 @@ export default {
       line-height: 22px;
       letter-spacing: 2.7px;
       width: 100%;
+      padding-left: 48px;
 
       border-radius: var(--Radius-r-50, 50px);
 background: var(--Secondary-100, #F5F7FA);
@@ -697,6 +707,8 @@ box-shadow: 2px 4px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0
     .passwordAgainHintText,
     .passwordHintText {
       color: $raphael-red-300;
+      margin-bottom: .5rem;
+      text-align: center;
     }
   }
   .resetPasswordBtn {

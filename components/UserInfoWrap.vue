@@ -75,6 +75,24 @@
         />
       </div>
 
+      <!-- HRV量測時間 -->
+      <label for="detectTime" v-if="timeShow">HRV量測時間</label>
+      <div class="detectTime" v-if="timeShow">
+        <img class="icon1" src="../assets/imgs/detectTime.svg" alt="" />
+        <select
+          v-model="localTime"
+          class="custom-select"
+          :class="{ selected: localTime }"
+        >
+          <option value="" disabled selected hidden>選擇HRV量測時間</option>
+
+          <option value="1">1分鐘</option>
+          <option value="2">2分鐘</option>
+          <option value="3">3分鐘</option>
+        </select>
+        <img class="icon2" src="../assets/imgs/arrowDown.svg" />
+      </div>
+
       <!-- 日常收縮壓選擇 -->
       <label for="DSPR">血壓</label>
       <div class="DSPR">
@@ -88,24 +106,6 @@
           <option value="normal">正常(120mmHg)</option>
           <option value="prehypertension">高血壓前期(120~139mmHg)</option>
           <option value="hypertension">高血壓(>=140mmHg)</option>
-        </select>
-        <img class="icon2" src="../assets/imgs/arrowDown.svg" />
-      </div>
-
-      <!-- 檢測時間 -->
-      <label for="detectTime" v-if="timeShow">檢測時間</label>
-      <div class="detectTime" v-if="timeShow">
-        <img class="icon1" src="../assets/imgs/detectTime.svg" alt="" />
-        <select
-          v-model="localTime"
-          class="custom-select"
-          :class="{ selected: localTime }"
-        >
-          <option value="" disabled selected hidden>選擇HRV量測時間</option>
-
-          <option value="1">1分鐘</option>
-          <option value="2">2分鐘</option>
-          <option value="3">3分鐘</option>
         </select>
         <img class="icon2" src="../assets/imgs/arrowDown.svg" />
       </div>
@@ -155,7 +155,7 @@
       @click="submitForm"
       :disabled="isSubmitDisabled"
     >
-      送出
+      {{ addressShow ? "儲存" : "確認" }}
     </button>
   </div>
 </template>
@@ -371,7 +371,7 @@ export default {
     position: relative;
     margin-bottom: 16px;
     @include neumorphismOuter($radius: 50px, $padding: 12px 10px);
-    z-index: 1000;
+    z-index: 10;
 
     .icon1,
     .icon2 {
@@ -408,12 +408,17 @@ export default {
         width: 100%;
         border-bottom: 1px solid $raphael-gray-300;
         appearance: none;
+
         background-color: transparent;
         color: $raphael-gray-500;
         font-family: Inter;
         font-size: 1.2rem;
         font-weight: 400;
         padding-left: 0.5rem;
+
+        border-radius: var(--Radius-r-50, 50px);
+        background: var(--Secondary-100, #f5f7fa);
+       
 
         option {
         }
@@ -451,7 +456,28 @@ export default {
     .address {
       width: 100%;
       input[type="text"] {
-        padding-left: 0.5rem;
+        outline: none;
+        border: none;
+
+        color: #74bc1f;
+
+        font-size: 18px;
+        font-style: normal;
+        font-weight: 400;
+        letter-spacing: 2.7px;
+        line-height: 22px;
+        flex: 1;
+        width: 100%;
+
+        border-radius: var(--Radius-r-50, 50px);
+        background: var(--Secondary-100, #fcfcfcbc);
+        
+        margin-top: .75rem;
+        padding: 1rem ;
+
+        &::placeholder {
+          font-size: 18px;
+        }
       }
     }
   }
