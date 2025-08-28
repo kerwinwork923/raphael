@@ -72,10 +72,14 @@ import { useRouter } from "vue-router";
 
 const userData = localStorage.getItem("userData");
 const userDataObj = JSON.parse(userData);
+
 console.log(userDataObj);
 
 const router = useRouter();
-
+if (!userDataObj.Member) {
+  localStorage.removeItem("userData");
+  router.push("/");
+}
 const goToPoint = () => {
   router.push("/point");
 };
@@ -269,7 +273,7 @@ const deleteBtn = () => {
     letter-spacing: 2.7px;
     text-align: center;
     padding: 8px;
-    margin-top:3rem;
+    margin-top: 3rem;
   }
 }
 </style>

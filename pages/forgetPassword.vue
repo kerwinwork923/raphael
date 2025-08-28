@@ -434,16 +434,15 @@ export default {
 
 <style lang="scss">
 .forgetPassword {
-  background: url("../assets/imgs/gradient-bg.png");
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-size: cover;
   display: flex;
   flex-direction: column;
-  place-items: center;
+  align-items: center;
+  justify-content: center;
   width: 100%;
-  height: 100vh;
+  height: 100dvh;
   padding: 1rem;
+  overflow: hidden;
+  @include gradientBg();
 
   .forgetPasswordGroup {
     display: flex;
