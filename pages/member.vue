@@ -1,6 +1,7 @@
 <template>
   <div class="memberWrap">
-    <div class="memberTop">
+    <div class="memberContainer">
+        <div class="memberTop">
       <div class="memberTopLeft">
         <img src="../assets/imgs/robot/character/pet4_3.png" alt="" />
       </div>
@@ -61,6 +62,8 @@
 
     <button class="logoutBtn" @click="logout">登出</button>
     <div class="deleteBtn" @click="deleteBtn">刪除帳號</div>
+    </div>
+
 
     <BottomNav />
   </div>
@@ -103,14 +106,15 @@ const goToChangeMember = () => {
 
 <style lang="scss">
 .memberWrap {
-  background: url("../assets/imgs/background.png");
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-size: cover;
+  @include gradientBg();
 
   width: 100%;
   min-height: 100vh;
-  padding: 1.5rem 1rem 7rem;
+  padding: 1.5rem 0rem 7rem;
+  .memberContainer{
+    width: 100%;
+    padding: 0 3%;
+  }
   .memberTop {
     display: flex;
     align-items: center;
@@ -277,7 +281,7 @@ const goToChangeMember = () => {
     letter-spacing: 2.7px;
     text-align: center;
     padding: 8px;
-    margin-top: 3rem;
+    margin-top: 2rem;
   }
 }
 </style>
