@@ -400,6 +400,26 @@
             </div>
           </transition>
         </div>
+
+        <!-- 歷史頁輸入列（固定在底部） -->
+        <div class="history-input-bar">
+            <input
+                 v-model="textInput"
+                 class="history-text-input"
+                 type="text"
+                 placeholder="請輸入訊息..."
+                 @keypress.enter="handleManualInput"
+                 ref="historyInputRef"
+            />
+              <button
+                  class="history-send-btn"
+                  :disabled="isLoading || !textInput.trim()"
+                  @click="textInput.trim() && handleManualInput()"
+                  aria-label="送出"
+                >
+                <img :src="sendSvg" alt="送出" />
+              </button>
+          </div>
       </div>
     </transition>
 
@@ -1307,6 +1327,74 @@
   }
 }
 
+/* 讓歷史內容不被底部輸入列遮住 */
+.history-page .history-content {
+  padding-bottom: 140px; // 原本有 padding，這裡再多留空間
+}
+
+/* 歷史頁底部輸入列---wing 20250829 */
+.history-input-bar {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 16px;
+  width: calc(100% - 32px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 1002;
+  @include liquidGlass($radius: 20px, $padding: 8px 12px);
+}
+
+.history-text-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  outline: none;
+  color: #2d3748;
+
+  &::placeholder {
+    color: #718096;
+  }
+}
+
+.history-send-btn {
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  @include neumorphismOuter($bgColor: $raphael-green-400, $radius: 50px, $padding: 0);
+  transition: all 0.2s ease;
+
+  &:hover,
+  &:active {
+    @include neumorphismOuter(
+      $bgColor: $raphael-green-500,
+      $radius: 50px,
+      $padding: 0,
+      $x: 0,
+      $y: 0,
+      $blur: 6px
+    );
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  img {
+    width: 22px;
+    height: 22px;
+  }
+}
+/* 歷史頁底部輸入列---wing 20250829 */
+
 /* 搜尋圖標淡入淡出動畫 */
 .slide-search-icon-enter-active,
 .slide-search-icon-leave-active {
@@ -1970,7 +2058,11 @@ import sendSvg from "~/assets/imgs/robot/send.svg";
 
 // ====== 新增：你的 n8n TTS webhook（需回傳 audio/wav 二進位檔）======
 const TTS_WEBHOOK_URL = "https://aiwisebalance.com/webhook/oss-gpt";
+const TEXT_WEBHOOK_URL = "https://aiwisebalance.com/webhook/Textchat"; // ← 你的「純文字」端點（若同一支就跟 TTS_URL 相同）
+const TEXT_MESSAGE_URL = "https://23700999.com:8081/HMA/TTEsaveChatMessageHistory.jsp"; // ← 你的「純文字」端點（若同一支就跟 TTS_URL 相同）
 const voicegender = "female";
+const historyInputRef = ref(null);
+
 // 響應式狀態
 const isListening = ref(false);
 const isLoading = ref(false);
@@ -2035,6 +2127,9 @@ const latestResponse = ref(""); // 最新回覆
 const showSearch = ref(false); // 搜尋功能開關
 const searchQuery = ref(""); // 搜尋關鍵字
 const searchResults = ref([]); // 搜尋結果
+const localData = localStorage.getItem("userData");
+const localobj= JSON.parse(localData);
+console.log("localobj=",localobj.Mobile);
 
 // 角色選擇相關狀態
 const showCharacterSelection = ref(false); // 顯示角色選擇彈窗
@@ -2519,6 +2614,7 @@ const showHistory = () => {
     nextTick(() => {
       setTimeout(() => {
         scrollToBottom();
+        historyInputRef.value?.focus(); // ★ 新增：自動聚焦輸入框
       }, 100);
     });
   }
@@ -3024,6 +3120,125 @@ const initSpeechRecognition = () => {
   }
 };
 
+/** 統一呼叫 n8n：可選擇是否播放音檔 */
+async function sendViaN8n(userText, { playAudio = false, extra = {} } = {}) {
+  const url = playAudio ? TTS_WEBHOOK_URL : TEXT_WEBHOOK_URL;
+  const nowtime=new Date().toISOString();
+  let res;
+  try {
+    res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chatInput: userText,
+        sessionId: UUID,
+        voicegender,
+        timestamp: nowtime,
+        pitch_semitones: 1.5,
+        ...extra,
+      }),
+    });
+  } catch (e) {
+    showAudioError.value = true;
+    throw e;
+  }
+
+  if (!res.ok) {
+    showAudioError.value = true;
+    throw new Error(`webhook failed: ${res.status}`);
+  }
+
+  // 先嘗試從 Header 取回文字（X-Answer）
+  let answerText = "";
+  const rawHeader = res.headers.get("x-answer");
+  if (rawHeader) {
+    try {
+      answerText = decodeURIComponent(rawHeader);
+    } catch {
+      // 後端若沒做 encodeURIComponent，就直接用原值
+      answerText = rawHeader;
+    }
+  }
+
+  const ct = (res.headers.get("content-type") || "").toLowerCase();
+
+  // 若是音訊回應
+  if (ct.includes("audio/")) {
+    const blob = await res.blob();
+    if (playAudio) {
+      const url = URL.createObjectURL(blob);
+      const audio = ensurePlayer();
+      try { audio.pause(); } catch {}
+      revokeObjectUrl();
+      audio.src = url;
+      currentObjectUrl = url;
+
+      audio.onplay = () => { isSpeaking.value = true; };
+      audio.onended = () => { isSpeaking.value = false; revokeObjectUrl(); };
+      audio.onerror = () => { isSpeaking.value = false; showAudioError.value = true; revokeObjectUrl(); };
+
+      try { await audio.play(); } catch { /* iOS 未互動可能失敗 */ }
+    }
+    // 音訊情境下，若 header 沒文字，就維持空字串，最後會交給預設備援
+  } else {
+    // 非音訊：嘗試解析 JSON / 純文字
+    let data = null;
+    try {
+      data = await res.clone().json();
+    } catch {
+      try {
+        const txt = await res.text();
+        if (!answerText) answerText = txt || "";
+      } catch {}
+    }
+
+    if (data && !answerText) {
+      // 兼容多種欄位：bot / answer / text / message / content / output...
+      const pick = (obj) => {
+        if (!obj) return "";
+        if (typeof obj === "string") return obj;
+        const keys = ["bot", "answer", "text", "message", "content", "output"];
+        for (const k of keys) {
+          const v = obj[k];
+          if (typeof v === "string" && v.trim()) return v;
+          if (v && typeof v === "object") {
+            const inner = pick(v);
+            if (inner) return inner;
+          }
+        }
+        return "";
+      };
+      answerText = pick(data);
+    }
+
+  
+  }
+
+      //寫入np資料庫
+      try {
+    res = await fetch(TEXT_MESSAGE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+          Key : "qrt897hpmd",
+          MID: localobj.MID,
+          Mobile: localobj.Mobile,
+          Type: "P",
+          Inmessage: userText,  
+          Outmessage: answerText,
+          Inputtime: nowtime,
+          Outputtime: new Date().toISOString()
+      }),
+    });
+     } catch (e) {
+         throw e;
+      }
+
+
+  return (answerText && String(answerText).trim()) || "（親愛的:您的問題我目前沒辦法回答）";
+}
+
+
 /** 一次呼叫 n8n，取得回覆文字（X-Answer header）+ 取得音檔 Blob 並播放 */
 async function fetchTTSAndPlayAndReturnText(userText, extra = {}) {
   let res;
@@ -3137,21 +3352,24 @@ const handleSpeechEnd = async (transcript) => {
 
   try {
     // 一次拿回覆 + 播音檔
-    const botResponse = await fetchTTSAndPlayAndReturnText(transcript, {
-      pitch_semitones: 1.5,
-    });
-
+    //const botResponse = await fetchTTSAndPlayAndReturnText(transcript, {
+    //  pitch_semitones: 1.5,
+    //});
+    const botResponse = await sendViaN8n(transcript, { playAudio: true });
+    console.log("botResponse",botResponse);
     const nowTs = Date.now();
     const newConversation = {
       id: nowTs,
       ts: nowTs,
       user: transcript, // ← 修正這裡
-      bot: botResponse || "（沒有回覆文字）",
+      bot: botResponse || "（親愛的:您的問題我目前沒辦法回答）",
       timestamp: new Date().toLocaleString("zh-TW"),
       dateKey: toDateKey(new Date(nowTs)),
     };
+    console.log("newConversation",newConversation);
+
     conversations.value.push(newConversation); // ★ 改用 push，保持陣列「舊→新」
-    latestResponse.value = botResponse || "（沒有回覆文字）";
+    latestResponse.value = botResponse || "（親愛的:您的問題我目前沒辦法回答）";
     saveConversations();
 
     // 如果當前在歷史記錄頁面，確保新訊息可見
@@ -3177,7 +3395,7 @@ const handleSpeechEnd = async (transcript) => {
       timestamp: new Date().toLocaleString("zh-TW"),
       dateKey: toDateKey(new Date()),
     };
-    conversations.value.unshift(errorConversation);
+    conversations.value.push(errorConversation);
     latestResponse.value = errorResponse;
     saveConversations();
 
@@ -3356,7 +3574,7 @@ const closeAudioError = () => {
   }
 };
 
-const handleManualInput = async () => {
+async function handleManualInput() {
   const input = textInput.value.trim();
   if (!input) return;
 
@@ -3365,21 +3583,22 @@ const handleManualInput = async () => {
   textInput.value = "";
 
   try {
-    const botResponse = await fetchTTSAndPlayAndReturnText(input, {
-      pitch_semitones: 1.5,
-    });
-
+    //const botResponse = await fetchTTSAndPlayAndReturnText(input, {
+    //  pitch_semitones: 1.5,
+    //});
+    const botResponse = await sendViaN8n(input, { playAudio: false });
+    console.log(botResponse);
     const nowTs = Date.now();
     const newConversation = {
       id: nowTs,
       ts: nowTs,
       user: input, // ← 修正這裡
-      bot: botResponse || "（沒有回覆文字）",
+      bot: botResponse || "（親愛的:您的問題我目前沒辦法回答）",
       timestamp: new Date().toLocaleString("zh-TW"),
       dateKey: toDateKey(new Date(nowTs)),
     };
     conversations.value.push(newConversation); // ★ 改用 push，保持陣列「舊→新」
-    latestResponse.value = botResponse || "（沒有回覆文字）";
+    latestResponse.value = botResponse || "（親愛的:您的問題我目前沒辦法回答）";
     saveConversations();
 
     // 如果當前在歷史記錄頁面，確保新訊息可見
@@ -3390,6 +3609,7 @@ const handleManualInput = async () => {
       nextTick(() => {
         setTimeout(() => {
           scrollToBottom();
+          historyInputRef.value?.focus(); // ★ 新增：送出後讓使用者可連續輸入
         }, 100);
       });
     }
@@ -3400,13 +3620,14 @@ const handleManualInput = async () => {
     const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
     const errorConversation = {
       id: Date.now(),
+      ts: Date.now(),
       user: input,
       bot: errorResponse,
       timestamp: new Date().toLocaleString("zh-TW"),
       dateKey: toDateKey(new Date()),
     };
 
-    conversations.value.unshift(errorConversation);
+    conversations.value.push(errorConversation);
     latestResponse.value = errorResponse;
     saveConversations();
 
@@ -3416,6 +3637,7 @@ const handleManualInput = async () => {
       nextTick(() => {
         setTimeout(() => {
           scrollToBottom();
+          historyInputRef.value?.focus();
         }, 100);
       });
     }
@@ -3837,4 +4059,22 @@ const maxHistoryDate = computed(() => {
   console.log("最晚日期:", result);
   return result;
 });
+
+// 本地指令：v-click-outside
+const vClickOutside = {
+  mounted(el, binding) {
+    el.__clickOutside__ = (e) => {
+      if (!(el === e.target || el.contains(e.target))) {
+        typeof binding.value === "function" && binding.value(e);
+      }
+    };
+    document.addEventListener("click", el.__clickOutside__);
+  },
+  unmounted(el) {
+    document.removeEventListener("click", el.__clickOutside__);
+    delete el.__clickOutside__;
+  },
+};
+
+
 </script>
