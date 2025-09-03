@@ -399,27 +399,27 @@
               <span>沒有找到相關對話</span>
             </div>
           </transition>
-        </div>
 
-        <!-- 歷史頁輸入列（固定在底部） -->
-        <div class="history-input-bar">
+          <!-- 歷史頁輸入列（固定在底部） -->
+          <div class="history-input-bar">
             <input
-                 v-model="textInput"
-                 class="history-text-input"
-                 type="text"
-                 placeholder="請輸入訊息..."
-                 @keypress.enter="handleManualInput"
-                 ref="historyInputRef"
+              v-model="textInput"
+              class="history-text-input"
+              type="text"
+              placeholder="請輸入訊息..."
+              @keypress.enter="handleManualInput"
+              ref="historyInputRef"
             />
-              <button
-                  class="history-send-btn"
-                  :disabled="isLoading || !textInput.trim()"
-                  @click="textInput.trim() && handleManualInput()"
-                  aria-label="送出"
-                >
-                <img :src="sendSvg" alt="送出" />
-              </button>
+            <button
+              class="history-send-btn"
+              :disabled="isLoading || !textInput.trim()"
+              @click="textInput.trim() && handleManualInput()"
+              aria-label="送出"
+            >
+              <img :src="sendSvg" alt="送出" />
+            </button>
           </div>
+        </div>
       </div>
     </transition>
 
@@ -1204,17 +1204,21 @@
   }
 
   .history-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
     flex: 1;
-    overflow-y: auto;
-    padding: 20px;
+    padding: 16px;
     background: transparent;
     min-height: 0; /* 讓 flex 子項可以縮、才捲得動 */
-    -webkit-overflow-scrolling: touch; /* iOS 慣性捲動 */
-    touch-action: pan-y; /* 明確允許垂直捲動 */
-
+    .history-list {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      touch-action: pan-y;
+      -webkit-overflow-scrolling: touch;
+    }
     .history-group {
-      margin-bottom: 30px;
-
       .date-separator {
         text-align: center;
         font-size: 14px;
@@ -1327,22 +1331,12 @@
   }
 }
 
-/* 讓歷史內容不被底部輸入列遮住 */
-.history-page .history-content {
-  padding-bottom: 140px; // 原本有 padding，這裡再多留空間
-}
-
 /* 歷史頁底部輸入列---wing 20250829 */
 .history-input-bar {
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 16px;
-  width: calc(100% - 32px);
   display: flex;
   align-items: center;
-  gap: 12px;
-  z-index: 1002;
+  justify-content: space-between;
+  gap: 16px;
   @include liquidGlass($radius: 20px, $padding: 8px 12px);
 }
 
@@ -1350,7 +1344,7 @@
   flex: 1;
   border: none;
   background: transparent;
-  font-size: 16px;
+  font-size: 18px;
   outline: none;
   color: #2d3748;
 
@@ -1362,13 +1356,17 @@
 .history-send-btn {
   border: none;
   border-radius: 50%;
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  @include neumorphismOuter($bgColor: $raphael-green-400, $radius: 50px, $padding: 0);
+  @include neumorphismOuter(
+    $bgColor: $raphael-green-400,
+    $radius: 50px,
+    $padding: 0
+  );
   transition: all 0.2s ease;
 
   &:hover,
@@ -2059,7 +2057,8 @@ import sendSvg from "~/assets/imgs/robot/send.svg";
 // ====== 新增：你的 n8n TTS webhook（需回傳 audio/wav 二進位檔）======
 const TTS_WEBHOOK_URL = "https://aiwisebalance.com/webhook/oss-gpt";
 const TEXT_WEBHOOK_URL = "https://aiwisebalance.com/webhook/Textchat"; // ← 你的「純文字」端點（若同一支就跟 TTS_URL 相同）
-const TEXT_MESSAGE_URL = "https://23700999.com:8081/HMA/TTEsaveChatMessageHistory.jsp"; // ← 你的「純文字」端點（若同一支就跟 TTS_URL 相同）
+const TEXT_MESSAGE_URL =
+  "https://23700999.com:8081/HMA/TTEsaveChatMessageHistory.jsp"; // ← 你的「純文字」端點（若同一支就跟 TTS_URL 相同）
 const voicegender = "female";
 const historyInputRef = ref(null);
 
@@ -2128,8 +2127,8 @@ const showSearch = ref(false); // 搜尋功能開關
 const searchQuery = ref(""); // 搜尋關鍵字
 const searchResults = ref([]); // 搜尋結果
 const localData = localStorage.getItem("userData");
-const localobj= JSON.parse(localData);
-console.log("localobj=",localobj.Mobile);
+const localobj = JSON.parse(localData);
+console.log("localobj=", localobj.Mobile);
 
 // 角色選擇相關狀態
 const showCharacterSelection = ref(false); // 顯示角色選擇彈窗
@@ -3123,7 +3122,7 @@ const initSpeechRecognition = () => {
 /** 統一呼叫 n8n：可選擇是否播放音檔 */
 async function sendViaN8n(userText, { playAudio = false, extra = {} } = {}) {
   const url = playAudio ? TTS_WEBHOOK_URL : TEXT_WEBHOOK_URL;
-  const nowtime=new Date().toISOString();
+  const nowtime = new Date().toISOString();
   let res;
   try {
     res = await fetch(url, {
@@ -3168,16 +3167,31 @@ async function sendViaN8n(userText, { playAudio = false, extra = {} } = {}) {
     if (playAudio) {
       const url = URL.createObjectURL(blob);
       const audio = ensurePlayer();
-      try { audio.pause(); } catch {}
+      try {
+        audio.pause();
+      } catch {}
       revokeObjectUrl();
       audio.src = url;
       currentObjectUrl = url;
 
-      audio.onplay = () => { isSpeaking.value = true; };
-      audio.onended = () => { isSpeaking.value = false; revokeObjectUrl(); };
-      audio.onerror = () => { isSpeaking.value = false; showAudioError.value = true; revokeObjectUrl(); };
+      audio.onplay = () => {
+        isSpeaking.value = true;
+      };
+      audio.onended = () => {
+        isSpeaking.value = false;
+        revokeObjectUrl();
+      };
+      audio.onerror = () => {
+        isSpeaking.value = false;
+        showAudioError.value = true;
+        revokeObjectUrl();
+      };
 
-      try { await audio.play(); } catch { /* iOS 未互動可能失敗 */ }
+      try {
+        await audio.play();
+      } catch {
+        /* iOS 未互動可能失敗 */
+      }
     }
     // 音訊情境下，若 header 沒文字，就維持空字串，最後會交給預設備援
   } else {
@@ -3210,34 +3224,33 @@ async function sendViaN8n(userText, { playAudio = false, extra = {} } = {}) {
       };
       answerText = pick(data);
     }
-
-  
   }
 
-      //寫入np資料庫
-      try {
+  //寫入np資料庫
+  try {
     res = await fetch(TEXT_MESSAGE_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-          Key : "qrt897hpmd",
-          MID: localobj.MID,
-          Mobile: localobj.Mobile,
-          Type: "P",
-          Inmessage: userText,  
-          Outmessage: answerText,
-          Inputtime: nowtime,
-          Outputtime: new Date().toISOString()
+        Key: "qrt897hpmd",
+        MID: localobj.MID,
+        Mobile: localobj.Mobile,
+        Type: "P",
+        Inmessage: userText,
+        Outmessage: answerText,
+        Inputtime: nowtime,
+        Outputtime: new Date().toISOString(),
       }),
     });
-     } catch (e) {
-         throw e;
-      }
+  } catch (e) {
+    throw e;
+  }
 
-
-  return (answerText && String(answerText).trim()) || "（親愛的:您的問題我目前沒辦法回答）";
+  return (
+    (answerText && String(answerText).trim()) ||
+    "（親愛的:您的問題我目前沒辦法回答）"
+  );
 }
-
 
 /** 一次呼叫 n8n，取得回覆文字（X-Answer header）+ 取得音檔 Blob 並播放 */
 async function fetchTTSAndPlayAndReturnText(userText, extra = {}) {
@@ -3356,7 +3369,7 @@ const handleSpeechEnd = async (transcript) => {
     //  pitch_semitones: 1.5,
     //});
     const botResponse = await sendViaN8n(transcript, { playAudio: true });
-    console.log("botResponse",botResponse);
+    console.log("botResponse", botResponse);
     const nowTs = Date.now();
     const newConversation = {
       id: nowTs,
@@ -3366,7 +3379,7 @@ const handleSpeechEnd = async (transcript) => {
       timestamp: new Date().toLocaleString("zh-TW"),
       dateKey: toDateKey(new Date(nowTs)),
     };
-    console.log("newConversation",newConversation);
+    console.log("newConversation", newConversation);
 
     conversations.value.push(newConversation); // ★ 改用 push，保持陣列「舊→新」
     latestResponse.value = botResponse || "（親愛的:您的問題我目前沒辦法回答）";
@@ -3644,7 +3657,7 @@ async function handleManualInput() {
   } finally {
     isLoading.value = false;
   }
-};
+}
 
 // 本地儲存對話記錄
 const saveConversations = () => {
@@ -4075,6 +4088,4 @@ const vClickOutside = {
     delete el.__clickOutside__;
   },
 };
-
-
 </script>
