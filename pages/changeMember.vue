@@ -166,8 +166,7 @@ export default {
 <style lang="scss">
 .changeMemberWrap {
     position: relative;
-    display: flex
-;
+    display: flex;
     flex-direction: column;
     place-items: center;
     width: 100%;

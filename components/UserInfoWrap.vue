@@ -418,7 +418,6 @@ export default {
 
         border-radius: var(--Radius-r-50, 50px);
         background: var(--Secondary-100, #f5f7fa);
-       
 
         option {
         }
@@ -471,9 +470,9 @@ export default {
 
         border-radius: var(--Radius-r-50, 50px);
         background: var(--Secondary-100, #fcfcfcbc);
-        
-        margin-top: .75rem;
-        padding: 1rem ;
+
+        margin-top: 0.75rem;
+        padding: 1rem;
 
         &::placeholder {
           font-size: 18px;
@@ -589,6 +588,7 @@ export default {
     }
 
     &:disabled {
+      @include neumorphismOuter($radius: 50px, $padding: 8px 12px);
       color: $raphael-gray-300;
       cursor: not-allowed;
       opacity: 0.6;
