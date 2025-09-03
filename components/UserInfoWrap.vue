@@ -322,7 +322,7 @@ export default {
   height: 100%;
 
   .infoBox {
-    height: 100%;
+    overflow: hidden;
     overflow-y: scroll;
   }
 
