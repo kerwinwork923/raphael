@@ -290,11 +290,7 @@
           </transition>
         </div>
 
-        <div
-          class="history-content"
-          @scroll="handleHistoryScroll"
-          ref="historyScrollContainer"
-        >
+        <div class="history-content">
           <!-- 載入更舊訊息指示器 -->
           <transition name="fade">
             <div v-if="isLoadingOlderMessages" class="loading-older-messages">
@@ -305,7 +301,12 @@
 
           <!-- 一般歷史記錄 -->
           <transition name="fade">
-            <div v-if="!showSearch || searchQuery === ''" class="history-list">
+            <div
+              v-if="!showSearch || searchQuery === ''"
+              class="history-list"
+              @scroll="handleHistoryScroll"
+              ref="historyScrollContainer"
+            >
               <div
                 v-for="(group, date) in groupedHistory"
                 :key="date"
@@ -1212,7 +1213,7 @@
     .history-list {
       flex: 1;
       min-height: 0;
-      padding-bottom:16px;
+      padding-bottom: 16px;
       overflow-y: auto;
       touch-action: pan-y;
       -webkit-overflow-scrolling: touch;
