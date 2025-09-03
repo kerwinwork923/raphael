@@ -292,8 +292,8 @@
 
         <div
           class="history-content"
-          ref="historyScrollContainer"
           @scroll="handleHistoryScroll"
+          ref="historyScrollContainer"
         >
           <!-- 載入更舊訊息指示器 -->
           <transition name="fade">
@@ -1334,7 +1334,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  @include liquidGlass($radius: 20px, $padding: 8px 12px);
+  @include neumorphismOuter($radius: 20px, $padding: 8px 12px);
 }
 
 .history-text-input {
