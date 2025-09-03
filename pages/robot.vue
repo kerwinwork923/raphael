@@ -1211,6 +1211,7 @@
     .history-list {
       flex: 1;
       min-height: 0;
+      padding-bottom:16px;
       overflow-y: auto;
       touch-action: pan-y;
       -webkit-overflow-scrolling: touch;
