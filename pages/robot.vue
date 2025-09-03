@@ -500,10 +500,7 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  font-family: "Noto Sans TC";
   padding-top: 1rem;
-  overflow: hidden;
-
   @include gradientBg();
 }
 
@@ -1780,14 +1777,14 @@
 
         &.selected .character-circle {
           border: 2px solid $raphael-green-400;
-          @include neumorphismOuter($radius: 50%, $padding: 0, $x: 0, $y: 1px);
+          @include neumorphismOuter($radius: 50%, $padding: 0, $x: 0, $y: 6px);
           &:hover,
           &:active {
             @include neumorphismOuter(
               $radius: 50%,
               $padding: 0,
               $x: 0,
-              $y: 1px
+              $y: 6px
             );
           }
         }
