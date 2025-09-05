@@ -171,7 +171,6 @@ const deleteAccount = async () => {
     return;
   }
 
-
   
   isLoading.value = true;
   
