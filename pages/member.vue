@@ -97,7 +97,7 @@ const goToChangeMember = () => {
 };
 
 const goToPrivacy = () => {
-  router.push("/PrivacyPage");
+  router.push("/privacyPage");
 };
 
 const goToDisclaimer = () => {
