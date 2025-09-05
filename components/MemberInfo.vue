@@ -28,7 +28,7 @@
       <h3>升級制度</h3>
       <ul>
         <li>{{ keepGradeInfo }}</li>
-        <li>{{ downgradeInfo }}</li>
+        <li v-if="downgradeInfo">{{ downgradeInfo }}</li>
       </ul>
       <h3>等級特權</h3>
       <ul>
@@ -112,7 +112,7 @@ export default {
       if (upInfo.includes("可升級")) {
         return upInfo;
       }
-      return "目前為最低等級";
+      return "";
     });
 
     // 根據等級名稱對應圖片

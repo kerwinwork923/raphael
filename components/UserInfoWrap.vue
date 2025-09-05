@@ -163,10 +163,25 @@ export default {
     sex: String,
     DSPR: String,
     date: String,
-    phoneShow: false,
-    addressShow: false,
-    emailShow: false,
-    timeShow: false,
+    city: String,
+    area: String,
+    address: String,
+    phoneShow: {
+      type: Boolean,
+      default: false
+    },
+    addressShow: {
+      type: Boolean,
+      default: false
+    },
+    emailShow: {
+      type: Boolean,
+      default: false
+    },
+    timeShow: {
+      type: Boolean,
+      default: false
+    },
     HRVCalTime: String,
   },
   setup(props, { emit }) {
@@ -175,7 +190,7 @@ export default {
     const localWeight = ref(props.weight || "");
     const localSex = ref(props.sex || "");
     const localDate = ref(null);
-    const localDSPR = ref(props.DSPR || "");
+    const localDSPR = ref(props.DSPR || ""); 
     const localTime = ref(props.HRVCalTime || "");
 
     const inputAddress = ref("");
@@ -198,24 +213,68 @@ export default {
       }
 
       const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+      
+      console.log("載入的 userData:", userData);
 
-      localName.value = userData.Name || "";
-      localHeight.value = userData.Height || "";
-      localWeight.value = userData.Weight || "";
-      localSex.value = userData.Sex || "";
-      localDate.value = userData.Birthday
-        ? new Date(
-            parseInt(userData.Birthday.split("/")[0]) + 1911,
-            parseInt(userData.Birthday.split("/")[1]) - 1,
-            parseInt(userData.Birthday.split("/")[2])
-          )
-        : null;
-      localDSPR.value = userData.DSPR || "";
-      localTime.value = userData.HRVCalTime || "";
-      selectedCity.value = userData.City || "";
-      selectedArea.value = userData.Zone || "";
-      inputAddress.value = userData.Address || "";
-      phone.value = userData.Mobile || "";
+      // 檢查資料結構，優先使用 Member 物件內的資料，如果沒有則使用根層級的資料
+      const memberData = userData.Member || userData;
+      
+      console.log("使用的 memberData:", memberData);
+
+      // 載入所有用戶資料欄位
+      localName.value = memberData.Name || "";
+      localHeight.value = memberData.Height || "";
+      localWeight.value = memberData.Weight || "";
+      localSex.value = memberData.Sex || "";
+      
+      // 處理生日資料
+      if (memberData.Birthday) {
+        try {
+          // 支援民國年格式 (如: 114/8/14) 或西元年格式
+          if (memberData.Birthday.includes("/")) {
+            const parts = memberData.Birthday.split("/");
+            if (parts.length === 3) {
+              // 判斷是民國年還是西元年
+              const year = parseInt(parts[0]);
+              const month = parseInt(parts[1]) - 1; // JavaScript 月份從 0 開始
+              const day = parseInt(parts[2]);
+              
+              // 如果年份小於 200，假設是民國年
+              const fullYear = year < 200 ? year + 1911 : year;
+              localDate.value = new Date(fullYear, month, day);
+              console.log("解析的生日:", localDate.value);
+            }
+          }
+        } catch (error) {
+          console.error("生日格式解析錯誤:", error);
+          localDate.value = null;
+        }
+      } else {
+        localDate.value = null;
+      }
+      
+      localDSPR.value = memberData.DSPR || "";
+      localTime.value = memberData.HRVCalTime || "";
+      selectedCity.value = memberData.City || "";
+      selectedArea.value = memberData.Zone || "";
+      inputAddress.value = memberData.Address || "";
+      phone.value = memberData.Mobile || "";
+      
+      // 調試信息
+      console.log("載入的欄位值:", {
+        name: localName.value,
+        height: localHeight.value,
+        weight: localWeight.value,
+        sex: localSex.value,
+        date: localDate.value,
+        DSPR: localDSPR.value,
+        time: localTime.value,
+        city: selectedCity.value,
+        area: selectedArea.value,
+        address: inputAddress.value,
+        phone: phone.value
+      });
+      
       if (selectedCity.value) {
         updateAreas(true);
       }
@@ -399,8 +458,6 @@ export default {
         color: $raphael-gray-300;
         font-size: 18px;
 
-        option {
-        }
         &::placeholder {
           color: $raphael-gray-300;
           font-size: 18px;

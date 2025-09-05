@@ -31,7 +31,7 @@ import axios from "axios";
 import { useRouter } from "vue-router";
 import { ref } from "vue";
 import { useSeo } from "~/composables/useSeo";
-
+import { useUserData } from "~/fn/api";
 export default {
   components: { UserInfoForm, TitleMenu, useSeo },
   setup() {
@@ -56,7 +56,7 @@ export default {
       url: "https://neuroplus.com.tw",
     });
 
-    const addUser = async () => {
+    const addUser = async (formData) => {
       try {
         loading.value = true;
         const localData = localStorage.getItem("userData");
@@ -64,28 +64,44 @@ export default {
           ? JSON.parse(localData)
           : {};
 
+        // 使用傳入的 formData 或 fallback 到 ref 值
+        const userData = formData || {
+          name: name.value,
+          height: height.value,
+          weight: weight.value,
+          sex: sex.value,
+          date: date.value,
+          DSPR: DSPR.value,
+          city: city.value,
+          area: area.value,
+          address: address.value,
+          HRVCalTime: HRVCalTime.value,
+        };
+
         if (
           !MID ||
           !Token ||
           !MAID ||
           !Mobile ||
-          !name.value ||
-          !height.value ||
-          !weight.value ||
-          !sex.value ||
-          !date.value
+          !userData.name ||
+          !userData.height ||
+          !userData.weight ||
+          !userData.sex ||
+          !userData.date
         ) {
           throw new Error("資料不完整");
         }
 
         let birthday = "";
-        if (date.value) {
-          const birthDate = new Date(date.value);
+        if (userData.date) {
+          const birthDate = new Date(userData.date);
           const rocYear = birthDate.getFullYear() - 1911;
           birthday = `${rocYear}/${
             birthDate.getMonth() + 1
           }/${birthDate.getDate()}`;
         }
+
+
 
         const response = await axios.post(
           "https://23700999.com:8081/HMA/API_AA5.jsp",
@@ -94,38 +110,47 @@ export default {
             Token,
             MAID,
             Mobile,
-            Name: name.value,
-            Height: height.value,
-            Weight: weight.value,
-            Sex: sex.value,
+            Name: userData.name,
+            Height: userData.height,
+            Weight: userData.weight,
+            Sex: userData.sex,
             Birthday: birthday,
-            DSPR: DSPR.value || "",
-            City: city.value,
-            Zone: area.value,
-            Address: address.value,
-            HRVCalTime: HRVCalTime.value,
+            DSPR: userData.DSPR || "",
+            City: userData.city,
+            Zone: userData.area,
+            Address: userData.address,
+            HRVCalTime: userData.HRVCalTime,
           }
         );
 
         if (response.status === 200) {
-          // 更新 localStorage 中的用戶資料
-          const updatedUserData = {
-            ...JSON.parse(localData),
-            Name: name.value,
-            Height: height.value,
-            Weight: weight.value,
-            Sex: sex.value,
-            Birthday: birthday,
-            DSPR: DSPR.value || "",
-            City: city.value,
-            Zone: area.value,
-            Address: address.value,
-            HRVCalTime: HRVCalTime.value,
-          };
-          localStorage.setItem("userData", JSON.stringify(updatedUserData));
+          console.log("API_AA5 回應:", response.data);
           
-          router.push("/member");
+          // 直接使用 API 回應更新 localStorage
+          if (response.data && response.data.Result === "OK") {
+            const existingUserData = JSON.parse(localData);
+            const updatedUserData = {
+              ...existingUserData,
+              ...response.data
+            };
+            localStorage.setItem("userData", JSON.stringify(updatedUserData));
+            console.log("localStorage 已更新:", updatedUserData);
+          }
+          
           console.log("資料更新成功:", response.data);
+          
+          // 更新用戶資料後，重新獲取最新的用戶資料
+          try {
+            const { userData: updatedUserData } = await useUserData();
+            if (updatedUserData) {
+              console.log("用戶資料已同步更新");
+            }
+          } catch (error) {
+            console.error("同步用戶資料失敗:", error);
+          }
+          
+          alert("資料更新成功");
+          router.push("/member");
         }
       } catch (err) {
         alert(err.message || "資料不完整");

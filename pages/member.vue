@@ -1,4 +1,5 @@
 <template>
+    <RaphaelLoading v-if="loading" />
   <div class="memberWrap">
     <div class="memberContainer">
       <div class="memberTop">
@@ -8,7 +9,7 @@
         <div class="memberTopRight">
           <h3>{{ userDataObj?.Member.Name }} 您好</h3>
           <div class="memberTopPoint">
-            目前積分 : {{ userDataObj?.NowAvaPoints }}
+            目前積分 : {{ userDataObj?.NowAvaPoints }} <img @click="getMemberData" src="../assets/imgs/member/reload.svg" alt="">
           </div>
         </div>
       </div>
@@ -65,9 +66,11 @@
 <script setup>
 import BottomNav from "~/components/BottomNav.vue";
 import { useRouter } from "vue-router";
-
+import { useUserData } from "~/fn/api";
+import { ref } from "vue";
 const userData = localStorage.getItem("userData");
 const userDataObj = JSON.parse(userData);
+const loading = ref(false);
 
 console.log(userDataObj);
 
@@ -102,6 +105,13 @@ const goToPrivacy = () => {
 
 const goToDisclaimer = () => {
   router.push("/disclaimer");
+};
+
+const getMemberData = async () => {
+    //loading
+    loading.value = true;
+    await useUserData();
+    loading.value = false;
 };
 </script>
 
@@ -140,11 +150,25 @@ const goToDisclaimer = () => {
         font-size: 24px;
       }
       .memberTopPoint {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        justify-content: space-between;
         @include neumorphismOuter($radius: 20px);
         color: $raphael-red-300;
         font-size: 18px;
         letter-spacing: 2.7px;
         font-weight: bold;
+        img {
+          cursor: pointer;
+          width: 26px;
+          height: 26px;
+          border-radius: var(--Radius-r-50, 50px);
+background: var(--Secondary-100, #F5F7FA);
+box-shadow: 2px 4px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.70));
+padding: 0.2rem;
+        }
       }
     }
   }
