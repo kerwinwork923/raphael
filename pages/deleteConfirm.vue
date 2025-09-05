@@ -1,7 +1,8 @@
 <template>
+     <Alert v-if="showAlert"  :defaultContent="alertContent" @close="showAlert = false"/>
   <div class="deleteConfirmWrap">
     <h2>刪除帳號</h2>
-
+ 
     <div class="deleteConfirmContainer" v-if="showStep1">
       <div class="deleteConfirmAlert">
         <img src="../assets/imgs/member/bigAlert.svg" alt="" />
@@ -106,6 +107,8 @@ const showStep3 = ref(false); // 新增 ref 來控制第三個 container 的顯�
 const mobileInput = ref(""); // 手機號碼輸入
 const isLoading = ref(false); // 載入狀態
 const errorMessage = ref(""); // 錯誤訊息
+const alertContent = ref(""); // 彈窗內容
+const showAlert = ref(false); // 彈窗顯示
 
 const goToMember = () => {
   router.push("/member");
@@ -148,12 +151,15 @@ const deleteAccount = async () => {
   
   // 驗證手機號碼格式
   if (!mobileInput.value.trim()) {
-    errorMessage.value = "請輸入手機號碼";
+ 
+    showAlert.value = true;
+    alertContent.value = "請輸入手機號碼";
     return;
   }
   
   if (!validateMobile(mobileInput.value.trim())) {
-    errorMessage.value = "請輸入正確的手機號碼格式 (09xxxxxxxx)";
+    showAlert.value = true;
+    alertContent.value = "請輸入正確的手機號碼格式 (09xxxxxxxx)";
     return;
   }
   
@@ -169,14 +175,17 @@ const deleteAccount = async () => {
       document.body.style.overflow = "hidden";
     } else if (result && result.Result === "ERROR") {
       // 查無此帳號
-      errorMessage.value = "查無此手機號碼的帳號，請確認後重新輸入";
+      showAlert.value = true;
+      alertContent.value = "查無此手機號碼的帳號，請確認後重新輸入";
     } else {
       // 其他錯誤
-      errorMessage.value = "驗證失敗，請稍後再試";
+      showAlert.value = true;
+      alertContent.value = "驗證失敗，請稍後再試";
     }
   } catch (error) {
     console.error("刪除帳號驗證失敗:", error);
-    errorMessage.value = "網路連線錯誤，請檢查網路後重試";
+    showAlert.value = true;
+    alertContent.value = "網路連線錯誤，請檢查網路後重試";
   } finally {
     isLoading.value = false;
   }
@@ -192,14 +201,17 @@ const confirmDeleteAccount = async () => {
     if (result && result.Result === "OK") {
       // 刪除成功，清除本地資料並跳轉
       localStorage.removeItem("userData");
-      alert("帳號已成功刪除");
+      showAlert.value = true;
+      alertContent.value = "帳號已成功刪除";
       router.push("/");
     } else {
-      alert("刪除失敗，請稍後再試");
+      showAlert.value = true;
+      alertContent.value = "刪除失敗，請稍後再試";
     }
   } catch (error) {
     console.error("最終刪除失敗:", error);
-    alert("刪除失敗，請稍後再試");
+    showAlert.value = true;
+    alertContent.value = "刪除失敗，請稍後再試";
   } finally {
     isLoading.value = false;
     showStep3.value = false;
