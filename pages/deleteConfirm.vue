@@ -162,6 +162,16 @@ const deleteAccount = async () => {
     alertContent.value = "請輸入正確的手機號碼格式 (09xxxxxxxx)";
     return;
   }
+
+    // 檢查輸入的手機號碼是否與 userData 中的電話一致
+    const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+  if (userData.Mobile && userData.Mobile !== mobileInput.value.trim()) {
+    showAlert.value = true;
+    alertContent.value = "手機號碼輸入錯誤";
+    return;
+  }
+
+
   
   isLoading.value = true;
   
