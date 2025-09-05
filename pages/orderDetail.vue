@@ -15,7 +15,10 @@
       <!-- 狀態條 -->
       <div class="order-step-bar">
         <!-- 預計送達時間或狀態警告 -->
-        <div class="delivery-estimate" v-if="shouldShowDeliveryEstimate && currentStep < 2">
+        <div
+          class="delivery-estimate"
+          v-if="shouldShowDeliveryEstimate && currentStep < 2"
+        >
           {{ deliveryEstimateText }}
         </div>
 
@@ -129,7 +132,7 @@
         </div>
       </div>
 
-      <div class="section" v-if="orderData">
+      <div class="section" v-if="orderData && currentStep < 2">
         <div class="section-title-group">
           <div class="section-title">訂單編號</div>
           <div class="section-content">

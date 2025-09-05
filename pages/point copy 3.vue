@@ -1,8 +1,7 @@
-<template>
   <RaphaelLoading v-if="loading" />
   <div class="point">
     <div class="pointContainer">
-      <TitleMenu Text="獎勵積分" :link="'/member'" :showImg1="read" :showImg2="time" @handleImg1Click="handleImg1Click" @handleImg2Click="handleImg2Click"></TitleMenu>
+      <TitleMenu Text="獎勵積分" link="/member" :showImg1="read" :showImg2="time" @handleImg1Click="handleImg1Click" @handleImg2Click="handleImg2Click"></TitleMenu>
       <MemberInfo />
       <div class="todayMissionGroup">
         <h3>今日任務</h3>

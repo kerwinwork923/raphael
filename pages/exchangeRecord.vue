@@ -69,7 +69,7 @@
         <div class="emptyState" v-if="exchangeRecords.length === 0">
           <!-- 底部插圖 -->
           <div class="bottomIllustration">
-            <img src="../assets/imgs/robot_sad.png" alt="目前沒有資料" />
+            <img src="../assets/imgs/robotSad.png" alt="目前沒有資料" />
             <h5>目前沒有兌換紀錄</h5>
           </div>
         </div>
@@ -255,7 +255,6 @@ async function fetchExchangeRecords() {
 }
 
 // 格式化日期
-// 取代原本的 formatDate
 function formatDate(input) {
   if (!input) return "";
 

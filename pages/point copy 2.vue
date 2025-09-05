@@ -39,7 +39,7 @@
       <div class="todayMissionGroup">
         <h3>今日任務</h3>
         <small>今日可獲得 470 積分，目前已獲得 5 積分</small>
-        <div class="todayMisstion">
+        <div class="todayMisstion" >
           <div class="todayMisstionItem">
             穿衣紀錄
             <div class="goMisstion">

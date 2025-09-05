@@ -72,7 +72,6 @@
           <!-- 空狀態 -->
           <div v-else class="emptyState">
             <div class="emptyIllustration">
-              <img src="../assets/imgs/robot_sad.png" alt="目前沒有獎品" />
               <h5>目前沒有可兌換的獎品</h5>
             </div>
           </div>

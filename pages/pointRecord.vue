@@ -17,7 +17,7 @@
                 class="yearItem"
                 v-for="year in availableYears"
                 :key="year"
-                 @click.stop="selectYear(year)"
+                @click.stop="selectYear(year)"
               >
                 {{ year }}年
               </div>
@@ -34,7 +34,7 @@
                 class="monthItem"
                 v-for="month in 12"
                 :key="month"
-                @click.stop="selectMonth(month)" 
+                @click.stop="selectMonth(month)"
               >
                 {{ month }}月
               </div>
@@ -62,16 +62,17 @@
           <div class="recordPoints" :class="getPointsClass(record.status)">
             +{{ record.points }}
           </div>
+
+      
         </div>
-     
-        <!-- 空狀態 -->
-        <div class="emptyState" v-if="pointRecords.length === 0">
-          <!-- 底部插圖 -->
-          <div class="bottomIllustration">
-            <img src="../assets/imgs/robot_sad.png" alt="目前沒有資料" />
-            <h5>目前沒有資料</h5>
+            <!-- 空狀態 -->
+            <div class="emptyState" v-if="pointRecords.length === 0">
+            <!-- 底部插圖 -->
+            <div class="bottomIllustration">
+              <img src="../assets/imgs/robotSad.png" alt="目前沒有資料" />
+              <h5>目前沒有資料</h5>
+            </div>
           </div>
-        </div>
       </div>
     </div>
   </div>
@@ -378,7 +379,7 @@ onUnmounted(() => {
       .recordCard {
         display: flex;
         justify-content: space-between;
-       
+
         padding: 1rem;
         margin-bottom: 0.75rem;
         background: var(--Secondary-100, #f5f7fa);

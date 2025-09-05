@@ -142,7 +142,7 @@ export default {
     const store = useCommon();
     const loading = ref(false);
     const goBack = () => {
-      router.push("/user");
+      router.push("/robot");
     };
     const API_HRV2 = async () => {
       try {
