@@ -541,7 +541,7 @@
     font-size: 18px;
     letter-spacing: 2.7px;
     cursor: pointer;
-    @include neumorphismOuter($radius: 50px, $padding: 13px 10px);
+    @include neumorphismOuter($radius: 50px, $padding: 13px 12px);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1572,7 +1572,7 @@
       justify-content: space-between;
       gap: 2px;
       transition: all 0.3s ease;
-      @include neumorphismOuter($radius: 50px, $padding: 12px 16px);
+      @include neumorphismOuter($radius: 50px, $padding: 13px 12px);
 
       &:hover,
       &:active {
@@ -1718,7 +1718,7 @@
     @include neumorphismOuter(
       $bgColor: $raphael-green-400,
       $radius: 50px,
-      $padding: 8px 16px
+      $padding: 9px 16px
     );
 
     transform: translateX(-50%);
