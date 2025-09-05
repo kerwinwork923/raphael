@@ -4,7 +4,6 @@
       <!-- 姓名輸入 -->
       <label for="name">姓名</label>
       <div class="nameGroup">
-        <img class="icon1" src="../assets/imgs/user.svg" alt="" />
         <input
           type="text"
           placeholder="請輸入您的姓名(暱稱)"
@@ -15,7 +14,6 @@
       <!-- 電話欄位 不可選 -->
       <label for="phone" v-if="phoneShow">電話</label>
       <div class="phoneGroup" v-if="phoneShow">
-        <img class="icon1" src="../assets/imgs/phone.svg" alt="" />
         <input type="text" :value="phone" disabled />
         <img class="icon2" src="../assets/imgs/noWrap.svg" alt="" />
       </div>
@@ -23,28 +21,24 @@
       <!-- 信箱輸入 -->
       <label for="email" v-if="emailShow">信箱</label>
       <div class="emailGroup" v-if="emailShow">
-        <img class="icon1" src="../assets/imgs/mail.svg" alt="" />
         <input type="email" placeholder="請輸入您的信箱" />
       </div>
 
       <!-- 身高輸入 -->
       <label for="height">身高</label>
       <div class="heightGroup">
-        <img class="icon1" src="../assets/imgs/height.svg" alt="" />
         <input type="text" placeholder="請輸入您的身高" v-model="localHeight" />
       </div>
 
       <!-- 體重輸入 -->
       <label for="weight">體重</label>
       <div class="weightGroup">
-        <img class="icon1" src="../assets/imgs/weight.svg" alt="" />
         <input type="text" placeholder="請輸入您的體重" v-model="localWeight" />
       </div>
 
       <!-- 性別選擇 -->
       <label for="sex">性別</label>
       <div class="groupGroup">
-        <img class="icon1" src="../assets/imgs/group.svg" alt="" />
         <select
           v-model="localSex"
           class="custom-select"
@@ -60,7 +54,6 @@
       <!-- 生日選擇 -->
       <label for="date">生日</label>
       <div class="dateGroup">
-        <img class="icon1" src="../assets/imgs/date.svg" alt="" />
         <VueDatePicker
           v-model="localDate"
           :format="formatDate"
@@ -78,7 +71,6 @@
       <!-- HRV量測時間 -->
       <label for="detectTime" v-if="timeShow">HRV量測時間</label>
       <div class="detectTime" v-if="timeShow">
-        <img class="icon1" src="../assets/imgs/detectTime.svg" alt="" />
         <select
           v-model="localTime"
           class="custom-select"
@@ -96,7 +88,6 @@
       <!-- 日常收縮壓選擇 -->
       <label for="DSPR">血壓</label>
       <div class="DSPR">
-        <img class="icon1" src="../assets/imgs/DSPR.svg" alt="" />
         <select
           v-model="localDSPR"
           class="custom-select"
@@ -322,7 +313,8 @@ export default {
   height: 100%;
 
   .infoBox {
-    height: 100%;
+    padding-bottom: 16px;
+    overflow: hidden;
     overflow-y: scroll;
   }
 
@@ -370,7 +362,7 @@ export default {
     gap: 4px;
     position: relative;
     margin-bottom: 16px;
-    @include neumorphismOuter($radius: 50px, $padding: 12px 10px);
+    @include neumorphismOuter($radius: 50px, $padding: 10px 12px);
     z-index: 10;
 
     .icon1,
@@ -393,39 +385,25 @@ export default {
     display: flex;
     flex-wrap: wrap;
     width: 100%;
-    justify-content: space-between;
+    gap: 16px;
     .city,
     .area {
-      width: 48%;
+      width: calc(100% / 2 - 8px);
       position: relative;
       select {
         outline: none;
         border: none;
-        padding-left: 0;
-        padding-bottom: 16px;
-        padding-top: 16px;
-        font-size: 1.2rem;
+        @include neumorphismOuter($radius: 50px, $padding: 10px 12px);
         width: 100%;
-        border-bottom: 1px solid $raphael-gray-300;
         appearance: none;
-
-        background-color: transparent;
-        color: $raphael-gray-500;
-        font-family: Inter;
-        font-size: 1.2rem;
-        font-weight: 400;
-        padding-left: 0.5rem;
-
-        border-radius: var(--Radius-r-50, 50px);
-        background: var(--Secondary-100, #f5f7fa);
-       
+        color: $raphael-gray-300;
+        font-size: 18px;
 
         option {
         }
         &::placeholder {
           color: $raphael-gray-300;
-          font-family: Inter;
-          font-size: 1.2rem;
+          font-size: 18px;
           font-weight: 400;
         }
 
@@ -435,7 +413,7 @@ export default {
       }
 
       .selected {
-        color: $raphael-black;
+        color: $raphael-green-400;
       }
 
       .icon1,
@@ -450,7 +428,6 @@ export default {
         right: 16px;
         transform: translateY(-50%);
         z-index: 1;
-        width: 18px;
       }
     }
     .address {
@@ -458,6 +435,7 @@ export default {
       input[type="text"] {
         outline: none;
         border: none;
+        @include neumorphismOuter($radius: 50px, $padding: 10px 12px);
 
         color: #74bc1f;
 
@@ -469,14 +447,9 @@ export default {
         flex: 1;
         width: 100%;
 
-        border-radius: var(--Radius-r-50, 50px);
-        background: var(--Secondary-100, #fcfcfcbc);
-        
-        margin-top: .75rem;
-        padding: 1rem ;
-
         &::placeholder {
           font-size: 18px;
+          color: $raphael-gray-300;
         }
       }
     }
@@ -494,7 +467,7 @@ export default {
     gap: 4px;
     position: relative;
     margin-bottom: 16px;
-    @include neumorphismOuter($radius: 50px, $padding: 12px 10px);
+    @include neumorphismOuter($radius: 50px, $padding: 10px 12px);
     .icon1,
     .icon2 {
       width: 24px;
@@ -538,7 +511,6 @@ export default {
 
   .detectTime {
     margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
     .icon1 {
       width: 22px;
     }
@@ -563,6 +535,7 @@ export default {
 
     &::placeholder {
       font-size: 18px;
+      color: $raphael-gray-300;
     }
   }
 
@@ -589,6 +562,7 @@ export default {
     }
 
     &:disabled {
+      @include neumorphismOuter($radius: 50px, $padding: 8px 12px);
       color: $raphael-gray-300;
       cursor: not-allowed;
       opacity: 0.6;

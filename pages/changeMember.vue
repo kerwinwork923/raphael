@@ -165,17 +165,19 @@ export default {
 
 <style lang="scss">
 .changeMemberWrap {
-  display: flex;
-  flex-direction: column;
-  place-items: center;
-  width: 100%;
-  max-width: 100%;
-  min-height: 100vh;
-  padding: 0 1rem;
-  padding-bottom: 50px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    place-items: center;
+    width: 100%;
+    padding: 0 1rem 56px 1rem;
+    height: 100vh;
+    overflow: hidden;
   @include gradientBg();
+
   .changeMemberGroup {
-    padding: 0.75rem 0 0 0;
+    flex: 1;
+    min-height: 0;
     width: 100%;
     max-width: 768px;
   }
