@@ -1,155 +1,137 @@
 <template>
   <div class="memberPointExange">
     <!-- 會員資訊（等級、點數等） -->
-    <div class="memberPointExangeContainer">
-      <TitleMenu
-        Text="積分兌換"
-        link="/point"
-        :showImg1="time"
-        @handleImg1Click="handleImg1Click"
-      ></TitleMenu>
-      <div class="memberPointExangeMB"></div>
-      <memberInfo />
+    <TitleMenu Text="積分兌換" link="/point" />
+    <div class="memberPointExangeMB"></div>
+    <memberGroup />
 
-      <div class="hasCoupon">
-        <h3>獎品列表</h3>
-        <div class="couponsGroup">
-          <!-- 用 bonusPaperList 動態列出券卡 -->
-          <template v-if="bonusPaperList && bonusPaperList.length > 0">
-            <div
-              class="coupon"
-              v-for="(coupon, index) in bonusPaperList"
-              :key="index"
-              :class="{
-                // '已兌換' 就灰階處理
-                couponExchanged: coupon.Info === '已兌換',
-                // '還差' 表示不可點擊或無法兌換
-                couponNot: coupon.Info.includes('還差'),
-              }"
-              @click="handleCouponClick(coupon)"
-            >
-              <img src="../assets/imgs/pointGiftCoupon.svg" alt="券底圖" />
-              <div class="couponContent">
-                <div class="couponGift">
-                  <img src="/assets/imgs/pointGift.png" alt="禮物圖" />
-                </div>
+    <div class="hasCoupon">
+      <h3>目前積分可兌換</h3>
+      <div class="couponsGroup">
+        <!-- 用 bonusPaperList 動態列出券卡 -->
+        <div
+          class="coupon"
+          v-for="(coupon, index) in bonusPaperList"
+          :key="index"
+          :class="{
+            // '已兌換' 就灰階處理
+            couponExchanged: coupon.Info === '已兌換',
+            // '還差' 表示不可點擊或無法兌換
+            couponNot: coupon.Info.includes('還差'),
+          }"
+          @click="handleCouponClick(coupon)"
+        >
+          <img src="../assets/imgs/pointGiftCoupon.svg" alt="券底圖" />
+          <div class="couponContent">
+            <div class="couponGift">
+              <img src="/assets/imgs/pointGift.png" alt="禮物圖" />
+            </div>
 
-                <div class="couponLine">
-                  <img src="/assets/imgs/couponLine.svg" alt="分割線" />
-                </div>
+            <div class="couponLine">
+              <img src="/assets/imgs/couponLine.svg" alt="分割線" />
+            </div>
 
-                <div class="couponText">
-                  <!-- 
+            <div class="couponText">
+              <!-- 
                   將 coupon.Name 分為 money、text 
                   e.g. "$1,000#現金抵用卷" => 
                        parseCouponName(coupon.Name).money = "$1,000" 
                        parseCouponName(coupon.Name).text  = "現金抵用卷"
                 -->
-                  <h4>{{ parseCouponName(coupon.Name).money }}</h4>
-                  <h5>{{ parseCouponName(coupon.Name).text }}</h5>
-                </div>
-
-                <div class="couponOption">
-                  <!-- coupon.Points 表示需要多少點才能換 -->
-                  <h4>{{ coupon.Points }}點</h4>
-                  <small v-if="coupon.Info.includes('兌換')">
-                    {{ coupon.Info }}
-                  </small>
-                  <!-- coupon.Info =>  "兌換" / "已兌換" / "還差 XXX 點" -->
-                </div>
-
-                <!-- 若 coupon.Info 包含 "還差" 就顯示提示(可自由調整是否顯示 small) -->
-                <div class="couponSmallInfoGroup">
-                  <small>有效期限 : {{ coupon.Period }} 個月 </small>
-                  <small v-if="coupon.Info.includes('還差')">
-                    {{ coupon.Info }}
-                  </small>
-                </div>
-              </div>
+              <h4>{{ parseCouponName(coupon.Name).money }}</h4>
+              <h5>{{ parseCouponName(coupon.Name).text }}</h5>
             </div>
-          </template>
 
-          <!-- 空狀態 -->
-          <div v-else class="emptyState">
-            <div class="emptyIllustration">
-              <img src="../assets/imgs/robot_sad.png" alt="目前沒有獎品" />
-              <h5>目前沒有可兌換的獎品</h5>
+            <div class="couponOption">
+              <!-- coupon.Points 表示需要多少點才能換 -->
+              <h4>{{ coupon.Points }}點</h4>
+              <small v-if="coupon.Info.includes('兌換')">
+                {{ coupon.Info }}
+              </small>
+              <!-- coupon.Info =>  "兌換" / "已兌換" / "還差 XXX 點" -->
+            </div>
+
+            <!-- 若 coupon.Info 包含 "還差" 就顯示提示(可自由調整是否顯示 small) -->
+            <div class="couponSmallInfoGroup">
+              <small>有效期限 : {{ coupon.Period }} 個月 </small>
+              <small v-if="coupon.Info.includes('還差')">
+                {{ coupon.Info }}
+              </small>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- 彈出視窗：exangeBox，依 showExchangeBox 顯示/隱藏 -->
-      <div class="exangeBox" v-if="showExchangeBox">
-        <h3>兌換確認</h3>
-        <div class="exangeBoxHR"></div>
-        <div class="exangeBoxImgGroup">
-          <img src="/assets/imgs/pointGift.png" alt="" />
-        </div>
-        <!-- 
+    <!-- 彈出視窗：exangeBox，依 showExchangeBox 顯示/隱藏 -->
+    <div class="exangeBox" v-if="showExchangeBox">
+      <h3>兌換確認</h3>
+      <div class="exangeBoxHR"></div>
+      <div class="exangeBoxImgGroup">
+        <img src="/assets/imgs/pointGift.png" alt="" />
+      </div>
+      <!-- 
           同樣用 parseCouponName 顯示彈窗券名稱 
           e.g. "$1,000 現金抵用卷"
         -->
-        <h4>
-          {{ parseCouponName(selectedCoupon.Name).money }}
-          {{ parseCouponName(selectedCoupon.Name).text }}
-        </h4>
+      <h4>
+        {{ parseCouponName(selectedCoupon.Name).money }}
+        {{ parseCouponName(selectedCoupon.Name).text }}
+      </h4>
 
-        <div class="exchangeBoxText">
-          <small>可用於療程商品折抵</small>
-          <h6>有效期限 : {{ formatDate(selectedCoupon.CanUseTime) }}+6個月</h6>
+      <div class="exchangeBoxText">
+        <small>可用於療程商品折抵</small>
+        <h6>有效期限 : {{ formatDate(selectedCoupon.CanUseTime) }}+6個月</h6>
 
-          <ul>
-            <!-- 目前積分 -->
-            <li>
-              目前積分
-              <span class="exchangeBoxList1"> {{ currentPoints }}點 </span>
-            </li>
+        <ul>
+          <!-- 目前積分 -->
+          <li>
+            目前積分
+            <span class="exchangeBoxList1"> {{ currentPoints }}點 </span>
+          </li>
 
-            <!-- 兌換積分(這張券所需點數) -->
-            <li>
-              兌換積分
-              <span class="exchangeBoxList2">
-                {{ selectedCoupon.Points }}點
-              </span>
-            </li>
+          <!-- 兌換積分(這張券所需點數) -->
+          <li>
+            兌換積分
+            <span class="exchangeBoxList2">
+              {{ selectedCoupon.Points }}點
+            </span>
+          </li>
 
-            <!-- 剩餘積分 = 目前 - 兌換 -->
-            <li>
-              剩餘積分
-              <span class="exchangeBoxList3"> {{ remainingPoints }}點 </span>
-            </li>
-          </ul>
-        </div>
-        <div class="exangeUseInfo">
-          <h5>使用須知</h5>
-          <ul>
-            <li>鈦金會員可立即使用 QR Code 進行使用或下次使用</li>
-            <li>其他會員僅可下次使用</li>
-            <li>兌換後無法更改使用方式，請謹慎選擇</li>
-          </ul>
-        </div>
-        <div class="exchangeBtnGroup">
-          <button @click="closeExchangeBox">取消</button>
-          <button class="exchangeBtn" @click="doExchange">兌換</button>
+          <!-- 剩餘積分 = 目前 - 兌換 -->
+          <li>
+            剩餘積分
+            <span class="exchangeBoxList3"> {{ remainingPoints }}點 </span>
+          </li>
+        </ul>
+      </div>
+      <div class="exangeUseInfo">
+        <h5>使用須知</h5>
+        <ul>
+          <li>鈦金會員可立即使用 QR Code 進行使用或下次使用</li>
+          <li>其他會員僅可下次使用</li>
+          <li>兌換後無法更改使用方式，請謹慎選擇</li>
+        </ul>
+      </div>
+      <div class="exchangeBtnGroup">
+        <button @click="closeExchangeBox">返回</button>
+        <button class="exchangeBtn" @click="doExchange">兌換</button>
+      </div>
+    </div>
+
+    <div class="verificationBox" v-show="verificationBoxVisible">
+      <div class="verificationNumberGroup">
+        <div class="verificationNumber">
+          {{ digitalCode }}
         </div>
       </div>
-
-      <div class="verificationBox" v-show="verificationBoxVisible">
-        <div class="verificationNumberGroup">
-          <div class="verificationNumber">
-            {{ digitalCode }}
-          </div>
-        </div>
-        <h4>{{ verificationPaperName.replace("#", " ") }}</h4>
-        <h5>可用於療程商品折抵</h5>
-        <small>有效期限 : {{ formatDate(verificationCoupon.CanUseTime) }}+{{ verificationCoupon.Period }}個月</small>
-        <div @click="closeAllModals" class="verificationClose">
-          <img src="../assets/imgs/pointClose.svg" alt="" />
-        </div>
-
-        <h6>結帳時向諮詢師出示此畫面 即可折抵消費。</h6>
+      <h4>{{ verificationPaperName.replace("#", " ") }}</h4>
+      <h5>可用於療程商品折抵</h5>
+      <div @click="closeAllModals" class="verificationClose">
+        <img src="../assets/imgs/pointClose.svg" alt="" />
       </div>
+
+      <h6>結帳時向諮詢師出示此畫面 即可折抵消費。</h6>
     </div>
   </div>
 
@@ -162,12 +144,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed } from "vue";
 import { usePoint } from "@/stores/point";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import { useSeo } from "~/composables/useSeo";
-import time from "@/assets/imgs/point/time.svg";
+
 useSeo({
   title: "",
   description:
@@ -179,11 +161,7 @@ const router = useRouter();
 const pointStore = usePoint();
 
 // 從 store 來的可兌換券列表
-const bonusPaperList = computed(() => {
-  const list = pointStore.bonusPaperList;
-  console.log("bonusPaperList:", list);
-  return list;
-});
+const bonusPaperList = computed(() => pointStore.bonusPaperList);
 
 // 「兌換確認」彈窗控制
 const showExchangeBox = ref(false);
@@ -196,12 +174,6 @@ const pointCoverVisible = ref(false); // 原本就有灰色遮罩
 const digitalCode = ref("");
 // 驗證碼視窗中要顯示的券名稱
 const verificationPaperName = ref("");
-// 驗證碼視窗中要顯示的券資訊
-const verificationCoupon = ref({
-  CanUseTime: "",
-  Period: "",
-  EndTime: ""
-});
 
 // 取得 store 的文字，例如： "累積積分6141點"，用 regex 轉成數字
 const currentPoints = computed(() => {
@@ -209,10 +181,6 @@ const currentPoints = computed(() => {
   const match = str.match(/\d+/);
   return match ? Number(match[0]) : 0;
 });
-
-function handleImg1Click() {
-  router.push("/exchangeRecord");
-}
 
 // 依使用者點擊的券所需點數做計算
 const remainingPoints = computed(() => {
@@ -267,11 +235,6 @@ function closeAllModals() {
   // 視情況是否需要清空 digitalCode, verificationPaperName
   digitalCode.value = "";
   verificationPaperName.value = "";
-  verificationCoupon.value = {
-    CanUseTime: "",
-    Period: "",
-    EndTime: ""
-  };
 }
 
 /**
@@ -302,24 +265,17 @@ async function doExchange() {
       // ① 先把 8 碼數字碼 及券名稱 存起來
       digitalCode.value = data.BonusPaper.DigitalCode; // "65977461"
       verificationPaperName.value = data.BonusPaper.PaperName; // "$1,000現金抵用卷" 或 "$1,000#現金抵用卷"
-      
-      // ② 設定驗證碼視窗的券資訊
-      verificationCoupon.value = {
-        CanUseTime: data.BonusPaper.CanUseTime, // "20250904"
-        Period: data.BonusPaper.Period, // "12"
-        EndTime: data.BonusPaper.EndTime // "20260904"
-      };
 
-      // ③ 若有需要更新前台「累積積分」(NowPoints = 兌換後剩餘積分)
+      // ② 若有需要更新前台「累積積分」(NowPoints = 兌換後剩餘積分)
       //    假設 store 有一個方法可以更新 nowAvaPoints：
       //    e.g. "累積積分5641點"
       const updatedPoints = data.BonusPaper.NowPoints;
       pointStore.nowAvaPoints = `累積積分${updatedPoints}點`;
 
-      // ④ 關閉「兌換確認」彈窗
+      // ③ 關閉「兌換確認」彈窗
       closeExchangeBox();
 
-      // ⑤ 開啟「驗證碼」視窗
+      // ④ 開啟「驗證碼」視窗
       verificationBoxVisible.value = true;
       pointCoverVisible.value = true;
     } else {
@@ -340,63 +296,29 @@ function formatDate(yyyymmdd) {
     8
   )}`;
 }
-
-// 獲取獎品列表數據
-async function fetchBonusData() {
-  if (!MID || !Token || !MAID || !Mobile) {
-    router.push("/");
-    return;
-  }
-
-  try {
-    const response = await axios.post(
-      "https://23700999.com:8081/HMA/API_Bonus.jsp",
-      { MID, Token, MAID, Mobile }
-    );
-
-    if (response.status === 200) {
-      // 設定 API 回傳的 NowBonusState
-      pointStore.setNowBonusState(response.data.NowBonusState);
-      console.log("獎品列表數據:", response.data.NowBonusState);
-    } else {
-      console.log("API_Bonus error:", response);
-    }
-  } catch (err) {
-    console.log("API_Bonus catch error:", err);
-  }
-}
-
-onMounted(() => {
-  fetchBonusData();
-});
 </script>
 
 <style lang="scss">
 .memberPointExange {
-  @include gradientBg();
-  width: 100%;
+  background-color: #f6f6f6;
+  padding: 0 5% 60px;
   min-height: 100vh;
-  .memberPointExangeContainer {
-    padding: 0 3%;
- 
-  }
   .memberPointExangeMB {
     margin-top: 1rem;
   }
   .hasCoupon {
     margin-top: 1rem;
-
+    background-color: #fff;
     max-width: 960px;
     padding: 12px;
     border-radius: 8px;
 
     h3 {
       color: #1e1e1e;
-      color: var(--Neutral-black, #1e1e1e);
-      font-size: var(--Text-font-size-20, 20px);
-      font-style: normal;
+
+      font-size: 20px;
       font-weight: 700;
-      letter-spacing: 3px;
+      letter-spacing: 0.15px;
       margin-bottom: 0.75rem;
     }
 
@@ -500,34 +422,7 @@ onMounted(() => {
           font-weight: 400;
           gap: 0.5rem;
         }
-      }
-    }
-
-    .emptyState {
-      text-align: center;
-      padding: 2rem 1rem;
-
-      .emptyIllustration {
-        padding: 1.25rem;
-        border-radius: var(--Radius-r-20, 20px);
-        background: var(--Secondary-100, #f5f7fa);
-        box-shadow: 2px 4px 12px 0 rgba(177, 192, 216, 0.7);
-
-        img {
-          width: 100%;
-          height: auto;
-          opacity: 0.8;
-          transform: scaleX(-1);
-        }
-
-        h5 {
-          color: var(--Neutral-black, #1e1e1e);
-          text-align: center;
-          font-size: var(--Text-font-size-24, 24px);
-          font-style: normal;
-          font-weight: 700;
-          letter-spacing: 0.12px;
-          margin-top: 1rem;
+        small {
         }
       }
     }
@@ -537,18 +432,15 @@ onMounted(() => {
 /* 彈出視窗 */
 .exangeBox {
   position: fixed;
-
-  width: 90%;
+  background-color: #fff;
+  width: 80%;
   max-width: 420px; /* 可自行調整 */
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   padding: 0 5% 1.25rem;
-  border-radius: var(--Radius-r-20, 20px);
-  background: var(--neutral-white-opacity-65, rgba(255, 255, 255, 0.65));
-  box-shadow: 2px 4px 12px 0
-    var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
-  backdrop-filter: blur(50px);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   z-index: 100;
   h3 {
     color: #74bc1f;
@@ -617,11 +509,8 @@ onMounted(() => {
     }
   }
   .exangeUseInfo {
-    border-radius: var(--Radius-r-20, 20px);
-    background: var(--Secondary-100, #f5f7fa);
-    box-shadow: -6px -6px 12px 0 var(--Neutral-white, #fff) inset,
-      6px 6px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4))
-        inset;
+    background-color: #fef1e2;
+    border-radius: 12px;
     padding: 12px;
     margin-top: 1.25rem;
     ul {
@@ -631,15 +520,13 @@ onMounted(() => {
         color: #666;
         margin-left: 1.5rem;
         line-height: 1.5;
-        margin-bottom: .75rem;
       }
     }
     h5 {
-      color: var(--Neutral-black, #1e1e1e);
+      color: #bc581f;
+
       font-size: 18px;
-      font-style: normal;
-      font-weight: 700;
-      letter-spacing: 0.09px;
+      font-weight: 400;
     }
   }
   .exchangeBtnGroup {
@@ -658,17 +545,10 @@ onMounted(() => {
       font-size: 18px;
       font-weight: 400;
       cursor: pointer;
-      background-color: #fff;
-      color: #EC4F4F;
-      border: 1px solid #EC4F4F;
-      border-radius: var(--Radius-r-50, 50px);
-border: 1px solid var(--Warning-default, #EC4F4F);
-//border距離
     }
     .exchangeBtn {
       background: #74bc1f;
       color: #fff;
-      border: none;
     }
   }
 }
@@ -682,15 +562,15 @@ border: 1px solid var(--Warning-default, #EC4F4F);
   z-index: 999;
   padding: 0.75rem;
   padding-bottom: 2rem;
-  border-radius: var(--Radius-r-20, 20px);
-background: var(--neutral-white-opacity-65, rgba(255, 255, 255, 0.65));
-box-shadow: 2px 4px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.70));
-backdrop-filter: blur(50px);
+  border-radius: 12px;
+  background: var(--shade-white, #fff);
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
   max-width: 768px;
   .verificationClose {
     position: absolute;
-    bottom: -18%;
+    bottom: 5%;
     cursor: pointer;
+    background-color: #74BC1F;
     width: 40px;
     height: 40px;
     display: flex;
@@ -699,37 +579,17 @@ backdrop-filter: blur(50px);
     border-radius: 999px;
     left: 50%;
     transform: translateX(-50%);
-    color: #EC4F4F;
-    border-radius: var(--Radius-r-50, 50px);
-background: var(--Secondary-100, #F5F7FA);
-box-shadow: 2px 4px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.70));
-padding: 0.25rem;
-img{
-  border: #EC4F4F 1px solid;
-  border-radius: 50%;
-  width: 100%;
-  height: 100%;
-  padding: 0.2rem;
-}
-
-
   }
   .verificationNumber {
-    border-radius: var(--Radius-r-20, 20px);
-background: var(--Secondary-100, #F5F7FA);
-box-shadow: -6px -6px 12px 0 var(--Neutral-white, #FFF) inset, 6px 6px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.40)) inset;
+    background: #fef1e2;
     border-radius: 0.75rem;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 1rem;
-    color: var(--Neutral-black, #1E1E1E);
-
-font-size: var(--Text-font-size-36, 36px);
-font-style: normal;
-font-weight: 700;
-
-
+    font-size: 2rem;
+    font-weight: bold;
+    color: #bc581f;
     letter-spacing: 18px;
   }
   h4 {
@@ -760,22 +620,7 @@ font-weight: 700;
     border-bottom: 2px solid;
     padding: 10px 0;
     margin-top: 1rem;
- 
-    line-height: 38.832px;
-  }
-  small{
-    color: rgba(0, 0, 0, 0.30);
-font-size: 14px;
-font-style: normal;
-font-weight: 400;
-
-width: 100%;
-display: flex;
-
-justify-content: center;
-letter-spacing: 0.048px;
-margin-top: 0.5rem;
-
+    margin-bottom: 2rem;
   }
 }
 .pointCover {

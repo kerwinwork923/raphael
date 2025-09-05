@@ -37,27 +37,27 @@
         </div>
         <img src="../assets/imgs/member/next_green.svg" alt="" />
       </div>
-      <div class="memberListItem">
-        <div class="memberListLeft">
+      <div class="memberListItem" @click="goToPrivacy">
+        <div class="memberListLeft" >
           <img src="../assets/imgs/member/privacy.svg" alt="" />
-          <h3>隱私權設定</h3>
+          <h3>隱私權政策</h3>
         </div>
         <img src="../assets/imgs/member/next_green.svg" alt="" />
       </div>
-      <div class="memberListItem">
+      <div class="memberListItem" @click="goToDisclaimer">
         <div class="memberListLeft">
           <img src="../assets/imgs/member/warning.svg" alt="" />
           <h3>免責聲明</h3>
         </div>
         <img src="../assets/imgs/member/next_green.svg" alt="" />
       </div>
-      <div class="memberListItem">
+      <!-- <div class="memberListItem">
         <div class="memberListLeft">
           <img src="../assets/imgs/member/about.svg" alt="" />
           <h3>關於</h3>
         </div>
         <img src="../assets/imgs/member/next_green.svg" alt="" />
-      </div>
+      </div> -->
     </div>
 
     <button class="logoutBtn" @click="logout">登出</button>
@@ -96,11 +96,19 @@ const logout = () => {
 };
 
 const deleteBtn = () => {
-  console.log("刪除帳號");
+  router.push("/deleteConfirm");
 };
 
 const goToChangeMember = () => {
   router.push("/changeMember");
+};
+
+const goToPrivacy = () => {
+  router.push("/PrivacyPage");
+};
+
+const goToDisclaimer = () => {
+  router.push("/disclaimer");
 };
 </script>
 
@@ -231,6 +239,7 @@ const goToChangeMember = () => {
       background: var(--Secondary-100, #f5f7fa);
       box-shadow: 2px 4px 12px 0
         var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+        cursor: pointer;
       .memberListLeft {
         display: flex;
         align-items: center;

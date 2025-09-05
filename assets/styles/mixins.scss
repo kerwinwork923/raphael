@@ -305,10 +305,10 @@
 
 @mixin gradientBg() {
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
   &::before {
     content: " ";
-    position: absolute;
+    position: fixed;
     background: rgba(245, 247, 250, 0.45);
     -webkit-backdrop-filter: blur(200px);
     backdrop-filter: blur(200px);

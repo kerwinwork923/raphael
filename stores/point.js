@@ -1,6 +1,6 @@
 // /stores/point.js
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 
 export const usePoint = defineStore("point", () => {
   const nowBonusState = ref(null);
@@ -15,6 +15,19 @@ export const usePoint = defineStore("point", () => {
 
   // 新增：存 Privillage 資訊
   const privillage = ref("");
+
+  // 計算屬性：今日任務列表
+  const todayMissionList = computed(() => {
+    return taskList.value || [];
+  });
+
+  // 計算屬性：今日已獲得積分
+  const todayCompletedPoints = computed(() => {
+    if (!taskList.value) return 0;
+    return taskList.value
+      .filter(task => task.Info === "已經完成")
+      .reduce((total, task) => total + (parseInt(task.Points) || 0), 0);
+  });
 
   function setNowBonusState(data) {
     nowBonusState.value = data;
@@ -42,6 +55,9 @@ export const usePoint = defineStore("point", () => {
     keepGrade,
     // 新增：把 privillage 也 return 出去
     privillage,
+    // 新增：今日任務相關的計算屬性
+    todayMissionList,
+    todayCompletedPoints,
     setNowBonusState
   };
 });
