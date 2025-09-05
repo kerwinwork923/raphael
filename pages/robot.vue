@@ -515,8 +515,8 @@
   padding: 0 1rem;
 
   .avatar-container {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border: 1px solid $raphael-green-400;
     cursor: pointer;
 
@@ -537,18 +537,16 @@
   }
 
   .character-name-btn {
-    color: #4a5568;
     color: $raphael-green-400;
-    font-family: "Noto Sans";
     font-size: 18px;
-    font-style: normal;
-    font-weight: 400;
     letter-spacing: 2.7px;
     cursor: pointer;
-    @include neumorphismOuter($radius: 50px, $padding: 11px 16px);
+    @include neumorphismOuter($radius: 50px, $padding: 13px 10px);
     display: flex;
     align-items: center;
-    gap: 2px;
+    justify-content: space-between;
+    min-width: 120px;
+    gap: 8px;
     transition: all 0.3s ease;
 
     &:hover,
