@@ -305,7 +305,7 @@
 
 @mixin gradientBg() {
   position: relative;
-  overflow-x: hidden;
+  overflow: hidden;
   &::before {
     content: " ";
     position: fixed;
