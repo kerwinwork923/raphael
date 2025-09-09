@@ -15,15 +15,12 @@
     <div class="greeting-bubble">
       <div v-if="isLoading" class="loading-indicator">
         <div class="spinner"></div>
-        <span>正在思考...</span>
+        <span>思考中...</span>
       </div>
       <div v-else-if="latestResponse" class="latest-response">
         {{ latestResponse }}
       </div>
       <div v-else class="greeting-text">嗨~~有什麼需要幫您</div>
-      <button class="volume-control" @click="toggleVolume">
-        <img :src="isMuted ? mutedSvg : volumeSvg" alt="音量" />
-      </button>
     </div>
 
     <!-- AI角色形象區域 -->
@@ -52,8 +49,8 @@
 
           <div v-if="isListening" class="pulse-ring"></div>
         </button>
-        <button class="control-btn text-btn" @click="toggleTextInput">
-          <img :src="keyboardSvg" alt="文字" />
+        <button class="control-btn volume-btn" @click="toggleVolume">
+          <img :src="isMuted ? mutedSvg : volumeSvg" alt="音量" />
         </button>
       </div>
     </transition>
@@ -210,21 +207,32 @@
             確定
           </button>
 
-          <!-- 底部角色切換區域 -->
+          <!-- 底部角色切換區域 - Swiper 版本 -->
           <div class="character-switch-area">
-            <div class="character-scroll-container">
-              <div
+            <swiper
+              ref="characterSwiperRef"
+              :slidesPerView="3.2"
+              :spaceBetween="8"
+              :centeredSlides="true"
+              :pagination="{
+                clickable: true,
+              }"
+              :modules="swiperModules"
+              class="character-swiper"
+              @slideChange="onSlideChange"
+            >
+              <swiper-slide
                 v-for="character in availableCharacters"
                 :key="character.id"
                 class="character-option"
                 :class="{ selected: currentCharacter.id === character.id }"
-                @click="selectCharacter(character)"
+                @click="onCharacterClick(character)"
               >
                 <div class="character-circle">
                   <img :src="character.avatar" alt="角色" />
                 </div>
-              </div>
-            </div>
+              </swiper-slide>
+            </swiper>
           </div>
         </div>
       </div>
@@ -332,7 +340,19 @@
                     </div>
 
                     <div class="bubble">
-                      {{ item.bot }}
+                      <!-- 如果正在載入，顯示 loading.gif -->
+                      <div v-if="item.isLoading" class="loading-in-message">
+                        <img
+                          :src="loadingGif"
+                          alt="載入中"
+                          class="loading-gif"
+                        />
+                        <span>AI 正在回覆...</span>
+                      </div>
+                      <!-- 否則顯示 bot 回覆 -->
+                      <div v-else>
+                        {{ item.bot }}
+                      </div>
                       <div class="time">{{ formatTime(item.timestamp) }}</div>
                     </div>
                   </div>
@@ -611,33 +631,6 @@
 
 .greeting-bubble .greeting-text {
   @extend .latest-response;
-}
-
-.volume-control {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  width: 40px;
-  height: 40px;
-  position: absolute;
-  right: 16px;
-  bottom: -56px;
-  z-index: 2;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  @include neumorphismOuter($radius: 50%, $padding: 0);
-
-  &:hover,
-  &:active {
-    @include neumorphismOuter(
-      $radius: 50%,
-      $padding: 0,
-      $x: 0,
-      $y: 0,
-      $blur: 6px
-    );
-  }
 }
 
 /* 角色形象區域 */
@@ -962,7 +955,7 @@
 
     p {
       font-size: 20px;
-      font-weight: 600;
+      font-weight: 700;
       line-height: 24px;
       color: #2d3748;
     }
@@ -1302,6 +1295,22 @@
             color: #718096;
             align-self: flex-end;
             opacity: 0.8;
+          }
+
+          .loading-in-message {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            .loading-gif {
+              width: 20px;
+              height: 20px;
+            }
+
+            span {
+              font-size: 14px;
+              color: #718096;
+            }
           }
         }
       }
@@ -1741,49 +1750,69 @@
     margin-bottom: 66px;
     padding: 0 1rem;
 
-    .character-scroll-container {
-      display: grid;
-      grid-auto-flow: column;
-      gap: 8px;
+    .character-swiper {
       @include neumorphismOuter();
-      overflow-x: auto;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
+      padding: 8px;
 
-      /* 隱藏滾動條但保持功能 */
-      scrollbar-width: none; /* Firefox */
-      -ms-overflow-style: none; /* IE and Edge */
-      &::-webkit-scrollbar {
-        display: none; /* Chrome, Safari, Opera */
+      /* 自定義 Swiper 樣式 */
+      :deep(.swiper-wrapper) {
+        align-items: center;
       }
 
-      /* 確保顯示3.2個角色的比例 */
+      :deep(.swiper-slide) {
+        width: 100px;
+        height: 100px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-shrink: 0; /* 防止被壓縮 */
+      }
+
+      :deep(.swiper-pagination) {
+        bottom: -20px;
+
+        .swiper-pagination-bullet {
+          background: rgba(116, 188, 31, 0.3);
+          opacity: 1;
+
+          &.swiper-pagination-bullet-active {
+            background: $raphael-green-400;
+          }
+        }
+      }
+
       .character-option {
         cursor: pointer;
         transition: all 0.3s ease;
-        width: 100px;
-        height: 100px;
+        width: 100%;
+        height: 100%;
 
         .character-circle {
           background: rgba(31, 188, 179, 0.2);
           border-radius: 50%;
+          width: 100px;
           height: 100px;
+          cursor: pointer;
+          border: none;
+
           overflow: hidden;
           transition: all 0.3s ease;
+
+          &:hover,
+          &:active {
+            background: rgba(31, 188, 179, 0.7);
+          }
 
           img {
             width: 100%;
             object-fit: cover;
-          }
-          &:hover,
-          &:active {
-            background: rgba(31, 188, 179, 0.7);
           }
         }
 
         &.selected .character-circle {
           border: 2px solid $raphael-green-400;
           @include neumorphismOuter($radius: 50%, $padding: 0, $x: 0, $y: 6px);
+
           &:hover,
           &:active {
             @include neumorphismOuter(
@@ -2044,13 +2073,20 @@ import { useHead } from "#app";
 import BottomNav from "~/components/BottomNav.vue";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
+// Import Swiper Vue.js components
+import { Swiper, SwiperSlide } from "swiper/vue";
+// Import Swiper styles
+import "swiper/css";
+import "swiper/css/pagination";
+// import required modules
+import { Pagination } from "swiper/modules";
 // 移除import，改用動態路徑
 import recycleSvg from "~/assets/imgs/robot/recycle.svg";
 import timeSvg from "~/assets/imgs/robot/time.svg";
 import soundSvg from "~/assets/imgs/robot/sound.svg";
-import keyboardSvg from "~/assets/imgs/robot/keyboard.svg";
 import assistantSoundGif from "~/assets/imgs/robot/assistantSound.gif";
 import assistantDefaultGif from "~/assets/imgs/robot/assistantDefault.gif";
+import loadingGif from "~/assets/imgs/robot/loading.gif";
 import volumeSvg from "~/assets/imgs/robot/volume.svg";
 import mutedSvg from "~/assets/imgs/robot/muted.svg";
 import searchSvg from "~/assets/imgs/robot/search.svg";
@@ -2062,8 +2098,14 @@ const TTS_WEBHOOK_URL = "https://aiwisebalance.com/webhook/oss-gpt";
 const TEXT_WEBHOOK_URL = "https://aiwisebalance.com/webhook/Textchat"; // ← 你的「純文字」端點（若同一支就跟 TTS_URL 相同）
 const TEXT_MESSAGE_URL =
   "https://23700999.com:8081/HMA/TTEsaveChatMessageHistory.jsp"; // ← 你的「純文字」端點（若同一支就跟 TTS_URL 相同）
+const GET_CHAT_HISTORY_URL =
+  "https://23700999.com:8081/HMA/TTEgetChatMessageHistoryList.jsp"; // ← 獲取聊天記錄的端點
 const voicegender = "female";
 const historyInputRef = ref(null);
+
+// Swiper modules
+const swiperModules = [Pagination];
+const characterSwiperRef = ref(null);
 
 // 響應式狀態
 const isListening = ref(false);
@@ -2129,9 +2171,10 @@ const latestResponse = ref(""); // 最新回覆
 const showSearch = ref(false); // 搜尋功能開關
 const searchQuery = ref(""); // 搜尋關鍵字
 const searchResults = ref([]); // 搜尋結果
+// 從 localStorage 獲取用戶資料
 const localData = localStorage.getItem("userData");
-const localobj = JSON.parse(localData);
-console.log("localobj=", localobj.Mobile);
+const localobj = localData ? JSON.parse(localData) : null;
+console.log("localobj=", localobj?.Mobile);
 
 // 角色選擇相關狀態
 const showCharacterSelection = ref(false); // 顯示角色選擇彈窗
@@ -2605,9 +2648,13 @@ const setActiveTab = (tab) => {
 };
 
 // 顯示歷史記錄
-const showHistory = () => {
+const showHistory = async () => {
   if (process.client) {
     showHistoryPage.value = true;
+
+    // 重新獲取最新的聊天記錄
+    await fetchChatHistory();
+
     // 重置分頁狀態
     currentPage.value = 1;
     hasMoreMessages.value = conversations.value.length > messagesPerPage.value;
@@ -2741,10 +2788,12 @@ const scrollToBottom = () => {
 };
 
 // 切換日曆顯示
-const toggleCalendar = () => {
+const toggleCalendar = async () => {
   if (process.client) {
     showCalendar.value = !showCalendar.value;
     if (showCalendar.value) {
+      // 重新獲取聊天記錄以確保日期是最新的
+      await fetchChatHistory();
       loadCalendarDates(); // 更新所有有紀錄的日期
 
       // 設定日曆顯示的月份為最新有記錄的月份
@@ -2760,6 +2809,7 @@ const toggleCalendar = () => {
       console.log(
         `日曆開啟，顯示月份: ${visibleYear.value}/${visibleMonth.value + 1}`
       );
+      console.log("當月可用日期:", Array.from(monthDateKeySet.value));
     }
   }
 };
@@ -2770,14 +2820,21 @@ const loadCalendarDates = () => {
     // 清空現有數據
     calendarDateKeySet.value.clear();
 
+    console.log("開始載入日曆日期，對話記錄數量:", conversations.value.length);
+
     // 從對話記錄中提取日期
-    conversations.value.forEach((conversation) => {
+    conversations.value.forEach((conversation, index) => {
       let dateKey;
       if (conversation.dateKey) {
         dateKey = conversation.dateKey;
       } else {
         dateKey = toDateKey(conversation.timestamp);
       }
+      console.log(`對話 ${index}:`, {
+        timestamp: conversation.timestamp,
+        dateKey: dateKey,
+        originalDateKey: conversation.dateKey,
+      });
       calendarDateKeySet.value.add(dateKey);
     });
 
@@ -2786,56 +2843,9 @@ const loadCalendarDates = () => {
       calendarDateKeySet.value
     ).sort();
 
-    console.log("載入的日期:", Array.from(calendarDateKeySet.value));
-    console.log(
-      "對話記錄:",
-      conversations.value.map((c) => ({
-        id: c.id,
-        timestamp: c.timestamp,
-        dateKey: c.dateKey || toDateKey(c.timestamp),
-      }))
-    );
+    console.log("最終載入的日期:", Array.from(calendarDateKeySet.value));
+    console.log("排序後的日期:", calendarDatesWithHistory.value);
   }
-};
-
-// 新增工具：確保日期出現在目前列表
-const ensureDateVisible = (dateKey) => {
-  if (!conversations.value.length) return null;
-
-  // 先找該日期的第一則訊息
-  const firstIndex = conversations.value.findIndex((c) => {
-    const cDateKey = c.dateKey || toDateKey(c.timestamp);
-    return cDateKey === dateKey;
-  });
-
-  if (firstIndex === -1) {
-    console.log(`找不到日期 ${dateKey} 的對話記錄`);
-    return null;
-  }
-
-  // 簡化分頁計算：確保該訊息在當前顯示範圍內
-  const total = conversations.value.length;
-  const startIndex = Math.max(
-    0,
-    total - currentPage.value * messagesPerPage.value
-  );
-  const endIndex = total;
-
-  // 如果該訊息不在當前顯示範圍內，調整分頁
-  if (firstIndex < startIndex || firstIndex >= endIndex) {
-    // 計算需要顯示多少頁才能包含該訊息
-    const messagesFromEnd = total - firstIndex;
-    const requiredPages = Math.ceil(messagesFromEnd / messagesPerPage.value);
-    currentPage.value = requiredPages;
-    console.log(
-      `調整分頁到第 ${currentPage.value} 頁以顯示日期 ${dateKey} 的訊息`
-    );
-  }
-
-  console.log(
-    `找到日期 ${dateKey} 的第一則訊息 ID: ${conversations.value[firstIndex]?.id}`
-  );
-  return conversations.value[firstIndex]?.id || null;
 };
 
 // 處理日期選擇變更
@@ -2844,24 +2854,59 @@ const handleDateChange = async (date) => {
   const key = toDateKey(date);
   console.log(`選擇日期: ${date}, 轉換為 key: ${key}`);
 
-  // 找到該日期第一則訊息
-  const targetId = ensureDateVisible(key);
-
   // 關閉日曆
   showCalendar.value = false;
 
-  // 確保 DOM 更新後再捲動
-  await nextTick();
-  if (targetId) {
-    const el = document.getElementById(`message-${targetId}`);
-    if (el) {
-      console.log(`滾動到訊息 ID: ${targetId}`);
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    } else {
-      console.log(`找不到 DOM 元素: message-${targetId}`);
+  // 找到該日期的第一則訊息
+  const targetMessage = conversations.value.find((msg) => {
+    const msgDateKey = msg.dateKey || toDateKey(msg.timestamp);
+    return msgDateKey === key;
+  });
+
+  if (targetMessage) {
+    console.log(`找到目標訊息 ID: ${targetMessage.id}`);
+
+    // 確保該訊息在當前顯示範圍內
+    const totalMessages = conversations.value.length;
+    const messageIndex = conversations.value.findIndex(
+      (msg) => msg.id === targetMessage.id
+    );
+
+    if (messageIndex !== -1) {
+      // 計算需要顯示多少頁才能包含該訊息
+      const messagesFromEnd = totalMessages - messageIndex;
+      const requiredPages = Math.ceil(messagesFromEnd / messagesPerPage.value);
+      currentPage.value = requiredPages;
+
+      console.log(
+        `調整分頁到第 ${currentPage.value} 頁以顯示日期 ${key} 的訊息`
+      );
+
+      // 等待 DOM 更新後滾動到目標訊息
+      await nextTick();
+      setTimeout(() => {
+        const el = document.getElementById(`message-${targetMessage.id}`);
+        if (el) {
+          console.log(`滾動到訊息 ID: ${targetMessage.id}`);
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+
+          // 添加高亮效果
+          el.style.backgroundColor = "rgba(116, 188, 31, 0.1)";
+          el.style.borderRadius = "12px";
+          el.style.transition = "background-color 0.3s ease";
+
+          // 3秒後移除高亮
+          setTimeout(() => {
+            el.style.backgroundColor = "";
+            el.style.borderRadius = "";
+          }, 3000);
+        } else {
+          console.log(`找不到 DOM 元素: message-${targetMessage.id}`);
+        }
+      }, 100);
     }
   } else {
-    console.log(`找不到日期 ${key} 的目標訊息`);
+    console.log(`找不到日期 ${key} 的訊息`);
   }
 };
 
@@ -2876,10 +2921,6 @@ const isDateDisabledForMonth = (date) => {
   const key = toDateKey(date);
   // 限制：僅允許該月有紀錄的日期（monthDateKeySet）
   const isDisabled = !monthDateKeySet.value.has(key);
-  console.log(
-    `日期 ${key} 是否被停用: ${isDisabled}, 當月可用日期:`,
-    Array.from(monthDateKeySet.value)
-  );
   return isDisabled;
 };
 
@@ -3014,17 +3055,76 @@ const startVoiceTimeout = () => {
   }, 5000); // 5秒超時
 };
 
-// 切換文字輸入
-const toggleTextInput = () => {
-  if (process.client) {
-    showTextInput.value = !showTextInput.value;
-    if (showTextInput.value) {
-      nextTick(() => {
-        if (textInputRef.value) {
-          textInputRef.value.focus();
-        }
-      });
+// 獲取聊天記錄
+const fetchChatHistory = async () => {
+  if (!localobj) {
+    console.error("用戶資料不存在");
+    return;
+  }
+
+  try {
+    const response = await fetch(GET_CHAT_HISTORY_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        Key: "qrt897hpmd",
+        MID: localobj.MID,
+        Mobile: localobj.Mobile,
+        CallTime: "1",
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API 調用失敗: ${response.status}`);
     }
+
+    const data = await response.json();
+    console.log("獲取到的聊天記錄:", data);
+
+    if (
+      data.Result === "OK" &&
+      data.ChatMessage &&
+      Array.isArray(data.ChatMessage)
+    ) {
+      // 轉換 API 資料格式為本地格式
+      const convertedMessages = data.ChatMessage.map((msg, index) => {
+        const inputTime = new Date(msg.Inputtime);
+        const outputTime = new Date(msg.Outputtime);
+
+        console.log(`處理訊息 ${index}:`, {
+          Inputtime: msg.Inputtime,
+          parsedDate: inputTime,
+          dateKey: toDateKey(inputTime),
+        });
+
+        return {
+          id: Date.now() + index, // 生成唯一 ID
+          ts: inputTime.getTime(),
+          user: msg.Inmessage || "",
+          bot: msg.Outmessage || "",
+          timestamp: inputTime.toLocaleString("zh-TW"),
+          dateKey: toDateKey(inputTime),
+        };
+      });
+
+      // 按時間排序（舊到新）
+      convertedMessages.sort((a, b) => a.ts - b.ts);
+
+      conversations.value = convertedMessages;
+
+      // 更新最新回覆
+      if (convertedMessages.length > 0) {
+        latestResponse.value =
+          convertedMessages[convertedMessages.length - 1].bot;
+      }
+
+      // 更新日曆數據
+      loadCalendarDates();
+
+      console.log("聊天記錄載入完成:", convertedMessages);
+    }
+  } catch (error) {
+    console.error("獲取聊天記錄失敗:", error);
   }
 };
 
@@ -3230,23 +3330,25 @@ async function sendViaN8n(userText, { playAudio = false, extra = {} } = {}) {
   }
 
   //寫入np資料庫
-  try {
-    res = await fetch(TEXT_MESSAGE_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        Key: "qrt897hpmd",
-        MID: localobj.MID,
-        Mobile: localobj.Mobile,
-        Type: "P",
-        Inmessage: userText,
-        Outmessage: answerText,
-        Inputtime: nowtime,
-        Outputtime: new Date().toISOString(),
-      }),
-    });
-  } catch (e) {
-    throw e;
+  if (localobj) {
+    try {
+      res = await fetch(TEXT_MESSAGE_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          Key: "qrt897hpmd",
+          MID: localobj.MID,
+          Mobile: localobj.Mobile,
+          Type: "P",
+          Inmessage: userText,
+          Outmessage: answerText,
+          Inputtime: nowtime,
+          Outputtime: new Date().toISOString(),
+        }),
+      });
+    } catch (e) {
+      console.error("保存聊天記錄失敗:", e);
+    }
   }
 
   return (
@@ -3363,36 +3465,33 @@ const toggleListening = () => {
 // 處理語音輸入結束
 const handleSpeechEnd = async (transcript) => {
   if (!transcript.trim()) return;
+
+  // 語音輸入：顯示 "思考中..." 而不是用戶輸入
   isLoading.value = true;
   currentTranscript.value = "";
 
   try {
     // 一次拿回覆 + 播音檔
-    //const botResponse = await fetchTTSAndPlayAndReturnText(transcript, {
-    //  pitch_semitones: 1.5,
-    //});
     const botResponse = await sendViaN8n(transcript, { playAudio: true });
     console.log("botResponse", botResponse);
     const nowTs = Date.now();
     const newConversation = {
       id: nowTs,
       ts: nowTs,
-      user: transcript, // ← 修正這裡
+      user: transcript,
       bot: botResponse || "（親愛的:您的問題我目前沒辦法回答）",
       timestamp: new Date().toLocaleString("zh-TW"),
       dateKey: toDateKey(new Date(nowTs)),
     };
     console.log("newConversation", newConversation);
 
-    conversations.value.push(newConversation); // ★ 改用 push，保持陣列「舊→新」
+    conversations.value.push(newConversation);
     latestResponse.value = botResponse || "（親愛的:您的問題我目前沒辦法回答）";
     saveConversations();
 
     // 如果當前在歷史記錄頁面，確保新訊息可見
     if (showHistoryPage.value) {
-      // 重置到第一頁以顯示最新訊息
       currentPage.value = 1;
-      // 滾動到最新訊息
       nextTick(() => {
         setTimeout(() => {
           scrollToBottom();
@@ -3594,135 +3693,97 @@ async function handleManualInput() {
   const input = textInput.value.trim();
   if (!input) return;
 
-  isLoading.value = true;
+  // 文字輸入：立即將用戶輸入添加到聊天記錄中
+  const nowTs = Date.now();
+  const userMessage = {
+    id: nowTs,
+    ts: nowTs,
+    user: input,
+    bot: "", // 暫時為空，等待 API 回傳
+    timestamp: new Date().toLocaleString("zh-TW"),
+    dateKey: toDateKey(new Date(nowTs)),
+    isLoading: true, // 標記為載入中
+  };
+
+  // 立即添加到聊天記錄
+  conversations.value.push(userMessage);
   currentTranscript.value = "";
   textInput.value = "";
 
+  // 如果當前在歷史記錄頁面，滾動到底部
+  if (showHistoryPage.value) {
+    currentPage.value = 1;
+    nextTick(() => {
+      setTimeout(() => {
+        scrollToBottom();
+        historyInputRef.value?.focus();
+      }, 100);
+    });
+  }
+
   try {
-    //const botResponse = await fetchTTSAndPlayAndReturnText(input, {
-    //  pitch_semitones: 1.5,
-    //});
     const botResponse = await sendViaN8n(input, { playAudio: false });
     console.log(botResponse);
-    const nowTs = Date.now();
-    const newConversation = {
-      id: nowTs,
-      ts: nowTs,
-      user: input, // ← 修正這裡
-      bot: botResponse || "（親愛的:您的問題我目前沒辦法回答）",
-      timestamp: new Date().toLocaleString("zh-TW"),
-      dateKey: toDateKey(new Date(nowTs)),
-    };
-    conversations.value.push(newConversation); // ★ 改用 push，保持陣列「舊→新」
+
+    // 更新聊天記錄中的 bot 回覆
+    const messageIndex = conversations.value.findIndex(
+      (msg) => msg.id === nowTs
+    );
+    if (messageIndex !== -1) {
+      conversations.value[messageIndex].bot =
+        botResponse || "（親愛的:您的問題我目前沒辦法回答）";
+      conversations.value[messageIndex].isLoading = false;
+    }
+
     latestResponse.value = botResponse || "（親愛的:您的問題我目前沒辦法回答）";
     saveConversations();
 
-    // 如果當前在歷史記錄頁面，確保新訊息可見
-    if (showHistoryPage.value) {
-      // 重置到第一頁以顯示最新訊息
-      currentPage.value = 1;
-      // 滾動到最新訊息
-      nextTick(() => {
-        setTimeout(() => {
-          scrollToBottom();
-          historyInputRef.value?.focus(); // ★ 新增：送出後讓使用者可連續輸入
-        }, 100);
-      });
-    }
-
-    console.log("文字輸入處理完成:", newConversation);
+    console.log("文字輸入處理完成:", userMessage);
   } catch (error) {
     console.error("API 調用錯誤:", error);
     const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
-    const errorConversation = {
-      id: Date.now(),
-      ts: Date.now(),
-      user: input,
-      bot: errorResponse,
-      timestamp: new Date().toLocaleString("zh-TW"),
-      dateKey: toDateKey(new Date()),
-    };
 
-    conversations.value.push(errorConversation);
+    // 更新聊天記錄中的錯誤回覆
+    const messageIndex = conversations.value.findIndex(
+      (msg) => msg.id === nowTs
+    );
+    if (messageIndex !== -1) {
+      conversations.value[messageIndex].bot = errorResponse;
+      conversations.value[messageIndex].isLoading = false;
+    }
+
     latestResponse.value = errorResponse;
     saveConversations();
-
-    // 如果當前在歷史記錄頁面，確保新訊息可見
-    if (showHistoryPage.value) {
-      currentPage.value = 1;
-      nextTick(() => {
-        setTimeout(() => {
-          scrollToBottom();
-          historyInputRef.value?.focus();
-        }, 100);
-      });
-    }
-  } finally {
-    isLoading.value = false;
   }
 }
 
-// 本地儲存對話記錄
+// 本地儲存對話記錄（現在主要用於日曆數據更新）
 const saveConversations = () => {
   if (process.client) {
-    localStorage.setItem(
-      "chatConversations",
-      JSON.stringify(conversations.value)
-    );
     // 更新日曆數據
     loadCalendarDates();
   }
 };
 
-// 載入本地對話記錄
-const loadConversations = () => {
+// 載入對話記錄（從 API 獲取）
+const loadConversations = async () => {
   if (process.client) {
-    const saved = localStorage.getItem("chatConversations");
-    if (saved) {
-      try {
-        const raw = JSON.parse(saved);
-        console.log("載入原始對話記錄:", raw);
+    // 從 API 獲取聊天記錄
+    await fetchChatHistory();
 
-        // 統一補上 dateKey
-        conversations.value = raw
-          .map((c) => {
-            const ts = c.ts ?? c.id ?? Date.now(); // 舊資料沒有 ts，就用 id（你本來就用 Date.now() 當 id）
-            return {
-              ...c,
-              ts,
-              dateKey: c.dateKey || toDateKey(new Date(ts)),
-            };
-          })
-          .sort((a, b) => a.ts - b.ts); // 保證陣列舊→新
-
-        latestResponse.value =
-          conversations.value[conversations.value.length - 1]?.bot || "";
-
-        console.log("處理後的對話記錄:", conversations.value);
-
-        loadCalendarDates();
-
-        // 初始化日曆顯示月份為最新有記錄的月份
-        if (conversations.value.length > 0) {
-          // 使用 nextTick 確保 calendarDateKeySet 已更新
-          nextTick(() => {
-            const latestDate = maxHistoryDate.value;
-            if (latestDate) {
-              visibleMonth.value = latestDate.getMonth();
-              visibleYear.value = latestDate.getFullYear();
-              console.log(
-                `初始化日曆顯示月份: ${visibleYear.value}/${
-                  visibleMonth.value + 1
-                }`
-              );
-            }
-          });
+    // 初始化日曆顯示月份為最新有記錄的月份
+    if (conversations.value.length > 0) {
+      // 使用 nextTick 確保 calendarDateKeySet 已更新
+      nextTick(() => {
+        const latestDate = maxHistoryDate.value;
+        if (latestDate) {
+          visibleMonth.value = latestDate.getMonth();
+          visibleYear.value = latestDate.getFullYear();
+          console.log(
+            `初始化日曆顯示月份: ${visibleYear.value}/${visibleMonth.value + 1}`
+          );
         }
-      } catch (e) {
-        if (process.client) {
-          console.error("載入對話記錄失敗:", e);
-        }
-      }
+      });
     }
   }
 };
@@ -3912,6 +3973,10 @@ const highlightKeyword = (text, keyword) => {
 const showCharacterModal = () => {
   if (process.client) {
     showCharacterSelection.value = true;
+    // 初始化 Swiper 到當前選中的角色
+    nextTick(() => {
+      initSwiperToCurrentCharacter();
+    });
   }
 };
 
@@ -3925,6 +3990,26 @@ const closeCharacterModal = () => {
 const toggleStyleExpansion = () => {
   if (process.client) {
     isStyleExpanded.value = !isStyleExpanded.value;
+  }
+};
+
+// Swiper 滑動事件處理
+const onSlideChange = (swiper) => {
+  const activeIndex = swiper.activeIndex;
+  const character = availableCharacters.value[activeIndex];
+  if (character) {
+    selectCharacter(character);
+  }
+};
+
+// 角色點擊事件處理
+const onCharacterClick = (character) => {
+  const characterIndex = availableCharacters.value.findIndex(
+    (c) => c.id === character.id
+  );
+  if (characterIndex !== -1 && characterSwiperRef.value) {
+    // 滑動到選中的角色並置中
+    characterSwiperRef.value.$el.swiper.slideTo(characterIndex);
   }
 };
 
@@ -3979,6 +4064,25 @@ const confirmCharacterSelection = () => {
       currentCharacter.value.customName || currentCharacter.value.displayName
     );
     console.log("當前頭貼:", currentCharacter.value.avatar);
+  }
+};
+
+// 初始化 Swiper 到當前選中的角色
+const initSwiperToCurrentCharacter = () => {
+  if (process.client && characterSwiperRef.value && currentCharacter.value) {
+    const characterIndex = availableCharacters.value.findIndex(
+      (c) => c.id === currentCharacter.value.id
+    );
+    if (characterIndex !== -1) {
+      // 等待 Swiper 初始化完成後滑動到指定位置
+      nextTick(() => {
+        setTimeout(() => {
+          if (characterSwiperRef.value && characterSwiperRef.value.$el) {
+            characterSwiperRef.value.$el.swiper.slideTo(characterIndex, 0);
+          }
+        }, 100);
+      });
+    }
   }
 };
 
@@ -4047,13 +4151,21 @@ const confirmNameInput = () => {
 
 // --- 日期工具：統一成 YYYY-MM-DD ---
 const toDateKey = (input) => {
-  if (input instanceof Date) return input.toISOString().slice(0, 10);
+  if (input instanceof Date) {
+    // 使用本地時間避免時區問題
+    const year = input.getFullYear();
+    const month = String(input.getMonth() + 1).padStart(2, "0");
+    const day = String(input.getDate()).padStart(2, "0");
+    const result = `${year}-${month}-${day}`;
+    console.log(`toDateKey (Date): ${input} → ${result}`);
+    return result;
+  }
   // input 可能是 "2025/8/20 下午 2:20:33" → 取前半段日期、轉成 YYYY-MM-DD
   const first = String(input).split(" ")[0]; // 2025/8/20
   const [y, m, d] = first.split("/");
   const pad = (n) => String(n).padStart(2, "0");
   const result = `${String(y).padStart(4, "0")}-${pad(m)}-${pad(d)}`;
-  console.log(`toDateKey: ${input} → ${result}`);
+  console.log(`toDateKey (String): ${input} → ${result}`);
   return result;
 };
 
