@@ -94,8 +94,8 @@ const setActiveTabFromRoute = () => {
     case "/service":
       activeTab.value = "services";
       break;
-    case "/UsageHistory" :
-      case "/HRVHistory":
+    case "/UsageHistory":
+    case "/HRVHistory":
       activeTab.value = "record";
       break;
     case "/robot":
@@ -105,8 +105,8 @@ const setActiveTabFromRoute = () => {
       activeTab.value = "shop";
       break;
     case "/member":
-      case "/point":
-      case "/package":
+    case "/point":
+    case "/package":
       activeTab.value = "member";
       break;
     default:
@@ -138,12 +138,12 @@ onMounted(() => {
   bottom: 0;
   left: 0;
   right: 0;
-  background: #F5F7FA;
+  background: #f5f7fa;
   display: grid;
   grid-auto-flow: column;
   grid-template-columns: repeat(3, 1fr);
-  padding: 12px 0;
-  padding-bottom: 24px;
+  padding-top: 4px;
+  padding-bottom: 34px;
   border-top: 1px solid $raphael-white;
   z-index: 100;
 
@@ -155,7 +155,7 @@ onMounted(() => {
     color: #4a5568;
     cursor: pointer;
     transition: all 0.3s ease;
-    padding: 8px;
+    padding: 1.5px 0;
     border-radius: 15px;
 
     &.active {
