@@ -1,4 +1,6 @@
 <template>
+  <!-- 首次解說 -->
+   
   <div class="chat-wrapper">
     <!-- 聊天頭部 -->
     <div class="chat-header">
@@ -39,6 +41,7 @@
         <button class="control-btn history-btn" @click="showHistory">
           <img :src="timeSvg" alt="歷史紀錄" />
         </button>
+       
         <button
           class="control-btn mic-btn"
           :class="{ listening: isListening }"
@@ -191,12 +194,22 @@
               <div class="style-grid" :class="{ expanded: isStyleExpanded }">
                 <div
                   v-for="style in visibleStyles"
-                  :key="style.id"
+                  :key="`${currentCharacter.id}-${style.id}`"
                   class="style-item"
-                  :class="{ active: currentCharacter.styleId === style.id }"
+                  :class="{
+                    active: currentCharacter.styleId === style.id,
+                    locked: style.locked,
+                  }"
                   @click="selectStyle(style)"
                 >
-                  <img :src="style.thumbnail" alt="造型" />
+                  <div v-if="style.locked" class="style-locked">
+                    <img :src="lockSvg" alt="鎖定" class="lock-icon" />
+                  </div>
+                  <img
+                    :src="style.thumbnail"
+                    alt="造型"
+                    :class="{ 'locked-image': style.locked }"
+                  />
                 </div>
               </div>
             </div>
@@ -225,11 +238,35 @@
                 v-for="character in availableCharacters"
                 :key="character.id"
                 class="character-option"
-                :class="{ selected: currentCharacter.id === character.id }"
+                :class="{
+                  selected: currentCharacter.id === character.id,
+                  locked: isCharacterLocked(character),
+                }"
                 @click="onCharacterClick(character)"
               >
                 <div class="character-circle">
-                  <img :src="character.avatar" alt="角色" />
+                  <!-- Loading 效果 -->
+                  <div
+                    v-if="characterImageLoading.has(character.id)"
+                    class="character-loading"
+                  >
+                    <div class="loading-spinner"></div>
+                  </div>
+                  <!-- 鎖定效果 -->
+                  <div
+                    v-if="isCharacterLocked(character)"
+                    class="character-locked"
+                  >
+                    <img :src="lockSvg" alt="鎖定" class="lock-icon" />
+                  </div>
+                  <!-- 角色圖片 -->
+                  <img
+                    :src="character.avatar"
+                    alt="角色"
+                    :class="{ 'locked-image': isCharacterLocked(character) }"
+                    @load="onCharacterImageLoad(character.id)"
+                    @error="onCharacterImageError(character.id)"
+                  />
                 </div>
               </swiper-slide>
             </swiper>
@@ -457,7 +494,8 @@
             v-model="characterNameInput"
             type="text"
             class="name-input-field"
-            placeholder="請輸入角色名稱"
+            placeholder="例如：嗨嗨嗨"
+            maxlength="10"
             @keyup.enter="confirmNameInput"
             ref="nameInputRef"
           />
@@ -513,6 +551,25 @@
         </div>
       </div>
     </transition>
+
+    <!-- 角色選擇離開確認彈窗 -->
+    <Alert
+      v-if="showCharacterExitConfirm"
+      default-content="現在離開的話，不會變更角色喔"
+      :show-click-button="true"
+      click-button-text="離開"
+      @click="confirmCharacterExit"
+      @close="cancelCharacterExit"
+    />
+
+    <!-- 近期推出彈窗 -->
+    <Alert
+      v-if="showComingSoon"
+      default-content="此角色即將推出，敬請期待！"
+ 
+
+      @close="closeComingSoonModal"
+    />
   </div>
 </template>
 
@@ -641,7 +698,7 @@
   flex: 1;
   width: 100%;
   height: 0;
-  padding-bottom: 83px;
+  padding-bottom: 97px;
 
   .character-image {
     height: 100%;
@@ -1684,6 +1741,12 @@
           margin: 0.5rem 0.5rem 0;
           overflow: hidden;
           transition: all 0.3s ease;
+          position: relative;
+
+          &.locked {
+            cursor: not-allowed;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+          }
 
           &:hover,
           &:active {
@@ -1692,7 +1755,34 @@
 
           img {
             width: 100%;
+        
             object-fit: cover;
+          }
+
+          .style-locked {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(3.5px);
+            border-radius: 50%;
+            z-index: 2;
+
+            .lock-icon {
+              width: 16px;
+              height: 16px;
+              filter: brightness(0) saturate(100%) invert(20%) sepia(0%)
+                saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%);
+            }
+          }
+
+          .locked-image {
+            filter: blur(3.5px);
           }
         }
 
@@ -1794,9 +1884,9 @@
           height: 100px;
           cursor: pointer;
           border: none;
-
           overflow: hidden;
           transition: all 0.3s ease;
+          position: relative;
 
           &:hover,
           &:active {
@@ -1804,8 +1894,56 @@
           }
 
           img {
-            width: 100%;
             object-fit: cover;
+            border-radius: 50%;
+          }
+
+          .character-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(31, 188, 179, 0.2);
+            border-radius: 50%;
+
+            .loading-spinner {
+              width: 24px;
+              height: 24px;
+              border: 3px solid rgba(116, 188, 31, 0.3);
+              border-top: 3px solid $raphael-green-400;
+              border-radius: 50%;
+              animation: spin 1s linear infinite;
+            }
+          }
+
+          .character-locked {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(3.5px);
+            border-radius: 50%;
+            z-index: 2;
+
+            .lock-icon {
+              width: 20px;
+              height: 20px;
+              filter: brightness(0) saturate(100%) invert(20%) sepia(0%)
+                saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%);
+            }
+          }
+
+          .locked-image {
+            filter: blur(3.5px);
           }
         }
 
@@ -2087,6 +2225,8 @@ import soundSvg from "~/assets/imgs/robot/sound.svg";
 import assistantSoundGif from "~/assets/imgs/robot/assistantSound.gif";
 import assistantDefaultGif from "~/assets/imgs/robot/assistantDefault.gif";
 import loadingGif from "~/assets/imgs/robot/loading.gif";
+import lockSvg from "~/assets/imgs/robot/lock.svg";
+import Alert from "~/components/Alert.vue";
 import volumeSvg from "~/assets/imgs/robot/volume.svg";
 import mutedSvg from "~/assets/imgs/robot/muted.svg";
 import searchSvg from "~/assets/imgs/robot/search.svg";
@@ -2107,7 +2247,16 @@ const historyInputRef = ref(null);
 const swiperModules = [Pagination];
 const characterSwiperRef = ref(null);
 
+// 角色圖片載入狀態
+const characterImageLoading = ref(new Set());
+
+// 檢查角色是否被鎖定
+const isCharacterLocked = (character) => {
+  return character.locked === true;
+};
+
 // 響應式狀態
+const router = useRouter();
 const isListening = ref(false);
 const isLoading = ref(false);
 const conversations = ref([]);
@@ -2176,8 +2325,17 @@ const localData = localStorage.getItem("userData");
 const localobj = localData ? JSON.parse(localData) : null;
 console.log("localobj=", localobj?.Mobile);
 
+if(!localData)
+{
+  router.push("/");
+}
+
+
 // 角色選擇相關狀態
 const showCharacterSelection = ref(false); // 顯示角色選擇彈窗
+const showComingSoon = ref(false); // 顯示近期推出彈窗
+const showCharacterExitConfirm = ref(false); // 顯示角色選擇離開確認彈窗
+const tempSelectedCharacter = ref(null); // 臨時選擇的角色
 const isStyleExpanded = ref(false); // 造型是否展開
 
 // 角色命名相關狀態
@@ -2272,8 +2430,8 @@ const availableCharacters = ref([
       { id: 2, thumbnail: doctor2, fullImage: doctor2 },
       { id: 3, thumbnail: doctor3, fullImage: doctor3 },
       { id: 4, thumbnail: doctor4, fullImage: doctor4 },
-      { id: 5, thumbnail: doctor5, fullImage: doctor5 },
-      { id: 6, thumbnail: doctor6, fullImage: doctor6 },
+      { id: 5, thumbnail: doctor5, fullImage: doctor5, locked: true },
+      { id: 6, thumbnail: doctor6, fullImage: doctor6, locked: true },
     ],
   },
   {
@@ -2291,7 +2449,7 @@ const availableCharacters = ref([
     styles: [
       { id: 1, thumbnail: girl1_1, fullImage: girl1_1 },
       { id: 2, thumbnail: girl1_2, fullImage: girl1_2 },
-      { id: 3, thumbnail: girl1_3, fullImage: girl1_3 },
+      { id: 3, thumbnail: girl1_3, fullImage: girl1_3, locked: true },
     ],
   },
   {
@@ -2308,7 +2466,7 @@ const availableCharacters = ref([
     },
     styles: [
       { id: 1, thumbnail: girl2_1, fullImage: girl2_1 },
-      { id: 2, thumbnail: girl2_2, fullImage: girl2_2 },
+      { id: 2, thumbnail: girl2_2, fullImage: girl2_2, locked: true },
     ],
   },
   {
@@ -2411,7 +2569,7 @@ const availableCharacters = ref([
     styles: [
       { id: 1, thumbnail: man3_1, fullImage: man3_1 },
       { id: 2, thumbnail: man3_2, fullImage: man3_2 },
-      { id: 3, thumbnail: man3_3, fullImage: man3_3 },
+      { id: 3, thumbnail: man3_3, fullImage: man3_3, locked: true },
     ],
   },
   {
@@ -3044,15 +3202,15 @@ const startVoiceTimeout = () => {
   }
   voiceTimeout = setTimeout(() => {
     if (isListening.value && !currentTranscript.value.trim()) {
+      // 3秒沒聲音直接顯示有關閉按鈕的提示
       showVoiceError.value = true;
-      // 切換到預設圖片
       voiceModalImageSrc.value = assistantDefaultGif;
+      isListening.value = false; // 停止語音識別
       if (process.client) {
         recognitionRef?.stop();
-        isListening.value = false;
       }
     }
-  }, 5000); // 5秒超時
+  }, 3000); // 3秒超時顯示提示
 };
 
 // 獲取聊天記錄
@@ -3179,19 +3337,27 @@ const initSpeechRecognition = () => {
           switch (event.error) {
             case "not-allowed":
               alert("請允許麥克風權限以使用語音功能");
+              closeVoiceModal();
               break;
             case "no-speech":
             case "audio-capture":
-              showVoiceError.value = true;
-              voiceModalImageSrc.value = assistantDefaultGif;
+              // 如果還沒有顯示錯誤提示，則顯示
+              if (!showVoiceError.value) {
+                showVoiceError.value = true;
+                voiceModalImageSrc.value = assistantDefaultGif;
+              }
               break;
             case "network":
               alert("網路連接問題，請檢查網路後重試");
+              closeVoiceModal();
               break;
             default:
               if (event.error !== "aborted") {
-                showVoiceError.value = true;
-                voiceModalImageSrc.value = assistantDefaultGif;
+                // 如果還沒有顯示錯誤提示，則顯示
+                if (!showVoiceError.value) {
+                  showVoiceError.value = true;
+                  voiceModalImageSrc.value = assistantDefaultGif;
+                }
               }
           }
         }
@@ -3200,10 +3366,13 @@ const initSpeechRecognition = () => {
       recognitionRef.onend = () => {
         if (process.client) {
           isListening.value = false;
-          // 如果沒有語音輸入且沒有轉錄內容，顯示錯誤提示
-          if (!currentTranscript.value.trim()) {
+          // 如果有語音輸入內容，處理後關閉視窗
+          if (currentTranscript.value.trim()) {
+            handleSpeechEnd(currentTranscript.value);
+            closeVoiceModal();
+          } else {
+            // 沒有語音輸入，顯示錯誤提示但不關閉視窗
             showVoiceError.value = true;
-            // 切換到預設圖片
             voiceModalImageSrc.value = assistantDefaultGif;
           }
         }
@@ -3973,6 +4142,10 @@ const highlightKeyword = (text, keyword) => {
 const showCharacterModal = () => {
   if (process.client) {
     showCharacterSelection.value = true;
+    // 初始化臨時選擇狀態為當前角色
+    tempSelectedCharacter.value = { ...currentCharacter.value };
+    // 初始化角色圖片載入狀態
+    initCharacterImageLoading();
     // 初始化 Swiper 到當前選中的角色
     nextTick(() => {
       initSwiperToCurrentCharacter();
@@ -3982,8 +4155,55 @@ const showCharacterModal = () => {
 
 const closeCharacterModal = () => {
   if (process.client) {
+    // 獲取原始保存的角色
+    const savedCharacter = localStorage.getItem("selectedCharacter")
+      ? JSON.parse(localStorage.getItem("selectedCharacter"))
+      : { id: "doctor", styleId: "doctor1" };
+
+    // 檢查臨時選擇的角色是否與保存的角色不同
+    const hasUnsavedChanges =
+      tempSelectedCharacter.value &&
+      (tempSelectedCharacter.value.id !== savedCharacter.id ||
+        tempSelectedCharacter.value.styleId !== savedCharacter.styleId);
+
+    if (hasUnsavedChanges) {
+      showCharacterExitConfirm.value = true;
+    } else {
+      showCharacterSelection.value = false;
+      isStyleExpanded.value = false;
+      tempSelectedCharacter.value = null;
+    }
+  }
+};
+
+// 近期推出彈窗相關函數
+const showComingSoonModal = () => {
+  if (process.client) {
+    showComingSoon.value = true;
+  }
+};
+
+const closeComingSoonModal = () => {
+  if (process.client) {
+    showComingSoon.value = false;
+  }
+};
+
+// 角色選擇離開確認彈窗相關函數
+const confirmCharacterExit = () => {
+  if (process.client) {
+    // 不保存變更，重置為原始角色
+    currentCharacter.value = { ...tempSelectedCharacter.value };
+    showCharacterExitConfirm.value = false;
     showCharacterSelection.value = false;
     isStyleExpanded.value = false;
+    tempSelectedCharacter.value = null;
+  }
+};
+
+const cancelCharacterExit = () => {
+  if (process.client) {
+    showCharacterExitConfirm.value = false;
   }
 };
 
@@ -3998,18 +4218,33 @@ const onSlideChange = (swiper) => {
   const activeIndex = swiper.activeIndex;
   const character = availableCharacters.value[activeIndex];
   if (character) {
-    selectCharacter(character);
+    // 更新臨時選擇狀態
+    tempSelectedCharacter.value = { ...character };
+    // 更新顯示的角色圖片
+    currentCharacter.value = { ...character };
+    characterImageSrc.value = character.fullImage;
   }
 };
 
 // 角色點擊事件處理
 const onCharacterClick = (character) => {
+  // 如果是鎖定的角色，顯示"近期推出"彈窗
+  if (isCharacterLocked(character)) {
+    showComingSoonModal();
+    return;
+  }
+
   const characterIndex = availableCharacters.value.findIndex(
     (c) => c.id === character.id
   );
   if (characterIndex !== -1 && characterSwiperRef.value) {
     // 滑動到選中的角色並置中
     characterSwiperRef.value.$el.swiper.slideTo(characterIndex);
+    // 更新臨時選擇狀態
+    tempSelectedCharacter.value = { ...character };
+    // 更新顯示的角色圖片
+    currentCharacter.value = { ...character };
+    characterImageSrc.value = character.fullImage;
   }
 };
 
@@ -4039,6 +4274,21 @@ const selectCharacter = (character) => {
 
 const selectStyle = (style) => {
   if (process.client) {
+    console.log("選擇樣式:", style.id, "鎖定狀態:", style.locked);
+    // 如果是鎖定的樣式，顯示"近期推出"彈窗
+    if (style.locked) {
+      showComingSoonModal();
+      return;
+    }
+
+    // 更新臨時選擇狀態
+    if (tempSelectedCharacter.value) {
+      tempSelectedCharacter.value.styleId = style.id;
+      tempSelectedCharacter.value.avatar = style.thumbnail;
+      tempSelectedCharacter.value.fullImage = style.fullImage;
+    }
+
+    // 更新顯示的角色圖片
     currentCharacter.value.styleId = style.id;
     currentCharacter.value.avatar = style.thumbnail; // 更新頭貼為選中樣式的縮圖
     currentCharacter.value.fullImage = style.fullImage;
@@ -4049,15 +4299,25 @@ const selectStyle = (style) => {
 
 const confirmCharacterSelection = () => {
   if (process.client) {
+    // 確認保存臨時選擇的角色
+    if (tempSelectedCharacter.value) {
+      currentCharacter.value = { ...tempSelectedCharacter.value };
+    }
+
     // 更新角色圖片路徑
     characterImageSrc.value = currentCharacter.value.fullImage;
-    // 關閉彈窗
-    closeCharacterModal();
+
     // 保存到本地存儲
     localStorage.setItem(
       "selectedCharacter",
       JSON.stringify(currentCharacter.value)
     );
+
+    // 關閉彈窗
+    showCharacterSelection.value = false;
+    isStyleExpanded.value = false;
+    tempSelectedCharacter.value = null;
+
     // 可以添加成功提示或其他確認邏輯
     console.log(
       "角色選擇已確認:",
@@ -4065,6 +4325,23 @@ const confirmCharacterSelection = () => {
     );
     console.log("當前頭貼:", currentCharacter.value.avatar);
   }
+};
+
+// 角色圖片載入事件處理
+const onCharacterImageLoad = (characterId) => {
+  characterImageLoading.value.delete(characterId);
+};
+
+const onCharacterImageError = (characterId) => {
+  characterImageLoading.value.delete(characterId);
+  console.error(`角色圖片載入失敗: ${characterId}`);
+};
+
+// 初始化角色圖片載入狀態
+const initCharacterImageLoading = () => {
+  availableCharacters.value.forEach((character) => {
+    characterImageLoading.value.add(character.id);
+  });
 };
 
 // 初始化 Swiper 到當前選中的角色
@@ -4104,7 +4381,9 @@ const showNameInputModal = () => {
 const closeNameInput = () => {
   if (process.client) {
     showNameInput.value = false;
-    characterNameInput.value = "";
+    // 重置為原始名稱，不儲存修改
+    characterNameInput.value =
+      currentCharacter.value.customName || currentCharacter.value.displayName;
     nameInputError.value = "";
   }
 };
