@@ -767,7 +767,7 @@ left: 50%;
   flex: 1;
   width: 100%;
   height: 0;
-  padding-bottom: 97px;
+  padding-bottom: 84px;
 
   .character-image {
     height: 100%;
