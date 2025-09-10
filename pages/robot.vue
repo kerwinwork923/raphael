@@ -1403,6 +1403,7 @@
   justify-content: space-between;
   gap: 16px;
   @include neumorphismOuter($radius: 20px, $padding: 8px 12px);
+  margin: 0 1rem;
 }
 
 .history-text-input {
