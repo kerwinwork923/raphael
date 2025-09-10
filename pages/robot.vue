@@ -1254,11 +1254,12 @@
     flex-direction: column;
     gap: 24px;
     flex: 1;
-    padding: 16px;
+
     padding-bottom: 56px;
     background: transparent;
     min-height: 0; /* 讓 flex 子項可以縮、才捲得動 */
     .history-list {
+      padding: 16px;
       flex: 1;
       min-height: 0;
       padding-bottom: 16px;

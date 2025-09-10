@@ -99,21 +99,21 @@ export default {
 
       // 1) 檢查身高
       const isInteger = (value) => Number.isInteger(parseInt(value, 10));
-      if (!isInteger(localData.Height) || parseInt(localData.Height) <= 0) {
+      if (!isInteger(localData.Member.Height) || parseInt(localData.Member.Height) <= 0) {
         alert("您的身高格式不正確，請修改會員資料");
         window.location.href = "/changeMember";
         return;
       }
 
       // 2) 檢查體重
-      if (!isInteger(localData.Weight) || parseInt(localData.Weight) <= 0) {
+      if (!isInteger(localData.Member.Weight) || parseInt(localData.Member.Weight) <= 0) {
         alert("您的體重格式不正確，請修改會員資料");
         window.location.href = "/changeMember";
         return;
       }
 
       // 3) 檢查生日
-      const birthdayParts = localData.Birthday.split("/");
+      const birthdayParts = localData.Member.Birthday.split("/");
       if (
         birthdayParts.length !== 3 ||
         parseInt(birthdayParts[0]) <= 0 ||
@@ -121,7 +121,7 @@ export default {
         parseInt(birthdayParts[1]) > 12 ||
         parseInt(birthdayParts[2]) < 1 ||
         parseInt(birthdayParts[2]) > 31 ||
-        isNaN(calculateAge(localData.Birthday))
+        isNaN(calculateAge(localData.Member.Birthday))
       ) {
         alert("生日格式不正確或包含無效日期，請修改會員資料。");
         window.location.href = "/changeMember";
@@ -129,7 +129,7 @@ export default {
       }
 
       // 4) 檢查性別
-      let scanAge = parseInt(localData.Sex);
+      let scanAge = parseInt(localData.Member.Sex);
       if (scanAge !== 1 && scanAge !== 2 && scanAge !== 0) {
         alert("性別格式不正確，請修改會員資料。");
         window.location.href = "/changeMember";
@@ -141,7 +141,7 @@ export default {
 
       // 5) 檢查高血壓分組
       const validDSPRValues = ["normal", "prehypertension", "hypertension"];
-      if (!validDSPRValues.includes(localData.DSPR)) {
+      if (!validDSPRValues.includes(localData.Member.DSPR)) {
         store.showDSPRSelect = true; // 顯示選擇彈窗
         handleCloseHRVAlert();
         return;
@@ -149,14 +149,14 @@ export default {
 
       // 6) 組裝要傳給 /vital/scan.html 的參數
       const convertedData = {
-        age: calculateAge(localData.Birthday),
-        bp_group: localData.DSPR,
+        age: calculateAge(localData.Member.Birthday),
+        bp_group: localData.Member.DSPR,
         bp_mode: "ternary",
         facing_mode: "user",
-        height: parseInt(localData.Height),
+        height: parseInt(localData.Member.Height),
         sex: scanAge,
-        weight: parseInt(localData.Weight),
-        time: parseInt(localData.HRVCalTime) || 2,
+        weight: parseInt(localData.Member.Weight),
+        time: parseInt(localData.Member.HRVCalTime) || 2,
       };
 
       // 存到 sessionStorage
