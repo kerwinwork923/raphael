@@ -1,20 +1,40 @@
 <template>
-  <!-- 首次解說 -->
-   
   <div class="chat-wrapper">
+    <!-- 首次解說覆蓋層 -->
+    <div v-if="showTutorial" class="tutorial-overlay" @click="closeTutorial">
+      <div class="tutorial-content">
+        <div class="tutorial-text">任意點擊關閉</div>
+      </div>
+    </div>
+
     <!-- 聊天頭部 -->
     <div class="chat-header">
-      <div class="avatar-container" @click="showCharacterModal">
+      <div
+        v-if="showTutorial && currentTutorialStep === 4"
+        class="overZIndex firstText firstText4"
+      >
+        這裡可以切換角色以及幫角色取名字
+      </div>
+      <div
+        class="avatar-container"
+        :class="{ overZIndex: showTutorial && currentTutorialStep === 4 }"
+        @click="showCharacterModal"
+      >
         <img class="avatar" :src="currentCharacter.avatar" alt="角色頭像" />
       </div>
-      <div class="character-name-btn" @click="showCharacterModal">
+      <div
+        class="character-name-btn"
+        :class="{ overZIndex: showTutorial && currentTutorialStep === 4 }"
+        @click="showCharacterModal"
+      >
         <span>{{ currentCharacter.customName || currentCharacter.name }}</span>
         <img :src="recycleSvg" alt="刷新" />
       </div>
     </div>
 
     <!-- 初始對話氣泡 -->
-    <div class="greeting-bubble">
+    <div class="greeting-bubble" :class="{ overZIndex: showTutorial && currentTutorialStep === 5 }">
+      <div  v-if="showTutorial && currentTutorialStep === 5" class="firstText firstText5">這裡可以看到回應的訊息</div>
       <div v-if="isLoading" class="loading-indicator">
         <div class="spinner"></div>
         <span>思考中...</span>
@@ -37,11 +57,28 @@
 
     <!-- 語音控制區域 - 從下方彈出 -->
     <transition name="slide-up">
-      <div v-if="showVoiceControls" class="voice-control-bar">
-        <button class="control-btn history-btn" @click="showHistory">
+      <div v-if="showVoiceControls" class="voice-control-bar" :class="{ overZIndex: showTutorial && currentTutorialStep === 1 || showTutorial && currentTutorialStep === 2 || showTutorial && currentTutorialStep === 3 }">
+        <button class="control-btn history-btn" @click="showHistory" >
           <img :src="timeSvg" alt="歷史紀錄" />
         </button>
-       
+        <div
+          v-if="showTutorial && currentTutorialStep === 1"
+          class="firstText firstText1"
+        >
+          這裡可以進行對話
+        </div>
+        <div
+          v-if="showTutorial && currentTutorialStep === 2"
+          class="firstText firstText2"
+        >
+          可自行關閉聲音
+        </div>
+        <div
+          v-if="showTutorial && currentTutorialStep === 3"
+          class="firstText firstText3"
+        >
+          這裡可以切換成文字對話
+        </div>
         <button
           class="control-btn mic-btn"
           :class="{ listening: isListening }"
@@ -566,8 +603,6 @@
     <Alert
       v-if="showComingSoon"
       default-content="此角色即將推出，敬請期待！"
- 
-
       @close="closeComingSoonModal"
     />
   </div>
@@ -590,7 +625,23 @@
   position: relative;
   gap: 10px;
   padding: 0 1rem;
-
+  position: relative;
+  .firstText4 {
+    left: 170px;
+    top: 200%;
+    //製作往上的正三角色
+    &::after {
+      content: "";
+      position: absolute;
+      top: -7px; // 箭頭接在泡泡的「上緣」外側
+      left: 25%; // 視需要微調水平位置
+      width: 0;
+      height: 0;
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-bottom: 8px solid #fff; 
+    }
+  }
   .avatar-container {
     width: 44px;
     height: 44px;
@@ -648,6 +699,24 @@
   align-items: baseline;
   margin-top: 1rem;
   padding: 0 1rem;
+
+  .firstText5 {
+left: 50%;
+  bottom: -77.5%;
+    //製作往上的正三角色
+    &::after {
+      content: "";
+      position: absolute;
+      top: -7px; // 箭頭接在泡泡的「上緣」外側
+      left: 50%; // 視需要微調水平位置
+      width: 0;
+      height: 0;
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-bottom: 8px solid #fff; 
+      transform: translateX(-50%);
+    }
+  }
 }
 
 .greeting-bubble .loading-indicator {
@@ -718,6 +787,56 @@
   gap: 20px;
   @include liquidGlass();
   z-index: 10;
+
+  .firstText1 {
+    top: -50%;
+    left: 50%;
+    //三角形
+    &::after{
+      content: "";
+      position: absolute;
+      bottom: -7px;
+      left: 50%; 
+      width: 0;
+      height: 0;
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-top: 8px solid #fff; 
+      transform: translateX(-50%);
+    }
+  }
+  .firstText2 {
+    top: -50%;
+    left: 83%;
+    &::after{
+      content: "";
+      position: absolute;
+      bottom: -7px;
+      left: 50%; 
+      width: 0;
+      height: 0;
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-top: 8px solid #fff; 
+      transform: translateX(-50%);
+    }
+  }
+  .firstText3 {
+    top: -50%;
+    left: 13%;
+    &::after{
+      content: "";
+      position: absolute;
+      bottom: -7px;
+      left: 50%; 
+      width: 0;
+      height: 0;
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-top: 8px solid #fff; 
+      transform: translateX(-50%);
+    }
+  }
 
   .control-btn {
     position: relative;
@@ -1757,7 +1876,7 @@
 
           img {
             width: 100%;
-        
+
             object-fit: cover;
           }
 
@@ -2205,6 +2324,54 @@
     }
   }
 }
+
+.firstText {
+  position: absolute;
+
+  border-radius: var(--Radius-r-20, 20px);
+  background: var(--Neutral-white, #fff);
+  padding: 1rem;
+  transform: translate(-50%, -50%);
+
+  white-space: nowrap;
+}
+.overZIndex {
+  z-index: 10000;
+}
+
+/* 首次登入解說覆蓋層樣式 */
+.tutorial-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(10px);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.tutorial-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.tutorial-text {
+  color: #fff;
+  text-align: center;
+  font-size: var(--Text-font-size-20, 20px);
+  font-style: normal;
+  font-weight: 700;
+  line-height: 120%; /* 24px */
+  pointer-events: none;
+}
 </style>
 
 <script setup>
@@ -2273,6 +2440,11 @@ const showAudioError = ref(false);
 const isManuallyStopped = ref(false);
 const showHistoryPage = ref(false);
 const showVoiceError = ref(false);
+
+// 首次登入解說相關狀態
+const showTutorial = ref(false);
+const currentTutorialStep = ref(1);
+const tutorialSteps = [1, 2, 3, 4 ,5]; // 解說步驟順序
 import doctor from "~/assets/imgs/robot/character/doctor.png";
 import doctor2 from "~/assets/imgs/robot/character/doctor2.png";
 import doctor3 from "~/assets/imgs/robot/character/doctor3.png";
@@ -2327,11 +2499,9 @@ const localData = localStorage.getItem("userData");
 const localobj = localData ? JSON.parse(localData) : null;
 console.log("localobj=", localobj?.Mobile);
 
-if(!localData)
-{
+if (!localData) {
   router.push("/");
 }
-
 
 // 角色選擇相關狀態
 const showCharacterSelection = ref(false); // 顯示角色選擇彈窗
@@ -2843,6 +3013,31 @@ const closeHistory = () => {
 
 const closeTextInput = () => {
   showTextInput.value = false;
+};
+
+// 首次登入解說相關函數
+const checkTutorialStatus = () => {
+  if (process.client) {
+    const hasSeenTutorial = localStorage.getItem("robotTutorialSeen");
+    if (!hasSeenTutorial) {
+      showTutorial.value = true;
+      currentTutorialStep.value = 1;
+    }
+  }
+};
+
+const closeTutorial = () => {
+  if (process.client) {
+    const currentIndex = tutorialSteps.indexOf(currentTutorialStep.value);
+    if (currentIndex < tutorialSteps.length - 1) {
+      // 如果還有下一步，切換到下一步
+      currentTutorialStep.value = tutorialSteps[currentIndex + 1];
+    } else {
+      // 如果是最後一步，關閉解說
+      showTutorial.value = false;
+      localStorage.setItem("robotTutorialSeen", "true");
+    }
+  }
 };
 
 // 處理歷史記錄滾動事件
@@ -3999,6 +4194,9 @@ onMounted(() => {
   if (process.client) {
     showVoiceControls.value = true;
   }
+
+  // 檢查首次登入解說狀態
+  checkTutorialStatus();
 
   // 添加調試函數到全局
   if (process.client) {
