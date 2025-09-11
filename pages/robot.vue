@@ -2500,6 +2500,7 @@ import pet3_1 from "~/assets/imgs/robot/character/pet3_1.png";
 import pet3_2 from "~/assets/imgs/robot/character/pet3_2.png";
 import pet4_1 from "~/assets/imgs/robot/character/pet4_1.png";
 import pet4_2 from "~/assets/imgs/robot/character/pet4_2.png";
+import pet4_3 from "~/assets/imgs/robot/character/pet4_3.png";
 
 const characterImageSrc = ref(doctor);
 
@@ -2886,6 +2887,7 @@ const availableCharacters = ref([
     styles: [
       { id: 1, thumbnail: pet4_1, fullImage: pet4_1 },
       { id: 2, thumbnail: pet4_2, fullImage: pet4_2 },
+      { id: 3, thumbnail: pet4_3, fullImage: pet4_3 },
     ],
   },
 ]);
