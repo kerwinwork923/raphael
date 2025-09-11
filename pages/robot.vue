@@ -2905,6 +2905,7 @@ const visibleStyles = computed(() => {
 
 let playbackConfirmed = false;
 let voiceTimeout = null; // 語音識別超時計時器
+let hasFinalResult = false; // 確保只處理一次 final
 
 // 語音識別和合成實例
 let recognitionRef = null;
@@ -3536,13 +3537,20 @@ const initSpeechRecognition = () => {
           currentTranscript.value = transcript;
         }
 
-        if (event.results[0].isFinal) {
-          // 清除超時計時器
-          if (voiceTimeout) {
-            clearTimeout(voiceTimeout);
-            voiceTimeout = null;
-          }
+        // 一旦拿到 final，就立刻關視窗 & 只處理一次
+        if (event.results[event.results.length - 1].isFinal && !hasFinalResult) {
+          hasFinalResult = true;
+          if (voiceTimeout) { clearTimeout(voiceTimeout); voiceTimeout = null; }
+
+          // 先關視窗（把顯示條件變成 false）
+          isListening.value = false;
+          showVoiceError.value = false;
+          closeVoiceModal();               // 立刻關掉 UI
+
+          // 再非同步送去處理（不要阻塞 UI）
           handleSpeechEnd(transcript);
+          // 可選：主動停止，確保一些瀏覽器會觸發 onend
+          try { recognitionRef.stop(); } catch {}
         }
       };
 
@@ -3593,23 +3601,16 @@ const initSpeechRecognition = () => {
       };
 
       recognitionRef.onend = () => {
-        if (process.client) {
+        // 若沒有拿到 final，就視為沒有聽到 → 顯示提示但保留視窗（你原本的行為）
+        if (!hasFinalResult) {
           isListening.value = false;
-          // 如果有語音輸入內容，處理後關閉視窗
-          if (currentTranscript.value.trim()) {
-            handleSpeechEnd(currentTranscript.value);
-            closeVoiceModal();
-          } else {
-            // 沒有語音輸入，顯示錯誤提示但不關閉視窗
-            showVoiceError.value = true;
-            voiceModalImageSrc.value = assistantDefaultGif;
-          }
+          showVoiceError.value = true;
+          voiceModalImageSrc.value = assistantDefaultGif;
         }
-        // 清除超時計時器
-        if (voiceTimeout) {
-          clearTimeout(voiceTimeout);
-          voiceTimeout = null;
-        }
+        // 重置旗標，準備下一次
+        hasFinalResult = false;
+
+        // 不要在 onend 再呼叫 handleSpeechEnd() 或 closeVoiceModal() 了
       };
     }
 
@@ -3851,7 +3852,10 @@ const toggleListening = () => {
     }
   } else {
     if (process.client) {
+      showVoiceError.value = false;      // 清掉錯誤狀態
+      voiceModalImageSrc.value = assistantSoundGif; // 重置圖片
       currentTranscript.value = "";
+      hasFinalResult = false;            // 重置旗標
       recognitionRef.start();
       isListening.value = true;
       // 開始3秒超時計時器
@@ -3898,9 +3902,6 @@ const handleSpeechEnd = async (transcript) => {
     }
 
     console.log("語音輸入處理完成:", newConversation);
-    
-    // 確保語音視窗關閉
-    closeVoiceModal();
   } catch (error) {
     console.error("API 調用錯誤:", error);
     const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
@@ -3914,9 +3915,6 @@ const handleSpeechEnd = async (transcript) => {
     conversations.value.push(errorConversation);
     latestResponse.value = errorResponse;
     saveConversations();
-    
-    // 確保語音視窗關閉
-    closeVoiceModal();
 
     // 如果當前在歷史記錄頁面，確保新訊息可見
     if (showHistoryPage.value) {
