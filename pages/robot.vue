@@ -25,7 +25,7 @@
       <div
         class="character-name-btn"
         :class="{ overZIndex: showTutorial && currentTutorialStep === 4 }"
-      @click="currentTutorialStep === 4 ? null : showCharacterModal()"
+        @click="currentTutorialStep === 4 ? null : showCharacterModal()"
       >
         <span>{{ currentCharacter.customName || currentCharacter.name }}</span>
         <img :src="recycleSvg" alt="刷新" />
@@ -155,7 +155,7 @@
 
     <!-- 錄音提示彈窗 -->
     <transition name="fade">
-      <div v-if="isListening || showVoiceError" class="voice-modal">
+      <div v-if="voiceModalOpen" class="voice-modal">
         <div class="voice-content" @click.stop>
           <img
             :src="voiceModalImageSrc"
@@ -2904,8 +2904,26 @@ const visibleStyles = computed(() => {
 });
 
 let playbackConfirmed = false;
+const voiceModalOpen = ref(false);
 let voiceTimeout = null; // 語音識別超時計時器
 let hasFinalResult = false; // 確保只處理一次 final
+let finalizedByUs = false;
+
+function clearVoiceTimeout() {
+  if (voiceTimeout) {
+    clearTimeout(voiceTimeout);
+    voiceTimeout = null;
+  }
+}
+
+function reallyCloseVoiceModal() {
+  clearVoiceTimeout();
+  isListening.value = false;
+  showVoiceError.value = false;
+  currentTranscript.value = "";
+  voiceModalImageSrc.value = assistantSoundGif;
+  voiceModalOpen.value = false; // ← 真正關窗
+}
 
 // 語音識別和合成實例
 let recognitionRef = null;
@@ -3008,9 +3026,9 @@ const setActiveTab = (tab) => {
 const showHistory = async () => {
   if (process.client) {
     showHistoryPage.value = true;
-    
+
     // 禁用背景滾動
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = "hidden";
 
     // 重新獲取最新的聊天記錄
     await fetchChatHistory();
@@ -3038,9 +3056,9 @@ const closeHistory = () => {
     searchResults.value = [];
     // 重置分頁和滾動狀態
     currentPage.value = 1;
-    
+
     // 恢復背景滾動
-    document.body.style.overflow = '';
+    document.body.style.overflow = "";
   }
 };
 
@@ -3387,25 +3405,7 @@ const handleCharacterClick = () => {
 
 // 關閉語音模態框
 const closeVoiceModal = () => {
-  if (isListening.value) {
-    if (process.client) {
-      recognitionRef?.stop();
-    }
-    if (process.client) {
-      isListening.value = false;
-    }
-  }
-  if (process.client) {
-    showVoiceError.value = false;
-    currentTranscript.value = "";
-    // 重置語音模態框圖片
-    voiceModalImageSrc.value = assistantSoundGif;
-  }
-  // 清除超時計時器
-  if (voiceTimeout) {
-    clearTimeout(voiceTimeout);
-    voiceTimeout = null;
-  }
+  reallyCloseVoiceModal();
 };
 
 // 處理語音模態框圖片點擊
@@ -3538,19 +3538,18 @@ const initSpeechRecognition = () => {
         }
 
         // 一旦拿到 final，就立刻關視窗 & 只處理一次
-        if (event.results[event.results.length - 1].isFinal && !hasFinalResult) {
+        if (
+          event.results[event.results.length - 1].isFinal &&
+          !hasFinalResult
+        ) {
           hasFinalResult = true;
-          if (voiceTimeout) { clearTimeout(voiceTimeout); voiceTimeout = null; }
-
-          // 先關視窗（把顯示條件變成 false）
-          isListening.value = false;
-          showVoiceError.value = false;
-          closeVoiceModal();               // 立刻關掉 UI
-
-          // 再非同步送去處理（不要阻塞 UI）
-          handleSpeechEnd(transcript);
-          // 可選：主動停止，確保一些瀏覽器會觸發 onend
-          try { recognitionRef.stop(); } catch {}
+          clearVoiceTimeout();
+          finalizedByUs = true; // ← 標記為我們主動收尾
+          reallyCloseVoiceModal(); // ← 先把 UI 關乾淨
+          handleSpeechEnd(transcript); // 非同步處理對話
+          try {
+            recognitionRef.stop();
+          } catch {}
         }
       };
 
@@ -3601,16 +3600,19 @@ const initSpeechRecognition = () => {
       };
 
       recognitionRef.onend = () => {
-        // 若沒有拿到 final，就視為沒有聽到 → 顯示提示但保留視窗（你原本的行為）
+        if (finalizedByUs) {
+          finalizedByUs = false;
+          hasFinalResult = false;
+          return;
+        }
         if (!hasFinalResult) {
+          // ← 沒拿到 final 才給提示
           isListening.value = false;
           showVoiceError.value = true;
           voiceModalImageSrc.value = assistantDefaultGif;
+          voiceModalOpen.value = true; // 保持彈窗開著讓使用者點關閉
         }
-        // 重置旗標，準備下一次
         hasFinalResult = false;
-
-        // 不要在 onend 再呼叫 handleSpeechEnd() 或 closeVoiceModal() 了
       };
     }
 
@@ -3841,24 +3843,17 @@ const toggleListening = () => {
     if (process.client) {
       recognitionRef.stop();
     }
-    if (process.client) {
-      isListening.value = false;
-      currentTranscript.value = "";
-    }
-    // 清除超時計時器
-    if (voiceTimeout) {
-      clearTimeout(voiceTimeout);
-      voiceTimeout = null;
-    }
+    reallyCloseVoiceModal();
   } else {
     if (process.client) {
-      showVoiceError.value = false;      // 清掉錯誤狀態
-      voiceModalImageSrc.value = assistantSoundGif; // 重置圖片
+      showVoiceError.value = false;
+      voiceModalImageSrc.value = assistantSoundGif;
       currentTranscript.value = "";
-      hasFinalResult = false;            // 重置旗標
-      recognitionRef.start();
+      hasFinalResult = false;
+      finalizedByUs = false;
+      voiceModalOpen.value = true; // ← 開窗
       isListening.value = true;
-      // 開始3秒超時計時器
+      recognitionRef.start();
       startVoiceTimeout();
     }
   }
@@ -4587,8 +4582,8 @@ const initSwiperToCurrentCharacter = () => {
 // 角色名稱編輯相關函數
 const showNameInputModal = () => {
   if (process.client) {
-       characterNameInput.value =
-         uiCharacter.value.customName || uiCharacter.value.displayName;
+    characterNameInput.value =
+      uiCharacter.value.customName || uiCharacter.value.displayName;
     nameInputError.value = "";
     showNameInput.value = true;
     nextTick(() => {
@@ -4603,8 +4598,8 @@ const closeNameInput = () => {
   if (process.client) {
     showNameInput.value = false;
     // 重置為原始名稱，不儲存修改
-       characterNameInput.value =
-         uiCharacter.value.customName || uiCharacter.value.displayName;
+    characterNameInput.value =
+      uiCharacter.value.customName || uiCharacter.value.displayName;
     nameInputError.value = "";
   }
 };
@@ -4623,32 +4618,35 @@ const confirmNameInput = () => {
       return;
     }
 
-       // 目標為畫面上正在預覽/編輯的角色（在角色彈窗中就是 tempSelectedCharacter）
-   const targetId = uiCharacter.value.id;
-   // 更新可用角色列表中的對應角色
-   const characterIndex = availableCharacters.value.findIndex(
-     (c) => c.id === targetId
-   );
+    // 目標為畫面上正在預覽/編輯的角色（在角色彈窗中就是 tempSelectedCharacter）
+    const targetId = uiCharacter.value.id;
+    // 更新可用角色列表中的對應角色
+    const characterIndex = availableCharacters.value.findIndex(
+      (c) => c.id === targetId
+    );
     if (characterIndex !== -1) {
-           availableCharacters.value[characterIndex] = {
-       ...availableCharacters.value[characterIndex],
-       customName: name,
-     };
+      availableCharacters.value[characterIndex] = {
+        ...availableCharacters.value[characterIndex],
+        customName: name,
+      };
     }
 
-       // 若彈窗中正在編輯的就是 tempSelectedCharacter，也同步更新它（讓畫面即時反映）
-   if (tempSelectedCharacter.value && tempSelectedCharacter.value.id === targetId) {
-     tempSelectedCharacter.value.customName = name;
-   }
+    // 若彈窗中正在編輯的就是 tempSelectedCharacter，也同步更新它（讓畫面即時反映）
+    if (
+      tempSelectedCharacter.value &&
+      tempSelectedCharacter.value.id === targetId
+    ) {
+      tempSelectedCharacter.value.customName = name;
+    }
 
-   // 若此角色同時也是當前使用中的角色，順便同步到 currentCharacter 與 localStorage
-   if (currentCharacter.value.id === targetId) {
-     currentCharacter.value.customName = name;
-     localStorage.setItem(
-       "selectedCharacter",
-       JSON.stringify(currentCharacter.value)
-     );
-   }
+    // 若此角色同時也是當前使用中的角色，順便同步到 currentCharacter 與 localStorage
+    if (currentCharacter.value.id === targetId) {
+      currentCharacter.value.customName = name;
+      localStorage.setItem(
+        "selectedCharacter",
+        JSON.stringify(currentCharacter.value)
+      );
+    }
 
     // 保存到本地存儲
     localStorage.setItem(
