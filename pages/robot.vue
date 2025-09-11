@@ -4587,8 +4587,8 @@ const initSwiperToCurrentCharacter = () => {
 // 角色名稱編輯相關函數
 const showNameInputModal = () => {
   if (process.client) {
-    characterNameInput.value =
-      currentCharacter.value.customName || currentCharacter.value.displayName;
+       characterNameInput.value =
+         uiCharacter.value.customName || uiCharacter.value.displayName;
     nameInputError.value = "";
     showNameInput.value = true;
     nextTick(() => {
@@ -4603,8 +4603,8 @@ const closeNameInput = () => {
   if (process.client) {
     showNameInput.value = false;
     // 重置為原始名稱，不儲存修改
-    characterNameInput.value =
-      currentCharacter.value.customName || currentCharacter.value.displayName;
+       characterNameInput.value =
+         uiCharacter.value.customName || uiCharacter.value.displayName;
     nameInputError.value = "";
   }
 };
@@ -4623,16 +4623,32 @@ const confirmNameInput = () => {
       return;
     }
 
-    // 更新當前角色的自定義名稱
-    currentCharacter.value.customName = name;
-
-    // 更新可用角色列表中的對應角色
-    const characterIndex = availableCharacters.value.findIndex(
-      (c) => c.id === currentCharacter.value.id
-    );
+       // 目標為畫面上正在預覽/編輯的角色（在角色彈窗中就是 tempSelectedCharacter）
+   const targetId = uiCharacter.value.id;
+   // 更新可用角色列表中的對應角色
+   const characterIndex = availableCharacters.value.findIndex(
+     (c) => c.id === targetId
+   );
     if (characterIndex !== -1) {
-      availableCharacters.value[characterIndex].customName = name;
+           availableCharacters.value[characterIndex] = {
+       ...availableCharacters.value[characterIndex],
+       customName: name,
+     };
     }
+
+       // 若彈窗中正在編輯的就是 tempSelectedCharacter，也同步更新它（讓畫面即時反映）
+   if (tempSelectedCharacter.value && tempSelectedCharacter.value.id === targetId) {
+     tempSelectedCharacter.value.customName = name;
+   }
+
+   // 若此角色同時也是當前使用中的角色，順便同步到 currentCharacter 與 localStorage
+   if (currentCharacter.value.id === targetId) {
+     currentCharacter.value.customName = name;
+     localStorage.setItem(
+       "selectedCharacter",
+       JSON.stringify(currentCharacter.value)
+     );
+   }
 
     // 保存到本地存儲
     localStorage.setItem(
