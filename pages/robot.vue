@@ -18,14 +18,14 @@
       <div
         class="avatar-container"
         :class="{ overZIndex: showTutorial && currentTutorialStep === 4 }"
-        @click="showCharacterModal"
+        @click="currentTutorialStep === 4 ? null : showCharacterModal()"
       >
         <img class="avatar" :src="currentCharacter.avatar" alt="角色頭像" />
       </div>
       <div
         class="character-name-btn"
         :class="{ overZIndex: showTutorial && currentTutorialStep === 4 }"
-        @click="showCharacterModal"
+      @click="currentTutorialStep === 4 ? null : showCharacterModal()"
       >
         <span>{{ currentCharacter.customName || currentCharacter.name }}</span>
         <img :src="recycleSvg" alt="刷新" />
@@ -33,8 +33,16 @@
     </div>
 
     <!-- 初始對話氣泡 -->
-    <div class="greeting-bubble" :class="{ overZIndex: showTutorial && currentTutorialStep === 5 }">
-      <div  v-if="showTutorial && currentTutorialStep === 5" class="firstText firstText5">這裡可以看到回應的訊息</div>
+    <div
+      class="greeting-bubble"
+      :class="{ overZIndex: showTutorial && currentTutorialStep === 5 }"
+    >
+      <div
+        v-if="showTutorial && currentTutorialStep === 5"
+        class="firstText firstText5"
+      >
+        這裡可以看到回應的訊息
+      </div>
       <div v-if="isLoading" class="loading-indicator">
         <div class="spinner"></div>
         <span>思考中...</span>
@@ -48,7 +56,7 @@
     <!-- AI角色形象區域 -->
     <div class="character-section">
       <img
-        :src="characterImageSrc"
+        :src="uiCharacter.fullImage"
         class="character-image"
         alt="AI角色"
         @click="handleCharacterClick"
@@ -57,8 +65,17 @@
 
     <!-- 語音控制區域 - 從下方彈出 -->
     <transition name="slide-up">
-      <div v-if="showVoiceControls" class="voice-control-bar" :class="{ overZIndex: showTutorial && currentTutorialStep === 1 || showTutorial && currentTutorialStep === 2 || showTutorial && currentTutorialStep === 3 }">
-        <button class="control-btn history-btn" @click="showHistory" >
+      <div
+        v-if="showVoiceControls"
+        class="voice-control-bar"
+        :class="{
+          overZIndex:
+            (showTutorial && currentTutorialStep === 1) ||
+            (showTutorial && currentTutorialStep === 2) ||
+            (showTutorial && currentTutorialStep === 3),
+        }"
+      >
+        <button class="control-btn history-btn" @click="showHistory">
           <img :src="timeSvg" alt="歷史紀錄" />
         </button>
         <div
@@ -203,7 +220,7 @@
           <!-- 當前選擇角色標籤 -->
           <div class="current-character-tag" @click="showNameInputModal">
             <span
-              >{{ currentCharacter.customName || currentCharacter.displayName }}
+              >{{ uiCharacter.customName || uiCharacter.displayName }}
               <img
                 src="/assets/imgs/robot/edit_green.svg"
                 alt="編輯"
@@ -216,7 +233,7 @@
           <div class="main-character-area">
             <div class="character-display">
               <img
-                :src="currentCharacter.fullImage"
+                :src="uiCharacter.fullImage"
                 alt="角色形象"
                 class="character-full-image"
               />
@@ -230,11 +247,11 @@
 
               <div class="style-grid" :class="{ expanded: isStyleExpanded }">
                 <div
-                  v-for="style in visibleStyles"
-                  :key="`${currentCharacter.id}-${style.id}`"
+                  v-for="style in uiCharacter.styles"
+                  :key="`${uiCharacter.id}-${style.id}`"
                   class="style-item"
                   :class="{
-                    active: currentCharacter.styleId === style.id,
+                    active: uiCharacter.styleId === style.id,
                     locked: style.locked,
                   }"
                   @click="selectStyle(style)"
@@ -276,7 +293,7 @@
                 :key="character.id"
                 class="character-option"
                 :class="{
-                  selected: currentCharacter.id === character.id,
+                  selected: uiCharacter.id === character.id,
                   locked: isCharacterLocked(character),
                 }"
                 @click="onCharacterClick(character)"
@@ -639,7 +656,7 @@
       height: 0;
       border-left: 7px solid transparent;
       border-right: 7px solid transparent;
-      border-bottom: 8px solid #fff; 
+      border-bottom: 8px solid #fff;
     }
   }
   .avatar-container {
@@ -701,8 +718,8 @@
   padding: 0 1rem;
 
   .firstText5 {
-left: 50%;
-  bottom: -77.5%;
+    left: 50%;
+    bottom: -77.5%;
     //製作往上的正三角色
     &::after {
       content: "";
@@ -713,7 +730,7 @@ left: 50%;
       height: 0;
       border-left: 7px solid transparent;
       border-right: 7px solid transparent;
-      border-bottom: 8px solid #fff; 
+      border-bottom: 8px solid #fff;
       transform: translateX(-50%);
     }
   }
@@ -792,48 +809,48 @@ left: 50%;
     top: -50%;
     left: 50%;
     //三角形
-    &::after{
+    &::after {
       content: "";
       position: absolute;
       bottom: -7px;
-      left: 50%; 
+      left: 50%;
       width: 0;
       height: 0;
       border-left: 7px solid transparent;
       border-right: 7px solid transparent;
-      border-top: 8px solid #fff; 
+      border-top: 8px solid #fff;
       transform: translateX(-50%);
     }
   }
   .firstText2 {
     top: -50%;
     left: 83%;
-    &::after{
+    &::after {
       content: "";
       position: absolute;
       bottom: -7px;
-      left: 50%; 
+      left: 50%;
       width: 0;
       height: 0;
       border-left: 7px solid transparent;
       border-right: 7px solid transparent;
-      border-top: 8px solid #fff; 
+      border-top: 8px solid #fff;
       transform: translateX(-50%);
     }
   }
   .firstText3 {
     top: -50%;
     left: 13%;
-    &::after{
+    &::after {
       content: "";
       position: absolute;
       bottom: -7px;
-      left: 50%; 
+      left: 50%;
       width: 0;
       height: 0;
       border-left: 7px solid transparent;
       border-right: 7px solid transparent;
-      border-top: 8px solid #fff; 
+      border-top: 8px solid #fff;
       transform: translateX(-50%);
     }
   }
@@ -2444,7 +2461,7 @@ const showVoiceError = ref(false);
 // 首次登入解說相關狀態
 const showTutorial = ref(false);
 const currentTutorialStep = ref(1);
-const tutorialSteps = [1, 2, 3, 4 ,5]; // 解說步驟順序
+const tutorialSteps = [1, 2, 3, 4, 5]; // 解說步驟順序
 import doctor from "~/assets/imgs/robot/character/doctor.png";
 import doctor2 from "~/assets/imgs/robot/character/doctor2.png";
 import doctor3 from "~/assets/imgs/robot/character/doctor3.png";
@@ -2485,6 +2502,13 @@ import pet4_1 from "~/assets/imgs/robot/character/pet4_1.png";
 import pet4_2 from "~/assets/imgs/robot/character/pet4_2.png";
 
 const characterImageSrc = ref(doctor);
+
+// UI 目前應該顯示誰的 computed
+const uiCharacter = computed(() =>
+  showCharacterSelection.value && tempSelectedCharacter.value
+    ? tempSelectedCharacter.value
+    : currentCharacter.value
+);
 
 const voiceModalImageSrc = ref(assistantSoundGif); // 語音模態框圖片路徑
 const textInputRef = ref(null); // 添加文字輸入框的 ref
@@ -2981,6 +3005,9 @@ const setActiveTab = (tab) => {
 const showHistory = async () => {
   if (process.client) {
     showHistoryPage.value = true;
+    
+    // 禁用背景滾動
+    document.body.style.overflow = 'hidden';
 
     // 重新獲取最新的聊天記錄
     await fetchChatHistory();
@@ -3008,6 +3035,9 @@ const closeHistory = () => {
     searchResults.value = [];
     // 重置分頁和滾動狀態
     currentPage.value = 1;
+    
+    // 恢復背景滾動
+    document.body.style.overflow = '';
   }
 };
 
@@ -3866,6 +3896,9 @@ const handleSpeechEnd = async (transcript) => {
     }
 
     console.log("語音輸入處理完成:", newConversation);
+    
+    // 確保語音視窗關閉
+    closeVoiceModal();
   } catch (error) {
     console.error("API 調用錯誤:", error);
     const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
@@ -3879,6 +3912,9 @@ const handleSpeechEnd = async (transcript) => {
     conversations.value.push(errorConversation);
     latestResponse.value = errorResponse;
     saveConversations();
+    
+    // 確保語音視窗關閉
+    closeVoiceModal();
 
     // 如果當前在歷史記錄頁面，確保新訊息可見
     if (showHistoryPage.value) {
@@ -4360,11 +4396,11 @@ const closeCharacterModal = () => {
       ? JSON.parse(localStorage.getItem("selectedCharacter"))
       : { id: "doctor", styleId: "doctor1" };
 
-    // 檢查臨時選擇的角色是否與保存的角色不同
+    // 檢查臨時選擇的角色是否與當前角色不同
     const hasUnsavedChanges =
       tempSelectedCharacter.value &&
-      (tempSelectedCharacter.value.id !== savedCharacter.id ||
-        tempSelectedCharacter.value.styleId !== savedCharacter.styleId);
+      (tempSelectedCharacter.value.id !== currentCharacter.value.id ||
+        tempSelectedCharacter.value.styleId !== currentCharacter.value.styleId);
 
     if (hasUnsavedChanges) {
       showCharacterExitConfirm.value = true;
@@ -4392,8 +4428,6 @@ const closeComingSoonModal = () => {
 // 角色選擇離開確認彈窗相關函數
 const confirmCharacterExit = () => {
   if (process.client) {
-    // 不保存變更，重置為原始角色
-    currentCharacter.value = { ...tempSelectedCharacter.value };
     showCharacterExitConfirm.value = false;
     showCharacterSelection.value = false;
     isStyleExpanded.value = false;
@@ -4420,9 +4454,6 @@ const onSlideChange = (swiper) => {
   if (character) {
     // 更新臨時選擇狀態
     tempSelectedCharacter.value = { ...character };
-    // 更新顯示的角色圖片
-    currentCharacter.value = { ...character };
-    characterImageSrc.value = character.fullImage;
   }
 };
 
@@ -4442,9 +4473,6 @@ const onCharacterClick = (character) => {
     characterSwiperRef.value.$el.swiper.slideTo(characterIndex);
     // 更新臨時選擇狀態
     tempSelectedCharacter.value = { ...character };
-    // 更新顯示的角色圖片
-    currentCharacter.value = { ...character };
-    characterImageSrc.value = character.fullImage;
   }
 };
 
@@ -4487,13 +4515,6 @@ const selectStyle = (style) => {
       tempSelectedCharacter.value.avatar = style.thumbnail;
       tempSelectedCharacter.value.fullImage = style.fullImage;
     }
-
-    // 更新顯示的角色圖片
-    currentCharacter.value.styleId = style.id;
-    currentCharacter.value.avatar = style.thumbnail; // 更新頭貼為選中樣式的縮圖
-    currentCharacter.value.fullImage = style.fullImage;
-    // 即時更新角色圖片
-    characterImageSrc.value = style.fullImage;
   }
 };
 
