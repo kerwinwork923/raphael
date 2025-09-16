@@ -251,7 +251,7 @@ function checkUserData() {
     const str = localStorage.getItem("userData");
     if (!str) throw new Error("localStorage 缺少 userData");
     userData = JSON.parse(str);
-    if (!userData.Member.Mobile || !userData.Member.Height || !userData.Member.Weight)
+    if (!userData.Mobile || !userData.Member.Height || !userData.Member.Weight)
       throw new Error("userData 格式不完整");
   } catch (err) {
     alert("讀取使用者資料失敗，請重新登入");
@@ -360,7 +360,7 @@ async function onRecordStop() {
 // 上傳 API
 async function sendToAPI(base64) {
   const payload = {
-    uuid: userData.Member.Mobile,
+    uuid: userData.Mobile,
     height: userData.Member.Height,
     weight: userData.Member.Weight,
     content: base64,
@@ -398,10 +398,10 @@ async function sendToAPI(base64) {
 
       // 組合 HRV3Save 參數
       const hrv3Payload = {
-        MID: userData.Member.MID || "",
-        MAID: userData.Member.MAID || "",
-        Token: userData.Member.Token || "",
-        Mobile: userData.Member.Mobile || "",
+        MID: userData.MID || "",
+        MAID: userData.MAID || "",
+        Token: userData.Token || "",
+        Mobile: userData.Mobile || "",
         UID: "",
         HRVCalTime: userData.Member.HRVCalTime || "",
         Flag: "",

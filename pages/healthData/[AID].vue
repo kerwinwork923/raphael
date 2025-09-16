@@ -318,8 +318,8 @@ export default {
       return;
     }
 
-    const { MID, Token, MAID, Mobile, Name } = JSON.parse(localData);
-    if (!MID || !Token || !MAID || !Mobile || !Name) {
+    const { MID, Token, MAID, Mobile } = JSON.parse(localData);
+    if (!MID || !Token || !MAID || !Mobile ) {
       alertVisable.value = true;
       alertMessage.value = "用戶資料不完整，請重新登入！";
       router.push("/");
