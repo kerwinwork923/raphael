@@ -111,7 +111,7 @@ const alertContent = ref(""); // 彈窗內容
 const showAlert = ref(false); // 彈窗顯示
 
 const goToMember = () => {
-  router.push("/member");
+  router.push("/accountManage");
 };
 
 const goToDeleteConfirm = () => {

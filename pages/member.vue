@@ -38,6 +38,13 @@
           </div>
           <img src="../assets/imgs/member/next_green.svg" alt="" />
         </div>
+        <div class="memberListItem" @click="goToAccountManage">
+          <div class="memberListLeft">
+            <img src="../assets/imgs/member/user.svg" alt="" />
+            <h3>帳號管理</h3>
+          </div>
+          <img src="../assets/imgs/member/next_green.svg" alt="" />
+        </div>
         <div class="memberListItem" @click="goToPrivacy">
           <div class="memberListLeft">
             <img src="../assets/imgs/member/privacy.svg" alt="" />
@@ -101,6 +108,10 @@ const goToChangeMember = () => {
 
 const goToPrivacy = () => {
   router.push("/privacyPage");
+};
+
+const goToAccountManage = () => {
+  router.push("/accountManage");
 };
 
 const goToDisclaimer = () => {
