@@ -62,21 +62,21 @@ export default {
 
       const isInteger = (value) => Number.isInteger(parseInt(value, 10));
 
-      if (!isInteger(localData.Height) || parseInt(localData.Height) <= 0) {
+      if (!isInteger(localData.Member.Height) || parseInt(localData.Member.Height) <= 0) {
         alert("您的身高格式不正確，請修改會員資料");
         window.location.href = "/changeMember";
 
         return;
       }
 
-      if (!isInteger(localData.Weight) || parseInt(localData.Weight) <= 0) {
+      if (!isInteger(localData.Member.Weight) || parseInt(localData.Member.Weight) <= 0) {
         alert("您的體重格式不正確，請修改會員資料");
         window.location.href = "/changeMember";
 
         return;
       }
 
-      const birthdayParts = localData.Birthday.split("/");
+      const birthdayParts = localData.Member.Birthday.split("/");
       if (
         birthdayParts.length !== 3 ||
         parseInt(birthdayParts[0]) <= 0 || // 年份檢查
@@ -84,7 +84,7 @@ export default {
         parseInt(birthdayParts[1]) > 12 || // 月份上限檢查
         parseInt(birthdayParts[2]) < 1 || // 日期下限檢查
         parseInt(birthdayParts[2]) > 31 || // 日期上限檢查
-        isNaN(calculateAge(localData.Birthday)) // 年齡計算有效性檢查
+        isNaN(calculateAge(localData.Member.Birthday)) // 年齡計算有效性檢查
       ) {
         alert("生日格式不正確或包含無效日期，請修改會員資料。");
 
@@ -92,7 +92,7 @@ export default {
         return;
       }
 
-      let scanAge = parseInt(localData.Sex);
+      let scanAge = parseInt(localData.Member.Sex);
       if (scanAge !== 1 && scanAge !== 2 && scanAge !== 0) {
         alert("性別格式不正確，請修改會員資料。");
         window.location.href = "/changeMember";
@@ -105,7 +105,7 @@ export default {
 
       // DSPR 檢查 - 判斷是否為預期的三個值之一
       const validDSPRValues = ["normal", "prehypertension", "hypertension"];
-      if (!validDSPRValues.includes(localData.DSPR)) {
+      if (!validDSPRValues.includes(localData.Member.DSPR)) {
         // alert("請選擇有效的血壓範圍。");
         store.showDSPRSelect = true; // 顯示選擇彈窗
         handleCloseHRVAlert();
@@ -113,14 +113,14 @@ export default {
       }
 
       const convertedData = {
-        age: calculateAge(localData.Birthday),
-        bp_group: localData.DSPR,
+        age: calculateAge(localData.Member.Birthday),
+        bp_group: localData.Member.DSPR,
         bp_mode: "ternary",
         facing_mode: "user",
-        height: parseInt(localData.Height),
+        height: parseInt(localData.Member.Height),
         sex: scanAge,
-        weight: parseInt(localData.Weight),
-        time: parseInt(localData.HRVCalTime) || 2,
+        weight: parseInt(localData.Member.Weight),
+        time: parseInt(localData.Member.HRVCalTime) || 2,
       };
 
       sessionStorage.setItem("data", JSON.stringify(convertedData));
