@@ -2,17 +2,7 @@
     <RaphaelLoading v-if="loading" />
   <div class="memberWrap">
     <div class="memberContainer">
-      <div class="memberTop">
-        <div class="memberTopLeft">
-          <img src="../assets/imgs/robot/mascotDefault.png" alt="" />
-        </div>
-        <div class="memberTopRight">
-          <h3>{{ userDataObj?.Member.Name }} 您好</h3>
-          <div class="memberTopPoint">
-            目前積分 : {{ userDataObj?.NowAvaPoints }} <img @click="getMemberData" src="../assets/imgs/member/reload.svg" alt="">
-          </div>
-        </div>
-      </div>
+      <MemberTop :userDataObj="userDataObj" @refresh="getMemberData" />
       <div class="memberCenter">
         <div class="memberCenterItem" @click="goToPoint">
           <img src="../assets/imgs/member/point.svg" alt="" />
@@ -63,7 +53,7 @@
       </div>
 
       <button class="logoutBtn" @click="logout">登出</button>
-      <div class="deleteBtn" @click="deleteBtn">刪除帳號</div>
+
     </div>
 
     <BottomNav />
@@ -72,6 +62,7 @@
 
 <script setup>
 import BottomNav from "~/components/BottomNav.vue";
+import MemberTop from "~/components/MemberTop.vue";
 import { useRouter } from "vue-router";
 import { useUserData } from "~/fn/api";
 import { ref } from "vue";
@@ -98,9 +89,6 @@ const logout = () => {
   router.push("/");
 };
 
-const deleteBtn = () => {
-  router.push("/deleteConfirm");
-};
 
 const goToChangeMember = () => {
   router.push("/changeMember");
@@ -139,49 +127,6 @@ const getMemberData = async () => {
     display: flex;
     flex-direction: column;
     gap: 24px;
-  }
-  .memberTop {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    .memberTopLeft {
-      width: 60px;
-      img {
-        width: 100%;
-      }
-    }
-    .memberTopRight {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      width: 100%;
-      h3 {
-        color: $raphael-black;
-        font-size: 24px;
-      }
-      .memberTopPoint {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-
-        justify-content: space-between;
-        @include neumorphismOuter($radius: 20px);
-        color: $raphael-red-300;
-        font-size: 18px;
-        letter-spacing: 2.7px;
-        font-weight: bold;
-        img {
-          cursor: pointer;
-          width: 26px;
-          height: 26px;
-          border-radius: var(--Radius-r-50, 50px);
-background: var(--Secondary-100, #F5F7FA);
-box-shadow: 2px 4px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.70));
-padding: 0.2rem;
-        }
-      }
-    }
   }
   .memberCenter {
     display: flex;
@@ -336,32 +281,6 @@ padding: 0.2rem;
       );
     }
   }
-  .deleteBtn {
-    width: 100%;
-    @include neumorphismOuter(
-      $bgColor: $raphael-red-300,
-      $radius: 50px,
-      $padding: 13px 12px
-    );
-    color: $raphael-white;
-    cursor: pointer;
-    font-size: 18px;
-    letter-spacing: 2.7px;
-    text-align: center;
-    margin-top: 20px;
-    transition: all ease 0.2s;
 
-    &:hover,
-    &:active {
-      @include neumorphismOuter(
-        $bgColor: $raphael-red-300,
-        $radius: 50px,
-        $padding: 13px 12px,
-        $x: 0,
-        $y: 0,
-        $blur: 6px
-      );
-    }
-  }
 }
 </style>
