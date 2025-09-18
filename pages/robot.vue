@@ -403,7 +403,7 @@
             <div
               v-if="!showSearch || searchQuery === ''"
               class="history-list"
-              @scroll="handleHistoryScroll"
+              @scroll.passive="handleHistoryScroll"
               ref="historyScrollContainer"
             >
               <div
@@ -2549,6 +2549,13 @@ const isLoadingOlderMessages = ref(false);
 const hasMoreMessages = ref(true);
 const currentPage = ref(1);
 const messagesPerPage = ref(20);
+const callTime = ref(1); // CallTime 計數器，用於載入更舊的訊息
+const knownKeys = new Set(); // 用於去重的穩定鍵集合
+
+// 生成穩定鍵用於去重
+const makeStableKey = (msg) => {
+  return `${msg.Inputtime}|${msg.Inmessage ?? ''}|${msg.Outputtime ?? ''}|${msg.Outmessage ?? ''}`;
+};
 
 // 日曆相關
 const showCalendar = ref(false);
@@ -2952,12 +2959,7 @@ const groupedHistory = computed(() => {
     0,
     totalMessages - currentPage.value * messagesPerPage.value
   );
-  const endIndex =
-    totalMessages - (currentPage.value - 1) * messagesPerPage.value;
-  const displayedConversations = conversations.value.slice(
-    startIndex,
-    endIndex
-  );
+  const displayedConversations = conversations.value.slice(startIndex) // ← 直接到最尾端（最新）
 
   displayedConversations.forEach((item) => {
     const date = item.dateKey || toDateKey(item.timestamp); // ← 確保有 dateKey
@@ -3030,12 +3032,15 @@ const showHistory = async () => {
     // 禁用背景滾動
     document.body.style.overflow = "hidden";
 
+    // 重置 CallTime 計數器
+    callTime.value = 1;
+
     // 重新獲取最新的聊天記錄
     await fetchChatHistory();
 
     // 重置分頁狀態
     currentPage.value = 1;
-    hasMoreMessages.value = conversations.value.length > messagesPerPage.value;
+    hasMoreMessages.value = true;
 
     // 等待頁面渲染完成後滾動到底部
     nextTick(() => {
@@ -3091,8 +3096,26 @@ const closeTutorial = () => {
   }
 };
 
+const lastScrollTop = ref(0);
+
+function logScroll(e, tag = 'scroll') {
+  const el = e?.target || e;
+  const { scrollTop, scrollHeight, clientHeight } = el;
+  const dir = scrollTop > lastScrollTop.value ? 'down' : 'up';
+  lastScrollTop.value = scrollTop;
+
+  const atTop = scrollTop <= 0;
+  const atBottom = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
+
+  console.log(
+    `[${tag}] top=${Math.round(scrollTop)} h=${scrollHeight} c=${clientHeight} dir=${dir} top?${atTop} bottom?${atBottom}`
+  );
+}
+
+
 // 處理歷史記錄滾動事件
-const handleHistoryScroll = () => {
+const handleHistoryScroll = (e) => {
+  logScroll(e, 'history');
   if (!historyScrollContainer.value) return;
 
   const container = historyScrollContainer.value;
@@ -3100,7 +3123,7 @@ const handleHistoryScroll = () => {
   const scrollHeight = container.scrollHeight;
   const clientHeight = container.clientHeight;
 
-  // 檢查是否滾動到頂部（載入更舊訊息）
+  // 檢查是否滾動到頂部 100px 以下（載入更舊訊息）
   if (
     scrollTop < 100 &&
     !isLoadingOlderMessages.value &&
@@ -3127,37 +3150,61 @@ const handleHistoryScroll = () => {
 };
 
 // 載入更舊的訊息
-const loadOlderMessages = () => {
-  if (isLoadingOlderMessages.value || !hasMoreMessages.value) return;
+const loadOlderMessages = async () => {
+
 
   isLoadingOlderMessages.value = true;
 
-  // 模擬載入延遲
-  setTimeout(() => {
-    const oldPage = currentPage.value;
-    currentPage.value++;
+  const container = historyScrollContainer.value;
+  // 記住老的 scroll 狀態
+  const oldScrollTop = container ? container.scrollTop : 0;
+  const oldScrollHeight = container ? container.scrollHeight : 0;
 
-    // 檢查是否還有更多訊息
-    const totalMessages = conversations.value.length;
-    const currentMessages = currentPage.value * messagesPerPage.value;
+  try {
+    // 增加 CallTime 計數器
+    callTime.value++;
+    
+    console.log(`載入更舊訊息，CallTime: ${callTime.value}`);
 
-    if (currentMessages >= totalMessages) {
+    // 調用 TTE API 獲取更舊的訊息，並取得實際新增的筆數
+    const addedCount = await fetchOlderChatHistory();
+
+    // 只有真的有新資料才翻頁
+    if (addedCount > 0) {
+      currentPage.value += 1;
+      console.log(`成功載入 ${addedCount} 條新訊息`);
+    } else {
       hasMoreMessages.value = false;
+      console.log("沒有更多舊訊息可載入");
     }
 
-    isLoadingOlderMessages.value = false;
+    // 等待 DOM 更新完成
+    await nextTick();
 
-    // 保持滾動位置
-    nextTick(() => {
-      if (historyScrollContainer.value) {
-        const container = historyScrollContainer.value;
-        const newScrollHeight = container.scrollHeight;
-        const oldScrollHeight = container.scrollHeight;
-        const scrollDiff = newScrollHeight - oldScrollHeight;
-        container.scrollTop = scrollDiff;
-      }
-    });
-  }, 500);
+    // 正確的復原公式
+    if (container) {
+      const newScrollHeight = container.scrollHeight;
+      container.scrollTop = oldScrollTop + (newScrollHeight - oldScrollHeight);
+    }
+
+    // 更新搜尋功能：重新計算搜尋結果（如果當前有搜尋）
+    if (showSearch.value && searchQuery.value.trim()) {
+      performSearch();
+    }
+
+    // 更新日曆可選時間
+    loadCalendarDates();
+
+    // 確保資料顯示完成後才允許下次觸發
+    console.log("載入完成，搜尋和日曆已更新");
+  } catch (error) {
+    console.error("載入更舊訊息失敗:", error);
+    // 如果載入失敗，回退 CallTime
+    callTime.value--;
+  } finally {
+    // 確保載入狀態被重置，允許下次觸發
+    isLoadingOlderMessages.value = false;
+  }
 };
 
 // 更新 sticky header 日期
@@ -3498,6 +3545,12 @@ const fetchChatHistory = async () => {
       // 按時間排序（舊到新）
       convertedMessages.sort((a, b) => a.ts - b.ts);
 
+      // 清空並填入 knownKeys
+      knownKeys.clear();
+      for (const msg of data.ChatMessage) {
+        knownKeys.add(makeStableKey(msg));
+      }
+
       conversations.value = convertedMessages;
 
       // 更新最新回覆
@@ -3513,6 +3566,78 @@ const fetchChatHistory = async () => {
     }
   } catch (error) {
     console.error("獲取聊天記錄失敗:", error);
+  }
+};
+
+// 獲取更舊的聊天記錄 (TTE API)
+const fetchOlderChatHistory = async () => {
+  if (!localobj) {
+    console.error("用戶資料不存在");
+    return 0;
+  }
+
+  try {
+    const response = await fetch("https://23700999.com:8081/HMA/TTEgetChatMessageHistoryList.jsp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        Key: "qrt897hpmd",
+        MID: localobj.MID,
+        Mobile: localobj.Mobile,
+        CallTime: callTime.value.toString(),
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API 調用失敗: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(`獲取到的更舊聊天記錄 (CallTime: ${callTime.value}):`, data);
+
+    if (!(data?.Result === "OK" && Array.isArray(data.ChatMessage))) {
+      return 0;
+    }
+
+    // 轉換 & 產生穩定鍵
+    const incoming = data.ChatMessage.map((msg) => {
+      const inputTime = new Date(msg.Inputtime);
+      const key = makeStableKey(msg);
+      return {
+        stableKey: key,
+        id: key, // 用穩定鍵作為 id
+        ts: inputTime.getTime(),
+        user: msg.Inmessage || "",
+        bot: msg.Outmessage || "",
+        timestamp: inputTime.toLocaleString("zh-TW"),
+        dateKey: toDateKey(inputTime),
+      };
+    }).sort((a, b) => a.ts - b.ts);
+
+    // 去重
+    const newOnes = [];
+    for (const m of incoming) {
+      if (!knownKeys.has(m.stableKey)) {
+        knownKeys.add(m.stableKey);
+        newOnes.push(m);
+      }
+    }
+
+    if (newOnes.length === 0) {
+      return 0;
+    }
+
+    // 合併回 conversations（保持時間序）
+    conversations.value = [...newOnes, ...conversations.value].sort((a, b) => a.ts - b.ts);
+
+    // 日曆也跟著更新
+    loadCalendarDates();
+
+    console.log(`載入更舊訊息完成，新增 ${newOnes.length} 條訊息`);
+    return newOnes.length;
+  } catch (error) {
+    console.error("獲取更舊聊天記錄失敗:", error);
+    throw error;
   }
 };
 
@@ -4331,33 +4456,25 @@ function getOrCreateVisitorID() {
 
 // 搜尋結果跳轉
 const scrollToMessage = (id) => {
-  // 關閉搜尋
   showSearch.value = false;
   searchQuery.value = "";
   searchResults.value = [];
 
-  // 等待動畫完成後跳轉
   setTimeout(() => {
-    const messageElement = document.getElementById(`message-${id}`);
-    if (messageElement) {
-      messageElement.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-
-      // 添加高亮效果
-      messageElement.style.backgroundColor = "rgba(116, 188, 31, 0.1)";
-      messageElement.style.borderRadius = "12px";
-      messageElement.style.transition = "background-color 0.3s ease";
-
-      // 3秒後移除高亮
+    const el = document.getElementById(`message-${id}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" }); // ← 重點
+      // 高亮 3 秒
+      el.style.backgroundColor = "rgba(116, 188, 31, 0.1)";
+      el.style.borderRadius = "12px";
       setTimeout(() => {
-        messageElement.style.backgroundColor = "";
-        messageElement.style.borderRadius = "";
+        el.style.backgroundColor = "";
+        el.style.borderRadius = "";
       }, 3000);
     }
   }, 300);
 };
+
 
 // 關鍵字高亮
 const highlightKeyword = (text, keyword) => {
