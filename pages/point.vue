@@ -295,7 +295,7 @@ function handleImg2Click() {
 
 .priceExchangeBox {
   position: fixed;
-  bottom: 90px;
+  bottom: 80px;
   width: 100%;
 
   margin: 0 auto;
