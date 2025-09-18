@@ -299,7 +299,7 @@ function handleImg2Click() {
   width: 100%;
 
   margin: 0 auto;
-  z-index: 1001;
+  z-index: 10;
   background-color: #fff;
 
   
