@@ -134,6 +134,7 @@ const getMemberData = async () => {
     justify-content: center;
     gap: 0.75rem;
     width: 100%;
+    display: none; //暫時隱藏
 
     .memberCenterItem {
       display: flex;

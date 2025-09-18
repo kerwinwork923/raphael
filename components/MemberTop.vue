@@ -6,8 +6,12 @@
     <div class="memberTopRight">
       <h3>{{ userDataObj?.Member.Name }} 您好</h3>
       <div class="memberTopPoint">
-        目前積分 : {{ userDataObj?.NowAvaPoints }} 
-        <img @click="handleRefresh" src="../assets/imgs/member/reload.svg" alt="">
+        目前積分 : {{ userDataObj?.NowAvaPoints }}
+        <img
+          @click="handleRefresh"
+          src="../assets/imgs/member/reload.svg"
+          alt=""
+        />
       </div>
     </div>
   </div>
@@ -20,16 +24,16 @@ import { ref } from "vue";
 const props = defineProps({
   userDataObj: {
     type: Object,
-    default: () => null
-  }
+    default: () => null,
+  },
 });
 
 // Emits
-const emit = defineEmits(['refresh']);
+const emit = defineEmits(["refresh"]);
 
 // Methods
 const handleRefresh = () => {
-  emit('refresh');
+  emit("refresh");
 };
 </script>
 
@@ -45,37 +49,46 @@ const handleRefresh = () => {
       width: 100%;
     }
   }
-  
+
   .memberTopRight {
     display: flex;
     flex-direction: column;
     gap: 8px;
     width: 100%;
-    
+
     h3 {
       color: $raphael-black;
       font-size: 24px;
     }
-    
+
     .memberTopPoint {
       display: flex;
       align-items: center;
       gap: 4px;
       justify-content: space-between;
-      @include neumorphismOuter($radius: 20px);
+      @include neumorphismOuter($radius: 20px, $padding: 8px 16px);
       color: $raphael-red-300;
       font-size: 18px;
       letter-spacing: 2.7px;
       font-weight: bold;
-      
+
       img {
         cursor: pointer;
         width: 26px;
         height: 26px;
-        border-radius: var(--Radius-r-50, 50px);
-        background: var(--Secondary-100, #F5F7FA);
-        box-shadow: 2px 4px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.70));
-        padding: 0.2rem;
+        @include neumorphismOuter($radius: 50px, $padding: 4px);
+        transition: all 0.2s ease;
+
+        &:active,
+        &:hover {
+          @include neumorphismOuter(
+            $radius: 50px,
+            $padding: 4px,
+            $x: 0,
+            $y: 0,
+            $blur: 6px
+          );
+        }
       }
     }
   }
