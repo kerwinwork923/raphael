@@ -4,19 +4,20 @@
     <div class="accountManageTopGroup">
       <div class="accountManageTopItem">
         <h4>帳號名稱</h4>
-        <h5>陳女士</h5>
+        <h5>{{userDataObj.Member?.Name}}</h5>
       </div>
       <div class="accountManageTopItem">
         <h4>註冊日期</h4>
-        <h5>2025/08/01 15:00</h5>
+        <!-- 20250826115303轉換為 2025/08/01 15:00-->
+        <h5>{{ formatDate(userDataObj.Member?.CheckTime) }}</h5>
       </div>
       <div class="accountManageTopItem">
         <h4>手機是否已驗證</h4>
-        <h5>是</h5>
+        <h5>缺</h5>
       </div>
       <div class="accountManageTopItem">
         <h4>最近登入時間</h4>
-        <h5>2025/10/10 12:00</h5>
+        <h5>缺</h5>
       </div>
     </div>
     <div class="accountManageBottomGroup">
@@ -37,8 +38,26 @@
 
 <script setup>
 const router = useRouter();
+const userData = localStorage.getItem("userData");
+const userDataObj = JSON.parse(userData);
+
 const deleteAccount = () => {
   router.push("/deleteConfirm");
+};
+
+// 轉換日期格式的函式
+const formatDate = (dateString) => {
+  if (!dateString) return "";
+
+  // 假設字串格式固定為 YYYYMMDDHHmmss
+  const year = dateString.slice(0, 4);
+  const month = dateString.slice(4, 6);
+  const day = dateString.slice(6, 8);
+  const hour = dateString.slice(8, 10);
+  const minute = dateString.slice(10, 12);
+  // const second = dateString.slice(12, 14); // 如果要顯示秒可以用
+
+  return `${year}/${month}/${day} ${hour}:${minute}`;
 };
 </script>
 
