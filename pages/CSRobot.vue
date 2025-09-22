@@ -219,7 +219,7 @@ const chatMessages = ref(null);
 const isFocused = ref(false);
 
 // 滿意度評分相關
-const satisfactionEmojis = ["😠", "😕", "😐", "😊", "😍"];
+const satisfactionEmojis = ["😠", "😰", "😐", "😊", "😁"];
 const satisfactionTexts = [
   "非常不滿意",
   "不太滿意",
@@ -577,6 +577,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  padding-bottom: 34px;
 }
 
 .media-buttons {

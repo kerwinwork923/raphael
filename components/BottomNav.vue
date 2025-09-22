@@ -92,6 +92,9 @@ const setActiveTabFromRoute = () => {
   const path = route.path;
   switch (path) {
     case "/service":
+    case "/package":
+    case "/contract":
+    case "/CSRobot":
       activeTab.value = "services";
       break;
     case "/UsageHistory":
@@ -106,7 +109,7 @@ const setActiveTabFromRoute = () => {
       break;
     case "/member":
     case "/point":
-    case "/package":
+   
       activeTab.value = "member";
       break;
     default:

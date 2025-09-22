@@ -9,6 +9,11 @@ export default defineNuxtConfig({
       routes: ["/"], // 可保留首頁
     },
   },
+  
+  // 添加實驗性功能來解決模組解析問題
+  experimental: {
+    payloadExtraction: false,
+  },
 
   app: {
     baseURL: "/", 
@@ -78,5 +83,14 @@ export default defineNuxtConfig({
         },
       },
     },
+    // 添加 Vite 配置來解決模組解析問題
+    optimizeDeps: {
+      include: ['vue', 'vue-router']
+    },
+    resolve: {
+      alias: {
+        '#internal': 'nuxt/dist/runtime'
+      }
+    }
   },
 });
