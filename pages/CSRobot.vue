@@ -313,6 +313,7 @@ const {
   revokePreviewURL,
   isAllowedImage,
   getExt,
+  isHEICFormat,
 } = useMediaConverter();
 
 // API 函數
@@ -420,6 +421,14 @@ const sendMessage = async () => {
           // 確保「送出前」用最新的 File（可能已被轉成 JPG）
           const processed = await processFileFormat(media.file);
           console.log('處理後的檔案:', { name: processed.name, type: processed.type });
+          
+          // 檢查轉換是否成功（如果還是 HEIC 格式，轉換可能失敗）
+          if (isHEICFormat(processed)) {
+            console.warn('HEIC 轉換失敗，跳過此圖片');
+            alert('HEIC 格式轉換失敗，請改用 JPG 或 PNG 格式的圖片');
+            continue; // 跳過這個檔案
+          }
+          
           const base64String = await fileToBase64(processed);
           const subName = getExt(processed);
           console.log('發送圖片:', { subName, base64Length: base64String.length });
