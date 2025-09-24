@@ -64,13 +64,13 @@
           <img src="../assets/imgs/member/next_green.svg" alt="" />
         </div> -->
 
-        <!-- <div class="serviceListItem" @click="goToCSRobot">
+        <div class="serviceListItem" @click="goToCSRobot">
           <div class="serviceListLeft">
             <img src="../assets/imgs/member/CSRobot.svg" alt="客服機器人" />
             <h3>客服機器人</h3>
           </div>
           <img src="../assets/imgs/member/next_green.svg" alt="" />
-        </div> -->
+        </div>
         
         
 

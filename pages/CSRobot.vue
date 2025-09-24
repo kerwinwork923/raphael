@@ -29,19 +29,33 @@
           <div v-if="message.type === 'service'" class="message-avatar">
             <img src="/assets/imgs/robot/character/pet4_3.png" alt="客服頭像" />
           </div>
-          
+
           <div class="message-content">
             <!-- 文字訊息 -->
-            <div v-if="message.messageType === 'text'" class="message-bubble" :class="message.type === 'user' ? 'user-bubble' : 'service-bubble'">
+            <div
+              v-if="message.messageType === 'text'"
+              class="message-bubble"
+              :class="
+                message.type === 'user' ? 'user-bubble' : 'service-bubble'
+              "
+            >
               {{ message.content }}
             </div>
 
             <!-- 圖片訊息 -->
-            <div v-else-if="message.messageType === 'image'" class="message-bubble media-bubble">
-  <div class="media-preview">
-    <img :src="message.url" alt="圖片" @click="openImagePreview(message.url)" class="preview-image" />
-  </div>
-</div>
+            <div
+              v-else-if="message.messageType === 'image'"
+              class="message-bubble media-bubble"
+            >
+              <div class="media-preview">
+                <img
+                  :src="message.url"
+                  alt="圖片"
+                  @click="openImagePreview(message.url)"
+                  class="preview-image"
+                />
+              </div>
+            </div>
 
             <!-- 滿意度評分卡片 -->
             <div
@@ -212,20 +226,27 @@
     <input
       ref="galleryInput"
       type="file"
-      accept="image/*,video/*"
+      accept="image/jpeg,image/jpg,image/png,image/heic,image/heif"
       multiple
       @change="handleGallerySelect"
       style="display: none"
     />
 
     <!-- 圖片預覽放大彈窗 -->
-    <div class="image-preview-overlay" v-if="showImagePreview" @click="closeImagePreview">
+    <div
+      class="image-preview-overlay"
+      v-if="showImagePreview"
+      @click="closeImagePreview"
+    >
       <div class="image-preview-modal" @click.stop>
         <button class="close-preview" @click="closeImagePreview">×</button>
-        <img :src="previewImageUrl" alt="放大預覽" class="preview-large-image" />
+        <img
+          :src="previewImageUrl"
+          alt="放大預覽"
+          class="preview-large-image"
+        />
       </div>
     </div>
-
   </div>
 </template>
 
@@ -261,7 +282,7 @@ const API_CONFIG = {
   Token: userData.Token,
   MAID: userData.MAID,
   Mobile: userData.Mobile,
-  Lang: "zhtw"
+  Lang: "zhtw",
 };
 
 // 滿意度評分相關
@@ -293,46 +314,55 @@ const {
 // API 函數
 const frSendLineText = async (content) => {
   try {
-    const response = await $fetch('https://23700999.com:8081/HMA/api/fr/frSendLineText', {
-      method: 'POST',
-      body: {
-        ...API_CONFIG,
-        Content: content
+    const response = await $fetch(
+      "https://23700999.com:8081/HMA/api/fr/frSendLineText",
+      {
+        method: "POST",
+        body: {
+          ...API_CONFIG,
+          Content: content,
+        },
       }
-    });
+    );
     return response;
   } catch (error) {
-    console.error('發送文字訊息失敗:', error);
+    console.error("發送文字訊息失敗:", error);
     throw error;
   }
 };
 
 const frSendLineImage = async (base64String, subName) => {
   try {
-    const response = await $fetch('https://23700999.com:8081/HMA/api/fr/frSendLineImage', {
-      method: 'POST',
-      body: {
-        ...API_CONFIG,
-        base64String,
-        subName
+    const response = await $fetch(
+      "https://23700999.com:8081/HMA/api/fr/frSendLineImage",
+      {
+        method: "POST",
+        body: {
+          ...API_CONFIG,
+          base64String,
+          subName,
+        },
       }
-    });
+    );
     return response;
   } catch (error) {
-    console.error('發送圖片訊息失敗:', error);
+    console.error("發送圖片訊息失敗:", error);
     throw error;
   }
 };
 
 const frGetLine = async () => {
   try {
-    const response = await $fetch('https://23700999.com:8081/HMA/api/fr/frGetLine', {
-      method: 'POST',
-      body: API_CONFIG
-    });
+    const response = await $fetch(
+      "https://23700999.com:8081/HMA/api/fr/frGetLine",
+      {
+        method: "POST",
+        body: API_CONFIG,
+      }
+    );
     return response;
   } catch (error) {
-    console.error('取得訊息失敗:', error);
+    console.error("取得訊息失敗:", error);
     throw error;
   }
 };
@@ -342,8 +372,8 @@ const fileToBase64 = (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result.split(',')[1]);
-    reader.onerror = error => reject(error);
+    reader.onload = () => resolve(reader.result.split(",")[1]);
+    reader.onerror = (error) => reject(error);
   });
 };
 
@@ -356,13 +386,13 @@ const sendMessage = async () => {
     if (newMessage.value.trim()) {
       const message = {
         content: newMessage.value,
-        messageType: 'text',
+        messageType: "text",
         time: getCurrentTime(),
         timestamp: Date.now(),
-        type: 'user'
+        type: "user",
       };
       messages.value.push(message);
-      
+
       // 發送到後台
       await frSendLineText(newMessage.value);
     }
@@ -376,14 +406,14 @@ const sendMessage = async () => {
           time: getCurrentTime(),
           timestamp: Date.now(),
           file: media.file,
-          type: 'user'
+          type: "user",
         };
         mediaMessages.value.push(mediaMessage);
-        
+
         // 如果是圖片，轉換為 base64 並發送
-        if (media.type === 'image') {
+        if (media.type === "image") {
           const base64String = await fileToBase64(media.file);
-          const subName = media.file.name.split('.').pop().toLowerCase();
+          const subName = media.file.name.split(".").pop().toLowerCase();
           await frSendLineImage(base64String, subName);
         }
       }
@@ -401,8 +431,8 @@ const sendMessage = async () => {
     // 獲取客服回應
     await getMessages();
   } catch (error) {
-    console.error('發送訊息失敗:', error);
-    alert('發送失敗，請稍後再試');
+    console.error("發送訊息失敗:", error);
+    alert("發送失敗，請稍後再試");
   }
 };
 
@@ -410,74 +440,77 @@ const sendMessage = async () => {
 const getMessages = async () => {
   try {
     const response = await frGetLine();
-    console.log('API 回應:', response);
-    
+    console.log("API 回應:", response);
+
     if (response && response.LineList) {
-      console.log('LineList 長度:', response.LineList.length);
-      
+      console.log("LineList 長度:", response.LineList.length);
+
       // 清空現有訊息，避免重複
       messages.value = [];
       mediaMessages.value = [];
-      
+
       response.LineList.forEach((msg, index) => {
         console.log(`訊息 ${index}:`, msg);
-        
-        if (msg.Mode === 'Input') {
+
+        if (msg.Mode === "Input") {
           // 用戶訊息
-          if (msg.messageType === 'text') {
+          if (msg.messageType === "text") {
             const userMessage = {
               content: msg.Content,
-              messageType: 'text',
+              messageType: "text",
               time: formatTime(msg.CheckTime),
               timestamp: new Date(msg.CheckTime).getTime(),
-              type: 'user'
+              type: "user",
             };
-            console.log('添加用戶文字訊息:', userMessage);
+            console.log("添加用戶文字訊息:", userMessage);
             messages.value.push(userMessage);
-          } else if (msg.messageType === 'image') {
+          } else if (msg.messageType === "image") {
             const mediaMessage = {
               url: msg.ImgURL,
-              messageType: 'image',
+              messageType: "image",
               time: formatTime(msg.CheckTime),
               timestamp: new Date(msg.CheckTime).getTime(),
               fileName: msg.FileName,
-              type: 'user'
+              type: "user",
             };
-            console.log('添加用戶圖片訊息:', mediaMessage);
+            console.log("添加用戶圖片訊息:", mediaMessage);
             mediaMessages.value.push(mediaMessage);
           }
-        } else if (msg.Mode === 'Output') {
+        } else if (msg.Mode === "Output") {
           // 客服回應
           const serviceMessage = {
             content: msg.Content,
-            messageType: 'text',
+            messageType: "text",
             time: formatTime(msg.CheckTime),
             timestamp: new Date(msg.CheckTime).getTime(),
-            type: 'service'
+            type: "service",
           };
-          console.log('添加客服回應:', serviceMessage);
+          console.log("添加客服回應:", serviceMessage);
           messages.value.push(serviceMessage);
         }
       });
-      
-      console.log('最終訊息列表:', messages.value);
-      console.log('最終媒體列表:', mediaMessages.value);
-      
+
+      console.log("最終訊息列表:", messages.value);
+      console.log("最終媒體列表:", mediaMessages.value);
+
       nextTick(() => {
         scrollToBottom();
       });
     } else {
-      console.log('沒有 LineList 或回應格式錯誤');
+      console.log("沒有 LineList 或回應格式錯誤");
     }
   } catch (error) {
-    console.error('獲取訊息失敗:', error);
+    console.error("獲取訊息失敗:", error);
   }
 };
 
 // 格式化時間
 const formatTime = (timeString) => {
   const date = new Date(timeString);
-  return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
+  return `${date.getHours().toString().padStart(2, "0")}:${date
+    .getMinutes()
+    .toString()
+    .padStart(2, "0")}`;
 };
 
 const getCurrentTime = () => {
@@ -513,7 +546,7 @@ const handleCameraCapture = (event) => {
     processMediaFile(file, "image");
   }
   // 清空 input 的 value，允許重複選擇同一檔案
-  event.target.value = '';
+  event.target.value = "";
 };
 
 const handleVideoCapture = (event) => {
@@ -522,17 +555,29 @@ const handleVideoCapture = (event) => {
     processMediaFile(file, "video");
   }
   // 清空 input 的 value，允許重複選擇同一檔案
-  event.target.value = '';
+  event.target.value = "";
 };
 
 const handleGallerySelect = (event) => {
   const files = Array.from(event.target.files);
   files.forEach((file) => {
-    const type = file.type.startsWith("video/") ? "video" : "image";
-    processMediaFile(file, type);
+    // 檢查檔案格式
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic', 'image/heif'];
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'heic', 'heif'];
+    
+    if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
+      alert('請選擇支援的圖片格式：JPG、PNG、HEIC');
+      return;
+    }
+    
+    // 只處理圖片，不處理影片
+    if (file.type.startsWith("image/")) {
+      processMediaFile(file, "image");
+    }
   });
   // 清空 input 的 value，允許重複選擇同一檔案
-  event.target.value = '';
+  event.target.value = "";
 };
 
 const processMediaFile = async (file, type) => {
@@ -541,6 +586,18 @@ const processMediaFile = async (file, type) => {
     if (!validateFileSize(file, 30)) {
       alert("檔案大小不能超過 30MB");
       return;
+    }
+
+    // 檢查圖片格式
+    if (type === "image") {
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic', 'image/heif'];
+      const fileExtension = file.name.split('.').pop().toLowerCase();
+      const allowedExtensions = ['jpg', 'jpeg', 'png', 'heic', 'heif'];
+      
+      if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
+        alert('請選擇支援的圖片格式：JPG、PNG、HEIC');
+        return;
+      }
     }
 
     // 檢查影片長度
@@ -646,7 +703,7 @@ const submitRating = (rating) => {
 onMounted(async () => {
   // 初始載入訊息
   await getMessages();
-  
+
   nextTick(() => {
     scrollToBottom();
   });
@@ -705,11 +762,11 @@ onUnmounted(() => {
   display: flex;
   align-items: flex-end;
   margin-bottom: 1rem;
-  
+
   &.user-message {
     justify-content: flex-end;
   }
-  
+
   &.service-message {
     justify-content: flex-start;
   }
@@ -764,11 +821,11 @@ onUnmounted(() => {
   font-size: 0.75rem;
   color: #666;
   margin-top: 0.35rem;
-  
+
   .user-message & {
     text-align: right;
   }
-  
+
   .service-message & {
     text-align: right;
   }
@@ -872,7 +929,6 @@ onUnmounted(() => {
   width: 80px;
   height: 80px;
   border-radius: 8px;
-
 }
 
 .preview-content {
@@ -890,7 +946,7 @@ onUnmounted(() => {
 .preview-image {
   cursor: pointer;
   transition: transform 0.2s ease;
-  
+
   &:hover {
     transform: scale(1.05);
   }
@@ -1144,7 +1200,7 @@ onUnmounted(() => {
   font-size: 18px;
   font-weight: bold;
   z-index: 1;
-  
+
   &:hover {
     background: rgba(0, 0, 0, 0.7);
   }
@@ -1157,7 +1213,6 @@ onUnmounted(() => {
   max-width: 80vw;
   max-height: 80vh;
 }
-
 
 @include respond-to(md) {
   .message-content {
