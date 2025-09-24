@@ -309,6 +309,8 @@ const {
   validateVideoDuration,
   createPreviewURL,
   revokePreviewURL,
+  isAllowedImage,
+  getExt,
 } = useMediaConverter();
 
 // API 函數
@@ -410,10 +412,12 @@ const sendMessage = async () => {
         };
         mediaMessages.value.push(mediaMessage);
 
-        // 如果是圖片，轉換為 base64 並發送
+        // 如果是圖片，確保使用處理過的檔案並轉換為 base64 發送
         if (media.type === "image") {
-          const base64String = await fileToBase64(media.file);
-          const subName = media.file.name.split(".").pop().toLowerCase();
+          // 確保「送出前」用最新的 File（可能已被轉成 JPG）
+          const processed = await processFileFormat(media.file);
+          const base64String = await fileToBase64(processed);
+          const subName = getExt(processed);
           await frSendLineImage(base64String, subName);
         }
       }
@@ -562,17 +566,13 @@ const handleGallerySelect = (event) => {
   const files = Array.from(event.target.files);
   files.forEach((file) => {
     // 檢查檔案格式
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic', 'image/heif'];
-    const fileExtension = file.name.split('.').pop().toLowerCase();
-    const allowedExtensions = ['jpg', 'jpeg', 'png', 'heic', 'heif'];
-    
-    if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
+    if (!isAllowedImage(file)) {
       alert('請選擇支援的圖片格式：JPG、PNG、HEIC');
       return;
     }
     
     // 只處理圖片，不處理影片
-    if (file.type.startsWith("image/")) {
+    if (file.type.startsWith("image/") || file.name.match(/\.(jpg|jpeg|png|heic|heif)$/i)) {
       processMediaFile(file, "image");
     }
   });
@@ -590,11 +590,7 @@ const processMediaFile = async (file, type) => {
 
     // 檢查圖片格式
     if (type === "image") {
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic', 'image/heif'];
-      const fileExtension = file.name.split('.').pop().toLowerCase();
-      const allowedExtensions = ['jpg', 'jpeg', 'png', 'heic', 'heif'];
-      
-      if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
+      if (!isAllowedImage(file)) {
         alert('請選擇支援的圖片格式：JPG、PNG、HEIC');
         return;
       }

@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import heic2any from "heic2any"
 
 export const useMediaConverter = () => {
   const isConverting = ref(false)
@@ -6,130 +7,53 @@ export const useMediaConverter = () => {
 
   // 檢查是否為 HEIC 格式
   const isHEICFormat = (file: File): boolean => {
-    const fileName = file.name.toLowerCase()
-    const mimeType = file.type.toLowerCase()
-    
-    return fileName.endsWith('.heic') || 
-           fileName.endsWith('.heif') || 
-           mimeType === 'image/heic' || 
-           mimeType === 'image/heif'
+    const name = (file.name || "").toLowerCase()
+    const type = (file.type || "").toLowerCase()
+    return name.endsWith(".heic") || 
+           name.endsWith(".heif") || 
+           type === "image/heic" || 
+           type === "image/heif"
   }
 
-  // 將 HEIC 轉換為 JPG（使用 Canvas API，改善手機兼容性）
+  // 確保檔案名稱有副檔名
+  const filenameWithExt = (name?: string, fallback = "image.jpg") => {
+    if (!name) return fallback
+    // 沒副檔名就補 .jpg
+    if (!/\.\w+$/.test(name)) return name + ".jpg"
+    return name.replace(/\.(heic|heif)$/i, ".jpg")
+  }
+
+  // 將 Blob 轉換為 File
+  const blobToFile = (blob: Blob, name: string): File =>
+    (blob instanceof File) ? blob : new File([blob], name, { type: blob.type || "image/jpeg" })
+
+  // 使用 heic2any 進行真正的 HEIC 轉 JPG
   const convertHEICToJPG = async (file: File): Promise<File> => {
     isConverting.value = true
-    conversionProgress.value = 0
-
+    conversionProgress.value = 10
+    
     try {
-      // 檢查瀏覽器是否支援 HEIC
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
-      const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)
+      const out = await heic2any({
+        blob: file,
+        toType: "image/jpeg",
+        quality: 0.8,
+      }) as Blob
       
-      // 在 iOS Safari 上，HEIC 通常可以正常顯示
-      if (isIOS && isSafari) {
-        console.log('iOS Safari 檢測到，嘗試直接處理 HEIC')
-      }
-
-      // 創建圖片元素來載入 HEIC 檔案
-      const img = new Image()
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')
-      
-      if (!ctx) {
-        throw new Error('無法創建 Canvas 上下文')
-      }
-
-      // 使用 Promise 來處理圖片載入
-      const loadImage = (): Promise<void> => {
-        return new Promise((resolve, reject) => {
-          // 設定超時時間
-          const timeout = setTimeout(() => {
-            reject(new Error('圖片載入超時'))
-          }, 10000) // 10秒超時
-
-          img.onload = () => {
-            clearTimeout(timeout)
-            conversionProgress.value = 50
-            
-            // 設定 Canvas 尺寸
-            canvas.width = img.width
-            canvas.height = img.height
-            
-            // 繪製圖片到 Canvas
-            ctx.drawImage(img, 0, 0)
-            conversionProgress.value = 100
-            resolve()
-          }
-          
-          img.onerror = () => {
-            clearTimeout(timeout)
-            reject(new Error('無法載入 HEIC 圖片，請嘗試使用 JPG 或 PNG 格式'))
-          }
-          
-          // 創建 URL 並載入圖片
-          const url = URL.createObjectURL(file)
-          img.src = url
-        })
-      }
-
-      await loadImage()
-      
-      // 將 Canvas 轉換為 Blob
-      const blob = await new Promise<Blob>((resolve, reject) => {
-        canvas.toBlob((blob) => {
-          if (blob) {
-            resolve(blob)
-          } else {
-            reject(new Error('Canvas 轉換失敗'))
-          }
-        }, 'image/jpeg', 0.8)
-      })
-      
-      // 創建新的 JPG 檔案
-      const jpgFile = new File([blob], 
-        file.name.replace(/\.(heic|heif)$/i, '.jpg'), 
-        { type: 'image/jpeg' }
-      )
-      
-      // 清理 URL
-      URL.revokeObjectURL(img.src)
-      
+      conversionProgress.value = 100
       isConverting.value = false
-      return jpgFile
-    } catch (error) {
-      console.error('HEIC 轉換失敗:', error)
+      return blobToFile(out, filenameWithExt(file.name))
+    } catch (err) {
+      console.error("HEIC 轉換失敗:", err)
       isConverting.value = false
-      
-      // 如果轉換失敗，提示用戶並返回原檔案
-      alert('HEIC 格式轉換失敗，請使用 JPG 或 PNG 格式的圖片')
-      return file
+      throw new Error("無法轉換 HEIC，請改用 JPG/PNG 或啟用相機拍照上傳")
     }
   }
 
   // 處理檔案格式轉換
   const processFileFormat = async (file: File): Promise<File> => {
+    // 某些 iOS 會給空 type，但檔名是 .heic
     if (isHEICFormat(file)) {
-      // 檢查是否為 iOS 設備
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
-      
-      if (isIOS) {
-        // 在 iOS 上，HEIC 通常可以正常處理
-        try {
-          return await convertHEICToJPG(file)
-        } catch (error) {
-          console.warn('HEIC 轉換失敗，嘗試直接使用原檔案:', error)
-          // 在 iOS 上，如果轉換失敗，直接返回原檔案
-          return file
-        }
-      } else {
-        // 非 iOS 設備，嘗試轉換
-        try {
-          return await convertHEICToJPG(file)
-        } catch (error) {
-          console.error('HEIC 轉換失敗:', error)
-          throw new Error('您的設備不支援 HEIC 格式，請使用 JPG 或 PNG 格式的圖片')
-        }
-      }
+      return await convertHEICToJPG(file)
     }
     return file
   }
@@ -175,6 +99,35 @@ export const useMediaConverter = () => {
     URL.revokeObjectURL(url)
   }
 
+  // 檢查是否為允許的圖片格式
+  const isAllowedImage = (file: File): boolean => {
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic', 'image/heif']
+    const name = (file.name || "").toLowerCase()
+    const ext = name.split(".").pop() || ""
+    const allowedExt = ['jpg','jpeg','png','heic','heif']
+    const type = (file.type || "").toLowerCase()
+
+    if (allowedTypes.includes(type)) return true
+    if (allowedExt.includes(ext)) return true
+    // type 空而且沒副檔名 → 先讓過，丟給 processFileFormat 決定
+    if (!type && !ext) return true
+    return false
+  }
+
+  // 取得副檔名（處理空 type/沒副檔名）
+  const getExt = (f: File): string => {
+    const n = (f.name || "").toLowerCase()
+    if (/\.(jpe?g|png|gif|webp)$/i.test(n)) return n.split(".").pop()!
+    // 看 MIME
+    const t = (f.type || "").toLowerCase()
+    if (t.includes("jpeg")) return "jpg"
+    if (t.includes("png")) return "png"
+    if (t.includes("gif")) return "gif"
+    if (t.includes("webp")) return "webp"
+    // 保底
+    return "jpg"
+  }
+
   return {
     isConverting,
     conversionProgress,
@@ -184,6 +137,8 @@ export const useMediaConverter = () => {
     validateFileSize,
     validateVideoDuration,
     createPreviewURL,
-    revokePreviewURL
+    revokePreviewURL,
+    isAllowedImage,
+    getExt
   }
 }
