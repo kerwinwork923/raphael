@@ -1,6 +1,8 @@
 <template>
   <div class="CSRobotWrap">
-    <TitleMenu Text="線上客服" link="back" />
+    <div class="titleMenuWrap">
+        <TitleMenu Text="線上客服" link="back" />
+    </div>
 
     <!-- 聊天區域 -->
     <div class="chat-container">
@@ -734,7 +736,9 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
 }
-
+.titleMenuWrap{
+  padding: 0 3%;
+}
 .chat-container {
   flex: 1;
   display: flex;
@@ -910,7 +914,7 @@ onUnmounted(() => {
   padding: 1rem;
   gap: 0.5rem;
   width: 100%;
-  min-height: 150px;
+  min-height: 110px;
 }
 
 .media-preview-area {
