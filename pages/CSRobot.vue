@@ -18,17 +18,30 @@
           </div>
         </div>
 
-        <!-- 用戶訊息 -->
+        <!-- 所有訊息（文字、圖片、客服回應）按時間排序 -->
         <div
-          class="message user-message"
-          v-for="(message, index) in messages"
+          class="message"
+          :class="message.type === 'user' ? 'user-message' : 'service-message'"
+          v-for="(message, index) in allMessages"
           :key="index"
         >
+          <!-- 客服回應需要頭像 -->
+          <div v-if="message.type === 'service'" class="message-avatar">
+            <img src="/assets/imgs/robot/character/pet4_3.png" alt="客服頭像" />
+          </div>
+          
           <div class="message-content">
-            <!-- 一般文字訊息 -->
-            <div v-if="!message.type" class="message-bubble user-bubble">
-              {{ message.text }}
+            <!-- 文字訊息 -->
+            <div v-if="message.messageType === 'text'" class="message-bubble" :class="message.type === 'user' ? 'user-bubble' : 'service-bubble'">
+              {{ message.content }}
             </div>
+
+            <!-- 圖片訊息 -->
+            <div v-else-if="message.messageType === 'image'" class="message-bubble media-bubble">
+  <div class="media-preview">
+    <img :src="message.url" alt="圖片" @click="openImagePreview(message.url)" class="preview-image" />
+  </div>
+</div>
 
             <!-- 滿意度評分卡片 -->
             <div
@@ -71,31 +84,6 @@
             </div>
 
             <div class="message-time">{{ message.time }}</div>
-          </div>
-        </div>
-
-        <!-- 媒體預覽 -->
-        <div
-          class="message user-message"
-          v-for="(media, index) in mediaMessages"
-          :key="'media-' + index"
-        >
-          <div class="message-content">
-            <div class="message-bubble user-bubble media-bubble">
-              <div class="media-preview" v-if="media.type === 'image'">
-                <img :src="media.url" alt="圖片" />
-                <button class="delete-media" @click="deleteMedia(index)">
-                  ×
-                </button>
-              </div>
-              <div class="media-preview" v-else-if="media.type === 'video'">
-                <video :src="media.url" controls></video>
-                <button class="delete-media" @click="deleteMedia(index)">
-                  ×
-                </button>
-              </div>
-            </div>
-            <div class="message-time">{{ media.time }}</div>
           </div>
         </div>
 
@@ -165,9 +153,10 @@
           <button class="media-btn" @click="openCamera" title="拍照">
             <img src="/assets/imgs/CSRobot/camera.svg" alt="拍照" />
           </button>
-          <button class="media-btn" @click="openVideo" title="錄影">
+          <!-- 暫時隱藏影片上傳功能 -->
+          <!-- <button class="media-btn" @click="openVideo" title="錄影">
             <img src="/assets/imgs/CSRobot/video.svg" alt="錄影" />
-          </button>
+          </button> -->
           <button class="media-btn" @click="openGallery" title="相簿">
             <img src="/assets/imgs/CSRobot/gallery.svg" alt="相簿" />
           </button>
@@ -175,7 +164,7 @@
         <button
           class="send-btn"
           @click="sendMessage"
-          :disabled="(!newMessage.trim() && previewMedia.length === 0) || isLoading"
+          :disabled="!newMessage.trim() && previewMedia.length === 0"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -237,16 +226,11 @@
       </div>
     </div>
 
-    <!-- 載入狀態 -->
-    <div class="loading-overlay" v-if="isLoading">
-      <div class="loading-spinner"></div>
-      <p>發送中...</p>
-    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, nextTick, onMounted, onUnmounted } from "vue";
+import { ref, reactive, nextTick, onMounted, onUnmounted, computed } from "vue";
 import { useMediaConverter } from "~/composables/useMediaConverter";
 
 // 響應式數據
@@ -258,7 +242,16 @@ const chatMessages = ref(null);
 const isFocused = ref(false);
 const showImagePreview = ref(false);
 const previewImageUrl = ref("");
-const isLoading = ref(false);
+
+// 合併所有訊息並按時間排序
+const allMessages = computed(() => {
+  const all = [...messages.value, ...mediaMessages.value];
+  return all.sort((a, b) => {
+    const timeA = new Date(a.timestamp || a.time);
+    const timeB = new Date(b.timestamp || b.time);
+    return timeA - timeB;
+  });
+});
 
 const userData = JSON.parse(localStorage.getItem("userData"));
 
@@ -300,7 +293,6 @@ const {
 // API 函數
 const frSendLineText = async (content) => {
   try {
-    isLoading.value = true;
     const response = await $fetch('https://23700999.com:8081/HMA/api/fr/frSendLineText', {
       method: 'POST',
       body: {
@@ -312,14 +304,11 @@ const frSendLineText = async (content) => {
   } catch (error) {
     console.error('發送文字訊息失敗:', error);
     throw error;
-  } finally {
-    isLoading.value = false;
   }
 };
 
 const frSendLineImage = async (base64String, subName) => {
   try {
-    isLoading.value = true;
     const response = await $fetch('https://23700999.com:8081/HMA/api/fr/frSendLineImage', {
       method: 'POST',
       body: {
@@ -332,8 +321,6 @@ const frSendLineImage = async (base64String, subName) => {
   } catch (error) {
     console.error('發送圖片訊息失敗:', error);
     throw error;
-  } finally {
-    isLoading.value = false;
   }
 };
 
@@ -368,8 +355,10 @@ const sendMessage = async () => {
     // 發送文字訊息
     if (newMessage.value.trim()) {
       const message = {
-        text: newMessage.value,
+        content: newMessage.value,
+        messageType: 'text',
         time: getCurrentTime(),
+        timestamp: Date.now(),
         type: 'user'
       };
       messages.value.push(message);
@@ -383,9 +372,11 @@ const sendMessage = async () => {
       for (const media of previewMedia.value) {
         const mediaMessage = {
           url: media.url,
-          type: media.type,
+          messageType: media.type,
           time: getCurrentTime(),
+          timestamp: Date.now(),
           file: media.file,
+          type: 'user'
         };
         mediaMessages.value.push(mediaMessage);
         
@@ -419,25 +410,74 @@ const sendMessage = async () => {
 const getMessages = async () => {
   try {
     const response = await frGetLine();
-    if (response && response.messages) {
-      response.messages.forEach(msg => {
-        if (msg.type === 'service') {
+    console.log('API 回應:', response);
+    
+    if (response && response.LineList) {
+      console.log('LineList 長度:', response.LineList.length);
+      
+      // 清空現有訊息，避免重複
+      messages.value = [];
+      mediaMessages.value = [];
+      
+      response.LineList.forEach((msg, index) => {
+        console.log(`訊息 ${index}:`, msg);
+        
+        if (msg.Mode === 'Input') {
+          // 用戶訊息
+          if (msg.messageType === 'text') {
+            const userMessage = {
+              content: msg.Content,
+              messageType: 'text',
+              time: formatTime(msg.CheckTime),
+              timestamp: new Date(msg.CheckTime).getTime(),
+              type: 'user'
+            };
+            console.log('添加用戶文字訊息:', userMessage);
+            messages.value.push(userMessage);
+          } else if (msg.messageType === 'image') {
+            const mediaMessage = {
+              url: msg.ImgURL,
+              messageType: 'image',
+              time: formatTime(msg.CheckTime),
+              timestamp: new Date(msg.CheckTime).getTime(),
+              fileName: msg.FileName,
+              type: 'user'
+            };
+            console.log('添加用戶圖片訊息:', mediaMessage);
+            mediaMessages.value.push(mediaMessage);
+          }
+        } else if (msg.Mode === 'Output') {
+          // 客服回應
           const serviceMessage = {
-            text: msg.content,
-            time: getCurrentTime(),
+            content: msg.Content,
+            messageType: 'text',
+            time: formatTime(msg.CheckTime),
+            timestamp: new Date(msg.CheckTime).getTime(),
             type: 'service'
           };
+          console.log('添加客服回應:', serviceMessage);
           messages.value.push(serviceMessage);
         }
       });
       
+      console.log('最終訊息列表:', messages.value);
+      console.log('最終媒體列表:', mediaMessages.value);
+      
       nextTick(() => {
         scrollToBottom();
       });
+    } else {
+      console.log('沒有 LineList 或回應格式錯誤');
     }
   } catch (error) {
     console.error('獲取訊息失敗:', error);
   }
+};
+
+// 格式化時間
+const formatTime = (timeString) => {
+  const date = new Date(timeString);
+  return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
 };
 
 const getCurrentTime = () => {
@@ -472,6 +512,8 @@ const handleCameraCapture = (event) => {
   if (file) {
     processMediaFile(file, "image");
   }
+  // 清空 input 的 value，允許重複選擇同一檔案
+  event.target.value = '';
 };
 
 const handleVideoCapture = (event) => {
@@ -479,6 +521,8 @@ const handleVideoCapture = (event) => {
   if (file) {
     processMediaFile(file, "video");
   }
+  // 清空 input 的 value，允許重複選擇同一檔案
+  event.target.value = '';
 };
 
 const handleGallerySelect = (event) => {
@@ -487,6 +531,8 @@ const handleGallerySelect = (event) => {
     const type = file.type.startsWith("video/") ? "video" : "image";
     processMediaFile(file, type);
   });
+  // 清空 input 的 value，允許重複選擇同一檔案
+  event.target.value = '';
 };
 
 const processMediaFile = async (file, type) => {
@@ -597,7 +643,10 @@ const submitRating = (rating) => {
 };
 
 // 組件掛載後滾動到底部
-onMounted(() => {
+onMounted(async () => {
+  // 初始載入訊息
+  await getMessages();
+  
   nextTick(() => {
     scrollToBottom();
   });
@@ -607,10 +656,10 @@ onMounted(() => {
     window.addEventListener("service-completed", showSatisfactionRating);
   }
 
-  // 測試用：5秒後自動顯示滿意度評分
-  setTimeout(() => {
-    showSatisfactionRating();
-  }, 5000);
+  // 暫時隱藏滿意度評分功能
+  // setTimeout(() => {
+  //   showSatisfactionRating();
+  // }, 5000);
 });
 
 // 清理事件監聽器
@@ -647,7 +696,7 @@ onUnmounted(() => {
 
 .chat-messages {
   flex: 1;
-  overflow-y: auto;
+
   padding: 1rem 0;
   @include scrollbarStyle();
 }
@@ -656,8 +705,13 @@ onUnmounted(() => {
   display: flex;
   align-items: flex-end;
   margin-bottom: 1rem;
+  
   &.user-message {
     justify-content: flex-end;
+  }
+  
+  &.service-message {
+    justify-content: flex-start;
   }
 }
 
@@ -709,8 +763,15 @@ onUnmounted(() => {
 .message-time {
   font-size: 0.75rem;
   color: #666;
-  margin-top: 0.25rem;
-  text-align: right;
+  margin-top: 0.35rem;
+  
+  .user-message & {
+    text-align: right;
+  }
+  
+  .service-message & {
+    text-align: right;
+  }
 }
 
 .media-preview {
@@ -1097,32 +1158,6 @@ onUnmounted(() => {
   max-height: 80vh;
 }
 
-// 載入狀態樣式
-.loading-overlay {
-  @include coverbg();
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-  background: rgba(255, 255, 255, 0.9);
-}
-
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #74bc1f;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
-}
-
-.loading-overlay p {
-  color: #1e1e1e;
-  font-size: 1rem;
-  margin: 0;
-}
 
 @include respond-to(md) {
   .message-content {
