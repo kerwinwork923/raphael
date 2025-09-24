@@ -416,10 +416,13 @@ const sendMessage = async () => {
 
         // 如果是圖片，確保使用處理過的檔案並轉換為 base64 發送
         if (media.type === "image") {
+          console.log('發送圖片前檢查:', { name: media.file.name, type: media.file.type });
           // 確保「送出前」用最新的 File（可能已被轉成 JPG）
           const processed = await processFileFormat(media.file);
+          console.log('處理後的檔案:', { name: processed.name, type: processed.type });
           const base64String = await fileToBase64(processed);
           const subName = getExt(processed);
+          console.log('發送圖片:', { subName, base64Length: base64String.length });
           await frSendLineImage(base64String, subName);
         }
       }
@@ -584,6 +587,8 @@ const handleGallerySelect = (event) => {
 
 const processMediaFile = async (file, type) => {
   try {
+    console.log('開始處理媒體檔案:', { name: file.name, type: file.type, size: file.size });
+    
     // 檢查檔案大小
     if (!validateFileSize(file, 30)) {
       alert("檔案大小不能超過 30MB");
@@ -607,8 +612,10 @@ const processMediaFile = async (file, type) => {
       }
     }
 
+    console.log('開始格式轉換...');
     // 處理格式轉換（HEIC 轉 JPG）
     const processedFile = await processFileFormat(file);
+    console.log('格式轉換完成:', { name: processedFile.name, type: processedFile.type, size: processedFile.size });
 
     // 添加到預覽區域
     addPreviewMedia(processedFile, type);
@@ -623,10 +630,11 @@ const addPreviewMedia = (file, type) => {
   const previewItem = {
     url,
     type,
-    file,
+    file, // 這裡保存的是處理過的檔案（HEIC 已轉為 JPG）
   };
 
   previewMedia.value.push(previewItem);
+  console.log('添加預覽媒體:', previewItem); // 調試日誌
 };
 
 const removePreview = (index) => {

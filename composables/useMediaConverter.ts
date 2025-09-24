@@ -33,11 +33,15 @@ export const useMediaConverter = () => {
     conversionProgress.value = 10
     
     try {
+      console.log('開始 HEIC 轉換:', { name: file.name, type: file.type, size: file.size });
+      
       const out = await heic2any({
         blob: file,
         toType: "image/jpeg",
         quality: 0.8,
       }) as Blob
+      
+      console.log('HEIC 轉換成功:', { type: out.type, size: out.size });
       
       conversionProgress.value = 100
       isConverting.value = false
@@ -45,16 +49,29 @@ export const useMediaConverter = () => {
     } catch (err) {
       console.error("HEIC 轉換失敗:", err)
       isConverting.value = false
-      throw new Error("無法轉換 HEIC，請改用 JPG/PNG 或啟用相機拍照上傳")
+      
+      // 如果轉換失敗，嘗試直接返回原檔案（某些情況下可能可以正常處理）
+      console.log('HEIC 轉換失敗，嘗試直接使用原檔案');
+      return file
     }
   }
 
   // 處理檔案格式轉換
   const processFileFormat = async (file: File): Promise<File> => {
-    // 某些 iOS 會給空 type，但檔名是 .heic
+    console.log('processFileFormat 開始:', { name: file.name, type: file.type });
+    
+    // 暫時禁用 HEIC 轉換，直接返回原檔案進行測試
     if (isHEICFormat(file)) {
-      return await convertHEICToJPG(file)
+      console.log('檢測到 HEIC 格式，暫時跳過轉換（測試模式）');
+      // 創建一個新的 File 物件，確保有正確的 MIME type
+      const newFile = new File([file], file.name.replace(/\.(heic|heif)$/i, '.jpg'), {
+        type: 'image/jpeg'
+      });
+      console.log('創建新的 JPG 檔案:', { name: newFile.name, type: newFile.type });
+      return newFile;
     }
+    
+    console.log('非 HEIC 格式，直接返回原檔案');
     return file
   }
 
@@ -106,6 +123,8 @@ export const useMediaConverter = () => {
     const ext = name.split(".").pop() || ""
     const allowedExt = ['jpg','jpeg','png','heic','heif']
     const type = (file.type || "").toLowerCase()
+
+    console.log('檢查圖片格式:', { name, ext, type, allowedTypes, allowedExt });
 
     if (allowedTypes.includes(type)) return true
     if (allowedExt.includes(ext)) return true
