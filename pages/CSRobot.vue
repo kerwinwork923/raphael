@@ -29,18 +29,21 @@
             <div v-if="!message.type" class="message-bubble user-bubble">
               {{ message.text }}
             </div>
-            
+
             <!-- 滿意度評分卡片 -->
-            <div v-else-if="message.type === 'satisfaction'" class="satisfaction-card">
+            <div
+              v-else-if="message.type === 'satisfaction'"
+              class="satisfaction-card"
+            >
               <div class="satisfaction-header">
                 <h3>請問您對於本次服務</h3>
               </div>
               <div class="satisfaction-content">
                 <div class="satisfaction-emoji">
-                  {{ satisfactionEmojis[message.rating - 1] || '😐' }}
+                  {{ satisfactionEmojis[message.rating - 1] || "😐" }}
                 </div>
                 <div class="satisfaction-text">
-                  {{ satisfactionTexts[message.rating - 1] || '請選擇評分' }}
+                  {{ satisfactionTexts[message.rating - 1] || "請選擇評分" }}
                 </div>
                 <div class="star-rating">
                   <span
@@ -54,12 +57,19 @@
                   </span>
                 </div>
                 <div class="satisfaction-buttons" v-if="message.rating > 0">
-                  <button class="skip-btn" @click="submitRating(0)">略過</button>
-                  <button class="submit-btn" @click="submitRating(message.rating)">送出</button>
+                  <button class="skip-btn" @click="submitRating(0)">
+                    略過
+                  </button>
+                  <button
+                    class="submit-btn"
+                    @click="submitRating(message.rating)"
+                  >
+                    送出
+                  </button>
                 </div>
               </div>
             </div>
-            
+
             <div class="message-time">{{ message.time }}</div>
           </div>
         </div>
@@ -107,7 +117,6 @@
           </div>
         </div>
       </div>
-
     </div>
 
     <div class="optionGroup">
@@ -115,15 +124,31 @@
       <div class="input-wrapper">
         <!-- 媒體預覽區域 -->
         <div class="media-preview-area" v-if="previewMedia.length > 0">
-          <div class="preview-item" v-for="(media, index) in previewMedia" :key="index">
+          <div
+            class="preview-item"
+            v-for="(media, index) in previewMedia"
+            :key="index"
+          >
             <div class="preview-content">
-              <img v-if="media.type === 'image'" :src="media.url" alt="預覽圖片" />
-              <video v-else-if="media.type === 'video'" :src="media.url" controls></video>
+              <img
+                v-if="media.type === 'image'"
+                :src="media.url"
+                alt="預覽圖片"
+                @click="openImagePreview(media.url)"
+                class="preview-image"
+              />
+              <video
+                v-else-if="media.type === 'video'"
+                :src="media.url"
+                controls
+              ></video>
             </div>
-            <button class="remove-preview" @click="removePreview(index)">×</button>
+            <button class="remove-preview" @click="removePreview(index)">
+              ×
+            </button>
           </div>
         </div>
-        
+
         <textarea
           v-model="newMessage"
           class="message-input"
@@ -150,7 +175,7 @@
         <button
           class="send-btn"
           @click="sendMessage"
-          :disabled="!newMessage.trim() && previewMedia.length === 0"
+          :disabled="(!newMessage.trim() && previewMedia.length === 0) || isLoading"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -203,6 +228,20 @@
       @change="handleGallerySelect"
       style="display: none"
     />
+
+    <!-- 圖片預覽放大彈窗 -->
+    <div class="image-preview-overlay" v-if="showImagePreview" @click="closeImagePreview">
+      <div class="image-preview-modal" @click.stop>
+        <button class="close-preview" @click="closeImagePreview">×</button>
+        <img :src="previewImageUrl" alt="放大預覽" class="preview-large-image" />
+      </div>
+    </div>
+
+    <!-- 載入狀態 -->
+    <div class="loading-overlay" v-if="isLoading">
+      <div class="loading-spinner"></div>
+      <p>發送中...</p>
+    </div>
   </div>
 </template>
 
@@ -217,6 +256,20 @@ const mediaMessages = ref([]);
 const previewMedia = ref([]);
 const chatMessages = ref(null);
 const isFocused = ref(false);
+const showImagePreview = ref(false);
+const previewImageUrl = ref("");
+const isLoading = ref(false);
+
+const userData = JSON.parse(localStorage.getItem("userData"));
+
+// API 配置
+const API_CONFIG = {
+  MID: userData.MID,
+  Token: userData.Token,
+  MAID: userData.MAID,
+  Mobile: userData.Mobile,
+  Lang: "zhtw"
+};
 
 // 滿意度評分相關
 const satisfactionEmojis = ["😠", "😰", "😐", "😊", "😁"];
@@ -244,43 +297,147 @@ const {
   revokePreviewURL,
 } = useMediaConverter();
 
+// API 函數
+const frSendLineText = async (content) => {
+  try {
+    isLoading.value = true;
+    const response = await $fetch('https://23700999.com:8081/HMA/api/fr/frSendLineText', {
+      method: 'POST',
+      body: {
+        ...API_CONFIG,
+        Content: content
+      }
+    });
+    return response;
+  } catch (error) {
+    console.error('發送文字訊息失敗:', error);
+    throw error;
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const frSendLineImage = async (base64String, subName) => {
+  try {
+    isLoading.value = true;
+    const response = await $fetch('https://23700999.com:8081/HMA/api/fr/frSendLineImage', {
+      method: 'POST',
+      body: {
+        ...API_CONFIG,
+        base64String,
+        subName
+      }
+    });
+    return response;
+  } catch (error) {
+    console.error('發送圖片訊息失敗:', error);
+    throw error;
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const frGetLine = async () => {
+  try {
+    const response = await $fetch('https://23700999.com:8081/HMA/api/fr/frGetLine', {
+      method: 'POST',
+      body: API_CONFIG
+    });
+    return response;
+  } catch (error) {
+    console.error('取得訊息失敗:', error);
+    throw error;
+  }
+};
+
+// 將檔案轉換為 base64
+const fileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = error => reject(error);
+  });
+};
+
 // 方法
-const sendMessage = () => {
+const sendMessage = async () => {
   if (!newMessage.value.trim() && previewMedia.value.length === 0) return;
 
-  // 發送文字訊息
-  if (newMessage.value.trim()) {
-    const message = {
-      text: newMessage.value,
-      time: getCurrentTime(),
-    };
-    messages.value.push(message);
-  }
-
-  // 發送媒體訊息
-  if (previewMedia.value.length > 0) {
-    previewMedia.value.forEach(media => {
-      const mediaMessage = {
-        url: media.url,
-        type: media.type,
+  try {
+    // 發送文字訊息
+    if (newMessage.value.trim()) {
+      const message = {
+        text: newMessage.value,
         time: getCurrentTime(),
-        file: media.file
+        type: 'user'
       };
-      mediaMessages.value.push(mediaMessage);
+      messages.value.push(message);
+      
+      // 發送到後台
+      await frSendLineText(newMessage.value);
+    }
+
+    // 發送媒體訊息
+    if (previewMedia.value.length > 0) {
+      for (const media of previewMedia.value) {
+        const mediaMessage = {
+          url: media.url,
+          type: media.type,
+          time: getCurrentTime(),
+          file: media.file,
+        };
+        mediaMessages.value.push(mediaMessage);
+        
+        // 如果是圖片，轉換為 base64 並發送
+        if (media.type === 'image') {
+          const base64String = await fileToBase64(media.file);
+          const subName = media.file.name.split('.').pop().toLowerCase();
+          await frSendLineImage(base64String, subName);
+        }
+      }
+    }
+
+    // 清空輸入
+    newMessage.value = "";
+    previewMedia.value = [];
+
+    // 滾動到底部
+    nextTick(() => {
+      scrollToBottom();
     });
+
+    // 獲取客服回應
+    await getMessages();
+  } catch (error) {
+    console.error('發送訊息失敗:', error);
+    alert('發送失敗，請稍後再試');
   }
+};
 
-  // 清空輸入
-  newMessage.value = "";
-  previewMedia.value = [];
-
-  // 滾動到底部
-  nextTick(() => {
-    scrollToBottom();
-  });
-
-  // 等待客服回應（不自動回覆）
-  // 這裡可以發送到後端等待真實客服回應
+// 獲取客服回應
+const getMessages = async () => {
+  try {
+    const response = await frGetLine();
+    if (response && response.messages) {
+      response.messages.forEach(msg => {
+        if (msg.type === 'service') {
+          const serviceMessage = {
+            text: msg.content,
+            time: getCurrentTime(),
+            type: 'service'
+          };
+          messages.value.push(serviceMessage);
+        }
+      });
+      
+      nextTick(() => {
+        scrollToBottom();
+      });
+    }
+  } catch (error) {
+    console.error('獲取訊息失敗:', error);
+  }
 };
 
 const getCurrentTime = () => {
@@ -376,6 +533,17 @@ const removePreview = (index) => {
   previewMedia.value.splice(index, 1);
 };
 
+// 圖片預覽放大功能
+const openImagePreview = (url) => {
+  previewImageUrl.value = url;
+  showImagePreview.value = true;
+};
+
+const closeImagePreview = () => {
+  showImagePreview.value = false;
+  previewImageUrl.value = "";
+};
+
 const deleteMedia = (index) => {
   revokePreviewURL(mediaMessages.value[index].url);
   mediaMessages.value.splice(index, 1);
@@ -385,13 +553,13 @@ const deleteMedia = (index) => {
 const showSatisfactionRating = () => {
   // 在聊天記錄中顯示滿意度評分卡片
   const satisfactionCard = {
-    type: 'satisfaction',
+    type: "satisfaction",
     time: getCurrentTime(),
-    rating: 0
+    rating: 0,
   };
-  
+
   messages.value.push(satisfactionCard);
-  
+
   nextTick(() => {
     scrollToBottom();
   });
@@ -399,7 +567,9 @@ const showSatisfactionRating = () => {
 
 const selectRating = (rating) => {
   // 找到最後一個滿意度評分卡片並更新評分
-  const lastSatisfactionIndex = messages.value.findLastIndex(msg => msg.type === 'satisfaction');
+  const lastSatisfactionIndex = messages.value.findLastIndex(
+    (msg) => msg.type === "satisfaction"
+  );
   if (lastSatisfactionIndex !== -1) {
     messages.value[lastSatisfactionIndex].rating = rating;
   }
@@ -436,7 +606,7 @@ onMounted(() => {
   if (typeof window !== "undefined") {
     window.addEventListener("service-completed", showSatisfactionRating);
   }
-  
+
   // 測試用：5秒後自動顯示滿意度評分
   setTimeout(() => {
     showSatisfactionRating();
@@ -455,7 +625,9 @@ onUnmounted(() => {
 .CSRobotWrap {
   @include gradientBg();
   width: 100%;
+  height: 100vh;
   min-height: 100vh;
+  overflow-y: auto;
   padding: 1rem 0rem 7rem;
   display: flex;
   flex-direction: column;
@@ -469,6 +641,8 @@ onUnmounted(() => {
   margin: 0 auto;
   padding: 0 1rem;
   width: 100%;
+  overflow-y: auto;
+  padding-bottom: 200px;
 }
 
 .chat-messages {
@@ -573,7 +747,7 @@ onUnmounted(() => {
 .input-container {
   background: white;
   padding: 1rem;
-  border-top: .5px solid #eee;
+  border-top: 0.5px solid #eee;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -605,7 +779,7 @@ onUnmounted(() => {
 }
 
 .optionGroup {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
@@ -637,17 +811,27 @@ onUnmounted(() => {
   width: 80px;
   height: 80px;
   border-radius: 8px;
-  overflow: hidden;
+
 }
 
 .preview-content {
   width: 100%;
   height: 100%;
-  
-  img, video {
+
+  img,
+  video {
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+}
+
+.preview-image {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  
+  &:hover {
+    transform: scale(1.05);
   }
 }
 
@@ -709,8 +893,10 @@ onUnmounted(() => {
 
 // 滿意度評分卡片樣式
 .satisfaction-card {
-  background: white;
-  border-radius: 12px;
+  border-radius: 8px;
+  background: var(--Neutral-white, #fff);
+  box-shadow: 0 6px 6px 0
+    var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
   padding: 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   max-width: 300px;
@@ -718,9 +904,11 @@ onUnmounted(() => {
 }
 
 .satisfaction-header h3 {
-  color: #1e1e1e;
-  margin: 0 0 1rem 0;
-  font-size: 1rem;
+  color: #000;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
 }
 
 .satisfaction-content {
@@ -735,17 +923,25 @@ onUnmounted(() => {
 }
 
 .satisfaction-text {
-  font-size: 0.875rem;
-  color: #1e1e1e;
-  margin-bottom: 0.75rem;
-  font-weight: 500;
+  color: var(--Neutral-black, #1e1e1e);
+
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
 }
 
 .star-rating {
   display: flex;
   justify-content: center;
-  gap: 0.25rem;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
   margin-bottom: 1rem;
+  padding: 4px 8px;
+  border-radius: var(--Radius-r-50, 50px);
+  background: var(--Neutral-white, #fff);
+  box-shadow: 0 2px 6px 0
+    var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4)) inset;
 }
 
 .star {
@@ -765,36 +961,30 @@ onUnmounted(() => {
 
 .satisfaction-buttons {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.25rem;
   justify-content: center;
 }
 
 .skip-btn,
 .submit-btn {
-  padding: 0.375rem 1rem;
   border: none;
-  border-radius: 0.375rem;
+
   cursor: pointer;
-  font-size: 0.875rem;
+
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
   transition: all 0.2s ease;
+  background: none;
 }
 
 .skip-btn {
-  background: #f5f5f5;
-  color: #666;
-
-  &:hover {
-    background: #e0e0e0;
-  }
+  color: var(--Neutral-400, #b3b3b3);
 }
 
 .submit-btn {
-  background: #74bc1f;
-  color: white;
-
-  &:hover {
-    background: #65a31b;
-  }
+  color: var(--Primary-default, #74bc1f);
 }
 
 // 轉換進度指示器樣式
@@ -855,6 +1045,83 @@ onUnmounted(() => {
   font-size: 0.875rem;
   color: #666;
   font-weight: 500;
+}
+
+// 圖片預覽放大彈窗樣式
+.image-preview-overlay {
+  @include coverbg();
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+}
+
+.image-preview-modal {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.close-preview {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  z-index: 1;
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.7);
+  }
+}
+
+.preview-large-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  max-width: 80vw;
+  max-height: 80vh;
+}
+
+// 載入狀態樣式
+.loading-overlay {
+  @include coverbg();
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #74bc1f;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+.loading-overlay p {
+  color: #1e1e1e;
+  font-size: 1rem;
+  margin: 0;
 }
 
 @include respond-to(md) {
