@@ -9,21 +9,21 @@ export const useMediaConverter = () => {
   const isIOS = /iphone|ipad|ipod/.test(ua)
   const isMobile = /iphone|ipad|ipod|android/.test(ua)
 
-  // 行動端與桌機的不同限制
+  // 行動端與桌機的不同限制（調更保守，手機更穩）
   const DESKTOP_LIMITS = {
-    maxBase64MB: 25,  // 你的後端允許的 Base64 上限（可調）
-    maxSide: 4096,
-    startQuality: 0.85,
-    minQuality: 0.5,
+    maxBase64MB: 20,
+    maxSide: 3200,
+    startQuality: 0.82,
+    minQuality: 0.55,
     step: 0.1,
     minSide: 1600,
   }
   const MOBILE_LIMITS = {
-    maxBase64MB: 20,  // 行動端保守點（可調）
-    maxSide: 2560,    // 限制像素邊長，避免 iOS Canvas OOM
-    startQuality: 0.82,
-    minQuality: 0.5,
-    step: 0.12,
+    maxBase64MB: 10,    // iOS 建議 ≤10MB Base64
+    maxSide: 1920,      // 壓邊長，避免 canvas OOM
+    startQuality: 0.8,
+    minQuality: 0.6,
+    step: 0.1,
     minSide: 1280,
   }
   const LIMITS = isMobile ? MOBILE_LIMITS : DESKTOP_LIMITS
@@ -70,12 +70,29 @@ export const useMediaConverter = () => {
 
   const nextFrame = () => new Promise(requestAnimationFrame)
 
+  // 分段 Base64（避免一次性 DataURL 造成 iOS OOM）
+  const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
+    const bytes = new Uint8Array(buffer)
+    const chunk = 0x8000 // 32KB
+    let binary = ''
+    for (let i = 0; i < bytes.length; i += chunk) {
+      const sub = bytes.subarray(i, i + chunk)
+      binary += String.fromCharCode.apply(null, Array.from(sub))
+    }
+    return btoa(binary)
+  }
+
+  // 對外提供：更安全的 file -> base64（不含 data: 前綴）
+  const fileToBase64 = async (file: File): Promise<string> => {
+    const buf = await file.arrayBuffer()
+    return arrayBufferToBase64(buf)
+  }
+
   const loadImage = (src: string): Promise<HTMLImageElement> =>
     new Promise((resolve, reject) => {
       const img = new Image()
       img.onload = () => resolve(img)
       img.onerror = reject
-      // 為避免某些 webview 的 decode 卡頓
       ;(img as any).decoding = 'async'
       img.src = src
     })
@@ -86,8 +103,29 @@ export const useMediaConverter = () => {
     return { width: Math.round(w * scale), height: Math.round(h * scale) }
   }
 
-  // 用 canvas 重新編碼（會限縮邊長）
+  // 用 canvas 重新編碼（優先用 createImageBitmap，失敗再退回 <img>）
   const drawToCanvas = async (blob: Blob, maxSide = LIMITS.maxSide): Promise<HTMLCanvasElement> => {
+    // 先試 createImageBitmap（較省 RAM）
+    try {
+      // @ts-ignore
+      if ('createImageBitmap' in window) {
+        // @ts-ignore
+        const bmp = await (window as any).createImageBitmap(blob)
+        const { width, height } = fitSize(bmp.width, bmp.height, maxSide)
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')!
+        ctx.drawImage(bmp, 0, 0, width, height)
+        // @ts-ignore
+        if ('close' in bmp) bmp.close?.()
+        return canvas
+      }
+    } catch (e) {
+      console.warn('createImageBitmap 失敗，改用 <img> 路徑：', e)
+    }
+
+    // 退回 <img> 路徑
     const url = URL.createObjectURL(blob)
     try {
       await nextFrame()
@@ -210,12 +248,22 @@ export const useMediaConverter = () => {
     }
   }
 
+  // 手機：非 HEIC 且太大也壓縮（避免後續 Base64 爆）
   const processFileFormat = async (file: File): Promise<File> => {
     console.log('processFileFormat 開始:', { name: file.name, type: file.type || '(empty)' })
 
     if (isHEICFormat(file)) {
       console.log('檢測到 HEIC/HEIF，開始轉換 → JPEG（含壓縮）')
       return await convertHEICToJPG(file)
+    }
+
+    // ★ 在手機上，只要原圖 > 3MB，一律重編為 JPEG 壓縮
+    if (isMobile && file.size > 3 * 1024 * 1024) {
+      const blob = new Blob([await file.arrayBuffer()], { type: file.type || 'image/jpeg' })
+      const canvas = await drawToCanvas(blob, MOBILE_LIMITS.maxSide)
+      let jpg = await canvasToBlob(canvas, 'image/jpeg', MOBILE_LIMITS.startQuality)
+      jpg = await enforceSize(jpg, { ...MOBILE_LIMITS })
+      return new File([jpg], replaceExt(file.name, 'jpg'), { type: 'image/jpeg' })
     }
 
     console.log('非 HEIC，直接返回原檔案')
@@ -286,6 +334,7 @@ export const useMediaConverter = () => {
     createPreviewURL,
     revokePreviewURL,
     isAllowedImage,
-    getExt
+    getExt,
+    fileToBase64,            // ★ 新增：分段 base64（請在頁面改用它）
   }
 }
