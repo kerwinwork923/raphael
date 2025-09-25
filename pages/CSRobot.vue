@@ -350,19 +350,13 @@ const frSendLineImage = async (base64String, fileName) => {
         body: {
           ...API_CONFIG,
           base64String,
-          subName: fileName, // 傳送完整檔名
+          subName: fileName,
         },
       }
     );
     return response;
   } catch (error) {
-    console.error("發送圖片訊息失敗:", {
-      message: error?.message,
-      status: error?.response?.status || error?.status,
-      data: error?.data,
-      fileName: fileName,
-      base64Length: base64String.length
-    });
+    console.error("發送圖片訊息失敗:", error);
     throw error;
   }
 };
@@ -418,61 +412,26 @@ const sendMessage = async () => {
         };
         mediaMessages.value.push(mediaMessage);
 
-        // 如果是圖片，確保正確轉換為 base64 發送
+        // 如果是圖片，直接轉換為 base64 發送
         if (media.type === "image") {
-          console.log('發送圖片前檢查:', { 
-            name: media.file.name, 
-            type: media.file.type, 
-            size: media.file.size 
+          console.log('發送圖片:', { name: media.file.name, type: media.file.type, size: media.file.size });
+          
+          // 使用簡單的 FileReader 轉 base64
+          const base64String = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const result = reader.result;
+              const base64 = result.split(',')[1]; // 移除 data:image/...;base64, 前綴
+              resolve(base64);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(media.file);
           });
           
-          try {
-            // 使用 composable 的分段 base64 轉換
-            const base64String = await fileToBase64(media.file);
-            const fileName = media.file.name || `image.${getExt(media.file) || 'jpg'}`;
-            
-            console.log('轉換完成:', { 
-              fileName, 
-              base64Length: base64String.length,
-              originalSize: media.file.size,
-              base64Size: Math.round(base64String.length * 0.75) // base64 約為原檔案的 4/3 大小
-            });
-            
-            // 檢查 base64 是否有效
-            if (!base64String || base64String.length === 0) {
-              throw new Error('Base64 轉換失敗');
-            }
-            
-            await frSendLineImage(base64String, fileName);
-            console.log('圖片發送成功');
-            
-          } catch (e) {
-            console.error('發送圖片失敗:', e);
-            
-            // 如果分段 base64 失敗，嘗試傳統方法
-            try {
-              console.log('嘗試傳統 FileReader 方法...');
-              const base64String = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => {
-                  const result = reader.result;
-                  const base64 = result.split(',')[1]; // 移除 data:image/...;base64, 前綴
-                  resolve(base64);
-                };
-                reader.onerror = reject;
-                reader.readAsDataURL(media.file);
-              });
-              
-              const fileName = media.file.name || `image.${getExt(media.file) || 'jpg'}`;
-              await frSendLineImage(base64String, fileName);
-              console.log('傳統方法發送成功');
-              
-            } catch (ee) {
-              console.error('傳統方法也失敗:', ee);
-              alert('圖片送出失敗，請稍後再試。');
-              continue;
-            }
-          }
+          const fileName = media.file.name || `image.${getExt(media.file) || 'jpg'}`;
+          console.log('轉換完成:', { fileName, base64Length: base64String.length });
+          
+          await frSendLineImage(base64String, fileName);
         }
       }
     }
