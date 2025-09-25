@@ -103,8 +103,8 @@
           </div>
         </div>
 
-        <!-- 底部錨點 -->
-        <div ref="bottomSentinel" style="height: 1px;"></div>
+        <!-- 放在所有訊息的最下面 -->
+        <div ref="bottomSentinel" style="height:1px;"></div>
 
         <!-- 轉換進度指示器 -->
         <div class="conversion-overlay" v-if="isConverting">
@@ -215,7 +215,7 @@
     <input
       ref="cameraInput"
       type="file"
-      accept="image/jpeg,image/jpg,image/png"
+      accept="image/*"
       capture="camera"
       @change="handleCameraCapture"
       style="display: none"
@@ -318,7 +318,6 @@ const {
   isAllowedImage,
   getExt,
   isHEICFormat,
-  fileToBase64,
 } = useMediaConverter();
 
 // API 函數
@@ -341,7 +340,7 @@ const frSendLineText = async (content) => {
   }
 };
 
-const frSendLineImage = async (base64String, fileName) => {
+const frSendLineImage = async (base64String, subName) => {
   try {
     const response = await $fetch(
       "https://23700999.com:8081/HMA/api/fr/frSendLineImage",
@@ -350,7 +349,7 @@ const frSendLineImage = async (base64String, fileName) => {
         body: {
           ...API_CONFIG,
           base64String,
-          subName: fileName,
+          subName,
         },
       }
     );
@@ -377,7 +376,15 @@ const frGetLine = async () => {
   }
 };
 
-
+// 將檔案轉換為 base64
+const fileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result.split(",")[1]);
+    reader.onerror = (error) => reject(error);
+  });
+};
 
 // 方法
 const sendMessage = async () => {
@@ -412,26 +419,24 @@ const sendMessage = async () => {
         };
         mediaMessages.value.push(mediaMessage);
 
-        // 如果是圖片，直接轉換為 base64 發送
+        // 如果是圖片，確保使用處理過的檔案並轉換為 base64 發送
         if (media.type === "image") {
-          console.log('發送圖片:', { name: media.file.name, type: media.file.type, size: media.file.size });
+          console.log('發送圖片前檢查:', { name: media.file.name, type: media.file.type });
+          // 確保「送出前」用最新的 File（可能已被轉成 JPG）
+          const processed = await processFileFormat(media.file);
+          console.log('處理後的檔案:', { name: processed.name, type: processed.type });
           
-          // 使用簡單的 FileReader 轉 base64
-          const base64String = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => {
-              const result = reader.result;
-              const base64 = result.split(',')[1]; // 移除 data:image/...;base64, 前綴
-              resolve(base64);
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(media.file);
-          });
+          // 檢查轉換是否成功（如果還是 HEIC 格式，轉換可能失敗）
+          if (isHEICFormat(processed)) {
+            console.warn('HEIC 轉換失敗，跳過此圖片');
+            alert('HEIC 格式轉換失敗，請改用 JPG 或 PNG 格式的圖片');
+            continue; // 跳過這個檔案
+          }
           
-          const fileName = media.file.name || `image.${getExt(media.file) || 'jpg'}`;
-          console.log('轉換完成:', { fileName, base64Length: base64String.length });
-          
-          await frSendLineImage(base64String, fileName);
+          const base64String = await fileToBase64(processed);
+          const subName = getExt(processed);
+          console.log('發送圖片:', { subName, base64Length: base64String.length });
+          await frSendLineImage(base64String, subName);
         }
       }
     }
@@ -536,7 +541,7 @@ const getCurrentTime = () => {
 };
 
 const scrollToBottom = () => {
-  // 優先使用底部錨點滾動
+  // 優先用底部錨點，避免圖片載入高度變動造成的誤差
   if (bottomSentinel.value) {
     bottomSentinel.value.scrollIntoView({ block: 'end' });
   } else if (chatMessages.value) {
@@ -544,11 +549,12 @@ const scrollToBottom = () => {
   }
 };
 
+// DOM 更新 + 瀏覽器排程 + 圖片高度回流後再補一次
 const scrollAfterRender = async () => {
   await nextTick();
   requestAnimationFrame(() => {
     scrollToBottom();
-    setTimeout(scrollToBottom, 50);
+    setTimeout(scrollToBottom, 80); // iOS/Safari 偶發再補一下
   });
 };
 
@@ -605,11 +611,36 @@ const processMediaFile = async (file, type) => {
   try {
     console.log('開始處理媒體檔案:', { name: file.name, type: file.type, size: file.size });
     
-    // 暫時移除所有限制，直接使用原檔案
-    console.log('直接使用原檔案，不進行任何檢查和轉換');
-    
-    // 直接添加到預覽區域
-    addPreviewMedia(file, type);
+    // 檢查檔案大小
+    if (!validateFileSize(file, 30)) {
+      alert("檔案大小不能超過 30MB");
+      return;
+    }
+
+    // 檢查圖片格式
+    if (type === "image") {
+      if (!isAllowedImage(file)) {
+        alert('請選擇支援的圖片格式：JPG、PNG、HEIC');
+        return;
+      }
+    }
+
+    // 檢查影片長度
+    if (type === "video") {
+      const isValidDuration = await validateVideoDuration(file, 10);
+      if (!isValidDuration) {
+        alert("影片長度不能超過 10 秒");
+        return;
+      }
+    }
+
+    console.log('開始格式轉換...');
+    // 處理格式轉換（HEIC 轉 JPG）
+    const processedFile = await processFileFormat(file);
+    console.log('格式轉換完成:', { name: processedFile.name, type: processedFile.type, size: processedFile.size });
+
+    // 添加到預覽區域
+    addPreviewMedia(processedFile, type);
   } catch (error) {
     console.error("處理媒體檔案時發生錯誤:", error);
     alert(error.message || "處理檔案時發生錯誤");
@@ -660,6 +691,7 @@ const showSatisfactionRating = async () => {
 
   messages.value.push(satisfactionCard);
 
+  // 確保滾動到最下方
   await scrollAfterRender();
 };
 
@@ -727,6 +759,8 @@ onUnmounted(() => {
   width: 100%;
   height: 100vh;
   min-height: 100vh;
+  /* 移除 overflow-y: auto; 由子層負責滾 */
+  padding: 1rem 0rem 0rem;
   display: flex;
   flex-direction: column;
 }
@@ -737,18 +771,22 @@ onUnmounted(() => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 0;
+  max-width: 100%;
+  margin: 0 auto;
   padding: 0 1rem;
-  padding-bottom: 200px;
+  width: 100%;
+  /* 移除 overflow-y: auto; 讓子層滾 */
+  padding-bottom: 200px; /* 預留固定輸入列的高度 */
+  min-height: 0;         /* ★ 讓子層能產生捲軸 */
 }
 
 .chat-messages {
   flex: 1;
-  min-height: 0;
-  overflow-y: auto;
+  min-height: 0;         /* ★ 關鍵：在 flex 內允許縮，才會有捲軸 */
+  overflow-y: auto;      /* ★ 只有這個層滾 */
   padding: 1rem 0;
-  scroll-behavior: smooth;
   @include scrollbarStyle();
+  scroll-behavior: smooth;
 }
 
 .message {

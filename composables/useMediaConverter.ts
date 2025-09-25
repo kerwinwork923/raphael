@@ -4,31 +4,6 @@ export const useMediaConverter = () => {
   const isConverting = ref(false)
   const conversionProgress = ref(0)
 
-  // ===== 平台偵測 =====
-  const ua = (typeof navigator !== 'undefined' ? navigator.userAgent : '').toLowerCase()
-  const isIOS = /iphone|ipad|ipod/.test(ua)
-  const isMobile = /iphone|ipad|ipod|android/.test(ua)
-
-  // 行動端與桌機的不同限制（調更保守，手機更穩）
-  const DESKTOP_LIMITS = {
-    maxBase64MB: 20,
-    maxSide: 3200,
-    startQuality: 0.82,
-    minQuality: 0.55,
-    step: 0.1,
-    minSide: 1600,
-  }
-  const MOBILE_LIMITS = {
-    maxBase64MB: 10,    // iOS 建議 ≤10MB Base64
-    maxSide: 1920,      // 壓邊長，避免 canvas OOM
-    startQuality: 0.8,
-    minQuality: 0.6,
-    step: 0.1,
-    minSide: 1280,
-  }
-  const LIMITS = isMobile ? MOBILE_LIMITS : DESKTOP_LIMITS
-
-  // ===== helpers =====
   const isHEICFormat = (file: File): boolean => {
     const name = (file.name || "").toLowerCase()
     const type = (file.type || "").toLowerCase()
@@ -44,233 +19,59 @@ export const useMediaConverter = () => {
     return name.replace(/\.(heic|heif)$/i, ".jpg")
   }
 
-  const replaceExt = (name: string | undefined, newExt: string, fallbackBase = "image"): string => {
-    const base = (name && name.replace(/\.\w+$/,'').trim()) || fallbackBase
-    const clean = newExt.replace(/^\./,'')
-    return `${base}.${clean}`
-  }
-
   const blobToFile = (blob: Blob, name: string): File =>
     (blob instanceof File) ? blob : new File([blob], name, { type: blob.type || "image/jpeg" })
 
-  const mimeFromErrMessage = (msg?: string): string | null => {
-    if (!msg) return null
-    const m = msg.match(/image\/[a-z0-9+.\-]+/i)
-    return m ? m[0].toLowerCase() : null
-  }
-
-  const extFromMime = (mime: string): string => {
-    const sub = mime.split('/')[1]?.toLowerCase() || 'jpg'
-    if (sub === 'jpeg') return 'jpg'
-    return sub
-  }
-
-  const maxBlobBytesFromBase64MB = (maxBase64MB: number) =>
-    Math.floor(maxBase64MB * 1024 * 1024 * 0.75) // Base64 ~ *4/3
-
-  const nextFrame = () => new Promise(requestAnimationFrame)
-
-  // 分段 Base64（避免一次性 DataURL 造成 iOS OOM）
-  const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
-    const bytes = new Uint8Array(buffer)
-    const chunk = 0x8000 // 32KB
-    let binary = ''
-    for (let i = 0; i < bytes.length; i += chunk) {
-      const sub = bytes.subarray(i, i + chunk)
-      binary += String.fromCharCode.apply(null, Array.from(sub))
-    }
-    return btoa(binary)
-  }
-
-  // 對外提供：更安全的 file -> base64（不含 data: 前綴）
-  const fileToBase64 = async (file: File): Promise<string> => {
-    const buf = await file.arrayBuffer()
-    return arrayBufferToBase64(buf)
-  }
-
-  const loadImage = (src: string): Promise<HTMLImageElement> =>
-    new Promise((resolve, reject) => {
-      const img = new Image()
-      img.onload = () => resolve(img)
-      img.onerror = reject
-      ;(img as any).decoding = 'async'
-      img.src = src
-    })
-
-  const fitSize = (w: number, h: number, maxSide: number) => {
-    if (Math.max(w, h) <= maxSide) return { width: w, height: h }
-    const scale = maxSide / Math.max(w, h)
-    return { width: Math.round(w * scale), height: Math.round(h * scale) }
-  }
-
-  // 用 canvas 重新編碼（優先用 createImageBitmap，失敗再退回 <img>）
-  const drawToCanvas = async (blob: Blob, maxSide = LIMITS.maxSide): Promise<HTMLCanvasElement> => {
-    // 先試 createImageBitmap（較省 RAM）
-    try {
-      // @ts-ignore
-      if ('createImageBitmap' in window) {
-        // @ts-ignore
-        const bmp = await (window as any).createImageBitmap(blob)
-        const { width, height } = fitSize(bmp.width, bmp.height, maxSide)
-        const canvas = document.createElement('canvas')
-        canvas.width = width
-        canvas.height = height
-        const ctx = canvas.getContext('2d')!
-        ctx.drawImage(bmp, 0, 0, width, height)
-        // @ts-ignore
-        if ('close' in bmp) bmp.close?.()
-        return canvas
-      }
-    } catch (e) {
-      console.warn('createImageBitmap 失敗，改用 <img> 路徑：', e)
-    }
-
-    // 退回 <img> 路徑
-    const url = URL.createObjectURL(blob)
-    try {
-      await nextFrame()
-      const img = await loadImage(url)
-      const { width, height } = fitSize(img.width, img.height, maxSide)
-      const canvas = document.createElement('canvas')
-      canvas.width = width
-      canvas.height = height
-      const ctx = canvas.getContext('2d')!
-      ctx.drawImage(img, 0, 0, width, height)
-      return canvas
-    } finally {
-      URL.revokeObjectURL(url)
-    }
-  }
-
-  // canvas -> blob，iOS 失敗時用 dataURL fallback
-  const canvasToBlob = (canvas: HTMLCanvasElement, type: string, quality?: number): Promise<Blob> =>
-    new Promise((resolve, reject) => {
-      canvas.toBlob((b) => {
-        if (b) return resolve(b)
-        try {
-          const dataUrl = canvas.toDataURL(type, quality)
-          const bin = atob(dataUrl.split(',')[1] || '')
-          const arr = new Uint8Array(bin.length)
-          for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i)
-          resolve(new Blob([arr], { type }))
-        } catch (e) {
-          reject(e)
-        }
-      }, type, quality)
-    })
-
-  // 壓到指定 Base64 上限：先降畫質，再縮邊
-  const enforceSize = async (
-    input: Blob,
-    {
-      maxBase64MB = LIMITS.maxBase64MB,
-      startQuality = LIMITS.startQuality,
-      minQuality = LIMITS.minQuality,
-      step = LIMITS.step,
-      maxSide = LIMITS.maxSide,
-      minSide = LIMITS.minSide
-    } = {}
-  ): Promise<Blob> => {
-    const targetBytes = maxBlobBytesFromBase64MB(maxBase64MB)
-    if (input.size <= targetBytes) return input
-
-    let quality = startQuality
-    let currentCanvas = await drawToCanvas(input, maxSide)
-
-    while (quality >= minQuality) {
-      await nextFrame()
-      const b = await canvasToBlob(currentCanvas, 'image/jpeg', quality)
-      if (b.size <= targetBytes) return b
-      quality = +(quality - step).toFixed(2)
-    }
-
-    let side = Math.max(currentCanvas.width, currentCanvas.height)
-    while (side > minSide) {
-      await nextFrame()
-      side = Math.floor(side * 0.85)
-      currentCanvas = await drawToCanvas(await canvasToBlob(currentCanvas, 'image/jpeg', minQuality), side)
-      const b = await canvasToBlob(currentCanvas, 'image/jpeg', minQuality)
-      if (b.size <= targetBytes) return b
-    }
-
-    return await canvasToBlob(currentCanvas, 'image/jpeg', minQuality)
-  }
-
-  // ===== 轉檔核心 =====
-
+  // 真的做 HEIC -> JPEG（動態載入 heic2any，避免 SSR 問題）
   const convertHEICToJPG = async (file: File): Promise<File> => {
     isConverting.value = true
     conversionProgress.value = 10
     try {
-      if (typeof window === 'undefined') throw new Error('HEIC conversion must run in the browser.')
+      // 僅在瀏覽器端執行
+      if (typeof window === 'undefined') {
+        throw new Error('HEIC conversion must run in the browser.')
+      }
 
-      console.log('開始真正的 HEIC 轉換:', { name: file.name, type: file.type || '(empty)', size: file.size })
-      await nextFrame()
+      console.log('開始真正的 HEIC 轉換:', { name: file.name, type: file.type, size: file.size });
 
+      // 動態 import，避免 SSR
       const mod = await import('heic2any')
       const heic2any = (mod.default ?? mod) as any
 
       const out = await heic2any({
         blob: file,
         toType: "image/jpeg",
-        quality: isMobile ? 0.8 : 0.85,
+        quality: 0.8,
       }) as Blob | Blob[]
 
-      const first = Array.isArray(out) ? out[0] : out
-      const jpgBlob = first.type ? first : new Blob([first], { type: 'image/jpeg' })
+      const blob = Array.isArray(out) ? out[0] : out
+      const jpgBlob = blob.type ? blob : new Blob([blob], { type: 'image/jpeg' })
 
-      // 行動端特別壓一下避免 Base64 膨脹/記憶體爆
-      const compact = await enforceSize(jpgBlob)
+      console.log('HEIC 轉換成功:', { type: jpgBlob.type, size: jpgBlob.size });
+
       conversionProgress.value = 100
-      return blobToFile(compact, filenameWithExt(file.name))
-    } catch (err: any) {
-      const msg: string = err?.message || ''
-      const code: number | undefined = err?.code
-
-      // heic2any：其實瀏覽器已可讀（常見 PNG）
-      if (code === 1 && /already browser readable/i.test(msg)) {
-        const detectedMime = mimeFromErrMessage(msg) || 'image/png'
-        console.warn(`heic2any: 已可被瀏覽器直接讀取（${detectedMime}），改用 Canvas 重新編碼為 JPEG。`)
-        const buf = await file.arrayBuffer()
-        const detectedBlob = new Blob([buf], { type: detectedMime })
-
-        const canvas = await drawToCanvas(detectedBlob)
-        let jpg = await canvasToBlob(canvas, 'image/jpeg', LIMITS.startQuality)
-        jpg = await enforceSize(jpg)
-
-        return new File([jpg], replaceExt(file.name, 'jpg'), { type: 'image/jpeg' })
-      }
-
+      return blobToFile(jpgBlob, filenameWithExt(file.name))
+    } catch (err) {
       console.error("HEIC 轉換失敗:", err)
+      // 失敗時，不要假裝成 JPG！回傳原檔，讓上層決定要不要擋掉或提示
       return file
     } finally {
       isConverting.value = false
     }
   }
 
-  // 手機：非 HEIC 且太大也壓縮（避免後續 Base64 爆）
+  // ✅ 修正：真的轉，不要只改副檔名
   const processFileFormat = async (file: File): Promise<File> => {
-    console.log('processFileFormat 開始:', { name: file.name, type: file.type || '(empty)' })
-
+    console.log('processFileFormat 開始:', { name: file.name, type: file.type });
+    
     if (isHEICFormat(file)) {
-      console.log('檢測到 HEIC/HEIF，開始轉換 → JPEG（含壓縮）')
+      console.log('檢測到 HEIC 格式，開始真正的轉換');
       return await convertHEICToJPG(file)
     }
-
-    // ★ 在手機上，只要原圖 > 3MB，一律重編為 JPEG 壓縮
-    if (isMobile && file.size > 3 * 1024 * 1024) {
-      const blob = new Blob([await file.arrayBuffer()], { type: file.type || 'image/jpeg' })
-      const canvas = await drawToCanvas(blob, MOBILE_LIMITS.maxSide)
-      let jpg = await canvasToBlob(canvas, 'image/jpeg', MOBILE_LIMITS.startQuality)
-      jpg = await enforceSize(jpg, { ...MOBILE_LIMITS })
-      return new File([jpg], replaceExt(file.name, 'jpg'), { type: 'image/jpeg' })
-    }
-
-    console.log('非 HEIC，直接返回原檔案')
+    
+    console.log('非 HEIC 格式，直接返回原檔案');
     return file
   }
-
-  // ===== 其他工具 =====
 
   const validateFileSize = (file: File, maxSizeMB: number = 30): boolean => {
     const maxSizeBytes = maxSizeMB * 1024 * 1024
@@ -320,6 +121,7 @@ export const useMediaConverter = () => {
     if (t.includes("png")) return "png"
     if (t.includes("gif")) return "gif"
     if (t.includes("webp")) return "webp"
+    // 保底
     return "jpg"
   }
 
@@ -334,7 +136,6 @@ export const useMediaConverter = () => {
     createPreviewURL,
     revokePreviewURL,
     isAllowedImage,
-    getExt,
-    fileToBase64,            // ★ 新增：分段 base64（請在頁面改用它）
+    getExt
   }
 }
