@@ -212,7 +212,7 @@
     <input
       ref="cameraInput"
       type="file"
-      accept="image/*"
+      accept="image/jpeg,image/jpg,image/png"
       capture="camera"
       @change="handleCameraCapture"
       style="display: none"

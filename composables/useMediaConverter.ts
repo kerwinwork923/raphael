@@ -4,8 +4,31 @@ export const useMediaConverter = () => {
   const isConverting = ref(false)
   const conversionProgress = ref(0)
 
-  // ====================== helpers ======================
+  // ===== 平台偵測 =====
+  const ua = (typeof navigator !== 'undefined' ? navigator.userAgent : '').toLowerCase()
+  const isIOS = /iphone|ipad|ipod/.test(ua)
+  const isMobile = /iphone|ipad|ipod|android/.test(ua)
 
+  // 行動端與桌機的不同限制
+  const DESKTOP_LIMITS = {
+    maxBase64MB: 25,  // 你的後端允許的 Base64 上限（可調）
+    maxSide: 4096,
+    startQuality: 0.85,
+    minQuality: 0.5,
+    step: 0.1,
+    minSide: 1600,
+  }
+  const MOBILE_LIMITS = {
+    maxBase64MB: 20,  // 行動端保守點（可調）
+    maxSide: 2560,    // 限制像素邊長，避免 iOS Canvas OOM
+    startQuality: 0.82,
+    minQuality: 0.5,
+    step: 0.12,
+    minSide: 1280,
+  }
+  const LIMITS = isMobile ? MOBILE_LIMITS : DESKTOP_LIMITS
+
+  // ===== helpers =====
   const isHEICFormat = (file: File): boolean => {
     const name = (file.name || "").toLowerCase()
     const type = (file.type || "").toLowerCase()
@@ -42,14 +65,32 @@ export const useMediaConverter = () => {
     return sub
   }
 
-  // Base64 長度 ~= 原始 bytes * 4/3，反推 blob 最大 bytes
   const maxBlobBytesFromBase64MB = (maxBase64MB: number) =>
-    Math.floor(maxBase64MB * 1024 * 1024 * 0.75)
+    Math.floor(maxBase64MB * 1024 * 1024 * 0.75) // Base64 ~ *4/3
 
-  // 用 canvas 重新編碼（並可縮圖）
-  const drawToCanvas = async (blob: Blob, maxSide = 4096): Promise<HTMLCanvasElement> => {
+  const nextFrame = () => new Promise(requestAnimationFrame)
+
+  const loadImage = (src: string): Promise<HTMLImageElement> =>
+    new Promise((resolve, reject) => {
+      const img = new Image()
+      img.onload = () => resolve(img)
+      img.onerror = reject
+      // 為避免某些 webview 的 decode 卡頓
+      ;(img as any).decoding = 'async'
+      img.src = src
+    })
+
+  const fitSize = (w: number, h: number, maxSide: number) => {
+    if (Math.max(w, h) <= maxSide) return { width: w, height: h }
+    const scale = maxSide / Math.max(w, h)
+    return { width: Math.round(w * scale), height: Math.round(h * scale) }
+  }
+
+  // 用 canvas 重新編碼（會限縮邊長）
+  const drawToCanvas = async (blob: Blob, maxSide = LIMITS.maxSide): Promise<HTMLCanvasElement> => {
     const url = URL.createObjectURL(blob)
     try {
+      await nextFrame()
       const img = await loadImage(url)
       const { width, height } = fitSize(img.width, img.height, maxSide)
       const canvas = document.createElement('canvas')
@@ -63,28 +104,12 @@ export const useMediaConverter = () => {
     }
   }
 
-  const loadImage = (src: string): Promise<HTMLImageElement> =>
-    new Promise((resolve, reject) => {
-      const img = new Image()
-      img.onload = () => resolve(img)
-      img.onerror = reject
-      img.decoding = 'async'
-      img.src = src
-    })
-
-  const fitSize = (w: number, h: number, maxSide: number) => {
-    if (Math.max(w, h) <= maxSide) return { width: w, height: h }
-    const scale = maxSide / Math.max(w, h)
-    return { width: Math.round(w * scale), height: Math.round(h * scale) }
-  }
-
-  // canvas 轉 blob，帶 fallback
+  // canvas -> blob，iOS 失敗時用 dataURL fallback
   const canvasToBlob = (canvas: HTMLCanvasElement, type: string, quality?: number): Promise<Blob> =>
     new Promise((resolve, reject) => {
       canvas.toBlob((b) => {
         if (b) return resolve(b)
         try {
-          // iOS 部分情況 toBlob 可能回 null，用 dataURL fallback
           const dataUrl = canvas.toDataURL(type, quality)
           const bin = atob(dataUrl.split(',')[1] || '')
           const arr = new Uint8Array(bin.length)
@@ -96,16 +121,16 @@ export const useMediaConverter = () => {
       }, type, quality)
     })
 
-  // 反覆降畫質 / 縮邊讓 blob 體積落在 Base64 上限內
+  // 壓到指定 Base64 上限：先降畫質，再縮邊
   const enforceSize = async (
     input: Blob,
     {
-      maxBase64MB = 25,      // 依你後端允許的 Base64 字串上限調整；30MB 字串 ≈ 22.5MB blob
-      startQuality = 0.85,
-      minQuality = 0.5,
-      step = 0.1,
-      maxSide = 4096,        // 先不大幅縮圖，只在必要時縮
-      minSide = 1600         // 若畫質降到 min 還超重，開始縮到此較小邊
+      maxBase64MB = LIMITS.maxBase64MB,
+      startQuality = LIMITS.startQuality,
+      minQuality = LIMITS.minQuality,
+      step = LIMITS.step,
+      maxSide = LIMITS.maxSide,
+      minSide = LIMITS.minSide
     } = {}
   ): Promise<Blob> => {
     const targetBytes = maxBlobBytesFromBase64MB(maxBase64MB)
@@ -114,38 +139,35 @@ export const useMediaConverter = () => {
     let quality = startQuality
     let currentCanvas = await drawToCanvas(input, maxSide)
 
-    // 先嘗試只降畫質
     while (quality >= minQuality) {
+      await nextFrame()
       const b = await canvasToBlob(currentCanvas, 'image/jpeg', quality)
       if (b.size <= targetBytes) return b
       quality = +(quality - step).toFixed(2)
     }
 
-    // 畫質降到 minQuality 仍超標 → 逐步縮邊
     let side = Math.max(currentCanvas.width, currentCanvas.height)
     while (side > minSide) {
+      await nextFrame()
       side = Math.floor(side * 0.85)
       currentCanvas = await drawToCanvas(await canvasToBlob(currentCanvas, 'image/jpeg', minQuality), side)
       const b = await canvasToBlob(currentCanvas, 'image/jpeg', minQuality)
       if (b.size <= targetBytes) return b
     }
 
-    // 還是超標就回最後結果（已盡力壓縮）
     return await canvasToBlob(currentCanvas, 'image/jpeg', minQuality)
   }
 
-  // ====================== conversion ======================
+  // ===== 轉檔核心 =====
 
-  // HEIC -> JPEG（或把「已可讀」的影像轉成 JPEG + 壓縮）
   const convertHEICToJPG = async (file: File): Promise<File> => {
     isConverting.value = true
     conversionProgress.value = 10
     try {
-      if (typeof window === 'undefined') {
-        throw new Error('HEIC conversion must run in the browser.')
-      }
+      if (typeof window === 'undefined') throw new Error('HEIC conversion must run in the browser.')
 
       console.log('開始真正的 HEIC 轉換:', { name: file.name, type: file.type || '(empty)', size: file.size })
+      await nextFrame()
 
       const mod = await import('heic2any')
       const heic2any = (mod.default ?? mod) as any
@@ -153,44 +175,41 @@ export const useMediaConverter = () => {
       const out = await heic2any({
         blob: file,
         toType: "image/jpeg",
-        quality: 0.8,
+        quality: isMobile ? 0.8 : 0.85,
       }) as Blob | Blob[]
 
       const first = Array.isArray(out) ? out[0] : out
       const jpgBlob = first.type ? first : new Blob([first], { type: 'image/jpeg' })
 
-      // 壓到可控大小（避免 Base64 膨脹）
-      const compact = await enforceSize(jpgBlob, { maxBase64MB: 25 })
+      // 行動端特別壓一下避免 Base64 膨脹/記憶體爆
+      const compact = await enforceSize(jpgBlob)
       conversionProgress.value = 100
       return blobToFile(compact, filenameWithExt(file.name))
     } catch (err: any) {
       const msg: string = err?.message || ''
       const code: number | undefined = err?.code
 
-      // heic2any 提示已可讀（多見於實際是 PNG）
+      // heic2any：其實瀏覽器已可讀（常見 PNG）
       if (code === 1 && /already browser readable/i.test(msg)) {
         const detectedMime = mimeFromErrMessage(msg) || 'image/png'
         console.warn(`heic2any: 已可被瀏覽器直接讀取（${detectedMime}），改用 Canvas 重新編碼為 JPEG。`)
         const buf = await file.arrayBuffer()
         const detectedBlob = new Blob([buf], { type: detectedMime })
 
-        // 直接重編成 JPEG 並壓縮
-        const canvas = await drawToCanvas(detectedBlob, 4096)
-        let jpg = await canvasToBlob(canvas, 'image/jpeg', 0.85)
-        jpg = await enforceSize(jpg, { maxBase64MB: 25 }) // 控制 Base64 長度
+        const canvas = await drawToCanvas(detectedBlob)
+        let jpg = await canvasToBlob(canvas, 'image/jpeg', LIMITS.startQuality)
+        jpg = await enforceSize(jpg)
 
         return new File([jpg], replaceExt(file.name, 'jpg'), { type: 'image/jpeg' })
       }
 
       console.error("HEIC 轉換失敗:", err)
-      // 回傳原檔，讓上層決定是否擋掉
       return file
     } finally {
       isConverting.value = false
     }
   }
 
-  // 真的轉，不只改副檔名
   const processFileFormat = async (file: File): Promise<File> => {
     console.log('processFileFormat 開始:', { name: file.name, type: file.type || '(empty)' })
 
@@ -199,13 +218,11 @@ export const useMediaConverter = () => {
       return await convertHEICToJPG(file)
     }
 
-    // 非 HEIC，但若是超大 PNG/WebP，也可視需要轉成 JPEG 壓一下（選配）
-    // 這裡保守處理：只記錄 log，不自動轉，避免影響預期色彩/透明背景
     console.log('非 HEIC，直接返回原檔案')
     return file
   }
 
-  // ====================== validations & utils ======================
+  // ===== 其他工具 =====
 
   const validateFileSize = (file: File, maxSizeMB: number = 30): boolean => {
     const maxSizeBytes = maxSizeMB * 1024 * 1024
