@@ -414,62 +414,21 @@ const sendMessage = async () => {
         };
         mediaMessages.value.push(mediaMessage);
 
-        // 如果是圖片，使用保底 JPEG 和分段 base64 發送
+        // 如果是圖片，直接發送
         if (media.type === "image") {
           console.log('發送圖片前檢查:', { name: media.file.name, type: media.file.type });
           
-          // 1) 先跑轉檔（HEIC 會被轉/壓）
-          let processed = await processFileFormat(media.file);
-          console.log('處理後的檔案:', { name: processed.name, type: processed.type, size: processed.size });
-          
-          // 2) 保底：沒有 MIME、或尺寸 > 3MB，就再重編一次成正統 JPEG
-          const needReencode =
-            !processed.type ||
-            processed.type === 'application/octet-stream' ||
-            processed.size > 3 * 1024 * 1024;
-
-          if (needReencode) {
-            console.log('需要重新編碼為 JPEG');
-            processed = await processFileFormat(processed);
-            if (!processed.type) {
-              processed = new File(
-                [await processed.arrayBuffer()],
-                (processed.name?.replace(/\.\w+$/, '') || 'image') + '.jpg',
-                { type: 'image/jpeg' }
-              );
-            }
-          }
-          
-          // 3) 用 composable 的分段 base64
-          const base64String = await fileToBase64(processed);
-          
-          // 4) 傳「完整檔名」，不要只傳副檔名
-          const fileName = processed.name || `image.${getExt(processed) || 'jpg'}`;
+          // 直接使用原檔案轉 base64
+          const base64String = await fileToBase64(media.file);
+          const fileName = media.file.name || `image.${getExt(media.file) || 'jpg'}`;
           console.log('發送圖片:', { fileName, base64Length: base64String.length });
           
           try {
             await frSendLineImage(base64String, fileName);
           } catch (e) {
-            console.error('發送圖片失敗（首次）:', e);
-            // 簡單回降：再小一點，再試一次
-            if (processed.size > 1.5 * 1024 * 1024) {
-              console.log('嘗試壓縮後重新發送');
-              const smaller = await processFileFormat(
-                new File([await processed.arrayBuffer()], processed.name, { type: processed.type || 'image/jpeg' })
-              );
-              const b64b = await fileToBase64(smaller);
-              try {
-                await frSendLineImage(b64b, smaller.name || fileName);
-                console.log('壓縮後發送成功');
-              } catch (ee) {
-                console.error('發送圖片失敗（回降）:', ee);
-                alert('圖片送出失敗，請改用較小圖片或稍後再試。');
-                continue;
-              }
-            } else {
-              alert('圖片送出失敗，請稍後再試。');
-              continue;
-            }
+            console.error('發送圖片失敗:', e);
+            alert('圖片送出失敗，請稍後再試。');
+            continue;
           }
         }
       }
@@ -579,9 +538,20 @@ const getCurrentTime = () => {
 
 const scrollToBottom = () => {
   if (chatMessages.value) {
-    // 使用 setTimeout 確保 DOM 更新完成後再滾動
+    // 使用多種方法確保滾動到最下方
     setTimeout(() => {
-      chatMessages.value.scrollTop = chatMessages.value.scrollHeight;
+      const element = chatMessages.value;
+      element.scrollTop = element.scrollHeight;
+      
+      // 強制滾動到最下方
+      setTimeout(() => {
+        element.scrollTop = element.scrollHeight;
+        // 使用 smooth scroll 作為備用
+        element.scrollTo({
+          top: element.scrollHeight,
+          behavior: 'smooth'
+        });
+      }, 50);
     }, 100);
   }
 };
@@ -639,36 +609,11 @@ const processMediaFile = async (file, type) => {
   try {
     console.log('開始處理媒體檔案:', { name: file.name, type: file.type, size: file.size });
     
-    // 檢查檔案大小
-    if (!validateFileSize(file, 30)) {
-      alert("檔案大小不能超過 30MB");
-      return;
-    }
-
-    // 檢查圖片格式
-    if (type === "image") {
-      if (!isAllowedImage(file)) {
-        alert('請選擇支援的圖片格式：JPG、PNG、HEIC');
-        return;
-      }
-    }
-
-    // 檢查影片長度
-    if (type === "video") {
-      const isValidDuration = await validateVideoDuration(file, 10);
-      if (!isValidDuration) {
-        alert("影片長度不能超過 10 秒");
-        return;
-      }
-    }
-
-    console.log('開始格式轉換...');
-    // 處理格式轉換（HEIC 轉 JPG）
-    const processedFile = await processFileFormat(file);
-    console.log('格式轉換完成:', { name: processedFile.name, type: processedFile.type, size: processedFile.size });
-
-    // 添加到預覽區域
-    addPreviewMedia(processedFile, type);
+    // 暫時移除所有限制，直接使用原檔案
+    console.log('直接使用原檔案，不進行任何檢查和轉換');
+    
+    // 直接添加到預覽區域
+    addPreviewMedia(file, type);
   } catch (error) {
     console.error("處理媒體檔案時發生錯誤:", error);
     alert(error.message || "處理檔案時發生錯誤");
