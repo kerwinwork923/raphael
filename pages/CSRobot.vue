@@ -24,8 +24,8 @@
         <div
           class="message"
           :class="message.type === 'user' ? 'user-message' : 'service-message'"
-          v-for="(message, index) in allMessages"
-          :key="index"
+          v-for="message in allMessages"
+          :key="message.id || (message.timestamp + '-' + message.type)"
         >
           <!-- 客服回應需要頭像 -->
           <div v-if="message.type === 'service'" class="message-avatar">
@@ -102,6 +102,9 @@
             <div class="message-time">{{ message.time }}</div>
           </div>
         </div>
+
+        <!-- 底部錨點 -->
+        <div ref="bottomSentinel" style="height: 1px;"></div>
 
         <!-- 轉換進度指示器 -->
         <div class="conversion-overlay" v-if="isConverting">
@@ -262,6 +265,7 @@ const messages = ref([]);
 const mediaMessages = ref([]);
 const previewMedia = ref([]);
 const chatMessages = ref(null);
+const bottomSentinel = ref(null);
 const isFocused = ref(false);
 const showImagePreview = ref(false);
 const previewImageUrl = ref("");
@@ -414,21 +418,60 @@ const sendMessage = async () => {
         };
         mediaMessages.value.push(mediaMessage);
 
-        // 如果是圖片，直接發送
+        // 如果是圖片，確保正確轉換為 base64 發送
         if (media.type === "image") {
-          console.log('發送圖片前檢查:', { name: media.file.name, type: media.file.type });
-          
-          // 直接使用原檔案轉 base64
-          const base64String = await fileToBase64(media.file);
-          const fileName = media.file.name || `image.${getExt(media.file) || 'jpg'}`;
-          console.log('發送圖片:', { fileName, base64Length: base64String.length });
+          console.log('發送圖片前檢查:', { 
+            name: media.file.name, 
+            type: media.file.type, 
+            size: media.file.size 
+          });
           
           try {
+            // 使用 composable 的分段 base64 轉換
+            const base64String = await fileToBase64(media.file);
+            const fileName = media.file.name || `image.${getExt(media.file) || 'jpg'}`;
+            
+            console.log('轉換完成:', { 
+              fileName, 
+              base64Length: base64String.length,
+              originalSize: media.file.size,
+              base64Size: Math.round(base64String.length * 0.75) // base64 約為原檔案的 4/3 大小
+            });
+            
+            // 檢查 base64 是否有效
+            if (!base64String || base64String.length === 0) {
+              throw new Error('Base64 轉換失敗');
+            }
+            
             await frSendLineImage(base64String, fileName);
+            console.log('圖片發送成功');
+            
           } catch (e) {
             console.error('發送圖片失敗:', e);
-            alert('圖片送出失敗，請稍後再試。');
-            continue;
+            
+            // 如果分段 base64 失敗，嘗試傳統方法
+            try {
+              console.log('嘗試傳統 FileReader 方法...');
+              const base64String = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                  const result = reader.result;
+                  const base64 = result.split(',')[1]; // 移除 data:image/...;base64, 前綴
+                  resolve(base64);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(media.file);
+              });
+              
+              const fileName = media.file.name || `image.${getExt(media.file) || 'jpg'}`;
+              await frSendLineImage(base64String, fileName);
+              console.log('傳統方法發送成功');
+              
+            } catch (ee) {
+              console.error('傳統方法也失敗:', ee);
+              alert('圖片送出失敗，請稍後再試。');
+              continue;
+            }
           }
         }
       }
@@ -439,9 +482,7 @@ const sendMessage = async () => {
     previewMedia.value = [];
 
     // 滾動到底部
-    nextTick(() => {
-      scrollToBottom();
-    });
+    await scrollAfterRender();
 
     // 獲取客服回應
     await getMessages();
@@ -509,8 +550,7 @@ const getMessages = async () => {
       console.log("最終媒體列表:", mediaMessages.value);
 
       // 確保滾動到最下方
-      await nextTick();
-      scrollToBottom();
+      await scrollAfterRender();
     } else {
       console.log("沒有 LineList 或回應格式錯誤");
     }
@@ -537,23 +577,20 @@ const getCurrentTime = () => {
 };
 
 const scrollToBottom = () => {
-  if (chatMessages.value) {
-    // 使用多種方法確保滾動到最下方
-    setTimeout(() => {
-      const element = chatMessages.value;
-      element.scrollTop = element.scrollHeight;
-      
-      // 強制滾動到最下方
-      setTimeout(() => {
-        element.scrollTop = element.scrollHeight;
-        // 使用 smooth scroll 作為備用
-        element.scrollTo({
-          top: element.scrollHeight,
-          behavior: 'smooth'
-        });
-      }, 50);
-    }, 100);
+  // 優先使用底部錨點滾動
+  if (bottomSentinel.value) {
+    bottomSentinel.value.scrollIntoView({ block: 'end' });
+  } else if (chatMessages.value) {
+    chatMessages.value.scrollTop = chatMessages.value.scrollHeight;
   }
+};
+
+const scrollAfterRender = async () => {
+  await nextTick();
+  requestAnimationFrame(() => {
+    scrollToBottom();
+    setTimeout(scrollToBottom, 50);
+  });
 };
 
 // 媒體上傳功能
@@ -654,7 +691,7 @@ const deleteMedia = (index) => {
 };
 
 // 滿意度評分功能
-const showSatisfactionRating = () => {
+const showSatisfactionRating = async () => {
   // 在聊天記錄中顯示滿意度評分卡片
   const satisfactionCard = {
     type: "satisfaction",
@@ -664,9 +701,7 @@ const showSatisfactionRating = () => {
 
   messages.value.push(satisfactionCard);
 
-  nextTick(() => {
-    scrollToBottom();
-  });
+  await scrollAfterRender();
 };
 
 const selectRating = (rating) => {
@@ -706,8 +741,7 @@ onMounted(async () => {
   await getMessages();
 
   // 確保滾動到最下方
-  await nextTick();
-  scrollToBottom();
+  await scrollAfterRender();
 
   // 監聽來自後台管理的事件
   if (typeof window !== "undefined") {
@@ -734,8 +768,6 @@ onUnmounted(() => {
   width: 100%;
   height: 100vh;
   min-height: 100vh;
-  overflow-y: auto;
-  padding: 1rem 0rem 7rem;
   display: flex;
   flex-direction: column;
 }
@@ -746,18 +778,17 @@ onUnmounted(() => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  max-width: 100%;
-  margin: 0 auto;
+  min-height: 0;
   padding: 0 1rem;
-  width: 100%;
-  overflow-y: auto;
   padding-bottom: 200px;
 }
 
 .chat-messages {
   flex: 1;
-
+  min-height: 0;
+  overflow-y: auto;
   padding: 1rem 0;
+  scroll-behavior: smooth;
   @include scrollbarStyle();
 }
 
