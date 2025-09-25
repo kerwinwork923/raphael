@@ -302,20 +302,46 @@ const cameraInput = ref(null);
 const videoInput = ref(null);
 const galleryInput = ref(null);
 
-// 媒體轉換功能
-const {
-  isConverting,
-  conversionProgress,
-  processFileFormat,
-  validateFileSize,
-  validateVideoDuration,
-  createPreviewURL,
-  revokePreviewURL,
-  isAllowedImage,
-  getExt,
-  isHEICFormat,
-  fileToBase64,
-} = useMediaConverter();
+// 暫時移除媒體轉換功能，直接使用原生方法
+const createPreviewURL = (file) => URL.createObjectURL(file);
+const revokePreviewURL = (url) => URL.revokeObjectURL(url);
+
+const isAllowedImage = (file) => {
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic', 'image/heif'];
+  const name = (file.name || "").toLowerCase();
+  const ext = name.split(".").pop() || "";
+  const allowedExt = ['jpg','jpeg','png','heic','heif'];
+  const type = (file.type || "").toLowerCase();
+  if (allowedTypes.includes(type)) return true;
+  if (allowedExt.includes(ext)) return true;
+  if (!type && !ext) return true;
+  return false;
+};
+
+const getExt = (f) => {
+  const n = (f.name || "").toLowerCase();
+  if (/\.(jpe?g|png|gif|webp)$/i.test(n)) return n.split(".").pop();
+  const t = (f.type || "").toLowerCase();
+  if (t.includes("jpeg")) return "jpg";
+  if (t.includes("png")) return "png";
+  if (t.includes("gif")) return "gif";
+  if (t.includes("webp")) return "webp";
+  return "jpg";
+};
+
+const fileToBase64 = async (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      // 移除 data:image/...;base64, 前綴
+      const base64 = result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
 
 // API 函數
 const frSendLineText = async (content) => {
@@ -408,22 +434,12 @@ const sendMessage = async () => {
         };
         mediaMessages.value.push(mediaMessage);
 
-        // 如果是圖片，確保使用處理過的檔案並轉換為 base64 發送
+        // 如果是圖片，直接轉換為 base64 發送
         if (media.type === "image") {
           console.log('發送圖片前檢查:', { name: media.file.name, type: media.file.type });
-          // 確保「送出前」用最新的 File（可能已被轉成 JPG）
-          const processed = await processFileFormat(media.file);
-          console.log('處理後的檔案:', { name: processed.name, type: processed.type });
           
-          // 檢查轉換是否成功（如果還是 HEIC 格式，轉換可能失敗）
-          if (isHEICFormat(processed)) {
-            console.warn('HEIC 轉換失敗，跳過此圖片');
-            alert('HEIC 格式轉換失敗，請改用 JPG 或 PNG 格式的圖片');
-            continue; // 跳過這個檔案
-          }
-          
-          const base64String = await fileToBase64(processed);
-          const subName = getExt(processed);
+          const base64String = await fileToBase64(media.file);
+          const subName = getExt(media.file);
           console.log('發送圖片:', { subName, base64Length: base64String.length });
           await frSendLineImage(base64String, subName);
         }
@@ -504,9 +520,9 @@ const getMessages = async () => {
       console.log("最終訊息列表:", messages.value);
       console.log("最終媒體列表:", mediaMessages.value);
 
-      nextTick(() => {
-        scrollToBottom();
-      });
+      // 確保滾動到最下方
+      await nextTick();
+      scrollToBottom();
     } else {
       console.log("沒有 LineList 或回應格式錯誤");
     }
@@ -534,7 +550,10 @@ const getCurrentTime = () => {
 
 const scrollToBottom = () => {
   if (chatMessages.value) {
-    chatMessages.value.scrollTop = chatMessages.value.scrollHeight;
+    // 使用 setTimeout 確保 DOM 更新完成後再滾動
+    setTimeout(() => {
+      chatMessages.value.scrollTop = chatMessages.value.scrollHeight;
+    }, 100);
   }
 };
 
@@ -591,11 +610,11 @@ const processMediaFile = async (file, type) => {
   try {
     console.log('開始處理媒體檔案:', { name: file.name, type: file.type, size: file.size });
     
-    // 檢查檔案大小
-    if (!validateFileSize(file, 30)) {
-      alert("檔案大小不能超過 30MB");
-      return;
-    }
+    // 暫時移除檔案大小限制
+    // if (!validateFileSize(file, 30)) {
+    //   alert("檔案大小不能超過 30MB");
+    //   return;
+    // }
 
     // 檢查圖片格式
     if (type === "image") {
@@ -605,22 +624,18 @@ const processMediaFile = async (file, type) => {
       }
     }
 
-    // 檢查影片長度
-    if (type === "video") {
-      const isValidDuration = await validateVideoDuration(file, 10);
-      if (!isValidDuration) {
-        alert("影片長度不能超過 10 秒");
-        return;
-      }
-    }
+    // 暫時移除影片長度檢查
+    // if (type === "video") {
+    //   const isValidDuration = await validateVideoDuration(file, 10);
+    //   if (!isValidDuration) {
+    //     alert("影片長度不能超過 10 秒");
+    //     return;
+    //   }
+    // }
 
-    console.log('開始格式轉換...');
-    // 處理格式轉換（HEIC 轉 JPG）
-    const processedFile = await processFileFormat(file);
-    console.log('格式轉換完成:', { name: processedFile.name, type: processedFile.type, size: processedFile.size });
-
-    // 添加到預覽區域
-    addPreviewMedia(processedFile, type);
+    console.log('直接使用原檔案，不進行格式轉換');
+    // 直接使用原檔案，不進行任何轉換
+    addPreviewMedia(file, type);
   } catch (error) {
     console.error("處理媒體檔案時發生錯誤:", error);
     alert(error.message || "處理檔案時發生錯誤");
@@ -712,9 +727,9 @@ onMounted(async () => {
   // 初始載入訊息
   await getMessages();
 
-  nextTick(() => {
-    scrollToBottom();
-  });
+  // 確保滾動到最下方
+  await nextTick();
+  scrollToBottom();
 
   // 監聽來自後台管理的事件
   if (typeof window !== "undefined") {
