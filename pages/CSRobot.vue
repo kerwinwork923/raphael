@@ -314,6 +314,7 @@ const {
   isAllowedImage,
   getExt,
   isHEICFormat,
+  fileToBase64,
 } = useMediaConverter();
 
 // API 函數
@@ -372,15 +373,7 @@ const frGetLine = async () => {
   }
 };
 
-// 將檔案轉換為 base64
-const fileToBase64 = (file) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result.split(",")[1]);
-    reader.onerror = (error) => reject(error);
-  });
-};
+
 
 // 方法
 const sendMessage = async () => {
