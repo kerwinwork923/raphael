@@ -1,7 +1,7 @@
 <template>
   <div class="videoDetailWrap">
     <div class="titleMenuWrap">
-        <TitleMenu link="/clinicStories" />
+      <TitleMenu link="/clinicStories" />
     </div>
     <!-- 影片播放器 -->
     <div class="videoPlayer">
@@ -21,9 +21,15 @@
         <div class="controlButton" @click="togglePlayPause">
           <img :src="isPlaying ? pauseIcon : playIcon" alt="播放/暫停" />
         </div>
-        <div class="progressBar" @click="onProgressBarClick">
+        <div
+          class="progressBar"
+          ref="progressBarEl"
+          @mousedown="onScrubStart"
+          @touchstart.prevent="onScrubStart"
+        >
           <div class="progress" :style="{ width: progressPercent + '%' }"></div>
         </div>
+
         <div class="timeDisplay">
           <span>{{ formatTime(currentTime) }}</span>
           <span>/</span>
@@ -216,7 +222,6 @@ const updateChaptersForVideo = (videoId) => {
       { time: "01:25", title: "斷點18" },
       { time: "01:30", title: "斷點19" },
       { time: "01:35", title: "斷點20" },
-
     ],
     2: [
       { time: "00:00", title: "斷點1" },
@@ -239,7 +244,6 @@ const updateChaptersForVideo = (videoId) => {
       { time: "01:25", title: "斷點18" },
       { time: "01:30", title: "斷點19" },
       { time: "01:35", title: "斷點20" },
-
     ],
     3: [
       { time: "00:00", title: "斷點1" },
@@ -262,7 +266,6 @@ const updateChaptersForVideo = (videoId) => {
       { time: "01:25", title: "斷點18" },
       { time: "01:30", title: "斷點19" },
       { time: "01:35", title: "斷點20" },
-
     ],
     3: [
       { time: "00:00", title: "斷點1" },
@@ -285,10 +288,9 @@ const updateChaptersForVideo = (videoId) => {
       { time: "01:25", title: "斷點18" },
       { time: "01:30", title: "斷點19" },
       { time: "01:35", title: "斷點20" },
-
     ],
     4: [
-    { time: "00:00", title: "斷點1" },
+      { time: "00:00", title: "斷點1" },
       { time: "00:05", title: "斷點2" },
       { time: "00:10", title: "斷點3" },
       { time: "00:15", title: "斷點4" },
@@ -310,7 +312,7 @@ const updateChaptersForVideo = (videoId) => {
       { time: "01:35", title: "斷點20" },
     ],
     4: [
-    { time: "00:00", title: "斷點1" },
+      { time: "00:00", title: "斷點1" },
       { time: "00:05", title: "斷點2" },
       { time: "00:10", title: "斷點3" },
       { time: "00:15", title: "斷點4" },
@@ -496,15 +498,17 @@ const seekToSeconds = (seconds) => {
   player.seekTo(seconds, true);
 };
 
-const seekToTime = (timeString, { autoplay = true, closeModal = true } = {}) => {
-  if (!player || !isYouTubeReady.value) return
-  const [m, s] = timeString.split(':').map(Number)
-  const total = (m || 0) * 60 + (s || 0)
-  player.seekTo(total, true)
-  if (closeModal) closeDescriptionModal()
-  if (autoplay) player.playVideo()
-}
-
+const seekToTime = (
+  timeString,
+  { autoplay = true, closeModal = true } = {}
+) => {
+  if (!player || !isYouTubeReady.value) return;
+  const [m, s] = timeString.split(":").map(Number);
+  const total = (m || 0) * 60 + (s || 0);
+  player.seekTo(total, true);
+  if (closeModal) closeDescriptionModal();
+  if (autoplay) player.playVideo();
+};
 
 // 點擊進度條跳轉
 const onProgressBarClick = (event) => {
@@ -569,6 +573,69 @@ const onTouchEnd = () => {
   }
 };
 
+
+const progressBarEl = ref(null)
+const isScrubbing = ref(false)
+const wasPlayingBeforeScrub = ref(false)
+
+const getPercentFromEvent = (e) => {
+  const el = progressBarEl.value
+  if (!el || !duration.value) return 0
+  const rect = el.getBoundingClientRect()
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX
+  const x = Math.min(Math.max(clientX - rect.left, 0), rect.width)
+  return rect.width ? (x / rect.width) : 0
+}
+
+const onScrubStart = (e) => {
+  if (!isYouTubeReady.value || !duration.value) return
+  isScrubbing.value = true
+  wasPlayingBeforeScrub.value = isPlaying.value
+  // 拖曳時先暫停（避免邊播邊拖）
+  if (wasPlayingBeforeScrub.value) player.pauseVideo()
+
+  // 立刻更新一次 UI
+  const p = getPercentFromEvent(e)
+  currentTime.value = p * duration.value
+  progressPercent.value = p * 100
+  // 拖曳中只更新 UI；想同步預覽可打開下一行（false = 不預取）
+  // player.seekTo(currentTime.value, false)
+
+  // 綁全域 move/up
+  window.addEventListener('mousemove', onScrubMove)
+  window.addEventListener('mouseup', onScrubEnd)
+  window.addEventListener('touchmove', onScrubMove, { passive: false })
+  window.addEventListener('touchend', onScrubEnd)
+}
+
+const onScrubMove = (e) => {
+  if (!isScrubbing.value) return
+  e.preventDefault?.()
+  const p = getPercentFromEvent(e)
+  currentTime.value = p * duration.value
+  progressPercent.value = p * 100
+  // 想邊拖邊預覽：打開
+  // player.seekTo(currentTime.value, false)
+}
+
+const onScrubEnd = () => {
+  if (!isScrubbing.value) return
+  isScrubbing.value = false
+
+  // 最終定位，允許跳到未緩存區
+  player.seekTo(currentTime.value, true)
+
+  // 恢復播放狀態
+  if (wasPlayingBeforeScrub.value) player.playVideo()
+
+  // 清理監聽
+  window.removeEventListener('mousemove', onScrubMove)
+  window.removeEventListener('mouseup', onScrubEnd)
+  window.removeEventListener('touchmove', onScrubMove)
+  window.removeEventListener('touchend', onScrubEnd)
+}
+
+
 // 根據 ID 獲取影片資料
 onMounted(() => {
   const videoId = parseInt(route.params.id);
@@ -597,8 +664,8 @@ const modules = [FreeMode];
   padding-bottom: 80px;
   padding-top: 1rem;
 
-  .titleMenuWrap{
-    padding: 0 .5rem;
+  .titleMenuWrap {
+    padding: 0 0.5rem;
   }
 
   .videoPlayer {
@@ -697,7 +764,7 @@ const modules = [FreeMode];
   }
 
   .videoInfo {
-    margin: 1rem ;
+    margin: 1rem;
     padding: 20px 16px;
     border-radius: var(--Radius-r-20, 20px);
     background: var(--Secondary-100, #f5f7fa);
@@ -713,7 +780,6 @@ const modules = [FreeMode];
     }
 
     .descriptionSection {
-
       .descriptionHeader {
         display: flex;
         justify-content: space-between;
