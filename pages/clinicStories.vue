@@ -1,101 +1,88 @@
 <template>
   <div class="clinicStoriesWrap">
     <div class="clinicStoriesContainer">
-    <div class="notificationBell">
-      <img src="../assets/imgs/member/bell.svg" alt="通知" />
-      <img src="../assets/imgs/robot/search.svg" alt="搜尋" />
-    </div>
+      <div class="notificationBell">
+        <img src="../assets/imgs/member/bell.svg" alt="通知" />
+        <img src="../assets/imgs/robot/search.svg" alt="搜尋" />
+      </div>
 
-    <!-- 可滑動標籤 -->
-    <div class="clinicStoriesTagsGroup">
-      <swiper
-        :slides-per-view="'auto'"
-        :space-between="12"
-        :free-mode="true"
-        class="tagsSwiper"
-      >
-        <swiper-slide v-for="tag in visibleTags" :key="tag.id" class="tagSlide">
-          <div
-            class="clinicStoriesTagsItem"
-            :class="{ active: activeTag === tag.id }"
-            @click="setActiveTag(tag.id)"
-          >
-            {{ tag.name }}
-          </div>
-        </swiper-slide>
-      </swiper>
-    </div>
-
-    <!-- 推薦影片區塊 -->
-    <div class="recommendedSection">
-      <h2 class="sectionTitle">推薦</h2>
-      <swiper
-        :slides-per-view="1.2"
-        :space-between="16"
-        :free-mode="true"
-        class="recommendedSwiper"
-      >
-        <swiper-slide
-          v-for="video in recommendedVideos"
-          :key="video.id"
-          class="videoSlide"
+      <!-- 可滑動標籤 -->
+      <div class="clinicStoriesTagsGroup">
+        <swiper
+          :slides-per-view="'auto'"
+          :space-between="12"
+          :free-mode="true"
+          class="tagsSwiper"
         >
-          <div class="videoCard" @click="goToVideoDetail(video.id)">
-            <div class="videoThumbnail">
-              <img :src="video.thumbnail" :alt="video.title" />
-
+          <swiper-slide
+            v-for="tag in visibleTags"
+            :key="tag.id"
+            class="tagSlide"
+          >
+            <div
+              class="clinicStoriesTagsItem"
+              :class="{ active: activeTag === tag.id }"
+              @click="setActiveTag(tag.id)"
+            >
+              {{ tag.name }}
             </div>
-            <div class="videoInfo">
-              <h3 class="videoCardTitle">{{ video.fullTitle }}</h3>
-              <div class="videoStats">
-                <div class="statItem">
-                  <img src="../assets/imgs/clinicStories/good.svg" alt="讚" />
-                  <span>{{ video.likes }}</span>
-                </div>
-                <div class="statItem">
-                  <img
-                    src="../assets/imgs/clinicStories/bubble.svg"
-                    alt="留言"
-                  />
-                  <span>{{ video.comments }}</span>
+          </swiper-slide>
+        </swiper>
+      </div>
+
+      <!-- 推薦影片區塊 -->
+      <div class="recommendedSection">
+        <h2 class="sectionTitle">推薦</h2>
+        <swiper
+          :slides-per-view="1.2"
+          :space-between="16"
+          :free-mode="true"
+          class="recommendedSwiper"
+        >
+          <swiper-slide
+            v-for="video in recommendedVideos"
+            :key="video.id"
+            class="videoSlide"
+          >
+            <div class="videoCard" @click="goToVideoDetail(video.id)">
+              <div class="videoThumbnail">
+                <img :src="video.thumbnail" :alt="video.title" />
+              </div>
+              <div class="videoInfo">
+                <h3 class="videoCardTitle">{{ video.fullTitle }}</h3>
+                <div class="videoStats">
+                  <div class="statItem">
+                    <img src="../assets/imgs/clinicStories/good.svg" alt="讚" />
+                    <span>{{ video.likes }}</span>
+                  </div>
+                  <div class="statItem">
+                    <img
+                      src="../assets/imgs/clinicStories/bubble.svg"
+                      alt="留言"
+                    />
+                    <span>{{ video.comments }}</span>
+                  </div>
                 </div>
               </div>
             </div>
+          </swiper-slide>
+        </swiper>
+      </div>
+
+      <!-- 下方影片區塊 -->
+      <div class="bottomVideoSection">
+        <div
+          class="videoCard large"
+          v-for="video in filteredVideos"
+          :key="video.id"
+          @click="goToVideoDetail(video.id)"
+        >
+          <div class="videoThumbnail">
+            <img :src="video.thumbnail" :alt="video.title" />
           </div>
-        </swiper-slide>
-      </swiper>
-    </div>
-
-    <!-- 下方影片區塊 -->
-    <div class="bottomVideoSection">
-      <div
-        class="videoCard large"
-        v-for="video in filteredVideos"
-        :key="video.id"
-        @click="goToVideoDetail(video.id)"
-      >
-        <div class="videoThumbnail">
-          <img :src="video.thumbnail" :alt="video.title" />
-
-        </div>
-        <div class="videoInfo">
-          <h3 class="videoCardTitle">{{ video.fullTitle }}</h3>
-          <div class="videoTags">
-            <swiper
-              :slides-per-view="'auto'"
-              :space-between="8"
-              :free-mode="true"
-              class="tagsSwiper"
-            >
-              <swiper-slide
-                v-for="tag in video.tags"
-                :key="tag"
-                class="tagSlide"
-              >
-                <span class="videoTag">{{ tag }}</span>
-              </swiper-slide>
-              </swiper>
-            </div>
+          <div class="videoInfo">
+            <h3 class="videoCardTitle">{{ video.fullTitle }}</h3>
+            <p class="videoCardSubtitle">{{ video.subtitle }}</p>
           </div>
         </div>
       </div>
@@ -134,7 +121,7 @@ const setActiveTag = (tagId) => {
 
 // 根據會員狀態過濾標籤
 const visibleTags = computed(() => {
-  return tags.value.filter(tag => {
+  return tags.value.filter((tag) => {
     if (tag.isVip && !isVipMember.value) {
       return false;
     }
@@ -156,7 +143,7 @@ const allVideos = ref([
     comments: 35,
     youtubeUrl: "https://www.youtube.com/watch?v=cuWAOp_T7R4",
     category: "case",
-    tags: ["自律神經", "失眠", "焦慮", "耳鳴", "康復", "案例分享"]
+    tags: ["自律神經", "失眠", "焦慮", "耳鳴", "康復", "案例分享"],
   },
   {
     id: 2,
@@ -170,7 +157,7 @@ const allVideos = ref([
     comments: 28,
     youtubeUrl: "https://www.youtube.com/watch?v=G9RoWlrIHyc",
     category: "doctor",
-    tags: ["醫師", "醫學", "治療", "專業", "解密"]
+    tags: ["醫師", "醫學", "治療", "專業", "解密"],
   },
   {
     id: 3,
@@ -184,7 +171,7 @@ const allVideos = ref([
     comments: 42,
     youtubeUrl: "https://www.youtube.com/watch?v=8GCJQ4Jh_W0",
     category: "health",
-    tags: ["養生", "保健", "健康", "日常", "管理"]
+    tags: ["養生", "保健", "健康", "日常", "管理"],
   },
   {
     id: 4,
@@ -198,17 +185,19 @@ const allVideos = ref([
     comments: 31,
     youtubeUrl: "https://www.youtube.com/watch?v=PimMlMVVh3s",
     category: "treatment",
-    tags: ["康復", "心得", "分享", "治療", "體驗"]
-  }
+    tags: ["康復", "心得", "分享", "治療", "體驗"],
+  },
 ]);
 
 // 根據選中標籤過濾影片
 const filteredVideos = computed(() => {
-  const activeTagData = tags.value.find(tag => tag.id === activeTag.value);
-  if (!activeTagData || activeTagData.category === 'all') {
+  const activeTagData = tags.value.find((tag) => tag.id === activeTag.value);
+  if (!activeTagData || activeTagData.category === "all") {
     return allVideos.value;
   }
-  return allVideos.value.filter(video => video.category === activeTagData.category);
+  return allVideos.value.filter(
+    (video) => video.category === activeTagData.category
+  );
 });
 
 // 推薦影片（固定顯示前3個）
@@ -232,7 +221,7 @@ const modules = [FreeMode];
   min-height: 100vh;
   padding: 0.5rem 0rem 0rem;
   padding-bottom: 80px; // 為底部導航留空間
-  
+
   .clinicStoriesContainer {
     width: 100%;
     max-width: 720px;
@@ -275,7 +264,7 @@ const modules = [FreeMode];
       font-size: 1.25rem;
       border-radius: var(--Radius-r-50, 50px);
       background: var(--Secondary-100, #f5f7fa);
-  
+
       color: var(--Primary-default, #74bc1f);
       font-family: "Noto Sans";
       font-size: var(--Text-font-size-18, 18px);
@@ -300,18 +289,21 @@ const modules = [FreeMode];
     margin-top: 100px; // 為固定標籤留空間
     padding: 0 16px;
     margin-bottom: 24px;
+    margin-top: 4.5rem;;
 
     .sectionTitle {
-      font-size: 24px;
-      font-weight: 600;
-      color: var(--Primary-default, #74bc1f);
-      margin-bottom: 16px;
-      font-family: "Noto Sans";
+      color: var(--Neutral-black, #1e1e1e);
+
+      font-size: var(--Text-font-size-20, 20px);
+      font-style: normal;
+      font-weight: 700;
+      line-height: 100%; /* 20px */
+      letter-spacing: 3px;
+      margin-bottom: .75rem;
     }
 
     .recommendedSwiper {
       width: 100%;
-      
     }
 
     .videoSlide {
@@ -336,8 +328,6 @@ const modules = [FreeMode];
           height: 100%;
           object-fit: cover;
         }
-
-
       }
 
       .videoInfo {
@@ -399,8 +389,6 @@ const modules = [FreeMode];
           height: 100%;
           object-fit: cover;
         }
-
-
       }
 
       .videoInfo {
@@ -413,25 +401,15 @@ const modules = [FreeMode];
           margin-bottom: 12px;
           line-height: 1.4;
         }
+        p {
+          overflow: hidden;
+          color: var(--Neutral-500, #666);
+          text-overflow: ellipsis;
 
-        .videoTags {
-          .tagsSwiper {
-            width: 100%;
-          }
-
-          .tagSlide {
-            width: auto;
-          }
-
-          .videoTag {
-            display: inline-block;
-            background: #f0f0f0;
-            color: #666;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            white-space: nowrap;
-          }
+          font-size: 14px;
+          font-style: normal;
+          font-weight: 500;
+          line-height: normal;
         }
       }
     }
