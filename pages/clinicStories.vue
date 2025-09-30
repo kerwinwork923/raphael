@@ -218,7 +218,7 @@ const recommendedVideos = computed(() => {
 
 // 跳轉到影片詳細頁面
 const goToVideoDetail = (videoId) => {
-  navigateTo(`/clinicStoriesVideo${videoId}`);
+  navigateTo(`/clinicStoriesVideo/${videoId}`);
 };
 
 const modules = [FreeMode];

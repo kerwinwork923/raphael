@@ -35,6 +35,11 @@
           <span>/</span>
           <span>{{ formatTime(duration) }}</span>
         </div>
+        
+        <!-- 全螢幕按鈕 -->
+        <div class="controlButton" @click="toggleFullscreen">
+          <img src="/assets/imgs/clinicStories/maximize.png" alt="全螢幕" />
+        </div>
       </div>
     </div>
 
@@ -346,6 +351,7 @@ const isPlaying = ref(false);
 const currentTime = ref(0);
 const duration = ref(0);
 const progressPercent = ref(0);
+const isVideoFullscreen = ref(false);
 
 // 滑動手勢相關
 const isFullscreen = ref(false);
@@ -484,6 +490,48 @@ const togglePlayPause = () => {
   } else {
     player.playVideo();
   }
+};
+
+// 全螢幕功能
+const toggleFullscreen = () => {
+  if (!player || !isYouTubeReady.value) return;
+  
+  if (isVideoFullscreen.value) {
+    // 退出全螢幕
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    } else if (document.mozCancelFullScreen) {
+      document.mozCancelFullScreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    }
+  } else {
+    // 進入全螢幕
+    const videoContainer = document.querySelector('.videoPlayer');
+    if (videoContainer) {
+      if (videoContainer.requestFullscreen) {
+        videoContainer.requestFullscreen();
+      } else if (videoContainer.webkitRequestFullscreen) {
+        videoContainer.webkitRequestFullscreen();
+      } else if (videoContainer.mozRequestFullScreen) {
+        videoContainer.mozRequestFullScreen();
+      } else if (videoContainer.msRequestFullscreen) {
+        videoContainer.msRequestFullscreen();
+      }
+    }
+  }
+};
+
+// 監聽全螢幕狀態變化
+const handleFullscreenChange = () => {
+  isVideoFullscreen.value = !!(
+    document.fullscreenElement ||
+    document.webkitFullscreenElement ||
+    document.mozFullScreenElement ||
+    document.msFullscreenElement
+  );
 };
 
 const formatTime = (seconds) => {
@@ -647,11 +695,23 @@ onMounted(() => {
     videoData.value = videoDatabase[1];
     updateChaptersForVideo(1);
   }
+  
+  // 監聽全螢幕狀態變化
+  document.addEventListener('fullscreenchange', handleFullscreenChange);
+  document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+  document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+  document.addEventListener('MSFullscreenChange', handleFullscreenChange);
 });
 
 onUnmounted(() => {
   cancelProgressLoop();
   if (player && player.destroy) player.destroy();
+  
+  // 移除全螢幕事件監聽
+  document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+  document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+  document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
 });
 
 const modules = [FreeMode];
@@ -674,6 +734,54 @@ const modules = [FreeMode];
     background: #000;
     margin-top: 1rem;
     position: relative;
+    
+    // 全螢幕樣式
+    &:fullscreen {
+      height: 100vh;
+      width: 100vw;
+      margin: 0;
+      background: #000;
+      
+      .videoContainer {
+        height: 100vh;
+        width: 100vw;
+        
+        iframe {
+          height: 100vh;
+          width: 100vw;
+        }
+      }
+      
+      .videoControls {
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        padding: 20px;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+      }
+    }
+    
+    // 全螢幕偽類支援
+    &:-webkit-full-screen {
+      height: 100vh;
+      width: 100vw;
+      margin: 0;
+      background: #000;
+    }
+    
+    &:-moz-full-screen {
+      height: 100vh;
+      width: 100vw;
+      margin: 0;
+      background: #000;
+    }
+    
+    &:-ms-fullscreen {
+      height: 100vh;
+      width: 100vw;
+      margin: 0;
+      background: #000;
+    }
 
     .videoContainer {
       position: relative; // 保險
@@ -698,8 +806,9 @@ const modules = [FreeMode];
       padding: 16px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 20px;
       pointer-events: auto; // 確保可以點擊
+
 
       .controlButton {
         width: 40px;
@@ -710,6 +819,12 @@ const modules = [FreeMode];
         align-items: center;
         justify-content: center;
         cursor: pointer;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          background: rgba(255, 255, 255, 1);
+          transform: scale(1.1);
+        }
 
         img {
           width: 20px;
@@ -841,7 +956,7 @@ const modules = [FreeMode];
     .modalContent {
       background: white;
       width: 100%;
-      max-height: 80vh;
+      height: 90vh; // 調整為快滿版
       border-radius: 20px 20px 0 0;
       animation: slideUp 0.3s ease;
       overflow: hidden;
@@ -884,7 +999,7 @@ const modules = [FreeMode];
 
       .modalBody {
         padding: 20px;
-        max-height: 60vh;
+        max-height: 75vh;
         overflow-y: auto;
 
         .descriptionText {
