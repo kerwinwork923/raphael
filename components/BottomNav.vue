@@ -62,6 +62,21 @@
     </div> -->
     <div
       class="nav-item"
+      :class="{ active: activeTab === 'clinicStories' }"
+      @click="navigateTo('/clinicStories')"
+    >
+      <div class="nav-icon">
+        <img
+          v-if="activeTab === 'clinicStories'"
+          src="/assets/imgs/clinicStories-active.svg"
+          alt="診間故事"
+        />
+        <img v-else src="/assets/imgs/clinicStories.svg" alt="診間故事" />
+      </div>
+      <span>診間故事</span>
+    </div>
+    <div
+      class="nav-item"
       :class="{ active: activeTab === 'member' }"
       @click="navigateTo('/member')"
     >
@@ -112,6 +127,9 @@ const setActiveTabFromRoute = () => {
    
       activeTab.value = "member";
       break;
+    case "/clinicStories":
+      activeTab.value = "clinicStories";
+      break;
     default:
       activeTab.value = "home";
   }
@@ -144,7 +162,7 @@ onMounted(() => {
   background: #f5f7fa;
   display: grid;
   grid-auto-flow: column;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   padding-top: 4px;
   padding-bottom: 34px;
   border-top: 1px solid $raphael-white;
