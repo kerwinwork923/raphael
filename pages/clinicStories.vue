@@ -46,7 +46,17 @@
           >
             <div class="videoCard" @click="goToVideoDetail(video.id)">
               <div class="videoThumbnail">
-                <img :src="video.thumbnail" :alt="video.title" />
+                <!-- Loading 效果 -->
+                <div v-if="videoLoading" class="videoLoading">
+                  <div class="loadingSpinner"></div>
+                </div>
+                <img 
+                  :src="video.thumbnail" 
+                  :alt="video.title" 
+                  @load="onVideoLoad"
+                  @loadstart="onVideoLoadStart"
+                  :style="{ opacity: videoLoading ? 0 : 1 }"
+                />
               </div>
               <div class="videoInfo">
                 <h3 class="videoCardTitle">{{ video.fullTitle }}</h3>
@@ -78,7 +88,17 @@
           @click="goToVideoDetail(video.id)"
         >
           <div class="videoThumbnail">
-            <img :src="video.thumbnail" :alt="video.title" />
+            <!-- Loading 效果 -->
+            <div v-if="videoLoading" class="videoLoading">
+              <div class="loadingSpinner"></div>
+            </div>
+            <img 
+              :src="video.thumbnail" 
+              :alt="video.title" 
+              @load="onVideoLoad"
+              @loadstart="onVideoLoadStart"
+              :style="{ opacity: videoLoading ? 0 : 1 }"
+            />
           </div>
           <div class="videoInfo">
             <h3 class="videoCardTitle">{{ video.fullTitle }}</h3>
@@ -103,6 +123,9 @@ import TitleMenu from "~/components/TitleMenu.vue";
 
 // 會員狀態
 const isVipMember = ref(false); // 可以從 store 或 API 獲取
+
+// 影片載入狀態
+const videoLoading = ref(true);
 
 // 標籤資料
 const tags = ref([
@@ -210,6 +233,16 @@ const goToVideoDetail = (videoId) => {
   navigateTo(`/clinicStoriesVideo${videoId}`);
 };
 
+// 影片載入完成處理
+const onVideoLoad = () => {
+  videoLoading.value = false;
+};
+
+// 影片載入開始處理
+const onVideoLoadStart = () => {
+  videoLoading.value = true;
+};
+
 const modules = [FreeMode];
 </script>
 
@@ -222,10 +255,12 @@ const modules = [FreeMode];
   padding: 0.5rem 0rem 0rem;
   padding-bottom: 80px; // 為底部導航留空間
 
+
   .clinicStoriesContainer {
     width: 100%;
     max-width: 720px;
     margin: 0 auto;
+    
   }
 
   .notificationBell {
@@ -327,6 +362,29 @@ const modules = [FreeMode];
           width: 100%;
           height: 100%;
           object-fit: cover;
+          transition: opacity 0.3s ease;
+        }
+
+        .videoLoading {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: #f5f5f5;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1;
+
+          .loadingSpinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e0e0e0;
+            border-top: 3px solid #74bc1f;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          }
         }
       }
 
@@ -388,6 +446,29 @@ const modules = [FreeMode];
           width: 100%;
           height: 100%;
           object-fit: cover;
+          transition: opacity 0.3s ease;
+        }
+
+        .videoLoading {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: #f5f5f5;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1;
+
+          .loadingSpinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #e0e0e0;
+            border-top: 3px solid #74bc1f;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          }
         }
       }
 
@@ -414,5 +495,11 @@ const modules = [FreeMode];
       }
     }
   }
+}
+
+// Loading 動畫
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>

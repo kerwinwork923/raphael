@@ -996,10 +996,10 @@ const modules = [FreeMode];
       }
     }
 
-    // 控制項隱藏時的樣式
+    // 控制項隱藏時的樣式 - 使用 fade 效果
     &.controls-hidden .videoControls {
       opacity: 0;
-      transform: translateY(100%);
+      transform: translateY(0);
       pointer-events: none;
     }
   }
@@ -1082,12 +1082,12 @@ const modules = [FreeMode];
 
     .descriptionSection {
       display: flex;
-     align-items: start;
+      align-items: start;
       gap: 0.5rem;
       width: 100%;
       .logoImg {
         width: 40px;
-    
+        
       }
       .descriptionHeader {
         flex: 2;
