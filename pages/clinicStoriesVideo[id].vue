@@ -4,7 +4,13 @@
       <TitleMenu link="/clinicStories" />
     </div>
     <!-- 影片播放器 -->
-    <div class="videoPlayer">
+    <div 
+      class="videoPlayer"
+      :class="{ 'controls-hidden': !controlsVisible }"
+      @mousemove="onVideoPlayerMouseMove"
+      @mouseleave="onVideoPlayerMouseLeave"
+      @touchstart="onVideoPlayerMouseMove"
+    >
       <div class="videoContainer">
         <iframe
           ref="videoIframe"
@@ -17,7 +23,12 @@
       </div>
 
       <!-- 影片控制器 -->
-      <div class="videoControls" v-if="showControls">
+      <div 
+        class="videoControls" 
+        v-if="showControls"
+        @mouseenter="onControlsMouseEnter"
+        @mouseleave="onControlsMouseLeave"
+      >
         <div class="controlButton" @click="togglePlayPause">
           <img :src="isPlaying ? pauseIcon : playIcon" alt="播放/暫停" />
         </div>
@@ -353,6 +364,11 @@ const duration = ref(0);
 const progressPercent = ref(0);
 const isVideoFullscreen = ref(false);
 
+// 控制項顯示/隱藏相關
+const controlsTimeout = ref(null);
+const isMouseOverControls = ref(false);
+const controlsVisible = ref(true);
+
 // 滑動手勢相關
 const isFullscreen = ref(false);
 const modalTransform = ref(0);
@@ -477,8 +493,13 @@ const onPlayerStateChange = (event) => {
   isPlaying.value = event.data === YTPS.PLAYING;
   if (event.data === YTPS.PLAYING) {
     startProgressLoop();
+    // 播放時開始控制項自動隱藏計時
+    startControlsHideTimer();
   } else if (event.data === YTPS.PAUSED || event.data === YTPS.ENDED) {
     cancelProgressLoop();
+    // 暫停或結束時停止計時並顯示控制項
+    clearControlsHideTimer();
+    showControlsImmediately();
   }
 };
 
@@ -489,6 +510,53 @@ const togglePlayPause = () => {
     player.pauseVideo();
   } else {
     player.playVideo();
+  }
+};
+
+// 控制項顯示/隱藏相關函數
+const startControlsHideTimer = () => {
+  clearControlsHideTimer();
+  controlsTimeout.value = setTimeout(() => {
+    if (isPlaying.value && !isMouseOverControls.value) {
+      controlsVisible.value = false;
+    }
+  }, 3000); // 3秒後隱藏控制項
+};
+
+const clearControlsHideTimer = () => {
+  if (controlsTimeout.value) {
+    clearTimeout(controlsTimeout.value);
+    controlsTimeout.value = null;
+  }
+};
+
+const showControlsImmediately = () => {
+  clearControlsHideTimer();
+  controlsVisible.value = true;
+};
+
+const onVideoPlayerMouseMove = () => {
+  if (isPlaying.value) {
+    showControlsImmediately();
+    startControlsHideTimer();
+  }
+};
+
+const onVideoPlayerMouseLeave = () => {
+  if (isPlaying.value) {
+    startControlsHideTimer();
+  }
+};
+
+const onControlsMouseEnter = () => {
+  isMouseOverControls.value = true;
+  clearControlsHideTimer();
+};
+
+const onControlsMouseLeave = () => {
+  isMouseOverControls.value = false;
+  if (isPlaying.value) {
+    startControlsHideTimer();
   }
 };
 
@@ -553,9 +621,28 @@ const seekToTime = (
   if (!player || !isYouTubeReady.value) return;
   const [m, s] = timeString.split(":").map(Number);
   const total = (m || 0) * 60 + (s || 0);
-  player.seekTo(total, true);
+  
+  // 檢查時間是否超過影片長度
+  if (total >= duration.value) {
+    // 如果超過影片長度，直接跳到影片結尾
+    player.seekTo(duration.value - 1, true);
+    // 播放到結尾後自動結束
+    if (autoplay) {
+      player.playVideo();
+      // 設置一個短暫的延遲來確保影片播放到結尾
+      setTimeout(() => {
+        if (player && player.pauseVideo) {
+          player.pauseVideo();
+        }
+      }, 1000);
+    }
+  } else {
+    // 正常跳轉
+    player.seekTo(total, true);
+    if (autoplay) player.playVideo();
+  }
+  
   if (closeModal) closeDescriptionModal();
-  if (autoplay) player.playVideo();
 };
 
 // 點擊進度條跳轉
@@ -705,6 +792,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   cancelProgressLoop();
+  clearControlsHideTimer();
   if (player && player.destroy) player.destroy();
   
   // 移除全螢幕事件監聽
@@ -734,6 +822,13 @@ const modules = [FreeMode];
     background: #000;
     margin-top: 1rem;
     position: relative;
+    // 修復手機端縮放問題
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
     
     // 全螢幕樣式
     &:fullscreen {
@@ -808,6 +903,9 @@ const modules = [FreeMode];
       align-items: center;
       gap: 20px;
       pointer-events: auto; // 確保可以點擊
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      opacity: 1;
+      transform: translateY(0);
 
 
       .controlButton {
@@ -875,6 +973,13 @@ const modules = [FreeMode];
         min-width: 80px;
         text-align: right;
       }
+    }
+
+    // 控制項隱藏時的樣式
+    &.controls-hidden .videoControls {
+      opacity: 0;
+      transform: translateY(100%);
+      pointer-events: none;
     }
   }
 
@@ -1081,6 +1186,7 @@ const modules = [FreeMode];
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   overflow: hidden;
 }
 
