@@ -64,17 +64,16 @@
 
       <!-- 說明區塊 -->
       <div class="descriptionSection">
+        <div class="logoImg">
+          <img src="/assets/imgs/clinicStories/raphael.svg" alt="Raphael">
+        </div>
         <div class="descriptionHeader">
           <p class="ellipsis-3">
-            {{ videoData.description }}{{ videoData.description
-            }}{{ videoData.description }}{{ videoData.description
-            }}{{ videoData.description }}{{ videoData.description
-            }}{{ videoData.description }}{{ videoData.description
-            }}{{ videoData.description }}{{ videoData.description
-            }}{{ videoData.description }}
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloribus aut molestias unde, alias odio voluptates accusamus, illo, iure tempore commodi debitis omnis excepturi! Laborum possimus rerum at hic molestiae esse?
           </p>
+          <h6 v-if="!showDescription" @click="toggleDescription">顯示完整內容</h6>
         </div>
-        <h6 v-if="!showDescription" @click="toggleDescription">顯示完整內容</h6>
+
       </div>
     </div>
 
@@ -98,17 +97,18 @@
           <button class="closeButton" @click="closeDescriptionModal">×</button>
         </div>
         <div class="modalBody">
+  
           <div class="descriptionText">
             <div class="bulletPoint">
               <span class="bullet">•</span>
-              <span>耳鳴、失眠、頭暈、胃不適...身體狀況越來越差?</span>
+              <span>List1</span>
             </div>
             <div class="bulletPoint">
               <span class="bullet">•</span>
-              <span>長達20年的身心折磨,還有救嗎?</span>
+              <span>List2</span>
             </div>
             <p class="descriptionParagraph">
-              長年飽受自律神經失調影響,嘗試過各種治療仍無改善,直到選擇自律神經調節療法。短短一個月內症狀明顯減輕,重新找回健康與希望!
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Eligendi officiis laboriosam optio reprehenderit. Voluptatibus laudantium laboriosam assumenda fuga ab explicabo in accusamus aperiam dignissimos. Quod porro amet voluptatem autem ratione.lorem Lorem, ipsum dolor sit amet consectetur adipisicing elit. Voluptatibus, aliquam debitis! Ullam harum voluptatem blanditiis maxime cum consectetur nulla obcaecati unde ad atque provident odit et possimus nemo, esse explicabo.
             </p>
           </div>
 
@@ -1081,11 +1081,19 @@ const modules = [FreeMode];
     }
 
     .descriptionSection {
+      display: flex;
+     align-items: start;
+      gap: 0.5rem;
+      width: 100%;
+      .logoImg {
+        width: 40px;
+    
+      }
       .descriptionHeader {
-        display: flex;
+        flex: 2;
         justify-content: space-between;
         align-items: center;
-
+      
         h3 {
           font-size: 16px;
           font-weight: 600;
@@ -1117,6 +1125,7 @@ const modules = [FreeMode];
         line-height: normal;
         cursor: pointer;
         margin-top: 0.5rem;
+        
       }
     }
   }
