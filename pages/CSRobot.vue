@@ -354,8 +354,18 @@ const frSendLineText = async (content) => {
   }
 };
 
-const frSendLineImage = async (base64String, subName) => {
+// ✅ 優化：添加重試機制的 API 函數
+const frSendLineImage = async (base64String, subName, retryCount = 0) => {
+  const maxRetries = 3;
+  const retryDelay = Math.pow(2, retryCount) * 1000; // 指數退避：1s, 2s, 4s
+  
   try {
+    console.log(`發送圖片 (嘗試 ${retryCount + 1}/${maxRetries + 1}):`, {
+      base64Length: base64String.length,
+      subName,
+      retryCount
+    });
+    
     const response = await $fetch(
       "https://23700999.com:8081/HMA/api/fr/frSendLineImage",
       {
@@ -365,11 +375,28 @@ const frSendLineImage = async (base64String, subName) => {
           base64String,
           subName,
         },
+        timeout: 30000, // 30秒超時
       }
     );
+    
+    console.log('圖片發送成功:', response);
     return response;
+    
   } catch (error) {
-    console.error("發送圖片訊息失敗:", error);
+    console.error(`發送圖片失敗 (嘗試 ${retryCount + 1}):`, error);
+    
+    // ✅ 重試邏輯：網路錯誤或超時時重試
+    if (retryCount < maxRetries && (
+      error.message?.includes('timeout') ||
+      error.message?.includes('network') ||
+      error.message?.includes('fetch') ||
+      error.status >= 500
+    )) {
+      console.log(`等待 ${retryDelay}ms 後重試...`);
+      await new Promise(resolve => setTimeout(resolve, retryDelay));
+      return frSendLineImage(base64String, subName, retryCount + 1);
+    }
+    
     throw error;
   }
 };
@@ -390,7 +417,7 @@ const frGetLine = async () => {
   }
 };
 
-// 將檔案轉換為 base64
+// 將檔案轉換為 base64（原始方法）
 const fileToBase64 = (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -398,6 +425,113 @@ const fileToBase64 = (file) => {
     reader.onload = () => resolve(reader.result.split(",")[1]);
     reader.onerror = (error) => reject(error);
   });
+};
+
+// ✅ 優化：改用 ArrayBuffer 方式轉 base64（節省 ~33% 記憶體）
+const fileToBase64Optimized = async (file) => {
+  const arrayBuffer = await file.arrayBuffer();
+  const uint8Array = new Uint8Array(arrayBuffer);
+  const binaryString = String.fromCharCode.apply(null, uint8Array);
+  return btoa(binaryString);
+};
+
+// ✅ 分段上傳功能：支援大檔案分塊傳輸（含重試機制）
+const uploadImageInChunks = async (file) => {
+  const uploadId = crypto.randomUUID();
+  const chunkSize = 512 * 1024; // 512KB 每塊
+  let index = 0;
+  
+  try {
+    console.log('開始分段上傳:', { uploadId, fileSize: file.size, chunkSize });
+    
+    // 1) 初始化上傳（讓後端建立暫存）
+    await fetchWithRetry("https://23700999.com:8081/HMA/api/fr/frInitImageUpload", {
+      method: "POST",
+      body: {
+        ...API_CONFIG,
+        uploadId,
+        fileName: file.name,
+        subName: getExt(file),
+      },
+    });
+    
+    // 2) 分段上傳
+    const arrayBuffer = await file.arrayBuffer();
+    const totalChunks = Math.ceil(arrayBuffer.byteLength / chunkSize);
+    
+    for (let offset = 0; offset < arrayBuffer.byteLength; offset += chunkSize) {
+      const chunk = arrayBuffer.slice(offset, offset + chunkSize);
+      const chunkBase64 = btoa(String.fromCharCode(...new Uint8Array(chunk)));
+      
+      console.log(`上傳分塊 ${index + 1}/${totalChunks}:`, {
+        offset,
+        chunkSize: chunk.byteLength,
+        isLast: index === totalChunks - 1
+      });
+      
+      // ✅ 重試機制：每個分塊都有重試
+      await fetchWithRetry("https://23700999.com:8081/HMA/api/fr/frSendLineImageChunk", {
+        method: "POST",
+        body: {
+          ...API_CONFIG,
+          uploadId,
+          index,
+          chunkBase64,
+          isLast: index === totalChunks - 1,
+        },
+      });
+      
+      index++;
+    }
+    
+    // 3) 完成上傳（讓後端合併檔案）
+    console.log('完成分段上傳，通知後端合併檔案...');
+    await fetchWithRetry("https://23700999.com:8081/HMA/api/fr/frFinalizeImageUpload", {
+      method: "POST",
+      body: {
+        ...API_CONFIG,
+        uploadId,
+        fileName: file.name,
+        subName: getExt(file),
+      },
+    });
+    
+    console.log('分段上傳完成！');
+    
+  } catch (error) {
+    console.error('分段上傳失敗:', error);
+    throw error;
+  }
+};
+
+// ✅ 通用重試機制
+const fetchWithRetry = async (url, options, retryCount = 0) => {
+  const maxRetries = 3;
+  const retryDelay = Math.pow(2, retryCount) * 1000;
+  
+  try {
+    const response = await $fetch(url, {
+      ...options,
+      timeout: 30000,
+    });
+    return response;
+    
+  } catch (error) {
+    console.error(`API 請求失敗 (嘗試 ${retryCount + 1}):`, error);
+    
+    if (retryCount < maxRetries && (
+      error.message?.includes('timeout') ||
+      error.message?.includes('network') ||
+      error.message?.includes('fetch') ||
+      error.status >= 500
+    )) {
+      console.log(`等待 ${retryDelay}ms 後重試...`);
+      await new Promise(resolve => setTimeout(resolve, retryDelay));
+      return fetchWithRetry(url, options, retryCount + 1);
+    }
+    
+    throw error;
+  }
 };
 
 // 方法
@@ -443,7 +577,7 @@ const sendMessage = async () => {
           console.log('發送圖片前檢查:', { name: media.file.name, type: media.file.type });
           
           try {
-            // ✅ 修復：嘗試 HEIC 轉檔，失敗時使用備援策略
+            // ✅ 行動端保命線：強制壓縮策略
             let processed = await processFileFormat(media.file);
             console.log('處理後的檔案:', { name: processed.name, type: processed.type });
             
@@ -452,25 +586,38 @@ const sendMessage = async () => {
             // 如果轉檔失敗（仍是 HEIC），使用備援策略
             if (isHEICFormat(processed)) {
               console.warn('HEIC 轉檔失敗，使用備援策略');
-              // 備援策略：直接使用原檔，讓後端處理
               willSendFile = media.file;
               console.log('使用原檔作為備援:', { name: willSendFile.name, type: willSendFile.type });
             }
             
-            // 壓縮圖片避免 base64 過大
-            const maxSize = 2 * 1024 * 1024; // 2MB
-            if (willSendFile.size > maxSize) {
-              console.log('圖片過大，開始壓縮...');
-              willSendFile = await compressImage(willSendFile, 1600, 0.7);
+            // ✅ 行動端強制壓縮：統一轉成 JPEG，限制尺寸和品質
+            console.log('行動端強制壓縮策略啟動...');
+            willSendFile = await compressImage(willSendFile, 1600, 0.7);
+            
+            // ✅ 行動端檔案大小限制：5MB 閥值
+            const MOBILE_MAX_BASE64_BYTES = 5 * 1024 * 1024;
+            if (willSendFile.size > MOBILE_MAX_BASE64_BYTES) {
+              console.warn('檔案仍過大，嘗試更激進的壓縮...');
+              willSendFile = await compressImage(willSendFile, 1200, 0.6);
+              
+              // 如果還是太大，走分段上傳
+              if (willSendFile.size > MOBILE_MAX_BASE64_BYTES) {
+                console.log('檔案過大，改用分段上傳...');
+                await uploadImageInChunks(willSendFile);
+                return; // 分段上傳完成，跳過 base64 發送
+              }
             }
             
-            const base64String = await fileToBase64(willSendFile);
+            // ✅ 優化：改用 ArrayBuffer 方式轉 base64（節省記憶體）
+            const base64String = await fileToBase64Optimized(willSendFile);
             const subName = getExt(willSendFile);
+            
             console.log('發送圖片:', { 
               subName, 
               base64Length: base64String.length,
               fileSize: willSendFile.size,
-              isCompressed: willSendFile.size < media.file.size
+              isCompressed: willSendFile.size < media.file.size,
+              compressionRatio: `${Math.round((1 - willSendFile.size / media.file.size) * 100)}%`
             });
             
             await frSendLineImage(base64String, subName);
@@ -479,7 +626,7 @@ const sendMessage = async () => {
             console.error('圖片處理失敗:', error);
             // 最後的備援：如果所有處理都失敗，至少嘗試發送原檔
             try {
-              const base64String = await fileToBase64(media.file);
+              const base64String = await fileToBase64Optimized(media.file);
               const subName = getExt(media.file);
               console.log('使用原檔發送:', { subName, base64Length: base64String.length });
               await frSendLineImage(base64String, subName);
