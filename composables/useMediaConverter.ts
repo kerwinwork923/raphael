@@ -125,6 +125,61 @@ export const useMediaConverter = () => {
     return "jpg"
   }
 
+  // 圖片壓縮功能
+  const compressImage = (file: File, maxWidth: number = 1600, quality: number = 0.8): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      const img = new Image()
+      
+      img.onload = () => {
+        // 計算新尺寸
+        let { width, height } = img
+        if (width > height) {
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width
+            width = maxWidth
+          }
+        } else {
+          if (height > maxWidth) {
+            width = (width * maxWidth) / height
+            height = maxWidth
+          }
+        }
+        
+        canvas.width = width
+        canvas.height = height
+        
+        // 繪製壓縮後的圖片
+        ctx?.drawImage(img, 0, 0, width, height)
+        
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const compressedFile = new File([blob], file.name, { 
+                type: 'image/jpeg',
+                lastModified: Date.now()
+              })
+              console.log('圖片壓縮完成:', { 
+                原始: file.size, 
+                壓縮後: compressedFile.size,
+                壓縮率: `${Math.round((1 - compressedFile.size / file.size) * 100)}%`
+              })
+              resolve(compressedFile)
+            } else {
+              reject(new Error('圖片壓縮失敗'))
+            }
+          },
+          'image/jpeg',
+          quality
+        )
+      }
+      
+      img.onerror = () => reject(new Error('圖片載入失敗'))
+      img.src = URL.createObjectURL(file)
+    })
+  }
+
   return {
     isConverting,
     conversionProgress,
@@ -136,6 +191,7 @@ export const useMediaConverter = () => {
     createPreviewURL,
     revokePreviewURL,
     isAllowedImage,
-    getExt
+    getExt,
+    compressImage
   }
 }

@@ -280,7 +280,8 @@ const allMessages = computed(() => {
   });
 });
 
-const userData = JSON.parse(localStorage.getItem("userData"));
+// ✅ 改善：添加用戶數據驗證
+const userData = JSON.parse(localStorage.getItem("userData") || "{}");
 
 // API 配置
 const API_CONFIG = {
@@ -289,6 +290,18 @@ const API_CONFIG = {
   MAID: userData.MAID,
   Mobile: userData.Mobile,
   Lang: "zhtw",
+};
+
+// 檢查用戶數據是否完整
+const validateUserData = () => {
+  if (!userData.MID || !userData.Token || !userData.MAID) {
+    console.error('用戶數據不完整:', userData);
+    alert('請重新登入');
+    // 可以導向登入頁面
+    // navigateTo('/login');
+    return false;
+  }
+  return true;
 };
 
 // 滿意度評分相關
@@ -318,6 +331,7 @@ const {
   isAllowedImage,
   getExt,
   isHEICFormat,
+  compressImage,
 } = useMediaConverter();
 
 // API 函數
@@ -390,6 +404,11 @@ const fileToBase64 = (file) => {
 const sendMessage = async () => {
   if (!newMessage.value.trim() && previewMedia.value.length === 0) return;
 
+  // ✅ 改善：驗證用戶數據
+  if (!validateUserData()) {
+    return;
+  }
+
   try {
     // 發送文字訊息
     if (newMessage.value.trim()) {
@@ -422,21 +441,53 @@ const sendMessage = async () => {
         // 如果是圖片，確保使用處理過的檔案並轉換為 base64 發送
         if (media.type === "image") {
           console.log('發送圖片前檢查:', { name: media.file.name, type: media.file.type });
-          // 確保「送出前」用最新的 File（可能已被轉成 JPG）
-          const processed = await processFileFormat(media.file);
-          console.log('處理後的檔案:', { name: processed.name, type: processed.type });
           
-          // 檢查轉換是否成功（如果還是 HEIC 格式，轉換可能失敗）
-          if (isHEICFormat(processed)) {
-            console.warn('HEIC 轉換失敗，跳過此圖片');
-            alert('HEIC 格式轉換失敗，請改用 JPG 或 PNG 格式的圖片');
-            continue; // 跳過這個檔案
+          try {
+            // ✅ 修復：嘗試 HEIC 轉檔，失敗時使用備援策略
+            let processed = await processFileFormat(media.file);
+            console.log('處理後的檔案:', { name: processed.name, type: processed.type });
+            
+            let willSendFile = processed;
+            
+            // 如果轉檔失敗（仍是 HEIC），使用備援策略
+            if (isHEICFormat(processed)) {
+              console.warn('HEIC 轉檔失敗，使用備援策略');
+              // 備援策略：直接使用原檔，讓後端處理
+              willSendFile = media.file;
+              console.log('使用原檔作為備援:', { name: willSendFile.name, type: willSendFile.type });
+            }
+            
+            // 壓縮圖片避免 base64 過大
+            const maxSize = 2 * 1024 * 1024; // 2MB
+            if (willSendFile.size > maxSize) {
+              console.log('圖片過大，開始壓縮...');
+              willSendFile = await compressImage(willSendFile, 1600, 0.7);
+            }
+            
+            const base64String = await fileToBase64(willSendFile);
+            const subName = getExt(willSendFile);
+            console.log('發送圖片:', { 
+              subName, 
+              base64Length: base64String.length,
+              fileSize: willSendFile.size,
+              isCompressed: willSendFile.size < media.file.size
+            });
+            
+            await frSendLineImage(base64String, subName);
+            
+          } catch (error) {
+            console.error('圖片處理失敗:', error);
+            // 最後的備援：如果所有處理都失敗，至少嘗試發送原檔
+            try {
+              const base64String = await fileToBase64(media.file);
+              const subName = getExt(media.file);
+              console.log('使用原檔發送:', { subName, base64Length: base64String.length });
+              await frSendLineImage(base64String, subName);
+            } catch (fallbackError) {
+              console.error('備援發送也失敗:', fallbackError);
+              alert('圖片上傳失敗，請檢查網路連線或嘗試其他格式');
+            }
           }
-          
-          const base64String = await fileToBase64(processed);
-          const subName = getExt(processed);
-          console.log('發送圖片:', { subName, base64Length: base64String.length });
-          await frSendLineImage(base64String, subName);
         }
       }
     }
@@ -465,27 +516,26 @@ const getMessages = async () => {
     if (response && response.LineList) {
       console.log("LineList 長度:", response.LineList.length);
 
-      // 清空現有訊息，避免重複
-      messages.value = [];
-      mediaMessages.value = [];
+      // ✅ 修復：不要清空本地訊息，改為合併去重
+      const makeKey = (m) => `${m.timestamp}-${m.type}-${m.fileName || m.content || m.url || ''}`;
+      const existing = new Set([...messages.value, ...mediaMessages.value].map(makeKey));
 
       response.LineList.forEach((msg, index) => {
         console.log(`訊息 ${index}:`, msg);
 
+        let item = null;
         if (msg.Mode === "Input") {
           // 用戶訊息
           if (msg.messageType === "text") {
-            const userMessage = {
+            item = {
               content: msg.Content,
               messageType: "text",
               time: formatTime(msg.CheckTime),
               timestamp: new Date(msg.CheckTime).getTime(),
               type: "user",
             };
-            console.log("添加用戶文字訊息:", userMessage);
-            messages.value.push(userMessage);
           } else if (msg.messageType === "image") {
-            const mediaMessage = {
+            item = {
               url: msg.ImgURL,
               messageType: "image",
               time: formatTime(msg.CheckTime),
@@ -493,20 +543,27 @@ const getMessages = async () => {
               fileName: msg.FileName,
               type: "user",
             };
-            console.log("添加用戶圖片訊息:", mediaMessage);
-            mediaMessages.value.push(mediaMessage);
           }
         } else if (msg.Mode === "Output") {
           // 客服回應
-          const serviceMessage = {
+          item = {
             content: msg.Content,
             messageType: "text",
             time: formatTime(msg.CheckTime),
             timestamp: new Date(msg.CheckTime).getTime(),
             type: "service",
           };
-          console.log("添加客服回應:", serviceMessage);
-          messages.value.push(serviceMessage);
+        }
+
+        if (item) {
+          const key = makeKey(item);
+          if (!existing.has(key)) {
+            console.log("添加新訊息:", item);
+            (item.messageType === 'image' ? mediaMessages.value : messages.value).push(item);
+            existing.add(key);
+          } else {
+            console.log("跳過重複訊息:", item);
+          }
         }
       });
 
@@ -611,9 +668,10 @@ const processMediaFile = async (file, type) => {
   try {
     console.log('開始處理媒體檔案:', { name: file.name, type: file.type, size: file.size });
     
-    // 檢查檔案大小
+    // ✅ 改善：更詳細的檔案大小檢查
     if (!validateFileSize(file, 30)) {
-      alert("檔案大小不能超過 30MB");
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+      alert(`檔案大小 ${sizeMB}MB 超過限制，請選擇小於 30MB 的檔案`);
       return;
     }
 
@@ -641,9 +699,24 @@ const processMediaFile = async (file, type) => {
 
     // 添加到預覽區域
     addPreviewMedia(processedFile, type);
+    
+    // ✅ 改善：成功提示
+    console.log('媒體檔案處理成功，已添加到預覽區域');
+    
   } catch (error) {
     console.error("處理媒體檔案時發生錯誤:", error);
-    alert(error.message || "處理檔案時發生錯誤");
+    
+    // ✅ 改善：更具體的錯誤提示
+    let errorMessage = "處理檔案時發生錯誤";
+    if (error.message.includes('HEIC')) {
+      errorMessage = "HEIC 格式轉換失敗，請嘗試使用 JPG 或 PNG 格式";
+    } else if (error.message.includes('size')) {
+      errorMessage = "檔案過大，請選擇較小的檔案";
+    } else if (error.message.includes('format')) {
+      errorMessage = "不支援的檔案格式，請選擇 JPG、PNG 或 HEIC";
+    }
+    
+    alert(errorMessage);
   }
 };
 
