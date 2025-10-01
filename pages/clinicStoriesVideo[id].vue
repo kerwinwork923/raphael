@@ -48,7 +48,11 @@
         </div>
         
         <!-- 全螢幕按鈕 -->
-        <div class="controlButton" @click="toggleFullscreen">
+        <div 
+          class="controlButton" 
+          :class="{ disabled: useNativeYTControls }"
+          @click="toggleFullscreen"
+        >
           <img src="/assets/imgs/clinicStories/maximize.png" alt="全螢幕" />
         </div>
       </div>
@@ -379,6 +383,18 @@ const isDragging = ref(false);
 // 影片 iframe 引用
 const videoIframe = ref(null);
 
+// 設備檢測和全螢幕支援檢測
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+              (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+const supportsElementFS = !!(document.fullscreenEnabled ||
+                             document.webkitFullscreenEnabled ||
+                             document.mozFullScreenEnabled ||
+                             document.msFullscreenEnabled);
+
+// iOS 且不支援任意元素全螢幕 → 用原生控制列
+const useNativeYTControls = isIOS && !supportsElementFS;
+
 // 計算 YouTube 嵌入 URL
 const youtubeEmbedUrl = computed(() => {
   const videoId = videoData.value.youtubeUrl.split("v=")[1]?.split("&")[0];
@@ -387,10 +403,11 @@ const youtubeEmbedUrl = computed(() => {
     enablejsapi: "1",
     origin,
     rel: "0",
-    controls: "0", // 隱藏原生控制列，改用自訂 UI
     modestbranding: "1",
-    playsinline: "1", // iOS 不全螢幕
-    // autoplay: '1'      // 注意：行動裝置通常需要使用者互動才會生效
+    playsinline: "1", // iOS 仍可行
+    // 關鍵：iOS 舊版不支援任意元素全螢幕 → 顯示 YouTube 的原生控制列（含全螢幕）
+    controls: useNativeYTControls ? "1" : "0",
+    fs: "1"
   });
   return `https://www.youtube.com/embed/${videoId}?${params.toString()}`;
 });
@@ -561,33 +578,39 @@ const onControlsMouseLeave = () => {
 };
 
 // 全螢幕功能
-const toggleFullscreen = () => {
-  if (!player || !isYouTubeReady.value) return;
-  
-  if (isVideoFullscreen.value) {
-    // 退出全螢幕
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen();
-    } else if (document.mozCancelFullScreen) {
-      document.mozCancelFullScreen();
-    } else if (document.msExitFullscreen) {
-      document.msExitFullscreen();
-    }
+const toggleFullscreen = async () => {
+  // iOS 舊版不支援任意元素全螢幕：交給原生控制列的全螢幕按鈕
+  if (useNativeYTControls) return;
+
+  const target = document.querySelector('.videoPlayer .videoContainer');
+  if (!target) return;
+
+  // 已在全螢幕 → 退出
+  if (document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      document.mozFullScreenElement ||
+      document.msFullscreenElement) {
+    (document.exitFullscreen ||
+     document.webkitExitFullscreen ||
+     document.mozCancelFullScreen ||
+     document.msExitFullscreen)?.call(document);
   } else {
     // 進入全螢幕
-    const videoContainer = document.querySelector('.videoPlayer');
-    if (videoContainer) {
-      if (videoContainer.requestFullscreen) {
-        videoContainer.requestFullscreen();
-      } else if (videoContainer.webkitRequestFullscreen) {
-        videoContainer.webkitRequestFullscreen();
-      } else if (videoContainer.mozRequestFullScreen) {
-        videoContainer.mozRequestFullScreen();
-      } else if (videoContainer.msRequestFullscreen) {
-        videoContainer.msRequestFullscreen();
+    try {
+      await (target.requestFullscreen ||
+             target.webkitRequestFullscreen ||
+             target.mozRequestFullScreen ||
+             target.msRequestFullscreen)?.call(target, { navigationUI: "hide" });
+      
+      // 嘗試鎖定橫向（支援的裝置才會成功，不會報錯）
+      try {
+        await screen.orientation?.lock?.('landscape');
+      } catch (e) {
+        // 忽略錯誤，某些設備不支援
+        console.log('Orientation lock not supported:', e);
       }
+    } catch (e) {
+      console.log('Fullscreen not supported:', e);
     }
   }
 };
@@ -783,6 +806,11 @@ onMounted(() => {
     updateChaptersForVideo(1);
   }
   
+  // iOS 舊版不支援任意元素全螢幕：直接用 YouTube 原生控制列
+  if (useNativeYTControls) {
+    showControls.value = false;
+  }
+  
   // 監聽全螢幕狀態變化
   document.addEventListener('fullscreenchange', handleFullscreenChange);
   document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
@@ -825,19 +853,22 @@ const modules = [FreeMode];
     // 修復手機端縮放問題 - 只保留必要的屬性
     -webkit-tap-highlight-color: transparent;
     
-    // 全螢幕樣式
-    &:fullscreen {
-      height: 100vh;
+    // 全螢幕樣式 - 使用動態視窗高避免瀏海/工具列壓縮
+    &:fullscreen,
+    &:-webkit-full-screen,
+    &:-moz-full-screen,
+    &:-ms-fullscreen {
+      height: 100svh; // 使用動態視窗高
       width: 100vw;
       margin: 0;
       background: #000;
       
       .videoContainer {
-        height: 100vh;
+        height: 100svh;
         width: 100vw;
         
         iframe {
-          height: 100vh;
+          height: 100svh;
           width: 100vw;
         }
       }
@@ -849,28 +880,6 @@ const modules = [FreeMode];
         padding: 20px;
         background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
       }
-    }
-    
-    // 全螢幕偽類支援
-    &:-webkit-full-screen {
-      height: 100vh;
-      width: 100vw;
-      margin: 0;
-      background: #000;
-    }
-    
-    &:-moz-full-screen {
-      height: 100vh;
-      width: 100vw;
-      margin: 0;
-      background: #000;
-    }
-    
-    &:-ms-fullscreen {
-      height: 100vh;
-      width: 100vw;
-      margin: 0;
-      background: #000;
     }
 
     .videoContainer {
@@ -918,9 +927,15 @@ const modules = [FreeMode];
         cursor: pointer;
         transition: all 0.2s ease;
         
-        &:hover {
+        &:hover:not(.disabled) {
           background: rgba(255, 255, 255, 1);
           transform: scale(1.1);
+        }
+
+        &.disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          pointer-events: none;
         }
 
         img {
