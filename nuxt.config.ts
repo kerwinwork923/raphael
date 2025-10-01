@@ -23,8 +23,7 @@ export default defineNuxtConfig({
         {
           name: "viewport",
           // ✅ 允許縮放（放寬 maximum-scale；不要 user-scalable）
-          content: "width=device-width, initial-scale=1, maximum-scale=5"
-          // 如需更自由，也可用： "width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=10"
+          content: "width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=10, user-scalable=yes"
         },
         {
           name: "description",

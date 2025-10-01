@@ -822,12 +822,7 @@ const modules = [FreeMode];
     background: #000;
     margin-top: 1rem;
     position: relative;
-    // 修復手機端縮放問題
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    -webkit-touch-callout: none;
+    // 修復手機端縮放問題 - 只保留必要的屬性
     -webkit-tap-highlight-color: transparent;
     
     // 全螢幕樣式
@@ -906,6 +901,10 @@ const modules = [FreeMode];
       transition: opacity 0.3s ease, transform 0.3s ease;
       opacity: 1;
       transform: translateY(0);
+      // 防止破版
+      overflow: hidden;
+      max-width: 100%;
+      box-sizing: border-box;
 
 
       .controlButton {
@@ -938,6 +937,8 @@ const modules = [FreeMode];
         position: relative;
         cursor: pointer;
         transition: all 0.2s ease;
+        min-width: 0; // 防止 flex 項目溢出
+        max-width: 100%;
 
         &:hover {
           height: 8px;
@@ -970,8 +971,13 @@ const modules = [FreeMode];
         color: white;
         font-size: 12px;
         font-weight: 500;
-        min-width: 80px;
+        min-width: 60px;
+        max-width: 80px;
         text-align: right;
+        flex-shrink: 0; // 防止縮小
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
 
@@ -980,6 +986,66 @@ const modules = [FreeMode];
       opacity: 0;
       transform: translateY(100%);
       pointer-events: none;
+    }
+  }
+
+  // 響應式設計 - 小螢幕設備
+  @media (max-width: 480px) {
+    .videoPlayer {
+      .videoControls {
+        padding: 12px;
+        gap: 12px;
+        
+        .controlButton {
+          width: 36px;
+          height: 36px;
+          
+          img {
+            width: 18px;
+            height: 18px;
+          }
+        }
+        
+        .timeDisplay {
+          font-size: 11px;
+          min-width: 50px;
+          max-width: 60px;
+        }
+        
+        .progressBar {
+          height: 5px;
+          
+          &:hover {
+            height: 6px;
+          }
+        }
+      }
+    }
+  }
+
+  // 超小螢幕設備
+  @media (max-width: 360px) {
+    .videoPlayer {
+      .videoControls {
+        padding: 8px;
+        gap: 8px;
+        
+        .controlButton {
+          width: 32px;
+          height: 32px;
+          
+          img {
+            width: 16px;
+            height: 16px;
+          }
+        }
+        
+        .timeDisplay {
+          font-size: 10px;
+          min-width: 45px;
+          max-width: 55px;
+        }
+      }
     }
   }
 
