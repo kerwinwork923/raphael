@@ -324,10 +324,16 @@
     background: rgba(27, 163, 155, 0.35);
     width: 100%;
     height: 100%;
-    -webkit-clip-path: circle(50% at right);
-    clip-path: circle(50% at right);
+    -webkit-clip-path: circle(100% at right);
+    clip-path: circle(100% at right);
     top: 0;
     right: 0;
     z-index: -2;
+
+    @include respond-to(md) {
+      -webkit-clip-path: circle(55% at right);
+      clip-path: circle(55% at right);
+
+    }
   }
 }
