@@ -285,6 +285,9 @@ const modules = [FreeMode];
     z-index: 5;
 
     .tagsSwiper {
+      background: transparent;
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
       width: 100%;
       padding: 1rem;
     }
@@ -307,8 +310,11 @@ const modules = [FreeMode];
 
       &.active,
       &:hover {
-        
-      @include neumorphismOuter($bgColor:#74bc1f,$radius: 50px, $padding: 0.5rem 1rem);
+        @include neumorphismOuter(
+          $bgColor: #74bc1f,
+          $radius: 50px,
+          $padding: 0.5rem 1rem
+        );
         color: white;
       }
     }
@@ -339,7 +345,7 @@ const modules = [FreeMode];
     }
 
     .videoCard {
-      @include neumorphismOuter($padding:0);
+      @include neumorphismOuter($padding: 0);
       overflow: hidden;
       height: 260px;
       cursor: pointer;
@@ -406,7 +412,7 @@ const modules = [FreeMode];
             gap: 4px;
             font-size: 12px;
             color: #666;
-            @include neumorphismOuter($radius:50px,$padding:4px 8px);
+            @include neumorphismOuter($radius: 50px, $padding: 4px 8px);
 
             img {
               width: 16px;
@@ -425,7 +431,7 @@ const modules = [FreeMode];
     margin-bottom: 24px;
 
     .videoCard.large {
-      background: #F5F7FA;
+      background: #f5f7fa;
       overflow: hidden;
       cursor: pointer;
 
