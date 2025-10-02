@@ -1,7 +1,10 @@
 <template>
-    <RaphaelLoading v-if="loading" />
+  <RaphaelLoading v-if="loading" />
   <div class="memberWrap">
     <div class="memberContainer">
+      <div class="notificationBell">
+        <img src="../assets/imgs/member/bell.svg" alt="通知" />
+      </div>
       <MemberTop :userDataObj="userDataObj" @refresh="getMemberData" />
       <div class="memberCenter">
         <div class="memberCenterItem" @click="goToPoint">
@@ -47,13 +50,11 @@
             <img src="../assets/imgs/member/warning.svg" alt="" />
             <h3>免責聲明</h3>
           </div>
-          <img src="../assets/imgs/member/next_green.svg"  alt="" />
+          <img src="../assets/imgs/member/next_green.svg" alt="" />
         </div>
-
       </div>
 
       <button class="logoutBtn" @click="logout">登出</button>
-
     </div>
 
     <BottomNav />
@@ -89,7 +90,6 @@ const logout = () => {
   router.push("/");
 };
 
-
 const goToChangeMember = () => {
   router.push("/changeMember");
 };
@@ -107,10 +107,10 @@ const goToDisclaimer = () => {
 };
 
 const getMemberData = async () => {
-    //loading
-    loading.value = true;
-    await useUserData();
-    loading.value = false;
+  //loading
+  loading.value = true;
+  await useUserData();
+  loading.value = false;
 };
 </script>
 
@@ -127,6 +127,19 @@ const getMemberData = async () => {
     display: flex;
     flex-direction: column;
     gap: 24px;
+  }
+  .notificationBell {
+    display: flex;
+    gap: 1rem;
+    height: 44px;
+    justify-content: flex-end;
+    align-items: center;
+
+    img {
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+    }
   }
   .memberCenter {
     display: flex;
@@ -282,6 +295,5 @@ const getMemberData = async () => {
       );
     }
   }
-
 }
 </style>
