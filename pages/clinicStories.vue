@@ -305,10 +305,11 @@ const modules = [FreeMode];
       white-space: nowrap;
       transition: all 0.3s ease;
 
-      &.active {
-        background: var(--Primary-default, #74bc1f);
+      &.active,
+      &:hover {
+        
+      @include neumorphismOuter($bgColor:#74bc1f,$radius: 50px, $padding: 0.5rem 1rem);
         color: white;
-        transform: scale(1.05);
       }
     }
   }
@@ -340,7 +341,7 @@ const modules = [FreeMode];
     .videoCard {
       @include neumorphismOuter($padding:0);
       overflow: hidden;
-      height: 250px;
+      height: 260px;
       cursor: pointer;
 
       .videoThumbnail {
@@ -405,6 +406,7 @@ const modules = [FreeMode];
             gap: 4px;
             font-size: 12px;
             color: #666;
+            @include neumorphismOuter($radius:50px,$padding:4px 8px);
 
             img {
               width: 16px;
