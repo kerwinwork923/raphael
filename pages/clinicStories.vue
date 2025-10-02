@@ -1,35 +1,36 @@
 <template>
   <div class="clinicStoriesWrap">
     <div class="clinicStoriesContainer">
-      <div class="notificationBell">
-        <img src="../assets/imgs/member/bell.svg" alt="通知" />
-        <img src="../assets/imgs/robot/search.svg" alt="搜尋" />
-      </div>
+      <div class="funcTool">
+        <div class="notificationBell">
+          <img src="../assets/imgs/member/bell.svg" alt="通知" />
+          <img src="../assets/imgs/robot/search.svg" alt="搜尋" />
+        </div>
 
-      <!-- 可滑動標籤 -->
-      <div class="clinicStoriesTagsGroup">
-        <swiper
-          :slides-per-view="'auto'"
-          :space-between="12"
-          :free-mode="true"
-          class="tagsSwiper"
-        >
-          <swiper-slide
-            v-for="tag in visibleTags"
-            :key="tag.id"
-            class="tagSlide"
+        <!-- 可滑動標籤 -->
+        <div class="clinicStoriesTagsGroup">
+          <swiper
+            :slides-per-view="'auto'"
+            :space-between="12"
+            :free-mode="true"
+            class="tagsSwiper"
           >
-            <div
-              class="clinicStoriesTagsItem"
-              :class="{ active: activeTag === tag.id }"
-              @click="setActiveTag(tag.id)"
+            <swiper-slide
+              v-for="tag in visibleTags"
+              :key="tag.id"
+              class="tagSlide"
             >
-              {{ tag.name }}
-            </div>
-          </swiper-slide>
-        </swiper>
+              <div
+                class="clinicStoriesTagsItem"
+                :class="{ active: activeTag === tag.id }"
+                @click="setActiveTag(tag.id)"
+              >
+                {{ tag.name }}
+              </div>
+            </swiper-slide>
+          </swiper>
+        </div>
       </div>
-
       <!-- 推薦影片區塊 -->
       <div class="recommendedSection">
         <h2 class="sectionTitle">推薦</h2>
@@ -260,16 +261,24 @@ const modules = [FreeMode];
     max-width: 720px;
     margin: 0 auto;
   }
-
-  .notificationBell {
-    position: absolute;
-    top: 1.25rem;
-    right: 16px;
+  .funcTool {
+    position: sticky;
+    display: flex;
+    flex-direction: column;
+    padding: 0 1rem;
+    background: transparent;
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+    top: 0;
     z-index: 10;
+  }
+  .notificationBell {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     gap: 1rem;
+    height:44px;
+
     img {
       width: 24px;
       height: 24px;
@@ -278,16 +287,10 @@ const modules = [FreeMode];
   }
 
   .clinicStoriesTagsGroup {
-    position: sticky;
-    top: 3.25rem;
-    left: 0;
     width: 100%;
     z-index: 5;
 
     .tagsSwiper {
-      background: transparent;
-      -webkit-backdrop-filter: blur(6px);
-      backdrop-filter: blur(6px);
       width: 100%;
       padding: 1rem;
     }
@@ -322,9 +325,8 @@ const modules = [FreeMode];
 
   .recommendedSection {
     padding: 0 16px;
-    margin-top: 66px;
-    margin-bottom: 8px;
-
+    margin: 8px 0;
+    
     .sectionTitle {
       color: #1e1e1e;
 
