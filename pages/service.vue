@@ -28,7 +28,7 @@
             </div>
           </div>
         </div>
-        
+
         <div class="serviceCenterRow">
           <div class="serviceCenterItem" @click="goToLeaveCenter">
             <img src="../assets/imgs/member/calendarClock.svg" alt="請假中心" />
@@ -71,9 +71,6 @@
           </div>
           <img src="../assets/imgs/member/next_green.svg" alt="" />
         </div>
-        
-        
-
       </div>
     </div>
 
@@ -112,7 +109,6 @@ const goToHealthAssessment = () => {
 };
 
 const goToLeaveCenter = () => {
- 
   router.push("/contract");
 };
 
@@ -127,17 +123,14 @@ const goToContract = () => {
 };
 
 const goToUpdateParts = () => {
-
   console.log("前往更新部位");
 };
 
 const goToSmartButler = () => {
-
   console.log("前往智慧管家");
 };
 
 const goToCSRobot = () => {
-
   console.log("前往客服機器人");
   router.push("/CSRobot");
 };
@@ -166,11 +159,12 @@ const getMemberData = async () => {
   }
 
   .notificationBell {
-    position: absolute;
-    top: 0;
-    right: 16px;
-    z-index: 10;
-    
+    display: flex;
+    gap: 1rem;
+    height: 44px;
+    justify-content: flex-end;
+    align-items: center;
+
     img {
       width: 24px;
       height: 24px;
@@ -289,14 +283,14 @@ const getMemberData = async () => {
         display: flex;
         align-items: center;
         gap: 4px;
-        
+
         h3 {
           color: $raphael-black;
           text-overflow: ellipsis;
           font-size: 18px;
           letter-spacing: 2.7px;
         }
-        
+
         img {
           width: 24px;
           height: 24px;
