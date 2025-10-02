@@ -50,9 +50,9 @@
                 <div v-if="videoLoading" class="videoLoading">
                   <div class="loadingSpinner"></div>
                 </div>
-                <img 
-                  :src="video.thumbnail" 
-                  :alt="video.title" 
+                <img
+                  :src="video.thumbnail"
+                  :alt="video.title"
                   @load="onVideoLoad"
                   @loadstart="onVideoLoadStart"
                   :style="{ opacity: videoLoading ? 0 : 1 }"
@@ -92,9 +92,9 @@
             <div v-if="videoLoading" class="videoLoading">
               <div class="loadingSpinner"></div>
             </div>
-            <img 
-              :src="video.thumbnail" 
-              :alt="video.title" 
+            <img
+              :src="video.thumbnail"
+              :alt="video.title"
               @load="onVideoLoad"
               @loadstart="onVideoLoadStart"
               :style="{ opacity: videoLoading ? 0 : 1 }"
@@ -255,12 +255,10 @@ const modules = [FreeMode];
   padding: 0.5rem 0rem 0rem;
   padding-bottom: 80px; // 為底部導航留空間
 
-
   .clinicStoriesContainer {
     width: 100%;
     max-width: 720px;
     margin: 0 auto;
-    
   }
 
   .notificationBell {
@@ -271,7 +269,7 @@ const modules = [FreeMode];
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 1rem;
     img {
       width: 24px;
       height: 24px;
@@ -285,10 +283,10 @@ const modules = [FreeMode];
     left: 0;
     width: 100%;
     z-index: 5;
-    padding: 0 16px;
 
     .tagsSwiper {
       width: 100%;
+      padding: 1rem;
     }
 
     .tagSlide {
@@ -296,18 +294,13 @@ const modules = [FreeMode];
     }
 
     .clinicStoriesTagsItem {
-      font-size: 1.25rem;
-      border-radius: var(--Radius-r-50, 50px);
-      background: var(--Secondary-100, #f5f7fa);
-
-      color: var(--Primary-default, #74bc1f);
-      font-family: "Noto Sans";
-      font-size: var(--Text-font-size-18, 18px);
+      @include neumorphismOuter($radius: 50px, $padding: 0.5rem 1rem);
+      color: #74bc1f;
+      font-size: 18px;
       font-style: normal;
       font-weight: 400;
       line-height: 100%;
       letter-spacing: 2.7px;
-      padding: 0.5rem 1rem;
       cursor: pointer;
       white-space: nowrap;
       transition: all 0.3s ease;
@@ -321,24 +314,23 @@ const modules = [FreeMode];
   }
 
   .recommendedSection {
-    margin-top: 100px; // 為固定標籤留空間
     padding: 0 16px;
-    margin-bottom: 24px;
-    margin-top: 4.5rem;;
+    margin-top: 66px;
+    margin-bottom: 8px;
 
     .sectionTitle {
-      color: var(--Neutral-black, #1e1e1e);
+      color: #1e1e1e;
 
-      font-size: var(--Text-font-size-20, 20px);
+      font-size: 20px;
       font-style: normal;
       font-weight: 700;
       line-height: 100%; /* 20px */
       letter-spacing: 3px;
-      margin-bottom: .75rem;
     }
 
     .recommendedSwiper {
       width: 100%;
+      padding: 1rem 0;
     }
 
     .videoSlide {
@@ -346,12 +338,11 @@ const modules = [FreeMode];
     }
 
     .videoCard {
-      background: white;
-      border-radius: 16px;
+      @include neumorphismOuter($padding:0);
       overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       height: 250px;
       cursor: pointer;
+
       .videoThumbnail {
         position: relative;
         width: 100%;
@@ -426,16 +417,16 @@ const modules = [FreeMode];
   }
 
   .bottomVideoSection {
-    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
     margin-bottom: 24px;
 
     .videoCard.large {
-      background: white;
-      border-radius: 16px;
+      background: #F5F7FA;
       overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      margin-bottom: 1rem;
       cursor: pointer;
+
       .videoThumbnail {
         position: relative;
         width: 100%;
@@ -499,7 +490,11 @@ const modules = [FreeMode];
 
 // Loading 動畫
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>
