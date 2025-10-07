@@ -54,6 +54,7 @@
                   :src="message.url"
                   alt="圖片"
                   @click="openImagePreview(message.url)"
+                  @load="onImgLoad"
                   class="preview-image"
                 />
               </div>
@@ -256,7 +257,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, nextTick, onMounted, onUnmounted, computed } from "vue";
+import { ref, reactive, nextTick, onMounted, onUnmounted, onBeforeUnmount, computed } from "vue";
 import { useMediaConverter } from "~/composables/useMediaConverter";
 
 // 響應式數據
@@ -269,6 +270,10 @@ const bottomSentinel = ref(null);
 const isFocused = ref(false);
 const showImagePreview = ref(false);
 const previewImageUrl = ref("");
+
+// 滾動相關 refs
+const autoStickThreshold = 80; // 距離底部 80px 內才自動貼底
+let ro = null; // ResizeObserver 實例
 
 // 合併所有訊息並按時間排序
 const allMessages = computed(() => {
@@ -543,6 +548,8 @@ const sendMessage = async () => {
     return;
   }
 
+  const shouldStick = isNearBottom(); // 先記錄是否靠近底部
+
   try {
     // 發送文字訊息
     if (newMessage.value.trim()) {
@@ -643,8 +650,12 @@ const sendMessage = async () => {
     newMessage.value = "";
     previewMedia.value = [];
 
-    // 滾動到底部
-    await scrollAfterRender();
+    // 智能滾動：只有在接近底部時才滾動
+    await nextTick();
+    if (shouldStick) {
+      await waitImagesDecoded();
+      scrollToBottomInstant();
+    }
 
     // 獲取客服回應
     await getMessages();
@@ -718,7 +729,9 @@ const getMessages = async () => {
       console.log("最終媒體列表:", mediaMessages.value);
 
       // 確保滾動到最下方
-      await scrollAfterRender();
+      await nextTick();
+      await waitImagesDecoded();
+      scrollToBottomInstant();
     } else {
       console.log("沒有 LineList 或回應格式錯誤");
     }
@@ -744,22 +757,62 @@ const getCurrentTime = () => {
     .padStart(2, "0")}`;
 };
 
-const scrollToBottom = () => {
-  // 優先用底部錨點，避免圖片載入高度變動造成的誤差
-  if (bottomSentinel.value) {
-    bottomSentinel.value.scrollIntoView({ block: 'end' });
-  } else if (chatMessages.value) {
-    chatMessages.value.scrollTop = chatMessages.value.scrollHeight;
+// 檢查是否接近底部
+const isNearBottom = () => {
+  const el = chatMessages.value;
+  if (!el) return true;
+  return el.scrollHeight - el.scrollTop - el.clientHeight <= autoStickThreshold;
+};
+
+// 絕對瞬間貼底（無動畫）
+const scrollToBottomInstant = () => {
+  const el = chatMessages.value;
+  if (!el) return;
+  // 方式一：錨點（處理圖片高度變動最穩）
+  if (bottomSentinel.value?.scrollIntoView) {
+    bottomSentinel.value.scrollIntoView({ block: "end", behavior: "auto" });
+  } else {
+    // 方式二：直接設定 scrollTop
+    el.scrollTop = el.scrollHeight;
   }
+};
+
+// 等容器裡所有 <img> 都完成 decode
+const waitImagesDecoded = async () => {
+  const el = chatMessages.value;
+  if (!el) return;
+
+  const imgs = Array.from(el.querySelectorAll("img"));
+  if (imgs.length === 0) return;
+
+  // decode() 會在圖片尺寸可用、可排版時 resolve
+  await Promise.all(
+    imgs.map((img) =>
+      img.decode
+        ? img.decode().catch(() => {}) // 某些瀏覽器可能丟錯
+        : img.complete
+        ? Promise.resolve()
+        : new Promise((res) => img.addEventListener("load", res, { once: true }))
+    )
+  );
+};
+
+// 圖片載入事件（保險加一手）
+const onImgLoad = async () => {
+  if (!isNearBottom()) return;
+  await nextTick();
+  scrollToBottomInstant();
+};
+
+const scrollToBottom = () => {
+  scrollToBottomInstant();
 };
 
 // DOM 更新 + 瀏覽器排程 + 圖片高度回流後再補一次
 const scrollAfterRender = async () => {
   await nextTick();
-  requestAnimationFrame(() => {
-    scrollToBottom();
-    setTimeout(scrollToBottom, 80); // iOS/Safari 偶發再補一下
-  });
+  await waitImagesDecoded();
+  scrollToBottomInstant();
 };
 
 // 媒體上傳功能
@@ -952,7 +1005,15 @@ onMounted(async () => {
   await getMessages();
 
   // 確保滾動到最下方
-  await scrollAfterRender();
+  await nextTick();
+  await waitImagesDecoded();
+  scrollToBottomInstant();
+
+  // 建立 ResizeObserver：只要內容高度增加，且使用者接近底部，就瞬間貼底
+  ro = new ResizeObserver(() => {
+    if (isNearBottom()) scrollToBottomInstant();
+  });
+  if (chatMessages.value) ro.observe(chatMessages.value);
 
   // 監聽來自後台管理的事件
   if (typeof window !== "undefined") {
@@ -970,6 +1031,10 @@ onUnmounted(() => {
   if (typeof window !== "undefined") {
     window.removeEventListener("service-completed", showSatisfactionRating);
   }
+  
+  // 清理 ResizeObserver
+  if (ro && chatMessages.value) ro.unobserve(chatMessages.value);
+  ro = null;
 });
 </script>
 
@@ -1006,7 +1071,7 @@ onUnmounted(() => {
   overflow-y: auto;      /* ★ 只有這個層滾 */
   padding: 1rem 0;
   @include scrollbarStyle();
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
 }
 
 .message {
