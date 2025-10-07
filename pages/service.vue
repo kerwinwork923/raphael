@@ -37,13 +37,13 @@
               前往 <img src="../assets/imgs/member/next.svg" alt="" />
             </div>
           </div>
-          <div class="serviceCenterItem" @click="goToShipmentInquiry">
+          <!-- <div class="serviceCenterItem" @click="goToShipmentInquiry">
             <img src="../assets/imgs/member/packageSearch.svg" alt="寄貨查詢" />
             <h3>寄貨查詢</h3>
             <div class="serviceCenterButton">
               前往 <img src="../assets/imgs/member/next.svg" alt="" />
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
 
@@ -53,6 +53,13 @@
           <div class="serviceListLeft">
             <img src="../assets/imgs/member/contract.svg" alt="我的合約" />
             <h3>我的合約</h3>
+          </div>
+          <img src="../assets/imgs/member/next_green.svg" alt="" />
+        </div>
+        <div class="serviceListItem" @click="goToShipmentInquiry">
+          <div class="serviceListLeft">
+            <img src="../assets/imgs/member/packageSearch.svg" alt="" />
+            <h3>寄貨查詢</h3>
           </div>
           <img src="../assets/imgs/member/next_green.svg" alt="" />
         </div>
@@ -174,7 +181,6 @@ const getMemberData = async () => {
 
   .serviceCenter {
     display: flex;
-    flex-direction: column;
     gap: 0.75rem;
     width: 100%;
 
@@ -191,7 +197,7 @@ const getMemberData = async () => {
         align-items: center;
         justify-content: center;
         gap: 8px;
-        width: 50%;
+        width: 100%;
         @include neumorphismOuter();
 
         h3 {
