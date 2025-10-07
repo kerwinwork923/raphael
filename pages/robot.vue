@@ -1067,7 +1067,7 @@
 
   transform: translateX(-50%);
   width: 100%;
-  height: 375px;
+  min-height: 375px;
 
   background: rgba(245, 247, 250, 0.1);
   backdrop-filter: blur(22px);
