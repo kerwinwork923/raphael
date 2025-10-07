@@ -629,6 +629,7 @@
 .chat-wrapper {
   display: flex;
   flex-direction: column;
+      align-items: center;
   height: 100vh;
   padding-top: 1rem;
   @include gradientBg();
@@ -637,6 +638,7 @@
 /* 聊天頭部 */
 .chat-header {
   width: 100%;
+  max-width:768px;
   display: flex;
   align-items: center;
   position: relative;
@@ -713,6 +715,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  max-width:768px;
   align-items: baseline;
   margin-top: 1rem;
   padding: 0 1rem;
@@ -781,6 +784,7 @@
   position: relative;
   display: flex;
   justify-content: center;
+  max-width:768px;
   flex: 1;
   width: 100%;
   height: 0;

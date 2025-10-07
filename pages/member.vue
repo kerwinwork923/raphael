@@ -123,6 +123,8 @@ const getMemberData = async () => {
 
   .memberContainer {
     width: 100%;
+    max-width:768px;
+    margin:auto;
     padding: 0 16px;
     display: flex;
     flex-direction: column;

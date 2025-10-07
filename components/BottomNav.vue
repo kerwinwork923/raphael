@@ -159,12 +159,14 @@ onMounted(() => {
   bottom: 0;
   left: 0;
   right: 0;
+  max-width: 768px;
   background: #f5f7fa;
   display: grid;
   grid-auto-flow: column;
   grid-template-columns: repeat(5, 1fr);
   padding-top: 4px;
   padding-bottom: 34px;
+  margin:auto;
   border-top: 1px solid $raphael-white;
   z-index: 100;
 
