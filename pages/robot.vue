@@ -76,7 +76,7 @@
         }"
       >
         <button class="control-btn history-btn" @click="showHistory">
-          <img :src="timeSvg" alt="歷史紀錄" />
+          <img :src="messagesSquare" alt="聊天紀錄" />
         </button>
         <div
           v-if="showTutorial && currentTutorialStep === 1"
@@ -1242,6 +1242,7 @@
   z-index: 1001;
   display: flex;
   flex-direction: column;
+  align-items: center;
   inset: 0; /* 取代 top/left/width/height */
   height: 100dvh; /* 行動版更準確 */
   min-height: 0; /* ★ 沒這行 iOS 常常不滾動 */
@@ -1256,7 +1257,8 @@
     align-items: center;
     justify-content: space-between;
     padding: 20px;
-
+    max-width: 768px;
+    width: 100%;
     gap: 10px;
 
     .back-arrow {
@@ -1393,6 +1395,7 @@
     display: flex;
     flex-direction: column;
     gap: 24px;
+    max-width:768px;
     flex: 1;
 
     padding-bottom: 56px;
@@ -2410,7 +2413,7 @@ import "swiper/css/pagination";
 import { Pagination } from "swiper/modules";
 // 移除import，改用動態路徑
 import recycleSvg from "~/assets/imgs/robot/recycle.svg";
-import timeSvg from "~/assets/imgs/robot/time.svg";
+import messagesSquare from "~/assets/imgs/robot/messagesSquare.svg";
 import soundSvg from "~/assets/imgs/robot/sound.svg";
 import assistantSoundGif from "~/assets/imgs/robot/assistantSound.gif";
 import assistantDefaultGif from "~/assets/imgs/robot/assistantDefault.gif";
