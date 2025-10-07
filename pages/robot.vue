@@ -1591,11 +1591,10 @@
 
   &:disabled {
     @include neumorphismOuter(
-      $bgColor: $raphael-green-400,
+      $bgColor: $raphael-gray-300,
       $radius: 50px,
       $padding: 0
     );
-    opacity: 0.5;
     cursor: not-allowed;
   }
 
