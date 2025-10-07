@@ -275,6 +275,17 @@ const previewImageUrl = ref("");
 const autoStickThreshold = 80; // 距離底部 80px 內才自動貼底
 let ro = null; // ResizeObserver 實例
 
+// 修復 iOS 100vh 問題
+const setAppVH = () => {
+  document.documentElement.style.setProperty('--app-vh', `${window.innerHeight}px`);
+};
+
+if (typeof window !== 'undefined') {
+  setAppVH();
+  window.addEventListener('resize', setAppVH);
+  window.addEventListener('orientationchange', setAppVH);
+}
+
 // 合併所有訊息並按時間排序
 const allMessages = computed(() => {
   const all = [...messages.value, ...mediaMessages.value];
@@ -1030,6 +1041,8 @@ onMounted(async () => {
 onUnmounted(() => {
   if (typeof window !== "undefined") {
     window.removeEventListener("service-completed", showSatisfactionRating);
+    window.removeEventListener("resize", setAppVH);
+    window.removeEventListener("orientationchange", setAppVH);
   }
   
   // 清理 ResizeObserver
@@ -1042,15 +1055,23 @@ onUnmounted(() => {
 .CSRobotWrap {
   @include gradientBg();
   width: 100%;
-  height: 100vh;
-  min-height: 100vh;
+  height: 100dvh;
+  min-height: 100dvh;
   /* 移除 overflow-y: auto; 由子層負責滾 */
   padding: 1rem 0rem 0rem;
   display: flex;
   flex-direction: column;
 }
+
+@supports not (height: 100dvh) {
+  .CSRobotWrap { 
+    height: var(--app-vh, 100vh); 
+    min-height: var(--app-vh, 100vh); 
+  }
+}
 .titleMenuWrap{
   padding: 0 3%;
+  min-height: 0; // 確保 flex 子層能正確縮放
 }
 .chat-container {
   flex: 1;
@@ -1061,7 +1082,7 @@ onUnmounted(() => {
   padding: 0 1rem;
   width: 100%;
   /* 移除 overflow-y: auto; 讓子層滾 */
-  padding-bottom: 200px; /* 預留固定輸入列的高度 */
+  padding-bottom: calc(200px + env(safe-area-inset-bottom)); /* 預留固定輸入列的高度 + 安全區域 */
   min-height: 0;         /* ★ 讓子層能產生捲軸 */
 }
 
@@ -1069,6 +1090,9 @@ onUnmounted(() => {
   flex: 1;
   min-height: 0;         /* ★ 關鍵：在 flex 內允許縮，才會有捲軸 */
   overflow-y: auto;      /* ★ 只有這個層滾 */
+  -webkit-overflow-scrolling: touch; // iOS 動量滾動
+  touch-action: pan-y;               // 明確允許垂直拖曳
+  overscroll-behavior: contain;      // 停止外層跟著被拖（避免彈跳誤觸）
   padding: 1rem 0;
   @include scrollbarStyle();
   scroll-behavior: auto;
@@ -1186,6 +1210,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.5rem;
   padding-bottom: 34px;
+  pointer-events: auto;    // 讓可互動的子層吃觸控
 }
 
 .media-buttons {
@@ -1218,6 +1243,8 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   width: 100%;
+  padding-bottom: env(safe-area-inset-bottom); // 處理安全區域
+  // pointer-events: none;  // 不要整層關，否則按鈕點不到
 }
 
 .input-wrapper {
@@ -1231,6 +1258,7 @@ onUnmounted(() => {
   gap: 0.5rem;
   width: 100%;
   min-height: 110px;
+  pointer-events: auto;    // 讓可互動的子層吃觸控
 }
 
 .media-preview-area {
