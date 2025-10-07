@@ -13,13 +13,13 @@
       <!-- 功能卡片區域 -->
       <div class="serviceCenter">
         <div class="serviceCenterRow">
-          <div class="serviceCenterItem" @click="goToExclusiveRecommendation">
+          <!-- <div class="serviceCenterItem" @click="goToExclusiveRecommendation">
             <img src="../assets/imgs/member/starPlus.svg" alt="專屬推薦" />
             <h3>專屬推薦</h3>
             <div class="serviceCenterButton">
               前往 <img src="../assets/imgs/member/next.svg" alt="" />
             </div>
-          </div>
+          </div> -->
           <div class="serviceCenterItem" @click="goToHealthAssessment">
             <img src="../assets/imgs/member/heartPulse.svg" alt="健康自評" />
             <h3>健康自評</h3>
