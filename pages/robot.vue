@@ -438,7 +438,6 @@
                           alt="載入中"
                           class="loading-gif"
                         />
-                        <span>AI 正在回覆...</span>
                       </div>
                       <!-- 否則顯示 bot 回覆 -->
                       <div v-else>
