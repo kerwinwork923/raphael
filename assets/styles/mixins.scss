@@ -310,8 +310,8 @@
     content: " ";
     position: fixed;
     background: rgba(245, 247, 250, 0.45);
-    -webkit-backdrop-filter: blur(80px);
-    backdrop-filter: blur(80px);
+    -webkit-backdrop-filter: blur(100px);
+    backdrop-filter: blur(100px);
     width: 100%;
     height: 100%;
     top: 0;
@@ -320,20 +320,14 @@
 
   &::after {
     content: " ";
-    position: absolute;
+    position: fixed;
     background: rgba(27, 163, 155, 0.35);
     width: 100%;
     height: 100%;
     -webkit-clip-path: circle(100% at right);
-    clip-path: circle(100% at right);
+    clip-path: circle(95vw at right);
     top: 0;
     right: 0;
     z-index: -2;
-
-    @include respond-to(md) {
-      -webkit-clip-path: circle(55% at right);
-      clip-path: circle(55% at right);
-
-    }
   }
 }

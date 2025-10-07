@@ -258,7 +258,6 @@ const modules = [FreeMode];
 
   .clinicStoriesContainer {
     width: 100%;
-    max-width: 720px;
     margin: 0 auto;
   }
   .funcTool {
