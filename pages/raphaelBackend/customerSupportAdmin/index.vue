@@ -237,6 +237,11 @@ const lastUpdated = ref("");
 // 客戶數據
 const customers = ref([]);
 
+// 輪詢相關
+const pollingInterval = ref(null);
+const isPolling = ref(false);
+const POLLING_INTERVAL = 15000; // 15秒
+
 // 滾動相關 refs
 const chatMessagesEl = ref(null);
 const messageEndEl = ref(null);
@@ -244,7 +249,17 @@ const autoStickThreshold = 80; // 距離底部 80px 內才自動貼底
 let ro = null; // ResizeObserver 實例
 
 // API 調用函數
-const fetchCustomerMessages = async (selectedCustomer = null) => {
+const fetchCustomerMessages = async (selectedCustomer = null, isPollingCall = false) => {
+  // 如果正在輪詢且已經有輪詢請求在進行中，則跳過
+  if (isPollingCall && isPolling.value) {
+    console.log("輪詢請求已進行中，跳過此次請求");
+    return;
+  }
+
+  if (isPollingCall) {
+    isPolling.value = true;
+  }
+
   isLoading.value = true;
 
   try {
@@ -405,6 +420,9 @@ const fetchCustomerMessages = async (selectedCustomer = null) => {
     }
   } finally {
     isLoading.value = false;
+    if (isPollingCall) {
+      isPolling.value = false;
+    }
   }
 };
 
@@ -664,6 +682,33 @@ const copyToChat = () => {
   }
 };
 
+// 啟動輪詢機制
+const startPolling = () => {
+  if (pollingInterval.value) {
+    clearInterval(pollingInterval.value);
+  }
+  
+  console.log("啟動 15 秒輪詢機制");
+  pollingInterval.value = setInterval(() => {
+    console.log("執行輪詢檢查新訊息");
+    // 如果有選中的客戶，則更新該客戶的訊息；否則更新所有客戶列表
+    if (selectedCustomer.value) {
+      fetchCustomerMessages(selectedCustomer.value, true);
+    } else {
+      fetchCustomerMessages(null, true);
+    }
+  }, POLLING_INTERVAL);
+};
+
+// 停止輪詢機制
+const stopPolling = () => {
+  if (pollingInterval.value) {
+    console.log("停止輪詢機制");
+    clearInterval(pollingInterval.value);
+    pollingInterval.value = null;
+  }
+};
+
 const handleLogout = () => {
   router.push("/raphaelBackend");
 };
@@ -673,6 +718,9 @@ onMounted(() => {
   // 載入客戶訊息數據
   fetchCustomerMessages();
   
+  // 啟動輪詢機制
+  startPolling();
+  
   // 建立 ResizeObserver：只要內容高度增加，且使用者接近底部，就瞬間貼底
   ro = new ResizeObserver(() => {
     if (isNearBottom()) scrollToBottomInstant();
@@ -681,6 +729,9 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  // 停止輪詢機制
+  stopPolling();
+  
   if (ro && chatMessagesEl.value) ro.unobserve(chatMessagesEl.value);
   ro = null;
 });
