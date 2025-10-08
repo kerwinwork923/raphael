@@ -271,6 +271,11 @@ const isFocused = ref(false);
 const showImagePreview = ref(false);
 const previewImageUrl = ref("");
 
+// 輪詢相關
+const pollingInterval = ref(null);
+const isPolling = ref(false);
+const POLLING_INTERVAL = 15000; // 15秒
+
 // 滾動相關 refs
 const autoStickThreshold = 80; // 距離底部 80px 內才自動貼底
 let ro = null; // ResizeObserver 實例
@@ -677,8 +682,18 @@ const sendMessage = async () => {
 };
 
 // 獲取客服回應
-const getMessages = async () => {
+const getMessages = async (isPollingCall = false) => {
   try {
+    // 如果正在輪詢且已經有輪詢請求在進行中，則跳過
+    if (isPollingCall && isPolling.value) {
+      console.log("輪詢請求已進行中，跳過此次請求");
+      return;
+    }
+
+    if (isPollingCall) {
+      isPolling.value = true;
+    }
+
     const response = await frGetLine();
     console.log("API 回應:", response);
 
@@ -688,6 +703,7 @@ const getMessages = async () => {
       // ✅ 修復：不要清空本地訊息，改為合併去重
       const makeKey = (m) => `${m.timestamp}-${m.type}-${m.fileName || m.content || m.url || ''}`;
       const existing = new Set([...messages.value, ...mediaMessages.value].map(makeKey));
+      let hasNewMessages = false;
 
       response.LineList.forEach((msg, index) => {
         console.log(`訊息 ${index}:`, msg);
@@ -730,6 +746,7 @@ const getMessages = async () => {
             console.log("添加新訊息:", item);
             (item.messageType === 'image' ? mediaMessages.value : messages.value).push(item);
             existing.add(key);
+            hasNewMessages = true;
           } else {
             console.log("跳過重複訊息:", item);
           }
@@ -739,15 +756,21 @@ const getMessages = async () => {
       console.log("最終訊息列表:", messages.value);
       console.log("最終媒體列表:", mediaMessages.value);
 
-      // 確保滾動到最下方
-      await nextTick();
-      await waitImagesDecoded();
-      scrollToBottomInstant();
+      // 只有在有新訊息時才滾動到底部
+      if (hasNewMessages) {
+        await nextTick();
+        await waitImagesDecoded();
+        scrollToBottomInstant();
+      }
     } else {
       console.log("沒有 LineList 或回應格式錯誤");
     }
   } catch (error) {
     console.error("獲取訊息失敗:", error);
+  } finally {
+    if (isPollingCall) {
+      isPolling.value = false;
+    }
   }
 };
 
@@ -1010,6 +1033,28 @@ const submitRating = (rating) => {
   // 例如：sendSatisfactionRating(ratingData)
 };
 
+// 啟動輪詢機制
+const startPolling = () => {
+  if (pollingInterval.value) {
+    clearInterval(pollingInterval.value);
+  }
+  
+  console.log("啟動 15 秒輪詢機制");
+  pollingInterval.value = setInterval(() => {
+    console.log("執行輪詢檢查新訊息");
+    getMessages(true);
+  }, POLLING_INTERVAL);
+};
+
+// 停止輪詢機制
+const stopPolling = () => {
+  if (pollingInterval.value) {
+    console.log("停止輪詢機制");
+    clearInterval(pollingInterval.value);
+    pollingInterval.value = null;
+  }
+};
+
 // 組件掛載後滾動到底部
 onMounted(async () => {
   // 初始載入訊息
@@ -1019,6 +1064,9 @@ onMounted(async () => {
   await nextTick();
   await waitImagesDecoded();
   scrollToBottomInstant();
+
+  // 啟動輪詢機制
+  startPolling();
 
   // 建立 ResizeObserver：只要內容高度增加，且使用者接近底部，就瞬間貼底
   ro = new ResizeObserver(() => {
@@ -1039,6 +1087,9 @@ onMounted(async () => {
 
 // 清理事件監聽器
 onUnmounted(() => {
+  // 停止輪詢機制
+  stopPolling();
+  
   if (typeof window !== "undefined") {
     window.removeEventListener("service-completed", showSatisfactionRating);
     window.removeEventListener("resize", setAppVH);
