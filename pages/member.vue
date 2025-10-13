@@ -119,7 +119,7 @@ const getMemberData = async () => {
   @include gradientBg();
   width: 100%;
   min-height: 100vh;
-  padding: 1rem 0rem 7rem;
+  padding: 1rem 0rem 84px;
 
   .memberContainer {
     width: 100%;
@@ -265,25 +265,12 @@ const getMemberData = async () => {
     position: relative;
     width: 100%;
     @include neumorphismOuter($radius: 50px, $padding: 9px 12px);
-    border: none;
+    @include insetBorderLine($raphael-red-300);
     color: $raphael-red-300;
     cursor: pointer;
     font-size: 18px;
     letter-spacing: 2.7px;
     margin-top: 20px;
-
-    &::after {
-      content: "";
-      position: absolute;
-      border: 1px solid $raphael-red-300;
-      width: auto;
-      height: 74%;
-      border-radius: 50px;
-      left: 4px;
-      right: 4px;
-      top: 4px;
-      margin: auto;
-    }
     transition: all ease 0.2s;
 
     &:hover,

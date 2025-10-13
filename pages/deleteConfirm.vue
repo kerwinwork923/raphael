@@ -1,8 +1,12 @@
 <template>
-     <Alert v-if="showAlert"  :defaultContent="alertContent" @close="showAlert = false"/>
+  <Alert
+    v-if="showAlert"
+    :defaultContent="alertContent"
+    @close="showAlert = false"
+  />
   <div class="deleteConfirmWrap">
     <h2>刪除帳號</h2>
- 
+
     <div class="deleteConfirmContainer" v-if="showStep1">
       <div class="deleteConfirmAlert">
         <img src="../assets/imgs/member/bigAlert.svg" alt="" />
@@ -47,10 +51,10 @@
     </div>
     <div class="deleteConfirmContainer2" v-if="showStep2">
       <p>為了保護您的資料安全，請輸入手機號碼以進行驗證</p>
-      <input 
-         type="tel"
-         inputmode="numeric"
-        placeholder="請輸入手機號碼" 
+      <input
+        type="tel"
+        inputmode="numeric"
+        placeholder="請輸入手機號碼"
         v-model="mobileInput"
         :disabled="isLoading"
       />
@@ -61,12 +65,12 @@
         <button class="deleteConfirmBtnCancel" @click="goToMember">
           再想想
         </button>
-        <button 
-          class="deleteConfirmBtnContinue" 
+        <button
+          class="deleteConfirmBtnContinue"
           @click="deleteAccount"
           :disabled="isLoading || !mobileInput.trim()"
         >
-          {{ isLoading ? '處理中...' : '刪除' }}
+          {{ isLoading ? "處理中..." : "刪除" }}
         </button>
       </div>
     </div>
@@ -79,19 +83,15 @@
         <button class="finalDeleteAlertCancel" @click="showStep3 = false">
           取消
         </button>
-        <button 
-          class="finalDeleteAlertContinue" 
+        <button
+          class="finalDeleteAlertContinue"
           @click="confirmDeleteAccount"
           :disabled="isLoading"
         >
-          {{ isLoading ? '刪除中...' : '確定刪除' }}
+          {{ isLoading ? "刪除中..." : "確定刪除" }}
         </button>
       </div>
     </div>
-
-    <div class="deleteCover" v-if="showStep3" @click="showStep3 = false"></div>
-    <Alert v-if="showStep3" @close="showStep3 = false" :showRedirectButton="false" />
-    <BottomNav />
   </div>
 </template>
 <script setup>
@@ -128,10 +128,10 @@ const callDeleteAccountAPI = async (mobile) => {
       "https://23700999.com:8081/HMA/TTEDeleteFromMember.jsp",
       {
         Key: "qrt897hpmd",
-        Mobile: mobile
+        Mobile: mobile,
       }
     );
-    
+
     return response.data;
   } catch (error) {
     console.error("刪除帳號 API 調用失敗:", error);
@@ -148,35 +148,33 @@ const validateMobile = (mobile) => {
 const deleteAccount = async () => {
   // 清除之前的錯誤訊息
   errorMessage.value = "";
-  
+
   // 驗證手機號碼格式
   if (!mobileInput.value.trim()) {
- 
     showAlert.value = true;
     alertContent.value = "請輸入手機號碼";
     return;
   }
-  
+
   if (!validateMobile(mobileInput.value.trim())) {
     showAlert.value = true;
     alertContent.value = "請輸入正確的手機號碼格式 (09xxxxxxxx)";
     return;
   }
 
-    // 檢查輸入的手機號碼是否與 userData 中的電話一致
-    const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+  // 檢查輸入的手機號碼是否與 userData 中的電話一致
+  const userData = JSON.parse(localStorage.getItem("userData") || "{}");
   if (userData.Mobile && userData.Mobile !== mobileInput.value.trim()) {
     showAlert.value = true;
     alertContent.value = "手機號碼輸入錯誤";
     return;
   }
 
-  
   isLoading.value = true;
-  
+
   try {
     const result = await callDeleteAccountAPI(mobileInput.value.trim());
-    
+
     // 根據 API 回應處理結果
     if (result && result.Result === "OK") {
       // 手機號碼存在，顯示最終確認視窗
@@ -203,10 +201,10 @@ const deleteAccount = async () => {
 // 最終確認刪除帳號
 const confirmDeleteAccount = async () => {
   isLoading.value = true;
-  
+
   try {
     const result = await callDeleteAccountAPI(mobileInput.value.trim());
-    
+
     if (result && result.Result === "OK") {
       // 刪除成功，清除本地資料並跳轉
       localStorage.removeItem("userData");
@@ -231,41 +229,44 @@ const confirmDeleteAccount = async () => {
 <style lang="scss" scoped>
 @import "@/assets/styles/mixins.scss";
 .deleteConfirmWrap {
-  width: 100%;
-  padding: 0 3%;
   @include gradientBg();
-  min-height: calc(120dvh + 140px);
-  padding: 1rem 0;
-  overflow: hidden;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   h2 {
-    color: var(--Neutral-black, #1e1e1e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height:44px;
+    max-width: 768px;
+    color:$raphael-black;
     text-align: center;
     font-size: 24px;
     font-style: normal;
     font-weight: 400;
-    letter-spacing: var(--Static-Body-Large-Tracking, 0.5px);
+    letter-spacing:0.5px;
   }
 
   .deleteConfirmContainer {
     width: 100%;
+    max-width: 768px;
     padding: 1rem;
 
     .deleteConfirmAlert {
-      border-radius: var(--Radius-r-20, 20px);
-      background: var(--warning-300-opacity-10, rgba(236, 79, 79, 0.1));
-      padding: 0.5rem 0 1rem;
-      box-shadow: 2px 4px 12px 0
-        var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
-      color: var(--Warning-hover, #d41c1c);
+      @include neumorphismOuter($bgColor: $raphael-red-100);
+      color: $raphael-red-500;
       text-align: center;
-      font-size: var(--Text-font-size-24, 24px);
+      font-size: 1.5rem;
       font-style: normal;
       font-weight: 700;
       letter-spacing: 0.12px;
       p {
-        color: var(--Warning-hover, #d41c1c);
+        color: $raphael-red-500;
         text-align: center;
-        font-size: var(--Text-font-size-18, 18px);
+        font-size: 15px;
         font-style: normal;
         font-weight: 400;
         letter-spacing: 0.5px;
@@ -273,41 +274,41 @@ const confirmDeleteAccount = async () => {
       }
     }
     .deleteDataListGroup {
-      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap:1rem;
+      margin-top: 1.5rem;
       h3 {
-        color: var(--Neutral-black, #1e1e1e);
+        color:$raphael-black;
 
-        font-size: var(--Text-font-size-20, 20px);
+        font-size: 20px;
         font-style: normal;
         font-weight: 700;
         line-height: 100%; /* 20px */
         letter-spacing: 3px;
       }
       .deleteDataListItem {
-        border-radius: var(--Radius-r-20, 20px);
-        background: var(--Secondary-100, #f5f7fa);
-        box-shadow: 2px 4px 12px 0
-          var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
-        margin-top: 1rem;
-        padding: 1rem;
+        @include neumorphismOuter();
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
         h4 {
-          color: var(--Neutral-black, #1e1e1e);
+          color:$raphael-black;
 
-          font-size: var(--Text-font-size-20, 20px);
+          font-size: 20px;
           font-style: normal;
           font-weight: 400;
 
           letter-spacing: 0.1px;
         }
         p {
-          color: var(--Neutral-500, #666);
+          color:$raphael-gray-500;
 
-          font-size: var(--Text-font-size-18, 18px);
+          font-size: 15px;
           font-style: normal;
           font-weight: 400;
 
           letter-spacing: 0.072px;
-          margin-top: 0.3rem;
         }
       }
     }
@@ -315,27 +316,25 @@ const confirmDeleteAccount = async () => {
 
   .deleteConfirmContainer2 {
     width: 100%;
+    max-width: 768px;
     padding: 1rem;
     p {
-      color: var(--Neutral-black, #1e1e1e);
+      color:$raphael-black;
       font-family: "Noto Sans";
-      font-size: var(--Text-font-size-20, 20px);
+      font-size: 20px;
       font-style: normal;
       font-weight: 700;
 
       letter-spacing: 3px;
     }
     input {
-      border-radius: var(--Radius-r-16, 16px);
-      background: var(--Secondary-100, #f5f7fa);
-      box-shadow: 2px 4px 12px 0
-        var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
+      @include neumorphismOuter();
       width: 100%;
-      padding: 1rem 1rem;
       margin-top: 1rem;
       border: none;
       letter-spacing: 2.7px;
-      font-size: var(--Text-font-size-18, 18px);
+      font-size: 15px;
+
       &::placeholder {
         overflow: hidden;
         color: var(--neutral-500-opacity-70, rgba(102, 102, 102, 0.7));
@@ -353,52 +352,37 @@ const confirmDeleteAccount = async () => {
     align-items: center;
     justify-content: center;
     width: 100%;
-    margin-top: 1rem;
+    margin-top: 1.5rem;
     gap: 1rem;
   }
   .deleteConfirmBtnFixed {
-    position: fixed;
-    bottom: 112px;
-    left: 5%;
-    right: 0;
+    position: sticky;
+    bottom: 16px;
     z-index: 1000;
-    width: 90%;
   }
   .deleteConfirmBtnCancel {
+    @include neumorphismOuter($radius:50px, $padding: 9px 12px);
+    @include insetBorderLine($raphael-cyan-400);
     width: 100%;
-    padding: 0.25rem 1rem;
-
-    background: var(--Secondary-100, #f5f7fa);
-    border-radius: var(--Radius-r-50, 50px);
-
-    border: 1px solid var(--Secondary-default, #1fbcb3);
-    box-shadow: 2px 4px 12px 0
-      var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
-    color: var(--Secondary-default, #1fbcb3);
-
-    font-size: var(--Text-font-size-18, 18px);
+    color:$raphael-cyan-400;
+    font-size: 15px;
     font-style: normal;
     font-weight: 400;
 
     letter-spacing: 2.7px;
   }
   .deleteConfirmBtnContinue {
+    @include neumorphismOuter($bgColor:$raphael-red-300,$radius:50px, $padding: 9px 12px);
+    border: none;
     width: 100%;
-    padding: 0.25rem 1rem;
-    border-radius: var(--Radius-r-50, 50px);
-    color: var(--Neutral-white, #fff);
-    font-size: var(--Text-font-size-18, 18px);
+    color:$raphael-white;
+    font-size: 15px;
     font-style: normal;
     font-weight: 400;
     letter-spacing: 2.7px;
-    background: var(--Warning-default, #ec4f4f);
-    box-shadow: 2px 4px 12px 0
-      var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
-    border: 1px solid var(--Warning-default, #ec4f4f);
-    
+
     &:disabled {
-      background: var(--Neutral-300, #ccc);
-      border-color: var(--Neutral-300, #ccc);
+      background: $raphael-gray-300;
       cursor: not-allowed;
       opacity: 0.6;
     }
@@ -419,8 +403,8 @@ const confirmDeleteAccount = async () => {
     padding: 1rem;
     z-index: 1001;
     p {
-      color: var(--Neutral-black, #1e1e1e);
-      font-size: var(--Text-font-size-20, 20px);
+      color:$raphael-black;
+      font-size: 20px;
       font-style: normal;
       font-weight: 700;
       letter-spacing: 3px;
@@ -439,7 +423,7 @@ const confirmDeleteAccount = async () => {
         background: transparent;
         color: var(--Neutral-400, #b3b3b3);
         text-align: center;
-        font-size: var(--Text-font-size-18, 18px);
+        font-size: 15px;
         font-style: normal;
         font-weight: 700;
         letter-spacing: 2.7px;
@@ -448,17 +432,17 @@ const confirmDeleteAccount = async () => {
         width: 100%;
         border-radius: var(--Radius-r-8, 8px);
         background: var(--Warning-default, #ec4f4f);
-        color: var(--Neutral-white, #fff);
+        color:$raphael-white;
         text-align: center;
         font-family: "Noto Sans";
-        font-size: var(--Text-font-size-18, 18px);
+        font-size: 15px;
         font-style: normal;
         font-weight: 700;
         line-height: 100%; /* 18px */
         letter-spacing: 2.7px;
         border: none;
         padding: 0.75rem 1rem;
-        
+
         &:disabled {
           background: var(--Neutral-300, #ccc);
           cursor: not-allowed;
@@ -467,7 +451,7 @@ const confirmDeleteAccount = async () => {
       }
     }
   }
-  
+
   .error-message {
     color: var(--Warning-default, #ec4f4f);
     font-size: var(--Text-font-size-16, 16px);
@@ -475,7 +459,7 @@ const confirmDeleteAccount = async () => {
     margin-top: 0.5rem;
     text-align: center;
   }
-  
+
   .deleteCover {
     background: rgba(217, 217, 217, 0.5);
     backdrop-filter: blur(2.5px);
@@ -487,7 +471,6 @@ const confirmDeleteAccount = async () => {
     top: 0;
     left: 0;
     z-index: 1000;
-
   }
 }
 </style>

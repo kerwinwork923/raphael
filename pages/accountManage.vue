@@ -71,6 +71,7 @@ const formatDate = (dateString) => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding-bottom:84px;
 }
 .titleMenu {
   max-width: 768px;
@@ -89,7 +90,7 @@ const formatDate = (dateString) => {
   max-width: 768px;
   padding: 0 1rem;
   .accountManageTopItem {
-    @include neumorphismOuter($padding: 0.75rem 1rem);
+    @include neumorphismOuter();
     display: flex;
     justify-content: space-between;
     flex-direction: column;
@@ -127,10 +128,7 @@ const formatDate = (dateString) => {
     letter-spacing: 3px;
   }
   .accountManageBottomItem {
-    @include neumorphismOuter(
-      $bgColor: $raphael-red-100,
-      $padding: 0.75rem 1rem
-    );
+    @include neumorphismOuter($bgColor: $raphael-red-100);
 
     p {
       color: $raphael-black;
