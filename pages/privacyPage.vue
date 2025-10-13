@@ -167,6 +167,9 @@
     backdrop-filter: blur(10px);
     top: 0;
     z-index: 10;
+    &:deep > div {
+      display: flex;
+    }
   }
 
   h1 {
