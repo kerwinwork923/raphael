@@ -1,10 +1,10 @@
 <template>
   <div class="accountManage">
-    <TitleMenu Text="帳號管理" link="/member" positionType="absolute" />
+    <TitleMenu Text="帳號管理" link="/member" />
     <div class="accountManageTopGroup">
       <div class="accountManageTopItem">
         <h4>帳號名稱</h4>
-        <h5>{{userDataObj.Member?.Name}}</h5>
+        <h5>{{ userDataObj.Member?.Name }}</h5>
       </div>
       <div class="accountManageTopItem">
         <h4>註冊日期</h4>
@@ -31,7 +31,9 @@
       <div class="accountManageBottomItem">
         <p>既有的內容將無法再存取</p>
       </div>
-      <button class="accountManageBottomBtn" @click="deleteAccount">刪除帳號</button>
+      <button class="accountManageBottomBtn" @click="deleteAccount">
+        刪除帳號
+      </button>
     </div>
   </div>
 </template>
@@ -63,38 +65,45 @@ const formatDate = (dateString) => {
 
 <style scoped lang="scss">
 .accountManage {
-  background: url("../assets/imgs/background.png");
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-size: cover;
+  @include gradientBg();
   min-height: 100vh;
   width: 100%;
-  padding: 3.25rem 3% 7rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.titleMenu {
+  max-width: 768px;
+  width: 100%;
+  padding: 0.75rem 1rem;
+
+  &:deep > div {
+    left: 1rem;
+  }
 }
 .accountManageTopGroup {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 1rem;
+  width: 100%;
+  max-width: 768px;
+  padding: 0 1rem;
   .accountManageTopItem {
-    border-radius: var(--Radius-r-20, 20px);
-    background: var(--Secondary-100, #f5f7fa);
-    box-shadow: 2px 4px 12px 0
-      var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
-    padding: 0.75rem 1rem;
+    @include neumorphismOuter($padding: 0.75rem 1rem);
     display: flex;
     justify-content: space-between;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
     h4 {
-      color: var(--Neutral-black, #1e1e1e);
-      font-size: var(--Text-font-size-20, 20px);
+      color: $raphael-black;
+      font-size: 20px;
       font-style: normal;
       font-weight: 400;
       letter-spacing: 0.1px;
     }
     h5 {
-      color: var(--Neutral-500, #666);
-      font-size: var(--Text-font-size-18, 18px);
+      color: $raphael-gray-500;
+      font-size: 18px;
       font-style: normal;
       font-weight: 400;
       letter-spacing: 0.072px;
@@ -104,44 +113,61 @@ const formatDate = (dateString) => {
 .accountManageBottomGroup {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 1rem;
   margin-top: 1.75rem;
+  width: 100%;
+  max-width: 768px;
+  padding: 0 1rem;
+
   h3 {
-    color: var(--Warning-default, #ec4f4f);
-    font-size: var(--Text-font-size-20, 20px);
+    color: $raphael-red-300;
+    font-size: 20px;
     font-style: normal;
     font-weight: 700;
     letter-spacing: 3px;
   }
   .accountManageBottomItem {
-    border-radius: var(--Radius-r-20, 20px);
-    background: var(--Warning-100, #fff5f5);
-    box-shadow: 2px 4px 12px 0
-      var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
+    @include neumorphismOuter(
+      $bgColor: $raphael-red-100,
+      $padding: 0.75rem 1rem
+    );
+
     p {
-      color: var(--Neutral-black, #1e1e1e);
-      font-size: var(--Text-font-size-20, 20px);
+      color: $raphael-black;
+      font-size: 20px;
       font-style: normal;
       font-weight: 400;
       letter-spacing: 0.1px;
+      line-height: 24px;
     }
-
-    padding: 0.75rem 1rem;
   }
 }
 .accountManageBottomBtn {
-  border-radius: var(--Radius-r-50, 50px);
-  background: var(--Warning-default, #ec4f4f);
-  box-shadow: 2px 4px 12px 0
-    var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
-  color: var(--Neutral-white, #fff);
-  font-size: var(--Text-font-size-18, 18px);
+  @include neumorphismOuter(
+    $bgColor: $raphael-gray-300,
+    $radius: 50px,
+    $padding: 0.5rem
+  );
+  color: $raphael-black;
+  font-size: 18px;
   font-style: normal;
   font-weight: 400;
   border: none;
   letter-spacing: 2.7px;
-  padding: .5rem;
   cursor: pointer;
-  margin-top: 0.5rem;
+  margin-top: 1.75rem;
+  transition: all 0.2s ease;
+
+  &:hover,
+  &:active {
+    @include neumorphismOuter(
+      $bgColor: $raphael-gray-300,
+      $radius: 50px,
+      $padding: 0.5rem,
+      $x: 0,
+      $y: 0,
+      $blur: 6px
+    );
+  }
 }
 </style>
