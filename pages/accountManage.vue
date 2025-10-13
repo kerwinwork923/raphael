@@ -89,6 +89,7 @@ const formatDate = (dateString) => {
   width: 100%;
   max-width: 768px;
   padding: 0 1rem;
+  margin-top:1rem;
   .accountManageTopItem {
     @include neumorphismOuter();
     display: flex;

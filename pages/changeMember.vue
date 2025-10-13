@@ -205,6 +205,7 @@ export default {
     min-height: 0;
     width: 100%;
     max-width: 768px;
+    margin-top:1rem;
   }
 
 
