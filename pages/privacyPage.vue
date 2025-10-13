@@ -148,7 +148,7 @@
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .privacy {
   min-height: 100vh;
   width: 100%;
