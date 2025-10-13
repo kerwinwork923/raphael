@@ -1161,6 +1161,7 @@ onUnmounted(() => {
   padding: 1rem 0rem 0rem;
   display: flex;
   flex-direction: column;
+      align-items: center;
 }
 
 @supports not (height: 100dvh) {
@@ -1175,12 +1176,14 @@ onUnmounted(() => {
   justify-content: center;
   height: 44px;
   min-height: 0; // 確保 flex 子層能正確縮放
+      max-width: 768px;
+    width: 100%;
 }
 .chat-container {
   flex: 1;
   display: flex;
   flex-direction: column;
-  max-width: 100%;
+  max-width: 768px;
   margin: 0 auto;
   padding: 0 1rem;
   width: 100%;
@@ -1350,7 +1353,9 @@ onUnmounted(() => {
   bottom: 0;
   left: 0;
   right: 0;
+  margin:auto;
   width: 100%;
+  max-width: 768px;
   padding-bottom: env(safe-area-inset-bottom); // 處理安全區域
   // pointer-events: none;  // 不要整層關，否則按鈕點不到
 }
