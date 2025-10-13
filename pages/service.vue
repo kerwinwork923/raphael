@@ -154,7 +154,7 @@ const getMemberData = async () => {
   @include gradientBg();
   width: 100%;
   min-height: 100vh;
-  padding: 1rem 0rem 7rem;
+  padding: 0.5rem 0 84px 0;
 
   .serviceContainer {
     width: 100%;
@@ -163,7 +163,6 @@ const getMemberData = async () => {
     padding: 0 16px;
     display: flex;
     flex-direction: column;
-    gap: 24px;
     position: relative;
   }
 
@@ -173,6 +172,7 @@ const getMemberData = async () => {
     height: 44px;
     justify-content: flex-end;
     align-items: center;
+    margin-bottom:1rem;
 
     img {
       width: 24px;
@@ -185,6 +185,7 @@ const getMemberData = async () => {
     display: flex;
     gap: 0.75rem;
     width: 100%;
+    margin:1.5rem 0;
 
     .serviceCenterRow {
       display: flex;

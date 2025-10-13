@@ -119,7 +119,7 @@ const getMemberData = async () => {
   @include gradientBg();
   width: 100%;
   min-height: 100vh;
-  padding: 1rem 0rem 84px;
+  padding: 0.5rem 0 84px 0;
 
   .memberContainer {
     width: 100%;
@@ -128,7 +128,6 @@ const getMemberData = async () => {
     padding: 0 16px;
     display: flex;
     flex-direction: column;
-    gap: 24px;
   }
   .notificationBell {
     display: flex;
@@ -136,6 +135,7 @@ const getMemberData = async () => {
     height: 44px;
     justify-content: flex-end;
     align-items: center;
+    margin-bottom:1rem;
 
     img {
       width: 24px;
@@ -224,6 +224,7 @@ const getMemberData = async () => {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    margin-top: 1.5rem;
 
     .memberListItem {
       display: flex;
@@ -270,7 +271,7 @@ const getMemberData = async () => {
     cursor: pointer;
     font-size: 18px;
     letter-spacing: 2.7px;
-    margin-top: 20px;
+    margin-top: 44px;
     transition: all ease 0.2s;
 
     &:hover,

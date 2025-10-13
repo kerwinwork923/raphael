@@ -253,8 +253,7 @@ const modules = [FreeMode];
   width: 100%;
   min-height: 100vh;
   min-height: 100vh;
-  padding: 0.5rem 0rem 0rem;
-  padding-bottom: 80px; // 為底部導航留空間
+  padding: 0.5rem 0rem 84px;
 
   .clinicStoriesContainer {
     width: 100%;
