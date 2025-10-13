@@ -199,7 +199,9 @@ export default {
     height: 100vh;
     overflow: hidden;
   @include gradientBg();
-
+  .titleMenu {
+    max-width:768px;
+  }
   .changeMemberGroup {
     flex: 1;
     min-height: 0;
