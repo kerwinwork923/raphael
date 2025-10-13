@@ -42,6 +42,7 @@
               "
             >
               {{ message.content }}
+              <div class="message-time">{{ message.time }}</div>
             </div>
 
             <!-- 圖片訊息 -->
@@ -99,8 +100,6 @@
                 </div>
               </div>
             </div>
-
-            <div class="message-time">{{ message.time }}</div>
           </div>
         </div>
 
@@ -1187,19 +1186,23 @@ onUnmounted(() => {
 
 .message-bubble {
   padding: 0.75rem 1rem;
-  border-radius: 1rem;
+  border-radius: 20px;
   word-wrap: break-word;
 
   &.service-bubble {
     background: white;
     color: #1e1e1e;
-    border-bottom-left-radius: 0.25rem;
+    border-bottom-left-radius: 0;
   }
 
   &.user-bubble {
     background: #74bc1f;
     color: white;
-    border-bottom-right-radius: 0.25rem;
+    border-bottom-right-radius: 0;
+
+    & > .message-time{
+      color:$raphael-white;
+    }
   }
 
   &.media-bubble {
@@ -1211,7 +1214,7 @@ onUnmounted(() => {
 .message-time {
   font-size: 0.75rem;
   color: #666;
-  margin-top: 0.35rem;
+  margin-top: 0.75rem;
 
   .user-message & {
     text-align: right;
