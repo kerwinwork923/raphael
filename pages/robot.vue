@@ -107,7 +107,7 @@
           <div v-if="isListening" class="pulse-ring"></div>
         </button>
         <button class="control-btn volume-btn" @click="toggleVolume">
-          <img :src="isMuted ? mutedSvg : volumeSvg" alt="音量" />
+          <img :src="isMuted ? volumeSvg : mutedSvg" alt="音量" />
         </button>
       </div>
     </transition>
