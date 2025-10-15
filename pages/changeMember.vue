@@ -195,16 +195,19 @@ export default {
     flex-direction: column;
     place-items: center;
     width: 100%;
-    padding: 0 1rem 56px 1rem;
+    padding: 0.5rem 1rem 56px 1rem;
     height: 100vh;
     overflow: hidden;
   @include gradientBg();
-
+  .titleMenu {
+    max-width:768px;
+  }
   .changeMemberGroup {
     flex: 1;
     min-height: 0;
     width: 100%;
     max-width: 768px;
+    margin-top:1rem;
   }
 
 

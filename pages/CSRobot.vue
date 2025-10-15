@@ -1,7 +1,7 @@
 <template>
   <div class="CSRobotWrap">
     <div class="titleMenuWrap">
-        <TitleMenu Text="線上客服" link="back" />
+      <TitleMenu Text="線上客服" link="back" />
     </div>
 
     <!-- 聊天區域 -->
@@ -25,7 +25,7 @@
           class="message"
           :class="message.type === 'user' ? 'user-message' : 'service-message'"
           v-for="message in allMessages"
-          :key="message.id || (message.timestamp + '-' + message.type)"
+          :key="message.id || message.timestamp + '-' + message.type"
         >
           <!-- 客服回應需要頭像 -->
           <div v-if="message.type === 'service'" class="message-avatar">
@@ -42,6 +42,7 @@
               "
             >
               {{ message.content }}
+              <div class="message-time">{{ message.time }}</div>
             </div>
 
             <!-- 圖片訊息 -->
@@ -99,13 +100,11 @@
                 </div>
               </div>
             </div>
-
-            <div class="message-time">{{ message.time }}</div>
           </div>
         </div>
 
         <!-- 放在所有訊息的最下面 -->
-        <div ref="bottomSentinel" style="height:1px;"></div>
+        <div ref="bottomSentinel" style="height: 1px"></div>
 
         <!-- 轉換進度指示器 -->
         <div class="conversion-overlay" v-if="isConverting">
@@ -257,7 +256,15 @@
 </template>
 
 <script setup>
-import { ref, reactive, nextTick, onMounted, onUnmounted, onBeforeUnmount, computed } from "vue";
+import {
+  ref,
+  reactive,
+  nextTick,
+  onMounted,
+  onUnmounted,
+  onBeforeUnmount,
+  computed,
+} from "vue";
 import { useMediaConverter } from "~/composables/useMediaConverter";
 
 // 響應式數據
@@ -282,13 +289,16 @@ let ro = null; // ResizeObserver 實例
 
 // 修復 iOS 100vh 問題
 const setAppVH = () => {
-  document.documentElement.style.setProperty('--app-vh', `${window.innerHeight}px`);
+  document.documentElement.style.setProperty(
+    "--app-vh",
+    `${window.innerHeight}px`
+  );
 };
 
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   setAppVH();
-  window.addEventListener('resize', setAppVH);
-  window.addEventListener('orientationchange', setAppVH);
+  window.addEventListener("resize", setAppVH);
+  window.addEventListener("orientationchange", setAppVH);
 }
 
 // 合併所有訊息並按時間排序
@@ -316,8 +326,8 @@ const API_CONFIG = {
 // 檢查用戶數據是否完整
 const validateUserData = () => {
   if (!userData.MID || !userData.Token || !userData.MAID) {
-    console.error('用戶數據不完整:', userData);
-    alert('請重新登入');
+    console.error("用戶數據不完整:", userData);
+    alert("請重新登入");
     // 可以導向登入頁面
     // navigateTo('/login');
     return false;
@@ -379,14 +389,14 @@ const frSendLineText = async (content) => {
 const frSendLineImage = async (base64String, subName, retryCount = 0) => {
   const maxRetries = 3;
   const retryDelay = Math.pow(2, retryCount) * 1000; // 指數退避：1s, 2s, 4s
-  
+
   try {
     console.log(`發送圖片 (嘗試 ${retryCount + 1}/${maxRetries + 1}):`, {
       base64Length: base64String.length,
       subName,
-      retryCount
+      retryCount,
     });
-    
+
     const response = await $fetch(
       "https://23700999.com:8081/HMA/api/fr/frSendLineImage",
       {
@@ -399,25 +409,25 @@ const frSendLineImage = async (base64String, subName, retryCount = 0) => {
         timeout: 30000, // 30秒超時
       }
     );
-    
-    console.log('圖片發送成功:', response);
+
+    console.log("圖片發送成功:", response);
     return response;
-    
   } catch (error) {
     console.error(`發送圖片失敗 (嘗試 ${retryCount + 1}):`, error);
-    
+
     // ✅ 重試邏輯：網路錯誤或超時時重試
-    if (retryCount < maxRetries && (
-      error.message?.includes('timeout') ||
-      error.message?.includes('network') ||
-      error.message?.includes('fetch') ||
-      error.status >= 500
-    )) {
+    if (
+      retryCount < maxRetries &&
+      (error.message?.includes("timeout") ||
+        error.message?.includes("network") ||
+        error.message?.includes("fetch") ||
+        error.status >= 500)
+    ) {
       console.log(`等待 ${retryDelay}ms 後重試...`);
-      await new Promise(resolve => setTimeout(resolve, retryDelay));
+      await new Promise((resolve) => setTimeout(resolve, retryDelay));
       return frSendLineImage(base64String, subName, retryCount + 1);
     }
-    
+
     throw error;
   }
 };
@@ -461,66 +471,74 @@ const uploadImageInChunks = async (file) => {
   const uploadId = crypto.randomUUID();
   const chunkSize = 512 * 1024; // 512KB 每塊
   let index = 0;
-  
+
   try {
-    console.log('開始分段上傳:', { uploadId, fileSize: file.size, chunkSize });
-    
+    console.log("開始分段上傳:", { uploadId, fileSize: file.size, chunkSize });
+
     // 1) 初始化上傳（讓後端建立暫存）
-    await fetchWithRetry("https://23700999.com:8081/HMA/api/fr/frInitImageUpload", {
-      method: "POST",
-      body: {
-        ...API_CONFIG,
-        uploadId,
-        fileName: file.name,
-        subName: getExt(file),
-      },
-    });
-    
-    // 2) 分段上傳
-    const arrayBuffer = await file.arrayBuffer();
-    const totalChunks = Math.ceil(arrayBuffer.byteLength / chunkSize);
-    
-    for (let offset = 0; offset < arrayBuffer.byteLength; offset += chunkSize) {
-      const chunk = arrayBuffer.slice(offset, offset + chunkSize);
-      const chunkBase64 = btoa(String.fromCharCode(...new Uint8Array(chunk)));
-      
-      console.log(`上傳分塊 ${index + 1}/${totalChunks}:`, {
-        offset,
-        chunkSize: chunk.byteLength,
-        isLast: index === totalChunks - 1
-      });
-      
-      // ✅ 重試機制：每個分塊都有重試
-      await fetchWithRetry("https://23700999.com:8081/HMA/api/fr/frSendLineImageChunk", {
+    await fetchWithRetry(
+      "https://23700999.com:8081/HMA/api/fr/frInitImageUpload",
+      {
         method: "POST",
         body: {
           ...API_CONFIG,
           uploadId,
-          index,
-          chunkBase64,
-          isLast: index === totalChunks - 1,
+          fileName: file.name,
+          subName: getExt(file),
         },
+      }
+    );
+
+    // 2) 分段上傳
+    const arrayBuffer = await file.arrayBuffer();
+    const totalChunks = Math.ceil(arrayBuffer.byteLength / chunkSize);
+
+    for (let offset = 0; offset < arrayBuffer.byteLength; offset += chunkSize) {
+      const chunk = arrayBuffer.slice(offset, offset + chunkSize);
+      const chunkBase64 = btoa(String.fromCharCode(...new Uint8Array(chunk)));
+
+      console.log(`上傳分塊 ${index + 1}/${totalChunks}:`, {
+        offset,
+        chunkSize: chunk.byteLength,
+        isLast: index === totalChunks - 1,
       });
-      
+
+      // ✅ 重試機制：每個分塊都有重試
+      await fetchWithRetry(
+        "https://23700999.com:8081/HMA/api/fr/frSendLineImageChunk",
+        {
+          method: "POST",
+          body: {
+            ...API_CONFIG,
+            uploadId,
+            index,
+            chunkBase64,
+            isLast: index === totalChunks - 1,
+          },
+        }
+      );
+
       index++;
     }
-    
+
     // 3) 完成上傳（讓後端合併檔案）
-    console.log('完成分段上傳，通知後端合併檔案...');
-    await fetchWithRetry("https://23700999.com:8081/HMA/api/fr/frFinalizeImageUpload", {
-      method: "POST",
-      body: {
-        ...API_CONFIG,
-        uploadId,
-        fileName: file.name,
-        subName: getExt(file),
-      },
-    });
-    
-    console.log('分段上傳完成！');
-    
+    console.log("完成分段上傳，通知後端合併檔案...");
+    await fetchWithRetry(
+      "https://23700999.com:8081/HMA/api/fr/frFinalizeImageUpload",
+      {
+        method: "POST",
+        body: {
+          ...API_CONFIG,
+          uploadId,
+          fileName: file.name,
+          subName: getExt(file),
+        },
+      }
+    );
+
+    console.log("分段上傳完成！");
   } catch (error) {
-    console.error('分段上傳失敗:', error);
+    console.error("分段上傳失敗:", error);
     throw error;
   }
 };
@@ -529,28 +547,28 @@ const uploadImageInChunks = async (file) => {
 const fetchWithRetry = async (url, options, retryCount = 0) => {
   const maxRetries = 3;
   const retryDelay = Math.pow(2, retryCount) * 1000;
-  
+
   try {
     const response = await $fetch(url, {
       ...options,
       timeout: 30000,
     });
     return response;
-    
   } catch (error) {
     console.error(`API 請求失敗 (嘗試 ${retryCount + 1}):`, error);
-    
-    if (retryCount < maxRetries && (
-      error.message?.includes('timeout') ||
-      error.message?.includes('network') ||
-      error.message?.includes('fetch') ||
-      error.status >= 500
-    )) {
+
+    if (
+      retryCount < maxRetries &&
+      (error.message?.includes("timeout") ||
+        error.message?.includes("network") ||
+        error.message?.includes("fetch") ||
+        error.status >= 500)
+    ) {
       console.log(`等待 ${retryDelay}ms 後重試...`);
-      await new Promise(resolve => setTimeout(resolve, retryDelay));
+      await new Promise((resolve) => setTimeout(resolve, retryDelay));
       return fetchWithRetry(url, options, retryCount + 1);
     }
-    
+
     throw error;
   }
 };
@@ -597,65 +615,78 @@ const sendMessage = async () => {
 
         // 如果是圖片，確保使用處理過的檔案並轉換為 base64 發送
         if (media.type === "image") {
-          console.log('發送圖片前檢查:', { name: media.file.name, type: media.file.type });
-          
+          console.log("發送圖片前檢查:", {
+            name: media.file.name,
+            type: media.file.type,
+          });
+
           try {
             // ✅ 行動端保命線：強制壓縮策略
             let processed = await processFileFormat(media.file);
-            console.log('處理後的檔案:', { name: processed.name, type: processed.type });
-            
+            console.log("處理後的檔案:", {
+              name: processed.name,
+              type: processed.type,
+            });
+
             let willSendFile = processed;
-            
+
             // 如果轉檔失敗（仍是 HEIC），使用備援策略
             if (isHEICFormat(processed)) {
-              console.warn('HEIC 轉檔失敗，使用備援策略');
+              console.warn("HEIC 轉檔失敗，使用備援策略");
               willSendFile = media.file;
-              console.log('使用原檔作為備援:', { name: willSendFile.name, type: willSendFile.type });
+              console.log("使用原檔作為備援:", {
+                name: willSendFile.name,
+                type: willSendFile.type,
+              });
             }
-            
+
             // ✅ 行動端強制壓縮：統一轉成 JPEG，限制尺寸和品質
-            console.log('行動端強制壓縮策略啟動...');
+            console.log("行動端強制壓縮策略啟動...");
             willSendFile = await compressImage(willSendFile, 1600, 0.7);
-            
+
             // ✅ 行動端檔案大小限制：5MB 閥值
             const MOBILE_MAX_BASE64_BYTES = 5 * 1024 * 1024;
             if (willSendFile.size > MOBILE_MAX_BASE64_BYTES) {
-              console.warn('檔案仍過大，嘗試更激進的壓縮...');
+              console.warn("檔案仍過大，嘗試更激進的壓縮...");
               willSendFile = await compressImage(willSendFile, 1200, 0.6);
-              
+
               // 如果還是太大，走分段上傳
               if (willSendFile.size > MOBILE_MAX_BASE64_BYTES) {
-                console.log('檔案過大，改用分段上傳...');
+                console.log("檔案過大，改用分段上傳...");
                 await uploadImageInChunks(willSendFile);
                 return; // 分段上傳完成，跳過 base64 發送
               }
             }
-            
+
             // ✅ 優化：改用 ArrayBuffer 方式轉 base64（節省記憶體）
             const base64String = await fileToBase64Optimized(willSendFile);
             const subName = getExt(willSendFile);
-            
-            console.log('發送圖片:', { 
-              subName, 
+
+            console.log("發送圖片:", {
+              subName,
               base64Length: base64String.length,
               fileSize: willSendFile.size,
               isCompressed: willSendFile.size < media.file.size,
-              compressionRatio: `${Math.round((1 - willSendFile.size / media.file.size) * 100)}%`
+              compressionRatio: `${Math.round(
+                (1 - willSendFile.size / media.file.size) * 100
+              )}%`,
             });
-            
+
             await frSendLineImage(base64String, subName);
-            
           } catch (error) {
-            console.error('圖片處理失敗:', error);
+            console.error("圖片處理失敗:", error);
             // 最後的備援：如果所有處理都失敗，至少嘗試發送原檔
             try {
               const base64String = await fileToBase64Optimized(media.file);
               const subName = getExt(media.file);
-              console.log('使用原檔發送:', { subName, base64Length: base64String.length });
+              console.log("使用原檔發送:", {
+                subName,
+                base64Length: base64String.length,
+              });
               await frSendLineImage(base64String, subName);
             } catch (fallbackError) {
-              console.error('備援發送也失敗:', fallbackError);
-              alert('圖片上傳失敗，請檢查網路連線或嘗試其他格式');
+              console.error("備援發送也失敗:", fallbackError);
+              alert("圖片上傳失敗，請檢查網路連線或嘗試其他格式");
             }
           }
         }
@@ -701,8 +732,11 @@ const getMessages = async (isPollingCall = false) => {
       console.log("LineList 長度:", response.LineList.length);
 
       // ✅ 修復：不要清空本地訊息，改為合併去重
-      const makeKey = (m) => `${m.timestamp}-${m.type}-${m.fileName || m.content || m.url || ''}`;
-      const existing = new Set([...messages.value, ...mediaMessages.value].map(makeKey));
+      const makeKey = (m) =>
+        `${m.timestamp}-${m.type}-${m.fileName || m.content || m.url || ""}`;
+      const existing = new Set(
+        [...messages.value, ...mediaMessages.value].map(makeKey)
+      );
       let hasNewMessages = false;
 
       response.LineList.forEach((msg, index) => {
@@ -744,7 +778,10 @@ const getMessages = async (isPollingCall = false) => {
           const key = makeKey(item);
           if (!existing.has(key)) {
             console.log("添加新訊息:", item);
-            (item.messageType === 'image' ? mediaMessages.value : messages.value).push(item);
+            (item.messageType === "image"
+              ? mediaMessages.value
+              : messages.value
+            ).push(item);
             existing.add(key);
             hasNewMessages = true;
           } else {
@@ -826,7 +863,9 @@ const waitImagesDecoded = async () => {
         ? img.decode().catch(() => {}) // 某些瀏覽器可能丟錯
         : img.complete
         ? Promise.resolve()
-        : new Promise((res) => img.addEventListener("load", res, { once: true }))
+        : new Promise((res) =>
+            img.addEventListener("load", res, { once: true })
+          )
     )
   );
 };
@@ -885,12 +924,15 @@ const handleGallerySelect = (event) => {
   files.forEach((file) => {
     // 檢查檔案格式
     if (!isAllowedImage(file)) {
-      alert('請選擇支援的圖片格式：JPG、PNG、HEIC');
+      alert("請選擇支援的圖片格式：JPG、PNG、HEIC");
       return;
     }
-    
+
     // 只處理圖片，不處理影片
-    if (file.type.startsWith("image/") || file.name.match(/\.(jpg|jpeg|png|heic|heif)$/i)) {
+    if (
+      file.type.startsWith("image/") ||
+      file.name.match(/\.(jpg|jpeg|png|heic|heif)$/i)
+    ) {
       processMediaFile(file, "image");
     }
   });
@@ -900,8 +942,12 @@ const handleGallerySelect = (event) => {
 
 const processMediaFile = async (file, type) => {
   try {
-    console.log('開始處理媒體檔案:', { name: file.name, type: file.type, size: file.size });
-    
+    console.log("開始處理媒體檔案:", {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+    });
+
     // ✅ 改善：更詳細的檔案大小檢查
     if (!validateFileSize(file, 30)) {
       const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
@@ -912,7 +958,7 @@ const processMediaFile = async (file, type) => {
     // 檢查圖片格式
     if (type === "image") {
       if (!isAllowedImage(file)) {
-        alert('請選擇支援的圖片格式：JPG、PNG、HEIC');
+        alert("請選擇支援的圖片格式：JPG、PNG、HEIC");
         return;
       }
     }
@@ -926,30 +972,33 @@ const processMediaFile = async (file, type) => {
       }
     }
 
-    console.log('開始格式轉換...');
+    console.log("開始格式轉換...");
     // 處理格式轉換（HEIC 轉 JPG）
     const processedFile = await processFileFormat(file);
-    console.log('格式轉換完成:', { name: processedFile.name, type: processedFile.type, size: processedFile.size });
+    console.log("格式轉換完成:", {
+      name: processedFile.name,
+      type: processedFile.type,
+      size: processedFile.size,
+    });
 
     // 添加到預覽區域
     addPreviewMedia(processedFile, type);
-    
+
     // ✅ 改善：成功提示
-    console.log('媒體檔案處理成功，已添加到預覽區域');
-    
+    console.log("媒體檔案處理成功，已添加到預覽區域");
   } catch (error) {
     console.error("處理媒體檔案時發生錯誤:", error);
-    
+
     // ✅ 改善：更具體的錯誤提示
     let errorMessage = "處理檔案時發生錯誤";
-    if (error.message.includes('HEIC')) {
+    if (error.message.includes("HEIC")) {
       errorMessage = "HEIC 格式轉換失敗，請嘗試使用 JPG 或 PNG 格式";
-    } else if (error.message.includes('size')) {
+    } else if (error.message.includes("size")) {
       errorMessage = "檔案過大，請選擇較小的檔案";
-    } else if (error.message.includes('format')) {
+    } else if (error.message.includes("format")) {
       errorMessage = "不支援的檔案格式，請選擇 JPG、PNG 或 HEIC";
     }
-    
+
     alert(errorMessage);
   }
 };
@@ -963,7 +1012,7 @@ const addPreviewMedia = (file, type) => {
   };
 
   previewMedia.value.push(previewItem);
-  console.log('添加預覽媒體:', previewItem); // 調試日誌
+  console.log("添加預覽媒體:", previewItem); // 調試日誌
 };
 
 const removePreview = (index) => {
@@ -1038,7 +1087,7 @@ const startPolling = () => {
   if (pollingInterval.value) {
     clearInterval(pollingInterval.value);
   }
-  
+
   console.log("啟動 15 秒輪詢機制");
   pollingInterval.value = setInterval(() => {
     console.log("執行輪詢檢查新訊息");
@@ -1089,13 +1138,13 @@ onMounted(async () => {
 onUnmounted(() => {
   // 停止輪詢機制
   stopPolling();
-  
+
   if (typeof window !== "undefined") {
     window.removeEventListener("service-completed", showSatisfactionRating);
     window.removeEventListener("resize", setAppVH);
     window.removeEventListener("orientationchange", setAppVH);
   }
-  
+
   // 清理 ResizeObserver
   if (ro && chatMessages.value) ro.unobserve(chatMessages.value);
   ro = null;
@@ -1112,38 +1161,46 @@ onUnmounted(() => {
   padding: 1rem 0rem 0rem;
   display: flex;
   flex-direction: column;
+      align-items: center;
 }
 
 @supports not (height: 100dvh) {
-  .CSRobotWrap { 
-    height: var(--app-vh, 100vh); 
-    min-height: var(--app-vh, 100vh); 
+  .CSRobotWrap {
+    height: var(--app-vh, 100vh);
+    min-height: var(--app-vh, 100vh);
   }
 }
-.titleMenuWrap{
-  padding: 0 3%;
+.titleMenuWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
   min-height: 0; // 確保 flex 子層能正確縮放
+      max-width: 768px;
+    width: 100%;
 }
 .chat-container {
   flex: 1;
   display: flex;
   flex-direction: column;
-  max-width: 100%;
+  max-width: 768px;
   margin: 0 auto;
   padding: 0 1rem;
   width: 100%;
   /* 移除 overflow-y: auto; 讓子層滾 */
-  padding-bottom: calc(200px + env(safe-area-inset-bottom)); /* 預留固定輸入列的高度 + 安全區域 */
-  min-height: 0;         /* ★ 讓子層能產生捲軸 */
+  padding-bottom: calc(
+    242px + env(safe-area-inset-bottom)
+  ); /* 預留固定輸入列的高度 + 安全區域 */
+  min-height: 0; /* ★ 讓子層能產生捲軸 */
 }
 
 .chat-messages {
   flex: 1;
-  min-height: 0;         /* ★ 關鍵：在 flex 內允許縮，才會有捲軸 */
-  overflow-y: auto;      /* ★ 只有這個層滾 */
+  min-height: 0; /* ★ 關鍵：在 flex 內允許縮，才會有捲軸 */
+  overflow-y: auto; /* ★ 只有這個層滾 */
   -webkit-overflow-scrolling: touch; // iOS 動量滾動
-  touch-action: pan-y;               // 明確允許垂直拖曳
-  overscroll-behavior: contain;      // 停止外層跟著被拖（避免彈跳誤觸）
+  touch-action: pan-y; // 明確允許垂直拖曳
+  overscroll-behavior: contain; // 停止外層跟著被拖（避免彈跳誤觸）
   padding: 1rem 0;
   @include scrollbarStyle();
   scroll-behavior: auto;
@@ -1187,19 +1244,23 @@ onUnmounted(() => {
 
 .message-bubble {
   padding: 0.75rem 1rem;
-  border-radius: 1rem;
+  border-radius: 20px;
   word-wrap: break-word;
 
   &.service-bubble {
     background: white;
     color: #1e1e1e;
-    border-bottom-left-radius: 0.25rem;
+    border-bottom-left-radius: 0;
   }
 
   &.user-bubble {
     background: #74bc1f;
     color: white;
-    border-bottom-right-radius: 0.25rem;
+    border-bottom-right-radius: 0;
+
+    & > .message-time {
+      color: $raphael-white;
+    }
   }
 
   &.media-bubble {
@@ -1211,7 +1272,7 @@ onUnmounted(() => {
 .message-time {
   font-size: 0.75rem;
   color: #666;
-  margin-top: 0.35rem;
+  margin-top: 0.75rem;
 
   .user-message & {
     text-align: right;
@@ -1256,12 +1317,11 @@ onUnmounted(() => {
 .input-container {
   background: white;
   padding: 1rem;
-  border-top: 0.5px solid #eee;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding-bottom: 34px;
-  pointer-events: auto;    // 讓可互動的子層吃觸控
+  pointer-events: auto; // 讓可互動的子層吃觸控
 }
 
 .media-buttons {
@@ -1293,7 +1353,9 @@ onUnmounted(() => {
   bottom: 0;
   left: 0;
   right: 0;
+  margin:auto;
   width: 100%;
+  max-width: 768px;
   padding-bottom: env(safe-area-inset-bottom); // 處理安全區域
   // pointer-events: none;  // 不要整層關，否則按鈕點不到
 }
@@ -1308,8 +1370,9 @@ onUnmounted(() => {
   padding: 1rem;
   gap: 0.5rem;
   width: 100%;
-  min-height: 110px;
-  pointer-events: auto;    // 讓可互動的子層吃觸控
+  min-height: 150px;
+  pointer-events: auto; // 讓可互動的子層吃觸控
+  resize:none;
 }
 
 .media-preview-area {
