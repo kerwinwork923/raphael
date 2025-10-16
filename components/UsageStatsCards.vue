@@ -59,12 +59,14 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .usage-stats-cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+
   gap: 16px;
  
 
   .stats-card {
+    width: 50%;
+
     @include neumorphismOuter(
       $bgColor: $raphael-white,
       $radius: 16px,
@@ -112,6 +114,7 @@ onMounted(() => {
         letter-spacing: 3.5px;
         width: 100%;
         padding: 4px 32px;
+        white-space: nowrap;
       }
 
       .card-number {
@@ -132,6 +135,7 @@ onMounted(() => {
         font-style: normal;
         font-weight: 400;
         letter-spacing: 0.072px;
+        white-space: nowrap;
       }
     }
   }

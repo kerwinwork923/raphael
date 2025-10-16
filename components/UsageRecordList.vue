@@ -232,8 +232,15 @@
                   align-items: center;
                   gap: 6px;
                   cursor: pointer;
-                  font-size: 14px;
-                  color: rgba(102, 102, 102, 0.7);
+               
+color: var(--neutral-500-opacity-70, rgba(102, 102, 102, 0.70));
+text-overflow: ellipsis;
+
+font-size: var(--Text-font-size-18, 18px);
+
+font-weight: 400;
+
+letter-spacing: 2.7px;
                   position: relative;
        
                   img {
@@ -385,11 +392,6 @@
     }
   
     .no-data-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 20px;
       text-align: center;
   
       .no-data-text {
