@@ -1330,13 +1330,10 @@ onBeforeUnmount(() => {
         border: none;
         color: #fff;
         padding: 0.5rem 1rem;
-
         color: var(--Primary-100, #f5f7fa);
-
         font-size: var(--Text-font-size-18, 18px);
         font-style: normal;
         font-weight: 400;
-
         letter-spacing: 2.7px;
         cursor: pointer;
         transition: all 0.2s ease;
@@ -1353,7 +1350,8 @@ onBeforeUnmount(() => {
 @include respond-to(xl) {
   .customer-support-admin {
     .mainContainer {
-      margin-left: 180px;
+        
+    // 暫時不要有邊欄  margin-left: 180px;
     }
   }
 }

@@ -45,6 +45,7 @@ const gotoUsageHistory = () => {
   display: flex;
   justify-content: center;
   width: 100%;
+  max-width: 768px;
 }
 .changeUsageTag {
   width: 50%;

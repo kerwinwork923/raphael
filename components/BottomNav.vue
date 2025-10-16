@@ -18,7 +18,7 @@
     <div
       class="nav-item"
       :class="{ active: activeTab === 'record' }"
-      @click="navigateTo('/UsageHistory')"
+      @click="navigateTo('/usageIndex')"
     >
       <div class="nav-icon">
         <img
@@ -114,6 +114,7 @@ const setActiveTabFromRoute = () => {
       break;
     case "/UsageHistory":
     case "/HRVHistory":
+    case "/usageIndex":
       activeTab.value = "record";
       break;
     case "/robot":
