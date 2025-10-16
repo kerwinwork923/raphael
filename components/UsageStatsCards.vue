@@ -113,8 +113,12 @@ onMounted(() => {
 
         letter-spacing: 3.5px;
         width: 100%;
-        padding: 4px 32px;
+        padding: 4px 20px;
         white-space: nowrap;
+        @include respond-to(md) {
+          padding: 4px 12px;
+          font-size: 20px;
+        }
       }
 
       .card-number {
@@ -126,6 +130,10 @@ onMounted(() => {
         font-weight: 700;
         line-height: 100%; /* 24px */
         letter-spacing: 0.12px;
+        @include respond-to(md) {
+
+          font-size: 20px;
+        }
       }
 
       .card-label {
@@ -136,6 +144,7 @@ onMounted(() => {
         font-weight: 400;
         letter-spacing: 0.072px;
         white-space: nowrap;
+        
       }
     }
   }
