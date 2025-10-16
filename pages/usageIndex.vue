@@ -92,6 +92,7 @@ box-shadow: 2px 4px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0
       letter-spacing: 3.6px;
       border: none;
       cursor: pointer;
+      padding: .25rem 0;
     }
   }
 }
