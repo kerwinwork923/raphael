@@ -3,7 +3,7 @@
   <div class="memberWrap">
     <div class="memberContainer">
       <div class="notificationBell">
-        <img src="../assets/imgs/member/bell.svg" alt="通知" />
+        <!-- <img src="../assets/imgs/member/bell.svg" alt="通知" /> -->
       </div>
       <MemberTop :userDataObj="userDataObj" @refresh="getMemberData" />
       <div class="memberCenter">

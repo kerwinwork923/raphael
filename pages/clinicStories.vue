@@ -3,7 +3,7 @@
     <div class="clinicStoriesContainer">
       <div class="funcTool">
         <div class="notificationBell">
-          <img src="../assets/imgs/member/bell.svg" alt="通知" />
+          <!-- <img src="../assets/imgs/member/bell.svg" alt="通知" /> -->
           <img src="../assets/imgs/robot/search.svg" alt="搜尋" />
         </div>
 

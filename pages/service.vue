@@ -4,7 +4,7 @@
     <div class="serviceContainer">
       <!-- 通知鈴鐺 -->
       <div class="notificationBell">
-        <img src="../assets/imgs/member/bell.svg" alt="通知" />
+        <!-- <img src="../assets/imgs/member/bell.svg" alt="通知" /> -->
       </div>
 
       <!-- 會員頂部資訊 -->
