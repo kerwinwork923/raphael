@@ -1079,6 +1079,7 @@ const reSend = async () => {
 };
 
 const addUser = async () => {
+  loading.value = true;
   try {
     const localData = localStorage.getItem("userData");
     const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
@@ -1123,12 +1124,32 @@ const addUser = async () => {
     );
 
     if (response.status === 200) {
-      router.push("/robot");
-      console.log(response.data);
+      console.log("註冊完成:", response.data);
+      
+      // 取得firebase推播 token
+      try {
+        await requestPermission();
+        localMessagingToken.value = messagingToken.value;
+      } catch (e) {
+        console.warn("Firebase 推播權限失敗", e);
+      }
+
+      console.log("取得的推播 Token:", localMessagingToken.value);
+      console.log("取得的MAID:", MAID);
+
+      // 儲存推播 key
+      savePushKey(MAID, messagingToken.value);
+
+      // 取得完整的用戶資料並更新 localStorage
+      await getUserData({ MID, Token, MAID, Mobile });
+
+      router.push({ name: "robot" });
     }
   } catch (err) {
     alert(err.message || "資料不完整");
     console.error(err);
+  } finally {
+    loading.value = false;
   }
 };
 
