@@ -1,16 +1,10 @@
 <template>
   <div class="usageIndexWrap">
     <div class="usageIndexContainer">
-      <div data-v-ca9243ba="" class="notificationBell">
-        <img
-          data-v-ca9243ba=""
-          src="/_nuxt/assets/imgs/member/bell.svg"
-          alt="通知"
-        />
-      </div>
       <!-- 頂部通知區域 -->
       <div class="notification-section">
         <MemberTop :userDataObj="userDataObj" />
+
       </div>
 
       <!-- 統計卡片 -->
@@ -41,7 +35,7 @@ const userDataObj = ref(null);
 
 const router = useRouter();
 onMounted(() => {
-  const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+  const userData = JSON.parse(localStorage.getItem("userData") || '{}');
   userDataObj.value = userData;
 });
 
@@ -53,7 +47,8 @@ const gotoGettingDressed = () => {
 .usageIndexWrap {
   @include gradientBg();
   width: 100%;
-  padding: 16px 0 84px 0;
+  min-height: 100vh;
+  padding: 1rem 0rem 12rem;
 
   .usageIndexContainer {
     width: 100%;
@@ -62,20 +57,14 @@ const gotoGettingDressed = () => {
     padding: 0 16px;
     display: flex;
     flex-direction: column;
-  }
+    gap: 24px;
 
-  .notificationBell {
-    display: flex;
-    gap: 1rem;
-    height: 44px;
-    justify-content: flex-end;
-    align-items: center;
-    margin-bottom: 1rem;
-    display: none;
+
   }
   .gettingDressedGroup {
     width: 100%;
     max-width: 768px;
+
     margin: 0 auto;
     padding: 1rem 16px;
     display: flex;
@@ -86,19 +75,24 @@ const gotoGettingDressed = () => {
     transform: translateX(-50%);
     z-index: 100;
     //擬態
+    background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(4px);
 
+    box-shadow: 2px 4px 12px 0
+      var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
     button {
-      @include neumorphismOuter($bgColor: $raphael-green-400, $radius: 50px);
       width: 100%;
-      color: $raphael-white;
-      font-size: 24px;
+      border-radius: var(--Radius-r-50, 50px);
+      background: var(--Primary-default, #74BC1F);
+      box-shadow: 2px 4px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.70));
+      color: var(--Neutral-white, #fff);
+      font-size: var(--Text-font-size-24, 24px);
       font-style: normal;
       font-weight: 700;
       letter-spacing: 3.6px;
       border: none;
       cursor: pointer;
-      padding: 0.25rem 0;
+      padding: .25rem 0;
     }
   }
 }
