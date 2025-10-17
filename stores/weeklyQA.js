@@ -149,13 +149,18 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
         Token,
         MAID,
         Mobile,
+        Member
+      } = localData ? JSON.parse(localData) : {};
+      
+      // 從 Member 物件中取得用戶資料
+      const {
         Name,
         Birthday,
         Mail,
         Zone,
         Address,
         Sex,
-      } = localData ? JSON.parse(localData) : {};
+      } = Member || {};
 
       // 字段對應處理
       const rbirth = Birthday || ""; // 映射生日
@@ -214,9 +219,12 @@ export const useWeeklyRecord = defineStore("weeklyQA", {
       common.startLoading();
 
       const localData = localStorage.getItem("userData");
-      const { MID, Token, MAID, Mobile, Name, Sex, AID } = localData
+      const { MID, Token, MAID, Mobile, Member, AID } = localData
         ? JSON.parse(localData)
         : {};
+      
+      // 從 Member 物件中取得用戶資料
+      const { Name, Sex } = Member || {};
 
       let AnsTimesMap = new Map();
       this.sortedByScore.forEach((question) => {
