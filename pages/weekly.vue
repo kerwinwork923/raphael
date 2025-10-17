@@ -1,7 +1,7 @@
 <template>
   <RaphaelLoading v-if="common.isLoading" />
   <div class="weeklyRecord">
-    <TitleMenu :Text="h1Text" link="/user" />
+    <TitleMenu :Text="h1Text" link="/service" />
 
     <div class="weeklyQAGroup">
       <TagList />

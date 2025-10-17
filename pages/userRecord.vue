@@ -7,7 +7,7 @@
           ? '結果分析'
           : '健康紀錄'
       "
-      link="/user"
+      link="/service"
     />
 
     <div class="userRecoreWrap">
