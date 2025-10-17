@@ -111,8 +111,8 @@ const goToExclusiveRecommendation = () => {
 };
 
 const goToHealthAssessment = () => {
-  // 健康自評功能
-  console.log("前往健康自評");
+  // 百題問卷
+  router.push("/weekly")
 };
 
 const goToLeaveCenter = () => {
