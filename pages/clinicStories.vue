@@ -253,7 +253,7 @@ const modules = [FreeMode];
   width: 100%;
   min-height: 100vh;
   min-height: 100vh;
-  padding: 0.5rem 0rem 84px;
+  padding: 0rem 0rem 84px;
 
   .clinicStoriesContainer {
     width: 100%;
@@ -289,9 +289,9 @@ const modules = [FreeMode];
   .clinicStoriesTagsGroup {
     width: 100%;
     z-index: 5;
-    margin-top: 24px;
     .tagsSwiper {
       width: 100%;
+      padding:16px 0;
     }
 
     .tagSlide {
