@@ -154,7 +154,7 @@ const getMemberData = async () => {
   @include gradientBg();
   width: 100%;
   min-height: 100vh;
-  padding: 0.5rem 0 84px 0;
+  padding: 16px 0 84px 0;
 
   .serviceContainer {
     width: 100%;

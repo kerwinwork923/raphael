@@ -119,12 +119,12 @@ const getMemberData = async () => {
   @include gradientBg();
   width: 100%;
   min-height: 100vh;
-  padding: 0.5rem 0 84px 0;
+  padding: 16px 0 84px 0;
 
   .memberContainer {
     width: 100%;
-    max-width:768px;
-    margin:auto;
+    max-width: 768px;
+    margin: auto;
     padding: 0 16px;
     display: flex;
     flex-direction: column;
@@ -135,7 +135,8 @@ const getMemberData = async () => {
     height: 44px;
     justify-content: flex-end;
     align-items: center;
-    margin-bottom:1rem;
+    margin-bottom: 1rem;
+    display: none;
 
     img {
       width: 24px;
