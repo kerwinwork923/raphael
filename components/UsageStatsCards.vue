@@ -57,7 +57,7 @@ onMounted(() => {
   display: flex;
   gap: 16px;
   margin: 1.5rem 0;
-
+  
   .stats-card {
     width: 100%;
 
@@ -87,10 +87,10 @@ onMounted(() => {
       flex-direction: column;
       align-items: center;
       gap: 8px;
-      width:100%;
+      width: 100%;
 
       .card-time {
-        @include neumorphismInset($padding:0.5rem);
+        @include neumorphismInset($padding: 0.5rem);
         color: $raphael-black;
         text-align: center;
 
@@ -115,9 +115,9 @@ onMounted(() => {
       }
 
       .card-label {
-        color:$raphael-cyan-300;
+        color: $raphael-cyan-300;
         text-align: center;
-        font-size:18px;
+        font-size: 18px;
         font-style: normal;
         font-weight: 400;
         letter-spacing: 0.072px;
