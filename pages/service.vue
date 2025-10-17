@@ -173,6 +173,7 @@ const getMemberData = async () => {
     justify-content: flex-end;
     align-items: center;
     margin-bottom:1rem;
+    display: none;
 
     img {
       width: 24px;
