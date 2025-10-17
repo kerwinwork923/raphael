@@ -110,8 +110,9 @@
           </h6> -->
         </div>
         <ProgressBar
+          v-if="useSleepRecordData.SleepRec?.[1]?.Score !== undefined"
           :score="useSleepRecordData.SleepRec?.[1]?.Score"
-          :colorProp="scoreColorFn(useSleepRecordData.SleepRec?.[0]?.Score, 0)"
+          :colorProp="scoreColorFn(useSleepRecordData.SleepRec?.[1]?.Score, 0)"
         />
       </div>
       <img class="doctorImg" src="../assets/imgs/doctor.png" alt="" />
