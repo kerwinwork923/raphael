@@ -266,8 +266,8 @@ const modules = [FreeMode];
     flex-direction: column;
     padding: 0 1rem;
     background: transparent;
-      -webkit-backdrop-filter: blur(10px);
-      backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
     top: 0;
     z-index: 10;
   }
@@ -276,8 +276,8 @@ const modules = [FreeMode];
     align-items: center;
     justify-content: flex-end;
     gap: 1rem;
-    height:44px;
-    display:none;
+    height: 44px;
+    display: none;
 
     img {
       width: 24px;
@@ -326,7 +326,7 @@ const modules = [FreeMode];
   .recommendedSection {
     padding: 0 16px;
     margin: 8px 0;
-    
+
     .sectionTitle {
       color: #1e1e1e;
 
