@@ -289,10 +289,9 @@ const modules = [FreeMode];
   .clinicStoriesTagsGroup {
     width: 100%;
     z-index: 5;
-
+    margin-top: 24px;
     .tagsSwiper {
       width: 100%;
-      padding: 1rem;
     }
 
     .tagSlide {
