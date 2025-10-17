@@ -406,6 +406,7 @@ const modules = [FreeMode];
         .videoStats {
           display: flex;
           gap: 16px;
+          display: none;
 
           .statItem {
             display: flex;
