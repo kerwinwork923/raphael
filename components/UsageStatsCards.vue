@@ -43,13 +43,8 @@ const props = defineProps({
   },
 });
 
-const {
-  loading,
-  error,
-  todayWearTime,
-  continuousDays,
-  fetchUsageRecords
-} = useUsageRecords();
+const { loading, error, todayWearTime, continuousDays, fetchUsageRecords } =
+  useUsageRecords();
 
 onMounted(() => {
   // 在 client 端觸發 API，支援用 props 覆蓋 localStorage
@@ -60,23 +55,18 @@ onMounted(() => {
 <style lang="scss" scoped>
 .usage-stats-cards {
   display: flex;
-
   gap: 16px;
- 
+  margin: 1.5rem 0;
 
   .stats-card {
-    width: 50%;
+    width: 100%;
 
-    @include neumorphismOuter(
-      $bgColor: $raphael-white,
-      $radius: 16px,
-      $padding: 20px
-    );
+    @include neumorphismOuter();
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 12px;
+    gap: 8px;
 
     .card-icon {
       width: 73px;
@@ -96,55 +86,42 @@ onMounted(() => {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
+      gap: 8px;
+      width:100%;
 
       .card-time {
-        border-radius: var(--Radius-r-20, 20px);
-        background: var(--Secondary-100, #f5f7fa);
-        box-shadow: -6px -6px 12px 0 var(--Neutral-white, #fff) inset,
-          6px 6px 12px 0
-            var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4)) inset;
-        color: var(--Neutral-black, #1e1e1e);
+        @include neumorphismInset($padding:0.5rem);
+        color: $raphael-black;
         text-align: center;
 
-        font-size: var(--Text-font-size-24, 24px);
+        font-size: 24px;
         font-style: normal;
         font-weight: 700;
 
         letter-spacing: 3.5px;
         width: 100%;
-        padding: 4px 20px;
         white-space: nowrap;
-        @include respond-to(md) {
-          padding: 4px 12px;
-          font-size: 20px;
-        }
       }
 
       .card-number {
-        color: var(--Neutral-black, #1e1e1e);
+        color: $raphael-black;
         text-align: center;
 
-        font-size: var(--Text-font-size-24, 24px);
+        font-size: 24px;
         font-style: normal;
         font-weight: 700;
         line-height: 100%; /* 24px */
         letter-spacing: 0.12px;
-        @include respond-to(md) {
-
-          font-size: 20px;
-        }
       }
 
       .card-label {
-        color: var(--Secondary-300, #b1c0d8);
+        color:$raphael-cyan-300;
         text-align: center;
-        font-size: var(--Text-font-size-18, 18px);
+        font-size:18px;
         font-style: normal;
         font-weight: 400;
         letter-spacing: 0.072px;
         white-space: nowrap;
-        
       }
     }
   }

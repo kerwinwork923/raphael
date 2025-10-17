@@ -277,6 +277,7 @@ const modules = [FreeMode];
     justify-content: flex-end;
     gap: 1rem;
     height:44px;
+    display:none;
 
     img {
       width: 24px;
