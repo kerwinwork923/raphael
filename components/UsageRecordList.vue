@@ -332,7 +332,7 @@ onUnmounted(() => {
       box-shadow: 2px 4px 12px rgba(177, 192, 216, 0.7);
       padding: 0.5rem 1rem;
 
-      --time-col-width: 120px;
+      --time-col-width: auto;
 
       /* 上方標籤與下方內容共用欄寬 */
       .record-header,
@@ -340,6 +340,7 @@ onUnmounted(() => {
         display: grid;
         grid-template-columns: 1fr var(--time-col-width) var(--time-col-width);
         align-items: center;
+        gap:0.5rem
       }
 
       .record-header {
@@ -359,7 +360,7 @@ onUnmounted(() => {
             color: #b1c0d8;
             font-size: 14px;
             font-weight: 500;
-            text-align: center;
+            text-align: left;
           }
 
           .label-start {
@@ -387,7 +388,7 @@ onUnmounted(() => {
             color: #1e1e1e;
             font-size: 20px;
             font-weight: 700;
-            text-align: center;
+            text-align: left;
           }
 
           .start-time {
