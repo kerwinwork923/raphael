@@ -715,6 +715,7 @@
   flex-direction: column;
   justify-content: flex-start;
   max-width:768px;
+  width:100%;
   align-items: baseline;
   margin-top: 1rem;
   padding: 0 1rem;
