@@ -6,7 +6,8 @@
             <div class="healthDataSettingTextGroup">
                 <h3>HRV檢測</h3>
                 <p>保持開啟，幫你更懂自己</p>
-            </div>
+            </div> 
+            
             <div class="optionGroup">
                 <!-- 按鈕 -->
             </div>
