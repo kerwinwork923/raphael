@@ -78,6 +78,14 @@
           </div>
           <img src="../assets/imgs/member/next_green.svg" alt="" />
         </div>
+
+        <div class="serviceListItem" @click="contactSupport">
+          <div class="serviceListLeft">
+            <img src="../assets/imgs/phone2.svg" alt="聯絡客服" />
+            <h3>聯絡客服</h3>
+          </div>
+          <img src="../assets/imgs/member/next_green.svg" alt="" />
+        </div>
       </div>
     </div>
 
@@ -112,7 +120,7 @@ const goToExclusiveRecommendation = () => {
 
 const goToHealthAssessment = () => {
   // 百題問卷
-  router.push("/weekly")
+  router.push("/weekly");
 };
 
 const goToLeaveCenter = () => {
@@ -147,6 +155,23 @@ const getMemberData = async () => {
   await useUserData();
   loading.value = false;
 };
+
+const SUPPORT_PHONE = '0800-000-760';
+
+const contactSupport = () => {
+  const phone = SUPPORT_PHONE.replace(/\D/g, '');
+  const ok = window.confirm(`撥打「${SUPPORT_PHONE}」？`);
+  if (!ok) return;
+
+  // 某些行動瀏覽器不接受直接 location.href，改用隱形 <a> 觸發
+  const a = document.createElement('a');
+  a.href = `tel:${phone}`;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+};
+
 </script>
 
 <style lang="scss" scoped>
@@ -172,7 +197,7 @@ const getMemberData = async () => {
     height: 44px;
     justify-content: flex-end;
     align-items: center;
-    margin-bottom:1rem;
+    margin-bottom: 1rem;
     display: none;
 
     img {
@@ -186,7 +211,7 @@ const getMemberData = async () => {
     display: flex;
     gap: 0.75rem;
     width: 100%;
-    margin:1.5rem 0;
+    margin: 1.5rem 0;
 
     .serviceCenterRow {
       display: flex;
