@@ -40,6 +40,23 @@
         </li>
         <li 
           :class="{ 
+            active: currentPage === 'customerSupportAdmin',
+            'has-focus': focusedItem === 'customerSupportAdmin' 
+          }" 
+          @click="handleMenuClick({ key: 'customerSupportAdmin', path: '/raphaelBackend/customerSupportAdmin' })"
+          @mouseenter="handleMouseEnter('customerSupportAdmin')"
+          @mouseleave="handleMouseLeave"
+          @focus="handleFocus('customerSupportAdmin')"
+          @blur="handleBlur"
+          tabindex="0"
+          role="menuitem"
+          aria-label="客服管理"
+        >
+          <img src="/assets/imgs/backend/customerSupportAdmin.svg" alt="客服管理" />
+          <span v-show="!collapsed">客服管理</span>
+        </li>
+        <li 
+          :class="{ 
             active: currentPage === 'order',
             'has-focus': focusedItem === 'order' 
           }" 

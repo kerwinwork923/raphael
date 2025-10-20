@@ -1,0 +1,31 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 機器人身體 -->
+  <ellipse cx="60" cy="80" rx="35" ry="25" fill="#F5F7FA" stroke="#E0E0E0" stroke-width="2"/>
+  
+  <!-- 機器人頭部 -->
+  <circle cx="60" cy="50" r="30" fill="#F5F7FA" stroke="#E0E0E0" stroke-width="2"/>
+  
+  <!-- 螢幕臉部 -->
+  <rect x="45" y="40" width="30" height="20" rx="4" fill="#2D3748"/>
+  
+  <!-- 眼睛 -->
+  <circle cx="52" cy="48" r="2" fill="#32CD32"/>
+  <circle cx="68" cy="48" r="2" fill="#32CD32"/>
+  
+  <!-- 嘴巴 -->
+  <path d="M52 56Q60 60 68 56" stroke="#32CD32" stroke-width="2" stroke-linecap="round" fill="none"/>
+  
+  <!-- 翅膀 -->
+  <ellipse cx="35" cy="45" rx="8" ry="15" fill="#87CEEB" opacity="0.8"/>
+  <ellipse cx="85" cy="45" rx="8" ry="15" fill="#87CEEB" opacity="0.8"/>
+  
+  <!-- 光環 -->
+  <circle cx="60" cy="25" r="8" fill="#FFD700" opacity="0.6"/>
+  
+  <!-- 十字標記 -->
+  <path d="M58 35L62 35M60 33L60 37" stroke="#FF6B6B" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- 手機 -->
+  <rect x="25" y="70" width="12" height="20" rx="2" fill="#2D3748"/>
+  <rect x="27" y="72" width="8" height="16" rx="1" fill="#4A5568"/>
+</svg>

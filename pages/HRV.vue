@@ -251,7 +251,7 @@ function checkUserData() {
     const str = localStorage.getItem("userData");
     if (!str) throw new Error("localStorage 缺少 userData");
     userData = JSON.parse(str);
-    if (!userData.Mobile || !userData.Height || !userData.Weight)
+    if (!userData.Mobile || !userData.Member.Height || !userData.Member.Weight)
       throw new Error("userData 格式不完整");
   } catch (err) {
     alert("讀取使用者資料失敗，請重新登入");
@@ -361,8 +361,8 @@ async function onRecordStop() {
 async function sendToAPI(base64) {
   const payload = {
     uuid: userData.Mobile,
-    height: userData.Height,
-    weight: userData.Weight,
+    height: userData.Member.Height,
+    weight: userData.Member.Weight,
     content: base64,
   };
   try {
@@ -403,7 +403,7 @@ async function sendToAPI(base64) {
         Token: userData.Token || "",
         Mobile: userData.Mobile || "",
         UID: "",
-        HRVCalTime: userData.HRVCalTime || "",
+        HRVCalTime: userData.Member.HRVCalTime || "",
         Flag: "",
         hbr: hbr?.toString() || "",
         rmssd: hrv.RMSSD?.toString() || "",

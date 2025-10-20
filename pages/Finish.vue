@@ -310,8 +310,8 @@ const goBack = () => {
 // 生命週期鉤子
 onMounted(() => {
   const userData = JSON.parse(localStorage.getItem("userData"));
-  if (userData?.Name) {
-    userName.value = userData.Name;
+  if (userData?.Member.Name) {
+    userName.value = userData.Member.Name;
   }
 
   fetchHRVData();

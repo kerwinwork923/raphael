@@ -79,7 +79,7 @@
 
         <router-link to="/package" class="item">
           <img src="../assets/imgs/logistics.svg" alt="" />
-          <div class="title">診所寄貨</div>
+          <div class="title">寄貨查詢</div>
         </router-link>
 
         <router-link to="/contract" class="item">

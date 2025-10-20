@@ -242,7 +242,7 @@
     </div>
 
     <div class="backToUserBtnGroupWeekly">
-      <button class="backToUserBtnWeekly" @click="backToUser">
+      <button class="backToUserBtnWeekly" @click="backToService">
         返回會員中心
       </button>
     </div>
@@ -265,7 +265,7 @@ export default {
 
     const router = useRouter();
 
-    const backToUser = () => router.push({ name: "user" });
+    const backToService = () => router.push({ name: "service" });
 
     const localData = localStorage.getItem("userData");
     const parsedData = localData ? JSON.parse(localData) : null;
@@ -297,7 +297,7 @@ export default {
     return {
       store,
       formatTimestamp,
-      backToUser,
+      backToService,
       computedScore,
       selectedType,
       changeSymptomLavel,

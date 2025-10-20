@@ -803,6 +803,12 @@ onMounted(() => {
     transition: all 0.2s;
     white-space: nowrap;
     
+    @include respond-to("lg") {
+     position: absolute;
+     right: 24px;
+     top: 24px;
+    }
+
     &.startBtn {
       background-color: $raphael-red-300;
       color: white;

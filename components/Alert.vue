@@ -9,6 +9,9 @@
       <button v-if="showRedirectButton" class="redirectBtn" @click="handleRedirect">
         跳轉
       </button>
+      <button v-if="showClickButton" class="closeBtn" @click="$emit('click')">
+        {{ clickButtonText }}
+      </button>
     </div>
   </div>
 </template>
@@ -32,10 +35,18 @@ export default defineComponent({
       type: Function,
       default: () => {}, // 默認為空函數
     },
+    showClickButton: {
+      type: Boolean,
+      default: false,
+    },
+    clickButtonText: {
+      type: String,
+      default: "確定",
+    },
   },
-  emits: ["close"],
+  emits: ["close", "click"],
   setup(props, { emit }) {
-    const { defaultContent, showRedirectButton, redirectTarget } = toRefs(props);
+    const { defaultContent, showRedirectButton, redirectTarget, showClickButton, clickButtonText } = toRefs(props);
 
     const handleClose = () => {
       emit("close"); // 通知父組件關閉
@@ -48,6 +59,8 @@ export default defineComponent({
     return {
       defaultContent,
       showRedirectButton,
+      showClickButton,
+      clickButtonText,
       handleClose,
       handleRedirect,
     };
@@ -62,8 +75,10 @@ export default defineComponent({
   width: 110%;
   height: 100%;
   left: -5%;
+  top:0%;
   position: fixed;
-  z-index: 12;
+  z-index: 12000;
+ 
 }
 .raphaelAlert {
   background: #fbfbfb;
@@ -78,7 +93,7 @@ export default defineComponent({
   left: 50%;
   top: 50%;
   transform: translate(-50%, -60%);
-  z-index: 99;
+  z-index: 13300;
   transition: 0.35s ease;
 }
 .raphaelAlert .content {
@@ -116,7 +131,8 @@ export default defineComponent({
   cursor: pointer;
   font-size: 1rem;
 }
-.raphaelAlert .btnGroup .redirectBtn {
+.raphaelAlert .btnGroup .redirectBtn,
+.raphaelAlert .btnGroup .closeBtn {
   border-left: 1px solid #aaa;
 }
 </style>

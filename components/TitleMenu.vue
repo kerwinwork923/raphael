@@ -18,6 +18,11 @@
     <h2>
       {{ Text }}
     </h2>
+    <div class="titleImgGroup" v-if="showImg1 || showImg2">
+
+      <img v-if="showImg1" :src="showImg1" @click="handleImg1Click" alt="">
+      <img v-if="showImg2" :src="showImg2" @click="handleImg2Click" alt="">
+    </div>
   </div>
 </template>
 
@@ -41,6 +46,14 @@ export default {
       default: 'sticky',
       validator: value => ['sticky', 'fixed', 'absolute'].includes(value),
     },
+    showImg1: {
+      type: String,
+      default: '',
+    },
+    showImg2: {
+      type: String,
+      default: '',
+    },  
   },
   methods: {
     handleClick() {
@@ -54,6 +67,12 @@ export default {
       } else {
         this.$router.push(this.link); // 導航到指定頁面
       }
+    },
+    handleImg1Click() {
+      this.$emit('handleImg1Click');
+    },
+    handleImg2Click() {
+      this.$emit('handleImg2Click');
     },
   },
 };
@@ -93,10 +112,24 @@ export default {
 
   &.absolute {
     position: absolute;
-    left: 0;
+    width: 95%;
+    left: 2.5%;
     right: 0;
     top: 0;
     z-index: 6;
+    svg{
+      transform: translateY(10%);
+    }
+  }
+  .titleImgGroup{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 100%;
+    
+    gap: .75rem;
+    z-index: -1;
+ 
   }
 }
 </style>

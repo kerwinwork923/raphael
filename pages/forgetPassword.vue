@@ -37,7 +37,8 @@
           <router-link to="/">返回</router-link>
         </div>
       </div>
-      <div class="verfifyWrap" v-if="currentStep === 'verify'">
+
+      <div class="verfifyWrap" v-if="currentStep === 'verify'" >
         <div class="verificationCodeGroup">
           <input
             v-for="(code, index) in verificationCodes"
@@ -132,12 +133,12 @@ import Alert from "../components/Alert.vue";
 export default {
   components: {
     Alert,
-    useSeo
+    useSeo,
   },
   setup() {
     const loading = ref(false);
     const router = useRouter();
-    const verificationTitle = ref("忘記密碼");
+    const verificationTitle = ref("請輸入手機號碼");
     const passwordAgainVisible = ref(false);
     const alertVisable = ref(false);
     const alertContent = ref("");
@@ -252,7 +253,7 @@ export default {
         }
       } catch (err) {
         alertVisable.value = true;
-        alertContent.value = err;
+        alertContent.value = "無此手機號碼";
       } finally {
         loading.value = false;
       }
@@ -434,25 +435,27 @@ export default {
 
 <style lang="scss">
 .forgetPassword {
-  background: url("../assets/imgs/gradient-bg.png");
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-size: cover;
   display: flex;
   flex-direction: column;
-  place-items: center;
+  align-items: center;
+  justify-content: center;
+  align-items: stretch;
   width: 100%;
-  height: 100vh;
-  padding: 1rem;
+  height: 100dvh;
+
+
+  overflow: hidden;
+  @include gradientBg();
 
   .forgetPasswordGroup {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 100%;
+    width: 90%;
+    margin: 0 auto;
     height: 100%;
-    max-width: 768px;
+   
 
     .raphaelIconImgGroup {
       text-align: center;
@@ -463,38 +466,40 @@ export default {
     }
 
     h1 {
-      
-      font-size: 1.5rem;
-      font-weight: 400;
-      letter-spacing: 0.5px;
-      margin-top: 8px;
-      text-align: center;
-      color: $raphael-purple-200;
+      color: var(--Primary-default, #74bc1f);
+
+      font-size: var(--Text-h2, 24px);
+      font-style: normal;
+      font-weight: 700;
+      line-height: 100%; /* 24px */
+      letter-spacing: 3.6px;
+      margin-top: 0.75rem;
     }
-    .forgetPasswordWrap{
+    .forgetPasswordWrap {
       width: 100%;
       min-height: 509px;
+      
     }
     .forgetPasswordBox {
-      background-color: $raphael-white;
       border-radius: 12px;
-      padding: 1rem 1rem 0.2rem 1rem;
+    
       margin-top: 2.25rem;
       .phoneGroup,
       .passwordGroup,
       .passwordAgainGroup {
         position: relative;
         margin-bottom: 1rem;
+        width: 100%;
         .icon1 {
           position: absolute;
           top: 50%;
-          left: 2px;
+          left: 16px;
           transform: translateY(-50%);
         }
         .icon2 {
           position: absolute;
           top: 50%;
-          right: 2px;
+          right: 16px;
           transform: translateY(-50%);
           cursor: pointer;
         }
@@ -508,9 +513,15 @@ export default {
         border-bottom: 1px solid $raphael-gray-400;
         font-size: 1.2rem;
         width: 100%;
-        padding-left: 36px;
+        padding-left: 48px;
         padding-bottom: 16px;
         padding-top: 16px;
+
+        border-radius: var(--Radius-r-50, 50px);
+        background: var(--Secondary-100, #f5f7fa);
+        box-shadow: 2px 4px 12px 0
+          var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+
         &::placeholder {
           color: $raphael-gray-500;
           font-family: Inter;
@@ -523,28 +534,36 @@ export default {
 
     .vertificationBtn,
     .resetPasswordBtn {
-      background-color: $raphael-green-400;
       color: $raphael-white;
-      padding: 0.5rem 0.75rem;
       width: 100%;
-      border-radius: 8px;
       border: none;
       font-size: 1.125rem;
       font-weight: 400;
       letter-spacing: 0.5px;
       transition: 0.25s ease;
-      margin-top: 1.5rem;
       cursor: pointer;
-      &:hover {
-        background-color: $raphael-green-500;
-      }
+
+      
+      @include neumorphismOuter($radius: 50px, $padding: 8px 12px);
+      color: #74bc1f;
+
       &:disabled {
-        background-color: $raphael-gray-400;
+        color: $raphael-gray-300;
         cursor: not-allowed;
         opacity: 0.6;
       }
+      &:hover,
+      &:active {
+        @include neumorphismOuter(
+          $radius: 50px,
+          $padding: 8px 12px,
+          $x: 0,
+          $y: 0,
+          $blur: 6px
+        );
+      }
     }
-  .returnLogin {
+    .returnLogin {
       text-align: center;
       margin-top: 1.25rem;
 
@@ -559,61 +578,88 @@ export default {
   }
 
   .verfifyWrap {
-    padding: 1rem;
-
-    .verificationCodeGroup {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column;
+      gap: 16px;
+      .verificationCodeGroup {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        margin-top: 1.5rem;
+        @include neumorphismOuter($radius: 50px, $padding: 10px 16px);
+        width: 100%;
 
-      padding: 1rem;
-      border-radius: 12px;
-      background-color: $raphael-white;
-
-      .vertifyCode {
-        background-color: $raphael-gray-200;
-        width: 2.75rem;
-        height: 2.75rem;
-        border-radius: 0.5rem;
-        text-align: center;
-        border: none;
-        cursor: pointer;
-        font-size: 1.5rem;
+        .vertifyCode {
+          padding: 2px 0;
+          border: none;
+          border-bottom: 1px solid #b1c0d8;
+          cursor: text;
+          text-align: center;
+          font-size: 20px;
+          font-weight: bold;
+          outline: none;
+          width: 100%;
+        }
       }
-    }
-    .verificationCodeHintText {
-      font-size: 14px;
-      color: $raphael-red-300;
-      text-align: center;
-      font-weight: 400;
-      letter-spacing: 0.1px;
-      margin-top: 12px;
-      line-height: 22.652px;
-    }
 
-    .reSendTextGroup {
-      text-align: center;
-      .reSendText {
-        outline: none;
-        background-color: transparent;
-        border: none;
-        margin-top: 44px;
-        color: $raphael-black;
-        font-weight: bold;
-        text-decoration: underline;
-        transition: 0.15s all ease;
-        &:disabled {
-          color: $raphael-gray-500;
+      .verificationCodeHintText {
+        font-size: 14px;
+        color: $raphael-red-300;
+        text-align: center;
+        font-weight: 400;
+        letter-spacing: 0.1px;
+        line-height: 22.652px;
+      }
+
+      .reSendTextGroup {
+        text-align: center;
+
+        .reSendText {
+          outline: none;
+          border: none;
+          font-size: 18px;
+          font-style: normal;
+          font-weight: 400;
+          letter-spacing: 2.7px;
+          transition: 0.15s all ease;
+          cursor: pointer;
+          width: 100%;
+          text-align: center;
+          @include neumorphismOuter($radius: 50px, $padding: 0.5rem 0);
+          color: #74bc1f;
           text-decoration: none;
+
+          &:disabled {
+            color: $raphael-gray-300;
+            cursor: not-allowed;
+            opacity: 0.6;
+          }
+          &:hover,
+          &:active {
+            @include neumorphismOuter(
+              $radius: 50px,
+              $padding: 0.5rem 0,
+              $x: 0,
+              $y: 0,
+              $blur: 6px
+            );
+          }
         }
       }
     }
-  }
+    .resetPasswordWrap{
+      width: 100%;
+      max-width: 768px;
+      padding: 0 1.5rem;
+    }
   .resetPasswordBox {
-    background-color: $raphael-white;
+
     border-radius: 12px;
-    padding: 1rem;
+   width: 100%;
     margin-top: 2.25rem;
+    margin-bottom: 1.5rem;
+    
     .phoneGroup,
     .passwordGroup,
     .passwordAgainGroup {
@@ -622,13 +668,13 @@ export default {
       .icon1 {
         position: absolute;
         top: 50%;
-        left: 2px;
+        left: 16px;
         transform: translateY(-50%);
       }
       .icon2 {
         position: absolute;
         top: 50%;
-        right: 2px;
+        right: 16px;
         transform: translateY(-50%);
         cursor: pointer;
       }
@@ -638,23 +684,32 @@ export default {
     input[type="number"] {
       outline: none;
       border: none;
-      border-bottom: 1px solid $raphael-gray-400;
-      font-size: 1.2rem;
+      background-color: #fff;
+      padding: 1rem;
+      border-radius: 50px;
+      color: #74bc1f;
+      font-size: 18px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 22px;
+      letter-spacing: 2.7px;
       width: 100%;
-      padding-left: 36px;
-      padding-bottom: 16px;
-      padding-top: 16px;
+      padding-left: 48px;
+
+      border-radius: var(--Radius-r-50, 50px);
+background: var(--Secondary-100, #F5F7FA);
+box-shadow: 2px 4px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.40));
+
       &::placeholder {
-        color: $raphael-gray-500;
-        font-family: Inter;
-        font-size: 1.2rem;
+        font-size: 18px;
         font-weight: 400;
-        color: $raphael-gray-400;
       }
     }
     .passwordAgainHintText,
     .passwordHintText {
       color: $raphael-red-300;
+      margin-bottom: .5rem;
+      text-align: center;
     }
   }
   .resetPasswordBtn {

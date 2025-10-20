@@ -9,6 +9,11 @@ export default defineNuxtConfig({
       routes: ["/"], // 可保留首頁
     },
   },
+  
+  // 添加實驗性功能來解決模組解析問題
+  experimental: {
+    payloadExtraction: false,
+  },
 
   app: {
     baseURL: "/", 
@@ -17,7 +22,8 @@ export default defineNuxtConfig({
       meta: [
         {
           name: "viewport",
-          content: "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no",
+          // ✅ 允許縮放（放寬 maximum-scale；不要 user-scalable）
+          content: "width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=10, user-scalable=yes"
         },
         {
           name: "description",
@@ -78,5 +84,14 @@ export default defineNuxtConfig({
         },
       },
     },
+    // 添加 Vite 配置來解決模組解析問題
+    optimizeDeps: {
+      include: ['vue', 'vue-router']
+    },
+    resolve: {
+      alias: {
+        '#internal': 'nuxt/dist/runtime'
+      }
+    }
   },
 });

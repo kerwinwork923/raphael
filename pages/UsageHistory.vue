@@ -1,7 +1,7 @@
 <template>
   <RaphaelLoading v-if="loading" />
   <div class="usageHistoryWrap">
-    <TitleMenu Text="穿衣紀錄" link="/user" />
+ 
     <ChangeUsageTags></ChangeUsageTags>
     <div class="productWrap">
       <h3 class="yourProductTitle" v-if="purchasedProducts.length > 1">
@@ -177,6 +177,7 @@
         開始使用
       </button>
     </div>
+    <BottomNav />
   </div>
 </template>
 
@@ -196,6 +197,7 @@ import normalClothesV5 from "@/assets/imgs/normalClothesV5.png";
 import RaphaelLoading from "@/components/RaphaelLoading.vue";
 // 例如有個 TitleMenu
 import TitleMenu from "@/components/TitleMenu.vue";
+import BottomNav from "@/components/BottomNav.vue";
 
 import { useSeo } from "~/composables/useSeo";
 
@@ -442,8 +444,8 @@ export default {
   background-color: $raphael-gray-100;
   min-height: 100vh;
   width: 100%;
-  padding: 0 1rem;
-  padding-bottom: 116px;
+  padding: 1rem 1rem 200px 1rem;
+ 
   .productWrap {
     width: 100%;
     max-width: 768px;
@@ -759,7 +761,7 @@ export default {
 
 .optionWrap {
   position: fixed;
-  bottom: 0;
+  bottom: 54px;
   left: 0;
   right: 0;
   margin: auto;

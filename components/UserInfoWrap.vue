@@ -2,8 +2,8 @@
   <div class="infoWrap">
     <div class="infoBox">
       <!-- 姓名輸入 -->
+      <label for="name">姓名</label>
       <div class="nameGroup">
-        <img class="icon1" src="../assets/imgs/user.svg" alt="" />
         <input
           type="text"
           placeholder="請輸入您的姓名(暱稱)"
@@ -12,33 +12,33 @@
       </div>
 
       <!-- 電話欄位 不可選 -->
+      <label for="phone" v-if="phoneShow">電話</label>
       <div class="phoneGroup" v-if="phoneShow">
-        <img class="icon1" src="../assets/imgs/phone.svg" alt="" />
         <input type="text" :value="phone" disabled />
         <img class="icon2" src="../assets/imgs/noWrap.svg" alt="" />
       </div>
 
       <!-- 信箱輸入 -->
+      <label for="email" v-if="emailShow">信箱</label>
       <div class="emailGroup" v-if="emailShow">
-        <img class="icon1" src="../assets/imgs/mail.svg" alt="" />
         <input type="email" placeholder="請輸入您的信箱" />
       </div>
 
       <!-- 身高輸入 -->
+      <label for="height">身高</label>
       <div class="heightGroup">
-        <img class="icon1" src="../assets/imgs/height.svg" alt="" />
         <input type="text" placeholder="請輸入您的身高" v-model="localHeight" />
       </div>
 
       <!-- 體重輸入 -->
+      <label for="weight">體重</label>
       <div class="weightGroup">
-        <img class="icon1" src="../assets/imgs/weight.svg" alt="" />
         <input type="text" placeholder="請輸入您的體重" v-model="localWeight" />
       </div>
 
       <!-- 性別選擇 -->
+      <label for="sex">性別</label>
       <div class="groupGroup">
-        <img class="icon1" src="../assets/imgs/group.svg" alt="" />
         <select
           v-model="localSex"
           class="custom-select"
@@ -52,8 +52,8 @@
       </div>
 
       <!-- 生日選擇 -->
+      <label for="date">生日</label>
       <div class="dateGroup">
-        <img class="icon1" src="../assets/imgs/date.svg" alt="" />
         <VueDatePicker
           v-model="localDate"
           :format="formatDate"
@@ -68,25 +68,9 @@
         />
       </div>
 
-      <!-- 日常收縮壓選擇 -->
-      <div class="DSPR">
-        <img class="icon1" src="../assets/imgs/DSPR.svg" alt="" />
-        <select
-          v-model="localDSPR"
-          class="custom-select"
-          :class="{ selected: localDSPR }"
-        >
-          <option value="" disabled selected hidden>請選擇血壓(選填)</option>
-          <option value="normal">正常(120mmHg)</option>
-          <option value="prehypertension">高血壓前期(120~139mmHg)</option>
-          <option value="hypertension">高血壓(>=140mmHg)</option>
-        </select>
-        <img class="icon2" src="../assets/imgs/arrowDown.svg" />
-      </div>
-
-      <!-- 檢測時間 -->
+      <!-- HRV量測時間 -->
+      <label for="detectTime" v-if="timeShow">HRV量測時間</label>
       <div class="detectTime" v-if="timeShow">
-        <img class="icon1" src="../assets/imgs/detectTime.svg" alt="" />
         <select
           v-model="localTime"
           class="custom-select"
@@ -101,7 +85,24 @@
         <img class="icon2" src="../assets/imgs/arrowDown.svg" />
       </div>
 
+      <!-- 日常收縮壓選擇 -->
+      <label for="DSPR">血壓</label>
+      <div class="DSPR">
+        <select
+          v-model="localDSPR"
+          class="custom-select"
+          :class="{ selected: localDSPR }"
+        >
+          <option value="" disabled selected hidden>請選擇血壓(選填)</option>
+          <option value="normal">正常(120mmHg)</option>
+          <option value="prehypertension">高血壓前期(120~139mmHg)</option>
+          <option value="hypertension">高血壓(>=140mmHg)</option>
+        </select>
+        <img class="icon2" src="../assets/imgs/arrowDown.svg" />
+      </div>
+
       <!-- 地址 -->
+      <label for="address" v-if="addressShow">地址</label>
       <div class="addressGroup" v-if="addressShow">
         <div class="city">
           <select
@@ -145,7 +146,7 @@
       @click="submitForm"
       :disabled="isSubmitDisabled"
     >
-      送出
+      {{ addressShow ? "儲存" : "確認" }}
     </button>
   </div>
 </template>
@@ -162,10 +163,25 @@ export default {
     sex: String,
     DSPR: String,
     date: String,
-    phoneShow: false,
-    addressShow: false,
-    emailShow: false,
-    timeShow: false,
+    city: String,
+    area: String,
+    address: String,
+    phoneShow: {
+      type: Boolean,
+      default: false
+    },
+    addressShow: {
+      type: Boolean,
+      default: false
+    },
+    emailShow: {
+      type: Boolean,
+      default: false
+    },
+    timeShow: {
+      type: Boolean,
+      default: false
+    },
     HRVCalTime: String,
   },
   setup(props, { emit }) {
@@ -174,7 +190,7 @@ export default {
     const localWeight = ref(props.weight || "");
     const localSex = ref(props.sex || "");
     const localDate = ref(null);
-    const localDSPR = ref(props.DSPR || "");
+    const localDSPR = ref(props.DSPR || ""); 
     const localTime = ref(props.HRVCalTime || "");
 
     const inputAddress = ref("");
@@ -197,24 +213,68 @@ export default {
       }
 
       const userData = JSON.parse(localStorage.getItem("userData") || "{}");
+      
+      console.log("載入的 userData:", userData);
 
-      localName.value = userData.Name || "";
-      localHeight.value = userData.Height || "";
-      localWeight.value = userData.Weight || "";
-      localSex.value = userData.Sex || "";
-      localDate.value = userData.Birthday
-        ? new Date(
-            parseInt(userData.Birthday.split("/")[0]) + 1911,
-            parseInt(userData.Birthday.split("/")[1]) - 1,
-            parseInt(userData.Birthday.split("/")[2])
-          )
-        : null;
-      localDSPR.value = userData.DSPR || "";
-      localTime.value = userData.HRVCalTime || "";
-      selectedCity.value = userData.City || "";
-      selectedArea.value = userData.Zone || "";
-      inputAddress.value = userData.Address || "";
-      phone.value = userData.Mobile || "";
+      // 檢查資料結構，優先使用 Member 物件內的資料，如果沒有則使用根層級的資料
+      const memberData = userData.Member || userData;
+      
+      console.log("使用的 memberData:", memberData);
+
+      // 載入所有用戶資料欄位
+      localName.value = memberData.Name || "";
+      localHeight.value = memberData.Height || "";
+      localWeight.value = memberData.Weight || "";
+      localSex.value = memberData.Sex || "";
+      
+      // 處理生日資料
+      if (memberData.Birthday) {
+        try {
+          // 支援民國年格式 (如: 114/8/14) 或西元年格式
+          if (memberData.Birthday.includes("/")) {
+            const parts = memberData.Birthday.split("/");
+            if (parts.length === 3) {
+              // 判斷是民國年還是西元年
+              const year = parseInt(parts[0]);
+              const month = parseInt(parts[1]) - 1; // JavaScript 月份從 0 開始
+              const day = parseInt(parts[2]);
+              
+              // 如果年份小於 200，假設是民國年
+              const fullYear = year < 200 ? year + 1911 : year;
+              localDate.value = new Date(fullYear, month, day);
+              console.log("解析的生日:", localDate.value);
+            }
+          }
+        } catch (error) {
+          console.error("生日格式解析錯誤:", error);
+          localDate.value = null;
+        }
+      } else {
+        localDate.value = null;
+      }
+      
+      localDSPR.value = memberData.DSPR || "";
+      localTime.value = memberData.HRVCalTime || "";
+      selectedCity.value = memberData.City || "";
+      selectedArea.value = memberData.Zone || "";
+      inputAddress.value = memberData.Address || "";
+      phone.value = memberData.Mobile || "";
+      
+      // 調試信息
+      console.log("載入的欄位值:", {
+        name: localName.value,
+        height: localHeight.value,
+        weight: localWeight.value,
+        sex: localSex.value,
+        date: localDate.value,
+        DSPR: localDSPR.value,
+        time: localTime.value,
+        city: selectedCity.value,
+        area: selectedArea.value,
+        address: inputAddress.value,
+        phone: phone.value
+      });
+      
       if (selectedCity.value) {
         updateAreas(true);
       }
@@ -306,11 +366,14 @@ export default {
 
 <style lang="scss">
 .infoWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  height: 100%;
+
   .infoBox {
-    background-color: $raphael-white;
-    border-radius: 1rem;
-    height: calc(100vh - 235px);
-    padding: 1rem;
+    padding-bottom: 16px;
+    overflow: hidden;
     overflow-y: scroll;
   }
 
@@ -321,14 +384,31 @@ export default {
     background: url("../assets/imgs/arrow-down.svg") no-repeat right 10px center;
     background-size: 12px;
     color: $raphael-gray-300;
-    font-size: 1.2rem;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 2.7px;
+    line-height: 22px;
+    flex: 1;
+    width: 100%;
   }
 
   .custom-select.selected {
-    color: $raphael-black;
+    color: $raphael-green-400;
   }
   .dp__instance_calendar {
     z-index: 1000;
+  }
+  label {
+    color: $raphael-gray-500;
+
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 0.5rem;
+    margin-left: 0.25rem;
   }
   .nameGroup,
   .heightGroup,
@@ -336,24 +416,27 @@ export default {
   .dateGroup,
   .phoneGroup,
   .emailGroup {
+    display: flex;
+    align-items: center;
+    gap: 4px;
     position: relative;
-    margin-bottom: 1rem;
-    z-index: 1000;
-    .icon1 {
-      position: absolute;
-      top: 50%;
-      left: 2px;
-      transform: translateY(-50%);
-      z-index: 2;
+    margin-bottom: 16px;
+    @include neumorphismOuter($radius: 50px, $padding: 10px 12px);
+    z-index: 10;
+
+    .icon1,
+    .icon2 {
+      width: 24px;
+      height: 24px;
     }
 
     .icon2 {
-      position: absolute;
-      top: 50%;
-      right: 2px;
-      transform: translateY(-50%);
-      width: 18px;
-      z-index: 1;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      &:hover,
+      &:active {
+        transform: scale(1.1);
+      }
     }
   }
 
@@ -361,34 +444,23 @@ export default {
     display: flex;
     flex-wrap: wrap;
     width: 100%;
-    justify-content: space-between;
+    gap: 16px;
     .city,
     .area {
-      width: 48%;
+      width: calc(100% / 2 - 8px);
       position: relative;
       select {
         outline: none;
         border: none;
-        padding-left: 0;
-        padding-bottom: 16px;
-        padding-top: 16px;
-        font-size: 1.2rem;
+        @include neumorphismOuter($radius: 50px, $padding: 10px 12px);
         width: 100%;
-        border-bottom: 1px solid $raphael-gray-300;
         appearance: none;
-        background-color: transparent;
-        color: $raphael-gray-500;
-        font-family: Inter;
-        font-size: 1.2rem;
-        font-weight: 400;
-        padding-left: 0.5rem;
+        color: $raphael-gray-300;
+        font-size: 18px;
 
-        option {
-        }
         &::placeholder {
           color: $raphael-gray-300;
-          font-family: Inter;
-          font-size: 1.2rem;
+          font-size: 18px;
           font-weight: 400;
         }
 
@@ -398,22 +470,44 @@ export default {
       }
 
       .selected {
-        color: $raphael-black;
+        color: $raphael-green-400;
+      }
+
+      .icon1,
+      .icon2 {
+        width: 24px;
+        height: 24px;
       }
 
       .icon2 {
         position: absolute;
         top: 50%;
-        right: 2px;
+        right: 16px;
         transform: translateY(-50%);
         z-index: 1;
-        width: 18px;
       }
     }
     .address {
       width: 100%;
       input[type="text"] {
-        padding-left: 0.5rem;
+        outline: none;
+        border: none;
+        @include neumorphismOuter($radius: 50px, $padding: 10px 12px);
+
+        color: #74bc1f;
+
+        font-size: 18px;
+        font-style: normal;
+        font-weight: 400;
+        letter-spacing: 2.7px;
+        line-height: 22px;
+        flex: 1;
+        width: 100%;
+
+        &::placeholder {
+          font-size: 18px;
+          color: $raphael-gray-300;
+        }
       }
     }
   }
@@ -426,36 +520,38 @@ export default {
   .DSPR,
   .detectTime {
     display: flex;
+    align-items: center;
+    gap: 4px;
     position: relative;
-    width: 100%;
-    .icon1 {
-      position: absolute;
-      top: 50%;
-      left: 2px;
-      transform: translateY(-50%);
-      z-index: 2;
+    margin-bottom: 16px;
+    @include neumorphismOuter($radius: 50px, $padding: 10px 12px);
+    .icon1,
+    .icon2 {
+      width: 24px;
+      height: 24px;
     }
     .icon2 {
-      position: absolute;
-      top: 50%;
-      right: 2px;
-      transform: translateY(-50%);
-      z-index: 1;
-      width: 18px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      &:hover,
+      &:active {
+        transform: scale(1.1);
+      }
     }
+
     select {
       outline: none;
       border: none;
-      padding-left: 36px;
-      padding-bottom: 16px;
-      padding-top: 16px;
-      font-size: 1.2rem;
       width: 100%;
-      border-bottom: 1px solid $raphael-gray-300;
       appearance: none;
       color: $raphael-gray-300;
-      font-family: Inter;
-      font-size: 1.2rem;
+      font-size: 18px;
+      font-style: normal;
+      font-weight: 400;
+      letter-spacing: 2.7px;
+      line-height: 22px;
+      flex: 1;
+      width: 100%;
 
       &::placeholder {
         color: $raphael-gray-300;
@@ -472,7 +568,6 @@ export default {
 
   .detectTime {
     margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
     .icon1 {
       width: 22px;
     }
@@ -484,28 +579,50 @@ export default {
   input[type="email"] {
     outline: none;
     border: none;
-    border-bottom: 1px solid $raphael-gray-300;
-    font-size: 1.2rem;
+    background-color: transparent;
+    color: #74bc1f;
+
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 2.7px;
+    line-height: 22px;
+    flex: 1;
     width: 100%;
-    padding-left: 36px;
-    padding-bottom: 16px;
-    padding-top: 16px;
-    color: $raphael-black;
+
     &::placeholder {
+      font-size: 18px;
       color: $raphael-gray-300;
-      font-family: Inter;
-      font-size: 1.2rem;
-      font-weight: 400;
     }
   }
 
   .infoSendBtn {
-    @include btnStyle($raphael-green-400, $raphael-white);
-    margin-top: 24px;
+    color: $raphael-green-400;
+    width: 100%;
+    border: none;
+    font-size: 1.125rem;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    transition: 0.25s ease;
+    cursor: pointer;
+    @include neumorphismOuter($radius: 50px, $padding: 8px 12px);
+
+    &:hover,
+    &:active {
+      @include neumorphismOuter(
+        $radius: 50px,
+        $padding: 8px 12px,
+        $x: 0,
+        $y: 0,
+        $blur: 6px
+      );
+    }
 
     &:disabled {
-      background-color: $raphael-gray-300;
+      @include neumorphismOuter($radius: 50px, $padding: 8px 12px);
+      color: $raphael-gray-300;
       cursor: not-allowed;
+      opacity: 0.6;
     }
   }
 }
@@ -524,24 +641,27 @@ export default {
   }
 
   .vue-datepicker-input {
-    padding-left: 36px;
+    padding-left: 2.75rem;
   }
 }
 
 .dp__input_wrap {
-  border-bottom: 1px solid $raphael-gray-300;
-  padding-bottom: 16px;
-  padding-top: 16px;
   .dp__pointer {
     border: none;
     background-color: none;
     width: 100%;
-    font-size: 1.25rem;
+    font-size: 18px;
+    background: #f5f7fa;
+    color: $raphael-green-400;
+    padding: 0;
+
+    &::placeholder {
+      color: $raphael-gray-400;
+      font-weight: 400;
+    }
   }
   svg {
     display: none;
   }
 }
-
-
 </style>

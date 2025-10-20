@@ -14,14 +14,17 @@
     <template v-else>
       <!-- 狀態條 -->
       <div class="order-step-bar">
-        <!-- 預計送達時間 -->
-        <div class="delivery-estimate" v-if="shouldShowDeliveryEstimate">
+        <!-- 預計送達時間或狀態警告 -->
+        <div
+          class="delivery-estimate"
+          v-if="shouldShowDeliveryEstimate && currentStep < 2"
+        >
           {{ deliveryEstimateText }}
         </div>
 
-        <!-- <div class="order-status-alert" v-if="currentStep >= 3">
-          狀態如果為「製作中」即無法修改個人化資訊
-        </div> -->
+        <div class="order-status-alert" v-else-if="currentStep >= 2">
+          狀態如果為「待製作」即無法修改個人化資訊
+        </div>
         <div class="step-bar">
           <!-- 進度線 -->
           <div
@@ -83,7 +86,7 @@
             </div>
             <button
               class="edit-btn"
-              v-if="currentStep < 3"
+              v-if="currentStep < 2"
               @click="editPersonalInfo(item)"
             >
               修改
@@ -129,7 +132,7 @@
         </div>
       </div>
 
-      <div class="section" v-if="orderData">
+      <div class="section" v-if="orderData && currentStep < 2">
         <div class="section-title-group">
           <div class="section-title">訂單編號</div>
           <div class="section-content">
@@ -643,6 +646,8 @@ onMounted(() => {
     text-align: center;
     font-weight: 700;
     font-size: 16px;
+    width: 95%;
+    margin: 0 auto 32px;
   }
   .order-step-bar {
     background: #fff;
