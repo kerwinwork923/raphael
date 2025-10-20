@@ -31,6 +31,13 @@
           </div>
           <img src="../assets/imgs/member/next_green.svg" alt="" />
         </div>
+        <div class="memberListItem" @click="goToHealthDataSetting">
+          <div class="memberListLeft">
+            <img src="../assets/imgs/member/heartPulse2.svg" alt="" />
+            <h3>健康數據設定</h3>
+          </div>
+          <img src="../assets/imgs/member/next_green.svg" alt="" />
+        </div>
         <div class="memberListItem" @click="goToAccountManage">
           <div class="memberListLeft">
             <img src="../assets/imgs/member/user.svg" alt="" />
@@ -104,6 +111,10 @@ const goToAccountManage = () => {
 
 const goToDisclaimer = () => {
   router.push("/disclaimer");
+};
+
+const goToHealthDataSetting = () => {
+  router.push("/healthDataSetting");
 };
 
 const getMemberData = async () => {
