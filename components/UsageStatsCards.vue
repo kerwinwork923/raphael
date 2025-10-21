@@ -57,6 +57,7 @@ onMounted(() => {
   display: flex;
   gap: 16px;
   margin: 1.5rem 0;
+  display: none;
   
   .stats-card {
     width: 100%;
