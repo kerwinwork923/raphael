@@ -57,10 +57,10 @@ const hrvEnabled = ref(true); // 預設開啟/關閉自己改
 
       width: 100%;
       min-height: 64px;
-      padding: 12px 16px;
+      padding: 16px;
       margin-top: 0.5rem;
 
-      border-radius: var(--Radius-r-50, 50px);
+      border-radius: var(--Radius-r-50, 20px);
       background: var(--Secondary-100, #f5f7fa);
       box-shadow: 2px 4px 12px 0
         var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
@@ -80,7 +80,7 @@ const hrvEnabled = ref(true); // 預設開啟/關閉自己改
           font-style: normal;
           font-weight: 400;
           letter-spacing: 2.4px;
-          margin-top: 0.25rem;
+          margin-top: 0.5rem;
         }
       }
 
