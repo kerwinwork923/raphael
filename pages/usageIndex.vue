@@ -92,7 +92,7 @@ const gotoGettingDressed = () => {
       letter-spacing: 3.6px;
       border: none;
       cursor: pointer;
-      padding: .25rem 0;
+      padding: .5rem 0;
     }
   }
 }
