@@ -57,7 +57,7 @@ const gotoGettingDressed = () => {
     padding: 0 16px;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 8px;
 
 
   }
