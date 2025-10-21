@@ -2425,13 +2425,8 @@ import searchSvg from "~/assets/imgs/robot/search.svg";
 import calendarSvg from "~/assets/imgs/robot/calendar.svg";
 import sendSvg from "~/assets/imgs/robot/send.svg";
 
-// ====== 新增：你的 n8n TTS webhook（需回傳 audio/wav 二進位檔）======
-const TTS_WEBHOOK_URL = "https://aiwisebalance.com/webhook/oss-gpt";
-const TEXT_WEBHOOK_URL = "https://aiwisebalance.com/webhook/Textchat"; // ← 你的「純文字」端點（若同一支就跟 TTS_URL 相同）
-const TEXT_MESSAGE_URL =
-  "https://23700999.com:8081/HMA/TTEsaveChatMessageHistory.jsp"; // ← 你的「純文字」端點（若同一支就跟 TTS_URL 相同）
-const GET_CHAT_HISTORY_URL =
-  "https://23700999.com:8081/HMA/TTEgetChatMessageHistoryList.jsp"; // ← 獲取聊天記錄的端點
+// ====== 統一使用 TTEgetChatMessageHistoryList.jsp API ======
+const UNIFIED_API_URL = "https://23700999.com:8081/HMA/TTEgetChatMessageHistoryList.jsp"; // ← 統一的 API 端點
 const voicegender = "female";
 const historyInputRef = ref(null);
 
@@ -3504,7 +3499,7 @@ const fetchChatHistory = async () => {
   }
 
   try {
-    const response = await fetch(GET_CHAT_HISTORY_URL, {
+    const response = await fetch(UNIFIED_API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -3583,7 +3578,7 @@ const fetchOlderChatHistory = async () => {
   }
 
   try {
-    const response = await fetch("https://23700999.com:8081/HMA/TTEgetChatMessageHistoryList.jsp", {
+    const response = await fetch(UNIFIED_API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -3754,21 +3749,30 @@ const initSpeechRecognition = () => {
   }
 };
 
-/** 統一呼叫 n8n：可選擇是否播放音檔 */
-async function sendViaN8n(userText, { playAudio = false, extra = {} } = {}) {
-  const url = playAudio ? TTS_WEBHOOK_URL : TEXT_WEBHOOK_URL;
+/** 統一使用 TTEgetChatMessageHistoryList.jsp API 處理語音和文字輸入 */
+async function sendViaUnifiedAPI(userText, { playAudio = false, extra = {} } = {}) {
+  if (!localobj) {
+    console.error("用戶資料不存在");
+    return "（親愛的:您的問題我目前沒辦法回答）";
+  }
+
   const nowtime = new Date().toISOString();
   let res;
+  
   try {
-    res = await fetch(url, {
+    res = await fetch(UNIFIED_API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        chatInput: userText,
-        sessionId: UUID,
-        voicegender,
-        timestamp: nowtime,
-        pitch_semitones: 1.5,
+        Key: "qrt897hpmd",
+        MID: localobj.MID,
+        Mobile: localobj.Mobile,
+        CallTime: "1",
+        // 新增語音和文字處理參數
+        UserInput: userText,
+        InputType: playAudio ? "voice" : "text",
+        VoiceGender: voicegender,
+        Timestamp: nowtime,
         ...extra,
       }),
     });
@@ -3779,108 +3783,46 @@ async function sendViaN8n(userText, { playAudio = false, extra = {} } = {}) {
 
   if (!res.ok) {
     showAudioError.value = true;
-    throw new Error(`webhook failed: ${res.status}`);
+    throw new Error(`API 調用失敗: ${res.status}`);
   }
 
-  // 先嘗試從 Header 取回文字（X-Answer）
+  const data = await res.json();
+  console.log("統一 API 回應:", data);
+
   let answerText = "";
-  const rawHeader = res.headers.get("x-answer");
-  if (rawHeader) {
-    try {
-      answerText = decodeURIComponent(rawHeader);
-    } catch {
-      // 後端若沒做 encodeURIComponent，就直接用原值
-      answerText = rawHeader;
-    }
+  
+  // 從 API 回應中提取回覆文字
+  if (data.Result === "OK" && data.Response) {
+    answerText = data.Response;
+  } else if (data.Result === "OK" && data.Outmessage) {
+    answerText = data.Outmessage;
+  } else if (data.Result === "OK" && data.Answer) {
+    answerText = data.Answer;
   }
 
-  const ct = (res.headers.get("content-type") || "").toLowerCase();
-
-  // 若是音訊回應
-  if (ct.includes("audio/")) {
-    const blob = await res.blob();
-    if (playAudio) {
-      const url = URL.createObjectURL(blob);
-      const audio = ensurePlayer();
-      try {
-        audio.pause();
-      } catch {}
-      revokeObjectUrl();
-      audio.src = url;
-      currentObjectUrl = url;
-
-      audio.onplay = () => {
-        isSpeaking.value = true;
-      };
-      audio.onended = () => {
-        isSpeaking.value = false;
-        revokeObjectUrl();
-      };
-      audio.onerror = () => {
-        isSpeaking.value = false;
-        showAudioError.value = true;
-        revokeObjectUrl();
-      };
-
-      try {
-        await audio.play();
-      } catch {
-        /* iOS 未互動可能失敗 */
-      }
-    }
-    // 音訊情境下，若 header 沒文字，就維持空字串，最後會交給預設備援
-  } else {
-    // 非音訊：嘗試解析 JSON / 純文字
-    let data = null;
+  // 如果啟用語音播放，使用瀏覽器 TTS
+  if (playAudio && answerText) {
     try {
-      data = await res.clone().json();
-    } catch {
-      try {
-        const txt = await res.text();
-        if (!answerText) answerText = txt || "";
-      } catch {}
-    }
-
-    if (data && !answerText) {
-      // 兼容多種欄位：bot / answer / text / message / content / output...
-      const pick = (obj) => {
-        if (!obj) return "";
-        if (typeof obj === "string") return obj;
-        const keys = ["bot", "answer", "text", "message", "content", "output"];
-        for (const k of keys) {
-          const v = obj[k];
-          if (typeof v === "string" && v.trim()) return v;
-          if (v && typeof v === "object") {
-            const inner = pick(v);
-            if (inner) return inner;
-          }
-        }
-        return "";
-      };
-      answerText = pick(data);
-    }
-  }
-
-  //寫入np資料庫
-  if (localobj) {
-    try {
-      res = await fetch(TEXT_MESSAGE_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          Key: "qrt897hpmd",
-          MID: localobj.MID,
-          Mobile: localobj.Mobile,
-          Type: "P",
-          Inmessage: userText,
-          Outmessage: answerText,
-          Inputtime: nowtime,
-          Outputtime: new Date().toISOString(),
-        }),
-      });
+      speakText(answerText);
     } catch (e) {
-      console.error("保存聊天記錄失敗:", e);
+      console.error("語音播放失敗:", e);
     }
+  }
+
+  // 保存對話記錄到本地
+  if (answerText) {
+    const newConversation = {
+      id: Date.now(),
+      ts: Date.now(),
+      user: userText,
+      bot: answerText,
+      timestamp: new Date().toLocaleString("zh-TW"),
+      dateKey: toDateKey(new Date()),
+    };
+    
+    conversations.value.push(newConversation);
+    latestResponse.value = answerText;
+    saveConversations();
   }
 
   return (
@@ -3889,69 +3831,6 @@ async function sendViaN8n(userText, { playAudio = false, extra = {} } = {}) {
   );
 }
 
-/** 一次呼叫 n8n，取得回覆文字（X-Answer header）+ 取得音檔 Blob 並播放 */
-async function fetchTTSAndPlayAndReturnText(userText, extra = {}) {
-  let res;
-  try {
-    res = await fetch(TTS_WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chatInput: userText, // 你要給 n8n 的輸入
-        sessionId: UUID,
-        voicegender: voicegender,
-        timestamp: new Date().toISOString(),
-        pitch_semitones: 1.5,
-      }),
-    });
-  } catch (e) {
-    showAudioError.value = true;
-    throw e;
-  }
-
-  if (!res.ok) {
-    showAudioError.value = true;
-    throw new Error(`TTS webhook failed: ${res.status}`);
-  }
-
-  // 1) 拿回覆文字（在 X-Answer）
-  const headerText = res.headers.get("x-answer") || "";
-  const answerText = decodeURIComponent(headerText);
-
-  // 2) 讀音檔並播放
-  const blob = await res.blob(); // audio/wav
-  const url = URL.createObjectURL(blob);
-  const audio = ensurePlayer();
-  try {
-    audio.pause();
-  } catch {}
-  revokeObjectUrl();
-  audio.src = url;
-  currentObjectUrl = url;
-
-  audio.onplay = () => {
-    isSpeaking.value = true;
-  };
-  audio.onended = () => {
-    isSpeaking.value = false;
-    revokeObjectUrl();
-  };
-  audio.onerror = () => {
-    isSpeaking.value = false;
-    showAudioError.value = true;
-    revokeObjectUrl();
-  };
-
-  try {
-    await audio.play();
-  } catch (e) {
-    // iOS 需要使用者手勢觸發
-    showAudioError.value = true;
-    throw e;
-  }
-
-  return answerText;
-}
 
 // 開始/停止語音識別
 const toggleListening = () => {
@@ -3999,23 +3878,9 @@ const handleSpeechEnd = async (transcript) => {
   currentTranscript.value = "";
 
   try {
-    // 一次拿回覆 + 播音檔
-    const botResponse = await sendViaN8n(transcript, { playAudio: true });
-    console.log("botResponse", botResponse);
-    const nowTs = Date.now();
-    const newConversation = {
-      id: nowTs,
-      ts: nowTs,
-      user: transcript,
-      bot: botResponse || "（親愛的:您的問題我目前沒辦法回答）",
-      timestamp: new Date().toLocaleString("zh-TW"),
-      dateKey: toDateKey(new Date(nowTs)),
-    };
-    console.log("newConversation", newConversation);
-
-    conversations.value.push(newConversation);
-    latestResponse.value = botResponse || "（親愛的:您的問題我目前沒辦法回答）";
-    saveConversations();
+    // 使用統一 API 處理語音輸入
+    const botResponse = await sendViaUnifiedAPI(transcript, { playAudio: true });
+    console.log("語音處理完成，botResponse:", botResponse);
 
     // 如果當前在歷史記錄頁面，確保新訊息可見
     if (showHistoryPage.value) {
@@ -4027,7 +3892,7 @@ const handleSpeechEnd = async (transcript) => {
       });
     }
 
-    console.log("語音輸入處理完成:", newConversation);
+    console.log("語音輸入處理完成");
   } catch (error) {
     console.error("API 調用錯誤:", error);
     const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
@@ -4250,8 +4115,8 @@ async function handleManualInput() {
   }
 
   try {
-    const botResponse = await sendViaN8n(input, { playAudio: false });
-    console.log(botResponse);
+    const botResponse = await sendViaUnifiedAPI(input, { playAudio: false });
+    console.log("文字處理完成，botResponse:", botResponse);
 
     // 更新聊天記錄中的 bot 回覆
     const messageIndex = conversations.value.findIndex(
