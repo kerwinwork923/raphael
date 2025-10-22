@@ -6,14 +6,30 @@
     <div class="filter-section">
       <div class="filter-buttons">
         <button class="filter-btn" @click="showYearPicker = !showYearPicker">
-          <img src="/assets/imgs/filter.svg" alt="篩選" class="filter-icon" />
+          <img
+            src="/assets/imgs/filter_green.svg"
+            alt="篩選"
+            class="filter-icon"
+          />
           {{ selectedYear }}
-          <!-- <img src="/assets/imgs/chevron-down.svg" alt="下拉" class="chevron-icon" /> -->
+          <img
+            src="/assets/imgs/arrowDown2.svg"
+            alt="下拉"
+            class="chevron-icon"
+          />
         </button>
         <button class="filter-btn" @click="showMonthPicker = !showMonthPicker">
-          <img src="/assets/imgs/filter.svg" alt="篩選" class="filter-icon" />
+          <img
+            src="/assets/imgs/filter_green.svg"
+            alt="篩選"
+            class="filter-icon"
+          />
           {{ selectedMonth }}
-          <!-- <img src="/assets/imgs/chevron-down.svg" alt="下拉" class="chevron-icon" /> -->
+          <img
+            src="/assets/imgs/arrowDown2.svg"
+            alt="下拉"
+            class="chevron-icon"
+          />
         </button>
       </div>
     </div>
@@ -28,7 +44,9 @@
         :class="{ expanded: expandedItems.includes(log.id) }"
       >
         <div class="log-header" @click="toggleExpand(log.id)">
-          <div class="log-date">{{ formatDate(log.date || log.timestamp) }}</div>
+          <div class="log-date">
+            {{ formatDate(log.date || log.timestamp) }}
+          </div>
           <div class="log-preview" v-if="!expandedItems.includes(log.id)">
             {{
               log.content.length > 20
@@ -40,11 +58,7 @@
             {{ log.content }}
           </div>
           <img
-            :src="
-              expandedItems.includes(log.id)
-                ? '/assets/imgs/robot/chevron-up.svg'
-                : '/assets/imgs/robot/chevron-up.svg'
-            "
+            src="/assets/imgs/arrowDown2.svg"
             alt="展開/收合"
             class="expand-icon"
             :class="{ rotated: expandedItems.includes(log.id) }"
@@ -158,19 +172,37 @@ const availableMonths = [
 
 // 篩選後的日誌
 const filteredLogs = computed(() => {
-  if (!healthLogs.value.length) return [];
+  if (!healthLogs.value.length) {
+    console.log("沒有健康日誌資料");
+    return [];
+  }
 
   const year = selectedYear.value;
   const month =
     availableMonths.find((m) => m.label === selectedMonth.value)?.value || 1;
 
-  return healthLogs.value
+  console.log(`篩選條件: ${year}年${month}月`);
+
+  const filtered = healthLogs.value
     .filter((log) => {
       // 使用 log.date 或 log.timestamp 作為日期來源
       const logDate = new Date(log.date || log.timestamp);
-      return logDate.getFullYear() === year && logDate.getMonth() + 1 === month;
+      const logYear = logDate.getFullYear();
+      const logMonth = logDate.getMonth() + 1;
+
+      console.log(
+        `檢查日誌: ${logDate.toISOString()}, 年份: ${logYear}, 月份: ${logMonth}`
+      );
+
+      return logYear === year && logMonth === month;
     })
-    .sort((a, b) => new Date(b.date || b.timestamp) - new Date(a.date || a.timestamp));
+    .sort(
+      (a, b) =>
+        new Date(b.date || b.timestamp) - new Date(a.date || a.timestamp)
+    );
+
+  console.log(`篩選結果: ${filtered.length} 筆`);
+  return filtered;
 });
 
 // 方法
@@ -178,11 +210,18 @@ const loadHealthLogs = () => {
   try {
     const stored = localStorage.getItem("healthLog");
     console.log("從 localStorage 讀取的資料:", stored);
-    
+
     if (stored) {
       healthLogs.value = JSON.parse(stored);
       console.log("解析後的健康日誌:", healthLogs.value);
       console.log("健康日誌總數:", healthLogs.value.length);
+
+      // 檢查資料格式
+      if (healthLogs.value.length > 0) {
+        console.log("第一筆資料格式:", healthLogs.value[0]);
+        console.log("第一筆資料的 date:", healthLogs.value[0].date);
+        console.log("第一筆資料的 timestamp:", healthLogs.value[0].timestamp);
+      }
     } else {
       console.log("localStorage 中沒有健康日誌資料");
       healthLogs.value = [];
@@ -233,9 +272,8 @@ onMounted(() => {
   @include gradientBg();
   width: 100%;
   min-height: 100vh;
-  padding: 16px 0 84px 0;
+  padding: 16px 0 104px 0;
   position: relative;
-
 }
 
 .filter-section {
@@ -254,15 +292,22 @@ onMounted(() => {
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    padding: 0.5rem 0.75rem;
+
+    border-radius: var(--Radius-r-50, 50px);
     background: var(--Secondary-100, #f5f7fa);
+    box-shadow: 2px 4px 12px 0
+      var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
     border: none;
-    border-radius: 20px;
-    color: var(--Neutral-700, #4a5568);
-    font-size: 14px;
-    font-weight: 500;
+    cursor: pointer;
+    color: var(--neutral-500-opacity-70, rgba(102, 102, 102, 0.7));
+    text-overflow: ellipsis;
+    font-size: var(--Text-font-size-18, 18px);
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 2.7px;
     cursor: pointer;
     transition: all 0.2s ease;
+    padding: 10px 12px !important;
     @include neumorphismOuter(
       $bgColor: var(--Secondary-100, #f5f7fa),
       $radius: 20px,
@@ -276,13 +321,13 @@ onMounted(() => {
     }
 
     .filter-icon {
-      width: 12px;
-      height: 12px;
+      width: 16px;
+      height: 16px;
     }
 
     .chevron-icon {
-      width: 8px;
-      height: 8px;
+      width: 16px;
+      height: 16px;
     }
   }
 }
@@ -293,8 +338,10 @@ onMounted(() => {
   font-size: var(--Text-font-size-18, 18px);
   font-style: normal;
   font-weight: 400;
+
   letter-spacing: 0.072px;
-  padding: 0 1rem;
+  padding-right: 1.25rem;
+  margin-bottom: 0.75rem;
 }
 
 .log-list {
@@ -380,17 +427,19 @@ onMounted(() => {
   min-height: 60vh;
   padding: 2rem;
   width: 100%;
+  max-width: 100%;
 }
 
 .empty-card {
   background: var(--Neutral-white, #fff);
   border-radius: 20px;
   padding: 3rem 2rem;
- text-align: right;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  text-align: center;
   @include neumorphismOuter(
-    $bgColor: var(--Neutral-white, #fff),
+    $bgColor: var(--Neutral-white, #2f1d1d),
     $radius: 20px,
     $x: 0,
     $y: 4px,
@@ -401,8 +450,6 @@ onMounted(() => {
     margin-bottom: 1.5rem;
 
     .character-img {
-      width: 120px;
-      height: 120px;
       object-fit: contain;
     }
   }
