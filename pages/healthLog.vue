@@ -1,138 +1,144 @@
 <template>
   <div class="healthLogWrap">
-    <TitleMenu Text="健康日誌" positionType="absolute" link="/robot" />
-
-    <!-- 篩選器區域 -->
-    <div class="filter-section">
-      <div class="filter-buttons">
-        <button class="filter-btn" @click="showYearPicker = !showYearPicker">
-          <img
-            src="/assets/imgs/filter_green.svg"
-            alt="篩選"
-            class="filter-icon"
-          />
-          {{ selectedYear }}
-          <img
-            src="/assets/imgs/arrowDown2.svg"
-            alt="下拉"
-            class="chevron-icon"
-          />
-        </button>
-        <button class="filter-btn" @click="showMonthPicker = !showMonthPicker">
-          <img
-            src="/assets/imgs/filter_green.svg"
-            alt="篩選"
-            class="filter-icon"
-          />
-          {{ selectedMonth }}
-          <img
-            src="/assets/imgs/arrowDown2.svg"
-            alt="下拉"
-            class="chevron-icon"
-          />
-        </button>
+    <div class="healthLogContent">
+      <TitleMenu Text="健康日誌" positionType="absolute" link="/robot" />
+      <!-- 篩選器區域 -->
+      <div class="filter-section">
+        <div class="filter-buttons">
+          <button class="filter-btn" @click="showYearPicker = !showYearPicker">
+            <img
+              src="/assets/imgs/filter_green.svg"
+              alt="篩選"
+              class="filter-icon"
+            />
+            {{ selectedYear }}
+            <img
+              src="/assets/imgs/arrowDown2.svg"
+              alt="下拉"
+              class="chevron-icon"
+            />
+          </button>
+          <button
+            class="filter-btn"
+            @click="showMonthPicker = !showMonthPicker"
+          >
+            <img
+              src="/assets/imgs/filter_green.svg"
+              alt="篩選"
+              class="filter-icon"
+            />
+            {{ selectedMonth }}
+            <img
+              src="/assets/imgs/arrowDown2.svg"
+              alt="下拉"
+              class="chevron-icon"
+            />
+          </button>
+        </div>
       </div>
-    </div>
-    <div class="total-count">總共 {{ filteredLogs.length }} 筆</div>
+      <div class="total-count">總共 {{ filteredLogs.length }} 筆</div>
 
-    <!-- 日誌列表 -->
-    <div class="log-list" v-if="filteredLogs.length > 0">
+      <!-- 日誌列表 -->
+      <div class="log-list" v-if="filteredLogs.length > 0">
+        <div
+          class="log-item"
+          v-for="log in filteredLogs"
+          :key="log.id"
+          :class="{ expanded: expandedItems.includes(log.id) }"
+        >
+          <div class="log-header" @click="toggleExpand(log.id)">
+            <div class="log-date">
+              {{ formatDate(log.date || log.timestamp) }}
+            </div>
+            <div class="log-preview" v-if="!expandedItems.includes(log.id)">
+              {{
+                log.content.length > 30
+                  ? log.content.substring(0, 30) + "..."
+                  : log.content
+              }}
+            </div>
+            <div class="log-content" v-else>
+              {{ log.content }}
+            </div>
+            <img
+              src="/assets/imgs/arrowDown2.svg"
+              alt="展開/收合"
+              class="expand-icon"
+              :class="{ rotated: expandedItems.includes(log.id) }"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- 空狀態 -->
+      <div class="empty-state" v-else>
+        <div class="empty-card">
+          <div class="empty-character">
+            <img
+              src="/assets/imgs/robotSad.png"
+              alt="空狀態角色"
+              class="character-img"
+            />
+          </div>
+          <div class="empty-message">目前沒有資料</div>
+        </div>
+      </div>
+
+      <!-- 年份選擇器 -->
       <div
-        class="log-item"
-        v-for="log in filteredLogs"
-        :key="log.id"
-        :class="{ expanded: expandedItems.includes(log.id) }"
+        class="picker-overlay"
+        v-if="showYearPicker"
+        @click="showYearPicker = false"
       >
-        <div class="log-header" @click="toggleExpand(log.id)">
-          <div class="log-date">
-            {{ formatDate(log.date || log.timestamp) }}
+        <div class="picker-modal" @click.stop>
+          <div class="picker-header">
+            <h3>選擇年份</h3>
+            <button @click="showYearPicker = false" class="close-btn">×</button>
           </div>
-          <div class="log-preview" v-if="!expandedItems.includes(log.id)">
-            {{
-              log.content.length > 20
-                ? log.content.substring(0, 20) + "..."
-                : log.content
-            }}
+          <div class="picker-content">
+            <button
+              v-for="year in availableYears"
+              :key="year"
+              class="picker-item"
+              :class="{ active: selectedYear === year }"
+              @click="selectYear(year)"
+            >
+              {{ year }}
+            </button>
           </div>
-          <div class="log-content" v-else>
-            {{ log.content }}
+        </div>
+      </div>
+
+      <!-- 月份選擇器 -->
+      <div
+        class="picker-overlay"
+        v-if="showMonthPicker"
+        @click="showMonthPicker = false"
+      >
+        <div class="picker-modal" @click.stop>
+          <div class="picker-header">
+            <h3>選擇月份</h3>
+            <button @click="showMonthPicker = false" class="close-btn">
+              ×
+            </button>
           </div>
-          <img
-            src="/assets/imgs/arrowDown2.svg"
-            alt="展開/收合"
-            class="expand-icon"
-            :class="{ rotated: expandedItems.includes(log.id) }"
-          />
+          <div class="picker-content">
+            <button
+              v-for="month in availableMonths"
+              :key="month.value"
+              class="picker-item"
+              :class="{ active: selectedMonth === month.label }"
+              @click="selectMonth(month.value)"
+            >
+              {{ month.label }}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- 空狀態 -->
-    <div class="empty-state" v-else>
-      <div class="empty-card">
-        <div class="empty-character">
-          <img
-            src="/assets/imgs/robotSad.png"
-            alt="空狀態角色"
-            class="character-img"
-          />
-        </div>
-        <div class="empty-message">目前沒有資料</div>
-      </div>
+      <!-- 底部導航 -->
+      <BottomNav />
     </div>
-
-    <!-- 年份選擇器 -->
-    <div
-      class="picker-overlay"
-      v-if="showYearPicker"
-      @click="showYearPicker = false"
-    >
-      <div class="picker-modal" @click.stop>
-        <div class="picker-header">
-          <h3>選擇年份</h3>
-          <button @click="showYearPicker = false" class="close-btn">×</button>
-        </div>
-        <div class="picker-content">
-          <button
-            v-for="year in availableYears"
-            :key="year"
-            class="picker-item"
-            :class="{ active: selectedYear === year }"
-            @click="selectYear(year)"
-          >
-            {{ year }}
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 月份選擇器 -->
-    <div
-      class="picker-overlay"
-      v-if="showMonthPicker"
-      @click="showMonthPicker = false"
-    >
-      <div class="picker-modal" @click.stop>
-        <div class="picker-header">
-          <h3>選擇月份</h3>
-          <button @click="showMonthPicker = false" class="close-btn">×</button>
-        </div>
-        <div class="picker-content">
-          <button
-            v-for="month in availableMonths"
-            :key="month.value"
-            class="picker-item"
-            :class="{ active: selectedMonth === month.label }"
-            @click="selectMonth(month.value)"
-          >
-            {{ month.label }}
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 底部導航 -->
-    <BottomNav />
   </div>
 </template>
 
@@ -151,28 +157,26 @@ const healthLogs = ref([]);
 
 // 可用年份和月份
 const availableYears = computed(() => {
-  const startYear = 2025
-  const currentYear = new Date().getFullYear()
+  const startYear = 2025;
+  const currentYear = new Date().getFullYear();
   return Array.from(
     { length: currentYear - startYear + 1 },
     (_, i) => startYear + i
-  ).reverse() // 若要最新年份排最上面
-})
-
+  ).reverse(); // 若要最新年份排最上面
+});
 
 const availableMonths = computed(() => {
-  const currentYear = new Date().getFullYear()
-  const currentMonth = new Date().getMonth() + 1
-  const isCurrentYear = selectedYear.value === currentYear
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth() + 1;
+  const isCurrentYear = selectedYear.value === currentYear;
 
-  const maxMonth = isCurrentYear ? currentMonth : 12
+  const maxMonth = isCurrentYear ? currentMonth : 12;
 
   return Array.from({ length: maxMonth }, (_, i) => ({
     value: i + 1,
-    label: `${i + 1}月`
-  }))
-})
-
+    label: `${i + 1}月`,
+  }));
+});
 
 // 篩選後的日誌
 const filteredLogs = computed(() => {
@@ -183,8 +187,8 @@ const filteredLogs = computed(() => {
 
   const year = selectedYear.value;
   const month =
-  availableMonths.value.find((m) => m.label === selectedMonth.value)?.value || 1;
-
+    availableMonths.value.find((m) => m.label === selectedMonth.value)?.value ||
+    1;
 
   console.log(`篩選條件: ${year}年${month}月`);
 
@@ -257,7 +261,6 @@ const selectMonth = (month) => {
   showMonthPicker.value = false;
 };
 
-
 const formatDate = (timestamp) => {
   const date = new Date(timestamp);
   const month = date.getMonth() + 1;
@@ -280,6 +283,10 @@ onMounted(() => {
   min-height: 100vh;
   padding: 16px 0 104px 0;
   position: relative;
+  .healthLogContent {
+    max-width: 768px;
+    margin: 0 auto;
+  }
 }
 
 .filter-section {
@@ -558,7 +565,7 @@ onMounted(() => {
     }
 
     &.active {
-      background: #74BC1F;
+      background: #74bc1f;
       color: #fff;
       font-weight: 600;
     }
