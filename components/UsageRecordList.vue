@@ -227,7 +227,11 @@ onUnmounted(() => {
     display: flex;
     flex-direction: column;
     gap: 16px;
-    margin-bottom: 16px;
+    padding: 16px 0;
+    position: sticky;
+    top: 0;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(4px);
 
     .section-title {
       font-size: 20px;
@@ -340,7 +344,7 @@ onUnmounted(() => {
         display: grid;
         grid-template-columns: 1fr var(--time-col-width) var(--time-col-width);
         align-items: center;
-        gap:0.5rem;
+        gap: 0.5rem;
       }
 
       .record-header {
