@@ -151,24 +151,28 @@ const healthLogs = ref([]);
 
 // 可用年份和月份
 const availableYears = computed(() => {
-  const currentYear = new Date().getFullYear();
-  return Array.from({ length: 5 }, (_, i) => currentYear - i);
-});
+  const startYear = 2025
+  const currentYear = new Date().getFullYear()
+  return Array.from(
+    { length: currentYear - startYear + 1 },
+    (_, i) => startYear + i
+  ).reverse() // 若要最新年份排最上面
+})
 
-const availableMonths = [
-  { value: 1, label: "1月" },
-  { value: 2, label: "2月" },
-  { value: 3, label: "3月" },
-  { value: 4, label: "4月" },
-  { value: 5, label: "5月" },
-  { value: 6, label: "6月" },
-  { value: 7, label: "7月" },
-  { value: 8, label: "8月" },
-  { value: 9, label: "9月" },
-  { value: 10, label: "10月" },
-  { value: 11, label: "11月" },
-  { value: 12, label: "12月" },
-];
+
+const availableMonths = computed(() => {
+  const currentYear = new Date().getFullYear()
+  const currentMonth = new Date().getMonth() + 1
+  const isCurrentYear = selectedYear.value === currentYear
+
+  const maxMonth = isCurrentYear ? currentMonth : 12
+
+  return Array.from({ length: maxMonth }, (_, i) => ({
+    value: i + 1,
+    label: `${i + 1}月`
+  }))
+})
+
 
 // 篩選後的日誌
 const filteredLogs = computed(() => {
@@ -179,7 +183,8 @@ const filteredLogs = computed(() => {
 
   const year = selectedYear.value;
   const month =
-    availableMonths.find((m) => m.label === selectedMonth.value)?.value || 1;
+  availableMonths.value.find((m) => m.label === selectedMonth.value)?.value || 1;
+
 
   console.log(`篩選條件: ${year}年${month}月`);
 
@@ -248,9 +253,10 @@ const selectYear = (year) => {
 
 const selectMonth = (month) => {
   selectedMonth.value =
-    availableMonths.find((m) => m.value === month)?.label || "1月";
+    availableMonths.value.find((m) => m.value === month)?.label || "1月";
   showMonthPicker.value = false;
 };
+
 
 const formatDate = (timestamp) => {
   const date = new Date(timestamp);
@@ -385,25 +391,32 @@ onMounted(() => {
   }
 
   .log-date {
-    color: var(--Neutral-700, #4a5568);
-    font-size: 14px;
-    font-weight: 600;
+    color: var(--Neutral-black, #1e1e1e);
+    font-size: var(--Text-font-size-20, 20px);
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: 0.1px;
     margin-bottom: 0.5rem;
   }
 
   .log-preview {
-    color: var(--Neutral-600, #666);
-    font-size: 14px;
-    line-height: 1.4;
+    color: var(--Neutral-500, #666);
+    font-size: var(--Text-font-size-18, 18px);
+    font-style: normal;
+    font-weight: 400;
+    line-height: 120%;
+    letter-spacing: 0.072px;
     margin-bottom: 0.5rem;
   }
 
   .log-content {
-    color: var(--Neutral-700, #4a5568);
-    font-size: 14px;
-    line-height: 1.6;
+    color: var(--Neutral-500, #666);
+    font-size: var(--Text-font-size-18, 18px);
+    font-style: normal;
+    font-weight: 400;
+    line-height: 120%;
+    letter-spacing: 0.072px;
     margin-bottom: 0.5rem;
-    display: none;
   }
 
   .expand-icon {
@@ -545,8 +558,8 @@ onMounted(() => {
     }
 
     &.active {
-      background: var(--Primary-100, #e8f5e8);
-      color: var(--Primary-700, #2d5a2d);
+      background: #74BC1F;
+      color: #fff;
       font-weight: 600;
     }
   }
