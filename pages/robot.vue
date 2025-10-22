@@ -2650,7 +2650,7 @@ import sendSvg from "~/assets/imgs/robot/send.svg";
 // ====== 參考 robot1021.vue 的 n8n API 方式 ======
 const TEXT_WEBHOOK_URL = "https://aiwisebalance.com/webhook/Textchat"; // ← n8n 文字端點
 const TEXT_MESSAGE_URL = "https://23700999.com:8081/HMA/TTEsaveChatMessageHistory.jsp"; // ← 儲存聊天記錄
-const GET_CHAT_HISTORY_URL = "https://23700999.com:8081/HMA/TTEgetChatMessageHistoryList.jsp"; // ← 獲取聊天記錄
+const GET_CHAT_HISTORY_URL = "https://23700999.com:8081/HMA/api/fr/frGetLineAIHuman"; // ← 獲取聊天記錄
 const voicegender = "female";
 const historyInputRef = ref(null);
 
@@ -2689,6 +2689,10 @@ const showSummaryMode = ref(false);
 const currentSummary = ref("");
 const showCustomerServiceModal = ref(false);
 const pendingInput = ref(""); // 儲存待處理的輸入
+
+// 定時器相關狀態
+const apiPollingInterval = ref(null); // API 輪詢定時器
+const isPollingActive = ref(false); // 是否正在輪詢
 
 // 歷史資料相關狀態
 const isLoadingOlderMessages = ref(false);
@@ -4416,9 +4420,83 @@ const handleCustomerService = async (contactService = false) => {
   showCustomerServiceModal.value = false;
 
   if (contactService) {
-    // 跳轉到客服頁面
-    console.log("用戶選擇聯繫客服，跳轉到客服頁面");
-    await navigateTo("/CSRobot");
+    // 直接打 frSendLineText API
+    console.log("用戶選擇聯繫客服，調用 frSendLineText API");
+    
+    try {
+      isLoading.value = true;
+      
+      // 調用 frSendLineText API
+      const response = await fetch("https://23700999.com:8081/HMA/api/fr/frSendLineText", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          MID: localobj.MID,
+          Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
+          MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
+          Mobile: localobj.Mobile,
+          Content: "呼叫客服",
+          Lang: "zhtw"
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`frSendLineText API 調用失敗: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("frSendLineText API 回應:", data);
+
+      // 顯示客服聯繫成功訊息
+      const successMessage = "已為您聯繫客服，請稍候客服人員的回覆。";
+      
+      // 保存對話記錄
+      const nowTs = Date.now();
+      const newConversation = {
+        id: nowTs,
+        ts: nowTs,
+        user: pendingInput.value || "聯繫客服",
+        bot: successMessage,
+        timestamp: new Date().toLocaleString("zh-TW"),
+        dateKey: toDateKey(new Date(nowTs)),
+      };
+
+      conversations.value.push(newConversation);
+      latestResponse.value = successMessage;
+      saveConversations();
+
+      // 清空待處理輸入
+      pendingInput.value = "";
+
+      // 如果當前在歷史記錄頁面，確保新訊息可見
+      if (showHistoryPage.value) {
+        currentPage.value = 1;
+        nextTick(() => {
+          setTimeout(() => {
+            scrollToBottom();
+          }, 100);
+        });
+      }
+      
+      console.log("客服聯繫完成");
+    } catch (error) {
+      console.error("客服聯繫失敗:", error);
+      const errorResponse = "抱歉，客服聯繫暫時無法使用，請稍後再試。";
+      const errorConversation = {
+        id: Date.now(),
+        user: pendingInput.value || "聯繫客服",
+        bot: errorResponse,
+        timestamp: new Date().toLocaleString("zh-TW"),
+        dateKey: toDateKey(new Date()),
+      };
+      conversations.value.push(errorConversation);
+      latestResponse.value = errorResponse;
+      saveConversations();
+    } finally {
+      isLoading.value = false;
+    }
   } else {
     // 選擇「否」，繼續AI分析
     console.log("用戶選擇繼續AI分析，發送原始輸入到AI");
@@ -4478,8 +4556,35 @@ const handleCustomerService = async (contactService = false) => {
   }
 };
 
+// 啟動 API 輪詢
+const startApiPolling = () => {
+  if (apiPollingInterval.value) {
+    clearInterval(apiPollingInterval.value);
+  }
+  
+  isPollingActive.value = true;
+  console.log("啟動 API 輪詢，每15秒檢查一次新訊息");
+  
+  apiPollingInterval.value = setInterval(async () => {
+    if (isPollingActive.value) {
+      console.log("執行定期 API 檢查...");
+      await fetchChatHistory(true); // 傳遞 isPolling = true
+    }
+  }, 60000); // 先改為1分鐘
+};
+
+// 停止 API 輪詢
+const stopApiPolling = () => {
+  if (apiPollingInterval.value) {
+    clearInterval(apiPollingInterval.value);
+    apiPollingInterval.value = null;
+  }
+  isPollingActive.value = false;
+  console.log("停止 API 輪詢");
+};
+
 // 獲取聊天記錄 (TTE API)
-const fetchChatHistory = async () => {
+const fetchChatHistory = async (isPolling = false) => {
   if (!localobj) {
     console.error("用戶資料不存在");
     return;
@@ -4490,10 +4595,11 @@ const fetchChatHistory = async () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        Key: "qrt897hpmd",
         MID: localobj.MID,
+        Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
+        MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
         Mobile: localobj.Mobile,
-        CallTime: "1",
+        Lang: "zhtw"
       }),
     });
 
@@ -4502,49 +4608,81 @@ const fetchChatHistory = async () => {
     }
 
     const data = await response.json();
-    console.log("獲取到的聊天記錄:", data);
+    
+    if (isPolling) {
+      console.log("輪詢檢查新訊息...");
+    } else {
+      console.log("獲取到的聊天記錄:", data);
+    }
 
     if (
       data.Result === "OK" &&
-      data.ChatMessage &&
-      Array.isArray(data.ChatMessage)
+      data.LineList &&
+      Array.isArray(data.LineList)
     ) {
-      // 過濾掉空記錄（沒有 Inputtime 或 Inmessage 的記錄）
-      const validMessages = data.ChatMessage.filter(msg => 
-        msg.Inputtime && 
-        msg.Inputtime.trim() !== "" && 
-        (msg.Inmessage || msg.Outmessage) // 至少要有輸入或輸出訊息
+      // 過濾掉空記錄（沒有 CheckTime 或 Content 的記錄）
+      const validMessages = data.LineList.filter(msg => 
+        msg.CheckTime && 
+        msg.CheckTime.trim() !== "" && 
+        msg.Content && 
+        msg.Content.trim() !== ""
       );
 
-      console.log(`原始記錄數: ${data.ChatMessage.length}, 有效記錄數: ${validMessages.length}`);
+      if (isPolling) {
+        console.log(`輪詢檢查: 原始記錄數: ${data.LineList.length}, 有效記錄數: ${validMessages.length}`);
+      } else {
+        console.log(`原始記錄數: ${data.LineList.length}, 有效記錄數: ${validMessages.length}`);
+      }
 
       // 轉換 API 資料格式為本地格式
       const convertedMessages = validMessages.map((msg, index) => {
-        const inputTime = new Date(msg.Inputtime);
-        const outputTime = new Date(msg.Outputtime);
+        const checkTime = new Date(msg.CheckTime);
 
-        console.log(`處理訊息 ${index}:`, {
-          Inputtime: msg.Inputtime,
-          parsedDate: inputTime,
-          dateKey: toDateKey(inputTime),
-        });
+        if (!isPolling) {
+          console.log(`處理訊息 ${index}:`, {
+            CheckTime: msg.CheckTime,
+            parsedDate: checkTime,
+            Mode: msg.Mode,
+            AHType: msg.AHType,
+            Content: msg.Content,
+            dateKey: toDateKey(checkTime),
+          });
+        }
+
+        // 根據 Mode 和 AHType 判斷是用戶還是 AI
+        const isUser = msg.Mode === "Input" || msg.AHType === "Human";
+        const isBot = msg.Mode === "Output" || msg.AHType === "AI";
 
         return {
           id: Date.now() + index, // 生成唯一 ID
-          ts: inputTime.getTime(),
-          user: msg.Inmessage || "",
-          bot: msg.Outmessage || "",
-          timestamp: inputTime.toLocaleString("zh-TW"),
-          dateKey: toDateKey(inputTime),
+          ts: checkTime.getTime(),
+          user: isUser ? msg.Content : "",
+          bot: isBot ? msg.Content : "",
+          timestamp: checkTime.toLocaleString("zh-TW"),
+          dateKey: toDateKey(checkTime),
         };
       });
 
       // 按時間排序（舊到新）
       convertedMessages.sort((a, b) => a.ts - b.ts);
 
+      // 檢查是否有新訊息
+      const hasNewMessages = isPolling && conversations.value.length !== convertedMessages.length;
+      
+      if (hasNewMessages) {
+        console.log(`發現新訊息！從 ${conversations.value.length} 條增加到 ${convertedMessages.length} 條`);
+        
+        // 滾動到底部顯示新訊息
+        nextTick(() => {
+          setTimeout(() => {
+            scrollToBottom();
+          }, 100);
+        });
+      }
+
       // 清空並填入 knownKeys
       knownKeys.clear();
-      for (const msg of data.ChatMessage) {
+      for (const msg of data.LineList) {
         knownKeys.add(makeStableKey(msg));
       }
 
@@ -4559,7 +4697,9 @@ const fetchChatHistory = async () => {
       // 更新日曆數據
       loadCalendarDates();
 
-      console.log("聊天記錄載入完成:", convertedMessages);
+      if (!isPolling) {
+        console.log("聊天記錄載入完成:", convertedMessages);
+      }
     }
   } catch (error) {
     console.error("獲取聊天記錄失敗:", error);
@@ -4578,10 +4718,11 @@ const fetchOlderChatHistory = async () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        Key: "qrt897hpmd",
         MID: localobj.MID,
+        Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
+        MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
         Mobile: localobj.Mobile,
-        CallTime: callTime.value.toString(),
+        Lang: "zhtw"
       }),
     });
 
@@ -4590,33 +4731,39 @@ const fetchOlderChatHistory = async () => {
     }
 
     const data = await response.json();
-    console.log(`獲取到的更舊聊天記錄 (CallTime: ${callTime.value}):`, data);
+    console.log(`獲取到的更舊聊天記錄:`, data);
 
-    if (!(data?.Result === "OK" && Array.isArray(data.ChatMessage))) {
+    if (!(data?.Result === "OK" && Array.isArray(data.LineList))) {
       return 0;
     }
 
     // 過濾掉空記錄
-    const validMessages = data.ChatMessage.filter(msg => 
-      msg.Inputtime && 
-      msg.Inputtime.trim() !== "" && 
-      (msg.Inmessage || msg.Outmessage)
+    const validMessages = data.LineList.filter(msg => 
+      msg.CheckTime && 
+      msg.CheckTime.trim() !== "" && 
+      msg.Content && 
+      msg.Content.trim() !== ""
     );
 
-    console.log(`更舊記錄 - 原始: ${data.ChatMessage.length}, 有效: ${validMessages.length}`);
+    console.log(`更舊記錄 - 原始: ${data.LineList.length}, 有效: ${validMessages.length}`);
 
     // 轉換 & 產生穩定鍵
     const incoming = validMessages.map((msg) => {
-      const inputTime = new Date(msg.Inputtime);
+      const checkTime = new Date(msg.CheckTime);
       const key = makeStableKey(msg);
+      
+      // 根據 Mode 和 AHType 判斷是用戶還是 AI
+      const isUser = msg.Mode === "Input" || msg.AHType === "Human";
+      const isBot = msg.Mode === "Output" || msg.AHType === "AI";
+      
       return {
         stableKey: key,
         id: key, // 用穩定鍵作為 id
-        ts: inputTime.getTime(),
-        user: msg.Inmessage || "",
-        bot: msg.Outmessage || "",
-        timestamp: inputTime.toLocaleString("zh-TW"),
-        dateKey: toDateKey(inputTime),
+        ts: checkTime.getTime(),
+        user: isUser ? msg.Content : "",
+        bot: isBot ? msg.Content : "",
+        timestamp: checkTime.toLocaleString("zh-TW"),
+        dateKey: toDateKey(checkTime),
       };
     }).sort((a, b) => a.ts - b.ts);
 
@@ -4716,6 +4863,9 @@ onMounted(() => {
   // 檢查首次登入解說狀態
   checkTutorialStatus();
 
+  // 啟動 API 輪詢
+  startApiPolling();
+
   // 添加調試函數到全局
   if (process.client) {
     window.debugCalendar = () => {
@@ -4729,6 +4879,11 @@ onMounted(() => {
       console.log("分組歷史:", groupedHistory.value);
     };
   }
+});
+
+// 組件卸載時清理
+onUnmounted(() => {
+  stopApiPolling();
 });
 
 // 載入保存的角色選擇
