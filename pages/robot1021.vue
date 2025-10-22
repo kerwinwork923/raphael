@@ -61,15 +61,6 @@
         alt="AI角色"
         @click="handleCharacterClick"
       />
-      <div class="healGroup">
-  
-        <div class="healthImg" @click="goToHealthLog">
-            <img src="/assets/imgs/robot/health.svg" alt="健康" />
-          
-          </div>
-          <h5>健康日誌</h5>
-      </div>
-    
     </div>
 
     <!-- 語音控制區域 - 從下方彈出 -->
@@ -105,7 +96,6 @@
         >
           這裡可以切換成文字對話
         </div>
-
         <button
           class="control-btn mic-btn"
           :class="{ listening: isListening }"
@@ -204,49 +194,6 @@
           <button @click="closeAudioError" class="alert-button">
             我知道了
           </button>
-        </div>
-      </div>
-    </transition>
-
-    <!-- 摘要模式彈窗 -->
-    <transition name="fade">
-      <div v-if="showSummaryMode" class="summary-modal">
-        <div class="robot-content">
-          <div class="robot-sphere"></div>
-          <h3 class="robot-title">這是我幫你整理的摘要~</h3>
-          <div class="robot-text">「{{ currentSummary }}」</div>
-          <div class="robot-buttons">
-            <button @click="handleSummaryMode(false)" class="robot-btn-cancel">
-              不用
-            </button>
-            <button @click="handleSummaryMode(true)" class="robot-btn-confirm">
-              儲存摘要
-            </button>
-          </div>
-        </div>
-      </div>
-    </transition>
-
-    <!-- 客服詢問彈窗 -->
-    <transition name="fade">
-      <div v-if="showCustomerServiceModal" class="customer-service-modal">
-        <div class="robot-content">
-          <div class="robot-sphere"></div>
-          <h3 class="robot-title">您是否想要找客服呢？</h3>
-          <div class="robot-buttons">
-            <button
-              @click="handleCustomerService(false)"
-              class="robot-btn-cancel"
-            >
-              否
-            </button>
-            <button
-              @click="handleCustomerService(true)"
-              class="robot-btn-confirm"
-            >
-              是
-            </button>
-          </div>
         </div>
       </div>
     </transition>
@@ -681,7 +628,7 @@
 .chat-wrapper {
   display: flex;
   flex-direction: column;
-  align-items: center;
+      align-items: center;
   height: 100vh;
   padding-top: 1rem;
   @include gradientBg();
@@ -690,7 +637,7 @@
 /* 聊天頭部 */
 .chat-header {
   width: 100%;
-  max-width: 768px;
+  max-width:768px;
   display: flex;
   align-items: center;
   position: relative;
@@ -767,8 +714,8 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  max-width: 768px;
-  width: 100%;
+  max-width:768px;
+  width:100%;
   align-items: baseline;
   margin-top: 1rem;
   padding: 0 1rem;
@@ -837,7 +784,7 @@
   position: relative;
   display: flex;
   justify-content: center;
-  max-width: 768px;
+  max-width:768px;
   flex: 1;
   width: 100%;
   height: 0;
@@ -847,41 +794,6 @@
     height: 100%;
     object-fit: cover;
   }
-  .healGroup{
-    position: absolute;
-      right: 2.25rem;
-      top: 2.5rem;
-      transform: translate(50%, -50%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 0.15rem;
-    .healthImg{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    width: 40px;
-    height: 40px;
-    border-radius: var(--Radius-r-50, 50px);
-      background: var(--Secondary-100, #f5f7fa);
-      box-shadow: 2px 4px 12px 0
-      var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
-      padding: 0.5rem;
-      cursor: pointer;
-  
-    }
-    h5{
-      color: var(--Neutral-500, #666);
-text-align: center;
-font-size: 10px;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
-    }
-  }
-  
 }
 
 /* 語音控制欄 - 絕對定位擬態設計 */
@@ -1297,139 +1209,6 @@ line-height: normal;
   }
 }
 
-/* 共用機器人彈窗樣式 */
-.robotCommonModel {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  min-height: 375px;
-  background: rgba(245, 247, 250, 0.1);
-  backdrop-filter: blur(22px);
-  z-index: 2000; /* 確保超過文字聊天室 */
-  @include neumorphismOuter(
-    $bgColor: rgba(245, 247, 250, 0.1),
-    $radius: 50px 50px 0 0,
-    $x: 0,
-    $y: -2px,
-    $blur: 12px,
-    $color: $raphael-white
-  );
-
-  .robot-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    padding: 40px 30px;
-    max-width: 90%;
-    width: 400px;
-    text-align: center;
-
-    .robot-sphere {
-      width: 80px;
-      height: 80px;
-      margin: 0 auto;
-      background-image: url('/assets/imgs/robot/assistantSound.gif');
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: center;
-      animation: pulse-wave 2s infinite ease-in-out;
-    }
-
-    .robot-title {
-      font-size: 24px;
-      font-weight: 700;
-      color: #2d3748;
-      margin-bottom: 10px;
-    }
-
-    .robot-text {
-      font-size: 16px;
-      color: #4a5568;
-      line-height: 1.6;
-      margin-bottom: 20px;
-      padding: 15px;
-      background: rgba(255, 255, 255, 0.5);
-      border-radius: 10px;
-      border-left: 4px solid #74bc1f;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .robot-buttons {
-      display: flex;
-      gap: 15px;
-      justify-content: center;
-      flex-wrap: wrap;
-
-      .robot-btn-cancel {
-        background: #f7fafc;
-        color: #4a5568;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 25px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        min-width: 100px;
-        @include neumorphismOuter(
-          $bgColor: #f7fafc,
-          $radius: 25px,
-          $x: 2px,
-          $y: 2px,
-          $blur: 4px
-        );
-
-        &:hover {
-          background: #edf2f7;
-          transform: translateY(-1px);
-        }
-      }
-
-      .robot-btn-confirm {
-        background: linear-gradient(90deg, #74bc1f, #5a9c0f);
-        color: white;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 25px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        min-width: 100px;
-        @include neumorphismOuter(
-          $bgColor: linear-gradient(90deg, #74bc1f, #5a9c0f),
-          $radius: 25px,
-          $x: 0,
-          $y: 2px,
-          $blur: 6px
-        );
-
-        &:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(116, 188, 31, 0.3);
-        }
-      }
-    }
-  }
-}
-
-/* 摘要模式樣式 - 使用共用樣式 */
-.summary-modal {
-  @extend .robotCommonModel;
-}
-
-/* 客服詢問樣式 - 使用共用樣式 */
-.customer-service-modal {
-  @extend .robotCommonModel;
-}
-
 /* 動畫 */
 .fade-enter-active,
 .fade-leave-active {
@@ -1616,7 +1395,7 @@ line-height: normal;
     display: flex;
     flex-direction: column;
     gap: 24px;
-    max-width: 768px;
+    max-width:768px;
     flex: 1;
 
     padding-bottom: 56px;
@@ -2621,7 +2400,6 @@ line-height: normal;
 <script setup>
 import { ref, onMounted, onUnmounted, computed, nextTick } from "vue";
 import { useHead } from "#app";
-import { navigateTo } from "#app";
 import BottomNav from "~/components/BottomNav.vue";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
@@ -2647,10 +2425,13 @@ import searchSvg from "~/assets/imgs/robot/search.svg";
 import calendarSvg from "~/assets/imgs/robot/calendar.svg";
 import sendSvg from "~/assets/imgs/robot/send.svg";
 
-// ====== 參考 robot1021.vue 的 n8n API 方式 ======
-const TEXT_WEBHOOK_URL = "https://aiwisebalance.com/webhook/Textchat"; // ← n8n 文字端點
-const TEXT_MESSAGE_URL = "https://23700999.com:8081/HMA/TTEsaveChatMessageHistory.jsp"; // ← 儲存聊天記錄
-const GET_CHAT_HISTORY_URL = "https://23700999.com:8081/HMA/TTEgetChatMessageHistoryList.jsp"; // ← 獲取聊天記錄
+// ====== 新增：你的 n8n TTS webhook（需回傳 audio/wav 二進位檔）======
+const TTS_WEBHOOK_URL = "https://aiwisebalance.com/webhook/oss-gpt";
+const TEXT_WEBHOOK_URL = "https://aiwisebalance.com/webhook/Textchat"; // ← 你的「純文字」端點（若同一支就跟 TTS_URL 相同）
+const TEXT_MESSAGE_URL =
+  "https://23700999.com:8081/HMA/TTEsaveChatMessageHistory.jsp"; // ← 你的「純文字」端點（若同一支就跟 TTS_URL 相同）
+const GET_CHAT_HISTORY_URL =
+  "https://23700999.com:8081/HMA/TTEgetChatMessageHistoryList.jsp"; // ← 獲取聊天記錄的端點
 const voicegender = "female";
 const historyInputRef = ref(null);
 
@@ -2665,7 +2446,6 @@ const characterImageLoading = ref(new Set());
 const isCharacterLocked = (character) => {
   return character.locked === true;
 };
-
 
 // 響應式狀態
 const router = useRouter();
@@ -2683,20 +2463,6 @@ const showAudioError = ref(false);
 const isManuallyStopped = ref(false);
 const showHistoryPage = ref(false);
 const showVoiceError = ref(false);
-
-// 摘要模式相關狀態
-const showSummaryMode = ref(false);
-const currentSummary = ref("");
-const showCustomerServiceModal = ref(false);
-const pendingInput = ref(""); // 儲存待處理的輸入
-
-// 歷史資料相關狀態
-const isLoadingOlderMessages = ref(false);
-const hasMoreMessages = ref(true);
-const currentPage = ref(1);
-const messagesPerPage = ref(20);
-const callTime = ref(1); // CallTime 計數器，用於載入更舊的訊息
-const knownKeys = new Set(); // 用於去重的穩定鍵集合
 
 // 首次登入解說相關狀態
 const showTutorial = ref(false);
@@ -2768,10 +2534,6 @@ if (!localData) {
   router.push("/");
 }
 
-const goToHealthLog = () => {
-  router.push('/healthLog');
-}
-
 // 角色選擇相關狀態
 const showCharacterSelection = ref(false); // 顯示角色選擇彈窗
 const showComingSoon = ref(false); // 顯示近期推出彈窗
@@ -2789,11 +2551,16 @@ const historyScrollContainer = ref(null);
 const isScrolling = ref(false);
 const scrollTimeout = ref(null);
 
+const isLoadingOlderMessages = ref(false);
+const hasMoreMessages = ref(true);
+const currentPage = ref(1);
+const messagesPerPage = ref(20);
+const callTime = ref(1); // CallTime 計數器，用於載入更舊的訊息
+const knownKeys = new Set(); // 用於去重的穩定鍵集合
+
 // 生成穩定鍵用於去重
 const makeStableKey = (msg) => {
-  return `${msg.Inputtime}|${msg.Inmessage ?? ""}|${msg.Outputtime ?? ""}|${
-    msg.Outmessage ?? ""
-  }`;
+  return `${msg.Inputtime}|${msg.Inmessage ?? ''}|${msg.Outputtime ?? ''}|${msg.Outmessage ?? ''}`;
 };
 
 // 日曆相關
@@ -3198,7 +2965,7 @@ const groupedHistory = computed(() => {
     0,
     totalMessages - currentPage.value * messagesPerPage.value
   );
-  const displayedConversations = conversations.value.slice(startIndex); // ← 直接到最尾端（最新）
+  const displayedConversations = conversations.value.slice(startIndex) // ← 直接到最尾端（最新）
 
   displayedConversations.forEach((item) => {
     const date = item.dateKey || toDateKey(item.timestamp); // ← 確保有 dateKey
@@ -3337,25 +3104,24 @@ const closeTutorial = () => {
 
 const lastScrollTop = ref(0);
 
-function logScroll(e, tag = "scroll") {
+function logScroll(e, tag = 'scroll') {
   const el = e?.target || e;
   const { scrollTop, scrollHeight, clientHeight } = el;
-  const dir = scrollTop > lastScrollTop.value ? "down" : "up";
+  const dir = scrollTop > lastScrollTop.value ? 'down' : 'up';
   lastScrollTop.value = scrollTop;
 
   const atTop = scrollTop <= 0;
   const atBottom = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
 
   console.log(
-    `[${tag}] top=${Math.round(
-      scrollTop
-    )} h=${scrollHeight} c=${clientHeight} dir=${dir} top?${atTop} bottom?${atBottom}`
+    `[${tag}] top=${Math.round(scrollTop)} h=${scrollHeight} c=${clientHeight} dir=${dir} top?${atTop} bottom?${atBottom}`
   );
 }
 
+
 // 處理歷史記錄滾動事件
 const handleHistoryScroll = (e) => {
-  logScroll(e, "history");
+  logScroll(e, 'history');
   if (!historyScrollContainer.value) return;
 
   const container = historyScrollContainer.value;
@@ -3391,6 +3157,8 @@ const handleHistoryScroll = (e) => {
 
 // 載入更舊的訊息
 const loadOlderMessages = async () => {
+
+
   isLoadingOlderMessages.value = true;
 
   const container = historyScrollContainer.value;
@@ -3401,7 +3169,7 @@ const loadOlderMessages = async () => {
   try {
     // 增加 CallTime 計數器
     callTime.value++;
-
+    
     console.log(`載入更舊訊息，CallTime: ${callTime.value}`);
 
     // 調用 TTE API 獲取更舊的訊息，並取得實際新增的筆數
@@ -3728,6 +3496,156 @@ const startVoiceTimeout = () => {
   }, 3000); // 3秒超時顯示提示
 };
 
+// 獲取聊天記錄
+const fetchChatHistory = async () => {
+  if (!localobj) {
+    console.error("用戶資料不存在");
+    return;
+  }
+
+  try {
+    const response = await fetch(GET_CHAT_HISTORY_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        Key: "qrt897hpmd",
+        MID: localobj.MID,
+        Mobile: localobj.Mobile,
+        CallTime: "1",
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API 調用失敗: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("獲取到的聊天記錄:", data);
+
+    if (
+      data.Result === "OK" &&
+      data.ChatMessage &&
+      Array.isArray(data.ChatMessage)
+    ) {
+      // 轉換 API 資料格式為本地格式
+      const convertedMessages = data.ChatMessage.map((msg, index) => {
+        const inputTime = new Date(msg.Inputtime);
+        const outputTime = new Date(msg.Outputtime);
+
+        console.log(`處理訊息 ${index}:`, {
+          Inputtime: msg.Inputtime,
+          parsedDate: inputTime,
+          dateKey: toDateKey(inputTime),
+        });
+
+        return {
+          id: Date.now() + index, // 生成唯一 ID
+          ts: inputTime.getTime(),
+          user: msg.Inmessage || "",
+          bot: msg.Outmessage || "",
+          timestamp: inputTime.toLocaleString("zh-TW"),
+          dateKey: toDateKey(inputTime),
+        };
+      });
+
+      // 按時間排序（舊到新）
+      convertedMessages.sort((a, b) => a.ts - b.ts);
+
+      // 清空並填入 knownKeys
+      knownKeys.clear();
+      for (const msg of data.ChatMessage) {
+        knownKeys.add(makeStableKey(msg));
+      }
+
+      conversations.value = convertedMessages;
+
+      // 更新最新回覆
+      if (convertedMessages.length > 0) {
+        latestResponse.value =
+          convertedMessages[convertedMessages.length - 1].bot;
+      }
+
+      // 更新日曆數據
+      loadCalendarDates();
+
+      console.log("聊天記錄載入完成:", convertedMessages);
+    }
+  } catch (error) {
+    console.error("獲取聊天記錄失敗:", error);
+  }
+};
+
+// 獲取更舊的聊天記錄 (TTE API)
+const fetchOlderChatHistory = async () => {
+  if (!localobj) {
+    console.error("用戶資料不存在");
+    return 0;
+  }
+
+  try {
+    const response = await fetch("https://23700999.com:8081/HMA/TTEgetChatMessageHistoryList.jsp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        Key: "qrt897hpmd",
+        MID: localobj.MID,
+        Mobile: localobj.Mobile,
+        CallTime: callTime.value.toString(),
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API 調用失敗: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(`獲取到的更舊聊天記錄 (CallTime: ${callTime.value}):`, data);
+
+    if (!(data?.Result === "OK" && Array.isArray(data.ChatMessage))) {
+      return 0;
+    }
+
+    // 轉換 & 產生穩定鍵
+    const incoming = data.ChatMessage.map((msg) => {
+      const inputTime = new Date(msg.Inputtime);
+      const key = makeStableKey(msg);
+      return {
+        stableKey: key,
+        id: key, // 用穩定鍵作為 id
+        ts: inputTime.getTime(),
+        user: msg.Inmessage || "",
+        bot: msg.Outmessage || "",
+        timestamp: inputTime.toLocaleString("zh-TW"),
+        dateKey: toDateKey(inputTime),
+      };
+    }).sort((a, b) => a.ts - b.ts);
+
+    // 去重
+    const newOnes = [];
+    for (const m of incoming) {
+      if (!knownKeys.has(m.stableKey)) {
+        knownKeys.add(m.stableKey);
+        newOnes.push(m);
+      }
+    }
+
+    if (newOnes.length === 0) {
+      return 0;
+    }
+
+    // 合併回 conversations（保持時間序）
+    conversations.value = [...newOnes, ...conversations.value].sort((a, b) => a.ts - b.ts);
+
+    // 日曆也跟著更新
+    loadCalendarDates();
+
+    console.log(`載入更舊訊息完成，新增 ${newOnes.length} 條訊息`);
+    return newOnes.length;
+  } catch (error) {
+    console.error("獲取更舊聊天記錄失敗:", error);
+    throw error;
+  }
+};
 
 // 初始化語音識別
 const initSpeechRecognition = () => {
@@ -3836,21 +3754,13 @@ const initSpeechRecognition = () => {
   }
 };
 
-/** 統一使用 TTEgetChatMessageHistoryList.jsp API 處理語音和文字輸入 */
-async function sendViaUnifiedAPI(
-  userText,
-  { playAudio = false, extra = {} } = {}
-) {
-  if (!localobj) {
-    console.error("用戶資料不存在");
-    return "（親愛的:您的問題我目前沒辦法回答）";
-  }
-
+/** 統一呼叫 n8n：可選擇是否播放音檔 */
+async function sendViaN8n(userText, { playAudio = false, extra = {} } = {}) {
+  const url = playAudio ? TTS_WEBHOOK_URL : TEXT_WEBHOOK_URL;
   const nowtime = new Date().toISOString();
   let res;
-
   try {
-    res = await fetch(TEXT_WEBHOOK_URL, {
+    res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -3869,7 +3779,7 @@ async function sendViaUnifiedAPI(
 
   if (!res.ok) {
     showAudioError.value = true;
-    throw new Error(`n8n webhook failed: ${res.status}`);
+    throw new Error(`webhook failed: ${res.status}`);
   }
 
   // 先嘗試從 Header 取回文字（X-Answer）
@@ -3918,6 +3828,7 @@ async function sendViaUnifiedAPI(
         /* iOS 未互動可能失敗 */
       }
     }
+    // 音訊情境下，若 header 沒文字，就維持空字串，最後會交給預設備援
   } else {
     // 非音訊：嘗試解析 JSON / 純文字
     let data = null;
@@ -3950,7 +3861,7 @@ async function sendViaUnifiedAPI(
     }
   }
 
-  // 寫入資料庫
+  //寫入np資料庫
   if (localobj) {
     try {
       res = await fetch(TEXT_MESSAGE_URL, {
@@ -3976,6 +3887,70 @@ async function sendViaUnifiedAPI(
     (answerText && String(answerText).trim()) ||
     "（親愛的:您的問題我目前沒辦法回答）"
   );
+}
+
+/** 一次呼叫 n8n，取得回覆文字（X-Answer header）+ 取得音檔 Blob 並播放 */
+async function fetchTTSAndPlayAndReturnText(userText, extra = {}) {
+  let res;
+  try {
+    res = await fetch(TTS_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chatInput: userText, // 你要給 n8n 的輸入
+        sessionId: UUID,
+        voicegender: voicegender,
+        timestamp: new Date().toISOString(),
+        pitch_semitones: 1.5,
+      }),
+    });
+  } catch (e) {
+    showAudioError.value = true;
+    throw e;
+  }
+
+  if (!res.ok) {
+    showAudioError.value = true;
+    throw new Error(`TTS webhook failed: ${res.status}`);
+  }
+
+  // 1) 拿回覆文字（在 X-Answer）
+  const headerText = res.headers.get("x-answer") || "";
+  const answerText = decodeURIComponent(headerText);
+
+  // 2) 讀音檔並播放
+  const blob = await res.blob(); // audio/wav
+  const url = URL.createObjectURL(blob);
+  const audio = ensurePlayer();
+  try {
+    audio.pause();
+  } catch {}
+  revokeObjectUrl();
+  audio.src = url;
+  currentObjectUrl = url;
+
+  audio.onplay = () => {
+    isSpeaking.value = true;
+  };
+  audio.onended = () => {
+    isSpeaking.value = false;
+    revokeObjectUrl();
+  };
+  audio.onerror = () => {
+    isSpeaking.value = false;
+    showAudioError.value = true;
+    revokeObjectUrl();
+  };
+
+  try {
+    await audio.play();
+  } catch (e) {
+    // iOS 需要使用者手勢觸發
+    showAudioError.value = true;
+    throw e;
+  }
+
+  return answerText;
 }
 
 // 開始/停止語音識別
@@ -4024,32 +3999,9 @@ const handleSpeechEnd = async (transcript) => {
   currentTranscript.value = "";
 
   try {
-    // 檢查字數是否超過50字，進入摘要模式
-    if (transcript.length > 50) {
-      // 延遲一下再顯示摘要模式，模擬整理內容的過程
-      setTimeout(() => {
-        currentSummary.value = transcript;
-        showSummaryMode.value = true;
-        isLoading.value = false;
-      }, 2000); // 2秒後顯示摘要
-      return;
-    }
-
-    // 檢查是否包含客服關鍵字
-    if (transcript.includes("真人") || transcript.includes("客服")) {
-      pendingInput.value = transcript; // 儲存原始輸入
-      showCustomerServiceModal.value = true;
-      isLoading.value = false;
-      return;
-    }
-
-    // 正常處理語音輸入
-    const botResponse = await sendViaUnifiedAPI(transcript, {
-      playAudio: true,
-    });
-    console.log("語音處理完成，botResponse:", botResponse);
-
-    // 保存對話記錄
+    // 一次拿回覆 + 播音檔
+    const botResponse = await sendViaN8n(transcript, { playAudio: true });
+    console.log("botResponse", botResponse);
     const nowTs = Date.now();
     const newConversation = {
       id: nowTs,
@@ -4059,6 +4011,7 @@ const handleSpeechEnd = async (transcript) => {
       timestamp: new Date().toLocaleString("zh-TW"),
       dateKey: toDateKey(new Date(nowTs)),
     };
+    console.log("newConversation", newConversation);
 
     conversations.value.push(newConversation);
     latestResponse.value = botResponse || "（親愛的:您的問題我目前沒辦法回答）";
@@ -4074,7 +4027,7 @@ const handleSpeechEnd = async (transcript) => {
       });
     }
 
-    console.log("語音輸入處理完成");
+    console.log("語音輸入處理完成:", newConversation);
   } catch (error) {
     console.error("API 調用錯誤:", error);
     const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
@@ -4105,17 +4058,7 @@ const handleSpeechEnd = async (transcript) => {
 
 // 語音播放文字
 const speakText = (text) => {
-  if (!synthRef || !text?.trim() || !process.client || isMuted.value) {
-    console.log("語音播放條件不滿足:", {
-      synthRef: !!synthRef,
-      text: !!text,
-      client: process.client,
-      muted: isMuted.value,
-    });
-    return;
-  }
-
-  console.log("開始播放語音:", text);
+  if (!synthRef || !text?.trim() || !process.client || isMuted.value) return;
 
   const speak = () => {
     if (!process.client) return;
@@ -4138,54 +4081,90 @@ const speakText = (text) => {
     utterance.pitch = voiceSettings.pitch;
     utterance.volume = voiceSettings.volume;
 
+    // iOS 預熱機制：先播放一個無聲的語音來激活 TTS
+    if (process.client && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
+      const warmupUtterance = new SpeechSynthesisUtterance("");
+      warmupUtterance.lang = "zh-TW";
+      warmupUtterance.volume = 0;
+      synthRef.speak(warmupUtterance);
+
+      // 延遲一下再播放真正的語音
+      setTimeout(() => {
+        synthRef.speak(utterance);
+      }, 100);
+    } else {
+      synthRef.speak(utterance);
+    }
+
+    const resumeHack = setInterval(() => {
+      if (!synthRef || !process.client) return;
+      if (synthRef.paused) synthRef.resume();
+      if (!synthRef.speaking) {
+        clearInterval(resumeHack);
+      }
+    }, 200);
+
     utterance.onstart = () => {
       if (!process.client) return;
-      console.log("語音開始播放");
+
       playbackConfirmed = true;
       isSpeaking.value = true;
     };
 
     utterance.onend = () => {
       if (process.client) {
-        console.log("語音播放結束");
         isSpeaking.value = false;
         isLoading.value = false;
       }
+      clearInterval(resumeHack);
     };
 
     utterance.onerror = (e) => {
       if (process.client) {
-        console.error("語音播放錯誤:", e);
         isSpeaking.value = false;
         isLoading.value = false;
         if (!isManuallyStopped.value) {
           showAudioError.value = true;
         }
+        console.error("語音播放失敗", e);
       }
+      clearInterval(resumeHack);
     };
 
     try {
       if (process.client) {
+        if (synthRef.paused) synthRef.resume();
         synthRef.speak(utterance);
-        console.log("已調用 synthRef.speak");
+      }
+
+      if (process.client) {
+        setTimeout(() => {
+          if (
+            !playbackConfirmed &&
+            !isManuallyStopped.value &&
+            !synthRef.speaking
+          ) {
+            showAudioError.value = true;
+            console.warn("裝置無法正常撥放語音");
+          }
+        }, 1500);
       }
     } catch (err) {
-      console.error("語音播放錯誤:", err);
+      if (process.client) {
+        console.error("語音撥放錯誤", err);
+        showAudioError.value = true;
+      }
+    }
+
+    if (process.client) {
+      console.log("🗣 準備播放文字:", text);
     }
   };
 
-  // 確保語音合成器已準備好
-  if (process.client && synthRef) {
-    if (synthRef.getVoices().length === 0) {
-      console.log("等待語音列表載入...");
-      synthRef.onvoiceschanged = () => {
-        console.log("語音列表已載入，開始播放");
-        speak();
-      };
-    } else {
-      console.log("語音列表已存在，直接播放");
-      speak();
-    }
+  if (process.client && synthRef && synthRef.getVoices().length === 0) {
+    synthRef.onvoiceschanged = () => speak();
+  } else if (process.client) {
+    speak();
   }
 };
 
@@ -4242,29 +4221,6 @@ async function handleManualInput() {
   const input = textInput.value.trim();
   if (!input) return;
 
-  // 檢查字數是否超過50字，進入摘要模式
-  if (input.length > 50) {
-    // 顯示載入狀態
-    isLoading.value = true;
-    textInput.value = "";
-
-    // 延遲一下再顯示摘要模式，模擬整理內容的過程
-    setTimeout(() => {
-      currentSummary.value = input;
-      showSummaryMode.value = true;
-      isLoading.value = false;
-    }, 2000); // 2秒後顯示摘要
-    return;
-  }
-
-  // 檢查是否包含客服關鍵字
-  if (input.includes("真人") || input.includes("客服")) {
-    pendingInput.value = input; // 儲存原始輸入
-    showCustomerServiceModal.value = true;
-    textInput.value = "";
-    return;
-  }
-
   // 文字輸入：立即將用戶輸入添加到聊天記錄中
   const nowTs = Date.now();
   const userMessage = {
@@ -4294,8 +4250,8 @@ async function handleManualInput() {
   }
 
   try {
-    const botResponse = await sendViaUnifiedAPI(input, { playAudio: true });
-    console.log("文字處理完成，botResponse:", botResponse);
+    const botResponse = await sendViaN8n(input, { playAudio: false });
+    console.log(botResponse);
 
     // 更新聊天記錄中的 bot 回覆
     const messageIndex = conversations.value.findIndex(
@@ -4334,318 +4290,6 @@ const saveConversations = () => {
   if (process.client) {
     // 更新日曆數據
     loadCalendarDates();
-  }
-};
-
-// 摘要模式處理函數
-const handleSummaryMode = async (saveSummary = false) => {
-  const summaryText = currentSummary.value;
-
-  // 關閉摘要模式
-  showSummaryMode.value = false;
-  currentSummary.value = "";
-
-  if (saveSummary) {
-    // 儲存摘要到健康日誌
-    try {
-      const healthLog = JSON.parse(localStorage.getItem("healthLog") || "[]");
-      const summaryEntry = {
-        id: Date.now(),
-        date: new Date().toISOString(),
-        type: "summary",
-        content: summaryText,
-        timestamp: new Date().toLocaleString("zh-TW"),
-      };
-      healthLog.push(summaryEntry);
-      localStorage.setItem("healthLog", JSON.stringify(healthLog));
-      console.log("摘要已儲存到健康日誌:", summaryEntry);
-      console.log("健康日誌總數:", healthLog.length);
-      
-      // 顯示成功提示
-      alert("摘要已成功儲存到健康日誌！");
-    } catch (error) {
-      console.error("儲存摘要失敗:", error);
-      alert("儲存摘要失敗，請重試");
-    }
-  }
-
-  // 檢查摘要內容是否包含客服關鍵字
-  if (summaryText.includes("真人") || summaryText.includes("客服")) {
-    console.log("摘要內容包含客服關鍵字，顯示客服詢問");
-    pendingInput.value = summaryText; // 儲存原始輸入
-    showCustomerServiceModal.value = true;
-    return; // 不發送API，等待用戶選擇
-  }
-
-  // 如果沒有客服關鍵字，直接發送API分析
-  try {
-    const botResponse = await sendViaUnifiedAPI(summaryText, {
-      playAudio: true,
-    });
-
-    const nowTs = Date.now();
-    const newConversation = {
-      id: nowTs,
-      ts: nowTs,
-      user: summaryText,
-      bot: botResponse || "（親愛的:您的問題我目前沒辦法回答）",
-      timestamp: new Date().toLocaleString("zh-TW"),
-      dateKey: toDateKey(new Date(nowTs)),
-    };
-
-    conversations.value.push(newConversation);
-    latestResponse.value = botResponse || "（親愛的:您的問題我目前沒辦法回答）";
-    saveConversations();
-
-    // 如果當前在歷史記錄頁面，確保新訊息可見
-    if (showHistoryPage.value) {
-      currentPage.value = 1;
-      nextTick(() => {
-        setTimeout(() => {
-          scrollToBottom();
-        }, 100);
-      });
-    }
-  } catch (error) {
-    console.error("API 調用錯誤:", error);
-  }
-};
-
-// 客服模式處理函數
-const handleCustomerService = async (contactService = false) => {
-  showCustomerServiceModal.value = false;
-
-  if (contactService) {
-    // 跳轉到客服頁面
-    console.log("用戶選擇聯繫客服，跳轉到客服頁面");
-    await navigateTo("/CSRobot");
-  } else {
-    // 選擇「否」，繼續AI分析
-    console.log("用戶選擇繼續AI分析，發送原始輸入到AI");
-    
-    if (pendingInput.value) {
-      const originalInput = pendingInput.value;
-      pendingInput.value = ""; // 清空待處理輸入
-      
-      // 發送原始輸入到AI分析
-      try {
-        isLoading.value = true;
-        const botResponse = await sendViaUnifiedAPI(originalInput, { playAudio: true });
-        
-        // 保存對話記錄
-        const nowTs = Date.now();
-        const newConversation = {
-          id: nowTs,
-          ts: nowTs,
-          user: originalInput,
-          bot: botResponse || "（親愛的:您的問題我目前沒辦法回答）",
-          timestamp: new Date().toLocaleString("zh-TW"),
-          dateKey: toDateKey(new Date(nowTs)),
-        };
-
-        conversations.value.push(newConversation);
-        latestResponse.value = botResponse || "（親愛的:您的問題我目前沒辦法回答）";
-        saveConversations();
-
-        // 如果當前在歷史記錄頁面，確保新訊息可見
-        if (showHistoryPage.value) {
-          currentPage.value = 1;
-          nextTick(() => {
-            setTimeout(() => {
-              scrollToBottom();
-            }, 100);
-          });
-        }
-        
-        console.log("客服詢問後的AI分析完成");
-      } catch (error) {
-        console.error("客服詢問後的API調用錯誤:", error);
-        const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
-        const errorConversation = {
-          id: Date.now(),
-          user: originalInput,
-          bot: errorResponse,
-          timestamp: new Date().toLocaleString("zh-TW"),
-          dateKey: toDateKey(new Date()),
-        };
-        conversations.value.push(errorConversation);
-        latestResponse.value = errorResponse;
-        saveConversations();
-      } finally {
-        isLoading.value = false;
-      }
-    }
-  }
-};
-
-// 獲取聊天記錄 (TTE API)
-const fetchChatHistory = async () => {
-  if (!localobj) {
-    console.error("用戶資料不存在");
-    return;
-  }
-
-  try {
-    const response = await fetch(GET_CHAT_HISTORY_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        Key: "qrt897hpmd",
-        MID: localobj.MID,
-        Mobile: localobj.Mobile,
-        CallTime: "1",
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API 調用失敗: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log("獲取到的聊天記錄:", data);
-
-    if (
-      data.Result === "OK" &&
-      data.ChatMessage &&
-      Array.isArray(data.ChatMessage)
-    ) {
-      // 過濾掉空記錄（沒有 Inputtime 或 Inmessage 的記錄）
-      const validMessages = data.ChatMessage.filter(msg => 
-        msg.Inputtime && 
-        msg.Inputtime.trim() !== "" && 
-        (msg.Inmessage || msg.Outmessage) // 至少要有輸入或輸出訊息
-      );
-
-      console.log(`原始記錄數: ${data.ChatMessage.length}, 有效記錄數: ${validMessages.length}`);
-
-      // 轉換 API 資料格式為本地格式
-      const convertedMessages = validMessages.map((msg, index) => {
-        const inputTime = new Date(msg.Inputtime);
-        const outputTime = new Date(msg.Outputtime);
-
-        console.log(`處理訊息 ${index}:`, {
-          Inputtime: msg.Inputtime,
-          parsedDate: inputTime,
-          dateKey: toDateKey(inputTime),
-        });
-
-        return {
-          id: Date.now() + index, // 生成唯一 ID
-          ts: inputTime.getTime(),
-          user: msg.Inmessage || "",
-          bot: msg.Outmessage || "",
-          timestamp: inputTime.toLocaleString("zh-TW"),
-          dateKey: toDateKey(inputTime),
-        };
-      });
-
-      // 按時間排序（舊到新）
-      convertedMessages.sort((a, b) => a.ts - b.ts);
-
-      // 清空並填入 knownKeys
-      knownKeys.clear();
-      for (const msg of data.ChatMessage) {
-        knownKeys.add(makeStableKey(msg));
-      }
-
-      conversations.value = convertedMessages;
-
-      // 更新最新回覆
-      if (convertedMessages.length > 0) {
-        latestResponse.value =
-          convertedMessages[convertedMessages.length - 1].bot;
-      }
-
-      // 更新日曆數據
-      loadCalendarDates();
-
-      console.log("聊天記錄載入完成:", convertedMessages);
-    }
-  } catch (error) {
-    console.error("獲取聊天記錄失敗:", error);
-  }
-};
-
-// 獲取更舊的聊天記錄 (TTE API)
-const fetchOlderChatHistory = async () => {
-  if (!localobj) {
-    console.error("用戶資料不存在");
-    return 0;
-  }
-
-  try {
-    const response = await fetch(GET_CHAT_HISTORY_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        Key: "qrt897hpmd",
-        MID: localobj.MID,
-        Mobile: localobj.Mobile,
-        CallTime: callTime.value.toString(),
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API 調用失敗: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log(`獲取到的更舊聊天記錄 (CallTime: ${callTime.value}):`, data);
-
-    if (!(data?.Result === "OK" && Array.isArray(data.ChatMessage))) {
-      return 0;
-    }
-
-    // 過濾掉空記錄
-    const validMessages = data.ChatMessage.filter(msg => 
-      msg.Inputtime && 
-      msg.Inputtime.trim() !== "" && 
-      (msg.Inmessage || msg.Outmessage)
-    );
-
-    console.log(`更舊記錄 - 原始: ${data.ChatMessage.length}, 有效: ${validMessages.length}`);
-
-    // 轉換 & 產生穩定鍵
-    const incoming = validMessages.map((msg) => {
-      const inputTime = new Date(msg.Inputtime);
-      const key = makeStableKey(msg);
-      return {
-        stableKey: key,
-        id: key, // 用穩定鍵作為 id
-        ts: inputTime.getTime(),
-        user: msg.Inmessage || "",
-        bot: msg.Outmessage || "",
-        timestamp: inputTime.toLocaleString("zh-TW"),
-        dateKey: toDateKey(inputTime),
-      };
-    }).sort((a, b) => a.ts - b.ts);
-
-    // 去重
-    const newOnes = [];
-    for (const m of incoming) {
-      if (!knownKeys.has(m.stableKey)) {
-        knownKeys.add(m.stableKey);
-        newOnes.push(m);
-      }
-    }
-
-    if (newOnes.length === 0) {
-      return 0;
-    }
-
-    // 合併回 conversations（保持時間序）
-    conversations.value = [...newOnes, ...conversations.value].sort(
-      (a, b) => a.ts - b.ts
-    );
-
-    // 日曆也跟著更新
-    loadCalendarDates();
-
-    console.log(`載入更舊訊息完成，新增 ${newOnes.length} 條訊息`);
-    return newOnes.length;
-  } catch (error) {
-    console.error("獲取更舊聊天記錄失敗:", error);
-    return 0;
   }
 };
 
@@ -4836,6 +4480,7 @@ const scrollToMessage = (id) => {
     }
   }, 300);
 };
+
 
 // 關鍵字高亮
 const highlightKeyword = (text, keyword) => {
