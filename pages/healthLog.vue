@@ -439,7 +439,7 @@ onMounted(() => {
   width: 100%;
   text-align: center;
   @include neumorphismOuter(
-    $bgColor: var(--Neutral-white, #2f1d1d),
+    $bgColor: var(--Neutral-white, #ffffff),
     $radius: 20px,
     $x: 0,
     $y: 4px,
