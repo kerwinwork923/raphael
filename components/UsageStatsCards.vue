@@ -67,7 +67,10 @@ onMounted(() => {
     align-items: center;
     text-align: center;
     gap: 8px;
-    display: none;
+
+    &:first-child {
+      display: none;
+    }
 
     .card-icon {
       width: 73px;
