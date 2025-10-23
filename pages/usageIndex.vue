@@ -57,7 +57,7 @@ const gotoGettingDressed = () => {
     padding: 0 16px;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 8px;
 
 
   }
@@ -92,7 +92,7 @@ const gotoGettingDressed = () => {
       letter-spacing: 3.6px;
       border: none;
       cursor: pointer;
-      padding: .25rem 0;
+      padding: .5rem 0;
     }
   }
 }

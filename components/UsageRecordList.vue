@@ -227,7 +227,11 @@ onUnmounted(() => {
     display: flex;
     flex-direction: column;
     gap: 16px;
-    margin-bottom: 16px;
+    padding: 16px 0;
+    position: sticky;
+    top: 0;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(4px);
 
     .section-title {
       font-size: 20px;
@@ -330,7 +334,7 @@ onUnmounted(() => {
       border-radius: 20px;
       background: #f5f7fa;
       box-shadow: 2px 4px 12px rgba(177, 192, 216, 0.7);
-      padding: 0.5rem 1rem;
+      padding: 1rem;
 
       --time-col-width: auto;
 
@@ -340,11 +344,11 @@ onUnmounted(() => {
         display: grid;
         grid-template-columns: 1fr var(--time-col-width) var(--time-col-width);
         align-items: center;
-        gap:0.5rem
+        gap: 0.5rem;
       }
 
       .record-header {
-        margin-bottom: 4px;
+        margin-bottom: 8px;
 
         .record-date {
           color: #b1c0d8;

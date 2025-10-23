@@ -57,7 +57,7 @@ onMounted(() => {
   display: flex;
   gap: 16px;
   margin: 1.5rem 0;
-  
+
   .stats-card {
     width: 100%;
 
@@ -67,6 +67,7 @@ onMounted(() => {
     align-items: center;
     text-align: center;
     gap: 8px;
+    display: none;
 
     .card-icon {
       width: 73px;

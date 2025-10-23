@@ -61,6 +61,15 @@
         alt="AI角色"
         @click="handleCharacterClick"
       />
+      <div class="healGroup">
+  
+        <div class="healthImg" @click="goToHealthLog">
+            <img src="/assets/imgs/robot/health.svg" alt="健康" />
+          
+          </div>
+          <h5>健康日誌</h5>
+      </div>
+    
     </div>
 
     <!-- 語音控制區域 - 從下方彈出 -->
@@ -96,6 +105,7 @@
         >
           這裡可以切換成文字對話
         </div>
+
         <button
           class="control-btn mic-btn"
           :class="{ listening: isListening }"
@@ -107,7 +117,7 @@
           <div v-if="isListening" class="pulse-ring"></div>
         </button>
         <button class="control-btn volume-btn" @click="toggleVolume">
-          <img :src="isMuted ? volumeSvg : mutedSvg" alt="音量" />
+          <img :src="isMuted ? mutedSvg : volumeSvg" alt="音量" />
         </button>
       </div>
     </transition>
@@ -194,6 +204,49 @@
           <button @click="closeAudioError" class="alert-button">
             我知道了
           </button>
+        </div>
+      </div>
+    </transition>
+
+    <!-- 摘要模式彈窗 -->
+    <transition name="fade">
+      <div v-if="showSummaryMode" class="summary-modal">
+        <div class="robot-content">
+          <div class="robot-sphere"></div>
+          <h3 class="robot-title">這是我幫你整理的摘要~</h3>
+          <div class="robot-text">「{{ currentSummary }}」</div>
+          <div class="robot-buttons">
+            <button @click="handleSummaryMode(false)" class="robot-btn-cancel">
+              不用
+            </button>
+            <button @click="handleSummaryMode(true)" class="robot-btn-confirm">
+              儲存摘要
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <!-- 客服詢問彈窗 -->
+    <transition name="fade">
+      <div v-if="showCustomerServiceModal" class="customer-service-modal">
+        <div class="robot-content">
+          <div class="robot-sphere"></div>
+          <h3 class="robot-title">您是否想要找客服呢？</h3>
+          <div class="robot-buttons">
+            <button
+              @click="handleCustomerService(false)"
+              class="robot-btn-cancel"
+            >
+              否
+            </button>
+            <button
+              @click="handleCustomerService(true)"
+              class="robot-btn-confirm"
+            >
+              是
+            </button>
+          </div>
         </div>
       </div>
     </transition>
@@ -418,14 +471,14 @@
                   class="history-message"
                   :id="`message-${item.id}`"
                 >
-                  <div class="message user">
+                  <div  v-if="item.user && item.user.trim()" class="message user">
                     <div class="bubble">
                       {{ item.user }}
                       <div class="time">{{ formatTime(item.timestamp) }}</div>
                     </div>
                   </div>
 
-                  <div class="message bot">
+                  <div  v-if="item.isLoading || (item.bot && item.bot.trim())" class="message bot">
                     <div class="avatar">
                       <img :src="currentCharacter.avatar" alt="角色頭像" />
                     </div>
@@ -624,11 +677,2795 @@
   </div>
 </template>
 
+<script setup>
+import { ref, onMounted, onUnmounted, computed, nextTick } from "vue";
+import { useHead } from "#app";
+import { navigateTo } from "#app";
+import BottomNav from "~/components/BottomNav.vue";
+import VueDatePicker from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
+// Import Swiper Vue.js components
+import { Swiper, SwiperSlide } from "swiper/vue";
+// Import Swiper styles
+import "swiper/css";
+import "swiper/css/pagination";
+// import required modules
+import { Pagination } from "swiper/modules";
+// 移除import，改用動態路徑
+import recycleSvg from "~/assets/imgs/robot/recycle.svg";
+import messagesSquare from "~/assets/imgs/robot/messagesSquare.svg";
+import soundSvg from "~/assets/imgs/robot/sound.svg";
+import assistantSoundGif from "~/assets/imgs/robot/assistantSound.gif";
+import assistantDefaultGif from "~/assets/imgs/robot/assistantDefault.gif";
+import loadingGif from "~/assets/imgs/robot/loading.gif";
+import lockSvg from "~/assets/imgs/robot/lock.svg";
+import Alert from "~/components/Alert.vue";
+import volumeSvg from "~/assets/imgs/robot/volume.svg";
+import mutedSvg from "~/assets/imgs/robot/muted.svg";
+import searchSvg from "~/assets/imgs/robot/search.svg";
+import calendarSvg from "~/assets/imgs/robot/calendar.svg";
+import sendSvg from "~/assets/imgs/robot/send.svg";
+
+// ====== 參考 robot1021.vue 的 n8n API 方式 ======
+const TEXT_WEBHOOK_URL = "https://aiwisebalance.com/webhook/Textchat"; // ← n8n 文字端點
+const TEXT_MESSAGE_URL = "https://23700999.com:8081/HMA/TTEsaveChatMessageHistory.jsp"; // ← 儲存聊天記錄
+const GET_CHAT_HISTORY_URL = "https://23700999.com:8081/HMA/api/fr/frGetLineAIHuman"; // ← 獲取聊天記錄
+const voicegender = "female";
+const historyInputRef = ref(null);
+
+// Swiper modules
+const swiperModules = [Pagination];
+const characterSwiperRef = ref(null);
+
+// 角色圖片載入狀態
+const characterImageLoading = ref(new Set());
+
+// 檢查角色是否被鎖定
+const isCharacterLocked = (character) => {
+  return character.locked === true;
+};
+
+
+// 響應式狀態
+const router = useRouter();
+const isListening = ref(false);
+const isLoading = ref(false);
+const conversations = ref([]);
+const currentTranscript = ref("");
+const isSpeaking = ref(false);
+const isMuted = ref(false); // 靜音狀態
+const UUID = getOrCreateVisitorID();
+const textInput = ref("");
+const showTextInput = ref(false);
+const showVoiceControls = ref(false);
+const showAudioError = ref(false);
+const isManuallyStopped = ref(false);
+const showHistoryPage = ref(false);
+const showVoiceError = ref(false);
+
+// 摘要模式相關狀態
+const showSummaryMode = ref(false);
+const currentSummary = ref("");
+const showCustomerServiceModal = ref(false);
+const pendingInput = ref(""); // 儲存待處理的輸入
+
+// 定時器相關狀態
+const apiPollingInterval = ref(null); // API 輪詢定時器
+const isPollingActive = ref(false); // 是否正在輪詢
+
+// 歷史資料相關狀態
+const isLoadingOlderMessages = ref(false);
+const hasMoreMessages = ref(true);
+const currentPage = ref(1);
+const messagesPerPage = ref(20);
+const callTime = ref(1); // CallTime 計數器，用於載入更舊的訊息
+const knownKeys = new Set(); // 用於去重的穩定鍵集合
+
+// 首次登入解說相關狀態
+const showTutorial = ref(false);
+const currentTutorialStep = ref(1);
+const tutorialSteps = [1, 2, 3, 4, 5]; // 解說步驟順序
+import doctor from "~/assets/imgs/robot/character/doctor.png";
+import doctor2 from "~/assets/imgs/robot/character/doctor2.png";
+import doctor3 from "~/assets/imgs/robot/character/doctor3.png";
+import doctor4 from "~/assets/imgs/robot/character/doctor4.png";
+import doctor5 from "~/assets/imgs/robot/character/doctor5.png";
+import doctor6 from "~/assets/imgs/robot/character/doctor6.png";
+import girl1_1 from "~/assets/imgs/robot/character/girl1_1.png";
+import girl1_2 from "~/assets/imgs/robot/character/girl1_2.png";
+import girl1_3 from "~/assets/imgs/robot/character/girl1_3.png";
+import girl2_1 from "~/assets/imgs/robot/character/girl2_1.png";
+import girl2_2 from "~/assets/imgs/robot/character/girl2_2.png";
+import girl3_1 from "~/assets/imgs/robot/character/girl3_1.png";
+import girl3_2 from "~/assets/imgs/robot/character/girl3_2.png";
+import girl4_1 from "~/assets/imgs/robot/character/girl4_1.png";
+import girl4_2 from "~/assets/imgs/robot/character/girl4_2.png";
+import girl5_1 from "~/assets/imgs/robot/character/girl5_1.png";
+import girl5_2 from "~/assets/imgs/robot/character/girl5_2.png";
+import man1_1 from "~/assets/imgs/robot/character/man1_1.png";
+import man1_2 from "~/assets/imgs/robot/character/man1_2.png";
+import man2_1 from "~/assets/imgs/robot/character/man2_1.png";
+import man2_2 from "~/assets/imgs/robot/character/man2_2.png";
+import man3_1 from "~/assets/imgs/robot/character/man3_1.png";
+import man3_2 from "~/assets/imgs/robot/character/man3_2.png";
+import man3_3 from "~/assets/imgs/robot/character/man3_3.png";
+import man4_1 from "~/assets/imgs/robot/character/man4_1.png";
+import man4_2 from "~/assets/imgs/robot/character/man4_2.png";
+import man5_1 from "~/assets/imgs/robot/character/man5_1.png";
+import man5_2 from "~/assets/imgs/robot/character/man5_2.png";
+import man6_1 from "~/assets/imgs/robot/character/man6_1.png";
+import man6_2 from "~/assets/imgs/robot/character/man6_2.png";
+import pet1_1 from "~/assets/imgs/robot/character/pet1_1.png";
+import pet1_2 from "~/assets/imgs/robot/character/pet1_2.png";
+import pet2_1 from "~/assets/imgs/robot/character/pet2_1.png";
+import pet2_2 from "~/assets/imgs/robot/character/pet2_2.png";
+import pet3_1 from "~/assets/imgs/robot/character/pet3_1.png";
+import pet3_2 from "~/assets/imgs/robot/character/pet3_2.png";
+import pet4_1 from "~/assets/imgs/robot/character/pet4_1.png";
+import pet4_2 from "~/assets/imgs/robot/character/pet4_2.png";
+import pet4_3 from "~/assets/imgs/robot/character/pet4_3.png";
+
+const characterImageSrc = ref(doctor);
+
+// UI 目前應該顯示誰的 computed
+const uiCharacter = computed(() =>
+  showCharacterSelection.value && tempSelectedCharacter.value
+    ? tempSelectedCharacter.value
+    : currentCharacter.value
+);
+
+const voiceModalImageSrc = ref(assistantSoundGif); // 語音模態框圖片路徑
+const textInputRef = ref(null); // 添加文字輸入框的 ref
+const searchInputRef = ref(null); // 添加搜尋輸入框的 ref
+const nameInputRef = ref(null); // 添加名稱輸入框的 ref
+const latestResponse = ref(""); // 最新回覆
+const showSearch = ref(false); // 搜尋功能開關
+const searchQuery = ref(""); // 搜尋關鍵字
+const searchResults = ref([]); // 搜尋結果
+// 從 localStorage 獲取用戶資料
+const localData = localStorage.getItem("userData");
+const localobj = localData ? JSON.parse(localData) : null;
+console.log("localobj=", localobj?.Mobile);
+
+if (!localData) {
+  router.push("/");
+}
+
+const goToHealthLog = () => {
+  router.push('/healthLog');
+}
+
+// 角色選擇相關狀態
+const showCharacterSelection = ref(false); // 顯示角色選擇彈窗
+const showComingSoon = ref(false); // 顯示近期推出彈窗
+const showCharacterExitConfirm = ref(false); // 顯示角色選擇離開確認彈窗
+const tempSelectedCharacter = ref(null); // 臨時選擇的角色
+const isStyleExpanded = ref(false); // 造型是否展開
+
+// 角色命名相關狀態
+const showNameInput = ref(false); // 顯示名稱輸入彈窗
+const characterNameInput = ref(""); // 角色名稱輸入
+const nameInputError = ref(""); // 名稱輸入錯誤訊息
+
+// 新增：聊天歷史改進相關變數
+const historyScrollContainer = ref(null);
+const isScrolling = ref(false);
+const scrollTimeout = ref(null);
+
+// 生成穩定鍵用於去重
+const makeStableKey = (msg) => {
+  return `${msg.Inputtime}|${msg.Inmessage ?? ""}|${msg.Outputtime ?? ""}|${
+    msg.Outmessage ?? ""
+  }`;
+};
+
+// 正確處理時間戳，修復時區問題
+const parseCorrectTime = (timeString) => {
+  if (!timeString) return new Date();
+  
+  // 如果時間格式是 "2025/09/23 09:57" 這種格式
+  if (timeString.includes('/') && timeString.includes(' ')) {
+    // 將 "2025/09/23 09:57" 轉換為本地時間，不進行時區轉換
+    const [datePart, timePart] = timeString.split(' ');
+    const [year, month, day] = datePart.split('/');
+    const [hour, minute] = timePart.split(':');
+    
+    // 創建本地時間，不進行時區轉換
+    return new Date(
+      parseInt(year), 
+      parseInt(month) - 1, // 月份從0開始
+      parseInt(day), 
+      parseInt(hour), 
+      parseInt(minute), 
+      0
+    );
+  }
+  
+  // 如果是 ISO 格式，直接解析
+  return new Date(timeString);
+};
+
+// 生成本地時間格式，避免時區問題
+const getLocalTimeString = (date = new Date()) => {
+  return date.toLocaleString("zh-TW", {
+    year: "numeric",
+    month: "2-digit", 
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false
+  }).replace(/\//g, "-").replace(",", "");
+};
+
+// 日曆相關
+const showCalendar = ref(false);
+const selectedDate = ref(null);
+const calendarDatesWithHistory = ref([]);
+const today = new Date();
+const endOfNextMonth = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+
+// 日曆顯示的年月（0-11）
+const visibleMonth = ref(new Date().getMonth());
+const visibleYear = ref(new Date().getFullYear());
+
+// 當月有紀錄的日期清單（Set<YYYY-MM-DD> → 只保留當月）
+const monthDateKeySet = computed(() => {
+  const set = new Set();
+  console.log(
+    `計算當月日期集合 - 當前顯示: ${visibleYear.value}/${
+      visibleMonth.value + 1
+    }`
+  );
+  console.log(`所有可用日期:`, Array.from(calendarDateKeySet.value));
+
+  calendarDateKeySet.value.forEach((key) => {
+    const d = new Date(key + "T00:00:00");
+    console.log(
+      `檢查日期 ${key}: ${d.getFullYear()}-${d.getMonth() + 1} vs ${
+        visibleYear.value
+      }-${visibleMonth.value + 1}`
+    );
+    if (
+      d.getFullYear() === visibleYear.value &&
+      d.getMonth() === visibleMonth.value
+    ) {
+      set.add(key);
+      console.log(`✓ 添加日期 ${key} 到當月集合`);
+    }
+  });
+  console.log(
+    `當月 ${visibleYear.value}/${visibleMonth.value + 1} 可用日期:`,
+    Array.from(set)
+  );
+  return set;
+});
+
+// 角色數據
+const currentCharacter = ref({
+  id: 1,
+  name: "芷澄",
+  displayName: "芷澄",
+  avatar: doctor,
+  fullImage: doctor,
+  styleId: 1,
+  customName: "芷澄", // 自定義名稱
+  voiceSettings: {
+    rate: 0.9,
+    pitch: 0.85,
+    volume: 1,
+  },
+});
+
+const availableCharacters = ref([
+  {
+    id: 1,
+    name: "芷澄",
+    displayName: "芷澄",
+    avatar: doctor,
+    fullImage: doctor,
+    customName: "芷澄",
+    voiceSettings: {
+      rate: 0.9,
+      pitch: 0.85,
+      volume: 1,
+    },
+    styles: [
+      { id: 1, thumbnail: doctor, fullImage: doctor },
+      { id: 2, thumbnail: doctor2, fullImage: doctor2 },
+      { id: 3, thumbnail: doctor3, fullImage: doctor3 },
+      { id: 4, thumbnail: doctor4, fullImage: doctor4 },
+      { id: 5, thumbnail: doctor5, fullImage: doctor5, locked: true },
+      { id: 6, thumbnail: doctor6, fullImage: doctor6, locked: true },
+    ],
+  },
+  {
+    id: 2,
+    name: "蕾紗",
+    displayName: "蕾紗",
+    avatar: girl1_1,
+    fullImage: girl1_1,
+    customName: "蕾紗",
+    voiceSettings: {
+      rate: 0.95,
+      pitch: 0.9,
+      volume: 1,
+    },
+    styles: [
+      { id: 1, thumbnail: girl1_1, fullImage: girl1_1 },
+      { id: 2, thumbnail: girl1_2, fullImage: girl1_2 },
+      { id: 3, thumbnail: girl1_3, fullImage: girl1_3, locked: true },
+    ],
+  },
+  {
+    id: 3,
+    name: "沁瑤",
+    displayName: "沁瑤",
+    avatar: girl2_1,
+    fullImage: girl2_1,
+    customName: "沁瑤",
+    voiceSettings: {
+      rate: 0.9,
+      pitch: 0.8,
+      volume: 1,
+    },
+    styles: [
+      { id: 1, thumbnail: girl2_1, fullImage: girl2_1 },
+      { id: 2, thumbnail: girl2_2, fullImage: girl2_2, locked: true },
+    ],
+  },
+  {
+    id: 4,
+    name: "晴婕",
+    displayName: "晴婕",
+    avatar: girl3_1,
+    fullImage: girl3_1,
+    customName: "晴婕",
+    voiceSettings: {
+      rate: 0.95,
+      pitch: 0.85,
+      volume: 1,
+    },
+    styles: [
+      { id: 1, thumbnail: girl3_1, fullImage: girl3_1 },
+      { id: 2, thumbnail: girl3_2, fullImage: girl3_2 },
+    ],
+  },
+  {
+    id: 5,
+    name: "芮欣",
+    displayName: "芮欣",
+    avatar: girl4_1,
+    fullImage: girl4_1,
+    customName: "芮欣",
+    voiceSettings: {
+      rate: 0.9,
+      pitch: 0.9,
+      volume: 1,
+    },
+    styles: [
+      { id: 1, thumbnail: girl4_1, fullImage: girl4_1 },
+      { id: 2, thumbnail: girl4_2, fullImage: girl4_2 },
+    ],
+  },
+  {
+    id: 6,
+    name: "語彤",
+    displayName: "語彤",
+    avatar: girl5_1,
+    fullImage: girl5_1,
+    customName: "語彤",
+    voiceSettings: {
+      rate: 0.95,
+      pitch: 0.8,
+      volume: 1,
+    },
+    styles: [
+      { id: 1, thumbnail: girl5_1, fullImage: girl5_1 },
+      { id: 2, thumbnail: girl5_2, fullImage: girl5_2 },
+    ],
+  },
+  {
+    id: 7,
+    name: "澤昊",
+    displayName: "澤昊",
+    avatar: man1_1,
+    fullImage: man1_1,
+    customName: "澤昊",
+    voiceSettings: {
+      rate: 0.85,
+      pitch: 0.7,
+      volume: 1,
+    },
+    styles: [
+      { id: 1, thumbnail: man1_1, fullImage: man1_1 },
+      { id: 2, thumbnail: man1_2, fullImage: man1_2 },
+    ],
+  },
+  {
+    id: 8,
+    name: "亦辰",
+    displayName: "亦辰",
+    avatar: man2_1,
+    fullImage: man2_1,
+    customName: "亦辰",
+    voiceSettings: {
+      rate: 0.9,
+      pitch: 0.75,
+      volume: 1,
+    },
+    styles: [
+      { id: 1, thumbnail: man2_1, fullImage: man2_1 },
+      { id: 2, thumbnail: man2_2, fullImage: man2_2 },
+    ],
+  },
+  {
+    id: 9,
+    name: "曜宸",
+    displayName: "曜宸",
+    avatar: man3_1,
+    fullImage: man3_1,
+    customName: "曜宸",
+    voiceSettings: {
+      rate: 0.85,
+      pitch: 0.8,
+      volume: 1,
+    },
+    styles: [
+      { id: 1, thumbnail: man3_1, fullImage: man3_1 },
+      { id: 2, thumbnail: man3_2, fullImage: man3_2 },
+      { id: 3, thumbnail: man3_3, fullImage: man3_3, locked: true },
+    ],
+  },
+  {
+    id: 10,
+    name: "霖澤",
+    displayName: "霖澤",
+    avatar: man4_1,
+    fullImage: man4_1,
+    customName: "霖澤",
+    voiceSettings: {
+      rate: 0.9,
+      pitch: 0.7,
+      volume: 1,
+    },
+    styles: [
+      { id: 1, thumbnail: man4_1, fullImage: man4_1 },
+      { id: 2, thumbnail: man4_2, fullImage: man4_2 },
+    ],
+  },
+  {
+    id: 11,
+    name: "承睿",
+    displayName: "承睿",
+    avatar: man5_1,
+    fullImage: man5_1,
+    customName: "承睿",
+    voiceSettings: {
+      rate: 0.85,
+      pitch: 0.75,
+      volume: 1,
+    },
+    styles: [
+      { id: 1, thumbnail: man5_1, fullImage: man5_1 },
+      { id: 2, thumbnail: man5_2, fullImage: man5_2 },
+    ],
+  },
+  {
+    id: 12,
+    name: "柏瀚",
+    displayName: "柏瀚",
+    avatar: man6_1,
+    fullImage: man6_1,
+    customName: "柏瀚",
+    voiceSettings: {
+      rate: 0.9,
+      pitch: 0.8,
+      volume: 1,
+    },
+    styles: [
+      { id: 1, thumbnail: man6_1, fullImage: man6_1 },
+      { id: 2, thumbnail: man6_2, fullImage: man6_2 },
+    ],
+  },
+
+  {
+    id: 13,
+    name: "檸檬",
+    displayName: "檸檬",
+    avatar: pet1_1,
+    fullImage: pet1_1,
+    customName: "檸檬",
+    voiceSettings: {
+      rate: 1.1,
+      pitch: 1.2,
+      volume: 1,
+    },
+    styles: [
+      { id: 1, thumbnail: pet1_1, fullImage: pet1_1 },
+      { id: 2, thumbnail: pet1_2, fullImage: pet1_2 },
+    ],
+  },
+  {
+    id: 14,
+    name: "芒果",
+    displayName: "芒果",
+    avatar: pet2_1,
+    fullImage: pet2_1,
+    customName: "芒果",
+    voiceSettings: {
+      rate: 1.0,
+      pitch: 1.1,
+      volume: 1,
+    },
+    styles: [
+      { id: 1, thumbnail: pet2_1, fullImage: pet2_1 },
+      { id: 2, thumbnail: pet2_2, fullImage: pet2_2 },
+    ],
+  },
+  {
+    id: 15,
+    name: "喵喵",
+    displayName: "喵喵",
+    avatar: pet3_1,
+    fullImage: pet3_1,
+    customName: "喵喵",
+    voiceSettings: {
+      rate: 1.2,
+      pitch: 1.3,
+      volume: 1,
+    },
+    styles: [
+      { id: 1, thumbnail: pet3_1, fullImage: pet3_1 },
+      { id: 2, thumbnail: pet3_2, fullImage: pet3_2 },
+    ],
+  },
+  {
+    id: 16,
+    name: "光羽",
+    displayName: "光羽",
+    avatar: pet4_1,
+    fullImage: pet4_1,
+    customName: "光羽",
+    voiceSettings: {
+      rate: 1.0,
+      pitch: 1.0,
+      volume: 1,
+    },
+    styles: [
+      { id: 1, thumbnail: pet4_1, fullImage: pet4_1 },
+      { id: 2, thumbnail: pet4_2, fullImage: pet4_2 },
+      { id: 3, thumbnail: pet4_3, fullImage: pet4_3 },
+    ],
+  },
+]);
+
+// 計算屬性：當前可見的造型
+const visibleStyles = computed(() => {
+  const character = availableCharacters.value.find(
+    (c) => c.id === currentCharacter.value.id
+  );
+  if (!character) return [];
+
+  // 全部展開
+  return character.styles;
+});
+
+let playbackConfirmed = false;
+const voiceModalOpen = ref(false);
+let voiceTimeout = null; // 語音識別超時計時器
+let hasFinalResult = false; // 確保只處理一次 final
+let finalizedByUs = false;
+
+function clearVoiceTimeout() {
+  if (voiceTimeout) {
+    clearTimeout(voiceTimeout);
+    voiceTimeout = null;
+  }
+}
+
+function reallyCloseVoiceModal() {
+  clearVoiceTimeout();
+  isListening.value = false;
+  showVoiceError.value = false;
+  currentTranscript.value = "";
+  voiceModalImageSrc.value = assistantSoundGif;
+  voiceModalOpen.value = false; // ← 真正關窗
+}
+
+// 語音識別和合成實例
+let recognitionRef = null;
+let synthRef = null;
+// ====== 新增：全域 Audio，集中管理播放與停止 ======
+let player = null;
+let currentObjectUrl = null;
+function ensurePlayer() {
+  if (!player) player = new Audio();
+  return player;
+}
+function revokeObjectUrl() {
+  if (currentObjectUrl) {
+    URL.revokeObjectURL(currentObjectUrl);
+    currentObjectUrl = null;
+  }
+}
+
+// 計算屬性：按日期分組的歷史記錄（升冪排列，最舊的在前面）
+const groupedHistory = computed(() => {
+  const groups = {};
+
+  // 計算要顯示的對話數量（分頁）- 從最新的開始顯示
+  const totalMessages = conversations.value.length;
+  const startIndex = Math.max(
+    0,
+    totalMessages - currentPage.value * messagesPerPage.value
+  );
+  const displayedConversations = conversations.value.slice(startIndex); // ← 直接到最尾端（最新）
+
+  displayedConversations.forEach((item) => {
+    const date = item.dateKey || toDateKey(item.timestamp); // ← 確保有 dateKey
+    if (!groups[date]) {
+      groups[date] = [];
+    }
+    groups[date].push(item);
+  });
+
+  // 對每個日期組內的對話按時間排序（最新的在前面）
+  Object.keys(groups).forEach((date) => {
+    groups[date].sort((a, b) => (a.ts ?? 0) - (b.ts ?? 0)); // 當日內：舊→新
+  });
+
+  // 按日期升冪排序（最舊的日期在前面）
+  const sortedGroups = {};
+  Object.keys(groups)
+    .sort((a, b) => new Date(a) - new Date(b))
+    .forEach((date) => {
+      sortedGroups[date] = groups[date];
+    });
+
+  return sortedGroups;
+});
+
+// 格式化日期
+const formatDate = (dateStr) => {
+  // 支援 YYYY-MM-DD 格式
+  if (dateStr.includes("-")) {
+    const [y, m, d] = dateStr.split("-");
+    const dt = new Date(Number(y), Number(m) - 1, Number(d));
+    const weekdays = ["日", "一", "二", "三", "四", "五", "六"];
+    return `${y}/${m}/${d} (${weekdays[dt.getDay()]})`;
+  }
+
+  // 原有的 YYYY/MM/DD 格式
+  const date = new Date(dateStr);
+  const weekdays = ["日", "一", "二", "三", "四", "五", "六"];
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const weekday = weekdays[date.getDay()];
+  return `${year}/${month}/${day} (${weekday})`;
+};
+
+// 格式化時間（只顯示時:分）
+const formatTime = (timestamp) => {
+  const timeStr = timestamp.split(" ")[1];
+  const [hours, minutes] = timeStr.split(":");
+  return `${hours}:${minutes}`;
+};
+
+// 設置活動標籤
+const setActiveTab = (tab) => {
+  if (process.client) {
+    // 如果點擊首頁，顯示語音控制
+    if (tab === "home") {
+      showVoiceControls.value = true;
+    } else {
+      showVoiceControls.value = false;
+    }
+  }
+};
+
+// 顯示歷史記錄
+const showHistory = async () => {
+  if (process.client) {
+    showHistoryPage.value = true;
+
+    // 禁用背景滾動
+    document.body.style.overflow = "hidden";
+
+    // 重置 CallTime 計數器
+    callTime.value = 1;
+
+    // 重新獲取最新的聊天記錄
+    await fetchChatHistory();
+
+    // 重置分頁狀態
+    currentPage.value = 1;
+    hasMoreMessages.value = true;
+
+    // 等待頁面渲染完成後滾動到底部
+    nextTick(() => {
+      setTimeout(() => {
+        scrollToBottom();
+        historyInputRef.value?.focus(); // ★ 新增：自動聚焦輸入框
+      }, 100);
+    });
+  }
+};
+
+// 關閉歷史記錄
+const closeHistory = () => {
+  if (process.client) {
+    showHistoryPage.value = false;
+    showSearch.value = false;
+    searchQuery.value = "";
+    searchResults.value = [];
+    // 重置分頁和滾動狀態
+    currentPage.value = 1;
+
+    // 恢復背景滾動
+    document.body.style.overflow = "";
+  }
+};
+
+const closeTextInput = () => {
+  showTextInput.value = false;
+};
+
+// 首次登入解說相關函數
+const checkTutorialStatus = () => {
+  if (process.client) {
+    const hasSeenTutorial = localStorage.getItem("robotTutorialSeen");
+    if (!hasSeenTutorial) {
+      showTutorial.value = true;
+      currentTutorialStep.value = 1;
+    }
+  }
+};
+
+const closeTutorial = () => {
+  if (process.client) {
+    const currentIndex = tutorialSteps.indexOf(currentTutorialStep.value);
+    if (currentIndex < tutorialSteps.length - 1) {
+      // 如果還有下一步，切換到下一步
+      currentTutorialStep.value = tutorialSteps[currentIndex + 1];
+    } else {
+      // 如果是最後一步，關閉解說
+      showTutorial.value = false;
+      localStorage.setItem("robotTutorialSeen", "true");
+    }
+  }
+};
+
+const lastScrollTop = ref(0);
+
+function logScroll(e, tag = "scroll") {
+  const el = e?.target || e;
+  const { scrollTop, scrollHeight, clientHeight } = el;
+  const dir = scrollTop > lastScrollTop.value ? "down" : "up";
+  lastScrollTop.value = scrollTop;
+
+  const atTop = scrollTop <= 0;
+  const atBottom = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
+
+  console.log(
+    `[${tag}] top=${Math.round(
+      scrollTop
+    )} h=${scrollHeight} c=${clientHeight} dir=${dir} top?${atTop} bottom?${atBottom}`
+  );
+}
+
+// 處理歷史記錄滾動事件
+const handleHistoryScroll = (e) => {
+  logScroll(e, "history");
+  if (!historyScrollContainer.value) return;
+
+  const container = historyScrollContainer.value;
+  const scrollTop = container.scrollTop;
+  const scrollHeight = container.scrollHeight;
+  const clientHeight = container.clientHeight;
+
+  // 檢查是否滾動到頂部 100px 以下（載入更舊訊息）
+  if (
+    scrollTop < 100 &&
+    !isLoadingOlderMessages.value &&
+    hasMoreMessages.value
+  ) {
+    loadOlderMessages();
+  }
+
+  // 更新 sticky header
+  updateStickyHeader();
+
+  // 設置滾動狀態
+  isScrolling.value = true;
+
+  // 清除之前的計時器
+  if (scrollTimeout.value) {
+    clearTimeout(scrollTimeout.value);
+  }
+
+  // 設置新的計時器（1.5秒後隱藏 sticky header）
+  scrollTimeout.value = setTimeout(() => {
+    isScrolling.value = false;
+  }, 1500);
+};
+
+// 載入更舊的訊息
+const loadOlderMessages = async () => {
+  isLoadingOlderMessages.value = true;
+
+  const container = historyScrollContainer.value;
+  // 記住老的 scroll 狀態
+  const oldScrollTop = container ? container.scrollTop : 0;
+  const oldScrollHeight = container ? container.scrollHeight : 0;
+
+  try {
+    // 增加 CallTime 計數器
+    callTime.value++;
+
+    console.log(`載入更舊訊息，CallTime: ${callTime.value}`);
+
+    // 調用 TTE API 獲取更舊的訊息，並取得實際新增的筆數
+    const addedCount = await fetchOlderChatHistory();
+
+    // 只有真的有新資料才翻頁
+    if (addedCount > 0) {
+      currentPage.value += 1;
+      console.log(`成功載入 ${addedCount} 條新訊息`);
+    } else {
+      hasMoreMessages.value = false;
+      console.log("沒有更多舊訊息可載入");
+    }
+
+    // 等待 DOM 更新完成
+    await nextTick();
+
+    // 正確的復原公式
+    if (container) {
+      const newScrollHeight = container.scrollHeight;
+      container.scrollTop = oldScrollTop + (newScrollHeight - oldScrollHeight);
+    }
+
+    // 更新搜尋功能：重新計算搜尋結果（如果當前有搜尋）
+    if (showSearch.value && searchQuery.value.trim()) {
+      performSearch();
+    }
+
+    // 更新日曆可選時間
+    loadCalendarDates();
+
+    // 確保資料顯示完成後才允許下次觸發
+    console.log("載入完成，搜尋和日曆已更新");
+  } catch (error) {
+    console.error("載入更舊訊息失敗:", error);
+    // 如果載入失敗，回退 CallTime
+    callTime.value--;
+  } finally {
+    // 確保載入狀態被重置，允許下次觸發
+    isLoadingOlderMessages.value = false;
+  }
+};
+
+// 更新 sticky header 日期
+const updateStickyHeader = () => {
+  if (!historyScrollContainer.value) return;
+
+  const container = historyScrollContainer.value;
+  const scrollTop = container.scrollTop;
+
+  // 找到當前可見的第一個日期分隔器
+  const dateSeparators = container.querySelectorAll(".date-separator");
+  let currentDate = "";
+
+  for (let i = 0; i < dateSeparators.length; i++) {
+    const separator = dateSeparators[i];
+    const rect = separator.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+
+    if (rect.top >= containerRect.top) {
+      currentDate = separator.textContent;
+      break;
+    }
+  }
+};
+
+// 自動滾動到底部
+const scrollToBottom = () => {
+  nextTick(() => {
+    if (historyScrollContainer.value) {
+      const container = historyScrollContainer.value;
+      container.scrollTop = container.scrollHeight;
+    }
+  });
+};
+
+// 切換日曆顯示
+const toggleCalendar = async () => {
+  if (process.client) {
+    showCalendar.value = !showCalendar.value;
+    if (showCalendar.value) {
+      // 重新獲取聊天記錄以確保日期是最新的
+      await fetchChatHistory();
+      loadCalendarDates(); // 更新所有有紀錄的日期
+
+      // 設定日曆顯示的月份為最新有記錄的月份
+      if (maxHistoryDate.value) {
+        visibleMonth.value = maxHistoryDate.value.getMonth();
+        visibleYear.value = maxHistoryDate.value.getFullYear();
+      } else {
+        const now = new Date();
+        visibleMonth.value = now.getMonth();
+        visibleYear.value = now.getFullYear();
+      }
+
+      console.log(
+        `日曆開啟，顯示月份: ${visibleYear.value}/${visibleMonth.value + 1}`
+      );
+      console.log("當月可用日期:", Array.from(monthDateKeySet.value));
+    }
+  }
+};
+
+// 載入日曆中有聊天記錄的日期
+const loadCalendarDates = () => {
+  if (process.client) {
+    // 清空現有數據
+    calendarDateKeySet.value.clear();
+
+    console.log("開始載入日曆日期，對話記錄數量:", conversations.value.length);
+
+    // 從對話記錄中提取日期
+    conversations.value.forEach((conversation, index) => {
+      let dateKey;
+      if (conversation.dateKey) {
+        dateKey = conversation.dateKey;
+      } else {
+        dateKey = toDateKey(conversation.timestamp);
+      }
+      console.log(`對話 ${index}:`, {
+        timestamp: conversation.timestamp,
+        dateKey: dateKey,
+        originalDateKey: conversation.dateKey,
+      });
+      calendarDateKeySet.value.add(dateKey);
+    });
+
+    // 更新 calendarDatesWithHistory 以保持向後兼容
+    calendarDatesWithHistory.value = Array.from(
+      calendarDateKeySet.value
+    ).sort();
+
+    console.log("最終載入的日期:", Array.from(calendarDateKeySet.value));
+    console.log("排序後的日期:", calendarDatesWithHistory.value);
+  }
+};
+
+// 處理日期選擇變更
+const handleDateChange = async (date) => {
+  if (!date) return;
+  const key = toDateKey(date);
+  console.log(`選擇日期: ${date}, 轉換為 key: ${key}`);
+
+  // 關閉日曆
+  showCalendar.value = false;
+
+  // 找到該日期的第一則訊息
+  const targetMessage = conversations.value.find((msg) => {
+    const msgDateKey = msg.dateKey || toDateKey(msg.timestamp);
+    return msgDateKey === key;
+  });
+
+  if (targetMessage) {
+    console.log(`找到目標訊息 ID: ${targetMessage.id}`);
+
+    // 確保該訊息在當前顯示範圍內
+    const totalMessages = conversations.value.length;
+    const messageIndex = conversations.value.findIndex(
+      (msg) => msg.id === targetMessage.id
+    );
+
+    if (messageIndex !== -1) {
+      // 計算需要顯示多少頁才能包含該訊息
+      const messagesFromEnd = totalMessages - messageIndex;
+      const requiredPages = Math.ceil(messagesFromEnd / messagesPerPage.value);
+      currentPage.value = requiredPages;
+
+      console.log(
+        `調整分頁到第 ${currentPage.value} 頁以顯示日期 ${key} 的訊息`
+      );
+
+      // 等待 DOM 更新後滾動到目標訊息
+      await nextTick();
+      setTimeout(() => {
+        const el = document.getElementById(`message-${targetMessage.id}`);
+        if (el) {
+          console.log(`滾動到訊息 ID: ${targetMessage.id}`);
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+
+          // 添加高亮效果
+          el.style.backgroundColor = "rgba(116, 188, 31, 0.1)";
+          el.style.borderRadius = "12px";
+          el.style.transition = "background-color 0.3s ease";
+
+          // 3秒後移除高亮
+          setTimeout(() => {
+            el.style.backgroundColor = "";
+            el.style.borderRadius = "";
+          }, 3000);
+        } else {
+          console.log(`找不到 DOM 元素: message-${targetMessage.id}`);
+        }
+      }, 100);
+    }
+  } else {
+    console.log(`找不到日期 ${key} 的訊息`);
+  }
+};
+
+// 檢查日期是否有聊天記錄
+const isDateDisabled = (date) => {
+  const dateStr = date.toISOString().split("T")[0];
+  return !calendarDateKeySet.value.has(dateStr);
+};
+
+// 停用不在清單內的日期（只允許「該月有紀錄的日子」）
+const isDateDisabledForMonth = (date) => {
+  const key = toDateKey(date);
+  // 限制：僅允許該月有紀錄的日期（monthDateKeySet）
+  const isDisabled = !monthDateKeySet.value.has(key);
+  return isDisabled;
+};
+
+const onMonthYearChange = ({ month, year }) => {
+  // month: 0-11
+  visibleMonth.value = month;
+  visibleYear.value = year;
+  // 這裡不需要再算，monthDateKeySet 會自動更新
+};
+
+// 切換搜尋功能
+const toggleSearch = () => {
+  if (process.client) {
+    if (!showSearch.value) {
+      // 開啟搜尋
+      showSearch.value = true;
+      // 延遲聚焦，等待動畫完成
+      setTimeout(() => {
+        if (searchInputRef.value) {
+          searchInputRef.value.focus();
+        }
+      }, 700);
+    } else {
+      // 關閉搜尋
+      searchQuery.value = "";
+      searchResults.value = [];
+      showSearch.value = false;
+    }
+  }
+};
+
+// 執行搜尋
+const performSearch = () => {
+  if (!searchQuery.value.trim()) {
+    searchResults.value = [];
+    return;
+  }
+
+  const query = searchQuery.value.toLowerCase();
+  const results = [];
+
+  conversations.value.forEach((conversation) => {
+    const userMatch = conversation.user.toLowerCase().includes(query);
+    const botMatch = conversation.bot.toLowerCase().includes(query);
+
+    if (userMatch || botMatch) {
+      results.push({
+        ...conversation,
+        matchType: userMatch ? "user" : "bot",
+        matchText: userMatch ? conversation.user : conversation.bot,
+        userName: "用戶", // 可以根據需要設置用戶名稱
+      });
+    }
+  });
+
+  // 按日期降冪排列（最新的在上面）
+  searchResults.value = results.sort((a, b) => {
+    const dateA = new Date(a.timestamp);
+    const dateB = new Date(b.timestamp);
+    return dateB - dateA;
+  });
+};
+
+// 清除搜尋（保留函數以備將來使用）
+const clearSearch = () => {
+  if (process.client) {
+    searchQuery.value = "";
+    searchResults.value = [];
+  }
+};
+
+// 處理角色圖片點擊
+const handleCharacterClick = () => {
+  // 可以添加其他點擊處理邏輯
+};
+
+// 關閉語音模態框
+const closeVoiceModal = () => {
+  reallyCloseVoiceModal();
+};
+
+// 處理語音模態框圖片點擊
+const handleVoiceModalClick = () => {
+  if (showVoiceError.value && process.client) {
+    showVoiceError.value = false;
+    // 重新開始語音識別
+    if (recognitionRef) {
+      currentTranscript.value = "";
+      // 切換回音波圖片
+      voiceModalImageSrc.value = assistantSoundGif;
+      recognitionRef.start();
+      isListening.value = true;
+      // 重新設置3秒超時
+      startVoiceTimeout();
+    }
+  }
+};
+
+// 開始語音識別超時計時器
+const startVoiceTimeout = () => {
+  if (voiceTimeout) {
+    clearTimeout(voiceTimeout);
+  }
+  voiceTimeout = setTimeout(() => {
+    if (isListening.value && !currentTranscript.value.trim()) {
+      // 3秒沒聲音直接顯示有關閉按鈕的提示
+      showVoiceError.value = true;
+      voiceModalImageSrc.value = assistantDefaultGif;
+      isListening.value = false; // 停止語音識別
+      if (process.client) {
+        recognitionRef?.stop();
+      }
+    }
+  }, 3000); // 3秒超時顯示提示
+};
+
+
+// 初始化語音識別
+const initSpeechRecognition = () => {
+  if (process.client && typeof window !== "undefined") {
+    if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+      const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef = new SpeechRecognition();
+      recognitionRef.continuous = false;
+      recognitionRef.interimResults = true;
+      recognitionRef.lang = "zh-TW";
+
+      recognitionRef.onresult = (event) => {
+        const transcript = Array.from(event.results)
+          .map((result) => result[0])
+          .map((result) => result.transcript)
+          .join("");
+
+        if (process.client) {
+          currentTranscript.value = transcript;
+        }
+
+        // 一旦拿到 final，就立刻關視窗 & 只處理一次
+        if (
+          event.results[event.results.length - 1].isFinal &&
+          !hasFinalResult
+        ) {
+          hasFinalResult = true;
+          clearVoiceTimeout();
+          finalizedByUs = true; // ← 標記為我們主動收尾
+          reallyCloseVoiceModal(); // ← 先把 UI 關乾淨
+          handleSpeechEnd(transcript); // 非同步處理對話
+          try {
+            recognitionRef.stop();
+          } catch {}
+        }
+      };
+
+      recognitionRef.onerror = (event) => {
+        if (process.client) {
+          console.error("語音識別錯誤:", event.error);
+        }
+        if (process.client) {
+          isListening.value = false;
+          currentTranscript.value = "";
+        }
+
+        // 清除超時計時器
+        if (voiceTimeout) {
+          clearTimeout(voiceTimeout);
+          voiceTimeout = null;
+        }
+
+        // 處理不同的錯誤類型
+        if (process.client) {
+          switch (event.error) {
+            case "not-allowed":
+              alert("請允許麥克風權限以使用語音功能");
+              closeVoiceModal();
+              break;
+            case "no-speech":
+            case "audio-capture":
+              // 如果還沒有顯示錯誤提示，則顯示
+              if (!showVoiceError.value) {
+                showVoiceError.value = true;
+                voiceModalImageSrc.value = assistantDefaultGif;
+              }
+              break;
+            case "network":
+              alert("網路連接問題，請檢查網路後重試");
+              closeVoiceModal();
+              break;
+            default:
+              if (event.error !== "aborted") {
+                // 如果還沒有顯示錯誤提示，則顯示
+                if (!showVoiceError.value) {
+                  showVoiceError.value = true;
+                  voiceModalImageSrc.value = assistantDefaultGif;
+                }
+              }
+          }
+        }
+      };
+
+      recognitionRef.onend = () => {
+        if (finalizedByUs) {
+          finalizedByUs = false;
+          hasFinalResult = false;
+          return;
+        }
+        if (!hasFinalResult) {
+          // ← 沒拿到 final 才給提示
+          isListening.value = false;
+          showVoiceError.value = true;
+          voiceModalImageSrc.value = assistantDefaultGif;
+          voiceModalOpen.value = true; // 保持彈窗開著讓使用者點關閉
+        }
+        hasFinalResult = false;
+      };
+    }
+
+    // 初始化語音合成
+    if ("speechSynthesis" in window) {
+      synthRef = window.speechSynthesis;
+    }
+  }
+};
+
+/** 統一使用 TTEgetChatMessageHistoryList.jsp API 處理語音和文字輸入 */
+async function sendViaUnifiedAPI(
+  userText,
+  { playAudio = false, extra = {} } = {}
+) {
+  if (!localobj) {
+    console.error("用戶資料不存在");
+    return "（親愛的:您的問題我目前沒辦法回答）";
+  }
+
+  // 使用本地時間，避免時區問題
+  const now = new Date();
+  const localTime = getLocalTimeString(now);
+  
+  let usedServerAudio = false; // 追蹤是否使用了伺服器音頻
+  let res;
+
+  try {
+    res = await fetch(TEXT_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chatInput: userText,
+        sessionId: UUID,
+        voicegender,
+        timestamp: localTime, // 使用本地時間格式
+        pitch_semitones: 1.5,
+        ...extra,
+      }),
+    });
+  } catch (e) {
+    showAudioError.value = true;
+    throw e;
+  }
+
+  if (!res.ok) {
+    showAudioError.value = true;
+    throw new Error(`n8n webhook failed: ${res.status}`);
+  }
+
+  // 先嘗試從 Header 取回文字（X-Answer）
+  let answerText = "";
+  const rawHeader = res.headers.get("x-answer");
+  if (rawHeader) {
+    try {
+      answerText = decodeURIComponent(rawHeader);
+    } catch {
+      // 後端若沒做 encodeURIComponent，就直接用原值
+      answerText = rawHeader;
+    }
+  }
+
+  const ct = (res.headers.get("content-type") || "").toLowerCase();
+
+  // 若是音訊回應
+  if (ct.includes("audio/")) {
+    const blob = await res.blob();
+    if (playAudio) {
+      // 若要播伺服器音檔，先關閉 TTS，避免互搶
+      try { synthRef?.cancel(); } catch {}
+      
+      const url = URL.createObjectURL(blob);
+      const audio = ensurePlayer();
+      try {
+        audio.pause();
+      } catch {}
+      revokeObjectUrl();
+      audio.src = url;
+      currentObjectUrl = url;
+
+      audio.onplay = () => {
+        isSpeaking.value = true;
+      };
+      audio.onended = () => {
+        isSpeaking.value = false;
+        revokeObjectUrl();
+      };
+      audio.onerror = () => {
+        isSpeaking.value = false;
+        if (!isMuted.value) showAudioError.value = true;
+        revokeObjectUrl();
+      };
+
+      usedServerAudio = true;
+      try {
+        await audio.play();
+      } catch (e) {
+        // iOS 若被自動播放限制擋下，給提示
+        if (!isMuted.value) showAudioError.value = true;
+      }
+    }
+  } else {
+    // 非音訊：嘗試解析 JSON / 純文字
+    let data = null;
+    try {
+      data = await res.clone().json();
+    } catch {
+      try {
+        const txt = await res.text();
+        if (!answerText) answerText = txt || "";
+      } catch {}
+    }
+
+    if (data && !answerText) {
+      // 兼容多種欄位：bot / answer / text / message / content / output...
+      const pick = (obj) => {
+        if (!obj) return "";
+        if (typeof obj === "string") return obj;
+        const keys = ["bot", "answer", "text", "message", "content", "output"];
+        for (const k of keys) {
+          const v = obj[k];
+          if (typeof v === "string" && v.trim()) return v;
+          if (v && typeof v === "object") {
+            const inner = pick(v);
+            if (inner) return inner;
+          }
+        }
+        return "";
+      };
+      answerText = pick(data);
+    }
+  }
+
+  // 寫入資料庫
+  if (localobj) {
+    try {
+      // 使用本地時間格式
+      const outputTime = getLocalTimeString();
+      
+      res = await fetch(TEXT_MESSAGE_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          Key: "qrt897hpmd",
+          MID: localobj.MID,
+          Mobile: localobj.Mobile,
+          Type: "P",
+          Inmessage: userText,
+          Outmessage: answerText,
+          Inputtime: localTime, // 使用本地時間
+          Outputtime: outputTime, // 使用本地時間
+        }),
+      });
+    } catch (e) {
+      console.error("保存聊天記錄失敗:", e);
+    }
+  }
+
+  const finalAnswer = (answerText && String(answerText).trim()) ||
+    "（親愛的:您的問題我目前沒辦法回答）";
+
+  // 只有在「沒有伺服器音檔可播」時，才用 TTS
+  if (playAudio && finalAnswer && !usedServerAudio) {
+    speakText(finalAnswer);
+  }
+
+  return finalAnswer;
+}
+
+// 開始/停止語音識別
+const toggleListening = () => {
+  if (!recognitionRef) {
+    unlockAudioIfNeeded(); // 🔓 在使用者手勢內解鎖音訊
+    if (process.client && typeof window !== "undefined") {
+      // 檢查是否為 HTTPS 或 localhost
+      if (
+        window.location.protocol !== "https:" &&
+        window.location.hostname !== "localhost"
+      ) {
+        alert("語音功能需要 HTTPS 連接，請使用安全連接");
+        return;
+      }
+      alert("您的瀏覽器不支援語音識別功能");
+    }
+    return;
+  }
+
+  if (isListening.value) {
+    if (process.client) {
+      recognitionRef.stop();
+    }
+    reallyCloseVoiceModal();
+  } else {
+    if (process.client) {
+      showVoiceError.value = false;
+      voiceModalImageSrc.value = assistantSoundGif;
+      currentTranscript.value = "";
+      hasFinalResult = false;
+      finalizedByUs = false;
+      voiceModalOpen.value = true; // ← 開窗
+      isListening.value = true;
+      recognitionRef.start();
+      startVoiceTimeout();
+    }
+  }
+};
+
+// 處理語音輸入結束
+const handleSpeechEnd = async (transcript) => {
+  if (!transcript.trim()) return;
+
+  // 語音輸入：顯示 "思考中..." 而不是用戶輸入
+  isLoading.value = true;
+  currentTranscript.value = "";
+
+  try {
+    // 檢查字數是否超過50字，進入摘要模式
+    if (transcript.length > 50) {
+      // 延遲一下再顯示摘要模式，模擬整理內容的過程
+      setTimeout(() => {
+        currentSummary.value = transcript;
+        showSummaryMode.value = true;
+        isLoading.value = false;
+      }, 2000); // 2秒後顯示摘要
+      return;
+    }
+
+    // 檢查是否包含客服關鍵字
+    if (transcript.includes("真人") || transcript.includes("客服")) {
+      pendingInput.value = transcript; // 儲存原始輸入
+      showCustomerServiceModal.value = true;
+      isLoading.value = false;
+      return;
+    }
+
+    // 正常處理語音輸入
+    const botResponse = await sendViaUnifiedAPI(transcript, {
+      playAudio: !isMuted.value, // 根據靜音狀態決定是否播放語音
+    });
+    console.log("語音處理完成，botResponse:", botResponse);
+
+    // 保存對話記錄
+    const nowTs = Date.now();
+    const newConversation = {
+      id: nowTs,
+      ts: nowTs,
+      user: transcript,
+      bot: botResponse || "（親愛的:您的問題我目前沒辦法回答）",
+      timestamp: new Date().toLocaleString("zh-TW"),
+      dateKey: toDateKey(new Date(nowTs)),
+    };
+
+    conversations.value.push(newConversation);
+    latestResponse.value = botResponse || "（親愛的:您的問題我目前沒辦法回答）";
+    saveConversations();
+
+    // 如果當前在歷史記錄頁面，確保新訊息可見
+    if (showHistoryPage.value) {
+      currentPage.value = 1;
+      nextTick(() => {
+        setTimeout(() => {
+          scrollToBottom();
+        }, 100);
+      });
+    }
+
+    console.log("語音輸入處理完成");
+  } catch (error) {
+    console.error("API 調用錯誤:", error);
+    const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
+    const errorConversation = {
+      id: Date.now(),
+      user: transcript,
+      bot: errorResponse,
+      timestamp: new Date().toLocaleString("zh-TW"),
+      dateKey: toDateKey(new Date()),
+    };
+    conversations.value.push(errorConversation);
+    latestResponse.value = errorResponse;
+    saveConversations();
+
+    // 如果當前在歷史記錄頁面，確保新訊息可見
+    if (showHistoryPage.value) {
+      currentPage.value = 1;
+      nextTick(() => {
+        setTimeout(() => {
+          scrollToBottom();
+        }, 100);
+      });
+    }
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// 語音播放文字
+const speakText = (text) => {
+  if (!synthRef || !text?.trim() || !process.client || isMuted.value) {
+    console.log("語音播放條件不滿足:", {
+      synthRef: !!synthRef,
+      text: !!text,
+      client: process.client,
+      muted: isMuted.value,
+    });
+    return;
+  }
+
+  console.log("開始播放語音:", text);
+
+  const speak = () => {
+    if (!process.client) return;
+
+    isManuallyStopped.value = false;
+    playbackConfirmed = false;
+    
+    // 停掉另外一路的 <audio>
+    try { const a = ensurePlayer(); a.pause(); a.currentTime = 0; } catch {}
+    // 停掉既有 TTS
+    try { synthRef.cancel(); } catch {}
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "zh-TW";
+
+    // 使用角色的自定義聲音設置
+    const voiceSettings = currentCharacter.value.voiceSettings || {
+      rate: 0.9,
+      pitch: 0.85,
+      volume: 1,
+    };
+
+    utterance.rate = voiceSettings.rate;
+    utterance.pitch = voiceSettings.pitch;
+    utterance.volume = voiceSettings.volume;
+
+    utterance.onstart = () => {
+      if (!process.client) return;
+      console.log("語音開始播放");
+      playbackConfirmed = true;
+      isSpeaking.value = true;
+    };
+
+    utterance.onend = () => {
+      if (process.client) {
+        console.log("語音播放結束");
+        isSpeaking.value = false;
+        isLoading.value = false;
+      }
+    };
+
+    utterance.onerror = (e) => {
+      if (process.client) {
+        console.error("語音播放錯誤:", e);
+        isSpeaking.value = false;
+        isLoading.value = false;
+        if (!isManuallyStopped.value) {
+          showAudioError.value = true;
+        }
+      }
+    };
+
+    try {
+      if (process.client) {
+        synthRef.speak(utterance);
+        console.log("已調用 synthRef.speak");
+      }
+    } catch (err) {
+      console.error("語音播放錯誤:", err);
+    }
+  };
+
+  // 確保語音合成器已準備好
+  if (process.client && synthRef) {
+    if (synthRef.getVoices().length === 0) {
+      console.log("等待語音列表載入...");
+      synthRef.onvoiceschanged = () => {
+        console.log("語音列表已載入，開始播放");
+        speak();
+      };
+    } else {
+      console.log("語音列表已存在，直接播放");
+      speak();
+    }
+  }
+};
+
+// 停止語音播放
+const stopSpeaking = () => {
+  /* if (synthRef && process.client) {
+    isManuallyStopped.value = true
+    showAudioError.value = false  // ✅ 手動停止不顯示錯誤視窗
+    synthRef.cancel()
+    isSpeaking.value = false
+  }*/
+  const a = ensurePlayer();
+  try {
+    a.pause();
+    a.currentTime = 0;
+  } catch {}
+  isSpeaking.value = false;
+  revokeObjectUrl();
+};
+
+// 切換音量控制
+const toggleVolume = () => {
+  if (process.client) {
+    // 切換靜音狀態
+    isMuted.value = !isMuted.value;
+
+    // 停掉 TTS
+    try { synthRef?.cancel(); } catch {}
+    
+    // 停掉 <audio> 播放
+    try {
+      const a = ensurePlayer();
+      a.pause();
+      a.currentTime = 0;
+    } catch {}
+
+    // 保存靜音狀態到本地存儲
+    localStorage.setItem("isMuted", JSON.stringify(isMuted.value));
+
+    console.log("音量控制切換:", isMuted.value ? "靜音" : "開啟");
+
+    // 如果從靜音切換到開啟，播放測試音
+    if (!isMuted.value) {
+      setTimeout(() => {
+        speakText("語音功能已開啟");
+      }, 500);
+    }
+  }
+};
+
+// 音訊解鎖機制（避免iOS自動播放限制）
+function unlockAudioIfNeeded() {
+  const a = ensurePlayer();
+  try {
+    a.muted = true;
+    a.play().then(() => {
+      a.pause();
+      a.currentTime = 0;
+      a.muted = false;
+    }).catch(() => {});
+  } catch {}
+}
+
+// 關閉音頻錯誤提示
+const closeAudioError = () => {
+  if (process.client) {
+    showAudioError.value = false;
+  }
+};
+
+async function handleManualInput() {
+  const input = textInput.value.trim();
+  if (!input) return;
+  
+  unlockAudioIfNeeded(); // 🔓 文字送出也解鎖一次
+
+  // 檢查字數是否超過50字，進入摘要模式
+  if (input.length > 50) {
+    // 顯示載入狀態
+    isLoading.value = true;
+    textInput.value = "";
+
+    // 延遲一下再顯示摘要模式，模擬整理內容的過程
+    setTimeout(() => {
+      currentSummary.value = input;
+      showSummaryMode.value = true;
+      isLoading.value = false;
+    }, 2000); // 2秒後顯示摘要
+    return;
+  }
+
+  // 檢查是否包含客服關鍵字
+  if (input.includes("真人") || input.includes("客服")) {
+    pendingInput.value = input; // 儲存原始輸入
+    showCustomerServiceModal.value = true;
+    textInput.value = "";
+    return;
+  }
+
+  // 文字輸入：立即將用戶輸入添加到聊天記錄中
+  const nowTs = Date.now();
+  const userMessage = {
+    id: nowTs,
+    ts: nowTs,
+    user: input,
+    bot: "", // 暫時為空，等待 API 回傳
+    timestamp: new Date().toLocaleString("zh-TW"),
+    dateKey: toDateKey(new Date(nowTs)),
+    isLoading: true, // 標記為載入中
+  };
+
+  // 立即添加到聊天記錄
+  conversations.value.push(userMessage);
+  currentTranscript.value = "";
+  textInput.value = "";
+
+  // 如果當前在歷史記錄頁面，滾動到底部
+  if (showHistoryPage.value) {
+    currentPage.value = 1;
+    nextTick(() => {
+      setTimeout(() => {
+        scrollToBottom();
+        historyInputRef.value?.focus();
+      }, 100);
+    });
+  }
+
+  try {
+    const botResponse = await sendViaUnifiedAPI(input, { playAudio: !isMuted.value });
+    console.log("文字處理完成，botResponse:", botResponse);
+
+    // 更新聊天記錄中的 bot 回覆
+    const messageIndex = conversations.value.findIndex(
+      (msg) => msg.id === nowTs
+    );
+    if (messageIndex !== -1) {
+      conversations.value[messageIndex].bot =
+        botResponse || "（親愛的:您的問題我目前沒辦法回答）";
+      conversations.value[messageIndex].isLoading = false;
+    }
+
+    latestResponse.value = botResponse || "（親愛的:您的問題我目前沒辦法回答）";
+    saveConversations();
+
+    console.log("文字輸入處理完成:", userMessage);
+  } catch (error) {
+    console.error("API 調用錯誤:", error);
+    const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
+
+    // 更新聊天記錄中的錯誤回覆
+    const messageIndex = conversations.value.findIndex(
+      (msg) => msg.id === nowTs
+    );
+    if (messageIndex !== -1) {
+      conversations.value[messageIndex].bot = errorResponse;
+      conversations.value[messageIndex].isLoading = false;
+    }
+
+    latestResponse.value = errorResponse;
+    saveConversations();
+  }
+}
+
+// 本地儲存對話記錄（現在主要用於日曆數據更新）
+const saveConversations = () => {
+  if (process.client) {
+    // 更新日曆數據
+    loadCalendarDates();
+  }
+};
+
+// 摘要模式處理函數
+const handleSummaryMode = async (saveSummary = false) => {
+  const summaryText = currentSummary.value;
+
+  // 關閉摘要模式
+  showSummaryMode.value = false;
+  currentSummary.value = "";
+
+  if (saveSummary) {
+    // 儲存摘要到健康日誌
+    try {
+      const healthLog = JSON.parse(localStorage.getItem("healthLog") || "[]");
+      const summaryEntry = {
+        id: Date.now(),
+        date: new Date().toISOString(),
+        type: "summary",
+        content: summaryText,
+        timestamp: new Date().toLocaleString("zh-TW"),
+      };
+      healthLog.push(summaryEntry);
+      localStorage.setItem("healthLog", JSON.stringify(healthLog));
+      console.log("摘要已儲存到健康日誌:", summaryEntry);
+      console.log("健康日誌總數:", healthLog.length);
+      
+      // 顯示成功提示
+      // alert("摘要已成功儲存到健康日誌！");
+    } catch (error) {
+      console.error("儲存摘要失敗:", error);
+      alert("儲存摘要失敗，請重試");
+    }
+  }
+
+  // 檢查摘要內容是否包含客服關鍵字
+  if (summaryText.includes("真人") || summaryText.includes("客服")) {
+    console.log("摘要內容包含客服關鍵字，顯示客服詢問");
+    pendingInput.value = summaryText; // 儲存原始輸入
+    showCustomerServiceModal.value = true;
+    return; // 不發送API，等待用戶選擇
+  }
+
+  // 如果沒有客服關鍵字，直接發送API分析
+  try {
+    const botResponse = await sendViaUnifiedAPI(summaryText, {
+      playAudio: !isMuted.value, // 根據靜音狀態決定是否播放語音
+    });
+
+    const nowTs = Date.now();
+    const newConversation = {
+      id: nowTs,
+      ts: nowTs,
+      user: summaryText,
+      bot: botResponse || "（親愛的:您的問題我目前沒辦法回答）",
+      timestamp: new Date().toLocaleString("zh-TW"),
+      dateKey: toDateKey(new Date(nowTs)),
+    };
+
+    conversations.value.push(newConversation);
+    latestResponse.value = botResponse || "（親愛的:您的問題我目前沒辦法回答）";
+    saveConversations();
+
+    // 如果當前在歷史記錄頁面，確保新訊息可見
+    if (showHistoryPage.value) {
+      currentPage.value = 1;
+      nextTick(() => {
+        setTimeout(() => {
+          scrollToBottom();
+        }, 100);
+      });
+    }
+  } catch (error) {
+    console.error("API 調用錯誤:", error);
+  }
+};
+
+// 客服模式處理函數（聯繫客服：靜默，不顯示任何提示或新增訊息）
+const handleCustomerService = async (contactService = false) => {
+  showCustomerServiceModal.value = false;
+
+  if (contactService) {
+    // 直接打 frSendLineText API（靜默）
+    try {
+      isLoading.value = true;
+
+      const response = await fetch("https://23700999.com:8081/HMA/api/fr/frSendLineText", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          MID: localobj.MID,
+          Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
+          MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
+          Mobile: localobj.Mobile,
+          Content: pendingInput.value || "呼叫客服",
+          Lang: "zhtw"
+        }),
+      });
+
+      if (!response.ok) {
+        // 失敗也不提示使用者；僅記錄 log 方便除錯
+        console.error(`frSendLineText 失敗: ${response.status}`);
+      } else {
+        // 成功同樣不提示、不新增氣泡
+        // 若要在開發時確認，可印 log，正式上線刪掉即可
+        const data = await response.json().catch(() => ({}));
+        console.info("frSendLineText 成功（靜默）:", data);
+      }
+
+      // 清空待處理輸入（避免殘留）
+      pendingInput.value = "";
+    } catch (error) {
+      // 靜默失敗：不改變 UI、不新增任何訊息
+      console.error("聯繫客服請求錯誤（靜默）:", error);
+    } finally {
+      isLoading.value = false;
+    }
+
+    // 直接結束，不做任何 UI 顯示或滾動處理
+    return;
+  }
+
+  // 選擇「否」，繼續 AI 分析（保持原行為）
+  console.log("用戶選擇繼續AI分析，發送原始輸入到AI");
+
+  if (pendingInput.value) {
+    const originalInput = pendingInput.value;
+    pendingInput.value = ""; // 清空待處理輸入
+
+    try {
+      isLoading.value = true;
+      const botResponse = await sendViaUnifiedAPI(originalInput, { playAudio: !isMuted.value });
+
+      const nowTs = Date.now();
+      const newConversation = {
+        id: nowTs,
+        ts: nowTs,
+        user: originalInput,
+        bot: botResponse || "（親愛的:您的問題我目前沒辦法回答）",
+        timestamp: new Date().toLocaleString("zh-TW"),
+        dateKey: toDateKey(new Date(nowTs)),
+      };
+
+      conversations.value.push(newConversation);
+      latestResponse.value = botResponse || "（親愛的:您的問題我目前沒辦法回答）";
+      saveConversations();
+
+      if (showHistoryPage.value) {
+        currentPage.value = 1;
+        nextTick(() => {
+          setTimeout(() => {
+            scrollToBottom();
+          }, 100);
+        });
+      }
+
+      console.log("客服詢問後的AI分析完成");
+    } catch (error) {
+      console.error("客服詢問後的API調用錯誤:", error);
+      const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
+      const errorConversation = {
+        id: Date.now(),
+        user: originalInput,
+        bot: errorResponse,
+        timestamp: new Date().toLocaleString("zh-TW"),
+        dateKey: toDateKey(new Date()),
+      };
+      conversations.value.push(errorConversation);
+      latestResponse.value = errorResponse;
+      saveConversations();
+    } finally {
+      isLoading.value = false;
+    }
+  }
+};
+
+
+// 啟動 API 輪詢
+const startApiPolling = () => {
+  if (apiPollingInterval.value) {
+    clearInterval(apiPollingInterval.value);
+  }
+  
+  isPollingActive.value = true;
+  console.log("啟動 API 輪詢，每15秒檢查一次新訊息");
+  
+  apiPollingInterval.value = setInterval(async () => {
+    if (isPollingActive.value) {
+      console.log("執行定期 API 檢查...");
+      await fetchChatHistory(true); // 傳遞 isPolling = true
+    }
+  }, 60000); // 先改為1分鐘
+};
+
+// 停止 API 輪詢
+const stopApiPolling = () => {
+  if (apiPollingInterval.value) {
+    clearInterval(apiPollingInterval.value);
+    apiPollingInterval.value = null;
+  }
+  isPollingActive.value = false;
+  console.log("停止 API 輪詢");
+};
+
+// 獲取聊天記錄 (TTE API)
+const fetchChatHistory = async (isPolling = false) => {
+  if (!localobj) {
+    console.error("用戶資料不存在");
+    return;
+  }
+
+  try {
+    const response = await fetch(GET_CHAT_HISTORY_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        MID: localobj.MID,
+        Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
+        MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
+        Mobile: localobj.Mobile,
+        Lang: "zhtw"
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API 調用失敗: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    if (isPolling) {
+      console.log("輪詢檢查新訊息...");
+    } else {
+      console.log("獲取到的聊天記錄:", data);
+    }
+
+    if (
+      data.Result === "OK" &&
+      data.LineList &&
+      Array.isArray(data.LineList)
+    ) {
+      // 過濾掉空記錄（沒有 CheckTime 或 Content 的記錄）
+      const validMessages = data.LineList.filter(msg => 
+        msg.CheckTime && 
+        msg.CheckTime.trim() !== "" && 
+        msg.Content && 
+        msg.Content.trim() !== ""
+      );
+
+      if (isPolling) {
+        console.log(`輪詢檢查: 原始記錄數: ${data.LineList.length}, 有效記錄數: ${validMessages.length}`);
+      } else {
+        console.log(`原始記錄數: ${data.LineList.length}, 有效記錄數: ${validMessages.length}`);
+      }
+
+      // 轉換 API 資料格式為本地格式
+      const convertedMessages = validMessages.map((msg, index) => {
+        const checkTime = parseCorrectTime(msg.CheckTime);
+
+        if (!isPolling) {
+          console.log(`處理訊息 ${index}:`, {
+            CheckTime: msg.CheckTime,
+            parsedDate: checkTime,
+            Mode: msg.Mode,
+            AHType: msg.AHType,
+            Content: msg.Content,
+            dateKey: toDateKey(checkTime),
+          });
+        }
+
+        // 根據 Mode 和 AHType 判斷是用戶還是 AI/客服
+        // Mode: "Input" = 用戶輸入, Mode: "Output" = AI/客服回應
+        // AHType: "Human" = 真人客服, AHType: "AI" = AI
+        const isUser = msg.Mode === "Input";
+        const isBot = msg.Mode === "Output";
+
+        return {
+          id: Date.now() + index, // 生成唯一 ID
+          ts: checkTime.getTime(),
+          user: isUser ? msg.Content : "",
+          bot: isBot ? msg.Content : "",
+          timestamp: checkTime.toLocaleString("zh-TW"),
+          dateKey: toDateKey(checkTime),
+        };
+      });
+
+      // 按時間排序（舊到新）
+      convertedMessages.sort((a, b) => a.ts - b.ts);
+
+      // 檢查是否有新訊息
+      const hasNewMessages = isPolling && conversations.value.length !== convertedMessages.length;
+      
+      if (hasNewMessages) {
+        console.log(`發現新訊息！從 ${conversations.value.length} 條增加到 ${convertedMessages.length} 條`);
+        
+        // 滾動到底部顯示新訊息
+        nextTick(() => {
+          setTimeout(() => {
+            scrollToBottom();
+          }, 100);
+        });
+      }
+
+      // 只有在非輪詢模式或發現新訊息時才更新
+      if (!isPolling || hasNewMessages) {
+        // 清空並填入 knownKeys
+        knownKeys.clear();
+        for (const msg of data.LineList) {
+          knownKeys.add(makeStableKey(msg));
+        }
+
+        conversations.value = convertedMessages;
+      }
+
+      // 更新最新回覆
+      if (convertedMessages.length > 0) {
+        latestResponse.value =
+          convertedMessages[convertedMessages.length - 1].bot;
+      }
+
+      // 更新日曆數據
+      loadCalendarDates();
+
+      if (!isPolling) {
+        console.log("聊天記錄載入完成:", convertedMessages);
+      }
+    }
+  } catch (error) {
+    console.error("獲取聊天記錄失敗:", error);
+  }
+};
+
+// 獲取更舊的聊天記錄 (TTE API)
+const fetchOlderChatHistory = async () => {
+  if (!localobj) {
+    console.error("用戶資料不存在");
+    return 0;
+  }
+
+  try {
+    const response = await fetch(GET_CHAT_HISTORY_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        MID: localobj.MID,
+        Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
+        MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
+        Mobile: localobj.Mobile,
+        Lang: "zhtw"
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API 調用失敗: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(`獲取到的更舊聊天記錄:`, data);
+
+    if (!(data?.Result === "OK" && Array.isArray(data.LineList))) {
+      return 0;
+    }
+
+    // 過濾掉空記錄
+    const validMessages = data.LineList.filter(msg => 
+      msg.CheckTime && 
+      msg.CheckTime.trim() !== "" && 
+      msg.Content && 
+      msg.Content.trim() !== ""
+    );
+
+    console.log(`更舊記錄 - 原始: ${data.LineList.length}, 有效: ${validMessages.length}`);
+
+    // 轉換 & 產生穩定鍵
+    const incoming = validMessages.map((msg) => {
+      const checkTime = parseCorrectTime(msg.CheckTime);
+      const key = makeStableKey(msg);
+      
+      // 根據 Mode 和 AHType 判斷是用戶還是 AI/客服
+      // Mode: "Input" = 用戶輸入, Mode: "Output" = AI/客服回應
+      // AHType: "Human" = 真人客服, AHType: "AI" = AI
+      const isUser = msg.Mode === "Input";
+      const isBot = msg.Mode === "Output";
+      
+      return {
+        stableKey: key,
+        id: key, // 用穩定鍵作為 id
+        ts: checkTime.getTime(),
+        user: isUser ? msg.Content : "",
+        bot: isBot ? msg.Content : "",
+        timestamp: checkTime.toLocaleString("zh-TW"),
+        dateKey: toDateKey(checkTime),
+      };
+    }).sort((a, b) => a.ts - b.ts);
+
+    // 去重
+    const newOnes = [];
+    for (const m of incoming) {
+      if (!knownKeys.has(m.stableKey)) {
+        knownKeys.add(m.stableKey);
+        newOnes.push(m);
+      }
+    }
+
+    if (newOnes.length === 0) {
+      return 0;
+    }
+
+    // 合併回 conversations（保持時間序）
+    conversations.value = [...newOnes, ...conversations.value].sort(
+      (a, b) => a.ts - b.ts
+    );
+
+    // 日曆也跟著更新
+    loadCalendarDates();
+
+    console.log(`載入更舊訊息完成，新增 ${newOnes.length} 條訊息`);
+    return newOnes.length;
+  } catch (error) {
+    console.error("獲取更舊聊天記錄失敗:", error);
+    return 0;
+  }
+};
+
+// 載入對話記錄（從 API 獲取）
+const loadConversations = async () => {
+  if (process.client) {
+    // 從 API 獲取聊天記錄
+    await fetchChatHistory();
+
+    // 初始化日曆顯示月份為最新有記錄的月份
+    if (conversations.value.length > 0) {
+      // 使用 nextTick 確保 calendarDateKeySet 已更新
+      nextTick(() => {
+        const latestDate = maxHistoryDate.value;
+        if (latestDate) {
+          visibleMonth.value = latestDate.getMonth();
+          visibleYear.value = latestDate.getFullYear();
+          console.log(
+            `初始化日曆顯示月份: ${visibleYear.value}/${visibleMonth.value + 1}`
+          );
+        }
+      });
+    }
+  }
+};
+
+// 組件掛載時初始化
+onMounted(() => {
+  /*if (
+    process.client &&
+    typeof window !== "undefined" &&
+    "speechSynthesis" in window
+  ) {
+    synthRef = window.speechSynthesis;
+
+    // 檢查語音合成支援
+    if (synthRef.getVoices().length === 0) {
+      synthRef.onvoiceschanged = () => {
+        const voices = synthRef.getVoices();
+        const chineseVoice = voices.find(
+          (voice) => voice.lang.includes("zh") || voice.lang.includes("cmn")
+        );
+        console.log(
+          "可用語音:",
+          voices.map((v) => `${v.name} (${v.lang})`)
+        );
+        console.log("中文語音:", chineseVoice);
+      };
+    }
+  }*/
+  initSpeechRecognition();
+  loadConversations();
+  loadSavedCharacter();
+
+  // 載入靜音狀態
+  if (process.client) {
+    const savedMuted = localStorage.getItem("isMuted");
+    if (savedMuted !== null) {
+      isMuted.value = JSON.parse(savedMuted);
+    }
+  }
+
+  // 如果當前是首頁，顯示語音控制
+  if (process.client) {
+    showVoiceControls.value = true;
+  }
+
+  // 檢查首次登入解說狀態
+  checkTutorialStatus();
+
+  // 啟動 API 輪詢
+  startApiPolling();
+
+  // 添加調試函數到全局
+  if (process.client) {
+    window.debugCalendar = () => {
+      console.log("=== 日曆調試信息 ===");
+      console.log("對話記錄:", conversations.value);
+      console.log("日曆日期集合:", Array.from(calendarDateKeySet.value));
+      console.log("當月日期集合:", Array.from(monthDateKeySet.value));
+      console.log("當前顯示月份:", visibleYear.value, visibleMonth.value + 1);
+      console.log("最早日期:", minHistoryDate.value);
+      console.log("最晚日期:", maxHistoryDate.value);
+      console.log("分組歷史:", groupedHistory.value);
+    };
+  }
+});
+
+// 組件卸載時清理
+onUnmounted(() => {
+  stopApiPolling();
+});
+
+// 載入保存的角色選擇
+const loadSavedCharacter = () => {
+  if (process.client) {
+    // 載入可用角色列表
+    const savedCharacters = localStorage.getItem("availableCharacters");
+    if (savedCharacters) {
+      try {
+        const parsedCharacters = JSON.parse(savedCharacters);
+        // 合併保存的數據與默認數據
+        availableCharacters.value = availableCharacters.value.map((char) => {
+          const savedChar = parsedCharacters.find((c) => c.id === char.id);
+          return savedChar ? { ...char, ...savedChar } : char;
+        });
+      } catch (e) {
+        console.error("載入角色列表失敗:", e);
+      }
+    }
+
+    // 載入當前選擇的角色
+    const saved = localStorage.getItem("selectedCharacter");
+    if (saved) {
+      try {
+        const savedCharacter = JSON.parse(saved);
+        const foundCharacter = availableCharacters.value.find(
+          (c) => c.id === savedCharacter.id
+        );
+        if (foundCharacter) {
+          currentCharacter.value = {
+            ...foundCharacter,
+            ...savedCharacter,
+            customName:
+              savedCharacter.customName ||
+              foundCharacter.customName ||
+              foundCharacter.displayName,
+          };
+          characterImageSrc.value = savedCharacter.fullImage;
+        }
+      } catch (e) {
+        console.error("載入角色選擇失敗:", e);
+      }
+    }
+  }
+};
+
+// 組件卸載時清理
+onUnmounted(() => {
+  if (recognitionRef) {
+    recognitionRef.stop();
+  }
+  if (player) {
+    try {
+      player.pause();
+    } catch {}
+  }
+  revokeObjectUrl();
+  //if (process.client && synthRef) {synthRef.cancel();}
+  // 清除超時計時器
+  if (voiceTimeout) {
+    clearTimeout(voiceTimeout);
+  }
+});
+
+// SEO
+useHead({
+  title: "語音對話App",
+  meta: [{ name: "description", content: "智能語音對話助手應用" }],
+});
+
+// 工具函數
+function getOrCreateVisitorID() {
+  if (typeof document === "undefined") return "default-session-id";
+
+  const name = "WBSID";
+  const existing = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith(name + "="))
+    ?.split("=")[1];
+
+  if (existing) return existing;
+
+  const newID = crypto.randomUUID();
+  document.cookie = `${name}=${newID}; path=/; max-age=31536000`;
+  return newID;
+}
+
+// 搜尋結果跳轉
+const scrollToMessage = (id) => {
+  showSearch.value = false;
+  searchQuery.value = "";
+  searchResults.value = [];
+
+  setTimeout(() => {
+    const el = document.getElementById(`message-${id}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" }); // ← 重點
+      // 高亮 3 秒
+      el.style.backgroundColor = "rgba(116, 188, 31, 0.1)";
+      el.style.borderRadius = "12px";
+      setTimeout(() => {
+        el.style.backgroundColor = "";
+        el.style.borderRadius = "";
+      }, 3000);
+    }
+  }, 300);
+};
+
+// 關鍵字高亮
+const highlightKeyword = (text, keyword) => {
+  if (!keyword) return text;
+  const regex = new RegExp(`(${keyword})`, "gi");
+  return text.replace(
+    regex,
+    '<span class="highlight" style="color:#74bc1f">$1</span>'
+  );
+};
+
+// 角色選擇相關函數
+const showCharacterModal = () => {
+  if (process.client) {
+    showCharacterSelection.value = true;
+    // 初始化臨時選擇狀態為當前角色
+    tempSelectedCharacter.value = { ...currentCharacter.value };
+    // 初始化角色圖片載入狀態
+    initCharacterImageLoading();
+    // 初始化 Swiper 到當前選中的角色
+    nextTick(() => {
+      initSwiperToCurrentCharacter();
+    });
+  }
+};
+
+const closeCharacterModal = () => {
+  if (process.client) {
+    // 獲取原始保存的角色
+    const savedCharacter = localStorage.getItem("selectedCharacter")
+      ? JSON.parse(localStorage.getItem("selectedCharacter"))
+      : { id: "doctor", styleId: "doctor1" };
+
+    // 檢查臨時選擇的角色是否與當前角色不同
+    const hasUnsavedChanges =
+      tempSelectedCharacter.value &&
+      (tempSelectedCharacter.value.id !== currentCharacter.value.id ||
+        tempSelectedCharacter.value.styleId !== currentCharacter.value.styleId);
+
+    if (hasUnsavedChanges) {
+      showCharacterExitConfirm.value = true;
+    } else {
+      showCharacterSelection.value = false;
+      isStyleExpanded.value = false;
+      tempSelectedCharacter.value = null;
+    }
+  }
+};
+
+// 近期推出彈窗相關函數
+const showComingSoonModal = () => {
+  if (process.client) {
+    showComingSoon.value = true;
+  }
+};
+
+const closeComingSoonModal = () => {
+  if (process.client) {
+    showComingSoon.value = false;
+  }
+};
+
+// 角色選擇離開確認彈窗相關函數
+const confirmCharacterExit = () => {
+  if (process.client) {
+    showCharacterExitConfirm.value = false;
+    showCharacterSelection.value = false;
+    isStyleExpanded.value = false;
+    tempSelectedCharacter.value = null;
+  }
+};
+
+const cancelCharacterExit = () => {
+  if (process.client) {
+    showCharacterExitConfirm.value = false;
+  }
+};
+
+const toggleStyleExpansion = () => {
+  if (process.client) {
+    isStyleExpanded.value = !isStyleExpanded.value;
+  }
+};
+
+// Swiper 滑動事件處理
+const onSlideChange = (swiper) => {
+  const activeIndex = swiper.activeIndex;
+  const character = availableCharacters.value[activeIndex];
+  if (character) {
+    // 更新臨時選擇狀態
+    tempSelectedCharacter.value = { ...character };
+  }
+};
+
+// 角色點擊事件處理
+const onCharacterClick = (character) => {
+  // 如果是鎖定的角色，顯示"近期推出"彈窗
+  if (isCharacterLocked(character)) {
+    showComingSoonModal();
+    return;
+  }
+
+  const characterIndex = availableCharacters.value.findIndex(
+    (c) => c.id === character.id
+  );
+  if (characterIndex !== -1 && characterSwiperRef.value) {
+    // 滑動到選中的角色並置中
+    characterSwiperRef.value.$el.swiper.slideTo(characterIndex);
+    // 更新臨時選擇狀態
+    tempSelectedCharacter.value = { ...character };
+  }
+};
+
+const selectCharacter = (character) => {
+  if (process.client) {
+    currentCharacter.value = {
+      ...character,
+      styleId: 1, // 默認選擇第一個造型
+      avatar: character.styles[0]?.thumbnail || character.avatar, // 更新頭貼為第一個樣式的縮圖
+      fullImage: character.styles[0]?.fullImage || character.fullImage,
+      customName: character.customName || character.displayName,
+      voiceSettings: character.voiceSettings || {
+        rate: 0.9,
+        pitch: 0.85,
+        volume: 1,
+      },
+    };
+    isStyleExpanded.value = false; // 切換角色時收起造型選擇
+
+    // 更新角色圖片路徑
+    characterImageSrc.value =
+      character.styles[0]?.fullImage || character.fullImage;
+
+    console.log("已選擇角色:", character.customName || character.displayName);
+  }
+};
+
+const selectStyle = (style) => {
+  if (process.client) {
+    console.log("選擇樣式:", style.id, "鎖定狀態:", style.locked);
+    // 如果是鎖定的樣式，顯示"近期推出"彈窗
+    if (style.locked) {
+      showComingSoonModal();
+      return;
+    }
+
+    // 更新臨時選擇狀態
+    if (tempSelectedCharacter.value) {
+      tempSelectedCharacter.value.styleId = style.id;
+      tempSelectedCharacter.value.avatar = style.thumbnail;
+      tempSelectedCharacter.value.fullImage = style.fullImage;
+    }
+  }
+};
+
+const confirmCharacterSelection = () => {
+  if (process.client) {
+    // 確認保存臨時選擇的角色
+    if (tempSelectedCharacter.value) {
+      currentCharacter.value = { ...tempSelectedCharacter.value };
+    }
+
+    // 更新角色圖片路徑
+    characterImageSrc.value = currentCharacter.value.fullImage;
+
+    // 保存到本地存儲
+    localStorage.setItem(
+      "selectedCharacter",
+      JSON.stringify(currentCharacter.value)
+    );
+
+    // 關閉彈窗
+    showCharacterSelection.value = false;
+    isStyleExpanded.value = false;
+    tempSelectedCharacter.value = null;
+
+    // 可以添加成功提示或其他確認邏輯
+    console.log(
+      "角色選擇已確認:",
+      currentCharacter.value.customName || currentCharacter.value.displayName
+    );
+    console.log("當前頭貼:", currentCharacter.value.avatar);
+  }
+};
+
+// 角色圖片載入事件處理
+const onCharacterImageLoad = (characterId) => {
+  characterImageLoading.value.delete(characterId);
+};
+
+const onCharacterImageError = (characterId) => {
+  characterImageLoading.value.delete(characterId);
+  console.error(`角色圖片載入失敗: ${characterId}`);
+};
+
+// 初始化角色圖片載入狀態
+const initCharacterImageLoading = () => {
+  availableCharacters.value.forEach((character) => {
+    characterImageLoading.value.add(character.id);
+  });
+};
+
+// 初始化 Swiper 到當前選中的角色
+const initSwiperToCurrentCharacter = () => {
+  if (process.client && characterSwiperRef.value && currentCharacter.value) {
+    const characterIndex = availableCharacters.value.findIndex(
+      (c) => c.id === currentCharacter.value.id
+    );
+    if (characterIndex !== -1) {
+      // 等待 Swiper 初始化完成後滑動到指定位置
+      nextTick(() => {
+        setTimeout(() => {
+          if (characterSwiperRef.value && characterSwiperRef.value.$el) {
+            characterSwiperRef.value.$el.swiper.slideTo(characterIndex, 0);
+          }
+        }, 100);
+      });
+    }
+  }
+};
+
+// 角色名稱編輯相關函數
+const showNameInputModal = () => {
+  if (process.client) {
+    characterNameInput.value =
+      uiCharacter.value.customName || uiCharacter.value.displayName;
+    nameInputError.value = "";
+    showNameInput.value = true;
+    nextTick(() => {
+      if (nameInputRef.value) {
+        nameInputRef.value.focus();
+      }
+    });
+  }
+};
+
+const closeNameInput = () => {
+  if (process.client) {
+    showNameInput.value = false;
+    // 重置為原始名稱，不儲存修改
+    characterNameInput.value =
+      uiCharacter.value.customName || uiCharacter.value.displayName;
+    nameInputError.value = "";
+  }
+};
+
+const confirmNameInput = () => {
+  if (process.client) {
+    const name = characterNameInput.value.trim();
+
+    if (!name) {
+      nameInputError.value = "角色不能沒有名字喔";
+      return;
+    }
+
+    if (name.length > 10) {
+      nameInputError.value = "名字不能超過10個字";
+      return;
+    }
+
+    // 目標為畫面上正在預覽/編輯的角色（在角色彈窗中就是 tempSelectedCharacter）
+    const targetId = uiCharacter.value.id;
+    // 更新可用角色列表中的對應角色
+    const characterIndex = availableCharacters.value.findIndex(
+      (c) => c.id === targetId
+    );
+    if (characterIndex !== -1) {
+      availableCharacters.value[characterIndex] = {
+        ...availableCharacters.value[characterIndex],
+        customName: name,
+      };
+    }
+
+    // 若彈窗中正在編輯的就是 tempSelectedCharacter，也同步更新它（讓畫面即時反映）
+    if (
+      tempSelectedCharacter.value &&
+      tempSelectedCharacter.value.id === targetId
+    ) {
+      tempSelectedCharacter.value.customName = name;
+    }
+
+    // 若此角色同時也是當前使用中的角色，順便同步到 currentCharacter 與 localStorage
+    if (currentCharacter.value.id === targetId) {
+      currentCharacter.value.customName = name;
+      localStorage.setItem(
+        "selectedCharacter",
+        JSON.stringify(currentCharacter.value)
+      );
+    }
+
+    // 保存到本地存儲
+    localStorage.setItem(
+      "selectedCharacter",
+      JSON.stringify(currentCharacter.value)
+    );
+    localStorage.setItem(
+      "availableCharacters",
+      JSON.stringify(availableCharacters.value)
+    );
+
+    closeNameInput();
+    console.log("角色名稱已更新:", name);
+  }
+};
+
+// --- 日期工具：統一成 YYYY-MM-DD ---
+const toDateKey = (input) => {
+  if (input instanceof Date) {
+    // 使用本地時間避免時區問題
+    const year = input.getFullYear();
+    const month = String(input.getMonth() + 1).padStart(2, "0");
+    const day = String(input.getDate()).padStart(2, "0");
+    const result = `${year}-${month}-${day}`;
+    console.log(`toDateKey (Date): ${input} → ${result}`);
+    return result;
+  }
+  // input 可能是 "2025/8/20 下午 2:20:33" → 取前半段日期、轉成 YYYY-MM-DD
+  const first = String(input).split(" ")[0]; // 2025/8/20
+  const [y, m, d] = first.split("/");
+  const pad = (n) => String(n).padStart(2, "0");
+  const result = `${String(y).padStart(4, "0")}-${pad(m)}-${pad(d)}`;
+  console.log(`toDateKey (String): ${input} → ${result}`);
+  return result;
+};
+
+// 有紀錄的日期集合（Set，比 array 包含查詢快）
+const calendarDateKeySet = ref(new Set());
+
+// 動態區間（可選）
+const minHistoryDate = computed(() => {
+  const arr = Array.from(calendarDateKeySet.value);
+  if (!arr.length) return undefined;
+  const result = new Date(arr.sort()[0]); // 最早
+  console.log("最早日期:", result);
+  return result;
+});
+const maxHistoryDate = computed(() => {
+  const arr = Array.from(calendarDateKeySet.value);
+  if (!arr.length) return undefined;
+  const result = new Date(arr.sort().slice(-1)[0]); // 最晚
+  console.log("最晚日期:", result);
+  return result;
+});
+
+// 本地指令：v-click-outside
+const vClickOutside = {
+  mounted(el, binding) {
+    el.__clickOutside__ = (e) => {
+      if (!(el === e.target || el.contains(e.target))) {
+        typeof binding.value === "function" && binding.value(e);
+      }
+    };
+    document.addEventListener("click", el.__clickOutside__);
+  },
+  unmounted(el) {
+    document.removeEventListener("click", el.__clickOutside__);
+    delete el.__clickOutside__;
+  },
+};
+</script>
+
+
+<!-- scss分段 -->
+
 <style lang="scss" scoped>
 .chat-wrapper {
   display: flex;
   flex-direction: column;
-      align-items: center;
+  align-items: center;
   height: 100vh;
   padding-top: 1rem;
   @include gradientBg();
@@ -637,7 +3474,7 @@
 /* 聊天頭部 */
 .chat-header {
   width: 100%;
-  max-width:768px;
+  max-width: 768px;
   display: flex;
   align-items: center;
   position: relative;
@@ -714,8 +3551,8 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  max-width:768px;
-  width:100%;
+  max-width: 768px;
+  width: 100%;
   align-items: baseline;
   margin-top: 1rem;
   padding: 0 1rem;
@@ -784,7 +3621,7 @@
   position: relative;
   display: flex;
   justify-content: center;
-  max-width:768px;
+  max-width: 768px;
   flex: 1;
   width: 100%;
   height: 0;
@@ -794,6 +3631,41 @@
     height: 100%;
     object-fit: cover;
   }
+  .healGroup{
+    position: absolute;
+      right: 2.25rem;
+      top: 2.5rem;
+      transform: translate(50%, -50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 0.15rem;
+    .healthImg{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--Radius-r-50, 50px);
+      background: var(--Secondary-100, #f5f7fa);
+      box-shadow: 2px 4px 12px 0
+      var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
+      padding: 0.5rem;
+      cursor: pointer;
+  
+    }
+    h5{
+      color: var(--Neutral-500, #666);
+text-align: center;
+font-size: 10px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+    }
+  }
+  
 }
 
 /* 語音控制欄 - 絕對定位擬態設計 */
@@ -1209,6 +4081,139 @@
   }
 }
 
+/* 共用機器人彈窗樣式 */
+.robotCommonModel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  min-height: 375px;
+  background: rgba(245, 247, 250, 0.1);
+  backdrop-filter: blur(22px);
+  z-index: 2000; /* 確保超過文字聊天室 */
+  @include neumorphismOuter(
+    $bgColor: rgba(245, 247, 250, 0.1),
+    $radius: 50px 50px 0 0,
+    $x: 0,
+    $y: -2px,
+    $blur: 12px,
+    $color: $raphael-white
+  );
+
+  .robot-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 40px 30px;
+    max-width: 90%;
+    width: 400px;
+    text-align: center;
+
+    .robot-sphere {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto;
+      background-image: url('/assets/imgs/robot/assistantSound.gif');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      animation: pulse-wave 2s infinite ease-in-out;
+    }
+
+    .robot-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #2d3748;
+      margin-bottom: 10px;
+    }
+
+    .robot-text {
+      font-size: 16px;
+      color: #4a5568;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 10px;
+      border-left: 4px solid #74bc1f;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .robot-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+
+      .robot-btn-cancel {
+        background: #f7fafc;
+        color: #4a5568;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 100px;
+        @include neumorphismOuter(
+          $bgColor: #f7fafc,
+          $radius: 25px,
+          $x: 2px,
+          $y: 2px,
+          $blur: 4px
+        );
+
+        &:hover {
+          background: #edf2f7;
+          transform: translateY(-1px);
+        }
+      }
+
+      .robot-btn-confirm {
+        background: linear-gradient(90deg, #74bc1f, #5a9c0f);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 100px;
+        @include neumorphismOuter(
+          $bgColor: linear-gradient(90deg, #74bc1f, #5a9c0f),
+          $radius: 25px,
+          $x: 0,
+          $y: 2px,
+          $blur: 6px
+        );
+
+        &:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(116, 188, 31, 0.3);
+        }
+      }
+    }
+  }
+}
+
+/* 摘要模式樣式 - 使用共用樣式 */
+.summary-modal {
+  @extend .robotCommonModel;
+}
+
+/* 客服詢問樣式 - 使用共用樣式 */
+.customer-service-modal {
+  @extend .robotCommonModel;
+}
+
 /* 動畫 */
 .fade-enter-active,
 .fade-leave-active {
@@ -1395,7 +4400,7 @@
     display: flex;
     flex-direction: column;
     gap: 24px;
-    max-width:768px;
+    max-width: 768px;
     flex: 1;
 
     padding-bottom: 56px;
@@ -2397,2447 +5402,3 @@
 }
 </style>
 
-<script setup>
-import { ref, onMounted, onUnmounted, computed, nextTick } from "vue";
-import { useHead } from "#app";
-import BottomNav from "~/components/BottomNav.vue";
-import VueDatePicker from "@vuepic/vue-datepicker";
-import "@vuepic/vue-datepicker/dist/main.css";
-// Import Swiper Vue.js components
-import { Swiper, SwiperSlide } from "swiper/vue";
-// Import Swiper styles
-import "swiper/css";
-import "swiper/css/pagination";
-// import required modules
-import { Pagination } from "swiper/modules";
-// 移除import，改用動態路徑
-import recycleSvg from "~/assets/imgs/robot/recycle.svg";
-import messagesSquare from "~/assets/imgs/robot/messagesSquare.svg";
-import soundSvg from "~/assets/imgs/robot/sound.svg";
-import assistantSoundGif from "~/assets/imgs/robot/assistantSound.gif";
-import assistantDefaultGif from "~/assets/imgs/robot/assistantDefault.gif";
-import loadingGif from "~/assets/imgs/robot/loading.gif";
-import lockSvg from "~/assets/imgs/robot/lock.svg";
-import Alert from "~/components/Alert.vue";
-import volumeSvg from "~/assets/imgs/robot/volume.svg";
-import mutedSvg from "~/assets/imgs/robot/muted.svg";
-import searchSvg from "~/assets/imgs/robot/search.svg";
-import calendarSvg from "~/assets/imgs/robot/calendar.svg";
-import sendSvg from "~/assets/imgs/robot/send.svg";
-
-// ====== 新增：你的 n8n TTS webhook（需回傳 audio/wav 二進位檔）======
-const TTS_WEBHOOK_URL = "https://aiwisebalance.com/webhook/oss-gpt";
-const TEXT_WEBHOOK_URL = "https://aiwisebalance.com/webhook/Textchat"; // ← 你的「純文字」端點（若同一支就跟 TTS_URL 相同）
-const TEXT_MESSAGE_URL =
-  "https://23700999.com:8081/HMA/TTEsaveChatMessageHistory.jsp"; // ← 你的「純文字」端點（若同一支就跟 TTS_URL 相同）
-const GET_CHAT_HISTORY_URL =
-  "https://23700999.com:8081/HMA/TTEgetChatMessageHistoryList.jsp"; // ← 獲取聊天記錄的端點
-const voicegender = "female";
-const historyInputRef = ref(null);
-
-// Swiper modules
-const swiperModules = [Pagination];
-const characterSwiperRef = ref(null);
-
-// 角色圖片載入狀態
-const characterImageLoading = ref(new Set());
-
-// 檢查角色是否被鎖定
-const isCharacterLocked = (character) => {
-  return character.locked === true;
-};
-
-// 響應式狀態
-const router = useRouter();
-const isListening = ref(false);
-const isLoading = ref(false);
-const conversations = ref([]);
-const currentTranscript = ref("");
-const isSpeaking = ref(false);
-const isMuted = ref(false); // 靜音狀態
-const UUID = getOrCreateVisitorID();
-const textInput = ref("");
-const showTextInput = ref(false);
-const showVoiceControls = ref(false);
-const showAudioError = ref(false);
-const isManuallyStopped = ref(false);
-const showHistoryPage = ref(false);
-const showVoiceError = ref(false);
-
-// 首次登入解說相關狀態
-const showTutorial = ref(false);
-const currentTutorialStep = ref(1);
-const tutorialSteps = [1, 2, 3, 4, 5]; // 解說步驟順序
-import doctor from "~/assets/imgs/robot/character/doctor.png";
-import doctor2 from "~/assets/imgs/robot/character/doctor2.png";
-import doctor3 from "~/assets/imgs/robot/character/doctor3.png";
-import doctor4 from "~/assets/imgs/robot/character/doctor4.png";
-import doctor5 from "~/assets/imgs/robot/character/doctor5.png";
-import doctor6 from "~/assets/imgs/robot/character/doctor6.png";
-import girl1_1 from "~/assets/imgs/robot/character/girl1_1.png";
-import girl1_2 from "~/assets/imgs/robot/character/girl1_2.png";
-import girl1_3 from "~/assets/imgs/robot/character/girl1_3.png";
-import girl2_1 from "~/assets/imgs/robot/character/girl2_1.png";
-import girl2_2 from "~/assets/imgs/robot/character/girl2_2.png";
-import girl3_1 from "~/assets/imgs/robot/character/girl3_1.png";
-import girl3_2 from "~/assets/imgs/robot/character/girl3_2.png";
-import girl4_1 from "~/assets/imgs/robot/character/girl4_1.png";
-import girl4_2 from "~/assets/imgs/robot/character/girl4_2.png";
-import girl5_1 from "~/assets/imgs/robot/character/girl5_1.png";
-import girl5_2 from "~/assets/imgs/robot/character/girl5_2.png";
-import man1_1 from "~/assets/imgs/robot/character/man1_1.png";
-import man1_2 from "~/assets/imgs/robot/character/man1_2.png";
-import man2_1 from "~/assets/imgs/robot/character/man2_1.png";
-import man2_2 from "~/assets/imgs/robot/character/man2_2.png";
-import man3_1 from "~/assets/imgs/robot/character/man3_1.png";
-import man3_2 from "~/assets/imgs/robot/character/man3_2.png";
-import man3_3 from "~/assets/imgs/robot/character/man3_3.png";
-import man4_1 from "~/assets/imgs/robot/character/man4_1.png";
-import man4_2 from "~/assets/imgs/robot/character/man4_2.png";
-import man5_1 from "~/assets/imgs/robot/character/man5_1.png";
-import man5_2 from "~/assets/imgs/robot/character/man5_2.png";
-import man6_1 from "~/assets/imgs/robot/character/man6_1.png";
-import man6_2 from "~/assets/imgs/robot/character/man6_2.png";
-import pet1_1 from "~/assets/imgs/robot/character/pet1_1.png";
-import pet1_2 from "~/assets/imgs/robot/character/pet1_2.png";
-import pet2_1 from "~/assets/imgs/robot/character/pet2_1.png";
-import pet2_2 from "~/assets/imgs/robot/character/pet2_2.png";
-import pet3_1 from "~/assets/imgs/robot/character/pet3_1.png";
-import pet3_2 from "~/assets/imgs/robot/character/pet3_2.png";
-import pet4_1 from "~/assets/imgs/robot/character/pet4_1.png";
-import pet4_2 from "~/assets/imgs/robot/character/pet4_2.png";
-import pet4_3 from "~/assets/imgs/robot/character/pet4_3.png";
-
-const characterImageSrc = ref(doctor);
-
-// UI 目前應該顯示誰的 computed
-const uiCharacter = computed(() =>
-  showCharacterSelection.value && tempSelectedCharacter.value
-    ? tempSelectedCharacter.value
-    : currentCharacter.value
-);
-
-const voiceModalImageSrc = ref(assistantSoundGif); // 語音模態框圖片路徑
-const textInputRef = ref(null); // 添加文字輸入框的 ref
-const searchInputRef = ref(null); // 添加搜尋輸入框的 ref
-const nameInputRef = ref(null); // 添加名稱輸入框的 ref
-const latestResponse = ref(""); // 最新回覆
-const showSearch = ref(false); // 搜尋功能開關
-const searchQuery = ref(""); // 搜尋關鍵字
-const searchResults = ref([]); // 搜尋結果
-// 從 localStorage 獲取用戶資料
-const localData = localStorage.getItem("userData");
-const localobj = localData ? JSON.parse(localData) : null;
-console.log("localobj=", localobj?.Mobile);
-
-if (!localData) {
-  router.push("/");
-}
-
-// 角色選擇相關狀態
-const showCharacterSelection = ref(false); // 顯示角色選擇彈窗
-const showComingSoon = ref(false); // 顯示近期推出彈窗
-const showCharacterExitConfirm = ref(false); // 顯示角色選擇離開確認彈窗
-const tempSelectedCharacter = ref(null); // 臨時選擇的角色
-const isStyleExpanded = ref(false); // 造型是否展開
-
-// 角色命名相關狀態
-const showNameInput = ref(false); // 顯示名稱輸入彈窗
-const characterNameInput = ref(""); // 角色名稱輸入
-const nameInputError = ref(""); // 名稱輸入錯誤訊息
-
-// 新增：聊天歷史改進相關變數
-const historyScrollContainer = ref(null);
-const isScrolling = ref(false);
-const scrollTimeout = ref(null);
-
-const isLoadingOlderMessages = ref(false);
-const hasMoreMessages = ref(true);
-const currentPage = ref(1);
-const messagesPerPage = ref(20);
-const callTime = ref(1); // CallTime 計數器，用於載入更舊的訊息
-const knownKeys = new Set(); // 用於去重的穩定鍵集合
-
-// 生成穩定鍵用於去重
-const makeStableKey = (msg) => {
-  return `${msg.Inputtime}|${msg.Inmessage ?? ''}|${msg.Outputtime ?? ''}|${msg.Outmessage ?? ''}`;
-};
-
-// 日曆相關
-const showCalendar = ref(false);
-const selectedDate = ref(null);
-const calendarDatesWithHistory = ref([]);
-const today = new Date();
-const endOfNextMonth = new Date(today.getFullYear(), today.getMonth() + 2, 0);
-
-// 日曆顯示的年月（0-11）
-const visibleMonth = ref(new Date().getMonth());
-const visibleYear = ref(new Date().getFullYear());
-
-// 當月有紀錄的日期清單（Set<YYYY-MM-DD> → 只保留當月）
-const monthDateKeySet = computed(() => {
-  const set = new Set();
-  console.log(
-    `計算當月日期集合 - 當前顯示: ${visibleYear.value}/${
-      visibleMonth.value + 1
-    }`
-  );
-  console.log(`所有可用日期:`, Array.from(calendarDateKeySet.value));
-
-  calendarDateKeySet.value.forEach((key) => {
-    const d = new Date(key + "T00:00:00");
-    console.log(
-      `檢查日期 ${key}: ${d.getFullYear()}-${d.getMonth() + 1} vs ${
-        visibleYear.value
-      }-${visibleMonth.value + 1}`
-    );
-    if (
-      d.getFullYear() === visibleYear.value &&
-      d.getMonth() === visibleMonth.value
-    ) {
-      set.add(key);
-      console.log(`✓ 添加日期 ${key} 到當月集合`);
-    }
-  });
-  console.log(
-    `當月 ${visibleYear.value}/${visibleMonth.value + 1} 可用日期:`,
-    Array.from(set)
-  );
-  return set;
-});
-
-// 角色數據
-const currentCharacter = ref({
-  id: 1,
-  name: "芷澄",
-  displayName: "芷澄",
-  avatar: doctor,
-  fullImage: doctor,
-  styleId: 1,
-  customName: "芷澄", // 自定義名稱
-  voiceSettings: {
-    rate: 0.9,
-    pitch: 0.85,
-    volume: 1,
-  },
-});
-
-const availableCharacters = ref([
-  {
-    id: 1,
-    name: "芷澄",
-    displayName: "芷澄",
-    avatar: doctor,
-    fullImage: doctor,
-    customName: "芷澄",
-    voiceSettings: {
-      rate: 0.9,
-      pitch: 0.85,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: doctor, fullImage: doctor },
-      { id: 2, thumbnail: doctor2, fullImage: doctor2 },
-      { id: 3, thumbnail: doctor3, fullImage: doctor3 },
-      { id: 4, thumbnail: doctor4, fullImage: doctor4 },
-      { id: 5, thumbnail: doctor5, fullImage: doctor5, locked: true },
-      { id: 6, thumbnail: doctor6, fullImage: doctor6, locked: true },
-    ],
-  },
-  {
-    id: 2,
-    name: "蕾紗",
-    displayName: "蕾紗",
-    avatar: girl1_1,
-    fullImage: girl1_1,
-    customName: "蕾紗",
-    voiceSettings: {
-      rate: 0.95,
-      pitch: 0.9,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: girl1_1, fullImage: girl1_1 },
-      { id: 2, thumbnail: girl1_2, fullImage: girl1_2 },
-      { id: 3, thumbnail: girl1_3, fullImage: girl1_3, locked: true },
-    ],
-  },
-  {
-    id: 3,
-    name: "沁瑤",
-    displayName: "沁瑤",
-    avatar: girl2_1,
-    fullImage: girl2_1,
-    customName: "沁瑤",
-    voiceSettings: {
-      rate: 0.9,
-      pitch: 0.8,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: girl2_1, fullImage: girl2_1 },
-      { id: 2, thumbnail: girl2_2, fullImage: girl2_2, locked: true },
-    ],
-  },
-  {
-    id: 4,
-    name: "晴婕",
-    displayName: "晴婕",
-    avatar: girl3_1,
-    fullImage: girl3_1,
-    customName: "晴婕",
-    voiceSettings: {
-      rate: 0.95,
-      pitch: 0.85,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: girl3_1, fullImage: girl3_1 },
-      { id: 2, thumbnail: girl3_2, fullImage: girl3_2 },
-    ],
-  },
-  {
-    id: 5,
-    name: "芮欣",
-    displayName: "芮欣",
-    avatar: girl4_1,
-    fullImage: girl4_1,
-    customName: "芮欣",
-    voiceSettings: {
-      rate: 0.9,
-      pitch: 0.9,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: girl4_1, fullImage: girl4_1 },
-      { id: 2, thumbnail: girl4_2, fullImage: girl4_2 },
-    ],
-  },
-  {
-    id: 6,
-    name: "語彤",
-    displayName: "語彤",
-    avatar: girl5_1,
-    fullImage: girl5_1,
-    customName: "語彤",
-    voiceSettings: {
-      rate: 0.95,
-      pitch: 0.8,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: girl5_1, fullImage: girl5_1 },
-      { id: 2, thumbnail: girl5_2, fullImage: girl5_2 },
-    ],
-  },
-  {
-    id: 7,
-    name: "澤昊",
-    displayName: "澤昊",
-    avatar: man1_1,
-    fullImage: man1_1,
-    customName: "澤昊",
-    voiceSettings: {
-      rate: 0.85,
-      pitch: 0.7,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: man1_1, fullImage: man1_1 },
-      { id: 2, thumbnail: man1_2, fullImage: man1_2 },
-    ],
-  },
-  {
-    id: 8,
-    name: "亦辰",
-    displayName: "亦辰",
-    avatar: man2_1,
-    fullImage: man2_1,
-    customName: "亦辰",
-    voiceSettings: {
-      rate: 0.9,
-      pitch: 0.75,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: man2_1, fullImage: man2_1 },
-      { id: 2, thumbnail: man2_2, fullImage: man2_2 },
-    ],
-  },
-  {
-    id: 9,
-    name: "曜宸",
-    displayName: "曜宸",
-    avatar: man3_1,
-    fullImage: man3_1,
-    customName: "曜宸",
-    voiceSettings: {
-      rate: 0.85,
-      pitch: 0.8,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: man3_1, fullImage: man3_1 },
-      { id: 2, thumbnail: man3_2, fullImage: man3_2 },
-      { id: 3, thumbnail: man3_3, fullImage: man3_3, locked: true },
-    ],
-  },
-  {
-    id: 10,
-    name: "霖澤",
-    displayName: "霖澤",
-    avatar: man4_1,
-    fullImage: man4_1,
-    customName: "霖澤",
-    voiceSettings: {
-      rate: 0.9,
-      pitch: 0.7,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: man4_1, fullImage: man4_1 },
-      { id: 2, thumbnail: man4_2, fullImage: man4_2 },
-    ],
-  },
-  {
-    id: 11,
-    name: "承睿",
-    displayName: "承睿",
-    avatar: man5_1,
-    fullImage: man5_1,
-    customName: "承睿",
-    voiceSettings: {
-      rate: 0.85,
-      pitch: 0.75,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: man5_1, fullImage: man5_1 },
-      { id: 2, thumbnail: man5_2, fullImage: man5_2 },
-    ],
-  },
-  {
-    id: 12,
-    name: "柏瀚",
-    displayName: "柏瀚",
-    avatar: man6_1,
-    fullImage: man6_1,
-    customName: "柏瀚",
-    voiceSettings: {
-      rate: 0.9,
-      pitch: 0.8,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: man6_1, fullImage: man6_1 },
-      { id: 2, thumbnail: man6_2, fullImage: man6_2 },
-    ],
-  },
-
-  {
-    id: 13,
-    name: "檸檬",
-    displayName: "檸檬",
-    avatar: pet1_1,
-    fullImage: pet1_1,
-    customName: "檸檬",
-    voiceSettings: {
-      rate: 1.1,
-      pitch: 1.2,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: pet1_1, fullImage: pet1_1 },
-      { id: 2, thumbnail: pet1_2, fullImage: pet1_2 },
-    ],
-  },
-  {
-    id: 14,
-    name: "芒果",
-    displayName: "芒果",
-    avatar: pet2_1,
-    fullImage: pet2_1,
-    customName: "芒果",
-    voiceSettings: {
-      rate: 1.0,
-      pitch: 1.1,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: pet2_1, fullImage: pet2_1 },
-      { id: 2, thumbnail: pet2_2, fullImage: pet2_2 },
-    ],
-  },
-  {
-    id: 15,
-    name: "喵喵",
-    displayName: "喵喵",
-    avatar: pet3_1,
-    fullImage: pet3_1,
-    customName: "喵喵",
-    voiceSettings: {
-      rate: 1.2,
-      pitch: 1.3,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: pet3_1, fullImage: pet3_1 },
-      { id: 2, thumbnail: pet3_2, fullImage: pet3_2 },
-    ],
-  },
-  {
-    id: 16,
-    name: "光羽",
-    displayName: "光羽",
-    avatar: pet4_1,
-    fullImage: pet4_1,
-    customName: "光羽",
-    voiceSettings: {
-      rate: 1.0,
-      pitch: 1.0,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: pet4_1, fullImage: pet4_1 },
-      { id: 2, thumbnail: pet4_2, fullImage: pet4_2 },
-      { id: 3, thumbnail: pet4_3, fullImage: pet4_3 },
-    ],
-  },
-]);
-
-// 計算屬性：當前可見的造型
-const visibleStyles = computed(() => {
-  const character = availableCharacters.value.find(
-    (c) => c.id === currentCharacter.value.id
-  );
-  if (!character) return [];
-
-  // 全部展開
-  return character.styles;
-});
-
-let playbackConfirmed = false;
-const voiceModalOpen = ref(false);
-let voiceTimeout = null; // 語音識別超時計時器
-let hasFinalResult = false; // 確保只處理一次 final
-let finalizedByUs = false;
-
-function clearVoiceTimeout() {
-  if (voiceTimeout) {
-    clearTimeout(voiceTimeout);
-    voiceTimeout = null;
-  }
-}
-
-function reallyCloseVoiceModal() {
-  clearVoiceTimeout();
-  isListening.value = false;
-  showVoiceError.value = false;
-  currentTranscript.value = "";
-  voiceModalImageSrc.value = assistantSoundGif;
-  voiceModalOpen.value = false; // ← 真正關窗
-}
-
-// 語音識別和合成實例
-let recognitionRef = null;
-let synthRef = null;
-// ====== 新增：全域 Audio，集中管理播放與停止 ======
-let player = null;
-let currentObjectUrl = null;
-function ensurePlayer() {
-  if (!player) player = new Audio();
-  return player;
-}
-function revokeObjectUrl() {
-  if (currentObjectUrl) {
-    URL.revokeObjectURL(currentObjectUrl);
-    currentObjectUrl = null;
-  }
-}
-
-// 計算屬性：按日期分組的歷史記錄（升冪排列，最舊的在前面）
-const groupedHistory = computed(() => {
-  const groups = {};
-
-  // 計算要顯示的對話數量（分頁）- 從最新的開始顯示
-  const totalMessages = conversations.value.length;
-  const startIndex = Math.max(
-    0,
-    totalMessages - currentPage.value * messagesPerPage.value
-  );
-  const displayedConversations = conversations.value.slice(startIndex) // ← 直接到最尾端（最新）
-
-  displayedConversations.forEach((item) => {
-    const date = item.dateKey || toDateKey(item.timestamp); // ← 確保有 dateKey
-    if (!groups[date]) {
-      groups[date] = [];
-    }
-    groups[date].push(item);
-  });
-
-  // 對每個日期組內的對話按時間排序（最新的在前面）
-  Object.keys(groups).forEach((date) => {
-    groups[date].sort((a, b) => (a.ts ?? 0) - (b.ts ?? 0)); // 當日內：舊→新
-  });
-
-  // 按日期升冪排序（最舊的日期在前面）
-  const sortedGroups = {};
-  Object.keys(groups)
-    .sort((a, b) => new Date(a) - new Date(b))
-    .forEach((date) => {
-      sortedGroups[date] = groups[date];
-    });
-
-  return sortedGroups;
-});
-
-// 格式化日期
-const formatDate = (dateStr) => {
-  // 支援 YYYY-MM-DD 格式
-  if (dateStr.includes("-")) {
-    const [y, m, d] = dateStr.split("-");
-    const dt = new Date(Number(y), Number(m) - 1, Number(d));
-    const weekdays = ["日", "一", "二", "三", "四", "五", "六"];
-    return `${y}/${m}/${d} (${weekdays[dt.getDay()]})`;
-  }
-
-  // 原有的 YYYY/MM/DD 格式
-  const date = new Date(dateStr);
-  const weekdays = ["日", "一", "二", "三", "四", "五", "六"];
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const weekday = weekdays[date.getDay()];
-  return `${year}/${month}/${day} (${weekday})`;
-};
-
-// 格式化時間（只顯示時:分）
-const formatTime = (timestamp) => {
-  const timeStr = timestamp.split(" ")[1];
-  const [hours, minutes] = timeStr.split(":");
-  return `${hours}:${minutes}`;
-};
-
-// 設置活動標籤
-const setActiveTab = (tab) => {
-  if (process.client) {
-    // 如果點擊首頁，顯示語音控制
-    if (tab === "home") {
-      showVoiceControls.value = true;
-    } else {
-      showVoiceControls.value = false;
-    }
-  }
-};
-
-// 顯示歷史記錄
-const showHistory = async () => {
-  if (process.client) {
-    showHistoryPage.value = true;
-
-    // 禁用背景滾動
-    document.body.style.overflow = "hidden";
-
-    // 重置 CallTime 計數器
-    callTime.value = 1;
-
-    // 重新獲取最新的聊天記錄
-    await fetchChatHistory();
-
-    // 重置分頁狀態
-    currentPage.value = 1;
-    hasMoreMessages.value = true;
-
-    // 等待頁面渲染完成後滾動到底部
-    nextTick(() => {
-      setTimeout(() => {
-        scrollToBottom();
-        historyInputRef.value?.focus(); // ★ 新增：自動聚焦輸入框
-      }, 100);
-    });
-  }
-};
-
-// 關閉歷史記錄
-const closeHistory = () => {
-  if (process.client) {
-    showHistoryPage.value = false;
-    showSearch.value = false;
-    searchQuery.value = "";
-    searchResults.value = [];
-    // 重置分頁和滾動狀態
-    currentPage.value = 1;
-
-    // 恢復背景滾動
-    document.body.style.overflow = "";
-  }
-};
-
-const closeTextInput = () => {
-  showTextInput.value = false;
-};
-
-// 首次登入解說相關函數
-const checkTutorialStatus = () => {
-  if (process.client) {
-    const hasSeenTutorial = localStorage.getItem("robotTutorialSeen");
-    if (!hasSeenTutorial) {
-      showTutorial.value = true;
-      currentTutorialStep.value = 1;
-    }
-  }
-};
-
-const closeTutorial = () => {
-  if (process.client) {
-    const currentIndex = tutorialSteps.indexOf(currentTutorialStep.value);
-    if (currentIndex < tutorialSteps.length - 1) {
-      // 如果還有下一步，切換到下一步
-      currentTutorialStep.value = tutorialSteps[currentIndex + 1];
-    } else {
-      // 如果是最後一步，關閉解說
-      showTutorial.value = false;
-      localStorage.setItem("robotTutorialSeen", "true");
-    }
-  }
-};
-
-const lastScrollTop = ref(0);
-
-function logScroll(e, tag = 'scroll') {
-  const el = e?.target || e;
-  const { scrollTop, scrollHeight, clientHeight } = el;
-  const dir = scrollTop > lastScrollTop.value ? 'down' : 'up';
-  lastScrollTop.value = scrollTop;
-
-  const atTop = scrollTop <= 0;
-  const atBottom = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
-
-  console.log(
-    `[${tag}] top=${Math.round(scrollTop)} h=${scrollHeight} c=${clientHeight} dir=${dir} top?${atTop} bottom?${atBottom}`
-  );
-}
-
-
-// 處理歷史記錄滾動事件
-const handleHistoryScroll = (e) => {
-  logScroll(e, 'history');
-  if (!historyScrollContainer.value) return;
-
-  const container = historyScrollContainer.value;
-  const scrollTop = container.scrollTop;
-  const scrollHeight = container.scrollHeight;
-  const clientHeight = container.clientHeight;
-
-  // 檢查是否滾動到頂部 100px 以下（載入更舊訊息）
-  if (
-    scrollTop < 100 &&
-    !isLoadingOlderMessages.value &&
-    hasMoreMessages.value
-  ) {
-    loadOlderMessages();
-  }
-
-  // 更新 sticky header
-  updateStickyHeader();
-
-  // 設置滾動狀態
-  isScrolling.value = true;
-
-  // 清除之前的計時器
-  if (scrollTimeout.value) {
-    clearTimeout(scrollTimeout.value);
-  }
-
-  // 設置新的計時器（1.5秒後隱藏 sticky header）
-  scrollTimeout.value = setTimeout(() => {
-    isScrolling.value = false;
-  }, 1500);
-};
-
-// 載入更舊的訊息
-const loadOlderMessages = async () => {
-
-
-  isLoadingOlderMessages.value = true;
-
-  const container = historyScrollContainer.value;
-  // 記住老的 scroll 狀態
-  const oldScrollTop = container ? container.scrollTop : 0;
-  const oldScrollHeight = container ? container.scrollHeight : 0;
-
-  try {
-    // 增加 CallTime 計數器
-    callTime.value++;
-    
-    console.log(`載入更舊訊息，CallTime: ${callTime.value}`);
-
-    // 調用 TTE API 獲取更舊的訊息，並取得實際新增的筆數
-    const addedCount = await fetchOlderChatHistory();
-
-    // 只有真的有新資料才翻頁
-    if (addedCount > 0) {
-      currentPage.value += 1;
-      console.log(`成功載入 ${addedCount} 條新訊息`);
-    } else {
-      hasMoreMessages.value = false;
-      console.log("沒有更多舊訊息可載入");
-    }
-
-    // 等待 DOM 更新完成
-    await nextTick();
-
-    // 正確的復原公式
-    if (container) {
-      const newScrollHeight = container.scrollHeight;
-      container.scrollTop = oldScrollTop + (newScrollHeight - oldScrollHeight);
-    }
-
-    // 更新搜尋功能：重新計算搜尋結果（如果當前有搜尋）
-    if (showSearch.value && searchQuery.value.trim()) {
-      performSearch();
-    }
-
-    // 更新日曆可選時間
-    loadCalendarDates();
-
-    // 確保資料顯示完成後才允許下次觸發
-    console.log("載入完成，搜尋和日曆已更新");
-  } catch (error) {
-    console.error("載入更舊訊息失敗:", error);
-    // 如果載入失敗，回退 CallTime
-    callTime.value--;
-  } finally {
-    // 確保載入狀態被重置，允許下次觸發
-    isLoadingOlderMessages.value = false;
-  }
-};
-
-// 更新 sticky header 日期
-const updateStickyHeader = () => {
-  if (!historyScrollContainer.value) return;
-
-  const container = historyScrollContainer.value;
-  const scrollTop = container.scrollTop;
-
-  // 找到當前可見的第一個日期分隔器
-  const dateSeparators = container.querySelectorAll(".date-separator");
-  let currentDate = "";
-
-  for (let i = 0; i < dateSeparators.length; i++) {
-    const separator = dateSeparators[i];
-    const rect = separator.getBoundingClientRect();
-    const containerRect = container.getBoundingClientRect();
-
-    if (rect.top >= containerRect.top) {
-      currentDate = separator.textContent;
-      break;
-    }
-  }
-};
-
-// 自動滾動到底部
-const scrollToBottom = () => {
-  nextTick(() => {
-    if (historyScrollContainer.value) {
-      const container = historyScrollContainer.value;
-      container.scrollTop = container.scrollHeight;
-    }
-  });
-};
-
-// 切換日曆顯示
-const toggleCalendar = async () => {
-  if (process.client) {
-    showCalendar.value = !showCalendar.value;
-    if (showCalendar.value) {
-      // 重新獲取聊天記錄以確保日期是最新的
-      await fetchChatHistory();
-      loadCalendarDates(); // 更新所有有紀錄的日期
-
-      // 設定日曆顯示的月份為最新有記錄的月份
-      if (maxHistoryDate.value) {
-        visibleMonth.value = maxHistoryDate.value.getMonth();
-        visibleYear.value = maxHistoryDate.value.getFullYear();
-      } else {
-        const now = new Date();
-        visibleMonth.value = now.getMonth();
-        visibleYear.value = now.getFullYear();
-      }
-
-      console.log(
-        `日曆開啟，顯示月份: ${visibleYear.value}/${visibleMonth.value + 1}`
-      );
-      console.log("當月可用日期:", Array.from(monthDateKeySet.value));
-    }
-  }
-};
-
-// 載入日曆中有聊天記錄的日期
-const loadCalendarDates = () => {
-  if (process.client) {
-    // 清空現有數據
-    calendarDateKeySet.value.clear();
-
-    console.log("開始載入日曆日期，對話記錄數量:", conversations.value.length);
-
-    // 從對話記錄中提取日期
-    conversations.value.forEach((conversation, index) => {
-      let dateKey;
-      if (conversation.dateKey) {
-        dateKey = conversation.dateKey;
-      } else {
-        dateKey = toDateKey(conversation.timestamp);
-      }
-      console.log(`對話 ${index}:`, {
-        timestamp: conversation.timestamp,
-        dateKey: dateKey,
-        originalDateKey: conversation.dateKey,
-      });
-      calendarDateKeySet.value.add(dateKey);
-    });
-
-    // 更新 calendarDatesWithHistory 以保持向後兼容
-    calendarDatesWithHistory.value = Array.from(
-      calendarDateKeySet.value
-    ).sort();
-
-    console.log("最終載入的日期:", Array.from(calendarDateKeySet.value));
-    console.log("排序後的日期:", calendarDatesWithHistory.value);
-  }
-};
-
-// 處理日期選擇變更
-const handleDateChange = async (date) => {
-  if (!date) return;
-  const key = toDateKey(date);
-  console.log(`選擇日期: ${date}, 轉換為 key: ${key}`);
-
-  // 關閉日曆
-  showCalendar.value = false;
-
-  // 找到該日期的第一則訊息
-  const targetMessage = conversations.value.find((msg) => {
-    const msgDateKey = msg.dateKey || toDateKey(msg.timestamp);
-    return msgDateKey === key;
-  });
-
-  if (targetMessage) {
-    console.log(`找到目標訊息 ID: ${targetMessage.id}`);
-
-    // 確保該訊息在當前顯示範圍內
-    const totalMessages = conversations.value.length;
-    const messageIndex = conversations.value.findIndex(
-      (msg) => msg.id === targetMessage.id
-    );
-
-    if (messageIndex !== -1) {
-      // 計算需要顯示多少頁才能包含該訊息
-      const messagesFromEnd = totalMessages - messageIndex;
-      const requiredPages = Math.ceil(messagesFromEnd / messagesPerPage.value);
-      currentPage.value = requiredPages;
-
-      console.log(
-        `調整分頁到第 ${currentPage.value} 頁以顯示日期 ${key} 的訊息`
-      );
-
-      // 等待 DOM 更新後滾動到目標訊息
-      await nextTick();
-      setTimeout(() => {
-        const el = document.getElementById(`message-${targetMessage.id}`);
-        if (el) {
-          console.log(`滾動到訊息 ID: ${targetMessage.id}`);
-          el.scrollIntoView({ behavior: "smooth", block: "start" });
-
-          // 添加高亮效果
-          el.style.backgroundColor = "rgba(116, 188, 31, 0.1)";
-          el.style.borderRadius = "12px";
-          el.style.transition = "background-color 0.3s ease";
-
-          // 3秒後移除高亮
-          setTimeout(() => {
-            el.style.backgroundColor = "";
-            el.style.borderRadius = "";
-          }, 3000);
-        } else {
-          console.log(`找不到 DOM 元素: message-${targetMessage.id}`);
-        }
-      }, 100);
-    }
-  } else {
-    console.log(`找不到日期 ${key} 的訊息`);
-  }
-};
-
-// 檢查日期是否有聊天記錄
-const isDateDisabled = (date) => {
-  const dateStr = date.toISOString().split("T")[0];
-  return !calendarDateKeySet.value.has(dateStr);
-};
-
-// 停用不在清單內的日期（只允許「該月有紀錄的日子」）
-const isDateDisabledForMonth = (date) => {
-  const key = toDateKey(date);
-  // 限制：僅允許該月有紀錄的日期（monthDateKeySet）
-  const isDisabled = !monthDateKeySet.value.has(key);
-  return isDisabled;
-};
-
-const onMonthYearChange = ({ month, year }) => {
-  // month: 0-11
-  visibleMonth.value = month;
-  visibleYear.value = year;
-  // 這裡不需要再算，monthDateKeySet 會自動更新
-};
-
-// 切換搜尋功能
-const toggleSearch = () => {
-  if (process.client) {
-    if (!showSearch.value) {
-      // 開啟搜尋
-      showSearch.value = true;
-      // 延遲聚焦，等待動畫完成
-      setTimeout(() => {
-        if (searchInputRef.value) {
-          searchInputRef.value.focus();
-        }
-      }, 700);
-    } else {
-      // 關閉搜尋
-      searchQuery.value = "";
-      searchResults.value = [];
-      showSearch.value = false;
-    }
-  }
-};
-
-// 執行搜尋
-const performSearch = () => {
-  if (!searchQuery.value.trim()) {
-    searchResults.value = [];
-    return;
-  }
-
-  const query = searchQuery.value.toLowerCase();
-  const results = [];
-
-  conversations.value.forEach((conversation) => {
-    const userMatch = conversation.user.toLowerCase().includes(query);
-    const botMatch = conversation.bot.toLowerCase().includes(query);
-
-    if (userMatch || botMatch) {
-      results.push({
-        ...conversation,
-        matchType: userMatch ? "user" : "bot",
-        matchText: userMatch ? conversation.user : conversation.bot,
-        userName: "用戶", // 可以根據需要設置用戶名稱
-      });
-    }
-  });
-
-  // 按日期降冪排列（最新的在上面）
-  searchResults.value = results.sort((a, b) => {
-    const dateA = new Date(a.timestamp);
-    const dateB = new Date(b.timestamp);
-    return dateB - dateA;
-  });
-};
-
-// 清除搜尋（保留函數以備將來使用）
-const clearSearch = () => {
-  if (process.client) {
-    searchQuery.value = "";
-    searchResults.value = [];
-  }
-};
-
-// 處理角色圖片點擊
-const handleCharacterClick = () => {
-  // 可以添加其他點擊處理邏輯
-};
-
-// 關閉語音模態框
-const closeVoiceModal = () => {
-  reallyCloseVoiceModal();
-};
-
-// 處理語音模態框圖片點擊
-const handleVoiceModalClick = () => {
-  if (showVoiceError.value && process.client) {
-    showVoiceError.value = false;
-    // 重新開始語音識別
-    if (recognitionRef) {
-      currentTranscript.value = "";
-      // 切換回音波圖片
-      voiceModalImageSrc.value = assistantSoundGif;
-      recognitionRef.start();
-      isListening.value = true;
-      // 重新設置3秒超時
-      startVoiceTimeout();
-    }
-  }
-};
-
-// 開始語音識別超時計時器
-const startVoiceTimeout = () => {
-  if (voiceTimeout) {
-    clearTimeout(voiceTimeout);
-  }
-  voiceTimeout = setTimeout(() => {
-    if (isListening.value && !currentTranscript.value.trim()) {
-      // 3秒沒聲音直接顯示有關閉按鈕的提示
-      showVoiceError.value = true;
-      voiceModalImageSrc.value = assistantDefaultGif;
-      isListening.value = false; // 停止語音識別
-      if (process.client) {
-        recognitionRef?.stop();
-      }
-    }
-  }, 3000); // 3秒超時顯示提示
-};
-
-// 獲取聊天記錄
-const fetchChatHistory = async () => {
-  if (!localobj) {
-    console.error("用戶資料不存在");
-    return;
-  }
-
-  try {
-    const response = await fetch(GET_CHAT_HISTORY_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        Key: "qrt897hpmd",
-        MID: localobj.MID,
-        Mobile: localobj.Mobile,
-        CallTime: "1",
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API 調用失敗: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log("獲取到的聊天記錄:", data);
-
-    if (
-      data.Result === "OK" &&
-      data.ChatMessage &&
-      Array.isArray(data.ChatMessage)
-    ) {
-      // 轉換 API 資料格式為本地格式
-      const convertedMessages = data.ChatMessage.map((msg, index) => {
-        const inputTime = new Date(msg.Inputtime);
-        const outputTime = new Date(msg.Outputtime);
-
-        console.log(`處理訊息 ${index}:`, {
-          Inputtime: msg.Inputtime,
-          parsedDate: inputTime,
-          dateKey: toDateKey(inputTime),
-        });
-
-        return {
-          id: Date.now() + index, // 生成唯一 ID
-          ts: inputTime.getTime(),
-          user: msg.Inmessage || "",
-          bot: msg.Outmessage || "",
-          timestamp: inputTime.toLocaleString("zh-TW"),
-          dateKey: toDateKey(inputTime),
-        };
-      });
-
-      // 按時間排序（舊到新）
-      convertedMessages.sort((a, b) => a.ts - b.ts);
-
-      // 清空並填入 knownKeys
-      knownKeys.clear();
-      for (const msg of data.ChatMessage) {
-        knownKeys.add(makeStableKey(msg));
-      }
-
-      conversations.value = convertedMessages;
-
-      // 更新最新回覆
-      if (convertedMessages.length > 0) {
-        latestResponse.value =
-          convertedMessages[convertedMessages.length - 1].bot;
-      }
-
-      // 更新日曆數據
-      loadCalendarDates();
-
-      console.log("聊天記錄載入完成:", convertedMessages);
-    }
-  } catch (error) {
-    console.error("獲取聊天記錄失敗:", error);
-  }
-};
-
-// 獲取更舊的聊天記錄 (TTE API)
-const fetchOlderChatHistory = async () => {
-  if (!localobj) {
-    console.error("用戶資料不存在");
-    return 0;
-  }
-
-  try {
-    const response = await fetch("https://23700999.com:8081/HMA/TTEgetChatMessageHistoryList.jsp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        Key: "qrt897hpmd",
-        MID: localobj.MID,
-        Mobile: localobj.Mobile,
-        CallTime: callTime.value.toString(),
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API 調用失敗: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log(`獲取到的更舊聊天記錄 (CallTime: ${callTime.value}):`, data);
-
-    if (!(data?.Result === "OK" && Array.isArray(data.ChatMessage))) {
-      return 0;
-    }
-
-    // 轉換 & 產生穩定鍵
-    const incoming = data.ChatMessage.map((msg) => {
-      const inputTime = new Date(msg.Inputtime);
-      const key = makeStableKey(msg);
-      return {
-        stableKey: key,
-        id: key, // 用穩定鍵作為 id
-        ts: inputTime.getTime(),
-        user: msg.Inmessage || "",
-        bot: msg.Outmessage || "",
-        timestamp: inputTime.toLocaleString("zh-TW"),
-        dateKey: toDateKey(inputTime),
-      };
-    }).sort((a, b) => a.ts - b.ts);
-
-    // 去重
-    const newOnes = [];
-    for (const m of incoming) {
-      if (!knownKeys.has(m.stableKey)) {
-        knownKeys.add(m.stableKey);
-        newOnes.push(m);
-      }
-    }
-
-    if (newOnes.length === 0) {
-      return 0;
-    }
-
-    // 合併回 conversations（保持時間序）
-    conversations.value = [...newOnes, ...conversations.value].sort((a, b) => a.ts - b.ts);
-
-    // 日曆也跟著更新
-    loadCalendarDates();
-
-    console.log(`載入更舊訊息完成，新增 ${newOnes.length} 條訊息`);
-    return newOnes.length;
-  } catch (error) {
-    console.error("獲取更舊聊天記錄失敗:", error);
-    throw error;
-  }
-};
-
-// 初始化語音識別
-const initSpeechRecognition = () => {
-  if (process.client && typeof window !== "undefined") {
-    if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
-      const SpeechRecognition =
-        window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognitionRef = new SpeechRecognition();
-      recognitionRef.continuous = false;
-      recognitionRef.interimResults = true;
-      recognitionRef.lang = "zh-TW";
-
-      recognitionRef.onresult = (event) => {
-        const transcript = Array.from(event.results)
-          .map((result) => result[0])
-          .map((result) => result.transcript)
-          .join("");
-
-        if (process.client) {
-          currentTranscript.value = transcript;
-        }
-
-        // 一旦拿到 final，就立刻關視窗 & 只處理一次
-        if (
-          event.results[event.results.length - 1].isFinal &&
-          !hasFinalResult
-        ) {
-          hasFinalResult = true;
-          clearVoiceTimeout();
-          finalizedByUs = true; // ← 標記為我們主動收尾
-          reallyCloseVoiceModal(); // ← 先把 UI 關乾淨
-          handleSpeechEnd(transcript); // 非同步處理對話
-          try {
-            recognitionRef.stop();
-          } catch {}
-        }
-      };
-
-      recognitionRef.onerror = (event) => {
-        if (process.client) {
-          console.error("語音識別錯誤:", event.error);
-        }
-        if (process.client) {
-          isListening.value = false;
-          currentTranscript.value = "";
-        }
-
-        // 清除超時計時器
-        if (voiceTimeout) {
-          clearTimeout(voiceTimeout);
-          voiceTimeout = null;
-        }
-
-        // 處理不同的錯誤類型
-        if (process.client) {
-          switch (event.error) {
-            case "not-allowed":
-              alert("請允許麥克風權限以使用語音功能");
-              closeVoiceModal();
-              break;
-            case "no-speech":
-            case "audio-capture":
-              // 如果還沒有顯示錯誤提示，則顯示
-              if (!showVoiceError.value) {
-                showVoiceError.value = true;
-                voiceModalImageSrc.value = assistantDefaultGif;
-              }
-              break;
-            case "network":
-              alert("網路連接問題，請檢查網路後重試");
-              closeVoiceModal();
-              break;
-            default:
-              if (event.error !== "aborted") {
-                // 如果還沒有顯示錯誤提示，則顯示
-                if (!showVoiceError.value) {
-                  showVoiceError.value = true;
-                  voiceModalImageSrc.value = assistantDefaultGif;
-                }
-              }
-          }
-        }
-      };
-
-      recognitionRef.onend = () => {
-        if (finalizedByUs) {
-          finalizedByUs = false;
-          hasFinalResult = false;
-          return;
-        }
-        if (!hasFinalResult) {
-          // ← 沒拿到 final 才給提示
-          isListening.value = false;
-          showVoiceError.value = true;
-          voiceModalImageSrc.value = assistantDefaultGif;
-          voiceModalOpen.value = true; // 保持彈窗開著讓使用者點關閉
-        }
-        hasFinalResult = false;
-      };
-    }
-
-    // 初始化語音合成
-    if ("speechSynthesis" in window) {
-      synthRef = window.speechSynthesis;
-    }
-  }
-};
-
-/** 統一呼叫 n8n：可選擇是否播放音檔 */
-async function sendViaN8n(userText, { playAudio = false, extra = {} } = {}) {
-  const url = playAudio ? TTS_WEBHOOK_URL : TEXT_WEBHOOK_URL;
-  const nowtime = new Date().toISOString();
-  let res;
-  try {
-    res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chatInput: userText,
-        sessionId: UUID,
-        voicegender,
-        timestamp: nowtime,
-        pitch_semitones: 1.5,
-        ...extra,
-      }),
-    });
-  } catch (e) {
-    showAudioError.value = true;
-    throw e;
-  }
-
-  if (!res.ok) {
-    showAudioError.value = true;
-    throw new Error(`webhook failed: ${res.status}`);
-  }
-
-  // 先嘗試從 Header 取回文字（X-Answer）
-  let answerText = "";
-  const rawHeader = res.headers.get("x-answer");
-  if (rawHeader) {
-    try {
-      answerText = decodeURIComponent(rawHeader);
-    } catch {
-      // 後端若沒做 encodeURIComponent，就直接用原值
-      answerText = rawHeader;
-    }
-  }
-
-  const ct = (res.headers.get("content-type") || "").toLowerCase();
-
-  // 若是音訊回應
-  if (ct.includes("audio/")) {
-    const blob = await res.blob();
-    if (playAudio) {
-      const url = URL.createObjectURL(blob);
-      const audio = ensurePlayer();
-      try {
-        audio.pause();
-      } catch {}
-      revokeObjectUrl();
-      audio.src = url;
-      currentObjectUrl = url;
-
-      audio.onplay = () => {
-        isSpeaking.value = true;
-      };
-      audio.onended = () => {
-        isSpeaking.value = false;
-        revokeObjectUrl();
-      };
-      audio.onerror = () => {
-        isSpeaking.value = false;
-        showAudioError.value = true;
-        revokeObjectUrl();
-      };
-
-      try {
-        await audio.play();
-      } catch {
-        /* iOS 未互動可能失敗 */
-      }
-    }
-    // 音訊情境下，若 header 沒文字，就維持空字串，最後會交給預設備援
-  } else {
-    // 非音訊：嘗試解析 JSON / 純文字
-    let data = null;
-    try {
-      data = await res.clone().json();
-    } catch {
-      try {
-        const txt = await res.text();
-        if (!answerText) answerText = txt || "";
-      } catch {}
-    }
-
-    if (data && !answerText) {
-      // 兼容多種欄位：bot / answer / text / message / content / output...
-      const pick = (obj) => {
-        if (!obj) return "";
-        if (typeof obj === "string") return obj;
-        const keys = ["bot", "answer", "text", "message", "content", "output"];
-        for (const k of keys) {
-          const v = obj[k];
-          if (typeof v === "string" && v.trim()) return v;
-          if (v && typeof v === "object") {
-            const inner = pick(v);
-            if (inner) return inner;
-          }
-        }
-        return "";
-      };
-      answerText = pick(data);
-    }
-  }
-
-  //寫入np資料庫
-  if (localobj) {
-    try {
-      res = await fetch(TEXT_MESSAGE_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          Key: "qrt897hpmd",
-          MID: localobj.MID,
-          Mobile: localobj.Mobile,
-          Type: "P",
-          Inmessage: userText,
-          Outmessage: answerText,
-          Inputtime: nowtime,
-          Outputtime: new Date().toISOString(),
-        }),
-      });
-    } catch (e) {
-      console.error("保存聊天記錄失敗:", e);
-    }
-  }
-
-  return (
-    (answerText && String(answerText).trim()) ||
-    "（親愛的:您的問題我目前沒辦法回答）"
-  );
-}
-
-/** 一次呼叫 n8n，取得回覆文字（X-Answer header）+ 取得音檔 Blob 並播放 */
-async function fetchTTSAndPlayAndReturnText(userText, extra = {}) {
-  let res;
-  try {
-    res = await fetch(TTS_WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chatInput: userText, // 你要給 n8n 的輸入
-        sessionId: UUID,
-        voicegender: voicegender,
-        timestamp: new Date().toISOString(),
-        pitch_semitones: 1.5,
-      }),
-    });
-  } catch (e) {
-    showAudioError.value = true;
-    throw e;
-  }
-
-  if (!res.ok) {
-    showAudioError.value = true;
-    throw new Error(`TTS webhook failed: ${res.status}`);
-  }
-
-  // 1) 拿回覆文字（在 X-Answer）
-  const headerText = res.headers.get("x-answer") || "";
-  const answerText = decodeURIComponent(headerText);
-
-  // 2) 讀音檔並播放
-  const blob = await res.blob(); // audio/wav
-  const url = URL.createObjectURL(blob);
-  const audio = ensurePlayer();
-  try {
-    audio.pause();
-  } catch {}
-  revokeObjectUrl();
-  audio.src = url;
-  currentObjectUrl = url;
-
-  audio.onplay = () => {
-    isSpeaking.value = true;
-  };
-  audio.onended = () => {
-    isSpeaking.value = false;
-    revokeObjectUrl();
-  };
-  audio.onerror = () => {
-    isSpeaking.value = false;
-    showAudioError.value = true;
-    revokeObjectUrl();
-  };
-
-  try {
-    await audio.play();
-  } catch (e) {
-    // iOS 需要使用者手勢觸發
-    showAudioError.value = true;
-    throw e;
-  }
-
-  return answerText;
-}
-
-// 開始/停止語音識別
-const toggleListening = () => {
-  if (!recognitionRef) {
-    if (process.client && typeof window !== "undefined") {
-      // 檢查是否為 HTTPS 或 localhost
-      if (
-        window.location.protocol !== "https:" &&
-        window.location.hostname !== "localhost"
-      ) {
-        alert("語音功能需要 HTTPS 連接，請使用安全連接");
-        return;
-      }
-      alert("您的瀏覽器不支援語音識別功能");
-    }
-    return;
-  }
-
-  if (isListening.value) {
-    if (process.client) {
-      recognitionRef.stop();
-    }
-    reallyCloseVoiceModal();
-  } else {
-    if (process.client) {
-      showVoiceError.value = false;
-      voiceModalImageSrc.value = assistantSoundGif;
-      currentTranscript.value = "";
-      hasFinalResult = false;
-      finalizedByUs = false;
-      voiceModalOpen.value = true; // ← 開窗
-      isListening.value = true;
-      recognitionRef.start();
-      startVoiceTimeout();
-    }
-  }
-};
-
-// 處理語音輸入結束
-const handleSpeechEnd = async (transcript) => {
-  if (!transcript.trim()) return;
-
-  // 語音輸入：顯示 "思考中..." 而不是用戶輸入
-  isLoading.value = true;
-  currentTranscript.value = "";
-
-  try {
-    // 一次拿回覆 + 播音檔
-    const botResponse = await sendViaN8n(transcript, { playAudio: true });
-    console.log("botResponse", botResponse);
-    const nowTs = Date.now();
-    const newConversation = {
-      id: nowTs,
-      ts: nowTs,
-      user: transcript,
-      bot: botResponse || "（親愛的:您的問題我目前沒辦法回答）",
-      timestamp: new Date().toLocaleString("zh-TW"),
-      dateKey: toDateKey(new Date(nowTs)),
-    };
-    console.log("newConversation", newConversation);
-
-    conversations.value.push(newConversation);
-    latestResponse.value = botResponse || "（親愛的:您的問題我目前沒辦法回答）";
-    saveConversations();
-
-    // 如果當前在歷史記錄頁面，確保新訊息可見
-    if (showHistoryPage.value) {
-      currentPage.value = 1;
-      nextTick(() => {
-        setTimeout(() => {
-          scrollToBottom();
-        }, 100);
-      });
-    }
-
-    console.log("語音輸入處理完成:", newConversation);
-  } catch (error) {
-    console.error("API 調用錯誤:", error);
-    const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
-    const errorConversation = {
-      id: Date.now(),
-      user: transcript,
-      bot: errorResponse,
-      timestamp: new Date().toLocaleString("zh-TW"),
-      dateKey: toDateKey(new Date()),
-    };
-    conversations.value.push(errorConversation);
-    latestResponse.value = errorResponse;
-    saveConversations();
-
-    // 如果當前在歷史記錄頁面，確保新訊息可見
-    if (showHistoryPage.value) {
-      currentPage.value = 1;
-      nextTick(() => {
-        setTimeout(() => {
-          scrollToBottom();
-        }, 100);
-      });
-    }
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-// 語音播放文字
-const speakText = (text) => {
-  if (!synthRef || !text?.trim() || !process.client || isMuted.value) return;
-
-  const speak = () => {
-    if (!process.client) return;
-
-    isManuallyStopped.value = false;
-    playbackConfirmed = false;
-    synthRef.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "zh-TW";
-
-    // 使用角色的自定義聲音設置
-    const voiceSettings = currentCharacter.value.voiceSettings || {
-      rate: 0.9,
-      pitch: 0.85,
-      volume: 1,
-    };
-
-    utterance.rate = voiceSettings.rate;
-    utterance.pitch = voiceSettings.pitch;
-    utterance.volume = voiceSettings.volume;
-
-    // iOS 預熱機制：先播放一個無聲的語音來激活 TTS
-    if (process.client && /iPad|iPhone|iPod/.test(navigator.userAgent)) {
-      const warmupUtterance = new SpeechSynthesisUtterance("");
-      warmupUtterance.lang = "zh-TW";
-      warmupUtterance.volume = 0;
-      synthRef.speak(warmupUtterance);
-
-      // 延遲一下再播放真正的語音
-      setTimeout(() => {
-        synthRef.speak(utterance);
-      }, 100);
-    } else {
-      synthRef.speak(utterance);
-    }
-
-    const resumeHack = setInterval(() => {
-      if (!synthRef || !process.client) return;
-      if (synthRef.paused) synthRef.resume();
-      if (!synthRef.speaking) {
-        clearInterval(resumeHack);
-      }
-    }, 200);
-
-    utterance.onstart = () => {
-      if (!process.client) return;
-
-      playbackConfirmed = true;
-      isSpeaking.value = true;
-    };
-
-    utterance.onend = () => {
-      if (process.client) {
-        isSpeaking.value = false;
-        isLoading.value = false;
-      }
-      clearInterval(resumeHack);
-    };
-
-    utterance.onerror = (e) => {
-      if (process.client) {
-        isSpeaking.value = false;
-        isLoading.value = false;
-        if (!isManuallyStopped.value) {
-          showAudioError.value = true;
-        }
-        console.error("語音播放失敗", e);
-      }
-      clearInterval(resumeHack);
-    };
-
-    try {
-      if (process.client) {
-        if (synthRef.paused) synthRef.resume();
-        synthRef.speak(utterance);
-      }
-
-      if (process.client) {
-        setTimeout(() => {
-          if (
-            !playbackConfirmed &&
-            !isManuallyStopped.value &&
-            !synthRef.speaking
-          ) {
-            showAudioError.value = true;
-            console.warn("裝置無法正常撥放語音");
-          }
-        }, 1500);
-      }
-    } catch (err) {
-      if (process.client) {
-        console.error("語音撥放錯誤", err);
-        showAudioError.value = true;
-      }
-    }
-
-    if (process.client) {
-      console.log("🗣 準備播放文字:", text);
-    }
-  };
-
-  if (process.client && synthRef && synthRef.getVoices().length === 0) {
-    synthRef.onvoiceschanged = () => speak();
-  } else if (process.client) {
-    speak();
-  }
-};
-
-// 停止語音播放
-const stopSpeaking = () => {
-  /* if (synthRef && process.client) {
-    isManuallyStopped.value = true
-    showAudioError.value = false  // ✅ 手動停止不顯示錯誤視窗
-    synthRef.cancel()
-    isSpeaking.value = false
-  }*/
-  const a = ensurePlayer();
-  try {
-    a.pause();
-    a.currentTime = 0;
-  } catch {}
-  isSpeaking.value = false;
-  revokeObjectUrl();
-};
-
-// 切換音量控制
-const toggleVolume = () => {
-  if (process.client) {
-    // 切換靜音狀態
-    isMuted.value = !isMuted.value;
-
-    // 如果當前正在播放語音，立即停止
-    if (synthRef && synthRef.speaking) {
-      synthRef.cancel();
-    }
-
-    // 保存靜音狀態到本地存儲
-    localStorage.setItem("isMuted", JSON.stringify(isMuted.value));
-
-    console.log("音量控制切換:", isMuted.value ? "靜音" : "開啟");
-
-    // 如果從靜音切換到開啟，播放測試音
-    if (!isMuted.value) {
-      setTimeout(() => {
-        speakText("語音功能已開啟");
-      }, 500);
-    }
-  }
-};
-
-// 關閉音頻錯誤提示
-const closeAudioError = () => {
-  if (process.client) {
-    showAudioError.value = false;
-  }
-};
-
-async function handleManualInput() {
-  const input = textInput.value.trim();
-  if (!input) return;
-
-  // 文字輸入：立即將用戶輸入添加到聊天記錄中
-  const nowTs = Date.now();
-  const userMessage = {
-    id: nowTs,
-    ts: nowTs,
-    user: input,
-    bot: "", // 暫時為空，等待 API 回傳
-    timestamp: new Date().toLocaleString("zh-TW"),
-    dateKey: toDateKey(new Date(nowTs)),
-    isLoading: true, // 標記為載入中
-  };
-
-  // 立即添加到聊天記錄
-  conversations.value.push(userMessage);
-  currentTranscript.value = "";
-  textInput.value = "";
-
-  // 如果當前在歷史記錄頁面，滾動到底部
-  if (showHistoryPage.value) {
-    currentPage.value = 1;
-    nextTick(() => {
-      setTimeout(() => {
-        scrollToBottom();
-        historyInputRef.value?.focus();
-      }, 100);
-    });
-  }
-
-  try {
-    const botResponse = await sendViaN8n(input, { playAudio: false });
-    console.log(botResponse);
-
-    // 更新聊天記錄中的 bot 回覆
-    const messageIndex = conversations.value.findIndex(
-      (msg) => msg.id === nowTs
-    );
-    if (messageIndex !== -1) {
-      conversations.value[messageIndex].bot =
-        botResponse || "（親愛的:您的問題我目前沒辦法回答）";
-      conversations.value[messageIndex].isLoading = false;
-    }
-
-    latestResponse.value = botResponse || "（親愛的:您的問題我目前沒辦法回答）";
-    saveConversations();
-
-    console.log("文字輸入處理完成:", userMessage);
-  } catch (error) {
-    console.error("API 調用錯誤:", error);
-    const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
-
-    // 更新聊天記錄中的錯誤回覆
-    const messageIndex = conversations.value.findIndex(
-      (msg) => msg.id === nowTs
-    );
-    if (messageIndex !== -1) {
-      conversations.value[messageIndex].bot = errorResponse;
-      conversations.value[messageIndex].isLoading = false;
-    }
-
-    latestResponse.value = errorResponse;
-    saveConversations();
-  }
-}
-
-// 本地儲存對話記錄（現在主要用於日曆數據更新）
-const saveConversations = () => {
-  if (process.client) {
-    // 更新日曆數據
-    loadCalendarDates();
-  }
-};
-
-// 載入對話記錄（從 API 獲取）
-const loadConversations = async () => {
-  if (process.client) {
-    // 從 API 獲取聊天記錄
-    await fetchChatHistory();
-
-    // 初始化日曆顯示月份為最新有記錄的月份
-    if (conversations.value.length > 0) {
-      // 使用 nextTick 確保 calendarDateKeySet 已更新
-      nextTick(() => {
-        const latestDate = maxHistoryDate.value;
-        if (latestDate) {
-          visibleMonth.value = latestDate.getMonth();
-          visibleYear.value = latestDate.getFullYear();
-          console.log(
-            `初始化日曆顯示月份: ${visibleYear.value}/${visibleMonth.value + 1}`
-          );
-        }
-      });
-    }
-  }
-};
-
-// 組件掛載時初始化
-onMounted(() => {
-  /*if (
-    process.client &&
-    typeof window !== "undefined" &&
-    "speechSynthesis" in window
-  ) {
-    synthRef = window.speechSynthesis;
-
-    // 檢查語音合成支援
-    if (synthRef.getVoices().length === 0) {
-      synthRef.onvoiceschanged = () => {
-        const voices = synthRef.getVoices();
-        const chineseVoice = voices.find(
-          (voice) => voice.lang.includes("zh") || voice.lang.includes("cmn")
-        );
-        console.log(
-          "可用語音:",
-          voices.map((v) => `${v.name} (${v.lang})`)
-        );
-        console.log("中文語音:", chineseVoice);
-      };
-    }
-  }*/
-  initSpeechRecognition();
-  loadConversations();
-  loadSavedCharacter();
-
-  // 載入靜音狀態
-  if (process.client) {
-    const savedMuted = localStorage.getItem("isMuted");
-    if (savedMuted !== null) {
-      isMuted.value = JSON.parse(savedMuted);
-    }
-  }
-
-  // 如果當前是首頁，顯示語音控制
-  if (process.client) {
-    showVoiceControls.value = true;
-  }
-
-  // 檢查首次登入解說狀態
-  checkTutorialStatus();
-
-  // 添加調試函數到全局
-  if (process.client) {
-    window.debugCalendar = () => {
-      console.log("=== 日曆調試信息 ===");
-      console.log("對話記錄:", conversations.value);
-      console.log("日曆日期集合:", Array.from(calendarDateKeySet.value));
-      console.log("當月日期集合:", Array.from(monthDateKeySet.value));
-      console.log("當前顯示月份:", visibleYear.value, visibleMonth.value + 1);
-      console.log("最早日期:", minHistoryDate.value);
-      console.log("最晚日期:", maxHistoryDate.value);
-      console.log("分組歷史:", groupedHistory.value);
-    };
-  }
-});
-
-// 載入保存的角色選擇
-const loadSavedCharacter = () => {
-  if (process.client) {
-    // 載入可用角色列表
-    const savedCharacters = localStorage.getItem("availableCharacters");
-    if (savedCharacters) {
-      try {
-        const parsedCharacters = JSON.parse(savedCharacters);
-        // 合併保存的數據與默認數據
-        availableCharacters.value = availableCharacters.value.map((char) => {
-          const savedChar = parsedCharacters.find((c) => c.id === char.id);
-          return savedChar ? { ...char, ...savedChar } : char;
-        });
-      } catch (e) {
-        console.error("載入角色列表失敗:", e);
-      }
-    }
-
-    // 載入當前選擇的角色
-    const saved = localStorage.getItem("selectedCharacter");
-    if (saved) {
-      try {
-        const savedCharacter = JSON.parse(saved);
-        const foundCharacter = availableCharacters.value.find(
-          (c) => c.id === savedCharacter.id
-        );
-        if (foundCharacter) {
-          currentCharacter.value = {
-            ...foundCharacter,
-            ...savedCharacter,
-            customName:
-              savedCharacter.customName ||
-              foundCharacter.customName ||
-              foundCharacter.displayName,
-          };
-          characterImageSrc.value = savedCharacter.fullImage;
-        }
-      } catch (e) {
-        console.error("載入角色選擇失敗:", e);
-      }
-    }
-  }
-};
-
-// 組件卸載時清理
-onUnmounted(() => {
-  if (recognitionRef) {
-    recognitionRef.stop();
-  }
-  if (player) {
-    try {
-      player.pause();
-    } catch {}
-  }
-  revokeObjectUrl();
-  //if (process.client && synthRef) {synthRef.cancel();}
-  // 清除超時計時器
-  if (voiceTimeout) {
-    clearTimeout(voiceTimeout);
-  }
-});
-
-// SEO
-useHead({
-  title: "語音對話App",
-  meta: [{ name: "description", content: "智能語音對話助手應用" }],
-});
-
-// 工具函數
-function getOrCreateVisitorID() {
-  if (typeof document === "undefined") return "default-session-id";
-
-  const name = "WBSID";
-  const existing = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith(name + "="))
-    ?.split("=")[1];
-
-  if (existing) return existing;
-
-  const newID = crypto.randomUUID();
-  document.cookie = `${name}=${newID}; path=/; max-age=31536000`;
-  return newID;
-}
-
-// 搜尋結果跳轉
-const scrollToMessage = (id) => {
-  showSearch.value = false;
-  searchQuery.value = "";
-  searchResults.value = [];
-
-  setTimeout(() => {
-    const el = document.getElementById(`message-${id}`);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" }); // ← 重點
-      // 高亮 3 秒
-      el.style.backgroundColor = "rgba(116, 188, 31, 0.1)";
-      el.style.borderRadius = "12px";
-      setTimeout(() => {
-        el.style.backgroundColor = "";
-        el.style.borderRadius = "";
-      }, 3000);
-    }
-  }, 300);
-};
-
-
-// 關鍵字高亮
-const highlightKeyword = (text, keyword) => {
-  if (!keyword) return text;
-  const regex = new RegExp(`(${keyword})`, "gi");
-  return text.replace(
-    regex,
-    '<span class="highlight" style="color:#74bc1f">$1</span>'
-  );
-};
-
-// 角色選擇相關函數
-const showCharacterModal = () => {
-  if (process.client) {
-    showCharacterSelection.value = true;
-    // 初始化臨時選擇狀態為當前角色
-    tempSelectedCharacter.value = { ...currentCharacter.value };
-    // 初始化角色圖片載入狀態
-    initCharacterImageLoading();
-    // 初始化 Swiper 到當前選中的角色
-    nextTick(() => {
-      initSwiperToCurrentCharacter();
-    });
-  }
-};
-
-const closeCharacterModal = () => {
-  if (process.client) {
-    // 獲取原始保存的角色
-    const savedCharacter = localStorage.getItem("selectedCharacter")
-      ? JSON.parse(localStorage.getItem("selectedCharacter"))
-      : { id: "doctor", styleId: "doctor1" };
-
-    // 檢查臨時選擇的角色是否與當前角色不同
-    const hasUnsavedChanges =
-      tempSelectedCharacter.value &&
-      (tempSelectedCharacter.value.id !== currentCharacter.value.id ||
-        tempSelectedCharacter.value.styleId !== currentCharacter.value.styleId);
-
-    if (hasUnsavedChanges) {
-      showCharacterExitConfirm.value = true;
-    } else {
-      showCharacterSelection.value = false;
-      isStyleExpanded.value = false;
-      tempSelectedCharacter.value = null;
-    }
-  }
-};
-
-// 近期推出彈窗相關函數
-const showComingSoonModal = () => {
-  if (process.client) {
-    showComingSoon.value = true;
-  }
-};
-
-const closeComingSoonModal = () => {
-  if (process.client) {
-    showComingSoon.value = false;
-  }
-};
-
-// 角色選擇離開確認彈窗相關函數
-const confirmCharacterExit = () => {
-  if (process.client) {
-    showCharacterExitConfirm.value = false;
-    showCharacterSelection.value = false;
-    isStyleExpanded.value = false;
-    tempSelectedCharacter.value = null;
-  }
-};
-
-const cancelCharacterExit = () => {
-  if (process.client) {
-    showCharacterExitConfirm.value = false;
-  }
-};
-
-const toggleStyleExpansion = () => {
-  if (process.client) {
-    isStyleExpanded.value = !isStyleExpanded.value;
-  }
-};
-
-// Swiper 滑動事件處理
-const onSlideChange = (swiper) => {
-  const activeIndex = swiper.activeIndex;
-  const character = availableCharacters.value[activeIndex];
-  if (character) {
-    // 更新臨時選擇狀態
-    tempSelectedCharacter.value = { ...character };
-  }
-};
-
-// 角色點擊事件處理
-const onCharacterClick = (character) => {
-  // 如果是鎖定的角色，顯示"近期推出"彈窗
-  if (isCharacterLocked(character)) {
-    showComingSoonModal();
-    return;
-  }
-
-  const characterIndex = availableCharacters.value.findIndex(
-    (c) => c.id === character.id
-  );
-  if (characterIndex !== -1 && characterSwiperRef.value) {
-    // 滑動到選中的角色並置中
-    characterSwiperRef.value.$el.swiper.slideTo(characterIndex);
-    // 更新臨時選擇狀態
-    tempSelectedCharacter.value = { ...character };
-  }
-};
-
-const selectCharacter = (character) => {
-  if (process.client) {
-    currentCharacter.value = {
-      ...character,
-      styleId: 1, // 默認選擇第一個造型
-      avatar: character.styles[0]?.thumbnail || character.avatar, // 更新頭貼為第一個樣式的縮圖
-      fullImage: character.styles[0]?.fullImage || character.fullImage,
-      customName: character.customName || character.displayName,
-      voiceSettings: character.voiceSettings || {
-        rate: 0.9,
-        pitch: 0.85,
-        volume: 1,
-      },
-    };
-    isStyleExpanded.value = false; // 切換角色時收起造型選擇
-
-    // 更新角色圖片路徑
-    characterImageSrc.value =
-      character.styles[0]?.fullImage || character.fullImage;
-
-    console.log("已選擇角色:", character.customName || character.displayName);
-  }
-};
-
-const selectStyle = (style) => {
-  if (process.client) {
-    console.log("選擇樣式:", style.id, "鎖定狀態:", style.locked);
-    // 如果是鎖定的樣式，顯示"近期推出"彈窗
-    if (style.locked) {
-      showComingSoonModal();
-      return;
-    }
-
-    // 更新臨時選擇狀態
-    if (tempSelectedCharacter.value) {
-      tempSelectedCharacter.value.styleId = style.id;
-      tempSelectedCharacter.value.avatar = style.thumbnail;
-      tempSelectedCharacter.value.fullImage = style.fullImage;
-    }
-  }
-};
-
-const confirmCharacterSelection = () => {
-  if (process.client) {
-    // 確認保存臨時選擇的角色
-    if (tempSelectedCharacter.value) {
-      currentCharacter.value = { ...tempSelectedCharacter.value };
-    }
-
-    // 更新角色圖片路徑
-    characterImageSrc.value = currentCharacter.value.fullImage;
-
-    // 保存到本地存儲
-    localStorage.setItem(
-      "selectedCharacter",
-      JSON.stringify(currentCharacter.value)
-    );
-
-    // 關閉彈窗
-    showCharacterSelection.value = false;
-    isStyleExpanded.value = false;
-    tempSelectedCharacter.value = null;
-
-    // 可以添加成功提示或其他確認邏輯
-    console.log(
-      "角色選擇已確認:",
-      currentCharacter.value.customName || currentCharacter.value.displayName
-    );
-    console.log("當前頭貼:", currentCharacter.value.avatar);
-  }
-};
-
-// 角色圖片載入事件處理
-const onCharacterImageLoad = (characterId) => {
-  characterImageLoading.value.delete(characterId);
-};
-
-const onCharacterImageError = (characterId) => {
-  characterImageLoading.value.delete(characterId);
-  console.error(`角色圖片載入失敗: ${characterId}`);
-};
-
-// 初始化角色圖片載入狀態
-const initCharacterImageLoading = () => {
-  availableCharacters.value.forEach((character) => {
-    characterImageLoading.value.add(character.id);
-  });
-};
-
-// 初始化 Swiper 到當前選中的角色
-const initSwiperToCurrentCharacter = () => {
-  if (process.client && characterSwiperRef.value && currentCharacter.value) {
-    const characterIndex = availableCharacters.value.findIndex(
-      (c) => c.id === currentCharacter.value.id
-    );
-    if (characterIndex !== -1) {
-      // 等待 Swiper 初始化完成後滑動到指定位置
-      nextTick(() => {
-        setTimeout(() => {
-          if (characterSwiperRef.value && characterSwiperRef.value.$el) {
-            characterSwiperRef.value.$el.swiper.slideTo(characterIndex, 0);
-          }
-        }, 100);
-      });
-    }
-  }
-};
-
-// 角色名稱編輯相關函數
-const showNameInputModal = () => {
-  if (process.client) {
-    characterNameInput.value =
-      uiCharacter.value.customName || uiCharacter.value.displayName;
-    nameInputError.value = "";
-    showNameInput.value = true;
-    nextTick(() => {
-      if (nameInputRef.value) {
-        nameInputRef.value.focus();
-      }
-    });
-  }
-};
-
-const closeNameInput = () => {
-  if (process.client) {
-    showNameInput.value = false;
-    // 重置為原始名稱，不儲存修改
-    characterNameInput.value =
-      uiCharacter.value.customName || uiCharacter.value.displayName;
-    nameInputError.value = "";
-  }
-};
-
-const confirmNameInput = () => {
-  if (process.client) {
-    const name = characterNameInput.value.trim();
-
-    if (!name) {
-      nameInputError.value = "角色不能沒有名字喔";
-      return;
-    }
-
-    if (name.length > 10) {
-      nameInputError.value = "名字不能超過10個字";
-      return;
-    }
-
-    // 目標為畫面上正在預覽/編輯的角色（在角色彈窗中就是 tempSelectedCharacter）
-    const targetId = uiCharacter.value.id;
-    // 更新可用角色列表中的對應角色
-    const characterIndex = availableCharacters.value.findIndex(
-      (c) => c.id === targetId
-    );
-    if (characterIndex !== -1) {
-      availableCharacters.value[characterIndex] = {
-        ...availableCharacters.value[characterIndex],
-        customName: name,
-      };
-    }
-
-    // 若彈窗中正在編輯的就是 tempSelectedCharacter，也同步更新它（讓畫面即時反映）
-    if (
-      tempSelectedCharacter.value &&
-      tempSelectedCharacter.value.id === targetId
-    ) {
-      tempSelectedCharacter.value.customName = name;
-    }
-
-    // 若此角色同時也是當前使用中的角色，順便同步到 currentCharacter 與 localStorage
-    if (currentCharacter.value.id === targetId) {
-      currentCharacter.value.customName = name;
-      localStorage.setItem(
-        "selectedCharacter",
-        JSON.stringify(currentCharacter.value)
-      );
-    }
-
-    // 保存到本地存儲
-    localStorage.setItem(
-      "selectedCharacter",
-      JSON.stringify(currentCharacter.value)
-    );
-    localStorage.setItem(
-      "availableCharacters",
-      JSON.stringify(availableCharacters.value)
-    );
-
-    closeNameInput();
-    console.log("角色名稱已更新:", name);
-  }
-};
-
-// --- 日期工具：統一成 YYYY-MM-DD ---
-const toDateKey = (input) => {
-  if (input instanceof Date) {
-    // 使用本地時間避免時區問題
-    const year = input.getFullYear();
-    const month = String(input.getMonth() + 1).padStart(2, "0");
-    const day = String(input.getDate()).padStart(2, "0");
-    const result = `${year}-${month}-${day}`;
-    console.log(`toDateKey (Date): ${input} → ${result}`);
-    return result;
-  }
-  // input 可能是 "2025/8/20 下午 2:20:33" → 取前半段日期、轉成 YYYY-MM-DD
-  const first = String(input).split(" ")[0]; // 2025/8/20
-  const [y, m, d] = first.split("/");
-  const pad = (n) => String(n).padStart(2, "0");
-  const result = `${String(y).padStart(4, "0")}-${pad(m)}-${pad(d)}`;
-  console.log(`toDateKey (String): ${input} → ${result}`);
-  return result;
-};
-
-// 有紀錄的日期集合（Set，比 array 包含查詢快）
-const calendarDateKeySet = ref(new Set());
-
-// 動態區間（可選）
-const minHistoryDate = computed(() => {
-  const arr = Array.from(calendarDateKeySet.value);
-  if (!arr.length) return undefined;
-  const result = new Date(arr.sort()[0]); // 最早
-  console.log("最早日期:", result);
-  return result;
-});
-const maxHistoryDate = computed(() => {
-  const arr = Array.from(calendarDateKeySet.value);
-  if (!arr.length) return undefined;
-  const result = new Date(arr.sort().slice(-1)[0]); // 最晚
-  console.log("最晚日期:", result);
-  return result;
-});
-
-// 本地指令：v-click-outside
-const vClickOutside = {
-  mounted(el, binding) {
-    el.__clickOutside__ = (e) => {
-      if (!(el === e.target || el.contains(e.target))) {
-        typeof binding.value === "function" && binding.value(e);
-      }
-    };
-    document.addEventListener("click", el.__clickOutside__);
-  },
-  unmounted(el) {
-    document.removeEventListener("click", el.__clickOutside__);
-    delete el.__clickOutside__;
-  },
-};
-</script>
