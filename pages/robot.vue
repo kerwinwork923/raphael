@@ -2555,63 +2555,76 @@ const handleSummaryMode = async (saveSummary = false) => {
   }
 };
 
-// 客服模式處理函數
+// 客服模式處理函數（聯繫客服：靜默，不顯示任何提示或新增訊息）
 const handleCustomerService = async (contactService = false) => {
   showCustomerServiceModal.value = false;
 
   if (contactService) {
-    // 直接打 frSendLineText API
-    console.log("用戶選擇聯繫客服，調用 frSendLineText API");
-    console.log("pendingInput.value:", pendingInput.value);
-    
+    // 直接打 frSendLineText API（靜默）
     try {
       isLoading.value = true;
-      
-      // 調用 frSendLineText API
+
       const response = await fetch("https://23700999.com:8081/HMA/api/fr/frSendLineText", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           MID: localobj.MID,
           Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
           MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
           Mobile: localobj.Mobile,
-          Content: pendingInput.value || "呼叫客服", // 使用實際的用戶輸入內容
+          Content: pendingInput.value || "呼叫客服",
           Lang: "zhtw"
         }),
       });
 
       if (!response.ok) {
-        throw new Error(`frSendLineText API 調用失敗: ${response.status}`);
+        // 失敗也不提示使用者；僅記錄 log 方便除錯
+        console.error(`frSendLineText 失敗: ${response.status}`);
+      } else {
+        // 成功同樣不提示、不新增氣泡
+        // 若要在開發時確認，可印 log，正式上線刪掉即可
+        const data = await response.json().catch(() => ({}));
+        console.info("frSendLineText 成功（靜默）:", data);
       }
 
-      const data = await response.json();
-      console.log("frSendLineText API 回應:", data);
+      // 清空待處理輸入（避免殘留）
+      pendingInput.value = "";
+    } catch (error) {
+      // 靜默失敗：不改變 UI、不新增任何訊息
+      console.error("聯繫客服請求錯誤（靜默）:", error);
+    } finally {
+      isLoading.value = false;
+    }
 
-      // 顯示客服聯繫成功訊息
-      const successMessage = "已為您聯繫客服，請稍候客服人員的回覆。";
-      
-      // 保存對話記錄
+    // 直接結束，不做任何 UI 顯示或滾動處理
+    return;
+  }
+
+  // 選擇「否」，繼續 AI 分析（保持原行為）
+  console.log("用戶選擇繼續AI分析，發送原始輸入到AI");
+
+  if (pendingInput.value) {
+    const originalInput = pendingInput.value;
+    pendingInput.value = ""; // 清空待處理輸入
+
+    try {
+      isLoading.value = true;
+      const botResponse = await sendViaUnifiedAPI(originalInput, { playAudio: !isMuted.value });
+
       const nowTs = Date.now();
       const newConversation = {
         id: nowTs,
         ts: nowTs,
-        user: pendingInput.value || "聯繫客服",
-        bot: successMessage,
+        user: originalInput,
+        bot: botResponse || "（親愛的:您的問題我目前沒辦法回答）",
         timestamp: new Date().toLocaleString("zh-TW"),
         dateKey: toDateKey(new Date(nowTs)),
       };
 
       conversations.value.push(newConversation);
-      latestResponse.value = successMessage;
+      latestResponse.value = botResponse || "（親愛的:您的問題我目前沒辦法回答）";
       saveConversations();
 
-      // 清空待處理輸入
-      pendingInput.value = "";
-
-      // 如果當前在歷史記錄頁面，確保新訊息可見
       if (showHistoryPage.value) {
         currentPage.value = 1;
         nextTick(() => {
@@ -2620,14 +2633,14 @@ const handleCustomerService = async (contactService = false) => {
           }, 100);
         });
       }
-      
-      console.log("客服聯繫完成");
+
+      console.log("客服詢問後的AI分析完成");
     } catch (error) {
-      console.error("客服聯繫失敗:", error);
-      const errorResponse = "抱歉，客服聯繫暫時無法使用，請稍後再試。";
+      console.error("客服詢問後的API調用錯誤:", error);
+      const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
       const errorConversation = {
         id: Date.now(),
-        user: pendingInput.value || "聯繫客服",
+        user: originalInput,
         bot: errorResponse,
         timestamp: new Date().toLocaleString("zh-TW"),
         dateKey: toDateKey(new Date()),
@@ -2638,64 +2651,9 @@ const handleCustomerService = async (contactService = false) => {
     } finally {
       isLoading.value = false;
     }
-  } else {
-    // 選擇「否」，繼續AI分析
-    console.log("用戶選擇繼續AI分析，發送原始輸入到AI");
-    
-    if (pendingInput.value) {
-      const originalInput = pendingInput.value;
-      pendingInput.value = ""; // 清空待處理輸入
-      
-      // 發送原始輸入到AI分析
-      try {
-        isLoading.value = true;
-        const botResponse = await sendViaUnifiedAPI(originalInput, { playAudio: !isMuted.value });
-        
-        // 保存對話記錄
-        const nowTs = Date.now();
-        const newConversation = {
-          id: nowTs,
-          ts: nowTs,
-          user: originalInput,
-          bot: botResponse || "（親愛的:您的問題我目前沒辦法回答）",
-          timestamp: new Date().toLocaleString("zh-TW"),
-          dateKey: toDateKey(new Date(nowTs)),
-        };
-
-        conversations.value.push(newConversation);
-        latestResponse.value = botResponse || "（親愛的:您的問題我目前沒辦法回答）";
-        saveConversations();
-
-        // 如果當前在歷史記錄頁面，確保新訊息可見
-        if (showHistoryPage.value) {
-          currentPage.value = 1;
-          nextTick(() => {
-            setTimeout(() => {
-              scrollToBottom();
-            }, 100);
-          });
-        }
-        
-        console.log("客服詢問後的AI分析完成");
-      } catch (error) {
-        console.error("客服詢問後的API調用錯誤:", error);
-        const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
-        const errorConversation = {
-          id: Date.now(),
-          user: originalInput,
-          bot: errorResponse,
-          timestamp: new Date().toLocaleString("zh-TW"),
-          dateKey: toDateKey(new Date()),
-        };
-        conversations.value.push(errorConversation);
-        latestResponse.value = errorResponse;
-        saveConversations();
-      } finally {
-        isLoading.value = false;
-      }
-    }
   }
 };
+
 
 // 啟動 API 輪詢
 const startApiPolling = () => {
