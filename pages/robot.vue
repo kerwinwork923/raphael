@@ -62,14 +62,11 @@
         @click="handleCharacterClick"
       />
       <div class="healGroup">
-  
         <div class="healthImg" @click="goToHealthLog">
-            <img src="/assets/imgs/robot/health.svg" alt="健康" />
-          
-          </div>
-          <h5>健康日誌</h5>
+          <img src="/assets/imgs/robot/health.svg" alt="健康" />
+        </div>
+        <h5>健康日誌</h5>
       </div>
-    
     </div>
 
     <!-- 語音控制區域 - 從下方彈出 -->
@@ -117,7 +114,7 @@
           <div v-if="isListening" class="pulse-ring"></div>
         </button>
         <button class="control-btn volume-btn" @click="toggleVolume">
-          <img :src="isMuted ? volumeSvg : mutedSvg" alt="音量" />
+          <img :src="isMuted ? mutedSvg : volumeSvg" alt="音量" />
         </button>
       </div>
     </transition>
@@ -471,14 +468,20 @@
                   class="history-message"
                   :id="`message-${item.id}`"
                 >
-                  <div  v-if="item.user && item.user.trim()" class="message user">
+                  <div
+                    v-if="item.user && item.user.trim()"
+                    class="message user"
+                  >
                     <div class="bubble">
                       {{ item.user }}
                       <div class="time">{{ formatTime(item.timestamp) }}</div>
                     </div>
                   </div>
 
-                  <div  v-if="item.isLoading || (item.bot && item.bot.trim())" class="message bot">
+                  <div
+                    v-if="item.isLoading || (item.bot && item.bot.trim())"
+                    class="message bot"
+                  >
                     <div class="avatar">
                       <img :src="currentCharacter.avatar" alt="角色頭像" />
                     </div>
@@ -708,8 +711,10 @@ import sendSvg from "~/assets/imgs/robot/send.svg";
 
 // ====== 參考 robot1021.vue 的 n8n API 方式 ======
 const TEXT_WEBHOOK_URL = "https://aiwisebalance.com/webhook/Textchat"; // ← n8n 文字端點
-const TEXT_MESSAGE_URL = "https://23700999.com:8081/HMA/TTEsaveChatMessageHistory.jsp"; // ← 儲存聊天記錄
-const GET_CHAT_HISTORY_URL = "https://23700999.com:8081/HMA/api/fr/frGetLineAIHuman"; // ← 獲取聊天記錄
+const TEXT_MESSAGE_URL =
+  "https://23700999.com:8081/HMA/TTEsaveChatMessageHistory.jsp"; // ← 儲存聊天記錄
+const GET_CHAT_HISTORY_URL =
+  "https://23700999.com:8081/HMA/api/fr/frGetLineAIHuman"; // ← 獲取聊天記錄
 const voicegender = "female";
 const historyInputRef = ref(null);
 
@@ -724,7 +729,6 @@ const characterImageLoading = ref(new Set());
 const isCharacterLocked = (character) => {
   return character.locked === true;
 };
-
 
 // 響應式狀態
 const router = useRouter();
@@ -832,8 +836,8 @@ if (!localData) {
 }
 
 const goToHealthLog = () => {
-  router.push('/healthLog');
-}
+  router.push("/healthLog");
+};
 
 // 角色選擇相關狀態
 const showCharacterSelection = ref(false); // 顯示角色選擇彈窗
@@ -862,40 +866,43 @@ const makeStableKey = (msg) => {
 // 正確處理時間戳，修復時區問題
 const parseCorrectTime = (timeString) => {
   if (!timeString) return new Date();
-  
+
   // 如果時間格式是 "2025/09/23 09:57" 這種格式
-  if (timeString.includes('/') && timeString.includes(' ')) {
+  if (timeString.includes("/") && timeString.includes(" ")) {
     // 將 "2025/09/23 09:57" 轉換為本地時間，不進行時區轉換
-    const [datePart, timePart] = timeString.split(' ');
-    const [year, month, day] = datePart.split('/');
-    const [hour, minute] = timePart.split(':');
-    
+    const [datePart, timePart] = timeString.split(" ");
+    const [year, month, day] = datePart.split("/");
+    const [hour, minute] = timePart.split(":");
+
     // 創建本地時間，不進行時區轉換
     return new Date(
-      parseInt(year), 
+      parseInt(year),
       parseInt(month) - 1, // 月份從0開始
-      parseInt(day), 
-      parseInt(hour), 
-      parseInt(minute), 
+      parseInt(day),
+      parseInt(hour),
+      parseInt(minute),
       0
     );
   }
-  
+
   // 如果是 ISO 格式，直接解析
   return new Date(timeString);
 };
 
 // 生成本地時間格式，避免時區問題
 const getLocalTimeString = (date = new Date()) => {
-  return date.toLocaleString("zh-TW", {
-    year: "numeric",
-    month: "2-digit", 
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false
-  }).replace(/\//g, "-").replace(",", "");
+  return date
+    .toLocaleString("zh-TW", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    })
+    .replace(/\//g, "-")
+    .replace(",", "");
 };
 
 // 日曆相關
@@ -1830,7 +1837,6 @@ const startVoiceTimeout = () => {
   }, 3000); // 3秒超時顯示提示
 };
 
-
 // 初始化語音識別
 const initSpeechRecognition = () => {
   if (process.client && typeof window !== "undefined") {
@@ -1951,7 +1957,7 @@ async function sendViaUnifiedAPI(
   // 使用本地時間，避免時區問題
   const now = new Date();
   const localTime = getLocalTimeString(now);
-  
+
   let usedServerAudio = false; // 追蹤是否使用了伺服器音頻
   let res;
 
@@ -1997,8 +2003,10 @@ async function sendViaUnifiedAPI(
     const blob = await res.blob();
     if (playAudio) {
       // 若要播伺服器音檔，先關閉 TTS，避免互搶
-      try { synthRef?.cancel(); } catch {}
-      
+      try {
+        synthRef?.cancel();
+      } catch {}
+
       const url = URL.createObjectURL(blob);
       const audio = ensurePlayer();
       try {
@@ -2066,7 +2074,7 @@ async function sendViaUnifiedAPI(
     try {
       // 使用本地時間格式
       const outputTime = getLocalTimeString();
-      
+
       res = await fetch(TEXT_MESSAGE_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -2086,7 +2094,8 @@ async function sendViaUnifiedAPI(
     }
   }
 
-  const finalAnswer = (answerText && String(answerText).trim()) ||
+  const finalAnswer =
+    (answerText && String(answerText).trim()) ||
     "（親愛的:您的問題我目前沒辦法回答）";
 
   // 只有在「沒有伺服器音檔可播」時，才用 TTS
@@ -2242,11 +2251,17 @@ const speakText = (text) => {
 
     isManuallyStopped.value = false;
     playbackConfirmed = false;
-    
+
     // 停掉另外一路的 <audio>
-    try { const a = ensurePlayer(); a.pause(); a.currentTime = 0; } catch {}
+    try {
+      const a = ensurePlayer();
+      a.pause();
+      a.currentTime = 0;
+    } catch {}
     // 停掉既有 TTS
-    try { synthRef.cancel(); } catch {}
+    try {
+      synthRef.cancel();
+    } catch {}
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "zh-TW";
@@ -2337,8 +2352,10 @@ const toggleVolume = () => {
     isMuted.value = !isMuted.value;
 
     // 停掉 TTS
-    try { synthRef?.cancel(); } catch {}
-    
+    try {
+      synthRef?.cancel();
+    } catch {}
+
     // 停掉 <audio> 播放
     try {
       const a = ensurePlayer();
@@ -2365,11 +2382,13 @@ function unlockAudioIfNeeded() {
   const a = ensurePlayer();
   try {
     a.muted = true;
-    a.play().then(() => {
-      a.pause();
-      a.currentTime = 0;
-      a.muted = false;
-    }).catch(() => {});
+    a.play()
+      .then(() => {
+        a.pause();
+        a.currentTime = 0;
+        a.muted = false;
+      })
+      .catch(() => {});
   } catch {}
 }
 
@@ -2383,7 +2402,7 @@ const closeAudioError = () => {
 async function handleManualInput() {
   const input = textInput.value.trim();
   if (!input) return;
-  
+
   unlockAudioIfNeeded(); // 🔓 文字送出也解鎖一次
 
   // 檢查字數是否超過50字，進入摘要模式
@@ -2438,7 +2457,9 @@ async function handleManualInput() {
   }
 
   try {
-    const botResponse = await sendViaUnifiedAPI(input, { playAudio: !isMuted.value });
+    const botResponse = await sendViaUnifiedAPI(input, {
+      playAudio: !isMuted.value,
+    });
     console.log("文字處理完成，botResponse:", botResponse);
 
     // 更新聊天記錄中的 bot 回覆
@@ -2504,7 +2525,7 @@ const handleSummaryMode = async (saveSummary = false) => {
       localStorage.setItem("healthLog", JSON.stringify(healthLog));
       console.log("摘要已儲存到健康日誌:", summaryEntry);
       console.log("健康日誌總數:", healthLog.length);
-      
+
       // 顯示成功提示
       // alert("摘要已成功儲存到健康日誌！");
     } catch (error) {
@@ -2564,18 +2585,21 @@ const handleCustomerService = async (contactService = false) => {
     try {
       isLoading.value = true;
 
-      const response = await fetch("https://23700999.com:8081/HMA/api/fr/frSendLineText", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          MID: localobj.MID,
-          Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
-          MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
-          Mobile: localobj.Mobile,
-          Content: pendingInput.value || "呼叫客服",
-          Lang: "zhtw"
-        }),
-      });
+      const response = await fetch(
+        "https://23700999.com:8081/HMA/api/fr/frSendLineText",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            MID: localobj.MID,
+            Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
+            MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
+            Mobile: localobj.Mobile,
+            Content: pendingInput.value || "呼叫客服",
+            Lang: "zhtw",
+          }),
+        }
+      );
 
       if (!response.ok) {
         // 失敗也不提示使用者；僅記錄 log 方便除錯
@@ -2609,7 +2633,9 @@ const handleCustomerService = async (contactService = false) => {
 
     try {
       isLoading.value = true;
-      const botResponse = await sendViaUnifiedAPI(originalInput, { playAudio: !isMuted.value });
+      const botResponse = await sendViaUnifiedAPI(originalInput, {
+        playAudio: !isMuted.value,
+      });
 
       const nowTs = Date.now();
       const newConversation = {
@@ -2622,7 +2648,8 @@ const handleCustomerService = async (contactService = false) => {
       };
 
       conversations.value.push(newConversation);
-      latestResponse.value = botResponse || "（親愛的:您的問題我目前沒辦法回答）";
+      latestResponse.value =
+        botResponse || "（親愛的:您的問題我目前沒辦法回答）";
       saveConversations();
 
       if (showHistoryPage.value) {
@@ -2654,16 +2681,15 @@ const handleCustomerService = async (contactService = false) => {
   }
 };
 
-
 // 啟動 API 輪詢
 const startApiPolling = () => {
   if (apiPollingInterval.value) {
     clearInterval(apiPollingInterval.value);
   }
-  
+
   isPollingActive.value = true;
   console.log("啟動 API 輪詢，每15秒檢查一次新訊息");
-  
+
   apiPollingInterval.value = setInterval(async () => {
     if (isPollingActive.value) {
       console.log("執行定期 API 檢查...");
@@ -2698,7 +2724,7 @@ const fetchChatHistory = async (isPolling = false) => {
         Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
         MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
         Mobile: localobj.Mobile,
-        Lang: "zhtw"
+        Lang: "zhtw",
       }),
     });
 
@@ -2707,30 +2733,31 @@ const fetchChatHistory = async (isPolling = false) => {
     }
 
     const data = await response.json();
-    
+
     if (isPolling) {
       console.log("輪詢檢查新訊息...");
     } else {
       console.log("獲取到的聊天記錄:", data);
     }
 
-    if (
-      data.Result === "OK" &&
-      data.LineList &&
-      Array.isArray(data.LineList)
-    ) {
+    if (data.Result === "OK" && data.LineList && Array.isArray(data.LineList)) {
       // 過濾掉空記錄（沒有 CheckTime 或 Content 的記錄）
-      const validMessages = data.LineList.filter(msg => 
-        msg.CheckTime && 
-        msg.CheckTime.trim() !== "" && 
-        msg.Content && 
-        msg.Content.trim() !== ""
+      const validMessages = data.LineList.filter(
+        (msg) =>
+          msg.CheckTime &&
+          msg.CheckTime.trim() !== "" &&
+          msg.Content &&
+          msg.Content.trim() !== ""
       );
 
       if (isPolling) {
-        console.log(`輪詢檢查: 原始記錄數: ${data.LineList.length}, 有效記錄數: ${validMessages.length}`);
+        console.log(
+          `輪詢檢查: 原始記錄數: ${data.LineList.length}, 有效記錄數: ${validMessages.length}`
+        );
       } else {
-        console.log(`原始記錄數: ${data.LineList.length}, 有效記錄數: ${validMessages.length}`);
+        console.log(
+          `原始記錄數: ${data.LineList.length}, 有效記錄數: ${validMessages.length}`
+        );
       }
 
       // 轉換 API 資料格式為本地格式
@@ -2768,11 +2795,14 @@ const fetchChatHistory = async (isPolling = false) => {
       convertedMessages.sort((a, b) => a.ts - b.ts);
 
       // 檢查是否有新訊息
-      const hasNewMessages = isPolling && conversations.value.length !== convertedMessages.length;
-      
+      const hasNewMessages =
+        isPolling && conversations.value.length !== convertedMessages.length;
+
       if (hasNewMessages) {
-        console.log(`發現新訊息！從 ${conversations.value.length} 條增加到 ${convertedMessages.length} 條`);
-        
+        console.log(
+          `發現新訊息！從 ${conversations.value.length} 條增加到 ${convertedMessages.length} 條`
+        );
+
         // 滾動到底部顯示新訊息
         nextTick(() => {
           setTimeout(() => {
@@ -2826,7 +2856,7 @@ const fetchOlderChatHistory = async () => {
         Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
         MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
         Mobile: localobj.Mobile,
-        Lang: "zhtw"
+        Lang: "zhtw",
       }),
     });
 
@@ -2842,36 +2872,41 @@ const fetchOlderChatHistory = async () => {
     }
 
     // 過濾掉空記錄
-    const validMessages = data.LineList.filter(msg => 
-      msg.CheckTime && 
-      msg.CheckTime.trim() !== "" && 
-      msg.Content && 
-      msg.Content.trim() !== ""
+    const validMessages = data.LineList.filter(
+      (msg) =>
+        msg.CheckTime &&
+        msg.CheckTime.trim() !== "" &&
+        msg.Content &&
+        msg.Content.trim() !== ""
     );
 
-    console.log(`更舊記錄 - 原始: ${data.LineList.length}, 有效: ${validMessages.length}`);
+    console.log(
+      `更舊記錄 - 原始: ${data.LineList.length}, 有效: ${validMessages.length}`
+    );
 
     // 轉換 & 產生穩定鍵
-    const incoming = validMessages.map((msg) => {
-      const checkTime = parseCorrectTime(msg.CheckTime);
-      const key = makeStableKey(msg);
-      
-      // 根據 Mode 和 AHType 判斷是用戶還是 AI/客服
-      // Mode: "Input" = 用戶輸入, Mode: "Output" = AI/客服回應
-      // AHType: "Human" = 真人客服, AHType: "AI" = AI
-      const isUser = msg.Mode === "Input";
-      const isBot = msg.Mode === "Output";
-      
-      return {
-        stableKey: key,
-        id: key, // 用穩定鍵作為 id
-        ts: checkTime.getTime(),
-        user: isUser ? msg.Content : "",
-        bot: isBot ? msg.Content : "",
-        timestamp: checkTime.toLocaleString("zh-TW"),
-        dateKey: toDateKey(checkTime),
-      };
-    }).sort((a, b) => a.ts - b.ts);
+    const incoming = validMessages
+      .map((msg) => {
+        const checkTime = parseCorrectTime(msg.CheckTime);
+        const key = makeStableKey(msg);
+
+        // 根據 Mode 和 AHType 判斷是用戶還是 AI/客服
+        // Mode: "Input" = 用戶輸入, Mode: "Output" = AI/客服回應
+        // AHType: "Human" = 真人客服, AHType: "AI" = AI
+        const isUser = msg.Mode === "Input";
+        const isBot = msg.Mode === "Output";
+
+        return {
+          stableKey: key,
+          id: key, // 用穩定鍵作為 id
+          ts: checkTime.getTime(),
+          user: isUser ? msg.Content : "",
+          bot: isBot ? msg.Content : "",
+          timestamp: checkTime.toLocaleString("zh-TW"),
+          dateKey: toDateKey(checkTime),
+        };
+      })
+      .sort((a, b) => a.ts - b.ts);
 
     // 去重
     const newOnes = [];
@@ -3458,7 +3493,6 @@ const vClickOutside = {
 };
 </script>
 
-
 <!-- scss分段 -->
 
 <style lang="scss" scoped>
@@ -3631,41 +3665,39 @@ const vClickOutside = {
     height: 100%;
     object-fit: cover;
   }
-  .healGroup{
+  .healGroup {
     position: absolute;
-      right: 2.25rem;
-      top: 2.5rem;
-      transform: translate(50%, -50%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 0.15rem;
-    .healthImg{
+    right: 2.25rem;
+    top: 2.5rem;
+    transform: translate(50%, -50%);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    width: 40px;
-    height: 40px;
-    border-radius: var(--Radius-r-50, 50px);
+    flex-direction: column;
+    gap: 0.15rem;
+    .healthImg {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 40px;
+      height: 40px;
+      border-radius: var(--Radius-r-50, 50px);
       background: var(--Secondary-100, #f5f7fa);
       box-shadow: 2px 4px 12px 0
-      var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
+        var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
       padding: 0.5rem;
       cursor: pointer;
-  
     }
-    h5{
+    h5 {
       color: var(--Neutral-500, #666);
-text-align: center;
-font-size: 10px;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
+      text-align: center;
+      font-size: 10px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
     }
   }
-  
 }
 
 /* 語音控制欄 - 絕對定位擬態設計 */
@@ -4118,7 +4150,7 @@ line-height: normal;
       width: 80px;
       height: 80px;
       margin: 0 auto;
-      background-image: url('/assets/imgs/robot/assistantSound.gif');
+      background-image: url("/assets/imgs/robot/assistantSound.gif");
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center;
@@ -5401,4 +5433,3 @@ line-height: normal;
   pointer-events: none;
 }
 </style>
-
