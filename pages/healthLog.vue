@@ -148,6 +148,9 @@ import TitleMenu from "~/components/TitleMenu.vue";
 import BottomNav from "~/components/BottomNav.vue";
 
 // 響應式數據
+const localData = localStorage.getItem("userData");
+const localobj = localData ? JSON.parse(localData) : null;
+
 const selectedYear = ref(new Date().getFullYear());
 const selectedMonth = ref(`${new Date().getMonth() + 1}月`);
 const showYearPicker = ref(false);
@@ -215,28 +218,48 @@ const filteredLogs = computed(() => {
 });
 
 // 方法
-const loadHealthLogs = () => {
+const loadHealthLogs = async () => {
   try {
-    const stored = localStorage.getItem("healthLog");
-    console.log("從 localStorage 讀取的資料:", stored);
+    // 從 API 讀取健康日誌
+    const response = await fetch("https://23700999.com:8081/HMA/api/fr/getSoundNote", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        MID: localobj?.MID || "1",
+        Token: localobj?.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
+        MAID: localobj?.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
+        Mobile: localobj?.Mobile || "0968324056",
+        Lang: "zhtw",
+        Year: selectedYear.value.toString(),
+        Month: selectedMonth.value.replace("月", "").padStart(2, "0")
+      }),
+    });
 
-    if (stored) {
-      healthLogs.value = JSON.parse(stored);
-      console.log("解析後的健康日誌:", healthLogs.value);
+    if (!response.ok) {
+      throw new Error(`讀取健康日誌 API 失敗: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("從 API 讀取的資料:", data);
+
+    if (data.Result === "OK" && data.SoundNoteList) {
+      // 轉換 API 資料格式為本地格式
+      healthLogs.value = data.SoundNoteList.map((item, index) => ({
+        id: Date.now() + index,
+        date: item.CheckTime,
+        timestamp: item.CheckTime,
+        type: "summary",
+        content: item.Note,
+      }));
+      
+      console.log("轉換後的健康日誌:", healthLogs.value);
       console.log("健康日誌總數:", healthLogs.value.length);
-
-      // 檢查資料格式
-      if (healthLogs.value.length > 0) {
-        console.log("第一筆資料格式:", healthLogs.value[0]);
-        console.log("第一筆資料的 date:", healthLogs.value[0].date);
-        console.log("第一筆資料的 timestamp:", healthLogs.value[0].timestamp);
-      }
     } else {
-      console.log("localStorage 中沒有健康日誌資料");
+      console.log("API 回應無效或無資料");
       healthLogs.value = [];
     }
   } catch (error) {
-    console.error("載入健康日誌失敗:", error);
+    console.error("讀取健康日誌失敗:", error);
     healthLogs.value = [];
   }
 };
@@ -250,15 +273,19 @@ const toggleExpand = (logId) => {
   }
 };
 
-const selectYear = (year) => {
+const selectYear = async (year) => {
   selectedYear.value = year;
   showYearPicker.value = false;
+  // 重新載入資料
+  await loadHealthLogs();
 };
 
-const selectMonth = (month) => {
+const selectMonth = async (month) => {
   selectedMonth.value =
     availableMonths.value.find((m) => m.value === month)?.label || "1月";
   showMonthPicker.value = false;
+  // 重新載入資料
+  await loadHealthLogs();
 };
 
 const formatDate = (timestamp) => {
@@ -271,8 +298,8 @@ const formatDate = (timestamp) => {
 };
 
 // 生命週期
-onMounted(() => {
-  loadHealthLogs();
+onMounted(async () => {
+  await loadHealthLogs();
 });
 </script>
 

@@ -62,14 +62,11 @@
         @click="handleCharacterClick"
       />
       <div class="healGroup">
-  
         <div class="healthImg" @click="goToHealthLog">
             <img src="/assets/imgs/robot/health.svg" alt="健康" />
-          
-          </div>
-          <h5>健康日誌</h5>
+        </div>
+        <h5>健康日誌</h5>
       </div>
-    
     </div>
 
     <!-- 語音控制區域 - 從下方彈出 -->
@@ -2490,26 +2487,37 @@ const handleSummaryMode = async (saveSummary = false) => {
   currentSummary.value = "";
 
   if (saveSummary) {
-    // 儲存摘要到健康日誌
+    // 儲存摘要到 API
     try {
-      const healthLog = JSON.parse(localStorage.getItem("healthLog") || "[]");
-      const summaryEntry = {
-        id: Date.now(),
-        date: new Date().toISOString(),
-        type: "summary",
-        content: summaryText,
-        timestamp: new Date().toLocaleString("zh-TW"),
-      };
-      healthLog.push(summaryEntry);
-      localStorage.setItem("healthLog", JSON.stringify(healthLog));
-      console.log("摘要已儲存到健康日誌:", summaryEntry);
-      console.log("健康日誌總數:", healthLog.length);
+      isLoading.value = true;
+      
+      const response = await fetch("https://23700999.com:8081/HMA/api/fr/saveSoundNote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          MID: localobj.MID,
+          Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
+          MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
+          Mobile: localobj.Mobile,
+          Lang: "zhtw",
+          SoundNote: summaryText
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`儲存摘要 API 失敗: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("摘要已儲存到 API:", data);
       
       // 顯示成功提示
-      // alert("摘要已成功儲存到健康日誌！");
+      alert("摘要已成功儲存到健康日誌！");
     } catch (error) {
       console.error("儲存摘要失敗:", error);
       alert("儲存摘要失敗，請重試");
+    } finally {
+      isLoading.value = false;
     }
   }
 
