@@ -36,10 +36,20 @@
           </button>
         </div>
       </div>
-      <div class="total-count">總共 {{ filteredLogs.length }} 筆</div>
+      <div class="total-count" v-if="isDataReady">
+        總共 {{ filteredLogs.length }} 筆
+      </div>
+
+      <!-- 載入狀態 -->
+      <div v-if="isLoading" class="loading-container">
+        <div class="loading-card">
+          <div class="loading-spinner"></div>
+          <div class="loading-text">載入健康日誌中...</div>
+        </div>
+      </div>
 
       <!-- 日誌列表 -->
-      <div class="log-list" v-if="filteredLogs.length > 0">
+      <div class="log-list" v-else-if="isDataReady && filteredLogs.length > 0">
         <div
           class="log-item"
           v-for="log in filteredLogs"
@@ -71,7 +81,7 @@
       </div>
 
       <!-- 空狀態 -->
-      <div class="empty-state" v-else>
+      <div class="empty-state" v-else-if="isDataReady && filteredLogs.length === 0">
         <div class="empty-card">
           <div class="empty-character">
             <img
@@ -158,6 +168,10 @@ const showMonthPicker = ref(false);
 const expandedItems = ref([]);
 const healthLogs = ref([]);
 
+// 載入狀態管理
+const isLoading = ref(true);
+const isDataReady = ref(false);
+
 // 可用年份和月份
 const availableYears = computed(() => {
   const startYear = 2025;
@@ -219,6 +233,9 @@ const filteredLogs = computed(() => {
 
 // 方法
 const loadHealthLogs = async () => {
+  isLoading.value = true;
+  isDataReady.value = false;
+  
   try {
     // 從 API 讀取健康日誌
     const response = await fetch("https://23700999.com:8081/HMA/api/fr/getSoundNote", {
@@ -261,6 +278,9 @@ const loadHealthLogs = async () => {
   } catch (error) {
     console.error("讀取健康日誌失敗:", error);
     healthLogs.value = [];
+  } finally {
+    isLoading.value = false;
+    isDataReady.value = true;
   }
 };
 
@@ -382,6 +402,53 @@ onMounted(async () => {
   letter-spacing: 0.072px;
   padding-right: 1.25rem;
   margin-bottom: 0.75rem;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 2rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+.loading-card {
+  background: var(--Neutral-white, #fff);
+  border-radius: 20px;
+  padding: 3rem 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  text-align: center;
+  @include neumorphismOuter(
+    $bgColor: var(--Neutral-white, #ffffff),
+    $radius: 20px,
+    $x: 0,
+    $y: 4px,
+    $blur: 12px
+  );
+
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(116, 188, 31, 0.3);
+    border-top: 3px solid #74bc1f;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1.5rem;
+  }
+
+  .loading-text {
+    color: var(--Neutral-700, #4a5568);
+    font-size: 18px;
+    font-weight: 500;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .log-list {

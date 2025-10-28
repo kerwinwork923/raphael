@@ -20,14 +20,27 @@
         :class="{ overZIndex: showTutorial && currentTutorialStep === 4 }"
         @click="currentTutorialStep === 4 ? null : showCharacterModal()"
       >
-        <img class="avatar" :src="currentCharacter.avatar" alt="角色頭像" />
+        <div v-if="isCharacterLoading" class="character-loading">
+          <div class="loading-spinner"></div>
+        </div>
+        <img 
+          v-else-if="isCharacterDataReady" 
+          class="avatar" 
+          :src="currentCharacter.avatar" 
+          alt="角色頭像" 
+        />
+        <div v-else class="character-placeholder">
+          <div class="placeholder-avatar"></div>
+        </div>
       </div>
       <div
         class="character-name-btn"
         :class="{ overZIndex: showTutorial && currentTutorialStep === 4 }"
         @click="currentTutorialStep === 4 ? null : showCharacterModal()"
       >
-        <span>{{ currentCharacter.customName || currentCharacter.name }}</span>
+        <span v-if="isCharacterDataReady">{{ currentCharacter.customName || currentCharacter.name }}</span>
+        <span v-else-if="isCharacterLoading">載入中...</span>
+        <span v-else>角色</span>
         <img :src="recycleSvg" alt="刷新" />
       </div>
     </div>
@@ -844,6 +857,10 @@ const showComingSoon = ref(false); // 顯示近期推出彈窗
 const showCharacterExitConfirm = ref(false); // 顯示角色選擇離開確認彈窗
 const tempSelectedCharacter = ref(null); // 臨時選擇的角色
 const isStyleExpanded = ref(false); // 造型是否展開
+
+// 角色載入狀態
+const isCharacterLoading = ref(true); // 角色載入中
+const isCharacterDataReady = ref(false); // 角色數據是否準備完成
 
 // 角色命名相關狀態
 const showNameInput = ref(false); // 顯示名稱輸入彈窗
@@ -3206,6 +3223,9 @@ const changeRoleDisplayName = async (displayName) => {
 // 載入保存的角色選擇
 const loadSavedCharacter = async () => {
   if (process.client) {
+    isCharacterLoading.value = true;
+    isCharacterDataReady.value = false;
+    
     try {
       // 從 API 獲取所有角色列表
       const apiRoles = await fetchAllRoles();
@@ -3276,6 +3296,10 @@ const loadSavedCharacter = async () => {
           console.error("載入本地角色選擇失敗:", e);
         }
       }
+    } finally {
+      // 載入完成，設置狀態
+      isCharacterLoading.value = false;
+      isCharacterDataReady.value = true;
     }
   }
 };
@@ -3784,6 +3808,52 @@ const vClickOutside = {
         $blur: 6px
       );
     }
+
+    .character-loading {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(116, 188, 31, 0.1);
+
+      .loading-spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(116, 188, 31, 0.3);
+        border-top: 2px solid $raphael-green-400;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+    }
+
+    .character-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(116, 188, 31, 0.05);
+
+      .placeholder-avatar {
+        width: 24px;
+        height: 24px;
+        background: rgba(116, 188, 31, 0.2);
+        border-radius: 50%;
+      }
+    }
+
+    .avatar {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: opacity 0.3s ease;
+    }
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 
   .character-name-btn {
