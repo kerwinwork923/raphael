@@ -2211,8 +2211,7 @@ const handleSummaryMode = async (saveSummary = false) => {
       const data = await response.json();
       console.log("摘要已儲存到 API:", data);
       
-      // 顯示成功提示
-      alert("摘要已成功儲存到健康日誌！");
+
     } catch (error) {
       console.error("儲存摘要失敗:", error);
       alert("儲存摘要失敗，請重試");
