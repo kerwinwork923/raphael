@@ -38,7 +38,7 @@
         :class="{ overZIndex: showTutorial && currentTutorialStep === 4 }"
         @click="currentTutorialStep === 4 ? null : showCharacterModal()"
       >
-        <span v-if="isCharacterDataReady">{{ currentCharacter.customName || currentCharacter.name }}</span>
+        <span v-if="isCharacterDataReady && currentCharacter">{{ currentCharacter.customName || currentCharacter.name }}</span>
         <span v-else-if="isCharacterLoading">載入中...</span>
         <span v-else>角色</span>
         <img :src="recycleSvg" alt="刷新" />
@@ -69,11 +69,15 @@
     <!-- AI角色形象區域 -->
     <div class="character-section">
       <img
+        v-if="uiCharacter && uiCharacter.fullImage"
         :src="uiCharacter.fullImage"
         class="character-image"
         alt="AI角色"
         @click="handleCharacterClick"
       />
+      <div v-else class="character-placeholder">
+        <div class="placeholder-character"></div>
+      </div>
       <div class="healGroup">
         <div class="healthImg" @click="goToHealthLog">
             <img src="/assets/imgs/robot/health.svg" alt="健康" />
@@ -283,7 +287,7 @@
           <!-- 當前選擇角色標籤 -->
           <div class="current-character-tag" @click="showNameInputModal">
             <span
-              >{{ uiCharacter.customName || uiCharacter.displayName }}
+              >{{ uiCharacter ? (uiCharacter.customName || uiCharacter.displayName) : '角色' }}
               <img
                 src="/assets/imgs/robot/edit_green.svg"
                 alt="編輯"
@@ -296,10 +300,14 @@
           <div class="main-character-area">
             <div class="character-display">
               <img
+                v-if="uiCharacter && uiCharacter.fullImage"
                 :src="uiCharacter.fullImage"
                 alt="角色形象"
                 class="character-full-image"
               />
+              <div v-else class="character-placeholder-large">
+                <div class="placeholder-character-large"></div>
+              </div>
             </div>
 
             <!-- 右側造型選擇 -->
@@ -310,11 +318,11 @@
 
               <div class="style-grid" :class="{ expanded: isStyleExpanded }">
                 <div
-                  v-for="style in uiCharacter.styles"
-                  :key="`${uiCharacter.id}-${style.id}`"
+                  v-for="style in (uiCharacter && uiCharacter.styles) || []"
+                  :key="`${uiCharacter?.id || 'unknown'}-${style.id}`"
                   class="style-item"
                   :class="{
-                    active: uiCharacter.styleId === style.id,
+                    active: uiCharacter && uiCharacter.styleId === style.id,
                     locked: style.locked,
                   }"
                   @click="selectStyle(style)"
@@ -356,7 +364,7 @@
                 :key="character.id"
                 class="character-option"
                 :class="{
-                  selected: uiCharacter.id === character.id,
+                  selected: uiCharacter && uiCharacter.id === character.id,
                   locked: isCharacterLocked(character),
                 }"
                 @click="onCharacterClick(character)"
@@ -781,47 +789,9 @@ const knownKeys = new Set(); // 用於去重的穩定鍵集合
 const showTutorial = ref(false);
 const currentTutorialStep = ref(1);
 const tutorialSteps = [1, 2, 3, 4, 5]; // 解說步驟順序
-import doctor from "~/assets/imgs/robot/character/doctor.png";
-import doctor2 from "~/assets/imgs/robot/character/doctor2.png";
-import doctor3 from "~/assets/imgs/robot/character/doctor3.png";
-import doctor4 from "~/assets/imgs/robot/character/doctor4.png";
-import doctor5 from "~/assets/imgs/robot/character/doctor5.png";
-import doctor6 from "~/assets/imgs/robot/character/doctor6.png";
-import girl1_1 from "~/assets/imgs/robot/character/girl1_1.png";
-import girl1_2 from "~/assets/imgs/robot/character/girl1_2.png";
-import girl1_3 from "~/assets/imgs/robot/character/girl1_3.png";
-import girl2_1 from "~/assets/imgs/robot/character/girl2_1.png";
-import girl2_2 from "~/assets/imgs/robot/character/girl2_2.png";
-import girl3_1 from "~/assets/imgs/robot/character/girl3_1.png";
-import girl3_2 from "~/assets/imgs/robot/character/girl3_2.png";
-import girl4_1 from "~/assets/imgs/robot/character/girl4_1.png";
-import girl4_2 from "~/assets/imgs/robot/character/girl4_2.png";
-import girl5_1 from "~/assets/imgs/robot/character/girl5_1.png";
-import girl5_2 from "~/assets/imgs/robot/character/girl5_2.png";
-import man1_1 from "~/assets/imgs/robot/character/man1_1.png";
-import man1_2 from "~/assets/imgs/robot/character/man1_2.png";
-import man2_1 from "~/assets/imgs/robot/character/man2_1.png";
-import man2_2 from "~/assets/imgs/robot/character/man2_2.png";
-import man3_1 from "~/assets/imgs/robot/character/man3_1.png";
-import man3_2 from "~/assets/imgs/robot/character/man3_2.png";
-import man3_3 from "~/assets/imgs/robot/character/man3_3.png";
-import man4_1 from "~/assets/imgs/robot/character/man4_1.png";
-import man4_2 from "~/assets/imgs/robot/character/man4_2.png";
-import man5_1 from "~/assets/imgs/robot/character/man5_1.png";
-import man5_2 from "~/assets/imgs/robot/character/man5_2.png";
-import man6_1 from "~/assets/imgs/robot/character/man6_1.png";
-import man6_2 from "~/assets/imgs/robot/character/man6_2.png";
-import pet1_1 from "~/assets/imgs/robot/character/pet1_1.png";
-import pet1_2 from "~/assets/imgs/robot/character/pet1_2.png";
-import pet2_1 from "~/assets/imgs/robot/character/pet2_1.png";
-import pet2_2 from "~/assets/imgs/robot/character/pet2_2.png";
-import pet3_1 from "~/assets/imgs/robot/character/pet3_1.png";
-import pet3_2 from "~/assets/imgs/robot/character/pet3_2.png";
-import pet4_1 from "~/assets/imgs/robot/character/pet4_1.png";
-import pet4_2 from "~/assets/imgs/robot/character/pet4_2.png";
-import pet4_3 from "~/assets/imgs/robot/character/pet4_3.png";
+// 角色圖片現在完全由 API 提供，不再需要本地 import
 
-const characterImageSrc = ref(doctor);
+const characterImageSrc = ref(null);
 
 // UI 目前應該顯示誰的 computed
 const uiCharacter = computed(() =>
@@ -961,314 +931,21 @@ const monthDateKeySet = computed(() => {
   return set;
 });
 
-// 角色數據
-const currentCharacter = ref({
-  id: 1,
-  name: "芷澄",
-  displayName: "芷澄",
-  avatar: doctor,
-  fullImage: doctor,
-  styleId: 1,
-  customName: "芷澄", // 自定義名稱
-  voiceSettings: {
-    rate: 0.9,
-    pitch: 0.85,
-    volume: 1,
-  },
-});
-
-const availableCharacters = ref([
-  {
-    id: 1,
-    name: "芷澄",
-    displayName: "芷澄",
-    avatar: doctor,
-    fullImage: doctor,
-    customName: "芷澄",
-    voiceSettings: {
-      rate: 0.9,
-      pitch: 0.85,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: doctor, fullImage: doctor },
-      { id: 2, thumbnail: doctor2, fullImage: doctor2 },
-      { id: 3, thumbnail: doctor3, fullImage: doctor3 },
-      { id: 4, thumbnail: doctor4, fullImage: doctor4 },
-      { id: 5, thumbnail: doctor5, fullImage: doctor5, locked: true },
-      { id: 6, thumbnail: doctor6, fullImage: doctor6, locked: true },
-    ],
-  },
-  {
-    id: 2,
-    name: "蕾紗",
-    displayName: "蕾紗",
-    avatar: girl1_1,
-    fullImage: girl1_1,
-    customName: "蕾紗",
-    voiceSettings: {
-      rate: 0.95,
-      pitch: 0.9,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: girl1_1, fullImage: girl1_1 },
-      { id: 2, thumbnail: girl1_2, fullImage: girl1_2 },
-      { id: 3, thumbnail: girl1_3, fullImage: girl1_3, locked: true },
-    ],
-  },
-  {
-    id: 3,
-    name: "沁瑤",
-    displayName: "沁瑤",
-    avatar: girl2_1,
-    fullImage: girl2_1,
-    customName: "沁瑤",
-    voiceSettings: {
-      rate: 0.9,
-      pitch: 0.8,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: girl2_1, fullImage: girl2_1 },
-      { id: 2, thumbnail: girl2_2, fullImage: girl2_2, locked: true },
-    ],
-  },
-  {
-    id: 4,
-    name: "晴婕",
-    displayName: "晴婕",
-    avatar: girl3_1,
-    fullImage: girl3_1,
-    customName: "晴婕",
-    voiceSettings: {
-      rate: 0.95,
-      pitch: 0.85,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: girl3_1, fullImage: girl3_1 },
-      { id: 2, thumbnail: girl3_2, fullImage: girl3_2 },
-    ],
-  },
-  {
-    id: 5,
-    name: "芮欣",
-    displayName: "芮欣",
-    avatar: girl4_1,
-    fullImage: girl4_1,
-    customName: "芮欣",
-    voiceSettings: {
-      rate: 0.9,
-      pitch: 0.9,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: girl4_1, fullImage: girl4_1 },
-      { id: 2, thumbnail: girl4_2, fullImage: girl4_2 },
-    ],
-  },
-  {
-    id: 6,
-    name: "語彤",
-    displayName: "語彤",
-    avatar: girl5_1,
-    fullImage: girl5_1,
-    customName: "語彤",
-    voiceSettings: {
-      rate: 0.95,
-      pitch: 0.8,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: girl5_1, fullImage: girl5_1 },
-      { id: 2, thumbnail: girl5_2, fullImage: girl5_2 },
-    ],
-  },
-  {
-    id: 7,
-    name: "澤昊",
-    displayName: "澤昊",
-    avatar: man1_1,
-    fullImage: man1_1,
-    customName: "澤昊",
-    voiceSettings: {
-      rate: 0.85,
-      pitch: 0.7,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: man1_1, fullImage: man1_1 },
-      { id: 2, thumbnail: man1_2, fullImage: man1_2 },
-    ],
-  },
-  {
-    id: 8,
-    name: "亦辰",
-    displayName: "亦辰",
-    avatar: man2_1,
-    fullImage: man2_1,
-    customName: "亦辰",
-    voiceSettings: {
-      rate: 0.9,
-      pitch: 0.75,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: man2_1, fullImage: man2_1 },
-      { id: 2, thumbnail: man2_2, fullImage: man2_2 },
-    ],
-  },
-  {
-    id: 9,
-    name: "曜宸",
-    displayName: "曜宸",
-    avatar: man3_1,
-    fullImage: man3_1,
-    customName: "曜宸",
-    voiceSettings: {
-      rate: 0.85,
-      pitch: 0.8,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: man3_1, fullImage: man3_1 },
-      { id: 2, thumbnail: man3_2, fullImage: man3_2 },
-      { id: 3, thumbnail: man3_3, fullImage: man3_3, locked: true },
-    ],
-  },
-  {
-    id: 10,
-    name: "霖澤",
-    displayName: "霖澤",
-    avatar: man4_1,
-    fullImage: man4_1,
-    customName: "霖澤",
-    voiceSettings: {
-      rate: 0.9,
-      pitch: 0.7,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: man4_1, fullImage: man4_1 },
-      { id: 2, thumbnail: man4_2, fullImage: man4_2 },
-    ],
-  },
-  {
-    id: 11,
-    name: "承睿",
-    displayName: "承睿",
-    avatar: man5_1,
-    fullImage: man5_1,
-    customName: "承睿",
-    voiceSettings: {
-      rate: 0.85,
-      pitch: 0.75,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: man5_1, fullImage: man5_1 },
-      { id: 2, thumbnail: man5_2, fullImage: man5_2 },
-    ],
-  },
-  {
-    id: 12,
-    name: "柏瀚",
-    displayName: "柏瀚",
-    avatar: man6_1,
-    fullImage: man6_1,
-    customName: "柏瀚",
-    voiceSettings: {
-      rate: 0.9,
-      pitch: 0.8,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: man6_1, fullImage: man6_1 },
-      { id: 2, thumbnail: man6_2, fullImage: man6_2 },
-    ],
-  },
-
-  {
-    id: 13,
-    name: "檸檬",
-    displayName: "檸檬",
-    avatar: pet1_1,
-    fullImage: pet1_1,
-    customName: "檸檬",
-    voiceSettings: {
-      rate: 1.1,
-      pitch: 1.2,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: pet1_1, fullImage: pet1_1 },
-      { id: 2, thumbnail: pet1_2, fullImage: pet1_2 },
-    ],
-  },
-  {
-    id: 14,
-    name: "芒果",
-    displayName: "芒果",
-    avatar: pet2_1,
-    fullImage: pet2_1,
-    customName: "芒果",
-    voiceSettings: {
-      rate: 1.0,
-      pitch: 1.1,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: pet2_1, fullImage: pet2_1 },
-      { id: 2, thumbnail: pet2_2, fullImage: pet2_2 },
-    ],
-  },
-  {
-    id: 15,
-    name: "喵喵",
-    displayName: "喵喵",
-    avatar: pet3_1,
-    fullImage: pet3_1,
-    customName: "喵喵",
-    voiceSettings: {
-      rate: 1.2,
-      pitch: 1.3,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: pet3_1, fullImage: pet3_1 },
-      { id: 2, thumbnail: pet3_2, fullImage: pet3_2 },
-    ],
-  },
-  {
-    id: 16,
-    name: "光羽",
-    displayName: "光羽",
-    avatar: pet4_1,
-    fullImage: pet4_1,
-    customName: "光羽",
-    voiceSettings: {
-      rate: 1.0,
-      pitch: 1.0,
-      volume: 1,
-    },
-    styles: [
-      { id: 1, thumbnail: pet4_1, fullImage: pet4_1 },
-      { id: 2, thumbnail: pet4_2, fullImage: pet4_2 },
-      { id: 3, thumbnail: pet4_3, fullImage: pet4_3 },
-    ],
-  },
-]);
+// 角色數據 - 完全由 API 提供
+const currentCharacter = ref(null);
+const availableCharacters = ref([]);
 
 // 計算屬性：當前可見的造型
 const visibleStyles = computed(() => {
+  if (!currentCharacter.value || !availableCharacters.value.length) return [];
+  
   const character = availableCharacters.value.find(
     (c) => c.id === currentCharacter.value.id
   );
   if (!character) return [];
 
   // 全部展開
-  return character.styles;
+  return character.styles || [];
 });
 
 let playbackConfirmed = false;
@@ -3233,7 +2910,8 @@ const loadSavedCharacter = async () => {
         availableCharacters.value = apiRoles;
         console.log("從 API 載入角色列表成功:", apiRoles.length, "個角色");
       } else {
-        console.warn("API 未返回角色列表，使用預設角色");
+        console.error("API 未返回角色列表");
+        availableCharacters.value = [];
       }
 
       // 從 API 獲取當前角色
@@ -3252,50 +2930,17 @@ const loadSavedCharacter = async () => {
           characterImageSrc.value = currentRole.fullImage;
           console.log("從 API 載入當前角色成功:", currentRole.displayName);
         } else {
-          console.warn("找不到對應的角色，使用預設角色");
+          console.error("找不到對應的角色");
+          currentCharacter.value = null;
         }
       } else {
-        console.warn("API 未返回當前角色，使用預設角色");
+        console.error("API 未返回當前角色");
+        currentCharacter.value = null;
       }
     } catch (error) {
-      console.error("載入角色失敗，使用本地備份:", error);
-      
-      // 如果 API 失敗，嘗試從本地存儲載入
-      const savedCharacters = localStorage.getItem("availableCharacters");
-      if (savedCharacters) {
-        try {
-          const parsedCharacters = JSON.parse(savedCharacters);
-          availableCharacters.value = availableCharacters.value.map((char) => {
-            const savedChar = parsedCharacters.find((c) => c.id === char.id);
-            return savedChar ? { ...char, ...savedChar } : char;
-          });
-        } catch (e) {
-          console.error("載入本地角色列表失敗:", e);
-        }
-      }
-
-      const saved = localStorage.getItem("selectedCharacter");
-      if (saved) {
-        try {
-          const savedCharacter = JSON.parse(saved);
-          const foundCharacter = availableCharacters.value.find(
-            (c) => c.id === savedCharacter.id
-          );
-          if (foundCharacter) {
-            currentCharacter.value = {
-              ...foundCharacter,
-              ...savedCharacter,
-              customName:
-                savedCharacter.customName ||
-                foundCharacter.customName ||
-                foundCharacter.displayName,
-            };
-            characterImageSrc.value = savedCharacter.fullImage;
-          }
-        } catch (e) {
-          console.error("載入本地角色選擇失敗:", e);
-        }
-      }
+      console.error("載入角色失敗:", error);
+      availableCharacters.value = [];
+      currentCharacter.value = null;
     } finally {
       // 載入完成，設置狀態
       isCharacterLoading.value = false;
@@ -3378,7 +3023,7 @@ const highlightKeyword = (text, keyword) => {
 
 // 角色選擇相關函數
 const showCharacterModal = () => {
-  if (process.client) {
+  if (process.client && currentCharacter.value) {
     showCharacterSelection.value = true;
     // 初始化臨時選擇狀態為當前角色
     tempSelectedCharacter.value = { ...currentCharacter.value };
@@ -3393,14 +3038,10 @@ const showCharacterModal = () => {
 
 const closeCharacterModal = () => {
   if (process.client) {
-    // 獲取原始保存的角色
-    const savedCharacter = localStorage.getItem("selectedCharacter")
-      ? JSON.parse(localStorage.getItem("selectedCharacter"))
-      : { id: "doctor", styleId: "doctor1" };
-
     // 檢查臨時選擇的角色是否與當前角色不同
     const hasUnsavedChanges =
       tempSelectedCharacter.value &&
+      currentCharacter.value &&
       (tempSelectedCharacter.value.id !== currentCharacter.value.id ||
         tempSelectedCharacter.value.styleId !== currentCharacter.value.styleId);
 
@@ -3533,24 +3174,18 @@ const confirmCharacterSelection = async () => {
       if (success) {
         // API 成功，更新本地狀態
         currentCharacter.value = { ...tempSelectedCharacter.value };
-        characterImageSrc.value = currentCharacter.value.fullImage;
+    characterImageSrc.value = currentCharacter.value.fullImage;
 
-        // 保存到本地存儲作為備份
-        localStorage.setItem(
-          "selectedCharacter",
-          JSON.stringify(currentCharacter.value)
-        );
+    // 關閉彈窗
+    showCharacterSelection.value = false;
+    isStyleExpanded.value = false;
+    tempSelectedCharacter.value = null;
 
-        // 關閉彈窗
-        showCharacterSelection.value = false;
-        isStyleExpanded.value = false;
-        tempSelectedCharacter.value = null;
-
-        console.log(
-          "角色選擇已確認:",
-          currentCharacter.value.customName || currentCharacter.value.displayName
-        );
-        console.log("當前頭貼:", currentCharacter.value.avatar);
+    console.log(
+      "角色選擇已確認:",
+      currentCharacter.value.customName || currentCharacter.value.displayName
+    );
+    console.log("當前頭貼:", currentCharacter.value.avatar);
       } else {
         console.error("角色選擇失敗，請重試");
         // 可以在這裡顯示錯誤提示給用戶
@@ -3600,7 +3235,7 @@ const initSwiperToCurrentCharacter = () => {
 
 // 角色名稱編輯相關函數
 const showNameInputModal = () => {
-  if (process.client) {
+  if (process.client && uiCharacter.value) {
     characterNameInput.value =
       uiCharacter.value.customName || uiCharacter.value.displayName;
     nameInputError.value = "";
@@ -3617,8 +3252,10 @@ const closeNameInput = () => {
   if (process.client) {
     showNameInput.value = false;
     // 重置為原始名稱，不儲存修改
+    if (uiCharacter.value) {
     characterNameInput.value =
       uiCharacter.value.customName || uiCharacter.value.displayName;
+    }
     nameInputError.value = "";
   }
 };
@@ -3643,45 +3280,34 @@ const confirmNameInput = async () => {
 
       if (success) {
         // API 成功，更新本地狀態
-        const targetId = uiCharacter.value.id;
+    const targetId = uiCharacter.value.id;
         
-        // 更新可用角色列表中的對應角色
-        const characterIndex = availableCharacters.value.findIndex(
-          (c) => c.id === targetId
-        );
-        if (characterIndex !== -1) {
-          availableCharacters.value[characterIndex] = {
-            ...availableCharacters.value[characterIndex],
-            customName: name,
-          };
-        }
+    // 更新可用角色列表中的對應角色
+    const characterIndex = availableCharacters.value.findIndex(
+      (c) => c.id === targetId
+    );
+    if (characterIndex !== -1) {
+      availableCharacters.value[characterIndex] = {
+        ...availableCharacters.value[characterIndex],
+        customName: name,
+      };
+    }
 
         // 若彈窗中正在編輯的就是 tempSelectedCharacter，也同步更新它
-        if (
-          tempSelectedCharacter.value &&
-          tempSelectedCharacter.value.id === targetId
-        ) {
-          tempSelectedCharacter.value.customName = name;
-        }
+    if (
+      tempSelectedCharacter.value &&
+      tempSelectedCharacter.value.id === targetId
+    ) {
+      tempSelectedCharacter.value.customName = name;
+    }
 
         // 若此角色同時也是當前使用中的角色，順便同步到 currentCharacter
-        if (currentCharacter.value.id === targetId) {
-          currentCharacter.value.customName = name;
-          // 保存到本地存儲作為備份
-          localStorage.setItem(
-            "selectedCharacter",
-            JSON.stringify(currentCharacter.value)
-          );
+        if (currentCharacter.value && currentCharacter.value.id === targetId) {
+      currentCharacter.value.customName = name;
         }
 
-        // 保存到本地存儲作為備份
-        localStorage.setItem(
-          "availableCharacters",
-          JSON.stringify(availableCharacters.value)
-        );
-
-        closeNameInput();
-        console.log("角色名稱已更新:", name);
+    closeNameInput();
+    console.log("角色名稱已更新:", name);
       } else {
         nameInputError.value = "更新失敗，請重試";
         console.error("角色名稱更新失敗");
@@ -3856,6 +3482,40 @@ const vClickOutside = {
   @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+  }
+
+  .character-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(116, 188, 31, 0.05);
+    border-radius: 50%;
+
+    .placeholder-character {
+      width: 30px;
+      height: 30px;
+      background: rgba(116, 188, 31, 0.2);
+      border-radius: 50%;
+    }
+  }
+
+  .character-placeholder-large {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(116, 188, 31, 0.05);
+    border-radius: 12px;
+
+    .placeholder-character-large {
+      width: 80px;
+      height: 80px;
+      background: rgba(116, 188, 31, 0.2);
+      border-radius: 50%;
+    }
   }
 
   .character-name-btn {
