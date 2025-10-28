@@ -3844,10 +3844,12 @@ const vClickOutside = {
     }
 
     .avatar {
-      width: 100%;
-      height: 100%;
+ 
+ 
+
       object-fit: cover;
       transition: opacity 0.3s ease;
+
     }
   }
 
