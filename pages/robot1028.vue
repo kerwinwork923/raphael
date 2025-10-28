@@ -707,12 +707,6 @@ import sendSvg from "~/assets/imgs/robot/send.svg";
 const TEXT_WEBHOOK_URL = "https://aiwisebalance.com/webhook/Textchat"; // ← n8n 文字端點
 const TEXT_MESSAGE_URL = "https://23700999.com:8081/HMA/TTEsaveChatMessageHistory.jsp"; // ← 儲存聊天記錄
 const GET_CHAT_HISTORY_URL = "https://23700999.com:8081/HMA/api/fr/frGetLineAIHuman"; // ← 獲取聊天記錄
-
-// ====== 角色相關 API ======
-const GET_ALL_ROLES_URL = "https://23700999.com:8081/HMA/api/fr/ALLRole"; // ← 獲取所有角色
-const ASSIGN_ROLE_URL = "https://23700999.com:8081/HMA/api/fr/AssignRole"; // ← 選擇角色
-const GET_CURRENT_ROLE_URL = "https://23700999.com:8081/HMA/api/fr/getRole"; // ← 獲取當前角色
-const CHANGE_ROLE_DISPLAY_NAME_URL = "https://23700999.com:8081/HMA/api/fr/RoleChgDisplayName"; // ← 更改角色顯示名稱
 const voicegender = "female";
 const historyInputRef = ref(null);
 
@@ -2940,7 +2934,7 @@ const loadConversations = async () => {
 };
 
 // 組件掛載時初始化
-onMounted(async () => {
+onMounted(() => {
   /*if (
     process.client &&
     typeof window !== "undefined" &&
@@ -2965,7 +2959,7 @@ onMounted(async () => {
   }*/
   initSpeechRecognition();
   loadConversations();
-  await loadSavedCharacter();
+  loadSavedCharacter();
 
   // 載入靜音狀態
   if (process.client) {
@@ -3006,275 +3000,45 @@ onUnmounted(() => {
   stopApiPolling();
 });
 
-// ====== 角色 API 相關函數 ======
-
-// 獲取所有角色列表
-const fetchAllRoles = async () => {
-  if (!localobj) {
-    console.error("用戶資料不存在，無法獲取角色列表");
-    return [];
-  }
-
-  try {
-    const response = await fetch(GET_ALL_ROLES_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        MID: localobj.MID,
-        Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
-        MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
-        Mobile: localobj.Mobile,
-        Lang: "zhtw"
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API 調用失敗: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log("獲取角色列表成功:", data);
-
-    if (data.Result === "OK" && data.RoleList) {
-      // 轉換 API 資料格式為本地格式
-      return data.RoleList.map((role) => ({
-        id: parseInt(role.RID),
-        name: role.Name,
-        displayName: role.Name,
-        customName: role.Name,
-        category: role.Category,
-        aid: role.AID,
-        rid: role.RID,
-        styleId: parseInt(role.Style),
-        avatar: role.StyleList.find(s => s.StyleID === role.Style)?.ImgURL || role.StyleList[0]?.ImgURL,
-        fullImage: role.StyleList.find(s => s.StyleID === role.Style)?.ImgURL || role.StyleList[0]?.ImgURL,
-        styles: role.StyleList.map(style => ({
-          id: parseInt(style.StyleID),
-          thumbnail: style.ImgURL,
-          fullImage: style.ImgURL,
-          locked: false // API 沒有提供鎖定狀態，預設為未鎖定
-        })),
-        voiceSettings: {
-          rate: 0.9,
-          pitch: 0.85,
-          volume: 1,
-        },
-      }));
-    } else {
-      console.error("API 回應格式錯誤:", data);
-      return [];
-    }
-  } catch (error) {
-    console.error("獲取角色列表失敗:", error);
-    return [];
-  }
-};
-
-// 獲取當前角色
-const fetchCurrentRole = async () => {
-  if (!localobj) {
-    console.error("用戶資料不存在，無法獲取當前角色");
-    return null;
-  }
-
-  try {
-    const response = await fetch(GET_CURRENT_ROLE_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        MID: localobj.MID,
-        Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
-        MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
-        Mobile: localobj.Mobile,
-        Lang: "zhtw"
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API 調用失敗: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log("獲取當前角色成功:", data);
-
-    if (data.Result === "OK" && data.Role) {
-      return {
-        id: parseInt(data.Role.RID),
-        name: data.Role.DefaultName,
-        displayName: data.Role.DisplayName,
-        customName: data.Role.DisplayName,
-        category: data.Role.Category,
-        styleId: parseInt(data.Role.StyleID),
-        avatar: data.Role.ImgURL,
-        fullImage: data.Role.ImgURL,
-        voiceSettings: {
-          rate: 0.9,
-          pitch: 0.85,
-          volume: 1,
-        },
-      };
-    } else {
-      console.error("API 回應格式錯誤:", data);
-      return null;
-    }
-  } catch (error) {
-    console.error("獲取當前角色失敗:", error);
-    return null;
-  }
-};
-
-// 選擇角色
-const assignRole = async (rid, styleId, displayName) => {
-  if (!localobj) {
-    console.error("用戶資料不存在，無法選擇角色");
-    return false;
-  }
-
-  try {
-    const response = await fetch(ASSIGN_ROLE_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        MID: localobj.MID,
-        Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
-        MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
-        Mobile: localobj.Mobile,
-        Lang: "zhtw",
-        RID: rid.toString(),
-        StyleID: styleId.toString(),
-        DisplayName: displayName
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API 調用失敗: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log("選擇角色成功:", data);
-
-    return data.Result === "OK";
-  } catch (error) {
-    console.error("選擇角色失敗:", error);
-    return false;
-  }
-};
-
-// 更改角色顯示名稱
-const changeRoleDisplayName = async (displayName) => {
-  if (!localobj) {
-    console.error("用戶資料不存在，無法更改角色名稱");
-    return false;
-  }
-
-  try {
-    const response = await fetch(CHANGE_ROLE_DISPLAY_NAME_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        MID: localobj.MID,
-        Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
-        MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
-        Mobile: localobj.Mobile,
-        Lang: "zhtw",
-        DisplayName: displayName
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API 調用失敗: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log("更改角色名稱成功:", data);
-
-    return data.Result === "OK";
-  } catch (error) {
-    console.error("更改角色名稱失敗:", error);
-    return false;
-  }
-};
-
 // 載入保存的角色選擇
-const loadSavedCharacter = async () => {
+const loadSavedCharacter = () => {
   if (process.client) {
-    try {
-      // 從 API 獲取所有角色列表
-      const apiRoles = await fetchAllRoles();
-      if (apiRoles.length > 0) {
-        availableCharacters.value = apiRoles;
-        console.log("從 API 載入角色列表成功:", apiRoles.length, "個角色");
-      } else {
-        console.warn("API 未返回角色列表，使用預設角色");
+    // 載入可用角色列表
+    const savedCharacters = localStorage.getItem("availableCharacters");
+    if (savedCharacters) {
+      try {
+        const parsedCharacters = JSON.parse(savedCharacters);
+        // 合併保存的數據與默認數據
+        availableCharacters.value = availableCharacters.value.map((char) => {
+          const savedChar = parsedCharacters.find((c) => c.id === char.id);
+          return savedChar ? { ...char, ...savedChar } : char;
+        });
+      } catch (e) {
+        console.error("載入角色列表失敗:", e);
       }
+    }
 
-      // 從 API 獲取當前角色
-      const currentRole = await fetchCurrentRole();
-      if (currentRole) {
-        // 找到對應的角色並更新
+    // 載入當前選擇的角色
+    const saved = localStorage.getItem("selectedCharacter");
+    if (saved) {
+      try {
+        const savedCharacter = JSON.parse(saved);
         const foundCharacter = availableCharacters.value.find(
-          (c) => c.id === currentRole.id
+          (c) => c.id === savedCharacter.id
         );
         if (foundCharacter) {
           currentCharacter.value = {
             ...foundCharacter,
-            ...currentRole,
-            customName: currentRole.customName || currentRole.displayName,
+            ...savedCharacter,
+            customName:
+              savedCharacter.customName ||
+              foundCharacter.customName ||
+              foundCharacter.displayName,
           };
-          characterImageSrc.value = currentRole.fullImage;
-          console.log("從 API 載入當前角色成功:", currentRole.displayName);
-        } else {
-          console.warn("找不到對應的角色，使用預設角色");
+          characterImageSrc.value = savedCharacter.fullImage;
         }
-      } else {
-        console.warn("API 未返回當前角色，使用預設角色");
-      }
-    } catch (error) {
-      console.error("載入角色失敗，使用本地備份:", error);
-      
-      // 如果 API 失敗，嘗試從本地存儲載入
-      const savedCharacters = localStorage.getItem("availableCharacters");
-      if (savedCharacters) {
-        try {
-          const parsedCharacters = JSON.parse(savedCharacters);
-          availableCharacters.value = availableCharacters.value.map((char) => {
-            const savedChar = parsedCharacters.find((c) => c.id === char.id);
-            return savedChar ? { ...char, ...savedChar } : char;
-          });
-        } catch (e) {
-          console.error("載入本地角色列表失敗:", e);
-        }
-      }
-
-      const saved = localStorage.getItem("selectedCharacter");
-      if (saved) {
-        try {
-          const savedCharacter = JSON.parse(saved);
-          const foundCharacter = availableCharacters.value.find(
-            (c) => c.id === savedCharacter.id
-          );
-          if (foundCharacter) {
-            currentCharacter.value = {
-              ...foundCharacter,
-              ...savedCharacter,
-              customName:
-                savedCharacter.customName ||
-                foundCharacter.customName ||
-                foundCharacter.displayName,
-            };
-            characterImageSrc.value = savedCharacter.fullImage;
-          }
-        } catch (e) {
-          console.error("載入本地角色選擇失敗:", e);
-        }
+      } catch (e) {
+        console.error("載入角色選擇失敗:", e);
       }
     }
   }
@@ -3496,45 +3260,33 @@ const selectStyle = (style) => {
   }
 };
 
-const confirmCharacterSelection = async () => {
-  if (process.client && tempSelectedCharacter.value) {
-    try {
-      // 調用 API 選擇角色
-      const success = await assignRole(
-        tempSelectedCharacter.value.rid || tempSelectedCharacter.value.id,
-        tempSelectedCharacter.value.styleId,
-        tempSelectedCharacter.value.customName || tempSelectedCharacter.value.displayName
-      );
-
-      if (success) {
-        // API 成功，更新本地狀態
-        currentCharacter.value = { ...tempSelectedCharacter.value };
-        characterImageSrc.value = currentCharacter.value.fullImage;
-
-        // 保存到本地存儲作為備份
-        localStorage.setItem(
-          "selectedCharacter",
-          JSON.stringify(currentCharacter.value)
-        );
-
-        // 關閉彈窗
-        showCharacterSelection.value = false;
-        isStyleExpanded.value = false;
-        tempSelectedCharacter.value = null;
-
-        console.log(
-          "角色選擇已確認:",
-          currentCharacter.value.customName || currentCharacter.value.displayName
-        );
-        console.log("當前頭貼:", currentCharacter.value.avatar);
-      } else {
-        console.error("角色選擇失敗，請重試");
-        // 可以在這裡顯示錯誤提示給用戶
-      }
-    } catch (error) {
-      console.error("角色選擇 API 調用失敗:", error);
-      // 可以在這裡顯示錯誤提示給用戶
+const confirmCharacterSelection = () => {
+  if (process.client) {
+    // 確認保存臨時選擇的角色
+    if (tempSelectedCharacter.value) {
+      currentCharacter.value = { ...tempSelectedCharacter.value };
     }
+
+    // 更新角色圖片路徑
+    characterImageSrc.value = currentCharacter.value.fullImage;
+
+    // 保存到本地存儲
+    localStorage.setItem(
+      "selectedCharacter",
+      JSON.stringify(currentCharacter.value)
+    );
+
+    // 關閉彈窗
+    showCharacterSelection.value = false;
+    isStyleExpanded.value = false;
+    tempSelectedCharacter.value = null;
+
+    // 可以添加成功提示或其他確認邏輯
+    console.log(
+      "角色選擇已確認:",
+      currentCharacter.value.customName || currentCharacter.value.displayName
+    );
+    console.log("當前頭貼:", currentCharacter.value.avatar);
   }
 };
 
@@ -3599,7 +3351,7 @@ const closeNameInput = () => {
   }
 };
 
-const confirmNameInput = async () => {
+const confirmNameInput = () => {
   if (process.client) {
     const name = characterNameInput.value.trim();
 
@@ -3613,59 +3365,48 @@ const confirmNameInput = async () => {
       return;
     }
 
-    try {
-      // 調用 API 更改角色顯示名稱
-      const success = await changeRoleDisplayName(name);
-
-      if (success) {
-        // API 成功，更新本地狀態
-        const targetId = uiCharacter.value.id;
-        
-        // 更新可用角色列表中的對應角色
-        const characterIndex = availableCharacters.value.findIndex(
-          (c) => c.id === targetId
-        );
-        if (characterIndex !== -1) {
-          availableCharacters.value[characterIndex] = {
-            ...availableCharacters.value[characterIndex],
-            customName: name,
-          };
-        }
-
-        // 若彈窗中正在編輯的就是 tempSelectedCharacter，也同步更新它
-        if (
-          tempSelectedCharacter.value &&
-          tempSelectedCharacter.value.id === targetId
-        ) {
-          tempSelectedCharacter.value.customName = name;
-        }
-
-        // 若此角色同時也是當前使用中的角色，順便同步到 currentCharacter
-        if (currentCharacter.value.id === targetId) {
-          currentCharacter.value.customName = name;
-          // 保存到本地存儲作為備份
-          localStorage.setItem(
-            "selectedCharacter",
-            JSON.stringify(currentCharacter.value)
-          );
-        }
-
-        // 保存到本地存儲作為備份
-        localStorage.setItem(
-          "availableCharacters",
-          JSON.stringify(availableCharacters.value)
-        );
-
-        closeNameInput();
-        console.log("角色名稱已更新:", name);
-      } else {
-        nameInputError.value = "更新失敗，請重試";
-        console.error("角色名稱更新失敗");
-      }
-    } catch (error) {
-      nameInputError.value = "更新失敗，請重試";
-      console.error("角色名稱更新 API 調用失敗:", error);
+    // 目標為畫面上正在預覽/編輯的角色（在角色彈窗中就是 tempSelectedCharacter）
+    const targetId = uiCharacter.value.id;
+    // 更新可用角色列表中的對應角色
+    const characterIndex = availableCharacters.value.findIndex(
+      (c) => c.id === targetId
+    );
+    if (characterIndex !== -1) {
+      availableCharacters.value[characterIndex] = {
+        ...availableCharacters.value[characterIndex],
+        customName: name,
+      };
     }
+
+    // 若彈窗中正在編輯的就是 tempSelectedCharacter，也同步更新它（讓畫面即時反映）
+    if (
+      tempSelectedCharacter.value &&
+      tempSelectedCharacter.value.id === targetId
+    ) {
+      tempSelectedCharacter.value.customName = name;
+    }
+
+    // 若此角色同時也是當前使用中的角色，順便同步到 currentCharacter 與 localStorage
+    if (currentCharacter.value.id === targetId) {
+      currentCharacter.value.customName = name;
+      localStorage.setItem(
+        "selectedCharacter",
+        JSON.stringify(currentCharacter.value)
+      );
+    }
+
+    // 保存到本地存儲
+    localStorage.setItem(
+      "selectedCharacter",
+      JSON.stringify(currentCharacter.value)
+    );
+    localStorage.setItem(
+      "availableCharacters",
+      JSON.stringify(availableCharacters.value)
+    );
+
+    closeNameInput();
+    console.log("角色名稱已更新:", name);
   }
 };
 
