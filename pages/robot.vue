@@ -230,7 +230,6 @@
         <div class="robot-content">
           <div class="robot-sphere"></div>
           <h3 class="robot-title">等我一下，我幫你整理剛剛說的內容～</h3>
-    
         </div>
       </div>
     </transition>
@@ -2408,6 +2407,12 @@ const handleCustomerService = async (contactService = false) => {
         // 若要在開發時確認，可印 log，正式上線刪掉即可
         const data = await response.json().catch(() => ({}));
         console.info("frSendLineText 成功（靜默）:", data);
+      // ✅ 立刻重抓一次歷史，讓「客服/真人」相關訊息馬上顯示
+       await fetchChatHistory(true);
+       // 若目前在歷史頁，卷到底讓最新訊息可見
+       if (showHistoryPage.value) {
+         nextTick(() => setTimeout(() => scrollToBottom(), 100));
+       }
       }
 
       // 清空待處理輸入（避免殘留）
