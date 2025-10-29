@@ -775,7 +775,7 @@ onBeforeUnmount(() => {
     box-shadow: 0 2px 20px 0
       var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
     padding: 24px;
-
+    max-width: 400px;
     @include respond-to(lg) {
       flex-direction: column;
       gap: 16px;
