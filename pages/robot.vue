@@ -24,7 +24,7 @@
           <div class="loading-spinner"></div>
         </div>
         <img
-          v-else-if="isCharacterDataReady"
+          v-else-if="isCharacterDataReady && currentCharacter && currentCharacter.avatar"
           class="avatar"
           :src="currentCharacter.avatar"
           alt="角色頭像"
@@ -521,7 +521,12 @@
                     class="message bot"
                   >
                     <div class="avatar">
-                      <img :src="currentCharacter.avatar" alt="角色頭像" />
+                      <img 
+                        v-if="currentCharacter && currentCharacter.avatar"
+                        :src="currentCharacter.avatar" 
+                        alt="角色頭像" 
+                      />
+                      <div v-else class="placeholder-avatar"></div>
                     </div>
 
                     <div class="bubble">
@@ -3089,12 +3094,36 @@ const loadSavedCharacter = async () => {
           characterImageSrc.value = currentRole.fullImage;
           console.log("從 API 載入當前角色成功:", currentRole.displayName);
         } else {
-          console.error("找不到對應的角色");
-          currentCharacter.value = null;
+          console.warn("找不到對應的角色，使用第一個可用角色作為預設");
+          // 如果找不到對應角色，使用第一個可用角色作為預設
+          if (availableCharacters.value.length > 0) {
+            const defaultCharacter = availableCharacters.value[0];
+            currentCharacter.value = {
+              ...defaultCharacter,
+              customName: currentRole.customName || currentRole.displayName || defaultCharacter.displayName,
+            };
+            characterImageSrc.value = defaultCharacter.fullImage;
+            console.log("使用預設角色:", defaultCharacter.displayName);
+          } else {
+            console.error("沒有可用的角色");
+            currentCharacter.value = null;
+          }
         }
       } else {
-        console.error("API 未返回當前角色");
-        currentCharacter.value = null;
+        console.warn("API 未返回當前角色，使用第一個可用角色作為預設");
+        // 如果沒有當前角色，使用第一個可用角色作為預設
+        if (availableCharacters.value.length > 0) {
+          const defaultCharacter = availableCharacters.value[0];
+          currentCharacter.value = {
+            ...defaultCharacter,
+            customName: defaultCharacter.displayName,
+          };
+          characterImageSrc.value = defaultCharacter.fullImage;
+          console.log("使用預設角色:", defaultCharacter.displayName);
+        } else {
+          console.error("沒有可用的角色");
+          currentCharacter.value = null;
+        }
       }
     } catch (error) {
       console.error("載入角色失敗:", error);
