@@ -1,1407 +1,206 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智平衡健康集團 - VIP 專屬邀請</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary: #2c5f7d;
-            --secondary: #4a9fb8;
-            --accent: #7ec8a3;
-            --gold: #d4af37;
-            --text-dark: #2d3748;
-            --text-light: #718096;
-            --bg-light: #f7fafc;
-            --white: #ffffff;
-        }
-
-        body {
-            font-family: 'Microsoft JhengHei', 'PingFang TC', sans-serif;
-            color: var(--text-dark);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        .page {
-            display: none;
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        /* Hero Section */
-        .hero {
-            position: relative;
-            min-height: 50vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: var(--white);
-            text-align: center;
-            padding: 2rem;
-            overflow: hidden;
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><path d="M0,300 Q300,100 600,300 T1200,300 L1200,600 L0,600 Z" fill="rgba(255,255,255,0.05)"/></svg>') no-repeat bottom;
-            background-size: cover;
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 1;
-            max-width: 900px;
-            animation: fadeInUp 1s ease;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .hero h1 {
-            font-size: clamp(2rem, 5vw, 3.5rem);
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            line-height: 1.2;
-        }
-
-        .hero h2 {
-            font-size: clamp(1.1rem, 2.5vw, 1.5rem);
-            font-weight: 300;
-            margin-bottom: 3rem;
-            opacity: 0.95;
-            line-height: 1.6;
-        }
-
-        .cta-group {
-            display: flex;
-            gap: 1.5rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 2rem;
-        }
-
-        .btn {
-            padding: 1rem 2.5rem;
-            font-size: 1.1rem;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-primary {
-            background: var(--gold);
-            color: var(--text-dark);
-            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.4);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.2);
-            color: var(--white);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-3px);
-        }
-
-        .hero-note {
-            font-size: 0.95rem;
-            opacity: 0.85;
-            max-width: 700px;
-            margin: 2rem auto 0;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
-        }
-
-        /* Section Styles */
-        .section {
-            padding: 5rem 2rem;
-        }
-
-        .section-alt {
-            background: var(--bg-light);
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: clamp(1.8rem, 4vw, 2.5rem);
-            margin-bottom: 3rem;
-            color: var(--primary);
-        }
-
-        /* Science Section */
-        .science-box {
-            background: var(--white);
-            border-radius: 20px;
-            padding: 3rem;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-        }
-
-        .science-content-wrapper {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 3rem;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .science-image {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        @media (max-width: 968px) {
-            .science-content-wrapper {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-            }
-        }
-
-        .science-list {
-            list-style: none;
-            margin: 0;
-        }
-
-        .science-list li {
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(to right, var(--bg-light), var(--white));
-            border-left: 4px solid var(--accent);
-            border-radius: 10px;
-            font-size: 1.1rem;
-            animation: slideInLeft 0.5s ease;
-        }
-
-        @keyframes slideInLeft {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .science-note {
-            margin-top: 2rem;
-            padding: 1rem;
-            background: var(--bg-light);
-            border-radius: 10px;
-            font-size: 0.9rem;
-            color: var(--text-light);
-            text-align: center;
-        }
-
-        /* Video Section */
-        .video-container {
-            position: relative;
-            padding-bottom: 56.25%;
-            height: 0;
-            overflow: hidden;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-            margin: 2rem 0;
-        }
-
-        .video-container iframe,
-        .video-container video {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        .video-placeholder {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--white);
-            font-size: 1.5rem;
-        }
-
-        /* Event Card */
-        .event-card {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: var(--white);
-            border-radius: 20px;
-            padding: 3rem;
-            box-shadow: 0 20px 60px rgba(44, 95, 125, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .event-card::before {
-            content: '✦';
-            position: absolute;
-            top: -20px;
-            right: -20px;
-            font-size: 200px;
-            opacity: 0.1;
-        }
-
-        .event-title {
-            font-size: clamp(1.5rem, 3vw, 2rem);
-            margin-bottom: 2rem;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
-            padding-bottom: 1rem;
-        }
-
-        .event-highlights {
-            list-style: none;
-            margin: 2rem 0;
-        }
-
-        .event-highlights li {
-            padding: 1rem 0;
-            padding-left: 2rem;
-            position: relative;
-            font-size: 1.1rem;
-        }
-
-        .event-highlights li::before {
-            content: '◆';
-            position: absolute;
-            left: 0;
-            color: var(--gold);
-        }
-
-        .countdown {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin: 2rem 0;
-            flex-wrap: wrap;
-        }
-
-        .countdown-item {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 1.5rem;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            min-width: 100px;
-        }
-
-        .countdown-number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            display: block;
-        }
-
-        .countdown-label {
-            font-size: 0.9rem;
-            opacity: 0.8;
-            margin-top: 0.5rem;
-        }
-
-        /* Form Styles */
-        .form-container {
-            background: var(--white);
-            border-radius: 20px;
-            padding: 3rem;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-            max-width: 700px;
-            margin: 3rem auto;
-        }
-
-        .form-step {
-            display: none;
-        }
-
-        .form-step.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .form-group {
-            margin-bottom: 2rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 1rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--secondary);
-            box-shadow: 0 0 0 3px rgba(74, 159, 184, 0.1);
-        }
-
-        .form-progress {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 3rem;
-        }
-
-        .progress-step {
-            flex: 1;
-            text-align: center;
-            position: relative;
-            padding: 1rem 0;
-        }
-
-        .progress-step::before {
-            content: '';
-            position: absolute;
-            top: 20px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #e2e8f0;
-            z-index: 0;
-        }
-
-        .progress-step:first-child::before {
-            left: 50%;
-        }
-
-        .progress-step:last-child::before {
-            right: 50%;
-        }
-
-        .progress-indicator {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #e2e8f0;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            z-index: 1;
-            font-weight: 700;
-            transition: all 0.3s ease;
-        }
-
-        .progress-step.active .progress-indicator {
-            background: var(--secondary);
-            color: var(--white);
-        }
-
-        .progress-step.completed .progress-indicator {
-            background: var(--accent);
-            color: var(--white);
-        }
-
-        /* Case Studies */
-        .cases-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin: 3rem 0;
-        }
-
-        .case-card {
-            background: var(--white);
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .case-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
-        }
-
-        .case-thumbnail {
-            width: 100%;
-            height: 200px;
-            background: linear-gradient(135deg, var(--secondary), var(--accent));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--white);
-            font-size: 3rem;
-            position: relative;
-        }
-
-        .case-lock {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 4rem;
-            opacity: 0.3;
-        }
-
-        .case-content {
-            padding: 1.5rem;
-        }
-
-        .case-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--primary);
-        }
-
-        .case-desc {
-            color: var(--text-light);
-            font-size: 0.95rem;
-            margin-bottom: 1rem;
-        }
-
-        .case-duration {
-            font-size: 0.85rem;
-            color: var(--text-light);
-            background: var(--bg-light);
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            display: inline-block;
-        }
-
-        /* Benefits Grid */
-        .benefits-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin: 3rem 0;
-        }
-
-        .benefit-card {
-            background: var(--white);
-            border-radius: 15px;
-            padding: 2rem;
-            text-align: center;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-        }
-
-        .benefit-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-        }
-
-        .benefit-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .benefit-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: var(--primary);
-        }
-
-        .benefit-desc {
-            color: var(--text-light);
-            font-size: 0.95rem;
-        }
-
-        /* Timeline */
-        .timeline {
-            position: relative;
-            padding: 2rem 0;
-        }
-
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: var(--accent);
-            transform: translateX(-50%);
-        }
-
-        .timeline-item {
-            display: flex;
-            margin-bottom: 2rem;
-            position: relative;
-        }
-
-        .timeline-item:nth-child(odd) {
-            flex-direction: row-reverse;
-        }
-
-        .timeline-content {
-            flex: 1;
-            padding: 1.5rem;
-            background: var(--white);
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-            margin: 0 2rem;
-        }
-
-        .timeline-time {
-            font-weight: 700;
-            color: var(--secondary);
-            margin-bottom: 0.5rem;
-        }
-
-        /* Footer */
-        .footer {
-            background: var(--text-dark);
-            color: var(--white);
-            padding: 3rem 2rem;
-            text-align: center;
-        }
-
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .footer-links a {
-            color: var(--white);
-            text-decoration: none;
-            opacity: 0.8;
-            transition: opacity 0.3s ease;
-        }
-
-        .footer-links a:hover {
-            opacity: 1;
-        }
-
-        /* Success Message */
-        .success-message {
-            display: none;
-            background: linear-gradient(135deg, var(--accent), var(--secondary));
-            color: var(--white);
-            padding: 3rem;
-            border-radius: 20px;
-            text-align: center;
-            margin: 2rem 0;
-        }
-
-        .success-message.show {
-            display: block;
-            animation: bounceIn 0.5s ease;
-        }
-
-        @keyframes bounceIn {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-20px); }
-            60% { transform: translateY(-10px); }
-        }
-
-        .success-message h3 {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-        }
-
-        .success-code {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin: 1.5rem 0;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            letter-spacing: 3px;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hero {
-                min-height: 50vh;
-            }
-
-            .section {
-                padding: 3rem 1rem;
-            }
-
-            .timeline::before {
-                left: 20px;
-            }
-
-            .timeline-item {
-                flex-direction: column !important;
-            }
-
-            .timeline-content {
-                margin-left: 3rem;
-                margin-right: 0;
-            }
-
-            .cta-group {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-            }
-        }
-
-        /* Checkbox Style */
-        .checkbox-group {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.5rem;
-        }
-
-        .checkbox-group input[type="checkbox"] {
-            margin-top: 0.3rem;
-            width: auto;
-        }
-
-        /* Exit Intent Popup */
-        .exit-popup {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--white);
-            padding: 3rem;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            z-index: 1000;
-            max-width: 500px;
-            text-align: center;
-        }
-
-        .exit-popup.show {
-            display: block;
-            animation: zoomIn 0.3s ease;
-        }
-
-        @keyframes zoomIn {
-            from {
-                transform: translate(-50%, -50%) scale(0.8);
-                opacity: 0;
-            }
-            to {
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 1;
-            }
-        }
-
-        .popup-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
-
-        .popup-overlay.show {
-            display: block;
-        }
-
-        .close-popup {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: none;
-            border: none;
-            font-size: 2rem;
-            cursor: pointer;
-            color: var(--text-light);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>智平衡 VIP｜邀請會專屬頁（金白風格 最終版）</title>
+  <style>
+    :root{
+      --deep:#0f3b3b;
+      --ink:#1f2a37;
+      --gold:#c9a14a;
+      --muted:#6b7280;
+      --bg:#ffffff;
+      --chip:#f8f4ea;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:"PingFang TC","Microsoft JhengHei",sans-serif;
+      background:var(--bg);
+      color:var(--ink);
+      line-height:1.7;
+      overflow-x:hidden;
+    }
+    .gold-bg{position:relative;isolation:isolate;}
+    .gold-svg{position:absolute;inset:0;z-index:-1;opacity:.85;pointer-events:none;}
+
+    header{text-align:center;padding:50px 16px 24px;}
+    .logo{width:120px;margin-bottom:16px;border-radius:50%;box-shadow:0 0 8px rgba(201,161,74,.3);}
+    h1{font-size:clamp(26px,4vw,38px);font-weight:800;color:var(--deep);margin-bottom:10px;}
+    .subtitle{color:#8b6a2d;font-weight:600;font-size:clamp(14px,2.5vw,17px);line-height:1.8;margin:0 auto;max-width:640px;}
+
+    .video-wrap{display:flex;justify-content:center;background:var(--chip);
+      border-top:1px solid rgba(201,161,74,.3);border-bottom:1px solid rgba(201,161,74,.3);padding:24px 8px;}
+    iframe{width:90%;aspect-ratio:16/9;max-width:780px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.15);}
+
+    .section{padding:50px 20px;}
+    .container{max-width:1100px;margin:0 auto;}
+    .title{font-size:clamp(22px,3vw,28px);text-align:center;color:var(--deep);margin-bottom:20px;position:relative;}
+    .title::after{content:"";display:block;width:100px;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:10px auto 0;border-radius:2px;}
+
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;}
+    .feature{background:#fff;border:1px solid rgba(201,161,74,.35);border-radius:14px;padding:18px;text-align:center;}
+    .feature h3{color:var(--deep);margin:6px 0 4px;font-size:18px;}
+    .feature p{color:var(--muted);font-size:14px;}
+
+    .card{background:#fff;border-radius:16px;padding:28px;border:1px solid rgba(201,161,74,.35);box-shadow:0 12px 36px rgba(17,24,39,.06);}
+    .hl{list-style:none;margin:8px 0 0;padding:0;}
+    .hl li{padding:8px 0 8px 20px;border-bottom:1px dashed rgba(201,161,74,.35);position:relative;}
+    .hl li::before{content:"◆";color:var(--gold);position:absolute;left:0;top:8px;}
+    .count{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:14px;}
+    .count .box{min-width:80px;text-align:center;background:var(--chip);border:1px solid rgba(201,161,74,.35);border-radius:10px;padding:10px 8px;}
+    .count .n{font-size:24px;font-weight:800;color:var(--deep);}
+    .cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
+    .btn{padding:10px 20px;border-radius:999px;border:2px solid var(--gold);background:var(--deep);color:#fff;font-weight:700;text-decoration:none;transition:.2s;}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(201,161,74,.25);}
+    .muted{color:var(--muted);}
+
+    .agenda ul{list-style:none;margin:0;padding:0;}
+    .agenda li{padding:6px 0 6px 20px;position:relative;color:#333;}
+    .agenda li::before{content:"●";color:var(--gold);position:absolute;left:0;top:8px;}
+
+    .form-field{margin-bottom:14px;}
+    label{font-weight:600;color:var(--deep);display:block;margin-bottom:6px;}
+    input,textarea{width:100%;padding:10px 12px;border:1px solid #ccc;border-radius:8px;font-size:15px;}
+    textarea{resize:vertical;}
+    button.submit{margin-top:12px;padding:12px 22px;border:none;border-radius:999px;background:var(--gold);color:var(--deep);font-weight:700;font-size:16px;cursor:pointer;transition:.2s;}
+    button.submit:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(201,161,74,.25);}
+
+    footer{border-top:1px solid rgba(201,161,74,.3);padding:24px 18px;text-align:center;color:var(--muted);background:linear-gradient(135deg,rgba(201,161,74,.08),rgba(255,255,255,0));}
+
+    @media(max-width:768px){
+      .section{padding:36px 14px;}
+      header{padding:36px 12px 12px;}
+      iframe{width:100%;}
+    }
+  </style>
 </head>
-<body>
-    <!-- Page 1: Landing Page -->
-    <div id="page1" class="page active">
-        <!-- Hero Section -->
-        <section class="hero">
-            <div class="hero-content">
-                <h1>我們陪伴無數人走出長期病痛的陰霾</h1>
-                <h2>那些吃藥治不好、不想再吃藥的您<br>透過「相應神經調節療法」<br>重新找回生命的節奏與希望</h2>
-                <div class="hero-note">
-                    您不是一個人。二十多年來，我們與超過十萬名病患並肩同行，見證自律神經平衡帶來的改變。
-                </div>
-            </div>
-        </section>
+<body class="gold-bg">
+  <svg class="gold-svg" viewBox="0 0 1200 800" preserveAspectRatio="none" aria-hidden="true">
+    <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#e9d9b0" stop-opacity="0"/><stop offset="40%" stop-color="#d9c491" stop-opacity=".55"/><stop offset="100%" stop-color="#c9a14a" stop-opacity=".9"/></linearGradient></defs>
+    <g fill="none" stroke="url(#g)" stroke-width="3">
+      <path d="M-50,60 L600,420 L1250,-10" />
+      <path d="M-100,720 L740,260 L1250,500" />
+      <path d="M-50,380 L420,10 L1250,260" />
+      <path d="M-10,560 L380,280 L1200,720" />
+    </g>
+  </svg>
 
-        <!-- Science Section -->
-          <!-- Science Section -->
-        <section class="section">
-            <div class="container">
-                <h2 class="section-title">從量子到免疫，印證我們的堅持</h2>
-                <div class="science-box">
-                    <div class="science-content-wrapper">
-                        <ul class="science-list">
-                            <li><strong>2025 諾貝爾物理獎：</strong>量子糾纏揭示關聯性的新視角</li>
-                            <li><strong>2025 諾貝爾醫學獎：</strong>身體周邊免疫系統在修復中的關鍵角色</li>
-                            <li><strong>我們的洞見：</strong>人體是可被重新調和的能量系統——身、心、神經與免疫彼此連動</li>
-                        </ul>
-                        <div class="science-image">
-                            <img src="../imgs/PIC1.png" alt="量子糾纏與身心靈連結概念圖" style="width: 100%; height: auto; border-radius: 15px;">
-                            <p style="text-align: center; margin-top: 1rem; font-size: 0.9rem; color: var(--text-light);">量子糾纏 × 身心靈整合 × 神經免疫平衡</p>
-                        </div>
-                    </div>
-                    <div class="science-note">
-                        以上內容為科普向敘事，活動現場將由執行長以臨床觀點與應用案例深入說明
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Video Section -->
-        <section class="section section-alt" id="videoSection">
-             <div class="container">
-    <h2 class="section-title">我們為您準備的「未來健康世界」</h2>
-    <div class="video-container">
-      <iframe
-        src="https://www.youtube.com/embed/G9RoWlrIHyc?start=28&rel=0&modestbranding=1&playsinline=1"
-        title="品牌新形象影片"
-        frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowfullscreen>
-      </iframe>
-    </div>
-    <div style="text-align: center; margin-top: 2rem;">
-      <p style="margin-bottom: 1.5rem; font-size: 1.1rem;">透過影像，感受我們對健康的理想與實踐</p>
-    </div>
-  </div>
-        </section>
-
-        <!-- Event Preview -->
-        <section class="section">
-            <div class="container">
-                <div class="event-card">
-                    <h3 class="event-title">11/28（四）台北晶華酒店｜VIP 邀請盛宴</h3>
-                    <ul class="event-highlights">
-                        <li>執行長專業演說：從 CNT、AI 到量子健康的臨床應用</li>
-                        <li>第六代紅光極智衣現場展示與體驗</li>
-                        <li>護您穩平衡衣：讓健康保養在睡眠中自動發生</li>
-                    </ul>
-                    <div class="countdown">
-                        <div class="countdown-item">
-                            <span class="countdown-number" id="days">--</span>
-                            <span class="countdown-label">天</span>
-                        </div>
-                        <div class="countdown-item">
-                            <span class="countdown-number" id="hours">--</span>
-                            <span class="countdown-label">小時</span>
-                        </div>
-                        <div class="countdown-item">
-                            <span class="countdown-number" id="minutes">--</span>
-                            <span class="countdown-label">分鐘</span>
-                        </div>
-                        <div class="countdown-item">
-                            <span class="countdown-number" id="seconds">--</span>
-                            <span class="countdown-label">秒</span>
-                        </div>
-                    </div>
-                    <div style="text-align: center; margin-top: 2rem;">
-                        <button class="btn btn-primary" onclick="goToPage(2)">立即查看 VIP 說明會細節</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="footer-links">
-                <a href="#">隱私政策</a>
-                <a href="#">服務條款</a>
-                <a href="#">客服中心</a>
-                <a href="#">LINE 官方帳號</a>
-            </div>
-            <p style="opacity: 0.7; margin-top: 1rem;">© 2025 智平衡健康集團（原拉菲爾生醫）</p>
-        </footer>
-    </div>
-
-    <!-- Page 2: Event Details & Registration -->
-    <div id="page2" class="page">
-        <!-- Event Overview -->
-        <section class="hero" style="min-height: 60vh;">
-            <div class="hero-content">
-                <h1>11/28（四）台北晶華酒店<br>VIP 邀請盛宴</h1>
-                <p style="font-size: 1.2rem; margin-bottom: 2rem;">
-                    時間：2025年11月28日（四）14:00<br>
-                    地點：台北晶華酒店<br>
-                    憑VIP邀請函入場，謝絕訪客!
-                </p>
-                <button class="btn btn-primary" onclick="scrollToForm()">立即報名保留席次</button>
-            </div>
-        </section>
-
-        <!-- Highlights -->
-        <section class="section section-alt">
-            <div class="container">
-                <h2 class="section-title">活動亮點</h2>
-                <div class="benefits-grid">
-                    <div class="benefit-card">
-                        <div class="benefit-icon">🎤</div>
-                        <h3 class="benefit-title">執行長 Keynote</h3>
-                        <p class="benefit-desc">量子×神經×免疫的同調<br>從科學到臨床的完整揭密</p>
-                    </div>
-                    <div class="benefit-card">
-                        <div class="benefit-icon">💡</div>
-                        <h3 class="benefit-title">第六代紅光極智衣</h3>
-                        <p class="benefit-desc">藍牙×雲端<br>遠端即時調整，無需等待</p>
-                    </div>
-                    <div class="benefit-card">
-                        <div class="benefit-icon">😴</div>
-                        <h3 class="benefit-title">護您穩平衡衣</h3>
-                        <p class="benefit-desc">睡眠中完成日常自調節<br>讓健康保養零負擔</p>
-                    </div>
-                    <div class="benefit-card">
-                        <div class="benefit-icon">🤖</div>
-                        <h3 class="benefit-title">AI × 穿戴</h3>
-                        <p class="benefit-desc">HRV / 生活數據 × 醫師對話<br>24 小時智慧照護</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-  
-        <!-- Timeline -->
-        <section class="section">
-            <div class="container">
-                <h2 class="section-title">活動議程</h2>
-                <div class="timeline">
-                    <div class="timeline-item">
-                        <div class="timeline-content">
-                            <div class="timeline-time">13:30 - 14:00</div>
-                            <h4>入席 & 迎賓</h4>
-                            <p>VIP 專屬接待，輕鬆交流</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-content">
-                            <div class="timeline-time">14:00 - 15:00</div>
-                            <h4>執行長 Keynote</h4>
-                            <p>從 CNT、AI 到量子健康的臨床應用</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-content">
-                            <div class="timeline-time">15:00 - 15:30</div>
-                            <h4>新品展示 & 體驗</h4>
-                            <p>第六代紅光極智衣、護您穩平衡衣現場試穿</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-content">
-                            <div class="timeline-time">15:30 - 16:30</div>
-                            <h4>VIP Q&A & 專屬禮遇說明</h4>
-                            <p>一對一諮詢與會員權益介紹</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Registration Form -->
-        <section class="section section-alt" id="registrationForm">
-            <div class="container">
-                <h2 class="section-title">VIP 報名表單</h2>
-                <div class="form-container">
-                    <div class="form-progress">
-                        <div class="progress-step active">
-                            <div class="progress-indicator">1</div>
-                            <small>基本資料</small>
-                        </div>
-                        <div class="progress-step">
-                            <div class="progress-indicator">2</div>
-                            <small>關注主題</small>
-                        </div>
-                        <div class="progress-step">
-                            <div class="progress-indicator">3</div>
-                            <small>體驗預約</small>
-                        </div>
-                    </div>
-
-                    <form id="vipForm">
-                        <!-- Step 1 -->
-                        <div class="form-step active" data-step="1">
-                            <div class="form-group">
-                                <label for="name">姓名 *</label>
-                                <input type="text" id="name" name="name" required placeholder="請輸入您的姓名">
-                            </div>
-                            <div class="form-group">
-                                <label for="phone">手機 *</label>
-                                <input type="tel" id="phone" name="phone" required placeholder="0912-345-678">
-                            </div>
-                            <div class="form-group">
-                                <label for="email">Email *</label>
-                                <input type="email" id="email" name="email" required placeholder="example@email.com">
-                            </div>
-                            <button type="button" class="btn btn-primary" onclick="nextStep(2)" style="width: 100%;">下一步</button>
-                        </div>
-
-                        <!-- Step 2 -->
-                        <div class="form-step" data-step="2">
-                            <div class="form-group">
-                                <label for="interests">您最關注的主題（可複選）</label>
-                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem;">
-                                    <label class="checkbox-group" style="font-weight: normal;">
-                                        <input type="checkbox" name="interests" value="redlight"> 紅光極智衣
-                                    </label>
-                                    <label class="checkbox-group" style="font-weight: normal;">
-                                        <input type="checkbox" name="interests" value="sleep"> 睡眠平衡衣
-                                    </label>
-                                    <label class="checkbox-group" style="font-weight: normal;">
-                                        <input type="checkbox" name="interests" value="ai"> AI 穿戴照護
-                                    </label>
-                                    <label class="checkbox-group" style="font-weight: normal;">
-                                        <input type="checkbox" name="interests" value="overall"> 相應神經調節療法」神經調節
-                                    </label>
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 1rem;">
-                                <button type="button" class="btn btn-secondary" onclick="prevStep(1)" style="flex: 1;">上一步</button>
-                                <button type="button" class="btn btn-primary" onclick="nextStep(3)" style="flex: 1;">下一步</button>
-                            </div>
-                        </div>
-
-                        <!-- Step 3 -->
-                        <div class="form-step" data-step="3">
-                            <div class="form-group">
-                                <label for="experience">是否需要現場體驗時段？</label>
-                                <select id="experience" name="experience">
-                                    <option value="">不需要</option>
-                                    <option value="19:40-20:00">19:40 - 20:00</option>
-                                    <option value="20:00-20:20">20:00 - 20:20</option>
-                                    <option value="20:20-20:30">20:20 - 20:30</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="notes">其他需求或備註</label>
-                                <textarea id="notes" name="notes" rows="4" placeholder="如有特殊需求，請告訴我們..."></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label class="checkbox-group">
-                                    <input type="checkbox" name="agreement" required>
-                                    <span>我同意個人資料使用條款及接收活動通知</span>
-                                </label>
-                            </div>
-                            <div style="display: flex; gap: 1rem;">
-                                <button type="button" class="btn btn-secondary" onclick="prevStep(2)" style="flex: 1;">上一步</button>
-                                <button type="submit" class="btn btn-primary" style="flex: 1;">確認送出</button>
-                            </div>
-                        </div>
-                    </form>
-
-                    <div class="success-message" id="successMessage">
-                        <h3>✓ 報名成功！</h3>
-                        <p>您的專屬序號</p>
-                        <div class="success-code">VIP-2025-1128</div>
-                        <p style="margin: 1.5rem 0;">我們已將確認信發送至您的信箱<br>活動前將再次提醒您</p>
-                        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                            <button class="btn btn-secondary" onclick="downloadICS()">加入行事曆</button>
-                            <button class="btn btn-primary" >查看相關案例</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Personalized Cases -->
-        <section class="section">
-            <div class="container">
-                <h2 class="section-title">您可能感興趣的真實改變</h2>
-                <p style="text-align: center; color: var(--text-light); margin-bottom: 3rem; font-size: 1.1rem;">
-                    這些故事之所以動人，是因為他們和你一樣，選擇了重新掌握健康節奏
-                </p>
-                <div class="cases-grid">
-                    <div class="case-card" onclick="showLoginPrompt()">
-                        <div class="case-thumbnail">
-                            🎬
-                            <div class="case-lock">🔒</div>
-                        </div>
-                        <div class="case-content">
-                            <h4 class="case-title">長期失眠的工程師</h4>
-                            <p class="case-desc">10年安眠藥史，透過相應神經調節找回自然睡眠</p>
-                            <span class="case-duration">完整版 8:32｜需登入觀看</span>
-                        </div>
-                    </div>
-                    <div class="case-card" onclick="showLoginPrompt()">
-                        <div class="case-thumbnail">
-                            🎬
-                            <div class="case-lock">🔒</div>
-                        </div>
-                        <div class="case-content">
-                            <h4 class="case-title">頑固型偏頭痛患者</h4>
-                            <p class="case-desc">每週發作3-4次，現在已減少至每月1次</p>
-                            <span class="case-duration">完整版 6:15｜需登入觀看</span>
-                        </div>
-                    </div>
-                    <div class="case-card" onclick="showLoginPrompt()">
-                        <div class="case-thumbnail">
-                            🎬
-                            <div class="case-lock">🔒</div>
-                        </div>
-                        <div class="case-content">
-                            <h4 class="case-title">自律神經失調的企業主</h4>
-                            <p class="case-desc">心悸、胸悶、焦慮，透過調節重獲平衡人生</p>
-                            <span class="case-duration">完整版 10:05｜需登入觀看</span>
-                        </div>
-                    </div>
-                </div>
-                <div style="text-align: center; margin-top: 3rem;">
-                    <button class="btn btn-primary">登入/註冊觀看完整案例</button>
-                </div>
-            </div>
-        </section>
-
-        <!-- FAQ -->
-        <section class="section section-alt">
-            <div class="container">
-                <h2 class="section-title">常見問題</h2>
-                <div style="max-width: 800px; margin: 0 auto;">
-                    <div style="background: var(--white); border-radius: 15px; padding: 2rem; margin-bottom: 1.5rem; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);">
-                        <h4 style="color: var(--primary); margin-bottom: 1rem;">我可以帶家人嗎？</h4>
-                        <p style="color: var(--text-light);">此為 VIP 專屬邀請，若需攜伴請在報名表備註欄註明，我們將為您安排。</p>
-                    </div>
-                    <div style="background: var(--white); border-radius: 15px; padding: 2rem; margin-bottom: 1.5rem; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);">
-                        <h4 style="color: var(--primary); margin-bottom: 1rem;">無法準時到，是否保留席次？</h4>
-                        <p style="color: var(--text-light);">建議提前告知，我們會盡力為您保留。若晚到超過30分鐘可能無法參與完整體驗。</p>
-                    </div>
-                    <div style="background: var(--white); border-radius: 15px; padding: 2rem; margin-bottom: 1.5rem; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);">
-                        <h4 style="color: var(--primary); margin-bottom: 1rem;">體驗是否需要更衣？是否有私密試戴區？</h4>
-                        <p style="color: var(--text-light);">我們提供獨立的私密體驗區，專業人員會協助您進行體驗，無需擔心隱私問題。</p>
-                    </div>
-                    <div style="background: var(--white); border-radius: 15px; padding: 2rem; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);">
-                        <h4 style="color: var(--primary); margin-bottom: 1rem;">如何取消或改期？</h4>
-                        <p style="color: var(--text-light);">請於活動前3天透過客服專線或 LINE 官方帳號告知，我們將協助您處理。</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Map & Contact -->
-        <section class="section">
-  <div class="container">
-    <h2 class="section-title">交通資訊</h2>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start;">
-      <div>
-        <h3 style="color: var(--primary); margin-bottom: 1rem;">台北晶華酒店</h3>
-        <p style="margin-bottom: 1rem; line-height: 1.8;">
-          <strong>地址：</strong>台北市中山區中山北路二段39巷3號<br>
-          <strong>捷運：</strong>中山站2號出口步行3分鐘<br>
-          <strong>停車：</strong>飯店地下停車場
-        </p>
-        <div style="margin-top: 2rem;">
-          <h4 style="color: var(--primary); margin-bottom: 1rem;">需要協助？</h4>
-          <p style="color: var(--text-light);">
-            客服專線：0800-080-760<br>
-            LINE ID：@smartbalance<br>
-            服務時間：週一至週六 9:00-18:00
-          </p>
-        </div>
-      </div>
-
-      <!-- ✅ Google Map 直接嵌入區 -->
-      <div style="border-radius: 15px; overflow: hidden; min-height: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-        <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3614.5739620669264!2d121.52237547604953!3d25.055372237244066!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3442a95f0f5d1b29%3A0x8c981f868fdfab16!2z5Y-w5YyX6aSo5YyX5ZyS5Y2A5Lit5bGx5Y2X5Y2A5Y-w5YyX6Lev5LiA5q61MznomZ8!5e0!3m2!1szh-TW!2stw!4v1730297452347!5m2!1szh-TW!2stw"
-          width="100%"
-          height="400"
-          style="border:0;"
-          allowfullscreen=""
-          loading="lazy"
-          referrerpolicy="no-referrer-when-downgrade">
-        </iframe>
-      </div>
-    </div>
+  <header>
+    <img src="https://i.pinimg.com/736x/89/6d/93/896d9311bb3fb31441530bc508b16f73.jpg" class="logo">
+    <h1>智平衡健康集團 WiseBalance</h1>
+    <p class="subtitle">
+      讓我們一起定義新的健康價值。<br>
+      這份邀請，只獻給願意理解自己身體語言的您。<br><br>
+      智平衡相信，健康不該被時間與空間限制，<br>
+      而是一場被理解、被訂製的旅程。
+    </p>
+  </header>
+<section class="video-wrap" style="display:flex;justify-content:center;background:#f8f4ea;padding:24px 10px;border-top:1px solid rgba(201,161,74,.3);border-bottom:1px solid rgba(201,161,74,.3);">
+  <div style="position:relative;width:100%;max-width:900px;aspect-ratio:16/9;border-radius:12px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.15);background:#000;">
+    <video controls autoplay muted playsinline loop style="width:100%;height:100%;object-fit:cover;border:0;">
+      <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+      您的瀏覽器不支援影片播放。
+    </video>
   </div>
 </section>
 
+</section>
 
-<script>
-/* ===================== 基本工具 ===================== */
-const $ = (sel, root=document) => root.querySelector(sel);
-const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
-/* ===================== 分頁切換 ===================== */
-function goToPage(n){
-  const pages = $$('.page');
-  pages.forEach(p=>p.classList.remove('active'));
-  const target = document.getElementById('page'+n);
-  if(target){ target.classList.add('active'); window.scrollTo({top:0,behavior:'smooth'}); }
-  else { alert('此區尚在建置中。'); }
-}
 
-function scrollToForm(){
-  goToPage(2);
-  setTimeout(()=>$('#registrationForm')?.scrollIntoView({behavior:'smooth'}), 150);
-}
+<section class="section container" style="padding:30px 0 20px;">
+  <p style="text-align:center;color:#444;margin:0 auto;max-width:680px;line-height:1.8;font-size:16px;">
+    在這場旅程中，科技不只是數據與分析，<br>
+    而是能「感受你」的夥伴。<br>
+    <strong>AI 不說教，只懂你。</strong><br>
+    讓健康，回到生活的節奏裡。
+  </p>
+</section>
 
-/* ===================== 倒數計時 ===================== */
-(function initCountdown(){
-  const target = new Date('2025-11-28T18:30:00+08:00'); // 活動開始時間（台北）
-  const ids = {days:'#days', hours:'#hours', minutes:'#minutes', seconds:'#seconds'};
-  const pad = n => String(n).padStart(2,'0');
-
-  function tick(){
-    const now = new Date();
-    let ms = target - now;
-    if(ms < 0) ms = 0;
-    const s = Math.floor(ms/1000);
-    const d = Math.floor(s/86400);
-    const h = Math.floor((s%86400)/3600);
-    const m = Math.floor((s%3600)/60);
-    const sec = s%60;
-    $(ids.days) && ($(ids.days).textContent = pad(d));
-    $(ids.hours) && ($(ids.hours).textContent = pad(h));
-    $(ids.minutes) && ($(ids.minutes).textContent = pad(m));
-    $(ids.seconds) && ($(ids.seconds).textContent = pad(sec));
-  }
-  tick();
-  setInterval(tick, 1000);
-})();
-
-/* ===================== 影片占位 → 真影片 ===================== */
-(function initVideo(){
-  const placeholder = $('#videoSection .video-placeholder');
-  // TODO: 換成你的品牌影片網址（YouTube / Vimeo / 自架 mp4）
-  const VIDEO_URL = ''; // 例如: 'https://www.youtube.com/embed/XXXXXXXX?autoplay=1&mute=1'
-  if(!placeholder) return;
-  placeholder.style.cursor = 'pointer';
-  placeholder.addEventListener('click', ()=> {
-    if(!VIDEO_URL){ alert('請在程式碼中的 VIDEO_URL 放入您的影片連結'); return; }
-    const wrapper = placeholder.parentElement;
-    wrapper.innerHTML = `<iframe src="${VIDEO_URL}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-  });
-})();
-
-/* ===================== 表單多步驟流程 ===================== */
-let currentStep = 1;
-const formEl = $('#vipForm');
-const successBox = $('#successMessage');
-
-function setStep(step){
-  currentStep = step;
-  $$('.form-step').forEach(s => s.classList.remove('active'));
-  $(`.form-step[data-step="${step}"]`)?.classList.add('active');
-  // 進度條
-  const steps = $$('.form-progress .progress-step');
-  steps.forEach((st, idx)=>{
-    st.classList.remove('active','completed');
-    if(idx+1 < step) st.classList.add('completed');
-    if(idx+1 === step) st.classList.add('active');
-  });
-}
-
-function nextStep(step){
-  // 簡易驗證：第一步三欄皆需填
-  if(currentStep===1){
-    const name = $('#name').value.trim();
-    const phone = $('#phone').value.trim();
-    const email = $('#email').value.trim();
-    if(!name || !phone || !email){ alert('請完整填寫「姓名／手機／Email」。'); return; }
-  }
-  setStep(step);
-}
-function prevStep(step){ setStep(step); }
-
-function updateProgress(){ /* 已整合在 setStep */ }
-
-/* 表單送出 */
-formEl?.addEventListener('submit', (e)=>{
-  e.preventDefault();
-  const data = Object.fromEntries(new FormData(formEl).entries());
-
-  // 同意條款檢查
-  if(!formEl.querySelector('input[name="agreement"]:checked') && !formEl.agreement?.checked){
-    alert('請勾選同意個資條款與活動通知。'); return;
-  }
-
-  // 儲存到 localStorage（可供後端前先暫存）
-  localStorage.setItem('vip_form', JSON.stringify({
-    ts: Date.now(),
-    ...data
-  }));
-
-  // 顯示成功訊息
-  successBox?.classList.add('show');
-  formEl.style.display = 'none';
-  // 自動滾到成功卡
-  successBox?.scrollIntoView({behavior:'smooth', block:'center'});
-});
-
-/* ===================== .ics 下載 ===================== */
-function downloadICS(){
-  const title = '智平衡健康集團 VIP 邀請盛宴';
-  const locationText = '台北晶華酒店（台北市中山區中山北路二段39巷3號）';
-  const start = '20251128T183000'; // 以當地時間顯示
-  const end   = '20251128T203000';
-
-  const ics =
-`BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//WiseBalance//VIP//EN
-CALSCALE:GREGORIAN
-BEGIN:VEVENT
-UID:${Date.now()}@wisebalance
-DTSTAMP:${toUTCStamp(new Date())}
-SUMMARY:${title}
-LOCATION:${locationText}
-DESCRIPTION:請準時出席。現場含執行長Keynote與第六代紅光極智衣、護您穩平衡衣展示。
-DTSTART;TZID=Asia/Taipei:${start}
-DTEND;TZID=Asia/Taipei:${end}
-END:VEVENT
-END:VCALENDAR`;
-  const blob = new Blob([ics], {type:'text/calendar;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'VIP_Event_1128.ics'; a.click();
-  URL.revokeObjectURL(url);
-
-  function toUTCStamp(d){
-    const pad = n => String(n).padStart(2,'0');
-    return d.getUTCFullYear()
-      + pad(d.getUTCMonth()+1)
-      + pad(d.getUTCDate()) + 'T'
-      + pad(d.getUTCHours())
-      + pad(d.getUTCMinutes())
-      + pad(d.getUTCSeconds()) + 'Z';
-  }
-}
-
-/* 讓 .ics 下載鈕可用（成功卡的按鈕已綁 onclick，但這裡保險再掛一次） */
-window.downloadICS = downloadICS;
-
-/* ===================== 個案影片鎖定提示 ===================== */
-function showLoginPrompt(){
-  alert('請先登入／註冊會員以觀看完整案例。');
-}
-window.showLoginPrompt = showLoginPrompt;
-
-/* ===================== URL 參數預填 & VIP 識別 ===================== */
-(function prefillFromQuery(){
-  const q = new URLSearchParams(location.search);
-  const vipId = q.get('vip_id') || q.get('vip') || '';
-  if(vipId) localStorage.setItem('vip_id', vipId);
-
-  const name = q.get('name');
-  const phone = q.get('phone');
-  const email = q.get('email');
-
-  if(name) $('#name').value = decodeURIComponent(name);
-  if(phone) $('#phone').value = decodeURIComponent(phone);
-  if(email) $('#email').value = decodeURIComponent(email);
-})();
-
-/* ===================== Exit Intent 彈窗（JS 動態建立） ===================== */
-(function initExitIntent(){
-  // 建立 DOM
-  const overlay = document.createElement('div');
-  overlay.className = 'popup-overlay';
-  const popup = document.createElement('div');
-  popup.className = 'exit-popup';
-  popup.innerHTML = `
-    <button class="close-popup" aria-label="close">&times;</button>
-    <h3 style="margin-bottom:0.5rem;color:var(--primary)">帶走你的專屬席次</h3>
-    <p style="color:var(--text-light);margin:0.5rem 0 1rem">留下聯絡方式，我們會提醒你 11/28 當天準時入席</p>
-    <div style="display:flex;gap:0.5rem; margin-top:1rem;">
-      <input id="popupPhone" type="tel" placeholder="手機號碼" style="flex:1;padding:0.8rem;border:1px solid #e2e8f0;border-radius:10px">
-      <button id="popupSave" class="btn btn-primary">保留席次</button>
+  <section class="section container">
+    <h2 class="title">現場首度公開：讓科技懂你、讓健康為你訂製</h2>
+    <div class="grid">
+      <div class="feature"><div>🎤</div><h3>執行長 Keynote</h3><p>當科技開始理解人</p></div>
+      <div class="feature"><div>🧥</div><h3>第六代紅光極智衣</h3><p>量身感知的智慧衣</p></div>
+      <div class="feature"><div>😴</div><h3>護您穩平衡衣</h3><p>讓睡眠自己懂得修復</p></div>
+      <div class="feature"><div>🤖</div><h3>AI 智慧照護</h3><p>讓關心跨越距離</p></div>
     </div>
-  `;
-  document.body.appendChild(overlay);
-  document.body.appendChild(popup);
+  </section>
 
-  const show = ()=>{
-    if(localStorage.getItem('vip_form')) return; // 已報名不彈
-    overlay.classList.add('show'); popup.classList.add('show');
-  };
-  const hide = ()=>{
-    overlay.classList.remove('show'); popup.classList.remove('show');
-  };
-  popup.querySelector('.close-popup').addEventListener('click', hide);
-  overlay.addEventListener('click', hide);
-  popup.querySelector('#popupSave').addEventListener('click', ()=>{
-    const v = $('#popupPhone').value.trim();
-    if(!v){ alert('請輸入手機號碼'); return; }
-    localStorage.setItem('vip_exit_phone', v);
-    hide();
-    goToPage(2);
-    scrollToForm();
-    $('#phone').value = v;
-  });
+  <section class="section container">
+    <div class="card" id="vip">
+      <h2 class="title" style="margin-top:0">11/28（五）台北晶華酒店｜VIP 邀請盛宴</h2>
+      <ul class="hl">
+        <li>執行長專業演說：從 CNT・AI 到量子健康的臨床應用</li>
+        <li>第六代紅光極智衣現場展示與體驗</li>
+        <li>護您穩平衡衣：讓健康保養在睡眠中自動發生</li>
+      </ul>
+      <div class="count" id="countdown">
+        <div class="box"><span class="n" id="d">--</span><div class="muted">天</div></div>
+        <div class="box"><span class="n" id="h">--</span><div class="muted">時</div></div>
+        <div class="box"><span class="n" id="m">--</span><div class="muted">分</div></div>
+        <div class="box"><span class="n" id="s">--</span><div class="muted">秒</div></div>
+      </div>
+      <div class="cta"><a href="#form" class="btn">保留席次</a></div>
+    </div>
+  </section>
 
-  // 滑鼠接近頁頂觸發
-  document.addEventListener('mouseout', (e)=>{
-    if(!e.relatedTarget && e.clientY <= 0) show();
-  });
-  // 停留 20 秒也觸發一次
-  setTimeout(show, 20000);
-})();
+  <section class="section container agenda">
+    <h2 class="title">活動議程</h2>
+    <div class="card">
+      <ul>
+        <li>13:30–14:00 入席＆迎賓｜VIP 專屬接待，輕鬆交流</li>
+        <li>14:00–15:00 執行長 Keynote｜從 CNT・AI 到量子健康的臨床應用</li>
+        <li>15:00–15:30 新品展示＆體驗｜第六代紅光極智衣、護您穩平衡衣</li>
+        <li>15:30–16:30 VIP Q&A＆專屬禮遇｜一對一諮詢＆會員權益介紹</li>
+      </ul>
+    </div>
+  </section>
 
-/* ===================== 導航按鈕導出（給 HTML inline onclick 用） ===================== */
-window.goToPage = goToPage;
-window.scrollToForm = scrollToForm;
-window.nextStep = nextStep;
-window.prevStep = prevStep;
+  <section id="form" class="section container">
+    <h2 class="title">VIP 報名表單</h2>
+    <form class="card" onsubmit="submitForm(event)">
+      <div class="form-field">
+        <label>姓名 *</label>
+        <input type="text" name="name" required placeholder="請輸入您的姓名">
+      </div>
+      <div class="form-field">
+        <label>手機 *</label>
+        <input type="tel" name="phone" required placeholder="0912-345-678">
+      </div>
+      <div class="form-field">
+        <label>Email *</label>
+        <input type="email" name="email" required placeholder="example@email.com">
+      </div>
+      <div class="form-field">
+        <label>其他需求或備註</label>
+        <textarea name="notes" rows="4" placeholder="如有特殊需求，請告訴我們..."></textarea>
+      </div>
+      <button class="submit" type="submit">確認送出</button>
+      <div id="ok" style="display:none;margin-top:12px;color:#2b9348;font-weight:700;text-align:center;">✓ 報名成功！已寄出確認信。</div>
+    </form>
+  </section>
 
-/* ===================== 初始化：確保第一步顯示 ===================== */
-document.addEventListener('DOMContentLoaded', ()=>{
-  setStep(1);
-});
-</script>
+  <footer>© 2025 智平衡健康集團 — 訂製健康，從理解開始。</footer>
+
+  <script>
+    const target=new Date("2025-11-28T13:00:00+08:00").getTime();
+    function tick(){
+      const diff=Math.max(0,target-Date.now());
+      const s=Math.floor(diff/1000);
+      const d=Math.floor(s/86400),h=Math.floor((s%86400)/3600),m=Math.floor((s%3600)/60),ss=s%60;
+      ["d","h","m","s"].forEach((k,i)=>{const v=[d,h,m,ss][i];const el=document.getElementById(k);if(el)el.textContent=String(v).padStart(2,"0");});
+    }
+    tick();setInterval(tick,1000);
+    function submitForm(e){
+      e.preventDefault();
+      const f=e.target;
+      const data=Object.fromEntries(new FormData(f).entries());
+      localStorage.setItem("vip_form",JSON.stringify({ts:Date.now(),...data}));
+      document.getElementById("ok").style.display="block";
+      f.scrollIntoView({behavior:"smooth",block:"center"});
+    }
+  </script>
+</body>
+</html>
