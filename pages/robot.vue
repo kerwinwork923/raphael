@@ -2867,13 +2867,9 @@ const fetchAllRoles = async () => {
         category: role.Category,
         aid: role.AID,
         rid: role.RID,
-        styleId: parseInt(role.Style),
-        avatar:
-          role.StyleList.find((s) => s.StyleID === role.Style)?.ImgURL ||
-          role.StyleList[0]?.ImgURL,
-        fullImage:
-          role.StyleList.find((s) => s.StyleID === role.Style)?.ImgURL ||
-          role.StyleList[0]?.ImgURL,
+        styleId: 1, // 預設使用第一個造型 (StyleID: "1")
+        avatar: role.StyleList[0]?.ImgURL, // 使用第一個造型的圖片
+        fullImage: role.StyleList[0]?.ImgURL, // 使用第一個造型的圖片
         styles: role.StyleList.map((style) => ({
           id: parseInt(style.StyleID),
           thumbnail: style.ImgURL,
@@ -2932,9 +2928,9 @@ const fetchCurrentRole = async () => {
         displayName: data.Role.DisplayName,
         customName: data.Role.DisplayName,
         category: data.Role.Category,
-        styleId: parseInt(data.Role.StyleID),
-        avatar: data.Role.ImgURL,
-        fullImage: data.Role.ImgURL,
+        styleId: 1, // 預設使用第一個造型 (StyleID: "1")
+        avatar: data.Role.ImgURL, // 使用 API 返回的圖片
+        fullImage: data.Role.ImgURL, // 使用 API 返回的圖片
         voiceSettings: {
           rate: 0.9,
           pitch: 0.85,
@@ -3100,9 +3096,12 @@ const loadSavedCharacter = async () => {
             const defaultCharacter = availableCharacters.value[0];
             currentCharacter.value = {
               ...defaultCharacter,
+              styleId: 1, // 確保使用第一個造型
+              avatar: defaultCharacter.styles[0]?.thumbnail || defaultCharacter.avatar,
+              fullImage: defaultCharacter.styles[0]?.fullImage || defaultCharacter.fullImage,
               customName: currentRole.customName || currentRole.displayName || defaultCharacter.displayName,
             };
-            characterImageSrc.value = defaultCharacter.fullImage;
+            characterImageSrc.value = defaultCharacter.styles[0]?.fullImage || defaultCharacter.fullImage;
             console.log("使用預設角色:", defaultCharacter.displayName);
           } else {
             console.error("沒有可用的角色");
@@ -3116,9 +3115,12 @@ const loadSavedCharacter = async () => {
           const defaultCharacter = availableCharacters.value[0];
           currentCharacter.value = {
             ...defaultCharacter,
+            styleId: 1, // 確保使用第一個造型
+            avatar: defaultCharacter.styles[0]?.thumbnail || defaultCharacter.avatar,
+            fullImage: defaultCharacter.styles[0]?.fullImage || defaultCharacter.fullImage,
             customName: defaultCharacter.displayName,
           };
-          characterImageSrc.value = defaultCharacter.fullImage;
+          characterImageSrc.value = defaultCharacter.styles[0]?.fullImage || defaultCharacter.fullImage;
           console.log("使用預設角色:", defaultCharacter.displayName);
         } else {
           console.error("沒有可用的角色");
