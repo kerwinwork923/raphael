@@ -81,7 +81,10 @@
       </div>
 
       <!-- 空狀態 -->
-      <div class="empty-state" v-else-if="isDataReady && filteredLogs.length === 0">
+      <div
+        class="empty-state"
+        v-else-if="isDataReady && filteredLogs.length === 0"
+      >
         <div class="empty-card">
           <div class="empty-character">
             <img
@@ -235,22 +238,25 @@ const filteredLogs = computed(() => {
 const loadHealthLogs = async () => {
   isLoading.value = true;
   isDataReady.value = false;
-  
+
   try {
     // 從 API 讀取健康日誌
-    const response = await fetch("https://23700999.com:8081/HMA/api/fr/getSoundNote", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        MID: localobj?.MID || "1",
-        Token: localobj?.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
-        MAID: localobj?.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
-        Mobile: localobj?.Mobile || "0968324056",
-        Lang: "zhtw",
-        Year: selectedYear.value.toString(),
-        Month: selectedMonth.value.replace("月", "").padStart(2, "0")
-      }),
-    });
+    const response = await fetch(
+      "https://23700999.com:8081/HMA/api/fr/getSoundNote",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          MID: localobj?.MID || "1",
+          Token: localobj?.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
+          MAID: localobj?.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
+          Mobile: localobj?.Mobile || "0968324056",
+          Lang: "zhtw",
+          Year: selectedYear.value.toString(),
+          Month: selectedMonth.value.replace("月", "").padStart(2, "0"),
+        }),
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`讀取健康日誌 API 失敗: ${response.status}`);
@@ -268,7 +274,7 @@ const loadHealthLogs = async () => {
         type: "summary",
         content: item.Note,
       }));
-      
+
       console.log("轉換後的健康日誌:", healthLogs.value);
       console.log("健康日誌總數:", healthLogs.value.length);
     } else {
@@ -333,6 +339,9 @@ onMounted(async () => {
   .healthLogContent {
     max-width: 768px;
     margin: 0 auto;
+    .titleMenu:deep > div {
+      left: 16px;
+    }
   }
 }
 
@@ -352,7 +361,7 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    @include neumorphismOuter($radius:50px,$padding:10px 12px);
+    @include neumorphismOuter($radius: 50px, $padding: 10px 12px);
     border: none;
     cursor: pointer;
     color: var(--neutral-500-opacity-70, rgba(102, 102, 102, 0.7));
@@ -435,8 +444,12 @@ onMounted(async () => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .log-list {
