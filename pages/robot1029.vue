@@ -24,9 +24,7 @@
           <div class="loading-spinner"></div>
         </div>
         <img
-          v-else-if="
-            isCharacterDataReady && currentCharacter && currentCharacter.avatar
-          "
+          v-else-if="isCharacterDataReady && currentCharacter && currentCharacter.avatar"
           class="avatar"
           :src="currentCharacter.avatar"
           alt="角色頭像"
@@ -492,11 +490,9 @@
             <div
               v-if="!showSearch || searchQuery === ''"
               class="history-list"
-
+              @scroll.passive="handleHistoryScroll"
               ref="historyScrollContainer"
             >
-              <!-- 頂部哨兵：用於觸發載入更舊訊息 -->
-              <div ref="topSentinel"></div>
               <div
                 v-for="(group, date) in groupedHistory"
                 :key="date"
@@ -524,10 +520,10 @@
                     class="message bot"
                   >
                     <div class="avatar">
-                      <img
+                      <img 
                         v-if="currentCharacter && currentCharacter.avatar"
-                        :src="currentCharacter.avatar"
-                        alt="角色頭像"
+                        :src="currentCharacter.avatar" 
+                        alt="角色頭像" 
                       />
                       <div v-else class="placeholder-avatar"></div>
                     </div>
@@ -546,13 +542,6 @@
                         {{ item.bot }}
                       </div>
                       <div class="time">{{ formatTime(item.timestamp) }}</div>
-                      <div class="sender-label">
-                        {{
-                          item.botFrom === "Human"
-                            ? "健康顧問"
-                            : currentCharacter.name || "AI"
-                        }}
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -781,8 +770,6 @@ const CHATGPT_API_URL =
   "https://23700999.com:8081/push_notification/api/chatgpt/ask"; // ← ChatGPT API
 const voicegender = "female";
 const historyInputRef = ref(null);
-const topSentinel = ref(null);
-let topObserver = null;
 
 // Swiper modules
 const swiperModules = [Pagination];
@@ -827,11 +814,10 @@ const isPollingActive = ref(false); // 是否正在輪詢
 
 // 歷史資料相關狀態
 const isLoadingOlderMessages = ref(false);
-const hasMoreMessages = ref(false);
+const hasMoreMessages = ref(true);
 const currentPage = ref(1);
-const messagesPerPage = ref(Infinity);
-const callTime = ref(1);
-const emptyBatchCount = ref(0);
+const messagesPerPage = ref(20);
+const callTime = ref(1); // CallTime 計數器，用於載入更舊的訊息
 const knownKeys = new Set(); // 用於去重的穩定鍵集合
 
 // 首次登入解說相關狀態
@@ -891,14 +877,11 @@ const historyScrollContainer = ref(null);
 const isScrolling = ref(false);
 const scrollTimeout = ref(null);
 
-// 生成穩定鍵用於去重（改用新 API 欄位）
+// 生成穩定鍵用於去重
 const makeStableKey = (msg) => {
-  // 盡量使用後端回傳的不可變欄位組合
-  const check = msg.CheckTime || msg.TTCheckTime || "";
-  const content = msg.Content || msg.Inmessage || msg.Outmessage || "";
-  const mode = msg.Mode || "";
-  const ah = msg.AHType || "";
-  return `${check}|${mode}|${ah}|${content}`;
+  return `${msg.Inputtime}|${msg.Inmessage ?? ""}|${msg.Outputtime ?? ""}|${
+    msg.Outmessage ?? ""
+  }`;
 };
 
 // 正確處理時間戳，修復時區問題
@@ -1253,16 +1236,21 @@ const loadOlderMessages = async () => {
   const oldScrollHeight = container ? container.scrollHeight : 0;
 
   try {
-    let addedCount = await fetchOlderChatHistory(callTime.value);
+    // 增加 CallTime 計數器
+    callTime.value++;
+
+    console.log(`載入更舊訊息，CallTime: ${callTime.value}`);
+
+    // 調用 TTE API 獲取更舊的訊息，並取得實際新增的筆數
+    const addedCount = await fetchOlderChatHistory();
+
     // 只有真的有新資料才翻頁
     if (addedCount > 0) {
-      callTime.value++;
       currentPage.value += 1;
+      console.log(`成功載入 ${addedCount} 條新訊息`);
     } else {
-      emptyBatchCount.value = (emptyBatchCount.value || 0) + 1;
-      if (emptyBatchCount.value >= 2) {
-        hasMoreMessages.value = false;
-      }
+      hasMoreMessages.value = false;
+      console.log("沒有更多舊訊息可載入");
     }
 
     // 等待 DOM 更新完成
@@ -1720,7 +1708,7 @@ async function runSummaryFlow(inputText) {
   try {
     isInSummaryFlow.value = true;
 
-    // UI：顯示「等我一下」彈窗
+    // UI：顯示「等我一下」彈窗，但不寫入 TTE
     showSummaryProcessing.value = true;
     currentSummary.value = "";
     showSummaryMode.value = false;
@@ -1731,20 +1719,74 @@ async function runSummaryFlow(inputText) {
       "你是一個聰明的智慧醫療助手，這是一段病患的症狀敘述內容，請幫我做摘要重點"
     );
 
-    // 設置原始輸入到 pendingInput，供後續使用
-    pendingInput.value = inputText;
+    // ❷ 一次性寫入 TTE：In = 使用者原文，Out = 最終回覆（不要「(摘要)」與「等我一下」）
+    await saveChatRecord({
+      inMsg: inputText,
+      outMsg: aiResponse || inputText, // 失敗就退回原文
+      // 讓時間都用本地時間：saveChatRecord 內已處理
+    });
 
-    // UI：進入「是否儲存到健康日誌」的彈窗
+    // 同時顯示在前端聊天畫面
+    const nowTs = Date.now();
+    const newConversation = {
+      id: nowTs,
+      ts: nowTs,
+      user: inputText, // 使用者原文
+      bot: aiResponse || inputText, // AI 整理後的回應
+      timestamp: new Date().toLocaleString("zh-TW"),
+      dateKey: toDateKey(new Date(nowTs)),
+    };
+    conversations.value.push(newConversation);
+    latestResponse.value = aiResponse || inputText;
+    saveConversations();
+
+    // 如果當前在歷史記錄頁面，確保新訊息可見
+    if (showHistoryPage.value) {
+      currentPage.value = 1;
+      nextTick(() => {
+        setTimeout(() => {
+          scrollToBottom();
+        }, 100);
+      });
+    }
+
+    // UI：進入「是否儲存到健康日誌」的彈窗（純 UI，與 TTE 聊天記錄無關）
     currentSummary.value = aiResponse || inputText;
     showSummaryProcessing.value = false;
     showSummaryMode.value = true;
   } catch (error) {
     console.error("摘要流程失敗:", error);
 
-    // 設置原始輸入到 pendingInput，供後續使用
-    pendingInput.value = inputText;
+    // ❸ 就算失敗，也只寫一次，把原文當作回覆（仍然不要多寫一筆）
+    await saveChatRecord({
+      inMsg: inputText,
+      outMsg: inputText,
+    });
 
-    // UI：顯示錯誤摘要
+    // 同時顯示在前端聊天畫面（失敗情況）
+    const nowTs = Date.now();
+    const newConversation = {
+      id: nowTs,
+      ts: nowTs,
+      user: inputText, // 使用者原文
+      bot: inputText, // 失敗時使用原文
+      timestamp: new Date().toLocaleString("zh-TW"),
+      dateKey: toDateKey(new Date(nowTs)),
+    };
+    conversations.value.push(newConversation);
+    latestResponse.value = inputText;
+    saveConversations();
+
+    // 如果當前在歷史記錄頁面，確保新訊息可見
+    if (showHistoryPage.value) {
+      currentPage.value = 1;
+      nextTick(() => {
+        setTimeout(() => {
+          scrollToBottom();
+        }, 100);
+      });
+    }
+
     currentSummary.value = inputText;
     showSummaryProcessing.value = false;
     showSummaryMode.value = true;
@@ -1885,18 +1927,6 @@ async function sendViaUnifiedAPI(
   // 只有在「沒有伺服器音檔可播」時，才用 TTS
   if (playAudio && finalAnswer && !usedServerAudio) {
     speakText(finalAnswer);
-  }
-
-  // 無論是否進入摘要，n8n 真正回覆到手後，一律寫入 TTEsaveChatMessageHistory
-  try {
-    await saveChatRecord({
-      inMsg: userText,
-      outMsg: finalAnswer,
-      inputAt: localTime,
-      outputAt: getLocalTimeString(new Date()),
-    });
-  } catch (e) {
-    console.error("寫入 TTE 聊天紀錄失敗:", e);
   }
 
   return finalAnswer;
@@ -2289,14 +2319,13 @@ const saveConversations = () => {
 // 摘要模式處理函數
 const handleSummaryMode = async (saveSummary = false) => {
   const summaryText = currentSummary.value;
-  const originalInput = pendingInput.value || ""; // 獲取原始輸入
 
   // 關閉摘要模式
   showSummaryMode.value = false;
   currentSummary.value = "";
 
   if (saveSummary) {
-    // 先打摘要API
+    // 儲存摘要到 API
     try {
       isLoading.value = true;
 
@@ -2322,97 +2351,26 @@ const handleSummaryMode = async (saveSummary = false) => {
 
       const data = await response.json();
       console.log("摘要已儲存到 API:", data);
-      alert("摘要已成功儲存到健康日誌！");
+
+
     } catch (error) {
       console.error("儲存摘要失敗:", error);
       alert("儲存摘要失敗，請重試");
+    } finally {
+      isLoading.value = false;
     }
   }
 
   // 檢查摘要內容是否包含客服關鍵字
   if (summaryText.includes("真人") || summaryText.includes("客服")) {
     console.log("摘要內容包含客服關鍵字，顯示客服詢問");
-    pendingInput.value = originalInput; // 儲存原始輸入
+    pendingInput.value = summaryText; // 儲存 AI 回應
     showCustomerServiceModal.value = true;
     return; // 不發送API，等待用戶選擇
   }
 
-  // 無論是否儲存摘要，都要打n8n模型並儲存對話記錄
-  if (originalInput) {
-    try {
-      isLoading.value = true;
-      // 先立即在 UI 放入使用者訊息 + 一個 loading 中的機器人訊息
-      const ts = new Date();
-      const dateKey = toDateKey(ts);
-      const loadingMessage = {
-        id: `${ts.getTime()}|pending`,
-        ts: ts.getTime(),
-        user: originalInput,
-        bot: "",
-        botFrom: "AI",
-        isLoading: true,
-        timestamp: ts.toLocaleString("zh-TW"),
-        dateKey,
-      };
-      conversations.value.push(loadingMessage);
-      await nextTick();
-
-      const botResponse = await sendViaUnifiedAPI(originalInput, {
-        playAudio: !isMuted.value,
-      });
-
-      // 將剛才的 loading 訊息更新為實際回覆
-      const idx = conversations.value.findIndex(
-        (m) => m.id === loadingMessage.id
-      );
-      if (idx !== -1) {
-        conversations.value[idx] = {
-          ...conversations.value[idx],
-          bot: botResponse,
-          isLoading: false,
-        };
-      }
-
-      // 清空待處理輸入
-      pendingInput.value = "";
-
-      // 如果當前在歷史記錄頁面，確保新訊息可見
-      if (showHistoryPage.value) {
-        currentPage.value = 1;
-        nextTick(() => {
-          setTimeout(() => {
-            scrollToBottom();
-          }, 100);
-        });
-      }
-
-      console.log("摘要模式後的n8n分析完成");
-    } catch (error) {
-      console.error("摘要模式後的API調用錯誤:", error);
-      const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
-      // 回填錯誤到 pending 訊息
-      const idx = conversations.value.findIndex((m) => m.isLoading);
-      if (idx !== -1) {
-        conversations.value[idx] = {
-          ...conversations.value[idx],
-          bot: errorResponse,
-          isLoading: false,
-        };
-      } else {
-        conversations.value.push({
-          id: Date.now(),
-          user: originalInput,
-          bot: errorResponse,
-          timestamp: new Date().toLocaleString("zh-TW"),
-          dateKey: toDateKey(new Date()),
-        });
-      }
-      latestResponse.value = errorResponse;
-      saveConversations();
-    } finally {
-      isLoading.value = false;
-    }
-  }
+  // 如果沒有客服關鍵字，摘要模式不需要新增對話紀錄
+  // 因為原始輸入已經在觸發摘要模式時存入了
 };
 
 // 客服模式處理函數（聯繫客服：靜默，不顯示任何提示或新增訊息）
@@ -2448,12 +2406,12 @@ const handleCustomerService = async (contactService = false) => {
         // 若要在開發時確認，可印 log，正式上線刪掉即可
         const data = await response.json().catch(() => ({}));
         console.info("frSendLineText 成功（靜默）:", data);
-        // ✅ 立刻重抓一次歷史，讓「客服/真人」相關訊息馬上顯示
-        await fetchChatHistory(true);
-        // 若目前在歷史頁，卷到底讓最新訊息可見
-        if (showHistoryPage.value) {
-          nextTick(() => setTimeout(() => scrollToBottom(), 100));
-        }
+      // ✅ 立刻重抓一次歷史，讓「客服/真人」相關訊息馬上顯示
+       await fetchChatHistory(true);
+       // 若目前在歷史頁，卷到底讓最新訊息可見
+       if (showHistoryPage.value) {
+         nextTick(() => setTimeout(() => scrollToBottom(), 100));
+       }
       }
 
       // 清空待處理輸入（避免殘留）
@@ -2622,16 +2580,15 @@ const fetchChatHistory = async (isPolling = false) => {
 
         // 根據 Mode 和 AHType 判斷是用戶還是 AI/客服
         // Mode: "Input" = 用戶輸入, Mode: "Output" = AI/客服回應
+        // AHType: "Human" = 真人客服, AHType: "AI" = AI
         const isUser = msg.Mode === "Input";
         const isBot = msg.Mode === "Output";
-        const botFrom = isBot ? (msg.AHType === "Human" ? "Human" : "AI") : "";
 
         return {
           id: Date.now() + index, // 生成唯一 ID
           ts: checkTime.getTime(),
           user: isUser ? msg.Content : "",
           bot: isBot ? msg.Content : "",
-          botFrom, // AI / Human
           timestamp: checkTime.toLocaleString("zh-TW"),
           dateKey: toDateKey(checkTime),
         };
@@ -2657,30 +2614,15 @@ const fetchChatHistory = async (isPolling = false) => {
         });
       }
 
-      // 合併策略：
-      // - 初次載入（非輪詢）：後端已改為回傳全部資料，直接覆蓋為完整清單
-      // - 輪詢：僅追加新訊息
-      if (!isPolling) {
-        // 重建 knownKeys 以利之後載入更舊
+      // 只有在非輪詢模式或發現新訊息時才更新
+      if (!isPolling || hasNewMessages) {
+        // 清空並填入 knownKeys
         knownKeys.clear();
         for (const msg of data.LineList) {
           knownKeys.add(makeStableKey(msg));
         }
+
         conversations.value = convertedMessages;
-        // 後端一次回完整清單，停用上滑載入更舊
-        hasMoreMessages.value = false;
-      } else if (hasNewMessages) {
-        const existingSet = new Set(
-          conversations.value.map((m) => `${m.ts}|${m.user}|${m.bot}`)
-        );
-        const appended = convertedMessages.filter(
-          (m) => !existingSet.has(`${m.ts}|${m.user}|${m.bot}`)
-        );
-        if (appended.length > 0) {
-          conversations.value = [...conversations.value, ...appended].sort(
-            (a, b) => a.ts - b.ts
-          );
-        }
       }
 
       // 更新最新回覆
@@ -2702,7 +2644,7 @@ const fetchChatHistory = async (isPolling = false) => {
 };
 
 // 獲取更舊的聊天記錄 (TTE API)
-const fetchOlderChatHistory = async (page) => {
+const fetchOlderChatHistory = async () => {
   if (!localobj) {
     console.error("用戶資料不存在");
     return 0;
@@ -2718,7 +2660,6 @@ const fetchOlderChatHistory = async (page) => {
         MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
         Mobile: localobj.Mobile,
         Lang: "zhtw",
-        CallTime: page, // 依次撈更舊（外部控制遞增）
       }),
     });
 
@@ -2757,18 +2698,16 @@ const fetchOlderChatHistory = async (page) => {
         // AHType: "Human" = 真人客服, AHType: "AI" = AI
         const isUser = msg.Mode === "Input";
         const isBot = msg.Mode === "Output";
-        const botFrom = isBot ? (msg.AHType === "Human" ? "Human" : "AI") : "";
-        const obj = {
+
+        return {
           stableKey: key,
-          id: key,
+          id: key, // 用穩定鍵作為 id
           ts: checkTime.getTime(),
           user: isUser ? msg.Content : "",
           bot: isBot ? msg.Content : "",
           timestamp: checkTime.toLocaleString("zh-TW"),
           dateKey: toDateKey(checkTime),
         };
-        if (isBot) obj.botFrom = botFrom;
-        return obj;
       })
       .sort((a, b) => a.ts - b.ts);
 
@@ -2871,34 +2810,6 @@ onMounted(async () => {
   // 啟動 API 輪詢
   startApiPolling();
 
-  // 啟動頂部哨兵觀察器，避免捲動事件漏觸發
-  nextTick(() => {
-    try {
-      if (historyScrollContainer.value && topSentinel.value) {
-        topObserver = new IntersectionObserver(
-          async (entries) => {
-            const [e] = entries;
-            if (
-              e &&
-              e.isIntersecting &&
-              !isLoadingOlderMessages.value &&
-              hasMoreMessages.value
-            ) {
-              await loadOlderMessages();
-            }
-          },
-          {
-            root: historyScrollContainer.value,
-            threshold: 0.0,
-          }
-        );
-
-      }
-    } catch (err) {
-      console.warn("IntersectionObserver 初始化失敗:", err);
-    }
-  });
-
   // 添加調試函數到全局
   if (process.client) {
     window.debugCalendar = () => {
@@ -2917,9 +2828,6 @@ onMounted(async () => {
 // 組件卸載時清理
 onUnmounted(() => {
   stopApiPolling();
-  try {
-    topObserver?.disconnect();
-  } catch {}
 });
 
 // ====== 角色 API 相關函數 ======
@@ -3193,20 +3101,11 @@ const loadSavedCharacter = async () => {
             currentCharacter.value = {
               ...defaultCharacter,
               styleId: 1, // 確保使用第一個造型
-              avatar:
-                defaultCharacter.styles[0]?.thumbnail ||
-                defaultCharacter.avatar,
-              fullImage:
-                defaultCharacter.styles[0]?.fullImage ||
-                defaultCharacter.fullImage,
-              customName:
-                currentRole.customName ||
-                currentRole.displayName ||
-                defaultCharacter.displayName,
+              avatar: defaultCharacter.styles[0]?.thumbnail || defaultCharacter.avatar,
+              fullImage: defaultCharacter.styles[0]?.fullImage || defaultCharacter.fullImage,
+              customName: currentRole.customName || currentRole.displayName || defaultCharacter.displayName,
             };
-            characterImageSrc.value =
-              defaultCharacter.styles[0]?.fullImage ||
-              defaultCharacter.fullImage;
+            characterImageSrc.value = defaultCharacter.styles[0]?.fullImage || defaultCharacter.fullImage;
             console.log("使用預設角色:", defaultCharacter.displayName);
           } else {
             console.error("沒有可用的角色");
@@ -3221,15 +3120,11 @@ const loadSavedCharacter = async () => {
           currentCharacter.value = {
             ...defaultCharacter,
             styleId: 1, // 確保使用第一個造型
-            avatar:
-              defaultCharacter.styles[0]?.thumbnail || defaultCharacter.avatar,
-            fullImage:
-              defaultCharacter.styles[0]?.fullImage ||
-              defaultCharacter.fullImage,
+            avatar: defaultCharacter.styles[0]?.thumbnail || defaultCharacter.avatar,
+            fullImage: defaultCharacter.styles[0]?.fullImage || defaultCharacter.fullImage,
             customName: defaultCharacter.displayName,
           };
-          characterImageSrc.value =
-            defaultCharacter.styles[0]?.fullImage || defaultCharacter.fullImage;
+          characterImageSrc.value = defaultCharacter.styles[0]?.fullImage || defaultCharacter.fullImage;
           console.log("使用預設角色:", defaultCharacter.displayName);
         } else {
           console.error("沒有可用的角色");
@@ -4731,7 +4626,7 @@ const vClickOutside = {
       }
 
       .history-message {
-        margin-bottom: 32px;
+        margin-bottom: 20px;
 
         .message {
           display: flex;
@@ -4740,7 +4635,6 @@ const vClickOutside = {
 
           &.bot {
             justify-content: flex-start;
-            margin-bottom: 20px;
 
             .avatar {
               width: 36px;
@@ -4760,7 +4654,7 @@ const vClickOutside = {
               gap: 8px;
               @include neumorphismOuter($radius: 20px 20px 20px 0);
               color: #2d3748;
-              width: 260px;
+              max-width: 70%;
             }
           }
 
@@ -4792,16 +4686,6 @@ const vClickOutside = {
             line-height: 1.4;
             word-break: break-word;
             position: relative;
-          }
-
-          .sender-label {
-            color: var(--Neutral-400, #b3b3b3);
-            font-size: var(--Text-font-size-14, 14px);
-            font-weight: 400;
-            line-height: normal;
-            position: absolute;
-            bottom: -25px;
-            left: 0;
           }
 
           .time {
