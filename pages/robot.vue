@@ -4760,7 +4760,7 @@ const vClickOutside = {
   justify-content: space-between;
   gap: 16px;
   @include neumorphismOuter($radius: 20px, $padding: 8px 12px);
-  margin:auto 1rem;
+  margin: auto 1rem;
 }
 
 .history-text-input {
@@ -5046,6 +5046,7 @@ const vClickOutside = {
       display: flex;
       flex-direction: column;
       align-items: center;
+      gap: 8px;
       width: 90px;
       height: 220px;
       @include neumorphismOuter($radius: 8px, $padding: 8px);
@@ -5055,14 +5056,11 @@ const vClickOutside = {
         flex-direction: column;
         align-items: center;
 
-        gap: 8px;
-
         span {
           color: #4a5568;
           text-align: center;
           font-weight: 500;
           color: $raphael-black;
-          margin-top: 0.5rem;
           font-size: var(--Text-font-size-14, 14px);
           font-style: normal;
           font-weight: 400;
@@ -5204,8 +5202,8 @@ const vClickOutside = {
   .character-switch-area {
     position: relative;
     width: 100%;
-    max-width:768px;
-    margin:auto;
+    max-width: 768px;
+    margin: auto;
     margin-bottom: 66px;
     padding: 0 1rem;
 
