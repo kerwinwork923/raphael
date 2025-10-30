@@ -412,19 +412,9 @@ onMounted(async () => {
 }
 
 .loading-card {
-  background: var(--Neutral-white, #fff);
-  border-radius: 20px;
-  padding: 3rem 2rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  @include neumorphismOuter($radius: 20px, $padding: 3rem 2rem);
   width: 100%;
   text-align: center;
-  @include neumorphismOuter(
-    $bgColor: var(--Neutral-white, #ffffff),
-    $radius: 20px,
-    $x: 0,
-    $y: 4px,
-    $blur: 12px
-  );
 
   .loading-spinner {
     width: 40px;
@@ -460,18 +450,8 @@ onMounted(async () => {
 }
 
 .log-item {
-  background: var(--Neutral-white, #fff);
-  border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  @include neumorphismOuter($radius: 20px);
   transition: all 0.3s ease;
-  @include neumorphismOuter(
-    $bgColor: var(--Neutral-white, #fff),
-    $radius: 12px,
-    $x: 0,
-    $y: 2px,
-    $blur: 8px
-  );
 
   &:hover {
     transform: translateY(-1px);
