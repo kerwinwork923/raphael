@@ -24,7 +24,9 @@
           <div class="loading-spinner"></div>
         </div>
         <img
-          v-else-if="isCharacterDataReady && currentCharacter && currentCharacter.avatar"
+          v-else-if="
+            isCharacterDataReady && currentCharacter && currentCharacter.avatar
+          "
           class="avatar"
           :src="currentCharacter.avatar"
           alt="角色頭像"
@@ -520,10 +522,10 @@
                     class="message bot"
                   >
                     <div class="avatar">
-                      <img 
+                      <img
                         v-if="currentCharacter && currentCharacter.avatar"
-                        :src="currentCharacter.avatar" 
-                        alt="角色頭像" 
+                        :src="currentCharacter.avatar"
+                        alt="角色頭像"
                       />
                       <div v-else class="placeholder-avatar"></div>
                     </div>
@@ -2407,12 +2409,12 @@ const handleCustomerService = async (contactService = false) => {
         // 若要在開發時確認，可印 log，正式上線刪掉即可
         const data = await response.json().catch(() => ({}));
         console.info("frSendLineText 成功（靜默）:", data);
-      // ✅ 立刻重抓一次歷史，讓「客服/真人」相關訊息馬上顯示
-       await fetchChatHistory(true);
-       // 若目前在歷史頁，卷到底讓最新訊息可見
-       if (showHistoryPage.value) {
-         nextTick(() => setTimeout(() => scrollToBottom(), 100));
-       }
+        // ✅ 立刻重抓一次歷史，讓「客服/真人」相關訊息馬上顯示
+        await fetchChatHistory(true);
+        // 若目前在歷史頁，卷到底讓最新訊息可見
+        if (showHistoryPage.value) {
+          nextTick(() => setTimeout(() => scrollToBottom(), 100));
+        }
       }
 
       // 清空待處理輸入（避免殘留）
@@ -3102,11 +3104,20 @@ const loadSavedCharacter = async () => {
             currentCharacter.value = {
               ...defaultCharacter,
               styleId: 1, // 確保使用第一個造型
-              avatar: defaultCharacter.styles[0]?.thumbnail || defaultCharacter.avatar,
-              fullImage: defaultCharacter.styles[0]?.fullImage || defaultCharacter.fullImage,
-              customName: currentRole.customName || currentRole.displayName || defaultCharacter.displayName,
+              avatar:
+                defaultCharacter.styles[0]?.thumbnail ||
+                defaultCharacter.avatar,
+              fullImage:
+                defaultCharacter.styles[0]?.fullImage ||
+                defaultCharacter.fullImage,
+              customName:
+                currentRole.customName ||
+                currentRole.displayName ||
+                defaultCharacter.displayName,
             };
-            characterImageSrc.value = defaultCharacter.styles[0]?.fullImage || defaultCharacter.fullImage;
+            characterImageSrc.value =
+              defaultCharacter.styles[0]?.fullImage ||
+              defaultCharacter.fullImage;
             console.log("使用預設角色:", defaultCharacter.displayName);
           } else {
             console.error("沒有可用的角色");
@@ -3121,11 +3132,15 @@ const loadSavedCharacter = async () => {
           currentCharacter.value = {
             ...defaultCharacter,
             styleId: 1, // 確保使用第一個造型
-            avatar: defaultCharacter.styles[0]?.thumbnail || defaultCharacter.avatar,
-            fullImage: defaultCharacter.styles[0]?.fullImage || defaultCharacter.fullImage,
+            avatar:
+              defaultCharacter.styles[0]?.thumbnail || defaultCharacter.avatar,
+            fullImage:
+              defaultCharacter.styles[0]?.fullImage ||
+              defaultCharacter.fullImage,
             customName: defaultCharacter.displayName,
           };
-          characterImageSrc.value = defaultCharacter.styles[0]?.fullImage || defaultCharacter.fullImage;
+          characterImageSrc.value =
+            defaultCharacter.styles[0]?.fullImage || defaultCharacter.fullImage;
           console.log("使用預設角色:", defaultCharacter.displayName);
         } else {
           console.error("沒有可用的角色");
@@ -4594,6 +4609,7 @@ const vClickOutside = {
     flex-direction: column;
     gap: 24px;
     max-width: 768px;
+    width: 100%;
     flex: 1;
 
     padding-bottom: 56px;
@@ -4744,7 +4760,6 @@ const vClickOutside = {
   justify-content: space-between;
   gap: 16px;
   @include neumorphismOuter($radius: 20px, $padding: 8px 12px);
-  margin: 0 1rem;
 }
 
 .history-text-input {
@@ -4940,6 +4955,9 @@ const vClickOutside = {
     justify-content: center;
     padding: 16px;
     position: relative;
+    margin: auto;
+    width: 100%;
+    max-width: 768px;
 
     .back-arrow {
       position: absolute;
@@ -4967,6 +4985,9 @@ const vClickOutside = {
     align-items: center;
     gap: 10px;
     justify-content: center;
+    width: 100%;
+    max-width: 768px;
+    margin: auto;
 
     span {
       display: inline-block;
@@ -5001,6 +5022,9 @@ const vClickOutside = {
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
     position: relative;
+    margin: auto;
+    width: 100%;
+    max-width: 768px;
 
     .character-display {
       height: 100%;
@@ -5179,6 +5203,8 @@ const vClickOutside = {
   .character-switch-area {
     position: relative;
     width: 100%;
+    max-width:768px;
+    margin:auto;
     margin-bottom: 66px;
     padding: 0 1rem;
 

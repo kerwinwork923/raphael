@@ -1,7 +1,7 @@
 <template>
   <div class="healthLogWrap">
     <div class="healthLogContent">
-      <TitleMenu Text="健康日誌" positionType="absolute" link="/robot" />
+      <TitleMenu Text="健康日誌" positionType="sticky" link="/robot" />
       <!-- 篩選器區域 -->
       <div class="filter-section">
         <div class="filter-buttons">
@@ -340,7 +340,7 @@ onMounted(async () => {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  padding: 3rem 1rem 0;
+  padding: 1rem 1rem 0;
   margin-bottom: 1rem;
 
   .filter-buttons {
