@@ -443,10 +443,14 @@ onMounted(async () => {
 }
 
 .log-list {
-  padding: 0 1rem;
+
+  padding: .25rem 1rem;
+  max-height: calc(70vh - 32px); /* 設定最大高度 */
+  overflow-y: auto; /* 開啟垂直滾動 */
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  
 }
 
 .log-item {
