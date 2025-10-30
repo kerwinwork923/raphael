@@ -4698,6 +4698,7 @@ const vClickOutside = {
     flex-direction: column;
     gap: 24px;
     max-width: 768px;
+    width: 100%;
     flex: 1;
 
     padding-bottom: 56px;
@@ -4859,7 +4860,7 @@ const vClickOutside = {
   justify-content: space-between;
   gap: 16px;
   @include neumorphismOuter($radius: 20px, $padding: 8px 12px);
-  margin: 0 1rem;
+  margin: auto 1rem;
 }
 
 .history-text-input {
@@ -5055,6 +5056,9 @@ const vClickOutside = {
     justify-content: center;
     padding: 16px;
     position: relative;
+    margin: auto;
+    width: 100%;
+    max-width: 768px;
 
     .back-arrow {
       position: absolute;
@@ -5082,6 +5086,9 @@ const vClickOutside = {
     align-items: center;
     gap: 10px;
     justify-content: center;
+    width: 100%;
+    max-width: 768px;
+    margin: auto;
 
     span {
       display: inline-block;
@@ -5116,6 +5123,9 @@ const vClickOutside = {
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
     position: relative;
+    margin: auto;
+    width: 100%;
+    max-width: 768px;
 
     .character-display {
       height: 100%;
@@ -5136,6 +5146,7 @@ const vClickOutside = {
       display: flex;
       flex-direction: column;
       align-items: center;
+      gap: 8px;
       width: 90px;
       height: 220px;
       @include neumorphismOuter($radius: 8px, $padding: 8px);
@@ -5145,14 +5156,11 @@ const vClickOutside = {
         flex-direction: column;
         align-items: center;
 
-        gap: 8px;
-
         span {
           color: #4a5568;
           text-align: center;
           font-weight: 500;
           color: $raphael-black;
-          margin-top: 0.5rem;
           font-size: var(--Text-font-size-14, 14px);
           font-style: normal;
           font-weight: 400;
@@ -5199,6 +5207,7 @@ const vClickOutside = {
           overflow: hidden;
           transition: all 0.3s ease;
           position: relative;
+          display:flex;
 
           &.locked {
             cursor: not-allowed;
@@ -5212,8 +5221,7 @@ const vClickOutside = {
 
           img {
             width: 100%;
-
-            object-fit: cover;
+            object-fit: contain;
           }
 
           .style-locked {
@@ -5294,6 +5302,8 @@ const vClickOutside = {
   .character-switch-area {
     position: relative;
     width: 100%;
+    max-width: 768px;
+    margin: auto;
     margin-bottom: 66px;
     padding: 0 1rem;
 

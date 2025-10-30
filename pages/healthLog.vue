@@ -1,7 +1,7 @@
 <template>
   <div class="healthLogWrap">
     <div class="healthLogContent">
-      <TitleMenu Text="健康日誌" positionType="absolute" link="/robot" />
+      <TitleMenu Text="健康日誌" positionType="sticky" link="/robot" />
       <!-- 篩選器區域 -->
       <div class="filter-section">
         <div class="filter-buttons">
@@ -81,7 +81,10 @@
       </div>
 
       <!-- 空狀態 -->
-      <div class="empty-state" v-else-if="isDataReady && filteredLogs.length === 0">
+      <div
+        class="empty-state"
+        v-else-if="isDataReady && filteredLogs.length === 0"
+      >
         <div class="empty-card">
           <div class="empty-character">
             <img
@@ -235,22 +238,25 @@ const filteredLogs = computed(() => {
 const loadHealthLogs = async () => {
   isLoading.value = true;
   isDataReady.value = false;
-  
+
   try {
     // 從 API 讀取健康日誌
-    const response = await fetch("https://23700999.com:8081/HMA/api/fr/getSoundNote", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        MID: localobj?.MID || "1",
-        Token: localobj?.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
-        MAID: localobj?.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
-        Mobile: localobj?.Mobile || "0968324056",
-        Lang: "zhtw",
-        Year: selectedYear.value.toString(),
-        Month: selectedMonth.value.replace("月", "").padStart(2, "0")
-      }),
-    });
+    const response = await fetch(
+      "https://23700999.com:8081/HMA/api/fr/getSoundNote",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          MID: localobj?.MID || "1",
+          Token: localobj?.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
+          MAID: localobj?.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
+          Mobile: localobj?.Mobile || "0968324056",
+          Lang: "zhtw",
+          Year: selectedYear.value.toString(),
+          Month: selectedMonth.value.replace("月", "").padStart(2, "0"),
+        }),
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`讀取健康日誌 API 失敗: ${response.status}`);
@@ -268,7 +274,7 @@ const loadHealthLogs = async () => {
         type: "summary",
         content: item.Note,
       }));
-      
+
       console.log("轉換後的健康日誌:", healthLogs.value);
       console.log("健康日誌總數:", healthLogs.value.length);
     } else {
@@ -333,6 +339,9 @@ onMounted(async () => {
   .healthLogContent {
     max-width: 768px;
     margin: 0 auto;
+    .titleMenu:deep > div {
+      left: 16px;
+    }
   }
 }
 
@@ -340,7 +349,7 @@ onMounted(async () => {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  padding: 3rem 1rem 0;
+  padding: 1rem 1rem 0;
   margin-bottom: 1rem;
 
   .filter-buttons {
@@ -352,11 +361,7 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     gap: 0.25rem;
-
-    border-radius: var(--Radius-r-50, 50px);
-    background: var(--Secondary-100, #f5f7fa);
-    box-shadow: 2px 4px 12px 0
-      var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+    @include neumorphismOuter($radius: 50px, $padding: 10px 12px);
     border: none;
     cursor: pointer;
     color: var(--neutral-500-opacity-70, rgba(102, 102, 102, 0.7));
@@ -367,14 +372,6 @@ onMounted(async () => {
     letter-spacing: 2.7px;
     cursor: pointer;
     transition: all 0.2s ease;
-    padding: 10px 12px !important;
-    @include neumorphismOuter(
-      $bgColor: var(--Secondary-100, #f5f7fa),
-      $radius: 20px,
-      $x: 2px,
-      $y: 2px,
-      $blur: 4px
-    );
 
     &:hover {
       background: var(--Secondary-200, #e2e8f0);
@@ -415,19 +412,9 @@ onMounted(async () => {
 }
 
 .loading-card {
-  background: var(--Neutral-white, #fff);
-  border-radius: 20px;
-  padding: 3rem 2rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  @include neumorphismOuter($radius: 20px, $padding: 3rem 2rem);
   width: 100%;
   text-align: center;
-  @include neumorphismOuter(
-    $bgColor: var(--Neutral-white, #ffffff),
-    $radius: 20px,
-    $x: 0,
-    $y: 4px,
-    $blur: 12px
-  );
 
   .loading-spinner {
     width: 40px;
@@ -447,8 +434,12 @@ onMounted(async () => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .log-list {
@@ -459,18 +450,8 @@ onMounted(async () => {
 }
 
 .log-item {
-  background: var(--Neutral-white, #fff);
-  border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  @include neumorphismOuter($radius: 20px);
   transition: all 0.3s ease;
-  @include neumorphismOuter(
-    $bgColor: var(--Neutral-white, #fff),
-    $radius: 12px,
-    $x: 0,
-    $y: 2px,
-    $blur: 8px
-  );
 
   &:hover {
     transform: translateY(-1px);
@@ -539,29 +520,18 @@ onMounted(async () => {
   justify-content: center;
   align-items: center;
   min-height: 60vh;
-  padding: 2rem;
+  padding: 1rem;
   width: 100%;
   max-width: 100%;
 }
 
 .empty-card {
-  background: var(--Neutral-white, #fff);
-  border-radius: 20px;
-  padding: 3rem 2rem;
+  @include neumorphismOuter();
 
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   width: 100%;
   text-align: center;
-  @include neumorphismOuter(
-    $bgColor: var(--Neutral-white, #ffffff),
-    $radius: 20px,
-    $x: 0,
-    $y: 4px,
-    $blur: 12px
-  );
 
   .empty-character {
-    margin-bottom: 1.5rem;
 
     .character-img {
       object-fit: contain;

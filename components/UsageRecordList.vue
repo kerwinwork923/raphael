@@ -120,7 +120,16 @@
 
     <!-- 無資料狀態 -->
     <div class="no-data-state" v-else>
-      <div class="no-data-text">目前沒有資料</div>
+      <div class="empty-card">
+        <div class="empty-character">
+          <img
+            src="/assets/imgs/robotSad.png"
+            alt="空狀態角色"
+            class="character-img"
+          />
+        </div>
+        <div class="empty-message">目前沒有資料</div>
+      </div>
     </div>
   </div>
 </template>
@@ -409,10 +418,24 @@ onUnmounted(() => {
   .no-data-state {
     text-align: center;
 
-    .no-data-text {
-      font-size: 16px;
-      color: #b1c0d8;
-      font-weight: 500;
+    .empty-card {
+      @include neumorphismOuter();
+
+      width: 100%;
+      text-align: center;
+
+      .empty-character {
+
+        .character-img {
+          object-fit: contain;
+        }
+      }
+
+      .empty-message {
+        color: var(--Neutral-700, #4a5568);
+        font-size: 18px;
+        font-weight: 500;
+      }
     }
   }
 
