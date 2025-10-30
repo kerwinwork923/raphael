@@ -2322,7 +2322,7 @@ const handleSummaryMode = async (saveSummary = false) => {
 
       const data = await response.json();
       console.log("摘要已儲存到 API:", data);
-      alert("摘要已成功儲存到健康日誌！");
+
     } catch (error) {
       console.error("儲存摘要失敗:", error);
       alert("儲存摘要失敗，請重試");
@@ -2478,23 +2478,38 @@ const handleCustomerService = async (contactService = false) => {
 
     try {
       isLoading.value = true;
+      // 先立即在 UI 放入使用者訊息 + 一個 loading 中的機器人訊息
+      const ts = new Date();
+      const dateKey = toDateKey(ts);
+      const loadingMessage = {
+        id: `${ts.getTime()}|pending`,
+        ts: ts.getTime(),
+        user: originalInput,
+        bot: "",
+        botFrom: "AI",
+        isLoading: true,
+        timestamp: ts.toLocaleString("zh-TW"),
+        dateKey,
+      };
+      conversations.value.push(loadingMessage);
+      await nextTick();
+
       const botResponse = await sendViaUnifiedAPI(originalInput, {
         playAudio: !isMuted.value,
       });
 
-      const nowTs = Date.now();
-      const newConversation = {
-        id: nowTs,
-        ts: nowTs,
-        user: originalInput,
-        bot: botResponse || "（親愛的:您的問題我目前沒辦法回答）",
-        timestamp: new Date().toLocaleString("zh-TW"),
-        dateKey: toDateKey(new Date(nowTs)),
-      };
-
-      conversations.value.push(newConversation);
-      latestResponse.value =
-        botResponse || "（親愛的:您的問題我目前沒辦法回答）";
+      // 將剛才的 loading 訊息更新為實際回覆
+      const idx = conversations.value.findIndex(
+        (m) => m.id === loadingMessage.id
+      );
+      if (idx !== -1) {
+        conversations.value[idx] = {
+          ...conversations.value[idx],
+          bot: botResponse || "（親愛的:您的問題我目前沒辦法回答）",
+          isLoading: false,
+        };
+      }
+      latestResponse.value = botResponse || "（親愛的:您的問題我目前沒辦法回答）";
       saveConversations();
 
       if (showHistoryPage.value) {
@@ -2510,14 +2525,25 @@ const handleCustomerService = async (contactService = false) => {
     } catch (error) {
       console.error("客服詢問後的API調用錯誤:", error);
       const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
-      const errorConversation = {
-        id: Date.now(),
-        user: originalInput,
-        bot: errorResponse,
-        timestamp: new Date().toLocaleString("zh-TW"),
-        dateKey: toDateKey(new Date()),
-      };
-      conversations.value.push(errorConversation);
+      // 回填錯誤到 pending 訊息或補一筆
+      const idx = conversations.value.findIndex((m) => m.isLoading);
+      if (idx !== -1) {
+        conversations.value[idx] = {
+          ...conversations.value[idx],
+          bot: errorResponse,
+          isLoading: false,
+        };
+      } else {
+        const errorNowTs = Date.now();
+        conversations.value.push({
+          id: errorNowTs,
+          ts: errorNowTs,
+          user: originalInput,
+          bot: errorResponse,
+          timestamp: new Date().toLocaleString("zh-TW"),
+          dateKey: toDateKey(new Date()),
+        });
+      }
       latestResponse.value = errorResponse;
       saveConversations();
     } finally {
@@ -2540,7 +2566,7 @@ const startApiPolling = () => {
       console.log("執行定期 API 檢查...");
       await fetchChatHistory(true); // 傳遞 isPolling = true
     }
-  }, 60000); // 先改為1分鐘
+  }, 15000);
 };
 
 // 停止 API 輪詢
