@@ -352,11 +352,7 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     gap: 0.25rem;
-
-    border-radius: var(--Radius-r-50, 50px);
-    background: var(--Secondary-100, #f5f7fa);
-    box-shadow: 2px 4px 12px 0
-      var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
+    @include neumorphismOuter($radius:50px,$padding:10px 12px);
     border: none;
     cursor: pointer;
     color: var(--neutral-500-opacity-70, rgba(102, 102, 102, 0.7));
@@ -367,14 +363,6 @@ onMounted(async () => {
     letter-spacing: 2.7px;
     cursor: pointer;
     transition: all 0.2s ease;
-    padding: 10px 12px !important;
-    @include neumorphismOuter(
-      $bgColor: var(--Secondary-100, #f5f7fa),
-      $radius: 20px,
-      $x: 2px,
-      $y: 2px,
-      $blur: 4px
-    );
 
     &:hover {
       background: var(--Secondary-200, #e2e8f0);
