@@ -5107,6 +5107,7 @@ const vClickOutside = {
           overflow: hidden;
           transition: all 0.3s ease;
           position: relative;
+          display:flex;
 
           &.locked {
             cursor: not-allowed;
@@ -5120,8 +5121,7 @@ const vClickOutside = {
 
           img {
             width: 100%;
-
-            object-fit: cover;
+            object-fit: contain;
           }
 
           .style-locked {
