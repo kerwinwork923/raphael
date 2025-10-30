@@ -520,29 +520,18 @@ onMounted(async () => {
   justify-content: center;
   align-items: center;
   min-height: 60vh;
-  padding: 2rem;
+  padding: 1rem;
   width: 100%;
   max-width: 100%;
 }
 
 .empty-card {
-  background: var(--Neutral-white, #fff);
-  border-radius: 20px;
-  padding: 3rem 2rem;
+  @include neumorphismOuter();
 
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   width: 100%;
   text-align: center;
-  @include neumorphismOuter(
-    $bgColor: var(--Neutral-white, #ffffff),
-    $radius: 20px,
-    $x: 0,
-    $y: 4px,
-    $blur: 12px
-  );
 
   .empty-character {
-    margin-bottom: 1.5rem;
 
     .character-img {
       object-fit: contain;
