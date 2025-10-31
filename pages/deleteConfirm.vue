@@ -240,20 +240,21 @@ const confirmDeleteAccount = async () => {
     align-items: center;
     justify-content: center;
     width: 100%;
-    height:44px;
+    height: 44px;
     max-width: 768px;
-    color:$raphael-black;
+    color: $raphael-black;
     text-align: center;
     font-size: 24px;
     font-style: normal;
     font-weight: 400;
-    letter-spacing:0.5px;
+    letter-spacing: 0.5px;
   }
 
   .deleteConfirmContainer {
     width: 100%;
     max-width: 768px;
     padding: 1rem;
+    padding-bottom: 84px;
 
     .deleteConfirmAlert {
       @include neumorphismOuter($bgColor: $raphael-red-100);
@@ -276,10 +277,10 @@ const confirmDeleteAccount = async () => {
     .deleteDataListGroup {
       display: flex;
       flex-direction: column;
-      gap:1rem;
+      gap: 1rem;
       margin-top: 1.5rem;
       h3 {
-        color:$raphael-black;
+        color: $raphael-black;
 
         font-size: 20px;
         font-style: normal;
@@ -293,7 +294,7 @@ const confirmDeleteAccount = async () => {
         flex-direction: column;
         gap: 8px;
         h4 {
-          color:$raphael-black;
+          color: $raphael-black;
 
           font-size: 20px;
           font-style: normal;
@@ -302,7 +303,7 @@ const confirmDeleteAccount = async () => {
           letter-spacing: 0.1px;
         }
         p {
-          color:$raphael-gray-500;
+          color: $raphael-gray-500;
 
           font-size: 15px;
           font-style: normal;
@@ -319,7 +320,7 @@ const confirmDeleteAccount = async () => {
     max-width: 768px;
     padding: 1rem;
     p {
-      color:$raphael-black;
+      color: $raphael-black;
       font-family: "Noto Sans";
       font-size: 20px;
       font-style: normal;
@@ -352,19 +353,21 @@ const confirmDeleteAccount = async () => {
     align-items: center;
     justify-content: center;
     width: 100%;
-    margin-top: 1.5rem;
     gap: 1rem;
   }
   .deleteConfirmBtnFixed {
     position: sticky;
-    bottom: 16px;
+    bottom: 44px;
+    backdrop-filter: blur(4px);
+    padding: 1.5rem 0;
+    padding-bottom: 0;
     z-index: 1000;
   }
   .deleteConfirmBtnCancel {
-    @include neumorphismOuter($radius:50px, $padding: 9px 12px);
+    @include neumorphismOuter($radius: 50px, $padding: 9px 12px);
     @include insetBorderLine($raphael-cyan-400);
     width: 100%;
-    color:$raphael-cyan-400;
+    color: $raphael-cyan-400;
     font-size: 15px;
     font-style: normal;
     font-weight: 400;
@@ -372,10 +375,14 @@ const confirmDeleteAccount = async () => {
     letter-spacing: 2.7px;
   }
   .deleteConfirmBtnContinue {
-    @include neumorphismOuter($bgColor:$raphael-red-300,$radius:50px, $padding: 9px 12px);
+    @include neumorphismOuter(
+      $bgColor: $raphael-red-300,
+      $radius: 50px,
+      $padding: 9px 12px
+    );
     border: none;
     width: 100%;
-    color:$raphael-white;
+    color: $raphael-white;
     font-size: 15px;
     font-style: normal;
     font-weight: 400;
@@ -403,7 +410,7 @@ const confirmDeleteAccount = async () => {
     padding: 1rem;
     z-index: 1001;
     p {
-      color:$raphael-black;
+      color: $raphael-black;
       font-size: 20px;
       font-style: normal;
       font-weight: 700;
@@ -432,7 +439,7 @@ const confirmDeleteAccount = async () => {
         width: 100%;
         border-radius: var(--Radius-r-8, 8px);
         background: var(--Warning-default, #ec4f4f);
-        color:$raphael-white;
+        color: $raphael-white;
         text-align: center;
         font-family: "Noto Sans";
         font-size: 15px;
