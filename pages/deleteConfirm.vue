@@ -325,7 +325,7 @@ const confirmDeleteAccount = async () => {
       font-size: 20px;
       font-style: normal;
       font-weight: 700;
-
+      line-height: 120%;
       letter-spacing: 3px;
     }
     input {
