@@ -492,7 +492,6 @@
             <div
               v-if="!showSearch || searchQuery === ''"
               class="history-list"
-
               ref="historyScrollContainer"
             >
               <!-- 頂部哨兵：用於觸發載入更舊訊息 -->
@@ -2322,7 +2321,6 @@ const handleSummaryMode = async (saveSummary = false) => {
 
       const data = await response.json();
       console.log("摘要已儲存到 API:", data);
-
     } catch (error) {
       console.error("儲存摘要失敗:", error);
       alert("儲存摘要失敗，請重試");
@@ -2509,7 +2507,8 @@ const handleCustomerService = async (contactService = false) => {
           isLoading: false,
         };
       }
-      latestResponse.value = botResponse || "（親愛的:您的問題我目前沒辦法回答）";
+      latestResponse.value =
+        botResponse || "（親愛的:您的問題我目前沒辦法回答）";
       saveConversations();
 
       if (showHistoryPage.value) {
@@ -2918,7 +2917,6 @@ onMounted(async () => {
             threshold: 0.0,
           }
         );
-
       }
     } catch (err) {
       console.warn("IntersectionObserver 初始化失敗:", err);
@@ -4417,6 +4415,7 @@ const vClickOutside = {
   background: rgba(245, 247, 250, 0.1);
   backdrop-filter: blur(22px);
   z-index: 2000; /* 確保超過文字聊天室 */
+
   @include neumorphismOuter(
     $bgColor: rgba(245, 247, 250, 0.1),
     $radius: 50px 50px 0 0,
@@ -4425,15 +4424,15 @@ const vClickOutside = {
     $blur: 12px,
     $color: $raphael-white
   );
+  padding-bottom:84px;
 
   .robot-content {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
-    padding: 40px 30px;
-    max-width: 90%;
-    width: 400px;
+    gap: 12px;
+    width: 100%;
+    padding: 16px;
     text-align: center;
 
     .robot-sphere {
@@ -4451,18 +4450,12 @@ const vClickOutside = {
       font-size: 24px;
       font-weight: 700;
       color: #2d3748;
-      margin-bottom: 10px;
     }
 
     .robot-text {
-      font-size: 16px;
-      color: #4a5568;
+      font-size: 18px;
+      color: $raphael-gray-500;
       line-height: 1.6;
-      margin-bottom: 20px;
-      padding: 15px;
-      background: rgba(255, 255, 255, 0.5);
-      border-radius: 10px;
-      border-left: 4px solid #74bc1f;
       max-height: 200px;
       overflow-y: auto;
     }
@@ -4471,55 +4464,51 @@ const vClickOutside = {
       display: flex;
       gap: 15px;
       justify-content: center;
-      flex-wrap: wrap;
+      width: 100%;
+      margin-top: 32px;
 
       .robot-btn-cancel {
-        background: #f7fafc;
-        color: #4a5568;
+        @include neumorphismOuter($radius: 50px, $padding: 5px 4px);
+        color: $raphael-green-400;
         border: none;
-        padding: 12px 24px;
-        border-radius: 25px;
-        font-size: 16px;
-        font-weight: 600;
+        font-size: 18px;
         cursor: pointer;
         transition: all 0.3s ease;
-        min-width: 100px;
-        @include neumorphismOuter(
-          $bgColor: #f7fafc,
-          $radius: 25px,
-          $x: 2px,
-          $y: 2px,
-          $blur: 4px
-        );
+        width: 100%;
 
         &:hover {
-          background: #edf2f7;
-          transform: translateY(-1px);
+          @include neumorphismOuter(
+            $radius: 50%,
+            $padding: 5px 4px,
+            $x: 0,
+            $y: 0,
+            $blur: 6px
+          );
         }
       }
 
       .robot-btn-confirm {
-        background: linear-gradient(90deg, #74bc1f, #5a9c0f);
-        color: white;
+        @include neumorphismOuter(
+          $bgColor: $raphael-green-400,
+          $radius: 50px,
+          $padding: 5px 4px
+        );
+        color: $raphael-white;
         border: none;
-        padding: 12px 24px;
-        border-radius: 25px;
-        font-size: 16px;
-        font-weight: 600;
+        font-size: 18px;
         cursor: pointer;
         transition: all 0.3s ease;
-        min-width: 100px;
-        @include neumorphismOuter(
-          $bgColor: linear-gradient(90deg, #74bc1f, #5a9c0f),
-          $radius: 25px,
-          $x: 0,
-          $y: 2px,
-          $blur: 6px
-        );
+        width: 100%;
 
         &:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(116, 188, 31, 0.3);
+          @include neumorphismOuter(
+            $bgColor: $raphael-green-400,
+            $radius: 50px,
+            $padding: 5px 4px,
+            $x: 0,
+            $y: 0,
+            $blur: 6px
+          );
         }
       }
     }
@@ -5232,7 +5221,7 @@ const vClickOutside = {
           overflow: hidden;
           transition: all 0.3s ease;
           position: relative;
-          display:flex;
+          display: flex;
 
           &.locked {
             cursor: not-allowed;
