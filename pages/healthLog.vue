@@ -492,7 +492,6 @@ onMounted(async () => {
     font-weight: 400;
     line-height: 120%;
     letter-spacing: 0.072px;
-    margin-bottom: 0.5rem;
   }
 
   .log-content {
