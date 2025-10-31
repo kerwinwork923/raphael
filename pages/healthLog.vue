@@ -444,7 +444,7 @@ onMounted(async () => {
 
 .log-list {
 
-  padding: .25rem 1rem;
+  padding: 1rem;
   max-height: calc(70vh - 32px); /* 設定最大高度 */
   overflow-y: auto; /* 開啟垂直滾動 */
   display: flex;
