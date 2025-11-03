@@ -4,7 +4,6 @@
       <!-- 頂部通知區域 -->
       <div class="notification-section">
         <MemberTop :userDataObj="userDataObj" />
-
       </div>
 
       <!-- 統計卡片 -->
@@ -35,7 +34,7 @@ const userDataObj = ref(null);
 
 const router = useRouter();
 onMounted(() => {
-  const userData = JSON.parse(localStorage.getItem("userData") || '{}');
+  const userData = JSON.parse(localStorage.getItem("userData") || "{}");
   userDataObj.value = userData;
 });
 
@@ -58,8 +57,6 @@ const gotoGettingDressed = () => {
     display: flex;
     flex-direction: column;
     gap: 8px;
-
-
   }
   .gettingDressedGroup {
     width: 100%;
@@ -75,16 +72,14 @@ const gotoGettingDressed = () => {
     transform: translateX(-50%);
     z-index: 100;
     //擬態
-    background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(4px);
 
-    box-shadow: 2px 4px 12px 0
-      var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
     button {
       width: 100%;
       border-radius: var(--Radius-r-50, 50px);
-      background: var(--Primary-default, #74BC1F);
-      box-shadow: 2px 4px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.70));
+      background: var(--Primary-default, #74bc1f);
+      box-shadow: 2px 4px 12px 0
+        var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
       color: var(--Neutral-white, #fff);
       font-size: var(--Text-font-size-24, 24px);
       font-style: normal;
@@ -92,7 +87,7 @@ const gotoGettingDressed = () => {
       letter-spacing: 3.6px;
       border: none;
       cursor: pointer;
-      padding: .5rem 0;
+      padding: 0.5rem 0;
     }
   }
 }
