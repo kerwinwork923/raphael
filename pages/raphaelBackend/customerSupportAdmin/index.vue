@@ -188,8 +188,12 @@
                 class="analysis-textarea"
               ></textarea>
             </div>
-            <button class="suggest-btn" @click="generateSuggestion">
-              建議
+            <button 
+              class="suggest-btn" 
+              @click="generateSuggestion"
+              :disabled="isGeneratingSuggestion"
+            >
+              {{ isGeneratingSuggestion ? '處理中...' : '建議' }}
             </button>
           </div>
 
@@ -233,6 +237,7 @@ const analysisInstructions = ref("");
 const aiSuggestion = ref("");
 const isLoading = ref(false);
 const lastUpdated = ref("");
+const isGeneratingSuggestion = ref(false);
 
 // 客戶數據
 const customers = ref([]);
@@ -670,10 +675,47 @@ const showAIAnalysis = () => {
   console.log("顯示AI分析");
 };
 
-const generateSuggestion = () => {
-  // 模擬AI建議生成
-  aiSuggestion.value =
-    "根據對話內容，建議回覆：感謝您的詢問，我們會盡快為您處理。";
+const generateSuggestion = async () => {
+  const transcript = conversationRecord.value.trim();
+  const prompt = analysisInstructions.value.trim();
+
+  if (!transcript || !prompt) {
+    alert('請確認【對話紀錄】和【分析指令】都不為空！');
+    return;
+  }
+
+  isGeneratingSuggestion.value = true;
+  aiSuggestion.value = '正在與 ChatGPT 互動，請稍候...';
+
+  try {
+    const response = await fetch('https://23700999.com:8081/push_notification/api/chatgpt/ask', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: transcript,
+        systemMessage: prompt,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`伺服器返回錯誤：${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.response) {
+      aiSuggestion.value = data.response;
+    } else {
+      aiSuggestion.value = '未收到有效的 ChatGPT 回應。';
+    }
+  } catch (error) {
+    aiSuggestion.value = `發生錯誤：${error.message}`;
+    console.error('生成 AI 建議時發生錯誤:', error);
+  } finally {
+    isGeneratingSuggestion.value = false;
+  }
 };
 
 const copyToChat = () => {
@@ -1341,20 +1383,27 @@ onBeforeUnmount(() => {
         &:hover {
           background: var(--Secondary-600, #589a1b);
         }
+        &:disabled {
+          background: #ccc;
+          cursor: not-allowed;
+          opacity: 0.7;
+          &:hover {
+            background: #ccc;
+          }
+        }
       }
     }
   }
 }
 
 // 響應式設計
-@include respond-to(xl) {
-  .customer-support-admin {
-    .mainContainer {
-        
-    // 暫時不要有邊欄  margin-left: 180px;
-    }
-  }
-}
+// @include respond-to(xl) {
+//   .customer-support-admin {
+//     .mainContainer {
+//       // 暫時不要有邊欄  margin-left: 180px;
+//     }
+//   }
+// }
 
 @include respond-to(lg) {
   .customer-support-admin {
