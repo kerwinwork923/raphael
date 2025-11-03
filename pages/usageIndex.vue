@@ -75,13 +75,10 @@ const gotoGettingDressed = () => {
     backdrop-filter: blur(4px);
 
     button {
+      @include neumorphismOuter($bgColor:$raphael-green-400,$radius:50px);
       width: 100%;
-      border-radius: var(--Radius-r-50, 50px);
-      background: var(--Primary-default, #74bc1f);
-      box-shadow: 2px 4px 12px 0
-        var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
-      color: var(--Neutral-white, #fff);
-      font-size: var(--Text-font-size-24, 24px);
+      color:$raphael-white;
+      font-size: 1.5rem;
       font-style: normal;
       font-weight: 700;
       letter-spacing: 3.6px;
