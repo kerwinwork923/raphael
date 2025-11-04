@@ -1,78 +1,64 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>智平衡 VIP｜邀請會專屬頁（金白風格 最終版）</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>智平衡訂製健康共創未來發表會</title>
   <style>
-    :root{
-      --deep:#0f3b3b;
-      --ink:#1f2a37;
-      --gold:#c9a14a;
-      --muted:#6b7280;
-      --bg:#ffffff;
-      --chip:#f8f4ea;
+    :root {
+      --deep: #0f3b3b;
+      --ink: #1f2a37;
+      --gold: #c9a14a;
+      --muted: #6b7280;
+      --bg: #ffffff;
+      --chip: #f8f4ea;
     }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{
-      font-family:"PingFang TC","Microsoft JhengHei",sans-serif;
-      background:var(--bg);
-      color:var(--ink);
-      line-height:1.7;
-      overflow-x:hidden;
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "PingFang TC","Microsoft JhengHei",sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.7;
+      overflow-x: hidden;
     }
-    .gold-bg{position:relative;isolation:isolate;}
-    .gold-svg{position:absolute;inset:0;z-index:-1;opacity:.85;pointer-events:none;}
-
-    header{text-align:center;padding:50px 16px 24px;}
-    .logo{width:120px;margin-bottom:16px;border-radius:50%;box-shadow:0 0 8px rgba(201,161,74,.3);}
-    h1{font-size:clamp(26px,4vw,38px);font-weight:800;color:var(--deep);margin-bottom:10px;}
-    .subtitle{color:#8b6a2d;font-weight:600;font-size:clamp(14px,2.5vw,17px);line-height:1.8;margin:0 auto;max-width:640px;}
-
-    .video-wrap{display:flex;justify-content:center;background:var(--chip);
-      border-top:1px solid rgba(201,161,74,.3);border-bottom:1px solid rgba(201,161,74,.3);padding:24px 8px;}
-    iframe{width:90%;aspect-ratio:16/9;max-width:780px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.15);}
-
-    .section{padding:50px 20px;}
-    .container{max-width:1100px;margin:0 auto;}
-    .title{font-size:clamp(22px,3vw,28px);text-align:center;color:var(--deep);margin-bottom:20px;position:relative;}
-    .title::after{content:"";display:block;width:100px;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:10px auto 0;border-radius:2px;}
-
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;}
-    .feature{background:#fff;border:1px solid rgba(201,161,74,.35);border-radius:14px;padding:18px;text-align:center;}
-    .feature h3{color:var(--deep);margin:6px 0 4px;font-size:18px;}
-    .feature p{color:var(--muted);font-size:14px;}
-
-    .card{background:#fff;border-radius:16px;padding:28px;border:1px solid rgba(201,161,74,.35);box-shadow:0 12px 36px rgba(17,24,39,.06);}
-    .hl{list-style:none;margin:8px 0 0;padding:0;}
-    .hl li{padding:8px 0 8px 20px;border-bottom:1px dashed rgba(201,161,74,.35);position:relative;}
-    .hl li::before{content:"◆";color:var(--gold);position:absolute;left:0;top:8px;}
-    .count{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:14px;}
-    .count .box{min-width:80px;text-align:center;background:var(--chip);border:1px solid rgba(201,161,74,.35);border-radius:10px;padding:10px 8px;}
-    .count .n{font-size:24px;font-weight:800;color:var(--deep);}
-    .cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
-    .btn{padding:10px 20px;border-radius:999px;border:2px solid var(--gold);background:var(--deep);color:#fff;font-weight:700;text-decoration:none;transition:.2s;}
-    .btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(201,161,74,.25);}
-    .muted{color:var(--muted);}
-
-    .agenda ul{list-style:none;margin:0;padding:0;}
-    .agenda li{padding:6px 0 6px 20px;position:relative;color:#333;}
-    .agenda li::before{content:"●";color:var(--gold);position:absolute;left:0;top:8px;}
-
-    .form-field{margin-bottom:14px;}
-    label{font-weight:600;color:var(--deep);display:block;margin-bottom:6px;}
-    input,textarea{width:100%;padding:10px 12px;border:1px solid #ccc;border-radius:8px;font-size:15px;}
-    textarea{resize:vertical;}
-    button.submit{margin-top:12px;padding:12px 22px;border:none;border-radius:999px;background:var(--gold);color:var(--deep);font-weight:700;font-size:16px;cursor:pointer;transition:.2s;}
-    button.submit:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(201,161,74,.25);}
-
-    footer{border-top:1px solid rgba(201,161,74,.3);padding:24px 18px;text-align:center;color:var(--muted);background:linear-gradient(135deg,rgba(201,161,74,.08),rgba(255,255,255,0));}
-
-    @media(max-width:768px){
-      .section{padding:36px 14px;}
-      header{padding:36px 12px 12px;}
-      iframe{width:100%;}
-    }
+    .gold-bg { position: relative; isolation: isolate; }
+    .gold-svg { position: absolute; inset: 0; z-index: -1; opacity: .85; pointer-events: none; }
+    header { text-align: center; padding: 50px 16px 24px; }
+    .logo { width: 120px; margin-bottom: 16px; border-radius: 50%; box-shadow: 0 0 8px rgba(201,161,74,.3); }
+    h1 { font-size: clamp(26px,4vw,38px); font-weight: 800; color: var(--deep); margin-bottom: 10px; }
+    .subtitle { color: #8b6a2d; font-weight: 600; font-size: clamp(14px,2.5vw,17px); line-height: 1.8; margin: 0 auto; max-width: 640px; }
+    .video-wrap { display: flex; justify-content: center; background: var(--chip); border-top: 1px solid rgba(201,161,74,.3); border-bottom: 1px solid rgba(201,161,74,.3); padding: 24px 8px; }
+    video { width: 90%; aspect-ratio: 16/9; max-width: 780px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+    .section { padding: 50px 20px; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .title { font-size: clamp(22px,3vw,28px); text-align: center; color: var(--deep); margin-bottom: 20px; position: relative; }
+    .title::after { content: ""; display: block; width: 100px; height: 3px; background: linear-gradient(90deg,transparent,var(--gold),transparent); margin: 10px auto 0; border-radius: 2px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 16px; }
+    .feature { background: #fff; border: 1px solid rgba(201,161,74,.35); border-radius: 14px; padding: 18px; text-align: center; }
+    .feature h3 { color: var(--deep); margin: 6px 0 4px; font-size: 18px; }
+    .feature p { color: var(--muted); font-size: 14px; }
+    .card { background: #fff; border-radius: 16px; padding: 28px; border: 1px solid rgba(201,161,74,.35); box-shadow: 0 12px 36px rgba(17,24,39,.06); }
+    .hl { list-style: none; margin: 8px 0 0; padding: 0; }
+    .hl li { padding: 8px 0 8px 20px; border-bottom: 1px dashed rgba(201,161,74,.35); position: relative; }
+    .hl li::before { content: "◆"; color: var(--gold); position: absolute; left: 0; top: 8px; }
+    .count { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+    .count .box { min-width: 80px; text-align: center; background: var(--chip); border: 1px solid rgba(201,161,74,.35); border-radius: 10px; padding: 10px 8px; }
+    .count .n { font-size: 24px; font-weight: 800; color: var(--deep); }
+    .cta { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+    .btn { padding: 10px 20px; border-radius: 999px; border: 2px solid var(--gold); background: var(--deep); color: #fff; font-weight: 700; text-decoration: none; transition: .2s; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(201,161,74,.25); }
+    .muted { color: var(--muted); }
+    .agenda ul { list-style: none; margin: 0; padding: 0; }
+    .agenda li { padding: 6px 0 6px 20px; position: relative; color: #333; }
+    .agenda li::before { content: "●"; color: var(--gold); position: absolute; left: 0; top: 8px; }
+    .form-field { margin-bottom: 14px; }
+    label { font-weight: 600; color: var(--deep); display: block; margin-bottom: 6px; }
+    input, textarea { width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; }
+    textarea { resize: vertical; }
+    button.submit { margin-top: 12px; padding: 12px 22px; border: none; border-radius: 999px; background: var(--gold); color: var(--deep); font-weight: 700; font-size: 16px; cursor: pointer; transition: .2s; }
+    button.submit:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(201,161,74,.25); }
+    footer { border-top: 1px solid rgba(201,161,74,.3); padding: 24px 18px; text-align: center; color: var(--muted); background: linear-gradient(135deg,rgba(201,161,74,.08),rgba(255,255,255,0)); }
+    @media(max-width:768px){ .section{padding:36px 14px;} header{padding:36px 12px 12px;} video{width:100%;} }
   </style>
 </head>
 <body class="gold-bg">
@@ -87,7 +73,7 @@
   </svg>
 
   <header>
-    <img src="https://i.pinimg.com/736x/89/6d/93/896d9311bb3fb31441530bc508b16f73.jpg" class="logo">
+    <img src="https://i.pinimg.com/736x/89/6d/93/896d9311bb3fb31441530bc508b16f73.jpg" class="logo" />
     <h1>智平衡健康集團 WiseBalance</h1>
     <p class="subtitle">
       讓我們一起定義新的健康價值。<br>
@@ -96,27 +82,24 @@
       而是一場被理解、被訂製的旅程。
     </p>
   </header>
-<section class="video-wrap" style="display:flex;justify-content:center;background:#f8f4ea;padding:24px 10px;border-top:1px solid rgba(201,161,74,.3);border-bottom:1px solid rgba(201,161,74,.3);">
-  <div style="position:relative;width:100%;max-width:900px;aspect-ratio:16/9;border-radius:12px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.15);background:#000;">
-    <video controls autoplay muted playsinline loop style="width:100%;height:100%;object-fit:cover;border:0;">
-      <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
-      您的瀏覽器不支援影片播放。
-    </video>
-  </div>
-</section>
 
-</section>
+  <section class="video-wrap">
+    <div style="position:relative;width:100%;max-width:900px;aspect-ratio:16/9;border-radius:12px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.15);background:#000;">
+      <video controls autoplay muted playsinline style="width:100%;height:100%;object-fit:cover;border:0;">
+        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
+        您的瀏覽器不支援影片播放。
+      </video>
+    </div>
+  </section>
 
-
-
-<section class="section container" style="padding:30px 0 20px;">
-  <p style="text-align:center;color:#444;margin:0 auto;max-width:680px;line-height:1.8;font-size:16px;">
-    在這場旅程中，科技不只是數據與分析，<br>
-    而是能「感受你」的夥伴。<br>
-    <strong>AI 不說教，只懂你。</strong><br>
-    讓健康，回到生活的節奏裡。
-  </p>
-</section>
+  <section class="section container" style="padding:30px 0 20px;">
+    <p style="text-align:center;color:#444;margin:0 auto;max-width:680px;line-height:1.8;font-size:16px;">
+      在這場旅程中，科技不只是數據與分析，<br>
+      而是能「感受你」的夥伴。<br>
+      <strong>AI 不說教，只懂你。</strong><br>
+      讓健康，回到生活的節奏裡。
+    </p>
+  </section>
 
   <section class="section container">
     <h2 class="title">現場首度公開：讓科技懂你、讓健康為你訂製</h2>
@@ -161,22 +144,10 @@
   <section id="form" class="section container">
     <h2 class="title">VIP 報名表單</h2>
     <form class="card" onsubmit="submitForm(event)">
-      <div class="form-field">
-        <label>姓名 *</label>
-        <input type="text" name="name" required placeholder="請輸入您的姓名">
-      </div>
-      <div class="form-field">
-        <label>手機 *</label>
-        <input type="tel" name="phone" required placeholder="0912-345-678">
-      </div>
-      <div class="form-field">
-        <label>Email *</label>
-        <input type="email" name="email" required placeholder="example@email.com">
-      </div>
-      <div class="form-field">
-        <label>其他需求或備註</label>
-        <textarea name="notes" rows="4" placeholder="如有特殊需求，請告訴我們..."></textarea>
-      </div>
+      <div class="form-field"><label>姓名 *</label><input type="text" name="Name" required placeholder="請輸入您的姓名" /></div>
+      <div class="form-field"><label>手機 </label><input type="tel" name="Mobile"  placeholder="0912345678" /></div>
+      <div class="form-field"><label>Email </label><input type="email" name="Email" placeholder="example@email.com" /></div>
+      <div class="form-field"><label>其他需求或備註</label><textarea name="Note" rows="4" placeholder="如有特殊需求，請告訴我們..."></textarea></div>
       <button class="submit" type="submit">確認送出</button>
       <div id="ok" style="display:none;margin-top:12px;color:#2b9348;font-weight:700;text-align:center;">✓ 報名成功！已寄出確認信。</div>
     </form>
@@ -185,22 +156,126 @@
   <footer>© 2025 智平衡健康集團 — 訂製健康，從理解開始。</footer>
 
   <script>
-    const target=new Date("2025-11-28T13:00:00+08:00").getTime();
-    function tick(){
-      const diff=Math.max(0,target-Date.now());
-      const s=Math.floor(diff/1000);
-      const d=Math.floor(s/86400),h=Math.floor((s%86400)/3600),m=Math.floor((s%3600)/60),ss=s%60;
-      ["d","h","m","s"].forEach((k,i)=>{const v=[d,h,m,ss][i];const el=document.getElementById(k);if(el)el.textContent=String(v).padStart(2,"0");});
+    const API_LOG_EVENT = "http://23700999.com/NRS/000TTELOG_EVENT.jsp";
+    const API_REGISTER  = "http://23700999.com/NRS/000TTERegister.jsp";
+    const eventtype="vip1";
+	let vipId = new URLSearchParams(location.search).get("vip") || "unknown";
+   //vipId="1111";
+    console.log("vipId="+vipId);
+	logEvent("leadingpage", eventtype);
+    
+	async function logEvent(event, eventtype) {
+      const payload = {SafeKey:"qrt897hpmd", VIP: vipId, event, eventtype};
+      console.log("payload1="+JSON.stringify(payload, null, 1));
+	 
+      try {
+      const res = await fetch(API_LOG_EVENT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+         body: JSON.stringify(payload)
+        });
+        console.log("[logEvent] status =", res.status);
+        const text = await res.text();
+        console.log("[logEvent] response =", text);
+      } catch (err) {
+        console.error("[logEvent] fail =", err);
+      }
+}
+
+    async function registerSignup({Name, Mobile, Email, Note }) {
+      const payload = {SafeKey:"qrt897hpmd",VIP: vipId, Name, Mobile, Email, Note };
+	  console.log("payload2="+JSON.stringify(payload, null, 1));
+      try { const res = await fetch(API_REGISTER, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(payload) }); 
+	  
+	  
+	  return res.ok; 
+	  }
+      catch { return false; }
     }
-    tick();setInterval(tick,1000);
-    function submitForm(e){
+
+    document.querySelectorAll('a[href="#form"]').forEach(btn => {
+  btn.addEventListener("click", (e) => {
+    e.preventDefault(); // 阻止預設跳轉行為
+
+    // 1️⃣ 呼叫 click_register 事件
+    logEvent("click_register", eventtype);
+    alert("payload="+payload);
+    // 2️⃣ 平滑滾動至表單
+    const formSection = document.querySelector("#form");
+    if (formSection) {
+      formSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    // 3️⃣ 自動聚焦第一個欄位（姓名）
+    const firstInput = document.querySelector('#form input[name="name"]');
+    if (firstInput) {
+      setTimeout(() => firstInput.focus({ preventScroll: true }), 400);
+    }
+  });
+});
+document.querySelectorAll('form input, form textarea').forEach(el => el.addEventListener("input", () => logEvent("input_field", { name: el.name }), { once: true }));
+
+    const target = new Date("2025-11-28T13:00:00+08:00").getTime();
+    function tick(){ 
+	const diff=Math.max(0,target-Date.now()); 
+	const s=Math.floor(diff/1000); 
+	const d=Math.floor(s/86400),h=Math.floor((s%86400)/3600),m=Math.floor((s%3600)/60),ss=s%60; ["d","h","m","s"].forEach((k,i)=>{const v=[d,h,m,ss][i]; 
+	const el=document.getElementById(k); 
+	if(el) el.textContent=String(v).padStart(2,"0");});
+	}
+    tick(); setInterval(tick,1000);
+
+    async function submitForm(e){
       e.preventDefault();
       const f=e.target;
       const data=Object.fromEntries(new FormData(f).entries());
-      localStorage.setItem("vip_form",JSON.stringify({ts:Date.now(),...data}));
+      const {Name="",Mobile="",Email="",Note=""}=data;
+      localStorage.setItem("vip_form",JSON.stringify({ts:Date.now(),vip:vipId,...data}));
       document.getElementById("ok").style.display="block";
       f.scrollIntoView({behavior:"smooth",block:"center"});
+      const btn=f.querySelector('button[type="submit"]'); const old=btn.textContent;
+      btn.disabled=true; btn.textContent="送出中…";
+      const maskedPhone=Mobile.replace(/(\d{4})\d+(\d{2})$/,"$1****$2");
+      const maskedEmail=Email.replace(/(.).+(@.+)/,"$1***$2");
+      const logP=logEvent("submit_form",eventtype);
+	  const regP=registerSignup({Name,Mobile,Email,Note});
+      await Promise.allSettled([logP,regP]);
+      btn.disabled=false; btn.textContent=old;
     }
+
+    const videoEl=document.querySelector("video");
+    if (videoEl) {
+  let started = false;
+  let watched50 = false;
+  let completed = false;
+
+  // 第一次播放
+  videoEl.addEventListener("play", () => {
+    if (!started) {
+      started = true;
+      logEvent("video_play", eventtype);
+    }
+  });
+
+  // 只偵測 50%
+  videoEl.addEventListener("timeupdate", () => {
+    const p = (videoEl.currentTime / videoEl.duration) * 100;
+    if (!watched50 && p >= 50) {
+      watched50 = true;
+      logEvent("video_progress50", eventtype);
+      console.log("🎯 Video reached 50%");
+    }
+  });
+
+  // 播放結束（100%）
+  videoEl.addEventListener("ended", () => {
+  if (!completed) {
+    completed = true;
+    logEvent("video_complete", eventtype);
+    console.log("✅ Video completed");
+  }
+});
+}
   </script>
 </body>
 </html>
