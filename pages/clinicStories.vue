@@ -160,7 +160,6 @@ const allVideos = ref([
     thumbnail: "https://img.youtube.com/vi/NlUPGFPoHbw/hqdefault.jpg",
     badge: "案例分享",
     title: "自律神經失調案例",
-    subtitle: "長期失眠 焦慮 耳鳴",
     description: "透過專業治療重獲健康",
     fullTitle: "拉菲爾人本診所案例分享：自律神經失調患者的康復之路",
     likes: 1200,
@@ -174,7 +173,6 @@ const allVideos = ref([
     thumbnail: "https://img.youtube.com/vi/JiXppLaDBL0/maxresdefault.jpg",
     badge: "醫師解密",
     title: "醫學新知",
-    subtitle: "專業醫師解析",
     description: "深入探討現代醫學治療方法",
     fullTitle: "醫師解密：現代醫學治療方法深度解析",
     likes: 950,
@@ -188,7 +186,6 @@ const allVideos = ref([
     thumbnail: "https://img.youtube.com/vi/G402X9Mam9Q/maxresdefault.jpg",
     badge: "健康知識",
     title: "養生保健",
-    subtitle: "日常健康管理",
     description: "簡單有效的健康維護方法",
     fullTitle: "健康知識：日常養生保健的實用方法",
     likes: 1100,
@@ -202,7 +199,6 @@ const allVideos = ref([
     thumbnail: "https://img.youtube.com/vi/PimMlMVVh3s/hqdefault.jpg",
     badge: "治療心得",
     title: "康復分享",
-    subtitle: "患者真實體驗",
     description: "從病痛到康復的完整歷程",
     fullTitle: "治療心得：患者康復過程的寶貴分享",
     likes: 880,
@@ -406,7 +402,7 @@ const modules = [FreeMode];
         .videoStats {
           display: flex;
           gap: 16px;
-          display: none;
+      
 
           .statItem {
             display: flex;
