@@ -4478,7 +4478,7 @@ const vClickOutside = {
 
         &:hover {
           @include neumorphismOuter(
-            $radius: 50%,
+            $radius: 50px,
             $padding: 5px 4px,
             $x: 0,
             $y: 0,
