@@ -67,7 +67,8 @@
                     :class="{ liked: video.isLiked }"
                     @click.stop="toggleLike(video)"
                   >
-                    <img src="../assets/imgs/clinicStories/good.svg" alt="讚" />
+                    <img v-if="video.isLiked" src="../assets/imgs/clinicStories/goodClick.svg" alt="讚" />
+                    <img v-else src="../assets/imgs/clinicStories/good.svg" alt="讚" />
                     <span>{{ video.likes }}</span>
                   </div>
                   <!-- <div class="statItem">
@@ -114,7 +115,8 @@
                 :class="{ liked: video.isLiked }"
                 @click.stop="toggleLike(video)"
               >
-                <img src="../assets/imgs/clinicStories/good.svg" alt="讚" />
+                <img v-if="video.isLiked" src="../assets/imgs/clinicStories/goodClick.svg" alt="讚" />
+                <img v-else src="../assets/imgs/clinicStories/good.svg" alt="讚" />
                 <span>{{ video.likes }}</span>
               </div>
               <!-- <div class="statItem">
@@ -595,11 +597,9 @@ const modules = [FreeMode];
               }
 
               &.liked {
-                color: #74bc1f;
+                color: #EC4F4F;
                 
-                img {
-                  filter: brightness(0) saturate(100%) invert(63%) sepia(94%) saturate(401%) hue-rotate(40deg) brightness(102%) contrast(89%);
-                }
+               
               }
             }
           }
@@ -705,11 +705,9 @@ const modules = [FreeMode];
               }
 
               &.liked {
-                color: #74bc1f;
+                color: #EC4F4F;
                 
-                img {
-                  filter: brightness(0) saturate(100%) invert(63%) sepia(94%) saturate(401%) hue-rotate(40deg) brightness(102%) contrast(89%);
-                }
+              
               }
             }
           }
