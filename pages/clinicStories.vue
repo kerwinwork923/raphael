@@ -62,7 +62,11 @@
               <div class="videoInfo">
                 <h3 class="videoCardTitle">{{ video.fullTitle }}</h3>
                 <div class="videoStats">
-                  <div class="statItem">
+                  <div 
+                    class="statItem" 
+                    :class="{ liked: video.isLiked }"
+                    @click.stop="toggleLike(video)"
+                  >
                     <img src="../assets/imgs/clinicStories/good.svg" alt="讚" />
                     <span>{{ video.likes }}</span>
                   </div>
@@ -104,6 +108,23 @@
           <div class="videoInfo">
             <h3 class="videoCardTitle">{{ video.fullTitle }}</h3>
             <p class="videoCardSubtitle">{{ video.subtitle }}</p>
+            <div class="videoStats">
+              <div 
+                class="statItem" 
+                :class="{ liked: video.isLiked }"
+                @click.stop="toggleLike(video)"
+              >
+                <img src="../assets/imgs/clinicStories/good.svg" alt="讚" />
+                <span>{{ video.likes }}</span>
+              </div>
+              <div class="statItem">
+                <img
+                  src="../assets/imgs/clinicStories/bubble.svg"
+                  alt="留言"
+                />
+                <span>{{ video.comments }}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -114,7 +135,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { FreeMode } from "swiper/modules";
 import "swiper/css";
@@ -125,16 +146,13 @@ import TitleMenu from "~/components/TitleMenu.vue";
 // 會員狀態
 const isVipMember = ref(false); // 可以從 store 或 API 獲取
 
-// 影片載入狀態
+// 載入狀態
+const loading = ref(false);
 const videoLoading = ref(true);
 
 // 標籤資料
 const tags = ref([
-  { id: 0, name: "全部影片", category: "all" },
-  { id: 1, name: "醫師解密", category: "doctor", isVip: true },
-  { id: 2, name: "案例分享", category: "case" },
-  { id: 3, name: "健康知識", category: "health" },
-  { id: 4, name: "治療心得", category: "treatment" },
+  { id: 0, name: "全部影片", category: "all", videoType: null },
 ]);
 
 const activeTag = ref(0);
@@ -154,60 +172,69 @@ const visibleTags = computed(() => {
 });
 
 // 所有影片資料
-const allVideos = ref([
-  {
-    id: 1,
-    thumbnail: "https://img.youtube.com/vi/NlUPGFPoHbw/hqdefault.jpg",
-    badge: "案例分享",
-    title: "自律神經失調案例",
-    description: "透過專業治療重獲健康",
-    fullTitle: "拉菲爾人本診所案例分享：自律神經失調患者的康復之路",
-    likes: 1200,
-    comments: 35,
-    youtubeUrl: "https://www.youtube.com/watch?v=NlUPGFPoHbw",
-    category: "case",
-    tags: ["自律神經", "失眠", "焦慮", "耳鳴", "康復", "案例分享"],
-  },
-  {
-    id: 2,
-    thumbnail: "https://img.youtube.com/vi/JiXppLaDBL0/maxresdefault.jpg",
-    badge: "醫師解密",
-    title: "醫學新知",
-    description: "深入探討現代醫學治療方法",
-    fullTitle: "醫師解密：現代醫學治療方法深度解析",
-    likes: 950,
-    comments: 28,
-    youtubeUrl: "https://www.youtube.com/watch?v=JiXppLaDBL0",
-    category: "doctor",
-    tags: ["醫師", "醫學", "治療", "專業", "解密"],
-  },
-  {
-    id: 3,
-    thumbnail: "https://img.youtube.com/vi/G402X9Mam9Q/maxresdefault.jpg",
-    badge: "健康知識",
-    title: "養生保健",
-    description: "簡單有效的健康維護方法",
-    fullTitle: "健康知識：日常養生保健的實用方法",
-    likes: 1100,
-    comments: 42,
-    youtubeUrl: "https://www.youtube.com/watch?v=G402X9Mam9Q",
-    category: "health",
-    tags: ["養生", "保健", "健康", "日常", "管理"],
-  },
-  {
-    id: 4,
-    thumbnail: "https://img.youtube.com/vi/PimMlMVVh3s/hqdefault.jpg",
-    badge: "治療心得",
-    title: "康復分享",
-    description: "從病痛到康復的完整歷程",
-    fullTitle: "治療心得：患者康復過程的寶貴分享",
-    likes: 880,
-    comments: 31,
-    youtubeUrl: "https://www.youtube.com/watch?v=PimMlMVVh3s",
-    category: "treatment",
-    tags: ["康復", "心得", "分享", "治療", "體驗"],
-  },
-]);
+const allVideos = ref([]);
+
+// 從 YouTube URL 提取 video ID
+const extractYouTubeVideoId = (url) => {
+  if (!url) return null;
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/);
+  return match ? match[1] : null;
+};
+
+// 從 YouTube URL 生成縮圖 URL
+const getYouTubeThumbnail = (url) => {
+  const videoId = extractYouTubeVideoId(url);
+  if (!videoId) return "";
+  return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+};
+
+// 轉換 API 資料為前端格式
+const transformApiData = (apiData) => {
+  return apiData.map((item) => {
+    const videoId = extractYouTubeVideoId(item.VideoURL);
+    return {
+      id: parseInt(item.AID),
+      thumbnail: getYouTubeThumbnail(item.VideoURL),
+      fullTitle: item.Name || "",
+      subtitle: item.Desc || "",
+      description: item.Desc || "",
+      likes: parseInt(item.goodCnt || "0"),
+      comments: parseInt(item.VideoMessageSize || "0"),
+      youtubeUrl: item.VideoURL || "",
+      videoTypes: item.VideoTypeList || [],
+      checkTime: item.CheckTime || "",
+      adminId: item.AdminID || "",
+      isLiked: false, // 預設為未點讚，可根據實際需求從 API 獲取
+    };
+  });
+};
+
+// 從所有影片中提取唯一標籤
+const extractUniqueTags = (videos) => {
+  const tagMap = new Map();
+  
+  videos.forEach((video) => {
+    if (video.videoTypes && Array.isArray(video.videoTypes)) {
+      video.videoTypes.forEach((videoType) => {
+        const key = videoType.VideoType || videoType.Name;
+        if (!tagMap.has(key)) {
+          tagMap.set(key, {
+            id: tagMap.size + 1,
+            name: videoType.Name || videoType.VideoType,
+            category: videoType.VideoType || videoType.Name,
+            videoType: videoType.VideoType,
+          });
+        }
+      });
+    }
+  });
+
+  const uniqueTags = Array.from(tagMap.values());
+  tags.value = [
+    { id: 0, name: "全部影片", category: "all", videoType: null },
+    ...uniqueTags,
+  ];
+};
 
 // 根據選中標籤過濾影片
 const filteredVideos = computed(() => {
@@ -215,9 +242,15 @@ const filteredVideos = computed(() => {
   if (!activeTagData || activeTagData.category === "all") {
     return allVideos.value;
   }
-  return allVideos.value.filter(
-    (video) => video.category === activeTagData.category
-  );
+  
+  return allVideos.value.filter((video) => {
+    if (!video.videoTypes || !Array.isArray(video.videoTypes)) {
+      return false;
+    }
+    return video.videoTypes.some(
+      (vt) => vt.VideoType === activeTagData.videoType
+    );
+  });
 });
 
 // 推薦影片（固定顯示前3個）
@@ -239,6 +272,140 @@ const onVideoLoad = () => {
 const onVideoLoadStart = () => {
   videoLoading.value = true;
 };
+
+// 點讚/取消點讚
+const toggleLike = async (video) => {
+  // 如果正在處理中，避免重複點擊
+  if (video.isProcessing) return;
+  
+  video.isProcessing = true;
+  const wasLiked = video.isLiked;
+  
+  try {
+    // 從 localStorage 獲取 userData
+    const userDataLocal = typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("userData") || "{}")
+      : {};
+
+    const requestBody = {
+      MID: userDataLocal.MID || "",
+      Token: userDataLocal.Token || "",
+      MAID: userDataLocal.MAID || "",
+      Mobile: userDataLocal.Mobile || "",
+      Lang: "zhtw",
+      AID: video.id.toString(),
+    };
+
+    let response;
+    if (wasLiked) {
+      // 取消點讚
+      response = await fetch(
+        "https://23700999.com:8081/HMA/api/fr/VideoDeleteGood",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
+    } else {
+      // 點讚
+      response = await fetch(
+        "https://23700999.com:8081/HMA/api/fr/VideoMakeGood",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
+    }
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (result.Result === "OK") {
+      // 更新點讚狀態和數量
+      video.isLiked = !wasLiked;
+      if (wasLiked) {
+        video.likes = Math.max(0, video.likes - 1);
+      } else {
+        video.likes = video.likes + 1;
+      }
+    } else {
+      console.error("點讚操作失敗:", result.Result);
+      // 可以顯示錯誤提示
+    }
+  } catch (error) {
+    console.error("點讚操作失敗:", error);
+    // 可以顯示錯誤提示
+  } finally {
+    video.isProcessing = false;
+  }
+};
+
+// 獲取影片列表
+const fetchVideoList = async () => {
+  loading.value = true;
+  try {
+    // 從 localStorage 獲取 userData
+    const userDataLocal = typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("userData") || "{}")
+      : {};
+
+    // 提取所需的參數
+    const requestBody = {
+      MID: userDataLocal.MID || "",
+      Token: userDataLocal.Token || "",
+      MAID: userDataLocal.MAID || "",
+      Mobile: userDataLocal.Mobile || "",
+      Lang: "zhtw", // 預設為繁體中文，可根據需求調整
+    };
+
+    const response = await fetch(
+      "https://23700999.com:8081/HMA/api/fr/getVideoList",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (result.Result === "OK" && result.VideoList) {
+      // 只處理 Status 為 "Y" 的影片
+      const activeVideos = result.VideoList.filter(
+        (item) => item.Status === "Y"
+      );
+      allVideos.value = transformApiData(activeVideos);
+      extractUniqueTags(allVideos.value);
+    } else {
+      console.error("API 返回錯誤:", result.Result || "未知錯誤");
+    }
+  } catch (error) {
+    console.error("獲取影片列表失敗:", error);
+  } finally {
+    loading.value = false;
+    videoLoading.value = false;
+  }
+};
+
+// 組件掛載時獲取資料
+onMounted(() => {
+  fetchVideoList();
+});
 
 const modules = [FreeMode];
 </script>
@@ -416,6 +583,25 @@ const modules = [FreeMode];
               width: 16px;
               height: 16px;
             }
+
+            // 點讚按鈕可點擊
+            &:first-child {
+              cursor: pointer;
+              transition: all 0.3s ease;
+              user-select: none;
+
+              &:hover {
+                transform: scale(1.05);
+              }
+
+              &.liked {
+                color: #74bc1f;
+                
+                img {
+                  filter: brightness(0) saturate(100%) invert(63%) sepia(94%) saturate(401%) hue-rotate(40deg) brightness(102%) contrast(89%);
+                }
+              }
+            }
           }
         }
       }
@@ -488,6 +674,45 @@ const modules = [FreeMode];
           font-style: normal;
           font-weight: 500;
           line-height: normal;
+        }
+
+        .videoStats {
+          display: flex;
+          gap: 16px;
+          margin-top: 12px;
+
+          .statItem {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: #666;
+            @include neumorphismOuter($radius: 50px, $padding: 4px 8px);
+
+            img {
+              width: 16px;
+              height: 16px;
+            }
+
+            // 點讚按鈕可點擊
+            &:first-child {
+              cursor: pointer;
+              transition: all 0.3s ease;
+              user-select: none;
+
+              &:hover {
+                transform: scale(1.05);
+              }
+
+              &.liked {
+                color: #74bc1f;
+                
+                img {
+                  filter: brightness(0) saturate(100%) invert(63%) sepia(94%) saturate(401%) hue-rotate(40deg) brightness(102%) contrast(89%);
+                }
+              }
+            }
+          }
         }
       }
     }
