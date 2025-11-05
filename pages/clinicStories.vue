@@ -70,13 +70,13 @@
                     <img src="../assets/imgs/clinicStories/good.svg" alt="讚" />
                     <span>{{ video.likes }}</span>
                   </div>
-                  <div class="statItem">
+                  <!-- <div class="statItem">
                     <img
                       src="../assets/imgs/clinicStories/bubble.svg"
                       alt="留言"
                     />
                     <span>{{ video.comments }}</span>
-                  </div>
+                  </div> -->
                 </div>
               </div>
             </div>
@@ -117,13 +117,13 @@
                 <img src="../assets/imgs/clinicStories/good.svg" alt="讚" />
                 <span>{{ video.likes }}</span>
               </div>
-              <div class="statItem">
+              <!-- <div class="statItem">
                 <img
                   src="../assets/imgs/clinicStories/bubble.svg"
                   alt="留言"
                 />
                 <span>{{ video.comments }}</span>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
