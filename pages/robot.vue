@@ -4411,6 +4411,7 @@ const vClickOutside = {
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
+  max-width: 768px;
   min-height: 375px;
   background: rgba(245, 247, 250, 0.1);
   backdrop-filter: blur(22px);
