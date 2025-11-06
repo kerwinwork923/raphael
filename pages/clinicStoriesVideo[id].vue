@@ -99,35 +99,18 @@
         <div class="modalBody">
   
           <div class="descriptionText">
-            <template v-if="videoData.videoTypes && videoData.videoTypes.length > 0">
-              <div
+            <div v-if="videoData.videoTypes && videoData.videoTypes.length > 0" class="tagsContainer">
+              <span
                 v-for="(videoType, index) in videoData.videoTypes"
                 :key="index"
-                class="bulletPoint"
+                class="tagItem"
               >
-                <span class="bullet">•</span>
-                <span>{{ videoType.Name }}</span>
-              </div>
-            </template>
+                #{{ videoType.Name }}
+              </span>
+            </div>
             <p v-if="videoData.description || videoData.subtitle" class="descriptionParagraph">
               {{ videoData.description || videoData.subtitle }}
             </p>
-          </div>
-
-          <!-- 時間軸章節 -->
-          <div class="timelineSection">
-            <h4>影片章節</h4>
-            <div class="timelineList">
-              <div
-                class="timelineItem"
-                v-for="chapter in videoChapters"
-                :key="chapter.time"
-                @click="seekToTime(chapter.time)"
-              >
-                <span class="timelineTime">{{ chapter.time }}</span>
-                <span class="timelineTitle">{{ chapter.title }}</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -200,156 +183,6 @@ const transformApiData = (apiData) => {
   return db;
 };
 
-// 影片章節資料 - 根據不同影片動態載入
-const videoChapters = ref([
-  { time: "00:00", title: "失眠一族的苦與痛" },
-  { time: "00:13", title: "耳鳴、失眠等全身上下都不舒服?" },
-  { time: "01:23", title: "為什麼選擇拉菲爾?" },
-  { time: "02:08", title: "第一次看診,成效出乎意料?" },
-  { time: "02:58", title: "最困擾的耳鳴、失眠及其他症狀的改善?" },
-  { time: "04:00", title: "無副作用療法的優勢?" },
-  { time: "05:02", title: "醫病更醫心,真心推薦!" },
-]);
-
-// 根據影片 ID 更新章節資料
-const updateChaptersForVideo = (videoId) => {
-  const chaptersData = {
-    1: [
-      { time: "00:00", title: "斷點1" },
-      { time: "00:05", title: "斷點2" },
-      { time: "00:10", title: "斷點3" },
-      { time: "00:15", title: "斷點4" },
-      { time: "00:20", title: "斷點5" },
-      { time: "00:25", title: "斷點6" },
-      { time: "00:30", title: "斷點7" },
-      { time: "00:35", title: "斷點8" },
-      { time: "00:40", title: "斷點9" },
-      { time: "00:45", title: "斷點10" },
-      { time: "00:50", title: "斷點11" },
-      { time: "00:55", title: "斷點12" },
-      { time: "01:00", title: "斷點13" },
-      { time: "01:05", title: "斷點14" },
-      { time: "01:10", title: "斷點15" },
-      { time: "01:15", title: "斷點16" },
-      { time: "01:20", title: "斷點17" },
-      { time: "01:25", title: "斷點18" },
-      { time: "01:30", title: "斷點19" },
-      { time: "01:35", title: "斷點20" },
-    ],
-    2: [
-      { time: "00:00", title: "斷點1" },
-      { time: "00:05", title: "斷點2" },
-      { time: "00:10", title: "斷點3" },
-      { time: "00:15", title: "斷點4" },
-      { time: "00:20", title: "斷點5" },
-      { time: "00:25", title: "斷點6" },
-      { time: "00:30", title: "斷點7" },
-      { time: "00:35", title: "斷點8" },
-      { time: "00:40", title: "斷點9" },
-      { time: "00:45", title: "斷點10" },
-      { time: "00:50", title: "斷點11" },
-      { time: "00:55", title: "斷點12" },
-      { time: "01:00", title: "斷點13" },
-      { time: "01:05", title: "斷點14" },
-      { time: "01:10", title: "斷點15" },
-      { time: "01:15", title: "斷點16" },
-      { time: "01:20", title: "斷點17" },
-      { time: "01:25", title: "斷點18" },
-      { time: "01:30", title: "斷點19" },
-      { time: "01:35", title: "斷點20" },
-    ],
-    3: [
-      { time: "00:00", title: "斷點1" },
-      { time: "00:05", title: "斷點2" },
-      { time: "00:10", title: "斷點3" },
-      { time: "00:15", title: "斷點4" },
-      { time: "00:20", title: "斷點5" },
-      { time: "00:25", title: "斷點6" },
-      { time: "00:30", title: "斷點7" },
-      { time: "00:35", title: "斷點8" },
-      { time: "00:40", title: "斷點9" },
-      { time: "00:45", title: "斷點10" },
-      { time: "00:50", title: "斷點11" },
-      { time: "00:55", title: "斷點12" },
-      { time: "01:00", title: "斷點13" },
-      { time: "01:05", title: "斷點14" },
-      { time: "01:10", title: "斷點15" },
-      { time: "01:15", title: "斷點16" },
-      { time: "01:20", title: "斷點17" },
-      { time: "01:25", title: "斷點18" },
-      { time: "01:30", title: "斷點19" },
-      { time: "01:35", title: "斷點20" },
-    ],
-    3: [
-      { time: "00:00", title: "斷點1" },
-      { time: "00:05", title: "斷點2" },
-      { time: "00:10", title: "斷點3" },
-      { time: "00:15", title: "斷點4" },
-      { time: "00:20", title: "斷點5" },
-      { time: "00:25", title: "斷點6" },
-      { time: "00:30", title: "斷點7" },
-      { time: "00:35", title: "斷點8" },
-      { time: "00:40", title: "斷點9" },
-      { time: "00:45", title: "斷點10" },
-      { time: "00:50", title: "斷點11" },
-      { time: "00:55", title: "斷點12" },
-      { time: "01:00", title: "斷點13" },
-      { time: "01:05", title: "斷點14" },
-      { time: "01:10", title: "斷點15" },
-      { time: "01:15", title: "斷點16" },
-      { time: "01:20", title: "斷點17" },
-      { time: "01:25", title: "斷點18" },
-      { time: "01:30", title: "斷點19" },
-      { time: "01:35", title: "斷點20" },
-    ],
-    4: [
-      { time: "00:00", title: "斷點1" },
-      { time: "00:05", title: "斷點2" },
-      { time: "00:10", title: "斷點3" },
-      { time: "00:15", title: "斷點4" },
-      { time: "00:20", title: "斷點5" },
-      { time: "00:25", title: "斷點6" },
-      { time: "00:30", title: "斷點7" },
-      { time: "00:35", title: "斷點8" },
-      { time: "00:40", title: "斷點9" },
-      { time: "00:45", title: "斷點10" },
-      { time: "00:50", title: "斷點11" },
-      { time: "00:55", title: "斷點12" },
-      { time: "01:00", title: "斷點13" },
-      { time: "01:05", title: "斷點14" },
-      { time: "01:10", title: "斷點15" },
-      { time: "01:15", title: "斷點16" },
-      { time: "01:20", title: "斷點17" },
-      { time: "01:25", title: "斷點18" },
-      { time: "01:30", title: "斷點19" },
-      { time: "01:35", title: "斷點20" },
-    ],
-    4: [
-      { time: "00:00", title: "斷點1" },
-      { time: "00:05", title: "斷點2" },
-      { time: "00:10", title: "斷點3" },
-      { time: "00:15", title: "斷點4" },
-      { time: "00:20", title: "斷點5" },
-      { time: "00:25", title: "斷點6" },
-      { time: "00:30", title: "斷點7" },
-      { time: "00:35", title: "斷點8" },
-      { time: "00:40", title: "斷點9" },
-      { time: "00:45", title: "斷點10" },
-      { time: "00:50", title: "斷點11" },
-      { time: "00:55", title: "斷點12" },
-      { time: "01:00", title: "斷點13" },
-      { time: "01:05", title: "斷點14" },
-      { time: "01:10", title: "斷點15" },
-      { time: "01:15", title: "斷點16" },
-      { time: "01:20", title: "斷點17" },
-      { time: "01:25", title: "斷點18" },
-      { time: "01:30", title: "斷點19" },
-      { time: "01:35", title: "斷點20" },
-    ],
-  };
-
-  videoChapters.value = chaptersData[videoId] || chaptersData[1];
-};
 
 // 狀態管理
 const showDescription = ref(false);
@@ -637,36 +470,6 @@ const seekToSeconds = (seconds) => {
   player.seekTo(seconds, true);
 };
 
-const seekToTime = (
-  timeString,
-  { autoplay = true, closeModal = true } = {}
-) => {
-  if (!player || !isYouTubeReady.value) return;
-  const [m, s] = timeString.split(":").map(Number);
-  const total = (m || 0) * 60 + (s || 0);
-  
-  // 檢查時間是否超過影片長度
-  if (total >= duration.value) {
-    // 如果超過影片長度，直接跳到影片結尾
-    player.seekTo(duration.value - 1, true);
-    // 播放到結尾後自動結束
-    if (autoplay) {
-      player.playVideo();
-      // 設置一個短暫的延遲來確保影片播放到結尾
-      setTimeout(() => {
-        if (player && player.pauseVideo) {
-          player.pauseVideo();
-        }
-      }, 1000);
-    }
-  } else {
-    // 正常跳轉
-    player.seekTo(total, true);
-    if (autoplay) player.playVideo();
-  }
-  
-  if (closeModal) closeDescriptionModal();
-};
 
 // 點擊進度條跳轉
 const onProgressBarClick = (event) => {
@@ -839,13 +642,11 @@ const fetchVideoList = async () => {
       const videoId = parseInt(route.params.id);
       if (videoDatabase.value[videoId]) {
         videoData.value = videoDatabase.value[videoId];
-        updateChaptersForVideo(videoId);
       } else {
         // 如果找不到對應的影片，使用第一個影片
         const firstVideoId = Object.keys(videoDatabase.value)[0];
         if (firstVideoId) {
           videoData.value = videoDatabase.value[parseInt(firstVideoId)];
-          updateChaptersForVideo(parseInt(firstVideoId));
         }
       }
     } else {
@@ -1254,21 +1055,24 @@ const modules = [FreeMode];
         .descriptionText {
           margin-bottom: 20px;
 
-          .bulletPoint {
+          .tagsContainer {
             display: flex;
-            align-items: flex-start;
-            margin-bottom: 8px;
+            flex-wrap: nowrap;
+            gap: 8px;
+            margin-bottom: 12px;
+            overflow-x: auto;
+            white-space: nowrap;
 
-            .bullet {
+            .tagItem {
+              display: inline-block;
               color: #74bc1f;
-              font-weight: bold;
-              margin-right: 8px;
-              margin-top: 2px;
-            }
-
-            span:last-child {
-              flex: 1;
-              line-height: 1.5;
+              font-size: 14px;
+              font-weight: 500;
+              white-space: nowrap;
+              
+              &:not(:last-child)::after {
+                content: " ";
+              }
             }
           }
 
@@ -1276,49 +1080,6 @@ const modules = [FreeMode];
             margin-top: 12px;
             line-height: 1.6;
             color: #666;
-          }
-        }
-
-        .timelineSection {
-          h4 {
-            font-size: 16px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 16px;
-          }
-
-          .timelineList {
-            .timelineItem {
-              display: flex;
-              align-items: center;
-              padding: 12px 0;
-              border-bottom: 1px solid #f5f5f5;
-
-              &:last-child {
-                border-bottom: none;
-              }
-
-              .timelineTime {
-                font-size: 14px;
-                color: #74bc1f;
-                font-weight: 600;
-                min-width: 50px;
-                text-decoration: underline;
-                cursor: pointer;
-                transition: color 0.2s ease;
-
-                &:hover {
-                  color: #5a9a1a;
-                }
-              }
-
-              .timelineTitle {
-                font-size: 16px;
-                color: #333;
-                margin-left: 16px;
-                flex: 1;
-              }
-            }
           }
         }
       }
