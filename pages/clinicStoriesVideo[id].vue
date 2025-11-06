@@ -1,116 +1,135 @@
 <template>
   <div class="videoDetailWrap">
-    <div class="titleMenuWrap">
-      <TitleMenu link="/clinicStories" />
-    </div>
-    <!-- 影片播放器 -->
-    <div 
-      class="videoPlayer"
-      :class="{ 'controls-hidden': !controlsVisible }"
-      @mousemove="onVideoPlayerMouseMove"
-      @mouseleave="onVideoPlayerMouseLeave"
-      @touchstart="onVideoPlayerMouseMove"
-    >
-      <div class="videoContainer">
-        <iframe
-          ref="videoIframe"
-          :src="youtubeEmbedUrl"
-          frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen
-          @load="onVideoLoad"
-        ></iframe>
+    <div class="videoDetailContainer">
+      <div class="titleMenuWrap">
+        <TitleMenu link="/clinicStories" />
       </div>
-
-      <!-- 影片控制器 -->
-      <div 
-        class="videoControls" 
-        v-if="showControls"
-        @mouseenter="onControlsMouseEnter"
-        @mouseleave="onControlsMouseLeave"
-      >
-        <div class="controlButton" @click="togglePlayPause">
-          <img :src="isPlaying ? pauseIcon : playIcon" alt="播放/暫停" />
-        </div>
-        <div
-          class="progressBar"
-          ref="progressBarEl"
-          @mousedown="onScrubStart"
-          @touchstart.prevent="onScrubStart"
-        >
-          <div class="progress" :style="{ width: progressPercent + '%' }"></div>
-        </div>
-
-        <div class="timeDisplay">
-          <span>{{ formatTime(currentTime) }}</span>
-          <span>/</span>
-          <span>{{ formatTime(duration) }}</span>
-        </div>
-        
-        <!-- 全螢幕按鈕 -->
-        <div 
-          class="controlButton" 
-          :class="{ disabled: useNativeYTControls }"
-          @click="toggleFullscreen"
-        >
-          <img src="/assets/imgs/clinicStories/maximize.png" alt="全螢幕" />
-        </div>
-      </div>
-    </div>
-
-    <!-- 影片資訊 -->
-    <div class="videoInfo">
-      <h1 class="videoTitle">{{ videoData.fullTitle }}</h1>
-
-      <!-- 說明區塊 -->
-      <div class="descriptionSection">
-        <div class="logoImg">
-          <img src="/assets/imgs/clinicStories/raphael.svg" alt="Raphael">
-        </div>
-      <div class="descriptionHeader">
-        <p class="ellipsis-3">
-          {{ videoData.description || videoData.subtitle || "" }}
-        </p>
-        <h6 v-if="!showDescription && (videoData.description || videoData.subtitle)" @click="toggleDescription">顯示完整內容</h6>
-      </div>
-
-      </div>
-    </div>
-
-    <!-- 說明彈出動畫 -->
-    <div
-      class="descriptionModal"
-      v-if="showDescriptionModal"
-      @click="closeDescriptionModal"
-      :class="{ fullscreen: isFullscreen }"
-    >
+      <!-- 影片播放器 -->
       <div
-        class="modalContent"
-        @click.stop
-        @touchstart="onTouchStart"
-        @touchmove="onTouchMove"
-        @touchend="onTouchEnd"
-        :style="{ transform: `translateY(${modalTransform}px)` }"
+        class="videoPlayer"
+        :class="{ 'controls-hidden': !controlsVisible }"
+        @mousemove="onVideoPlayerMouseMove"
+        @mouseleave="onVideoPlayerMouseLeave"
+        @touchstart="onVideoPlayerMouseMove"
       >
-        <div class="modalHeader">
-          <h3>說明</h3>
-          <button class="closeButton" @click="closeDescriptionModal">×</button>
+        <div class="videoContainer">
+          <iframe
+            ref="videoIframe"
+            :src="youtubeEmbedUrl"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+            @load="onVideoLoad"
+          ></iframe>
         </div>
-        <div class="modalBody">
-  
-          <div class="descriptionText">
-            <div v-if="videoData.videoTypes && videoData.videoTypes.length > 0" class="tagsContainer">
-              <span
-                v-for="(videoType, index) in videoData.videoTypes"
-                :key="index"
-                class="tagItem"
-              >
-                #{{ videoType.Name }}
-              </span>
-            </div>
-            <p v-if="videoData.description || videoData.subtitle" class="descriptionParagraph">
-              {{ videoData.description || videoData.subtitle }}
+
+        <!-- 影片控制器 -->
+        <div
+          class="videoControls"
+          v-if="showControls"
+          @mouseenter="onControlsMouseEnter"
+          @mouseleave="onControlsMouseLeave"
+        >
+          <div class="controlButton" @click="togglePlayPause">
+            <img :src="isPlaying ? pauseIcon : playIcon" alt="播放/暫停" />
+          </div>
+          <div
+            class="progressBar"
+            ref="progressBarEl"
+            @mousedown="onScrubStart"
+            @touchstart.prevent="onScrubStart"
+          >
+            <div
+              class="progress"
+              :style="{ width: progressPercent + '%' }"
+            ></div>
+          </div>
+
+          <div class="timeDisplay">
+            <span>{{ formatTime(currentTime) }}</span>
+            <span>/</span>
+            <span>{{ formatTime(duration) }}</span>
+          </div>
+
+          <!-- 全螢幕按鈕 -->
+          <div
+            class="controlButton"
+            :class="{ disabled: useNativeYTControls }"
+            @click="toggleFullscreen"
+          >
+            <img src="/assets/imgs/clinicStories/maximize.png" alt="全螢幕" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 影片資訊 -->
+      <div class="videoInfo">
+        <h1 class="videoTitle">{{ videoData.fullTitle }}</h1>
+
+        <!-- 說明區塊 -->
+        <div class="descriptionSection">
+          <div class="logoImg">
+            <img src="/assets/imgs/clinicStories/raphael.svg" alt="Raphael" />
+          </div>
+          <div class="descriptionHeader">
+            <p class="ellipsis-3">
+              {{ videoData.description || videoData.subtitle || "" }}
             </p>
+            <h6
+              v-if="
+                !showDescription &&
+                (videoData.description || videoData.subtitle)
+              "
+              @click="toggleDescription"
+            >
+              顯示完整內容
+            </h6>
+          </div>
+        </div>
+      </div>
+
+      <!-- 說明彈出動畫 -->
+      <div
+        class="descriptionModal"
+        v-if="showDescriptionModal"
+        @click="closeDescriptionModal"
+        :class="{ fullscreen: isFullscreen }"
+      >
+        <div
+          class="modalContent"
+          @click.stop
+          @touchstart="onTouchStart"
+          @touchmove="onTouchMove"
+          @touchend="onTouchEnd"
+          :style="{ transform: `translateY(${modalTransform}px)` }"
+        >
+          <div class="modalHeader">
+            <h3>說明</h3>
+            <button class="closeButton" @click="closeDescriptionModal">
+              ×
+            </button>
+          </div>
+          <div class="modalBody">
+            <div class="descriptionText">
+              <div
+                v-if="videoData.videoTypes && videoData.videoTypes.length > 0"
+                class="tagsContainer"
+              >
+                <span
+                  v-for="(videoType, index) in videoData.videoTypes"
+                  :key="index"
+                  class="tagItem"
+                >
+                  #{{ videoType.Name }}
+                </span>
+              </div>
+              <p
+                v-if="videoData.description || videoData.subtitle"
+                class="descriptionParagraph"
+              >
+                {{ videoData.description || videoData.subtitle }}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -150,7 +169,9 @@ const videoData = ref({
 // 從 YouTube URL 提取 video ID
 const extractYouTubeVideoId = (url) => {
   if (!url) return null;
-  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/);
+  const match = url.match(
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/
+  );
   return match ? match[1] : null;
 };
 
@@ -183,7 +204,6 @@ const transformApiData = (apiData) => {
   return db;
 };
 
-
 // 狀態管理
 const showDescription = ref(false);
 const showDescriptionModal = ref(false);
@@ -210,13 +230,16 @@ const isDragging = ref(false);
 const videoIframe = ref(null);
 
 // 設備檢測和全螢幕支援檢測
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-              (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isIOS =
+  /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
-const supportsElementFS = !!(document.fullscreenEnabled ||
-                             document.webkitFullscreenEnabled ||
-                             document.mozFullScreenEnabled ||
-                             document.msFullscreenEnabled);
+const supportsElementFS = !!(
+  document.fullscreenEnabled ||
+  document.webkitFullscreenEnabled ||
+  document.mozFullScreenEnabled ||
+  document.msFullscreenEnabled
+);
 
 // iOS 且不支援任意元素全螢幕 → 用原生控制列
 const useNativeYTControls = isIOS && !supportsElementFS;
@@ -239,7 +262,7 @@ const youtubeEmbedUrl = computed(() => {
     playsinline: "1", // iOS 仍可行
     // 關鍵：iOS 舊版不支援任意元素全螢幕 → 顯示 YouTube 的原生控制列（含全螢幕）
     controls: useNativeYTControls ? "1" : "0",
-    fs: "1"
+    fs: "1",
   });
   return `https://www.youtube.com/embed/${videoId}?${params.toString()}`;
 });
@@ -415,35 +438,41 @@ const toggleFullscreen = async () => {
   // iOS 舊版不支援任意元素全螢幕：交給原生控制列的全螢幕按鈕
   if (useNativeYTControls) return;
 
-  const target = document.querySelector('.videoPlayer .videoContainer');
+  const target = document.querySelector(".videoPlayer .videoContainer");
   if (!target) return;
 
   // 已在全螢幕 → 退出
-  if (document.fullscreenElement ||
-      document.webkitFullscreenElement ||
-      document.mozFullScreenElement ||
-      document.msFullscreenElement) {
-    (document.exitFullscreen ||
-     document.webkitExitFullscreen ||
-     document.mozCancelFullScreen ||
-     document.msExitFullscreen)?.call(document);
+  if (
+    document.fullscreenElement ||
+    document.webkitFullscreenElement ||
+    document.mozFullScreenElement ||
+    document.msFullscreenElement
+  ) {
+    (
+      document.exitFullscreen ||
+      document.webkitExitFullscreen ||
+      document.mozCancelFullScreen ||
+      document.msExitFullscreen
+    )?.call(document);
   } else {
     // 進入全螢幕
     try {
-      await (target.requestFullscreen ||
-             target.webkitRequestFullscreen ||
-             target.mozRequestFullScreen ||
-             target.msRequestFullscreen)?.call(target, { navigationUI: "hide" });
-      
+      await (
+        target.requestFullscreen ||
+        target.webkitRequestFullscreen ||
+        target.mozRequestFullScreen ||
+        target.msRequestFullscreen
+      )?.call(target, { navigationUI: "hide" });
+
       // 嘗試鎖定橫向（支援的裝置才會成功，不會報錯）
       try {
-        await screen.orientation?.lock?.('landscape');
+        await screen.orientation?.lock?.("landscape");
       } catch (e) {
         // 忽略錯誤，某些設備不支援
-        console.log('Orientation lock not supported:', e);
+        console.log("Orientation lock not supported:", e);
       }
     } catch (e) {
-      console.log('Fullscreen not supported:', e);
+      console.log("Fullscreen not supported:", e);
     }
   }
 };
@@ -469,7 +498,6 @@ const seekToSeconds = (seconds) => {
   if (!player || !isYouTubeReady.value) return;
   player.seekTo(seconds, true);
 };
-
 
 // 點擊進度條跳轉
 const onProgressBarClick = (event) => {
@@ -534,76 +562,75 @@ const onTouchEnd = () => {
   }
 };
 
-
-const progressBarEl = ref(null)
-const isScrubbing = ref(false)
-const wasPlayingBeforeScrub = ref(false)
+const progressBarEl = ref(null);
+const isScrubbing = ref(false);
+const wasPlayingBeforeScrub = ref(false);
 
 const getPercentFromEvent = (e) => {
-  const el = progressBarEl.value
-  if (!el || !duration.value) return 0
-  const rect = el.getBoundingClientRect()
-  const clientX = e.touches ? e.touches[0].clientX : e.clientX
-  const x = Math.min(Math.max(clientX - rect.left, 0), rect.width)
-  return rect.width ? (x / rect.width) : 0
-}
+  const el = progressBarEl.value;
+  if (!el || !duration.value) return 0;
+  const rect = el.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const x = Math.min(Math.max(clientX - rect.left, 0), rect.width);
+  return rect.width ? x / rect.width : 0;
+};
 
 const onScrubStart = (e) => {
-  if (!isYouTubeReady.value || !duration.value) return
-  isScrubbing.value = true
-  wasPlayingBeforeScrub.value = isPlaying.value
+  if (!isYouTubeReady.value || !duration.value) return;
+  isScrubbing.value = true;
+  wasPlayingBeforeScrub.value = isPlaying.value;
   // 拖曳時先暫停（避免邊播邊拖）
-  if (wasPlayingBeforeScrub.value) player.pauseVideo()
+  if (wasPlayingBeforeScrub.value) player.pauseVideo();
 
   // 立刻更新一次 UI
-  const p = getPercentFromEvent(e)
-  currentTime.value = p * duration.value
-  progressPercent.value = p * 100
+  const p = getPercentFromEvent(e);
+  currentTime.value = p * duration.value;
+  progressPercent.value = p * 100;
   // 拖曳中只更新 UI；想同步預覽可打開下一行（false = 不預取）
   // player.seekTo(currentTime.value, false)
 
   // 綁全域 move/up
-  window.addEventListener('mousemove', onScrubMove)
-  window.addEventListener('mouseup', onScrubEnd)
-  window.addEventListener('touchmove', onScrubMove, { passive: false })
-  window.addEventListener('touchend', onScrubEnd)
-}
+  window.addEventListener("mousemove", onScrubMove);
+  window.addEventListener("mouseup", onScrubEnd);
+  window.addEventListener("touchmove", onScrubMove, { passive: false });
+  window.addEventListener("touchend", onScrubEnd);
+};
 
 const onScrubMove = (e) => {
-  if (!isScrubbing.value) return
-  e.preventDefault?.()
-  const p = getPercentFromEvent(e)
-  currentTime.value = p * duration.value
-  progressPercent.value = p * 100
+  if (!isScrubbing.value) return;
+  e.preventDefault?.();
+  const p = getPercentFromEvent(e);
+  currentTime.value = p * duration.value;
+  progressPercent.value = p * 100;
   // 想邊拖邊預覽：打開
   // player.seekTo(currentTime.value, false)
-}
+};
 
 const onScrubEnd = () => {
-  if (!isScrubbing.value) return
-  isScrubbing.value = false
+  if (!isScrubbing.value) return;
+  isScrubbing.value = false;
 
   // 最終定位，允許跳到未緩存區
-  player.seekTo(currentTime.value, true)
+  player.seekTo(currentTime.value, true);
 
   // 恢復播放狀態
-  if (wasPlayingBeforeScrub.value) player.playVideo()
+  if (wasPlayingBeforeScrub.value) player.playVideo();
 
   // 清理監聽
-  window.removeEventListener('mousemove', onScrubMove)
-  window.removeEventListener('mouseup', onScrubEnd)
-  window.removeEventListener('touchmove', onScrubMove)
-  window.removeEventListener('touchend', onScrubEnd)
-}
-
+  window.removeEventListener("mousemove", onScrubMove);
+  window.removeEventListener("mouseup", onScrubEnd);
+  window.removeEventListener("touchmove", onScrubMove);
+  window.removeEventListener("touchend", onScrubEnd);
+};
 
 // 獲取影片列表
 const fetchVideoList = async () => {
   try {
     // 從 localStorage 獲取 userData
-    const userDataLocal = typeof window !== "undefined"
-      ? JSON.parse(localStorage.getItem("userData") || "{}")
-      : {};
+    const userDataLocal =
+      typeof window !== "undefined"
+        ? JSON.parse(localStorage.getItem("userData") || "{}")
+        : {};
 
     // 提取所需的參數
     const requestBody = {
@@ -637,7 +664,7 @@ const fetchVideoList = async () => {
         (item) => item.Status === "Y"
       );
       videoDatabase.value = transformApiData(activeVideos);
-      
+
       // 根據路由參數找到對應影片
       const videoId = parseInt(route.params.id);
       if (videoDatabase.value[videoId]) {
@@ -660,29 +687,32 @@ const fetchVideoList = async () => {
 // 根據 ID 獲取影片資料
 onMounted(async () => {
   await fetchVideoList();
-  
+
   // iOS 舊版不支援任意元素全螢幕：直接用 YouTube 原生控制列
   if (useNativeYTControls) {
     showControls.value = false;
   }
-  
+
   // 監聽全螢幕狀態變化
-  document.addEventListener('fullscreenchange', handleFullscreenChange);
-  document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-  document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-  document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+  document.addEventListener("fullscreenchange", handleFullscreenChange);
+  document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+  document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+  document.addEventListener("MSFullscreenChange", handleFullscreenChange);
 });
 
 onUnmounted(() => {
   cancelProgressLoop();
   clearControlsHideTimer();
   if (player && player.destroy) player.destroy();
-  
+
   // 移除全螢幕事件監聽
-  document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
-  document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
-  document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+  document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  document.removeEventListener(
+    "webkitfullscreenchange",
+    handleFullscreenChange
+  );
+  document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
+  document.removeEventListener("MSFullscreenChange", handleFullscreenChange);
 });
 
 const modules = [FreeMode];
@@ -695,6 +725,10 @@ const modules = [FreeMode];
   padding-bottom: 80px;
   padding-top: 1rem;
 
+  .videoDetailContainer {
+    max-width: 768px;
+    margin: 0 auto;
+  }
   .titleMenuWrap {
     padding: 0 0.5rem;
   }
@@ -707,7 +741,7 @@ const modules = [FreeMode];
     position: relative;
     // 修復手機端縮放問題 - 只保留必要的屬性
     -webkit-tap-highlight-color: transparent;
-    
+
     // 全螢幕樣式 - 使用動態視窗高避免瀏海/工具列壓縮
     &:fullscreen,
     &:-webkit-full-screen,
@@ -717,17 +751,17 @@ const modules = [FreeMode];
       width: 100vw;
       margin: 0;
       background: #000;
-      
+
       .videoContainer {
         height: 100svh;
         width: 100vw;
-        
+
         iframe {
           height: 100svh;
           width: 100vw;
         }
       }
-      
+
       .videoControls {
         bottom: 20px;
         left: 20px;
@@ -770,7 +804,6 @@ const modules = [FreeMode];
       max-width: 100%;
       box-sizing: border-box;
 
-
       .controlButton {
         width: 40px;
         height: 40px;
@@ -781,7 +814,7 @@ const modules = [FreeMode];
         justify-content: center;
         cursor: pointer;
         transition: all 0.2s ease;
-        
+
         &:hover:not(.disabled) {
           background: rgba(255, 255, 255, 1);
           transform: scale(1.1);
@@ -865,26 +898,26 @@ const modules = [FreeMode];
       .videoControls {
         padding: 12px;
         gap: 12px;
-        
+
         .controlButton {
           width: 36px;
           height: 36px;
-          
+
           img {
             width: 18px;
             height: 18px;
           }
         }
-        
+
         .timeDisplay {
           font-size: 11px;
           min-width: 50px;
           max-width: 60px;
         }
-        
+
         .progressBar {
           height: 5px;
-          
+
           &:hover {
             height: 6px;
           }
@@ -899,17 +932,17 @@ const modules = [FreeMode];
       .videoControls {
         padding: 8px;
         gap: 8px;
-        
+
         .controlButton {
           width: 32px;
           height: 32px;
-          
+
           img {
             width: 16px;
             height: 16px;
           }
         }
-        
+
         .timeDisplay {
           font-size: 10px;
           min-width: 45px;
@@ -942,13 +975,12 @@ const modules = [FreeMode];
       width: 100%;
       .logoImg {
         width: 40px;
-        
       }
       .descriptionHeader {
         flex: 2;
         justify-content: space-between;
         align-items: center;
-      
+
         h3 {
           font-size: 16px;
           font-weight: 600;
@@ -980,7 +1012,6 @@ const modules = [FreeMode];
         line-height: normal;
         cursor: pointer;
         margin-top: 0.5rem;
-        
       }
     }
   }
@@ -1069,7 +1100,7 @@ const modules = [FreeMode];
               font-size: 14px;
               font-weight: 500;
               white-space: nowrap;
-              
+
               &:not(:last-child)::after {
                 content: " ";
               }
