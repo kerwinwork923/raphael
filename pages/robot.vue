@@ -762,7 +762,7 @@ import calendarSvg from "~/assets/imgs/robot/calendar.svg";
 import sendSvg from "~/assets/imgs/robot/send.svg";
 
 // ====== 參考 robot1021.vue 的 n8n API 方式 ======
-const TEXT_WEBHOOK_URL = "https://aiwisebalance.com/webhook/Textchat"; // ← n8n 文字端點
+const TEXT_WEBHOOK_URL = "https://aiwisebalancegroup.com/webhook/Textchat"; // ← n8n 文字端點
 const TEXT_MESSAGE_URL =
   "https://23700999.com:8081/HMA/TTEsaveChatMessageHistory.jsp"; // ← 儲存聊天記錄
 const GET_CHAT_HISTORY_URL =

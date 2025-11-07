@@ -141,9 +141,9 @@
                 <p v-else class="commentTextFull">{{ comment.text }}</p>
               </div>
             </div>
-            <div class="commentMore">
+            <!-- <div class="commentMore">
               <span>⋮</span>
-            </div>
+            </div> -->
           </div>
         </div>
 
@@ -266,15 +266,15 @@
                   <p v-else class="commentTextFull">{{ comment.text }}</p>
                 </div>
               </div>
-              <div class="commentMore">
+              <!-- <div class="commentMore">
                 <span>⋮</span>
-              </div>
+              </div> -->
             </div>
             
             <!-- 查看更多按鈕 -->
-            <div v-if="hasMoreComments" class="viewMoreComments" @click="loadMoreComments">
+            <!-- <div v-if="hasMoreComments" class="viewMoreComments" @click="loadMoreComments">
               查看更多 >
-            </div>
+            </div> -->
           </div>
 
           <!-- 留言輸入區 -->
@@ -1787,17 +1787,18 @@ const modules = [FreeMode];
     width: 100%;
     height: 85vh;
     max-height: 85vh;
-    border-radius: 20px 20px 0 0;
+    border-radius: 20px 20px 0 0; 
     display: flex;
     flex-direction: column;
     animation: slideUp 0.3s ease;
     transition: transform 0.3s ease;
     touch-action: pan-y;
+    
     overflow: hidden;
 
     border-radius: var(--Radius-r-20, 20px) var(--Radius-r-20, 20px) 0 0;
-background: var(--Secondary-100, #F5F7FA);
-box-shadow: 0 -6px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.70));
+    background: var(--Secondary-100, #F5F7FA);
+    box-shadow: 0 -6px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.70));
 
     .modalDragBar {
       width: 40px;
