@@ -84,7 +84,84 @@
             >
               顯示完整內容
             </h6>
+
+            <div class="actionButtons">
+              <div 
+                class="statItem" 
+                :class="{ liked: videoData.isLiked }"
+                @click.stop="toggleLike(videoData)"
+              >
+                <img v-if="videoData.isLiked" src="../assets/imgs/clinicStories/goodClick.svg" alt="讚" />
+                <img v-else src="../assets/imgs/clinicStories/good.svg" alt="讚" />
+                <span>{{ videoData.likes }}</span>
+              </div>
+            </div>
+
           </div>
+        </div>
+      </div>
+
+      <!-- 留言區 -->
+      <div class="commentsSection">
+        <div class="commentsHeader">
+          <span class="commentsTitle">留言 {{ videoData.comments }}</span>
+          <span v-if="hasMoreComments" class="viewMoreButton" @click="openCommentsModal">
+            查看更多 >
+          </span>
+        </div>
+
+        <!-- 留言列表 -->
+        <div class="commentsList">
+          <div v-if="displayedComments.length === 0" class="noComments">
+            尚無留言
+          </div>
+          <div
+            v-for="(comment, index) in displayedComments"
+            :key="comment.id || index"
+            class="commentItem"
+          >
+            <div class="commentAvatar">
+              <!-- 頭像占位 -->
+            </div>
+            <div class="commentContent">
+              <div class="commentHeader">
+                <span class="commentName">{{ comment.name }}</span>
+                <span class="commentTime">{{ comment.time }}</span>
+              </div>
+              <div class="commentText">
+                <p v-if="!comment.showFull && comment.text.length > 50" class="commentTextShort">
+                  {{ comment.text.substring(0, 50) }}...
+                  <span
+                    class="showMoreText"
+                    @click="showFullComment(index)"
+                  >
+                    顯示完整內容
+                  </span>
+                </p>
+                <p v-else class="commentTextFull">{{ comment.text }}</p>
+              </div>
+            </div>
+            <div class="commentMore">
+              <span>⋮</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 留言輸入區 -->
+        <div class="commentsInputArea">
+          <input
+            v-model="newComment"
+            type="text"
+            placeholder="請留下您的感想"
+            class="commentInput"
+            @keyup.enter="submitComment"
+          />
+          <button class="sendCommentButton" @click="submitComment">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22 2L11 13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -133,6 +210,91 @@
           </div>
         </div>
       </div>
+
+      <!-- 留言模態視窗 -->
+      <div
+        class="commentsModal"
+        v-if="showCommentsModal"
+        @click="closeCommentsModal"
+      >
+        <div
+          class="commentsModalContent"
+          @click.stop
+          @touchstart="onCommentsTouchStart"
+          @touchmove="onCommentsTouchMove"
+          @touchend="onCommentsTouchEnd"
+          :style="{ transform: `translateY(${commentsModalTransform}px)` }"
+        >
+          <!-- 模態視窗頂部拖曳條 -->
+          <div class="modalDragBar"></div>
+          
+          <!-- 留言標題欄 -->
+          <div class="commentsHeader">
+            <div class="commentsTitle">
+              <span>留言 {{ videoData.comments }}</span>
+            </div>
+            <button class="closeCommentsButton" @click="closeCommentsModal">
+              ×
+            </button>
+          </div>
+
+          <!-- 留言列表 -->
+          <div class="commentsList" ref="commentsListRef">
+            <div
+              v-for="(comment, index) in fullCommentsList"
+              :key="index"
+              class="commentItem"
+            >
+              <div class="commentAvatar">
+                <!-- <img src="/assets/imgs/clinicStories/user-avatar.svg" alt="頭像" /> -->
+              </div>
+              <div class="commentContent">
+                <div class="commentHeader">
+                  <span class="commentName">{{ comment.name }}</span>
+                  <span class="commentTime">{{ comment.time }}</span>
+                </div>
+                <div class="commentText">
+                  <p v-if="!comment.showFull && comment.text.length > 50" class="commentTextShort">
+                    {{ comment.text.substring(0, 50) }}...
+                    <span
+                      class="showMoreText"
+                      @click="showFullCommentInModal(index)"
+                    >
+                      顯示完整內容
+                    </span>
+                  </p>
+                  <p v-else class="commentTextFull">{{ comment.text }}</p>
+                </div>
+              </div>
+              <div class="commentMore">
+                <span>⋮</span>
+              </div>
+            </div>
+            
+            <!-- 查看更多按鈕 -->
+            <div v-if="hasMoreComments" class="viewMoreComments" @click="loadMoreComments">
+              查看更多 >
+            </div>
+          </div>
+
+          <!-- 留言輸入區 -->
+          <div class="commentsInputArea">
+            <input
+              v-model="newComment"
+              type="text"
+              placeholder="請留下您的感想"
+              class="commentInput"
+              @keyup.enter="submitComment"
+            />
+            <button class="sendCommentButton" @click="submitComment">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22 2L11 13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -164,6 +326,7 @@ const videoData = ref({
   videoTypes: [],
   checkTime: "",
   adminId: "",
+  isLiked: false,
 });
 
 // 從 YouTube URL 提取 video ID
@@ -180,6 +343,21 @@ const getYouTubeThumbnail = (url) => {
   const videoId = extractYouTubeVideoId(url);
   if (!videoId) return "";
   return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+};
+
+// 轉換留言資料格式
+const transformCommentsData = (videoMessageList) => {
+  if (!videoMessageList || !Array.isArray(videoMessageList)) {
+    return [];
+  }
+  
+  return videoMessageList.map((msg) => ({
+    id: parseInt(msg.BID || "0"),
+    name: msg.Name || "使用者",
+    time: "剛剛", // API 沒有提供時間，可以根據實際需求調整
+    text: msg.Message || "",
+    showFull: false,
+  }));
 };
 
 // 轉換 API 資料為前端格式
@@ -199,6 +377,8 @@ const transformApiData = (apiData) => {
       videoTypes: item.VideoTypeList || [],
       checkTime: item.CheckTime || "",
       adminId: item.AdminID || "",
+      isLiked: false,
+      messageList: transformCommentsData(item.VideoMessageList || []),
     };
   });
   return db;
@@ -225,6 +405,20 @@ const modalTransform = ref(0);
 const touchStartY = ref(0);
 const touchStartTransform = ref(0);
 const isDragging = ref(false);
+
+// 留言相關狀態
+const showCommentsModal = ref(false);
+const commentsList = ref([]);
+const commentsModalTransform = ref(0);
+const commentsTouchStartY = ref(0);
+const commentsTouchStartTransform = ref(0);
+const isCommentsDragging = ref(false);
+const newComment = ref("");
+const hasMoreComments = computed(() => {
+  // 只要有留言就顯示"查看更多"按鈕
+  return videoData.value.comments > 0;
+});
+const commentsListRef = ref(null);
 
 // 影片 iframe 引用
 const videoIframe = ref(null);
@@ -265,6 +459,16 @@ const youtubeEmbedUrl = computed(() => {
     fs: "1",
   });
   return `https://www.youtube.com/embed/${videoId}?${params.toString()}`;
+});
+
+// 顯示的留言（主頁面只顯示前3條）
+const displayedComments = computed(() => {
+  return commentsList.value.slice(0, 3);
+});
+
+// 完整留言列表（模態視窗顯示）
+const fullCommentsList = computed(() => {
+  return commentsList.value;
 });
 
 // 切換說明顯示
@@ -623,6 +827,216 @@ const onScrubEnd = () => {
   window.removeEventListener("touchend", onScrubEnd);
 };
 
+// 點讚/取消點讚
+const toggleLike = async (video) => {
+  // 如果正在處理中，避免重複點擊
+  if (video.isProcessing) return;
+
+  video.isProcessing = true;
+  const wasLiked = video.isLiked;
+
+  try {
+    // 從 localStorage 獲取 userData
+    const userDataLocal =
+      typeof window !== "undefined"
+        ? JSON.parse(localStorage.getItem("userData") || "{}")
+        : {};
+
+    const requestBody = {
+      MID: userDataLocal.MID || "",
+      Token: userDataLocal.Token || "",
+      MAID: userDataLocal.MAID || "",
+      Mobile: userDataLocal.Mobile || "",
+      Lang: "zhtw",
+      AID: video.id.toString(),
+    };
+
+    let response;
+    if (wasLiked) {
+      // 取消點讚
+      response = await fetch(
+        "https://23700999.com:8081/HMA/api/fr/VideoDeleteGood",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
+    } else {
+      // 點讚
+      response = await fetch(
+        "https://23700999.com:8081/HMA/api/fr/VideoMakeGood",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
+    }
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (result.Result === "OK") {
+      // 更新點讚狀態和數量
+      video.isLiked = !wasLiked;
+      if (wasLiked) {
+        video.likes = Math.max(0, video.likes - 1);
+      } else {
+        video.likes = video.likes + 1;
+      }
+    } else {
+      console.error("點讚操作失敗:", result.Result);
+    }
+  } catch (error) {
+    console.error("點讚操作失敗:", error);
+  } finally {
+    video.isProcessing = false;
+  }
+};
+
+// 留言相關函數
+const openCommentsModal = () => {
+  showCommentsModal.value = true;
+  commentsModalTransform.value = 0;
+  // 這裡可以調用 API 獲取完整留言列表
+  // fetchComments();
+};
+
+const closeCommentsModal = () => {
+  showCommentsModal.value = false;
+  commentsModalTransform.value = 0;
+};
+
+const showFullComment = (index) => {
+  // 主頁面留言列表中使用
+  const comment = displayedComments.value[index];
+  const actualIndex = commentsList.value.findIndex(c => c === comment);
+  if (actualIndex !== -1) {
+    commentsList.value[actualIndex].showFull = true;
+  }
+};
+
+const showFullCommentInModal = (index) => {
+  // 模態視窗留言列表中使用
+  const comment = fullCommentsList.value[index];
+  const actualIndex = commentsList.value.findIndex(c => c === comment);
+  if (actualIndex !== -1) {
+    commentsList.value[actualIndex].showFull = true;
+  }
+};
+
+const loadMoreComments = () => {
+  // 載入更多留言
+  // fetchMoreComments();
+};
+
+const submitComment = async () => {
+  if (!newComment.value.trim()) return;
+  if (!videoData.value.id) return;
+
+  try {
+    // 從 localStorage 獲取 userData
+    const userDataLocal =
+      typeof window !== "undefined"
+        ? JSON.parse(localStorage.getItem("userData") || "{}")
+        : {};
+
+    const requestBody = {
+      MID: userDataLocal.MID || "",
+      Token: userDataLocal.Token || "",
+      MAID: userDataLocal.MAID || "",
+      Mobile: userDataLocal.Mobile || "",
+      Lang: "zhtw",
+      AID: videoData.value.id.toString(),
+      Message: newComment.value.trim(),
+    };
+
+    const response = await fetch(
+      "https://23700999.com:8081/HMA/api/fr/VideoMakeMessage",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (result.Result === "OK") {
+      // 成功提交留言，添加到列表最前面
+      commentsList.value.unshift({
+        id: result.BID || null,
+        name: userDataLocal.Name || userDataLocal.Member?.Name || "使用者",
+        time: "剛剛",
+        text: newComment.value.trim(),
+        showFull: false,
+      });
+
+      // 更新留言數量
+      videoData.value.comments += 1;
+      
+      // 清空輸入框
+      newComment.value = "";
+    } else {
+      console.error("提交留言失敗:", result.Result);
+      // 可以顯示錯誤提示給用戶
+      alert("提交留言失敗，請稍後再試");
+    }
+  } catch (error) {
+    console.error("提交留言失敗:", error);
+    // 可以顯示錯誤提示給用戶
+    alert("提交留言失敗，請稍後再試");
+  }
+};
+
+// 留言模態視窗滑動手勢
+const onCommentsTouchStart = (e) => {
+  commentsTouchStartY.value = e.touches[0].clientY;
+  commentsTouchStartTransform.value = commentsModalTransform.value;
+  isCommentsDragging.value = true;
+};
+
+const onCommentsTouchMove = (e) => {
+  if (!isCommentsDragging.value) return;
+  
+  const currentY = e.touches[0].clientY;
+  const deltaY = currentY - commentsTouchStartY.value;
+  const newTransform = commentsTouchStartTransform.value + deltaY;
+  
+  // 限制滑動範圍，只能向下拖曳關閉
+  if (newTransform > 0) {
+    commentsModalTransform.value = newTransform;
+  }
+};
+
+const onCommentsTouchEnd = () => {
+  if (!isCommentsDragging.value) return;
+  
+  isCommentsDragging.value = false;
+  
+  // 根據滑動距離決定是否關閉
+  if (commentsModalTransform.value > 100) {
+    closeCommentsModal();
+  } else {
+    // 恢復原狀
+    commentsModalTransform.value = 0;
+  }
+};
+
 // 獲取影片列表
 const fetchVideoList = async () => {
   try {
@@ -669,11 +1083,15 @@ const fetchVideoList = async () => {
       const videoId = parseInt(route.params.id);
       if (videoDatabase.value[videoId]) {
         videoData.value = videoDatabase.value[videoId];
+        // 載入該影片的留言列表
+        commentsList.value = videoData.value.messageList || [];
       } else {
         // 如果找不到對應的影片，使用第一個影片
         const firstVideoId = Object.keys(videoDatabase.value)[0];
         if (firstVideoId) {
           videoData.value = videoDatabase.value[parseInt(firstVideoId)];
+          // 載入該影片的留言列表
+          commentsList.value = videoData.value.messageList || [];
         }
       }
     } else {
@@ -973,14 +1391,45 @@ const modules = [FreeMode];
       align-items: start;
       gap: 0.5rem;
       width: 100%;
+      
       .logoImg {
         width: 40px;
       }
-      .descriptionHeader {
-        flex: 2;
-        justify-content: space-between;
-        align-items: center;
+        .descriptionHeader {
+          flex: 2;
+          justify-content: space-between;
+          align-items: center;
+          
+          .actionButtons {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+          }
+          
+          .statItem {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: #666;
+            @include neumorphismOuter($radius: 50px, $padding: 4px 8px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
 
+            img {
+              width: 16px;
+              height: 16px;
+            }
+
+            &:hover {
+              transform: scale(1.05);
+            }
+
+            &.liked {
+              color: #EC4F4F;
+            }
+          }
         h3 {
           font-size: 16px;
           font-weight: 600;
@@ -1012,6 +1461,179 @@ const modules = [FreeMode];
         line-height: normal;
         cursor: pointer;
         margin-top: 0.5rem;
+      }
+    }
+  }
+
+  // 留言區樣式（主頁面）
+  .commentsSection {
+    margin: 1rem;
+    padding: 20px 16px;
+    border-radius: var(--Radius-r-20, 20px);
+    background: var(--Secondary-100, #f5f7fa);
+    box-shadow: 2px 4px 12px 0
+      var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
+
+    .commentsHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e0e0e0;
+
+      
+
+      .commentsTitle {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1e1e1e;
+      }
+
+      .viewMoreButton {
+        font-size: 14px;
+        color: #74bc1f;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        
+        &:hover {
+          opacity: 0.8;
+        }
+      }
+    }
+
+    .commentsList {
+      margin-bottom: 16px;
+
+      .noComments {
+        text-align: center;
+        padding: 20px;
+        color: #999;
+        font-size: 14px;
+      }
+
+      .commentItem {
+        display: flex;
+        gap: 12px;
+        padding: 12px;
+        background: white;
+        border-radius: 12px;
+        margin-bottom: 12px;
+
+        .commentAvatar {
+          width: 40px;
+          height: 40px;
+          flex-shrink: 0;
+          background: #e0e0e0;
+          border-radius: 50%;
+        }
+
+        .commentContent {
+          flex: 1;
+          min-width: 0;
+
+          .commentHeader {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+
+            .commentName {
+              font-size: 14px;
+              font-weight: 600;
+              color: #333;
+            }
+
+            .commentTime {
+              font-size: 12px;
+              color: #999;
+            }
+          }
+
+          .commentText {
+            .commentTextShort {
+              font-size: 14px;
+              color: #666;
+              line-height: 1.5;
+              margin: 0;
+
+              .showMoreText {
+                color: #74bc1f;
+                cursor: pointer;
+                margin-left: 4px;
+              }
+            }
+
+            .commentTextFull {
+              font-size: 14px;
+              color: #666;
+              line-height: 1.5;
+              margin: 0;
+            }
+          }
+        }
+
+        .commentMore {
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          color: #999;
+          font-size: 18px;
+          flex-shrink: 0;
+        }
+      }
+    }
+
+    .commentsInputArea {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 16px;
+
+      .commentInput {
+        flex: 1;
+        padding: 12px 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 24px;
+        font-size: 14px;
+        outline: none;
+        background: white;
+
+        &::placeholder {
+          color: #999;
+        }
+
+        &:focus {
+          border-color: #74bc1f;
+        }
+      }
+
+      .sendCommentButton {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: #74bc1f;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: background 0.3s ease;
+
+        &:hover {
+          background: #5a9a1a;
+        }
+
+        svg {
+          width: 20px;
+          height: 20px;
+        }
       }
     }
   }
@@ -1113,7 +1735,9 @@ const modules = [FreeMode];
             color: #666;
           }
         }
+       
       }
+      
     }
   }
 }
@@ -1142,6 +1766,221 @@ const modules = [FreeMode];
   }
   to {
     transform: translateY(0);
+  }
+}
+
+// 留言模態視窗樣式
+.commentsModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1001;
+  display: flex;
+  align-items: flex-end;
+  animation: fadeIn 0.3s ease;
+
+  .commentsModalContent {
+    background: white;
+    width: 100%;
+    height: 85vh;
+    max-height: 85vh;
+    border-radius: 20px 20px 0 0;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.3s ease;
+    transition: transform 0.3s ease;
+    touch-action: pan-y;
+    overflow: hidden;
+
+    border-radius: var(--Radius-r-20, 20px) var(--Radius-r-20, 20px) 0 0;
+background: var(--Secondary-100, #F5F7FA);
+box-shadow: 0 -6px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.70));
+
+    .modalDragBar {
+      width: 40px;
+      height: 4px;
+      background: #ddd;
+      border-radius: 2px;
+      margin: 8px auto;
+      cursor: grab;
+    }
+
+    .commentsHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid #f0f0f0;
+
+      .commentsTitle {
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+      }
+
+      .closeCommentsButton {
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: #666;
+        cursor: pointer;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+    .commentsList {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+      background: #f5f5f5;
+
+      .commentItem {
+        display: flex;
+        gap: 12px;
+        padding: 12px;
+        background: white;
+        border-radius: 12px;
+        margin-bottom: 12px;
+
+        .commentAvatar {
+          width: 40px;
+          height: 40px;
+          flex-shrink: 0;
+
+          img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #e0e0e0;
+          }
+        }
+
+        .commentContent {
+          flex: 1;
+          min-width: 0;
+
+          .commentHeader {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+
+            .commentName {
+              font-size: 14px;
+              font-weight: 600;
+              color: #333;
+            }
+
+            .commentTime {
+              font-size: 12px;
+              color: #999;
+            }
+          }
+
+          .commentText {
+            .commentTextShort {
+              font-size: 14px;
+              color: #666;
+              line-height: 1.5;
+              margin: 0;
+
+              .showMoreText {
+                color: #74bc1f;
+                cursor: pointer;
+                margin-left: 4px;
+              }
+            }
+
+            .commentTextFull {
+              font-size: 14px;
+              color: #666;
+              line-height: 1.5;
+              margin: 0;
+            }
+          }
+        }
+
+        .commentMore {
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          color: #999;
+          font-size: 18px;
+          flex-shrink: 0;
+        }
+      }
+
+      .viewMoreComments {
+        text-align: center;
+        padding: 16px;
+        color: #74bc1f;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+      }
+    }
+
+    .commentsInputArea {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      background: white;
+      border-top: 1px solid #f0f0f0;
+
+      .commentInput {
+        flex: 1;
+        padding: 12px 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 24px;
+        font-size: 14px;
+        outline: none;
+
+        &::placeholder {
+          color: #999;
+        }
+
+        &:focus {
+          border-color: #74bc1f;
+        }
+      }
+
+      .sendCommentButton {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: #74bc1f;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: background 0.3s ease;
+
+        &:hover {
+          background: #5a9a1a;
+        }
+
+        img {
+          width: 20px;
+          height: 20px;
+          filter: brightness(0) invert(1);
+        }
+      }
+    }
   }
 }
 </style>
