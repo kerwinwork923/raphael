@@ -345,6 +345,42 @@ const getYouTubeThumbnail = (url) => {
   return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
 };
 
+// 格式化時間為相對時間
+const formatRelativeTime = (checkTime) => {
+  if (!checkTime) return "剛剛";
+  
+  try {
+    // 將 "2025/11/10 12:00" 格式轉換為 Date
+    const timeStr = checkTime.replace(/\//g, "-");
+    const commentDate = new Date(timeStr);
+    const now = new Date();
+    const diffMs = now - commentDate;
+    
+    // 計算時間差
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffMins < 1) {
+      return "剛剛";
+    } else if (diffMins < 60) {
+      return `${diffMins}分鐘前`;
+    } else if (diffHours < 24) {
+      return `${diffHours}小時前`;
+    } else if (diffDays < 7) {
+      return `${diffDays}天以前`;
+    } else {
+      // 超過7天顯示日期
+      const month = commentDate.getMonth() + 1;
+      const day = commentDate.getDate();
+      return `${month}/${day}`;
+    }
+  } catch (error) {
+    console.error("時間格式化失敗:", error);
+    return "剛剛";
+  }
+};
+
 // 轉換留言資料格式
 const transformCommentsData = (videoMessageList) => {
   if (!videoMessageList || !Array.isArray(videoMessageList)) {
@@ -354,7 +390,7 @@ const transformCommentsData = (videoMessageList) => {
   return videoMessageList.map((msg) => ({
     id: parseInt(msg.BID || "0"),
     name: msg.Name || "使用者",
-    time: "剛剛", // API 沒有提供時間，可以根據實際需求調整
+    time: formatRelativeTime(msg.CheckTime),
     text: msg.Message || "",
     showFull: false,
   }));
@@ -460,6 +496,7 @@ const youtubeEmbedUrl = computed(() => {
   });
   return `https://www.youtube.com/embed/${videoId}?${params.toString()}`;
 });
+
 
 // 顯示的留言（主頁面只顯示前3條）
 const displayedComments = computed(() => {
@@ -978,10 +1015,13 @@ const submitComment = async () => {
 
     if (result.Result === "OK") {
       // 成功提交留言，添加到列表最前面
+      const now = new Date();
+      const checkTime = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}/${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+      
       commentsList.value.unshift({
-        id: result.BID || null,
+        id: result.BID ? parseInt(result.BID) : null,
         name: userDataLocal.Name || userDataLocal.Member?.Name || "使用者",
-        time: "剛剛",
+        time: formatRelativeTime(checkTime),
         text: newComment.value.trim(),
         showFull: false,
       });

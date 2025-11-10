@@ -706,8 +706,6 @@ const modules = [FreeMode];
 
               &.liked {
                 color: #EC4F4F;
-                
-              
               }
             }
           }
