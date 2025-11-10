@@ -586,7 +586,10 @@
                     </div>
                     <span class="result-date">{{
                       formatDate(
-                        result.dateKey || (result.timestamp ? result.timestamp.split(" ")[0] : "")
+                        result.dateKey ||
+                          (result.timestamp
+                            ? result.timestamp.split(" ")[0]
+                            : "")
                       )
                     }}</span>
                   </div>
@@ -599,7 +602,10 @@
                     </div>
                     <span class="result-date">{{
                       formatDate(
-                        result.dateKey || (result.timestamp ? result.timestamp.split(" ")[0] : "")
+                        result.dateKey ||
+                          (result.timestamp
+                            ? result.timestamp.split(" ")[0]
+                            : "")
                       )
                     }}</span>
                   </div>
@@ -698,8 +704,10 @@
               :locale="'zh-TW'"
               :enable-time-picker="false"
               no-today
+              :min-date="minHistoryDate"
               :max-date="maxHistoryDate"
-              :disabled-dates="isDateDisabledForMonth"
+              :disabled-dates="isDateDisabledGlobally"
+              :highlight="highlightDates"
               @update:month-year="onMonthYearChange"
               @update:modelValue="handleDateChange"
               class="calendar-datepicker"
@@ -974,38 +982,6 @@ const endOfNextMonth = new Date(today.getFullYear(), today.getMonth() + 2, 0);
 const visibleMonth = ref(new Date().getMonth());
 const visibleYear = ref(new Date().getFullYear());
 
-// 當月有紀錄的日期清單（Set<YYYY-MM-DD> → 只保留當月）
-const monthDateKeySet = computed(() => {
-  const set = new Set();
-  console.log(
-    `計算當月日期集合 - 當前顯示: ${visibleYear.value}/${
-      visibleMonth.value + 1
-    }`
-  );
-  console.log(`所有可用日期:`, Array.from(calendarDateKeySet.value));
-
-  calendarDateKeySet.value.forEach((key) => {
-    const d = new Date(key + "T00:00:00");
-    console.log(
-      `檢查日期 ${key}: ${d.getFullYear()}-${d.getMonth() + 1} vs ${
-        visibleYear.value
-      }-${visibleMonth.value + 1}`
-    );
-    if (
-      d.getFullYear() === visibleYear.value &&
-      d.getMonth() === visibleMonth.value
-    ) {
-      set.add(key);
-      console.log(`✓ 添加日期 ${key} 到當月集合`);
-    }
-  });
-  console.log(
-    `當月 ${visibleYear.value}/${visibleMonth.value + 1} 可用日期:`,
-    Array.from(set)
-  );
-  return set;
-});
-
 // 角色數據 - 完全由 API 提供
 const currentCharacter = ref(null);
 const availableCharacters = ref([]);
@@ -1097,6 +1073,17 @@ const groupedHistory = computed(() => {
 
   return sortedGroups;
 });
+
+// ✅ 全域：只允許「任何有紀錄的日子」
+const isDateDisabledGlobally = (date) => {
+  const key = toDateKey(date);
+  return !calendarDateKeySet.value.has(key);
+};
+
+// ✅ 將所有有紀錄的日期高亮（VueDatePicker 支援 string 或 Date）
+const highlightDates = computed(() =>
+  Array.from(calendarDateKeySet.value).sort()
+);
 
 // 格式化日期
 const formatDate = (dateStr) => {
@@ -1369,7 +1356,6 @@ const toggleCalendar = async () => {
       console.log(
         `日曆開啟，顯示月份: ${visibleYear.value}/${visibleMonth.value + 1}`
       );
-      console.log("當月可用日期:", Array.from(monthDateKeySet.value));
     }
   }
 };
@@ -1385,16 +1371,16 @@ const loadCalendarDates = () => {
     // 從對話記錄中提取日期
     conversations.value.forEach((conversation, index) => {
       let dateKey;
-      
+
       // 優先使用 dateKey
       if (conversation.dateKey) {
         dateKey = conversation.dateKey;
-      } 
+      }
       // 如果有 timestamp，從 timestamp 提取
       else if (conversation.timestamp) {
         try {
           // 處理字串格式的 timestamp
-          if (typeof conversation.timestamp === 'string') {
+          if (typeof conversation.timestamp === "string") {
             const date = parseCorrectTime(conversation.timestamp);
             dateKey = toDateKey(date);
           } else {
@@ -1421,7 +1407,7 @@ const loadCalendarDates = () => {
         console.warn(`對話 ${index} 沒有日期資訊，使用當前日期`);
         dateKey = toDateKey(new Date());
       }
-      
+
       if (dateKey) {
         calendarDateKeySet.value.add(dateKey);
       }
@@ -1505,19 +1491,9 @@ const isDateDisabled = (date) => {
   return !calendarDateKeySet.value.has(dateStr);
 };
 
-// 停用不在清單內的日期（只允許「該月有紀錄的日子」）
-const isDateDisabledForMonth = (date) => {
-  const key = toDateKey(date);
-  // 限制：僅允許該月有紀錄的日期（monthDateKeySet）
-  const isDisabled = !monthDateKeySet.value.has(key);
-  return isDisabled;
-};
-
 const onMonthYearChange = ({ month, year }) => {
-  // month: 0-11
-  visibleMonth.value = month;
+  visibleMonth.value = month; // 0-11
   visibleYear.value = year;
-  // 這裡不需要再算，monthDateKeySet 會自動更新
 };
 
 // 切換搜尋功能
@@ -1555,7 +1531,7 @@ const performSearch = () => {
     // 確保 user 和 bot 都是字串，避免 undefined 或 null
     const userText = (conversation.user || "").toString().toLowerCase();
     const botText = (conversation.bot || "").toString().toLowerCase();
-    
+
     const userMatch = userText.includes(query) && userText.length > 0;
     const botMatch = botText.includes(query) && botText.length > 0;
 
@@ -1580,7 +1556,7 @@ const performSearch = () => {
       return 0;
     }
   });
-  
+
   console.log(`搜尋 "${searchQuery.value}" 找到 ${results.length} 筆結果`);
 };
 
@@ -1755,13 +1731,13 @@ async function saveChatRecord({
     console.error("保存聊天記錄失敗: 用戶資料不存在");
     return;
   }
-  
+
   // 確保訊息內容不為空
   if (!inMsg && !outMsg) {
     console.warn("保存聊天記錄失敗: 輸入和輸出訊息都為空");
     return;
   }
-  
+
   // 預設使用本地時間（避免時區問題）
   const inputTime = inputAt || getLocalTimeString(new Date());
   const outputTime = outputAt || getLocalTimeString(new Date());
@@ -1783,12 +1759,14 @@ async function saveChatRecord({
     });
 
     if (!response.ok) {
-      throw new Error(`API 調用失敗: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `API 調用失敗: ${response.status} ${response.statusText}`
+      );
     }
 
     const result = await response.json();
     console.log("保存聊天記錄成功:", result);
-    
+
     // 檢查 API 回傳結果
     if (result && result.Result && result.Result !== "OK") {
       console.error("保存聊天記錄失敗: API 回傳錯誤", result);
@@ -2027,7 +2005,9 @@ const handleSpeechEnd = async (transcript) => {
   if (!transcript.trim()) return;
 
   // 檢查是否正在等待 AI 回應，如果是則不允許發送新訊息
-  const hasLoadingMessage = conversations.value.some(msg => msg.isLoading === true);
+  const hasLoadingMessage = conversations.value.some(
+    (msg) => msg.isLoading === true
+  );
   if (hasLoadingMessage || isLoading.value) {
     console.log("正在等待 AI 回應，請稍候...");
     return;
@@ -2286,7 +2266,9 @@ async function handleManualInput() {
   if (!input) return;
 
   // 檢查是否正在等待 AI 回應，如果是則不允許發送新訊息
-  const hasLoadingMessage = conversations.value.some(msg => msg.isLoading === true);
+  const hasLoadingMessage = conversations.value.some(
+    (msg) => msg.isLoading === true
+  );
   if (hasLoadingMessage || isLoading.value) {
     console.log("正在等待 AI 回應，請稍候...");
     return;
@@ -3042,7 +3024,7 @@ onMounted(async () => {
       console.log("=== 日曆調試信息 ===");
       console.log("對話記錄:", conversations.value);
       console.log("日曆日期集合:", Array.from(calendarDateKeySet.value));
-      console.log("當月日期集合:", Array.from(monthDateKeySet.value));
+
       console.log("當前顯示月份:", visibleYear.value, visibleMonth.value + 1);
       console.log("最早日期:", minHistoryDate.value);
       console.log("最晚日期:", maxHistoryDate.value);
@@ -3451,10 +3433,10 @@ const scrollToMessage = (id) => {
 const highlightKeyword = (text, keyword) => {
   if (!text || !text.trim()) return "";
   if (!keyword || !keyword.trim()) return text;
-  
+
   try {
     // 轉義特殊字符，避免正則表達式錯誤
-    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const regex = new RegExp(`(${escapedKeyword})`, "gi");
     return text.replace(
       regex,
@@ -3679,6 +3661,17 @@ const initSwiperToCurrentCharacter = () => {
     }
   }
 };
+
+// 依當前日曆顯示的年/月，產生「當月」有紀錄的日期集合
+const monthDateKeySet = computed(() => {
+  const y = String(visibleYear.value);
+  const m = String(visibleMonth.value + 1).padStart(2, "0");
+  const prefix = `${y}-${m}-`; // 例如 "2025-11-"
+  return new Set(
+    Array.from(calendarDateKeySet.value).filter((key) => key.startsWith(prefix))
+  );
+});
+
 
 // 角色名稱編輯相關函數
 const showNameInputModal = () => {
@@ -4555,7 +4548,7 @@ const vClickOutside = {
     $blur: 12px,
     $color: $raphael-white
   );
-  padding-bottom:84px;
+  padding-bottom: 84px;
 
   .robot-content {
     display: flex;
