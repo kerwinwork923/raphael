@@ -575,7 +575,7 @@
                   class="search-result-item"
                   @click="scrollToMessage(result.id)"
                 >
-                  <div class="bubble">
+                  <div v-if="result.user && result.user.trim()" class="bubble">
                     <div class="content">
                       <span class="user-name">{{
                         result.userName || "用戶"
@@ -586,11 +586,11 @@
                     </div>
                     <span class="result-date">{{
                       formatDate(
-                        result.dateKey || result.timestamp.split(" ")[0]
+                        result.dateKey || (result.timestamp ? result.timestamp.split(" ")[0] : "")
                       )
                     }}</span>
                   </div>
-                  <div class="bubble">
+                  <div v-if="result.bot && result.bot.trim()" class="bubble">
                     <div class="content">
                       <span class="bot-name">{{ currentCharacter.name }}</span>
                       <span
@@ -599,7 +599,7 @@
                     </div>
                     <span class="result-date">{{
                       formatDate(
-                        result.dateKey || result.timestamp.split(" ")[0]
+                        result.dateKey || (result.timestamp ? result.timestamp.split(" ")[0] : "")
                       )
                     }}</span>
                   </div>
@@ -919,6 +919,27 @@ const parseCorrectTime = (timeString) => {
       parseInt(hour),
       parseInt(minute),
       0
+    );
+  }
+
+  // 如果時間格式是 "2025-10-23 15:36:53" 這種格式（使用連字號）
+  if (timeString.includes("-") && timeString.includes(" ")) {
+    // 將 "2025-10-23 15:36:53" 轉換為本地時間，不進行時區轉換
+    const [datePart, timePart] = timeString.split(" ");
+    const [year, month, day] = datePart.split("-");
+    const timeParts = timePart.split(":");
+    const hour = timeParts[0] || "0";
+    const minute = timeParts[1] || "0";
+    const second = timeParts[2] || "0";
+
+    // 創建本地時間，不進行時區轉換
+    return new Date(
+      parseInt(year),
+      parseInt(month) - 1, // 月份從0開始
+      parseInt(day),
+      parseInt(hour),
+      parseInt(minute),
+      parseInt(second)
     );
   }
 
@@ -1364,17 +1385,46 @@ const loadCalendarDates = () => {
     // 從對話記錄中提取日期
     conversations.value.forEach((conversation, index) => {
       let dateKey;
+      
+      // 優先使用 dateKey
       if (conversation.dateKey) {
         dateKey = conversation.dateKey;
-      } else {
-        dateKey = toDateKey(conversation.timestamp);
+      } 
+      // 如果有 timestamp，從 timestamp 提取
+      else if (conversation.timestamp) {
+        try {
+          // 處理字串格式的 timestamp
+          if (typeof conversation.timestamp === 'string') {
+            const date = parseCorrectTime(conversation.timestamp);
+            dateKey = toDateKey(date);
+          } else {
+            dateKey = toDateKey(conversation.timestamp);
+          }
+        } catch (e) {
+          console.error(`處理對話 ${index} 的日期時發生錯誤:`, e);
+          // 如果解析失敗，使用當前日期
+          dateKey = toDateKey(new Date());
+        }
       }
-      console.log(`對話 ${index}:`, {
-        timestamp: conversation.timestamp,
-        dateKey: dateKey,
-        originalDateKey: conversation.dateKey,
-      });
-      calendarDateKeySet.value.add(dateKey);
+      // 如果有 ts (timestamp 數字)，從 ts 提取
+      else if (conversation.ts) {
+        try {
+          const date = new Date(conversation.ts);
+          dateKey = toDateKey(date);
+        } catch (e) {
+          console.error(`處理對話 ${index} 的 ts 時發生錯誤:`, e);
+          dateKey = toDateKey(new Date());
+        }
+      }
+      // 如果都沒有，使用當前日期
+      else {
+        console.warn(`對話 ${index} 沒有日期資訊，使用當前日期`);
+        dateKey = toDateKey(new Date());
+      }
+      
+      if (dateKey) {
+        calendarDateKeySet.value.add(dateKey);
+      }
     });
 
     // 更新 calendarDatesWithHistory 以保持向後兼容
@@ -1498,12 +1548,16 @@ const performSearch = () => {
     return;
   }
 
-  const query = searchQuery.value.toLowerCase();
+  const query = searchQuery.value.toLowerCase().trim();
   const results = [];
 
   conversations.value.forEach((conversation) => {
-    const userMatch = conversation.user.toLowerCase().includes(query);
-    const botMatch = conversation.bot.toLowerCase().includes(query);
+    // 確保 user 和 bot 都是字串，避免 undefined 或 null
+    const userText = (conversation.user || "").toString().toLowerCase();
+    const botText = (conversation.bot || "").toString().toLowerCase();
+    
+    const userMatch = userText.includes(query) && userText.length > 0;
+    const botMatch = botText.includes(query) && botText.length > 0;
 
     if (userMatch || botMatch) {
       results.push({
@@ -1517,10 +1571,17 @@ const performSearch = () => {
 
   // 按日期降冪排列（最新的在上面）
   searchResults.value = results.sort((a, b) => {
-    const dateA = new Date(a.timestamp);
-    const dateB = new Date(b.timestamp);
-    return dateB - dateA;
+    try {
+      const dateA = new Date(a.timestamp || a.ts || Date.now());
+      const dateB = new Date(b.timestamp || b.ts || Date.now());
+      return dateB - dateA;
+    } catch (e) {
+      console.error("排序搜尋結果時發生錯誤:", e);
+      return 0;
+    }
   });
+  
+  console.log(`搜尋 "${searchQuery.value}" 找到 ${results.length} 筆結果`);
 };
 
 // 清除搜尋（保留函數以備將來使用）
@@ -1690,13 +1751,23 @@ async function saveChatRecord({
   inputAt,
   outputAt,
 } = {}) {
-  if (!localobj) return;
+  if (!localobj) {
+    console.error("保存聊天記錄失敗: 用戶資料不存在");
+    return;
+  }
+  
+  // 確保訊息內容不為空
+  if (!inMsg && !outMsg) {
+    console.warn("保存聊天記錄失敗: 輸入和輸出訊息都為空");
+    return;
+  }
+  
   // 預設使用本地時間（避免時區問題）
   const inputTime = inputAt || getLocalTimeString(new Date());
   const outputTime = outputAt || getLocalTimeString(new Date());
 
   try {
-    await fetch(TEXT_MESSAGE_URL, {
+    const response = await fetch(TEXT_MESSAGE_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -1704,12 +1775,24 @@ async function saveChatRecord({
         MID: localobj.MID,
         Mobile: localobj.Mobile,
         Type: "P",
-        Inmessage: inMsg,
-        Outmessage: outMsg,
+        Inmessage: inMsg || "",
+        Outmessage: outMsg || "",
         Inputtime: inputTime,
         Outputtime: outputTime,
       }),
     });
+
+    if (!response.ok) {
+      throw new Error(`API 調用失敗: ${response.status} ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    console.log("保存聊天記錄成功:", result);
+    
+    // 檢查 API 回傳結果
+    if (result && result.Result && result.Result !== "OK") {
+      console.error("保存聊天記錄失敗: API 回傳錯誤", result);
+    }
   } catch (e) {
     console.error("保存聊天記錄失敗:", e);
   }
@@ -3366,12 +3449,21 @@ const scrollToMessage = (id) => {
 
 // 關鍵字高亮
 const highlightKeyword = (text, keyword) => {
-  if (!keyword) return text;
-  const regex = new RegExp(`(${keyword})`, "gi");
-  return text.replace(
-    regex,
-    '<span class="highlight" style="color:#74bc1f">$1</span>'
-  );
+  if (!text || !text.trim()) return "";
+  if (!keyword || !keyword.trim()) return text;
+  
+  try {
+    // 轉義特殊字符，避免正則表達式錯誤
+    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escapedKeyword})`, "gi");
+    return text.replace(
+      regex,
+      '<span class="highlight" style="color:#74bc1f">$1</span>'
+    );
+  } catch (e) {
+    console.error("關鍵字高亮錯誤:", e);
+    return text;
+  }
 };
 
 // 角色選擇相關函數
@@ -3701,15 +3793,23 @@ const calendarDateKeySet = ref(new Set());
 const minHistoryDate = computed(() => {
   const arr = Array.from(calendarDateKeySet.value);
   if (!arr.length) return undefined;
-  const result = new Date(arr.sort()[0]); // 最早
-  console.log("最早日期:", result);
+  // 排序後取最早日期，格式為 "YYYY-MM-DD"
+  const earliestKey = arr.sort()[0];
+  // 將 "YYYY-MM-DD" 轉換為 Date 對象
+  const [year, month, day] = earliestKey.split("-");
+  const result = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  console.log("最早日期:", result, "來自 key:", earliestKey);
   return result;
 });
 const maxHistoryDate = computed(() => {
   const arr = Array.from(calendarDateKeySet.value);
   if (!arr.length) return undefined;
-  const result = new Date(arr.sort().slice(-1)[0]); // 最晚
-  console.log("最晚日期:", result);
+  // 排序後取最晚日期，格式為 "YYYY-MM-DD"
+  const latestKey = arr.sort().slice(-1)[0];
+  // 將 "YYYY-MM-DD" 轉換為 Date 對象
+  const [year, month, day] = latestKey.split("-");
+  const result = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  console.log("最晚日期:", result, "來自 key:", latestKey);
   return result;
 });
 
