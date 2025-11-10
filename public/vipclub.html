@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>智平衡會員｜專屬影片體驗</title>
+  <title>智平衡會員頻道｜專屬影片體驗</title>
   <style>
     :root {
       --deep:#0f3b3b;
@@ -106,7 +106,7 @@
       transition:.2s;
     }
     .cta:hover { background:transparent; color:var(--gold); }
-
+    
     /* 雙欄影片區 */
     .grid-two {
       display:grid;
@@ -218,7 +218,18 @@
       font-size:14px;
       background:linear-gradient(135deg,rgba(201,161,74,.07),rgba(255,255,255,0));
     }
-	
+   .section { padding: 50px 20px; }
+   .container { max-width: 1100px; margin: 0 auto; }
+   .title { font-size: clamp(22px,3vw,28px); text-align: center; color: var(--deep); margin-bottom: 20px; position: relative; }
+   .title::after { content: ""; display: block; width: 100px; height: 3px; background: linear-gradient(90deg,transparent,var(--gold),transparent); margin: 10px auto 0; border-radius: 2px; }
+   .grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 16px; }
+   .feature { background: #fff; border: 1px solid rgba(201,161,74,.35); border-radius: 14px; padding: 18px; text-align: center; }
+   .feature h3 { color: var(--deep); margin: 6px 0 4px; font-size: 18px; }
+   .feature p { color: var(--muted); font-size: 14px; }
+   .card { background: #fff; border-radius: 16px; padding: 28px; border: 1px solid rgba(201,161,74,.35); box-shadow: 0 12px 36px rgba(17,24,39,.06); }
+   .hl { list-style: none; margin: 8px 0 0; padding: 0; }
+   .hl li { padding: 8px 0 8px 20px; border-bottom: 1px dashed rgba(201,161,74,.35); position: relative; }
+   .hl li::before { content: "◆"; color: var(--gold); position: absolute; left: 0; top: 8px; }
    .survey-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1200;}
    .survey-wrap{background:#fff;border:2px solid var(--gold);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.25);width:min(780px,94vw);max-height:90vh;overflow:auto;padding:20px;}
    .survey-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
@@ -233,6 +244,7 @@
    .btn-primary:hover{opacity:.9}
    .btn-ghost{background:transparent;color:var(--gold)}
    .survey-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111;color:#fff;border-radius:10px;padding:10px 14px;font-size:14px;display:none;z-index:1300}
+   
   </style>
 </head>
 <body>
@@ -248,9 +260,9 @@
   </div>
 
   <header>
-    <h1>智平衡會員專屬｜影片體驗活動</h1>
+    <h1>智平衡會員頻道｜影片體驗活動</h1>
     <div class="accent"></div>
-    <p>專為智平衡會員打造的影片體驗，邀請您重新感受「被照顧的安心感」。<br>看完影片並完成問卷，就有機會獲得價值 <b style="color:var(--gold)">5,000 元精油禮盒</b>！</p>
+    <p>專為智平衡會員打造的影片體驗，邀請您重新感受「被照顧的安心感」。<br>看完影片並完成問卷，就有機會獲得價值 <b style="color:var(--gold)">VIP專屬禮盒</b>！</p>
   </header>
 
   <!-- 第一區：Hero 會員頻道發刊宣言 -->
@@ -260,12 +272,12 @@
       <p>這是一個屬於您的專屬時刻。<br>放下外界的喧囂，讓我們一起回到「被照顧」的節奏。<br>智平衡邀請您，透過每一段真誠的聲音，重新連結身心的穩定與信任。</p>
     </div>
     <!-- 可自行替換連結 -->
-    <iframe src="https://www.youtube-nocookie.com/embed/heS-mRhncAg" data-video-id="video001" allowfullscreen title="會員頻道發刊宣言"></iframe>
+    <iframe src="https://www.youtube-nocookie.com/embed/heS-mRhncAg" data-video-id="video001" allowfullscreen title="會員頻道發刊宣言" ></iframe>
   </section>
 
   <!-- 第二區：東風衛視專訪 -->
   <section class="single-video">
-    <iframe src="https://www.youtube.com/watch?v=OnvLbczesUU" data-video-id="video002" title="東風衛視專訪" allowfullscreen></iframe>
+    <iframe src="https://www.youtube.com/watch?v=OnvLbczesUU" data-video-id="video002" title="東風衛視專訪" allowfullscreen ></iframe>
     <h3>《東風衛視專訪：科技讓醫療回到人本》</h3>
     <p>醫師談的不只是技術，而是一種「不吃藥也能改善」的新希望。<br>透過 AI 數據與穿戴監測，讓照顧更貼近每個人的節奏——<br>為你找到屬於自己的健康方式。</p>
   </section>
@@ -355,6 +367,20 @@
   </div>
 </div>
 <div class="survey-toast" id="surveyToast" role="status" aria-live="polite">已送出，感謝你的回覆！</div>
+
+<section class="section container">
+  <div class="card" id="vip">
+    <h2 class="title" style="margin-top:0">台北晶華酒店｜VIP 邀請盛宴</h2>
+    <ul class="hl">
+      <li>執行長專業演說：從相應神經調節療法、AI到量子健康的臨床應用</li>
+      <li>第六代紅光極智衣現場展示與體驗</li>
+      <li>護您穩平衡衣：讓健康保養在睡眠中自動發生</li>
+    </ul>
+    <div class="cta">
+      <a id="goVip" href="" class="btn">前往VIP盛宴</a>
+    </div>    
+  </div>
+</section>
 
   <footer>© 2025 智平衡健康集團 — 感謝您一直以來的信任。看完影片並完成問卷，就有機會獲得 <span style="color:var(--gold)">5,000 元精油禮盒</span>！</footer>
 
@@ -578,6 +604,8 @@ function createPlayers() {
 document.addEventListener("DOMContentLoaded", () => {
   prepareIframes();
   bindVipUnlock();
+   // 讓 VIP 連結帶上 ?vip=
+  wireVipLink();
   const s = document.createElement("script");
   s.src = "https://www.youtube.com/iframe_api";
   document.head.appendChild(s);
@@ -660,10 +688,11 @@ const SURVEY_DEFS = {
 
   <fieldset data-role="q4" data-metric="共創願景" data-cta="Referral/Advocacy" data-imprint="信任">
     <legend>Q4｜下一支影片你希望「完成」哪件事？</legend>
-    <label><input type="radio" name="q4" value="示範完整流程">示範一個完整的「5 分鐘協商 → 回課程」操作流程（可模仿）。</label><br>
-    <label><input type="radio" name="q4" value="老師角度執行">示範如何在課堂上用「冷處理＋轉移」安全執行（老師角度）。</label><br>
-    <label><input type="radio" name="q4" value="三句可用語句">提供家長／老師能用的 3 個即刻可用的語句或步驟。</label><br>
-    <label><input type="radio" name="q4" value="情緒支持討論">討論行為改變時常見的情緒反應與如何支持（家長情緒面）。</label>
+    <label><input type="checkbox" name="q4[]" value="示範完整流程">示範一個完整的「5 分鐘協商 → 回課程」操作流程（可模仿）。</label><br>
+    <label><input type="checkbox" name="q4[]" value="老師角度執行">示範如何在課堂上用「冷處理＋轉移」安全執行（老師角度）。</label><br>
+    <label><input type="checkbox" name="q4[]" value="三句可用語句">提供家長／老師能用的 3 個即刻可用的語句或步驟。</label><br>
+    <label><input type="checkbox" name="q4[]" value="情緒支持討論">討論行為改變時常見的情緒反應與如何支持（家長情緒面）。</label>
+    <label>其他（請補充）：<input type="text" name="q4_other" placeholder="請輸入"></label>
   </fieldset> `
   },
 
@@ -697,10 +726,11 @@ const SURVEY_DEFS = {
 
   <fieldset data-role="q4" data-metric="共創願景" data-cta="Referral/Advocacy" data-imprint="信任">
     <legend>Q4｜下一支影片你希望「完成」哪件事？</legend>
-    <label><input type="radio" name="q4" value="示範嗅覺練習">示範一段完整的「嗅覺修復」練習流程（含呼吸指導）。</label><br>
-    <label><input type="radio" name="q4" value="解釋腦霧與壓力關聯">講解「腦霧、焦慮」與自律神經的關聯機制。</label><br>
-    <label><input type="radio" name="q4" value="提供香氣指南">提供不同香氣對情緒與記憶修復的指南。</label><br>
-    <label><input type="radio" name="q4" value="延伸神經修復主題">延伸探討「五感修復 × 神經可塑性」的生活應用。</label>
+    <label><input type="checkbox" name="q4[]" value="示範嗅覺練習">示範一段完整的「嗅覺修復」練習流程（含呼吸指導）。</label><br>
+    <label><input type="checkbox" name="q4[]" value="解釋腦霧與壓力關聯">講解「腦霧、焦慮」與自律神經的關聯機制。</label><br>
+    <label><input type="checkbox" name="q4[]" value="提供香氣指南">提供不同香氣對情緒與記憶修復的指南。</label><br>
+    <label><input type="checkbox" name="q4[]" value="延伸神經修復主題">延伸探討「五感修復 × 神經可塑性」的生活應用。</label>
+    <label>其他（請補充）：<input type="text" name="q4_other" placeholder="請輸入"></label>
   </fieldset>
 
     `
@@ -736,10 +766,11 @@ const SURVEY_DEFS = {
 
   <fieldset data-role="q4" data-metric="共創願景" data-cta="Referral/Advocacy" data-imprint="信任">
     <legend>Q4｜下一支影片你希望「完成」哪件事？</legend>
-    <label><input type="radio" name="q4" value="示範觀察練習">示範一個「觀察腸道與呼吸」的實際練習流程。</label><br>
-    <label><input type="radio" name="q4" value="解析腸腦連線">講解「腸腦軸線」與身心健康的具體關聯。</label><br>
-    <label><input type="radio" name="q4" value="提供自我檢測表">提供一份「腸腦同步狀態」的自我檢測表。</label><br>
-    <label><input type="radio" name="q4" value="探討專注與健康">討論現代人專注力與身體信號的關係。</label>
+    <label><input type="checkbox" name="q4[]" value="示範觀察練習">示範一個「觀察腸道與呼吸」的實際練習流程。</label><br>
+    <label><input type="checkbox" name="q4[]" value="解析腸腦連線">講解「腸腦軸線」與身心健康的具體關聯。</label><br>
+    <label><input type="checkbox" name="q4[]" value="提供自我檢測表">提供一份「腸腦同步狀態」的自我檢測表。</label><br>
+    <label><input type="checkbox" name="q4[]" value="探討專注與健康">討論現代人專注力與身體信號的關係。</label>
+    <label>其他（請補充）：<input type="text" name="q4_other" placeholder="請輸入"></label>
   </fieldset>
     `
   }
@@ -818,13 +849,14 @@ function closeSurvey() {
 }
 
 /** 綁定所有 .cta 打開對應問卷 */
-document.querySelectorAll(".cta").forEach(btn => {
-  btn.addEventListener("click", (e) => {
+document.querySelectorAll('a.cta[href="#q"]:not(#goVip)').forEach(a => {
+  a.addEventListener("click", (e) => {
     e.preventDefault();
-    const meta = getContextFromCTA(btn);
+    const meta = getContextFromCTA(a);
     openSurvey(meta);
   });
 });
+
 
 /** 關閉行為 */
 $close.addEventListener("click", closeSurvey);
@@ -986,6 +1018,31 @@ function getContextFromCTA(btn) {
   const title = (titleEl?.textContent || iframe?.title || document.title).trim();
   return { videoId, youtubeId, title, iframe };
 }
+
+// 讓「前往VIP盛宴」自動帶上 ?vip= 參數
+function wireVipLink(){
+  const a = document.getElementById("goVip") || document.querySelector("#vip a.btn");
+  if (!a) return;
+
+  // 目標頁面
+  const target = "./vip1.html";
+  // 若目標本身已有查詢參數就用 & 接續
+  const url = new URL(target, location.href);
+  url.searchParams.set("vip", vipId);
+
+  // 如需一併帶其他參數（例如 uid），取消下行註解：
+  // const uid = new URLSearchParams(location.search).get("uid");
+  // if (uid) url.searchParams.set("uid", uid);
+  a.href = url.toString();
+  // 點擊時打一筆事件
+  a.addEventListener("click", () => {
+    logEvent("goto_vip1", EventType);
+  });
+}
+
+
+
+
 
 /** 開發時可用的小工具 */
 window.VideoTrack = {
