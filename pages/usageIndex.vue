@@ -78,7 +78,7 @@ const gotoGettingDressed = () => {
       @include neumorphismOuter($bgColor:$raphael-green-400,$radius:50px);
       width: 100%;
       color:$raphael-white;
-      font-size: 1.5rem;
+      font-size: 1.125rem;
       font-style: normal;
       font-weight: 700;
       letter-spacing: 3.6px;
