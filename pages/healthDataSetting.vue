@@ -1,6 +1,8 @@
 <template>
   <div class="healthDataSettingWrap">
-    <TitleMenu Text="健康數據設定" link="back" />
+    <div class="titleMenuWrap">
+      <TitleMenu Text="健康數據設定" link="back" />
+    </div>
     <div class="healthDataSettingContent">
       <div class="healthDataSettingItem">
         <div class="healthDataSettingTextGroup">
@@ -15,6 +17,7 @@
               class="toggle__input"
               type="checkbox"
               v-model="hrvEnabled"
+              :disabled="isUpdating"
               aria-label="切換 HRV 檢測"
             />
             <span class="toggle__track"></span>
@@ -26,10 +29,83 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, watch } from "vue";
 import TitleMenu from "~/components/TitleMenu.vue";
+import { updateHRVSetting, reloadUserData } from "~/fn/api.js";
 
-const hrvEnabled = ref(true); // 預設開啟/關閉自己改
+// 從 localStorage 讀取初始狀態
+const getInitialHRVState = () => {
+  try {
+    const localData = localStorage.getItem("userData");
+    if (localData) {
+      const userData = JSON.parse(localData);
+      // HRVONOFF: "Y" 為開啟, "N" 為關閉
+      return userData?.Member?.HRVONOFF === "Y";
+    }
+  } catch (error) {
+    console.error("讀取 localStorage 失敗:", error);
+  }
+  return false; // 預設關閉
+};
+
+const hrvEnabled = ref(false);
+const isUpdating = ref(false);
+const isInitialized = ref(false);
+
+// 重新載入用戶資料並更新狀態
+const refreshUserData = async () => {
+  try {
+    const newUserData = await reloadUserData();
+    if (newUserData) {
+      // 更新本地狀態（設置 isUpdating 避免觸發 watch）
+      isUpdating.value = true;
+      hrvEnabled.value = newUserData?.Member?.HRVONOFF === "Y";
+      isUpdating.value = false;
+      console.log("用戶資料已重新載入，HRV 狀態:", hrvEnabled.value);
+    }
+  } catch (error) {
+    console.error("重新載入用戶資料失敗:", error);
+    isUpdating.value = false;
+  }
+};
+
+// 監聽 toggle 變化並調用 API
+watch(hrvEnabled, async (newValue, oldValue) => {
+  // 避免初始化時或更新中時觸發
+  if (!isInitialized.value || isUpdating.value) return;
+  
+  isUpdating.value = true;
+  const previousValue = oldValue;
+
+  try {
+    console.log(`更新 HRV 設定: ${newValue ? "開啟" : "關閉"}`);
+    const result = await updateHRVSetting(newValue);
+
+    if (result.success) {
+      // API 成功後重新載入用戶資料
+      await refreshUserData();
+    } else {
+      // API 失敗時恢復原狀態
+      isUpdating.value = true;
+      hrvEnabled.value = previousValue;
+      isUpdating.value = false;
+    }
+  } catch (error) {
+    console.error("更新 HRV 設定時發生錯誤:", error);
+    // 發生錯誤時恢復原狀態
+    isUpdating.value = true;
+    hrvEnabled.value = previousValue;
+    isUpdating.value = false;
+    alert("更新 HRV 設定時發生錯誤，請稍後再試");
+  }
+});
+
+onMounted(() => {
+  // 組件掛載時設置初始狀態
+  hrvEnabled.value = getInitialHRVState();
+  // 標記為已初始化，之後的變化才會觸發 API
+  isInitialized.value = true;
+});
 </script>
 
 <style lang="scss">
@@ -37,8 +113,10 @@ const hrvEnabled = ref(true); // 預設開啟/關閉自己改
   @include gradientBg();
   width: 100%;
   min-height: 100vh;
-  padding: 16px 0 12px 0;
-
+  padding: 0.75rem 0 12px 0;
+  .titleMenuWrap{
+    padding: 0 3%;
+  }
   .titleMenu {
     max-width: 768px;
     margin: 0 auto;
