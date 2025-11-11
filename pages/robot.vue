@@ -2777,31 +2777,15 @@ const fetchChatHistory = async (isPolling = false) => {
         });
       }
 
-      // 合併策略：
-      // - 初次載入（非輪詢）：後端已改為回傳全部資料，直接覆蓋為完整清單
-      // - 輪詢：僅追加新訊息
-      if (!isPolling) {
-        // 重建 knownKeys 以利之後載入更舊
-        knownKeys.clear();
-        for (const msg of data.LineList) {
-          knownKeys.add(makeStableKey(msg));
-        }
-        conversations.value = convertedMessages;
-        // 後端一次回完整清單，停用上滑載入更舊
-        hasMoreMessages.value = false;
-      } else if (hasNewMessages) {
-        const existingSet = new Set(
-          conversations.value.map((m) => `${m.ts}|${m.user}|${m.bot}`)
-        );
-        const appended = convertedMessages.filter(
-          (m) => !existingSet.has(`${m.ts}|${m.user}|${m.bot}`)
-        );
-        if (appended.length > 0) {
-          conversations.value = [...conversations.value, ...appended].sort(
-            (a, b) => a.ts - b.ts
-          );
-        }
+
+  
+      knownKeys.clear();
+      for (const msg of data.LineList) {
+        knownKeys.add(makeStableKey(msg));
       }
+      conversations.value = convertedMessages;
+      hasMoreMessages.value = false;
+
 
       // 更新最新回覆
       if (convertedMessages.length > 0) {
