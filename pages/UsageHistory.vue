@@ -142,7 +142,7 @@
               {{ recommendedProducts[currentRecommendIndex].name }}
             </h3>
             <p>{{ recommendedProducts[currentRecommendIndex].slogan }}</p>
-            <div class="priceGroup">
+            <!-- <div class="priceGroup">
               <div
                 class="priceItem"
                 v-for="(price, idx) in parsePrices(
@@ -153,7 +153,7 @@
                 <span class="priceValue">{{ price.value }}</span>
                 <span class="pricePeriod">/{{ price.period }}</span>
               </div>
-            </div>
+            </div> -->
             <button class="contactBtn" @click="contactSupport">聯絡客服</button>
             <div class="featureTitle">產品特色</div>
             <ul class="featureListGroup">
