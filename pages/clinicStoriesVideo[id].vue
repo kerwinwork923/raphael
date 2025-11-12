@@ -1597,9 +1597,8 @@ const modules = [FreeMode];
 
     padding: 20px 16px;
     border-radius: var(--Radius-r-20, 20px);
-    background: var(--Secondary-100, #f5f7fa);
-    box-shadow: 2px 4px 12px 0
-      var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
+background: var(--Secondary-100, #F5F7FA);
+box-shadow: 2px 4px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.70));
 
     .commentsList {
       margin-bottom: 16px;
@@ -1696,14 +1695,21 @@ const modules = [FreeMode];
       .commentInput {
         flex: 1;
         padding: 12px 16px;
-        border: 1px solid #e0e0e0;
-        border-radius: 24px;
-        font-size: 14px;
-        outline: none;
-        background: white;
+        border-radius: var(--Radius-r-20, 20px);
+background: var(--Secondary-100, #F5F7FA);
+box-shadow: 2px 4px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.70));
+border: none;
+outline: none;
+color: var(--Neutral-black, #1E1E1E);
 
+
+font-size: var(--Text-font-size-18, 18px);
+font-style: normal;
+font-weight: 700;
+
+letter-spacing: 0.09px;
         &::placeholder {
-          color: #999;
+          
         }
 
         &:focus {
