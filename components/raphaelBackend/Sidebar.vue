@@ -21,6 +21,7 @@
     <!-- ─────────── menu ─────────── -->
     <nav class="menu">
       <ul>
+
         <li 
           :class="{ 
             active: currentPage === 'member',
@@ -38,6 +39,7 @@
           <img src="/assets/imgs/backend/member.svg" alt="會員清單" />
           <span v-show="!collapsed">會員清單</span>
         </li>
+
         <li 
           :class="{ 
             active: currentPage === 'customerSupportAdmin',
@@ -55,6 +57,7 @@
           <img src="/assets/imgs/backend/customerSupportAdmin.svg" alt="客服管理" />
           <span v-show="!collapsed">客服管理</span>
         </li>
+
         <li 
           :class="{ 
             active: currentPage === 'videoManage',
@@ -72,6 +75,7 @@
           <img src="/assets/imgs/backend/videoManage.svg" alt="影音管理" />
           <span v-show="!collapsed">影音管理</span>
         </li>
+
         <li 
           :class="{ 
             active: currentPage === 'order',
@@ -89,6 +93,7 @@
           <img src="/assets/imgs/backend/order.svg" alt="訂單管理" />
           <span v-show="!collapsed">訂單管理</span>
         </li>
+
         <li 
           :class="{ 
             active: currentPage === 'production',
@@ -106,6 +111,7 @@
           <img src="/assets/imgs/backend/production.svg" alt="生產管理" />
           <span v-show="!collapsed">生產管理</span>
         </li>
+
         <!-- <li 
           :class="{ 
             active: currentPage === 'push',
@@ -123,6 +129,7 @@
           <img src="/assets/imgs/backend/push.svg" alt="推播設定" />
           <span v-show="!collapsed">推播設定</span>
         </li> -->
+        
         <!-- <li 
           :class="{ 
             active: currentPage === 'points',
