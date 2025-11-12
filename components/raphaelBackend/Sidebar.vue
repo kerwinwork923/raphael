@@ -57,6 +57,23 @@
         </li>
         <li 
           :class="{ 
+            active: currentPage === 'videoManage',
+            'has-focus': focusedItem === 'videoManage' 
+          }" 
+          @click="handleMenuClick({ key: 'videoManage', path: '/raphaelBackend/videoManage' })"
+          @mouseenter="handleMouseEnter('videoManage')"
+          @mouseleave="handleMouseLeave"
+          @focus="handleFocus('videoManage')"
+          @blur="handleBlur"
+          tabindex="0"
+          role="menuitem"
+          aria-label="影音管理"
+        >
+          <img src="/assets/imgs/backend/videoManage.svg" alt="影音管理" />
+          <span v-show="!collapsed">影音管理</span>
+        </li>
+        <li 
+          :class="{ 
             active: currentPage === 'order',
             'has-focus': focusedItem === 'order' 
           }" 
@@ -247,6 +264,11 @@ watch(() => route.path, (newPath: string) => {
     currentPage.value = 'account';
     emit('update:modelValue', 'account');
     emit('page-change', 'account');
+  }
+  else if (newPath.includes('/videoManage')) {
+    currentPage.value = 'videoManage';
+    emit('update:modelValue', 'videoManage');
+    emit('page-change', 'videoManage');
   }
 }, { immediate: true });
 
