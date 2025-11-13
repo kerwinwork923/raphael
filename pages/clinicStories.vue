@@ -154,7 +154,7 @@ const videoLoading = ref(true);
 
 // 標籤資料
 const tags = ref([
-  { id: 0, name: "全部影片", category: "all", videoType: null },
+  { id: 0, name: "全部影片", category: "all", videoBigType: null },
 ]);
 
 const activeTag = ref(0);
@@ -204,6 +204,7 @@ const transformApiData = (apiData) => {
       comments: parseInt(item.VideoMessageSize || "0"),
       youtubeUrl: item.VideoURL || "",
       videoTypes: item.VideoTypeList || [],
+      videoBigTypes: item.VideoBigTypeList || [],
       checkTime: item.CheckTime || "",
       adminId: item.AdminID || "",
       isLiked: false, // 預設為未點讚，可根據實際需求從 API 獲取
@@ -211,31 +212,58 @@ const transformApiData = (apiData) => {
   });
 };
 
-// 從所有影片中提取唯一標籤
-const extractUniqueTags = (videos) => {
-  const tagMap = new Map();
-  
-  videos.forEach((video) => {
-    if (video.videoTypes && Array.isArray(video.videoTypes)) {
-      video.videoTypes.forEach((videoType) => {
-        const key = videoType.VideoType || videoType.Name;
-        if (!tagMap.has(key)) {
-          tagMap.set(key, {
-            id: tagMap.size + 1,
-            name: videoType.Name || videoType.VideoType,
-            category: videoType.VideoType || videoType.Name,
-            videoType: videoType.VideoType,
-          });
-        }
-      });
-    }
-  });
+// 獲取標籤種類清單
+const fetchVideoBigTypeList = async () => {
+  try {
+    // 從 localStorage 獲取 userData
+    const userDataLocal = typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("userData") || "{}")
+      : {};
 
-  const uniqueTags = Array.from(tagMap.values());
-  tags.value = [
-    { id: 0, name: "全部影片", category: "all", videoType: null },
-    ...uniqueTags,
-  ];
+    const requestBody = {
+      MID: userDataLocal.MID || "",
+      Token: userDataLocal.Token || "",
+      MAID: userDataLocal.MAID || "",
+      Mobile: userDataLocal.Mobile || "",
+      Lang: "zhtw",
+    };
+
+    const response = await fetch(
+      "https://23700999.com:8081/HMA/api/fr/getVideoBigTypeList",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (result.Result === "OK" && result.VideoBigTypeList) {
+      // 轉換標籤格式
+      const typeTags = result.VideoBigTypeList.map((type, index) => ({
+        id: index + 1,
+        name: type.Name || "",
+        category: type.Type || "",
+        videoBigType: type.Type || "",
+      }));
+
+      tags.value = [
+        { id: 0, name: "全部影片", category: "all", videoBigType: null },
+        ...typeTags,
+      ];
+    } else {
+      console.error("API 返回錯誤:", result.Result || "未知錯誤");
+    }
+  } catch (error) {
+    console.error("獲取標籤種類清單失敗:", error);
+  }
 };
 
 // 根據選中標籤過濾影片
@@ -246,11 +274,11 @@ const filteredVideos = computed(() => {
   }
   
   return allVideos.value.filter((video) => {
-    if (!video.videoTypes || !Array.isArray(video.videoTypes)) {
+    if (!video.videoBigTypes || !Array.isArray(video.videoBigTypes)) {
       return false;
     }
-    return video.videoTypes.some(
-      (vt) => vt.VideoType === activeTagData.videoType
+    return video.videoBigTypes.some(
+      (vbt) => vbt.VideoBigType === activeTagData.videoBigType
     );
   });
 });
@@ -392,7 +420,6 @@ const fetchVideoList = async () => {
         (item) => item.Status === "Y"
       );
       allVideos.value = transformApiData(activeVideos);
-      extractUniqueTags(allVideos.value);
     } else {
       console.error("API 返回錯誤:", result.Result || "未知錯誤");
     }
@@ -405,8 +432,10 @@ const fetchVideoList = async () => {
 };
 
 // 組件掛載時獲取資料
-onMounted(() => {
-  fetchVideoList();
+onMounted(async () => {
+  // 先獲取標籤清單，再獲取影片列表
+  await fetchVideoBigTypeList();
+  await fetchVideoList();
 });
 
 const modules = [FreeMode];
