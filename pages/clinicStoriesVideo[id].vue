@@ -1772,14 +1772,18 @@ const modules = [FreeMode];
     }
 
     .modalContent {
-      background: white;
+
       width: 100%;
       height: 90vh; // 調整為快滿版
-      border-radius: 20px 20px 0 0;
+
       animation: slideUp 0.3s ease;
       overflow: hidden;
       transition: transform 0.3s ease, border-radius 0.3s ease;
       touch-action: pan-y;
+
+      border-radius: var(--Radius-r-20, 20px) var(--Radius-r-20, 20px) 0 0;
+background: var(--Secondary-100, #F5F7FA);
+box-shadow: 0 -6px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.70));
 
       &.fullscreen {
         border-radius: 0;
@@ -1930,10 +1934,10 @@ const modules = [FreeMode];
       border-bottom: 1px solid #f0f0f0;
 
       .commentsTitle {
-        font-size: 18px;
-        font-weight: 600;
-        color: #333;
-      }
+      font-size: 20px;
+      font-weight: 700;
+      color: #1e1e1e;
+    }
 
       .closeCommentsButton {
         background: none;
@@ -1986,14 +1990,22 @@ const modules = [FreeMode];
             gap: 8px;
 
             .commentName {
-              font-size: 14px;
-              font-weight: 600;
-              color: #333;
+              color: var(--Neutral-black, #1e1e1e);
+              text-overflow: ellipsis;
+
+              font-size: var(--Text-font-size-18, 18px);
+              font-style: normal;
+              font-weight: 700;
+              line-height: normal;
             }
 
             .commentTime {
-              font-size: 12px;
-              color: #999;
+              color: var(--Neutral-400, #b3b3b3);
+              text-overflow: ellipsis;
+              font-size: var(--Text-font-size-12, 12px);
+              font-style: normal;
+              font-weight: 400;
+              line-height: normal;
             }
           }
 
@@ -2012,10 +2024,13 @@ const modules = [FreeMode];
             }
 
             .commentTextFull {
-              font-size: 14px;
-              color: #666;
-              line-height: 1.5;
-              margin: 0;
+              overflow: hidden;
+              color: var(--Neutral-black, #1e1e1e);
+              text-overflow: ellipsis;
+              font-size: var(--Text-font-size-16, 16px);
+              font-style: normal;
+              font-weight: 500;
+              line-height: normal;
             }
           }
         }
@@ -2052,13 +2067,20 @@ const modules = [FreeMode];
       .commentInput {
         flex: 1;
         padding: 12px 16px;
-        border: 1px solid #e0e0e0;
-        border-radius: 24px;
-        font-size: 14px;
+        border-radius: var(--Radius-r-20, 20px);
+        background: var(--Secondary-100, #f5f7fa);
+        box-shadow: 2px 4px 12px 0
+          var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
+        border: none;
         outline: none;
+        color: var(--Neutral-black, #1e1e1e);
 
+        font-size: var(--Text-font-size-18, 18px);
+        font-style: normal;
+        font-weight: 700;
+
+        letter-spacing: 0.09px;
         &::placeholder {
-          color: #999;
         }
 
         &:focus {
