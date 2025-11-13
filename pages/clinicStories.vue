@@ -22,13 +22,54 @@
             >
               <div
                 class="clinicStoriesTagsItem"
-                :class="{ active: activeTag === tag.id }"
-                @click="setActiveTag(tag.id)"
+                :class="{ 
+                  active: activeTag === tag.id,
+                  expandable: tag.videoBigType === '03',
+                  expanded: isSubTagsExpanded && tag.videoBigType === '03'
+                }"
+                @click="handleTagClick(tag)"
               >
-                {{ tag.name }}
+                <span>{{ tag.name }}</span>
+                <img 
+                  v-if="tag.videoBigType === '03'" 
+                  src="../assets/imgs/clinicStories/myClinicStory.svg"
+                  alt="展開"
+                  class="ellipsis-icon"
+                  @click.stop="toggleSubTags"
+                />
               </div>
             </swiper-slide>
           </swiper>
+        </div>
+      </div>
+      
+      <!-- 子標籤彈窗 -->
+      <div v-if="isSubTagsExpanded" class="subTagsModal" @click.self="closeSubTagsModal">
+        <div class="subTagsModalContent">
+          <!-- 標題欄 -->
+          <div class="subTagsModalHeader">
+            <h2 class="subTagsModalTitle">我的診間故事</h2>
+            <button class="subTagsModalClose" @click="closeSubTagsModal">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+          
+          <!-- 子標籤列表 -->
+          <div class="subTagsModalBody">
+            <div class="subTagsGrid">
+              <div
+                v-for="subTag in subTags"
+                :key="subTag.id"
+                class="subTagItem"
+                :class="{ active: activeSubTag === subTag.id }"
+                @click="setActiveSubTag(subTag.id)"
+              >
+                {{ subTag.name }}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <!-- 推薦影片區塊 -->
@@ -158,9 +199,60 @@ const tags = ref([
 ]);
 
 const activeTag = ref(0);
+const activeSubTag = ref(null);
+const isSubTagsExpanded = ref(false);
+const subTags = ref([]);
+
+// 處理標籤點擊
+const handleTagClick = (tag) => {
+  // 如果是「我的診間故事」(videoBigType === '03')，展開子標籤
+  if (tag.videoBigType === '03') {
+    if (!isSubTagsExpanded.value) {
+      toggleSubTags();
+    }
+  } else {
+    // 其他標籤正常切換
+    setActiveTag(tag.id);
+    // 收起子標籤並清除子標籤選中狀態
+    isSubTagsExpanded.value = false;
+    activeSubTag.value = null;
+  }
+};
 
 const setActiveTag = (tagId) => {
   activeTag.value = tagId;
+  // 如果不是「我的診間故事」，收起子標籤
+  const tag = tags.value.find(t => t.id === tagId);
+  if (tag && tag.videoBigType !== '03') {
+    isSubTagsExpanded.value = false;
+    activeSubTag.value = null;
+  }
+};
+
+// 切換子標籤展開/收起
+const toggleSubTags = () => {
+  isSubTagsExpanded.value = true;
+  if (subTags.value.length === 0) {
+    // 如果子標籤還沒載入，則載入
+    fetchVideoTypeList();
+  }
+};
+
+// 關閉子標籤彈窗
+const closeSubTagsModal = () => {
+  isSubTagsExpanded.value = false;
+};
+
+// 設置子標籤為活動狀態
+const setActiveSubTag = (subTagId) => {
+  activeSubTag.value = subTagId;
+  // 同時設置父標籤為活動狀態（「我的診間故事」）
+  const clinicStoryTag = tags.value.find(t => t.videoBigType === '03');
+  if (clinicStoryTag) {
+    activeTag.value = clinicStoryTag.id;
+  }
+  // 關閉彈窗
+  closeSubTagsModal();
 };
 
 // 根據會員狀態過濾標籤
@@ -266,8 +358,67 @@ const fetchVideoBigTypeList = async () => {
   }
 };
 
+// 獲取子標籤清單（VideoTypeList）
+const fetchVideoTypeList = async () => {
+  try {
+    const requestBody = {
+      AdminID: "kerwin",
+      Token: "qWyXVEU5jGeZhtsSRGx6MgnSzTSooHb8",
+    };
+
+    const response = await fetch(
+      "https://23700999.com:8081/HMA/api/bk/getVideoTypeList",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (result.Result === "OK" && result.VideoTypeList) {
+      // 轉換子標籤格式
+      subTags.value = result.VideoTypeList.map((type, index) => ({
+        id: `sub-${index}`,
+        name: type.Name || "",
+        videoType: type.Type || "",
+      }));
+    } else {
+      console.error("API 返回錯誤:", result.Result || "未知錯誤");
+    }
+  } catch (error) {
+    console.error("獲取子標籤清單失敗:", error);
+  }
+};
+
 // 根據選中標籤過濾影片
 const filteredVideos = computed(() => {
+  // 如果有選中的子標籤，優先使用子標籤過濾
+  if (activeSubTag.value !== null) {
+    const activeSubTagData = subTags.value.find(
+      (tag) => tag.id === activeSubTag.value
+    );
+    if (activeSubTagData) {
+      return allVideos.value.filter((video) => {
+        // 只根據 VideoType 過濾，不限制 VideoBigType
+        if (!video.videoTypes || !Array.isArray(video.videoTypes)) {
+          return false;
+        }
+        return video.videoTypes.some(
+          (vt) => vt.VideoType === activeSubTagData.videoType
+        );
+      });
+    }
+  }
+  
+  // 否則使用主標籤過濾
   const activeTagData = tags.value.find((tag) => tag.id === activeTag.value);
   if (!activeTagData || activeTagData.category === "all") {
     return allVideos.value;
@@ -503,6 +654,13 @@ const modules = [FreeMode];
       cursor: pointer;
       white-space: nowrap;
       transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+
+      span {
+        flex: 1;
+      }
 
       &.active,
       &:hover {
@@ -512,10 +670,144 @@ const modules = [FreeMode];
           $padding: 0.5rem 1rem
         );
         color: white;
+
+        .ellipsis-icon {
+          filter: brightness(0) invert(1);
+        }
+      }
+
+      &.expanded {
+        @include neumorphismOuter(
+          $bgColor: #74bc1f,
+          $radius: 50px,
+          $padding: 0.5rem 1rem
+        );
+        color: white;
+
+        .ellipsis-icon {
+          filter: brightness(0) invert(1);
+        }
+      }
+
+      .ellipsis-icon {
+        width: 17px;
+        height: 17px;
+        cursor: pointer;
+        flex-shrink: 0;
+    
+        transition: opacity 0.3s ease;
+
+        &:hover {
+          opacity: 0.8;
+        }
       }
     }
+
+
   }
 
+      // 子標籤彈窗
+      .subTagsModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeIn 0.3s ease;
+
+      .subTagsModalContent {
+        width: 100%;
+        max-width: 768px;
+        background: #f5f7fa;
+        border-radius: 20px 20px 0 0;
+        height: 85vh;
+        display: flex;
+        flex-direction: column;
+        animation: slideUp 0.3s ease;
+        transform: translateY(0);
+
+        .subTagsModalHeader {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 20px 16px;
+          border-bottom: 1px solid #e0e0e0;
+
+          .subTagsModalTitle {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e1e1e;
+            margin: 0;
+            letter-spacing: 3px;
+          }
+
+          .subTagsModalClose {
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            transition: color 0.3s ease;
+
+            &:hover {
+              color: #1e1e1e;
+            }
+
+            svg {
+              width: 24px;
+              height: 24px;
+            }
+          }
+        }
+
+        .subTagsModalBody {
+          flex: 1;
+          overflow-y: auto;
+          padding: 16px;
+
+          .subTagsGrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+            width: 100%;
+
+            .subTagItem {
+              @include neumorphismOuter($radius: 50px, $padding: 0.5rem 1rem);
+              color: #74bc1f;
+              font-size: 18px;
+              font-style: normal;
+              font-weight: 400;
+              line-height: 100%;
+              letter-spacing: 2.7px;
+              cursor: pointer;
+              white-space: nowrap;
+              transition: all 0.3s ease;
+              text-align: center;
+              width: 100%;
+
+              &.active,
+              &:hover {
+                @include neumorphismOuter(
+                  $bgColor: #74bc1f,
+                  $radius: 50px,
+                  $padding: 0.5rem 1rem
+                );
+                color: white;
+              }
+            }
+          }
+        }
+      }
+    }
+    
   .recommendedSection {
     padding: 0 16px;
     margin: 8px 0;
@@ -751,6 +1043,25 @@ const modules = [FreeMode];
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+// 彈窗動畫
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
   }
 }
 </style>
