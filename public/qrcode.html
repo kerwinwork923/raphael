@@ -367,7 +367,8 @@
     const switchCamBtn = document.getElementById("switchCamBtn");
     const statusText = document.getElementById("statusText");
     const logBody = document.getElementById("logBody");
-    const EventType="qrcode";
+    const EventType = "qrcode";
+  
     let scanner = null;              // Html5Qrcode 物件
     let isScanning = false;          // 是否正在掃描
     let logs = [];                   // 掃描紀錄
@@ -378,7 +379,6 @@
   
     let isProcessingScan = false;    // 避免同一張 QR 被重複觸發報到流程
   
-    // TODO: 換成你實際的報到 API URL
     const CHECKIN_API = "https://23700999.com:8081/HMA/000TTELOG_EVENT.jsp";
   
     const scanConfig = {
@@ -454,139 +454,177 @@
     }
   
     // 解析 vip=11087&name=陳威穎
-function extractFields(decodedText) {
-  let vip = null;
-  let name = null;
-
-  // 1) 若為 URL
-  try {
-    const url = new URL(decodedText);
-    vip = url.searchParams.get("vip") || url.searchParams.get("VIP");
-    name = url.searchParams.get("name");
-  } catch (e) {
-    // Not URL → fallback
-  }
-
-  // 2) 用正則解析 vip=
-  if (!vip) {
-    const vipMatch = decodedText.match(/vip=([^&]+)/i);
-    if (vipMatch) vip = vipMatch[1];
-  }
-
-  // 3) 用正則解析 name=
-  if (!name) {
-    const nameMatch = decodedText.match(/name=([^&]+)/i);
-    if (nameMatch) name = decodeURIComponent(nameMatch[1]);
-  }
-
-  return { vip, name };
-}
-
-
-async function logEvent(vip, name, Event, EventType) {
-    const payload = {SafeKey:"qrt897hpmd", VIP: vip, Event, EventType} ;
-    console.log("payload1="+JSON.stringify(payload, null, 1));
-       // 1) 先嘗試 sendBeacon（POST，Content-Type: text/plain; charset=UTF-8）
-    try {
-           const ok = navigator.sendBeacon(CHECKIN_API, new Blob(
-           [JSON.stringify(payload)], { type: "text/plain;charset=UTF-8" }
-          ));
-          if (ok) {console.info("[logEvent] sendBeacon sent");return;}     
-    } catch (e) {
-         console.warn("[logEvent] sendBeacon failed, fallback to fetch no-cors", e);
-    }
-      // 2) fallback: simple request（no-cors + text/plain → 不會 preflight）
-    try {
-             await fetch(CHECKIN_API, {
-               method: "POST",
-               mode: "no-cors",
-               headers: { "Content-Type": "text/plain;charset=UTF-8" }, // 注意：不要 application/json
-               body: new Blob([JSON.stringify(payload)], { type: "text/plain;charset=UTF-8" }),
-               keepalive: true,
-               });
-              console.info("[logEvent] fetch(no-cors) sent (opaque response)");
-        } catch (err) {
-             console.error("[logEvent] still failed:", err);
-          }
-
-          return true;
+    function extractFields(decodedText) {
+      let vip = null;
+      let name = null;
+  
+      // 1) 若為 URL
+      try {
+        const url = new URL(decodedText);
+        vip = url.searchParams.get("vip") || url.searchParams.get("VIP");
+        name = url.searchParams.get("name");
+      } catch (e) {
+        // Not URL → fallback
       }
-
-
-
-
-    // 呼叫報到 API，送出 JSON
+  
+      // 2) 用正則解析 vip=
+      if (!vip) {
+        const vipMatch = decodedText.match(/vip=([^&]+)/i);
+        if (vipMatch) vip = vipMatch[1];
+      }
+  
+      // 3) 用正則解析 name=
+      if (!name) {
+        const nameMatch = decodedText.match(/name=([^&]+)/i);
+        if (nameMatch) name = decodeURIComponent(nameMatch[1]);
+      }
+  
+      return { vip, name };
+    }
+  
+    async function logEvent(vip, name, Event, EventType) {
+      const payload = { SafeKey: "qrt897hpmd", VIP: vip, Event, EventType };
+      console.log("payload1=" + JSON.stringify(payload, null, 1));
+  
+      // 1) sendBeacon
+      try {
+        const ok = navigator.sendBeacon(
+          CHECKIN_API,
+          new Blob([JSON.stringify(payload)], { type: "text/plain;charset=UTF-8" })
+        );
+        if (ok) {
+          console.info("[logEvent] sendBeacon sent");
+          return true;
+        }
+      } catch (e) {
+        console.warn("[logEvent] sendBeacon failed, fallback to fetch no-cors", e);
+      }
+  
+      // 2) fetch no-cors
+      try {
+        await fetch(CHECKIN_API, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=UTF-8" },
+          body: new Blob([JSON.stringify(payload)], { type: "text/plain;charset=UTF-8" }),
+          keepalive: true
+        });
+        console.info("[logEvent] fetch(no-cors) sent (opaque response)");
+        return true;
+      } catch (err) {
+        console.error("[logEvent] still failed:", err);
+        return false;
+      }
+    }
+  
+    // （目前沒用到 JSON API，如要改成 JSON 就調這個）
     async function sendCheckin(vip, name, time, rawText) {
-  const payload = {
-    VIP: vip,
-    Name: name,
-    ts: time,
-    qrRaw: rawText
-  };
-
-  const res = await fetch(CHECKIN_API, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
-
-  if (!res.ok) throw new Error("HTTP " + res.status);
-  return true;
-}
+      const payload = {
+        VIP: vip,
+        Name: name,
+        ts: time,
+        qrRaw: rawText
+      };
+  
+      const res = await fetch(CHECKIN_API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+  
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return true;
+    }
   
     // 掃描成功時
     async function onScanSuccess(decodedText, decodedResult) {
-  if (isProcessingScan) return;
-  isProcessingScan = true;
-
-  const time = nowString();
-  const isDup = scannedSet.has(decodedText);
-
-  logs.push({
-    text: decodedText,
-    time,
-    duplicate: isDup
-  });
-  if (!isDup) scannedSet.add(decodedText);
-
-  renderLogs();
-
-  // 解析 vip 與 name
-  const { vip, name } = extractFields(decodedText);
-
-  if (!vip) {
-    alert("QRCode 內容中找不到 vip=xxxx，請確認是否為正確報到 QRcode。");
-    statusText.innerHTML =
-      `狀態：<span class="err">找不到 VIP 編號</span>`;
-    isProcessingScan = false;
-    return;
-  }
-
-  // name 若沒掃到，就用「來賓」
-  const displayName = name || "來賓";
-
-  statusText.innerHTML =
-    `狀態：<span class="ok">已掃描：VIP=${vip}（${displayName}），送出報到中…</span>`;
-
-  try {
-    //await sendCheckin(vip, displayName, time, decodedText);
-    await logEvent(vip, name, "QrcodeCheckin", EventType); 
-    
-    // 🎉 報到成功，顯示中文名字
-    alert(`報到成功！\n${displayName} 已完成報到 ✔`);
-    statusText.innerHTML =
-      `狀態：<span class="ok">${displayName} 報到成功，請掃描下一位。</span>`;
-
-  } catch (e) {
-    console.error("[checkin] error:", e);
-    alert("報到失敗，請再掃一次或改人工登記。");
-    statusText.innerHTML =
-      `狀態：<span class="err">API 呼叫失敗</span>`;
-  } finally {
-    isProcessingScan = false;
-  }
-}
-
+      if (isProcessingScan) return;
+      isProcessingScan = true;
+  
+      // 🔴 先停止掃描，避免同一張 QR 被連續讀取
+      if (scanner && isScanning) {
+        try {
+          await scanner.stop();
+        } catch (e) {
+          console.warn("stop error:", e);
+        }
+        isScanning = false;
+        startBtn.disabled = true;
+        stopBtn.disabled = true;
+      }
+  
+      const time = nowString();
+      const isDup = scannedSet.has(decodedText);
+  
+      logs.push({
+        text: decodedText,
+        time,
+        duplicate: isDup
+      });
+      if (!isDup) scannedSet.add(decodedText);
+  
+      renderLogs();
+  
+      // 解析 vip 與 name
+      const { vip, name } = extractFields(decodedText);
+  
+      if (!vip) {
+        alert("QRCode 內容中找不到 vip=xxxx，請確認是否為正確報到 QRcode。");
+        statusText.innerHTML =
+          `狀態：<span class="err">找不到 VIP 編號</span>`;
+        isProcessingScan = false;
+        // 失敗一樣嘗試重新啟動掃描
+        restartScanAfterDialog();
+        return;
+      }
+  
+      const displayName = name || "來賓";
+  
+      statusText.innerHTML =
+        `狀態：<span class="ok">已掃描：VIP=${vip}（${displayName}），送出報到中…</span>`;
+  
+      try {
+        // 依你現在實作使用 logEvent
+        await logEvent(vip, name, "QrcodeCheckin", EventType);
+  
+        // 🎉 報到成功，顯示中文名字
+        alert(`報到成功！\n${displayName} 已完成報到 ✔`);
+        statusText.innerHTML =
+          `狀態：<span class="ok">${displayName} 報到成功，請掃描下一位。</span>`;
+      } catch (e) {
+        console.error("[checkin] error:", e);
+        alert("報到失敗，請再掃一次或改用人工登記。");
+        statusText.innerHTML =
+          `狀態：<span class="err">API 呼叫失敗</span>`;
+      } finally {
+        isProcessingScan = false;
+        // ✅ 使用者按下 alert 的「確定」後，才會跑到這裡 → 再重新開始掃描
+        restartScanAfterDialog();
+      }
+    }
+  
+    // 按下 alert「確定」後重新啟動掃描
+    async function restartScanAfterDialog() {
+      if (!scanner) return;
+      try {
+        await ensureCameras();
+        const cameraId = cameras[currentCameraIndex].id;
+        await scanner.start(cameraId, scanConfig, onScanSuccess, onScanFailure);
+  
+        isScanning = true;
+        startBtn.disabled = true;               // 已在掃描中，不需要再按
+        stopBtn.disabled = false;
+        switchCamBtn.disabled = cameras.length < 2;
+        updateStatus("正在掃描中");
+      } catch (e) {
+        console.error("[restartScanAfterDialog] error:", e);
+        statusText.innerHTML =
+          `狀態：<span class="err">重新啟動掃描失敗，請按「開始掃描」再試一次。</span>`;
+        // 讓使用者可以手動重新按開始
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+      }
+    }
   
     function onScanFailure(error) {
       // 為避免洗版，不在這裡輸出 console
@@ -692,6 +730,7 @@ async function logEvent(vip, name, Event, EventType) {
     // 若想一開頁就自動啟動掃描，可開啟下行：
     // window.addEventListener("load", startScan);
   </script>
+  
   
   
 </body>
