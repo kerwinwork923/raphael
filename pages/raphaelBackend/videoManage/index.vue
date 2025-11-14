@@ -196,6 +196,7 @@
             </div>
           </div>
         </div>
+        
       </div>
     </aside>
   </div>
@@ -453,9 +454,14 @@ function refreshData() {
     }
 
     &.table-header {
-      font-weight: 600;
-      white-space: nowrap;
-      color: $primary-600;
+      color: var(--Primary-600, #2D3047);
+
+
+font-size: 20px;
+font-style: normal;
+font-weight: 400;
+
+letter-spacing: var(--Title-Medium-Tracking, 0.15px);
       @include respond-to("lg") {
         display: none;
       }
@@ -529,19 +535,17 @@ function refreshData() {
 
       &.recommended {
         .chip {
-          display: inline-block;
-          padding: 4px 8px;
-          border-radius: 4px;
-          font-size: 0.875rem;
-          background: rgba($raphael-gray-500, 0.1);
-          color: $raphael-gray-500;
-          border: 1px solid $raphael-gray-500;
+          color: var(--Neutral-500, #666);
 
-          &--success {
-            background: rgba($chip-success, 0.1);
-            color: $chip-success;
-            border: 1px solid $chip-success;
-          }
+
+font-size: 20px;
+font-style: normal;
+font-weight: 400;
+line-height: 100%; /* 20px */
+letter-spacing: var(--Title-Medium-Tracking, 0.15px);
+   
+
+
         }
       }
 
@@ -620,7 +624,7 @@ function refreshData() {
               position: absolute;
               inset: 0;
               border-radius: 9999px;
-              background: #e5e7eb;
+              background: #ccc;
               box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.12),
                 0 1px 0 rgba(255, 255, 255, 0.6);
               transition: background-color 0.25s ease;
@@ -642,7 +646,7 @@ function refreshData() {
             }
 
             .toggle__input:checked + .toggle__track {
-              background: $primary-200;
+              background: #2D3047;
 
               &::after {
                 transform: translate(22px, -50%);
