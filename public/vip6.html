@@ -57,6 +57,19 @@
     textarea { resize: vertical; }
     button.submit { margin-top: 12px; padding: 12px 22px; border: none; border-radius: 999px; background: var(--gold); color: var(--deep); font-weight: 700; font-size: 16px; cursor: pointer; transition: .2s; }
     button.submit:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(201,161,74,.25); }
+    button.gift {
+  margin-top: 24px;
+  padding: 24px 48px;       /* 增加按鈕的高度與寬度 */
+  border: none;
+  border-radius: 999px;
+  background: var(--gold);
+  color: var(--deep);
+  font-weight: 700;
+  font-size: 36px;          /* 字體變超大 */
+  cursor: pointer;
+  transition: .2s;
+  line-height: 1.2;         /* 避免大字體導致高度怪異 */
+}
     footer { border-top: 1px solid rgba(201,161,74,.3); padding: 24px 18px; text-align: center; color: var(--muted); background: linear-gradient(135deg,rgba(201,161,74,.08),rgba(255,255,255,0)); }
     @media(max-width:768px){ .section{padding:36px 14px;} header{padding:36px 12px 12px;} video{width:100%;} }
   </style>
@@ -146,6 +159,10 @@
     </div>
   </section>
 
+  <section class="section container">
+    <h2 class="title"><button class="gift">點我! 觀看影片、領取限量貴賓典藏禮</button></h2>
+  </section>
+
 
   <section id="form" class="section container">
     <h2 class="title">VIP 報名表單</h2>
@@ -167,7 +184,17 @@
    //vipId="1111";
     console.log("vipId="+vipId);
 	  logEvent("leadingpage", EventType);
-    
+    const giftBtn = document.querySelector("button.gift");
+if (giftBtn) {
+  giftBtn.addEventListener("click", () => {
+    // 記錄按鈕點擊事件（可選）
+    logEvent("click_gift", EventType);
+
+    // 帶參數跳轉
+    const targetUrl = `https://neuroplus.com.tw/vipclub.html?vip=${encodeURIComponent(vipId)}`;
+    window.location.href = targetUrl;
+  });
+}
 	async function logEvent(Event, EventType) {
       const payload = {SafeKey:"qrt897hpmd", VIP: vipId, Event, EventType} ;
       console.log("payload1="+JSON.stringify(payload, null, 1));
