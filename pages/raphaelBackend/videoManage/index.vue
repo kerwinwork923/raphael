@@ -32,7 +32,8 @@
       <section class="video-table">
         <!-- header row -->
         <div class="table-row table-header">
-          <div class="cover">封面照</div>
+          <!-- 封面照先隱藏 -->
+          <!-- <div class="cover">封面照</div> -->
           <div class="title">影片標題</div>
           <div class="recommended">標示為推薦</div>
           <div class="likes">按讚數</div>
@@ -47,7 +48,7 @@
             :key="video.id"
             class="table-row"
           >
-            <div class="cell cover" data-label="封面照">
+            <!-- <div class="cell cover" data-label="封面照">
               <div class="cover-image">
                 <img
                   v-if="video.coverImage"
@@ -55,15 +56,18 @@
                   :alt="video.title"
                 />
                 <div v-else class="cover-placeholder">
-                  <!-- <img src="/assets/imgs/backend/image-placeholder.svg" alt="" /> -->
+                  <img src="/assets/imgs/backend/image-placeholder.svg" alt="" />
                 </div>
               </div>
-            </div>
+            </div> -->
             <div class="cell title" data-label="影片標題">
               {{ video.title }}
             </div>
             <div class="cell recommended" data-label="標示為推薦">
-              <span class="chip" :class="{ 'chip--success': video.isRecommended }">
+              <span
+                class="chip"
+                :class="{ 'chip--success': video.isRecommended }"
+              >
                 {{ video.isRecommended ? "是" : "否" }}
               </span>
             </div>
@@ -80,7 +84,10 @@
                 >
                   <!-- <img src="/assets/imgs/backend/edit.svg" alt="編輯" /> -->
                 </button>
-                <label class="toggle" :aria-pressed="video.isPublished.toString()">
+                <label
+                  class="toggle"
+                  :aria-pressed="video.isPublished ? 'true' : 'false'"
+                >
                   <input
                     class="toggle__input"
                     type="checkbox"
@@ -161,7 +168,10 @@
           <h4 class="section-title">說明</h4>
           <div class="section-content">
             <ul class="description-list">
-              <li v-for="(item, index) in selectedVideo.description" :key="index">
+              <li
+                v-for="(item, index) in selectedVideo.description"
+                :key="index"
+              >
                 {{ item }}
               </li>
             </ul>
@@ -196,7 +206,6 @@
             </div>
           </div>
         </div>
-        
       </div>
     </aside>
   </div>
@@ -204,6 +213,8 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
 import Sidebar from "/components/raphaelBackend/Sidebar.vue";
 import FilterToolbar from "/components/raphaelBackend/FilterToolbar.vue";
 import DataUpdateHeader from "/components/raphaelBackend/DataUpdateHeader.vue";
@@ -216,66 +227,80 @@ useSeo({
   url: "https://neuroplus.com.tw",
 });
 
-// 模擬 store（之後可以替換成實際的 store）
+const router = useRouter();
+
+// 從 localStorage/sessionStorage 獲取認證資訊
+const token = ref(
+  typeof window !== "undefined"
+    ? localStorage.getItem("backendToken") ||
+        sessionStorage.getItem("backendToken")
+    : ""
+);
+const adminID = ref(
+  typeof window !== "undefined"
+    ? localStorage.getItem("adminID") || sessionStorage.getItem("adminID")
+    : ""
+);
+
+// 介面定義
+interface VideoType {
+  VideoType: string;
+  Name: string;
+}
+
+interface VideoBigType {
+  VideoBigType: string;
+  Name: string;
+}
+
+interface VideoMessage {
+  CheckTime: string;
+  Message: string;
+  BID: string;
+  Name: string;
+}
+
+interface ApiVideo {
+  Status: string;
+  VideoTypeList: VideoType[];
+  CheckTime: string;
+  AdminID: string;
+  Desc: string;
+  VideoBigTypeList: VideoBigType[];
+  VideoMessageSize: string;
+  goodCnt: string;
+  AID: string;
+  VideoURL: string;
+  Name: string;
+  VideoMessageList: VideoMessage[];
+}
+
+interface Video {
+  id: string;
+  title: string;
+  coverImage: string;
+  isRecommended: boolean;
+  likes: number;
+  comments: number;
+  isPublished: boolean;
+  description: string[];
+  videoLink: string;
+  tags: string[];
+  status: string;
+  checkTime: string;
+  adminID: string;
+  aid: string;
+}
+
+// store
 const store = reactive({
-  total: 4,
+  total: 0,
   lastUpdated: new Date().toLocaleString("zh-TW"),
   keyword: "",
   page: 1,
   pageSize: 10,
-  videos: [
-    {
-      id: 1,
-      title: "拉菲爾人本診所案例分享",
-      coverImage: "",
-      isRecommended: true,
-      likes: 100,
-      comments: 20,
-      isPublished: false,
-      description: [
-        "★耳鳴、失眠、頭暈、胃不適...身體狀況越來越差?",
-        "★長達20年的身心折磨,還有救嗎?長年飽受自律神經失調影響,嘗試過各種治療仍無改善,直到選擇自律神經調節療...回健康與希望!",
-      ],
-      videoLink: "https://youtu.be/ZvHT3hHhC1U?si=0uDmJK_kN6xxKKN",
-      tags: ["症狀標籤", "症狀標籤", "症狀標籤", "症狀標籤", "症狀標籤", "症狀標籤"],
-    },
-    {
-      id: 2,
-      title: "自律神經調節案例",
-      coverImage: "",
-      isRecommended: false,
-      likes: 50,
-      comments: 10,
-      isPublished: true,
-      description: ["案例說明內容"],
-      videoLink: "https://youtu.be/example",
-      tags: ["標籤1", "標籤2"],
-    },
-    {
-      id: 3,
-      title: "健康管理指南",
-      coverImage: "",
-      isRecommended: true,
-      likes: 200,
-      comments: 30,
-      isPublished: true,
-      description: ["健康管理說明"],
-      videoLink: "https://youtu.be/example2",
-      tags: ["健康", "管理"],
-    },
-    {
-      id: 4,
-      title: "治療流程介紹",
-      coverImage: "",
-      isRecommended: false,
-      likes: 75,
-      comments: 15,
-      isPublished: true,
-      description: ["治療流程說明"],
-      videoLink: "https://youtu.be/example3",
-      tags: ["治療", "流程"],
-    },
-  ],
+  videos: [] as Video[],
+  loading: false,
   setKeyword(value: string) {
     this.keyword = value;
     // 這裡可以加入搜尋邏輯
@@ -292,6 +317,59 @@ const store = reactive({
   },
 });
 
+// 將 API 資料轉換為前端格式
+function transformApiData(apiVideos: ApiVideo[]): Video[] {
+  return apiVideos.map((video) => ({
+    id: video.AID,
+    title: video.Name,
+    coverImage: "",
+    isRecommended: false, // API 沒有這個欄位，預設為 false
+    likes: parseInt(video.goodCnt) || 0,
+    comments: parseInt(video.VideoMessageSize) || 0,
+    isPublished: video.Status === "Y",
+    description: video.Desc ? [video.Desc] : [],
+    videoLink: video.VideoURL || "",
+    tags: [
+      ...(video.VideoTypeList?.map((t) => t.Name) || []),
+      ...(video.VideoBigTypeList?.map((t) => t.Name) || []),
+    ],
+    status: video.Status,
+    checkTime: video.CheckTime,
+    adminID: video.AdminID,
+    aid: video.AID,
+  }));
+}
+
+// 取得影片列表
+async function fetchVideoList() {
+  store.loading = true;
+  try {
+    const response = await axios.post(
+      "https://23700999.com:8081/HMA/api/bk/getVideoList",
+      {
+        Token: token.value,
+        AdminID: adminID.value,
+      }
+    );
+
+    if (
+      response.data &&
+      response.data.Result === "OK" &&
+      response.data.VideoList
+    ) {
+      store.videos = transformApiData(response.data.VideoList);
+      store.total = store.videos.length;
+      store.lastUpdated = new Date().toLocaleString("zh-TW");
+    } else {
+      console.error("API 返回錯誤:", response.data);
+    }
+  } catch (error) {
+    console.error("取得影片列表失敗:", error);
+  } finally {
+    store.loading = false;
+  }
+}
+
 // 使用 computed 處理分頁邏輯
 const paginatedVideos = computed(() => {
   const start = (store.page - 1) * store.pageSize;
@@ -306,12 +384,11 @@ const totalPages = computed(() => {
 const selectedVideo = ref<any>(null);
 
 onMounted(() => {
-  // 這裡可以加入載入資料的邏輯
+  fetchVideoList();
 });
 
 function handleAddNew() {
-  // 處理新增影片邏輯
-  console.log("新增影片");
+  router.push("/raphaelBackend/videoManage/addVideo");
 }
 
 function handleEdit(video: any) {
@@ -343,9 +420,7 @@ function closeDetailPanel() {
 }
 
 function refreshData() {
-  // 這裡可以加入重新載入資料的邏輯
-  store.lastUpdated = new Date().toLocaleString("zh-TW");
-  console.log("重新載入資料");
+  fetchVideoList();
 }
 </script>
 
@@ -427,7 +502,7 @@ function refreshData() {
 
   .table-row {
     display: grid;
-    grid-template-columns: 120px 2fr 1fr 1fr 1fr 2fr;
+    grid-template-columns: 5fr 2fr 1fr 1fr 1fr ;
     position: relative;
     gap: 2px;
     align-items: center;
@@ -454,14 +529,11 @@ function refreshData() {
     }
 
     &.table-header {
-      color: var(--Primary-600, #2D3047);
-
-
-font-size: 20px;
-font-style: normal;
-font-weight: 400;
-
-letter-spacing: var(--Title-Medium-Tracking, 0.15px);
+      color: var(--Primary-600, #2d3047);
+      font-size: 20px;
+      font-style: normal;
+      font-weight: 400;
+      letter-spacing: var(--Title-Medium-Tracking, 0.15px);
       @include respond-to("lg") {
         display: none;
       }
@@ -530,22 +602,17 @@ letter-spacing: var(--Title-Medium-Tracking, 0.15px);
       &.title {
         overflow: hidden;
         text-overflow: ellipsis;
-        white-space: nowrap;
+        word-break: break-word;
       }
 
       &.recommended {
         .chip {
           color: var(--Neutral-500, #666);
-
-
-font-size: 20px;
-font-style: normal;
-font-weight: 400;
-line-height: 100%; /* 20px */
-letter-spacing: var(--Title-Medium-Tracking, 0.15px);
-   
-
-
+          font-size: 20px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: 100%; /* 20px */
+          letter-spacing: var(--Title-Medium-Tracking, 0.15px);
         }
       }
 
@@ -646,7 +713,7 @@ letter-spacing: var(--Title-Medium-Tracking, 0.15px);
             }
 
             .toggle__input:checked + .toggle__track {
-              background: #2D3047;
+              background: #2d3047;
 
               &::after {
                 transform: translate(22px, -50%);
