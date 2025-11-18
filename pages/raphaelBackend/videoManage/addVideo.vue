@@ -88,19 +88,42 @@
         </div>
 
 
-<!-- 標示為推薦 -->
+    <!-- 標示為推薦 -->
+    <div class="form-section">
+    <label class="form-label">標示為推薦</label>
+    <div class="input-wrapper">
+        <span class="input-icon">
+        <img src="/assets/imgs/backend/fire.svg" alt="標示為推薦" />
+        </span>
+        <select
+        v-model="formData.isRecommended"
+        class="form-input select-input"
+        >
+        <option :value="true">是</option>
+        <option :value="false">否</option>
+        </select>
+    </div>
+    </div>
+
+<!-- 大標籤 -->
 <div class="form-section">
-  <label class="form-label">標示為推薦</label>
+  <label class="form-label">影片類別</label>
   <div class="input-wrapper">
     <span class="input-icon">
-      <img src="/assets/imgs/backend/fire.svg" alt="標示為推薦" />
+      <img src="/assets/imgs/backend/tag.svg" alt="影片類別" />
     </span>
     <select
-      v-model="formData.isRecommended"
+      v-model="formData.bigType"
       class="form-input select-input"
     >
-      <option :value="true">是</option>
-      <option :value="false">否</option>
+      <option value="">影片類別</option>
+      <option
+        v-for="bigType in videoBigTypeList"
+        :key="bigType.Type"
+        :value="bigType.Type"
+      >
+        {{ bigType.Name }}
+      </option>
     </select>
   </div>
 </div>
@@ -116,7 +139,7 @@
       @click="openTagDialog"
     >
       <span class="tag-button-text">
-        {{ formData.tags || "選擇標籤" }}
+        {{ selectedTagsDisplay || "選擇標籤" }}
       </span>
     </button>
   </div>
@@ -141,15 +164,27 @@
         </div>
       </div>
     </main>
+
+    <!-- 標籤設定彈窗 -->
+    <TagSetting
+      v-model="showTagDialog"
+      :selected-tags="selectedTagsList"
+      :available-tags="availableTagsList"
+      @save="handleTagSave"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { ref, reactive, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import axios from "axios";
 import Sidebar from "/components/raphaelBackend/Sidebar.vue";
+import TagSetting from "/components/raphaelBackend/tasSetting.vue";
+import { useVideoTypeStore } from "~/stores/useVideoTypeStore";
 
 const router = useRouter();
+const videoTypeStore = useVideoTypeStore();
 
 // 表單資料
 const formData = reactive({
@@ -158,6 +193,34 @@ const formData = reactive({
   isRecommended: true,
   tags: "",
   description: "",
+  bigType: "" as string, // 影片大標籤（單選）
+  videoTypes: [] as string[], // 影片類型（多選，從標籤選擇器來的）
+});
+
+// 影片大標籤列表
+interface VideoBigType {
+  Type: string;
+  Name: string;
+}
+
+const videoBigTypeList = ref<VideoBigType[]>([]);
+const loadingBigType = ref(false);
+
+// 標籤相關
+const showTagDialog = ref(false);
+const selectedTagsList = ref<string[]>([]);
+
+// 可用的標籤列表（從 store 取得）
+const availableTagsList = computed(() => {
+  return videoTypeStore.videoTypeList.map((item: { Type: string; Name: string }) => item.Name);
+});
+
+// 將選中的標籤轉換為字串顯示
+const selectedTagsDisplay = computed(() => {
+  if (selectedTagsList.value.length === 0) {
+    return "";
+  }
+  return selectedTagsList.value.join(", ");
 });
 
 // 檔案上傳相關
@@ -224,18 +287,77 @@ function removeCoverImage() {
   }
 }
 
-// 開啟標籤下拉選單
+// 開啟標籤設定彈窗
 function openTagDialog() {
-  console.log("開啟標籤下拉選單");
+  showTagDialog.value = true;
 }
+
+// 處理標籤儲存
+function handleTagSave(tags: string[]) {
+  selectedTagsList.value = tags;
+  formData.tags = tags.join(", ");
+  
+  // 將標籤名稱轉換為 Type 代碼
+  formData.videoTypes = tags
+    .map((tagName: string) => {
+      const typeItem = videoTypeStore.videoTypeList.find(
+        (item: { Type: string; Name: string }) => item.Name === tagName
+      );
+      return typeItem?.Type || "";
+    })
+    .filter((type: string) => type !== "");
+}
+
+
+// 取得影片大標籤列表
+async function fetchVideoBigTypeList() {
+  loadingBigType.value = true;
+  try {
+    const token = typeof window !== "undefined"
+      ? localStorage.getItem("backendToken") || sessionStorage.getItem("backendToken")
+      : "";
+    const adminID = typeof window !== "undefined"
+      ? localStorage.getItem("adminID") || sessionStorage.getItem("adminID")
+      : "";
+
+    if (!token || !adminID) {
+      throw new Error("缺少 token 或 adminID");
+    }
+
+    const response = await axios.post(
+      "https://23700999.com:8081/HMA/api/bk/getVideoBigTypeList",
+      {
+        AdminID: adminID,
+        Token: token,
+      }
+    );
+
+    if (response.data && response.data.Result === "OK" && response.data.VideoBigTypeList) {
+      videoBigTypeList.value = response.data.VideoBigTypeList;
+    } else {
+      console.error("API 返回錯誤:", response.data);
+      videoBigTypeList.value = [];
+    }
+  } catch (error) {
+    console.error("取得影片大標籤列表失敗:", error);
+    videoBigTypeList.value = [];
+  } finally {
+    loadingBigType.value = false;
+  }
+}
+
+// 初始化資料
+onMounted(async () => {
+  // 取得影片類型列表（從 store）
+  await videoTypeStore.fetchVideoTypeList();
+  
+  // 取得影片大標籤列表
+  await fetchVideoBigTypeList();
+});
 
 // 返回
 function handleBack() {
   router.push("/raphaelBackend/videoManage");
-}
-
-function handleSave() {
-  console.log("儲存並上架");
 }
 
 // 提交表單
@@ -251,13 +373,66 @@ async function handleSubmit() {
     return;
   }
 
-  // TODO: 這裡可以加入 API 呼叫來儲存資料
-  console.log("提交表單:", formData);
-  console.log("封面圖片:", coverImage.value);
+  if (formData.videoTypes.length === 0) {
+    alert("請至少選擇一個標籤");
+    return;
+  }
 
-  // 暫時先返回列表頁
-  alert("儲存成功！");
-  handleBack();
+  if (!formData.bigType) {
+    alert("請選擇影片類別");
+    return;
+  }
+
+  if (!formData.description.trim()) {
+    alert("請輸入說明");
+    return;
+  }
+
+  try {
+    const token = typeof window !== "undefined"
+      ? localStorage.getItem("backendToken") || sessionStorage.getItem("backendToken")
+      : "";
+    const adminID = typeof window !== "undefined"
+      ? localStorage.getItem("adminID") || sessionStorage.getItem("adminID")
+      : "";
+
+    if (!token || !adminID) {
+      alert("請先登入");
+      return;
+    }
+
+    const requestData = {
+      AdminID: adminID,
+      Token: token,
+      Type: formData.videoTypes, // Video種類 (一定要有)
+      BigType: [formData.bigType], // Video標籤種類 (一定要有，轉為陣列)
+      VideoURL: formData.videoLink, // Video網址 (一定要有)
+      Name: formData.title.trim(), // 名稱 (沒有空白)
+      Desc: formData.description.trim(), // 說明 (一定要有)
+    };
+
+    console.log("提交資料:", requestData);
+
+    const response = await axios.post(
+      "https://23700999.com:8081/HMA/api/bk/CreateVideo",
+      requestData
+    );
+
+    if (response.data && response.data.Result === "OK") {
+      alert("儲存成功！");
+      handleBack();
+    } else {
+      alert("儲存失敗：" + (response.data?.Message || "未知錯誤"));
+    }
+  } catch (error: any) {
+    console.error("儲存影片失敗:", error);
+    alert("儲存失敗：" + (error.response?.data?.Message || error.message || "未知錯誤"));
+  }
+}
+
+// 儲存並上架（與 handleSubmit 相同功能）
+async function handleSave() {
+  await handleSubmit();
 }
 </script>
 
@@ -498,6 +673,7 @@ async function handleSubmit() {
     background-repeat: no-repeat;
     background-position: right 16px center;
     background-size: 16px 16px;
+
   }
 }
 
@@ -520,14 +696,12 @@ async function handleSubmit() {
     }
 
     .tag-button-text {
-        color: $raphael-gray-400;
+      color: $raphael-gray-400;
 
-
-      // 沒選任何標籤時，用 placeholder 的顏色
-      &:empty::before {
-        content: "選擇標籤";
-        color: $raphael-gray-400;
-      } 
+      // 有選中標籤時，改變顏色
+      &:not(:empty) {
+        color: $primary-600;
+      }
     }
   }
 }
