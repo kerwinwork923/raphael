@@ -735,21 +735,7 @@ function refreshData() {
               opacity: 0.7;
             }
 
-            &.btn-edit {
-              img {
-                filter: brightness(0) saturate(100%) invert(48%) sepia(79%)
-                  saturate(2476%) hue-rotate(142deg) brightness(98%)
-                  contrast(101%);
-              }
-            }
-
-            &.btn-delete {
-              img {
-                filter: brightness(0) saturate(100%) invert(27%) sepia(51%)
-                  saturate(2878%) hue-rotate(346deg) brightness(104%)
-                  contrast(97%);
-              }
-            }
+        
           }
 
           .toggle {
