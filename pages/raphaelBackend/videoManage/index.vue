@@ -33,7 +33,7 @@
         <!-- header row -->
         <div class="table-row table-header">
           <!-- 封面照先隱藏 -->
-          <!-- <div class="cover">封面照</div> -->
+          <div class="cover">封面照</div>
           <div class="title">影片標題</div>
           <div class="recommended">標示為推薦</div>
           <div class="likes">按讚數</div>
@@ -48,7 +48,7 @@
             :key="video.id"
             class="table-row"
           >
-            <!-- <div class="cell cover" data-label="封面照">
+            <div class="cell cover" data-label="封面照">
               <div class="cover-image">
                 <img
                   v-if="video.coverImage"
@@ -56,10 +56,10 @@
                   :alt="video.title"
                 />
                 <div v-else class="cover-placeholder">
-                  <img src="/assets/imgs/backend/image-placeholder.svg" alt="" />
+                
                 </div>
               </div>
-            </div> -->
+            </div>
             <div class="cell title" data-label="影片標題">
               {{ video.title }}
             </div>
@@ -585,7 +585,7 @@ function refreshData() {
 
   .table-row {
     display: grid;
-    grid-template-columns: 4.5fr 1fr 1fr 1fr 1fr ;
+    grid-template-columns:1fr 4.5fr 1fr 1fr 1fr 1fr ;
     position: relative;
     gap: 2px;
     align-items: center;
@@ -651,8 +651,8 @@ function refreshData() {
 
       &.cover {
         .cover-image {
-          width: 80px;
-          height: 60px;
+          width: 120px;
+          height: 80px;
           border-radius: 4px;
           overflow: hidden;
           display: flex;
@@ -709,7 +709,7 @@ function refreshData() {
           align-items: center;
           gap: 0.5rem;
           width: 100%;
-          justify-content: flex-end;
+         
 
           @include respond-to("lg") {
             width: 100%;
