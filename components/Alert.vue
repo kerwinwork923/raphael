@@ -5,7 +5,7 @@
       <slot>{{ defaultContent }}</slot>
     </div>
     <div class="btnGroup">
-      <button class="closeBtn" @click="handleClose">關閉</button>
+      <button class="closeBtn" @click="handleClose">{{ closeButtonText }}</button>
       <button v-if="showRedirectButton" class="redirectBtn" @click="handleRedirect">
         跳轉
       </button>
@@ -43,10 +43,14 @@ export default defineComponent({
       type: String,
       default: "確定",
     },
+    closeButtonText: {
+      type: String,
+      default: "關閉",
+    },
   },
   emits: ["close", "click"],
   setup(props, { emit }) {
-    const { defaultContent, showRedirectButton, redirectTarget, showClickButton, clickButtonText } = toRefs(props);
+    const { defaultContent, showRedirectButton, redirectTarget, showClickButton, clickButtonText, closeButtonText } = toRefs(props);
 
     const handleClose = () => {
       emit("close"); // 通知父組件關閉
@@ -61,6 +65,7 @@ export default defineComponent({
       showRedirectButton,
       showClickButton,
       clickButtonText,
+      closeButtonText,
       handleClose,
       handleRedirect,
     };
@@ -132,7 +137,7 @@ export default defineComponent({
   font-size: 1rem;
 }
 .raphaelAlert .btnGroup .redirectBtn,
-.raphaelAlert .btnGroup .closeBtn {
+.raphaelAlert .btnGroup .closeBtn:not(:first-child) {
   border-left: 1px solid #aaa;
 }
 </style>

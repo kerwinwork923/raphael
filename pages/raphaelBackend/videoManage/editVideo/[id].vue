@@ -106,6 +106,23 @@
           </div>
         </div>
 
+        <!-- 上架狀態 -->
+        <div class="form-section">
+          <label class="form-label">上架狀態</label>
+          <div class="input-wrapper">
+            <span class="input-icon">
+              <img src="/assets/imgs/backend/fire.svg" alt="上架狀態" />
+            </span>
+            <select
+              v-model="formData.isPublished"
+              class="form-input select-input"
+            >
+              <option :value="true">上架</option>
+              <option :value="false">下架</option>
+            </select>
+          </div>
+        </div>
+
         <!-- 大標籤 -->
         <div class="form-section">
           <label class="form-label">影片類別</label>
@@ -132,15 +149,31 @@
         <!-- 標籤 -->
         <div class="form-section">
           <label class="form-label">標籤</label>
-          <div class="input-wrapper tag-input-wrapper">
+          <div class="tag-container">
+            <div v-if="selectedTagsList.length > 0" class="tag-chips">
+              <div
+                v-for="(tag, index) in selectedTagsList"
+                :key="index"
+                class="tag-chip"
+              >
+                <span class="tag-chip-name">{{ tag }}</span>
+                <button
+                  type="button"
+                  class="tag-chip-delete"
+                  @click="removeTag(tag)"
+                  :aria-label="`移除 ${tag}`"
+                >
+                  <img src="/assets/imgs/backend/delete.svg" alt="刪除" />
+                </button>
+              </div>
+            </div>
             <button
               type="button"
-              class="tag-button"
+              class="tag-add-button"
               @click="openTagDialog"
             >
-              <span class="tag-button-text">
-                {{ selectedTagsDisplay || "選擇標籤" }}
-              </span>
+              <span class="tag-add-icon">+</span>
+              <span class="tag-add-text">新增標籤</span>
             </button>
           </div>
         </div>
@@ -199,6 +232,7 @@ const formData = reactive({
   title: "",
   videoLink: "",
   isRecommended: true,
+  isPublished: true, // 上架狀態
   tags: "",
   description: "",
   bigType: "" as string,
@@ -286,6 +320,22 @@ function processFile(file: File) {
   reader.readAsDataURL(file);
 }
 
+// 將檔案轉換為 base64
+function fileToBase64(file: File): Promise<{ base64: string; subName: string }> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      const base64 = result.split(",")[1]; // 移除 data:image/xxx;base64, 前綴
+      const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const subName = extension === "jpeg" ? "jpg" : extension;
+      resolve({ base64, subName });
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 // 移除封面圖片
 function removeCoverImage() {
   coverImage.value = null;
@@ -314,6 +364,25 @@ function handleTagSave(tags: string[]) {
       return typeItem?.Type || "";
     })
     .filter((type: string) => type !== "");
+}
+
+// 移除單個標籤
+function removeTag(tagName: string) {
+  const index = selectedTagsList.value.indexOf(tagName);
+  if (index > -1) {
+    selectedTagsList.value.splice(index, 1);
+    formData.tags = selectedTagsList.value.join(", ");
+    
+    // 更新 videoTypes
+    formData.videoTypes = selectedTagsList.value
+      .map((tag: string) => {
+        const typeItem = videoTypeStore.videoTypeList.find(
+          (item: { Type: string; Name: string }) => item.Name === tag
+        );
+        return typeItem?.Type || "";
+      })
+      .filter((type: string) => type !== "");
+  }
 }
 
 // 取得影片大標籤列表
@@ -398,8 +467,16 @@ async function fetchVideoData() {
           formData.videoTypes = video.VideoTypeList.map((t: any) => t.VideoType);
         }
         
-        // 設定推薦狀態（如果 API 有提供）
-        // formData.isRecommended = video.IsRecommended || false;
+        // 設定推薦狀態
+        formData.isRecommended = (video as any).PromoteVideo === "Y";
+        
+        // 設定上架狀態
+        formData.isPublished = (video as any).OnLineVideo === "Y" || video.Status === "Y";
+        
+        // 設定現有封面圖片
+        if ((video as any).ImgURL) {
+          existingCoverImage.value = (video as any).ImgURL;
+        }
       } else {
         alert("找不到該影片");
         handleBack();
@@ -469,7 +546,18 @@ async function handleSubmit() {
       return;
     }
 
-    const requestData = {
+    // 處理圖片 base64
+    let imageData = null;
+    if (coverImage.value) {
+      try {
+        imageData = await fileToBase64(coverImage.value);
+      } catch (error) {
+        alert("圖片處理失敗，請重新選擇");
+        return;
+      }
+    }
+
+    const requestData: any = {
       AdminID: adminID,
       Token: token,
       AID: videoId, // 編輯時需要傳遞 AID
@@ -478,13 +566,22 @@ async function handleSubmit() {
       VideoURL: formData.videoLink,
       Name: formData.title.trim(),
       Desc: formData.description.trim(),
+      PromoteVideo: formData.isRecommended ? "Y" : "N", // 推薦
+      OnLineVideo: formData.isPublished ? "Y" : "N", // 上架
     };
 
-    console.log("提交資料:", requestData);
+    // 如果有新圖片，加入 base64 資料（編輯時只有上傳新圖片才需要傳）
+    if (imageData) {
+      requestData.base64String = imageData.base64;
+      requestData.subName = imageData.subName;
+    }
+    // 如果沒有上傳新圖片，不傳 base64String 和 subName（保持原有圖片）
+
+    console.log("提交資料:", { ...requestData, base64String: imageData ? "[已包含]" : "無" });
 
     // 串接更新 API
     const response = await axios.post(
-      "https://23700999.com:8081/HMA/api/bk/UpdateVideo",
+      "https://23700999.com:8081/HMA/api/bk/ModifyVideo",
       requestData
     );
 
@@ -758,29 +855,92 @@ async function handleSave() {
   }
 }
 
-.tag-input-wrapper {
-  .tag-button {
-    width: 100%;
-    padding: 12px 16px 12px 48px;
-    border: 1px solid $border;
-    border-radius: 8px;
-    font-size: 16px;
-    color: $primary-600;
-    background: $raphael-white;
-    transition: all 0.2s ease;
-    text-align: left;
+// 標籤容器
+.tag-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tag-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 50px;
+  background: rgba($primary-200, 0.1);
+  border: 1px solid $primary-200;
+  
+  .tag-chip-name {
+    color: $primary-200;
+    font-size: 14px;
+    font-weight: 400;
+  }
+  
+  .tag-chip-delete {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    border: none;
+    background: transparent;
     cursor: pointer;
-    &:hover {
-      border-color: $primary-200;
-      box-shadow: 0 0 0 3px rgba($primary-200, 0.1);
+    transition: all 0.2s ease;
+    
+    img {
+      width: 12px;
+      height: 12px;
+      opacity: 0.7;
     }
-
-    .tag-button-text {
-      color: $raphael-gray-400;
-
-      &:not(:empty) {
-        color: $primary-600;
+    
+    &:hover {
+      opacity: 1;
+      
+      img {
+        opacity: 1;
       }
+    }
+  }
+}
+
+.tag-add-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px dashed $border;
+  border-radius: 8px;
+  background: $raphael-white;
+  color: $raphael-gray-500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: fit-content;
+  
+  .tag-add-icon {
+    font-size: 18px;
+    font-weight: 600;
+    color: $primary-200;
+  }
+  
+  .tag-add-text {
+    color: $raphael-gray-500;
+  }
+  
+  &:hover {
+    border-color: $primary-200;
+    background: rgba($primary-200, 0.05);
+    
+    .tag-add-text {
+      color: $primary-200;
     }
   }
 }

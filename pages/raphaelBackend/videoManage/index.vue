@@ -76,14 +76,13 @@
               {{ video.comments }}
             </div>
             <div class="cell actions" data-label="操作">
-              <img src="/assets/imgs/backend/edit.svg" alt="編輯" class="edit-icon">
               <div class="action-buttons">
                 <button
                   class="btn-action btn-edit"
                   @click="handleEdit(video)"
                   title="編輯"
                 >
-                  <!-- <img src="/assets/imgs/backend/edit.svg" alt="編輯" /> -->
+                  <img src="/assets/imgs/backend/edit.svg" alt="編輯" />
                 </button>
                 <label
                   class="toggle"
@@ -107,10 +106,9 @@
                   @click="handleDelete(video)"
                   title="刪除"
                 >
-                  <!-- <img src="/assets/imgs/backend/delete.svg" alt="刪除" /> -->
+                  <img src="/assets/imgs/backend/delete2.svg" alt="刪除" />
                 </button>
               </div>
-              <img src="/assets/imgs/backend/delete2.svg" alt="刪除" class="delete-icon">
             </div>
           </div>
         </div>
@@ -327,11 +325,11 @@ function transformApiData(apiVideos: ApiVideo[]): Video[] {
   return apiVideos.map((video) => ({
     id: video.AID,
     title: video.Name,
-    coverImage: "",
-    isRecommended: false, // API 沒有這個欄位，預設為 false
+    coverImage: (video as any).ImgURL || "",
+    isRecommended: (video as any).PromoteVideo === "Y", // 推薦狀態
     likes: parseInt(video.goodCnt) || 0,
     comments: parseInt(video.VideoMessageSize) || 0,
-    isPublished: video.Status === "Y",
+    isPublished: (video as any).OnLineVideo === "Y" || video.Status === "Y", // 上架狀態
     description: video.Desc ? [video.Desc] : [],
     videoLink: video.VideoURL || "",
     tags: [
@@ -342,6 +340,12 @@ function transformApiData(apiVideos: ApiVideo[]): Video[] {
     checkTime: video.CheckTime,
     adminID: video.AdminID,
     aid: video.AID,
+    promoteVideo: (video as any).PromoteVideo || "N",
+    onLineVideo: (video as any).OnLineVideo || "N",
+    // 保留原始資料以便更新時使用
+    videoTypes: video.VideoTypeList?.map((t) => t.VideoType) || [],
+    bigTypes: video.VideoBigTypeList?.map((t) => t.VideoBigType) || [],
+    imgURL: (video as any).ImgURL || "",
   }));
 }
 
@@ -400,21 +404,97 @@ function handleEdit(video: any) {
   router.push(`/raphaelBackend/videoManage/editVideo/${video.aid}`);
 }
 
-function handleTogglePublish(video: any) {
-  video.isPublished = !video.isPublished;
-  // 這裡可以加入 API 呼叫
-  console.log("切換上架狀態", video);
+async function handleTogglePublish(video: any) {
+  const newStatus = !video.isPublished;
+  
+  try {
+    const token = typeof window !== "undefined"
+      ? localStorage.getItem("backendToken") || sessionStorage.getItem("backendToken")
+      : "";
+    const adminID = typeof window !== "undefined"
+      ? localStorage.getItem("adminID") || sessionStorage.getItem("adminID")
+      : "";
+
+    if (!token || !adminID) {
+      alert("請先登入");
+      return;
+    }
+
+    // 需要從 store 中找到完整的影片資料
+    const fullVideo = store.videos.find((v: any) => v.aid === video.aid);
+    if (!fullVideo) {
+      alert("找不到影片資料");
+      return;
+    }
+
+    // 準備更新資料（只更新上架狀態）
+    const requestData: any = {
+      AdminID: adminID,
+      Token: token,
+      AID: video.aid,
+      Type: fullVideo.videoTypes || [],
+      BigType: fullVideo.bigTypes || [],
+      VideoURL: fullVideo.videoLink || "",
+      Name: fullVideo.title || "",
+      Desc: fullVideo.description?.[0] || "",
+      PromoteVideo: fullVideo.promoteVideo || "N",
+      OnLineVideo: newStatus ? "Y" : "N",
+    };
+
+    const response = await axios.post(
+      "https://23700999.com:8081/HMA/api/bk/ModifyVideo",
+      requestData
+    );
+
+    if (response.data && response.data.Result === "OK") {
+      video.isPublished = newStatus;
+      video.onLineVideo = newStatus ? "Y" : "N";
+    } else {
+      alert("更新失敗：" + (response.data?.Message || "未知錯誤"));
+    }
+  } catch (error: any) {
+    console.error("切換上架狀態失敗:", error);
+    alert("更新失敗：" + (error.response?.data?.Message || error.message || "未知錯誤"));
+  }
 }
 
-function handleDelete(video: any) {
-  if (confirm(`確定要刪除「${video.title}」嗎？`)) {
-    // 這裡可以加入 API 呼叫
-    const index = store.videos.findIndex((v: any) => v.id === video.id);
-    if (index > -1) {
-      store.videos.splice(index, 1);
-      store.total--;
+async function handleDelete(video: any) {
+  if (!confirm(`確定要刪除「${video.title}」嗎？`)) {
+    return;
+  }
+
+  try {
+    const token = typeof window !== "undefined"
+      ? localStorage.getItem("backendToken") || sessionStorage.getItem("backendToken")
+      : "";
+    const adminID = typeof window !== "undefined"
+      ? localStorage.getItem("adminID") || sessionStorage.getItem("adminID")
+      : "";
+
+    if (!token || !adminID) {
+      alert("請先登入");
+      return;
     }
-    console.log("刪除影片", video);
+
+    const response = await axios.post(
+      "https://23700999.com:8081/HMA/api/bk/DeleteVideo",
+      {
+        AdminID: adminID,
+        Token: token,
+        AID: video.aid,
+      }
+    );
+
+    if (response.data && response.data.Result === "OK") {
+      alert("刪除成功！");
+      // 重新載入列表
+      await fetchVideoList();
+    } else {
+      alert("刪除失敗：" + (response.data?.Message || "未知錯誤"));
+    }
+  } catch (error: any) {
+    console.error("刪除影片失敗:", error);
+    alert("刪除失敗：" + (error.response?.data?.Message || error.message || "未知錯誤"));
   }
 }
 
@@ -628,6 +708,8 @@ function refreshData() {
           display: flex;
           align-items: center;
           gap: 0.5rem;
+          width: 100%;
+          justify-content: flex-end;
 
           @include respond-to("lg") {
             width: 100%;

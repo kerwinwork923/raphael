@@ -288,7 +288,7 @@ const transformApiData = (apiData) => {
     const videoId = extractYouTubeVideoId(item.VideoURL);
     return {
       id: parseInt(item.AID),
-      thumbnail: getYouTubeThumbnail(item.VideoURL),
+      thumbnail: item.ImgURL || getYouTubeThumbnail(item.VideoURL),
       fullTitle: item.Name || "",
       subtitle: item.Desc || "",
       description: item.Desc || "",
@@ -300,6 +300,8 @@ const transformApiData = (apiData) => {
       checkTime: item.CheckTime || "",
       adminId: item.AdminID || "",
       isLiked: false, // 預設為未點讚，可根據實際需求從 API 獲取
+      promoteVideo: item.PromoteVideo || "",
+      onLineVideo: item.OnLineVideo || "",
     };
   });
 };
@@ -434,9 +436,9 @@ const filteredVideos = computed(() => {
   });
 });
 
-// 推薦影片（固定顯示前3個）
+// 推薦影片（只顯示 PromoteVideo === "Y" 的影片）
 const recommendedVideos = computed(() => {
-  return allVideos.value.slice(0, 3);
+  return allVideos.value.filter((video) => video.promoteVideo === "Y");
 });
 
 // 跳轉到影片詳細頁面
@@ -566,9 +568,9 @@ const fetchVideoList = async () => {
     const result = await response.json();
 
     if (result.Result === "OK" && result.VideoList) {
-      // 只處理 Status 為 "Y" 的影片
+      // 只處理 OnLineVideo 為 "Y" 的影片（已上架）
       const activeVideos = result.VideoList.filter(
-        (item) => item.Status === "Y"
+        (item) => item.OnLineVideo === "Y"
       );
       allVideos.value = transformApiData(activeVideos);
     } else {

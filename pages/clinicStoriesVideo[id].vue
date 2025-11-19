@@ -133,27 +133,31 @@
             <div class="commentAvatar">
               <!-- 頭像占位 -->
             </div>
-            <div class="commentContent">
-              <div class="commentHeader">
-                <span class="commentName">{{ comment.name }}</span>
-                <span class="commentTime">{{ comment.time }}</span>
+              <div class="commentContent">
+                <div class="commentHeader">
+                  <span class="commentName">{{ comment.name }}</span>
+                  <span class="commentTime">{{ comment.time }}</span>
+                </div>
+                <div class="commentText">
+                  <p
+                    v-if="!comment.showFull && comment.text.length > 50"
+                    class="commentTextShort"
+                  >
+                    {{ comment.text.substring(0, 50) }}...
+                    <span class="showMoreText" @click="showFullComment(index)">
+                      顯示完整內容
+                    </span>
+                  </p>
+                  <p v-else class="commentTextFull">{{ comment.text }}</p>
+                </div>
               </div>
-              <div class="commentText">
-                <p
-                  v-if="!comment.showFull && comment.text.length > 50"
-                  class="commentTextShort"
-                >
-                  {{ comment.text.substring(0, 50) }}...
-                  <span class="showMoreText" @click="showFullComment(index)">
-                    顯示完整內容
-                  </span>
-                </p>
-                <p v-else class="commentTextFull">{{ comment.text }}</p>
+              <div 
+                v-if="comment.isOwnComment" 
+                class="commentMore"
+                @click.stop="openCommentMenu(index)"
+              >
+                <span>⋮</span>
               </div>
-            </div>
-            <!-- <div class="commentMore">
-              <span>⋮</span>
-            </div> -->
           </div>
         </div>
 
@@ -297,9 +301,13 @@
                   <p v-else class="commentTextFull">{{ comment.text }}</p>
                 </div>
               </div>
-              <!-- <div class="commentMore">
+              <div 
+                v-if="comment.isOwnComment" 
+                class="commentMore"
+                @click.stop="openCommentMenuInModal(index)"
+              >
                 <span>⋮</span>
-              </div> -->
+              </div>
             </div>
 
             <!-- 查看更多按鈕 -->
@@ -345,6 +353,100 @@
         </div>
       </div>
     </div>
+
+    <!-- 留言操作選單彈窗 -->
+    <div
+      class="commentMenuModal"
+      v-if="showCommentMenu"
+      @click="closeCommentMenu"
+    >
+      <div class="commentMenuContent" @click.stop>
+        <div class="commentMenuHeader">
+          <span class="commentMenuTitle">留言</span>
+          <button class="commentMenuClose" @click="closeCommentMenu">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="commentMenuOptions">
+          <div class="commentMenuOption" @click="editComment">
+            <img src="/assets/imgs/backend/edit.svg" alt="編輯" />
+            <span>編輯</span>
+          </div>
+          <div class="commentMenuOption" @click="deleteComment">
+            <img src="/assets/imgs/backend/delete.svg" alt="刪除" />
+            <span>刪除</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 編輯留言輸入框 -->
+    <div
+      class="editCommentModal"
+      v-if="showEditComment"
+      @click="closeEditComment"
+    >
+      <div class="editCommentContent" @click.stop>
+        <div class="modalDragBar"></div>
+        <div class="editCommentHeader">
+          <span class="editCommentTitle">留言</span>
+          <button class="editCommentClose" @click="closeEditComment">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+        <div class="editCommentBody">
+          <textarea
+            v-model="editingCommentText"
+            class="editCommentInput"
+            placeholder="請留下您的感想"
+            rows="6"
+          ></textarea>
+        </div>
+        <div class="editCommentSendArea">
+          <button class="editCommentSendButton" @click="saveEditedComment">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M22 2L11 13"
+                stroke="white"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M22 2L15 22L11 13L2 9L22 2Z"
+                stroke="white"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 刪除確認 Alert -->
+    <Teleport to="body">
+      <Alert
+        v-if="showDeleteAlert"
+        :default-content="'確定要刪除嗎？'"
+        :show-click-button="true"
+        click-button-text="確定"
+        close-button-text="取消"
+        @click="confirmDeleteComment"
+        @close="showDeleteAlert = false"
+      />
+    </Teleport>
   </div>
 </template>
 
@@ -356,6 +458,7 @@ import "swiper/css";
 import "swiper/css/free-mode";
 import playIcon from "@/assets/imgs/clinicStories/playButton.png";
 import pauseIcon from "@/assets/imgs/clinicStories/pause.png";
+import Alert from "~/components/Alert.vue";
 const route = useRoute();
 const router = useRouter();
 
@@ -436,12 +539,19 @@ const transformCommentsData = (videoMessageList) => {
     return [];
   }
 
+  // 獲取當前用戶資訊
+  const userDataLocal = typeof window !== "undefined"
+    ? JSON.parse(localStorage.getItem("userData") || "{}")
+    : {};
+  const currentUserName = userDataLocal.Name || userDataLocal.Member?.Name || "";
+
   return videoMessageList.map((msg) => ({
     id: parseInt(msg.BID || "0"),
     name: msg.Name || "使用者",
     time: formatRelativeTime(msg.CheckTime),
     text: msg.Message || "",
     showFull: false,
+    isOwnComment: msg.Name === currentUserName, // 判斷是否為自己的留言
   }));
 };
 
@@ -452,7 +562,7 @@ const transformApiData = (apiData) => {
     const videoId = extractYouTubeVideoId(item.VideoURL);
     db[parseInt(item.AID)] = {
       id: parseInt(item.AID),
-      thumbnail: getYouTubeThumbnail(item.VideoURL),
+      thumbnail: item.ImgURL || getYouTubeThumbnail(item.VideoURL),
       fullTitle: item.Name || "",
       subtitle: item.Desc || "",
       description: item.Desc || "",
@@ -463,6 +573,8 @@ const transformApiData = (apiData) => {
       checkTime: item.CheckTime || "",
       adminId: item.AdminID || "",
       isLiked: false,
+      promoteVideo: item.PromoteVideo || "",
+      onLineVideo: item.OnLineVideo || "",
       messageList: transformCommentsData(item.VideoMessageList || []),
     };
   });
@@ -504,6 +616,16 @@ const hasMoreComments = computed(() => {
   return videoData.value.comments > 0;
 });
 const commentsListRef = ref(null);
+
+// 留言操作相關狀態
+const showCommentMenu = ref(false);
+const selectedCommentIndex = ref(-1);
+const selectedCommentId = ref(null); 
+
+const isModalComment = ref(false); // 是否在模態視窗中的留言
+const showEditComment = ref(false);
+const editingCommentText = ref("");
+const showDeleteAlert = ref(false);
 
 // 影片 iframe 引用
 const videoIframe = ref(null);
@@ -1070,12 +1192,16 @@ const submitComment = async () => {
         now.getHours()
       ).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
 
+      // 獲取當前用戶資訊
+      const currentUserName = userDataLocal.Name || userDataLocal.Member?.Name || "使用者";
+      
       commentsList.value.unshift({
         id: result.BID ? parseInt(result.BID) : null,
-        name: userDataLocal.Name || userDataLocal.Member?.Name || "使用者",
+        name: currentUserName,
         time: formatRelativeTime(checkTime),
         text: newComment.value.trim(),
         showFull: false,
+        isOwnComment: true, // 新留言一定是自己的
       });
 
       // 更新留言數量
@@ -1165,9 +1291,9 @@ const fetchVideoList = async () => {
     const result = await response.json();
 
     if (result.Result === "OK" && result.VideoList) {
-      // 只處理 Status 為 "Y" 的影片
+      // 只處理 OnLineVideo 為 "Y" 的影片（已上架）
       const activeVideos = result.VideoList.filter(
-        (item) => item.Status === "Y"
+        (item) => item.OnLineVideo === "Y"
       );
       videoDatabase.value = transformApiData(activeVideos);
 
@@ -1224,6 +1350,182 @@ onUnmounted(() => {
   document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
   document.removeEventListener("MSFullscreenChange", handleFullscreenChange);
 });
+
+// 開啟留言操作選單（主頁面）
+const openCommentMenu = (index) => {
+  const comment = displayedComments.value[index];
+  selectedCommentIndex.value = index;
+  selectedCommentId.value = comment?.id || null;
+  isModalComment.value = false;
+  showCommentMenu.value = true;
+};
+
+// 開啟留言操作選單（模態視窗）
+const openCommentMenuInModal = (index) => {
+  const comment = fullCommentsList.value[index];
+  selectedCommentIndex.value = index;
+  selectedCommentId.value = comment?.id || null;
+  isModalComment.value = true;
+  showCommentMenu.value = true;
+};
+
+// 關閉留言操作選單
+const closeCommentMenu = () => {
+  showCommentMenu.value = false;
+  selectedCommentIndex.value = -1;
+  
+};
+
+// 編輯留言
+const editComment = () => {
+  // 從 commentsList 中找到對應的留言
+  const comment = commentsList.value.find((c) => c.id === selectedCommentId.value);
+  
+  if (comment) {
+    editingCommentText.value = comment.text;
+    showEditComment.value = true;
+    closeCommentMenu();
+  } else {
+    alert("找不到留言資料");
+  }
+};
+
+// 關閉編輯留言
+const closeEditComment = () => {
+  showEditComment.value = false;
+  editingCommentText.value = "";
+};
+
+// 儲存編輯後的留言
+const saveEditedComment = async () => {
+  if (!editingCommentText.value.trim()) {
+    alert("請輸入留言內容");
+    return;
+  }
+
+  // 從 commentsList 中找到對應的留言
+  const comment = commentsList.value.find((c) => c.id === selectedCommentId.value);
+
+  if (!comment || !comment.id) {
+    alert("找不到留言資料");
+    return;
+  }
+
+  try {
+    const userDataLocal = typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("userData") || "{}")
+      : {};
+
+    const requestBody = {
+      MID: userDataLocal.MID || "",
+      Token: userDataLocal.Token || "",
+      MAID: userDataLocal.MAID || "",
+      Mobile: userDataLocal.Mobile || "",
+      Lang: "zhtw",
+      AID: videoData.value.id.toString(),
+      BID: comment.id.toString(),
+      NewMessage: editingCommentText.value.trim(),
+    };
+
+    const response = await fetch(
+      "https://23700999.com:8081/HMA/api/fr/VideoModifyMessage",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (result.Result === "OK") {
+      // 更新留言內容
+      comment.text = editingCommentText.value.trim();
+      closeEditComment();
+      selectedCommentId.value = null; // ✅ 這裡再清
+    } else {
+      console.error("編輯留言失敗:", result.Result);
+      alert("編輯留言失敗，請稍後再試");
+    }
+  } catch (error) {
+    console.error("編輯留言失敗:", error);
+    alert("編輯留言失敗，請稍後再試");
+  }
+};
+
+// 刪除留言
+const deleteComment = () => {
+  closeCommentMenu();
+  showDeleteAlert.value = true;
+};
+
+// 確認刪除留言
+const confirmDeleteComment = async () => {
+  showDeleteAlert.value = false;
+
+  // 從 commentsList 中找到對應的留言
+  const comment = commentsList.value.find((c) => c.id === selectedCommentId.value);
+
+  if (!comment || !comment.id) {
+    alert("找不到留言資料");
+    return;
+  }
+
+  try {
+    const userDataLocal = typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("userData") || "{}")
+      : {};
+
+    const requestBody = {
+      MID: userDataLocal.MID || "",
+      Token: userDataLocal.Token || "",
+      MAID: userDataLocal.MAID || "",
+      Mobile: userDataLocal.Mobile || "",
+      Lang: "zhtw",
+      AID: videoData.value.id.toString(),
+    };
+
+    const response = await fetch(
+      "https://23700999.com:8081/HMA/api/fr/VideoDeleteMessage",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (result.Result === "OK") {
+      // 從列表中移除留言
+      const actualIndex = commentsList.value.findIndex((c) => c.id === comment.id);
+      if (actualIndex !== -1) {
+        commentsList.value.splice(actualIndex, 1);
+        // 更新留言數量
+        videoData.value.comments = Math.max(0, videoData.value.comments - 1);
+      }
+      selectedCommentId.value = null;
+    } else {
+      console.error("刪除留言失敗:", result.Result);
+      alert("刪除留言失敗，請稍後再試");
+    }
+  } catch (error) {
+    console.error("刪除留言失敗:", error);
+    alert("刪除留言失敗，請稍後再試");
+  }
+};
 
 const modules = [FreeMode];
 </script>
@@ -1694,6 +1996,16 @@ const modules = [FreeMode];
           color: #999;
           font-size: 18px;
           flex-shrink: 0;
+          transition: color 0.2s ease;
+
+          &:hover {
+            color: #666;
+          }
+
+          span {
+            font-size: 20px;
+            line-height: 1;
+          }
         }
       }
     }
@@ -2045,6 +2357,16 @@ box-shadow: 0 -6px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.
           color: #999;
           font-size: 18px;
           flex-shrink: 0;
+          transition: color 0.2s ease;
+
+          &:hover {
+            color: #666;
+          }
+
+          span {
+            font-size: 20px;
+            line-height: 1;
+          }
         }
       }
 
@@ -2109,6 +2431,227 @@ box-shadow: 0 -6px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.
           width: 20px;
           height: 20px;
           filter: brightness(0) invert(1);
+        }
+      }
+    }
+  }
+}
+
+// 留言操作選單彈窗樣式
+.commentMenuModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1002;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeIn 0.3s ease;
+
+  .commentMenuContent {
+    width: 100%;
+    max-width: 768px;
+    background: white;
+    border-radius: 20px 20px 0 0;
+    animation: slideUp 0.3s ease;
+    padding-bottom: env(safe-area-inset-bottom);
+
+    .commentMenuHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid #f0f0f0;
+
+      .commentMenuTitle {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1e1e1e;
+      }
+
+      .commentMenuClose {
+        background: none;
+        border: none;
+        padding: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #666;
+        transition: color 0.3s ease;
+
+        &:hover {
+          color: #1e1e1e;
+        }
+
+        svg {
+          width: 24px;
+          height: 24px;
+        }
+      }
+    }
+
+    .commentMenuOptions {
+      padding: 8px 0;
+
+      .commentMenuOption {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 20px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+
+        &:hover {
+          background: #f5f5f5;
+        }
+
+        &:active {
+          background: #e0e0e0;
+        }
+
+        img {
+          width: 20px;
+          height: 20px;
+        }
+
+        span {
+          font-size: 16px;
+          color: #1e1e1e;
+        }
+      }
+    }
+  }
+}
+
+// 編輯留言彈窗樣式
+.editCommentModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1003;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeIn 0.3s ease;
+
+  .editCommentContent {
+    width: 100%;
+    max-width: 768px;
+    background: white;
+    border-radius: 20px 20px 0 0;
+    animation: slideUp 0.3s ease;
+    padding-bottom: env(safe-area-inset-bottom);
+
+    .modalDragBar {
+      width: 40px;
+      height: 4px;
+      background: #ddd;
+      border-radius: 2px;
+      margin: 8px auto;
+      cursor: grab;
+    }
+
+    .editCommentHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid #f0f0f0;
+
+      .editCommentTitle {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1e1e1e;
+      }
+
+      .editCommentClose {
+        background: none;
+        border: none;
+        padding: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #666;
+        transition: color 0.3s ease;
+
+        &:hover {
+          color: #1e1e1e;
+        }
+
+        svg {
+          width: 24px;
+          height: 24px;
+        }
+      }
+    }
+
+    .editCommentBody {
+      padding: 20px;
+      padding-bottom: 12px;
+
+      .editCommentInput {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: var(--Radius-r-20, 20px);
+        border: none;
+        font-size: var(--Text-font-size-18, 18px);
+        font-style: normal;
+        font-weight: 700;
+        letter-spacing: 0.09px;
+        font-family: inherit;
+        resize: vertical;
+        min-height: 120px;
+        outline: none;
+        transition: border-color 0.2s ease;
+        background: var(--Secondary-100, #f5f7fa);
+        box-shadow: 2px 4px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
+        color: var(--Neutral-black, #1e1e1e);
+
+        &:focus {
+          border-color: #74bc1f;
+        }
+
+        &::placeholder {
+          color: #999;
+        }
+      }
+    }
+
+    .editCommentSendArea {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 0 20px 20px;
+      gap: 12px;
+
+      .editCommentSendButton {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: #74bc1f;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: background 0.3s ease;
+
+        &:hover {
+          background: #5a9a1a;
+        }
+
+        svg {
+          width: 20px;
+          height: 20px;
         }
       }
     }
