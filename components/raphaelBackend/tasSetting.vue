@@ -12,7 +12,9 @@
           <!-- 左邊：目前標籤 -->
           <div class="tag-section">
             <div class="section-header">
-              <h3 class="section-title">目前標籤({{ localSelectedTags.length }})</h3>
+              <h3 class="section-title">
+                目前標籤({{ localSelectedTags.length }})
+              </h3>
             </div>
             <div class="tag-list">
               <div
@@ -27,21 +29,8 @@
                   type="button"
                   :aria-label="`移除 ${tag}`"
                 >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 16 16"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M12 4L4 12M4 4L12 12"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                    />
-                  </svg>
-                </button>
+            <img src="/assets/imgs/backend/delete.svg" alt="刪除" class="delete-icon">
+            </button>
               </div>
               <div v-if="localSelectedTags.length === 0" class="empty-state">
                 尚未選擇標籤
@@ -52,7 +41,9 @@
           <!-- 右邊：現有標籤 -->
           <div class="tag-section">
             <div class="section-header">
-              <h3 class="section-title">現有標籤({{ filteredAvailableTags.length }})</h3>
+              <h3 class="section-title">
+                現有標籤({{ filteredAvailableTags.length }})
+              </h3>
               <div class="search-wrapper">
                 <img
                   src="/assets/imgs/backend/search.svg"
@@ -78,7 +69,10 @@
                 <span class="tag-add-icon">+</span>
                 <span class="tag-name">{{ tag }}</span>
               </button>
-              <div v-if="filteredAvailableTags.length === 0" class="empty-state">
+              <div
+                v-if="filteredAvailableTags.length === 0"
+                class="empty-state"
+              >
                 沒有符合的標籤
               </div>
             </div>
@@ -198,7 +192,7 @@ function handleSave() {
   background: $raphael-white;
   border-radius: 16px;
   width: 100%;
-  max-width: 800px;
+  max-width: 900px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
@@ -283,34 +277,47 @@ function handleSave() {
   flex-wrap: wrap;
   gap: 8px;
   overflow-y: auto;
-  min-height: 200px;
-  max-height: 400px;
+
+
   padding: 4px;
   @include scrollbarStyle();
 }
 
 .tag-chip {
-    display: flex;
-width: 167px;
-height: 44px;
-padding: var(--Padding-p-9, 9px) var(--Padding-p-12, 12px);
-justify-content: center;
-align-items: center;
-gap: var(--Margin-m-8, 8px);
-border-radius: var(--Radius-r-50, 50px);
-background: var(--Primary-200, #B1C0D8);
+  display: flex;
+  width: 167px;
+  height: 44px;
+  padding: var(--Padding-p-9, 9px) var(--Padding-p-12, 12px);
+
+  align-items: center;
+  gap: var(--Margin-m-8, 8px);
+  border-radius: var(--Radius-r-50, 50px);
+  border: none;
+  background-color: #fff;
+  color: var(--Primary-600, #2d3047);
+  font-size: var(--Text-font-size-18, 18px);
+  font-style: normal;
+  font-weight: 400;
+
+  letter-spacing: 2.7px;
+cursor: pointer;
   .tag-name {
     color: $raphael-gray-500;
   }
 }
 
 .tag-chip-selected {
-  background: rgba($primary-200, 0.1);
-  border-color: $primary-200;
-
+  display: flex;
+  width: 167px;
+  height: 44px;
+  padding: var(--Padding-p-9, 9px) var(--Padding-p-12, 12px);
+  justify-content: center;
+  align-items: center;
+  gap: var(--Margin-m-8, 8px);
+  border-radius: var(--Radius-r-50, 50px);
+  background: $primary-200;
   .tag-name {
-    color: $primary-200;
-    font-weight: 500;
+    color: $raphael-white;
   }
 
   .tag-remove {
@@ -410,4 +417,3 @@ background: var(--Primary-200, #B1C0D8);
   }
 }
 </style>
-

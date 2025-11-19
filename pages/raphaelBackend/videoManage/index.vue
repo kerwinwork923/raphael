@@ -76,6 +76,7 @@
               {{ video.comments }}
             </div>
             <div class="cell actions" data-label="操作">
+              <img src="/assets/imgs/backend/edit.svg" alt="編輯" class="edit-icon">
               <div class="action-buttons">
                 <button
                   class="btn-action btn-edit"
@@ -97,6 +98,7 @@
                   />
                   <span class="toggle__track"></span>
                 </label>
+           
                 <span class="toggle-label">
                   {{ video.isPublished ? "上架" : "下架" }}
                 </span>
@@ -108,6 +110,7 @@
                   <!-- <img src="/assets/imgs/backend/delete.svg" alt="刪除" /> -->
                 </button>
               </div>
+              <img src="/assets/imgs/backend/delete2.svg" alt="刪除" class="delete-icon">
             </div>
           </div>
         </div>
@@ -206,6 +209,8 @@
             </div>
           </div>
         </div>
+
+
       </div>
     </aside>
   </div>
@@ -392,9 +397,7 @@ function handleAddNew() {
 }
 
 function handleEdit(video: any) {
-  selectedVideo.value = video;
-  // 處理編輯邏輯
-  console.log("編輯影片", video);
+  router.push(`/raphaelBackend/videoManage/editVideo/${video.aid}`);
 }
 
 function handleTogglePublish(video: any) {
@@ -502,7 +505,7 @@ function refreshData() {
 
   .table-row {
     display: grid;
-    grid-template-columns: 5fr 2fr 1fr 1fr 1fr ;
+    grid-template-columns: 4.5fr 1fr 1fr 1fr 1fr ;
     position: relative;
     gap: 2px;
     align-items: center;
