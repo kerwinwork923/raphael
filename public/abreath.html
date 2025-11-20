@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>智平衡｜嗅覺 × 正念呼吸 × 神經修復練習</title>
+  <style>
+    :root {
+      --deep:#0f3b3b;
+      --gold:#c9a14a;
+      --muted:#6b7280;
+      --ink:#1f2a37;
+      --bg:#ffffff;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body {
+      font-family:"PingFang TC","Microsoft JhengHei",system-ui,Segoe UI,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--ink);
+      line-height:1.8;
+    }
+    header {
+      text-align:center;
+      padding:32px 16px 10px;
+    }
+    header h1 {
+      font-size:clamp(26px,4vw,38px);
+      font-weight:800;
+      color:var(--deep);
+      letter-spacing:1px;
+    }
+    header p {
+      max-width:800px;
+      margin:10px auto 0;
+      color:var(--muted);
+      font-size:15px;
+    }
+    header .accent {
+      width:140px;
+      height:3px;
+      background:var(--gold);
+      margin:18px auto 0;
+      border-radius:2px;
+    }
+
+    .page-wrap {
+      max-width:1080px;
+      margin:0 auto 60px;
+      padding:0 16px;
+    }
+
+    .intro-card {
+      margin-top:24px;
+      padding:20px 22px;
+      border-radius:18px;
+      border:1px solid rgba(201,161,74,.35);
+      box-shadow:0 10px 30px rgba(15,59,59,0.08);
+      background:#fff;
+    }
+    .intro-card h2 {
+      font-size:20px;
+      color:var(--deep);
+      margin-bottom:6px;
+      font-weight:800;
+    }
+    .intro-card p {
+      font-size:15px;
+      color:var(--muted);
+      margin-bottom:4px;
+    }
+    .intro-card ul {
+      margin:8px 0 0 18px;
+      color:var(--muted);
+      font-size:14px;
+    }
+    .intro-card li { margin-bottom:4px; }
+
+    /* 模式切換 */
+    .mode-switch {
+      margin-top:26px;
+      display:flex;
+      justify-content:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .mode-btn {
+      padding:10px 22px;
+      border-radius:999px;
+      border:1px solid rgba(201,161,74,.6);
+      background:#fff;
+      color:var(--deep);
+      font-weight:800;
+      font-size:14px;
+      cursor:pointer;
+      transition:.2s;
+    }
+    .mode-btn.active {
+      background:var(--gold);
+      color:#fff;
+      box-shadow:0 8px 22px rgba(201,161,74,.45);
+    }
+    .mode-btn:hover { transform:translateY(-1px); }
+
+    .panel {
+      margin-top:24px;
+      border-radius:18px;
+      border:1px solid rgba(201,161,74,.35);
+      box-shadow:0 12px 34px rgba(17,24,39,.06);
+      background:#fff;
+      padding:22px 22px 26px;
+      display:none;
+    }
+    .panel.active { display:block; }
+
+    .panel-header h3 {
+      font-size:20px;
+      color:var(--deep);
+      font-weight:800;
+      margin-bottom:4px;
+    }
+    .panel-header p {
+      font-size:14px;
+      color:var(--muted);
+      margin-bottom:10px;
+    }
+
+    .video-wrap {
+      margin-top:10px;
+      border-radius:16px;
+      overflow:hidden;
+      box-shadow:0 8px 28px rgba(0,0,0,0.14);
+    }
+    .video-wrap iframe {
+      width:100%;
+      aspect-ratio:16/9;
+      border:0;
+      display:block;
+    }
+
+    .two-col {
+      margin-top:18px;
+      display:grid;
+      grid-template-columns:minmax(0,1.6fr) minmax(0,1.2fr);
+      gap:18px;
+    }
+    @media (max-width:768px){
+      .two-col { grid-template-columns:1fr; }
+    }
+
+    .bullet-box {
+      padding:14px 16px;
+      border-radius:14px;
+      border:1px dashed rgba(201,161,74,.6);
+      background:rgba(201,161,74,.03);
+      font-size:14px;
+      color:var(--muted);
+    }
+    .bullet-box h4 {
+      font-size:15px;
+      color:var(--deep);
+      font-weight:800;
+      margin-bottom:6px;
+    }
+    .bullet-box ul {
+      margin-left:18px;
+    }
+    .bullet-box li { margin-bottom:4px; }
+
+    /* 實作控制＆進度 */
+    .practice-controls {
+      padding:14px 16px;
+      border-radius:14px;
+      border:1px solid rgba(201,161,74,.35);
+      background:linear-gradient(135deg,rgba(201,161,74,.08),#fff);
+    }
+    .practice-controls h4 {
+      font-size:15px;
+      font-weight:800;
+      color:var(--deep);
+      margin-bottom:6px;
+    }
+    .practice-controls p {
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:10px;
+    }
+    .btn-primary, .btn-ghost {
+      display:inline-block;
+      padding:9px 18px;
+      border-radius:999px;
+      font-size:14px;
+      font-weight:800;
+      cursor:pointer;
+      border:2px solid var(--gold);
+      transition:.2s;
+    }
+    .btn-primary {
+      background:var(--gold);
+      color:#fff;
+      margin-right:6px;
+    }
+    .btn-primary:disabled {
+      opacity:.4;
+      cursor:not-allowed;
+    }
+    .btn-primary:not(:disabled):hover {
+      background:transparent;
+      color:var(--gold);
+    }
+    .btn-ghost {
+      background:transparent;
+      color:var(--gold);
+    }
+    .btn-ghost:hover {
+      background:rgba(201,161,74,.08);
+    }
+
+    .practice-stats {
+      padding:14px 16px;
+      border-radius:14px;
+      border:1px solid rgba(148,163,184,0.4);
+      font-size:14px;
+      color:var(--muted);
+      background:#fafafa;
+    }
+    .practice-stats h4 {
+      font-size:15px;
+      color:var(--deep);
+      font-weight:800;
+      margin-bottom:6px;
+    }
+    .practice-stats strong { color:var(--gold); }
+    .stat-row { margin-bottom:4px; }
+
+    .session-list {
+      margin-top:8px;
+      max-height:220px;
+      overflow:auto;
+      padding-left:16px;
+    }
+    .session-list li {
+      margin-bottom:4px;
+      font-size:13px;
+    }
+
+    .tag {
+      display:inline-block;
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid rgba(201,161,74,.5);
+      font-size:11px;
+      color:var(--gold);
+      margin-left:4px;
+    }
+
+    .toast {
+      position:fixed;
+      left:50%;
+      bottom:24px;
+      transform:translateX(-50%);
+      background:#111827;
+      color:#fff;
+      padding:10px 16px;
+      border-radius:999px;
+      font-size:13px;
+      display:none;
+      z-index:999;
+    }
+
+    footer {
+      margin-top:40px;
+      text-align:center;
+      padding:26px 10px 32px;
+      border-top:1px solid rgba(201,161,74,.28);
+      color:var(--muted);
+      font-size:13px;
+      background:linear-gradient(135deg,rgba(201,161,74,.05),rgba(255,255,255,0));
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>嗅覺 × 正念呼吸 × 神經修復｜每日30分鐘完整練習</h1>
+  <div class="accent"></div>
+  <p>透過「擴香 × 單鼻呼吸 × 嗅覺正念」，讓自律神經從緊繃模式，回到修復與穩定。<br>
+  建議每天固定一個時間，給自己 30 分鐘，只專心照顧自己。</p>
+</header>
+
+<main class="page-wrap">
+  <section class="intro-card">
+    <h2>這個頁面，分成兩個步驟：</h2>
+    <p>① 先看教學影片，了解擴香儀操作與整體流程：何時換邊、何時塞導息器、何時做循環嘆息。</p>
+    <p>② 熟悉之後，每天跟著實作影片做 30 分鐘練習，系統會幫您紀錄每一次練習足跡。</p>
+    <ul>
+      <li>0-5 分鐘：雙鼻嘆息呼吸法 - 緩慢吸氣緩慢吐氣</li>
+      <li>5-15 分鐘：右側單鼻正念呼吸(塞住左鼻)- 提高交感神經活性</li>
+      <li>15-20 分鐘: 雙鼻嘆息呼吸法 - 緩慢吸氣緩慢吐氣 </li>
+      <li>20-30 分鐘: 左側單鼻正念呼吸(塞住右鼻)- 提高副交感神經活性</li>
+    </ul>
+  </section>
+
+  <!-- 模式切換按鈕 -->
+  <div class="mode-switch" aria-label="練習模式選擇">
+    <button class="mode-btn active" data-target="panel-learn">① 先了解：教學影片</button>
+    <button class="mode-btn" data-target="panel-practice">② 開始實作：每日練習紀錄</button>
+  </div>
+
+  <!-- 面板一：教學影片 -->
+  <section id="panel-learn" class="panel active" aria-labelledby="learn-title">
+    <div class="panel-header">
+      <h3 id="learn-title">了解原理與操作｜教學影片</h3>
+      <p>建議先完整看完一次教學影片，確認你清楚以下幾件事：擴香儀怎麼切換左右、導息器怎麼使用、四個段落各在做什麼。</p>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="video-wrap">
+          <!-- 🔁 這裡換成「教學影片」網址 -->
+          <iframe
+            src="https://www.youtube.com/embed/OnvLbczesUU?rel=0&modestbranding=1"
+            title="單側芳香 × 正念呼吸 教學影片"
+            allowfullscreen
+          ></iframe>
+        </div>
+      </div>
+
+      <div class="bullet-box">
+        <h4>這支教學影片，會帶你看懂：</h4>
+        <ul>
+          <li>如何正確操作智平衡雙噴頭擴香儀（左、右精油切換）</li>
+          <li>30 分鐘的 4 個段落：嘆息呼吸 × 右鼻正念 × 嘆息呼吸 × 左鼻正念</li>
+          <li>導息器要塞哪一邊？什麼時候拔掉、什麼時候換香氣。</li>
+          <li>每一段練習時，身體與情緒可能出現的變化，以及如何溫柔地帶自己回來。</li>
+        </ul>
+        <p style="margin-top:6px;">當你已經熟悉整個 30 分鐘的節奏，就可以切換到第二個模式：每天跟著實作影片練習，並開始累積自己的紀錄。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 面板二：每日實作 -->
+  <section id="panel-practice" class="panel" aria-labelledby="practice-title">
+    <div class="panel-header">
+      <h3 id="practice-title">每日實作｜30 分鐘單側芳香 × 正念呼吸</h3>
+      <p>請先準備好：擴香儀、左右兩瓶精油、導息器與一個不被打擾的角落。<br>
+      每次都從這裡開始，按下「開始本次練習」，影片會啟動，同時幫您留下今天的一筆紀錄。</p>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="video-wrap">
+          <!-- 🔁 這裡換成「正式實作影片」網址 -->
+          <iframe
+            id="practiceVideo"
+            src="https://www.youtube.com/embed/v8Jx_GX2mgE?enablejsapi=1&rel=0&modestbranding=1"
+            title="單側芳香 × 正念呼吸 實作引導"
+            allowfullscreen
+          ></iframe>
+        </div>
+
+        <div class="practice-controls" style="margin-top:14px;">
+          <h4>實作前請先確認：</h4>
+          <p>擴香儀中左右精油分別放好；導息器在手邊。手機請調成靜音或飛航模式，讓這30 分鐘只屬於您。</p>
+          <button id="btnStart" class="btn-primary">開始本次 30 分鐘練習</button>
+          <button id="btnFinish" class="btn-ghost" disabled>我已完成這次練習</button>
+          <p style="font-size:12px;margin-top:6px;color:var(--muted);">
+            ✅ 按下「開始」後，系統會先記錄開始時間。<br>
+            ✅ 練習結束時，請記得按「我已完成」，才會算進累積次數。
+          </p>
+        </div>
+      </div>
+
+      <div class="practice-stats">
+        <h4>我的練習成長紀錄 </h4>
+        <p class="stat-row">累積完成次數：<strong id="statTotal">0</strong> 次</p>
+        <p class="stat-row">最近一次完成時間：<strong id="statLast">尚未開始</strong></p>
+        <p class="stat-row">持續練習天數（至少一天一次）：<strong id="statStreak">0</strong> 天</p>
+
+        <ul id="sessionList" class="session-list"></ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<footer>© 2025 智平衡健康集團 — 感謝您願意花時間好好照顧自己。</footer>
+
+<!-- YouTube Iframe API -->
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+  /* ====== 模式切換 ====== */
+  const modeBtns = document.querySelectorAll(".mode-btn");
+  const panels = document.querySelectorAll(".panel");
+  modeBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const target = btn.dataset.target;
+      modeBtns.forEach(b => b.classList.toggle("active", b === btn));
+      panels.forEach(p => p.classList.toggle("active", p.id === target));
+    });
+  });
+
+  /* ====== YouTube Player for practice ====== */
+  let practicePlayer = null;
+  let currentSession = null; // {start:timestamp}
+
+  window.onYouTubeIframeAPIReady = function() {
+    const iframe = document.getElementById("practiceVideo");
+    if (!iframe) return;
+    practicePlayer = new YT.Player("practiceVideo", {
+      events: {
+        onStateChange: (e) => {
+          if (e.data === YT.PlayerState.ENDED && currentSession && !currentSession.finishedBy) {
+            // 影片播完，若使用者忘記按「完成」，自動幫他結束一次
+            finishPractice("auto");
+          }
+        }
+      }
+    });
+  };
+
+  /* ====== 練習紀錄（localStorage） ====== */
+  const STORAGE_KEY = "aromaPracticeSessions_v1";
+
+  function loadSessions() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    } catch {
+      return [];
+    }
+  }
+  function saveSessions(list) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  }
+
+  function formatDate(ts) {
+    const d = new Date(ts);
+    const pad = n => String(n).padStart(2,"0");
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+  function formatDateYMD(ts) {
+    const d = new Date(ts);
+    const pad = n => String(n).padStart(2,"0");
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  }
+
+  function computeStreak(sessions) {
+    if (!sessions.length) return 0;
+    const days = Array.from(new Set(sessions.map(s => formatDateYMD(s.end || s.start)))).sort();
+    // 從最後一天往前算連續天數
+    let streak = 1;
+    for (let i = days.length - 2; i >= 0; i--) {
+      const cur = new Date(days[i]);
+      const next = new Date(days[i+1]);
+      const diff = (next - cur) / (1000*60*60*24);
+      if (diff === 1) {
+        streak++;
+      } else if (diff > 1) {
+        break;
+      }
+    }
+    return streak;
+  }
+
+  function renderSessions() {
+    const sessions = loadSessions();
+    const totalEl = document.getElementById("statTotal");
+    const lastEl  = document.getElementById("statLast");
+    const listEl  = document.getElementById("sessionList");
+    const streakEl= document.getElementById("statStreak");
+
+    totalEl.textContent = sessions.length;
+    if (sessions.length) {
+      const last = sessions[sessions.length - 1];
+      lastEl.textContent = formatDate(last.end || last.start);
+    } else {
+      lastEl.textContent = "尚未開始";
+    }
+    streakEl.textContent = computeStreak(sessions);
+
+    listEl.innerHTML = "";
+    sessions.slice().reverse().forEach((s, idx) => {
+      const li = document.createElement("li");
+      const mins = Math.round((s.duration || 0) / 60);
+      li.textContent = `${formatDate(s.end || s.start)} — 完成一次練習（約 ${mins || 30} 分鐘）`;
+      listEl.appendChild(li);
+    });
+  }
+
+  /* ====== 控制按鈕 ====== */
+  const btnStart = document.getElementById("btnStart");
+  const btnFinish = document.getElementById("btnFinish");
+  const toast = document.getElementById("toast");
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.style.display = "block";
+    setTimeout(() => { toast.style.display = "none"; }, 1800);
+  }
+
+  function startPractice() {
+    if (currentSession) {
+      showToast("已經在進行一個練習囉。先完成這次再開始下一次。");
+      return;
+    }
+    currentSession = { start: Date.now(), finishedBy: null };
+    btnStart.disabled = true;
+    btnFinish.disabled = false;
+
+    if (practicePlayer && practicePlayer.playVideo) {
+      practicePlayer.playVideo();
+    }
+    showToast("已開始本次練習，祝你有一段安穩的 30 分鐘。");
+  }
+
+  function finishPractice(mode) {
+    if (!currentSession) {
+      showToast("目前沒有正在進行的練習。");
+      return;
+    }
+    currentSession.end = Date.now();
+    currentSession.duration = (currentSession.end - currentSession.start) / 1000; // sec
+    currentSession.finishedBy = mode || "manual";
+
+    const sessions = loadSessions();
+    sessions.push(currentSession);
+    saveSessions(sessions);
+    currentSession = null;
+
+    btnStart.disabled = false;
+    btnFinish.disabled = true;
+
+    renderSessions();
+    showToast("已為你記錄這次練習，辛苦了！");
+  }
+
+  btnStart.addEventListener("click", () => startPractice());
+  btnFinish.addEventListener("click", () => finishPractice("manual"));
+
+  // 初始化
+  document.addEventListener("DOMContentLoaded", renderSessions);
+</script>
+
+</body>
+</html>
