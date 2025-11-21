@@ -63,6 +63,15 @@ export default defineNuxtConfig({
           rel: "canonical",
           href: "https://neuroplus.com.tw",
         },
+        {
+          rel: "icon",
+          type: "image/png",
+          href: "/logoIcon.png",
+        },
+        {
+          rel: "apple-touch-icon",
+          href: "/logoIcon.png",
+        },
       ],
     },
   },
