@@ -157,11 +157,15 @@ const handleVisibilityChange = async () => {
     console.log("頁面進入背景，停止錄影和相機");
 
     // 通知 Service Worker
-    if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
-      navigator.serviceWorker.controller.postMessage({
-        type: "VISIBILITY_CHANGE",
-        hidden: true,
-      });
+    try {
+      if (typeof navigator !== 'undefined' && "serviceWorker" in navigator && navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: "VISIBILITY_CHANGE",
+          hidden: true,
+        });
+      }
+    } catch (error) {
+      console.warn("Service Worker postMessage failed:", error);
     }
 
     // 使用穩定的停止方法關閉錄影
@@ -213,15 +217,24 @@ const handleForceStopMedia = async (event) => {
 
 // 頁面一載入就自動開啟鏡頭
 onMounted(async () => {
+  // 確保在客戶端環境執行
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+    return;
+  }
+
   // 添加頁面可見性變化監聽器
   document.addEventListener("visibilitychange", handleVisibilityChange);
 
   // 添加 Service Worker 訊息監聽器
-  if ("serviceWorker" in navigator && navigator.serviceWorker) {
-    navigator.serviceWorker.addEventListener(
-      "message",
-      handleServiceWorkerMessage
-    );
+  try {
+    if ("serviceWorker" in navigator && navigator.serviceWorker && typeof navigator.serviceWorker.addEventListener === 'function') {
+      navigator.serviceWorker.addEventListener(
+        "message",
+        handleServiceWorkerMessage
+      );
+    }
+  } catch (error) {
+    console.warn("Service Worker event listener setup failed:", error);
   }
 
   // 添加強制關閉媒體事件監聽器
@@ -631,11 +644,15 @@ onUnmounted(async () => {
   document.removeEventListener("visibilitychange", handleVisibilityChange);
 
   // 移除 Service Worker 訊息監聽器
-  if ("serviceWorker" in navigator && navigator.serviceWorker) {
-    navigator.serviceWorker.removeEventListener(
-      "message",
-      handleServiceWorkerMessage
-    );
+  try {
+    if (typeof navigator !== 'undefined' && "serviceWorker" in navigator && navigator.serviceWorker && typeof navigator.serviceWorker.removeEventListener === 'function') {
+      navigator.serviceWorker.removeEventListener(
+        "message",
+        handleServiceWorkerMessage
+      );
+    }
+  } catch (error) {
+    console.warn("Service Worker event listener removal failed:", error);
   }
 
   // 移除強制關閉媒體事件監聽器
