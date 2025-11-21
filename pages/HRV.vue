@@ -217,7 +217,7 @@ onMounted(async () => {
   document.addEventListener("visibilitychange", handleVisibilityChange);
 
   // 添加 Service Worker 訊息監聽器
-  if ("serviceWorker" in navigator) {
+  if ("serviceWorker" in navigator && navigator.serviceWorker) {
     navigator.serviceWorker.addEventListener(
       "message",
       handleServiceWorkerMessage
@@ -631,7 +631,7 @@ onUnmounted(async () => {
   document.removeEventListener("visibilitychange", handleVisibilityChange);
 
   // 移除 Service Worker 訊息監聽器
-  if ("serviceWorker" in navigator) {
+  if ("serviceWorker" in navigator && navigator.serviceWorker) {
     navigator.serviceWorker.removeEventListener(
       "message",
       handleServiceWorkerMessage
