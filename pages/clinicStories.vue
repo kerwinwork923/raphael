@@ -299,7 +299,8 @@ const transformApiData = (apiData) => {
       videoBigTypes: item.VideoBigTypeList || [],
       checkTime: item.CheckTime || "",
       adminId: item.AdminID || "",
-      isLiked: false, // 預設為未點讚，可根據實際需求從 API 獲取
+      // isLiked: item.EverGood === "Y", // 根據 API 的 EverGood 欄位判斷是否已按讚
+      isLiked: false,
       promoteVideo: item.PromoteVideo || "",
       onLineVideo: item.OnLineVideo || "",
     };

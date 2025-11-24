@@ -572,6 +572,7 @@ const transformApiData = (apiData) => {
       videoTypes: item.VideoTypeList || [],
       checkTime: item.CheckTime || "",
       adminId: item.AdminID || "",
+      // isLiked: item.EverGood === "Y", // 根據 API 的 EverGood 欄位判斷是否已按讚
       isLiked: false,
       promoteVideo: item.PromoteVideo || "",
       onLineVideo: item.OnLineVideo || "",

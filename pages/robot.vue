@@ -194,7 +194,11 @@
           <p v-if="showVoiceError" class="voice-error-text">
             聽不太清楚，請點擊再試一次
           </p>
-          <p v-else-if="currentTranscript" class="transcript-text">
+          <p 
+            v-else-if="currentTranscript && currentTranscript.trim()" 
+            class="transcript-text"
+            :key="`transcript-${currentTranscript}`"
+          >
             {{ currentTranscript }}
           </p>
           <div
@@ -1631,7 +1635,14 @@ const initSpeechRecognition = () => {
           .join("");
 
         if (process.client) {
-          currentTranscript.value = transcript;
+          // 使用 nextTick 確保 Android 上正確更新 DOM
+          nextTick(() => {
+            currentTranscript.value = transcript || "";
+            // 強制觸發重新渲染（Android 兼容性）
+            if (transcript) {
+              console.log("語音識別結果:", transcript);
+            }
+          });
         }
 
         // 一旦拿到 final，就立刻關視窗 & 只處理一次
@@ -4411,10 +4422,27 @@ const vClickOutside = {
 
     .transcript-text {
       margin-top: 16px;
-      font-size: 16px;
+      font-size: 18px;
       color: #2d3748;
+      -webkit-text-fill-color: #2d3748; /* Android 兼容性 */
       font-weight: 600;
       text-align: center;
+      padding: 8px 16px;
+      min-height: 24px;
+      line-height: 1.5;
+      word-break: break-word;
+      max-width: 90%;
+      /* Android 字體渲染優化 */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      /* 強制硬體加速 */
+      transform: translateZ(0);
+      will-change: contents;
+      /* 確保文字可見 */
+      opacity: 1;
+      display: block;
+      visibility: visible;
     }
   }
 }
