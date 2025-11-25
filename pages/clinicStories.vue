@@ -22,16 +22,16 @@
             >
               <div
                 class="clinicStoriesTagsItem"
-                :class="{ 
+                :class="{
                   active: activeTag === tag.id,
                   expandable: tag.videoBigType === '03',
-                  expanded: isSubTagsExpanded && tag.videoBigType === '03'
+                  expanded: isSubTagsExpanded && tag.videoBigType === '03',
                 }"
                 @click="handleTagClick(tag)"
               >
                 <span>{{ tag.name }}</span>
-                <img 
-                  v-if="tag.videoBigType === '03'" 
+                <img
+                  v-if="tag.videoBigType === '03'"
                   src="../assets/imgs/clinicStories/myClinicStory.svg"
                   alt="展開"
                   class="ellipsis-icon"
@@ -42,20 +42,38 @@
           </swiper>
         </div>
       </div>
-      
+
       <!-- 子標籤彈窗 -->
-      <div v-if="isSubTagsExpanded" class="subTagsModal" @click.self="closeSubTagsModal">
+      <div
+        v-if="isSubTagsExpanded"
+        class="subTagsModal"
+        @click.self="closeSubTagsModal"
+      >
         <div class="subTagsModalContent">
+          <!-- 模態視窗頂部拖曳條 -->
+          <div class="modalDragBar"></div>
           <!-- 標題欄 -->
           <div class="subTagsModalHeader">
             <h2 class="subTagsModalTitle">我的診間故事</h2>
             <button class="subTagsModalClose" @click="closeSubTagsModal">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <path
+                  d="M18 6L6 18M6 6L18 18"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
               </svg>
             </button>
           </div>
-          
+
           <!-- 子標籤列表 -->
           <div class="subTagsModalBody">
             <div class="subTagsGrid">
@@ -103,13 +121,21 @@
               <div class="videoInfo">
                 <h3 class="videoCardTitle">{{ video.fullTitle }}</h3>
                 <div class="videoStats">
-                  <div 
-                    class="statItem" 
+                  <div
+                    class="statItem"
                     :class="{ liked: video.isLiked }"
                     @click.stop="toggleLike(video)"
                   >
-                    <img v-if="video.isLiked" src="../assets/imgs/clinicStories/goodClick.svg" alt="讚" />
-                    <img v-else src="../assets/imgs/clinicStories/good.svg" alt="讚" />
+                    <img
+                      v-if="video.isLiked"
+                      src="../assets/imgs/clinicStories/goodClick.svg"
+                      alt="讚"
+                    />
+                    <img
+                      v-else
+                      src="../assets/imgs/clinicStories/good.svg"
+                      alt="讚"
+                    />
                     <span>{{ video.likes }}</span>
                   </div>
                   <!-- <div class="statItem">
@@ -151,13 +177,21 @@
             <h3 class="videoCardTitle">{{ video.fullTitle }}</h3>
             <p class="videoCardSubtitle">{{ video.subtitle }}</p>
             <div class="videoStats">
-              <div 
-                class="statItem" 
+              <div
+                class="statItem"
                 :class="{ liked: video.isLiked }"
                 @click.stop="toggleLike(video)"
               >
-                <img v-if="video.isLiked" src="../assets/imgs/clinicStories/goodClick.svg" alt="讚" />
-                <img v-else src="../assets/imgs/clinicStories/good.svg" alt="讚" />
+                <img
+                  v-if="video.isLiked"
+                  src="../assets/imgs/clinicStories/goodClick.svg"
+                  alt="讚"
+                />
+                <img
+                  v-else
+                  src="../assets/imgs/clinicStories/good.svg"
+                  alt="讚"
+                />
                 <span>{{ video.likes }}</span>
               </div>
               <!-- <div class="statItem">
@@ -206,7 +240,7 @@ const subTags = ref([]);
 // 處理標籤點擊
 const handleTagClick = (tag) => {
   // 如果是「我的診間故事」(videoBigType === '03')，展開子標籤
-  if (tag.videoBigType === '03') {
+  if (tag.videoBigType === "03") {
     if (!isSubTagsExpanded.value) {
       toggleSubTags();
     }
@@ -222,8 +256,8 @@ const handleTagClick = (tag) => {
 const setActiveTag = (tagId) => {
   activeTag.value = tagId;
   // 如果不是「我的診間故事」，收起子標籤
-  const tag = tags.value.find(t => t.id === tagId);
-  if (tag && tag.videoBigType !== '03') {
+  const tag = tags.value.find((t) => t.id === tagId);
+  if (tag && tag.videoBigType !== "03") {
     isSubTagsExpanded.value = false;
     activeSubTag.value = null;
   }
@@ -247,7 +281,7 @@ const closeSubTagsModal = () => {
 const setActiveSubTag = (subTagId) => {
   activeSubTag.value = subTagId;
   // 同時設置父標籤為活動狀態（「我的診間故事」）
-  const clinicStoryTag = tags.value.find(t => t.videoBigType === '03');
+  const clinicStoryTag = tags.value.find((t) => t.videoBigType === "03");
   if (clinicStoryTag) {
     activeTag.value = clinicStoryTag.id;
   }
@@ -271,7 +305,9 @@ const allVideos = ref([]);
 // 從 YouTube URL 提取 video ID
 const extractYouTubeVideoId = (url) => {
   if (!url) return null;
-  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/);
+  const match = url.match(
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/
+  );
   return match ? match[1] : null;
 };
 
@@ -311,9 +347,10 @@ const transformApiData = (apiData) => {
 const fetchVideoBigTypeList = async () => {
   try {
     // 從 localStorage 獲取 userData
-    const userDataLocal = typeof window !== "undefined"
-      ? JSON.parse(localStorage.getItem("userData") || "{}")
-      : {};
+    const userDataLocal =
+      typeof window !== "undefined"
+        ? JSON.parse(localStorage.getItem("userData") || "{}")
+        : {};
 
     const requestBody = {
       MID: userDataLocal.MID || "",
@@ -420,13 +457,13 @@ const filteredVideos = computed(() => {
       });
     }
   }
-  
+
   // 否則使用主標籤過濾
   const activeTagData = tags.value.find((tag) => tag.id === activeTag.value);
   if (!activeTagData || activeTagData.category === "all") {
     return allVideos.value;
   }
-  
+
   return allVideos.value.filter((video) => {
     if (!video.videoBigTypes || !Array.isArray(video.videoBigTypes)) {
       return false;
@@ -461,15 +498,16 @@ const onVideoLoadStart = () => {
 const toggleLike = async (video) => {
   // 如果正在處理中，避免重複點擊
   if (video.isProcessing) return;
-  
+
   video.isProcessing = true;
   const wasLiked = video.isLiked;
-  
+
   try {
     // 從 localStorage 獲取 userData
-    const userDataLocal = typeof window !== "undefined"
-      ? JSON.parse(localStorage.getItem("userData") || "{}")
-      : {};
+    const userDataLocal =
+      typeof window !== "undefined"
+        ? JSON.parse(localStorage.getItem("userData") || "{}")
+        : {};
 
     const requestBody = {
       MID: userDataLocal.MID || "",
@@ -538,9 +576,10 @@ const fetchVideoList = async () => {
   loading.value = true;
   try {
     // 從 localStorage 獲取 userData
-    const userDataLocal = typeof window !== "undefined"
-      ? JSON.parse(localStorage.getItem("userData") || "{}")
-      : {};
+    const userDataLocal =
+      typeof window !== "undefined"
+        ? JSON.parse(localStorage.getItem("userData") || "{}")
+        : {};
 
     // 提取所需的參數
     const requestBody = {
@@ -639,7 +678,7 @@ const modules = [FreeMode];
     z-index: 5;
     .tagsSwiper {
       width: 100%;
-      padding:16px 0;
+      padding: 16px 0;
     }
 
     .tagSlide {
@@ -697,7 +736,7 @@ const modules = [FreeMode];
         height: 17px;
         cursor: pointer;
         flex-shrink: 0;
-    
+
         transition: opacity 0.3s ease;
 
         &:hover {
@@ -705,112 +744,118 @@ const modules = [FreeMode];
         }
       }
     }
-
-
   }
 
-      // 子標籤彈窗
-      .subTagsModal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
+  // 子標籤彈窗
+  .subTagsModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+
+    .subTagsModalContent {
+      width: 100%;
+      max-width: 768px;
+      background: #f5f7fa;
+      border-radius: 20px 20px 0 0;
+      height: 85vh;
       display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      z-index: 1000;
-      animation: fadeIn 0.3s ease;
-
-      .subTagsModalContent {
-        width: 100%;
-        max-width: 768px;
-        background: #f5f7fa;
-        border-radius: 20px 20px 0 0;
-        height: 85vh;
+      flex-direction: column;
+      animation: slideUp 0.3s ease;
+      transform: translateY(0);
+      
+      .modalDragBar {
+        width: 40px;
+        height: 4px;
+        background: #ddd;
+        border-radius: 2px;
+        margin: 8px auto;
+        cursor: grab;
+      }
+      .subTagsModalHeader {
         display: flex;
-        flex-direction: column;
-        animation: slideUp 0.3s ease;
-        transform: translateY(0);
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px;
+        border-bottom: 1px solid #e0e0e0;
 
-        .subTagsModalHeader {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 20px 16px;
-          border-bottom: 1px solid #e0e0e0;
-
-          .subTagsModalTitle {
-            font-size: 20px;
-            font-weight: 700;
-            color: #1e1e1e;
-            margin: 0;
-            letter-spacing: 3px;
-          }
-
-          .subTagsModalClose {
-            background: none;
-            border: none;
-            padding: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #666;
-            transition: color 0.3s ease;
-
-            &:hover {
-              color: #1e1e1e;
-            }
-
-            svg {
-              width: 24px;
-              height: 24px;
-            }
-          }
+        .subTagsModalTitle {
+          font-size: 20px;
+          font-weight: 700;
+          color: #1e1e1e;
+          margin: 0;
+          letter-spacing: 3px;
         }
 
-        .subTagsModalBody {
-          flex: 1;
-          overflow-y: auto;
-          padding: 16px;
+        .subTagsModalClose {
+          background: none;
+          border: none;
+          padding: 4px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #666;
+          transition: color 0.3s ease;
 
-          .subTagsGrid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 12px;
+          &:hover {
+            color: #1e1e1e;
+          }
+
+          svg {
+            width: 24px;
+            height: 24px;
+          }
+        }
+      }
+
+      .subTagsModalBody {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+
+        .subTagsGrid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+          gap: 16px;
+          width: 100%;
+
+          .subTagItem {
+            @include neumorphismOuter($radius: 50px, $padding: 0.5rem 1rem);
+            color: #74bc1f;
+            font-size: 18px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 100%;
+            letter-spacing: 2.7px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            text-align: center;
             width: 100%;
 
-            .subTagItem {
-              @include neumorphismOuter($radius: 50px, $padding: 0.5rem 1rem);
-              color: #74bc1f;
-              font-size: 18px;
-              font-style: normal;
-              font-weight: 400;
-              line-height: 100%;
-              letter-spacing: 2.7px;
-              cursor: pointer;
-              white-space: nowrap;
-              transition: all 0.3s ease;
-              text-align: center;
-              width: 100%;
-
-              &.active,
-              &:hover {
-                @include neumorphismOuter(
-                  $bgColor: #74bc1f,
-                  $radius: 50px,
-                  $padding: 0.5rem 1rem
-                );
-                color: white;
-              }
+            &.active,
+            &:hover {
+              @include neumorphismOuter(
+                $bgColor: #74bc1f,
+                $radius: 50px,
+                $padding: 0.5rem 1rem
+              );
+              color: white;
             }
           }
         }
       }
     }
-    
+  }
+
   .recommendedSection {
     padding: 0 16px;
     margin: 8px 0;
@@ -895,7 +940,6 @@ const modules = [FreeMode];
         .videoStats {
           display: flex;
           gap: 16px;
-      
 
           .statItem {
             display: flex;
@@ -921,9 +965,7 @@ const modules = [FreeMode];
               }
 
               &.liked {
-                color: #EC4F4F;
-                
-               
+                color: #ec4f4f;
               }
             }
           }
@@ -1029,7 +1071,7 @@ const modules = [FreeMode];
               }
 
               &.liked {
-                color: #EC4F4F;
+                color: #ec4f4f;
               }
             }
           }

@@ -8,12 +8,12 @@
       <div class="nav-icon">
         <img
           v-if="activeTab === 'services'"
-          src="/assets/imgs/robot/service-active.svg"
-          alt="我的服務"
+          src="/assets/imgs/robot/heartRate-active.svg"
+          alt="健康任務"
         />
-        <img v-else src="/assets/imgs/robot/service.svg" alt="我的服務" />
+        <img v-else src="/assets/imgs/robot/heartRate.svg" alt="健康任務" />
       </div>
-      <span>我的服務</span>
+      <span>健康任務</span>
     </div>
     <div
       class="nav-item"
@@ -125,7 +125,6 @@ const setActiveTabFromRoute = () => {
       break;
     case "/member":
     case "/point":
-   
       activeTab.value = "member";
       break;
     case "/clinicStories":
@@ -167,7 +166,7 @@ onMounted(() => {
   grid-template-columns: repeat(5, 1fr);
   padding-top: 4px;
   padding-bottom: 34px;
-  margin:auto;
+  margin: auto;
   border-top: 1px solid $raphael-white;
   z-index: 100;
 

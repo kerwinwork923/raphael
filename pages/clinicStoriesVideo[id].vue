@@ -133,31 +133,31 @@
             <div class="commentAvatar">
               <!-- 頭像占位 -->
             </div>
-              <div class="commentContent">
-                <div class="commentHeader">
-                  <span class="commentName">{{ comment.name }}</span>
-                  <span class="commentTime">{{ comment.time }}</span>
-                </div>
-                <div class="commentText">
-                  <p
-                    v-if="!comment.showFull && comment.text.length > 50"
-                    class="commentTextShort"
-                  >
-                    {{ comment.text.substring(0, 50) }}...
-                    <span class="showMoreText" @click="showFullComment(index)">
-                      顯示完整內容
-                    </span>
-                  </p>
-                  <p v-else class="commentTextFull">{{ comment.text }}</p>
-                </div>
+            <div class="commentContent">
+              <div class="commentHeader">
+                <span class="commentName">{{ comment.name }}</span>
+                <span class="commentTime">{{ comment.time }}</span>
               </div>
-              <div 
-                v-if="comment.isOwnComment" 
-                class="commentMore"
-                @click.stop="openCommentMenu(index)"
-              >
-                <span>⋮</span>
+              <div class="commentText">
+                <p
+                  v-if="!comment.showFull && comment.text.length > 50"
+                  class="commentTextShort"
+                >
+                  {{ comment.text.substring(0, 50) }}...
+                  <span class="showMoreText" @click="showFullComment(index)">
+                    顯示完整內容
+                  </span>
+                </p>
+                <p v-else class="commentTextFull">{{ comment.text }}</p>
               </div>
+            </div>
+            <div
+              v-if="comment.isOwnComment"
+              class="commentMore"
+              @click.stop="openCommentMenu(index)"
+            >
+              <span>⋮</span>
+            </div>
           </div>
         </div>
 
@@ -266,7 +266,21 @@
               <span>留言 {{ videoData.comments }}</span>
             </div>
             <button class="closeCommentsButton" @click="closeCommentsModal">
-              ×
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <path
+                  d="M18 6L6 18M6 6L18 18"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
             </button>
           </div>
 
@@ -301,8 +315,8 @@
                   <p v-else class="commentTextFull">{{ comment.text }}</p>
                 </div>
               </div>
-              <div 
-                v-if="comment.isOwnComment" 
+              <div
+                v-if="comment.isOwnComment"
                 class="commentMore"
                 @click.stop="openCommentMenuInModal(index)"
               >
@@ -364,8 +378,20 @@
         <div class="commentMenuHeader">
           <span class="commentMenuTitle">留言</span>
           <button class="commentMenuClose" @click="closeCommentMenu">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <path
+                d="M18 6L6 18M6 6L18 18"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
         </div>
@@ -393,8 +419,20 @@
         <div class="editCommentHeader">
           <span class="editCommentTitle">留言</span>
           <button class="editCommentClose" @click="closeEditComment">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <path
+                d="M18 6L6 18M6 6L18 18"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
         </div>
@@ -540,10 +578,12 @@ const transformCommentsData = (videoMessageList) => {
   }
 
   // 獲取當前用戶資訊
-  const userDataLocal = typeof window !== "undefined"
-    ? JSON.parse(localStorage.getItem("userData") || "{}")
-    : {};
-  const currentUserName = userDataLocal.Name || userDataLocal.Member?.Name || "";
+  const userDataLocal =
+    typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("userData") || "{}")
+      : {};
+  const currentUserName =
+    userDataLocal.Name || userDataLocal.Member?.Name || "";
 
   return videoMessageList.map((msg) => ({
     id: parseInt(msg.BID || "0"),
@@ -621,7 +661,7 @@ const commentsListRef = ref(null);
 // 留言操作相關狀態
 const showCommentMenu = ref(false);
 const selectedCommentIndex = ref(-1);
-const selectedCommentId = ref(null); 
+const selectedCommentId = ref(null);
 
 const isModalComment = ref(false); // 是否在模態視窗中的留言
 const showEditComment = ref(false);
@@ -1194,8 +1234,9 @@ const submitComment = async () => {
       ).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
 
       // 獲取當前用戶資訊
-      const currentUserName = userDataLocal.Name || userDataLocal.Member?.Name || "使用者";
-      
+      const currentUserName =
+        userDataLocal.Name || userDataLocal.Member?.Name || "使用者";
+
       commentsList.value.unshift({
         id: result.BID ? parseInt(result.BID) : null,
         name: currentUserName,
@@ -1374,14 +1415,15 @@ const openCommentMenuInModal = (index) => {
 const closeCommentMenu = () => {
   showCommentMenu.value = false;
   selectedCommentIndex.value = -1;
-  
 };
 
 // 編輯留言
 const editComment = () => {
   // 從 commentsList 中找到對應的留言
-  const comment = commentsList.value.find((c) => c.id === selectedCommentId.value);
-  
+  const comment = commentsList.value.find(
+    (c) => c.id === selectedCommentId.value
+  );
+
   if (comment) {
     editingCommentText.value = comment.text;
     showEditComment.value = true;
@@ -1405,7 +1447,9 @@ const saveEditedComment = async () => {
   }
 
   // 從 commentsList 中找到對應的留言
-  const comment = commentsList.value.find((c) => c.id === selectedCommentId.value);
+  const comment = commentsList.value.find(
+    (c) => c.id === selectedCommentId.value
+  );
 
   if (!comment || !comment.id) {
     alert("找不到留言資料");
@@ -1413,9 +1457,10 @@ const saveEditedComment = async () => {
   }
 
   try {
-    const userDataLocal = typeof window !== "undefined"
-      ? JSON.parse(localStorage.getItem("userData") || "{}")
-      : {};
+    const userDataLocal =
+      typeof window !== "undefined"
+        ? JSON.parse(localStorage.getItem("userData") || "{}")
+        : {};
 
     const requestBody = {
       MID: userDataLocal.MID || "",
@@ -1471,7 +1516,9 @@ const confirmDeleteComment = async () => {
   showDeleteAlert.value = false;
 
   // 從 commentsList 中找到對應的留言
-  const comment = commentsList.value.find((c) => c.id === selectedCommentId.value);
+  const comment = commentsList.value.find(
+    (c) => c.id === selectedCommentId.value
+  );
 
   if (!comment || !comment.id) {
     alert("找不到留言資料");
@@ -1479,9 +1526,10 @@ const confirmDeleteComment = async () => {
   }
 
   try {
-    const userDataLocal = typeof window !== "undefined"
-      ? JSON.parse(localStorage.getItem("userData") || "{}")
-      : {};
+    const userDataLocal =
+      typeof window !== "undefined"
+        ? JSON.parse(localStorage.getItem("userData") || "{}")
+        : {};
 
     const requestBody = {
       MID: userDataLocal.MID || "",
@@ -1511,7 +1559,9 @@ const confirmDeleteComment = async () => {
 
     if (result.Result === "OK") {
       // 從列表中移除留言
-      const actualIndex = commentsList.value.findIndex((c) => c.id === comment.id);
+      const actualIndex = commentsList.value.findIndex(
+        (c) => c.id === comment.id
+      );
       if (actualIndex !== -1) {
         commentsList.value.splice(actualIndex, 1);
         // 更新留言數量
@@ -1865,10 +1915,7 @@ const modules = [FreeMode];
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 24px;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    padding: 0 16px;
+    margin: 0 1rem;
 
     .commentsTitle {
       font-size: 20px;
@@ -2085,7 +2132,6 @@ const modules = [FreeMode];
     }
 
     .modalContent {
-
       width: 100%;
       height: 90vh; // 調整為快滿版
 
@@ -2095,8 +2141,8 @@ const modules = [FreeMode];
       touch-action: pan-y;
 
       border-radius: var(--Radius-r-20, 20px) var(--Radius-r-20, 20px) 0 0;
-background: var(--Secondary-100, #F5F7FA);
-box-shadow: 0 -6px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.70));
+      background: var(--Secondary-100, #f5f7fa);
+      box-shadow: 0 -6px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
 
       &.fullscreen {
         border-radius: 0;
@@ -2210,25 +2256,19 @@ box-shadow: 0 -6px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.
   z-index: 1001;
   display: flex;
   align-items: flex-end;
+  justify-content: center;
   animation: fadeIn 0.3s ease;
 
   .commentsModalContent {
-    background: white;
     width: 100%;
-    height: 85vh;
-    max-height: 85vh;
+    max-width: 768px;
+    background: #f5f7fa;
     border-radius: 20px 20px 0 0;
+    height: 85vh;
     display: flex;
     flex-direction: column;
     animation: slideUp 0.3s ease;
-    transition: transform 0.3s ease;
-    touch-action: pan-y;
-
-    overflow: hidden;
-
-    border-radius: var(--Radius-r-20, 20px) var(--Radius-r-20, 20px) 0 0;
-    background: var(--Secondary-100, #f5f7fa);
-    box-shadow: 0 -6px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
+    transform: translateY(0);
 
     .modalDragBar {
       width: 40px;
@@ -2243,14 +2283,14 @@ box-shadow: 0 -6px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 16px 20px;
+      padding: 16px;
       border-bottom: 1px solid #f0f0f0;
 
       .commentsTitle {
-      font-size: 20px;
-      font-weight: 700;
-      color: #1e1e1e;
-    }
+        font-size: 20px;
+        font-weight: 700;
+        color: #1e1e1e;
+      }
 
       .closeCommentsButton {
         background: none;
@@ -2613,7 +2653,8 @@ box-shadow: 0 -6px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.
         outline: none;
         transition: border-color 0.2s ease;
         background: var(--Secondary-100, #f5f7fa);
-        box-shadow: 2px 4px 12px 0 var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
+        box-shadow: 2px 4px 12px 0
+          var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
         color: var(--Neutral-black, #1e1e1e);
 
         &:focus {
