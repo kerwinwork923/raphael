@@ -1607,6 +1607,7 @@ const handleVoiceModalClick = () => {
   }
 };
 
+
 // 開始語音識別超時計時器
 const startVoiceTimeout = () => {
   if (voiceTimeout) {
@@ -1622,8 +1623,9 @@ const startVoiceTimeout = () => {
         recognitionRef?.stop();
       }
     }
-  }, 3000); // 3秒超時顯示提示
+  }, 5000); // 5秒超時顯示提示
 };
+
 
 // 初始化語音識別
 const initSpeechRecognition = () => {
