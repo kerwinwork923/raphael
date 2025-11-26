@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
@@ -75,7 +75,6 @@
     }
     .intro-card li { margin-bottom:4px; }
 
-    /* 模式切換 */
     .mode-switch {
       margin-top:26px;
       display:flex;
@@ -166,7 +165,6 @@
     }
     .bullet-box li { margin-bottom:4px; }
 
-    /* 實作控制＆進度 */
     .practice-controls {
       padding:14px 16px;
       border-radius:14px;
@@ -243,16 +241,6 @@
       font-size:13px;
     }
 
-    .tag {
-      display:inline-block;
-      padding:2px 8px;
-      border-radius:999px;
-      border:1px solid rgba(201,161,74,.5);
-      font-size:11px;
-      color:var(--gold);
-      margin-left:4px;
-    }
-
     .toast {
       position:fixed;
       left:50%;
@@ -300,13 +288,11 @@
     </ul>
   </section>
 
-  <!-- 模式切換按鈕 -->
   <div class="mode-switch" aria-label="練習模式選擇">
     <button class="mode-btn active" data-target="panel-learn">① 先了解：教學影片</button>
     <button class="mode-btn" data-target="panel-practice">② 開始實作：每日練習紀錄</button>
   </div>
 
-  <!-- 面板一：教學影片 -->
   <section id="panel-learn" class="panel active" aria-labelledby="learn-title">
     <div class="panel-header">
       <h3 id="learn-title">了解原理與操作｜教學影片</h3>
@@ -316,7 +302,6 @@
     <div class="two-col">
       <div>
         <div class="video-wrap">
-          <!-- 🔁 這裡換成「教學影片」網址 -->
           <iframe
             src="https://www.youtube.com/embed/OnvLbczesUU?rel=0&modestbranding=1"
             title="單側芳香 × 正念呼吸 教學影片"
@@ -338,7 +323,6 @@
     </div>
   </section>
 
-  <!-- 面板二：每日實作 -->
   <section id="panel-practice" class="panel" aria-labelledby="practice-title">
     <div class="panel-header">
       <h3 id="practice-title">每日實作｜30 分鐘單側芳香 × 正念呼吸</h3>
@@ -348,12 +332,12 @@
 
     <div class="two-col">
       <div>
-        <div class="video-wrap">
-          <!-- 🔁 這裡換成「正式實作影片」網址 -->
+        <div class="video-wrap"> 
           <iframe
             id="practiceVideo"
-            src="https://www.youtube.com/embed/v8Jx_GX2mgE?enablejsapi=1&rel=0&modestbranding=1"
+            src="https://www.youtube.com/embed/v8Jx_GX2mgE?enablejsapi=1&rel=0&modestbranding=1&origin=http://localhost:3000"
             title="單側芳香 × 正念呼吸 實作引導"
+            allow="autoplay; encrypted-media"
             allowfullscreen
           ></iframe>
         </div>
@@ -364,8 +348,8 @@
           <button id="btnStart" class="btn-primary">開始本次 30 分鐘練習</button>
           <button id="btnFinish" class="btn-ghost" disabled>我已完成這次練習</button>
           <p style="font-size:12px;margin-top:6px;color:var(--muted);">
-            ✅ 按下「開始」後，系統會先記錄開始時間。<br>
-            ✅ 練習結束時，請記得按「我已完成」，才會算進累積次數。
+            ✅ 按下「開始」後，系統會先記錄開始時間並呼叫 API。<br>
+            ✅ 練習結束時，請記得按「我已完成」，或等影片播完自動紀錄完成。
           </p>
         </div>
       </div>
@@ -386,116 +370,520 @@
 
 <footer>© 2025 智平衡健康集團 — 感謝您願意花時間好好照顧自己。</footer>
 
-<!-- YouTube Iframe API -->
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
+  /* ====== API 設定 ====== */
+  const Save_Breath_Record_URL = "https://23700999.com:8081/HMA/000TTEUPDATE_BREATH_RECORD.jsp";
+  const Get_Breath_Record_URL  = "https://23700999.com:8081/HMA/000TTEGET_BREATH_RECORD.jsp";
+  const API_LOG_EVENT          = "https://23700999.com:8081/HMA/000TTELOG_EVENT.jsp";
+  const EventType = "Breath";
+  logEvent("leadingpage", EventType);
+  
+  let vipId = new URLSearchParams(location.search).get("vip") || "unknown";
+  let BID="";
+  /* ====== 取得手機裝置與系統資訊 ====== */
+  function getDeviceInfo() {
+    var ua = navigator.userAgent || "";
+    var uaData = navigator.userAgentData || null;
+
+    var os = "未知";
+    if (/Android/i.test(ua)) {
+      os = "Android";
+    } else if (/iPhone|iPad|iPod/i.test(ua)) {
+      os = "iOS";
+    } else if (/Win/i.test(ua)) {
+      os = "Windows";
+    } else if (/Mac/i.test(ua)) {
+      os = "macOS";
+    } else if (/Linux/i.test(ua)) {
+      os = "Linux";
+    }
+
+    var deviceModel = "無法辨識";
+    var m = ua.match(/\(([^)]+)\)/);
+    if (m) {
+      var inside = m[1];
+      if (inside.indexOf("Android") !== -1) {
+        var parts = inside.split(";");
+        deviceModel = parts[parts.length - 1].trim();
+      } else if (/iPhone/.test(inside)) {
+        deviceModel = "iPhone";
+      } else if (/iPad/.test(inside)) {
+        deviceModel = "iPad";
+      }
+    }
+
+    var platform = "";
+    if (uaData && uaData.platform) {
+      platform = uaData.platform;
+    } else if (navigator.platform) {
+      platform = navigator.platform;
+    }
+
+    return { os: os, deviceModel: deviceModel, platform: platform, userAgent: ua };
+  }
+
+  const deviceInfo = getDeviceInfo();
+  console.log("vipId=" + vipId, deviceInfo);
+
+
+  async function logEvent(Event, EventType) {
+    const payload = {SafeKey:"qrt897hpmd", VIP: vipId, Event, EventType} ;
+    console.log("payload1="+JSON.stringify(payload, null, 1));
+       // 1) 先嘗試 sendBeacon（POST，Content-Type: text/plain; charset=UTF-8）
+    try {
+           const ok = navigator.sendBeacon(API_LOG_EVENT, new Blob(
+           [JSON.stringify(payload)], { type: "text/plain;charset=UTF-8" }
+          ));
+          if (ok) {console.info("[logEvent] sendBeacon sent");return;}     
+    } catch (e) {
+         console.warn("[logEvent] sendBeacon failed, fallback to fetch no-cors", e);
+    }
+      // 2) fallback: simple request（no-cors + text/plain → 不會 preflight）
+    try {
+             await fetch(API_LOG_EVENT, {
+               method: "POST",
+               mode: "no-cors",
+               headers: { "Content-Type": "text/plain;charset=UTF-8" }, // 注意：不要 application/json
+               body: new Blob([JSON.stringify(payload)], { type: "text/plain;charset=UTF-8" }),
+               keepalive: true,
+               });
+              console.info("[logEvent] fetch(no-cors) sent (opaque response)");
+        } catch (err) {
+             console.error("[logEvent] still failed:", err);
+          }
+}
+
+  /* ====== 練習事件送到後端：type = start / end ====== */
+  async function sendPracticeEvent(type, data) {
+
+   const payload = {
+       Key: "qrt897hpmd",
+       BID: BID,                     // ⭐ 這裡會帶上一開始取得的 BID
+       type: type,                  // start / end
+       VIP: vipId,
+       DeviceModel: deviceInfo.deviceModel,
+       Os: deviceInfo.os,
+       Platform: deviceInfo.platform,
+       userAgent: deviceInfo.userAgent
+    };
+
+//console.log("payload4="+JSON.stringify(payload, null, 1));
+
+/* =====================================================
+   第 1 階段：用正常 fetch 送（可取得 JSON 回應）
+   ===================================================== */
+try {
+  const res = await fetch(Save_Breath_Record_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+
+  const text = await res.text();
+ // console.log("📥 API 回應原始文字 =", text);
+
+  // 嘗試解析 JSON
+  let json = null;
+  try {
+    json = JSON.parse(text);
+  } catch (e) {
+    console.warn("⚠ 回應不是 JSON，無法更新 BID");
+  }
+
+  // ⭐ 如果成功解析 JSON & 有 BID，更新全域 BID
+  if (json && json.BID) {
+    BID = json.BID;
+    console.log("⭐ BID 已更新為：", BID);
+  }
+  // 已成功送出就 return，不走 fallback
+  return;
+}
+catch (e) {
+  console.warn("❌ 正常 fetch 失敗，改用 sendBeacon / no-cors fallback！", e);
+}
+
+/* 第 2 階段：sendBeacon（無法取得回應）*/
+try {
+  const ok = navigator.sendBeacon(
+    Save_Breath_Record_URL,
+    new Blob([JSON.stringify(payload)], {
+      type: "text/plain;charset=UTF-8"
+    })
+  );
+
+  if (ok) {
+    console.info("📡 sendBeacon 已送出（但無法取得 BID）");
+    return;
+  }
+} catch (e) {
+  console.warn("sendBeacon 失敗 -> fallback to no-cors fetch", e);
+}
+/* 第 3 階段：no-cors fallback（無法取得回應） */
+try {
+  await fetch(Save_Breath_Record_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: {
+      "Content-Type": "text/plain;charset=UTF-8"
+    },
+    body: new Blob([JSON.stringify(payload)], {
+      type: "text/plain;charset=UTF-8"
+    }),
+    keepalive: true
+  });
+
+  console.info("🌐 fetch(no-cors) 已送出（無法取得 BID）");
+} catch (err) {
+  console.error("💥 fallback 全部失敗：", err);
+}
+}
+
+async function getBreathRecord() {
+  const payload = {
+    Key: "qrt897hpmd",
+    VIP: vipId,
+  };
+  //console.log("payloadg=" + JSON.stringify(payload, null, 1));
+
+  try {
+    const res = await fetch(Get_Breath_Record_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const text = await res.text();
+    //console.log("📥 Get_Breath_Record 回應原始文字 =", text);
+
+    let json = null;
+    try {
+      json = JSON.parse(text);
+    } catch (e) {
+      console.warn("⚠ Get_Breath_Record 回應不是 JSON，無法解析成紀錄陣列");
+      return [];
+    }
+
+    return json;   // 期待後端回傳的是陣列
+  } catch (e) {
+    console.warn("❌ 呼叫 Get_Breath_Record_URL 失敗：", e);
+    return [];
+  }
+}
+
+
+function parseBackendTime(ts) {
+  if (!ts) return null;
+  ts = String(ts).trim();
+
+  // 14 碼：yyyyMMddHHmmss  →  2025 11 26 09:10:23
+  if (/^\d{14}$/.test(ts)) {
+    const year  = parseInt(ts.slice(0, 4), 10);
+    const month = parseInt(ts.slice(4, 6), 10) - 1; // 0-based
+    const day   = parseInt(ts.slice(6, 8), 10);
+    const hour  = parseInt(ts.slice(8,10), 10);
+    const min   = parseInt(ts.slice(10,12), 10);
+    const sec   = parseInt(ts.slice(12,14), 10);
+    return new Date(year, month, day, hour, min, sec);
+  }
+
+  // 如果以後後端改成 timestamp (13 碼毫秒)
+  if (/^\d{13}$/.test(ts)) {
+    const ms = parseInt(ts, 10);
+    const d  = new Date(ms);
+    if (!isNaN(d.getTime())) return d;
+  }
+
+  // 最後才嘗試用原生 Date 解析（例如已經是 ISO 字串）
+  const d = new Date(ts);
+  if (isNaN(d.getTime())) return null;
+  return d;
+}
+
+
   /* ====== 模式切換 ====== */
-  const modeBtns = document.querySelectorAll(".mode-btn");
-  const panels = document.querySelectorAll(".panel");
-  modeBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const target = btn.dataset.target;
-      modeBtns.forEach(b => b.classList.toggle("active", b === btn));
-      panels.forEach(p => p.classList.toggle("active", p.id === target));
+  var modeBtns = document.querySelectorAll(".mode-btn");
+  var panels = document.querySelectorAll(".panel");
+  modeBtns.forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      var target = btn.dataset.target;
+      modeBtns.forEach(function(b) { b.classList.toggle("active", b === btn); });
+      panels.forEach(function(p) { p.classList.toggle("active", p.id === target); });
     });
   });
 
-  /* ====== YouTube Player for practice ====== */
-  let practicePlayer = null;
-  let currentSession = null; // {start:timestamp}
+  /* ====== YouTube Player & 練習 Session ====== */
+  var practicePlayer = null;
+  var currentSession = null;
+  var pendingStartPlay = false;
+
+  var practiceFlags = {
+    clicked: false,
+    sent50: false,
+    sent100: false,
+    halfTimer: null
+  };
+
+  var YT_STATUS = {
+    CLICK: "click",
+    HALF: "50",
+    END: "100"
+  };
+
+  function trackVideoStatusToSession(status, player) {
+    if (!currentSession) return;
+
+    if (!currentSession.videoEvents) {
+      currentSession.videoEvents = [];
+    }
+
+    var meta = null;
+    try {
+      if (player && typeof player.getVideoData === "function") {
+        var data = player.getVideoData();
+        if (data) {
+          meta = {
+            videoId: data.video_id,
+            title: data.title,
+            author: data.author
+          };
+        }
+      }
+    } catch (e) {}
+
+    var now = Date.now();
+    var currentTime = null;
+    var duration = null;
+    try {
+      if (player && typeof player.getCurrentTime === "function") {
+        currentTime = player.getCurrentTime();
+      }
+      if (player && typeof player.getDuration === "function") {
+        duration = player.getDuration();
+      }
+    } catch (e) {}
+
+    currentSession.videoEvents.push({
+      status: status,
+      at: now,
+      currentTime: currentTime,
+      duration: duration,
+      meta: meta
+    });
+
+    console.log("YT event recorded:", status, currentSession.videoEvents);
+  }
 
   window.onYouTubeIframeAPIReady = function() {
-    const iframe = document.getElementById("practiceVideo");
-    if (!iframe) return;
+    console.log("YouTube Iframe API Ready");
+    var iframe = document.getElementById("practiceVideo");
+    if (!iframe) {
+      console.log("找不到 practiceVideo iframe");
+      return;
+    }
+
     practicePlayer = new YT.Player("practiceVideo", {
       events: {
-        onStateChange: (e) => {
-          if (e.data === YT.PlayerState.ENDED && currentSession && !currentSession.finishedBy) {
-            // 影片播完，若使用者忘記按「完成」，自動幫他結束一次
-            finishPractice("auto");
+        onStateChange: function(e) {
+          var state = e.data;
+          var player = practicePlayer;
+
+          if (state === YT.PlayerState.PLAYING) {
+            if (!practiceFlags.clicked) {
+              practiceFlags.clicked = true;
+              trackVideoStatusToSession(YT_STATUS.CLICK, player);
+            }
+
+            if (!practiceFlags.halfTimer && !practiceFlags.sent50) {
+              practiceFlags.halfTimer = setInterval(function() {
+                try {
+                  var d = (player && typeof player.getDuration === "function") ? player.getDuration() : 0;
+                  var c = (player && typeof player.getCurrentTime === "function") ? player.getCurrentTime() : 0;
+                  if (d > 0 && c / d >= 0.5 && !practiceFlags.sent50) {
+                    practiceFlags.sent50 = true;
+                    trackVideoStatusToSession(YT_STATUS.HALF, player);
+                    clearInterval(practiceFlags.halfTimer);
+                    practiceFlags.halfTimer = null;
+                  }
+                } catch (err) {}
+              }, 1000);
+            }
+          }
+
+          if (state === YT.PlayerState.ENDED) {
+            if (!practiceFlags.sent100) {
+              practiceFlags.sent100 = true;
+
+              if (practiceFlags.halfTimer) {
+                clearInterval(practiceFlags.halfTimer);
+                practiceFlags.halfTimer = null;
+              }
+
+              trackVideoStatusToSession(YT_STATUS.END, player);
+
+              if (currentSession && !currentSession.finishedBy) {
+                finishPractice("autoVideoEnded");
+              }
+            }
           }
         }
       }
     });
+
+    if (pendingStartPlay && practicePlayer && typeof practicePlayer.playVideo === "function") {
+      console.log("pendingStartPlay -> autoplay now");
+      practicePlayer.playVideo();
+      pendingStartPlay = false;
+    }
   };
 
-  /* ====== 練習紀錄（localStorage） ====== */
-  const STORAGE_KEY = "aromaPracticeSessions_v1";
-
-  function loadSessions() {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    } catch {
-      return [];
-    }
-  }
-  function saveSessions(list) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-  }
+  /* ====== 成長紀錄：從 DB (Get_Breath_Record_URL) 取得 ====== */
 
   function formatDate(ts) {
-    const d = new Date(ts);
-    const pad = n => String(n).padStart(2,"0");
-    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  }
-  function formatDateYMD(ts) {
-    const d = new Date(ts);
-    const pad = n => String(n).padStart(2,"0");
-    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-  }
+  var d = parseBackendTime(ts);
+  if (!d) return "時間格式錯誤";
+  var pad = function(n){ return String(n).padStart(2,"0"); };
+  return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+" "+pad(d.getHours())+":"+pad(d.getMinutes());
+}
 
-  function computeStreak(sessions) {
-    if (!sessions.length) return 0;
-    const days = Array.from(new Set(sessions.map(s => formatDateYMD(s.end || s.start)))).sort();
-    // 從最後一天往前算連續天數
-    let streak = 1;
-    for (let i = days.length - 2; i >= 0; i--) {
-      const cur = new Date(days[i]);
-      const next = new Date(days[i+1]);
-      const diff = (next - cur) / (1000*60*60*24);
-      if (diff === 1) {
-        streak++;
-      } else if (diff > 1) {
-        break;
+function formatDateYMD(ts) {
+  var d = parseBackendTime(ts);
+  if (!d) return null;
+  var pad = function(n){ return String(n).padStart(2,"0"); };
+  return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+}
+
+function computeStreakFromRecords(records) {
+  if (!records || !records.length) return 0;
+
+  var daysSet = new Set();
+  records.forEach(function(r){
+    // 優先用 Endtime，其次 Starttime / CheckTime
+    var ts =
+      r.Endtime   || r.ENDTIME   ||
+      r.Starttime || r.STARTTIME ||
+      r.CheckTime || r.CHECKTIME;
+
+    var dayStr = formatDateYMD(ts);
+    if (dayStr) daysSet.add(dayStr);
+  });
+
+  var days = Array.from(daysSet).sort();
+  if (!days.length) return 0;
+
+  var streak = 1;
+  for (var i = days.length - 2; i >= 0; i--) {
+    var cur  = new Date(days[i]);
+    var next = new Date(days[i+1]);
+    var diff = (next - cur) / (1000*60*60*24);
+    if (diff === 1) streak++;
+    else if (diff > 1) break;
+  }
+  return streak;
+}
+
+
+function renderSessionsFromDB() {
+  var totalEl  = document.getElementById("statTotal");
+  var lastEl   = document.getElementById("statLast");
+  var streakEl = document.getElementById("statStreak");
+  var listEl   = document.getElementById("sessionList");
+
+  // ⭐ 這裡記得用 Promise 方式接 async 結果
+  getBreathRecord()
+    .then(function(records) {
+      if (!Array.isArray(records)) {
+        console.warn("Get_Breath_Record_URL 回傳不是陣列，實際值 =", records);
+        records = [];
       }
-    }
-    return streak;
-  }
 
-  function renderSessions() {
-    const sessions = loadSessions();
-    const totalEl = document.getElementById("statTotal");
-    const lastEl  = document.getElementById("statLast");
-    const listEl  = document.getElementById("sessionList");
-    const streakEl= document.getElementById("statStreak");
+      // 1) 累積完成次數
+      totalEl.textContent = records.length;
 
-    totalEl.textContent = sessions.length;
-    if (sessions.length) {
-      const last = sessions[sessions.length - 1];
-      lastEl.textContent = formatDate(last.end || last.start);
-    } else {
-      lastEl.textContent = "尚未開始";
-    }
-    streakEl.textContent = computeStreak(sessions);
+      // 2) 最近一次完成時間：用最後一筆的 Endtime / Starttime / CheckTime
+      if (records.length) {
+        var last = records[records.length - 1];
+        var lastEnd =
+          last.Endtime   || last.ENDTIME   ||
+          last.Starttime || last.STARTTIME ||
+          last.CheckTime || last.CHECKTIME;
 
-    listEl.innerHTML = "";
-    sessions.slice().reverse().forEach((s, idx) => {
-      const li = document.createElement("li");
-      const mins = Math.round((s.duration || 0) / 60);
-      li.textContent = `${formatDate(s.end || s.start)} — 完成一次練習（約 ${mins || 30} 分鐘）`;
-      listEl.appendChild(li);
+        lastEl.textContent = formatDate(lastEnd);
+      } else {
+        lastEl.textContent = "尚未開始";
+      }
+
+      // 3) 連續天數
+      streakEl.textContent = computeStreakFromRecords(records);
+
+      // 4) 列表明細
+      listEl.innerHTML = "";
+      records.slice().reverse().forEach(function(rec){
+         var li = document.createElement("li");
+
+         var start = rec.Starttime || rec.STARTTIME;
+         var end   = rec.Endtime   || rec.ENDTIME;
+
+  // ---- 1. 先用 Duration（秒）換算成分鐘 ----
+         var rawSec =
+             parseInt(rec.Duration, 10)  ||
+             parseInt(rec.DURATION, 10)  ||
+             parseInt(rec.duration, 10)  ||
+             parseInt(rec.DURATION2, 10) || 0;
+
+          var mins = 0;
+          if (!isNaN(rawSec) && rawSec > 0) {
+             mins = Math.round(rawSec / 60);      // 37 秒 → 四捨五入成 1 分鐘
+              if (mins < 1) mins = 1;              // 最少顯示 1 分鐘
+            } else {
+    // ---- 2. 沒有 Duration，就用 Start / End 算 ----
+            var sDate = parseBackendTime(start);
+            var eDate = parseBackendTime(end);
+            if (sDate && eDate) {
+               var diffMs = eDate - sDate;
+               mins = Math.round(diffMs / 60000);
+               if (mins < 1) mins = 1;
+             } else {
+                mins = 30; // 實在算不出來時就給預設 30 分鐘
+              }
+             }
+
+             var startStr = start ? formatDate(start) : "未知開始時間";
+             var endStr   = end   ? formatDate(end)   : "未知結束時間";
+
+             li.textContent = startStr + " ～ " + endStr + " — 完成 " + mins + " 分鐘";
+             listEl.appendChild(li);
     });
-  }
 
-  /* ====== 控制按鈕 ====== */
-  const btnStart = document.getElementById("btnStart");
-  const btnFinish = document.getElementById("btnFinish");
-  const toast = document.getElementById("toast");
+    })
+    .catch(function(err) {
+      console.error("❌ renderSessionsFromDB 發生錯誤：", err);
+    });
+}
+
+  
+
+
+
+  /* ====== 控制按鈕 & 流程 ====== */
+  var btnStart  = document.getElementById("btnStart");
+  var btnFinish = document.getElementById("btnFinish");
+  var toast     = document.getElementById("toast");
 
   function showToast(msg) {
     toast.textContent = msg;
     toast.style.display = "block";
-    setTimeout(() => { toast.style.display = "none"; }, 1800);
+    setTimeout(function(){ toast.style.display = "none"; }, 1800);
+  }
+
+  function resetPracticeFlags() {
+    if (practiceFlags.halfTimer) {
+      clearInterval(practiceFlags.halfTimer);
+      practiceFlags.halfTimer = null;
+    }
+    practiceFlags.clicked = false;
+    practiceFlags.sent50  = false;
+    practiceFlags.sent100 = false;
   }
 
   function startPractice() {
@@ -503,13 +891,32 @@
       showToast("已經在進行一個練習囉。先完成這次再開始下一次。");
       return;
     }
-    currentSession = { start: Date.now(), finishedBy: null };
-    btnStart.disabled = true;
+
+    currentSession = { 
+      start: Date.now(), 
+      finishedBy: null,
+      device: deviceInfo
+    };
+
+    // 呼叫 API：開始練習（可以把 start_time 傳出去）
+    sendPracticeEvent("start", {
+      start_time: currentSession.start
+    });
+
+    resetPracticeFlags();
+    
+    btnStart.disabled  = true;
     btnFinish.disabled = false;
 
-    if (practicePlayer && practicePlayer.playVideo) {
+    console.log("startPractice: practicePlayer =", practicePlayer);
+
+    if (practicePlayer && typeof practicePlayer.playVideo === "function") {
       practicePlayer.playVideo();
+    } else {
+      console.log("player 尚未 ready，設定 pendingStartPlay = true");
+      pendingStartPlay = true;
     }
+
     showToast("已開始本次練習，祝你有一段安穩的 30 分鐘。");
   }
 
@@ -518,27 +925,39 @@
       showToast("目前沒有正在進行的練習。");
       return;
     }
-    currentSession.end = Date.now();
-    currentSession.duration = (currentSession.end - currentSession.start) / 1000; // sec
+
+    currentSession.end      = Date.now();
+    currentSession.duration = (currentSession.end - currentSession.start) / 1000; // 秒
     currentSession.finishedBy = mode || "manual";
 
-    const sessions = loadSessions();
-    sessions.push(currentSession);
-    saveSessions(sessions);
+    var minutes = Math.round(currentSession.duration / 60);
+
+    // 呼叫 API：結束練習，把 start / end / minutes 傳到資料庫
+    sendPracticeEvent("end", {
+      start_time: currentSession.start,
+      end_time: currentSession.end,
+      duration_sec: currentSession.duration,
+      minutes: minutes
+    });
+
     currentSession = null;
 
-    btnStart.disabled = false;
+    btnStart.disabled  = false;
     btnFinish.disabled = true;
 
-    renderSessions();
+    // 從資料庫重新抓最新成長紀錄
+    renderSessionsFromDB();
+
     showToast("已為你記錄這次練習，辛苦了！");
   }
 
-  btnStart.addEventListener("click", () => startPractice());
-  btnFinish.addEventListener("click", () => finishPractice("manual"));
+  btnStart.addEventListener("click", function(){ startPractice(); });
+  btnFinish.addEventListener("click", function(){ finishPractice("manual"); });
 
-  // 初始化
-  document.addEventListener("DOMContentLoaded", renderSessions);
+  document.addEventListener("DOMContentLoaded", function(){
+    // 一進頁面就先抓資料庫成長紀錄
+    renderSessionsFromDB();
+  });
 </script>
 
 </body>
