@@ -197,7 +197,8 @@
           <p 
             v-else-if="currentTranscript && currentTranscript.trim()" 
             class="transcript-text"
-            :key="`transcript-${currentTranscript}`"
+            :key="`transcript-${currentTranscript}-${Date.now()}`"
+            ref="voiceModalTranscriptRef"
           >
             {{ currentTranscript }}
           </p>
@@ -864,6 +865,7 @@ const voiceModalImageSrc = ref(assistantSoundGif); // 語音模態框圖片路�
 const textInputRef = ref(null); // 添加文字輸入框的 ref
 const searchInputRef = ref(null); // 添加搜尋輸入框的 ref
 const nameInputRef = ref(null); // 添加名稱輸入框的 ref
+const voiceModalTranscriptRef = ref(null); // 語音模態框中的文字顯示 ref
 const latestResponse = ref(""); // 最新回覆
 const showSearch = ref(false); // 搜尋功能開關
 const searchQuery = ref(""); // 搜尋關鍵字
@@ -1635,10 +1637,24 @@ const initSpeechRecognition = () => {
           .join("");
 
         if (process.client) {
-          // 使用 nextTick 確保 Android 上正確更新 DOM
+          // Android 兼容性：立即更新值，不等待 nextTick
+          currentTranscript.value = transcript || "";
+          
+          // 強制更新 DOM（Android 需要）
           nextTick(() => {
-            currentTranscript.value = transcript || "";
-            // 強制觸發重新渲染（Android 兼容性）
+            // 優先使用 ref，如果沒有則使用 querySelector
+            const transcriptEl = voiceModalTranscriptRef.value || 
+                                document.querySelector('.voice-modal .transcript-text');
+            if (transcriptEl && transcript) {
+              // 直接設置文字內容，確保 Android 上顯示
+              transcriptEl.textContent = transcript;
+              transcriptEl.style.display = 'block';
+              transcriptEl.style.opacity = '1';
+              transcriptEl.style.visibility = 'visible';
+              // 強制重繪
+              transcriptEl.offsetHeight; // 觸發重排
+            }
+            
             if (transcript) {
               console.log("語音識別結果:", transcript);
             }
@@ -2005,6 +2021,18 @@ const toggleListening = () => {
       finalizedByUs = false;
       voiceModalOpen.value = true; // ← 開窗
       isListening.value = true;
+      
+      // Android 兼容性：確保文字元素可見
+      nextTick(() => {
+        const transcriptEl = voiceModalTranscriptRef.value || 
+                            document.querySelector('.voice-modal .transcript-text');
+        if (transcriptEl) {
+          transcriptEl.style.display = 'block';
+          transcriptEl.style.opacity = '1';
+          transcriptEl.style.visibility = 'visible';
+        }
+      });
+      
       recognitionRef.start();
       startVoiceTimeout();
     }
