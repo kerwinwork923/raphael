@@ -86,8 +86,8 @@
       </div>
 
       <!-- 日常收縮壓選擇 -->
-      <label for="DSPR">血壓</label>
-      <div class="DSPR">
+      <label for="DSPR" v-if="DSPRShow">血壓</label>
+      <div class="DSPR" v-if="DSPRShow">
         <select
           v-model="localDSPR"
           class="custom-select"
@@ -179,6 +179,10 @@ export default {
       default: false
     },
     timeShow: {
+      type: Boolean,
+      default: false
+    },
+    DSPRShow: {
       type: Boolean,
       default: false
     },

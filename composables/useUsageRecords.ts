@@ -22,6 +22,9 @@ export const useUsageRecords = () => {
     '護您穩深眠衣'
   ])
 
+
+  const MAX_USE_MS = 24 * 60 * 60 * 1000; // 24 小時
+
   const generateYearOptions = () => {
     const y = new Date().getFullYear()
     const years: string[] = []
@@ -87,19 +90,30 @@ export const useUsageRecords = () => {
     return `${parseInt(month)}/${parseInt(day)} ${hour}:${minute}`
   }
 
-  // 向上取整的使用時長
-  const calculateDuration = (startTime: string, endTime: string) => {
-    if (!startTime) return '0分鐘'
-    const start = parseTS(startTime)
-    const end = endTime ? parseTS(endTime) : new Date()
-    let diffMs = end.getTime() - start.getTime()
-    if (diffMs < 0) diffMs = 0
-    const diffMinutes = Math.max(1, Math.ceil(diffMs / (1000 * 60)))
-    if (diffMinutes < 60) return `${diffMinutes}分鐘`
-    const hours = Math.floor(diffMinutes / 60)
-    const minutes = diffMinutes % 60
-    return `${hours}小時${minutes}分鐘`
+
+// 向上取整的使用時長，單筆最多 24 小時
+const calculateDuration = (startTime: string, endTime: string) => {
+  if (!startTime) return '0分鐘'
+
+  const start = parseTS(startTime)
+  const end = endTime ? parseTS(endTime) : new Date()
+
+  let diffMs = end.getTime() - start.getTime()
+  if (diffMs < 0) diffMs = 0
+
+  // 🔴 這行是關鍵：單筆最多只算 24 小時
+  if (diffMs > MAX_USE_MS) {
+    diffMs = MAX_USE_MS
   }
+
+  const diffMinutes = Math.max(1, Math.ceil(diffMs / (1000 * 60)))
+
+  if (diffMinutes < 60) return `${diffMinutes}分鐘`
+  const hours = Math.floor(diffMinutes / 60)
+  const minutes = diffMinutes % 60
+  return `${hours}小時${minutes}分鐘`
+}
+
 
   const transformApiData = (apiData: any[]) => {
     return apiData.map((item, index) => {
@@ -162,7 +176,17 @@ export const useUsageRecords = () => {
       const result = await response.json()
 
       if (result.Result === 'OK' && result.Data) {
-        usageRecords.value = transformApiData(result.Data)
+        // 過濾最近 24 小時內的記錄
+        const now = new Date()
+        const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+        
+        const filteredData = result.Data.filter((item: any) => {
+          if (!item.CheckTime) return false
+          const checkTime = parseTS(item.CheckTime)
+          return checkTime.getTime() >= twentyFourHoursAgo.getTime()
+        })
+        
+        usageRecords.value = transformApiData(filteredData)
         filteredRecords.value = [...usageRecords.value]
         applyFilters()
       } else {

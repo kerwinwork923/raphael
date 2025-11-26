@@ -291,6 +291,8 @@ export default {
     });
     const router = useRouter();
     const store = useCommon();
+    const MAX_USE_MS = 24 * 60 * 60 * 1000; // 24 小時的毫秒數
+
 
     // 產品名稱 (路由)
     const productName = decodeURIComponent(
@@ -407,19 +409,47 @@ export default {
     }
 
     // 計算單筆使用時長(分鐘)
-    function calcUsedMinutes(item) {
-      const start = parseYMDHMS(item.oriStartTime);
-      const end = parseYMDHMS(item.oriEndTime);
-      if (!start || !end || end <= start) return 0;
-      const totalMinutes = Math.round((end - start) / 60000);
-      const hours = Math.floor(totalMinutes / 60);
-      const minutes = totalMinutes % 60;
+  // 計算單筆使用時長(分鐘)，最多只顯示 24 小時
+function calcUsedMinutes(item) {
+  const start = parseYMDHMS(item.oriStartTime);
+  let end = parseYMDHMS(item.oriEndTime);
 
-      if (hours > 0) {
-        return `${hours}小時${minutes}分鐘`;
+  // 1. 如果 oriEndTime 解析不到，試著用 EndTime(字串)；再不行就用現在時間
+  if (!end || isNaN(end.getTime())) {
+    if (item.EndTime) {
+      // EndTime 格式：2025/11/25 17:31
+      const tmp = new Date(item.EndTime.replace(/\//g, "-"));
+      if (!isNaN(tmp.getTime())) {
+        end = tmp;
       }
-      return `${minutes}分鐘`;
     }
+  }
+  if (!end || isNaN(end.getTime())) {
+    // API 沒有 EndTime 的情況 -> 當作正在使用中，用「現在時間」當結束
+    end = new Date();
+  }
+
+  // 起始時間有問題就直接 0 分鐘
+  if (!start || isNaN(start.getTime())) return "0分鐘";
+
+  let diffMs = end - start;
+  if (diffMs <= 0) return "0分鐘";
+
+  // 2. 最多只算 24 小時
+  if (diffMs > MAX_USE_MS) {
+    diffMs = MAX_USE_MS;
+  }
+
+  const totalMinutes = Math.round(diffMs / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours > 0) {
+    return `${hours}小時${minutes}分鐘`;
+  }
+  return `${minutes}分鐘`;
+}
+
 
     // 篩選當前年/月 => 顯示
     const filteredUseList = computed(() => {
