@@ -1623,7 +1623,7 @@ const startVoiceTimeout = () => {
         recognitionRef?.stop();
       }
     }
-  }, 5000); // 5秒超時顯示提示
+  }, 10000); // 10秒超時顯示提示
 };
 
 
@@ -1764,13 +1764,13 @@ async function saveChatRecord({
 } = {}) {
   if (!localobj) {
     console.error("保存聊天記錄失敗: 用戶資料不存在");
-    return;
+    return { success: false, error: "用戶資料不存在" };
   }
 
   // 確保訊息內容不為空
   if (!inMsg && !outMsg) {
     console.warn("保存聊天記錄失敗: 輸入和輸出訊息都為空");
-    return;
+    return { success: false, error: "訊息內容為空" };
   }
 
   // 預設使用本地時間（避免時區問題）
@@ -1778,6 +1778,13 @@ async function saveChatRecord({
   const outputTime = outputAt || getLocalTimeString(new Date());
 
   try {
+    console.log("開始保存聊天記錄到 API:", {
+      inMsg: inMsg.substring(0, 50) + (inMsg.length > 50 ? "..." : ""),
+      outMsg: outMsg.substring(0, 50) + (outMsg.length > 50 ? "..." : ""),
+      inputTime,
+      outputTime,
+    });
+
     const response = await fetch(TEXT_MESSAGE_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1794,20 +1801,25 @@ async function saveChatRecord({
     });
 
     if (!response.ok) {
+      const errorText = await response.text().catch(() => "");
       throw new Error(
-        `API 調用失敗: ${response.status} ${response.statusText}`
+        `API 調用失敗: ${response.status} ${response.statusText} - ${errorText}`
       );
     }
 
     const result = await response.json();
-    console.log("保存聊天記錄成功:", result);
+    console.log("保存聊天記錄 API 回應:", result);
 
     // 檢查 API 回傳結果
     if (result && result.Result && result.Result !== "OK") {
       console.error("保存聊天記錄失敗: API 回傳錯誤", result);
+      return { success: false, error: result.Result, data: result };
     }
+
+    return { success: true, data: result };
   } catch (e) {
     console.error("保存聊天記錄失敗:", e);
+    return { success: false, error: e.message || String(e) };
   }
 }
 
@@ -1984,14 +1996,16 @@ async function sendViaUnifiedAPI(
 
   // 無論是否進入摘要，n8n 真正回覆到手後，一律寫入 TTEsaveChatMessageHistory
   try {
-    await saveChatRecord({
+    const saveResult = await saveChatRecord({
       inMsg: userText,
       outMsg: finalAnswer,
       inputAt: localTime,
       outputAt: getLocalTimeString(new Date()),
     });
+    console.log("語音對話已保存到 API:", { userText, finalAnswer, saveResult });
   } catch (e) {
     console.error("寫入 TTE 聊天紀錄失敗:", e);
+    // 即使保存失敗，也繼續返回結果，不影響用戶體驗
   }
 
   return finalAnswer;
@@ -2116,12 +2130,29 @@ const handleSpeechEnd = async (transcript) => {
   } catch (error) {
     console.error("API 調用錯誤:", error);
     const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
+    const nowTs = Date.now();
+    const localTime = getLocalTimeString(new Date(nowTs));
+    
+    // 保存錯誤對話到 API
+    try {
+      await saveChatRecord({
+        inMsg: transcript,
+        outMsg: errorResponse,
+        inputAt: localTime,
+        outputAt: getLocalTimeString(new Date()),
+      });
+      console.log("錯誤對話已保存到 API");
+    } catch (saveError) {
+      console.error("保存錯誤對話到 API 失敗:", saveError);
+    }
+    
     const errorConversation = {
-      id: Date.now(),
+      id: nowTs,
+      ts: nowTs,
       user: transcript,
       bot: errorResponse,
       timestamp: new Date().toLocaleString("zh-TW"),
-      dateKey: toDateKey(new Date()),
+      dateKey: toDateKey(new Date(nowTs)),
     };
     conversations.value.push(errorConversation);
     latestResponse.value = errorResponse;
