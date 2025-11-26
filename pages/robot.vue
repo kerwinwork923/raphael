@@ -182,38 +182,44 @@
     <BottomNav />
 
     <!-- 錄音提示彈窗 -->
-    <transition name="fade">
-      <div v-if="voiceModalOpen" class="voice-modal">
-        <div class="voice-content" @click.stop>
-          <img
-            :src="voiceModalImageSrc"
-            alt="音波圖"
-            class="voice-wave"
-            @click="handleVoiceModalClick"
-          />
-          <p v-if="showVoiceError" class="voice-error-text">
-            聽不太清楚，請點擊再試一次
-          </p>
-          <p 
-            v-else-if="currentTranscript && currentTranscript.trim()" 
-            class="transcript-text"
-            :key="`transcript-${currentTranscript}-${Date.now()}`"
-            ref="voiceModalTranscriptRef"
-          >
-            {{ currentTranscript }}
-          </p>
-          <div
-            class="voiceModelClose"
-            v-if="!isListening"
-            @click="closeVoiceModal"
-          >
-            <div class="voiceModelImg">
-              <img src="/assets/imgs/robot/close_red.svg" alt="關閉" />
-            </div>
-          </div>
+ <!-- 錄音提示彈窗 -->
+<transition name="fade">
+  <div v-if="voiceModalOpen" class="voice-modal">
+    <div class="voice-content" @click.stop>
+      <img
+        :src="voiceModalImageSrc"
+        alt="音波圖"
+        class="voice-wave"
+        @click="handleVoiceModalClick"
+      />
+
+      <!-- 錯誤文字 -->
+      <p v-if="showVoiceError" class="voice-error-text">
+        聽不太清楚，請點擊再試一次
+      </p>
+
+      <!-- 錄音中文字（固定一個節點，不用 key，不會一直被 destroy） -->
+      <p
+        v-else
+        class="transcript-text"
+        ref="voiceModalTranscriptRef"
+      >
+        {{ currentTranscript || '' }}
+      </p>
+
+      <div
+        class="voiceModelClose"
+        v-if="!isListening"
+        @click="closeVoiceModal"
+      >
+        <div class="voiceModelImg">
+          <img src="/assets/imgs/robot/close_red.svg" alt="關閉" />
         </div>
       </div>
-    </transition>
+    </div>
+  </div>
+</transition>
+
 
     <!-- 語音播放錯誤提示 -->
     <transition name="fade">
