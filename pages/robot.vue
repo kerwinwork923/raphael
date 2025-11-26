@@ -1639,28 +1639,47 @@ const initSpeechRecognition = () => {
       recognitionRef.lang = "zh-TW";
 
       recognitionRef.onresult = (event) => {
-        const transcript = Array.from(event.results)
-          .map((result) => result[0])
-          .map((result) => result.transcript)
-          .join("");
+        // 處理所有結果（包括 interim 和 final）
+        let transcript = "";
+        for (let i = 0; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
 
         if (process.client) {
-          // Android 兼容性：立即更新值，不等待 nextTick
+          // Android 兼容性：立即同步更新 DOM，不等待 Vue 響應式系統
+          const transcriptEl = voiceModalTranscriptRef.value || 
+                              document.querySelector('.voice-modal .transcript-text');
+          
+          // 優先直接操作 DOM，確保 Android 上立即顯示
+          if (transcriptEl) {
+            // 立即更新 DOM，不等待 Vue 響應式
+            transcriptEl.textContent = transcript || "";
+            transcriptEl.style.display = transcript ? 'block' : 'none';
+            transcriptEl.style.opacity = '1';
+            transcriptEl.style.visibility = 'visible';
+            
+            // 強制同步重繪（Android 需要）
+            if (transcript) {
+              // 使用多種方式強制重繪
+              transcriptEl.offsetHeight; // 觸發重排
+              void transcriptEl.offsetWidth; // 觸發重排
+              
+              // 使用 requestAnimationFrame 確保在下一個繪製週期顯示
+              requestAnimationFrame(() => {
+                transcriptEl.textContent = transcript;
+                transcriptEl.style.display = 'block';
+              });
+            }
+          }
+          
+          // 同時更新響應式值（用於 Vue 綁定）
           currentTranscript.value = transcript || "";
           
-          // 強制更新 DOM（Android 需要）
+          // 使用 nextTick 作為備用更新機制
           nextTick(() => {
-            // 優先使用 ref，如果沒有則使用 querySelector
-            const transcriptEl = voiceModalTranscriptRef.value || 
-                                document.querySelector('.voice-modal .transcript-text');
             if (transcriptEl && transcript) {
-              // 直接設置文字內容，確保 Android 上顯示
               transcriptEl.textContent = transcript;
               transcriptEl.style.display = 'block';
-              transcriptEl.style.opacity = '1';
-              transcriptEl.style.visibility = 'visible';
-              // 強制重繪
-              transcriptEl.offsetHeight; // 觸發重排
             }
             
             if (transcript) {
@@ -2044,15 +2063,27 @@ const toggleListening = () => {
       voiceModalOpen.value = true; // ← 開窗
       isListening.value = true;
       
-      // Android 兼容性：確保文字元素可見
-      nextTick(() => {
+      // Android 兼容性：立即準備文字元素，不等待 nextTick
+      // 使用雙重機制：立即操作 + nextTick 備用
+      const prepareTranscriptEl = () => {
         const transcriptEl = voiceModalTranscriptRef.value || 
                             document.querySelector('.voice-modal .transcript-text');
         if (transcriptEl) {
           transcriptEl.style.display = 'block';
           transcriptEl.style.opacity = '1';
           transcriptEl.style.visibility = 'visible';
+          transcriptEl.textContent = ''; // 清空之前的內容
+          // 強制重繪
+          transcriptEl.offsetHeight;
         }
+      };
+      
+      // 立即執行
+      prepareTranscriptEl();
+      
+      // nextTick 作為備用
+      nextTick(() => {
+        prepareTranscriptEl();
       });
       
       recognitionRef.start();
@@ -4503,13 +4534,21 @@ const vClickOutside = {
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       text-rendering: optimizeLegibility;
-      /* 強制硬體加速 */
+      /* 強制硬體加速 - Android 需要 */
       transform: translateZ(0);
-      will-change: contents;
-      /* 確保文字可見 */
-      opacity: 1;
-      display: block;
-      visibility: visible;
+      will-change: transform, contents;
+      /* 確保文字可見 - 預設值 */
+      opacity: 1 !important;
+      display: block !important;
+      visibility: visible !important;
+      /* Android 立即渲染優化 */
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      /* 強制 GPU 加速 */
+      -webkit-transform: translateZ(0);
+      -moz-transform: translateZ(0);
+      -ms-transform: translateZ(0);
+      -o-transform: translateZ(0);
     }
   }
 }
