@@ -1658,21 +1658,37 @@ const initSpeechRecognition = () => {
 
       recognitionRef.onresult = (event) => {
         // 處理所有結果（包括 interim 和 final）
-        // 只處理最新的 interim 結果和所有 final 結果
+        // 正確處理：累積所有 final 結果 + 只顯示最後一個 interim 結果（如果存在）
         let transcript = "";
         let hasFinal = false;
         
+        // 先累積所有 final 結果
         for (let i = 0; i < event.results.length; i++) {
           const result = event.results[i];
           if (result.isFinal) {
             transcript += result[0].transcript;
             hasFinal = true;
-          } else {
-            // 只取最新的 interim 結果
-            if (i === event.results.length - 1) {
-              transcript += result[0].transcript;
-            }
           }
+        }
+        
+        // 然後只添加最後一個 interim 結果（如果存在且不是 final）
+        const lastResult = event.results[event.results.length - 1];
+        if (lastResult && !lastResult.isFinal) {
+          transcript += lastResult[0].transcript;
+        }
+        
+        // 調試日誌：檢查結果
+        if (process.client && transcript) {
+          console.log("語音識別結果處理:", {
+            resultsCount: event.results.length,
+            transcript,
+            hasFinal,
+            results: Array.from(event.results).map((r, i) => ({
+              index: i,
+              text: r[0].transcript,
+              isFinal: r.isFinal
+            }))
+          });
         }
 
         if (process.client) {
@@ -2674,9 +2690,26 @@ const handleCustomerService = async (contactService = false) => {
 
   if (contactService) {
     // 直接打 frSendLineText API（靜默）
+    const inputText = pendingInput.value || "呼叫客服";
+    const inputTime = getLocalTimeString(new Date());
+    
     try {
       isLoading.value = true;
 
+      // 1. 先保存聊天記錄到 TTEsaveChatMessageHistory.jsp（與文字輸入一致）
+      try {
+        await saveChatRecord({
+          inMsg: inputText,
+          outMsg: "", // 客服訊息由後端處理，這裡先留空
+          inputAt: inputTime,
+          outputAt: getLocalTimeString(new Date()),
+        });
+        console.log("客服對話已保存到 TTEsaveChatMessageHistory");
+      } catch (saveError) {
+        console.error("保存客服對話到 TTEsaveChatMessageHistory 失敗:", saveError);
+      }
+
+      // 2. 然後打 frSendLineText API
       const response = await fetch(
         "https://23700999.com:8081/HMA/api/fr/frSendLineText",
         {
@@ -2687,7 +2720,7 @@ const handleCustomerService = async (contactService = false) => {
             Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
             MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
             Mobile: localobj.Mobile,
-            Content: pendingInput.value || "呼叫客服",
+            Content: inputText,
             Lang: "zhtw",
           }),
         }
