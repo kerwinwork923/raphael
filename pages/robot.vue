@@ -968,19 +968,16 @@ const parseCorrectTime = (timeString) => {
 };
 
 // 生成本地時間格式，避免時區問題
+// 格式：YYYY-MM-DD HH:mm:ss（與 API 要求一致）
 const getLocalTimeString = (date = new Date()) => {
-  return date
-    .toLocaleString("zh-TW", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    })
-    .replace(/\//g, "-")
-    .replace(",", "");
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hour = String(date.getHours()).padStart(2, "0");
+  const minute = String(date.getMinutes()).padStart(2, "0");
+  const second = String(date.getSeconds()).padStart(2, "0");
+  
+  return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
 };
 
 // 日曆相關
@@ -1623,7 +1620,7 @@ const startVoiceTimeout = () => {
         recognitionRef?.stop();
       }
     }
-  }, 10000); // 10秒超時顯示提示
+  }, 8000); // 8秒超時顯示提示
 };
 
 
@@ -1634,7 +1631,7 @@ const initSpeechRecognition = () => {
       const SpeechRecognition =
         window.SpeechRecognition || window.webkitSpeechRecognition;
       recognitionRef = new SpeechRecognition();
-      recognitionRef.continuous = false;
+      recognitionRef.continuous = true;
       recognitionRef.interimResults = true;
       recognitionRef.lang = "zh-TW";
 
