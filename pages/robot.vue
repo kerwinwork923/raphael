@@ -1598,29 +1598,50 @@ const handleVoiceModalClick = () => {
       voiceModalImageSrc.value = assistantSoundGif;
       recognitionRef.start();
       isListening.value = true;
-      // 重新設置3秒超時
-      startVoiceTimeout();
+      // 重新設置超時（初始時沒有文字）
+      startVoiceTimeout(false);
     }
   }
 };
 
 
 // 開始語音識別超時計時器
-const startVoiceTimeout = () => {
+// 當有文字時，延長超時時間；無文字時，較短超時
+const startVoiceTimeout = (hasText = false) => {
   if (voiceTimeout) {
     clearTimeout(voiceTimeout);
   }
+  
+  // 如果有文字，給更長的靜音時間（3秒）；如果沒有文字，給較短時間（8秒）
+  const timeoutDuration = hasText ? 3000 : 8000;
+  
   voiceTimeout = setTimeout(() => {
-    if (isListening.value && !currentTranscript.value.trim()) {
-      // 3秒沒聲音直接顯示有關閉按鈕的提示
-      showVoiceError.value = true;
-      voiceModalImageSrc.value = assistantDefaultGif;
-      isListening.value = false; // 停止語音識別
-      if (process.client) {
-        recognitionRef?.stop();
+    if (isListening.value) {
+      const transcript = currentTranscript.value.trim();
+      
+      if (!transcript) {
+        // 沒有文字，顯示錯誤提示
+        showVoiceError.value = true;
+        voiceModalImageSrc.value = assistantDefaultGif;
+        isListening.value = false;
+        if (process.client) {
+          recognitionRef?.stop();
+        }
+      } else {
+        // 有文字但靜音超過3秒，自動結束並處理
+        hasFinalResult = true;
+        clearVoiceTimeout();
+        finalizedByUs = true;
+        reallyCloseVoiceModal();
+        handleSpeechEnd(transcript);
+        if (process.client) {
+          try {
+            recognitionRef?.stop();
+          } catch {}
+        }
       }
     }
-  }, 8000); // 8秒超時顯示提示
+  }, timeoutDuration);
 };
 
 
@@ -1637,9 +1658,21 @@ const initSpeechRecognition = () => {
 
       recognitionRef.onresult = (event) => {
         // 處理所有結果（包括 interim 和 final）
+        // 只處理最新的 interim 結果和所有 final 結果
         let transcript = "";
+        let hasFinal = false;
+        
         for (let i = 0; i < event.results.length; i++) {
-          transcript += event.results[i][0].transcript;
+          const result = event.results[i];
+          if (result.isFinal) {
+            transcript += result[0].transcript;
+            hasFinal = true;
+          } else {
+            // 只取最新的 interim 結果
+            if (i === event.results.length - 1) {
+              transcript += result[0].transcript;
+            }
+          }
         }
 
         if (process.client) {
@@ -1647,58 +1680,65 @@ const initSpeechRecognition = () => {
           const transcriptEl = voiceModalTranscriptRef.value || 
                               document.querySelector('.voice-modal .transcript-text');
           
+          const textToShow = transcript || "";
+          
           // 優先直接操作 DOM，確保 Android 上立即顯示
           if (transcriptEl) {
-            // 立即更新 DOM，不等待 Vue 響應式
-            transcriptEl.textContent = transcript || "";
-            transcriptEl.style.display = transcript ? 'block' : 'none';
-            transcriptEl.style.opacity = '1';
-            transcriptEl.style.visibility = 'visible';
+            // 立即同步更新 DOM（不等待任何異步操作）
+            transcriptEl.textContent = textToShow;
             
-            // 強制同步重繪（Android 需要）
-            if (transcript) {
-              // 使用多種方式強制重繪
-              transcriptEl.offsetHeight; // 觸發重排
-              void transcriptEl.offsetWidth; // 觸發重排
+            // 強制同步樣式更新
+            if (textToShow) {
+              transcriptEl.style.display = 'block';
+              transcriptEl.style.opacity = '1';
+              transcriptEl.style.visibility = 'visible';
               
-              // 使用 requestAnimationFrame 確保在下一個繪製週期顯示
-              requestAnimationFrame(() => {
-                transcriptEl.textContent = transcript;
-                transcriptEl.style.display = 'block';
-              });
+              // 強制同步重繪（Android 需要）- 立即執行，不等待
+              // 使用多種方式觸發重排
+              const force = transcriptEl.offsetHeight; // 觸發重排
+              void transcriptEl.offsetWidth; // 觸發重排
+              void transcriptEl.scrollTop; // 觸發重排
+              
+              // 立即再次設置，確保更新
+              transcriptEl.textContent = textToShow;
+            } else {
+              transcriptEl.style.display = 'none';
             }
+            
+            // 使用 requestAnimationFrame 作為額外保障（異步，不阻塞）
+            requestAnimationFrame(() => {
+              if (transcriptEl && textToShow) {
+                transcriptEl.textContent = textToShow;
+                transcriptEl.style.display = 'block';
+              }
+            });
           }
           
           // 同時更新響應式值（用於 Vue 綁定）
-          currentTranscript.value = transcript || "";
+          currentTranscript.value = textToShow;
+          
+          // 如果有文字，重置超時計時器（延長收音時間）
+          if (transcript.trim()) {
+            clearVoiceTimeout();
+            // 設置更短的靜音超時（3秒無新文字才結束）
+            startVoiceTimeout(true); // 傳入 true 表示有文字
+          }
           
           // 使用 nextTick 作為備用更新機制
           nextTick(() => {
-            if (transcriptEl && transcript) {
-              transcriptEl.textContent = transcript;
+            if (transcriptEl && textToShow) {
+              transcriptEl.textContent = textToShow;
               transcriptEl.style.display = 'block';
             }
             
             if (transcript) {
-              console.log("語音識別結果:", transcript);
+              console.log("語音識別結果:", transcript, "isFinal:", hasFinal);
             }
           });
         }
 
-        // 一旦拿到 final，就立刻關視窗 & 只處理一次
-        if (
-          event.results[event.results.length - 1].isFinal &&
-          !hasFinalResult
-        ) {
-          hasFinalResult = true;
-          clearVoiceTimeout();
-          finalizedByUs = true; // ← 標記為我們主動收尾
-          reallyCloseVoiceModal(); // ← 先把 UI 關乾淨
-          handleSpeechEnd(transcript); // 非同步處理對話
-          try {
-            recognitionRef.stop();
-          } catch {}
-        }
+        // 不立即關閉，讓用戶可以持續說話
+        // 只有在 onend 事件或超時時才處理
       };
 
       recognitionRef.onerror = (event) => {
@@ -1753,13 +1793,27 @@ const initSpeechRecognition = () => {
           hasFinalResult = false;
           return;
         }
-        if (!hasFinalResult) {
-          // ← 沒拿到 final 才給提示
-          isListening.value = false;
-          showVoiceError.value = true;
-          voiceModalImageSrc.value = assistantDefaultGif;
-          voiceModalOpen.value = true; // 保持彈窗開著讓使用者點關閉
+        
+        // 如果語音識別自然結束（不是我們主動停止的）
+        if (!hasFinalResult && isListening.value) {
+          const transcript = currentTranscript.value.trim();
+          
+          if (transcript) {
+            // 有文字，自動處理
+            hasFinalResult = true;
+            clearVoiceTimeout();
+            finalizedByUs = true;
+            reallyCloseVoiceModal();
+            handleSpeechEnd(transcript);
+          } else {
+            // 沒有文字，顯示錯誤提示
+            isListening.value = false;
+            showVoiceError.value = true;
+            voiceModalImageSrc.value = assistantDefaultGif;
+            voiceModalOpen.value = true; // 保持彈窗開著讓使用者點關閉
+          }
         }
+        
         hasFinalResult = false;
       };
     }
@@ -2084,7 +2138,7 @@ const toggleListening = () => {
       });
       
       recognitionRef.start();
-      startVoiceTimeout();
+      startVoiceTimeout(false); // 初始時沒有文字
     }
   }
 };
