@@ -80,7 +80,7 @@ export default {
       "雙效紅光活力衣",
       "全效調節衣",
       "居家治療儀",
-      "護您穩深眠衣",
+      "護您穩平衡衣",
     ];
     const nextText = ref("下一步");
     if (!validName.includes(productName)) {

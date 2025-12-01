@@ -78,6 +78,24 @@
 
         <li 
           :class="{ 
+            active: currentPage === 'categoryManagement',
+            'has-focus': focusedItem === 'categoryManagement' 
+          }" 
+          @click="handleMenuClick({ key: 'categoryManagement', path: '/raphaelBackend/categoryManagement' })"
+          @mouseenter="handleMouseEnter('categoryManagement')"
+          @mouseleave="handleMouseLeave"
+          @focus="handleFocus('categoryManagement')"
+          @blur="handleBlur"
+          tabindex="0"
+          role="menuitem"
+          aria-label="分類管理"
+        >
+          <!-- <img src="/assets/imgs/backend/categoryManagement.svg" alt="分類管理" /> -->
+          <span v-show="!collapsed">分類管理</span>
+        </li>
+
+        <li 
+          :class="{ 
             active: currentPage === 'order',
             'has-focus': focusedItem === 'order' 
           }" 
@@ -276,6 +294,10 @@ watch(() => route.path, (newPath: string) => {
     currentPage.value = 'videoManage';
     emit('update:modelValue', 'videoManage');
     emit('page-change', 'videoManage');
+  } else if (newPath.includes('/categoryManagement')) {
+    currentPage.value = 'categoryManagement';
+    emit('update:modelValue', 'categoryManagement');
+    emit('page-change', 'categoryManagement');
   }
 }, { immediate: true });
 
