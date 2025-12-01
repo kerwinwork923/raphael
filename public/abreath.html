@@ -303,8 +303,9 @@
       <div>
         <div class="video-wrap">
           <iframe
-            src="https://www.youtube.com/embed/OnvLbczesUU?rel=0&modestbranding=1"
+            src="https://www.youtube.com/embed/nWhNM32nYfk?rel=0&modestbranding=1"
             title="單側芳香 × 正念呼吸 教學影片"
+            data-video-id="videobreath001"
             allowfullscreen
           ></iframe>
         </div>
@@ -329,19 +330,19 @@
       <p>請先準備好：擴香儀、左右兩瓶精油、導息器與一個不被打擾的角落。<br>
       每次都從這裡開始，按下「開始本次練習」，影片會啟動，同時幫您留下今天的一筆紀錄。</p>
     </div>
-
     <div class="two-col">
       <div>
         <div class="video-wrap"> 
           <iframe
             id="practiceVideo"
-            src="https://www.youtube.com/embed/v8Jx_GX2mgE?enablejsapi=1&rel=0&modestbranding=1&origin=http://localhost:3000"
+            
+            src="https://www.youtube.com/embed/LQWKNEmk58U?enablejsapi=1&rel=0&modestbranding=1"
             title="單側芳香 × 正念呼吸 實作引導"
             allow="autoplay; encrypted-media"
+            data-video-id="videobreath002"
             allowfullscreen
           ></iframe>
         </div>
-
         <div class="practice-controls" style="margin-top:14px;">
           <h4>實作前請先確認：</h4>
           <p>擴香儀中左右精油分別放好；導息器在手邊。手機請調成靜音或飛航模式，讓這30 分鐘只屬於您。</p>
@@ -377,10 +378,16 @@
   const Get_Breath_Record_URL  = "https://23700999.com:8081/HMA/000TTEGET_BREATH_RECORD.jsp";
   const API_LOG_EVENT          = "https://23700999.com:8081/HMA/000TTELOG_EVENT.jsp";
   const EventType = "Breath";
-  logEvent("leadingpage", EventType);
-  
+  const STORAGE_WATCHED_KEY = "yt_watched_list";
   let vipId = new URLSearchParams(location.search).get("vip") || "unknown";
   let BID="";
+  // ===== YouTube 追蹤播放器初始化旗標 =====
+  let ytApiReady = false;           // YT Iframe API 是否載入完成
+  let playersInitialized = false;   // createPlayers 是否已經跑過
+  let wantInitOtherPlayers = false; // 是否已經有人要求初始化其它影片
+
+  logEvent("leadingpage", EventType);
+
   /* ====== 取得手機裝置與系統資訊 ====== */
   function getDeviceInfo() {
     var ua = navigator.userAgent || "";
@@ -601,6 +608,70 @@ function parseBackendTime(ts) {
 }
 
 
+   // 先把原本建立 practicePlayer 的內容抽成一個函式
+function initPracticePlayer() {
+  console.log("YouTube Iframe API Ready");
+  var iframe = document.getElementById("practiceVideo");
+  if (!iframe) {
+    console.log("找不到 practiceVideo iframe");
+    return;
+  }
+
+  practicePlayer = new YT.Player("practiceVideo", {
+    events: {
+      onStateChange: function(e) {
+        var state = e.data;
+        var player = practicePlayer;
+
+        if (state === YT.PlayerState.PLAYING) {
+          if (!practiceFlags.clicked) {
+            practiceFlags.clicked = true;
+            trackVideoStatusToSession(YT_STATUS.CLICK, player);
+          }
+
+          if (!practiceFlags.halfTimer && !practiceFlags.sent50) {
+            practiceFlags.halfTimer = setInterval(function() {
+              try {
+                var d = player.getDuration ? player.getDuration() : 0;
+                var c = player.getCurrentTime ? player.getCurrentTime() : 0;
+                if (d > 0 && c / d >= 0.5 && !practiceFlags.sent50) {
+                  practiceFlags.sent50 = true;
+                  trackVideoStatusToSession(YT_STATUS.HALF, player);
+                  clearInterval(practiceFlags.halfTimer);
+                  practiceFlags.halfTimer = null;
+                }
+              } catch (err) {}
+            }, 1000);
+          }
+        }
+
+        if (state === YT.PlayerState.ENDED) {
+          if (!practiceFlags.sent100) {
+            practiceFlags.sent100 = true;
+
+            if (practiceFlags.halfTimer) {
+              clearInterval(practiceFlags.halfTimer);
+              practiceFlags.halfTimer = null;
+            }
+
+            trackVideoStatusToSession(YT_STATUS.END, player);
+
+            if (currentSession && !currentSession.finishedBy) {
+              finishPractice("autoVideoEnded");
+            }
+          }
+        }
+      }
+    }
+  });
+
+  if (pendingStartPlay && practicePlayer && typeof practicePlayer.playVideo === "function") {
+    console.log("pendingStartPlay -> autoplay now");
+    practicePlayer.playVideo();
+    pendingStartPlay = false;
+  }
+}
+
   /* ====== 模式切換 ====== */
   var modeBtns = document.querySelectorAll(".mode-btn");
   var panels = document.querySelectorAll(".panel");
@@ -674,70 +745,36 @@ function parseBackendTime(ts) {
     console.log("YT event recorded:", status, currentSession.videoEvents);
   }
 
-  window.onYouTubeIframeAPIReady = function() {
-    console.log("YouTube Iframe API Ready");
-    var iframe = document.getElementById("practiceVideo");
-    if (!iframe) {
-      console.log("找不到 practiceVideo iframe");
-      return;
-    }
+  // YouTube API 載入完成後，統一從這裡呼叫
+  window.onYouTubeIframeAPIReady = function () {
+     ytApiReady = true;
+     initPracticePlayer();  // 30 分鐘練習影片
 
-    practicePlayer = new YT.Player("practiceVideo", {
-      events: {
-        onStateChange: function(e) {
-          var state = e.data;
-          var player = practicePlayer;
+  // 如果之前 startPractice 已經呼叫過 ensurePlayersInitialized()
+  //（wantInitOtherPlayers=true），那這裡幫忙真的去 createPlayers()
+     //if (wantInitOtherPlayers && !playersInitialized) {
+         createPlayers();
+         playersInitialized = true;
+    // }
+};
 
-          if (state === YT.PlayerState.PLAYING) {
-            if (!practiceFlags.clicked) {
-              practiceFlags.clicked = true;
-              trackVideoStatusToSession(YT_STATUS.CLICK, player);
-            }
+// 確保只在「API 已載入」且「尚未建立」時呼叫 createPlayers()
+function ensurePlayersInitialized() {
+   // 有按過「開始練習」就設為 true
+   wantInitOtherPlayers = true;
 
-            if (!practiceFlags.halfTimer && !practiceFlags.sent50) {
-              practiceFlags.halfTimer = setInterval(function() {
-                try {
-                  var d = (player && typeof player.getDuration === "function") ? player.getDuration() : 0;
-                  var c = (player && typeof player.getCurrentTime === "function") ? player.getCurrentTime() : 0;
-                  if (d > 0 && c / d >= 0.5 && !practiceFlags.sent50) {
-                    practiceFlags.sent50 = true;
-                    trackVideoStatusToSession(YT_STATUS.HALF, player);
-                    clearInterval(practiceFlags.halfTimer);
-                    practiceFlags.halfTimer = null;
-                  }
-                } catch (err) {}
-              }, 1000);
-            }
-          }
+// API 還沒 ready 就先記下意圖，等 onYouTubeIframeAPIReady 補作
+   if (!ytApiReady) return;
 
-          if (state === YT.PlayerState.ENDED) {
-            if (!practiceFlags.sent100) {
-              practiceFlags.sent100 = true;
+   if (playersInitialized) return;   // 已經建過就不要重複 new
 
-              if (practiceFlags.halfTimer) {
-                clearInterval(practiceFlags.halfTimer);
-                practiceFlags.halfTimer = null;
-              }
+   createPlayers();
+   playersInitialized = true;
+}
 
-              trackVideoStatusToSession(YT_STATUS.END, player);
+/* ====== 成長紀錄：從 DB (Get_Breath_Record_URL) 取得 ====== */
 
-              if (currentSession && !currentSession.finishedBy) {
-                finishPractice("autoVideoEnded");
-              }
-            }
-          }
-        }
-      }
-    });
 
-    if (pendingStartPlay && practicePlayer && typeof practicePlayer.playVideo === "function") {
-      console.log("pendingStartPlay -> autoplay now");
-      practicePlayer.playVideo();
-      pendingStartPlay = false;
-    }
-  };
-
-  /* ====== 成長紀錄：從 DB (Get_Breath_Record_URL) 取得 ====== */
 
   function formatDate(ts) {
   var d = parseBackendTime(ts);
@@ -887,6 +924,9 @@ function renderSessionsFromDB() {
   }
 
   function startPractice() {
+    
+    ensurePlayersInitialized();
+
     if (currentSession) {
       showToast("已經在進行一個練習囉。先完成這次再開始下一次。");
       return;
@@ -956,8 +996,151 @@ function renderSessionsFromDB() {
 
   document.addEventListener("DOMContentLoaded", function(){
     // 一進頁面就先抓資料庫成長紀錄
-    renderSessionsFromDB();
+      renderSessionsFromDB();
+
+// ★ 對所有 iframe 做正規化 & 加上 data-track="yt"
+      prepareIframes();
   });
+
+
+
+  /** 解析 YouTube 來源為 { id(ytId), url(可追蹤embed) } */
+function normalizeYouTubeSrc(src) {
+  if (!src) return null;
+  const be = src.match(/youtu\.be\/([A-Za-z0-9_-]{6,})/);
+  const watch = src.match(/[?&]v=([A-Za-z0-9_-]{6,})/);
+  const embed = src.match(/\/embed\/([A-Za-z0-9_-]{6,})/);
+  const ytId = be?.[1] || watch?.[1] || embed?.[1];
+  if (!ytId) return null;
+  const url = new URL("https://www.youtube-nocookie.com/embed/" + ytId);
+  url.searchParams.set("enablejsapi", "1");
+  url.searchParams.set("rel", "0");
+  url.searchParams.set("modestbranding", "1");
+  url.searchParams.set("playsinline", "1");
+  return { id: ytId, url: url.toString() };
+}
+
+/** 掃描 iframes → 正規化 → 補資料屬性 */
+function prepareIframes() {
+  const iframes = Array.from(document.querySelectorAll("iframe"));
+  let idx = 0;
+  for (const el of iframes) {
+    // ★ 跳過實作用的主影片，不要讓 createPlayers 管它
+    if (el.id === "practiceVideo") continue;
+
+    const norm = normalizeYouTubeSrc(el.getAttribute("src"));
+    if (!norm) continue;
+
+    el.src = norm.url;
+    if (!el.id) el.id = `ytp-${++idx}`;
+
+    let title = el.getAttribute("title") || `video-${idx}`;
+    const card = el.closest(".card, .single-video, .hero");
+    const h = card?.querySelector("h3, h4, h2");
+    if (h?.textContent) title = h.textContent.trim();
+
+    el.dataset.track     = "yt";
+    el.dataset.title     = title;
+    el.dataset.youtubeId = norm.id;
+    el.dataset.videoId   = el.dataset.videoId || norm.id;
+  }
+}
+
+
+/** 播放器&狀態旗標 */
+const players = {};
+const flags = {}; // { [iframeId]: { clicked, sent50, sent100 } }
+
+/** 標記 100% 完成清單（可選） */
+function markWatched(record) {
+  try {
+    const list = JSON.parse(localStorage.getItem(STORAGE_WATCHED_KEY) || "[]");
+    if (!list.find(x => x.videoId === record.videoId)) {
+      list.push(record);
+      localStorage.setItem(STORAGE_WATCHED_KEY, JSON.stringify(list));
+    }
+  } catch {}
+}
+
+/** 送事件的統一函式 */
+function sendProgress({ iframeId, status, player, meta }) {
+  const duration = Math.round(player?.getDuration?.() || 0);
+  const watched  = Math.round(player?.getCurrentTime?.() || 0);
+  const payload = {
+    vipId,
+    status,                    // "click" | "50" | "100"
+    videoId:   meta.videoId,   // 你的商務ID
+    youtubeId: meta.youtubeId, // 真正 YT ID
+    title:     meta.title,
+    watchedSec: watched,
+    duration,
+    ts: new Date().toISOString()
+  };
+  console.log("payload1="+JSON.stringify(payload, null, 1));
+  //postEvent(payload);
+  if (status === "100") {
+    markWatched(payload);
+  }
+}
+function createPlayers() {
+  const iframes = Array.from(document.querySelectorAll('iframe[data-track="yt"]'));
+  iframes.forEach((el) => {
+    const iframeId = el.id;
+    const meta = {
+      videoId:   el.dataset.videoId,
+      youtubeId: el.dataset.youtubeId,
+      title:     el.dataset.title || el.title || el.dataset.videoId || el.dataset.youtubeId
+    };
+    flags[iframeId] = { clicked: false, sent50: false, sent100: false };
+
+    players[iframeId] = new YT.Player(iframeId, {
+      events: {
+        onStateChange: (e) => {
+          const state  = e.data;
+          const player = players[iframeId];
+
+          // click（首次播放）
+          if (state === YT.PlayerState.PLAYING && !flags[iframeId].clicked) {
+            flags[iframeId].clicked = true;
+            sendProgress({ iframeId, status: "click", player, meta });
+            logEvent("videoPlay_"+el.dataset.videoId, EventType);
+          }
+
+          // 每秒檢查一次是否跨過 50%
+          if (state === YT.PlayerState.PLAYING && !flags[iframeId].sent50) {
+            if (!flags[iframeId].halfTimer) {
+              flags[iframeId].halfTimer = setInterval(() => {
+                try {
+                  const d = player.getDuration?.() || 0;
+                  const c = player.getCurrentTime?.() || 0;
+                  if (d > 0 && c / d >= 0.5 && !flags[iframeId].sent50) {
+                    flags[iframeId].sent50 = true;
+                    sendProgress({ iframeId, status: "50", player, meta });
+                    logEvent("videoPlay50_"+el.dataset.videoId, EventType);
+                    clearInterval(flags[iframeId].halfTimer);
+                    flags[iframeId].halfTimer = null;
+                  }
+                } catch {}
+              }, 1000);
+            }
+          }
+
+          // 100%（播放結束）
+          if (state === YT.PlayerState.ENDED && !flags[iframeId].sent100) {
+            flags[iframeId].sent100 = true;
+            if (flags[iframeId].halfTimer) {
+              clearInterval(flags[iframeId].halfTimer);
+              flags[iframeId].halfTimer = null;
+            }
+            sendProgress({ iframeId, status: "100", player, meta });
+            logEvent("videoPlay100_"+el.dataset.videoId, EventType);
+          }
+        }
+      }
+    });
+  });
+}
+
 </script>
 
 </body>
