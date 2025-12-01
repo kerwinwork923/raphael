@@ -9,7 +9,7 @@
 
     <!-- 根據產品類型顯示對應 TimeRing 或卡片 (保留原程式邏輯) -->
     <TimeRing2
-      v-if="productName === '三效深眠衣' || productName === '全效調節衣' || productName === '護您穩深眠衣'"
+      v-if="productName === '三效深眠衣' || productName === '全效調節衣' || productName === '護您穩平衡衣'"
       :productName="productName"
       :hasDetectRecord="false"
       :todayUseRecord="todayUseRecord"
@@ -100,7 +100,7 @@
       </div>
     </div>
 
-    <div class="usageInfoGroup" v-if="usageCardState === '全效調節衣' || usageCardState === '護您穩深眠衣'">
+    <div class="usageInfoGroup" v-if="usageCardState === '全效調節衣' || usageCardState === '護您穩平衡衣'">
       <div class="usageInfoCard">
         <h3>非侵入性治療</h3>
         <p>
@@ -303,7 +303,7 @@ export default {
       "雙效紅光活力衣",
       "全效調節衣",
       "居家治療儀",
-      "護您穩深眠衣",
+      "護您穩平衡衣",
     ];
     if (!validName.includes(productName)) {
       router.push("/usageHistory");
