@@ -3669,8 +3669,9 @@ const vClickOutside = {
   width: 100%;
   height: 120px;
   @include neumorphismOuter();
-  overflow: hidden;
-  overflow-y: scroll;
+  overflow-y: auto;
+  word-wrap: break-word;
+  word-break: break-word;
   @include scrollbarStyle();
 }
 
