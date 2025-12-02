@@ -76,7 +76,7 @@
           <span v-show="!collapsed">影音管理</span>
         </li>
 
-        <li 
+        <!-- <li 
           :class="{ 
             active: currentPage === 'categoryManagement',
             'has-focus': focusedItem === 'categoryManagement' 
@@ -90,9 +90,9 @@
           role="menuitem"
           aria-label="分類管理"
         >
-          <!-- <img src="/assets/imgs/backend/categoryManagement.svg" alt="分類管理" /> -->
+          <img src="/assets/imgs/backend/categoryManagement.svg" alt="分類管理" />
           <span v-show="!collapsed">分類管理</span>
-        </li>
+        </li> -->
 
         <li 
           :class="{ 
