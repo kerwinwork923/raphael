@@ -114,7 +114,7 @@
 
   
 
-    <!-- 錄音提示彈窗 -->
+
  <!-- 錄音提示彈窗 -->
 <transition name="fade">
   <div v-if="voiceModalOpen" class="voice-modal">
@@ -502,8 +502,8 @@ import searchSvg from "~/assets/imgs/robot/search.svg";
 import calendarSvg from "~/assets/imgs/robot/calendar.svg";
 import sendSvg from "~/assets/imgs/robot/send.svg";
 
-// ====== 參考 robot1021.vue 的 n8n API 方式 ======
-const TEXT_WEBHOOK_URL = "https://aiwisebalancegroup.com/webhook/Textchat"; // ← n8n 文字端點
+
+const TEXT_WEBHOOK_URL = "https://23700999.com:8081/push_notification/api/chatgpt/ask";
 // 移除 API URL，改用 localStorage
 // const TEXT_MESSAGE_URL = "https://23700999.com:8081/HMA/TTEsaveChatMessageHistory.jsp"; // ← 儲存聊天記錄
 // const GET_CHAT_HISTORY_URL = "https://23700999.com:8081/HMA/api/fr/frGetLineAIHuman"; // ← 獲取聊天記錄
@@ -1744,11 +1744,9 @@ async function sendViaUnifiedAPI(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        chatInput: userText,
-        sessionId: UUID,
-        voicegender,
-        timestamp: localTime, // 使用本地時間格式
-        pitch_semitones: 1.5,
+        systemMessage: "你是專業健康顧問",
+        message: userText,
+        model: "gpt-5-mini",
         ...extra,
       }),
     });
@@ -1828,11 +1826,11 @@ async function sendViaUnifiedAPI(
     }
 
     if (data && !answerText) {
-      // 兼容多種欄位：bot / answer / text / message / content / output...
+      // 兼容多種欄位：response / bot / answer / text / message / content / output...
       const pick = (obj) => {
         if (!obj) return "";
         if (typeof obj === "string") return obj;
-        const keys = ["bot", "answer", "text", "message", "content", "output"];
+        const keys = ["response", "bot", "answer", "text", "message", "content", "output"];
         for (const k of keys) {
           const v = obj[k];
           if (typeof v === "string" && v.trim()) return v;
