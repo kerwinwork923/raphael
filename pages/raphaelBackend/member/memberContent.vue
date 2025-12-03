@@ -1489,7 +1489,7 @@ const isAnyAlertOpen = computed(() => {
         display: flex;
         flex-direction: column;
         flex: 1;
-        min-width: 290px;
+        max-width: 400px;
         gap: 12px;
         justify-content: space-between;
 
