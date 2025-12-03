@@ -1496,6 +1496,7 @@ const isAnyAlertOpen = computed(() => {
         .memberInfoCard2 {
           padding: 1rem;
           width: 100%;
+          height: 100%;
           border-radius: 20px;
           background-color: #fff;
           box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
@@ -1567,7 +1568,7 @@ const isAnyAlertOpen = computed(() => {
         .memberInfoTableRowItem {
           width: 33.3333%;
           text-align: center;
-          padding: 1rem;
+          padding: 1rem 0;
         }
       }
     }

@@ -255,7 +255,7 @@ const yearlyGroup = computed(() => {
     padding: 12px 16px;
     border-radius: 20px;
     background: #fff;
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+    box-shadow: 0px 2px 12px -2px rgba(177, 192, 216, 0.5);
 
     .ContractUserAlertProgressTitle {
       display: flex;
