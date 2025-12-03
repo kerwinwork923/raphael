@@ -1664,7 +1664,7 @@ async function runSummaryFlow(inputText) {
 
 不可以問我問題（除非我明確要求你詢問）。
 
-沒有提到的欄位只能寫「未提及」，不能自行填入。
+
 
 固定輸出格式（每次都一定要這樣）
 
