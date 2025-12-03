@@ -2804,7 +2804,7 @@ const changeRoleDisplayName = async (displayName) => {
 // ChatGPT API 調用函數
 const callChatGPT = async (
   message,
-  systemMessage = "你是一個聰明的智慧醫療助手，這是一段病患的症狀敘述內容，請幫我做摘要重點"
+  systemMessage = "你是一個聰明的智慧醫療助手，這是一段病患的症狀敘述內容，請幫我做摘要重點，【限制規則】1. 忠實記錄我說的每一句話或資訊（不可遺漏）。2. 不改變原意，只能優化語序、加標點、使語句更自然。3. 不可推理或猜測病因。4. 不可補充我沒說的內容。5. 不可加入任何建議、分析、評論或衛教。6. 不可使用 *、#、-、>、Markdown 格式符號。7. 不可使用條列符號，全部以自然語句呈現。"
 ) => {
   try {
     const response = await fetch(CHATGPT_API_URL, {
