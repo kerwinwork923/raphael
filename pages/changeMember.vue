@@ -9,14 +9,13 @@
         @update:weight="weight = $event"
         @update:sex="sex = $event"
         @update:date="date = $event"
-        @update:DSPR="DSPR = $event"
         @update:city="city = $event"
         @update:area="area = $event"
         @update:address="address = $event"
-        @update:HRVCalTime="HRVCalTime = $event"
+        @update:email="email = $event"
         phoneShow="true"
         addressShow="true"
-        timeShow="true"
+        emailShow="true"
         @submit="addUser"
       />
     </div>
@@ -40,11 +39,10 @@ export default {
     const weight = ref("");
     const sex = ref("");
     const date = ref("");
-    const DSPR = ref("");
     const city = ref("");
     const area = ref("");
     const address = ref("");
-    const HRVCalTime = ref("");
+    const email = ref("");
     const router = useRouter();
 
     const loading = ref(false);
@@ -71,11 +69,10 @@ export default {
           weight: weight.value,
           sex: sex.value,
           date: date.value,
-          DSPR: DSPR.value,
           city: city.value,
           area: area.value,
           address: address.value,
-          HRVCalTime: HRVCalTime.value,
+          email: email.value,
         };
 
         if (
@@ -115,11 +112,10 @@ export default {
             Weight: userData.weight,
             Sex: userData.sex,
             Birthday: birthday,
-            DSPR: userData.DSPR || "",
             City: userData.city,
             Zone: userData.area,
             Address: userData.address,
-            HRVCalTime: userData.HRVCalTime,
+            Mail: userData.email,
           }
         );
 
@@ -175,13 +171,11 @@ export default {
       weight,
       sex,
       date,
-      DSPR,
       city,
       area,
       address,
+      email,
       addUser,
-   
-      HRVCalTime,
       loading,
     };
   },

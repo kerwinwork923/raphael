@@ -21,7 +21,7 @@
       <!-- 信箱輸入 -->
       <label for="email" v-if="emailShow">信箱</label>
       <div class="emailGroup" v-if="emailShow">
-        <input type="email" placeholder="請輸入您的信箱" />
+        <input type="email" placeholder="請輸入您的信箱" v-model="localEmail" />
       </div>
 
       <!-- 身高輸入 -->
@@ -66,39 +66,6 @@
           teleport="body"
           no-today
         />
-      </div>
-
-      <!-- HRV量測時間 -->
-      <label for="detectTime" v-if="timeShow">HRV量測時間</label>
-      <div class="detectTime" v-if="timeShow">
-        <select
-          v-model="localTime"
-          class="custom-select"
-          :class="{ selected: localTime }"
-        >
-          <option value="" disabled selected hidden>選擇HRV量測時間</option>
-
-          <option value="1">1分鐘</option>
-          <option value="2">2分鐘</option>
-          <option value="3">3分鐘</option>
-        </select>
-        <img class="icon2" src="../assets/imgs/arrowDown.svg" />
-      </div>
-
-      <!-- 日常收縮壓選擇 -->
-      <label for="DSPR" v-if="DSPRShow">血壓</label>
-      <div class="DSPR" v-if="DSPRShow">
-        <select
-          v-model="localDSPR"
-          class="custom-select"
-          :class="{ selected: localDSPR }"
-        >
-          <option value="" disabled selected hidden>請選擇血壓(選填)</option>
-          <option value="normal">正常(120mmHg)</option>
-          <option value="prehypertension">高血壓前期(120~139mmHg)</option>
-          <option value="hypertension">高血壓(>=140mmHg)</option>
-        </select>
-        <img class="icon2" src="../assets/imgs/arrowDown.svg" />
       </div>
 
       <!-- 地址 -->
@@ -161,7 +128,6 @@ export default {
     height: String,
     weight: String,
     sex: String,
-    DSPR: String,
     date: String,
     city: String,
     area: String,
@@ -178,15 +144,7 @@ export default {
       type: Boolean,
       default: false
     },
-    timeShow: {
-      type: Boolean,
-      default: false
-    },
-    DSPRShow: {
-      type: Boolean,
-      default: false
-    },
-    HRVCalTime: String,
+    email: String,
   },
   setup(props, { emit }) {
     const localName = ref(props.name || "");
@@ -194,9 +152,7 @@ export default {
     const localWeight = ref(props.weight || "");
     const localSex = ref(props.sex || "");
     const localDate = ref(null);
-    const localDSPR = ref(props.DSPR || ""); 
-    const localTime = ref(props.HRVCalTime || "");
-
+    const localEmail = ref(props.email || "");
     const inputAddress = ref("");
     const citiesData = ref([]);
     const selectedCity = ref("");
@@ -257,13 +213,11 @@ export default {
         localDate.value = null;
       }
       
-      localDSPR.value = memberData.DSPR || "";
-      localTime.value = memberData.HRVCalTime || "";
       selectedCity.value = memberData.City || "";
       selectedArea.value = memberData.Zone || "";
       inputAddress.value = memberData.Address || "";
       phone.value = memberData.Mobile || "";
-      
+      localEmail.value = memberData.Mail || "";
       // 調試信息
       console.log("載入的欄位值:", {
         name: localName.value,
@@ -271,12 +225,11 @@ export default {
         weight: localWeight.value,
         sex: localSex.value,
         date: localDate.value,
-        DSPR: localDSPR.value,
-        time: localTime.value,
         city: selectedCity.value,
         area: selectedArea.value,
         address: inputAddress.value,
-        phone: phone.value
+        phone: phone.value,
+        email: localEmail.value
       });
       
       if (selectedCity.value) {
@@ -326,11 +279,10 @@ export default {
         weight: localWeight.value,
         sex: localSex.value,
         date: localDate.value,
-        DSPR: localDSPR.value,
         city: selectedCity.value,
         area: selectedArea.value,
         address: inputAddress.value,
-        HRVCalTime: localTime.value,
+        email: localEmail.value,
       });
     };
 
@@ -339,11 +291,10 @@ export default {
     watch(localWeight, (newValue) => emit("update:weight", newValue));
     watch(localSex, (newValue) => emit("update:sex", newValue));
     watch(localDate, (newValue) => emit("update:date", newValue));
-    watch(localDSPR, (newValue) => emit("update:DSPR", newValue));
     watch(selectedCity, (newValue) => emit("update:city", newValue));
     watch(selectedArea, (newValue) => emit("update:area", newValue));
     watch(inputAddress, (newValue) => emit("update:address", newValue));
-    watch(localTime, (newValue) => emit("update:HRVCalTime", newValue));
+    watch(localEmail, (newValue) => emit("update:email", newValue));
 
     return {
       localName,
@@ -351,7 +302,6 @@ export default {
       localWeight,
       localSex,
       localDate,
-      localDSPR,
       inputAddress,
       citiesData,
       selectedCity,
@@ -362,7 +312,7 @@ export default {
       isSubmitDisabled,
       formatDate,
       phone,
-      localTime,
+      localEmail,
     };
   },
 };
@@ -520,9 +470,7 @@ export default {
     display: flex;
   }
 
-  .groupGroup,
-  .DSPR,
-  .detectTime {
+  .groupGroup {
     display: flex;
     align-items: center;
     gap: 4px;
@@ -567,13 +515,6 @@ export default {
       &::-ms-expand {
         display: none;
       }
-    }
-  }
-
-  .detectTime {
-    margin-top: 0.5rem;
-    .icon1 {
-      width: 22px;
     }
   }
 
