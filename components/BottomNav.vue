@@ -28,7 +28,7 @@
         />
         <img v-else src="/assets/imgs/robot/cloth.svg" alt="穿衣紀錄" />
       </div>
-      <span>穿衣紀錄</span>
+      <span>陪伴旅程</span>
     </div>
     <div
       class="nav-item"
