@@ -45,6 +45,41 @@
           </div>
           <img src="../assets/imgs/member/next_green.svg" alt="" />
         </div>
+
+        <div class="memberListItem" @click="goToContract">
+          <div class="memberListLeft">
+            <img src="../assets/imgs/member/contract.svg" alt="" />
+            <h3>我的合約</h3>
+          </div>
+          <img src="../assets/imgs/member/next_green.svg" alt="" />
+        </div>
+
+        <div class="memberListItem" @click="goToContract">
+          <div class="memberListLeft">
+            <img src="../assets/imgs/member/calendarClock.svg" alt="請假中心" />
+            <h3>請假中心</h3>
+          </div>
+          <img src="../assets/imgs/member/next_green.svg" alt="" />
+        </div>
+
+    
+
+        <div class="memberListItem" @click="goToShipmentInquiry">
+          <div class="memberListLeft">
+            <img src="../assets/imgs/member/packageSearch.svg" alt="" />
+            <h3>寄貨查詢</h3>
+          </div>
+          <img src="../assets/imgs/member/next_green.svg" alt="" />
+        </div>
+
+        <div class="memberListItem" @click="contactSupport">
+          <div class="memberListLeft">
+            <img src="../assets/imgs/phone2.svg" alt="" />
+            <h3>聯絡客服專線</h3>
+          </div>
+          <img src="../assets/imgs/member/next_green.svg" alt="" />
+        </div>
+        
         <div class="memberListItem" @click="goToPrivacy">
           <div class="memberListLeft">
             <img src="../assets/imgs/member/privacy.svg" alt="" />
@@ -109,12 +144,36 @@ const goToAccountManage = () => {
   router.push("/accountManage");
 };
 
+const goToContract = () => {
+  router.push("/contract");
+};
+
+const goToShipmentInquiry = () => {
+  router.push("/package");
+};
+
 const goToDisclaimer = () => {
   router.push("/disclaimer");
 };
 
 const goToHealthDataSetting = () => {
   router.push("/healthDataSetting");
+};
+
+const SUPPORT_PHONE = '0800-000-760';
+
+const contactSupport = () => {
+  const phone = SUPPORT_PHONE.replace(/\D/g, '');
+  const ok = window.confirm(`撥打「${SUPPORT_PHONE}」？`);
+  if (!ok) return;
+
+  // 某些行動瀏覽器不接受直接 location.href，改用隱形 <a> 觸發
+  const a = document.createElement('a');
+  a.href = `tel:${phone}`;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 };
 
 const getMemberData = async () => {

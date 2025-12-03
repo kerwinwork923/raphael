@@ -10,7 +10,7 @@
         leaveApplicationAlertShow || leaveRecordAlertShow || overLimitAlertShow
       "
     ></div>
-    <TitleMenu Text="合約|請假" link="/service" />
+    <TitleMenu Text="合約|請假" link="/member" />
 
     <!-- Tabs 切換 -->
     <div class="typeChangeTag">
