@@ -19,7 +19,9 @@ export const useUsageRecords = () => {
     '全效調節衣',
     '居家治療儀',
     '雙效紅光活力衣',
-    '護您穩深眠衣'
+    '護您穩深眠衣',
+    '護您穩平衡衣',
+    '三效深眠衣'
   ])
 
 
@@ -176,14 +178,9 @@ const calculateDuration = (startTime: string, endTime: string) => {
       const result = await response.json()
 
       if (result.Result === 'OK' && result.Data) {
-        // 過濾最近 24 小時內的記錄
-        const now = new Date()
-        const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
-        
+        // 過濾掉沒有 CheckTime 的記錄
         const filteredData = result.Data.filter((item: any) => {
-          if (!item.CheckTime) return false
-          const checkTime = parseTS(item.CheckTime)
-          return checkTime.getTime() >= twentyFourHoursAgo.getTime()
+          return !!item.CheckTime
         })
         
         usageRecords.value = transformApiData(filteredData)
