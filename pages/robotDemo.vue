@@ -1670,6 +1670,7 @@ async function runSummaryFlow(inputText) {
 
 
 （逐句潤飾成清楚流暢的文字，意義必須完全一致）
+(輸出格式不要有*)
 
 `
     );
