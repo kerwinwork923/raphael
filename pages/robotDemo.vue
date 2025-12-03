@@ -1640,6 +1640,7 @@ async function runSummaryFlow(inputText) {
 5. 不可加入任何建議、分析、評論或衛教。
 6. 不可使用 *、#、-、>、Markdown 格式符號。
 7. 不可使用條列符號，全部以自然語句呈現。
+(輸出格式不要有*)
 請嚴格遵守以上格式與規則，開始後不需要再次重述任務或格式。
 
 `
@@ -1690,7 +1691,7 @@ async function sendViaUnifiedAPI(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        systemMessage: "你是專業健康顧問",
+        systemMessage: "你是專業健康顧問，【限制規則】 不可使用 *、#、-、>、Markdown 格式符號。7. 不可使用條列符號，全部以自然語句呈現。",
         message: userText,
         model: "gpt-5-mini",
         ...extra,
