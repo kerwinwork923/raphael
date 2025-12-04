@@ -585,7 +585,7 @@ function refreshData() {
 
   .table-row {
     display: grid;
-    grid-template-columns:1fr 4.5fr 1fr 1fr 1fr 1fr ;
+    grid-template-columns:1fr 4.5fr 1fr 1fr 1fr 1.5fr ;
     position: relative;
     gap: 2px;
     align-items: center;
@@ -709,7 +709,8 @@ function refreshData() {
           align-items: center;
           gap: 0.5rem;
           width: 100%;
-         
+          // 允許換行，避免水平太擠時整列撐爆
+          flex-wrap: wrap;
 
           @include respond-to("lg") {
             width: 100%;
@@ -734,8 +735,6 @@ function refreshData() {
             &:hover {
               opacity: 0.7;
             }
-
-        
           }
 
           .toggle {
@@ -747,6 +746,8 @@ function refreshData() {
             border-radius: 9999px;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
+            // ❗ 重要：不要被 flex 擠壓，避免 toggle__track 變形
+            flex-shrink: 0;
 
             .toggle__input {
               position: absolute;
@@ -766,6 +767,8 @@ function refreshData() {
               box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.12),
                 0 1px 0 rgba(255, 255, 255, 0.6);
               transition: background-color 0.25s ease;
+              // 確保尺寸穩定
+              box-sizing: border-box;
 
               &::after {
                 content: "";
@@ -803,6 +806,7 @@ function refreshData() {
           }
         }
       }
+
     }
   }
 

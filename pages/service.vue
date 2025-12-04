@@ -30,13 +30,7 @@
         </div>
 
         <div class="serviceCenterRow">
-          <div class="serviceCenterItem" @click="goToLeaveCenter">
-            <img src="../assets/imgs/member/calendarClock.svg" alt="請假中心" />
-            <h3>請假中心</h3>
-            <div class="serviceCenterButton">
-              前往 <img src="../assets/imgs/member/next.svg" alt="" />
-            </div>
-          </div>
+
           <!-- <div class="serviceCenterItem" @click="goToShipmentInquiry">
             <img src="../assets/imgs/member/packageSearch.svg" alt="寄貨查詢" />
             <h3>寄貨查詢</h3>
@@ -49,20 +43,8 @@
 
       <!-- 列表功能區域 -->
       <div class="serviceListGroup">
-        <div class="serviceListItem" @click="goToContract">
-          <div class="serviceListLeft">
-            <img src="../assets/imgs/member/contract.svg" alt="我的合約" />
-            <h3>我的合約</h3>
-          </div>
-          <img src="../assets/imgs/member/next_green.svg" alt="" />
-        </div>
-        <div class="serviceListItem" @click="goToShipmentInquiry">
-          <div class="serviceListLeft">
-            <img src="../assets/imgs/member/packageSearch.svg" alt="" />
-            <h3>寄貨查詢</h3>
-          </div>
-          <img src="../assets/imgs/member/next_green.svg" alt="" />
-        </div>
+
+
         <!-- <div class="serviceListItem" @click="goToFAQ">
           <div class="serviceListLeft">
             <img src="../assets/imgs/member/QA.svg" alt="我的合約" />
@@ -79,13 +61,7 @@
           <img src="../assets/imgs/member/next_green.svg" alt="" />
         </div> -->
 
-        <div class="serviceListItem" @click="contactSupport">
-          <div class="serviceListLeft">
-            <img src="../assets/imgs/phone2.svg" alt="聯絡客服" />
-            <h3>聯絡客服</h3>
-          </div>
-          <img src="../assets/imgs/member/next_green.svg" alt="" />
-        </div>
+
       </div>
     </div>
 
@@ -112,43 +88,14 @@ if (!userDataObj?.Member) {
   router.push("/");
 }
 
-// 導航方法
-const goToExclusiveRecommendation = () => {
-  // 專屬推薦功能
-  console.log("前往專屬推薦");
-};
+
 
 const goToHealthAssessment = () => {
   // 百題問卷
   router.push("/weekly");
 };
 
-const goToLeaveCenter = () => {
-  router.push("/contract");
-};
 
-const goToShipmentInquiry = () => {
-  // 寄貨查詢功能
-  router.push("/package");
-};
-
-const goToContract = () => {
-  // 我的合約功能
-  router.push("/contract");
-};
-
-const goToUpdateParts = () => {
-  console.log("前往更新部位");
-};
-
-const goToSmartButler = () => {
-  console.log("前往智慧管家");
-};
-
-const goToCSRobot = () => {
-  console.log("前往客服機器人");
-  router.push("/CSRobot");
-};
 
 const getMemberData = async () => {
   loading.value = true;

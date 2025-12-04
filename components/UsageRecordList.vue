@@ -98,21 +98,19 @@
         :key="record.id"
         class="record-item"
       >
-        <!-- 上方標籤 -->
-        <div class="record-header">
+        <div class="left">
           <div class="record-date">{{ record.date }}</div>
-          <div class="record-labels">
-            <span class="label-start">開始時間</span>
-            <span class="label-duration">總共使用</span>
-          </div>
+          <div class="product-name">{{ record.productName }}</div>
         </div>
 
-        <!-- 下方數值 -->
-        <div class="record-content">
-          <div class="product-name">{{ record.productName }}</div>
-          <div class="record-times">
-            <span class="start-time">{{ record.startTime }}</span>
-            <span class="duration">{{ record.duration }}</span>
+        <div class="right">
+          <div class="column">
+            <div class="label-start">開始時間</div>
+            <div class="start-time">{{ record.startTime }}</div>
+          </div>
+          <div class="column">
+            <div class="label-duration">總共使用</div>
+            <div class="duration">{{ record.duration }}</div>
           </div>
         </div>
       </div>
@@ -335,85 +333,83 @@ onUnmounted(() => {
   }
 
   .record-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 
-    .record-item {
-      border-radius: 20px;
-      background: #f5f7fa;
-      box-shadow: 2px 4px 12px rgba(177, 192, 216, 0.7);
-      padding: 1rem;
+  .record-item {
+    border-radius: 20px;
+    background: #f5f7fa;
+    box-shadow: 2px 4px 12px rgba(177, 192, 216, 0.7);
+    padding: 1rem;
 
-      --time-col-width: auto;
 
-      /* 上方標籤與下方內容共用欄寬 */
-      .record-header,
-      .record-content {
-        display: grid;
-        grid-template-columns: 1fr var(--time-col-width) var(--time-col-width);
-        align-items: center;
-        gap: 0.5rem;
+ display: flex;
+ justify-content: space-between;
+
+    align-items: flex-start;
+
+    /* 左邊：日期 + 產品名稱 */
+    .left {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      
+      .record-date {
+        font-size: 14px;
+        color: #b1c0d8;
+        font-weight: 500;
       }
 
-      .record-header {
-        margin-bottom: 8px;
+      .product-name {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1e1e1e;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
 
-        .record-date {
-          color: #b1c0d8;
+    /* 右邊：開始時間 / 總共使用 */
+    .right {
+      min-width: 0;
+      display: flex;
+      justify-content: space-between;
+      width: 180px;
+      gap: 1rem;
+
+      .column {
+     
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      
+
+     
+        .label-start,
+        .label-duration {
           font-size: 14px;
+          color: #b1c0d8;
           font-weight: 500;
+          text-align: right;
+          white-space: nowrap;
         }
 
-        .record-labels {
-          display: contents;
-
-          .label-start,
-          .label-duration {
-            color: #b1c0d8;
-            font-size: 14px;
-            font-weight: 500;
-            text-align: left;
-          }
-
-          .label-start {
-            grid-column: 2;
-          }
-          .label-duration {
-            grid-column: 3;
-          }
-        }
-      }
-
-      .record-content {
-        .product-name {
-          color: #1e1e1e;
+        .start-time,
+        .duration {
           font-size: 20px;
           font-weight: 700;
-          overflow: hidden;
-        }
-
-        .record-times {
-          display: contents;
-
-          .start-time,
-          .duration {
-            color: #1e1e1e;
-            font-size: 20px;
-            font-weight: 700;
-            text-align: left;
-          }
-
-          .start-time {
-            grid-column: 2;
-          }
-          .duration {
-            grid-column: 3;
-          }
+          color: #1e1e1e;
+          text-align: right;
+          white-space: nowrap;
         }
       }
     }
   }
+}
+
 
   .no-data-state {
     text-align: center;
@@ -425,7 +421,6 @@ onUnmounted(() => {
       text-align: center;
 
       .empty-character {
-
         .character-img {
           object-fit: contain;
         }
@@ -506,8 +501,13 @@ onUnmounted(() => {
 }
 
 @media (max-width: 360px) {
-  .record-item {
-    --time-col-width: 100px;
+  .record-list .record-item {
+    grid-template-columns: 1fr; // 上下排
+    row-gap: 8px;
+
+    .right {
+      justify-items: start;
+    }
   }
 }
 </style>
