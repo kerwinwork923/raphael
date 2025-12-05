@@ -24,18 +24,18 @@
                 class="clinicStoriesTagsItem"
                 :class="{
                   active: activeTag === tag.id,
-                  expandable: tag.videoBigType === '03',
-                  expanded: isSubTagsExpanded && tag.videoBigType === '03',
+                  expandable: tag.isMoreTag,
+                  expanded: isMoreTagsModalOpen && tag.isMoreTag,
                 }"
                 @click="handleTagClick(tag)"
               >
                 <span>{{ tag.name }}</span>
                 <img
-                  v-if="tag.videoBigType === '03'"
+                  v-if="tag.isMoreTag"
                   src="../assets/imgs/clinicStories/myClinicStory.svg"
                   alt="展開"
                   class="ellipsis-icon"
-                  @click.stop="toggleSubTags"
+                  @click.stop="openMoreTagsModal"
                 />
               </div>
             </swiper-slide>
@@ -43,19 +43,19 @@
         </div>
       </div>
 
-      <!-- 子標籤彈窗 -->
+      <!-- 更多標籤彈窗 -->
       <div
-        v-if="isSubTagsExpanded"
+        v-if="isMoreTagsModalOpen"
         class="subTagsModal"
-        @click.self="closeSubTagsModal"
+        @click.self="closeMoreTagsModal"
       >
         <div class="subTagsModalContent">
           <!-- 模態視窗頂部拖曳條 -->
           <div class="modalDragBar"></div>
           <!-- 標題欄 -->
           <div class="subTagsModalHeader">
-            <h2 class="subTagsModalTitle">我的診間故事</h2>
-            <button class="subTagsModalClose" @click="closeSubTagsModal">
+            <h2 class="subTagsModalTitle">更多故事</h2>
+            <button class="subTagsModalClose" @click="closeMoreTagsModal">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -74,7 +74,7 @@
             </button>
           </div>
 
-          <!-- 子標籤列表 -->
+          <!-- 標籤列表 -->
           <div class="subTagsModalBody">
             <div class="subTagsGrid">
               <div
@@ -234,47 +234,43 @@ const tags = ref([
 
 const activeTag = ref(0);
 const activeSubTag = ref(null);
-const isSubTagsExpanded = ref(false);
+const isMoreTagsModalOpen = ref(false);
 const subTags = ref([]);
 
 // 處理標籤點擊
 const handleTagClick = (tag) => {
-  // 如果是「我的診間故事」(videoBigType === '03')，展開子標籤
-  if (tag.videoBigType === "03") {
-    if (!isSubTagsExpanded.value) {
-      toggleSubTags();
-    }
+  // 如果是「更多標籤」，展開所有標籤彈窗
+  if (tag.isMoreTag) {
+    openMoreTagsModal();
   } else {
     // 其他標籤正常切換
     setActiveTag(tag.id);
-    // 收起子標籤並清除子標籤選中狀態
-    isSubTagsExpanded.value = false;
+    // 清除子標籤選中狀態
     activeSubTag.value = null;
   }
 };
 
 const setActiveTag = (tagId) => {
   activeTag.value = tagId;
-  // 如果不是「我的診間故事」，收起子標籤
+  // 如果不是「我的診間故事」，清除子標籤選中狀態
   const tag = tags.value.find((t) => t.id === tagId);
   if (tag && tag.videoBigType !== "03") {
-    isSubTagsExpanded.value = false;
     activeSubTag.value = null;
   }
 };
 
-// 切換子標籤展開/收起
-const toggleSubTags = () => {
-  isSubTagsExpanded.value = true;
+// 打開更多標籤彈窗
+const openMoreTagsModal = () => {
+  isMoreTagsModalOpen.value = true;
+  // 如果子標籤還沒載入，則載入
   if (subTags.value.length === 0) {
-    // 如果子標籤還沒載入，則載入
     fetchVideoTypeList();
   }
 };
 
-// 關閉子標籤彈窗
-const closeSubTagsModal = () => {
-  isSubTagsExpanded.value = false;
+// 關閉更多標籤彈窗
+const closeMoreTagsModal = () => {
+  isMoreTagsModalOpen.value = false;
 };
 
 // 設置子標籤為活動狀態
@@ -286,17 +282,29 @@ const setActiveSubTag = (subTagId) => {
     activeTag.value = clinicStoryTag.id;
   }
   // 關閉彈窗
-  closeSubTagsModal();
+  closeMoreTagsModal();
 };
 
 // 根據會員狀態過濾標籤
 const visibleTags = computed(() => {
-  return tags.value.filter((tag) => {
+  const filtered = tags.value.filter((tag) => {
     if (tag.isVip && !isVipMember.value) {
       return false;
     }
     return true;
   });
+  
+  // 只顯示前 4 個標籤（全部影片 + 3 個主標籤），然後加上「更多故事」
+  const mainTags = filtered.slice(0, 4);
+  const moreTag = {
+    id: -1,
+    name: "更多故事",
+    category: "more",
+    videoBigType: null,
+    isMoreTag: true,
+  };
+  
+  return [...mainTags, moreTag];
 });
 
 // 所有影片資料
