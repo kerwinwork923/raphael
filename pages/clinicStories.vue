@@ -14,6 +14,7 @@
             :space-between="12"
             :free-mode="true"
             class="tagsSwiper"
+            @swiper="setTagsSwiper"
           >
             <swiper-slide
               v-for="tag in visibleTags"
@@ -212,7 +213,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, nextTick } from "vue";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { FreeMode } from "swiper/modules";
 import "swiper/css";
@@ -236,6 +237,7 @@ const activeTag = ref(0);
 const activeSubTag = ref(null);
 const isMoreTagsModalOpen = ref(false);
 const subTags = ref([]);
+const tagsSwiper = ref(null);
 
 // 處理標籤點擊
 const handleTagClick = (tag) => {
@@ -273,16 +275,41 @@ const closeMoreTagsModal = () => {
   isMoreTagsModalOpen.value = false;
 };
 
+// 設置 Swiper 實例
+const setTagsSwiper = (swiper) => {
+  tagsSwiper.value = swiper;
+};
+
 // 設置子標籤為活動狀態
-const setActiveSubTag = (subTagId) => {
+const setActiveSubTag = async (subTagId) => {
   activeSubTag.value = subTagId;
-  // 同時設置父標籤為活動狀態（「我的診間故事」）
-  const clinicStoryTag = tags.value.find((t) => t.videoBigType === "03");
-  if (clinicStoryTag) {
-    activeTag.value = clinicStoryTag.id;
+
+  // 把上面的主標籤高亮到「更多故事」這顆
+  const moreTag = visibleTags.value.find((t) => t.isMoreTag);
+  if (moreTag) {
+    activeTag.value = moreTag.id; // 一般是 -1
   }
+
   // 關閉彈窗
   closeMoreTagsModal();
+
+  // 等待 DOM 更新後，滾動到「更多故事」標籤
+  await nextTick();
+  scrollToMoreTag();
+};
+
+
+// 滾動到「更多故事」標籤
+const scrollToMoreTag = () => {
+  if (!tagsSwiper.value) return;
+  
+  // 找到「更多故事」標籤的索引（最後一個）
+  const moreTagIndex = visibleTags.value.length - 1;
+  
+  // 使用 Swiper 的 slideTo 方法滾動到該標籤
+  if (moreTagIndex >= 0) {
+    tagsSwiper.value.slideTo(moreTagIndex, 500); // 500ms 動畫時間
+  }
 };
 
 // 根據會員狀態過濾標籤
