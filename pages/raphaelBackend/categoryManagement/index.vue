@@ -28,55 +28,56 @@
         </button>
       </div>
 
-      <!-- tabs -->
-      <div class="tabs-container">
-        <button
-          class="tab-btn"
-          :class="{ active: activeTab === 'category' }"
-          @click="activeTab = 'category'"
-        >
-          類別管理
-        </button>
-        <button
-          class="tab-btn"
-          :class="{ active: activeTab === 'tag' }"
-          @click="activeTab = 'tag'"
-        >
-          標籤管理
-        </button>
-      </div>
-
-      <!-- content grid -->
-      <section class="category-grid">
+      <div class="tabsGroup">
+        <!-- tabs -->
+        <div class="tabs-container">
+          <button
+            class="tab-btn"
+            :class="{ active: activeTab === 'category' }"
+            @click="activeTab = 'category'"
+          >
+            類別管理
+          </button>
+          <button
+            class="tab-btn"
+            :class="{ active: activeTab === 'tag' }"
+            @click="activeTab = 'tag'"
+          >
+            標籤管理
+          </button>
+        </div>
+        <!-- content grid -->
+        <section class="category-grid">
           <div
-          v-for="item in filteredItems"
-          :key="item.id"
-          class="category-card"
-        >
-          <div class="card-content">
-            <h3 class="card-title">{{ item.name }}</h3>
-            <div class="card-meta">
-              <span class="apply-count">套用數 {{ item.applyCount }}</span>
+            v-for="item in filteredItems"
+            :key="item.id"
+            class="category-card"
+          >
+            <div class="card-content">
+              <h3 class="card-title">{{ item.name }}</h3>
+              <div class="card-meta">
+                <span class="apply-count">套用數 {{ item.applyCount }}</span>
+              </div>
+            </div>
+            <div class="card-actions">
+              <button
+                class="btn-action btn-edit"
+                @click="handleEdit(item)"
+                title="編輯"
+              >
+                <img src="/assets/imgs/backend/edit.svg" alt="編輯" />
+              </button>
+              <button
+                class="btn-action btn-delete"
+                @click="handleDelete(item)"
+                title="刪除"
+              >
+                <img src="/assets/imgs/backend/delete2.svg" alt="刪除" />
+              </button>
             </div>
           </div>
-          <div class="card-actions">
-            <button
-              class="btn-action btn-edit"
-              @click="handleEdit(item)"
-              title="編輯"
-            >
-              <img src="/assets/imgs/backend/edit.svg" alt="編輯" />
-            </button>
-            <button
-              class="btn-action btn-delete"
-              @click="handleDelete(item)"
-              title="刪除"
-            >
-              <img src="/assets/imgs/backend/delete2.svg" alt="刪除" />
-            </button>
-          </div>
-        </div>
-      </section>
+        </section>
+      </div>
     </main>
   </div>
 </template>
@@ -169,7 +170,9 @@ function handleDelete(item: CategoryItem) {
   }
   // TODO: 執行刪除 API
   if (activeTab.value === "category") {
-    categories.value = categories.value.filter((c: CategoryItem) => c.id !== item.id);
+    categories.value = categories.value.filter(
+      (c: CategoryItem) => c.id !== item.id
+    );
   } else {
     tags.value = tags.value.filter((t: CategoryItem) => t.id !== item.id);
   }
@@ -201,6 +204,15 @@ function refreshData() {
   @include respond-to("xl") {
     padding: 16px 16px;
   }
+}
+
+.tabsGroup {
+  background-color: #fff;
+  border-radius: 20px;
+  background: var(--Neutral-white, #fff);
+  box-shadow: 0 2px 20px 0
+    var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
+  padding: 16px;
 }
 
 .toolbar-section {
@@ -244,10 +256,10 @@ function refreshData() {
   border-bottom: 2px solid $border;
 
   .tab-btn {
-    padding: 12px 24px;
+    padding: 9px 12px;
     background: transparent;
     border: none;
-    border-bottom: 3px solid transparent;
+
     color: $raphael-gray-500;
     font-size: 16px;
     font-weight: 400;
@@ -255,15 +267,16 @@ function refreshData() {
     transition: all 0.2s ease;
     position: relative;
     top: 2px;
-
+    border-radius: 6px;
     &:hover {
-      color: $chip-success;
+      background: var(--Primary-default, #1BA39B);
+      color: var(--Primary-100, #F5F7FA);
+
     }
 
     &.active {
-      color: $chip-success;
-      border-bottom-color: $chip-success;
-      font-weight: 600;
+      background: var(--Primary-default, #1BA39B);
+      color: var(--Primary-100, #F5F7FA);
     }
   }
 }
@@ -272,7 +285,8 @@ function refreshData() {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 16px;
-  flex: 1;
+  align-items: flex-start;
+  align-content: flex-start;
   padding: 1rem 0;
 
   @include respond-to("md") {
@@ -330,7 +344,6 @@ function refreshData() {
       justify-content: flex-end;
       gap: 8px;
       padding-top: 8px;
-      border-top: 1px solid $border;
 
       .btn-action {
         background: none;
