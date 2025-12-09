@@ -520,6 +520,7 @@ export default {
       "三效深眠衣",
       "全效調節衣",
       "居家治療儀",
+      "第六代紅光極智衣"
     ];
     const stateOptions = ["進行中", "已到期"];
 
@@ -1053,7 +1054,7 @@ export default {
         text-align: left;
         padding: 0.75rem;
         font-size: 18px;
-        max-height: 200px;
+        max-height: 220px;
         backdrop-filter: blur(6px);
         box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
         overflow-y: auto;

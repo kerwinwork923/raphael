@@ -83,7 +83,7 @@
         <div class="memberListItem" @click="goToPrivacy">
           <div class="memberListLeft">
             <img src="../assets/imgs/member/privacy.svg" alt="" />
-            <h3>隱私權設定</h3>
+            <h3>隱私權政策</h3>
           </div>
           <img src="../assets/imgs/member/next_green.svg" alt="" />
         </div>
