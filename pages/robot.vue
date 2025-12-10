@@ -1013,8 +1013,6 @@ const voiceModalOpen = ref(false);
 let voiceTimeout = null; // 語音識別超時計時器
 let hasFinalResult = false; // 確保只處理一次 final
 let finalizedByUs = false;
-let lastProcessedResultIndex = -1; // ✅ 追蹤最後處理的結果索引，避免 Android 重複累積
-let accumulatedFinalText = ""; // ✅ 累積的 final 結果，避免重複
 
 function clearVoiceTimeout() {
   if (voiceTimeout) {
@@ -1030,8 +1028,6 @@ function reallyCloseVoiceModal() {
   currentTranscript.value = "";
   voiceModalImageSrc.value = assistantSoundGif;
   voiceModalOpen.value = false; // ← 真正關窗
-  lastProcessedResultIndex = -1; // ✅ 重置結果索引追蹤
-  accumulatedFinalText = ""; // ✅ 重置累積的 final 結果
 }
 
 // 語音識別和合成實例
@@ -1661,26 +1657,20 @@ const initSpeechRecognition = () => {
       recognitionRef.lang = "zh-TW";
 
       recognitionRef.onresult = (event) => {
-        // ✅ Android 修復：只處理新增的結果，避免重複累積
-        // 追蹤已經處理過的最後一個結果索引
-        const currentResultCount = event.results.length;
-        const startIndex = Math.max(0, lastProcessedResultIndex + 1);
-        
-        // 如果沒有新結果，直接返回
-        if (startIndex >= currentResultCount) {
-          return;
-        }
-        
-        let newFinalText = "";
+        // ✅ Android 修復：每次從頭重算整句，不手動累積
+        // Android 的 Web Speech API 每次回傳的 transcript 已經包含前面所有內容
+        // 所以我們不需要自己累積，直接從 event.results 提取完整句子即可
+        let finalText = "";
         let interimText = "";
         let hasFinal = false;
         
-        // 只處理新增的結果（從 startIndex 開始）
-        for (let i = startIndex; i < currentResultCount; i++) {
+        // 直接掃描所有 results，提取 final 和 interim
+        for (let i = 0; i < event.results.length; i++) {
           const result = event.results[i];
           if (result.isFinal) {
-            // 只累積新的 final 結果
-            newFinalText += result[0].transcript;
+            // Android 上每個 final result 已經包含前面所有內容
+            // 所以我們只取最後一個 final 結果（最完整的）
+            finalText = result[0].transcript;
             hasFinal = true;
           } else {
             // 只保留最後一個 interim 結果
@@ -1688,20 +1678,16 @@ const initSpeechRecognition = () => {
           }
         }
         
-        // 更新累積的 final 結果
-        accumulatedFinalText += newFinalText;
-        
-        // 更新最後處理的索引
-        lastProcessedResultIndex = currentResultCount - 1;
-        
-        // 組合最終的 transcript：累積的 final + 最後一個 interim
-        const transcript = accumulatedFinalText + (interimText || "");
+        // 組合最終的 transcript：final 結果 + 最後一個 interim（如果存在）
+        const transcript = finalText + (interimText || "");
         
         // 調試日誌：檢查結果
         if (process.client && transcript) {
           console.log("語音識別結果處理:", {
             resultsCount: event.results.length,
             transcript,
+            finalText,
+            interimText,
             hasFinal,
             results: Array.from(event.results).map((r, i) => ({
               index: i,
@@ -1731,12 +1717,9 @@ const initSpeechRecognition = () => {
               
               // 強制同步重繪（Android 需要）- 立即執行，不等待
               // 使用多種方式觸發重排
-              const force = transcriptEl.offsetHeight; // 觸發重排
+              void transcriptEl.offsetHeight; // 觸發重排
               void transcriptEl.offsetWidth; // 觸發重排
               void transcriptEl.scrollTop; // 觸發重排
-              
-              // 立即再次設置，確保更新
-              transcriptEl.textContent = textToShow;
             } else {
               transcriptEl.style.display = 'none';
             }
@@ -2147,8 +2130,6 @@ const toggleListening = () => {
       currentTranscript.value = "";
       hasFinalResult = false;
       finalizedByUs = false;
-      lastProcessedResultIndex = -1; // ✅ 重置結果索引追蹤
-      accumulatedFinalText = ""; // ✅ 重置累積的 final 結果
       voiceModalOpen.value = true; // ← 開窗
       isListening.value = true;
       
