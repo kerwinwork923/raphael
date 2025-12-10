@@ -1379,31 +1379,37 @@ const initSpeechRecognition = () => {
       recognitionRef.lang = "zh-TW";
 
       recognitionRef.onresult = (event) => {
-        // 處理所有結果（包括 interim 和 final）
-        // 正確處理：累積所有 final 結果 + 只顯示最後一個 interim 結果（如果存在）
-        let transcript = "";
+        // ✅ Android 修復：每次從頭重算整句，不手動累積
+        // Android 的 Web Speech API 每次回傳的 transcript 已經包含前面所有內容
+        // 所以我們不需要自己累積，直接從 event.results 提取完整句子即可
+        let finalText = "";
+        let interimText = "";
         let hasFinal = false;
         
-        // 先累積所有 final 結果
+        // 直接掃描所有 results，提取 final 和 interim
+        // Android 上每個 final result 已經包含前面所有內容，所以只取最後一個 final
         for (let i = 0; i < event.results.length; i++) {
           const result = event.results[i];
           if (result.isFinal) {
-            transcript += result[0].transcript;
+            // 只保留最後一個 final 結果（最完整的，已包含所有前面的內容）
+            finalText = result[0].transcript;
             hasFinal = true;
+          } else {
+            // 只保留最後一個 interim 結果
+            interimText = result[0].transcript;
           }
         }
         
-        // 然後只添加最後一個 interim 結果（如果存在且不是 final）
-        const lastResult = event.results[event.results.length - 1];
-        if (lastResult && !lastResult.isFinal) {
-          transcript += lastResult[0].transcript;
-        }
+        // 組合最終的 transcript：final 結果 + 最後一個 interim（如果存在）
+        const transcript = finalText + (interimText || "");
         
         // 調試日誌：檢查結果
         if (process.client && transcript) {
           console.log("語音識別結果處理:", {
             resultsCount: event.results.length,
             transcript,
+            finalText,
+            interimText,
             hasFinal,
             results: Array.from(event.results).map((r, i) => ({
               index: i,
@@ -1433,12 +1439,9 @@ const initSpeechRecognition = () => {
               
               // 強制同步重繪（Android 需要）- 立即執行，不等待
               // 使用多種方式觸發重排
-              const force = transcriptEl.offsetHeight; // 觸發重排
+              void transcriptEl.offsetHeight; // 觸發重排
               void transcriptEl.offsetWidth; // 觸發重排
               void transcriptEl.scrollTop; // 觸發重排
-              
-              // 立即再次設置，確保更新
-              transcriptEl.textContent = textToShow;
             } else {
               transcriptEl.style.display = 'none';
             }
