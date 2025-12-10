@@ -1013,6 +1013,8 @@ const voiceModalOpen = ref(false);
 let voiceTimeout = null; // 語音識別超時計時器
 let hasFinalResult = false; // 確保只處理一次 final
 let finalizedByUs = false;
+let lastProcessedResultIndex = -1; // ✅ 追蹤最後處理的結果索引，避免 Android 重複累積
+let accumulatedFinalText = ""; // ✅ 累積的 final 結果，避免重複
 
 function clearVoiceTimeout() {
   if (voiceTimeout) {
@@ -1028,6 +1030,8 @@ function reallyCloseVoiceModal() {
   currentTranscript.value = "";
   voiceModalImageSrc.value = assistantSoundGif;
   voiceModalOpen.value = false; // ← 真正關窗
+  lastProcessedResultIndex = -1; // ✅ 重置結果索引追蹤
+  accumulatedFinalText = ""; // ✅ 重置累積的 final 結果
 }
 
 // 語音識別和合成實例
@@ -1657,25 +1661,41 @@ const initSpeechRecognition = () => {
       recognitionRef.lang = "zh-TW";
 
       recognitionRef.onresult = (event) => {
-        // 處理所有結果（包括 interim 和 final）
-        // 正確處理：累積所有 final 結果 + 只顯示最後一個 interim 結果（如果存在）
-        let transcript = "";
+        // ✅ Android 修復：只處理新增的結果，避免重複累積
+        // 追蹤已經處理過的最後一個結果索引
+        const currentResultCount = event.results.length;
+        const startIndex = Math.max(0, lastProcessedResultIndex + 1);
+        
+        // 如果沒有新結果，直接返回
+        if (startIndex >= currentResultCount) {
+          return;
+        }
+        
+        let newFinalText = "";
+        let interimText = "";
         let hasFinal = false;
         
-        // 先累積所有 final 結果
-        for (let i = 0; i < event.results.length; i++) {
+        // 只處理新增的結果（從 startIndex 開始）
+        for (let i = startIndex; i < currentResultCount; i++) {
           const result = event.results[i];
           if (result.isFinal) {
-            transcript += result[0].transcript;
+            // 只累積新的 final 結果
+            newFinalText += result[0].transcript;
             hasFinal = true;
+          } else {
+            // 只保留最後一個 interim 結果
+            interimText = result[0].transcript;
           }
         }
         
-        // 然後只添加最後一個 interim 結果（如果存在且不是 final）
-        const lastResult = event.results[event.results.length - 1];
-        if (lastResult && !lastResult.isFinal) {
-          transcript += lastResult[0].transcript;
-        }
+        // 更新累積的 final 結果
+        accumulatedFinalText += newFinalText;
+        
+        // 更新最後處理的索引
+        lastProcessedResultIndex = currentResultCount - 1;
+        
+        // 組合最終的 transcript：累積的 final + 最後一個 interim
+        const transcript = accumulatedFinalText + (interimText || "");
         
         // 調試日誌：檢查結果
         if (process.client && transcript) {
@@ -2127,6 +2147,8 @@ const toggleListening = () => {
       currentTranscript.value = "";
       hasFinalResult = false;
       finalizedByUs = false;
+      lastProcessedResultIndex = -1; // ✅ 重置結果索引追蹤
+      accumulatedFinalText = ""; // ✅ 重置累積的 final 結果
       voiceModalOpen.value = true; // ← 開窗
       isListening.value = true;
       
