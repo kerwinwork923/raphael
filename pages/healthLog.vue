@@ -50,32 +50,83 @@
 
       <!-- 日誌列表 -->
       <div class="log-list" v-else-if="isDataReady && filteredLogs.length > 0">
-        <div
-          class="log-item"
-          v-for="log in filteredLogs"
-          :key="log.id"
-          :class="{ expanded: expandedItems.includes(log.id) }"
-        >
-          <div class="log-header" @click="toggleExpand(log.id)">
-            <div class="log-date">
-              {{ formatDate(log.date || log.timestamp) }}
+        <div class="timeline-container">
+          <div class="log-item" v-for="log in filteredLogs" :key="log.id">
+            <div class="log-content-wrapper">
+              <div class="log-date">
+                {{ formatDate(log.date || log.timestamp) }}
+              </div>
+
+              <!-- 口述內容區塊 -->
+              <div
+                class="content-section"
+                v-if="log.preSoundNote && log.preSoundNote.trim()"
+              >
+                <div
+                  class="section-header"
+                  @click="
+                    isExpandable(log.id, 'oral') &&
+                      toggleSection(log.id, 'oral')
+                  "
+                >
+                  <span class="section-title">口述內容</span>
+                  <img
+                    v-if="isExpandable(log.id, 'oral')"
+                    src="/assets/imgs/arrowDown2.svg"
+                    alt="展開/收合"
+                    class="section-chevron"
+                    :class="{
+                      rotated: !expandedSections[`${log.id}-oral`],
+                    }"
+                  />
+                </div>
+
+                <div
+                  class="section-content"
+                  :class="{
+                    expanded: expandedSections[`${log.id}-oral`],
+                  }"
+                >
+                  {{ log.preSoundNote }}
+                </div>
+              </div>
+
+              <div
+                class="timeline-line"
+                v-if="log.preSoundNote && log.preSoundNote.trim()"
+              ></div>
+              <!-- AI摘要內容區塊 -->
+              <div
+                class="content-section"
+                v-if="log.content && log.content.trim()"
+              >
+                <div
+                  class="section-header"
+                  @click="
+                    isExpandable(log.id, 'ai') && toggleSection(log.id, 'ai')
+                  "
+                >
+                  <span class="section-title">AI摘要內容</span>
+                  <img
+                    v-if="isExpandable(log.id, 'ai')"
+                    src="/assets/imgs/arrowDown2.svg"
+                    alt="展開/收合"
+                    class="section-chevron"
+                    :class="{
+                      rotated: !expandedSections[`${log.id}-ai`],
+                    }"
+                  />
+                </div>
+                <div
+                  class="section-content"
+                  :class="{
+                    expanded: expandedSections[`${log.id}-ai`],
+                  }"
+                >
+                  {{ log.content }}
+                </div>
+              </div>
             </div>
-            <div class="log-preview" v-if="!expandedItems.includes(log.id)">
-              {{
-                log.content.length > 30
-                  ? log.content.substring(0, 30) + "..."
-                  : log.content
-              }}
-            </div>
-            <div class="log-content" v-else>
-              {{ log.content }}
-            </div>
-            <img
-              src="/assets/imgs/arrowDown2.svg"
-              alt="展開/收合"
-              class="expand-icon"
-              :class="{ rotated: expandedItems.includes(log.id) }"
-            />
           </div>
         </div>
       </div>
@@ -168,7 +219,8 @@ const selectedYear = ref(new Date().getFullYear());
 const selectedMonth = ref(`${new Date().getMonth() + 1}月`);
 const showYearPicker = ref(false);
 const showMonthPicker = ref(false);
-const expandedItems = ref([]);
+const expandedSections = ref({}); // 已有
+const expandableSections = ref({}); // ✅ 新增：是否需要展開（要不要顯示箭頭）
 const healthLogs = ref([]);
 
 // 載入狀態管理
@@ -266,14 +318,31 @@ const loadHealthLogs = async () => {
     console.log("從 API 讀取的資料:", data);
 
     if (data.Result === "OK" && data.SoundNoteList) {
-      // 轉換 API 資料格式為本地格式
       healthLogs.value = data.SoundNoteList.map((item, index) => ({
         id: Date.now() + index,
         date: item.CheckTime,
         timestamp: item.CheckTime,
         type: "summary",
-        content: item.Note,
+        content: item.Note || "", // AI 摘要內容
+        preSoundNote: item.PreSoundNote || "", // 口述內容
       }));
+
+      // ✅ 根據字數決定這一塊「需不需要展開箭頭」
+      const MAX_PREVIEW_CHARS = 50; // 你可以自己調整，代表大約兩行以內
+
+      healthLogs.value.forEach((log) => {
+        if (log.preSoundNote && log.preSoundNote.trim()) {
+          const key = `${log.id}-oral`;
+          expandableSections.value[key] =
+            log.preSoundNote.trim().length > MAX_PREVIEW_CHARS;
+        }
+
+        if (log.content && log.content.trim()) {
+          const key = `${log.id}-ai`;
+          expandableSections.value[key] =
+            log.content.trim().length > MAX_PREVIEW_CHARS;
+        }
+      });
 
       console.log("轉換後的健康日誌:", healthLogs.value);
       console.log("健康日誌總數:", healthLogs.value.length);
@@ -290,13 +359,9 @@ const loadHealthLogs = async () => {
   }
 };
 
-const toggleExpand = (logId) => {
-  const index = expandedItems.value.indexOf(logId);
-  if (index > -1) {
-    expandedItems.value.splice(index, 1);
-  } else {
-    expandedItems.value.push(logId);
-  }
+const toggleSection = (logId, sectionType) => {
+  const key = `${logId}-${sectionType}`;
+  expandedSections.value[key] = !expandedSections.value[key];
 };
 
 const selectYear = async (year) => {
@@ -323,6 +388,11 @@ const formatDate = (timestamp) => {
   return `${month}/${day} ${hours}:${minutes}`;
 };
 
+const isExpandable = (logId, sectionType) => {
+  const key = `${logId}-${sectionType}`;
+  return !!expandableSections.value[key];
+};
+
 // 生命週期
 onMounted(async () => {
   await loadHealthLogs();
@@ -342,6 +412,12 @@ onMounted(async () => {
     .titleMenu:deep > div {
       left: 16px;
     }
+  }
+  .timeline-line {
+    background: var(--Secondary-300, #b1c0d8);
+    height: 1px;
+    width: 100%;
+    margin: 1rem 0;
   }
 }
 
@@ -443,79 +519,108 @@ onMounted(async () => {
 }
 
 .log-list {
-
   padding: 1rem;
-  max-height: calc(70vh - 32px); /* 設定最大高度 */
-  overflow-y: auto; /* 開啟垂直滾動 */
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  
+  max-height: calc(70vh - 32px);
+  overflow-y: auto;
+  @include scrollbarStyle();
+}
+
+.timeline-container {
+  position: relative;
 }
 
 .log-item {
+  position: relative;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.log-content-wrapper {
+  flex: 1;
   @include neumorphismOuter($radius: 20px);
+  padding: 1rem;
   transition: all 0.3s ease;
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
+}
 
-  &.expanded {
-    .log-content {
-      display: block;
-    }
-    .log-preview {
-      display: none;
-    }
+.log-date {
+  color: var(--Neutral-black, #1e1e1e);
+  font-size: var(--Text-font-size-18, 18px);
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  margin-bottom: .75rem;
+}
+
+.content-section {
+  &:last-child {
+    margin-bottom: 0;
   }
+}
 
-  .log-header {
-    cursor: pointer;
-    position: relative;
-  }
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s ease;
 
-  .log-date {
-    color: var(--Neutral-black, #1e1e1e);
-    font-size: var(--Text-font-size-20, 20px);
-    font-style: normal;
-    font-weight: 500;
-    letter-spacing: 0.1px;
-    margin-bottom: 0.5rem;
-  }
-
-  .log-preview {
+  .section-title {
     color: var(--Neutral-500, #666);
+    text-align: center;
     font-size: var(--Text-font-size-18, 18px);
     font-style: normal;
-    font-weight: 400;
-    line-height: 120%;
-    letter-spacing: 0.072px;
+    font-weight: 700;
+
+    letter-spacing: 0.09px;
   }
 
-  .log-content {
-    color: var(--Neutral-500, #666);
-    font-size: var(--Text-font-size-18, 18px);
-    font-style: normal;
-    font-weight: 400;
-    line-height: 120%;
-    letter-spacing: 0.072px;
-    margin-bottom: 0.5rem;
-  }
-
-  .expand-icon {
-    position: absolute;
-    top: 0;
-    right: 0;
+  .section-chevron {
     width: 16px;
     height: 16px;
     transition: transform 0.3s ease;
+    filter: brightness(0) saturate(100%) invert(58%) sepia(95%) saturate(2000%)
+      hue-rotate(60deg) brightness(100%) contrast(85%);
+    transform: rotate(180deg); // 預設向上（綠色向上箭頭）
 
     &.rotated {
-      transform: rotate(180deg);
+      transform: rotate(0deg); // 收合時向下
     }
   }
+}
+
+.section-content {
+  color: var(--Neutral-500, #666);
+  font-size: var(--Text-font-size-16, 16px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: 0.064px;
+
+  // ✅ 預設兩行截斷
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2; // 顯示 2 行
+  overflow: hidden;
+
+  margin-top: 0.5rem;
+  word-break: break-word;
+  transition: all 0.3s ease;
+}
+
+.section-content.expanded {
+  // ✅ 展開時取消行數限制
+  -webkit-line-clamp: unset;
+  max-height: none; // 保險用，可加可不加
 }
 
 .empty-state {
@@ -535,7 +640,6 @@ onMounted(async () => {
   text-align: center;
 
   .empty-character {
-
     .character-img {
       object-fit: contain;
     }

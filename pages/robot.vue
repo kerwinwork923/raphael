@@ -2565,7 +2565,7 @@ const handleSummaryMode = async (saveSummary = false) => {
   currentSummary.value = "";
 
   if (saveSummary) {
-    // 先打摘要API
+    // 先打摘要API，包含原始內容和摘要內容
     try {
       isLoading.value = true;
 
@@ -2580,7 +2580,8 @@ const handleSummaryMode = async (saveSummary = false) => {
             MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
             Mobile: localobj.Mobile,
             Lang: "zhtw",
-            SoundNote: summaryText,
+            SoundNote: summaryText, // AI摘要內容
+            PreSoundNote: originalInput, // 使用者原始文字/語音內容
           }),
         }
       );

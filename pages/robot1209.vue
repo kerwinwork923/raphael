@@ -1,28 +1,65 @@
 <template>
   <div class="chat-wrapper">
+    <!-- 首次解說覆蓋層 -->
+    <div v-if="showTutorial" class="tutorial-overlay" @click="closeTutorial">
+      <div class="tutorial-content">
+        <div class="tutorial-text">任意點擊關閉</div>
+      </div>
+    </div>
 
     <!-- 聊天頭部 -->
     <div class="chat-header">
       <div
-        class="avatar-container"
+        v-if="showTutorial && currentTutorialStep === 4"
+        class="overZIndex firstText firstText4"
       >
+        這裡可以切換角色以及幫角色取名字
+      </div>
+      <div
+        class="avatar-container"
+        :class="{ overZIndex: showTutorial && currentTutorialStep === 4 }"
+        @click="currentTutorialStep === 4 ? null : showCharacterModal()"
+      >
+        <div v-if="isCharacterLoading" class="character-loading">
+          <div class="loading-spinner"></div>
+        </div>
         <img
+          v-else-if="
+            isCharacterDataReady && currentCharacter && currentCharacter.avatar
+          "
           class="avatar"
-          src="/assets/imgs/robotDemo/doctor.png"
-          alt="院長"
+          :src="currentCharacter.avatar"
+          alt="角色頭像"
         />
+        <div v-else class="character-placeholder">
+          <div class="placeholder-avatar"></div>
+        </div>
       </div>
       <div
         class="character-name-btn"
+        :class="{ overZIndex: showTutorial && currentTutorialStep === 4 }"
+        @click="currentTutorialStep === 4 ? null : showCharacterModal()"
       >
-        <span>院長</span>
+        <span v-if="isCharacterDataReady && currentCharacter">{{
+          currentCharacter.customName || currentCharacter.name
+        }}</span>
+        <span v-else-if="isCharacterLoading">載入中...</span>
+        <span v-else>角色</span>
+        <img :src="recycleSvg" alt="刷新" />
       </div>
     </div>
 
     <!-- 初始對話氣泡 -->
     <div
       class="greeting-bubble"
+      :class="{ overZIndex: showTutorial && currentTutorialStep === 5 }"
     >
+      <div
+        v-if="showTutorial && currentTutorialStep === 5"
+        class="firstText firstText5"
+      >
+        這裡可以看到回應的訊息
+      </div>
       <div v-if="isLoading" class="loading-indicator">
         <div class="spinner"></div>
         <span>思考中...</span>
@@ -36,12 +73,17 @@
     <!-- AI角色形象區域 -->
     <div class="character-section">
       <img
-        src="/assets/imgs/robotDemo/doctor.png"
+        v-if="uiCharacter && uiCharacter.fullImage"
+        :src="uiCharacter.fullImage"
         class="character-image"
-        alt="院長"
+        alt="AI角色"
+        @click="handleCharacterClick"
       />
+      <div v-else class="character-placeholder">
+        <div class="placeholder-character"></div>
+      </div>
       <div class="healGroup">
-        <div class="healthImg" @click="goToHealthLog2">
+        <div class="healthImg" @click="goToHealthLog">
           <img src="/assets/imgs/robot/health.svg" alt="健康" />
         </div>
         <h5>健康日誌</h5>
@@ -53,10 +95,34 @@
       <div
         v-if="showVoiceControls"
         class="voice-control-bar"
+        :class="{
+          overZIndex:
+            (showTutorial && currentTutorialStep === 1) ||
+            (showTutorial && currentTutorialStep === 2) ||
+            (showTutorial && currentTutorialStep === 3),
+        }"
       >
         <button class="control-btn history-btn" @click="showHistory">
           <img :src="messagesSquare" alt="聊天紀錄" />
         </button>
+        <div
+          v-if="showTutorial && currentTutorialStep === 1"
+          class="firstText firstText1"
+        >
+          這裡可以進行對話
+        </div>
+        <div
+          v-if="showTutorial && currentTutorialStep === 2"
+          class="firstText firstText2"
+        >
+          可自行關閉聲音
+        </div>
+        <div
+          v-if="showTutorial && currentTutorialStep === 3"
+          class="firstText firstText3"
+        >
+          這裡可以切換成文字對話
+        </div>
 
         <button
           class="control-btn mic-btn"
@@ -112,9 +178,10 @@
       </div>
     </transition>
 
-  
+    <!-- 底部導航列 -->
+    <BottomNav />
 
-
+    <!-- 錄音提示彈窗 -->
  <!-- 錄音提示彈窗 -->
 <transition name="fade">
   <div v-if="voiceModalOpen" class="voice-modal">
@@ -199,7 +266,168 @@
       </div>
     </transition>
 
+    <!-- 客服詢問彈窗 -->
+    <transition name="fade">
+      <div v-if="showCustomerServiceModal" class="customer-service-modal">
+        <div class="robot-content">
+          <div class="robot-sphere"></div>
+          <h3 class="robot-title">您是否想要找客服呢？</h3>
+          <div class="robot-buttons">
+            <button
+              @click="handleCustomerService(false)"
+              class="robot-btn-cancel"
+            >
+              否
+            </button>
+            <button
+              @click="handleCustomerService(true)"
+              class="robot-btn-confirm"
+            >
+              是
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
 
+    <!-- 角色選擇彈窗 -->
+    <transition name="fade">
+      <div
+        v-if="showCharacterSelection"
+        class="character-modal-overlay"
+        @click="closeCharacterModal"
+      >
+        <div class="character-modal" @click.stop>
+          <!-- 彈窗頭部 -->
+          <div class="character-modal-header">
+            <img
+              src="/assets/imgs/backArrow.svg"
+              @click="closeCharacterModal"
+              alt="返回"
+              class="back-arrow"
+            />
+            <h2 class="modal-title">切換角色</h2>
+          </div>
+
+          <!-- 當前選擇角色標籤 -->
+          <div class="current-character-tag" @click="showNameInputModal">
+            <span
+              >{{
+                uiCharacter
+                  ? uiCharacter.customName || uiCharacter.displayName
+                  : "角色"
+              }}
+              <img
+                src="/assets/imgs/robot/edit_green.svg"
+                alt="編輯"
+                class="edit-icon"
+              />
+            </span>
+          </div>
+
+          <!-- 主要角色展示區域 -->
+          <div class="main-character-area">
+            <div class="character-display">
+              <img
+                v-if="uiCharacter && uiCharacter.fullImage"
+                :src="uiCharacter.fullImage"
+                alt="角色形象"
+                class="character-full-image"
+              />
+              <div v-else class="character-placeholder-large">
+                <div class="placeholder-character-large"></div>
+              </div>
+            </div>
+
+            <!-- 右側造型選擇 -->
+            <div class="style-selector">
+              <div class="style-header">
+                <span>更換造型</span>
+              </div>
+
+              <div class="style-grid" :class="{ expanded: isStyleExpanded }">
+                <div
+                  v-for="style in (uiCharacter && uiCharacter.styles) || []"
+                  :key="`${uiCharacter?.id || 'unknown'}-${style.id}`"
+                  class="style-item"
+                  :class="{
+                    active: uiCharacter && uiCharacter.styleId === style.id,
+                    locked: style.locked,
+                  }"
+                  @click="selectStyle(style)"
+                >
+                  <div v-if="style.locked" class="style-locked">
+                    <img :src="lockSvg" alt="鎖定" class="lock-icon" />
+                  </div>
+                  <img
+                    :src="style.thumbnail"
+                    alt="造型"
+                    :class="{ 'locked-image': style.locked }"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 確定按鈕 -->
+          <button class="confirm-btn" @click="confirmCharacterSelection">
+            確定
+          </button>
+
+          <!-- 底部角色切換區域 - Swiper 版本 -->
+          <div class="character-switch-area">
+            <swiper
+              ref="characterSwiperRef"
+              :slidesPerView="3.2"
+              :spaceBetween="8"
+              :centeredSlides="true"
+              :pagination="{
+                clickable: true,
+              }"
+              :modules="swiperModules"
+              class="character-swiper"
+              @slideChange="onSlideChange"
+            >
+              <swiper-slide
+                v-for="character in availableCharacters"
+                :key="character.id"
+                class="character-option"
+                :class="{
+                  selected: uiCharacter && uiCharacter.id === character.id,
+                  locked: isCharacterLocked(character),
+                }"
+                @click="onCharacterClick(character)"
+              >
+                <div class="character-circle">
+                  <!-- Loading 效果 -->
+                  <div
+                    v-if="characterImageLoading.has(character.id)"
+                    class="character-loading"
+                  >
+                    <div class="loading-spinner"></div>
+                  </div>
+                  <!-- 鎖定效果 -->
+                  <div
+                    v-if="isCharacterLocked(character)"
+                    class="character-locked"
+                  >
+                    <img :src="lockSvg" alt="鎖定" class="lock-icon" />
+                  </div>
+                  <!-- 角色圖片 -->
+                  <img
+                    :src="character.avatar"
+                    alt="角色"
+                    :class="{ 'locked-image': isCharacterLocked(character) }"
+                    @load="onCharacterImageLoad(character.id)"
+                    @error="onCharacterImageError(character.id)"
+                  />
+                </div>
+              </swiper-slide>
+            </swiper>
+          </div>
+        </div>
+      </div>
+    </transition>
 
     <!-- 歷史紀錄頁面 -->
     <transition name="slide-left">
@@ -307,9 +535,11 @@
                   >
                     <div class="avatar">
                       <img
-                        src="/assets/imgs/robotDemo/doctor.png"
-                        alt="院長"
+                        v-if="currentCharacter && currentCharacter.avatar"
+                        :src="currentCharacter.avatar"
+                        alt="角色頭像"
                       />
+                      <div v-else class="placeholder-avatar"></div>
                     </div>
 
                     <div class="bubble">
@@ -330,7 +560,7 @@
                         {{
                           item.botFrom === "Human"
                             ? "健康顧問"
-                            : "院長"
+                            : currentCharacter.name || "AI"
                         }}
                       </div>
                     </div>
@@ -376,7 +606,7 @@
                   </div>
                   <div v-if="result.bot && result.bot.trim()" class="bubble">
                     <div class="content">
-                      <span class="bot-name">院長</span>
+                      <span class="bot-name">{{ currentCharacter.name }}</span>
                       <span
                         v-html="highlightKeyword(result.bot, searchQuery)"
                       ></span>
@@ -429,6 +659,38 @@
       </div>
     </transition>
 
+    <!-- 角色名稱輸入彈窗 -->
+    <transition name="fade">
+      <div
+        v-if="showNameInput"
+        class="name-input-overlay"
+        @click="closeNameInput"
+      >
+        <div class="name-input-modal" @click.stop>
+          <h3 class="name-input-title">幫角色取一個名字吧</h3>
+          <input
+            v-model="characterNameInput"
+            type="text"
+            class="name-input-field"
+            placeholder="例如：嗨嗨嗨"
+            maxlength="10"
+            @keyup.enter="confirmNameInput"
+            ref="nameInputRef"
+          />
+          <div v-if="nameInputError" class="name-input-error">
+            {{ nameInputError }}
+          </div>
+          <div class="name-input-buttons">
+            <button class="name-input-cancel" @click="closeNameInput">
+              取消
+            </button>
+            <button class="name-input-confirm" @click="confirmNameInput">
+              確定
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
 
     <!-- 日曆選擇彈窗 -->
     <transition name="calendar-expand">
@@ -470,6 +732,22 @@
       </div>
     </transition>
 
+    <!-- 角色選擇離開確認彈窗 -->
+    <Alert
+      v-if="showCharacterExitConfirm"
+      default-content="現在離開的話，不會變更角色喔"
+      :show-click-button="true"
+      click-button-text="離開"
+      @click="confirmCharacterExit"
+      @close="cancelCharacterExit"
+    />
+
+    <!-- 近期推出彈窗 -->
+    <Alert
+      v-if="showComingSoon"
+      default-content="此角色即將推出，敬請期待！"
+      @close="closeComingSoonModal"
+    />
   </div>
 </template>
 
@@ -502,11 +780,12 @@ import searchSvg from "~/assets/imgs/robot/search.svg";
 import calendarSvg from "~/assets/imgs/robot/calendar.svg";
 import sendSvg from "~/assets/imgs/robot/send.svg";
 
-
-const TEXT_WEBHOOK_URL = "https://23700999.com:8081/push_notification/api/chatgpt/ask";
-// 移除 API URL，改用 localStorage
-// const TEXT_MESSAGE_URL = "https://23700999.com:8081/HMA/TTEsaveChatMessageHistory.jsp"; // ← 儲存聊天記錄
-// const GET_CHAT_HISTORY_URL = "https://23700999.com:8081/HMA/api/fr/frGetLineAIHuman"; // ← 獲取聊天記錄
+// ====== 參考 robot1021.vue 的 n8n API 方式 ======
+const TEXT_WEBHOOK_URL = "https://aiwisebalancegroup.com/webhook/Textchat"; // ← n8n 文字端點
+const TEXT_MESSAGE_URL =
+  "https://23700999.com:8081/HMA/TTEsaveChatMessageHistory.jsp"; // ← 儲存聊天記錄
+const GET_CHAT_HISTORY_URL =
+  "https://23700999.com:8081/HMA/api/fr/frGetLineAIHuman"; // ← 獲取聊天記錄
 
 // ====== 角色相關 API ======
 const GET_ALL_ROLES_URL = "https://23700999.com:8081/HMA/api/fr/ALLRole"; // ← 獲取所有角色
@@ -518,7 +797,7 @@ const CHANGE_ROLE_DISPLAY_NAME_URL =
 // ====== ChatGPT API ======
 const CHATGPT_API_URL =
   "https://23700999.com:8081/push_notification/api/chatgpt/ask"; // ← ChatGPT API
-const voicegender = "male";
+const voicegender = "female";
 const historyInputRef = ref(null);
 const topSentinel = ref(null);
 let topObserver = null;
@@ -555,7 +834,7 @@ const showVoiceError = ref(false);
 // 摘要模式相關狀態
 const showSummaryMode = ref(false);
 const currentSummary = ref("");
-// 移除客服相關狀態
+const showCustomerServiceModal = ref(false);
 const pendingInput = ref(""); // 儲存待處理的輸入
 const showSummaryProcessing = ref(false); // 摘要處理中彈窗
 const isInSummaryFlow = ref(false); // 確保摘要流程不誤觸一般流程
@@ -573,10 +852,10 @@ const callTime = ref(1);
 const emptyBatchCount = ref(0);
 const knownKeys = new Set(); // 用於去重的穩定鍵集合
 
-// 移除首次登入解說相關狀態
-// const showTutorial = ref(false);
-// const currentTutorialStep = ref(1);
-// const tutorialSteps = [1, 2, 3, 4, 5]; // 解說步驟順序
+// 首次登入解說相關狀態
+const showTutorial = ref(false);
+const currentTutorialStep = ref(1);
+const tutorialSteps = [1, 2, 3, 4, 5]; // 解說步驟順序
 // 角色圖片現在完全由 API 提供，不再需要本地 import
 
 const characterImageSrc = ref(null);
@@ -597,18 +876,17 @@ const latestResponse = ref(""); // 最新回覆
 const showSearch = ref(false); // 搜尋功能開關
 const searchQuery = ref(""); // 搜尋關鍵字
 const searchResults = ref([]); // 搜尋結果
-// 從 localStorage 獲取用戶資料（可選，用於記錄等功能）
+// 從 localStorage 獲取用戶資料
 const localData = localStorage.getItem("userData");
 const localobj = localData ? JSON.parse(localData) : null;
 console.log("localobj=", localobj?.Mobile);
 
-// 移除登入檢查，允許未登入用戶使用
-// if (!localData) {
-//   router.push("/");
-// }
+if (!localData) {
+  router.push("/");
+}
 
-const goToHealthLog2 = () => {
-  router.push("/healthLog2");
+const goToHealthLog = () => {
+  router.push("/healthLog");
 };
 
 // 角色選擇相關狀態
@@ -902,30 +1180,30 @@ const closeTextInput = () => {
   showTextInput.value = false;
 };
 
-// 移除首次登入解說相關函數
-// const checkTutorialStatus = () => {
-//   if (process.client) {
-//     const hasSeenTutorial = localStorage.getItem("robotTutorialSeen");
-//     if (!hasSeenTutorial) {
-//       showTutorial.value = true;
-//       currentTutorialStep.value = 1;
-//     }
-//   }
-// };
+// 首次登入解說相關函數
+const checkTutorialStatus = () => {
+  if (process.client) {
+    const hasSeenTutorial = localStorage.getItem("robotTutorialSeen");
+    if (!hasSeenTutorial) {
+      showTutorial.value = true;
+      currentTutorialStep.value = 1;
+    }
+  }
+};
 
-// const closeTutorial = () => {
-//   if (process.client) {
-//     const currentIndex = tutorialSteps.indexOf(currentTutorialStep.value);
-//     if (currentIndex < tutorialSteps.length - 1) {
-//       // 如果還有下一步，切換到下一步
-//       currentTutorialStep.value = tutorialSteps[currentIndex + 1];
-//     } else {
-//       // 如果是最後一步，關閉解說
-//       showTutorial.value = false;
-//       localStorage.setItem("robotTutorialSeen", "true");
-//     }
-//   }
-// };
+const closeTutorial = () => {
+  if (process.client) {
+    const currentIndex = tutorialSteps.indexOf(currentTutorialStep.value);
+    if (currentIndex < tutorialSteps.length - 1) {
+      // 如果還有下一步，切換到下一步
+      currentTutorialStep.value = tutorialSteps[currentIndex + 1];
+    } else {
+      // 如果是最後一步，關閉解說
+      showTutorial.value = false;
+      localStorage.setItem("robotTutorialSeen", "true");
+    }
+  }
+};
 
 const lastScrollTop = ref(0);
 
@@ -1335,7 +1613,7 @@ const startVoiceTimeout = (hasText = false) => {
   }
   
   // 如果有文字，給更長的靜音時間（3秒）；如果沒有文字，給較短時間（8秒）
-  const timeoutDuration = hasText ? 5000 : 10000;
+  const timeoutDuration = hasText ? 3000 : 8000;
   
   voiceTimeout = setTimeout(() => {
     if (isListening.value) {
@@ -1563,13 +1841,18 @@ const initSpeechRecognition = () => {
   }
 };
 
-// 寫入聊天紀錄的 helper 函數（使用 localStorage）
+// 寫入聊天紀錄的 helper 函數
 async function saveChatRecord({
   inMsg = "",
   outMsg = "",
   inputAt,
   outputAt,
 } = {}) {
+  if (!localobj) {
+    console.error("保存聊天記錄失敗: 用戶資料不存在");
+    return { success: false, error: "用戶資料不存在" };
+  }
+
   // 確保訊息內容不為空
   if (!inMsg && !outMsg) {
     console.warn("保存聊天記錄失敗: 輸入和輸出訊息都為空");
@@ -1581,31 +1864,45 @@ async function saveChatRecord({
   const outputTime = outputAt || getLocalTimeString(new Date());
 
   try {
-    // 從 localStorage 讀取現有聊天記錄
-    const storageKey = "robotDemo_chatHistory";
-    const existingData = localStorage.getItem(storageKey);
-    const chatHistory = existingData ? JSON.parse(existingData) : [];
-
-    // 創建新的聊天記錄項目
-    const newRecord = {
-      id: Date.now(),
-      ts: Date.now(),
-      user: inMsg || "",
-      bot: outMsg || "",
-      timestamp: inputTime,
-      dateKey: toDateKey(new Date(inputTime)),
+    console.log("開始保存聊天記錄到 API:", {
+      inMsg: inMsg.substring(0, 50) + (inMsg.length > 50 ? "..." : ""),
+      outMsg: outMsg.substring(0, 50) + (outMsg.length > 50 ? "..." : ""),
       inputTime,
       outputTime,
-    };
+    });
 
-    // 添加到記錄中
-    chatHistory.push(newRecord);
+    const response = await fetch(TEXT_MESSAGE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        Key: "qrt897hpmd",
+        MID: localobj.MID,
+        Mobile: localobj.Mobile,
+        Type: "P",
+        Inmessage: inMsg || "",
+        Outmessage: outMsg || "",
+        Inputtime: inputTime,
+        Outputtime: outputTime,
+      }),
+    });
 
-    // 保存回 localStorage
-    localStorage.setItem(storageKey, JSON.stringify(chatHistory));
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => "");
+      throw new Error(
+        `API 調用失敗: ${response.status} ${response.statusText} - ${errorText}`
+      );
+    }
 
-    console.log("聊天記錄已保存到 localStorage:", newRecord);
-    return { success: true, data: newRecord };
+    const result = await response.json();
+    console.log("保存聊天記錄 API 回應:", result);
+
+    // 檢查 API 回傳結果
+    if (result && result.Result && result.Result !== "OK") {
+      console.error("保存聊天記錄失敗: API 回傳錯誤", result);
+      return { success: false, error: result.Result, data: result };
+    }
+
+    return { success: true, data: result };
   } catch (e) {
     console.error("保存聊天記錄失敗:", e);
     return { success: false, error: e.message || String(e) };
@@ -1624,23 +1921,7 @@ async function runSummaryFlow(inputText) {
     // 呼叫 ChatGPT 產生精簡內容
     const aiResponse = await callChatGPT(
       inputText,
-      `你是一個「健康管理的陪伴機器人」，你的工作只有一項：
-1.忠實紀錄與潤飾使用者的症狀/身體困擾內容，並整理成可交給醫師的結構化紀錄。
-【輸出格式要求】
-只輸出以下一個區塊（不要加星號、不要加多餘符號、不要加說明文字）：
-（逐句潤飾我說的內容，使語句更清楚流暢，但意思完全相同。
-如果有多個症狀或事件，可分多筆，但每筆資料必須是我說過的內容。）
-【限制規則】
-1. 忠實記錄我說的每一句話或資訊（不可遺漏）。
-2. 不改變原意，只能優化語序、加標點、使語句更自然。
-3. 不可推理或猜測病因。
-4. 不可補充我沒說的內容。
-5. 不可加入任何建議、分析、評論或衛教。
-6. 不可使用 *、#、-、>、Markdown 格式符號。
-7. 不可使用條列符號，全部以自然語句呈現。
-請嚴格遵守以上格式與規則，開始後不需要再次重述任務或格式。
-
-`
+      "你是一個聰明的智慧醫療助手，這是一段病患的症狀敘述內容，請幫我做摘要重點"
     );
 
     // 設置原始輸入到 pendingInput，供後續使用
@@ -1670,11 +1951,10 @@ async function sendViaUnifiedAPI(
   userText,
   { playAudio = false, extra = {} } = {}
 ) {
-  // 移除登入檢查，允許未登入用戶使用
-  // if (!localobj) {
-  //   console.error("用戶資料不存在");
-  //   return "（親愛的:您的問題我目前沒辦法回答）";
-  // }
+  if (!localobj) {
+    console.error("用戶資料不存在");
+    return "（親愛的:您的問題我目前沒辦法回答）";
+  }
 
   // 使用本地時間，避免時區問題
   const now = new Date();
@@ -1688,9 +1968,11 @@ async function sendViaUnifiedAPI(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        systemMessage: "你是專業健康顧問，【限制規則】 不可使用 *、#、-、>、Markdown 格式符號。7. 不可使用條列符號，全部以自然語句呈現。",
-        message: userText,
-        model: "gpt-5-mini",
+        chatInput: userText,
+        sessionId: UUID,
+        voicegender,
+        timestamp: localTime, // 使用本地時間格式
+        pitch_semitones: 1.5,
         ...extra,
       }),
     });
@@ -1770,11 +2052,11 @@ async function sendViaUnifiedAPI(
     }
 
     if (data && !answerText) {
-      // 兼容多種欄位：response / bot / answer / text / message / content / output...
+      // 兼容多種欄位：bot / answer / text / message / content / output...
       const pick = (obj) => {
         if (!obj) return "";
         if (typeof obj === "string") return obj;
-        const keys = ["response", "bot", "answer", "text", "message", "content", "output"];
+        const keys = ["bot", "answer", "text", "message", "content", "output"];
         for (const k of keys) {
           const v = obj[k];
           if (typeof v === "string" && v.trim()) return v;
@@ -1798,7 +2080,7 @@ async function sendViaUnifiedAPI(
     speakText(finalAnswer);
   }
 
-  // 保存聊天記錄到 localStorage
+  // 無論是否進入摘要，n8n 真正回覆到手後，一律寫入 TTEsaveChatMessageHistory
   try {
     const saveResult = await saveChatRecord({
       inMsg: userText,
@@ -1806,9 +2088,9 @@ async function sendViaUnifiedAPI(
       inputAt: localTime,
       outputAt: getLocalTimeString(new Date()),
     });
-    console.log("對話已保存到 localStorage:", { userText, finalAnswer, saveResult });
+    console.log("語音對話已保存到 API:", { userText, finalAnswer, saveResult });
   } catch (e) {
-    console.error("寫入聊天紀錄失敗:", e);
+    console.error("寫入 TTE 聊天紀錄失敗:", e);
     // 即使保存失敗，也繼續返回結果，不影響用戶體驗
   }
 
@@ -1895,13 +2177,21 @@ const handleSpeechEnd = async (transcript) => {
   currentTranscript.value = "";
 
   try {
-    // 所有輸入都會進入摘要模式（移除50字限制）
-    await runSummaryFlow(transcript); // 不新增聊天泡泡，但 DB 會寫兩筆
-    // 注意：runSummaryFlow 內部可能會設置 isLoading，所以這裡不直接設置 false
-    // 讓 runSummaryFlow 自己管理 isLoading 狀態
-    return;
+    // 檢查字數是否超過50字，進入摘要模式
+    if (transcript.length > 50) {
+      await runSummaryFlow(transcript); // 不新增聊天泡泡，但 DB 會寫兩筆
+      // 注意：runSummaryFlow 內部可能會設置 isLoading，所以這裡不直接設置 false
+      // 讓 runSummaryFlow 自己管理 isLoading 狀態
+      return;
+    }
 
-    // 移除客服功能，直接處理輸入
+    // 檢查是否包含客服關鍵字
+    if (transcript.includes("真人") || transcript.includes("客服")) {
+      pendingInput.value = transcript; // 儲存原始輸入
+      showCustomerServiceModal.value = true;
+      isLoading.value = false; // 客服模式不需要等待 API，可以解除載入狀態
+      return;
+    }
 
     // 正常處理語音輸入
     const botResponse = await sendViaUnifiedAPI(transcript, {
@@ -1941,7 +2231,7 @@ const handleSpeechEnd = async (transcript) => {
     const nowTs = Date.now();
     const localTime = getLocalTimeString(new Date(nowTs));
     
-    // 保存錯誤對話到 localStorage
+    // 保存錯誤對話到 API
     try {
       await saveChatRecord({
         inMsg: transcript,
@@ -1949,9 +2239,9 @@ const handleSpeechEnd = async (transcript) => {
         inputAt: localTime,
         outputAt: getLocalTimeString(new Date()),
       });
-      console.log("錯誤對話已保存到 localStorage");
+      console.log("錯誤對話已保存到 API");
     } catch (saveError) {
-      console.error("保存錯誤對話失敗:", saveError);
+      console.error("保存錯誤對話到 API 失敗:", saveError);
     }
     
     const errorConversation = {
@@ -2014,8 +2304,8 @@ const speakText = (text) => {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "zh-TW";
 
-    // 使用固定的聲音設置（院長角色）
-    const voiceSettings = {
+    // 使用角色的自定義聲音設置
+    const voiceSettings = currentCharacter.value.voiceSettings || {
       rate: 0.9,
       pitch: 0.85,
       volume: 1,
@@ -2165,19 +2455,28 @@ async function handleManualInput() {
   // 設置載入狀態，防止連續發送
   isLoading.value = true;
 
-  // 所有輸入都會進入摘要模式（移除50字限制）
-  const raw = input;
-  textInput.value = "";
-  try {
-    await runSummaryFlow(raw); // 不新增聊天泡泡，但 DB 會寫兩筆
-  } finally {
-    // 摘要模式完成後才解除載入狀態
-    // 注意：runSummaryFlow 內部可能會設置 isLoading，所以這裡不直接設置 false
-    // 讓 runSummaryFlow 自己管理 isLoading 狀態
+  // 檢查字數是否超過50字，進入摘要模式
+  if (input.length > 50) {
+    const raw = input;
+    textInput.value = "";
+    try {
+      await runSummaryFlow(raw); // 不新增聊天泡泡，但 DB 會寫兩筆
+    } finally {
+      // 摘要模式完成後才解除載入狀態
+      // 注意：runSummaryFlow 內部可能會設置 isLoading，所以這裡不直接設置 false
+      // 讓 runSummaryFlow 自己管理 isLoading 狀態
+    }
+    return;
   }
-  return;
 
-  // 移除客服功能，直接處理輸入
+  // 檢查是否包含客服關鍵字
+  if (input.includes("真人") || input.includes("客服")) {
+    pendingInput.value = input; // 儲存原始輸入
+    showCustomerServiceModal.value = true;
+    textInput.value = "";
+    isLoading.value = false; // 客服模式不需要等待 API，可以解除載入狀態
+    return;
+  }
 
   // 文字輸入：立即將用戶輸入添加到聊天記錄中
   const nowTs = Date.now();
@@ -2248,17 +2547,9 @@ async function handleManualInput() {
   }
 }
 
-// 本地儲存對話記錄到 localStorage
+// 本地儲存對話記錄（現在主要用於日曆數據更新）
 const saveConversations = () => {
   if (process.client) {
-    try {
-      const storageKey = "robotDemo_chatHistory";
-      // 將 conversations 保存到 localStorage
-      localStorage.setItem(storageKey, JSON.stringify(conversations.value));
-      console.log("對話記錄已保存到 localStorage");
-    } catch (error) {
-      console.error("保存對話記錄失敗:", error);
-    }
     // 更新日曆數據
     loadCalendarDates();
   }
@@ -2274,31 +2565,46 @@ const handleSummaryMode = async (saveSummary = false) => {
   currentSummary.value = "";
 
   if (saveSummary) {
-    // 儲存摘要到 localStorage
+    // 先打摘要API
     try {
-      const storageKey = "robotDemo_healthLogs";
-      const existingData = localStorage.getItem(storageKey);
-      const healthLogs = existingData ? JSON.parse(existingData) : [];
+      isLoading.value = true;
 
-      const newLog = {
-        id: Date.now(),
-        date: new Date().toISOString(),
-        timestamp: new Date().toISOString(),
-        type: "summary",
-        content: summaryText, // AI摘要內容
-        preSoundNote: originalInput, // 口述內容（原始內容）
-      };
+      const response = await fetch(
+        "https://23700999.com:8081/HMA/api/fr/saveSoundNote",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            MID: localobj.MID,
+            Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
+            MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
+            Mobile: localobj.Mobile,
+            Lang: "zhtw",
+            SoundNote: summaryText,
+          }),
+        }
+      );
 
-      healthLogs.push(newLog);
-      localStorage.setItem(storageKey, JSON.stringify(healthLogs));
-      console.log("摘要已儲存到 localStorage:", newLog);
+      if (!response.ok) {
+        throw new Error(`儲存摘要 API 失敗: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("摘要已儲存到 API:", data);
     } catch (error) {
       console.error("儲存摘要失敗:", error);
       alert("儲存摘要失敗，請重試");
     }
   }
 
-  // 移除客服功能檢查
+  // 檢查摘要內容是否包含客服關鍵字
+  if (summaryText.includes("真人") || summaryText.includes("客服")) {
+    console.log("摘要內容包含客服關鍵字，顯示客服詢問");
+    pendingInput.value = originalInput; // 儲存原始輸入
+    showCustomerServiceModal.value = true;
+    isLoading.value = false; // 客服模式不需要等待 API，可以解除載入狀態
+    return; // 不發送API，等待用戶選擇
+  }
 
   // 無論是否儲存摘要，都要打n8n模型並儲存對話記錄
   if (originalInput) {
@@ -2378,20 +2684,173 @@ const handleSummaryMode = async (saveSummary = false) => {
   }
 };
 
-// 移除客服模式處理函數
+// 客服模式處理函數（聯繫客服：靜默，不顯示任何提示或新增訊息）
+const handleCustomerService = async (contactService = false) => {
+  showCustomerServiceModal.value = false;
 
-// 啟動 API 輪詢（改為 localStorage 檢查）
+  if (contactService) {
+    // 直接打 frSendLineText API（靜默）
+    const inputText = pendingInput.value || "呼叫客服";
+    const inputTime = getLocalTimeString(new Date());
+    
+    try {
+      isLoading.value = true;
+
+      // 1. 先保存聊天記錄到 TTEsaveChatMessageHistory.jsp（與文字輸入一致）
+      try {
+        await saveChatRecord({
+          inMsg: inputText,
+          outMsg: "", // 客服訊息由後端處理，這裡先留空
+          inputAt: inputTime,
+          outputAt: getLocalTimeString(new Date()),
+        });
+        console.log("客服對話已保存到 TTEsaveChatMessageHistory");
+      } catch (saveError) {
+        console.error("保存客服對話到 TTEsaveChatMessageHistory 失敗:", saveError);
+      }
+
+      // 2. 然後打 frSendLineText API
+      const response = await fetch(
+        "https://23700999.com:8081/HMA/api/fr/frSendLineText",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            MID: localobj.MID,
+            Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
+            MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
+            Mobile: localobj.Mobile,
+            Content: inputText,
+            Lang: "zhtw",
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        // 失敗也不提示使用者；僅記錄 log 方便除錯
+        console.error(`frSendLineText 失敗: ${response.status}`);
+      } else {
+        // 成功同樣不提示、不新增氣泡
+        // 若要在開發時確認，可印 log，正式上線刪掉即可
+        const data = await response.json().catch(() => ({}));
+        console.info("frSendLineText 成功（靜默）:", data);
+        // ✅ 立刻重抓一次歷史，讓「客服/真人」相關訊息馬上顯示
+        await fetchChatHistory(true);
+        // 若目前在歷史頁，卷到底讓最新訊息可見
+        if (showHistoryPage.value) {
+          nextTick(() => setTimeout(() => scrollToBottom(), 100));
+        }
+      }
+
+      // 清空待處理輸入（避免殘留）
+      pendingInput.value = "";
+    } catch (error) {
+      // 靜默失敗：不改變 UI、不新增任何訊息
+      console.error("聯繫客服請求錯誤（靜默）:", error);
+    } finally {
+      isLoading.value = false;
+    }
+
+    // 直接結束，不做任何 UI 顯示或滾動處理
+    return;
+  }
+
+  // 選擇「否」，繼續 AI 分析（保持原行為）
+  console.log("用戶選擇繼續AI分析，發送原始輸入到AI");
+
+  if (pendingInput.value) {
+    const originalInput = pendingInput.value;
+    pendingInput.value = ""; // 清空待處理輸入
+
+    try {
+      isLoading.value = true;
+      // 先立即在 UI 放入使用者訊息 + 一個 loading 中的機器人訊息
+      const ts = new Date();
+      const dateKey = toDateKey(ts);
+      const loadingMessage = {
+        id: `${ts.getTime()}|pending`,
+        ts: ts.getTime(),
+        user: originalInput,
+        bot: "",
+        botFrom: "AI",
+        isLoading: true,
+        timestamp: ts.toLocaleString("zh-TW"),
+        dateKey,
+      };
+      conversations.value.push(loadingMessage);
+      await nextTick();
+
+      const botResponse = await sendViaUnifiedAPI(originalInput, {
+        playAudio: !isMuted.value,
+      });
+
+      // 將剛才的 loading 訊息更新為實際回覆
+      const idx = conversations.value.findIndex(
+        (m) => m.id === loadingMessage.id
+      );
+      if (idx !== -1) {
+        conversations.value[idx] = {
+          ...conversations.value[idx],
+          bot: botResponse || "（親愛的:您的問題我目前沒辦法回答）",
+          isLoading: false,
+        };
+      }
+      latestResponse.value =
+        botResponse || "（親愛的:您的問題我目前沒辦法回答）";
+      saveConversations();
+
+      if (showHistoryPage.value) {
+        currentPage.value = 1;
+        nextTick(() => {
+          setTimeout(() => {
+            scrollToBottom();
+          }, 100);
+        });
+      }
+
+      console.log("客服詢問後的AI分析完成");
+    } catch (error) {
+      console.error("客服詢問後的API調用錯誤:", error);
+      const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
+      // 回填錯誤到 pending 訊息或補一筆
+      const idx = conversations.value.findIndex((m) => m.isLoading);
+      if (idx !== -1) {
+        conversations.value[idx] = {
+          ...conversations.value[idx],
+          bot: errorResponse,
+          isLoading: false,
+        };
+      } else {
+        const errorNowTs = Date.now();
+        conversations.value.push({
+          id: errorNowTs,
+          ts: errorNowTs,
+          user: originalInput,
+          bot: errorResponse,
+          timestamp: new Date().toLocaleString("zh-TW"),
+          dateKey: toDateKey(new Date()),
+        });
+      }
+      latestResponse.value = errorResponse;
+      saveConversations();
+    } finally {
+      isLoading.value = false;
+    }
+  }
+};
+
+// 啟動 API 輪詢
 const startApiPolling = () => {
   if (apiPollingInterval.value) {
     clearInterval(apiPollingInterval.value);
   }
 
   isPollingActive.value = true;
-  console.log("啟動 localStorage 檢查，每15秒檢查一次新訊息");
+  console.log("啟動 API 輪詢，每15秒檢查一次新訊息");
 
   apiPollingInterval.value = setInterval(async () => {
     if (isPollingActive.value) {
-      console.log("執行定期 localStorage 檢查...");
+      console.log("執行定期 API 檢查...");
       await fetchChatHistory(true); // 傳遞 isPolling = true
     }
   }, 15000);
@@ -2407,84 +2866,242 @@ const stopApiPolling = () => {
   console.log("停止 API 輪詢");
 };
 
-// 獲取聊天記錄（從 localStorage）
+// 獲取聊天記錄 (TTE API)
 const fetchChatHistory = async (isPolling = false) => {
+  if (!localobj) {
+    console.error("用戶資料不存在");
+    return;
+  }
+
   try {
-    const storageKey = "robotDemo_chatHistory";
-    const existingData = localStorage.getItem(storageKey);
-    const chatHistory = existingData ? JSON.parse(existingData) : [];
+    const response = await fetch(GET_CHAT_HISTORY_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        MID: localobj.MID,
+        Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
+        MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
+        Mobile: localobj.Mobile,
+        Lang: "zhtw",
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API 調用失敗: ${response.status}`);
+    }
+
+    const data = await response.json();
 
     if (isPolling) {
       console.log("輪詢檢查新訊息...");
     } else {
-      console.log("從 localStorage 獲取到的聊天記錄:", chatHistory);
+      console.log("獲取到的聊天記錄:", data);
     }
 
-    // 轉換為本地格式
-    const convertedMessages = chatHistory.map((msg) => {
-      const checkTime = parseCorrectTime(msg.timestamp || msg.inputTime);
-      return {
-        id: msg.id || Date.now(),
-        ts: msg.ts || checkTime.getTime(),
-        user: msg.user || "",
-        bot: msg.bot || "",
-        botFrom: msg.botFrom || "AI",
-        timestamp: msg.timestamp || checkTime.toLocaleString("zh-TW"),
-        dateKey: msg.dateKey || toDateKey(checkTime),
-      };
-    });
-
-    // 按時間排序（舊到新）
-    convertedMessages.sort((a, b) => a.ts - b.ts);
-
-    // 檢查是否有新訊息
-    const hasNewMessages =
-      isPolling && conversations.value.length !== convertedMessages.length;
-
-    if (hasNewMessages) {
-      console.log(
-        `發現新訊息！從 ${conversations.value.length} 條增加到 ${convertedMessages.length} 條`
+    if (data.Result === "OK" && data.LineList && Array.isArray(data.LineList)) {
+      // 過濾掉空記錄（沒有 CheckTime 或 Content 的記錄）
+      const validMessages = data.LineList.filter(
+        (msg) =>
+          msg.CheckTime &&
+          msg.CheckTime.trim() !== "" &&
+          msg.Content &&
+          msg.Content.trim() !== ""
       );
 
-      // 滾動到底部顯示新訊息
-      nextTick(() => {
-        setTimeout(() => {
-          scrollToBottom();
-        }, 100);
+      if (isPolling) {
+        console.log(
+          `輪詢檢查: 原始記錄數: ${data.LineList.length}, 有效記錄數: ${validMessages.length}`
+        );
+      } else {
+        console.log(
+          `原始記錄數: ${data.LineList.length}, 有效記錄數: ${validMessages.length}`
+        );
+      }
+
+      // 轉換 API 資料格式為本地格式
+      const convertedMessages = validMessages.map((msg, index) => {
+        const checkTime = parseCorrectTime(msg.CheckTime);
+
+        if (!isPolling) {
+          console.log(`處理訊息 ${index}:`, {
+            CheckTime: msg.CheckTime,
+            parsedDate: checkTime,
+            Mode: msg.Mode,
+            AHType: msg.AHType,
+            Content: msg.Content,
+            dateKey: toDateKey(checkTime),
+          });
+        }
+
+        // 根據 Mode 和 AHType 判斷是用戶還是 AI/客服
+        // Mode: "Input" = 用戶輸入, Mode: "Output" = AI/客服回應
+        const isUser = msg.Mode === "Input";
+        const isBot = msg.Mode === "Output";
+        const botFrom = isBot ? (msg.AHType === "Human" ? "Human" : "AI") : "";
+
+        return {
+          id: Date.now() + index, // 生成唯一 ID
+          ts: checkTime.getTime(),
+          user: isUser ? msg.Content : "",
+          bot: isBot ? msg.Content : "",
+          botFrom, // AI / Human
+          timestamp: checkTime.toLocaleString("zh-TW"),
+          dateKey: toDateKey(checkTime),
+        };
       });
-    }
 
-    conversations.value = convertedMessages;
-    hasMoreMessages.value = false;
+      // 按時間排序（舊到新）
+      convertedMessages.sort((a, b) => a.ts - b.ts);
 
-    // 更新最新回覆
-    if (convertedMessages.length > 0) {
-      latestResponse.value =
-        convertedMessages[convertedMessages.length - 1].bot;
-    }
+      // 檢查是否有新訊息
+      const hasNewMessages =
+        isPolling && conversations.value.length !== convertedMessages.length;
 
-    // 更新日曆數據
-    loadCalendarDates();
+      if (hasNewMessages) {
+        console.log(
+          `發現新訊息！從 ${conversations.value.length} 條增加到 ${convertedMessages.length} 條`
+        );
 
-    if (!isPolling) {
-      console.log("聊天記錄載入完成:", convertedMessages);
+        // 滾動到底部顯示新訊息
+        nextTick(() => {
+          setTimeout(() => {
+            scrollToBottom();
+          }, 100);
+        });
+      }
+
+
+  
+      knownKeys.clear();
+      for (const msg of data.LineList) {
+        knownKeys.add(makeStableKey(msg));
+      }
+      conversations.value = convertedMessages;
+      hasMoreMessages.value = false;
+
+
+      // 更新最新回覆
+      if (convertedMessages.length > 0) {
+        latestResponse.value =
+          convertedMessages[convertedMessages.length - 1].bot;
+      }
+
+      // 更新日曆數據
+      loadCalendarDates();
+
+      if (!isPolling) {
+        console.log("聊天記錄載入完成:", convertedMessages);
+      }
     }
   } catch (error) {
     console.error("獲取聊天記錄失敗:", error);
   }
 };
 
-// 獲取更舊的聊天記錄（從 localStorage，實際上所有記錄都在，這裡只是為了兼容）
+// 獲取更舊的聊天記錄 (TTE API)
 const fetchOlderChatHistory = async (page) => {
-  // localStorage 已經包含所有記錄，不需要分頁載入
-  // 但為了保持兼容性，返回 0 表示沒有更多記錄
-  return 0;
+  if (!localobj) {
+    console.error("用戶資料不存在");
+    return 0;
+  }
+
+  try {
+    const response = await fetch(GET_CHAT_HISTORY_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        MID: localobj.MID,
+        Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
+        MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
+        Mobile: localobj.Mobile,
+        Lang: "zhtw",
+        CallTime: page, // 依次撈更舊（外部控制遞增）
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API 調用失敗: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(`獲取到的更舊聊天記錄:`, data);
+
+    if (!(data?.Result === "OK" && Array.isArray(data.LineList))) {
+      return 0;
+    }
+
+    // 過濾掉空記錄
+    const validMessages = data.LineList.filter(
+      (msg) =>
+        msg.CheckTime &&
+        msg.CheckTime.trim() !== "" &&
+        msg.Content &&
+        msg.Content.trim() !== ""
+    );
+
+    console.log(
+      `更舊記錄 - 原始: ${data.LineList.length}, 有效: ${validMessages.length}`
+    );
+
+    // 轉換 & 產生穩定鍵
+    const incoming = validMessages
+      .map((msg) => {
+        const checkTime = parseCorrectTime(msg.CheckTime);
+        const key = makeStableKey(msg);
+
+        // 根據 Mode 和 AHType 判斷是用戶還是 AI/客服
+        // Mode: "Input" = 用戶輸入, Mode: "Output" = AI/客服回應
+        // AHType: "Human" = 真人客服, AHType: "AI" = AI
+        const isUser = msg.Mode === "Input";
+        const isBot = msg.Mode === "Output";
+        const botFrom = isBot ? (msg.AHType === "Human" ? "Human" : "AI") : "";
+        const obj = {
+          stableKey: key,
+          id: key,
+          ts: checkTime.getTime(),
+          user: isUser ? msg.Content : "",
+          bot: isBot ? msg.Content : "",
+          timestamp: checkTime.toLocaleString("zh-TW"),
+          dateKey: toDateKey(checkTime),
+        };
+        if (isBot) obj.botFrom = botFrom;
+        return obj;
+      })
+      .sort((a, b) => a.ts - b.ts);
+
+    // 去重
+    const newOnes = [];
+    for (const m of incoming) {
+      if (!knownKeys.has(m.stableKey)) {
+        knownKeys.add(m.stableKey);
+        newOnes.push(m);
+      }
+    }
+
+    if (newOnes.length === 0) {
+      return 0;
+    }
+
+    // 合併回 conversations（保持時間序）
+    conversations.value = [...newOnes, ...conversations.value].sort(
+      (a, b) => a.ts - b.ts
+    );
+
+    // 日曆也跟著更新
+    loadCalendarDates();
+
+    console.log(`載入更舊訊息完成，新增 ${newOnes.length} 條訊息`);
+    return newOnes.length;
+  } catch (error) {
+    console.error("獲取更舊聊天記錄失敗:", error);
+    return 0;
+  }
 };
 
-// 載入對話記錄（從 localStorage 獲取）
+// 載入對話記錄（從 API 獲取）
 const loadConversations = async () => {
   if (process.client) {
-    // 從 localStorage 獲取聊天記錄
+    // 從 API 獲取聊天記錄
     await fetchChatHistory();
 
     // 初始化日曆顯示月份為最新有記錄的月份
@@ -2530,8 +3147,7 @@ onMounted(async () => {
   }*/
   initSpeechRecognition();
   loadConversations();
-  // 移除角色載入，固定使用院長角色
-  // await loadSavedCharacter();
+  await loadSavedCharacter();
 
   // 載入靜音狀態
   if (process.client) {
@@ -2546,8 +3162,8 @@ onMounted(async () => {
     showVoiceControls.value = true;
   }
 
-  // 移除首次登入解說狀態檢查
-  // checkTutorialStatus();
+  // 檢查首次登入解說狀態
+  checkTutorialStatus();
 
   // 啟動 API 輪詢
   startApiPolling();
@@ -2802,17 +3418,7 @@ const changeRoleDisplayName = async (displayName) => {
 // ChatGPT API 調用函數
 const callChatGPT = async (
   message,
-  systemMessage = `你是一個「專業健康顧問」，你的工作只有一項：1.陪伴式回應（簡短、溫柔、像真人）
-【輸出格式要求】
-只輸出以下一個區塊（不要加星號、不要加多餘符號、不要加說明文字）：
-（在這裡以溫柔、簡短的語氣回應使用者的情緒或敘述，像真人陪伴）
-【限制規則】
-1. 不可推理或猜測病因。
-2. 不可加入任何建議、分析、評論或衛教。
-3. 不可使用 *、#、-、>、Markdown 格式符號。
-4. 不可使用條列符號，全部以自然語句呈現。
-請嚴格遵守以上格式與規則，開始後不需要再次重述任務或格式。
-`
+  systemMessage = "你是一個聰明的智慧醫療助手，這是一段病患的症狀敘述內容，請幫我做摘要重點"
 ) => {
   try {
     const response = await fetch(CHATGPT_API_URL, {
@@ -3623,9 +4229,8 @@ const vClickOutside = {
   width: 100%;
   height: 120px;
   @include neumorphismOuter();
-  overflow-y: auto;
-  word-wrap: break-word;
-  word-break: break-word;
+  overflow: hidden;
+  overflow-y: scroll;
   @include scrollbarStyle();
 }
 
@@ -4241,7 +4846,10 @@ const vClickOutside = {
   @extend .robotCommonModel;
 }
 
-/* 移除客服詢問樣式 */
+/* 客服詢問樣式 - 使用共用樣式 */
+.customer-service-modal {
+  @extend .robotCommonModel;
+}
 
 /* 動畫 */
 .fade-enter-active,
@@ -5417,5 +6025,37 @@ const vClickOutside = {
   z-index: 10000;
 }
 
-/* 移除首次登入解說覆蓋層樣式 */
+/* 首次登入解說覆蓋層樣式 */
+.tutorial-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(10px);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.tutorial-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.tutorial-text {
+  color: #fff;
+  text-align: center;
+  font-size: var(--Text-font-size-20, 20px);
+  font-style: normal;
+  font-weight: 700;
+  line-height: 120%; /* 24px */
+  pointer-events: none;
+}
 </style>
