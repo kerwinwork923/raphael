@@ -38,7 +38,7 @@
           </div>
           <img src="../assets/imgs/member/next_green.svg" alt="" />
         </div> -->
-        <div class="memberListItem" @click="goToAccountManage">
+        <div class="memberListItem margin-12" @click="goToAccountManage">
           <div class="memberListLeft">
             <img src="../assets/imgs/member/user.svg" alt="" />
             <h3>帳號管理</h3>
@@ -64,7 +64,7 @@
 
     
 
-        <div class="memberListItem" @click="goToShipmentInquiry">
+        <div class="memberListItem margin-12" @click="goToShipmentInquiry">
           <div class="memberListLeft">
             <img src="../assets/imgs/member/packageSearch.svg" alt="" />
             <h3>寄貨查詢</h3>
@@ -294,7 +294,7 @@ const getMemberData = async () => {
   .memberListGroup {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 0.75rem;
     margin-top: 1.5rem;
 
     .memberListItem {
@@ -331,6 +331,9 @@ const getMemberData = async () => {
           height: 24px;
         }
       }
+    }
+    .margin-12{
+      margin-bottom: 0.75rem;
     }
   }
   .logoutBtn {
