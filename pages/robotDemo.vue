@@ -1,28 +1,21 @@
 <template>
   <div class="chat-wrapper">
-
     <!-- 聊天頭部 -->
     <div class="chat-header">
-      <div
-        class="avatar-container"
-      >
+      <div class="avatar-container">
         <img
           class="avatar"
           src="/assets/imgs/robotDemo/doctor.png"
           alt="院長"
         />
       </div>
-      <div
-        class="character-name-btn"
-      >
+      <div class="character-name-btn">
         <span>院長</span>
       </div>
     </div>
 
     <!-- 初始對話氣泡 -->
-    <div
-      class="greeting-bubble"
-    >
+    <div class="greeting-bubble">
       <div v-if="isLoading" class="loading-indicator">
         <div class="spinner"></div>
         <span>思考中...</span>
@@ -50,10 +43,7 @@
 
     <!-- 語音控制區域 - 從下方彈出 -->
     <transition name="slide-up">
-      <div
-        v-if="showVoiceControls"
-        class="voice-control-bar"
-      >
+      <div v-if="showVoiceControls" class="voice-control-bar">
         <button class="control-btn history-btn" @click="showHistory">
           <img :src="messagesSquare" alt="聊天紀錄" />
         </button>
@@ -112,47 +102,39 @@
       </div>
     </transition>
 
-  
+    <!-- 錄音提示彈窗 -->
+    <transition name="fade">
+      <div v-if="voiceModalOpen" class="voice-modal">
+        <div class="voice-content" @click.stop>
+          <img
+            :src="voiceModalImageSrc"
+            alt="音波圖"
+            class="voice-wave"
+            @click="handleVoiceModalClick"
+          />
 
+          <!-- 錯誤文字 -->
+          <p v-if="showVoiceError" class="voice-error-text">
+            聽不太清楚，請點擊再試一次
+          </p>
 
- <!-- 錄音提示彈窗 -->
-<transition name="fade">
-  <div v-if="voiceModalOpen" class="voice-modal">
-    <div class="voice-content" @click.stop>
-      <img
-        :src="voiceModalImageSrc"
-        alt="音波圖"
-        class="voice-wave"
-        @click="handleVoiceModalClick"
-      />
+          <!-- 錄音中文字（固定一個節點，不用 key，不會一直被 destroy） -->
+          <p v-else class="transcript-text" ref="voiceModalTranscriptRef">
+            {{ currentTranscript || "" }}
+          </p>
 
-      <!-- 錯誤文字 -->
-      <p v-if="showVoiceError" class="voice-error-text">
-        聽不太清楚，請點擊再試一次
-      </p>
-
-      <!-- 錄音中文字（固定一個節點，不用 key，不會一直被 destroy） -->
-      <p
-        v-else
-        class="transcript-text"
-        ref="voiceModalTranscriptRef"
-      >
-        {{ currentTranscript || '' }}
-      </p>
-
-      <div
-        class="voiceModelClose"
-        v-if="!isListening"
-        @click="closeVoiceModal"
-      >
-        <div class="voiceModelImg">
-          <img src="/assets/imgs/robot/close_red.svg" alt="關閉" />
+          <div
+            class="voiceModelClose"
+            v-if="!isListening"
+            @click="closeVoiceModal"
+          >
+            <div class="voiceModelImg">
+              <img src="/assets/imgs/robot/close_red.svg" alt="關閉" />
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-</transition>
-
+    </transition>
 
     <!-- 語音播放錯誤提示 -->
     <transition name="fade">
@@ -198,8 +180,6 @@
         </div>
       </div>
     </transition>
-
-
 
     <!-- 歷史紀錄頁面 -->
     <transition name="slide-left">
@@ -306,10 +286,7 @@
                     class="message bot"
                   >
                     <div class="avatar">
-                      <img
-                        src="/assets/imgs/robotDemo/doctor.png"
-                        alt="院長"
-                      />
+                      <img src="/assets/imgs/robotDemo/doctor.png" alt="院長" />
                     </div>
 
                     <div class="bubble">
@@ -327,11 +304,7 @@
                       </div>
                       <div class="time">{{ formatTime(item.timestamp) }}</div>
                       <div class="sender-label">
-                        {{
-                          item.botFrom === "Human"
-                            ? "健康顧問"
-                            : "院長"
-                        }}
+                        {{ item.botFrom === "Human" ? "健康顧問" : "院長" }}
                       </div>
                     </div>
                   </div>
@@ -429,7 +402,6 @@
       </div>
     </transition>
 
-
     <!-- 日曆選擇彈窗 -->
     <transition name="calendar-expand">
       <div v-if="showCalendar" class="calendar-overlay" @click="toggleCalendar">
@@ -469,7 +441,6 @@
         </div>
       </div>
     </transition>
-
   </div>
 </template>
 
@@ -502,8 +473,8 @@ import searchSvg from "~/assets/imgs/robot/search.svg";
 import calendarSvg from "~/assets/imgs/robot/calendar.svg";
 import sendSvg from "~/assets/imgs/robot/send.svg";
 
-
-const TEXT_WEBHOOK_URL = "https://23700999.com:8081/push_notification/api/chatgpt/ask";
+const TEXT_WEBHOOK_URL =
+  "https://23700999.com:8081/push_notification/api/chatgpt/ask";
 // 移除 API URL，改用 localStorage
 // const TEXT_MESSAGE_URL = "https://23700999.com:8081/HMA/TTEsaveChatMessageHistory.jsp"; // ← 儲存聊天記錄
 // const GET_CHAT_HISTORY_URL = "https://23700999.com:8081/HMA/api/fr/frGetLineAIHuman"; // ← 獲取聊天記錄
@@ -698,7 +669,7 @@ const getLocalTimeString = (date = new Date()) => {
   const hour = String(date.getHours()).padStart(2, "0");
   const minute = String(date.getMinutes()).padStart(2, "0");
   const second = String(date.getSeconds()).padStart(2, "0");
-  
+
   return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
 };
 
@@ -1326,21 +1297,20 @@ const handleVoiceModalClick = () => {
   }
 };
 
-
 // 開始語音識別超時計時器
 // 當有文字時，延長超時時間；無文字時，較短超時
 const startVoiceTimeout = (hasText = false) => {
   if (voiceTimeout) {
     clearTimeout(voiceTimeout);
   }
-  
+
   // 如果有文字，給更長的靜音時間（3秒）；如果沒有文字，給較短時間（8秒）
   const timeoutDuration = hasText ? 5000 : 10000;
-  
+
   voiceTimeout = setTimeout(() => {
     if (isListening.value) {
       const transcript = currentTranscript.value.trim();
-      
+
       if (!transcript) {
         // 沒有文字，顯示錯誤提示
         showVoiceError.value = true;
@@ -1366,7 +1336,6 @@ const startVoiceTimeout = (hasText = false) => {
   }, timeoutDuration);
 };
 
-
 // 初始化語音識別
 const initSpeechRecognition = () => {
   if (process.client && typeof window !== "undefined") {
@@ -1385,7 +1354,7 @@ const initSpeechRecognition = () => {
         let finalText = "";
         let interimText = "";
         let hasFinal = false;
-        
+
         // 直接掃描所有 results，提取 final 和 interim
         // Android 上每個 final result 已經包含前面所有內容，所以只取最後一個 final
         for (let i = 0; i < event.results.length; i++) {
@@ -1399,10 +1368,10 @@ const initSpeechRecognition = () => {
             interimText = result[0].transcript;
           }
         }
-        
+
         // 組合最終的 transcript：final 結果 + 最後一個 interim（如果存在）
         const transcript = finalText + (interimText || "");
-        
+
         // 調試日誌：檢查結果
         if (process.client && transcript) {
           console.log("語音識別結果處理:", {
@@ -1414,64 +1383,65 @@ const initSpeechRecognition = () => {
             results: Array.from(event.results).map((r, i) => ({
               index: i,
               text: r[0].transcript,
-              isFinal: r.isFinal
-            }))
+              isFinal: r.isFinal,
+            })),
           });
         }
 
         if (process.client) {
           // Android 兼容性：立即同步更新 DOM，不等待 Vue 響應式系統
-          const transcriptEl = voiceModalTranscriptRef.value || 
-                              document.querySelector('.voice-modal .transcript-text');
-          
+          const transcriptEl =
+            voiceModalTranscriptRef.value ||
+            document.querySelector(".voice-modal .transcript-text");
+
           const textToShow = transcript || "";
-          
+
           // 優先直接操作 DOM，確保 Android 上立即顯示
           if (transcriptEl) {
             // 立即同步更新 DOM（不等待任何異步操作）
             transcriptEl.textContent = textToShow;
-            
+
             // 強制同步樣式更新
             if (textToShow) {
-              transcriptEl.style.display = 'block';
-              transcriptEl.style.opacity = '1';
-              transcriptEl.style.visibility = 'visible';
-              
+              transcriptEl.style.display = "block";
+              transcriptEl.style.opacity = "1";
+              transcriptEl.style.visibility = "visible";
+
               // 強制同步重繪（Android 需要）- 立即執行，不等待
               // 使用多種方式觸發重排
               void transcriptEl.offsetHeight; // 觸發重排
               void transcriptEl.offsetWidth; // 觸發重排
               void transcriptEl.scrollTop; // 觸發重排
             } else {
-              transcriptEl.style.display = 'none';
+              transcriptEl.style.display = "none";
             }
-            
+
             // 使用 requestAnimationFrame 作為額外保障（異步，不阻塞）
             requestAnimationFrame(() => {
               if (transcriptEl && textToShow) {
                 transcriptEl.textContent = textToShow;
-                transcriptEl.style.display = 'block';
+                transcriptEl.style.display = "block";
               }
             });
           }
-          
+
           // 同時更新響應式值（用於 Vue 綁定）
           currentTranscript.value = textToShow;
-          
+
           // 如果有文字，重置超時計時器（延長收音時間）
           if (transcript.trim()) {
             clearVoiceTimeout();
             // 設置更短的靜音超時（3秒無新文字才結束）
             startVoiceTimeout(true); // 傳入 true 表示有文字
           }
-          
+
           // 使用 nextTick 作為備用更新機制
           nextTick(() => {
             if (transcriptEl && textToShow) {
               transcriptEl.textContent = textToShow;
-              transcriptEl.style.display = 'block';
+              transcriptEl.style.display = "block";
             }
-            
+
             if (transcript) {
               console.log("語音識別結果:", transcript, "isFinal:", hasFinal);
             }
@@ -1534,11 +1504,11 @@ const initSpeechRecognition = () => {
           hasFinalResult = false;
           return;
         }
-        
+
         // 如果語音識別自然結束（不是我們主動停止的）
         if (!hasFinalResult && isListening.value) {
           const transcript = currentTranscript.value.trim();
-          
+
           if (transcript) {
             // 有文字，自動處理
             hasFinalResult = true;
@@ -1554,7 +1524,7 @@ const initSpeechRecognition = () => {
             voiceModalOpen.value = true; // 保持彈窗開著讓使用者點關閉
           }
         }
-        
+
         hasFinalResult = false;
       };
     }
@@ -1691,7 +1661,40 @@ async function sendViaUnifiedAPI(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        systemMessage: "你是專業健康顧問，【限制規則】 不可使用 *、#、-、>、Markdown 格式符號。7. 不可使用條列符號，全部以自然語句呈現。",
+        systemMessage: `你是健康管理陪伴機器人，服務於健康管理／療程 app。
+你的任務是：協助患者清楚表達自身症狀，將患者描述潤色為專業但不冰冷的醫療紀錄語句，整理成可供醫師與團隊參考的結構化紀錄，全程保持同理、支持、不製造焦慮。
+核心溝通原則（對患者可見）
+語氣：醫療專業、溫和、中性、不質疑患者感受
+態度：先理解、再整理，不急於補問
+表達：不提任何內部流程、系統、步驟或「接下來我會怎麼做」
+界線：不做診斷、不推論原因、不提供治療、用藥、檢查或回診建議、不評論療效好壞，目的只限於紀錄：讓患者「被聽懂、被記錄」
+
+症狀資訊收集範圍（內部遵循，勿明說）
+每一個症狀，需逐步確認以下 5 項（可分次完成）：症狀內容、嚴重程度、發生頻率、發生時間。若未改善，已持續幾天，追問原則：一次盡量涵蓋多項
+若患者不清楚 → 接受「不確定／不清楚」
+對患者的追問話術原則（示例風格）:「為了幫您更完整地記錄目前的狀況，想請您再協助補充幾個部分，若有不確定的地方直接說不清楚即可。」
+
+追問時 只問描述，不做解釋、不延伸建議。
+結構化紀錄輸出格式（可對患者顯示）
+每個症狀一組
+彈性:5 個欄位，未提供者則不要顯示那欄位
+格式如下（範例）：
+症狀內容: 胃食道逆流
+嚴重程度: 中度
+發生頻率: 幾乎每天
+發生時間: 兩個月前開始
+持續天數: 約 60 天
+狀態描述: 沒有明顯變化
+
+狀態描述標準化規則
+使用者說「沒有改善／未改善」→ 沒有明顯變化
+其他狀態僅能為：有改善、沒有明顯變化、變差
+關懷訊息模組（可主動使用），1～2 句即可
+重點是陪伴與肯定表達、不誇大、不情緒化
+【限制規則】 不可使用 *、#、-、>、Markdown 格式符號。不可使用條列符號，全部以自然語句呈現。
+
+範例語氣：
+「這段時間持續不舒服一定很辛苦，謝謝您願意詳細說明，讓我們能更貼近您的實際狀況。`,
         message: userText,
         model: "gpt-5-mini",
         ...extra,
@@ -1777,7 +1780,15 @@ async function sendViaUnifiedAPI(
       const pick = (obj) => {
         if (!obj) return "";
         if (typeof obj === "string") return obj;
-        const keys = ["response", "bot", "answer", "text", "message", "content", "output"];
+        const keys = [
+          "response",
+          "bot",
+          "answer",
+          "text",
+          "message",
+          "content",
+          "output",
+        ];
         for (const k of keys) {
           const v = obj[k];
           if (typeof v === "string" && v.trim()) return v;
@@ -1809,7 +1820,11 @@ async function sendViaUnifiedAPI(
       inputAt: localTime,
       outputAt: getLocalTimeString(new Date()),
     });
-    console.log("對話已保存到 localStorage:", { userText, finalAnswer, saveResult });
+    console.log("對話已保存到 localStorage:", {
+      userText,
+      finalAnswer,
+      saveResult,
+    });
   } catch (e) {
     console.error("寫入聊天紀錄失敗:", e);
     // 即使保存失敗，也繼續返回結果，不影響用戶體驗
@@ -1850,30 +1865,31 @@ const toggleListening = () => {
       finalizedByUs = false;
       voiceModalOpen.value = true; // ← 開窗
       isListening.value = true;
-      
+
       // Android 兼容性：立即準備文字元素，不等待 nextTick
       // 使用雙重機制：立即操作 + nextTick 備用
       const prepareTranscriptEl = () => {
-        const transcriptEl = voiceModalTranscriptRef.value || 
-                            document.querySelector('.voice-modal .transcript-text');
+        const transcriptEl =
+          voiceModalTranscriptRef.value ||
+          document.querySelector(".voice-modal .transcript-text");
         if (transcriptEl) {
-          transcriptEl.style.display = 'block';
-          transcriptEl.style.opacity = '1';
-          transcriptEl.style.visibility = 'visible';
-          transcriptEl.textContent = ''; // 清空之前的內容
+          transcriptEl.style.display = "block";
+          transcriptEl.style.opacity = "1";
+          transcriptEl.style.visibility = "visible";
+          transcriptEl.textContent = ""; // 清空之前的內容
           // 強制重繪
           transcriptEl.offsetHeight;
         }
       };
-      
+
       // 立即執行
       prepareTranscriptEl();
-      
+
       // nextTick 作為備用
       nextTick(() => {
         prepareTranscriptEl();
       });
-      
+
       recognitionRef.start();
       startVoiceTimeout(false); // 初始時沒有文字
     }
@@ -1943,7 +1959,7 @@ const handleSpeechEnd = async (transcript) => {
     const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
     const nowTs = Date.now();
     const localTime = getLocalTimeString(new Date(nowTs));
-    
+
     // 保存錯誤對話到 localStorage
     try {
       await saveChatRecord({
@@ -1956,7 +1972,7 @@ const handleSpeechEnd = async (transcript) => {
     } catch (saveError) {
       console.error("保存錯誤對話失敗:", saveError);
     }
-    
+
     const errorConversation = {
       id: nowTs,
       ts: nowTs,
@@ -3245,7 +3261,6 @@ const monthDateKeySet = computed(() => {
     Array.from(calendarDateKeySet.value).filter((key) => key.startsWith(prefix))
   );
 });
-
 
 // 角色名稱編輯相關函數
 const showNameInputModal = () => {
