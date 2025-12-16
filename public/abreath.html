@@ -264,36 +264,73 @@
       font-size:13px;
       background:linear-gradient(135deg,rgba(201,161,74,.05),rgba(255,255,255,0));
     }
+
+     /* ====== 強化：① 每日練習按鈕更顯眼 ====== */
+.mode-btn-practice{
+  border-width:2px;
+  padding:12px 26px;
+  font-size:15px;
+  position:relative;
+  box-shadow:0 10px 26px rgba(15,59,59,0.12);
+}
+.mode-btn-practice.active{
+  box-shadow:0 14px 34px rgba(201,161,74,.55);
+  transform:translateY(-1px);
+}
+
+/* 小標籤 */
+.pill{
+  display:inline-block;
+  margin-left:8px;
+  padding:3px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  background:rgba(15,59,59,0.08);
+  color:var(--deep);
+}
+.mode-btn-practice.active .pill{
+  background:rgba(255,255,255,0.22);
+  color:#fff;
+}
+
+/* 輕微呼吸動畫（只在 active 時） */
+@keyframes breathe {
+  0%, 100% { transform:translateY(-1px) scale(1); }
+  50%      { transform:translateY(-2px) scale(1.02); }
+}
+.mode-btn-practice.active{
+  animation:breathe 1.8s ease-in-out infinite;
+}
+
+
+
   </style>
 </head>
 <body>
 
 <header>
-  <h1>嗅覺 × 正念呼吸 × 神經修復｜每日30分鐘完整練習</h1>
+  <h1>每日30分鐘嘆息呼吸練習</h1>
   <div class="accent"></div>
-  <p>透過「擴香 × 單鼻呼吸 × 嗅覺正念」，讓自律神經從緊繃模式，回到修復與穩定。<br>
-  建議每天固定一個時間，給自己 30 分鐘，只專心照顧自己。</p>
+  <p>透過「嗅覺 × 嘆息呼吸 × 神經修復」，讓自律神經從緊繃模式，回到修復與穩定。建議每天固定一個時間，給自己 30 分鐘，只專心照顧自己。</p>
 </header>
 
 <main class="page-wrap">
   <section class="intro-card">
-    <h2>這個頁面，分成兩個步驟：</h2>
-    <p>① 先看教學影片，了解擴香儀操作與整體流程：何時換邊、何時塞導息器、何時做循環嘆息。</p>
-    <p>② 熟悉之後，每天跟著實作影片做 30 分鐘練習，系統會幫您紀錄每一次練習足跡。</p>
     <ul>
-      <li>0-5 分鐘：雙鼻嘆息呼吸法 - 緩慢吸氣緩慢吐氣</li>
+      <li>0-5 分鐘：雙鼻循環嘆息呼吸法 - 緩慢吸氣緩慢吐氣</li>
       <li>5-15 分鐘：右側單鼻正念呼吸(塞住左鼻)- 提高交感神經活性</li>
-      <li>15-20 分鐘: 雙鼻嘆息呼吸法 - 緩慢吸氣緩慢吐氣 </li>
+      <li>15-20 分鐘: 雙鼻循環嘆息呼吸法 - 緩慢吸氣緩慢吐氣 </li>
       <li>20-30 分鐘: 左側單鼻正念呼吸(塞住右鼻)- 提高副交感神經活性</li>
     </ul>
   </section>
 
   <div class="mode-switch" aria-label="練習模式選擇">
-    <button class="mode-btn active" data-target="panel-learn">① 先了解：教學影片</button>
-    <button class="mode-btn" data-target="panel-practice">② 開始實作：每日練習紀錄</button>
+    <button class="mode-btn active" data-target="panel-practice">① 每日練習紀錄</button>
+    <button class="mode-btn" data-target="panel-learn">② 教學影片複習</button>
   </div>
 
-  <section id="panel-learn" class="panel active" aria-labelledby="learn-title">
+  <section id="panel-learn" class="panel" aria-labelledby="learn-title">
     <div class="panel-header">
       <h3 id="learn-title">了解原理與操作｜教學影片</h3>
       <p>建議先完整看完一次教學影片，確認你清楚以下幾件事：擴香儀怎麼切換左右、導息器怎麼使用、四個段落各在做什麼。</p>
@@ -324,9 +361,9 @@
     </div>
   </section>
 
-  <section id="panel-practice" class="panel" aria-labelledby="practice-title">
+  <section id="panel-practice" class="panel active" aria-labelledby="practice-title">
     <div class="panel-header">
-      <h3 id="practice-title">每日實作｜30 分鐘單側芳香 × 正念呼吸</h3>
+      <h3 id="practice-title">每日實作｜30 分鐘芳香 × 循環嘆息呼吸</h3>
       <p>請先準備好：擴香儀、左右兩瓶精油、導息器與一個不被打擾的角落。<br>
       每次都從這裡開始，按下「開始本次練習」，影片會啟動，同時幫您留下今天的一筆紀錄。</p>
     </div>
@@ -345,11 +382,11 @@
         </div>
         <div class="practice-controls" style="margin-top:14px;">
           <h4>實作前請先確認：</h4>
-          <p>擴香儀中左右精油分別放好；導息器在手邊。手機請調成靜音或飛航模式，讓這30 分鐘只屬於您。</p>
-          <button id="btnStart" class="btn-primary">開始本次 30 分鐘練習</button>
-          <button id="btnFinish" class="btn-ghost" disabled>我已完成這次練習</button>
+          <p>擴香儀中左右精油分別放好；導息器在手邊。找尋一個安靜的角落，讓這30 分鐘只屬於您。</p>
+          <button id="btnStart" class="btn-primary">開始本次練習</button>
+          <button id="btnFinish" class="btn-ghost" disabled>我已完成</button>
           <p style="font-size:12px;margin-top:6px;color:var(--muted);">
-            ✅ 按下「開始」後，系統會先記錄開始時間並呼叫 API。<br>
+            ✅ 按下「開始」後，系統會自動記錄開始時間。<br>
             ✅ 練習結束時，請記得按「我已完成」，或等影片播完自動紀錄完成。
           </p>
         </div>
@@ -551,7 +588,7 @@ async function getBreathRecord() {
     Key: "qrt897hpmd",
     VIP: vipId,
   };
-  //console.log("payloadg=" + JSON.stringify(payload, null, 1));
+  console.log("payloadg=" + JSON.stringify(payload, null, 1));
 
   try {
     const res = await fetch(Get_Breath_Record_URL, {

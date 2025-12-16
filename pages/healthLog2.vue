@@ -2,41 +2,47 @@
   <div class="healthLogWrap">
     <div class="healthLogContent">
       <TitleMenu Text="健康日誌" positionType="sticky" link="/robotdemo" />
-      <!-- 篩選器區域 -->
-      <div class="filter-section">
-        <div class="filter-buttons">
-          <button class="filter-btn" @click="showYearPicker = !showYearPicker">
-            <img
-              src="/assets/imgs/filter_green.svg"
-              alt="篩選"
-              class="filter-icon"
-            />
-            {{ selectedYear }}
-            <img
-              src="/assets/imgs/arrowDown2.svg"
-              alt="下拉"
-              class="chevron-icon"
-            />
-          </button>
-          <button
-            class="filter-btn"
-            @click="showMonthPicker = !showMonthPicker"
-          >
-            <img
-              src="/assets/imgs/filter_green.svg"
-              alt="篩選"
-              class="filter-icon"
-            />
-            {{ selectedMonth }}
-            <img
-              src="/assets/imgs/arrowDown2.svg"
-              alt="下拉"
-              class="chevron-icon"
-            />
-          </button>
-        </div>
+
+      <!-- 切換標籤 -->
+      <div class="tab-section">
+        <button
+          class="tab-btn"
+          :class="{ active: activeTab === 'log' }"
+          @click="activeTab = 'log'"
+        >
+          日誌
+        </button>
+        <button
+          class="tab-btn"
+          :class="{ active: activeTab === 'summary' }"
+          @click="activeTab = 'summary'"
+        >
+          本週摘要
+        </button>
       </div>
-      <div class="total-count" v-if="isDataReady">
+
+      <!-- 週別選擇器 -->
+      <div class="week-selector">
+        <button class="week-nav-btn" @click="goToPreviousWeek" disabled>
+          <img
+            src="/assets/imgs/arrowDown2.svg"
+            alt="上一週"
+            class="week-arrow left disabled"
+          />
+        </button>
+        <div class="week-range">
+          {{ weekRangeText }}
+        </div>
+        <button class="week-nav-btn" @click="goToNextWeek" disabled>
+          <img
+            src="/assets/imgs/arrowDown2.svg"
+            alt="下一週"
+            class="week-arrow right disabled"
+          />
+        </button>
+      </div>
+
+      <div class="total-count" v-if="isDataReady && activeTab === 'log'">
         總共 {{ filteredLogs.length }} 筆
       </div>
 
@@ -49,7 +55,12 @@
       </div>
 
       <!-- 日誌列表 -->
-      <div class="log-list" v-else-if="isDataReady && filteredLogs.length > 0">
+      <div
+        v-else-if="
+          isDataReady && activeTab === 'log' && filteredLogs.length > 0
+        "
+        class="log-list"
+      >
         <div class="timeline-container">
           <div class="log-item" v-for="log in filteredLogs" :key="log.id">
             <div class="log-content-wrapper">
@@ -131,10 +142,45 @@
         </div>
       </div>
 
+      <!-- 本週摘要 -->
+      <div
+        v-else-if="isDataReady && activeTab === 'summary'"
+        class="summary-container"
+      >
+        <!-- 載入狀態 -->
+        <div v-if="isSummaryLoading" class="loading-container">
+          <div class="loading-card">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">正在彙整本週摘要...</div>
+          </div>
+        </div>
+        <!-- 摘要內容 -->
+        <div v-else-if="weeklySummary" class="summary-card">
+          <div class="summary-content">
+            {{ weeklySummary }}
+          </div>
+        </div>
+        <!-- 空狀態 -->
+        <div v-else class="empty-state">
+          <div class="empty-card">
+            <div class="empty-character">
+              <img
+                src="/assets/imgs/robotSad.png"
+                alt="空狀態角色"
+                class="character-img"
+              />
+            </div>
+            <div class="empty-message">目前沒有資料</div>
+          </div>
+        </div>
+      </div>
+
       <!-- 空狀態 -->
       <div
+        v-else-if="
+          isDataReady && activeTab === 'log' && filteredLogs.length === 0
+        "
         class="empty-state"
-        v-else-if="isDataReady && filteredLogs.length === 0"
       >
         <div class="empty-card">
           <div class="empty-character">
@@ -147,65 +193,12 @@
           <div class="empty-message">目前沒有資料</div>
         </div>
       </div>
-
-      <!-- 年份選擇器 -->
-      <div
-        class="picker-overlay"
-        v-if="showYearPicker"
-        @click="showYearPicker = false"
-      >
-        <div class="picker-modal" @click.stop>
-          <div class="picker-header">
-            <h3>選擇年份</h3>
-            <button @click="showYearPicker = false" class="close-btn">×</button>
-          </div>
-          <div class="picker-content">
-            <button
-              v-for="year in availableYears"
-              :key="year"
-              class="picker-item"
-              :class="{ active: selectedYear === year }"
-              @click="selectYear(year)"
-            >
-              {{ year }}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- 月份選擇器 -->
-      <div
-        class="picker-overlay"
-        v-if="showMonthPicker"
-        @click="showMonthPicker = false"
-      >
-        <div class="picker-modal" @click.stop>
-          <div class="picker-header">
-            <h3>選擇月份</h3>
-            <button @click="showMonthPicker = false" class="close-btn">
-              ×
-            </button>
-          </div>
-          <div class="picker-content">
-            <button
-              v-for="month in availableMonths"
-              :key="month.value"
-              class="picker-item"
-              :class="{ active: selectedMonth === month.label }"
-              @click="selectMonth(month.value)"
-            >
-              {{ month.label }}
-            </button>
-          </div>
-        </div>
-      </div>
-
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import TitleMenu from "~/components/TitleMenu.vue";
 import BottomNav from "~/components/BottomNav.vue";
 
@@ -213,76 +206,229 @@ import BottomNav from "~/components/BottomNav.vue";
 const localData = localStorage.getItem("userData");
 const localobj = localData ? JSON.parse(localData) : null;
 
-const selectedYear = ref(new Date().getFullYear());
-const selectedMonth = ref(`${new Date().getMonth() + 1}月`);
-const showYearPicker = ref(false);
-const showMonthPicker = ref(false);
-const expandedSections = ref({}); // 已有
-const expandableSections = ref({}); // ✅ 新增：是否需要展開（要不要顯示箭頭）
+const activeTab = ref("log"); // 'log' 或 'summary'
+const expandedSections = ref({});
+const expandableSections = ref({});
 const healthLogs = ref([]);
+const currentWeekStart = ref(null); // 當前選中的週開始日期
 
 // 載入狀態管理
 const isLoading = ref(true);
 const isDataReady = ref(false);
+const isSummaryLoading = ref(false); // 本週摘要載入狀態
 
-// 可用年份和月份
-const availableYears = computed(() => {
-  const startYear = 2025;
-  const currentYear = new Date().getFullYear();
-  return Array.from(
-    { length: currentYear - startYear + 1 },
-    (_, i) => startYear + i
-  ).reverse(); // 若要最新年份排最上面
+// API URL（參考 robotDemo.vue）
+const TEXT_WEBHOOK_URL =
+  "https://23700999.com:8081/push_notification/api/chatgpt/ask";
+
+// 獲取本週的開始日期（週一）
+const getWeekStart = (date = new Date()) => {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // 調整到週一
+  return new Date(d.setDate(diff));
+};
+
+// 獲取本週的結束日期（今天，不是週日）
+const getWeekEnd = (weekStart) => {
+  const today = new Date();
+  today.setHours(23, 59, 59, 999); // 設定為今天的最後一刻
+  return today;
+};
+
+// 初始化當前週
+const initCurrentWeek = () => {
+  currentWeekStart.value = getWeekStart();
+};
+
+// 週範圍文字（從週一到今天）
+const weekRangeText = computed(() => {
+  if (!currentWeekStart.value) return "";
+  const today = new Date();
+  const startStr = formatDateRange(currentWeekStart.value);
+  const endStr = formatDateRange(today);
+  return `${startStr} - ${endStr}`;
 });
 
-const availableMonths = computed(() => {
-  const currentYear = new Date().getFullYear();
-  const currentMonth = new Date().getMonth() + 1;
-  const isCurrentYear = selectedYear.value === currentYear;
-
-  const maxMonth = isCurrentYear ? currentMonth : 12;
-
-  return Array.from({ length: maxMonth }, (_, i) => ({
-    value: i + 1,
-    label: `${i + 1}月`,
-  }));
+// 是否為當前週
+const isCurrentWeek = computed(() => {
+  if (!currentWeekStart.value) return true;
+  const today = new Date();
+  const currentWeekStartDate = getWeekStart(today);
+  return currentWeekStart.value.getTime() === currentWeekStartDate.getTime();
 });
 
-// 篩選後的日誌
+// 格式化日期範圍（YYYY/MM/DD）
+const formatDateRange = (date) => {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const day = date.getDate().toString().padStart(2, "0");
+  return `${year}/${month}/${day}`;
+};
+
+// 篩選該週的日誌（從週一到今天）
 const filteredLogs = computed(() => {
-  if (!healthLogs.value.length) {
-    console.log("沒有健康日誌資料");
+  if (!healthLogs.value.length || !currentWeekStart.value) {
     return [];
   }
 
-  const year = selectedYear.value;
-  const month =
-    availableMonths.value.find((m) => m.label === selectedMonth.value)?.value ||
-    1;
-
-  console.log(`篩選條件: ${year}年${month}月`);
+  const today = new Date();
+  today.setHours(23, 59, 59, 999); // 設定為今天的最後一刻
 
   const filtered = healthLogs.value
     .filter((log) => {
-      // 使用 log.date 或 log.timestamp 作為日期來源
       const logDate = new Date(log.date || log.timestamp);
-      const logYear = logDate.getFullYear();
-      const logMonth = logDate.getMonth() + 1;
-
-      console.log(
-        `檢查日誌: ${logDate.toISOString()}, 年份: ${logYear}, 月份: ${logMonth}`
-      );
-
-      return logYear === year && logMonth === month;
+      return logDate >= currentWeekStart.value && logDate <= today;
     })
     .sort(
       (a, b) =>
         new Date(b.date || b.timestamp) - new Date(a.date || a.timestamp)
     );
 
-  console.log(`篩選結果: ${filtered.length} 筆`);
   return filtered;
 });
+
+// 本週摘要（使用 ref 而不是 computed，因為需要異步載入）
+const weeklySummary = ref("");
+
+// 調用 API 彙整本週摘要
+const generateWeeklySummary = async () => {
+  if (activeTab.value !== "summary" || !filteredLogs.value.length) {
+    weeklySummary.value = "";
+    return;
+  }
+
+  // 收集該週所有有 AI 摘要的內容
+  const aiSummaries = filteredLogs.value
+    .filter((log) => log.content && log.content.trim())
+    .map((log) => {
+      const date = new Date(log.date || log.timestamp);
+      const dateStr = formatDate(log.date || log.timestamp);
+      return {
+        date: dateStr,
+        content: log.content.trim(),
+      };
+    });
+
+  if (aiSummaries.length === 0) {
+    weeklySummary.value = "";
+    return;
+  }
+
+  // 準備要送給 AI 的內容
+  const summaryParts = aiSummaries.map(
+    (item, index) => `${index + 1}. ${item.date}\n${item.content}`
+  );
+  const combinedSummary = summaryParts.join("\n\n");
+
+  // 調用 API 彙整摘要
+  isSummaryLoading.value = true;
+  try {
+    const response = await fetch(TEXT_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        systemMessage: `你是一個「健康管理陪伴機器人」，你的工作是彙整本週的健康日誌摘要。
+
+【任務】
+請將以下本週（${weekRangeText.value}）的健康日誌內容，彙整成一份簡潔、有條理的週摘要。
+
+【輸出格式要求】
+1. 以自然、流暢的語句呈現，不要使用條列式或編號
+2. 重點整理本週的健康狀況變化、症狀發展、改善或惡化情況
+3. 保持客觀記錄，不提供醫療建議或診斷
+4. 不要使用 *、#、-、>、Markdown 格式符號
+5. 輸出內容應該是一段完整的文字，讓使用者能快速了解本週整體健康狀況
+
+【限制規則】
+1. 不可推理或猜測病因
+2. 不可加入任何建議、分析、評論或衛教
+3. 不可使用條列符號，全部以自然語句呈現
+4. 忠實反映日誌內容，不添加未提及的資訊
+
+請嚴格遵守以上格式與規則，開始後不需要再次重述任務或格式。`,
+        message: `以下是本週（${weekRangeText.value}）的健康日誌內容，共 ${aiSummaries.length} 筆記錄：\n\n${combinedSummary}\n\n請幫我彙整成本週的健康狀況摘要。`,
+        model: "gpt-5-mini",
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API 調用失敗: ${response.status}`);
+    }
+
+    let answerText = "";
+
+    // 嘗試從 Header 取回文字（X-Answer）
+    const rawHeader = response.headers.get("x-answer");
+    if (rawHeader) {
+      try {
+        answerText = decodeURIComponent(rawHeader);
+      } catch {
+        answerText = rawHeader;
+      }
+    }
+
+    // 如果 Header 沒有，嘗試從 JSON 回應中取得
+    if (!answerText) {
+      let data = null;
+      try {
+        data = await response.clone().json();
+      } catch {
+        try {
+          const txt = await response.text();
+          if (txt) answerText = txt;
+        } catch {}
+      }
+
+      if (data) {
+        const pick = (obj) => {
+          if (!obj) return "";
+          if (typeof obj === "string") return obj;
+          const keys = [
+            "response",
+            "bot",
+            "answer",
+            "text",
+            "message",
+            "content",
+            "output",
+          ];
+          for (const k of keys) {
+            const v = obj[k];
+            if (typeof v === "string" && v.trim()) return v;
+            if (v && typeof v === "object") {
+              const inner = pick(v);
+              if (inner) return inner;
+            }
+          }
+          return "";
+        };
+        answerText = pick(data);
+      }
+    }
+
+    weeklySummary.value =
+      answerText.trim() ||
+      `本週健康狀況摘要\n\n${combinedSummary}\n\n---\n以上為本週（${weekRangeText.value}）的健康日誌彙整，共 ${aiSummaries.length} 筆記錄。`;
+  } catch (error) {
+    console.error("彙整本週摘要失敗:", error);
+    // 如果 API 失敗，使用簡單的彙整
+    weeklySummary.value = `本週健康狀況摘要\n\n${combinedSummary}\n\n---\n以上為本週（${weekRangeText.value}）的健康日誌彙整，共 ${aiSummaries.length} 筆記錄。`;
+  } finally {
+    isSummaryLoading.value = false;
+  }
+};
+
+// 監聽 activeTab 和 filteredLogs 變化，自動生成摘要
+watch(
+  [() => activeTab.value, () => filteredLogs.value.length],
+  () => {
+    if (activeTab.value === "summary") {
+      generateWeeklySummary();
+    }
+  },
+  { immediate: true }
+);
 
 // 方法
 const loadHealthLogs = async () => {
@@ -297,19 +443,8 @@ const loadHealthLogs = async () => {
 
     console.log("從 localStorage 讀取的資料:", allLogs);
 
-    // 篩選指定年份和月份的日誌
-    const year = selectedYear.value;
-    const month =
-      availableMonths.value.find((m) => m.label === selectedMonth.value)?.value ||
-      1;
-
-    const filteredLogs = allLogs
-      .filter((log) => {
-        const logDate = new Date(log.date || log.timestamp);
-        const logYear = logDate.getFullYear();
-        const logMonth = logDate.getMonth() + 1;
-        return logYear === year && logMonth === month;
-      })
+    // 轉換所有日誌資料
+    healthLogs.value = allLogs
       .map((item, index) => ({
         id: item.id || Date.now() + index,
         date: item.date || item.timestamp,
@@ -323,10 +458,8 @@ const loadHealthLogs = async () => {
           new Date(b.date || b.timestamp) - new Date(a.date || a.timestamp)
       );
 
-    healthLogs.value = filteredLogs;
-
     // ✅ 根據字數決定這一塊「需不需要展開箭頭」
-    const MAX_PREVIEW_CHARS = 50; // 你可以自己調整，代表大約兩行以內
+    const MAX_PREVIEW_CHARS = 50;
 
     healthLogs.value.forEach((log) => {
       if (log.preSoundNote && log.preSoundNote.trim()) {
@@ -363,21 +496,6 @@ const isExpandable = (logId, sectionType) => {
   return !!expandableSections.value[key];
 };
 
-const selectYear = async (year) => {
-  selectedYear.value = year;
-  showYearPicker.value = false;
-  // 重新載入資料
-  await loadHealthLogs();
-};
-
-const selectMonth = async (month) => {
-  selectedMonth.value =
-    availableMonths.value.find((m) => m.value === month)?.label || "1月";
-  showMonthPicker.value = false;
-  // 重新載入資料
-  await loadHealthLogs();
-};
-
 const formatDate = (timestamp) => {
   const date = new Date(timestamp);
   const month = date.getMonth() + 1;
@@ -387,8 +505,21 @@ const formatDate = (timestamp) => {
   return `${month}/${day} ${hours}:${minutes}`;
 };
 
+// 切換到上一週（Demo 版本：不允許切換到過去）
+const goToPreviousWeek = () => {
+  // Demo 版本不允許切換到過去的週
+  return;
+};
+
+// 切換到下一週（Demo 版本：不允許切換到未來）
+const goToNextWeek = () => {
+  // Demo 版本不允許切換到未來的週
+  return;
+};
+
 // 生命週期
 onMounted(async () => {
+  initCurrentWeek();
   await loadHealthLogs();
 });
 </script>
@@ -397,9 +528,14 @@ onMounted(async () => {
 .healthLogWrap {
   @include gradientBg();
   width: 100%;
-  min-height: 100vh;
+  max-height: 100vh;
   padding: 16px 0 104px 0;
   position: relative;
+  overflow-y:  hidden;
+  @media (min-width: 667px) {
+    max-height: none;
+    overflow-y: visible;
+  }
   .healthLogContent {
     max-width: 768px;
     margin: 0 auto;
@@ -409,47 +545,95 @@ onMounted(async () => {
   }
 }
 
-.filter-section {
+.tab-section {
   display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding: 1rem 1rem 0;
-  margin-bottom: 1rem;
-
-  .filter-buttons {
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  .filter-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    @include neumorphismOuter($radius: 50px, $padding: 10px 12px);
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  margin: 0.25rem 1rem;
+  border-radius: var(--Radius-r-50, 50px);
+  background: var(--Secondary-100, #f5f7fa);
+  box-shadow: 2px 4px 12px 0
+    var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
+  .tab-btn {
+    flex: 1;
+    padding: .35rem;
     border: none;
-    cursor: pointer;
+    background: var(--Neutral-white, #fff);
+    border-radius: 50px;
     color: var(--neutral-500-opacity-70, rgba(102, 102, 102, 0.7));
-    text-overflow: ellipsis;
     font-size: var(--Text-font-size-18, 18px);
-    font-style: normal;
-    font-weight: 400;
-    letter-spacing: 2.7px;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
 
-    &:hover {
-      background: var(--Secondary-200, #e2e8f0);
+    color: var(--Primary-default, #74bc1f);
+    font-size: var(--Text-font-size-18, 18px);
+    font-style: normal;
+    font-weight: 400;
+
+    letter-spacing: 2.7px;
+
+    &.active {
+      border-radius: var(--Radius-r-50, 50px);
+      background: var(--Secondary-100, #f5f7fa);
+      box-shadow: 2px 4px 12px 0
+        var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7)) inset;
     }
 
-    .filter-icon {
-      width: 16px;
-      height: 16px;
+    &:hover:not(.active) {
+      background: var(--Secondary-100, #f5f7fa);
+    }
+  }
+}
+
+.week-selector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+ 
+  padding: .25rem;
+  margin-bottom: 1rem;
+
+  .week-nav-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s ease;
+
+    &:disabled {
+      cursor: not-allowed;
     }
 
-    .chevron-icon {
-      width: 16px;
-      height: 16px;
+    .week-arrow {
+      width: 20px;
+      height: 20px;
+      transition: opacity 0.2s ease;
+
+      &.left {
+        transform: rotate(90deg);
+      }
+
+      &.right {
+        transform: rotate(-90deg);
+      }
+
+      &.disabled {
+        opacity: 0.3;
+        filter: grayscale(100%);
+      }
     }
+  }
+
+  .week-range {
+    color: var(--Neutral-700, #4a5568);
+    font-size: var(--Text-font-size-18, 18px);
+    font-weight: 500;
+    min-width: 200px;
+    text-align: center;
   }
 }
 
@@ -620,6 +804,28 @@ onMounted(async () => {
   margin: 1rem 0;
 }
 
+.summary-container {
+  padding: 1rem;
+  min-height: 60vh;
+
+  .summary-card {
+    @include neumorphismOuter($radius: 20px);
+    padding: 1.5rem;
+    background: var(--Neutral-white, #fff);
+
+    .summary-content {
+      color: var(--Neutral-700, #4a5568);
+      font-size: var(--Text-font-size-16, 16px);
+      font-style: normal;
+      font-weight: 400;
+      line-height: 1.8;
+      letter-spacing: 0.064px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  }
+}
+
 .empty-state {
   display: flex;
   justify-content: center;
@@ -637,7 +843,6 @@ onMounted(async () => {
   text-align: center;
 
   .empty-character {
-
     .character-img {
       object-fit: contain;
     }
