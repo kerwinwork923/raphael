@@ -3883,7 +3883,10 @@ top: 11.5rem;
     cursor: pointer;
     transition: all 0.3s ease;
     @include neumorphismOuter($radius: 50%, $padding: 0);
-
+    img{
+      width: 36px;
+      height: 36px;
+    }
     &:hover,
     &:active {
       @include neumorphismOuter(
