@@ -4305,12 +4305,12 @@ const vClickOutside = {
   .healGroup2 {
 
     right: 2.25rem;
-    top: 6.5rem;
+    top: 7rem;
 
   }
   .healGroup3 {
     right: 2.25rem;
-    top: 10.5rem;
+    top: 11.5rem;
   }
 }
 
@@ -4388,7 +4388,10 @@ const vClickOutside = {
     cursor: pointer;
     transition: all 0.3s ease;
     @include neumorphismOuter($radius: 50%, $padding: 0);
-
+    img{
+      width: 36px;
+      height: 36px;
+    }
     &:hover,
     &:active {
       @include neumorphismOuter(
