@@ -3800,12 +3800,12 @@ const vClickOutside = {
   .healGroup2 {
 
 right: 2.25rem;
-top: 6.5rem;
+top: 7rem;
 
 }
 .healGroup3 {
 right: 2.25rem;
-top: 10.5rem;
+top: 11.5rem;
 }
 }
 
