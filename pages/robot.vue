@@ -88,6 +88,18 @@
         </div>
         <h5>健康日誌</h5>
       </div>
+      <div class="healGroup healGroup2">
+        <div class="healthImg" @click="showHistory">
+          <img :src="messagesSquare" alt="聊天紀錄" />
+        </div>
+        <h5>聊天紀錄</h5>
+      </div>
+      <div class="healGroup healGroup3">
+      <div class="healthImg" @click="toggleVolume">
+          <img :src="isMuted ? mutedSvg : volumeSvg" alt="音量" />
+        </div> 
+        <h5 > {{ isMuted ? '靜音' : '聲音' }}</h5>
+      </div>
     </div>
 
     <!-- 語音控制區域 - 從下方彈出 -->
@@ -4290,6 +4302,16 @@ const vClickOutside = {
       line-height: normal;
     }
   }
+  .healGroup2 {
+
+    right: 2.25rem;
+    top: 6.5rem;
+
+  }
+  .healGroup3 {
+    right: 2.25rem;
+    top: 10.5rem;
+  }
 }
 
 /* 語音控制欄 - 絕對定位擬態設計 */
@@ -4304,7 +4326,7 @@ const vClickOutside = {
   gap: 20px;
   @include liquidGlass();
   z-index: 10;
-
+  padding: .35rem 2.25rem;
   .firstText1 {
     top: -50%;
     left: 50%;

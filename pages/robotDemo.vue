@@ -39,6 +39,19 @@
         </div>
         <h5>健康日誌</h5>
       </div>
+      <div class="healGroup healGroup2">
+        <div class="healthImg"  @click="showHistory">
+          <img :src="messagesSquare" alt="聊天紀錄" />
+        </div>
+        <h5>聊天紀錄</h5>
+      </div>
+      <div class="healGroup healGroup3">
+      <div class="healthImg" @click="toggleVolume">
+          <img :src="isMuted ? mutedSvg : volumeSvg" alt="音量" />
+        </div> 
+        <h5 > {{ isMuted ? '靜音' : '聲音' }}</h5>
+      </div>
+
     </div>
 
     <!-- 語音控制區域 - 從下方彈出 -->
@@ -58,9 +71,9 @@
 
           <div v-if="isListening" class="pulse-ring"></div>
         </button>
-        <button class="control-btn volume-btn" @click="toggleVolume">
+        <!-- <button class="control-btn volume-btn" @click="toggleVolume">
           <img :src="isMuted ? mutedSvg : volumeSvg" alt="音量" />
-        </button>
+        </button> -->
       </div>
     </transition>
 
@@ -580,6 +593,10 @@ console.log("localobj=", localobj?.Mobile);
 
 const goToHealthLog2 = () => {
   router.push("/healthLog2");
+};
+
+const goToChatHistory = () => {
+  router.push("/chatHistory");
 };
 
 // 角色選擇相關狀態
@@ -3780,6 +3797,16 @@ const vClickOutside = {
       line-height: normal;
     }
   }
+  .healGroup2 {
+
+right: 2.25rem;
+top: 6.5rem;
+
+}
+.healGroup3 {
+right: 2.25rem;
+top: 10.5rem;
+}
 }
 
 /* 語音控制欄 - 絕對定位擬態設計 */
@@ -3794,7 +3821,7 @@ const vClickOutside = {
   gap: 20px;
   @include liquidGlass();
   z-index: 10;
-
+  padding: .35rem 2.25rem;
   .firstText1 {
     top: -50%;
     left: 50%;
@@ -3851,8 +3878,8 @@ const vClickOutside = {
     justify-content: center;
     align-items: center;
     border: none;
-    width: 44px;
-    height: 44px;
+    width: 60px;
+    height: 60px;
     cursor: pointer;
     transition: all 0.3s ease;
     @include neumorphismOuter($radius: 50%, $padding: 0);
