@@ -134,9 +134,9 @@
 
           <div v-if="isListening" class="pulse-ring"></div>
         </button>
-        <button class="control-btn volume-btn" @click="toggleVolume">
+        <!-- <button class="control-btn volume-btn" @click="toggleVolume">
           <img :src="isMuted ? mutedSvg : volumeSvg" alt="音量" />
-        </button>
+        </button> -->
       </div>
     </transition>
 
@@ -4361,8 +4361,8 @@ const vClickOutside = {
     justify-content: center;
     align-items: center;
     border: none;
-    width: 44px;
-    height: 44px;
+    width: 60px;
+    height: 60px;
     cursor: pointer;
     transition: all 0.3s ease;
     @include neumorphismOuter($radius: 50%, $padding: 0);
