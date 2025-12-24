@@ -36,6 +36,8 @@
     body {
       font-family: "PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
     }
+    
+    html { font-size: 20px; }              /* 原本瀏覽器預設約 16px */
 
     /* 背景容器 */
     .wb-geo-lines {
@@ -54,10 +56,12 @@
       opacity: .9;
       pointer-events: none;
     }
+
+
   </style>
 </head>
 
-<body class="min-h-screen bg-wb-ivory text-wb-ink antialiased">
+<body class="min-h-screen bg-wb-ivory text-wb-ink antialiased>
 
   <div class="wb-geo-lines">
 
@@ -96,82 +100,53 @@
     <section class="mx-auto max-w-5xl px-4 pt-10 pb-8">
       <div class="rounded-2xl border border-wb-line bg-white/85 shadow-soft">
         <div class="p-7 md:p-10">
-          <p class="text-sm text-wb-muted">如果您是因為那封邀請信而掃描了 QR Code</p>
           <h1 class="mt-3 text-2xl md:text-4xl font-semibold text-wb-deep">
-            這一頁不是活動介紹，<br class="hidden md:block">而是那封信之後，我想繼續對您說的話。
+            你好!我是黃忠信博士，讀完了寄給你的信，以下是我想繼續對你說的話。
           </h1>
           <p class="mt-5 max-w-2xl text-base text-wb-ink/90">
-            也許不是因為狀況突然變糟，而是因為您很清楚——這些年來，一直沒有真正穩定下來。您不需要先做任何決定；您只需要把這三個小時的「健康關鍵」先聽懂。
+            這些年來，你身體一直沒有真正穩定下來。我將會說明「你為什麼會卡住」與「為什麼這次不同」。
           </p>
-
-          <div class="mt-7 flex gap-3 flex-wrap">
-            <a href="#video"
-               class="rounded-2xl bg-wb-deep px-5 py-3 text-sm font-semibold text-white shadow-soft">
-              先看執行長影片
-            </a>
-            <a href="#why"
-               class="rounded-2xl border border-wb-line bg-white px-5 py-3 text-sm font-semibold text-wb-deep">
-              我會聽懂什麼
-            </a>
-          </div>
-
-          <div class="mt-6 grid gap-3 rounded-xl border border-wb-line bg-wb-ivory/60 p-4 md:grid-cols-3">
-            <div><div class="text-xs text-wb-muted">日期</div><div class="font-semibold">2026/01/10（六）</div></div>
-            <div><div class="text-xs text-wb-muted">時間</div><div class="font-semibold">13:00 入場｜13:30 開始</div></div>
-            <div><div class="text-xs text-wb-muted">地點</div><div class="font-semibold">台北君悅酒店<br>(臺灣臺北市信義區松壽路二號)</div></div>
-          </div>
         </div>
+        <div class="relative aspect-video overflow-hidden rounded-2xl border border-wb-line bg-white shadow-soft">
+          <iframe
+          class="absolute inset-0 h-full w-full"
+          src="https://www.youtube-nocookie.com/embed/dGWGaTpZBQY?autoplay=1&mute=1&playsinline=1&controls=1&modestbranding=1&rel=0"
+          title="YouTube video"
+          allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+          allowfullscreen
+        ></iframe>
+       </div>
       </div>
     </section>
 
-    <!-- Video -->
-    <!-- Video -->
-   <section id="video" class="mx-auto max-w-5xl px-4 py-8">
-      <h2 class="text-xl md:text-2xl font-semibold text-wb-deep mb-3">執行長親自說清楚</h2>
-      <p class="mt-2 text-sm leading-relaxed text-slate-900">此段為影片區：不是介紹產品，而是說明「您為什麼會卡住」與「為什麼這次不同」。</p>
-    
-  <!-- ✅ 關鍵：relative + overflow-hidden，讓 absolute iframe 只在這個框內 -->
-    <div class="relative aspect-video overflow-hidden rounded-2xl border border-wb-line bg-white shadow-soft">
-      <iframe
-      class="absolute inset-0 h-full w-full"
-      src="https://www.youtube-nocookie.com/embed/dGWGaTpZBQY?autoplay=1&mute=1&playsinline=1&controls=1&modestbranding=1&rel=0"
-      title="YouTube video"
-      allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-      allowfullscreen
-    ></iframe>
-   </div>
-  </section>
-
-
-    <!-- Why -->
     <!-- Why -->
 <section id="why" class="mx-auto max-w-5xl px-4 py-8">
   <div class="rounded-3xl border border-wb-line bg-white p-7 shadow-soft">
     <h2 class="text-xl md:text-2xl font-semibold text-wb-deep mb-6">
-      這三個小時，您會清楚理解哪一個健康關鍵
+      這次，你會清楚理解哪一些健康關鍵
     </h2>
 
     <div class="grid gap-4 md:grid-cols-3">
       <div class="rounded-xl border border-wb-line bg-white p-5">
-        <div class="text-xs text-wb-muted">您會聽懂</div>
+        <div class="text-xs text-wb-muted">你會聽懂</div>
         <div class="mt-2 font-semibold text-wb-ink">為什麼反覆調整仍不穩定</div>
         <ul class="mt-3 space-y-2 text-sm text-wb-ink/80">
-          <li>• 為什麼問題會在不同地方輪流出現</li>
+          <li>• 為什麼健康問題會在不同地方輪流出現</li>
           <li>• 為什麼只處理結果，效果無法累積</li>
         </ul>
       </div>
 
       <div class="rounded-xl border border-wb-line bg-white p-5">
-        <div class="text-xs text-wb-muted">您會看見</div>
-        <div class="mt-2 font-semibold text-wb-ink">哪些關鍵一直被分段處理</div>
+        <div class="text-xs text-wb-muted">你會看見</div>
+        <div class="mt-2 font-semibold text-wb-ink">哪些健康關鍵一直沒被處理好</div>
         <ul class="mt-3 space-y-2 text-sm text-wb-ink/80">
-          <li>• 哪些環節過去斷掉</li>
-          <li>• 哪些線索其實彼此牽動</li>
+          <li>• 哪些健康資訊過去被零散的處理</li>
+          <li>• 哪些健康線索其實彼此牽動</li>
         </ul>
       </div>
 
       <div class="rounded-xl border border-wb-line bg-white p-5">
-        <div class="text-xs text-wb-muted">您會理解</div>
+        <div class="text-xs text-wb-muted">你會理解</div>
         <div class="mt-2 font-semibold text-wb-ink">接下來怎麼走得下去</div>
         <ul class="mt-3 space-y-2 text-sm text-wb-ink/80">
           <li>• 不再只靠意志力硬撐</li>
@@ -181,41 +156,10 @@
     </div>
 
     <p class="mt-6 text-sm leading-relaxed text-wb-ink/80">
-      這不是快速給答案的分享，而是一場把整個脈絡一次說清楚的正式發表會。
+      這是一場把整個脈絡一次說清楚的正式發表會。
     </p>
   </div>
 </section>
-
-<!-- Agenda (Concept) -->
-<section class="mx-auto max-w-5xl px-4 py-8">
-  <div class="flex items-end justify-between gap-4">
-    <div>
-      <h2 class="text-xl md:text-2xl font-semibold text-wb-deep">概念型議程（理解的三個階段）</h2>
-      <p class="mt-2 text-sm text-wb-muted">這不是時間表，是你在現場的理解會走到的三個位置。</p>
-    </div>
-  </div>
-
-  <div class="mt-5 grid gap-4 md:grid-cols-3">
-    <div class="rounded-3xl border border-wb-line bg-white/85 p-6 shadow-soft">
-      <div class="text-xs text-wb-gold">第一階段</div>
-      <div class="mt-2 text-base font-semibold text-wb-ink">為什麼一直卡在這裡</div>
-      <div class="mt-3 text-sm text-wb-ink/80">從反覆、不穩定、撐著走開始，釐清真正卡住的結構。</div>
-    </div>
-
-    <div class="rounded-3xl border border-wb-line bg-white/85 p-6 shadow-soft">
-      <div class="text-xs text-wb-gold">第二階段</div>
-      <div class="mt-2 text-base font-semibold text-wb-ink">關鍵結構如何被接回來</div>
-      <div class="mt-3 text-sm text-wb-ink/80">看見過去被分段處理的關鍵，理解為何效果無法累積。</div>
-    </div>
-
-    <div class="rounded-3xl border border-wb-line bg-white/85 p-6 shadow-soft">
-      <div class="text-xs text-wb-gold">第三階段</div>
-      <div class="mt-2 text-base font-semibold text-wb-ink">接下來怎麼走得下去</div>
-      <div class="mt-3 text-sm text-wb-ink/80">把理解落回生活節奏，建立可持續、可被接住的路徑。</div>
-    </div>
-  </div>
-</section>
-
 
     <!-- Event Info（同風格：白卡＋金線邊框＋深綠標題＋灰文字） -->
 <section class="mx-auto max-w-5xl px-4 py-8">
@@ -232,11 +176,9 @@
       <div class="rounded-2xl border border-wb-line bg-white p-5 shadow-soft">
         <div class="text-xs text-wb-muted">地點</div>
         <div class="mt-1 text-sm font-semibold text-wb-ink">台北君悅酒店</div>
-        <div class="mt-1 text-sm text-wb-ink/80">（實際廳別與入場方式依邀請函與現場人員指引）</div>
+        <div class="mt-1 text-sm text-wb-ink/80">凱悅聽二區(3F)</div>
       </div>
     </div>
-
-    <p class="mt-4 text-xs text-wb-muted">備註：實際出席與相關說明，請依邀請函內容為準。</p>
   </div>
 </section>
 
@@ -244,53 +186,20 @@
 <section class="mx-auto max-w-5xl px-4 py-8">
   <div class="grid gap-4 md:grid-cols-2">
     <div class="rounded-3xl border border-wb-line bg-wb-deep p-7 shadow-strong">
-      <h2 class="text-lg font-semibold text-white">這場發表會，適合您嗎？</h2>
+      <h2 class="text-lg font-semibold text-white">這場發表會適合這樣的你</h2>
       <ul class="mt-4 space-y-2 text-sm text-white/90">
-        <li>• 反覆、不穩定、長期影響生活節奏</li>
+        <li>• 症狀反覆、不穩定、長期影響生活節奏</li>
         <li>• 嘗試過許多方式，仍覺得少一個關鍵</li>
         <li>• 願意用一個下午，把事情真正聽懂</li>
       </ul>
     </div>
-
-    <div class="rounded-3xl border border-wb-line bg-white/85 p-7 shadow-soft">
-      <h2 class="text-lg font-semibold text-wb-deep">這一場可能不適合您</h2>
-      <ul class="mt-4 space-y-2 text-sm text-wb-ink/80">
-        <li>• 只想要快速答案，不想了解完整脈絡</li>
-        <li>• 不打算為自己留出一段理解與調整的時間</li>
-      </ul>
-    </div>
-
   </div>
 </section>
 
 <!-- RSVP（同風格：白卡＋步驟白卡＋深綠主按鈕＋米白補充框） -->
 <section id="rsvp" class="mx-auto max-w-5xl px-4 pt-8 pb-14">
   <div class="rounded-3xl border border-wb-line bg-white/90 p-7 shadow-soft md:p-9">
-    <h2 class="text-xl font-semibold text-wb-deep md:text-2xl">接受邀請</h2>
-    <p class="mt-3 max-w-2xl text-sm leading-relaxed text-wb-muted">
-      您不需要先做任何決定。先把事情聽懂，再決定怎麼走。
-    </p>
-
-    <div class="mt-6 grid gap-4 md:grid-cols-3">
-      <div class="rounded-2xl border border-wb-line bg-white p-5 shadow-soft">
-        <div class="text-xs text-wb-gold">步驟 1</div>
-        <div class="mt-2 font-semibold text-wb-ink">填寫基本資料</div>
-        <div class="mt-2 text-sm text-wb-ink/80">用於現場報到與座位安排。</div>
-      </div>
-
-      <div class="rounded-2xl border border-wb-line bg-white p-5 shadow-soft">
-        <div class="text-xs text-wb-gold">步驟 2</div>
-        <div class="mt-2 font-semibold text-wb-ink">完成登記</div>
-        <div class="mt-2 text-sm text-wb-ink/80">將由專人進行出席確認。</div>
-      </div>
-
-      <div class="rounded-2xl border border-wb-line bg-white p-5 shadow-soft">
-        <div class="text-xs text-wb-gold">步驟 3</div>
-        <div class="mt-2 font-semibold text-wb-ink">按時入席</div>
-        <div class="mt-2 text-sm text-wb-ink/80">建議提早到場以利報到。</div>
-      </div>
-    </div>
-
+    
     <div class="mt-6">
       <h2 class="text-xl md:text-2xl font-semibold text-wb-deep">VIP 報名表單</h2>
       <p class="mt-2 text-sm text-wb-muted">填寫資料以利現場報到與座位安排。</p>
@@ -339,11 +248,13 @@
     </div>
     <div class="mt-6 rounded-2xl border border-wb-line bg-wb-ivory/70 p-5 text-sm">
       <button
-      class="gift inline-flex justify-center rounded-2xl bg-wb-deep px-6 py-3 text-sm font-semibold text-white shadow-soft ring-1 ring-wb-line hover:opacity-95"
+        class="gift inline-flex w-full justify-center rounded-2xl bg-wb-gold px-6 py-3 text-sm font-semibold text-wb-deep shadow-soft ring-1 ring-wb-line hover:brightness-95 active:brightness-90"
+        type="button"
       >
-      點我! 觀看影片、領取限量貴賓典藏禮
-     </button>
+        點我! 觀看影片、現場領取限量貴賓禮
+      </button>
     </div>
+    
     <div class="mt-6 rounded-2xl border border-wb-line bg-wb-ivory/70 p-5 text-sm">
       <div class="font-semibold text-wb-deep">補充說明</div>
       <ul class="mt-2 space-y-1 text-sm text-wb-muted">

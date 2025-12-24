@@ -237,33 +237,6 @@
           </div>
         </template>
       </template>
-
-          <!-- 錄音完成後的顯示（重新錄音時使用） -->
-          <template v-else-if="isRecordingComplete">
-            <!-- 關閉按鈕 - 錄音完成後也顯示 -->
-            <div class="voiceModelClose" @click="closeVoiceModal">
-              <img src="/assets/imgs/robot/close.svg" alt="關閉" />
-            </div>
-
-            <p class="voice-confirm-text">
-              確認好文字後 請按一下「送出語音」。
-            </p>
-            <p class="voice-label-text">你說:</p>
-            <div class="transcript-display">
-              {{ pendingTranscript || "" }}
-            </div>
-            <div class="voice-action-buttons">
-              <button class="voice-btn voice-btn-retry" @click="retryRecording">
-                重新錄音
-              </button>
-              <button
-                class="voice-btn voice-btn-send"
-                @click="sendVoiceMessage"
-              >
-                送出語音
-              </button>
-            </div>
-          </template>
         </div>
       </div>
     </transition>
@@ -2259,25 +2232,12 @@ const stopRecording = () => {
   if (process.client && recognitionRef) {
     finalizedByUs = true;
     recognitionRef.stop();
-
-    // 保存當前轉錄的文字
-    pendingTranscript.value = currentTranscript.value.trim();
-
-    // 標記錄音完成，顯示確認畫面
-    isListening.value = false;
-    isRecordingComplete.value = true;
-    showVoiceError.value = false; // 確保不顯示錯誤提示
-
-    // 確保模態框保持打開狀態，顯示確認畫面
-    voiceModalOpen.value = true;
-
-    console.log("停止錄音，顯示確認畫面", {
-      isRecordingComplete: isRecordingComplete.value,
-      pendingTranscript: pendingTranscript.value,
-      voiceModalOpen: voiceModalOpen.value,
-      isListening: isListening.value,
-    });
   }
+
+  // 直接關閉模態框，不顯示確認畫面
+  reallyCloseVoiceModal();
+  isRecordingComplete.value = false;
+  pendingTranscript.value = "";
 };
 
 // 重新錄音（回到開始錄音狀態）
@@ -2296,31 +2256,24 @@ const retryRecording = () => {
 const sendVoiceFromRecording = async () => {
   const transcript = currentTranscript.value.trim();
 
+  if (!transcript) {
+    alert("請先錄音");
+    return;
+  }
+
   // 停止錄音
   if (process.client && recognitionRef) {
     finalizedByUs = true;
     recognitionRef.stop();
   }
 
-  // 保存當前轉錄的文字
-  pendingTranscript.value = transcript;
+  // 關閉模態框
+  reallyCloseVoiceModal();
+  isRecordingComplete.value = false;
+  pendingTranscript.value = "";
 
-  // 標記錄音完成，顯示確認畫面（如截圖所示）
-  isListening.value = false;
-  isRecordingComplete.value = true;
-  showVoiceError.value = false;
-
-  // 確保模態框保持打開狀態，顯示確認畫面
-  voiceModalOpen.value = true;
-
-  console.log("送出語音，顯示確認畫面", {
-    isRecordingComplete: isRecordingComplete.value,
-    pendingTranscript: pendingTranscript.value,
-    voiceModalOpen: voiceModalOpen.value
-  });
-
-  // 不直接處理語音輸入，讓用戶在確認畫面中選擇「送出語音」或「重新錄音」
-  // 用戶點擊確認畫面中的「送出語音」按鈕時才會調用 handleSpeechEnd
+  // 直接處理語音輸入（延續之前的後續動作）
+  await handleSpeechEnd(transcript);
 };
 
 // 送出語音訊息（錄音完成後點擊「送出語音」按鈕）
