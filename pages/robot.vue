@@ -4669,9 +4669,15 @@ const vClickOutside = {
   transition: all 0.3s ease;
   position: relative;
   pointer-events: none;
+  
+  
+
   img {
     position: absolute;
-
+    width: 18px;
+    height: 18px;
+    right: 0;
+    top: 0;
   }
 
   &:hover,
