@@ -119,32 +119,90 @@
     <transition name="fade">
       <div v-if="voiceModalOpen" class="voice-modal">
         <div class="voice-content" @click.stop>
-          <img
-            :src="voiceModalImageSrc"
-            alt="音波圖"
-            class="voice-wave"
-            @click="handleVoiceModalClick"
-          />
-
           <!-- 錯誤文字 -->
           <p v-if="showVoiceError" class="voice-error-text">
             聽不太清楚，請點擊再試一次
           </p>
 
-          <!-- 錄音中文字（固定一個節點，不用 key，不會一直被 destroy） -->
-          <p v-else class="transcript-text" ref="voiceModalTranscriptRef">
-            {{ currentTranscript || "" }}
-          </p>
-
-          <div
-            class="voiceModelClose"
-            v-if="!isListening"
-            @click="closeVoiceModal"
-          >
-            <div class="voiceModelImg">
-              <img src="/assets/imgs/robot/close_red.svg" alt="關閉" />
+          <!-- 錄音中顯示 -->
+          <template v-else-if="isListening && !isRecordingComplete">
+            <!-- 關閉按鈕 - 錄音中顯示（右上角） -->
+            <div class="voiceModelClose" @click="stopRecording">
+              <img src="/assets/imgs/robot/close.svg" alt="關閉" />
             </div>
-          </div>
+
+            <!-- 如果還沒有收到聲音，顯示開始說話提示和音波圖 -->
+            <template v-if="!currentTranscript || !currentTranscript.trim()">
+              <p class="voice-start-text">開始說話吧</p>
+              <img
+                :src="voiceModalImageSrc"
+                alt="音波圖"
+                class="voice-wave"
+              />
+            </template>
+
+            <!-- 如果已經收到聲音，顯示確認畫面樣式 -->
+            <template v-else>
+              <p class="voice-confirm-text">
+                確認好文字後 請按一下「送出語音」。
+              </p>
+              <p class="voice-label-text">你說:</p>
+              <div class="transcript-display" ref="voiceModalTranscriptRef">
+                {{ currentTranscript }}
+              </div>
+              <div class="voice-action-buttons">
+                <button class="voice-btn voice-btn-retry" @click="retryRecording">
+                  重新錄音
+                </button>
+                <button
+                  class="voice-btn voice-btn-send"
+                  @click="sendVoiceFromRecording"
+                >
+                  送出語音
+                </button>
+              </div>
+            </template>
+          </template>
+
+          <!-- 錄音完成後的顯示 -->
+          <template v-else-if="isRecordingComplete">
+            <!-- 關閉按鈕 - 錄音完成後也顯示 -->
+            <div class="voiceModelClose" @click="closeVoiceModal">
+              <img src="/assets/imgs/robot/close.svg" alt="關閉" />
+            </div>
+
+            <p class="voice-confirm-text">
+              確認好文字後 請按一下「送出語音」。
+            </p>
+            <p class="voice-label-text">你說:</p>
+            <div class="transcript-display">
+              {{ pendingTranscript || '' }}
+            </div>
+            <div class="voice-action-buttons">
+              <button class="voice-btn voice-btn-retry" @click="retryRecording">
+                重新錄音
+              </button>
+              <button class="voice-btn voice-btn-send" @click="sendVoiceMessage">
+                送出語音
+              </button>
+            </div>
+          </template>
+
+          <!-- 其他情況（錯誤等） -->
+          <template v-else>
+            <p class="transcript-text" ref="voiceModalTranscriptRef">
+              {{ currentTranscript || "" }}
+            </p>
+            <div
+              class="voiceModelClose"
+              v-if="!isListening"
+              @click="closeVoiceModal"
+            >
+              <div class="voiceModelImg">
+                <img src="/assets/imgs/robot/close_red.svg" alt="關閉" />
+              </div>
+            </div>
+          </template>
         </div>
       </div>
     </transition>
@@ -723,6 +781,8 @@ const voiceModalOpen = ref(false);
 let voiceTimeout = null; // 語音識別超時計時器
 let hasFinalResult = false; // 確保只處理一次 final
 let finalizedByUs = false;
+const isRecordingComplete = ref(false); // 錄音是否完成（用戶手動停止）
+const pendingTranscript = ref(""); // 待處理的轉錄文字
 
 function clearVoiceTimeout() {
   if (voiceTimeout) {
@@ -734,8 +794,10 @@ function clearVoiceTimeout() {
 function reallyCloseVoiceModal() {
   clearVoiceTimeout();
   isListening.value = false;
+  isRecordingComplete.value = false;
   showVoiceError.value = false;
   currentTranscript.value = "";
+  pendingTranscript.value = "";
   voiceModalImageSrc.value = assistantSoundGif;
   voiceModalOpen.value = false; // ← 真正關窗
 }
@@ -1365,29 +1427,33 @@ const initSpeechRecognition = () => {
       recognitionRef.lang = "zh-TW";
 
       recognitionRef.onresult = (event) => {
-        // ✅ Android 修復：每次從頭重算整句，不手動累積
-        // Android 的 Web Speech API 每次回傳的 transcript 已經包含前面所有內容
-        // 所以我們不需要自己累積，直接從 event.results 提取完整句子即可
-        let finalText = "";
+        // ✅ 累積所有對話內容，不中斷
+        // 當 continuous = true 時，event.results 會累積所有結果
+        // 我們需要提取所有 final 結果，確保不遺漏任何對話內容
+        let finalTextParts = [];
         let interimText = "";
         let hasFinal = false;
 
-        // 直接掃描所有 results，提取 final 和 interim
-        // Android 上每個 final result 已經包含前面所有內容，所以只取最後一個 final
+        // 遍歷所有 results，累積所有 final 結果
         for (let i = 0; i < event.results.length; i++) {
           const result = event.results[i];
           if (result.isFinal) {
-            // 只保留最後一個 final 結果（最完整的，已包含所有前面的內容）
-            finalText = result[0].transcript;
+            // 累積所有 final 結果，確保不遺漏任何對話
+            const transcript = result[0].transcript.trim();
+            if (transcript) {
+              finalTextParts.push(transcript);
+            }
             hasFinal = true;
           } else {
-            // 只保留最後一個 interim 結果
+            // 只保留最後一個 interim 結果（即時顯示當前正在說的話）
             interimText = result[0].transcript;
           }
         }
 
-        // 組合最終的 transcript：final 結果 + 最後一個 interim（如果存在）
-        const transcript = finalText + (interimText || "");
+        // 組合最終的 transcript：所有 final 結果用空格連接 + 最後一個 interim（如果存在）
+        // 這樣可以確保所有已完成的對話都被保留
+        const finalText = finalTextParts.join(" ");
+        const transcript = finalText + (interimText ? (finalText ? " " : "") + interimText : "");
 
         // 調試日誌：檢查結果
         if (process.client && transcript) {
@@ -1445,12 +1511,8 @@ const initSpeechRecognition = () => {
           // 同時更新響應式值（用於 Vue 綁定）
           currentTranscript.value = textToShow;
 
-          // 如果有文字，重置超時計時器（延長收音時間）
-          if (transcript.trim()) {
-            clearVoiceTimeout();
-            // 設置更短的靜音超時（3秒無新文字才結束）
-            startVoiceTimeout(true); // 傳入 true 表示有文字
-          }
+          // 移除時間限制，不再調用 startVoiceTimeout
+          // 讓用戶可以無限制地錄音，直到手動停止
 
           // 使用 nextTick 作為備用更新機制
           nextTick(() => {
@@ -1470,13 +1532,14 @@ const initSpeechRecognition = () => {
       };
 
       recognitionRef.onerror = (event) => {
-        if (process.client) {
+        // 靜默處理 no-speech 和 aborted 錯誤，不輸出錯誤日誌
+        // aborted 是我們主動停止錄音時的正常行為，不是錯誤
+        if (process.client && event.error !== "no-speech" && event.error !== "aborted") {
           console.error("語音識別錯誤:", event.error);
         }
-        if (process.client) {
-          isListening.value = false;
-          currentTranscript.value = "";
-        }
+
+        // 不自動停止錄音和清空狀態，讓錯誤處理邏輯決定
+        // 只有在特定錯誤（如 not-allowed）時才停止
 
         // 清除超時計時器
         if (voiceTimeout) {
@@ -1492,11 +1555,35 @@ const initSpeechRecognition = () => {
               closeVoiceModal();
               break;
             case "no-speech":
+              // 不顯示錯誤提示，讓用戶可以繼續錄音，不限制秒數
+              // 自動重新啟動錄音，保持連續不中斷
+              if (isListening.value && !isRecordingComplete.value) {
+                try {
+                  setTimeout(() => {
+                    if (isListening.value && !isRecordingComplete.value && recognitionRef) {
+                      recognitionRef.start();
+                      console.log("no-speech 自動重新啟動錄音");
+                    }
+                  }, 100);
+                } catch (error) {
+                  console.error("自動重新啟動失敗:", error);
+                }
+              }
+              break;
             case "audio-capture":
-              // 如果還沒有顯示錯誤提示，則顯示
-              if (!showVoiceError.value) {
-                showVoiceError.value = true;
-                voiceModalImageSrc.value = assistantDefaultGif;
+              // 音訊捕獲錯誤，不顯示錯誤提示，自動重新啟動
+              // 讓用戶可以繼續錄音，不限制秒數
+              if (isListening.value && !isRecordingComplete.value) {
+                try {
+                  setTimeout(() => {
+                    if (isListening.value && !isRecordingComplete.value && recognitionRef) {
+                      recognitionRef.start();
+                      console.log("audio-capture 自動重新啟動錄音");
+                    }
+                  }, 100);
+                } catch (error) {
+                  console.error("自動重新啟動失敗:", error);
+                }
               }
               break;
             case "network":
@@ -1504,41 +1591,38 @@ const initSpeechRecognition = () => {
               closeVoiceModal();
               break;
             default:
+              // aborted 是我們主動停止錄音時的正常行為，不需要處理
+              // 其他錯誤也不自動顯示錯誤提示，讓用戶可以繼續
               if (event.error !== "aborted") {
-                // 如果還沒有顯示錯誤提示，則顯示
-                if (!showVoiceError.value) {
-                  showVoiceError.value = true;
-                  voiceModalImageSrc.value = assistantDefaultGif;
-                }
+                // 其他錯誤已經在開頭過濾了，這裡不需要再輸出
               }
           }
         }
       };
 
       recognitionRef.onend = () => {
+        // 如果是我們主動停止的，直接返回
         if (finalizedByUs) {
           finalizedByUs = false;
           hasFinalResult = false;
           return;
         }
 
-        // 如果語音識別自然結束（不是我們主動停止的）
-        if (!hasFinalResult && isListening.value) {
-          const transcript = currentTranscript.value.trim();
-
-          if (transcript) {
-            // 有文字，自動處理
-            hasFinalResult = true;
-            clearVoiceTimeout();
-            finalizedByUs = true;
-            reallyCloseVoiceModal();
-            handleSpeechEnd(transcript);
-          } else {
-            // 沒有文字，顯示錯誤提示
-            isListening.value = false;
-            showVoiceError.value = true;
-            voiceModalImageSrc.value = assistantDefaultGif;
-            voiceModalOpen.value = true; // 保持彈窗開著讓使用者點關閉
+        // 如果語音識別自然結束（瀏覽器自動停止，例如長時間靜音）
+        // 但用戶還在錄音狀態，我們需要自動重新啟動以保持連續錄音
+        if (isListening.value && !isRecordingComplete.value && process.client) {
+          // 自動重新啟動錄音，保持連續不中斷
+          try {
+            // 使用 setTimeout 避免立即重啟可能造成的問題
+            setTimeout(() => {
+              if (isListening.value && !isRecordingComplete.value && recognitionRef) {
+                recognitionRef.start();
+                console.log("語音識別自動重新啟動，保持連續錄音");
+              }
+            }, 100);
+          } catch (error) {
+            console.error("自動重新啟動語音識別失敗:", error);
+            // 如果重新啟動失敗，不顯示錯誤提示，讓用戶可以繼續嘗試
           }
         }
 
@@ -1950,48 +2034,141 @@ const toggleListening = () => {
   }
 
   if (isListening.value) {
-    if (process.client) {
-      recognitionRef.stop();
-    }
-    reallyCloseVoiceModal();
+    // 如果正在錄音，停止錄音並顯示確認按鈕
+    stopRecording();
   } else {
-    if (process.client) {
-      showVoiceError.value = false;
-      voiceModalImageSrc.value = assistantSoundGif;
-      currentTranscript.value = "";
-      hasFinalResult = false;
-      finalizedByUs = false;
-      voiceModalOpen.value = true; // ← 開窗
-      isListening.value = true;
-
-      // Android 兼容性：立即準備文字元素，不等待 nextTick
-      // 使用雙重機制：立即操作 + nextTick 備用
-      const prepareTranscriptEl = () => {
-        const transcriptEl =
-          voiceModalTranscriptRef.value ||
-          document.querySelector(".voice-modal .transcript-text");
-        if (transcriptEl) {
-          transcriptEl.style.display = "block";
-          transcriptEl.style.opacity = "1";
-          transcriptEl.style.visibility = "visible";
-          transcriptEl.textContent = ""; // 清空之前的內容
-          // 強制重繪
-          transcriptEl.offsetHeight;
-        }
-      };
-
-      // 立即執行
-      prepareTranscriptEl();
-
-      // nextTick 作為備用
-      nextTick(() => {
-        prepareTranscriptEl();
-      });
-
-      recognitionRef.start();
-      startVoiceTimeout(false); // 初始時沒有文字
-    }
+    // 開始錄音
+    startRecording();
   }
+};
+
+// 開始錄音
+const startRecording = () => {
+  if (process.client) {
+    showVoiceError.value = false;
+    voiceModalImageSrc.value = assistantSoundGif;
+    currentTranscript.value = "";
+    pendingTranscript.value = "";
+    hasFinalResult = false;
+    finalizedByUs = false;
+    isRecordingComplete.value = false;
+    voiceModalOpen.value = true; // ← 開窗
+    isListening.value = true;
+
+    // Android 兼容性：立即準備文字元素，不等待 nextTick
+    // 使用雙重機制：立即操作 + nextTick 備用
+    const prepareTranscriptEl = () => {
+      const transcriptEl =
+        voiceModalTranscriptRef.value ||
+        document.querySelector(".voice-modal .transcript-text");
+      if (transcriptEl) {
+        transcriptEl.style.display = "block";
+        transcriptEl.style.opacity = "1";
+        transcriptEl.style.visibility = "visible";
+        transcriptEl.textContent = ""; // 清空之前的內容
+        // 強制重繪
+        transcriptEl.offsetHeight;
+      }
+    };
+
+    // 立即執行
+    prepareTranscriptEl();
+
+    // nextTick 作為備用
+    nextTick(() => {
+      prepareTranscriptEl();
+    });
+
+    recognitionRef.start();
+    // 移除時間限制，不再調用 startVoiceTimeout
+  }
+};
+
+// 停止錄音（用戶點擊關閉按鈕）
+const stopRecording = () => {
+  if (process.client && recognitionRef) {
+    finalizedByUs = true;
+    recognitionRef.stop();
+
+    // 保存當前轉錄的文字
+    pendingTranscript.value = currentTranscript.value.trim();
+
+    // 標記錄音完成，顯示確認畫面
+    isListening.value = false;
+    isRecordingComplete.value = true;
+    showVoiceError.value = false;
+
+    // 確保模態框保持打開狀態，顯示確認畫面
+    voiceModalOpen.value = true;
+
+    console.log("停止錄音，顯示確認畫面", {
+      isRecordingComplete: isRecordingComplete.value,
+      pendingTranscript: pendingTranscript.value,
+      voiceModalOpen: voiceModalOpen.value,
+      isListening: isListening.value
+    });
+  }
+};
+
+// 重新錄音（回到開始錄音狀態）
+const retryRecording = () => {
+  // 重置狀態
+  isRecordingComplete.value = false;
+  pendingTranscript.value = "";
+  currentTranscript.value = "";
+  showVoiceError.value = false;
+
+  // 重新開始錄音
+  startRecording();
+};
+
+// 從錄音中直接送出語音（錄音中點擊「送出語音」按鈕）
+const sendVoiceFromRecording = async () => {
+  const transcript = currentTranscript.value.trim();
+
+  // 停止錄音
+  if (process.client && recognitionRef) {
+    finalizedByUs = true;
+    recognitionRef.stop();
+  }
+
+  // 保存當前轉錄的文字
+  pendingTranscript.value = transcript;
+
+  // 標記錄音完成，顯示確認畫面
+  isListening.value = false;
+  isRecordingComplete.value = true;
+  showVoiceError.value = false;
+
+  // 確保模態框保持打開狀態，顯示確認畫面
+  voiceModalOpen.value = true;
+
+  console.log("送出語音，顯示確認畫面", {
+    isRecordingComplete: isRecordingComplete.value,
+    pendingTranscript: pendingTranscript.value,
+    voiceModalOpen: voiceModalOpen.value
+  });
+
+  // 不直接處理語音輸入，讓用戶在確認畫面中選擇「送出語音」或「重新錄音」
+  // 用戶點擊確認畫面中的「送出語音」按鈕時才會調用 handleSpeechEnd
+};
+
+// 送出語音訊息（錄音完成後點擊「送出語音」按鈕）
+const sendVoiceMessage = async () => {
+  const transcript = pendingTranscript.value.trim();
+
+  if (!transcript) {
+    alert("請先錄音");
+    return;
+  }
+
+  // 關閉模態框
+  reallyCloseVoiceModal();
+  isRecordingComplete.value = false;
+  pendingTranscript.value = "";
+
+  // 處理語音輸入（延續之前的後續動作）
+  await handleSpeechEnd(transcript);
 };
 
 // 處理語音輸入結束
@@ -4042,9 +4219,12 @@ top: 11.5rem;
   }
 }
 .voiceModelClose {
-  @include neumorphismOuter($radius: 50%, $padding: 4px);
-  margin-top: 44px;
+  position: absolute;
+  top: 20px;
+  right: 30px;
+
   transition: all 0.3s ease;
+  z-index: 10;
 
   &:hover,
   &:active {
@@ -4055,6 +4235,11 @@ top: 11.5rem;
       $y: 0,
       $blur: 6px
     );
+  }
+
+  img {
+    width: 24px;
+    height: 24px;
   }
 
   .voiceModelImg {
@@ -4109,6 +4294,23 @@ top: 11.5rem;
       height: 115px;
       object-fit: contain;
       animation: pulse-wave 1.6s infinite ease-in-out;
+      flex-shrink: 0;
+      min-width: 115px;
+      min-height: 115px;
+    }
+
+    .voice-start-text {
+      color: var(--Neutral-black, #1e1e1e);
+      text-align: center;
+      font-size: var(--Text-font-size-18, 18px);
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+      text-transform: lowercase;
+      position: absolute;
+      top: 40px;
+      left: 50%;
+      transform: translate(-50%, -50%);
     }
 
     .voice-text {
@@ -4124,6 +4326,117 @@ top: 11.5rem;
       font-size: 20px;
       font-weight: 600;
       text-transform: lowercase;
+    }
+
+    .voice-confirm-text {
+      margin-top: 16px;
+      font-size: 16px;
+      color: #2d3748;
+      font-weight: 500;
+      text-align: center;
+      padding: 0 16px;
+    }
+
+    .voice-label-text {
+      margin-top: 12px;
+      font-size: 16px;
+      color: #2d3748;
+      font-weight: 600;
+      text-align: left;
+      width: 90%;
+      padding: 0 16px;
+    }
+
+    .transcript-display {
+      margin-top: 8px;
+      font-size: 16px;
+      color: #2d3748;
+      font-weight: 400;
+      text-align: left;
+      padding: 12px 16px;
+      min-height: 60px;
+      max-height: 200px;
+      overflow-y: auto;
+      line-height: 1.6;
+      word-break: break-word;
+      max-width: 90%;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 8px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .voice-action-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      padding: 0 16px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .voice-btn {
+      flex: 1;
+      max-width: 150px;
+      padding: 12px 24px;
+      border-radius: 24px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      outline: none;
+
+      &:active:not(:disabled) {
+        transform: scale(0.95);
+      }
+    }
+
+    // 錄音中單獨顯示的送出按鈕
+    .voice-content > .voice-btn-send {
+      flex: none;
+      max-width: none;
+      width: calc(100% - 32px);
+      margin: 20px 16px 0;
+
+      border-radius: var(--Radius-r-50, 50px);
+      background: var(--Primary-default, #74bc1f);
+      box-shadow: 2px 4px 12px 0
+        var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
+      color: white;
+    }
+
+    .voice-btn-retry {
+      border-radius: var(--Radius-r-50, 50px);
+      background: var(--Secondary-100, #f5f7fa);
+      box-shadow: 2px 4px 12px 0
+        var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
+      color: var(--Primary-default, #74bc1f);
+
+      font-size: var(--Text-font-size-18, 18px);
+      font-style: normal;
+      font-weight: 400;
+
+      letter-spacing: 2.7px;
+      &:hover {
+        background: #f0fdf4;
+      }
+    }
+
+    .voice-btn-send {
+      border-radius: var(--Radius-r-50, 50px);
+      background: var(--Primary-default, #74bc1f);
+      box-shadow: 2px 4px 12px 0
+        var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
+      color: white;
+
+      font-size: var(--Text-font-size-18, 18px);
+      font-style: normal;
+      font-weight: 400;
+
+      letter-spacing: 2.7px;
+      &:hover {
+        background: #5a9a17;
+      }
     }
 
     .transcript-text {
@@ -4164,7 +4477,7 @@ top: 11.5rem;
 @keyframes pulse-wave {
   0%,
   100% {
-    transform: scale(0.95);
+    transform: scale(1);
     opacity: 0.8;
   }
   50% {

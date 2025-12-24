@@ -1,65 +1,21 @@
 <template>
   <div class="chat-wrapper">
-    <!-- 首次解說覆蓋層 -->
-    <div v-if="showTutorial" class="tutorial-overlay" @click="closeTutorial">
-      <div class="tutorial-content">
-        <div class="tutorial-text">任意點擊關閉</div>
-      </div>
-    </div>
-
     <!-- 聊天頭部 -->
     <div class="chat-header">
-      <div
-        v-if="showTutorial && currentTutorialStep === 4"
-        class="overZIndex firstText firstText4"
-      >
-        這裡可以切換角色以及幫角色取名字
-      </div>
-      <div
-        class="avatar-container"
-        :class="{ overZIndex: showTutorial && currentTutorialStep === 4 }"
-        @click="currentTutorialStep === 4 ? null : showCharacterModal()"
-      >
-        <div v-if="isCharacterLoading" class="character-loading">
-          <div class="loading-spinner"></div>
-        </div>
+      <div class="avatar-container">
         <img
-          v-else-if="
-            isCharacterDataReady && currentCharacter && currentCharacter.avatar
-          "
           class="avatar"
-          :src="currentCharacter.avatar"
-          alt="角色頭像"
+          src="/assets/imgs/robotDemo/doctor.png"
+          alt="院長"
         />
-        <div v-else class="character-placeholder">
-          <div class="placeholder-avatar"></div>
-        </div>
       </div>
-      <div
-        class="character-name-btn"
-        :class="{ overZIndex: showTutorial && currentTutorialStep === 4 }"
-        @click="currentTutorialStep === 4 ? null : showCharacterModal()"
-      >
-        <span v-if="isCharacterDataReady && currentCharacter">{{
-          currentCharacter.customName || currentCharacter.name
-        }}</span>
-        <span v-else-if="isCharacterLoading">載入中...</span>
-        <span v-else>角色</span>
-        <img :src="recycleSvg" alt="刷新" />
+      <div class="character-name-btn">
+        <span>院長</span>
       </div>
     </div>
 
     <!-- 初始對話氣泡 -->
-    <div
-      class="greeting-bubble"
-      :class="{ overZIndex: showTutorial && currentTutorialStep === 5 }"
-    >
-      <div
-        v-if="showTutorial && currentTutorialStep === 5"
-        class="firstText firstText5"
-      >
-        這裡可以看到回應的訊息
-      </div>
+    <div class="greeting-bubble">
       <div v-if="isLoading" class="loading-indicator">
         <div class="spinner"></div>
         <span>思考中...</span>
@@ -73,68 +29,37 @@
     <!-- AI角色形象區域 -->
     <div class="character-section">
       <img
-        v-if="uiCharacter && uiCharacter.fullImage"
-        :src="uiCharacter.fullImage"
+        src="/assets/imgs/robotDemo/doctor.png"
         class="character-image"
-        alt="AI角色"
-        @click="handleCharacterClick"
+        alt="院長"
       />
-      <div v-else class="character-placeholder">
-        <div class="placeholder-character"></div>
-      </div>
       <div class="healGroup">
-        <div class="healthImg" @click="goToHealthLog">
+        <div class="healthImg" @click="goToHealthLog2">
           <img src="/assets/imgs/robot/health.svg" alt="健康" />
         </div>
         <h5>健康日誌</h5>
       </div>
       <div class="healGroup healGroup2">
-        <div class="healthImg" @click="showHistory">
+        <div class="healthImg"  @click="showHistory">
           <img :src="messagesSquare" alt="聊天紀錄" />
         </div>
         <h5>聊天紀錄</h5>
       </div>
       <div class="healGroup healGroup3">
-        <div class="healthImg" @click="toggleVolume">
+      <div class="healthImg" @click="toggleVolume">
           <img :src="isMuted ? mutedSvg : volumeSvg" alt="音量" />
-        </div>
-        <h5>{{ isMuted ? "靜音" : "聲音" }}</h5>
+        </div> 
+        <h5 > {{ isMuted ? '靜音' : '聲音' }}</h5>
       </div>
+
     </div>
 
     <!-- 語音控制區域 - 從下方彈出 -->
     <transition name="slide-up">
-      <div
-        v-if="showVoiceControls"
-        class="voice-control-bar"
-        :class="{
-          overZIndex:
-            (showTutorial && currentTutorialStep === 1) ||
-            (showTutorial && currentTutorialStep === 2) ||
-            (showTutorial && currentTutorialStep === 3),
-        }"
-      >
+      <div v-if="showVoiceControls" class="voice-control-bar">
         <button class="control-btn history-btn" @click="showHistory">
           <img :src="messagesSquare" alt="聊天紀錄" />
         </button>
-        <div
-          v-if="showTutorial && currentTutorialStep === 1"
-          class="firstText firstText1"
-        >
-          這裡可以進行對話
-        </div>
-        <div
-          v-if="showTutorial && currentTutorialStep === 2"
-          class="firstText firstText2"
-        >
-          可自行關閉聲音
-        </div>
-        <div
-          v-if="showTutorial && currentTutorialStep === 3"
-          class="firstText firstText3"
-        >
-          這裡可以切換成文字對話
-        </div>
 
         <button
           class="control-btn mic-btn"
@@ -190,80 +115,36 @@
       </div>
     </transition>
 
-    <!-- 底部導航列 -->
-    <BottomNav />
-
     <!-- 錄音提示彈窗 -->
     <transition name="fade">
       <div v-if="voiceModalOpen" class="voice-modal">
         <div class="voice-content" @click.stop>
-      <!-- 錯誤文字 - 只在特定錯誤時顯示，不因時間限制顯示 -->
-      <p v-if="showVoiceError && !isListening && !isRecordingComplete" class="voice-error-text">
-        聽不太清楚，請點擊再試一次
-      </p>
+          <img
+            :src="voiceModalImageSrc"
+            alt="音波圖"
+            class="voice-wave"
+            @click="handleVoiceModalClick"
+          />
 
-      <!-- 錄音中顯示 -->
-      <template v-if="isListening && !isRecordingComplete">
-        <!-- 關閉按鈕 - 錄音中顯示（右上角） -->
-        <div class="voiceModelClose" @click="stopRecording">
-          <img src="/assets/imgs/robot/close.svg" alt="關閉" />
-        </div>
-
-        <!-- 如果還沒有收到聲音，顯示開始說話提示和音波圖 -->
-        <template v-if="!currentTranscript || !currentTranscript.trim()">
-          <p class="voice-start-text">開始說話吧</p>
-          <img :src="voiceModalImageSrc" alt="音波圖" class="voice-wave" />
-        </template>
-
-        <!-- 如果已經收到聲音，顯示確認畫面樣式 -->
-        <template v-else>
-          <p class="voice-confirm-text">
-            確認好文字後 請按一下「送出語音」。
+          <!-- 錯誤文字 -->
+          <p v-if="showVoiceError" class="voice-error-text">
+            聽不太清楚，請點擊再試一次
           </p>
-          <p class="voice-label-text">你說:</p>
-          <div class="transcript-display">
-            {{ currentTranscript }}
-          </div>
-          <div class="voice-action-buttons">
-            <button class="voice-btn voice-btn-retry" @click="retryRecording">
-              重新錄音
-            </button>
-            <button
-              class="voice-btn voice-btn-send"
-              @click="sendVoiceFromRecording"
-            >
-              送出語音
-            </button>
-          </div>
-        </template>
-      </template>
 
-          <!-- 錄音完成後的顯示（重新錄音時使用） -->
-          <template v-else-if="isRecordingComplete">
-            <!-- 關閉按鈕 - 錄音完成後也顯示 -->
-            <div class="voiceModelClose" @click="closeVoiceModal">
-              <img src="/assets/imgs/robot/close.svg" alt="關閉" />
-            </div>
+          <!-- 錄音中文字（固定一個節點，不用 key，不會一直被 destroy） -->
+          <p v-else class="transcript-text" ref="voiceModalTranscriptRef">
+            {{ currentTranscript || "" }}
+          </p>
 
-            <p class="voice-confirm-text">
-              確認好文字後 請按一下「送出語音」。
-            </p>
-            <p class="voice-label-text">你說:</p>
-            <div class="transcript-display">
-              {{ pendingTranscript || "" }}
+          <div
+            class="voiceModelClose"
+            v-if="!isListening"
+            @click="closeVoiceModal"
+          >
+            <div class="voiceModelImg">
+              <img src="/assets/imgs/robot/close_red.svg" alt="關閉" />
             </div>
-            <div class="voice-action-buttons">
-              <button class="voice-btn voice-btn-retry" @click="retryRecording">
-                重新錄音
-              </button>
-              <button
-                class="voice-btn voice-btn-send"
-                @click="sendVoiceMessage"
-              >
-                送出語音
-              </button>
-            </div>
-          </template>
+          </div>
         </div>
       </div>
     </transition>
@@ -308,169 +189,6 @@
             <button @click="handleSummaryMode(true)" class="robot-btn-confirm">
               儲存摘要
             </button>
-          </div>
-        </div>
-      </div>
-    </transition>
-
-    <!-- 客服詢問彈窗 -->
-    <transition name="fade">
-      <div v-if="showCustomerServiceModal" class="customer-service-modal">
-        <div class="robot-content">
-          <div class="robot-sphere"></div>
-          <h3 class="robot-title">您是否想要找客服呢？</h3>
-          <div class="robot-buttons">
-            <button
-              @click="handleCustomerService(false)"
-              class="robot-btn-cancel"
-            >
-              否
-            </button>
-            <button
-              @click="handleCustomerService(true)"
-              class="robot-btn-confirm"
-            >
-              是
-            </button>
-          </div>
-        </div>
-      </div>
-    </transition>
-
-    <!-- 角色選擇彈窗 -->
-    <transition name="fade">
-      <div
-        v-if="showCharacterSelection"
-        class="character-modal-overlay"
-        @click="closeCharacterModal"
-      >
-        <div class="character-modal" @click.stop>
-          <!-- 彈窗頭部 -->
-          <div class="character-modal-header">
-            <img
-              src="/assets/imgs/backArrow.svg"
-              @click="closeCharacterModal"
-              alt="返回"
-              class="back-arrow"
-            />
-            <h2 class="modal-title">切換角色</h2>
-          </div>
-
-          <!-- 當前選擇角色標籤 -->
-          <div class="current-character-tag" @click="showNameInputModal">
-            <span
-              >{{
-                uiCharacter
-                  ? uiCharacter.customName || uiCharacter.displayName
-                  : "角色"
-              }}
-              <img
-                src="/assets/imgs/robot/edit_green.svg"
-                alt="編輯"
-                class="edit-icon"
-              />
-            </span>
-          </div>
-
-          <!-- 主要角色展示區域 -->
-          <div class="main-character-area">
-            <div class="character-display">
-              <img
-                v-if="uiCharacter && uiCharacter.fullImage"
-                :src="uiCharacter.fullImage"
-                alt="角色形象"
-                class="character-full-image"
-              />
-              <div v-else class="character-placeholder-large">
-                <div class="placeholder-character-large"></div>
-              </div>
-            </div>
-
-            <!-- 右側造型選擇 -->
-            <div class="style-selector">
-              <div class="style-header">
-                <span>更換造型</span>
-              </div>
-
-              <div class="style-grid" :class="{ expanded: isStyleExpanded }">
-                <div
-                  v-for="style in (uiCharacter && uiCharacter.styles) || []"
-                  :key="`${uiCharacter?.id || 'unknown'}-${style.id}`"
-                  class="style-item"
-                  :class="{
-                    active: uiCharacter && uiCharacter.styleId === style.id,
-                    locked: style.locked,
-                  }"
-                  @click="selectStyle(style)"
-                >
-                  <div v-if="style.locked" class="style-locked">
-                    <img :src="lockSvg" alt="鎖定" class="lock-icon" />
-                  </div>
-                  <img
-                    :src="style.thumbnail"
-                    alt="造型"
-                    :class="{ 'locked-image': style.locked }"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 確定按鈕 -->
-          <button class="confirm-btn" @click="confirmCharacterSelection">
-            確定
-          </button>
-
-          <!-- 底部角色切換區域 - Swiper 版本 -->
-          <div class="character-switch-area">
-            <swiper
-              ref="characterSwiperRef"
-              :slidesPerView="3.2"
-              :spaceBetween="8"
-              :centeredSlides="true"
-              :pagination="{
-                clickable: true,
-              }"
-              :modules="swiperModules"
-              class="character-swiper"
-              @slideChange="onSlideChange"
-            >
-              <swiper-slide
-                v-for="character in availableCharacters"
-                :key="character.id"
-                class="character-option"
-                :class="{
-                  selected: uiCharacter && uiCharacter.id === character.id,
-                  locked: isCharacterLocked(character),
-                }"
-                @click="onCharacterClick(character)"
-              >
-                <div class="character-circle">
-                  <!-- Loading 效果 -->
-                  <div
-                    v-if="characterImageLoading.has(character.id)"
-                    class="character-loading"
-                  >
-                    <div class="loading-spinner"></div>
-                  </div>
-                  <!-- 鎖定效果 -->
-                  <div
-                    v-if="isCharacterLocked(character)"
-                    class="character-locked"
-                  >
-                    <img :src="lockSvg" alt="鎖定" class="lock-icon" />
-                  </div>
-                  <!-- 角色圖片 -->
-                  <img
-                    :src="character.avatar"
-                    alt="角色"
-                    :class="{ 'locked-image': isCharacterLocked(character) }"
-                    @load="onCharacterImageLoad(character.id)"
-                    @error="onCharacterImageError(character.id)"
-                  />
-                </div>
-              </swiper-slide>
-            </swiper>
           </div>
         </div>
       </div>
@@ -581,12 +299,7 @@
                     class="message bot"
                   >
                     <div class="avatar">
-                      <img
-                        v-if="currentCharacter && currentCharacter.avatar"
-                        :src="currentCharacter.avatar"
-                        alt="角色頭像"
-                      />
-                      <div v-else class="placeholder-avatar"></div>
+                      <img src="/assets/imgs/robotDemo/doctor.png" alt="院長" />
                     </div>
 
                     <div class="bubble">
@@ -604,11 +317,7 @@
                       </div>
                       <div class="time">{{ formatTime(item.timestamp) }}</div>
                       <div class="sender-label">
-                        {{
-                          item.botFrom === "Human"
-                            ? "健康顧問"
-                            : currentCharacter.name || "AI"
-                        }}
+                        {{ item.botFrom === "Human" ? "健康顧問" : "院長" }}
                       </div>
                     </div>
                   </div>
@@ -653,7 +362,7 @@
                   </div>
                   <div v-if="result.bot && result.bot.trim()" class="bubble">
                     <div class="content">
-                      <span class="bot-name">{{ currentCharacter.name }}</span>
+                      <span class="bot-name">院長</span>
                       <span
                         v-html="highlightKeyword(result.bot, searchQuery)"
                       ></span>
@@ -706,39 +415,6 @@
       </div>
     </transition>
 
-    <!-- 角色名稱輸入彈窗 -->
-    <transition name="fade">
-      <div
-        v-if="showNameInput"
-        class="name-input-overlay"
-        @click="closeNameInput"
-      >
-        <div class="name-input-modal" @click.stop>
-          <h3 class="name-input-title">幫角色取一個名字吧</h3>
-          <input
-            v-model="characterNameInput"
-            type="text"
-            class="name-input-field"
-            placeholder="例如：嗨嗨嗨"
-            maxlength="10"
-            @keyup.enter="confirmNameInput"
-            ref="nameInputRef"
-          />
-          <div v-if="nameInputError" class="name-input-error">
-            {{ nameInputError }}
-          </div>
-          <div class="name-input-buttons">
-            <button class="name-input-cancel" @click="closeNameInput">
-              取消
-            </button>
-            <button class="name-input-confirm" @click="confirmNameInput">
-              確定
-            </button>
-          </div>
-        </div>
-      </div>
-    </transition>
-
     <!-- 日曆選擇彈窗 -->
     <transition name="calendar-expand">
       <div v-if="showCalendar" class="calendar-overlay" @click="toggleCalendar">
@@ -778,23 +454,6 @@
         </div>
       </div>
     </transition>
-
-    <!-- 角色選擇離開確認彈窗 -->
-    <Alert
-      v-if="showCharacterExitConfirm"
-      default-content="現在離開的話，不會變更角色喔"
-      :show-click-button="true"
-      click-button-text="離開"
-      @click="confirmCharacterExit"
-      @close="cancelCharacterExit"
-    />
-
-    <!-- 近期推出彈窗 -->
-    <Alert
-      v-if="showComingSoon"
-      default-content="此角色即將推出，敬請期待！"
-      @close="closeComingSoonModal"
-    />
   </div>
 </template>
 
@@ -827,12 +486,11 @@ import searchSvg from "~/assets/imgs/robot/search.svg";
 import calendarSvg from "~/assets/imgs/robot/calendar.svg";
 import sendSvg from "~/assets/imgs/robot/send.svg";
 
-// ====== 參考 robot1021.vue 的 n8n API 方式 ======
-const TEXT_WEBHOOK_URL = "https://aiwisebalancegroup.com/webhook/Textchat"; // ← n8n 文字端點
-const TEXT_MESSAGE_URL =
-  "https://23700999.com:8081/HMA/TTEsaveChatMessageHistory.jsp"; // ← 儲存聊天記錄
-const GET_CHAT_HISTORY_URL =
-  "https://23700999.com:8081/HMA/api/fr/frGetLineAIHuman"; // ← 獲取聊天記錄
+const TEXT_WEBHOOK_URL =
+  "https://23700999.com:8081/push_notification/api/chatgpt/ask";
+// 移除 API URL，改用 localStorage
+// const TEXT_MESSAGE_URL = "https://23700999.com:8081/HMA/TTEsaveChatMessageHistory.jsp"; // ← 儲存聊天記錄
+// const GET_CHAT_HISTORY_URL = "https://23700999.com:8081/HMA/api/fr/frGetLineAIHuman"; // ← 獲取聊天記錄
 
 // ====== 角色相關 API ======
 const GET_ALL_ROLES_URL = "https://23700999.com:8081/HMA/api/fr/ALLRole"; // ← 獲取所有角色
@@ -844,7 +502,7 @@ const CHANGE_ROLE_DISPLAY_NAME_URL =
 // ====== ChatGPT API ======
 const CHATGPT_API_URL =
   "https://23700999.com:8081/push_notification/api/chatgpt/ask"; // ← ChatGPT API
-const voicegender = "female";
+const voicegender = "male";
 const historyInputRef = ref(null);
 const topSentinel = ref(null);
 let topObserver = null;
@@ -881,7 +539,7 @@ const showVoiceError = ref(false);
 // 摘要模式相關狀態
 const showSummaryMode = ref(false);
 const currentSummary = ref("");
-const showCustomerServiceModal = ref(false);
+// 移除客服相關狀態
 const pendingInput = ref(""); // 儲存待處理的輸入
 const showSummaryProcessing = ref(false); // 摘要處理中彈窗
 const isInSummaryFlow = ref(false); // 確保摘要流程不誤觸一般流程
@@ -899,10 +557,10 @@ const callTime = ref(1);
 const emptyBatchCount = ref(0);
 const knownKeys = new Set(); // 用於去重的穩定鍵集合
 
-// 首次登入解說相關狀態
-const showTutorial = ref(false);
-const currentTutorialStep = ref(1);
-const tutorialSteps = [1, 2, 3, 4, 5]; // 解說步驟順序
+// 移除首次登入解說相關狀態
+// const showTutorial = ref(false);
+// const currentTutorialStep = ref(1);
+// const tutorialSteps = [1, 2, 3, 4, 5]; // 解說步驟順序
 // 角色圖片現在完全由 API 提供，不再需要本地 import
 
 const characterImageSrc = ref(null);
@@ -923,17 +581,22 @@ const latestResponse = ref(""); // 最新回覆
 const showSearch = ref(false); // 搜尋功能開關
 const searchQuery = ref(""); // 搜尋關鍵字
 const searchResults = ref([]); // 搜尋結果
-// 從 localStorage 獲取用戶資料
+// 從 localStorage 獲取用戶資料（可選，用於記錄等功能）
 const localData = localStorage.getItem("userData");
 const localobj = localData ? JSON.parse(localData) : null;
 console.log("localobj=", localobj?.Mobile);
 
-if (!localData) {
-  router.push("/");
-}
+// 移除登入檢查，允許未登入用戶使用
+// if (!localData) {
+//   router.push("/");
+// }
 
-const goToHealthLog = () => {
-  router.push("/healthLog");
+const goToHealthLog2 = () => {
+  router.push("/healthLog2");
+};
+
+const goToChatHistory = () => {
+  router.push("/chatHistory");
 };
 
 // 角色選擇相關狀態
@@ -1060,8 +723,6 @@ const voiceModalOpen = ref(false);
 let voiceTimeout = null; // 語音識別超時計時器
 let hasFinalResult = false; // 確保只處理一次 final
 let finalizedByUs = false;
-const isRecordingComplete = ref(false); // 錄音是否完成（用戶手動停止）
-const pendingTranscript = ref(""); // 待處理的轉錄文字
 
 function clearVoiceTimeout() {
   if (voiceTimeout) {
@@ -1073,10 +734,8 @@ function clearVoiceTimeout() {
 function reallyCloseVoiceModal() {
   clearVoiceTimeout();
   isListening.value = false;
-  isRecordingComplete.value = false;
   showVoiceError.value = false;
   currentTranscript.value = "";
-  pendingTranscript.value = "";
   voiceModalImageSrc.value = assistantSoundGif;
   voiceModalOpen.value = false; // ← 真正關窗
 }
@@ -1231,30 +890,30 @@ const closeTextInput = () => {
   showTextInput.value = false;
 };
 
-// 首次登入解說相關函數
-const checkTutorialStatus = () => {
-  if (process.client) {
-    const hasSeenTutorial = localStorage.getItem("robotTutorialSeen");
-    if (!hasSeenTutorial) {
-      showTutorial.value = true;
-      currentTutorialStep.value = 1;
-    }
-  }
-};
+// 移除首次登入解說相關函數
+// const checkTutorialStatus = () => {
+//   if (process.client) {
+//     const hasSeenTutorial = localStorage.getItem("robotTutorialSeen");
+//     if (!hasSeenTutorial) {
+//       showTutorial.value = true;
+//       currentTutorialStep.value = 1;
+//     }
+//   }
+// };
 
-const closeTutorial = () => {
-  if (process.client) {
-    const currentIndex = tutorialSteps.indexOf(currentTutorialStep.value);
-    if (currentIndex < tutorialSteps.length - 1) {
-      // 如果還有下一步，切換到下一步
-      currentTutorialStep.value = tutorialSteps[currentIndex + 1];
-    } else {
-      // 如果是最後一步，關閉解說
-      showTutorial.value = false;
-      localStorage.setItem("robotTutorialSeen", "true");
-    }
-  }
-};
+// const closeTutorial = () => {
+//   if (process.client) {
+//     const currentIndex = tutorialSteps.indexOf(currentTutorialStep.value);
+//     if (currentIndex < tutorialSteps.length - 1) {
+//       // 如果還有下一步，切換到下一步
+//       currentTutorialStep.value = tutorialSteps[currentIndex + 1];
+//     } else {
+//       // 如果是最後一步，關閉解說
+//       showTutorial.value = false;
+//       localStorage.setItem("robotTutorialSeen", "true");
+//     }
+//   }
+// };
 
 const lastScrollTop = ref(0);
 
@@ -1649,8 +1308,8 @@ const handleVoiceModalClick = () => {
       voiceModalImageSrc.value = assistantSoundGif;
       recognitionRef.start();
       isListening.value = true;
-      isRecordingComplete.value = false;
-      // 移除時間限制，不再調用 startVoiceTimeout
+      // 重新設置超時（初始時沒有文字）
+      startVoiceTimeout(false);
     }
   }
 };
@@ -1663,7 +1322,7 @@ const startVoiceTimeout = (hasText = false) => {
   }
 
   // 如果有文字，給更長的靜音時間（3秒）；如果沒有文字，給較短時間（8秒）
-  const timeoutDuration = hasText ? 3000 : 8000;
+  const timeoutDuration = hasText ? 5000 : 10000;
 
   voiceTimeout = setTimeout(() => {
     if (isListening.value) {
@@ -1706,34 +1365,29 @@ const initSpeechRecognition = () => {
       recognitionRef.lang = "zh-TW";
 
       recognitionRef.onresult = (event) => {
-        // ✅ 累積所有對話內容，不中斷
-        // 當 continuous = true 時，event.results 會累積所有結果
-        // 我們需要提取所有 final 結果，確保不遺漏任何對話內容
-        let finalTextParts = [];
+        // ✅ Android 修復：每次從頭重算整句，不手動累積
+        // Android 的 Web Speech API 每次回傳的 transcript 已經包含前面所有內容
+        // 所以我們不需要自己累積，直接從 event.results 提取完整句子即可
+        let finalText = "";
         let interimText = "";
         let hasFinal = false;
 
-        // 遍歷所有 results，累積所有 final 結果
+        // 直接掃描所有 results，提取 final 和 interim
+        // Android 上每個 final result 已經包含前面所有內容，所以只取最後一個 final
         for (let i = 0; i < event.results.length; i++) {
           const result = event.results[i];
           if (result.isFinal) {
-            // 累積所有 final 結果，確保不遺漏任何對話
-            const transcript = result[0].transcript.trim();
-            if (transcript) {
-              finalTextParts.push(transcript);
-            }
+            // 只保留最後一個 final 結果（最完整的，已包含所有前面的內容）
+            finalText = result[0].transcript;
             hasFinal = true;
           } else {
-            // 只保留最後一個 interim 結果（即時顯示當前正在說的話）
+            // 只保留最後一個 interim 結果
             interimText = result[0].transcript;
           }
         }
 
-        // 組合最終的 transcript：所有 final 結果用空格連接 + 最後一個 interim（如果存在）
-        // 這樣可以確保所有已完成的對話都被保留
-        const finalText = finalTextParts.join(" ");
-        const transcript =
-          finalText + (interimText ? (finalText ? " " : "") + interimText : "");
+        // 組合最終的 transcript：final 結果 + 最後一個 interim（如果存在）
+        const transcript = finalText + (interimText || "");
 
         // 調試日誌：檢查結果
         if (process.client && transcript) {
@@ -1791,8 +1445,12 @@ const initSpeechRecognition = () => {
           // 同時更新響應式值（用於 Vue 綁定）
           currentTranscript.value = textToShow;
 
-          // 移除時間限制，不再調用 startVoiceTimeout
-          // 讓用戶可以無限制地錄音，直到手動停止
+          // 如果有文字，重置超時計時器（延長收音時間）
+          if (transcript.trim()) {
+            clearVoiceTimeout();
+            // 設置更短的靜音超時（3秒無新文字才結束）
+            startVoiceTimeout(true); // 傳入 true 表示有文字
+          }
 
           // 使用 nextTick 作為備用更新機制
           nextTick(() => {
@@ -1808,18 +1466,17 @@ const initSpeechRecognition = () => {
         }
 
         // 不立即關閉，讓用戶可以持續說話
-        // 只有在用戶手動停止時才處理
+        // 只有在 onend 事件或超時時才處理
       };
 
       recognitionRef.onerror = (event) => {
-        // 靜默處理 no-speech 和 aborted 錯誤，不輸出錯誤日誌
-        // aborted 是我們主動停止錄音時的正常行為，不是錯誤
-        if (process.client && event.error !== "no-speech" && event.error !== "aborted") {
+        if (process.client) {
           console.error("語音識別錯誤:", event.error);
         }
-
-        // 不自動停止錄音和清空狀態，讓錯誤處理邏輯決定
-        // 只有在特定錯誤（如 not-allowed）時才停止
+        if (process.client) {
+          isListening.value = false;
+          currentTranscript.value = "";
+        }
 
         // 清除超時計時器
         if (voiceTimeout) {
@@ -1835,43 +1492,11 @@ const initSpeechRecognition = () => {
               closeVoiceModal();
               break;
             case "no-speech":
-              // 不顯示錯誤提示，讓用戶可以繼續錄音，不限制秒數
-              // 自動重新啟動錄音，保持連續不中斷
-              if (isListening.value && !isRecordingComplete.value) {
-                try {
-                  setTimeout(() => {
-                    if (
-                      isListening.value &&
-                      !isRecordingComplete.value &&
-                      recognitionRef
-                    ) {
-                      recognitionRef.start();
-                      console.log("no-speech 自動重新啟動錄音");
-                    }
-                  }, 100);
-                } catch (error) {
-                  console.error("自動重新啟動失敗:", error);
-                }
-              }
-              break;
             case "audio-capture":
-              // 音訊捕獲錯誤，不顯示錯誤提示，自動重新啟動
-              // 讓用戶可以繼續錄音，不限制秒數
-              if (isListening.value && !isRecordingComplete.value) {
-                try {
-                  setTimeout(() => {
-                    if (
-                      isListening.value &&
-                      !isRecordingComplete.value &&
-                      recognitionRef
-                    ) {
-                      recognitionRef.start();
-                      console.log("audio-capture 自動重新啟動錄音");
-                    }
-                  }, 100);
-                } catch (error) {
-                  console.error("自動重新啟動失敗:", error);
-                }
+              // 如果還沒有顯示錯誤提示，則顯示
+              if (!showVoiceError.value) {
+                showVoiceError.value = true;
+                voiceModalImageSrc.value = assistantDefaultGif;
               }
               break;
             case "network":
@@ -1879,42 +1504,41 @@ const initSpeechRecognition = () => {
               closeVoiceModal();
               break;
             default:
-              // aborted 是我們主動停止錄音時的正常行為，不需要處理
-              // 其他錯誤也不自動顯示錯誤提示，讓用戶可以繼續
-              // 錯誤日誌已經在開頭過濾了 aborted，這裡不需要再輸出
-              break;
+              if (event.error !== "aborted") {
+                // 如果還沒有顯示錯誤提示，則顯示
+                if (!showVoiceError.value) {
+                  showVoiceError.value = true;
+                  voiceModalImageSrc.value = assistantDefaultGif;
+                }
+              }
           }
         }
       };
 
       recognitionRef.onend = () => {
-        // 如果是我們主動停止的，直接返回
         if (finalizedByUs) {
           finalizedByUs = false;
           hasFinalResult = false;
           return;
         }
 
-        // 如果語音識別自然結束（瀏覽器自動停止，例如長時間靜音）
-        // 但用戶還在錄音狀態，我們需要自動重新啟動以保持連續錄音
-        if (isListening.value && !isRecordingComplete.value && process.client) {
-          // 自動重新啟動錄音，保持連續不中斷
-          try {
-            // 使用 setTimeout 避免立即重啟可能造成的問題
-            setTimeout(() => {
-              if (
-                isListening.value &&
-                !isRecordingComplete.value &&
-                recognitionRef
-              ) {
-                recognitionRef.start();
-                console.log("語音識別自動重新啟動，保持連續錄音");
-              }
-            }, 100);
-          } catch (error) {
-            console.error("自動重新啟動語音識別失敗:", error);
-            // 如果重新啟動失敗，不顯示錯誤提示，讓用戶可以繼續嘗試
-            // 完全由用戶手動控制
+        // 如果語音識別自然結束（不是我們主動停止的）
+        if (!hasFinalResult && isListening.value) {
+          const transcript = currentTranscript.value.trim();
+
+          if (transcript) {
+            // 有文字，自動處理
+            hasFinalResult = true;
+            clearVoiceTimeout();
+            finalizedByUs = true;
+            reallyCloseVoiceModal();
+            handleSpeechEnd(transcript);
+          } else {
+            // 沒有文字，顯示錯誤提示
+            isListening.value = false;
+            showVoiceError.value = true;
+            voiceModalImageSrc.value = assistantDefaultGif;
+            voiceModalOpen.value = true; // 保持彈窗開著讓使用者點關閉
           }
         }
 
@@ -1929,18 +1553,13 @@ const initSpeechRecognition = () => {
   }
 };
 
-// 寫入聊天紀錄的 helper 函數
+// 寫入聊天紀錄的 helper 函數（使用 localStorage）
 async function saveChatRecord({
   inMsg = "",
   outMsg = "",
   inputAt,
   outputAt,
 } = {}) {
-  if (!localobj) {
-    console.error("保存聊天記錄失敗: 用戶資料不存在");
-    return { success: false, error: "用戶資料不存在" };
-  }
-
   // 確保訊息內容不為空
   if (!inMsg && !outMsg) {
     console.warn("保存聊天記錄失敗: 輸入和輸出訊息都為空");
@@ -1952,45 +1571,31 @@ async function saveChatRecord({
   const outputTime = outputAt || getLocalTimeString(new Date());
 
   try {
-    console.log("開始保存聊天記錄到 API:", {
-      inMsg: inMsg.substring(0, 50) + (inMsg.length > 50 ? "..." : ""),
-      outMsg: outMsg.substring(0, 50) + (outMsg.length > 50 ? "..." : ""),
+    // 從 localStorage 讀取現有聊天記錄
+    const storageKey = "robotDemo_chatHistory";
+    const existingData = localStorage.getItem(storageKey);
+    const chatHistory = existingData ? JSON.parse(existingData) : [];
+
+    // 創建新的聊天記錄項目
+    const newRecord = {
+      id: Date.now(),
+      ts: Date.now(),
+      user: inMsg || "",
+      bot: outMsg || "",
+      timestamp: inputTime,
+      dateKey: toDateKey(new Date(inputTime)),
       inputTime,
       outputTime,
-    });
+    };
 
-    const response = await fetch(TEXT_MESSAGE_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        Key: "qrt897hpmd",
-        MID: localobj.MID,
-        Mobile: localobj.Mobile,
-        Type: "P",
-        Inmessage: inMsg || "",
-        Outmessage: outMsg || "",
-        Inputtime: inputTime,
-        Outputtime: outputTime,
-      }),
-    });
+    // 添加到記錄中
+    chatHistory.push(newRecord);
 
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => "");
-      throw new Error(
-        `API 調用失敗: ${response.status} ${response.statusText} - ${errorText}`
-      );
-    }
+    // 保存回 localStorage
+    localStorage.setItem(storageKey, JSON.stringify(chatHistory));
 
-    const result = await response.json();
-    console.log("保存聊天記錄 API 回應:", result);
-
-    // 檢查 API 回傳結果
-    if (result && result.Result && result.Result !== "OK") {
-      console.error("保存聊天記錄失敗: API 回傳錯誤", result);
-      return { success: false, error: result.Result, data: result };
-    }
-
-    return { success: true, data: result };
+    console.log("聊天記錄已保存到 localStorage:", newRecord);
+    return { success: true, data: newRecord };
   } catch (e) {
     console.error("保存聊天記錄失敗:", e);
     return { success: false, error: e.message || String(e) };
@@ -2009,7 +1614,23 @@ async function runSummaryFlow(inputText) {
     // 呼叫 ChatGPT 產生精簡內容
     const aiResponse = await callChatGPT(
       inputText,
-      "你是一個聰明的智慧醫療助手，這是一段病患的症狀敘述內容，請幫我做摘要重點"
+      `你是一個「健康管理的陪伴機器人」，你的工作只有一項：
+1.忠實紀錄與潤飾使用者的症狀/身體困擾內容，並整理成可交給醫師的結構化紀錄。
+【輸出格式要求】
+只輸出以下一個區塊（不要加星號、不要加多餘符號、不要加說明文字）：
+（逐句潤飾我說的內容，使語句更清楚流暢，但意思完全相同。
+如果有多個症狀或事件，可分多筆，但每筆資料必須是我說過的內容。）
+【限制規則】
+1. 忠實記錄我說的每一句話或資訊（不可遺漏）。
+2. 不改變原意，只能優化語序、加標點、使語句更自然。
+3. 不可推理或猜測病因。
+4. 不可補充我沒說的內容。
+5. 不可加入任何建議、分析、評論或衛教。
+6. 不可使用 *、#、-、>、Markdown 格式符號。
+7. 不可使用條列符號，全部以自然語句呈現。
+請嚴格遵守以上格式與規則，開始後不需要再次重述任務或格式。
+
+`
     );
 
     // 設置原始輸入到 pendingInput，供後續使用
@@ -2039,10 +1660,11 @@ async function sendViaUnifiedAPI(
   userText,
   { playAudio = false, extra = {} } = {}
 ) {
-  if (!localobj) {
-    console.error("用戶資料不存在");
-    return "（親愛的:您的問題我目前沒辦法回答）";
-  }
+  // 移除登入檢查，允許未登入用戶使用
+  // if (!localobj) {
+  //   console.error("用戶資料不存在");
+  //   return "（親愛的:您的問題我目前沒辦法回答）";
+  // }
 
   // 使用本地時間，避免時區問題
   const now = new Date();
@@ -2056,11 +1678,123 @@ async function sendViaUnifiedAPI(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        chatInput: userText,
-        sessionId: UUID,
-        voicegender,
-        timestamp: localTime, // 使用本地時間格式
-        pitch_semitones: 1.5,
+        systemMessage: `你是一位健康管理 app 內的即時回覆機器人。 
+你的任務是依使用者回報內容的性質，分為「症狀類回報」與「生活問題」兩種處理方式，提供紀錄、回應與生活層面的協助。 
+
+圖形 
+
+一、症狀類回報（健康管理紀錄與陪伴） 
+
+判定條件 
+
+只要使用者明確描述身體或生理狀態，即歸類為症狀，包括但不限於： 
+
+疼痛、發燒、頭暈 
+
+睡不著、失眠 
+
+噁心、疲倦等身體狀態描述 
+
+📌 「睡不著」屬於症狀，一律歸在此類 
+
+圖形 
+
+回覆方式（必須全部遵守） 
+
+1️⃣ 固定 3 段結構（順序不可更動） 
+
+① 病情已紀錄 
+需明確表示回報內容已被正式記錄（可自由改寫，但語意需清楚） 
+
+② 簡短生活建議 
+
+僅限一般生活層面 
+
+不涉及醫療、治療、用藥、就醫 
+
+不針對症狀本身做解釋 
+
+約 30 字內 
+
+語氣溫和，不使用命令語 
+
+③ 中性同理陪伴 
+
+表達理解狀態對生活安排的影響 
+
+強調「有人在記錄、有人陪伴」 
+
+不渲染情緒、不安撫過度 
+
+圖形 
+
+2️⃣ 核心限制（嚴格遵守） 
+
+❌ 不追問、不提問、不延續對話 
+❌ 不進行醫療診斷、推論或解釋 
+❌ 不使用外網資料 
+❌ 不強化負向感受 
+
+圖形 
+
+3️⃣ 禁止使用詞語（或相近語意） 
+
+不舒服、難受、痛苦、辛苦 
+
+撐著、受不了、很糟 
+
+嚴重、惡化、危險 
+
+👉 若需表達同理，只能描述「狀態對生活的影響」或「被理解與陪伴」，不可強化負向感受。 
+
+圖形 
+
+二、生活問題（一般生活協助） 
+
+判定條件 
+
+非身體或生理症狀，而是日常需求、狀態或選擇，例如： 
+
+肚子餓、很忙 
+
+想吃什麼 
+
+怎麼安排作息 
+
+一般生活常識或生活選擇問題 
+
+📌 不包含任何身體狀態描述 
+
+圖形 
+
+回覆方式 
+
+不受症狀類 PROMPT 限制 
+
+不需套用 3 段結構 
+
+不必進行病情紀錄說明 
+
+語氣自然、偏生活助理 
+
+可搜尋外網，提供簡短、實用的生活建議 
+
+圖形 
+
+運作判斷示意（供系統理解） 
+
+使用者說：「我肚子痛」 
+→ 症狀類回報 → 嚴格 3 段格式 
+
+使用者說：「我睡不著」 
+→ 症狀類回報 → 嚴格 3 段格式 
+
+使用者說：「我肚子餓」 
+→ 生活問題 → 自由回覆 
+
+ `,
+        message: userText,
+        model: "gpt-5-mini",
         ...extra,
       }),
     });
@@ -2140,11 +1874,19 @@ async function sendViaUnifiedAPI(
     }
 
     if (data && !answerText) {
-      // 兼容多種欄位：bot / answer / text / message / content / output...
+      // 兼容多種欄位：response / bot / answer / text / message / content / output...
       const pick = (obj) => {
         if (!obj) return "";
         if (typeof obj === "string") return obj;
-        const keys = ["bot", "answer", "text", "message", "content", "output"];
+        const keys = [
+          "response",
+          "bot",
+          "answer",
+          "text",
+          "message",
+          "content",
+          "output",
+        ];
         for (const k of keys) {
           const v = obj[k];
           if (typeof v === "string" && v.trim()) return v;
@@ -2168,7 +1910,7 @@ async function sendViaUnifiedAPI(
     speakText(finalAnswer);
   }
 
-  // 無論是否進入摘要，n8n 真正回覆到手後，一律寫入 TTEsaveChatMessageHistory
+  // 保存聊天記錄到 localStorage
   try {
     const saveResult = await saveChatRecord({
       inMsg: userText,
@@ -2176,9 +1918,13 @@ async function sendViaUnifiedAPI(
       inputAt: localTime,
       outputAt: getLocalTimeString(new Date()),
     });
-    console.log("語音對話已保存到 API:", { userText, finalAnswer, saveResult });
+    console.log("對話已保存到 localStorage:", {
+      userText,
+      finalAnswer,
+      saveResult,
+    });
   } catch (e) {
-    console.error("寫入 TTE 聊天紀錄失敗:", e);
+    console.error("寫入聊天紀錄失敗:", e);
     // 即使保存失敗，也繼續返回結果，不影響用戶體驗
   }
 
@@ -2204,141 +1950,48 @@ const toggleListening = () => {
   }
 
   if (isListening.value) {
-    // 如果正在錄音，停止錄音並顯示確認按鈕
-    stopRecording();
+    if (process.client) {
+      recognitionRef.stop();
+    }
+    reallyCloseVoiceModal();
   } else {
-    // 開始錄音
-    startRecording();
-  }
-};
+    if (process.client) {
+      showVoiceError.value = false;
+      voiceModalImageSrc.value = assistantSoundGif;
+      currentTranscript.value = "";
+      hasFinalResult = false;
+      finalizedByUs = false;
+      voiceModalOpen.value = true; // ← 開窗
+      isListening.value = true;
 
-// 開始錄音
-const startRecording = () => {
-  if (process.client) {
-    showVoiceError.value = false;
-    voiceModalImageSrc.value = assistantSoundGif;
-    currentTranscript.value = "";
-    pendingTranscript.value = "";
-    hasFinalResult = false;
-    finalizedByUs = false;
-    isRecordingComplete.value = false;
-    voiceModalOpen.value = true; // ← 開窗
-    isListening.value = true;
+      // Android 兼容性：立即準備文字元素，不等待 nextTick
+      // 使用雙重機制：立即操作 + nextTick 備用
+      const prepareTranscriptEl = () => {
+        const transcriptEl =
+          voiceModalTranscriptRef.value ||
+          document.querySelector(".voice-modal .transcript-text");
+        if (transcriptEl) {
+          transcriptEl.style.display = "block";
+          transcriptEl.style.opacity = "1";
+          transcriptEl.style.visibility = "visible";
+          transcriptEl.textContent = ""; // 清空之前的內容
+          // 強制重繪
+          transcriptEl.offsetHeight;
+        }
+      };
 
-    // Android 兼容性：立即準備文字元素，不等待 nextTick
-    // 使用雙重機制：立即操作 + nextTick 備用
-    const prepareTranscriptEl = () => {
-      const transcriptEl =
-        voiceModalTranscriptRef.value ||
-        document.querySelector(".voice-modal .transcript-text");
-      if (transcriptEl) {
-        transcriptEl.style.display = "block";
-        transcriptEl.style.opacity = "1";
-        transcriptEl.style.visibility = "visible";
-        transcriptEl.textContent = ""; // 清空之前的內容
-        // 強制重繪
-        transcriptEl.offsetHeight;
-      }
-    };
-
-    // 立即執行
-    prepareTranscriptEl();
-
-    // nextTick 作為備用
-    nextTick(() => {
+      // 立即執行
       prepareTranscriptEl();
-    });
 
-    recognitionRef.start();
-    // 移除時間限制，不再調用 startVoiceTimeout
+      // nextTick 作為備用
+      nextTick(() => {
+        prepareTranscriptEl();
+      });
+
+      recognitionRef.start();
+      startVoiceTimeout(false); // 初始時沒有文字
+    }
   }
-};
-
-// 停止錄音（用戶點擊關閉按鈕）
-const stopRecording = () => {
-  if (process.client && recognitionRef) {
-    finalizedByUs = true;
-    recognitionRef.stop();
-
-    // 保存當前轉錄的文字
-    pendingTranscript.value = currentTranscript.value.trim();
-
-    // 標記錄音完成，顯示確認畫面
-    isListening.value = false;
-    isRecordingComplete.value = true;
-    showVoiceError.value = false; // 確保不顯示錯誤提示
-
-    // 確保模態框保持打開狀態，顯示確認畫面
-    voiceModalOpen.value = true;
-
-    console.log("停止錄音，顯示確認畫面", {
-      isRecordingComplete: isRecordingComplete.value,
-      pendingTranscript: pendingTranscript.value,
-      voiceModalOpen: voiceModalOpen.value,
-      isListening: isListening.value,
-    });
-  }
-};
-
-// 重新錄音（回到開始錄音狀態）
-const retryRecording = () => {
-  // 重置狀態
-  isRecordingComplete.value = false;
-  pendingTranscript.value = "";
-  currentTranscript.value = "";
-  showVoiceError.value = false;
-
-  // 重新開始錄音
-  startRecording();
-};
-
-// 從錄音中直接送出語音（錄音中點擊「送出語音」按鈕）
-const sendVoiceFromRecording = async () => {
-  const transcript = currentTranscript.value.trim();
-
-  // 停止錄音
-  if (process.client && recognitionRef) {
-    finalizedByUs = true;
-    recognitionRef.stop();
-  }
-
-  // 保存當前轉錄的文字
-  pendingTranscript.value = transcript;
-
-  // 標記錄音完成，顯示確認畫面（如截圖所示）
-  isListening.value = false;
-  isRecordingComplete.value = true;
-  showVoiceError.value = false;
-
-  // 確保模態框保持打開狀態，顯示確認畫面
-  voiceModalOpen.value = true;
-
-  console.log("送出語音，顯示確認畫面", {
-    isRecordingComplete: isRecordingComplete.value,
-    pendingTranscript: pendingTranscript.value,
-    voiceModalOpen: voiceModalOpen.value
-  });
-
-  // 不直接處理語音輸入，讓用戶在確認畫面中選擇「送出語音」或「重新錄音」
-  // 用戶點擊確認畫面中的「送出語音」按鈕時才會調用 handleSpeechEnd
-};
-
-// 送出語音訊息（錄音完成後點擊「送出語音」按鈕）
-const sendVoiceMessage = async () => {
-  const transcript = pendingTranscript.value.trim();
-
-  if (!transcript) {
-    alert("請先錄音");
-    return;
-  }
-
-  // 關閉模態框
-  reallyCloseVoiceModal();
-  isRecordingComplete.value = false;
-  pendingTranscript.value = "";
-
-  // 處理語音輸入（延續之前的後續動作）
-  await handleSpeechEnd(transcript);
 };
 
 // 處理語音輸入結束
@@ -2359,21 +2012,13 @@ const handleSpeechEnd = async (transcript) => {
   currentTranscript.value = "";
 
   try {
-    // 檢查字數是否超過0字，進入摘要模式
-    if (transcript.length > 0) {
-      await runSummaryFlow(transcript); // 不新增聊天泡泡，但 DB 會寫兩筆
-      // 注意：runSummaryFlow 內部可能會設置 isLoading，所以這裡不直接設置 false
-      // 讓 runSummaryFlow 自己管理 isLoading 狀態
-      return;
-    }
+    // 所有輸入都會進入摘要模式（移除50字限制）
+    await runSummaryFlow(transcript); // 不新增聊天泡泡，但 DB 會寫兩筆
+    // 注意：runSummaryFlow 內部可能會設置 isLoading，所以這裡不直接設置 false
+    // 讓 runSummaryFlow 自己管理 isLoading 狀態
+    return;
 
-    // 檢查是否包含客服關鍵字
-    if (transcript.includes("真人") || transcript.includes("客服")) {
-      pendingInput.value = transcript; // 儲存原始輸入
-      showCustomerServiceModal.value = true;
-      isLoading.value = false; // 客服模式不需要等待 API，可以解除載入狀態
-      return;
-    }
+    // 移除客服功能，直接處理輸入
 
     // 正常處理語音輸入
     const botResponse = await sendViaUnifiedAPI(transcript, {
@@ -2413,7 +2058,7 @@ const handleSpeechEnd = async (transcript) => {
     const nowTs = Date.now();
     const localTime = getLocalTimeString(new Date(nowTs));
 
-    // 保存錯誤對話到 API
+    // 保存錯誤對話到 localStorage
     try {
       await saveChatRecord({
         inMsg: transcript,
@@ -2421,9 +2066,9 @@ const handleSpeechEnd = async (transcript) => {
         inputAt: localTime,
         outputAt: getLocalTimeString(new Date()),
       });
-      console.log("錯誤對話已保存到 API");
+      console.log("錯誤對話已保存到 localStorage");
     } catch (saveError) {
-      console.error("保存錯誤對話到 API 失敗:", saveError);
+      console.error("保存錯誤對話失敗:", saveError);
     }
 
     const errorConversation = {
@@ -2486,8 +2131,8 @@ const speakText = (text) => {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "zh-TW";
 
-    // 使用角色的自定義聲音設置
-    const voiceSettings = currentCharacter.value.voiceSettings || {
+    // 使用固定的聲音設置（院長角色）
+    const voiceSettings = {
       rate: 0.9,
       pitch: 0.85,
       volume: 1,
@@ -2637,28 +2282,19 @@ async function handleManualInput() {
   // 設置載入狀態，防止連續發送
   isLoading.value = true;
 
-  // 檢查字數是否超過50字，進入摘要模式
-  if (input.length > 50) {
-    const raw = input;
-    textInput.value = "";
-    try {
-      await runSummaryFlow(raw); // 不新增聊天泡泡，但 DB 會寫兩筆
-    } finally {
-      // 摘要模式完成後才解除載入狀態
-      // 注意：runSummaryFlow 內部可能會設置 isLoading，所以這裡不直接設置 false
-      // 讓 runSummaryFlow 自己管理 isLoading 狀態
-    }
-    return;
+  // 所有輸入都會進入摘要模式（移除50字限制）
+  const raw = input;
+  textInput.value = "";
+  try {
+    await runSummaryFlow(raw); // 不新增聊天泡泡，但 DB 會寫兩筆
+  } finally {
+    // 摘要模式完成後才解除載入狀態
+    // 注意：runSummaryFlow 內部可能會設置 isLoading，所以這裡不直接設置 false
+    // 讓 runSummaryFlow 自己管理 isLoading 狀態
   }
+  return;
 
-  // 檢查是否包含客服關鍵字
-  if (input.includes("真人") || input.includes("客服")) {
-    pendingInput.value = input; // 儲存原始輸入
-    showCustomerServiceModal.value = true;
-    textInput.value = "";
-    isLoading.value = false; // 客服模式不需要等待 API，可以解除載入狀態
-    return;
-  }
+  // 移除客服功能，直接處理輸入
 
   // 文字輸入：立即將用戶輸入添加到聊天記錄中
   const nowTs = Date.now();
@@ -2729,9 +2365,17 @@ async function handleManualInput() {
   }
 }
 
-// 本地儲存對話記錄（現在主要用於日曆數據更新）
+// 本地儲存對話記錄到 localStorage
 const saveConversations = () => {
   if (process.client) {
+    try {
+      const storageKey = "robotDemo_chatHistory";
+      // 將 conversations 保存到 localStorage
+      localStorage.setItem(storageKey, JSON.stringify(conversations.value));
+      console.log("對話記錄已保存到 localStorage");
+    } catch (error) {
+      console.error("保存對話記錄失敗:", error);
+    }
     // 更新日曆數據
     loadCalendarDates();
   }
@@ -2747,47 +2391,31 @@ const handleSummaryMode = async (saveSummary = false) => {
   currentSummary.value = "";
 
   if (saveSummary) {
-    // 先打摘要API，包含原始內容和摘要內容
+    // 儲存摘要到 localStorage
     try {
-      isLoading.value = true;
+      const storageKey = "robotDemo_healthLogs";
+      const existingData = localStorage.getItem(storageKey);
+      const healthLogs = existingData ? JSON.parse(existingData) : [];
 
-      const response = await fetch(
-        "https://23700999.com:8081/HMA/api/fr/saveSoundNote",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            MID: localobj.MID,
-            Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
-            MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
-            Mobile: localobj.Mobile,
-            Lang: "zhtw",
-            SoundNote: summaryText, // AI摘要內容
-            PreSoundNote: originalInput, // 使用者原始文字/語音內容
-          }),
-        }
-      );
+      const newLog = {
+        id: Date.now(),
+        date: new Date().toISOString(),
+        timestamp: new Date().toISOString(),
+        type: "summary",
+        content: summaryText, // AI摘要內容
+        preSoundNote: originalInput, // 口述內容（原始內容）
+      };
 
-      if (!response.ok) {
-        throw new Error(`儲存摘要 API 失敗: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("摘要已儲存到 API:", data);
+      healthLogs.push(newLog);
+      localStorage.setItem(storageKey, JSON.stringify(healthLogs));
+      console.log("摘要已儲存到 localStorage:", newLog);
     } catch (error) {
       console.error("儲存摘要失敗:", error);
       alert("儲存摘要失敗，請重試");
     }
   }
 
-  // 檢查摘要內容是否包含客服關鍵字
-  if (summaryText.includes("真人") || summaryText.includes("客服")) {
-    console.log("摘要內容包含客服關鍵字，顯示客服詢問");
-    pendingInput.value = originalInput; // 儲存原始輸入
-    showCustomerServiceModal.value = true;
-    isLoading.value = false; // 客服模式不需要等待 API，可以解除載入狀態
-    return; // 不發送API，等待用戶選擇
-  }
+  // 移除客服功能檢查
 
   // 無論是否儲存摘要，都要打n8n模型並儲存對話記錄
   if (originalInput) {
@@ -2867,176 +2495,20 @@ const handleSummaryMode = async (saveSummary = false) => {
   }
 };
 
-// 客服模式處理函數（聯繫客服：靜默，不顯示任何提示或新增訊息）
-const handleCustomerService = async (contactService = false) => {
-  showCustomerServiceModal.value = false;
+// 移除客服模式處理函數
 
-  if (contactService) {
-    // 直接打 frSendLineText API（靜默）
-    const inputText = pendingInput.value || "呼叫客服";
-    const inputTime = getLocalTimeString(new Date());
-
-    try {
-      isLoading.value = true;
-
-      // 1. 先保存聊天記錄到 TTEsaveChatMessageHistory.jsp（與文字輸入一致）
-      try {
-        await saveChatRecord({
-          inMsg: inputText,
-          outMsg: "", // 客服訊息由後端處理，這裡先留空
-          inputAt: inputTime,
-          outputAt: getLocalTimeString(new Date()),
-        });
-        console.log("客服對話已保存到 TTEsaveChatMessageHistory");
-      } catch (saveError) {
-        console.error(
-          "保存客服對話到 TTEsaveChatMessageHistory 失敗:",
-          saveError
-        );
-      }
-
-      // 2. 然後打 frSendLineText API
-      const response = await fetch(
-        "https://23700999.com:8081/HMA/api/fr/frSendLineText",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            MID: localobj.MID,
-            Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
-            MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
-            Mobile: localobj.Mobile,
-            Content: inputText,
-            Lang: "zhtw",
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        // 失敗也不提示使用者；僅記錄 log 方便除錯
-        console.error(`frSendLineText 失敗: ${response.status}`);
-      } else {
-        // 成功同樣不提示、不新增氣泡
-        // 若要在開發時確認，可印 log，正式上線刪掉即可
-        const data = await response.json().catch(() => ({}));
-        console.info("frSendLineText 成功（靜默）:", data);
-        // ✅ 立刻重抓一次歷史，讓「客服/真人」相關訊息馬上顯示
-        await fetchChatHistory(true);
-        // 若目前在歷史頁，卷到底讓最新訊息可見
-        if (showHistoryPage.value) {
-          nextTick(() => setTimeout(() => scrollToBottom(), 100));
-        }
-      }
-
-      // 清空待處理輸入（避免殘留）
-      pendingInput.value = "";
-    } catch (error) {
-      // 靜默失敗：不改變 UI、不新增任何訊息
-      console.error("聯繫客服請求錯誤（靜默）:", error);
-    } finally {
-      isLoading.value = false;
-    }
-
-    // 直接結束，不做任何 UI 顯示或滾動處理
-    return;
-  }
-
-  // 選擇「否」，繼續 AI 分析（保持原行為）
-  console.log("用戶選擇繼續AI分析，發送原始輸入到AI");
-
-  if (pendingInput.value) {
-    const originalInput = pendingInput.value;
-    pendingInput.value = ""; // 清空待處理輸入
-
-    try {
-      isLoading.value = true;
-      // 先立即在 UI 放入使用者訊息 + 一個 loading 中的機器人訊息
-      const ts = new Date();
-      const dateKey = toDateKey(ts);
-      const loadingMessage = {
-        id: `${ts.getTime()}|pending`,
-        ts: ts.getTime(),
-        user: originalInput,
-        bot: "",
-        botFrom: "AI",
-        isLoading: true,
-        timestamp: ts.toLocaleString("zh-TW"),
-        dateKey,
-      };
-      conversations.value.push(loadingMessage);
-      await nextTick();
-
-      const botResponse = await sendViaUnifiedAPI(originalInput, {
-        playAudio: !isMuted.value,
-      });
-
-      // 將剛才的 loading 訊息更新為實際回覆
-      const idx = conversations.value.findIndex(
-        (m) => m.id === loadingMessage.id
-      );
-      if (idx !== -1) {
-        conversations.value[idx] = {
-          ...conversations.value[idx],
-          bot: botResponse || "（親愛的:您的問題我目前沒辦法回答）",
-          isLoading: false,
-        };
-      }
-      latestResponse.value =
-        botResponse || "（親愛的:您的問題我目前沒辦法回答）";
-      saveConversations();
-
-      if (showHistoryPage.value) {
-        currentPage.value = 1;
-        nextTick(() => {
-          setTimeout(() => {
-            scrollToBottom();
-          }, 100);
-        });
-      }
-
-      console.log("客服詢問後的AI分析完成");
-    } catch (error) {
-      console.error("客服詢問後的API調用錯誤:", error);
-      const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
-      // 回填錯誤到 pending 訊息或補一筆
-      const idx = conversations.value.findIndex((m) => m.isLoading);
-      if (idx !== -1) {
-        conversations.value[idx] = {
-          ...conversations.value[idx],
-          bot: errorResponse,
-          isLoading: false,
-        };
-      } else {
-        const errorNowTs = Date.now();
-        conversations.value.push({
-          id: errorNowTs,
-          ts: errorNowTs,
-          user: originalInput,
-          bot: errorResponse,
-          timestamp: new Date().toLocaleString("zh-TW"),
-          dateKey: toDateKey(new Date()),
-        });
-      }
-      latestResponse.value = errorResponse;
-      saveConversations();
-    } finally {
-      isLoading.value = false;
-    }
-  }
-};
-
-// 啟動 API 輪詢
+// 啟動 API 輪詢（改為 localStorage 檢查）
 const startApiPolling = () => {
   if (apiPollingInterval.value) {
     clearInterval(apiPollingInterval.value);
   }
 
   isPollingActive.value = true;
-  console.log("啟動 API 輪詢，每15秒檢查一次新訊息");
+  console.log("啟動 localStorage 檢查，每15秒檢查一次新訊息");
 
   apiPollingInterval.value = setInterval(async () => {
     if (isPollingActive.value) {
-      console.log("執行定期 API 檢查...");
+      console.log("執行定期 localStorage 檢查...");
       await fetchChatHistory(true); // 傳遞 isPolling = true
     }
   }, 15000);
@@ -3052,239 +2524,84 @@ const stopApiPolling = () => {
   console.log("停止 API 輪詢");
 };
 
-// 獲取聊天記錄 (TTE API)
+// 獲取聊天記錄（從 localStorage）
 const fetchChatHistory = async (isPolling = false) => {
-  if (!localobj) {
-    console.error("用戶資料不存在");
-    return;
-  }
-
   try {
-    const response = await fetch(GET_CHAT_HISTORY_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        MID: localobj.MID,
-        Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
-        MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
-        Mobile: localobj.Mobile,
-        Lang: "zhtw",
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API 調用失敗: ${response.status}`);
-    }
-
-    const data = await response.json();
+    const storageKey = "robotDemo_chatHistory";
+    const existingData = localStorage.getItem(storageKey);
+    const chatHistory = existingData ? JSON.parse(existingData) : [];
 
     if (isPolling) {
       console.log("輪詢檢查新訊息...");
     } else {
-      console.log("獲取到的聊天記錄:", data);
+      console.log("從 localStorage 獲取到的聊天記錄:", chatHistory);
     }
 
-    if (data.Result === "OK" && data.LineList && Array.isArray(data.LineList)) {
-      // 過濾掉空記錄（沒有 CheckTime 或 Content 的記錄）
-      const validMessages = data.LineList.filter(
-        (msg) =>
-          msg.CheckTime &&
-          msg.CheckTime.trim() !== "" &&
-          msg.Content &&
-          msg.Content.trim() !== ""
+    // 轉換為本地格式
+    const convertedMessages = chatHistory.map((msg) => {
+      const checkTime = parseCorrectTime(msg.timestamp || msg.inputTime);
+      return {
+        id: msg.id || Date.now(),
+        ts: msg.ts || checkTime.getTime(),
+        user: msg.user || "",
+        bot: msg.bot || "",
+        botFrom: msg.botFrom || "AI",
+        timestamp: msg.timestamp || checkTime.toLocaleString("zh-TW"),
+        dateKey: msg.dateKey || toDateKey(checkTime),
+      };
+    });
+
+    // 按時間排序（舊到新）
+    convertedMessages.sort((a, b) => a.ts - b.ts);
+
+    // 檢查是否有新訊息
+    const hasNewMessages =
+      isPolling && conversations.value.length !== convertedMessages.length;
+
+    if (hasNewMessages) {
+      console.log(
+        `發現新訊息！從 ${conversations.value.length} 條增加到 ${convertedMessages.length} 條`
       );
 
-      if (isPolling) {
-        console.log(
-          `輪詢檢查: 原始記錄數: ${data.LineList.length}, 有效記錄數: ${validMessages.length}`
-        );
-      } else {
-        console.log(
-          `原始記錄數: ${data.LineList.length}, 有效記錄數: ${validMessages.length}`
-        );
-      }
-
-      // 轉換 API 資料格式為本地格式
-      const convertedMessages = validMessages.map((msg, index) => {
-        const checkTime = parseCorrectTime(msg.CheckTime);
-
-        if (!isPolling) {
-          console.log(`處理訊息 ${index}:`, {
-            CheckTime: msg.CheckTime,
-            parsedDate: checkTime,
-            Mode: msg.Mode,
-            AHType: msg.AHType,
-            Content: msg.Content,
-            dateKey: toDateKey(checkTime),
-          });
-        }
-
-        // 根據 Mode 和 AHType 判斷是用戶還是 AI/客服
-        // Mode: "Input" = 用戶輸入, Mode: "Output" = AI/客服回應
-        const isUser = msg.Mode === "Input";
-        const isBot = msg.Mode === "Output";
-        const botFrom = isBot ? (msg.AHType === "Human" ? "Human" : "AI") : "";
-
-        return {
-          id: Date.now() + index, // 生成唯一 ID
-          ts: checkTime.getTime(),
-          user: isUser ? msg.Content : "",
-          bot: isBot ? msg.Content : "",
-          botFrom, // AI / Human
-          timestamp: checkTime.toLocaleString("zh-TW"),
-          dateKey: toDateKey(checkTime),
-        };
+      // 滾動到底部顯示新訊息
+      nextTick(() => {
+        setTimeout(() => {
+          scrollToBottom();
+        }, 100);
       });
+    }
 
-      // 按時間排序（舊到新）
-      convertedMessages.sort((a, b) => a.ts - b.ts);
+    conversations.value = convertedMessages;
+    hasMoreMessages.value = false;
 
-      // 檢查是否有新訊息
-      const hasNewMessages =
-        isPolling && conversations.value.length !== convertedMessages.length;
+    // 更新最新回覆
+    if (convertedMessages.length > 0) {
+      latestResponse.value =
+        convertedMessages[convertedMessages.length - 1].bot;
+    }
 
-      if (hasNewMessages) {
-        console.log(
-          `發現新訊息！從 ${conversations.value.length} 條增加到 ${convertedMessages.length} 條`
-        );
+    // 更新日曆數據
+    loadCalendarDates();
 
-        // 滾動到底部顯示新訊息
-        nextTick(() => {
-          setTimeout(() => {
-            scrollToBottom();
-          }, 100);
-        });
-      }
-
-      knownKeys.clear();
-      for (const msg of data.LineList) {
-        knownKeys.add(makeStableKey(msg));
-      }
-      conversations.value = convertedMessages;
-      hasMoreMessages.value = false;
-
-      // 更新最新回覆
-      if (convertedMessages.length > 0) {
-        latestResponse.value =
-          convertedMessages[convertedMessages.length - 1].bot;
-      }
-
-      // 更新日曆數據
-      loadCalendarDates();
-
-      if (!isPolling) {
-        console.log("聊天記錄載入完成:", convertedMessages);
-      }
+    if (!isPolling) {
+      console.log("聊天記錄載入完成:", convertedMessages);
     }
   } catch (error) {
     console.error("獲取聊天記錄失敗:", error);
   }
 };
 
-// 獲取更舊的聊天記錄 (TTE API)
+// 獲取更舊的聊天記錄（從 localStorage，實際上所有記錄都在，這裡只是為了兼容）
 const fetchOlderChatHistory = async (page) => {
-  if (!localobj) {
-    console.error("用戶資料不存在");
-    return 0;
-  }
-
-  try {
-    const response = await fetch(GET_CHAT_HISTORY_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        MID: localobj.MID,
-        Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
-        MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
-        Mobile: localobj.Mobile,
-        Lang: "zhtw",
-        CallTime: page, // 依次撈更舊（外部控制遞增）
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API 調用失敗: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log(`獲取到的更舊聊天記錄:`, data);
-
-    if (!(data?.Result === "OK" && Array.isArray(data.LineList))) {
-      return 0;
-    }
-
-    // 過濾掉空記錄
-    const validMessages = data.LineList.filter(
-      (msg) =>
-        msg.CheckTime &&
-        msg.CheckTime.trim() !== "" &&
-        msg.Content &&
-        msg.Content.trim() !== ""
-    );
-
-    console.log(
-      `更舊記錄 - 原始: ${data.LineList.length}, 有效: ${validMessages.length}`
-    );
-
-    // 轉換 & 產生穩定鍵
-    const incoming = validMessages
-      .map((msg) => {
-        const checkTime = parseCorrectTime(msg.CheckTime);
-        const key = makeStableKey(msg);
-
-        // 根據 Mode 和 AHType 判斷是用戶還是 AI/客服
-        // Mode: "Input" = 用戶輸入, Mode: "Output" = AI/客服回應
-        // AHType: "Human" = 真人客服, AHType: "AI" = AI
-        const isUser = msg.Mode === "Input";
-        const isBot = msg.Mode === "Output";
-        const botFrom = isBot ? (msg.AHType === "Human" ? "Human" : "AI") : "";
-        const obj = {
-          stableKey: key,
-          id: key,
-          ts: checkTime.getTime(),
-          user: isUser ? msg.Content : "",
-          bot: isBot ? msg.Content : "",
-          timestamp: checkTime.toLocaleString("zh-TW"),
-          dateKey: toDateKey(checkTime),
-        };
-        if (isBot) obj.botFrom = botFrom;
-        return obj;
-      })
-      .sort((a, b) => a.ts - b.ts);
-
-    // 去重
-    const newOnes = [];
-    for (const m of incoming) {
-      if (!knownKeys.has(m.stableKey)) {
-        knownKeys.add(m.stableKey);
-        newOnes.push(m);
-      }
-    }
-
-    if (newOnes.length === 0) {
-      return 0;
-    }
-
-    // 合併回 conversations（保持時間序）
-    conversations.value = [...newOnes, ...conversations.value].sort(
-      (a, b) => a.ts - b.ts
-    );
-
-    // 日曆也跟著更新
-    loadCalendarDates();
-
-    console.log(`載入更舊訊息完成，新增 ${newOnes.length} 條訊息`);
-    return newOnes.length;
-  } catch (error) {
-    console.error("獲取更舊聊天記錄失敗:", error);
-    return 0;
-  }
+  // localStorage 已經包含所有記錄，不需要分頁載入
+  // 但為了保持兼容性，返回 0 表示沒有更多記錄
+  return 0;
 };
 
-// 載入對話記錄（從 API 獲取）
+// 載入對話記錄（從 localStorage 獲取）
 const loadConversations = async () => {
   if (process.client) {
-    // 從 API 獲取聊天記錄
+    // 從 localStorage 獲取聊天記錄
     await fetchChatHistory();
 
     // 初始化日曆顯示月份為最新有記錄的月份
@@ -3330,7 +2647,8 @@ onMounted(async () => {
   }*/
   initSpeechRecognition();
   loadConversations();
-  await loadSavedCharacter();
+  // 移除角色載入，固定使用院長角色
+  // await loadSavedCharacter();
 
   // 載入靜音狀態
   if (process.client) {
@@ -3345,8 +2663,8 @@ onMounted(async () => {
     showVoiceControls.value = true;
   }
 
-  // 檢查首次登入解說狀態
-  checkTutorialStatus();
+  // 移除首次登入解說狀態檢查
+  // checkTutorialStatus();
 
   // 啟動 API 輪詢
   startApiPolling();
@@ -3601,7 +2919,17 @@ const changeRoleDisplayName = async (displayName) => {
 // ChatGPT API 調用函數
 const callChatGPT = async (
   message,
-  systemMessage = "你是一個聰明的智慧醫療助手，這是一段病患的症狀敘述內容，請幫我做摘要重點"
+  systemMessage = `你是一個「專業健康顧問」，你的工作只有一項：1.陪伴式回應（簡短、溫柔、像真人）
+【輸出格式要求】
+只輸出以下一個區塊（不要加星號、不要加多餘符號、不要加說明文字）：
+（在這裡以溫柔、簡短的語氣回應使用者的情緒或敘述，像真人陪伴）
+【限制規則】
+1. 不可推理或猜測病因。
+2. 不可加入任何建議、分析、評論或衛教。
+3. 不可使用 *、#、-、>、Markdown 格式符號。
+4. 不可使用條列符號，全部以自然語句呈現。
+請嚴格遵守以上格式與規則，開始後不需要再次重述任務或格式。
+`
 ) => {
   try {
     const response = await fetch(CHATGPT_API_URL, {
@@ -4411,8 +3739,9 @@ const vClickOutside = {
   width: 100%;
   height: 120px;
   @include neumorphismOuter();
-  overflow: hidden;
-  overflow-y: scroll;
+  overflow-y: auto;
+  word-wrap: break-word;
+  word-break: break-word;
   @include scrollbarStyle();
 }
 
@@ -4469,13 +3798,15 @@ const vClickOutside = {
     }
   }
   .healGroup2 {
-    right: 2.25rem;
-    top: 7rem;
-  }
-  .healGroup3 {
-    right: 2.25rem;
-    top: 11.5rem;
-  }
+
+right: 2.25rem;
+top: 7rem;
+
+}
+.healGroup3 {
+right: 2.25rem;
+top: 11.5rem;
+}
 }
 
 /* 語音控制欄 - 絕對定位擬態設計 */
@@ -4488,10 +3819,9 @@ const vClickOutside = {
   align-items: center;
   justify-content: center;
   gap: 20px;
-  height: 72px; 
   @include liquidGlass();
   z-index: 10;
-  padding: 0.35rem 2.25rem;
+  padding: .35rem 2.25rem;
   .firstText1 {
     top: -50%;
     left: 50%;
@@ -4553,7 +3883,7 @@ const vClickOutside = {
     cursor: pointer;
     transition: all 0.3s ease;
     @include neumorphismOuter($radius: 50%, $padding: 0);
-    img {
+    img{
       width: 36px;
       height: 36px;
     }
@@ -4712,14 +4042,9 @@ const vClickOutside = {
   }
 }
 .voiceModelClose {
-  position: relative;
+  @include neumorphismOuter($radius: 50%, $padding: 4px);
+  margin-top: 44px;
   transition: all 0.3s ease;
-  position: relative;
-  pointer-events: none;
-  img {
-    position: absolute;
-
-  }
 
   &:hover,
   &:active {
@@ -4739,9 +4064,6 @@ const vClickOutside = {
     display: flex;
     align-items: center;
     justify-content: center;
-    position: absolute;
-    top: 0;
-    right: 0;
   }
 }
 
@@ -4767,7 +4089,6 @@ const vClickOutside = {
   background: rgba(245, 247, 250, 0.1);
   backdrop-filter: blur(22px);
   z-index: 100;
-  position: relative;
   @include neumorphismOuter(
     $bgColor: rgba(245, 247, 250, 0.1),
     $radius: 50px 50px 0 0,
@@ -4782,18 +4103,11 @@ const vClickOutside = {
     flex-direction: column;
     align-items: center;
     gap: 12px;
-   
+
     .voice-wave {
       width: 115px;
       height: 115px;
-      min-width: 115px; // 確保最小寬度
-      min-height: 115px; // 確保最小高度
-      max-width: 115px; // 確保最大寬度，防止放大
-      max-height: 115px; // 確保最大高度，防止放大
       object-fit: contain;
-      flex-shrink: 0; // 防止圖片縮小
-      flex-grow: 0; // 防止圖片放大
-      position: relative; // 確保位置固定
       animation: pulse-wave 1.6s infinite ease-in-out;
     }
 
@@ -4812,21 +4126,6 @@ const vClickOutside = {
       text-transform: lowercase;
     }
 
-    .voice-start-text {
-      color: var(--Neutral-black, #1e1e1e);
-      text-align: center;
-
-      font-size: var(--Text-font-size-18, 18px);
-      font-style: normal;
-      font-weight: 400;
-      line-height: normal;
-      text-transform: lowercase;
-      position: absolute;
-      top: 40px;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-
     .transcript-text {
       margin-top: 16px;
       font-size: 18px;
@@ -4839,9 +4138,6 @@ const vClickOutside = {
       line-height: 1.5;
       word-break: break-word;
       max-width: 90%;
-      // 確保文字區域不會影響圖片位置
-      position: relative;
-      z-index: 1;
       /* Android 字體渲染優化 */
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
@@ -4862,141 +4158,17 @@ const vClickOutside = {
       -ms-transform: translateZ(0);
       -o-transform: translateZ(0);
     }
-
-    .voice-confirm-text {
-      margin-top: 16px;
-      font-size: 16px;
-      color: #2d3748;
-      font-weight: 500;
-      text-align: center;
-      padding: 0 16px;
-    }
-
-    .voice-label-text {
-      margin-top: 12px;
-      font-size: 16px;
-      color: #2d3748;
-      font-weight: 600;
-      text-align: left;
-      width: 90%;
-      padding: 0 16px;
-    }
-
-    .transcript-display {
-      margin-top: 8px;
-      font-size: 16px;
-      color: #2d3748;
-      font-weight: 400;
-      text-align: left;
-      padding: 12px 16px;
-      min-height: 60px;
-      max-height: 200px;
-      overflow-y: auto;
-      line-height: 1.6;
-      word-break: break-word;
-      max-width: 90%;
-      background: rgba(255, 255, 255, 0.5);
-      border-radius: 8px;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-
-      position: fixed;
-  left: 0;
-  right: 0;
-  bottom: calc(72px + env(safe-area-inset-bottom)); /* 貼在語音列上方 */
-  z-index: 999;
-  pointer-events: none; /* 如果你不需要點擊 */
-    }
-
-    .voice-action-buttons {
-      display: flex;
-      gap: 12px;
-      margin-top: 20px;
-      padding: 0 16px;
-      width: 100%;
-      justify-content: center;
-    }
-
-    .voice-btn {
-      flex: 1;
-      max-width: 150px;
-      padding: 12px 24px;
-      border-radius: 24px;
-      font-size: 16px;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      outline: none;
-
-      &:active:not(:disabled) {
-        transform: scale(0.95);
-      }
-    }
-
-    // 錄音中單獨顯示的送出按鈕
-    .voice-content > .voice-btn-send {
-      flex: none;
-      max-width: none;
-      width: calc(100% - 32px);
-      margin: 20px 16px 0;
-
-      border-radius: var(--Radius-r-50, 50px);
-      background: var(--Primary-default, #74bc1f);
-      box-shadow: 2px 4px 12px 0
-        var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
-    }
-
-    .voice-btn-retry {
-      border-radius: var(--Radius-r-50, 50px);
-      background: var(--Secondary-100, #f5f7fa);
-      box-shadow: 2px 4px 12px 0
-        var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
-      color: var(--Primary-default, #74bc1f);
-
-      font-size: var(--Text-font-size-18, 18px);
-      font-style: normal;
-      font-weight: 400;
-
-      letter-spacing: 2.7px;
-      &:hover {
-        background: #f0fdf4;
-      }
-    }
-
-    .voice-btn-send {
-      border-radius: var(--Radius-r-50, 50px);
-      background: var(--Primary-default, #74bc1f);
-      box-shadow: 2px 4px 12px 0
-        var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
-      color: var(--White-default, #fff);
-      font-family: "Noto Sans";
-      font-size: var(--Text-font-size-18, 18px);
-      font-style: normal;
-      font-weight: 400;
-      line-height: 100%; /* 18px */
-      letter-spacing: 2.7px;
-      &:hover:not(:disabled) {
-        background: #22c55e;
-      }
-
-      &:disabled {
-        background: #cbd5e1;
-        color: #94a3b8;
-        cursor: not-allowed;
-        opacity: 0.6;
-      }
-    }
   }
 }
 
 @keyframes pulse-wave {
   0%,
   100% {
-    transform: scale(1);
+    transform: scale(0.95);
     opacity: 0.8;
   }
   50% {
-    transform: scale(1.1);
+    transform: scale(1.05);
     opacity: 1;
   }
 }
@@ -5198,10 +4370,7 @@ const vClickOutside = {
   @extend .robotCommonModel;
 }
 
-/* 客服詢問樣式 - 使用共用樣式 */
-.customer-service-modal {
-  @extend .robotCommonModel;
-}
+/* 移除客服詢問樣式 */
 
 /* 動畫 */
 .fade-enter-active,
@@ -6377,37 +5546,5 @@ const vClickOutside = {
   z-index: 10000;
 }
 
-/* 首次登入解說覆蓋層樣式 */
-.tutorial-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(10px);
-  z-index: 9999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-}
-
-.tutorial-content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-}
-
-.tutorial-text {
-  color: #fff;
-  text-align: center;
-  font-size: var(--Text-font-size-20, 20px);
-  font-style: normal;
-  font-weight: 700;
-  line-height: 120%; /* 24px */
-  pointer-events: none;
-}
+/* 移除首次登入解說覆蓋層樣式 */
 </style>
