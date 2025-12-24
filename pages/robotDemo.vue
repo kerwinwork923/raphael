@@ -4283,7 +4283,7 @@ top: 11.5rem;
     }
 
     .voice-confirm-text {
-      margin-top: 16px;
+
       font-size: 16px;
       color: #2d3748;
       font-weight: 500;
@@ -4292,7 +4292,7 @@ top: 11.5rem;
     }
 
     .voice-label-text {
-      margin-top: 12px;
+
       font-size: 16px;
       color: #2d3748;
       font-weight: 600;
