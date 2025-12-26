@@ -1726,8 +1726,10 @@ const initSpeechRecognition = () => {
 
         if (process.client) {
           // Android 兼容性：立即同步更新 DOM，不等待 Vue 響應式系統
+          // 優先查找 transcript-display（確認畫面），其次查找 transcript-text（錄音中）
           const transcriptEl =
             voiceModalTranscriptRef.value ||
+            document.querySelector(".voice-modal .transcript-display") ||
             document.querySelector(".voice-modal .transcript-text");
 
           const textToShow = transcript || "";
@@ -2242,6 +2244,16 @@ const stopRecording = () => {
 
 // 重新錄音（回到開始錄音狀態）
 const retryRecording = () => {
+  // 停止當前錄音
+  if (process.client && recognitionRef) {
+    finalizedByUs = true;
+    recognitionRef.stop();
+  }
+
+  // 清除當前錄音會話的對話紀錄（只清除當前錄音產生的，不影響歷史紀錄）
+  // 這裡我們需要清除當前錄音過程中累積的轉錄內容
+  // 但由於 currentTranscript 會在 startRecording 中被清空，這裡主要確保狀態重置
+
   // 重置狀態
   isRecordingComplete.value = false;
   pendingTranscript.value = "";
@@ -4854,16 +4866,8 @@ const vClickOutside = {
       line-height: 1.6;
       word-break: break-word;
       max-width: 90%;
-      background: rgba(255, 255, 255, 0.5);
-      border-radius: 8px;
-      border: 1px solid rgba(0, 0, 0, 0.1);
 
-      position: fixed;
-  left: 0;
-  right: 0;
-  bottom: calc(72px + env(safe-area-inset-bottom)); /* 貼在語音列上方 */
-  z-index: 999;
-  pointer-events: none; /* 如果你不需要點擊 */
+
     }
 
     .voice-action-buttons {
