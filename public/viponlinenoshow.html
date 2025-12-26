@@ -29,7 +29,7 @@
       line-height:1.8;
     }
     a{color:inherit}
-    img,iframe{max-width:100%;display:block}
+    img,iframe,video{max-width:100%;display:block}
   
     /* ===== Layout ===== */
     .wrap{max-width:1100px;margin:0 auto;padding:0 16px 70px;}
@@ -145,6 +145,8 @@
       aspect-ratio:16/9;
       border:0;
       background:#000;
+      display:block;
+      object-fit:contain;
     }
   
     /* ===== CTA button ===== */
@@ -334,10 +336,17 @@
         </div>
       </div>
       <div class="video-wrap">
-        <!-- TODO: 換成你的精華版 YouTube 影片 ID -->
-          <iframe class="video"
-          src="https://www.youtube.com/watch?v=mq9VRdR7rl4" data-video-id="video013"  
-          title="智平衡健康複利系統發表會｜精華版" allowfullscreen></iframe>
+        <video 
+          class="video" 
+          id="video-player"
+          data-video-id="video013"
+          data-title="智平衡健康複利系統發表會｜精華版"
+          controls
+          playsinline
+          preload="metadata">
+          <source src="/video/1221_2.mp4" type="video/mp4">
+          您的瀏覽器不支援影片播放。
+        </video>
       </div>
       <div>
         <button class="gift cta-btn" type="button">
@@ -439,53 +448,25 @@ function appendLocalEvent(evt) {
   } catch {}
 }
 
-/** ====== 解析 YouTube URL → 統一轉成可追蹤 embed ====== */
-function normalizeYouTubeSrc(src) {
-  if (!src) return null;
-  const be    = src.match(/youtu\.be\/([A-Za-z0-9_-]{6,})/);
-  const watch = src.match(/[?&]v=([A-Za-z0-9_-]{6,})/);
-  const embed = src.match(/\/embed\/([A-Za-z0-9_-]{6,})/);
-  const ytId = be?.[1] || watch?.[1] || embed?.[1];
-  if (!ytId) return null;
-
-  const url = new URL("https://www.youtube-nocookie.com/embed/" + ytId);
-  url.searchParams.set("enablejsapi", "1");
-  url.searchParams.set("rel", "0");
-  url.searchParams.set("modestbranding", "1");
-  url.searchParams.set("playsinline", "1");
-  url.searchParams.set("origin", location.origin); // ✅ 重要：避免 stateChange 不完整
-
-  return { id: ytId, url: url.toString() };
-}
-
-/** ====== 掃描 iframes → 正規化 → 補資料屬性 ====== */
-function prepareIframes() {
-  const iframes = Array.from(document.querySelectorAll("iframe"));
+/** ====== 準備影片元素 ====== */
+function prepareVideos() {
+  const videos = Array.from(document.querySelectorAll("video[data-video-id]"));
   let idx = 0;
 
-  for (const el of iframes) {
-    const norm = normalizeYouTubeSrc(el.getAttribute("src"));
-    if (!norm) continue;
+  for (const el of videos) {
+    // 給 id（如果沒有）
+    if (!el.id) el.id = `video-${++idx}`;
 
-    // 轉成 embed（可追蹤）
-    el.src = norm.url;
-
-    // 給 id（YT.Player 需要）
-    if (!el.id) el.id = `ytp-${++idx}`;
-
-    // 標題
-    let title = el.getAttribute("title") || `video-${idx}`;
-
-    el.dataset.track = "yt";
-    el.dataset.title = title;
-    el.dataset.youtubeId = norm.id;
-    el.dataset.videoId = el.dataset.videoId || norm.id; // 你的商務 id，沒填就用 ytId
+    // 確保資料屬性存在
+    el.dataset.track = "video";
+    el.dataset.title = el.dataset.title || el.getAttribute("title") || `video-${idx}`;
+    el.dataset.videoId = el.dataset.videoId || `video-${idx}`;
   }
 }
 
 /** ====== 播放器與旗標 ====== */
 const players = {};
-const flags = {}; // { [iframeId]: { clicked, sent50, sent100, halfTimer, endTimer } }
+const flags = {}; // { [videoId]: { clicked, sent50, sent100, halfTimer, endTimer } }
 
 /** ====== 100% 完成清單（可選） ====== */
 function markWatched(record) {
@@ -499,15 +480,14 @@ function markWatched(record) {
 }
 
 /** ====== 送事件（目前你還是只 console + 本地流水帳；DB 由 logEvent 打） ====== */
-function sendProgress({ iframeId, status, player, meta }) {
-  const duration = Math.round(player?.getDuration?.() || 0);
-  const watched  = Math.round(player?.getCurrentTime?.() || 0);
+function sendProgress({ videoId, status, player, meta }) {
+  const duration = Math.round(player?.duration || 0);
+  const watched  = Math.round(player?.currentTime || 0);
 
   const payload = {
     vipId,
     status,                    // click | 50 | 100
     videoId:   meta.videoId,   // 你的商務ID
-    youtubeId: meta.youtubeId, // 真正 YT ID
     title:     meta.title,
     watchedSec: watched,
     duration,
@@ -522,108 +502,69 @@ function sendProgress({ iframeId, status, player, meta }) {
 
 /** ====== 建立播放器並追蹤 click / 50% / 100% ====== */
 function createPlayers() {
-  if (!window.YT || !YT.Player) {
-    console.warn("[YT] not ready yet");
-    return;
-  }
+  const videos = Array.from(document.querySelectorAll('video[data-track="video"]'));
+  console.log("[Video] found videos:", videos.length);
 
-  const iframes = Array.from(document.querySelectorAll('iframe[data-track="yt"]'));
-  console.log("[YT] found iframes:", iframes.length);
-
-  iframes.forEach((el) => {
-    const iframeId = el.id;
+  videos.forEach((el) => {
+    const videoId = el.id;
 
     const meta = {
       videoId: el.dataset.videoId,
-      youtubeId: el.dataset.youtubeId,
-      title: el.dataset.title || el.title || el.dataset.videoId || el.dataset.youtubeId,
+      title: el.dataset.title || el.getAttribute("title") || el.dataset.videoId,
     };
 
-    flags[iframeId] = { clicked: false, sent50: false, sent100: false, halfTimer: null, endTimer: null };
+    flags[videoId] = { clicked: false, sent50: false, sent100: false, halfTimer: null, endTimer: null };
+    players[videoId] = el;
 
-    players[iframeId] = new YT.Player(iframeId, {
-      events: {
-        onReady: () => console.log("[YT ready]", iframeId, meta),
-        onError: (err) => console.log("[YT error]", iframeId, err),
+    // 影片載入完成
+    el.addEventListener("loadedmetadata", () => {
+      console.log("[Video ready]", videoId, meta);
+    });
 
-        onStateChange: (e) => {
-          const state = e.data;
-          const player = players[iframeId];
+    // 影片錯誤
+    el.addEventListener("error", (err) => {
+      console.log("[Video error]", videoId, err);
+    });
 
-          // ✅ Debug：你會看到 1/2/0
-          console.log("[YT state]", iframeId, "state=", state);
+    // 首次播放（click 事件）
+    el.addEventListener("play", () => {
+      if (!flags[videoId].clicked) {
+        flags[videoId].clicked = true;
+        sendProgress({ videoId, status: "click", player: el, meta });
+        logEvent("videoPlay_" + meta.videoId, EventType);
+      }
+    });
 
-          // click（首次播放）
-          if (state === YT.PlayerState.PLAYING && !flags[iframeId].clicked) {
-            flags[iframeId].clicked = true;
-            sendProgress({ iframeId, status: "click", player, meta });
-            logEvent("videoPlay_" + meta.videoId, EventType);
-          }
+    // 追蹤播放進度
+    el.addEventListener("timeupdate", () => {
+      const duration = el.duration || 0;
+      const currentTime = el.currentTime || 0;
 
-          // 50% timer
-          if (state === YT.PlayerState.PLAYING && !flags[iframeId].sent50 && !flags[iframeId].halfTimer) {
-            flags[iframeId].halfTimer = setInterval(() => {
-              try {
-                const d = player.getDuration?.() || 0;
-                const c = player.getCurrentTime?.() || 0;
-                if (d > 0 && c / d >= 0.5 && !flags[iframeId].sent50) {
-                  flags[iframeId].sent50 = true;
-                  sendProgress({ iframeId, status: "50", player, meta });
-                  logEvent("videoPlay50_" + meta.videoId, EventType);
+      if (duration > 0 && !el.paused) {
+        const progress = currentTime / duration;
 
-                  clearInterval(flags[iframeId].halfTimer);
-                  flags[iframeId].halfTimer = null;
-                }
-              } catch {}
-            }, 1000);
-          }
-
-          // ✅ 補強：99% 當作 100%（避免 ENDED 不觸發）
-          if (state === YT.PlayerState.PLAYING && !flags[iframeId].sent100 && !flags[iframeId].endTimer) {
-            flags[iframeId].endTimer = setInterval(() => {
-              try {
-                const d = player.getDuration?.() || 0;
-                const c = player.getCurrentTime?.() || 0;
-                if (d > 0 && c / d >= 0.99 && !flags[iframeId].sent100) {
-                  flags[iframeId].sent100 = true;
-                  sendProgress({ iframeId, status: "100", player, meta });
-                  logEvent("videoPlay100_" + meta.videoId, EventType);
-
-                  clearInterval(flags[iframeId].endTimer);
-                  flags[iframeId].endTimer = null;
-
-                  if (flags[iframeId].halfTimer) {
-                    clearInterval(flags[iframeId].halfTimer);
-                    flags[iframeId].halfTimer = null;
-                  }
-                }
-              } catch {}
-            }, 1000);
-          }
-
-          // 100%（ENDED）
-          if (state === YT.PlayerState.ENDED && !flags[iframeId].sent100) {
-            flags[iframeId].sent100 = true;
-
-            if (flags[iframeId].halfTimer) {
-              clearInterval(flags[iframeId].halfTimer);
-              flags[iframeId].halfTimer = null;
-            }
-            if (flags[iframeId].endTimer) {
-              clearInterval(flags[iframeId].endTimer);
-              flags[iframeId].endTimer = null;
-            }
-
-            sendProgress({ iframeId, status: "100", player, meta });
-            logEvent("videoPlay100_" + meta.videoId, EventType);
-          }
-
-          // 暫停時清 endTimer（避免停在中間也被誤判 99%）
-          if (state === YT.PlayerState.PAUSED && flags[iframeId].endTimer) {
-            clearInterval(flags[iframeId].endTimer);
-            flags[iframeId].endTimer = null;
-          }
+        // 50% 進度
+        if (progress >= 0.5 && !flags[videoId].sent50) {
+          flags[videoId].sent50 = true;
+          sendProgress({ videoId, status: "50", player: el, meta });
+          logEvent("videoPlay50_" + meta.videoId, EventType);
         }
+
+        // 99% 當作 100%（避免 ended 事件不觸發）
+        if (progress >= 0.99 && !flags[videoId].sent100) {
+          flags[videoId].sent100 = true;
+          sendProgress({ videoId, status: "100", player: el, meta });
+          logEvent("videoPlay100_" + meta.videoId, EventType);
+        }
+      }
+    });
+
+    // 影片結束
+    el.addEventListener("ended", () => {
+      if (!flags[videoId].sent100) {
+        flags[videoId].sent100 = true;
+        sendProgress({ videoId, status: "100", player: el, meta });
+        logEvent("videoPlay100_" + meta.videoId, EventType);
       }
     });
   });
@@ -631,18 +572,9 @@ function createPlayers() {
 
 /** ====== 啟動 ====== */
 document.addEventListener("DOMContentLoaded", () => {
-  prepareIframes();
-
-  // ✅ 這頁沒有 wireVipLink()，不要呼叫，不然會直接噴錯把追蹤卡死
-  // wireVipLink();
-
-  // 動態載入 YouTube Iframe API
-  const s = document.createElement("script");
-  s.src = "https://www.youtube.com/iframe_api";
-  document.head.appendChild(s);
+  prepareVideos();
+  createPlayers();
 });
-
-window.onYouTubeIframeAPIReady = createPlayers;
 
 /** ====== 開發時工具 ====== */
 window.VideoTrack = {
