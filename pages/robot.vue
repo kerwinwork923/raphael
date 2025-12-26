@@ -4667,7 +4667,7 @@ const vClickOutside = {
 .voiceModelClose {
   position: relative;
   transition: all 0.3s ease;
-  position: relative;
+  
   pointer-events: none;
   
   
@@ -4715,7 +4715,7 @@ const vClickOutside = {
   display: flex;
   justify-content: center;
   align-items: center;
-  position: fixed;
+  position: fixed !important;
   bottom: 0;
   left: 50%;
 
