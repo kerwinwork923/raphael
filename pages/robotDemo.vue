@@ -1745,6 +1745,12 @@ async function sendViaUnifiedAPI(
 
   console.log(`24 小時內對話數量: ${recentConversations.length}`, recentConversations);
 
+  // 📌 將 conversationHistory 格式化為字串，合併到 message 中
+  const messageWithHistory = JSON.stringify({
+    text: userText,
+    conversationHistory: recentConversations,
+  });
+
   let usedServerAudio = false; // 追蹤是否使用了伺服器音頻
   let res;
 
@@ -1753,7 +1759,6 @@ async function sendViaUnifiedAPI(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        conversationHistory: recentConversations, // 📌 加入 24 小時對話歷史
         systemMessage: `【System Prompt｜對話型病情追問與紀錄機器人 
 
 你是一位健康管理 app 內的對話型病情紀錄機器人。 
@@ -1917,7 +1922,7 @@ B️⃣ 完整病情追問模板（沒改善／狀況持續時必用）
 讓患者清楚感受到： 
 
 有人在聽、有人在問、有人在記錄 `,
-        message: userText,
+        message: messageWithHistory, // 📌 將對話歷史以 JSON 字串形式包含在 message 中
         model: "gpt-5-mini",
         ...extra,
       }),
