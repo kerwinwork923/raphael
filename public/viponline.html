@@ -740,7 +740,7 @@
           title="智平衡健康複利系統發表會｜完整版" allowfullscreen></iframe>
       </div>
     </section>
-    <button class="gift cta-btn" type="button" data-open="survey" data-video-id="video015">填寫問卷</button>  
+    <button class="gift cta-btn" type="button" data-open="survey" data-video-id="video015">填寫問卷領5000</button>  
 
     <section id="form" class="section container">
       <h2 class="title">會員專屬優惠｜優惠只到 2026/01/15</h2>
@@ -776,6 +776,7 @@
       <div class="survey-wrap" role="dialog" aria-modal="true" aria-labelledby="surveyTitle">
         <div class="survey-head">
           <h3 id="surveyTitle">填寫問卷</h3>
+          <button type="button" class="survey-close" id="surveyClose">關閉</button>
         </div>
     
         <form id="dynamic-form">
@@ -807,12 +808,9 @@
           <button type="button" class="survey-success-close" id="surveySuccessClose" aria-label="關閉">關閉</button>
         </div>
         <p class="survey-success-text" id="surveySuccessText">
-          感謝你完整看完影片，也花時間留下回饋。<br>
-          作為今天完整參與的回饋，我們準備了一份<br>
-          5000 元專屬折價回饋，<br>
-          可於未來有需要時使用。<br>
-          今天不需要做任何決定，<br>
-          我們只是很珍惜你願意把感覺留下來。
+          感謝你花時間完整看完發表會，並完成這份回饋問卷。
+          作為回饋，這組 QR Code 將為你保留一筆「5000 元專屬折抵」。<br>
+          請現在截圖保存此畫面。未來若你決定加入「智平衡健康複利系統」，只要在購買時出示此 QR Code，即可折抵 5,000 元費用。
         </p>
         <div class="survey-success-qr">
           <div id="surveySuccessQR"></div>
@@ -1514,7 +1512,7 @@ window.VideoTrack = {
 
 /** ===== Survey Success Modal control ===== */
 const THANK_YOU_QR_URL  = "vip="+vipId; // TODO: 換成你的 LINE/表單/預約頁
-const THANK_YOU_MESSAGE = "感謝你完整看完影片，也花時間留下回饋。\n作為今天完整參與的回饋，我們準備了一份\n5000 元專屬折價回饋，\n可於未來有需要時使用。\n今天不需要做任何決定，\n我們只是很珍惜你願意把感覺留下來。";
+const THANK_YOU_MESSAGE = "感謝你花時間完整看完發表會，並完成這份回饋問卷。作為回饋，這組 QR Code 將為你保留一筆「5000 元專屬折抵」。請現在 截圖保存此畫面。未來若你決定加入「智平衡健康複利系統」，只要在購買時出示此 QR Code，即可 折抵 5,000 元費用。";
 
 const $successOverlay = document.getElementById("surveySuccessOverlay");
 const $successQRBox   = document.getElementById("surveySuccessQR");
