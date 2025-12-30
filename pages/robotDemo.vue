@@ -45,6 +45,12 @@
         </div>
         <h5>聊天紀錄</h5>
       </div>
+      <div class="healGroup healGroup4">
+        <div class="healthImg"  @click="goToVoice">
+          <img src="/assets/imgs/robot/mic.svg" alt="語音" />
+        </div>
+        <h5>專人協助</h5>
+      </div>
       <div class="healGroup healGroup3">
       <div class="healthImg" @click="toggleVolume">
           <img :src="isMuted ? mutedSvg : volumeSvg" alt="音量" />
@@ -907,6 +913,10 @@ const showHistory = async () => {
       }, 100);
     });
   }
+};
+
+const goToVoice = () => {
+  // router.push("/specialAssistance");
 };
 
 // 關閉歷史記錄
@@ -4017,7 +4027,13 @@ top: 7rem;
 }
 .healGroup3 {
 right: 2.25rem;
+top: 16rem;
+}
+.healGroup4 {
+right: 2.25rem;
+
 top: 11.5rem;
+
 }
 }
 

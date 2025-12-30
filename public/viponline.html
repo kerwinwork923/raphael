@@ -4,6 +4,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>智平衡健康複利系統發表會</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+   <!-- Tailwind theme -->
+   <script>
+     tailwind.config = {
+       theme: {
+         extend: {
+           colors: {
+             wb: {
+               deep: '#0f3b3b',
+               gold: '#c9a14a',
+               ink:  '#1f2a37',
+               muted:'#6b7280',
+               ivory:'#f6f1e7',
+               line: 'rgba(201,161,74,.35)'
+             }
+           },
+           boxShadow: {
+             soft: '0 12px 36px rgba(17,24,39,.08)',
+             strong: '0 20px 60px rgba(0,0,0,.18)'
+           }
+         }
+       }
+     }
+   </script>
   <style>
     :root{
       --deep:#0f3b3b;
@@ -22,12 +47,32 @@
     }
   
     *{box-sizing:border-box;margin:0;padding:0}
+   
+
     body{
       font-family:"PingFang TC","Microsoft JhengHei",system-ui,Segoe UI,Arial,sans-serif;
       background:var(--bg);
       color:var(--ink);
       line-height:1.8;
     }
+
+    .wb-geo-lines {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+    }
+
+    /* 金色幾何底線 */
+    .wb-geo-svg {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      width: 100%;
+      height: 100%;
+      opacity: .9;
+      pointer-events: none;
+    }
+
     a{color:inherit}
     img,iframe{max-width:100%;display:block}
   
@@ -39,10 +84,10 @@
       .section{padding:34px 16px;}
     }
   
-    /* ===== Header ===== */
+    /* ===== Header（✅縮短「線」與「如果你曾經…」之間距離的關鍵）===== */
     header{
       text-align:center;
-      padding:88px 16px 34px;
+      padding:88px 16px 12px; /* 原本 bottom 34px → 12px */
     }
     header .brand{
       max-width:1100px;
@@ -50,7 +95,7 @@
       display:flex;
       flex-direction:column;
       align-items:center;
-      gap:16px;
+      gap:4px; /* 原本 6px → 4px */
     }
     header h1{
       font-size:clamp(44px,6.2vw,74px);
@@ -64,14 +109,14 @@
       height:4px;
       background:var(--gold);
       border-radius:999px;
-      margin-top:6px;
+      margin-top:0; /* 更貼 */
     }
     header .subtitle{
       max-width:920px;
       color:var(--muted);
       font-size:18px;
       line-height:1.65;
-      margin-top:6px;
+      margin-top:0; /* 更貼 */
     }
   
     /* ===== Cards ===== */
@@ -91,8 +136,11 @@
       font-size:18px;
       margin-bottom:8px;
     }
-    .sub{color:var(--muted);font-size:16px;
-     text-align: center;}
+    .sub{
+      color:var(--muted);
+      font-size:16px;
+      text-align:center;
+    }
   
     /* ===== Title ===== */
     .title{
@@ -177,19 +225,32 @@
       padding:10px 16px;
     }
   
-    .cta-btn{ /* 兼容你原本 class */
+    /* ✅ 合併你原本重複的 .cta-btn 定義，避免互相覆蓋 */
+    .cta-btn{
       background:var(--gold);
       color:#fff;
       border:2px solid var(--gold);
       padding:11px 18px;
       border-radius:999px;
       font-weight:900;
-      display:inline-block;
       text-decoration:none;
       transition:.2s;
       margin-top:14px;
+  
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      width:100%;
+      font-size:18px;
+      letter-spacing:2px;
+      cursor:pointer;
     }
-    .cta-btn:hover{background:transparent;color:var(--gold);}
+    .cta-btn img{
+      width:25px;
+      height:25px;
+      margin-left:2px;
+    }
+    .cta-btn:hover{background:#c28e20;color:var(--bg);}
   
     /* ===== Bullets ===== */
     .bullets{
@@ -235,7 +296,6 @@
       margin:0 0 8px;
       font-weight:900;
       letter-spacing:.5px;
-      
     }
   
     .form-card input,
@@ -279,15 +339,16 @@
       cursor:pointer;
       transition:.2s;
       min-height:50px;
-      width:100%; /* 表單主按鈕滿版 */
+      width:100%;
       font-size:18px;
-      letter-spacing: 2px;
+      letter-spacing:2px;
     }
     .btn-submit:hover{filter:brightness(.98)}
     .btn-submit:active{transform:translateY(1px)}
     .btn-submit:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+  
     .pad{ padding:22px 22px 24px; }
-    
+  
     /* ===== Popup ===== */
     .popup-overlay{
       position:fixed;
@@ -435,10 +496,204 @@
       font-size:14px;
       background:linear-gradient(135deg,rgba(201,161,74,.07),rgba(255,255,255,0));
     }
+  
+    /* ===== Survey：通用排版（你現有的版本保留）===== */
+    .survey-wrap fieldset label{
+      display:block;
+      margin-top:10px;
+    }
+  
+    /* 單選/複選：固定左圈右字 */
+    .survey-wrap fieldset label:has(input[type="radio"]),
+    .survey-wrap fieldset label:has(input[type="checkbox"]){
+      line-height:1;      /* ✅ 1倍行高 */
+      margin-top:6px;
+      font-weight:600;
+    }
+    .survey-wrap fieldset label input[type="radio"],
+    .survey-wrap fieldset label input[type="checkbox"]{
+      margin-top:0;
+    }
+  
+    /* 簡答（textarea / text）才用兩欄 */
+    .survey-wrap .qa-row{
+      display:grid;
+      grid-template-columns:140px 1fr;
+      gap:12px;
+      align-items:start;
+      margin-top:10px;
+      font-weight:700;
+      color:#444;
+    }
+    .survey-wrap .qa-row textarea,
+    .survey-wrap .qa-row input[type="text"]{
+      width:100%;
+      padding:12px 14px;
+      border-radius:12px;
+      border:1px solid rgba(17,24,39,.14);
+      font-size:16px;
+      line-height:1.6;
+      outline:none;
+    }
+    .survey-wrap .qa-row textarea{
+      min-height:96px;
+      resize:vertical;
+    }
+    .survey-wrap .qa-row textarea:focus,
+    .survey-wrap .qa-row input[type="text"]:focus{
+      border-color:rgba(201,161,74,.95);
+      box-shadow:var(--focus);
+    }
+    @media (max-width:640px){
+      .survey-wrap .qa-row{grid-template-columns:1fr;}
+    }
+
+    /* ===== 縮短 header 與第一段內容的距離（減半） ===== */
+    header + .wrap > .section:first-of-type{
+       padding-top: 12px;   /* 原本 50px → 約一半 */
+     }
+     .survey-success-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.55);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:1400;
+      animation:fadeIn .25s ease forwards;
+    }
+    .survey-success{
+      background:#fff;
+      border:2px solid var(--gold);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow-strong);
+      width:min(520px, 92vw);
+      padding:18px 18px 16px;
+    }
+    .survey-success-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+      }
+    .survey-success-head h3{
+      margin:0;
+      font-size:18px;
+      color:var(--deep);
+      font-weight:900;
+    }
+    .survey-success-close{
+      appearance:none;
+      border:0;
+      background:#eee;
+      border-radius:10px;
+      padding:6px 10px;
+      cursor:pointer;
+    }
+    .survey-success-close:hover{ background:#e4e4e4; }
+
+    .survey-success-text{
+      margin:10px 0 14px;
+      color:var(--muted);
+      font-weight:700;
+      line-height:1.7;
+    }
+
+    .survey-success-qr{
+      display:flex;
+      justify-content:center;
+      margin:10px 0 14px;
+    }
+#surveySuccessQR{
+  padding:10px;
+  border:1px solid rgba(17,24,39,.10);
+  border-radius:14px;
+  background:#fff;
+}
+
+.survey-success-link{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  margin:12px 0 14px;
+}
+.survey-success-link input{
+  flex:1;
+  padding:12px 12px;
+  border-radius:12px;
+  border:1px solid rgba(17,24,39,.14);
+  font-size:14px;
+  color:#111;
+  outline:none;
+}
+.survey-success-copy{
+  border:2px solid var(--gold);
+  background:transparent;
+  color:var(--gold);
+  border-radius:999px;
+  padding:10px 14px;
+  font-weight:900;
+  cursor:pointer;
+}
+.survey-success-copy:hover{ filter:brightness(.98); }
+
+.survey-success-primary{
+  width:100%;
+  background:var(--gold);
+  border:0;
+  color:#fff;
+  font-weight:900;
+  padding:12px 18px;
+  border-radius:999px;
+  cursor:pointer;
+  transition:.2s;
+}
+.survey-success-primary:hover{ filter:brightness(.98); }
+
+
+
+#full .key-points{
+  list-style: none;
+  padding-left: 0;
+}
+#full .key-points li{
+  position: relative;
+  padding-left: 26px;
+}
+#full .key-points li::before{
+  content: "◆";
+  position: absolute;
+  left: 0;
+  top: 0.2em;
+  color: var(--gold);
+}
+/* 最後那一句提示 */
+#full .key-cta{
+  margin-top: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--deep);
+}
+
   </style>
   
 </head>
 <body>
+  <div class="wb-geo-lines">
+
+    <!-- 金色幾何背景 -->
+    <svg class="wb-geo-svg" viewBox="0 0 1440 900" preserveAspectRatio="none">
+      <g fill="none" stroke="rgba(201,161,74,.35)" stroke-width="3">
+        <path d="M-80,120 L420,0 L980,240 L1540,40" />
+        <path d="M-120,520 L520,260 L1040,520 L1540,300" />
+        <path d="M-120,860 L520,620 L1040,860 L1540,660" />
+        <path d="M-60,60 L320,260 L760,120 L1120,320 L1540,220" opacity=".55"/>
+        <path d="M-60,720 L320,520 L760,660 L1120,460 L1540,560" opacity=".55"/>
+      </g>
+    </svg>
+
+
   <!-- POP 彈窗 -->
   <div class="popup-overlay" id="vipPopup">
     <div class="popup">
@@ -452,26 +707,31 @@
 
   <header>
     <div class="brand">
-      <h1>智平衡健康複利系統發表會</h1>
+      <h1>智平衡健康複利系統發表會(完整版)</h1>
       <div class="divider"></div>
       <div class="subtitle">
         健康不是靠一次努力<br>而是一套能被監測、理解<br>並持續累積的系統
       </div>
     </div>
   </header>
-
   <main class="wrap">
-
     <!-- 完整版 -->
     <section id="full" class="section card">
       <div class="pad">
-        <div class="kicker">智平衡健康複利系統發表會｜完整版</div>
-        <div class="sub">這一段<br>說清楚「修復如何被系統接手」<br>讓健康從一次調整，變成能長期累積</div>
-        <ul class="bullets">
-          <li>AI 持續理解你的身體狀態</li>
-          <li>穿戴裝置把感覺轉成數據</li>
-          <li>由專業團隊遠端調整，讓每一步都不白費</li>
-        </ul>
+        <div class="sub">健康，要怎麼不用再靠你自己撐。<br>
+          今天把這一件事說清楚，<br>
+          你會在影片裡得到三個很具體的答案：
+          </div><br>
+          <ul class="key-points">
+            <li>為什麼過去的調整常常「做對了，卻無法累積」</li>
+            <li>修復如何從一次一次的努力，變成「被系統接手的長期照顧」</li>
+            <li>當穿戴數據＋AI 持續理解身體，專業團隊怎麼把每一步變成可累積的健康複利</li>
+          </ul>
+          
+          <p class="key-cta">
+            👉 一次掌握完整關鍵，讓你更清楚自己為什麼一直卡在這裡。
+          </p>
+          
       </div>
       <div class="video-wrap">
         <!-- TODO: 換成你的完整版 YouTube 影片 ID -->
@@ -480,6 +740,7 @@
           title="智平衡健康複利系統發表會｜完整版" allowfullscreen></iframe>
       </div>
     </section>
+    <button class="gift cta-btn" type="button" data-open="survey" data-video-id="video015">填寫問卷</button>  
 
     <section id="form" class="section container">
       <h2 class="title">會員專屬優惠｜優惠只到 2026/01/15</h2>
@@ -510,40 +771,7 @@
       
     </section>
 
-
-    <!-- 會員專屬優惠 + 留資料 -->
-    <!-- <section class="section card">
-      <div class="pad">
-        <div class="kicker">會員專屬優惠｜優惠只到 2026/01/15</div>
-        <div class="sub">立即留下姓名與電話，我們將由專人與您聯繫，協助您了解服務與合適的路徑。</div>
-
-        <form id="leadForm" autocomplete="on">
-          <div class="row">
-            <div>
-              <label for="leadName">姓名</label>
-              <input id="leadName" name="name" type="text" placeholder="請輸入姓名" required />
-            </div>
-            <div>
-              <label for="leadPhone">電話</label>
-              <input id="leadPhone" name="phone" type="tel" placeholder="請輸入電話" required />
-            </div>
-            <div class="form-field">
-              <label for="leadName">其他需求或備註</label>
-              <textarea name="Note" rows="4" placeholder="如有特殊需求，請告訴我們...">
-              </textarea>
-            </div>
-          </div>
-          <div class="submit">
-            <button type="submit">立即留下聯繫方式</button>
-            <span class="note">送出後將由專人與您聯繫（不會公開您的資料）</span>
-          </div>
-
-          <div class="toast" id="toast">已收到！我們將盡快由專人與您聯繫。</div>
-        </form>
-      </div>
-    </section>-->
-
-
+   <section>
     <div class="survey-overlay" id="surveyOverlay" aria-hidden="true">
       <div class="survey-wrap" role="dialog" aria-modal="true" aria-labelledby="surveyTitle">
         <div class="survey-head">
@@ -572,9 +800,34 @@
       </div>
     </div>
     <div class="survey-toast" id="surveyToast" role="status" aria-live="polite">已送出，感謝你的回覆！</div>
+    
+    <div class="survey-success-overlay" id="surveySuccessOverlay" aria-hidden="true">
+      <div class="survey-success" role="dialog" aria-modal="true" aria-labelledby="surveySuccessTitle">
+        <div class="survey-success-head">
+          <h3 id="surveySuccessTitle">✅問卷已送出</h3>
+          <button type="button" class="survey-success-close" id="surveySuccessClose" aria-label="關閉">關閉</button>
+        </div>
+        <p class="survey-success-text" id="surveySuccessText">
+          感謝你的回覆！請畫面擷取 QRCode，攜帶至診所。
+        </p>
+        <div class="survey-success-qr">
+          <div id="surveySuccessQR"></div>
+        </div> 
+        <button type="button" class="survey-success-primary" id="surveySuccessOk">我知道了</button>
+      </div>
+    </div>
+
+
+
+
+
+
+  </section>
+
+
     <footer>© 2025 智平衡健康集團 — 感謝您一直以來的信任。</footer>
   </main>
-
+</div>
 <script>
 /** === 設定 === */
 const SURVEY_POST_URL = "https://23700999.com:8081/HMA/000TTEMemberChannelSurvey.jsp"; // ← 換成你的問卷紀錄 API";
@@ -583,6 +836,7 @@ const API_LOG_EVENT = "https://23700999.com:8081/HMA/000TTELOG_EVENT.jsp";
 const STORAGE_EVENTS_KEY  = "videoEvents";   // 事件流水帳（可選）
 const STORAGE_WATCHED_KEY = "watchedVideos"; // 完成清單（可選）
 const EventType="viponline";
+
 let vipId = new URLSearchParams(location.search).get("vip") || "unknown";
 let EventCode="";
 console.log("vipId="+vipId);
@@ -926,85 +1180,51 @@ window.onYouTubeIframeAPIReady = createPlayers;
 
 /** ===== 四支影片的問卷定義（依你的 data-video-id 對應）===== */
 /** 建議對應下列 4 支：
- *  video003：醫師真心話-1
- *  video004：醫師真心話-2
- *  video005：正念×芳香×修復
- *  video006：你可能從沒這樣大便過
+ *  video015：醫師真心話-1
  * 若你想用 youtubeId 對應，也可在 SURVEY_DEFS 用 key: 'o0yUTESrNkg' 這種寫法。
  */
 const SURVEY_DEFS = {
   /* 醫師真心話-1（沿用你提供的B類問卷） */
-  "video003": {
-    title: "醫師真心話-1｜不是控制症狀，而是找回源頭（B 類問卷）",
+  "video015": {
+    title: "發表會影片觀後感",
     html: `
       <fieldset aria-labelledby="q1" data-role="q1" data-metric="理解峰" data-imprint="洞見" data-cta="First Visit">
-        <legend id="q1">Q1｜哪一句話最讓你有感？（單選）</legend>
-        <label><input type="radio" name="q1" value="我們不要一直只針對症狀，應該是去找原因，把問題解決掉" required> 我們不要一直只針對症狀，應該是去找原因，把問題解決掉。</label><br>
-        <label><input type="radio" name="q1" value="藥物只是挖東牆補西牆"> 藥物只是挖東牆補西牆，越補越亂。</label><br>
-        <label><input type="radio" name="q1" value="人體本身有非常精密的運作，不需要被過度控制"> 人體本身有非常精密的運作，不需要被過度控制。</label><br>
-        <label><input type="radio" name="q1" value="我還不確定"> 我還不確定，需要再想想。</label>
+        <legend id="q1">Q1｜完整版影片中，那位「曾經中風、後來恢復工作」的人是誰？ </legend>
+        <div class="qa-row"><div>請簡答填寫：</div>
+            <textarea name="q1" placeholder="請輸入" required rows="3"></textarea></div>
       </fieldset>
       <fieldset aria-labelledby="q2" data-role="q2" data-metric="決策" data-imprint="行動意圖" data-cta="Immediate Conversion">
-        <legend id="q2">Q2｜今天你最想先完成哪件事？（單選）</legend>
-        <label><input type="radio" name="q2" value="找出自己長期不舒服的「真正原因」" required> 找出自己長期不舒服的「真正原因」。</label><br>
-        <label><input type="radio" name="q2" value="嘗試減少一種長期服用的藥物，並觀察變化"> 嘗試減少一種長期服用的藥物，並觀察變化。</label><br>
-        <label><input type="radio" name="q2" value="學會記錄症狀與生活作息之間的關聯"> 學會記錄症狀與生活作息之間的關聯。</label><br>
-        <label><input type="radio" name="q2" value="諮詢專業醫師，了解功能性問題的根源"> 諮詢專業醫師，了解功能性問題的根源。</label>
+        <legend id="q2">Q2｜如果你要往下一步，最想先確認的是？（單選）</legend>
+        <label><input type="radio" name="q2" value="到底適不適合我的狀態" required> 到底適不適合我的狀態</label><br>
+        <label><input type="radio" name="q2" value="真實效果與改善可能性"> 真實效果與改善可能性</label><br>
+        <label><input type="radio" name="q2" value="價格與投入方式怎麼安排"> 價格與投入方式怎麼安排</label><br>
+        <label><input type="radio" name="q2" value="希望有人陪我做而不是自己摸索"> 希望有人陪我做而不是自己摸索</label><br>
+        <label><input type="radio" name="q2" value="我需要再想一下，但不排斥了解"> 我需要再想一下，但不排斥了解</label>
       </fieldset>
       <fieldset aria-labelledby="q3" data-role="q3" data-metric="實踐" data-imprint="行動印記" data-cta="Repeat Engagement">
-        <legend id="q3">Q3｜這週你想挑戰哪個任務？（單選）</legend>
-        <label><input type="radio" name="q3" value="實作一次「找原因而非止症狀」的健康檢視" required> 實作一次「找原因而非止症狀」的健康檢視。</label><br>
-        <label><input type="radio" name="q3" value="重新整理自己的用藥與身體變化紀錄"> 重新整理自己的用藥與身體變化紀錄。</label><br>
-        <label><input type="radio" name="q3" value="練習一天不依賴止痛藥、觀察身體反應"> 練習一天不依賴止痛藥、觀察身體反應。</label><br>
-        <label><input type="radio" name="q3" value="與家人或朋友分享「從源頭看病」的新觀點"> 與家人或朋友分享「從源頭看病」的新觀點。</label>
+        <legend id="q3">Q3｜對你來說，安心做決策最重要的是？（單選）</legend>
+        <label><input type="radio" name="q3" value="醫師或專業團隊說明清楚我就安心" required> 醫師或專業團隊說明清楚我就安心</label><br>
+        <label><input type="radio" name="q3" value="有明確追蹤方式、看得到數據"> 有明確追蹤方式、看得到數據</label><br>
+        <label><input type="radio" name="q3" value="想先看看更多案例"> 想先看看更多案例</label><br>
+        <label><input type="radio" name="q3" value="希望有人陪著我慢慢調整"> 希望有人陪著我慢慢調整</label><br>
+        <label><input type="radio" name="q3" value="想自己多感受一下再決定"> 想自己多感受一下再決定</label>
       </fieldset>
       <fieldset aria-labelledby="q4" data-role="q4" data-metric="共創" data-imprint="信任印記" data-cta="Referral/Advocacy">
-        <legend id="q4">Q4｜下一支影片你希望「完成」哪件事？（可複選）</legend>
-        <label><input type="checkbox" name="q4[]" value="學會如何找出功能性問題的真正源頭"> 學會如何找出功能性問題的真正源頭。</label><br>
-        <label><input type="checkbox" name="q4[]" value="了解「身體訊號」與「自律神經」之間的連動"> 了解「身體訊號」與「自律神經」之間的連動。</label><br>
-        <label><input type="checkbox" name="q4[]" value="看實例"> 看實例：不用藥也能改善的臨床案例。</label><br>
-        <label><input type="checkbox" name="q4[]" value="學會建立屬於自己的健康調節計畫"> 學會建立屬於自己的健康調節計畫。</label><br>
-        <label>其他（請補充）：<input type="text" name="q4_other" placeholder="請輸入"></label>
+        <legend id="q4">Q4｜你目前對「改善與投入」的心態最接近哪句？（複選）</legend>
+        <label><input type="checkbox" name="q4[]" value="有改善我願意投入"> 有改善我願意投入</label><br>
+        <label><input type="checkbox" name="q4[]" value="可以，但我想搞懂為什麼值得"> 可以，但我想搞懂為什麼值得</label><br>
+        <label><input type="checkbox" name="q4[]" value="如果價格友善，我會更願意行動"> 如果價格友善，我會更願意行動</label><br>
+        <label><input type="checkbox" name="q4[]" value="我會保守一點，需要再觀察"> 我會保守一點，需要再觀察</label><br>
+        <label><input type="checkbox" name="q4[]" value="我想了解，但行動需要一個推力"> 我想了解，但行動需要一個推力</label>
       </fieldset>
-    `
-  },
-
-  /* 你可能從沒這樣大便過（腸腦軸） */
-  "video006": {
-    title: "腦洞大開：你可能從沒這樣大便過（腸腦軸自評問卷）",
-    html: `
-       <fieldset data-role="q1" data-metric="理解峰" data-cta="First Visit" data-imprint="理解">
-    <legend>Q1｜哪一句話最讓你有感？（單選）</legend>
-    <label><input type="radio" name="q1" value="你的大腦意識與大腸其實有量子的關係">「你的大腦的意識跟大腸其實有量子的關係。」</label><br>
-    <label><input type="radio" name="q1" value="滑手機會讓大腦和腸子分離">「滑手機的時候，大腦和腸子是分離的，各做各的。」</label><br>
-    <label><input type="radio" name="q1" value="觀察腸子的動作會讓排便更順">「當你觀察腸子的動作、放慢呼吸時，排便會變得很順。」</label><br>
-    <label><input type="radio" name="q1" value="我還不確定">我還不確定，需要再想想。</label>
-  </fieldset>
-
-  <fieldset data-role="q2" data-metric="行動決策" data-cta="Immediate Conversion" data-imprint="行動">
-    <legend>Q2｜今天你最想先嘗試哪件事？（單選）</legend>
-    <label><input type="radio" name="q2" value="排便時不滑手機">排便時暫停滑手機，專心觀察呼吸與腸道動作。</label><br>
-    <label><input type="radio" name="q2" value="練習量子觀察法">每天早上練習 3 分鐘「量子觀察」身體狀態。</label><br>
-    <label><input type="radio" name="q2" value="建立排便儀式">固定時間、固定姿勢地建立排便儀式感。</label><br>
-    <label><input type="radio" name="q2" value="記錄身體反應">記錄一週內排便與心情變化的關聯。</label>
-  </fieldset>
-
-  <fieldset data-role="q3" data-metric="任務化行動" data-cta="Repeat Engagement" data-imprint="行動">
-    <legend>Q3｜這週你想挑戰哪個任務？（單選）</legend>
-    <label><input type="radio" name="q3" value="觀察排便節奏">觀察一次完整的「放下手機→觀察→順利排出」過程。</label><br>
-    <label><input type="radio" name="q3" value="每日三分鐘觀察">每天三分鐘靜坐觀察腹部起伏。</label><br>
-    <label><input type="radio" name="q3" value="減少干擾練習">嘗試在如廁時減少外在干擾，體驗差異。</label><br>
-    <label><input type="radio" name="q3" value="分享體驗">與家人或朋友分享「身體意識與排便順暢」的體驗。</label>
-  </fieldset>
-
-  <fieldset data-role="q4" data-metric="共創願景" data-cta="Referral/Advocacy" data-imprint="信任">
-    <legend>Q4｜下一支影片你希望「完成」哪件事？（可複選）</legend>
-    <label><input type="checkbox" name="q4[]" value="示範觀察練習">示範一個「觀察腸道與呼吸」的實際練習流程。</label><br>
-    <label><input type="checkbox" name="q4[]" value="解析腸腦連線">講解「腸腦軸線」與身心健康的具體關聯。</label><br>
-    <label><input type="checkbox" name="q4[]" value="提供自我檢測表">提供一份「腸腦同步狀態」的自我檢測表。</label><br>
-    <label><input type="checkbox" name="q4[]" value="探討專注與健康">討論現代人專注力與身體信號的關係。</label>
-    <label>其他（請補充）：<input type="text" name="q4_other" placeholder="請輸入"></label>
-  </fieldset>
+       <fieldset aria-labelledby="q5" data-role="q5" data-metric="共創" data-imprint="信任印記" data-cta="Referral/Advocacy">
+        <legend id="q5">Q5｜我們可以怎麼協助你？（單選）</legend>
+        <label><input type="radio" name="q5" value="先安排一次體驗／諮詢時段"> 先安排一次體驗／諮詢時段</label><br>
+        <label><input type="radio" name="q5" value="先由客服協助我了解方案重點"> 先由客服協助我了解方案重點</label><br>
+        <label><input type="radio" name="q5" value="想再看一次完整版影片"> 想再看一次完整版影片</label><br>
+        <label><input type="radio" name="q5" value="想先拿重點摘要慢慢看"> 想先拿重點摘要慢慢看</label><br>
+        <label><input type="radio" name="q5" value="我還不急，但之後想持續收到資訊"> 我還不急，但之後想持續收到資訊</label>
+      </fieldset>
     `
   }
 };
@@ -1082,13 +1302,28 @@ function closeSurvey() {
 }
 
 /** 綁定所有 .cta 打開對應問卷 */
-document.querySelectorAll('a.cta[href="#q"]:not(#goVip)').forEach(a => {
-  a.addEventListener("click", (e) => {
-    e.preventDefault();
-    const meta = getContextFromCTA(a);
+ // 綁定：所有「開問卷」按鈕/連結都支援
+document.querySelectorAll('[data-open="survey"], a.cta[href="#q"]:not(#goVip)').forEach(el => {
+  el.addEventListener("click", (e) => {
+    e.preventDefault?.();
+
+    // 1) 優先用 data-video-id 指定要開哪支影片的問卷
+    const forcedVideoId = el.dataset.videoId;
+
+    let meta = getContextFromCTA(el);
+
+    // 2) 如果是獨立按鈕（旁邊沒有 iframe），就從指定值補齊
+    if (forcedVideoId) meta.videoId = forcedVideoId;
+
+    // 3) 如果仍抓不到影片，給一個保底（避免空）
+    if (!meta.videoId && !meta.youtubeId) {
+      meta = { videoId: "video012", youtubeId: "", title: document.title, iframe: null };
+    }
+
     openSurvey(meta);
   });
 });
+
 
 
 /** 關閉行為 */
@@ -1138,9 +1373,6 @@ async function SurveySubmit(videoId, youtubeId, answers) {
     return { delivered: false, mode: "no-cors" };
   }
 }
-
-
-
 
 /** 送出表單 → 呼叫問卷紀錄 API（答案＋id）+ 打點 survey_submit */
 $form.addEventListener("submit", async (evt) => {
@@ -1196,14 +1428,11 @@ $form.addEventListener("submit", async (evt) => {
     for (const [k, v] of Object.entries(raw)) {
       if (!hiddenKeys.has(k)) answers[k] = v;
     }
-
-    // 5) 組 API 要送的 JSON（精簡乾淨）
-    //const surveyPayload = {
-    //  ...payloadBase,
-    //  answers, // 只包含題目答案
-    //};
-   
-   // console.log("surveyPayload="+JSON.stringify(surveyPayload, null, 2));
+    
+    // ===== 一定要有 q4_other =====
+    if (!Object.prototype.hasOwnProperty.call(answers, "q4_other")) {
+       answers.q4_other = "";
+     }
     
     // 6) 寫入你的問卷紀錄 API
     // postJSON(SURVEY_POST_URL, surveyPayload);
@@ -1215,8 +1444,14 @@ $form.addEventListener("submit", async (evt) => {
 
     // 8) UI 收尾
     closeSurvey();
-    $toast.style.display = "block";
-    setTimeout(() => { $toast.style.display = "none"; }, 1800);
+    //$toast.style.display = "block";
+    //setTimeout(() => { $toast.style.display = "none"; }, 1800);
+    
+    openSurveySuccessModal({
+         url: THANK_YOU_QR_URL,
+         text: THANK_YOU_MESSAGE
+    });
+
     $form.reset();
 
   } catch (err) {
@@ -1273,16 +1508,66 @@ function wireVipLink(){
   });
 }
 
-
-
-
-
 /** 開發時可用的小工具 */
 window.VideoTrack = {
   events()  { return JSON.parse(localStorage.getItem(STORAGE_EVENTS_KEY) || "[]"); },
   watched() { return JSON.parse(localStorage.getItem(STORAGE_WATCHED_KEY) || "[]"); },
   clear()   { localStorage.removeItem(STORAGE_EVENTS_KEY); localStorage.removeItem(STORAGE_WATCHED_KEY); }
 };
+
+/** ===== Survey Success Modal control ===== */
+const THANK_YOU_QR_URL  = "vip="+vipId; // TODO: 換成你的 LINE/表單/預約頁
+const THANK_YOU_MESSAGE = "感謝你的回覆！\n請畫面擷取 QRCode，攜帶至診所";
+
+const $successOverlay = document.getElementById("surveySuccessOverlay");
+const $successQRBox   = document.getElementById("surveySuccessQR");
+const $successText    = document.getElementById("surveySuccessText");
+const $successLink    = document.getElementById("surveySuccessLink");
+const $successClose   = document.getElementById("surveySuccessClose");
+const $successOk      = document.getElementById("surveySuccessOk");
+const $successCopy    = document.getElementById("surveySuccessCopy");
+
+let _successQR = null;
+
+function openSurveySuccessModal({ url = THANK_YOU_QR_URL, text = THANK_YOU_MESSAGE } = {}) {
+  if (!$successOverlay) return;
+
+  // 文字
+  if ($successText) $successText.textContent = text;
+
+  // 連結
+  if ($successLink) $successLink.value = url;
+
+  // QRCode（避免重複疊加）
+  if ($successQRBox) {
+    $successQRBox.innerHTML = "";
+    try {
+      _successQR = new QRCode($successQRBox, {
+        text: url,
+        width: 220,
+        height: 220
+      });
+    } catch (e) {
+      // 若 QRCode 套件載不到，至少顯示連結
+      console.warn("QRCode init failed:", e);
+    }
+  }
+
+  $successOverlay.style.display = "flex";
+  $successOverlay.setAttribute("aria-hidden", "false");
+}
+
+function closeSurveySuccessModal() {
+  if (!$successOverlay) return;
+  $successOverlay.style.display = "none";
+  $successOverlay.setAttribute("aria-hidden", "true");
+}
+
+// 關閉事件
+$successClose?.addEventListener("click", closeSurveySuccessModal);
+$successOk?.addEventListener("click", closeSurveySuccessModal);
+$successOverlay?.addEventListener("click", (e) => { if (e.target === $successOverlay) closeSurveySuccessModal(); });
+
 </script>
 
 

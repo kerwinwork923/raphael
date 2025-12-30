@@ -4,6 +4,30 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>智平衡健康複利系統發表會</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind theme -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            wb: {
+              deep: '#0f3b3b',
+              gold: '#c9a14a',
+              ink:  '#1f2a37',
+              muted:'#6b7280',
+              ivory:'#f6f1e7',
+              line: 'rgba(201,161,74,.35)'
+            }
+          },
+          boxShadow: {
+            soft: '0 12px 36px rgba(17,24,39,.08)',
+            strong: '0 20px 60px rgba(0,0,0,.18)'
+          }
+        }
+      }
+    }
+  </script>
   <style>
     :root{
       --deep:#0f3b3b;
@@ -27,6 +51,23 @@
       background:var(--bg);
       color:var(--ink);
       line-height:1.8;
+    }
+
+    .wb-geo-lines {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+    }
+
+    /* 金色幾何底線 */
+    .wb-geo-svg {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      width: 100%;
+      height: 100%;
+      opacity: .9;
+      pointer-events: none;
     }
     a{color:inherit}
     img,iframe,video{max-width:100%;display:block}
@@ -302,6 +343,33 @@
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
     @keyframes popIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
   
+
+    #full .key-points{
+  list-style: none;
+  padding-left: 0;
+}
+#full .key-points li{
+  position: relative;
+  padding-left: 26px;
+}
+#full .key-points li::before{
+  content: "◆";
+  position: absolute;
+  left: 0;
+  top: 0.2em;
+  color: var(--gold);
+}
+/* 最後那一句提示 */
+#full .key-cta{
+  margin-top: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--deep);
+}
+
+#full.section{
+  padding-top: 5px;   /* 原本 50px → 25px */
+}
     /* ===== Footer ===== */
     footer{
       margin-top:60px;
@@ -316,7 +384,18 @@
   
 </head>
 <body>
+  <div class="wb-geo-lines">
 
+    <!-- 金色幾何背景 -->
+    <svg class="wb-geo-svg" viewBox="0 0 1440 900" preserveAspectRatio="none">
+      <g fill="none" stroke="rgba(201,161,74,.35)" stroke-width="3">
+        <path d="M-80,120 L420,0 L980,240 L1540,40" />
+        <path d="M-120,520 L520,260 L1040,520 L1540,300" />
+        <path d="M-120,860 L520,620 L1040,860 L1540,660" />
+        <path d="M-60,60 L320,260 L760,120 L1120,320 L1540,220" opacity=".55"/>
+        <path d="M-60,720 L320,520 L760,660 L1120,460 L1540,560" opacity=".55"/>
+      </g>
+    </svg>
   <header>
     <div class="brand">
       <h1>智平衡健康複利系統發表會</h1>
@@ -329,9 +408,12 @@
 
   <main class="wrap">
     <!-- 精華版 -->
-    <section class="section card">
+    <section id="full" class="section card">
       <div class="pad">
-        <div class="kicker">50秒抓到關鍵<br>它不需要你多做什麼<br>系統會持續陪你走</div>
+        <div class="kicker">50秒抓到關鍵<br>
+          它不需要你多做什麼<br>
+          系統會持續陪你走
+          </div>
       </div>
       <div class="video-wrap">
         <video 
@@ -347,6 +429,19 @@
         </video>
       </div>
       <div>
+        <div class="pad">
+          <div class="sub">你現在看到的，是濃縮後的重點。完整版會用一套「看得懂、做得到」的方式，幫你釐清：你到底卡在哪一段。<br> 
+            <br>你會聽到三個多數人一直沒被好好說清楚的關鍵：<br>
+            </div><br>
+            <ul class="key-points">
+              <li>為什麼有人調整很快，有人卻一直原地打轉</li>
+              <li>不是不努力，而是走在錯的入口</li>
+              <li>哪個一啟動，身體才會真的開始「回來」</li>
+            </ul>
+            <p class="key-cta">
+              👉 你現在需要的是把狀態理清，完整版會更適合你。
+            </p>
+        </div>
         <button class="gift cta-btn" type="button">
           立即觀看完整發表會 <img src="/imgs/click.png" alt="point">
         </button>
@@ -355,7 +450,7 @@
 
     <footer>© 2026 智平衡健康集團 — 感謝您一直以來的信任。</footer>
   </main>
-
+</div>
 <script>
 /** === 設定 === */
 const SURVEY_POST_URL = "https://23700999.com:8081/HMA/000TTEMemberChannelSurvey.jsp"; // ← 換成你的問卷紀錄 API";
