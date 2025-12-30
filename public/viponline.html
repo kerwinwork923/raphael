@@ -776,7 +776,6 @@
       <div class="survey-wrap" role="dialog" aria-modal="true" aria-labelledby="surveyTitle">
         <div class="survey-head">
           <h3 id="surveyTitle">填寫問卷</h3>
-          <button class="survey-close" type="button" aria-label="關閉" id="surveyClose">關閉</button>
         </div>
     
         <form id="dynamic-form">
@@ -808,7 +807,12 @@
           <button type="button" class="survey-success-close" id="surveySuccessClose" aria-label="關閉">關閉</button>
         </div>
         <p class="survey-success-text" id="surveySuccessText">
-          感謝你的回覆！請畫面擷取 QRCode，攜帶至診所。
+          感謝你完整看完影片，也花時間留下回饋。<br>
+          作為今天完整參與的回饋，我們準備了一份<br>
+          5000 元專屬折價回饋，<br>
+          可於未來有需要時使用。<br>
+          今天不需要做任何決定，<br>
+          我們只是很珍惜你願意把感覺留下來。
         </p>
         <div class="survey-success-qr">
           <div id="surveySuccessQR"></div>
@@ -1186,46 +1190,37 @@ window.onYouTubeIframeAPIReady = createPlayers;
 const SURVEY_DEFS = {
   /* 醫師真心話-1（沿用你提供的B類問卷） */
   "video015": {
-    title: "發表會影片觀後感",
+    title: "完整版影片看完後｜快速回饋",
     html: `
       <fieldset aria-labelledby="q1" data-role="q1" data-metric="理解峰" data-imprint="洞見" data-cta="First Visit">
-        <legend id="q1">Q1｜完整版影片中，那位「曾經中風、後來恢復工作」的人是誰？ </legend>
-        <div class="qa-row"><div>請簡答填寫：</div>
-            <textarea name="q1" placeholder="請輸入" required rows="3"></textarea></div>
+        <legend id="q1">Q1｜看完這支完整影片後，哪一個感覺最接近你現在的狀態？ </legend>
+        <label><input type="radio" name="q1" value="我第一次清楚感覺到，健康是可以慢慢累積的" required> 我第一次清楚感覺到，健康是可以慢慢累積的</label><br>
+        <label><input type="radio" name="q1" value="我突然理解，為什麼以前那麼努力，卻很難真的變好"> 我突然理解，為什麼以前那麼努力，卻很難真的變好</label><br>
+        <label><input type="radio" name="q1" value="我對「修復能力」這件事有了新的認識"> 我對「修復能力」這件事有了新的認識</label><br>
+        <label><input type="radio" name="q1" value="資訊很多，我需要時間消化，但覺得方向不一樣"> 資訊很多，我需要時間消化，但覺得方向不一樣</label><br>
       </fieldset>
       <fieldset aria-labelledby="q2" data-role="q2" data-metric="決策" data-imprint="行動意圖" data-cta="Immediate Conversion">
-        <legend id="q2">Q2｜如果你要往下一步，最想先確認的是？（單選）</legend>
-        <label><input type="radio" name="q2" value="到底適不適合我的狀態" required> 到底適不適合我的狀態</label><br>
-        <label><input type="radio" name="q2" value="真實效果與改善可能性"> 真實效果與改善可能性</label><br>
-        <label><input type="radio" name="q2" value="價格與投入方式怎麼安排"> 價格與投入方式怎麼安排</label><br>
-        <label><input type="radio" name="q2" value="希望有人陪我做而不是自己摸索"> 希望有人陪我做而不是自己摸索</label><br>
-        <label><input type="radio" name="q2" value="我需要再想一下，但不排斥了解"> 我需要再想一下，但不排斥了解</label>
+        <legend id="q2">Q2｜今天的內容，哪一段最像是在描述你自己？</legend>
+        <label><input type="radio" name="q2" value="做過很多努力，但心裡總覺得哪裡怪怪的" required> 做過很多努力，但心裡總覺得哪裡怪怪的</label><br>
+        <label><input type="radio" name="q2" value="健康好像一直在處理，卻沒有真的往上走"> 健康好像一直在處理，卻沒有真的往上走</label><br>
+        <label><input type="radio" name="q2" value="很多狀況其實沒有被完整理解"> 很多狀況其實沒有被完整理解</label><br>
+        <label><input type="radio" name="q2" value="我是先聽聽看，想多了解新的可能"> 我是先聽聽看，想多了解新的可能</label><br>
       </fieldset>
       <fieldset aria-labelledby="q3" data-role="q3" data-metric="實踐" data-imprint="行動印記" data-cta="Repeat Engagement">
-        <legend id="q3">Q3｜對你來說，安心做決策最重要的是？（單選）</legend>
-        <label><input type="radio" name="q3" value="醫師或專業團隊說明清楚我就安心" required> 醫師或專業團隊說明清楚我就安心</label><br>
-        <label><input type="radio" name="q3" value="有明確追蹤方式、看得到數據"> 有明確追蹤方式、看得到數據</label><br>
-        <label><input type="radio" name="q3" value="想先看看更多案例"> 想先看看更多案例</label><br>
-        <label><input type="radio" name="q3" value="希望有人陪著我慢慢調整"> 希望有人陪著我慢慢調整</label><br>
-        <label><input type="radio" name="q3" value="想自己多感受一下再決定"> 想自己多感受一下再決定</label>
+        <legend id="q3">Q3｜聽完之後，你現在比較接近哪一種心情？</legend>
+        <label><input type="radio" name="q3" value="我大概懂了，想慢慢確認" required> 我大概懂了，想慢慢確認</label><br>
+        <label><input type="radio" name="q3" value="我有被說服，但還想知道實際會怎麼發生"> 我有被說服，但還想知道實際會怎麼發生</label><br>
+        <label><input type="radio" name="q3" value="我覺得方向對，但資訊有點多">我覺得方向對，但資訊有點多</label><br>
+        <label><input type="radio" name="q3" value="我現在先不急著想下一步"> 我現在先不急著想下一步</label><br>
       </fieldset>
       <fieldset aria-labelledby="q4" data-role="q4" data-metric="共創" data-imprint="信任印記" data-cta="Referral/Advocacy">
-        <legend id="q4">Q4｜你目前對「改善與投入」的心態最接近哪句？（複選）</legend>
-        <label><input type="checkbox" name="q4[]" value="有改善我願意投入"> 有改善我願意投入</label><br>
-        <label><input type="checkbox" name="q4[]" value="可以，但我想搞懂為什麼值得"> 可以，但我想搞懂為什麼值得</label><br>
-        <label><input type="checkbox" name="q4[]" value="如果價格友善，我會更願意行動"> 如果價格友善，我會更願意行動</label><br>
-        <label><input type="checkbox" name="q4[]" value="我會保守一點，需要再觀察"> 我會保守一點，需要再觀察</label><br>
-        <label><input type="checkbox" name="q4[]" value="我想了解，但行動需要一個推力"> 我想了解，但行動需要一個推力</label>
-      </fieldset>
-       <fieldset aria-labelledby="q5" data-role="q5" data-metric="共創" data-imprint="信任印記" data-cta="Referral/Advocacy">
-        <legend id="q5">Q5｜我們可以怎麼協助你？（單選）</legend>
-        <label><input type="radio" name="q5" value="先安排一次體驗／諮詢時段"> 先安排一次體驗／諮詢時段</label><br>
-        <label><input type="radio" name="q5" value="先由客服協助我了解方案重點"> 先由客服協助我了解方案重點</label><br>
-        <label><input type="radio" name="q5" value="想再看一次完整版影片"> 想再看一次完整版影片</label><br>
-        <label><input type="radio" name="q5" value="想先拿重點摘要慢慢看"> 想先拿重點摘要慢慢看</label><br>
-        <label><input type="radio" name="q5" value="我還不急，但之後想持續收到資訊"> 我還不急，但之後想持續收到資訊</label>
-      </fieldset>
-    `
+        <legend id="q4">Q4｜如果今天只帶走一個收穫，你希望是？</legend>
+        <label><input type="radio" name="q4[]" value="對健康有一個新的看法"> 對健康有一個新的看法</label><br>
+        <label><input type="radio" name="q4[]" value="對自己身體多了一點信心"> 對自己身體多了一點信心</label><br>
+        <label><input type="radio" name="q4[]" value="覺得未來可以有不同的選擇"> 覺得未來可以有不同的選擇</label><br>
+        <label><input type="radio" name="q4[]" value="先放在心裡，之後再回來想"> 先放在心裡，之後再回來想</label><br>
+     </fieldset>
+     `
   }
 };
 
@@ -1433,7 +1428,9 @@ $form.addEventListener("submit", async (evt) => {
     if (!Object.prototype.hasOwnProperty.call(answers, "q4_other")) {
        answers.q4_other = "";
      }
-    
+     if (!Object.prototype.hasOwnProperty.call(answers, "q5")) {
+       answers.q5 = "";
+     }
     // 6) 寫入你的問卷紀錄 API
     // postJSON(SURVEY_POST_URL, surveyPayload);
     await SurveySubmit(raw.videoId, raw.youtubeId, answers);
@@ -1517,7 +1514,7 @@ window.VideoTrack = {
 
 /** ===== Survey Success Modal control ===== */
 const THANK_YOU_QR_URL  = "vip="+vipId; // TODO: 換成你的 LINE/表單/預約頁
-const THANK_YOU_MESSAGE = "感謝你的回覆！\n請畫面擷取 QRCode，攜帶至診所";
+const THANK_YOU_MESSAGE = "感謝你完整看完影片，也花時間留下回饋。\n作為今天完整參與的回饋，我們準備了一份\n5000 元專屬折價回饋，\n可於未來有需要時使用。\n今天不需要做任何決定，\n我們只是很珍惜你願意把感覺留下來。";
 
 const $successOverlay = document.getElementById("surveySuccessOverlay");
 const $successQRBox   = document.getElementById("surveySuccessQR");
