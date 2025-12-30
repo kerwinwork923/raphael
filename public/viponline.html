@@ -553,23 +553,37 @@
        padding-top: 12px;   /* 原本 50px → 約一半 */
      }
      .survey-success-overlay{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.55);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      z-index:1400;
-      animation:fadeIn .25s ease forwards;
-    }
-    .survey-success{
-      background:#fff;
-      border:2px solid var(--gold);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow-strong);
-      width:min(520px, 92vw);
-      padding:18px 18px 16px;
-    }
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  display: none;
+  z-index: 1400;
+
+  /* 關鍵：可滾動 */
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+
+  /* 關鍵：不要硬置中，避免下方按鈕被卡住 */
+  align-items: flex-start;
+  justify-content: center;
+  padding: 16px 10px;
+}
+
+/* ✅ 視窗本體限制高度，內容超出就捲動 */
+.survey-success{
+  background:#fff;
+  border:2px solid var(--gold);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-strong);
+  width: min(520px, 92vw);
+
+  /* 關鍵：高度限制 + 可捲 */
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+
+  padding: 18px 18px 16px;
+  margin: 0 auto;
+}
     .survey-success-head{
       display:flex;
       align-items:center;
@@ -718,9 +732,7 @@
     <!-- 完整版 -->
     <section id="full" class="section card">
       <div class="pad">
-        <div class="sub">健康，要怎麼不用再靠你自己撐。<br>
-          今天把這一件事說清楚，<br>
-          你會在影片裡得到三個很具體的答案：
+        <div class="sub">健康，要怎麼不用再靠你自己撐。今天把這一件事說清楚，你會在影片裡得到三個很具體的答案：
           </div><br>
           <ul class="key-points">
             <li>為什麼過去的調整常常「做對了，卻無法累積」</li>
@@ -1533,14 +1545,18 @@ function openSurveySuccessModal({ url = THANK_YOU_QR_URL, text = THANK_YOU_MESSA
   // 連結
   if ($successLink) $successLink.value = url;
 
+
+  const QR_SCALE = 0.67;
+  const QR_BASE  = 220;
+  const QR_SIZE  = Math.round(QR_BASE * QR_SCALE); 
   // QRCode（避免重複疊加）
   if ($successQRBox) {
     $successQRBox.innerHTML = "";
     try {
       _successQR = new QRCode($successQRBox, {
         text: url,
-        width: 220,
-        height: 220
+        width: QR_SIZE,
+        height: QR_SIZE
       });
     } catch (e) {
       // 若 QRCode 套件載不到，至少顯示連結
