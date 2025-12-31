@@ -18,7 +18,7 @@
 
       <!-- 諮詢記錄列表 -->
       <div class="consultation-list" v-if="filteredConsultations.length > 0">
-        <div class="timeline-container">
+        <div class="consultation-cards">
           <div
             class="consultation-card"
             v-for="consultation in filteredConsultations"
@@ -35,7 +35,7 @@
             <div class="card-body">
               <div class="summary-title">
                 您口述的摘要內容
-                <span>
+                <span @click="editSummary(consultation)">
                   <img src="/assets/imgs/robot/edit.svg" alt="編輯" />
                 </span>
               </div>
@@ -205,6 +205,117 @@
         </transition>
       </div>
     </transition>
+
+    <!-- 查看進度頁面 -->
+    <transition name="slide-left">
+      <div v-if="showViewProgress" class="view-progress-page">
+        <!-- 頂部標題欄 -->
+        <div class="view-progress-header">
+          <img
+            src="/assets/imgs/backArrow.svg"
+            @click="closeViewProgress"
+            alt="返回"
+            class="back-arrow"
+          />
+          <div class="header-date">
+            {{ viewingConsultation ? formatDateTime(viewingConsultation.date) : '' }}
+          </div>
+          <div class="header-spacer"></div>
+        </div>
+
+        <!-- 進度時間線卡片 -->
+        <div class="progress-timeline-card">
+          <p class="timeline-description">
+            內容會依序由客服整理,再由專業人員協助說明。
+          </p>
+          <div class="timeline-wrapper">
+            <div class="timeline-container">
+              <div class="timeline-step completed">
+                <div class="timeline-circle filled"></div>
+                <div class="timeline-info">
+                  <div class="timeline-label">諮詢日期</div>
+                  <div class="timeline-date-time" v-if="viewingConsultation">
+                    <span class="timeline-date">{{ formatDateOnly(viewingConsultation.date) }}</span>
+                    <span class="timeline-time">{{ formatTimeOnly(viewingConsultation.date) }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="timeline-connector" :class="{ active: viewingConsultation?.status !== 'pending' }"></div>
+              <div class="timeline-step" :class="{ completed: viewingConsultation?.status !== 'pending' }">
+                <div class="timeline-circle" :class="{ filled: viewingConsultation?.status !== 'pending' }"></div>
+                <div class="timeline-info">
+                  <div class="timeline-label">客服處理</div>
+                </div>
+              </div>
+              <div class="timeline-connector" :class="{ active: viewingConsultation?.status === 'in_progress' || viewingConsultation?.status === 'completed' }"></div>
+              <div class="timeline-step" :class="{ completed: viewingConsultation?.status === 'in_progress' || viewingConsultation?.status === 'completed' }">
+                <div class="timeline-circle" :class="{ filled: viewingConsultation?.status === 'in_progress' || viewingConsultation?.status === 'completed' }"></div>
+                <div class="timeline-info">
+                  <div class="timeline-label">醫師處理</div>
+                </div>
+              </div>
+              <div class="timeline-connector" :class="{ active: viewingConsultation?.status === 'completed' }"></div>
+              <div class="timeline-step" :class="{ completed: viewingConsultation?.status === 'completed' }">
+                <div class="timeline-circle" :class="{ filled: viewingConsultation?.status === 'completed' }"></div>
+                <div class="timeline-info">
+                  <div class="timeline-label">處理完畢</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 內容卡片 -->
+        <div class="content-card">
+          <div class="content-card-header">
+            <h3 class="content-title">您口述的內容</h3>
+            <span @click="editSummary()" class="edit-icon">
+              <img src="/assets/imgs/robot/edit.svg" alt="編輯" />
+            </span>
+          </div>
+          <div class="content-text" v-if="viewingConsultation">
+            {{ viewingConsultation.summary }}
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <!-- 編輯摘要頁面 -->
+    <transition name="slide-left">
+      <div v-if="showEditSummary" class="edit-summary-page">
+        <!-- 頂部標題欄 -->
+        <div class="edit-summary-header">
+          <img
+            src="/assets/imgs/backArrow.svg"
+            @click="closeEditSummary"
+            alt="返回"
+            class="back-arrow"
+          />
+          <h2 class="page-title">您口述的內容</h2>
+          <div class="header-spacer"></div>
+        </div>
+
+        <!-- 文字編輯區域 -->
+        <div class="edit-summary-content">
+          <textarea
+            v-model="editedSummaryText"
+            class="edit-summary-textarea"
+            ref="editSummaryTextareaRef"
+            placeholder="請輸入內容"
+          ></textarea>
+        </div>
+
+        <!-- 底部按鈕 -->
+        <div class="edit-summary-actions">
+          <button class="cancel-btn" @click="closeEditSummary">
+            取消
+          </button>
+          <button class="confirm-btn" @click="confirmEditSummary">
+            確認修改
+          </button>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -276,6 +387,22 @@ const formatDateTime = (dateString) => {
   return `${year}/${month}/${day} ${hours}:${minutes}`;
 };
 
+// 格式化日期（僅日期）
+const formatDateOnly = (dateString) => {
+  const date = new Date(dateString);
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${month}/${day}`;
+};
+
+// 格式化時間（僅時間）
+const formatTimeOnly = (dateString) => {
+  const date = new Date(dateString);
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`;
+};
+
 // 獲取狀態文字
 const getStatusText = (status) => {
   const statusMap = {
@@ -286,10 +413,138 @@ const getStatusText = (status) => {
   return statusMap[status] || status;
 };
 
+// 查看進度相關狀態
+const showViewProgress = ref(false);
+const viewingConsultation = ref(null);
+
 // 查看進度
 const viewProgress = (id) => {
-  console.log("查看進度:", id);
-  // TODO: 導航到進度詳情頁面
+  const consultation = consultations.value.find((c) => c.id === id);
+  if (consultation) {
+    viewingConsultation.value = consultation;
+    showViewProgress.value = true;
+    
+    // 禁用背景滾動
+    if (process.client) {
+      document.body.style.overflow = "hidden";
+    }
+  }
+};
+
+// 關閉查看進度頁面
+const closeViewProgress = () => {
+  showViewProgress.value = false;
+  viewingConsultation.value = null;
+  
+  // 恢復背景滾動
+  if (process.client) {
+    document.body.style.overflow = "";
+  }
+};
+
+// 編輯摘要相關狀態
+const showEditSummary = ref(false);
+const editingConsultation = ref(null);
+const editedSummaryText = ref("");
+const editSummaryTextareaRef = ref(null);
+
+// 編輯摘要（可以從進度頁面或列表頁面調用）
+const editSummary = (consultation = null) => {
+  // 如果沒有傳入 consultation，使用當前查看的 consultation
+  const targetConsultation = consultation || viewingConsultation.value;
+  
+  if (!targetConsultation) return;
+  
+  editingConsultation.value = targetConsultation;
+  editedSummaryText.value = targetConsultation.summary || "";
+  showEditSummary.value = true;
+  
+  // 如果從進度頁面打開，先關閉進度頁面
+  if (showViewProgress.value) {
+    showViewProgress.value = false;
+  }
+  
+  // 禁用背景滾動
+  if (process.client) {
+    document.body.style.overflow = "hidden";
+  }
+  
+  // 自動聚焦到文字輸入框
+  nextTick(() => {
+    setTimeout(() => {
+      editSummaryTextareaRef.value?.focus();
+      // 將游標移到文字末尾
+      if (editSummaryTextareaRef.value) {
+        const textarea = editSummaryTextareaRef.value;
+        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+      }
+    }, 100);
+  });
+};
+
+// 關閉編輯摘要頁面
+const closeEditSummary = () => {
+  showEditSummary.value = false;
+  editingConsultation.value = null;
+  editedSummaryText.value = "";
+  
+  // 如果之前是在查看進度，返回進度頁面
+  if (viewingConsultation.value) {
+    nextTick(() => {
+      showViewProgress.value = true;
+      if (process.client) {
+        document.body.style.overflow = "hidden";
+      }
+    });
+  } else {
+    // 恢復背景滾動
+    if (process.client) {
+      document.body.style.overflow = "";
+    }
+  }
+};
+
+// 確認修改摘要
+const confirmEditSummary = () => {
+  if (!editingConsultation.value) return;
+  
+  const newSummary = editedSummaryText.value.trim();
+  
+  if (!newSummary) {
+    alert("摘要內容不能為空");
+    return;
+  }
+  
+  // 更新諮詢記錄中的摘要
+  const consultationIndex = consultations.value.findIndex(
+    (c) => c.id === editingConsultation.value.id
+  );
+  
+  if (consultationIndex !== -1) {
+    consultations.value[consultationIndex].summary = newSummary;
+    console.log("摘要已更新:", newSummary);
+    
+    // 同時更新 viewingConsultation（如果在查看進度頁面）
+    if (viewingConsultation.value && viewingConsultation.value.id === editingConsultation.value.id) {
+      viewingConsultation.value.summary = newSummary;
+    }
+    
+    // TODO: 這裡可以調用 API 保存修改
+    // await updateConsultationSummary(editingConsultation.value.id, newSummary);
+  }
+  
+  // 關閉編輯頁面，返回進度頁面（如果之前是在進度頁面）
+  closeEditSummary();
+  
+  // 如果之前是在查看進度，重新打開進度頁面
+  if (viewingConsultation.value && viewingConsultation.value.id === editingConsultation.value.id) {
+    nextTick(() => {
+      showViewProgress.value = true;
+      if (process.client) {
+        document.body.style.overflow = "hidden";
+      }
+    });
+  }
 };
 
 // 新增諮詢相關狀態
@@ -720,7 +975,7 @@ onUnmounted(() => {
   margin-top: 1.5rem;
 }
 
-.timeline-container {
+.consultation-cards {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -1309,5 +1564,366 @@ onUnmounted(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+// 查看進度頁面
+.view-progress-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #e0e5ec 0%, #f0f4f8 100%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-bottom: 2rem;
+
+  .view-progress-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    background: transparent;
+    position: relative;
+
+    .back-arrow {
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+
+    .header-date {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: var(--Text-font-size-18, 18px);
+      font-weight: 500;
+      color: var(--Neutral-black, #1e1e1e);
+      pointer-events: none;
+    }
+
+    .header-spacer {
+      width: 24px;
+    }
+  }
+
+  .progress-timeline-card {
+    background: #f5f7fa;
+    border-radius: 16px;
+    padding: 1.5rem 1.25rem;
+    margin: 1rem 1.25rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+
+    .timeline-description {
+      font-size: var(--Text-font-size-16, 16px);
+      color: var(--Neutral-500, #666);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+      text-align: center;
+      font-weight: 400;
+    }
+
+    .timeline-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 0.5rem;
+
+      .timeline-container {
+        display: flex;
+        flex-direction: row; // ✅ 明確設置為橫向，避免被其他樣式影響
+        align-items: flex-start;
+        justify-content: space-between;
+        position: relative;
+        min-width: 100%;
+        padding: 0.5rem 0;
+        gap: 0; // ✅ 清除可能的 gap 影響
+
+        .timeline-step {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          flex: 0 0 auto;
+          position: relative;
+          min-width: 60px;
+
+          .timeline-circle {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid #4a90e2;
+            background: transparent;
+            margin-bottom: 0.75rem;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 2;
+
+            &.filled {
+              background: #4a90e2;
+              border-color: #4a90e2;
+            }
+          }
+
+          .timeline-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 100%;
+
+            .timeline-label {
+              font-size: var(--Text-font-size-14, 14px);
+              color: var(--Neutral-500, #666);
+              margin-bottom: 0.5rem;
+              white-space: nowrap;
+              font-weight: 400;
+            }
+
+            .timeline-date-time {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              gap: 0.125rem;
+
+              .timeline-date {
+                font-size: var(--Text-font-size-14, 14px);
+                color: var(--Neutral-black, #1e1e1e);
+                font-weight: 500;
+              }
+
+              .timeline-time {
+                font-size: var(--Text-font-size-14, 14px);
+                color: var(--Neutral-500, #666);
+                font-weight: 400;
+              }
+            }
+          }
+
+          &.completed {
+            .timeline-label {
+              color: var(--Neutral-black, #1e1e1e);
+              font-weight: 500;
+            }
+          }
+        }
+
+        .timeline-connector {
+          flex: 1;
+          height: 2px;
+          background: #e0e0e0;
+          margin: 0 0.5rem;
+          margin-top: 9px; // ✅ 調整為更接近圓心位置（圓點 16px + 2px border，視覺中心約在 9px）
+          transition: all 0.3s ease;
+          position: relative;
+          min-width: 20px;
+          max-width: 60px;
+          align-self: flex-start; // ✅ 確保連線對齊圓心
+
+          &.active {
+            background: #4a90e2;
+          }
+        }
+      }
+    }
+  }
+
+  .content-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 1.5rem 1.25rem;
+    margin: 1rem 1.25rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+
+    .content-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+
+      .content-title {
+        font-size: var(--Text-font-size-18, 18px);
+        font-weight: 700;
+        color: var(--Neutral-black, #1e1e1e);
+        margin: 0;
+        letter-spacing: 0.09px;
+      }
+
+      .edit-icon {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: scale(1.1);
+        }
+
+        img {
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+
+    .content-text {
+      font-size: var(--Text-font-size-16, 16px);
+      color: var(--Neutral-500, #666);
+      line-height: 1.6;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+  }
+}
+
+// 編輯摘要頁面
+.edit-summary-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #e0e5ec 0%, #f0f4f8 100%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .edit-summary-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    background: transparent;
+    position: relative;
+
+    .back-arrow {
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+
+    .page-title {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: var(--Text-font-size-20, 20px);
+      font-weight: 600;
+      color: var(--Neutral-black, #1e1e1e);
+      margin: 0;
+      pointer-events: none;
+    }
+
+    .header-spacer {
+      width: 24px; // 與返回按鈕同寬，保持標題置中
+    }
+  }
+
+  .edit-summary-content {
+    flex: 1;
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    .edit-summary-textarea {
+      flex: 1;
+      width: 100%;
+      border: none;
+      outline: none;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 1.25rem;
+      font-size: var(--Text-font-size-18, 18px);
+      font-weight: 400;
+      line-height: 1.6;
+      color: var(--Neutral-black, #1e1e1e);
+      resize: none;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+      transition: box-shadow 0.3s ease;
+      overflow-y: auto;
+      @include scrollbarStyle();
+
+      &::placeholder {
+        color: var(--Neutral-400, #b3b3b3);
+      }
+
+      &:focus {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      }
+    }
+  }
+
+  .edit-summary-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem 2rem;
+    background: transparent;
+
+    .cancel-btn,
+    .confirm-btn {
+      flex: 1;
+      max-width: 200px;
+      padding: 0.875rem 1.5rem;
+      border-radius: 16px;
+      font-size: var(--Text-font-size-18, 18px);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+    }
+
+    .cancel-btn {
+      background: #ffffff;
+      color: var(--Primary-default, #74bc1f);
+      border: 1px solid var(--Primary-default, #74bc1f);
+      box-shadow: 2px 4px 12px 0
+        var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
+
+      &:hover {
+        background: rgba(116, 188, 31, 0.05);
+        transform: translateY(-2px);
+        box-shadow: 2px 6px 16px 0
+          var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.8));
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+
+    .confirm-btn {
+      background: var(--Primary-default, #74bc1f);
+      color: #ffffff;
+      box-shadow: 2px 4px 12px 0
+        var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
+
+      &:hover {
+        background: var(--Primary-hover, #65a31b);
+        transform: translateY(-2px);
+        box-shadow: 2px 6px 16px 0 rgba(116, 188, 31, 0.4);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+  }
 }
 </style>
