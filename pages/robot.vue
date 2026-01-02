@@ -1690,39 +1690,59 @@ const initSpeechRecognition = () => {
       recognitionRef.lang = "zh-TW";
 
       recognitionRef.onresult = (event) => {
-        // ✅ Android 優化：使用 event.resultIndex 只處理本次變動的結果
-        // 避免把 interim 和 final 混在一起導致重複
-        let interim = "";
-
-        // ✅ 只處理本次變動的區段（避免 Android 重複回傳造成重複 append）
-        for (let i = event.resultIndex; i < event.results.length; i++) {
+        // ✅ Android 修復：Android 的 Web Speech API 每個 final result 的 transcript 已經包含前面所有內容
+        // 所以我們不需要自己累積，直接從 event.results 提取完整句子即可
+        // 這樣可以避免重複文字的問題
+        let finalText = "";
+        let interimText = "";
+        
+        // 直接掃描所有 results，提取 final 和 interim
+        // Android 上每個 final result 已經包含前面所有內容，所以只取最後一個 final
+        for (let i = 0; i < event.results.length; i++) {
           const result = event.results[i];
           const text = result[0]?.transcript?.trim() || "";
           if (!text) continue;
 
           if (result.isFinal) {
-            // ✅ 只把 final 累積進 finalTranscript
-            finalTranscript += (finalTranscript ? " " : "") + text;
+            // ✅ Android 上每個 final result 已經包含前面所有內容
+            // 所以我們只取最後一個 final 結果（最完整的）
+            finalText = text;
+            // 同步更新 finalTranscript（用於重啟時保留）
+            finalTranscript = text;
           } else {
-            // ✅ interim 不累積，只取最新一段
-            interim = text;
+            // ✅ 只保留最後一個 interim 結果
+            interimText = text;
           }
         }
-
-        // ✅ 顯示文字 = final（累積） + interim（最新一段）
-        const displayText = finalTranscript + (interim ? (finalTranscript ? " " : "") + interim : "");
-        const transcript = displayText;
+        
+        // ✅ 組合最終的 transcript：final 結果（已包含所有前面內容）+ 最後一個 interim（如果存在）
+        // 注意：如果 finalText 存在，interimText 通常是 finalText 的延續，需要拼接
+        // 但 Android 上 interimText 可能已經包含 finalText，所以需要檢查
+        let transcript = "";
+        if (finalText) {
+          // 如果有 final，檢查 interim 是否已經包含在 final 中
+          if (interimText && !interimText.startsWith(finalText)) {
+            // interim 是新的內容，需要拼接
+            transcript = finalText + " " + interimText;
+          } else {
+            // interim 已經包含在 final 中，或不存在
+            transcript = finalText;
+          }
+        } else {
+          // 只有 interim，直接使用
+          transcript = interimText;
+        }
 
         // 調試日誌：檢查結果
         if (process.client && transcript) {
           console.log("語音識別結果處理:", {
-            resultIndex: event.resultIndex,
             resultsCount: event.results.length,
             transcript,
+            finalText,
+            interimText,
             finalTranscript,
-            interim,
-            results: Array.from(event.results).slice(event.resultIndex).map((r, i) => ({
-              index: event.resultIndex + i,
+            results: Array.from(event.results).map((r, i) => ({
+              index: i,
               text: r[0].transcript,
               isFinal: r.isFinal,
             })),
@@ -1782,7 +1802,7 @@ const initSpeechRecognition = () => {
             }
 
             if (transcript) {
-              console.log("語音識別結果:", transcript, "finalTranscript:", finalTranscript, "interim:", interim);
+              console.log("語音識別結果:", transcript, "finalText:", finalText, "interimText:", interimText);
             }
           });
         }
