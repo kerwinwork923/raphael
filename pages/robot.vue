@@ -1678,6 +1678,26 @@ const startVoiceTimeout = (hasText = false) => {
   }, timeoutDuration);
 };
 
+// ✅ 重疊合併工具（字元層級，能抗空白/微修正）
+function mergeWithOverlap(base = "", addition = "") {
+  base = (base || "").trim();
+  addition = (addition || "").trim();
+  if (!base) return addition;
+  if (!addition) return base;
+
+  // 如果 addition 已包含 base（Android 常見：回傳整句）
+  if (addition.includes(base)) return addition;
+
+  // 找最大重疊後綴/前綴
+  const max = Math.min(base.length, addition.length);
+  for (let k = max; k > 0; k--) {
+    if (base.slice(-k) === addition.slice(0, k)) {
+      return (base + addition.slice(k)).trim();
+    }
+  }
+  return (base + " " + addition).trim();
+}
+
 // 初始化語音識別
 const initSpeechRecognition = () => {
   if (process.client && typeof window !== "undefined") {
@@ -1685,130 +1705,75 @@ const initSpeechRecognition = () => {
       const SpeechRecognition =
         window.SpeechRecognition || window.webkitSpeechRecognition;
       recognitionRef = new SpeechRecognition();
-      recognitionRef.continuous = true;
+      
+      // ✅ Android 優化：某些機型 continuous = true 會導致頻繁 onend → restart
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      recognitionRef.continuous = !isAndroid; // Android 用 false 比較穩
+      
       recognitionRef.interimResults = true;
       recognitionRef.lang = "zh-TW";
 
       recognitionRef.onresult = (event) => {
-        // ✅ Android 修復：Android 的 Web Speech API 每個 final result 的 transcript 已經包含前面所有內容
-        // 所以我們不需要自己累積，直接從 event.results 提取完整句子即可
-        // 這樣可以避免重複文字的問題
-        let finalText = "";
         let interimText = "";
-        
-        // 直接掃描所有 results，提取 final 和 interim
-        // Android 上每個 final result 已經包含前面所有內容，所以只取最後一個 final
-        for (let i = 0; i < event.results.length; i++) {
-          const result = event.results[i];
-          const text = result[0]?.transcript?.trim() || "";
+
+        // ✅ 只處理「新增」的 results，避免 Android 重掃造成重複
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const r = event.results[i];
+          const text = (r[0]?.transcript || "").trim();
           if (!text) continue;
 
-          if (result.isFinal) {
-            // ✅ Android 上每個 final result 已經包含前面所有內容
-            // 所以我們只取最後一個 final 結果（最完整的）
-            finalText = text;
-            // 同步更新 finalTranscript（用於重啟時保留）
-            finalTranscript = text;
+          if (r.isFinal) {
+            // ✅ final：Android 可能回整句，也可能只回新增片段
+            finalTranscript = mergeWithOverlap(finalTranscript, text);
+            interimText = ""; // final 出現就清 interim
           } else {
-            // ✅ 只保留最後一個 interim 結果
+            // interim：只保留最新一段（不累積）
             interimText = text;
           }
         }
-        
-        // ✅ 組合最終的 transcript：final 結果（已包含所有前面內容）+ 最後一個 interim（如果存在）
-        // 注意：如果 finalText 存在，interimText 通常是 finalText 的延續，需要拼接
-        // 但 Android 上 interimText 可能已經包含 finalText，所以需要檢查
-        let transcript = "";
-        if (finalText) {
-          // 如果有 final，檢查 interim 是否已經包含在 final 中
-          if (interimText && !interimText.startsWith(finalText)) {
-            // interim 是新的內容，需要拼接
-            transcript = finalText + " " + interimText;
-          } else {
-            // interim 已經包含在 final 中，或不存在
-            transcript = finalText;
-          }
-        } else {
-          // 只有 interim，直接使用
-          transcript = interimText;
-        }
+
+        // ✅ 顯示用：final + interim（用重疊合併，避免重複）
+        const textToShow = mergeWithOverlap(finalTranscript, interimText);
 
         // 調試日誌：檢查結果
-        if (process.client && transcript) {
+        if (process.client && textToShow) {
           console.log("語音識別結果處理:", {
+            resultIndex: event.resultIndex,
             resultsCount: event.results.length,
-            transcript,
-            finalText,
-            interimText,
+            textToShow,
             finalTranscript,
-            results: Array.from(event.results).map((r, i) => ({
-              index: i,
+            interimText,
+            results: Array.from(event.results).slice(event.resultIndex).map((r, i) => ({
+              index: event.resultIndex + i,
               text: r[0].transcript,
               isFinal: r.isFinal,
             })),
           });
         }
 
+        // 直接更新 DOM（你原本那套保留）
         if (process.client) {
-          // Android 兼容性：立即同步更新 DOM，不等待 Vue 響應式系統
-          // 優先查找 transcript-display（確認畫面），其次查找 transcript-text（錄音中）
           const transcriptEl =
             voiceModalTranscriptRef.value ||
             document.querySelector(".voice-modal .transcript-display") ||
             document.querySelector(".voice-modal .transcript-text");
 
-          const textToShow = transcript || "";
-
-          // 優先直接操作 DOM，確保 Android 上立即顯示
           if (transcriptEl) {
-            // 立即同步更新 DOM（不等待任何異步操作）
             transcriptEl.textContent = textToShow;
-
-            // 強制同步樣式更新
+            transcriptEl.style.display = textToShow ? "block" : "none";
             if (textToShow) {
-              transcriptEl.style.display = "block";
               transcriptEl.style.opacity = "1";
               transcriptEl.style.visibility = "visible";
-
-              // 強制同步重繪（Android 需要）- 立即執行，不等待
-              // 使用多種方式觸發重排
-              void transcriptEl.offsetHeight; // 觸發重排
-              void transcriptEl.offsetWidth; // 觸發重排
-              void transcriptEl.scrollTop; // 觸發重排
-            } else {
-              transcriptEl.style.display = "none";
             }
-
-            // 使用 requestAnimationFrame 作為額外保障（異步，不阻塞）
+            void transcriptEl.offsetHeight;
             requestAnimationFrame(() => {
-              if (transcriptEl && textToShow) {
-                transcriptEl.textContent = textToShow;
-                transcriptEl.style.display = "block";
-              }
+              if (transcriptEl) transcriptEl.textContent = textToShow;
             });
           }
 
-          // 同時更新響應式值（用於 Vue 綁定）
+          // 同步 Vue
           currentTranscript.value = textToShow;
-
-          // 移除時間限制，不再調用 startVoiceTimeout
-          // 讓用戶可以無限制地錄音，直到手動停止
-
-          // 使用 nextTick 作為備用更新機制
-          nextTick(() => {
-            if (transcriptEl && textToShow) {
-              transcriptEl.textContent = textToShow;
-              transcriptEl.style.display = "block";
-            }
-
-            if (transcript) {
-              console.log("語音識別結果:", transcript, "finalText:", finalText, "interimText:", interimText);
-            }
-          });
         }
-
-        // 不立即關閉，讓用戶可以持續說話
-        // 只有在用戶手動停止時才處理
       };
 
       recognitionRef.onerror = (event) => {
