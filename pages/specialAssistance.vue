@@ -1,7 +1,7 @@
 <template>
   <div class="specialAssistanceWrap">
     <div class="specialAssistanceContent">
-      <TitleMenu Text="專人協助" positionType="sticky" link="/robotDemo" />
+      <TitleMenu Text="專人協助" positionType="sticky" link="/robot" />
 
       <!-- 標籤切換器 -->
       <div class="tab-container">
