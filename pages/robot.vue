@@ -100,6 +100,12 @@
         </div>
         <h5>{{ isMuted ? "靜音" : "聲音" }}</h5>
       </div>
+      <div class="healGroup healGroup4">
+        <div class="healthImg" @click="goToSpecialAssistance">
+          <img src="/assets/imgs/robot/mic.svg" alt="專人協助" />
+        </div>
+        <h5>專人協助</h5>
+      </div>
     </div>
 
     <!-- 語音控制區域 - 從下方彈出 -->
@@ -4440,6 +4446,11 @@ const vClickOutside = {
   .healGroup3 {
     right: 2.25rem;
     top: 11.5rem;
+  }
+  .healGroup4 {
+    right: 2.25rem;
+    top: 16rem;
+
   }
 }
 

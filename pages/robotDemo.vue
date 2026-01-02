@@ -4025,12 +4025,12 @@ top: 7rem;
 }
 .healGroup3 {
 right: 2.25rem;
-top: 16rem;
+top: 11.5rem;
 }
 .healGroup4 {
 right: 2.25rem;
-
-top: 11.5rem;
+top: 16rem;
+display: none;
 
 }
 }
