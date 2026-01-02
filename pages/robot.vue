@@ -4030,6 +4030,10 @@ const closeNameInput = () => {
   }
 };
 
+const goToSpecialAssistance = () => {
+  router.push("/specialAssistance");
+};
+
 const confirmNameInput = async () => {
   if (process.client) {
     const name = characterNameInput.value.trim();
@@ -4135,6 +4139,8 @@ const maxHistoryDate = computed(() => {
   console.log("最晚日期:", result, "來自 key:", latestKey);
   return result;
 });
+
+
 
 // 本地指令：v-click-outside
 const vClickOutside = {
