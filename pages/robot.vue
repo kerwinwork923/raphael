@@ -1690,68 +1690,39 @@ const initSpeechRecognition = () => {
       recognitionRef.lang = "zh-TW";
 
       recognitionRef.onresult = (event) => {
-        // ✅ Android 優化：避免重複處理結果
-        // 當 continuous = true 時，event.results 會累積所有結果
-        // Android 上每次 onresult 都會包含所有歷史結果，導致重複
-        // 解決方案：只處理新的結果（索引大於上次處理的長度）
-        
-        const currentResultLength = event.results.length;
-        let finalTextParts = [];
-        let interimText = "";
-        let hasFinal = false;
-        let hasNewResults = false;
+        // ✅ Android 優化：使用 event.resultIndex 只處理本次變動的結果
+        // 避免把 interim 和 final 混在一起導致重複
+        let interim = "";
 
-        // 只處理新的結果（從上次處理的位置開始）
-        const startIndex = lastResultLength;
-        
-        for (let i = startIndex; i < currentResultLength; i++) {
+        // ✅ 只處理本次變動的區段（避免 Android 重複回傳造成重複 append）
+        for (let i = event.resultIndex; i < event.results.length; i++) {
           const result = event.results[i];
-          const resultKey = `${i}_${result[0].transcript}`; // 使用索引和內容作為唯一鍵
-          
-          // 避免重複處理同一個結果
-          if (processedResultIndices.has(resultKey)) {
-            continue;
-          }
-          
+          const text = result[0]?.transcript?.trim() || "";
+          if (!text) continue;
+
           if (result.isFinal) {
-            const transcript = result[0].transcript.trim();
-            if (transcript) {
-              finalTextParts.push(transcript);
-              processedResultIndices.add(resultKey);
-              hasFinal = true;
-              hasNewResults = true;
-            }
+            // ✅ 只把 final 累積進 finalTranscript
+            finalTranscript += (finalTranscript ? " " : "") + text;
           } else {
-            // 只保留最後一個 interim 結果（即時顯示當前正在說的話）
-            interimText = result[0].transcript;
-            hasNewResults = true;
+            // ✅ interim 不累積，只取最新一段
+            interim = text;
           }
         }
 
-        // 更新已處理的結果長度
-        if (hasNewResults) {
-          lastResultLength = currentResultLength;
-        }
-
-        // 組合最終的 transcript：已有文字 + 新的 final 結果 + 最後一個 interim（如果存在）
-        const existingText = currentTranscript.value || "";
-        const newFinalText = finalTextParts.join(" ");
-        const finalText = existingText 
-          ? (existingText + (newFinalText ? " " + newFinalText : ""))
-          : newFinalText;
-        const transcript =
-          finalText + (interimText ? (finalText ? " " : "") + interimText : "");
+        // ✅ 顯示文字 = final（累積） + interim（最新一段）
+        const displayText = finalTranscript + (interim ? (finalTranscript ? " " : "") + interim : "");
+        const transcript = displayText;
 
         // 調試日誌：檢查結果
         if (process.client && transcript) {
           console.log("語音識別結果處理:", {
+            resultIndex: event.resultIndex,
             resultsCount: event.results.length,
             transcript,
-            finalText,
-            interimText,
-            hasFinal,
-            results: Array.from(event.results).map((r, i) => ({
-              index: i,
+            finalTranscript,
+            interim,
+            results: Array.from(event.results).slice(event.resultIndex).map((r, i) => ({
+              index: event.resultIndex + i,
               text: r[0].transcript,
               isFinal: r.isFinal,
             })),
@@ -1811,7 +1782,7 @@ const initSpeechRecognition = () => {
             }
 
             if (transcript) {
-              console.log("語音識別結果:", transcript, "isFinal:", hasFinal);
+              console.log("語音識別結果:", transcript, "finalTranscript:", finalTranscript, "interim:", interim);
             }
           });
         }
@@ -1847,10 +1818,10 @@ const initSpeechRecognition = () => {
               // Android 優化：只在有文字時才自動重啟，避免頻繁重啟導致不穩定
               // 如果沒有文字，不自動重啟，讓用戶手動控制
               if (isListening.value && !isRecordingComplete.value && !isRestarting) {
-                const hasText = currentTranscript.value && currentTranscript.value.trim();
+                const hasText = finalTranscript && finalTranscript.trim();
                 if (hasText) {
-                  // 有文字時才自動重啟，保留已有文字
-                  const savedText = currentTranscript.value;
+                  // 有文字時才自動重啟，保留已有 final 文字
+                  // ✅ restart 時不要清 finalTranscript（保留已經 final 的內容）
                   isRestarting = true;
                   try {
                     setTimeout(() => {
@@ -1860,14 +1831,10 @@ const initSpeechRecognition = () => {
                         recognitionRef &&
                         !finalizedByUs
                       ) {
-                        // 重啟前保留已有文字，重置結果追蹤
-                        lastResultLength = 0;
-                        processedResultIndices.clear();
-                        if (savedText && !currentTranscript.value) {
-                          currentTranscript.value = savedText;
-                        }
+                        // ✅ 保留 finalTranscript，不清空（已 final 的內容要保留）
+                        // currentTranscript 會由 onresult 自動更新
                         recognitionRef.start();
-                        console.log("no-speech 自動重新啟動錄音（有文字）", savedText);
+                        console.log("no-speech 自動重新啟動錄音（有文字）", finalTranscript);
                         isRestarting = false;
                       } else {
                         isRestarting = false;
@@ -1886,7 +1853,7 @@ const initSpeechRecognition = () => {
             case "audio-capture":
               // Android 優化：只在有文字時才自動重啟
               if (isListening.value && !isRecordingComplete.value && !isRestarting) {
-                const hasText = currentTranscript.value && currentTranscript.value.trim();
+                const hasText = finalTranscript && finalTranscript.trim();
                 if (hasText) {
                   // ✅ restart 時不要清 finalTranscript（保留已經 final 的內容）
                   isRestarting = true;
@@ -1898,7 +1865,8 @@ const initSpeechRecognition = () => {
                         recognitionRef &&
                         !finalizedByUs
                       ) {
-                        // ✅ 保留 finalTranscript，不清空
+                        // ✅ 保留 finalTranscript，不清空（已 final 的內容要保留）
+                        // currentTranscript 會由 onresult 自動更新
                         recognitionRef.start();
                         console.log("audio-capture 自動重新啟動錄音（有文字）", finalTranscript);
                         isRestarting = false;
@@ -1940,12 +1908,11 @@ const initSpeechRecognition = () => {
         // Android 優化：只在有文字且不在重啟中時才自動重啟
         // 避免頻繁重啟導致不穩定和跳回"開始說話吧"
         if (isListening.value && !isRecordingComplete.value && process.client && !isRestarting) {
-          const hasText = currentTranscript.value && currentTranscript.value.trim();
+          const hasText = finalTranscript && finalTranscript.trim();
           
           if (hasText) {
-            // 有文字時才自動重啟，保留已有文字
-            // 保存當前文字，避免重啟時丟失
-            const savedText = currentTranscript.value;
+            // 有文字時才自動重啟，保留已有 final 文字
+            // ✅ restart 時不要清 finalTranscript（保留已經 final 的內容）
             isRestarting = true;
             try {
               // 增加延遲，避免頻繁重啟
@@ -1956,16 +1923,10 @@ const initSpeechRecognition = () => {
                   recognitionRef &&
                   !finalizedByUs
                 ) {
-                  // 重啟前保留已有文字，重置結果追蹤（新會話從新索引開始）
-                  // 但保留 currentTranscript，這樣 onresult 會正確累積
-                  lastResultLength = 0;
-                  processedResultIndices.clear();
-                  // 確保文字不會丟失
-                  if (savedText && !currentTranscript.value) {
-                    currentTranscript.value = savedText;
-                  }
+                  // ✅ 保留 finalTranscript，不清空（已 final 的內容要保留）
+                  // currentTranscript 會由 onresult 自動更新
                   recognitionRef.start();
-                  console.log("語音識別自動重新啟動，保持連續錄音（有文字）", savedText);
+                  console.log("語音識別自動重新啟動，保持連續錄音（有文字）", finalTranscript);
                   isRestarting = false;
                 } else {
                   isRestarting = false;
@@ -2288,8 +2249,8 @@ const startRecording = () => {
     voiceModalOpen.value = true; // ← 開窗
     isListening.value = true;
     // 重置 Android 相關狀態
-    processedResultIndices.clear();
-    lastResultLength = 0;
+    finalTranscript = ""; // ✅ 一定要清，不然會沿用上次錄音
+    currentTranscript.value = "";
     isRestarting = false;
 
     // Android 兼容性：立即準備文字元素，不等待 nextTick
@@ -2352,8 +2313,7 @@ const retryRecording = () => {
   currentTranscript.value = "";
   showVoiceError.value = false;
   // 重置 Android 相關狀態
-  processedResultIndices.clear();
-  lastResultLength = 0;
+  finalTranscript = ""; // ✅ 清空 final 累積
   isRestarting = false;
 
   // 重新開始錄音
@@ -6481,4 +6441,5 @@ const vClickOutside = {
   pointer-events: none;
 }
 </style>
+
 
