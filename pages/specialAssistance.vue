@@ -2048,7 +2048,7 @@ onUnmounted(() => {
       line-height: 1.5;
       text-align: center;
       font-weight: 400;
-    }
+    }   
 
     .timeline-wrapper {
       overflow-x: auto;
@@ -2194,7 +2194,7 @@ onUnmounted(() => {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 1rem;
+      margin-bottom: .5rem;
 
       .content-title {
         font-size: var(--Text-font-size-18, 18px);
