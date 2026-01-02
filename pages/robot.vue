@@ -1041,8 +1041,7 @@ let hasFinalResult = false; // 確保只處理一次 final
 let finalizedByUs = false;
 const isRecordingComplete = ref(false); // 錄音是否完成（用戶手動停止）
 const pendingTranscript = ref(""); // 待處理的轉錄文字
-let processedResultIndices = new Set(); // 追蹤已處理的結果索引，避免重複（Android 問題）
-let lastResultLength = 0; // 追蹤上次結果長度，用於檢測新結果
+let finalTranscript = ""; // ✅ 只放 final，不放 interim（避免 Android 重複）
 let isRestarting = false; // 標記是否正在重新啟動，避免重複啟動
 
 function clearVoiceTimeout() {
@@ -1062,8 +1061,7 @@ function reallyCloseVoiceModal() {
   voiceModalImageSrc.value = assistantSoundGif;
   voiceModalOpen.value = false; // ← 真正關窗
   // 重置 Android 相關狀態
-  processedResultIndices.clear();
-  lastResultLength = 0;
+  finalTranscript = ""; // ✅ 清空 final 累積
   isRestarting = false;
 }
 
@@ -1890,7 +1888,7 @@ const initSpeechRecognition = () => {
               if (isListening.value && !isRecordingComplete.value && !isRestarting) {
                 const hasText = currentTranscript.value && currentTranscript.value.trim();
                 if (hasText) {
-                  const savedText = currentTranscript.value;
+                  // ✅ restart 時不要清 finalTranscript（保留已經 final 的內容）
                   isRestarting = true;
                   try {
                     setTimeout(() => {
@@ -1900,14 +1898,9 @@ const initSpeechRecognition = () => {
                         recognitionRef &&
                         !finalizedByUs
                       ) {
-                        // 重啟前保留已有文字，重置結果追蹤
-                        lastResultLength = 0;
-                        processedResultIndices.clear();
-                        if (savedText && !currentTranscript.value) {
-                          currentTranscript.value = savedText;
-                        }
+                        // ✅ 保留 finalTranscript，不清空
                         recognitionRef.start();
-                        console.log("audio-capture 自動重新啟動錄音（有文字）", savedText);
+                        console.log("audio-capture 自動重新啟動錄音（有文字）", finalTranscript);
                         isRestarting = false;
                       } else {
                         isRestarting = false;
