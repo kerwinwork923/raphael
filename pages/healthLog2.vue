@@ -266,40 +266,46 @@ const formatDateRange = (date) => {
   return `${year}/${month}/${day}`;
 };
 
-// 篩選該週的日誌（從週一到今天）
+// ✅ 顯示全部日誌（不再限制為本週）
 const filteredLogs = computed(() => {
-  if (!healthLogs.value.length || !currentWeekStart.value) {
+  if (!healthLogs.value.length) {
     return [];
   }
 
-  const today = new Date();
-  today.setHours(23, 59, 59, 999); // 設定為今天的最後一刻
-
-  const filtered = healthLogs.value
-    .filter((log) => {
-      const logDate = new Date(log.date || log.timestamp);
-      return logDate >= currentWeekStart.value && logDate <= today;
-    })
+  // 直接返回所有日誌，按時間降序排列（最新的在前面）
+  return healthLogs.value
     .sort(
       (a, b) =>
         new Date(b.date || b.timestamp) - new Date(a.date || a.timestamp)
     );
-
-  return filtered;
 });
 
 // 本週摘要（使用 ref 而不是 computed，因為需要異步載入）
 const weeklySummary = ref("");
 
-// 調用 API 彙整本週摘要
+// 調用 API 彙整本週摘要（雖然日誌顯示全部，但摘要仍只顯示本週）
 const generateWeeklySummary = async () => {
-  if (activeTab.value !== "summary" || !filteredLogs.value.length) {
+  if (activeTab.value !== "summary") {
+    weeklySummary.value = "";
+    return;
+  }
+
+  // ✅ 先篩選本週的日誌（摘要只顯示本週）
+  const today = new Date();
+  today.setHours(23, 59, 59, 999);
+  const weekLogs = healthLogs.value.filter((log) => {
+    if (!currentWeekStart.value) return false;
+    const logDate = new Date(log.date || log.timestamp);
+    return logDate >= currentWeekStart.value && logDate <= today;
+  });
+
+  if (!weekLogs.length) {
     weeklySummary.value = "";
     return;
   }
 
   // 收集該週所有有 AI 摘要的內容
-  const aiSummaries = filteredLogs.value
+  const aiSummaries = weekLogs
     .filter((log) => log.content && log.content.trim())
     .map((log) => {
       const date = new Date(log.date || log.timestamp);
@@ -492,9 +498,9 @@ const generateWeeklySummary = async () => {
   }
 };
 
-// 監聽 activeTab 和 filteredLogs 變化，自動生成摘要
+// 監聽 activeTab 和 healthLogs 變化，自動生成摘要
 watch(
-  [() => activeTab.value, () => filteredLogs.value.length],
+  [() => activeTab.value, () => healthLogs.value.length],
   () => {
     if (activeTab.value === "summary") {
       generateWeeklySummary();
@@ -509,23 +515,58 @@ const loadHealthLogs = async () => {
   isDataReady.value = false;
 
   try {
-    // 從 localStorage 讀取健康日誌
-    const storageKey = "robotDemo_healthLogs";
-    const existingData = localStorage.getItem(storageKey);
-    const allLogs = existingData ? JSON.parse(existingData) : [];
+    // ✅ 從 robotDemo_healthLogs 讀取（優先）
+    const healthLogsKey = "robotDemo_healthLogs";
+    const healthLogsData = localStorage.getItem(healthLogsKey);
+    const healthLogsArray = healthLogsData ? JSON.parse(healthLogsData) : [];
 
-    console.log("從 localStorage 讀取的資料:", allLogs);
+    // ✅ 從 robotDemo_chatHistory 讀取聊天記錄
+    const chatHistoryKey = "robotDemo_chatHistory";
+    const chatHistoryData = localStorage.getItem(chatHistoryKey);
+    const chatHistoryArray = chatHistoryData ? JSON.parse(chatHistoryData) : [];
 
-    // 轉換所有日誌資料
-    healthLogs.value = allLogs
-      .map((item, index) => ({
-        id: item.id || Date.now() + index,
+    console.log("從 localStorage 讀取的健康日誌:", healthLogsArray);
+    console.log("從 localStorage 讀取的聊天記錄:", chatHistoryArray);
+
+    // 合併兩個來源的資料
+    const allLogs = [];
+
+    // 1. 從 robotDemo_healthLogs 讀取（已有完整格式）
+    healthLogsArray.forEach((item) => {
+      allLogs.push({
+        id: item.id || Date.now(),
         date: item.date || item.timestamp,
         timestamp: item.timestamp || item.date,
         type: item.type || "summary",
         content: item.content || item.Note || "", // AI 摘要內容
         preSoundNote: item.preSoundNote || item.originalInput || "", // 口述內容
-      }))
+      });
+    });
+
+    // 2. 從 robotDemo_chatHistory 讀取（需要轉換格式）
+    chatHistoryArray.forEach((item) => {
+      // 只處理有 user 和 bot 的記錄（完整的對話）
+      if (item.user && item.bot) {
+        allLogs.push({
+          id: item.id || item.ts || Date.now(),
+          date: item.timestamp || item.inputTime || new Date(item.ts).toISOString(),
+          timestamp: item.timestamp || item.inputTime || new Date(item.ts).toISOString(),
+          type: "summary",
+          content: item.bot || "", // AI 回覆作為摘要內容
+          preSoundNote: item.user || "", // 用戶輸入作為口述內容
+        });
+      }
+    });
+
+    // 轉換所有日誌資料並去重（根據 id）
+    const uniqueLogsMap = new Map();
+    allLogs.forEach((log) => {
+      if (!uniqueLogsMap.has(log.id)) {
+        uniqueLogsMap.set(log.id, log);
+      }
+    });
+
+    healthLogs.value = Array.from(uniqueLogsMap.values())
       .sort(
         (a, b) =>
           new Date(b.date || b.timestamp) - new Date(a.date || a.timestamp)
@@ -589,6 +630,20 @@ const goToNextWeek = () => {
   // Demo 版本不允許切換到未來的週
   return;
 };
+
+// 監聽健康日誌更新事件（同頁面內）
+if (process.client) {
+  window.addEventListener('healthLogsUpdated', () => {
+    loadHealthLogs();
+  });
+  
+  // 也監聽 storage 事件（不同標籤頁之間）
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'robotDemo_healthLogs') {
+      loadHealthLogs();
+    }
+  });
+}
 
 // 生命週期
 onMounted(async () => {

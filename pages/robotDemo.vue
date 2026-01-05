@@ -1650,6 +1650,14 @@ async function saveChatRecord({
     localStorage.setItem(storageKey, JSON.stringify(chatHistory));
 
     console.log("聊天記錄已保存到 localStorage:", newRecord);
+    
+    // ✅ 觸發自定義事件，讓 healthLog2.vue 可以即時更新（同頁面內）
+    if (process.client) {
+      window.dispatchEvent(new CustomEvent('chatHistoryUpdated', {
+        detail: { chatHistory }
+      }));
+    }
+    
     return { success: true, data: newRecord };
   } catch (e) {
     console.error("保存聊天記錄失敗:", e);
@@ -2583,6 +2591,11 @@ const saveConversations = () => {
       // 將 conversations 保存到 localStorage
       localStorage.setItem(storageKey, JSON.stringify(conversations.value));
       console.log("對話記錄已保存到 localStorage");
+      
+      // ✅ 觸發自定義事件，讓 healthLog2.vue 可以即時更新（同頁面內）
+      window.dispatchEvent(new CustomEvent('chatHistoryUpdated', {
+        detail: { conversations: conversations.value }
+      }));
     } catch (error) {
       console.error("保存對話記錄失敗:", error);
     }
@@ -2607,10 +2620,14 @@ const handleSummaryMode = async (saveSummary = false) => {
       const existingData = localStorage.getItem(storageKey);
       const healthLogs = existingData ? JSON.parse(existingData) : [];
 
+      // 使用本地時間，避免時區問題
+      const now = new Date();
+      const localDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds());
+      
       const newLog = {
         id: Date.now(),
-        date: new Date().toISOString(),
-        timestamp: new Date().toISOString(),
+        date: localDate.toISOString(), // 使用本地時間的 ISO 格式
+        timestamp: localDate.toISOString(),
         type: "summary",
         content: summaryText, // AI摘要內容
         preSoundNote: originalInput, // 口述內容（原始內容）
@@ -2619,6 +2636,13 @@ const handleSummaryMode = async (saveSummary = false) => {
       healthLogs.push(newLog);
       localStorage.setItem(storageKey, JSON.stringify(healthLogs));
       console.log("摘要已儲存到 localStorage:", newLog);
+      
+      // ✅ 觸發自定義事件，讓 healthLog2.vue 可以即時更新（同頁面內）
+      if (process.client) {
+        window.dispatchEvent(new CustomEvent('healthLogsUpdated', {
+          detail: { logs: healthLogs }
+        }));
+      }
     } catch (error) {
       console.error("儲存摘要失敗:", error);
       alert("儲存摘要失敗，請重試");
