@@ -372,6 +372,8 @@ const SAVE_CONSULTATION_API_URL =
   "https://23700999.com:8081/HMA/api/fr/MemCustAPI3"; // 儲存資料
 const GET_CONSULTATION_API_URL =
   "https://23700999.com:8081/HMA/api/fr/getMemCustAPI3"; // 獲取列表
+const MODIFY_CONSULTATION_API_URL =
+  "https://23700999.com:8081/HMA/api/fr/ModifyMemCustAPI3"; // 修改資料
 const TEXT_WEBHOOK_URL =
   "https://23700999.com:8081/push_notification/api/chatgpt/ask";
 
@@ -530,8 +532,26 @@ const editSummary = (consultation = null) => {
 
   if (!targetConsultation) return;
 
-  editingConsultation.value = targetConsultation;
-  editedSummaryText.value = targetConsultation.summary || "";
+  // ✅ 從 consultations 中查找完整的 consultation 對象（包含 aid）
+  // 使用 inputTime 作為唯一標識符來匹配（因為 id 是動態生成的）
+  let fullConsultation = consultations.value.find(
+    (c) => c.inputTime === targetConsultation.inputTime
+  );
+
+  // 如果找不到，嘗試使用 id 匹配
+  if (!fullConsultation) {
+    fullConsultation = consultations.value.find(
+      (c) => c.id === targetConsultation.id
+    );
+  }
+
+  // 如果還是找不到，使用原始的 targetConsultation
+  if (!fullConsultation) {
+    fullConsultation = targetConsultation;
+  }
+
+  editingConsultation.value = fullConsultation;
+  editedSummaryText.value = fullConsultation.summary || "";
   showEditSummary.value = true;
 
   // 如果從進度頁面打開，先關閉進度頁面
@@ -594,8 +614,32 @@ const confirmEditSummary = async () => {
   }
 
   try {
-    // 調用 API 更新摘要
-    await sendConsultationAPI(newSummary);
+    // 獲取 AID（從 editingConsultation 或從 consultations 中查找）
+    let aid = editingConsultation.value.aid;
+    
+    if (!aid) {
+      // 如果沒有 AID，嘗試從 consultations 中查找（使用 inputTime 匹配）
+      const foundConsultation = consultations.value.find(
+        (c) => c.inputTime === editingConsultation.value.inputTime
+      );
+      
+      // 如果還是找不到，嘗試使用 id 匹配
+      const foundById = foundConsultation || consultations.value.find(
+        (c) => c.id === editingConsultation.value.id
+      );
+      
+      if (foundById && foundById.aid) {
+        aid = foundById.aid;
+        editingConsultation.value.aid = aid; // 更新 editingConsultation 的 aid
+      } else {
+        console.error("找不到 AID，editingConsultation:", editingConsultation.value);
+        console.error("consultations:", consultations.value);
+        throw new Error("找不到 AID，無法修改。請重新載入頁面後再試。");
+      }
+    }
+
+    // 調用修改 API 更新摘要
+    await modifyConsultationAPI(newSummary, aid);
 
     // 重新獲取諮詢列表以更新資料
     await fetchConsultations();
@@ -1140,6 +1184,50 @@ const sendConsultationAPI = async (inmessage) => {
   }
 };
 
+// 修改諮詢到 API（更新資料）
+const modifyConsultationAPI = async (inmessage, aid) => {
+  if (!localobj) {
+    throw new Error("用戶資料不存在");
+  }
+
+  if (!aid) {
+    throw new Error("AID 不存在，無法修改");
+  }
+
+  try {
+    const response = await fetch(MODIFY_CONSULTATION_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        MID: localobj.MID || "1",
+        Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
+        MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
+        Mobile: localobj.Mobile || "0968324056",
+        Lang: "zhtw",
+        Inmessage: inmessage,
+        AID: aid,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API 調用失敗: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.Result === "OK") {
+      return { success: true, data };
+    } else {
+      throw new Error("API 返回錯誤");
+    }
+  } catch (error) {
+    console.error("修改諮詢 API 錯誤:", error);
+    throw error;
+  }
+};
+
 // 獲取諮詢列表
 const fetchConsultations = async () => {
   if (!localobj) {
@@ -1191,6 +1279,7 @@ const fetchConsultations = async () => {
           custTime: item.CustTime || "",
           doctorTime: item.DoctorTime || "",
           closeTime: item.CloseTime || "",
+          aid: item.AID || item.aid || "", // 保存 AID 用於修改
         };
       });
 
@@ -2375,4 +2464,6 @@ onUnmounted(() => {
     }
   }
 }
+
+
 </style>

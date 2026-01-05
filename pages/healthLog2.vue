@@ -224,9 +224,13 @@ const TEXT_WEBHOOK_URL =
 // 獲取本週的開始日期（週一）
 const getWeekStart = (date = new Date()) => {
   const d = new Date(date);
+  d.setHours(0, 0, 0, 0); // 重置時間為 00:00:00
   const day = d.getDay();
   const diff = d.getDate() - day + (day === 0 ? -6 : 1); // 調整到週一
-  return new Date(d.setDate(diff));
+  const weekStart = new Date(d);
+  weekStart.setDate(diff);
+  weekStart.setHours(0, 0, 0, 0); // 確保時間為 00:00:00
+  return weekStart;
 };
 
 // 獲取本週的結束日期（今天，不是週日）
@@ -291,12 +295,27 @@ const generateWeeklySummary = async () => {
   }
 
   // ✅ 先篩選本週的日誌（摘要只顯示本週）
+  if (!currentWeekStart.value) {
+    weeklySummary.value = "";
+    return;
+  }
+
+  // 確保 currentWeekStart 的時間為 00:00:00
+  const weekStart = new Date(currentWeekStart.value);
+  weekStart.setHours(0, 0, 0, 0);
+
   const today = new Date();
   today.setHours(23, 59, 59, 999);
+
   const weekLogs = healthLogs.value.filter((log) => {
-    if (!currentWeekStart.value) return false;
+    if (!log.date && !log.timestamp) return false;
+    
     const logDate = new Date(log.date || log.timestamp);
-    return logDate >= currentWeekStart.value && logDate <= today;
+    // 只比較日期部分，忽略時間
+    const logDateOnly = new Date(logDate);
+    logDateOnly.setHours(0, 0, 0, 0);
+    
+    return logDateOnly >= weekStart && logDate <= today;
   });
 
   if (!weekLogs.length) {
@@ -502,6 +521,11 @@ const generateWeeklySummary = async () => {
 watch(
   [() => activeTab.value, () => healthLogs.value.length],
   () => {
+    // 確保 currentWeekStart 已初始化
+    if (!currentWeekStart.value) {
+      initCurrentWeek();
+    }
+    
     if (activeTab.value === "summary") {
       generateWeeklySummary();
     }
