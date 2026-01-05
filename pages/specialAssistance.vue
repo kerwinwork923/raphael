@@ -699,6 +699,7 @@ let recognitionRef = null;
 let voiceTimeout = null;
 let hasFinalResult = false;
 let finalizedByUs = false;
+let finalTranscript = ""; // ✅ 只放 final，不放 interim（避免 Android 重複）
 
 // 新增諮詢
 const addConsultation = () => {
@@ -757,6 +758,26 @@ const switchInputMethod = (method) => {
   }
 };
 
+// ✅ 重疊合併工具（字元層級，能抗空白/微修正）
+function mergeWithOverlap(base = "", addition = "") {
+  base = (base || "").trim();
+  addition = (addition || "").trim();
+  if (!base) return addition;
+  if (!addition) return base;
+
+  // 如果 addition 已包含 base（Android 常見：回傳整句）
+  if (addition.includes(base)) return addition;
+
+  // 找最大重疊後綴/前綴
+  const max = Math.min(base.length, addition.length);
+  for (let k = max; k > 0; k--) {
+    if (base.slice(-k) === addition.slice(0, k)) {
+      return (base + addition.slice(k)).trim();
+    }
+  }
+  return (base + " " + addition).trim();
+}
+
 // 初始化語音識別
 const initSpeechRecognition = () => {
   if (process.client && typeof window !== "undefined") {
@@ -764,58 +785,57 @@ const initSpeechRecognition = () => {
       const SpeechRecognition =
         window.SpeechRecognition || window.webkitSpeechRecognition;
       recognitionRef = new SpeechRecognition();
-      recognitionRef.continuous = true;
+      
+      // ✅ Android 優化：某些機型 continuous = true 會導致頻繁 onend → restart
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      recognitionRef.continuous = !isAndroid; // Android 用 false 比較穩
+      
       recognitionRef.interimResults = true;
       recognitionRef.lang = "zh-TW";
 
       recognitionRef.onresult = (event) => {
-        let finalTextParts = [];
         let interimText = "";
-        let hasFinal = false;
 
-        for (let i = 0; i < event.results.length; i++) {
-          const result = event.results[i];
-          if (result.isFinal) {
-            const transcript = result[0].transcript.trim();
-            if (transcript) {
-              finalTextParts.push(transcript);
-            }
-            hasFinal = true;
+        // ✅ 只處理「新增」的 results，避免 Android 重掃造成重複
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const r = event.results[i];
+          const text = (r[0]?.transcript || "").trim();
+          if (!text) continue;
+
+          if (r.isFinal) {
+            // ✅ final：Android 可能回整句，也可能只回新增片段
+            finalTranscript = mergeWithOverlap(finalTranscript, text);
+            interimText = ""; // final 出現就清 interim
           } else {
-            interimText = result[0].transcript;
+            // interim：只保留最新一段（不累積）
+            interimText = text;
           }
         }
 
-        const finalText = finalTextParts.join(" ");
-        const transcript =
-          finalText + (interimText ? (finalText ? " " : "") + interimText : "");
+        // ✅ 顯示用：final + interim（用重疊合併，避免重複）
+        const textToShow = mergeWithOverlap(finalTranscript, interimText);
 
+        // 直接更新 DOM（你原本那套保留）
         if (process.client) {
           const transcriptEl =
             voiceModalTranscriptRef.value ||
+            document.querySelector(".voice-modal .transcript-display") ||
             document.querySelector(".voice-modal .transcript-text");
-
-          const textToShow = transcript || "";
 
           if (transcriptEl) {
             transcriptEl.textContent = textToShow;
+            transcriptEl.style.display = textToShow ? "block" : "none";
             if (textToShow) {
-              transcriptEl.style.display = "block";
               transcriptEl.style.opacity = "1";
               transcriptEl.style.visibility = "visible";
-              void transcriptEl.offsetHeight;
-            } else {
-              transcriptEl.style.display = "none";
             }
-
+            void transcriptEl.offsetHeight;
             requestAnimationFrame(() => {
-              if (transcriptEl && textToShow) {
-                transcriptEl.textContent = textToShow;
-                transcriptEl.style.display = "block";
-              }
+              if (transcriptEl) transcriptEl.textContent = textToShow;
             });
           }
 
+          // 同步 Vue
           currentTranscript.value = textToShow;
         }
       };
@@ -928,6 +948,8 @@ function reallyCloseVoiceModal() {
   currentTranscript.value = "";
   voiceModalImageSrc.value = assistantSoundGif;
   voiceModalOpen.value = false;
+  // 重置 Android 相關狀態
+  finalTranscript = ""; // ✅ 清空 final 累積
 }
 
 // 關閉語音模態框
@@ -969,6 +991,9 @@ const startRecording = () => {
     isRecordingComplete.value = false;
     voiceModalOpen.value = true;
     isListening.value = true;
+    // 重置 Android 相關狀態
+    finalTranscript = ""; // ✅ 一定要清，不然會沿用上次錄音
+    currentTranscript.value = "";
 
     const prepareTranscriptEl = () => {
       const transcriptEl =
@@ -1014,6 +1039,8 @@ const retryRecording = () => {
   isRecordingComplete.value = false;
   currentTranscript.value = "";
   showVoiceError.value = false;
+  // 重置 Android 相關狀態
+  finalTranscript = ""; // ✅ 清空 final 累積
 
   startRecording();
 };
