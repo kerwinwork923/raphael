@@ -765,6 +765,7 @@ let hasFinalResult = false; // 確保只處理一次 final
 let finalizedByUs = false;
 const isRecordingComplete = ref(false); // 錄音是否完成（用戶手動停止）
 const pendingTranscript = ref(""); // 待處理的轉錄文字
+let finalTranscript = ""; // ✅ 只放 final，不放 interim（避免 Android 重複）
 
 function clearVoiceTimeout() {
   if (voiceTimeout) {
@@ -782,6 +783,8 @@ function reallyCloseVoiceModal() {
   pendingTranscript.value = "";
   voiceModalImageSrc.value = assistantSoundGif;
   voiceModalOpen.value = false; // ← 真正關窗
+  // 重置 Android 相關狀態
+  finalTranscript = ""; // ✅ 清空 final 累積
 }
 
 // 語音識別和合成實例
@@ -1401,6 +1404,26 @@ const startVoiceTimeout = (hasText = false) => {
   }, timeoutDuration);
 };
 
+// ✅ 重疊合併工具（字元層級，能抗空白/微修正）
+function mergeWithOverlap(base = "", addition = "") {
+  base = (base || "").trim();
+  addition = (addition || "").trim();
+  if (!base) return addition;
+  if (!addition) return base;
+
+  // 如果 addition 已包含 base（Android 常見：回傳整句）
+  if (addition.includes(base)) return addition;
+
+  // 找最大重疊後綴/前綴
+  const max = Math.min(base.length, addition.length);
+  for (let k = max; k > 0; k--) {
+    if (base.slice(-k) === addition.slice(0, k)) {
+      return (base + addition.slice(k)).trim();
+    }
+  }
+  return (base + " " + addition).trim();
+}
+
 // 初始化語音識別
 const initSpeechRecognition = () => {
   if (process.client && typeof window !== "undefined") {
@@ -1408,113 +1431,75 @@ const initSpeechRecognition = () => {
       const SpeechRecognition =
         window.SpeechRecognition || window.webkitSpeechRecognition;
       recognitionRef = new SpeechRecognition();
-      recognitionRef.continuous = true;
+      
+      // ✅ Android 優化：某些機型 continuous = true 會導致頻繁 onend → restart
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      recognitionRef.continuous = !isAndroid; // Android 用 false 比較穩
+      
       recognitionRef.interimResults = true;
       recognitionRef.lang = "zh-TW";
 
       recognitionRef.onresult = (event) => {
-        // ✅ 累積所有對話內容，不中斷
-        // 當 continuous = true 時，event.results 會累積所有結果
-        // 我們需要提取所有 final 結果，確保不遺漏任何對話內容
-        let finalTextParts = [];
         let interimText = "";
-        let hasFinal = false;
 
-        // 遍歷所有 results，累積所有 final 結果
-        for (let i = 0; i < event.results.length; i++) {
-          const result = event.results[i];
-          if (result.isFinal) {
-            // 累積所有 final 結果，確保不遺漏任何對話
-            const transcript = result[0].transcript.trim();
-            if (transcript) {
-              finalTextParts.push(transcript);
-            }
-            hasFinal = true;
+        // ✅ 只處理「新增」的 results，避免 Android 重掃造成重複
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const r = event.results[i];
+          const text = (r[0]?.transcript || "").trim();
+          if (!text) continue;
+
+          if (r.isFinal) {
+            // ✅ final：Android 可能回整句，也可能只回新增片段
+            finalTranscript = mergeWithOverlap(finalTranscript, text);
+            interimText = ""; // final 出現就清 interim
           } else {
-            // 只保留最後一個 interim 結果（即時顯示當前正在說的話）
-            interimText = result[0].transcript;
+            // interim：只保留最新一段（不累積）
+            interimText = text;
           }
         }
 
-        // 組合最終的 transcript：所有 final 結果用空格連接 + 最後一個 interim（如果存在）
-        // 這樣可以確保所有已完成的對話都被保留
-        const finalText = finalTextParts.join(" ");
-        const transcript = finalText + (interimText ? (finalText ? " " : "") + interimText : "");
+        // ✅ 顯示用：final + interim（用重疊合併，避免重複）
+        const textToShow = mergeWithOverlap(finalTranscript, interimText);
 
         // 調試日誌：檢查結果
-        if (process.client && transcript) {
+        if (process.client && textToShow) {
           console.log("語音識別結果處理:", {
+            resultIndex: event.resultIndex,
             resultsCount: event.results.length,
-            transcript,
-            finalText,
+            textToShow,
+            finalTranscript,
             interimText,
-            hasFinal,
-            results: Array.from(event.results).map((r, i) => ({
-              index: i,
+            results: Array.from(event.results).slice(event.resultIndex).map((r, i) => ({
+              index: event.resultIndex + i,
               text: r[0].transcript,
               isFinal: r.isFinal,
             })),
           });
         }
 
+        // 直接更新 DOM（你原本那套保留）
         if (process.client) {
-          // Android 兼容性：立即同步更新 DOM，不等待 Vue 響應式系統
           const transcriptEl =
             voiceModalTranscriptRef.value ||
+            document.querySelector(".voice-modal .transcript-display") ||
             document.querySelector(".voice-modal .transcript-text");
 
-          const textToShow = transcript || "";
-
-          // 優先直接操作 DOM，確保 Android 上立即顯示
           if (transcriptEl) {
-            // 立即同步更新 DOM（不等待任何異步操作）
             transcriptEl.textContent = textToShow;
-
-            // 強制同步樣式更新
+            transcriptEl.style.display = textToShow ? "block" : "none";
             if (textToShow) {
-              transcriptEl.style.display = "block";
               transcriptEl.style.opacity = "1";
               transcriptEl.style.visibility = "visible";
-
-              // 強制同步重繪（Android 需要）- 立即執行，不等待
-              // 使用多種方式觸發重排
-              void transcriptEl.offsetHeight; // 觸發重排
-              void transcriptEl.offsetWidth; // 觸發重排
-              void transcriptEl.scrollTop; // 觸發重排
-            } else {
-              transcriptEl.style.display = "none";
             }
-
-            // 使用 requestAnimationFrame 作為額外保障（異步，不阻塞）
+            void transcriptEl.offsetHeight;
             requestAnimationFrame(() => {
-              if (transcriptEl && textToShow) {
-                transcriptEl.textContent = textToShow;
-                transcriptEl.style.display = "block";
-              }
+              if (transcriptEl) transcriptEl.textContent = textToShow;
             });
           }
 
-          // 同時更新響應式值（用於 Vue 綁定）
+          // 同步 Vue
           currentTranscript.value = textToShow;
-
-          // 移除時間限制，不再調用 startVoiceTimeout
-          // 讓用戶可以無限制地錄音，直到手動停止
-
-          // 使用 nextTick 作為備用更新機制
-          nextTick(() => {
-            if (transcriptEl && textToShow) {
-              transcriptEl.textContent = textToShow;
-              transcriptEl.style.display = "block";
-            }
-
-            if (transcript) {
-              console.log("語音識別結果:", transcript, "isFinal:", hasFinal);
-            }
-          });
         }
-
-        // 不立即關閉，讓用戶可以持續說話
-        // 只有在 onend 事件或超時時才處理
       };
 
       recognitionRef.onerror = (event) => {
@@ -2107,6 +2092,9 @@ const startRecording = () => {
     isRecordingComplete.value = false;
     voiceModalOpen.value = true; // ← 開窗
     isListening.value = true;
+    // 重置 Android 相關狀態
+    finalTranscript = ""; // ✅ 一定要清，不然會沿用上次錄音
+    currentTranscript.value = "";
 
     // Android 兼容性：立即準備文字元素，不等待 nextTick
     // 使用雙重機制：立即操作 + nextTick 備用
@@ -2167,6 +2155,8 @@ const retryRecording = () => {
   pendingTranscript.value = "";
   currentTranscript.value = "";
   showVoiceError.value = false;
+  // 重置 Android 相關狀態
+  finalTranscript = ""; // ✅ 清空 final 累積
 
   // 重新開始錄音
   startRecording();
