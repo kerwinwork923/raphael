@@ -130,6 +130,28 @@
             聽不太清楚，請點擊再試一次
           </p>
 
+          <!-- 準備開始說話（模態框已打開但還沒開始錄音） -->
+          <template v-else-if="voiceModalOpen && !isListening && !isRecordingComplete">
+            <!-- 關閉按鈕 -->
+            <div class="voiceModelClose" @click="closeVoiceModal">
+              <img src="/assets/imgs/robot/close.svg" alt="關閉" />
+            </div>
+
+            <p class="voice-start-text">開始說話吧</p>
+            <img
+              :src="voiceModalImageSrc"
+              alt="音波圖"
+              class="voice-wave"
+            />
+            <!-- 開始說話按鈕 -->
+            <button
+              class="voice-btn voice-btn-start"
+              @click="beginSpeechRecognition"
+            >
+              開始說話
+            </button>
+          </template>
+
           <!-- 錄音中顯示 -->
           <template v-else-if="isListening && !isRecordingComplete">
             <!-- 關閉按鈕 - 錄音中顯示（右上角） -->
@@ -766,6 +788,7 @@ let finalizedByUs = false;
 const isRecordingComplete = ref(false); // 錄音是否完成（用戶手動停止）
 const pendingTranscript = ref(""); // 待處理的轉錄文字
 let finalTranscript = ""; // ✅ 只放 final，不放 interim（避免 Android 重複）
+const isReadyToSpeak = ref(false); // 是否準備好開始說話（已打開模態框但還沒開始錄音）
 
 function clearVoiceTimeout() {
   if (voiceTimeout) {
@@ -778,6 +801,7 @@ function reallyCloseVoiceModal() {
   clearVoiceTimeout();
   isListening.value = false;
   isRecordingComplete.value = false;
+  isReadyToSpeak.value = false; // 重置準備狀態
   showVoiceError.value = false;
   currentTranscript.value = "";
   pendingTranscript.value = "";
@@ -2088,7 +2112,7 @@ const toggleListening = () => {
   }
 };
 
-// 開始錄音
+// 開始錄音（打開模態框，但不立即開始錄音）
 const startRecording = () => {
   if (process.client) {
     showVoiceError.value = false;
@@ -2098,11 +2122,20 @@ const startRecording = () => {
     hasFinalResult = false;
     finalizedByUs = false;
     isRecordingComplete.value = false;
+    isReadyToSpeak.value = false; // 重置為未準備狀態
     voiceModalOpen.value = true; // ← 開窗
-    isListening.value = true;
+    isListening.value = false; // 先不開始錄音，等待用戶點擊按鈕
     // 重置 Android 相關狀態
     finalTranscript = ""; // ✅ 一定要清，不然會沿用上次錄音
     currentTranscript.value = "";
+  }
+};
+
+// 真正開始語音識別（用戶點擊「開始說話」按鈕後）
+const beginSpeechRecognition = () => {
+  if (process.client && recognitionRef) {
+    isReadyToSpeak.value = true; // 標記為已準備好
+    isListening.value = true; // 開始錄音
 
     // Android 兼容性：立即準備文字元素，不等待 nextTick
     // 使用雙重機制：立即操作 + nextTick 備用
@@ -2160,13 +2193,14 @@ const retryRecording = () => {
 
   // 重置狀態
   isRecordingComplete.value = false;
+  isReadyToSpeak.value = false; // 重置準備狀態
   pendingTranscript.value = "";
   currentTranscript.value = "";
   showVoiceError.value = false;
   // 重置 Android 相關狀態
   finalTranscript = ""; // ✅ 清空 final 累積
 
-  // 重新開始錄音
+  // 重新開始錄音（打開模態框，但不立即開始）
   startRecording();
 };
 
@@ -4496,6 +4530,31 @@ display: none;
       letter-spacing: 2.7px;
       &:hover {
         background: #5a9a17;
+      }
+    }
+
+    .voice-btn-start {
+      border-radius: var(--Radius-r-50, 50px);
+      background: var(--Primary-default, #74bc1f);
+      box-shadow: 2px 4px 12px 0
+        var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
+      color: white;
+      font-size: var(--Text-font-size-18, 18px);
+      font-style: normal;
+      font-weight: 400;
+      letter-spacing: 2.7px;
+      width: calc(100% - 32px);
+      margin: 20px 16px 0;
+      padding: 12px 24px;
+      flex: none;
+      max-width: none;
+
+      &:hover {
+        background: #5a9a17;
+      }
+
+      &:active:not(:disabled) {
+        transform: scale(0.95);
       }
     }
 
