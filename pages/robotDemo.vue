@@ -40,24 +40,23 @@
         <h5>健康日誌</h5>
       </div>
       <div class="healGroup healGroup2">
-        <div class="healthImg"  @click="showHistory">
+        <div class="healthImg" @click="showHistory">
           <img :src="messagesSquare" alt="聊天紀錄" />
         </div>
         <h5>聊天紀錄</h5>
       </div>
       <div class="healGroup healGroup4">
-        <div class="healthImg"  @click="goToVoice">
+        <div class="healthImg" @click="goToVoice">
           <img src="/assets/imgs/robot/mic.svg" alt="語音" />
         </div>
         <h5>專人協助</h5>
       </div>
       <div class="healGroup healGroup3">
-      <div class="healthImg" @click="toggleVolume">
+        <div class="healthImg" @click="toggleVolume">
           <img :src="isMuted ? mutedSvg : volumeSvg" alt="音量" />
-        </div> 
-        <h5 > {{ isMuted ? '靜音' : '聲音' }}</h5>
+        </div>
+        <h5>{{ isMuted ? "靜音" : "聲音" }}</h5>
       </div>
-
     </div>
 
     <!-- 語音控制區域 - 從下方彈出 -->
@@ -125,24 +124,33 @@
     <transition name="fade">
       <div v-if="voiceModalOpen" class="voice-modal">
         <div class="voice-content" @click.stop>
-          <!-- 錯誤文字 -->
-          <p v-if="showVoiceError" class="voice-error-text">
-            聽不太清楚，請點擊再試一次
-          </p>
+          <!-- 錯誤狀態 -->
+          <template v-if="showVoiceError">
+            <div class="voiceModelClose" @click="closeVoiceModal">
+              <img src="/assets/imgs/robot/close.svg" alt="關閉" />
+            </div>
+            <p class="voice-error-text">剛剛沒聽清楚,我們再試一次吧。</p>
+            <p class="voice-error-hint">請按一下「重新錄音」。</p>
+            <img :src="voiceModalImageSrc" alt="音波圖" class="voice-wave" />
+            <button
+              class="voice-btn voice-btn-retry voice-btn-retry-not"
+              @click="retryRecording"
+            >
+              重新錄音
+            </button>
+          </template>
 
           <!-- 準備開始說話（模態框已打開但還沒開始錄音） -->
-          <template v-else-if="voiceModalOpen && !isListening && !isRecordingComplete">
+          <template
+            v-else-if="voiceModalOpen && !isListening && !isRecordingComplete"
+          >
             <!-- 關閉按鈕 -->
             <div class="voiceModelClose" @click="closeVoiceModal">
               <img src="/assets/imgs/robot/close.svg" alt="關閉" />
             </div>
 
             <p class="voice-start-text">開始說話吧</p>
-            <img
-              :src="voiceModalImageSrc"
-              alt="音波圖"
-              class="voice-wave"
-            />
+            <img :src="voiceModalImageSrc" alt="音波圖" class="voice-wave" />
             <!-- 開始說話按鈕 -->
             <button
               class="voice-btn voice-btn-start"
@@ -162,11 +170,8 @@
             <!-- 如果還沒有收到聲音，顯示開始說話提示和音波圖 -->
             <template v-if="!currentTranscript || !currentTranscript.trim()">
               <p class="voice-start-text">開始說話吧</p>
-              <img
-                :src="voiceModalImageSrc"
-                alt="音波圖"
-                class="voice-wave"
-              />
+              <img :src="voiceModalImageSrc" alt="音波圖" class="voice-wave" />
+              <p class="voice-listening-text">聆聽中...</p>
             </template>
 
             <!-- 如果已經收到聲音，顯示確認畫面樣式 -->
@@ -179,7 +184,10 @@
                 {{ currentTranscript }}
               </div>
               <div class="voice-action-buttons">
-                <button class="voice-btn voice-btn-retry" @click="retryRecording">
+                <button
+                  class="voice-btn voice-btn-retry"
+                  @click="retryRecording"
+                >
                   重新錄音
                 </button>
                 <button
@@ -223,35 +231,6 @@
           <button @click="closeAudioError" class="alert-button">
             我知道了
           </button>
-        </div>
-      </div>
-    </transition>
-
-    <!-- 摘要處理中彈窗（同樣式，但只有提示文字、無按鈕） -->
-    <transition name="fade">
-      <div v-if="showSummaryProcessing" class="summary-modal">
-        <div class="robot-content">
-          <div class="robot-sphere"></div>
-          <h3 class="robot-title">等我一下，我幫你整理剛剛說的內容～</h3>
-        </div>
-      </div>
-    </transition>
-
-    <!-- 摘要模式彈窗 -->
-    <transition name="fade">
-      <div v-if="showSummaryMode" class="summary-modal">
-        <div class="robot-content">
-          <div class="robot-sphere"></div>
-          <h3 class="robot-title">這是我幫你整理的摘要~</h3>
-          <div class="robot-text">「{{ currentSummary }}」</div>
-          <div class="robot-buttons">
-            <button @click="handleSummaryMode(false)" class="robot-btn-cancel">
-              不用
-            </button>
-            <button @click="handleSummaryMode(true)" class="robot-btn-confirm">
-              儲存摘要
-            </button>
-          </div>
         </div>
       </div>
     </transition>
@@ -1396,7 +1375,7 @@ const startVoiceTimeout = (hasText = false) => {
     clearTimeout(voiceTimeout);
   }
 
-  // 如果有文字，給更長的靜音時間（3秒）；如果沒有文字，給較短時間（8秒）
+  // 如果有文字，給更長的靜音時間（5秒）；如果沒有文字，給10秒
   const timeoutDuration = hasText ? 5000 : 10000;
 
   voiceTimeout = setTimeout(() => {
@@ -1404,7 +1383,7 @@ const startVoiceTimeout = (hasText = false) => {
       const transcript = currentTranscript.value.trim();
 
       if (!transcript) {
-        // 沒有文字，顯示錯誤提示
+        // ✅ 沒有文字，10秒後顯示錯誤狀態（不自動關閉）
         showVoiceError.value = true;
         voiceModalImageSrc.value = assistantDefaultGif;
         isListening.value = false;
@@ -1412,7 +1391,7 @@ const startVoiceTimeout = (hasText = false) => {
           recognitionRef?.stop();
         }
       } else {
-        // 有文字但靜音超過3秒，自動結束並處理
+        // 有文字但靜音超過5秒，自動結束並處理
         hasFinalResult = true;
         clearVoiceTimeout();
         finalizedByUs = true;
@@ -1455,11 +1434,11 @@ const initSpeechRecognition = () => {
       const SpeechRecognition =
         window.SpeechRecognition || window.webkitSpeechRecognition;
       recognitionRef = new SpeechRecognition();
-      
+
       // ✅ Android 優化：某些機型 continuous = true 會導致頻繁 onend → restart
       const isAndroid = /Android/i.test(navigator.userAgent);
       recognitionRef.continuous = !isAndroid; // Android 用 false 比較穩
-      
+
       recognitionRef.interimResults = true;
       recognitionRef.lang = "zh-TW";
 
@@ -1493,11 +1472,13 @@ const initSpeechRecognition = () => {
             textToShow,
             finalTranscript,
             interimText,
-            results: Array.from(event.results).slice(event.resultIndex).map((r, i) => ({
-              index: event.resultIndex + i,
-              text: r[0].transcript,
-              isFinal: r.isFinal,
-            })),
+            results: Array.from(event.results)
+              .slice(event.resultIndex)
+              .map((r, i) => ({
+                index: event.resultIndex + i,
+                text: r[0].transcript,
+                isFinal: r.isFinal,
+              })),
           });
         }
 
@@ -1523,13 +1504,24 @@ const initSpeechRecognition = () => {
 
           // 同步 Vue
           currentTranscript.value = textToShow;
+
+          // ✅ 收到聲音時，清除超時計時器並重新啟動（如果有文字用5秒，沒文字用10秒）
+          if (textToShow && textToShow.trim()) {
+            startVoiceTimeout(true); // 有文字，給5秒
+          } else {
+            startVoiceTimeout(false); // 沒文字，給10秒
+          }
         }
       };
 
       recognitionRef.onerror = (event) => {
         // 靜默處理 no-speech 和 aborted 錯誤，不輸出錯誤日誌
         // aborted 是我們主動停止錄音時的正常行為，不是錯誤
-        if (process.client && event.error !== "no-speech" && event.error !== "aborted") {
+        if (
+          process.client &&
+          event.error !== "no-speech" &&
+          event.error !== "aborted"
+        ) {
           console.error("語音識別錯誤:", event.error);
         }
 
@@ -1555,7 +1547,11 @@ const initSpeechRecognition = () => {
               if (isListening.value && !isRecordingComplete.value) {
                 try {
                   setTimeout(() => {
-                    if (isListening.value && !isRecordingComplete.value && recognitionRef) {
+                    if (
+                      isListening.value &&
+                      !isRecordingComplete.value &&
+                      recognitionRef
+                    ) {
                       recognitionRef.start();
                       console.log("no-speech 自動重新啟動錄音");
                     }
@@ -1571,7 +1567,11 @@ const initSpeechRecognition = () => {
               if (isListening.value && !isRecordingComplete.value) {
                 try {
                   setTimeout(() => {
-                    if (isListening.value && !isRecordingComplete.value && recognitionRef) {
+                    if (
+                      isListening.value &&
+                      !isRecordingComplete.value &&
+                      recognitionRef
+                    ) {
                       recognitionRef.start();
                       console.log("audio-capture 自動重新啟動錄音");
                     }
@@ -1610,7 +1610,11 @@ const initSpeechRecognition = () => {
           try {
             // 使用 setTimeout 避免立即重啟可能造成的問題
             setTimeout(() => {
-              if (isListening.value && !isRecordingComplete.value && recognitionRef) {
+              if (
+                isListening.value &&
+                !isRecordingComplete.value &&
+                recognitionRef
+              ) {
                 recognitionRef.start();
                 console.log("語音識別自動重新啟動，保持連續錄音");
               }
@@ -1674,14 +1678,16 @@ async function saveChatRecord({
     localStorage.setItem(storageKey, JSON.stringify(chatHistory));
 
     console.log("聊天記錄已保存到 localStorage:", newRecord);
-    
+
     // ✅ 觸發自定義事件，讓 healthLog2.vue 可以即時更新（同頁面內）
     if (process.client) {
-      window.dispatchEvent(new CustomEvent('chatHistoryUpdated', {
-        detail: { chatHistory }
-      }));
+      window.dispatchEvent(
+        new CustomEvent("chatHistoryUpdated", {
+          detail: { chatHistory },
+        })
+      );
     }
-    
+
     return { success: true, data: newRecord };
   } catch (e) {
     console.error("保存聊天記錄失敗:", e);
@@ -1692,11 +1698,6 @@ async function saveChatRecord({
 async function runSummaryFlow(inputText) {
   try {
     isInSummaryFlow.value = true;
-
-    // UI：顯示「等我一下」彈窗
-    showSummaryProcessing.value = true;
-    currentSummary.value = "";
-    showSummaryMode.value = false;
 
     // 呼叫 ChatGPT 產生精簡內容
     const aiResponse = await callChatGPT(
@@ -1722,21 +1723,102 @@ async function runSummaryFlow(inputText) {
 
     // 設置原始輸入到 pendingInput，供後續使用
     pendingInput.value = inputText;
+    const summaryText = aiResponse || inputText;
+    currentSummary.value = summaryText;
 
-    // UI：進入「是否儲存到健康日誌」的彈窗
-    currentSummary.value = aiResponse || inputText;
-    showSummaryProcessing.value = false;
-    showSummaryMode.value = true;
+    // ✅ 直接儲存摘要到 localStorage（不顯示彈窗）
+    try {
+      const storageKey = "robotDemo_healthLogs";
+      const existingData = localStorage.getItem(storageKey);
+      const healthLogs = existingData ? JSON.parse(existingData) : [];
+
+      // 使用本地時間，避免時區問題
+      const now = new Date();
+      const localDate = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        now.getHours(),
+        now.getMinutes(),
+        now.getSeconds()
+      );
+
+      const newLog = {
+        id: Date.now(),
+        date: localDate.toISOString(), // 使用本地時間的 ISO 格式
+        timestamp: localDate.toISOString(),
+        type: "summary",
+        content: summaryText, // AI摘要內容
+        preSoundNote: inputText, // 口述內容（原始內容）
+      };
+
+      healthLogs.push(newLog);
+      localStorage.setItem(storageKey, JSON.stringify(healthLogs));
+      console.log("摘要已自動儲存到 localStorage:", newLog);
+
+      // ✅ 觸發自定義事件，讓 healthLog2.vue 可以即時更新（同頁面內）
+      if (process.client) {
+        window.dispatchEvent(
+          new CustomEvent("healthLogsUpdated", {
+            detail: { logs: healthLogs },
+          })
+        );
+      }
+    } catch (error) {
+      console.error("儲存摘要失敗:", error);
+      // 不顯示錯誤提示，靜默失敗
+    }
+
+    // 繼續後續流程（打n8n模型並儲存對話記錄）
+    await handleSummaryModeContinue(inputText);
   } catch (error) {
     console.error("摘要流程失敗:", error);
 
     // 設置原始輸入到 pendingInput，供後續使用
     pendingInput.value = inputText;
-
-    // UI：顯示錯誤摘要
     currentSummary.value = inputText;
-    showSummaryProcessing.value = false;
-    showSummaryMode.value = true;
+
+    // 即使失敗也嘗試儲存原始輸入
+    try {
+      const storageKey = "robotDemo_healthLogs";
+      const existingData = localStorage.getItem(storageKey);
+      const healthLogs = existingData ? JSON.parse(existingData) : [];
+
+      const now = new Date();
+      const localDate = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        now.getHours(),
+        now.getMinutes(),
+        now.getSeconds()
+      );
+
+      const newLog = {
+        id: Date.now(),
+        date: localDate.toISOString(),
+        timestamp: localDate.toISOString(),
+        type: "summary",
+        content: inputText,
+        preSoundNote: inputText,
+      };
+
+      healthLogs.push(newLog);
+      localStorage.setItem(storageKey, JSON.stringify(healthLogs));
+
+      if (process.client) {
+        window.dispatchEvent(
+          new CustomEvent("healthLogsUpdated", {
+            detail: { logs: healthLogs },
+          })
+        );
+      }
+    } catch (saveError) {
+      console.error("儲存摘要失敗:", saveError);
+    }
+
+    // 繼續後續流程
+    await handleSummaryModeContinue(inputText);
   } finally {
     isInSummaryFlow.value = false;
   }
@@ -1758,19 +1840,22 @@ async function sendViaUnifiedAPI(
   const localTime = getLocalTimeString(now);
 
   // 📌 24 小時聊天記憶功能：提取最近 24 小時內的對話
-  const twentyFourHoursAgo = now.getTime() - (24 * 60 * 60 * 1000);
+  const twentyFourHoursAgo = now.getTime() - 24 * 60 * 60 * 1000;
   const recentConversations = conversations.value
-    .filter(conv => {
+    .filter((conv) => {
       const convTime = conv.ts || new Date(conv.timestamp).getTime();
       return convTime >= twentyFourHoursAgo;
     })
-    .map(conv => ({
+    .map((conv) => ({
       user: conv.user || "",
-      assistant: conv.bot || ""
+      assistant: conv.bot || "",
     }))
-    .filter(conv => conv.user || conv.assistant); // 只保留有內容的對話
+    .filter((conv) => conv.user || conv.assistant); // 只保留有內容的對話
 
-  console.log(`24 小時內對話數量: ${recentConversations.length}`, recentConversations);
+  console.log(
+    `24 小時內對話數量: ${recentConversations.length}`,
+    recentConversations
+  );
 
   // 📌 將 conversationHistory 格式化為字串，合併到 message 中
   const messageWithHistory = JSON.stringify({
@@ -2162,7 +2247,8 @@ const beginSpeechRecognition = () => {
     });
 
     recognitionRef.start();
-    // 移除時間限制，不再調用 startVoiceTimeout
+    // ✅ 啟動10秒超時計時器（如果沒有聲音，顯示錯誤狀態）
+    startVoiceTimeout(false);
   }
 };
 
@@ -2625,11 +2711,13 @@ const saveConversations = () => {
       // 將 conversations 保存到 localStorage
       localStorage.setItem(storageKey, JSON.stringify(conversations.value));
       console.log("對話記錄已保存到 localStorage");
-      
+
       // ✅ 觸發自定義事件，讓 healthLog2.vue 可以即時更新（同頁面內）
-      window.dispatchEvent(new CustomEvent('chatHistoryUpdated', {
-        detail: { conversations: conversations.value }
-      }));
+      window.dispatchEvent(
+        new CustomEvent("chatHistoryUpdated", {
+          detail: { conversations: conversations.value },
+        })
+      );
     } catch (error) {
       console.error("保存對話記錄失敗:", error);
     }
@@ -2638,54 +2726,8 @@ const saveConversations = () => {
   }
 };
 
-// 摘要模式處理函數
-const handleSummaryMode = async (saveSummary = false) => {
-  const summaryText = currentSummary.value;
-  const originalInput = pendingInput.value || ""; // 獲取原始輸入
-
-  // 關閉摘要模式
-  showSummaryMode.value = false;
-  currentSummary.value = "";
-
-  if (saveSummary) {
-    // 儲存摘要到 localStorage
-    try {
-      const storageKey = "robotDemo_healthLogs";
-      const existingData = localStorage.getItem(storageKey);
-      const healthLogs = existingData ? JSON.parse(existingData) : [];
-
-      // 使用本地時間，避免時區問題
-      const now = new Date();
-      const localDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), now.getSeconds());
-      
-      const newLog = {
-        id: Date.now(),
-        date: localDate.toISOString(), // 使用本地時間的 ISO 格式
-        timestamp: localDate.toISOString(),
-        type: "summary",
-        content: summaryText, // AI摘要內容
-        preSoundNote: originalInput, // 口述內容（原始內容）
-      };
-
-      healthLogs.push(newLog);
-      localStorage.setItem(storageKey, JSON.stringify(healthLogs));
-      console.log("摘要已儲存到 localStorage:", newLog);
-      
-      // ✅ 觸發自定義事件，讓 healthLog2.vue 可以即時更新（同頁面內）
-      if (process.client) {
-        window.dispatchEvent(new CustomEvent('healthLogsUpdated', {
-          detail: { logs: healthLogs }
-        }));
-      }
-    } catch (error) {
-      console.error("儲存摘要失敗:", error);
-      alert("儲存摘要失敗，請重試");
-    }
-  }
-
-  // 移除客服功能檢查
-
-  // 無論是否儲存摘要，都要打n8n模型並儲存對話記錄
+// 摘要模式後續處理函數（打n8n模型並儲存對話記錄）
+const handleSummaryModeContinue = async (originalInput) => {
   if (originalInput) {
     try {
       isLoading.value = true;
@@ -4066,21 +4108,18 @@ const vClickOutside = {
     }
   }
   .healGroup2 {
-
-right: 2.25rem;
-top: 7rem;
-
-}
-.healGroup3 {
-right: 2.25rem;
-top: 11.5rem;
-}
-.healGroup4 {
-right: 2.25rem;
-top: 16rem;
-display: none;
-
-}
+    right: 2.25rem;
+    top: 7rem;
+  }
+  .healGroup3 {
+    right: 2.25rem;
+    top: 11.5rem;
+  }
+  .healGroup4 {
+    right: 2.25rem;
+    top: 16rem;
+    display: none;
+  }
 }
 
 /* 語音控制欄 - 絕對定位擬態設計 */
@@ -4095,7 +4134,7 @@ display: none;
   gap: 20px;
   @include liquidGlass();
   z-index: 10;
-  padding: .35rem 2.25rem;
+  padding: 0.35rem 2.25rem;
   .firstText1 {
     top: -50%;
     left: 50%;
@@ -4157,7 +4196,7 @@ display: none;
     cursor: pointer;
     transition: all 0.3s ease;
     @include neumorphismOuter($radius: 50%, $padding: 0);
-    img{
+    img {
       width: 36px;
       height: 36px;
     }
@@ -4415,16 +4454,36 @@ display: none;
       font-weight: 600;
     }
 
+    .voice-listening-text {
+      color: var(--Neutral-black, #1e1e1e);
+      text-align: center;
+      font-size: var(--Text-font-size-20, 20px);
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+      text-transform: lowercase;
+      margin-top: 12px;
+    }
+
     .voice-error-text {
       color: $raphael-black;
       text-align: center;
-      font-size: 20px;
-      font-weight: 600;
-      text-transform: lowercase;
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .voice-error-hint {
+      color: $raphael-black;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.5;
+      margin-bottom: 20px;
     }
 
     .voice-confirm-text {
-
       font-size: 16px;
       color: #2d3748;
       font-weight: 500;
@@ -4433,7 +4492,6 @@ display: none;
     }
 
     .voice-label-text {
-
       font-size: 16px;
       color: #2d3748;
       font-weight: 600;
@@ -4455,8 +4513,6 @@ display: none;
       line-height: 1.6;
       word-break: break-word;
       max-width: 90%;
-
-
     }
 
     .voice-action-buttons {
@@ -4514,6 +4570,18 @@ display: none;
       &:hover {
         background: #f0fdf4;
       }
+
+      // 錯誤狀態下的按鈕樣式（全寬）
+      .voice-content > & {
+        width: calc(100% - 32px);
+        margin: 20px 16px 0;
+        flex: none;
+        max-width: none;
+      }
+    }
+
+    .voice-btn-retry-not {
+      margin-top: 1.5rem;
     }
 
     .voice-btn-send {
