@@ -102,12 +102,12 @@
                 </div>
               </div>
 
-              <div
+              <!-- <div
                 class="timeline-line"
                 v-if="log.preSoundNote && log.preSoundNote.trim()"
-              ></div>
+              ></div> -->
               <!-- AI摘要內容區塊 -->
-              <div
+              <!-- <div
                 class="content-section"
                 v-if="log.content && log.content.trim()"
               >
@@ -136,7 +136,7 @@
                 >
                   {{ log.content }}
                 </div>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>

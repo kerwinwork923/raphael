@@ -15,7 +15,7 @@
     </div>
 
     <!-- 初始對話氣泡 -->
-    <div class="greeting-bubble">
+    <!-- <div class="greeting-bubble">
       <div v-if="isLoading" class="loading-indicator">
         <div class="spinner"></div>
         <span>思考中...</span>
@@ -24,7 +24,7 @@
         {{ latestResponse }}
       </div>
       <div v-else class="greeting-text">嗨~~有什麼需要幫您</div>
-    </div>
+    </div> -->
 
     <!-- AI角色形象區域 -->
     <div class="character-section">
@@ -33,37 +33,27 @@
         class="character-image"
         alt="院長"
       />
-      <div class="healGroup">
+      <div class="healGroup healGroup5">
         <div class="healthImg" @click="goToHealthLog2">
           <img src="/assets/imgs/robot/health.svg" alt="健康" />
         </div>
         <h5>健康日誌</h5>
       </div>
-      <div class="healGroup healGroup2">
-        <div class="healthImg" @click="showHistory">
-          <img :src="messagesSquare" alt="聊天紀錄" />
-        </div>
-        <h5>聊天紀錄</h5>
-      </div>
+
       <div class="healGroup healGroup4">
         <div class="healthImg" @click="goToVoice">
           <img src="/assets/imgs/robot/mic.svg" alt="語音" />
         </div>
         <h5>專人協助</h5>
       </div>
-      <div class="healGroup healGroup3">
-        <div class="healthImg" @click="toggleVolume">
-          <img :src="isMuted ? mutedSvg : volumeSvg" alt="音量" />
-        </div>
-        <h5>{{ isMuted ? "靜音" : "聲音" }}</h5>
-      </div>
+
     </div>
 
     <!-- 語音控制區域 - 從下方彈出 -->
     <transition name="slide-up">
       <div v-if="showVoiceControls" class="voice-control-bar">
         <button class="control-btn history-btn" @click="showHistory">
-          <img :src="messagesSquare" alt="聊天紀錄" />
+          <img :src="textIconSvg" alt="文字對話" />
         </button>
 
         <button
@@ -76,9 +66,9 @@
 
           <div v-if="isListening" class="pulse-ring"></div>
         </button>
-        <!-- <button class="control-btn volume-btn" @click="toggleVolume">
+        <button class="control-btn volume-btn" @click="toggleVolume">
           <img :src="isMuted ? mutedSvg : volumeSvg" alt="音量" />
-        </button> -->
+        </button>
       </div>
     </transition>
 
@@ -516,6 +506,7 @@ import { Pagination } from "swiper/modules";
 import recycleSvg from "~/assets/imgs/robot/recycle.svg";
 import messagesSquare from "~/assets/imgs/robot/messagesSquare.svg";
 import soundSvg from "~/assets/imgs/robot/sound.svg";
+import textIconSvg from "~/assets/imgs/robot/textIcon.svg";
 import assistantSoundGif from "~/assets/imgs/robot/assistantSound.gif";
 import assistantDefaultGif from "~/assets/imgs/robot/assistantDefault.gif";
 import loadingGif from "~/assets/imgs/robot/loading.gif";
@@ -4071,7 +4062,8 @@ const vClickOutside = {
   padding-bottom: 84px;
 
   .character-image {
-    height: 100%;
+    margin-top: 15%;
+    height: 90%;
     object-fit: cover;
   }
   .healGroup {
@@ -4107,18 +4099,16 @@ const vClickOutside = {
       line-height: normal;
     }
   }
-  .healGroup2 {
-    right: 2.25rem;
-    top: 7rem;
-  }
-  .healGroup3 {
-    right: 2.25rem;
-    top: 11.5rem;
-  }
+
   .healGroup4 {
     right: 2.25rem;
     top: 16rem;
     display: none;
+  }
+  .healGroup5 {
+    right: 2.25rem;
+    top: 8.5rem;
+  
   }
 }
 
