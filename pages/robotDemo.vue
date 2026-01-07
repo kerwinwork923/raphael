@@ -85,7 +85,10 @@
             class="text-input"
             placeholder="請輸入文字"
             @keypress.enter="handleManualInput"
+            @click="focusTextInput"
+            @focus="focusTextInput"
             ref="textInputRef"
+            inputmode="text"
           />
           <button
             class="send-btn"
@@ -932,6 +935,15 @@ const closeTextInput = () => {
   showTextInput.value = false;
 };
 
+// 聚焦文字輸入框（觸發鍵盤彈出）
+const focusTextInput = () => {
+  if (process.client && textInputRef.value) {
+    nextTick(() => {
+      textInputRef.value?.focus();
+    });
+  }
+};
+
 // 移除首次登入解說相關函數
 // const checkTutorialStatus = () => {
 //   if (process.client) {
@@ -1757,8 +1769,8 @@ async function runSummaryFlow(inputText) {
       // 不顯示錯誤提示，靜默失敗
     }
 
-    // 繼續後續流程（打n8n模型並儲存對話記錄）
-    await handleSummaryModeContinue(inputText);
+    // ✅ 只調用一次摘要 API，不再調用後續的對話 API
+    // 移除 handleSummaryModeContinue 調用
   } catch (error) {
     console.error("摘要流程失敗:", error);
 
@@ -1805,10 +1817,11 @@ async function runSummaryFlow(inputText) {
       console.error("儲存摘要失敗:", saveError);
     }
 
-    // 繼續後續流程
-    await handleSummaryModeContinue(inputText);
+    // ✅ 只調用一次摘要 API，不再調用後續的對話 API
+    // 移除 handleSummaryModeContinue 調用
   } finally {
     isInSummaryFlow.value = false;
+    isLoading.value = false; // ✅ 確保載入狀態被重置
   }
 }
 
