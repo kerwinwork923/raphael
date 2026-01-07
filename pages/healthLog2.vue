@@ -686,13 +686,22 @@ const goToNextWeek = () => {
 
 // 監聽健康日誌更新事件（同頁面內）
 if (process.client) {
+  // 監聽健康日誌更新事件
   window.addEventListener('healthLogsUpdated', () => {
+    console.log('收到 healthLogsUpdated 事件，重新載入健康日誌');
+    loadHealthLogs();
+  });
+  
+  // 監聽聊天記錄更新事件
+  window.addEventListener('chatHistoryUpdated', () => {
+    console.log('收到 chatHistoryUpdated 事件，重新載入健康日誌');
     loadHealthLogs();
   });
   
   // 也監聽 storage 事件（不同標籤頁之間）
   window.addEventListener('storage', (e) => {
-    if (e.key === 'robotDemo_healthLogs') {
+    if (e.key === 'robotDemo_healthLogs' || e.key === 'robotDemo_chatHistory') {
+      console.log(`收到 storage 事件，key: ${e.key}，重新載入健康日誌`);
       loadHealthLogs();
     }
   });
