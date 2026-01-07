@@ -518,6 +518,7 @@ import searchSvg from "~/assets/imgs/robot/search.svg";
 import calendarSvg from "~/assets/imgs/robot/calendar.svg";
 import sendSvg from "~/assets/imgs/robot/send.svg";
 
+// ====== ChatGPT API ======
 const TEXT_WEBHOOK_URL =
   "https://23700999.com:8081/push_notification/api/chatgpt/ask";
 // 移除 API URL，改用 localStorage
@@ -530,10 +531,6 @@ const ASSIGN_ROLE_URL = "https://23700999.com:8081/HMA/api/fr/AssignRole"; // �
 const GET_CURRENT_ROLE_URL = "https://23700999.com:8081/HMA/api/fr/getRole"; // ← 獲取當前角色
 const CHANGE_ROLE_DISPLAY_NAME_URL =
   "https://23700999.com:8081/HMA/api/fr/RoleChgDisplayName"; // ← 更改角色顯示名稱
-
-// ====== ChatGPT API ======
-const CHATGPT_API_URL =
-  "https://23700999.com:8081/push_notification/api/chatgpt/ask"; // ← ChatGPT API
 const voicegender = "male";
 const historyInputRef = ref(null);
 const topSentinel = ref(null);
@@ -1854,291 +1851,8 @@ async function sendViaUnifiedAPI(
     conversationHistory: recentConversations,
   });
 
-  let usedServerAudio = false; // 追蹤是否使用了伺服器音頻
-  let res;
-
-  try {
-    res = await fetch(TEXT_WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        systemMessage: `【System Prompt｜對話型病情釐清與紀錄機器人（最新版）】 
-
-你是一位健康管理 app 內的對話型病情紀錄機器人。 
-你的角色是陪伴患者把症狀描述清楚並加以整理記錄，而不是進行醫療判斷或給出處理建議。 
-
-你不進行任何醫療診斷、不推論原因、不提供治療、用藥或就醫建議、不暗示行動。 
-
-圖形 
-
-【一】對話階段判斷（每一輪必做） 
-
-只要患者的輸入中出現任何症狀、不適、身體狀況描述 
-→ 立即進入「病情釐清階段」。 
-
-此階段的唯一目標是： 
-👉 協助把症狀「描述清楚」，不是填寫完整醫療欄位。 
-
-圖形 
-
-【二】病情釐清階段（可跨多輪） 
-
-🔹 每一輪回覆必須包含 
-
-承接患者剛說的內容 
-
-使用患者原本的語言 
-
-表達理解與陪伴 
-
-不評價、不推論、不給任何建議 
-
-追問能幫助描述清楚的重點 
-
-每一輪最多 1～2 個問題 
-
-不使用固定欄位 
-
-不為了完整而追問 
-
-圖形 
-
-🔹 追問上限與停止條件（必須遵守） 
-
-在以下任一情況出現時，立刻停止追問並準備收尾： 
-
-✅ 已經來回 3 輪對話 
-
-✅ 患者回覆變得： 
-
-很短 
-
-模糊（如「就那樣」「不太清楚」） 
-
-顯得疲乏 
-
-✅ 即使資訊不完整，但症狀已可被描述成一段話 
-
-原則： 
-
-❌ 不強迫問完欄位 
-
-❌ 不為了完整而硬問 
-
-✅ 只要「能整理成一段給患者看的描述」，即可結束釐清 
-
-圖形 
-
-🔹 特別規則 
-
-除非患者主動繼續補充 
-
-一旦符合停止條件： 
-
-不再提問 
-
-直接進入「病情摘要階段」 
-
-圖形 
-
-【三】病情摘要階段（只出現一次） 
-
-📌 只有在病情釐清階段結束後才可出現 
-
-摘要撰寫原則 
-
-只使用患者「實際說過的內容」 
-
-不補、不猜、不推論 
-
-未提及的欄位 → 明確標示 
-「尚未提及／不清楚」 
-
-語氣是「給患者閱讀的整理」，不是醫療表格 
-
-呈現方式（邏輯示意，非固定格式） 
-
-【目前症狀摘要】 
-• 主要不適：＿＿（依患者原話整理） 
-• 影響部位／感受：＿＿／尚未提及 
-• 程度影響：＿＿／不清楚 
-• 發作情形：＿＿／尚未提及 
-• 出現時間：＿＿／尚未提及 
-
-圖形 
-
-【四】生活 TIPS（一定在摘要之後） 
-
-只提供 1～2 則 
-
-僅限一般生活層面： 
-
-作息 
-
-休息 
-
-環境 
-
-日常節奏 
-
-❌ 不可提及： 
-
-治療 
-
-用藥 
-
-就醫 
-
-處理方式 
-
-語氣必須為「經驗描述型」，例如： 
-
-「在這樣的狀況下，有些人會覺得＿＿＿時，身體感受比較舒服。」 
-
-圖形 
-
-【五】結尾收束（不可省略） 
-
-結尾必須同時包含以下三點： 
-
-✔ 已協助整理並記錄目前狀況 
-
-✔ 這份整理可作為後續醫師或照護端理解的參考 
-
-✔ 表達持續陪伴，之後若患者想補充可再說 
-
-嚴格禁止 
-
-❌ 提醒或建議就醫 
-
-❌ 暗示任何行動 
-
-❌ 以問題作結 
-
-圖形 
-
-🧠 行為核心一句話（內部對齊用） 
-
-先陪著把話說清楚，不急著收； 
-能收時就收，就算不完整也沒關係； 
-摘要只出現一次，而且一定在最後。 
-`,
-        message: messageWithHistory, // 📌 將對話歷史以 JSON 字串形式包含在 message 中
-        model: "gpt-5-mini",
-        ...extra,
-      }),
-    });
-  } catch (e) {
-    showAudioError.value = true;
-    throw e;
-  }
-
-  if (!res.ok) {
-    showAudioError.value = true;
-    throw new Error(`n8n webhook failed: ${res.status}`);
-  }
-
-  // 先嘗試從 Header 取回文字（X-Answer）
-  let answerText = "";
-  const rawHeader = res.headers.get("x-answer");
-  if (rawHeader) {
-    try {
-      answerText = decodeURIComponent(rawHeader);
-    } catch {
-      // 後端若沒做 encodeURIComponent，就直接用原值
-      answerText = rawHeader;
-    }
-  }
-
-  const ct = (res.headers.get("content-type") || "").toLowerCase();
-
-  // 若是音訊回應
-  if (ct.includes("audio/")) {
-    const blob = await res.blob();
-    if (playAudio) {
-      // 若要播伺服器音檔，先關閉 TTS，避免互搶
-      try {
-        synthRef?.cancel();
-      } catch {}
-
-      const url = URL.createObjectURL(blob);
-      const audio = ensurePlayer();
-      try {
-        audio.pause();
-      } catch {}
-      revokeObjectUrl();
-      audio.src = url;
-      currentObjectUrl = url;
-
-      audio.onplay = () => {
-        isSpeaking.value = true;
-      };
-      audio.onended = () => {
-        isSpeaking.value = false;
-        revokeObjectUrl();
-      };
-      audio.onerror = () => {
-        isSpeaking.value = false;
-        if (!isMuted.value) showAudioError.value = true;
-        revokeObjectUrl();
-      };
-
-      usedServerAudio = true;
-      try {
-        await audio.play();
-      } catch (e) {
-        // iOS 若被自動播放限制擋下，給提示
-        if (!isMuted.value) showAudioError.value = true;
-      }
-    }
-  } else {
-    // 非音訊：嘗試解析 JSON / 純文字
-    let data = null;
-    try {
-      data = await res.clone().json();
-    } catch {
-      try {
-        const txt = await res.text();
-        if (!answerText) answerText = txt || "";
-      } catch {}
-    }
-
-    if (data && !answerText) {
-      // 兼容多種欄位：response / bot / answer / text / message / content / output...
-      const pick = (obj) => {
-        if (!obj) return "";
-        if (typeof obj === "string") return obj;
-        const keys = [
-          "response",
-          "bot",
-          "answer",
-          "text",
-          "message",
-          "content",
-          "output",
-        ];
-        for (const k of keys) {
-          const v = obj[k];
-          if (typeof v === "string" && v.trim()) return v;
-          if (v && typeof v === "object") {
-            const inner = pick(v);
-            if (inner) return inner;
-          }
-        }
-        return "";
-      };
-      answerText = pick(data);
-    }
-  }
-
-  const finalAnswer =
-    (answerText && String(answerText).trim()) ||
-    "（親愛的:您的問題我目前沒辦法回答）";
-
-  // 只有在「沒有伺服器音檔可播」時，才用 TTS
-  if (playAudio && finalAnswer && !usedServerAudio) {
-    speakText(finalAnswer);
-  }
+  // ✅ 已移除 API 調用，直接返回默認值
+  const finalAnswer = "（親愛的:您的問題我目前沒辦法回答）";
 
   // 保存聊天記錄到 localStorage
   try {
@@ -3217,30 +2931,27 @@ const changeRoleDisplayName = async (displayName) => {
   }
 };
 
-// ChatGPT API 調用函數
+// ChatGPT API 調用函數（用於摘要生成）
 const callChatGPT = async (
   message,
-  systemMessage = `你是一個「專業健康顧問」，你的工作只有一項：1.陪伴式回應（簡短、溫柔、像真人）
-【輸出格式要求】
-只輸出以下一個區塊（不要加星號、不要加多餘符號、不要加說明文字）：
-（在這裡以溫柔、簡短的語氣回應使用者的情緒或敘述，像真人陪伴）
-【限制規則】
-1. 不可推理或猜測病因。
-2. 不可加入任何建議、分析、評論或衛教。
-3. 不可使用 *、#、-、>、Markdown 格式符號。
-4. 不可使用條列符號，全部以自然語句呈現。
-請嚴格遵守以上格式與規則，開始後不需要再次重述任務或格式。
-`
+  systemMessage = ""
 ) => {
   try {
-    const response = await fetch(CHATGPT_API_URL, {
+    // 將 message 格式化為 JSON 字串
+    const messageWithHistory = JSON.stringify({
+      text: message,
+      conversationHistory: [],
+    });
+
+    const response = await fetch(TEXT_WEBHOOK_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        message: message,
         systemMessage: systemMessage,
+        message: messageWithHistory,
+        model: "gpt-5-mini",
       }),
     });
 
@@ -3248,16 +2959,64 @@ const callChatGPT = async (
       throw new Error(`伺服器返回錯誤：${response.status}`);
     }
 
-    const data = await response.json();
+    // 先嘗試從 Header 取回文字（X-Answer）
+    let answerText = "";
+    const rawHeader = response.headers.get("x-answer");
+    if (rawHeader) {
+      try {
+        answerText = decodeURIComponent(rawHeader);
+      } catch {
+        answerText = rawHeader;
+      }
+    }
 
-    if (data.response) {
-      return data.response;
+    // 如果沒有從 header 獲取到，嘗試從 body 獲取
+    if (!answerText) {
+      const ct = (response.headers.get("content-type") || "").toLowerCase();
+      
+      // 若是音訊回應，不處理
+      if (ct.includes("audio/")) {
+        throw new Error("收到音訊回應，無法處理");
+      }
+
+      // 嘗試解析 JSON
+      const data = await response.json();
+      
+      // 兼容多種欄位：response / bot / answer / text / message / content / output...
+      const pick = (obj) => {
+        if (!obj) return "";
+        if (typeof obj === "string") return obj;
+        const keys = [
+          "response",
+          "bot",
+          "answer",
+          "text",
+          "message",
+          "content",
+          "output",
+        ];
+        for (const k of keys) {
+          const v = obj[k];
+          if (typeof v === "string" && v.trim()) return v;
+          if (v && typeof v === "object") {
+            const inner = pick(v);
+            if (inner) return inner;
+          }
+        }
+        return "";
+      };
+      answerText = pick(data);
+    }
+
+    if (answerText) {
+      return answerText;
     } else {
       throw new Error("未收到有效的 ChatGPT 回應");
     }
   } catch (error) {
     console.error("ChatGPT API 調用失敗:", error);
-    throw error;
+    // 如果 API 調用失敗，返回原始輸入
+    return message;
   }
 };
 
