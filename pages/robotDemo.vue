@@ -72,7 +72,7 @@
     </transition>
 
     <!-- 文字輸入區域 -->
-    <transition name="slide-up">
+    <transition name="slide-up" @after-enter="focusTextInput">
       <div
         v-if="showTextInput && !isListening && !showVoiceError"
         class="text-input-section"
@@ -84,8 +84,6 @@
             class="text-input"
             placeholder="請輸入文字"
             @keypress.enter="handleManualInput"
-            @click="focusTextInput"
-            @focus="focusTextInput"
             ref="textInputRef"
             inputmode="text"
           />
@@ -891,15 +889,7 @@ const showHistory = () => {
   if (process.client) {
     // 只顯示文字輸入區域，不打開歷史頁面
     showTextInput.value = true;
-    
-    // 等待 DOM 更新後聚焦輸入框，觸發鍵盤彈出
-    nextTick(() => {
-      setTimeout(() => {
-        if (textInputRef.value) {
-          textInputRef.value.focus();
-        }
-      }, 100);
-    });
+    // focus 交給 transition 的 after-enter 事件處理
   }
 };
 
@@ -927,11 +917,10 @@ const closeTextInput = () => {
 };
 
 // 聚焦文字輸入框（觸發鍵盤彈出）
+// 在 transition 的 after-enter 事件中調用，此時 DOM 已經完全渲染
 const focusTextInput = () => {
   if (process.client && textInputRef.value) {
-    nextTick(() => {
-      textInputRef.value?.focus();
-    });
+    textInputRef.value.focus({ preventScroll: true });
   }
 };
 
