@@ -51,7 +51,7 @@
     <!-- 語音控制區域 - 從下方彈出 -->
     <transition name="slide-up">
       <div v-if="showVoiceControls" class="voice-control-bar">
-        <button class="control-btn history-btn" @click="showHistory">
+        <button class="control-btn history-btn" @click.stop="showHistory">
           <img :src="textIconSvg" alt="文字對話" />
         </button>
 
@@ -889,7 +889,20 @@ const showHistory = () => {
   if (process.client) {
     // 只顯示文字輸入區域，不打開歷史頁面
     showTextInput.value = true;
-    // focus 交給 transition 的 after-enter 事件處理
+    
+    // ✅ iOS/Android 更穩：在 nextTick + requestAnimationFrame 中 focus
+    // 確保 focus 在用戶手勢內觸發，而不是只依賴 after-enter
+    nextTick(() => {
+      // 延一個 frame，確保 DOM 已更新
+      requestAnimationFrame(() => {
+        if (textInputRef.value) {
+          textInputRef.value.focus({ preventScroll: true });
+          // 有些機器需要再補一下 click
+          textInputRef.value?.click?.();
+        }
+      });
+    });
+    // 保留 @after-enter="focusTextInput" 作為備援
   }
 };
 
