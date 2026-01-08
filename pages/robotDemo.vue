@@ -886,33 +886,20 @@ const setActiveTab = (tab) => {
   }
 };
 
-// 顯示歷史記錄
-const showHistory = async () => {
+// 顯示文字輸入（點擊 history-btn 時只彈出鍵盤，不打開歷史頁面）
+const showHistory = () => {
   if (process.client) {
-    showHistoryPage.value = true;
-
-    // 禁用背景滾動
-    document.body.style.overflow = "hidden";
-
-    // 重置 CallTime 計數器
-    callTime.value = 1;
-
-    // 重新獲取最新的聊天記錄
-    await fetchChatHistory();
-
-    // 重置分頁狀態
-    currentPage.value = 1;
-    hasMoreMessages.value = true;
-
-    // 等待頁面渲染完成後滾動到底部並聚焦輸入框
-    await nextTick();
-    setTimeout(() => {
-      scrollToBottom();
-      // ✅ 自動聚焦輸入框，觸發鍵盤彈出
-      if (historyInputRef.value) {
-        historyInputRef.value.focus();
-      }
-    }, 300); // 增加延遲時間，確保頁面完全渲染
+    // 只顯示文字輸入區域，不打開歷史頁面
+    showTextInput.value = true;
+    
+    // 等待 DOM 更新後聚焦輸入框，觸發鍵盤彈出
+    nextTick(() => {
+      setTimeout(() => {
+        if (textInputRef.value) {
+          textInputRef.value.focus();
+        }
+      }, 100);
+    });
   }
 };
 
