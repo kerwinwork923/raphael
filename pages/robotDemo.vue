@@ -208,6 +208,40 @@
       </div>
     </transition>
 
+    <!-- 保存成功模態框 -->
+    <transition name="fade">
+      <div v-if="showSaveSuccessModal" class="voice-modal">
+        <div class="voice-content" @click.stop>
+          <!-- 關閉按鈕 -->
+          <div class="voiceModelClose" @click="closeSaveSuccessModal">
+            <img src="/assets/imgs/robot/close.svg" alt="關閉" />
+          </div>
+
+          <!-- 保存成功文字 -->
+          <p class="save-success-text">已幫您儲存到「健康日誌」</p>
+
+          <!-- 圖片（沒有收到聲音的那張） -->
+          <img :src="assistantDefaultGif" alt="保存成功" class="save-success-image" />
+
+          <!-- 按鈕區域 -->
+          <div class="save-success-buttons">
+            <button
+              class="voice-btn voice-btn-retry"
+              @click="retryAfterSave"
+            >
+              重新錄音
+            </button>
+            <button
+              class="voice-btn voice-btn-view"
+              @click="viewHealthLog"
+            >
+              觀看內容
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
+
     <!-- 歷史紀錄頁面 -->
     <transition name="slide-left">
       <div v-if="showHistoryPage" class="history-page">
@@ -558,6 +592,7 @@ const currentSummary = ref("");
 const pendingInput = ref(""); // 儲存待處理的輸入
 const showSummaryProcessing = ref(false); // 摘要處理中彈窗
 const isInSummaryFlow = ref(false); // 確保摘要流程不誤觸一般流程
+const showSaveSuccessModal = ref(false); // 顯示保存成功模態框
 
 // 定時器相關狀態
 const apiPollingInterval = ref(null); // API 輪詢定時器
@@ -1345,36 +1380,15 @@ const handleVoiceModalClick = () => {
 // 開始語音識別超時計時器
 // 當有文字時，延長超時時間；無文字時，較短超時
 const startVoiceTimeout = (hasText = false) => {
+  // ✅ 完全移除超時限制，不限制時間收錄
+  // 清除任何現有的超時，讓用戶可以無限期錄音
   if (voiceTimeout) {
     clearTimeout(voiceTimeout);
     voiceTimeout = null;
   }
-
-  // ✅ 如果有文字（顯示「重新錄音」和「送出語音」按鈕），不設置超時，不限制時間
-  if (hasText) {
-    // 清除任何現有的超時，讓用戶可以無限期錄音
-    return;
-  }
-
-  // 如果沒有文字，10秒後顯示錯誤狀態（不自動關閉）
-  const timeoutDuration = 10000;
-
-  voiceTimeout = setTimeout(() => {
-    if (isListening.value) {
-      const transcript = currentTranscript.value.trim();
-
-      if (!transcript) {
-        // ✅ 沒有文字，10秒後顯示錯誤狀態（不自動關閉）
-        showVoiceError.value = true;
-        voiceModalImageSrc.value = assistantDefaultGif;
-        isListening.value = false;
-        if (process.client) {
-          recognitionRef?.stop();
-        }
-      }
-      // ✅ 如果有文字，不會進入這裡（因為 hasText = true 時不會設置超時）
-    }
-  }, timeoutDuration);
+  
+  // 不再設置任何超時，無論是否有文字
+  // 用戶可以隨時選擇「重新錄音」或「送出語音」
 };
 
 // ✅ 重疊合併工具（字元層級，能抗空白/微修正）
@@ -1475,12 +1489,8 @@ const initSpeechRecognition = () => {
           // 同步 Vue
           currentTranscript.value = textToShow;
 
-          // ✅ 收到聲音時，清除超時計時器並重新啟動（如果有文字用5秒，沒文字用10秒）
-          if (textToShow && textToShow.trim()) {
-            startVoiceTimeout(true); // 有文字，給5秒
-          } else {
-            startVoiceTimeout(false); // 沒文字，給10秒
-          }
+          // ✅ 收到聲音時，清除超時計時器（現在完全不限制時間）
+          startVoiceTimeout(true); // 清除任何現有超時，不限制時間
         }
       };
 
@@ -1634,7 +1644,9 @@ const initSpeechRecognition = () => {
         // ✅ Android 優化：如果語音識別自然結束，但用戶還在錄音狀態，自動重新啟動
         // Android 上 continuous = false，所以會頻繁觸發 onend，需要自動重啟
         // ✅ 重要：即使重啟失敗，也不關閉模態框，讓用戶可以繼續操作
-        if (isListening.value && !isRecordingComplete.value && process.client) {
+        // ✅ 完全不限制時間，讓用戶可以無限期錄音
+        if (process.client && voiceModalOpen.value) {
+          // ✅ 只要模態框還開著，就嘗試自動重啟（不檢查 isListening，因為可能暫時為 false）
           const isAndroid = /Android/i.test(navigator.userAgent);
           
           // Android 需要更長的延遲，避免頻繁重啟導致不穩定
@@ -1642,37 +1654,33 @@ const initSpeechRecognition = () => {
           
           try {
             setTimeout(() => {
-              // 再次檢查狀態，確保用戶還在錄音
-              if (
-                isListening.value &&
-                !isRecordingComplete.value &&
-                !finalizedByUs &&
-                recognitionRef &&
-                voiceModalOpen.value // ✅ 確保模態框還開著
-              ) {
+              // ✅ 只檢查模態框是否還開著，不檢查其他狀態（因為狀態可能暫時變化）
+              if (voiceModalOpen.value && recognitionRef && !finalizedByUs) {
                 try {
                   recognitionRef.start();
+                  // ✅ 重啟成功後，確保 isListening 狀態正確
+                  if (!isListening.value) {
+                    isListening.value = true;
+                  }
                   console.log("語音識別自動重新啟動，保持連續錄音");
                 } catch (startError) {
                   console.warn("第一次啟動失敗，嘗試重試:", startError);
                   // 如果啟動失敗，可能是還在處理中，再延遲重試一次
                   if (isAndroid) {
                     setTimeout(() => {
-                      // ✅ 再次檢查所有狀態，包括模態框是否還開著
-                      if (
-                        isListening.value &&
-                        !isRecordingComplete.value &&
-                        !finalizedByUs &&
-                        recognitionRef &&
-                        voiceModalOpen.value
-                      ) {
+                      // ✅ 再次檢查模態框是否還開著
+                      if (voiceModalOpen.value && recognitionRef && !finalizedByUs) {
                         try {
                           recognitionRef.start();
+                          if (!isListening.value) {
+                            isListening.value = true;
+                          }
                           console.log("重試啟動語音識別成功");
                         } catch (retryError) {
                           console.warn("重試啟動語音識別失敗，但不關閉模態框:", retryError);
                           // ✅ 即使重試失敗，也不關閉模態框，讓用戶可以手動操作
                           // 不調用 reallyCloseVoiceModal()，保持模態框打開
+                          // 用戶可以點擊「重新錄音」按鈕來手動重啟
                         }
                       }
                     }, 500);
@@ -1825,6 +1833,14 @@ async function runSummaryFlow(inputText) {
           })
         );
       }
+
+      // ✅ 關閉語音模態框（如果還開著）
+      if (voiceModalOpen.value) {
+        reallyCloseVoiceModal();
+      }
+
+      // ✅ 顯示保存成功模態框
+      showSaveSuccessModal.value = true;
     } catch (error) {
       console.error("儲存摘要失敗:", error);
       // 不顯示錯誤提示，靜默失敗
@@ -2421,6 +2437,24 @@ const closeAudioError = () => {
   if (process.client) {
     showAudioError.value = false;
   }
+};
+
+// 關閉保存成功模態框
+const closeSaveSuccessModal = () => {
+  showSaveSuccessModal.value = false;
+};
+
+// 保存成功後重新錄音
+const retryAfterSave = () => {
+  closeSaveSuccessModal();
+  // 重新開始錄音
+  startRecording();
+};
+
+// 觀看健康日誌
+const viewHealthLog = () => {
+  closeSaveSuccessModal();
+  router.push("/healthLog2");
 };
 
 async function handleManualInput() {
@@ -4217,6 +4251,7 @@ letter-spacing: 2.7px;
 border: none;
       flex-shrink: 0;
       transition: all 0.3s ease;
+      background: transparent;
 
       &:hover,
       &:active {
@@ -4547,6 +4582,81 @@ border: none;
       -ms-transform: translateZ(0);
       -o-transform: translateZ(0);
     }
+
+    // 保存成功相關樣式
+    .save-success-text {
+      color: var(--Neutral-black, #1e1e1e);
+      text-align: center;
+      font-size: var(--Text-font-size-18, 18px);
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+      margin-top: 40px;
+      margin-bottom: 20px;
+    }
+
+    .save-success-image {
+      width: 115px;
+      height: 115px;
+      object-fit: contain;
+      animation: pulse-wave 1.6s infinite ease-in-out;
+      flex-shrink: 0;
+      min-width: 115px;
+      min-height: 115px;
+      margin: 20px 0;
+    }
+
+    .save-success-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      margin-bottom: 40px;
+      padding: 0 16px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .voice-btn-view {
+      border-radius: var(--Radius-r-50, 50px);
+      background: var(--Primary-default, #74bc1f);
+      box-shadow: 2px 4px 12px 0
+        var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
+      color: white;
+      font-size: var(--Text-font-size-18, 18px);
+      font-style: normal;
+      font-weight: 400;
+      letter-spacing: 2.7px;
+      flex: 1;
+      max-width: 150px;
+      padding: 12px 24px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: #5a9a17;
+      }
+
+      &:active:not(:disabled) {
+        transform: scale(0.95);
+      }
+    }
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 30px rgba(116, 188, 31, 0.6),
+      0 0 60px rgba(116, 188, 31, 0.4),
+      inset 0 0 20px rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 40px rgba(116, 188, 31, 0.8),
+      0 0 80px rgba(116, 188, 31, 0.6),
+      inset 0 0 25px rgba(255, 255, 255, 0.4);
   }
 }
 
