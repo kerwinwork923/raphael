@@ -72,7 +72,7 @@
     </transition>
 
     <!-- 文字輸入區域 -->
-    <transition name="slide-up" @after-enter="focusTextInput">
+    <transition name="slide-up" >
       <div
         v-if="showTextInput && !isListening && !showVoiceError"
         class="text-input-section"
@@ -882,18 +882,7 @@ const showHistory = () => {
     // 只顯示文字輸入區域，不打開歷史頁面
     showTextInput.value = true;
     
-    // ✅ iOS/Android 更穩：在 nextTick + requestAnimationFrame 中 focus
-    // 確保 focus 在用戶手勢內觸發，而不是只依賴 after-enter
-    nextTick(() => {
-      // 延一個 frame，確保 DOM 已更新
-      requestAnimationFrame(() => {
-        if (textInputRef.value) {
-          textInputRef.value.focus({ preventScroll: true });
-          // 有些機器需要再補一下 click
-          textInputRef.value?.click?.();
-        }
-      });
-    });
+
     // 保留 @after-enter="focusTextInput" 作為備援
   }
 };
@@ -2335,6 +2324,10 @@ async function handleManualInput() {
   // 所有輸入都會進入摘要模式（移除50字限制）
   const raw = input;
   textInput.value = "";
+  
+  // ✅ 輸入完成後立即關閉文字輸入框
+  closeTextInput();
+  
   try {
     await runSummaryFlow(raw); // 不新增聊天泡泡，但 DB 會寫兩筆
   } finally {
@@ -4042,7 +4035,7 @@ const vClickOutside = {
     align-items: center;
     @include liquidGlass($radius: 20px, $padding: 12px 16px);
     margin: 0 auto;
-    width: 80%;
+    width: 75%;
     .text-input {
       flex: 1;
       border: none;
