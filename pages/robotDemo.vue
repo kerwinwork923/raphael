@@ -87,15 +87,7 @@
             ref="textInputRef"
             inputmode="text"
           />
-          <button
-            class="send-btn"
-            @click="textInput.trim() ? handleManualInput() : toggleListening()"
-          >
-            <img
-              :src="textInput.trim() ? sendSvg : soundSvg"
-              :alt="textInput.trim() ? '送出' : '語音'"
-            />
-          </button>
+
         </div>
       </div>
     </transition>
@@ -4040,7 +4032,7 @@ const vClickOutside = {
   width: 100%;
   padding: 0 16px;
   position: fixed;
-  bottom: 219px;
+  bottom: 185px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
@@ -4048,8 +4040,9 @@ const vClickOutside = {
   .input-container {
     display: flex;
     align-items: center;
-    @include liquidGlass($radius: 20px, $padding: 8px 16px);
-
+    @include liquidGlass($radius: 20px, $padding: 12px 16px);
+    margin: 0 auto;
+    width: 80%;
     .text-input {
       flex: 1;
       border: none;
@@ -4058,42 +4051,13 @@ const vClickOutside = {
       background: transparent;
       padding-right: 16px;
       color: #2d3748;
-
+ 
       &::placeholder {
         color: #718096;
       }
     }
 
-    .send-btn {
-      border-radius: 50%;
-      width: 45px;
-      height: 45px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      color: $raphael-white;
-      font-size: 18px;
-      @include neumorphismOuter(
-        $bgColor: $raphael-green-400,
-        $radius: 50px,
-        $padding: 0
-      );
-      border: none;
-      transition: all 0.3s ease;
 
-      &:hover,
-      &:active {
-        @include neumorphismOuter(
-          $bgColor: $raphael-green-500,
-          $radius: 50%,
-          $padding: 0,
-          $x: 0,
-          $y: 0,
-          $blur: 6px
-        );
-      }
-    }
   }
 }
 
