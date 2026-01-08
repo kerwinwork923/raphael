@@ -434,7 +434,10 @@
               type="text"
               placeholder="請輸入訊息..."
               @keypress.enter="handleManualInput"
+              @click="focusHistoryInput"
+              @focus="focusHistoryInput"
               ref="historyInputRef"
+              inputmode="text"
             />
             <button
               class="history-send-btn"
@@ -885,32 +888,34 @@ const setActiveTab = (tab) => {
 };
 
 // 顯示歷史記錄
-// const showHistory = async () => {
-//   if (process.client) {
-//     showHistoryPage.value = true;
+const showHistory = async () => {
+  if (process.client) {
+    showHistoryPage.value = true;
 
-//     // 禁用背景滾動
-//     document.body.style.overflow = "hidden";
+    // 禁用背景滾動
+    document.body.style.overflow = "hidden";
 
-//     // 重置 CallTime 計數器
-//     callTime.value = 1;
+    // 重置 CallTime 計數器
+    callTime.value = 1;
 
-//     // 重新獲取最新的聊天記錄
-//     await fetchChatHistory();
+    // 重新獲取最新的聊天記錄
+    await fetchChatHistory();
 
-//     // 重置分頁狀態
-//     currentPage.value = 1;
-//     hasMoreMessages.value = true;
+    // 重置分頁狀態
+    currentPage.value = 1;
+    hasMoreMessages.value = true;
 
-//     // 等待頁面渲染完成後滾動到底部
-//     nextTick(() => {
-//       setTimeout(() => {
-//         scrollToBottom();
-//         historyInputRef.value?.focus(); // ★ 新增：自動聚焦輸入框
-//       }, 100);
-//     });
-//   }
-// };
+    // 等待頁面渲染完成後滾動到底部並聚焦輸入框
+    await nextTick();
+    setTimeout(() => {
+      scrollToBottom();
+      // ✅ 自動聚焦輸入框，觸發鍵盤彈出
+      if (historyInputRef.value) {
+        historyInputRef.value.focus();
+      }
+    }, 300); // 增加延遲時間，確保頁面完全渲染
+  }
+};
 
 const goToVoice = () => {
   // router.push("/specialAssistance");
@@ -940,6 +945,15 @@ const focusTextInput = () => {
   if (process.client && textInputRef.value) {
     nextTick(() => {
       textInputRef.value?.focus();
+    });
+  }
+};
+
+// 聚焦歷史頁輸入框（觸發鍵盤彈出）
+const focusHistoryInput = () => {
+  if (process.client && historyInputRef.value) {
+    nextTick(() => {
+      historyInputRef.value?.focus();
     });
   }
 };
