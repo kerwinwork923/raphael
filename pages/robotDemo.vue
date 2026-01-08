@@ -46,7 +46,6 @@
         </div>
         <h5>專人協助</h5>
       </div>
-
     </div>
 
     <!-- 語音控制區域 - 從下方彈出 -->
@@ -2945,10 +2944,7 @@ const changeRoleDisplayName = async (displayName) => {
 };
 
 // ChatGPT API 調用函數（用於摘要生成）
-const callChatGPT = async (
-  message,
-  systemMessage = ""
-) => {
+const callChatGPT = async (message, systemMessage = "") => {
   try {
     // 將 message 格式化為 JSON 字串
     const messageWithHistory = JSON.stringify({
@@ -2986,7 +2982,7 @@ const callChatGPT = async (
     // 如果沒有從 header 獲取到，嘗試從 body 獲取
     if (!answerText) {
       const ct = (response.headers.get("content-type") || "").toLowerCase();
-      
+
       // 若是音訊回應，不處理
       if (ct.includes("audio/")) {
         throw new Error("收到音訊回應，無法處理");
@@ -2994,7 +2990,7 @@ const callChatGPT = async (
 
       // 嘗試解析 JSON
       const data = await response.json();
-      
+
       // 兼容多種欄位：response / bot / answer / text / message / content / output...
       const pick = (obj) => {
         if (!obj) return "";
@@ -3831,7 +3827,7 @@ const vClickOutside = {
   flex: 1;
   width: 100%;
   height: 0;
-  padding-bottom: 84px;
+  // padding-bottom: 84px;
 
   .character-image {
     margin-top: 15%;
@@ -3880,14 +3876,13 @@ const vClickOutside = {
   .healGroup5 {
     right: 2.25rem;
     top: 8.5rem;
-  
   }
 }
 
 /* 語音控制欄 - 絕對定位擬態設計 */
 .voice-control-bar {
   position: fixed;
-  bottom: 124px;
+  bottom: 91px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
