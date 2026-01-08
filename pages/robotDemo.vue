@@ -131,25 +131,7 @@
             </button>
           </template>
 
-          <!-- 準備開始說話（模態框已打開但還沒開始錄音） -->
-          <template
-            v-else-if="voiceModalOpen && !isListening && !isRecordingComplete"
-          >
-            <!-- 關閉按鈕 -->
-            <div class="voiceModelClose" @click="closeVoiceModal">
-              <img src="/assets/imgs/robot/close.svg" alt="關閉" />
-            </div>
-
-            <p class="voice-start-text">開始說話吧</p>
-            <img :src="voiceModalImageSrc" alt="音波圖" class="voice-wave" />
-            <!-- 開始說話按鈕 -->
-            <button
-              class="voice-btn voice-btn-start"
-              @click="beginSpeechRecognition"
-            >
-              開始說話
-            </button>
-          </template>
+          <!-- 準備開始說話（模態框已打開但還沒開始錄音）- 已移除按鈕，直接開始錄音 -->
 
           <!-- 錄音中顯示 -->
           <template v-else-if="isListening && !isRecordingComplete">
@@ -1534,40 +1516,84 @@ const initSpeechRecognition = () => {
               closeVoiceModal();
               break;
             case "no-speech":
-              // 不顯示錯誤提示，讓用戶可以繼續錄音，不限制秒數
-              // 自動重新啟動錄音，保持連續不中斷
-              if (isListening.value && !isRecordingComplete.value) {
+              // ✅ Android 優化：no-speech 錯誤時自動重新啟動，延遲時間更長
+              if (isListening.value && !isRecordingComplete.value && !finalizedByUs) {
+                const isAndroid = /Android/i.test(navigator.userAgent);
+                const delay = isAndroid ? 300 : 100;
                 try {
                   setTimeout(() => {
                     if (
                       isListening.value &&
                       !isRecordingComplete.value &&
+                      !finalizedByUs &&
                       recognitionRef
                     ) {
-                      recognitionRef.start();
-                      console.log("no-speech 自動重新啟動錄音");
+                      try {
+                        recognitionRef.start();
+                        console.log("no-speech 自動重新啟動錄音");
+                      } catch (startError) {
+                        // Android 可能需要更長延遲
+                        if (isAndroid) {
+                          setTimeout(() => {
+                            if (
+                              isListening.value &&
+                              !isRecordingComplete.value &&
+                              !finalizedByUs &&
+                              recognitionRef
+                            ) {
+                              try {
+                                recognitionRef.start();
+                              } catch (retryError) {
+                                console.error("重試啟動失敗:", retryError);
+                              }
+                            }
+                          }, 500);
+                        }
+                      }
                     }
-                  }, 100);
+                  }, delay);
                 } catch (error) {
                   console.error("自動重新啟動失敗:", error);
                 }
               }
               break;
             case "audio-capture":
-              // 音訊捕獲錯誤，不顯示錯誤提示，自動重新啟動
-              // 讓用戶可以繼續錄音，不限制秒數
-              if (isListening.value && !isRecordingComplete.value) {
+              // ✅ Android 優化：audio-capture 錯誤時自動重新啟動，延遲時間更長
+              if (isListening.value && !isRecordingComplete.value && !finalizedByUs) {
+                const isAndroid = /Android/i.test(navigator.userAgent);
+                const delay = isAndroid ? 300 : 100;
                 try {
                   setTimeout(() => {
                     if (
                       isListening.value &&
                       !isRecordingComplete.value &&
+                      !finalizedByUs &&
                       recognitionRef
                     ) {
-                      recognitionRef.start();
-                      console.log("audio-capture 自動重新啟動錄音");
+                      try {
+                        recognitionRef.start();
+                        console.log("audio-capture 自動重新啟動錄音");
+                      } catch (startError) {
+                        // Android 可能需要更長延遲
+                        if (isAndroid) {
+                          setTimeout(() => {
+                            if (
+                              isListening.value &&
+                              !isRecordingComplete.value &&
+                              !finalizedByUs &&
+                              recognitionRef
+                            ) {
+                              try {
+                                recognitionRef.start();
+                              } catch (retryError) {
+                                console.error("重試啟動失敗:", retryError);
+                              }
+                            }
+                          }, 500);
+                        }
+                      }
                     }
-                  }, 100);
+                  }, delay);
                 } catch (error) {
                   console.error("自動重新啟動失敗:", error);
                 }
@@ -1595,25 +1621,49 @@ const initSpeechRecognition = () => {
           return;
         }
 
-        // 如果語音識別自然結束（瀏覽器自動停止，例如長時間靜音）
-        // 但用戶還在錄音狀態，我們需要自動重新啟動以保持連續錄音
+        // ✅ Android 優化：如果語音識別自然結束，但用戶還在錄音狀態，自動重新啟動
+        // Android 上 continuous = false，所以會頻繁觸發 onend，需要自動重啟
         if (isListening.value && !isRecordingComplete.value && process.client) {
-          // 自動重新啟動錄音，保持連續不中斷
+          const isAndroid = /Android/i.test(navigator.userAgent);
+          
+          // Android 需要更長的延遲，避免頻繁重啟導致不穩定
+          const delay = isAndroid ? 300 : 100;
+          
           try {
-            // 使用 setTimeout 避免立即重啟可能造成的問題
             setTimeout(() => {
+              // 再次檢查狀態，確保用戶還在錄音
               if (
                 isListening.value &&
                 !isRecordingComplete.value &&
+                !finalizedByUs &&
                 recognitionRef
               ) {
-                recognitionRef.start();
-                console.log("語音識別自動重新啟動，保持連續錄音");
+                try {
+                  recognitionRef.start();
+                  console.log("語音識別自動重新啟動，保持連續錄音");
+                } catch (startError) {
+                  // 如果啟動失敗，可能是還在處理中，再延遲重試一次
+                  if (isAndroid) {
+                    setTimeout(() => {
+                      if (
+                        isListening.value &&
+                        !isRecordingComplete.value &&
+                        !finalizedByUs &&
+                        recognitionRef
+                      ) {
+                        try {
+                          recognitionRef.start();
+                        } catch (retryError) {
+                          console.error("重試啟動語音識別失敗:", retryError);
+                        }
+                      }
+                    }, 500);
+                  }
+                }
               }
-            }, 100);
+            }, delay);
           } catch (error) {
             console.error("自動重新啟動語音識別失敗:", error);
-            // 如果重新啟動失敗，不顯示錯誤提示，讓用戶可以繼續嘗試
           }
         }
 
@@ -1907,7 +1957,7 @@ const toggleListening = () => {
   }
 };
 
-// 開始錄音（打開模態框，但不立即開始錄音）
+// 開始錄音（打開模態框並立即開始錄音）
 const startRecording = () => {
   if (process.client) {
     showVoiceError.value = false;
@@ -1917,12 +1967,54 @@ const startRecording = () => {
     hasFinalResult = false;
     finalizedByUs = false;
     isRecordingComplete.value = false;
-    isReadyToSpeak.value = false; // 重置為未準備狀態
+    isReadyToSpeak.value = false;
     voiceModalOpen.value = true; // ← 開窗
-    isListening.value = false; // 先不開始錄音，等待用戶點擊按鈕
     // 重置 Android 相關狀態
     finalTranscript = ""; // ✅ 一定要清，不然會沿用上次錄音
     currentTranscript.value = "";
+    
+    // ✅ 立即開始錄音（不再等待按鈕）
+    if (recognitionRef) {
+      isListening.value = true;
+      
+      // Android 兼容性：立即準備文字元素
+      const prepareTranscriptEl = () => {
+        const transcriptEl =
+          voiceModalTranscriptRef.value ||
+          document.querySelector(".voice-modal .transcript-text");
+        if (transcriptEl) {
+          transcriptEl.style.display = "block";
+          transcriptEl.style.opacity = "1";
+          transcriptEl.style.visibility = "visible";
+          transcriptEl.textContent = "";
+          transcriptEl.offsetHeight;
+        }
+      };
+      
+      prepareTranscriptEl();
+      
+      nextTick(() => {
+        prepareTranscriptEl();
+        try {
+          recognitionRef.start();
+          // ✅ 啟動10秒超時計時器（如果沒有聲音，顯示錯誤狀態）
+          startVoiceTimeout(false);
+        } catch (error) {
+          console.error("啟動語音識別失敗:", error);
+          // 如果啟動失敗，嘗試延遲重試
+          setTimeout(() => {
+            if (isListening.value && recognitionRef) {
+              try {
+                recognitionRef.start();
+                startVoiceTimeout(false);
+              } catch (retryError) {
+                console.error("重試啟動語音識別失敗:", retryError);
+              }
+            }
+          }, 200);
+        }
+      });
+    }
   }
 };
 
@@ -1980,23 +2072,23 @@ const retryRecording = () => {
   // 停止當前錄音
   if (process.client && recognitionRef) {
     finalizedByUs = true;
-    recognitionRef.stop();
+    try {
+      recognitionRef.stop();
+    } catch (error) {
+      console.error("停止錄音失敗:", error);
+    }
   }
-
-  // 清除當前錄音會話的對話紀錄（只清除當前錄音產生的，不影響歷史紀錄）
-  // 這裡我們需要清除當前錄音過程中累積的轉錄內容
-  // 但由於 currentTranscript 會在 startRecording 中被清空，這裡主要確保狀態重置
 
   // 重置狀態
   isRecordingComplete.value = false;
-  isReadyToSpeak.value = false; // 重置準備狀態
+  isReadyToSpeak.value = false;
   pendingTranscript.value = "";
   currentTranscript.value = "";
   showVoiceError.value = false;
   // 重置 Android 相關狀態
   finalTranscript = ""; // ✅ 清空 final 累積
 
-  // 重新開始錄音（打開模態框，但不立即開始）
+  // ✅ 重新開始錄音（會自動開始，不需要按鈕）
   startRecording();
 };
 
