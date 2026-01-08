@@ -1513,7 +1513,8 @@ const initSpeechRecognition = () => {
               break;
             case "no-speech":
               // ✅ Android 優化：no-speech 錯誤時自動重新啟動，延遲時間更長
-              if (isListening.value && !isRecordingComplete.value && !finalizedByUs) {
+              // ✅ 即使重啟失敗，也不關閉模態框，讓用戶可以繼續操作
+              if (isListening.value && !isRecordingComplete.value && !finalizedByUs && voiceModalOpen.value) {
                 const isAndroid = /Android/i.test(navigator.userAgent);
                 const delay = isAndroid ? 300 : 100;
                 try {
@@ -1522,12 +1523,14 @@ const initSpeechRecognition = () => {
                       isListening.value &&
                       !isRecordingComplete.value &&
                       !finalizedByUs &&
-                      recognitionRef
+                      recognitionRef &&
+                      voiceModalOpen.value // ✅ 確保模態框還開著
                     ) {
                       try {
                         recognitionRef.start();
                         console.log("no-speech 自動重新啟動錄音");
                       } catch (startError) {
+                        console.warn("no-speech 重啟失敗，嘗試延遲重試:", startError);
                         // Android 可能需要更長延遲
                         if (isAndroid) {
                           setTimeout(() => {
@@ -1535,12 +1538,15 @@ const initSpeechRecognition = () => {
                               isListening.value &&
                               !isRecordingComplete.value &&
                               !finalizedByUs &&
-                              recognitionRef
+                              recognitionRef &&
+                              voiceModalOpen.value
                             ) {
                               try {
                                 recognitionRef.start();
+                                console.log("no-speech 重試啟動成功");
                               } catch (retryError) {
-                                console.error("重試啟動失敗:", retryError);
+                                console.warn("no-speech 重試啟動失敗，但不關閉模態框:", retryError);
+                                // ✅ 即使重試失敗，也不關閉模態框
                               }
                             }
                           }, 500);
@@ -1550,12 +1556,14 @@ const initSpeechRecognition = () => {
                   }, delay);
                 } catch (error) {
                   console.error("自動重新啟動失敗:", error);
+                  // ✅ 即使發生錯誤，也不關閉模態框
                 }
               }
               break;
             case "audio-capture":
               // ✅ Android 優化：audio-capture 錯誤時自動重新啟動，延遲時間更長
-              if (isListening.value && !isRecordingComplete.value && !finalizedByUs) {
+              // ✅ 即使重啟失敗，也不關閉模態框，讓用戶可以繼續操作
+              if (isListening.value && !isRecordingComplete.value && !finalizedByUs && voiceModalOpen.value) {
                 const isAndroid = /Android/i.test(navigator.userAgent);
                 const delay = isAndroid ? 300 : 100;
                 try {
@@ -1564,12 +1572,14 @@ const initSpeechRecognition = () => {
                       isListening.value &&
                       !isRecordingComplete.value &&
                       !finalizedByUs &&
-                      recognitionRef
+                      recognitionRef &&
+                      voiceModalOpen.value // ✅ 確保模態框還開著
                     ) {
                       try {
                         recognitionRef.start();
                         console.log("audio-capture 自動重新啟動錄音");
                       } catch (startError) {
+                        console.warn("audio-capture 重啟失敗，嘗試延遲重試:", startError);
                         // Android 可能需要更長延遲
                         if (isAndroid) {
                           setTimeout(() => {
@@ -1577,12 +1587,15 @@ const initSpeechRecognition = () => {
                               isListening.value &&
                               !isRecordingComplete.value &&
                               !finalizedByUs &&
-                              recognitionRef
+                              recognitionRef &&
+                              voiceModalOpen.value
                             ) {
                               try {
                                 recognitionRef.start();
+                                console.log("audio-capture 重試啟動成功");
                               } catch (retryError) {
-                                console.error("重試啟動失敗:", retryError);
+                                console.warn("audio-capture 重試啟動失敗，但不關閉模態框:", retryError);
+                                // ✅ 即使重試失敗，也不關閉模態框
                               }
                             }
                           }, 500);
@@ -1592,6 +1605,7 @@ const initSpeechRecognition = () => {
                   }, delay);
                 } catch (error) {
                   console.error("自動重新啟動失敗:", error);
+                  // ✅ 即使發生錯誤，也不關閉模態框
                 }
               }
               break;
@@ -1619,6 +1633,7 @@ const initSpeechRecognition = () => {
 
         // ✅ Android 優化：如果語音識別自然結束，但用戶還在錄音狀態，自動重新啟動
         // Android 上 continuous = false，所以會頻繁觸發 onend，需要自動重啟
+        // ✅ 重要：即使重啟失敗，也不關閉模態框，讓用戶可以繼續操作
         if (isListening.value && !isRecordingComplete.value && process.client) {
           const isAndroid = /Android/i.test(navigator.userAgent);
           
@@ -1632,25 +1647,32 @@ const initSpeechRecognition = () => {
                 isListening.value &&
                 !isRecordingComplete.value &&
                 !finalizedByUs &&
-                recognitionRef
+                recognitionRef &&
+                voiceModalOpen.value // ✅ 確保模態框還開著
               ) {
                 try {
                   recognitionRef.start();
                   console.log("語音識別自動重新啟動，保持連續錄音");
                 } catch (startError) {
+                  console.warn("第一次啟動失敗，嘗試重試:", startError);
                   // 如果啟動失敗，可能是還在處理中，再延遲重試一次
                   if (isAndroid) {
                     setTimeout(() => {
+                      // ✅ 再次檢查所有狀態，包括模態框是否還開著
                       if (
                         isListening.value &&
                         !isRecordingComplete.value &&
                         !finalizedByUs &&
-                        recognitionRef
+                        recognitionRef &&
+                        voiceModalOpen.value
                       ) {
                         try {
                           recognitionRef.start();
+                          console.log("重試啟動語音識別成功");
                         } catch (retryError) {
-                          console.error("重試啟動語音識別失敗:", retryError);
+                          console.warn("重試啟動語音識別失敗，但不關閉模態框:", retryError);
+                          // ✅ 即使重試失敗，也不關閉模態框，讓用戶可以手動操作
+                          // 不調用 reallyCloseVoiceModal()，保持模態框打開
                         }
                       }
                     }, 500);
@@ -1660,6 +1682,7 @@ const initSpeechRecognition = () => {
             }, delay);
           } catch (error) {
             console.error("自動重新啟動語音識別失敗:", error);
+            // ✅ 即使發生錯誤，也不關閉模態框，讓用戶可以繼續操作
           }
         }
 
