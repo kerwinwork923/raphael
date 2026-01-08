@@ -1347,10 +1347,17 @@ const handleVoiceModalClick = () => {
 const startVoiceTimeout = (hasText = false) => {
   if (voiceTimeout) {
     clearTimeout(voiceTimeout);
+    voiceTimeout = null;
   }
 
-  // 如果有文字，給更長的靜音時間（5秒）；如果沒有文字，給10秒
-  const timeoutDuration = hasText ? 5000 : 10000;
+  // ✅ 如果有文字（顯示「重新錄音」和「送出語音」按鈕），不設置超時，不限制時間
+  if (hasText) {
+    // 清除任何現有的超時，讓用戶可以無限期錄音
+    return;
+  }
+
+  // 如果沒有文字，10秒後顯示錯誤狀態（不自動關閉）
+  const timeoutDuration = 10000;
 
   voiceTimeout = setTimeout(() => {
     if (isListening.value) {
@@ -1364,19 +1371,8 @@ const startVoiceTimeout = (hasText = false) => {
         if (process.client) {
           recognitionRef?.stop();
         }
-      } else {
-        // 有文字但靜音超過5秒，自動結束並處理
-        hasFinalResult = true;
-        clearVoiceTimeout();
-        finalizedByUs = true;
-        reallyCloseVoiceModal();
-        handleSpeechEnd(transcript);
-        if (process.client) {
-          try {
-            recognitionRef?.stop();
-          } catch {}
-        }
       }
+      // ✅ 如果有文字，不會進入這裡（因為 hasText = true 時不會設置超時）
     }
   }, timeoutDuration);
 };
