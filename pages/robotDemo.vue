@@ -87,7 +87,16 @@
             ref="textInputRef"
             inputmode="text"
           />
-
+          <button
+            class="send-btn"
+            @click="textInput.trim() && handleManualInput()"
+            :disabled="!textInput.trim()"
+          >
+            <img :src="sendSvg" alt="送出" />
+          </button>
+          <button class="cancel-btn" @click="closeTextInput">
+            取消
+          </button>
         </div>
       </div>
     </transition>
@@ -4033,24 +4042,76 @@ const vClickOutside = {
   .input-container {
     display: flex;
     align-items: center;
+    gap: 4px;
     @include liquidGlass($radius: 20px, $padding: 12px 16px);
     margin: 0 auto;
-    width: 75%;
+    width: 90%;
+    max-width: 500px;
+    
     .text-input {
       flex: 1;
       border: none;
       font-size: 16px;
       outline: none;
       background: transparent;
-      padding-right: 16px;
       color: #2d3748;
+      min-width: 0;
  
       &::placeholder {
         color: #718096;
       }
     }
 
+    .send-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid #74bc1f;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
 
+      img {
+        width: 20px;
+        height: 20px;
+        filter: brightness(0) saturate(100%) invert(58%) sepia(95%) saturate(2000%)
+          hue-rotate(60deg) brightness(100%) contrast(85%);
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      &:not(:disabled):hover,
+      &:not(:disabled):active {
+        background: rgba(116, 188, 31, 0.1);
+        transform: scale(1.05);
+      }
+    }
+
+    .cancel-btn {
+      color: var(--Neutral-500, #666);
+
+font-size: var(--Text-font-size-18, 18px);
+font-style: normal;
+font-weight: 400;
+
+letter-spacing: 2.7px;
+border: none;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+
+      &:hover,
+      &:active {
+        opacity: 0.7;
+      }
+    }
   }
 }
 
