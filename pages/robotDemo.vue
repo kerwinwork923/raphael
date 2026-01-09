@@ -1419,9 +1419,10 @@ const initSpeechRecognition = () => {
         window.SpeechRecognition || window.webkitSpeechRecognition;
       recognitionRef = new SpeechRecognition();
 
-      // ✅ Android 優化：某些機型 continuous = true 會導致頻繁 onend → restart
+      // ✅ Android 優化：嘗試使用 continuous = true 以獲得更好的響應速度和連續性
       const isAndroid = /Android/i.test(navigator.userAgent);
-      recognitionRef.continuous = !isAndroid; // Android 用 false 比較穩
+      // ✅ 改為 true 以獲得更好的響應速度，如果遇到問題可以改回 false
+      recognitionRef.continuous = true;
 
       recognitionRef.interimResults = true;
       recognitionRef.lang = "zh-TW";
@@ -1559,7 +1560,7 @@ const initSpeechRecognition = () => {
                                 // ✅ 即使重試失敗，也不關閉模態框
                               }
                             }
-                          }, 100); // ✅ 減少重試延遲，從 500ms 降到 100ms
+                          }, 20); // ✅ 極速重試，從 100ms 降到 20ms
                         }
                       }
                     }
@@ -1608,7 +1609,7 @@ const initSpeechRecognition = () => {
                                 // ✅ 即使重試失敗，也不關閉模態框
                               }
                             }
-                          }, 100); // ✅ 減少重試延遲，從 500ms 降到 100ms
+                          }, 20); // ✅ 極速重試，從 100ms 降到 20ms
                         }
                       }
                     }
@@ -1649,8 +1650,8 @@ const initSpeechRecognition = () => {
           // ✅ 只要模態框還開著，就嘗試自動重啟（不檢查 isListening，因為可能暫時為 false）
           const isAndroid = /Android/i.test(navigator.userAgent);
           
-          // ✅ Android 優化：減少延遲，加快響應速度
-          const delay = isAndroid ? 50 : 30; // ✅ 大幅減少延遲，從 300ms 降到 50ms
+          // ✅ Android 優化：極速響應，幾乎零延遲
+          const delay = isAndroid ? 10 : 20; // ✅ 極速響應，從 50ms 降到 10ms
           
           try {
             setTimeout(() => {
@@ -1665,7 +1666,7 @@ const initSpeechRecognition = () => {
                   console.log("語音識別自動重新啟動，保持連續錄音");
                 } catch (startError) {
                   console.warn("第一次啟動失敗，嘗試重試:", startError);
-                  // ✅ Android 優化：如果啟動失敗，快速重試，減少延遲
+                  // ✅ Android 優化：如果啟動失敗，極速重試，幾乎零延遲
                   if (isAndroid) {
                     setTimeout(() => {
                       // ✅ 再次檢查模態框是否還開著
@@ -1683,7 +1684,7 @@ const initSpeechRecognition = () => {
                           // 用戶可以點擊「重新錄音」按鈕來手動重啟
                         }
                       }
-                    }, 100); // ✅ 減少重試延遲，從 500ms 降到 100ms
+                    }, 20); // ✅ 極速重試，從 100ms 降到 20ms
                   }
                 }
               }
@@ -2031,7 +2032,7 @@ const startRecording = () => {
       // ✅ Android 優化：立即準備，不等待 nextTick
       prepareTranscriptEl();
       
-      // ✅ Android 優化：立即啟動，減少延遲
+      // ✅ Android 優化：立即啟動，零延遲
       const startRecognition = () => {
         try {
           recognitionRef.start();
@@ -2040,8 +2041,8 @@ const startRecording = () => {
           console.log("語音識別立即啟動");
         } catch (error) {
           console.warn("立即啟動失敗，嘗試快速重試:", error);
-          // ✅ Android 優化：快速重試，減少延遲
-          const retryDelay = isAndroid ? 50 : 100;
+          // ✅ Android 優化：極速重試，幾乎零延遲
+          const retryDelay = isAndroid ? 10 : 50; // ✅ Android 只用 10ms，幾乎立即重試
           setTimeout(() => {
             if (isListening.value && recognitionRef && voiceModalOpen.value) {
               try {
@@ -2050,26 +2051,28 @@ const startRecording = () => {
                 console.log("快速重試啟動成功");
               } catch (retryError) {
                 console.warn("快速重試失敗，嘗試標準重試:", retryError);
-                // 如果快速重試失敗，再試一次標準延遲
+                // ✅ Android 優化：如果快速重試失敗，立即再試一次
+                const finalRetryDelay = isAndroid ? 30 : 100;
                 setTimeout(() => {
                   if (isListening.value && recognitionRef && voiceModalOpen.value) {
                     try {
                       recognitionRef.start();
                       startVoiceTimeout(false);
+                      console.log("最終重試啟動成功");
                     } catch (finalError) {
                       console.error("最終啟動失敗:", finalError);
                     }
                   }
-                }, isAndroid ? 100 : 200);
+                }, finalRetryDelay);
               }
             }
           }, retryDelay);
         }
       };
       
-      // ✅ Android 優化：立即啟動，不等待 nextTick（減少延遲）
+      // ✅ Android 優化：立即啟動，零延遲，不等待任何東西
       if (isAndroid) {
-        // Android 上立即啟動，不等待 DOM 更新
+        // Android 上立即啟動，不等待 DOM 更新，不等待任何延遲
         startRecognition();
       } else {
         // 其他平台使用 nextTick 確保 DOM 準備好
