@@ -225,7 +225,9 @@
 
           <!-- 按鈕區域 -->
           <div class="save-success-buttons">
+            <!-- ✅ 只有語音輸入時才顯示「重新錄音」按鈕 -->
             <button
+              v-if="saveSuccessInputType === 'voice'"
               class="voice-btn voice-btn-retry"
               @click="retryAfterSave"
             >
@@ -593,6 +595,8 @@ const pendingInput = ref(""); // 儲存待處理的輸入
 const showSummaryProcessing = ref(false); // 摘要處理中彈窗
 const isInSummaryFlow = ref(false); // 確保摘要流程不誤觸一般流程
 const showSaveSuccessModal = ref(false); // 顯示保存成功模態框
+const saveSuccessInputType = ref("voice"); // 輸入方式：'voice' 或 'text'
+const saveSuccessContent = ref(""); // 保存的摘要內容
 
 // 定時器相關狀態
 const apiPollingInterval = ref(null); // API 輪詢定時器
@@ -1765,7 +1769,7 @@ async function saveChatRecord({
   }
 }
 
-async function runSummaryFlow(inputText) {
+async function runSummaryFlow(inputText, inputType = "voice") {
   try {
     isInSummaryFlow.value = true;
 
@@ -1839,6 +1843,10 @@ async function runSummaryFlow(inputText) {
       if (voiceModalOpen.value) {
         reallyCloseVoiceModal();
       }
+
+      // ✅ 記錄輸入方式和內容
+      saveSuccessInputType.value = inputType;
+      saveSuccessContent.value = summaryText;
 
       // ✅ 顯示保存成功模態框
       showSaveSuccessModal.value = true;
@@ -2220,7 +2228,7 @@ const handleSpeechEnd = async (transcript) => {
 
   try {
     // 所有輸入都會進入摘要模式（移除50字限制）
-    await runSummaryFlow(transcript); // 不新增聊天泡泡，但 DB 會寫兩筆
+    await runSummaryFlow(transcript, "voice"); // 不新增聊天泡泡，但 DB 會寫兩筆
     // 注意：runSummaryFlow 內部可能會設置 isLoading，所以這裡不直接設置 false
     // 讓 runSummaryFlow 自己管理 isLoading 狀態
     return;
@@ -2515,7 +2523,7 @@ async function handleManualInput() {
   closeTextInput();
   
   try {
-    await runSummaryFlow(raw); // 不新增聊天泡泡，但 DB 會寫兩筆
+    await runSummaryFlow(raw, "text"); // 不新增聊天泡泡，但 DB 會寫兩筆
   } finally {
     // 摘要模式完成後才解除載入狀態
     // 注意：runSummaryFlow 內部可能會設置 isLoading，所以這裡不直接設置 false
