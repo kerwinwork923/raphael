@@ -1,22 +1,17 @@
 <template>
-  
   <div v-if="loading" class="loading-mask">
     <div class="loading-spinner"></div>
     <div>載入中，請稍候...</div>
   </div>
-
   <div v-else class="memberInfo">
-
     <Sidebar />
     <!-- ───── 彈窗 ───── -->
-
     <ContractUserAlert
       v-if="showContract"
       :contracts="contractList"
       :member-name="member?.Name ?? ''"
       @close="closeContract"
     />
-
     <HRVUserAlertAlert v-if="showHRV" :record="selectedHRV" @close="closeHRV" />
 
     <AutonomicNerveAlert
@@ -24,13 +19,11 @@
       :record="selectedANS"
       @close="closeANS"
     />
-
     <LifeDetectAlert
       v-if="showLife"
       :record="selectedLife"
       @close="closeLife"
     />
-
     <BabyRecordAlert
       v-if="showBaby"
       :record="selectedBaby"
@@ -151,10 +144,10 @@
             </div>
           </div>
 
-          <!-- █ 產品使用紀錄 ------------------------------------------------- -->
+          <!-- █ 使用紀錄查詢 ------------------------------------------------- -->
           <div class="memberInfoCard memberInfoCardGroupW50">
             <div class="memberInfoTitleWrap">
-              <h3>產品使用紀錄</h3>
+              <h3>使用紀錄查詢</h3>
               <div class="memberInfoTitleGroup">
                 <small>已使用 {{ totalHome }} 次</small>
                 <VueDatePicker
@@ -171,13 +164,9 @@
 
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
-                <div class="memberInfoTableTitleItem">看診日期</div>
-                <div class="memberInfoTableTitleItem">治療名稱</div>
-                <div class="memberInfoTableTitleItem">治療部位</div>
-                <div class="memberInfoTableTitleItem">開始時間</div>
-                <div class="memberInfoTableTitleItem">結束時間</div>
-                <div class="memberInfoTableTitleItem">總使用時間</div>
-                <div class="memberInfoTableTitleItem">貼片模式</div>
+                <div class="memberInfoTableTitleItem">APP 使用日期</div>
+                <div class="memberInfoTableTitleItem">APP 結束日期</div>
+                <div class="memberInfoTableTitleItem">間隔天數</div>
               </div>
               <div class="memberInfoTableHR" />
 
@@ -245,17 +234,17 @@
           </div>
 
           <!-- 使用紀錄分析 -->
-          <!-- <div class="memberInfoCard memberInfoCardGroupW100">
+          <div class="memberInfoCard memberInfoCardGroupW100">
             <h3>使用紀錄分析</h3>
             <UsageAnalysisChart :usage-data="filteredHomeForChart" />
-          </div> -->
+          </div>
         </div>
 
         <!-- █ HRV ----------------------------------------------------------- -->
         <div class="memberInfoRow">
           <div class="memberInfoCard w-half">
             <div class="memberInfoTitleWrap">
-              <h3>手錶紀錄</h3>
+              <h3>HRV檢測紀錄查詢</h3>
               <div class="memberInfoTitleGroup">
                 <small>共 {{ totalHRV }} 筆</small>
                 <VueDatePicker
@@ -270,14 +259,10 @@
             </div>
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
-                <div class="memberInfoTableTitleItem">使用時間</div>
-                <div class="memberInfoTableTitleItem">血壓</div>
-                <div class="memberInfoTableTitleItem">血氧</div>
-                <div class="memberInfoTableTitleItem">心率</div>
-                <div class="memberInfoTableTitleItem">睡眠</div>
-                <div class="memberInfoTableTitleItem">壓力分析</div>
-                <div class="memberInfoTableTitleItem">步數與卡路里</div>
-
+                <div class="memberInfoTableTitleItem">檢測時間</div>
+                <div class="memberInfoTableTitleItem">生理年齡</div>
+                <div class="memberInfoTableTitleItem">HRV</div>
+                <div class="memberInfoTableTitleItem">間隔天數</div>
               </div>
               <div class="memberInfoTableHR" />
 

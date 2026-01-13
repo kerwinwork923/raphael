@@ -1790,6 +1790,7 @@ async function runSummaryFlow(inputText, inputType = "voice") {
 5. 不可加入任何建議、分析、評論或衛教。
 6. 不可使用 *、#、-、>、Markdown 格式符號。
 7. 不可使用條列符號，全部以自然語句呈現。
+8. 只能使用繁體字回應。
 請嚴格遵守以上格式與規則，開始後不需要再次重述任務或格式。
 
 `
