@@ -38,7 +38,7 @@
         </div>
       </div>
 
-      <div class="verfifyWrap" v-if="currentStep === 'verify'" >
+      <div class="verfifyWrap" v-if="currentStep === 'verify'">
         <div class="verificationCodeGroup">
           <input
             v-for="(code, index) in verificationCodes"
@@ -223,16 +223,23 @@ export default {
       try {
         const response = await axios.post(
           "https://23700999.com:8081/HMA/API_ForgetPassword.jsp",
-          {
-            Mobile: mobile.value,
-          }
+          { Mobile: mobile.value }
         );
 
         if (response.status === 200) {
           console.log(response.data);
 
-          loading.value = false;
+          // ✅ 這段新增：API回傳「無此手機號碼」
+          if (
+            response.data?.Result === "無此手機號碼" &&
+            (response.data?.MID === "" || !response.data?.MID)
+          ) {
+            alertVisable.value = true;
+            alertContent.value = "此號碼並非會員，請直接進行註冊";
+            return; // ⬅️ 很重要：不要再往下走 verify 流程
+          }
 
+          // ✅ 原本成功流程
           if (response.data) {
             localStorage.setItem(
               "userData",
@@ -241,19 +248,19 @@ export default {
                 Mobile: mobile.value,
               })
             );
+
             startCountdown();
 
-            if (currentStep.value != "verify") {
+            if (currentStep.value !== "verify") {
               currentStep.value = "verify";
               verificationTitle.value = "輸入驗證碼";
             }
-          } else {
-            loading.value = false;
           }
         }
       } catch (err) {
+        // ⚠️ 這裡建議也改成一致文案（或依需求保留）
         alertVisable.value = true;
-        alertContent.value = "無此手機號碼";
+        alertContent.value = "此號碼並非會員，請直接進行註冊";
       } finally {
         loading.value = false;
       }
@@ -443,7 +450,6 @@ export default {
   width: 100%;
   height: 100dvh;
 
-
   overflow: hidden;
   @include gradientBg();
 
@@ -455,7 +461,6 @@ export default {
     width: 90%;
     margin: 0 auto;
     height: 100%;
-   
 
     .raphaelIconImgGroup {
       text-align: center;
@@ -478,11 +483,10 @@ export default {
     .forgetPasswordWrap {
       width: 100%;
       min-height: 509px;
-      
     }
     .forgetPasswordBox {
       border-radius: 12px;
-    
+
       margin-top: 2.25rem;
       .phoneGroup,
       .passwordGroup,
@@ -543,7 +547,6 @@ export default {
       transition: 0.25s ease;
       cursor: pointer;
 
-      
       @include neumorphismOuter($radius: 50px, $padding: 8px 12px);
       color: #74bc1f;
 
@@ -578,88 +581,87 @@ export default {
   }
 
   .verfifyWrap {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    .verificationCodeGroup {
       display: flex;
-      flex-direction: column;
-      gap: 16px;
-      .verificationCodeGroup {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 8px;
-        margin-top: 1.5rem;
-        @include neumorphismOuter($radius: 50px, $padding: 10px 16px);
-        width: 100%;
-
-        .vertifyCode {
-          padding: 2px 0;
-          border: none;
-          border-bottom: 1px solid #b1c0d8;
-          cursor: text;
-          text-align: center;
-          font-size: 20px;
-          font-weight: bold;
-          outline: none;
-          width: 100%;
-        }
-      }
-
-      .verificationCodeHintText {
-        font-size: 14px;
-        color: $raphael-red-300;
-        text-align: center;
-        font-weight: 400;
-        letter-spacing: 0.1px;
-        line-height: 22.652px;
-      }
-
-      .reSendTextGroup {
-        text-align: center;
-
-        .reSendText {
-          outline: none;
-          border: none;
-          font-size: 18px;
-          font-style: normal;
-          font-weight: 400;
-          letter-spacing: 2.7px;
-          transition: 0.15s all ease;
-          cursor: pointer;
-          width: 100%;
-          text-align: center;
-          @include neumorphismOuter($radius: 50px, $padding: 0.5rem 0);
-          color: #74bc1f;
-          text-decoration: none;
-
-          &:disabled {
-            color: $raphael-gray-300;
-            cursor: not-allowed;
-            opacity: 0.6;
-          }
-          &:hover,
-          &:active {
-            @include neumorphismOuter(
-              $radius: 50px,
-              $padding: 0.5rem 0,
-              $x: 0,
-              $y: 0,
-              $blur: 6px
-            );
-          }
-        }
-      }
-    }
-    .resetPasswordWrap{
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-top: 1.5rem;
+      @include neumorphismOuter($radius: 50px, $padding: 10px 16px);
       width: 100%;
-      max-width: 768px;
-      padding: 0 1.5rem;
-    }
-  .resetPasswordBox {
 
+      .vertifyCode {
+        padding: 2px 0;
+        border: none;
+        border-bottom: 1px solid #b1c0d8;
+        cursor: text;
+        text-align: center;
+        font-size: 20px;
+        font-weight: bold;
+        outline: none;
+        width: 100%;
+      }
+    }
+
+    .verificationCodeHintText {
+      font-size: 14px;
+      color: $raphael-red-300;
+      text-align: center;
+      font-weight: 400;
+      letter-spacing: 0.1px;
+      line-height: 22.652px;
+    }
+
+    .reSendTextGroup {
+      text-align: center;
+
+      .reSendText {
+        outline: none;
+        border: none;
+        font-size: 18px;
+        font-style: normal;
+        font-weight: 400;
+        letter-spacing: 2.7px;
+        transition: 0.15s all ease;
+        cursor: pointer;
+        width: 100%;
+        text-align: center;
+        @include neumorphismOuter($radius: 50px, $padding: 0.5rem 0);
+        color: #74bc1f;
+        text-decoration: none;
+
+        &:disabled {
+          color: $raphael-gray-300;
+          cursor: not-allowed;
+          opacity: 0.6;
+        }
+        &:hover,
+        &:active {
+          @include neumorphismOuter(
+            $radius: 50px,
+            $padding: 0.5rem 0,
+            $x: 0,
+            $y: 0,
+            $blur: 6px
+          );
+        }
+      }
+    }
+  }
+  .resetPasswordWrap {
+    width: 100%;
+    max-width: 768px;
+    padding: 0 1.5rem;
+  }
+  .resetPasswordBox {
     border-radius: 12px;
-   width: 100%;
+    width: 100%;
     margin-top: 2.25rem;
     margin-bottom: 1.5rem;
-    
+
     .phoneGroup,
     .passwordGroup,
     .passwordAgainGroup {
@@ -697,8 +699,9 @@ export default {
       padding-left: 48px;
 
       border-radius: var(--Radius-r-50, 50px);
-background: var(--Secondary-100, #F5F7FA);
-box-shadow: 2px 4px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.40));
+      background: var(--Secondary-100, #f5f7fa);
+      box-shadow: 2px 4px 12px 0
+        var(--secondary-300-opacity-40, rgba(177, 192, 216, 0.4));
 
       &::placeholder {
         font-size: 18px;
@@ -708,7 +711,7 @@ box-shadow: 2px 4px 12px 0 var(--secondary-300-opacity-40, rgba(177, 192, 216, 0
     .passwordAgainHintText,
     .passwordHintText {
       color: $raphael-red-300;
-      margin-bottom: .5rem;
+      margin-bottom: 0.5rem;
       text-align: center;
     }
   }
