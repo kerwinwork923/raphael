@@ -31,11 +31,6 @@
       @close="closeLife"
     />
 
-    <BabyRecordAlert
-      v-if="showBaby"
-      :record="selectedBaby"
-      @close="closeBaby"
-    />
 
     <!-- ───── 主要內容 ───── -->
     <div class="memberInfoContent">
@@ -583,51 +578,156 @@
           </div>
         </div>
 
-        <!-- █ 寶貝檢測 ------------------------------------------------------- -->
+        <!-- █ APP使用紀錄 ------------------------------------------------------- -->
         <div class="memberInfoRow">
           <div class="memberInfoCard w-half">
             <div class="memberInfoTitleWrap">
-              <h3>寶貝檢測紀錄查詢</h3>
+              <h3>APP使用紀錄</h3>
               <div class="memberInfoTitleGroup">
-                <small>共 {{ totalChild }} 筆</small>
+                <small>已使用 {{ totalApp }} 次</small>
                 <VueDatePicker
+                  v-model="appDateRange"
                   range
-                  v-model="babyRange"
-                  placeholder="使用日期區間"
                   :enable-time-picker="false"
                   format="yyyy/MM/dd"
+                  placeholder="選擇日期區間"
+                  prepend-icon="i-calendar"
                   teleport="body"
+                />
+                <img
+                  src="/assets/imgs/backend/search.svg"
+                  alt="search"
+                  style="cursor: pointer; width: 20px; height: 20px"
                 />
               </div>
             </div>
+
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
-                <div class="memberInfoTableTitleItem">檢測時間</div>
-                <div class="memberInfoTableTitleItem">分數</div>
-                <div class="memberInfoTableTitleItem">嚴重程度</div>
+                <div class="memberInfoTableTitleItem">APP 使用日期</div>
+                <div class="memberInfoTableTitleItem">APP 結束日期</div>
                 <div class="memberInfoTableTitleItem">間隔天數</div>
               </div>
               <div class="memberInfoTableHR" />
 
-              <template v-if="paginatedChild.length">
+              <template v-if="paginatedApp.length">
                 <div
-                  class="memberInfoTableRow baby-row"
-                  v-for="baby in paginatedChild"
-                  :key="baby.AID"
+                  class="memberInfoTableRow"
+                  v-for="app in paginatedApp"
+                  :key="app.id"
                 >
-                  <div class="memberInfoTableRowItem">{{ baby.CheckTime }}</div>
-                  <div class="memberInfoTableRowItem">{{ baby.ALL_Score }}</div>
+                  <div class="memberInfoTableRowItem">{{ app.startDate }}</div>
+                  <div class="memberInfoTableRowItem">{{ app.endDate }}</div>
+                  <div class="memberInfoTableRowItem">{{ app.diffDays }} 天</div>
+                </div>
+              </template>
+              <div class="memberInfoTableRow" v-else>
+                <div class="memberInfoTableRowItem" style="width: 100%">
+                  尚無資料
+                </div>
+              </div>
+            </div>
+
+            <nav class="pagination" v-if="totalApp">
+              <button
+                class="btn-page"
+                :disabled="pageApp === 1"
+                @click="pageApp = 1"
+              >
+                &lt;&lt;
+              </button>
+              <button
+                class="btn-page"
+                :disabled="pageApp === 1"
+                @click="pageApp--"
+              >
+                &lt;
+              </button>
+              <button
+                class="btn-page btn-page-number"
+                v-for="p in pageNumberListApp"
+                :key="p"
+                :class="{ active: pageApp === p }"
+                @click="pageApp = p"
+              >
+                {{ p }}
+              </button>
+              <button
+                class="btn-page"
+                :disabled="pageApp === totalPagesApp"
+                @click="pageApp++"
+              >
+                &gt;
+              </button>
+              <button
+                class="btn-page"
+                :disabled="pageApp === totalPagesApp"
+                @click="pageApp = totalPagesApp"
+              >
+                &gt;&gt;
+              </button>
+            </nav>
+          </div>
+
+          <div class="memberInfoCard w-half">
+            <h3>APP使用紀錄分析</h3>
+            <UsageAnalysisChart :usage-data="filteredAppForChart" />
+          </div>
+        </div>
+
+        <!-- █ 影片觀看紀錄 ------------------------------------------------------- -->
+        <div class="memberInfoRow">
+          <div class="memberInfoCard memberInfoCardGroupW100">
+            <div class="memberInfoTitleWrap">
+              <h3>影片觀看紀錄</h3>
+              <div class="memberInfoTitleGroup">
+                <small>觀看 {{ totalVideo }} 次</small>
+                <VueDatePicker
+                  v-model="videoRange"
+                  range
+                  :enable-time-picker="false"
+                  format="yyyy/MM/dd"
+                  placeholder="選擇日期區間"
+                  prepend-icon="i-calendar"
+                  teleport="body"
+                />
+                <img
+                  src="/assets/imgs/backend/search.svg"
+                  alt="search"
+                  style="cursor: pointer; width: 20px; height: 20px"
+                />
+              </div>
+            </div>
+
+            <div class="memberInfoTable">
+              <div class="memberInfoTableTitle">
+                <div class="memberInfoTableTitleItem">影片名稱</div>
+                <div class="memberInfoTableTitleItem">觀看日期</div>
+                <div class="memberInfoTableTitleItem">完成度</div>
+                <div class="memberInfoTableTitleItem">是否按讚</div>
+                <div class="memberInfoTableTitleItem">是否留言</div>
+              </div>
+              <div class="memberInfoTableHR" />
+
+              <template v-if="paginatedVideo.length">
+                <div
+                  class="memberInfoTableRow"
+                  v-for="video in paginatedVideo"
+                  :key="video.id"
+                >
+                  <div class="memberInfoTableRowItem">{{ video.name }}</div>
+                  <div class="memberInfoTableRowItem">{{ video.watchDate }}</div>
+                  <div class="memberInfoTableRowItem">{{ video.completion }}%</div>
                   <div class="memberInfoTableRowItem">
-                    {{ baby.ALL_Serious }}
+                    {{ video.liked ? "是" : "否" }}
                   </div>
                   <div class="memberInfoTableRowItem">
-                    {{ baby.diffDays ?? "—" }}
+                    {{ video.commented ? "是" : "否" }}
                   </div>
                   <img
                     src="/assets/imgs/backend/goNext.svg"
                     alt="detail"
                     style="cursor: pointer"
-                    @click.stop="openBaby(baby)"
                   />
                 </div>
               </template>
@@ -638,50 +738,45 @@
               </div>
             </div>
 
-            <nav class="pagination" v-if="totalChild">
+            <nav class="pagination" v-if="totalVideo">
               <button
                 class="btn-page"
-                :disabled="pageChild === 1"
-                @click="pageChild = 1"
+                :disabled="pageVideo === 1"
+                @click="pageVideo = 1"
               >
                 &lt;&lt;
               </button>
               <button
                 class="btn-page"
-                :disabled="pageChild === 1"
-                @click="pageChild--"
+                :disabled="pageVideo === 1"
+                @click="pageVideo--"
               >
                 &lt;
               </button>
               <button
                 class="btn-page btn-page-number"
-                v-for="p in pageNumberListChild"
+                v-for="p in pageNumberListVideo"
                 :key="p"
-                :class="{ active: pageChild === p }"
-                @click="pageChild = p"
+                :class="{ active: pageVideo === p }"
+                @click="pageVideo = p"
               >
                 {{ p }}
               </button>
               <button
                 class="btn-page"
-                :disabled="pageChild === totalPagesChild"
-                @click="pageChild++"
+                :disabled="pageVideo === totalPagesVideo"
+                @click="pageVideo++"
               >
                 &gt;
               </button>
               <button
                 class="btn-page"
-                :disabled="pageChild === totalPagesChild"
-                @click="pageChild = totalPagesChild"
+                :disabled="pageVideo === totalPagesVideo"
+                @click="pageVideo = totalPagesVideo"
               >
                 &gt;&gt;
               </button>
             </nav>
-          </div>
-
-          <div class="memberInfoCard w-half">
-            <h3>寶貝檢測紀錄分析</h3>
-            <BabyScoreChart :records="filteredChild" />
           </div>
         </div>
       </div>
@@ -703,8 +798,6 @@ import ContractUserAlert from "~/components/raphaelBackend/ContractUserAlert.vue
 import HRVUserAlertAlert from "~/components/raphaelBackend/HRVUserAlert.vue";
 import AutonomicNerveAlert from "~/components/raphaelBackend/AutonomicNerve.vue";
 import LifeDetectAlert from "~/components/raphaelBackend/LifeDetectAlert.vue";
-import BabyRecordAlert from "~/components/raphaelBackend/BabyRecordAlert.vue";
-import BabyScoreChart from "~/components/raphaelBackend/BabyScoreChart.vue";
 import { useSeo } from "~/composables/useSeo";
 const router = useRouter();
 const route = useRoute();
@@ -749,8 +842,9 @@ const {
   hrvRecords,
   ansRecords,
   lifeRecords,
-  childANS,
   homeOrders,
+  videoRecords,
+  appRecords,
   hasFetched,
 } = storeToRefs(memberStore);
 
@@ -767,7 +861,8 @@ const selectedHRV = ref<any>(null);
 const hrvRange = ref<Date[] | null>(null);
 const ansRange = ref<Date[] | null>(null);
 const lifeRange = ref<Date[] | null>(null);
-const babyRange = ref<Date[] | null>(null);
+const videoRange = ref<Date[] | null>(null);
+const appDateRange = ref<Date[] | null>(null);
 
 /* ---------- paging helpers ---------- */
 const PAGE_MAIN = 4;
@@ -877,15 +972,62 @@ const paginatedLife = computed(() => {
   return lifeRecords.value.slice(s, s + PAGE_SUB);
 });
 
-/* CHILD */
-const pageChild = ref(1);
-const totalChild = computed(() => childANS.value.length);
-const totalPagesChild = computed(() =>
-  Math.max(1, Math.ceil(totalChild.value / PAGE_SUB))
+/* VIDEO */
+const pageVideo = ref(1);
+const filteredVideo = computed(() => {
+  if (!videoRange.value || videoRange.value.length < 2) return videoRecords.value;
+  const [from, to] = videoRange.value;
+  const start = from.getTime();
+  const end = to.getTime();
+  return videoRecords.value.filter((r) => {
+    const ms = Date.parse(r.watchDate.replace(/\//g, "-"));
+    return ms >= start && ms <= end;
+  });
+});
+const totalVideo = computed(() => filteredVideo.value.length);
+const totalPagesVideo = computed(() =>
+  Math.max(1, Math.ceil(totalVideo.value / PAGE_SUB))
 );
-const paginatedChild = computed(() => {
-  const s = (pageChild.value - 1) * PAGE_SUB;
-  return childANS.value.slice(s, s + PAGE_SUB);
+const paginatedVideo = computed(() => {
+  const s = (pageVideo.value - 1) * PAGE_SUB;
+  return filteredVideo.value.slice(s, s + PAGE_SUB);
+});
+const pageNumberListVideo = computed(() =>
+  pageButtons(totalPagesVideo.value, pageVideo.value, maxButtons.value)
+);
+
+/* APP */
+const pageApp = ref(1);
+const filteredApp = computed(() => {
+  if (!appDateRange.value || appDateRange.value.length < 2) return appRecords.value;
+  const [from, to] = appDateRange.value;
+  const start = from.getTime();
+  const end = to.getTime();
+  return appRecords.value.filter((r) => {
+    const ms = Date.parse(r.startDate.replace(/\//g, "-"));
+    return ms >= start && ms <= end;
+  });
+});
+const totalApp = computed(() => filteredApp.value.length);
+const totalPagesApp = computed(() =>
+  Math.max(1, Math.ceil(totalApp.value / PAGE_SUB))
+);
+const paginatedApp = computed(() => {
+  const s = (pageApp.value - 1) * PAGE_SUB;
+  return filteredApp.value.slice(s, s + PAGE_SUB);
+});
+const pageNumberListApp = computed(() =>
+  pageButtons(totalPagesApp.value, pageApp.value, maxButtons.value)
+);
+const filteredAppForChart = computed(() => {
+  if (!appDateRange.value || appDateRange.value.length < 2) return appRecords.value;
+  const [from, to] = appDateRange.value;
+  const start = from.getTime();
+  const end = to.getTime();
+  return appRecords.value.filter((r) => {
+    const ms = Date.parse(r.startDate.replace(/\//g, "-"));
+    return ms >= start && ms <= end;
+  });
 });
 
 function gotoHRV(p: number) {
@@ -951,17 +1093,21 @@ const makeFiltered = <T>(
 const filteredHRV = makeFiltered(hrvRecords, hrvRange, "CheckTime");
 const filteredANS = makeFiltered(ansRecords, ansRange, "CheckTime");
 const filteredLife = makeFiltered(lifeRecords, lifeRange, "CheckTime");
-const filteredChild = makeFiltered(childANS, babyRange, "CheckTime");
 
 /* 圖表：只要原始陣列 (完整) ------------------------------ */
 const chartHRV = computed(() => hrvRecords.value); // 全部資料
 const chartANS = computed(() => ansRecords.value);
 const chartLife = computed(() => lifeRecords.value);
-const chartChild = computed(() => childANS.value);
 
 /* ---------- watch & lifecycle ---------- */
 watch(homeDateRange, () => {
   pageHome.value = 1;
+});
+watch(videoRange, () => {
+  pageVideo.value = 1;
+});
+watch(appDateRange, () => {
+  pageApp.value = 1;
 });
 
 function pageButtons(total: number, current: number, max = maxButtons.value) {
@@ -988,9 +1134,6 @@ const pageNumberListANS = computed(() =>
 );
 const pageNumberListLife = computed(() =>
   pageButtons(totalPagesLife.value, pageLife.value, maxButtons.value)
-);
-const pageNumberListChild = computed(() =>
-  pageButtons(totalPagesChild.value, pageChild.value, maxButtons.value)
 );
 
 const loading = ref(false);
@@ -1115,59 +1258,6 @@ function closeLife() {
   showLife.value = false;
 }
 
-const showBaby = ref(false);
-const selectedBaby = ref<any>(null);
-
-async function fetchChildANSDetail(baby: any) {
-  const { token, admin, sel } = getAuth();
-  if (!token || !admin || !sel.MID) return null;
-
-  const AID = baby.AID;
-  const CID = baby.CID;
-
-  let preAID = "";
-  const sortedList = childANS.value
-    .slice()
-    .sort(
-      (x, y) =>
-        new Date(y.CheckTime).getTime() - new Date(x.CheckTime).getTime()
-    );
-  const currentIndex = sortedList.findIndex((item) => item.AID === AID);
-  if (currentIndex !== -1 && currentIndex < sortedList.length - 1) {
-    preAID = sortedList[currentIndex + 1].AID;
-  }
-
-  const res = await fetch(
-    "https://23700999.com:8081/HMA/API_Home_ChildANSDetail.jsp",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        AdminID: admin,
-        Token: token,
-        MID: sel.MID,
-        Mobile: sel.Mobile ?? "",
-        CID,
-        AID,
-        preAID,
-      }),
-    }
-  );
-  return await res.json();
-}
-
-async function openBaby(baby: any) {
-  const detail = await fetchChildANSDetail(baby);
-  if (detail && detail.Result === "OK") {
-    selectedBaby.value = detail;
-    showBaby.value = true;
-  } else {
-    alert("取得寶貝詳細資料失敗");
-  }
-}
-function closeBaby() {
-  showBaby.value = false;
-}
 
 const props = defineProps<{ record: any }>();
 defineEmits(["close"]);
@@ -1189,9 +1279,14 @@ const isAnyAlertOpen = computed(() => {
     showContract.value ||
     showHRV.value ||
     showANS.value ||
-    showLife.value ||
-    showBaby.value
+    showLife.value
   );
+});
+
+const isExpired = computed(() => {
+  if (!currentOrder.value?.RentEnd) return false;
+  const endDate = new Date(currentOrder.value.RentEnd.replace(/\//g, "-"));
+  return endDate < new Date();
 });
 </script>
 
@@ -1552,7 +1647,7 @@ const isAnyAlertOpen = computed(() => {
         white-space: nowrap;
         font-size: 1rem;
         .memberInfoTableTitleItem {
-          width: 33.3333%;
+          flex: 1;
           text-align: center;
         }
       }
@@ -1581,7 +1676,7 @@ const isAnyAlertOpen = computed(() => {
           }
         }
         .memberInfoTableRowItem {
-          width: 33.3333%;
+          flex: 1;
           text-align: center;
           padding: 1rem 0;
         }

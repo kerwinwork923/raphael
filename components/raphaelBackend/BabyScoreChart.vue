@@ -17,7 +17,8 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted, nextTick, computed } from "vue";
 import VueDatePicker from "@vuepic/vue-datepicker";
-import { Chart } from "chart.js";
+import { Chart, registerables } from "chart.js";
+Chart.register(...registerables);
 
 const props = defineProps<{
   records: Array<{

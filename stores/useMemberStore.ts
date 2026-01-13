@@ -11,6 +11,8 @@ export const useMemberStore = defineStore('member', () => {
   const lifeRecords = ref<any[]>([])
   const childANS = ref<any[]>([])
   const homeOrders = ref<any[]>([])
+  const videoRecords = ref<any[]>([])
+  const appRecords = ref<any[]>([])
   const hasFetched = ref(false)
 
   // 方法
@@ -30,18 +32,44 @@ export const useMemberStore = defineStore('member', () => {
           Mobile: sel.Mobile ?? "",
         }),
       })
+
+      
       const basicData = await basicRes.json()
       if (basicData.Result === "OK") {
         member.value = basicData.MemberDetail.Member
         currentOrder.value = basicData.MemberDetail.NowOrderList?.[0] ?? null
       }
 
-      // 清空其他資料（因為 API 不提供）
+      // 取得自律神經和生活檢測資料
+      const empty = { StartDate: "", EndDate: "" }
+      const post = (url: string, extra = empty) =>
+        fetch(`https://23700999.com:8081/HMA/${url}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            AdminID: admin,
+            Token: token,
+            MID: sel.MID,
+            Mobile: sel.Mobile ?? "",
+            ...extra,
+          }),
+        }).then((r) => r.json())
+
+      const [ansRes, lifeRes] = await Promise.all([
+        post("API_MemberANS.jsp"),
+        post("API_MemberSleepRec.jsp"),
+      ])
+
+      // 設定資料
+      ansRecords.value = ansRes?.MemberANS?.ANSList ?? []
+      lifeRecords.value = lifeRes?.MemberSleepRec?.SleepRecList ?? []
+
+      // 清空其他資料
       homeOrders.value = []
       hrvRecords.value = []
-      ansRecords.value = []
-      lifeRecords.value = []
       childANS.value = []
+      videoRecords.value = []
+      appRecords.value = []
 
       lastUpdated.value = new Date().toLocaleString("zh-TW")
       hasFetched.value = true
@@ -59,6 +87,8 @@ export const useMemberStore = defineStore('member', () => {
     lifeRecords.value = []
     childANS.value = []
     homeOrders.value = []
+    videoRecords.value = []
+    appRecords.value = []
     hasFetched.value = false
   }
 
@@ -72,6 +102,8 @@ export const useMemberStore = defineStore('member', () => {
     lifeRecords,
     childANS,
     homeOrders,
+    videoRecords,
+    appRecords,
     hasFetched,
     // 方法
     fetchAll,

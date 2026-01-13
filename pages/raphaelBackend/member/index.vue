@@ -50,8 +50,9 @@
             <div class="cell name" data-label="會員名稱">{{ member.name }}</div>
             <div class="cell level" data-label="等級">{{ member.level }}</div>
             <div class="cell birth" data-label="生日">
-              {{ member.birthday }}
-            </div>
+  {{ formatBirthday(member.birthday) }}
+</div>
+
             <div class="cell phone" data-label="電話">{{ member.phone }}</div>
 
             <!-- 產品欄位 ― 永遠保留格子，不讓 grid 塌掉 -->
@@ -229,6 +230,43 @@ function refreshData() {
 function scrollToTop() {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
+
+function formatBirthday(birthday: string) {
+  if (!birthday) return "";
+
+  // 已經是 xx/xx/xx 或 xxx/xx/xx 就直接回傳
+  if (birthday.includes("/")) {
+    const parts = birthday.split("/");
+    if (parts.length === 3) {
+      const [y, m, d] = parts;
+      return `${y.padStart(3, "0")}/${m.padStart(2, "0")}/${d.padStart(2, "0")}`;
+    }
+    return birthday;
+  }
+
+  // 純數字處理
+  const digits = birthday.replace(/\D/g, "");
+
+  // 民國 7 碼：0840113
+  if (digits.length === 7) {
+    const y = digits.slice(0, 3);
+    const m = digits.slice(3, 5);
+    const d = digits.slice(5, 7);
+    return `${y}/${m}/${d}`;
+  }
+
+  // 西元 8 碼：19930917 → 轉民國
+  if (digits.length === 8) {
+    const year = Number(digits.slice(0, 4)) - 1911;
+    const m = digits.slice(4, 6);
+    const d = digits.slice(6, 8);
+    return `${String(year).padStart(3, "0")}/${m}/${d}`;
+  }
+
+  return birthday;
+}
+
+
 </script>
 
 <style scoped lang="scss">

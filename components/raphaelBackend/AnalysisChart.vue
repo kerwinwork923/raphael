@@ -22,7 +22,8 @@
 import { ref, watch, onMounted, onUnmounted, nextTick, computed } from "vue";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
-import { Chart } from "chart.js";
+import { Chart, registerables } from "chart.js";
+Chart.register(...registerables);
 
 /* ---------- Props ---------- */
 const props = defineProps<{
