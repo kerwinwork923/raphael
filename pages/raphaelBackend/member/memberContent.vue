@@ -1,12 +1,10 @@
 <template>
-  
   <div v-if="loading" class="loading-mask">
     <div class="loading-spinner"></div>
     <div>載入中，請稍候...</div>
   </div>
 
   <div v-else class="memberInfo">
-
     <Sidebar />
     <!-- ───── 彈窗 ───── -->
 
@@ -16,7 +14,6 @@
       :member-name="member?.Name ?? ''"
       @close="closeContract"
     />
-
 
     <AutonomicNerveAlert
       v-if="showANS"
@@ -29,7 +26,6 @@
       :record="selectedLife"
       @close="closeLife"
     />
-
 
     <!-- ───── 主要內容 ───── -->
     <div class="memberInfoContent">
@@ -169,38 +165,53 @@
                 <div class="filterDropdownWrapper">
                   <div class="filterTrigger" @click="toggleHomeFilter">
                     <span>看診日期</span>
-                    <img 
-                      src="/assets/imgs/backend/arrow-down.svg" 
-                      alt="arrow" 
+                    <img
+                      src="/assets/imgs/backend/arrow-down.svg"
+                      alt="arrow"
                       :class="{ rotated: showHomeFilter }"
                     />
                   </div>
-                  <div class="filterDropdownPanel" v-if="showHomeFilter" @click.stop>
+                  <div
+                    class="filterDropdownPanel"
+                    v-if="showHomeFilter"
+                    @click.stop
+                  >
                     <div class="filterCategories">
-                      <div 
+                      <div
                         class="filterCategory"
-                        :class="{ active: selectedHomeFilterCategory === 'ConsultationDate' }"
+                        :class="{
+                          active:
+                            selectedHomeFilterCategory === 'ConsultationDate',
+                        }"
                         @click="selectHomeFilterCategory('ConsultationDate')"
                       >
                         看診日期
                       </div>
-                      <div 
+                      <div
                         class="filterCategory"
-                        :class="{ active: selectedHomeFilterCategory === 'FavoriteName' }"
+                        :class="{
+                          active: selectedHomeFilterCategory === 'FavoriteName',
+                        }"
                         @click="selectHomeFilterCategory('FavoriteName')"
                       >
                         我的最愛名稱
                       </div>
-                      <div 
+                      <div
                         class="filterCategory"
-                        :class="{ active: selectedHomeFilterCategory === 'TreatmentArea' }"
+                        :class="{
+                          active:
+                            selectedHomeFilterCategory === 'TreatmentArea',
+                        }"
                         @click="selectHomeFilterCategory('TreatmentArea')"
                       >
                         治療部位
                       </div>
-                      <div 
+                      <div
                         class="filterCategory"
-                        :class="{ active: selectedHomeFilterCategory === 'TreatmentTime' }"
+                        :class="{
+                          active:
+                            selectedHomeFilterCategory === 'TreatmentTime',
+                        }"
                         @click="selectHomeFilterCategory('TreatmentTime')"
                       >
                         治療時間
@@ -213,8 +224,8 @@
                         :key="option"
                         @click="toggleHomeFilterOption(option)"
                       >
-                        <input 
-                          type="checkbox" 
+                        <input
+                          type="checkbox"
                           :checked="selectedHomeFilterOptions.includes(option)"
                           @click.stop
                         />
@@ -235,25 +246,60 @@
 
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
-                <div class="memberInfoTableTitleItem" @click="handleSort('home', 'ConsultationDate')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('home', 'ConsultationDate')"
+                >
                   看診日期
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('home', 'FavoriteName')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('home', 'FavoriteName')"
+                >
                   我的最愛名稱
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('home', 'PointInfo')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('home', 'PointInfo')"
+                >
                   點位資訊
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('home', 'TreatmentTime')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('home', 'TreatmentTime')"
+                >
                   治療時間
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('home', 'TotalUsage')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('home', 'TotalUsage')"
+                >
                   總使用次數
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
               </div>
               <div class="memberInfoTableHR" />
@@ -264,11 +310,21 @@
                   v-for="row in paginatedHome"
                   :key="row.id"
                 >
-                  <div class="memberInfoTableRowItem">{{ row.ConsultationDate || "—" }}</div>
-                  <div class="memberInfoTableRowItem">{{ row.FavoriteName || "—" }}</div>
-                  <div class="memberInfoTableRowItem">{{ row.PointInfo || "—" }}</div>
-                  <div class="memberInfoTableRowItem">{{ row.TreatmentTime || "—" }}</div>
-                  <div class="memberInfoTableRowItem">{{ row.TotalUsage || "—" }}</div>
+                  <div class="memberInfoTableRowItem">
+                    {{ row.ConsultationDate || "—" }}
+                  </div>
+                  <div class="memberInfoTableRowItem">
+                    {{ row.FavoriteName || "—" }}
+                  </div>
+                  <div class="memberInfoTableRowItem">
+                    {{ row.PointInfo || "—" }}
+                  </div>
+                  <div class="memberInfoTableRowItem">
+                    {{ row.TreatmentTime || "—" }}
+                  </div>
+                  <div class="memberInfoTableRowItem">
+                    {{ row.TotalUsage || "—" }}
+                  </div>
                   <img
                     src="/assets/imgs/backend/goNext.svg"
                     alt="detail"
@@ -352,21 +408,49 @@
             </div>
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
-                <div class="memberInfoTableTitleItem" @click="handleSort('ring', 'CheckTime')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('ring', 'CheckTime')"
+                >
                   使用時間
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('ring', 'heartRate')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('ring', 'heartRate')"
+                >
                   心率
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('ring', 'sleep')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('ring', 'sleep')"
+                >
                   睡眠
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('ring', 'steps')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('ring', 'steps')"
+                >
                   步數與卡路里
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
               </div>
               <div class="memberInfoTableHR" />
@@ -378,7 +462,9 @@
                   :key="r.id"
                 >
                   <div class="memberInfoTableRowItem">{{ r.CheckTime }}</div>
-                  <div class="memberInfoTableRowItem">{{ r.heartRate || "—" }}</div>
+                  <div class="memberInfoTableRowItem">
+                    {{ r.heartRate || "—" }}
+                  </div>
                   <div class="memberInfoTableRowItem">{{ r.sleep || "—" }}</div>
                   <div class="memberInfoTableRowItem">{{ r.steps || "—" }}</div>
                 </div>
@@ -453,21 +539,49 @@
 
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
-                <div class="memberInfoTableTitleItem" @click="handleSort('ans', 'CheckTime')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('ans', 'CheckTime')"
+                >
                   檢測時間
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('ans', 'TotalScore')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('ans', 'TotalScore')"
+                >
                   分數
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('ans', 'TotalDesc')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('ans', 'TotalDesc')"
+                >
                   嚴重程度
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('ans', 'diffDays')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('ans', 'diffDays')"
+                >
                   間隔天數
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
               </div>
               <div class="memberInfoTableHR" />
@@ -575,21 +689,49 @@
 
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
-                <div class="memberInfoTableTitleItem" @click="handleSort('life', 'CheckTime')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('life', 'CheckTime')"
+                >
                   檢測時間
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('life', 'Score')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('life', 'Score')"
+                >
                   分數
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('life', 'daytimeSleepiness')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('life', 'daytimeSleepiness')"
+                >
                   睡眠品質
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('life', 'diffDays')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('life', 'diffDays')"
+                >
                   間隔天數
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
               </div>
               <div class="memberInfoTableHR" />
@@ -701,17 +843,38 @@
 
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
-                <div class="memberInfoTableTitleItem" @click="handleSort('app', 'startDate')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('app', 'startDate')"
+                >
                   APP 使用日期
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('app', 'endDate')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('app', 'endDate')"
+                >
                   APP 結束日期
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('app', 'diffDays')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('app', 'diffDays')"
+                >
                   間隔天數
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
               </div>
               <div class="memberInfoTableHR" />
@@ -724,7 +887,9 @@
                 >
                   <div class="memberInfoTableRowItem">{{ app.startDate }}</div>
                   <div class="memberInfoTableRowItem">{{ app.endDate }}</div>
-                  <div class="memberInfoTableRowItem">{{ app.diffDays }} 天</div>
+                  <div class="memberInfoTableRowItem">
+                    {{ app.diffDays }} 天
+                  </div>
                 </div>
               </template>
               <div class="memberInfoTableRow" v-else>
@@ -807,25 +972,60 @@
 
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
-                <div class="memberInfoTableTitleItem" @click="handleSort('video', 'name')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('video', 'name')"
+                >
                   影片名稱
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('video', 'watchDate')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('video', 'watchDate')"
+                >
                   觀看日期
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('video', 'completion')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('video', 'completion')"
+                >
                   完成度
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('video', 'liked')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('video', 'liked')"
+                >
                   是否按讚
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('video', 'commented')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('video', 'commented')"
+                >
                   是否留言
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
               </div>
               <div class="memberInfoTableHR" />
@@ -837,13 +1037,23 @@
                   :key="video.id"
                 >
                   <div class="memberInfoTableRowItem">{{ video.name }}</div>
-                  <div class="memberInfoTableRowItem">{{ video.watchDate }}</div>
-                  <div class="memberInfoTableRowItem">{{ video.completion }}%</div>
                   <div class="memberInfoTableRowItem">
-                    {{ video.liked === true || video.liked === "是" ? "是" : "否" }}
+                    {{ video.watchDate }}
                   </div>
                   <div class="memberInfoTableRowItem">
-                    {{ video.commented === true || video.commented === "是" ? "是" : "否" }}
+                    {{ video.completion }}%
+                  </div>
+                  <div class="memberInfoTableRowItem">
+                    {{
+                      video.liked === true || video.liked === "是" ? "是" : "否"
+                    }}
+                  </div>
+                  <div class="memberInfoTableRowItem">
+                    {{
+                      video.commented === true || video.commented === "是"
+                        ? "是"
+                        : "否"
+                    }}
                   </div>
                   <img
                     src="/assets/imgs/backend/goNext.svg"
@@ -986,7 +1196,9 @@ const selectedHomeFilterOptions = ref<string[]>([]);
 const homeKeyword = ref("");
 
 // 排序狀態
-const sortState = ref<Record<string, { field: string; order: "asc" | "desc" | null }>>({
+const sortState = ref<
+  Record<string, { field: string; order: "asc" | "desc" | null }>
+>({
   home: { field: "", order: null },
   ring: { field: "", order: null },
   ans: { field: "", order: null },
@@ -1013,51 +1225,229 @@ function handleResize() {
 onMounted(() => {
   handleResize();
   window.addEventListener("resize", handleResize);
-  
+
   // 指環紀錄假資料
   ringRecords.value = [
-    { id: 1, CheckTime: "2024/10/10 12:00", heartRate: "58", sleep: "8小時20分", steps: "1298步" },
-    { id: 2, CheckTime: "2024/10/11 12:00", heartRate: "62", sleep: "7小時30分", steps: "1500步" },
-    { id: 3, CheckTime: "2024/10/12 12:00", heartRate: "60", sleep: "8小時00分", steps: "1350步" },
-    { id: 4, CheckTime: "2024/10/13 12:00", heartRate: "65", sleep: "7小時45分", steps: "1420步" },
-    { id: 5, CheckTime: "2024/10/14 12:00", heartRate: "59", sleep: "8小時10分", steps: "1380步" },
-    { id: 6, CheckTime: "2024/10/15 12:00", heartRate: "63", sleep: "7小時50分", steps: "1450步" },
-    { id: 7, CheckTime: "2024/10/16 12:00", heartRate: "61", sleep: "8小時05分", steps: "1320步" },
-    { id: 8, CheckTime: "2024/10/17 12:00", heartRate: "64", sleep: "7小時55分", steps: "1400步" },
+    {
+      id: 1,
+      CheckTime: "2024/10/10 12:00",
+      heartRate: "58",
+      sleep: "8小時20分",
+      steps: "1298步",
+    },
+    {
+      id: 2,
+      CheckTime: "2024/10/11 12:00",
+      heartRate: "62",
+      sleep: "7小時30分",
+      steps: "1500步",
+    },
+    {
+      id: 3,
+      CheckTime: "2024/10/12 12:00",
+      heartRate: "60",
+      sleep: "8小時00分",
+      steps: "1350步",
+    },
+    {
+      id: 4,
+      CheckTime: "2024/10/13 12:00",
+      heartRate: "65",
+      sleep: "7小時45分",
+      steps: "1420步",
+    },
+    {
+      id: 5,
+      CheckTime: "2024/10/14 12:00",
+      heartRate: "59",
+      sleep: "8小時10分",
+      steps: "1380步",
+    },
+    {
+      id: 6,
+      CheckTime: "2024/10/15 12:00",
+      heartRate: "63",
+      sleep: "7小時50分",
+      steps: "1450步",
+    },
+    {
+      id: 7,
+      CheckTime: "2024/10/16 12:00",
+      heartRate: "61",
+      sleep: "8小時05分",
+      steps: "1320步",
+    },
+    {
+      id: 8,
+      CheckTime: "2024/10/17 12:00",
+      heartRate: "64",
+      sleep: "7小時55分",
+      steps: "1400步",
+    },
   ];
-  
+
   // 產品使用紀錄假資料
   homeOrders.value = [
-    { id: 1, ConsultationDate: "2024/11/01 11:00", FavoriteName: "肩膀疼痛", PointInfo: "543168432168431", TreatmentTime: "2024/11/03 12:15", TotalUsage: 10 },
-    { id: 2, ConsultationDate: "2024/10/20 10:00", FavoriteName: "咳嗽頭痛", PointInfo: "543168432168431", TreatmentTime: "2024/10/28 14:00", TotalUsage: 1 },
-    { id: 3, ConsultationDate: "2024/10/15 09:00", FavoriteName: "身心不平衡", PointInfo: "543168432168431", TreatmentTime: "2024/10/22 15:00", TotalUsage: 2 },
-    { id: 4, ConsultationDate: "2024/10/01 08:00", FavoriteName: "胃痛", PointInfo: "543168432168431", TreatmentTime: "2024/10/16 16:00", TotalUsage: 0 },
-    { id: 5, ConsultationDate: "2024/10/01 07:00", FavoriteName: "白油油", PointInfo: "543168432168431", TreatmentTime: "2024/10/10 10:55", TotalUsage: 5 },
-    { id: 6, ConsultationDate: "2024/11/05 14:00", FavoriteName: "肩膀疼痛", PointInfo: "543168432168432", TreatmentTime: "2024/11/07 16:30", TotalUsage: 3 },
-    { id: 7, ConsultationDate: "2024/10/25 13:00", FavoriteName: "頭痛", PointInfo: "543168432168433", TreatmentTime: "2024/10/27 11:20", TotalUsage: 2 },
-    { id: 8, ConsultationDate: "2024/10/18 15:00", FavoriteName: "腰痛", PointInfo: "543168432168434", TreatmentTime: "2024/10/20 09:45", TotalUsage: 1 },
-    { id: 9, ConsultationDate: "2024/10/12 11:00", FavoriteName: "肩膀疼痛", PointInfo: "543168432168435", TreatmentTime: "2024/10/14 13:15", TotalUsage: 4 },
-    { id: 10, ConsultationDate: "2024/10/08 09:00", FavoriteName: "失眠", PointInfo: "543168432168436", TreatmentTime: "2024/10/10 10:00", TotalUsage: 2 },
+    {
+      id: 1,
+      ConsultationDate: "2024/11/01 11:00",
+      FavoriteName: "肩膀疼痛",
+      PointInfo: "543168432168431",
+      TreatmentTime: "2024/11/03 12:15",
+      TotalUsage: 10,
+    },
+    {
+      id: 2,
+      ConsultationDate: "2024/10/20 10:00",
+      FavoriteName: "咳嗽頭痛",
+      PointInfo: "543168432168431",
+      TreatmentTime: "2024/10/28 14:00",
+      TotalUsage: 1,
+    },
+    {
+      id: 3,
+      ConsultationDate: "2024/10/15 09:00",
+      FavoriteName: "身心不平衡",
+      PointInfo: "543168432168431",
+      TreatmentTime: "2024/10/22 15:00",
+      TotalUsage: 2,
+    },
+    {
+      id: 4,
+      ConsultationDate: "2024/10/01 08:00",
+      FavoriteName: "胃痛",
+      PointInfo: "543168432168431",
+      TreatmentTime: "2024/10/16 16:00",
+      TotalUsage: 0,
+    },
+    {
+      id: 5,
+      ConsultationDate: "2024/10/01 07:00",
+      FavoriteName: "白油油",
+      PointInfo: "543168432168431",
+      TreatmentTime: "2024/10/10 10:55",
+      TotalUsage: 5,
+    },
+    {
+      id: 6,
+      ConsultationDate: "2024/11/05 14:00",
+      FavoriteName: "肩膀疼痛",
+      PointInfo: "543168432168432",
+      TreatmentTime: "2024/11/07 16:30",
+      TotalUsage: 3,
+    },
+    {
+      id: 7,
+      ConsultationDate: "2024/10/25 13:00",
+      FavoriteName: "頭痛",
+      PointInfo: "543168432168433",
+      TreatmentTime: "2024/10/27 11:20",
+      TotalUsage: 2,
+    },
+    {
+      id: 8,
+      ConsultationDate: "2024/10/18 15:00",
+      FavoriteName: "腰痛",
+      PointInfo: "543168432168434",
+      TreatmentTime: "2024/10/20 09:45",
+      TotalUsage: 1,
+    },
+    {
+      id: 9,
+      ConsultationDate: "2024/10/12 11:00",
+      FavoriteName: "肩膀疼痛",
+      PointInfo: "543168432168435",
+      TreatmentTime: "2024/10/14 13:15",
+      TotalUsage: 4,
+    },
+    {
+      id: 10,
+      ConsultationDate: "2024/10/08 09:00",
+      FavoriteName: "失眠",
+      PointInfo: "543168432168436",
+      TreatmentTime: "2024/10/10 10:00",
+      TotalUsage: 2,
+    },
   ];
-  
+
   // 影片觀看紀錄假資料
   videoRecords.value = [
-    { id: 1, name: "《腦洞大開》原來「大腦」...", watchDate: "2025/12/09 12:12", completion: 100, liked: true, commented: true },
-    { id: 2, name: "《醫師真心話》吃藥越多,...", watchDate: "2025/12/09 11:12", completion: 50, liked: false, commented: false },
-    { id: 3, name: "《醫師真心話》孩子不聽話...", watchDate: "2025/12/08 17:12", completion: 0, liked: false, commented: false },
-    { id: 4, name: "《我的診間故事EP1》三年...", watchDate: "2025/10/16 12:01", completion: 0, liked: false, commented: false },
-    { id: 5, name: "《醫師真心話》孩子不聽話...", watchDate: "2025/10/10 15:20", completion: 50, liked: false, commented: false },
+    {
+      id: 1,
+      name: "《腦洞大開》原來「大腦」...",
+      watchDate: "2025/12/09 12:12",
+      completion: 100,
+      liked: true,
+      commented: true,
+    },
+    {
+      id: 2,
+      name: "《醫師真心話》吃藥越多,...",
+      watchDate: "2025/12/09 11:12",
+      completion: 50,
+      liked: false,
+      commented: false,
+    },
+    {
+      id: 3,
+      name: "《醫師真心話》孩子不聽話...",
+      watchDate: "2025/12/08 17:12",
+      completion: 0,
+      liked: false,
+      commented: false,
+    },
+    {
+      id: 4,
+      name: "《我的診間故事EP1》三年...",
+      watchDate: "2025/10/16 12:01",
+      completion: 0,
+      liked: false,
+      commented: false,
+    },
+    {
+      id: 5,
+      name: "《醫師真心話》孩子不聽話...",
+      watchDate: "2025/10/10 15:20",
+      completion: 50,
+      liked: false,
+      commented: false,
+    },
   ];
-  
+
   // APP使用紀錄假資料
   appRecords.value = [
-    { id: 1, startDate: "2024/10/10 12:00", endDate: "2024/10/11 12:00", diffDays: 1 },
-    { id: 2, startDate: "2024/10/11 12:00", endDate: "2024/10/12 12:00", diffDays: 1 },
-    { id: 3, startDate: "2024/10/12 12:00", endDate: "2024/10/13 12:00", diffDays: 1 },
-    { id: 4, startDate: "2024/10/13 12:00", endDate: "2024/10/14 12:00", diffDays: 1 },
-    { id: 5, startDate: "2024/10/14 12:00", endDate: "2024/10/15 12:00", diffDays: 1 },
+    {
+      id: 1,
+      startDate: "2024/10/10 12:00",
+      endDate: "2024/10/11 12:00",
+      diffDays: 1,
+    },
+    {
+      id: 2,
+      startDate: "2024/10/11 12:00",
+      endDate: "2024/10/12 12:00",
+      diffDays: 1,
+    },
+    {
+      id: 3,
+      startDate: "2024/10/12 12:00",
+      endDate: "2024/10/13 12:00",
+      diffDays: 1,
+    },
+    {
+      id: 4,
+      startDate: "2024/10/13 12:00",
+      endDate: "2024/10/14 12:00",
+      diffDays: 1,
+    },
+    {
+      id: 5,
+      startDate: "2024/10/14 12:00",
+      endDate: "2024/10/15 12:00",
+      diffDays: 1,
+    },
   ];
-  
+
   // 點擊外部關閉下拉選單
   document.addEventListener("click", (e) => {
     const target = e.target as HTMLElement;
@@ -1077,10 +1467,10 @@ const pageNumberList = computed(() =>
 // 產品使用紀錄篩選選項
 const homeFilterOptions = computed(() => {
   if (!homeOrders.value.length) return [];
-  
+
   const category = selectedHomeFilterCategory.value;
   const options = new Set<string>();
-  
+
   homeOrders.value.forEach((item: any) => {
     let value = "";
     switch (category) {
@@ -1099,13 +1489,13 @@ const homeFilterOptions = computed(() => {
     }
     if (value) options.add(value);
   });
-  
+
   return Array.from(options).sort();
 });
 
 const filteredHome = computed(() => {
   let data = homeOrders.value;
-  
+
   // 日期區間篩選
   if (homeDateRange.value && homeDateRange.value.length >= 2) {
     const [from, to] = homeDateRange.value;
@@ -1116,7 +1506,7 @@ const filteredHome = computed(() => {
       return ms >= start && ms <= end;
     });
   }
-  
+
   // 篩選選項
   if (selectedHomeFilterOptions.value.length > 0) {
     const category = selectedHomeFilterCategory.value;
@@ -1139,7 +1529,7 @@ const filteredHome = computed(() => {
       return selectedHomeFilterOptions.value.includes(value);
     });
   }
-  
+
   // 關鍵字搜尋
   if (homeKeyword.value) {
     const keyword = homeKeyword.value.toLowerCase();
@@ -1153,36 +1543,36 @@ const filteredHome = computed(() => {
       );
     });
   }
-  
+
   // 排序
   if (sortState.value.home.order && sortState.value.home.field) {
     data = [...data].sort((a: any, b: any) => {
       const field = sortState.value.home.field;
       let aVal = a[field];
       let bVal = b[field];
-      
+
       // 日期排序
       if (field === "ConsultationDate" || field === "TreatmentTime") {
         aVal = new Date(aVal?.replace(/\//g, "-") || "").getTime();
         bVal = new Date(bVal?.replace(/\//g, "-") || "").getTime();
       }
-      
+
       // 數字排序
       if (typeof aVal === "number" && typeof bVal === "number") {
         return sortState.value.home.order === "asc" ? aVal - bVal : bVal - aVal;
       }
-      
+
       // 字串排序
       if (typeof aVal === "string" && typeof bVal === "string") {
-        return sortState.value.home.order === "asc" 
-          ? aVal.localeCompare(bVal) 
+        return sortState.value.home.order === "asc"
+          ? aVal.localeCompare(bVal)
           : bVal.localeCompare(aVal);
       }
-      
+
       return 0;
     });
   }
-  
+
   return data;
 });
 
@@ -1230,7 +1620,7 @@ const pageRing = ref(1);
 const ringRecords = ref<any[]>([]);
 const filteredRing = computed(() => {
   let data = ringRecords.value;
-  
+
   // 日期區間篩選
   if (ringRange.value && ringRange.value.length >= 2) {
     const [from, to] = ringRange.value;
@@ -1241,36 +1631,36 @@ const filteredRing = computed(() => {
       return ms >= start && ms <= end;
     });
   }
-  
+
   // 排序
   if (sortState.value.ring.order && sortState.value.ring.field) {
     data = [...data].sort((a: any, b: any) => {
       const field = sortState.value.ring.field;
       let aVal = a[field];
       let bVal = b[field];
-      
+
       // 日期排序
       if (field === "CheckTime") {
         aVal = new Date(aVal?.replace(/\//g, "-") || "").getTime();
         bVal = new Date(bVal?.replace(/\//g, "-") || "").getTime();
       }
-      
+
       // 數字排序
       if (typeof aVal === "number" && typeof bVal === "number") {
         return sortState.value.ring.order === "asc" ? aVal - bVal : bVal - aVal;
       }
-      
+
       // 字串排序
       if (typeof aVal === "string" && typeof bVal === "string") {
-        return sortState.value.ring.order === "asc" 
-          ? aVal.localeCompare(bVal) 
+        return sortState.value.ring.order === "asc"
+          ? aVal.localeCompare(bVal)
           : bVal.localeCompare(aVal);
       }
-      
+
       return 0;
     });
   }
-  
+
   return data;
 });
 const totalRing = computed(() => filteredRing.value.length);
@@ -1293,36 +1683,36 @@ const totalPagesANS = computed(() =>
 );
 const filteredANSWithSort = computed(() => {
   let data = filteredANS.value;
-  
+
   // 排序
   if (sortState.value.ans.order && sortState.value.ans.field) {
     data = [...data].sort((a: any, b: any) => {
       const field = sortState.value.ans.field;
       let aVal = a[field];
       let bVal = b[field];
-      
+
       // 日期排序
       if (field === "CheckTime") {
         aVal = new Date(aVal?.replace(/\//g, "-") || "").getTime();
         bVal = new Date(bVal?.replace(/\//g, "-") || "").getTime();
       }
-      
+
       // 數字排序
       if (typeof aVal === "number" && typeof bVal === "number") {
         return sortState.value.ans.order === "asc" ? aVal - bVal : bVal - aVal;
       }
-      
+
       // 字串排序
       if (typeof aVal === "string" && typeof bVal === "string") {
-        return sortState.value.ans.order === "asc" 
-          ? aVal.localeCompare(bVal) 
+        return sortState.value.ans.order === "asc"
+          ? aVal.localeCompare(bVal)
           : bVal.localeCompare(aVal);
       }
-      
+
       return 0;
     });
   }
-  
+
   return data;
 });
 
@@ -1339,36 +1729,36 @@ const totalPagesLife = computed(() =>
 );
 const filteredLifeWithSort = computed(() => {
   let data = filteredLife.value;
-  
+
   // 排序
   if (sortState.value.life.order && sortState.value.life.field) {
     data = [...data].sort((a: any, b: any) => {
       const field = sortState.value.life.field;
       let aVal = a[field];
       let bVal = b[field];
-      
+
       // 日期排序
       if (field === "CheckTime") {
         aVal = new Date(aVal?.replace(/\//g, "-") || "").getTime();
         bVal = new Date(bVal?.replace(/\//g, "-") || "").getTime();
       }
-      
+
       // 數字排序
       if (typeof aVal === "number" && typeof bVal === "number") {
         return sortState.value.life.order === "asc" ? aVal - bVal : bVal - aVal;
       }
-      
+
       // 字串排序
       if (typeof aVal === "string" && typeof bVal === "string") {
-        return sortState.value.life.order === "asc" 
-          ? aVal.localeCompare(bVal) 
+        return sortState.value.life.order === "asc"
+          ? aVal.localeCompare(bVal)
           : bVal.localeCompare(aVal);
       }
-      
+
       return 0;
     });
   }
-  
+
   return data;
 });
 
@@ -1380,7 +1770,8 @@ const paginatedLife = computed(() => {
 /* VIDEO */
 const pageVideo = ref(1);
 const filteredVideo = computed(() => {
-  if (!videoRange.value || videoRange.value.length < 2) return videoRecords.value;
+  if (!videoRange.value || videoRange.value.length < 2)
+    return videoRecords.value;
   const [from, to] = videoRange.value;
   const start = from.getTime();
   const end = to.getTime();
@@ -1395,36 +1786,38 @@ const totalPagesVideo = computed(() =>
 );
 const filteredVideoWithSort = computed(() => {
   let data = filteredVideo.value;
-  
+
   // 排序
   if (sortState.value.video.order && sortState.value.video.field) {
     data = [...data].sort((a: any, b: any) => {
       const field = sortState.value.video.field;
       let aVal = a[field];
       let bVal = b[field];
-      
+
       // 日期排序
       if (field === "watchDate") {
         aVal = new Date(aVal?.replace(/\//g, "-") || "").getTime();
         bVal = new Date(bVal?.replace(/\//g, "-") || "").getTime();
       }
-      
+
       // 數字排序
       if (typeof aVal === "number" && typeof bVal === "number") {
-        return sortState.value.video.order === "asc" ? aVal - bVal : bVal - aVal;
+        return sortState.value.video.order === "asc"
+          ? aVal - bVal
+          : bVal - aVal;
       }
-      
+
       // 字串排序
       if (typeof aVal === "string" && typeof bVal === "string") {
-        return sortState.value.video.order === "asc" 
-          ? aVal.localeCompare(bVal) 
+        return sortState.value.video.order === "asc"
+          ? aVal.localeCompare(bVal)
           : bVal.localeCompare(aVal);
       }
-      
+
       return 0;
     });
   }
-  
+
   return data;
 });
 
@@ -1439,7 +1832,8 @@ const pageNumberListVideo = computed(() =>
 /* APP */
 const pageApp = ref(1);
 const filteredApp = computed(() => {
-  if (!appDateRange.value || appDateRange.value.length < 2) return appRecords.value;
+  if (!appDateRange.value || appDateRange.value.length < 2)
+    return appRecords.value;
   const [from, to] = appDateRange.value;
   const start = from.getTime();
   const end = to.getTime();
@@ -1454,36 +1848,36 @@ const totalPagesApp = computed(() =>
 );
 const filteredAppWithSort = computed(() => {
   let data = filteredApp.value;
-  
+
   // 排序
   if (sortState.value.app.order && sortState.value.app.field) {
     data = [...data].sort((a: any, b: any) => {
       const field = sortState.value.app.field;
       let aVal = a[field];
       let bVal = b[field];
-      
+
       // 日期排序
       if (field === "startDate" || field === "endDate") {
         aVal = new Date(aVal?.replace(/\//g, "-") || "").getTime();
         bVal = new Date(bVal?.replace(/\//g, "-") || "").getTime();
       }
-      
+
       // 數字排序
       if (typeof aVal === "number" && typeof bVal === "number") {
         return sortState.value.app.order === "asc" ? aVal - bVal : bVal - aVal;
       }
-      
+
       // 字串排序
       if (typeof aVal === "string" && typeof bVal === "string") {
-        return sortState.value.app.order === "asc" 
-          ? aVal.localeCompare(bVal) 
+        return sortState.value.app.order === "asc"
+          ? aVal.localeCompare(bVal)
           : bVal.localeCompare(aVal);
       }
-      
+
       return 0;
     });
   }
-  
+
   return data;
 });
 
@@ -1495,7 +1889,8 @@ const pageNumberListApp = computed(() =>
   pageButtons(totalPagesApp.value, pageApp.value, maxButtons.value)
 );
 const filteredAppForChart = computed(() => {
-  if (!appDateRange.value || appDateRange.value.length < 2) return appRecords.value;
+  if (!appDateRange.value || appDateRange.value.length < 2)
+    return appRecords.value;
   const [from, to] = appDateRange.value;
   const start = from.getTime();
   const end = to.getTime();
@@ -1544,7 +1939,6 @@ function toggleHomeFilterOption(option: string) {
   }
 }
 
-
 /* ---------- API ---------- */
 async function fetchBasic() {
   const { token, admin, sel } = getAuth();
@@ -1565,7 +1959,6 @@ async function fetchBasic() {
   currentOrder.value = j.MemberDetail.NowOrderList?.[0] ?? null;
   lastUpdated.value = new Date().toLocaleString("zh-TW");
 }
-
 
 /* ---------- 共用範本 ---------- */
 const makeFiltered = <T>(
@@ -1762,7 +2155,6 @@ function closeLife() {
   showLife.value = false;
 }
 
-
 const props = defineProps<{ record: any }>();
 defineEmits(["close"]);
 
@@ -1779,11 +2171,7 @@ const mmdd = (raw: string) => {
 };
 
 const isAnyAlertOpen = computed(() => {
-  return (
-    showContract.value ||
-    showANS.value ||
-    showLife.value
-  );
+  return showContract.value || showANS.value || showLife.value;
 });
 
 const isExpired = computed(() => {
@@ -2099,9 +2487,10 @@ const isExpired = computed(() => {
           .filterDropdownWrapper {
             position: relative;
             border-radius: var(--Radius-r-50, 50px);
-background: var(--Neutral-white, #FFF);
-box-shadow: 0 2px 20px 0 var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
-width: 250px;
+            background: var(--Neutral-white, #fff);
+            box-shadow: 0 2px 20px 0
+              var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
+            width: 250px;
             .filterTrigger {
               display: flex;
               align-items: center;
@@ -2114,7 +2503,6 @@ width: 250px;
               font-size: 14px;
               transition: all 0.2s;
 
-              
               img {
                 width: 16px;
                 height: 16px;
@@ -2130,7 +2518,7 @@ width: 250px;
             .filterDropdownPanel {
               position: absolute;
               top: calc(100% + 8px);
-              left: 0;
+              right: 0;
               display: flex;
               background: #fff;
               border-radius: 12px;
@@ -2140,7 +2528,7 @@ width: 250px;
               max-height: 400px;
               overflow: hidden;
               .filterCategories {
-                width: 50px;
+                width: auto;
                 border-right: 1px solid #e0e0e0;
                 padding: 1rem 0;
                 .filterCategory {
@@ -2163,7 +2551,7 @@ width: 250px;
                 flex: 1;
                 padding: 1rem;
                 overflow-y: auto;
-                max-height: 100px;
+                max-height: 100%;
                 .filterOption {
                   display: flex;
                   align-items: center;
