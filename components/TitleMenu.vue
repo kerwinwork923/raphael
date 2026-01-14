@@ -19,9 +19,8 @@
       {{ Text }}
     </h2>
     <div class="titleImgGroup" v-if="showImg1 || showImg2">
-
-      <img v-if="showImg1" :src="showImg1" @click="handleImg1Click" alt="">
-      <img v-if="showImg2" :src="showImg2" @click="handleImg2Click" alt="">
+      <img v-if="showImg1" :src="showImg1" @click="handleImg1Click" alt="" />
+      <img v-if="showImg2" :src="showImg2" @click="handleImg2Click" alt="" />
     </div>
   </div>
 </template>
@@ -37,42 +36,54 @@ export default {
       type: String,
       required: true,
     },
+    // ✅ 新增：是否允許返回 history
+    enableHistoryBack: {
+      type: Boolean,
+      default: true,
+    },
+
     scrollToBottom: {
       type: Boolean, // 决定是否返回后滚动到底部
       default: false,
     },
     positionType: {
       type: String,
-      default: 'sticky',
-      validator: value => ['sticky', 'fixed', 'absolute'].includes(value),
+      default: "sticky",
+      validator: (value) => ["sticky", "fixed", "absolute"].includes(value),
     },
     showImg1: {
       type: String,
-      default: '',
+      default: "",
     },
     showImg2: {
       type: String,
-      default: '',
-    },  
+      default: "",
+    },
   },
   methods: {
     handleClick() {
-      if (this.link === "back") {
-        // 檢查是否有歷史紀錄
-        if (window.history.length > 1) {
-          this.$router.back(); // 返回上一頁
-        } else {
-          this.$router.push("/user"); // 跳轉到默認頁
-        }
-      } else {
-        this.$router.push(this.link); // 導航到指定頁面
+    if (this.link === "back") {
+      // ✅ 如果不允許回上一頁：直接去預設頁
+      if (!this.enableHistoryBack) {
+        this.$router.push("/user");
+        return;
       }
-    },
+
+      // ✅ 允許回上一頁：有 history 就 back，沒有就去預設頁
+      if (window.history.length > 1) {
+        this.$router.back();
+      } else {
+        this.$router.push("/user");
+      }
+    } else {
+      this.$router.push(this.link);
+    }
+  },
     handleImg1Click() {
-      this.$emit('handleImg1Click');
+      this.$emit("handleImg1Click");
     },
     handleImg2Click() {
-      this.$emit('handleImg2Click');
+      this.$emit("handleImg2Click");
     },
   },
 };
@@ -117,19 +128,18 @@ export default {
     right: 0;
     top: 0;
     z-index: 6;
-    svg{
+    svg {
       transform: translateY(10%);
     }
   }
-  .titleImgGroup{
+  .titleImgGroup {
     display: flex;
     align-items: center;
     justify-content: flex-end;
     width: 100%;
-    
-    gap: .75rem;
+
+    gap: 0.75rem;
     z-index: -1;
- 
   }
 }
 </style>

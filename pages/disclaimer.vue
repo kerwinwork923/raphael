@@ -1,7 +1,7 @@
 <template>
   <div class="disclaimer">
     <div class="disclaimerWrap">
-      <TitleMenu Text="免責聲明" link="/member" positionType="sticky" />
+      <TitleMenu Text="免責聲明" link="back" positionType="sticky" />
       <h3>智平衡AI穿戴紀錄系統免責聲明</h3>
       <p>
         本APP所提供的

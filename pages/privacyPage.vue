@@ -3,7 +3,9 @@
     <!-- <Navbar /> -->
 
     <div class="privacyWrap">
-      <TitleMenu Text="隱私權政策" link="/member" positionType="sticky" />
+      <TitleMenu Text="隱私權政策" link="back" positionType="sticky" />
+
+
       <p>
         「NeuroPlus 神經調節家服務平台」（下稱本平台）為<span class="pointBold"
           >智平衡健康集團與拉菲爾人本診所</span
