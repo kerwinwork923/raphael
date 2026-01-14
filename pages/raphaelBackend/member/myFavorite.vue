@@ -136,7 +136,7 @@ const router = useRouter();
 const route = useRoute();
 
 const loading = ref(false);
-const memberName = ref("Steven Yeh");
+const memberName = ref("測試用");
 const lastUpdated = ref("2024/11/7 上午10:43");
 
 // 摘要資料
@@ -195,7 +195,7 @@ const pageNumberList = computed(() => {
 });
 
 function goBack() {
-  router.push("/raphaelBackend/member");
+  router.push("/raphaelBackend/member/memberContent");
 }
 
 function refresh() {

@@ -160,6 +160,7 @@
                   src="/assets/imgs/backend/search.svg"
                   alt="search"
                   style="cursor: pointer; width: 20px; height: 20px"
+
                 />
                 <!-- 看診日期下拉選單 -->
                 <div class="filterDropdownWrapper">
@@ -299,6 +300,7 @@
                     src="/assets/imgs/backend/sort.svg"
                     alt="sort"
                     class="sortIcon"
+                    
                   />
                 </div>
               </div>
@@ -329,6 +331,7 @@
                     src="/assets/imgs/backend/goNext.svg"
                     alt="detail"
                     style="cursor: pointer; position: absolute; right: 0"
+                    @click="router.push(`/raphaelBackend/member/myFavorite?AID=${row.AID}`)"
                   />
                 </div>
               </template>
