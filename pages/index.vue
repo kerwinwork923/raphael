@@ -198,6 +198,10 @@
           />
         </div>
       </div>
+      <div class="privacyAndDisclaimerGroup">
+        <router-link to="/privacyPage">隱私權政策</router-link>
+        <router-link to="/disclaimer">免責聲明</router-link>
+      </div>
     </div>
   </div>
 </template>
@@ -617,6 +621,25 @@
     font-style: normal;
     font-weight: 700;
     letter-spacing: 3.6px;
+  }
+}
+
+.privacyAndDisclaimerGroup {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  position: absolute;
+  bottom: 12.5%;
+  left: 0;
+  right: 0;
+  a {
+    color: var(--Neutral-500, #666);
+    font-size: var(--Text-font-size-16, 16px);
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 2.4px;
+    text-decoration: none;
+    cursor: pointer;
   }
 }
 </style>
@@ -1125,7 +1148,7 @@ const addUser = async () => {
 
     if (response.status === 200) {
       console.log("註冊完成:", response.data);
-      
+
       // 取得firebase推播 token
       try {
         await requestPermission();
@@ -1185,7 +1208,7 @@ onMounted(() => {
     const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};
 
     if (MID || Token || MAID || Mobile) {
-       router.push("/robot");
+      router.push("/robot");
     }
 
     // 初始化驗證碼輸入框
