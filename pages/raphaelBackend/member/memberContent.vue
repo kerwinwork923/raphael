@@ -17,7 +17,6 @@
       @close="closeContract"
     />
 
-    <HRVUserAlertAlert v-if="showHRV" :record="selectedHRV" @close="closeHRV" />
 
     <AutonomicNerveAlert
       v-if="showANS"
@@ -157,22 +156,105 @@
                   range
                   :enable-time-picker="false"
                   format="yyyy/MM/dd"
-                  placeholder="使用日期區間"
+                  placeholder="選擇日期區間"
                   prepend-icon="i-calendar"
                   teleport="body"
+                />
+                <img
+                  src="/assets/imgs/backend/search.svg"
+                  alt="search"
+                  style="cursor: pointer; width: 20px; height: 20px"
+                />
+                <!-- 看診日期下拉選單 -->
+                <div class="filterDropdownWrapper">
+                  <div class="filterTrigger" @click="toggleHomeFilter">
+                    <span>看診日期</span>
+                    <img 
+                      src="/assets/imgs/backend/arrow-down.svg" 
+                      alt="arrow" 
+                      :class="{ rotated: showHomeFilter }"
+                    />
+                  </div>
+                  <div class="filterDropdownPanel" v-if="showHomeFilter" @click.stop>
+                    <div class="filterCategories">
+                      <div 
+                        class="filterCategory"
+                        :class="{ active: selectedHomeFilterCategory === 'ConsultationDate' }"
+                        @click="selectHomeFilterCategory('ConsultationDate')"
+                      >
+                        看診日期
+                      </div>
+                      <div 
+                        class="filterCategory"
+                        :class="{ active: selectedHomeFilterCategory === 'FavoriteName' }"
+                        @click="selectHomeFilterCategory('FavoriteName')"
+                      >
+                        我的最愛名稱
+                      </div>
+                      <div 
+                        class="filterCategory"
+                        :class="{ active: selectedHomeFilterCategory === 'TreatmentArea' }"
+                        @click="selectHomeFilterCategory('TreatmentArea')"
+                      >
+                        治療部位
+                      </div>
+                      <div 
+                        class="filterCategory"
+                        :class="{ active: selectedHomeFilterCategory === 'TreatmentTime' }"
+                        @click="selectHomeFilterCategory('TreatmentTime')"
+                      >
+                        治療時間
+                      </div>
+                    </div>
+                    <div class="filterOptions">
+                      <div
+                        class="filterOption"
+                        v-for="option in homeFilterOptions"
+                        :key="option"
+                        @click="toggleHomeFilterOption(option)"
+                      >
+                        <input 
+                          type="checkbox" 
+                          :checked="selectedHomeFilterOptions.includes(option)"
+                          @click.stop
+                        />
+                        <span>{{ option }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- 搜尋關鍵字 -->
+                <input
+                  type="text"
+                  v-model="homeKeyword"
+                  placeholder="搜尋關鍵字"
+                  class="searchKeywordInput"
                 />
               </div>
             </div>
 
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
-                <div class="memberInfoTableTitleItem">看診日期</div>
-                <div class="memberInfoTableTitleItem">治療名稱</div>
-                <div class="memberInfoTableTitleItem">治療部位</div>
-                <div class="memberInfoTableTitleItem">開始時間</div>
-                <div class="memberInfoTableTitleItem">結束時間</div>
-                <div class="memberInfoTableTitleItem">總使用時間</div>
-                <div class="memberInfoTableTitleItem">貼片模式</div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('home', 'ConsultationDate')">
+                  看診日期
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('home', 'FavoriteName')">
+                  我的最愛名稱
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('home', 'PointInfo')">
+                  點位資訊
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('home', 'TreatmentTime')">
+                  治療時間
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('home', 'TotalUsage')">
+                  總使用次數
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
               </div>
               <div class="memberInfoTableHR" />
 
@@ -180,13 +262,18 @@
                 <div
                   class="memberInfoTableRow"
                   v-for="row in paginatedHome"
-                  :key="row.UID"
+                  :key="row.id"
                 >
-                  <div class="memberInfoTableRowItem">{{ row.StartTime }}</div>
-                  <div class="memberInfoTableRowItem">{{ row.EndTime }}</div>
-                  <div class="memberInfoTableRowItem">
-                    {{ row.diffDays || "—" }} 天
-                  </div>
+                  <div class="memberInfoTableRowItem">{{ row.ConsultationDate || "—" }}</div>
+                  <div class="memberInfoTableRowItem">{{ row.FavoriteName || "—" }}</div>
+                  <div class="memberInfoTableRowItem">{{ row.PointInfo || "—" }}</div>
+                  <div class="memberInfoTableRowItem">{{ row.TreatmentTime || "—" }}</div>
+                  <div class="memberInfoTableRowItem">{{ row.TotalUsage || "—" }}</div>
+                  <img
+                    src="/assets/imgs/backend/goNext.svg"
+                    alt="detail"
+                    style="cursor: pointer; position: absolute; right: 0"
+                  />
                 </div>
               </template>
               <div class="memberInfoTableRow" v-else>
@@ -246,16 +333,16 @@
           </div> -->
         </div>
 
-        <!-- █ HRV ----------------------------------------------------------- -->
+        <!-- █ 指環紀錄 ----------------------------------------------------------- -->
         <div class="memberInfoRow">
           <div class="memberInfoCard w-half">
             <div class="memberInfoTitleWrap">
-              <h3>手錶紀錄</h3>
+              <h3>指環紀錄</h3>
               <div class="memberInfoTitleGroup">
-                <small>共 {{ totalHRV }} 筆</small>
+                <small>共 {{ totalRing }} 筆</small>
                 <VueDatePicker
-                  v-model="hrvRange"
-                  placeholder="使用日期區間"
+                  v-model="ringRange"
+                  placeholder="選擇日期區間"
                   range
                   :enable-time-picker="false"
                   format="yyyy/MM/dd"
@@ -265,36 +352,35 @@
             </div>
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
-                <div class="memberInfoTableTitleItem">使用時間</div>
-                <div class="memberInfoTableTitleItem">血壓</div>
-                <div class="memberInfoTableTitleItem">血氧</div>
-                <div class="memberInfoTableTitleItem">心率</div>
-                <div class="memberInfoTableTitleItem">睡眠</div>
-                <div class="memberInfoTableTitleItem">壓力分析</div>
-                <div class="memberInfoTableTitleItem">步數與卡路里</div>
-
+                <div class="memberInfoTableTitleItem" @click="handleSort('ring', 'CheckTime')">
+                  使用時間
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('ring', 'heartRate')">
+                  心率
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('ring', 'sleep')">
+                  睡眠
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('ring', 'steps')">
+                  步數與卡路里
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
               </div>
               <div class="memberInfoTableHR" />
 
-              <template v-if="paginatedHRV.length">
+              <template v-if="paginatedRing.length">
                 <div
                   class="memberInfoTableRow"
-                  v-for="h in paginatedHRV"
-                  :key="h.CheckTime"
+                  v-for="r in paginatedRing"
+                  :key="r.id"
                 >
-                  <div class="memberInfoTableRowItem">{{ h.CheckTime }}</div>
-                  <div class="memberInfoTableRowItem">{{ h.bioage }}</div>
-                  <div class="memberInfoTableRowItem">{{ h.HRV }}</div>
-                  <div class="memberInfoTableRowItem">
-                    {{ h.diffDays || "—" }}
-                  </div>
-
-                  <img
-                    src="/assets/imgs/backend/goNext.svg"
-                    alt="detail"
-                    style="cursor: pointer"
-                    @click="openHRV(h)"
-                  />
+                  <div class="memberInfoTableRowItem">{{ r.CheckTime }}</div>
+                  <div class="memberInfoTableRowItem">{{ r.heartRate || "—" }}</div>
+                  <div class="memberInfoTableRowItem">{{ r.sleep || "—" }}</div>
+                  <div class="memberInfoTableRowItem">{{ r.steps || "—" }}</div>
                 </div>
               </template>
               <div class="memberInfoTableRow" v-else>
@@ -305,58 +391,45 @@
             </div>
 
             <!-- 分頁 4/頁 -->
-            <nav class="pagination" v-if="totalHRV">
+            <nav class="pagination" v-if="totalRing">
               <button
                 class="btn-page"
-                :disabled="pageHRV === 1"
-                @click="gotoHRV(1)"
+                :disabled="pageRing === 1"
+                @click="pageRing = 1"
               >
                 &lt;&lt;
               </button>
               <button
                 class="btn-page"
-                :disabled="pageHRV === 1"
-                @click="prevHRV"
+                :disabled="pageRing === 1"
+                @click="pageRing--"
               >
                 &lt;
               </button>
               <button
                 class="btn-page btn-page-number"
-                v-for="p in pageNumberListHRV"
+                v-for="p in pageNumberListRing"
                 :key="p"
-                :class="{ active: pageHRV === p }"
-                @click="gotoHRV(p)"
+                :class="{ active: pageRing === p }"
+                @click="pageRing = p"
               >
                 {{ p }}
               </button>
               <button
                 class="btn-page"
-                :disabled="pageHRV === totalPagesHRV"
-                @click="nextHRV"
+                :disabled="pageRing === totalPagesRing"
+                @click="pageRing++"
               >
                 &gt;
               </button>
               <button
                 class="btn-page"
-                :disabled="pageHRV === totalPagesHRV"
-                @click="gotoHRV(totalPagesHRV)"
+                :disabled="pageRing === totalPagesRing"
+                @click="pageRing = totalPagesRing"
               >
                 &gt;&gt;
               </button>
             </nav>
-          </div>
-
-          <div class="memberInfoCard w-half">
-            <h3>HRV檢測紀錄分析</h3>
-            <AnalysisChart
-              :records="hrvRecords"
-              :range="hrvRange"
-              date-key="CheckTime"
-              primary-key="bioage"
-              secondary-key="HRV"
-              primary-label="生理年齡"
-              secondary-label="HRV"
-            />
           </div>
         </div>
 
@@ -380,10 +453,22 @@
 
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
-                <div class="memberInfoTableTitleItem">檢測時間</div>
-                <div class="memberInfoTableTitleItem">分數</div>
-                <div class="memberInfoTableTitleItem">嚴重程度</div>
-                <div class="memberInfoTableTitleItem">間隔天數</div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('ans', 'CheckTime')">
+                  檢測時間
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('ans', 'TotalScore')">
+                  分數
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('ans', 'TotalDesc')">
+                  嚴重程度
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('ans', 'diffDays')">
+                  間隔天數
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
               </div>
               <div class="memberInfoTableHR" />
 
@@ -490,10 +575,22 @@
 
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
-                <div class="memberInfoTableTitleItem">檢測時間</div>
-                <div class="memberInfoTableTitleItem">分數</div>
-                <div class="memberInfoTableTitleItem">睡眠品質</div>
-                <div class="memberInfoTableTitleItem">間隔天數</div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('life', 'CheckTime')">
+                  檢測時間
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('life', 'Score')">
+                  分數
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('life', 'daytimeSleepiness')">
+                  睡眠品質
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('life', 'diffDays')">
+                  間隔天數
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
               </div>
               <div class="memberInfoTableHR" />
 
@@ -604,9 +701,18 @@
 
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
-                <div class="memberInfoTableTitleItem">APP 使用日期</div>
-                <div class="memberInfoTableTitleItem">APP 結束日期</div>
-                <div class="memberInfoTableTitleItem">間隔天數</div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('app', 'startDate')">
+                  APP 使用日期
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('app', 'endDate')">
+                  APP 結束日期
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('app', 'diffDays')">
+                  間隔天數
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
               </div>
               <div class="memberInfoTableHR" />
 
@@ -701,11 +807,26 @@
 
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
-                <div class="memberInfoTableTitleItem">影片名稱</div>
-                <div class="memberInfoTableTitleItem">觀看日期</div>
-                <div class="memberInfoTableTitleItem">完成度</div>
-                <div class="memberInfoTableTitleItem">是否按讚</div>
-                <div class="memberInfoTableTitleItem">是否留言</div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('video', 'name')">
+                  影片名稱
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('video', 'watchDate')">
+                  觀看日期
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('video', 'completion')">
+                  完成度
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('video', 'liked')">
+                  是否按讚
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('video', 'commented')">
+                  是否留言
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
               </div>
               <div class="memberInfoTableHR" />
 
@@ -719,10 +840,10 @@
                   <div class="memberInfoTableRowItem">{{ video.watchDate }}</div>
                   <div class="memberInfoTableRowItem">{{ video.completion }}%</div>
                   <div class="memberInfoTableRowItem">
-                    {{ video.liked ? "是" : "否" }}
+                    {{ video.liked === true || video.liked === "是" ? "是" : "否" }}
                   </div>
                   <div class="memberInfoTableRowItem">
-                    {{ video.commented ? "是" : "否" }}
+                    {{ video.commented === true || video.commented === "是" ? "是" : "否" }}
                   </div>
                   <img
                     src="/assets/imgs/backend/goNext.svg"
@@ -795,7 +916,6 @@ import Sidebar from "~/components/raphaelBackend/Sidebar.vue";
 import UsageAnalysisChart from "~/components/raphaelBackend/UsageAnalysisChart.vue";
 import AnalysisChart from "~/components/raphaelBackend/AnalysisChart.vue";
 import ContractUserAlert from "~/components/raphaelBackend/ContractUserAlert.vue";
-import HRVUserAlertAlert from "~/components/raphaelBackend/HRVUserAlert.vue";
 import AutonomicNerveAlert from "~/components/raphaelBackend/AutonomicNerve.vue";
 import LifeDetectAlert from "~/components/raphaelBackend/LifeDetectAlert.vue";
 import { useSeo } from "~/composables/useSeo";
@@ -842,11 +962,13 @@ const {
   hrvRecords,
   ansRecords,
   lifeRecords,
-  homeOrders,
   videoRecords,
   appRecords,
   hasFetched,
 } = storeToRefs(memberStore);
+
+// 產品使用紀錄使用本地資料（不使用 store）
+const homeOrders = ref<any[]>([]);
 
 const showContract = ref(false);
 const contractList = ref<any[]>([]);
@@ -855,10 +977,23 @@ const contractList = ref<any[]>([]);
 const homeDateRange = ref<Date[] | null>(null);
 const homeChartDateRange = ref<Date[] | null>(null);
 
-const showHRV = ref(false);
-const selectedHRV = ref<any>(null);
+const ringRange = ref<Date[] | null>(null);
 
-const hrvRange = ref<Date[] | null>(null);
+// 產品使用紀錄篩選相關
+const showHomeFilter = ref(false);
+const selectedHomeFilterCategory = ref<string>("ConsultationDate");
+const selectedHomeFilterOptions = ref<string[]>([]);
+const homeKeyword = ref("");
+
+// 排序狀態
+const sortState = ref<Record<string, { field: string; order: "asc" | "desc" | null }>>({
+  home: { field: "", order: null },
+  ring: { field: "", order: null },
+  ans: { field: "", order: null },
+  life: { field: "", order: null },
+  video: { field: "", order: null },
+  app: { field: "", order: null },
+});
 const ansRange = ref<Date[] | null>(null);
 const lifeRange = ref<Date[] | null>(null);
 const videoRange = ref<Date[] | null>(null);
@@ -874,9 +1009,62 @@ function handleResize() {
   maxButtons.value = window.innerWidth <= 480 ? 3 : 5; // 480px 以下顯示 3 個
 }
 
+// 假資料
 onMounted(() => {
   handleResize();
   window.addEventListener("resize", handleResize);
+  
+  // 指環紀錄假資料
+  ringRecords.value = [
+    { id: 1, CheckTime: "2024/10/10 12:00", heartRate: "58", sleep: "8小時20分", steps: "1298步" },
+    { id: 2, CheckTime: "2024/10/11 12:00", heartRate: "62", sleep: "7小時30分", steps: "1500步" },
+    { id: 3, CheckTime: "2024/10/12 12:00", heartRate: "60", sleep: "8小時00分", steps: "1350步" },
+    { id: 4, CheckTime: "2024/10/13 12:00", heartRate: "65", sleep: "7小時45分", steps: "1420步" },
+    { id: 5, CheckTime: "2024/10/14 12:00", heartRate: "59", sleep: "8小時10分", steps: "1380步" },
+    { id: 6, CheckTime: "2024/10/15 12:00", heartRate: "63", sleep: "7小時50分", steps: "1450步" },
+    { id: 7, CheckTime: "2024/10/16 12:00", heartRate: "61", sleep: "8小時05分", steps: "1320步" },
+    { id: 8, CheckTime: "2024/10/17 12:00", heartRate: "64", sleep: "7小時55分", steps: "1400步" },
+  ];
+  
+  // 產品使用紀錄假資料
+  homeOrders.value = [
+    { id: 1, ConsultationDate: "2024/11/01 11:00", FavoriteName: "肩膀疼痛", PointInfo: "543168432168431", TreatmentTime: "2024/11/03 12:15", TotalUsage: 10 },
+    { id: 2, ConsultationDate: "2024/10/20 10:00", FavoriteName: "咳嗽頭痛", PointInfo: "543168432168431", TreatmentTime: "2024/10/28 14:00", TotalUsage: 1 },
+    { id: 3, ConsultationDate: "2024/10/15 09:00", FavoriteName: "身心不平衡", PointInfo: "543168432168431", TreatmentTime: "2024/10/22 15:00", TotalUsage: 2 },
+    { id: 4, ConsultationDate: "2024/10/01 08:00", FavoriteName: "胃痛", PointInfo: "543168432168431", TreatmentTime: "2024/10/16 16:00", TotalUsage: 0 },
+    { id: 5, ConsultationDate: "2024/10/01 07:00", FavoriteName: "白油油", PointInfo: "543168432168431", TreatmentTime: "2024/10/10 10:55", TotalUsage: 5 },
+    { id: 6, ConsultationDate: "2024/11/05 14:00", FavoriteName: "肩膀疼痛", PointInfo: "543168432168432", TreatmentTime: "2024/11/07 16:30", TotalUsage: 3 },
+    { id: 7, ConsultationDate: "2024/10/25 13:00", FavoriteName: "頭痛", PointInfo: "543168432168433", TreatmentTime: "2024/10/27 11:20", TotalUsage: 2 },
+    { id: 8, ConsultationDate: "2024/10/18 15:00", FavoriteName: "腰痛", PointInfo: "543168432168434", TreatmentTime: "2024/10/20 09:45", TotalUsage: 1 },
+    { id: 9, ConsultationDate: "2024/10/12 11:00", FavoriteName: "肩膀疼痛", PointInfo: "543168432168435", TreatmentTime: "2024/10/14 13:15", TotalUsage: 4 },
+    { id: 10, ConsultationDate: "2024/10/08 09:00", FavoriteName: "失眠", PointInfo: "543168432168436", TreatmentTime: "2024/10/10 10:00", TotalUsage: 2 },
+  ];
+  
+  // 影片觀看紀錄假資料
+  videoRecords.value = [
+    { id: 1, name: "《腦洞大開》原來「大腦」...", watchDate: "2025/12/09 12:12", completion: 100, liked: true, commented: true },
+    { id: 2, name: "《醫師真心話》吃藥越多,...", watchDate: "2025/12/09 11:12", completion: 50, liked: false, commented: false },
+    { id: 3, name: "《醫師真心話》孩子不聽話...", watchDate: "2025/12/08 17:12", completion: 0, liked: false, commented: false },
+    { id: 4, name: "《我的診間故事EP1》三年...", watchDate: "2025/10/16 12:01", completion: 0, liked: false, commented: false },
+    { id: 5, name: "《醫師真心話》孩子不聽話...", watchDate: "2025/10/10 15:20", completion: 50, liked: false, commented: false },
+  ];
+  
+  // APP使用紀錄假資料
+  appRecords.value = [
+    { id: 1, startDate: "2024/10/10 12:00", endDate: "2024/10/11 12:00", diffDays: 1 },
+    { id: 2, startDate: "2024/10/11 12:00", endDate: "2024/10/12 12:00", diffDays: 1 },
+    { id: 3, startDate: "2024/10/12 12:00", endDate: "2024/10/13 12:00", diffDays: 1 },
+    { id: 4, startDate: "2024/10/13 12:00", endDate: "2024/10/14 12:00", diffDays: 1 },
+    { id: 5, startDate: "2024/10/14 12:00", endDate: "2024/10/15 12:00", diffDays: 1 },
+  ];
+  
+  // 點擊外部關閉下拉選單
+  document.addEventListener("click", (e) => {
+    const target = e.target as HTMLElement;
+    if (!target.closest(".filterDropdownWrapper")) {
+      showHomeFilter.value = false;
+    }
+  });
 });
 onUnmounted(() => {
   window.removeEventListener("resize", handleResize);
@@ -886,16 +1074,116 @@ const pageNumberList = computed(() =>
   pageButtons(totalPagesHome.value, pageHome.value, maxButtons.value)
 );
 
-const filteredHome = computed(() => {
-  if (!homeDateRange.value || homeDateRange.value.length < 2)
-    return homeOrders.value;
-  const [from, to] = homeDateRange.value;
-  const start = from.getTime(),
-    end = to.getTime();
-  return homeOrders.value.filter((r) => {
-    const ms = Date.parse(r.StartTime.replace(/\//g, "-"));
-    return ms >= start && ms <= end;
+// 產品使用紀錄篩選選項
+const homeFilterOptions = computed(() => {
+  if (!homeOrders.value.length) return [];
+  
+  const category = selectedHomeFilterCategory.value;
+  const options = new Set<string>();
+  
+  homeOrders.value.forEach((item: any) => {
+    let value = "";
+    switch (category) {
+      case "ConsultationDate":
+        value = item.ConsultationDate || "";
+        break;
+      case "FavoriteName":
+        value = item.FavoriteName || "";
+        break;
+      case "TreatmentArea":
+        value = item.TreatmentArea || "";
+        break;
+      case "TreatmentTime":
+        value = item.TreatmentTime || "";
+        break;
+    }
+    if (value) options.add(value);
   });
+  
+  return Array.from(options).sort();
+});
+
+const filteredHome = computed(() => {
+  let data = homeOrders.value;
+  
+  // 日期區間篩選
+  if (homeDateRange.value && homeDateRange.value.length >= 2) {
+    const [from, to] = homeDateRange.value;
+    const start = from.getTime();
+    const end = to.getTime();
+    data = data.filter((r: any) => {
+      const ms = Date.parse(r.ConsultationDate?.replace(/\//g, "-") || "");
+      return ms >= start && ms <= end;
+    });
+  }
+  
+  // 篩選選項
+  if (selectedHomeFilterOptions.value.length > 0) {
+    const category = selectedHomeFilterCategory.value;
+    data = data.filter((r: any) => {
+      let value = "";
+      switch (category) {
+        case "ConsultationDate":
+          value = r.ConsultationDate || "";
+          break;
+        case "FavoriteName":
+          value = r.FavoriteName || "";
+          break;
+        case "TreatmentArea":
+          value = r.TreatmentArea || "";
+          break;
+        case "TreatmentTime":
+          value = r.TreatmentTime || "";
+          break;
+      }
+      return selectedHomeFilterOptions.value.includes(value);
+    });
+  }
+  
+  // 關鍵字搜尋
+  if (homeKeyword.value) {
+    const keyword = homeKeyword.value.toLowerCase();
+    data = data.filter((r: any) => {
+      return (
+        (r.ConsultationDate || "").toLowerCase().includes(keyword) ||
+        (r.FavoriteName || "").toLowerCase().includes(keyword) ||
+        (r.PointInfo || "").toLowerCase().includes(keyword) ||
+        (r.TreatmentTime || "").toLowerCase().includes(keyword) ||
+        String(r.TotalUsage || "").includes(keyword)
+      );
+    });
+  }
+  
+  // 排序
+  if (sortState.value.home.order && sortState.value.home.field) {
+    data = [...data].sort((a: any, b: any) => {
+      const field = sortState.value.home.field;
+      let aVal = a[field];
+      let bVal = b[field];
+      
+      // 日期排序
+      if (field === "ConsultationDate" || field === "TreatmentTime") {
+        aVal = new Date(aVal?.replace(/\//g, "-") || "").getTime();
+        bVal = new Date(bVal?.replace(/\//g, "-") || "").getTime();
+      }
+      
+      // 數字排序
+      if (typeof aVal === "number" && typeof bVal === "number") {
+        return sortState.value.home.order === "asc" ? aVal - bVal : bVal - aVal;
+      }
+      
+      // 字串排序
+      if (typeof aVal === "string" && typeof bVal === "string") {
+        return sortState.value.home.order === "asc" 
+          ? aVal.localeCompare(bVal) 
+          : bVal.localeCompare(aVal);
+      }
+      
+      return 0;
+    });
+  }
+  
+  return data;
 });
 
 const filteredHomeForChart = computed(() => {
@@ -937,18 +1225,65 @@ function nextHome() {
   if (pageHome.value < totalPagesHome.value) pageHome.value++;
 }
 
-/* HRV */
-const pageHRV = ref(1);
-/* 以 HRV 為例，其餘四個區塊做相同調整 ---------------------------- */
-const totalHRV = computed(() => filteredHRV.value.length);
-
-const totalPagesHRV = computed(() =>
-  Math.max(1, Math.ceil(totalHRV.value / PAGE_SUB))
-);
-const paginatedHRV = computed(() => {
-  const s = (pageHRV.value - 1) * PAGE_SUB;
-  return filteredHRV.value.slice(s, s + PAGE_SUB);
+/* RING */
+const pageRing = ref(1);
+const ringRecords = ref<any[]>([]);
+const filteredRing = computed(() => {
+  let data = ringRecords.value;
+  
+  // 日期區間篩選
+  if (ringRange.value && ringRange.value.length >= 2) {
+    const [from, to] = ringRange.value;
+    const start = from.getTime();
+    const end = to.getTime();
+    data = data.filter((r: any) => {
+      const ms = Date.parse(r.CheckTime?.replace(/\//g, "-") || "");
+      return ms >= start && ms <= end;
+    });
+  }
+  
+  // 排序
+  if (sortState.value.ring.order && sortState.value.ring.field) {
+    data = [...data].sort((a: any, b: any) => {
+      const field = sortState.value.ring.field;
+      let aVal = a[field];
+      let bVal = b[field];
+      
+      // 日期排序
+      if (field === "CheckTime") {
+        aVal = new Date(aVal?.replace(/\//g, "-") || "").getTime();
+        bVal = new Date(bVal?.replace(/\//g, "-") || "").getTime();
+      }
+      
+      // 數字排序
+      if (typeof aVal === "number" && typeof bVal === "number") {
+        return sortState.value.ring.order === "asc" ? aVal - bVal : bVal - aVal;
+      }
+      
+      // 字串排序
+      if (typeof aVal === "string" && typeof bVal === "string") {
+        return sortState.value.ring.order === "asc" 
+          ? aVal.localeCompare(bVal) 
+          : bVal.localeCompare(aVal);
+      }
+      
+      return 0;
+    });
+  }
+  
+  return data;
 });
+const totalRing = computed(() => filteredRing.value.length);
+const totalPagesRing = computed(() =>
+  Math.max(1, Math.ceil(totalRing.value / PAGE_SUB))
+);
+const paginatedRing = computed(() => {
+  const s = (pageRing.value - 1) * PAGE_SUB;
+  return filteredRing.value.slice(s, s + PAGE_SUB);
+});
+const pageNumberListRing = computed(() =>
+  pageButtons(totalPagesRing.value, pageRing.value, maxButtons.value)
+);
 
 /* ANS */
 const pageANS = ref(1);
@@ -956,9 +1291,44 @@ const totalANS = computed(() => ansRecords.value.length);
 const totalPagesANS = computed(() =>
   Math.max(1, Math.ceil(totalANS.value / PAGE_SUB))
 );
+const filteredANSWithSort = computed(() => {
+  let data = filteredANS.value;
+  
+  // 排序
+  if (sortState.value.ans.order && sortState.value.ans.field) {
+    data = [...data].sort((a: any, b: any) => {
+      const field = sortState.value.ans.field;
+      let aVal = a[field];
+      let bVal = b[field];
+      
+      // 日期排序
+      if (field === "CheckTime") {
+        aVal = new Date(aVal?.replace(/\//g, "-") || "").getTime();
+        bVal = new Date(bVal?.replace(/\//g, "-") || "").getTime();
+      }
+      
+      // 數字排序
+      if (typeof aVal === "number" && typeof bVal === "number") {
+        return sortState.value.ans.order === "asc" ? aVal - bVal : bVal - aVal;
+      }
+      
+      // 字串排序
+      if (typeof aVal === "string" && typeof bVal === "string") {
+        return sortState.value.ans.order === "asc" 
+          ? aVal.localeCompare(bVal) 
+          : bVal.localeCompare(aVal);
+      }
+      
+      return 0;
+    });
+  }
+  
+  return data;
+});
+
 const paginatedANS = computed(() => {
   const s = (pageANS.value - 1) * PAGE_SUB;
-  return ansRecords.value.slice(s, s + PAGE_SUB);
+  return filteredANSWithSort.value.slice(s, s + PAGE_SUB);
 });
 
 /* LIFE */
@@ -967,9 +1337,44 @@ const totalLife = computed(() => lifeRecords.value.length);
 const totalPagesLife = computed(() =>
   Math.max(1, Math.ceil(totalLife.value / PAGE_SUB))
 );
+const filteredLifeWithSort = computed(() => {
+  let data = filteredLife.value;
+  
+  // 排序
+  if (sortState.value.life.order && sortState.value.life.field) {
+    data = [...data].sort((a: any, b: any) => {
+      const field = sortState.value.life.field;
+      let aVal = a[field];
+      let bVal = b[field];
+      
+      // 日期排序
+      if (field === "CheckTime") {
+        aVal = new Date(aVal?.replace(/\//g, "-") || "").getTime();
+        bVal = new Date(bVal?.replace(/\//g, "-") || "").getTime();
+      }
+      
+      // 數字排序
+      if (typeof aVal === "number" && typeof bVal === "number") {
+        return sortState.value.life.order === "asc" ? aVal - bVal : bVal - aVal;
+      }
+      
+      // 字串排序
+      if (typeof aVal === "string" && typeof bVal === "string") {
+        return sortState.value.life.order === "asc" 
+          ? aVal.localeCompare(bVal) 
+          : bVal.localeCompare(aVal);
+      }
+      
+      return 0;
+    });
+  }
+  
+  return data;
+});
+
 const paginatedLife = computed(() => {
   const s = (pageLife.value - 1) * PAGE_SUB;
-  return lifeRecords.value.slice(s, s + PAGE_SUB);
+  return filteredLifeWithSort.value.slice(s, s + PAGE_SUB);
 });
 
 /* VIDEO */
@@ -988,9 +1393,44 @@ const totalVideo = computed(() => filteredVideo.value.length);
 const totalPagesVideo = computed(() =>
   Math.max(1, Math.ceil(totalVideo.value / PAGE_SUB))
 );
+const filteredVideoWithSort = computed(() => {
+  let data = filteredVideo.value;
+  
+  // 排序
+  if (sortState.value.video.order && sortState.value.video.field) {
+    data = [...data].sort((a: any, b: any) => {
+      const field = sortState.value.video.field;
+      let aVal = a[field];
+      let bVal = b[field];
+      
+      // 日期排序
+      if (field === "watchDate") {
+        aVal = new Date(aVal?.replace(/\//g, "-") || "").getTime();
+        bVal = new Date(bVal?.replace(/\//g, "-") || "").getTime();
+      }
+      
+      // 數字排序
+      if (typeof aVal === "number" && typeof bVal === "number") {
+        return sortState.value.video.order === "asc" ? aVal - bVal : bVal - aVal;
+      }
+      
+      // 字串排序
+      if (typeof aVal === "string" && typeof bVal === "string") {
+        return sortState.value.video.order === "asc" 
+          ? aVal.localeCompare(bVal) 
+          : bVal.localeCompare(aVal);
+      }
+      
+      return 0;
+    });
+  }
+  
+  return data;
+});
+
 const paginatedVideo = computed(() => {
   const s = (pageVideo.value - 1) * PAGE_SUB;
-  return filteredVideo.value.slice(s, s + PAGE_SUB);
+  return filteredVideoWithSort.value.slice(s, s + PAGE_SUB);
 });
 const pageNumberListVideo = computed(() =>
   pageButtons(totalPagesVideo.value, pageVideo.value, maxButtons.value)
@@ -1012,9 +1452,44 @@ const totalApp = computed(() => filteredApp.value.length);
 const totalPagesApp = computed(() =>
   Math.max(1, Math.ceil(totalApp.value / PAGE_SUB))
 );
+const filteredAppWithSort = computed(() => {
+  let data = filteredApp.value;
+  
+  // 排序
+  if (sortState.value.app.order && sortState.value.app.field) {
+    data = [...data].sort((a: any, b: any) => {
+      const field = sortState.value.app.field;
+      let aVal = a[field];
+      let bVal = b[field];
+      
+      // 日期排序
+      if (field === "startDate" || field === "endDate") {
+        aVal = new Date(aVal?.replace(/\//g, "-") || "").getTime();
+        bVal = new Date(bVal?.replace(/\//g, "-") || "").getTime();
+      }
+      
+      // 數字排序
+      if (typeof aVal === "number" && typeof bVal === "number") {
+        return sortState.value.app.order === "asc" ? aVal - bVal : bVal - aVal;
+      }
+      
+      // 字串排序
+      if (typeof aVal === "string" && typeof bVal === "string") {
+        return sortState.value.app.order === "asc" 
+          ? aVal.localeCompare(bVal) 
+          : bVal.localeCompare(aVal);
+      }
+      
+      return 0;
+    });
+  }
+  
+  return data;
+});
+
 const paginatedApp = computed(() => {
   const s = (pageApp.value - 1) * PAGE_SUB;
-  return filteredApp.value.slice(s, s + PAGE_SUB);
+  return filteredAppWithSort.value.slice(s, s + PAGE_SUB);
 });
 const pageNumberListApp = computed(() =>
   pageButtons(totalPagesApp.value, pageApp.value, maxButtons.value)
@@ -1030,15 +1505,45 @@ const filteredAppForChart = computed(() => {
   });
 });
 
-function gotoHRV(p: number) {
-  pageHRV.value = p;
+// 排序功能
+function handleSort(type: string, field: string) {
+  const current = sortState.value[type];
+  if (current.field === field) {
+    // 同一欄位：無序 -> 升序 -> 降序 -> 無序
+    if (current.order === null) {
+      current.order = "asc";
+    } else if (current.order === "asc") {
+      current.order = "desc";
+    } else {
+      current.order = null;
+      current.field = "";
+    }
+  } else {
+    // 不同欄位：直接設為升序
+    current.field = field;
+    current.order = "asc";
+  }
 }
-function prevHRV() {
-  if (pageHRV.value > 1) pageHRV.value--;
+
+// 產品使用紀錄篩選功能
+function toggleHomeFilter() {
+  showHomeFilter.value = !showHomeFilter.value;
 }
-function nextHRV() {
-  if (pageHRV.value < totalPagesHRV.value) pageHRV.value++;
+
+function selectHomeFilterCategory(category: string) {
+  selectedHomeFilterCategory.value = category;
+  selectedHomeFilterOptions.value = [];
 }
+
+function toggleHomeFilterOption(option: string) {
+  const index = selectedHomeFilterOptions.value.indexOf(option);
+  if (index > -1) {
+    selectedHomeFilterOptions.value.splice(index, 1);
+  } else {
+    selectedHomeFilterOptions.value.push(option);
+  }
+}
+
 
 /* ---------- API ---------- */
 async function fetchBasic() {
@@ -1061,13 +1566,6 @@ async function fetchBasic() {
   lastUpdated.value = new Date().toLocaleString("zh-TW");
 }
 
-function openHRV(rec: any) {
-  selectedHRV.value = rec; // 把整筆傳給 Alert
-  showHRV.value = true;
-}
-function closeHRV() {
-  showHRV.value = false;
-}
 
 /* ---------- 共用範本 ---------- */
 const makeFiltered = <T>(
@@ -1090,7 +1588,6 @@ const makeFiltered = <T>(
 
 /* ---------- 各列表 ---------- */
 /* 列表：依 range 過濾 ------------------------------------- */
-const filteredHRV = makeFiltered(hrvRecords, hrvRange, "CheckTime");
 const filteredANS = makeFiltered(ansRecords, ansRange, "CheckTime");
 const filteredLife = makeFiltered(lifeRecords, lifeRange, "CheckTime");
 
@@ -1103,11 +1600,21 @@ const chartLife = computed(() => lifeRecords.value);
 watch(homeDateRange, () => {
   pageHome.value = 1;
 });
+watch(selectedHomeFilterOptions, () => {
+  pageHome.value = 1;
+});
+watch(homeKeyword, () => {
+  pageHome.value = 1;
+});
+
 watch(videoRange, () => {
   pageVideo.value = 1;
 });
 watch(appDateRange, () => {
   pageApp.value = 1;
+});
+watch(ringRange, () => {
+  pageRing.value = 1;
 });
 
 function pageButtons(total: number, current: number, max = maxButtons.value) {
@@ -1126,9 +1633,6 @@ function pageButtons(total: number, current: number, max = maxButtons.value) {
   return pages;
 }
 
-const pageNumberListHRV = computed(() =>
-  pageButtons(totalPagesHRV.value, pageHRV.value, maxButtons.value)
-);
 const pageNumberListANS = computed(() =>
   pageButtons(totalPagesANS.value, pageANS.value, maxButtons.value)
 );
@@ -1277,7 +1781,6 @@ const mmdd = (raw: string) => {
 const isAnyAlertOpen = computed(() => {
   return (
     showContract.value ||
-    showHRV.value ||
     showANS.value ||
     showLife.value
   );
@@ -1593,6 +2096,114 @@ const isExpired = computed(() => {
               box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
             }
           }
+          .filterDropdownWrapper {
+            position: relative;
+            border-radius: var(--Radius-r-50, 50px);
+background: var(--Neutral-white, #FFF);
+box-shadow: 0 2px 20px 0 var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
+width: 250px;
+            .filterTrigger {
+              display: flex;
+              align-items: center;
+              gap: 4px;
+              padding: 0.5rem 1rem;
+              background: #fff;
+              border-radius: 50px;
+              cursor: pointer;
+              box-shadow: 0px 2px 12px -2px rgba(177, 192, 216, 0.5);
+              font-size: 14px;
+              transition: all 0.2s;
+
+              
+              img {
+                width: 16px;
+                height: 16px;
+                transition: transform 0.2s;
+                &.rotated {
+                  transform: rotate(180deg);
+                }
+              }
+              &:hover {
+                box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
+              }
+            }
+            .filterDropdownPanel {
+              position: absolute;
+              top: calc(100% + 8px);
+              left: 0;
+              display: flex;
+              background: #fff;
+              border-radius: 12px;
+              box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.15);
+              z-index: 100;
+              min-width: 500px;
+              max-height: 400px;
+              overflow: hidden;
+              .filterCategories {
+                width: 50px;
+                border-right: 1px solid #e0e0e0;
+                padding: 1rem 0;
+                .filterCategory {
+                  padding: 0.75rem 1rem;
+                  cursor: pointer;
+                  transition: all 0.2s;
+                  font-size: 14px;
+                  color: #666;
+                  &:hover {
+                    background: #f5f7fa;
+                  }
+                  &.active {
+                    background: rgba(27, 163, 155, 0.1);
+                    color: #1ba39b;
+                    font-weight: 500;
+                  }
+                }
+              }
+              .filterOptions {
+                flex: 1;
+                padding: 1rem;
+                overflow-y: auto;
+                max-height: 100px;
+                .filterOption {
+                  display: flex;
+                  align-items: center;
+                  gap: 0.75rem;
+                  padding: 0.5rem;
+                  cursor: pointer;
+                  border-radius: 4px;
+                  transition: background 0.2s;
+                  font-size: 14px;
+                  color: #1ba39b;
+                  &:hover {
+                    background: #f5f7fa;
+                  }
+                  input[type="checkbox"] {
+                    width: 18px;
+                    height: 18px;
+                    cursor: pointer;
+                    accent-color: #1ba39b;
+                  }
+                }
+              }
+            }
+          }
+          .searchKeywordInput {
+            padding: 0.5rem 1rem;
+            background: #fff;
+            border: none;
+            border-radius: 50px;
+            outline: none;
+            font-size: 14px;
+            box-shadow: 0px 2px 12px -2px rgba(177, 192, 216, 0.5);
+            transition: all 0.2s;
+            min-width: 150px;
+            &::placeholder {
+              color: #999;
+            }
+            &:focus {
+              box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
+            }
+          }
         }
       }
       .memberInfoCardGroup {
@@ -1649,6 +2260,27 @@ const isExpired = computed(() => {
         .memberInfoTableTitleItem {
           flex: 1;
           text-align: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+          cursor: pointer;
+          user-select: none;
+          transition: background-color 0.2s;
+          padding: 0.5rem;
+          border-radius: 4px;
+          &:hover {
+            background-color: rgba(27, 163, 155, 0.1);
+          }
+          .sortIcon {
+            width: 16px;
+            height: 16px;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+          }
+          &:hover .sortIcon {
+            opacity: 1;
+          }
         }
       }
       .memberInfoTableHR {
