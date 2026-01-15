@@ -7,6 +7,92 @@
   <div v-else class="myFavoriteInfo">
     <Sidebar />
 
+    <!-- ───── 操作紀錄彈窗 ───── -->
+    <div v-if="showOperationModal" class="operationModalOverlay" @click="closeOperationModal">
+      <div class="operationModal" @click.stop>
+        <!-- 標題列 -->
+        <div class="operationModalHeader">
+          <div class="operationModalHeaderLeft">
+            <img src="/assets/imgs/backend/Subtract.svg" alt="NP" class="npLogo" />
+          </div>
+          <div class="operationModalHeaderCenter">
+            <h3>操作紀錄</h3>
+          </div>
+          <div class="operationModalHeaderRight">
+            <span class="operationCount">已操作 {{ operationRecords }} 筆</span>
+            <div class="operationFilters">
+              <VueDatePicker
+                v-model="operationDateRange"
+                range
+                :enable-time-picker="false"
+                format="yyyy/MM/dd"
+                placeholder="操作日期查詢"
+                prepend-icon="i-calendar"
+                teleport="body"
+                class="dateFilter"
+              />
+              <div class="eventFilterWrapper">
+                <div class="eventFilterTrigger" @click="toggleEventFilter">
+                  <img src="/assets/imgs/backend/search.svg" alt="filter" style="width: 16px; height: 16px;" />
+                  <span>事件篩選</span>
+                  <img 
+                    src="/assets/imgs/backend/arrow-down.svg" 
+                    alt="arrow" 
+                    :class="{ rotated: showEventFilter }"
+                  />
+                </div>
+                <div class="eventFilterDropdown" v-if="showEventFilter" @click.stop>
+                  <div
+                    class="eventFilterOption"
+                    v-for="event in eventOptions"
+                    :key="event"
+                    @click="toggleEventOption(event)"
+                  >
+                    <input 
+                      type="checkbox" 
+                      :checked="selectedEvents.includes(event)"
+                      @click.stop
+                    />
+                    <span>{{ event }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 表格內容 -->
+        <div class="operationModalTable">
+          <div class="operationTableHeader">
+            <div class="operationTableHeaderItem">操作日期</div>
+            <div class="operationTableHeaderItem">操作時間</div>
+            <div class="operationTableHeaderItem">操作事件</div>
+          </div>
+          <div class="operationTableHR" />
+
+          <div class="operationTableBody">
+            <div
+              class="operationTableRow"
+              v-for="record in filteredOperationRecords"
+              :key="record.id"
+            >
+              <div class="operationTableCell">{{ record.date }}</div>
+              <div class="operationTableCell">{{ record.time }}</div>
+              <div class="operationTableCell">{{ record.event }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 關閉按鈕 -->
+        <div class="operationModalFooter">
+          <div class="operationModalClose" @click="closeOperationModal">
+  
+            <img src="/assets/imgs/backend/close.svg" alt="close" />
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ───── 主要內容 ───── -->
     <div class="myFavoriteContent">
       <!-- 標題列 -->
@@ -45,9 +131,14 @@
         </div>
         <div class="summaryCard">
           <div class="summaryCardLabel">操作紀錄</div>
-          <div class="summaryCardValue">
+          <div class="summaryCardValue ">
             {{ operationRecords || "—" }}筆
-            <!-- <img src="/assets/imgs/backend/more.svg" alt="more" class="moreIcon" /> -->
+            <img 
+              src="/assets/imgs/backend/dot.svg" 
+              alt="dot" 
+              class="dotIcon"
+              @click="openOperationModal"
+            />
           </div>
         </div>
       </div>
@@ -128,8 +219,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import VueDatePicker from "@vuepic/vue-datepicker";
 import Sidebar from "~/components/raphaelBackend/Sidebar.vue";
 
 const router = useRouter();
@@ -151,6 +243,24 @@ const tableData = ref<any[]>([]);
 const currentPage = ref(1);
 const pageSize = ref(10);
 
+// 操作紀錄彈窗
+const showOperationModal = ref(false);
+const operationDateRange = ref<Date[] | null>(null);
+const showEventFilter = ref(false);
+const selectedEvents = ref<string[]>([]);
+const operationRecordsData = ref<any[]>([]);
+
+const eventOptions = [
+  "結束治療",
+  "開始治療",
+  "治療滿30分鐘",
+  "蜂鳴器長嗶一分鐘",
+  "低電2警示",
+  "低電1警示",
+  "暫停治療",
+  "恢復治療",
+];
+
 // 假資料
 onMounted(() => {
   // 生成假資料
@@ -163,6 +273,28 @@ onMounted(() => {
     pauseDuration: "3分鐘",
     totalDuration: "63分鐘",
   }));
+
+  // 操作紀錄假資料
+  operationRecordsData.value = [
+    { id: 1, date: "2025/12/25", time: "14:30:00", event: "結束治療" },
+    { id: 2, date: "2025/12/24", time: "13:20:10", event: "開始治療" },
+    { id: 3, date: "2025/12/23", time: "12:15:45", event: "治療滿30分鐘" },
+    { id: 4, date: "2025/12/22", time: "11:05:30", event: "蜂鳴器長嗶一分鐘" },
+    { id: 5, date: "2025/12/21", time: "10:00:00", event: "低電2警示" },
+    { id: 6, date: "2025/12/20", time: "09:45:15", event: "開始治療" },
+    { id: 7, date: "2025/12/19", time: "08:30:20", event: "結束治療" },
+    { id: 8, date: "2025/12/18", time: "07:15:30", event: "低電1警示" },
+    { id: 9, date: "2025/12/17", time: "06:00:45", event: "暫停治療" },
+    { id: 10, date: "2025/12/16", time: "05:45:10", event: "恢復治療" },
+  ];
+
+  // 點擊外部關閉事件篩選
+  document.addEventListener("click", (e) => {
+    const target = e.target as HTMLElement;
+    if (!target.closest(".eventFilterWrapper")) {
+      showEventFilter.value = false;
+    }
+  });
 });
 
 // 分頁計算
@@ -206,6 +338,56 @@ function refresh() {
     loading.value = false;
   }, 1000);
 }
+
+// 操作紀錄彈窗功能
+function openOperationModal() {
+  showOperationModal.value = true;
+}
+
+function closeOperationModal() {
+  showOperationModal.value = false;
+  showEventFilter.value = false;
+}
+
+function toggleEventFilter() {
+  showEventFilter.value = !showEventFilter.value;
+}
+
+function toggleEventOption(event: string) {
+  const index = selectedEvents.value.indexOf(event);
+  if (index > -1) {
+    selectedEvents.value.splice(index, 1);
+  } else {
+    selectedEvents.value.push(event);
+  }
+}
+
+// 篩選操作紀錄
+const filteredOperationRecords = computed(() => {
+  let data = operationRecordsData.value;
+
+  // 日期篩選
+  if (operationDateRange.value && operationDateRange.value.length >= 2) {
+    const [from, to] = operationDateRange.value;
+    const start = from.getTime();
+    const end = to.getTime();
+    data = data.filter((r: any) => {
+      const ms = Date.parse(r.date?.replace(/\//g, "-") || "");
+      return ms >= start && ms <= end;
+    });
+  }
+
+  // 事件篩選
+  if (selectedEvents.value.length > 0) {
+    data = data.filter((r: any) => selectedEvents.value.includes(r.event));
+  }
+
+  return data;
+});
+
+watch(operationDateRange, () => {
+  // 當日期範圍改變時可以觸發其他邏輯
+});
 </script>
 
 <style scoped lang="scss">
@@ -363,6 +545,10 @@ function refresh() {
             }
           }
         }
+        .dotIcon {
+            margin-left: auto;
+            cursor: pointer;
+        }
       }
     }
 
@@ -487,6 +673,296 @@ function refresh() {
     }
     100% {
       transform: rotate(360deg);
+    }
+  }
+}
+
+// 操作紀錄彈窗樣式
+.operationModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  z-index: 10000;
+
+  .operationModal {
+    position: fixed;
+    width: 80%;
+    max-width: 1200px;
+    left: 50%;
+    top: 50%;
+    height: 90%;
+    transform: translate(-50%, -50%);
+    border-radius: 20px;
+    border: 3px solid var(--Primary-default, #1ba39b);
+    background: var(--neutral-white-opacity-30, rgba(255, 255, 255, 0.3));
+    box-shadow: 0px 2px 20px 0px
+      var(--primary-400-opacity-25, rgba(27, 163, 155, 0.25));
+    backdrop-filter: blur(25px);
+    z-index: 100;
+    padding: 1rem 2.5%;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+
+    // 自訂 scrollbar 樣式（Webkit）
+    &::-webkit-scrollbar {
+      width: 12px;
+    }
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #878787;
+      border-radius: 10px;
+      border: 2px solid transparent;
+      background-clip: content-box;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background-color: #848484;
+    }
+
+ 
+
+
+  
+
+
+
+    .operationModalHeader {
+      text-align: center;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0;
+      gap: 1rem;
+
+      @include respond-to("md") {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .operationModalHeaderLeft {
+        .npLogo {
+          width: 2rem;
+          height: 2rem;
+          border-radius: 9.8px;
+          border: 1px solid var(--Primary-default, #1ba39b);
+          padding: 2px 4px;
+        }
+      }
+
+      .operationModalHeaderCenter {
+        flex: 1;
+        h3 {
+          color: $primary-600;
+          font-size: var(--Text-font-size-24, 20px);
+          font-style: normal;
+          font-weight: 700;
+          letter-spacing: 0.12px;
+          margin: 0;
+        }
+      }
+
+      .operationModalHeaderRight {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+
+        @include respond-to("md") {
+          width: 100%;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .operationCount {
+          color: $primary-600;
+          font-size: 16px;
+          font-weight: 500;
+          white-space: nowrap;
+        }
+
+        .operationFilters {
+          display: flex;
+          gap: 0.75rem;
+          align-items: center;
+
+          @include respond-to("md") {
+            width: 100%;
+            flex-direction: column;
+          }
+
+          .dateFilter {
+            :deep(.dp__input) {
+              padding: 0.5rem 1rem;
+              border-radius: 50px;
+              background: #fff;
+              box-shadow: 0px 2px 12px -2px rgba(177, 192, 216, 0.5);
+              border: none;
+              font-size: 14px;
+            }
+          }
+
+          .eventFilterWrapper {
+            position: relative;
+
+            .eventFilterTrigger {
+              display: flex;
+              align-items: center;
+              gap: 4px;
+              padding: 0.5rem 1rem;
+              background: #fff;
+              border-radius: 50px;
+              cursor: pointer;
+              box-shadow: 0px 2px 12px -2px rgba(177, 192, 216, 0.5);
+              font-size: 14px;
+              transition: all 0.2s;
+
+              img {
+                width: 16px;
+                height: 16px;
+
+                &.rotated {
+                  transform: rotate(180deg);
+                }
+              }
+
+              &:hover {
+                box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
+              }
+            }
+
+            .eventFilterDropdown {
+              position: absolute;
+              top: calc(100% + 8px);
+              right: 0;
+              background: #fff;
+              border-radius: 12px;
+              box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.15);
+              z-index: 100;
+              min-width: 200px;
+              max-height: 300px;
+              overflow-y: auto;
+              padding: 0.5rem;
+
+              .eventFilterOption {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                padding: 0.5rem;
+                cursor: pointer;
+                border-radius: 4px;
+                transition: background 0.2s;
+                font-size: 14px;
+                color: #1ba39b;
+
+                &:hover {
+                  background: #f5f7fa;
+                }
+
+                input[type="checkbox"] {
+                  width: 18px;
+                  height: 18px;
+                  cursor: pointer;
+                  accent-color: #1ba39b;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .operationModalTable {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+
+      .operationTableHeader {
+        display: flex;
+        padding: 1rem 2rem;
+        background: #f9f9f9;
+        border-bottom: 1px solid #e0e0e0;
+
+        .operationTableHeaderItem {
+          flex: 1;
+          text-align: center;
+          font-weight: 600;
+          color: $primary-600;
+          font-size: 16px;
+        }
+      }
+
+      .operationTableHR {
+        background: $primary-200;
+        width: 100%;
+        height: 1px;
+      }
+
+      .operationTableBody {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0 2rem;
+
+        .operationTableRow {
+          display: flex;
+          padding: 1rem 0;
+          border-bottom: 1px solid #f0f0f0;
+
+          &:last-child {
+            border-bottom: none;
+          }
+
+          &:hover {
+            background-color: #f9f9f9;
+          }
+
+          .operationTableCell {
+            flex: 1;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+          }
+        }
+      }
+    }
+
+    .operationModalFooter {
+      text-align: center;
+      margin-top: 0.5rem;
+      position: absolute;
+      bottom: 2%;
+      left: 50%;
+      transform: translateX(-50%);
+
+      .operationModalClose {
+        border-radius: var(--Radius-r-50, 50px);
+        background: $raphael-white;
+        box-shadow: 0px 2px 20px 0px
+          var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
+        padding: 0.25rem;
+        cursor: pointer;
+        display: inline-block;
+        transition: all 0.2s;
+
+        &:hover {
+          box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
+        }
+
+        img {
+          width: 20px;
+          height: 20px;
+          display: block;
+        }
+      }
     }
   }
 }
