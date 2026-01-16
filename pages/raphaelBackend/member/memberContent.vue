@@ -263,33 +263,33 @@
                   @click="handleSort('home', 'FavoriteName')"
                 >
                   我的最愛名稱
-                  <img
+                  <!-- <img
                     src="/assets/imgs/backend/sort.svg"
                     alt="sort"
                     class="sortIcon"
-                  />
+                  /> -->
                 </div>
                 <div
                   class="memberInfoTableTitleItem"
                   @click="handleSort('home', 'PointInfo')"
                 >
                   點位資訊
-                  <img
+                  <!-- <img
                     src="/assets/imgs/backend/sort.svg"
                     alt="sort"
                     class="sortIcon"
-                  />
+                  /> -->
                 </div>
                 <div
                   class="memberInfoTableTitleItem"
                   @click="handleSort('home', 'TreatmentTime')"
                 >
                   治療時間
-                  <img
+                  <!-- <img
                     src="/assets/imgs/backend/sort.svg"
                     alt="sort"
                     class="sortIcon"
-                  />
+                  /> -->
                 </div>
                 <div
                   class="memberInfoTableTitleItem"
