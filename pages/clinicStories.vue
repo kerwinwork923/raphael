@@ -298,14 +298,13 @@ const setActiveSubTag = async (subTagId) => {
   scrollToMoreTag();
 };
 
-
 // 滾動到「更多故事」標籤
 const scrollToMoreTag = () => {
   if (!tagsSwiper.value) return;
-  
+
   // 找到「更多故事」標籤的索引（最後一個）
   const moreTagIndex = visibleTags.value.length - 1;
-  
+
   // 使用 Swiper 的 slideTo 方法滾動到該標籤
   if (moreTagIndex >= 0) {
     tagsSwiper.value.slideTo(moreTagIndex, 500); // 500ms 動畫時間
@@ -320,7 +319,7 @@ const visibleTags = computed(() => {
     }
     return true;
   });
-  
+
   // 只顯示前 4 個標籤（全部影片 + 3 個主標籤），然後加上「更多故事」
   const mainTags = filtered.slice(0, 4);
   const moreTag = {
@@ -330,7 +329,7 @@ const visibleTags = computed(() => {
     videoBigType: null,
     isMoreTag: true,
   };
-  
+
   return [...mainTags, moreTag];
 });
 
@@ -341,7 +340,7 @@ const allVideos = ref([]);
 const extractYouTubeVideoId = (url) => {
   if (!url) return null;
   const match = url.match(
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
   );
   return match ? match[1] : null;
 };
@@ -403,7 +402,7 @@ const fetchVideoBigTypeList = async () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(requestBody),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -449,7 +448,7 @@ const fetchVideoTypeList = async () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(requestBody),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -478,7 +477,7 @@ const filteredVideos = computed(() => {
   // 如果有選中的子標籤，優先使用子標籤過濾
   if (activeSubTag.value !== null) {
     const activeSubTagData = subTags.value.find(
-      (tag) => tag.id === activeSubTag.value
+      (tag) => tag.id === activeSubTag.value,
     );
     if (activeSubTagData) {
       return allVideos.value.filter((video) => {
@@ -487,7 +486,7 @@ const filteredVideos = computed(() => {
           return false;
         }
         return video.videoTypes.some(
-          (vt) => vt.VideoType === activeSubTagData.videoType
+          (vt) => vt.VideoType === activeSubTagData.videoType,
         );
       });
     }
@@ -504,7 +503,7 @@ const filteredVideos = computed(() => {
       return false;
     }
     return video.videoBigTypes.some(
-      (vbt) => vbt.VideoBigType === activeTagData.videoBigType
+      (vbt) => vbt.VideoBigType === activeTagData.videoBigType,
     );
   });
 });
@@ -564,7 +563,7 @@ const toggleLike = async (video) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(requestBody),
-        }
+        },
       );
     } else {
       // 點讚
@@ -576,7 +575,7 @@ const toggleLike = async (video) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(requestBody),
-        }
+        },
       );
     }
 
@@ -633,7 +632,7 @@ const fetchVideoList = async () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(requestBody),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -645,7 +644,7 @@ const fetchVideoList = async () => {
     if (result.Result === "OK" && result.VideoList) {
       // 只處理 OnLineVideo 為 "Y" 的影片（已上架）
       const activeVideos = result.VideoList.filter(
-        (item) => item.OnLineVideo === "Y"
+        (item) => item.OnLineVideo === "Y",
       );
       allVideos.value = transformApiData(activeVideos);
     } else {
@@ -805,7 +804,7 @@ const modules = [FreeMode];
       flex-direction: column;
       animation: slideUp 0.3s ease;
       transform: translateY(0);
-      
+
       .modalDragBar {
         width: 40px;
         height: 4px;
@@ -1065,9 +1064,13 @@ const modules = [FreeMode];
           color: #333;
           margin-bottom: 12px;
           line-height: 1.4;
-        }
-        p {
+          text-overflow: ellipsis;
           overflow: hidden;
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
+        }
+        .videoCardSubtitle {
           color: var(--Neutral-500, #666);
           text-overflow: ellipsis;
 
@@ -1075,6 +1078,11 @@ const modules = [FreeMode];
           font-style: normal;
           font-weight: 500;
           line-height: normal;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
         }
 
         .videoStats {

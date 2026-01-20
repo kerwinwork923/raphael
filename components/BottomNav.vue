@@ -69,11 +69,11 @@
         <img
           v-if="activeTab === 'clinicStories'"
           src="/assets/imgs/clinicStories-active.svg"
-          alt="診間故事"
+          alt="真心故事"
         />
-        <img v-else src="/assets/imgs/clinicStories.svg" alt="診間故事" />
+        <img v-else src="/assets/imgs/clinicStories.svg" alt="真心故事" />
       </div>
-      <span>診間故事</span>
+      <span>真心故事</span>
     </div>
     <div
       class="nav-item"
@@ -84,11 +84,11 @@
         <img
           v-if="activeTab === 'member'"
           src="/assets/imgs/robot/member-active.svg"
-          alt="會員"
+          alt="會員中心"
         />
-        <img v-else src="/assets/imgs/robot/member.svg" alt="會員" />
+        <img v-else src="/assets/imgs/robot/member.svg" alt="會員中心" />
       </div>
-      <span>會員</span>
+      <span>會員中心</span>
     </div>
   </nav>
 </template>
@@ -145,7 +145,7 @@ watch(
   () => route.path,
   () => {
     setActiveTabFromRoute();
-  }
+  },
 );
 
 onMounted(() => {
