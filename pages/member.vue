@@ -137,7 +137,7 @@ const goToChangeMember = () => {
 };
 
 const goToPrivacy = () => {
-  router.push("/privacyPage");
+  router.push("/https://www.raphaelclinic.com.tw/privacy");
 };
 
 const goToAccountManage = () => {
