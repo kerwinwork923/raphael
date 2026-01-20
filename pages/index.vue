@@ -629,7 +629,7 @@
   justify-content: center;
   gap: 20px;
   position: absolute;
-  bottom: 5.5%;
+  bottom: 24px;
   left: 0;
   right: 0;
   a {
