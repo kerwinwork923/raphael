@@ -199,7 +199,7 @@
         </div>
       </div>
       <div class="privacyAndDisclaimerGroup">
-        <router-link to="/privacyPage">隱私權政策</router-link>
+        <a href="https://www.raphaelclinic.com.tw/privacy" target="_blank">隱私權政策</a>
         <router-link to="/disclaimer">免責聲明</router-link>
       </div>
     </div>
