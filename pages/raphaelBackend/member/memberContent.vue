@@ -53,7 +53,14 @@
           <div class="memberInfoCardGroup memberInfoCardGroupW50">
             <!-- 基本資料 -->
             <div class="memberInfoCard2">
-              <h3>基本資料</h3>
+              <div class="memberInfoCard2Header">
+                <h3>基本資料</h3>
+                <div class="memberInfoIconGroup">
+                  <img src="/assets/imgs/backend/editGray.svg" alt="edit" />
+                  <img src="/assets/imgs/backend/deleteGray.svg" alt="delete" />
+                </div>
+              </div>
+            
               <h5>{{ member?.GradeName || "—" }}</h5>
 
               <div class="memberInfoList">
@@ -2612,6 +2619,21 @@ const isExpired = computed(() => {
           border-radius: 20px;
           background-color: #fff;
           box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
+   
+          .memberInfoCard2Header{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+      
+          }
+          .memberInfoIconGroup{
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        img{
+          cursor: pointer;
+        }
+          }
         }
         @include respond-to("md") {
           width: 100% !important;

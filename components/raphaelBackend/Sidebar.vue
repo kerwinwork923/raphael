@@ -76,6 +76,25 @@
           <span v-show="!collapsed">影音管理</span>
         </li>
 
+        <li 
+          :class="{ 
+            active: currentPage === 'messageManage',
+            'has-focus': focusedItem === 'messageManage' 
+          }" 
+          @click="handleMenuClick({ key: 'messageManage', path: '/raphaelBackend/messageManage' })"
+          @mouseenter="handleMouseEnter('messageManage')"
+          @mouseleave="handleMouseLeave"
+          @focus="handleFocus('messageManage')"
+          @blur="handleBlur"
+          tabindex="0"
+          role="menuitem"
+          aria-label="留言管理"
+        >
+          <img src="/assets/imgs/backend/message.svg" alt="留言管理" />
+          <span v-show="!collapsed">留言管理</span>
+        </li>
+
+      
         <!-- <li 
           :class="{ 
             active: currentPage === 'categoryManagement',
@@ -298,6 +317,11 @@ watch(() => route.path, (newPath: string) => {
     currentPage.value = 'categoryManagement';
     emit('update:modelValue', 'categoryManagement');
     emit('page-change', 'categoryManagement');
+  }
+  else if (newPath.includes('/messageManage')) {
+    currentPage.value = 'messageManage';
+    emit('update:modelValue', 'messageManage');
+    emit('page-change', 'messageManage');
   }
 }, { immediate: true });
 

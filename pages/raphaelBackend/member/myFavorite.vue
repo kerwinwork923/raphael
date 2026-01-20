@@ -8,16 +8,25 @@
     <Sidebar />
 
     <!-- ───── 操作紀錄彈窗 ───── -->
-    <div v-if="showOperationModal" class="operationModalOverlay" @click="closeOperationModal">
+    <div
+      v-if="showOperationModal"
+      class="operationModalOverlay"
+      @click="closeOperationModal"
+    >
       <div class="operationModal" @click.stop>
         <!-- 標題列 -->
         <div class="operationModalHeader">
           <div class="operationModalHeaderLeft">
-            <img src="/assets/imgs/backend/Subtract.svg" alt="NP" class="npLogo" />
+            <img
+              src="/assets/imgs/backend/Subtract.svg"
+              alt="NP"
+              class="npLogo"
+            />
           </div>
           <div class="operationModalHeaderCenter">
             <h3>操作紀錄</h3>
           </div>
+          <hr />
           <div class="operationModalHeaderRight">
             <span class="operationCount">已操作 {{ operationRecords }} 筆</span>
             <div class="operationFilters">
@@ -33,23 +42,31 @@
               />
               <div class="eventFilterWrapper">
                 <div class="eventFilterTrigger" @click="toggleEventFilter">
-                  <img src="/assets/imgs/backend/search.svg" alt="filter" style="width: 16px; height: 16px;" />
+                  <img
+                    src="/assets/imgs/backend/search.svg"
+                    alt="filter"
+                    style="width: 16px; height: 16px"
+                  />
                   <span>事件篩選</span>
-                  <img 
-                    src="/assets/imgs/backend/arrow-down.svg" 
-                    alt="arrow" 
+                  <img
+                    src="/assets/imgs/backend/arrow-down.svg"
+                    alt="arrow"
                     :class="{ rotated: showEventFilter }"
                   />
                 </div>
-                <div class="eventFilterDropdown" v-if="showEventFilter" @click.stop>
+                <div
+                  class="eventFilterDropdown"
+                  v-if="showEventFilter"
+                  @click.stop
+                >
                   <div
                     class="eventFilterOption"
                     v-for="event in eventOptions"
                     :key="event"
                     @click="toggleEventOption(event)"
                   >
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       :checked="selectedEvents.includes(event)"
                       @click.stop
                     />
@@ -86,7 +103,6 @@
         <!-- 關閉按鈕 -->
         <div class="operationModalFooter">
           <div class="operationModalClose" @click="closeOperationModal">
-  
             <img src="/assets/imgs/backend/close.svg" alt="close" />
           </div>
         </div>
@@ -131,11 +147,11 @@
         </div>
         <div class="summaryCard">
           <div class="summaryCardLabel">操作紀錄</div>
-          <div class="summaryCardValue ">
+          <div class="summaryCardValue">
             {{ operationRecords || "—" }}筆
-            <img 
-              src="/assets/imgs/backend/dot.svg" 
-              alt="dot" 
+            <img
+              src="/assets/imgs/backend/dot.svg"
+              alt="dot"
               class="dotIcon"
               @click="openOperationModal"
             />
@@ -156,11 +172,7 @@
         <div class="tableHR" />
 
         <template v-if="tableData.length">
-          <div
-            class="tableRow"
-            v-for="row in paginatedData"
-            :key="row.id"
-          >
+          <div class="tableRow" v-for="row in paginatedData" :key="row.id">
             <div class="tableCell">{{ row.startDate }}</div>
             <div class="tableCell">{{ row.startTime }}</div>
             <div class="tableCell">{{ row.endTime }}</div>
@@ -546,8 +558,8 @@ watch(operationDateRange, () => {
           }
         }
         .dotIcon {
-            margin-left: auto;
-            cursor: pointer;
+          margin-left: auto;
+          cursor: pointer;
         }
       }
     }
@@ -726,19 +738,10 @@ watch(operationDateRange, () => {
       background-color: #848484;
     }
 
- 
-
-
-  
-
-
-
     .operationModalHeader {
       text-align: center;
       margin-bottom: 0.75rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+
       padding: 0;
       gap: 1rem;
 
@@ -760,6 +763,8 @@ watch(operationDateRange, () => {
 
       .operationModalHeaderCenter {
         flex: 1;
+        margin-top: 0.25rem;
+        margin-bottom: 0.15rem;
         h3 {
           color: $primary-600;
           font-size: var(--Text-font-size-24, 20px);
@@ -775,6 +780,7 @@ watch(operationDateRange, () => {
         align-items: center;
         gap: 1rem;
         flex-wrap: wrap;
+        justify-content: end;
 
         @include respond-to("md") {
           width: 100%;
@@ -783,10 +789,11 @@ watch(operationDateRange, () => {
         }
 
         .operationCount {
-          color: $primary-600;
+          color: var(--Primary-200, #b1c0d8);
           font-size: 16px;
-          font-weight: 500;
-          white-space: nowrap;
+          font-style: normal;
+          font-weight: 400;
+          letter-spacing: 0.5px;
         }
 
         .operationFilters {
@@ -824,10 +831,11 @@ watch(operationDateRange, () => {
               box-shadow: 0px 2px 12px -2px rgba(177, 192, 216, 0.5);
               font-size: 14px;
               transition: all 0.2s;
-
+              width: 200px;
+              height: 42px;
               img {
-                width: 16px;
-                height: 16px;
+                width: 12px;
+                height: 12px;
 
                 &.rotated {
                   transform: rotate(180deg);
@@ -885,11 +893,13 @@ watch(operationDateRange, () => {
       overflow: hidden;
       display: flex;
       flex-direction: column;
-
+      border-radius: var(--Radius-r-20, 20px);
+background: var(--Neutral-white, #FFF);
+box-shadow: 0 2px 20px 0 var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
       .operationTableHeader {
         display: flex;
         padding: 1rem 2rem;
-        background: #f9f9f9;
+     
         border-bottom: 1px solid #e0e0e0;
 
         .operationTableHeaderItem {
@@ -939,7 +949,7 @@ watch(operationDateRange, () => {
       text-align: center;
       margin-top: 0.5rem;
       position: absolute;
-      bottom: 2%;
+      bottom: 3.5%;
       left: 50%;
       transform: translateX(-50%);
 
