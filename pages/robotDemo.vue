@@ -72,7 +72,7 @@
     </transition>
 
     <!-- 文字輸入區域 -->
-    <transition name="slide-up" >
+    <transition name="slide-up">
       <div
         v-if="showTextInput && !isListening && !showVoiceError"
         class="text-input-section"
@@ -94,9 +94,7 @@
           >
             <img :src="sendSvg" alt="送出" />
           </button>
-          <button class="cancel-btn" @click="closeTextInput">
-            取消
-          </button>
+          <button class="cancel-btn" @click="closeTextInput">取消</button>
         </div>
       </div>
     </transition>
@@ -221,7 +219,11 @@
           <p class="save-success-text">已幫您儲存到「健康日誌」</p>
 
           <!-- 圖片（沒有收到聲音的那張） -->
-          <img :src="assistantDefaultGif" alt="保存成功" class="save-success-image" />
+          <img
+            :src="assistantDefaultGif"
+            alt="保存成功"
+            class="save-success-image"
+          />
 
           <!-- 按鈕區域 -->
           <div class="save-success-buttons">
@@ -233,10 +235,7 @@
             >
               重新錄音
             </button>
-            <button
-              class="voice-btn voice-btn-view"
-              @click="viewHealthLog"
-            >
+            <button class="voice-btn voice-btn-view" @click="viewHealthLog">
               觀看內容
             </button>
           </div>
@@ -911,7 +910,6 @@ const showHistory = () => {
   if (process.client) {
     // 只顯示文字輸入區域，不打開歷史頁面
     showTextInput.value = true;
-    
 
     // 保留 @after-enter="focusTextInput" 作為備援
   }
@@ -1390,7 +1388,7 @@ const startVoiceTimeout = (hasText = false) => {
     clearTimeout(voiceTimeout);
     voiceTimeout = null;
   }
-  
+
   // 不再設置任何超時，無論是否有文字
   // 用戶可以隨時選擇「重新錄音」或「送出語音」
 };
@@ -1527,11 +1525,16 @@ const initSpeechRecognition = () => {
               closeVoiceModal();
               break;
             case "no-speech":
-          // ✅ Android 優化：no-speech 錯誤時自動重新啟動，減少延遲
-          // ✅ 即使重啟失敗，也不關閉模態框，讓用戶可以繼續操作
-          if (isListening.value && !isRecordingComplete.value && !finalizedByUs && voiceModalOpen.value) {
-            const isAndroid = /Android/i.test(navigator.userAgent);
-            const delay = isAndroid ? 100 : 50; // ✅ 減少延遲，加快響應
+              // ✅ Android 優化：no-speech 錯誤時自動重新啟動，減少延遲
+              // ✅ 即使重啟失敗，也不關閉模態框，讓用戶可以繼續操作
+              if (
+                isListening.value &&
+                !isRecordingComplete.value &&
+                !finalizedByUs &&
+                voiceModalOpen.value
+              ) {
+                const isAndroid = /Android/i.test(navigator.userAgent);
+                const delay = isAndroid ? 100 : 50; // ✅ 減少延遲，加快響應
                 try {
                   setTimeout(() => {
                     if (
@@ -1545,7 +1548,10 @@ const initSpeechRecognition = () => {
                         recognitionRef.start();
                         console.log("no-speech 自動重新啟動錄音");
                       } catch (startError) {
-                        console.warn("no-speech 重啟失敗，嘗試延遲重試:", startError);
+                        console.warn(
+                          "no-speech 重啟失敗，嘗試延遲重試:",
+                          startError
+                        );
                         // ✅ Android 優化：快速重試，減少延遲
                         if (isAndroid) {
                           setTimeout(() => {
@@ -1560,7 +1566,10 @@ const initSpeechRecognition = () => {
                                 recognitionRef.start();
                                 console.log("no-speech 重試啟動成功");
                               } catch (retryError) {
-                                console.warn("no-speech 重試啟動失敗，但不關閉模態框:", retryError);
+                                console.warn(
+                                  "no-speech 重試啟動失敗，但不關閉模態框:",
+                                  retryError
+                                );
                                 // ✅ 即使重試失敗，也不關閉模態框
                               }
                             }
@@ -1578,7 +1587,12 @@ const initSpeechRecognition = () => {
             case "audio-capture":
               // ✅ Android 優化：audio-capture 錯誤時自動重新啟動，減少延遲
               // ✅ 即使重啟失敗，也不關閉模態框，讓用戶可以繼續操作
-              if (isListening.value && !isRecordingComplete.value && !finalizedByUs && voiceModalOpen.value) {
+              if (
+                isListening.value &&
+                !isRecordingComplete.value &&
+                !finalizedByUs &&
+                voiceModalOpen.value
+              ) {
                 const isAndroid = /Android/i.test(navigator.userAgent);
                 const delay = isAndroid ? 100 : 50; // ✅ 減少延遲，加快響應
                 try {
@@ -1594,7 +1608,10 @@ const initSpeechRecognition = () => {
                         recognitionRef.start();
                         console.log("audio-capture 自動重新啟動錄音");
                       } catch (startError) {
-                        console.warn("audio-capture 重啟失敗，嘗試延遲重試:", startError);
+                        console.warn(
+                          "audio-capture 重啟失敗，嘗試延遲重試:",
+                          startError
+                        );
                         // ✅ Android 優化：快速重試，減少延遲
                         if (isAndroid) {
                           setTimeout(() => {
@@ -1609,7 +1626,10 @@ const initSpeechRecognition = () => {
                                 recognitionRef.start();
                                 console.log("audio-capture 重試啟動成功");
                               } catch (retryError) {
-                                console.warn("audio-capture 重試啟動失敗，但不關閉模態框:", retryError);
+                                console.warn(
+                                  "audio-capture 重試啟動失敗，但不關閉模態框:",
+                                  retryError
+                                );
                                 // ✅ 即使重試失敗，也不關閉模態框
                               }
                             }
@@ -1653,10 +1673,10 @@ const initSpeechRecognition = () => {
         if (process.client && voiceModalOpen.value) {
           // ✅ 只要模態框還開著，就嘗試自動重啟（不檢查 isListening，因為可能暫時為 false）
           const isAndroid = /Android/i.test(navigator.userAgent);
-          
+
           // ✅ Android 優化：極速響應，幾乎零延遲
           const delay = isAndroid ? 10 : 20; // ✅ 極速響應，從 50ms 降到 10ms
-          
+
           try {
             setTimeout(() => {
               // ✅ 只檢查模態框是否還開著，不檢查其他狀態（因為狀態可能暫時變化）
@@ -1674,7 +1694,11 @@ const initSpeechRecognition = () => {
                   if (isAndroid) {
                     setTimeout(() => {
                       // ✅ 再次檢查模態框是否還開著
-                      if (voiceModalOpen.value && recognitionRef && !finalizedByUs) {
+                      if (
+                        voiceModalOpen.value &&
+                        recognitionRef &&
+                        !finalizedByUs
+                      ) {
                         try {
                           recognitionRef.start();
                           if (!isListening.value) {
@@ -1682,7 +1706,10 @@ const initSpeechRecognition = () => {
                           }
                           console.log("重試啟動語音識別成功");
                         } catch (retryError) {
-                          console.warn("重試啟動語音識別失敗，但不關閉模態框:", retryError);
+                          console.warn(
+                            "重試啟動語音識別失敗，但不關閉模態框:",
+                            retryError
+                          );
                           // ✅ 即使重試失敗，也不關閉模態框，讓用戶可以手動操作
                           // 不調用 reallyCloseVoiceModal()，保持模態框打開
                           // 用戶可以點擊「重新錄音」按鈕來手動重啟
@@ -1776,23 +1803,143 @@ async function runSummaryFlow(inputText, inputType = "voice") {
     // 呼叫 ChatGPT 產生精簡內容
     const aiResponse = await callChatGPT(
       inputText,
-      `你是一個「健康管理的陪伴機器人」，你的工作只有一項：
-1.忠實紀錄與潤飾使用者的症狀/身體困擾內容，並整理成可交給醫師的結構化紀錄。
-【輸出格式要求】
-只輸出以下一個區塊（不要加星號、不要加多餘符號、不要加說明文字）：
-（逐句潤飾我說的內容，使語句更清楚流暢，但意思完全相同。
-如果有多個症狀或事件，可分多筆，但每筆資料必須是我說過的內容。）
-【限制規則】
-1. 忠實記錄我說的每一句話或資訊（不可遺漏）。
-2. 不改變原意，只能優化語序、加標點、使語句更自然。
-3. 不可推理或猜測病因。
-4. 不可補充我沒說的內容。
-5. 不可加入任何建議、分析、評論或衛教。
-6. 不可使用 *、#、-、>、Markdown 格式符號。
-7. 不可使用條列符號，全部以自然語句呈現。
-8. 只能使用繁體字回應。
-請嚴格遵守以上格式與規則，開始後不需要再次重述任務或格式。
+      `你是一位健康管理 app 內的對話式紀錄整理機器人。 任務是根據患者最近七天內的對話內容，整理可閱讀的一週症狀與生活摘要。
 
+你不是醫療人員。 不提供診斷、不解釋原因、不判斷嚴重度、不給建議； 僅整理患者原話，安全、簡單呈現。
+
+
+語言規則
+
+1. 七天對話 全文英文 → 英文輸出
+
+2. 只要出現任何中文（含繁體）→ 繁體中文輸出
+
+3. 不翻譯、不調整語氣
+
+4. 英文次數格式：mentioned X times this week
+
+
+核心原則
+
+1. 僅使用患者原文
+
+2. 不補充未出現資訊
+
+3. 不做任何醫療推論
+
+4. 簡短、可快速閱讀
+
+5. 症狀名稱與描述不重複
+
+
+類型判斷
+
+· 睡眠、情緒、食慾、緊繃 → 症狀
+
+· 人的感受或狀態 → 症狀
+
+· 事件或情境 → 生活
+
+
+症狀規則
+
+1. 僅整理患者主動提到的不舒服
+
+2. 症狀名稱用患者原話，不合併
+
+3. 語意相近可並列（逗號分隔），次數各自計算
+
+4. 症狀需標示歸類（呈現用）：
+
+o 緊繃 → 身體
+
+o 睡眠相關 → 睡眠
+
+o 喉嚨相關 → 喉嚨
+
+o 其餘 → 可辨識部位
+
+o 無法辨識 → 全身
+
+症狀呈現
+
+· 避免歸類與症狀同詞重複
+
+· 若重複，改為：歸類：狀態
+
+· 僅使用患者原文詞彙 （例：睡眠：不好／喉嚨：疼痛／身體：緊繃）
+
+
+次數
+
+· 講幾次記幾次，不合併、不去重
+
+· 中文：本週提及 X 次
+
+
+生活（含藥品）
+
+1. 僅記錄事件，不解釋
+
+2. 同類事件可合併
+
+3. 同句含感受＋事件：
+
+o 感受 → 症狀
+
+o 事件 → 生活
+
+藥品
+
+· 永遠列生活第 1 項
+
+· 依出現順序
+
+· 格式：藥名-數量-頻率（原文）
+
+· 使用方式未變不重複
+
+· 有更改 → 新增一筆＋日期＋「改」
+
+
+固定輸出格式
+
+中文
+
+這週你提到的狀況有
+
+症狀
+
+症狀名稱：描述 本週提及X次
+
+
+生活
+
+1 事件描述
+
+
+我們幫您的身體變化紀錄起來，請您放心。
+
+英文（全文英文時）
+
+This week, you mentioned the following:
+
+Symptoms
+
+Symptom: description, mentioned X times this week
+
+Lifestyle
+
+1. Event description
+
+We’ve recorded these body changes for you. Please feel at ease.
+
+
+無資料
+
+· 中文：這週還沒有新的留言唷，請您想到什麼，隨時都可以跟我們說。
+
+· 英文：There were no new messages this week. Feel free to share anything with us anytime.
 `
     );
 
@@ -2017,13 +2164,13 @@ const startRecording = () => {
     // 重置 Android 相關狀態
     finalTranscript = ""; // ✅ 一定要清，不然會沿用上次錄音
     currentTranscript.value = "";
-    
+
     // ✅ 立即開始錄音（不再等待按鈕）
     if (recognitionRef) {
       isListening.value = true;
-      
+
       const isAndroid = /Android/i.test(navigator.userAgent);
-      
+
       // Android 兼容性：立即準備文字元素
       const prepareTranscriptEl = () => {
         const transcriptEl =
@@ -2037,10 +2184,10 @@ const startRecording = () => {
           transcriptEl.offsetHeight;
         }
       };
-      
+
       // ✅ Android 優化：立即準備，不等待 nextTick
       prepareTranscriptEl();
-      
+
       // ✅ Android 優化：立即啟動，零延遲
       const startRecognition = () => {
         try {
@@ -2063,7 +2210,11 @@ const startRecording = () => {
                 // ✅ Android 優化：如果快速重試失敗，立即再試一次
                 const finalRetryDelay = isAndroid ? 30 : 100;
                 setTimeout(() => {
-                  if (isListening.value && recognitionRef && voiceModalOpen.value) {
+                  if (
+                    isListening.value &&
+                    recognitionRef &&
+                    voiceModalOpen.value
+                  ) {
                     try {
                       recognitionRef.start();
                       startVoiceTimeout(false);
@@ -2078,7 +2229,7 @@ const startRecording = () => {
           }, retryDelay);
         }
       };
-      
+
       // ✅ Android 優化：立即啟動，零延遲，不等待任何東西
       if (isAndroid) {
         // Android 上立即啟動，不等待 DOM 更新，不等待任何延遲
@@ -2519,10 +2670,10 @@ async function handleManualInput() {
   // 所有輸入都會進入摘要模式（移除50字限制）
   const raw = input;
   textInput.value = "";
-  
+
   // ✅ 輸入完成後立即關閉文字輸入框
   closeTextInput();
-  
+
   try {
     await runSummaryFlow(raw, "text"); // 不新增聊天泡泡，但 DB 會寫兩筆
   } finally {
@@ -4233,7 +4384,7 @@ const vClickOutside = {
     margin: 0 auto;
     width: 90%;
     max-width: 500px;
-    
+
     .text-input {
       flex: 1;
       border: none;
@@ -4242,7 +4393,7 @@ const vClickOutside = {
       background: transparent;
       color: #2d3748;
       min-width: 0;
- 
+
       &::placeholder {
         color: #718096;
       }
@@ -4265,8 +4416,8 @@ const vClickOutside = {
       img {
         width: 20px;
         height: 20px;
-        filter: brightness(0) saturate(100%) invert(58%) sepia(95%) saturate(2000%)
-          hue-rotate(60deg) brightness(100%) contrast(85%);
+        filter: brightness(0) saturate(100%) invert(58%) sepia(95%)
+          saturate(2000%) hue-rotate(60deg) brightness(100%) contrast(85%);
       }
 
       &:disabled {
@@ -4284,12 +4435,12 @@ const vClickOutside = {
     .cancel-btn {
       color: var(--Neutral-500, #666);
 
-font-size: var(--Text-font-size-18, 18px);
-font-style: normal;
-font-weight: 400;
+      font-size: var(--Text-font-size-18, 18px);
+      font-style: normal;
+      font-weight: 400;
 
-letter-spacing: 2.7px;
-border: none;
+      letter-spacing: 2.7px;
+      border: none;
       flex-shrink: 0;
       transition: all 0.3s ease;
       background: transparent;
@@ -4690,14 +4841,12 @@ border: none;
   100% {
     transform: scale(1);
     box-shadow: 0 0 30px rgba(116, 188, 31, 0.6),
-      0 0 60px rgba(116, 188, 31, 0.4),
-      inset 0 0 20px rgba(255, 255, 255, 0.3);
+      0 0 60px rgba(116, 188, 31, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.3);
   }
   50% {
     transform: scale(1.05);
     box-shadow: 0 0 40px rgba(116, 188, 31, 0.8),
-      0 0 80px rgba(116, 188, 31, 0.6),
-      inset 0 0 25px rgba(255, 255, 255, 0.4);
+      0 0 80px rgba(116, 188, 31, 0.6), inset 0 0 25px rgba(255, 255, 255, 0.4);
   }
 }
 
