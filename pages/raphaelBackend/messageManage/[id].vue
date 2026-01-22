@@ -28,10 +28,7 @@
           <!-- 影片縮圖 -->
           <div class="video-thumbnail">
             <img
-              :src="
-                messageDetail?.videoThumbnail ||
-                '/assets/imgs/backend/video-placeholder.jpg'
-              "
+              src="/assets/imgs/banner-2.png"
               alt="影片縮圖"
             />
           </div>
@@ -58,8 +55,9 @@
               target="_blank"
             >
               <h4>
-                <img src="/assets/imgs/backend/link.svg" alt="連結" />
                 影片連結
+                <img src="/assets/imgs/backend/linkGray.svg" alt="連結" />
+                
               </h4>
               <div
                 v-if="messageDetail?.videoLink"
@@ -125,7 +123,7 @@
           ></textarea>
           <div class="reply-actions">
             <button class="btn submit-btn" @click="handleSubmitReply">
-              送出回覆
+              回覆
             </button>
           </div>
         </div>
@@ -456,15 +454,15 @@ onMounted(() => {
         }
 
         .video-link {
-          grid-column: 1 / -1;
+        
           margin-top: 1rem;
           padding-top: 1rem;
-          border-top: 1px solid #e5e9f2;
+       
 
           h4 {
             display: flex;
             align-items: center;
-            gap: 8px;
+
             color: $primary-600;
             font-size: 18px;
             font-weight: 600;
@@ -480,9 +478,11 @@ onMounted(() => {
             font-weight: 400;
             letter-spacing: 2.7px;
 
+            margin-top: 1rem;
             img {
-              width: 20px;
-              height: 20px;
+              width: 18px;
+              height: 18px;
+              transform: translateY(2px);
             }
           }
 
@@ -518,9 +518,10 @@ onMounted(() => {
 
         .comment-header {
           display: flex;
-          justify-content: space-between;
+ 
           align-items: center;
           margin-bottom: 1rem;
+          gap: 1rem;
 
           .comment-user {
             display: flex;
@@ -638,8 +639,8 @@ onMounted(() => {
           justify-content: flex-end;
 
           .submit-btn {
-            padding: 8px 24px;
-            background: $chip-success;
+            padding: 9px 12px;
+            background: var(--Secondary-default, #74BC1F);
             color: #fff;
             border: none;
             border-radius: 6px;
@@ -647,9 +648,9 @@ onMounted(() => {
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
-
+            letter-spacing: 2.7px;
             &:hover {
-              background: #0d8a82;
+              background: var(--Secondary-hover, #65A31B);
             }
           }
         }

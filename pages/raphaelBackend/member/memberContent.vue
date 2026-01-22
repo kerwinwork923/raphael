@@ -27,6 +27,23 @@
       @close="closeLife"
     />
 
+    <EditBasicInfoModal
+      :show="showEditBasicModal"
+      :initial-data="{
+        name: member?.Name ?? '',
+        birthday: member?.Birthday ?? '',
+        phone: member?.Mobile ?? '',
+      }"
+      @close="closeEditBasicModal"
+      @submit="handleEditBasicSubmit"
+    />
+
+    <DeleteMemberModal
+      :show="showDeleteMemberModal"
+      @close="closeDeleteMemberModal"
+      @confirm="handleDeleteMemberConfirm"
+    />
+
     <!-- ───── 主要內容 ───── -->
     <div class="memberInfoContent">
       <!-- 標題列 -->
@@ -56,8 +73,8 @@
               <div class="memberInfoCard2Header">
                 <h3>基本資料</h3>
                 <div class="memberInfoIconGroup">
-                  <img src="/assets/imgs/backend/editGray.svg" alt="edit" />
-                  <img src="/assets/imgs/backend/deleteGray.svg" alt="delete" />
+                  <img src="/assets/imgs/backend/editGray.svg" @click="openEditBasicModal" alt="edit" />
+                  <img src="/assets/imgs/backend/deleteGray.svg" @click="openDeleteMemberModal" alt="delete" />
                 </div>
               </div>
             
@@ -1138,6 +1155,8 @@ import AnalysisChart from "~/components/raphaelBackend/AnalysisChart.vue";
 import ContractUserAlert from "~/components/raphaelBackend/ContractUserAlert.vue";
 import AutonomicNerveAlert from "~/components/raphaelBackend/AutonomicNerve.vue";
 import LifeDetectAlert from "~/components/raphaelBackend/LifeDetectAlert.vue";
+import EditBasicInfoModal from "~/components/raphaelBackend/EditBasicInfoModal.vue";
+import DeleteMemberModal from "~/components/raphaelBackend/DeleteMemberModal.vue";
 import { useSeo } from "~/composables/useSeo";
 const router = useRouter();
 const route = useRoute();
@@ -1192,6 +1211,10 @@ const homeOrders = ref<any[]>([]);
 
 const showContract = ref(false);
 const contractList = ref<any[]>([]);
+
+// 基本資料編輯和刪除會員彈跳視窗
+const showEditBasicModal = ref(false);
+const showDeleteMemberModal = ref(false);
 
 /* ---------- refs ---------- */
 const homeDateRange = ref<Date[] | null>(null);
@@ -2163,6 +2186,106 @@ function openLife(life: any) {
 }
 function closeLife() {
   showLife.value = false;
+}
+
+// 基本資料編輯相關函數
+function openEditBasicModal() {
+  showEditBasicModal.value = true;
+}
+
+function closeEditBasicModal() {
+  showEditBasicModal.value = false;
+}
+
+async function handleEditBasicSubmit(data: {
+  name: string;
+  birthday: string;
+  phone: string;
+}) {
+  const { token, admin, sel } = getAuth();
+  if (!token || !admin || !sel.MID) {
+    alert("請先登入");
+    return;
+  }
+
+  try {
+    // TODO: 替換為實際的 API 端點
+    const response = await fetch(
+      "https://23700999.com:8081/HMA/API_UpdateMemberBasicInfo.jsp",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          AdminID: admin,
+          Token: token,
+          MID: sel.MID,
+          Name: data.name,
+          Birthday: data.birthday,
+          Mobile: data.phone,
+        }),
+      }
+    );
+
+    const result = await response.json();
+    if (result.Result === "OK") {
+      alert("基本資料更新成功");
+      closeEditBasicModal();
+      // 重新載入會員資料
+      await refresh();
+    } else {
+      alert(result.Message || "更新失敗，請稍後再試");
+    }
+  } catch (error) {
+    console.error("更新基本資料失敗:", error);
+    alert("更新失敗，請稍後再試");
+  }
+}
+
+// 刪除會員相關函數
+function openDeleteMemberModal() {
+  showDeleteMemberModal.value = true;
+}
+
+function closeDeleteMemberModal() {
+  showDeleteMemberModal.value = false;
+}
+
+async function handleDeleteMemberConfirm() {
+  const { token, admin, sel } = getAuth();
+  if (!token || !admin || !sel.MID) {
+    alert("請先登入");
+    return;
+  }
+
+  try {
+    // TODO: 替換為實際的 API 端點
+    const response = await fetch(
+      "https://23700999.com:8081/HMA/API_DeleteMember.jsp",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          AdminID: admin,
+          Token: token,
+          MID: sel.MID,
+          Mobile: sel.Mobile ?? "",
+        }),
+      }
+    );
+
+    const result = await response.json();
+    if (result.Result === "OK") {
+      alert("會員已刪除");
+      closeDeleteMemberModal();
+      // 返回會員列表
+      router.push("/raphaelBackend/member");
+    } else {
+      alert(result.Message || "刪除失敗，請稍後再試");
+    }
+  } catch (error) {
+    console.error("刪除會員失敗:", error);
+    alert("刪除失敗，請稍後再試");
+  }
 }
 
 const props = defineProps<{ record: any }>();
