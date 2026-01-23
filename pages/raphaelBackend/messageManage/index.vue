@@ -4,6 +4,7 @@
 
     <!-- ─────────────── Main Content ─────────────── -->
     <main class="content">
+      
       <!-- page header -->
       <header class="page-header">
         <h2 class="title">
@@ -14,6 +15,7 @@
 
       <!-- toolbar / filters -->
       <section class="toolbar">
+
         <!-- 搜尋欄位 -->
         <div class="search-wrapper">
           <input
@@ -206,6 +208,8 @@ interface VideoOption {
   label: string;
   value: string;
 }
+
+
 
 /* ---------- 響應式資料 ---------- */
 const messages = ref<Message[]>([]);
@@ -694,14 +698,19 @@ watch([searchKeyword, selectedVideo, dateRange], () => {
           cursor: pointer;
           transition: all 0.2s;
 
+          
           &.replied {
-            background: $chip-success;
-            color: #fff;
+            border-radius: 4px;
+border: 1px solid var(--Primary-default, #1BA39B);
+background: var(--primary-400-opacity-10, rgba(27, 163, 155, 0.10));
+color: var(--Primary-default, #1BA39B);
           }
 
           &.unreplied {
-            background: #ec4f4f;
-            color: #fff;
+            border-radius: 4px;
+border: 1px solid var(--Primary-default, #EC4F4F);
+background: var(--warning-300-opacity-10, rgba(236, 79, 79, 0.10));
+color: var(--Warning-default, #EC4F4F);
           }
         }
 
