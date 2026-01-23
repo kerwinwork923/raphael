@@ -4,16 +4,16 @@
       <div class="editBasicInfoModalBox">
         <!-- 標題區域 -->
         <div class="editBasicInfoModalHeader">
-          <div class="editBasicInfoModalIcon">
-            <span>NP</span>
-          </div>
+          <img src="/assets/imgs/backend/Subtract.svg" alt="" />
           <div class="editBasicInfoModalTitleGroup">
             <h3>基本資料編輯</h3>
             <h4>info edit</h4>
           </div>
         </div>
 
+        <div class="editBasicInfoHR"></div>
         <!-- 表單區域 -->
+         
         <div class="editBasicInfoModalForm">
           <div class="editBasicInfoModalField">
             <label>姓名</label>
@@ -115,25 +115,12 @@ function handleSubmit() {
 </script>
 
 <style scoped lang="scss">
-// 淡入淡出動畫
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-.fade-enter-to,
-.fade-leave-from {
-  opacity: 1;
-}
+
 
 .editBasicInfoModal {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
+
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -151,14 +138,20 @@ function handleSubmit() {
   padding: 2rem;
   animation: slideUp 0.3s ease;
 
+  border-radius: var(--Radius-r-20, 20px);
+border: 3px solid var(--Primary-default, #1BA39B);
+background: var(--neutral-white-opacity-30, rgba(255, 255, 255, 0.30));
+box-shadow: 0 2px 20px 0 var(--primary-400-opacity-25, rgba(27, 163, 155, 0.25));
+backdrop-filter: blur(25px);
+
   @keyframes slideUp {
     from {
       transform: translateY(20px);
-      opacity: 0;
+  
     }
     to {
       transform: translateY(0);
-      opacity: 1;
+      
     }
   }
 }
@@ -167,29 +160,28 @@ function handleSubmit() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
+  gap: .5rem;
+  margin-bottom: .5rem;
+  
+
+  img {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 9.8px;
+      border: 1px solid var(--Primary-default, #1ba39b);
+      padding: 2px 4px;
+    }
 }
 
-.editBasicInfoModalIcon {
-  width: 60px;
-  height: 60px;
-  background: var(--Primary-default, #1ba39b);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  span {
-    color: #fff;
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
+.editBasicInfoHR{
+    width: 100%;
+    height: 1px;
+    background: var(--Primary-200, #B1C0D8);
   }
-}
 
 .editBasicInfoModalTitleGroup {
   text-align: center;
+
 
   h3 {
     color: #2d3047;
@@ -200,12 +192,11 @@ function handleSubmit() {
   }
 
   h4 {
-    color: #6d8ab6;
-    font-size: 14px;
-    font-weight: 400;
-    letter-spacing: 0.5px;
-    margin: 0;
-    text-transform: lowercase;
+    color: var(--Primary-default, #1BA39B);
+font-size: var(--Text-font-size-18, 18px);
+font-style: normal;
+font-weight: 400;
+letter-spacing: 0.09px;
   }
 }
 
@@ -214,6 +205,7 @@ function handleSubmit() {
   flex-direction: column;
   gap: 1.5rem;
   margin-bottom: 2rem;
+  margin-top: .65rem;
 }
 
 .editBasicInfoModalField {
@@ -222,10 +214,13 @@ function handleSubmit() {
   gap: 0.5rem;
 
   label {
-    color: #2d3047;
-    font-size: 16px;
-    font-weight: 500;
-    letter-spacing: 0.5px;
+    color: var(--Primary-600, #2D3047);
+
+font-size: var(--Text-font-size-24, 24px);
+font-style: normal;
+font-weight: 400;
+
+letter-spacing: 3.6px;
   }
 
   input {
@@ -237,7 +232,15 @@ function handleSubmit() {
     color: #2d3047;
     background: #fff;
     transition: all 0.2s ease;
+    overflow: hidden;
+color: var(--Primary-default, #1BA39B);
+text-overflow: ellipsis;
 
+font-size: var(--Text-font-size-18, 18px);
+font-style: normal;
+font-weight: 400;
+line-height: var(--lineHeight-line-height-18, 29.1px); /* 161.667% */
+letter-spacing: 2.7px;
     &:focus {
       outline: none;
       border-color: var(--Primary-default, #1ba39b);
@@ -253,7 +256,7 @@ function handleSubmit() {
 .editBasicInfoModalActions {
   display: flex;
   gap: 1rem;
-  justify-content: flex-end;
+  justify-content: center;
 
   button {
     padding: 0.75rem 2rem;
@@ -265,23 +268,17 @@ function handleSubmit() {
     transition: all 0.2s ease;
     letter-spacing: 0.5px;
 
-    &:focus {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(27, 163, 155, 0.2);
-    }
   }
 
   .btn-close {
-    background: #b1c0d8;
-    color: #fff;
+    background-color: transparent;
+ 
 
-    &:hover {
-      background: #9aa8c0;
-    }
   }
 
   .btn-submit {
-    background: var(--Primary-default, #1ba39b);
+    border-radius: 6px;
+    background: var(--Primary-default, #1BA39B);
     color: #fff;
 
     &:hover {

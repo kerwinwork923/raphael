@@ -96,12 +96,13 @@ function handleConfirm() {
 }
 
 .deleteMemberModalText {
-  color: #2d3047;
-  font-size: 18px;
-  font-weight: 400;
-  letter-spacing: 0.5px;
-  margin: 0;
-  line-height: 1.5;
+  color: var(--Primary-300, #6D8AB6);
+
+font-size: 16px;
+font-style: normal;
+font-weight: 400;
+line-height: 25.888px; /* 161.8% */
+letter-spacing: 0.5px;
 }
 
 .deleteMemberModalDivider {
@@ -142,7 +143,14 @@ function handleConfirm() {
   }
 
   .btn-cancel {
-    color: #6d8ab6;
+    color: var(--shade-gray-300, #CCC);
+text-align: center;
+
+font-size: 16px;
+font-style: normal;
+font-weight: 400;
+line-height: 100%; /* 16px */
+letter-spacing: 0.5px;
 
     &:hover {
       background: #f5f7fa;

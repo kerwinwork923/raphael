@@ -271,7 +271,7 @@
 
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
-                <div
+                <!-- <div
                   class="memberInfoTableTitleItem"
                   @click="handleSort('home', 'ConsultationDate')"
                 >
@@ -281,7 +281,7 @@
                     alt="sort"
                     class="sortIcon"
                   />
-                </div>
+                </div> -->
                 <div
                   class="memberInfoTableTitleItem"
                   @click="handleSort('home', 'FavoriteName')"
@@ -293,17 +293,17 @@
                     class="sortIcon"
                   /> -->
                 </div>
-                <div
+                <!-- <div
                   class="memberInfoTableTitleItem"
                   @click="handleSort('home', 'PointInfo')"
                 >
                   點位資訊
-                  <!-- <img
+                  <img
                     src="/assets/imgs/backend/sort.svg"
                     alt="sort"
                     class="sortIcon"
-                  /> -->
-                </div>
+                  />
+                </div> -->
                 <div
                   class="memberInfoTableTitleItem"
                   @click="handleSort('home', 'TreatmentTime')"
@@ -336,15 +336,15 @@
                   v-for="row in paginatedHome"
                   :key="row.id"
                 >
-                  <div class="memberInfoTableRowItem">
+                  <!-- <div class="memberInfoTableRowItem">
                     {{ row.ConsultationDate || "—" }}
-                  </div>
+                  </div> -->
                   <div class="memberInfoTableRowItem">
                     {{ row.FavoriteName || "—" }}
                   </div>
-                  <div class="memberInfoTableRowItem">
+                  <!-- <div class="memberInfoTableRowItem">
                     {{ row.PointInfo || "—" }}
-                  </div>
+                  </div> -->
                   <div class="memberInfoTableRowItem">
                     {{ row.TreatmentTime || "—" }}
                   </div>

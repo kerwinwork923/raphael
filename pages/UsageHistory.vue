@@ -184,6 +184,7 @@ import redLightClothes from "@/assets/imgs/redLightClothes.png";
 import normalClothes from "@/assets/imgs/normalClothes.png";
 import redLightClothes2 from "@/assets/imgs/redLightClothes2.png";
 import normalClothesV5 from "@/assets/imgs/normalClothesV5.png";
+import smartClothesV6 from "@/assets/imgs/smartClothesV6.png";
 
 import RaphaelLoading from "@/components/RaphaelLoading.vue";
 import TitleMenu from "@/components/TitleMenu.vue";
@@ -231,6 +232,7 @@ export default {
       三效深眠衣: normalClothes,
       居家治療儀: redLightClothes2,
       護您穩平衡衣: normalClothesV5,
+      第六代紅光極智衣: smartClothesV6,
     };
 
     // ------------------ API 抓取資料 ------------------
