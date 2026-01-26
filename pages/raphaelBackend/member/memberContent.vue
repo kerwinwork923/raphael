@@ -188,91 +188,91 @@
                   prepend-icon="i-calendar"
                   teleport="body"
                 />
-                <img
-                  src="/assets/imgs/backend/search.svg"
-                  alt="search"
-                  style="cursor: pointer; width: 20px; height: 20px"
-                />
                 <!-- 看診日期下拉選單 -->
-                <div class="filterDropdownWrapper">
-                  <div class="filterTrigger" @click="toggleHomeFilter">
-                    <span>看診日期</span>
-                    <img
-                      src="/assets/imgs/backend/arrow-down.svg"
-                      alt="arrow"
-                      :class="{ rotated: showHomeFilter }"
-                    />
-                  </div>
-                  <div
-                    class="filterDropdownPanel"
-                    v-if="showHomeFilter"
-                    @click.stop
-                  >
-                    <div class="filterCategories">
-                      <div
-                        class="filterCategory"
-                        :class="{
-                          active:
-                            selectedHomeFilterCategory === 'ConsultationDate',
-                        }"
-                        @click="selectHomeFilterCategory('ConsultationDate')"
-                      >
-                        看診日期
+                <div class="filterDropdown">
+                  <div class="filterDropdownWrapper">
+                    <div class="filterTrigger" @click="toggleHomeFilter">
+                      <span>看診日期</span>
+                      <img
+                        src="/assets/imgs/backend/arrow-down.svg"
+                        alt="arrow"
+                        :class="{ rotated: showHomeFilter }"
+                      />
+                    </div>
+                    <div
+                      class="filterDropdownPanel"
+                      v-if="showHomeFilter"
+                      @click.stop
+                    >
+                      <div class="filterCategories">
+                        <div
+                          class="filterCategory"
+                          :class="{
+                            active:
+                              selectedHomeFilterCategory === 'ConsultationDate',
+                          }"
+                          @click="selectHomeFilterCategory('ConsultationDate')"
+                        >
+                          看診日期
+                        </div>
+                        <div
+                          class="filterCategory"
+                          :class="{
+                            active:
+                              selectedHomeFilterCategory === 'FavoriteName',
+                          }"
+                          @click="selectHomeFilterCategory('FavoriteName')"
+                        >
+                          我的最愛名稱
+                        </div>
+                        <div
+                          class="filterCategory"
+                          :class="{
+                            active:
+                              selectedHomeFilterCategory === 'TreatmentArea',
+                          }"
+                          @click="selectHomeFilterCategory('TreatmentArea')"
+                        >
+                          治療部位
+                        </div>
+                        <div
+                          class="filterCategory"
+                          :class="{
+                            active:
+                              selectedHomeFilterCategory === 'TreatmentTime',
+                          }"
+                          @click="selectHomeFilterCategory('TreatmentTime')"
+                        >
+                          治療時間
+                        </div>
                       </div>
-                      <div
-                        class="filterCategory"
-                        :class="{
-                          active: selectedHomeFilterCategory === 'FavoriteName',
-                        }"
-                        @click="selectHomeFilterCategory('FavoriteName')"
-                      >
-                        我的最愛名稱
-                      </div>
-                      <div
-                        class="filterCategory"
-                        :class="{
-                          active:
-                            selectedHomeFilterCategory === 'TreatmentArea',
-                        }"
-                        @click="selectHomeFilterCategory('TreatmentArea')"
-                      >
-                        治療部位
-                      </div>
-                      <div
-                        class="filterCategory"
-                        :class="{
-                          active:
-                            selectedHomeFilterCategory === 'TreatmentTime',
-                        }"
-                        @click="selectHomeFilterCategory('TreatmentTime')"
-                      >
-                        治療時間
+                      <div class="filterOptions">
+                        <div
+                          class="filterOption"
+                          v-for="option in homeFilterOptions"
+                          :key="option"
+                          @click="toggleHomeFilterOption(option)"
+                        >
+                          <input
+                            type="checkbox"
+                            :checked="
+                              selectedHomeFilterOptions.includes(option)
+                            "
+                            @click.stop
+                          />
+                          <span>{{ option }}</span>
+                        </div>
                       </div>
                     </div>
-                    <div class="filterOptions">
-                      <div
-                        class="filterOption"
-                        v-for="option in homeFilterOptions"
-                        :key="option"
-                        @click="toggleHomeFilterOption(option)"
-                      >
-                        <input
-                          type="checkbox"
-                          :checked="selectedHomeFilterOptions.includes(option)"
-                          @click.stop
-                        />
-                        <span>{{ option }}</span>
-                      </div>
-                    </div>
                   </div>
+                  <!-- 搜尋關鍵字 -->
+                  <input
+                    type="text"
+                    v-model="homeKeyword"
+                    placeholder="搜尋關鍵字"
+                    class="searchKeywordInput"
+                  />
                 </div>
-                <!-- 搜尋關鍵字 -->
-                <input
-                  type="text"
-                  v-model="homeKeyword"
-                  placeholder="搜尋關鍵字"
-                  class="searchKeywordInput"
-                />
               </div>
             </div>
 
@@ -2627,112 +2627,126 @@ const isExpired = computed(() => {
               box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
             }
           }
-          .filterDropdownWrapper {
-            position: relative;
+          .filterDropdown {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
             border-radius: var(--Radius-r-50, 50px);
             background: var(--Neutral-white, #fff);
             box-shadow: 0 2px 20px 0
               var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
-            width: 250px;
-            .filterTrigger {
-              display: flex;
-              align-items: center;
-              gap: 4px;
-              padding: 0.5rem 1rem;
+            .filterDropdownWrapper {
+              position: relative;
+              width: max-content;
+              &::after {
+                content: "";
+                position: absolute;
+                background: #ddd;
+                width: 1px;
+                height: 100%;
+                top: 0;
+                right: -7px;
+              }
+              .filterTrigger {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 4px;
+                padding: 0.25rem 1rem;
+                background: #fff;
+                border-radius: 50px;
+                cursor: pointer;
+                font-size: 14px;
+                transition: all 0.2s;
+
+                img {
+                  width: 12px;
+                  height: 12px;
+                  transition: transform 0.2s;
+                  &.rotated {
+                    transform: rotate(180deg);
+                  }
+                }
+                &:hover {
+                  box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
+                }
+              }
+              .filterDropdownPanel {
+                position: absolute;
+                top: calc(100% + 8px);
+                right: 0;
+                display: flex;
+                background: #fff;
+                border-radius: 12px;
+                z-index: 100;
+                min-width: 500px;
+                max-height: 400px;
+                box-shadow: 0 2px 20px 0
+                  var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
+                overflow: hidden;
+                .filterCategories {
+                  width: auto;
+                  border-right: 1px solid #e0e0e0;
+                  padding: 1rem 0;
+                  .filterCategory {
+                    padding: 0.75rem 1rem;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    font-size: 14px;
+                    color: #666;
+                    &:hover {
+                      background: #f5f7fa;
+                    }
+                    &.active {
+                      background: rgba(27, 163, 155, 0.1);
+                      color: #1ba39b;
+                      font-weight: 500;
+                    }
+                  }
+                }
+                .filterOptions {
+                  flex: 1;
+                  padding: 1rem;
+                  overflow-y: auto;
+                  max-height: 100%;
+                  .filterOption {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                    padding: 0.5rem;
+                    cursor: pointer;
+                    border-radius: 4px;
+                    transition: background 0.2s;
+                    font-size: 14px;
+                    color: #1ba39b;
+                    &:hover {
+                      background: #f5f7fa;
+                    }
+                    input[type="checkbox"] {
+                      width: 18px;
+                      height: 18px;
+                      cursor: pointer;
+                      accent-color: #1ba39b;
+                    }
+                  }
+                }
+              }
+            }
+            .searchKeywordInput {
+              padding: 0.25rem 1rem;
               background: #fff;
+              border: none;
               border-radius: 50px;
-              cursor: pointer;
-              box-shadow: 0px 2px 12px -2px rgba(177, 192, 216, 0.5);
+              outline: none;
               font-size: 14px;
               transition: all 0.2s;
-
-              img {
-                width: 16px;
-                height: 16px;
-                transition: transform 0.2s;
-                &.rotated {
-                  transform: rotate(180deg);
-                }
+              min-width: 150px;
+              &::placeholder {
+                color: #999;
               }
-              &:hover {
+              &:focus {
                 box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
               }
-            }
-            .filterDropdownPanel {
-              position: absolute;
-              top: calc(100% + 8px);
-              right: 0;
-              display: flex;
-              background: #fff;
-              border-radius: 12px;
-              box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.15);
-              z-index: 100;
-              min-width: 500px;
-              max-height: 400px;
-              overflow: hidden;
-              .filterCategories {
-                width: auto;
-                border-right: 1px solid #e0e0e0;
-                padding: 1rem 0;
-                .filterCategory {
-                  padding: 0.75rem 1rem;
-                  cursor: pointer;
-                  transition: all 0.2s;
-                  font-size: 14px;
-                  color: #666;
-                  &:hover {
-                    background: #f5f7fa;
-                  }
-                  &.active {
-                    background: rgba(27, 163, 155, 0.1);
-                    color: #1ba39b;
-                    font-weight: 500;
-                  }
-                }
-              }
-              .filterOptions {
-                flex: 1;
-                padding: 1rem;
-                overflow-y: auto;
-                max-height: 100%;
-                .filterOption {
-                  display: flex;
-                  align-items: center;
-                  gap: 0.75rem;
-                  padding: 0.5rem;
-                  cursor: pointer;
-                  border-radius: 4px;
-                  transition: background 0.2s;
-                  font-size: 14px;
-                  color: #1ba39b;
-                  &:hover {
-                    background: #f5f7fa;
-                  }
-                  input[type="checkbox"] {
-                    width: 18px;
-                    height: 18px;
-                    cursor: pointer;
-                    accent-color: #1ba39b;
-                  }
-                }
-              }
-            }
-          }
-          .searchKeywordInput {
-            padding: 0.5rem 1rem;
-            background: #fff;
-            border: none;
-            border-radius: 50px;
-            outline: none;
-            font-size: 14px;
-            box-shadow: 0px 2px 12px -2px rgba(177, 192, 216, 0.5);
-            transition: all 0.2s;
-            min-width: 150px;
-            &::placeholder {
-              color: #999;
-            }
-            &:focus {
-              box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
             }
           }
         }
