@@ -2795,10 +2795,9 @@ const isExpired = computed(() => {
         font-size: 1rem;
         .memberInfoTableTitleItem {
           flex: 1;
-          text-align: center;
           display: flex;
           align-items: center;
-          justify-content: center;
+          justify-content: flex-start;
           gap: 4px;
           cursor: pointer;
           user-select: none;
@@ -2845,8 +2844,7 @@ const isExpired = computed(() => {
         }
         .memberInfoTableRowItem {
           flex: 1;
-          text-align: center;
-          padding: 1rem 0;
+          padding: 1rem 0.5rem;
         }
       }
     }

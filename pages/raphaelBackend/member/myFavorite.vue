@@ -311,7 +311,7 @@ onMounted(() => {
 
 // 分頁計算
 const totalPages = computed(() =>
-  Math.max(1, Math.ceil(tableData.value.length / pageSize.value))
+  Math.max(1, Math.ceil(tableData.value.length / pageSize.value)),
 );
 
 const paginatedData = computed(() => {
@@ -410,6 +410,9 @@ watch(operationDateRange, () => {
   gap: 1%;
 
   .myFavoriteContent {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
     padding: 1rem;
     padding-left: 0;
     width: 100%;
@@ -426,7 +429,6 @@ watch(operationDateRange, () => {
       width: 100%;
       display: flex;
       justify-content: space-between;
-      margin-bottom: 1.5rem;
 
       .memberNameRWD {
         display: none;
@@ -512,7 +514,6 @@ watch(operationDateRange, () => {
     .summaryCards {
       display: flex;
       gap: 1rem;
-      margin-bottom: 2rem;
       flex-wrap: wrap;
 
       @include respond-to("md") {
@@ -570,7 +571,7 @@ watch(operationDateRange, () => {
       border-radius: 20px;
       padding: 1.5rem;
       box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
-      margin-bottom: 1.5rem;
+      flex: 1;
 
       .tableHeader {
         display: flex;
@@ -582,7 +583,6 @@ watch(operationDateRange, () => {
 
         .tableHeaderItem {
           flex: 1;
-          text-align: center;
           padding: 0.5rem;
         }
       }
@@ -598,7 +598,6 @@ watch(operationDateRange, () => {
         display: flex;
         align-items: center;
         color: #666;
-        padding: 1rem 0;
         border-bottom: 1px solid #f0f0f0;
 
         &:last-child {
@@ -612,8 +611,7 @@ watch(operationDateRange, () => {
 
         .tableCell {
           flex: 1;
-          text-align: center;
-          padding: 0.5rem;
+          padding: 1rem 0.5rem;
           font-size: 14px;
         }
       }
@@ -894,12 +892,13 @@ watch(operationDateRange, () => {
       display: flex;
       flex-direction: column;
       border-radius: var(--Radius-r-20, 20px);
-background: var(--Neutral-white, #FFF);
-box-shadow: 0 2px 20px 0 var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
+      background: var(--Neutral-white, #fff);
+      box-shadow: 0 2px 20px 0
+        var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
       .operationTableHeader {
         display: flex;
         padding: 1rem 2rem;
-     
+
         border-bottom: 1px solid #e0e0e0;
 
         .operationTableHeaderItem {
