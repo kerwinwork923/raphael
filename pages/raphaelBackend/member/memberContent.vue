@@ -73,11 +73,19 @@
               <div class="memberInfoCard2Header">
                 <h3>基本資料</h3>
                 <div class="memberInfoIconGroup">
-                  <img src="/assets/imgs/backend/editGray.svg" @click="openEditBasicModal" alt="edit" />
-                  <img src="/assets/imgs/backend/deleteGray.svg" @click="openDeleteMemberModal" alt="delete" />
+                  <img
+                    src="/assets/imgs/backend/editGray.svg"
+                    @click="openEditBasicModal"
+                    alt="edit"
+                  />
+                  <img
+                    src="/assets/imgs/backend/deleteGray.svg"
+                    @click="openDeleteMemberModal"
+                    alt="delete"
+                  />
                 </div>
               </div>
-            
+
               <h5>{{ member?.GradeName || "—" }}</h5>
 
               <div class="memberInfoList">
@@ -184,7 +192,6 @@
                   src="/assets/imgs/backend/search.svg"
                   alt="search"
                   style="cursor: pointer; width: 20px; height: 20px"
-
                 />
                 <!-- 看診日期下拉選單 -->
                 <div class="filterDropdownWrapper">
@@ -324,7 +331,6 @@
                     src="/assets/imgs/backend/sort.svg"
                     alt="sort"
                     class="sortIcon"
-                    
                   />
                 </div>
               </div>
@@ -332,9 +338,14 @@
 
               <template v-if="paginatedHome.length">
                 <div
-                  class="memberInfoTableRow"
+                  class="memberInfoTableRow productUsagRecords"
                   v-for="row in paginatedHome"
                   :key="row.id"
+                  @click="
+                    router.push(
+                      `/raphaelBackend/member/myFavorite?AID=${row.AID}`,
+                    )
+                  "
                 >
                   <!-- <div class="memberInfoTableRowItem">
                     {{ row.ConsultationDate || "—" }}
@@ -355,7 +366,6 @@
                     src="/assets/imgs/backend/goNext.svg"
                     alt="detail"
                     style="cursor: pointer; position: absolute; right: 0"
-                    @click="router.push(`/raphaelBackend/member/myFavorite?AID=${row.AID}`)"
                   />
                 </div>
               </template>
@@ -615,9 +625,10 @@
 
               <template v-if="paginatedANS.length">
                 <div
-                  class="memberInfoTableRow"
+                  class="memberInfoTableRow hrvRecord"
                   v-for="a in paginatedANS"
                   :key="a.CheckTime"
+                  @click="openANS(a)"
                 >
                   <div class="memberInfoTableRowItem">{{ a.CheckTime }}</div>
                   <div class="memberInfoTableRowItem">
@@ -633,7 +644,6 @@
                     src="/assets/imgs/backend/goNext.svg"
                     alt="detail"
                     style="cursor: pointer"
-                    @click="openANS(a)"
                   />
                 </div>
               </template>
@@ -1494,7 +1504,7 @@ onUnmounted(() => {
 });
 
 const pageNumberList = computed(() =>
-  pageButtons(totalPagesHome.value, pageHome.value, maxButtons.value)
+  pageButtons(totalPagesHome.value, pageHome.value, maxButtons.value),
 );
 
 // 產品使用紀錄篩選選項
@@ -1629,7 +1639,7 @@ const pageHome = ref(1);
 const totalHome = computed(() => filteredHome.value.length);
 
 const totalPagesHome = computed(() =>
-  Math.max(1, Math.ceil(totalHome.value / PAGE_MAIN))
+  Math.max(1, Math.ceil(totalHome.value / PAGE_MAIN)),
 );
 const paginatedHome = computed(() => {
   const s = (pageHome.value - 1) * PAGE_MAIN;
@@ -1698,21 +1708,21 @@ const filteredRing = computed(() => {
 });
 const totalRing = computed(() => filteredRing.value.length);
 const totalPagesRing = computed(() =>
-  Math.max(1, Math.ceil(totalRing.value / PAGE_SUB))
+  Math.max(1, Math.ceil(totalRing.value / PAGE_SUB)),
 );
 const paginatedRing = computed(() => {
   const s = (pageRing.value - 1) * PAGE_SUB;
   return filteredRing.value.slice(s, s + PAGE_SUB);
 });
 const pageNumberListRing = computed(() =>
-  pageButtons(totalPagesRing.value, pageRing.value, maxButtons.value)
+  pageButtons(totalPagesRing.value, pageRing.value, maxButtons.value),
 );
 
 /* ANS */
 const pageANS = ref(1);
 const totalANS = computed(() => ansRecords.value.length);
 const totalPagesANS = computed(() =>
-  Math.max(1, Math.ceil(totalANS.value / PAGE_SUB))
+  Math.max(1, Math.ceil(totalANS.value / PAGE_SUB)),
 );
 const filteredANSWithSort = computed(() => {
   let data = filteredANS.value;
@@ -1758,7 +1768,7 @@ const paginatedANS = computed(() => {
 const pageLife = ref(1);
 const totalLife = computed(() => lifeRecords.value.length);
 const totalPagesLife = computed(() =>
-  Math.max(1, Math.ceil(totalLife.value / PAGE_SUB))
+  Math.max(1, Math.ceil(totalLife.value / PAGE_SUB)),
 );
 const filteredLifeWithSort = computed(() => {
   let data = filteredLife.value;
@@ -1815,7 +1825,7 @@ const filteredVideo = computed(() => {
 });
 const totalVideo = computed(() => filteredVideo.value.length);
 const totalPagesVideo = computed(() =>
-  Math.max(1, Math.ceil(totalVideo.value / PAGE_SUB))
+  Math.max(1, Math.ceil(totalVideo.value / PAGE_SUB)),
 );
 const filteredVideoWithSort = computed(() => {
   let data = filteredVideo.value;
@@ -1859,7 +1869,7 @@ const paginatedVideo = computed(() => {
   return filteredVideoWithSort.value.slice(s, s + PAGE_SUB);
 });
 const pageNumberListVideo = computed(() =>
-  pageButtons(totalPagesVideo.value, pageVideo.value, maxButtons.value)
+  pageButtons(totalPagesVideo.value, pageVideo.value, maxButtons.value),
 );
 
 /* APP */
@@ -1877,7 +1887,7 @@ const filteredApp = computed(() => {
 });
 const totalApp = computed(() => filteredApp.value.length);
 const totalPagesApp = computed(() =>
-  Math.max(1, Math.ceil(totalApp.value / PAGE_SUB))
+  Math.max(1, Math.ceil(totalApp.value / PAGE_SUB)),
 );
 const filteredAppWithSort = computed(() => {
   let data = filteredApp.value;
@@ -1919,7 +1929,7 @@ const paginatedApp = computed(() => {
   return filteredAppWithSort.value.slice(s, s + PAGE_SUB);
 });
 const pageNumberListApp = computed(() =>
-  pageButtons(totalPagesApp.value, pageApp.value, maxButtons.value)
+  pageButtons(totalPagesApp.value, pageApp.value, maxButtons.value),
 );
 const filteredAppForChart = computed(() => {
   if (!appDateRange.value || appDateRange.value.length < 2)
@@ -1994,10 +2004,10 @@ async function fetchBasic() {
 }
 
 /* ---------- 共用範本 ---------- */
-const makeFiltered = <T>(
+const makeFiltered = <T,>(
   src: Ref<T[]>,
   range: Ref<Date[] | null>,
-  dateKey: keyof T // 欄位名稱，如 'CheckTime'
+  dateKey: keyof T, // 欄位名稱，如 'CheckTime'
 ) =>
   computed(() => {
     if (!range.value || range.value.length < 2) return src.value;
@@ -2006,7 +2016,7 @@ const makeFiltered = <T>(
     const end = to.getTime();
     return src.value.filter((r: any) => {
       const ms = Date.parse(
-        (r[dateKey] as string).split(" ")[0].replace(/\//g, "-")
+        (r[dateKey] as string).split(" ")[0].replace(/\//g, "-"),
       );
       return ms >= start && ms <= end;
     });
@@ -2060,10 +2070,10 @@ function pageButtons(total: number, current: number, max = maxButtons.value) {
 }
 
 const pageNumberListANS = computed(() =>
-  pageButtons(totalPagesANS.value, pageANS.value, maxButtons.value)
+  pageButtons(totalPagesANS.value, pageANS.value, maxButtons.value),
 );
 const pageNumberListLife = computed(() =>
-  pageButtons(totalPagesLife.value, pageLife.value, maxButtons.value)
+  pageButtons(totalPagesLife.value, pageLife.value, maxButtons.value),
 );
 
 const loading = ref(false);
@@ -2076,7 +2086,7 @@ watch(
     await memberStore.fetchAll(getAuth());
     loading.value = false;
   },
-  { deep: true, immediate: true }
+  { deep: true, immediate: true },
 );
 
 /* ---------- 分頁操作 ---------- */
@@ -2125,7 +2135,7 @@ async function fetchANSDetail(a: any) {
     .slice()
     .sort(
       (x, y) =>
-        new Date(y.CheckTime).getTime() - new Date(x.CheckTime).getTime()
+        new Date(y.CheckTime).getTime() - new Date(x.CheckTime).getTime(),
     );
 
   // 找到當前記錄的索引
@@ -2143,7 +2153,7 @@ async function fetchANSDetail(a: any) {
     sortedList.map((item) => ({
       AID: item.AID,
       CheckTime: item.CheckTime,
-    }))
+    })),
   );
 
   const res = await fetch(
@@ -2159,7 +2169,7 @@ async function fetchANSDetail(a: any) {
         AID,
         preAID,
       }),
-    }
+    },
   );
   return await res.json();
 }
@@ -2223,7 +2233,7 @@ async function handleEditBasicSubmit(data: {
           Birthday: data.birthday,
           Mobile: data.phone,
         }),
-      }
+      },
     );
 
     const result = await response.json();
@@ -2270,7 +2280,7 @@ async function handleDeleteMemberConfirm() {
           MID: sel.MID,
           Mobile: sel.Mobile ?? "",
         }),
-      }
+      },
     );
 
     const result = await response.json();
@@ -2742,20 +2752,19 @@ const isExpired = computed(() => {
           border-radius: 20px;
           background-color: #fff;
           box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
-   
-          .memberInfoCard2Header{
+
+          .memberInfoCard2Header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-      
           }
-          .memberInfoIconGroup{
+          .memberInfoIconGroup {
             display: flex;
             align-items: center;
             gap: 4px;
-        img{
-          cursor: pointer;
-        }
+            img {
+              cursor: pointer;
+            }
           }
         }
         @include respond-to("md") {
@@ -2832,20 +2841,28 @@ const isExpired = computed(() => {
 
         &:hover {
           color: $chip-success;
+
+          & > img {
+            border-radius: 50%;
+            box-shadow: inset 0px 2px 6px -1px $primary-200;
+          }
         }
         img {
           position: absolute;
           right: 0;
           transition: all 0.25s ease;
-          &:hover {
-            border-radius: 50%;
-            box-shadow: inset 0px 2px 6px -1px $primary-200;
-          }
         }
         .memberInfoTableRowItem {
           flex: 1;
           padding: 1rem 0.5rem;
         }
+      }
+
+      .productUsagRecords {
+        cursor: pointer;
+      }
+      .hrvRecord {
+        @extend .productUsagRecords;
       }
     }
   }

@@ -46,12 +46,13 @@
             v-for="member in store.paginatedMembers"
             :key="member.id"
             class="table-row"
+            @click="handleGoInfo(member)"
           >
             <div class="cell name" data-label="會員名稱">{{ member.name }}</div>
             <div class="cell level" data-label="等級">{{ member.level }}</div>
             <div class="cell birth" data-label="生日">
-  {{ formatBirthday(member.birthday) }}
-</div>
+              {{ formatBirthday(member.birthday) }}
+            </div>
 
             <div class="cell phone" data-label="電話">{{ member.phone }}</div>
 
@@ -112,12 +113,7 @@
               </div>
             </div>
 
-            <div
-              class="goInfo"
-              @click="handleGoInfo(member)"
-              role="button"
-              tabindex="0"
-            >
+            <div class="goInfo" role="button" tabindex="0">
               <img src="/assets/imgs/backend/goNext.svg" alt="詳細" />
             </div>
           </div>
@@ -216,7 +212,7 @@ onMounted(() => {
 function handleGoInfo(m: any) {
   localStorage.setItem(
     "selectedMember",
-    JSON.stringify({ MID: m.id, Mobile: m.phone })
+    JSON.stringify({ MID: m.id, Mobile: m.phone }),
   );
   router.push(`/raphaelBackend/member/memberContent`);
 }
@@ -265,8 +261,6 @@ function formatBirthday(birthday: string) {
 
   return birthday;
 }
-
-
 </script>
 
 <style scoped lang="scss">
@@ -339,6 +333,32 @@ function formatBirthday(birthday: string) {
       overflow: hidden;
       overflow-y: scroll;
       @include scrollbarStyle();
+
+      & > .table-row {
+        cursor: pointer;
+        transition: all ease 0.2s;
+
+        &:hover {
+          color: $chip-success;
+
+          & > .goInfo {
+            border-radius: 50%;
+            box-shadow: inset 0px 2px 6px -1px $primary-200;
+          }
+        }
+
+        .goInfo {
+          position: absolute;
+          top: 50%;
+          right: 12px;
+          transform: translateY(-50%);
+          cursor: pointer;
+          transition: all 0.25s ease;
+          @include respond-to("lg") {
+            top: 29px;
+          }
+        }
+      }
     }
     .table-row {
       display: grid;
@@ -348,11 +368,6 @@ function formatBirthday(birthday: string) {
       align-items: center;
       padding: 13px 16px;
       color: $raphael-gray-500;
-      transition: all ease 0.2s;
-
-      &:hover {
-        color: $chip-success;
-      }
 
       @include respond-to("lg") {
         display: flex;
@@ -518,21 +533,6 @@ function formatBirthday(birthday: string) {
         .chip--success,
         .chip--danger {
           padding: 4px;
-        }
-      }
-      .goInfo {
-        position: absolute;
-        top: 50%;
-        right: 12px;
-        transform: translateY(-50%);
-        cursor: pointer;
-        transition: all 0.25s ease;
-        &:hover {
-          border-radius: 50%;
-          box-shadow: inset 0px 2px 6px -1px $primary-200;
-        }
-        @include respond-to("lg") {
-          top: 29px;
         }
       }
     }
