@@ -28,7 +28,7 @@
           </div>
           <hr />
           <div class="operationModalHeaderRight">
-            <span class="operationCount">已操作 {{ operationRecords }} 筆</span>
+            <span class="operationCount">已操作 {{ operationRecordsData.length }} 筆</span>
             <div class="operationFilters">
               <VueDatePicker
                 v-model="operationDateRange"
@@ -61,7 +61,7 @@
                 >
                   <div
                     class="eventFilterOption"
-                    v-for="event in eventOptions"
+                    v-for="event in availableEventOptions.length ? availableEventOptions : eventOptions"
                     :key="event"
                     @click="toggleEventOption(event)"
                   >
@@ -139,11 +139,12 @@
         </div>
         <div class="summaryCard">
           <div class="summaryCardLabel">治療部位</div>
-          <div class="summaryCardValue">{{ treatmentArea || "—" }}</div>
+          <div class="summaryCardValue summaryCardValue--break">{{ treatmentArea || "—" }}</div>
         </div>
         <div class="summaryCard">
           <div class="summaryCardLabel">貼片模式</div>
-          <div class="summaryCardValue">{{ patchMode || "—" }}</div>
+          <!-- <div class="summaryCardValue">{{ patchMode || "—" }}</div> -->
+          <div class="summaryCardValue"> — </div>
         </div>
         <div class="summaryCard">
           <div class="summaryCardLabel">操作紀錄</div>
@@ -173,12 +174,12 @@
 
         <template v-if="tableData.length">
           <div class="tableRow" v-for="row in paginatedData" :key="row.id">
-            <div class="tableCell">{{ row.startDate }}</div>
-            <div class="tableCell">{{ row.startTime }}</div>
-            <div class="tableCell">{{ row.endTime }}</div>
-            <div class="tableCell">{{ row.treatmentDuration }}</div>
-            <div class="tableCell">{{ row.pauseDuration }}</div>
-            <div class="tableCell">{{ row.totalDuration }}</div>
+            <div class="tableCell">{{ row.startDate || "—" }}</div>
+            <div class="tableCell">{{ row.startTime || "—" }}</div>
+            <div class="tableCell">{{ row.endTime || "—" }}</div>
+            <div class="tableCell">{{ row.treatmentDuration || "—" }}</div>
+            <div class="tableCell">{{ row.pauseDuration || "—" }}</div>
+            <div class="tableCell">{{ row.totalDuration || "—" }}</div>
           </div>
         </template>
         <div class="tableRow" v-else>
@@ -235,20 +236,24 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import Sidebar from "~/components/raphaelBackend/Sidebar.vue";
+import { useMemberStore } from "~/stores/useMemberStore";
+import { storeToRefs } from "pinia";
 
 const router = useRouter();
 const route = useRoute();
+const memberStore = useMemberStore();
+const { favoriteTPointsList, favoriteUseRecordList, optDetailList, member } = storeToRefs(memberStore);
 
 const loading = ref(false);
-const memberName = ref("測試用");
+const memberName = computed(() => member.value?.Name || "—");
 const lastUpdated = ref("2024/11/7 上午10:43");
 
 // 摘要資料
-const favoriteName = ref("肩膀疼痛");
-const totalUsage = ref(5);
-const treatmentArea = ref("543168432168431");
-const patchMode = ref("呼吸模式");
-const operationRecords = ref(100);
+const favoriteName = ref("—");
+const totalUsage = ref(0);
+const treatmentArea = ref("—");
+const patchMode = ref("—");
+const operationRecords = ref(0);
 
 // 表格資料
 const tableData = ref<any[]>([]);
@@ -273,32 +278,80 @@ const eventOptions = [
   "恢復治療",
 ];
 
-// 假資料
-onMounted(() => {
-  // 生成假資料
-  tableData.value = Array.from({ length: 20 }, (_, i) => ({
-    id: i + 1,
-    startDate: "2025/12/12",
-    startTime: "14:00",
-    endTime: "15:00",
-    treatmentDuration: "60分鐘",
-    pauseDuration: "3分鐘",
-    totalDuration: "63分鐘",
-  }));
+// 根據 AID 取得資料
+function getAuth() {
+  return {
+    token:
+      localStorage.getItem("backendToken") ??
+      sessionStorage.getItem("backendToken"),
+    admin: localStorage.getItem("adminID") ?? sessionStorage.getItem("adminID"),
+    sel: JSON.parse(localStorage.getItem("selectedMember") ?? "{}") as {
+      MID?: string;
+      Mobile?: string;
+    },
+  };
+}
 
-  // 操作紀錄假資料
-  operationRecordsData.value = [
-    { id: 1, date: "2025/12/25", time: "14:30:00", event: "結束治療" },
-    { id: 2, date: "2025/12/24", time: "13:20:10", event: "開始治療" },
-    { id: 3, date: "2025/12/23", time: "12:15:45", event: "治療滿30分鐘" },
-    { id: 4, date: "2025/12/22", time: "11:05:30", event: "蜂鳴器長嗶一分鐘" },
-    { id: 5, date: "2025/12/21", time: "10:00:00", event: "低電2警示" },
-    { id: 6, date: "2025/12/20", time: "09:45:15", event: "開始治療" },
-    { id: 7, date: "2025/12/19", time: "08:30:20", event: "結束治療" },
-    { id: 8, date: "2025/12/18", time: "07:15:30", event: "低電1警示" },
-    { id: 9, date: "2025/12/17", time: "06:00:45", event: "暫停治療" },
-    { id: 10, date: "2025/12/16", time: "05:45:10", event: "恢復治療" },
-  ];
+async function loadData() {
+  const aid = route.query.AID as string;
+  if (!aid) {
+    router.push("/raphaelBackend/member/memberContent");
+    return;
+  }
+
+  loading.value = true;
+  try {
+    // 取得產品使用紀錄（用於摘要資料）
+    await memberStore.fetchFavoriteTPointsList(getAuth());
+    
+    // 根據 AID 找到對應的資料
+    const targetItem = favoriteTPointsList.value.find(
+      (item: any) => item.AID === aid
+    );
+
+    if (targetItem) {
+      // 設定摘要資料
+      favoriteName.value = targetItem.FavoriteName || "—";
+      totalUsage.value = parseInt(targetItem.TotalUsage || "0");
+      treatmentArea.value = targetItem.TreatmentArea || "—";
+      
+      // 轉換貼片模式（如果沒有資料則顯示 "-"）
+      if (targetItem.TMode) {
+        const modeMap: Record<string, string> = {
+          "1": "呼吸模式",
+          "2": "其他模式",
+        };
+        patchMode.value = modeMap[targetItem.TMode] || "—";
+      } else {
+        patchMode.value = "—";
+      }
+    } else {
+      // 沒有找到資料時重置摘要
+      favoriteName.value = "—";
+      totalUsage.value = 0;
+      treatmentArea.value = "—";
+      patchMode.value = "—";
+    }
+
+    // 取得使用紀錄列表（表格資料）
+    await memberStore.fetchFavoriteTPointsMIDUseRecordList(getAuth(), aid);
+    tableData.value = favoriteUseRecordList.value || [];
+    
+    // 取得操作紀錄（彈窗資料）
+    await memberStore.fetchOptDetailMIDList(getAuth(), aid);
+    operationRecordsData.value = optDetailList.value || [];
+    operationRecords.value = optDetailList.value.length || 0;
+    
+    lastUpdated.value = new Date().toLocaleString("zh-TW");
+  } catch (error) {
+    console.error("載入資料失敗：", error);
+  } finally {
+    loading.value = false;
+  }
+}
+
+// 操作紀錄資料從 API 取得，不需要假資料
+onMounted(() => {
 
   // 點擊外部關閉事件篩選
   document.addEventListener("click", (e) => {
@@ -307,7 +360,18 @@ onMounted(() => {
       showEventFilter.value = false;
     }
   });
+  
+  // 載入資料
+  loadData();
 });
+
+// 監聽路由變化
+watch(
+  () => route.query.AID,
+  () => {
+    loadData();
+  }
+);
 
 // 分頁計算
 const totalPages = computed(() =>
@@ -342,13 +406,8 @@ function goBack() {
   router.push("/raphaelBackend/member/memberContent");
 }
 
-function refresh() {
-  loading.value = true;
-  // 模擬 API 呼叫
-  setTimeout(() => {
-    lastUpdated.value = new Date().toLocaleString("zh-TW");
-    loading.value = false;
-  }, 1000);
+async function refresh() {
+  await loadData();
 }
 
 // 操作紀錄彈窗功能
@@ -382,9 +441,10 @@ const filteredOperationRecords = computed(() => {
   if (operationDateRange.value && operationDateRange.value.length >= 2) {
     const [from, to] = operationDateRange.value;
     const start = from.getTime();
-    const end = to.getTime();
+    const end = to.getTime() + 24 * 60 * 60 * 1000 - 1; // 包含結束日期的整天
     data = data.filter((r: any) => {
-      const ms = Date.parse(r.date?.replace(/\//g, "-") || "");
+      if (!r.date) return false;
+      const ms = Date.parse(r.date.replace(/\//g, "-"));
       return ms >= start && ms <= end;
     });
   }
@@ -395,6 +455,15 @@ const filteredOperationRecords = computed(() => {
   }
 
   return data;
+});
+
+// 動態取得所有可用的事件選項（從實際資料中提取）
+const availableEventOptions = computed(() => {
+  const events = new Set<string>();
+  operationRecordsData.value.forEach((r: any) => {
+    if (r.event) events.add(r.event);
+  });
+  return Array.from(events).sort();
 });
 
 watch(operationDateRange, () => {
@@ -544,7 +613,14 @@ watch(operationDateRange, () => {
           font-weight: 600;
           display: flex;
           align-items: center;
+          flex-wrap: wrap;
+
+
+          
+
           gap: 8px;
+
+          z-index: 10;
 
           .moreIcon {
             width: 16px;
@@ -557,6 +633,13 @@ watch(operationDateRange, () => {
               opacity: 1;
             }
           }
+        }
+        .summaryCardValue--break {
+          min-width: 0;                 
+          white-space: normal;
+          overflow-wrap: anywhere;      
+          word-break: break-word;       
+          line-height: 1.4;
         }
         .dotIcon {
           margin-left: auto;

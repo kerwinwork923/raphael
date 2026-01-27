@@ -419,12 +419,226 @@
             </nav>
           </div>
 
+
+
           <!-- 使用紀錄分析 -->
           <!-- <div class="memberInfoCard memberInfoCardGroupW100">
             <h3>使用紀錄分析</h3>
             <UsageAnalysisChart :usage-data="filteredHomeForChart" />
           </div> -->
         </div>
+
+                  <!-- █ 健康日誌 & 本周摘要 ------------------------------------------------- -->
+                  <div class="memberInfoRow">
+            <!-- 健康日誌 -->
+            <div class="memberInfoCard w-half">
+              <div class="memberInfoTitleWrap">
+                <h3>健康日誌</h3>
+                <div class="memberInfoTitleGroup">
+                  <small>已使用 {{ totalHealthLog }} 次</small>
+                  <VueDatePicker
+                    v-model="healthLogDateRange"
+                    range
+                    :enable-time-picker="false"
+                    format="yyyy/MM/dd"
+                    placeholder="選擇日期或日期區間"
+                    prepend-icon="i-calendar"
+                    :teleport="true"
+                  />
+                </div>
+              </div>
+
+              <div class="memberInfoTable">
+                <div class="memberInfoTableTitle">
+                  <div
+                    class="memberInfoTableTitleItem"
+                    @click="handleSort('healthLog', 'VerbalContent')"
+                  >
+                    口述內容
+                  </div>
+                  <div
+                    class="memberInfoTableTitleItem"
+                    @click="handleSort('healthLog', 'VerbalDate')"
+                  >
+                    口述日期
+                    <img
+                      src="/assets/imgs/backend/sort.svg"
+                      alt="sort"
+                      class="sortIcon"
+                    />
+                  </div>
+                </div>
+                <div class="memberInfoTableHR" />
+
+                <template v-if="paginatedHealthLog.length">
+                  <div
+                    class="memberInfoTableRow"
+                    v-for="row in paginatedHealthLog"
+                    :key="row.id"
+                  >
+                    <div class="memberInfoTableRowItem">
+                      {{ row.VerbalContent || "—" }}
+                    </div>
+                    <div class="memberInfoTableRowItem">
+                      {{ row.VerbalDate || "—" }}
+                    </div>
+                  </div>
+                </template>
+                <div class="memberInfoTableRow" v-else>
+                  <div class="memberInfoTableRowItem" style="width: 100%">
+                    尚無資料
+                  </div>
+                </div>
+              </div>
+
+              <!-- 分頁 -->
+              <nav class="pagination" v-if="totalHealthLog">
+                <button
+                  class="btn-page"
+                  :disabled="pageHealthLog === 1"
+                  @click="pageHealthLog = 1"
+                >
+                  &lt;&lt;
+                </button>
+                <button
+                  class="btn-page"
+                  :disabled="pageHealthLog === 1"
+                  @click="pageHealthLog--"
+                >
+                  &lt;
+                </button>
+                <button
+                  class="btn-page btn-page-number"
+                  v-for="p in pageNumberListHealthLog"
+                  :key="p"
+                  :class="{ active: pageHealthLog === p }"
+                  @click="pageHealthLog = p"
+                >
+                  {{ p }}
+                </button>
+                <button
+                  class="btn-page"
+                  :disabled="pageHealthLog === totalPagesHealthLog"
+                  @click="pageHealthLog++"
+                >
+                  &gt;
+                </button>
+                <button
+                  class="btn-page"
+                  :disabled="pageHealthLog === totalPagesHealthLog"
+                  @click="pageHealthLog = totalPagesHealthLog"
+                >
+                  &gt;&gt;
+                </button>
+              </nav>
+            </div>
+
+            <!-- 本週摘要 -->
+            <div class="memberInfoCard w-half">
+              <div class="memberInfoTitleWrap">
+                <h3>本週摘要</h3>
+              </div>
+
+              <div class="memberInfoTable">
+                <div class="memberInfoTableTitle">
+                  <div
+                    class="memberInfoTableTitleItem"
+                    @click="handleSort('weeklySummary', 'SummaryContent')"
+                  >
+                    摘要內容
+                  </div>
+                  <div
+                    class="memberInfoTableTitleItem"
+                    @click="handleSort('weeklySummary', 'AggregateQuantity')"
+                  >
+                    彙整數量
+                  </div>
+                  <div
+                    class="memberInfoTableTitleItem"
+                    @click="handleSort('weeklySummary', 'DateRange')"
+                  >
+                    日期區間
+                    <img
+                      src="/assets/imgs/backend/sort.svg"
+                      alt="sort"
+                      class="sortIcon"
+                    />
+                  </div>
+                </div>
+                <div class="memberInfoTableHR" />
+
+                <template v-if="paginatedWeeklySummary.length">
+                  <div
+                    class="memberInfoTableRow"
+                    v-for="row in paginatedWeeklySummary"
+                    :key="row.id"
+                    style="cursor: pointer"
+                  >
+                    <div class="memberInfoTableRowItem">
+                      {{ row.SummaryContent || "—" }}
+                    </div>
+                    <div class="memberInfoTableRowItem">
+                      {{ row.AggregateQuantity || "—" }}
+                    </div>
+                    <div class="memberInfoTableRowItem">
+                      {{ row.DateRange || "—" }}
+                    </div>
+                    <img
+                      src="/assets/imgs/backend/goNext.svg"
+                      alt="detail"
+                      style="cursor: pointer; position: absolute; right: 0"
+                    />
+                  </div>
+                </template>
+                <div class="memberInfoTableRow" v-else>
+                  <div class="memberInfoTableRowItem" style="width: 100%">
+                    尚無資料
+                  </div>
+                </div>
+              </div>
+
+              <!-- 分頁 -->
+              <nav class="pagination" v-if="totalWeeklySummary">
+                <button
+                  class="btn-page"
+                  :disabled="pageWeeklySummary === 1"
+                  @click="pageWeeklySummary = 1"
+                >
+                  &lt;&lt;
+                </button>
+                <button
+                  class="btn-page"
+                  :disabled="pageWeeklySummary === 1"
+                  @click="pageWeeklySummary--"
+                >
+                  &lt;
+                </button>
+                <button
+                  class="btn-page btn-page-number"
+                  v-for="p in pageNumberListWeeklySummary"
+                  :key="p"
+                  :class="{ active: pageWeeklySummary === p }"
+                  @click="pageWeeklySummary = p"
+                >
+                  {{ p }}
+                </button>
+                <button
+                  class="btn-page"
+                  :disabled="pageWeeklySummary === totalPagesWeeklySummary"
+                  @click="pageWeeklySummary++"
+                >
+                  &gt;
+                </button>
+                <button
+                  class="btn-page"
+                  :disabled="pageWeeklySummary === totalPagesWeeklySummary"
+                  @click="pageWeeklySummary = totalPagesWeeklySummary"
+                >
+                  &gt;&gt;
+                </button>
+              </nav>
+            </div>
+          </div>
 
         <!-- █ 指環紀錄 ----------------------------------------------------------- -->
         <div class="memberInfoRow">
@@ -1213,11 +1427,15 @@ const {
   lifeRecords,
   videoRecords,
   appRecords,
+  healthLogRecords,
+  weeklySummaryRecords,
+  favoriteTPointsList,
   hasFetched,
 } = storeToRefs(memberStore);
 
-// 產品使用紀錄使用本地資料（不使用 store）
-const homeOrders = ref<any[]>([]);
+// 產品使用紀錄從 store 取得（透過 processedHomeOrders 處理分組）
+
+// 健康日誌和本周摘要資料從 store 取得，不需要本地 ref
 
 const showContract = ref(false);
 const contractList = ref<any[]>([]);
@@ -1248,11 +1466,14 @@ const sortState = ref<
   life: { field: "", order: null },
   video: { field: "", order: null },
   app: { field: "", order: null },
+  healthLog: { field: "", order: null },
+  weeklySummary: { field: "", order: null },
 });
 const ansRange = ref<Date[] | null>(null);
 const lifeRange = ref<Date[] | null>(null);
 const videoRange = ref<Date[] | null>(null);
 const appDateRange = ref<Date[] | null>(null);
+const healthLogDateRange = ref<Date[] | null>(null);
 
 /* ---------- paging helpers ---------- */
 const PAGE_MAIN = 4;
@@ -1329,89 +1550,7 @@ onMounted(() => {
     },
   ];
 
-  // 產品使用紀錄假資料
-  homeOrders.value = [
-    {
-      id: 1,
-      ConsultationDate: "2024/11/01 11:00",
-      FavoriteName: "肩膀疼痛",
-      PointInfo: "543168432168431",
-      TreatmentTime: "2024/11/03 12:15",
-      TotalUsage: 10,
-    },
-    {
-      id: 2,
-      ConsultationDate: "2024/10/20 10:00",
-      FavoriteName: "咳嗽頭痛",
-      PointInfo: "543168432168431",
-      TreatmentTime: "2024/10/28 14:00",
-      TotalUsage: 1,
-    },
-    {
-      id: 3,
-      ConsultationDate: "2024/10/15 09:00",
-      FavoriteName: "身心不平衡",
-      PointInfo: "543168432168431",
-      TreatmentTime: "2024/10/22 15:00",
-      TotalUsage: 2,
-    },
-    {
-      id: 4,
-      ConsultationDate: "2024/10/01 08:00",
-      FavoriteName: "胃痛",
-      PointInfo: "543168432168431",
-      TreatmentTime: "2024/10/16 16:00",
-      TotalUsage: 0,
-    },
-    {
-      id: 5,
-      ConsultationDate: "2024/10/01 07:00",
-      FavoriteName: "白油油",
-      PointInfo: "543168432168431",
-      TreatmentTime: "2024/10/10 10:55",
-      TotalUsage: 5,
-    },
-    {
-      id: 6,
-      ConsultationDate: "2024/11/05 14:00",
-      FavoriteName: "肩膀疼痛",
-      PointInfo: "543168432168432",
-      TreatmentTime: "2024/11/07 16:30",
-      TotalUsage: 3,
-    },
-    {
-      id: 7,
-      ConsultationDate: "2024/10/25 13:00",
-      FavoriteName: "頭痛",
-      PointInfo: "543168432168433",
-      TreatmentTime: "2024/10/27 11:20",
-      TotalUsage: 2,
-    },
-    {
-      id: 8,
-      ConsultationDate: "2024/10/18 15:00",
-      FavoriteName: "腰痛",
-      PointInfo: "543168432168434",
-      TreatmentTime: "2024/10/20 09:45",
-      TotalUsage: 1,
-    },
-    {
-      id: 9,
-      ConsultationDate: "2024/10/12 11:00",
-      FavoriteName: "肩膀疼痛",
-      PointInfo: "543168432168435",
-      TreatmentTime: "2024/10/14 13:15",
-      TotalUsage: 4,
-    },
-    {
-      id: 10,
-      ConsultationDate: "2024/10/08 09:00",
-      FavoriteName: "失眠",
-      PointInfo: "543168432168436",
-      TreatmentTime: "2024/10/10 10:00",
-      TotalUsage: 2,
-    },
-  ];
+  // 產品使用紀錄資料從 API 取得，不需要假資料
 
   // 影片觀看紀錄假資料
   videoRecords.value = [
@@ -1491,6 +1630,8 @@ onMounted(() => {
     },
   ];
 
+  // 健康日誌和本周摘要資料從 API 取得，不需要假資料
+
   // 點擊外部關閉下拉選單
   document.addEventListener("click", (e) => {
     const target = e.target as HTMLElement;
@@ -1507,14 +1648,19 @@ const pageNumberList = computed(() =>
   pageButtons(totalPagesHome.value, pageHome.value, maxButtons.value),
 );
 
+// 產品使用紀錄從 store 取得，直接使用（每個 AID 都是一筆獨立記錄）
+const processedHomeOrders = computed(() => {
+  return favoriteTPointsList.value || [];
+});
+
 // 產品使用紀錄篩選選項
 const homeFilterOptions = computed(() => {
-  if (!homeOrders.value.length) return [];
+  if (!processedHomeOrders.value.length) return [];
 
   const category = selectedHomeFilterCategory.value;
   const options = new Set<string>();
 
-  homeOrders.value.forEach((item: any) => {
+  processedHomeOrders.value.forEach((item: any) => {
     let value = "";
     switch (category) {
       case "ConsultationDate":
@@ -1537,7 +1683,7 @@ const homeFilterOptions = computed(() => {
 });
 
 const filteredHome = computed(() => {
-  let data = homeOrders.value;
+  let data = processedHomeOrders.value;
 
   // 日期區間篩選
   if (homeDateRange.value && homeDateRange.value.length >= 2) {
@@ -1621,14 +1767,16 @@ const filteredHome = computed(() => {
 
 const filteredHomeForChart = computed(() => {
   if (!homeChartDateRange.value || homeChartDateRange.value.length < 2)
-    return homeOrders.value;
+    return processedHomeOrders.value;
 
   const [from, to] = homeChartDateRange.value;
   const start = from.getTime();
   const end = to.getTime();
 
-  return homeOrders.value.filter((r) => {
-    const ms = Date.parse(r.StartTime.replace(/\//g, "-"));
+  return processedHomeOrders.value.filter((r: any) => {
+    const dateStr = r.StartDate || r.ConsultationDate || r.TDate || "";
+    if (!dateStr) return false;
+    const ms = Date.parse(dateStr.replace(/\//g, "-"));
     return ms >= start && ms <= end;
   });
 });
@@ -1943,6 +2091,126 @@ const filteredAppForChart = computed(() => {
   });
 });
 
+/* HEALTH LOG */
+const pageHealthLog = ref(1);
+const filteredHealthLog = computed(() => {
+  let data = healthLogRecords.value || [];
+
+  // 日期區間篩選（前端篩選，因為 API 是依月份取得）
+  if (healthLogDateRange.value && healthLogDateRange.value.length >= 2) {
+    const [from, to] = healthLogDateRange.value;
+    const start = from.getTime();
+    const end = to.getTime() + 24 * 60 * 60 * 1000 - 1; // 包含結束日期的整天
+    data = data.filter((r: any) => {
+      if (!r.VerbalDate) return false;
+      const ms = Date.parse(r.VerbalDate.replace(/\//g, "-"));
+      return ms >= start && ms <= end;
+    });
+  }
+
+  // 排序
+  if (sortState.value.healthLog.order && sortState.value.healthLog.field) {
+    data = [...data].sort((a: any, b: any) => {
+      const field = sortState.value.healthLog.field;
+      let aVal = a[field];
+      let bVal = b[field];
+
+      // 日期排序
+      if (field === "VerbalDate") {
+        aVal = new Date(aVal?.replace(/\//g, "-") || "").getTime();
+        bVal = new Date(bVal?.replace(/\//g, "-") || "").getTime();
+      }
+
+      // 字串排序
+      if (typeof aVal === "string" && typeof bVal === "string") {
+        return sortState.value.healthLog.order === "asc"
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      }
+
+      return 0;
+    });
+  }
+
+  return data;
+});
+const totalHealthLog = computed(() => filteredHealthLog.value.length);
+const totalPagesHealthLog = computed(() =>
+  Math.max(1, Math.ceil(totalHealthLog.value / PAGE_SUB)),
+);
+const paginatedHealthLog = computed(() => {
+  const s = (pageHealthLog.value - 1) * PAGE_SUB;
+  return filteredHealthLog.value.slice(s, s + PAGE_SUB);
+});
+const pageNumberListHealthLog = computed(() =>
+  pageButtons(totalPagesHealthLog.value, pageHealthLog.value, maxButtons.value),
+);
+
+/* WEEKLY SUMMARY */
+const pageWeeklySummary = ref(1);
+const filteredWeeklySummary = computed(() => {
+  let data = weeklySummaryRecords.value || [];
+
+  // 排序
+  if (
+    sortState.value.weeklySummary.order &&
+    sortState.value.weeklySummary.field
+  ) {
+    data = [...data].sort((a: any, b: any) => {
+      const field = sortState.value.weeklySummary.field;
+      let aVal = a[field];
+      let bVal = b[field];
+
+      // 日期區間排序（取開始日期）
+      if (field === "DateRange" || field === "DatePeriod") {
+        const aStart = aVal?.split(" - ")[0] || "";
+        const bStart = bVal?.split(" - ")[0] || "";
+        aVal = new Date(aStart?.replace(/\//g, "-") || "").getTime();
+        bVal = new Date(bStart?.replace(/\//g, "-") || "").getTime();
+      }
+      
+      // 彙整數量排序
+      if (field === "AggregateQuantity" || field === "CNT") {
+        aVal = parseInt(aVal) || 0;
+        bVal = parseInt(bVal) || 0;
+      }
+
+      // 數字排序
+      if (typeof aVal === "number" && typeof bVal === "number") {
+        return sortState.value.weeklySummary.order === "asc"
+          ? aVal - bVal
+          : bVal - aVal;
+      }
+
+      // 字串排序
+      if (typeof aVal === "string" && typeof bVal === "string") {
+        return sortState.value.weeklySummary.order === "asc"
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      }
+
+      return 0;
+    });
+  }
+
+  return data;
+});
+const totalWeeklySummary = computed(() => filteredWeeklySummary.value.length);
+const totalPagesWeeklySummary = computed(() =>
+  Math.max(1, Math.ceil(totalWeeklySummary.value / PAGE_SUB)),
+);
+const paginatedWeeklySummary = computed(() => {
+  const s = (pageWeeklySummary.value - 1) * PAGE_SUB;
+  return filteredWeeklySummary.value.slice(s, s + PAGE_SUB);
+});
+const pageNumberListWeeklySummary = computed(() =>
+  pageButtons(
+    totalPagesWeeklySummary.value,
+    pageWeeklySummary.value,
+    maxButtons.value,
+  ),
+);
+
 // 排序功能
 function handleSort(type: string, field: string) {
   const current = sortState.value[type];
@@ -2052,6 +2320,45 @@ watch(appDateRange, () => {
 watch(ringRange, () => {
   pageRing.value = 1;
 });
+watch(healthLogDateRange, async (newRange) => {
+  pageHealthLog.value = 1;
+  // 當日期範圍改變時，重新取得健康日誌
+  // 如果選擇的日期範圍跨月，則取得多個月的資料
+  if (newRange && newRange.length >= 2) {
+    const [from, to] = newRange;
+    const fromYear = from.getFullYear();
+    const fromMonth = from.getMonth() + 1;
+    const toYear = to.getFullYear();
+    const toMonth = to.getMonth() + 1;
+    
+    // 如果跨月，取得所有相關月份的資料
+    const monthsToFetch: Array<{ year: string; month: string }> = [];
+    let currentYear = fromYear;
+    let currentMonth = fromMonth;
+    
+    while (
+      currentYear < toYear ||
+      (currentYear === toYear && currentMonth <= toMonth)
+    ) {
+      monthsToFetch.push({
+        year: currentYear.toString(),
+        month: currentMonth.toString().padStart(2, "0"),
+      });
+      
+      currentMonth++;
+      if (currentMonth > 12) {
+        currentMonth = 1;
+        currentYear++;
+      }
+    }
+    
+    // 取得所有相關月份的資料（第一個月份覆蓋，後續月份合併）
+    for (let i = 0; i < monthsToFetch.length; i++) {
+      const { year, month } = monthsToFetch[i];
+      await memberStore.fetchHealthLog(getAuth(), year, month, i > 0);
+    }
+  }
+}, { deep: true });
 
 function pageButtons(total: number, current: number, max = maxButtons.value) {
   const pages: number[] = [];
@@ -2084,6 +2391,19 @@ watch(
     loading.value = true;
     memberStore.clear();
     await memberStore.fetchAll(getAuth());
+    
+    // 取得產品使用紀錄
+    await memberStore.fetchFavoriteTPointsList(getAuth());
+    
+    // 取得健康日誌（使用當前年月）
+    const now = new Date();
+    const year = now.getFullYear().toString();
+    const month = (now.getMonth() + 1).toString().padStart(2, "0");
+    await memberStore.fetchHealthLog(getAuth(), year, month);
+    
+    // 取得本周摘要
+    await memberStore.fetchWeeklySummary(getAuth());
+    
     loading.value = false;
   },
   { deep: true, immediate: true },
@@ -2741,6 +3061,7 @@ const isExpired = computed(() => {
               font-size: 14px;
               transition: all 0.2s;
               min-width: 150px;
+              
               &::placeholder {
                 color: #999;
               }
