@@ -290,17 +290,30 @@ export const useMemberStore = defineStore('member', () => {
       const data = await res.json()
       if (data.Result === "OK") {
         // 根據 FAID (對應 AID) 篩選資料，並轉換事件類型
+        // 包含 FAID === aid 的資料，也包含 FAID === "0" 的資料（可能是該會員的其他操作）
         optDetailList.value = (data.OptDetailMIDList || [])
-          .filter((item: any) => item.FAID === aid)
+          .filter((item: any) => item.FAID === aid || item.FAID === "0")
           .map((item: any, index: number) => {
             let eventDesc = "—"
             
-            if (item.Event === "B") {
-              eventDesc = getBEventDesc(item.Parameter, item.Desc)
-            } else if (item.Event === "A") {
+            if (item.Event === "A") {
               eventDesc = getAEventDesc(item.Parameter, item.Desc)
+            } else if (item.Event === "B") {
+              eventDesc = getBEventDesc(item.Parameter, item.Desc)
+            } else if (item.Event === "C") {
+              eventDesc = getCEventDesc(item.Parameter, item.Desc)
+            } else if (item.Event === "D") {
+              eventDesc = getDEventDesc(item.Parameter, item.Desc)
+            } else if (item.Event === "E") {
+              eventDesc = getEEventDesc(item.Parameter, item.Desc)
+            } else if (item.Event === "F") {
+              eventDesc = getFEventDesc(item.Parameter, item.Desc)
+            } else if (item.Event === "G") {
+              eventDesc = getGEventDesc(item.Parameter, item.Desc)
+            } else if (item.Event === "H") {
+              eventDesc = getHEventDesc(item.Parameter, item.Desc)
             } else if (item.Event === "P") {
-              // 根據 Parameter 判斷
+              // P 事件：套用我的最愛點位
               if (item.Parameter === "2") {
                 eventDesc = "套用我的最愛點位"
               } else if (item.Parameter === "3") {
@@ -308,16 +321,11 @@ export const useMemberStore = defineStore('member', () => {
               } else {
                 eventDesc = item.Desc || "套用我的最愛點位"
               }
-            } else if (item.Event === "D") {
-              // D 事件通常是點位相關，Desc 為空時顯示 "—"
-              eventDesc = item.Desc || "—"
-            } else if (item.Event === "E") {
-              // E 事件通常是錯誤相關，Desc 為空時顯示 "—"
-              eventDesc = item.Desc || "—"
             } else {
               eventDesc = item.Desc || "—"
             }
             
+            // 只顯示中文描述，不顯示代號
             return {
               id: item.AID || index + 1,
               date: item.DD || "",
@@ -375,25 +383,73 @@ export const useMemberStore = defineStore('member', () => {
     }
   }
 
-  // 輔助函數：轉換 B 事件描述
-  function getBEventDesc(parameter: string, desc: string): string {
-    if (parameter === "1") return "開始治療"
-    if (parameter === "2") {
-      if (desc && desc.includes("暫停")) return "暫停治療"
-      return "恢復治療"
-    }
-    if (parameter === "3") return "結束治療"
-    if (parameter === "4") {
-      if (desc && desc.includes("30")) return "治療滿30分鐘"
-      return desc || "—"
-    }
-    return desc || "—"
-  }
-
-  // 輔助函數：轉換 A 事件描述
+  // 輔助函數：轉換 A 事件描述（開關機）
   function getAEventDesc(parameter: string, desc: string): string {
     if (parameter === "1") return "開機"
     if (parameter === "2") return "關機"
+    return desc || "—"
+  }
+
+  // 輔助函數：轉換 B 事件描述（治療）
+  function getBEventDesc(parameter: string, desc: string): string {
+    if (parameter === "1") return "治療開始"
+    if (parameter === "2") return "治療暫停"
+    if (parameter === "3") return "治療結束"
+    if (parameter === "4") return "治療30分鐘"
+    return desc || "—"
+  }
+
+  // 輔助函數：轉換 C 事件描述（電力）
+  function getCEventDesc(parameter: string, desc: string): string {
+    if (parameter === "1") return "充電開始"
+    if (parameter === "2") return "充電完成"
+    if (parameter === "3") return "充電結束"
+    if (parameter === "4") return "充電過充"
+    if (parameter === "5") return "低電警示"
+    if (parameter === "6") return "電量不足"
+    return desc || "—"
+  }
+
+  // 輔助函數：轉換 D 事件描述（接頭接觸不良）
+  function getDEventDesc(parameter: string, desc: string): string {
+    if (parameter === "1") return "A接頭接觸不良"
+    if (parameter === "2") return "B接頭接觸不良"
+    if (parameter === "3") return "C接頭接觸不良"
+    if (parameter === "4") return "D接頭接觸不良"
+    if (parameter === "5") return "A接頭接觸恢復"
+    if (parameter === "6") return "B接頭接觸恢復"
+    if (parameter === "7") return "C接頭接觸恢復"
+    if (parameter === "8") return "D接頭接觸恢復"
+    return desc || "—"
+  }
+
+  // 輔助函數：轉換 E 事件描述（合約到期）
+  function getEEventDesc(parameter: string, desc: string): string {
+    if (parameter === "1") return "超過結束日期"
+    if (parameter === "2") return "治療次數不足"
+    if (parameter === "3") return "今日已使用"
+    return desc || "—"
+  }
+
+  // 輔助函數：轉換 F 事件描述（提示音）
+  function getFEventDesc(parameter: string, desc: string): string {
+    // F 事件通常是音檔名稱，優先使用 Desc，如果沒有則使用 Parameter
+    return desc || parameter || "—"
+  }
+
+  // 輔助函數：轉換 G 事件描述（藍芽連線）
+  function getGEventDesc(parameter: string, desc: string): string {
+    if (parameter === "1") return "連線"
+    return desc || "—"
+  }
+
+  // 輔助函數：轉換 H 事件描述（貼片故障）
+  function getHEventDesc(parameter: string, desc: string): string {
+    // H 事件：1~48=第1~48片貼片，但標註"無此功能"
+    const paramNum = parseInt(parameter)
+    if (paramNum >= 1 && paramNum <= 48) {
+      return `第${paramNum}片貼片`
+    }
     return desc || "—"
   }
 
