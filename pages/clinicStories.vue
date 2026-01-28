@@ -139,13 +139,13 @@
                     />
                     <span>{{ video.likes }}</span>
                   </div>
-                  <!-- <div class="statItem">
+                  <div class="statItem">
                     <img
                       src="../assets/imgs/clinicStories/bubble.svg"
                       alt="留言"
                     />
                     <span>{{ video.comments }}</span>
-                  </div> -->
+                  </div>
                 </div>
               </div>
             </div>
