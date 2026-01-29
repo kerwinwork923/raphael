@@ -1653,9 +1653,63 @@ const pageNumberList = computed(() =>
   pageButtons(totalPagesHome.value, pageHome.value, maxButtons.value),
 );
 
-// 產品使用紀錄從 store 取得，直接使用（每個 AID 都是一筆獨立記錄）
+// 將治療時間字串轉為分鐘數（例："1小時30分鐘" -> 90）
+function parseDurationToMinutes(str: string): number {
+  if (!str || str === "—") return 0;
+  let minutes = 0;
+  const hourMatch = str.match(/(\d+)小時/);
+  if (hourMatch) minutes += parseInt(hourMatch[1], 10) * 60;
+  const minMatch = str.match(/(\d+)分鐘/);
+  if (minMatch) minutes += parseInt(minMatch[1], 10);
+  return minutes;
+}
+// 將分鐘數轉為顯示字串（例：90 -> "1小時30分鐘"）
+function formatMinutesToDuration(totalMinutes: number): string {
+  if (totalMinutes <= 0) return "—";
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours > 0) return `${hours}小時${minutes}分鐘`;
+  return `${minutes}分鐘`;
+}
+
+// 產品使用紀錄：依「同樣名稱的最愛」合併成同一列，治療時間與使用次數加總
 const processedHomeOrders = computed(() => {
-  return favoriteTPointsList.value || [];
+  const list = favoriteTPointsList.value || [];
+  const key = (r: any) => `${r.FavoriteName || ""}_${r.AID || ""}`;
+  const groups = new Map<string, any[]>();
+  list.forEach((r: any) => {
+    const k = key(r);
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k)!.push(r);
+  });
+  return Array.from(groups.entries()).map(([, rows]) => {
+    const first = rows[0];
+    const totalUsageSum = rows.reduce(
+      (sum, r) => sum + parseInt(String(r.TotalUsage || "0"), 10),
+      0,
+    );
+    const totalMinutes = rows.reduce(
+      (sum, r) => sum + parseDurationToMinutes(r.TreatmentTime || ""),
+      0,
+    );
+    return {
+      id: first.id,
+      AID: first.AID,
+      ConsultationDate: first.ConsultationDate,
+      FavoriteName: first.FavoriteName,
+      TreatmentArea: first.TreatmentArea,
+      StartDate: first.StartDate,
+      StartTime: first.StartTime,
+      EndTime: first.EndTime,
+      TreatmentTime: formatMinutesToDuration(totalMinutes),
+      TotalUsage: String(totalUsageSum),
+      PauseTime: first.PauseTime,
+      TotalTime: first.TotalTime,
+      TMode: first.TMode,
+      TemperatureDiff: first.TemperatureDiff,
+      AccMinutes: first.AccMinutes,
+    };
+  });
 });
 
 // 產品使用紀錄篩選選項

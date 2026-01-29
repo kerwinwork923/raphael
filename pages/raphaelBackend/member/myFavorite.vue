@@ -242,8 +242,7 @@ import { storeToRefs } from "pinia";
 const router = useRouter();
 const route = useRoute();
 const memberStore = useMemberStore();
-const { favoriteTPointsList, favoriteUseRecordList, optDetailList, member } =
-  storeToRefs(memberStore);
+const { favoriteTPointsList, optDetailList, member } = storeToRefs(memberStore);
 
 const loading = ref(false);
 const memberName = computed(() => member.value?.Name || "—");
@@ -293,6 +292,15 @@ function getAuth() {
   };
 }
 
+// 將 YYYYMMDDHHmmss 轉為 HH:mm:ss
+function formatTimeFromYMDHMS(ymdhm: string): string {
+  if (!ymdhm || ymdhm.length < 14) return "—";
+  const h = ymdhm.substring(8, 10);
+  const m = ymdhm.substring(10, 12);
+  const s = ymdhm.substring(12, 14);
+  return `${h}:${m}:${s}`;
+}
+
 async function loadData() {
   const aid = route.query.AID as string;
   if (!aid) {
@@ -302,39 +310,47 @@ async function loadData() {
 
   loading.value = true;
   try {
-    // 取得產品使用紀錄（favoriteTPointsList 內部已改接 UseRecordMIDList）
+    // 取得使用紀錄（UseRecordMIDList，存進 favoriteTPointsList）
     await memberStore.fetchFavoriteTPointsList(getAuth());
 
-    // 根據 AID 找到對應的資料
+    // 根據 AID 找一筆用於摘要（同一 AID 的 FavoriteName / TotalUsage 一致）
     const targetItem = favoriteTPointsList.value.find(
       (item: any) => item.AID === aid,
     );
 
     if (targetItem) {
-      // 設定摘要資料
       favoriteName.value = targetItem.FavoriteName || "—";
       totalUsage.value = parseInt(
         (targetItem.TotalUsage as string) || "0",
       );
       treatmentArea.value = targetItem.TreatmentArea || "—";
-      patchMode.value = "—"; // 新來源沒有模式資訊，統一顯示「—」
+      patchMode.value = "—";
     } else {
-      // 沒有找到資料時重置摘要
       favoriteName.value = "—";
       totalUsage.value = 0;
       treatmentArea.value = "—";
       patchMode.value = "—";
     }
 
-    // 取得使用紀錄列表（表格資料）
-    await memberStore.fetchFavoriteTPointsMIDUseRecordList(getAuth(), aid);
-    tableData.value = favoriteUseRecordList.value || [];
-    
+    // 使用紀錄表格：改用 UseRecordMIDList（favoriteTPointsList）依 AID 篩選並轉成表格格式
+    const list = (favoriteTPointsList.value || []).filter(
+      (r: any) => r.AID === aid,
+    );
+    tableData.value = list.map((r: any, index: number) => ({
+      id: r.id || `${r.AID}_${index}`,
+      startDate: r.StartDate || r.ConsultationDate || "—",
+      startTime: formatTimeFromYMDHMS(r.StartTime || ""),
+      endTime: r.EndTime ? formatTimeFromYMDHMS(r.EndTime) : "—",
+      treatmentDuration: r.TreatmentTime || "—",
+      pauseDuration: "00:00",
+      totalDuration: r.TreatmentTime || "—",
+    }));
+
     // 取得操作紀錄（彈窗資料）
     await memberStore.fetchOptDetailMIDList(getAuth(), aid);
     operationRecordsData.value = optDetailList.value || [];
     operationRecords.value = optDetailList.value.length || 0;
-    
+
     lastUpdated.value = new Date().toLocaleString("zh-TW");
   } catch (error) {
     console.error("載入資料失敗：", error);
