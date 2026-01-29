@@ -189,6 +189,8 @@ const productOptions = [
   { label: "三效深眠衣", value: "三效深眠衣" },
   { label: "全效調節衣", value: "全效調節衣" },
   { label: "居家治療儀", value: "居家治療儀" },
+  { label: "第五代穿戴調節衣紅光加強版", value: "第五代穿戴調節衣紅光加強版" },
+  { label: "第六代紅光極智衣", value: "第六代紅光極智衣" },
 ];
 const statusOptions = [
   "忠誠用戶",
