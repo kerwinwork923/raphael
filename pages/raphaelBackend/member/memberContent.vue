@@ -2152,6 +2152,12 @@ const pageWeeklySummary = ref(1);
 const filteredWeeklySummary = computed(() => {
   let data = weeklySummaryRecords.value || [];
 
+  // 只顯示當前會員的本週摘要（依 MID 篩選）
+  const currentMID = getAuth().sel?.MID;
+  if (currentMID) {
+    data = data.filter((r: any) => r.MID === currentMID);
+  }
+
   // 排序
   if (
     sortState.value.weeklySummary.order &&

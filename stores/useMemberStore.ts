@@ -156,14 +156,17 @@ export const useMemberStore = defineStore('member', () => {
 
       const data = await res.json()
       if (data.Result === "OK") {
-        // 轉換 API 資料格式為前端需要的格式
-        weeklySummaryRecords.value = (data.CaseWeeklySummaryList || []).map((item: any, index: number) => ({
-          id: index + 1,
+        // API 回傳 CaseWeeklySummarySingleWeekList
+        const list = data.CaseWeeklySummarySingleWeekList || data.CaseWeeklySummaryList || []
+        weeklySummaryRecords.value = list.map((item: any, index: number) => ({
+          id: item.AID || index + 1,
           SummaryContent: item.AISummary || "",
           MetaSummary: item.MetaSummary || "",
           AggregateQuantity: item.CNT || "0",
           StartDate: item.StartDate || "",
           DateRange: item.DatePeriod || "",
+          MID: item.MID || "",
+          AID: item.AID || "",
         }))
       } else {
         weeklySummaryRecords.value = []
