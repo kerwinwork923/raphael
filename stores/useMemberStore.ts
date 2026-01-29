@@ -158,16 +158,28 @@ export const useMemberStore = defineStore('member', () => {
       if (data.Result === "OK") {
         // API 回傳 CaseWeeklySummarySingleWeekList
         const list = data.CaseWeeklySummarySingleWeekList || data.CaseWeeklySummaryList || []
-        weeklySummaryRecords.value = list.map((item: any, index: number) => ({
-          id: item.AID || index + 1,
-          SummaryContent: item.AISummary || "",
-          MetaSummary: item.MetaSummary || "",
-          AggregateQuantity: item.CNT || "0",
-          StartDate: item.StartDate || "",
-          DateRange: item.DatePeriod || "",
-          MID: item.MID || "",
-          AID: item.AID || "",
-        }))
+        weeklySummaryRecords.value = list.map((item: any, index: number) => {
+          // 統一 DateRange 格式，避免多餘 / 或區間符號不一致
+          let dateRange = (item.DatePeriod || "").trim()
+          // 合併多餘斜線（修正 API 回傳如 2026//0/1/ 的錯誤）
+          dateRange = dateRange.replace(/\/+/g, "/")
+          // 統一區間分隔為 " - "（支援 "2026/01/26-2026/02/01" 或 "~"）
+          if (dateRange.includes("~")) dateRange = dateRange.replace(/~/g, " - ")
+          if (dateRange.includes("-") && !dateRange.includes(" - ")) {
+            const parts = dateRange.split("-")
+            if (parts.length === 2) dateRange = parts.map((p: string) => p.trim()).join(" - ")
+          }
+          return {
+            id: item.AID || index + 1,
+            SummaryContent: item.AISummary || "",
+            MetaSummary: item.MetaSummary || "",
+            AggregateQuantity: item.CNT || "0",
+            StartDate: item.StartDate || "",
+            DateRange: dateRange,
+            MID: item.MID || "",
+            AID: item.AID || "",
+          }
+        })
       } else {
         weeklySummaryRecords.value = []
       }

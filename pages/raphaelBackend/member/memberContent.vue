@@ -581,7 +581,11 @@
                       {{ row.AggregateQuantity || "—" }}
                     </div>
                     <div class="memberInfoTableRowItem">
-                      {{ row.DateRange || "—" }}
+                      {{
+                        (row.DateRange || "")
+                          .replace(/\s*\/\s*$/, "")
+                          .replace(/^\s*\/\s*/, "") || "—"
+                      }}
                     </div>
                     <img
                       src="/assets/imgs/backend/goNext.svg"
