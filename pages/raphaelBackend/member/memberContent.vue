@@ -1074,7 +1074,7 @@
         </div>
 
         <!-- █ APP使用紀錄 ------------------------------------------------------- -->
-        <div class="memberInfoRow">
+        <!-- <div class="memberInfoRow">
           <div class="memberInfoCard w-half">
             <div class="memberInfoTitleWrap">
               <h3>APP使用紀錄</h3>
@@ -1200,10 +1200,10 @@
             <h3>APP使用紀錄分析</h3>
             <UsageAnalysisChart :usage-data="filteredAppForChart" />
           </div>
-        </div>
+        </div> -->
 
         <!-- █ 影片觀看紀錄 ------------------------------------------------------- -->
-        <div class="memberInfoRow">
+        <!-- <div class="memberInfoRow">
           <div class="memberInfoCard memberInfoCardGroupW100">
             <div class="memberInfoTitleWrap">
               <h3>影片觀看紀錄</h3>
@@ -1365,7 +1365,7 @@
               </button>
             </nav>
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
