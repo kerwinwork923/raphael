@@ -640,8 +640,8 @@
             </div>
           </div>
 
-        <!-- █ 指環紀錄 ----------------------------------------------------------- -->
-        <div class="memberInfoRow">
+        <!-- █ 指環紀錄 ------------------------------------------------------- -->
+        <!-- <div class="memberInfoRow">
           <div class="memberInfoCard w-half">
             <div class="memberInfoTitleWrap">
               <h3>指環紀錄</h3>
@@ -727,7 +727,7 @@
               </div>
             </div>
 
-            <!-- 分頁 4/頁 -->
+    
             <nav class="pagination" v-if="totalRing">
               <button
                 class="btn-page"
@@ -768,7 +768,7 @@
               </button>
             </nav>
           </div>
-        </div>
+        </div> -->
 
         <!-- █ 自律神經 ------------------------------------------------------- -->
         <div class="memberInfoRow">
@@ -923,6 +923,7 @@
         <!-- █ 生活檢測 ------------------------------------------------------- -->
         <div class="memberInfoRow">
           <div class="memberInfoCard w-half">
+            
             <div class="memberInfoTitleWrap">
               <h3>生活檢測紀錄查詢</h3>
               <div class="memberInfoTitleGroup">

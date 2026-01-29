@@ -175,45 +175,63 @@ export const useMemberStore = defineStore('member', () => {
   }
 
   async function fetchFavoriteTPointsList(auth: any) {
+    // 產品使用紀錄：改用 UseRecordMIDList API 做來源
     try {
       const { token, admin, sel } = auth
       if (!token || !admin || !sel.MID) return
 
-      const res = await fetch("https://23700999.com:8081/HMA/api/bk/FavoriteTPointsList", {
+      const res = await fetch("https://23700999.com:8081/HMA/api/bk/UseRecordMIDList", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           AdminID: admin,
           Token: token,
           MID: sel.MID,
+          StartDate: "",
+          EndDate: "",
         }),
       })
 
       const data = await res.json()
       if (data.Result === "OK") {
-        favoriteTPointsList.value = (data.FavoriteTPointsList || []).map((item: any, index: number) => ({
-          id: item.AID || index + 1,
-          AID: item.AID || "",
-          ConsultationDate: item.TDate || "",
-          FavoriteName: item.TName || "",
-          TreatmentArea: item.Tpoints || "",
-          StartDate: item.StartDate || "",
-          StartTime: item.StartTime || "",
-          EndTime: item.EndTime || "",
-          PauseTime: item.PauseTime || "",
-          TreatmentTime: item.TreatTime || "",
-          TotalTime: item.TotalTime || "",
-          TMode: item.TMode || "",
-          TemperatureDiff: item.TemperatureDiff || "",
-          TotalUsage: item.cntFavorite || "0",
-          AccMinutes: item.AccMinutes || "0",
-        }))
+        const list = data.UseRecordMIDList || []
+        favoriteTPointsList.value = list.map((item: any, index: number) => {
+          // 從 StartTime 取出日期字串 YYYY/MM/DD
+          let consultationDate = ""
+          const startTime: string = item.StartTime || ""
+          if (startTime.length >= 8) {
+            const y = startTime.substring(0, 4)
+            const m = startTime.substring(4, 6)
+            const d = startTime.substring(6, 8)
+            consultationDate = `${y}/${m}/${d}`
+          }
+
+          const duration = calculateDuration(item.StartTime, item.EndTime)
+
+          return {
+            id: item.UID || index + 1,
+            AID: item.AID || "",
+            ConsultationDate: consultationDate,
+            FavoriteName: item.FavoriteName || "",
+            // 新 API 沒有點位資訊，暫以產品名稱帶入或留空皆可
+            TreatmentArea: item.ProductName || "",
+            StartDate: consultationDate,
+            StartTime: item.StartTime || "",
+            EndTime: item.EndTime || "",
+            PauseTime: "",
+            TreatmentTime: duration,
+            TotalTime: "",
+            TMode: "",
+            TemperatureDiff: "",
+            TotalUsage: item.cntFavorite || "0",
+            AccMinutes: "0",
+          }
+        })
       } else {
         favoriteTPointsList.value = []
       }
-      
     } catch (error) {
-      console.error('取得產品使用紀錄失敗：', error)
+      console.error("取得產品使用紀錄失敗：", error)
       favoriteTPointsList.value = []
     }
   }

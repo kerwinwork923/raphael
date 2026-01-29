@@ -242,7 +242,8 @@ import { storeToRefs } from "pinia";
 const router = useRouter();
 const route = useRoute();
 const memberStore = useMemberStore();
-const { favoriteTPointsList, favoriteUseRecordList, optDetailList, member } = storeToRefs(memberStore);
+const { favoriteTPointsList, favoriteUseRecordList, optDetailList, member } =
+  storeToRefs(memberStore);
 
 const loading = ref(false);
 const memberName = computed(() => member.value?.Name || "—");
@@ -301,30 +302,22 @@ async function loadData() {
 
   loading.value = true;
   try {
-    // 取得產品使用紀錄（用於摘要資料）
+    // 取得產品使用紀錄（favoriteTPointsList 內部已改接 UseRecordMIDList）
     await memberStore.fetchFavoriteTPointsList(getAuth());
-    
+
     // 根據 AID 找到對應的資料
     const targetItem = favoriteTPointsList.value.find(
-      (item: any) => item.AID === aid
+      (item: any) => item.AID === aid,
     );
 
     if (targetItem) {
       // 設定摘要資料
       favoriteName.value = targetItem.FavoriteName || "—";
-      totalUsage.value = parseInt(targetItem.TotalUsage || "0");
+      totalUsage.value = parseInt(
+        (targetItem.TotalUsage as string) || "0",
+      );
       treatmentArea.value = targetItem.TreatmentArea || "—";
-      
-      // 轉換貼片模式（如果沒有資料則顯示 "-"）
-      if (targetItem.TMode) {
-        const modeMap: Record<string, string> = {
-          "1": "呼吸模式",
-          "2": "其他模式",
-        };
-        patchMode.value = modeMap[targetItem.TMode] || "—";
-      } else {
-        patchMode.value = "—";
-      }
+      patchMode.value = "—"; // 新來源沒有模式資訊，統一顯示「—」
     } else {
       // 沒有找到資料時重置摘要
       favoriteName.value = "—";
@@ -614,10 +607,6 @@ watch(operationDateRange, () => {
           display: flex;
           align-items: center;
           flex-wrap: wrap;
-
-
-          
-
           gap: 8px;
 
           z-index: 10;
