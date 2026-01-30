@@ -113,7 +113,7 @@
           <span v-show="!collapsed">分類管理</span>
         </li> -->
 
-        <li 
+        <!-- <li 
           :class="{ 
             active: currentPage === 'order',
             'has-focus': focusedItem === 'order' 
@@ -129,9 +129,9 @@
         >
           <img src="/assets/imgs/backend/order.svg" alt="訂單管理" />
           <span v-show="!collapsed">訂單管理</span>
-        </li>
+        </li> -->
 
-        <li 
+        <!-- <li 
           :class="{ 
             active: currentPage === 'production',
             'has-focus': focusedItem === 'production' 
@@ -147,7 +147,7 @@
         >
           <img src="/assets/imgs/backend/production.svg" alt="生產管理" />
           <span v-show="!collapsed">生產管理</span>
-        </li>
+        </li> -->
 
         <!-- <li 
           :class="{ 
@@ -288,23 +288,28 @@ watch(() => route.path, (newPath: string) => {
     currentPage.value = 'member';
     emit('update:modelValue', 'member');
     emit('page-change', 'member');
-  } else if (newPath.includes('/order')) {
+  }
+   else if (newPath.includes('/order')) {
     currentPage.value = 'order';
     emit('update:modelValue', 'order');
     emit('page-change', 'order');
-  } else if (newPath.includes('/production')) {
+  } 
+  else if (newPath.includes('/production')) {
     currentPage.value = 'production';
     emit('update:modelValue', 'production');
     emit('page-change', 'production');
-  } else if (newPath.includes('/push')) {
+  }
+   else if (newPath.includes('/push')) {
     currentPage.value = 'push';
     emit('update:modelValue', 'push');
     emit('page-change', 'push');
-  } else if (newPath.includes('/points')) {
+  } 
+  else if (newPath.includes('/points')) {
     currentPage.value = 'points';
     emit('update:modelValue', 'points');
     emit('page-change', 'points');
-  } else if (newPath.includes('/account')) {
+  }
+   else if (newPath.includes('/account')) {
     currentPage.value = 'account';
     emit('update:modelValue', 'account');
     emit('page-change', 'account');
@@ -313,7 +318,8 @@ watch(() => route.path, (newPath: string) => {
     currentPage.value = 'videoManage';
     emit('update:modelValue', 'videoManage');
     emit('page-change', 'videoManage');
-  } else if (newPath.includes('/categoryManagement')) {
+  }
+   else if (newPath.includes('/categoryManagement')) {
     currentPage.value = 'categoryManagement';
     emit('update:modelValue', 'categoryManagement');
     emit('page-change', 'categoryManagement');
@@ -323,6 +329,7 @@ watch(() => route.path, (newPath: string) => {
     emit('update:modelValue', 'messageManage');
     emit('page-change', 'messageManage');
   }
+  
 }, { immediate: true });
 
 // 監聽 props 變化
