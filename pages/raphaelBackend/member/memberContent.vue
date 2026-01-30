@@ -351,8 +351,12 @@
                     {{ row.ConsultationDate || "—" }}
                   </div> -->
                   <div class="memberInfoTableRowItem">
-                    {{ row.FavoriteName || "—" }}
-                  </div>
+  {{
+    row.AID === 0 || row.AID === "0"
+      ? "未加入"
+      : (row.FavoriteName || "—")
+  }}
+</div>
                   <!-- <div class="memberInfoTableRowItem">
                     {{ row.PointInfo || "—" }}
                   </div> -->
