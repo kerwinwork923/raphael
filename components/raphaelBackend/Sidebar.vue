@@ -40,7 +40,7 @@
           <span v-show="!collapsed">會員清單</span>
         </li>
 
-        <li 
+        <!-- <li 
           :class="{ 
             active: currentPage === 'customerSupportAdmin',
             'has-focus': focusedItem === 'customerSupportAdmin' 
@@ -92,7 +92,7 @@
         >
           <img src="/assets/imgs/backend/message.svg" alt="留言管理" />
           <span v-show="!collapsed">留言管理</span>
-        </li>
+        </li> -->
 
       
         <!-- <li 

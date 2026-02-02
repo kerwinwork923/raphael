@@ -44,6 +44,41 @@
       @confirm="handleDeleteMemberConfirm"
     />
 
+    <!-- 本週摘要詳情彈跳視窗 -->
+    <Teleport to="body">
+      <div
+        v-if="showWeeklySummaryModal"
+        class="weekly-summary-mask"
+        @click.self="closeWeeklySummaryModal"
+      >
+        <div class="weekly-summary-modal">
+          <div class="weekly-summary-modal-header">
+            <h3>{{ selectedWeeklySummary?.DateRange ?? "—" }}</h3>
+            <p class="summary-date-label">Summary date</p>
+            <button
+              type="button"
+              class="weekly-summary-close"
+              aria-label="關閉"
+              @click="closeWeeklySummaryModal"
+            >
+              <img src="/assets/imgs/backend/close.svg" alt="關閉" />
+            </button>
+          </div>
+          <div class="weekly-summary-modal-body">
+            <div class="weekly-summary-section">
+              <h4>彙整數量 {{ selectedWeeklySummary?.AggregateQuantity ?? "—" }}</h4>
+            </div>
+            <div class="weekly-summary-section">
+              <h4>摘要內容</h4>
+              <div class="weekly-summary-content">
+                {{ selectedWeeklySummary?.SummaryContent ?? "—" }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
     <!-- ───── 主要內容 ───── -->
     <div class="memberInfoContent">
       <!-- 標題列 -->
@@ -55,7 +90,6 @@
           <button class="goBackBtn" @click="goBack">
             <img src="/assets/imgs/backend/back.svg" alt />返回
           </button>
-
           <div class="rwdW100">
             <button class="btn refresh" @click="refresh">資料更新</button>
             <span class="updated-time">最後更新: {{ lastUpdated || "—" }}</span>
@@ -136,6 +170,7 @@
                     {{ currentOrder.RentStart }}
                   </div>
                 </div>
+
                 <div class="memberInfoList">
                   <div class="memberInfoListTitle">
                     <img src="/assets/imgs/backend/time.svg" alt />結束時間
@@ -351,12 +386,12 @@
                     {{ row.ConsultationDate || "—" }}
                   </div> -->
                   <div class="memberInfoTableRowItem">
-  {{
-    row.AID === 0 || row.AID === "0"
-      ? "未加入"
-      : (row.FavoriteName || "—")
-  }}
-</div>
+                    {{
+                      row.AID === 0 || row.AID === "0"
+                        ? "未加入"
+                        : (row.FavoriteName || "—")
+                    }}
+                  </div>
                   <!-- <div class="memberInfoTableRowItem">
                     {{ row.PointInfo || "—" }}
                   </div> -->
@@ -577,8 +612,9 @@
                     v-for="row in paginatedWeeklySummary"
                     :key="row.id"
                     style="cursor: pointer"
+                    @click="openWeeklySummaryModal(row)"
                   >
-                    <div class="memberInfoTableRowItem">
+                    <div class="memberInfoTableRowItem summary-cell-one-line">
                       {{ row.SummaryContent || "—" }}
                     </div>
                     <div class="memberInfoTableRowItem">
@@ -1452,6 +1488,16 @@ const contractList = ref<any[]>([]);
 // 基本資料編輯和刪除會員彈跳視窗
 const showEditBasicModal = ref(false);
 const showDeleteMemberModal = ref(false);
+
+// 本週摘要詳情彈跳視窗
+const showWeeklySummaryModal = ref(false);
+const selectedWeeklySummary = ref<{
+  SummaryContent?: string;
+  AggregateQuantity?: string;
+  DateRange?: string;
+  AID?: string;
+  MID?: string;
+} | null>(null);
 
 /* ---------- refs ---------- */
 const homeDateRange = ref<Date[] | null>(null);
@@ -2587,6 +2633,15 @@ function closeLife() {
   showLife.value = false;
 }
 
+function openWeeklySummaryModal(row: any) {
+  selectedWeeklySummary.value = row;
+  showWeeklySummaryModal.value = true;
+}
+function closeWeeklySummaryModal() {
+  showWeeklySummaryModal.value = false;
+  selectedWeeklySummary.value = null;
+}
+
 // 基本資料編輯相關函數
 function openEditBasicModal() {
   showEditBasicModal.value = true;
@@ -2703,7 +2758,7 @@ const mmdd = (raw: string) => {
 };
 
 const isAnyAlertOpen = computed(() => {
-  return showContract.value || showANS.value || showLife.value;
+  return showContract.value || showANS.value || showLife.value || showWeeklySummaryModal.value;
 });
 
 const isExpired = computed(() => {
@@ -3259,6 +3314,12 @@ const isExpired = computed(() => {
         .memberInfoTableRowItem {
           flex: 1;
           padding: 1rem 0.5rem;
+          &.summary-cell-one-line {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
         }
       }
 
@@ -3301,6 +3362,89 @@ const isExpired = computed(() => {
     .btn-page-number {
       background: white;
     }
+  }
+}
+
+/* 本週摘要詳情彈跳視窗 */
+.weekly-summary-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+.weekly-summary-modal {
+  width: 90%;
+  max-width: 640px;
+  max-height: 85vh;
+  border-radius: 20px;
+  border: 3px solid var(--Primary-default, #1ba39b);
+  background: var(--neutral-white-opacity-30, rgba(255, 255, 255, 0.95));
+  box-shadow: 0px 2px 20px 0px
+    var(--primary-400-opacity-25, rgba(27, 163, 155, 0.25));
+  backdrop-filter: blur(25px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  .weekly-summary-modal-header {
+    padding: 1rem 1.25rem 0.5rem;
+    position: relative;
+    h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      color: #2d3047;
+    }
+    .summary-date-label {
+      margin: 0.25rem 0 0;
+      font-size: 0.875rem;
+      color: #666;
+    }
+    .weekly-summary-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      img {
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+  .weekly-summary-modal-body {
+    padding: 1rem 1.25rem 1.25rem;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+  }
+  .weekly-summary-section {
+    margin-bottom: 1rem;
+    &:last-child {
+      margin-bottom: 0;
+    }
+    h4 {
+      margin: 0 0 0.5rem;
+      font-size: 1rem;
+      color: #2d3047;
+    }
+  }
+  .weekly-summary-content {
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: #444;
   }
 }
 
