@@ -28,7 +28,9 @@
           </div>
           <hr />
           <div class="operationModalHeaderRight">
-            <span class="operationCount">已操作 {{ operationRecordsData.length }} 筆</span>
+            <span class="operationCount"
+              >已操作 {{ operationRecordsData.length }} 筆</span
+            >
             <div class="operationFilters">
               <VueDatePicker
                 v-model="operationDateRange"
@@ -61,7 +63,9 @@
                 >
                   <div
                     class="eventFilterOption"
-                    v-for="event in availableEventOptions.length ? availableEventOptions : eventOptions"
+                    v-for="event in availableEventOptions.length
+                      ? availableEventOptions
+                      : eventOptions"
                     :key="event"
                     @click="toggleEventOption(event)"
                   >
@@ -139,23 +143,20 @@
         </div>
         <div class="summaryCard">
           <div class="summaryCardLabel">治療部位</div>
-          <div class="summaryCardValue summaryCardValue--break">{{ treatmentArea || "—" }}</div>
+          <div class="summaryCardValue summaryCardValue--break">
+            {{ treatmentArea || "—" }}
+          </div>
         </div>
         <div class="summaryCard">
           <div class="summaryCardLabel">貼片模式</div>
           <!-- <div class="summaryCardValue">{{ patchMode || "—" }}</div> -->
-          <div class="summaryCardValue"> — </div>
+          <div class="summaryCardValue">—</div>
         </div>
-        <div class="summaryCard">
+        <div class="summaryCard dotIcon" @click="openOperationModal">
           <div class="summaryCardLabel">操作紀錄</div>
           <div class="summaryCardValue">
             {{ operationRecords || "—" }}筆
-            <img
-              src="/assets/imgs/backend/dot.svg"
-              alt="dot"
-              class="dotIcon"
-              @click="openOperationModal"
-            />
+            <img src="/assets/imgs/backend/dot.svg" alt="dot" />
           </div>
         </div>
       </div>
@@ -320,9 +321,7 @@ async function loadData() {
 
     if (targetItem) {
       favoriteName.value = targetItem.FavoriteName || "—";
-      totalUsage.value = parseInt(
-        (targetItem.TotalUsage as string) || "0",
-      );
+      totalUsage.value = parseInt((targetItem.TotalUsage as string) || "0");
       treatmentArea.value = targetItem.TreatmentArea || "—";
       patchMode.value = "—";
     } else {
@@ -361,7 +360,6 @@ async function loadData() {
 
 // 操作紀錄資料從 API 取得，不需要假資料
 onMounted(() => {
-
   // 點擊外部關閉事件篩選
   document.addEventListener("click", (e) => {
     const target = e.target as HTMLElement;
@@ -369,7 +367,7 @@ onMounted(() => {
       showEventFilter.value = false;
     }
   });
-  
+
   // 載入資料
   loadData();
 });
@@ -379,7 +377,7 @@ watch(
   () => route.query.AID,
   () => {
     loadData();
-  }
+  },
 );
 
 // 分頁計算
@@ -622,6 +620,7 @@ watch(operationDateRange, () => {
           font-weight: 600;
           display: flex;
           align-items: center;
+          justify-content: space-between;
           flex-wrap: wrap;
           gap: 8px;
 
@@ -640,15 +639,19 @@ watch(operationDateRange, () => {
           }
         }
         .summaryCardValue--break {
-          min-width: 0;                 
+          min-width: 0;
           white-space: normal;
-          overflow-wrap: anywhere;      
-          word-break: break-word;       
+          overflow-wrap: anywhere;
+          word-break: break-word;
           line-height: 1.4;
         }
-        .dotIcon {
-          margin-left: auto;
-          cursor: pointer;
+      }
+
+      .dotIcon {
+        cursor: pointer;
+        transition: all 0.25s ease;
+        &:hover {
+          box-shadow: 2px 10px 20px 0px rgba(177, 192, 216, 0.5);
         }
       }
     }
@@ -1008,6 +1011,7 @@ watch(operationDateRange, () => {
         flex: 1;
         overflow-y: auto;
         padding: 0 2rem;
+        padding-bottom: 44px;
 
         .operationTableRow {
           display: flex;
