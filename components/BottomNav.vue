@@ -15,7 +15,7 @@
       </div>
       <span>健康任務</span>
     </div>
-    <div
+    <!-- <div
       class="nav-item"
       :class="{ active: activeTab === 'record' }"
       @click="navigateTo('/usageIndex')"
@@ -29,7 +29,7 @@
         <img v-else src="/assets/imgs/robot/cloth.svg" alt="穿衣紀錄" />
       </div>
       <span>陪伴旅程</span>
-    </div>
+    </div> -->
     <div
       class="nav-item"
       :class="{ active: activeTab === 'home' }"
@@ -163,7 +163,7 @@ onMounted(() => {
   background: #f5f7fa;
   display: grid;
   grid-auto-flow: column;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   padding-top: 4px;
   padding-bottom: 34px;
   margin: auto;

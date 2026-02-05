@@ -46,7 +46,7 @@
           <img src="../assets/imgs/member/next_green.svg" alt="" />
         </div>
 
-        <div class="memberListItem" @click="goToContract">
+        <!-- <div class="memberListItem" @click="goToContract">
           <div class="memberListLeft">
             <img src="../assets/imgs/member/contract.svg" alt="" />
             <h3>我的合約</h3>
@@ -70,7 +70,7 @@
             <h3>寄貨查詢</h3>
           </div>
           <img src="../assets/imgs/member/next_green.svg" alt="" />
-        </div>
+        </div> -->
 
         <div class="memberListItem" @click="contactSupport">
           <div class="memberListLeft">
