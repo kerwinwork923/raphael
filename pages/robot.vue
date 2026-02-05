@@ -4887,6 +4887,8 @@ const vClickOutside = {
       font-weight: 400;
       line-height: 100%; /* 18px */
       letter-spacing: 2.7px;
+      display: flex;
+      justify-content: center;
       &:hover {
         background: #22c55e;
       }

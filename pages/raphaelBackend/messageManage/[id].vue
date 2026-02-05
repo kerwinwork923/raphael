@@ -96,6 +96,7 @@
               />
             </button>
           </div>
+
           <div class="comment-content">
             {{ comment.content }}
           </div>
@@ -125,6 +126,7 @@
           </div>
         </div>
       </section>
+      
     </main>
   </div>
 </template>

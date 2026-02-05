@@ -3,7 +3,7 @@
     <!-- <Navbar /> -->
 
     <div class="privacyWrap">
-      <TitleMenu Text="隱私權保護政策" link="back" positionType="sticky" />
+      <TitleMenu Text="隱私權政策" link="back" positionType="sticky" />
 
 
       <p>

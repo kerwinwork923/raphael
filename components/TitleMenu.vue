@@ -1,5 +1,6 @@
 <template>
   <div :class="['titleMenu', positionType]">
+    
     <div @click="handleClick">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -18,10 +19,12 @@
     <h2>
       {{ Text }}
     </h2>
+
     <div class="titleImgGroup" v-if="showImg1 || showImg2">
       <img v-if="showImg1" :src="showImg1" @click="handleImg1Click" alt="" />
       <img v-if="showImg2" :src="showImg2" @click="handleImg2Click" alt="" />
     </div>
+
   </div>
 </template>
 

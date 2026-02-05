@@ -77,6 +77,7 @@
 
         <!-- pagination -->
         <nav class="pagination" v-if="totalPages > 1">
+
           <button
             class="btn-page"
             :disabled="currentPage === 1"
@@ -84,6 +85,7 @@
           >
             &lt;&lt;
           </button>
+
           <button
             class="btn-page"
             :disabled="currentPage === 1"
@@ -91,6 +93,7 @@
           >
             &lt;
           </button>
+
           <button
             v-for="p in pageNumberList"
             :key="p"
@@ -101,6 +104,7 @@
           >
             {{ p }}
           </button>
+
           <button
             class="btn-page"
             :disabled="currentPage === totalPages"
@@ -108,6 +112,7 @@
           >
             &gt;
           </button>
+
           <button
             class="btn-page"
             :disabled="currentPage === totalPages"
@@ -115,6 +120,7 @@
           >
             &gt;&gt;
           </button>
+          
         </nav>
       </section>
     </main>
