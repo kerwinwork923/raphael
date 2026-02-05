@@ -10,20 +10,27 @@ interface SeoOptions {
 export const useSeo = (options: SeoOptions) => {
   const { title, description, image, url } = options
 
+  const siteName = '拉斐爾人本診所'
+  const brandKeywords = 'NeuroPlus｜neuro-plus｜神經調節'
+  const fullSiteName = `${siteName} ${brandKeywords}`
+
+  const defaultDescription =
+    '拉斐爾人本診所（NeuroPlus／neuro-plus）專注於神經調節與身心整合，提供專業評估與個人化健康照護，協助改善自律神經與身心平衡。'
+
   useHead({
-    title: title ? `${title} - NeuroPlus神經調節家` : 'NeuroPlus神經調節家',
+    title: title ? `${title} - ${siteName}` : fullSiteName,
     meta: [
       {
         name: 'description',
-        content: description || 'NeuroPlus神經調節家提供專業的自律神經檢測服務，運用FDA認證AI技術，透過人臉辨識快速分析HRV數據。'
+        content: description || defaultDescription
       },
       {
         property: 'og:title',
-        content: title ? `${title} - NeuroPlus神經調節家` : 'NeuroPlus神經調節家'
+        content: title ? `${title} - ${siteName}` : fullSiteName
       },
       {
         property: 'og:description',
-        content: description || 'NeuroPlus神經調節家提供專業的自律神經檢測服務，運用FDA認證AI技術，透過人臉辨識快速分析HRV數據。'
+        content: description || defaultDescription
       },
       {
         property: 'og:image',
@@ -31,8 +38,8 @@ export const useSeo = (options: SeoOptions) => {
       },
       {
         property: 'og:url',
-        content: url || 'https://neuroplus.com.tw'
+        content: url || 'https://raphael.clinic'
       }
     ]
   })
-} 
+}

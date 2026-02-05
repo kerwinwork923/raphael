@@ -1578,6 +1578,11 @@ const confirmDeleteComment = async () => {
   }
 };
 
+useHead({
+  title: "拉菲爾人本診所",
+  meta: [{ name: "description", content: "是透過相應神經調節療法，以無藥、無副作用、非侵入性的治療方式治療自律神經失調、神經痛、弱視、耳鳴、眩暈、胃食道逆流、顏面神經麻痺、失眠、過敏性鼻炎、焦慮憂鬱、胃食道逆流、三叉神經痛、帶狀皰疹神經痛等疾病。" }],
+});
+
 const modules = [FreeMode];
 </script>
 
