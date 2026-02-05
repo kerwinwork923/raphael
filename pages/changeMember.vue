@@ -13,9 +13,15 @@
         @update:area="area = $event"
         @update:address="address = $event"
         @update:email="email = $event"
+        @update:asusEmail="asusEmail = $event"
+        @update:acerEmail="acerEmail = $event"
+        @update:garminEmail="garminEmail = $event"
         phoneShow="true"
         addressShow="true"
         emailShow="true"
+        asusEmailShow="true"
+        acerEmailShow="true"
+        garminEmailShow="true"
         @submit="addUser"
       />
     </div>
@@ -43,6 +49,9 @@ export default {
     const area = ref("");
     const address = ref("");
     const email = ref("");
+    const asusEmail = ref("");
+const acerEmail = ref("");
+const garminEmail = ref("");
     const router = useRouter();
 
     const loading = ref(false);
@@ -73,6 +82,9 @@ export default {
           area: area.value,
           address: address.value,
           email: email.value,
+          asusEmail: asusEmail.value,
+  acerEmail: acerEmail.value,
+  garminEmail: garminEmail.value,
         };
 
         if (
@@ -116,6 +128,9 @@ export default {
             Zone: userData.area,
             Address: userData.address,
             Mail: userData.email,
+            AsusMail: userData.asusEmail,
+  AcerMail: userData.acerEmail,
+  GarminMail: userData.garminEmail,
           }
         );
 
@@ -175,6 +190,9 @@ export default {
       area,
       address,
       email,
+      asusEmail,
+      acerEmail,
+      garminEmail,
       addUser,
       loading,
     };

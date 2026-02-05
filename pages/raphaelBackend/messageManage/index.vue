@@ -79,7 +79,8 @@
         </div>
 
         <!-- data rows -->
-        <div class="table-list">
+        <div v-if="loading" class="loading-row">載入中...</div>
+        <div class="table-list" v-else>
           <div
             v-for="message in paginatedMessages"
             :key="message.id"
@@ -180,6 +181,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
+import axios from "axios";
 import Sidebar from "@/components/raphaelBackend/Sidebar.vue";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
@@ -194,14 +196,31 @@ useSeo({
 
 const router = useRouter();
 
+const VIDEO_SINGLE_MESSAGE_API =
+  "https://23700999.com:8081/HMA/api/bk/VideoMessageList";
+
+// 從 localStorage/sessionStorage 獲取認證資訊
+const token = ref(
+  typeof window !== "undefined"
+    ? localStorage.getItem("backendToken") ||
+        sessionStorage.getItem("backendToken")
+    : ""
+);
+const adminID = ref(
+  typeof window !== "undefined"
+    ? localStorage.getItem("adminID") || sessionStorage.getItem("adminID")
+    : ""
+);
+
 /* ---------- 型別定義 ---------- */
 interface Message {
-  id: number;
+  id: string; // BID，用於詳情頁路由
   content: string;
   videoTitle: string;
   sender: string;
   status: "replied" | "unreplied";
   date: string;
+  AID: string;
 }
 
 interface VideoOption {
@@ -209,7 +228,17 @@ interface VideoOption {
   value: string;
 }
 
-
+interface ApiVideoMessage {
+  Status: string;
+  Response: string;
+  CheckTime: string;
+  Message: string;
+  MID: string;
+  BID: string;
+  AID: string;
+  Mobile: string;
+  Name: string;
+}
 
 /* ---------- 響應式資料 ---------- */
 const messages = ref<Message[]>([]);
@@ -218,13 +247,16 @@ const selectedVideo = ref("");
 const dateRange = ref<Date[] | null>(null);
 const currentPage = ref(1);
 const pageSize = ref(10);
+const loading = ref(false);
 
-/* ---------- 影片選項（假資料，之後可從 API 取得） ---------- */
-const videoOptions = ref<VideoOption[]>([
-  { label: "拉菲爾人本診所案例分享", value: "video1" },
-  { label: "健康講座系列", value: "video2" },
-  { label: "治療案例", value: "video3" },
-]);
+/* ---------- 影片選項（從 API 列表的 AID 去重產生） ---------- */
+const videoOptions = computed<VideoOption[]>(() => {
+  const aids = new Set(messages.value.map((m: Message) => m.AID));
+  return Array.from(aids).map((aid) => ({
+    label: `影片 AID: ${aid}`,
+    value: aid,
+  }));
+});
 
 /* ---------- 計算屬性 ---------- */
 // 篩選後的訊息
@@ -242,20 +274,9 @@ const filteredMessages = computed(() => {
     );
   }
 
-  // 影片篩選
+  // 影片篩選（依 AID）
   if (selectedVideo.value) {
-    result = result.filter((msg: Message) => msg.videoTitle === selectedVideo.value);
-  }
-
-  // 日期篩選
-  if (dateRange.value && dateRange.value.length >= 2) {
-    const [from, to] = dateRange.value;
-    const start = from.getTime();
-    const end = to.getTime();
-    result = result.filter((msg: Message) => {
-      const msgDate = new Date(msg.date).getTime();
-      return msgDate >= start && msgDate <= end;
-    });
+    result = result.filter((msg: Message) => msg.AID === selectedVideo.value);
   }
 
   return result;
@@ -319,101 +340,81 @@ const nextPage = () => {
   if (currentPage.value < totalPages.value) currentPage.value++;
 };
 
-// 刪除訊息
-const handleDelete = (id: number) => {
+// 刪除訊息（目前僅前端移除，若有刪除 API 可再串接）
+const handleDelete = (id: string) => {
   if (confirm("確定要刪除此留言嗎？")) {
-    messages.value = messages.value.filter((msg) => msg.id !== id);
+    messages.value = messages.value.filter((msg: Message) => msg.id !== id);
   }
 };
 
-// 查看訊息
-const handleView = (id: number) => {
+// 查看訊息（id 為 BID）
+const handleView = (id: string) => {
   router.push(`/raphaelBackend/messageManage/${id}`);
 };
 
-/* ---------- 假資料 ---------- */
-const mockMessages = [
-  {
-    id: 1,
-    content: "留言文案留言文案留言文案留言...",
-    videoTitle: "拉菲爾人本診所案例分...",
-    sender: "成女士",
-    status: "replied",
-    date: "2024/12/01",
-    // 詳細資料
-    fullContent: "留言文案留言文案留言文案留言文案留言文案留言文案留言文案留言文案留言文案留言文案留言文案留言文案留言文案留言文案留言文案",
-    videoId: 1,
-    videoFullTitle: "拉菲爾人本診所案例分享:【全身都是病?超過20年的失調人生,短短一個月 症狀大幅...",
-    videoThumbnail: "/assets/imgs/backend/video-placeholder.jpg",
-    descriptionPoints: [
-      "耳鳴、失眠、頭暈、胃不適...身體狀況越來越差?",
-      "長達20年的身心折磨,還有救嗎?",
-    ],
-    description: "長年飽受自律神經失調影響,嘗試過各種治療仍無改善,直到選擇自律神經調節療法,短短一個月內症狀明顯減輕,重新找回健康與希望!",
-    videoLink: "https://example.com/video/123",
-    commentDate: "2025/10/10",
-    commentTime: "10:00",
-  },
-  {
-    id: 2,
-    content: "留言文案留言文案留言文案留言...",
-    videoTitle: "拉菲爾人本診所案例分...",
-    sender: "成女士",
-    status: "unreplied",
-    date: "2024/12/02",
-    fullContent: "這是第二則留言的完整內容，包含更多詳細資訊...",
-    videoId: 1,
-    videoFullTitle: "拉菲爾人本診所案例分享:【全身都是病?超過20年的失調人生,短短一個月 症狀大幅...",
-    videoThumbnail: "/assets/imgs/backend/video-placeholder.jpg",
-    descriptionPoints: [
-      "耳鳴、失眠、頭暈、胃不適...身體狀況越來越差?",
-      "長達20年的身心折磨,還有救嗎?",
-    ],
-    description: "長年飽受自律神經失調影響,嘗試過各種治療仍無改善,直到選擇自律神經調節療法,短短一個月內症狀明顯減輕,重新找回健康與希望!",
-    videoLink: "https://example.com/video/123",
-    commentDate: "2025/10/11",
-    commentTime: "14:30",
-  },
-  {
-    id: 3,
-    content: "留言文案留言文案留言文案留言...",
-    videoTitle: "拉菲爾人本診所案例分...",
-    sender: "成女士",
-    status: "unreplied",
-    date: "2024/12/03",
-    fullContent: "這是第三則留言的完整內容...",
-    videoId: 1,
-    videoFullTitle: "拉菲爾人本診所案例分享:【全身都是病?超過20年的失調人生,短短一個月 症狀大幅...",
-    videoThumbnail: "/assets/imgs/backend/video-placeholder.jpg",
-    descriptionPoints: [
-      "耳鳴、失眠、頭暈、胃不適...身體狀況越來越差?",
-      "長達20年的身心折磨,還有救嗎?",
-    ],
-    description: "長年飽受自律神經失調影響,嘗試過各種治療仍無改善,直到選擇自律神經調節療法,短短一個月內症狀明顯減輕,重新找回健康與希望!",
-    videoLink: "https://example.com/video/123",
-    commentDate: "2025/10/12",
-    commentTime: "09:15",
-  },
-];
+// 將日期格式為 YYYYMMDD
+function formatDateToYYYYMMDD(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}${m}${d}`;
+}
+
+// 取得留言列表
+async function fetchMessageList() {
+  if (!adminID.value || !token.value) return;
+  loading.value = true;
+  try {
+    let StartDate = "";
+    let EndDate = "";
+    if (dateRange.value && dateRange.value.length >= 2) {
+      StartDate = formatDateToYYYYMMDD(dateRange.value[0]);
+      EndDate = formatDateToYYYYMMDD(dateRange.value[1]);
+    }
+    const response = await axios.post(VIDEO_SINGLE_MESSAGE_API, {
+      AdminID: adminID.value,
+      Token: token.value,
+      StartDate,
+      EndDate,
+    });
+    if (
+      response.data?.Result === "OK" &&
+      Array.isArray(response.data.VideoMessageList)
+    ) {
+      const list = response.data.VideoMessageList as ApiVideoMessage[];
+      messages.value = list.map((item) => ({
+        id: item.BID,
+        content: item.Message,
+        videoTitle: `影片 AID: ${item.AID}`,
+        sender: item.Name,
+        status:
+          item.Response === "已回覆" ? ("replied" as const) : ("unreplied" as const),
+        date: item.CheckTime,
+        AID: item.AID,
+      }));
+    } else {
+      messages.value = [];
+    }
+  } catch (err) {
+    console.error("取得留言列表失敗:", err);
+    messages.value = [];
+  } finally {
+    loading.value = false;
+  }
+}
 
 /* ---------- 生命週期 ---------- */
 onMounted(() => {
-  // 假資料（之後可改為 API 呼叫）
-  messages.value = mockMessages.map((msg) => ({
-    id: msg.id,
-    content: msg.content,
-    videoTitle: msg.videoTitle,
-    sender: msg.sender,
-    status: msg.status as "replied" | "unreplied",
-    date: msg.date,
-  }));
-  
-  // 將完整假資料存到 localStorage，供詳細頁使用
-  localStorage.setItem("mockMessages", JSON.stringify(mockMessages));
+  fetchMessageList();
+});
+
+// 監聽日期範圍變化，重新取得列表
+watch(dateRange, () => {
+  fetchMessageList();
 });
 
 // 監聽篩選條件變化，重置分頁
-watch([searchKeyword, selectedVideo, dateRange], () => {
+watch([searchKeyword, selectedVideo], () => {
   currentPage.value = 1;
 });
 </script>
@@ -701,16 +702,16 @@ watch([searchKeyword, selectedVideo, dateRange], () => {
           
           &.replied {
             border-radius: 4px;
-border: 1px solid var(--Primary-default, #1BA39B);
-background: var(--primary-400-opacity-10, rgba(27, 163, 155, 0.10));
-color: var(--Primary-default, #1BA39B);
+            border: 1px solid var(--Primary-default, #1BA39B);
+            background: var(--primary-400-opacity-10, rgba(27, 163, 155, 0.10));
+            color: var(--Primary-default, #1BA39B);
           }
 
           &.unreplied {
             border-radius: 4px;
-border: 1px solid var(--Primary-default, #EC4F4F);
-background: var(--warning-300-opacity-10, rgba(236, 79, 79, 0.10));
-color: var(--Warning-default, #EC4F4F);
+            border: 1px solid var(--Primary-default, #EC4F4F);
+            background: var(--warning-300-opacity-10, rgba(236, 79, 79, 0.10));
+            color: var(--Warning-default, #EC4F4F);
           }
         }
 
@@ -732,6 +733,12 @@ color: var(--Warning-default, #EC4F4F);
             }
           }
         }
+      }
+
+      .loading-row {
+        text-align: center;
+        padding: 3rem 0;
+        color: $raphael-gray-500;
       }
 
       .no-data {

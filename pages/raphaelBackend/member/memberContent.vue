@@ -66,7 +66,9 @@
           </div>
           <div class="weekly-summary-modal-body">
             <div class="weekly-summary-section">
-              <h4>彙整數量 {{ selectedWeeklySummary?.AggregateQuantity ?? "—" }}</h4>
+              <h4>
+                彙整數量 {{ selectedWeeklySummary?.AggregateQuantity ?? "—" }}
+              </h4>
             </div>
             <div class="weekly-summary-section">
               <h4>摘要內容</h4>
@@ -153,6 +155,15 @@
                 <div class="memberInfoTag" v-if="member?.memType">
                   {{ member.memType }}
                 </div>
+              </div>
+
+              <div
+               
+                class="acerBox"
+                @click="goToAcerNumber"
+              >
+                <img src="/assets/imgs/backend/watch.svg" alt />
+                <span>華碩序號({{ latestVivoWatch?.Deviceid || "—" }})</span>
               </div>
             </div>
 
@@ -378,7 +389,7 @@
                   :key="row.id"
                   @click="
                     router.push(
-                      `/raphaelBackend/member/myFavorite?AID=${row.AID}`,
+                      `/raphaelBackend/member/myFavorite?AID=${row.AID}`
                     )
                   "
                 >
@@ -389,7 +400,7 @@
                     {{
                       row.AID === 0 || row.AID === "0"
                         ? "未加入"
-                        : (row.FavoriteName || "—")
+                        : row.FavoriteName || "—"
                     }}
                   </div>
                   <!-- <div class="memberInfoTableRowItem">
@@ -458,8 +469,6 @@
             </nav>
           </div>
 
-
-
           <!-- 使用紀錄分析 -->
           <!-- <div class="memberInfoCard memberInfoCardGroupW100">
             <h3>使用紀錄分析</h3>
@@ -467,222 +476,222 @@
           </div> -->
         </div>
 
-                  <!-- █ 健康日誌 & 本周摘要 ------------------------------------------------- -->
-                  <div class="memberInfoRow">
-            <!-- 健康日誌 -->
-            <div class="memberInfoCard w-half">
-              <div class="memberInfoTitleWrap">
-                <h3>健康日誌</h3>
-                <div class="memberInfoTitleGroup">
-                  <small>已使用 {{ totalHealthLog }} 次</small>
-                  <VueDatePicker
-                    v-model="healthLogDateRange"
-                    range
-                    :enable-time-picker="false"
-                    format="yyyy/MM/dd"
-                    placeholder="選擇日期或日期區間"
-                    prepend-icon="i-calendar"
-                    :teleport="true"
+        <!-- █ 健康日誌 & 本周摘要 ------------------------------------------------- -->
+        <div class="memberInfoRow">
+          <!-- 健康日誌 -->
+          <div class="memberInfoCard w-half">
+            <div class="memberInfoTitleWrap">
+              <h3>健康日誌</h3>
+              <div class="memberInfoTitleGroup">
+                <small>已使用 {{ totalHealthLog }} 次</small>
+                <VueDatePicker
+                  v-model="healthLogDateRange"
+                  range
+                  :enable-time-picker="false"
+                  format="yyyy/MM/dd"
+                  placeholder="選擇日期或日期區間"
+                  prepend-icon="i-calendar"
+                  :teleport="true"
+                />
+              </div>
+            </div>
+
+            <div class="memberInfoTable">
+              <div class="memberInfoTableTitle">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('healthLog', 'VerbalContent')"
+                >
+                  口述內容
+                </div>
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('healthLog', 'VerbalDate')"
+                >
+                  口述日期
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
                   />
                 </div>
               </div>
+              <div class="memberInfoTableHR" />
 
-              <div class="memberInfoTable">
-                <div class="memberInfoTableTitle">
-                  <div
-                    class="memberInfoTableTitleItem"
-                    @click="handleSort('healthLog', 'VerbalContent')"
-                  >
-                    口述內容
+              <template v-if="paginatedHealthLog.length">
+                <div
+                  class="memberInfoTableRow"
+                  v-for="row in paginatedHealthLog"
+                  :key="row.id"
+                >
+                  <div class="memberInfoTableRowItem">
+                    {{ row.VerbalContent || "—" }}
                   </div>
-                  <div
-                    class="memberInfoTableTitleItem"
-                    @click="handleSort('healthLog', 'VerbalDate')"
-                  >
-                    口述日期
-                    <img
-                      src="/assets/imgs/backend/sort.svg"
-                      alt="sort"
-                      class="sortIcon"
-                    />
+                  <div class="memberInfoTableRowItem">
+                    {{ row.VerbalDate || "—" }}
                   </div>
                 </div>
-                <div class="memberInfoTableHR" />
-
-                <template v-if="paginatedHealthLog.length">
-                  <div
-                    class="memberInfoTableRow"
-                    v-for="row in paginatedHealthLog"
-                    :key="row.id"
-                  >
-                    <div class="memberInfoTableRowItem">
-                      {{ row.VerbalContent || "—" }}
-                    </div>
-                    <div class="memberInfoTableRowItem">
-                      {{ row.VerbalDate || "—" }}
-                    </div>
-                  </div>
-                </template>
-                <div class="memberInfoTableRow" v-else>
-                  <div class="memberInfoTableRowItem" style="width: 100%">
-                    尚無資料
-                  </div>
+              </template>
+              <div class="memberInfoTableRow" v-else>
+                <div class="memberInfoTableRowItem" style="width: 100%">
+                  尚無資料
                 </div>
               </div>
-
-              <!-- 分頁 -->
-              <nav class="pagination" v-if="totalHealthLog">
-                <button
-                  class="btn-page"
-                  :disabled="pageHealthLog === 1"
-                  @click="pageHealthLog = 1"
-                >
-                  &lt;&lt;
-                </button>
-                <button
-                  class="btn-page"
-                  :disabled="pageHealthLog === 1"
-                  @click="pageHealthLog--"
-                >
-                  &lt;
-                </button>
-                <button
-                  class="btn-page btn-page-number"
-                  v-for="p in pageNumberListHealthLog"
-                  :key="p"
-                  :class="{ active: pageHealthLog === p }"
-                  @click="pageHealthLog = p"
-                >
-                  {{ p }}
-                </button>
-                <button
-                  class="btn-page"
-                  :disabled="pageHealthLog === totalPagesHealthLog"
-                  @click="pageHealthLog++"
-                >
-                  &gt;
-                </button>
-                <button
-                  class="btn-page"
-                  :disabled="pageHealthLog === totalPagesHealthLog"
-                  @click="pageHealthLog = totalPagesHealthLog"
-                >
-                  &gt;&gt;
-                </button>
-              </nav>
             </div>
 
-            <!-- 本週摘要 -->
-            <div class="memberInfoCard w-half">
-              <div class="memberInfoTitleWrap">
-                <h3>本週摘要</h3>
-              </div>
-
-              <div class="memberInfoTable">
-                <div class="memberInfoTableTitle">
-                  <div
-                    class="memberInfoTableTitleItem"
-                    @click="handleSort('weeklySummary', 'SummaryContent')"
-                  >
-                    摘要內容
-                  </div>
-                  <div
-                    class="memberInfoTableTitleItem"
-                    @click="handleSort('weeklySummary', 'AggregateQuantity')"
-                  >
-                    彙整數量
-                  </div>
-                  <div
-                    class="memberInfoTableTitleItem"
-                    @click="handleSort('weeklySummary', 'DateRange')"
-                  >
-                    日期區間
-                    <img
-                      src="/assets/imgs/backend/sort.svg"
-                      alt="sort"
-                      class="sortIcon"
-                    />
-                  </div>
-                </div>
-                <div class="memberInfoTableHR" />
-
-                <template v-if="paginatedWeeklySummary.length">
-                  <div
-                    class="memberInfoTableRow"
-                    v-for="row in paginatedWeeklySummary"
-                    :key="row.id"
-                    style="cursor: pointer"
-                    @click="openWeeklySummaryModal(row)"
-                  >
-                    <div class="memberInfoTableRowItem summary-cell-one-line">
-                      {{ row.SummaryContent || "—" }}
-                    </div>
-                    <div class="memberInfoTableRowItem">
-                      {{ row.AggregateQuantity || "—" }}
-                    </div>
-                    <div class="memberInfoTableRowItem">
-                      {{
-                        (row.DateRange || "")
-                          .replace(/\s*\/\s*$/, "")
-                          .replace(/^\s*\/\s*/, "") || "—"
-                      }}
-                    </div>
-                    <img
-                      src="/assets/imgs/backend/goNext.svg"
-                      alt="detail"
-                      style="cursor: pointer; position: absolute; right: 0"
-                    />
-                  </div>
-                </template>
-                <div class="memberInfoTableRow" v-else>
-                  <div class="memberInfoTableRowItem" style="width: 100%">
-                    尚無資料
-                  </div>
-                </div>
-              </div>
-
-              <!-- 分頁 -->
-              <nav class="pagination" v-if="totalWeeklySummary">
-                <button
-                  class="btn-page"
-                  :disabled="pageWeeklySummary === 1"
-                  @click="pageWeeklySummary = 1"
-                >
-                  &lt;&lt;
-                </button>
-                <button
-                  class="btn-page"
-                  :disabled="pageWeeklySummary === 1"
-                  @click="pageWeeklySummary--"
-                >
-                  &lt;
-                </button>
-                <button
-                  class="btn-page btn-page-number"
-                  v-for="p in pageNumberListWeeklySummary"
-                  :key="p"
-                  :class="{ active: pageWeeklySummary === p }"
-                  @click="pageWeeklySummary = p"
-                >
-                  {{ p }}
-                </button>
-                <button
-                  class="btn-page"
-                  :disabled="pageWeeklySummary === totalPagesWeeklySummary"
-                  @click="pageWeeklySummary++"
-                >
-                  &gt;
-                </button>
-                <button
-                  class="btn-page"
-                  :disabled="pageWeeklySummary === totalPagesWeeklySummary"
-                  @click="pageWeeklySummary = totalPagesWeeklySummary"
-                >
-                  &gt;&gt;
-                </button>
-              </nav>
-            </div>
+            <!-- 分頁 -->
+            <nav class="pagination" v-if="totalHealthLog">
+              <button
+                class="btn-page"
+                :disabled="pageHealthLog === 1"
+                @click="pageHealthLog = 1"
+              >
+                &lt;&lt;
+              </button>
+              <button
+                class="btn-page"
+                :disabled="pageHealthLog === 1"
+                @click="pageHealthLog--"
+              >
+                &lt;
+              </button>
+              <button
+                class="btn-page btn-page-number"
+                v-for="p in pageNumberListHealthLog"
+                :key="p"
+                :class="{ active: pageHealthLog === p }"
+                @click="pageHealthLog = p"
+              >
+                {{ p }}
+              </button>
+              <button
+                class="btn-page"
+                :disabled="pageHealthLog === totalPagesHealthLog"
+                @click="pageHealthLog++"
+              >
+                &gt;
+              </button>
+              <button
+                class="btn-page"
+                :disabled="pageHealthLog === totalPagesHealthLog"
+                @click="pageHealthLog = totalPagesHealthLog"
+              >
+                &gt;&gt;
+              </button>
+            </nav>
           </div>
+
+          <!-- 本週摘要 -->
+          <div class="memberInfoCard w-half">
+            <div class="memberInfoTitleWrap">
+              <h3>本週摘要</h3>
+            </div>
+
+            <div class="memberInfoTable">
+              <div class="memberInfoTableTitle">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('weeklySummary', 'SummaryContent')"
+                >
+                  摘要內容
+                </div>
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('weeklySummary', 'AggregateQuantity')"
+                >
+                  彙整數量
+                </div>
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('weeklySummary', 'DateRange')"
+                >
+                  日期區間
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
+                </div>
+              </div>
+              <div class="memberInfoTableHR" />
+
+              <template v-if="paginatedWeeklySummary.length">
+                <div
+                  class="memberInfoTableRow"
+                  v-for="row in paginatedWeeklySummary"
+                  :key="row.id"
+                  style="cursor: pointer"
+                  @click="openWeeklySummaryModal(row)"
+                >
+                  <div class="memberInfoTableRowItem summary-cell-one-line">
+                    {{ row.SummaryContent || "—" }}
+                  </div>
+                  <div class="memberInfoTableRowItem">
+                    {{ row.AggregateQuantity || "—" }}
+                  </div>
+                  <div class="memberInfoTableRowItem">
+                    {{
+                      (row.DateRange || "")
+                        .replace(/\s*\/\s*$/, "")
+                        .replace(/^\s*\/\s*/, "") || "—"
+                    }}
+                  </div>
+                  <img
+                    src="/assets/imgs/backend/goNext.svg"
+                    alt="detail"
+                    style="cursor: pointer; position: absolute; right: 0"
+                  />
+                </div>
+              </template>
+              <div class="memberInfoTableRow" v-else>
+                <div class="memberInfoTableRowItem" style="width: 100%">
+                  尚無資料
+                </div>
+              </div>
+            </div>
+
+            <!-- 分頁 -->
+            <nav class="pagination" v-if="totalWeeklySummary">
+              <button
+                class="btn-page"
+                :disabled="pageWeeklySummary === 1"
+                @click="pageWeeklySummary = 1"
+              >
+                &lt;&lt;
+              </button>
+              <button
+                class="btn-page"
+                :disabled="pageWeeklySummary === 1"
+                @click="pageWeeklySummary--"
+              >
+                &lt;
+              </button>
+              <button
+                class="btn-page btn-page-number"
+                v-for="p in pageNumberListWeeklySummary"
+                :key="p"
+                :class="{ active: pageWeeklySummary === p }"
+                @click="pageWeeklySummary = p"
+              >
+                {{ p }}
+              </button>
+              <button
+                class="btn-page"
+                :disabled="pageWeeklySummary === totalPagesWeeklySummary"
+                @click="pageWeeklySummary++"
+              >
+                &gt;
+              </button>
+              <button
+                class="btn-page"
+                :disabled="pageWeeklySummary === totalPagesWeeklySummary"
+                @click="pageWeeklySummary = totalPagesWeeklySummary"
+              >
+                &gt;&gt;
+              </button>
+            </nav>
+          </div>
+        </div>
 
         <!-- █ 指環紀錄 ------------------------------------------------------- -->
         <!-- <div class="memberInfoRow">
@@ -967,7 +976,6 @@
         <!-- █ 生活檢測 ------------------------------------------------------- -->
         <div class="memberInfoRow">
           <div class="memberInfoCard w-half">
-            
             <div class="memberInfoTitleWrap">
               <h3>生活檢測紀錄查詢</h3>
               <div class="memberInfoTitleGroup">
@@ -1475,6 +1483,7 @@ const {
   healthLogRecords,
   weeklySummaryRecords,
   favoriteTPointsList,
+  vivoWatchList,
   hasFetched,
 } = storeToRefs(memberStore);
 
@@ -1529,6 +1538,32 @@ const lifeRange = ref<Date[] | null>(null);
 const videoRange = ref<Date[] | null>(null);
 const appDateRange = ref<Date[] | null>(null);
 const healthLogDateRange = ref<Date[] | null>(null);
+
+/* ---------- 華碩序號相關 ---------- */
+// 取得最新的華碩序號（第一筆，已按 CreateTime 降序排序）
+const latestVivoWatch = computed(() => {
+  if (vivoWatchList.value && vivoWatchList.value.length > 0) {
+    return vivoWatchList.value[0];
+  }
+  return null;
+});
+
+// 是否有華碩序號
+const hasVivoWatch = computed(() => {
+  return vivoWatchList.value && vivoWatchList.value.length > 0;
+});
+
+// 跳轉到華碩序號管理頁面
+function goToAcerNumber() {
+  // 將會員資訊存到 localStorage，供 acerNumber.vue 使用
+  const memberData = {
+    MID: getAuth().sel?.MID || "",
+    Mobile: getAuth().sel?.Mobile || "",
+    Name: member.value?.Name || "",
+  };
+  localStorage.setItem("selectedMember", JSON.stringify(memberData));
+  router.push("/raphaelBackend/member/acerNumber");
+}
 
 /* ---------- paging helpers ---------- */
 const PAGE_MAIN = 4;
@@ -1700,7 +1735,7 @@ onUnmounted(() => {
 });
 
 const pageNumberList = computed(() =>
-  pageButtons(totalPagesHome.value, pageHome.value, maxButtons.value),
+  pageButtons(totalPagesHome.value, pageHome.value, maxButtons.value)
 );
 
 // 將治療時間字串轉為分鐘數（例："1小時30分鐘" -> 90）
@@ -1736,11 +1771,11 @@ const processedHomeOrders = computed(() => {
     const first = rows[0];
     const totalUsageSum = rows.reduce(
       (sum, r) => sum + parseInt(String(r.TotalUsage || "0"), 10),
-      0,
+      0
     );
     const totalMinutes = rows.reduce(
       (sum, r) => sum + parseDurationToMinutes(r.TreatmentTime || ""),
-      0,
+      0
     );
     return {
       id: first.id,
@@ -1896,7 +1931,7 @@ const pageHome = ref(1);
 const totalHome = computed(() => filteredHome.value.length);
 
 const totalPagesHome = computed(() =>
-  Math.max(1, Math.ceil(totalHome.value / PAGE_MAIN)),
+  Math.max(1, Math.ceil(totalHome.value / PAGE_MAIN))
 );
 const paginatedHome = computed(() => {
   const s = (pageHome.value - 1) * PAGE_MAIN;
@@ -1965,21 +2000,21 @@ const filteredRing = computed(() => {
 });
 const totalRing = computed(() => filteredRing.value.length);
 const totalPagesRing = computed(() =>
-  Math.max(1, Math.ceil(totalRing.value / PAGE_SUB)),
+  Math.max(1, Math.ceil(totalRing.value / PAGE_SUB))
 );
 const paginatedRing = computed(() => {
   const s = (pageRing.value - 1) * PAGE_SUB;
   return filteredRing.value.slice(s, s + PAGE_SUB);
 });
 const pageNumberListRing = computed(() =>
-  pageButtons(totalPagesRing.value, pageRing.value, maxButtons.value),
+  pageButtons(totalPagesRing.value, pageRing.value, maxButtons.value)
 );
 
 /* ANS */
 const pageANS = ref(1);
 const totalANS = computed(() => ansRecords.value.length);
 const totalPagesANS = computed(() =>
-  Math.max(1, Math.ceil(totalANS.value / PAGE_SUB)),
+  Math.max(1, Math.ceil(totalANS.value / PAGE_SUB))
 );
 const filteredANSWithSort = computed(() => {
   let data = filteredANS.value;
@@ -2025,7 +2060,7 @@ const paginatedANS = computed(() => {
 const pageLife = ref(1);
 const totalLife = computed(() => lifeRecords.value.length);
 const totalPagesLife = computed(() =>
-  Math.max(1, Math.ceil(totalLife.value / PAGE_SUB)),
+  Math.max(1, Math.ceil(totalLife.value / PAGE_SUB))
 );
 const filteredLifeWithSort = computed(() => {
   let data = filteredLife.value;
@@ -2082,7 +2117,7 @@ const filteredVideo = computed(() => {
 });
 const totalVideo = computed(() => filteredVideo.value.length);
 const totalPagesVideo = computed(() =>
-  Math.max(1, Math.ceil(totalVideo.value / PAGE_SUB)),
+  Math.max(1, Math.ceil(totalVideo.value / PAGE_SUB))
 );
 const filteredVideoWithSort = computed(() => {
   let data = filteredVideo.value;
@@ -2126,7 +2161,7 @@ const paginatedVideo = computed(() => {
   return filteredVideoWithSort.value.slice(s, s + PAGE_SUB);
 });
 const pageNumberListVideo = computed(() =>
-  pageButtons(totalPagesVideo.value, pageVideo.value, maxButtons.value),
+  pageButtons(totalPagesVideo.value, pageVideo.value, maxButtons.value)
 );
 
 /* APP */
@@ -2144,7 +2179,7 @@ const filteredApp = computed(() => {
 });
 const totalApp = computed(() => filteredApp.value.length);
 const totalPagesApp = computed(() =>
-  Math.max(1, Math.ceil(totalApp.value / PAGE_SUB)),
+  Math.max(1, Math.ceil(totalApp.value / PAGE_SUB))
 );
 const filteredAppWithSort = computed(() => {
   let data = filteredApp.value;
@@ -2186,7 +2221,7 @@ const paginatedApp = computed(() => {
   return filteredAppWithSort.value.slice(s, s + PAGE_SUB);
 });
 const pageNumberListApp = computed(() =>
-  pageButtons(totalPagesApp.value, pageApp.value, maxButtons.value),
+  pageButtons(totalPagesApp.value, pageApp.value, maxButtons.value)
 );
 const filteredAppForChart = computed(() => {
   if (!appDateRange.value || appDateRange.value.length < 2)
@@ -2245,14 +2280,14 @@ const filteredHealthLog = computed(() => {
 });
 const totalHealthLog = computed(() => filteredHealthLog.value.length);
 const totalPagesHealthLog = computed(() =>
-  Math.max(1, Math.ceil(totalHealthLog.value / PAGE_SUB)),
+  Math.max(1, Math.ceil(totalHealthLog.value / PAGE_SUB))
 );
 const paginatedHealthLog = computed(() => {
   const s = (pageHealthLog.value - 1) * PAGE_SUB;
   return filteredHealthLog.value.slice(s, s + PAGE_SUB);
 });
 const pageNumberListHealthLog = computed(() =>
-  pageButtons(totalPagesHealthLog.value, pageHealthLog.value, maxButtons.value),
+  pageButtons(totalPagesHealthLog.value, pageHealthLog.value, maxButtons.value)
 );
 
 /* WEEKLY SUMMARY */
@@ -2283,7 +2318,7 @@ const filteredWeeklySummary = computed(() => {
         aVal = new Date(aStart?.replace(/\//g, "-") || "").getTime();
         bVal = new Date(bStart?.replace(/\//g, "-") || "").getTime();
       }
-      
+
       // 彙整數量排序
       if (field === "AggregateQuantity" || field === "CNT") {
         aVal = parseInt(aVal) || 0;
@@ -2312,7 +2347,7 @@ const filteredWeeklySummary = computed(() => {
 });
 const totalWeeklySummary = computed(() => filteredWeeklySummary.value.length);
 const totalPagesWeeklySummary = computed(() =>
-  Math.max(1, Math.ceil(totalWeeklySummary.value / PAGE_SUB)),
+  Math.max(1, Math.ceil(totalWeeklySummary.value / PAGE_SUB))
 );
 const paginatedWeeklySummary = computed(() => {
   const s = (pageWeeklySummary.value - 1) * PAGE_SUB;
@@ -2322,8 +2357,8 @@ const pageNumberListWeeklySummary = computed(() =>
   pageButtons(
     totalPagesWeeklySummary.value,
     pageWeeklySummary.value,
-    maxButtons.value,
-  ),
+    maxButtons.value
+  )
 );
 
 // 排序功能
@@ -2387,10 +2422,10 @@ async function fetchBasic() {
 }
 
 /* ---------- 共用範本 ---------- */
-const makeFiltered = <T,>(
+const makeFiltered = <T>(
   src: Ref<T[]>,
   range: Ref<Date[] | null>,
-  dateKey: keyof T, // 欄位名稱，如 'CheckTime'
+  dateKey: keyof T // 欄位名稱，如 'CheckTime'
 ) =>
   computed(() => {
     if (!range.value || range.value.length < 2) return src.value;
@@ -2399,7 +2434,7 @@ const makeFiltered = <T,>(
     const end = to.getTime();
     return src.value.filter((r: any) => {
       const ms = Date.parse(
-        (r[dateKey] as string).split(" ")[0].replace(/\//g, "-"),
+        (r[dateKey] as string).split(" ")[0].replace(/\//g, "-")
       );
       return ms >= start && ms <= end;
     });
@@ -2435,45 +2470,49 @@ watch(appDateRange, () => {
 watch(ringRange, () => {
   pageRing.value = 1;
 });
-watch(healthLogDateRange, async (newRange) => {
-  pageHealthLog.value = 1;
-  // 當日期範圍改變時，重新取得健康日誌
-  // 如果選擇的日期範圍跨月，則取得多個月的資料
-  if (newRange && newRange.length >= 2) {
-    const [from, to] = newRange;
-    const fromYear = from.getFullYear();
-    const fromMonth = from.getMonth() + 1;
-    const toYear = to.getFullYear();
-    const toMonth = to.getMonth() + 1;
-    
-    // 如果跨月，取得所有相關月份的資料
-    const monthsToFetch: Array<{ year: string; month: string }> = [];
-    let currentYear = fromYear;
-    let currentMonth = fromMonth;
-    
-    while (
-      currentYear < toYear ||
-      (currentYear === toYear && currentMonth <= toMonth)
-    ) {
-      monthsToFetch.push({
-        year: currentYear.toString(),
-        month: currentMonth.toString().padStart(2, "0"),
-      });
-      
-      currentMonth++;
-      if (currentMonth > 12) {
-        currentMonth = 1;
-        currentYear++;
+watch(
+  healthLogDateRange,
+  async (newRange) => {
+    pageHealthLog.value = 1;
+    // 當日期範圍改變時，重新取得健康日誌
+    // 如果選擇的日期範圍跨月，則取得多個月的資料
+    if (newRange && newRange.length >= 2) {
+      const [from, to] = newRange;
+      const fromYear = from.getFullYear();
+      const fromMonth = from.getMonth() + 1;
+      const toYear = to.getFullYear();
+      const toMonth = to.getMonth() + 1;
+
+      // 如果跨月，取得所有相關月份的資料
+      const monthsToFetch: Array<{ year: string; month: string }> = [];
+      let currentYear = fromYear;
+      let currentMonth = fromMonth;
+
+      while (
+        currentYear < toYear ||
+        (currentYear === toYear && currentMonth <= toMonth)
+      ) {
+        monthsToFetch.push({
+          year: currentYear.toString(),
+          month: currentMonth.toString().padStart(2, "0"),
+        });
+
+        currentMonth++;
+        if (currentMonth > 12) {
+          currentMonth = 1;
+          currentYear++;
+        }
+      }
+
+      // 取得所有相關月份的資料（第一個月份覆蓋，後續月份合併）
+      for (let i = 0; i < monthsToFetch.length; i++) {
+        const { year, month } = monthsToFetch[i];
+        await memberStore.fetchHealthLog(getAuth(), year, month, i > 0);
       }
     }
-    
-    // 取得所有相關月份的資料（第一個月份覆蓋，後續月份合併）
-    for (let i = 0; i < monthsToFetch.length; i++) {
-      const { year, month } = monthsToFetch[i];
-      await memberStore.fetchHealthLog(getAuth(), year, month, i > 0);
-    }
-  }
-}, { deep: true });
+  },
+  { deep: true }
+);
 
 function pageButtons(total: number, current: number, max = maxButtons.value) {
   const pages: number[] = [];
@@ -2492,10 +2531,10 @@ function pageButtons(total: number, current: number, max = maxButtons.value) {
 }
 
 const pageNumberListANS = computed(() =>
-  pageButtons(totalPagesANS.value, pageANS.value, maxButtons.value),
+  pageButtons(totalPagesANS.value, pageANS.value, maxButtons.value)
 );
 const pageNumberListLife = computed(() =>
-  pageButtons(totalPagesLife.value, pageLife.value, maxButtons.value),
+  pageButtons(totalPagesLife.value, pageLife.value, maxButtons.value)
 );
 
 const loading = ref(false);
@@ -2506,22 +2545,29 @@ watch(
     loading.value = true;
     memberStore.clear();
     await memberStore.fetchAll(getAuth());
-    
+
     // 取得產品使用紀錄
     await memberStore.fetchFavoriteTPointsList(getAuth());
-    
+
     // 取得健康日誌（使用當前年月）
     const now = new Date();
     const year = now.getFullYear().toString();
     const month = (now.getMonth() + 1).toString().padStart(2, "0");
     await memberStore.fetchHealthLog(getAuth(), year, month);
-    
+
     // 取得本周摘要
     await memberStore.fetchWeeklySummary(getAuth());
-    
+
+    // 取得華碩序號列表
+    const { sel } = getAuth();
+    if (sel?.MID) {
+      await memberStore.fetchVivoWatchList(sel.MID);
+    }
+
     loading.value = false;
+
   },
-  { deep: true, immediate: true },
+  { deep: true, immediate: true }
 );
 
 /* ---------- 分頁操作 ---------- */
@@ -2546,9 +2592,14 @@ function closeContract() {
 }
 
 /* ---------- 其他 ---------- */
-function refresh() {
+async function refresh() {
   memberStore.clear();
-  memberStore.fetchAll(getAuth());
+  await memberStore.fetchAll(getAuth());
+  // 重新取得華碩序號列表
+  const { sel } = getAuth();
+  if (sel?.MID) {
+    await memberStore.fetchVivoWatchList(sel.MID);
+  }
 }
 function goBack() {
   router.push("/raphaelBackend/member");
@@ -2570,7 +2621,7 @@ async function fetchANSDetail(a: any) {
     .slice()
     .sort(
       (x, y) =>
-        new Date(y.CheckTime).getTime() - new Date(x.CheckTime).getTime(),
+        new Date(y.CheckTime).getTime() - new Date(x.CheckTime).getTime()
     );
 
   // 找到當前記錄的索引
@@ -2588,7 +2639,7 @@ async function fetchANSDetail(a: any) {
     sortedList.map((item) => ({
       AID: item.AID,
       CheckTime: item.CheckTime,
-    })),
+    }))
   );
 
   const res = await fetch(
@@ -2604,7 +2655,7 @@ async function fetchANSDetail(a: any) {
         AID,
         preAID,
       }),
-    },
+    }
   );
   return await res.json();
 }
@@ -2677,7 +2728,7 @@ async function handleEditBasicSubmit(data: {
           Birthday: data.birthday,
           Mobile: data.phone,
         }),
-      },
+      }
     );
 
     const result = await response.json();
@@ -2724,7 +2775,7 @@ async function handleDeleteMemberConfirm() {
           MID: sel.MID,
           Mobile: sel.Mobile ?? "",
         }),
-      },
+      }
     );
 
     const result = await response.json();
@@ -2758,7 +2809,12 @@ const mmdd = (raw: string) => {
 };
 
 const isAnyAlertOpen = computed(() => {
-  return showContract.value || showANS.value || showLife.value || showWeeklySummaryModal.value;
+  return (
+    showContract.value ||
+    showANS.value ||
+    showLife.value ||
+    showWeeklySummaryModal.value
+  );
 });
 
 const isExpired = computed(() => {
@@ -3006,6 +3062,48 @@ const isExpired = computed(() => {
             }
           }
         }
+        .acerBox {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+          border-radius: 6px;
+          border: 1px solid var(--Primary-default, #1ba39b);
+          background: none;
+          padding: 4px 8px;
+          color: var(--Primary-default, #1ba39b);
+          font-size: 14px;
+          font-style: normal;
+          font-weight: 400;
+          margin-top: 0.75rem;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          &:hover {
+            background: $chip-success;
+            color: #fff;
+            & > img {
+              filter: brightness(10);
+            }
+            & > span {
+              color: #fff;
+            }
+          }
+          img {
+            width: 16px;
+          }
+          span {
+            color: var(--Primary-default, #1ba39b);
+            font-size: var(--Text-font-size-18, 18px);
+            font-style: normal;
+            font-weight: 400;
+            letter-spacing: 1px;
+          }
+          .acerBox-arrow {
+            width: 14px;
+            height: 14px;
+            margin-left: 4px;
+          }
+        }
         .consumptionBtn {
           width: 100%;
           padding: 6px 8px;
@@ -3185,7 +3283,7 @@ const isExpired = computed(() => {
               font-size: 14px;
               transition: all 0.2s;
               min-width: 150px;
-              
+
               &::placeholder {
                 color: #999;
               }

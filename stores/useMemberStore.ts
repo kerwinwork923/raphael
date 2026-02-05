@@ -18,6 +18,7 @@ export const useMemberStore = defineStore('member', () => {
   const favoriteTPointsList = ref<any[]>([])
   const favoriteUseRecordList = ref<any[]>([])
   const optDetailList = ref<any[]>([])
+  const vivoWatchList = ref<any[]>([])
   const hasFetched = ref(false)
 
   // 方法
@@ -80,6 +81,7 @@ export const useMemberStore = defineStore('member', () => {
       favoriteTPointsList.value = []
       favoriteUseRecordList.value = []
       optDetailList.value = []
+      vivoWatchList.value = []
 
       lastUpdated.value = new Date().toLocaleString("zh-TW")
       hasFetched.value = true
@@ -142,7 +144,7 @@ export const useMemberStore = defineStore('member', () => {
 
   async function fetchWeeklySummary(auth: any) {
     try {
-      const { token, admin } = auth
+      const { token, admin, sel } = auth
       if (!token || !admin) return
 
       const res = await fetch("https://23700999.com:8081/HMA/api/bk/CaseWeeklySummarySingleWeekList", {
@@ -151,6 +153,7 @@ export const useMemberStore = defineStore('member', () => {
         body: JSON.stringify({
           AdminID: admin,
           Token: token,
+          MID: sel.MID,
         }),
       })
 
@@ -486,6 +489,38 @@ export const useMemberStore = defineStore('member', () => {
     return desc || "—"
   }
 
+  // 取得華碩/Vivo Watch 序號列表
+  async function fetchVivoWatchList(mid: string) {
+    try {
+      if (!mid) {
+        vivoWatchList.value = []
+        return
+      }
+
+      const res = await fetch("https://23700999.com:8081/HMA/TTEloadVivoWatchIDList.jsp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          Key: "qrt897hpmd",
+          MID: mid,
+        }),
+      })
+
+      const data = await res.json()
+      if (data.Result === "OK" && Array.isArray(data.Data)) {
+        // 按 CreateTime 降序排序，最新的在前面
+        vivoWatchList.value = data.Data.sort((a: any, b: any) => {
+          return (b.CreateTime || "").localeCompare(a.CreateTime || "")
+        })
+      } else {
+        vivoWatchList.value = []
+      }
+    } catch (error) {
+      console.error("取得華碩序號列表失敗：", error)
+      vivoWatchList.value = []
+    }
+  }
+
   function clear() {
     member.value = null
     currentOrder.value = null
@@ -502,6 +537,7 @@ export const useMemberStore = defineStore('member', () => {
     favoriteTPointsList.value = []
     favoriteUseRecordList.value = []
     optDetailList.value = []
+    vivoWatchList.value = []
     hasFetched.value = false
   }
 
@@ -522,6 +558,7 @@ export const useMemberStore = defineStore('member', () => {
     favoriteTPointsList,
     favoriteUseRecordList,
     optDetailList,
+    vivoWatchList,
     hasFetched,
     // 方法
     fetchAll,
@@ -530,6 +567,7 @@ export const useMemberStore = defineStore('member', () => {
     fetchFavoriteTPointsList,
     fetchFavoriteTPointsMIDUseRecordList,
     fetchOptDetailMIDList,
+    fetchVivoWatchList,
     clear,
   }
 }) 

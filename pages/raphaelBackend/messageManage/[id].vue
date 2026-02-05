@@ -7,7 +7,7 @@
       <!-- page header -->
       <header class="page-header">
         <h2 class="title">
-          {{ messageDetail?.videoTitle || "載入中..." }}
+          {{ loading ? "載入中..." : (messageDetail?.videoTitle || "影片留言詳情") }}
         </h2>
         <div class="action-buttons">
           <button class="btn back-btn" @click="goBack">
@@ -49,24 +49,19 @@
             </p>
 
             <!-- 影片連結 -->
-            <a
-              class="video-link"
-              :href="messageDetail?.videoLink"
-              target="_blank"
-            >
+            <div class="video-link">
               <h4>
                 影片連結
                 <img src="/assets/imgs/backend/linkGray.svg" alt="連結" />
-                
               </h4>
-              <div
+              <a
                 v-if="messageDetail?.videoLink"
                 :href="messageDetail.videoLink"
                 target="_blank"
                 class="link-text"
-              ></div>
+              >{{ messageDetail.videoLink }}</a>
               <span v-else class="link-text">尚無連結</span>
-            </a>
+            </div>
           </div>
         </div>
       </section>
@@ -104,6 +99,8 @@
           <div class="comment-content">
             {{ comment.content }}
           </div>
+
+          
         </div>
 
         <!-- 無留言提示 -->
@@ -133,8 +130,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import axios from "axios";
 import Sidebar from "@/components/raphaelBackend/Sidebar.vue";
 import { useSeo } from "~/composables/useSeo";
 
@@ -145,12 +143,27 @@ useSeo({
   url: "https://neuroplus.com.tw",
 });
 
+const VIDEO_SINGLE_MESSAGE_API =
+  "https://23700999.com:8081/HMA/api/bk/VideoSingleMessage";
+
 const router = useRouter();
 const route = useRoute();
 
+const token = ref(
+  typeof window !== "undefined"
+    ? localStorage.getItem("backendToken") ||
+        sessionStorage.getItem("backendToken")
+    : ""
+);
+const adminID = ref(
+  typeof window !== "undefined"
+    ? localStorage.getItem("adminID") || sessionStorage.getItem("adminID")
+    : ""
+);
+
 /* ---------- 型別定義 ---------- */
 interface MessageDetail {
-  id: number;
+  id: string;
   videoTitle: string;
   videoThumbnail?: string;
   descriptionPoints?: string[];
@@ -159,7 +172,7 @@ interface MessageDetail {
 }
 
 interface Comment {
-  id: number;
+  id: string;
   sender: string;
   date: string;
   time: string;
@@ -171,6 +184,7 @@ interface Comment {
 const messageDetail = ref<MessageDetail | null>(null);
 const comments = ref<Comment[]>([]);
 const replyContent = ref("");
+const loading = ref(false);
 
 /* ---------- 方法 ---------- */
 // 返回列表頁
@@ -216,62 +230,57 @@ const handleSubmitReply = () => {
   fetchMessageDetail();
 };
 
-// 取得留言詳細資料
+// 取得留言詳細資料（BID 來自 route.params.id）
 const fetchMessageDetail = async () => {
-  const messageId = Number(route.params.id);
+  const BID = route.params.id as string;
+  if (!BID || !adminID.value || !token.value) {
+    messageDetail.value = null;
+    comments.value = [];
+    return;
+  }
+  loading.value = true;
+  try {
+    const response = await axios.post(VIDEO_SINGLE_MESSAGE_API, {
+      AdminID: adminID.value,
+      Token: token.value,
+      BID,
+    });
+    const data = response.data;
+    if (data?.Result === "OK") {
+      // CheckTime 格式 "2026/02/02 10:59"
+      const checkTime = data.CheckTime || "";
+      const [datePart = "", timePart = ""] = checkTime.split(" ");
 
-  // TODO: 呼叫 API 取得資料
-  // 目前從 localStorage 取得假資料
-  const mockMessagesStr = localStorage.getItem("mockMessages");
-  if (mockMessagesStr) {
-    const mockMessages: any[] = JSON.parse(mockMessagesStr);
-    const message = mockMessages.find((msg: any) => msg.id === messageId);
-
-    if (message) {
-      // 設定影片資訊
       messageDetail.value = {
-        id: message.id,
-        videoTitle: message.videoFullTitle || message.videoTitle,
-        videoThumbnail: message.videoThumbnail,
-        descriptionPoints: message.descriptionPoints,
-        description: message.description,
-        videoLink: message.videoLink,
+        id: data.BID || BID,
+        videoTitle: data.VideoURL ? "影片留言詳情" : "影片留言詳情",
+        videoThumbnail: data.ImgURL || "/assets/imgs/banner-2.png",
+        descriptionPoints: data.Desc ? [data.Desc] : [],
+        description: data.Desc || "",
+        videoLink: data.VideoURL || "",
       };
 
-      // 設定留言資料
       comments.value = [
         {
-          id: message.id,
-          sender: message.sender,
-          date: message.commentDate || message.date,
-          time: message.commentTime || "",
-          content: message.fullContent || message.content,
-          status: message.status,
+          id: data.BID || BID,
+          sender: data.Name || "",
+          date: datePart,
+          time: timePart,
+          content: data.Message || "",
+          status:
+            data.Response === "已回覆" ? ("replied" as const) : ("unreplied" as const),
         },
       ];
     } else {
-      // 如果找不到對應的留言，顯示預設資料
-      messageDetail.value = {
-        id: messageId,
-        videoTitle: "載入中...",
-        videoThumbnail: "/assets/imgs/backend/video-placeholder.jpg",
-        descriptionPoints: [],
-        description: "",
-        videoLink: "",
-      };
+      messageDetail.value = null;
       comments.value = [];
     }
-  } else {
-    // 如果 localStorage 沒有資料，顯示預設資料
-    messageDetail.value = {
-      id: messageId,
-      videoTitle: "載入中...",
-      videoThumbnail: "/assets/imgs/backend/video-placeholder.jpg",
-      descriptionPoints: [],
-      description: "",
-      videoLink: "",
-    };
+  } catch (err) {
+    console.error("取得留言詳情失敗:", err);
+    messageDetail.value = null;
     comments.value = [];
+  } finally {
+    loading.value = false;
   }
 };
 

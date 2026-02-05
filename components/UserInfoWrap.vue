@@ -19,9 +19,39 @@
       </div>
 
       <!-- 信箱輸入 -->
-      <label for="email" v-if="emailShow">信箱</label>
+      <label for="email" v-if="emailShow">常用信箱</label>
       <div class="emailGroup" v-if="emailShow">
         <input type="email" placeholder="請輸入您的信箱" v-model="localEmail" />
+      </div>
+
+      <!-- 華碩註冊信箱 -->
+      <label for="asusEmail" v-if="asusEmailShow">華碩註冊信箱</label>
+      <div class="asusEmailGroup" v-if="asusEmailShow">
+        <input
+          type="email"
+          placeholder="請輸入華碩註冊信箱"
+          v-model="localAsusEmail"
+        />
+      </div>
+
+      <!-- 宏碁註冊信箱 -->
+      <label for="acerEmail" v-if="acerEmailShow">宏碁註冊信箱</label>
+      <div class="acerEmailGroup" v-if="acerEmailShow">
+        <input
+          type="email"
+          placeholder="請輸入宏碁註冊信箱"
+          v-model="localAcerEmail"
+        />
+      </div>
+
+      <!-- Garmin註冊信箱 -->
+      <label for="garminEmail" v-if="garminEmailShow">Garmin註冊信箱</label>
+      <div class="garminEmailGroup" v-if="garminEmailShow">
+        <input
+          type="email"
+          placeholder="請輸入Garmin註冊信箱"
+          v-model="localGarminEmail"
+        />
       </div>
 
       <!-- 身高輸入 -->
@@ -88,6 +118,7 @@
           </select>
           <img class="icon2" src="../assets/imgs/arrowDown.svg" />
         </div>
+
         <div class="area">
           <select v-model="selectedArea" :class="{ selected: selectedArea }">
             <option value="" disabled selected hidden>鄉鎮地區</option>
@@ -101,6 +132,7 @@
           </select>
           <img class="icon2" src="../assets/imgs/arrowDown.svg" />
         </div>
+
         <div class="address">
           <input type="text" placeholder="輸入地址" v-model="inputAddress" />
         </div>
@@ -108,11 +140,7 @@
     </div>
 
     <!-- 送出按鈕 -->
-    <button
-      class="infoSendBtn"
-      @click="submitForm"
-      :disabled="isSubmitDisabled"
-    >
+    <button class="infoSendBtn" @click="submitForm" :disabled="isSubmitDisabled">
       {{ addressShow ? "儲存" : "確認" }}
     </button>
   </div>
@@ -132,27 +160,40 @@ export default {
     city: String,
     area: String,
     address: String,
-    phoneShow: {
-      type: Boolean,
-      default: false
-    },
-    addressShow: {
-      type: Boolean,
-      default: false
-    },
-    emailShow: {
-      type: Boolean,
-      default: false
-    },
     email: String,
+    asusEmail: String,
+    acerEmail: String,
+    garminEmail: String,
+    phoneShow: { type: Boolean, default: false },
+    addressShow: { type: Boolean, default: false },
+    emailShow: { type: Boolean, default: false },
+    asusEmailShow: { type: Boolean, default: false },
+    acerEmailShow: { type: Boolean, default: false },
+    garminEmailShow: { type: Boolean, default: false },
   },
+
   setup(props, { emit }) {
+    // ✅ props 解構出來，避免 template 出現 xxx is not defined
+    const {
+      phoneShow,
+      addressShow,
+      emailShow,
+      asusEmailShow,
+      acerEmailShow,
+      garminEmailShow,
+    } = props;
+
     const localName = ref(props.name || "");
     const localHeight = ref(props.height || "");
     const localWeight = ref(props.weight || "");
     const localSex = ref(props.sex || "");
     const localDate = ref(null);
+
     const localEmail = ref(props.email || "");
+    const localAsusEmail = ref(props.asusEmail || "");
+    const localAcerEmail = ref(props.acerEmail || "");
+    const localGarminEmail = ref(props.garminEmail || "");
+
     const inputAddress = ref("");
     const citiesData = ref([]);
     const selectedCity = ref("");
@@ -173,94 +214,67 @@ export default {
       }
 
       const userData = JSON.parse(localStorage.getItem("userData") || "{}");
-      
-      console.log("載入的 userData:", userData);
-
-      // 檢查資料結構，優先使用 Member 物件內的資料，如果沒有則使用根層級的資料
       const memberData = userData.Member || userData;
-      
-      console.log("使用的 memberData:", memberData);
 
-      // 載入所有用戶資料欄位
       localName.value = memberData.Name || "";
       localHeight.value = memberData.Height || "";
       localWeight.value = memberData.Weight || "";
       localSex.value = memberData.Sex || "";
-      
-      // 處理生日資料
-      if (memberData.Birthday) {
+
+      // 生日（支援民國/西元 yyyy/mm/dd）
+      if (memberData.Birthday && memberData.Birthday.includes("/")) {
         try {
-          // 支援民國年格式 (如: 114/8/14) 或西元年格式
-          if (memberData.Birthday.includes("/")) {
-            const parts = memberData.Birthday.split("/");
-            if (parts.length === 3) {
-              // 判斷是民國年還是西元年
-              const year = parseInt(parts[0]);
-              const month = parseInt(parts[1]) - 1; // JavaScript 月份從 0 開始
-              const day = parseInt(parts[2]);
-              
-              // 如果年份小於 200，假設是民國年
-              const fullYear = year < 200 ? year + 1911 : year;
-              localDate.value = new Date(fullYear, month, day);
-              console.log("解析的生日:", localDate.value);
-            }
+          const parts = memberData.Birthday.split("/");
+          if (parts.length === 3) {
+            const year = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10) - 1;
+            const day = parseInt(parts[2], 10);
+            const fullYear = year < 200 ? year + 1911 : year;
+            localDate.value = new Date(fullYear, month, day);
           }
-        } catch (error) {
-          console.error("生日格式解析錯誤:", error);
+        } catch (e) {
+          console.error("生日格式解析錯誤:", e);
           localDate.value = null;
         }
       } else {
         localDate.value = null;
       }
-      
+
       selectedCity.value = memberData.City || "";
       selectedArea.value = memberData.Zone || "";
       inputAddress.value = memberData.Address || "";
       phone.value = memberData.Mobile || "";
       localEmail.value = memberData.Mail || "";
-      // 調試信息
-      console.log("載入的欄位值:", {
-        name: localName.value,
-        height: localHeight.value,
-        weight: localWeight.value,
-        sex: localSex.value,
-        date: localDate.value,
-        city: selectedCity.value,
-        area: selectedArea.value,
-        address: inputAddress.value,
-        phone: phone.value,
-        email: localEmail.value
-      });
-      
-      if (selectedCity.value) {
-        updateAreas(true);
-      }
+
+
+      localAsusEmail.value = memberData.AsusMail ?? "";
+localAcerEmail.value = memberData.AcerMail ?? "";
+localGarminEmail.value = memberData.GarminMail ?? "";
+
+
+      if (selectedCity.value) updateAreas(true);
     });
 
     const updateAreas = (initial = false) => {
-      const city = citiesData.value.find(
-        (c) => c.CityName === selectedCity.value
-      );
+      const city = citiesData.value.find((c) => c.CityName === selectedCity.value);
       filteredAreas.value = city ? city.AreaList : [];
 
       if (
         !initial ||
-        !filteredAreas.value.some(
-          (area) => area.AreaName === selectedArea.value
-        )
+        !filteredAreas.value.some((a) => a.AreaName === selectedArea.value)
       ) {
         selectedArea.value = "";
       }
     };
 
-    // 民國年轉換
+    // 民國年顯示
     const formatDate = (date) => {
       if (!date) return "";
-      const rocYear = date.getFullYear() - 1911; // Convert to ROC year
+      const rocYear = date.getFullYear() - 1911;
       return `${rocYear}年${date.getMonth() + 1}月${date.getDate()}日`;
     };
 
-    const zhTWLocale = zhTW;
+    const zhTWLocale = zhTW; // 若你有用到可留著，沒用到也可刪
 
     const isSubmitDisabled = computed(() => {
       return (
@@ -283,40 +297,65 @@ export default {
         area: selectedArea.value,
         address: inputAddress.value,
         email: localEmail.value,
+        asusEmail: localAsusEmail.value,
+        acerEmail: localAcerEmail.value,
+        garminEmail: localGarminEmail.value,
       });
     };
 
-    watch(localName, (newValue) => emit("update:name", newValue));
-    watch(localHeight, (newValue) => emit("update:height", newValue));
-    watch(localWeight, (newValue) => emit("update:weight", newValue));
-    watch(localSex, (newValue) => emit("update:sex", newValue));
-    watch(localDate, (newValue) => emit("update:date", newValue));
-    watch(selectedCity, (newValue) => emit("update:city", newValue));
-    watch(selectedArea, (newValue) => emit("update:area", newValue));
-    watch(inputAddress, (newValue) => emit("update:address", newValue));
-    watch(localEmail, (newValue) => emit("update:email", newValue));
+    // ✅ 一般欄位雙向更新
+    watch(localName, (v) => emit("update:name", v));
+    watch(localHeight, (v) => emit("update:height", v));
+    watch(localWeight, (v) => emit("update:weight", v));
+    watch(localSex, (v) => emit("update:sex", v));
+    watch(localDate, (v) => emit("update:date", v));
+    watch(selectedCity, (v) => emit("update:city", v));
+    watch(selectedArea, (v) => emit("update:area", v));
+    watch(inputAddress, (v) => emit("update:address", v));
+    watch(localEmail, (v) => emit("update:email", v));
+
+    // ✅ 三家註冊信箱雙向更新
+    watch(localAsusEmail, (v) => emit("update:asusEmail", v));
+    watch(localAcerEmail, (v) => emit("update:acerEmail", v));
+    watch(localGarminEmail, (v) => emit("update:garminEmail", v));
 
     return {
+      // fields
       localName,
       localHeight,
       localWeight,
       localSex,
       localDate,
+      localEmail,
+      localAsusEmail,
+      localAcerEmail,
+      localGarminEmail,
+
       inputAddress,
       citiesData,
       selectedCity,
       selectedArea,
       filteredAreas,
+      phone,
+
+      // funcs / computed
       updateAreas,
       submitForm,
       isSubmitDisabled,
       formatDate,
-      phone,
-      localEmail,
+
+      // show flags
+      phoneShow,
+      addressShow,
+      emailShow,
+      asusEmailShow,
+      acerEmailShow,
+      garminEmailShow,
     };
   },
 };
 </script>
+
 
 <style lang="scss">
 .infoWrap {
@@ -369,7 +408,10 @@ export default {
   .weightGroup,
   .dateGroup,
   .phoneGroup,
-  .emailGroup {
+  .emailGroup,
+  .asusEmailGroup,
+  .acerEmailGroup,
+  .garminEmailGroup {
     display: flex;
     align-items: center;
     gap: 4px;
