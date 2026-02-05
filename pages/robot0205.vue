@@ -49,8 +49,8 @@
       </div>
     </div>
 
-    <!-- 初始對話氣泡（已移除 AI 回應功能）-->
-    <!-- <div
+    <!-- 初始對話氣泡 -->
+    <div
       class="greeting-bubble"
       :class="{ overZIndex: showTutorial && currentTutorialStep === 5 }"
     >
@@ -68,7 +68,7 @@
         {{ latestResponse }}
       </div>
       <div v-else class="greeting-text">嗨~~有什麼需要幫您</div>
-    </div> -->
+    </div>
 
     <!-- AI角色形象區域 -->
     <div class="character-section">
@@ -82,26 +82,65 @@
       <div v-else class="character-placeholder">
         <div class="placeholder-character"></div>
       </div>
-      <div class="healGroup healGroup5">
+      <div class="healGroup">
         <div class="healthImg" @click="goToHealthLog">
           <img src="/assets/imgs/robot/health.svg" alt="健康" />
         </div>
         <h5>健康日誌</h5>
       </div>
-      <!-- <div class="healGroup healGroup4">
+      <div class="healGroup healGroup2">
+        <div class="healthImg" @click="showHistory">
+          <img :src="messagesSquare" alt="聊天紀錄" />
+        </div>
+        <h5>聊天紀錄</h5>
+      </div>
+      <div class="healGroup healGroup3">
+        <div class="healthImg" @click="toggleVolume">
+          <img :src="isMuted ? mutedSvg : volumeSvg" alt="音量" />
+        </div>
+        <h5>{{ isMuted ? "靜音" : "聲音" }}</h5>
+      </div>
+      <div class="healGroup healGroup4">
         <div class="healthImg" @click="goToSpecialAssistance">
           <img src="/assets/imgs/robot/mic.svg" alt="專人協助" />
         </div>
         <h5>專人協助</h5>
-      </div> -->
+      </div>
     </div>
 
     <!-- 語音控制區域 - 從下方彈出 -->
     <transition name="slide-up">
-      <div v-if="showVoiceControls" class="voice-control-bar">
-        <button class="control-btn history-btn" @click.stop="showTextInputArea">
-          <img :src="textIconSvg" alt="文字對話" />
+      <div
+        v-if="showVoiceControls"
+        class="voice-control-bar"
+        :class="{
+          overZIndex:
+            (showTutorial && currentTutorialStep === 1) ||
+            (showTutorial && currentTutorialStep === 2) ||
+            (showTutorial && currentTutorialStep === 3),
+        }"
+      >
+        <button class="control-btn history-btn" @click="showHistory">
+          <img :src="messagesSquare" alt="聊天紀錄" />
         </button>
+        <div
+          v-if="showTutorial && currentTutorialStep === 1"
+          class="firstText firstText1"
+        >
+          這裡可以進行對話
+        </div>
+        <div
+          v-if="showTutorial && currentTutorialStep === 2"
+          class="firstText firstText2"
+        >
+          可自行關閉聲音
+        </div>
+        <div
+          v-if="showTutorial && currentTutorialStep === 3"
+          class="firstText firstText3"
+        >
+          這裡可以切換成文字對話
+        </div>
 
         <button
           class="control-btn mic-btn"
@@ -113,6 +152,9 @@
 
           <div v-if="isListening" class="pulse-ring"></div>
         </button>
+        <!-- <button class="control-btn volume-btn" @click="toggleVolume">
+          <img :src="isMuted ? mutedSvg : volumeSvg" alt="音量" />
+        </button> -->
       </div>
     </transition>
 
@@ -130,16 +172,16 @@
             placeholder="請輸入文字"
             @keypress.enter="handleManualInput"
             ref="textInputRef"
-            inputmode="text"
           />
           <button
             class="send-btn"
-            @click="textInput.trim() && handleManualInput()"
-            :disabled="!textInput.trim()"
+            @click="textInput.trim() ? handleManualInput() : toggleListening()"
           >
-            <img :src="sendSvg" alt="送出" />
+            <img
+              :src="textInput.trim() ? sendSvg : soundSvg"
+              :alt="textInput.trim() ? '送出' : '語音'"
+            />
           </button>
-          <button class="cancel-btn" @click="closeTextInput">取消</button>
         </div>
       </div>
     </transition>
@@ -244,43 +286,6 @@
             </button>
             <button @click="handleSummaryMode(true)" class="robot-btn-confirm">
               儲存摘要
-            </button>
-          </div>
-        </div>
-      </div>
-    </transition>
-
-    <!-- 保存成功模態框 -->
-    <transition name="fade">
-      <div v-if="showSaveSuccessModal" class="voice-modal">
-        <div class="voice-content" @click.stop>
-          <!-- 關閉按鈕 -->
-          <div class="voiceModelClose" @click="closeSaveSuccessModal">
-            <img src="/assets/imgs/robot/close.svg" alt="關閉" />
-          </div>
-
-          <!-- 保存成功文字 -->
-          <p class="save-success-text">已幫您儲存到「健康日誌」</p>
-
-          <!-- 圖片 -->
-          <img
-            :src="assistantDefaultGif"
-            alt="保存成功"
-            class="save-success-image"
-          />
-
-          <!-- 按鈕區域 -->
-          <div class="save-success-buttons">
-            <!-- 只有語音輸入時才顯示「重新錄音」按鈕 -->
-            <button
-              v-if="saveSuccessInputType === 'voice'"
-              class="voice-btn voice-btn-retry"
-              @click="retryAfterSave"
-            >
-              重新錄音
-            </button>
-            <button class="voice-btn voice-btn-view" @click="viewHealthLog">
-              觀看內容
             </button>
           </div>
         </div>
@@ -450,7 +455,235 @@
       </div>
     </transition>
 
-    <!-- 歷史紀錄頁面（已停用聊天功能）-->
+    <!-- 歷史紀錄頁面 -->
+    <transition name="slide-left">
+      <div v-if="showHistoryPage" class="history-page">
+        <div class="history-header">
+          <img
+            src="/assets/imgs/backArrow.svg"
+            @click="closeHistory"
+            alt="返回"
+            class="back-arrow"
+          />
+
+          <!-- 絕對置中的標題 -->
+          <div class="title-center">
+            <transition name="fade">
+              <h2 v-if="!showSearch" class="history-title">聊天紀錄</h2>
+            </transition>
+          </div>
+
+          <!-- 右側圖示群（固定寬度佔位）-->
+          <div class="right-icons">
+            <transition name="fade">
+              <img
+                v-if="!showSearch"
+                :src="searchSvg"
+                alt="搜尋"
+                @click="toggleSearch"
+                class="search-icon"
+              />
+            </transition>
+            <img
+              :src="calendarSvg"
+              alt="日曆"
+              class="calendar-icon"
+              @click="toggleCalendar"
+            />
+          </div>
+
+          <!-- 搜尋欄位（覆蓋整列）-->
+          <transition name="slide-search">
+            <div v-if="showSearch" class="search-container">
+              <img :src="searchSvg" alt="搜尋" class="search-input-icon" />
+              <input
+                v-model="searchQuery"
+                @input="performSearch"
+                @keyup.enter="performSearch"
+                type="text"
+                placeholder="搜尋對話內容"
+                class="search-input"
+                ref="searchInputRef"
+              />
+              <img
+                src="/assets/imgs/close.svg"
+                alt="關閉"
+                @click="toggleSearch"
+                class="close-search-icon"
+              />
+            </div>
+          </transition>
+        </div>
+
+        <div class="history-content">
+          <!-- 載入更舊訊息指示器 -->
+          <transition name="fade">
+            <div v-if="isLoadingOlderMessages" class="loading-older-messages">
+              <div class="spinner"></div>
+              <span>載入更舊的訊息...</span>
+            </div>
+          </transition>
+
+          <!-- 一般歷史記錄 -->
+          <transition name="fade">
+            <div
+              v-if="!showSearch || searchQuery === ''"
+              class="history-list"
+              ref="historyScrollContainer"
+            >
+              <!-- 頂部哨兵：用於觸發載入更舊訊息 -->
+              <div ref="topSentinel"></div>
+              <div
+                v-for="(group, date) in groupedHistory"
+                :key="date"
+                class="history-group"
+              >
+                <div class="date-separator">{{ formatDate(date) }}</div>
+                <div
+                  v-for="item in group"
+                  :key="item.id"
+                  class="history-message"
+                  :id="`message-${item.id}`"
+                >
+                  <div
+                    v-if="item.user && item.user.trim()"
+                    class="message user"
+                  >
+                    <div class="bubble">
+                      {{ item.user }}
+                      <div class="time">{{ formatTime(item.timestamp) }}</div>
+                    </div>
+                  </div>
+
+                  <div
+                    v-if="item.isLoading || (item.bot && item.bot.trim())"
+                    class="message bot"
+                  >
+                    <div class="avatar">
+                      <img
+                        v-if="currentCharacter && currentCharacter.avatar"
+                        :src="currentCharacter.avatar"
+                        alt="角色頭像"
+                      />
+                      <div v-else class="placeholder-avatar"></div>
+                    </div>
+
+                    <div class="bubble">
+                      <!-- 如果正在載入，顯示 loading.gif -->
+                      <div v-if="item.isLoading" class="loading-in-message">
+                        <img
+                          :src="loadingGif"
+                          alt="載入中"
+                          class="loading-gif"
+                        />
+                      </div>
+                      <!-- 否則顯示 bot 回覆 -->
+                      <div v-else>
+                        {{ item.bot }}
+                      </div>
+                      <div class="time">{{ formatTime(item.timestamp) }}</div>
+                      <div class="sender-label">
+                        {{
+                          item.botFrom === "Human"
+                            ? "健康顧問"
+                            : currentCharacter.name || "AI"
+                        }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </transition>
+
+          <!-- 搜尋結果 -->
+          <transition name="fade">
+            <div
+              v-if="showSearch && searchQuery && searchResults.length > 0"
+              class="search-results"
+            >
+              <div class="search-results-header">
+                <span>總共 {{ searchResults.length }}筆</span>
+              </div>
+              <div class="searchList">
+                <div
+                  v-for="result in searchResults"
+                  :key="result.id"
+                  class="search-result-item"
+                  @click="scrollToMessage(result.id)"
+                >
+                  <div v-if="result.user && result.user.trim()" class="bubble">
+                    <div class="content">
+                      <span class="user-name">{{
+                        result.userName || "用戶"
+                      }}</span>
+                      <span
+                        v-html="highlightKeyword(result.user, searchQuery)"
+                      ></span>
+                    </div>
+                    <span class="result-date">{{
+                      formatDate(
+                        result.dateKey ||
+                          (result.timestamp
+                            ? result.timestamp.split(" ")[0]
+                            : "")
+                      )
+                    }}</span>
+                  </div>
+                  <div v-if="result.bot && result.bot.trim()" class="bubble">
+                    <div class="content">
+                      <span class="bot-name">{{ currentCharacter.name }}</span>
+                      <span
+                        v-html="highlightKeyword(result.bot, searchQuery)"
+                      ></span>
+                    </div>
+                    <span class="result-date">{{
+                      formatDate(
+                        result.dateKey ||
+                          (result.timestamp
+                            ? result.timestamp.split(" ")[0]
+                            : "")
+                      )
+                    }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </transition>
+
+          <!-- 無搜尋結果 -->
+          <transition name="fade">
+            <div
+              v-if="showSearch && searchQuery && searchResults.length === 0"
+              class="no-results"
+            >
+              <img src="/assets/imgs/robot/mascotPhone.png" />
+              <span>沒有找到相關對話</span>
+            </div>
+          </transition>
+
+          <!-- 歷史頁輸入列（固定在底部） -->
+          <div class="history-input-bar">
+            <input
+              v-model="textInput"
+              class="history-text-input"
+              type="text"
+              placeholder="請輸入訊息..."
+              @keypress.enter="handleManualInput"
+              ref="historyInputRef"
+            />
+            <button
+              class="history-send-btn"
+              :disabled="isLoading || !textInput.trim()"
+              @click="textInput.trim() && handleManualInput()"
+              aria-label="送出"
+            >
+              <img :src="sendSvg" alt="送出" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
 
     <!-- 角色名稱輸入彈窗 -->
     <transition name="fade">
@@ -562,7 +795,6 @@ import { Pagination } from "swiper/modules";
 import recycleSvg from "~/assets/imgs/robot/recycle.svg";
 import messagesSquare from "~/assets/imgs/robot/messagesSquare.svg";
 import soundSvg from "~/assets/imgs/robot/sound.svg";
-import textIconSvg from "~/assets/imgs/robot/textIcon.svg";
 import assistantSoundGif from "~/assets/imgs/robot/assistantSound.gif";
 import assistantDefaultGif from "~/assets/imgs/robot/assistantDefault.gif";
 import loadingGif from "~/assets/imgs/robot/loading.gif";
@@ -632,9 +864,6 @@ const showCustomerServiceModal = ref(false);
 const pendingInput = ref(""); // 儲存待處理的輸入
 const showSummaryProcessing = ref(false); // 摘要處理中彈窗
 const isInSummaryFlow = ref(false); // 確保摘要流程不誤觸一般流程
-const showSaveSuccessModal = ref(false); // 顯示保存成功模態框
-const saveSuccessInputType = ref("voice"); // 輸入方式：'voice' 或 'text'
-const saveSuccessContent = ref(""); // 保存的摘要內容
 
 // 定時器相關狀態
 const apiPollingInterval = ref(null); // API 輪詢定時器
@@ -939,20 +1168,7 @@ const setActiveTab = (tab) => {
   }
 };
 
-// 顯示文字輸入區域（點擊文字圖標時）
-const showTextInputArea = () => {
-  if (process.client) {
-    showTextInput.value = true;
-    // 延遲聚焦，等待動畫完成
-    nextTick(() => {
-      if (textInputRef.value) {
-        textInputRef.value.focus({ preventScroll: true });
-      }
-    });
-  }
-};
-
-// 顯示歷史記錄（已停用聊天功能）
+// 顯示歷史記錄
 const showHistory = async () => {
   if (process.client) {
     showHistoryPage.value = true;
@@ -1790,7 +2006,7 @@ async function saveChatRecord({
   }
 }
 
-async function runSummaryFlow(inputText, inputType = "voice") {
+async function runSummaryFlow(inputText) {
   try {
     isInSummaryFlow.value = true;
 
@@ -1802,246 +2018,28 @@ async function runSummaryFlow(inputText, inputType = "voice") {
     // 呼叫 ChatGPT 產生精簡內容
     const aiResponse = await callChatGPT(
       inputText,
-      `你是一位健康管理 app 內的對話式紀錄整理機器人。 任務是根據患者最近七天內的對話內容，整理可閱讀的一週症狀與生活摘要。
-
-你不是醫療人員。 不提供診斷、不解釋原因、不判斷嚴重度、不給建議； 僅整理患者原話，安全、簡單呈現。
-
-
-語言規則
-
-1. 七天對話 全文英文 → 英文輸出
-
-2. 只要出現任何中文（含繁體）→ 繁體中文輸出
-
-3. 不翻譯、不調整語氣
-
-4. 英文次數格式：mentioned X times this week
-
-
-核心原則
-
-1. 僅使用患者原文
-
-2. 不補充未出現資訊
-
-3. 不做任何醫療推論
-
-4. 簡短、可快速閱讀
-
-5. 症狀名稱與描述不重複
-
-
-類型判斷
-
-· 睡眠、情緒、食慾、緊繃 → 症狀
-
-· 人的感受或狀態 → 症狀
-
-· 事件或情境 → 生活
-
-
-症狀規則
-
-1. 僅整理患者主動提到的不舒服
-
-2. 症狀名稱用患者原話，不合併
-
-3. 語意相近可並列（逗號分隔），次數各自計算
-
-4. 症狀需標示歸類（呈現用）：
-
-o 緊繃 → 身體
-
-o 睡眠相關 → 睡眠
-
-o 喉嚨相關 → 喉嚨
-
-o 其餘 → 可辨識部位
-
-o 無法辨識 → 全身
-
-症狀呈現
-
-· 避免歸類與症狀同詞重複
-
-· 若重複，改為：歸類：狀態
-
-· 僅使用患者原文詞彙 （例：睡眠：不好／喉嚨：疼痛／身體：緊繃）
-
-
-次數
-
-· 講幾次記幾次，不合併、不去重
-
-· 中文：本週提及 X 次
-
-
-生活（含藥品）
-
-1. 僅記錄事件，不解釋
-
-2. 同類事件可合併
-
-3. 同句含感受＋事件：
-
-o 感受 → 症狀
-
-o 事件 → 生活
-
-藥品
-
-· 永遠列生活第 1 項
-
-· 依出現順序
-
-· 格式：藥名-數量-頻率（原文）
-
-· 使用方式未變不重複
-
-· 有更改 → 新增一筆＋日期＋「改」
-
-
-固定輸出格式
-
-中文
-
-這週你提到的狀況有
-
-症狀
-
-症狀名稱：描述 本週提及X次
-
-
-生活
-
-1 事件描述
-
-
-我們幫您的身體變化紀錄起來，請您放心。
-
-英文（全文英文時）
-
-This week, you mentioned the following:
-
-Symptoms
-
-Symptom: description, mentioned X times this week
-
-Lifestyle
-
-1. Event description
-
-We've recorded these body changes for you. Please feel at ease.
-
-
-無資料
-
-· 中文：這週還沒有新的留言唷，請您想到什麼，隨時都可以跟我們說。
-
-· 英文：There were no new messages this week. Feel free to share anything with us anytime.
-`
+      "你是一個聰明的智慧醫療助手，這是一段病患的症狀敘述內容，請幫我做摘要重點"
     );
 
     // 設置原始輸入到 pendingInput，供後續使用
     pendingInput.value = inputText;
-    const summaryText = aiResponse || inputText;
-    currentSummary.value = summaryText;
 
-    // ✅ 直接儲存摘要到 API（不顯示確認彈窗）
-    try {
-      const response = await fetch(
-        "https://23700999.com:8081/HMA/api/fr/saveSoundNote",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            MID: localobj.MID,
-            Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
-            MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
-            Mobile: localobj.Mobile,
-            Lang: "zhtw",
-            SoundNote: summaryText, // AI摘要內容
-            PreSoundNote: inputText, // 使用者原始文字/語音內容
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`儲存摘要 API 失敗: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("摘要已自動儲存到 API:", data);
-    } catch (saveError) {
-      console.error("儲存摘要失敗:", saveError);
-      // 不顯示錯誤提示，靜默失敗
-    }
-
-    // ✅ 關閉處理中彈窗
+    // UI：進入「是否儲存到健康日誌」的彈窗
+    currentSummary.value = aiResponse || inputText;
     showSummaryProcessing.value = false;
-
-    // ✅ 關閉語音模態框（如果還開著）
-    if (voiceModalOpen.value) {
-      reallyCloseVoiceModal();
-    }
-
-    // ✅ 記錄輸入方式和內容
-    saveSuccessInputType.value = inputType;
-    saveSuccessContent.value = summaryText;
-
-    // ✅ 顯示保存成功模態框
-    showSaveSuccessModal.value = true;
-
+    showSummaryMode.value = true;
   } catch (error) {
     console.error("摘要流程失敗:", error);
 
     // 設置原始輸入到 pendingInput，供後續使用
     pendingInput.value = inputText;
+
+    // UI：顯示錯誤摘要
     currentSummary.value = inputText;
-
-    // 即使失敗也嘗試儲存原始輸入
-    try {
-      const response = await fetch(
-        "https://23700999.com:8081/HMA/api/fr/saveSoundNote",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            MID: localobj.MID,
-            Token: localobj.Token || "kRwzQVDP8T4XQVcBBF8llJVMOirIxvf7",
-            MAID: localobj.MAID || "mFjpTsOmYmjhzvfDKwdjkzyBGEZwFd4J",
-            Mobile: localobj.Mobile,
-            Lang: "zhtw",
-            SoundNote: inputText,
-            PreSoundNote: inputText,
-          }),
-        }
-      );
-      if (response.ok) {
-        console.log("原始內容已儲存到 API");
-      }
-    } catch (saveError) {
-      console.error("儲存原始內容失敗:", saveError);
-    }
-
-    // ✅ 關閉處理中彈窗
     showSummaryProcessing.value = false;
-
-    // ✅ 關閉語音模態框（如果還開著）
-    if (voiceModalOpen.value) {
-      reallyCloseVoiceModal();
-    }
-
-    // ✅ 記錄輸入方式和內容
-    saveSuccessInputType.value = inputType;
-    saveSuccessContent.value = inputText;
-
-    // ✅ 顯示保存成功模態框
-    showSaveSuccessModal.value = true;
-
+    showSummaryMode.value = true;
   } finally {
     isInSummaryFlow.value = false;
-    isLoading.value = false; // ✅ 確保載入狀態被重置
   }
 }
 
@@ -2349,26 +2347,113 @@ const sendVoiceMessage = async () => {
   await handleSpeechEnd(transcript);
 };
 
-// 處理語音輸入結束（只做摘要，移除 AI 對話功能）
+// 處理語音輸入結束
 const handleSpeechEnd = async (transcript) => {
   if (!transcript.trim()) return;
 
-  // 檢查是否正在處理中
-  if (isLoading.value) {
-    console.log("正在處理中，請稍候...");
+  // 檢查是否正在等待 AI 回應，如果是則不允許發送新訊息
+  const hasLoadingMessage = conversations.value.some(
+    (msg) => msg.isLoading === true
+  );
+  if (hasLoadingMessage || isLoading.value) {
+    console.log("正在等待 AI 回應，請稍候...");
     return;
   }
 
-  // 語音輸入：設置載入狀態
+  // 語音輸入：顯示 "思考中..." 而不是用戶輸入
   isLoading.value = true;
   currentTranscript.value = "";
 
   try {
-    // 所有語音輸入都進入摘要模式（移除 AI 對話功能）
-    await runSummaryFlow(transcript, "voice");
-    // 注意：runSummaryFlow 內部會管理 isLoading 狀態
+    // 檢查字數是否超過0字，進入摘要模式
+    if (transcript.length > 0) {
+      await runSummaryFlow(transcript); // 不新增聊天泡泡，但 DB 會寫兩筆
+      // 注意：runSummaryFlow 內部可能會設置 isLoading，所以這裡不直接設置 false
+      // 讓 runSummaryFlow 自己管理 isLoading 狀態
+      return;
+    }
+
+    // 檢查是否包含客服關鍵字
+    if (transcript.includes("真人") || transcript.includes("客服")) {
+      pendingInput.value = transcript; // 儲存原始輸入
+      showCustomerServiceModal.value = true;
+      isLoading.value = false; // 客服模式不需要等待 API，可以解除載入狀態
+      return;
+    }
+
+    // 正常處理語音輸入
+    const botResponse = await sendViaUnifiedAPI(transcript, {
+      playAudio: !isMuted.value, // 根據靜音狀態決定是否播放語音
+    });
+    console.log("語音處理完成，botResponse:", botResponse);
+
+    // 保存對話記錄
+    const nowTs = Date.now();
+    const newConversation = {
+      id: nowTs,
+      ts: nowTs,
+      user: transcript,
+      bot: botResponse || "（親愛的:您的問題我目前沒辦法回答）",
+      timestamp: new Date().toLocaleString("zh-TW"),
+      dateKey: toDateKey(new Date(nowTs)),
+    };
+
+    conversations.value.push(newConversation);
+    latestResponse.value = botResponse || "（親愛的:您的問題我目前沒辦法回答）";
+    saveConversations();
+
+    // 如果當前在歷史記錄頁面，確保新訊息可見
+    if (showHistoryPage.value) {
+      currentPage.value = 1;
+      nextTick(() => {
+        setTimeout(() => {
+          scrollToBottom();
+        }, 100);
+      });
+    }
+
+    console.log("語音輸入處理完成");
   } catch (error) {
-    console.error("摘要處理錯誤:", error);
+    console.error("API 調用錯誤:", error);
+    const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
+    const nowTs = Date.now();
+    const localTime = getLocalTimeString(new Date(nowTs));
+
+    // 保存錯誤對話到 API
+    try {
+      await saveChatRecord({
+        inMsg: transcript,
+        outMsg: errorResponse,
+        inputAt: localTime,
+        outputAt: getLocalTimeString(new Date()),
+      });
+      console.log("錯誤對話已保存到 API");
+    } catch (saveError) {
+      console.error("保存錯誤對話到 API 失敗:", saveError);
+    }
+
+    const errorConversation = {
+      id: nowTs,
+      ts: nowTs,
+      user: transcript,
+      bot: errorResponse,
+      timestamp: new Date().toLocaleString("zh-TW"),
+      dateKey: toDateKey(new Date(nowTs)),
+    };
+    conversations.value.push(errorConversation);
+    latestResponse.value = errorResponse;
+    saveConversations();
+
+    // 如果當前在歷史記錄頁面，確保新訊息可見
+    if (showHistoryPage.value) {
+      currentPage.value = 1;
+      nextTick(() => {
+        setTimeout(() => {
+          scrollToBottom();
+        }, 100);
+      });
+    }
+  } finally {
     isLoading.value = false;
   }
 };
@@ -2540,31 +2625,16 @@ const closeAudioError = () => {
   }
 };
 
-// 關閉保存成功模態框
-const closeSaveSuccessModal = () => {
-  showSaveSuccessModal.value = false;
-};
-
-// 保存成功後重新錄音
-const retryAfterSave = () => {
-  closeSaveSuccessModal();
-  // 重新開始錄音
-  startRecording();
-};
-
-// 觀看健康日誌
-const viewHealthLog = () => {
-  closeSaveSuccessModal();
-  router.push("/healthLog");
-};
-
 async function handleManualInput() {
   const input = textInput.value.trim();
   if (!input) return;
 
-  // 檢查是否正在處理中
-  if (isLoading.value) {
-    console.log("正在處理中，請稍候...");
+  // 檢查是否正在等待 AI 回應，如果是則不允許發送新訊息
+  const hasLoadingMessage = conversations.value.some(
+    (msg) => msg.isLoading === true
+  );
+  if (hasLoadingMessage || isLoading.value) {
+    console.log("正在等待 AI 回應，請稍候...");
     return;
   }
 
@@ -2573,18 +2643,95 @@ async function handleManualInput() {
   // 設置載入狀態，防止連續發送
   isLoading.value = true;
 
-  // 所有輸入都進入摘要模式（移除 AI 對話功能）
-  const raw = input;
+  // 檢查字數是否超過50字，進入摘要模式
+  if (input.length > 50) {
+    const raw = input;
+    textInput.value = "";
+    try {
+      await runSummaryFlow(raw); // 不新增聊天泡泡，但 DB 會寫兩筆
+    } finally {
+      // 摘要模式完成後才解除載入狀態
+      // 注意：runSummaryFlow 內部可能會設置 isLoading，所以這裡不直接設置 false
+      // 讓 runSummaryFlow 自己管理 isLoading 狀態
+    }
+    return;
+  }
+
+  // 檢查是否包含客服關鍵字
+  if (input.includes("真人") || input.includes("客服")) {
+    pendingInput.value = input; // 儲存原始輸入
+    showCustomerServiceModal.value = true;
+    textInput.value = "";
+    isLoading.value = false; // 客服模式不需要等待 API，可以解除載入狀態
+    return;
+  }
+
+  // 文字輸入：立即將用戶輸入添加到聊天記錄中
+  const nowTs = Date.now();
+  const userMessage = {
+    id: nowTs,
+    ts: nowTs,
+    user: input,
+    bot: "", // 暫時為空，等待 API 回傳
+    timestamp: new Date().toLocaleString("zh-TW"),
+    dateKey: toDateKey(new Date(nowTs)),
+    isLoading: true, // 標記為載入中
+  };
+
+  // 立即添加到聊天記錄
+  conversations.value.push(userMessage);
+  currentTranscript.value = "";
   textInput.value = "";
 
-  // ✅ 輸入完成後立即關閉文字輸入框
-  closeTextInput();
+  // 如果當前在歷史記錄頁面，滾動到底部
+  if (showHistoryPage.value) {
+    currentPage.value = 1;
+    nextTick(() => {
+      setTimeout(() => {
+        scrollToBottom();
+        historyInputRef.value?.focus();
+      }, 100);
+    });
+  }
 
   try {
-    await runSummaryFlow(raw, "text"); // 只做摘要，不做 AI 對話
+    const botResponse = await sendViaUnifiedAPI(input, {
+      playAudio: !isMuted.value,
+    });
+    console.log("文字處理完成，botResponse:", botResponse);
+
+    // 更新聊天記錄中的 bot 回覆
+    const messageIndex = conversations.value.findIndex(
+      (msg) => msg.id === nowTs
+    );
+    if (messageIndex !== -1) {
+      conversations.value[messageIndex].bot =
+        botResponse || "（親愛的:您的問題我目前沒辦法回答）";
+      conversations.value[messageIndex].isLoading = false;
+    }
+
+    latestResponse.value = botResponse || "（親愛的:您的問題我目前沒辦法回答）";
+    saveConversations();
+
+    console.log("文字輸入處理完成:", userMessage);
+  } catch (error) {
+    console.error("API 調用錯誤:", error);
+    const errorResponse = "抱歉，服務暫時無法使用，請稍後再試。";
+
+    // 更新聊天記錄中的錯誤回覆
+    const messageIndex = conversations.value.findIndex(
+      (msg) => msg.id === nowTs
+    );
+    if (messageIndex !== -1) {
+      conversations.value[messageIndex].bot = errorResponse;
+      conversations.value[messageIndex].isLoading = false;
+    }
+
+    latestResponse.value = errorResponse;
+    saveConversations();
   } finally {
-    // 摘要模式完成後才解除載入狀態
-    // 注意：runSummaryFlow 內部會管理 isLoading 狀態
+    // 無論成功或失敗，都要解除載入狀態
+    isLoading.value = false;
   }
 }
 
@@ -4295,7 +4442,7 @@ const vClickOutside = {
   width: 100%;
   height: 0;
   padding-bottom: 84px;
-  margin-top: 12%;
+
   .character-image {
     height: 100%;
     object-fit: cover;
@@ -4532,53 +4679,33 @@ const vClickOutside = {
     }
 
     .send-btn {
-      width: 40px;
-      height: 40px;
       border-radius: 50%;
-      border: 2px solid #74bc1f;
-      background: #fff;
+      width: 45px;
+      height: 45px;
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       cursor: pointer;
-      padding: 0;
-      flex-shrink: 0;
-      transition: all 0.3s ease;
-
-      img {
-        width: 20px;
-        height: 20px;
-        filter: brightness(0) saturate(100%) invert(58%) sepia(95%)
-          saturate(2000%) hue-rotate(60deg) brightness(100%) contrast(85%);
-      }
-
-      &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-
-      &:not(:disabled):hover,
-      &:not(:disabled):active {
-        background: rgba(116, 188, 31, 0.1);
-        transform: scale(1.05);
-      }
-    }
-    .cancel-btn {
-      color: var(--Neutral-500, #666);
-
-      font-size: var(--Text-font-size-18, 18px);
-      font-style: normal;
-      font-weight: 400;
-
-      letter-spacing: 2.7px;
+      color: $raphael-white;
+      font-size: 18px;
+      @include neumorphismOuter(
+        $bgColor: $raphael-green-400,
+        $radius: 50px,
+        $padding: 0
+      );
       border: none;
-      flex-shrink: 0;
       transition: all 0.3s ease;
-      background: transparent;
 
       &:hover,
       &:active {
-        opacity: 0.7;
+        @include neumorphismOuter(
+          $bgColor: $raphael-green-500,
+          $radius: 50%,
+          $padding: 0,
+          $x: 0,
+          $y: 0,
+          $blur: 6px
+        );
       }
     }
   }
@@ -4873,59 +5000,6 @@ const vClickOutside = {
         cursor: not-allowed;
         opacity: 0.6;
       }
-    }
-
-    .voice-btn-view {
-      border-radius: var(--Radius-r-50, 50px);
-      background: var(--Primary-default, #74bc1f);
-      box-shadow: 2px 4px 12px 0
-        var(--secondary-300-opacity-70, rgba(177, 192, 216, 0.7));
-      color: var(--White-default, #fff);
-      font-family: "Noto Sans";
-      font-size: var(--Text-font-size-18, 18px);
-      font-style: normal;
-      font-weight: 400;
-      line-height: 100%; /* 18px */
-      letter-spacing: 2.7px;
-      &:hover {
-        background: #22c55e;
-      }
-    }
-  }
-
-  // 保存成功相關樣式
-  .save-success-text {
-    color: var(--Black-default, #3b3b3b);
-    text-align: center;
-    font-size: var(--Text-font-size-18, 18px);
-    font-style: normal;
-    font-weight: 400;
-    line-height: 160%;
-    letter-spacing: 2.7px;
-    margin-bottom: 16px;
-  }
-
-  .save-success-image {
-    width: 120px;
-    height: 120px;
-    object-fit: contain;
-    margin: 0 auto 24px;
-    display: block;
-  }
-
-  .save-success-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    width: 100%;
-    padding: 0 16px;
-
-    .voice-btn {
-      padding: 12px 24px;
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      width: 100%;
     }
   }
 }

@@ -1790,7 +1790,8 @@ async function saveChatRecord({
     }
 
     return { success: true, data: newRecord };
-  } catch (e) {
+  } 
+  catch (e) {
     console.error("保存聊天記錄失敗:", e);
     return { success: false, error: e.message || String(e) };
   }

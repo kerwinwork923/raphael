@@ -225,15 +225,7 @@
               <h3>產品使用紀錄</h3>
               <div class="memberInfoTitleGroup">
                 <small>已使用 {{ totalHome }} 次</small>
-                <VueDatePicker
-                  v-model="homeDateRange"
-                  range
-                  :enable-time-picker="false"
-                  format="yyyy/MM/dd"
-                  placeholder="選擇日期區間"
-                  prepend-icon="i-calendar"
-                  teleport="body"
-                />
+       
                 <!-- 看診日期下拉選單 -->
                 <div class="filterDropdown">
                   <div class="filterDropdownWrapper">
@@ -1509,7 +1501,7 @@ const selectedWeeklySummary = ref<{
 } | null>(null);
 
 /* ---------- refs ---------- */
-const homeDateRange = ref<Date[] | null>(null);
+
 const homeChartDateRange = ref<Date[] | null>(null);
 
 const ringRange = ref<Date[] | null>(null);
@@ -1829,16 +1821,7 @@ const homeFilterOptions = computed(() => {
 const filteredHome = computed(() => {
   let data = processedHomeOrders.value;
 
-  // 日期區間篩選
-  if (homeDateRange.value && homeDateRange.value.length >= 2) {
-    const [from, to] = homeDateRange.value;
-    const start = from.getTime();
-    const end = to.getTime();
-    data = data.filter((r: any) => {
-      const ms = Date.parse(r.ConsultationDate?.replace(/\//g, "-") || "");
-      return ms >= start && ms <= end;
-    });
-  }
+
 
   // 篩選選項
   if (selectedHomeFilterOptions.value.length > 0) {
@@ -2451,9 +2434,7 @@ const chartANS = computed(() => ansRecords.value);
 const chartLife = computed(() => lifeRecords.value);
 
 /* ---------- watch & lifecycle ---------- */
-watch(homeDateRange, () => {
-  pageHome.value = 1;
-});
+
 watch(selectedHomeFilterOptions, () => {
   pageHome.value = 1;
 });
