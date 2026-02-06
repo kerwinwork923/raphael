@@ -37,6 +37,7 @@ import { useRouter } from "vue-router";
 import { ref } from "vue";
 import { useSeo } from "~/composables/useSeo";
 import { useUserData } from "~/fn/api";
+
 export default {
   components: { UserInfoForm, TitleMenu, useSeo },
   setup() {
@@ -50,8 +51,8 @@ export default {
     const address = ref("");
     const email = ref("");
     const asusEmail = ref("");
-const acerEmail = ref("");
-const garminEmail = ref("");
+    const acerEmail = ref("");
+    const garminEmail = ref("");
     const router = useRouter();
 
     const loading = ref(false);
@@ -62,6 +63,11 @@ const garminEmail = ref("");
         "NeuroPlus神經調節家提供專業的自律神經檢測服務，運用FDA認證AI技術，透過人臉辨識快速分析HRV數據，幫助您了解自律神經狀態。",
       url: "https://neuroplus.com.tw",
     });
+
+    useHead({
+  title: "拉菲爾人本診所",
+  meta: [{ name: "description", content: "是透過相應神經調節療法，以無藥、無副作用、非侵入性的治療方式治療自律神經失調、神經痛、弱視、耳鳴、眩暈、胃食道逆流、顏面神經麻痺、失眠、過敏性鼻炎、焦慶憂鬱、胃食道逆流、三叉神經痛、帶狀皰疹神經痛等疾病。" }],
+});
 
     const addUser = async (formData) => {
       try {
@@ -83,8 +89,8 @@ const garminEmail = ref("");
           address: address.value,
           email: email.value,
           asusEmail: asusEmail.value,
-  acerEmail: acerEmail.value,
-  garminEmail: garminEmail.value,
+          acerEmail: acerEmail.value,
+          garminEmail: garminEmail.value,
         };
 
         if (
@@ -129,8 +135,8 @@ const garminEmail = ref("");
             Address: userData.address,
             Mail: userData.email,
             AsusMail: userData.asusEmail,
-  AcerMail: userData.acerEmail,
-  GarminMail: userData.garminEmail,
+            AcerMail: userData.acerEmail,
+            GarminMail: userData.garminEmail,
           }
         );
 
@@ -171,7 +177,6 @@ const garminEmail = ref("");
       }
     };
 
- 
 
     const localData = localStorage.getItem("userData");
     const { MID, Token, MAID, Mobile } = localData ? JSON.parse(localData) : {};

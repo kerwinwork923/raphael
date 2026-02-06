@@ -6,7 +6,9 @@
         <!-- <img src="../assets/imgs/member/bell.svg" alt="通知" /> -->
       </div>
       <MemberTop :userDataObj="userDataObj" @refresh="getMemberData" />
+
       <div class="memberCenter">
+
         <div class="memberCenterItem" @click="goToPoint">
           <img src="../assets/imgs/member/point.svg" alt="" />
           <h3>我的積分</h3>
@@ -14,6 +16,7 @@
             前往 <img src="../assets/imgs/member/next.svg" alt="" />
           </div>
         </div>
+
         <div class="memberCenterItem" @click="goToPackage">
           <img src="../assets/imgs/member/order.svg" alt="" />
           <h3>我的訂單</h3>
@@ -21,9 +24,11 @@
             前往 <img src="../assets/imgs/member/next.svg" alt="" />
           </div>
         </div>
+
       </div>
 
       <div class="memberListGroup">
+
         <div class="memberListItem" @click="goToChangeMember">
           <div class="memberListLeft">
             <img src="../assets/imgs/member/setting.svg" alt="" />
@@ -31,6 +36,7 @@
           </div>
           <img src="../assets/imgs/member/next_green.svg" alt="" />
         </div>
+
         <!-- <div class="memberListItem" @click="goToHealthDataSetting">
           <div class="memberListLeft">
             <img src="../assets/imgs/member/heartPulse2.svg" alt="" />
@@ -38,6 +44,7 @@
           </div>
           <img src="../assets/imgs/member/next_green.svg" alt="" />
         </div> -->
+
         <div class="memberListItem margin-12" @click="goToAccountManage">
           <div class="memberListLeft">
             <img src="../assets/imgs/member/user.svg" alt="" />
@@ -87,13 +94,15 @@
           </div>
           <img src="../assets/imgs/member/next_green.svg" alt="" />
         </div>
-        <div class="memberListItem" @click="goToDisclaimer">
+
+        <!-- <div class="memberListItem" @click="goToDisclaimer">
           <div class="memberListLeft">
             <img src="../assets/imgs/member/warning.svg" alt="" />
             <h3>免責聲明</h3>
           </div>
           <img src="../assets/imgs/member/next_green.svg" alt="" />
-        </div>
+        </div> -->
+
       </div>
 
       <button class="logoutBtn" @click="logout">登出</button>
@@ -175,6 +184,11 @@ const contactSupport = () => {
   a.click();
   document.body.removeChild(a);
 };
+
+useHead({
+  title: "拉菲爾人本診所",
+  meta: [{ name: "description", content: "是透過相應神經調節療法，以無藥、無副作用、非侵入性的治療方式治療自律神經失調、神經痛、弱視、耳鳴、眩暈、胃食道逆流、顏面神經麻痺、失眠、過敏性鼻炎、焦慶憂鬱、胃食道逆流、三叉神經痛、帶狀皰疹神經痛等疾病。" }],
+});
 
 const getMemberData = async () => {
   //loading

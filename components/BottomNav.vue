@@ -39,11 +39,11 @@
         <img
           v-if="activeTab === 'home'"
           src="/assets/imgs/robot/home-active.svg"
-          alt="首頁"
+          alt="AI陪伴"
         />
-        <img v-else src="/assets/imgs/robot/home.svg" alt="首頁" />
+        <img v-else src="/assets/imgs/robot/home.svg" alt="AI陪伴" />
       </div>
-      <span>首頁</span>
+      <span>AI陪伴</span>
     </div>
     <!-- <div
       class="nav-item"
