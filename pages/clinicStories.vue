@@ -671,6 +671,7 @@ onMounted(async () => {
 });
 
 const modules = [FreeMode];
+
 </script>
 
 <style lang="scss" scoped>

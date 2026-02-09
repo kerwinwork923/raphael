@@ -163,7 +163,7 @@
                 @click="goToAcerNumber"
               >
                 <img src="/assets/imgs/backend/watch.svg" alt />
-                <span>華碩序號({{ latestVivoWatch?.Deviceid || "—" }})</span>
+                <span>華碩序號({{ latestVivoWatch?.Deviceid || "無資料" }})</span>
               </div>
             </div>
 
@@ -212,10 +212,17 @@
                 <h5>目前合約</h5>
                 <p style="text-align: center; padding: 8px 0">尚無合約資料</p>
               </template>
-
+              <div class="memberInfoBtnGroup">
               <button class="consumptionBtn" @click="openContract">
                 <img src="/assets/imgs/backend/time2.svg" alt />消費紀錄
               </button>
+     
+                <!-- <button class="operationRecordBtn" @click="openOperationRecord">
+                  <img src="/assets/imgs/backend/time2.svg" alt="operation" />
+                  <span>操作紀錄</span>
+                </button> -->
+              </div>
+
             </div>
           </div>
 
@@ -485,6 +492,12 @@
                   prepend-icon="i-calendar"
                   :teleport="true"
                 />
+           
+                  <button class="exportExcelBtn" @click="exportHealthLogExcel">
+                    <img src="/assets/imgs/backend/download.svg" alt="excel" />
+                    <span>匯出</span>
+                  </button>
+           
               </div>
             </div>
 
@@ -1418,6 +1431,7 @@ import VueDatePicker from "@vuepic/vue-datepicker";
 import { useMemberStore } from "~/stores/useMemberStore";
 import { storeToRefs } from "pinia";
 
+import * as XLSX from "xlsx";
 import Sidebar from "~/components/raphaelBackend/Sidebar.vue";
 import UsageAnalysisChart from "~/components/raphaelBackend/UsageAnalysisChart.vue";
 import AnalysisChart from "~/components/raphaelBackend/AnalysisChart.vue";
@@ -1722,6 +1736,7 @@ onMounted(() => {
     }
   });
 });
+
 onUnmounted(() => {
   window.removeEventListener("resize", handleResize);
 });
@@ -2273,6 +2288,44 @@ const pageNumberListHealthLog = computed(() =>
   pageButtons(totalPagesHealthLog.value, pageHealthLog.value, maxButtons.value)
 );
 
+/* 匯出健康日誌 Excel */
+const exportHealthLogExcel = () => {
+  const data = filteredHealthLog.value;
+  if (!data.length) {
+    alert("目前沒有健康日誌資料可匯出");
+    return;
+  }
+
+  // 組裝 Excel 資料
+  const rows = data.map((row: any) => ({
+    口述內容: row.VerbalContent || "",
+    口述日期: row.VerbalDate || "",
+    AI摘要: row.Note || "",
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(rows);
+
+  // 設定欄位寬度
+  ws["!cols"] = [
+    { wch: 60 }, // 口述內容
+    { wch: 20 }, // 口述日期
+    { wch: 60 }, // AI摘要
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "健康日誌");
+
+  // 產出檔名（會員名稱 + 日期）
+  const memberName = member.value?.Name || "會員";
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}${(today.getMonth() + 1)
+    .toString()
+    .padStart(2, "0")}${today.getDate().toString().padStart(2, "0")}`;
+  const fileName = `${memberName}_健康日誌_${dateStr}.xlsx`;
+
+  XLSX.writeFile(wb, fileName);
+};
+
 /* WEEKLY SUMMARY */
 const pageWeeklySummary = ref(1);
 const filteredWeeklySummary = computed(() => {
@@ -2530,11 +2583,8 @@ watch(
     // 取得產品使用紀錄
     await memberStore.fetchFavoriteTPointsList(getAuth());
 
-    // 取得健康日誌（使用當前年月）
-    const now = new Date();
-    const year = now.getFullYear().toString();
-    const month = (now.getMonth() + 1).toString().padStart(2, "0");
-    await memberStore.fetchHealthLog(getAuth(), year, month);
+    // 取得健康日誌（使用空白月份取得全部列表）
+    await memberStore.fetchHealthLog(getAuth(), "", "");
 
     // 取得本周摘要
     await memberStore.fetchWeeklySummary(getAuth());
@@ -3085,7 +3135,14 @@ const isExpired = computed(() => {
             margin-left: 4px;
           }
         }
-        .consumptionBtn {
+        .memberInfoBtnGroup{
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-top: 0.75rem;
+       
+        }
+        .consumptionBtn, .operationRecordBtn {
           width: 100%;
           padding: 6px 8px;
           color: var(--Primary-default, #1ba39b);
@@ -3273,6 +3330,23 @@ const isExpired = computed(() => {
               }
             }
           }
+        }
+        .exportExcelBtn{
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 4px;
+          padding: 0.1rem .5em;
+          border-radius: 50px;
+          background: #fff;
+          color: var(--Neutral-500, #666);
+          font-size: 14px;
+          cursor: pointer;
+          border: none;
+          border-radius: var(--Radius-r-50, 50px);
+          background: var(--Neutral-white, #FFF);
+          box-shadow: 0 2px 20px 0 var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
+          width: 140px;
         }
       }
       .memberInfoCardGroup {

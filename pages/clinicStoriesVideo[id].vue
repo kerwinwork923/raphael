@@ -1027,6 +1027,8 @@ const getPercentFromEvent = (e) => {
   return rect.width ? x / rect.width : 0;
 };
 
+
+
 const onScrubStart = (e) => {
   if (!isYouTubeReady.value || !duration.value) return;
   isScrubbing.value = true;
@@ -1205,6 +1207,7 @@ const submitComment = async () => {
       Lang: "zhtw",
       AID: videoData.value.id.toString(),
       Message: newComment.value.trim(),
+      
     };
 
     const response = await fetch(
