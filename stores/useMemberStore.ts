@@ -306,7 +306,7 @@ export const useMemberStore = defineStore('member', () => {
     }
   }
 
-  async function fetchOptDetailMIDList(auth: any, aid: string, startDate?: string, endDate?: string) {
+  async function fetchOptDetailMIDList(auth: any, aid: string = "", startDate?: string, endDate?: string) {
     try {
       const { token, admin, sel } = auth
       if (!token || !admin || !sel.MID) return
@@ -326,9 +326,9 @@ export const useMemberStore = defineStore('member', () => {
       const data = await res.json()
       if (data.Result === "OK") {
         // 根據 FAID (對應 AID) 篩選資料，並轉換事件類型
-        // 包含 FAID === aid 的資料，也包含 FAID === "0" 的資料（可能是該會員的其他操作）
+        // 當 aid 為空時，回傳全部資料；否則篩選 FAID === aid 或 FAID === "0"
         optDetailList.value = (data.OptDetailMIDList || [])
-          .filter((item: any) => item.FAID === aid || item.FAID === "0")
+          .filter((item: any) => !aid || item.FAID === aid || item.FAID === "0")
           .map((item: any, index: number) => {
             let eventDesc = "—"
             
