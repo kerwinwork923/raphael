@@ -136,43 +136,6 @@
                   {{ log.preSoundNote }}
                 </div>
               </div>
-
-              <div
-                class="timeline-line"
-                v-if="log.preSoundNote && log.preSoundNote.trim() && log.content && log.content.trim()"
-              ></div>
-
-              <!-- AI摘要內容區塊 -->
-              <div
-                class="content-section"
-                v-if="log.content && log.content.trim()"
-              >
-                <div
-                  class="section-header"
-                  @click="
-                    isExpandable(log.id, 'ai') && toggleSection(log.id, 'ai')
-                  "
-                >
-                  <span class="section-title">AI摘要內容</span>
-                  <img
-                    v-if="isExpandable(log.id, 'ai')"
-                    src="/assets/imgs/arrowDown2.svg"
-                    alt="展開/收合"
-                    class="section-chevron"
-                    :class="{
-                      rotated: !expandedSections[`${log.id}-ai`],
-                    }"
-                  />
-                </div>
-                <div
-                  class="section-content"
-                  :class="{
-                    expanded: expandedSections[`${log.id}-ai`],
-                  }"
-                >
-                  {{ log.content }}
-                </div>
-              </div>
             </div>
           </div>
         </div>
