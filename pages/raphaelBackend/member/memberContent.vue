@@ -150,6 +150,114 @@
       </div>
     </div>
 
+    <!-- ───── 手錶紀錄詳情彈窗 ───── -->
+    <div
+      v-if="showWatchDetailModal"
+      class="watchDetailOverlay"
+      @click="closeWatchDetail"
+    >
+      <div class="watchDetailModal" @click.stop>
+        <!-- 標題 -->
+        <div class="watchDetailHeader">
+          <img src="/assets/imgs/backend/Subtract.svg" alt="NP" class="npLogo" />
+          <h3 class="watchDetailDate">{{ selectedWatchRecord?.CheckTime || "—" }}</h3>
+          <p class="watchDetailSub">Detection Time</p>
+        </div>
+
+        <!-- 健康指標卡片 -->
+        <div class="watchMetricCards">
+          <div class="watchMetricCard">
+            <span class="metricLabel">血壓</span>
+            <span class="metricValue">{{ selectedWatchRecord?.bloodPressure || "—" }}</span>
+            <span class="metricUnit">mmH/g</span>
+          </div>
+          <div class="watchMetricCard">
+            <span class="metricLabel">心率</span>
+            <span class="metricValue">{{ selectedWatchRecord?.heartRateVal ?? "—" }}</span>
+            <span class="metricUnit">bpm</span>
+          </div>
+          <div class="watchMetricCard">
+            <span class="metricLabel">血氧</span>
+            <span class="metricValue">{{ selectedWatchRecord?.bloodOxygenVal ?? "—" }}</span>
+            <span class="metricUnit">SpO2%</span>
+          </div>
+          <div class="watchMetricCard">
+            <span class="metricLabel">HRV</span>
+            <span class="metricValue">{{ selectedWatchRecord?.hrvVal ?? "—" }}</span>
+            <span class="metricUnit">ms</span>
+          </div>
+          <div class="watchMetricCard">
+            <span class="metricLabel">體溫</span>
+            <span class="metricValue">{{ selectedWatchRecord?.tempVal ?? "—" }}</span>
+            <span class="metricUnit">°C</span>
+          </div>
+          <div class="watchMetricCard">
+            <span class="metricLabel">運動</span>
+            <span class="metricValue">{{ selectedWatchRecord?.stepsVal ?? "—" }}</span>
+            <span class="metricUnit">步</span>
+          </div>
+          <div class="watchMetricCard">
+            <span class="metricLabel">壓力</span>
+            <span class="metricValue">{{ selectedWatchRecord?.stressLevel || "—" }}</span>
+            <span class="metricUnit">{{ selectedWatchRecord?.stressLevelEn || "" }}</span>
+          </div>
+        </div>
+
+        <!-- 睡眠區塊 -->
+        <div class="watchSleepSection">
+          <h4>睡眠時長 {{ selectedWatchRecord?.sleepDuration || "—" }}</h4>
+          <div class="watchSleepGrid">
+            <div class="watchSleepRow">
+              <span class="sleepLabel">睡眠分數</span>
+              <span class="sleepValue">{{ selectedWatchRecord?.sleepScore || "—" }}</span>
+            </div>
+            <div class="watchSleepRow">
+              <span class="sleepLabel">清醒</span>
+              <span class="sleepValue">{{ selectedWatchRecord?.sleepAwakePct || "—" }} | {{ selectedWatchRecord?.sleepAwakeDur || "—" }}</span>
+            </div>
+            <div class="watchSleepRow">
+              <span class="sleepLabel">REM</span>
+              <span class="sleepValue">{{ selectedWatchRecord?.sleepRemPct || "—" }}  | {{ selectedWatchRecord?.sleepRemDur || "—" }}</span>
+            </div>
+            <div class="watchSleepRow">
+              <span class="sleepLabel">淺眠</span>
+              <span class="sleepValue">{{ selectedWatchRecord?.sleepLightPct || "—" }} | {{ selectedWatchRecord?.sleepLightDur || "—" }}</span>
+            </div>
+            <div class="watchSleepRow">
+              <span class="sleepLabel">深眠</span>
+              <span class="sleepValue">{{ selectedWatchRecord?.sleepDeepPct || "—" }}  | {{ selectedWatchRecord?.sleepDeepDur || "—" }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 身體組成區塊 -->
+        <div class="watchBodySection">
+          <h4>身體組成</h4>
+          <div class="watchBodyGrid">
+            <div class="watchBodyRow">
+              <span class="bodyLabel">水分</span>
+              <span class="bodyValue">{{ selectedWatchRecord?.bodyWater || "—" }}</span>
+            </div>
+            <div class="watchBodyRow">
+              <span class="bodyLabel">體脂</span>
+              <span class="bodyValue">{{ selectedWatchRecord?.bodyFat || "—" }}</span>
+            </div>
+            <div class="watchBodyRow">
+              <span class="bodyLabel">肌肉</span>
+              <span class="bodyValue">{{ selectedWatchRecord?.bodyMuscle || "—" }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 關閉按鈕 -->
+        <div class="watchDetailFooter">
+          <div class="watchDetailClose" @click="closeWatchDetail">
+            <img src="/assets/imgs/backend/close.svg" alt="close" />
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 本週摘要詳情彈跳視窗 -->
     <Teleport to="body">
       <div
@@ -339,11 +447,11 @@
               <div class="memberInfoTitleGroup">
                 <small>已使用 {{ totalHome }} 次</small>
        
-                <!-- 看診日期下拉選單 -->
+                <!-- 我的最愛名稱篩選 -->
                 <div class="filterDropdown">
                   <div class="filterDropdownWrapper">
                     <div class="filterTrigger" @click="toggleHomeFilter">
-                      <span>看診日期</span>
+                      <span>我的最愛名稱篩選</span>
                       <img
                         src="/assets/imgs/backend/arrow-down.svg"
                         alt="arrow"
@@ -364,7 +472,7 @@
                           }"
                           @click="selectHomeFilterCategory('ConsultationDate')"
                         >
-                          看診日期
+                          開始日期
                         </div>
                         <div
                           class="filterCategory"
@@ -380,21 +488,11 @@
                           class="filterCategory"
                           :class="{
                             active:
-                              selectedHomeFilterCategory === 'TreatmentArea',
+                              selectedHomeFilterCategory === 'ProductName',
                           }"
-                          @click="selectHomeFilterCategory('TreatmentArea')"
+                          @click="selectHomeFilterCategory('ProductName')"
                         >
-                          治療部位
-                        </div>
-                        <div
-                          class="filterCategory"
-                          :class="{
-                            active:
-                              selectedHomeFilterCategory === 'TreatmentTime',
-                          }"
-                          @click="selectHomeFilterCategory('TreatmentTime')"
-                        >
-                          治療時間
+                          產品名稱
                         </div>
                       </div>
                       <div class="filterOptions">
@@ -433,7 +531,7 @@
                   class="memberInfoTableTitleItem"
                   @click="handleSort('home', 'ConsultationDate')"
                 >
-                  看診日期
+                  開始日期
                   <img
                     src="/assets/imgs/backend/sort.svg"
                     alt="sort"
@@ -442,9 +540,15 @@
                 </div>
                 <div
                   class="memberInfoTableTitleItem"
-                  @click="handleSort('home', 'FavoriteName')"
+                  @click="handleSort('home', 'FormattedStartTime')"
                 >
-                  我的最愛名稱
+                  開始時間
+                </div>
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('home', 'FormattedEndTime')"
+                >
+                  結束時間
                 </div>
                 <div
                   class="memberInfoTableTitleItem"
@@ -454,14 +558,9 @@
                 </div>
                 <div
                   class="memberInfoTableTitleItem"
-                  @click="handleSort('home', 'TotalUsage')"
+                  @click="handleSort('home', 'FavoriteName')"
                 >
-                  總使用次數
-                  <img
-                    src="/assets/imgs/backend/sort.svg"
-                    alt="sort"
-                    class="sortIcon"
-                  />
+                  我的最愛名稱
                 </div>
               </div>
               <div class="memberInfoTableHR" />
@@ -471,14 +570,18 @@
                   class="memberInfoTableRow productUsagRecords"
                   v-for="row in paginatedHome"
                   :key="row.id"
-                  @click="
-                    router.push(
-                      `/raphaelBackend/member/myFavorite?AID=${row.AID}`
-                    )
-                  "
                 >
                   <div class="memberInfoTableRowItem">
                     {{ row.ConsultationDate || "—" }}
+                  </div>
+                  <div class="memberInfoTableRowItem">
+                    {{ row.FormattedStartTime || "—" }}
+                  </div>
+                  <div class="memberInfoTableRowItem">
+                    {{ row.FormattedEndTime || "—" }}
+                  </div>
+                  <div class="memberInfoTableRowItem">
+                    {{ row.TreatmentTime || "—" }}
                   </div>
                   <div class="memberInfoTableRowItem">
                     {{
@@ -487,17 +590,6 @@
                         : row.FavoriteName || "—"
                     }}
                   </div>
-                  <div class="memberInfoTableRowItem">
-                    {{ row.TreatmentTime || "—" }}
-                  </div>
-                  <div class="memberInfoTableRowItem">
-                    {{ row.TotalUsage || "—" }}
-                  </div>
-                  <img
-                    src="/assets/imgs/backend/goNext.svg"
-                    alt="detail"
-                    style="cursor: pointer; position: absolute; right: 0"
-                  />
                 </div>
               </template>
               <div class="memberInfoTableRow" v-else>
@@ -781,134 +873,175 @@
         </div>
 
         <!-- █ 指環紀錄 ------------------------------------------------------- -->
-        <!-- <div class="memberInfoRow">
-          <div class="memberInfoCard w-half">
+        <!-- █ 手錶紀錄 ------------------------------------------------- -->
+        <div class="memberInfoRow">
+          <div class="memberInfoCard watchRecordCard">
             <div class="memberInfoTitleWrap">
-              <h3>指環紀錄</h3>
+              <h3>手錶紀錄</h3>
               <div class="memberInfoTitleGroup">
-                <small>共 {{ totalRing }} 筆</small>
+                <small>已使用 {{ totalRing }} 次</small>
                 <VueDatePicker
                   v-model="ringRange"
-                  placeholder="選擇日期區間"
                   range
                   :enable-time-picker="false"
                   format="yyyy/MM/dd"
+                  placeholder="選擇日期區間"
+                  prepend-icon="i-calendar"
                   teleport="body"
+                />
+
+                <!-- 分類篩選 -->
+                <div class="watchFilterDropdownWrapper">
+                  <div class="filterTrigger" @click="showWatchFilter = !showWatchFilter">
+                    <img src="/assets/imgs/backend/search.svg" alt="filter" style="width:16px;height:16px" />
+                    <span>{{ watchFilterCategoryLabel }}</span>
+                    <img
+                      src="/assets/imgs/backend/arrow-down.svg"
+                      alt="arrow"
+                      :class="{ rotated: showWatchFilter }"
+                    />
+                  </div>
+                  <div class="filterDropdownPanel" v-if="showWatchFilter" @click.stop>
+                    <div class="filterCategories">
+                      <div
+                        class="filterCategory"
+                        :class="{ active: watchFilterCategory === 'CheckTime' }"
+                        @click="watchFilterCategory = 'CheckTime'"
+                      >使用時間</div>
+                      <div
+                        class="filterCategory"
+                        :class="{ active: watchFilterCategory === 'heartRate' }"
+                        @click="watchFilterCategory = 'heartRate'"
+                      >心率</div>
+                      <div
+                        class="filterCategory"
+                        :class="{ active: watchFilterCategory === 'bloodOxygen' }"
+                        @click="watchFilterCategory = 'bloodOxygen'"
+                      >血氧</div>
+                      <div
+                        class="filterCategory"
+                        :class="{ active: watchFilterCategory === 'stress' }"
+                        @click="watchFilterCategory = 'stress'"
+                      >壓力</div>
+                      <div
+                        class="filterCategory"
+                        :class="{ active: watchFilterCategory === 'temperature' }"
+                        @click="watchFilterCategory = 'temperature'"
+                      >溫度</div>
+                    </div>
+                    <div class="filterOptions">
+                      <div
+                        class="filterOption"
+                        v-for="opt in watchFilterOptions"
+                        :key="opt"
+                        @click="toggleWatchFilterOption(opt)"
+                      >
+                        <input type="checkbox" :checked="selectedWatchFilterOptions.includes(opt)" @click.stop />
+                        <span>{{ opt }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 關鍵字搜尋 -->
+                <input
+                  type="text"
+                  v-model="watchKeyword"
+                  placeholder="搜尋關鍵字"
+                  class="searchKeywordInput"
                 />
               </div>
             </div>
-            <div class="memberInfoTable">
+
+            <div class="memberInfoTable watchTable">
               <div class="memberInfoTableTitle">
-                <div
-                  class="memberInfoTableTitleItem"
-                  @click="handleSort('ring', 'CheckTime')"
-                >
+                <div class="memberInfoTableTitleItem" @click="handleSort('ring', 'CheckTime')">
                   使用時間
-                  <img
-                    src="/assets/imgs/backend/sort.svg"
-                    alt="sort"
-                    class="sortIcon"
-                  />
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
                 </div>
-                <div
-                  class="memberInfoTableTitleItem"
-                  @click="handleSort('ring', 'heartRate')"
-                >
+                <div class="memberInfoTableTitleItem" @click="handleSort('ring', 'heartRate')">
                   心率
-                  <img
-                    src="/assets/imgs/backend/sort.svg"
-                    alt="sort"
-                    class="sortIcon"
-                  />
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
                 </div>
-                <div
-                  class="memberInfoTableTitleItem"
-                  @click="handleSort('ring', 'sleep')"
-                >
+                <div class="memberInfoTableTitleItem" @click="handleSort('ring', 'bloodOxygen')">
+                  血氧
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('ring', 'stress')">
+                  壓力
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('ring', 'sleep')">
                   睡眠
-                  <img
-                    src="/assets/imgs/backend/sort.svg"
-                    alt="sort"
-                    class="sortIcon"
-                  />
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
                 </div>
-                <div
-                  class="memberInfoTableTitleItem"
-                  @click="handleSort('ring', 'steps')"
-                >
-                  步數與卡路里
-                  <img
-                    src="/assets/imgs/backend/sort.svg"
-                    alt="sort"
-                    class="sortIcon"
-                  />
+                <div class="memberInfoTableTitleItem" @click="handleSort('ring', 'temperature')">
+                  溫度
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('ring', 'steps')">
+                  運動
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
+                <div class="memberInfoTableTitleItem" @click="handleSort('ring', 'hrv')">
+                  HRV
+                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                </div>
+                <div class="memberInfoTableTitleItem watchBodyCompCol">
+                  身體組成
                 </div>
               </div>
               <div class="memberInfoTableHR" />
 
               <template v-if="paginatedRing.length">
                 <div
-                  class="memberInfoTableRow"
+                  class="memberInfoTableRow watchRow"
                   v-for="r in paginatedRing"
                   :key="r.id"
+                  @click="openWatchDetail(r)"
                 >
                   <div class="memberInfoTableRowItem">{{ r.CheckTime }}</div>
-                  <div class="memberInfoTableRowItem">
-                    {{ r.heartRate || "—" }}
-                  </div>
+                  <div class="memberInfoTableRowItem">{{ r.heartRate || "—" }}</div>
+                  <div class="memberInfoTableRowItem">{{ r.bloodOxygen || "—" }}</div>
+                  <div class="memberInfoTableRowItem">{{ r.stress || "—" }}</div>
                   <div class="memberInfoTableRowItem">{{ r.sleep || "—" }}</div>
+                  <div class="memberInfoTableRowItem">{{ r.temperature || "—" }}</div>
                   <div class="memberInfoTableRowItem">{{ r.steps || "—" }}</div>
+                  <div class="memberInfoTableRowItem">{{ r.hrv || "—" }}</div>
+                  <div class="memberInfoTableRowItem watchBodyCompCell">
+                    <span>水分 {{ r.bodyWater || "—" }}</span>
+                    <span>體指 {{ r.bodyFat || "—" }}</span>
+                    <span>肌肉 {{ r.bodyMuscle || "—" }}</span>
+                  </div>
+                  <img
+                    src="/assets/imgs/backend/goNext.svg"
+                    alt="detail"
+                    style="cursor:pointer; position:absolute; right:0"
+                  />
                 </div>
               </template>
               <div class="memberInfoTableRow" v-else>
-                <div class="memberInfoTableRowItem" style="width: 100%">
-                  尚無資料
-                </div>
+                <div class="memberInfoTableRowItem" style="width:100%">尚無資料</div>
               </div>
             </div>
 
-    
+            <!-- 分頁 -->
             <nav class="pagination" v-if="totalRing">
-              <button
-                class="btn-page"
-                :disabled="pageRing === 1"
-                @click="pageRing = 1"
-              >
-                &lt;&lt;
-              </button>
-              <button
-                class="btn-page"
-                :disabled="pageRing === 1"
-                @click="pageRing--"
-              >
-                &lt;
-              </button>
+              <button class="btn-page" :disabled="pageRing === 1" @click="pageRing = 1">&lt;&lt;</button>
+              <button class="btn-page" :disabled="pageRing === 1" @click="pageRing--">&lt;</button>
               <button
                 class="btn-page btn-page-number"
                 v-for="p in pageNumberListRing"
                 :key="p"
                 :class="{ active: pageRing === p }"
-                @click="pageRing = p"
-              >
-                {{ p }}
-              </button>
-              <button
-                class="btn-page"
-                :disabled="pageRing === totalPagesRing"
-                @click="pageRing++"
-              >
-                &gt;
-              </button>
-              <button
-                class="btn-page"
-                :disabled="pageRing === totalPagesRing"
-                @click="pageRing = totalPagesRing"
-              >
-                &gt;&gt;
-              </button>
+                :disabled="p === '...'"
+                @click="typeof p === 'number' && (pageRing = p)"
+              >{{ p }}</button>
+              <button class="btn-page" :disabled="pageRing === totalPagesRing" @click="pageRing++">&gt;</button>
+              <button class="btn-page" :disabled="pageRing === totalPagesRing" @click="pageRing = totalPagesRing">&gt;&gt;</button>
             </nav>
           </div>
-        </div> -->
+        </div>
 
         <!-- █ 自律神經 ------------------------------------------------------- -->
         <div class="memberInfoRow">
@@ -1669,63 +1802,232 @@ onMounted(() => {
   handleResize();
   window.addEventListener("resize", handleResize);
 
-  // 指環紀錄假資料
+  // 手錶紀錄假資料
   ringRecords.value = [
     {
       id: 1,
-      CheckTime: "2024/10/10 12:00",
-      heartRate: "58",
-      sleep: "8小時20分",
-      steps: "1298步",
+      CheckTime: "2024/10/09 12:00",
+      heartRate: "62 bpm",
+      bloodOxygen: "88",
+      stress: "79/100",
+      sleep: "6h10m",
+      temperature: "36.5°C",
+      steps: "1200步",
+      hrv: "37 ms",
+      bodyWater: "62.50%",
+      bodyFat: "18.5%",
+      bodyMuscle: "39.0kg",
+      // 詳情彈窗用
+      bloodPressure: "110/67",
+      heartRateVal: 62,
+      bloodOxygenVal: 88,
+      hrvVal: 37,
+      tempVal: 36.5,
+      stepsVal: 1200,
+      stressLevel: "中等",
+      stressLevelEn: "medium",
+      sleepDuration: "6h10m",
+      sleepScore: "79/100",
+      sleepAwakePct: "10%", sleepAwakeDur: "37m",
+      sleepRemPct: "8%", sleepRemDur: "30m",
+      sleepLightPct: "72%", sleepLightDur: "4h26m",
+      sleepDeepPct: "10%", sleepDeepDur: "37m",
     },
     {
       id: 2,
-      CheckTime: "2024/10/11 12:00",
-      heartRate: "62",
-      sleep: "7小時30分",
-      steps: "1500步",
+      CheckTime: "2024/10/08 12:00",
+      heartRate: "55 bpm",
+      bloodOxygen: "90",
+      stress: "82/100",
+      sleep: "5h30m",
+      temperature: "36.6°C",
+      steps: "1200步",
+      hrv: "36 ms",
+      bodyWater: "61.00%",
+      bodyFat: "19.5%",
+      bodyMuscle: "37.5kg",
+      bloodPressure: "115/70",
+      heartRateVal: 55,
+      bloodOxygenVal: 90,
+      hrvVal: 36,
+      tempVal: 36.6,
+      stepsVal: 1200,
+      stressLevel: "中等",
+      stressLevelEn: "medium",
+      sleepDuration: "5h30m",
+      sleepScore: "82/100",
+      sleepAwakePct: "9%", sleepAwakeDur: "30m",
+      sleepRemPct: "7%", sleepRemDur: "23m",
+      sleepLightPct: "75%", sleepLightDur: "4h07m",
+      sleepDeepPct: "9%", sleepDeepDur: "30m",
     },
     {
       id: 3,
-      CheckTime: "2024/10/12 12:00",
-      heartRate: "60",
-      sleep: "8小時00分",
-      steps: "1350步",
+      CheckTime: "2024/10/07 12:00",
+      heartRate: "60 bpm",
+      bloodOxygen: "85",
+      stress: "84/100",
+      sleep: "5h50m",
+      temperature: "36.4°C",
+      steps: "1200步",
+      hrv: "39 ms",
+      bodyWater: "59.80%",
+      bodyFat: "20.0%",
+      bodyMuscle: "38.0kg",
+      bloodPressure: "108/65",
+      heartRateVal: 60,
+      bloodOxygenVal: 85,
+      hrvVal: 39,
+      tempVal: 36.4,
+      stepsVal: 1200,
+      stressLevel: "放鬆",
+      stressLevelEn: "low",
+      sleepDuration: "5h50m",
+      sleepScore: "84/100",
+      sleepAwakePct: "8%", sleepAwakeDur: "28m",
+      sleepRemPct: "9%", sleepRemDur: "31m",
+      sleepLightPct: "74%", sleepLightDur: "4h19m",
+      sleepDeepPct: "9%", sleepDeepDur: "31m",
     },
     {
       id: 4,
-      CheckTime: "2024/10/13 12:00",
-      heartRate: "65",
-      sleep: "7小時45分",
-      steps: "1420步",
+      CheckTime: "2024/10/06 12:00",
+      heartRate: "54 bpm",
+      bloodOxygen: "82",
+      stress: "80/100",
+      sleep: "6h00m",
+      temperature: "36.78°C",
+      steps: "1200步",
+      hrv: "38 ms",
+      bodyWater: "60.20%",
+      bodyFat: "19.0%",
+      bodyMuscle: "38.8kg",
+      bloodPressure: "112/68",
+      heartRateVal: 54,
+      bloodOxygenVal: 82,
+      hrvVal: 38,
+      tempVal: 36.78,
+      stepsVal: 1200,
+      stressLevel: "放鬆",
+      stressLevelEn: "low",
+      sleepDuration: "6h00m",
+      sleepScore: "80/100",
+      sleepAwakePct: "11%", sleepAwakeDur: "40m",
+      sleepRemPct: "6%", sleepRemDur: "22m",
+      sleepLightPct: "76%", sleepLightDur: "4h33m",
+      sleepDeepPct: "7%", sleepDeepDur: "25m",
     },
     {
       id: 5,
-      CheckTime: "2024/10/14 12:00",
-      heartRate: "59",
-      sleep: "8小時10分",
-      steps: "1380步",
+      CheckTime: "2024/10/10 12:00",
+      heartRate: "82 bpm",
+      bloodOxygen: "98",
+      stress: "77/100",
+      sleep: "5h45m",
+      temperature: "36.4°C",
+      steps: "11000步",
+      hrv: "38 ms",
+      bodyWater: "60.70%",
+      bodyFat: "19.30%",
+      bodyMuscle: "38.8kg",
+      bloodPressure: "110/67",
+      heartRateVal: 82,
+      bloodOxygenVal: 98,
+      hrvVal: 38,
+      tempVal: 36.4,
+      stepsVal: 11000,
+      stressLevel: "放鬆",
+      stressLevelEn: "low",
+      sleepDuration: "5h45m",
+      sleepScore: "77/100",
+      sleepAwakePct: "11%", sleepAwakeDur: "24h0m",
+      sleepRemPct: "6%", sleepRemDur: "41m",
+      sleepLightPct: "77%", sleepLightDur: "32m",
+      sleepDeepPct: "6%", sleepDeepDur: "48m",
     },
     {
       id: 6,
-      CheckTime: "2024/10/15 12:00",
-      heartRate: "63",
-      sleep: "7小時50分",
-      steps: "1450步",
+      CheckTime: "2024/10/05 12:00",
+      heartRate: "58 bpm",
+      bloodOxygen: "91",
+      stress: "75/100",
+      sleep: "7h20m",
+      temperature: "36.3°C",
+      steps: "980步",
+      hrv: "40 ms",
+      bodyWater: "61.50%",
+      bodyFat: "18.0%",
+      bodyMuscle: "39.5kg",
+      bloodPressure: "118/72",
+      heartRateVal: 58,
+      bloodOxygenVal: 91,
+      hrvVal: 40,
+      tempVal: 36.3,
+      stepsVal: 980,
+      stressLevel: "放鬆",
+      stressLevelEn: "low",
+      sleepDuration: "7h20m",
+      sleepScore: "75/100",
+      sleepAwakePct: "12%", sleepAwakeDur: "53m",
+      sleepRemPct: "5%", sleepRemDur: "22m",
+      sleepLightPct: "73%", sleepLightDur: "5h21m",
+      sleepDeepPct: "10%", sleepDeepDur: "44m",
     },
     {
       id: 7,
-      CheckTime: "2024/10/16 12:00",
-      heartRate: "61",
-      sleep: "8小時05分",
-      steps: "1320步",
+      CheckTime: "2024/10/04 12:00",
+      heartRate: "66 bpm",
+      bloodOxygen: "95",
+      stress: "85/100",
+      sleep: "6h30m",
+      temperature: "36.7°C",
+      steps: "3200步",
+      hrv: "35 ms",
+      bodyWater: "58.90%",
+      bodyFat: "20.5%",
+      bodyMuscle: "37.0kg",
+      bloodPressure: "120/75",
+      heartRateVal: 66,
+      bloodOxygenVal: 95,
+      hrvVal: 35,
+      tempVal: 36.7,
+      stepsVal: 3200,
+      stressLevel: "中等",
+      stressLevelEn: "medium",
+      sleepDuration: "6h30m",
+      sleepScore: "85/100",
+      sleepAwakePct: "7%", sleepAwakeDur: "27m",
+      sleepRemPct: "10%", sleepRemDur: "39m",
+      sleepLightPct: "70%", sleepLightDur: "4h33m",
+      sleepDeepPct: "13%", sleepDeepDur: "51m",
     },
     {
       id: 8,
-      CheckTime: "2024/10/17 12:00",
-      heartRate: "64",
-      sleep: "7小時55分",
-      steps: "1400步",
+      CheckTime: "2024/10/03 12:00",
+      heartRate: "70 bpm",
+      bloodOxygen: "93",
+      stress: "88/100",
+      sleep: "5h15m",
+      temperature: "36.8°C",
+      steps: "5500步",
+      hrv: "33 ms",
+      bodyWater: "57.80%",
+      bodyFat: "21.0%",
+      bodyMuscle: "36.5kg",
+      bloodPressure: "125/78",
+      heartRateVal: 70,
+      bloodOxygenVal: 93,
+      hrvVal: 33,
+      tempVal: 36.8,
+      stepsVal: 5500,
+      stressLevel: "偏高",
+      stressLevelEn: "high",
+      sleepDuration: "5h15m",
+      sleepScore: "88/100",
+      sleepAwakePct: "6%", sleepAwakeDur: "19m",
+      sleepRemPct: "11%", sleepRemDur: "35m",
+      sleepLightPct: "68%", sleepLightDur: "3h34m",
+      sleepDeepPct: "15%", sleepDeepDur: "47m",
     },
   ];
 
@@ -1820,6 +2122,9 @@ onMounted(() => {
     if (!target.closest(".eventFilterWrapper")) {
       showEventFilter.value = false;
     }
+    if (!target.closest(".watchFilterDropdownWrapper")) {
+      showWatchFilter.value = false;
+    }
   });
 });
 
@@ -1874,11 +2179,8 @@ const homeFilterOptions = computed(() => {
       case "FavoriteName":
         value = item.FavoriteName || "";
         break;
-      case "TreatmentArea":
-        value = item.TreatmentArea || "";
-        break;
-      case "TreatmentTime":
-        value = item.TreatmentTime || "";
+      case "ProductName":
+        value = item.ProductName || "";
         break;
     }
     if (value) options.add(value);
@@ -1904,11 +2206,8 @@ const filteredHome = computed(() => {
         case "FavoriteName":
           value = r.FavoriteName || "";
           break;
-        case "TreatmentArea":
-          value = r.TreatmentArea || "";
-          break;
-        case "TreatmentTime":
-          value = r.TreatmentTime || "";
+        case "ProductName":
+          value = r.ProductName || "";
           break;
       }
       return selectedHomeFilterOptions.value.includes(value);
@@ -1921,10 +2220,11 @@ const filteredHome = computed(() => {
     data = data.filter((r: any) => {
       return (
         (r.ConsultationDate || "").toLowerCase().includes(keyword) ||
+        (r.FormattedStartTime || "").toLowerCase().includes(keyword) ||
+        (r.FormattedEndTime || "").toLowerCase().includes(keyword) ||
         (r.FavoriteName || "").toLowerCase().includes(keyword) ||
-        (r.PointInfo || "").toLowerCase().includes(keyword) ||
-        (r.TreatmentTime || "").toLowerCase().includes(keyword) ||
-        String(r.TotalUsage || "").includes(keyword)
+        (r.ProductName || "").toLowerCase().includes(keyword) ||
+        (r.TreatmentTime || "").toLowerCase().includes(keyword)
       );
     });
   }
@@ -1937,7 +2237,7 @@ const filteredHome = computed(() => {
       let bVal = b[field];
 
       // 日期排序
-      if (field === "ConsultationDate" || field === "TreatmentTime") {
+      if (field === "ConsultationDate") {
         aVal = new Date(aVal?.replace(/\//g, "-") || "").getTime();
         bVal = new Date(bVal?.replace(/\//g, "-") || "").getTime();
       }
@@ -2003,8 +2303,52 @@ function nextHome() {
 }
 
 /* RING */
+// ───── 手錶紀錄 ─────
 const pageRing = ref(1);
 const ringRecords = ref<any[]>([]);
+const showWatchFilter = ref(false);
+const watchFilterCategory = ref<string>("CheckTime");
+const selectedWatchFilterOptions = ref<string[]>([]);
+const watchKeyword = ref("");
+const showWatchDetailModal = ref(false);
+const selectedWatchRecord = ref<any>(null);
+
+const watchFilterCategoryLabel = computed(() => {
+  const map: Record<string, string> = {
+    CheckTime: "使用時間",
+    heartRate: "心率",
+    bloodOxygen: "血氧",
+    stress: "壓力",
+    temperature: "溫度",
+  };
+  return map[watchFilterCategory.value] || "使用時間";
+});
+
+const watchFilterOptions = computed(() => {
+  const cat = watchFilterCategory.value;
+  const opts = new Set<string>();
+  ringRecords.value.forEach((r: any) => {
+    const val = r[cat];
+    if (val) opts.add(String(val));
+  });
+  return Array.from(opts).sort();
+});
+
+function toggleWatchFilterOption(opt: string) {
+  const idx = selectedWatchFilterOptions.value.indexOf(opt);
+  if (idx > -1) selectedWatchFilterOptions.value.splice(idx, 1);
+  else selectedWatchFilterOptions.value.push(opt);
+}
+
+function openWatchDetail(record: any) {
+  selectedWatchRecord.value = record;
+  showWatchDetailModal.value = true;
+}
+
+function closeWatchDetail() {
+  showWatchDetailModal.value = false;
+}
+
 const filteredRing = computed(() => {
   let data = ringRecords.value;
 
@@ -2012,11 +2356,29 @@ const filteredRing = computed(() => {
   if (ringRange.value && ringRange.value.length >= 2) {
     const [from, to] = ringRange.value;
     const start = from.getTime();
-    const end = to.getTime();
+    const end = to.getTime() + 24 * 60 * 60 * 1000 - 1;
     data = data.filter((r: any) => {
       const ms = Date.parse(r.CheckTime?.replace(/\//g, "-") || "");
       return ms >= start && ms <= end;
     });
+  }
+
+  // 分類篩選
+  if (selectedWatchFilterOptions.value.length > 0) {
+    const cat = watchFilterCategory.value;
+    data = data.filter((r: any) =>
+      selectedWatchFilterOptions.value.includes(String(r[cat] || ""))
+    );
+  }
+
+  // 關鍵字搜尋
+  if (watchKeyword.value) {
+    const kw = watchKeyword.value.toLowerCase();
+    data = data.filter((r: any) =>
+      Object.values(r).some(
+        (v) => typeof v === "string" && v.toLowerCase().includes(kw)
+      )
+    );
   }
 
   // 排序
@@ -2050,13 +2412,14 @@ const filteredRing = computed(() => {
 
   return data;
 });
+const PAGE_WATCH = 10;
 const totalRing = computed(() => filteredRing.value.length);
 const totalPagesRing = computed(() =>
-  Math.max(1, Math.ceil(totalRing.value / PAGE_SUB))
+  Math.max(1, Math.ceil(totalRing.value / PAGE_WATCH))
 );
 const paginatedRing = computed(() => {
-  const s = (pageRing.value - 1) * PAGE_SUB;
-  return filteredRing.value.slice(s, s + PAGE_SUB);
+  const s = (pageRing.value - 1) * PAGE_WATCH;
+  return filteredRing.value.slice(s, s + PAGE_WATCH);
 });
 const pageNumberListRing = computed(() =>
   pageButtons(totalPagesRing.value, pageRing.value, maxButtons.value)
@@ -2558,6 +2921,12 @@ watch(appDateRange, () => {
 watch(ringRange, () => {
   pageRing.value = 1;
 });
+watch(watchKeyword, () => {
+  pageRing.value = 1;
+});
+watch(selectedWatchFilterOptions, () => {
+  pageRing.value = 1;
+});
 watch(
   healthLogDateRange,
   async (newRange) => {
@@ -2994,6 +3363,7 @@ const availableEventOptions = computed(() => {
   gap: 1%;
   .w-half {
     flex: 1;
+    width: 0;
     @include respond-to("xl") {
       flex: unset;
       width: 100%;
@@ -3460,6 +3830,8 @@ const availableEventOptions = computed(() => {
               font-size: 14px;
               transition: all 0.2s;
               min-width: 150px;
+
+              
 
               &::placeholder {
                 color: #999;
@@ -4053,6 +4425,371 @@ const availableEventOptions = computed(() => {
           display: block;
         }
       }
+    }
+  }
+}
+
+// ───── 手錶紀錄表格樣式 ─────
+.watchRecordCard {
+  width: 100% !important;
+}
+
+.watchTable {
+  .memberInfoTableTitle {
+    gap: 0;
+  }
+
+  .memberInfoTableTitleItem {
+    min-width: 0;
+    font-size: 13px !important;
+    white-space: nowrap;
+  }
+
+  .memberInfoTableRow.watchRow {
+    cursor: pointer;
+    transition: background 0.15s;
+
+
+
+    &:hover {
+      background-color: #f5fafa;
+    }
+
+    .memberInfoTableRowItem {
+      font-size: 13px;
+      min-width: 0;
+    }
+  }
+
+  .watchBodyCompCol {
+    min-width: 120px;
+  }
+
+  .watchBodyCompCell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    line-height: 1.4;
+    font-size: 12px !important;
+
+    span {
+      white-space: nowrap;
+    }
+  }
+}
+
+.watchFilterDropdownWrapper {
+  position: relative;
+
+  .filterTrigger {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0.3rem .5rem;
+    background: #fff;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0px 2px 12px -2px rgba(177, 192, 216, 0.5);
+    font-size: 14px;
+    transition: all 0.2s;
+ 
+    width: 140px;
+    img {
+      width: 12px;
+      height: 12px;
+
+      &.rotated {
+        transform: rotate(180deg);
+      }
+    }
+
+    &:hover {
+      box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
+    }
+  }
+
+  .filterDropdownPanel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.15);
+    z-index: 200;
+    min-width: 300px;
+    max-height: 350px;
+    overflow: hidden;
+    display: flex;
+
+    .filterCategories {
+      border-right: 1px solid #eee;
+      padding: 0.5rem 0;
+      min-width: 90px;
+
+      .filterCategory {
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        font-size: 13px;
+        white-space: nowrap;
+        transition: all 0.15s;
+
+        &.active {
+          color: #1ba39b;
+          font-weight: 600;
+          background: #f0faf9;
+        }
+
+        &:hover {
+          background: #f5f7fa;
+        }
+      }
+    }
+
+    .filterOptions {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0.5rem;
+
+      .filterOption {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.4rem 0.5rem;
+        cursor: pointer;
+        border-radius: 4px;
+        font-size: 13px;
+        color: #333;
+
+        &:hover {
+          background: #f5f7fa;
+        }
+
+        input[type="checkbox"] {
+          width: 16px;
+          height: 16px;
+          cursor: pointer;
+          accent-color: #1ba39b;
+        }
+      }
+    }
+  }
+}
+
+// ───── 手錶紀錄詳情彈窗樣式 ─────
+.watchDetailOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.25);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .watchDetailModal {
+    width: 460px;
+    max-width: 92vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 20px;
+    border: 3px solid var(--Primary-default, #1ba39b);
+    background: var(--neutral-white-opacity-30, rgba(255, 255, 255, 0.95));
+    box-shadow: 0px 2px 20px 0px rgba(27, 163, 155, 0.25);
+    backdrop-filter: blur(25px);
+    padding: 1.5rem;
+    position: relative;
+
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #c0c0c0;
+      border-radius: 10px;
+    }
+  }
+}
+
+.watchDetailHeader {
+  text-align: center;
+  margin-bottom: 1.25rem;
+
+  .npLogo {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9.8px;
+    border: 1px solid var(--Primary-default, #1ba39b);
+    padding: 2px 4px;
+    margin-bottom: 0.5rem;
+  }
+
+  .watchDetailDate {
+    color: $primary-600;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .watchDetailSub {
+    color: #1ba39b;
+    font-size: 13px;
+    margin: 0.15rem 0 0;
+  }
+}
+
+.watchMetricCards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 0.75rem;
+
+  .watchMetricCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 70px;
+    flex: 1;
+    padding: 0.4rem 0.25rem;
+    border-right: 1px solid #f0f0f0;
+
+    &:last-child {
+      border-right: none;
+    }
+
+    .metricLabel {
+      font-size: 11px;
+      color: #999;
+      margin-bottom: 0.15rem;
+    }
+
+    .metricValue {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+      line-height: 1.2;
+    }
+
+    .metricUnit {
+      font-size: 11px;
+      color: #aaa;
+    }
+  }
+}
+
+.watchSleepSection {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+  padding: 1rem;
+  margin-bottom: 1rem;
+
+  h4 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 0.75rem;
+  }
+
+  .watchSleepGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+
+    .watchSleepRow {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.35rem 0;
+      border-bottom: 1px solid #f5f5f5;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .sleepLabel {
+        color: #1ba39b;
+        font-size: 14px;
+      }
+
+      .sleepValue {
+        color: #333;
+        font-size: 14px;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+.watchBodySection {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+  padding: 1rem;
+  margin-bottom: 1rem;
+
+  h4 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 0.75rem;
+  }
+
+  .watchBodyGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+
+    .watchBodyRow {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.35rem 0;
+      border-bottom: 1px solid #f5f5f5;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .bodyLabel {
+        color: #1ba39b;
+        font-size: 14px;
+      }
+
+      .bodyValue {
+        color: #333;
+        font-size: 14px;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+.watchDetailFooter {
+  text-align: center;
+  margin-top: 0.5rem;
+
+  .watchDetailClose {
+    border-radius: 50px;
+    background: #fff;
+    box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
+    padding: 0.25rem;
+    cursor: pointer;
+    display: inline-block;
+    transition: all 0.2s;
+
+    &:hover {
+      box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
+    }
+
+    img {
+      width: 20px;
+      height: 20px;
+      display: block;
     }
   }
 }

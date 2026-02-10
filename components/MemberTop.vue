@@ -5,14 +5,14 @@
     </div>
     <div class="memberTopRight">
       <h3>{{ userDataObj?.Member.Name }} 您好</h3>
-      <div class="memberTopPoint">
+      <!-- <div class="memberTopPoint">
         目前積分 : {{ userDataObj?.NowAvaPoints }}
         <img
           @click="handleRefresh"
           src="../assets/imgs/member/reload.svg"
           alt=""
         />
-      </div>
+      </div> -->
     </div>
   </div>
 </template>

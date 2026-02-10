@@ -226,16 +226,32 @@ export const useMemberStore = defineStore('member', () => {
 
           const duration = calculateDuration(item.StartTime, item.EndTime)
 
+          // 格式化開始時間 HH:mm
+          let formattedStartTime = ""
+          if (startTime.length >= 12) {
+            formattedStartTime = `${startTime.substring(8, 10)}:${startTime.substring(10, 12)}`
+          }
+
+          // 格式化結束時間 HH:mm
+          const endTimeRaw: string = item.EndTime || ""
+          let formattedEndTime = ""
+          if (endTimeRaw.length >= 12) {
+            formattedEndTime = `${endTimeRaw.substring(8, 10)}:${endTimeRaw.substring(10, 12)}`
+          }
+
           return {
             id: item.UID || index + 1,
             AID: item.AID || "",
             ConsultationDate: consultationDate,
             FavoriteName: item.FavoriteName || "",
+            ProductName: item.ProductName || "",
             // 新 API 沒有點位資訊，暫以產品名稱帶入或留空皆可
             TreatmentArea: item.ProductName || "",
             StartDate: consultationDate,
             StartTime: item.StartTime || "",
             EndTime: item.EndTime || "",
+            FormattedStartTime: formattedStartTime,
+            FormattedEndTime: formattedEndTime,
             PauseTime: "",
             TreatmentTime: duration,
             TotalTime: "",
