@@ -4295,7 +4295,7 @@ const vClickOutside = {
   width: 100%;
   height: 0;
   padding-bottom: 84px;
-  margin-top: 12%;
+  margin-top: 44px;
   .character-image {
     height: 100%;
     object-fit: cover;

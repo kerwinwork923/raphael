@@ -58,7 +58,11 @@
 
       <!-- 週別選擇器（僅在本週摘要時顯示） -->
       <div class="week-selector" v-if="activeTab === 'summary'">
-        <button class="week-nav-btn" @click="goToPreviousWeek" :disabled="!canGoToPreviousWeek">
+        <button
+          class="week-nav-btn"
+          @click="goToPreviousWeek"
+          :disabled="!canGoToPreviousWeek"
+        >
           <img
             src="/assets/imgs/arrowDown2.svg"
             alt="上一週"
@@ -69,7 +73,11 @@
         <div class="week-range">
           {{ weekRangeText }}
         </div>
-        <button class="week-nav-btn" @click="goToNextWeek" :disabled="!canGoToNextWeek">
+        <button
+          class="week-nav-btn"
+          @click="goToNextWeek"
+          :disabled="!canGoToNextWeek"
+        >
           <img
             src="/assets/imgs/arrowDown2.svg"
             alt="下一週"
@@ -93,7 +101,9 @@
 
       <!-- 日誌列表 -->
       <div
-        v-else-if="isDataReady && activeTab === 'log' && filteredLogs.length > 0"
+        v-else-if="
+          isDataReady && activeTab === 'log' && filteredLogs.length > 0
+        "
         class="log-list"
       >
         <div class="timeline-container">
@@ -112,7 +122,7 @@
                   class="section-header"
                   @click="
                     isExpandable(log.id, 'oral') &&
-                      toggleSection(log.id, 'oral')
+                    toggleSection(log.id, 'oral')
                   "
                 >
                   <span class="section-title">口述內容</span>
@@ -159,7 +169,7 @@
           <div class="summary-content">
             {{ weeklySummary }}
           </div>
-          
+
           <!-- 已儲存的補充內容顯示 -->
           <div v-if="savedMetaSummary" class="saved-meta-section">
             <div class="saved-meta-title">補充內容</div>
@@ -183,29 +193,36 @@
         <!-- 底部按鈕區域 -->
         <div v-if="!isSummaryLoading" class="bottom-action">
           <div class="action-buttons">
-            <button 
-              class="update-summary-btn" 
+            <button
+              class="update-summary-btn"
               @click="regenerateWeeklySummary"
               :disabled="isRegenerating"
             >
-              {{ isRegenerating ? '生成中...' : (weeklySummary ? '更新摘要' : '生成摘要') }}
+              {{
+                isRegenerating
+                  ? "生成中..."
+                  : weeklySummary
+                    ? "更新摘要"
+                    : "生成摘要"
+              }}
             </button>
-            <button 
-              v-if="weeklySummary" 
-              class="add-meta-btn" 
+            <button
+              v-if="weeklySummary"
+              class="add-meta-btn"
               @click="openMetaModal"
             >
               補充內容
             </button>
           </div>
         </div>
-        
       </div>
 
       <!-- 空狀態 -->
       <div
         class="empty-state"
-        v-else-if="isDataReady && activeTab === 'log' && filteredLogs.length === 0"
+        v-else-if="
+          isDataReady && activeTab === 'log' && filteredLogs.length === 0
+        "
       >
         <div class="empty-card">
           <div class="empty-character">
@@ -277,7 +294,11 @@
           <div class="meta-modal">
             <div class="meta-modal-header">
               <button class="back-btn" @click="closeMetaModal">
-                <img src="/assets/imgs/arrowDown2.svg" alt="返回" class="back-arrow" />
+                <img
+                  src="/assets/imgs/arrowDown2.svg"
+                  alt="返回"
+                  class="back-arrow"
+                />
               </button>
               <h3>補充內容</h3>
               <div class="header-spacer"></div>
@@ -291,12 +312,12 @@
             </div>
             <div class="meta-modal-footer">
               <button class="cancel-btn" @click="closeMetaModal">取消</button>
-              <button 
-                class="confirm-btn" 
+              <button
+                class="confirm-btn"
                 @click="saveWeeklySummary"
                 :disabled="isSaving"
               >
-                {{ isSaving ? '送出中...' : '確認送出' }}
+                {{ isSaving ? "送出中..." : "確認送出" }}
               </button>
             </div>
           </div>
@@ -304,9 +325,7 @@
       </transition>
 
       <!-- 儲存成功提示 -->
-      <div v-if="showSaveSuccess" class="save-success-toast">
-        儲存成功！
-      </div>
+      <div v-if="showSaveSuccess" class="save-success-toast">儲存成功！</div>
 
       <!-- 底部導航 -->
       <BottomNav />
@@ -364,7 +383,7 @@ const availableYears = computed(() => {
   const currentYear = new Date().getFullYear();
   return Array.from(
     { length: currentYear - startYear + 1 },
-    (_, i) => startYear + i
+    (_, i) => startYear + i,
   ).reverse();
 });
 
@@ -483,7 +502,7 @@ const filteredLogs = computed(() => {
     })
     .sort(
       (a, b) =>
-        new Date(b.date || b.timestamp) - new Date(a.date || a.timestamp)
+        new Date(b.date || b.timestamp) - new Date(a.date || a.timestamp),
     );
 
   console.log(`篩選結果: ${filtered.length} 筆`);
@@ -503,7 +522,7 @@ const getWeekLogs = () => {
 
   return healthLogs.value.filter((log) => {
     if (!log.date && !log.timestamp) return false;
-    
+
     const logDate = new Date(log.date || log.timestamp);
     return logDate >= weekStart && logDate <= weekEnd;
   });
@@ -512,9 +531,9 @@ const getWeekLogs = () => {
 // 獲取週期摘要列表
 const fetchWeeklySummaryList = async () => {
   if (!currentWeekStart.value) return;
-  
+
   const startDate = formatDateYYYYMMDD(currentWeekStart.value);
-  
+
   try {
     const response = await fetch(WEEKLY_SUMMARY_LIST_API_URL, {
       method: "POST",
@@ -549,10 +568,10 @@ const checkWeekSaved = () => {
   if (!currentWeekStart.value) return;
 
   const startDate = formatDateYYYYMMDD(currentWeekStart.value);
-  
+
   // 在列表中尋找該週的摘要
   const found = weeklySummaryList.value.find(
-    (item) => item.StartDate === startDate
+    (item) => item.StartDate === startDate,
   );
 
   if (found) {
@@ -579,7 +598,7 @@ const generateWeeklySummary = async () => {
 
   // 先檢查是否已有儲存的摘要
   checkWeekSaved();
-  
+
   // 如果已經有儲存的摘要，不需要重新生成
   if (isWeekSaved.value && weeklySummary.value) {
     isSummaryLoading.value = false;
@@ -611,7 +630,7 @@ const generateWeeklySummary = async () => {
 
   // 準備要送給 AI 的內容
   const summaryParts = aiSummaries.map(
-    (item, index) => `${index + 1}. ${item.date}\n${item.content}`
+    (item, index) => `${index + 1}. ${item.date}\n${item.content}`,
   );
   const combinedSummary = summaryParts.join("\n\n");
 
@@ -836,7 +855,7 @@ We've recorded these body changes for you. Please feel at ease.
 // 強制更新摘要（重新生成）
 const regenerateWeeklySummary = async () => {
   if (isRegenerating.value) return;
-  
+
   const weekLogs = getWeekLogs();
 
   // 如果本週沒有日誌資料，提示用戶
@@ -863,13 +882,13 @@ const regenerateWeeklySummary = async () => {
 
   // 準備要送給 AI 的內容
   const summaryParts = aiSummaries.map(
-    (item, index) => `${index + 1}. ${item.date}\n${item.content}`
+    (item, index) => `${index + 1}. ${item.date}\n${item.content}`,
   );
   const combinedSummary = summaryParts.join("\n\n");
 
   // 開始重新生成
   isRegenerating.value = true;
-  
+
   try {
     const response = await fetch(TEXT_WEBHOOK_URL, {
       method: "POST",
@@ -1077,16 +1096,15 @@ We've recorded these body changes for you. Please feel at ease.
     weeklySummary.value =
       answerText.trim() ||
       `本週健康狀況摘要\n\n${combinedSummary}\n\n---\n以上為本週（${weekRangeText.value}）的健康日誌彙整，共 ${aiSummaries.length} 筆記錄。`;
-    
+
     // 重置儲存狀態，讓用戶可以重新儲存
     isWeekSaved.value = false;
-    
+
     // 顯示成功提示
     showSaveSuccess.value = true;
     setTimeout(() => {
       showSaveSuccess.value = false;
     }, 2000);
-    
   } catch (error) {
     console.error("更新摘要失敗:", error);
     alert("更新摘要失敗，請稍後再試");
@@ -1148,13 +1166,13 @@ const saveWeeklySummary = async () => {
       isWeekSaved.value = true;
       currentWeekAID.value = data.AID;
       savedMetaSummary.value = metaSummary.value;
-      
+
       // 關閉 Modal
       closeMetaModal();
-      
+
       // 重新獲取列表
       await fetchWeeklySummaryList();
-      
+
       // 顯示儲存成功提示
       showSaveSuccess.value = true;
       setTimeout(() => {
@@ -1173,24 +1191,28 @@ const saveWeeklySummary = async () => {
 
 // 監聽 activeTab 和 currentWeekStart 變化
 watch(
-  [() => activeTab.value, () => healthLogs.value.length, () => currentWeekStart.value],
+  [
+    () => activeTab.value,
+    () => healthLogs.value.length,
+    () => currentWeekStart.value,
+  ],
   async () => {
     if (!currentWeekStart.value) {
       initCurrentWeek();
     }
-    
+
     if (activeTab.value === "summary") {
       metaSummary.value = "";
       savedMetaSummary.value = "";
       weeklySummary.value = "";
       isWeekSaved.value = false;
-      
+
       // 先獲取列表再生成摘要
       await fetchWeeklySummaryList();
       await generateWeeklySummary();
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 // 方法
@@ -1214,7 +1236,7 @@ const loadHealthLogs = async () => {
           Year: selectedYear.value.toString(),
           Month: selectedMonth.value.replace("月", "").padStart(2, "0"),
         }),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -1428,8 +1450,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.25rem 1rem;
-  margin: 0.5rem 0 1rem;
+  padding: 1rem;
 
   .week-nav-btn {
     background: none;
@@ -1633,8 +1654,8 @@ onMounted(async () => {
 }
 
 .summary-container {
-  padding: 1rem;
-  min-height: 60vh;
+  padding: 0 1rem;
+  height: calc(100vh - 273px);
   display: flex;
   flex-direction: column;
 
@@ -1643,6 +1664,8 @@ onMounted(async () => {
     padding: 1.5rem;
     background: var(--Neutral-white, #fff);
     flex: 1;
+    height: 0;
+    overflow-y: scroll;
 
     .summary-title {
       color: var(--Neutral-800, #2d3748);
@@ -1686,7 +1709,7 @@ onMounted(async () => {
 }
 
 .bottom-action {
-  padding: 1rem;
+  padding: 1rem 0;
   margin-top: auto;
 
   .action-buttons {
@@ -1697,7 +1720,7 @@ onMounted(async () => {
 
   .update-summary-btn {
     flex: 1;
-    padding: 1rem;
+    padding: 0.5rem;
     background: var(--Secondary-100, #f5f7fa);
     color: var(--Primary-default, #74bc1f);
     border: 2px solid var(--Primary-default, #74bc1f);
@@ -1720,7 +1743,7 @@ onMounted(async () => {
 
   .add-meta-btn {
     flex: 1;
-    padding: 1rem;
+    padding: 0.5rem;
     background: var(--Primary-default, #74bc1f);
     color: #fff;
     border: none;
