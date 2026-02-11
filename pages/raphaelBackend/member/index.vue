@@ -17,13 +17,17 @@
         v-model:search-value="store.keyword"
         v-model:date-value="store.dateRange"
         v-model:product-value="store.productFilter"
+        v-model:grade-value="store.gradeFilter"
         v-model:status-value="store.statusFilter"
         :product-options="productOptions"
+        :grade-options="gradeOptions"
         :status-options="statusOptions"
+        :show-grade-filter="true"
         date-placeholder="註冊日期區間"
         @search="store.setKeyword"
         @date-change="store.setDateRange"
         @product-change="store.setProductFilter"
+        @grade-change="store.setGradeFilter"
         @status-change="store.setStatusFilter"
       />
 
@@ -191,6 +195,12 @@ const productOptions = [
   { label: "居家治療儀", value: "居家治療儀" },
   { label: "第五代穿戴調節衣紅光加強版", value: "第五代穿戴調節衣紅光加強版" },
   { label: "第六代紅光極智衣", value: "第六代紅光極智衣" },
+];
+const gradeOptions = [
+  { label: "鈦金會員", value: "鈦金會員" },
+  { label: "金卡會員", value: "金卡會員" },
+  { label: "銀卡會員", value: "銀卡會員" },
+  { label: "雲端會員", value: "雲端會員" },
 ];
 const statusOptions = [
   "忠誠用戶",

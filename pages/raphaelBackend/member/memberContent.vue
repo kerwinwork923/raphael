@@ -157,14 +157,14 @@
       @click="closeWatchDetail"
     >
       <div class="watchDetailModal" @click.stop>
-        <!-- 標題 -->
+
         <div class="watchDetailHeader">
           <img src="/assets/imgs/backend/Subtract.svg" alt="NP" class="npLogo" />
           <h3 class="watchDetailDate">{{ selectedWatchRecord?.CheckTime || "—" }}</h3>
           <p class="watchDetailSub">Detection Time</p>
         </div>
 
-        <!-- 健康指標卡片 -->
+  
         <div class="watchMetricCards">
           <div class="watchMetricCard">
             <span class="metricLabel">血壓</span>
@@ -203,7 +203,7 @@
           </div>
         </div>
 
-        <!-- 睡眠區塊 -->
+
         <div class="watchSleepSection">
           <h4>睡眠時長 {{ selectedWatchRecord?.sleepDuration || "—" }}</h4>
           <div class="watchSleepGrid">
@@ -230,7 +230,7 @@
           </div>
         </div>
 
-        <!-- 身體組成區塊 -->
+    
         <div class="watchBodySection">
           <h4>身體組成</h4>
           <div class="watchBodyGrid">
@@ -249,7 +249,7 @@
           </div>
         </div>
 
-        <!-- 關閉按鈕 -->
+
         <div class="watchDetailFooter">
           <div class="watchDetailClose" @click="closeWatchDetail">
             <img src="/assets/imgs/backend/close.svg" alt="close" />
@@ -258,7 +258,7 @@
       </div>
     </div>
 
-    <!-- 本週摘要詳情彈跳視窗 -->
+ 
     <Teleport to="body">
       <div
         v-if="showWeeklySummaryModal"
@@ -562,6 +562,18 @@
                 >
                   我的最愛名稱
                 </div>
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('home', 'TotalUsage')"
+                >
+                  使用次數
+                </div>
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('home', 'TMode')"
+                >
+                  貼片模式
+                </div>
               </div>
               <div class="memberInfoTableHR" />
 
@@ -589,6 +601,12 @@
                         ? "未加入"
                         : row.FavoriteName || "—"
                     }}
+                  </div>
+                  <div class="memberInfoTableRowItem">
+                    {{ row.TotalUsage || "0" }}
+                  </div>
+                  <div class="memberInfoTableRowItem">
+                    {{ row.TMode || "—" }}
                   </div>
                 </div>
               </template>
@@ -1788,7 +1806,7 @@ function goToAcerNumber() {
 }
 
 /* ---------- paging helpers ---------- */
-const PAGE_MAIN = 4;
+const PAGE_MAIN = 10;
 const PAGE_SUB = 4;
 
 const maxButtons = ref(5);
@@ -2224,7 +2242,8 @@ const filteredHome = computed(() => {
         (r.FormattedEndTime || "").toLowerCase().includes(keyword) ||
         (r.FavoriteName || "").toLowerCase().includes(keyword) ||
         (r.ProductName || "").toLowerCase().includes(keyword) ||
-        (r.TreatmentTime || "").toLowerCase().includes(keyword)
+        (r.TreatmentTime || "").toLowerCase().includes(keyword) ||
+        (r.TMode || "").toLowerCase().includes(keyword)
       );
     });
   }
@@ -2255,6 +2274,13 @@ const filteredHome = computed(() => {
       }
 
       return 0;
+    });
+  } else {
+    // 預設排序：按 StartTime 降序（最新的在最前面）
+    data = [...data].sort((a: any, b: any) => {
+      const aTime = a.StartTime || "";
+      const bTime = b.StartTime || "";
+      return bTime.localeCompare(aTime);
     });
   }
 
@@ -2287,7 +2313,6 @@ const totalPagesHome = computed(() =>
 );
 const paginatedHome = computed(() => {
   const s = (pageHome.value - 1) * PAGE_MAIN;
-  console.log("filteredHome", filteredHome.value);
   return filteredHome.value.slice(s, s + PAGE_MAIN);
 });
 

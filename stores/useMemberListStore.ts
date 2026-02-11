@@ -44,6 +44,7 @@ export const useMemberListStore = defineStore('memberList', () => {
   const keyword = ref('')
   const dateRange = ref<Date[] | null>(null)
   const productFilter = ref('')
+  const gradeFilter = ref('')
   const statusFilter = ref('')
   const page = ref(1)
   const pageSize = 10
@@ -55,8 +56,9 @@ export const useMemberListStore = defineStore('memberList', () => {
       const kw = keyword.value.trim()
       const hit = !kw || [m.name, m.phone, m.birthday].some((v) => v.includes(kw))
 
-      /* 產品 / 狀態 */
+      /* 產品 / 等級 / 狀態 */
       const prodOk = !productFilter.value || m.product === productFilter.value
+      const gradeOk = !gradeFilter.value || m.level === gradeFilter.value
       const statusOk = !statusFilter.value || m.memType === statusFilter.value
 
       /* 日期 */
@@ -67,7 +69,7 @@ export const useMemberListStore = defineStore('memberList', () => {
         dateOk = regDate >= start && regDate <= end
       }
 
-      return hit && prodOk && statusOk && dateOk
+      return hit && prodOk && gradeOk && statusOk && dateOk
     })
   })
 
@@ -158,6 +160,11 @@ export const useMemberListStore = defineStore('memberList', () => {
     page.value = 1
   }
 
+  function setGradeFilter(filter: string) {
+    gradeFilter.value = filter
+    page.value = 1
+  }
+
   function setStatusFilter(filter: string) {
     statusFilter.value = filter
     page.value = 1
@@ -183,6 +190,7 @@ export const useMemberListStore = defineStore('memberList', () => {
     keyword,
     dateRange,
     productFilter,
+    gradeFilter,
     statusFilter,
     page,
     pageSize,
@@ -197,6 +205,7 @@ export const useMemberListStore = defineStore('memberList', () => {
     setKeyword,
     setDateRange,
     setProductFilter,
+    setGradeFilter,
     setStatusFilter,
     gotoPage,
     prevPage,

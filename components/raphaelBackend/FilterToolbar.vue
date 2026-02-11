@@ -50,6 +50,30 @@
       />
     </div>
 
+    <!-- 等級篩選 -->
+    <div v-if="showGradeFilter" class="selectWrapper">
+      <img
+        class="selectWrapperIcon1"
+        src="/assets/imgs/backend/filter.svg"
+        alt=""
+      />
+      <select :value="gradeValue" @change="handleGradeChange">
+        <option value="">{{ gradePlaceholder }}</option>
+        <option
+          v-for="grade in gradeOptions"
+          :key="grade.value"
+          :value="grade.value"
+        >
+          {{ grade.label }}
+        </option>
+      </select>
+      <img
+        class="selectWrapperIcon2"
+        src="/assets/imgs/backend/dropdown.svg"
+        alt=""
+      />
+    </div>
+
     <!-- 狀態篩選 -->
     <div v-if="showStatusFilter" class="selectWrapper">
       <img
@@ -90,6 +114,7 @@ interface Props {
   showSearch?: boolean;
   showDatePicker?: boolean;
   showProductFilter?: boolean;
+  showGradeFilter?: boolean;
   showStatusFilter?: boolean;
 
   // 搜尋相關
@@ -106,6 +131,11 @@ interface Props {
   productPlaceholder?: string;
   productOptions?: FilterOption[];
 
+  // 等級篩選相關
+  gradeValue?: string;
+  gradePlaceholder?: string;
+  gradeOptions?: FilterOption[];
+
   // 狀態篩選相關
   statusValue?: string;
   statusPlaceholder?: string;
@@ -116,10 +146,12 @@ interface Emits {
   (e: "update:searchValue", value: string): void;
   (e: "update:dateValue", value: any): void;
   (e: "update:productValue", value: string): void;
+  (e: "update:gradeValue", value: string): void;
   (e: "update:statusValue", value: string): void;
   (e: "search", value: string): void;
   (e: "dateChange", value: any): void;
   (e: "productChange", value: string): void;
+  (e: "gradeChange", value: string): void;
   (e: "statusChange", value: string): void;
 }
 
@@ -127,6 +159,7 @@ const props = withDefaults(defineProps<Props>(), {
   showSearch: true,
   showDatePicker: true,
   showProductFilter: true,
+  showGradeFilter: false,
   showStatusFilter: true,
   searchValue: "",
   searchPlaceholder: "請輸入關鍵字",
@@ -136,6 +169,9 @@ const props = withDefaults(defineProps<Props>(), {
   productValue: "",
   productPlaceholder: "商品篩選",
   productOptions: () => [],
+  gradeValue: "",
+  gradePlaceholder: "等級篩選",
+  gradeOptions: () => [],
   statusValue: "",
   statusPlaceholder: "狀態篩選",
   statusOptions: () => [],
@@ -164,6 +200,15 @@ const handleProductChange = (event: Event) => {
   if (target) {
     emit("update:productValue", target.value);
     emit("productChange", target.value);
+  }
+};
+
+// 處理等級篩選變更
+const handleGradeChange = (event: Event) => {
+  const target = event.target as HTMLSelectElement;
+  if (target) {
+    emit("update:gradeValue", target.value);
+    emit("gradeChange", target.value);
   }
 };
 

@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const useMemberStore = defineStore('member', () => {
+  
   // 狀態
   const member = ref<any>(null)
   const currentOrder = ref<any>(null)
@@ -16,6 +17,7 @@ export const useMemberStore = defineStore('member', () => {
   const healthLogRecords = ref<any[]>([])
   const weeklySummaryRecords = ref<any[]>([])
   const favoriteTPointsList = ref<any[]>([])
+  const favoriteMIDList = ref<any[]>([])
   const favoriteUseRecordList = ref<any[]>([])
   const optDetailList = ref<any[]>([])
   const vivoWatchList = ref<any[]>([])
@@ -192,60 +194,115 @@ export const useMemberStore = defineStore('member', () => {
     }
   }
 
-  async function fetchFavoriteTPointsList(auth: any) {
-    // 產品使用紀錄：改用 UseRecordMIDList API 做來源
+  // 取得我的最愛版本名稱清單
+  async function fetchFavoriteMIDList(auth: any) {
     try {
       const { token, admin, sel } = auth
       if (!token || !admin || !sel.MID) return
 
-      const res = await fetch("https://23700999.com:8081/HMA/api/bk/UseRecordMIDList", {
+      const res = await fetch("https://23700999.com:8081/HMA/api/bk/FavoriteTPointsMIDList", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           AdminID: admin,
           Token: token,
           MID: sel.MID,
-          StartDate: "",
-          EndDate: "",
         }),
       })
 
       const data = await res.json()
       if (data.Result === "OK") {
-        const list = data.UseRecordMIDList || []
-        favoriteTPointsList.value = list.map((item: any, index: number) => {
-          // 從 StartTime 取出日期字串 YYYY/MM/DD
+        favoriteMIDList.value = data.FavoriteTPointsMIDList || []
+      } else {
+        favoriteMIDList.value = []
+      }
+    } catch (error) {
+      console.error("取得我的最愛清單失敗：", error)
+      favoriteMIDList.value = []
+    }
+  }
+
+  async function fetchFavoriteTPointsList(auth: any) {
+    // 產品使用紀錄：改用 UseRecordMIDList API + FavoriteTPointsMIDList 合併
+    try {
+      const { token, admin, sel } = auth
+      if (!token || !admin || !sel.MID) return
+
+      // 同時呼叫兩個 API
+      const [useRecordRes, favoriteRes] = await Promise.all([
+        fetch("https://23700999.com:8081/HMA/api/bk/UseRecordMIDList", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            AdminID: admin,
+            Token: token,
+            MID: sel.MID,
+            StartDate: "",
+            EndDate: "",
+          }),
+        }),
+        fetch("https://23700999.com:8081/HMA/api/bk/FavoriteTPointsMIDList", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            AdminID: admin,
+            Token: token,
+            MID: sel.MID,
+          }),
+        }),
+      ])
+
+      const useRecordData = await useRecordRes.json()
+      const favoriteData = await favoriteRes.json()
+
+      // 建立我的最愛 AID → 資料的對照表
+      const favoriteMap = new Map<string, any>()
+      const favList = (favoriteData.Result === "OK") ? (favoriteData.FavoriteTPointsMIDList || []) : []
+      favoriteMIDList.value = favList
+      favList.forEach((fav: any) => {
+        const aid = String(fav.AID ?? "")
+        if (aid && aid !== "0") {
+          favoriteMap.set(aid, fav)
+        }
+      })
+
+      // ---- 1. 處理 UseRecordMIDList（使用紀錄）----
+      const useRecordRows: any[] = []
+      if (useRecordData.Result === "OK") {
+        const list = useRecordData.UseRecordMIDList || []
+        list.forEach((item: any, index: number) => {
           let consultationDate = ""
           const startTime: string = item.StartTime || ""
           if (startTime.length >= 8) {
-            const y = startTime.substring(0, 4)
-            const m = startTime.substring(4, 6)
-            const d = startTime.substring(6, 8)
-            consultationDate = `${y}/${m}/${d}`
+            consultationDate = `${startTime.substring(0, 4)}/${startTime.substring(4, 6)}/${startTime.substring(6, 8)}`
           }
 
           const duration = calculateDuration(item.StartTime, item.EndTime)
 
-          // 格式化開始時間 HH:mm
           let formattedStartTime = ""
           if (startTime.length >= 12) {
             formattedStartTime = `${startTime.substring(8, 10)}:${startTime.substring(10, 12)}`
           }
 
-          // 格式化結束時間 HH:mm
           const endTimeRaw: string = item.EndTime || ""
           let formattedEndTime = ""
           if (endTimeRaw.length >= 12) {
             formattedEndTime = `${endTimeRaw.substring(8, 10)}:${endTimeRaw.substring(10, 12)}`
           }
 
-          return {
-            id: item.UID || index + 1,
-            AID: item.AID || "",
+          // 比對 AID 取得我的最愛名稱
+          const aidStr = String(item.AID ?? "")
+          const matchedFavorite = favoriteMap.get(aidStr)
+          const favoriteName = matchedFavorite?.TName || item.FavoriteName || ""
+          const tMode = matchedFavorite?.TMode || ""
+          const cntFavorite = matchedFavorite?.cntFavorite || item.cntFavorite || "0"
+
+          useRecordRows.push({
+            id: item.UID || `use_${index}`,
+            AID: item.AID ?? "",
             ConsultationDate: consultationDate,
-            FavoriteName: item.FavoriteName || "",
+            FavoriteName: favoriteName,
             ProductName: item.ProductName || "",
-            // 新 API 沒有點位資訊，暫以產品名稱帶入或留空皆可
             TreatmentArea: item.ProductName || "",
             StartDate: consultationDate,
             StartTime: item.StartTime || "",
@@ -255,15 +312,67 @@ export const useMemberStore = defineStore('member', () => {
             PauseTime: "",
             TreatmentTime: duration,
             TotalTime: "",
-            TMode: "",
+            TMode: tMode,
             TemperatureDiff: "",
-            TotalUsage: item.cntFavorite || "0",
+            TotalUsage: cntFavorite,
             AccMinutes: "0",
-          }
+            _source: "useRecord",
+          })
         })
-      } else {
-        favoriteTPointsList.value = []
       }
+
+      // ---- 2. 處理 FavoriteTPointsMIDList（我的最愛清單）----
+      // 收集 UseRecordMIDList 中已出現的 AID
+      const usedAIDs = new Set(useRecordRows.map((r: any) => String(r.AID)))
+
+      const favoriteRows: any[] = []
+      favList.forEach((fav: any, index: number) => {
+        const aid = String(fav.AID ?? "")
+        // 不管 AID 是否在使用紀錄中出現，全部都加入顯示
+        const checkTime: string = fav.CheckTime || ""
+        let favDate = ""
+        let favStartTime = ""
+        if (checkTime.length >= 8) {
+          favDate = `${checkTime.substring(0, 4)}/${checkTime.substring(4, 6)}/${checkTime.substring(6, 8)}`
+        }
+        if (checkTime.length >= 12) {
+          favStartTime = `${checkTime.substring(8, 10)}:${checkTime.substring(10, 12)}`
+        }
+
+        // 只加入使用紀錄中「沒有出現過」的 AID，避免重複
+        if (!usedAIDs.has(aid)) {
+          favoriteRows.push({
+            id: `fav_${fav.AID || index}`,
+            AID: aid,
+            ConsultationDate: favDate,
+            FavoriteName: fav.TName || "",
+            ProductName: "",
+            TreatmentArea: "",
+            StartDate: favDate,
+            StartTime: checkTime,
+            EndTime: "",
+            FormattedStartTime: favStartTime,
+            FormattedEndTime: "",
+            PauseTime: "",
+            TreatmentTime: "",
+            TotalTime: "",
+            TMode: fav.TMode || "",
+            TemperatureDiff: "",
+            TotalUsage: fav.cntFavorite || "0",
+            AccMinutes: "0",
+            _source: "favorite",
+          })
+        }
+      })
+
+      // 合併：使用紀錄 + 未出現在使用紀錄中的我的最愛，按 StartTime 降序排列
+      const merged = [...useRecordRows, ...favoriteRows]
+      merged.sort((a: any, b: any) => {
+        const aTime = a.StartTime || ""
+        const bTime = b.StartTime || ""
+        return bTime.localeCompare(aTime)
+      })
+      favoriteTPointsList.value = merged
     } catch (error) {
       console.error("取得產品使用紀錄失敗：", error)
       favoriteTPointsList.value = []
@@ -552,6 +661,7 @@ export const useMemberStore = defineStore('member', () => {
     weeklySummaryRecords.value = []
     favoriteTPointsList.value = []
     favoriteUseRecordList.value = []
+    favoriteMIDList.value = []
     optDetailList.value = []
     vivoWatchList.value = []
     hasFetched.value = false
@@ -572,6 +682,7 @@ export const useMemberStore = defineStore('member', () => {
     healthLogRecords,
     weeklySummaryRecords,
     favoriteTPointsList,
+    favoriteMIDList,
     favoriteUseRecordList,
     optDetailList,
     vivoWatchList,
@@ -581,6 +692,7 @@ export const useMemberStore = defineStore('member', () => {
     fetchHealthLog,
     fetchWeeklySummary,
     fetchFavoriteTPointsList,
+    fetchFavoriteMIDList,
     fetchFavoriteTPointsMIDUseRecordList,
     fetchOptDetailMIDList,
     fetchVivoWatchList,
