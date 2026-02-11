@@ -3291,6 +3291,14 @@ const fetchAllRoles = async () => {
     const data = await response.json();
     console.log("獲取角色列表成功:", data);
 
+    // Token 失效，導回登入頁
+    if (data.Result === "NotOKToken") {
+      console.warn("Token 已失效，返回登入頁面");
+      localStorage.removeItem("userData");
+      router.push("/");
+      return [];
+    }
+
     if (data.Result === "OK" && data.RoleList) {
       // 轉換 API 資料格式為本地格式
       return data.RoleList.map((role) => ({
@@ -3354,6 +3362,14 @@ const fetchCurrentRole = async () => {
 
     const data = await response.json();
     console.log("獲取當前角色成功:", data);
+
+    // Token 失效，導回登入頁
+    if (data.Result === "NotOKToken") {
+      console.warn("Token 已失效，返回登入頁面");
+      localStorage.removeItem("userData");
+      router.push("/");
+      return null;
+    }
 
     if (data.Result === "OK" && data.Role) {
       return {
