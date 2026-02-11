@@ -164,12 +164,11 @@
           <p class="watchDetailSub">Detection Time</p>
         </div>
 
-  
         <div class="watchMetricCards">
           <div class="watchMetricCard">
             <span class="metricLabel">血壓</span>
             <span class="metricValue">{{ selectedWatchRecord?.bloodPressure || "—" }}</span>
-            <span class="metricUnit">mmH/g</span>
+            <span class="metricUnit">mm / hg</span>
           </div>
           <div class="watchMetricCard">
             <span class="metricLabel">心率</span>
@@ -255,6 +254,9 @@
             <img src="/assets/imgs/backend/close.svg" alt="close" />
           </div>
         </div>
+
+
+
       </div>
     </div>
 
@@ -412,6 +414,7 @@
                     目前尚未續約，請確認是否續約以恢復服務。
                   </div>
                 </div>
+
                 <div class="memberInfoWarningTagsGroup">
                   <div class="memberInfoWarningTag used">
                     已使用 {{ currentOrder.Used || 0 }} 天
@@ -421,16 +424,17 @@
                   </div>
                 </div>
               </template>
+
               <template v-else>
                 <h3>—</h3>
                 <h5>目前合約</h5>
                 <p style="text-align: center; padding: 8px 0">尚無合約資料</p>
               </template>
+
               <div class="memberInfoBtnGroup">
-              <button class="consumptionBtn" @click="openContract">
-                <img src="/assets/imgs/backend/time2.svg" alt />消費紀錄
-              </button>
-     
+                <button class="consumptionBtn" @click="openContract">
+                  <img src="/assets/imgs/backend/time2.svg" alt />消費紀錄
+                </button>
                 <button class="operationRecordBtn" @click="openOperationRecord">
                   <img src="/assets/imgs/backend/time2.svg" alt="operation" />
                   <span>操作紀錄</span>
@@ -562,18 +566,7 @@
                 >
                   我的最愛名稱
                 </div>
-                <div
-                  class="memberInfoTableTitleItem"
-                  @click="handleSort('home', 'TotalUsage')"
-                >
-                  使用次數
-                </div>
-                <div
-                  class="memberInfoTableTitleItem"
-                  @click="handleSort('home', 'TMode')"
-                >
-                  貼片模式
-                </div>
+
               </div>
               <div class="memberInfoTableHR" />
 
@@ -602,12 +595,7 @@
                         : row.FavoriteName || "—"
                     }}
                   </div>
-                  <div class="memberInfoTableRowItem">
-                    {{ row.TotalUsage || "0" }}
-                  </div>
-                  <div class="memberInfoTableRowItem">
-                    {{ row.TMode || "—" }}
-                  </div>
+
                 </div>
               </template>
               <div class="memberInfoTableRow" v-else>
@@ -893,8 +881,8 @@
         <!-- █ 指環紀錄 ------------------------------------------------------- -->
         <!-- █ 手錶紀錄 ------------------------------------------------- -->
         <div class="memberInfoRow">
-          <div class="memberInfoCard watchRecordCard">
-            <div class="memberInfoTitleWrap">
+        <div class="memberInfoCard watchRecordCard">
+             <!--  <div class="memberInfoTitleWrap">
               <h3>手錶紀錄</h3>
               <div class="memberInfoTitleGroup">
                 <small>已使用 {{ totalRing }} 次</small>
@@ -908,7 +896,6 @@
                   teleport="body"
                 />
 
-                <!-- 分類篩選 -->
                 <div class="watchFilterDropdownWrapper">
                   <div class="filterTrigger" @click="showWatchFilter = !showWatchFilter">
                     <img src="/assets/imgs/backend/search.svg" alt="filter" style="width:16px;height:16px" />
@@ -961,7 +948,6 @@
                   </div>
                 </div>
 
-                <!-- 關鍵字搜尋 -->
                 <input
                   type="text"
                   v-model="watchKeyword"
@@ -969,7 +955,7 @@
                   class="searchKeywordInput"
                 />
               </div>
-            </div>
+            </div> -->
 
             <div class="memberInfoTable watchTable">
               <div class="memberInfoTableTitle">
@@ -1160,6 +1146,7 @@
             </div>
 
             <nav class="pagination" v-if="totalANS">
+
               <button
                 class="btn-page"
                 :disabled="pageANS === 1"
@@ -1167,6 +1154,7 @@
               >
                 &lt;&lt;
               </button>
+
               <button
                 class="btn-page"
                 :disabled="pageANS === 1"
@@ -1174,6 +1162,9 @@
               >
                 &lt;
               </button>
+
+
+
               <button
                 class="btn-page btn-page-number"
                 v-for="p in pageNumberListANS"
@@ -1773,6 +1764,7 @@ const sortState = ref<
   healthLog: { field: "", order: null },
   weeklySummary: { field: "", order: null },
 });
+
 const ansRange = ref<Date[] | null>(null);
 const lifeRange = ref<Date[] | null>(null);
 const videoRange = ref<Date[] | null>(null);
