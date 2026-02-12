@@ -3131,13 +3131,25 @@ function closeContract() {
 
 /* ---------- 其他 ---------- */
 async function refresh() {
+  loading.value = true;
   memberStore.clear();
   await memberStore.fetchAll(getAuth());
+
+  // 取得產品使用紀錄
+  await memberStore.fetchFavoriteTPointsList(getAuth());
+
+  // 取得健康日誌
+  await memberStore.fetchHealthLog(getAuth(), "", "");
+
+  // 取得本周摘要
+  await memberStore.fetchWeeklySummary(getAuth());
+
   // 重新取得華碩序號列表
   const { sel } = getAuth();
   if (sel?.MID) {
     await memberStore.fetchVivoWatchList(sel.MID);
   }
+  loading.value = false;
 }
 function goBack() {
   router.push("/raphaelBackend/member");
