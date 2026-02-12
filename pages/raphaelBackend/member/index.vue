@@ -12,6 +12,7 @@
         :last-updated="store.lastUpdated"
         @refresh="refreshData"
       />
+      
       <!-- toolbar / filters -->
       <FilterToolbar
         v-model:search-value="store.keyword"

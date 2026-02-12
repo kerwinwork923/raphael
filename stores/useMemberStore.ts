@@ -27,7 +27,7 @@ export const useMemberStore = defineStore('member', () => {
   async function fetchAll(auth: any) {
     try {
       const { token, admin, sel } = auth
-      if (!token || !admin || !sel.MID) return
+      if (!token || !admin || (!sel.MID && !sel.Mobile)) return
 
       // 只使用 API_MemberDetail.jsp
       const basicRes = await fetch("https://23700999.com:8081/HMA/API_MemberDetail.jsp", {
@@ -36,7 +36,7 @@ export const useMemberStore = defineStore('member', () => {
         body: JSON.stringify({
           AdminID: admin,
           Token: token,
-          MID: sel.MID,
+          MID: sel.MID ?? "",
           Mobile: sel.Mobile ?? "",
         }),
       })
@@ -57,7 +57,7 @@ export const useMemberStore = defineStore('member', () => {
           body: JSON.stringify({
             AdminID: admin,
             Token: token,
-            MID: sel.MID,
+            MID: sel.MID ?? "",
             Mobile: sel.Mobile ?? "",
             ...extra,
           }),
@@ -95,14 +95,14 @@ export const useMemberStore = defineStore('member', () => {
   async function fetchHealthLog(auth: any, year: string, month: string, append = false) {
     try {
       const { token, admin, sel } = auth
-      if (!token || !admin || !sel.MID) return
+      if (!token || !admin || (!sel.MID && !sel.Mobile)) return
 
       const res = await fetch("https://23700999.com:8081/HMA/api/fr/getSoundNote", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           Token: token,
-          MID: sel.MID,
+          MID: sel.MID ?? "",
           Mobile: sel.Mobile ?? "",
           MAID: admin,
           Lang: "zhtw",
@@ -155,7 +155,7 @@ export const useMemberStore = defineStore('member', () => {
         body: JSON.stringify({
           AdminID: admin,
           Token: token,
-          MID: sel.MID,
+          MID: sel.MID ?? "",
         }),
       })
 
@@ -198,7 +198,7 @@ export const useMemberStore = defineStore('member', () => {
   async function fetchFavoriteMIDList(auth: any) {
     try {
       const { token, admin, sel } = auth
-      if (!token || !admin || !sel.MID) return
+      if (!token || !admin || (!sel.MID && !sel.Mobile)) return
 
       const res = await fetch("https://23700999.com:8081/HMA/api/bk/FavoriteTPointsMIDList", {
         method: "POST",
@@ -206,7 +206,7 @@ export const useMemberStore = defineStore('member', () => {
         body: JSON.stringify({
           AdminID: admin,
           Token: token,
-          MID: sel.MID,
+          MID: sel.MID ?? "",
         }),
       })
 
@@ -226,7 +226,7 @@ export const useMemberStore = defineStore('member', () => {
     // 產品使用紀錄：改用 UseRecordMIDList API + FavoriteTPointsMIDList 合併
     try {
       const { token, admin, sel } = auth
-      if (!token || !admin || !sel.MID) return
+      if (!token || !admin || (!sel.MID && !sel.Mobile)) return
 
       // 同時呼叫兩個 API
       const [useRecordRes, favoriteRes] = await Promise.all([
@@ -236,7 +236,7 @@ export const useMemberStore = defineStore('member', () => {
           body: JSON.stringify({
             AdminID: admin,
             Token: token,
-            MID: sel.MID,
+            MID: sel.MID ?? "",
             StartDate: "",
             EndDate: "",
           }),
@@ -247,7 +247,7 @@ export const useMemberStore = defineStore('member', () => {
           body: JSON.stringify({
             AdminID: admin,
             Token: token,
-            MID: sel.MID,
+            MID: sel.MID ?? "",
           }),
         }),
       ])
@@ -382,7 +382,7 @@ export const useMemberStore = defineStore('member', () => {
   async function fetchFavoriteTPointsMIDUseRecordList(auth: any, aid: string, startDate?: string, endDate?: string) {
     try {
       const { token, admin, sel } = auth
-      if (!token || !admin || !sel.MID || !aid) return
+      if (!token || !admin || (!sel.MID && !sel.Mobile) || !aid) return
 
       const res = await fetch("https://23700999.com:8081/HMA/api/bk/FavoriteTPointsMIDUseRecordList", {
         method: "POST",
@@ -390,7 +390,7 @@ export const useMemberStore = defineStore('member', () => {
         body: JSON.stringify({
           AdminID: admin,
           Token: token,
-          MID: sel.MID,
+          MID: sel.MID ?? "",
           StartDate: startDate || "",
           EndDate: endDate || "",
         }),
@@ -434,7 +434,7 @@ export const useMemberStore = defineStore('member', () => {
   async function fetchOptDetailMIDList(auth: any, aid: string = "", startDate?: string, endDate?: string) {
     try {
       const { token, admin, sel } = auth
-      if (!token || !admin || !sel.MID) return
+      if (!token || !admin || (!sel.MID && !sel.Mobile)) return
 
       const res = await fetch("https://23700999.com:8081/HMA/api/bk/OptDetailMIDList", {
         method: "POST",
@@ -442,7 +442,7 @@ export const useMemberStore = defineStore('member', () => {
         body: JSON.stringify({
           AdminID: admin,
           Token: token,
-          MID: sel.MID,
+          MID: sel.MID ?? "",
           StartDate: startDate || "",
           EndDate: endDate || "",
         }),

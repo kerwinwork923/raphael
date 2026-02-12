@@ -576,18 +576,23 @@
                   v-for="row in paginatedHome"
                   :key="row.id"
                 >
+
                   <div class="memberInfoTableRowItem">
                     {{ row.ConsultationDate || "—" }}
                   </div>
+
                   <div class="memberInfoTableRowItem">
                     {{ row.FormattedStartTime || "—" }}
                   </div>
+                  
                   <div class="memberInfoTableRowItem">
                     {{ row.FormattedEndTime || "—" }}
                   </div>
+
                   <div class="memberInfoTableRowItem">
                     {{ row.TreatmentTime || "—" }}
                   </div>
+                  
                   <div class="memberInfoTableRowItem">
                     {{
                       row.AID === 0 || row.AID === "0"
@@ -3013,10 +3018,67 @@ const pageNumberListLife = computed(() =>
 
 const loading = ref(false);
 
+/* ---------- 外部轉移登入 ---------- */
+async function handleTransferLogin(): Promise<boolean> {
+  const adminID = route.query.AdminID as string | undefined;
+  const safeKey = route.query.SafeKey as string | undefined;
+  const mobile = route.query.Mobile as string | undefined;
+
+  if (!adminID || !safeKey) return false;
+
+  try {
+    const res = await fetch(
+      "https://23700999.com:8081/HMA/API_AdminTransferLogin.jsp",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          AdminID: adminID,
+          SafeKey: safeKey,
+        }),
+      }
+    );
+    const data = await res.json();
+
+    if (data.Result === "OK" && data.Token) {
+      // 將 Token 與 AdminID 存入 localStorage
+      localStorage.setItem("backendToken", data.Token);
+      localStorage.setItem("adminID", data.AdminID || adminID);
+
+      // 將 Mobile 存入 selectedMember，供後續載入會員資料使用
+      if (mobile) {
+        localStorage.setItem(
+          "selectedMember",
+          JSON.stringify({ Mobile: mobile })
+        );
+      }
+      return true;
+    } else {
+      console.error("轉移登入失敗：", data.Result);
+      return false;
+    }
+  } catch (err) {
+    console.error("轉移登入 API 錯誤：", err);
+    return false;
+  }
+}
+
 watch(
   () => route.query,
   async () => {
     loading.value = true;
+
+    // 若 URL 帶有 AdminID & SafeKey，先執行轉移登入
+    const hasTransferParams = route.query.AdminID && route.query.SafeKey;
+    if (hasTransferParams) {
+      const loginOk = await handleTransferLogin();
+      if (!loginOk) {
+        loading.value = false;
+        console.error("轉移登入失敗，無法載入會員資料");
+        return;
+      }
+    }
+
     memberStore.clear();
     await memberStore.fetchAll(getAuth());
 
@@ -3036,7 +3098,6 @@ watch(
     }
 
     loading.value = false;
-
   },
   { deep: true, immediate: true }
 );
