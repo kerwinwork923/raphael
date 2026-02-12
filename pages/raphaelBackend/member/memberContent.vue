@@ -3042,24 +3042,22 @@ async function handleTransferLogin(): Promise<boolean> {
     const data = await res.json();
 
     if (data.Result === "OK" && data.Token) {
+      // MID 為空代表無此會員
+      if (!data.MID) {
+        alert("無此會員");
+        window.close();
+        return false;
+      }
+
       // 將 Token 與 AdminID 存入 localStorage
       localStorage.setItem("backendToken", data.Token);
       localStorage.setItem("adminID", data.AdminID || adminID);
 
       // 將 MID 與 Mobile 存入 selectedMember，供後續載入會員資料使用
-      const memberInfo: { MID?: string; Mobile?: string } = {};
-      if (data.MID) {
-        memberInfo.MID = data.MID;
-      }
-      if (mobile) {
-        memberInfo.Mobile = mobile;
-      }
-      if (memberInfo.MID || memberInfo.Mobile) {
-        localStorage.setItem(
-          "selectedMember",
-          JSON.stringify(memberInfo)
-        );
-      }
+      localStorage.setItem(
+        "selectedMember",
+        JSON.stringify({ MID: data.MID, Mobile: mobile || "" })
+      );
       return true;
     } else {
       console.error("轉移登入失敗：", data.Result);
