@@ -3035,6 +3035,7 @@ async function handleTransferLogin(): Promise<boolean> {
         body: JSON.stringify({
           AdminID: adminID,
           SafeKey: safeKey,
+          Mobile: mobile || "",
         }),
       }
     );
@@ -3045,11 +3046,18 @@ async function handleTransferLogin(): Promise<boolean> {
       localStorage.setItem("backendToken", data.Token);
       localStorage.setItem("adminID", data.AdminID || adminID);
 
-      // 將 Mobile 存入 selectedMember，供後續載入會員資料使用
+      // 將 MID 與 Mobile 存入 selectedMember，供後續載入會員資料使用
+      const memberInfo: { MID?: string; Mobile?: string } = {};
+      if (data.MID) {
+        memberInfo.MID = data.MID;
+      }
       if (mobile) {
+        memberInfo.Mobile = mobile;
+      }
+      if (memberInfo.MID || memberInfo.Mobile) {
         localStorage.setItem(
           "selectedMember",
-          JSON.stringify({ Mobile: mobile })
+          JSON.stringify(memberInfo)
         );
       }
       return true;
