@@ -255,7 +255,6 @@
       </div> -->
     </div>
 
- 
     <Teleport to="body">
       <div
         v-if="showWeeklySummaryModal"
@@ -368,13 +367,11 @@
                 </div>
               </div>
 
-              <div
-               
-                class="acerBox"
-                @click="goToAcerNumber"
-              >
+              <div class="acerBox" @click="goToAcerNumber">
                 <img src="/assets/imgs/backend/watch.svg" alt />
-                <span>華碩序號({{ latestVivoWatch?.Deviceid || "無資料" }})</span>
+                <span
+                  >華碩序號({{ latestVivoWatch?.Deviceid || "無資料" }})</span
+                >
               </div>
             </div>
 
@@ -435,7 +432,6 @@
                   <span>操作紀錄</span>
                 </button>
               </div>
-
             </div>
           </div>
 
@@ -445,7 +441,7 @@
               <h3>產品使用紀錄</h3>
               <div class="memberInfoTitleGroup">
                 <small>已使用 {{ totalHome }} 次</small>
-       
+
                 <!-- 我的最愛名稱篩選 -->
                 <div class="filterDropdown">
                   <div class="filterDropdownWrapper">
@@ -561,7 +557,6 @@
                 >
                   我的最愛名稱
                 </div>
-
               </div>
               <div class="memberInfoTableHR" />
 
@@ -571,7 +566,6 @@
                   v-for="row in paginatedHome"
                   :key="row.id"
                 >
-
                   <div class="memberInfoTableRowItem">
                     {{ row.ConsultationDate || "—" }}
                   </div>
@@ -579,7 +573,7 @@
                   <div class="memberInfoTableRowItem">
                     {{ row.FormattedStartTime || "—" }}
                   </div>
-                  
+
                   <div class="memberInfoTableRowItem">
                     {{ row.FormattedEndTime || "—" }}
                   </div>
@@ -587,7 +581,7 @@
                   <div class="memberInfoTableRowItem">
                     {{ row.TreatmentTime || "—" }}
                   </div>
-                  
+
                   <div class="memberInfoTableRowItem">
                     {{
                       row.AID === 0 || row.AID === "0"
@@ -595,7 +589,6 @@
                         : row.FavoriteName || "—"
                     }}
                   </div>
-
                 </div>
               </template>
               <div class="memberInfoTableRow" v-else>
@@ -672,12 +665,11 @@
                   prepend-icon="i-calendar"
                   :teleport="true"
                 />
-           
-                  <button class="exportExcelBtn" @click="exportHealthLogExcel">
-                    <img src="/assets/imgs/backend/download.svg" alt="excel" />
-                    <span>匯出</span>
-                  </button>
-           
+
+                <button class="exportExcelBtn" @click="exportHealthLogExcel">
+                  <img src="/assets/imgs/backend/download.svg" alt="excel" />
+                  <span>匯出</span>
+                </button>
               </div>
             </div>
 
@@ -880,9 +872,9 @@
 
         <!-- █ 指環紀錄 ------------------------------------------------------- -->
         <!-- █ 手錶紀錄 ------------------------------------------------- -->
-        <div class="memberInfoRow">
-        <div class="memberInfoCard watchRecordCard">
-             <!--  <div class="memberInfoTitleWrap">
+        <!-- <div class="memberInfoRow">
+          <div class="memberInfoCard watchRecordCard">
+            <div class="memberInfoTitleWrap">
               <h3>手錶紀錄</h3>
               <div class="memberInfoTitleGroup">
                 <small>已使用 {{ totalRing }} 次</small>
@@ -897,8 +889,15 @@
                 />
 
                 <div class="watchFilterDropdownWrapper">
-                  <div class="filterTrigger" @click="showWatchFilter = !showWatchFilter">
-                    <img src="/assets/imgs/backend/search.svg" alt="filter" style="width:16px;height:16px" />
+                  <div
+                    class="filterTrigger"
+                    @click="showWatchFilter = !showWatchFilter"
+                  >
+                    <img
+                      src="/assets/imgs/backend/search.svg"
+                      alt="filter"
+                      style="width: 16px; height: 16px"
+                    />
                     <span>{{ watchFilterCategoryLabel }}</span>
                     <img
                       src="/assets/imgs/backend/arrow-down.svg"
@@ -906,33 +905,51 @@
                       :class="{ rotated: showWatchFilter }"
                     />
                   </div>
-                  <div class="filterDropdownPanel" v-if="showWatchFilter" @click.stop>
+                  <div
+                    class="filterDropdownPanel"
+                    v-if="showWatchFilter"
+                    @click.stop
+                  >
                     <div class="filterCategories">
                       <div
                         class="filterCategory"
                         :class="{ active: watchFilterCategory === 'CheckTime' }"
                         @click="watchFilterCategory = 'CheckTime'"
-                      >使用時間</div>
+                      >
+                        使用時間
+                      </div>
                       <div
                         class="filterCategory"
                         :class="{ active: watchFilterCategory === 'heartRate' }"
                         @click="watchFilterCategory = 'heartRate'"
-                      >心率</div>
+                      >
+                        心率
+                      </div>
                       <div
                         class="filterCategory"
-                        :class="{ active: watchFilterCategory === 'bloodOxygen' }"
+                        :class="{
+                          active: watchFilterCategory === 'bloodOxygen',
+                        }"
                         @click="watchFilterCategory = 'bloodOxygen'"
-                      >血氧</div>
+                      >
+                        血氧
+                      </div>
                       <div
                         class="filterCategory"
                         :class="{ active: watchFilterCategory === 'stress' }"
                         @click="watchFilterCategory = 'stress'"
-                      >壓力</div>
+                      >
+                        壓力
+                      </div>
                       <div
                         class="filterCategory"
-                        :class="{ active: watchFilterCategory === 'temperature' }"
+                        :class="{
+                          active: watchFilterCategory === 'temperature',
+                        }"
                         @click="watchFilterCategory = 'temperature'"
-                      >溫度</div>
+                      >
+                        溫度
+                      </div>
                     </div>
                     <div class="filterOptions">
                       <div
@@ -941,7 +958,11 @@
                         :key="opt"
                         @click="toggleWatchFilterOption(opt)"
                       >
-                        <input type="checkbox" :checked="selectedWatchFilterOptions.includes(opt)" @click.stop />
+                        <input
+                          type="checkbox"
+                          :checked="selectedWatchFilterOptions.includes(opt)"
+                          @click.stop
+                        />
                         <span>{{ opt }}</span>
                       </div>
                     </div>
@@ -955,41 +976,97 @@
                   class="searchKeywordInput"
                 />
               </div>
-            </div> -->
+            </div>
 
             <div class="memberInfoTable watchTable">
               <div class="memberInfoTableTitle">
-                <div class="memberInfoTableTitleItem" @click="handleSort('ring', 'CheckTime')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('ring', 'CheckTime')"
+                >
                   使用時間
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('ring', 'heartRate')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('ring', 'heartRate')"
+                >
                   心率
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('ring', 'bloodOxygen')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('ring', 'bloodOxygen')"
+                >
                   血氧
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('ring', 'stress')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('ring', 'stress')"
+                >
                   壓力
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('ring', 'sleep')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('ring', 'sleep')"
+                >
                   睡眠
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('ring', 'temperature')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('ring', 'temperature')"
+                >
                   溫度
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('ring', 'steps')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('ring', 'steps')"
+                >
                   運動
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
-                <div class="memberInfoTableTitleItem" @click="handleSort('ring', 'hrv')">
+                <div
+                  class="memberInfoTableTitleItem"
+                  @click="handleSort('ring', 'hrv')"
+                >
                   HRV
-                  <img src="/assets/imgs/backend/sort.svg" alt="sort" class="sortIcon" />
+                  <img
+                    src="/assets/imgs/backend/sort.svg"
+                    alt="sort"
+                    class="sortIcon"
+                  />
                 </div>
                 <div class="memberInfoTableTitleItem watchBodyCompCol">
                   身體組成
@@ -1005,11 +1082,19 @@
                   @click="openWatchDetail(r)"
                 >
                   <div class="memberInfoTableRowItem">{{ r.CheckTime }}</div>
-                  <div class="memberInfoTableRowItem">{{ r.heartRate || "—" }}</div>
-                  <div class="memberInfoTableRowItem">{{ r.bloodOxygen || "—" }}</div>
-                  <div class="memberInfoTableRowItem">{{ r.stress || "—" }}</div>
+                  <div class="memberInfoTableRowItem">
+                    {{ r.heartRate || "—" }}
+                  </div>
+                  <div class="memberInfoTableRowItem">
+                    {{ r.bloodOxygen || "—" }}
+                  </div>
+                  <div class="memberInfoTableRowItem">
+                    {{ r.stress || "—" }}
+                  </div>
                   <div class="memberInfoTableRowItem">{{ r.sleep || "—" }}</div>
-                  <div class="memberInfoTableRowItem">{{ r.temperature || "—" }}</div>
+                  <div class="memberInfoTableRowItem">
+                    {{ r.temperature || "—" }}
+                  </div>
                   <div class="memberInfoTableRowItem">{{ r.steps || "—" }}</div>
                   <div class="memberInfoTableRowItem">{{ r.hrv || "—" }}</div>
                   <div class="memberInfoTableRowItem watchBodyCompCell">
@@ -1020,19 +1105,33 @@
                   <img
                     src="/assets/imgs/backend/goNext.svg"
                     alt="detail"
-                    style="cursor:pointer; position:absolute; right:0"
+                    style="cursor: pointer; position: absolute; right: 0"
                   />
                 </div>
               </template>
               <div class="memberInfoTableRow" v-else>
-                <div class="memberInfoTableRowItem" style="width:100%">尚無資料</div>
+                <div class="memberInfoTableRowItem" style="width: 100%">
+                  尚無資料
+                </div>
               </div>
             </div>
 
-            <!-- 分頁 -->
+    
             <nav class="pagination" v-if="totalRing">
-              <button class="btn-page" :disabled="pageRing === 1" @click="pageRing = 1">&lt;&lt;</button>
-              <button class="btn-page" :disabled="pageRing === 1" @click="pageRing--">&lt;</button>
+              <button
+                class="btn-page"
+                :disabled="pageRing === 1"
+                @click="pageRing = 1"
+              >
+                &lt;&lt;
+              </button>
+              <button
+                class="btn-page"
+                :disabled="pageRing === 1"
+                @click="pageRing--"
+              >
+                &lt;
+              </button>
               <button
                 class="btn-page btn-page-number"
                 v-for="p in pageNumberListRing"
@@ -1040,12 +1139,26 @@
                 :class="{ active: pageRing === p }"
                 :disabled="p === '...'"
                 @click="typeof p === 'number' && (pageRing = p)"
-              >{{ p }}</button>
-              <button class="btn-page" :disabled="pageRing === totalPagesRing" @click="pageRing++">&gt;</button>
-              <button class="btn-page" :disabled="pageRing === totalPagesRing" @click="pageRing = totalPagesRing">&gt;&gt;</button>
+              >
+                {{ p }}
+              </button>
+              <button
+                class="btn-page"
+                :disabled="pageRing === totalPagesRing"
+                @click="pageRing++"
+              >
+                &gt;
+              </button>
+              <button
+                class="btn-page"
+                :disabled="pageRing === totalPagesRing"
+                @click="pageRing = totalPagesRing"
+              >
+                &gt;&gt;
+              </button>
             </nav>
           </div>
-        </div>
+        </div> -->
 
         <!-- █ 自律神經 ------------------------------------------------------- -->
         <div class="memberInfoRow">
@@ -1146,7 +1259,6 @@
             </div>
 
             <nav class="pagination" v-if="totalANS">
-
               <button
                 class="btn-page"
                 :disabled="pageANS === 1"
@@ -1162,8 +1274,6 @@
               >
                 &lt;
               </button>
-
-
 
               <button
                 class="btn-page btn-page-number"
@@ -1839,10 +1949,14 @@ onMounted(() => {
       stressLevelEn: "medium",
       sleepDuration: "6h10m",
       sleepScore: "79/100",
-      sleepAwakePct: "10%", sleepAwakeDur: "37m",
-      sleepRemPct: "8%", sleepRemDur: "30m",
-      sleepLightPct: "72%", sleepLightDur: "4h26m",
-      sleepDeepPct: "10%", sleepDeepDur: "37m",
+      sleepAwakePct: "10%",
+      sleepAwakeDur: "37m",
+      sleepRemPct: "8%",
+      sleepRemDur: "30m",
+      sleepLightPct: "72%",
+      sleepLightDur: "4h26m",
+      sleepDeepPct: "10%",
+      sleepDeepDur: "37m",
     },
     {
       id: 2,
@@ -1867,10 +1981,14 @@ onMounted(() => {
       stressLevelEn: "medium",
       sleepDuration: "5h30m",
       sleepScore: "82/100",
-      sleepAwakePct: "9%", sleepAwakeDur: "30m",
-      sleepRemPct: "7%", sleepRemDur: "23m",
-      sleepLightPct: "75%", sleepLightDur: "4h07m",
-      sleepDeepPct: "9%", sleepDeepDur: "30m",
+      sleepAwakePct: "9%",
+      sleepAwakeDur: "30m",
+      sleepRemPct: "7%",
+      sleepRemDur: "23m",
+      sleepLightPct: "75%",
+      sleepLightDur: "4h07m",
+      sleepDeepPct: "9%",
+      sleepDeepDur: "30m",
     },
     {
       id: 3,
@@ -1895,10 +2013,14 @@ onMounted(() => {
       stressLevelEn: "low",
       sleepDuration: "5h50m",
       sleepScore: "84/100",
-      sleepAwakePct: "8%", sleepAwakeDur: "28m",
-      sleepRemPct: "9%", sleepRemDur: "31m",
-      sleepLightPct: "74%", sleepLightDur: "4h19m",
-      sleepDeepPct: "9%", sleepDeepDur: "31m",
+      sleepAwakePct: "8%",
+      sleepAwakeDur: "28m",
+      sleepRemPct: "9%",
+      sleepRemDur: "31m",
+      sleepLightPct: "74%",
+      sleepLightDur: "4h19m",
+      sleepDeepPct: "9%",
+      sleepDeepDur: "31m",
     },
     {
       id: 4,
@@ -1923,10 +2045,14 @@ onMounted(() => {
       stressLevelEn: "low",
       sleepDuration: "6h00m",
       sleepScore: "80/100",
-      sleepAwakePct: "11%", sleepAwakeDur: "40m",
-      sleepRemPct: "6%", sleepRemDur: "22m",
-      sleepLightPct: "76%", sleepLightDur: "4h33m",
-      sleepDeepPct: "7%", sleepDeepDur: "25m",
+      sleepAwakePct: "11%",
+      sleepAwakeDur: "40m",
+      sleepRemPct: "6%",
+      sleepRemDur: "22m",
+      sleepLightPct: "76%",
+      sleepLightDur: "4h33m",
+      sleepDeepPct: "7%",
+      sleepDeepDur: "25m",
     },
     {
       id: 5,
@@ -1951,10 +2077,14 @@ onMounted(() => {
       stressLevelEn: "low",
       sleepDuration: "5h45m",
       sleepScore: "77/100",
-      sleepAwakePct: "11%", sleepAwakeDur: "24h0m",
-      sleepRemPct: "6%", sleepRemDur: "41m",
-      sleepLightPct: "77%", sleepLightDur: "32m",
-      sleepDeepPct: "6%", sleepDeepDur: "48m",
+      sleepAwakePct: "11%",
+      sleepAwakeDur: "24h0m",
+      sleepRemPct: "6%",
+      sleepRemDur: "41m",
+      sleepLightPct: "77%",
+      sleepLightDur: "32m",
+      sleepDeepPct: "6%",
+      sleepDeepDur: "48m",
     },
     {
       id: 6,
@@ -1979,10 +2109,14 @@ onMounted(() => {
       stressLevelEn: "low",
       sleepDuration: "7h20m",
       sleepScore: "75/100",
-      sleepAwakePct: "12%", sleepAwakeDur: "53m",
-      sleepRemPct: "5%", sleepRemDur: "22m",
-      sleepLightPct: "73%", sleepLightDur: "5h21m",
-      sleepDeepPct: "10%", sleepDeepDur: "44m",
+      sleepAwakePct: "12%",
+      sleepAwakeDur: "53m",
+      sleepRemPct: "5%",
+      sleepRemDur: "22m",
+      sleepLightPct: "73%",
+      sleepLightDur: "5h21m",
+      sleepDeepPct: "10%",
+      sleepDeepDur: "44m",
     },
     {
       id: 7,
@@ -2007,10 +2141,14 @@ onMounted(() => {
       stressLevelEn: "medium",
       sleepDuration: "6h30m",
       sleepScore: "85/100",
-      sleepAwakePct: "7%", sleepAwakeDur: "27m",
-      sleepRemPct: "10%", sleepRemDur: "39m",
-      sleepLightPct: "70%", sleepLightDur: "4h33m",
-      sleepDeepPct: "13%", sleepDeepDur: "51m",
+      sleepAwakePct: "7%",
+      sleepAwakeDur: "27m",
+      sleepRemPct: "10%",
+      sleepRemDur: "39m",
+      sleepLightPct: "70%",
+      sleepLightDur: "4h33m",
+      sleepDeepPct: "13%",
+      sleepDeepDur: "51m",
     },
     {
       id: 8,
@@ -2035,10 +2173,14 @@ onMounted(() => {
       stressLevelEn: "high",
       sleepDuration: "5h15m",
       sleepScore: "88/100",
-      sleepAwakePct: "6%", sleepAwakeDur: "19m",
-      sleepRemPct: "11%", sleepRemDur: "35m",
-      sleepLightPct: "68%", sleepLightDur: "3h34m",
-      sleepDeepPct: "15%", sleepDeepDur: "47m",
+      sleepAwakePct: "6%",
+      sleepAwakeDur: "19m",
+      sleepRemPct: "11%",
+      sleepRemDur: "35m",
+      sleepLightPct: "68%",
+      sleepLightDur: "3h34m",
+      sleepDeepPct: "15%",
+      sleepDeepDur: "47m",
     },
   ];
 
@@ -2202,8 +2344,6 @@ const homeFilterOptions = computed(() => {
 
 const filteredHome = computed(() => {
   let data = processedHomeOrders.value;
-
-
 
   // 篩選選項
   if (selectedHomeFilterOptions.value.length > 0) {
@@ -3444,7 +3584,6 @@ const availableEventOptions = computed(() => {
   });
   return Array.from(events).sort();
 });
-
 </script>
 
 <style scoped lang="scss">
@@ -3508,7 +3647,6 @@ const availableEventOptions = computed(() => {
           justify-content: space-between;
           width: 100%;
         }
-
 
         .rwdW100 {
           display: flex;
@@ -3736,14 +3874,14 @@ const availableEventOptions = computed(() => {
             margin-left: 4px;
           }
         }
-        .memberInfoBtnGroup{
+        .memberInfoBtnGroup {
           display: flex;
           align-items: center;
           gap: 8px;
           margin-top: 0.75rem;
-       
         }
-        .consumptionBtn, .operationRecordBtn {
+        .consumptionBtn,
+        .operationRecordBtn {
           width: 100%;
           padding: 6px 8px;
           color: var(--Primary-default, #1ba39b);
@@ -3923,8 +4061,6 @@ const availableEventOptions = computed(() => {
               transition: all 0.2s;
               min-width: 150px;
 
-              
-
               &::placeholder {
                 color: #999;
               }
@@ -3934,12 +4070,12 @@ const availableEventOptions = computed(() => {
             }
           }
         }
-        .exportExcelBtn{
+        .exportExcelBtn {
           display: flex;
           justify-content: center;
           align-items: center;
           gap: 4px;
-          padding: 0.1rem .5em;
+          padding: 0.1rem 0.5em;
           border-radius: 50px;
           background: #fff;
           color: var(--Neutral-500, #666);
@@ -3947,8 +4083,9 @@ const availableEventOptions = computed(() => {
           cursor: pointer;
           border: none;
           border-radius: var(--Radius-r-50, 50px);
-          background: var(--Neutral-white, #FFF);
-          box-shadow: 0 2px 20px 0 var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
+          background: var(--Neutral-white, #fff);
+          box-shadow: 0 2px 20px 0
+            var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
           width: 140px;
         }
       }
@@ -4541,8 +4678,6 @@ const availableEventOptions = computed(() => {
     cursor: pointer;
     transition: background 0.15s;
 
-
-
     &:hover {
       background-color: #f5fafa;
     }
@@ -4577,14 +4712,14 @@ const availableEventOptions = computed(() => {
     display: flex;
     align-items: center;
     gap: 4px;
-    padding: 0.3rem .5rem;
+    padding: 0.3rem 0.5rem;
     background: #fff;
     border-radius: 50px;
     cursor: pointer;
     box-shadow: 0px 2px 12px -2px rgba(177, 192, 216, 0.5);
     font-size: 14px;
     transition: all 0.2s;
- 
+
     width: 140px;
     img {
       width: 12px;
