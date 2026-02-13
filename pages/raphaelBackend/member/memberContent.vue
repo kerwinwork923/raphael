@@ -659,6 +659,7 @@
                 <VueDatePicker
                   v-model="healthLogDateRange"
                   range
+                  :partial-range="true"
                   :enable-time-picker="false"
                   format="yyyy/MM/dd"
                   placeholder="選擇日期或日期區間"
@@ -2383,25 +2384,31 @@ const filteredHome = computed(() => {
 
   // 排序
   if (sortState.value.home.order && sortState.value.home.field) {
+    const field = sortState.value.home.field;
+    const isAsc = sortState.value.home.order === "asc";
+
     data = [...data].sort((a: any, b: any) => {
-      const field = sortState.value.home.field;
       let aVal = a[field];
       let bVal = b[field];
 
-      // 日期排序
+      // 日期欄位排序：同時以 StartTime 作為次排序
       if (field === "ConsultationDate") {
-        aVal = new Date(aVal?.replace(/\//g, "-") || "").getTime();
-        bVal = new Date(bVal?.replace(/\//g, "-") || "").getTime();
+        const aTime = a.StartTime || "";
+        const bTime = b.StartTime || "";
+        // 直接用完整的 StartTime（YYYYMMDDHHmmss）比較，日期+時間一次排完
+        return isAsc
+          ? aTime.localeCompare(bTime)
+          : bTime.localeCompare(aTime);
       }
 
       // 數字排序
       if (typeof aVal === "number" && typeof bVal === "number") {
-        return sortState.value.home.order === "asc" ? aVal - bVal : bVal - aVal;
+        return isAsc ? aVal - bVal : bVal - aVal;
       }
 
       // 字串排序
       if (typeof aVal === "string" && typeof bVal === "string") {
-        return sortState.value.home.order === "asc"
+        return isAsc
           ? aVal.localeCompare(bVal)
           : bVal.localeCompare(aVal);
       }
@@ -2814,15 +2821,19 @@ const filteredHealthLog = computed(() => {
   let data = healthLogRecords.value || [];
 
   // 日期區間篩選（前端篩選，因為 API 是依月份取得）
-  if (healthLogDateRange.value && healthLogDateRange.value.length >= 2) {
-    const [from, to] = healthLogDateRange.value;
-    const start = from.getTime();
-    const end = to.getTime() + 24 * 60 * 60 * 1000 - 1; // 包含結束日期的整天
-    data = data.filter((r: any) => {
-      if (!r.VerbalDate) return false;
-      const ms = Date.parse(r.VerbalDate.replace(/\//g, "-"));
-      return ms >= start && ms <= end;
-    });
+  if (healthLogDateRange.value && healthLogDateRange.value.length >= 1) {
+    const from = healthLogDateRange.value[0];
+    const to = healthLogDateRange.value[1] || from; // 單日選取時 to 可能為 null
+    if (from) {
+      // 統一使用純日期字串比較（YYYY/MM/DD），避免時區偏移問題
+      const startStr = `${from.getFullYear()}/${String(from.getMonth() + 1).padStart(2, "0")}/${String(from.getDate()).padStart(2, "0")}`;
+      const endStr = `${to.getFullYear()}/${String(to.getMonth() + 1).padStart(2, "0")}/${String(to.getDate()).padStart(2, "0")}`;
+      data = data.filter((r: any) => {
+        if (!r.VerbalDate) return false;
+        const dateStr = r.VerbalDate; // 格式已是 YYYY/MM/DD
+        return dateStr >= startStr && dateStr <= endStr;
+      });
+    }
   }
 
   // 排序
@@ -3091,8 +3102,9 @@ watch(
     pageHealthLog.value = 1;
     // 當日期範圍改變時，重新取得健康日誌
     // 如果選擇的日期範圍跨月，則取得多個月的資料
-    if (newRange && newRange.length >= 2) {
-      const [from, to] = newRange;
+    if (newRange && newRange.length >= 1 && newRange[0]) {
+      const from = newRange[0];
+      const to = newRange[1] || from; // 單日選取時 to 可能為 null
       const fromYear = from.getFullYear();
       const fromMonth = from.getMonth() + 1;
       const toYear = to.getFullYear();
