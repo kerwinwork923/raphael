@@ -156,7 +156,7 @@
       class="watchDetailOverlay"
       @click="closeWatchDetail"
     >
-      <div class="watchDetailModal" @click.stop>
+      <!-- <div class="watchDetailModal" @click.stop>
 
         <div class="watchDetailHeader">
           <img src="/assets/imgs/backend/Subtract.svg" alt="NP" class="npLogo" />
@@ -202,7 +202,6 @@
           </div>
         </div>
 
-
         <div class="watchSleepSection">
           <h4>睡眠時長 {{ selectedWatchRecord?.sleepDuration || "—" }}</h4>
           <div class="watchSleepGrid">
@@ -229,7 +228,6 @@
           </div>
         </div>
 
-    
         <div class="watchBodySection">
           <h4>身體組成</h4>
           <div class="watchBodyGrid">
@@ -248,16 +246,13 @@
           </div>
         </div>
 
-
         <div class="watchDetailFooter">
           <div class="watchDetailClose" @click="closeWatchDetail">
             <img src="/assets/imgs/backend/close.svg" alt="close" />
           </div>
         </div>
 
-
-
-      </div>
+      </div> -->
     </div>
 
  
@@ -1689,6 +1684,7 @@ type ApiMember = {
   memType: string;
   CheckTime: string;
 };
+
 type ApiOrder = { ProductName: string; RentStart: string; RentEnd: string };
 
 /* ---------- Utils ---------- */
