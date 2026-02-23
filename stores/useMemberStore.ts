@@ -6,6 +6,7 @@ export const useMemberStore = defineStore('member', () => {
   // 狀態
   const member = ref<any>(null)
   const currentOrder = ref<any>(null)
+  const orderList = ref<any[]>([])
   const lastUpdated = ref('')
   const hrvRecords = ref<any[]>([])
   const ansRecords = ref<any[]>([])
@@ -21,6 +22,7 @@ export const useMemberStore = defineStore('member', () => {
   const favoriteUseRecordList = ref<any[]>([])
   const optDetailList = ref<any[]>([])
   const vivoWatchList = ref<any[]>([])
+  const asusHealthData = ref<any>(null)
   const hasFetched = ref(false)
 
   // 方法
@@ -45,7 +47,8 @@ export const useMemberStore = defineStore('member', () => {
       const basicData = await basicRes.json()
       if (basicData.Result === "OK") {
         member.value = basicData.MemberDetail.Member
-        currentOrder.value = basicData.MemberDetail.NowOrderList?.[0] ?? null
+        orderList.value = basicData.MemberDetail.NowOrderList ?? []
+        currentOrder.value = orderList.value[0] ?? null
       }
 
       // 取得自律神經和生活檢測資料
@@ -84,6 +87,7 @@ export const useMemberStore = defineStore('member', () => {
       favoriteUseRecordList.value = []
       optDetailList.value = []
       vivoWatchList.value = []
+      asusHealthData.value = null
 
       lastUpdated.value = new Date().toLocaleString("zh-TW")
       hasFetched.value = true
@@ -149,7 +153,7 @@ export const useMemberStore = defineStore('member', () => {
       const { token, admin, sel } = auth
       if (!token || !admin) return
 
-      const res = await fetch("https://23700999.com:8081/HMA/api/bk/CaseWeeklySummarySingleWeekList", {
+      const res = await fetch("https://23700999.com:8081/HMA/api/bk/CaseWeeklySummaryList", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -161,8 +165,8 @@ export const useMemberStore = defineStore('member', () => {
 
       const data = await res.json()
       if (data.Result === "OK") {
-        // API 回傳 CaseWeeklySummarySingleWeekList
-        const list = data.CaseWeeklySummarySingleWeekList || data.CaseWeeklySummaryList || []
+        // API 回傳 CaseWeeklySummaryList
+        const list = data.CaseWeeklySummaryList || data.CaseWeeklySummaryList || []
         weeklySummaryRecords.value = list.map((item: any, index: number) => {
           // 統一 DateRange 格式，避免多餘 / 或區間符號不一致
           let dateRange = (item.DatePeriod || "").trim()
@@ -646,9 +650,40 @@ export const useMemberStore = defineStore('member', () => {
     }
   }
 
+  async function fetchAsusHealthData(auth: any) {
+    try {
+      const { token, admin, sel } = auth
+      if (!token || !admin || !sel.MID) {
+        asusHealthData.value = null
+        return
+      }
+
+      const res = await fetch("https://23700999.com:8081/HMA/api/bk/asus_healthData", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          AdminID: admin,
+          Token: token,
+          MID: sel.MID,
+        }),
+      })
+
+      const data = await res.json()
+      if (data.Result === "OK" && data.mapAsusHealthData) {
+        asusHealthData.value = data.mapAsusHealthData
+      } else {
+        asusHealthData.value = null
+      }
+    } catch (error) {
+      console.error("取得華碩健康數據失敗：", error)
+      asusHealthData.value = null
+    }
+  }
+
   function clear() {
     member.value = null
     currentOrder.value = null
+    orderList.value = []
     lastUpdated.value = ''
     hrvRecords.value = []
     ansRecords.value = []
@@ -664,6 +699,7 @@ export const useMemberStore = defineStore('member', () => {
     favoriteMIDList.value = []
     optDetailList.value = []
     vivoWatchList.value = []
+    asusHealthData.value = null
     hasFetched.value = false
   }
 
@@ -671,6 +707,7 @@ export const useMemberStore = defineStore('member', () => {
     // 狀態
     member,
     currentOrder,
+    orderList,
     lastUpdated,
     hrvRecords,
     ansRecords,
@@ -686,6 +723,7 @@ export const useMemberStore = defineStore('member', () => {
     favoriteUseRecordList,
     optDetailList,
     vivoWatchList,
+    asusHealthData,
     hasFetched,
     // 方法
     fetchAll,
@@ -696,6 +734,7 @@ export const useMemberStore = defineStore('member', () => {
     fetchFavoriteTPointsMIDUseRecordList,
     fetchOptDetailMIDList,
     fetchVivoWatchList,
+    fetchAsusHealthData,
     clear,
   }
 }) 

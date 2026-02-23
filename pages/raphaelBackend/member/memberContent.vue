@@ -156,92 +156,132 @@
       class="watchDetailOverlay"
       @click="closeWatchDetail"
     >
-      <!-- <div class="watchDetailModal" @click.stop>
-
+      <div class="watchDetailModal" @click.stop>
         <div class="watchDetailHeader">
-          <img src="/assets/imgs/backend/Subtract.svg" alt="NP" class="npLogo" />
-          <h3 class="watchDetailDate">{{ selectedWatchRecord?.CheckTime || "—" }}</h3>
-          <p class="watchDetailSub">Detection Time</p>
+          <img
+            src="/assets/imgs/backend/Subtract.svg"
+            alt="NP"
+            class="npLogo"
+          />
+          <h3 class="watchDetailDate">
+            {{ selectedWatchRecord?.CheckTime || "—" }}
+          </h3>
+          <p class="watchDetailSub">每日健康數據</p>
         </div>
 
         <div class="watchMetricCards">
           <div class="watchMetricCard">
             <span class="metricLabel">血壓</span>
-            <span class="metricValue">{{ selectedWatchRecord?.bloodPressure || "—" }}</span>
-            <span class="metricUnit">mm / hg</span>
+            <span class="metricValue">{{
+              selectedWatchRecord?.bloodPressure || "—"
+            }}</span>
+            <span class="metricUnit">mmHg</span>
           </div>
           <div class="watchMetricCard">
             <span class="metricLabel">心率</span>
-            <span class="metricValue">{{ selectedWatchRecord?.heartRateVal ?? "—" }}</span>
-            <span class="metricUnit">bpm</span>
+            <span class="metricValue">{{
+              selectedWatchRecord?.heartRate || "—"
+            }}</span>
           </div>
           <div class="watchMetricCard">
             <span class="metricLabel">血氧</span>
-            <span class="metricValue">{{ selectedWatchRecord?.bloodOxygenVal ?? "—" }}</span>
+            <span class="metricValue">{{
+              selectedWatchRecord?.bloodOxygen || "—"
+            }}</span>
             <span class="metricUnit">SpO2%</span>
           </div>
           <div class="watchMetricCard">
             <span class="metricLabel">HRV</span>
-            <span class="metricValue">{{ selectedWatchRecord?.hrvVal ?? "—" }}</span>
-            <span class="metricUnit">ms</span>
+            <span class="metricValue">{{
+              selectedWatchRecord?.hrv || "—"
+            }}</span>
           </div>
           <div class="watchMetricCard">
             <span class="metricLabel">體溫</span>
-            <span class="metricValue">{{ selectedWatchRecord?.tempVal ?? "—" }}</span>
-            <span class="metricUnit">°C</span>
+            <span class="metricValue">{{
+              selectedWatchRecord?.temperature || "—"
+            }}</span>
           </div>
           <div class="watchMetricCard">
             <span class="metricLabel">運動</span>
-            <span class="metricValue">{{ selectedWatchRecord?.stepsVal ?? "—" }}</span>
-            <span class="metricUnit">步</span>
+            <span class="metricValue">{{
+              selectedWatchRecord?.steps || "—"
+            }}</span>
           </div>
           <div class="watchMetricCard">
             <span class="metricLabel">壓力</span>
-            <span class="metricValue">{{ selectedWatchRecord?.stressLevel || "—" }}</span>
-            <span class="metricUnit">{{ selectedWatchRecord?.stressLevelEn || "" }}</span>
+            <span class="metricValue">{{
+              selectedWatchRecord?.stress || "—"
+            }}</span>
           </div>
         </div>
 
-        <div class="watchSleepSection">
-          <h4>睡眠時長 {{ selectedWatchRecord?.sleepDuration || "—" }}</h4>
-          <div class="watchSleepGrid">
+        <div
+          class="watchSleepSection"
+          v-if="selectedWatchRecord?.sleepRecords?.length"
+        >
+          <h4>睡眠紀錄</h4>
+          <div
+            class="watchSleepGrid"
+            v-for="(sr, idx) in selectedWatchRecord.sleepRecords"
+            :key="idx"
+          >
+            <div class="watchSleepRow">
+              <span class="sleepLabel">時段</span>
+              <span class="sleepValue"
+                >{{ sr.StartTime }} ~ {{ sr.EndTime }}</span
+              >
+            </div>
             <div class="watchSleepRow">
               <span class="sleepLabel">睡眠分數</span>
-              <span class="sleepValue">{{ selectedWatchRecord?.sleepScore || "—" }}</span>
+              <span class="sleepValue">{{ sr.SleepScore || "—" }}</span>
             </div>
             <div class="watchSleepRow">
-              <span class="sleepLabel">清醒</span>
-              <span class="sleepValue">{{ selectedWatchRecord?.sleepAwakePct || "—" }} | {{ selectedWatchRecord?.sleepAwakeDur || "—" }}</span>
-            </div>
-            <div class="watchSleepRow">
-              <span class="sleepLabel">REM</span>
-              <span class="sleepValue">{{ selectedWatchRecord?.sleepRemPct || "—" }}  | {{ selectedWatchRecord?.sleepRemDur || "—" }}</span>
-            </div>
-            <div class="watchSleepRow">
-              <span class="sleepLabel">淺眠</span>
-              <span class="sleepValue">{{ selectedWatchRecord?.sleepLightPct || "—" }} | {{ selectedWatchRecord?.sleepLightDur || "—" }}</span>
+              <span class="sleepLabel">翻身次數</span>
+              <span class="sleepValue">{{ sr.Toss || "—" }}</span>
             </div>
             <div class="watchSleepRow">
               <span class="sleepLabel">深眠</span>
-              <span class="sleepValue">{{ selectedWatchRecord?.sleepDeepPct || "—" }}  | {{ selectedWatchRecord?.sleepDeepDur || "—" }}</span>
+              <span class="sleepValue">{{ sr.ComfortCount || "—" }} 分鐘</span>
+            </div>
+            <div class="watchSleepRow">
+              <span class="sleepLabel">淺眠</span>
+              <span class="sleepValue">{{ sr.LightCount || "—" }} 分鐘</span>
+            </div>
+            <div class="watchSleepRow">
+              <span class="sleepLabel">REM</span>
+              <span class="sleepValue">{{ sr.RemCount || "—" }} 分鐘</span>
             </div>
           </div>
         </div>
 
-        <div class="watchBodySection">
+        <div
+          class="watchBodySection"
+          v-if="
+            selectedWatchRecord?.bodyWater ||
+            selectedWatchRecord?.bodyFat ||
+            selectedWatchRecord?.bodyMuscle
+          "
+        >
           <h4>身體組成</h4>
           <div class="watchBodyGrid">
             <div class="watchBodyRow">
               <span class="bodyLabel">水分</span>
-              <span class="bodyValue">{{ selectedWatchRecord?.bodyWater || "—" }}</span>
+              <span class="bodyValue">{{
+                selectedWatchRecord?.bodyWater || "—"
+              }}</span>
             </div>
             <div class="watchBodyRow">
               <span class="bodyLabel">體脂</span>
-              <span class="bodyValue">{{ selectedWatchRecord?.bodyFat || "—" }}</span>
+              <span class="bodyValue">{{
+                selectedWatchRecord?.bodyFat || "—"
+              }}</span>
             </div>
             <div class="watchBodyRow">
               <span class="bodyLabel">肌肉</span>
-              <span class="bodyValue">{{ selectedWatchRecord?.bodyMuscle || "—" }}</span>
+              <span class="bodyValue">{{
+                selectedWatchRecord?.bodyMuscle || "—"
+              }}</span>
             </div>
           </div>
         </div>
@@ -251,8 +291,7 @@
             <img src="/assets/imgs/backend/close.svg" alt="close" />
           </div>
         </div>
-
-      </div> -->
+      </div>
     </div>
 
     <Teleport to="body">
@@ -263,6 +302,7 @@
       >
         <div class="weekly-summary-modal">
           <div class="weekly-summary-modal-header">
+            <img class="weekly-summary-modal-header-img" src="/assets/imgs/backend/Subtract.svg" alt="" />
             <h3>{{ selectedWeeklySummary?.DateRange ?? "—" }}</h3>
             <p class="summary-date-label">Summary date</p>
             <button
@@ -276,14 +316,20 @@
           </div>
           <div class="weekly-summary-modal-body">
             <div class="weekly-summary-section">
-              <h4>
+              <div>
                 彙整數量 {{ selectedWeeklySummary?.AggregateQuantity ?? "—" }}
-              </h4>
+              </div>
             </div>
             <div class="weekly-summary-section">
               <h4>摘要內容</h4>
               <div class="weekly-summary-content">
                 {{ selectedWeeklySummary?.SummaryContent ?? "—" }}
+              </div>
+            </div>
+            <div class="weekly-summary-section">
+              <h4>補充內容</h4>
+              <div class="weekly-summary-content">
+                {{ selectedWeeklySummary?.MetaSummary || "—" }}
               </div>
             </div>
           </div>
@@ -377,8 +423,53 @@
 
             <!-- 合約 (沒有資料也要顯示空殼) -->
             <div class="memberInfoCard2">
-              <template v-if="currentOrder">
-                <h3>{{ currentOrder.ProductName }}</h3>
+              <div class="contractHeader">
+                <h3>{{ activeOrder?.ProductName || "—" }}</h3>
+                <div
+                  v-if="uniqueProductNames.length > 1"
+                  class="contractDropdown"
+                >
+                  <button
+                    class="contractDropdownTrigger"
+                    @click.stop="showContractDropdown = !showContractDropdown"
+                  >
+                    <img
+                      src="/assets/imgs/backend/arrow-down.svg"
+                      alt="切換產品"
+                      :class="{ rotated: showContractDropdown }"
+                    />
+                  </button>
+                  <div
+                    v-if="showContractDropdown"
+                    class="contractDropdownPanel"
+                    @click.stop
+                  >
+                    <div
+                      class="contractDropdownItem"
+                      :class="{ active: selectedProductName === '' }"
+                      @click="
+                        selectedProductName = '';
+                        showContractDropdown = false;
+                      "
+                    >
+                      全部產品
+                    </div>
+                    <div
+                      v-for="name in uniqueProductNames"
+                      :key="name"
+                      class="contractDropdownItem"
+                      :class="{ active: selectedProductName === name }"
+                      @click="
+                        selectedProductName = name;
+                        showContractDropdown = false;
+                      "
+                    >
+                      {{ name }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <template v-if="activeOrder">
                 <h5>目前合約</h5>
 
                 <div class="memberInfoList">
@@ -386,7 +477,7 @@
                     <img src="/assets/imgs/backend/time.svg" alt />開始時間
                   </div>
                   <div class="memberInfoListContent">
-                    {{ currentOrder.RentStart }}
+                    {{ activeOrder.RentStart }}
                   </div>
                 </div>
 
@@ -395,13 +486,13 @@
                     <img src="/assets/imgs/backend/time.svg" alt />結束時間
                   </div>
                   <div class="memberInfoListContent">
-                    {{ currentOrder.RentEnd }}
+                    {{ activeOrder.RentEnd }}
                   </div>
                 </div>
 
                 <div class="memberInfoWarning" v-if="isExpired">
                   合約已於
-                  <h6>{{ currentOrder.RentEnd }} 到期</h6>
+                  <h6>{{ activeOrder.RentEnd }} 到期</h6>
                   <div class="memberInfoWarning">
                     目前尚未續約，請確認是否續約以恢復服務。
                   </div>
@@ -409,16 +500,15 @@
 
                 <div class="memberInfoWarningTagsGroup">
                   <div class="memberInfoWarningTag used">
-                    已使用 {{ currentOrder.Used || 0 }} 天
+                    已使用 {{ activeOrder.Used || 0 }} 天
                   </div>
                   <div class="memberInfoWarningTag remain">
-                    剩餘 {{ currentOrder.Still || 0 }} 天
+                    剩餘 {{ activeOrder.Still || 0 }} 天
                   </div>
                 </div>
               </template>
 
               <template v-else>
-                <h3>—</h3>
                 <h5>目前合約</h5>
                 <p style="text-align: center; padding: 8px 0">尚無合約資料</p>
               </template>
@@ -478,16 +568,6 @@
                           @click="selectHomeFilterCategory('FavoriteName')"
                         >
                           我的最愛名稱
-                        </div>
-                        <div
-                          class="filterCategory"
-                          :class="{
-                            active:
-                              selectedHomeFilterCategory === 'ProductName',
-                          }"
-                          @click="selectHomeFilterCategory('ProductName')"
-                        >
-                          產品名稱
                         </div>
                       </div>
                       <div class="filterOptions">
@@ -642,10 +722,10 @@
           </div>
 
           <!-- 使用紀錄分析 -->
-          <!-- <div class="memberInfoCard memberInfoCardGroupW100">
+          <div class="memberInfoCard memberInfoCardGroupW100">
             <h3>使用紀錄分析</h3>
             <UsageAnalysisChart :usage-data="filteredHomeForChart" />
-          </div> -->
+          </div>
         </div>
 
         <!-- █ 健康日誌 & 本周摘要 ------------------------------------------------- -->
@@ -871,9 +951,8 @@
           </div>
         </div>
 
-        <!-- █ 指環紀錄 ------------------------------------------------------- -->
         <!-- █ 手錶紀錄 ------------------------------------------------- -->
-        <!-- <div class="memberInfoRow">
+        <div class="memberInfoRow">
           <div class="memberInfoCard watchRecordCard">
             <div class="memberInfoTitleWrap">
               <h3>手錶紀錄</h3>
@@ -889,93 +968,93 @@
                   teleport="body"
                 />
 
-                <div class="watchFilterDropdownWrapper">
-                  <div
-                    class="filterTrigger"
-                    @click="showWatchFilter = !showWatchFilter"
-                  >
-                    <img
-                      src="/assets/imgs/backend/search.svg"
-                      alt="filter"
-                      style="width: 16px; height: 16px"
-                    />
-                    <span>{{ watchFilterCategoryLabel }}</span>
-                    <img
-                      src="/assets/imgs/backend/arrow-down.svg"
-                      alt="arrow"
-                      :class="{ rotated: showWatchFilter }"
-                    />
-                  </div>
-                  <div
-                    class="filterDropdownPanel"
-                    v-if="showWatchFilter"
-                    @click.stop
-                  >
-                    <div class="filterCategories">
-                      <div
-                        class="filterCategory"
-                        :class="{ active: watchFilterCategory === 'CheckTime' }"
-                        @click="watchFilterCategory = 'CheckTime'"
-                      >
-                        使用時間
+                <div class="filterDropdown">
+                  <div class="filterDropdownWrapper watchFilterDropdownWrapper">
+                    <div
+                      class="filterTrigger"
+                      @click="showWatchFilter = !showWatchFilter"
+                    >
+                      <span>{{ watchFilterCategoryLabel }}</span>
+                      <img
+                        src="/assets/imgs/backend/arrow-down.svg"
+                        alt="arrow"
+                        :class="{ rotated: showWatchFilter }"
+                      />
+                    </div>
+                    <div
+                      class="filterDropdownPanel"
+                      v-if="showWatchFilter"
+                      @click.stop
+                    >
+                      <div class="filterCategories">
+                        <div
+                          class="filterCategory"
+                          :class="{
+                            active: watchFilterCategory === 'CheckTime',
+                          }"
+                          @click="watchFilterCategory = 'CheckTime'"
+                        >
+                          使用時間
+                        </div>
+                        <div
+                          class="filterCategory"
+                          :class="{
+                            active: watchFilterCategory === 'heartRate',
+                          }"
+                          @click="watchFilterCategory = 'heartRate'"
+                        >
+                          心率
+                        </div>
+                        <div
+                          class="filterCategory"
+                          :class="{
+                            active: watchFilterCategory === 'bloodOxygen',
+                          }"
+                          @click="watchFilterCategory = 'bloodOxygen'"
+                        >
+                          血氧
+                        </div>
+                        <div
+                          class="filterCategory"
+                          :class="{ active: watchFilterCategory === 'stress' }"
+                          @click="watchFilterCategory = 'stress'"
+                        >
+                          壓力
+                        </div>
+                        <div
+                          class="filterCategory"
+                          :class="{
+                            active: watchFilterCategory === 'temperature',
+                          }"
+                          @click="watchFilterCategory = 'temperature'"
+                        >
+                          溫度
+                        </div>
                       </div>
-                      <div
-                        class="filterCategory"
-                        :class="{ active: watchFilterCategory === 'heartRate' }"
-                        @click="watchFilterCategory = 'heartRate'"
-                      >
-                        心率
-                      </div>
-                      <div
-                        class="filterCategory"
-                        :class="{
-                          active: watchFilterCategory === 'bloodOxygen',
-                        }"
-                        @click="watchFilterCategory = 'bloodOxygen'"
-                      >
-                        血氧
-                      </div>
-                      <div
-                        class="filterCategory"
-                        :class="{ active: watchFilterCategory === 'stress' }"
-                        @click="watchFilterCategory = 'stress'"
-                      >
-                        壓力
-                      </div>
-                      <div
-                        class="filterCategory"
-                        :class="{
-                          active: watchFilterCategory === 'temperature',
-                        }"
-                        @click="watchFilterCategory = 'temperature'"
-                      >
-                        溫度
+                      <div class="filterOptions">
+                        <div
+                          class="filterOption"
+                          v-for="opt in watchFilterOptions"
+                          :key="opt"
+                          @click="toggleWatchFilterOption(opt)"
+                        >
+                          <input
+                            type="checkbox"
+                            :checked="selectedWatchFilterOptions.includes(opt)"
+                            @click.stop
+                          />
+                          <span>{{ opt }}</span>
+                        </div>
                       </div>
                     </div>
-                    <div class="filterOptions">
-                      <div
-                        class="filterOption"
-                        v-for="opt in watchFilterOptions"
-                        :key="opt"
-                        @click="toggleWatchFilterOption(opt)"
-                      >
-                        <input
-                          type="checkbox"
-                          :checked="selectedWatchFilterOptions.includes(opt)"
-                          @click.stop
-                        />
-                        <span>{{ opt }}</span>
-                      </div>
-                    </div>
                   </div>
+                  <input
+                    type="text"
+                    v-model="watchKeyword"
+                    placeholder="搜尋關鍵字"
+                    class="searchKeywordInput"
+                  />
                 </div>
-
-                <input
-                  type="text"
-                  v-model="watchKeyword"
-                  placeholder="搜尋關鍵字"
-                  class="searchKeywordInput"
-                />
               </div>
             </div>
 
@@ -985,90 +1064,21 @@
                   class="memberInfoTableTitleItem"
                   @click="handleSort('ring', 'CheckTime')"
                 >
-                  使用時間
+                  日期
                   <img
                     src="/assets/imgs/backend/sort.svg"
                     alt="sort"
                     class="sortIcon"
                   />
                 </div>
-                <div
-                  class="memberInfoTableTitleItem"
-                  @click="handleSort('ring', 'heartRate')"
-                >
-                  心率
-                  <img
-                    src="/assets/imgs/backend/sort.svg"
-                    alt="sort"
-                    class="sortIcon"
-                  />
-                </div>
-                <div
-                  class="memberInfoTableTitleItem"
-                  @click="handleSort('ring', 'bloodOxygen')"
-                >
-                  血氧
-                  <img
-                    src="/assets/imgs/backend/sort.svg"
-                    alt="sort"
-                    class="sortIcon"
-                  />
-                </div>
-                <div
-                  class="memberInfoTableTitleItem"
-                  @click="handleSort('ring', 'stress')"
-                >
-                  壓力
-                  <img
-                    src="/assets/imgs/backend/sort.svg"
-                    alt="sort"
-                    class="sortIcon"
-                  />
-                </div>
-                <div
-                  class="memberInfoTableTitleItem"
-                  @click="handleSort('ring', 'sleep')"
-                >
-                  睡眠
-                  <img
-                    src="/assets/imgs/backend/sort.svg"
-                    alt="sort"
-                    class="sortIcon"
-                  />
-                </div>
-                <div
-                  class="memberInfoTableTitleItem"
-                  @click="handleSort('ring', 'temperature')"
-                >
-                  溫度
-                  <img
-                    src="/assets/imgs/backend/sort.svg"
-                    alt="sort"
-                    class="sortIcon"
-                  />
-                </div>
-                <div
-                  class="memberInfoTableTitleItem"
-                  @click="handleSort('ring', 'steps')"
-                >
-                  運動
-                  <img
-                    src="/assets/imgs/backend/sort.svg"
-                    alt="sort"
-                    class="sortIcon"
-                  />
-                </div>
-                <div
-                  class="memberInfoTableTitleItem"
-                  @click="handleSort('ring', 'hrv')"
-                >
-                  HRV
-                  <img
-                    src="/assets/imgs/backend/sort.svg"
-                    alt="sort"
-                    class="sortIcon"
-                  />
-                </div>
+                <div class="memberInfoTableTitleItem">血壓</div>
+                <div class="memberInfoTableTitleItem">心率</div>
+                <div class="memberInfoTableTitleItem">血氧</div>
+                <div class="memberInfoTableTitleItem">壓力</div>
+                <div class="memberInfoTableTitleItem">睡眠分數</div>
+                <div class="memberInfoTableTitleItem">溫度</div>
+                <div class="memberInfoTableTitleItem">運動</div>
+                <div class="memberInfoTableTitleItem">HRV</div>
                 <div class="memberInfoTableTitleItem watchBodyCompCol">
                   身體組成
                 </div>
@@ -1084,6 +1094,9 @@
                 >
                   <div class="memberInfoTableRowItem">{{ r.CheckTime }}</div>
                   <div class="memberInfoTableRowItem">
+                    {{ r.bloodPressure || "—" }}
+                  </div>
+                  <div class="memberInfoTableRowItem">
                     {{ r.heartRate || "—" }}
                   </div>
                   <div class="memberInfoTableRowItem">
@@ -1092,7 +1105,9 @@
                   <div class="memberInfoTableRowItem">
                     {{ r.stress || "—" }}
                   </div>
-                  <div class="memberInfoTableRowItem">{{ r.sleep || "—" }}</div>
+                  <div class="memberInfoTableRowItem">
+                    {{ r.sleep || "—" }}
+                  </div>
                   <div class="memberInfoTableRowItem">
                     {{ r.temperature || "—" }}
                   </div>
@@ -1100,7 +1115,7 @@
                   <div class="memberInfoTableRowItem">{{ r.hrv || "—" }}</div>
                   <div class="memberInfoTableRowItem watchBodyCompCell">
                     <span>水分 {{ r.bodyWater || "—" }}</span>
-                    <span>體指 {{ r.bodyFat || "—" }}</span>
+                    <span>體脂 {{ r.bodyFat || "—" }}</span>
                     <span>肌肉 {{ r.bodyMuscle || "—" }}</span>
                   </div>
                   <img
@@ -1117,7 +1132,6 @@
               </div>
             </div>
 
-    
             <nav class="pagination" v-if="totalRing">
               <button
                 class="btn-page"
@@ -1159,7 +1173,7 @@
               </button>
             </nav>
           </div>
-        </div> -->
+        </div>
 
         <!-- █ 自律神經 ------------------------------------------------------- -->
         <div class="memberInfoRow">
@@ -1816,6 +1830,7 @@ const memberStore = useMemberStore();
 const {
   member,
   currentOrder,
+  orderList,
   lastUpdated,
   hrvRecords,
   ansRecords,
@@ -1827,6 +1842,7 @@ const {
   favoriteTPointsList,
   optDetailList,
   vivoWatchList,
+  asusHealthData,
   hasFetched,
 } = storeToRefs(memberStore);
 
@@ -1837,6 +1853,26 @@ const {
 const showContract = ref(false);
 const contractList = ref<any[]>([]);
 
+const selectedProductName = ref<string>("");
+const showContractDropdown = ref(false);
+
+const uniqueProductNames = computed(() => {
+  const names = new Set<string>();
+  (orderList.value || []).forEach((o: any) => {
+    if (o.ProductName) names.add(o.ProductName);
+  });
+  return Array.from(names);
+});
+
+const activeOrder = computed(() => {
+  if (!selectedProductName.value) return currentOrder.value;
+  return (
+    (orderList.value || []).find(
+      (o: any) => o.ProductName === selectedProductName.value
+    ) ?? currentOrder.value
+  );
+});
+
 // 基本資料編輯和刪除會員彈跳視窗
 const showEditBasicModal = ref(false);
 const showDeleteMemberModal = ref(false);
@@ -1845,6 +1881,7 @@ const showDeleteMemberModal = ref(false);
 const showWeeklySummaryModal = ref(false);
 const selectedWeeklySummary = ref<{
   SummaryContent?: string;
+  MetaSummary?: string;
   AggregateQuantity?: string;
   DateRange?: string;
   AID?: string;
@@ -1924,268 +1961,7 @@ onMounted(() => {
   handleResize();
   window.addEventListener("resize", handleResize);
 
-  // 手錶紀錄假資料
-  ringRecords.value = [
-    {
-      id: 1,
-      CheckTime: "2024/10/09 12:00",
-      heartRate: "62 bpm",
-      bloodOxygen: "88",
-      stress: "79/100",
-      sleep: "6h10m",
-      temperature: "36.5°C",
-      steps: "1200步",
-      hrv: "37 ms",
-      bodyWater: "62.50%",
-      bodyFat: "18.5%",
-      bodyMuscle: "39.0kg",
-      // 詳情彈窗用
-      bloodPressure: "110/67",
-      heartRateVal: 62,
-      bloodOxygenVal: 88,
-      hrvVal: 37,
-      tempVal: 36.5,
-      stepsVal: 1200,
-      stressLevel: "中等",
-      stressLevelEn: "medium",
-      sleepDuration: "6h10m",
-      sleepScore: "79/100",
-      sleepAwakePct: "10%",
-      sleepAwakeDur: "37m",
-      sleepRemPct: "8%",
-      sleepRemDur: "30m",
-      sleepLightPct: "72%",
-      sleepLightDur: "4h26m",
-      sleepDeepPct: "10%",
-      sleepDeepDur: "37m",
-    },
-    {
-      id: 2,
-      CheckTime: "2024/10/08 12:00",
-      heartRate: "55 bpm",
-      bloodOxygen: "90",
-      stress: "82/100",
-      sleep: "5h30m",
-      temperature: "36.6°C",
-      steps: "1200步",
-      hrv: "36 ms",
-      bodyWater: "61.00%",
-      bodyFat: "19.5%",
-      bodyMuscle: "37.5kg",
-      bloodPressure: "115/70",
-      heartRateVal: 55,
-      bloodOxygenVal: 90,
-      hrvVal: 36,
-      tempVal: 36.6,
-      stepsVal: 1200,
-      stressLevel: "中等",
-      stressLevelEn: "medium",
-      sleepDuration: "5h30m",
-      sleepScore: "82/100",
-      sleepAwakePct: "9%",
-      sleepAwakeDur: "30m",
-      sleepRemPct: "7%",
-      sleepRemDur: "23m",
-      sleepLightPct: "75%",
-      sleepLightDur: "4h07m",
-      sleepDeepPct: "9%",
-      sleepDeepDur: "30m",
-    },
-    {
-      id: 3,
-      CheckTime: "2024/10/07 12:00",
-      heartRate: "60 bpm",
-      bloodOxygen: "85",
-      stress: "84/100",
-      sleep: "5h50m",
-      temperature: "36.4°C",
-      steps: "1200步",
-      hrv: "39 ms",
-      bodyWater: "59.80%",
-      bodyFat: "20.0%",
-      bodyMuscle: "38.0kg",
-      bloodPressure: "108/65",
-      heartRateVal: 60,
-      bloodOxygenVal: 85,
-      hrvVal: 39,
-      tempVal: 36.4,
-      stepsVal: 1200,
-      stressLevel: "放鬆",
-      stressLevelEn: "low",
-      sleepDuration: "5h50m",
-      sleepScore: "84/100",
-      sleepAwakePct: "8%",
-      sleepAwakeDur: "28m",
-      sleepRemPct: "9%",
-      sleepRemDur: "31m",
-      sleepLightPct: "74%",
-      sleepLightDur: "4h19m",
-      sleepDeepPct: "9%",
-      sleepDeepDur: "31m",
-    },
-    {
-      id: 4,
-      CheckTime: "2024/10/06 12:00",
-      heartRate: "54 bpm",
-      bloodOxygen: "82",
-      stress: "80/100",
-      sleep: "6h00m",
-      temperature: "36.78°C",
-      steps: "1200步",
-      hrv: "38 ms",
-      bodyWater: "60.20%",
-      bodyFat: "19.0%",
-      bodyMuscle: "38.8kg",
-      bloodPressure: "112/68",
-      heartRateVal: 54,
-      bloodOxygenVal: 82,
-      hrvVal: 38,
-      tempVal: 36.78,
-      stepsVal: 1200,
-      stressLevel: "放鬆",
-      stressLevelEn: "low",
-      sleepDuration: "6h00m",
-      sleepScore: "80/100",
-      sleepAwakePct: "11%",
-      sleepAwakeDur: "40m",
-      sleepRemPct: "6%",
-      sleepRemDur: "22m",
-      sleepLightPct: "76%",
-      sleepLightDur: "4h33m",
-      sleepDeepPct: "7%",
-      sleepDeepDur: "25m",
-    },
-    {
-      id: 5,
-      CheckTime: "2024/10/10 12:00",
-      heartRate: "82 bpm",
-      bloodOxygen: "98",
-      stress: "77/100",
-      sleep: "5h45m",
-      temperature: "36.4°C",
-      steps: "11000步",
-      hrv: "38 ms",
-      bodyWater: "60.70%",
-      bodyFat: "19.30%",
-      bodyMuscle: "38.8kg",
-      bloodPressure: "110/67",
-      heartRateVal: 82,
-      bloodOxygenVal: 98,
-      hrvVal: 38,
-      tempVal: 36.4,
-      stepsVal: 11000,
-      stressLevel: "放鬆",
-      stressLevelEn: "low",
-      sleepDuration: "5h45m",
-      sleepScore: "77/100",
-      sleepAwakePct: "11%",
-      sleepAwakeDur: "24h0m",
-      sleepRemPct: "6%",
-      sleepRemDur: "41m",
-      sleepLightPct: "77%",
-      sleepLightDur: "32m",
-      sleepDeepPct: "6%",
-      sleepDeepDur: "48m",
-    },
-    {
-      id: 6,
-      CheckTime: "2024/10/05 12:00",
-      heartRate: "58 bpm",
-      bloodOxygen: "91",
-      stress: "75/100",
-      sleep: "7h20m",
-      temperature: "36.3°C",
-      steps: "980步",
-      hrv: "40 ms",
-      bodyWater: "61.50%",
-      bodyFat: "18.0%",
-      bodyMuscle: "39.5kg",
-      bloodPressure: "118/72",
-      heartRateVal: 58,
-      bloodOxygenVal: 91,
-      hrvVal: 40,
-      tempVal: 36.3,
-      stepsVal: 980,
-      stressLevel: "放鬆",
-      stressLevelEn: "low",
-      sleepDuration: "7h20m",
-      sleepScore: "75/100",
-      sleepAwakePct: "12%",
-      sleepAwakeDur: "53m",
-      sleepRemPct: "5%",
-      sleepRemDur: "22m",
-      sleepLightPct: "73%",
-      sleepLightDur: "5h21m",
-      sleepDeepPct: "10%",
-      sleepDeepDur: "44m",
-    },
-    {
-      id: 7,
-      CheckTime: "2024/10/04 12:00",
-      heartRate: "66 bpm",
-      bloodOxygen: "95",
-      stress: "85/100",
-      sleep: "6h30m",
-      temperature: "36.7°C",
-      steps: "3200步",
-      hrv: "35 ms",
-      bodyWater: "58.90%",
-      bodyFat: "20.5%",
-      bodyMuscle: "37.0kg",
-      bloodPressure: "120/75",
-      heartRateVal: 66,
-      bloodOxygenVal: 95,
-      hrvVal: 35,
-      tempVal: 36.7,
-      stepsVal: 3200,
-      stressLevel: "中等",
-      stressLevelEn: "medium",
-      sleepDuration: "6h30m",
-      sleepScore: "85/100",
-      sleepAwakePct: "7%",
-      sleepAwakeDur: "27m",
-      sleepRemPct: "10%",
-      sleepRemDur: "39m",
-      sleepLightPct: "70%",
-      sleepLightDur: "4h33m",
-      sleepDeepPct: "13%",
-      sleepDeepDur: "51m",
-    },
-    {
-      id: 8,
-      CheckTime: "2024/10/03 12:00",
-      heartRate: "70 bpm",
-      bloodOxygen: "93",
-      stress: "88/100",
-      sleep: "5h15m",
-      temperature: "36.8°C",
-      steps: "5500步",
-      hrv: "33 ms",
-      bodyWater: "57.80%",
-      bodyFat: "21.0%",
-      bodyMuscle: "36.5kg",
-      bloodPressure: "125/78",
-      heartRateVal: 70,
-      bloodOxygenVal: 93,
-      hrvVal: 33,
-      tempVal: 36.8,
-      stepsVal: 5500,
-      stressLevel: "偏高",
-      stressLevelEn: "high",
-      sleepDuration: "5h15m",
-      sleepScore: "88/100",
-      sleepAwakePct: "6%",
-      sleepAwakeDur: "19m",
-      sleepRemPct: "11%",
-      sleepRemDur: "35m",
-      sleepLightPct: "68%",
-      sleepLightDur: "3h34m",
-      sleepDeepPct: "15%",
-      sleepDeepDur: "47m",
-    },
-  ];
-
-  // 產品使用紀錄資料從 API 取得，不需要假資料
+  // 手錶紀錄由 asusHealthData watcher 自動填入
 
   // 影片觀看紀錄假資料
   videoRecords.value = [
@@ -2279,6 +2055,9 @@ onMounted(() => {
     if (!target.closest(".watchFilterDropdownWrapper")) {
       showWatchFilter.value = false;
     }
+    if (!target.closest(".contractDropdown")) {
+      showContractDropdown.value = false;
+    }
   });
 });
 
@@ -2333,9 +2112,6 @@ const homeFilterOptions = computed(() => {
       case "FavoriteName":
         value = item.FavoriteName || "";
         break;
-      case "ProductName":
-        value = item.ProductName || "";
-        break;
     }
     if (value) options.add(value);
   });
@@ -2345,6 +2121,11 @@ const homeFilterOptions = computed(() => {
 
 const filteredHome = computed(() => {
   let data = processedHomeOrders.value;
+
+  // 依選中的產品名稱篩選
+  if (selectedProductName.value) {
+    data = data.filter((r: any) => r.ProductName === selectedProductName.value);
+  }
 
   // 篩選選項
   if (selectedHomeFilterOptions.value.length > 0) {
@@ -2357,9 +2138,6 @@ const filteredHome = computed(() => {
           break;
         case "FavoriteName":
           value = r.FavoriteName || "";
-          break;
-        case "ProductName":
-          value = r.ProductName || "";
           break;
       }
       return selectedHomeFilterOptions.value.includes(value);
@@ -2396,9 +2174,7 @@ const filteredHome = computed(() => {
         const aTime = a.StartTime || "";
         const bTime = b.StartTime || "";
         // 直接用完整的 StartTime（YYYYMMDDHHmmss）比較，日期+時間一次排完
-        return isAsc
-          ? aTime.localeCompare(bTime)
-          : bTime.localeCompare(aTime);
+        return isAsc ? aTime.localeCompare(bTime) : bTime.localeCompare(aTime);
       }
 
       // 數字排序
@@ -2408,9 +2184,7 @@ const filteredHome = computed(() => {
 
       // 字串排序
       if (typeof aVal === "string" && typeof bVal === "string") {
-        return isAsc
-          ? aVal.localeCompare(bVal)
-          : bVal.localeCompare(aVal);
+        return isAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
       }
 
       return 0;
@@ -2469,6 +2243,136 @@ function nextHome() {
 
 /* RING */
 // ───── 手錶紀錄 ─────
+function buildWatchRecords(raw: any): any[] {
+  if (!raw) return [];
+  const dateMap: Record<string, any> = {};
+
+  const ensure = (d: string) => {
+    if (!dateMap[d]) {
+      dateMap[d] = {
+        id: d,
+        CheckTime: d.replace(/-/g, "/"),
+        bloodPressure: "",
+        heartRate: "",
+        bloodOxygen: "",
+        stress: "",
+        sleep: "",
+        temperature: "",
+        steps: "",
+        hrv: "",
+        bodyWater: "",
+        bodyFat: "",
+        bodyMuscle: "",
+        bpRecords: [],
+        sleepRecords: [],
+        biaRecords: [],
+      };
+    }
+    return dateMap[d];
+  };
+
+  (raw.Hb || []).forEach((item: any) => {
+    if (!item.Date) return;
+    const row = ensure(item.Date);
+    if (item.HeartrateMin && item.HeartrateMax)
+      row.heartRate = `${item.HeartrateMin}~${item.HeartrateMax} bpm`;
+  });
+
+  (raw.Spo2 || []).forEach((item: any) => {
+    if (!item.Date) return;
+    const row = ensure(item.Date);
+    if (item.Spo2Min && item.Spo2Max)
+      row.bloodOxygen = `${item.Spo2Min}~${item.Spo2Max}`;
+  });
+
+  (raw.Step || []).forEach((item: any) => {
+    if (!item.Date) return;
+    const row = ensure(item.Date);
+    if (item.stepsSUM) row.steps = `${item.stepsSUM} 步`;
+  });
+
+  (raw.Tp || []).forEach((item: any) => {
+    if (!item.Date) return;
+    const row = ensure(item.Date);
+    if (item.TpMin && item.TpMax)
+      row.temperature = `${item.TpMin}~${item.TpMax}°C`;
+  });
+
+  (raw.Bp || []).forEach((item: any) => {
+    const d = (item.time || "").slice(0, 10);
+    if (!d) return;
+    const row = ensure(d);
+    row.bpRecords.push(item);
+  });
+
+  (raw.Sleep || []).forEach((item: any) => {
+    const d = (item.StartTime || "").slice(0, 10);
+    if (!d) return;
+    const row = ensure(d);
+    row.sleepRecords.push(item);
+  });
+
+  (raw.Bia || []).forEach((item: any) => {
+    const d = (item.time || "").slice(0, 10);
+    if (!d) return;
+    const row = ensure(d);
+    row.biaRecords.push(item);
+  });
+
+  Object.values(dateMap).forEach((row: any) => {
+    if (row.bpRecords.length) {
+      const bps = row.bpRecords;
+      const avgSys = Math.round(
+        bps.reduce((s: number, b: any) => s + Number(b.sys || 0), 0) /
+          bps.length
+      );
+      const avgDia = Math.round(
+        bps.reduce((s: number, b: any) => s + Number(b.dia || 0), 0) /
+          bps.length
+      );
+      row.bloodPressure = `${avgSys}/${avgDia}`;
+
+      const rmssdVals = bps
+        .map((b: any) => Number(b.rmssd || 0))
+        .filter((v: number) => v > 0);
+      if (rmssdVals.length) {
+        row.hrv = `${Math.round(
+          rmssdVals.reduce((a: number, b: number) => a + b, 0) /
+            rmssdVals.length
+        )} ms`;
+      }
+
+      const stressVals = bps
+        .map((b: any) => Number(b.deStressIndex || 0))
+        .filter((v: number) => v > 0);
+      if (stressVals.length) {
+        row.stress = `${Math.round(
+          stressVals.reduce((a: number, b: number) => a + b, 0) /
+            stressVals.length
+        )}/100`;
+      }
+    }
+
+    if (row.sleepRecords.length) {
+      const best = row.sleepRecords.reduce((prev: any, cur: any) =>
+        Number(cur.SleepScore || 0) > Number(prev.SleepScore || 0) ? cur : prev
+      );
+      row.sleep = best.SleepScore ? `${best.SleepScore} 分` : "";
+    }
+
+    if (row.biaRecords.length) {
+      const latest = row.biaRecords[row.biaRecords.length - 1];
+      if (latest.water)
+        row.bodyWater = `${(Number(latest.water) / 10).toFixed(1)}%`;
+      if (latest.fat) row.bodyFat = `${(Number(latest.fat) / 10).toFixed(1)}%`;
+      if (latest.skm)
+        row.bodyMuscle = `${(Number(latest.skm) / 10).toFixed(1)}%`;
+    }
+  });
+
+  return Object.values(dateMap).sort((a, b) => b.id.localeCompare(a.id));
+}
+
 const pageRing = ref(1);
 const ringRecords = ref<any[]>([]);
 const showWatchFilter = ref(false);
@@ -2826,8 +2730,13 @@ const filteredHealthLog = computed(() => {
     const to = healthLogDateRange.value[1] || from; // 單日選取時 to 可能為 null
     if (from) {
       // 統一使用純日期字串比較（YYYY/MM/DD），避免時區偏移問題
-      const startStr = `${from.getFullYear()}/${String(from.getMonth() + 1).padStart(2, "0")}/${String(from.getDate()).padStart(2, "0")}`;
-      const endStr = `${to.getFullYear()}/${String(to.getMonth() + 1).padStart(2, "0")}/${String(to.getDate()).padStart(2, "0")}`;
+      const startStr = `${from.getFullYear()}/${String(
+        from.getMonth() + 1
+      ).padStart(2, "0")}/${String(from.getDate()).padStart(2, "0")}`;
+      const endStr = `${to.getFullYear()}/${String(to.getMonth() + 1).padStart(
+        2,
+        "0"
+      )}/${String(to.getDate()).padStart(2, "0")}`;
       data = data.filter((r: any) => {
         if (!r.VerbalDate) return false;
         const dateStr = r.VerbalDate; // 格式已是 YYYY/MM/DD
@@ -3039,7 +2948,8 @@ async function fetchBasic() {
   const j = await r.json();
   if (j.Result !== "OK") return;
   member.value = j.MemberDetail.Member;
-  currentOrder.value = j.MemberDetail.NowOrderList?.[0] ?? null;
+  orderList.value = j.MemberDetail.NowOrderList ?? [];
+  currentOrder.value = orderList.value[0] ?? null;
   lastUpdated.value = new Date().toLocaleString("zh-TW");
 }
 
@@ -3080,6 +2990,9 @@ watch(selectedHomeFilterOptions, () => {
 watch(homeKeyword, () => {
   pageHome.value = 1;
 });
+watch(selectedProductName, () => {
+  pageHome.value = 1;
+});
 
 watch(videoRange, () => {
   pageVideo.value = 1;
@@ -3087,6 +3000,14 @@ watch(videoRange, () => {
 watch(appDateRange, () => {
   pageApp.value = 1;
 });
+watch(
+  asusHealthData,
+  (raw) => {
+    ringRecords.value = buildWatchRecords(raw);
+    pageRing.value = 1;
+  },
+  { immediate: true }
+);
 watch(ringRange, () => {
   pageRing.value = 1;
 });
@@ -3251,6 +3172,9 @@ watch(
       await memberStore.fetchVivoWatchList(sel.MID);
     }
 
+    // 取得華碩健康數據（手錶紀錄）
+    await memberStore.fetchAsusHealthData(getAuth());
+
     loading.value = false;
   },
   { deep: true, immediate: true }
@@ -3268,8 +3192,7 @@ function next(refVar: Ref<number>, totalPages: number) {
 }
 
 function openContract() {
-  // 這裡示範直接用 currentOrder，也可以改呼叫 API 取得完整歷史
-  contractList.value = currentOrder.value ? [currentOrder.value] : [];
+  contractList.value = activeOrder.value ? [activeOrder.value] : [];
   showContract.value = true;
 }
 
@@ -3297,6 +3220,9 @@ async function refresh() {
   if (sel?.MID) {
     await memberStore.fetchVivoWatchList(sel.MID);
   }
+
+  // 重新取得華碩健康數據
+  await memberStore.fetchAsusHealthData(getAuth());
   loading.value = false;
 }
 function goBack() {
@@ -3516,8 +3442,8 @@ const isAnyAlertOpen = computed(() => {
 });
 
 const isExpired = computed(() => {
-  if (!currentOrder.value?.RentEnd) return false;
-  const endDate = new Date(currentOrder.value.RentEnd.replace(/\//g, "-"));
+  if (!activeOrder.value?.RentEnd) return false;
+  const endDate = new Date(activeOrder.value.RentEnd.replace(/\//g, "-"));
   return endDate < new Date();
 });
 
@@ -4117,6 +4043,69 @@ const availableEventOptions = computed(() => {
           background-color: #fff;
           box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
 
+          .contractHeader {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            h3 {
+              margin: 0;
+            }
+          }
+
+          .contractDropdown {
+            position: relative;
+            .contractDropdownTrigger {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 28px;
+              height: 28px;
+              border: none;
+              background: transparent;
+              cursor: pointer;
+              border-radius: 50%;
+              transition: background 0.2s;
+              &:hover {
+                background: rgba(27, 163, 155, 0.08);
+              }
+              img {
+                width: 14px;
+                height: 14px;
+                transition: transform 0.2s;
+                &.rotated {
+                  transform: rotate(180deg);
+                }
+              }
+            }
+            .contractDropdownPanel {
+              position: absolute;
+              top: calc(100% + 6px);
+              right: 0;
+              min-width: 160px;
+              background: #fff;
+              border-radius: 12px;
+              box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+              z-index: 200;
+              padding: 6px 0;
+              .contractDropdownItem {
+                padding: 8px 16px;
+                font-size: 13px;
+                color: #333;
+                cursor: pointer;
+                transition: all 0.15s;
+                white-space: nowrap;
+                &:hover {
+                  background: #f5f7fa;
+                }
+                &.active {
+                  color: #1ba39b;
+                  font-weight: 600;
+                  background: rgba(27, 163, 155, 0.08);
+                }
+              }
+            }
+          }
+
           .memberInfoCard2Header {
             display: flex;
             align-items: center;
@@ -4294,9 +4283,19 @@ const availableEventOptions = computed(() => {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+
+  .weekly-summary-modal-header-img {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 9.8px;
+      border: 1px solid var(--Primary-default, #1ba39b);
+      padding: 2px 4px;
+      text-align: center;
+    }
   .weekly-summary-modal-header {
     padding: 1rem 1.25rem 0.5rem;
     position: relative;
+    text-align: center;
     h3 {
       margin: 0;
       font-size: 1.25rem;
@@ -4334,6 +4333,11 @@ const availableEventOptions = computed(() => {
   }
   .weekly-summary-section {
     margin-bottom: 1rem;
+    border-radius: var(--Radius-r-20, 20px);
+    background: var(--Neutral-white, #fff);
+    box-shadow: 0 2px 20px 0
+      var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
+    padding: 1rem;
     &:last-child {
       margin-bottom: 0;
     }
@@ -4341,6 +4345,11 @@ const availableEventOptions = computed(() => {
       margin: 0 0 0.5rem;
       font-size: 1rem;
       color: #2d3047;
+      color: var(--Primary-600, #2d3047);
+      font-size: var(--Text-font-size-24, 24px);
+      font-style: normal;
+      font-weight: 400;
+      letter-spacing: 0.12px;
     }
   }
   .weekly-summary-content {
@@ -4713,103 +4722,6 @@ const availableEventOptions = computed(() => {
 
     span {
       white-space: nowrap;
-    }
-  }
-}
-
-.watchFilterDropdownWrapper {
-  position: relative;
-
-  .filterTrigger {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 0.3rem 0.5rem;
-    background: #fff;
-    border-radius: 50px;
-    cursor: pointer;
-    box-shadow: 0px 2px 12px -2px rgba(177, 192, 216, 0.5);
-    font-size: 14px;
-    transition: all 0.2s;
-
-    width: 140px;
-    img {
-      width: 12px;
-      height: 12px;
-
-      &.rotated {
-        transform: rotate(180deg);
-      }
-    }
-
-    &:hover {
-      box-shadow: inset 0px 2px 6px rgba(177, 192, 216, 0.75);
-    }
-  }
-
-  .filterDropdownPanel {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.15);
-    z-index: 200;
-    min-width: 300px;
-    max-height: 350px;
-    overflow: hidden;
-    display: flex;
-
-    .filterCategories {
-      border-right: 1px solid #eee;
-      padding: 0.5rem 0;
-      min-width: 90px;
-
-      .filterCategory {
-        padding: 0.5rem 1rem;
-        cursor: pointer;
-        font-size: 13px;
-        white-space: nowrap;
-        transition: all 0.15s;
-
-        &.active {
-          color: #1ba39b;
-          font-weight: 600;
-          background: #f0faf9;
-        }
-
-        &:hover {
-          background: #f5f7fa;
-        }
-      }
-    }
-
-    .filterOptions {
-      flex: 1;
-      overflow-y: auto;
-      padding: 0.5rem;
-
-      .filterOption {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.4rem 0.5rem;
-        cursor: pointer;
-        border-radius: 4px;
-        font-size: 13px;
-        color: #333;
-
-        &:hover {
-          background: #f5f7fa;
-        }
-
-        input[type="checkbox"] {
-          width: 16px;
-          height: 16px;
-          cursor: pointer;
-          accent-color: #1ba39b;
-        }
-      }
     }
   }
 }
