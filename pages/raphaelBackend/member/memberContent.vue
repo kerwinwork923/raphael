@@ -72,10 +72,10 @@
               <VueDatePicker
                 v-model="operationDateRange"
                 range
+                :partial-range="true"
                 :enable-time-picker="false"
                 format="yyyy/MM/dd"
                 placeholder="操作日期查詢"
-                prepend-icon="i-calendar"
                 teleport="body"
                 class="dateFilter"
               />
@@ -721,11 +721,6 @@
             </nav>
           </div>
 
-          <!-- 使用紀錄分析 -->
-          <div class="memberInfoCard memberInfoCardGroupW100">
-            <h3>使用紀錄分析</h3>
-            <UsageAnalysisChart :usage-data="filteredHomeForChart" />
-          </div>
         </div>
 
         <!-- █ 健康日誌 & 本周摘要 ------------------------------------------------- -->
@@ -1782,7 +1777,6 @@ import { storeToRefs } from "pinia";
 
 import * as XLSX from "xlsx";
 import Sidebar from "~/components/raphaelBackend/Sidebar.vue";
-import UsageAnalysisChart from "~/components/raphaelBackend/UsageAnalysisChart.vue";
 import AnalysisChart from "~/components/raphaelBackend/AnalysisChart.vue";
 import ContractUserAlert from "~/components/raphaelBackend/ContractUserAlert.vue";
 import AutonomicNerveAlert from "~/components/raphaelBackend/AutonomicNerve.vue";
@@ -1890,7 +1884,6 @@ const selectedWeeklySummary = ref<{
 
 /* ---------- refs ---------- */
 
-const homeChartDateRange = ref<Date[] | null>(null);
 
 const ringRange = ref<Date[] | null>(null);
 
@@ -2201,21 +2194,6 @@ const filteredHome = computed(() => {
   return data;
 });
 
-const filteredHomeForChart = computed(() => {
-  if (!homeChartDateRange.value || homeChartDateRange.value.length < 2)
-    return processedHomeOrders.value;
-
-  const [from, to] = homeChartDateRange.value;
-  const start = from.getTime();
-  const end = to.getTime();
-
-  return processedHomeOrders.value.filter((r: any) => {
-    const dateStr = r.StartDate || r.ConsultationDate || r.TDate || "";
-    if (!dateStr) return false;
-    const ms = Date.parse(dateStr.replace(/\//g, "-"));
-    return ms >= start && ms <= end;
-  });
-});
 
 /* 使用紀錄 */
 const pageHome = ref(1);
@@ -3494,16 +3472,18 @@ function toggleEventOption(event: string) {
 const filteredOperationRecords = computed(() => {
   let data = operationRecordsData.value;
 
-  // 日期篩選
-  if (operationDateRange.value && operationDateRange.value.length >= 2) {
+  // 日期篩選（支援單日選擇：to 為 null 時視為同一天）
+  if (operationDateRange.value && operationDateRange.value.length >= 1) {
     const [from, to] = operationDateRange.value;
-    const start = from.getTime();
-    const end = to.getTime() + 24 * 60 * 60 * 1000 - 1;
-    data = data.filter((r: any) => {
-      if (!r.date) return false;
-      const ms = Date.parse(r.date.replace(/\//g, "-"));
-      return ms >= start && ms <= end;
-    });
+    if (from) {
+      const start = from.getTime();
+      const end = (to ?? from).getTime() + 24 * 60 * 60 * 1000 - 1;
+      data = data.filter((r: any) => {
+        if (!r.date) return false;
+        const ms = Date.parse(r.date.replace(/\//g, "-"));
+        return ms >= start && ms <= end;
+      });
+    }
   }
 
   // 事件篩選
@@ -3525,11 +3505,14 @@ const availableEventOptions = computed(() => {
 </script>
 
 <style scoped lang="scss">
+
 .memberInfo {
   display: flex;
   min-height: 100vh;
   background: $primary-100;
   gap: 1%;
+
+ 
   .w-half {
     flex: 1;
     width: 0;
@@ -4508,7 +4491,7 @@ const availableEventOptions = computed(() => {
 
           .dateFilter {
             :deep(.dp__input) {
-              padding: 0.5rem 1rem;
+              padding: 0.5rem 1rem 0.5rem 2.25rem;
               border-radius: 50px;
               background: #fff;
               box-shadow: 0px 2px 12px -2px rgba(177, 192, 216, 0.5);
