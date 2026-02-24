@@ -1614,7 +1614,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted, nextTick } from "vue";
+import { ref, computed, watch, watchEffect, onMounted, onUnmounted, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import { useMemberStore } from "~/stores/useMemberStore";
@@ -3225,13 +3225,25 @@ watch(
   (raw) => {
     ringRecords.value = buildWatchRecords(raw);
     pageRing.value = 1;
-    renderWatchCharts();
   },
   { immediate: true }
 );
+watchEffect(
+  () => {
+    if (!watchChart.value.labels.length) {
+      destroyWatchCharts();
+      return;
+    }
+    nextTick(() => {
+      requestAnimationFrame(() => {
+        renderWatchCharts();
+      });
+    });
+  },
+  { flush: "post" }
+);
 watch(ringRange, () => {
   pageRing.value = 1;
-  renderWatchCharts();
 });
 watch(watchKeyword, () => {
   pageRing.value = 1;
@@ -3526,6 +3538,7 @@ function openLife(life: any) {
   selectedLife.value = life;
   showLife.value = true;
 }
+
 function closeLife() {
   showLife.value = false;
 }
@@ -3534,6 +3547,7 @@ function openWeeklySummaryModal(row: any) {
   selectedWeeklySummary.value = row;
   showWeeklySummaryModal.value = true;
 }
+
 function closeWeeklySummaryModal() {
   showWeeklySummaryModal.value = false;
   selectedWeeklySummary.value = null;
