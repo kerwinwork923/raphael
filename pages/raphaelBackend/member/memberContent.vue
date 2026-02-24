@@ -2210,14 +2210,27 @@ function parseDateOnlyToMs(dateLike: string) {
   return new Date(y, m - 1, day).getTime();
 }
 
+function toLocalDayStart(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+}
+
+function toLocalDayEnd(date: Date) {
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    23,
+    59,
+    59,
+    999
+  ).getTime();
+}
+
 function getRangeBoundary(range: Date[] | null) {
   if (!range || !range.length || !range[0]) return [null, null] as const;
   const from = range[0];
   const to = range[1] ?? range[0];
-  return [
-    from.getTime(),
-    to.getTime() + 24 * 60 * 60 * 1000 - 1,
-  ] as const;
+  return [toLocalDayStart(from), toLocalDayEnd(to)] as const;
 }
 
 const heartRateCanvas = ref<HTMLCanvasElement | null>(null);
@@ -2642,8 +2655,8 @@ const filteredRing = computed(() => {
   if (ringRange.value && ringRange.value.length >= 1) {
     const [from, to] = ringRange.value;
     if (from) {
-      const start = from.getTime();
-      const end = (to ?? from).getTime() + 24 * 60 * 60 * 1000 - 1;
+      const start = toLocalDayStart(from);
+      const end = toLocalDayEnd(to ?? from);
       data = data.filter((r: any) => {
         const ms = parseDateOnlyToMs(r.CheckTime || "");
         if (Number.isNaN(ms)) return false;
@@ -3734,8 +3747,8 @@ const filteredOperationRecords = computed(() => {
   if (operationDateRange.value && operationDateRange.value.length >= 1) {
     const [from, to] = operationDateRange.value;
     if (from) {
-      const start = from.getTime();
-      const end = (to ?? from).getTime() + 24 * 60 * 60 * 1000 - 1;
+      const start = toLocalDayStart(from);
+      const end = toLocalDayEnd(to ?? from);
       data = data.filter((r: any) => {
         if (!r.date) return false;
         const ms = parseDateOnlyToMs(r.date || "");
