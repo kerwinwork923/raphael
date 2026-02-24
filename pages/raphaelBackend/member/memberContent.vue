@@ -946,227 +946,72 @@
           </div>
         </div>
 
-        <!-- █ 手錶紀錄 ------------------------------------------------- -->
+        <!-- █ 手錶紀錄（圖表版） ------------------------------------------- -->
         <div class="memberInfoRow">
           <div class="memberInfoCard watchRecordCard">
             <div class="memberInfoTitleWrap">
               <h3>手錶紀錄</h3>
               <div class="memberInfoTitleGroup">
-                <small>已使用 {{ totalRing }} 次</small>
                 <VueDatePicker
                   v-model="ringRange"
                   range
+                  :partial-range="true"
                   :enable-time-picker="false"
                   format="yyyy/MM/dd"
                   placeholder="選擇日期區間"
-                  prepend-icon="i-calendar"
                   teleport="body"
                 />
-
-                <div class="filterDropdown">
-                  <div class="filterDropdownWrapper watchFilterDropdownWrapper">
-                    <div
-                      class="filterTrigger"
-                      @click="showWatchFilter = !showWatchFilter"
-                    >
-                      <span>{{ watchFilterCategoryLabel }}</span>
-                      <img
-                        src="/assets/imgs/backend/arrow-down.svg"
-                        alt="arrow"
-                        :class="{ rotated: showWatchFilter }"
-                      />
-                    </div>
-                    <div
-                      class="filterDropdownPanel"
-                      v-if="showWatchFilter"
-                      @click.stop
-                    >
-                      <div class="filterCategories">
-                        <div
-                          class="filterCategory"
-                          :class="{
-                            active: watchFilterCategory === 'CheckTime',
-                          }"
-                          @click="watchFilterCategory = 'CheckTime'"
-                        >
-                          使用時間
-                        </div>
-                        <div
-                          class="filterCategory"
-                          :class="{
-                            active: watchFilterCategory === 'heartRate',
-                          }"
-                          @click="watchFilterCategory = 'heartRate'"
-                        >
-                          心率
-                        </div>
-                        <div
-                          class="filterCategory"
-                          :class="{
-                            active: watchFilterCategory === 'bloodOxygen',
-                          }"
-                          @click="watchFilterCategory = 'bloodOxygen'"
-                        >
-                          血氧
-                        </div>
-                        <div
-                          class="filterCategory"
-                          :class="{ active: watchFilterCategory === 'stress' }"
-                          @click="watchFilterCategory = 'stress'"
-                        >
-                          壓力
-                        </div>
-                        <div
-                          class="filterCategory"
-                          :class="{
-                            active: watchFilterCategory === 'temperature',
-                          }"
-                          @click="watchFilterCategory = 'temperature'"
-                        >
-                          溫度
-                        </div>
-                      </div>
-                      <div class="filterOptions">
-                        <div
-                          class="filterOption"
-                          v-for="opt in watchFilterOptions"
-                          :key="opt"
-                          @click="toggleWatchFilterOption(opt)"
-                        >
-                          <input
-                            type="checkbox"
-                            :checked="selectedWatchFilterOptions.includes(opt)"
-                            @click.stop
-                          />
-                          <span>{{ opt }}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <input
-                    type="text"
-                    v-model="watchKeyword"
-                    placeholder="搜尋關鍵字"
-                    class="searchKeywordInput"
-                  />
-                </div>
               </div>
             </div>
 
-            <div class="memberInfoTable watchTable">
-              <div class="memberInfoTableTitle">
-                <div
-                  class="memberInfoTableTitleItem"
-                  @click="handleSort('ring', 'CheckTime')"
-                >
-                  日期
-                  <img
-                    src="/assets/imgs/backend/sort.svg"
-                    alt="sort"
-                    class="sortIcon"
-                  />
-                </div>
-                <div class="memberInfoTableTitleItem">血壓</div>
-                <div class="memberInfoTableTitleItem">心率</div>
-                <div class="memberInfoTableTitleItem">血氧</div>
-                <div class="memberInfoTableTitleItem">壓力</div>
-                <div class="memberInfoTableTitleItem">睡眠分數</div>
-                <div class="memberInfoTableTitleItem">溫度</div>
-                <div class="memberInfoTableTitleItem">運動</div>
-                <div class="memberInfoTableTitleItem">HRV</div>
-                <div class="memberInfoTableTitleItem watchBodyCompCol">
-                  身體組成
-                </div>
+            <div class="watchChartsGrid" v-if="watchChart.labels.length">
+              <div class="watchChartCard">
+                <h4>心率</h4>
+                <canvas ref="heartRateCanvas" class="watchChartCanvas"></canvas>
               </div>
-              <div class="memberInfoTableHR" />
 
-              <template v-if="paginatedRing.length">
-                <div
-                  class="memberInfoTableRow watchRow"
-                  v-for="r in paginatedRing"
-                  :key="r.id"
-                  @click="openWatchDetail(r)"
-                >
-                  <div class="memberInfoTableRowItem">{{ r.CheckTime }}</div>
-                  <div class="memberInfoTableRowItem">
-                    {{ r.bloodPressure || "—" }}
-                  </div>
-                  <div class="memberInfoTableRowItem">
-                    {{ r.heartRate || "—" }}
-                  </div>
-                  <div class="memberInfoTableRowItem">
-                    {{ r.bloodOxygen || "—" }}
-                  </div>
-                  <div class="memberInfoTableRowItem">
-                    {{ r.stress || "—" }}
-                  </div>
-                  <div class="memberInfoTableRowItem">
-                    {{ r.sleep || "—" }}
-                  </div>
-                  <div class="memberInfoTableRowItem">
-                    {{ r.temperature || "—" }}
-                  </div>
-                  <div class="memberInfoTableRowItem">{{ r.steps || "—" }}</div>
-                  <div class="memberInfoTableRowItem">{{ r.hrv || "—" }}</div>
-                  <div class="memberInfoTableRowItem watchBodyCompCell">
-                    <span>水分 {{ r.bodyWater || "—" }}</span>
-                    <span>體脂 {{ r.bodyFat || "—" }}</span>
-                    <span>肌肉 {{ r.bodyMuscle || "—" }}</span>
-                  </div>
-                  <img
-                    src="/assets/imgs/backend/goNext.svg"
-                    alt="detail"
-                    style="cursor: pointer; position: absolute; right: 0"
-                  />
-                </div>
-              </template>
-              <div class="memberInfoTableRow" v-else>
-                <div class="memberInfoTableRowItem" style="width: 100%">
-                  尚無資料
-                </div>
+              <div class="watchChartCard">
+                <h4>血氧</h4>
+                <canvas ref="spo2Canvas" class="watchChartCanvas"></canvas>
+              </div>
+
+              <div class="watchChartCard">
+                <h4>血壓</h4>
+                <canvas ref="bpCanvas" class="watchChartCanvas"></canvas>
+              </div>
+
+              <div class="watchChartCard">
+                <h4>壓力</h4>
+                <canvas ref="stressCanvas" class="watchChartCanvas"></canvas>
+              </div>
+
+              <div class="watchChartCard">
+                <h4>睡眠</h4>
+                <canvas ref="sleepCanvas" class="watchChartCanvas"></canvas>
+              </div>
+
+              <div class="watchChartCard">
+                <h4>溫度</h4>
+                <canvas ref="tempCanvas" class="watchChartCanvas"></canvas>
+              </div>
+
+              <div class="watchChartCard">
+                <h4>運動</h4>
+                <canvas ref="stepsCanvas" class="watchChartCanvas"></canvas>
+              </div>
+
+              <div class="watchChartCard">
+                <h4>HRV</h4>
+                <canvas ref="hrvCanvas" class="watchChartCanvas"></canvas>
+              </div>
+
+              <div class="watchChartCard">
+                <h4>身體組成</h4>
+                <canvas ref="bodyCanvas" class="watchChartCanvas"></canvas>
               </div>
             </div>
 
-            <nav class="pagination" v-if="totalRing">
-              <button
-                class="btn-page"
-                :disabled="pageRing === 1"
-                @click="pageRing = 1"
-              >
-                &lt;&lt;
-              </button>
-              <button
-                class="btn-page"
-                :disabled="pageRing === 1"
-                @click="pageRing--"
-              >
-                &lt;
-              </button>
-              <button
-                class="btn-page btn-page-number"
-                v-for="p in pageNumberListRing"
-                :key="p"
-                :class="{ active: pageRing === p }"
-                :disabled="p === '...'"
-                @click="typeof p === 'number' && (pageRing = p)"
-              >
-                {{ p }}
-              </button>
-              <button
-                class="btn-page"
-                :disabled="pageRing === totalPagesRing"
-                @click="pageRing++"
-              >
-                &gt;
-              </button>
-              <button
-                class="btn-page"
-                :disabled="pageRing === totalPagesRing"
-                @click="pageRing = totalPagesRing"
-              >
-                &gt;&gt;
-              </button>
-            </nav>
+            <div class="watchChartEmpty" v-else>尚無手錶紀錄資料</div>
           </div>
         </div>
 
@@ -1769,7 +1614,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from "vue";
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import { useMemberStore } from "~/stores/useMemberStore";
@@ -1784,6 +1629,8 @@ import LifeDetectAlert from "~/components/raphaelBackend/LifeDetectAlert.vue";
 import EditBasicInfoModal from "~/components/raphaelBackend/EditBasicInfoModal.vue";
 import DeleteMemberModal from "~/components/raphaelBackend/DeleteMemberModal.vue";
 import { useSeo } from "~/composables/useSeo";
+import { Chart, registerables } from "chart.js";
+Chart.register(...registerables);
 const router = useRouter();
 const route = useRoute();
 
@@ -2045,17 +1892,17 @@ onMounted(() => {
     if (!target.closest(".eventFilterWrapper")) {
       showEventFilter.value = false;
     }
-    if (!target.closest(".watchFilterDropdownWrapper")) {
-      showWatchFilter.value = false;
-    }
     if (!target.closest(".contractDropdown")) {
       showContractDropdown.value = false;
     }
   });
+
+  renderWatchCharts();
 });
 
 onUnmounted(() => {
   window.removeEventListener("resize", handleResize);
+  destroyWatchCharts();
 });
 
 const pageNumberList = computed(() =>
@@ -2351,6 +2198,123 @@ function buildWatchRecords(raw: any): any[] {
   return Object.values(dateMap).sort((a, b) => b.id.localeCompare(a.id));
 }
 
+function toDateKey(dateLike: string) {
+  return (dateLike || "").slice(0, 10).replace(/\//g, "-");
+}
+
+function parseDateOnlyToMs(dateLike: string) {
+  const d = toDateKey(dateLike);
+  if (!d) return NaN;
+  const [y, m, day] = d.split("-").map(Number);
+  if (!y || !m || !day) return NaN;
+  return new Date(y, m - 1, day).getTime();
+}
+
+function getRangeBoundary(range: Date[] | null) {
+  if (!range || !range.length || !range[0]) return [null, null] as const;
+  const from = range[0];
+  const to = range[1] ?? range[0];
+  return [
+    from.getTime(),
+    to.getTime() + 24 * 60 * 60 * 1000 - 1,
+  ] as const;
+}
+
+const heartRateCanvas = ref<HTMLCanvasElement | null>(null);
+const spo2Canvas = ref<HTMLCanvasElement | null>(null);
+const bpCanvas = ref<HTMLCanvasElement | null>(null);
+const stressCanvas = ref<HTMLCanvasElement | null>(null);
+const sleepCanvas = ref<HTMLCanvasElement | null>(null);
+const tempCanvas = ref<HTMLCanvasElement | null>(null);
+const stepsCanvas = ref<HTMLCanvasElement | null>(null);
+const hrvCanvas = ref<HTMLCanvasElement | null>(null);
+const bodyCanvas = ref<HTMLCanvasElement | null>(null);
+const watchCharts: Record<string, Chart | null> = {
+  heartRate: null,
+  spo2: null,
+  bp: null,
+  stress: null,
+  sleep: null,
+  temp: null,
+  steps: null,
+  hrv: null,
+  body: null,
+};
+
+function destroyWatchCharts() {
+  Object.keys(watchCharts).forEach((k) => {
+    watchCharts[k]?.destroy();
+    watchCharts[k] = null;
+  });
+}
+
+function createLineChart(
+  key: keyof typeof watchCharts,
+  canvas: HTMLCanvasElement | null,
+  labels: string[],
+  datasets: any[]
+) {
+  if (!canvas) return;
+  watchCharts[key]?.destroy();
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  watchCharts[key] = new Chart(ctx, {
+    type: "line",
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { position: "bottom", labels: { boxWidth: 8, boxHeight: 8 } },
+      },
+      scales: {
+        y: { beginAtZero: true, ticks: { font: { size: 10 } } },
+        x: { ticks: { font: { size: 10 } } },
+      },
+      elements: {
+        point: { radius: 2 },
+        line: { tension: 0.3, borderWidth: 1.5 },
+      },
+    },
+  });
+}
+
+function createBarChart(
+  key: keyof typeof watchCharts,
+  canvas: HTMLCanvasElement | null,
+  labels: string[],
+  datasets: any[],
+  stacked = false
+) {
+  if (!canvas) return;
+  watchCharts[key]?.destroy();
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  watchCharts[key] = new Chart(ctx, {
+    type: "bar",
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: "bottom", labels: { boxWidth: 8, boxHeight: 8 } },
+      },
+      scales: {
+        x: { stacked, ticks: { font: { size: 10 } } },
+        y: { stacked, beginAtZero: true, ticks: { font: { size: 10 } } },
+      },
+      datasets: {
+        bar: {
+          borderRadius: 2,
+          barThickness: 10,
+          maxBarThickness: 12,
+        },
+      },
+    },
+  });
+}
+
 const pageRing = ref(1);
 const ringRecords = ref<any[]>([]);
 const showWatchFilter = ref(false);
@@ -2359,6 +2323,281 @@ const selectedWatchFilterOptions = ref<string[]>([]);
 const watchKeyword = ref("");
 const showWatchDetailModal = ref(false);
 const selectedWatchRecord = ref<any>(null);
+
+const watchChart = computed(() => {
+  const raw = asusHealthData.value || {};
+  const [fromMs, toMs] = getRangeBoundary(ringRange.value);
+  const inRange = (dateKey: string) => {
+    if (fromMs === null || toMs === null) return true;
+    const ms = parseDateOnlyToMs(dateKey);
+    if (Number.isNaN(ms)) return false;
+    return ms >= fromMs && ms <= toMs;
+  };
+
+  const dateSet = new Set<string>();
+  (raw.Hb || []).forEach((x: any) => x.Date && inRange(x.Date) && dateSet.add(x.Date));
+  (raw.Spo2 || []).forEach((x: any) => x.Date && inRange(x.Date) && dateSet.add(x.Date));
+  (raw.Step || []).forEach((x: any) => x.Date && inRange(x.Date) && dateSet.add(x.Date));
+  (raw.Tp || []).forEach((x: any) => x.Date && inRange(x.Date) && dateSet.add(x.Date));
+  (raw.Bp || []).forEach((x: any) => {
+    const d = toDateKey(x.time || "");
+    if (d && inRange(d)) dateSet.add(d);
+  });
+  (raw.Sleep || []).forEach((x: any) => {
+    const d = toDateKey(x.StartTime || "");
+    if (d && inRange(d)) dateSet.add(d);
+  });
+  (raw.Bia || []).forEach((x: any) => {
+    const d = toDateKey(x.time || "");
+    if (d && inRange(d)) dateSet.add(d);
+  });
+
+  let dates = Array.from(dateSet).sort();
+
+  const hbMap = new Map<string, any>((raw.Hb || []).map((x: any) => [x.Date, x]));
+  const spo2Map = new Map<string, any>((raw.Spo2 || []).map((x: any) => [x.Date, x]));
+  const stepMap = new Map<string, any>((raw.Step || []).map((x: any) => [x.Date, x]));
+  const tpMap = new Map<string, any>((raw.Tp || []).map((x: any) => [x.Date, x]));
+
+  const bpGroup: Record<string, any[]> = {};
+  (raw.Bp || []).forEach((x: any) => {
+    const d = toDateKey(x.time || "");
+    if (!d) return;
+    bpGroup[d] ||= [];
+    bpGroup[d].push(x);
+  });
+
+  const sleepGroup: Record<string, { deep: number; rem: number; light: number; awake: number }> = {};
+  (raw.Sleep || []).forEach((x: any) => {
+    const d = toDateKey(x.StartTime || "");
+    if (!d) return;
+    sleepGroup[d] ||= { deep: 0, rem: 0, light: 0, awake: 0 };
+    sleepGroup[d].deep += Number(x.ComfortCount || 0);
+    sleepGroup[d].rem += Number(x.RemCount || 0);
+    sleepGroup[d].light += Number(x.LightCount || 0);
+    sleepGroup[d].awake += Number(x.AwakeCount || 0);
+  });
+
+  const biaGroup: Record<string, any[]> = {};
+  (raw.Bia || []).forEach((x: any) => {
+    const d = toDateKey(x.time || "");
+    if (!d) return;
+    biaGroup[d] ||= [];
+    biaGroup[d].push(x);
+  });
+
+  // 只保留至少有一個有效數值的日期，避免出現大量空白圖卡
+  dates = dates.filter((d) => {
+    const hb = hbMap.get(d);
+    const spo2 = spo2Map.get(d);
+    const step = stepMap.get(d);
+    const tp = tpMap.get(d);
+    const sleep = sleepGroup[d];
+    const bp = bpGroup[d];
+    const bia = biaGroup[d];
+
+    return (
+      Number(hb?.HeartrateMin || 0) > 0 ||
+      Number(hb?.HeartrateMax || 0) > 0 ||
+      Number(spo2?.Spo2Min || 0) > 0 ||
+      Number(spo2?.Spo2Max || 0) > 0 ||
+      Number(step?.stepsSUM || 0) > 0 ||
+      Number(tp?.TpMin || 0) > 0 ||
+      Number(tp?.TpMax || 0) > 0 ||
+      (bp && bp.length > 0) ||
+      (sleep && (sleep.deep + sleep.rem + sleep.light + sleep.awake) > 0) ||
+      (bia && bia.length > 0)
+    );
+  });
+
+  if (fromMs === null && toMs === null && dates.length > 7) dates = dates.slice(-7);
+  const labels = dates.map((d) => d.slice(5).replace("-", "/"));
+
+  const heartRateMin = dates.map((d) => Number(hbMap.get(d)?.HeartrateMin || 0));
+  const heartRateMax = dates.map((d) => Number(hbMap.get(d)?.HeartrateMax || 0));
+  const spo2Min = dates.map((d) => Number(spo2Map.get(d)?.Spo2Min || 0));
+  const spo2Max = dates.map((d) => Number(spo2Map.get(d)?.Spo2Max || 0));
+  const tempMin = dates.map((d) => Number(tpMap.get(d)?.TpMin || 0));
+  const tempMax = dates.map((d) => Number(tpMap.get(d)?.TpMax || 0));
+  const steps = dates.map((d) => Number(stepMap.get(d)?.stepsSUM || 0));
+
+  const bpSys = dates.map((d) => {
+    const arr = bpGroup[d] || [];
+    if (!arr.length) return 0;
+    return Math.round(arr.reduce((s: number, x: any) => s + Number(x.sys || 0), 0) / arr.length);
+  });
+  const bpDia = dates.map((d) => {
+    const arr = bpGroup[d] || [];
+    if (!arr.length) return 0;
+    return Math.round(arr.reduce((s: number, x: any) => s + Number(x.dia || 0), 0) / arr.length);
+  });
+  const stress = dates.map((d) => {
+    const arr = bpGroup[d] || [];
+    if (!arr.length) return 0;
+    return Math.round(arr.reduce((s: number, x: any) => s + Number(x.deStressIndex || 0), 0) / arr.length);
+  });
+  const hrv = dates.map((d) => {
+    const arr = bpGroup[d] || [];
+    if (!arr.length) return 0;
+    return Math.round(arr.reduce((s: number, x: any) => s + Number(x.rmssd || 0), 0) / arr.length);
+  });
+
+  const sleepDeep = dates.map((d) => sleepGroup[d]?.deep || 0);
+  const sleepRem = dates.map((d) => sleepGroup[d]?.rem || 0);
+  const sleepLight = dates.map((d) => sleepGroup[d]?.light || 0);
+  const sleepAwake = dates.map((d) => sleepGroup[d]?.awake || 0);
+  const sleepTotal = dates.map((_, i) => sleepDeep[i] + sleepRem[i] + sleepLight[i] + sleepAwake[i]);
+  const sleepMax = Math.max(...sleepTotal, 1);
+
+  const bodyWater = dates.map((d) => {
+    const arr = biaGroup[d] || [];
+    if (!arr.length) return 0;
+    const last = arr[arr.length - 1];
+    return Number(last.water || 0) / 10;
+  });
+  const bodyFat = dates.map((d) => {
+    const arr = biaGroup[d] || [];
+    if (!arr.length) return 0;
+    const last = arr[arr.length - 1];
+    return Number(last.fat || 0) / 10;
+  });
+  const bodyMuscle = dates.map((d) => {
+    const arr = biaGroup[d] || [];
+    if (!arr.length) return 0;
+    const last = arr[arr.length - 1];
+    return Number(last.skm || 0) / 10;
+  });
+
+  return {
+    labels,
+    heartRateMin,
+    heartRateMax,
+    spo2Min,
+    spo2Max,
+    bpSys,
+    bpDia,
+    stress,
+    tempMin,
+    tempMax,
+    steps,
+    hrv,
+    sleepDeep,
+    sleepRem,
+    sleepLight,
+    sleepAwake,
+    sleepTotal,
+    sleepMax,
+    stepMax: Math.max(...steps, 1),
+    bodyWater,
+    bodyFat,
+    bodyMuscle,
+  };
+});
+
+async function renderWatchCharts() {
+  await nextTick();
+  const labels = watchChart.value.labels;
+  if (!labels.length) {
+    destroyWatchCharts();
+    return;
+  }
+
+  createLineChart("heartRate", heartRateCanvas.value, labels, [
+    {
+      label: "最高",
+      data: watchChart.value.heartRateMax,
+      borderColor: "#7cbc28",
+      backgroundColor: "#7cbc28",
+    },
+    {
+      label: "最低",
+      data: watchChart.value.heartRateMin,
+      borderColor: "#27a3a9",
+      backgroundColor: "#27a3a9",
+    },
+  ]);
+
+  createLineChart("spo2", spo2Canvas.value, labels, [
+    {
+      label: "最高",
+      data: watchChart.value.spo2Max,
+      borderColor: "#7cbc28",
+      backgroundColor: "#7cbc28",
+    },
+    {
+      label: "最低",
+      data: watchChart.value.spo2Min,
+      borderColor: "#27a3a9",
+      backgroundColor: "#27a3a9",
+    },
+  ]);
+
+  createLineChart("bp", bpCanvas.value, labels, [
+    {
+      label: "收縮壓",
+      data: watchChart.value.bpSys,
+      borderColor: "#7cbc28",
+      backgroundColor: "#7cbc28",
+    },
+    {
+      label: "舒張壓",
+      data: watchChart.value.bpDia,
+      borderColor: "#27a3a9",
+      backgroundColor: "#27a3a9",
+    },
+  ]);
+
+  createLineChart("stress", stressCanvas.value, labels, [
+    {
+      label: "舒壓指數",
+      data: watchChart.value.stress,
+      borderColor: "#7cbc28",
+      backgroundColor: "#7cbc28",
+    },
+  ]);
+
+  createBarChart(
+    "sleep",
+    sleepCanvas.value,
+    labels,
+    [
+      { label: "深眠", data: watchChart.value.sleepDeep, backgroundColor: "#3f8c25" },
+      { label: "REM", data: watchChart.value.sleepRem, backgroundColor: "#74b84a" },
+      { label: "淺眠", data: watchChart.value.sleepLight, backgroundColor: "#a4ce77" },
+      { label: "清醒", data: watchChart.value.sleepAwake, backgroundColor: "#d3e8b8" },
+    ],
+    true
+  );
+
+  createLineChart("temp", tempCanvas.value, labels, [
+    {
+      label: "最高",
+      data: watchChart.value.tempMax,
+      borderColor: "#7cbc28",
+      backgroundColor: "#7cbc28",
+    },
+    {
+      label: "最低",
+      data: watchChart.value.tempMin,
+      borderColor: "#27a3a9",
+      backgroundColor: "#27a3a9",
+    },
+  ]);
+
+  createBarChart("steps", stepsCanvas.value, labels, [
+    { label: "總步數", data: watchChart.value.steps, backgroundColor: "#7cbc28" },
+  ]);
+
+  createLineChart("hrv", hrvCanvas.value, labels, [
+    { label: "RMSSD", data: watchChart.value.hrv, borderColor: "#7cbc28", backgroundColor: "#7cbc28" },
+  ]);
+
+  createLineChart("body", bodyCanvas.value, labels, [
+    { label: "水分", data: watchChart.value.bodyWater, borderColor: "#27a3a9", backgroundColor: "#27a3a9" },
+    { label: "體脂肪", data: watchChart.value.bodyFat, borderColor: "#7cbc28", backgroundColor: "#7cbc28" },
+    { label: "肌肉量", data: watchChart.value.bodyMuscle, borderColor: "#2f6fa3", backgroundColor: "#2f6fa3" },
+  ]);
+}
 
 const watchFilterCategoryLabel = computed(() => {
   const map: Record<string, string> = {
@@ -2400,14 +2639,17 @@ const filteredRing = computed(() => {
   let data = ringRecords.value;
 
   // 日期區間篩選
-  if (ringRange.value && ringRange.value.length >= 2) {
+  if (ringRange.value && ringRange.value.length >= 1) {
     const [from, to] = ringRange.value;
-    const start = from.getTime();
-    const end = to.getTime() + 24 * 60 * 60 * 1000 - 1;
-    data = data.filter((r: any) => {
-      const ms = Date.parse(r.CheckTime?.replace(/\//g, "-") || "");
-      return ms >= start && ms <= end;
-    });
+    if (from) {
+      const start = from.getTime();
+      const end = (to ?? from).getTime() + 24 * 60 * 60 * 1000 - 1;
+      data = data.filter((r: any) => {
+        const ms = parseDateOnlyToMs(r.CheckTime || "");
+        if (Number.isNaN(ms)) return false;
+        return ms >= start && ms <= end;
+      });
+    }
   }
 
   // 分類篩選
@@ -2983,11 +3225,13 @@ watch(
   (raw) => {
     ringRecords.value = buildWatchRecords(raw);
     pageRing.value = 1;
+    renderWatchCharts();
   },
   { immediate: true }
 );
 watch(ringRange, () => {
   pageRing.value = 1;
+  renderWatchCharts();
 });
 watch(watchKeyword, () => {
   pageRing.value = 1;
@@ -3480,7 +3724,8 @@ const filteredOperationRecords = computed(() => {
       const end = (to ?? from).getTime() + 24 * 60 * 60 * 1000 - 1;
       data = data.filter((r: any) => {
         if (!r.date) return false;
-        const ms = Date.parse(r.date.replace(/\//g, "-"));
+        const ms = parseDateOnlyToMs(r.date || "");
+        if (Number.isNaN(ms)) return false;
         return ms >= start && ms <= end;
       });
     }
@@ -4662,51 +4907,70 @@ const availableEventOptions = computed(() => {
   }
 }
 
-// ───── 手錶紀錄表格樣式 ─────
+// ───── 手錶紀錄圖表樣式 ─────
 .watchRecordCard {
   width: 100% !important;
 }
 
-.watchTable {
-  .memberInfoTableTitle {
-    gap: 0;
+.watchChartsGrid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+
+  @include respond-to("xl") {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .memberInfoTableTitleItem {
-    min-width: 0;
-    font-size: 13px !important;
-    white-space: nowrap;
+  @include respond-to("md") {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
   }
+}
 
-  .memberInfoTableRow.watchRow {
-    cursor: pointer;
-    transition: background 0.15s;
+.watchChartCard {
+  border-radius: 14px;
+  border: 1px solid #e7edf3;
+  background: #fff;
+  padding: 12px 12px 8px;
+  min-height: 205px;
 
-    &:hover {
-      background-color: #f5fafa;
-    }
-
-    .memberInfoTableRowItem {
-      font-size: 13px;
-      min-width: 0;
-    }
+  h4 {
+    margin: 0 0 6px;
+    color: #2d3047;
+    font-size: 22px;
+    font-weight: 600;
   }
+}
 
-  .watchBodyCompCol {
-    min-width: 120px;
-  }
+.watchChartCanvas {
+  width: 100% !important;
+  height: 155px !important;
+}
 
-  .watchBodyCompCell {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    line-height: 1.4;
-    font-size: 12px !important;
+.watchChartCard :deep(canvas) {
+  display: block;
+}
 
-    span {
-      white-space: nowrap;
-    }
-  }
+.watchChartCard :deep(.chartjs-render-monitor) {
+  width: 100% !important;
+  height: 155px !important;
+}
+
+.watchChartCard :deep(.chartjs-legend ul) {
+  margin-top: 2px !important;
+}
+
+.watchChartCard :deep(.chartjs-legend li) {
+  font-size: 11px !important;
+}
+
+.watchChartEmpty {
+  margin-top: 12px;
+  border-radius: 12px;
+  border: 1px dashed #d9e3ee;
+  color: #8a98a8;
+  padding: 24px 12px;
+  text-align: center;
 }
 
 // ───── 手錶紀錄詳情彈窗樣式 ─────
