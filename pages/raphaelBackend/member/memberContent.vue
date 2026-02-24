@@ -4971,7 +4971,7 @@ const availableEventOptions = computed(() => {
 
 .watchChartCanvas {
   width: 100% !important;
-  height: 155px !important;
+  height: 300px !important;
 }
 
 .watchChartCard :deep(canvas) {
@@ -4980,7 +4980,7 @@ const availableEventOptions = computed(() => {
 
 .watchChartCard :deep(.chartjs-render-monitor) {
   width: 100% !important;
-  height: 155px !important;
+  height: 160px !important;
 }
 
 .watchChartCard :deep(.chartjs-legend ul) {
