@@ -25,11 +25,73 @@
           </div>
 
           <div class="editBasicInfoModalField">
+            <label>常用信箱</label>
+            <input
+              type="text"
+              v-model="formData.mail"
+              placeholder="請輸入常用信箱"
+            />
+          </div>
+
+          <div class="editBasicInfoModalField">
+            <label>宏碁註冊信箱</label>
+            <input
+              type="text"
+              v-model="formData.acerMail"
+              placeholder="請輸入宏碁註冊信箱"
+            />
+          </div>
+
+          <div class="editBasicInfoModalField">
+            <label>Garmin註冊信箱</label>
+            <input
+              type="text"
+              v-model="formData.garminMail"
+              placeholder="請輸入Garmin註冊信箱"
+            />
+          </div>
+
+          <div class="editBasicInfoModalField">
+            <label>身高</label>
+            <input
+              type="text"
+              v-model="formData.height"
+              placeholder="請輸入身高"
+            />
+          </div>
+
+          <div class="editBasicInfoModalField">
+            <label>體重</label>
+            <input
+              type="text"
+              v-model="formData.weight"
+              placeholder="請輸入體重"
+            />
+          </div>
+
+          <div class="editBasicInfoModalField">
+            <label>性別</label>
+            <input
+              type="text"
+              v-model="formData.sex"
+              placeholder="請輸入性別（1:男、2:女）"
+            />
+          </div>
+
+          <div class="editBasicInfoModalField">
             <label>生日</label>
             <input
               type="text"
               v-model="formData.birthday"
               placeholder="請輸入生日"
+            />
+          </div>
+
+          <div class="editBasicInfoModalField">
+            <label>地址</label>
+            <textarea
+              v-model="formData.address"
+              placeholder="請輸入地址"
             />
           </div>
 
@@ -56,36 +118,63 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 
+type EditBasicFormData = {
+  name: string;
+  mail: string;
+  acerMail: string;
+  garminMail: string;
+  height: string;
+  weight: string;
+  sex: string;
+  birthday: string;
+  address: string;
+  phone: string;
+};
+
 const props = defineProps<{
   show: boolean;
-  initialData?: {
-    name?: string;
-    birthday?: string;
-    phone?: string;
-  };
+  initialData?: Partial<EditBasicFormData>;
 }>();
 
 const emit = defineEmits<{
   close: [];
-  submit: [data: { name: string; birthday: string; phone: string }];
+  submit: [data: EditBasicFormData];
 }>();
 
-const formData = ref({
+function buildFormData(newData?: Partial<EditBasicFormData>): EditBasicFormData {
+  return {
+    name: newData?.name || "",
+    mail: newData?.mail || "",
+    acerMail: newData?.acerMail || "",
+    garminMail: newData?.garminMail || "",
+    height: newData?.height || "",
+    weight: newData?.weight || "",
+    sex: newData?.sex || "",
+    birthday: newData?.birthday || "",
+    address: newData?.address || "",
+    phone: newData?.phone || "",
+  };
+}
+
+const formData = ref<EditBasicFormData>({
   name: "",
+  mail: "",
+  acerMail: "",
+  garminMail: "",
+  height: "",
+  weight: "",
+  sex: "",
   birthday: "",
+  address: "",
   phone: "",
 });
 
 // 當 initialData 改變時，更新表單資料
 watch(
   () => props.initialData,
-  (newData) => {
+  (newData: Partial<EditBasicFormData> | undefined) => {
     if (newData) {
-      formData.value = {
-        name: newData.name || "",
-        birthday: newData.birthday || "",
-        phone: newData.phone || "",
-      };
+      formData.value = buildFormData(newData);
     }
   },
   { immediate: true, deep: true }
@@ -94,13 +183,9 @@ watch(
 // 當 show 變為 true 時，重置表單
 watch(
   () => props.show,
-  (isShow) => {
+  (isShow: boolean) => {
     if (isShow && props.initialData) {
-      formData.value = {
-        name: props.initialData.name || "",
-        birthday: props.initialData.birthday || "",
-        phone: props.initialData.phone || "",
-      };
+      formData.value = buildFormData(props.initialData);
     }
   }
 );
@@ -132,6 +217,8 @@ function handleSubmit() {
   position: relative;
   width: 100%;
   max-width: 500px;
+  max-height: 70%;
+  overflow-y: auto;
   background: #fff;
   border-radius: 20px;
   box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
@@ -223,7 +310,8 @@ font-weight: 400;
 letter-spacing: 3.6px;
   }
 
-  input {
+  input,
+  textarea {
     width: 100%;
     padding: 0.75rem 1rem;
     border: 1px solid #e5e9f2;
@@ -250,6 +338,11 @@ letter-spacing: 2.7px;
     &::placeholder {
       color: #b1c0d8;
     }
+  }
+
+  textarea {
+    min-height: 78px;
+    resize: vertical;
   }
 }
 

@@ -30,9 +30,16 @@
     <EditBasicInfoModal
       :show="showEditBasicModal"
       :initial-data="{
-        name: member?.Name ?? '',
-        birthday: member?.Birthday ?? '',
-        phone: member?.Mobile ?? '',
+        name: String(member?.Name ?? ''),
+        mail: String(member?.Mail ?? ''),
+        acerMail: String(member?.AcerMail ?? ''),
+        garminMail: String(member?.GarminMail ?? ''),
+        height: String(member?.Height ?? ''),
+        weight: String(member?.Weight ?? ''),
+        sex: String(member?.Sex ?? member?.Gender ?? ''),
+        birthday: String(member?.Birthday ?? ''),
+        address: String(member?.Address ?? ''),
+        phone: String(member?.Mobile ?? ''),
       }"
       @close="closeEditBasicModal"
       @submit="handleEditBasicSubmit"
@@ -118,7 +125,6 @@
             </div>
           </div>
         </div>
-
         <!-- 表格內容 -->
         <div class="operationModalTable">
           <div class="operationTableHeader">
@@ -140,7 +146,6 @@
             </div>
           </div>
         </div>
-
         <!-- 關閉按鈕 -->
         <div class="operationModalFooter">
           <div class="operationModalClose" @click="closeOperationRecord">
@@ -3577,7 +3582,14 @@ function closeEditBasicModal() {
 
 async function handleEditBasicSubmit(data: {
   name: string;
+  mail: string;
+  acerMail: string;
+  garminMail: string;
+  height: string;
+  weight: string;
+  sex: string;
   birthday: string;
+  address: string;
   phone: string;
 }) {
   const { token, admin, sel } = getAuth();
@@ -3586,10 +3598,17 @@ async function handleEditBasicSubmit(data: {
     return;
   }
 
+  const sexValue = String(
+    data.sex ?? (member.value as any)?.Sex ?? (member.value as any)?.Gender ?? ""
+  ).trim();
+  if (!sexValue) {
+    alert("性別不可空白，請先補齊會員性別資料");
+    return;
+  }
+
   try {
-    // TODO: 替換為實際的 API 端點
     const response = await fetch(
-      "https://23700999.com:8081/HMA/API_UpdateMemberBasicInfo.jsp",
+      "https://23700999.com:8081/HMA/api/bk/MemberModify",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -3598,8 +3617,15 @@ async function handleEditBasicSubmit(data: {
           Token: token,
           MID: sel.MID,
           Name: data.name,
+          Mail: data.mail,
+          AcerMail: data.acerMail,
+          GarminMail: data.garminMail,
+          Height: data.height,
+          Weight: data.weight,
           Birthday: data.birthday,
+          Address: data.address,
           Mobile: data.phone,
+          Sex: sexValue,
         }),
       }
     );
