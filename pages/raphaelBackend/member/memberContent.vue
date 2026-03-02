@@ -310,7 +310,11 @@
       >
         <div class="weekly-summary-modal">
           <div class="weekly-summary-modal-header">
-            <img class="weekly-summary-modal-header-img" src="/assets/imgs/backend/Subtract.svg" alt="" />
+            <img
+              class="weekly-summary-modal-header-img"
+              src="/assets/imgs/backend/Subtract.svg"
+              alt=""
+            />
             <h3>{{ selectedWeeklySummary?.DateRange ?? "—" }}</h3>
             <p class="summary-date-label">Summary date</p>
             <button
@@ -728,7 +732,6 @@
               </button>
             </nav>
           </div>
-
         </div>
 
         <!-- █ 健康日誌 & 本周摘要 ------------------------------------------------- -->
@@ -1622,7 +1625,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, watchEffect, onMounted, onUnmounted, nextTick } from "vue";
+import {
+  ref,
+  computed,
+  watch,
+  watchEffect,
+  onMounted,
+  onUnmounted,
+  nextTick,
+} from "vue";
 import { useRouter, useRoute } from "vue-router";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import { useMemberStore } from "~/stores/useMemberStore";
@@ -1717,7 +1728,7 @@ const activeOrder = computed(() => {
   if (!selectedProductName.value) return currentOrder.value;
   return (
     (orderList.value || []).find(
-      (o: any) => o.ProductName === selectedProductName.value
+      (o: any) => o.ProductName === selectedProductName.value,
     ) ?? currentOrder.value
   );
 });
@@ -1738,7 +1749,6 @@ const selectedWeeklySummary = ref<{
 } | null>(null);
 
 /* ---------- refs ---------- */
-
 
 const ringRange = ref<Date[] | null>(null);
 
@@ -1914,7 +1924,7 @@ onUnmounted(() => {
 });
 
 const pageNumberList = computed(() =>
-  pageButtons(totalPagesHome.value, pageHome.value, maxButtons.value)
+  pageButtons(totalPagesHome.value, pageHome.value, maxButtons.value),
 );
 
 // 將治療時間字串轉為分鐘數（例："1小時30分鐘" -> 90）
@@ -2049,14 +2059,13 @@ const filteredHome = computed(() => {
   return data;
 });
 
-
 /* 使用紀錄 */
 const pageHome = ref(1);
 
 const totalHome = computed(() => filteredHome.value.length);
 
 const totalPagesHome = computed(() =>
-  Math.max(1, Math.ceil(totalHome.value / PAGE_MAIN))
+  Math.max(1, Math.ceil(totalHome.value / PAGE_MAIN)),
 );
 const paginatedHome = computed(() => {
   const s = (pageHome.value - 1) * PAGE_MAIN;
@@ -2157,11 +2166,11 @@ function buildWatchRecords(raw: any): any[] {
       const bps = row.bpRecords;
       const avgSys = Math.round(
         bps.reduce((s: number, b: any) => s + Number(b.sys || 0), 0) /
-          bps.length
+          bps.length,
       );
       const avgDia = Math.round(
         bps.reduce((s: number, b: any) => s + Number(b.dia || 0), 0) /
-          bps.length
+          bps.length,
       );
       row.bloodPressure = `${avgSys}/${avgDia}`;
 
@@ -2171,7 +2180,7 @@ function buildWatchRecords(raw: any): any[] {
       if (rmssdVals.length) {
         row.hrv = `${Math.round(
           rmssdVals.reduce((a: number, b: number) => a + b, 0) /
-            rmssdVals.length
+            rmssdVals.length,
         )} ms`;
       }
 
@@ -2181,14 +2190,14 @@ function buildWatchRecords(raw: any): any[] {
       if (stressVals.length) {
         row.stress = `${Math.round(
           stressVals.reduce((a: number, b: number) => a + b, 0) /
-            stressVals.length
+            stressVals.length,
         )}/100`;
       }
     }
 
     if (row.sleepRecords.length) {
       const best = row.sleepRecords.reduce((prev: any, cur: any) =>
-        Number(cur.SleepScore || 0) > Number(prev.SleepScore || 0) ? cur : prev
+        Number(cur.SleepScore || 0) > Number(prev.SleepScore || 0) ? cur : prev,
       );
       row.sleep = best.SleepScore ? `${best.SleepScore} 分` : "";
     }
@@ -2219,7 +2228,11 @@ function parseDateOnlyToMs(dateLike: string) {
 }
 
 function toLocalDayStart(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+  ).getTime();
 }
 
 function toLocalDayEnd(date: Date) {
@@ -2230,7 +2243,7 @@ function toLocalDayEnd(date: Date) {
     23,
     59,
     59,
-    999
+    999,
   ).getTime();
 }
 
@@ -2273,7 +2286,7 @@ function createLineChart(
   key: keyof typeof watchCharts,
   canvas: HTMLCanvasElement | null,
   labels: string[],
-  datasets: any[]
+  datasets: any[],
 ) {
   if (!canvas) return;
   watchCharts[key]?.destroy();
@@ -2306,7 +2319,7 @@ function createBarChart(
   canvas: HTMLCanvasElement | null,
   labels: string[],
   datasets: any[],
-  stacked = false
+  stacked = false,
 ) {
   if (!canvas) return;
   watchCharts[key]?.destroy();
@@ -2356,10 +2369,18 @@ const watchChart = computed(() => {
   };
 
   const dateSet = new Set<string>();
-  (raw.Hb || []).forEach((x: any) => x.Date && inRange(x.Date) && dateSet.add(x.Date));
-  (raw.Spo2 || []).forEach((x: any) => x.Date && inRange(x.Date) && dateSet.add(x.Date));
-  (raw.Step || []).forEach((x: any) => x.Date && inRange(x.Date) && dateSet.add(x.Date));
-  (raw.Tp || []).forEach((x: any) => x.Date && inRange(x.Date) && dateSet.add(x.Date));
+  (raw.Hb || []).forEach(
+    (x: any) => x.Date && inRange(x.Date) && dateSet.add(x.Date),
+  );
+  (raw.Spo2 || []).forEach(
+    (x: any) => x.Date && inRange(x.Date) && dateSet.add(x.Date),
+  );
+  (raw.Step || []).forEach(
+    (x: any) => x.Date && inRange(x.Date) && dateSet.add(x.Date),
+  );
+  (raw.Tp || []).forEach(
+    (x: any) => x.Date && inRange(x.Date) && dateSet.add(x.Date),
+  );
   (raw.Bp || []).forEach((x: any) => {
     const d = toDateKey(x.time || "");
     if (d && inRange(d)) dateSet.add(d);
@@ -2375,10 +2396,18 @@ const watchChart = computed(() => {
 
   let dates = Array.from(dateSet).sort();
 
-  const hbMap = new Map<string, any>((raw.Hb || []).map((x: any) => [x.Date, x]));
-  const spo2Map = new Map<string, any>((raw.Spo2 || []).map((x: any) => [x.Date, x]));
-  const stepMap = new Map<string, any>((raw.Step || []).map((x: any) => [x.Date, x]));
-  const tpMap = new Map<string, any>((raw.Tp || []).map((x: any) => [x.Date, x]));
+  const hbMap = new Map<string, any>(
+    (raw.Hb || []).map((x: any) => [x.Date, x]),
+  );
+  const spo2Map = new Map<string, any>(
+    (raw.Spo2 || []).map((x: any) => [x.Date, x]),
+  );
+  const stepMap = new Map<string, any>(
+    (raw.Step || []).map((x: any) => [x.Date, x]),
+  );
+  const tpMap = new Map<string, any>(
+    (raw.Tp || []).map((x: any) => [x.Date, x]),
+  );
 
   const bpGroup: Record<string, any[]> = {};
   (raw.Bp || []).forEach((x: any) => {
@@ -2388,7 +2417,10 @@ const watchChart = computed(() => {
     bpGroup[d].push(x);
   });
 
-  const sleepGroup: Record<string, { deep: number; rem: number; light: number; awake: number }> = {};
+  const sleepGroup: Record<
+    string,
+    { deep: number; rem: number; light: number; awake: number }
+  > = {};
   (raw.Sleep || []).forEach((x: any) => {
     const d = toDateKey(x.StartTime || "");
     if (!d) return;
@@ -2426,16 +2458,21 @@ const watchChart = computed(() => {
       Number(tp?.TpMin || 0) > 0 ||
       Number(tp?.TpMax || 0) > 0 ||
       (bp && bp.length > 0) ||
-      (sleep && (sleep.deep + sleep.rem + sleep.light + sleep.awake) > 0) ||
+      (sleep && sleep.deep + sleep.rem + sleep.light + sleep.awake > 0) ||
       (bia && bia.length > 0)
     );
   });
 
-  if (fromMs === null && toMs === null && dates.length > 7) dates = dates.slice(-7);
+  if (fromMs === null && toMs === null && dates.length > 7)
+    dates = dates.slice(-7);
   const labels = dates.map((d) => d.slice(5).replace("-", "/"));
 
-  const heartRateMin = dates.map((d) => Number(hbMap.get(d)?.HeartrateMin || 0));
-  const heartRateMax = dates.map((d) => Number(hbMap.get(d)?.HeartrateMax || 0));
+  const heartRateMin = dates.map((d) =>
+    Number(hbMap.get(d)?.HeartrateMin || 0),
+  );
+  const heartRateMax = dates.map((d) =>
+    Number(hbMap.get(d)?.HeartrateMax || 0),
+  );
   const spo2Min = dates.map((d) => Number(spo2Map.get(d)?.Spo2Min || 0));
   const spo2Max = dates.map((d) => Number(spo2Map.get(d)?.Spo2Max || 0));
   const tempMin = dates.map((d) => Number(tpMap.get(d)?.TpMin || 0));
@@ -2445,29 +2482,41 @@ const watchChart = computed(() => {
   const bpSys = dates.map((d) => {
     const arr = bpGroup[d] || [];
     if (!arr.length) return 0;
-    return Math.round(arr.reduce((s: number, x: any) => s + Number(x.sys || 0), 0) / arr.length);
+    return Math.round(
+      arr.reduce((s: number, x: any) => s + Number(x.sys || 0), 0) / arr.length,
+    );
   });
   const bpDia = dates.map((d) => {
     const arr = bpGroup[d] || [];
     if (!arr.length) return 0;
-    return Math.round(arr.reduce((s: number, x: any) => s + Number(x.dia || 0), 0) / arr.length);
+    return Math.round(
+      arr.reduce((s: number, x: any) => s + Number(x.dia || 0), 0) / arr.length,
+    );
   });
   const stress = dates.map((d) => {
     const arr = bpGroup[d] || [];
     if (!arr.length) return 0;
-    return Math.round(arr.reduce((s: number, x: any) => s + Number(x.deStressIndex || 0), 0) / arr.length);
+    return Math.round(
+      arr.reduce((s: number, x: any) => s + Number(x.deStressIndex || 0), 0) /
+        arr.length,
+    );
   });
   const hrv = dates.map((d) => {
     const arr = bpGroup[d] || [];
     if (!arr.length) return 0;
-    return Math.round(arr.reduce((s: number, x: any) => s + Number(x.rmssd || 0), 0) / arr.length);
+    return Math.round(
+      arr.reduce((s: number, x: any) => s + Number(x.rmssd || 0), 0) /
+        arr.length,
+    );
   });
 
   const sleepDeep = dates.map((d) => sleepGroup[d]?.deep || 0);
   const sleepRem = dates.map((d) => sleepGroup[d]?.rem || 0);
   const sleepLight = dates.map((d) => sleepGroup[d]?.light || 0);
   const sleepAwake = dates.map((d) => sleepGroup[d]?.awake || 0);
-  const sleepTotal = dates.map((_, i) => sleepDeep[i] + sleepRem[i] + sleepLight[i] + sleepAwake[i]);
+  const sleepTotal = dates.map(
+    (_, i) => sleepDeep[i] + sleepRem[i] + sleepLight[i] + sleepAwake[i],
+  );
   const sleepMax = Math.max(...sleepTotal, 1);
 
   const bodyWater = dates.map((d) => {
@@ -2582,12 +2631,28 @@ async function renderWatchCharts() {
     sleepCanvas.value,
     labels,
     [
-      { label: "深眠", data: watchChart.value.sleepDeep, backgroundColor: "#3f8c25" },
-      { label: "REM", data: watchChart.value.sleepRem, backgroundColor: "#74b84a" },
-      { label: "淺眠", data: watchChart.value.sleepLight, backgroundColor: "#a4ce77" },
-      { label: "清醒", data: watchChart.value.sleepAwake, backgroundColor: "#d3e8b8" },
+      {
+        label: "深眠",
+        data: watchChart.value.sleepDeep,
+        backgroundColor: "#3f8c25",
+      },
+      {
+        label: "REM",
+        data: watchChart.value.sleepRem,
+        backgroundColor: "#74b84a",
+      },
+      {
+        label: "淺眠",
+        data: watchChart.value.sleepLight,
+        backgroundColor: "#a4ce77",
+      },
+      {
+        label: "清醒",
+        data: watchChart.value.sleepAwake,
+        backgroundColor: "#d3e8b8",
+      },
     ],
-    true
+    true,
   );
 
   createLineChart("temp", tempCanvas.value, labels, [
@@ -2606,17 +2671,41 @@ async function renderWatchCharts() {
   ]);
 
   createBarChart("steps", stepsCanvas.value, labels, [
-    { label: "總步數", data: watchChart.value.steps, backgroundColor: "#7cbc28" },
+    {
+      label: "總步數",
+      data: watchChart.value.steps,
+      backgroundColor: "#7cbc28",
+    },
   ]);
 
   createLineChart("hrv", hrvCanvas.value, labels, [
-    { label: "RMSSD", data: watchChart.value.hrv, borderColor: "#7cbc28", backgroundColor: "#7cbc28" },
+    {
+      label: "RMSSD",
+      data: watchChart.value.hrv,
+      borderColor: "#7cbc28",
+      backgroundColor: "#7cbc28",
+    },
   ]);
 
   createLineChart("body", bodyCanvas.value, labels, [
-    { label: "水分", data: watchChart.value.bodyWater, borderColor: "#27a3a9", backgroundColor: "#27a3a9" },
-    { label: "體脂肪", data: watchChart.value.bodyFat, borderColor: "#7cbc28", backgroundColor: "#7cbc28" },
-    { label: "肌肉量", data: watchChart.value.bodyMuscle, borderColor: "#2f6fa3", backgroundColor: "#2f6fa3" },
+    {
+      label: "水分",
+      data: watchChart.value.bodyWater,
+      borderColor: "#27a3a9",
+      backgroundColor: "#27a3a9",
+    },
+    {
+      label: "體脂肪",
+      data: watchChart.value.bodyFat,
+      borderColor: "#7cbc28",
+      backgroundColor: "#7cbc28",
+    },
+    {
+      label: "肌肉量",
+      data: watchChart.value.bodyMuscle,
+      borderColor: "#2f6fa3",
+      backgroundColor: "#2f6fa3",
+    },
   ]);
 }
 
@@ -2677,7 +2766,7 @@ const filteredRing = computed(() => {
   if (selectedWatchFilterOptions.value.length > 0) {
     const cat = watchFilterCategory.value;
     data = data.filter((r: any) =>
-      selectedWatchFilterOptions.value.includes(String(r[cat] || ""))
+      selectedWatchFilterOptions.value.includes(String(r[cat] || "")),
     );
   }
 
@@ -2686,8 +2775,8 @@ const filteredRing = computed(() => {
     const kw = watchKeyword.value.toLowerCase();
     data = data.filter((r: any) =>
       Object.values(r).some(
-        (v) => typeof v === "string" && v.toLowerCase().includes(kw)
-      )
+        (v) => typeof v === "string" && v.toLowerCase().includes(kw),
+      ),
     );
   }
 
@@ -2725,21 +2814,21 @@ const filteredRing = computed(() => {
 const PAGE_WATCH = 10;
 const totalRing = computed(() => filteredRing.value.length);
 const totalPagesRing = computed(() =>
-  Math.max(1, Math.ceil(totalRing.value / PAGE_WATCH))
+  Math.max(1, Math.ceil(totalRing.value / PAGE_WATCH)),
 );
 const paginatedRing = computed(() => {
   const s = (pageRing.value - 1) * PAGE_WATCH;
   return filteredRing.value.slice(s, s + PAGE_WATCH);
 });
 const pageNumberListRing = computed(() =>
-  pageButtons(totalPagesRing.value, pageRing.value, maxButtons.value)
+  pageButtons(totalPagesRing.value, pageRing.value, maxButtons.value),
 );
 
 /* ANS */
 const pageANS = ref(1);
 const totalANS = computed(() => ansRecords.value.length);
 const totalPagesANS = computed(() =>
-  Math.max(1, Math.ceil(totalANS.value / PAGE_SUB))
+  Math.max(1, Math.ceil(totalANS.value / PAGE_SUB)),
 );
 const filteredANSWithSort = computed(() => {
   let data = filteredANS.value;
@@ -2785,7 +2874,7 @@ const paginatedANS = computed(() => {
 const pageLife = ref(1);
 const totalLife = computed(() => lifeRecords.value.length);
 const totalPagesLife = computed(() =>
-  Math.max(1, Math.ceil(totalLife.value / PAGE_SUB))
+  Math.max(1, Math.ceil(totalLife.value / PAGE_SUB)),
 );
 const filteredLifeWithSort = computed(() => {
   let data = filteredLife.value;
@@ -2842,7 +2931,7 @@ const filteredVideo = computed(() => {
 });
 const totalVideo = computed(() => filteredVideo.value.length);
 const totalPagesVideo = computed(() =>
-  Math.max(1, Math.ceil(totalVideo.value / PAGE_SUB))
+  Math.max(1, Math.ceil(totalVideo.value / PAGE_SUB)),
 );
 const filteredVideoWithSort = computed(() => {
   let data = filteredVideo.value;
@@ -2886,7 +2975,7 @@ const paginatedVideo = computed(() => {
   return filteredVideoWithSort.value.slice(s, s + PAGE_SUB);
 });
 const pageNumberListVideo = computed(() =>
-  pageButtons(totalPagesVideo.value, pageVideo.value, maxButtons.value)
+  pageButtons(totalPagesVideo.value, pageVideo.value, maxButtons.value),
 );
 
 /* APP */
@@ -2904,7 +2993,7 @@ const filteredApp = computed(() => {
 });
 const totalApp = computed(() => filteredApp.value.length);
 const totalPagesApp = computed(() =>
-  Math.max(1, Math.ceil(totalApp.value / PAGE_SUB))
+  Math.max(1, Math.ceil(totalApp.value / PAGE_SUB)),
 );
 const filteredAppWithSort = computed(() => {
   let data = filteredApp.value;
@@ -2946,7 +3035,7 @@ const paginatedApp = computed(() => {
   return filteredAppWithSort.value.slice(s, s + PAGE_SUB);
 });
 const pageNumberListApp = computed(() =>
-  pageButtons(totalPagesApp.value, pageApp.value, maxButtons.value)
+  pageButtons(totalPagesApp.value, pageApp.value, maxButtons.value),
 );
 const filteredAppForChart = computed(() => {
   if (!appDateRange.value || appDateRange.value.length < 2)
@@ -2972,11 +3061,11 @@ const filteredHealthLog = computed(() => {
     if (from) {
       // 統一使用純日期字串比較（YYYY/MM/DD），避免時區偏移問題
       const startStr = `${from.getFullYear()}/${String(
-        from.getMonth() + 1
+        from.getMonth() + 1,
       ).padStart(2, "0")}/${String(from.getDate()).padStart(2, "0")}`;
       const endStr = `${to.getFullYear()}/${String(to.getMonth() + 1).padStart(
         2,
-        "0"
+        "0",
       )}/${String(to.getDate()).padStart(2, "0")}`;
       data = data.filter((r: any) => {
         if (!r.VerbalDate) return false;
@@ -3014,14 +3103,14 @@ const filteredHealthLog = computed(() => {
 });
 const totalHealthLog = computed(() => filteredHealthLog.value.length);
 const totalPagesHealthLog = computed(() =>
-  Math.max(1, Math.ceil(totalHealthLog.value / PAGE_SUB))
+  Math.max(1, Math.ceil(totalHealthLog.value / PAGE_SUB)),
 );
 const paginatedHealthLog = computed(() => {
   const s = (pageHealthLog.value - 1) * PAGE_SUB;
   return filteredHealthLog.value.slice(s, s + PAGE_SUB);
 });
 const pageNumberListHealthLog = computed(() =>
-  pageButtons(totalPagesHealthLog.value, pageHealthLog.value, maxButtons.value)
+  pageButtons(totalPagesHealthLog.value, pageHealthLog.value, maxButtons.value),
 );
 
 /* 匯出健康日誌 Excel */
@@ -3119,7 +3208,7 @@ const filteredWeeklySummary = computed(() => {
 });
 const totalWeeklySummary = computed(() => filteredWeeklySummary.value.length);
 const totalPagesWeeklySummary = computed(() =>
-  Math.max(1, Math.ceil(totalWeeklySummary.value / PAGE_SUB))
+  Math.max(1, Math.ceil(totalWeeklySummary.value / PAGE_SUB)),
 );
 const paginatedWeeklySummary = computed(() => {
   const s = (pageWeeklySummary.value - 1) * PAGE_SUB;
@@ -3129,8 +3218,8 @@ const pageNumberListWeeklySummary = computed(() =>
   pageButtons(
     totalPagesWeeklySummary.value,
     pageWeeklySummary.value,
-    maxButtons.value
-  )
+    maxButtons.value,
+  ),
 );
 
 // 排序功能
@@ -3195,10 +3284,10 @@ async function fetchBasic() {
 }
 
 /* ---------- 共用範本 ---------- */
-const makeFiltered = <T>(
+const makeFiltered = <T,>(
   src: Ref<T[]>,
   range: Ref<Date[] | null>,
-  dateKey: keyof T // 欄位名稱，如 'CheckTime'
+  dateKey: keyof T, // 欄位名稱，如 'CheckTime'
 ) =>
   computed(() => {
     if (!range.value || range.value.length < 2) return src.value;
@@ -3207,7 +3296,7 @@ const makeFiltered = <T>(
     const end = to.getTime();
     return src.value.filter((r: any) => {
       const ms = Date.parse(
-        (r[dateKey] as string).split(" ")[0].replace(/\//g, "-")
+        (r[dateKey] as string).split(" ")[0].replace(/\//g, "-"),
       );
       return ms >= start && ms <= end;
     });
@@ -3247,7 +3336,7 @@ watch(
     ringRecords.value = buildWatchRecords(raw);
     pageRing.value = 1;
   },
-  { immediate: true }
+  { immediate: true },
 );
 watchEffect(
   () => {
@@ -3261,7 +3350,7 @@ watchEffect(
       });
     });
   },
-  { flush: "post" }
+  { flush: "post" },
 );
 watch(ringRange, () => {
   pageRing.value = 1;
@@ -3314,7 +3403,7 @@ watch(
       }
     }
   },
-  { deep: true }
+  { deep: true },
 );
 
 function pageButtons(total: number, current: number, max = maxButtons.value) {
@@ -3334,10 +3423,10 @@ function pageButtons(total: number, current: number, max = maxButtons.value) {
 }
 
 const pageNumberListANS = computed(() =>
-  pageButtons(totalPagesANS.value, pageANS.value, maxButtons.value)
+  pageButtons(totalPagesANS.value, pageANS.value, maxButtons.value),
 );
 const pageNumberListLife = computed(() =>
-  pageButtons(totalPagesLife.value, pageLife.value, maxButtons.value)
+  pageButtons(totalPagesLife.value, pageLife.value, maxButtons.value),
 );
 
 const loading = ref(false);
@@ -3361,7 +3450,7 @@ async function handleTransferLogin(): Promise<boolean> {
           SafeKey: safeKey,
           Mobile: mobile || "",
         }),
-      }
+      },
     );
     const data = await res.json();
 
@@ -3380,7 +3469,7 @@ async function handleTransferLogin(): Promise<boolean> {
       // 將 MID 與 Mobile 存入 selectedMember，供後續載入會員資料使用
       localStorage.setItem(
         "selectedMember",
-        JSON.stringify({ MID: data.MID, Mobile: mobile || "" })
+        JSON.stringify({ MID: data.MID, Mobile: mobile || "" }),
       );
       return true;
     } else {
@@ -3432,7 +3521,7 @@ watch(
 
     loading.value = false;
   },
-  { deep: true, immediate: true }
+  { deep: true, immediate: true },
 );
 
 /* ---------- 分頁操作 ---------- */
@@ -3500,7 +3589,7 @@ async function fetchANSDetail(a: any) {
     .slice()
     .sort(
       (x, y) =>
-        new Date(y.CheckTime).getTime() - new Date(x.CheckTime).getTime()
+        new Date(y.CheckTime).getTime() - new Date(x.CheckTime).getTime(),
     );
 
   // 找到當前記錄的索引
@@ -3518,7 +3607,7 @@ async function fetchANSDetail(a: any) {
     sortedList.map((item) => ({
       AID: item.AID,
       CheckTime: item.CheckTime,
-    }))
+    })),
   );
 
   const res = await fetch(
@@ -3534,7 +3623,7 @@ async function fetchANSDetail(a: any) {
         AID,
         preAID,
       }),
-    }
+    },
   );
   return await res.json();
 }
@@ -3605,6 +3694,10 @@ async function handleEditBasicSubmit(data: {
   }
 
   const sexValue = String(
+    data.sex ??
+      (member.value as any)?.Sex ??
+      (member.value as any)?.Gender ??
+      "",
     (member.value as any)?.Sex ?? (member.value as any)?.Gender ?? ""
   ).trim();
   if (!sexValue) {
@@ -3637,7 +3730,7 @@ async function handleEditBasicSubmit(data: {
           Mobile: data.phone,
           Sex: sexValue,
         }),
-      }
+      },
     );
 
     const result = await response.json();
@@ -3684,7 +3777,7 @@ async function handleDeleteMemberConfirm() {
           MID: sel.MID,
           Mobile: sel.Mobile ?? "",
         }),
-      }
+      },
     );
 
     const result = await response.json();
@@ -3813,14 +3906,12 @@ const availableEventOptions = computed(() => {
 </script>
 
 <style scoped lang="scss">
-
 .memberInfo {
   display: flex;
   min-height: 100vh;
   background: $primary-100;
   gap: 1%;
 
- 
   .w-half {
     flex: 1;
     width: 0;
@@ -4576,13 +4667,13 @@ const availableEventOptions = computed(() => {
   flex-direction: column;
 
   .weekly-summary-modal-header-img {
-      width: 2rem;
-      height: 2rem;
-      border-radius: 9.8px;
-      border: 1px solid var(--Primary-default, #1ba39b);
-      padding: 2px 4px;
-      text-align: center;
-    }
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9.8px;
+    border: 1px solid var(--Primary-default, #1ba39b);
+    padding: 2px 4px;
+    text-align: center;
+  }
   .weekly-summary-modal-header {
     padding: 1rem 1.25rem 0.5rem;
     position: relative;
@@ -4992,7 +5083,7 @@ const availableEventOptions = computed(() => {
 
 .watchChartCard {
   border-radius: 14px;
-  border: 1px solid #e7edf3;
+  box-shadow: 0 2px 20px #b1c0d840;
   background: #fff;
   padding: 12px 12px 8px;
   min-height: 205px;
