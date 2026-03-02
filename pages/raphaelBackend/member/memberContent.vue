@@ -158,7 +158,7 @@
       </div>
     </div>
 
-    <!-- ───── 手錶紀錄詳情彈窗 ───── -->
+    <!-- ───── 華碩手錶紀錄詳情彈窗 ───── -->
     <div
       v-if="showWatchDetailModal"
       class="watchDetailOverlay"
@@ -954,11 +954,11 @@
           </div>
         </div>
 
-        <!-- █ 手錶紀錄（圖表版） ------------------------------------------- -->
+        <!-- █ 華碩手錶紀錄（圖表版） ------------------------------------------- -->
         <div class="memberInfoRow">
           <div class="memberInfoCard watchRecordCard">
             <div class="memberInfoTitleWrap">
-              <h3>手錶紀錄</h3>
+              <h3>華碩手錶紀錄</h3>
               <div class="memberInfoTitleGroup">
                 <VueDatePicker
                   v-model="ringRange"
@@ -1809,7 +1809,7 @@ onMounted(() => {
   handleResize();
   window.addEventListener("resize", handleResize);
 
-  // 手錶紀錄由 asusHealthData watcher 自動填入
+  // 華碩手錶紀錄由 asusHealthData watcher 自動填入
 
   // 影片觀看紀錄假資料
   videoRecords.value = [
@@ -2075,7 +2075,7 @@ function nextHome() {
 }
 
 /* RING */
-// ───── 手錶紀錄 ─────
+// ───── 華碩手錶紀錄 ─────
 function buildWatchRecords(raw: any): any[] {
   if (!raw) return [];
   const dateMap: Record<string, any> = {};
@@ -3427,7 +3427,7 @@ watch(
       await memberStore.fetchVivoWatchList(sel.MID);
     }
 
-    // 取得華碩健康數據（手錶紀錄）
+    // 取得華碩健康數據（華碩手錶紀錄）
     await memberStore.fetchAsusHealthData(getAuth());
 
     loading.value = false;
@@ -4970,7 +4970,7 @@ const availableEventOptions = computed(() => {
   }
 }
 
-// ───── 手錶紀錄圖表樣式 ─────
+// ───── 華碩手錶紀錄圖表樣式 ─────
 .watchRecordCard {
   width: 100% !important;
 }
@@ -5036,7 +5036,7 @@ const availableEventOptions = computed(() => {
   text-align: center;
 }
 
-// ───── 手錶紀錄詳情彈窗樣式 ─────
+// ───── 華碩手錶紀錄詳情彈窗樣式 ─────
 .watchDetailOverlay {
   position: fixed;
   top: 0;
