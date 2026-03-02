@@ -32,13 +32,16 @@
       :initial-data="{
         name: String(member?.Name ?? ''),
         mail: String(member?.Mail ?? ''),
+        asusMail: String(member?.AsusMail ?? ''),
         acerMail: String(member?.AcerMail ?? ''),
         garminMail: String(member?.GarminMail ?? ''),
         height: String(member?.Height ?? ''),
         weight: String(member?.Weight ?? ''),
-        sex: String(member?.Sex ?? member?.Gender ?? ''),
         birthday: String(member?.Birthday ?? ''),
-        address: String(member?.Address ?? ''),
+        dspr: String(member?.DSPR ?? ''),
+        hrvCalTime: String(member?.HRVCalTime ?? ''),
+        city: String(member?.City ?? ''),
+        zone: String(member?.Zone ?? ''),
         phone: String(member?.Mobile ?? ''),
       }"
       @close="closeEditBasicModal"
@@ -3583,13 +3586,16 @@ function closeEditBasicModal() {
 async function handleEditBasicSubmit(data: {
   name: string;
   mail: string;
+  asusMail: string;
   acerMail: string;
   garminMail: string;
   height: string;
   weight: string;
-  sex: string;
   birthday: string;
-  address: string;
+  dspr: string;
+  hrvCalTime: string;
+  city: string;
+  zone: string;
   phone: string;
 }) {
   const { token, admin, sel } = getAuth();
@@ -3599,7 +3605,7 @@ async function handleEditBasicSubmit(data: {
   }
 
   const sexValue = String(
-    data.sex ?? (member.value as any)?.Sex ?? (member.value as any)?.Gender ?? ""
+    (member.value as any)?.Sex ?? (member.value as any)?.Gender ?? ""
   ).trim();
   if (!sexValue) {
     alert("性別不可空白，請先補齊會員性別資料");
@@ -3618,12 +3624,16 @@ async function handleEditBasicSubmit(data: {
           MID: sel.MID,
           Name: data.name,
           Mail: data.mail,
+          AsusMail: data.asusMail,
           AcerMail: data.acerMail,
           GarminMail: data.garminMail,
           Height: data.height,
           Weight: data.weight,
           Birthday: data.birthday,
-          Address: data.address,
+          DSPR: data.dspr,
+          HRVCalTime: data.hrvCalTime,
+          City: data.city,
+          Zone: data.zone,
           Mobile: data.phone,
           Sex: sexValue,
         }),

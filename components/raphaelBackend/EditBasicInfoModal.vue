@@ -34,6 +34,15 @@
           </div>
 
           <div class="editBasicInfoModalField">
+            <label>華碩註冊信箱</label>
+            <input
+              type="text"
+              v-model="formData.asusMail"
+              placeholder="請輸入華碩註冊信箱"
+            />
+          </div>
+
+          <div class="editBasicInfoModalField">
             <label>宏碁註冊信箱</label>
             <input
               type="text"
@@ -70,15 +79,6 @@
           </div>
 
           <div class="editBasicInfoModalField">
-            <label>性別</label>
-            <input
-              type="text"
-              v-model="formData.sex"
-              placeholder="請輸入性別（1:男、2:女）"
-            />
-          </div>
-
-          <div class="editBasicInfoModalField">
             <label>生日</label>
             <input
               type="text"
@@ -87,12 +87,44 @@
             />
           </div>
 
+
+
+    
+
           <div class="editBasicInfoModalField">
-            <label>地址</label>
-            <textarea
-              v-model="formData.address"
-              placeholder="請輸入地址"
-            />
+            <label>城市</label>
+            <div class="selectWrap">
+              <select
+                v-model="formData.city"
+                :class="{ selected: !!formData.city }"
+                @change="updateAreasByCity"
+              >
+                <option value="" disabled>縣市</option>
+                <option
+                  v-for="city in citiesData"
+                  :key="city.CityName"
+                  :value="city.CityName"
+                >
+                  {{ city.CityName }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="editBasicInfoModalField">
+            <label>行政區</label>
+            <div class="selectWrap">
+              <select v-model="formData.zone" :class="{ selected: !!formData.zone }">
+                <option value="" disabled>鄉鎮地區</option>
+                <option
+                  v-for="area in filteredAreas"
+                  :key="area.AreaName"
+                  :value="area.AreaName"
+                >
+                  {{ area.AreaName }}
+                </option>
+              </select>
+            </div>
           </div>
 
           <div class="editBasicInfoModalField">
@@ -116,18 +148,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
+
+type AreaItem = {
+  AreaName: string;
+};
+
+type CityItem = {
+  CityName: string;
+  AreaList: AreaItem[];
+};
 
 type EditBasicFormData = {
   name: string;
   mail: string;
+  asusMail: string;
   acerMail: string;
   garminMail: string;
   height: string;
   weight: string;
-  sex: string;
   birthday: string;
-  address: string;
+  dspr: string;
+  hrvCalTime: string;
+  city: string;
+  zone: string;
   phone: string;
 };
 
@@ -145,13 +189,16 @@ function buildFormData(newData?: Partial<EditBasicFormData>): EditBasicFormData 
   return {
     name: newData?.name || "",
     mail: newData?.mail || "",
+    asusMail: newData?.asusMail || "",
     acerMail: newData?.acerMail || "",
     garminMail: newData?.garminMail || "",
     height: newData?.height || "",
     weight: newData?.weight || "",
-    sex: newData?.sex || "",
     birthday: newData?.birthday || "",
-    address: newData?.address || "",
+    dspr: newData?.dspr || "",
+    hrvCalTime: newData?.hrvCalTime || "",
+    city: newData?.city || "",
+    zone: newData?.zone || "",
     phone: newData?.phone || "",
   };
 }
@@ -159,15 +206,35 @@ function buildFormData(newData?: Partial<EditBasicFormData>): EditBasicFormData 
 const formData = ref<EditBasicFormData>({
   name: "",
   mail: "",
+  asusMail: "",
   acerMail: "",
   garminMail: "",
   height: "",
   weight: "",
-  sex: "",
   birthday: "",
-  address: "",
+  dspr: "",
+  hrvCalTime: "",
+  city: "",
+  zone: "",
   phone: "",
 });
+
+const citiesData = ref<CityItem[]>([]);
+const filteredAreas = ref<AreaItem[]>([]);
+
+function updateAreasByCity() {
+  const city = citiesData.value.find(
+    (item: CityItem) => item.CityName === formData.value.city
+  );
+  filteredAreas.value = city?.AreaList ?? [];
+  if (
+    !filteredAreas.value.some(
+      (area: AreaItem) => area.AreaName === formData.value.zone
+    )
+  ) {
+    formData.value.zone = "";
+  }
+}
 
 // 當 initialData 改變時，更新表單資料
 watch(
@@ -175,6 +242,7 @@ watch(
   (newData: Partial<EditBasicFormData> | undefined) => {
     if (newData) {
       formData.value = buildFormData(newData);
+      updateAreasByCity();
     }
   },
   { immediate: true, deep: true }
@@ -186,9 +254,21 @@ watch(
   (isShow: boolean) => {
     if (isShow && props.initialData) {
       formData.value = buildFormData(props.initialData);
+      updateAreasByCity();
     }
   }
 );
+
+onMounted(async () => {
+  try {
+    const response = await fetch("/AllData.json");
+    if (!response.ok) return;
+    citiesData.value = (await response.json()) as CityItem[];
+    updateAreasByCity();
+  } catch (error) {
+    console.error("載入地址資料失敗:", error);
+  }
+});
 
 function handleClose() {
   emit("close");
@@ -311,7 +391,7 @@ letter-spacing: 3.6px;
   }
 
   input,
-  textarea {
+  select {
     width: 100%;
     padding: 0.75rem 1rem;
     border: 1px solid #e5e9f2;
@@ -339,10 +419,28 @@ letter-spacing: 2.7px;
       color: #b1c0d8;
     }
   }
+}
 
-  textarea {
-    min-height: 78px;
-    resize: vertical;
+.selectWrap {
+  position: relative;
+
+  select {
+    appearance: none;
+    background-color: #fff;
+    cursor: pointer;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    right: 0.9rem;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid #1ba39b;
+    border-bottom: 2px solid #1ba39b;
+    transform: translateY(-60%) rotate(45deg);
+    pointer-events: none;
   }
 }
 
