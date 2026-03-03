@@ -973,47 +973,47 @@
             </div>
 
             <div class="watchChartsGrid" v-if="watchChart.labels.length">
-              <div class="watchChartCard">
+              <div class="watchChartCard watchChartCardClickable" @click="openWatchMetricPage('heartRate')">
                 <h4>心率</h4>
                 <canvas ref="heartRateCanvas" class="watchChartCanvas"></canvas>
               </div>
 
-              <div class="watchChartCard">
+              <div class="watchChartCard watchChartCardClickable" @click="openWatchMetricPage('spo2')">
                 <h4>血氧</h4>
                 <canvas ref="spo2Canvas" class="watchChartCanvas"></canvas>
               </div>
 
-              <div class="watchChartCard">
+              <div class="watchChartCard watchChartCardClickable" @click="openWatchMetricPage('bp')">
                 <h4>血壓</h4>
                 <canvas ref="bpCanvas" class="watchChartCanvas"></canvas>
               </div>
 
-              <div class="watchChartCard">
+              <div class="watchChartCard watchChartCardClickable" @click="openWatchMetricPage('stress')">
                 <h4>壓力</h4>
                 <canvas ref="stressCanvas" class="watchChartCanvas"></canvas>
               </div>
-
-              <div class="watchChartCard">
+              <!-- @click="openWatchMetricPage('sleep')" -->
+              <div class="watchChartCard watchChartCardClickable" >
                 <h4>睡眠</h4>
                 <canvas ref="sleepCanvas" class="watchChartCanvas"></canvas>
               </div>
-
-              <div class="watchChartCard">
+              <!-- @click="openWatchMetricPage('temp')" -->
+              <div class="watchChartCard watchChartCardClickable" >
                 <h4>溫度</h4>
                 <canvas ref="tempCanvas" class="watchChartCanvas"></canvas>
               </div>
-
-              <div class="watchChartCard">
+              <!-- @click="openWatchMetricPage('steps')" -->
+              <div class="watchChartCard watchChartCardClickable" >
                 <h4>運動</h4>
                 <canvas ref="stepsCanvas" class="watchChartCanvas"></canvas>
               </div>
-
-              <div class="watchChartCard">
+              <!-- @click="openWatchMetricPage('hrv')" -->
+              <div class="watchChartCard watchChartCardClickable" >
                 <h4>HRV</h4>
                 <canvas ref="hrvCanvas" class="watchChartCanvas"></canvas>
               </div>
-
-              <div class="watchChartCard">
+              <!-- @click="openWatchMetricPage('body')" -->
+              <div class="watchChartCard watchChartCardClickable" >
                 <h4>身體組成</h4>
                 <canvas ref="bodyCanvas" class="watchChartCanvas"></canvas>
               </div>
@@ -1792,6 +1792,10 @@ function goToAcerNumber() {
   };
   localStorage.setItem("selectedMember", JSON.stringify(memberData));
   router.push("/raphaelBackend/member/acerNumber");
+}
+
+function openWatchMetricPage(metric: string) {
+  router.push(`/raphaelBackend/member/watchMetric/${metric}`);
 }
 
 /* ---------- paging helpers ---------- */
@@ -5002,6 +5006,16 @@ const availableEventOptions = computed(() => {
     color: #2d3047;
     font-size: 22px;
     font-weight: 600;
+  }
+}
+
+.watchChartCardClickable {
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(27, 163, 155, 0.16);
   }
 }
 
