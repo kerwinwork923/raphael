@@ -108,7 +108,7 @@ const metricKey = computed<MetricKey>(() => {
   return keys.includes(raw as MetricKey) ? (raw as MetricKey) : "heartRate";
 });
 
-const metricTitle = computed(() => metricTitleMap[metricKey.value]);
+const metricTitle = computed<string>(() => metricTitleMap[metricKey.value as MetricKey]);
 
 function getAuth() {
   return {
@@ -172,6 +172,17 @@ function safeTimeFromDateTime(dateTime: string) {
   return dateTime.slice(11, 16);
 }
 
+function formatTimeDisplay(dateTime: string) {
+  if (!dateTime) return "";
+  const d = new Date(dateTime.replace(" ", "T"));
+  if (Number.isNaN(d.getTime())) return safeTimeFromDateTime(dateTime);
+  return d.toLocaleTimeString("zh-TW", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
 const metricData = computed<MetricData>(() => {
   const key = metricKey.value;
   const raw = asusHealthData.value || {};
@@ -186,11 +197,20 @@ const metricData = computed<MetricData>(() => {
   if (key === "heartRate") {
     let list = (raw.Hb || []).filter((x: any) => x.Date && inRange(x.Date));
     if (fromMs === null && toMs === null) list = list.slice(-7);
+    const heartRateDetailList = (raw.Bp || [])
+      .filter((x: any) => {
+        const d = toDateKey(x.time || "");
+        return d && inRange(d) && Number(x.hr || 0) > 0;
+      })
+      .sort((a: any, b: any) => (a.time || "").localeCompare(b.time || ""));
     return {
       chartType: "line",
-      headers: ["測量日期", "最低", "最高"],
+      headers: ["測量時間", "數據"],
       labels: list.map((x: any) => toDateLabel(x.Date)),
-      rows: list.map((x: any) => [String(x.Date || ""), String(x.HeartrateMin || ""), String(x.HeartrateMax || "")]),
+      rows: heartRateDetailList.map((x: any) => [
+        formatTimeDisplay(String(x.time || "")),
+        String(x.hr || ""),
+      ]),
       datasets: [
         { label: "最高", data: list.map((x: any) => Number(x.HeartrateMax || 0)), borderColor: "#9fb6df", backgroundColor: "#9fb6df" },
         { label: "最低", data: list.map((x: any) => Number(x.HeartrateMin || 0)), borderColor: "#1ba39b", backgroundColor: "#1ba39b" },
@@ -218,9 +238,12 @@ const metricData = computed<MetricData>(() => {
     if (fromMs === null && toMs === null) list = list.slice(-7);
     return {
       chartType: "line",
-      headers: ["測量日期", "最低", "最高"],
+      headers: ["測量日期", "體溫"],
       labels: list.map((x: any) => toDateLabel(x.Date)),
-      rows: list.map((x: any) => [String(x.Date || ""), String(x.TpMin || ""), String(x.TpMax || "")]),
+      rows: list.map((x: any) => [
+        String(x.Date || ""),
+        `${String(x.TpMin || "—")}/${String(x.TpMax || "—")}`,
+      ]),
       datasets: [
         { label: "最高", data: list.map((x: any) => Number(x.TpMax || 0)), borderColor: "#9fb6df", backgroundColor: "#9fb6df" },
         { label: "最低", data: list.map((x: any) => Number(x.TpMin || 0)), borderColor: "#1ba39b", backgroundColor: "#1ba39b" },
@@ -347,6 +370,7 @@ const metricData = computed<MetricData>(() => {
   }
 
   if (key === "sleep") {
+    const sleepScoreMap: Record<string, number> = {};
     const sleepGroup: Record<string, { deep: number; rem: number; light: number; awake: number; start: string; end: string }> = {};
     (raw.Sleep || []).forEach((x: any) => {
       const d = toDateKey(x.StartTime || "");
@@ -356,6 +380,10 @@ const metricData = computed<MetricData>(() => {
       sleepGroup[d].rem += Number(x.RemCount || 0);
       sleepGroup[d].light += Number(x.LightCount || 0);
       sleepGroup[d].awake += Number(x.AwakeCount || 0);
+      sleepScoreMap[d] = Math.max(
+        Number(sleepScoreMap[d] || 0),
+        Number(x.SleepScore || 0)
+      );
       const start = safeTimeFromDateTime(x.StartTime || "");
       const end = safeTimeFromDateTime(x.EndTime || "");
       if (!sleepGroup[d].start || start < sleepGroup[d].start) sleepGroup[d].start = start;
@@ -366,17 +394,9 @@ const metricData = computed<MetricData>(() => {
     return {
       chartType: "bar",
       stacked: true,
-      headers: ["測量日期", "深眠", "REM", "淺眠", "清醒", "測量時間", "結束時間"],
+      headers: ["測量日期", "紓壓指數"],
       labels: dates.map((d) => toDateLabel(d)),
-      rows: dates.map((d) => [
-        d,
-        String(sleepGroup[d].deep),
-        String(sleepGroup[d].rem),
-        String(sleepGroup[d].light),
-        String(sleepGroup[d].awake),
-        sleepGroup[d].start,
-        sleepGroup[d].end,
-      ]),
+      rows: dates.map((d) => [d, String(sleepScoreMap[d] || 0)]),
       datasets: [
         { label: "深眠", data: dates.map((d) => sleepGroup[d].deep), backgroundColor: "#3f8c25" },
         { label: "REM", data: dates.map((d) => sleepGroup[d].rem), backgroundColor: "#74b84a" },
@@ -552,6 +572,7 @@ onUnmounted(() => {
   border-radius: 8px;
   padding: 0.5rem 0.9rem;
   cursor: pointer;
+  
 }
 
 .detailCard {
