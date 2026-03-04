@@ -650,13 +650,34 @@ export const useMemberStore = defineStore('member', () => {
     }
   }
 
-  async function fetchAsusHealthData(auth: any) {
+  function formatDateYYYYMMDD(date: Date) {
+    const y = date.getFullYear()
+    const m = String(date.getMonth() + 1).padStart(2, '0')
+    const d = String(date.getDate()).padStart(2, '0')
+    return `${y}${m}${d}`
+  }
+
+  function getRecent7StartDate() {
+    const d = new Date()
+    d.setDate(d.getDate() - 6)
+    return formatDateYYYYMMDD(d)
+  }
+
+  async function fetchAsusHealthData(
+    auth: any,
+    range?: { StartDate?: string; EndDate?: string }
+  ) {
     try {
       const { token, admin, sel } = auth
       if (!token || !admin || !sel.MID) {
         asusHealthData.value = null
         return
       }
+
+      const defaultStart = getRecent7StartDate()
+      const defaultEnd = formatDateYYYYMMDD(new Date())
+      const StartDate = (range?.StartDate || defaultStart).trim()
+      const EndDate = (range?.EndDate || defaultEnd).trim()
 
       const res = await fetch("https://23700999.com:8081/HMA/api/bk/asus_healthData", {
         method: "POST",
@@ -665,6 +686,8 @@ export const useMemberStore = defineStore('member', () => {
           AdminID: admin,
           Token: token,
           MID: sel.MID,
+          StartDate,
+          EndDate,
         }),
       })
 

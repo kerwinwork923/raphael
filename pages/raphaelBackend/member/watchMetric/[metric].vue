@@ -52,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref, watchEffect } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch, watchEffect } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import Sidebar from "~/components/raphaelBackend/Sidebar.vue";
@@ -183,6 +183,63 @@ function formatTimeDisplay(dateTime: string) {
   });
 }
 
+function parseYYYYMMDDToDate(raw: string) {
+  if (!/^\d{8}$/.test(raw)) return null;
+  const y = Number(raw.slice(0, 4));
+  const m = Number(raw.slice(4, 6));
+  const d = Number(raw.slice(6, 8));
+  if (!y || !m || !d) return null;
+  return new Date(y, m - 1, d);
+}
+
+function formatDateYYYYMMDD(date: Date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}${m}${d}`;
+}
+
+function getRecent7StartDate() {
+  const d = new Date();
+  d.setDate(d.getDate() - 6);
+  return formatDateYYYYMMDD(d);
+}
+
+function getAsusApiDateRange() {
+  if (dateRange.value && dateRange.value.length >= 1 && dateRange.value[0]) {
+    const from = dateRange.value[0];
+    const to = dateRange.value[1] ?? dateRange.value[0];
+    return {
+      StartDate: formatDateYYYYMMDD(from),
+      EndDate: formatDateYYYYMMDD(to),
+    };
+  }
+  return {
+    StartDate: getRecent7StartDate(),
+    EndDate: formatDateYYYYMMDD(new Date()),
+  };
+}
+
+const shouldShowDateWithTime = computed(() => {
+  if (dateRange.value && dateRange.value.length >= 1 && dateRange.value[0]) {
+    const from = toLocalDayStart(dateRange.value[0]);
+    const to = toLocalDayStart(dateRange.value[1] ?? dateRange.value[0]);
+    return to > from;
+  }
+  // 預設是最近 7 天，直接顯示日期+時間避免混淆
+  return true;
+});
+
+function formatMeasureTime(dateTime: string) {
+  const date = toDateKey(dateTime);
+  const time = safeTimeFromDateTime(dateTime);
+  if (shouldShowDateWithTime.value) {
+    if (date && time) return `${date} ${time}`;
+    if (date) return date;
+  }
+  return formatTimeDisplay(dateTime);
+}
+
 const metricData = computed<MetricData>(() => {
   const key = metricKey.value;
   const raw = asusHealthData.value || {};
@@ -197,19 +254,19 @@ const metricData = computed<MetricData>(() => {
   if (key === "heartRate") {
     let list = (raw.Hb || []).filter((x: any) => x.Date && inRange(x.Date));
     if (fromMs === null && toMs === null) list = list.slice(-7);
-    const heartRateDetailList = (raw.Bp || [])
+    const heartRateDetailList = (raw.HbDetail || [])
       .filter((x: any) => {
         const d = toDateKey(x.time || "");
-        return d && inRange(d) && Number(x.hr || 0) > 0;
+        return d && inRange(d) && Number(x.heartrate || 0) > 0;
       })
       .sort((a: any, b: any) => (a.time || "").localeCompare(b.time || ""));
     return {
       chartType: "line",
-      headers: ["測量時間", "數據"],
+      headers: [shouldShowDateWithTime.value ? "測量日期時間" : "測量時間", "數據"],
       labels: list.map((x: any) => toDateLabel(x.Date)),
       rows: heartRateDetailList.map((x: any) => [
-        formatTimeDisplay(String(x.time || "")),
-        String(x.hr || ""),
+        formatMeasureTime(String(x.time || "")),
+        String(x.heartrate || ""),
       ]),
       datasets: [
         { label: "最高", data: list.map((x: any) => Number(x.HeartrateMax || 0)), borderColor: "#9fb6df", backgroundColor: "#9fb6df" },
@@ -221,11 +278,20 @@ const metricData = computed<MetricData>(() => {
   if (key === "spo2") {
     let list = (raw.Spo2 || []).filter((x: any) => x.Date && inRange(x.Date));
     if (fromMs === null && toMs === null) list = list.slice(-7);
+    const spo2DetailList = (raw.Spo2Detail || [])
+      .filter((x: any) => {
+        const d = toDateKey(x.time || "");
+        return d && inRange(d) && Number(x.spo2 || 0) > 0;
+      })
+      .sort((a: any, b: any) => (a.time || "").localeCompare(b.time || ""));
     return {
       chartType: "line",
-      headers: ["測量日期", "最低", "最高"],
+      headers: [shouldShowDateWithTime.value ? "測量日期時間" : "測量時間", "數據"],
       labels: list.map((x: any) => toDateLabel(x.Date)),
-      rows: list.map((x: any) => [String(x.Date || ""), String(x.Spo2Min || ""), String(x.Spo2Max || "")]),
+      rows: spo2DetailList.map((x: any) => [
+        formatMeasureTime(String(x.time || "")),
+        String(x.spo2 || ""),
+      ]),
       datasets: [
         { label: "最高", data: list.map((x: any) => Number(x.Spo2Max || 0)), borderColor: "#9fb6df", backgroundColor: "#9fb6df" },
         { label: "最低", data: list.map((x: any) => Number(x.Spo2Min || 0)), borderColor: "#1ba39b", backgroundColor: "#1ba39b" },
@@ -236,13 +302,19 @@ const metricData = computed<MetricData>(() => {
   if (key === "temp") {
     let list = (raw.Tp || []).filter((x: any) => x.Date && inRange(x.Date));
     if (fromMs === null && toMs === null) list = list.slice(-7);
+    const tpDetailList = (raw.TpDetail || [])
+      .filter((x: any) => {
+        const d = toDateKey(x.time || "");
+        return d && inRange(d) && Number(x.temerature || 0) > 0;
+      })
+      .sort((a: any, b: any) => (a.time || "").localeCompare(b.time || ""));
     return {
       chartType: "line",
-      headers: ["測量日期", "體溫"],
+      headers: [shouldShowDateWithTime.value ? "測量日期時間" : "測量時間", "體溫"],
       labels: list.map((x: any) => toDateLabel(x.Date)),
-      rows: list.map((x: any) => [
-        String(x.Date || ""),
-        `${String(x.TpMin || "—")}/${String(x.TpMax || "—")}`,
+      rows: tpDetailList.map((x: any) => [
+        formatMeasureTime(String(x.time || "")),
+        String(x.temerature || ""),
       ]),
       datasets: [
         { label: "最高", data: list.map((x: any) => Number(x.TpMax || 0)), borderColor: "#9fb6df", backgroundColor: "#9fb6df" },
@@ -522,9 +594,22 @@ onMounted(async () => {
   if (!hasFetched.value) {
     await memberStore.fetchAll(auth);
   }
-  if (!asusHealthData.value) {
-    await memberStore.fetchAsusHealthData(auth);
+
+  const qStart = String(route.query.start || "");
+  const qEnd = String(route.query.end || "");
+  const qStartDate = parseYYYYMMDDToDate(qStart);
+  const qEndDate = parseYYYYMMDDToDate(qEnd);
+  if (qStartDate) {
+    dateRange.value = [qStartDate, qEndDate ?? qStartDate];
   }
+
+  if (!asusHealthData.value) {
+    await memberStore.fetchAsusHealthData(auth, getAsusApiDateRange());
+  }
+});
+
+watch(dateRange, async () => {
+  await memberStore.fetchAsusHealthData(getAuth(), getAsusApiDateRange());
 });
 
 onUnmounted(() => {
@@ -566,13 +651,19 @@ onUnmounted(() => {
 }
 
 .goBackBtn {
+
+  font-size: var(--Text-font-size-18, 18px);
+
+  font-weight: 400;
+  letter-spacing: 2.7px;
+
   border: none;
   background: #8f9db8;
   color: #fff;
   border-radius: 8px;
   padding: 0.5rem 0.9rem;
   cursor: pointer;
-  
+  width: 100px;
 }
 
 .detailCard {

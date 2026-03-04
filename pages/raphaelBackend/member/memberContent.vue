@@ -1020,6 +1020,7 @@
                 <h4>身體組成</h4>
                 <canvas ref="bodyCanvas" class="watchChartCanvas"></canvas>
               </div>
+              
             </div>
 
             <div class="watchChartEmpty" v-else>尚無手錶紀錄資料</div>
@@ -1805,7 +1806,17 @@ function goToAcerNumber() {
 }
 
 function openWatchMetricPage(metric: string) {
-  router.push(`/raphaelBackend/member/watchMetric/${metric}`);
+  const query: Record<string, string> = {};
+  if (ringRange.value && ringRange.value.length >= 1 && ringRange.value[0]) {
+    const from = ringRange.value[0];
+    const to = ringRange.value[1] ?? ringRange.value[0];
+    query.start = formatDateYYYYMMDD(from);
+    query.end = formatDateYYYYMMDD(to);
+  }
+  router.push({
+    path: `/raphaelBackend/member/watchMetric/${metric}`,
+    query,
+  });
 }
 
 /* ---------- paging helpers ---------- */
@@ -2249,6 +2260,34 @@ function toLocalDayEnd(date: Date) {
     59,
     999,
   ).getTime();
+}
+
+function formatDateYYYYMMDD(date: Date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}${m}${d}`;
+}
+
+function getRecent7StartDate() {
+  const d = new Date();
+  d.setDate(d.getDate() - 6);
+  return formatDateYYYYMMDD(d);
+}
+
+function getAsusApiDateRange() {
+  if (ringRange.value && ringRange.value.length >= 1 && ringRange.value[0]) {
+    const from = ringRange.value[0];
+    const to = ringRange.value[1] ?? ringRange.value[0];
+    return {
+      StartDate: formatDateYYYYMMDD(from),
+      EndDate: formatDateYYYYMMDD(to),
+    };
+  }
+  return {
+    StartDate: getRecent7StartDate(),
+    EndDate: formatDateYYYYMMDD(new Date()),
+  };
 }
 
 function getRangeBoundary(range: Date[] | null) {
@@ -3356,7 +3395,8 @@ watchEffect(
   },
   { flush: "post" },
 );
-watch(ringRange, () => {
+watch(ringRange, async () => {
+  await memberStore.fetchAsusHealthData(getAuth(), getAsusApiDateRange());
   pageRing.value = 1;
 });
 watch(watchKeyword, () => {
@@ -3521,7 +3561,7 @@ watch(
     }
 
     // 取得華碩健康數據（華碩手錶紀錄）
-    await memberStore.fetchAsusHealthData(getAuth());
+    await memberStore.fetchAsusHealthData(getAuth(), getAsusApiDateRange());
 
     loading.value = false;
   },
@@ -3570,7 +3610,7 @@ async function refresh() {
   }
 
   // 重新取得華碩健康數據
-  await memberStore.fetchAsusHealthData(getAuth());
+  await memberStore.fetchAsusHealthData(getAuth(), getAsusApiDateRange());
   loading.value = false;
 }
 function goBack() {
@@ -3698,10 +3738,6 @@ async function handleEditBasicSubmit(data: {
   }
 
   const sexValue = String(
-    data.sex ??
-      (member.value as any)?.Sex ??
-      (member.value as any)?.Gender ??
-      "",
     (member.value as any)?.Sex ?? (member.value as any)?.Gender ?? ""
   ).trim();
   if (!sexValue) {
