@@ -995,28 +995,28 @@
                 <h4>壓力</h4>
                 <canvas ref="stressCanvas" class="watchChartCanvas"></canvas>
               </div>
-              <!-- @click="openWatchMetricPage('sleep')" -->
-              <div class="watchChartCard watchChartCardClickable" >
+
+              <div class="watchChartCard watchChartCardClickable" @click="openWatchMetricPage('sleep')" >
                 <h4>睡眠</h4>
                 <canvas ref="sleepCanvas" class="watchChartCanvas"></canvas>
               </div>
-              <!-- @click="openWatchMetricPage('temp')" -->
-              <div class="watchChartCard watchChartCardClickable" >
+            
+              <div class="watchChartCard watchChartCardClickable" @click="openWatchMetricPage('temp')" >
                 <h4>溫度</h4>
                 <canvas ref="tempCanvas" class="watchChartCanvas"></canvas>
               </div>
-              <!-- @click="openWatchMetricPage('steps')" -->
-              <div class="watchChartCard watchChartCardClickable" >
+
+              <div class="watchChartCard watchChartCardClickable" @click="openWatchMetricPage('steps')" >
                 <h4>運動</h4>
                 <canvas ref="stepsCanvas" class="watchChartCanvas"></canvas>
               </div>
-              <!-- @click="openWatchMetricPage('hrv')" -->
-              <div class="watchChartCard watchChartCardClickable" >
+
+              <div class="watchChartCard watchChartCardClickable" @click="openWatchMetricPage('hrv')" >
                 <h4>HRV</h4>
                 <canvas ref="hrvCanvas" class="watchChartCanvas"></canvas>
               </div>
-              <!-- @click="openWatchMetricPage('body')" -->
-              <div class="watchChartCard watchChartCardClickable" >
+
+              <div class="watchChartCard watchChartCardClickable" @click="openWatchMetricPage('body')" >
                 <h4>身體組成</h4>
                 <canvas ref="bodyCanvas" class="watchChartCanvas"></canvas>
               </div>
