@@ -23,6 +23,7 @@ export const useMemberStore = defineStore('member', () => {
   const optDetailList = ref<any[]>([])
   const vivoWatchList = ref<any[]>([])
   const asusHealthData = ref<any>(null)
+  const acerHealthData = ref<any>(null)
   const hasFetched = ref(false)
 
   // 方法
@@ -88,6 +89,7 @@ export const useMemberStore = defineStore('member', () => {
       optDetailList.value = []
       vivoWatchList.value = []
       asusHealthData.value = null
+      acerHealthData.value = null
 
       lastUpdated.value = new Date().toLocaleString("zh-TW")
       hasFetched.value = true
@@ -663,6 +665,11 @@ export const useMemberStore = defineStore('member', () => {
     return formatDateYYYYMMDD(d)
   }
 
+  function hasAnyArrayData(obj: any) {
+    if (!obj || typeof obj !== "object") return false
+    return Object.values(obj).some((v: any) => Array.isArray(v) && v.length > 0)
+  }
+
   async function fetchAsusHealthData(
     auth: any,
     range?: { StartDate?: string; EndDate?: string }
@@ -693,13 +700,91 @@ export const useMemberStore = defineStore('member', () => {
 
       const data = await res.json()
       if (data.Result === "OK" && data.mapAsusHealthData) {
-        asusHealthData.value = data.mapAsusHealthData
+        let finalData = data.mapAsusHealthData
+        // 預設最近 7 天若無資料，自動回退抓全部，避免圖表空白
+        if (!range?.StartDate && !range?.EndDate && !hasAnyArrayData(finalData)) {
+          const fallbackRes = await fetch("https://23700999.com:8081/HMA/api/bk/asus_healthData", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              AdminID: admin,
+              Token: token,
+              MID: sel.MID,
+              StartDate: "",
+              EndDate: "",
+            }),
+          })
+          const fallbackData = await fallbackRes.json()
+          if (fallbackData.Result === "OK" && fallbackData.mapAsusHealthData) {
+            finalData = fallbackData.mapAsusHealthData
+          }
+        }
+        asusHealthData.value = finalData
       } else {
         asusHealthData.value = null
       }
     } catch (error) {
       console.error("取得華碩健康數據失敗：", error)
       asusHealthData.value = null
+    }
+  }
+
+  async function fetchAcerHealthData(
+    auth: any,
+    range?: { StartDate?: string; EndDate?: string }
+  ) {
+    try {
+      const { token, admin, sel } = auth
+      if (!token || !admin || !sel.MID) {
+        acerHealthData.value = null
+        return
+      }
+
+      const defaultStart = getRecent7StartDate()
+      const defaultEnd = formatDateYYYYMMDD(new Date())
+      const StartDate = (range?.StartDate || defaultStart).trim()
+      const EndDate = (range?.EndDate || defaultEnd).trim()
+
+      const res = await fetch("https://23700999.com:8081/HMA/api/bk/acer_healthData", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          AdminID: admin,
+          Token: token,
+          MID: sel.MID,
+          StartDate,
+          EndDate,
+        }),
+      })
+
+      const data = await res.json()
+      if (data.Result === "OK" && data.mapAcerHealthData) {
+        let finalData = data.mapAcerHealthData
+        // 預設最近 7 天若無資料，自動回退抓全部，避免圖表空白
+        if (!range?.StartDate && !range?.EndDate && !hasAnyArrayData(finalData)) {
+          const fallbackRes = await fetch("https://23700999.com:8081/HMA/api/bk/acer_healthData", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              AdminID: admin,
+              Token: token,
+              MID: sel.MID,
+              StartDate: "",
+              EndDate: "",
+            }),
+          })
+          const fallbackData = await fallbackRes.json()
+          if (fallbackData.Result === "OK" && fallbackData.mapAcerHealthData) {
+            finalData = fallbackData.mapAcerHealthData
+          }
+        }
+        acerHealthData.value = finalData
+      } else {
+        acerHealthData.value = null
+      }
+    } catch (error) {
+      console.error("取得宏碁指環健康數據失敗：", error)
+      acerHealthData.value = null
     }
   }
 
@@ -723,6 +808,7 @@ export const useMemberStore = defineStore('member', () => {
     optDetailList.value = []
     vivoWatchList.value = []
     asusHealthData.value = null
+    acerHealthData.value = null
     hasFetched.value = false
   }
 
@@ -747,6 +833,7 @@ export const useMemberStore = defineStore('member', () => {
     optDetailList,
     vivoWatchList,
     asusHealthData,
+    acerHealthData,
     hasFetched,
     // 方法
     fetchAll,
@@ -758,6 +845,7 @@ export const useMemberStore = defineStore('member', () => {
     fetchOptDetailMIDList,
     fetchVivoWatchList,
     fetchAsusHealthData,
+    fetchAcerHealthData,
     clear,
   }
 }) 

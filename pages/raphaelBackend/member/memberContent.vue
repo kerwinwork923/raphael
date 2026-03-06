@@ -1027,6 +1027,57 @@
           </div>
         </div>
 
+        <!-- █ 宏碁指環紀錄（圖表版） --------------------------------------------- -->
+        <div class="memberInfoRow">
+          <div class="memberInfoCard watchRecordCard">
+            <div class="memberInfoTitleWrap">
+              <h3>宏碁指環紀錄</h3>
+              <div class="memberInfoTitleGroup">
+                <VueDatePicker
+                  v-model="acerRingRange"
+                  range
+                  :partial-range="true"
+                  :enable-time-picker="false"
+                  format="yyyy/MM/dd"
+                  placeholder="選擇日期區間"
+                  teleport="body"
+                />
+              </div>
+            </div>
+
+            <div class="watchChartsGrid" v-if="acerRingChart.labels.length">
+              <div class="watchChartCard watchChartCardClickable" @click="openAcerMetricPage('heartRate')">
+                <h4>心率</h4>
+                <canvas
+                  ref="acerHeartRateCanvas"
+                  class="watchChartCanvas"
+                ></canvas>
+              </div>
+
+              <div class="watchChartCard watchChartCardClickable" @click="openAcerMetricPage('spo2')">
+                <h4>血氧</h4>
+                <canvas ref="acerSpo2Canvas" class="watchChartCanvas"></canvas>
+              </div>
+
+              <div class="watchChartCard watchChartCardClickable" @click="openAcerMetricPage('sleep')">
+                <h4>睡眠</h4>
+                <canvas ref="acerSleepCanvas" class="watchChartCanvas"></canvas>
+              </div>
+
+              <div class="watchChartCard watchChartCardWide watchChartCardClickable" @click="openAcerMetricPage('temp')">
+                <h4>溫度</h4>
+                <canvas ref="acerTempCanvas" class="watchChartCanvas"></canvas>
+              </div>
+
+              <div class="watchChartCard watchChartCardClickable" @click="openAcerMetricPage('activity')">
+                <h4>運動</h4>
+                <canvas ref="acerStepsCanvas" class="watchChartCanvas"></canvas>
+              </div>
+            </div>
+            <div class="watchChartEmpty" v-else>尚無宏碁指環紀錄資料</div>
+          </div>
+        </div>
+
         <!-- █ 自律神經 ------------------------------------------------------- -->
         <div class="memberInfoRow">
           <div class="memberInfoCard w-half">
@@ -1704,6 +1755,7 @@ const {
   optDetailList,
   vivoWatchList,
   asusHealthData,
+  acerHealthData,
   hasFetched,
 } = storeToRefs(memberStore);
 
@@ -1752,6 +1804,7 @@ const selectedWeeklySummary = ref<{
 /* ---------- refs ---------- */
 
 const ringRange = ref<Date[] | null>(null);
+const acerRingRange = ref<Date[] | null>(null);
 
 // 產品使用紀錄篩選相關
 const showHomeFilter = ref(false);
@@ -1815,6 +1868,20 @@ function openWatchMetricPage(metric: string) {
   }
   router.push({
     path: `/raphaelBackend/member/watchMetric/${metric}`,
+    query,
+  });
+}
+
+function openAcerMetricPage(metric: string) {
+  const query: Record<string, string> = {};
+  if (acerRingRange.value && acerRingRange.value.length >= 1 && acerRingRange.value[0]) {
+    const from = acerRingRange.value[0];
+    const to = acerRingRange.value[1] ?? acerRingRange.value[0];
+    query.start = formatDateYYYYMMDD(from);
+    query.end = formatDateYYYYMMDD(to);
+  }
+  router.push({
+    path: `/raphaelBackend/member/acerMetric/${metric}`,
     query,
   });
 }
@@ -1936,6 +2003,7 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener("resize", handleResize);
   destroyWatchCharts();
+  destroyAcerRingCharts();
 });
 
 const pageNumberList = computed(() =>
@@ -2231,7 +2299,15 @@ function buildWatchRecords(raw: any): any[] {
 }
 
 function toDateKey(dateLike: string) {
-  return (dateLike || "").slice(0, 10).replace(/\//g, "-");
+  const raw = String(dateLike || "").trim();
+  if (!raw) return "";
+  if (/^\d{8}$/.test(raw)) {
+    return `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}`;
+  }
+  if (/^\d{4}[/-]\d{2}[/-]\d{2}/.test(raw)) {
+    return raw.slice(0, 10).replace(/\//g, "-");
+  }
+  return raw.slice(0, 10).replace(/\//g, "-");
 }
 
 function parseDateOnlyToMs(dateLike: string) {
@@ -2290,6 +2366,33 @@ function getAsusApiDateRange() {
   };
 }
 
+function getAcerApiDateRange() {
+  if (acerRingRange.value && acerRingRange.value.length >= 1 && acerRingRange.value[0]) {
+    const from = acerRingRange.value[0];
+    const to = acerRingRange.value[1] ?? acerRingRange.value[0];
+    return {
+      StartDate: formatDateYYYYMMDD(from),
+      EndDate: formatDateYYYYMMDD(to),
+    };
+  }
+  return {
+    StartDate: getRecent7StartDate(),
+    EndDate: formatDateYYYYMMDD(new Date()),
+  };
+}
+
+function parseYYYYMMDDToDateKey(raw: string) {
+  const value = String(raw || "");
+  if (!/^\d{8}$/.test(value)) return "";
+  return `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6, 8)}`;
+}
+
+function parseAcerRawDateTimeToDateKey(rawDateTime: string) {
+  const value = String(rawDateTime || "");
+  if (!/^\d{14}$/.test(value)) return "";
+  return `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6, 8)}`;
+}
+
 function getRangeBoundary(range: Date[] | null) {
   if (!range || !range.length || !range[0]) return [null, null] as const;
   const from = range[0];
@@ -2306,6 +2409,11 @@ const tempCanvas = ref<HTMLCanvasElement | null>(null);
 const stepsCanvas = ref<HTMLCanvasElement | null>(null);
 const hrvCanvas = ref<HTMLCanvasElement | null>(null);
 const bodyCanvas = ref<HTMLCanvasElement | null>(null);
+const acerHeartRateCanvas = ref<HTMLCanvasElement | null>(null);
+const acerSpo2Canvas = ref<HTMLCanvasElement | null>(null);
+const acerSleepCanvas = ref<HTMLCanvasElement | null>(null);
+const acerTempCanvas = ref<HTMLCanvasElement | null>(null);
+const acerStepsCanvas = ref<HTMLCanvasElement | null>(null);
 const watchCharts: Record<string, Chart | null> = {
   heartRate: null,
   spo2: null,
@@ -2317,11 +2425,25 @@ const watchCharts: Record<string, Chart | null> = {
   hrv: null,
   body: null,
 };
+const acerRingCharts: Record<string, Chart | null> = {
+  heartRate: null,
+  spo2: null,
+  sleep: null,
+  temp: null,
+  steps: null,
+};
 
 function destroyWatchCharts() {
   Object.keys(watchCharts).forEach((k) => {
     watchCharts[k]?.destroy();
     watchCharts[k] = null;
+  });
+}
+
+function destroyAcerRingCharts() {
+  Object.keys(acerRingCharts).forEach((k) => {
+    acerRingCharts[k]?.destroy();
+    acerRingCharts[k] = null;
   });
 }
 
@@ -2412,18 +2534,22 @@ const watchChart = computed(() => {
   };
 
   const dateSet = new Set<string>();
-  (raw.Hb || []).forEach(
-    (x: any) => x.Date && inRange(x.Date) && dateSet.add(x.Date),
-  );
-  (raw.Spo2 || []).forEach(
-    (x: any) => x.Date && inRange(x.Date) && dateSet.add(x.Date),
-  );
-  (raw.Step || []).forEach(
-    (x: any) => x.Date && inRange(x.Date) && dateSet.add(x.Date),
-  );
-  (raw.Tp || []).forEach(
-    (x: any) => x.Date && inRange(x.Date) && dateSet.add(x.Date),
-  );
+  (raw.Hb || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d && inRange(d)) dateSet.add(d);
+  });
+  (raw.Spo2 || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d && inRange(d)) dateSet.add(d);
+  });
+  (raw.Step || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d && inRange(d)) dateSet.add(d);
+  });
+  (raw.Tp || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d && inRange(d)) dateSet.add(d);
+  });
   (raw.Bp || []).forEach((x: any) => {
     const d = toDateKey(x.time || "");
     if (d && inRange(d)) dateSet.add(d);
@@ -2439,18 +2565,26 @@ const watchChart = computed(() => {
 
   let dates = Array.from(dateSet).sort();
 
-  const hbMap = new Map<string, any>(
-    (raw.Hb || []).map((x: any) => [x.Date, x]),
-  );
-  const spo2Map = new Map<string, any>(
-    (raw.Spo2 || []).map((x: any) => [x.Date, x]),
-  );
-  const stepMap = new Map<string, any>(
-    (raw.Step || []).map((x: any) => [x.Date, x]),
-  );
-  const tpMap = new Map<string, any>(
-    (raw.Tp || []).map((x: any) => [x.Date, x]),
-  );
+  const hbMap = new Map<string, any>();
+  (raw.Hb || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d) hbMap.set(d, x);
+  });
+  const spo2Map = new Map<string, any>();
+  (raw.Spo2 || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d) spo2Map.set(d, x);
+  });
+  const stepMap = new Map<string, any>();
+  (raw.Step || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d) stepMap.set(d, x);
+  });
+  const tpMap = new Map<string, any>();
+  (raw.Tp || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d) tpMap.set(d, x);
+  });
 
   const bpGroup: Record<string, any[]> = {};
   (raw.Bp || []).forEach((x: any) => {
@@ -2482,29 +2616,7 @@ const watchChart = computed(() => {
     biaGroup[d].push(x);
   });
 
-  // 只保留至少有一個有效數值的日期，避免出現大量空白圖卡
-  dates = dates.filter((d) => {
-    const hb = hbMap.get(d);
-    const spo2 = spo2Map.get(d);
-    const step = stepMap.get(d);
-    const tp = tpMap.get(d);
-    const sleep = sleepGroup[d];
-    const bp = bpGroup[d];
-    const bia = biaGroup[d];
-
-    return (
-      Number(hb?.HeartrateMin || 0) > 0 ||
-      Number(hb?.HeartrateMax || 0) > 0 ||
-      Number(spo2?.Spo2Min || 0) > 0 ||
-      Number(spo2?.Spo2Max || 0) > 0 ||
-      Number(step?.stepsSUM || 0) > 0 ||
-      Number(tp?.TpMin || 0) > 0 ||
-      Number(tp?.TpMax || 0) > 0 ||
-      (bp && bp.length > 0) ||
-      (sleep && sleep.deep + sleep.rem + sleep.light + sleep.awake > 0) ||
-      (bia && bia.length > 0)
-    );
-  });
+  // 華碩 API 也可能回傳空字串，保留日期軸與 0 值，避免整段圖表消失
 
   if (fromMs === null && toMs === null && dates.length > 7)
     dates = dates.slice(-7);
@@ -2749,6 +2861,205 @@ async function renderWatchCharts() {
       borderColor: "#2f6fa3",
       backgroundColor: "#2f6fa3",
     },
+  ]);
+}
+
+const acerRingChart = computed(() => {
+  const raw = acerHealthData.value || {};
+  const [fromMs, toMs] = getRangeBoundary(acerRingRange.value);
+  const inRange = (dateKey: string) => {
+    if (fromMs === null || toMs === null) return true;
+    const ms = parseDateOnlyToMs(dateKey);
+    if (Number.isNaN(ms)) return false;
+    return ms >= fromMs && ms <= toMs;
+  };
+
+  const dateSet = new Set<string>();
+  (raw.Hb || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d && inRange(d)) dateSet.add(d);
+  });
+  (raw.Spo2 || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d && inRange(d)) dateSet.add(d);
+  });
+  (raw.Tp || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d && inRange(d)) dateSet.add(d);
+  });
+  (raw.Sleep || []).forEach((x: any) => {
+    const d = parseAcerRawDateTimeToDateKey(x.RawDateTime || "");
+    if (d && inRange(d)) dateSet.add(d);
+  });
+  (raw.Activity || []).forEach((x: any) => {
+    const d = parseAcerRawDateTimeToDateKey(x.RawDateTime || "");
+    if (d && inRange(d)) dateSet.add(d);
+  });
+
+  let dates = Array.from(dateSet).sort();
+
+  const hbMap = new Map<string, any>();
+  (raw.Hb || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d) hbMap.set(d, x);
+  });
+  const spo2Map = new Map<string, any>();
+  (raw.Spo2 || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d) spo2Map.set(d, x);
+  });
+  const tpMap = new Map<string, any>();
+  (raw.Tp || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d) tpMap.set(d, x);
+  });
+
+  const sleepGroup: Record<string, { deep: number; rem: number; light: number; awake: number }> = {};
+  (raw.Sleep || []).forEach((x: any) => {
+    const d = parseAcerRawDateTimeToDateKey(x.RawDateTime || "");
+    if (!d) return;
+    sleepGroup[d] ||= { deep: 0, rem: 0, light: 0, awake: 0 };
+    sleepGroup[d].deep += Number(x.ComfortCount || 0);
+    sleepGroup[d].rem += Number(x.RemCount || 0);
+    sleepGroup[d].light += Number(x.LightCount || 0);
+  });
+
+  const activityGroup: Record<string, number> = {};
+  (raw.Activity || []).forEach((x: any) => {
+    const d = parseAcerRawDateTimeToDateKey(x.RawDateTime || "");
+    if (!d) return;
+    activityGroup[d] ||= 0;
+    activityGroup[d] += Number(x.step || 0);
+  });
+
+  // 宏碁 API 常回傳空值字串，仍保留日期軸與 0 值，避免整段圖表消失
+
+  if (fromMs === null && toMs === null && dates.length > 7) {
+    dates = dates.slice(-7);
+  }
+
+  const labels = dates.map((d) => d.slice(5).replace("-", "/"));
+  return {
+    labels,
+    heartRateMax: dates.map((d) => Number(hbMap.get(d)?.HeartrateMax || 0)),
+    heartRateMin: dates.map((d) => Number(hbMap.get(d)?.HeartrateMin || 0)),
+    spo2Max: dates.map((d) => Number(spo2Map.get(d)?.Spo2Max || 0)),
+    spo2Min: dates.map((d) => Number(spo2Map.get(d)?.Spo2Min || 0)),
+    tempMax: dates.map((d) => Number(tpMap.get(d)?.TpMax || 0)),
+    tempMin: dates.map((d) => Number(tpMap.get(d)?.TpMin || 0)),
+    sleepDeep: dates.map((d) => sleepGroup[d]?.deep || 0),
+    sleepRem: dates.map((d) => sleepGroup[d]?.rem || 0),
+    sleepLight: dates.map((d) => sleepGroup[d]?.light || 0),
+    sleepAwake: dates.map((d) => sleepGroup[d]?.awake || 0),
+    steps: dates.map((d) => activityGroup[d] || 0),
+  };
+});
+
+function createAcerLineChart(
+  key: keyof typeof acerRingCharts,
+  canvas: HTMLCanvasElement | null,
+  labels: string[],
+  datasets: any[]
+) {
+  if (!canvas) return;
+  acerRingCharts[key]?.destroy();
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  acerRingCharts[key] = new Chart(ctx, {
+    type: "line",
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { position: "bottom", labels: { boxWidth: 8, boxHeight: 8 } },
+      },
+      scales: {
+        y: { beginAtZero: true, ticks: { font: { size: 10 } } },
+        x: { ticks: { font: { size: 10 } } },
+      },
+      elements: {
+        point: { radius: 2 },
+        line: { tension: 0.3, borderWidth: 1.5 },
+      },
+    },
+  });
+}
+
+function createAcerBarChart(
+  key: keyof typeof acerRingCharts,
+  canvas: HTMLCanvasElement | null,
+  labels: string[],
+  datasets: any[],
+  stacked = false
+) {
+  if (!canvas) return;
+  acerRingCharts[key]?.destroy();
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  acerRingCharts[key] = new Chart(ctx, {
+    type: "bar",
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: "bottom", labels: { boxWidth: 8, boxHeight: 8 } },
+      },
+      scales: {
+        x: { stacked, ticks: { font: { size: 10 } } },
+        y: { stacked, beginAtZero: true, ticks: { font: { size: 10 } } },
+      },
+      datasets: {
+        bar: {
+          borderRadius: 2,
+          barThickness: 10,
+          maxBarThickness: 12,
+        },
+      },
+    },
+  });
+}
+
+function renderAcerRingCharts() {
+  const data = acerRingChart.value;
+  const labels = data.labels;
+  if (!labels.length) {
+    destroyAcerRingCharts();
+    return;
+  }
+
+  createAcerLineChart("heartRate", acerHeartRateCanvas.value, labels, [
+    { label: "最高", data: data.heartRateMax, borderColor: "#7cbc28", backgroundColor: "#7cbc28" },
+    { label: "最低", data: data.heartRateMin, borderColor: "#27a3a9", backgroundColor: "#27a3a9" },
+  ]);
+
+  createAcerLineChart("spo2", acerSpo2Canvas.value, labels, [
+    { label: "最高", data: data.spo2Max, borderColor: "#7cbc28", backgroundColor: "#7cbc28" },
+    { label: "最低", data: data.spo2Min, borderColor: "#27a3a9", backgroundColor: "#27a3a9" },
+  ]);
+
+  createAcerBarChart(
+    "sleep",
+    acerSleepCanvas.value,
+    labels,
+    [
+      { label: "清醒", data: data.sleepAwake, backgroundColor: "#3f8c25" },
+      { label: "REM", data: data.sleepRem, backgroundColor: "#74b84a" },
+      { label: "淺眠", data: data.sleepLight, backgroundColor: "#a4ce77" },
+      { label: "深眠", data: data.sleepDeep, backgroundColor: "#27a3a9" },
+    ],
+    true
+  );
+
+  createAcerLineChart("temp", acerTempCanvas.value, labels, [
+    { label: "最高", data: data.tempMax, borderColor: "#7cbc28", backgroundColor: "#7cbc28" },
+    { label: "最低", data: data.tempMin, borderColor: "#27a3a9", backgroundColor: "#27a3a9" },
+  ]);
+
+  createAcerBarChart("steps", acerStepsCanvas.value, labels, [
+    { label: "總步數", data: data.steps, backgroundColor: "#7cbc28" },
   ]);
 }
 
@@ -3354,6 +3665,7 @@ const filteredLife = makeFiltered(lifeRecords, lifeRange, "CheckTime");
 const chartHRV = computed(() => hrvRecords.value); // 全部資料
 const chartANS = computed(() => ansRecords.value);
 const chartLife = computed(() => lifeRecords.value);
+const loading = ref(false);
 
 /* ---------- watch & lifecycle ---------- */
 
@@ -3383,6 +3695,7 @@ watch(
 );
 watchEffect(
   () => {
+    if (loading.value) return;
     if (!watchChart.value.labels.length) {
       destroyWatchCharts();
       return;
@@ -3395,9 +3708,26 @@ watchEffect(
   },
   { flush: "post" },
 );
+watchEffect(
+  () => {
+    if (!acerRingChart.value.labels.length) {
+      destroyAcerRingCharts();
+    } else {
+      nextTick(() => {
+        requestAnimationFrame(() => {
+          renderAcerRingCharts();
+        });
+      });
+    }
+  },
+  { flush: "post" },
+);
 watch(ringRange, async () => {
   await memberStore.fetchAsusHealthData(getAuth(), getAsusApiDateRange());
   pageRing.value = 1;
+});
+watch(acerRingRange, async () => {
+  await memberStore.fetchAcerHealthData(getAuth(), getAcerApiDateRange());
 });
 watch(watchKeyword, () => {
   pageRing.value = 1;
@@ -3472,8 +3802,6 @@ const pageNumberListANS = computed(() =>
 const pageNumberListLife = computed(() =>
   pageButtons(totalPagesLife.value, pageLife.value, maxButtons.value),
 );
-
-const loading = ref(false);
 
 /* ---------- 外部轉移登入 ---------- */
 async function handleTransferLogin(): Promise<boolean> {
@@ -3562,6 +3890,8 @@ watch(
 
     // 取得華碩健康數據（華碩手錶紀錄）
     await memberStore.fetchAsusHealthData(getAuth(), getAsusApiDateRange());
+    // 取得宏碁健康數據（宏碁指環紀錄）
+    await memberStore.fetchAcerHealthData(getAuth(), getAcerApiDateRange());
 
     loading.value = false;
   },
@@ -3611,6 +3941,8 @@ async function refresh() {
 
   // 重新取得華碩健康數據
   await memberStore.fetchAsusHealthData(getAuth(), getAsusApiDateRange());
+  // 重新取得宏碁健康數據
+  await memberStore.fetchAcerHealthData(getAuth(), getAcerApiDateRange());
   loading.value = false;
 }
 function goBack() {
