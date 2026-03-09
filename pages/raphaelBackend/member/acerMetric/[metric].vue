@@ -1,5 +1,9 @@
 <template>
   <div class="memberInfo">
+    <div v-if="isMetricLoading" class="loading-mask">
+      <div class="loading-spinner"></div>
+      <div>資料載入中，請稍候...</div>
+    </div>
     <Sidebar />
     <div class="memberInfoContent">
       <div class="pageHeader">
@@ -79,7 +83,9 @@ const memberStore = useMemberStore();
 const { member, acerHealthData, hasFetched } = storeToRefs(memberStore);
 const dateRange = ref<Date[] | null>(null);
 const detailCanvas = ref<HTMLCanvasElement | null>(null);
+const isMetricLoading = ref(false);
 let detailChart: Chart | null = null;
+let skipNextDateRangeWatch = false;
 
 const metricTitleMap: Record<MetricKey, string> = {
   heartRate: "心率",
@@ -457,6 +463,15 @@ function renderDetailChart() {
   });
 }
 
+async function fetchMetricData() {
+  isMetricLoading.value = true;
+  try {
+    await memberStore.fetchAcerHealthData(getAuth(), getAcerApiDateRange());
+  } finally {
+    isMetricLoading.value = false;
+  }
+}
+
 watchEffect(() => {
   if (!metricData.value.labels.length) {
     destroyDetailChart();
@@ -485,16 +500,18 @@ onMounted(async () => {
   const qStartDate = parseYYYYMMDDToDate(qStart);
   const qEndDate = parseYYYYMMDDToDate(qEnd);
   if (qStartDate) {
+    skipNextDateRangeWatch = true;
     dateRange.value = [qStartDate, qEndDate ?? qStartDate];
   }
-
-  if (!acerHealthData.value) {
-    await memberStore.fetchAcerHealthData(auth, getAcerApiDateRange());
-  }
+  await fetchMetricData();
 });
 
 watch(dateRange, async () => {
-  await memberStore.fetchAcerHealthData(getAuth(), getAcerApiDateRange());
+  if (skipNextDateRangeWatch) {
+    skipNextDateRangeWatch = false;
+    return;
+  }
+  await fetchMetricData();
 });
 
 onUnmounted(() => {
@@ -505,6 +522,33 @@ onUnmounted(() => {
 <style scoped lang="scss">
 .memberInfo {
   display: flex;
+}
+
+.loading-mask {
+  position: fixed;
+  z-index: 9999;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-spinner {
+  border: 6px solid #eee;
+  border-top: 6px solid #1ba39b;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .memberInfoContent {
