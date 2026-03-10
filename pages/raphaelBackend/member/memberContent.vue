@@ -1078,6 +1078,55 @@
           </div>
         </div>
 
+        <!-- █ Garmin 紀錄（圖表版 / 假資料） -------------------------------------- -->
+        <!-- <div class="memberInfoRow">
+          <div class="memberInfoCard watchRecordCard">
+            <div class="memberInfoTitleWrap">
+              <h3>Garmin 紀錄</h3>
+              <div class="memberInfoTitleGroup">
+                <VueDatePicker
+                  v-model="garminRange"
+                  range
+                  :partial-range="true"
+                  :enable-time-picker="false"
+                  format="yyyy/MM/dd"
+                  placeholder="選擇日期區間"
+                  teleport="body"
+                />
+              </div>
+            </div>
+
+            <div class="watchChartsGrid" v-if="garminChart.labels.length">
+              <div class="watchChartCard watchChartCardClickable" @click="openGarminMetricPage('heartRate')">
+                <h4>心率</h4>
+                <canvas ref="garminHeartRateCanvas" class="watchChartCanvas"></canvas>
+              </div>
+
+              <div class="watchChartCard watchChartCardClickable" @click="openGarminMetricPage('spo2')">
+                <h4>血氧</h4>
+                <canvas ref="garminSpo2Canvas" class="watchChartCanvas"></canvas>
+              </div>
+
+              <div class="watchChartCard watchChartCardClickable" @click="openGarminMetricPage('stress')">
+                <h4>壓力</h4>
+                <canvas ref="garminStressCanvas" class="watchChartCanvas"></canvas>
+              </div>
+
+              <div class="watchChartCard watchChartCardWide watchChartCardClickable" @click="openGarminMetricPage('sleep')">
+                <h4>睡眠</h4>
+                <canvas ref="garminSleepCanvas" class="watchChartCanvas"></canvas>
+              </div>
+
+              <div class="watchChartCard watchChartCardWide watchChartCardClickable" @click="openGarminMetricPage('temp')">
+                <h4>溫度</h4>
+                <canvas ref="garminTempCanvas" class="watchChartCanvas"></canvas>
+              </div>
+            </div>
+
+            <div class="watchChartEmpty" v-else>尚無 Garmin 紀錄資料</div>
+          </div>
+        </div> -->
+
         <!-- █ 自律神經 ------------------------------------------------------- -->
         <div class="memberInfoRow">
           <div class="memberInfoCard w-half">
@@ -1805,6 +1854,7 @@ const selectedWeeklySummary = ref<{
 
 const ringRange = ref<Date[] | null>(null);
 const acerRingRange = ref<Date[] | null>(null);
+const garminRange = ref<Date[] | null>(null);
 
 // 產品使用紀錄篩選相關
 const showHomeFilter = ref(false);
@@ -1882,6 +1932,20 @@ function openAcerMetricPage(metric: string) {
   }
   router.push({
     path: `/raphaelBackend/member/acerMetric/${metric}`,
+    query,
+  });
+}
+
+function openGarminMetricPage(metric: string) {
+  const query: Record<string, string> = {};
+  if (garminRange.value && garminRange.value.length >= 1 && garminRange.value[0]) {
+    const from = garminRange.value[0];
+    const to = garminRange.value[1] ?? garminRange.value[0];
+    query.start = formatDateYYYYMMDD(from);
+    query.end = formatDateYYYYMMDD(to);
+  }
+  router.push({
+    path: `/raphaelBackend/member/garminMetric/${metric}`,
     query,
   });
 }
@@ -2004,6 +2068,7 @@ onUnmounted(() => {
   window.removeEventListener("resize", handleResize);
   destroyWatchCharts();
   destroyAcerRingCharts();
+  destroyGarminCharts();
 });
 
 const pageNumberList = computed(() =>
@@ -2414,6 +2479,11 @@ const acerSpo2Canvas = ref<HTMLCanvasElement | null>(null);
 const acerSleepCanvas = ref<HTMLCanvasElement | null>(null);
 const acerTempCanvas = ref<HTMLCanvasElement | null>(null);
 const acerStepsCanvas = ref<HTMLCanvasElement | null>(null);
+const garminHeartRateCanvas = ref<HTMLCanvasElement | null>(null);
+const garminSpo2Canvas = ref<HTMLCanvasElement | null>(null);
+const garminStressCanvas = ref<HTMLCanvasElement | null>(null);
+const garminSleepCanvas = ref<HTMLCanvasElement | null>(null);
+const garminTempCanvas = ref<HTMLCanvasElement | null>(null);
 const watchCharts: Record<string, Chart | null> = {
   heartRate: null,
   spo2: null,
@@ -2432,6 +2502,13 @@ const acerRingCharts: Record<string, Chart | null> = {
   temp: null,
   steps: null,
 };
+const garminCharts: Record<string, Chart | null> = {
+  heartRate: null,
+  spo2: null,
+  stress: null,
+  sleep: null,
+  temp: null,
+};
 
 function destroyWatchCharts() {
   Object.keys(watchCharts).forEach((k) => {
@@ -2444,6 +2521,13 @@ function destroyAcerRingCharts() {
   Object.keys(acerRingCharts).forEach((k) => {
     acerRingCharts[k]?.destroy();
     acerRingCharts[k] = null;
+  });
+}
+
+function destroyGarminCharts() {
+  Object.keys(garminCharts).forEach((k) => {
+    garminCharts[k]?.destroy();
+    garminCharts[k] = null;
   });
 }
 
@@ -3060,6 +3144,164 @@ function renderAcerRingCharts() {
 
   createAcerBarChart("steps", acerStepsCanvas.value, labels, [
     { label: "總步數", data: data.steps, backgroundColor: "#7cbc28" },
+  ]);
+}
+
+function createGarminLineChart(
+  key: keyof typeof garminCharts,
+  canvas: HTMLCanvasElement | null,
+  labels: string[],
+  datasets: any[],
+) {
+  if (!canvas) return;
+  garminCharts[key]?.destroy();
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  garminCharts[key] = new Chart(ctx, {
+    type: "line",
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { position: "bottom", labels: { boxWidth: 8, boxHeight: 8 } },
+      },
+      scales: {
+        y: { beginAtZero: true, ticks: { font: { size: 10 } } },
+        x: { ticks: { font: { size: 10 } } },
+      },
+      elements: {
+        point: { radius: 2 },
+        line: { tension: 0.3, borderWidth: 1.5 },
+      },
+    },
+  });
+}
+
+function createGarminBarChart(
+  key: keyof typeof garminCharts,
+  canvas: HTMLCanvasElement | null,
+  labels: string[],
+  datasets: any[],
+  stacked = false,
+) {
+  if (!canvas) return;
+  garminCharts[key]?.destroy();
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  garminCharts[key] = new Chart(ctx, {
+    type: "bar",
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: "bottom", labels: { boxWidth: 8, boxHeight: 8 } },
+      },
+      scales: {
+        x: { stacked, ticks: { font: { size: 10 } } },
+        y: { stacked, beginAtZero: true, ticks: { font: { size: 10 } } },
+      },
+      datasets: {
+        bar: {
+          borderRadius: 2,
+          barThickness: 10,
+          maxBarThickness: 12,
+        },
+      },
+    },
+  });
+}
+
+function getRecentDateKeys(days = 7) {
+  const list: string[] = [];
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  for (let i = days - 1; i >= 0; i--) {
+    const x = new Date(d);
+    x.setDate(d.getDate() - i);
+    list.push(toDateKey(formatDateYYYYMMDD(x)));
+  }
+  return list;
+}
+
+const garminFakeDaily = computed(() => {
+  return getRecentDateKeys(7).map((date, idx) => ({
+    date,
+    heartRateMax: 76 + ((idx * 3) % 12),
+    heartRateMin: 54 + ((idx * 2) % 8),
+    spo2Max: 98 + (idx % 2),
+    spo2Min: 93 + (idx % 4),
+    stressMax: 78 + ((idx * 5) % 18),
+    stressMin: 45 + ((idx * 3) % 12),
+    tempMax: 36.6 + ((idx % 3) * 0.2),
+    tempMin: 35.8 + ((idx % 2) * 0.2),
+    sleepDeep: 90 + ((idx * 11) % 40),
+    sleepRem: 45 + ((idx * 7) % 30),
+    sleepLight: 180 + ((idx * 13) % 60),
+  }));
+});
+
+const garminChart = computed(() => {
+  const [fromMs, toMs] = getRangeBoundary(garminRange.value);
+  const inRange = (dateKey: string) => {
+    if (fromMs === null || toMs === null) return true;
+    const ms = parseDateOnlyToMs(dateKey);
+    if (Number.isNaN(ms)) return false;
+    return ms >= fromMs && ms <= toMs;
+  };
+  const source = garminFakeDaily.value.filter((x: any) => inRange(x.date));
+  const labels = source.map((x: any) => x.date.slice(5).replace("-", "/"));
+  return {
+    labels,
+    heartRateMax: source.map((x: any) => x.heartRateMax),
+    heartRateMin: source.map((x: any) => x.heartRateMin),
+    spo2Max: source.map((x: any) => x.spo2Max),
+    spo2Min: source.map((x: any) => x.spo2Min),
+    stressMax: source.map((x: any) => x.stressMax),
+    stressMin: source.map((x: any) => x.stressMin),
+    tempMax: source.map((x: any) => Number(x.tempMax.toFixed(1))),
+    tempMin: source.map((x: any) => Number(x.tempMin.toFixed(1))),
+    sleepDeep: source.map((x: any) => x.sleepDeep),
+    sleepRem: source.map((x: any) => x.sleepRem),
+    sleepLight: source.map((x: any) => x.sleepLight),
+  };
+});
+
+function renderGarminCharts() {
+  const data = garminChart.value;
+  const labels = data.labels;
+  if (!labels.length) {
+    destroyGarminCharts();
+    return;
+  }
+  createGarminLineChart("heartRate", garminHeartRateCanvas.value, labels, [
+    { label: "最高", data: data.heartRateMax, borderColor: "#7cbc28", backgroundColor: "#7cbc28" },
+    { label: "最低", data: data.heartRateMin, borderColor: "#27a3a9", backgroundColor: "#27a3a9" },
+  ]);
+  createGarminLineChart("spo2", garminSpo2Canvas.value, labels, [
+    { label: "最高", data: data.spo2Max, borderColor: "#7cbc28", backgroundColor: "#7cbc28" },
+    { label: "最低", data: data.spo2Min, borderColor: "#27a3a9", backgroundColor: "#27a3a9" },
+  ]);
+  createGarminLineChart("stress", garminStressCanvas.value, labels, [
+    { label: "最高", data: data.stressMax, borderColor: "#7cbc28", backgroundColor: "#7cbc28" },
+    { label: "最低", data: data.stressMin, borderColor: "#27a3a9", backgroundColor: "#27a3a9" },
+  ]);
+  createGarminBarChart(
+    "sleep",
+    garminSleepCanvas.value,
+    labels,
+    [
+      { label: "REM", data: data.sleepRem, backgroundColor: "#74b84a" },
+      { label: "淺眠", data: data.sleepLight, backgroundColor: "#a4ce77" },
+      { label: "深眠", data: data.sleepDeep, backgroundColor: "#27a3a9" },
+    ],
+    true,
+  );
+  createGarminLineChart("temp", garminTempCanvas.value, labels, [
+    { label: "最高", data: data.tempMax, borderColor: "#7cbc28", backgroundColor: "#7cbc28" },
+    { label: "最低", data: data.tempMin, borderColor: "#27a3a9", backgroundColor: "#27a3a9" },
   ]);
 }
 
@@ -3719,6 +3961,31 @@ watchEffect(
         });
       });
     }
+  },
+  { flush: "post" },
+);
+watchEffect(
+  () => {
+    const labels = garminChart.value.labels;
+    const canvasReady =
+      !!garminHeartRateCanvas.value &&
+      !!garminSpo2Canvas.value &&
+      !!garminStressCanvas.value &&
+      !!garminSleepCanvas.value &&
+      !!garminTempCanvas.value;
+
+    if (!labels.length) {
+      destroyGarminCharts();
+      return;
+    }
+
+    if (!canvasReady) return;
+
+    nextTick(() => {
+      requestAnimationFrame(() => {
+        renderGarminCharts();
+      });
+    });
   },
   { flush: "post" },
 );
