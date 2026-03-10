@@ -119,7 +119,7 @@
                     <input
                       type="checkbox"
                       :checked="selectedEvents.includes(event)"
-                      @click.stop
+                      @click.stop="toggleEventOption(event)"
                     />
                     <span>{{ event }}</span>
                   </div>
@@ -594,7 +594,7 @@
                             :checked="
                               selectedHomeFilterOptions.includes(option)
                             "
-                            @click.stop
+                            @click.stop="toggleHomeFilterOption(option)"
                           />
                           <span>{{ option }}</span>
                         </div>
