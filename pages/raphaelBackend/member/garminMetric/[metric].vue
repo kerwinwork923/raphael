@@ -167,6 +167,13 @@ const dateKeys = computed<string[]>(() => {
   });
 });
 
+const isSingleDaySelected = computed(() => {
+  if (!dateRange.value || dateRange.value.length < 1 || !dateRange.value[0]) return false;
+  const from = toLocalDayStart(dateRange.value[0]);
+  const to = toLocalDayStart(dateRange.value[1] ?? dateRange.value[0]);
+  return from === to;
+});
+
 const metricData = computed<MetricData>(() => {
   const labels = dateKeys.value.map((d: string) => d.slice(5).replace("-", "/"));
   const idxValues = dateKeys.value.map((_: string, idx: number) => idx);
@@ -183,6 +190,20 @@ const metricData = computed<MetricData>(() => {
   const sleepLight = idxValues.map((i: number) => 180 + ((i * 13) % 60));
 
   if (metricKey.value === "heartRate") {
+    if (isSingleDaySelected.value) {
+      const hourlyLabels = Array.from({ length: 24 }, (_, h) => `${String(h).padStart(2, "0")}:00`);
+      const hourlyValues = hourlyLabels.map((_, h) => 56 + ((h * 3 + 7) % 24));
+      return {
+        headers: ["測量時間", "心率"],
+        rows: hourlyLabels.map((t: string, i: number) => [t, String(hourlyValues[i])]),
+        labels: hourlyLabels,
+        datasets: [
+          { label: "心率", data: hourlyValues, borderColor: "#1ba39b", backgroundColor: "#1ba39b" },
+        ],
+        chartType: "line",
+      };
+    }
+
     return {
       headers: ["日期", "最高心率", "最低心率"],
       rows: labels.map((d: string, i: number) => [d, String(hrMax[i]), String(hrMin[i])]),

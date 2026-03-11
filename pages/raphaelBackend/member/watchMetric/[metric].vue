@@ -236,6 +236,13 @@ const shouldShowDateWithTime = computed(() => {
   return true;
 });
 
+const isSingleDaySelected = computed(() => {
+  if (!dateRange.value || dateRange.value.length < 1 || !dateRange.value[0]) return false;
+  const from = toLocalDayStart(dateRange.value[0]);
+  const to = toLocalDayStart(dateRange.value[1] ?? dateRange.value[0]);
+  return from === to;
+});
+
 function formatMeasureTime(dateTime: string) {
   const date = toDateKey(dateTime);
   const time = safeTimeFromDateTime(dateTime);
@@ -266,6 +273,27 @@ const metricData = computed<MetricData>(() => {
         return d && inRange(d) && Number(x.heartrate || 0) > 0;
       })
       .sort((a: any, b: any) => (a.time || "").localeCompare(b.time || ""));
+
+    if (isSingleDaySelected.value && heartRateDetailList.length) {
+      return {
+        chartType: "line",
+        headers: ["測量時間", "心率"],
+        labels: heartRateDetailList.map((x: any) => safeTimeFromDateTime(String(x.time || ""))),
+        rows: heartRateDetailList.map((x: any) => [
+          safeTimeFromDateTime(String(x.time || "")),
+          String(x.heartrate || ""),
+        ]),
+        datasets: [
+          {
+            label: "心率",
+            data: heartRateDetailList.map((x: any) => Number(x.heartrate || 0)),
+            borderColor: "#1ba39b",
+            backgroundColor: "#1ba39b",
+          },
+        ],
+      };
+    }
+
     return {
       chartType: "line",
       headers: [shouldShowDateWithTime.value ? "測量日期時間" : "測量時間", "數據"],
