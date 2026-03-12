@@ -196,6 +196,95 @@
         </div>
       </div>
 
+      <!-- 留言版塊 -->
+      <section v-if="!loading" class="message-board">
+        <div class="message-board__header">
+          <h3>留言管理</h3>
+          <span>共 {{ messageTotal }} 筆</span>
+        </div>
+
+        <div class="message-board__toolbar">
+          <div class="message-search">
+            <input
+              v-model="messageKeyword"
+              type="text"
+              placeholder="搜尋留言內容、留言者"
+            />
+            <img src="/assets/imgs/backend/search.svg" alt="search" />
+          </div>
+
+          <div class="message-date">
+            <VueDatePicker
+              v-model="messageDateRange"
+              range
+              :enable-time-picker="false"
+              format="yyyy/MM/dd"
+              placeholder="留言日期查詢"
+              teleport="body"
+            />
+          </div>
+        </div>
+
+        <div class="message-board__table">
+          <div class="message-row message-header">
+            <div>留言內容</div>
+            <div>留言者</div>
+            <div>狀態</div>
+            <div>留言時間</div>
+          </div>
+
+          <div v-if="messageLoading" class="message-empty">留言載入中...</div>
+          <template v-else-if="paginatedMessages.length">
+            <div class="message-row" v-for="item in paginatedMessages" :key="item.id">
+              <div>{{ item.content }}</div>
+              <div>{{ item.sender }}</div>
+              <div>
+                <span
+                  class="message-status"
+                  :class="item.status === 'replied' ? 'replied' : 'unreplied'"
+                >
+                  {{ item.status === "replied" ? "已回覆" : "未回覆" }}
+                </span>
+              </div>
+              <div>{{ item.date }}</div>
+            </div>
+          </template>
+          <div v-else class="message-empty">尚無留言資料</div>
+        </div>
+
+        <nav class="pagination" v-if="messageTotalPages > 1">
+          <button class="btn-page" :disabled="messagePage === 1" @click="messagePage = 1">
+            &lt;&lt;
+          </button>
+          <button class="btn-page" :disabled="messagePage === 1" @click="messagePage--">
+            &lt;
+          </button>
+          <button
+            v-for="p in messagePageNumberList"
+            :key="p"
+            class="btn-page btn-page-number"
+            :class="{ active: messagePage === p }"
+            @click="messagePage = p"
+          >
+            {{ p }}
+          </button>
+          <button
+            class="btn-page"
+            :disabled="messagePage === messageTotalPages"
+            @click="messagePage++"
+          >
+            &gt;
+          </button>
+          <button
+            class="btn-page"
+            :disabled="messagePage === messageTotalPages"
+            @click="messagePage = messageTotalPages"
+          >
+            &gt;&gt;
+          </button>
+        </nav>
+      </section>
+
       <!-- Loading -->
       <div v-if="loading" class="loading-container">
         <p>載入中...</p>
@@ -213,16 +302,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from "vue";
+import { ref, reactive, computed, onMounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import axios from "axios";
 import Sidebar from "/components/raphaelBackend/Sidebar.vue";
 import TagSetting from "/components/raphaelBackend/tasSetting.vue";
+import VueDatePicker from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
 import { useVideoTypeStore } from "~/stores/useVideoTypeStore";
 
 const router = useRouter();
 const route = useRoute();
 const videoTypeStore = useVideoTypeStore();
+const VIDEO_MESSAGE_API = "https://23700999.com:8081/HMA/api/bk/VideoMessageList";
 
 // 取得影片 ID
 const videoId = route.params.id as string;
@@ -243,6 +335,27 @@ const formData = reactive({
 interface VideoBigType {
   Type: string;
   Name: string;
+}
+
+interface ApiVideoMessage {
+  Status: string;
+  Response: string;
+  CheckTime: string;
+  Message: string;
+  MID: string;
+  BID: string;
+  AID: string;
+  Mobile: string;
+  Name: string;
+}
+
+interface BoardMessage {
+  id: string;
+  content: string;
+  sender: string;
+  status: "replied" | "unreplied";
+  date: string;
+  AID: string;
 }
 
 const videoBigTypeList = ref<VideoBigType[]>([]);
@@ -272,6 +385,106 @@ const coverImage = ref<File | null>(null);
 const coverImagePreview = ref<string>("");
 const existingCoverImage = ref<string>("");
 const isDragOver = ref(false);
+
+// 留言版塊
+const messageKeyword = ref("");
+const messageDateRange = ref<Date[] | null>(null);
+const messageLoading = ref(false);
+const messagePage = ref(1);
+const messagePageSize = ref(10);
+const messages = ref<BoardMessage[]>([]);
+
+const filteredMessages = computed(() => {
+  let data = messages.value.filter((m: BoardMessage) => m.AID === videoId);
+  if (messageKeyword.value.trim()) {
+    const kw = messageKeyword.value.trim().toLowerCase();
+    data = data.filter(
+      (m: BoardMessage) =>
+        m.content.toLowerCase().includes(kw) ||
+        m.sender.toLowerCase().includes(kw),
+    );
+  }
+  return data;
+});
+
+const messageTotal = computed(() => filteredMessages.value.length);
+const messageTotalPages = computed(() =>
+  Math.max(1, Math.ceil(messageTotal.value / messagePageSize.value)),
+);
+const paginatedMessages = computed(() => {
+  const start = (messagePage.value - 1) * messagePageSize.value;
+  return filteredMessages.value.slice(start, start + messagePageSize.value);
+});
+const messagePageNumberList = computed(() => {
+  const total = messageTotalPages.value;
+  const current = messagePage.value;
+  const maxButtons = 5;
+  if (total <= maxButtons) return Array.from({ length: total }, (_, i) => i + 1);
+  let start = Math.max(1, current - 2);
+  let end = Math.min(total, start + maxButtons - 1);
+  if (end - start < maxButtons - 1) start = Math.max(1, end - maxButtons + 1);
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+});
+
+function formatDateToYYYYMMDD(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}${m}${d}`;
+}
+
+async function fetchVideoMessages() {
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("backendToken") || sessionStorage.getItem("backendToken")
+      : "";
+  const adminID =
+    typeof window !== "undefined"
+      ? localStorage.getItem("adminID") || sessionStorage.getItem("adminID")
+      : "";
+  if (!token || !adminID) return;
+
+  messageLoading.value = true;
+  try {
+    let StartDate = "";
+    let EndDate = "";
+    if (messageDateRange.value && messageDateRange.value.length >= 2) {
+      StartDate = formatDateToYYYYMMDD(messageDateRange.value[0]);
+      EndDate = formatDateToYYYYMMDD(messageDateRange.value[1]);
+    }
+    const response = await axios.post(VIDEO_MESSAGE_API, {
+      AdminID: adminID,
+      Token: token,
+      StartDate,
+      EndDate,
+    });
+
+    if (
+      response.data?.Result === "OK" &&
+      Array.isArray(response.data.VideoMessageList)
+    ) {
+      const list = response.data.VideoMessageList as ApiVideoMessage[];
+      messages.value = list.map((item) => ({
+        id: item.BID || "",
+        content: item.Message || "",
+        sender: item.Name || "",
+        status:
+          item.Response === "已回覆"
+            ? ("replied" as const)
+            : ("unreplied" as const),
+        date: item.CheckTime || "",
+        AID: item.AID || "",
+      }));
+    } else {
+      messages.value = [];
+    }
+  } catch (error) {
+    console.error("取得留言列表失敗:", error);
+    messages.value = [];
+  } finally {
+    messageLoading.value = false;
+  }
+}
 
 // 觸發檔案選擇
 function triggerFileInput() {
@@ -499,6 +712,7 @@ onMounted(async () => {
   await videoTypeStore.fetchVideoTypeList();
   await fetchVideoBigTypeList();
   await fetchVideoData();
+  await fetchVideoMessages();
 });
 
 // 返回
@@ -601,6 +815,15 @@ async function handleSubmit() {
 async function handleSave() {
   await handleSubmit();
 }
+
+watch(messageDateRange, async () => {
+  messagePage.value = 1;
+  await fetchVideoMessages();
+});
+
+watch(messageKeyword, () => {
+  messagePage.value = 1;
+});
 </script>
 
 <style scoped lang="scss">
@@ -1004,6 +1227,161 @@ async function handleSave() {
 
   &:hover {
     background: $primary-300;
+  }
+}
+
+.message-board {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 1px solid $border;
+  border-radius: 20px;
+  background: $raphael-white;
+  box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
+  padding: 16px;
+
+  .message-board__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: $primary-600;
+
+    h3 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    span {
+      color: $primary-200;
+      font-size: 16px;
+      font-weight: 600;
+    }
+  }
+
+  .message-board__toolbar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .message-search,
+  .message-date {
+    position: relative;
+    min-width: 220px;
+    flex: 1;
+  }
+
+  .message-search {
+    img {
+      width: 16px;
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    input {
+      width: 100%;
+      border: none;
+      border-radius: 50px;
+      box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
+      padding: 8px 12px 8px 36px;
+    }
+  }
+
+  .message-date {
+    :deep(.dp__input) {
+      border: none;
+      border-radius: 50px;
+      box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
+      padding-left: 34px;
+    }
+
+    :deep(.dp__input_icon) {
+      color: $chip-success;
+    }
+  }
+
+  .message-board__table {
+    border: 1px solid $border;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .message-row {
+    display: grid;
+    grid-template-columns: 2.5fr 1fr 0.8fr 1.4fr;
+    gap: 10px;
+    align-items: center;
+    padding: 12px 14px;
+    border-top: 1px solid $border;
+    color: $raphael-gray-500;
+    font-size: 14px;
+  }
+
+  .message-header {
+    border-top: none;
+    color: $primary-600;
+    font-weight: 600;
+    background: rgba(177, 192, 216, 0.08);
+  }
+
+  .message-empty {
+    padding: 28px 12px;
+    text-align: center;
+    color: $raphael-gray-500;
+  }
+
+  .message-status {
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    font-size: 12px;
+  }
+
+  .message-status.replied {
+    color: #1ba39b;
+    border-color: #1ba39b;
+    background: rgba(27, 163, 155, 0.1);
+  }
+
+  .message-status.unreplied {
+    color: #ec4f4f;
+    border-color: #ec4f4f;
+    background: rgba(236, 79, 79, 0.1);
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-top: 8px;
+
+    .btn-page {
+      padding: 6px 10px;
+      min-width: 32px;
+      border-radius: 4px;
+      background-color: transparent;
+      cursor: pointer;
+      border: none;
+      color: $raphael-gray-500;
+
+      &.active {
+        background: $chip-success;
+        color: #fff;
+      }
+
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    }
+
+    .btn-page-number {
+      background: #fff;
+    }
   }
 }
 
