@@ -1796,13 +1796,122 @@ async function saveChatRecord({
   }
 }
 
+// 組裝最近 7 天的患者留言，供摘要使用
+function buildSevenDaySummaryInput(currentInputText = "") {
+  if (!process.client) {
+    return {
+      hasMessages: false,
+      summaryInput: "本週沒有留言紀錄",
+      lines: [],
+    };
+  }
+
+  const chatStorageKey = "robotDemo_chatHistory";
+  const chatRaw = localStorage.getItem(chatStorageKey);
+  const chatHistory = chatRaw ? JSON.parse(chatRaw) : [];
+
+  const healthStorageKey = "robotDemo_healthLogs";
+  const healthRaw = localStorage.getItem(healthStorageKey);
+  const healthLogs = healthRaw ? JSON.parse(healthRaw) : [];
+
+  const now = new Date();
+  const sevenDaysAgo = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() - 6,
+    0,
+    0,
+    0,
+    0
+  );
+
+  const fromChatHistory = chatHistory
+    .filter((item) => {
+      const rawTime = item.inputTime || item.timestamp || item.ts;
+      const msgDate =
+        typeof rawTime === "number" ? new Date(rawTime) : parseCorrectTime(rawTime);
+      return msgDate >= sevenDaysAgo && msgDate <= now;
+    })
+    .map((item) => {
+      const rawTime = item.inputTime || item.timestamp || item.ts;
+      const msgDate =
+        typeof rawTime === "number" ? new Date(rawTime) : parseCorrectTime(rawTime);
+      const userText = String(item.user || "").trim();
+      return {
+        time: getLocalTimeString(msgDate),
+        user: userText,
+      };
+    })
+    .filter((item) => item.user.length > 0);
+
+  const fromHealthLogs = healthLogs
+    .filter((item) => {
+      const rawTime = item.timestamp || item.date;
+      if (!rawTime) return false;
+      const msgDate = parseCorrectTime(rawTime);
+      return msgDate >= sevenDaysAgo && msgDate <= now;
+    })
+    .map((item) => {
+      const msgDate = parseCorrectTime(item.timestamp || item.date);
+      const userText = String(item.preSoundNote || "").trim();
+      return {
+        time: getLocalTimeString(msgDate),
+        user: userText,
+      };
+    })
+    .filter((item) => item.user.length > 0);
+
+  // 確保本次輸入一定會被納入摘要，避免空資料誤判
+  const normalizedCurrentInput = String(currentInputText || "").trim();
+  const currentInputItem = normalizedCurrentInput
+    ? [
+        {
+          time: getLocalTimeString(now),
+          user: normalizedCurrentInput,
+        },
+      ]
+    : [];
+
+  const uniqueMap = new Map();
+  [...fromChatHistory, ...fromHealthLogs, ...currentInputItem].forEach((item) => {
+    const key = `${item.time}|${item.user}`;
+    if (!uniqueMap.has(key)) {
+      uniqueMap.set(key, item);
+    }
+  });
+
+  const withinSevenDays = Array.from(uniqueMap.values()).sort(
+    (a, b) => new Date(a.time) - new Date(b.time)
+  );
+
+  if (!withinSevenDays.length) {
+    return {
+      hasMessages: false,
+      summaryInput: "本週沒有留言紀錄",
+      lines: [],
+    };
+  }
+
+  const lines = withinSevenDays.map(
+    (item, index) => `${index + 1}. [${item.time}] ${item.user}`
+  );
+
+  return {
+    hasMessages: true,
+    summaryInput: lines.join("\n"),
+    lines,
+  };
+}
+
 async function runSummaryFlow(inputText, inputType = "voice") {
   try {
     isInSummaryFlow.value = true;
+    const weeklyData = buildSevenDaySummaryInput(inputText);
 
-    // 呼叫 ChatGPT 產生精簡內容
-    const aiResponse = await callChatGPT(
-      inputText,
+    // 呼叫 ChatGPT 產生最近 7 天摘要
+    const aiResponse = weeklyData.hasMessages
+      ? await callChatGPT(
+          weeklyData.summaryInput,
       `
       你是一位健康管理 app 內的對話式紀錄整理機器人。 
 任務是根據患者最近七天內的對話內容，整理為可閱讀的一週症狀與生活摘要。 
@@ -1944,11 +2053,12 @@ There were no new messages this week
 
  
 `
-    );
+        )
+      : "本週沒有留言紀錄";
 
     // 設置原始輸入到 pendingInput，供後續使用
     pendingInput.value = inputText;
-    const summaryText = aiResponse || inputText;
+    const summaryText = (aiResponse || "").trim() || "本週沒有留言紀錄";
     currentSummary.value = summaryText;
 
     // ✅ 直接儲存摘要到 localStorage（不顯示彈窗）
@@ -3283,12 +3393,6 @@ const changeRoleDisplayName = async (displayName) => {
 // ChatGPT API 調用函數（用於摘要生成）
 const callChatGPT = async (message, systemMessage = "") => {
   try {
-    // 將 message 格式化為 JSON 字串
-    const messageWithHistory = JSON.stringify({
-      text: message,
-      conversationHistory: [],
-    });
-
     const response = await fetch(TEXT_WEBHOOK_URL, {
       method: "POST",
       headers: {
@@ -3296,7 +3400,7 @@ const callChatGPT = async (message, systemMessage = "") => {
       },
       body: JSON.stringify({
         systemMessage: systemMessage,
-        message: messageWithHistory,
+        message: message,
         model: "gpt-5-mini",
       }),
     });
@@ -3325,9 +3429,6 @@ const callChatGPT = async (message, systemMessage = "") => {
         throw new Error("收到音訊回應，無法處理");
       }
 
-      // 嘗試解析 JSON
-      const data = await response.json();
-
       // 兼容多種欄位：response / bot / answer / text / message / content / output...
       const pick = (obj) => {
         if (!obj) return "";
@@ -3351,7 +3452,22 @@ const callChatGPT = async (message, systemMessage = "") => {
         }
         return "";
       };
-      answerText = pick(data);
+
+      // 先試 JSON，失敗時回退為純文字
+      if (ct.includes("application/json")) {
+        const data = await response.json();
+        answerText = pick(data);
+      } else {
+        const rawText = (await response.text()) || "";
+        if (rawText.trim()) {
+          try {
+            const parsed = JSON.parse(rawText);
+            answerText = pick(parsed) || rawText;
+          } catch {
+            answerText = rawText;
+          }
+        }
+      }
     }
 
     if (answerText) {
