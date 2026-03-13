@@ -57,7 +57,7 @@
           <img src="/assets/imgs/backend/customerSupportAdmin.svg" alt="客服管理" />
           <span v-show="!collapsed">客服管理</span>
         </li>
-
+      -->
         <li 
           :class="{ 
             active: currentPage === 'videoManage',
@@ -75,7 +75,7 @@
           <img src="/assets/imgs/backend/videoManage.svg" alt="影音管理" />
           <span v-show="!collapsed">影音管理</span>
         </li>
-
+        <!--
         <li 
           :class="{ 
             active: currentPage === 'messageManage',

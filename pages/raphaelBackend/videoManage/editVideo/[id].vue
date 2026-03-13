@@ -199,8 +199,11 @@
       <!-- 留言版塊 -->
       <section v-if="!loading" class="message-board">
         <div class="message-board__header">
-          <h3>留言管理</h3>
-          <span>共 {{ messageTotal }} 筆</span>
+
+          <div class="message-board__stats">
+            <span>留言數 {{ messageTotal }}</span>
+            <span>按讚數 {{ likesCount }}</span>
+          </div>
         </div>
 
         <div class="message-board__toolbar">
@@ -225,20 +228,22 @@
           </div>
         </div>
 
-        <div class="message-board__table">
-          <div class="message-row message-header">
-            <div>留言內容</div>
-            <div>留言者</div>
-            <div>狀態</div>
-            <div>留言時間</div>
-          </div>
-
+        <div class="message-board__list">
           <div v-if="messageLoading" class="message-empty">留言載入中...</div>
           <template v-else-if="paginatedMessages.length">
-            <div class="message-row" v-for="item in paginatedMessages" :key="item.id">
-              <div>{{ item.content }}</div>
-              <div>{{ item.sender }}</div>
-              <div>
+            <div class="comment-item" v-for="item in paginatedMessages" :key="item.id">
+              <div class="comment-header">
+                <div class="comment-user">
+                  <img
+                    src="/assets/imgs/backend/user.svg"
+                    alt="使用者"
+                    class="user-icon"
+                  />
+                  <div class="user-info">
+                    <span class="user-name">{{ item.sender || "訪客" }}</span>
+                    <span class="comment-time">留言時間 {{ item.date }}</span>
+                  </div>
+                </div>
                 <span
                   class="message-status"
                   :class="item.status === 'replied' ? 'replied' : 'unreplied'"
@@ -246,10 +251,10 @@
                   {{ item.status === "replied" ? "已回覆" : "未回覆" }}
                 </span>
               </div>
-              <div>{{ item.date }}</div>
+              <div class="comment-content">{{ item.content }}</div>
             </div>
           </template>
-          <div v-else class="message-empty">尚無留言資料</div>
+          <div v-else class="message-empty">尚未有人留言</div>
         </div>
 
         <nav class="pagination" v-if="messageTotalPages > 1">
@@ -393,6 +398,7 @@ const messageLoading = ref(false);
 const messagePage = ref(1);
 const messagePageSize = ref(10);
 const messages = ref<BoardMessage[]>([]);
+const likesCount = ref(0);
 
 const filteredMessages = computed(() => {
   let data = messages.value.filter((m: BoardMessage) => m.AID === videoId);
@@ -685,6 +691,7 @@ async function fetchVideoData() {
         
         // 設定上架狀態
         formData.isPublished = (video as any).OnLineVideo === "Y" || video.Status === "Y";
+        likesCount.value = parseInt((video as any).goodCnt || "0", 10) || 0;
         
         // 設定現有封面圖片
         if ((video as any).ImgURL) {
@@ -1234,12 +1241,11 @@ watch(messageKeyword, () => {
   margin-top: 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  border: 1px solid $border;
+  gap: 16px;
   border-radius: 20px;
   background: $raphael-white;
   box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
-  padding: 16px;
+  padding: 20px;
 
   .message-board__header {
     display: flex;
@@ -1252,11 +1258,23 @@ watch(messageKeyword, () => {
       font-size: 24px;
       font-weight: 700;
     }
+  }
+
+  .message-board__stats {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 
     span {
-      color: $primary-200;
-      font-size: 16px;
-      font-weight: 600;
+      color: $raphael-gray-500;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 2px 0;
+
+      &:not(:last-child) {
+        border-right: 1px solid $border;
+        padding-right: 12px;
+      }
     }
   }
 
@@ -1264,6 +1282,7 @@ watch(messageKeyword, () => {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
+    margin-bottom: 2px;
   }
 
   .message-search,
@@ -1286,7 +1305,7 @@ watch(messageKeyword, () => {
       width: 100%;
       border: none;
       border-radius: 50px;
-      box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
+      box-shadow: 0px 2px 12px 0px rgba(177, 192, 216, 0.2);
       padding: 8px 12px 8px 36px;
     }
   }
@@ -1295,7 +1314,7 @@ watch(messageKeyword, () => {
     :deep(.dp__input) {
       border: none;
       border-radius: 50px;
-      box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
+      box-shadow: 0px 2px 12px 0px rgba(177, 192, 216, 0.2);
       padding-left: 34px;
     }
 
@@ -1304,41 +1323,88 @@ watch(messageKeyword, () => {
     }
   }
 
-  .message-board__table {
-    border: 1px solid $border;
-    border-radius: 12px;
-    overflow: hidden;
+  .message-board__list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
 
-  .message-row {
-    display: grid;
-    grid-template-columns: 2.5fr 1fr 0.8fr 1.4fr;
-    gap: 10px;
-    align-items: center;
+  .comment-item {
+    border: 1px solid #dce6f5;
+    border-radius: 12px;
     padding: 12px 14px;
-    border-top: 1px solid $border;
+    background: #fff;
+  }
+
+  .comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .comment-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .user-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+  }
+
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .user-name {
+    color: $primary-600;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .comment-time {
+    color: $raphael-gray-500;
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .comment-content {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .message-empty {
+    border: 1px solid $border;
+    border-radius: 12px;
+    background: #fafcff;
+    min-height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
     color: $raphael-gray-500;
     font-size: 14px;
   }
 
-  .message-header {
-    border-top: none;
-    color: $primary-600;
-    font-weight: 600;
-    background: rgba(177, 192, 216, 0.08);
-  }
-
-  .message-empty {
-    padding: 28px 12px;
-    text-align: center;
-    color: $raphael-gray-500;
-  }
-
   .message-status {
-    padding: 4px 10px;
+    padding: 3px 10px;
     border-radius: 4px;
     border: 1px solid transparent;
     font-size: 12px;
+    line-height: 1.2;
+    flex-shrink: 0;
   }
 
   .message-status.replied {
@@ -1357,7 +1423,7 @@ watch(messageKeyword, () => {
     display: flex;
     justify-content: center;
     gap: 4px;
-    margin-top: 8px;
+    margin-top: 4px;
 
     .btn-page {
       padding: 6px 10px;
@@ -1407,6 +1473,31 @@ watch(messageKeyword, () => {
     .btn-cancel,
     .btn-submit {
       width: 100%;
+    }
+  }
+
+  .message-board {
+    padding: 14px;
+
+    .message-board__header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .message-board__stats {
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+    .message-search,
+    .message-date {
+      min-width: 100%;
+    }
+
+    .comment-header {
+      flex-direction: column;
+      align-items: flex-start;
     }
   }
 }
