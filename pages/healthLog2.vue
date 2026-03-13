@@ -270,6 +270,48 @@ const formatDateRange = (date) => {
   return `${year}/${month}/${day}`;
 };
 
+// 解析多種日期格式，避免本地字串格式被 new Date 判定為 Invalid Date
+const parseLogDate = (value) => {
+  if (!value) return new Date(NaN);
+  if (value instanceof Date) return value;
+  if (typeof value === "number") return new Date(value);
+
+  const text = String(value).trim();
+  if (!text) return new Date(NaN);
+
+  // YYYY-MM-DD HH:mm:ss
+  if (text.includes("-") && text.includes(" ")) {
+    const [datePart, timePart = "00:00:00"] = text.split(" ");
+    const [y, m, d] = datePart.split("-").map((n) => parseInt(n, 10));
+    const [hh = "0", mm = "0", ss = "0"] = timePart.split(":");
+    return new Date(y, (m || 1) - 1, d || 1, +hh, +mm, +ss);
+  }
+
+  // YYYY/MM/DD HH:mm:ss 或 YYYY/MM/DD 上午/下午 HH:mm:ss
+  if (text.includes("/") && text.includes(" ")) {
+    const match = text.match(
+      /^(\d{4})\/(\d{1,2})\/(\d{1,2})\s*(上午|下午)?\s*(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/i
+    );
+    if (match) {
+      const [, y, m, d, ampm, h, min, sec] = match;
+      let hour = parseInt(h, 10);
+      if (ampm === "下午" && hour < 12) hour += 12;
+      if (ampm === "上午" && hour === 12) hour = 0;
+      return new Date(
+        parseInt(y, 10),
+        parseInt(m, 10) - 1,
+        parseInt(d, 10),
+        hour,
+        parseInt(min, 10),
+        parseInt(sec || "0", 10)
+      );
+    }
+  }
+
+  // 其他格式交給原生解析
+  return new Date(text);
+};
+
 // ✅ 顯示全部日誌（不再限制為本週）
 const filteredLogs = computed(() => {
   if (!healthLogs.value.length) {
@@ -280,7 +322,7 @@ const filteredLogs = computed(() => {
   return healthLogs.value
     .sort(
       (a, b) =>
-        new Date(b.date || b.timestamp) - new Date(a.date || a.timestamp)
+        parseLogDate(b.date || b.timestamp) - parseLogDate(a.date || a.timestamp)
     );
 });
 
@@ -309,12 +351,14 @@ const generateWeeklySummary = async () => {
 
   const weekLogs = healthLogs.value.filter((log) => {
     if (!log.date && !log.timestamp) return false;
-    
-    const logDate = new Date(log.date || log.timestamp);
+
+    const logDate = parseLogDate(log.date || log.timestamp);
+    if (Number.isNaN(logDate.getTime())) return false;
+
     // 只比較日期部分，忽略時間
     const logDateOnly = new Date(logDate);
     logDateOnly.setHours(0, 0, 0, 0);
-    
+
     return logDateOnly >= weekStart && logDate <= today;
   });
 
@@ -323,25 +367,29 @@ const generateWeeklySummary = async () => {
     return;
   }
 
-  // 收集該週所有有 AI 摘要的內容
-  const aiSummaries = weekLogs
-    .filter((log) => log.content && log.content.trim())
+  // 以「口述內容」作為本週摘要主資料來源，避免拿 AI 結果再摘要造成失真
+  const sourceLogs = weekLogs
+    .filter(
+      (log) =>
+        (log.preSoundNote && log.preSoundNote.trim()) ||
+        (log.content && log.content.trim())
+    )
     .map((log) => {
-      const date = new Date(log.date || log.timestamp);
       const dateStr = formatDate(log.date || log.timestamp);
+      const sourceText = (log.preSoundNote || log.content || "").trim();
       return {
         date: dateStr,
-        content: log.content.trim(),
+        content: sourceText,
       };
     });
 
-  if (aiSummaries.length === 0) {
+  if (sourceLogs.length === 0) {
     weeklySummary.value = "";
     return;
   }
 
   // 準備要送給 AI 的內容
-  const summaryParts = aiSummaries.map(
+  const summaryParts = sourceLogs.map(
     (item, index) => `${index + 1}. ${item.date}\n${item.content}`
   );
   const combinedSummary = summaryParts.join("\n\n");
@@ -492,7 +540,7 @@ We’ve recorded these body changes for you. Please feel at ease.
 · 英文：There were no new messages this week. Feel free to share anything with us anytime.
 
   `,
-        message: `以下是本週（${weekRangeText.value}）的健康日誌內容，共 ${aiSummaries.length} 筆記錄：\n\n${combinedSummary}\n\n請依據以上原始文字，整理成一份「病情&生活紀錄摘要」。\n\n重要：結尾固定說明中，請將「日期範圍」替換為「${weekRangeText.value}」，完整結尾說明應為：\n「以上內容我已幫您完成紀錄並整理（${weekRangeText.value}），後續會提供給醫師了解與參考；請放心，我們會陪著您把狀況清楚整理下來。」`,
+        message: `以下是本週（${weekRangeText.value}）的患者留言內容，共 ${sourceLogs.length} 筆記錄：\n\n${combinedSummary}\n\n請依據以上原始文字，整理成一份「病情&生活紀錄摘要」。\n\n重要：結尾固定說明中，請將「日期範圍」替換為「${weekRangeText.value}」，完整結尾說明應為：\n「以上內容我已幫您完成紀錄並整理（${weekRangeText.value}），後續會提供給醫師了解與參考；請放心，我們會陪著您把狀況清楚整理下來。」`,
         model: "gpt-5-mini",
       }),
     });
@@ -554,11 +602,11 @@ We’ve recorded these body changes for you. Please feel at ease.
 
     weeklySummary.value =
       answerText.trim() ||
-      `本週健康狀況摘要\n\n${combinedSummary}\n\n---\n以上為本週（${weekRangeText.value}）的健康日誌彙整，共 ${aiSummaries.length} 筆記錄。`;
+      `本週健康狀況摘要\n\n${combinedSummary}\n\n---\n以上為本週（${weekRangeText.value}）的健康日誌彙整，共 ${sourceLogs.length} 筆記錄。`;
   } catch (error) {
     console.error("彙整本週摘要失敗:", error);
     // 如果 API 失敗，使用簡單的彙整
-    weeklySummary.value = `本週健康狀況摘要\n\n${combinedSummary}\n\n---\n以上為本週（${weekRangeText.value}）的健康日誌彙整，共 ${aiSummaries.length} 筆記錄。`;
+    weeklySummary.value = `本週健康狀況摘要\n\n${combinedSummary}\n\n---\n以上為本週（${weekRangeText.value}）的健康日誌彙整，共 ${sourceLogs.length} 筆記錄。`;
   } finally {
     isSummaryLoading.value = false;
   }
@@ -640,7 +688,7 @@ const loadHealthLogs = async () => {
     healthLogs.value = Array.from(uniqueLogsMap.values())
       .sort(
         (a, b) =>
-          new Date(b.date || b.timestamp) - new Date(a.date || a.timestamp)
+          parseLogDate(b.date || b.timestamp) - parseLogDate(a.date || a.timestamp)
       );
 
     // ✅ 根據字數決定這一塊「需不需要展開箭頭」
@@ -682,7 +730,8 @@ const isExpandable = (logId, sectionType) => {
 };
 
 const formatDate = (timestamp) => {
-  const date = new Date(timestamp);
+  const date = parseLogDate(timestamp);
+  if (Number.isNaN(date.getTime())) return "--/-- --:--";
   const month = date.getMonth() + 1;
   const day = date.getDate();
   const hours = date.getHours().toString().padStart(2, "0");
