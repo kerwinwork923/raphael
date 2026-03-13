@@ -24,6 +24,7 @@ export const useMemberStore = defineStore('member', () => {
   const vivoWatchList = ref<any[]>([])
   const asusHealthData = ref<any>(null)
   const acerHealthData = ref<any>(null)
+  const garminHealthData = ref<any>(null)
   const hasFetched = ref(false)
 
   // 方法
@@ -788,6 +789,65 @@ export const useMemberStore = defineStore('member', () => {
     }
   }
 
+  async function fetchGarminHealthData(
+    auth: any,
+    range?: { StartDate?: string; EndDate?: string }
+  ) {
+    try {
+      const { token, admin, sel } = auth
+      if (!token || !admin || !sel.MID) {
+        garminHealthData.value = null
+        return
+      }
+
+      const defaultStart = getRecent7StartDate()
+      const defaultEnd = formatDateYYYYMMDD(new Date())
+      const StartDate = (range?.StartDate || defaultStart).trim()
+      const EndDate = (range?.EndDate || defaultEnd).trim()
+
+      const res = await fetch("https://23700999.com:8081/HMA/api/bk/garmin_healthData", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          AdminID: admin,
+          Token: token,
+          MID: sel.MID,
+          StartDate,
+          EndDate,
+        }),
+      })
+
+      const data = await res.json()
+      if (data.Result === "OK" && data.mapGarminHealthData) {
+        let finalData = data.mapGarminHealthData
+        // 預設最近 7 天若無資料，自動回退抓全部，避免圖表空白
+        if (!range?.StartDate && !range?.EndDate && !hasAnyArrayData(finalData)) {
+          const fallbackRes = await fetch("https://23700999.com:8081/HMA/api/bk/garmin_healthData", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              AdminID: admin,
+              Token: token,
+              MID: sel.MID,
+              StartDate: "",
+              EndDate: "",
+            }),
+          })
+          const fallbackData = await fallbackRes.json()
+          if (fallbackData.Result === "OK" && fallbackData.mapGarminHealthData) {
+            finalData = fallbackData.mapGarminHealthData
+          }
+        }
+        garminHealthData.value = finalData
+      } else {
+        garminHealthData.value = null
+      }
+    } catch (error) {
+      console.error("取得 Garmin 健康數據失敗：", error)
+      garminHealthData.value = null
+    }
+  }
+
   function clear() {
     member.value = null
     currentOrder.value = null
@@ -809,6 +869,7 @@ export const useMemberStore = defineStore('member', () => {
     vivoWatchList.value = []
     asusHealthData.value = null
     acerHealthData.value = null
+    garminHealthData.value = null
     hasFetched.value = false
   }
 
@@ -834,6 +895,7 @@ export const useMemberStore = defineStore('member', () => {
     vivoWatchList,
     asusHealthData,
     acerHealthData,
+    garminHealthData,
     hasFetched,
     // 方法
     fetchAll,
@@ -846,6 +908,7 @@ export const useMemberStore = defineStore('member', () => {
     fetchVivoWatchList,
     fetchAsusHealthData,
     fetchAcerHealthData,
+    fetchGarminHealthData,
     clear,
   }
 }) 

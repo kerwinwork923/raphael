@@ -340,78 +340,110 @@ onUnmounted(() => {
 <style scoped lang="scss">
 .memberInfo {
   display: flex;
-  min-height: 100vh;
-  background: #f4f8f5;
 }
 
 .memberInfoContent {
   flex: 1;
-  padding: 24px;
+  padding: 1rem 1.25rem 1.5rem;
+  background: #f5f8fa;
+  min-height: 100vh;
 }
 
 .pageHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+
+  h3 {
+    margin: 0;
+    color: #2d3047;
+    font-size: 1.75rem;
+    font-weight: 700;
+  }
 }
 
 .headerActions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 0.75rem;
 }
 
 .goBackBtn {
-  border: 1px solid #7cbc28;
-  background: #fff;
-  color: #3f8c25;
+  font-size: var(--Text-font-size-18, 18px);
+  font-weight: 400;
+  letter-spacing: 2.7px;
+  border: none;
+  background: #8f9db8;
+  color: #fff;
   border-radius: 8px;
-  padding: 8px 14px;
+  padding: 0.5rem 0.9rem;
   cursor: pointer;
+  width: 100px;
 }
 
 .detailCard {
-  background: #fff;
   border-radius: 12px;
-  padding: 14px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  background: #fff;
+  padding: 0.9rem;
 }
 
 .chartWrap {
-  height: 320px;
+  width: 100%;
+  height: 340px;
+  border-radius: 10px;
+  border: 1px solid #e9eef5;
+  padding: 0.6rem;
 }
 
 .tableWrap {
-  margin-top: 16px;
+  margin-top: 0.85rem;
+  border-radius: 10px;
+  border: 1px solid #e9eef5;
+  overflow: hidden;
 }
 
 .tableHeader,
 .tableRow {
   display: grid;
-  gap: 8px;
 }
 
-.tableHeader {
-  font-weight: 600;
-  color: #3f8c25;
-  margin-bottom: 8px;
+.th,
+.td {
+  padding: 0.8rem 0.7rem;
+  font-size: 0.95rem;
+  color: #2d3047;
+  border-bottom: 1px solid #eef2f7;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
-.tableBody {
-  max-height: 360px;
-  overflow: auto;
-}
-
-.tableRow {
-  padding: 10px 0;
-  border-bottom: 1px solid #eef2ef;
+.th {
+  font-weight: 700;
+  background: #f8fbff;
 }
 
 .tableEmpty {
-  color: #888;
-  padding: 16px 0;
+  padding: 1rem;
   text-align: center;
+  color: #6d7c96;
+}
+
+@media (max-width: 900px) {
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tableWrap {
+    overflow-x: auto;
+  }
+
+  .tableHeader,
+  .tableRow {
+    min-width: 700px;
+  }
 }
 </style>

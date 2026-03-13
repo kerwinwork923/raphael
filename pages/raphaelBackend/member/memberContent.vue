@@ -1078,8 +1078,8 @@
           </div>
         </div>
 
-        <!-- █ Garmin 紀錄（圖表版 / 假資料） -------------------------------------- -->
-        <!-- <div class="memberInfoRow">
+        <!-- █ Garmin 紀錄 ----------------------------------------------------- -->
+        <div class="memberInfoRow">
           <div class="memberInfoCard watchRecordCard">
             <div class="memberInfoTitleWrap">
               <h3>Garmin 紀錄</h3>
@@ -1125,7 +1125,7 @@
 
             <div class="watchChartEmpty" v-else>尚無 Garmin 紀錄資料</div>
           </div>
-        </div> -->
+        </div>
 
         <!-- █ 自律神經 ------------------------------------------------------- -->
         <div class="memberInfoRow">
@@ -1805,6 +1805,7 @@ const {
   vivoWatchList,
   asusHealthData,
   acerHealthData,
+  garminHealthData,
   hasFetched,
 } = storeToRefs(memberStore);
 
@@ -2435,6 +2436,21 @@ function getAcerApiDateRange() {
   if (acerRingRange.value && acerRingRange.value.length >= 1 && acerRingRange.value[0]) {
     const from = acerRingRange.value[0];
     const to = acerRingRange.value[1] ?? acerRingRange.value[0];
+    return {
+      StartDate: formatDateYYYYMMDD(from),
+      EndDate: formatDateYYYYMMDD(to),
+    };
+  }
+  return {
+    StartDate: getRecent7StartDate(),
+    EndDate: formatDateYYYYMMDD(new Date()),
+  };
+}
+
+function getGarminApiDateRange() {
+  if (garminRange.value && garminRange.value.length >= 1 && garminRange.value[0]) {
+    const from = garminRange.value[0];
+    const to = garminRange.value[1] ?? garminRange.value[0];
     return {
       StartDate: formatDateYYYYMMDD(from),
       EndDate: formatDateYYYYMMDD(to),
@@ -3214,33 +3230,101 @@ function createGarminBarChart(
   });
 }
 
-function getRecentDateKeys(days = 7) {
-  const list: string[] = [];
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  for (let i = days - 1; i >= 0; i--) {
-    const x = new Date(d);
-    x.setDate(d.getDate() - i);
-    list.push(toDateKey(formatDateYYYYMMDD(x)));
-  }
-  return list;
-}
-
 const garminFakeDaily = computed(() => {
-  return getRecentDateKeys(7).map((date, idx) => ({
-    date,
-    heartRateMax: 76 + ((idx * 3) % 12),
-    heartRateMin: 54 + ((idx * 2) % 8),
-    spo2Max: 98 + (idx % 2),
-    spo2Min: 93 + (idx % 4),
-    stressMax: 78 + ((idx * 5) % 18),
-    stressMin: 45 + ((idx * 3) % 12),
-    tempMax: 36.6 + ((idx % 3) * 0.2),
-    tempMin: 35.8 + ((idx % 2) * 0.2),
-    sleepDeep: 90 + ((idx * 11) % 40),
-    sleepRem: 45 + ((idx * 7) % 30),
-    sleepLight: 180 + ((idx * 13) % 60),
-  }));
+  const raw = garminHealthData.value || {};
+  const [fromMs, toMs] = getRangeBoundary(garminRange.value);
+  const inRange = (dateKey: string) => {
+    if (fromMs === null || toMs === null) return true;
+    const ms = parseDateOnlyToMs(dateKey);
+    if (Number.isNaN(ms)) return false;
+    return ms >= fromMs && ms <= toMs;
+  };
+
+  const parseGarminRawDateTimeToDateKey = (rawDateTime: string) => {
+    const value = String(rawDateTime || "");
+    if (/^\d{14}$/.test(value)) {
+      return `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6, 8)}`;
+    }
+    if (/^\d{8}/.test(value)) {
+      return parseYYYYMMDDToDateKey(value.slice(0, 8));
+    }
+    return toDateKey(value);
+  };
+
+  const dateSet = new Set<string>();
+  (raw.Hb || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d && inRange(d)) dateSet.add(d);
+  });
+  (raw.Spo2 || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d && inRange(d)) dateSet.add(d);
+  });
+  (raw.Stress || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d && inRange(d)) dateSet.add(d);
+  });
+  (raw.Sleep || []).forEach((x: any) => {
+    const d = parseGarminRawDateTimeToDateKey(x.StartTime || "");
+    if (d && inRange(d)) dateSet.add(d);
+  });
+  (raw.Activity || []).forEach((x: any) => {
+    const d = parseGarminRawDateTimeToDateKey(x.rawDataTime || "");
+    if (d && inRange(d)) dateSet.add(d);
+  });
+
+  let dates = Array.from(dateSet).sort();
+  if (fromMs === null && toMs === null && dates.length > 7) {
+    dates = dates.slice(-7);
+  }
+
+  const hbMap = new Map<string, any>();
+  (raw.Hb || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d) hbMap.set(d, x);
+  });
+  const spo2Map = new Map<string, any>();
+  (raw.Spo2 || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d) spo2Map.set(d, x);
+  });
+  const stressMap = new Map<string, any>();
+  (raw.Stress || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d) stressMap.set(d, x);
+  });
+
+  const sleepGroup: Record<string, { deep: number; rem: number; light: number; awake: number }> = {};
+  (raw.Sleep || []).forEach((x: any) => {
+    const d = parseGarminRawDateTimeToDateKey(x.StartTime || "");
+    if (!d) return;
+    sleepGroup[d] ||= { deep: 0, rem: 0, light: 0, awake: 0 };
+    sleepGroup[d].deep += Number(x.ComfortCount || 0);
+    sleepGroup[d].rem += Number(x.RemCount || 0);
+    sleepGroup[d].light += Number(x.LightCount || 0);
+    sleepGroup[d].awake += Number(x.AwakeCount || 0);
+  });
+
+  const labels = dates.map((d) => d.slice(5).replace("-", "/"));
+  return labels.map((_, idx) => {
+    const d = dates[idx];
+    return {
+      date: d,
+      heartRateMax: Number(hbMap.get(d)?.HeartrateMax || 0),
+      heartRateMin: Number(hbMap.get(d)?.HeartrateMin || 0),
+      spo2Max: Number(spo2Map.get(d)?.Spo2Max || 0),
+      spo2Min: Number(spo2Map.get(d)?.Spo2Min || 0),
+      stressMax: Number(stressMap.get(d)?.StressMax || 0),
+      stressMin: Number(stressMap.get(d)?.StressMin || 0),
+      // Garmin 目前未提供溫度欄位，保留資料結構避免圖表崩潰
+      tempMax: 0,
+      tempMin: 0,
+      sleepDeep: sleepGroup[d]?.deep || 0,
+      sleepRem: sleepGroup[d]?.rem || 0,
+      sleepLight: sleepGroup[d]?.light || 0,
+      sleepAwake: sleepGroup[d]?.awake || 0,
+    };
+  });
 });
 
 const garminChart = computed(() => {
@@ -3266,6 +3350,7 @@ const garminChart = computed(() => {
     sleepDeep: source.map((x: any) => x.sleepDeep),
     sleepRem: source.map((x: any) => x.sleepRem),
     sleepLight: source.map((x: any) => x.sleepLight),
+    sleepAwake: source.map((x: any) => x.sleepAwake),
   };
 });
 
@@ -3293,6 +3378,7 @@ function renderGarminCharts() {
     garminSleepCanvas.value,
     labels,
     [
+      { label: "清醒", data: data.sleepAwake, backgroundColor: "#3f8c25" },
       { label: "REM", data: data.sleepRem, backgroundColor: "#74b84a" },
       { label: "淺眠", data: data.sleepLight, backgroundColor: "#a4ce77" },
       { label: "深眠", data: data.sleepDeep, backgroundColor: "#27a3a9" },
@@ -3952,15 +4038,26 @@ watchEffect(
 );
 watchEffect(
   () => {
-    if (!acerRingChart.value.labels.length) {
+    const labels = acerRingChart.value.labels;
+    const canvasReady =
+      !!acerHeartRateCanvas.value &&
+      !!acerSpo2Canvas.value &&
+      !!acerSleepCanvas.value &&
+      !!acerTempCanvas.value &&
+      !!acerStepsCanvas.value;
+
+    if (!labels.length) {
       destroyAcerRingCharts();
-    } else {
-      nextTick(() => {
-        requestAnimationFrame(() => {
-          renderAcerRingCharts();
-        });
-      });
+      return;
     }
+
+    if (!canvasReady) return;
+
+    nextTick(() => {
+      requestAnimationFrame(() => {
+        renderAcerRingCharts();
+      });
+    });
   },
   { flush: "post" },
 );
@@ -3995,6 +4092,9 @@ watch(ringRange, async () => {
 });
 watch(acerRingRange, async () => {
   await memberStore.fetchAcerHealthData(getAuth(), getAcerApiDateRange());
+});
+watch(garminRange, async () => {
+  await memberStore.fetchGarminHealthData(getAuth(), getGarminApiDateRange());
 });
 watch(watchKeyword, () => {
   pageRing.value = 1;
@@ -4159,6 +4259,8 @@ watch(
     await memberStore.fetchAsusHealthData(getAuth(), getAsusApiDateRange());
     // 取得宏碁健康數據（宏碁指環紀錄）
     await memberStore.fetchAcerHealthData(getAuth(), getAcerApiDateRange());
+    // 取得 Garmin 健康數據（Garmin 紀錄）
+    await memberStore.fetchGarminHealthData(getAuth(), getGarminApiDateRange());
 
     loading.value = false;
   },
@@ -4210,6 +4312,8 @@ async function refresh() {
   await memberStore.fetchAsusHealthData(getAuth(), getAsusApiDateRange());
   // 重新取得宏碁健康數據
   await memberStore.fetchAcerHealthData(getAuth(), getAcerApiDateRange());
+  // 重新取得 Garmin 健康數據
+  await memberStore.fetchGarminHealthData(getAuth(), getGarminApiDateRange());
   loading.value = false;
 }
 function goBack() {
