@@ -28,7 +28,7 @@
           <!-- 影片縮圖 -->
           <div class="video-thumbnail">
             <img
-              src="/assets/imgs/banner-2.png"
+              :src="messageDetail?.videoThumbnail || '/assets/imgs/banner-2.png'"
               alt="影片縮圖"
             />
           </div>
@@ -120,8 +120,12 @@
             class="reply-textarea"
           ></textarea>
           <div class="reply-actions">
-            <button class="btn submit-btn" @click="handleSubmitReply">
-              回覆
+            <button
+              class="btn submit-btn"
+              :disabled="submittingReply"
+              @click="handleSubmitReply"
+            >
+              {{ submittingReply ? "送出中..." : "回覆" }}
             </button>
           </div>
         </div>
@@ -147,6 +151,8 @@ useSeo({
 
 const VIDEO_SINGLE_MESSAGE_API =
   "https://23700999.com:8081/HMA/api/bk/VideoSingleMessage";
+const VIDEO_SINGLE_MESSAGE_MODIFY_API =
+  "https://23700999.com:8081/HMA/api/bk/VideoSingleMessageModify";
 
 const router = useRouter();
 const route = useRoute();
@@ -179,6 +185,8 @@ interface Comment {
   date: string;
   time: string;
   content: string;
+  BID: string;
+  responseText: string;
   status: "replied" | "unreplied";
 }
 
@@ -187,6 +195,7 @@ const messageDetail = ref<MessageDetail | null>(null);
 const comments = ref<Comment[]>([]);
 const replyContent = ref("");
 const loading = ref(false);
+const submittingReply = ref(false);
 
 /* ---------- 方法 ---------- */
 // 返回列表頁
@@ -218,18 +227,45 @@ const handleReply = () => {
 };
 
 // 送出回覆
-const handleSubmitReply = () => {
+const handleSubmitReply = async () => {
   if (!replyContent.value.trim()) {
     alert("請輸入回覆內容");
     return;
   }
 
-  // TODO: 呼叫 API 送出回覆
-  alert("回覆已送出");
-  replyContent.value = "";
+  const targetComment = comments.value[0];
+  if (!targetComment) {
+    alert("找不到留言資料，請重新整理後再試");
+    return;
+  }
 
-  // 重新載入留言資料
-  fetchMessageDetail();
+  if (!adminID.value || !token.value) {
+    alert("請先登入");
+    return;
+  }
+
+  submittingReply.value = true;
+  try {
+    const response = await axios.post(VIDEO_SINGLE_MESSAGE_MODIFY_API, {
+      AdminID: adminID.value,
+      Token: token.value,
+      BID: targetComment.BID,
+      Response: replyContent.value.trim(),
+    });
+
+    if (response.data?.Result === "OK") {
+      alert("回覆已送出");
+      await fetchMessageDetail();
+      return;
+    }
+
+    alert("回覆失敗：" + (response.data?.Message || "未知錯誤"));
+  } catch (err: any) {
+    console.error("送出回覆失敗:", err);
+    alert("回覆失敗：" + (err.response?.data?.Message || err.message || "未知錯誤"));
+  } finally {
+    submittingReply.value = false;
+  }
 };
 
 // 取得留言詳細資料（BID 來自 route.params.id）
@@ -255,7 +291,7 @@ const fetchMessageDetail = async () => {
 
       messageDetail.value = {
         id: data.BID || BID,
-        videoTitle: data.VideoURL ? "影片留言詳情" : "影片留言詳情",
+        videoTitle: data.Name || "影片留言詳情",
         videoThumbnail: data.ImgURL || "/assets/imgs/banner-2.png",
         descriptionPoints: data.Desc ? [data.Desc] : [],
         description: data.Desc || "",
@@ -265,22 +301,34 @@ const fetchMessageDetail = async () => {
       comments.value = [
         {
           id: data.BID || BID,
-          sender: data.Name || "",
+          BID: data.BID || BID,
+          sender: data.MemName || "",
           date: datePart,
           time: timePart,
           content: data.Message || "",
+          responseText: data.Response || "",
           status:
-            data.Response === "已回覆" ? ("replied" as const) : ("unreplied" as const),
+            data.Response && data.Response !== "未回覆"
+              ? ("replied" as const)
+              : ("unreplied" as const),
         },
       ];
+
+      if (data.Response && data.Response !== "未回覆") {
+        replyContent.value = data.Response;
+      } else {
+        replyContent.value = "";
+      }
     } else {
       messageDetail.value = null;
       comments.value = [];
+      replyContent.value = "";
     }
   } catch (err) {
     console.error("取得留言詳情失敗:", err);
     messageDetail.value = null;
     comments.value = [];
+    replyContent.value = "";
   } finally {
     loading.value = false;
   }
@@ -662,6 +710,11 @@ onMounted(() => {
             letter-spacing: 2.7px;
             &:hover {
               background: var(--Secondary-hover, #65A31B);
+            }
+
+            &:disabled {
+              opacity: 0.7;
+              cursor: not-allowed;
             }
           }
         }

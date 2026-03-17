@@ -150,6 +150,24 @@
                 </p>
                 <p v-else class="commentTextFull">{{ comment.text }}</p>
               </div>
+              <div v-if="comment.responseText" class="advisorReply">
+                <div class="advisorReplyLine"></div>
+                <div class="advisorReplyContent">
+                  <div class="advisorAvatar">
+                    <img
+                      src="/assets/imgs/robot.png"
+                      alt="健康顧問"
+                    />
+                  </div>
+                  <div class="advisorBody">
+                    <div class="advisorHeader">
+                      <span class="advisorName">健康顧問</span>
+                      <!-- <span class="advisorTime">{{ comment.responseTime }}</span> -->
+                    </div>
+                    <p class="advisorText">{{ comment.responseText }}</p>
+                  </div>
+                </div>
+              </div>
             </div>
             <div
               v-if="comment.isOwnComment"
@@ -313,6 +331,24 @@
                     </span>
                   </p>
                   <p v-else class="commentTextFull">{{ comment.text }}</p>
+                </div>
+                <div v-if="comment.responseText" class="advisorReply">
+                  <div class="advisorReplyLine"></div>
+                  <div class="advisorReplyContent">
+                    <div class="advisorAvatar">
+                      <img
+                        src="/assets/imgs/backend/messageRobot.svg"
+                        alt="健康顧問"
+                      />
+                    </div>
+                    <div class="advisorBody">
+                      <div class="advisorHeader">
+                        <span class="advisorName">健康顧問</span>
+                        <span class="advisorTime">{{ comment.responseTime }}</span>
+                      </div>
+                      <p class="advisorText">{{ comment.responseText }}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div
@@ -590,6 +626,9 @@ const transformCommentsData = (videoMessageList) => {
     name: msg.Name || "使用者",
     time: formatRelativeTime(msg.CheckTime),
     text: msg.Message || "",
+    responseText:
+      msg.Response && msg.Response !== "未回覆" ? msg.Response.trim() : "",
+    responseTime: formatRelativeTime(msg.CheckTime),
     showFull: false,
     isOwnComment: msg.Name === currentUserName, // 判斷是否為自己的留言
   }));
@@ -2705,6 +2744,75 @@ const modules = [FreeMode];
         }
       }
     }
+  }
+}
+
+.advisorReply {
+  margin-top: 10px;
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+
+  .advisorReplyLine {
+    width: 2px;
+    border-radius: 2px;
+    background: #8bd2cb;
+    flex-shrink: 0;
+  }
+
+  .advisorReplyContent {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .advisorAvatar {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 50%;
+      background-color: #fff;
+    padding: 2px;
+    border-radius: 999;
+    transform: scale(1.2);
+    }
+  }
+
+  .advisorBody {
+    min-width: 0;
+  }
+
+  .advisorHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+
+  }
+
+  .advisorName {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e1e1e;
+  }
+
+  .advisorTime {
+    font-size: 12px;
+    color: #b3b3b3;
+  }
+
+  .advisorText {
+    margin: 0;
+    font-size: 16px;
+    color: #1e1e1e;
+    line-height: 1.5;
+    word-break: break-word;
   }
 }
 </style>
