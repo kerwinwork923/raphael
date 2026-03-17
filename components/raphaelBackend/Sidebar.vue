@@ -75,7 +75,7 @@
           <img src="/assets/imgs/backend/videoManage.svg" alt="影音管理" />
           <span v-show="!collapsed">影音管理</span>
         </li>
-        <!--
+        
         <li 
           :class="{ 
             active: currentPage === 'messageManage',
@@ -92,7 +92,7 @@
         >
           <img src="/assets/imgs/backend/message.svg" alt="留言管理" />
           <span v-show="!collapsed">留言管理</span>
-        </li> -->
+        </li>
 
       
         <!-- <li 
