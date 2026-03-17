@@ -437,10 +437,7 @@
             <div class="memberInfoCard2">
               <div class="contractHeader">
                 <h3>{{ activeOrder?.ProductName || "—" }}</h3>
-                <div
-                  v-if="uniqueProductNames.length > 1"
-                  class="contractDropdown"
-                >
+                <div v-if="contractOptions.length > 1" class="contractDropdown">
                   <button
                     class="contractDropdownTrigger"
                     @click.stop="showContractDropdown = !showContractDropdown"
@@ -458,8 +455,9 @@
                   >
                     <div
                       class="contractDropdownItem"
-                      :class="{ active: selectedProductName === '' }"
+                      :class="{ active: selectedContractKey === '' }"
                       @click="
+                        selectedContractKey = '';
                         selectedProductName = '';
                         showContractDropdown = false;
                       "
@@ -467,16 +465,17 @@
                       全部產品
                     </div>
                     <div
-                      v-for="name in uniqueProductNames"
-                      :key="name"
+                      v-for="option in contractOptions"
+                      :key="option.key"
                       class="contractDropdownItem"
-                      :class="{ active: selectedProductName === name }"
+                      :class="{ active: selectedContractKey === option.key }"
                       @click="
-                        selectedProductName = name;
+                        selectedContractKey = option.key;
+                        selectedProductName = option.order.ProductName || '';
                         showContractDropdown = false;
                       "
                     >
-                      {{ name }}
+                      {{ option.label }}
                     </div>
                   </div>
                 </div>
@@ -1817,22 +1816,35 @@ const showContract = ref(false);
 const contractList = ref<any[]>([]);
 
 const selectedProductName = ref<string>("");
+const selectedContractKey = ref<string>("");
 const showContractDropdown = ref(false);
 
-const uniqueProductNames = computed(() => {
-  const names = new Set<string>();
-  (orderList.value || []).forEach((o: any) => {
-    if (o.ProductName) names.add(o.ProductName);
+function buildContractKey(order: any, index: number) {
+  return `${order?.ProductName || ""}|${order?.RentStart || ""}|${order?.RentEnd || ""}|${index}`;
+}
+
+const contractOptions = computed(() => {
+  return (orderList.value || []).map((o: any, index: number) => {
+    const productName = o?.ProductName || "未命名產品";
+    const rentStart = o?.RentStart || "—";
+    const rentEnd = o?.RentEnd || "—";
+    return {
+      key: buildContractKey(o, index),
+      label: `${productName} (${rentStart} ~ ${rentEnd})`,
+      order: o,
+    };
   });
-  return Array.from(names);
 });
 
 const activeOrder = computed(() => {
-  if (!selectedProductName.value) return currentOrder.value;
+  if (!selectedContractKey.value) return currentOrder.value;
+  const target = contractOptions.value.find(
+    (item: any) => item.key === selectedContractKey.value,
+  );
+  if (target) return target.order;
   return (
-    (orderList.value || []).find(
-      (o: any) => o.ProductName === selectedProductName.value,
-    ) ?? currentOrder.value
+    contractOptions.value.find((item: any) => item.order === currentOrder.value)?.order ??
+    currentOrder.value
   );
 });
 
@@ -3962,6 +3974,8 @@ async function fetchBasic() {
   member.value = j.MemberDetail.Member;
   orderList.value = j.MemberDetail.NowOrderList ?? [];
   currentOrder.value = orderList.value[0] ?? null;
+  selectedContractKey.value = "";
+  selectedProductName.value = "";
   lastUpdated.value = new Date().toLocaleString("zh-TW");
 }
 
