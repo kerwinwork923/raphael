@@ -27,6 +27,24 @@ export const useMemberStore = defineStore('member', () => {
   const garminHealthData = ref<any>(null)
   const hasFetched = ref(false)
 
+  function parseContractDate(value?: string) {
+    if (!value) return null
+    const timestamp = Date.parse(value.replace(/\//g, '-'))
+    if (Number.isNaN(timestamp)) return null
+    return new Date(timestamp)
+  }
+
+  function getCurrentContractOrder(orders: any[]) {
+    const now = Date.now()
+    const activeOrder = orders.find((order: any) => {
+      const startDate = parseContractDate(order?.RentStart)
+      const endDate = parseContractDate(order?.RentEnd)
+      if (!startDate || !endDate) return false
+      return startDate.getTime() <= now && endDate.getTime() >= now
+    })
+    return activeOrder ?? orders[0] ?? null
+  }
+
   // 方法
   async function fetchAll(auth: any) {
     try {
@@ -49,8 +67,26 @@ export const useMemberStore = defineStore('member', () => {
       const basicData = await basicRes.json()
       if (basicData.Result === "OK") {
         member.value = basicData.MemberDetail.Member
-        orderList.value = basicData.MemberDetail.NowOrderList ?? []
-        currentOrder.value = orderList.value[0] ?? null
+      }
+
+      const historyRes = await fetch("https://23700999.com:8081/HMA/API_HistoryHomeOrder.jsp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          AdminID: admin,
+          MID: sel.MID ?? "",
+          Mobile: sel.Mobile ?? "",
+          Token: token,
+        }),
+      })
+      const historyData = await historyRes.json()
+      if (historyData.Result === 'OK') {
+        const historyOrderList = historyData?.HistoryHomeOrder?.orderList ?? []
+        orderList.value = Array.isArray(historyOrderList) ? historyOrderList : []
+        currentOrder.value = getCurrentContractOrder(orderList.value)
+      } else {
+        orderList.value = []
+        currentOrder.value = null
       }
 
       // 取得自律神經和生活檢測資料

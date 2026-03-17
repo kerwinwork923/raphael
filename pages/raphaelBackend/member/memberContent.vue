@@ -1770,7 +1770,15 @@ type ApiMember = {
   CheckTime: string;
 };
 
-type ApiOrder = { ProductName: string; RentStart: string; RentEnd: string };
+type ApiOrder = {
+  OrderName?: string;
+  ProductName: string;
+  RentStart: string;
+  RentEnd: string;
+  TotalFee?: string;
+  Used?: string;
+  Still?: string;
+};
 
 /* ---------- Utils ---------- */
 function getAuth() {
@@ -1821,6 +1829,24 @@ const showContractDropdown = ref(false);
 
 function buildContractKey(order: any, index: number) {
   return `${order?.ProductName || ""}|${order?.RentStart || ""}|${order?.RentEnd || ""}|${index}`;
+}
+
+function parseContractDate(value?: string) {
+  if (!value) return null;
+  const timestamp = Date.parse(value.replace(/\//g, "-"));
+  if (Number.isNaN(timestamp)) return null;
+  return new Date(timestamp);
+}
+
+function getCurrentContractOrder(orders: ApiOrder[]) {
+  const now = Date.now();
+  const activeOrder = orders.find((order) => {
+    const startDate = parseContractDate(order.RentStart);
+    const endDate = parseContractDate(order.RentEnd);
+    if (!startDate || !endDate) return false;
+    return startDate.getTime() <= now && endDate.getTime() >= now;
+  });
+  return activeOrder ?? orders[0] ?? null;
 }
 
 const contractOptions = computed(() => {
@@ -3972,11 +3998,52 @@ async function fetchBasic() {
   const j = await r.json();
   if (j.Result !== "OK") return;
   member.value = j.MemberDetail.Member;
-  orderList.value = j.MemberDetail.NowOrderList ?? [];
-  currentOrder.value = orderList.value[0] ?? null;
-  selectedContractKey.value = "";
+  await fetchContractHistory();
   selectedProductName.value = "";
   lastUpdated.value = new Date().toLocaleString("zh-TW");
+}
+
+async function fetchContractHistory() {
+  const { token, admin, sel } = getAuth();
+  if (!token || !admin || !sel.MID) {
+    orderList.value = [];
+    currentOrder.value = null;
+    selectedContractKey.value = "";
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      "https://23700999.com:8081/HMA/API_HistoryHomeOrder.jsp",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          AdminID: admin,
+          MID: sel.MID,
+          Mobile: sel.Mobile ?? "",
+          Token: token,
+        }),
+      },
+    );
+    const data = await response.json();
+    if (data.Result !== "OK") {
+      orderList.value = [];
+      currentOrder.value = null;
+      selectedContractKey.value = "";
+      return;
+    }
+
+    const historyOrderList = data?.HistoryHomeOrder?.orderList ?? [];
+    orderList.value = Array.isArray(historyOrderList) ? historyOrderList : [];
+    currentOrder.value = getCurrentContractOrder(orderList.value as ApiOrder[]);
+    selectedContractKey.value = "";
+  } catch (error) {
+    console.error("fetchContractHistory error:", error);
+    orderList.value = [];
+    currentOrder.value = null;
+    selectedContractKey.value = "";
+  }
 }
 
 /* ---------- 共用範本 ---------- */
@@ -4293,7 +4360,7 @@ function next(refVar: Ref<number>, totalPages: number) {
 }
 
 function openContract() {
-  contractList.value = activeOrder.value ? [activeOrder.value] : [];
+  contractList.value = [...(orderList.value ?? [])];
   showContract.value = true;
 }
 
@@ -5559,6 +5626,8 @@ const availableEventOptions = computed(() => {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
+
+    
 
     // 自訂 scrollbar 樣式（Webkit）
     &::-webkit-scrollbar {

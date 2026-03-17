@@ -45,15 +45,15 @@
 
     <!-- 每筆合約 -->
     <div
-      v-for="c in filtered"
-      :key="c.RentStart + c.ProductName"
+      v-for="(c, idx) in filtered"
+      :key="`${c.ProductName}-${c.RentStart}-${c.RentEnd}-${idx}`"
       class="ContractUserAlertContent"
     >
       <h3>{{ c.ProductName }}</h3>
 
       <div class="ContractUserAlertContentList">
         <h4><img src="/assets/imgs/backend/money.svg" alt="" />消費金額</h4>
-        <h5>{{ (c.TotalFee ?? 0).toLocaleString() }}</h5>
+        <h5>{{ toNumber(c.TotalFee).toLocaleString() }}</h5>
       </div>
 
       <div class="ContractUserAlertContentList">
@@ -69,7 +69,7 @@
 
     <!-- 關閉 -->
     <div class="closeBtnGroup">
-      <img
+      <img 
         class="closeBtn"
         src="/assets/imgs/backend/close.svg"
         alt=""
@@ -86,6 +86,7 @@ import "@vuepic/vue-datepicker/dist/main.css";
 
 const props = defineProps<{
   contracts: {
+    OrderName?: string;
     ProductName: string;
     RentStart: string;
     RentEnd: string;
@@ -98,6 +99,11 @@ const props = defineProps<{
 defineEmits(["close"]);
 
 const range = ref<Date[] | null>(null);
+
+function toNumber(value?: string) {
+  const n = Number(value ?? 0);
+  return Number.isFinite(n) ? n : 0;
+}
 
 /* 依日期範圍過濾 */
 const filtered = computed(() => {
@@ -113,7 +119,7 @@ const filtered = computed(() => {
 
 /* 小計 */
 const totalAmount = computed(() =>
-  filtered.value.reduce((s, c) => s + (Number(c.TotalFee) ?? 0), 0)
+  filtered.value.reduce((s, c) => s + toNumber(c.TotalFee), 0)
 );
 const totalCount = computed(() => filtered.value.length);
 
