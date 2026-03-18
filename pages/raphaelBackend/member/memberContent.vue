@@ -511,10 +511,10 @@
 
                 <div class="memberInfoWarningTagsGroup">
                   <div class="memberInfoWarningTag used">
-                    已使用 {{ activeOrder.Used || 0 }} 天
+                    已使用 {{ usedDaysDisplay }} 天
                   </div>
                   <div class="memberInfoWarningTag remain">
-                    剩餘 {{ activeOrder.Still || 0 }} 天
+                    剩餘 {{ remainingDaysDisplay }} 天
                   </div>
                 </div>
               </template>
@@ -4647,6 +4647,53 @@ const isExpired = computed(() => {
   if (!activeOrder.value?.RentEnd) return false;
   const endDate = new Date(activeOrder.value.RentEnd.replace(/\//g, "-"));
   return endDate < new Date();
+});
+
+function toValidNumber(value: unknown) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function startOfDay(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function diffDaysInclusive(start: Date, end: Date) {
+  const msPerDay = 24 * 60 * 60 * 1000;
+  return Math.floor((startOfDay(end).getTime() - startOfDay(start).getTime()) / msPerDay) + 1;
+}
+
+const usedDaysDisplay = computed(() => {
+  const usedFromApi = toValidNumber(activeOrder.value?.Used);
+  if (usedFromApi !== null) return Math.max(usedFromApi, 0);
+
+  const startDate = parseContractDate(activeOrder.value?.RentStart);
+  const endDate = parseContractDate(activeOrder.value?.RentEnd);
+  if (!startDate || !endDate) return 0;
+
+  const today = startOfDay(new Date());
+  const start = startOfDay(startDate);
+  const end = startOfDay(endDate);
+  if (today < start) return 0;
+  const usedEnd = today > end ? end : today;
+  return Math.max(diffDaysInclusive(start, usedEnd), 0);
+});
+
+const remainingDaysDisplay = computed(() => {
+  const stillFromApi = toValidNumber(activeOrder.value?.Still);
+  if (stillFromApi !== null) return Math.max(stillFromApi, 0);
+
+  const startDate = parseContractDate(activeOrder.value?.RentStart);
+  const endDate = parseContractDate(activeOrder.value?.RentEnd);
+  if (!startDate || !endDate) return 0;
+
+  const today = startOfDay(new Date());
+  const start = startOfDay(startDate);
+  const end = startOfDay(endDate);
+  if (today > end) return 0;
+  if (today < start) return Math.max(diffDaysInclusive(start, end), 0);
+  const totalDays = Math.max(diffDaysInclusive(start, end), 0);
+  return Math.max(totalDays - usedDaysDisplay.value, 0);
 });
 
 // ───── 操作紀錄彈窗 ─────
