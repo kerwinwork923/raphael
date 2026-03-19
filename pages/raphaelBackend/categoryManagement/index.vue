@@ -79,14 +79,23 @@
         </section>
       </div>
     </main>
+
+    <CategoryConfirmModal
+      :show="activeDialog === 'delete'"
+      message="確定要刪除嗎？"
+      @close="closeDeleteDialog"
+      @confirm="confirmDelete"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from "vue";
+import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
 import Sidebar from "/components/raphaelBackend/Sidebar.vue";
 import FilterToolbar from "/components/raphaelBackend/FilterToolbar.vue";
 import DataUpdateHeader from "/components/raphaelBackend/DataUpdateHeader.vue";
+import CategoryConfirmModal from "/components/raphaelBackend/CategoryConfirmModal.vue";
 import { useSeo } from "~/composables/useSeo";
 
 useSeo({
@@ -105,9 +114,12 @@ interface CategoryItem {
 }
 
 // 狀態管理
+const router = useRouter();
 const activeTab = ref<"category" | "tag">("category");
 const searchKeyword = ref("");
 const lastUpdated = ref(new Date().toLocaleString("zh-TW"));
+const activeDialog = ref<"delete" | null>(null);
+const pendingDeleteId = ref<string | null>(null);
 
 // 資料
 const categories = ref<CategoryItem[]>([
@@ -140,7 +152,7 @@ const filteredItems = computed(() => {
     return currentItems.value;
   }
   const keyword = searchKeyword.value.toLowerCase();
-  return currentItems.value.filter((item) =>
+  return currentItems.value.filter((item: CategoryItem) =>
     item.name.toLowerCase().includes(keyword)
   );
 });
@@ -155,27 +167,39 @@ function handleSearch(value: string) {
 }
 
 function handleAddNew() {
-  // TODO: 開啟新增對話框
-  console.log("新增", activeTab.value);
+  router.push("/raphaelBackend/categoryManagement/add");
 }
 
 function handleEdit(item: CategoryItem) {
-  // TODO: 開啟編輯對話框
-  console.log("編輯", item);
+  router.push({
+    path: `/raphaelBackend/categoryManagement/${item.id}`,
+    query: { name: item.name },
+  });
 }
 
 function handleDelete(item: CategoryItem) {
-  if (!confirm(`確定要刪除「${item.name}」嗎？`)) {
-    return;
-  }
-  // TODO: 執行刪除 API
+  pendingDeleteId.value = item.id;
+  activeDialog.value = "delete";
+}
+
+function closeDeleteDialog() {
+  activeDialog.value = null;
+  pendingDeleteId.value = null;
+}
+
+function confirmDelete() {
+  if (!pendingDeleteId.value) return;
+
+  const targetId = pendingDeleteId.value;
   if (activeTab.value === "category") {
     categories.value = categories.value.filter(
-      (c: CategoryItem) => c.id !== item.id
+      (c: CategoryItem) => c.id !== targetId
     );
   } else {
-    tags.value = tags.value.filter((t: CategoryItem) => t.id !== item.id);
+    tags.value = tags.value.filter((t: CategoryItem) => t.id !== targetId);
   }
+
+  closeDeleteDialog();
 }
 
 function refreshData() {
