@@ -205,6 +205,12 @@ function formatDateYYYYMMDD(date: Date) {
   return `${y}${m}${d}`;
 }
 
+function addDays(date: Date, days: number) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
 function getRecent7StartDate() {
   const d = new Date();
   d.setDate(d.getDate() - 6);
@@ -215,11 +221,16 @@ function getAsusApiDateRange() {
   if (dateRange.value && dateRange.value.length >= 1 && dateRange.value[0]) {
     const from = dateRange.value[0];
     const to = dateRange.value[1] ?? dateRange.value[0];
+
+    // 往前多抓一天，避免後端把起始日吃掉
+    const safeFrom = addDays(from, -1);
+
     return {
-      StartDate: formatDateYYYYMMDD(from),
+      StartDate: formatDateYYYYMMDD(safeFrom),
       EndDate: formatDateYYYYMMDD(to),
     };
   }
+
   return {
     StartDate: getRecent7StartDate(),
     EndDate: formatDateYYYYMMDD(new Date()),
@@ -232,7 +243,6 @@ const shouldShowDateWithTime = computed(() => {
     const to = toLocalDayStart(dateRange.value[1] ?? dateRange.value[0]);
     return to > from;
   }
-  // 預設是最近 7 天，直接顯示日期+時間避免混淆
   return true;
 });
 
@@ -253,10 +263,86 @@ function formatMeasureTime(dateTime: string) {
   return formatTimeDisplay(dateTime);
 }
 
+function get4HourBucketLabel(hour: number) {
+  return `${String(hour).padStart(2, "0")}:00`;
+}
+
+function build4HourBuckets() {
+  return [0, 4, 8, 12, 16, 20];
+}
+
+function getBucketHourFromDateTime(dateTime: string) {
+  if (!dateTime || dateTime.length < 13) return null;
+  const hour = Number(dateTime.slice(11, 13));
+  if (Number.isNaN(hour)) return null;
+  return Math.floor(hour / 4) * 4;
+}
+
+function aggregateSingleValueBy4Hour(list: any[], dateField: string, valueField: string) {
+  const bucketHours = build4HourBuckets();
+  const bucketMap = new Map<number, number[]>();
+
+  bucketHours.forEach((h) => bucketMap.set(h, []));
+
+  list.forEach((item) => {
+    const hour = getBucketHourFromDateTime(String(item[dateField] || ""));
+    const value = Number(item[valueField] || 0);
+    if (hour === null || value <= 0) return;
+    bucketMap.get(hour)?.push(value);
+  });
+
+  return {
+    labels: bucketHours.map((h) => get4HourBucketLabel(h)),
+    avgData: bucketHours.map((h) => {
+      const arr = bucketMap.get(h) || [];
+      if (!arr.length) return null;
+      return Math.round(arr.reduce((sum, n) => sum + n, 0) / arr.length);
+    }),
+    maxData: bucketHours.map((h) => {
+      const arr = bucketMap.get(h) || [];
+      return arr.length ? Math.max(...arr) : null;
+    }),
+    minData: bucketHours.map((h) => {
+      const arr = bucketMap.get(h) || [];
+      return arr.length ? Math.min(...arr) : null;
+    }),
+  };
+}
+
+function aggregateStepsBy4Hour(list: any[], dateField: string, valueField: string) {
+  const bucketHours = build4HourBuckets();
+  const bucketMap = new Map<number, number>();
+
+  bucketHours.forEach((h) => bucketMap.set(h, 0));
+
+  list.forEach((item) => {
+    const hour = getBucketHourFromDateTime(String(item[dateField] || ""));
+    if (hour === null) return;
+    bucketMap.set(hour, Number(bucketMap.get(hour) || 0) + Number(item[valueField] || 0));
+  });
+
+  return {
+    labels: bucketHours.map((h) => get4HourBucketLabel(h)),
+    data: bucketHours.map((h) => Number(bucketMap.get(h) || 0)),
+  };
+}
+
+function groupByDate<T>(list: T[], getDate: (item: T) => string) {
+  const result: Record<string, T[]> = {};
+  list.forEach((item) => {
+    const d = getDate(item);
+    if (!d) return;
+    result[d] ||= [];
+    result[d].push(item);
+  });
+  return result;
+}
+
 const metricData = computed<MetricData>(() => {
   const key = metricKey.value;
   const raw = asusHealthData.value || {};
   const [fromMs, toMs] = getRangeBoundary(dateRange.value);
+
   const inRange = (dateKey: string) => {
     if (fromMs === null || toMs === null) return true;
     const ms = parseDateOnlyToMs(dateKey);
@@ -267,18 +353,20 @@ const metricData = computed<MetricData>(() => {
   if (key === "heartRate") {
     let list = (raw.Hb || []).filter((x: any) => x.Date && inRange(x.Date));
     if (fromMs === null && toMs === null) list = list.slice(-7);
+
     const heartRateDetailList = (raw.HbDetail || [])
       .filter((x: any) => {
         const d = toDateKey(x.time || "");
         return d && inRange(d) && Number(x.heartrate || 0) > 0;
       })
-      .sort((a: any, b: any) => (a.time || "").localeCompare(b.time || ""));
+      .sort((a: any, b: any) => String(a.time || "").localeCompare(String(b.time || "")));
 
-    if (isSingleDaySelected.value && heartRateDetailList.length) {
+    if (isSingleDaySelected.value) {
+      const bucketed = aggregateSingleValueBy4Hour(heartRateDetailList, "time", "heartrate");
       return {
         chartType: "line",
         headers: ["測量時間", "心率"],
-        labels: heartRateDetailList.map((x: any) => safeTimeFromDateTime(String(x.time || ""))),
+        labels: bucketed.labels,
         rows: heartRateDetailList.map((x: any) => [
           safeTimeFromDateTime(String(x.time || "")),
           String(x.heartrate || ""),
@@ -286,7 +374,7 @@ const metricData = computed<MetricData>(() => {
         datasets: [
           {
             label: "心率",
-            data: heartRateDetailList.map((x: any) => Number(x.heartrate || 0)),
+            data: bucketed.avgData,
             borderColor: "#1ba39b",
             backgroundColor: "#1ba39b",
           },
@@ -312,12 +400,35 @@ const metricData = computed<MetricData>(() => {
   if (key === "spo2") {
     let list = (raw.Spo2 || []).filter((x: any) => x.Date && inRange(x.Date));
     if (fromMs === null && toMs === null) list = list.slice(-7);
+
     const spo2DetailList = (raw.Spo2Detail || [])
       .filter((x: any) => {
         const d = toDateKey(x.time || "");
         return d && inRange(d) && Number(x.spo2 || 0) > 0;
       })
-      .sort((a: any, b: any) => (a.time || "").localeCompare(b.time || ""));
+      .sort((a: any, b: any) => String(a.time || "").localeCompare(String(b.time || "")));
+
+    if (isSingleDaySelected.value) {
+      const bucketed = aggregateSingleValueBy4Hour(spo2DetailList, "time", "spo2");
+      return {
+        chartType: "line",
+        headers: ["測量時間", "血氧"],
+        labels: bucketed.labels,
+        rows: spo2DetailList.map((x: any) => [
+          safeTimeFromDateTime(String(x.time || "")),
+          String(x.spo2 || ""),
+        ]),
+        datasets: [
+          {
+            label: "血氧",
+            data: bucketed.avgData,
+            borderColor: "#1ba39b",
+            backgroundColor: "#1ba39b",
+          },
+        ],
+      };
+    }
+
     return {
       chartType: "line",
       headers: [shouldShowDateWithTime.value ? "測量日期時間" : "測量時間", "數據"],
@@ -336,12 +447,35 @@ const metricData = computed<MetricData>(() => {
   if (key === "temp") {
     let list = (raw.Tp || []).filter((x: any) => x.Date && inRange(x.Date));
     if (fromMs === null && toMs === null) list = list.slice(-7);
+
     const tpDetailList = (raw.TpDetail || [])
       .filter((x: any) => {
         const d = toDateKey(x.time || "");
         return d && inRange(d) && Number(x.temerature || 0) > 0;
       })
-      .sort((a: any, b: any) => (a.time || "").localeCompare(b.time || ""));
+      .sort((a: any, b: any) => String(a.time || "").localeCompare(String(b.time || "")));
+
+    if (isSingleDaySelected.value) {
+      const bucketed = aggregateSingleValueBy4Hour(tpDetailList, "time", "temerature");
+      return {
+        chartType: "line",
+        headers: ["測量時間", "體溫"],
+        labels: bucketed.labels,
+        rows: tpDetailList.map((x: any) => [
+          safeTimeFromDateTime(String(x.time || "")),
+          String(x.temerature || ""),
+        ]),
+        datasets: [
+          {
+            label: "體溫",
+            data: bucketed.avgData,
+            borderColor: "#1ba39b",
+            backgroundColor: "#1ba39b",
+          },
+        ],
+      };
+    }
+
     return {
       chartType: "line",
       headers: [shouldShowDateWithTime.value ? "測量日期時間" : "測量時間", "體溫"],
@@ -360,6 +494,34 @@ const metricData = computed<MetricData>(() => {
   if (key === "steps") {
     let list = (raw.Step || []).filter((x: any) => x.Date && inRange(x.Date));
     if (fromMs === null && toMs === null) list = list.slice(-7);
+
+    const stepDetailList = (raw.StepDetail || [])
+      .filter((x: any) => {
+        const d = toDateKey(x.time || "");
+        return d && inRange(d);
+      })
+      .sort((a: any, b: any) => String(a.time || "").localeCompare(String(b.time || "")));
+
+    if (isSingleDaySelected.value && stepDetailList.length) {
+      const bucketed = aggregateStepsBy4Hour(stepDetailList, "time", "steps");
+      return {
+        chartType: "bar",
+        headers: ["測量時間", "步數"],
+        labels: bucketed.labels,
+        rows: stepDetailList.map((x: any) => [
+          safeTimeFromDateTime(String(x.time || "")),
+          String(x.steps || ""),
+        ]),
+        datasets: [
+          {
+            label: "步數",
+            data: bucketed.data,
+            backgroundColor: "#7cbc28",
+          },
+        ],
+      };
+    }
+
     return {
       chartType: "bar",
       headers: ["測量日期", "步數"],
@@ -369,52 +531,37 @@ const metricData = computed<MetricData>(() => {
     };
   }
 
-  if (key === "bp" || key === "stress" || key === "hrv") {
-    const bpGroup: Record<string, any[]> = {};
-    (raw.Bp || []).forEach((x: any) => {
-      const d = toDateKey(x.time || "");
-      if (!d || !inRange(d)) return;
-      bpGroup[d] ||= [];
-      bpGroup[d].push(x);
-    });
-    let dates = Object.keys(bpGroup).sort();
-    if (fromMs === null && toMs === null && dates.length > 7) dates = dates.slice(-7);
+  if (key === "bp") {
+    const bpDetailList = (raw.Bp || [])
+      .filter((x: any) => {
+        const d = toDateKey(x.time || "");
+        return d && inRange(d);
+      })
+      .sort((a: any, b: any) => String(a.time || "").localeCompare(String(b.time || "")));
 
-    if (key === "bp") {
+    if (isSingleDaySelected.value && bpDetailList.length) {
+      const sysBucket = aggregateSingleValueBy4Hour(bpDetailList, "time", "sys");
+      const diaBucket = aggregateSingleValueBy4Hour(bpDetailList, "time", "dia");
+
       return {
         chartType: "line",
-        headers: ["測量日期", "收縮壓", "舒張壓", "測量時間", "結束時間"],
-        labels: dates.map((d) => toDateLabel(d)),
-        rows: dates.map((d) => {
-          const arr = bpGroup[d] || [];
-          const avgSys = arr.length
-            ? Math.round(arr.reduce((s: number, x: any) => s + Number(x.sys || 0), 0) / arr.length)
-            : 0;
-          const avgDia = arr.length
-            ? Math.round(arr.reduce((s: number, x: any) => s + Number(x.dia || 0), 0) / arr.length)
-            : 0;
-          const start = safeTimeFromDateTime(arr[0]?.time || "");
-          const end = safeTimeFromDateTime(arr[arr.length - 1]?.time || "");
-          return [d, String(avgSys), String(avgDia), start, end];
-        }),
+        headers: ["測量時間", "收縮壓", "舒張壓"],
+        labels: sysBucket.labels,
+        rows: bpDetailList.map((x: any) => [
+          safeTimeFromDateTime(String(x.time || "")),
+          String(x.sys || ""),
+          String(x.dia || ""),
+        ]),
         datasets: [
           {
             label: "收縮壓",
-            data: dates.map((d) => {
-              const arr = bpGroup[d] || [];
-              if (!arr.length) return 0;
-              return Math.round(arr.reduce((s: number, x: any) => s + Number(x.sys || 0), 0) / arr.length);
-            }),
+            data: sysBucket.avgData,
             borderColor: "#9fb6df",
             backgroundColor: "#9fb6df",
           },
           {
             label: "舒張壓",
-            data: dates.map((d) => {
-              const arr = bpGroup[d] || [];
-              if (!arr.length) return 0;
-              return Math.round(arr.reduce((s: number, x: any) => s + Number(x.dia || 0), 0) / arr.length);
-            }),
+            data: diaBucket.avgData,
             borderColor: "#1ba39b",
             backgroundColor: "#1ba39b",
           },
@@ -422,39 +569,149 @@ const metricData = computed<MetricData>(() => {
       };
     }
 
-    if (key === "stress") {
+    const bpGroup = groupByDate(bpDetailList, (x: any) => toDateKey(x.time || ""));
+    let dates = Object.keys(bpGroup).sort();
+    if (fromMs === null && toMs === null && dates.length > 7) dates = dates.slice(-7);
+
+    return {
+      chartType: "line",
+      headers: ["測量日期", "收縮壓", "舒張壓", "測量時間", "結束時間"],
+      labels: dates.map((d) => toDateLabel(d)),
+      rows: dates.map((d) => {
+        const arr = bpGroup[d] || [];
+        const avgSys = arr.length
+          ? Math.round(arr.reduce((s: number, x: any) => s + Number(x.sys || 0), 0) / arr.length)
+          : 0;
+        const avgDia = arr.length
+          ? Math.round(arr.reduce((s: number, x: any) => s + Number(x.dia || 0), 0) / arr.length)
+          : 0;
+        const start = safeTimeFromDateTime(arr[0]?.time || "");
+        const end = safeTimeFromDateTime(arr[arr.length - 1]?.time || "");
+        return [d, String(avgSys), String(avgDia), start, end];
+      }),
+      datasets: [
+        {
+          label: "收縮壓",
+          data: dates.map((d) => {
+            const arr = bpGroup[d] || [];
+            if (!arr.length) return 0;
+            return Math.round(arr.reduce((s: number, x: any) => s + Number(x.sys || 0), 0) / arr.length);
+          }),
+          borderColor: "#9fb6df",
+          backgroundColor: "#9fb6df",
+        },
+        {
+          label: "舒張壓",
+          data: dates.map((d) => {
+            const arr = bpGroup[d] || [];
+            if (!arr.length) return 0;
+            return Math.round(arr.reduce((s: number, x: any) => s + Number(x.dia || 0), 0) / arr.length);
+          }),
+          borderColor: "#1ba39b",
+          backgroundColor: "#1ba39b",
+        },
+      ],
+    };
+  }
+
+  if (key === "stress") {
+    const stressDetailList = (raw.Bp || [])
+      .filter((x: any) => {
+        const d = toDateKey(x.time || "");
+        return d && inRange(d) && Number(x.deStressIndex || 0) > 0;
+      })
+      .sort((a: any, b: any) => String(a.time || "").localeCompare(String(b.time || "")));
+
+    if (isSingleDaySelected.value && stressDetailList.length) {
+      const bucketed = aggregateSingleValueBy4Hour(stressDetailList, "time", "deStressIndex");
       return {
         chartType: "line",
-        headers: ["測量日期", "舒壓指數"],
-        labels: dates.map((d) => toDateLabel(d)),
-        rows: dates.map((d) => {
-          const arr = bpGroup[d] || [];
-          const avg = arr.length
-            ? Math.round(arr.reduce((s: number, x: any) => s + Number(x.deStressIndex || 0), 0) / arr.length)
-            : 0;
-          return [d, String(avg)];
-        }),
+        headers: ["測量時間", "舒壓指數"],
+        labels: bucketed.labels,
+        rows: stressDetailList.map((x: any) => [
+          safeTimeFromDateTime(String(x.time || "")),
+          String(x.deStressIndex || ""),
+        ]),
         datasets: [
           {
             label: "舒壓指數",
-            data: dates.map((d) => {
-              const arr = bpGroup[d] || [];
-              if (!arr.length) return 0;
-              return Math.round(arr.reduce((s: number, x: any) => s + Number(x.deStressIndex || 0), 0) / arr.length);
-            }),
+            data: bucketed.avgData,
             borderColor: "#1ba39b",
             backgroundColor: "#1ba39b",
           },
         ],
       };
     }
+
+    const stressGroup = groupByDate(stressDetailList, (x: any) => toDateKey(x.time || ""));
+    let dates = Object.keys(stressGroup).sort();
+    if (fromMs === null && toMs === null && dates.length > 7) dates = dates.slice(-7);
+
+    return {
+      chartType: "line",
+      headers: ["測量日期", "舒壓指數"],
+      labels: dates.map((d) => toDateLabel(d)),
+      rows: dates.map((d) => {
+        const arr = stressGroup[d] || [];
+        const avg = arr.length
+          ? Math.round(arr.reduce((s: number, x: any) => s + Number(x.deStressIndex || 0), 0) / arr.length)
+          : 0;
+        return [d, String(avg)];
+      }),
+      datasets: [
+        {
+          label: "舒壓指數",
+          data: dates.map((d) => {
+            const arr = stressGroup[d] || [];
+            if (!arr.length) return 0;
+            return Math.round(arr.reduce((s: number, x: any) => s + Number(x.deStressIndex || 0), 0) / arr.length);
+          }),
+          borderColor: "#1ba39b",
+          backgroundColor: "#1ba39b",
+        },
+      ],
+    };
+  }
+
+  if (key === "hrv") {
+    const hrvDetailList = (raw.Bp || [])
+      .filter((x: any) => {
+        const d = toDateKey(x.time || "");
+        return d && inRange(d) && Number(x.rmssd || 0) > 0;
+      })
+      .sort((a: any, b: any) => String(a.time || "").localeCompare(String(b.time || "")));
+
+    if (isSingleDaySelected.value && hrvDetailList.length) {
+      const bucketed = aggregateSingleValueBy4Hour(hrvDetailList, "time", "rmssd");
+      return {
+        chartType: "line",
+        headers: ["測量時間", "RMSSD"],
+        labels: bucketed.labels,
+        rows: hrvDetailList.map((x: any) => [
+          safeTimeFromDateTime(String(x.time || "")),
+          String(x.rmssd || ""),
+        ]),
+        datasets: [
+          {
+            label: "RMSSD",
+            data: bucketed.avgData,
+            borderColor: "#7cbc28",
+            backgroundColor: "#7cbc28",
+          },
+        ],
+      };
+    }
+
+    const hrvGroup = groupByDate(hrvDetailList, (x: any) => toDateKey(x.time || ""));
+    let dates = Object.keys(hrvGroup).sort();
+    if (fromMs === null && toMs === null && dates.length > 7) dates = dates.slice(-7);
 
     return {
       chartType: "line",
       headers: ["測量日期", "RMSSD"],
       labels: dates.map((d) => toDateLabel(d)),
       rows: dates.map((d) => {
-        const arr = bpGroup[d] || [];
+        const arr = hrvGroup[d] || [];
         const avg = arr.length
           ? Math.round(arr.reduce((s: number, x: any) => s + Number(x.rmssd || 0), 0) / arr.length)
           : 0;
@@ -464,7 +721,7 @@ const metricData = computed<MetricData>(() => {
         {
           label: "RMSSD",
           data: dates.map((d) => {
-            const arr = bpGroup[d] || [];
+            const arr = hrvGroup[d] || [];
             if (!arr.length) return 0;
             return Math.round(arr.reduce((s: number, x: any) => s + Number(x.rmssd || 0), 0) / arr.length);
           }),
@@ -478,29 +735,31 @@ const metricData = computed<MetricData>(() => {
   if (key === "sleep") {
     const sleepScoreMap: Record<string, number> = {};
     const sleepGroup: Record<string, { deep: number; rem: number; light: number; awake: number; start: string; end: string }> = {};
+
     (raw.Sleep || []).forEach((x: any) => {
       const d = toDateKey(x.StartTime || "");
       if (!d || !inRange(d)) return;
+
       sleepGroup[d] ||= { deep: 0, rem: 0, light: 0, awake: 0, start: "", end: "" };
       sleepGroup[d].deep += Number(x.ComfortCount || 0);
       sleepGroup[d].rem += Number(x.RemCount || 0);
       sleepGroup[d].light += Number(x.LightCount || 0);
       sleepGroup[d].awake += Number(x.AwakeCount || 0);
-      sleepScoreMap[d] = Math.max(
-        Number(sleepScoreMap[d] || 0),
-        Number(x.SleepScore || 0)
-      );
+      sleepScoreMap[d] = Math.max(Number(sleepScoreMap[d] || 0), Number(x.SleepScore || 0));
+
       const start = safeTimeFromDateTime(x.StartTime || "");
       const end = safeTimeFromDateTime(x.EndTime || "");
       if (!sleepGroup[d].start || start < sleepGroup[d].start) sleepGroup[d].start = start;
       if (!sleepGroup[d].end || end > sleepGroup[d].end) sleepGroup[d].end = end;
     });
+
     let dates = Object.keys(sleepGroup).sort();
     if (fromMs === null && toMs === null && dates.length > 7) dates = dates.slice(-7);
+
     return {
       chartType: "bar",
       stacked: true,
-      headers: ["測量日期", "紓壓指數"],
+      headers: ["測量日期", "睡眠分數"],
       labels: dates.map((d) => toDateLabel(d)),
       rows: dates.map((d) => [d, String(sleepScoreMap[d] || 0)]),
       datasets: [
@@ -512,15 +771,67 @@ const metricData = computed<MetricData>(() => {
     };
   }
 
-  const biaGroup: Record<string, any[]> = {};
-  (raw.Bia || []).forEach((x: any) => {
-    const d = toDateKey(x.time || "");
-    if (!d || !inRange(d)) return;
-    biaGroup[d] ||= [];
-    biaGroup[d].push(x);
-  });
+  const biaDetailList = (raw.Bia || [])
+    .filter((x: any) => {
+      const d = toDateKey(x.time || "");
+      return d && inRange(d);
+    })
+    .sort((a: any, b: any) => String(a.time || "").localeCompare(String(b.time || "")));
+
+  if (isSingleDaySelected.value && biaDetailList.length) {
+    const waterBucket = aggregateSingleValueBy4Hour(
+      biaDetailList.map((x: any) => ({ ...x, waterValue: Number(x.water || 0) / 10 })),
+      "time",
+      "waterValue"
+    );
+    const fatBucket = aggregateSingleValueBy4Hour(
+      biaDetailList.map((x: any) => ({ ...x, fatValue: Number(x.fat || 0) / 10 })),
+      "time",
+      "fatValue"
+    );
+    const skmBucket = aggregateSingleValueBy4Hour(
+      biaDetailList.map((x: any) => ({ ...x, skmValue: Number(x.skm || 0) / 10 })),
+      "time",
+      "skmValue"
+    );
+
+    return {
+      chartType: "line",
+      headers: ["測量時間", "水分", "體脂肪", "肌肉量"],
+      labels: waterBucket.labels,
+      rows: biaDetailList.map((x: any) => [
+        safeTimeFromDateTime(String(x.time || "")),
+        ((Number(x.water || 0) / 10) || 0).toFixed(1),
+        ((Number(x.fat || 0) / 10) || 0).toFixed(1),
+        ((Number(x.skm || 0) / 10) || 0).toFixed(1),
+      ]),
+      datasets: [
+        {
+          label: "水分",
+          data: waterBucket.avgData,
+          borderColor: "#27a3a9",
+          backgroundColor: "#27a3a9",
+        },
+        {
+          label: "體脂肪",
+          data: fatBucket.avgData,
+          borderColor: "#7cbc28",
+          backgroundColor: "#7cbc28",
+        },
+        {
+          label: "肌肉量",
+          data: skmBucket.avgData,
+          borderColor: "#2f6fa3",
+          backgroundColor: "#2f6fa3",
+        },
+      ],
+    };
+  }
+
+  const biaGroup = groupByDate(biaDetailList, (x: any) => toDateKey(x.time || ""));
   let dates = Object.keys(biaGroup).sort();
   if (fromMs === null && toMs === null && dates.length > 7) dates = dates.slice(-7);
+
   return {
     chartType: "line",
     headers: ["測量日期", "水分", "體脂肪", "肌肉量", "測量時間"],
@@ -581,7 +892,9 @@ function renderDetailChart() {
   if (!canvas || !metricData.value.labels.length) return;
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
+
   destroyDetailChart();
+
   detailChart = new Chart(ctx, {
     type: metricData.value.chartType,
     data: {
@@ -596,13 +909,32 @@ function renderDetailChart() {
         legend: { position: "bottom", labels: { boxWidth: 8, boxHeight: 8 } },
       },
       scales: {
-        x: { stacked: !!metricData.value.stacked, ticks: { font: { size: 10 } } },
-        y: { stacked: !!metricData.value.stacked, beginAtZero: true, ticks: { font: { size: 10 } } },
+        x: {
+          stacked: !!metricData.value.stacked,
+          ticks: {
+            font: { size: 10 },
+            maxRotation: 0,
+            autoSkip: false,
+          },
+        },
+        y: {
+          stacked: !!metricData.value.stacked,
+          beginAtZero: true,
+          ticks: { font: { size: 10 } },
+        },
       },
       elements: {
-        point: { radius: 2 },
-        line: { tension: 0.3, borderWidth: 1.5 },
-      },
+  point: {
+    radius: 4,
+    hoverRadius: 6,
+    hitRadius: 10,
+    pointStyle: "circle",
+  },
+  line: {
+    tension: 0.3,
+    borderWidth: 2,
+  },
+},
     },
   });
 }
@@ -621,6 +953,7 @@ watchEffect(() => {
     destroyDetailChart();
     return;
   }
+
   nextTick(() => {
     requestAnimationFrame(() => {
       renderDetailChart();
@@ -634,6 +967,7 @@ onMounted(async () => {
     router.push("/raphaelBackend/member");
     return;
   }
+
   if (!hasFetched.value) {
     await memberStore.fetchAll(auth);
   }
@@ -642,10 +976,12 @@ onMounted(async () => {
   const qEnd = String(route.query.end || "");
   const qStartDate = parseYYYYMMDDToDate(qStart);
   const qEndDate = parseYYYYMMDDToDate(qEnd);
+
   if (qStartDate) {
     skipNextDateRangeWatch = true;
     dateRange.value = [qStartDate, qEndDate ?? qStartDate];
   }
+
   await fetchMetricData();
 });
 
@@ -661,7 +997,6 @@ onUnmounted(() => {
   destroyDetailChart();
 });
 </script>
-
 <style scoped lang="scss">
 .memberInfo {
   display: flex;
@@ -756,7 +1091,8 @@ onUnmounted(() => {
   margin-top: 0.85rem;
   border-radius: 10px;
   border: 1px solid #e9eef5;
-  overflow: hidden;
+  max-height: 340px;
+  overflow: auto;
 }
 
 .tableHeader,

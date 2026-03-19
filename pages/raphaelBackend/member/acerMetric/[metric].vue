@@ -191,6 +191,12 @@ function formatDateYYYYMMDD(date: Date) {
   return `${y}${m}${d}`;
 }
 
+function addDays(date: Date, days: number) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
 function getRecent7StartDate() {
   const d = new Date();
   d.setDate(d.getDate() - 6);
@@ -201,16 +207,28 @@ function getAcerApiDateRange() {
   if (dateRange.value && dateRange.value.length >= 1 && dateRange.value[0]) {
     const from = dateRange.value[0];
     const to = dateRange.value[1] ?? dateRange.value[0];
+
+    // 往前多抓一天，避免後端起始日邊界吃掉第一天
+    const safeFrom = addDays(from, -1);
+
     return {
-      StartDate: formatDateYYYYMMDD(from),
+      StartDate: formatDateYYYYMMDD(safeFrom),
       EndDate: formatDateYYYYMMDD(to),
     };
   }
+
   return {
     StartDate: getRecent7StartDate(),
     EndDate: formatDateYYYYMMDD(new Date()),
   };
 }
+
+const isSingleDayRange = computed(() => {
+  if (!dateRange.value?.[0]) return false;
+  const from = toLocalDayStart(dateRange.value[0]);
+  const to = toLocalDayStart(dateRange.value[1] ?? dateRange.value[0]);
+  return from === to;
+});
 
 const shouldShowDateWithTime = computed(() => {
   if (dateRange.value && dateRange.value.length >= 1 && dateRange.value[0]) {
@@ -231,10 +249,86 @@ function formatMeasureTime(rawDateTime: string) {
   return time || date || "";
 }
 
+function get4HourBucketLabel(hour: number) {
+  const start = String(hour).padStart(2, "0");
+  const end = String(Math.min(hour + 4, 24)).padStart(2, "0");
+  return `${start}:00-${end}:00`;
+}
+
+function getBucketHourFromRawDateTime(raw: string) {
+  const value = String(raw || "");
+  if (!/^\d{14}$/.test(value)) return null;
+  const hour = Number(value.slice(8, 10));
+  if (Number.isNaN(hour)) return null;
+  return Math.floor(hour / 4) * 4;
+}
+
+function build4HourBuckets() {
+  return [0, 4, 8, 12, 16, 20];
+}
+
+function aggregateMinMaxBy4Hour(list: any[], field: string) {
+  const bucketHours = build4HourBuckets();
+  const bucketMap = new Map<number, number[]>();
+
+  bucketHours.forEach((h) => bucketMap.set(h, []));
+
+  list.forEach((item) => {
+    const hour = getBucketHourFromRawDateTime(item.RawDateTime || "");
+    const value = Number(item[field] || 0);
+    if (hour === null || value <= 0) return;
+    bucketMap.get(hour)?.push(value);
+  });
+
+  return {
+    labels: bucketHours.map((h) => get4HourBucketLabel(h)),
+    maxData: bucketHours.map((h) => {
+      const arr = bucketMap.get(h) || [];
+      return arr.length ? Math.max(...arr) : null;
+    }),
+    minData: bucketHours.map((h) => {
+      const arr = bucketMap.get(h) || [];
+      return arr.length ? Math.min(...arr) : null;
+    }),
+  };
+}
+
+function aggregateSumBy4Hour(list: any[], fields: string[]) {
+  const bucketHours = build4HourBuckets();
+  const bucketMap = new Map<number, Record<string, number>>();
+
+  bucketHours.forEach((h) => {
+    bucketMap.set(
+      h,
+      fields.reduce((acc, key) => {
+        acc[key] = 0;
+        return acc;
+      }, {} as Record<string, number>),
+    );
+  });
+
+  list.forEach((item) => {
+    const hour = getBucketHourFromRawDateTime(item.RawDateTime || "");
+    if (hour === null) return;
+    const target = bucketMap.get(hour);
+    if (!target) return;
+
+    fields.forEach((field) => {
+      target[field] += Number(item[field] || 0);
+    });
+  });
+
+  return {
+    labels: bucketHours.map((h) => get4HourBucketLabel(h)),
+    data: bucketHours.map((h) => bucketMap.get(h) || {}),
+  };
+}
+
 const metricData = computed<MetricData>(() => {
   const key = metricKey.value;
   const raw = acerHealthData.value || {};
   const [fromMs, toMs] = getRangeBoundary(dateRange.value);
+
   const inRange = (dateKey: string) => {
     if (fromMs === null || toMs === null) return true;
     const ms = parseDateOnlyToMs(dateKey);
@@ -254,6 +348,21 @@ const metricData = computed<MetricData>(() => {
         return d && inRange(d) && Number(x.hearts || 0) > 0;
       })
       .sort((a: any, b: any) => String(a.RawDateTime || "").localeCompare(String(b.RawDateTime || "")));
+
+    if (isSingleDayRange.value) {
+      const bucketed = aggregateMinMaxBy4Hour(detail, "hearts");
+
+      return {
+        chartType: "line",
+        headers: [shouldShowDateWithTime.value ? "測量日期時間" : "測量時間", "心率"],
+        labels: bucketed.labels,
+        rows: detail.map((x: any) => [formatMeasureTime(String(x.RawDateTime || "")), String(x.hearts || "")]),
+        datasets: [
+          { label: "最高", data: bucketed.maxData, borderColor: "#9fb6df", backgroundColor: "#9fb6df" },
+          { label: "最低", data: bucketed.minData, borderColor: "#1ba39b", backgroundColor: "#1ba39b" },
+        ],
+      };
+    }
 
     return {
       chartType: "line",
@@ -280,6 +389,21 @@ const metricData = computed<MetricData>(() => {
       })
       .sort((a: any, b: any) => String(a.RawDateTime || "").localeCompare(String(b.RawDateTime || "")));
 
+    if (isSingleDayRange.value) {
+      const bucketed = aggregateMinMaxBy4Hour(detail, "bloodOxygen");
+
+      return {
+        chartType: "line",
+        headers: [shouldShowDateWithTime.value ? "測量日期時間" : "測量時間", "血氧"],
+        labels: bucketed.labels,
+        rows: detail.map((x: any) => [formatMeasureTime(String(x.RawDateTime || "")), String(x.bloodOxygen || "")]),
+        datasets: [
+          { label: "最高", data: bucketed.maxData, borderColor: "#9fb6df", backgroundColor: "#9fb6df" },
+          { label: "最低", data: bucketed.minData, borderColor: "#1ba39b", backgroundColor: "#1ba39b" },
+        ],
+      };
+    }
+
     return {
       chartType: "line",
       headers: [shouldShowDateWithTime.value ? "測量日期時間" : "測量時間", "血氧"],
@@ -305,6 +429,21 @@ const metricData = computed<MetricData>(() => {
       })
       .sort((a: any, b: any) => String(a.RawDateTime || "").localeCompare(String(b.RawDateTime || "")));
 
+    if (isSingleDayRange.value) {
+      const bucketed = aggregateMinMaxBy4Hour(detail, "tempeartures");
+
+      return {
+        chartType: "line",
+        headers: [shouldShowDateWithTime.value ? "測量日期時間" : "測量時間", "體溫"],
+        labels: bucketed.labels,
+        rows: detail.map((x: any) => [formatMeasureTime(String(x.RawDateTime || "")), String(x.tempeartures || "")]),
+        datasets: [
+          { label: "最高", data: bucketed.maxData, borderColor: "#9fb6df", backgroundColor: "#9fb6df" },
+          { label: "最低", data: bucketed.minData, borderColor: "#1ba39b", backgroundColor: "#1ba39b" },
+        ],
+      };
+    }
+
     return {
       chartType: "line",
       headers: [shouldShowDateWithTime.value ? "測量日期時間" : "測量時間", "體溫"],
@@ -327,6 +466,7 @@ const metricData = computed<MetricData>(() => {
       group[d].rem += Number(x.RemCount || 0);
       group[d].light += Number(x.LightCount || 0);
     });
+
     let dates = Object.keys(group).sort();
     if (fromMs === null && toMs === null && dates.length > 7) dates = dates.slice(-7);
 
@@ -345,7 +485,6 @@ const metricData = computed<MetricData>(() => {
   }
 
   if (key === "activity") {
-    const group: Record<string, number> = {};
     const detail = (raw.Activity || [])
       .filter((x: any) => {
         const d = parseRawDateTimeToDateKey(x.RawDateTime || "");
@@ -353,6 +492,7 @@ const metricData = computed<MetricData>(() => {
       })
       .sort((a: any, b: any) => String(a.RawDateTime || "").localeCompare(String(b.RawDateTime || "")));
 
+    const group: Record<string, number> = {};
     detail.forEach((x: any) => {
       const d = parseRawDateTimeToDateKey(x.RawDateTime || "");
       if (!d) return;
@@ -362,6 +502,30 @@ const metricData = computed<MetricData>(() => {
 
     let dates = Object.keys(group).sort();
     if (fromMs === null && toMs === null && dates.length > 7) dates = dates.slice(-7);
+
+    if (isSingleDayRange.value) {
+      const bucketed = aggregateSumBy4Hour(detail, ["step", "calorie", "distance", "duration"]);
+
+      return {
+        chartType: "bar",
+        headers: [shouldShowDateWithTime.value ? "測量日期時間" : "測量時間", "步數", "卡路里", "距離", "時長(秒)"],
+        labels: bucketed.labels,
+        rows: detail.map((x: any) => [
+          formatMeasureTime(String(x.RawDateTime || "")),
+          String(x.step || ""),
+          String(x.calorie || ""),
+          String(x.distance || ""),
+          String(x.duration || ""),
+        ]),
+        datasets: [
+          {
+            label: "步數",
+            data: bucketed.data.map((x) => Number(x.step || 0)),
+            backgroundColor: "#7cbc28",
+          },
+        ],
+      };
+    }
 
     return {
       chartType: "bar",
@@ -391,6 +555,21 @@ const metricData = computed<MetricData>(() => {
       })
       .sort((a: any, b: any) => String(a.RawDateTime || "").localeCompare(String(b.RawDateTime || "")));
 
+    if (isSingleDayRange.value) {
+      const bucketed = aggregateMinMaxBy4Hour(detail, "hrvs");
+
+      return {
+        chartType: "line",
+        headers: [shouldShowDateWithTime.value ? "測量日期時間" : "測量時間", "HRV"],
+        labels: bucketed.labels,
+        rows: detail.map((x: any) => [formatMeasureTime(String(x.RawDateTime || "")), String(x.hrvs || "")]),
+        datasets: [
+          { label: "最高", data: bucketed.maxData, borderColor: "#9fb6df", backgroundColor: "#9fb6df" },
+          { label: "最低", data: bucketed.minData, borderColor: "#1ba39b", backgroundColor: "#1ba39b" },
+        ],
+      };
+    }
+
     return {
       chartType: "line",
       headers: [shouldShowDateWithTime.value ? "測量日期時間" : "測量時間", "HRV"],
@@ -415,6 +594,21 @@ const metricData = computed<MetricData>(() => {
     })
     .sort((a: any, b: any) => String(a.RawDateTime || "").localeCompare(String(b.RawDateTime || "")));
 
+  if (isSingleDayRange.value) {
+    const bucketed = aggregateMinMaxBy4Hour(detail, "stress");
+
+    return {
+      chartType: "line",
+      headers: [shouldShowDateWithTime.value ? "測量日期時間" : "測量時間", "壓力"],
+      labels: bucketed.labels,
+      rows: detail.map((x: any) => [formatMeasureTime(String(x.RawDateTime || "")), String(x.stress || "")]),
+      datasets: [
+        { label: "最高", data: bucketed.maxData, borderColor: "#9fb6df", backgroundColor: "#9fb6df" },
+        { label: "最低", data: bucketed.minData, borderColor: "#1ba39b", backgroundColor: "#1ba39b" },
+      ],
+    };
+  }
+
   return {
     chartType: "line",
     headers: [shouldShowDateWithTime.value ? "測量日期時間" : "測量時間", "壓力"],
@@ -437,7 +631,9 @@ function renderDetailChart() {
   if (!canvas || !metricData.value.labels.length) return;
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
+
   destroyDetailChart();
+
   detailChart = new Chart(ctx, {
     type: metricData.value.chartType,
     data: {
@@ -452,8 +648,19 @@ function renderDetailChart() {
         legend: { position: "bottom", labels: { boxWidth: 8, boxHeight: 8 } },
       },
       scales: {
-        x: { stacked: !!metricData.value.stacked, ticks: { font: { size: 10 } } },
-        y: { stacked: !!metricData.value.stacked, beginAtZero: true, ticks: { font: { size: 10 } } },
+        x: {
+          stacked: !!metricData.value.stacked,
+          ticks: {
+            font: { size: 10 },
+            maxRotation: 0,
+            autoSkip: false,
+          },
+        },
+        y: {
+          stacked: !!metricData.value.stacked,
+          beginAtZero: true,
+          ticks: { font: { size: 10 } },
+        },
       },
       elements: {
         point: { radius: 2 },
@@ -477,6 +684,7 @@ watchEffect(() => {
     destroyDetailChart();
     return;
   }
+
   nextTick(() => {
     requestAnimationFrame(() => {
       renderDetailChart();
@@ -499,10 +707,12 @@ onMounted(async () => {
   const qEnd = String(route.query.end || "");
   const qStartDate = parseYYYYMMDDToDate(qStart);
   const qEndDate = parseYYYYMMDDToDate(qEnd);
+
   if (qStartDate) {
     skipNextDateRangeWatch = true;
     dateRange.value = [qStartDate, qEndDate ?? qStartDate];
   }
+
   await fetchMetricData();
 });
 
@@ -518,7 +728,6 @@ onUnmounted(() => {
   destroyDetailChart();
 });
 </script>
-
 <style scoped lang="scss">
 .memberInfo {
   display: flex;
