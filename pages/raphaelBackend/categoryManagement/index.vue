@@ -90,8 +90,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import axios from "axios";
 import Sidebar from "/components/raphaelBackend/Sidebar.vue";
 import FilterToolbar from "/components/raphaelBackend/FilterToolbar.vue";
 import DataUpdateHeader from "/components/raphaelBackend/DataUpdateHeader.vue";
@@ -120,27 +121,20 @@ const searchKeyword = ref("");
 const lastUpdated = ref(new Date().toLocaleString("zh-TW"));
 const activeDialog = ref<"delete" | null>(null);
 const pendingDeleteId = ref<string | null>(null);
+const loading = ref(false);
+
+const API_BASE = "https://23700999.com:8081/HMA/api/bk";
+
+interface ApiTypeItem {
+  Type?: string;
+  VideoType?: string;
+  VideoBigType?: string;
+  Name?: string;
+}
 
 // 資料
-const categories = ref<CategoryItem[]>([
-  { id: "1", name: "醫師真心話", applyCount: 10, type: "category" },
-  { id: "2", name: "腦洞大開", applyCount: 0, type: "category" },
-  { id: "3", name: "我的診間故事", applyCount: 0, type: "category" },
-  { id: "4", name: "類別名稱", applyCount: 0, type: "category" },
-]);
-
-const tags = ref<CategoryItem[]>([
-  { id: "1", name: "自律神經失調", applyCount: 10, type: "tag" },
-  { id: "2", name: "焦慮", applyCount: 0, type: "tag" },
-  { id: "3", name: "憂鬱", applyCount: 0, type: "tag" },
-  { id: "4", name: "失眠", applyCount: 0, type: "tag" },
-  { id: "5", name: "胃食道逆流", applyCount: 0, type: "tag" },
-  { id: "6", name: "過動症", applyCount: 0, type: "tag" },
-  { id: "7", name: "ADHA", applyCount: 0, type: "tag" },
-  { id: "8", name: "恐慌", applyCount: 0, type: "tag" },
-  { id: "9", name: "耳鳴", applyCount: 0, type: "tag" },
-  { id: "10", name: "思覺失調", applyCount: 0, type: "tag" },
-]);
+const categories = ref<CategoryItem[]>([]);
+const tags = ref<CategoryItem[]>([]);
 
 // 計算屬性
 const currentItems = computed(() => {
@@ -167,13 +161,16 @@ function handleSearch(value: string) {
 }
 
 function handleAddNew() {
-  router.push("/raphaelBackend/categoryManagement/add");
+  router.push({
+    path: "/raphaelBackend/categoryManagement/add",
+    query: { kind: activeTab.value },
+  });
 }
 
 function handleEdit(item: CategoryItem) {
   router.push({
     path: `/raphaelBackend/categoryManagement/${item.id}`,
-    query: { name: item.name },
+    query: { name: item.name, kind: activeTab.value },
   });
 }
 
@@ -202,11 +199,102 @@ function confirmDelete() {
   closeDeleteDialog();
 }
 
-function refreshData() {
-  // TODO: 重新載入資料
-  lastUpdated.value = new Date().toLocaleString("zh-TW");
-  console.log("重新載入資料");
+function mapTypeItemToCard(
+  item: ApiTypeItem,
+  fallbackId: string,
+  targetType: "category" | "tag"
+): CategoryItem {
+  const id = item.Type || item.VideoType || item.VideoBigType || fallbackId;
+  return {
+    id: String(id),
+    name: String(item.Name || ""),
+    applyCount: 0,
+    type: targetType,
+  };
 }
+
+function getAuth() {
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("backendToken") ||
+        sessionStorage.getItem("backendToken")
+      : "";
+  const adminID =
+    typeof window !== "undefined"
+      ? localStorage.getItem("adminID") || sessionStorage.getItem("adminID")
+      : "";
+
+  if (!token || !adminID) {
+    alert("請先登入後台再操作");
+    return null;
+  }
+
+  return { token, adminID };
+}
+
+async function fetchCategoryItems() {
+  const auth = getAuth();
+  if (!auth) return;
+
+  const response = await axios.post(`${API_BASE}/getVideoBigTypeList`, {
+    AdminID: auth.adminID,
+    Token: auth.token,
+  });
+
+  if (response.data?.Result !== "OK") {
+    throw new Error(response.data?.Message || "取得類別資料失敗");
+  }
+
+  const list = Array.isArray(response.data?.VideoBigTypeList)
+    ? response.data.VideoBigTypeList
+    : [];
+
+  categories.value = list.map((item: ApiTypeItem, index: number) =>
+    mapTypeItemToCard(item, String(index + 1), "category")
+  );
+}
+
+async function fetchTagItems() {
+  const auth = getAuth();
+  if (!auth) return;
+
+  const response = await axios.post(`${API_BASE}/getVideoTypeList`, {
+    AdminID: auth.adminID,
+    Token: auth.token,
+  });
+
+  if (response.data?.Result !== "OK") {
+    throw new Error(response.data?.Message || "取得標籤資料失敗");
+  }
+
+  const list = Array.isArray(response.data?.VideoTypeList)
+    ? response.data.VideoTypeList
+    : [];
+
+  tags.value = list.map((item: ApiTypeItem, index: number) =>
+    mapTypeItemToCard(item, String(index + 1), "tag")
+  );
+}
+
+async function refreshData() {
+  if (loading.value) return;
+  loading.value = true;
+
+  try {
+    await Promise.all([fetchCategoryItems(), fetchTagItems()]);
+  } catch (error) {
+    console.error("重新載入分類資料失敗:", error);
+    alert("重新載入資料失敗");
+  } finally {
+    loading.value = false;
+  }
+
+  lastUpdated.value = new Date().toLocaleString("zh-TW");
+}
+
+onMounted(() => {
+  refreshData();
+});
 </script>
 
 <style scoped lang="scss">

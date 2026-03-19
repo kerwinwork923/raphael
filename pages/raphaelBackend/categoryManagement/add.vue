@@ -4,7 +4,7 @@
 
     <main class="content">
       <header class="page-header">
-        <h2 class="title">新增類別</h2>
+        <h2 class="title">新增{{ kindLabel }}</h2>
         <div class="action-buttons">
           <button class="btn back-btn" @click="handleBack">
             <img src="/assets/imgs/backend/back.svg" alt="返回" />
@@ -61,7 +61,8 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import axios from "axios";
 import Sidebar from "/components/raphaelBackend/Sidebar.vue";
 import CategoryConfirmModal from "/components/raphaelBackend/CategoryConfirmModal.vue";
 import { useSeo } from "~/composables/useSeo";
@@ -73,11 +74,28 @@ useSeo({
   url: "https://neuroplus.com.tw",
 });
 
+type KindType = "category" | "tag";
+
+const route = useRoute();
 const router = useRouter();
 const categoryName = ref("");
 const activeDialog = ref<"save" | "leave" | null>(null);
+const saving = ref(false);
+
+const API_BASE = "https://23700999.com:8081/HMA/api/bk";
 
 const hasModified = computed(() => categoryName.value.trim().length > 0);
+const kind = computed<KindType>(() =>
+  route.query.kind === "tag" ? "tag" : "category"
+);
+const kindLabel = computed(() => (kind.value === "category" ? "類別" : "標籤"));
+
+interface ApiTypeItem {
+  Type?: string;
+  VideoType?: string;
+  VideoBigType?: string;
+  Name?: string;
+}
 
 function handleBack() {
   if (hasModified.value) {
@@ -88,17 +106,138 @@ function handleBack() {
 }
 
 function handleSave() {
+  if (saving.value) return;
   if (!categoryName.value.trim()) {
-    alert("請輸入類別名稱");
+    alert(`請輸入${kindLabel.value}名稱`);
     return;
   }
   activeDialog.value = "save";
 }
 
-function confirmSave() {
+function getAuth() {
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("backendToken") ||
+        sessionStorage.getItem("backendToken")
+      : "";
+  const adminID =
+    typeof window !== "undefined"
+      ? localStorage.getItem("adminID") || sessionStorage.getItem("adminID")
+      : "";
+
+  if (!token || !adminID) {
+    alert("請先登入後台再操作");
+    return null;
+  }
+
+  return { token, adminID };
+}
+
+function normalizeList(rawList: unknown): Array<{ Type: string; Name: string }> {
+  if (!Array.isArray(rawList)) return [];
+
+  return rawList
+    .map((item: ApiTypeItem) => {
+      const type = item.Type || item.VideoType || item.VideoBigType || "";
+      const name = item.Name || "";
+      return { Type: String(type), Name: String(name) };
+    })
+    .filter((item) => item.Type && item.Name);
+}
+
+function makeNextTypeCode(list: Array<{ Type: string }>) {
+  const numericCodes = list
+    .map((item) => Number(item.Type))
+    .filter((num) => Number.isFinite(num));
+  const maxCode = numericCodes.length ? Math.max(...numericCodes) : 0;
+  return String(maxCode + 1).padStart(2, "0");
+}
+
+async function getCurrentTypeList(auth: { token: string; adminID: string }) {
+  if (kind.value === "category") {
+    const response = await axios.post(`${API_BASE}/getVideoBigTypeList`, {
+      AdminID: auth.adminID,
+      Token: auth.token,
+    });
+    if (response.data?.Result !== "OK") {
+      throw new Error(response.data?.Message || "取得類別清單失敗");
+    }
+    return normalizeList(response.data?.VideoBigTypeList);
+  }
+
+  const response = await axios.post(`${API_BASE}/getVideoTypeList`, {
+    AdminID: auth.adminID,
+    Token: auth.token,
+  });
+  if (response.data?.Result !== "OK") {
+    throw new Error(response.data?.Message || "取得標籤清單失敗");
+  }
+  return normalizeList(response.data?.VideoTypeList);
+}
+
+async function submitModifyApi(
+  auth: { token: string; adminID: string },
+  payloadList: Array<{ Type: string; Name: string }>
+) {
+  if (kind.value === "category") {
+    return axios.post(`${API_BASE}/VideoBigTypeModify`, {
+      AdminID: auth.adminID,
+      Token: auth.token,
+      VideoBigTypeList: payloadList,
+    });
+  }
+
+  return axios.post(`${API_BASE}/VideoTypeModify`, {
+    AdminID: auth.adminID,
+    Token: auth.token,
+    VideoTypeList: payloadList,
+  });
+}
+
+async function confirmSave() {
+  if (saving.value) return;
   activeDialog.value = null;
-  alert("新增成功（待串接 API）");
-  router.push("/raphaelBackend/categoryManagement");
+
+  const auth = getAuth();
+  if (!auth) return;
+
+  saving.value = true;
+  try {
+    const currentList = await getCurrentTypeList(auth);
+    const nextType = makeNextTypeCode(currentList);
+    const newName = categoryName.value.trim();
+
+    const duplicateName = currentList.some(
+      (item) => item.Name.trim().toLowerCase() === newName.toLowerCase()
+    );
+    if (duplicateName) {
+      alert(`${kindLabel.value}名稱已存在，請換一個名稱`);
+      return;
+    }
+
+    const payloadList = [
+      ...currentList,
+      {
+        Type: nextType,
+        Name: newName,
+      },
+    ];
+
+    const response = await submitModifyApi(auth, payloadList);
+
+    if (response.data?.Result === "OK") {
+      alert(`新增${kindLabel.value}成功`);
+      router.push("/raphaelBackend/categoryManagement");
+      return;
+    }
+
+    throw new Error(response.data?.Message || `新增${kindLabel.value}失敗`);
+  } catch (error: any) {
+    console.error(`新增${kindLabel.value}失敗:`, error);
+    alert(error?.message || `新增${kindLabel.value}失敗`);
+  } finally {
+    saving.value = false;
+  }
 }
 
 function confirmLeave() {

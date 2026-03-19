@@ -198,6 +198,8 @@ const router = useRouter();
 
 const VIDEO_SINGLE_MESSAGE_API =
   "https://23700999.com:8081/HMA/api/bk/VideoMessageList";
+const VIDEO_DELETE_MESSAGE_API =
+  "https://23700999.com:8081/HMA/api/bk/VideoDeleteMessage";
 
 // 從 localStorage/sessionStorage 獲取認證資訊
 const token = ref(
@@ -238,6 +240,7 @@ interface ApiVideoMessage {
   AID: string;
   Mobile: string;
   Name: string;
+  MemName?: string;
 }
 
 /* ---------- 響應式資料 ---------- */
@@ -251,9 +254,14 @@ const loading = ref(false);
 
 /* ---------- 影片選項（從 API 列表的 AID 去重產生） ---------- */
 const videoOptions = computed<VideoOption[]>(() => {
-  const aids = new Set(messages.value.map((m: Message) => m.AID));
-  return Array.from(aids).map((aid) => ({
-    label: `影片 AID: ${aid}`,
+  const videoMap = new Map<string, string>();
+  messages.value.forEach((item: Message) => {
+    if (!videoMap.has(item.AID)) {
+      videoMap.set(item.AID, item.videoTitle);
+    }
+  });
+  return Array.from(videoMap.entries()).map(([aid, title]) => ({
+    label: title || `影片 AID: ${aid}`,
     value: aid,
   }));
 });
@@ -340,10 +348,31 @@ const nextPage = () => {
   if (currentPage.value < totalPages.value) currentPage.value++;
 };
 
-// 刪除訊息（目前僅前端移除，若有刪除 API 可再串接）
-const handleDelete = (id: string) => {
-  if (confirm("確定要刪除此留言嗎？")) {
-    messages.value = messages.value.filter((msg: Message) => msg.id !== id);
+// 刪除留言
+const handleDelete = async (id: string) => {
+  if (!confirm("確定要刪除此留言嗎？")) return;
+  if (!adminID.value || !token.value) {
+    alert("請先登入");
+    return;
+  }
+
+  try {
+    const response = await axios.post(VIDEO_DELETE_MESSAGE_API, {
+      AdminID: adminID.value,
+      Token: token.value,
+      BID: id,
+    });
+
+    if (response.data?.Result === "OK") {
+      messages.value = messages.value.filter((msg: Message) => msg.id !== id);
+      alert("刪除成功");
+      return;
+    }
+
+    alert("刪除失敗：" + (response.data?.Message || "未知錯誤"));
+  } catch (err: any) {
+    console.error("刪除留言失敗:", err);
+    alert("刪除失敗：" + (err.response?.data?.Message || err.message || "未知錯誤"));
   }
 };
 
@@ -385,10 +414,12 @@ async function fetchMessageList() {
       messages.value = list.map((item) => ({
         id: item.BID,
         content: item.Message,
-        videoTitle: `影片 AID: ${item.AID}`,
-        sender: item.Name,
+        videoTitle: item.Name || `影片 AID: ${item.AID}`,
+        sender: item.MemName || "",
         status:
-          item.Response === "已回覆" ? ("replied" as const) : ("unreplied" as const),
+          item.Response && item.Response !== "未回覆"
+            ? ("replied" as const)
+            : ("unreplied" as const),
         date: item.CheckTime,
         AID: item.AID,
       }));

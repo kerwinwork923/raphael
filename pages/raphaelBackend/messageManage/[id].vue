@@ -14,9 +14,13 @@
             <img src="/assets/imgs/backend/back.svg" alt="返回" />
             返回
           </button>
-          <button class="btn delete-btn" @click="handleDelete">
+          <button
+            class="btn delete-btn"
+            :disabled="deletingMessage"
+            @click="handleDelete"
+          >
             <img src="/assets/imgs/backend/deleteWhite.svg" alt="刪除" />
-            刪除
+            {{ deletingMessage ? "刪除中..." : "刪除" }}
           </button>
         </div>
       </header>
@@ -28,9 +32,19 @@
           <!-- 影片縮圖 -->
           <div class="video-thumbnail">
             <img
-              :src="messageDetail?.videoThumbnail || '/assets/imgs/banner-2.png'"
+              v-if="hasVideoThumbnail && !thumbnailLoadFailed"
+              :src="messageDetail?.videoThumbnail"
               alt="影片縮圖"
+              @error="thumbnailLoadFailed = true"
             />
+            <div v-else class="thumbnail-placeholder">
+              <img
+                src="/assets/imgs/backend/media.svg"
+                alt="無縮圖"
+                class="placeholder-icon"
+              />
+              <span>尚無縮圖</span>
+            </div>
           </div>
 
           <!-- 影片說明 -->
@@ -132,11 +146,13 @@
       </section>
       
     </main>
+
+    
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import axios from "axios";
 import Sidebar from "@/components/raphaelBackend/Sidebar.vue";
@@ -153,6 +169,8 @@ const VIDEO_SINGLE_MESSAGE_API =
   "https://23700999.com:8081/HMA/api/bk/VideoSingleMessage";
 const VIDEO_SINGLE_MESSAGE_MODIFY_API =
   "https://23700999.com:8081/HMA/api/bk/VideoSingleMessageModify";
+const VIDEO_DELETE_MESSAGE_API =
+  "https://23700999.com:8081/HMA/api/bk/VideoDeleteMessage";
 
 const router = useRouter();
 const route = useRoute();
@@ -196,6 +214,11 @@ const comments = ref<Comment[]>([]);
 const replyContent = ref("");
 const loading = ref(false);
 const submittingReply = ref(false);
+const deletingMessage = ref(false);
+const thumbnailLoadFailed = ref(false);
+const hasVideoThumbnail = computed(() =>
+  Boolean(messageDetail.value?.videoThumbnail?.trim())
+);
 
 /* ---------- 方法 ---------- */
 // 返回列表頁
@@ -204,10 +227,40 @@ const goBack = () => {
 };
 
 // 刪除留言
-const handleDelete = () => {
-  if (confirm("確定要刪除此留言嗎？")) {
-    // TODO: 呼叫 API 刪除
-    goBack();
+const handleDelete = async () => {
+  if (!confirm("確定要刪除此留言嗎？")) return;
+  if (!adminID.value || !token.value) {
+    alert("請先登入");
+    return;
+  }
+
+  const targetComment = comments.value[0];
+  const targetBID = targetComment?.BID || String(route.params.id || "");
+  if (!targetBID) {
+    alert("找不到留言資料，請重新整理後再試");
+    return;
+  }
+
+  deletingMessage.value = true;
+  try {
+    const response = await axios.post(VIDEO_DELETE_MESSAGE_API, {
+      AdminID: adminID.value,
+      Token: token.value,
+      BID: targetBID,
+    });
+
+    if (response.data?.Result === "OK") {
+      alert("刪除成功");
+      goBack();
+      return;
+    }
+
+    alert("刪除失敗：" + (response.data?.Message || "未知錯誤"));
+  } catch (err: any) {
+    console.error("刪除留言失敗:", err);
+    alert("刪除失敗：" + (err.response?.data?.Message || err.message || "未知錯誤"));
+  } finally {
+    deletingMessage.value = false;
   }
 };
 
@@ -285,6 +338,7 @@ const fetchMessageDetail = async () => {
     });
     const data = response.data;
     if (data?.Result === "OK") {
+      thumbnailLoadFailed.value = false;
       // CheckTime 格式 "2026/02/02 10:59"
       const checkTime = data.CheckTime || "";
       const [datePart = "", timePart = ""] = checkTime.split(" ");
@@ -292,7 +346,7 @@ const fetchMessageDetail = async () => {
       messageDetail.value = {
         id: data.BID || BID,
         videoTitle: data.Name || "影片留言詳情",
-        videoThumbnail: data.ImgURL || "/assets/imgs/banner-2.png",
+        videoThumbnail: data.ImgURL || "",
         descriptionPoints: data.Desc ? [data.Desc] : [],
         description: data.Desc || "",
         videoLink: data.VideoURL || "",
@@ -302,7 +356,7 @@ const fetchMessageDetail = async () => {
         {
           id: data.BID || BID,
           BID: data.BID || BID,
-          sender: data.MemName || "",
+          sender: data.MemName || data.Name || "",
           date: datePart,
           time: timePart,
           content: data.Message || "",
@@ -407,6 +461,11 @@ onMounted(() => {
           font-size: 14px;
           transition: all 0.2s;
 
+          &:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+          }
+
           img {
             width: 16px;
             height: 16px;
@@ -467,10 +526,38 @@ onMounted(() => {
         }
 
         .video-thumbnail {
+          min-height: 180px;
+          border-radius: 12px;
+          border: 1px solid #e5e9f2;
+          background: #f8fafc;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+
           img {
             width: 100%;
-            border-radius: 12px;
+            height: 100%;
             object-fit: cover;
+          }
+
+          .thumbnail-placeholder {
+            width: 100%;
+            height: 100%;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #9aa9c3;
+            font-size: 14px;
+
+            .placeholder-icon {
+              width: 32px;
+              height: 32px;
+              opacity: 0.65;
+            }
           }
         }
 

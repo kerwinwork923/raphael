@@ -4,7 +4,7 @@
 
     <main class="content">
       <header class="page-header">
-        <h2 class="title">編輯類別</h2>
+        <h2 class="title">編輯{{ kindLabel }}</h2>
         <div class="action-buttons">
           <button class="btn back-btn" @click="handleBack">
             <img src="/assets/imgs/backend/back.svg" alt="返回" />
@@ -62,6 +62,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import axios from "axios";
 import Sidebar from "/components/raphaelBackend/Sidebar.vue";
 import CategoryConfirmModal from "/components/raphaelBackend/CategoryConfirmModal.vue";
 import { useSeo } from "~/composables/useSeo";
@@ -73,16 +74,32 @@ useSeo({
   url: "https://neuroplus.com.tw",
 });
 
+type KindType = "category" | "tag";
+
 const route = useRoute();
 const router = useRouter();
 
 const initialName = String(route.query.name ?? "");
 const categoryName = ref(initialName);
 const activeDialog = ref<"save" | "leave" | null>(null);
+const saving = ref(false);
+
+const API_BASE = "https://23700999.com:8081/HMA/api/bk";
 
 const hasModified = computed(
   () => categoryName.value.trim() !== initialName.trim()
 );
+const kind = computed<KindType>(() =>
+  route.query.kind === "tag" ? "tag" : "category"
+);
+const kindLabel = computed(() => (kind.value === "category" ? "類別" : "標籤"));
+
+interface ApiTypeItem {
+  Type?: string;
+  VideoType?: string;
+  VideoBigType?: string;
+  Name?: string;
+}
 
 function handleBack() {
   if (hasModified.value) {
@@ -93,17 +110,124 @@ function handleBack() {
 }
 
 function handleSave() {
+  if (saving.value) return;
   if (!categoryName.value.trim()) {
-    alert("請輸入類別名稱");
+    alert(`請輸入${kindLabel.value}名稱`);
     return;
   }
   activeDialog.value = "save";
 }
 
-function confirmSave() {
+function getAuth() {
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("backendToken") ||
+        sessionStorage.getItem("backendToken")
+      : "";
+  const adminID =
+    typeof window !== "undefined"
+      ? localStorage.getItem("adminID") || sessionStorage.getItem("adminID")
+      : "";
+
+  if (!token || !adminID) {
+    alert("請先登入後台再操作");
+    return null;
+  }
+
+  return { token, adminID };
+}
+
+function normalizeList(rawList: unknown): Array<{ Type: string; Name: string }> {
+  if (!Array.isArray(rawList)) return [];
+
+  return rawList
+    .map((item: ApiTypeItem) => {
+      const type = item.Type || item.VideoType || item.VideoBigType || "";
+      const name = item.Name || "";
+      return { Type: String(type), Name: String(name) };
+    })
+    .filter((item) => item.Type && item.Name);
+}
+
+async function getCurrentTypeList(auth: { token: string; adminID: string }) {
+  if (kind.value === "category") {
+    const response = await axios.post(`${API_BASE}/getVideoBigTypeList`, {
+      AdminID: auth.adminID,
+      Token: auth.token,
+    });
+    if (response.data?.Result !== "OK") {
+      throw new Error(response.data?.Message || "取得類別清單失敗");
+    }
+    return normalizeList(response.data?.VideoBigTypeList);
+  }
+
+  const response = await axios.post(`${API_BASE}/getVideoTypeList`, {
+    AdminID: auth.adminID,
+    Token: auth.token,
+  });
+  if (response.data?.Result !== "OK") {
+    throw new Error(response.data?.Message || "取得標籤清單失敗");
+  }
+  return normalizeList(response.data?.VideoTypeList);
+}
+
+async function confirmSave() {
+  if (saving.value) return;
   activeDialog.value = null;
-  alert(`儲存成功（ID: ${String(route.params.id)}，待串接 API）`);
-  router.push("/raphaelBackend/categoryManagement");
+
+  const auth = getAuth();
+  if (!auth) return;
+
+  const targetType = String(route.params.id || "").trim();
+  if (!targetType) {
+    alert("缺少種類編號，無法儲存");
+    return;
+  }
+
+  const targetName = categoryName.value.trim();
+  saving.value = true;
+
+  try {
+    const currentList = await getCurrentTypeList(auth);
+    const updatedList = currentList.map((item) =>
+      item.Type === targetType ? { ...item, Name: targetName } : item
+    );
+
+    if (!updatedList.some((item) => item.Type === targetType)) {
+      updatedList.push({ Type: targetType, Name: targetName });
+    }
+
+    const payload =
+      kind.value === "category"
+        ? {
+            AdminID: auth.adminID,
+            Token: auth.token,
+            VideoBigTypeList: updatedList,
+          }
+        : {
+            AdminID: auth.adminID,
+            Token: auth.token,
+            VideoTypeList: updatedList,
+          };
+
+    const endpoint =
+      kind.value === "category" ? "VideoBigTypeModify" : "VideoTypeModify";
+
+    const response = await axios.post(`${API_BASE}/${endpoint}`, payload);
+
+    if (response.data?.Result === "OK") {
+      alert(`儲存${kindLabel.value}成功`);
+      router.push("/raphaelBackend/categoryManagement");
+      return;
+    }
+
+    throw new Error(response.data?.Message || `儲存${kindLabel.value}失敗`);
+  } catch (error: any) {
+    console.error(`儲存${kindLabel.value}失敗:`, error);
+    alert(error?.message || `儲存${kindLabel.value}失敗`);
+  } finally {
+    saving.value = false;
+  }
 }
 
 function confirmLeave() {
