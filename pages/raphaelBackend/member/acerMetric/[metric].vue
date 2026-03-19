@@ -819,7 +819,8 @@ onUnmounted(() => {
   margin-top: 0.85rem;
   border-radius: 10px;
   border: 1px solid #e9eef5;
-  overflow: hidden;
+  max-height: 340px;
+  overflow: scroll;
 }
 
 .tableHeader,
