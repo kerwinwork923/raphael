@@ -674,11 +674,7 @@
                   </div>
 
                   <div class="memberInfoTableRowItem">
-                    {{
-                      row.AID === 0 || row.AID === "0"
-                        ? "未加入"
-                        : row.FavoriteName || "—"
-                    }}
+                    {{ getHomeFavoriteLabel(row) }}
                   </div>
                 </div>
               </template>
@@ -2133,9 +2129,10 @@ function formatMinutesToDuration(totalMinutes: number): string {
   return `${minutes}分鐘`;
 }
 
-function getHomeFavoriteLabel(item: any, fallback = ""): string {
+function getHomeFavoriteLabel(item: any): string {
   if (item?.AID === 0 || item?.AID === "0") return "未加入";
-  return item?.FavoriteName || fallback;
+  const favoriteName = String(item?.FavoriteName || "").trim();
+  return favoriteName || "未加入";
 }
 
 // 產品使用紀錄：每一筆獨立顯示，不做合併
@@ -2160,7 +2157,7 @@ const homeFilterOptions = computed(() => {
         value = item.ConsultationDate || "";
         break;
       case "FavoriteName":
-        value = item.FavoriteName || "";
+        value = getHomeFavoriteLabel(item);
         break;
     }
     if (value) options.add(value);
@@ -2187,7 +2184,7 @@ const filteredHome = computed(() => {
           value = r.ConsultationDate || "";
           break;
         case "FavoriteName":
-          value = r.FavoriteName || "";
+          value = getHomeFavoriteLabel(r);
           break;
       }
       return selectedHomeFilterOptions.value.includes(value);
@@ -2198,14 +2195,26 @@ const filteredHome = computed(() => {
   if (homeKeyword.value) {
     const keyword = homeKeyword.value.toLowerCase();
     data = data.filter((r: any) => {
+      const favoriteLabel = getHomeFavoriteLabel(r);
+      const keywordTokens = [
+        r.ConsultationDate || "—",
+        r.FormattedStartTime || "—",
+        r.FormattedEndTime || "—",
+        favoriteLabel,
+        r.ProductName || "—",
+        r.TreatmentTime || "—",
+        r.TMode || "—",
+      ]
+        .map((v) => String(v).toLowerCase())
+        .filter(Boolean);
+
+      // 兼容舊用語，避免後台習慣關鍵字搜不到
+      if (favoriteLabel === "未加入") {
+        keywordTokens.push("沒有最愛點", "未得", "未得點");
+      }
+
       return (
-        (r.ConsultationDate || "").toLowerCase().includes(keyword) ||
-        (r.FormattedStartTime || "").toLowerCase().includes(keyword) ||
-        (r.FormattedEndTime || "").toLowerCase().includes(keyword) ||
-        (r.FavoriteName || "").toLowerCase().includes(keyword) ||
-        (r.ProductName || "").toLowerCase().includes(keyword) ||
-        (r.TreatmentTime || "").toLowerCase().includes(keyword) ||
-        (r.TMode || "").toLowerCase().includes(keyword)
+        keywordTokens.some((text) => text.includes(keyword))
       );
     });
   }
