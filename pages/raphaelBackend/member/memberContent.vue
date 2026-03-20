@@ -2133,6 +2133,11 @@ function formatMinutesToDuration(totalMinutes: number): string {
   return `${minutes}分鐘`;
 }
 
+function getHomeFavoriteLabel(item: any, fallback = ""): string {
+  if (item?.AID === 0 || item?.AID === "0") return "未加入";
+  return item?.FavoriteName || fallback;
+}
+
 // 產品使用紀錄：每一筆獨立顯示，不做合併
 const processedHomeOrders = computed(() => {
   return (favoriteTPointsList.value || []).map((r: any, index: number) => ({
