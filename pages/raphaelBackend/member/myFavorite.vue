@@ -344,6 +344,7 @@ async function loadData() {
       pauseDuration: "00:00",
       totalDuration: r.TreatmentTime || "—",
     }));
+    currentPage.value = 1;
 
     // 取得操作紀錄（彈窗資料）
     await memberStore.fetchOptDetailMIDList(getAuth(), aid);
@@ -376,6 +377,7 @@ onMounted(() => {
 watch(
   () => route.query.AID,
   () => {
+    currentPage.value = 1;
     loadData();
   },
 );
@@ -407,6 +409,11 @@ const pageNumberList = computed(() => {
     for (let i = start; i <= end; i++) pages.push(i);
   }
   return pages;
+});
+
+watch(totalPages, (total: number) => {
+  if (currentPage.value > total) currentPage.value = total;
+  if (currentPage.value < 1) currentPage.value = 1;
 });
 
 function goBack() {

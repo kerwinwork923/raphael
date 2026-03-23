@@ -1122,6 +1122,53 @@
           </div>
         </div>
 
+        <!-- █ 護您穩平衡衣卡片群組 -------------------------------------------- -->
+        <div class="memberInfoRow">
+          <div class="memberInfoCard watchRecordCard">
+            <div class="memberInfoTitleWrap">
+              <h3>護您穩平衡衣</h3>
+              <div class="memberInfoTitleGroup">
+                <small>共 {{ balanceClothCards.length }} 張卡片</small>
+              </div>
+            </div>
+
+            <div class="balanceCardGrid" v-if="balanceClothCards.length">
+              <button
+                type="button"
+                class="balanceCard"
+                v-for="card in balanceClothCards"
+                :key="card.AID"
+                @click="openBalanceClothDetail(card.AID)"
+              >
+                <h4>{{ card.name }}</h4>
+                <div class="balanceCardMeta">看診時間 {{ card.visitTime }}</div>
+
+                <div class="balanceCardInfo">
+                  <span class="balanceCardLabel">SN碼</span>
+                  <span class="balanceCardValue">{{ card.sn }}</span>
+                </div>
+                <div class="balanceCardInfo">
+                  <span class="balanceCardLabel">產品狀態</span>
+                  <span
+                    class="balanceStatus"
+                    :class="{
+                      enabled: card.statusLabel === '已啟用',
+                      disabled: card.statusLabel === '已停用',
+                    }"
+                    >{{ card.statusLabel }}</span
+                  >
+                </div>
+                <div class="balanceCardInfo">
+                  <span class="balanceCardLabel">使用次數</span>
+                  <span class="balanceCardValue">{{ card.usageCount }}</span>
+                </div>
+              </button>
+            </div>
+
+            <div class="watchChartEmpty" v-else>尚無護您穩平衡衣資料</div>
+          </div>
+        </div>
+
         <!-- █ 自律神經 ------------------------------------------------------- -->
         <div class="memberInfoRow">
           <div class="memberInfoCard w-half">
@@ -1985,6 +2032,60 @@ function openGarminMetricPage(metric: string) {
   });
 }
 
+function parseUsageCount(value: unknown) {
+  const parsed = Number.parseInt(String(value ?? "0"), 10);
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function getBalanceStatusLabel(item: any) {
+  const raw = String(
+    item?.ProductStatus ??
+      item?.Status ??
+      item?.TStatus ??
+      item?.UseStatus ??
+      "",
+  ).trim();
+  if (!raw) return "—";
+
+  const lowered = raw.toLowerCase();
+  if (
+    ["1", "y", "yes", "true", "active", "enabled", "啟用", "已啟用"].includes(
+      lowered,
+    )
+  ) {
+    return "已啟用";
+  }
+  if (
+    ["0", "n", "no", "false", "inactive", "disabled", "停用", "已停用"].includes(
+      lowered,
+    )
+  ) {
+    return "已停用";
+  }
+  return raw;
+}
+
+function getBalanceSn(item: any) {
+  const raw = String(
+    item?.SN ??
+      item?.SNCode ??
+      item?.DeviceSN ??
+      item?.DeviceID ??
+      item?.DeviceId ??
+      item?.SerialNumber ??
+      "",
+  ).trim();
+  return raw || "—";
+}
+
+function formatBalanceVisitTime(item: any) {
+  const date = String(item?.ConsultationDate || "").trim();
+  const time = String(item?.FormattedStartTime || "").trim();
+  if (date && time) return `${date} ${time}`;
+  if (date) return date;
+  return "—";
+}
+
 /* ---------- paging helpers ---------- */
 const PAGE_MAIN = 10;
 const PAGE_SUB = 4;
@@ -2259,6 +2360,49 @@ const filteredHome = computed(() => {
 
   return data;
 });
+
+const balanceClothCards = computed(() => {
+  const grouped = new Map<string, any[]>();
+  processedHomeOrders.value.forEach((item: any) => {
+    const aid = String(item?.AID ?? "").trim();
+    if (!aid || aid === "0") return;
+    const favoriteName = getHomeFavoriteLabel(item);
+    if (favoriteName === "未加入") return;
+    if (!grouped.has(aid)) grouped.set(aid, []);
+    grouped.get(aid)!.push(item);
+  });
+
+  return Array.from(grouped.entries())
+    .map(([aid, rows]) => {
+      const sorted = [...rows].sort((a: any, b: any) =>
+        String(b?.StartTime || "").localeCompare(String(a?.StartTime || "")),
+      );
+      const latest = sorted[0] || {};
+      const usageCount = rows.reduce(
+        (max, row) => Math.max(max, parseUsageCount(row?.TotalUsage)),
+        0,
+      );
+
+      return {
+        AID: aid,
+        name: getHomeFavoriteLabel(latest),
+        visitTime: formatBalanceVisitTime(latest),
+        sortKey: String(latest?.StartTime || ""),
+        sn: getBalanceSn(latest),
+        statusLabel: getBalanceStatusLabel(latest),
+        usageCount,
+      };
+    })
+    .sort((a, b) => b.sortKey.localeCompare(a.sortKey));
+});
+
+function openBalanceClothDetail(aid: string) {
+  if (!aid) return;
+  router.push({
+    path: "/raphaelBackend/member/myFavorite",
+    query: { AID: aid },
+  });
+}
 
 /* 使用紀錄 */
 const pageHome = ref(1);
@@ -6022,6 +6166,88 @@ const availableEventOptions = computed(() => {
   color: #8a98a8;
   padding: 24px 12px;
   text-align: center;
+}
+
+.balanceCardGrid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+
+  @include respond-to("xl") {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include respond-to("md") {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+}
+
+.balanceCard {
+  border-radius: 14px;
+  box-shadow: 0 2px 20px #b1c0d840;
+  background: #fff;
+  padding: 14px;
+  min-height: 190px;
+  border: 1px solid #e7edf5;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(27, 163, 155, 0.16);
+  }
+
+  h4 {
+    margin: 0;
+    color: #2d3047;
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  .balanceCardMeta {
+    color: #6d8ab6;
+    font-size: 14px;
+    margin: 6px 0 12px;
+  }
+
+  .balanceCardInfo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .balanceCardLabel {
+    color: #9bb1cf;
+    font-size: 15px;
+  }
+
+  .balanceCardValue {
+    color: #2d3047;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .balanceStatus {
+    font-size: 16px;
+    font-weight: 600;
+    color: #7c8fa8;
+
+    &.enabled {
+      color: #1ba39b;
+    }
+
+    &.disabled {
+      color: #ec4f4f;
+    }
+  }
 }
 
 // ───── 華碩手錶紀錄詳情彈窗樣式 ─────

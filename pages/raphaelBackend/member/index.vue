@@ -31,9 +31,13 @@
         @grade-change="store.setGradeFilter"
         @status-change="store.setStatusFilter"
       />
+   
 
       <!-- data table -->
       <section class="member-table">
+        <button class="btn-add" @click="handleExportExcel">
+        匯出成excel
+      </button>
         <!-- header row -->
         <div class="table-row table-header">
           <div class="name">會員名稱</div>
@@ -171,11 +175,16 @@
 
 <script setup lang="ts">
 import { onMounted } from "vue";
+import * as XLSX from "xlsx";
 import Sidebar from "/components/raphaelBackend/Sidebar.vue";
 import FilterToolbar from "/components/raphaelBackend/FilterToolbar.vue";
 import DataUpdateHeader from "/components/raphaelBackend/DataUpdateHeader.vue";
 import { useRouter } from "vue-router";
-import { useMemberListStore } from "~/stores/useMemberListStore";
+import {
+  useMemberListStore,
+  type Member,
+  type MemberRaw,
+} from "~/stores/useMemberListStore";
 import { useSeo } from "~/composables/useSeo";
 
 useSeo({
@@ -274,11 +283,104 @@ function formatBirthday(birthday: string) {
 
   return birthday;
 }
+
+function sexLabel(sex: string | undefined) {
+  if (sex === "1") return "男";
+  if (sex === "2") return "女";
+  if (sex === "0" || !sex) return "未填";
+  return sex;
+}
+
+function homeOrderText(orders: MemberRaw["HomeOrder"] | undefined) {
+  if (!Array.isArray(orders) || orders.length === 0) return "";
+  return orders
+    .map((o) => {
+      const name = o.ProductName ?? "";
+      const rs = o.RentStart ?? "";
+      const re = o.RentEnd ?? "";
+      const used = o.Used ?? "";
+      const period = o.Period ?? "";
+      const still = o.Still ?? "";
+      return `${name}｜起租${rs}～${re}｜已用${used}天｜期間${period}天｜剩${still}天`;
+    })
+    .join("\n");
+}
+
+function handleExportExcel() {
+  const list = store.filteredMembers;
+  if (!list.length) {
+    alert("目前沒有符合條件的會員可匯出");
+    return;
+  }
+
+  const rows = list.map((m: Member) => {
+    const raw = store.rawByMid.get(m.id) as MemberRaw | undefined;
+    return {
+      MID: raw?.MID ?? m.id,
+      MAID: raw?.MAID ?? "",
+      姓名: raw?.Name ?? m.name,
+      性別: sexLabel(raw?.Sex),
+      生日: raw?.Birthday ?? m.birthday,
+      手機: raw?.Mobile ?? m.phone,
+      信箱: raw?.Mail ?? "",
+      會員等級: raw?.GradeName ?? m.level,
+      等級代碼: raw?.Grade ?? "",
+      用戶分類: raw?.memType ?? m.memType,
+      城市: raw?.City ?? "",
+      區域: raw?.Zone ?? "",
+      地址: raw?.Address ?? "",
+      身高: raw?.Height ?? "",
+      體重: raw?.Weight ?? "",
+      HRV: raw?.HRV ?? m.hrv,
+      HRV開關: raw?.HRVONOFF ?? "",
+      HRV計算時間: raw?.HRVCalTime ?? "",
+      自律神經總分: raw?.TotalScore ?? raw?.totalScore ?? "",
+      生活自律分數: raw?.Score ?? raw?.score ?? "",
+      DSPR: raw?.DSPR ?? m.ans,
+      是否認證: raw?.IsAuth ?? "",
+      帳號狀態: raw?.Status ?? "",
+      註冊日: raw?.TDate ?? "",
+      最後登入時間: raw?.CheckTime ?? "",
+      修改時間: raw?.ModifyTime ?? "",
+      Garmin信箱: raw?.GarminMail ?? "",
+      Asus信箱: raw?.AsusMail ?? "",
+      Acer信箱: raw?.AcerMail ?? "",
+      租賃訂單摘要: homeOrderText(raw?.HomeOrder),
+    };
+  });
+
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "會員清單");
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}_${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}`;
+  XLSX.writeFile(wb, `會員清單_${dateStr}.xlsx`);
+}
 </script>
 
 <style scoped lang="scss">
 // you can replace colors with variables / mixins defined in your project
-
+.btn-add {
+  background: $primary-200;
+  color: $primary-100;
+  font-size: 1rem;
+  font-style: normal;
+  font-weight: 400;
+  margin-left: auto;
+  padding: 0.2rem 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: absolute;
+  right: 1rem;
+  top: .5rem;
+  z-index: 30;
+  &:hover {
+    background: $primary-300;
+  }
+  cursor: pointer;
+}
 .dashboard {
   display: flex;
   height: 100vh;
@@ -328,6 +430,7 @@ function formatBirthday(birthday: string) {
   }
 
   .member-table {
+    position: relative;
     display: flex;
     flex-direction: column;
     flex: 1;

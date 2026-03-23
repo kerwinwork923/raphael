@@ -1,13 +1,18 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
-interface MemberRaw {
+/** API `MemberList` 單筆（欄位依後端可能增減） */
+export interface MemberRaw {
   MID: string
+  MAID?: string
   Name: string
   Birthday: string
   Mobile: string
   GradeName: string
+  Grade?: string
   HRV: string
+  HRVONOFF?: string
+  HRVCalTime?: string
   DSPR: string
   memType: string
   TDate: string
@@ -15,10 +20,32 @@ interface MemberRaw {
   totalScore: string
   Score?: string
   TotalScore?: string
-  HomeOrder: { ProductName: string; Used: string; Still: string }[]
+  Sex?: string
+  City?: string
+  Zone?: string
+  Address?: string
+  Height?: string
+  Weight?: string
+  Mail?: string
+  GarminMail?: string
+  AsusMail?: string
+  AcerMail?: string
+  IsAuth?: string
+  Status?: string
+  CheckTime?: string
+  ModifyTime?: string
+  Password?: string
+  HomeOrder: {
+    ProductName?: string
+    Used?: string
+    Still?: string
+    RentStart?: string
+    RentEnd?: string
+    Period?: string
+  }[]
 }
 
-interface Member {
+export interface Member {
   id: string
   name: string
   birthday: string
@@ -48,6 +75,9 @@ export const useMemberListStore = defineStore('memberList', () => {
   const statusFilter = ref('')
   const page = ref(1)
   const pageSize = 10
+
+  /** 以 MID 對應 API 原始列，供匯出 Excel */
+  const rawByMid = ref<Map<string, MemberRaw>>(new Map())
 
   // 計算屬性
   const filteredMembers = computed(() => {
@@ -106,6 +136,12 @@ export const useMemberListStore = defineStore('memberList', () => {
       })
       if (!res.ok) throw new Error(res.statusText)
       const { MemberList }: { MemberList: MemberRaw[] } = await res.json()
+
+      const midMap = new Map<string, MemberRaw>()
+      for (const r of MemberList) {
+        if (r.MID != null && r.MID !== '') midMap.set(String(r.MID), r)
+      }
+      rawByMid.value = midMap
 
       members.value = MemberList.map((r) => {
         const order = r.HomeOrder?.[0] ?? {}
@@ -194,6 +230,7 @@ export const useMemberListStore = defineStore('memberList', () => {
     statusFilter,
     page,
     pageSize,
+    rawByMid,
     // 計算屬性
     filteredMembers,
     total,
