@@ -145,11 +145,12 @@
             &lt;
           </button>
           <button
-            v-for="p in store.totalPages"
-            :key="p"
+            v-for="(p, idx) in visiblePageItems"
+            :key="`${p}-${idx}`"
             class="btn-page btn-page-number"
-            :class="{ active: store.page === p }"
-            @click="store.gotoPage(p)"
+            :class="{ active: typeof p === 'number' && store.page === p }"
+            :disabled="p === '...'"
+            @click="typeof p === 'number' && store.gotoPage(p)"
           >
             {{ p }}
           </button>
@@ -174,7 +175,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { computed, onMounted } from "vue";
 import * as XLSX from "xlsx";
 import Sidebar from "/components/raphaelBackend/Sidebar.vue";
 import FilterToolbar from "/components/raphaelBackend/FilterToolbar.vue";
@@ -196,6 +197,7 @@ useSeo({
 
 const router = useRouter();
 const store = useMemberListStore();
+type PageItem = number | "...";
 
 /* ---------- 產品 / 狀態選項 ---------- */
 const productOptions = [
@@ -229,6 +231,35 @@ const statusOptions = [
 /* ---------- 取會員資料 ---------- */
 onMounted(() => {
   store.fetchMembers();
+});
+
+const visiblePageItems = computed<PageItem[]>(() => {
+  const total = store.totalPages;
+  const current = store.page;
+  const maxItems = 10; // 最多顯示 10 格（含 ...）
+
+  if (total <= maxItems) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
+  const items: PageItem[] = [];
+  const leftBoundary = 3;
+  const rightBoundary = total - 2;
+
+  if (current <= leftBoundary) {
+    items.push(1, 2, 3, 4, 5, 6, 7, "...", total);
+    return items;
+  }
+
+  if (current >= rightBoundary) {
+    items.push(1, "...", total - 6, total - 5, total - 4, total - 3, total - 2, total - 1, total);
+    return items;
+  }
+
+  items.push(1, "...");
+  items.push(current - 2, current - 1, current, current + 1, current + 2);
+  items.push("...", total);
+  return items;
 });
 
 function handleGoInfo(m: any) {
@@ -707,7 +738,7 @@ function handleExportExcel() {
         border-color: $chip-success;
       }
       &:disabled {
-        opacity: 0.4;
+        opacity: 0.8;
         cursor: not-allowed;
       }
     }

@@ -17,6 +17,7 @@
       <VueDatePicker
         :model-value="dateValue"
         range
+        :partial-range="false"
         :enable-time-picker="false"
         :format="'yyyy/MM/dd'"
         :min-date="minDate"

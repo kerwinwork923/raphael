@@ -63,6 +63,44 @@ export interface Member {
   totalScore: number | null
 }
 
+function isValidDate(value: unknown): value is Date {
+  return value instanceof Date && !Number.isNaN(value.getTime())
+}
+
+function getStartOfDay(date: Date) {
+  const d = new Date(date)
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
+function getEndOfDay(date: Date) {
+  const d = new Date(date)
+  d.setHours(23, 59, 59, 999)
+  return d
+}
+
+function normalizeDateRange(value: unknown): [Date, Date] | null {
+  // 單日（Date 物件）
+  if (isValidDate(value)) {
+    return [getStartOfDay(value), getEndOfDay(value)]
+  }
+
+  // 區間（Date[]）
+  if (Array.isArray(value)) {
+    const dates = value.filter(isValidDate)
+    if (dates.length === 0) return null
+    if (dates.length === 1) {
+      return [getStartOfDay(dates[0]), getEndOfDay(dates[0])]
+    }
+    const [a, b] = dates
+    const start = a <= b ? a : b
+    const end = a <= b ? b : a
+    return [getStartOfDay(start), getEndOfDay(end)]
+  }
+
+  return null
+}
+
 export const useMemberListStore = defineStore('memberList', () => {
   // 狀態
   const members = ref<Member[]>([])
@@ -81,6 +119,8 @@ export const useMemberListStore = defineStore('memberList', () => {
 
   // 計算屬性
   const filteredMembers = computed(() => {
+    const normalizedRange = normalizeDateRange(dateRange.value)
+
     return members.value.filter((m) => {
       /* 關鍵字 */
       const kw = keyword.value.trim()
@@ -93,10 +133,11 @@ export const useMemberListStore = defineStore('memberList', () => {
 
       /* 日期 */
       let dateOk = true
-      if (Array.isArray(dateRange.value) && dateRange.value[0] && dateRange.value[1]) {
-        const [start, end] = dateRange.value
+      if (normalizedRange) {
+        const [startAt, endAt] = normalizedRange
         const regDate = new Date(m.registerDate.replace(/-/g, "/"))
-        dateOk = regDate >= start && regDate <= end
+        regDate.setHours(12, 0, 0, 0)
+        dateOk = regDate >= startAt && regDate <= endAt
       }
 
       return hit && prodOk && gradeOk && statusOk && dateOk
@@ -186,8 +227,8 @@ export const useMemberListStore = defineStore('memberList', () => {
     page.value = 1
   }
 
-  function setDateRange(range: Date[] | null) {
-    dateRange.value = range
+  function setDateRange(range: Date[] | Date | null) {
+    dateRange.value = range as Date[] | null
     page.value = 1
   }
 

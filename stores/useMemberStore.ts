@@ -116,7 +116,7 @@ export const useMemberStore = defineStore('member', () => {
       // 清空其他資料
       homeOrders.value = []
       hrvRecords.value = []
-      childANS.value = []
+      childANS.value = [] 
       videoRecords.value = []
       appRecords.value = []
       healthLogRecords.value = []
@@ -702,6 +702,58 @@ export const useMemberStore = defineStore('member', () => {
     return formatDateYYYYMMDD(d)
   }
 
+  function parseYYYYMMDD(value?: string) {
+    const raw = String(value || "").trim()
+    if (!/^\d{8}$/.test(raw)) return null
+
+    const y = Number(raw.slice(0, 4))
+    const m = Number(raw.slice(4, 6))
+    const d = Number(raw.slice(6, 8))
+    if (!y || !m || !d) return null
+
+    return new Date(y, m - 1, d)
+  }
+
+  function addDays(date: Date, days: number) {
+    const d = new Date(date)
+    d.setDate(d.getDate() + days)
+    return d
+  }
+
+  function normalizeHealthRange(range?: { StartDate?: string; EndDate?: string }) {
+    const defaultStart = getRecent7StartDate()
+    const defaultEnd = formatDateYYYYMMDD(new Date())
+
+    const rawStart = (range?.StartDate || defaultStart).trim()
+    const rawEnd = (range?.EndDate || defaultEnd).trim()
+
+    const parsedStart = parseYYYYMMDD(rawStart)
+    const parsedEnd = parseYYYYMMDD(rawEnd)
+
+    // 1) 先確保起訖順序正確（避免使用者反向選取）
+    let startDateObj = parsedStart
+    let endDateObj = parsedEnd
+    if (startDateObj && endDateObj && startDateObj.getTime() > endDateObj.getTime()) {
+      const tmp = startDateObj
+      startDateObj = endDateObj
+      endDateObj = tmp
+    }
+
+    // 2) 單日選取（只有一側有值）時，補成同一天
+    if (startDateObj && !endDateObj) endDateObj = startDateObj
+    if (!startDateObj && endDateObj) startDateObj = endDateObj
+
+    // 3) 有明確日期時，StartDate 往前補一天，避免 API 吃掉第一天
+    const safeStartObj = startDateObj ? addDays(startDateObj, -1) : null
+    const safeStart = safeStartObj ? formatDateYYYYMMDD(safeStartObj) : rawStart
+    const safeEnd = endDateObj ? formatDateYYYYMMDD(endDateObj) : rawEnd
+
+    return {
+      StartDate: safeStart,
+      EndDate: safeEnd,
+    }
+  }
+
   function hasAnyArrayData(obj: any) {
     if (!obj || typeof obj !== "object") return false
     return Object.values(obj).some((v: any) => Array.isArray(v) && v.length > 0)
@@ -718,10 +770,7 @@ export const useMemberStore = defineStore('member', () => {
         return
       }
 
-      const defaultStart = getRecent7StartDate()
-      const defaultEnd = formatDateYYYYMMDD(new Date())
-      const StartDate = (range?.StartDate || defaultStart).trim()
-      const EndDate = (range?.EndDate || defaultEnd).trim()
+      const { StartDate, EndDate } = normalizeHealthRange(range)
 
       const res = await fetch("https://23700999.com:8081/HMA/api/bk/asus_healthData", {
         method: "POST",
@@ -777,10 +826,7 @@ export const useMemberStore = defineStore('member', () => {
         return
       }
 
-      const defaultStart = getRecent7StartDate()
-      const defaultEnd = formatDateYYYYMMDD(new Date())
-      const StartDate = (range?.StartDate || defaultStart).trim()
-      const EndDate = (range?.EndDate || defaultEnd).trim()
+      const { StartDate, EndDate } = normalizeHealthRange(range)
 
       const res = await fetch("https://23700999.com:8081/HMA/api/bk/acer_healthData", {
         method: "POST",
@@ -836,10 +882,7 @@ export const useMemberStore = defineStore('member', () => {
         return
       }
 
-      const defaultStart = getRecent7StartDate()
-      const defaultEnd = formatDateYYYYMMDD(new Date())
-      const StartDate = (range?.StartDate || defaultStart).trim()
-      const EndDate = (range?.EndDate || defaultEnd).trim()
+      const { StartDate, EndDate } = normalizeHealthRange(range)
 
       const res = await fetch("https://23700999.com:8081/HMA/api/bk/garmin_healthData", {
         method: "POST",
