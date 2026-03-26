@@ -20,6 +20,7 @@ export const useMemberStore = defineStore('member', () => {
   const favoriteTPointsList = ref<any[]>([])
   const favoriteMIDList = ref<any[]>([])
   const favoriteUseRecordList = ref<any[]>([])
+  const stabilityAllList = ref<any[]>([])
   const optDetailList = ref<any[]>([])
   const vivoWatchList = ref<any[]>([])
   const asusHealthData = ref<any>(null)
@@ -419,6 +420,72 @@ export const useMemberStore = defineStore('member', () => {
     } catch (error) {
       console.error("取得產品使用紀錄失敗：", error)
       favoriteTPointsList.value = []
+    }
+  }
+
+  async function fetchStabilityAll(auth: any) {
+    try {
+      const { token, admin, sel } = auth
+      if (!token || !admin || (!sel.MID && !sel.Mobile)) return
+
+      const res = await fetch("https://23700999.com:8081/HMA/api/bk/stability_ALL", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          AdminID: admin,
+          Token: token,
+          MID: sel.MID ?? "",
+        }),
+      })
+
+      const data = await res.json()
+      if (data.Result === "OK") {
+        stabilityAllList.value = data.StableList || []
+      } else {
+        stabilityAllList.value = []
+      }
+    } catch (error) {
+      console.error("取得護您穩平衡衣資料失敗：", error)
+      stabilityAllList.value = []
+    }
+  }
+
+  async function fetchStabilityDetail(auth: any, aid: string) {
+    try {
+      const { token, admin, sel } = auth
+      if (!token || !admin || (!sel.MID && !sel.Mobile) || !aid) return null
+
+      const res = await fetch("https://23700999.com:8081/HMA/api/bk/stability_query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          AdminID: admin,
+          Token: token,
+          MID: sel.MID ?? "",
+          AID: aid,
+        }),
+      })
+
+      const data = await res.json()
+      if (data.Result === "OK") {
+        return {
+          AID: String(data.AID ?? aid),
+          MID: String(data.MID ?? sel.MID ?? ""),
+          TypeName: String(data.TypeName ?? ""),
+          Name: String(data.Name ?? ""),
+          SN: String(data.SN ?? ""),
+          CheckTime: String(data.CheckTime ?? ""),
+          SVTime: String(data.SVTime ?? ""),
+          UsesTimes: String(data.UsesTimes ?? "0"),
+          ProductState: String(data.ProductState ?? ""),
+          CreateTime: String(data.CreateTime ?? ""),
+          WearRec: Array.isArray(data.WearRec) ? data.WearRec : [],
+        }
+      }
+      return null
+    } catch (error) {
+      console.error("取得護您穩平衡衣單筆資料失敗：", error)
+      return null
     }
   }
 
@@ -943,6 +1010,7 @@ export const useMemberStore = defineStore('member', () => {
     weeklySummaryRecords.value = []
     favoriteTPointsList.value = []
     favoriteUseRecordList.value = []
+    stabilityAllList.value = []
     favoriteMIDList.value = []
     optDetailList.value = []
     vivoWatchList.value = []
@@ -970,6 +1038,7 @@ export const useMemberStore = defineStore('member', () => {
     favoriteTPointsList,
     favoriteMIDList,
     favoriteUseRecordList,
+    stabilityAllList,
     optDetailList,
     vivoWatchList,
     asusHealthData,
@@ -981,6 +1050,8 @@ export const useMemberStore = defineStore('member', () => {
     fetchHealthLog,
     fetchWeeklySummary,
     fetchFavoriteTPointsList,
+    fetchStabilityAll,
+    fetchStabilityDetail,
     fetchFavoriteMIDList,
     fetchFavoriteTPointsMIDUseRecordList,
     fetchOptDetailMIDList,

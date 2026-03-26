@@ -311,39 +311,57 @@ async function loadData() {
 
   loading.value = true;
   try {
-    // 取得使用紀錄（UseRecordMIDList，存進 favoriteTPointsList）
+    // 先載入全部資料，維持其他相依區塊（例如操作紀錄列表）不受影響
     await memberStore.fetchFavoriteTPointsList(getAuth());
 
-    // 根據 AID 找一筆用於摘要（同一 AID 的 FavoriteName / TotalUsage 一致）
-    const targetItem = favoriteTPointsList.value.find(
-      (item: any) => item.AID === aid,
-    );
+    // 單筆查詢：護您穩平衡衣
+    const stableDetail = await memberStore.fetchStabilityDetail(getAuth(), aid);
+    const targetItem = favoriteTPointsList.value.find((item: any) => item.AID === aid);
 
-    if (targetItem) {
-      favoriteName.value = targetItem.FavoriteName || "—";
-      totalUsage.value = parseInt((targetItem.TotalUsage as string) || "0");
-      treatmentArea.value = targetItem.TreatmentArea || "—";
-      patchMode.value = "—";
+    if (stableDetail) {
+      favoriteName.value = stableDetail.Name || "—";
+      totalUsage.value = parseInt(String(stableDetail.UsesTimes || "0"), 10) || 0;
+      treatmentArea.value = stableDetail.TypeName || "—";
+      patchMode.value = stableDetail.TypeName || "—";
+
+      const wearRecList = Array.isArray(stableDetail.WearRec) ? stableDetail.WearRec : [];
+      tableData.value = wearRecList.map((r: any, index: number) => ({
+        id: `${stableDetail.AID}_${r.StartTime || index}`,
+        startDate:
+          r.StartTime && String(r.StartTime).length >= 8
+            ? `${String(r.StartTime).substring(0, 4)}/${String(r.StartTime).substring(4, 6)}/${String(r.StartTime).substring(6, 8)}`
+            : "—",
+        startTime: formatTimeFromYMDHMS(r.StartTime || ""),
+        endTime: r.EndTime ? formatTimeFromYMDHMS(r.EndTime) : "—",
+        treatmentDuration: `${parseInt(String(r.Duration || "0"), 10) || 0}分鐘`,
+        pauseDuration: "00:00",
+        totalDuration: `${parseInt(String(r.Duration || "0"), 10) || 0}分鐘`,
+      }));
     } else {
-      favoriteName.value = "—";
-      totalUsage.value = 0;
-      treatmentArea.value = "—";
-      patchMode.value = "—";
-    }
+      // 若單筆查不到，回退使用列表資料，避免畫面全空
+      if (targetItem) {
+        favoriteName.value = targetItem.FavoriteName || "—";
+        totalUsage.value = parseInt((targetItem.TotalUsage as string) || "0");
+        treatmentArea.value = targetItem.TreatmentArea || "—";
+        patchMode.value = "—";
+      } else {
+        favoriteName.value = "—";
+        totalUsage.value = 0;
+        treatmentArea.value = "—";
+        patchMode.value = "—";
+      }
 
-    // 使用紀錄表格：改用 UseRecordMIDList（favoriteTPointsList）依 AID 篩選並轉成表格格式
-    const list = (favoriteTPointsList.value || []).filter(
-      (r: any) => r.AID === aid,
-    );
-    tableData.value = list.map((r: any, index: number) => ({
-      id: r.id || `${r.AID}_${index}`,
-      startDate: r.StartDate || r.ConsultationDate || "—",
-      startTime: formatTimeFromYMDHMS(r.StartTime || ""),
-      endTime: r.EndTime ? formatTimeFromYMDHMS(r.EndTime) : "—",
-      treatmentDuration: r.TreatmentTime || "—",
-      pauseDuration: "00:00",
-      totalDuration: r.TreatmentTime || "—",
-    }));
+      const list = (favoriteTPointsList.value || []).filter((r: any) => r.AID === aid);
+      tableData.value = list.map((r: any, index: number) => ({
+        id: r.id || `${r.AID}_${index}`,
+        startDate: r.StartDate || r.ConsultationDate || "—",
+        startTime: formatTimeFromYMDHMS(r.StartTime || ""),
+        endTime: r.EndTime ? formatTimeFromYMDHMS(r.EndTime) : "—",
+        treatmentDuration: r.TreatmentTime || "—",
+        pauseDuration: "00:00",
+        totalDuration: r.TreatmentTime || "—",
+      }));
+    }
     currentPage.value = 1;
 
     // 取得操作紀錄（彈窗資料）

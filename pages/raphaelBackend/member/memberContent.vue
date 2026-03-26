@@ -528,7 +528,11 @@
                 <button class="consumptionBtn" @click="openContract">
                   <img src="/assets/imgs/backend/time2.svg" alt />消費紀錄
                 </button>
-                <button class="operationRecordBtn" @click="openOperationRecord">
+                <button
+                  v-if="showOperationRecordBtn"
+                  class="operationRecordBtn"
+                  @click="openOperationRecord"
+                >
                   <img src="/assets/imgs/backend/time2.svg" alt="operation" />
                   <span>操作紀錄</span>
                 </button>
@@ -1127,9 +1131,7 @@
           <div class="memberInfoCard watchRecordCard">
             <div class="memberInfoTitleWrap">
               <h3>護您穩平衡衣</h3>
-              <div class="memberInfoTitleGroup">
-                <small>共 {{ balanceClothCards.length }} 張卡片</small>
-              </div>
+      
             </div>
 
             <div class="balanceCardGrid" v-if="balanceClothCards.length">
@@ -1851,6 +1853,7 @@ const {
   healthLogRecords,
   weeklySummaryRecords,
   favoriteTPointsList,
+  stabilityAllList,
   optDetailList,
   vivoWatchList,
   asusHealthData,
@@ -2079,6 +2082,15 @@ function getBalanceSn(item: any) {
 }
 
 function formatBalanceVisitTime(item: any) {
+  const svTime = String(item?.SVTime || "").trim();
+  if (svTime.length >= 12) {
+    const y = svTime.substring(0, 4);
+    const m = svTime.substring(4, 6);
+    const d = svTime.substring(6, 8);
+    const hh = svTime.substring(8, 10);
+    const mm = svTime.substring(10, 12);
+    return `${y}/${m}/${d} ${hh}:${mm}`;
+  }
   const date = String(item?.ConsultationDate || "").trim();
   const time = String(item?.FormattedStartTime || "").trim();
   if (date && time) return `${date} ${time}`;
@@ -2362,44 +2374,24 @@ const filteredHome = computed(() => {
 });
 
 const balanceClothCards = computed(() => {
-  const grouped = new Map<string, any[]>();
-  processedHomeOrders.value.forEach((item: any) => {
-    const aid = String(item?.AID ?? "").trim();
-    if (!aid || aid === "0") return;
-    const favoriteName = getHomeFavoriteLabel(item);
-    if (favoriteName === "未加入") return;
-    if (!grouped.has(aid)) grouped.set(aid, []);
-    grouped.get(aid)!.push(item);
-  });
-
-  return Array.from(grouped.entries())
-    .map(([aid, rows]) => {
-      const sorted = [...rows].sort((a: any, b: any) =>
-        String(b?.StartTime || "").localeCompare(String(a?.StartTime || "")),
-      );
-      const latest = sorted[0] || {};
-      const usageCount = rows.reduce(
-        (max, row) => Math.max(max, parseUsageCount(row?.TotalUsage)),
-        0,
-      );
-
-      return {
-        AID: aid,
-        name: getHomeFavoriteLabel(latest),
-        visitTime: formatBalanceVisitTime(latest),
-        sortKey: String(latest?.StartTime || ""),
-        sn: getBalanceSn(latest),
-        statusLabel: getBalanceStatusLabel(latest),
-        usageCount,
-      };
-    })
-    .sort((a, b) => b.sortKey.localeCompare(a.sortKey));
+  return (stabilityAllList.value || [])
+    .map((item: any) => ({
+      AID: String(item?.AID ?? "").trim(),
+      name: String(item?.Name || "").trim() || "—",
+      visitTime: formatBalanceVisitTime(item),
+      sortKey: String(item?.SVTime || item?.CreateTime || ""),
+      sn: getBalanceSn(item),
+      statusLabel: getBalanceStatusLabel(item),
+      usageCount: parseUsageCount(item?.UsesTimes),
+    }))
+    .filter((card: any) => card.AID && card.AID !== "0")
+    .sort((a: any, b: any) => b.sortKey.localeCompare(a.sortKey));
 });
 
 function openBalanceClothDetail(aid: string) {
   if (!aid) return;
   router.push({
-    path: "/raphaelBackend/member/myFavorite",
+    path: "/raphaelBackend/member/stable",
     query: { AID: aid },
   });
 }
@@ -4481,6 +4473,8 @@ watch(
 
     // 取得產品使用紀錄
     await memberStore.fetchFavoriteTPointsList(getAuth());
+    // 取得護您穩平衡衣卡片
+    await memberStore.fetchStabilityAll(getAuth());
 
     // 取得健康日誌（使用空白月份取得全部列表）
     await memberStore.fetchHealthLog(getAuth(), "", "");
@@ -4534,6 +4528,8 @@ async function refresh() {
 
   // 取得產品使用紀錄
   await memberStore.fetchFavoriteTPointsList(getAuth());
+  // 取得護您穩平衡衣卡片
+  await memberStore.fetchStabilityAll(getAuth());
 
   // 取得健康日誌
   await memberStore.fetchHealthLog(getAuth(), "", "");
@@ -4855,6 +4851,19 @@ const remainingDaysDisplay = computed(() => {
 });
 
 // ───── 操作紀錄彈窗 ─────
+const operationRecordAllowedProducts = [
+  "第六代紅光極智衣",
+  "第五代穿戴調節衣紅光加強版",
+  "護您穩平衡衣",
+];
+
+const showOperationRecordBtn = computed(() => {
+  const productName = activeOrder.value?.ProductName;
+  if (!productName) return false;
+  const normalized = String(productName).trim();
+  return operationRecordAllowedProducts.includes(normalized);
+});
+
 const showOperationRecord = ref(false);
 const operationDateRange = ref<Date[] | null>(null);
 const showEventFilter = ref(false);

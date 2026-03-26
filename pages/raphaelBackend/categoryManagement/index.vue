@@ -23,9 +23,9 @@
           search-placeholder="請輸入關鍵字"
           @search="handleSearch"
         />
-        <button class="btn-add" @click="handleAddNew">
+        <!-- <button class="btn-add" @click="handleAddNew">
           <span>+ 新增</span>
-        </button>
+        </button> -->
       </div>
 
       <div class="tabsGroup">
@@ -67,13 +67,13 @@
               >
                 <img src="/assets/imgs/backend/edit.svg" alt="編輯" />
               </button>
-              <button
+              <!-- <button
                 class="btn-action btn-delete"
                 @click="handleDelete(item)"
                 title="刪除"
               >
                 <img src="/assets/imgs/backend/delete2.svg" alt="刪除" />
-              </button>
+              </button> -->
             </div>
           </div>
         </section>
@@ -160,12 +160,7 @@ function handleSearch(value: string) {
   searchKeyword.value = value;
 }
 
-function handleAddNew() {
-  router.push({
-    path: "/raphaelBackend/categoryManagement/add",
-    query: { kind: activeTab.value },
-  });
-}
+
 
 function handleEdit(item: CategoryItem) {
   router.push({

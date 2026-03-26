@@ -12,10 +12,7 @@
           <img src="/assets/imgs/backend/close.svg" alt="關閉" />
         </button>
 
-        <span class="link-line link-line-confirm"></span>
-        <span class="link-dot link-dot-confirm"></span>
-        <span class="link-line link-line-close"></span>
-        <span class="link-dot link-dot-close"></span>
+
       </div>
     </div>
   </transition>
@@ -122,45 +119,9 @@ const emit = defineEmits<{
 }
 
 /* 線段以彈窗本體為相對參考，不依賴設計稿原點座標 */
-.link-line,
-.link-dot {
-  position: absolute;
-  background: #b7d7dc;
-}
 
-.link-line {
-  width: clamp(52px, 18vw, 96px);
-  height: 3px;
-  right: -1px;
-  transform: translateX(100%);
-  border-radius: 999px;
-}
 
-.link-dot {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-}
 
-.link-line-confirm {
-  top: 55%;
-}
-
-.link-dot-confirm {
-  top: calc(55% - 11px);
-  right: -26px;
-  transform: translateX(calc(100% - 38px));
-}
-
-.link-line-close {
-  top: calc(100% - 24px);
-}
-
-.link-dot-close {
-  top: calc(100% - 36px);
-  right: -26px;
-  transform: translateX(calc(100% - 38px));
-}
 
 @media (max-width: 960px) {
   .dialog-shell {
@@ -175,9 +136,6 @@ const emit = defineEmits<{
     font-size: 28px;
   }
 
-  .link-line,
-  .link-dot {
-    display: none;
-  }
+
 }
 </style>

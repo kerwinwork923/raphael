@@ -95,7 +95,7 @@
         </li>
 
       
-        <!-- <li 
+        <li 
           :class="{ 
             active: currentPage === 'categoryManagement',
             'has-focus': focusedItem === 'categoryManagement' 
@@ -111,7 +111,7 @@
         >
           <img src="/assets/imgs/backend/tag.svg" alt="分類管理" />
           <span v-show="!collapsed">分類管理</span>
-        </li>  -->
+        </li> 
 
         <!-- <li 
           :class="{ 
