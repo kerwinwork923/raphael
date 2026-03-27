@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProjectOS — AI Decision OS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          brand: {
+            50: '#f0f7ff',
+            100: '#e0efff',
+            500: '#3b82f6',
+            600: '#2563eb',
+            700: '#1d4ed8'
+          }
+        }
+      }
+    }
+  }
+</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  *{font-family:'Inter',sans-serif;}
+  .fade-in{animation:fadeIn .3s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .pulse-red{animation:pRed 2s infinite;}
+  @keyframes pRed{0%,100%{opacity:1}50%{opacity:.6}}
+
+  .status-draft{background:#f1f5f9;color:#64748b}
+  .status-opening{background:#ede9fe;color:#6d28d9}
+  .status-in_progress{background:#dbeafe;color:#1d4ed8}
+  .status-review{background:#fef3c7;color:#b45309}
+  .status-closed{background:#dcfce7;color:#15803d}
+
+  .notif-panel{
+    position:fixed;top:0;right:0;height:100%;width:320px;background:white;
+    box-shadow:-4px 0 24px rgba(0,0,0,.12);z-index:60;
+    transform:translateX(100%);transition:transform .3s ease;
+  }
+  .notif-panel.open{transform:translateX(0);}
+  .notif-overlay{
+    position:fixed;inset:0;background:rgba(15,23,42,.3);
+    z-index:59;display:none;
+  }
+  .notif-overlay.open{display:block;}
+
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-track{background:#f1f5f9}
+  ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+  textarea:focus,input:focus,select:focus{outline:none;box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+
+  .prio-critical{background:#fee2e2;color:#dc2626;}
+  .prio-high{background:#fed7aa;color:#c2410c;}
+  .prio-medium{background:#fef9c3;color:#854d0e;}
+  .prio-low{background:#f0fdf4;color:#15803d;}
+
+  .progress-bar{transition:width .6s ease;}
+</style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+<!-- NAV -->
+<nav class="bg-white border-b border-slate-200 sticky top-0 z-40">
+  <div class="max-w-screen-xl mx-auto px-4 flex items-center h-14 gap-4">
+    <a href="dashboard.html" class="flex items-center gap-2 font-bold text-blue-600 text-lg tracking-tight hover:opacity-80">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
+      </svg>
+      ProjectOS
+    </a>
+    <span class="text-xs text-slate-300 font-light">AI Decision OS</span>
+    <div class="flex-1"></div>
+    <a href="dashboard.html" class="text-sm text-blue-600 font-medium px-2 py-1 rounded-md hover:bg-blue-50 transition">Dashboard</a>
+    <a href="create-project.html" class="text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition">建立新專案</a>
+    <a href="task-tracking.html" class="text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition">Task 追蹤</a>
+    <button onclick="toggleNotif()" class="relative w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100 transition">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+      </svg>
+      <span class="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center font-bold" style="font-size:9px">3</span>
+    </button>
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">A</div>
+    </div>
+  </div>
+</nav>
+
+<div class="max-w-screen-xl mx-auto px-4 py-5">
+
+  <!-- STATS BAR -->
+  <div id="stats-bar" class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3 mb-5"></div>
+
+  <!-- ALL PROJECTS TABLE -->
+  <div class="bg-white rounded-xl border border-slate-200 p-5">
+    <div class="flex flex-col md:flex-row md:items-center gap-3 mb-4">
+      <h2 class="font-semibold text-slate-900">所有專案</h2>
+      <div class="flex-1"></div>
+      <div class="flex flex-wrap gap-2">
+        <div class="relative">
+          <svg class="w-3.5 h-3.5 absolute left-2.5 top-2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
+          </svg>
+          <input type="text" placeholder="搜尋..." class="pl-7 pr-3 py-1.5 border border-slate-200 rounded-lg text-xs w-36 focus:border-blue-300 transition" oninput="filterProjects(this.value)">
+        </div>
+        <select class="border border-slate-200 rounded-lg text-xs px-2 py-1.5 text-slate-600" onchange="filterByStatus(this.value)">
+          <option value="">全部狀態</option>
+          <option value="draft">草稿</option>
+          <option value="opening">開案中</option>
+          <option value="in_progress">進行中</option>
+          <option value="review">Review</option>
+          <option value="closed">已結案</option>
+        </select>
+        <button onclick="togglePrioritySort()" id="sort-btn" class="border border-slate-200 rounded-lg text-xs px-3 py-1.5 text-slate-600 hover:bg-slate-50 transition">排序：優先順序 ↓</button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-12 text-xs font-medium text-slate-400 px-3 pb-2 border-b border-slate-100">
+      <div class="col-span-4">專案名稱</div>
+      <div class="col-span-1 text-center">健康</div>
+      <div class="col-span-1">負責人</div>
+      <div class="col-span-1">狀態</div>
+      <div class="col-span-2">完成率</div>
+      <div class="col-span-1">優先</div>
+      <div class="col-span-1">更新</div>
+      <div class="col-span-1 text-center">→</div>
+    </div>
+
+    <div id="project-table" class="divide-y divide-slate-50"></div>
+  </div>
+</div>
+
+<!-- NOTIFICATION PANEL -->
+<div class="notif-overlay" id="notif-overlay" onclick="toggleNotif()"></div>
+<div class="notif-panel" id="notif-panel">
+  <div class="flex items-center justify-between px-5 pt-5 pb-4 border-b border-slate-100">
+    <h3 class="font-semibold text-slate-900">通知中心</h3>
+    <button onclick="toggleNotif()" class="text-slate-400 hover:text-slate-600 text-lg leading-none">✕</button>
+  </div>
+  <div class="px-5 py-4 space-y-3 overflow-y-auto" style="max-height:calc(100vh - 80px)">
+    <div class="bg-red-50 border border-red-200 rounded-xl p-3 fade-in">
+      <div class="flex items-start gap-2">
+        <span class="text-sm mt-0.5">🔴</span>
+        <div class="flex-1">
+          <p class="text-sm font-semibold text-red-800">Q1 活動企劃 延遲 +5 天</p>
+          <p class="text-xs text-red-600 mt-0.5">行銷素材未交付，Carol 負責</p>
+          <div class="flex gap-2 mt-2">
+            <button onclick="notifyOwner('Carol');toggleNotif()" class="text-xs bg-red-100 hover:bg-red-200 text-red-700 px-2.5 py-1 rounded-lg font-medium transition">通知 Carol</button>
+            <button onclick="showToast('已升級給主管');toggleNotif()" class="text-xs bg-white border border-red-200 text-red-600 px-2.5 py-1 rounded-lg font-medium transition">升級</button>
+          </div>
+        </div>
+        <span class="text-xs text-slate-400">5天前</span>
+      </div>
+    </div>
+
+    <div class="bg-orange-50 border border-orange-200 rounded-xl p-3 fade-in">
+      <div class="flex items-start gap-2">
+        <span class="text-sm mt-0.5">🟠</span>
+        <div class="flex-1">
+          <p class="text-sm font-semibold text-orange-800">法務審核 Blocked 3 天</p>
+          <p class="text-xs text-orange-600 mt-0.5">等待法務部門回覆，Legal 負責</p>
+          <div class="flex gap-2 mt-2">
+            <button onclick="notifyOwner('Legal');toggleNotif()" class="text-xs bg-orange-100 hover:bg-orange-200 text-orange-700 px-2.5 py-1 rounded-lg font-medium transition">通知 Legal</button>
+            <button onclick="showToast('已指派給 Alice');toggleNotif()" class="text-xs bg-white border border-orange-200 text-orange-600 px-2.5 py-1 rounded-lg font-medium transition">指派</button>
+          </div>
+        </div>
+        <span class="text-xs text-slate-400">3天前</span>
+      </div>
+    </div>
+
+    <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 fade-in">
+      <div class="flex items-start gap-2">
+        <span class="text-sm mt-0.5">🟡</span>
+        <div class="flex-1">
+          <p class="text-sm font-semibold text-amber-800">客服系統 KPI 未達標</p>
+          <p class="text-xs text-amber-600 mt-0.5">客戶滿意度 68%，目標 90%（-22%）</p>
+          <div class="flex gap-2 mt-2">
+            <a href="task-tracking.html" class="text-xs bg-amber-100 hover:bg-amber-200 text-amber-700 px-2.5 py-1 rounded-lg font-medium transition">查看詳情</a>
+          </div>
+        </div>
+        <span class="text-xs text-slate-400">今天</span>
+      </div>
+    </div>
+
+    <div class="pt-3 border-t border-slate-100">
+      <p class="text-xs text-center text-slate-400">通知智慧合併，避免通知疲勞</p>
+      <p class="text-xs text-center text-slate-400 mt-1">每日最多 5 則優先通知</p>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="fixed bottom-5 right-5 z-50 hidden">
+  <div class="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 max-w-sm fade-in">
+    <svg id="toast-icon" class="w-4 h-4 text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+    </svg>
+    <p id="toast-msg" class="text-sm"></p>
+  </div>
+</div>
+
+<script>
+// ─── DATA ───
+const PROJECTS = [
+  {id:1,name:'Q2 新產品線計畫',owner:'Alice',dept:'業務發展處',status:'opening',done:1,total:7,blocked:1,delayed:false,staleDays:0,kpiMiss:false,daysLeft:96,updated:'3小時前',url:'task-tracking.html',kpi:{metric:'月銷售量',target:100,current:45,unit:'件'},blockedTask:'完成法務審核',blockedReason:'等待法務部門回覆，已發信 3 天',blockedAssignee:'Legal',delayDays:0},
+  {id:2,name:'官網改版計畫',owner:'Bob',dept:'創新研發處',status:'review',done:8,total:10,blocked:0,delayed:false,staleDays:1,kpiMiss:false,daysLeft:10,updated:'1天前',url:'#',kpi:{metric:'上線時程',target:100,current:80,unit:'%'},blockedTask:'',blockedReason:'',blockedAssignee:'',delayDays:0},
+  {id:3,name:'Q1 活動企劃',owner:'Carol',dept:'業務發展處',status:'in_progress',done:2,total:5,blocked:1,delayed:true,staleDays:5,kpiMiss:true,daysLeft:-5,updated:'5天前',url:'#',kpi:{metric:'活動報名數',target:500,current:180,unit:'人'},blockedTask:'行銷素材製作',blockedReason:'等待設計部門交付，已催促 2 次',blockedAssignee:'Carol',delayDays:5},
+  {id:4,name:'客服系統升級',owner:'Dave',dept:'客服暨會員關係部',status:'in_progress',done:7,total:10,blocked:2,delayed:false,staleDays:14,kpiMiss:true,daysLeft:30,updated:'14天前',url:'#',kpi:{metric:'客戶滿意度',target:90,current:68,unit:'%'},blockedTask:'API整合測試',blockedReason:'外部廠商未提供測試環境',blockedAssignee:'Dave',delayDays:0},
+  {id:5,name:'供應商評估計畫',owner:'Alice',dept:'總經理室',status:'opening',done:0,total:4,blocked:0,delayed:true,staleDays:2,kpiMiss:false,daysLeft:-1,updated:'2天前',url:'#',kpi:{metric:'評估完成率',target:100,current:25,unit:'%'},blockedTask:'',blockedReason:'',blockedAssignee:'',delayDays:1},
+  {id:6,name:'員工培訓計畫 Q2',owner:'HR',dept:'總經理室',status:'draft',done:0,total:6,blocked:0,delayed:false,staleDays:10,kpiMiss:false,daysLeft:60,updated:'10天前',url:'#',kpi:{metric:'培訓人數',target:50,current:0,unit:'人'},blockedTask:'',blockedReason:'',blockedAssignee:'',delayDays:0},
+  {id:7,name:'舊官網下架計畫',owner:'Bob',dept:'創新研發處',status:'in_progress',done:3,total:5,blocked:1,delayed:true,staleDays:3,kpiMiss:false,daysLeft:-2,updated:'3天前',url:'#',kpi:{metric:'下架完成率',target:100,current:60,unit:'%'},blockedTask:'DNS 設定變更',blockedReason:'等待 IT 部門操作',blockedAssignee:'Bob',delayDays:2},
+  {id:8,name:'年度品牌重塑',owner:'Carol',dept:'業務發展處',status:'closed',done:12,total:12,blocked:0,delayed:false,staleDays:7,kpiMiss:false,daysLeft:0,updated:'1週前',url:'#',kpi:{metric:'品牌認知度',target:85,current:87,unit:'%'},blockedTask:'',blockedReason:'',blockedAssignee:'',delayDays:0},
+];
+
+// ─── ALGORITHMS ───
+function calcHealth(p) {
+  let s = 100;
+  if (p.delayed) s -= 20;
+  s -= p.blocked * 10;
+  if (p.kpiMiss) s -= 15;
+  if (p.staleDays > 14) s -= 20;
+  else if (p.staleDays > 7) s -= 10;
+  const cr = p.total ? p.done / p.total : 0;
+  if (cr < 0.3 && p.daysLeft < 30 && p.daysLeft > 0) s -= 5;
+  return Math.max(5, Math.min(100, s));
+}
+
+function calcPriority(p) {
+  let s = 0;
+  if (p.delayed) s += 40 + p.delayDays * 5;
+  s += p.blocked * 15;
+  if (p.kpiMiss) s += 25;
+  if (p.staleDays > 14) s += 20;
+  else if (p.staleDays > 7) s += 10;
+  if (p.daysLeft < 0) s += 30;
+  else if (p.daysLeft < 7) s += 20;
+  else if (p.daysLeft < 14) s += 10;
+  return s;
+}
+
+function healthColor(h) {
+  return h >= 80 ? '#22c55e' : h >= 60 ? '#f59e0b' : '#ef4444';
+}
+
+function priorityLabel(score) {
+  if (score >= 80) return {label:'緊急',cls:'prio-critical'};
+  if (score >= 50) return {label:'高',cls:'prio-high'};
+  if (score >= 20) return {label:'中',cls:'prio-medium'};
+  return {label:'低',cls:'prio-low'};
+}
+
+// ─── STATS ───
+function renderStats() {
+  const total = PROJECTS.length;
+  const opening = PROJECTS.filter(p => p.status === 'opening').length;
+  const inProgress = PROJECTS.filter(p => p.status === 'in_progress').length;
+  const review = PROJECTS.filter(p => p.status === 'review').length;
+  const closed = PROJECTS.filter(p => p.status === 'closed').length;
+  const delayed = PROJECTS.filter(p => p.delayed).length;
+  const blocked = PROJECTS.reduce((sum, p) => sum + (p.blocked || 0), 0);
+
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="bg-white rounded-xl border border-slate-200 p-3.5 text-center">
+      <p class="text-xs text-slate-400 font-medium mb-1">全部專案</p>
+      <p class="text-2xl font-bold text-slate-900">${total}</p>
+      <p class="text-xs text-slate-400 mt-0.5">目前總數</p>
+    </div>
+    <div class="bg-violet-50 rounded-xl border border-violet-200 p-3.5 text-center">
+      <p class="text-xs text-violet-500 font-medium mb-1">開案中</p>
+      <p class="text-2xl font-bold text-violet-700">${opening}</p>
+      <p class="text-xs text-violet-400 mt-0.5">待正式推進</p>
+    </div>
+    <div class="bg-blue-50 rounded-xl border border-blue-200 p-3.5 text-center">
+      <p class="text-xs text-blue-500 font-medium mb-1">進行中</p>
+      <p class="text-2xl font-bold text-blue-700">${inProgress}</p>
+      <p class="text-xs text-blue-400 mt-0.5">${total ? Math.round(inProgress / total * 100) : 0}%</p>
+    </div>
+    <div class="bg-amber-50 rounded-xl border border-amber-200 p-3.5 text-center">
+      <p class="text-xs text-amber-500 font-medium mb-1">Review</p>
+      <p class="text-2xl font-bold text-amber-700">${review}</p>
+      <p class="text-xs text-amber-400 mt-0.5">等待結案</p>
+    </div>
+    <div class="bg-green-50 rounded-xl border border-green-200 p-3.5 text-center">
+      <p class="text-xs text-green-500 font-medium mb-1">已結案</p>
+      <p class="text-2xl font-bold text-green-700">${closed}</p>
+      <p class="text-xs text-green-400 mt-0.5">已完成</p>
+    </div>
+    <div class="bg-red-50 rounded-xl border border-red-200 p-3.5 text-center ${delayed > 0 ? 'pulse-red' : ''}">
+      <p class="text-xs text-red-500 font-medium mb-1">延遲</p>
+      <p class="text-2xl font-bold text-red-600">${delayed}</p>
+      <p class="text-xs text-red-400 mt-0.5">需關注</p>
+    </div>
+    <div class="bg-orange-50 rounded-xl border border-orange-200 p-3.5 text-center">
+      <p class="text-xs text-orange-500 font-medium mb-1">Blocked</p>
+      <p class="text-2xl font-bold text-orange-600">${blocked}</p>
+      <p class="text-xs text-orange-400 mt-0.5">等待解除</p>
+    </div>
+  `;
+}
+
+// ─── PROJECT TABLE ───
+let prioritySorted = true;
+let currentProjects = [];
+
+function togglePrioritySort() {
+  prioritySorted = !prioritySorted;
+  document.getElementById('sort-btn').textContent = prioritySorted ? '排序：優先順序 ↓' : '排序：最後更新 ↓';
+  renderProjectTable(currentProjects);
+}
+
+function getStatusClass(status) {
+  return {
+    draft:'status-draft',
+    opening:'status-opening',
+    in_progress:'status-in_progress',
+    review:'status-review',
+    closed:'status-closed'
+  }[status] || '';
+}
+
+function getStatusLabel(status) {
+  return {
+    draft:'草稿',
+    opening:'開案中',
+    in_progress:'進行中',
+    review:'Review',
+    closed:'已結案'
+  }[status] || status;
+}
+
+function renderProjectTable(projects) {
+  currentProjects = projects;
+
+  const sorted = prioritySorted
+    ? [...projects].sort((a, b) => calcPriority(b) - calcPriority(a))
+    : projects;
+
+  const av = {
+    Alice:'bg-blue-500',
+    Bob:'bg-purple-500',
+    Carol:'bg-pink-500',
+    Dave:'bg-amber-500',
+    HR:'bg-green-500'
+  };
+
+  document.getElementById('project-table').innerHTML = sorted.map(p => {
+    const pct = Math.round((p.done / p.total) * 100);
+    const bar = pct >= 75 ? 'bg-green-500' : pct >= 40 ? 'bg-blue-500' : 'bg-amber-500';
+    const sc = getStatusClass(p.status);
+    const sl = getStatusLabel(p.status);
+    const h = calcHealth(p);
+    const hc = healthColor(h);
+    const pr = calcPriority(p);
+    const pl = priorityLabel(pr);
+    const circ = 88;
+    const da = (h / 100) * circ;
+
+    return `
+      <div class="grid grid-cols-12 items-center px-3 py-3 hover:bg-slate-50 transition group">
+        <div class="col-span-4 flex items-center gap-2 min-w-0">
+          <span class="text-sm font-medium text-slate-800 truncate group-hover:text-blue-600">${p.name}</span>
+          ${p.delayed ? `<span class="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-bold flex-shrink-0">+${p.delayDays}天</span>` : ''}
+          ${p.blocked > 0 ? `<span class="text-xs bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded font-medium flex-shrink-0">🔴${p.blocked}</span>` : ''}
+        </div>
+        <div class="col-span-1 flex justify-center">
+          <div class="relative" style="width:32px;height:32px;">
+            <svg style="transform:rotate(-90deg)" width="32" height="32" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="14" fill="none" stroke="#e2e8f0" stroke-width="3.5"/>
+              <circle cx="18" cy="18" r="14" fill="none" stroke="${hc}" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="${da} ${circ}"/>
+            </svg>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <span style="font-size:8px;font-weight:700;color:${hc}">${h}</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-span-1 flex items-center gap-1">
+          <div class="w-6 h-6 rounded-full ${av[p.owner] || 'bg-slate-400'} flex items-center justify-center text-white text-xs font-bold">${p.owner[0]}</div>
+        </div>
+        <div class="col-span-1">
+          <span class="${sc} text-xs px-2 py-0.5 rounded-full font-medium">${sl}</span>
+        </div>
+        <div class="col-span-2">
+          <div class="flex items-center gap-2">
+            <div class="flex-1 bg-slate-100 rounded-full h-1.5">
+              <div class="${bar} h-1.5 rounded-full progress-bar" style="width:${pct}%"></div>
+            </div>
+            <span class="text-xs text-slate-500 w-7 text-right">${pct}%</span>
+          </div>
+        </div>
+        <div class="col-span-1">
+          <span class="${pl.cls} text-xs px-2 py-0.5 rounded-full font-medium">${pl.label}</span>
+        </div>
+        <div class="col-span-1 text-xs text-slate-400">${p.updated}</div>
+        <div class="col-span-1 text-center">
+          <a href="${p.url}" class="text-slate-400 hover:text-blue-600 transition font-bold">↗</a>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function filterProjects(q) {
+  renderProjectTable(
+    q
+      ? PROJECTS.filter(p =>
+          p.name.toLowerCase().includes(q.toLowerCase()) ||
+          p.owner.toLowerCase().includes(q.toLowerCase())
+        )
+      : PROJECTS
+  );
+}
+
+function filterByStatus(s) {
+  renderProjectTable(s ? PROJECTS.filter(p => p.status === s) : PROJECTS);
+}
+
+// ─── NOTIFICATION ───
+function toggleNotif() {
+  const panel = document.getElementById('notif-panel');
+  const overlay = document.getElementById('notif-overlay');
+  panel.classList.toggle('open');
+  overlay.classList.toggle('open');
+}
+
+// ─── TOAST ───
+let toastTimer;
+
+function showToast(msg, type='success') {
+  const toast = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  document.getElementById('toast-icon').className =
+    type === 'warn'
+      ? 'w-4 h-4 text-amber-400 flex-shrink-0'
+      : 'w-4 h-4 text-green-400 flex-shrink-0';
+
+  toast.classList.remove('hidden');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.add('hidden'), 3000);
+}
+
+function notifyOwner(name) {
+  showToast(`已通知 ${name}，系統發送提醒`);
+}
+
+// ─── INIT ───
+document.addEventListener('DOMContentLoaded', () => {
+  renderStats();
+  renderProjectTable(PROJECTS);
+});
+</script>
+</body>
+</html>

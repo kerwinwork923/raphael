@@ -12,7 +12,7 @@
         :last-updated="store.lastUpdated"
         @refresh="refreshData"
       />
-      
+
       <!-- toolbar / filters -->
       <FilterToolbar
         v-model:search-value="store.keyword"
@@ -31,13 +31,10 @@
         @grade-change="store.setGradeFilter"
         @status-change="store.setStatusFilter"
       />
-   
 
       <!-- data table -->
       <section class="member-table">
-        <button class="btn-add" @click="handleExportExcel">
-        匯出成excel
-      </button>
+        <button class="btn-add" @click="handleExportExcel">匯出成excel</button>
         <!-- header row -->
         <div class="table-row table-header">
           <div class="name">會員名稱</div>
@@ -252,7 +249,17 @@ const visiblePageItems = computed<PageItem[]>(() => {
   }
 
   if (current >= rightBoundary) {
-    items.push(1, "...", total - 6, total - 5, total - 4, total - 3, total - 2, total - 1, total);
+    items.push(
+      1,
+      "...",
+      total - 6,
+      total - 5,
+      total - 4,
+      total - 3,
+      total - 2,
+      total - 1,
+      total
+    );
     return items;
   }
 
@@ -265,7 +272,7 @@ const visiblePageItems = computed<PageItem[]>(() => {
 function handleGoInfo(m: any) {
   localStorage.setItem(
     "selectedMember",
-    JSON.stringify({ MID: m.id, Mobile: m.phone }),
+    JSON.stringify({ MID: m.id, Mobile: m.phone })
   );
   router.push(`/raphaelBackend/member/memberContent`);
 }
@@ -288,7 +295,10 @@ function formatBirthday(birthday: string) {
     const parts = birthday.split("/");
     if (parts.length === 3) {
       const [y, m, d] = parts;
-      return `${y.padStart(3, "0")}/${m.padStart(2, "0")}/${d.padStart(2, "0")}`;
+      return `${y.padStart(3, "0")}/${m.padStart(2, "0")}/${d.padStart(
+        2,
+        "0"
+      )}`;
     }
     return birthday;
   }
@@ -384,7 +394,13 @@ function handleExportExcel() {
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "會員清單");
   const now = new Date();
-  const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}_${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}`;
+  const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(
+    2,
+    "0"
+  )}${String(now.getDate()).padStart(2, "0")}_${String(now.getHours()).padStart(
+    2,
+    "0"
+  )}${String(now.getMinutes()).padStart(2, "0")}`;
   XLSX.writeFile(wb, `會員清單_${dateStr}.xlsx`);
 }
 </script>
@@ -405,7 +421,7 @@ function handleExportExcel() {
   transition: all 0.2s ease;
   position: absolute;
   right: 1rem;
-  top: .5rem;
+  top: 0.5rem;
   z-index: 30;
   &:hover {
     background: $primary-300;

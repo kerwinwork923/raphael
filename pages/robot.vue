@@ -842,10 +842,12 @@ let synthRef = null;
 // ====== 新增：全域 Audio，集中管理播放與停止 ======
 let player = null;
 let currentObjectUrl = null;
+
 function ensurePlayer() {
   if (!player) player = new Audio();
   return player;
 }
+
 function revokeObjectUrl() {
   if (currentObjectUrl) {
     URL.revokeObjectURL(currentObjectUrl);
