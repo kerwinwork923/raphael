@@ -583,7 +583,7 @@ function collectManualTaskList() {
     return {
       Topic: t.title || "",
       Description: t.desc || "",
-      StertDate: toYYYYMMDD(t.startDate || ""),
+      StartDate: toYYYYMMDD(t.startDate || ""),
       EndDate: toYYYYMMDD(t.endDate || ""),
       ChargeMan: t.assignee || "",
       State: statusToCode(t.status || "待辦"),
@@ -683,7 +683,7 @@ function collectAIGeneratedProjectPayload() {
   const TaskList = generatedTasks.map((t) => ({
     Topic: t.title || "",
     Description: t.note || "",
-    StertDate: StartDate,
+    StartDate: StartDate,
     EndDate: toYYYYMMDD(t.due || ""),
     ChargeMan: t.assignee || "",
     State: "1",
