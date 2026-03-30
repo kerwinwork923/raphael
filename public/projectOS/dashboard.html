@@ -77,15 +77,14 @@
     <a href="dashboard.html" class="text-sm text-blue-600 font-medium px-2 py-1 rounded-md hover:bg-blue-50 transition">Dashboard</a>
     <a href="create-project.html" class="text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition">建立新專案</a>
     <a href="task-tracking.html" class="text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition">Task 追蹤</a>
+    <a href="profile.html" class="text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition">會員資料</a>
     <button onclick="toggleNotif()" class="relative w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100 transition">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
       </svg>
       <span class="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center font-bold" style="font-size:9px">3</span>
     </button>
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">A</div>
-    </div>
+    <a href="profile.html" id="navUserAvatar" class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold hover:ring-2 hover:ring-blue-300 transition shrink-0" title="會員資料">?</a>
   </div>
 </nav>
 
@@ -446,7 +445,19 @@ function notifyOwner(name) {
 }
 
 // ─── INIT ───
+function initNavAvatar() {
+  try {
+    const raw = localStorage.getItem('userData');
+    if (!raw) return;
+    const u = JSON.parse(raw);
+    const name = (u.Member && u.Member.Name) || u.Name || '會員';
+    const el = document.getElementById('navUserAvatar');
+    if (el) el.textContent = String(name).trim().charAt(0).toUpperCase() || '?';
+  } catch (e) {}
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  initNavAvatar();
   renderStats();
   renderProjectTable(PROJECTS);
 });

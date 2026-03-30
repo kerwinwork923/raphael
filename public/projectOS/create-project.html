@@ -47,7 +47,8 @@
     <a href="dashboard.html" class="text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition">Dashboard</a>
     <a href="create-project.html" class="text-sm text-blue-600 font-medium px-2 py-1 rounded-md hover:bg-blue-50 transition">建立新專案</a>
     <a href="task-tracking.html" class="text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition">Task 追蹤</a>
-    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">A</div>
+    <a href="profile.html" class="text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition">會員資料</a>
+    <a href="profile.html" id="navUserAvatar" class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold hover:ring-2 hover:ring-blue-300 transition shrink-0" title="會員資料">?</a>
   </div>
 </nav>
 
@@ -795,6 +796,17 @@ function showToast(msg, type='success') {
   clearTimeout(toastTimer);
   toastTimer=setTimeout(()=>toast.classList.add('hidden'),3500);
 }
+
+(function initNavAvatar(){
+  try {
+    const raw = localStorage.getItem('userData');
+    if (!raw) return;
+    const u = JSON.parse(raw);
+    const name = (u.Member && u.Member.Name) || u.Name || '會員';
+    const el = document.getElementById('navUserAvatar');
+    if (el) el.textContent = String(name).trim().charAt(0).toUpperCase() || '?';
+  } catch (e) {}
+})();
 </script>
 </body>
 </html>
