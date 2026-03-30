@@ -41,24 +41,28 @@
         <div class="grid grid-cols-2 gap-3 mt-7">
           <div class="bg-white/10 border border-white/10 rounded-2xl p-4">
             <p class="text-xs text-slate-300">本週待追蹤</p>
-            <p class="text-2xl font-extrabold mt-1">12</p>
+            <p
+              id="weeklyTrackingCount"
+              class="text-2xl font-extrabold mt-1 tabular-nums"
+            >0</p>
           </div>
           <div class="bg-white/10 border border-white/10 rounded-2xl p-4">
             <p class="text-xs text-slate-300">風險任務</p>
-            <p class="text-2xl font-extrabold mt-1 text-orange-300">3</p>
+            <p
+              id="riskTaskCount"
+              class="text-2xl font-extrabold mt-1 text-orange-300 tabular-nums"
+            >0</p>
           </div>
         </div>
       </section>
 
       <section class="rounded-3xl border border-slate-200 bg-white p-7 md:p-9 text-slate-800 shadow-2xl">
-        <div class="flex items-center justify-between mb-5">
-          <a href="dashboard.html" class="text-xs text-slate-500 hover:text-blue-600">返回 Dashboard</a>
-        </div>
+  
 
         <!-- ① 一般登入 -->
         <div id="stepLogin">
           <h2 class="text-2xl font-extrabold text-slate-900">後台帳號登入</h2>
-          <p class="text-sm text-slate-500 mt-1">請輸入管理員帳號與密碼（與 raphaelBackend 後台相同）。</p>
+          <p class="text-sm text-slate-500 mt-1">請輸入管理員帳號與密碼</p>
 
           <form id="loginForm" class="space-y-4 mt-6" novalidate>
             <div>
@@ -85,7 +89,7 @@
                 <input type="checkbox" id="rememberMe" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500">
                 記住帳號（並將登入狀態保留在本機）
               </label>
-              <button type="button" id="gotoReset" class="text-blue-600 hover:text-blue-700 shrink-0 text-xs">忘記密碼？</button>
+           
             </div>
 
             <button type="submit" id="submitBtn" disabled class="w-full bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2.5 rounded-xl font-bold text-sm transition">登入 ProjectOS</button>
@@ -150,13 +154,17 @@
   </main>
 
   <script>
+    window.__LOGIN_METRICS__ = {
+      weeklyTrackingCount: 17,
+      riskTaskCount: 5
+    };
+  
     (function () {
       var API_BASE = "https://23700999.com:8081/PM";
       var LOGIN_URL = API_BASE + "/api/fr/Login";
-      // 首次登入/重設密碼先保留，但「一般登入」不會再走這些舊流程
       var FIRST_LOGIN_URL = API_BASE + "/API_FirstAdminLogin.jsp";
       var RESET_PWD_URL = API_BASE + "/API_AdminModifyPassword.jsp";
-
+  
       var usernameEl = document.getElementById("username");
       var passwordEl = document.getElementById("password");
       var rememberMeEl = document.getElementById("rememberMe");
@@ -166,17 +174,20 @@
       var togglePwd = document.getElementById("togglePwd");
       var eyeOpen = document.getElementById("eyeOpen");
       var eyeClose = document.getElementById("eyeClose");
-
+  
       var stepLogin = document.getElementById("stepLogin");
       var stepFirst = document.getElementById("stepFirst");
       var stepReset = document.getElementById("stepReset");
-
+  
+      var weeklyTrackingCountEl = document.getElementById("weeklyTrackingCount");
+      var riskTaskCountEl = document.getElementById("riskTaskCount");
+  
       var remembered = localStorage.getItem("rememberID");
       if (remembered) {
         usernameEl.value = remembered;
         rememberMeEl.checked = true;
       }
-
+  
       function setLoading(on) {
         loadingOverlay.classList.toggle("hidden", !on);
         loadingOverlay.classList.toggle("flex", on);
@@ -184,21 +195,57 @@
           submitBtn.disabled = on || !usernameEl.value.trim() || !passwordEl.value;
         }
       }
-
+  
       function updateSubmitState() {
         submitBtn.disabled = !usernameEl.value.trim() || !passwordEl.value;
       }
-
+  
+      function easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+      }
+  
+      function animateCount(el, endValue, duration) {
+        if (!el) return;
+  
+        var startValue = 0;
+        var startTime = null;
+        var finalValue = Number(endValue) || 0;
+  
+        function frame(timestamp) {
+          if (!startTime) startTime = timestamp;
+  
+          var progress = Math.min((timestamp - startTime) / duration, 1);
+          var eased = easeOutCubic(progress);
+          var current = Math.round(startValue + (finalValue - startValue) * eased);
+  
+          el.textContent = current.toLocaleString("zh-TW");
+  
+          if (progress < 1) {
+            requestAnimationFrame(frame);
+          } else {
+            el.textContent = finalValue.toLocaleString("zh-TW");
+          }
+        }
+  
+        requestAnimationFrame(frame);
+      }
+  
+      function initLoginMetrics() {
+        var metrics = window.__LOGIN_METRICS__ || {};
+        animateCount(weeklyTrackingCountEl, metrics.weeklyTrackingCount || 0, 1200);
+        animateCount(riskTaskCountEl, metrics.riskTaskCount || 0, 1400);
+      }
+  
       usernameEl.addEventListener("input", updateSubmitState);
       passwordEl.addEventListener("input", updateSubmitState);
-
+  
       togglePwd.addEventListener("click", function () {
         var show = passwordEl.type === "password";
         passwordEl.type = show ? "text" : "password";
         eyeOpen.classList.toggle("hidden", !show);
         eyeClose.classList.toggle("hidden", show);
       });
-
+  
       rememberMeEl.addEventListener("change", function () {
         if (rememberMeEl.checked && usernameEl.value.trim()) {
           localStorage.setItem("rememberID", usernameEl.value.trim());
@@ -206,26 +253,23 @@
           localStorage.removeItem("rememberID");
         }
       });
+  
       usernameEl.addEventListener("input", function () {
         if (rememberMeEl.checked) {
           localStorage.setItem("rememberID", usernameEl.value.trim());
         }
       });
-
+  
       function showStep(step) {
         stepLogin.classList.toggle("step-hidden", step !== "login");
         stepFirst.classList.toggle("step-hidden", step !== "first");
         stepReset.classList.toggle("step-hidden", step !== "reset");
       }
-
-      document.getElementById("gotoReset").addEventListener("click", function () {
-        document.getElementById("resetAcc").value = usernameEl.value.trim();
-        showStep("reset");
-      });
+  
       document.getElementById("gotoLogin").addEventListener("click", function () {
         showStep("login");
       });
-
+  
       function clearOppositeStorage(useLocal) {
         if (useLocal) {
           sessionStorage.removeItem("backendToken");
@@ -237,14 +281,14 @@
           localStorage.removeItem("adminName");
         }
       }
-
+  
       function persistSession(token, adminId, remember) {
         var storage = remember ? localStorage : sessionStorage;
         clearOppositeStorage(remember);
         storage.setItem("backendToken", token);
         storage.setItem("adminID", adminId);
       }
-
+  
       function redirectIfLoggedIn() {
         var t =
           localStorage.getItem("backendToken") ||
@@ -253,7 +297,7 @@
           window.location.href = "dashboard.html";
         }
       }
-
+  
       function postJson(url, body) {
         return fetch(url, {
           method: "POST",
@@ -264,11 +308,11 @@
           return res.json();
         });
       }
-
+  
       function alertMsg(msg) {
         alert(msg);
       }
-
+  
       form.addEventListener("submit", function (e) {
         e.preventDefault();
         var username = usernameEl.value.trim();
@@ -278,7 +322,7 @@
           alertMsg("密碼需至少 6 碼");
           return;
         }
-
+  
         setLoading(true);
         postJson(LOGIN_URL, { AdminID: username, Password: password })
           .then(function (r) {
@@ -302,92 +346,10 @@
             setLoading(false);
           });
       });
-
-      document.getElementById("btnFirstSubmit").addEventListener("click", function () {
-        var username = usernameEl.value.trim();
-        var oldP = document.getElementById("oldPwd").value;
-        var newP = document.getElementById("newPwd").value;
-        var newP2 = document.getElementById("newPwd2").value;
-        if (!oldP || !newP || !newP2) {
-          alertMsg("所有欄位皆為必填");
-          return;
-        }
-        if (newP.length < 6) {
-          alertMsg("新密碼需至少 6 碼");
-          return;
-        }
-        if (newP !== newP2) {
-          alertMsg("兩次輸入的新密碼不一致");
-          return;
-        }
-
-        setLoading(true);
-        postJson(FIRST_LOGIN_URL, {
-          AdminID: username,
-          Password: oldP,
-          NewPassword: newP,
-        })
-          .then(function (r) {
-            if (r.Result === "OK" && r.Token) {
-              var remember = rememberMeEl.checked;
-              if (remember) localStorage.setItem("rememberID", username);
-              persistSession(r.Token, username, remember);
-              var st1 = remember ? localStorage : sessionStorage;
-              if (r.AdminName) st1.setItem("adminName", r.AdminName);
-              else st1.removeItem("adminName");
-              window.location.href = "dashboard.html";
-            } else {
-              alertMsg("修改失敗：" + (r.Message || r.Result || "未知錯誤"));
-            }
-          })
-          .catch(function () {
-            alertMsg("伺服器錯誤");
-          })
-          .finally(function () {
-            setLoading(false);
-          });
-      });
-
-      document.getElementById("btnResetSubmit").addEventListener("click", function () {
-        var acc = document.getElementById("resetAcc").value.trim();
-        var rn = document.getElementById("resetNew").value;
-        var rn2 = document.getElementById("resetNew2").value;
-        if (!acc || !rn || !rn2) {
-          alertMsg("所有欄位皆為必填");
-          return;
-        }
-        if (rn.length < 6) {
-          alertMsg("新密碼需至少 6 碼");
-          return;
-        }
-        if (rn !== rn2) {
-          alertMsg("兩次輸入的新密碼不一致");
-          return;
-        }
-
-        setLoading(true);
-        postJson(RESET_PWD_URL, { AdminID: acc, NewPassword: rn })
-          .then(function (r) {
-            if (r.Result === "OK") {
-              alertMsg("重設成功，請使用新密碼登入");
-              showStep("login");
-              usernameEl.value = acc;
-              passwordEl.value = "";
-              updateSubmitState();
-            } else {
-              alertMsg("重設失敗：" + (r.Result || "未知錯誤"));
-            }
-          })
-          .catch(function () {
-            alertMsg("伺服器錯誤");
-          })
-          .finally(function () {
-            setLoading(false);
-          });
-      });
-
+  
       redirectIfLoggedIn();
       updateSubmitState();
+      initLoginMetrics();
     })();
   </script>
 </body>
