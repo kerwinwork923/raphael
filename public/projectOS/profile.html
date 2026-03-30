@@ -163,14 +163,14 @@
           Result: 'API 狀態',
           adminID: '管理員帳號',
           AdminName: '管理員姓名',
-          backendToken: '後台登入狀態'
+  
         };
         return map[key] || key;
       }
 
       function formatValue(key, val) {
         if (val == null || val === '') return '—';
-        if (key === 'backendToken') return '已登入（Token 已隱藏）';
+
         return String(val);
       }
 
@@ -189,7 +189,7 @@
         if (u.mode === 'backend') {
           pushRow('adminID', u.adminID, false);
           if (u.adminName) pushRow('AdminName', u.adminName, false);
-          pushRow('backendToken', u.backendToken || u.Token, false);
+      
           return out;
         }
 
