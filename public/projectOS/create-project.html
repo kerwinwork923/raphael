@@ -54,11 +54,13 @@
 
 <div class="max-w-screen-lg mx-auto px-4 py-8">
 
-  <!-- HEADER -->
-  <div class="flex items-center gap-3 mb-8">
-    <a href="dashboard.html" class="flex items-center gap-1 text-sm text-slate-500 hover:text-blue-600 transition">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>返回
-    </a>
+  <!-- HEADER -->    
+   <a href="dashboard.html" class=" gap-1  text-slate-500  bg-blue-600 px-2 py-1 rounded-md text-white transition  ">
+    返回
+  </a>
+  <div class="flex items-center gap-3 mb-8 mt-2">
+
+
     <div class="flex-1">
       <h1 class="text-2xl font-extrabold text-slate-900">建立新專案</h1>
       <p class="text-sm text-slate-500 mt-0.5">選擇 AI 自動生成，或手動填寫建立專案</p>
@@ -500,6 +502,223 @@
 </div>
 
 <script>
+// ─── BACKEND API (FR) ───
+const API_BASE = "https://23700999.com:8081/PM";
+const NEW_PROJECT_URL = API_BASE + "/api/fr/NewProject";
+
+const DEPARTMENT_CODE_MAP = {
+  "業務發展處": "1",
+  "總經理室": "2",
+  "創新研發處": "3",
+  "智慧醫療業務部": "4",
+  "客服暨會員關係部": "5"
+};
+
+// 依照 UI 狀態文字做「猜測」對應 Code；若後端 Code 不同可再把 map 改掉
+const TASK_STATE_CODE_MAP = {
+  "待辦": "1",
+  "進行中": "2",
+  "完成": "3",
+  "延遲": "4"
+};
+
+function getBackendTokenAndAdmin() {
+  const token = localStorage.getItem("backendToken") || sessionStorage.getItem("backendToken");
+  const adminID = localStorage.getItem("adminID") || sessionStorage.getItem("adminID");
+  if (!token || !adminID) {
+    showToast("請先登入後台（右上角頭像需要有登入狀態）", "warn");
+    return null;
+  }
+  return { token, adminID };
+}
+
+function postJson(url, body) {
+  return fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  }).then(function (res) {
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  });
+}
+
+function toYYYYMMDD(d) {
+  if (!d) return "";
+  const s = String(d).trim();
+  return s.includes("-") ? s.replace(/-/g, "") : s;
+}
+
+function departmentNameToCode(deptText) {
+  if (!deptText) return "";
+  return DEPARTMENT_CODE_MAP[deptText] || "";
+}
+
+function statusToCode(statusText) {
+  return TASK_STATE_CODE_MAP[statusText] || "1";
+}
+
+function collectManualKPIList() {
+  const rows = document.querySelectorAll("#m-kpi-list > div");
+  return Array.from(rows)
+    .map((row) => {
+      const inputs = row.querySelectorAll("input");
+      const KPIName = inputs[0] ? inputs[0].value.trim() : "";
+      const KPITarget = inputs[1] ? inputs[1].value.trim() : "";
+      if (!KPIName && !KPITarget) return null;
+      return { KPIName: KPIName, KPITarget: KPITarget };
+    })
+    .filter(Boolean);
+}
+
+function collectManualTaskList() {
+  // 把前置任務的「本機 id」轉成「1-based CID」：後端 spec 範例用 CID 不能是空白
+  const idToCid = {};
+  manualTasks.forEach((t, idx) => {
+    idToCid[t.id] = String(idx + 1);
+  });
+
+  return manualTasks.map((t) => {
+    const prereqCid = t.prerequisite ? idToCid[t.prerequisite] || "0" : "0";
+    return {
+      Topic: t.title || "",
+      Description: t.desc || "",
+      StertDate: toYYYYMMDD(t.startDate || ""),
+      EndDate: toYYYYMMDD(t.endDate || ""),
+      ChargeMan: t.assignee || "",
+      State: statusToCode(t.status || "待辦"),
+      PreTaskID: String(prereqCid).trim() || "0",
+    };
+  });
+}
+
+function collectManualProjectPayload() {
+  const ProjectName = document.getElementById("m-proj-name").value.trim();
+  const ChargeMan = document.getElementById("m-owner").value.trim();
+  const Participants = document.getElementById("m-members").value.trim();
+  const StartDate = toYYYYMMDD(document.getElementById("m-start").value);
+  const EndDate = toYYYYMMDD(document.getElementById("m-end").value);
+  const deptText = document.getElementById("m-dept").value;
+  const Department = departmentNameToCode(deptText);
+  const ShareProject_URL = document.getElementById("m-url").value.trim();
+  const Decision = document.getElementById("m-decision").value.trim();
+
+  const KPIList = collectManualKPIList();
+  const TaskList = collectManualTaskList();
+
+  const missing = [];
+  if (!ProjectName) missing.push("專案名稱");
+  if (!ChargeMan) missing.push("負責人");
+  if (!Participants) missing.push("參與人員");
+  if (!StartDate) missing.push("開始日期");
+  if (!EndDate) missing.push("結束日期");
+  if (!Department) missing.push("部門");
+  if (!Decision) missing.push("決策摘要");
+  if (!KPIList.length) missing.push("KPIList");
+  if (!TaskList.length) missing.push("TaskList");
+  if (missing.length) {
+    showToast("請補齊： " + missing.join("、"), "warn");
+    return null;
+  }
+
+  return {
+    ProjectName,
+    ChargeMan,
+    Participants,
+    StartDate,
+    EndDate,
+    Department,
+    ShareProject_URL,
+    Decision,
+    KPIList,
+    TaskList,
+  };
+}
+
+function collectAIGeneratedProjectPayload() {
+  const ProjectName = document.getElementById("proj-name").value.trim();
+  const basicCard = document.getElementById("proj-name").closest(".section-card");
+  const textInputs = basicCard ? basicCard.querySelectorAll("input[type='text']") : [];
+  // 基本資訊區塊的 input 順序：proj-name / owner / members / share url
+  const ChargeMan = textInputs[1] ? textInputs[1].value.trim() : "";
+  const Participants = textInputs[2] ? textInputs[2].value.trim() : "";
+  const ShareProject_URL = textInputs[3] ? textInputs[3].value.trim() : "";
+
+  const dateInputs = basicCard ? basicCard.querySelectorAll("input[type='date']") : [];
+  const StartDate = toYYYYMMDD(dateInputs[0] ? dateInputs[0].value : "");
+  const EndDate = toYYYYMMDD(dateInputs[1] ? dateInputs[1].value : "");
+
+  const deptSelect = basicCard ? basicCard.querySelector("select") : null;
+  const Department = deptSelect ? departmentNameToCode(deptSelect.value) : "";
+
+  const decisionSummaryEl = document.getElementById("decision-summary");
+  const textarea = document.querySelector("#step-generated textarea");
+  const Decision =
+    (decisionSummaryEl ? decisionSummaryEl.textContent.trim() : "") +
+    (textarea && textarea.value.trim() ? "\n" + textarea.value.trim() : "");
+
+  // KPIList：kpi-list 區塊（span 版與 addKPI 的 input 版都支援）
+  const kpiRows = document.querySelectorAll("#step-generated #kpi-list > div");
+  const KPIList = Array.from(kpiRows)
+    .map((row) => {
+      const span = row.querySelector("span");
+      const inputs = row.querySelectorAll("input");
+
+      if (span) {
+        const KPIName = (span.textContent || "").trim();
+        const KPITarget = inputs[0] ? inputs[0].value.trim() : "";
+        if (!KPIName && !KPITarget) return null;
+        return { KPIName, KPITarget };
+      }
+
+      // addKPI() 產生的 row：input[0]=名稱, input[1]=目標值
+      const KPIName = inputs[0] ? inputs[0].value.trim() : "";
+      const KPITarget = inputs[1] ? inputs[1].value.trim() : "";
+      if (!KPIName && !KPITarget) return null;
+      return { KPIName, KPITarget };
+    })
+    .filter(Boolean);
+
+  // TaskList：從 generatedTasks 直接轉（缺少前置任務/狀態，就用後端可接受的預設）
+  const TaskList = generatedTasks.map((t) => ({
+    Topic: t.title || "",
+    Description: t.note || "",
+    StertDate: StartDate,
+    EndDate: toYYYYMMDD(t.due || ""),
+    ChargeMan: t.assignee || "",
+    State: "1",
+    PreTaskID: "0",
+  }));
+
+  const missing = [];
+  if (!ProjectName) missing.push("專案名稱");
+  if (!ChargeMan) missing.push("負責人");
+  if (!Participants) missing.push("參與人員");
+  if (!StartDate) missing.push("開始日期");
+  if (!EndDate) missing.push("結束日期");
+  if (!Department) missing.push("部門");
+  if (!Decision) missing.push("決策摘要");
+  if (!KPIList.length) missing.push("KPIList");
+  if (!TaskList.length) missing.push("TaskList");
+  if (missing.length) {
+    showToast("請補齊： " + missing.join("、"), "warn");
+    return null;
+  }
+
+  return {
+    ProjectName,
+    ChargeMan,
+    Participants,
+    StartDate,
+    EndDate,
+    Department,
+    ShareProject_URL,
+    Decision,
+    KPIList,
+    TaskList,
+  };
+}
+
 // ─── TASKS DATA ───
 let generatedTasks = [
   {id:1, title:'市場調查與競品分析', assignee:'Alice', due:'2026-04-08', priority:'高'},
@@ -633,10 +852,26 @@ function resetForm() {
 // ─── SUBMIT ───
 function saveDraft() { showToast('草稿已儲存'); }
 function submitProject() {
-  const name = document.getElementById('proj-name').value.trim();
-  if(!name){ showToast('請填入專案名稱','warn'); return; }
-  showToast('🎉 專案建立成功！');
-  setTimeout(() => { window.location.href = 'task-tracking.html'; }, 800);
+  const session = getBackendTokenAndAdmin();
+  if (!session) return;
+
+  const payload = collectAIGeneratedProjectPayload();
+  if (!payload) return;
+
+  showToast("建立專案中…", "success");
+  postJson(NEW_PROJECT_URL, Object.assign({ AdminID: session.adminID, Token: session.token }, payload))
+    .then(function (r) {
+      if (r && r.Result === "OK") {
+        if (r.AID != null) localStorage.setItem("projectAID", String(r.AID));
+        showToast("🎉 專案建立成功！");
+        setTimeout(() => { window.location.href = "task-tracking.html"; }, 800);
+      } else {
+        showToast("建立失敗：" + (r && (r.Message || r.Result) ? (r.Message || r.Result) : "未知錯誤"), "warn");
+      }
+    })
+    .catch(function () {
+      showToast("伺服器錯誤，請稍後再試", "warn");
+    });
 }
 
 // ─── MODE TOGGLE ───
@@ -780,10 +1015,26 @@ function renderManualTasks() {
 
 // ─── MANUAL SUBMIT ───
 function submitManualProject() {
-  const name = document.getElementById('m-proj-name').value.trim();
-  if (!name) { showToast('請填入專案名稱', 'warn'); return; }
-  showToast('🎉 專案建立成功！');
-  setTimeout(() => { window.location.href = 'task-tracking.html'; }, 800);
+  const session = getBackendTokenAndAdmin();
+  if (!session) return;
+
+  const payload = collectManualProjectPayload();
+  if (!payload) return;
+
+  showToast("建立專案中…", "success");
+  postJson(NEW_PROJECT_URL, Object.assign({ AdminID: session.adminID, Token: session.token }, payload))
+    .then(function (r) {
+      if (r && r.Result === "OK") {
+        if (r.AID != null) localStorage.setItem("projectAID", String(r.AID));
+        showToast("🎉 專案建立成功！");
+        setTimeout(() => { window.location.href = "task-tracking.html"; }, 800);
+      } else {
+        showToast("建立失敗：" + (r && (r.Message || r.Result) ? (r.Message || r.Result) : "未知錯誤"), "warn");
+      }
+    })
+    .catch(function () {
+      showToast("伺服器錯誤，請稍後再試", "warn");
+    });
 }
 
 // ─── TOAST ───
@@ -799,12 +1050,19 @@ function showToast(msg, type='success') {
 
 (function initNavAvatar(){
   try {
-    const raw = localStorage.getItem('userData');
-    if (!raw) return;
-    const u = JSON.parse(raw);
-    const name = (u.Member && u.Member.Name) || u.Name || '會員';
     const el = document.getElementById('navUserAvatar');
-    if (el) el.textContent = String(name).trim().charAt(0).toUpperCase() || '?';
+    if (!el) return;
+    const raw = localStorage.getItem('userData');
+    if (raw) {
+      const u = JSON.parse(raw);
+      const name = (u.Member && u.Member.Name) || u.Name || '會員';
+      el.textContent = String(name).trim().charAt(0).toUpperCase() || '?';
+      return;
+    }
+    const adminName = localStorage.getItem('adminName') || sessionStorage.getItem('adminName');
+    const adminId = localStorage.getItem('adminID') || sessionStorage.getItem('adminID');
+    const label = (adminName || adminId || '').trim();
+    if (label) el.textContent = label.charAt(0).toUpperCase() || '?';
   } catch (e) {}
 })();
 </script>

@@ -1381,12 +1381,19 @@ function showToast(msg,type='success'){
 
 function initNavAvatar() {
   try {
-    const raw = localStorage.getItem('userData');
-    if (!raw) return;
-    const u = JSON.parse(raw);
-    const name = (u.Member && u.Member.Name) || u.Name || '會員';
     const el = document.getElementById('navUserAvatar');
-    if (el) el.textContent = String(name).trim().charAt(0).toUpperCase() || '?';
+    if (!el) return;
+    const raw = localStorage.getItem('userData');
+    if (raw) {
+      const u = JSON.parse(raw);
+      const name = (u.Member && u.Member.Name) || u.Name || '會員';
+      el.textContent = String(name).trim().charAt(0).toUpperCase() || '?';
+      return;
+    }
+    const adminName = localStorage.getItem('adminName') || sessionStorage.getItem('adminName');
+    const adminId = localStorage.getItem('adminID') || sessionStorage.getItem('adminID');
+    const label = (adminName || adminId || '').trim();
+    if (label) el.textContent = label.charAt(0).toUpperCase() || '?';
   } catch (e) {}
 }
 

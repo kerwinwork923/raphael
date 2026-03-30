@@ -63,9 +63,9 @@
         <div class="flex flex-col sm:flex-row sm:items-center gap-5">
           <div id="heroAvatar" class="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center text-3xl font-extrabold ring-2 ring-white/30 shrink-0">?</div>
           <div class="min-w-0 flex-1">
-            <p class="text-xs font-medium text-blue-100 uppercase tracking-wider">NeuroPlus 同步帳號</p>
+            <p id="heroBadge" class="text-xs font-medium text-blue-100 uppercase tracking-wider">帳號</p>
             <h1 id="heroName" class="text-2xl sm:text-3xl font-extrabold mt-1 truncate">會員</h1>
-            <p id="heroMobile" class="text-sm text-blue-100/90 mt-1 font-mono"></p>
+            <p id="heroSub" class="text-sm text-blue-100/90 mt-1 font-mono"></p>
           </div>
           <div class="flex flex-col sm:items-end gap-2 shrink-0">
             <button type="button" id="btnRefresh" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-sm font-semibold border border-white/30 transition">
@@ -82,9 +82,7 @@
         <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-4">基本資料</h2>
         <dl id="fieldList" class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4"></dl>
 
-        <p class="text-xs text-slate-400 mt-8 leading-relaxed">
-          資料來自本機儲存的登入狀態（與主站相同）。點「重新整理資料」可向伺服器同步最新會員資訊；登出將清除本機 session。
-        </p>
+
       </div>
     </div>
   </div>
@@ -99,11 +97,32 @@
       var loadingOverlay = document.getElementById('loadingOverlay');
       var fieldList = document.getElementById('fieldList');
       var heroName = document.getElementById('heroName');
-      var heroMobile = document.getElementById('heroMobile');
+      var heroBadge = document.getElementById('heroBadge');
+      var heroSub = document.getElementById('heroSub');
       var heroAvatar = document.getElementById('heroAvatar');
       var navAvatar = document.getElementById('navAvatar');
+      var btnRefresh = document.getElementById('btnRefresh');
+
+      function getBackendSession() {
+        var fromLocal = localStorage.getItem('backendToken');
+        var fromSess = sessionStorage.getItem('backendToken');
+        var token = fromLocal || fromSess;
+        if (!token) return null;
+        var storage = fromLocal ? localStorage : sessionStorage;
+        return {
+          mode: 'backend',
+          Token: token,
+          backendToken: token,
+          adminID: storage.getItem('adminID') || '',
+          adminName: storage.getItem('adminName') || '',
+          _storage: fromLocal ? 'local' : 'session'
+        };
+      }
 
       function requireLogin() {
+        var backend = getBackendSession();
+        if (backend) return backend;
+
         try {
           var raw = localStorage.getItem('userData');
           if (!raw) throw new Error('no user');
@@ -112,6 +131,7 @@
           var maidOk = d.MAID && String(d.MAID).trim();
           var mobileOk = d.Mobile && String(d.Mobile).trim();
           if (!tokenOk || !maidOk || !mobileOk) throw new Error('incomplete');
+          d.mode = 'member';
           return d;
         } catch (e) {
           window.location.href = 'index.html';
@@ -140,13 +160,17 @@
           Birthday: '生日',
           Mail: '電子郵件',
           NowAvaPoints: '可用積分',
-          Result: 'API 狀態'
+          Result: 'API 狀態',
+          adminID: '管理員帳號',
+          AdminName: '管理員姓名',
+          backendToken: '後台登入狀態'
         };
         return map[key] || key;
       }
 
       function formatValue(key, val) {
         if (val == null || val === '') return '—';
+   
         return String(val);
       }
 
@@ -162,6 +186,13 @@
           out.push({ key: key, val: val, fromMember: !!fromMember });
         }
 
+        if (u.mode === 'backend') {
+          pushRow('adminID', u.adminID, false);
+          if (u.adminName) pushRow('AdminName', u.adminName, false);
+          pushRow('backendToken', u.backendToken || u.Token, false);
+          return out;
+        }
+
         if (u.Member && u.Member.Name != null && String(u.Member.Name).trim() !== '') {
           pushRow('Name', u.Member.Name, true);
         } else if (u.Name != null && String(u.Name).trim() !== '') {
@@ -173,7 +204,7 @@
         });
 
         Object.keys(u).forEach(function (k) {
-          if (k === 'Member' || SENSITIVE[k]) return;
+          if (k === 'Member' || k === 'mode' || SENSITIVE[k]) return;
           if (typeof u[k] === 'object' && u[k] !== null) return;
           if (seen[k]) return;
           pushRow(k, u[k], false);
@@ -183,9 +214,19 @@
       }
 
       function render(u) {
-        var name = displayName(u);
+        var name;
+        if (u.mode === 'backend') {
+          heroBadge.textContent = '後台管理員';
+          name = u.adminName || u.adminID || '管理員';
+          heroSub.textContent = u.adminID ? '帳號：' + u.adminID : '';
+          btnRefresh.classList.add('hidden');
+        } else {
+          heroBadge.textContent = 'NeuroPlus 會員';
+          name = displayName(u);
+          heroSub.textContent = u.Mobile ? String(u.Mobile) : '';
+          btnRefresh.classList.remove('hidden');
+        }
         heroName.textContent = name;
-        heroMobile.textContent = u.Mobile ? String(u.Mobile) : '';
         var ini = initialChar(name);
         heroAvatar.textContent = ini;
         navAvatar.textContent = ini;
@@ -234,6 +275,10 @@
       function refreshFromServer() {
         var u = requireLogin();
         if (!u) return;
+        if (u.mode === 'backend') {
+          alert('後台帳號無法透過此功能同步會員資料。');
+          return;
+        }
         setLoading(true);
         return postJson(USER_DATA_URL, {
           MID: u.MID,
@@ -261,6 +306,12 @@
       function logout() {
         if (!confirm('確定要登出？登出後需重新登入才能使用 ProjectOS。')) return;
         localStorage.removeItem('userData');
+        localStorage.removeItem('backendToken');
+        localStorage.removeItem('adminID');
+        localStorage.removeItem('adminName');
+        sessionStorage.removeItem('backendToken');
+        sessionStorage.removeItem('adminID');
+        sessionStorage.removeItem('adminName');
         window.location.href = 'index.html';
       }
 
