@@ -215,7 +215,7 @@
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
               建立專案
             </button>
-            <button onclick="saveDraft()" class="w-full border border-slate-200 text-slate-600 hover:bg-slate-50 py-2.5 rounded-xl text-sm transition">儲存草稿</button>
+           
           </div>
 
         </div>
@@ -421,7 +421,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
             建立專案
           </button>
-          <button onclick="saveDraft()" class="w-full border border-slate-200 text-slate-600 hover:bg-slate-50 py-2.5 rounded-xl text-sm transition">儲存草稿</button>
+        
           <button onclick="resetForm()" class="w-full text-slate-400 hover:text-slate-600 py-2 text-xs transition mt-1">重新輸入</button>
         </div>
 
@@ -850,7 +850,7 @@ function resetForm() {
 }
 
 // ─── SUBMIT ───
-function saveDraft() { showToast('草稿已儲存'); }
+
 function submitProject() {
   const session = getBackendTokenAndAdmin();
   if (!session) return;
