@@ -864,7 +864,7 @@ function submitProject() {
       if (r && r.Result === "OK") {
         if (r.AID != null) localStorage.setItem("projectAID", String(r.AID));
         showToast("🎉 專案建立成功！");
-        setTimeout(() => { window.location.href = "task-tracking.html"; }, 800);
+          setTimeout(() => { window.location.href = "/projectOS/task-tracking.html"; }, 800);
       } else {
         showToast("建立失敗：" + (r && (r.Message || r.Result) ? (r.Message || r.Result) : "未知錯誤"), "warn");
       }
@@ -1027,7 +1027,7 @@ function submitManualProject() {
       if (r && r.Result === "OK") {
         if (r.AID != null) localStorage.setItem("projectAID", String(r.AID));
         showToast("🎉 專案建立成功！");
-        setTimeout(() => { window.location.href = "task-tracking.html"; }, 800);
+        setTimeout(() => { window.location.href = "/projectOS/task-tracking.html"; }, 800);
       } else {
         showToast("建立失敗：" + (r && (r.Message || r.Result) ? (r.Message || r.Result) : "未知錯誤"), "warn");
       }

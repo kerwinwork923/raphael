@@ -294,7 +294,7 @@
           localStorage.getItem("backendToken") ||
           sessionStorage.getItem("backendToken");
         if (t) {
-          window.location.href = "dashboard.html";
+          window.location.href = "/projectOS/dashboard.html";
         }
       }
   
@@ -334,7 +334,7 @@
                 localStorage.removeItem("rememberID");
               }
               persistSession(r.Token, username, remember);
-              window.location.href = "dashboard.html";
+              window.location.href = "/projectOS/dashboard.html";
             } else {
               alertMsg("登入失敗：" + (r && r.Result != null ? r.Result : "請檢查帳號密碼"));
             }

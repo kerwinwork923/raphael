@@ -134,7 +134,7 @@
           d.mode = 'member';
           return d;
         } catch (e) {
-          window.location.href = 'index.html';
+          window.location.href = '/projectOS/index.html';
           return null;
         }
       }
@@ -312,7 +312,7 @@
         sessionStorage.removeItem('backendToken');
         sessionStorage.removeItem('adminID');
         sessionStorage.removeItem('adminName');
-        window.location.href = 'index.html';
+        window.location.href = '/projectOS/index.html';
       }
 
       var user = requireLogin();
