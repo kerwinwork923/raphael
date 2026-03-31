@@ -32,23 +32,8 @@
     </div>
   </div>
 
-  <nav class="bg-white border-b border-slate-200 sticky top-0 z-40">
-    <div class="max-w-screen-xl mx-auto px-4 flex items-center h-14 gap-4">
-      <a href="dashboard.html" class="flex items-center gap-2 font-bold text-blue-600 text-lg tracking-tight hover:opacity-80">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
-        </svg>
-        ProjectOS
-      </a>
-      <span class="text-xs text-slate-300 hidden sm:inline">AI Decision OS</span>
-      <div class="flex-1"></div>
-      <a href="dashboard.html" class="text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition">Dashboard</a>
-      <a href="create-project.html" class="text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition">建立新專案</a>
-      <a href="task-tracking.html" class="text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition">Task 追蹤</a>
-      <a href="profile.html" class="text-sm text-blue-600 font-medium px-2 py-1 rounded-md hover:bg-blue-50 transition">會員資料</a>
-      <a href="profile.html" id="navAvatar" class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold shrink-0 hover:ring-2 hover:ring-blue-300 transition" title="會員資料">?</a>
-    </div>
-  </nav>
+  <div id="projectos-header"></div>
+  <script src="./shared-header.js"></script>
 
   <div class="max-w-screen-lg mx-auto px-4 py-8">
     <div class="flex flex-wrap items-center gap-3 mb-8">
@@ -100,7 +85,7 @@
       var heroBadge = document.getElementById('heroBadge');
       var heroSub = document.getElementById('heroSub');
       var heroAvatar = document.getElementById('heroAvatar');
-      var navAvatar = document.getElementById('navAvatar');
+      var navAvatar = document.getElementById('navUserAvatar');
       var btnRefresh = document.getElementById('btnRefresh');
 
       function getBackendSession() {
@@ -229,7 +214,7 @@
         heroName.textContent = name;
         var ini = initialChar(name);
         heroAvatar.textContent = ini;
-        navAvatar.textContent = ini;
+        if (navAvatar) navAvatar.textContent = ini;
 
         var rows = orderedKeys(u);
         fieldList.innerHTML = rows.map(function (row) {

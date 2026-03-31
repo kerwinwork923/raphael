@@ -35,27 +35,13 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen">
 
-<!-- NAV -->
-<nav class="bg-white border-b border-slate-200 sticky top-0 z-40">
-  <div class="max-w-screen-xl mx-auto px-4 flex items-center h-14 gap-4">
-    <a href="dashboard.html" class="flex items-center gap-2 font-bold text-blue-600 text-lg tracking-tight hover:opacity-80">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
-      ProjectOS
-    </a>
-    <span class="text-xs text-slate-300">AI Decision OS</span>
-    <div class="flex-1"></div>
-    <a href="dashboard.html" class="text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition">Dashboard</a>
-    <a href="create-project.html" class="text-sm text-blue-600 font-medium px-2 py-1 rounded-md hover:bg-blue-50 transition">建立新專案</a>
-    <a href="task-tracking.html" class="text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition">Task 追蹤</a>
-    <a href="profile.html" class="text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition">會員資料</a>
-    <a href="profile.html" id="navUserAvatar" class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold hover:ring-2 hover:ring-blue-300 transition shrink-0" title="會員資料">?</a>
-  </div>
-</nav>
+<div id="projectos-header"></div>
+<script src="./shared-header.js"></script>
 
 <div class="max-w-screen-lg mx-auto px-4 py-8">
 
   <!-- HEADER -->    
-   <a href="dashboard.html" class=" gap-1  text-slate-500  bg-blue-600 px-2 py-1 rounded-md text-white transition  ">
+   <a href="dashboard.html" class=" gap-1   text-white  bg-blue-600 px-2 py-1 rounded-md text-white transition  ">
     返回
   </a>
   <div class="flex items-center gap-3 mb-8 mt-2">
@@ -506,7 +492,15 @@
 const API_BASE = "https://23700999.com:8081/PM";
 const NEW_PROJECT_URL = API_BASE + "/api/fr/NewProject";
 
-const DEPARTMENT_CODE_MAP = {
+const GET_DEPARTMENT_URL = API_BASE + "/api/fr/getDepartmentCode";
+const TASK_STATE_LIST_URLS = [
+  API_BASE + "/api/fr/getTaskStateList",
+  API_BASE + "/api/fr/getTaskStateCode",
+  API_BASE + "/api/fr/getTaskState"
+];
+
+// 預設值：API 若失敗時仍可運作
+let DEPARTMENT_CODE_MAP = {
   "業務發展處": "1",
   "總經理室": "2",
   "創新研發處": "3",
@@ -514,13 +508,31 @@ const DEPARTMENT_CODE_MAP = {
   "客服暨會員關係部": "5"
 };
 
-// 依照 UI 狀態文字做「猜測」對應 Code；若後端 Code 不同可再把 map 改掉
-const TASK_STATE_CODE_MAP = {
+// 依照 UI 狀態文字做「猜測」對應 Code；會在取得 TaskStateList 後自動更新
+let TASK_STATE_CODE_MAP = {
   "待辦": "1",
   "進行中": "2",
   "完成": "3",
   "延遲": "4"
 };
+
+let departmentListCache = null;
+let taskStateListCache = null;
+
+function statusIconByCode(code) {
+  switch (String(code)) {
+    case "1":
+      return "📋";
+    case "2":
+      return "🔵";
+    case "3":
+      return "✅";
+    case "4":
+      return "⚠️";
+    default:
+      return "•";
+  }
+}
 
 function getBackendTokenAndAdmin() {
   const token = localStorage.getItem("backendToken") || sessionStorage.getItem("backendToken");
@@ -551,11 +563,87 @@ function toYYYYMMDD(d) {
 
 function departmentNameToCode(deptText) {
   if (!deptText) return "";
-  return DEPARTMENT_CODE_MAP[deptText] || "";
+  const s = String(deptText).trim();
+  return DEPARTMENT_CODE_MAP[s] || (/^\d+$/.test(s) ? s : "");
 }
 
 function statusToCode(statusText) {
-  return TASK_STATE_CODE_MAP[statusText] || "1";
+  if (!statusText) return "1";
+  const s = String(statusText).trim();
+  return TASK_STATE_CODE_MAP[s] || (/^\d+$/.test(s) ? s : "1");
+}
+
+function setSelectValueIfOptionExists(selectEl, desiredValue, fallbackValue) {
+  if (!selectEl) return;
+  const dv = desiredValue == null ? "" : String(desiredValue);
+  const exists = Array.from(selectEl.options).some((o) => String(o.value) === dv);
+  if (exists) {
+    selectEl.value = dv;
+    return;
+  }
+  const fv = fallbackValue == null ? "" : String(fallbackValue);
+  if (fv && Array.from(selectEl.options).some((o) => String(o.value) === fv)) {
+    selectEl.value = fv;
+    return;
+  }
+  if (selectEl.options.length) selectEl.value = selectEl.options[0].value;
+}
+
+function populateDepartmentSelect(selectEl, placeholderText) {
+  if (!selectEl) return;
+  const current = selectEl.value;
+  selectEl.innerHTML = "";
+
+  if (placeholderText != null) {
+    const ph = document.createElement("option");
+    ph.value = "";
+    ph.textContent = placeholderText;
+    selectEl.appendChild(ph);
+  }
+
+  const list =
+    Array.isArray(departmentListCache) && departmentListCache.length
+      ? departmentListCache
+      : Object.keys(DEPARTMENT_CODE_MAP).map((name) => ({
+          Name: name,
+          Code: DEPARTMENT_CODE_MAP[name],
+        }));
+
+  list.forEach((d) => {
+    const opt = document.createElement("option");
+    opt.value = String(d.Name);
+    opt.textContent = String(d.Name);
+    selectEl.appendChild(opt);
+  });
+
+  setSelectValueIfOptionExists(
+    selectEl,
+    current,
+    placeholderText != null ? "" : selectEl.options[0]?.value
+  );
+}
+
+function populateTaskStateSelect(selectEl) {
+  if (!selectEl) return;
+  const current = selectEl.value;
+  selectEl.innerHTML = "";
+
+  const list =
+    Array.isArray(taskStateListCache) && taskStateListCache.length
+      ? taskStateListCache
+      : Object.keys(TASK_STATE_CODE_MAP).map((name) => ({
+          Name: name,
+          Code: TASK_STATE_CODE_MAP[name],
+        }));
+
+  list.forEach((st) => {
+    const opt = document.createElement("option");
+    opt.value = String(st.Name);
+    opt.textContent = `${statusIconByCode(st.Code)} ${String(st.Name)}`;
+    selectEl.appendChild(opt);
+  });
+
+  setSelectValueIfOptionExists(selectEl, current, selectEl.options[0]?.value);
 }
 
 function collectManualKPIList() {
@@ -924,7 +1012,7 @@ let manualTasks = [];
 let editingTaskId = null;
 
 const AV_COLORS_M = {Alice:'bg-blue-500',Bob:'bg-purple-500',Carol:'bg-pink-500',Dave:'bg-orange-400','Dev Team':'bg-green-500',Legal:'bg-slate-400'};
-const STATUS_STYLES = {'待辦':'bg-slate-100 text-slate-600','進行中':'bg-blue-100 text-blue-700','完成':'bg-green-100 text-green-700','延遲':'bg-red-100 text-red-700'};
+const STATUS_STYLES_BY_CODE = {'1':'bg-slate-100 text-slate-600','2':'bg-blue-100 text-blue-700','3':'bg-green-100 text-green-700','4':'bg-red-100 text-red-700'};
 
 function openTaskModal(id = null) {
   editingTaskId = id;
@@ -936,7 +1024,8 @@ function openTaskModal(id = null) {
     document.getElementById('mt-start').value = t.startDate || '';
     document.getElementById('mt-end').value = t.endDate || '';
     document.getElementById('mt-assignee').value = t.assignee || 'Alice';
-    document.getElementById('mt-status').value = t.status || '待辦';
+    const selStatus = document.getElementById('mt-status');
+    setSelectValueIfOptionExists(selStatus, t.status || '待辦', selStatus?.options?.[0]?.value);
     document.getElementById('modal-title-text').textContent = '編輯任務';
     deleteBtn.classList.remove('hidden');
   } else {
@@ -945,7 +1034,8 @@ function openTaskModal(id = null) {
     document.getElementById('mt-start').value = '';
     document.getElementById('mt-end').value = '';
     document.getElementById('mt-assignee').value = 'Alice';
-    document.getElementById('mt-status').value = '待辦';
+    const selStatus = document.getElementById('mt-status');
+    setSelectValueIfOptionExists(selStatus, '待辦', selStatus?.options?.[0]?.value);
     document.getElementById('modal-title-text').textContent = '新增任務';
     deleteBtn.classList.add('hidden');
   }
@@ -1008,7 +1098,7 @@ function renderManualTasks() {
         <p class="text-xs font-medium text-slate-700 truncate">${t.title}</p>
         <p class="text-xs text-slate-400">${t.assignee||'未指定'}${t.endDate?' · '+t.endDate:''}</p>
       </div>
-      <span class="text-xs ${STATUS_STYLES[t.status]||'bg-slate-100 text-slate-500'} px-2 py-0.5 rounded-full flex-shrink-0">${t.status||'待辦'}</span>
+      <span class="text-xs ${STATUS_STYLES_BY_CODE[statusToCode(t.status||'待辦')]||'bg-slate-100 text-slate-500'} px-2 py-0.5 rounded-full flex-shrink-0">${t.status||'待辦'}</span>
     </div>`).join('');
   document.getElementById('m-task-count').textContent = manualTasks.length + ' 個任務';
 }
@@ -1064,6 +1154,67 @@ function showToast(msg, type='success') {
     const label = (adminName || adminId || '').trim();
     if (label) el.textContent = label.charAt(0).toUpperCase() || '?';
   } catch (e) {}
+})();
+
+// ─── INIT REFERENCE DATA (Departments / Task States) ───
+(function initReferenceData() {
+  // 不用 await：只要更新 UI 即可
+  var session = getBackendTokenAndAdmin();
+  if (!session) return;
+
+  var authBody = { AdminID: session.adminID, Token: session.token };
+
+  // 1) 部門資訊
+  postJson(GET_DEPARTMENT_URL, authBody)
+    .then(function (resp) {
+      if (resp && String(resp.Result).toUpperCase() === "OK" && Array.isArray(resp.DepartmentList)) {
+        departmentListCache = resp.DepartmentList;
+        DEPARTMENT_CODE_MAP = {};
+        resp.DepartmentList.forEach(function (d) {
+          if (!d) return;
+          var name = String(d.Name || "").trim();
+          var code = String(d.Code || "").trim();
+          if (!name || !code) return;
+          DEPARTMENT_CODE_MAP[name] = code;
+        });
+
+        populateDepartmentSelect(document.getElementById('m-dept'), '選擇部門');
+        // AI 生成步驟用的部門 select（只會存在於 #step-generated 區塊）
+        populateDepartmentSelect(document.querySelector('#step-generated select'), null);
+      }
+    })
+    .catch(function () {
+      // API 失敗時保留預設 select + map
+    });
+
+  // 2) 任務狀態列表（嘗試多個可能 endpoint）
+  var tryUrls = TASK_STATE_LIST_URLS.slice();
+  var tryNext = function () {
+    if (!tryUrls.length) return;
+    var url = tryUrls.shift();
+    postJson(url, authBody)
+      .then(function (resp) {
+        if (!resp) return;
+        if (String(resp.Result).toUpperCase() !== "OK") return;
+        if (!Array.isArray(resp.TaskStateList)) return;
+
+        taskStateListCache = resp.TaskStateList;
+        TASK_STATE_CODE_MAP = {};
+        resp.TaskStateList.forEach(function (st) {
+          if (!st) return;
+          var name = String(st.Name || "").trim();
+          var code = String(st.Code || "").trim();
+          if (!name || !code) return;
+          TASK_STATE_CODE_MAP[name] = code;
+        });
+
+        populateTaskStateSelect(document.getElementById('mt-status'));
+      })
+      .catch(function () {
+        tryNext();
+      });
+  };
+  tryNext();
 })();
 </script>
 </body>

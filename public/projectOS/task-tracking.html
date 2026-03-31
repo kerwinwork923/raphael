@@ -54,6 +54,7 @@ tailwind.config = {
   @keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
   .detail-tab-content.hidden{display:none;}
   .drop-zone-active{border-color:#3b82f6 !important;background:#eff6ff;}
+  .kanban-drop-active{outline:2px dashed #60a5fa;outline-offset:4px;background:rgba(59,130,246,.06);}
   .file-item{animation:fadeIn .2s ease;}
    .modal-body-scroll {
     overflow-y: auto;
@@ -63,22 +64,8 @@ tailwind.config = {
 </head>
 <body class="bg-slate-50 text-slate-800">
 
-<nav class="bg-white border-b border-slate-200 sticky top-0 z-40">
-  <div class="max-w-screen-xl mx-auto px-4 flex items-center h-14 gap-4">
-    <a href="dashboard.html" class="flex items-center gap-2 font-bold text-blue-600 text-lg tracking-tight hover:opacity-80">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
-      </svg>
-      ProjectOS
-    </a>
-    <div class="flex-1"></div>
-    <a href="dashboard.html" class="text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition">Dashboard</a>
-    <a href="create-project.html" class="text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition">建立新專案</a>
-    <a href="task-tracking.html" class="text-sm text-blue-600 font-medium px-2 py-1 rounded-md hover:bg-blue-50 transition">Task 追蹤</a>
-    <a href="profile.html" class="text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition">會員資料</a>
-    <a href="profile.html" id="navUserAvatar" class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold hover:ring-2 hover:ring-blue-300 transition shrink-0" title="會員資料">?</a>
-  </div>
-</nav>
+<div id="projectos-header"></div>
+<script src="./shared-header.js"></script>
 
 <div class="max-w-screen-xl mx-auto px-4 py-5">
 
@@ -701,6 +688,207 @@ tailwind.config = {
 </div>
 
 <script>
+// ─── BACKEND API (FR) ───
+const API_BASE = "https://23700999.com:8081/PM";
+const GET_PROJECT_LIST_URL = API_BASE + "/api/fr/getProjectList";
+
+function getBackendTokenAndAdmin() {
+  const token = localStorage.getItem("backendToken") || sessionStorage.getItem("backendToken");
+  const adminID = localStorage.getItem("adminID") || sessionStorage.getItem("adminID");
+  if (!token || !adminID) return null;
+  return { token, adminID };
+}
+
+function postJson(url, body) {
+  return fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  }).then(function (res) {
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  });
+}
+
+function extractProjectArray(resp) {
+  if (!resp || typeof resp !== "object") return [];
+  if (Array.isArray(resp)) return resp;
+  if (Array.isArray(resp.ProjectList)) return resp.ProjectList;
+  if (Array.isArray(resp.Data)) return resp.Data;
+  if (Array.isArray(resp.Projects)) return resp.Projects;
+  if (Array.isArray(resp.List)) return resp.List;
+  for (var k in resp) {
+    if (k === "Result" || k === "Message") continue;
+    if (Array.isArray(resp[k])) return resp[k];
+  }
+  return [];
+}
+
+function toIsoDate(dateStr) {
+  if (!dateStr) return "";
+  const s = String(dateStr).trim();
+  if (!s) return "";
+  if (s.includes("-")) return s.slice(0, 10);
+  const digits = s.replace(/\D/g, "");
+  if (digits.length < 8) return s;
+  return digits.slice(0, 4) + "-" + digits.slice(4, 6) + "-" + digits.slice(6, 8);
+}
+
+function calcDaysOverdue(endDateIso) {
+  const end = endDateIso ? new Date(endDateIso) : null;
+  if (!end || isNaN(end.getTime())) return 0;
+  const todayDate = new Date(today());
+  const endD = new Date(endDateIso);
+  // 取整天差（今天當作 0）
+  return Math.max(0, Math.ceil((todayDate - endD) / 86400000));
+}
+
+function deriveProjectStatusFromTasks(tasksObj) {
+  const all = Object.values(tasksObj).flat();
+  const total = all.length;
+  if (total === 0) return "in_progress";
+  const done = tasksObj.done.length;
+  if (done === total) return "closed";
+  const ratio = done / total;
+  return ratio >= 0.8 ? "review" : "in_progress";
+}
+
+function applyProjectStatusBadge(status) {
+  const badge = document.getElementById("project-status-badge");
+  if (!badge) return;
+  if (status === "review") {
+    badge.className = "status-review text-xs px-2.5 py-1 rounded-full font-semibold";
+    badge.textContent = "Review";
+  } else if (status === "closed") {
+    badge.className = "status-closed text-xs px-2.5 py-1 rounded-full font-semibold";
+    badge.textContent = "已結案";
+  } else {
+    badge.className = "status-in_progress text-xs px-2.5 py-1 rounded-full font-semibold";
+    badge.textContent = "進行中";
+  }
+}
+
+async function initProjectFromBackendIfPossible() {
+  const auth = getBackendTokenAndAdmin();
+  if (!auth) return;
+
+  // from dashboard: task-tracking.html?project=ProjectName
+  const urlParams = new URLSearchParams(window.location.search || "");
+  const projectNameQ = (urlParams.get("project") || "").trim();
+  // from create-project: localStorage.projectAID
+  const projectAID = (localStorage.getItem("projectAID") || "").trim();
+
+  let resp;
+  try {
+    resp = await postJson(GET_PROJECT_LIST_URL, { AdminID: auth.adminID, Token: auth.token });
+  } catch (e) {
+    return;
+  }
+
+  if (!resp || resp.Result == null || String(resp.Result).toUpperCase() !== "OK") return;
+  const projects = extractProjectArray(resp);
+  if (!projects.length) return;
+
+  const selected =
+    (projectNameQ
+      ? projects.find((p) => String(p.ProjectName || "").trim() === projectNameQ)
+      : null) ||
+    (projectAID
+      ? projects.find((p) => String(p.AID || p.ProjectAID || "").trim() === projectAID)
+      : null) ||
+    projects[0];
+
+  if (!selected) return;
+
+  const rawTasks = Array.isArray(selected.TaskList) ? selected.TaskList : [];
+  const rawKpis = Array.isArray(selected.KPIList) ? selected.KPIList : [];
+
+  // 先重組 TASKS（renderKanban 會用 TASKS）
+  const cidToLocalId = {};
+  const colBuckets = { todo: [], doing: [], done: [], blocked: [] };
+
+  // 第一趟：建立 CID -> local id 對照（PreTaskID 需要）
+  rawTasks.forEach((t, idx) => {
+    const cid =
+      t && (t.CID || t.cid || t.TaskCID || t.TaskCid || t.CIDValue || t.cidValue || "");
+    const cidStr = String(cid || "").trim();
+    const localId = "task-" + (idx + 1);
+    if (cidStr) cidToLocalId[cidStr] = localId;
+  });
+
+  rawTasks.forEach((t, idx) => {
+    const localId = "task-" + (idx + 1);
+    const stateCode = String(t && (t.State || t.TaskState || t.taskState || "1")).trim();
+    const topic = String(t && (t.Topic || t.Title || t.topic || "")).trim();
+    const desc = String(t && (t.Description || t.Desc || t.description || "")).trim();
+    const assignee = String(t && (t.ChargeMan || t.ChargePerson || t.assignee || t.Owner || "")).trim();
+    const startDate = toIsoDate(t && (t.StartDate || t.startDate || ""));
+    const endDate = toIsoDate(t && (t.EndDate || t.endDate || ""));
+
+    const preRaw = t && (t.PreTaskID || t.PreTaskId || t.PreTask || t.PreTaskCID || "");
+    const preStr = String(preRaw || "").trim();
+    const depId = preStr && preStr !== "0" ? cidToLocalId[preStr] || "" : "";
+
+    const blockedReason =
+      stateCode === "4"
+        ? String(
+            (t && (t.BlockedReason || t.blockedReason || t.BlockedReasonText || t.BlockedDesc || t.blockedDesc || t.Description)) ||
+              ""
+          ).trim()
+        : "";
+    const blockedDays = stateCode === "4" ? Number(t && (t.BlockedDays || t.blockedDays || 0)) || calcDaysOverdue(endDate) : undefined;
+
+    const taskObj = {
+      id: localId,
+      title: topic,
+      desc: desc,
+      assignee: assignee,
+      startDate: startDate,
+      endDate: endDate,
+      dep: depId,
+      blockedReason: blockedReason,
+      blockedDays: blockedDays,
+    };
+
+    if (stateCode === "1") colBuckets.todo.push(taskObj);
+    else if (stateCode === "2") colBuckets.doing.push(taskObj);
+    else if (stateCode === "3") colBuckets.done.push(taskObj);
+    else colBuckets.blocked.push(taskObj);
+  });
+
+  // 把重組後的 TASKS 注入目前頁面
+  TASKS = colBuckets;
+  completedCount = TASKS.done.length;
+
+  // 讓 header / status badge 與 tasks 同步
+  const projectName = String(selected.ProjectName || selected.name || "未命名專案").trim();
+  const chargeMan = String(selected.ChargeMan || selected.ChargePerson || selected.owner || selected.Owner || "—").trim();
+  const endYmdIso = toIsoDate(selected.EndDate || selected.endDate || "");
+
+  const h1 = document.querySelector(".flex-1 h1.text-xl.font-extrabold.text-slate-900");
+  if (h1) h1.textContent = projectName;
+
+  const p = document.querySelector(".flex-1 p.text-xs.text-slate-500.mt-1");
+  if (p) {
+    const participants = selected.Participants ? String(selected.Participants).trim() : "";
+    const creator = chargeMan || participants || "—";
+    p.textContent = `負責人：${chargeMan} · 發起人：${creator} · 預計結案：${endYmdIso || "—"}`;
+  }
+
+  const blockedSpan = document.querySelector("span.risk-pulse");
+  if (blockedSpan) blockedSpan.textContent = `🔴 Blocked ×${TASKS.blocked.length}`;
+
+  projectStatus = deriveProjectStatusFromTasks(TASKS);
+  applyProjectStatusBadge(projectStatus);
+
+  // 如果後端提供 ShareProject_URL，則同步到 Decision 區塊
+  if (selected.ShareProject_URL) {
+    DECISION_CHATGPT.shareProjectUrl = String(selected.ShareProject_URL || "").trim();
+  }
+
+  // 若後端有傳 KPIList，就不額外接 UI（目前 KPI 畫面是靜態）
+}
+
 let nextId = 100;
 let TASKS = {
   todo: [
@@ -749,6 +937,7 @@ let editingTaskCol = null;
 let completedCount = 0;
 let projectStatus = 'in_progress';
 let problemTaskId = null;
+let DRAGGING_TASK = null;
 
 function today() { return new Date().toISOString().split('T')[0]; }
 function isOverdue(d) { return d && d < today(); }
@@ -827,7 +1016,7 @@ function buildCard(t, col) {
   const badgesHtml = db ? `<div class="flex flex-wrap gap-1 mt-1.5">${db}</div>` : '';
 
   if(col==='done') return `
-    <div class="kanban-card bg-white rounded-xl border border-green-200 p-3 opacity-80 hover:opacity-100 transition fade-in ${uc}">
+    <div class="kanban-card bg-white rounded-xl border border-green-200 p-3 opacity-80 hover:opacity-100 transition fade-in ${uc}" draggable="true" ondragstart="onCardDragStart(event,'${t.id}','${col}')" ondragend="onCardDragEnd(event)">
       ${titleHtml}${descHtml}
       <div class="flex items-center justify-between mt-2">
         <div class="flex items-center gap-1">${avatarHtml}</div>
@@ -838,7 +1027,7 @@ function buildCard(t, col) {
       </div>
     </div>`;
   if(col==='blocked') return `
-    <div class="kanban-card bg-white rounded-xl border border-red-200 p-3 fade-in">
+    <div class="kanban-card bg-white rounded-xl border border-red-200 p-3 fade-in" draggable="true" ondragstart="onCardDragStart(event,'${t.id}','${col}')" ondragend="onCardDragEnd(event)">
       ${titleHtml}${descHtml}
       <div class="bg-red-50 border border-red-100 rounded-lg px-2.5 py-2 mb-2.5">
         <p class="text-xs text-red-600 font-medium">${t.blockedReason||'尚未填寫阻擋原因'}</p>
@@ -851,7 +1040,7 @@ function buildCard(t, col) {
       </div>
     </div>`;
   if(col==='doing') return `
-    <div class="kanban-card bg-white rounded-xl border border-blue-200 p-3 shadow-sm fade-in ${uc}">
+    <div class="kanban-card bg-white rounded-xl border border-blue-200 p-3 shadow-sm fade-in ${uc}" draggable="true" ondragstart="onCardDragStart(event,'${t.id}','${col}')" ondragend="onCardDragEnd(event)">
       <div class="flex items-start gap-1 flex-wrap mb-1">${ub}</div>
       ${titleHtml}${descHtml}${badgesHtml}
       <div class="flex items-center justify-between mt-2 mb-2.5"><div class="flex items-center gap-1">${avatarHtml}</div></div>
@@ -861,7 +1050,7 @@ function buildCard(t, col) {
       </div>
     </div>`;
   return `
-    <div class="kanban-card bg-white rounded-xl border border-slate-200 p-3 hover:border-blue-200 transition fade-in ${uc} ${locked?'opacity-60':''}">
+    <div class="kanban-card bg-white rounded-xl border border-slate-200 p-3 hover:border-blue-200 transition fade-in ${uc} ${locked?'opacity-60':''}" draggable="true" ondragstart="onCardDragStart(event,'${t.id}','${col}')" ondragend="onCardDragEnd(event)">
       <div class="flex items-start gap-1 flex-wrap mb-1">${ub}</div>
       ${titleHtml}${descHtml}${badgesHtml}
       <div class="flex items-center justify-between mt-2 mb-2.5"><div class="flex items-center gap-1">${avatarHtml}</div></div>
@@ -882,6 +1071,66 @@ function renderKanban() {
   updateHealth();
   updateKpiProgress();
   populateDepSelect();
+}
+
+function clearKanbanDropStyle() {
+  ['todo','doing','done','blocked'].forEach(function (col) {
+    const el = document.getElementById('col-' + col);
+    if (el) el.classList.remove('kanban-drop-active');
+  });
+}
+
+function onCardDragStart(event, id, fromCol) {
+  DRAGGING_TASK = { id: id, fromCol: fromCol };
+  if (event.dataTransfer) {
+    event.dataTransfer.setData('text/plain', JSON.stringify(DRAGGING_TASK));
+    event.dataTransfer.effectAllowed = 'move';
+  }
+}
+
+function onCardDragEnd() {
+  DRAGGING_TASK = null;
+  clearKanbanDropStyle();
+}
+
+function onColDragOver(event, toCol) {
+  event.preventDefault();
+  if (!DRAGGING_TASK) return;
+  if (DRAGGING_TASK.fromCol === toCol) return;
+  clearKanbanDropStyle();
+  const el = document.getElementById('col-' + toCol);
+  if (el) el.classList.add('kanban-drop-active');
+}
+
+function onColDrop(event, toCol) {
+  event.preventDefault();
+  clearKanbanDropStyle();
+
+  let payload = DRAGGING_TASK;
+  if (!payload && event.dataTransfer) {
+    try {
+      payload = JSON.parse(event.dataTransfer.getData('text/plain') || '{}');
+    } catch (e) {
+      payload = null;
+    }
+  }
+  DRAGGING_TASK = null;
+  if (!payload || !payload.id || !payload.fromCol) return;
+  if (payload.fromCol === toCol) return;
+
+  quickMove(payload.id, payload.fromCol, toCol);
+}
+
+function initKanbanDragAndDrop() {
+  ['todo','doing','done','blocked'].forEach(function (col) {
+    const el = document.getElementById('col-' + col);
+    if (!el) return;
+    el.addEventListener('dragover', function (e) { onColDragOver(e, col); });
+    el.addEventListener('drop', function (e) { onColDrop(e, col); });
+    el.addEventListener('dragleave', function (e) {
+      if (e.target === el) el.classList.remove('kanban-drop-active');
+    });
+  });
 }
 
 function updateProgress() {
@@ -1399,17 +1648,22 @@ function initNavAvatar() {
 
 document.addEventListener('DOMContentLoaded', () => {
   initNavAvatar();
-  renderKanban();
-  renderFiles();
+  initKanbanDragAndDrop();
+  initProjectFromBackendIfPossible()
+    .catch(function () {})
+    .finally(function () {
+      renderKanban();
+      renderFiles();
 
-  document.getElementById('decision-shareproject-url').value = DECISION_CHATGPT.shareProjectUrl || '';
-  document.getElementById('decision-shareproject-link').href = DECISION_CHATGPT.shareProjectUrl || '#';
-  renderDecisionTopicRows();
+      document.getElementById('decision-shareproject-url').value = DECISION_CHATGPT.shareProjectUrl || '';
+      document.getElementById('decision-shareproject-link').href = DECISION_CHATGPT.shareProjectUrl || '#';
+      renderDecisionTopicRows();
 
-  document.getElementById('modal-task-status').addEventListener('change', function(){
-    document.getElementById('modal-blocked-section').classList.toggle('hidden', this.value !== 'blocked');
-    setModalDot(this.value);
-  });
+      document.getElementById('modal-task-status').addEventListener('change', function(){
+        document.getElementById('modal-blocked-section').classList.toggle('hidden', this.value !== 'blocked');
+        setModalDot(this.value);
+      });
+    });
 });
 
 </script>
