@@ -5190,7 +5190,7 @@ const availableEventOptions = computed(() => {
           display: flex;
           align-items: center;
           gap: 8px;
-          margin-top: 1.5rem;
+          margin-top: .25rem;
 
           .memberInfoTag {
             border-radius: 50px;
@@ -5224,7 +5224,7 @@ const availableEventOptions = computed(() => {
           font-size: 14px;
           font-style: normal;
           font-weight: 400;
-          margin-top: 0.75rem;
+          margin-top: .75rem;
           cursor: pointer;
           transition: all 0.2s ease;
           &:hover {
