@@ -436,7 +436,13 @@
             <!-- 合約 (沒有資料也要顯示空殼) -->
             <div class="memberInfoCard2">
               <div class="contractHeader">
-                <h3>{{ activeOrder?.ProductName || "—" }}</h3>
+                <h3>
+                  {{
+                    selectedContractKey === ""
+                      ? "全部產品"
+                      : activeOrder?.ProductName || "—"
+                  }}
+                </h3>
                 <div v-if="contractOptions.length > 1" class="contractDropdown">
                   <button
                     class="contractDropdownTrigger"
@@ -480,7 +486,7 @@
                   </div>
                 </div>
               </div>
-              <template v-if="activeOrder">
+              <template v-if="selectedContractKey && activeOrder">
                 <h5>目前合約</h5>
 
                 <div class="memberInfoList">
@@ -519,7 +525,7 @@
                 </div>
               </template>
 
-              <template v-else>
+              <template v-else-if="selectedContractKey && !activeOrder">
                 <h5>目前合約</h5>
                 <p style="text-align: center; padding: 8px 0">尚無合約資料</p>
               </template>
@@ -537,6 +543,8 @@
                   <span>操作紀錄</span>
                 </button>
               </div>
+
+              
             </div>
           </div>
 
@@ -2243,9 +2251,9 @@ function formatMinutesToDuration(totalMinutes: number): string {
 }
 
 function getHomeFavoriteLabel(item: any): string {
-  if (item?.AID === 0 || item?.AID === "0") return "未加入";
+  if (item?.AID === 0 || item?.AID === "0") return "NA";
   const favoriteName = String(item?.FavoriteName || "").trim();
-  return favoriteName || "未加入";
+  return favoriteName || "NA";
 }
 
 // 產品使用紀錄：每一筆獨立顯示，不做合併
@@ -2322,8 +2330,8 @@ const filteredHome = computed(() => {
         .filter(Boolean);
 
       // 兼容舊用語，避免後台習慣關鍵字搜不到
-      if (favoriteLabel === "未加入") {
-        keywordTokens.push("沒有最愛點", "未得", "未得點");
+      if (favoriteLabel === "NA") {
+        keywordTokens.push("未加入", "沒有最愛點", "未得", "未得點");
       }
 
       return (
@@ -3956,6 +3964,8 @@ const filteredHealthLog = computed(() => {
       if (field === "VerbalDate") {
         aVal = new Date(aVal?.replace(/\//g, "-") || "").getTime();
         bVal = new Date(bVal?.replace(/\//g, "-") || "").getTime();
+        const isAsc = sortState.value.healthLog.order === "asc";
+        return isAsc ? aVal - bVal : bVal - aVal;
       }
 
       // 字串排序
@@ -3966,6 +3976,17 @@ const filteredHealthLog = computed(() => {
       }
 
       return 0;
+    });
+  } else {
+    // 預設：口述日期降序（最新在前）
+    data = [...data].sort((a: any, b: any) => {
+      const aTime = new Date(
+        (a.VerbalDate || "").replace(/\//g, "-") || "",
+      ).getTime();
+      const bTime = new Date(
+        (b.VerbalDate || "").replace(/\//g, "-") || "",
+      ).getTime();
+      return bTime - aTime;
     });
   }
 
@@ -5236,7 +5257,8 @@ const availableEventOptions = computed(() => {
           display: flex;
           align-items: center;
           gap: 8px;
-          margin-top: 0.75rem;
+          margin-top: auto;
+          padding-top: 0.75rem;
         }
         .consumptionBtn,
         .operationRecordBtn {
@@ -5258,6 +5280,8 @@ const availableEventOptions = computed(() => {
           margin-top: 0.75rem;
           cursor: pointer;
           transition: all ese 0.2s;
+
+
 
           &:hover {
             background: $chip-success;
@@ -5459,6 +5483,9 @@ const availableEventOptions = computed(() => {
           padding: 1rem;
           width: 100%;
           height: 100%;
+          min-height: 250px;
+          display: flex;
+          flex-direction: column;
           border-radius: 20px;
           background-color: #fff;
           box-shadow: 0px 2px 20px 0px rgba(177, 192, 216, 0.25);
