@@ -433,7 +433,6 @@ function mapApiProjectToRow(raw, index) {
   var kpiTargetStr = (firstKpi.KPITarget || "").trim();
   var kpiNum = parseFloat(String(kpiTargetStr).replace(/[^\d.-]/g, ""));
   var blk = firstBlockedLikeTask(tasks);
-  var shareUrl = (raw.ShareProject_URL || "").trim();
   var name = (raw.ProjectName || "未命名專案").trim() || "未命名專案";
   var q = encodeURIComponent(name);
   return {
@@ -450,7 +449,8 @@ function mapApiProjectToRow(raw, index) {
     kpiMiss: false,
     daysLeft: daysLeft,
     updated: formatYmdSlash(endYmd) || "—",
-    url: shareUrl || ("task-tracking.html?project=" + q),
+    // 需求：Dashboard 的專案跳轉統一導向 task-tracking 內頁
+    url: "task-tracking.html?project=" + q,
     kpi: {
       metric: kpiMetric,
       target: isNaN(kpiNum) ? 100 : kpiNum,

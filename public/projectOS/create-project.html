@@ -140,8 +140,18 @@
             </div>
             <div class="grid grid-cols-2 gap-3">
               <div class="col-span-2"><label class="block text-xs font-medium text-slate-500 mb-1.5">專案名稱 <span class="text-red-400">*</span></label><input id="m-proj-name" type="text" placeholder="輸入專案名稱..." class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 transition font-medium"></div>
-              <div><label class="block text-xs font-medium text-slate-500 mb-1.5">負責人</label><input id="m-owner" type="text" placeholder="負責人姓名" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 transition"></div>
-              <div><label class="block text-xs font-medium text-slate-500 mb-1.5">參與人員</label><input id="m-members" type="text" placeholder="多人以逗號分隔" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 transition"></div>
+              <div><label class="block text-xs font-medium text-slate-500 mb-1.5">負責人</label>
+                <div class="flex gap-2">
+                  <input id="m-owner" type="text" readonly placeholder="點擊選擇負責人" onclick="openAdminPicker('owner')" class="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 transition cursor-pointer bg-white" title="從員工名單選擇">
+                  <button type="button" onclick="openAdminPicker('owner')" class="shrink-0 px-3 py-2 text-xs font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition">選擇</button>
+                </div>
+              </div>
+              <div><label class="block text-xs font-medium text-slate-500 mb-1.5">參與人員</label>
+                <div class="flex gap-2">
+                  <input id="m-members" type="text" readonly placeholder="點擊選擇參與人員（可多選）" onclick="openAdminPicker('members')" class="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 transition cursor-pointer bg-white" title="從員工名單選擇">
+                  <button type="button" onclick="openAdminPicker('members')" class="shrink-0 px-3 py-2 text-xs font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition">選擇</button>
+                </div>
+              </div>
               <div><label class="block text-xs font-medium text-slate-500 mb-1.5">開始日期</label><input id="m-start" type="date" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 transition"></div>
               <div><label class="block text-xs font-medium text-slate-500 mb-1.5">預計結束</label><input id="m-end" type="date" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 transition"></div>
               <div><label class="block text-xs font-medium text-slate-500 mb-1.5">部門</label>
@@ -447,9 +457,10 @@
       <div class="grid grid-cols-2 gap-3">
         <div>
           <label class="block text-sm font-semibold text-slate-700 mb-1.5">負責人</label>
-          <select id="mt-assignee" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-blue-400 transition">
-            <option>Alice</option><option>Bob</option><option>Carol</option><option>Dave</option><option>Dev Team</option><option>Legal</option>
-          </select>
+          <div class="flex gap-2">
+            <input id="mt-assignee" type="text" readonly placeholder="點擊選擇負責人" onclick="openAdminPicker('taskAssignee')" class="flex-1 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-blue-400 transition cursor-pointer bg-white" title="從員工名單選擇">
+            <button type="button" onclick="openAdminPicker('taskAssignee')" class="shrink-0 px-3 py-2 text-xs font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition">選擇</button>
+          </div>
         </div>
         <div>
           <label class="block text-sm font-semibold text-slate-700 mb-1.5">狀態</label>
@@ -477,6 +488,25 @@
   </div>
 </div>
 
+<!-- ADMIN NAME PICKER MODAL -->
+<div id="admin-picker-modal" class="fixed inset-0 z-[55] hidden items-center justify-center" style="background:rgba(0,0,0,0.45)" onclick="if(event.target===this)closeAdminPicker()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 fade-in max-h-[90vh] flex flex-col" onclick="event.stopPropagation()">
+    <div class="flex items-center gap-3 mb-4">
+      <h3 class="font-bold text-slate-900 text-lg" id="admin-picker-title">選擇員工</h3>
+      <button type="button" onclick="closeAdminPicker()" class="ml-auto text-slate-400 hover:text-slate-600 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <input id="admin-picker-search" type="text" placeholder="搜尋姓名…" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:border-blue-400 transition mb-3" oninput="renderAdminPickerList()">
+    <p class="text-xs text-slate-400 mb-2" id="admin-picker-hint"></p>
+    <div id="admin-picker-list" class="flex-1 min-h-[200px] max-h-[min(50vh,360px)] overflow-y-auto border border-slate-100 rounded-xl divide-y divide-slate-100"></div>
+    <div class="flex gap-3 mt-5">
+      <button type="button" onclick="applyAdminPicker()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition">確定</button>
+      <button type="button" onclick="closeAdminPicker()" class="border border-slate-200 text-slate-600 hover:bg-slate-50 px-5 py-3 rounded-xl text-sm font-medium transition">取消</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div id="toast" class="fixed bottom-5 right-5 z-50 hidden">
   <div class="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 max-w-sm fade-in">
@@ -491,6 +521,7 @@ const API_BASE = "https://23700999.com:8081/PM";
 const NEW_PROJECT_URL = API_BASE + "/api/fr/NewProject";
 
 const GET_DEPARTMENT_URL = API_BASE + "/api/fr/getDepartmentCode";
+const GET_ADMIN_NAME_LIST_URL = API_BASE + "/api/fr/getAdminNameList";
 const TASK_STATE_LIST_URLS = [
   API_BASE + "/api/fr/getTaskStateList",
   API_BASE + "/api/fr/getTaskStateCode",
@@ -516,6 +547,8 @@ let TASK_STATE_CODE_MAP = {
 
 let departmentListCache = null;
 let taskStateListCache = null;
+let adminNameListCache = null;
+let adminPickerMode = "owner";
 
 function statusIconByCode(code) {
   switch (String(code)) {
@@ -551,6 +584,192 @@ function postJson(url, body) {
     if (!res.ok) throw new Error("HTTP " + res.status);
     return res.json();
   });
+}
+
+function dedupeAdminNames(arr) {
+  const seen = new Set();
+  const out = [];
+  (arr || []).forEach(function (n) {
+    const s = String(n == null ? "" : n).trim();
+    if (!s || seen.has(s)) return;
+    seen.add(s);
+    out.push(s);
+  });
+  out.sort(function (a, b) {
+    return a.localeCompare(b, "zh-Hant");
+  });
+  return out;
+}
+
+function escAttr(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;");
+}
+
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function fetchAdminNameList() {
+  const session = getBackendTokenAndAdmin();
+  if (!session) return Promise.reject(new Error("no session"));
+  return postJson(GET_ADMIN_NAME_LIST_URL, { AdminID: session.adminID, Token: session.token }).then(function (r) {
+    if (!r || String(r.Result).toUpperCase() !== "OK") throw new Error("bad result");
+    const raw = r.adminNameList || r.AdminNameList || [];
+    if (!Array.isArray(raw)) throw new Error("bad list");
+    adminNameListCache = dedupeAdminNames(raw);
+    return adminNameListCache;
+  });
+}
+
+function openAdminPicker(mode) {
+  adminPickerMode = mode;
+  const session = getBackendTokenAndAdmin();
+  if (!session) return;
+
+  const titleEl = document.getElementById("admin-picker-title");
+  const hintEl = document.getElementById("admin-picker-hint");
+  const searchEl = document.getElementById("admin-picker-search");
+  if (titleEl) {
+    titleEl.textContent =
+      mode === "owner" || mode === "taskAssignee" ? "選擇負責人" : "選擇參與人員";
+  }
+  if (hintEl) {
+    hintEl.textContent =
+      mode === "members" ? "可勾選多位，確定後以逗號分隔寫入欄位" : "請選擇一位負責人";
+  }
+  if (searchEl) searchEl.value = "";
+
+  function showModal() {
+    const modal = document.getElementById("admin-picker-modal");
+    if (modal) {
+      modal.classList.remove("hidden");
+      modal.style.display = "flex";
+    }
+    renderAdminPickerList();
+    setTimeout(function () {
+      if (searchEl) searchEl.focus();
+    }, 50);
+  }
+
+  if (adminNameListCache && adminNameListCache.length) {
+    showModal();
+    return;
+  }
+
+  fetchAdminNameList()
+    .then(function () {
+      showModal();
+    })
+    .catch(function () {
+      showToast("無法取得員工名單", "warn");
+    });
+}
+
+function closeAdminPicker() {
+  const modal = document.getElementById("admin-picker-modal");
+  if (modal) {
+    modal.classList.add("hidden");
+    modal.style.display = "";
+  }
+}
+
+function renderAdminPickerList() {
+  const listEl = document.getElementById("admin-picker-list");
+  const searchEl = document.getElementById("admin-picker-search");
+  if (!listEl || !adminNameListCache || !adminNameListCache.length) {
+    if (listEl && (!adminNameListCache || !adminNameListCache.length)) {
+      listEl.innerHTML = '<p class="text-sm text-slate-400 text-center py-8">載入中或尚無資料</p>';
+    }
+    return;
+  }
+
+  const q = (searchEl && searchEl.value ? searchEl.value : "").trim().toLowerCase();
+  const names = adminNameListCache.filter(function (n) {
+    return !q || String(n).toLowerCase().indexOf(q) >= 0;
+  });
+
+  const ownerVal = document.getElementById("m-owner") ? document.getElementById("m-owner").value.trim() : "";
+  const taskAssigneeVal = document.getElementById("mt-assignee")
+    ? document.getElementById("mt-assignee").value.trim()
+    : "";
+  const memSet = new Set();
+  (document.getElementById("m-members") ? document.getElementById("m-members").value : "")
+    .split(/[,，、\s]+/)
+    .forEach(function (s) {
+      const t = s.trim();
+      if (t) memSet.add(t);
+    });
+
+  if (!names.length) {
+    listEl.innerHTML = '<p class="text-sm text-slate-400 text-center py-8">沒有符合的姓名</p>';
+    return;
+  }
+
+  if (adminPickerMode === "owner" || adminPickerMode === "taskAssignee") {
+    const checkedBase = adminPickerMode === "taskAssignee" ? taskAssigneeVal : ownerVal;
+    const radioName = adminPickerMode === "taskAssignee" ? "admin-picker-task-assignee" : "admin-picker-owner";
+    listEl.innerHTML = names
+      .map(function (name) {
+        const checked = name === checkedBase ? " checked" : "";
+        return (
+          '<label class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer text-sm text-slate-800">' +
+          '<input type="radio" name="' +
+          radioName +
+          '" class="shrink-0 text-blue-600" value="' +
+          escAttr(name) +
+          '"' +
+          checked +
+          ">" +
+          "<span>" +
+          escHtml(name) +
+          "</span></label>"
+        );
+      })
+      .join("");
+  } else {
+    listEl.innerHTML = names
+      .map(function (name) {
+        const checked = memSet.has(name) ? " checked" : "";
+        return (
+          '<label class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer text-sm text-slate-800">' +
+          '<input type="checkbox" class="ap-mem-cb shrink-0 text-blue-600 rounded" value="' +
+          escAttr(name) +
+          '"' +
+          checked +
+          ">" +
+          "<span>" +
+          escHtml(name) +
+          "</span></label>"
+        );
+      })
+      .join("");
+  }
+}
+
+function applyAdminPicker() {
+  if (adminPickerMode === "owner") {
+    const radio = document.querySelector('input[name="admin-picker-owner"]:checked');
+    const el = document.getElementById("m-owner");
+    if (el) el.value = radio ? radio.value : "";
+  } else if (adminPickerMode === "taskAssignee") {
+    const radio = document.querySelector('input[name="admin-picker-task-assignee"]:checked');
+    const el = document.getElementById("mt-assignee");
+    if (el) el.value = radio ? radio.value : "";
+  } else {
+    const boxes = document.querySelectorAll("#admin-picker-list .ap-mem-cb:checked");
+    const vals = Array.from(boxes).map(function (cb) {
+      return cb.value;
+    });
+    const el = document.getElementById("m-members");
+    if (el) el.value = vals.join(",");
+  }
+  closeAdminPicker();
 }
 
 function toYYYYMMDD(d) {
@@ -1021,7 +1240,7 @@ function openTaskModal(id = null) {
     document.getElementById('mt-desc').value = t.desc || '';
     document.getElementById('mt-start').value = t.startDate || '';
     document.getElementById('mt-end').value = t.endDate || '';
-    document.getElementById('mt-assignee').value = t.assignee || 'Alice';
+    document.getElementById('mt-assignee').value = t.assignee || '';
     const selStatus = document.getElementById('mt-status');
     setSelectValueIfOptionExists(selStatus, t.status || '待辦', selStatus?.options?.[0]?.value);
     document.getElementById('modal-title-text').textContent = '編輯任務';
@@ -1031,7 +1250,7 @@ function openTaskModal(id = null) {
     document.getElementById('mt-desc').value = '';
     document.getElementById('mt-start').value = '';
     document.getElementById('mt-end').value = '';
-    document.getElementById('mt-assignee').value = 'Alice';
+    document.getElementById('mt-assignee').value = '';
     const selStatus = document.getElementById('mt-status');
     setSelectValueIfOptionExists(selStatus, '待辦', selStatus?.options?.[0]?.value);
     document.getElementById('modal-title-text').textContent = '新增任務';
