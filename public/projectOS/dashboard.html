@@ -124,11 +124,13 @@
       <div class="col-span-1">狀態</div>
       <div class="col-span-2">完成率</div>
       <div class="col-span-1">優先</div>
-      <div class="col-span-1">更新</div>
+      <div class="col-span-1">結束日</div>
       <div class="col-span-1 text-center">→</div>
     </div>
 
-    <div id="project-table" class="divide-y divide-slate-50"></div>
+    <div id="project-table" class="divide-y divide-slate-50">
+      <div id="project-table-loading" class="px-3 py-10 text-center text-sm text-slate-400">載入專案清單中…</div>
+    </div>
   </div>
 </div>
 
@@ -202,17 +204,244 @@
 </div>
 
 <script>
-// ─── DATA ───
-const PROJECTS = [
-  {id:1,name:'Q2 新產品線計畫',owner:'Alice',dept:'業務發展處',status:'opening',done:1,total:7,blocked:1,delayed:false,staleDays:0,kpiMiss:false,daysLeft:96,updated:'3小時前',url:'task-tracking.html',kpi:{metric:'月銷售量',target:100,current:45,unit:'件'},blockedTask:'完成法務審核',blockedReason:'等待法務部門回覆，已發信 3 天',blockedAssignee:'Legal',delayDays:0},
-  {id:2,name:'官網改版計畫',owner:'Bob',dept:'創新研發處',status:'review',done:8,total:10,blocked:0,delayed:false,staleDays:1,kpiMiss:false,daysLeft:10,updated:'1天前',url:'#',kpi:{metric:'上線時程',target:100,current:80,unit:'%'},blockedTask:'',blockedReason:'',blockedAssignee:'',delayDays:0},
-  {id:3,name:'Q1 活動企劃',owner:'Carol',dept:'業務發展處',status:'in_progress',done:2,total:5,blocked:1,delayed:true,staleDays:5,kpiMiss:true,daysLeft:-5,updated:'5天前',url:'#',kpi:{metric:'活動報名數',target:500,current:180,unit:'人'},blockedTask:'行銷素材製作',blockedReason:'等待設計部門交付，已催促 2 次',blockedAssignee:'Carol',delayDays:5},
-  {id:4,name:'客服系統升級',owner:'Dave',dept:'客服暨會員關係部',status:'in_progress',done:7,total:10,blocked:2,delayed:false,staleDays:14,kpiMiss:true,daysLeft:30,updated:'14天前',url:'#',kpi:{metric:'客戶滿意度',target:90,current:68,unit:'%'},blockedTask:'API整合測試',blockedReason:'外部廠商未提供測試環境',blockedAssignee:'Dave',delayDays:0},
-  {id:5,name:'供應商評估計畫',owner:'Alice',dept:'總經理室',status:'opening',done:0,total:4,blocked:0,delayed:true,staleDays:2,kpiMiss:false,daysLeft:-1,updated:'2天前',url:'#',kpi:{metric:'評估完成率',target:100,current:25,unit:'%'},blockedTask:'',blockedReason:'',blockedAssignee:'',delayDays:1},
-  {id:6,name:'員工培訓計畫 Q2',owner:'HR',dept:'總經理室',status:'draft',done:0,total:6,blocked:0,delayed:false,staleDays:10,kpiMiss:false,daysLeft:60,updated:'10天前',url:'#',kpi:{metric:'培訓人數',target:50,current:0,unit:'人'},blockedTask:'',blockedReason:'',blockedAssignee:'',delayDays:0},
-  {id:7,name:'舊官網下架計畫',owner:'Bob',dept:'創新研發處',status:'in_progress',done:3,total:5,blocked:1,delayed:true,staleDays:3,kpiMiss:false,daysLeft:-2,updated:'3天前',url:'#',kpi:{metric:'下架完成率',target:100,current:60,unit:'%'},blockedTask:'DNS 設定變更',blockedReason:'等待 IT 部門操作',blockedAssignee:'Bob',delayDays:2},
-  {id:8,name:'年度品牌重塑',owner:'Carol',dept:'業務發展處',status:'closed',done:12,total:12,blocked:0,delayed:false,staleDays:7,kpiMiss:false,daysLeft:0,updated:'1週前',url:'#',kpi:{metric:'品牌認知度',target:85,current:87,unit:'%'},blockedTask:'',blockedReason:'',blockedAssignee:'',delayDays:0},
-];
+// ─── BACKEND API (FR) ───
+const API_BASE = "https://23700999.com:8081/PM";
+const GET_PROJECT_LIST_URL = API_BASE + "/api/fr/getProjectList";
+
+const DEPARTMENT_CODE_TO_NAME = {
+  "1": "業務發展處",
+  "2": "總經理室",
+  "3": "創新研發處",
+  "4": "智慧醫療業務部",
+  "5": "客服暨會員關係部"
+};
+
+/** @type {Array<object>} */
+let PROJECTS = [];
+
+function getBackendTokenAndAdmin() {
+  const token = localStorage.getItem("backendToken") || sessionStorage.getItem("backendToken");
+  const adminID = localStorage.getItem("adminID") || sessionStorage.getItem("adminID");
+  if (!token || !adminID) return null;
+  return { token, adminID };
+}
+
+function postJson(url, body) {
+  return fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  }).then(function (res) {
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  });
+}
+
+function ymdToday() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return "" + y + m + day;
+}
+
+function parseYmd(ymd) {
+  if (!ymd || String(ymd).length < 8) return null;
+  const s = String(ymd).replace(/\D/g, "");
+  if (s.length < 8) return null;
+  const y = parseInt(s.slice(0, 4), 10);
+  const mo = parseInt(s.slice(4, 6), 10) - 1;
+  const da = parseInt(s.slice(6, 8), 10);
+  return new Date(y, mo, da);
+}
+
+function daysBetweenYmd(a, b) {
+  const A = parseYmd(a);
+  const B = parseYmd(b);
+  if (!A || !B) return 0;
+  return Math.round((B - A) / 86400000);
+}
+
+function daysFromTodayToYmd(endYmd) {
+  return daysBetweenYmd(ymdToday(), endYmd);
+}
+
+function formatYmdSlash(ymd) {
+  var d = parseYmd(ymd);
+  if (!d) return "";
+  return (
+    d.getFullYear() +
+    "/" +
+    String(d.getMonth() + 1).padStart(2, "0") +
+    "/" +
+    String(d.getDate()).padStart(2, "0")
+  );
+}
+
+function extractProjectArray(resp) {
+  if (!resp || typeof resp !== "object") return [];
+  if (Array.isArray(resp)) return resp;
+  if (Array.isArray(resp.ProjectList)) return resp.ProjectList;
+  if (Array.isArray(resp.Data)) return resp.Data;
+  if (Array.isArray(resp.Projects)) return resp.Projects;
+  if (Array.isArray(resp.List)) return resp.List;
+  for (var k in resp) {
+    if (k === "Result" || k === "Message") continue;
+    if (Array.isArray(resp[k])) return resp[k];
+  }
+  return [];
+}
+
+function deriveProjectStatus(tasks) {
+  var total = tasks.length;
+  if (total === 0) return "opening";
+  var done = tasks.filter(function (t) {
+    return String(t.State) === "3";
+  }).length;
+  if (done === total) return "closed";
+  if (tasks.some(function (t) {
+    return String(t.State) === "4";
+  })) return "in_progress";
+  if (tasks.some(function (t) {
+    return String(t.State) === "2";
+  })) return "in_progress";
+  if (tasks.every(function (t) {
+    return String(t.State) === "1";
+  })) return "opening";
+  var ratio = done / total;
+  if (ratio >= 0.8 && done < total) return "review";
+  return "in_progress";
+}
+
+function countOverdueNotDone(tasks) {
+  var today = ymdToday();
+  return tasks.filter(function (t) {
+    if (String(t.State) === "3") return false;
+    var end = t.EndDate || t.StertDate;
+    return end && String(end).replace(/\D/g, "").slice(0, 8) < today;
+  }).length;
+}
+
+function firstBlockedLikeTask(tasks) {
+  var today = ymdToday();
+  for (var i = 0; i < tasks.length; i++) {
+    var t = tasks[i];
+    if (String(t.State) === "3") continue;
+    var end = t.EndDate || t.StertDate;
+    if (end && String(end).replace(/\D/g, "").slice(0, 8) < today) {
+      return {
+        task: (t.Topic || "").trim() || "任務",
+        reason: (t.Description || "").trim() || "已超過結束日仍未完成",
+        assignee: (t.ChargeMan || "").trim() || "—"
+      };
+    }
+  }
+  return { task: "", reason: "", assignee: "" };
+}
+
+function mapApiProjectToRow(raw, index) {
+  var tasks = Array.isArray(raw.TaskList) ? raw.TaskList : [];
+  var kpis = Array.isArray(raw.KPIList) ? raw.KPIList : [];
+  var deptCode = raw.Department != null ? String(raw.Department) : "";
+  var deptName = DEPARTMENT_CODE_TO_NAME[deptCode] || (deptCode ? "部門 " + deptCode : "—");
+  var total = tasks.length;
+  var done = tasks.filter(function (t) {
+    return String(t.State) === "3";
+  }).length;
+  var blocked = countOverdueNotDone(tasks);
+  var delayed = tasks.some(function (t) {
+    return String(t.State) === "4";
+  });
+  var endYmd = raw.EndDate ? String(raw.EndDate).replace(/\D/g, "").slice(0, 8) : "";
+  var projEnd = endYmd || "";
+  if (!delayed && projEnd && done < total) {
+    var dl = daysFromTodayToYmd(projEnd);
+    if (dl < 0) delayed = true;
+  }
+  var delayDays = 0;
+  if (projEnd && done < total) {
+    var dleft = daysFromTodayToYmd(projEnd);
+    if (dleft < 0) delayDays = Math.abs(dleft);
+  }
+  if (tasks.some(function (t) {
+    return String(t.State) === "4";
+  })) {
+    delayDays = Math.max(delayDays, 1);
+  }
+  var daysLeft = projEnd ? daysFromTodayToYmd(projEnd) : 90;
+  var staleDays = 0;
+  var status = deriveProjectStatus(tasks);
+  if (total === 0) status = "draft";
+  var firstKpi = kpis[0] || {};
+  var kpiMetric = (firstKpi.KPIName || "KPI").trim() || "KPI";
+  var kpiTargetStr = (firstKpi.KPITarget || "").trim();
+  var kpiNum = parseFloat(String(kpiTargetStr).replace(/[^\d.-]/g, ""));
+  var blk = firstBlockedLikeTask(tasks);
+  var shareUrl = (raw.ShareProject_URL || "").trim();
+  var name = (raw.ProjectName || "未命名專案").trim() || "未命名專案";
+  var q = encodeURIComponent(name);
+  return {
+    id: index + 1,
+    name: name,
+    owner: (raw.ChargeMan || "—").trim() || "—",
+    dept: deptName,
+    status: status,
+    done: done,
+    total: total,
+    blocked: blocked,
+    delayed: delayed,
+    staleDays: staleDays,
+    kpiMiss: false,
+    daysLeft: daysLeft,
+    updated: formatYmdSlash(endYmd) || "—",
+    url: shareUrl || ("task-tracking.html?project=" + q),
+    kpi: {
+      metric: kpiMetric,
+      target: isNaN(kpiNum) ? 100 : kpiNum,
+      current: 0,
+      unit: ""
+    },
+    blockedTask: blk.task,
+    blockedReason: blk.reason,
+    blockedAssignee: blk.assignee,
+    delayDays: delayDays
+  };
+}
+
+function fetchProjectList() {
+  var auth = getBackendTokenAndAdmin();
+  if (!auth) {
+    window.location.href = "/projectOS/index.html";
+    return Promise.resolve();
+  }
+  var loadingEl = document.getElementById("project-table-loading");
+  if (loadingEl) loadingEl.style.display = "";
+
+  return postJson(GET_PROJECT_LIST_URL, {
+    AdminID: auth.adminID,
+    Token: auth.token
+  })
+    .then(function (data) {
+      if (data && data.Result != null && String(data.Result).toUpperCase() !== "OK") {
+        showToast("取得專案失敗：" + data.Result, "warn");
+        PROJECTS = [];
+        return;
+      }
+      var arr = extractProjectArray(data);
+      PROJECTS = arr.map(function (p, i) {
+        return mapApiProjectToRow(p, i);
+      });
+    })
+    .catch(function () {
+      showToast("無法連線取得專案清單", "warn");
+      PROJECTS = [];
+    })
+    .finally(function () {
+      if (loadingEl) loadingEl.style.display = "none";
+      renderStats();
+      renderProjectTable(PROJECTS);
+    });
+}
 
 // ─── ALGORITHMS ───
 function calcHealth(p) {
@@ -222,7 +451,7 @@ function calcHealth(p) {
   if (p.kpiMiss) s -= 15;
   if (p.staleDays > 14) s -= 20;
   else if (p.staleDays > 7) s -= 10;
-  const cr = p.total ? p.done / p.total : 0;
+  const cr = p.total > 0 ? p.done / p.total : 0;
   if (cr < 0.3 && p.daysLeft < 30 && p.daysLeft > 0) s -= 5;
   return Math.max(5, Math.min(100, s));
 }
@@ -306,7 +535,7 @@ let currentProjects = [];
 
 function togglePrioritySort() {
   prioritySorted = !prioritySorted;
-  document.getElementById('sort-btn').textContent = prioritySorted ? '排序：優先順序 ↓' : '排序：最後更新 ↓';
+  document.getElementById('sort-btn').textContent = prioritySorted ? '排序：優先順序 ↓' : '排序：結束日 ↓';
   renderProjectTable(currentProjects);
 }
 
@@ -337,6 +566,12 @@ function renderProjectTable(projects) {
     ? [...projects].sort((a, b) => calcPriority(b) - calcPriority(a))
     : projects;
 
+  if (!sorted.length) {
+    document.getElementById('project-table').innerHTML =
+      '<div class="px-3 py-12 text-center text-sm text-slate-400">尚無專案資料，或請確認後端已回傳列表。</div>';
+    return;
+  }
+
   const av = {
     Alice:'bg-blue-500',
     Bob:'bg-purple-500',
@@ -346,7 +581,7 @@ function renderProjectTable(projects) {
   };
 
   document.getElementById('project-table').innerHTML = sorted.map(p => {
-    const pct = Math.round((p.done / p.total) * 100);
+    const pct = p.total ? Math.round((p.done / p.total) * 100) : 0;
     const bar = pct >= 75 ? 'bg-green-500' : pct >= 40 ? 'bg-blue-500' : 'bg-amber-500';
     const sc = getStatusClass(p.status);
     const sl = getStatusLabel(p.status);
@@ -465,8 +700,7 @@ function initNavAvatar() {
 
 document.addEventListener('DOMContentLoaded', () => {
   initNavAvatar();
-  renderStats();
-  renderProjectTable(PROJECTS);
+  fetchProjectList();
 });
 </script>
 </body>

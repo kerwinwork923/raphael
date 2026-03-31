@@ -52,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref, watchEffect } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch, watchEffect } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import Sidebar from "~/components/raphaelBackend/Sidebar.vue";
@@ -75,7 +75,7 @@ type MetricData = {
 const route = useRoute();
 const router = useRouter();
 const memberStore = useMemberStore();
-const { member } = storeToRefs(memberStore);
+const { member, garminHealthData } = storeToRefs(memberStore);
 const dateRange = ref<Date[] | null>(null);
 const detailCanvas = ref<HTMLCanvasElement | null>(null);
 let detailChart: Chart | null = null;
@@ -143,28 +143,155 @@ function parseYYYYMMDDToDate(raw: string) {
   return new Date(y, m - 1, d);
 }
 
-function getRecentDateKeys(days = 7) {
-  const result: string[] = [];
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
-    result.push(toDateKey(formatDateYYYYMMDD(d)));
-  }
-  return result;
+function getAuth() {
+  const token = localStorage.getItem("backendToken") ?? sessionStorage.getItem("backendToken");
+  const admin = localStorage.getItem("adminID") ?? sessionStorage.getItem("adminID");
+  const sel = JSON.parse(localStorage.getItem("selectedMember") ?? "{}") as { MID?: string; Mobile?: string };
+  return { token, admin, sel };
 }
 
-const dateKeys = computed<string[]>(() => {
-  if (!dateRange.value || !dateRange.value[0]) return getRecentDateKeys(7);
-  const startMs = toLocalDayStart(dateRange.value[0]);
-  const endMs = toLocalDayEnd(dateRange.value[1] ?? dateRange.value[0]);
-  const all = getRecentDateKeys(30);
-  return all.filter((d: string) => {
-    const ms = parseDateOnlyToMs(d);
-    if (Number.isNaN(ms)) return false;
-    return ms >= startMs && ms <= endMs;
+function getGarminApiDateRange() {
+  if (!dateRange.value || !dateRange.value[0]) return {};
+  const from = dateRange.value[0];
+  const to = dateRange.value[1] ?? dateRange.value[0];
+  return {
+    StartDate: formatDateYYYYMMDD(from),
+    EndDate: formatDateYYYYMMDD(to),
+  };
+}
+
+function parseGarminRawDateTimeToDateKey(rawDateTime: string) {
+  const value = String(rawDateTime || "");
+  if (/^\d{14}$/.test(value)) {
+    return `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6, 8)}`;
+  }
+  if (/^\d{8}/.test(value)) {
+    return toDateKey(value.slice(0, 8));
+  }
+  return toDateKey(value);
+}
+
+function parseGarminRawDateTimeToTimeLabel(rawDateTime: string) {
+  const value = String(rawDateTime || "");
+  if (/^\d{14}$/.test(value)) return `${value.slice(8, 10)}:${value.slice(10, 12)}`;
+  if (/^\d{8}$/.test(value)) return "00:00";
+  const normalized = value.replace("T", " ").replace(/\//g, "-");
+  const match = normalized.match(/(\d{2}):(\d{2})/);
+  if (match) return `${match[1]}:${match[2]}`;
+  return value.slice(11, 16) || "00:00";
+}
+
+const dateBoundary = computed(() => {
+  if (!dateRange.value || !dateRange.value[0]) {
+    return { fromMs: null as number | null, toMs: null as number | null };
+  }
+  return {
+    fromMs: toLocalDayStart(dateRange.value[0]),
+    toMs: toLocalDayEnd(dateRange.value[1] ?? dateRange.value[0]),
+  };
+});
+
+function inSelectedRange(dateKey: string) {
+  const { fromMs, toMs } = dateBoundary.value;
+  if (fromMs === null || toMs === null) return true;
+  const ms = parseDateOnlyToMs(dateKey);
+  if (Number.isNaN(ms)) return false;
+  return ms >= fromMs && ms <= toMs;
+}
+
+const garminDaily = computed(() => {
+  const raw = garminHealthData.value || {};
+  const dateSet = new Set<string>();
+
+  (raw.Hb || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d && inSelectedRange(d)) dateSet.add(d);
   });
+  (raw.Spo2 || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d && inSelectedRange(d)) dateSet.add(d);
+  });
+  (raw.Stress || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d && inSelectedRange(d)) dateSet.add(d);
+  });
+  (raw.Sleep || []).forEach((x: any) => {
+    const d = parseGarminRawDateTimeToDateKey(x.StartTime || "");
+    if (d && inSelectedRange(d)) dateSet.add(d);
+  });
+  (raw.Activity || []).forEach((x: any) => {
+    const d = parseGarminRawDateTimeToDateKey(x.rawDataTime || x.RawDateTime || "");
+    if (d && inSelectedRange(d)) dateSet.add(d);
+  });
+
+  const dates = Array.from(dateSet).sort();
+  const hbMap = new Map<string, any>();
+  (raw.Hb || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d) hbMap.set(d, x);
+  });
+  const spo2Map = new Map<string, any>();
+  (raw.Spo2 || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d) spo2Map.set(d, x);
+  });
+  const stressMap = new Map<string, any>();
+  (raw.Stress || []).forEach((x: any) => {
+    const d = toDateKey(x.Date || "");
+    if (d) stressMap.set(d, x);
+  });
+
+  const sleepGroup: Record<string, { deep: number; rem: number; light: number }> = {};
+  (raw.Sleep || []).forEach((x: any) => {
+    const d = parseGarminRawDateTimeToDateKey(x.StartTime || "");
+    if (!d) return;
+    sleepGroup[d] ||= { deep: 0, rem: 0, light: 0 };
+    sleepGroup[d].deep += Number(x.ComfortCount || 0);
+    sleepGroup[d].rem += Number(x.RemCount || 0);
+    sleepGroup[d].light += Number(x.LightCount || 0);
+  });
+
+  return dates.map((d) => ({
+    date: d,
+    heartRateMax: Number(hbMap.get(d)?.HeartrateMax || 0),
+    heartRateMin: Number(hbMap.get(d)?.HeartrateMin || 0),
+    spo2Max: Number(spo2Map.get(d)?.Spo2Max || 0),
+    spo2Min: Number(spo2Map.get(d)?.Spo2Min || 0),
+    stressMax: Number(stressMap.get(d)?.StressMax || 0),
+    stressMin: Number(stressMap.get(d)?.StressMin || 0),
+    tempMax: 0,
+    tempMin: 0,
+    sleepDeep: sleepGroup[d]?.deep || 0,
+    sleepRem: sleepGroup[d]?.rem || 0,
+    sleepLight: sleepGroup[d]?.light || 0,
+  }));
+});
+
+const singleDayHeartRate = computed(() => {
+  if (!isSingleDaySelected.value || !dateRange.value?.[0]) return [];
+  const target = toDateKey(formatDateYYYYMMDD(dateRange.value[0]));
+  const raw = garminHealthData.value || {};
+  const activity = (raw.Activity || [])
+    .map((x: any) => {
+      const sourceTime = x.rawDataTime || x.RawDateTime || "";
+      return {
+        date: parseGarminRawDateTimeToDateKey(sourceTime),
+        time: parseGarminRawDateTimeToTimeLabel(sourceTime),
+        value: Number(
+          x.Heartrate ??
+            x.HeartRate ??
+            x.heartRate ??
+            x.HR ??
+            x.hr ??
+            x.avgHeartRate ??
+            x.HeartRateAvg ??
+            0,
+        ),
+      };
+    })
+    .filter((x: any) => x.date === target && x.time)
+    .sort((a: any, b: any) => a.time.localeCompare(b.time));
+  return activity;
 });
 
 const isSingleDaySelected = computed(() => {
@@ -175,24 +302,24 @@ const isSingleDaySelected = computed(() => {
 });
 
 const metricData = computed<MetricData>(() => {
-  const labels = dateKeys.value.map((d: string) => d.slice(5).replace("-", "/"));
-  const idxValues = dateKeys.value.map((_: string, idx: number) => idx);
-  const hrMax = idxValues.map((i: number) => 76 + ((i * 3) % 12));
-  const hrMin = idxValues.map((i: number) => 54 + ((i * 2) % 8));
-  const spo2Max = idxValues.map((i: number) => 98 + (i % 2));
-  const spo2Min = idxValues.map((i: number) => 93 + (i % 4));
-  const stressMax = idxValues.map((i: number) => 78 + ((i * 5) % 18));
-  const stressMin = idxValues.map((i: number) => 45 + ((i * 3) % 12));
-  const tempMax = idxValues.map((i: number) => Number((36.6 + ((i % 3) * 0.2)).toFixed(1)));
-  const tempMin = idxValues.map((i: number) => Number((35.8 + ((i % 2) * 0.2)).toFixed(1)));
-  const sleepDeep = idxValues.map((i: number) => 90 + ((i * 11) % 40));
-  const sleepRem = idxValues.map((i: number) => 45 + ((i * 7) % 30));
-  const sleepLight = idxValues.map((i: number) => 180 + ((i * 13) % 60));
+  const source = garminDaily.value;
+  const labels = source.map((x: any) => x.date.slice(5).replace("-", "/"));
+  const hrMax = source.map((x: any) => x.heartRateMax);
+  const hrMin = source.map((x: any) => x.heartRateMin);
+  const spo2Max = source.map((x: any) => x.spo2Max);
+  const spo2Min = source.map((x: any) => x.spo2Min);
+  const stressMax = source.map((x: any) => x.stressMax);
+  const stressMin = source.map((x: any) => x.stressMin);
+  const tempMax = source.map((x: any) => x.tempMax);
+  const tempMin = source.map((x: any) => x.tempMin);
+  const sleepDeep = source.map((x: any) => x.sleepDeep);
+  const sleepRem = source.map((x: any) => x.sleepRem);
+  const sleepLight = source.map((x: any) => x.sleepLight);
 
   if (metricKey.value === "heartRate") {
-    if (isSingleDaySelected.value) {
-      const hourlyLabels = Array.from({ length: 24 }, (_, h) => `${String(h).padStart(2, "0")}:00`);
-      const hourlyValues = hourlyLabels.map((_, h) => 56 + ((h * 3 + 7) % 24));
+    if (isSingleDaySelected.value && singleDayHeartRate.value.length) {
+      const hourlyLabels = singleDayHeartRate.value.map((x: any) => x.time);
+      const hourlyValues = singleDayHeartRate.value.map((x: any) => x.value);
       return {
         headers: ["測量時間", "心率"],
         rows: hourlyLabels.map((t: string, i: number) => [t, String(hourlyValues[i])]),
@@ -310,11 +437,7 @@ watchEffect(() => {
 });
 
 onMounted(async () => {
-  const { token, admin, sel } = {
-    token: localStorage.getItem("backendToken") ?? sessionStorage.getItem("backendToken"),
-    admin: localStorage.getItem("adminID") ?? sessionStorage.getItem("adminID"),
-    sel: JSON.parse(localStorage.getItem("selectedMember") ?? "{}") as { MID?: string; Mobile?: string },
-  };
+  const { token, admin, sel } = getAuth();
   if (!member.value && token && admin && sel?.MID) {
     await memberStore.fetchAll({
       token,
@@ -329,6 +452,11 @@ onMounted(async () => {
   if (qStartDate) {
     dateRange.value = [qStartDate, qEndDate ?? qStartDate];
   }
+  await memberStore.fetchGarminHealthData(getAuth(), getGarminApiDateRange());
+});
+
+watch(dateRange, async () => {
+  await memberStore.fetchGarminHealthData(getAuth(), getGarminApiDateRange());
 });
 
 onUnmounted(() => {
