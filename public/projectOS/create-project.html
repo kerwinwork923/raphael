@@ -195,6 +195,27 @@
           <option value="">無前置任務</option>
         </select>
       </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1.5">執行計畫 P</label>
+          <textarea id="mt-exe-plan" rows="3" placeholder="請輸入執行計畫（Plan）..." class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm resize-none focus:border-blue-400 transition"></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1.5">執行狀況 D</label>
+          <textarea id="mt-exe-cond" rows="3" placeholder="請輸入執行狀況（Do）..." class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm resize-none focus:border-blue-400 transition"></textarea>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1.5">執行結果 C</label>
+        <textarea id="mt-exe-result" rows="3" placeholder="請輸入執行結果（Check）..." class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm resize-none focus:border-blue-400 transition"></textarea>
+      </div>
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="block text-sm font-semibold text-slate-700">重要討論主題 URL</label>
+          <button type="button" onclick="addTaskDiscussionRow()" class="text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 px-2.5 py-1 rounded-lg font-medium transition">+ 新增討論 URL</button>
+        </div>
+        <div id="mt-discussion-list" class="space-y-2"></div>
+      </div>
     </div>
 
     <div class="flex gap-3 mt-6">
@@ -612,6 +633,12 @@ function collectManualTaskList() {
       ChargeMan: t.assignee || "",
       State: statusToCode(t.status || "待辦"),
       PreTaskID: String(prereqCid).trim() || "0",
+      ExePlan: t.exePlan || "",
+      ExeCond: t.exeCond || "",
+      ExeResult: t.exeResult || "",
+      URLList: (Array.isArray(t.discussionLinks) ? t.discussionLinks : [])
+        .map((item) => String(item && item.url ? item.url : "").trim())
+        .filter(Boolean),
     };
   });
 }
@@ -638,8 +665,8 @@ function collectManualProjectPayload() {
   if (!EndDate) missing.push("結束日期");
   if (!Department) missing.push("部門");
   if (!Decision) missing.push("決策摘要");
-  if (!KPIList.length) missing.push("KPIList");
-  if (!TaskList.length) missing.push("TaskList");
+
+
   if (missing.length) {
     showToast("請補齊： " + missing.join("、"), "warn");
     return null;
@@ -660,27 +687,69 @@ function collectManualProjectPayload() {
 }
 
 // ─── MANUAL KPI ───
+// ─── MANUAL KPI ───
 let manualKPIs = [];
+
+function escapeAttr(value) {
+  return String(value == null ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function updateManualKPI(id, field, value) {
+  const item = manualKPIs.find(k => k.id === id);
+  if (!item) return;
+  item[field] = value;
+}
+
 function addManualKPI() {
-  const id = Date.now();
-  manualKPIs.push({id});
+  const id = Date.now() + Math.floor(Math.random() * 1000);
+  manualKPIs.push({
+    id,
+    name: "",
+    target: ""
+  });
   renderManualKPIs();
+
   setTimeout(() => {
-    const row = document.getElementById('m-kpi-row-' + id);
-    if (row) row.querySelector('input').focus();
+    const row = document.getElementById("m-kpi-row-" + id);
+    if (row) {
+      const firstInput = row.querySelector("input");
+      if (firstInput) firstInput.focus();
+    }
   }, 50);
 }
+
 function removeManualKPI(id) {
   manualKPIs = manualKPIs.filter(k => k.id !== id);
   renderManualKPIs();
 }
+
 function renderManualKPIs() {
-  document.getElementById('m-kpi-list').innerHTML = manualKPIs.map(k => `
+  const listEl = document.getElementById("m-kpi-list");
+  if (!listEl) return;
+
+  listEl.innerHTML = manualKPIs.map(k => `
     <div id="m-kpi-row-${k.id}" class="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2.5 task-chip">
-      <input type="text" placeholder="指標名稱" class="w-28 bg-transparent text-xs text-slate-500 focus:outline-none flex-shrink-0 border-b border-slate-300 pb-0.5">
-      <input type="text" placeholder="目標值" class="flex-1 bg-transparent text-sm font-semibold text-blue-700 focus:outline-none border-b border-blue-300 pb-0.5">
+      <input
+        type="text"
+        placeholder="指標名稱"
+        value="${escapeAttr(k.name || "")}"
+        oninput="updateManualKPI(${k.id}, 'name', this.value)"
+        class="w-28 bg-transparent text-xs text-slate-500 focus:outline-none flex-shrink-0 border-b border-slate-300 pb-0.5"
+      >
+      <input
+        type="text"
+        placeholder="目標值"
+        value="${escapeAttr(k.target || "")}"
+        oninput="updateManualKPI(${k.id}, 'target', this.value)"
+        class="flex-1 bg-transparent text-sm font-semibold text-blue-700 focus:outline-none border-b border-blue-300 pb-0.5"
+      >
       <button onclick="removeManualKPI(${k.id})" class="text-slate-300 hover:text-red-400 transition ml-2 text-sm">✕</button>
-    </div>`).join('');
+    </div>
+  `).join("");
 }
 
 // ─── MANUAL TASKS ───
@@ -700,20 +769,28 @@ function openTaskModal(id = null) {
     document.getElementById('mt-start').value = t.startDate || '';
     document.getElementById('mt-end').value = t.endDate || '';
     document.getElementById('mt-assignee').value = t.assignee || '';
+    document.getElementById('mt-exe-plan').value = t.exePlan || '';
+    document.getElementById('mt-exe-cond').value = t.exeCond || '';
+    document.getElementById('mt-exe-result').value = t.exeResult || '';
     const selStatus = document.getElementById('mt-status');
     setSelectValueIfOptionExists(selStatus, t.status || '待辦', selStatus?.options?.[0]?.value);
     document.getElementById('modal-title-text').textContent = '編輯任務';
     deleteBtn.classList.remove('hidden');
+    renderTaskDiscussionRows(t.discussionLinks || []);
   } else {
     document.getElementById('mt-title').value = '';
     document.getElementById('mt-desc').value = '';
     document.getElementById('mt-start').value = '';
     document.getElementById('mt-end').value = '';
     document.getElementById('mt-assignee').value = '';
+    document.getElementById('mt-exe-plan').value = '';
+    document.getElementById('mt-exe-cond').value = '';
+    document.getElementById('mt-exe-result').value = '';
     const selStatus = document.getElementById('mt-status');
     setSelectValueIfOptionExists(selStatus, '待辦', selStatus?.options?.[0]?.value);
     document.getElementById('modal-title-text').textContent = '新增任務';
     deleteBtn.classList.add('hidden');
+    renderTaskDiscussionRows([]);
   }
   const prereq = document.getElementById('mt-prereq');
   prereq.innerHTML = '<option value="">無前置任務</option>' +
@@ -746,6 +823,10 @@ function saveTaskModal() {
     assignee: document.getElementById('mt-assignee').value,
     status: document.getElementById('mt-status').value,
     prerequisite: document.getElementById('mt-prereq').value,
+    exePlan: document.getElementById('mt-exe-plan').value.trim(),
+    exeCond: document.getElementById('mt-exe-cond').value.trim(),
+    exeResult: document.getElementById('mt-exe-result').value.trim(),
+    discussionLinks: getTaskDiscussionRowsFromDOM(),
   };
   if (editingTaskId) {
     const idx = manualTasks.findIndex(t => t.id === editingTaskId);
@@ -772,11 +853,53 @@ function renderManualTasks() {
       <div class="w-6 h-6 rounded-full ${AV_COLORS_M[t.assignee]||'bg-slate-400'} flex items-center justify-center text-white text-xs font-bold flex-shrink-0">${(t.assignee||'?')[0]}</div>
       <div class="flex-1 min-w-0">
         <p class="text-xs font-medium text-slate-700 truncate">${t.title}</p>
-        <p class="text-xs text-slate-400">${t.assignee||'未指定'}${t.endDate?' · '+t.endDate:''}</p>
+        <p class="text-xs text-slate-400">${t.assignee||'未指定'}${t.endDate?' · '+t.endDate:''}${(t.discussionLinks||[]).length?' · URL '+(t.discussionLinks||[]).length:' '}</p>
       </div>
       <span class="text-xs ${STATUS_STYLES_BY_CODE[statusToCode(t.status||'待辦')]||'bg-slate-100 text-slate-500'} px-2 py-0.5 rounded-full flex-shrink-0">${t.status||'待辦'}</span>
     </div>`).join('');
   document.getElementById('m-task-count').textContent = manualTasks.length + ' 個任務';
+}
+
+function renderTaskDiscussionRows(items) {
+  const listEl = document.getElementById('mt-discussion-list');
+  if (!listEl) return;
+  const rows = Array.isArray(items) ? items : [];
+  if (!rows.length) {
+    listEl.innerHTML = '<div class="text-xs text-slate-400 border border-dashed border-slate-200 rounded-lg px-3 py-3 text-center">尚未新增討論 URL</div>';
+    return;
+  }
+  listEl.innerHTML = rows.map((item, idx) => `
+    <div class="border border-slate-200 rounded-xl p-3 space-y-2">
+      <input type="text" value="${escapeAttr(item.title || '')}" placeholder="討論主題名稱（可選）" class="mt-discussion-title w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+      <div class="flex gap-2">
+        <input type="text" value="${escapeAttr(item.url || '')}" placeholder="https://chatgpt.com/share/..." class="mt-discussion-url flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm">
+        <button type="button" onclick="removeTaskDiscussionRow(${idx})" class="px-3 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 text-sm transition">刪除</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function getTaskDiscussionRowsFromDOM() {
+  const listEl = document.getElementById('mt-discussion-list');
+  if (!listEl) return [];
+  const cards = listEl.querySelectorAll('.border.border-slate-200.rounded-xl');
+  return Array.from(cards).map((card, idx) => ({
+    id: 'mtd-' + idx,
+    title: card.querySelector('.mt-discussion-title')?.value.trim() || '',
+    url: card.querySelector('.mt-discussion-url')?.value.trim() || ''
+  })).filter((x) => x.title || x.url);
+}
+
+function addTaskDiscussionRow() {
+  const list = getTaskDiscussionRowsFromDOM();
+  list.push({ id: 'mtd-' + Date.now(), title: '', url: '' });
+  renderTaskDiscussionRows(list);
+}
+
+function removeTaskDiscussionRow(idx) {
+  const list = getTaskDiscussionRowsFromDOM();
+  list.splice(idx, 1);
+  renderTaskDiscussionRows(list);
 }
 
 // ─── MANUAL SUBMIT ───
