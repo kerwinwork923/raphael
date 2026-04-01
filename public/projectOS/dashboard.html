@@ -216,6 +216,9 @@ function getBackendTokenAndAdmin() {
 }
 
 function postJson(url, body) {
+  if (typeof window.projectOSPostJson === "function") {
+    return window.projectOSPostJson(url, body);
+  }
   return fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

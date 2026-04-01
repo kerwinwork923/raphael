@@ -691,6 +691,7 @@ tailwind.config = {
 // ─── BACKEND API (FR) ───
 const API_BASE = "https://23700999.com:8081/PM";
 const GET_PROJECT_LIST_URL = API_BASE + "/api/fr/getProjectList";
+const UPLOAD_FILE_PROJECT_URL = API_BASE + "/api/fr/UploadFieProject";
 
 function getBackendTokenAndAdmin() {
   const token = localStorage.getItem("backendToken") || sessionStorage.getItem("backendToken");
@@ -700,6 +701,9 @@ function getBackendTokenAndAdmin() {
 }
 
 function postJson(url, body) {
+  if (typeof window.projectOSPostJson === "function") {
+    return window.projectOSPostJson(url, body);
+  }
   return fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -909,8 +913,8 @@ let TASKS = {
 };
 
 let FILES = [
-  { id:'f1', name:'競品分析報告_v2.pdf', size:2457600, type:'pdf', uploadedAt:'2026-03-18', uploadedBy:'Alice' },
-  { id:'f2', name:'市場調查問卷.xlsx', size:153600, type:'xlsx', uploadedAt:'2026-03-10', uploadedBy:'Bob' }
+  { id:'f1', name:'競品分析報告_v2.pdf', size:2457600, type:'pdf', uploadedAt:'2026-03-18', uploadedBy:'Alice', url:'' },
+  { id:'f2', name:'市場調查問卷.xlsx', size:153600, type:'xlsx', uploadedAt:'2026-03-10', uploadedBy:'Bob', url:'' }
 ];
 
 let DECISION_CHATGPT = {
@@ -1403,21 +1407,89 @@ function findTask(id) {
   return null;
 }
 
-function handleFileUpload(input) {
-  Array.from(input.files).forEach(file => addFile(file));
-  input.value = '';
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result || '');
+      const base64 = result.includes(',') ? result.split(',')[1] : result;
+      resolve(base64);
+    };
+    reader.onerror = () => reject(new Error('讀取檔案失敗'));
+    reader.readAsDataURL(file);
+  });
 }
-function handleDrop(e) {
-  e.preventDefault();
-  document.getElementById('drop-zone').classList.remove('drop-zone-active');
-  Array.from(e.dataTransfer.files).forEach(file => addFile(file));
+
+async function uploadFileToProject(file) {
+  const auth = getBackendTokenAndAdmin();
+  if (!auth) throw new Error('尚未登入，缺少 AdminID / Token');
+
+  const aid = (localStorage.getItem('projectAID') || '').trim();
+  if (!aid) throw new Error('缺少專案 AID，請先從專案列表進入');
+
+  const base64String = await fileToBase64(file);
+  const payload = {
+    AdminID: auth.adminID,
+    Token: auth.token,
+    AID: aid,
+    base64String: base64String,
+    FileName: file.name
+  };
+
+  const resp = await postJson(UPLOAD_FILE_PROJECT_URL, payload);
+  if (!resp || String(resp.Result || '').toUpperCase() !== 'OK') {
+    throw new Error((resp && (resp.Message || resp.Msg)) || '上傳失敗');
+  }
+
+  return {
+    fileURL: String(resp.FileURL || '').trim(),
+    aid: String(resp.AID || aid).trim()
+  };
 }
-function addFile(file) {
+
+async function appendUploadedFile(file) {
   const ext = file.name.split('.').pop().toLowerCase();
   const id = 'f' + Date.now() + Math.random().toString(36).slice(2,6);
-  FILES.push({ id, name: file.name, size: file.size, type: ext, uploadedAt: new Date().toISOString().slice(0,10), uploadedBy: 'Alice' });
+  const uploadResult = await uploadFileToProject(file);
+  FILES.push({
+    id,
+    name: file.name,
+    size: file.size,
+    type: ext,
+    uploadedAt: new Date().toISOString().slice(0,10),
+    uploadedBy: (localStorage.getItem('adminID') || sessionStorage.getItem('adminID') || 'Admin'),
+    url: uploadResult.fileURL
+  });
+}
+
+async function handleFileUpload(input) {
+  const files = Array.from(input.files || []);
+  if (!files.length) return;
+  for (const file of files) {
+    try {
+      await appendUploadedFile(file);
+      showToast(`已上傳「${file.name}」`);
+    } catch (err) {
+      showToast(`「${file.name}」上傳失敗：${err.message || '未知錯誤'}`, 'warn');
+    }
+  }
   renderFiles();
-  showToast(`已上傳「${file.name}」`);
+  input.value = '';
+}
+async function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drop-zone-active');
+  const files = Array.from((e.dataTransfer && e.dataTransfer.files) || []);
+  if (!files.length) return;
+  for (const file of files) {
+    try {
+      await appendUploadedFile(file);
+      showToast(`已上傳「${file.name}」`);
+    } catch (err) {
+      showToast(`「${file.name}」上傳失敗：${err.message || '未知錯誤'}`, 'warn');
+    }
+  }
+  renderFiles();
 }
 function removeFile(id) {
   const idx = FILES.findIndex(f => f.id === id);
@@ -1439,7 +1511,9 @@ function renderFiles() {
     <div class="file-item flex items-center gap-3 border border-slate-200 rounded-lg px-3 py-2">
       <div class="text-lg">${fileIcon(f.type)}</div>
       <div class="flex-1 min-w-0">
-        <p class="text-sm font-medium text-slate-800 truncate">${f.name}</p>
+        <p class="text-sm font-medium text-slate-800 truncate">
+          ${f.url ? `<a href="${f.url}" target="_blank" rel="noopener noreferrer" class="hover:text-blue-600 hover:underline">${f.name}</a>` : f.name}
+        </p>
         <p class="text-xs text-slate-400">${formatFileSize(f.size)} · ${f.uploadedAt} · ${f.uploadedBy}</p>
       </div>
       <button onclick="removeFile('${f.id}')" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50 transition">移除</button>
