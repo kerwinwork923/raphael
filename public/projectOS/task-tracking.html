@@ -733,6 +733,10 @@ const NEW_DECISION_URL = API_BASE + "/api/fr/NewDecision";
 const UPLOAD_FILE_PROJECT_URL = API_BASE + "/api/fr/UploadFieProject";
 // 任務狀態修改（你提供的規格）
 const TASK_MODIFY_STATE_URL = API_BASE + "/api/fr/TaskModifyState";
+// 任務內容/狀態修改（你提供的規格）
+const TASK_MODIFY_URL = API_BASE + "/api/fr/ModifyTask";
+// 任務刪除（你提供的規格）
+const TASK_DELETE_URL = API_BASE + "/api/fr/DeleteTask";
 // 新增任務：目前程式碼庫未找到實際 endpoint；此為合理推測點位，可能需要你再確認/調整
 const NEW_TASK_URL = API_BASE + "/api/fr/NewTask";
 const GET_ADMIN_NAME_LIST_URL = API_BASE + "/api/fr/getAdminNameList";
@@ -1180,6 +1184,49 @@ async function createTaskToBackend(taskPayload) {
     TaskList: [taskItem],
   };
   return await tryPost(payloadTaskList);
+}
+
+async function modifyTaskToBackend(taskCid, backendTaskPayload) {
+  const auth = getBackendTokenAndAdmin();
+  if (!auth) throw new Error("尚未登入，缺少 AdminID / Token");
+
+  const aid = (CURRENT_PROJECT_AID || localStorage.getItem("projectAID") || "").trim();
+  if (!aid) throw new Error("缺少專案 AID，請先從專案列表進入");
+
+  const payload = {
+    AdminID: auth.adminID,
+    Token: auth.token,
+    AID: String(aid).trim(),
+    CID: String(taskCid || "").trim(),
+    ...(backendTaskPayload || {}),
+  };
+
+  const resp = await postJson(TASK_MODIFY_URL, payload);
+  if (!resp || String(resp.Result || "").toUpperCase() !== "OK") {
+    throw new Error((resp && (resp.Message || resp.Msg || resp.message)) || "ModifyTask 失敗");
+  }
+  return resp;
+}
+
+async function deleteTaskToBackend(taskCid) {
+  const auth = getBackendTokenAndAdmin();
+  if (!auth) throw new Error("尚未登入，缺少 AdminID / Token");
+
+  const aid = (CURRENT_PROJECT_AID || localStorage.getItem("projectAID") || "").trim();
+  if (!aid) throw new Error("缺少專案 AID，請先從專案列表進入");
+
+  const payload = {
+    AdminID: auth.adminID,
+    Token: auth.token,
+    AID: String(aid).trim(),
+    CID: String(taskCid || "").trim(),
+  };
+
+  const resp = await postJson(TASK_DELETE_URL, payload);
+  if (!resp || String(resp.Result || "").toUpperCase() !== "OK") {
+    throw new Error((resp && (resp.Message || resp.Msg || resp.message)) || "DeleteTask 失敗");
+  }
+  return resp;
 }
 
 function calcDaysOverdue(endDateIso) {
@@ -2001,14 +2048,48 @@ async function saveTaskModal() {
       const { task: t, col } = found;
       const statusChanged = col !== newStatus;
 
-      // 1) 狀態變更先同步後端
-      if (statusChanged && t.cid && CURRENT_PROJECT_AID) {
+      // 1) 同步後端：修改任務內容/狀態/前置/討論 URL
+      if (t.cid && CURRENT_PROJECT_AID) {
         try {
-          await modifyTaskStateBackend(t.cid, colToStateCode(newStatus));
+          const depLocalId = taskData.dep || "";
+          const depTaskFound = depLocalId ? findTask(depLocalId) : null;
+          const prereqCid =
+            depTaskFound && depTaskFound.task && depTaskFound.task.cid ? String(depTaskFound.task.cid).trim() : "0";
+
+          const urlList = (taskData.discussionLinks || [])
+            .map((x) => String(x && x.url ? x.url : "").trim())
+            .filter(Boolean);
+
+          const isBlocked = newStatus === "blocked";
+          const descriptionToSend = isBlocked
+            ? String(taskData.blockedReason || taskData.desc || "").trim()
+            : String(taskData.desc || "").trim();
+
+          const backendTaskPayload = {
+            Topic: String(taskData.title || title || "").trim(),
+            Description: descriptionToSend,
+            StartDate: toYYYYMMDD(taskData.startDate || ""),
+            EndDate: toYYYYMMDD(taskData.endDate || ""),
+            ChargeMan: String(taskData.assignee || "").trim(),
+            State: colToStateCode(newStatus),
+            PreTaskID: prereqCid || "0",
+            ExePlan: String(taskData.plan || "").trim(),
+            ExeCond: String(taskData.doingNote || "").trim(),
+            ExeResult: String(taskData.checkResult || "").trim(),
+            URLList: urlList,
+          };
+
+          const resp = await modifyTaskToBackend(t.cid, backendTaskPayload);
+          const newCid = resp && (resp.CID || resp.Cid);
+          if (newCid) t.cid = String(newCid).trim();
         } catch (e) {
-          showToast("修改任務狀態失敗：" + (e && e.message ? e.message : "未知錯誤"), "warn");
+          showToast("修改任務失敗：" + (e && e.message ? e.message : "未知錯誤"), "warn");
           return;
         }
+      } else if (t.cid && !CURRENT_PROJECT_AID) {
+        showToast("缺少專案 AID，僅本機更新任務", "warn");
+      } else {
+        showToast("此任務尚未同步到後端，僅本機更新任務", "warn");
       }
 
       // 2) 再更新本機任務資料 / Kanban 分類
@@ -2095,14 +2176,54 @@ async function saveTaskModal() {
   renderKanban();
 }
 
-function deleteTaskModal() {
-  const id=document.getElementById('modal-task-id').value;
-  if(!id){closeTaskModal();return;}
-  const found=findTask(id);
-  if(!found){closeTaskModal();return;}
-  TASKS[found.col]=TASKS[found.col].filter(t=>t.id!==id);
+async function deleteTaskModal() {
+  const id = document.getElementById('modal-task-id').value;
+  if (!id) {
+    closeTaskModal();
+    return;
+  }
+  const found = findTask(id);
+  if (!found) {
+    closeTaskModal();
+    return;
+  }
+
+  const taskCid = found.task && found.task.cid ? String(found.task.cid).trim() : "";
+
+  if (taskCid && CURRENT_PROJECT_AID) {
+    const ok = window.confirm("確定要刪除此任務？");
+    if (!ok) return;
+    try {
+      await deleteTaskToBackend(taskCid);
+      backendProjectSynced = false;
+      await initProjectFromBackendIfPossible().catch(function () {});
+    } catch (e) {
+      showToast("刪除任務失敗：" + (e && e.message ? e.message : "未知錯誤"), "warn");
+      return;
+    }
+  } else if (!taskCid) {
+    showToast("此任務尚未同步到後端，將僅本機刪除", "warn");
+  } else if (!CURRENT_PROJECT_AID) {
+    showToast("缺少專案 AID，將僅本機刪除任務", "warn");
+  }
+
+  // 確保本機 Kanban 移除該任務（避免 dep/欄位對不上）
+  ['todo', 'doing', 'done', 'blocked'].forEach((col) => {
+    TASKS[col] = (TASKS[col] || []).filter((t) => t.id !== id);
+  });
+
   closeTaskModal();
   renderKanban();
+  renderFiles();
+
+  const spIn = document.getElementById('decision-shareproject-url');
+  if (spIn) spIn.value = DECISION_CHATGPT.shareProjectUrl || '';
+  const spLink = document.getElementById('decision-shareproject-link');
+  if (spLink) spLink.href = DECISION_CHATGPT.shareProjectUrl || 'javascript:void(0)';
+  syncHeaderShareProjectFromDecision();
+  renderDecisionTopicRows();
+  syncDecisionBidHint();
+
   showToast('任務已刪除');
 }
 
