@@ -74,24 +74,24 @@ tailwind.config = {
     <a href="dashboard.html" class="flex items-center gap-1 text-sm text-slate-500 hover:text-blue-600 transition mt-1">← 返回</a>
     <div class="flex-1">
       <div class="flex flex-wrap items-center gap-2">
-        <h1 class="text-xl font-extrabold text-slate-900">Q2 新產品線計畫</h1>
+        <h1 id="project-title" class="text-xl font-extrabold text-slate-900">載入中…</h1>
         <span id="project-status-badge" class="status-in_progress text-xs px-2.5 py-1 rounded-full font-semibold">進行中</span>
-        <span class="text-xs bg-red-100 text-red-600 px-2.5 py-1 rounded-full font-semibold risk-pulse">🔴 Blocked ×1</span>
+        <span id="project-blocked-badge" class="text-xs bg-red-100 text-red-600 px-2.5 py-1 rounded-full font-semibold risk-pulse">🔴 Blocked ×0</span>
       </div>
-      <p class="text-xs text-slate-500 mt-1">負責人：Alice Chen · 發起人：Alice Chen · 預計結案：2026-06-30</p>
+      <p id="project-subtitle" class="text-xs text-slate-500 mt-1">正在連線取得專案…</p>
     </div>
 
     <div class="flex items-center gap-2 flex-wrap">
-      <a href="#" class="flex items-center gap-1 text-xs border border-slate-200 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition">
+      <a id="header-shareproject-link" href="#" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-xs border border-slate-200 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
         </svg>
         ShareProject
       </a>
-      <button onclick="advanceStatus()" class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition">
+      <!-- <button onclick="advanceStatus()" class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition">
         推進至 Review →
-      </button>
-      <div class="bg-white border border-slate-200 rounded-xl px-3 py-2 flex items-center gap-2.5">
+      </button> -->
+      <!-- <div class="bg-white border border-slate-200 rounded-xl px-3 py-2 flex items-center gap-2.5">
         <div class="relative" style="width:40px;height:40px;">
           <svg class="health-ring" width="40" height="40" viewBox="0 0 40 40">
             <circle cx="20" cy="20" r="16" fill="none" stroke="#e2e8f0" stroke-width="4"/>
@@ -105,7 +105,7 @@ tailwind.config = {
           <p class="text-xs font-semibold text-slate-700">健康分數</p>
           <p id="health-label" class="text-xs text-green-600 font-medium">計算中</p>
         </div>
-      </div>
+      </div> -->
       <button onclick="openNewTaskModal('todo')" class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2.5 rounded-lg font-medium transition">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -119,8 +119,8 @@ tailwind.config = {
   <div class="flex gap-1 border-b border-slate-200 mb-5">
     <button onclick="setDetailTab(this,'decision')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">Decision</button>
     <button onclick="setDetailTab(this,'tasks')" class="detail-tab active text-sm px-4 py-2.5 border-b-2 border-blue-600 text-blue-600 font-medium">Tasks</button>
-    <button onclick="setDetailTab(this,'kpi')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">KPI</button>
-    <button onclick="setDetailTab(this,'review')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">Review</button>
+    <!-- <button onclick="setDetailTab(this,'kpi')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">KPI</button> -->
+    <!-- <button onclick="setDetailTab(this,'review')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">Review</button> -->
   </div>
 
   <!-- TASKS TAB -->
@@ -132,24 +132,24 @@ tailwind.config = {
       </div>
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div>
-          <div class="flex justify-between text-xs mb-1.5"><span class="text-slate-600">月銷售量</span><span class="font-bold text-blue-700">45 / 100 件</span></div>
-          <div class="w-full bg-slate-100 rounded-full h-2"><div class="bg-blue-500 h-2 rounded-full kpi-bar" style="width:45%"></div></div>
-          <p class="text-xs text-slate-400 mt-1">目標達成率 45%</p>
+          <div class="flex justify-between text-xs mb-1.5"><span class="text-slate-600">月銷售量</span><span class="font-bold text-slate-500">— / —</span></div>
+          <div class="w-full bg-slate-100 rounded-full h-2"><div class="bg-blue-500 h-2 rounded-full kpi-bar" style="width:0%"></div></div>
+          <p class="text-xs text-slate-400 mt-1">尚無資料</p>
         </div>
         <div>
-          <div class="flex justify-between text-xs mb-1.5"><span class="text-slate-600">新客轉換率</span><span class="font-bold text-amber-600">9% / 15%</span></div>
-          <div class="w-full bg-slate-100 rounded-full h-2"><div class="bg-amber-400 h-2 rounded-full kpi-bar" style="width:60%"></div></div>
-          <p class="text-xs text-slate-400 mt-1">目標達成率 60%</p>
+          <div class="flex justify-between text-xs mb-1.5"><span class="text-slate-600">新客轉換率</span><span class="font-bold text-slate-500">— / —</span></div>
+          <div class="w-full bg-slate-100 rounded-full h-2"><div class="bg-amber-400 h-2 rounded-full kpi-bar" style="width:0%"></div></div>
+          <p class="text-xs text-slate-400 mt-1">尚無資料</p>
         </div>
         <div>
-          <div class="flex justify-between text-xs mb-1.5"><span class="text-slate-600">上線時程</span><span class="font-bold text-amber-600" id="kpi-timeline-val">進行中</span></div>
-          <div class="w-full bg-slate-100 rounded-full h-2"><div id="kpi-progress-bar" class="bg-blue-400 h-2 rounded-full kpi-bar" style="width:43%"></div></div>
-          <p class="text-xs text-slate-400 mt-1" id="kpi-progress-label">任務完成 43%</p>
+          <div class="flex justify-between text-xs mb-1.5"><span class="text-slate-600">上線時程</span><span class="font-bold text-slate-500" id="kpi-timeline-val">—</span></div>
+          <div class="w-full bg-slate-100 rounded-full h-2"><div id="kpi-progress-bar" class="bg-blue-400 h-2 rounded-full kpi-bar" style="width:0%"></div></div>
+          <p class="text-xs text-slate-400 mt-1" id="kpi-progress-label">任務完成 0%</p>
         </div>
         <div>
-          <div class="flex justify-between text-xs mb-1.5"><span class="text-slate-600">客戶滿意度</span><span class="font-bold text-green-600">目標 ≥85%</span></div>
+          <div class="flex justify-between text-xs mb-1.5"><span class="text-slate-600">客戶滿意度</span><span class="font-bold text-slate-500">—</span></div>
           <div class="w-full bg-slate-100 rounded-full h-2"><div class="bg-green-400 h-2 rounded-full kpi-bar" style="width:0%"></div></div>
-          <p class="text-xs text-slate-400 mt-1">上線後追蹤</p>
+          <p class="text-xs text-slate-400 mt-1">尚無資料</p>
         </div>
       </div>
     </div>
@@ -158,10 +158,10 @@ tailwind.config = {
       <div class="bg-white rounded-xl border border-slate-200 p-4">
         <div class="flex items-center justify-between mb-2">
           <span class="text-sm font-semibold text-slate-700">整體進度</span>
-          <span id="progress-pct" class="text-sm font-bold text-blue-600">43%</span>
+          <span id="progress-pct" class="text-sm font-bold text-blue-600">0%</span>
         </div>
         <div class="w-full bg-slate-100 rounded-full h-2.5 mb-2">
-          <div id="progress-bar" class="bg-blue-500 h-2.5 rounded-full progress-bar" style="width:43%"></div>
+          <div id="progress-bar" class="bg-blue-500 h-2.5 rounded-full progress-bar" style="width:0%"></div>
         </div>
         <div id="progress-summary" class="flex flex-wrap gap-3 text-xs text-slate-500"></div>
       </div>
@@ -232,10 +232,13 @@ tailwind.config = {
     
     <!-- LEFT -->
     <div class="bg-white rounded-xl border border-slate-200 p-5">
-      <h3 class="font-semibold mb-4 flex items-center gap-2">
+      <h3 class="font-semibold mb-1 flex items-center gap-2">
         <span class="w-2 h-2 bg-purple-500 rounded-full inline-block"></span>
         Decision 記錄
       </h3>
+      <p class="text-[11px] text-slate-400 mb-4 leading-relaxed">
+        送出後呼叫後端 <code class="text-[10px] bg-slate-100 px-1 rounded">NewDecision</code>；主題列之 <span class="text-slate-500">TaskID</span> 為後端任務 CID（請先自儀表板載入專案任務）。
+      </p>
 
       <div class="space-y-4">
         <!-- ChatGPT ShareProject URL -->
@@ -245,7 +248,7 @@ tailwind.config = {
             <input
               id="decision-shareproject-url"
               type="text"
-              placeholder="https://chatgpt.com/share/..."
+              placeholder="貼上 ShareProject 連結（https://…）"
               class="flex-1 border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:border-blue-400 transition"
             >
             <a
@@ -290,7 +293,8 @@ tailwind.config = {
             id="decision-background"
             class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm resize-none leading-relaxed"
             rows="4"
-          >本專案目標為建立 Q2 新產品線，聚焦新客獲取、通路上架與上市節奏控制，並透過跨部門協作降低法務與開發阻塞。</textarea>
+            placeholder="說明專案背景…"
+          ></textarea>
         </div>
 
         <!-- Core decision -->
@@ -300,10 +304,8 @@ tailwind.config = {
             id="decision-core"
             class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm resize-none leading-relaxed"
             rows="5"
-          >1. 先完成市場驗證，再擴大行銷預算。
-2. 上市節奏分兩階段，優先導入 MVP 通路。
-3. 法務審核與產品開發並行，避免整體排程延誤。
-4. KPI 以銷售量、轉換率、上線時程為主。</textarea>
+            placeholder="條列核心決策…"
+          ></textarea>
         </div>
 
         <!-- Risk -->
@@ -313,17 +315,19 @@ tailwind.config = {
             id="decision-risk"
             class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm resize-none leading-relaxed"
             rows="4"
-          >- 法務審核若超過 5 天未完成，將影響上市時程。
-- 通路簽約需依賴前置市場與定價資料。
-- 若轉換率低於 10%，需調整行銷策略與 CTA。</textarea>
+            placeholder="風險與假設…"
+          ></textarea>
         </div>
 
         <button
+          id="decision-save-btn"
+          type="button"
           onclick="saveDecisionData()"
-          class="w-full bg-slate-900 hover:bg-slate-700 text-white py-2.5 rounded-lg text-sm font-medium transition"
+          class="w-full bg-slate-900 hover:bg-slate-700 disabled:opacity-60 text-white py-2.5 rounded-lg text-sm font-medium transition"
         >
           儲存 Decision
         </button>
+        <p id="decision-bid-hint" class="text-xs text-slate-500 mt-2 hidden"></p>
       </div>
     </div>
 
@@ -373,15 +377,15 @@ tailwind.config = {
         <div class="flex items-end gap-4 mb-4">
           <div>
             <p class="text-xs text-slate-400 mb-1">目標</p>
-            <p class="text-3xl font-bold text-slate-900">100 <span class="text-sm font-normal text-slate-400">件</span></p>
+            <p class="text-3xl font-bold text-slate-500">— <span class="text-sm font-normal text-slate-400">件</span></p>
           </div>
           <div class="text-slate-300">vs</div>
           <div>
             <p class="text-xs text-slate-400 mb-1">實際</p>
-            <p class="text-3xl font-bold text-blue-600">45 <span class="text-sm font-normal text-slate-400">件</span></p>
+            <p class="text-3xl font-bold text-slate-500">— <span class="text-sm font-normal text-slate-400">件</span></p>
           </div>
         </div>
-        <div class="w-full bg-slate-100 rounded-full h-3 mb-3"><div class="bg-blue-500 h-3 rounded-full" style="width:45%"></div></div>
+        <div class="w-full bg-slate-100 rounded-full h-3 mb-3"><div class="bg-blue-500 h-3 rounded-full" style="width:0%"></div></div>
         <button onclick="showToast('已開啟 KPI 輸入')" class="w-full text-sm bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition">填入實際值</button>
       </div>
 
@@ -393,15 +397,15 @@ tailwind.config = {
         <div class="flex items-end gap-4 mb-4">
           <div>
             <p class="text-xs text-slate-400 mb-1">目標</p>
-            <p class="text-3xl font-bold text-slate-900">15 <span class="text-sm font-normal text-slate-400">%</span></p>
+            <p class="text-3xl font-bold text-slate-500">— <span class="text-sm font-normal text-slate-400">%</span></p>
           </div>
           <div class="text-slate-300">vs</div>
           <div>
             <p class="text-xs text-slate-400 mb-1">實際</p>
-            <p class="text-3xl font-bold text-blue-600">9 <span class="text-sm font-normal text-slate-400">%</span></p>
+            <p class="text-3xl font-bold text-slate-500">— <span class="text-sm font-normal text-slate-400">%</span></p>
           </div>
         </div>
-        <div class="w-full bg-slate-100 rounded-full h-3 mb-3"><div class="bg-amber-400 h-3 rounded-full" style="width:60%"></div></div>
+        <div class="w-full bg-slate-100 rounded-full h-3 mb-3"><div class="bg-amber-400 h-3 rounded-full" style="width:0%"></div></div>
         <button onclick="showToast('已開啟 KPI 輸入')" class="w-full text-sm bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition">填入實際值</button>
       </div>
 
@@ -413,15 +417,15 @@ tailwind.config = {
         <div class="flex items-end gap-4 mb-4">
           <div>
             <p class="text-xs text-slate-400 mb-1">目標</p>
-            <p class="text-3xl font-bold text-slate-900">2026-06-30</p>
+            <p class="text-3xl font-bold text-slate-500">—</p>
           </div>
           <div class="text-slate-300">vs</div>
           <div>
             <p class="text-xs text-slate-400 mb-1">目前</p>
-            <p class="text-3xl font-bold text-blue-600">43 <span class="text-sm font-normal text-slate-400">% 完成</span></p>
+            <p class="text-3xl font-bold text-slate-500">— <span class="text-sm font-normal text-slate-400">% 完成</span></p>
           </div>
         </div>
-        <div class="w-full bg-slate-100 rounded-full h-3 mb-3"><div class="bg-blue-400 h-3 rounded-full" style="width:43%"></div></div>
+        <div class="w-full bg-slate-100 rounded-full h-3 mb-3"><div class="bg-blue-400 h-3 rounded-full" style="width:0%"></div></div>
         <button onclick="showToast('已開啟 KPI 輸入')" class="w-full text-sm bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition">填入實際值</button>
       </div>
 
@@ -433,12 +437,12 @@ tailwind.config = {
         <div class="flex items-end gap-4 mb-4">
           <div>
             <p class="text-xs text-slate-400 mb-1">目標</p>
-            <p class="text-3xl font-bold text-slate-900">85 <span class="text-sm font-normal text-slate-400">%</span></p>
+            <p class="text-3xl font-bold text-slate-500">— <span class="text-sm font-normal text-slate-400">%</span></p>
           </div>
           <div class="text-slate-300">vs</div>
           <div>
             <p class="text-xs text-slate-400 mb-1">實際</p>
-            <p class="text-3xl font-bold text-blue-600">— <span class="text-sm font-normal text-slate-400">尚未記錄</span></p>
+            <p class="text-3xl font-bold text-slate-500">— <span class="text-sm font-normal text-slate-400">尚未記錄</span></p>
           </div>
         </div>
         <div class="w-full bg-slate-100 rounded-full h-3 mb-3"><div class="bg-slate-300 h-3 rounded-full" style="width:0%"></div></div>
@@ -691,7 +695,17 @@ tailwind.config = {
 // ─── BACKEND API (FR) ───
 const API_BASE = "https://23700999.com:8081/PM";
 const GET_PROJECT_LIST_URL = API_BASE + "/api/fr/getProjectList";
+const NEW_DECISION_URL = API_BASE + "/api/fr/NewDecision";
 const UPLOAD_FILE_PROJECT_URL = API_BASE + "/api/fr/UploadFieProject";
+// 任務狀態修改（你提供的規格）
+const TASK_MODIFY_STATE_URL = API_BASE + "/api/fr/TaskModifyState";
+// 新增任務：目前程式碼庫未找到實際 endpoint；此為合理推測點位，可能需要你再確認/調整
+const NEW_TASK_URL = API_BASE + "/api/fr/NewTask";
+
+/** 目前頁面對應的專案 AID（來自 getProjectList 或 localStorage.projectAID） */
+let CURRENT_PROJECT_AID = "";
+/** 是否已成功自 getProjectList 套用專案與任務 */
+let backendProjectSynced = false;
 
 function getBackendTokenAndAdmin() {
   const token = localStorage.getItem("backendToken") || sessionStorage.getItem("backendToken");
@@ -738,6 +752,86 @@ function toIsoDate(dateStr) {
   return digits.slice(0, 4) + "-" + digits.slice(4, 6) + "-" + digits.slice(6, 8);
 }
 
+function toYYYYMMDD(dateStr) {
+  // 後端 NewProject/TaskList 範例通常用 YYYYMMDD（無 -）
+  if (!dateStr) return "";
+  const s = String(dateStr).trim();
+  if (!s) return "";
+  return s.includes("-") ? s.replace(/-/g, "") : s;
+}
+
+function colToStateCode(col) {
+  // 與 initProjectFromBackendIfPossible 裡的分流對齊：1/2/3/4
+  if (col === "todo") return "1";
+  if (col === "doing") return "2";
+  if (col === "done") return "3";
+  if (col === "blocked") return "4";
+  return "1";
+}
+
+function normalizeUrlListItems(urlList) {
+  // 兼容：後端可能回傳字串陣列，或物件陣列
+  if (!Array.isArray(urlList)) return [];
+  return urlList
+    .map((x) => {
+      if (typeof x === "string") return { title: "", url: x };
+      if (x && typeof x === "object") {
+        const url = x.url || x.URL || x.TopicURL || x.link || "";
+        const title = x.title || x.Title || x.TopicName || "";
+        return { title: title || "", url: url || "" };
+      }
+      return { title: "", url: "" };
+    })
+    .filter((x) => x.url && String(x.url).trim());
+}
+
+async function modifyTaskStateBackend(taskCid, newStateCode) {
+  const auth = getBackendTokenAndAdmin();
+  if (!auth) throw new Error("尚未登入，缺少 AdminID / Token");
+
+  const aid = (CURRENT_PROJECT_AID || localStorage.getItem("projectAID") || "").trim();
+  if (!aid) throw new Error("缺少專案 AID，請先從專案列表進入");
+
+  const payload = {
+    AdminID: auth.adminID,
+    Token: auth.token,
+    TaskList: [
+      {
+        CID: String(taskCid || "").trim(),
+        AID: String(aid).trim(),
+        NewState: String(newStateCode || "").trim(),
+      },
+    ],
+  };
+
+  const resp = await postJson(TASK_MODIFY_STATE_URL, payload);
+  if (!resp || String(resp.Result || "").toUpperCase() !== "OK") {
+    throw new Error((resp && (resp.Message || resp.Msg)) || "TaskModifyState 失敗");
+  }
+  return resp;
+}
+
+async function createTaskToBackend(taskPayload) {
+  const auth = getBackendTokenAndAdmin();
+  if (!auth) throw new Error("尚未登入，缺少 AdminID / Token");
+
+  const aid = (CURRENT_PROJECT_AID || localStorage.getItem("projectAID") || "").trim();
+  if (!aid) throw new Error("缺少專案 AID，請先從專案列表進入");
+
+  const payload = {
+    AdminID: auth.adminID,
+    Token: auth.token,
+    AID: String(aid).trim(),
+    TaskList: [taskPayload],
+  };
+
+  const resp = await postJson(NEW_TASK_URL, payload);
+  if (!resp || String(resp.Result || "").toUpperCase() !== "OK") {
+    throw new Error((resp && (resp.Message || resp.Msg)) || "新增任務失敗");
+  }
+  return resp;
+}
+
 function calcDaysOverdue(endDateIso) {
   const end = endDateIso ? new Date(endDateIso) : null;
   if (!end || isNaN(end.getTime())) return 0;
@@ -774,7 +868,14 @@ function applyProjectStatusBadge(status) {
 
 async function initProjectFromBackendIfPossible() {
   const auth = getBackendTokenAndAdmin();
-  if (!auth) return;
+  if (!auth) {
+    try {
+      CURRENT_PROJECT_AID = (localStorage.getItem("projectAID") || "").trim();
+    } catch (e) {
+      CURRENT_PROJECT_AID = "";
+    }
+    return;
+  }
 
   // from dashboard: task-tracking.html?project=ProjectName
   const urlParams = new URLSearchParams(window.location.search || "");
@@ -804,6 +905,13 @@ async function initProjectFromBackendIfPossible() {
 
   if (!selected) return;
 
+  CURRENT_PROJECT_AID = String(selected.AID || selected.ProjectAID || "").trim();
+  if (CURRENT_PROJECT_AID) {
+    try {
+      localStorage.setItem("projectAID", CURRENT_PROJECT_AID);
+    } catch (e) {}
+  }
+
   const rawTasks = Array.isArray(selected.TaskList) ? selected.TaskList : [];
   const rawKpis = Array.isArray(selected.KPIList) ? selected.KPIList : [];
 
@@ -822,6 +930,9 @@ async function initProjectFromBackendIfPossible() {
 
   rawTasks.forEach((t, idx) => {
     const localId = "task-" + (idx + 1);
+    const cidRaw =
+      t && (t.CID || t.cid || t.TaskCID || t.TaskCid || t.CIDValue || t.cidValue || "");
+    const cidStr = String(cidRaw || "").trim();
     const stateCode = String(t && (t.State || t.TaskState || t.taskState || "1")).trim();
     const topic = String(t && (t.Topic || t.Title || t.topic || "")).trim();
     const desc = String(t && (t.Description || t.Desc || t.description || "")).trim();
@@ -844,6 +955,8 @@ async function initProjectFromBackendIfPossible() {
 
     const taskObj = {
       id: localId,
+      /** 後端任務 CID，提交 Decision 時對應 TaskID */
+      cid: cidStr,
       title: topic,
       desc: desc,
       assignee: assignee,
@@ -852,6 +965,10 @@ async function initProjectFromBackendIfPossible() {
       dep: depId,
       blockedReason: blockedReason,
       blockedDays: blockedDays,
+      plan: String(t && (t.ExePlan || t.exePlan || t.exe_plan || "")).trim(),
+      doingNote: String(t && (t.ExeCond || t.exeCond || t.exe_cond || "")).trim(),
+      checkResult: String(t && (t.ExeResult || t.exeResult || t.exe_result || "")).trim(),
+      discussionLinks: normalizeUrlListItems(t && (t.URLList || t.UrlList || t.urlList || [])),
     };
 
     if (stateCode === "1") colBuckets.todo.push(taskObj);
@@ -869,17 +986,17 @@ async function initProjectFromBackendIfPossible() {
   const chargeMan = String(selected.ChargeMan || selected.ChargePerson || selected.owner || selected.Owner || "—").trim();
   const endYmdIso = toIsoDate(selected.EndDate || selected.endDate || "");
 
-  const h1 = document.querySelector(".flex-1 h1.text-xl.font-extrabold.text-slate-900");
+  const h1 = document.getElementById("project-title");
   if (h1) h1.textContent = projectName;
 
-  const p = document.querySelector(".flex-1 p.text-xs.text-slate-500.mt-1");
+  const p = document.getElementById("project-subtitle");
   if (p) {
     const participants = selected.Participants ? String(selected.Participants).trim() : "";
     const creator = chargeMan || participants || "—";
     p.textContent = `負責人：${chargeMan} · 發起人：${creator} · 預計結案：${endYmdIso || "—"}`;
   }
 
-  const blockedSpan = document.querySelector("span.risk-pulse");
+  const blockedSpan = document.getElementById("project-blocked-badge");
   if (blockedSpan) blockedSpan.textContent = `🔴 Blocked ×${TASKS.blocked.length}`;
 
   projectStatus = deriveProjectStatusFromTasks(TASKS);
@@ -890,53 +1007,113 @@ async function initProjectFromBackendIfPossible() {
     DECISION_CHATGPT.shareProjectUrl = String(selected.ShareProject_URL || "").trim();
   }
 
+  // 從後端填入：已上傳檔案（FileList）
+  FILES = [];
+  if (Array.isArray(selected.FileList)) {
+    FILES = selected.FileList
+      .map((f, i) => {
+        const fileName = String(f.FileName || "").trim();
+        const fileURL = String(f.FileURL || "").trim();
+        if (!fileName && !fileURL) return null;
+        const ext = fileName.includes(".") ? fileName.split(".").pop().toLowerCase() : "";
+        return {
+          id: "f-api-" + i,
+          name: fileName || "uploaded_file_" + (i + 1),
+          size: Number(f.Size || f.size || 0) || 0,
+          type: ext,
+          uploadedAt: f.UploadedAt ? String(f.UploadedAt) : "",
+          uploadedBy: f.UploadedBy ? String(f.UploadedBy) : "",
+          url: fileURL,
+        };
+      })
+      .filter(Boolean);
+  }
+
+  // 從後端填入：重要討論主題（DecisionList -> DecisionTopicList）
+  // 這裡取最後一次 Decision（或有 ShareProjectURL 的那筆）
+  DECISION_CHATGPT.topics = [];
+  let lastDecisionRecord = null;
+  if (Array.isArray(selected.DecisionList) && selected.DecisionList.length) {
+    // 預設用最後一筆；若最後一筆沒有 ShareProjectURL 就嘗試找有的
+    const last = selected.DecisionList[selected.DecisionList.length - 1];
+    lastDecisionRecord = last;
+    if (!DECISION_CHATGPT.shareProjectUrl && last && last.ShareProjectURL) {
+      DECISION_CHATGPT.shareProjectUrl = String(last.ShareProjectURL || "").trim();
+    } else if (last && last.ShareProjectURL) {
+      // 後端也可能在 DecisionList 裡同步 ShareProjectURL，優先採用它
+      DECISION_CHATGPT.shareProjectUrl = String(last.ShareProjectURL || "").trim();
+    }
+
+    const topicSource = last && Array.isArray(last.DecisionTopicList) ? last.DecisionTopicList : [];
+    if (topicSource.length) {
+      DECISION_CHATGPT.topics = topicSource
+        .map((tp, idx) => {
+          const taskIdBackend = String(tp.TaskID || tp.TaskId || "").trim();
+          const localTaskId = taskIdBackend && cidToLocalId[taskIdBackend] ? cidToLocalId[taskIdBackend] : "";
+          const topicName = String(tp.TopicName || tp.TopicTitle || "").trim();
+          const topicURL = String(tp.TopicURL || tp.Url || tp.url || "").trim();
+          if (!topicName && !topicURL) return null;
+          return {
+            id: "dc-api-" + idx,
+            title: topicName || "",
+            url: topicURL || "",
+            taskId: localTaskId || "",
+          };
+        })
+        .filter(Boolean);
+    }
+  }
+
+  // Decision 背景/核心/風險文字（DecisionList 優先；沒有 DecisionList 才用 selected.Decision）
+  const bgEl = document.getElementById("decision-background");
+  const coreEl = document.getElementById("decision-core");
+  const riskEl = document.getElementById("decision-risk");
+
+  const hasDecisionList = !!lastDecisionRecord;
+  if (hasDecisionList) {
+    if (bgEl && lastDecisionRecord && lastDecisionRecord.BackGround != null) {
+      const v = String(lastDecisionRecord.BackGround || "").trim();
+      if (v) bgEl.value = v;
+    }
+    if (coreEl && lastDecisionRecord && lastDecisionRecord.Kernal != null) {
+      const v = String(lastDecisionRecord.Kernal || "").trim();
+      if (v) coreEl.value = v;
+    } else if (coreEl && lastDecisionRecord && lastDecisionRecord.Decision != null) {
+      const v = String(lastDecisionRecord.Decision || "").trim();
+      if (v && !coreEl.value) coreEl.value = v;
+    }
+    if (riskEl && lastDecisionRecord && lastDecisionRecord.Risk != null) {
+      const v = String(lastDecisionRecord.Risk || "").trim();
+      if (v) riskEl.value = v;
+    }
+  } else {
+    const decisionStr = selected.Decision ? String(selected.Decision || "").trim() : "";
+    if (coreEl && decisionStr) {
+      // 以免覆蓋使用者手動輸入（理論上這裡是載入階段，但保險起見）
+      if (!coreEl.value || coreEl.value.trim() === "") coreEl.value = decisionStr;
+    }
+  }
+
   // 若後端有傳 KPIList，就不額外接 UI（目前 KPI 畫面是靜態）
+  backendProjectSynced = true;
 }
 
 let nextId = 100;
 let TASKS = {
-  todo: [
-    {id:'t1',title:'制定行銷計畫',desc:'分析目標市場，制定完整行銷策略與預算規劃。',assignee:'Bob',startDate:'2026-04-01',endDate:'2026-04-15',blockedReason:'',dep:''},
-    {id:'t2',title:'建立銷售通路',desc:'評估線上/線下通路並完成簽約。',assignee:'Carol',startDate:'2026-04-10',endDate:'2026-05-01',blockedReason:'',dep:'t1'}
-  ],
-  doing: [
-    {id:'t3',title:'完成產品開發',desc:'包含前端、後端、API 整合與 QA 測試。',assignee:'Dev Team',startDate:'2026-03-15',endDate:'2026-04-30',blockedReason:'',dep:''}
-  ],
-  done: [
-    {id:'t4',title:'市場調查',desc:'完成競品分析報告 v2。',assignee:'Alice',startDate:'2026-03-01',endDate:'2026-03-15',blockedReason:'',dep:''},
-    {id:'t5',title:'競品分析',desc:'',assignee:'Alice',startDate:'2026-03-10',endDate:'2026-03-18',blockedReason:'',dep:''},
-    {id:'t6',title:'定價策略',desc:'',assignee:'Bob',startDate:'2026-03-15',endDate:'2026-03-22',blockedReason:'',dep:''}
-  ],
-  blocked: [
-    {id:'t7',title:'完成法務審核',desc:'確認產品上線相關合約與免責條款。',assignee:'Legal',startDate:'2026-04-01',endDate:'2026-04-10',blockedReason:'等待法務部門回覆，已發信 3 天',dep:'',blockedDays:3}
-  ]
+  todo: [],
+  doing: [],
+  done: [],
+  blocked: []
 };
 
-let FILES = [
-  { id:'f1', name:'競品分析報告_v2.pdf', size:2457600, type:'pdf', uploadedAt:'2026-03-18', uploadedBy:'Alice', url:'' },
-  { id:'f2', name:'市場調查問卷.xlsx', size:153600, type:'xlsx', uploadedAt:'2026-03-10', uploadedBy:'Bob', url:'' }
-];
+let FILES = [];
 
 let DECISION_CHATGPT = {
-  shareProjectUrl: 'https://chatgpt.com/share/example-project-room',
-  topics: [
-    {
-      id: 'dc1',
-      title: 'Q2 新產品線策略討論',
-      url: 'https://chatgpt.com/share/topic-001',
-      taskId: 't1'
-    },
-    {
-      id: 'dc2',
-      title: '通路上架優先順序討論',
-      url: 'https://chatgpt.com/share/topic-002',
-      taskId: 't2'
-    }
-  ]
+  shareProjectUrl: "",
+  topics: []
 };
 
-
-const AV = {Alice:'bg-blue-400',Bob:'bg-purple-400',Carol:'bg-pink-400','Dev Team':'bg-green-400',Legal:'bg-slate-400'};
+const AV = {};
 let editingTaskCol = null;
 let completedCount = 0;
 let projectStatus = 'in_progress';
@@ -1007,7 +1184,8 @@ function setDetailTab(btn, tab) {
 }
 
 function buildCard(t, col) {
-  const av = AV[t.assignee]||'bg-slate-400';
+  const assigneeName = (t.assignee && String(t.assignee).trim()) ? String(t.assignee).trim() : "未指定";
+  const av = AV[assigneeName] || "bg-slate-400";
   const hasDesc = t.desc && t.desc.trim().length > 0;
   const uc = col !== 'done' && col !== 'blocked' ? urgencyClass(t) : '';
   const ub = urgencyBadge(t);
@@ -1016,7 +1194,7 @@ function buildCard(t, col) {
 
   const titleHtml = `<p class="text-sm font-semibold text-slate-800 mb-1 cursor-pointer hover:text-blue-600 transition leading-snug" onclick="openEditModal('${t.id}')">${locked?'🔒 ':''}${t.title}</p>`;
   const descHtml = hasDesc ? `<p class="text-xs text-slate-500 desc-clamp mb-1">${t.desc}</p>` : '';
-  const avatarHtml = `<div class="w-5 h-5 rounded-full ${av} flex items-center justify-center text-white font-bold flex-shrink-0" style="font-size:10px">${t.assignee[0]}</div><span class="text-xs text-slate-500">${t.assignee}</span>`;
+  const avatarHtml = `<div class="w-5 h-5 rounded-full ${av} flex items-center justify-center text-white font-bold flex-shrink-0" style="font-size:10px">${assigneeName.charAt(0)}</div><span class="text-xs text-slate-500">${assigneeName}</span>`;
   const badgesHtml = db ? `<div class="flex flex-wrap gap-1 mt-1.5">${db}</div>` : '';
 
   if(col==='done') return `
@@ -1146,6 +1324,8 @@ function updateProgress() {
   document.getElementById('progress-bar').className = `h-2.5 rounded-full progress-bar ${pct>=75?'bg-green-500':pct>=40?'bg-blue-500':'bg-amber-500'}`;
   document.getElementById('progress-summary').innerHTML =
     `<span>✅ 完成 ${TASKS.done.length}</span><span>🔄 進行 ${TASKS.doing.length}</span><span>📋 待辦 ${TASKS.todo.length}</span><span>🔴 Blocked ${TASKS.blocked.length}</span>`;
+  const blockedHdr = document.getElementById('project-blocked-badge');
+  if (blockedHdr) blockedHdr.textContent = `🔴 Blocked ×${TASKS.blocked.length}`;
 }
 
 function updateUrgencyCounts() {
@@ -1176,10 +1356,19 @@ function updateHealth() {
 }
 
 function updateKpiProgress() {
-  const done = TASKS.done.length, total = Object.values(TASKS).flat().length;
-  const pct = total ? Math.round(done/total*100) : 0;
-  document.getElementById('kpi-progress-bar').style.width = pct+'%';
-  document.getElementById('kpi-progress-label').textContent = `任務完成 ${pct}%`;
+  const done = TASKS.done.length,
+    total = Object.values(TASKS).flat().length;
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  const bar = document.getElementById("kpi-progress-bar");
+  const label = document.getElementById("kpi-progress-label");
+  const timeline = document.getElementById("kpi-timeline-val");
+  if (bar) bar.style.width = pct + "%";
+  if (label) label.textContent = `任務完成 ${pct}%`;
+  if (timeline) {
+    if (total === 0) timeline.textContent = "—";
+    else if (pct >= 100) timeline.textContent = "已完成";
+    else timeline.textContent = "進行中";
+  }
 }
 
 function populateDepSelect() {
@@ -1213,21 +1402,38 @@ function getTaskOptionsHtml(selectedId = '') {
 }
 
 
-function quickMove(id, fromCol, toCol) {
+async function quickMove(id, fromCol, toCol) {
   const idx = TASKS[fromCol].findIndex(t=>t.id===id);
   if(idx===-1) return;
   if(toCol==='doing' && fromCol==='todo') {
     const task = TASKS[fromCol][idx];
     if(!canStart(task)){ showToast('⛓ 前置任務尚未完成，無法開始','warn'); return; }
   }
-  const task = TASKS[fromCol].splice(idx,1)[0];
-  if(toCol==='blocked' && !task.blockedReason) task.blockedReason = '待補充阻擋原因';
-  TASKS[toCol].push(task);
+
+  const task = TASKS[fromCol][idx];
+  const targetStateCode = colToStateCode(toCol);
+
+  // 有後端 CID 才能同步狀態
+  if (task && task.cid && CURRENT_PROJECT_AID) {
+    try {
+      // 有些欄位移動前需要使用者確認；這裡先同步成功再更新 UI
+      await modifyTaskStateBackend(task.cid, targetStateCode);
+    } catch (e) {
+      showToast("修改任務狀態失敗：" + (e && e.message ? e.message : "未知錯誤"), "warn");
+      return;
+    }
+  }
+
+  // ✅ 到這裡表示：後端同步成功（或此任務沒有 cid 無法同步）
+  const moved = TASKS[fromCol].splice(idx,1)[0];
+  if(toCol==='blocked' && !moved.blockedReason) moved.blockedReason = '待補充阻擋原因';
+  TASKS[toCol].push(moved);
+
   if(toCol==='done') {
     completedCount++;
-    celebrateCompletion(task.title);
+    celebrateCompletion(moved.title);
   } else {
-    showToast(`「${task.title}」已移至 ${toCol==='doing'?'進行中':toCol==='blocked'?'Blocked':toCol}`);
+    showToast(`「${moved.title}」已移至 ${toCol==='doing'?'進行中':toCol==='blocked'?'Blocked':toCol}`);
   }
   renderKanban();
 }
@@ -1320,7 +1526,7 @@ function setModalDot(col) {
   document.getElementById('modal-status-dot').className=`w-2.5 h-2.5 rounded-full ${colors[col]||'bg-slate-400'}`;
 }
 
-function saveTaskModal() {
+async function saveTaskModal() {
   const title = document.getElementById('modal-task-title').value.trim();
   if (!title) {
     showToast('請填入任務標題', 'warn');
@@ -1346,15 +1552,33 @@ function saveTaskModal() {
     blockedDays: newStatus === 'blocked' ? 0 : undefined,
   };
 
+  if (newStatus === 'blocked' && !taskData.blockedReason) {
+    // 與 quickMove 的行為一致：blocked 狀態至少要有提醒文字
+    taskData.blockedReason = '待補充阻擋原因';
+  }
+
   const id = document.getElementById('modal-task-id').value;
 
   if (id) {
     const found = findTask(id);
     if (found) {
       const { task: t, col } = found;
+      const statusChanged = col !== newStatus;
+
+      // 1) 狀態變更先同步後端
+      if (statusChanged && t.cid && CURRENT_PROJECT_AID) {
+        try {
+          await modifyTaskStateBackend(t.cid, colToStateCode(newStatus));
+        } catch (e) {
+          showToast("修改任務狀態失敗：" + (e && e.message ? e.message : "未知錯誤"), "warn");
+          return;
+        }
+      }
+
+      // 2) 再更新本機任務資料 / Kanban 分類
       Object.assign(t, taskData);
 
-      if (col !== newStatus) {
+      if (statusChanged) {
         TASKS[col] = TASKS[col].filter(x => x.id !== id);
         TASKS[newStatus].push(t);
       }
@@ -1362,11 +1586,63 @@ function saveTaskModal() {
       showToast(`「${title}」已更新`);
     }
   } else {
-    TASKS[newStatus].push({
+    // 先做本機新增（避免使用者體驗卡住）
+    const newLocal = {
       id: 'task-' + (++nextId),
+      cid: '',
       ...taskData
-    });
+    };
+    TASKS[newStatus].push(newLocal);
     showToast(`「${title}」已建立`);
+
+    // 再嘗試同步到後端新增任務（endpoint 依你後端實際為準）
+    try {
+      const depLocalId = document.getElementById('modal-task-dep').value;
+      const depTask = depLocalId ? findTask(depLocalId) : null;
+      const prereqCid = depTask && depTask.task && depTask.task.cid ? String(depTask.task.cid).trim() : "0";
+
+      const urlList = (taskData.discussionLinks || [])
+        .map(x => String(x && x.url ? x.url : '').trim())
+        .filter(Boolean);
+
+      const isBlocked = newStatus === "blocked";
+      const descriptionToSend = isBlocked
+        ? String(taskData.blockedReason || taskData.desc || "").trim()
+        : String(taskData.desc || "").trim();
+
+      const backendTaskPayload = {
+        Topic: String(taskData.title || "").trim(),
+        Description: descriptionToSend,
+        StartDate: toYYYYMMDD(taskData.startDate || ""),
+        EndDate: toYYYYMMDD(taskData.endDate || ""),
+        ChargeMan: String(taskData.assignee || "").trim(),
+        State: colToStateCode(newStatus),
+        PreTaskID: prereqCid || "0",
+        ExePlan: String(taskData.plan || "").trim(),
+        ExeCond: String(taskData.doingNote || "").trim(),
+        ExeResult: String(taskData.checkResult || "").trim(),
+        URLList: urlList,
+      };
+
+      if (backendTaskPayload.Topic && CURRENT_PROJECT_AID) {
+        await createTaskToBackend(backendTaskPayload);
+        showToast("任務已同步到後端");
+        backendProjectSynced = false;
+        await initProjectFromBackendIfPossible().catch(() => {});
+
+        // 由後端回填最新 TASKS / FILES / Decision URL
+        renderKanban();
+        renderFiles();
+        document.getElementById("decision-shareproject-url").value = DECISION_CHATGPT.shareProjectUrl || "";
+        document.getElementById("decision-shareproject-link").href = DECISION_CHATGPT.shareProjectUrl || "#";
+        syncHeaderShareProjectFromDecision();
+        renderDecisionTopicRows();
+        syncDecisionBidHint();
+      }
+    } catch (e) {
+      // API 不一定存在或格式不同，先保留本機新增行為
+      showToast("新增任務 API 可能未串接成功：" + (e && e.message ? e.message : "未知錯誤"), "warn");
+    }
   }
 
   closeTaskModal();
@@ -1555,15 +1831,16 @@ function renderDecisionTopicRows() {
         <input
           type="text"
           value="${item.url || ''}"
-          placeholder="https://chatgpt.com/share/..."
+          placeholder="https://…"
           onchange="updateDecisionTopicField(${idx}, 'url', this.value)"
           class="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm"
         >
         <a
+          id="decision-topic-open-link-${idx}"
           href="${item.url || '#'}"
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex items-center justify-center px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 transition"
+          class="${item.url ? '':'opacity-50 pointer-events-none'} inline-flex items-center justify-center px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 transition"
         >
           開啟
         </a>
@@ -1598,12 +1875,167 @@ function removeDecisionTopicRow(idx) {
 function updateDecisionTopicField(idx, key, value) {
   if (!DECISION_CHATGPT.topics[idx]) return;
   DECISION_CHATGPT.topics[idx][key] = value;
+
+  // 重要討論 URL：讓「開啟」按鈕會跟著輸入即時更新
+  if (key === "url") {
+    const link = document.getElementById("decision-topic-open-link-" + idx);
+    if (link) {
+      const url = (value || "").trim();
+      link.href = url || "#";
+      // 空字串時不要跳到頁首
+      link.classList.toggle("opacity-50", !url);
+      link.classList.toggle("pointer-events-none", !url);
+    }
+  }
 }
 
-function saveDecisionData() {
-  DECISION_CHATGPT.shareProjectUrl = document.getElementById('decision-shareproject-url').value.trim();
-  document.getElementById('decision-shareproject-link').href = DECISION_CHATGPT.shareProjectUrl || '#';
-  showToast('Decision 已儲存');
+function resolveTaskCidForDecision(localTaskId) {
+  const id = String(localTaskId || "").trim();
+  if (!id) return "";
+  const ft = findTask(id);
+  const cid = ft && ft.task && ft.task.cid != null ? String(ft.task.cid).trim() : "";
+  return cid;
+}
+
+function syncHeaderShareProjectFromDecision() {
+  const url = (
+    (DECISION_CHATGPT && DECISION_CHATGPT.shareProjectUrl) ||
+    (document.getElementById("decision-shareproject-url") &&
+      document.getElementById("decision-shareproject-url").value) ||
+    ""
+  ).trim();
+  const a = document.getElementById("header-shareproject-link");
+  if (a) {
+    a.href = url || "#";
+    a.setAttribute("aria-disabled", url ? "false" : "true");
+    a.classList.toggle("opacity-50", !url);
+    a.classList.toggle("pointer-events-none", !url);
+  }
+
+  // Decision 區塊的「前往討論」
+  const a2 = document.getElementById("decision-shareproject-link");
+  if (a2) {
+    a2.href = url || "#";
+    a2.classList.toggle("opacity-50", !url);
+    a2.classList.toggle("pointer-events-none", !url);
+  }
+}
+
+function applyFallbackDemoHeader() {
+  const t = document.getElementById("project-title");
+  const s = document.getElementById("project-subtitle");
+  if (t) t.textContent = "專案任務追蹤（本地預覽）";
+  if (s) s.textContent = "未從後端同步 · 可於本頁操作 Kanban 與 Decision";
+}
+
+function syncDecisionBidHint() {
+  const el = document.getElementById("decision-bid-hint");
+  if (!el) return;
+  const aid = (CURRENT_PROJECT_AID || (function () {
+    try {
+      return (localStorage.getItem("projectAID") || "").trim();
+    } catch (e) {
+      return "";
+    }
+  })());
+  if (!aid) {
+    el.classList.add("hidden");
+    return;
+  }
+  let bid = "";
+  try {
+    bid = (localStorage.getItem("decisionBID_" + aid) || "").trim();
+  } catch (e) {}
+  if (bid) {
+    el.textContent = "上次提交的 Decision ID（BID）：" + bid;
+    el.classList.remove("hidden");
+  } else {
+    el.classList.add("hidden");
+  }
+}
+
+async function saveDecisionData() {
+  DECISION_CHATGPT.shareProjectUrl = document.getElementById("decision-shareproject-url").value.trim();
+  document.getElementById("decision-shareproject-link").href = DECISION_CHATGPT.shareProjectUrl || "#";
+  syncHeaderShareProjectFromDecision();
+
+  const auth = getBackendTokenAndAdmin();
+  if (!auth) {
+    showToast("請先登入（缺少 backendToken / adminID）", "warn");
+    return;
+  }
+
+  const aid = (CURRENT_PROJECT_AID || (function () {
+    try {
+      return (localStorage.getItem("projectAID") || "").trim();
+    } catch (e) {
+      return "";
+    }
+  })());
+  if (!aid) {
+    showToast("找不到專案 AID，請從儀表板進入專案或確認已載入專案清單", "warn");
+    return;
+  }
+
+  const backGround = document.getElementById("decision-background").value.trim();
+  const kernal = document.getElementById("decision-core").value.trim();
+  const risk = document.getElementById("decision-risk").value.trim();
+  const shareUrl = DECISION_CHATGPT.shareProjectUrl;
+
+  const decisionTopicList = (DECISION_CHATGPT.topics || []).map(function (topic) {
+    const localTaskId = (topic.taskId || "").trim();
+    const taskCid = resolveTaskCidForDecision(localTaskId);
+    return {
+      TopicName: (topic.title || "").trim(),
+      TaskID: taskCid,
+      TopicURL: (topic.url || "").trim(),
+    };
+  });
+
+  const body = {
+    AdminID: auth.adminID,
+    Token: auth.token,
+    AID: aid,
+    ShareProjectURL: shareUrl,
+    BackGround: backGround,
+    Kernal: kernal,
+    Risk: risk,
+    DecisionTopicList: decisionTopicList,
+  };
+
+  const btn = document.getElementById("decision-save-btn");
+  try {
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "送出中…";
+    }
+    const resp = await postJson(NEW_DECISION_URL, body);
+    if (!resp || String(resp.Result).toUpperCase() !== "OK") {
+      const msg =
+        (resp && (resp.Message || resp.Msg || resp.message)) || "NewDecision 失敗";
+      showToast(String(msg), "warn");
+      return;
+    }
+    const bid = resp.BID != null ? String(resp.BID).trim() : "";
+    if (bid) {
+      try {
+        localStorage.setItem("decisionBID_" + aid, bid);
+      } catch (e) {}
+      const hint = document.getElementById("decision-bid-hint");
+      if (hint) {
+        hint.textContent = "Decision ID（BID）：" + bid;
+        hint.classList.remove("hidden");
+      }
+    }
+    showToast("Decision 已提交" + (bid ? "（BID: " + bid + "）" : ""));
+  } catch (e) {
+    showToast("提交失敗：" + (e && e.message ? e.message : "未知錯誤"), "warn");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "儲存 Decision";
+    }
+  }
 }
 
 function renderTaskDiscussionRows(items = []) {
@@ -1631,9 +2063,19 @@ function renderTaskDiscussionRows(items = []) {
         <input
           type="text"
           value="${item.url || ''}"
-          placeholder="https://chatgpt.com/share/..."
+          placeholder="https://…"
           class="task-discussion-url flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm"
+          oninput="updateTaskDiscussionUrlLink(${idx}, this.value)"
         >
+        <a
+          id="task-discussion-open-link-${idx}"
+          href="${item.url || '#'}"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="${item.url ? '' : 'opacity-50 pointer-events-none'} inline-flex items-center justify-center px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 transition"
+        >
+          開啟
+        </a>
         <button
           type="button"
           onclick="removeTaskDiscussionRow(${idx})"
@@ -1644,6 +2086,15 @@ function renderTaskDiscussionRows(items = []) {
       </div>
     </div>
   `).join('');
+}
+
+function updateTaskDiscussionUrlLink(idx, url) {
+  const link = document.getElementById("task-discussion-open-link-" + idx);
+  if (!link) return;
+  const u = (url || "").trim();
+  link.href = u || "#";
+  link.classList.toggle("opacity-50", !u);
+  link.classList.toggle("pointer-events-none", !u);
 }
 
 function addTaskDiscussionRow() {
@@ -1726,12 +2177,25 @@ document.addEventListener('DOMContentLoaded', () => {
   initProjectFromBackendIfPossible()
     .catch(function () {})
     .finally(function () {
+      if (!backendProjectSynced) {
+        applyFallbackDemoHeader();
+      }
       renderKanban();
       renderFiles();
 
       document.getElementById('decision-shareproject-url').value = DECISION_CHATGPT.shareProjectUrl || '';
       document.getElementById('decision-shareproject-link').href = DECISION_CHATGPT.shareProjectUrl || '#';
+      syncHeaderShareProjectFromDecision();
       renderDecisionTopicRows();
+      syncDecisionBidHint();
+
+      const spIn = document.getElementById('decision-shareproject-url');
+      if (spIn) {
+        spIn.addEventListener('input', function () {
+          DECISION_CHATGPT.shareProjectUrl = this.value.trim();
+          syncHeaderShareProjectFromDecision();
+        });
+      }
 
       document.getElementById('modal-task-status').addEventListener('change', function(){
         document.getElementById('modal-blocked-section').classList.toggle('hidden', this.value !== 'blocked');
