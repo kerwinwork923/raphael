@@ -545,21 +545,33 @@ tailwind.config = {
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1.5">負責人</label>
-            <input
-              id="modal-task-assignee"
-              type="text"
-              placeholder="請輸入負責人"
-              class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:border-blue-400 transition"
-            >
+            <div class="flex gap-2">
+              <input
+                id="modal-task-assignee"
+                type="text"
+                readonly
+                placeholder="點擊選擇負責人"
+                onclick="openAdminPicker('taskAssignee')"
+                class="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:border-blue-400 transition cursor-pointer bg-white"
+                title="從員工名單選擇"
+              >
+              <button
+                type="button"
+                onclick="openAdminPicker('taskAssignee')"
+                class="shrink-0 px-3 py-2 text-xs font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition"
+              >
+                選擇
+              </button>
+            </div>
           </div>
 
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1.5">狀態</label>
             <select id="modal-task-status" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:border-blue-400 transition">
               <option value="todo">📋 待辦</option>
-              <option value="doing">🔄 進行中</option>
+              <option value="doing">🔵 進行中</option>
               <option value="done">✅ 完成</option>
-              <option value="blocked">🔴 Blocked</option>
+              <option value="blocked">⚠️ 延遲</option>
             </select>
           </div>
 
@@ -631,6 +643,25 @@ tailwind.config = {
   </div>
 </div>
 
+<!-- ADMIN NAME PICKER MODAL -->
+<div id="admin-picker-modal" class="fixed inset-0 z-[55] hidden items-center justify-center" style="background:rgba(0,0,0,0.45)" onclick="if(event.target===this)closeAdminPicker()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 fade-in max-h-[90vh] flex flex-col" onclick="event.stopPropagation()">
+    <div class="flex items-center gap-3 mb-4">
+      <h3 class="font-bold text-slate-900 text-lg" id="admin-picker-title">選擇員工</h3>
+      <button type="button" onclick="closeAdminPicker()" class="ml-auto text-slate-400 hover:text-slate-600 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <input id="admin-picker-search" type="text" placeholder="搜尋姓名…" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:border-blue-400 transition mb-3" oninput="renderAdminPickerList()">
+    <p class="text-xs text-slate-400 mb-2" id="admin-picker-hint"></p>
+    <div id="admin-picker-list" class="flex-1 min-h-[200px] max-h-[min(50vh,360px)] overflow-y-auto border border-slate-100 rounded-xl divide-y divide-slate-100"></div>
+    <div class="flex gap-3 mt-5">
+      <button type="button" onclick="applyAdminPicker()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition">確定</button>
+      <button type="button" onclick="closeAdminPicker()" class="border border-slate-200 text-slate-600 hover:bg-slate-50 px-5 py-3 rounded-xl text-sm font-medium transition">取消</button>
+    </div>
+  </div>
+</div>
+
 <!-- PROBLEM CENTER MODAL -->
 <div id="problem-modal" class="fixed inset-0 z-50 hidden modal-backdrop" style="background:rgba(15,23,42,.45)" onclick="closeProblemModal(event)">
   <div class="flex items-center justify-center min-h-screen p-4">
@@ -697,17 +728,23 @@ tailwind.config = {
 // ─── BACKEND API (FR) ───
 const API_BASE = "https://23700999.com:8081/PM";
 const GET_PROJECT_LIST_URL = API_BASE + "/api/fr/getProjectList";
+const GET_SINGLE_PROJECT_URL = API_BASE + "/api/fr/getProject";
 const NEW_DECISION_URL = API_BASE + "/api/fr/NewDecision";
 const UPLOAD_FILE_PROJECT_URL = API_BASE + "/api/fr/UploadFieProject";
 // 任務狀態修改（你提供的規格）
 const TASK_MODIFY_STATE_URL = API_BASE + "/api/fr/TaskModifyState";
 // 新增任務：目前程式碼庫未找到實際 endpoint；此為合理推測點位，可能需要你再確認/調整
 const NEW_TASK_URL = API_BASE + "/api/fr/NewTask";
+const GET_ADMIN_NAME_LIST_URL = API_BASE + "/api/fr/getAdminNameList";
+const TASK_STATE_LIST_URLS = [API_BASE + "/api/fr/getTaskStateCode", API_BASE + "/api/fr/getTaskState"];
 
 /** 目前頁面對應的專案 AID（來自 getProjectList 或 localStorage.projectAID） */
 let CURRENT_PROJECT_AID = "";
 /** 是否已成功自 getProjectList 套用專案與任務 */
 let backendProjectSynced = false;
+let adminNameListCache = null;
+let adminPickerMode = "taskAssignee";
+let taskStateListCache = null;
 
 function getBackendTokenAndAdmin() {
   const token = localStorage.getItem("backendToken") || sessionStorage.getItem("backendToken");
@@ -744,6 +781,16 @@ function extractProjectArray(resp) {
   return [];
 }
 
+function extractSingleProject(resp) {
+  if (!resp || typeof resp !== "object") return null;
+  if (resp.SingleProject && typeof resp.SingleProject === "object") return resp.SingleProject;
+  if (resp.singleProject && typeof resp.singleProject === "object") return resp.singleProject;
+  if (resp.Data && typeof resp.Data === "object" && resp.Data.SingleProject && typeof resp.Data.SingleProject === "object") {
+    return resp.Data.SingleProject;
+  }
+  return null;
+}
+
 function toIsoDate(dateStr) {
   if (!dateStr) return "";
   const s = String(dateStr).trim();
@@ -769,6 +816,252 @@ function colToStateCode(col) {
   if (col === "done") return "3";
   if (col === "blocked") return "4";
   return "1";
+}
+
+function statusIconByCode(code) {
+  switch (String(code)) {
+    case "1":
+      return "📋";
+    case "2":
+      return "🔵";
+    case "3":
+      return "✅";
+    case "4":
+      return "⚠️";
+    default:
+      return "•";
+  }
+}
+
+function dedupeAdminNames(arr) {
+  const seen = new Set();
+  const out = [];
+  (arr || []).forEach(function (n) {
+    const s = String(n == null ? "" : n).trim();
+    if (!s || seen.has(s)) return;
+    seen.add(s);
+    out.push(s);
+  });
+  out.sort(function (a, b) {
+    return a.localeCompare(b, "zh-Hant");
+  });
+  return out;
+}
+
+function escapeAttr(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;");
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function fetchAdminNameList() {
+  const session = getBackendTokenAndAdmin();
+  if (!session) return Promise.reject(new Error("no session"));
+  return postJson(GET_ADMIN_NAME_LIST_URL, { AdminID: session.adminID, Token: session.token }).then(function (r) {
+    if (!r || String(r.Result).toUpperCase() !== "OK") throw new Error("bad result");
+    const raw = r.adminNameList || r.AdminNameList || [];
+    if (!Array.isArray(raw)) throw new Error("bad list");
+    adminNameListCache = dedupeAdminNames(raw);
+    return adminNameListCache;
+  });
+}
+
+function openAdminPicker(mode) {
+  adminPickerMode = mode;
+  const session = getBackendTokenAndAdmin();
+  if (!session) {
+    showToast("請先登入後台（右上角頭像需要有登入狀態）", "warn");
+    return;
+  }
+
+  const titleEl = document.getElementById("admin-picker-title");
+  const hintEl = document.getElementById("admin-picker-hint");
+  const searchEl = document.getElementById("admin-picker-search");
+  if (titleEl) titleEl.textContent = "選擇負責人";
+  if (hintEl) hintEl.textContent = "請選擇一位負責人";
+  if (searchEl) searchEl.value = "";
+
+  function showModal() {
+    const modal = document.getElementById("admin-picker-modal");
+    if (modal) {
+      modal.classList.remove("hidden");
+      modal.style.display = "flex";
+    }
+    renderAdminPickerList();
+    setTimeout(function () {
+      if (searchEl) searchEl.focus();
+    }, 50);
+  }
+
+  if (adminNameListCache && adminNameListCache.length) {
+    showModal();
+    return;
+  }
+
+  fetchAdminNameList()
+    .then(function () {
+      showModal();
+    })
+    .catch(function () {
+      showToast("無法取得員工名單", "warn");
+    });
+}
+
+function closeAdminPicker() {
+  const modal = document.getElementById("admin-picker-modal");
+  if (modal) {
+    modal.classList.add("hidden");
+    modal.style.display = "";
+  }
+}
+
+function renderAdminPickerList() {
+  const listEl = document.getElementById("admin-picker-list");
+  const searchEl = document.getElementById("admin-picker-search");
+  if (!listEl) return;
+
+  const names = adminNameListCache || [];
+  if (!names.length) {
+    listEl.innerHTML = '<p class="text-sm text-slate-400 text-center py-8">載入中或尚無資料</p>';
+    return;
+  }
+
+  const q = (searchEl && searchEl.value ? searchEl.value : "").trim().toLowerCase();
+  const filtered = q ? names.filter((n) => String(n).toLowerCase().indexOf(q) >= 0) : names;
+
+  if (!filtered.length) {
+    listEl.innerHTML = '<p class="text-sm text-slate-400 text-center py-8">沒有符合的姓名</p>';
+    return;
+  }
+
+  if (adminPickerMode === "taskAssignee") {
+    const taskAssigneeValEl = document.getElementById("modal-task-assignee");
+    const checkedBase = taskAssigneeValEl ? taskAssigneeValEl.value.trim() : "";
+    listEl.innerHTML = filtered
+      .map(function (name) {
+        const checked = name === checkedBase ? " checked" : "";
+        return (
+          '<label class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer text-sm text-slate-800">' +
+          '<input type="radio" name="admin-picker-task-assignee" class="shrink-0 text-blue-600" value="' +
+          escapeAttr(name) +
+          '"' +
+          checked +
+          ">" +
+          "<span>" +
+          escapeHtml(name) +
+          "</span></label>"
+        );
+      })
+      .join("");
+  } else {
+    // 預設只支援負責人選擇
+    const taskAssigneeValEl = document.getElementById("modal-task-assignee");
+    const checkedBase = taskAssigneeValEl ? taskAssigneeValEl.value.trim() : "";
+    listEl.innerHTML = filtered
+      .map(function (name) {
+        const checked = name === checkedBase ? " checked" : "";
+        return (
+          '<label class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer text-sm text-slate-800">' +
+          '<input type="radio" name="admin-picker-task-assignee" class="shrink-0 text-blue-600" value="' +
+          escapeAttr(name) +
+          '"' +
+          checked +
+          ">" +
+          "<span>" +
+          escapeHtml(name) +
+          "</span></label>"
+        );
+      })
+      .join("");
+  }
+}
+
+function applyAdminPicker() {
+  if (adminPickerMode === "taskAssignee") {
+    const radio = document.querySelector('input[name="admin-picker-task-assignee"]:checked');
+    const el = document.getElementById("modal-task-assignee");
+    if (el) el.value = radio ? radio.value : "";
+  }
+  closeAdminPicker();
+}
+
+function populateTaskStatusSelect(selectEl) {
+  if (!selectEl) return;
+  const current = selectEl.value;
+  selectEl.innerHTML = "";
+
+  const fallbackByCode = {
+    "1": "待辦",
+    "2": "進行中",
+    "3": "完成",
+    "4": "延遲",
+  };
+
+  const codeToName = {};
+  if (Array.isArray(taskStateListCache) && taskStateListCache.length) {
+    taskStateListCache.forEach(function (st) {
+      if (!st) return;
+      const code = String(st.Code || "").trim();
+      const name = String(st.Name || "").trim();
+      if (code && name) codeToName[code] = name;
+    });
+  }
+
+  const ordered = ["1", "2", "3", "4"];
+  const codeToCol = { "1": "todo", "2": "doing", "3": "done", "4": "blocked" };
+
+  ordered.forEach(function (code) {
+    const col = codeToCol[code];
+    if (!col) return;
+    const name = codeToName[code] || fallbackByCode[code] || col;
+    const opt = document.createElement("option");
+    opt.value = col;
+    opt.textContent = `${statusIconByCode(code)} ${name}`;
+    selectEl.appendChild(opt);
+  });
+
+  // 保留先前選擇的 Kanban 欄位
+  if (Array.from(selectEl.options).some((o) => String(o.value) === String(current))) {
+    selectEl.value = current;
+  } else if (selectEl.options.length) {
+    selectEl.value = selectEl.options[0].value;
+  }
+}
+
+async function initTaskStateSelectReferenceData() {
+  const session = getBackendTokenAndAdmin();
+  if (!session) return;
+
+  const authBody = { AdminID: session.adminID, Token: session.token };
+  let lastErr;
+
+  const tryUrls = TASK_STATE_LIST_URLS.slice();
+  while (tryUrls.length) {
+    const url = tryUrls.shift();
+    try {
+      const resp = await postJson(url, authBody);
+      if (!resp || String(resp.Result || "").toUpperCase() !== "OK") continue;
+
+      const list = resp.TaskStateList || resp.taskStateList || [];
+      if (!Array.isArray(list) || !list.length) continue;
+
+      taskStateListCache = list;
+      populateTaskStatusSelect(document.getElementById("modal-task-status"));
+      return;
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+
+  // 失敗不影響使用：保留 HTML 預設選項即可
+  if (lastErr) {
+    // noop
+  }
 }
 
 function normalizeUrlListItems(urlList) {
@@ -886,28 +1179,88 @@ async function initProjectFromBackendIfPossible() {
   const projectAID = (localStorage.getItem("projectAID") || "").trim();
 
   let resp;
-  try {
-    resp = await postJson(GET_PROJECT_LIST_URL, { AdminID: auth.adminID, Token: auth.token });
-  } catch (e) {
-    return;
+  let selected = null;
+
+  // 1) 優先使用 /api/fr/getProject（有 AID 才能呼叫單一專案）
+  if (projectAID) {
+    try {
+      resp = await postJson(GET_SINGLE_PROJECT_URL, {
+        AdminID: auth.adminID,
+        Token: auth.token,
+        AID: projectAID,
+      });
+      if (resp && String(resp.Result || "").toUpperCase() === "OK") {
+        selected = extractSingleProject(resp);
+      }
+    } catch (e) {
+      // fallback below
+    }
   }
 
-  if (!resp || resp.Result == null || String(resp.Result).toUpperCase() !== "OK") return;
-  const projects = extractProjectArray(resp);
-  if (!projects.length) return;
+  // 2) 若沒有 selected：嘗試用 dashboard 的 project=名稱 找到 AID，再切換到 /api/fr/getProject
+  if (!selected && !projectAID && projectNameQ) {
+    try {
+      resp = await postJson(GET_PROJECT_LIST_URL, { AdminID: auth.adminID, Token: auth.token });
+      if (resp && String(resp.Result || "").toUpperCase() === "OK") {
+        const projects = extractProjectArray(resp);
+        const found = projects.find((p) => String(p.ProjectName || "").trim() === projectNameQ);
+        const foundAID = found ? String(found.AID || found.ProjectAID || "").trim() : "";
+        if (foundAID) {
+          try {
+            const singleResp = await postJson(GET_SINGLE_PROJECT_URL, {
+              AdminID: auth.adminID,
+              Token: auth.token,
+              AID: foundAID,
+            });
+            if (singleResp && String(singleResp.Result || "").toUpperCase() === "OK") {
+              selected = extractSingleProject(singleResp);
+              if (selected) {
+                try {
+                  localStorage.setItem("projectAID", foundAID);
+                } catch (e) {}
+              }
+            }
+          } catch (e) {
+            // noop
+          }
+        }
+      }
+    } catch (e) {
+      // noop
+    }
+  }
 
-  const selected =
-    (projectNameQ
-      ? projects.find((p) => String(p.ProjectName || "").trim() === projectNameQ)
-      : null) ||
-    (projectAID
-      ? projects.find((p) => String(p.AID || p.ProjectAID || "").trim() === projectAID)
-      : null) ||
-    projects[0];
+  // 3) 後相容：若後端尚未提供 getProject 單一回傳，就退回舊 getProjectList 的專案陣列
+  if (!selected) {
+    try {
+      resp = await postJson(GET_PROJECT_LIST_URL, { AdminID: auth.adminID, Token: auth.token });
+    } catch (e) {
+      return;
+    }
+
+    if (!resp || resp.Result == null || String(resp.Result).toUpperCase() !== "OK") return;
+
+    // 若後端也把 getProjectList 改成回 SingleProject，就直接吃
+    selected = extractSingleProject(resp);
+
+    if (!selected) {
+      const projects = extractProjectArray(resp);
+      if (!projects.length) return;
+
+      selected =
+        (projectNameQ
+          ? projects.find((p) => String(p.ProjectName || "").trim() === projectNameQ)
+          : null) ||
+        (projectAID
+          ? projects.find((p) => String(p.AID || p.ProjectAID || "").trim() === projectAID)
+          : null) ||
+        projects[0];
+    }
+  }
 
   if (!selected) return;
 
-  CURRENT_PROJECT_AID = String(selected.AID || selected.ProjectAID || "").trim();
+  CURRENT_PROJECT_AID = String(selected.AID || selected.ProjectAID || projectAID || "").trim();
   if (CURRENT_PROJECT_AID) {
     try {
       localStorage.setItem("projectAID", CURRENT_PROJECT_AID);
@@ -2287,6 +2640,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!backendProjectSynced) {
         applyFallbackDemoHeader();
       }
+      initTaskStateSelectReferenceData().catch(function () {});
       renderKanban();
       renderFiles();
 
