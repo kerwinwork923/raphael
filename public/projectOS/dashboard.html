@@ -438,6 +438,9 @@ function mapApiProjectToRow(raw, index) {
   var blk = firstBlockedLikeTask(tasks);
   var name = (raw.ProjectName || "未命名專案").trim() || "未命名專案";
   var q = encodeURIComponent(name);
+  // 專案跳轉需要用 AID 精準定位；否則可能被 task-tracking 的 localStorage 舊值覆蓋
+  var projectAID =
+    raw.AID != null ? String(raw.AID).trim() : raw.ProjectAID != null ? String(raw.ProjectAID).trim() : "";
   return {
     id: index + 1,
     name: name,
@@ -453,7 +456,9 @@ function mapApiProjectToRow(raw, index) {
     daysLeft: daysLeft,
     updated: formatYmdSlash(endYmd) || "—",
     // 需求：Dashboard 的專案跳轉統一導向 task-tracking 內頁
-    url: "task-tracking.html?project=" + q,
+    url: projectAID
+      ? "task-tracking.html?projectAID=" + encodeURIComponent(projectAID) + "&project=" + q
+      : "task-tracking.html?project=" + q,
     kpi: {
       metric: kpiMetric,
       target: isNaN(kpiNum) ? 100 : kpiNum,

@@ -1230,8 +1230,10 @@ async function initProjectFromBackendIfPossible() {
   // from dashboard: task-tracking.html?project=ProjectName
   const urlParams = new URLSearchParams(window.location.search || "");
   const projectNameQ = (urlParams.get("project") || "").trim();
-  // from create-project: localStorage.projectAID
-  const projectAID = (localStorage.getItem("projectAID") || "").trim();
+  // from dashboard: task-tracking.html?projectAID=123
+  const projectAIDFromUrl = (urlParams.get("projectAID") || "").trim();
+  // from create-project: localStorage.projectAID（若 URL 沒帶，才回落）
+  const projectAID = (projectAIDFromUrl || localStorage.getItem("projectAID") || "").trim();
 
   let resp;
   let selected = null;
