@@ -1012,16 +1012,44 @@ function populateTaskStatusSelect(selectEl) {
     });
   }
 
-  const ordered = ["1", "2", "3", "4"];
   const codeToCol = { "1": "todo", "2": "doing", "3": "done", "4": "blocked" };
 
-  ordered.forEach(function (code) {
-    const col = codeToCol[code];
+  // 顯示所有後端狀態（你提到有 7 種），但 Kanban 仍只有 4 欄位：
+  // 這裡把「後端狀態」映射到最近的 col value（todo/doing/done/blocked）。
+  const list =
+    Array.isArray(taskStateListCache) && taskStateListCache.length
+      ? taskStateListCache
+      : [
+          { Code: "1", Name: "待辦" },
+          { Code: "2", Name: "進行中" },
+          { Code: "3", Name: "完成" },
+          { Code: "4", Name: "延遲" },
+        ];
+
+  function guessColByName(nameStr) {
+    const n = String(nameStr || "").trim();
+    if (!n) return "doing";
+    if (codeToCol && codeToCol["1"] && /待辦|todo|draft/i.test(n)) return "todo";
+    if (/進行中|doing|in progress/i.test(n)) return "doing";
+    if (/完成|done|closed|結案/i.test(n)) return "done";
+    if (/延遲|blocked|block|阻擋|卡住/i.test(n)) return "blocked";
+    return "doing";
+  }
+
+  list.forEach(function (st) {
+    if (!st) return;
+    const code = String(st.Code || "").trim();
+    const name = String(st.Name || "").trim();
+
+    const col = codeToCol[code] || guessColByName(name);
     if (!col) return;
-    const name = codeToName[code] || fallbackByCode[code] || col;
+
+    const icon = statusIconByCode(colToStateCode(col));
+    const labelName = name || codeToName[code] || fallbackByCode[code] || col;
+
     const opt = document.createElement("option");
-    opt.value = col;
-    opt.textContent = `${statusIconByCode(code)} ${name}`;
+    opt.value = col; // Kanban 欄位值
+    opt.textContent = `${icon} ${labelName}`;
     selectEl.appendChild(opt);
   });
 
@@ -2226,10 +2254,10 @@ function renderDecisionTopicRows() {
         >
         <a
           id="decision-topic-open-link-${idx}"
-          href="${item.url ? item.url : 'javascript:void(0)'}"
+          href="${item.url ? item.url : '#'}"
           target="_blank"
           rel="noopener noreferrer"
-          class="${item.url ? '':'opacity-50 pointer-events-none'} inline-flex items-center justify-center px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 transition"
+          class="inline-flex items-center justify-center px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 transition ${item.url ? '' : 'hidden'}"
         >
           開啟
         </a>
@@ -2310,10 +2338,8 @@ function updateDecisionTopicField(idx, key, value) {
     const link = document.getElementById("decision-topic-open-link-" + idx);
     if (link) {
       const url = (value || "").trim();
-      link.href = url ? url : "javascript:void(0)";
-      // 空字串時不要跳到頁首
-      link.classList.toggle("opacity-50", !url);
-      link.classList.toggle("pointer-events-none", !url);
+      link.href = url ? url : "#";
+      link.classList.toggle("hidden", !url);
     }
   }
 }
@@ -2335,18 +2361,16 @@ function syncHeaderShareProjectFromDecision() {
   ).trim();
   const a = document.getElementById("header-shareproject-link");
   if (a) {
-    a.href = url ? url : "javascript:void(0)";
+    a.href = url ? url : "#";
     a.setAttribute("aria-disabled", url ? "false" : "true");
-    a.classList.toggle("opacity-50", !url);
-    a.classList.toggle("pointer-events-none", !url);
+    a.classList.toggle("hidden", !url);
   }
 
   // Decision 區塊的「前往討論」
   const a2 = document.getElementById("decision-shareproject-link");
   if (a2) {
-    a2.href = url ? url : "javascript:void(0)";
-    a2.classList.toggle("opacity-50", !url);
-    a2.classList.toggle("pointer-events-none", !url);
+    a2.href = url ? url : "#";
+    a2.classList.toggle("hidden", !url);
   }
 }
 
