@@ -82,7 +82,7 @@ tailwind.config = {
     </div>
 
     <div class="flex items-center gap-2 flex-wrap">
-      <a id="header-shareproject-link" href="#" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-xs border border-slate-200 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition">
+      <a id="header-shareproject-link" href="javascript:void(0)" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-xs border border-slate-200 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
         </svg>
@@ -241,6 +241,8 @@ tailwind.config = {
       </p>
 
       <div class="space-y-4">
+
+
         <!-- ChatGPT ShareProject URL -->
         <div>
           <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">ChatGPT ShareProject URL</p>
@@ -253,7 +255,7 @@ tailwind.config = {
             >
             <a
               id="decision-shareproject-link"
-              href="#"
+              href="javascript:void(0)"
               target="_blank"
               rel="noopener noreferrer"
               class="inline-flex items-center justify-center px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 transition whitespace-nowrap"
@@ -1002,45 +1004,64 @@ async function initProjectFromBackendIfPossible() {
   projectStatus = deriveProjectStatusFromTasks(TASKS);
   applyProjectStatusBadge(projectStatus);
 
-  // 如果後端提供 ShareProject_URL，則同步到 Decision 區塊
-  if (selected.ShareProject_URL) {
-    DECISION_CHATGPT.shareProjectUrl = String(selected.ShareProject_URL || "").trim();
+  // ShareProjectURL：優先吃 DecisionList[].ShareProjectURL
+  // 若 DecisionList 沒資料才回退使用 selected.ShareProject_URL
+  if (!Array.isArray(selected.DecisionList) || !selected.DecisionList.length) {
+    if (selected.ShareProject_URL) {
+      DECISION_CHATGPT.shareProjectUrl = String(selected.ShareProject_URL || "").trim();
+    }
   }
 
   // 從後端填入：已上傳檔案（FileList）
-  FILES = [];
-  if (Array.isArray(selected.FileList)) {
-    FILES = selected.FileList
-      .map((f, i) => {
-        const fileName = String(f.FileName || "").trim();
-        const fileURL = String(f.FileURL || "").trim();
-        if (!fileName && !fileURL) return null;
-        const ext = fileName.includes(".") ? fileName.split(".").pop().toLowerCase() : "";
-        return {
-          id: "f-api-" + i,
-          name: fileName || "uploaded_file_" + (i + 1),
-          size: Number(f.Size || f.size || 0) || 0,
-          type: ext,
-          uploadedAt: f.UploadedAt ? String(f.UploadedAt) : "",
-          uploadedBy: f.UploadedBy ? String(f.UploadedBy) : "",
-          url: fileURL,
-        };
-      })
-      .filter(Boolean);
-  }
+  FILES = (Array.isArray(selected.FileList) ? selected.FileList : [])
+    .map((f, i) => {
+      const fileURL = String(
+        f.FileURL || f.FileUrl || f.fileURL || f.fileUrl || f.URL || f.Url || ""
+      ).trim();
+
+      let fileName = String(
+        f.FileName || f.Filename || f.fileName || f.filename || ""
+      ).trim();
+
+      // 若缺 FileName，嘗試從 FileURL 推回檔名
+      if (!fileName && fileURL) {
+        const seg = String(fileURL).split("/").pop() || "";
+        try {
+          fileName = decodeURIComponent(seg);
+        } catch (e) {
+          fileName = seg;
+        }
+      }
+
+      if (!fileName && !fileURL) return null;
+
+      const extSource = fileName || fileURL;
+      const ext = extSource.includes(".")
+        ? extSource.split(".").pop().toLowerCase()
+        : "";
+
+      return {
+        id: "f-api-" + i,
+        name: fileName || "uploaded_file_" + (i + 1),
+        size: Number(f.Size || f.size || f.FileSize || f.fileSize || 0) || 0,
+        type: ext,
+        uploadedAt: String(f.UploadedAt || "").trim(),
+        uploadedBy: String(f.UploadedBy || "").trim(),
+        url: fileURL,
+      };
+    })
+    .filter(Boolean);
 
   // 從後端填入：重要討論主題（DecisionList -> DecisionTopicList）
   // 這裡取最後一次 Decision（或有 ShareProjectURL 的那筆）
   DECISION_CHATGPT.topics = [];
   let lastDecisionRecord = null;
   if (Array.isArray(selected.DecisionList) && selected.DecisionList.length) {
-    // 預設用最後一筆；若最後一筆沒有 ShareProjectURL 就嘗試找有的
+    // 預設用最後一筆；若有 ShareProjectURL 就覆蓋使用
     const last = selected.DecisionList[selected.DecisionList.length - 1];
     lastDecisionRecord = last;
-    if (!DECISION_CHATGPT.shareProjectUrl && last && last.ShareProjectURL) {
-      DECISION_CHATGPT.shareProjectUrl = String(last.ShareProjectURL || "").trim();
-    } else if (last && last.ShareProjectURL) {
-      // 後端也可能在 DecisionList 裡同步 ShareProjectURL，優先採用它
+    if (last && last.ShareProjectURL != null) {
+      // 即使是空字串也要清掉舊值，避免切專案時殘留
       DECISION_CHATGPT.shareProjectUrl = String(last.ShareProjectURL || "").trim();
     }
 
@@ -1072,19 +1093,18 @@ async function initProjectFromBackendIfPossible() {
   const hasDecisionList = !!lastDecisionRecord;
   if (hasDecisionList) {
     if (bgEl && lastDecisionRecord && lastDecisionRecord.BackGround != null) {
-      const v = String(lastDecisionRecord.BackGround || "").trim();
-      if (v) bgEl.value = v;
+      // 保持「後端有給就覆蓋」，避免舊值殘留
+      bgEl.value = String(lastDecisionRecord.BackGround || "").trim();
     }
     if (coreEl && lastDecisionRecord && lastDecisionRecord.Kernal != null) {
-      const v = String(lastDecisionRecord.Kernal || "").trim();
-      if (v) coreEl.value = v;
+      coreEl.value = String(lastDecisionRecord.Kernal || "").trim();
     } else if (coreEl && lastDecisionRecord && lastDecisionRecord.Decision != null) {
+      // 若 Kernal 沒有提供，才用舊欄位 Decision 做 fallback
       const v = String(lastDecisionRecord.Decision || "").trim();
-      if (v && !coreEl.value) coreEl.value = v;
+      coreEl.value = v;
     }
     if (riskEl && lastDecisionRecord && lastDecisionRecord.Risk != null) {
-      const v = String(lastDecisionRecord.Risk || "").trim();
-      if (v) riskEl.value = v;
+      riskEl.value = String(lastDecisionRecord.Risk || "").trim();
     }
   } else {
     const decisionStr = selected.Decision ? String(selected.Decision || "").trim() : "";
@@ -1093,6 +1113,12 @@ async function initProjectFromBackendIfPossible() {
       if (!coreEl.value || coreEl.value.trim() === "") coreEl.value = decisionStr;
     }
   }
+
+  // Decision display（左側顯示區塊）
+  renderDecisionDisplay(selected);
+
+  // 立刻刷新檔案區（避免載入時被 fallback/舊資料覆蓋）
+  renderFiles();
 
   // 若後端有傳 KPIList，就不額外接 UI（目前 KPI 畫面是靜態）
   backendProjectSynced = true;
@@ -1634,7 +1660,7 @@ async function saveTaskModal() {
         renderKanban();
         renderFiles();
         document.getElementById("decision-shareproject-url").value = DECISION_CHATGPT.shareProjectUrl || "";
-        document.getElementById("decision-shareproject-link").href = DECISION_CHATGPT.shareProjectUrl || "#";
+        document.getElementById("decision-shareproject-link").href = DECISION_CHATGPT.shareProjectUrl || "javascript:void(0)";
         syncHeaderShareProjectFromDecision();
         renderDecisionTopicRows();
         syncDecisionBidHint();
@@ -1778,19 +1804,29 @@ function removeFile(id) {
 function renderFiles() {
   const list = document.getElementById('file-list');
   const label = document.getElementById('file-count-label');
-  label.textContent = `${FILES.length} 個檔案`;
-  if(!FILES.length){
+  if (!list || !label) return;
+
+  const normalizedFiles = Array.isArray(FILES) ? FILES.filter(Boolean) : [];
+  label.textContent = `${normalizedFiles.length} 個檔案`;
+  if (!normalizedFiles.length) {
     list.innerHTML = '<p class="text-sm text-slate-400 text-center py-4">尚未上傳檔案</p>';
     return;
   }
-  list.innerHTML = FILES.map(f => `
+
+  list.innerHTML = normalizedFiles.map(f => `
     <div class="file-item flex items-center gap-3 border border-slate-200 rounded-lg px-3 py-2">
       <div class="text-lg">${fileIcon(f.type)}</div>
       <div class="flex-1 min-w-0">
-        <p class="text-sm font-medium text-slate-800 truncate">
-          ${f.url ? `<a href="${f.url}" target="_blank" rel="noopener noreferrer" class="hover:text-blue-600 hover:underline">${f.name}</a>` : f.name}
+        <p class="text-sm font-medium text-slate-800 break-all">
+          ${
+            f.url
+              ? `<a href="${f.url}" target="_blank" rel="noopener noreferrer" class="hover:text-blue-600 hover:underline">${f.name}</a>`
+              : f.name
+          }
         </p>
-        <p class="text-xs text-slate-400">${formatFileSize(f.size)} · ${f.uploadedAt} · ${f.uploadedBy}</p>
+        <p class="text-xs text-slate-400">
+          ${formatFileSize(Number(f.size || 0))} · ${f.uploadedAt || '-'} · ${f.uploadedBy || '-'}
+        </p>
       </div>
       <button onclick="removeFile('${f.id}')" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50 transition">移除</button>
     </div>
@@ -1837,7 +1873,7 @@ function renderDecisionTopicRows() {
         >
         <a
           id="decision-topic-open-link-${idx}"
-          href="${item.url || '#'}"
+          href="${item.url ? item.url : 'javascript:void(0)'}"
           target="_blank"
           rel="noopener noreferrer"
           class="${item.url ? '':'opacity-50 pointer-events-none'} inline-flex items-center justify-center px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 transition"
@@ -1854,6 +1890,46 @@ function renderDecisionTopicRows() {
       </div>
     </div>
   `).join('');
+}
+
+function renderDecisionDisplay(selected) {
+  const wrap = document.getElementById("decision-display");
+  const content = document.getElementById("decision-display-content");
+  if (!wrap || !content) return;
+
+  const escapeHtmlText = (s) =>
+    String(s == null ? "" : s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+
+  let html = "";
+  if (Array.isArray(selected.DecisionList) && selected.DecisionList.length) {
+    const d = selected.DecisionList[selected.DecisionList.length - 1] || {};
+    const bg = d.BackGround != null ? String(d.BackGround).trim() : "";
+    const core = d.Kernal != null ? String(d.Kernal).trim() : "";
+    const risk = d.Risk != null ? String(d.Risk).trim() : "";
+    html += `<p><b>背景：</b>${escapeHtmlText(bg || "-")}</p>`;
+    html += `<p><b>決策：</b>${escapeHtmlText(core || "-")}</p>`;
+    html += `<p><b>風險：</b>${escapeHtmlText(risk || "-")}</p>`;
+
+    const sp = d.ShareProjectURL != null ? String(d.ShareProjectURL).trim() : "";
+    if (sp) {
+      html += `<p><a href="${escapeHtmlText(sp)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">👉 前往討論</a></p>`;
+    }
+  } else if (selected.Decision) {
+    const dec = String(selected.Decision).trim();
+    if (dec) html = `<p>${escapeHtmlText(dec)}</p>`;
+  }
+
+  if (html) {
+    wrap.classList.remove("hidden");
+    content.innerHTML = html;
+  } else {
+    wrap.classList.add("hidden");
+  }
 }
 
 function addDecisionTopicRow() {
@@ -1881,7 +1957,7 @@ function updateDecisionTopicField(idx, key, value) {
     const link = document.getElementById("decision-topic-open-link-" + idx);
     if (link) {
       const url = (value || "").trim();
-      link.href = url || "#";
+      link.href = url ? url : "javascript:void(0)";
       // 空字串時不要跳到頁首
       link.classList.toggle("opacity-50", !url);
       link.classList.toggle("pointer-events-none", !url);
@@ -1906,7 +1982,7 @@ function syncHeaderShareProjectFromDecision() {
   ).trim();
   const a = document.getElementById("header-shareproject-link");
   if (a) {
-    a.href = url || "#";
+    a.href = url ? url : "javascript:void(0)";
     a.setAttribute("aria-disabled", url ? "false" : "true");
     a.classList.toggle("opacity-50", !url);
     a.classList.toggle("pointer-events-none", !url);
@@ -1915,7 +1991,7 @@ function syncHeaderShareProjectFromDecision() {
   // Decision 區塊的「前往討論」
   const a2 = document.getElementById("decision-shareproject-link");
   if (a2) {
-    a2.href = url || "#";
+    a2.href = url ? url : "javascript:void(0)";
     a2.classList.toggle("opacity-50", !url);
     a2.classList.toggle("pointer-events-none", !url);
   }
@@ -1956,7 +2032,7 @@ function syncDecisionBidHint() {
 
 async function saveDecisionData() {
   DECISION_CHATGPT.shareProjectUrl = document.getElementById("decision-shareproject-url").value.trim();
-  document.getElementById("decision-shareproject-link").href = DECISION_CHATGPT.shareProjectUrl || "#";
+  document.getElementById("decision-shareproject-link").href = DECISION_CHATGPT.shareProjectUrl || "javascript:void(0)";
   syncHeaderShareProjectFromDecision();
 
   const auth = getBackendTokenAndAdmin();
@@ -1982,15 +2058,34 @@ async function saveDecisionData() {
   const risk = document.getElementById("decision-risk").value.trim();
   const shareUrl = DECISION_CHATGPT.shareProjectUrl;
 
-  const decisionTopicList = (DECISION_CHATGPT.topics || []).map(function (topic) {
-    const localTaskId = (topic.taskId || "").trim();
-    const taskCid = resolveTaskCidForDecision(localTaskId);
-    return {
-      TopicName: (topic.title || "").trim(),
-      TaskID: taskCid,
-      TopicURL: (topic.url || "").trim(),
-    };
-  });
+  // 統一輸出格式：TopicName / TaskID(CID) / TopicURL
+  // - 若 TopicName 與 TopicURL 都空：直接略過
+  // - 若 TaskID 解析不到（找不到對應任務 CID）：略過並提醒
+  let skippedMissingTask = false;
+  const decisionTopicList = (DECISION_CHATGPT.topics || [])
+    .map(function (topic) {
+      const localTaskId = (topic.taskId || "").trim();
+      const taskCid = resolveTaskCidForDecision(localTaskId);
+      const TopicName = (topic.title || "").trim();
+      const TopicURL = (topic.url || "").trim();
+
+      if (!TopicName && !TopicURL) return null;
+      if (!taskCid) {
+        skippedMissingTask = true;
+        return null;
+      }
+
+      return {
+        TopicName,
+        TaskID: taskCid,
+        TopicURL,
+      };
+    })
+    .filter(Boolean);
+
+  if (skippedMissingTask) {
+    showToast("有部分重要主題未選對任務（缺 TaskID/CID），已略過", "warn");
+  }
 
   const body = {
     AdminID: auth.adminID,
@@ -2027,6 +2122,18 @@ async function saveDecisionData() {
         hint.classList.remove("hidden");
       }
     }
+    // 更新左側 Decision display（即使沒刷新後端，使用者也能看到顯示區塊）
+    renderDecisionDisplay({
+      DecisionList: [
+        {
+          BackGround: backGround,
+          Kernal: kernal,
+          Risk: risk,
+          ShareProjectURL: shareUrl,
+        },
+      ],
+    });
+
     showToast("Decision 已提交" + (bid ? "（BID: " + bid + "）" : ""));
   } catch (e) {
     showToast("提交失敗：" + (e && e.message ? e.message : "未知錯誤"), "warn");
@@ -2069,7 +2176,7 @@ function renderTaskDiscussionRows(items = []) {
         >
         <a
           id="task-discussion-open-link-${idx}"
-          href="${item.url || '#'}"
+          href="${item.url ? item.url : 'javascript:void(0)'}"
           target="_blank"
           rel="noopener noreferrer"
           class="${item.url ? '' : 'opacity-50 pointer-events-none'} inline-flex items-center justify-center px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 transition"
@@ -2092,7 +2199,7 @@ function updateTaskDiscussionUrlLink(idx, url) {
   const link = document.getElementById("task-discussion-open-link-" + idx);
   if (!link) return;
   const u = (url || "").trim();
-  link.href = u || "#";
+  link.href = u ? u : "javascript:void(0)";
   link.classList.toggle("opacity-50", !u);
   link.classList.toggle("pointer-events-none", !u);
 }
@@ -2184,7 +2291,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderFiles();
 
       document.getElementById('decision-shareproject-url').value = DECISION_CHATGPT.shareProjectUrl || '';
-      document.getElementById('decision-shareproject-link').href = DECISION_CHATGPT.shareProjectUrl || '#';
+      document.getElementById('decision-shareproject-link').href = DECISION_CHATGPT.shareProjectUrl || 'javascript:void(0)';
       syncHeaderShareProjectFromDecision();
       renderDecisionTopicRows();
       syncDecisionBidHint();
