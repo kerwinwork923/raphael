@@ -1136,23 +1136,50 @@ async function modifyTaskStateBackend(taskCid, newStateCode) {
 
 async function createTaskToBackend(taskPayload) {
   const auth = getBackendTokenAndAdmin();
-  if (!auth) throw new Error("尚未登入，缺少 AdminID / Token");
-
   const aid = (CURRENT_PROJECT_AID || localStorage.getItem("projectAID") || "").trim();
   if (!aid) throw new Error("缺少專案 AID，請先從專案列表進入");
 
-  const payload = {
-    AdminID: auth.adminID,
-    Token: auth.token,
+  // 依你提供的格式：單一任務直接包含 AID/Topic/.../URLList
+  // 但實務上後端可能也接受 TaskList 包裝，因此這裡做「先嘗試規格版，失敗再嘗試 TaskList 版」備援。
+  const taskItem = {
+    ...(taskPayload || {}),
     AID: String(aid).trim(),
-    TaskList: [taskPayload],
   };
 
-  const resp = await postJson(NEW_TASK_URL, payload);
-  if (!resp || String(resp.Result || "").toUpperCase() !== "OK") {
-    throw new Error((resp && (resp.Message || resp.Msg)) || "新增任務失敗");
+  async function tryPost(body) {
+    const resp = await postJson(NEW_TASK_URL, body);
+    if (!resp || String(resp.Result || "").toUpperCase() !== "OK") {
+      throw new Error((resp && (resp.Message || resp.Msg || resp.message)) || "新增任務失敗");
+    }
+    return resp;
   }
-  return resp;
+
+  // 版本 1：規格版（附帶 AdminID/Token 若可取得）
+  try {
+    // 先嘗試「純規格版」（對嚴格後端最友善）
+    const payloadSpecNoAuth = { ...(taskItem || {}) };
+    return await tryPost(payloadSpecNoAuth);
+  } catch (e) {
+    // fallthrough: 嘗試帶 auth 或 TaskList 版本
+  }
+  if (auth) {
+    try {
+      const payloadSpecWithAuth = { ...(taskItem || {}) };
+      payloadSpecWithAuth.AdminID = auth.adminID;
+      payloadSpecWithAuth.Token = auth.token;
+      return await tryPost(payloadSpecWithAuth);
+    } catch (e) {
+      // fallthrough: 交由 TaskList 版本嘗試
+    }
+  }
+
+  // 版本 2：TaskList 包裝版（對齊後端可能的實作方式）
+  const payloadTaskList = {
+    ...(auth ? { AdminID: auth.adminID, Token: auth.token } : {}),
+    AID: String(aid).trim(),
+    TaskList: [taskItem],
+  };
+  return await tryPost(payloadTaskList);
 }
 
 function calcDaysOverdue(endDateIso) {
@@ -2017,7 +2044,9 @@ async function saveTaskModal() {
         ? String(taskData.blockedReason || taskData.desc || "").trim()
         : String(taskData.desc || "").trim();
 
+      const aid = (CURRENT_PROJECT_AID || localStorage.getItem("projectAID") || "").trim();
       const backendTaskPayload = {
+        AID: aid,
         Topic: String(taskData.title || "").trim(),
         Description: descriptionToSend,
         StartDate: toYYYYMMDD(taskData.startDate || ""),
@@ -2031,8 +2060,16 @@ async function saveTaskModal() {
         URLList: urlList,
       };
 
-      if (backendTaskPayload.Topic && CURRENT_PROJECT_AID) {
-        await createTaskToBackend(backendTaskPayload);
+      if (backendTaskPayload.Topic && aid) {
+        const resp = await createTaskToBackend(backendTaskPayload);
+
+        // 即時回填 cid（若後端回傳 CID）
+        const createdCid =
+          (resp && (resp.CID || resp.Cid)) ||
+          (resp && resp.TaskList && resp.TaskList[0] && (resp.TaskList[0].CID || resp.TaskList[0].Cid)) ||
+          "";
+        if (createdCid) newLocal.cid = String(createdCid).trim();
+
         showToast("任務已同步到後端");
         backendProjectSynced = false;
         await initProjectFromBackendIfPossible().catch(() => {});

@@ -527,6 +527,16 @@ function departmentNameToCode(deptText) {
 function statusToCode(statusText) {
   if (!statusText) return "1";
   const s = String(statusText).trim();
+  // 優先用後端 TaskStateList（支援你提到的 7 種狀態）
+  if (Array.isArray(taskStateListCache) && taskStateListCache.length) {
+    const match = taskStateListCache.find((st) => {
+      if (!st) return false;
+      const name = String(st.Name || "").trim();
+      const code = String(st.Code || "").trim();
+      return name === s || code === s;
+    });
+    if (match && match.Code != null) return String(match.Code).trim();
+  }
   return TASK_STATE_CODE_MAP[s] || (/^\d+$/.test(s) ? s : "1");
 }
 
