@@ -731,8 +731,7 @@ const GET_PROJECT_LIST_URL = API_BASE + "/api/fr/getProjectList";
 const GET_SINGLE_PROJECT_URL = API_BASE + "/api/fr/getProject";
 const NEW_DECISION_URL = API_BASE + "/api/fr/NewDecision";
 const UPLOAD_FILE_PROJECT_URL = API_BASE + "/api/fr/UploadFieProject";
-// 單一專案修改（刪除檔案等：以更新後的 FileList 送出）
-const MODIFY_PROJECT_URL = API_BASE + "/api/fr/ModifyProject";
+const DELETE_FILE_PROJECT_URL = API_BASE + "/api/fr/DeleteFieProject";
 // 任務狀態修改（你提供的規格）
 const TASK_MODIFY_STATE_URL = API_BASE + "/api/fr/TaskModifyState";
 // 任務內容/狀態修改（你提供的規格）
@@ -748,8 +747,6 @@ const TASK_STATE_LIST_URLS = [API_BASE + "/api/fr/getTaskStateCode", API_BASE + 
 let CURRENT_PROJECT_AID = "";
 /** 是否已成功自 getProjectList 套用專案與任務 */
 let backendProjectSynced = false;
-/** 最近一次 getProject 成功回傳的 SingleProject 深拷貝（供 ModifyProject 帶齊欄位） */
-let CACHED_SINGLE_PROJECT = null;
 let adminNameListCache = null;
 let adminPickerMode = "taskAssignee";
 let taskStateListCache = null;
@@ -814,82 +811,24 @@ function resolveShareProjectUrlFromProject(selected) {
   return selected.ShareProject_URL != null ? String(selected.ShareProject_URL).trim() : "";
 }
 
-function buildKpiListForModifyProject(p) {
-  const list = p && Array.isArray(p.KPIList) ? p.KPIList : [];
-  return list.map(function (k) {
-    if (!k || typeof k !== "object") return { KPIName: "", KPITarget: "" };
-    return {
-      KPIName: String(k.KPIName || "").trim(),
-      KPITarget: String(k.KPITarget || "").trim(),
-    };
-  });
-}
-
-function buildFileListPayloadFromFiles() {
-  const aid = String(CURRENT_PROJECT_AID || "").trim();
-  const cachedFiles =
-    CACHED_SINGLE_PROJECT && Array.isArray(CACHED_SINGLE_PROJECT.FileList) ? CACHED_SINGLE_PROJECT.FileList : [];
-  return (FILES || []).map(function (f) {
-    if (!f) return null;
-    let bid = f.bid != null ? String(f.bid).trim() : "";
-    let base64String = f.base64String ? String(f.base64String) : "";
-    const fileName = String(f.name || "").trim();
-    if (!bid && fileName) {
-      for (let i = 0; i < cachedFiles.length; i++) {
-        const cf = cachedFiles[i];
-        if (!cf) continue;
-        const fn = String(cf.FileName || cf.filename || cf.Filename || "").trim();
-        if (fn === fileName) {
-          bid = String(cf.BID || cf.bid || "").trim();
-          if (!base64String) base64String = String(cf.base64String || cf.Base64String || "").trim();
-          break;
-        }
-      }
-    }
-    return {
-      BID: bid,
-      AID: aid,
-      base64String: base64String,
-      FileName: fileName,
-    };
-  }).filter(Boolean);
-}
-
-function buildModifyProjectPayloadFromCache() {
+async function deleteFileFromProject(bid) {
   const auth = getBackendTokenAndAdmin();
   if (!auth) throw new Error("尚未登入，缺少 AdminID / Token");
-  const p = CACHED_SINGLE_PROJECT;
-  if (!p || typeof p !== "object") throw new Error("尚未載入專案資料");
-  const aid = String(CURRENT_PROJECT_AID || "").trim();
+  const aid = String(CURRENT_PROJECT_AID || localStorage.getItem("projectAID") || "").trim();
   if (!aid) throw new Error("缺少專案 AID");
+  const b = String(bid || "").trim();
+  if (!b) throw new Error("缺少檔案 BID");
 
-  const taskListRaw = Array.isArray(p.TaskList) ? p.TaskList : [];
-  const decisionListRaw = Array.isArray(p.DecisionList) ? p.DecisionList : [];
-
-  return {
+  const payload = {
     AdminID: auth.adminID,
     Token: auth.token,
     AID: aid,
-    State: String(p.State != null ? p.State : "0").trim(),
-    ProjectName: String(p.ProjectName || "").trim(),
-    ChargeMan: String(p.ChargeMan || "").trim(),
-    Participants: String(p.Participants || "").trim(),
-    StartDate: toYYYYMMDD(p.StartDate || ""),
-    EndDate: toYYYYMMDD(p.EndDate || ""),
-    Department: String(p.Department != null ? p.Department : "").trim(),
-    ShareProject_URL: String(p.ShareProject_URL || "").trim(),
-    Decision: String(p.Decision || "").trim(),
-    KPIList: buildKpiListForModifyProject(p),
-    TaskList: JSON.parse(JSON.stringify(taskListRaw)),
-    FileList: buildFileListPayloadFromFiles(),
-    DecisionList: JSON.parse(JSON.stringify(decisionListRaw)),
+    BID: b,
   };
-}
 
-async function modifyProjectToBackend(payload) {
-  const resp = await postJson(MODIFY_PROJECT_URL, payload);
+  const resp = await postJson(DELETE_FILE_PROJECT_URL, payload);
   if (!resp || String(resp.Result || "").toUpperCase() !== "OK") {
-    throw new Error((resp && (resp.Message || resp.Msg || resp.message)) || "ModifyProject 失敗");
+    throw new Error((resp && (resp.Message || resp.Msg || resp.message)) || "DeleteFieProject 失敗");
   }
   return resp;
 }
@@ -1462,12 +1401,6 @@ async function initProjectFromBackendIfPossible() {
   }
 
   if (!selected) return;
-
-  try {
-    CACHED_SINGLE_PROJECT = JSON.parse(JSON.stringify(selected));
-  } catch (e) {
-    CACHED_SINGLE_PROJECT = selected;
-  }
 
   CURRENT_PROJECT_AID = String(selected.AID || selected.ProjectAID || projectAID || "").trim();
   if (CURRENT_PROJECT_AID) {
@@ -2450,12 +2383,13 @@ async function removeFile(id) {
   if (idx === -1) return;
   const removed = FILES[idx];
   const name = removed.name;
-  FILES.splice(idx, 1);
-  renderFiles();
+  const bid = removed.bid != null ? String(removed.bid).trim() : "";
 
-  if (backendProjectSynced && CACHED_SINGLE_PROJECT && getBackendTokenAndAdmin()) {
+  if (backendProjectSynced && bid && getBackendTokenAndAdmin()) {
     try {
-      await modifyProjectToBackend(buildModifyProjectPayloadFromCache());
+      await deleteFileFromProject(bid);
+      FILES.splice(idx, 1);
+      renderFiles();
       await initProjectFromBackendIfPossible().catch(function () {});
       renderKanban();
       renderFiles();
@@ -2464,13 +2398,14 @@ async function removeFile(id) {
       syncHeaderShareProjectFromDecision();
       showToast("已從後端移除「" + name + "」");
     } catch (e) {
-      FILES.splice(idx, 0, removed);
-      renderFiles();
       showToast("移除失敗：" + (e && e.message ? e.message : "未知錯誤"), "warn");
     }
-  } else {
-    showToast("已移除「" + name + "」");
+    return;
   }
+
+  FILES.splice(idx, 1);
+  renderFiles();
+  showToast("已移除「" + name + "」");
 }
 function renderFiles() {
   const list = document.getElementById('file-list');
