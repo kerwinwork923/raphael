@@ -730,6 +730,7 @@ const API_BASE = "https://23700999.com:8081/PM";
 const GET_PROJECT_LIST_URL = API_BASE + "/api/fr/getProjectList";
 const GET_SINGLE_PROJECT_URL = API_BASE + "/api/fr/getProject";
 const NEW_DECISION_URL = API_BASE + "/api/fr/NewDecision";
+const MODIFY_DECISION_URL = API_BASE + "/api/fr/ModifyDecision";
 const UPLOAD_FILE_PROJECT_URL = API_BASE + "/api/fr/UploadFieProject";
 const DELETE_FILE_PROJECT_URL = API_BASE + "/api/fr/DeleteFieProject";
 // 任務狀態修改（你提供的規格）
@@ -756,6 +757,20 @@ function getBackendTokenAndAdmin() {
   const adminID = localStorage.getItem("adminID") || sessionStorage.getItem("adminID");
   if (!token || !adminID) return null;
   return { token, adminID };
+}
+
+/** FR API 常見 Result／result；成功時有時僅回 BID 而無 Result */
+function isFrApiResultOk(resp) {
+  if (!resp || typeof resp !== "object") return false;
+  const errMsg = resp.Message || resp.Msg || resp.message;
+  const r = resp.Result !== undefined ? resp.Result : resp.result;
+  if (r === undefined || r === null || r === "") {
+    if (errMsg && String(errMsg).trim()) return false;
+    return true;
+  }
+  const s = String(r).trim().toUpperCase();
+  if (s === "NG" || s === "FAIL" || s === "ERROR" || s === "FALSE" || s === "0" || s === "NO") return false;
+  return s === "OK" || s === "SUCCESS" || s === "TRUE" || s === "1" || r === true || r === 1;
 }
 
 function postJson(url, body) {
@@ -797,10 +812,30 @@ function extractSingleProject(resp) {
 }
 
 /**
- * DecisionList 由後往前找第一筆非空 ShareProjectURL；皆空則用專案根層 ShareProject_URL。
+ * 單一專案 Decision：新版為物件 SingleProject.Decision；舊版為 DecisionList 陣列。
+ */
+function getDecisionRecordFromProject(selected) {
+  if (!selected || typeof selected !== "object") return null;
+  const dec = selected.Decision;
+  if (dec && typeof dec === "object" && !Array.isArray(dec)) {
+    return dec;
+  }
+  if (Array.isArray(selected.DecisionList) && selected.DecisionList.length) {
+    return selected.DecisionList[selected.DecisionList.length - 1] || null;
+  }
+  return null;
+}
+
+/**
+ * ShareProjectURL：優先 Decision 物件／DecisionList 中非空 ShareProjectURL，否則專案根層 ShareProject_URL。
  */
 function resolveShareProjectUrlFromProject(selected) {
   if (!selected || typeof selected !== "object") return "";
+  const rec = getDecisionRecordFromProject(selected);
+  if (rec && rec.ShareProjectURL != null) {
+    const u = String(rec.ShareProjectURL).trim();
+    if (u) return u;
+  }
   const list = Array.isArray(selected.DecisionList) ? selected.DecisionList : [];
   for (let i = list.length - 1; i >= 0; i--) {
     const d = list[i];
@@ -827,7 +862,7 @@ async function deleteFileFromProject(bid) {
   };
 
   const resp = await postJson(DELETE_FILE_PROJECT_URL, payload);
-  if (!resp || String(resp.Result || "").toUpperCase() !== "OK") {
+  if (!isFrApiResultOk(resp)) {
     throw new Error((resp && (resp.Message || resp.Msg || resp.message)) || "DeleteFieProject 失敗");
   }
   return resp;
@@ -1499,7 +1534,7 @@ async function initProjectFromBackendIfPossible() {
   projectStatus = deriveProjectStatusFromTasks(TASKS);
   applyProjectStatusBadge(projectStatus);
 
-  // ShareProject：DecisionList 由後往前找非空 ShareProjectURL，否則用專案 ShareProject_URL
+  // ShareProject：Decision 物件或 DecisionList／ShareProject_URL
   DECISION_CHATGPT.shareProjectUrl = resolveShareProjectUrlFromProject(selected);
 
   // 從後端填入：已上傳檔案（FileList）
@@ -1547,15 +1582,13 @@ async function initProjectFromBackendIfPossible() {
     })
     .filter(Boolean);
 
-  // 從後端填入：重要討論主題（DecisionList -> DecisionTopicList）
-  // 這裡取最後一次 Decision（或有 ShareProjectURL 的那筆）
+  // 重要討論主題：Decision.DecisionTopicList 或舊版 DecisionList[-].DecisionTopicList
   DECISION_CHATGPT.topics = [];
-  let lastDecisionRecord = null;
-  if (Array.isArray(selected.DecisionList) && selected.DecisionList.length) {
-    const last = selected.DecisionList[selected.DecisionList.length - 1];
-    lastDecisionRecord = last;
-
-    const topicSource = last && Array.isArray(last.DecisionTopicList) ? last.DecisionTopicList : [];
+  const lastDecisionRecord = getDecisionRecordFromProject(selected);
+  if (lastDecisionRecord) {
+    const topicSource = Array.isArray(lastDecisionRecord.DecisionTopicList)
+      ? lastDecisionRecord.DecisionTopicList
+      : [];
     if (topicSource.length) {
       DECISION_CHATGPT.topics = topicSource
         .map((tp, idx) => {
@@ -1575,32 +1608,27 @@ async function initProjectFromBackendIfPossible() {
     }
   }
 
-  // Decision 背景/核心/風險文字（DecisionList 優先；沒有 DecisionList 才用 selected.Decision）
+  // Decision 背景/核心/風險（Decision 物件或 DecisionList 最後一筆；舊版字串 Decision 僅填核心摘要）
   const bgEl = document.getElementById("decision-background");
   const coreEl = document.getElementById("decision-core");
   const riskEl = document.getElementById("decision-risk");
 
-  const hasDecisionList = !!lastDecisionRecord;
-  if (hasDecisionList) {
-    if (bgEl && lastDecisionRecord && lastDecisionRecord.BackGround != null) {
-      // 保持「後端有給就覆蓋」，避免舊值殘留
+  if (lastDecisionRecord) {
+    if (bgEl && lastDecisionRecord.BackGround != null) {
       bgEl.value = String(lastDecisionRecord.BackGround || "").trim();
     }
-    if (coreEl && lastDecisionRecord && lastDecisionRecord.Kernal != null) {
+    if (coreEl && lastDecisionRecord.Kernal != null) {
       coreEl.value = String(lastDecisionRecord.Kernal || "").trim();
-    } else if (coreEl && lastDecisionRecord && lastDecisionRecord.Decision != null) {
-      // 若 Kernal 沒有提供，才用舊欄位 Decision 做 fallback
-      const v = String(lastDecisionRecord.Decision || "").trim();
-      coreEl.value = v;
+    } else if (coreEl && lastDecisionRecord.Decision != null && typeof lastDecisionRecord.Decision === "string") {
+      coreEl.value = String(lastDecisionRecord.Decision || "").trim();
     }
-    if (riskEl && lastDecisionRecord && lastDecisionRecord.Risk != null) {
+    if (riskEl && lastDecisionRecord.Risk != null) {
       riskEl.value = String(lastDecisionRecord.Risk || "").trim();
     }
-  } else {
-    const decisionStr = selected.Decision ? String(selected.Decision || "").trim() : "";
-    if (coreEl && decisionStr) {
-      // 以免覆蓋使用者手動輸入（理論上這裡是載入階段，但保險起見）
-      if (!coreEl.value || coreEl.value.trim() === "") coreEl.value = decisionStr;
+  } else if (typeof selected.Decision === "string" && selected.Decision.trim()) {
+    const decisionStr = String(selected.Decision).trim();
+    if (coreEl && (!coreEl.value || coreEl.value.trim() === "")) {
+      coreEl.value = decisionStr;
     }
   }
 
@@ -1618,6 +1646,13 @@ async function initProjectFromBackendIfPossible() {
 
   // 立刻刷新檔案區（避免載入時被 fallback/舊資料覆蓋）
   renderFiles();
+
+  try {
+    const drec = getDecisionRecordFromProject(selected);
+    if (drec && drec.BID != null && CURRENT_PROJECT_AID) {
+      localStorage.setItem("decisionBID_" + CURRENT_PROJECT_AID, String(drec.BID).trim());
+    }
+  } catch (e) {}
 
   // 若後端有傳 KPIList，就不額外接 UI（目前 KPI 畫面是靜態）
   backendProjectSynced = true;
@@ -2326,25 +2361,51 @@ async function uploadFileToProject(file) {
     throw new Error((resp && (resp.Message || resp.Msg)) || '上傳失敗');
   }
 
+  const bidRaw = resp.BID != null ? resp.BID : resp.bid != null ? resp.bid : resp.FileBID != null ? resp.FileBID : "";
+  const bidStr = bidRaw !== "" && bidRaw != null ? String(bidRaw).trim() : "";
+
   return {
     fileURL: String(resp.FileURL || '').trim(),
-    aid: String(resp.AID || aid).trim()
+    aid: String(resp.AID || aid).trim(),
+    bid: bidStr,
   };
 }
 
 async function appendUploadedFile(file) {
   const ext = file.name.split('.').pop().toLowerCase();
-  const id = 'f' + Date.now() + Math.random().toString(36).slice(2,6);
+  const id = 'f' + Date.now() + Math.random().toString(36).slice(2, 6);
   const uploadResult = await uploadFileToProject(file);
-  FILES.push({
-    id,
-    name: file.name,
-    size: file.size,
-    type: ext,
-    uploadedAt: new Date().toISOString().slice(0,10),
-    uploadedBy: (localStorage.getItem('adminID') || sessionStorage.getItem('adminID') || 'Admin'),
-    url: uploadResult.fileURL
-  });
+  const bid = uploadResult.bid || "";
+
+  if (bid) {
+    FILES.push({
+      id,
+      name: file.name,
+      size: file.size,
+      type: ext,
+      uploadedAt: new Date().toISOString().slice(0, 10),
+      uploadedBy: (localStorage.getItem("adminID") || sessionStorage.getItem("adminID") || "Admin"),
+      url: uploadResult.fileURL,
+      bid: bid,
+      aid: uploadResult.aid || "",
+    });
+    return;
+  }
+
+  // 上傳 API 若未回傳 BID：改由 getProject 重載 FileList（才能用 DeleteFieProject）
+  backendProjectSynced = false;
+  await initProjectFromBackendIfPossible().catch(function () {});
+  renderKanban();
+  renderFiles();
+  const spIn = document.getElementById("decision-shareproject-url");
+  if (spIn) spIn.value = DECISION_CHATGPT.shareProjectUrl || "";
+  const spLink = document.getElementById("decision-shareproject-link");
+  if (spLink) {
+    spLink.href = DECISION_CHATGPT.shareProjectUrl || "javascript:void(0)";
+    spLink.classList.toggle("hidden", !DECISION_CHATGPT.shareProjectUrl);
+  }
+  syncHeaderShareProjectFromDecision();
+  renderDecisionTopicRows();
 }
 
 async function handleFileUpload(input) {
@@ -2388,18 +2449,19 @@ async function removeFile(id) {
   if (backendProjectSynced && bid && getBackendTokenAndAdmin()) {
     try {
       await deleteFileFromProject(bid);
-      FILES.splice(idx, 1);
-      renderFiles();
-      await initProjectFromBackendIfPossible().catch(function () {});
-      renderKanban();
-      renderFiles();
-      const spIn = document.getElementById("decision-shareproject-url");
-      if (spIn) spIn.value = DECISION_CHATGPT.shareProjectUrl || "";
-      syncHeaderShareProjectFromDecision();
-      showToast("已從後端移除「" + name + "」");
     } catch (e) {
       showToast("移除失敗：" + (e && e.message ? e.message : "未知錯誤"), "warn");
+      return;
     }
+    FILES.splice(idx, 1);
+    renderFiles();
+    await initProjectFromBackendIfPossible().catch(function () {});
+    renderKanban();
+    renderFiles();
+    const spIn = document.getElementById("decision-shareproject-url");
+    if (spIn) spIn.value = DECISION_CHATGPT.shareProjectUrl || "";
+    syncHeaderShareProjectFromDecision();
+    showToast("已從後端移除「" + name + "」");
     return;
   }
 
@@ -2516,7 +2578,7 @@ function renderDecisionDisplay(selected) {
       .replace(/'/g, "&#39;");
 
   let html = "";
-  // NewDecision 送出後的本地預覽（非 getProject 的 DecisionList）
+  // NewDecision 送出後的本地預覽
   const preview =
     selected &&
     selected.decisionPreview &&
@@ -2525,6 +2587,18 @@ function renderDecisionDisplay(selected) {
       : null;
   if (preview) {
     const d = preview;
+    const bg = d.BackGround != null ? String(d.BackGround).trim() : "";
+    const core = d.Kernal != null ? String(d.Kernal).trim() : "";
+    const risk = d.Risk != null ? String(d.Risk).trim() : "";
+    html += `<p><b>背景：</b>${escapeHtmlText(bg || "-")}</p>`;
+    html += `<p><b>決策：</b>${escapeHtmlText(core || "-")}</p>`;
+    html += `<p><b>風險：</b>${escapeHtmlText(risk || "-")}</p>`;
+    const sp = d.ShareProjectURL != null ? String(d.ShareProjectURL).trim() : "";
+    if (sp) {
+      html += `<p><a href="${escapeHtmlText(sp)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">👉 前往討論</a></p>`;
+    }
+  } else if (selected.Decision && typeof selected.Decision === "object" && !Array.isArray(selected.Decision)) {
+    const d = selected.Decision;
     const bg = d.BackGround != null ? String(d.BackGround).trim() : "";
     const core = d.Kernal != null ? String(d.Kernal).trim() : "";
     const risk = d.Risk != null ? String(d.Risk).trim() : "";
@@ -2548,9 +2622,9 @@ function renderDecisionDisplay(selected) {
     if (sp) {
       html += `<p><a href="${escapeHtmlText(sp)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">👉 前往討論</a></p>`;
     }
-  } else if (selected.Decision) {
+  } else if (typeof selected.Decision === "string" && String(selected.Decision).trim()) {
     const dec = String(selected.Decision).trim();
-    if (dec) html = `<p>${escapeHtmlText(dec)}</p>`;
+    html = `<p>${escapeHtmlText(dec)}</p>`;
   }
 
   if (html) {
@@ -2630,9 +2704,30 @@ function applyFallbackDemoHeader() {
   if (s) s.textContent = "未從後端同步 · 可於本頁操作 Kanban 與 Decision";
 }
 
+function refreshDecisionSaveButtonLabel() {
+  const btn = document.getElementById("decision-save-btn");
+  if (!btn) return;
+  const aid = (CURRENT_PROJECT_AID || (function () {
+    try {
+      return (localStorage.getItem("projectAID") || "").trim();
+    } catch (e) {
+      return "";
+    }
+  })());
+  let bid = "";
+  try {
+    bid = aid ? (localStorage.getItem("decisionBID_" + aid) || "").trim() : "";
+  } catch (e) {}
+  if (btn.disabled) return;
+  btn.textContent = bid ? "修改 Decision" : "儲存 Decision";
+}
+
 function syncDecisionBidHint() {
   const el = document.getElementById("decision-bid-hint");
-  if (!el) return;
+  if (!el) {
+    refreshDecisionSaveButtonLabel();
+    return;
+  }
   const aid = (CURRENT_PROJECT_AID || (function () {
     try {
       return (localStorage.getItem("projectAID") || "").trim();
@@ -2642,6 +2737,7 @@ function syncDecisionBidHint() {
   })());
   if (!aid) {
     el.classList.add("hidden");
+    refreshDecisionSaveButtonLabel();
     return;
   }
   let bid = "";
@@ -2654,6 +2750,7 @@ function syncDecisionBidHint() {
   } else {
     el.classList.add("hidden");
   }
+  refreshDecisionSaveButtonLabel();
 }
 
 async function saveDecisionData() {
@@ -2713,8 +2810,12 @@ async function saveDecisionData() {
     showToast("有部分重要主題未選對任務（缺 TaskID/CID），已略過", "warn");
   }
 
-  // NewDecision 規格：僅下列欄位 + DecisionTopicList（重要討論主題陣列），不含 DecisionList
-  const body = {
+  let existingDecisionBid = "";
+  try {
+    existingDecisionBid = (localStorage.getItem("decisionBID_" + aid) || "").trim();
+  } catch (e) {}
+
+  const basePayload = {
     AdminID: auth.adminID,
     Token: auth.token,
     AID: aid,
@@ -2725,20 +2826,28 @@ async function saveDecisionData() {
     DecisionTopicList: decisionTopicList,
   };
 
+  const isModifyDecision = !!existingDecisionBid;
+  const decisionUrl = isModifyDecision ? MODIFY_DECISION_URL : NEW_DECISION_URL;
+  const body = isModifyDecision
+    ? Object.assign({}, basePayload, { BID: existingDecisionBid })
+    : basePayload;
+
   const btn = document.getElementById("decision-save-btn");
   try {
     if (btn) {
       btn.disabled = true;
       btn.textContent = "送出中…";
     }
-    const resp = await postJson(NEW_DECISION_URL, body);
-    if (!resp || String(resp.Result || "").toUpperCase() !== "OK") {
+    const resp = await postJson(decisionUrl, body);
+    if (!isFrApiResultOk(resp)) {
       const msg =
-        (resp && (resp.Message || resp.Msg || resp.message)) || "NewDecision 失敗";
+        (resp && (resp.Message || resp.Msg || resp.message)) ||
+        (isModifyDecision ? "ModifyDecision 失敗" : "NewDecision 失敗");
       showToast(String(msg), "warn");
       return;
     }
-    const bid = resp.BID != null ? String(resp.BID).trim() : "";
+    const bidFromResp = resp.BID != null ? String(resp.BID).trim() : "";
+    const bid = bidFromResp || (isModifyDecision ? existingDecisionBid : "");
     if (bid) {
       try {
         localStorage.setItem("decisionBID_" + aid, bid);
@@ -2749,7 +2858,6 @@ async function saveDecisionData() {
         hint.classList.remove("hidden");
       }
     }
-    // 更新左側 Decision display（本地預覽；非 API 的 DecisionList）
     renderDecisionDisplay({
       decisionPreview: {
         BackGround: backGround,
@@ -2759,13 +2867,16 @@ async function saveDecisionData() {
       },
     });
 
-    showToast("Decision 已提交" + (bid ? "（BID: " + bid + "）" : ""));
+    showToast(
+      (isModifyDecision ? "Decision 已更新" : "Decision 已提交") +
+        (bid ? "（BID: " + bid + "）" : "")
+    );
   } catch (e) {
     showToast("提交失敗：" + (e && e.message ? e.message : "未知錯誤"), "warn");
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.textContent = "儲存 Decision";
+      refreshDecisionSaveButtonLabel();
     }
   }
 }
