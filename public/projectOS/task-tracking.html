@@ -237,7 +237,7 @@ tailwind.config = {
         Decision 記錄
       </h3>
       <p class="text-[11px] text-slate-400 mb-4 leading-relaxed">
-        送出後呼叫後端 <code class="text-[10px] bg-slate-100 px-1 rounded">NewDecision</code>；主題列之 <span class="text-slate-500">TaskID</span> 為後端任務 CID（請先自儀表板載入專案任務）。
+        送出後呼叫後端 <code class="text-[10px] bg-slate-100 px-1 rounded">NewDecision</code>（僅 <code class="text-[10px] bg-slate-100 px-1 rounded">DecisionTopicList</code> 陣列，無 <code class="text-[10px] bg-slate-100 px-1 rounded">DecisionList</code>）；主題列之 <span class="text-slate-500">TaskID</span> 為後端任務 CID（請先自儀表板載入專案任務）。
       </p>
 
       <div class="space-y-4">
@@ -731,6 +731,8 @@ const GET_PROJECT_LIST_URL = API_BASE + "/api/fr/getProjectList";
 const GET_SINGLE_PROJECT_URL = API_BASE + "/api/fr/getProject";
 const NEW_DECISION_URL = API_BASE + "/api/fr/NewDecision";
 const UPLOAD_FILE_PROJECT_URL = API_BASE + "/api/fr/UploadFieProject";
+// 單一專案修改（刪除檔案等：以更新後的 FileList 送出）
+const MODIFY_PROJECT_URL = API_BASE + "/api/fr/ModifyProject";
 // 任務狀態修改（你提供的規格）
 const TASK_MODIFY_STATE_URL = API_BASE + "/api/fr/TaskModifyState";
 // 任務內容/狀態修改（你提供的規格）
@@ -746,6 +748,8 @@ const TASK_STATE_LIST_URLS = [API_BASE + "/api/fr/getTaskStateCode", API_BASE + 
 let CURRENT_PROJECT_AID = "";
 /** 是否已成功自 getProjectList 套用專案與任務 */
 let backendProjectSynced = false;
+/** 最近一次 getProject 成功回傳的 SingleProject 深拷貝（供 ModifyProject 帶齊欄位） */
+let CACHED_SINGLE_PROJECT = null;
 let adminNameListCache = null;
 let adminPickerMode = "taskAssignee";
 let taskStateListCache = null;
@@ -793,6 +797,101 @@ function extractSingleProject(resp) {
     return resp.Data.SingleProject;
   }
   return null;
+}
+
+/**
+ * DecisionList 由後往前找第一筆非空 ShareProjectURL；皆空則用專案根層 ShareProject_URL。
+ */
+function resolveShareProjectUrlFromProject(selected) {
+  if (!selected || typeof selected !== "object") return "";
+  const list = Array.isArray(selected.DecisionList) ? selected.DecisionList : [];
+  for (let i = list.length - 1; i >= 0; i--) {
+    const d = list[i];
+    if (!d) continue;
+    const u = d.ShareProjectURL != null ? String(d.ShareProjectURL).trim() : "";
+    if (u) return u;
+  }
+  return selected.ShareProject_URL != null ? String(selected.ShareProject_URL).trim() : "";
+}
+
+function buildKpiListForModifyProject(p) {
+  const list = p && Array.isArray(p.KPIList) ? p.KPIList : [];
+  return list.map(function (k) {
+    if (!k || typeof k !== "object") return { KPIName: "", KPITarget: "" };
+    return {
+      KPIName: String(k.KPIName || "").trim(),
+      KPITarget: String(k.KPITarget || "").trim(),
+    };
+  });
+}
+
+function buildFileListPayloadFromFiles() {
+  const aid = String(CURRENT_PROJECT_AID || "").trim();
+  const cachedFiles =
+    CACHED_SINGLE_PROJECT && Array.isArray(CACHED_SINGLE_PROJECT.FileList) ? CACHED_SINGLE_PROJECT.FileList : [];
+  return (FILES || []).map(function (f) {
+    if (!f) return null;
+    let bid = f.bid != null ? String(f.bid).trim() : "";
+    let base64String = f.base64String ? String(f.base64String) : "";
+    const fileName = String(f.name || "").trim();
+    if (!bid && fileName) {
+      for (let i = 0; i < cachedFiles.length; i++) {
+        const cf = cachedFiles[i];
+        if (!cf) continue;
+        const fn = String(cf.FileName || cf.filename || cf.Filename || "").trim();
+        if (fn === fileName) {
+          bid = String(cf.BID || cf.bid || "").trim();
+          if (!base64String) base64String = String(cf.base64String || cf.Base64String || "").trim();
+          break;
+        }
+      }
+    }
+    return {
+      BID: bid,
+      AID: aid,
+      base64String: base64String,
+      FileName: fileName,
+    };
+  }).filter(Boolean);
+}
+
+function buildModifyProjectPayloadFromCache() {
+  const auth = getBackendTokenAndAdmin();
+  if (!auth) throw new Error("尚未登入，缺少 AdminID / Token");
+  const p = CACHED_SINGLE_PROJECT;
+  if (!p || typeof p !== "object") throw new Error("尚未載入專案資料");
+  const aid = String(CURRENT_PROJECT_AID || "").trim();
+  if (!aid) throw new Error("缺少專案 AID");
+
+  const taskListRaw = Array.isArray(p.TaskList) ? p.TaskList : [];
+  const decisionListRaw = Array.isArray(p.DecisionList) ? p.DecisionList : [];
+
+  return {
+    AdminID: auth.adminID,
+    Token: auth.token,
+    AID: aid,
+    State: String(p.State != null ? p.State : "0").trim(),
+    ProjectName: String(p.ProjectName || "").trim(),
+    ChargeMan: String(p.ChargeMan || "").trim(),
+    Participants: String(p.Participants || "").trim(),
+    StartDate: toYYYYMMDD(p.StartDate || ""),
+    EndDate: toYYYYMMDD(p.EndDate || ""),
+    Department: String(p.Department != null ? p.Department : "").trim(),
+    ShareProject_URL: String(p.ShareProject_URL || "").trim(),
+    Decision: String(p.Decision || "").trim(),
+    KPIList: buildKpiListForModifyProject(p),
+    TaskList: JSON.parse(JSON.stringify(taskListRaw)),
+    FileList: buildFileListPayloadFromFiles(),
+    DecisionList: JSON.parse(JSON.stringify(decisionListRaw)),
+  };
+}
+
+async function modifyProjectToBackend(payload) {
+  const resp = await postJson(MODIFY_PROJECT_URL, payload);
+  if (!resp || String(resp.Result || "").toUpperCase() !== "OK") {
+    throw new Error((resp && (resp.Message || resp.Msg || resp.message)) || "ModifyProject 失敗");
+  }
+  return resp;
 }
 
 function toIsoDate(dateStr) {
@@ -1364,6 +1463,12 @@ async function initProjectFromBackendIfPossible() {
 
   if (!selected) return;
 
+  try {
+    CACHED_SINGLE_PROJECT = JSON.parse(JSON.stringify(selected));
+  } catch (e) {
+    CACHED_SINGLE_PROJECT = selected;
+  }
+
   CURRENT_PROJECT_AID = String(selected.AID || selected.ProjectAID || projectAID || "").trim();
   if (CURRENT_PROJECT_AID) {
     try {
@@ -1461,13 +1566,8 @@ async function initProjectFromBackendIfPossible() {
   projectStatus = deriveProjectStatusFromTasks(TASKS);
   applyProjectStatusBadge(projectStatus);
 
-  // ShareProjectURL：優先吃 DecisionList[].ShareProjectURL
-  // 若 DecisionList 沒資料才回退使用 selected.ShareProject_URL
-  if (!Array.isArray(selected.DecisionList) || !selected.DecisionList.length) {
-    if (selected.ShareProject_URL) {
-      DECISION_CHATGPT.shareProjectUrl = String(selected.ShareProject_URL || "").trim();
-    }
-  }
+  // ShareProject：DecisionList 由後往前找非空 ShareProjectURL，否則用專案 ShareProject_URL
+  DECISION_CHATGPT.shareProjectUrl = resolveShareProjectUrlFromProject(selected);
 
   // 從後端填入：已上傳檔案（FileList）
   FILES = (Array.isArray(selected.FileList) ? selected.FileList : [])
@@ -1497,6 +1597,8 @@ async function initProjectFromBackendIfPossible() {
         ? extSource.split(".").pop().toLowerCase()
         : "";
 
+      const bidRaw = f.BID != null ? f.BID : f.bid;
+      const aidRaw = f.AID != null ? f.AID : f.aid;
       return {
         id: "f-api-" + i,
         name: fileName || "uploaded_file_" + (i + 1),
@@ -1505,6 +1607,9 @@ async function initProjectFromBackendIfPossible() {
         uploadedAt: String(f.UploadedAt || "").trim(),
         uploadedBy: String(f.UploadedBy || "").trim(),
         url: fileURL,
+        bid: bidRaw != null && String(bidRaw).trim() !== "" ? String(bidRaw).trim() : "",
+        aid: aidRaw != null && String(aidRaw).trim() !== "" ? String(aidRaw).trim() : "",
+        base64String: f.base64String != null ? String(f.base64String) : f.Base64String != null ? String(f.Base64String) : "",
       };
     })
     .filter(Boolean);
@@ -1514,13 +1619,8 @@ async function initProjectFromBackendIfPossible() {
   DECISION_CHATGPT.topics = [];
   let lastDecisionRecord = null;
   if (Array.isArray(selected.DecisionList) && selected.DecisionList.length) {
-    // 預設用最後一筆；若有 ShareProjectURL 就覆蓋使用
     const last = selected.DecisionList[selected.DecisionList.length - 1];
     lastDecisionRecord = last;
-    if (last && last.ShareProjectURL != null) {
-      // 即使是空字串也要清掉舊值，避免切專案時殘留
-      DECISION_CHATGPT.shareProjectUrl = String(last.ShareProjectURL || "").trim();
-    }
 
     const topicSource = last && Array.isArray(last.DecisionTopicList) ? last.DecisionTopicList : [];
     if (topicSource.length) {
@@ -1573,6 +1673,15 @@ async function initProjectFromBackendIfPossible() {
 
   // Decision display（左側顯示區塊）
   renderDecisionDisplay(selected);
+
+  const spInLoad = document.getElementById("decision-shareproject-url");
+  if (spInLoad) spInLoad.value = DECISION_CHATGPT.shareProjectUrl || "";
+  const spLinkLoad = document.getElementById("decision-shareproject-link");
+  if (spLinkLoad) {
+    spLinkLoad.href = DECISION_CHATGPT.shareProjectUrl || "javascript:void(0)";
+    spLinkLoad.classList.toggle("hidden", !DECISION_CHATGPT.shareProjectUrl);
+  }
+  syncHeaderShareProjectFromDecision();
 
   // 立刻刷新檔案區（避免載入時被 fallback/舊資料覆蓋）
   renderFiles();
@@ -2334,13 +2443,34 @@ async function handleDrop(e) {
   }
   renderFiles();
 }
-function removeFile(id) {
-  const idx = FILES.findIndex(f => f.id === id);
+async function removeFile(id) {
+  const idx = FILES.findIndex(function (f) {
+    return f && f.id === id;
+  });
   if (idx === -1) return;
-  const name = FILES[idx].name;
+  const removed = FILES[idx];
+  const name = removed.name;
   FILES.splice(idx, 1);
   renderFiles();
-  showToast(`已移除「${name}」`);
+
+  if (backendProjectSynced && CACHED_SINGLE_PROJECT && getBackendTokenAndAdmin()) {
+    try {
+      await modifyProjectToBackend(buildModifyProjectPayloadFromCache());
+      await initProjectFromBackendIfPossible().catch(function () {});
+      renderKanban();
+      renderFiles();
+      const spIn = document.getElementById("decision-shareproject-url");
+      if (spIn) spIn.value = DECISION_CHATGPT.shareProjectUrl || "";
+      syncHeaderShareProjectFromDecision();
+      showToast("已從後端移除「" + name + "」");
+    } catch (e) {
+      FILES.splice(idx, 0, removed);
+      renderFiles();
+      showToast("移除失敗：" + (e && e.message ? e.message : "未知錯誤"), "warn");
+    }
+  } else {
+    showToast("已移除「" + name + "」");
+  }
 }
 function renderFiles() {
   const list = document.getElementById('file-list');
@@ -2437,6 +2567,10 @@ function renderDecisionDisplay(selected) {
   const wrap = document.getElementById("decision-display");
   const content = document.getElementById("decision-display-content");
   if (!wrap || !content) return;
+  if (!selected || typeof selected !== "object") {
+    wrap.classList.add("hidden");
+    return;
+  }
 
   const escapeHtmlText = (s) =>
     String(s == null ? "" : s)
@@ -2447,7 +2581,26 @@ function renderDecisionDisplay(selected) {
       .replace(/'/g, "&#39;");
 
   let html = "";
-  if (Array.isArray(selected.DecisionList) && selected.DecisionList.length) {
+  // NewDecision 送出後的本地預覽（非 getProject 的 DecisionList）
+  const preview =
+    selected &&
+    selected.decisionPreview &&
+    typeof selected.decisionPreview === "object"
+      ? selected.decisionPreview
+      : null;
+  if (preview) {
+    const d = preview;
+    const bg = d.BackGround != null ? String(d.BackGround).trim() : "";
+    const core = d.Kernal != null ? String(d.Kernal).trim() : "";
+    const risk = d.Risk != null ? String(d.Risk).trim() : "";
+    html += `<p><b>背景：</b>${escapeHtmlText(bg || "-")}</p>`;
+    html += `<p><b>決策：</b>${escapeHtmlText(core || "-")}</p>`;
+    html += `<p><b>風險：</b>${escapeHtmlText(risk || "-")}</p>`;
+    const sp = d.ShareProjectURL != null ? String(d.ShareProjectURL).trim() : "";
+    if (sp) {
+      html += `<p><a href="${escapeHtmlText(sp)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">👉 前往討論</a></p>`;
+    }
+  } else if (Array.isArray(selected.DecisionList) && selected.DecisionList.length) {
     const d = selected.DecisionList[selected.DecisionList.length - 1] || {};
     const bg = d.BackGround != null ? String(d.BackGround).trim() : "";
     const core = d.Kernal != null ? String(d.Kernal).trim() : "";
@@ -2513,10 +2666,11 @@ function resolveTaskCidForDecision(localTaskId) {
 }
 
 function syncHeaderShareProjectFromDecision() {
+  const inputEl = document.getElementById("decision-shareproject-url");
+  const urlFromInput = inputEl ? String(inputEl.value || "").trim() : "";
   const url = (
+    urlFromInput ||
     (DECISION_CHATGPT && DECISION_CHATGPT.shareProjectUrl) ||
-    (document.getElementById("decision-shareproject-url") &&
-      document.getElementById("decision-shareproject-url").value) ||
     ""
   ).trim();
   const a = document.getElementById("header-shareproject-link");
@@ -2624,6 +2778,7 @@ async function saveDecisionData() {
     showToast("有部分重要主題未選對任務（缺 TaskID/CID），已略過", "warn");
   }
 
+  // NewDecision 規格：僅下列欄位 + DecisionTopicList（重要討論主題陣列），不含 DecisionList
   const body = {
     AdminID: auth.adminID,
     Token: auth.token,
@@ -2642,7 +2797,7 @@ async function saveDecisionData() {
       btn.textContent = "送出中…";
     }
     const resp = await postJson(NEW_DECISION_URL, body);
-    if (!resp || String(resp.Result).toUpperCase() !== "OK") {
+    if (!resp || String(resp.Result || "").toUpperCase() !== "OK") {
       const msg =
         (resp && (resp.Message || resp.Msg || resp.message)) || "NewDecision 失敗";
       showToast(String(msg), "warn");
@@ -2659,16 +2814,14 @@ async function saveDecisionData() {
         hint.classList.remove("hidden");
       }
     }
-    // 更新左側 Decision display（即使沒刷新後端，使用者也能看到顯示區塊）
+    // 更新左側 Decision display（本地預覽；非 API 的 DecisionList）
     renderDecisionDisplay({
-      DecisionList: [
-        {
-          BackGround: backGround,
-          Kernal: kernal,
-          Risk: risk,
-          ShareProjectURL: shareUrl,
-        },
-      ],
+      decisionPreview: {
+        BackGround: backGround,
+        Kernal: kernal,
+        Risk: risk,
+        ShareProjectURL: shareUrl,
+      },
     });
 
     showToast("Decision 已提交" + (bid ? "（BID: " + bid + "）" : ""));
