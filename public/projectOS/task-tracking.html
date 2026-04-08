@@ -29,6 +29,9 @@ tailwind.config = {
   @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
   .status-draft{background:#f1f5f9;color:#64748b}
   .status-in_progress{background:#dbeafe;color:#1d4ed8}
+  .status-under_review{background:#ede9fe;color:#7c3aed}
+  .status-revision_required{background:#fff7ed;color:#c2410c}
+  .status-approved{background:#dcfce7;color:#15803d}
   .status-review{background:#fef3c7;color:#b45309}
   .status-closed{background:#dcfce7;color:#15803d}
   .risk-pulse{animation:rPulse 2s infinite;}
@@ -79,6 +82,11 @@ tailwind.config = {
         <span id="project-blocked-badge" class="text-xs bg-red-100 text-red-600 px-2.5 py-1 rounded-full font-semibold risk-pulse">🔴 Blocked ×0</span>
       </div>
       <p id="project-subtitle" class="text-xs text-slate-500 mt-1">正在連線取得專案…</p>
+      <div class="mt-2 flex flex-wrap items-center gap-2 text-xs">
+        <span id="proposal-status-pill" class="status-draft px-2.5 py-1 rounded-full font-semibold">提案草稿</span>
+        <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium">目前輪次：<span id="proposal-round-badge">Round 1</span></span>
+        <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium">最後更新：<span id="proposal-last-actor">—</span></span>
+      </div>
     </div>
 
     <div class="flex items-center gap-2 flex-wrap">
@@ -117,6 +125,7 @@ tailwind.config = {
 
   <!-- TABS -->
   <div class="flex gap-1 border-b border-slate-200 mb-5">
+    <button onclick="setDetailTab(this,'proposal')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">Proposal</button>
     <button onclick="setDetailTab(this,'decision')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">Decision</button>
     <button onclick="setDetailTab(this,'tasks')" class="detail-tab active text-sm px-4 py-2.5 border-b-2 border-blue-600 text-blue-600 font-medium">Tasks</button>
     <!-- <button onclick="setDetailTab(this,'kpi')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">KPI</button> -->
@@ -225,6 +234,77 @@ tailwind.config = {
       </div>
     </div>
   </div>
+
+<!-- PROPOSAL TAB -->
+<div id="tab-proposal" class="detail-tab-content hidden">
+  <div class="grid grid-cols-1 xl:grid-cols-[1.35fr_.9fr] gap-4 mb-4">
+    <div class="bg-white rounded-xl border border-slate-200 p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="font-semibold flex items-center gap-2">
+            <span class="w-2 h-2 bg-violet-500 rounded-full inline-block"></span>
+            Proposal Review Timeline
+          </h3>
+          <p class="text-xs text-slate-400 mt-1">提案人與執行長的往返確認紀錄，通過後才進入正式 Decision。</p>
+        </div>
+        <span id="proposal-thread-status" class="status-draft text-xs px-2.5 py-1 rounded-full font-semibold">草稿</span>
+      </div>
+      <div id="proposal-timeline" class="space-y-3"></div>
+    </div>
+
+    <div class="space-y-4">
+      <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <h3 class="font-semibold mb-4 flex items-center gap-2">
+          <span class="w-2 h-2 bg-blue-500 rounded-full inline-block"></span>
+          Proposal 操作
+        </h3>
+        <div class="grid grid-cols-1 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">Proposal 類別</label>
+            <select id="proposal-type-select" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 bg-white">
+              <option value="">載入中…</option>
+            </select>
+            <p id="proposal-type-hint" class="text-xs text-slate-400 mt-1 hidden"></p>
+          </div>
+          <div>
+            <label id="proposal-summary-label" class="block text-xs font-semibold text-slate-500 mb-1.5">提案摘要</label>
+            <textarea id="proposal-summary-input" rows="5" placeholder="請輸入本輪提案摘要或執行長建議..." class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm resize-none leading-relaxed"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">討論 URL</label>
+            <input id="proposal-url-input" type="text" placeholder="https://chatgpt.com/share/..." class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">目前角色</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" id="proposal-role-proposer" onclick="setProposalRole('proposer')" class="proposal-role-btn bg-blue-50 text-blue-600 border border-blue-200 rounded-lg px-3 py-2 text-sm font-medium">提案人</button>
+              <button type="button" id="proposal-role-ceo" onclick="setProposalRole('ceo')" class="proposal-role-btn bg-white text-slate-600 border border-slate-200 rounded-lg px-3 py-2 text-sm font-medium">執行長</button>
+            </div>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-3 border border-slate-200">
+            <p class="text-xs text-slate-500 mb-1">目前流程判斷</p>
+            <p id="proposal-next-step" class="text-sm font-semibold text-slate-800">請提案人填寫摘要與 URL 後送交執行長。</p>
+          </div>
+          <div id="proposal-action-row" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button type="button" id="proposal-submit-btn" onclick="submitProposalRound()" class="bg-blue-600 sm:col-span-2 hover:bg-blue-700 text-white py-2.5 rounded-lg text-sm font-semibold transition">送交執行長</button>
+            <button type="button" id="proposal-revision-btn" onclick="submitCeoFeedback('revision_required')" class="border border-amber-200 text-amber-700 hover:bg-amber-50 py-2.5 rounded-lg text-sm font-semibold transition">退回修改</button>
+            <button type="button" id="proposal-approve-btn" onclick="submitCeoFeedback('approved')" class="bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-lg text-sm font-semibold transition">通過提案並轉為進行中</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <h3 class="font-semibold mb-3">流程規則</h3>
+        <ul class="text-sm text-slate-600 space-y-2 leading-relaxed">
+          <li>1. 提案人選擇 <span class="font-semibold text-slate-800">Proposal 類別</span>，並填寫 <span class="font-semibold text-slate-800">提案摘要 + 討論 URL</span>（送交時會呼叫 NewProposal API）。</li>
+          <li>2. 執行長回覆 <span class="font-semibold text-slate-800">提案建議 + 討論 URL</span>。</li>
+          <li>3. 可重複多輪，直到執行長按下 <span class="font-semibold text-green-700">通過提案</span>。</li>
+          <li>4. 通過後請至 Decision 填寫正式記錄並與任務對齊。</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
 
  <!-- DECISION TAB -->
 <div id="tab-decision" class="detail-tab-content hidden">
@@ -662,6 +742,39 @@ tailwind.config = {
   </div>
 </div>
 
+<!-- PROPOSAL EDIT MODAL -->
+<div id="proposal-edit-modal" class="fixed inset-0 z-[56] hidden modal-backdrop" style="background:rgba(15,23,42,.45)" onclick="closeProposalEditModal(event)">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl fade-in" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <div>
+          <h3 class="font-bold text-slate-900">編輯 Proposal</h3>
+          <p id="proposal-edit-meta" class="text-xs text-slate-400 mt-1">—</p>
+        </div>
+        <button type="button" onclick="closeProposalEditModal()" class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">✕</button>
+      </div>
+      <div class="px-6 py-5 space-y-4">
+        <input type="hidden" id="proposal-edit-id">
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1.5">提案摘要 / 建議</label>
+          <textarea id="proposal-edit-note" rows="5" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm resize-none leading-relaxed"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1.5">討論 URL</label>
+          <input id="proposal-edit-url" type="text" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm">
+        </div>
+      </div>
+      <div class="flex items-center justify-between gap-2 px-6 py-4 border-t border-slate-100 bg-white rounded-b-2xl">
+        <button type="button" id="proposal-delete-btn" onclick="deleteProposalItem()" class="px-4 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 text-sm font-medium transition">刪除</button>
+        <div class="flex gap-2">
+          <button type="button" id="proposal-save-btn" onclick="saveProposalEdit()" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition">儲存修改</button>
+          <button type="button" onclick="closeProposalEditModal()" class="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-medium transition">取消</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- PROBLEM CENTER MODAL -->
 <div id="problem-modal" class="fixed inset-0 z-50 hidden modal-backdrop" style="background:rgba(15,23,42,.45)" onclick="closeProblemModal(event)">
   <div class="flex items-center justify-center min-h-screen p-4">
@@ -743,6 +856,10 @@ const TASK_DELETE_URL = API_BASE + "/api/fr/DeleteTask";
 const NEW_TASK_URL = API_BASE + "/api/fr/NewTask";
 const GET_ADMIN_NAME_LIST_URL = API_BASE + "/api/fr/getAdminNameList";
 const TASK_STATE_LIST_URLS = [API_BASE + "/api/fr/getTaskStateCode", API_BASE + "/api/fr/getTaskState"];
+const NEW_PROPOSAL_URL = API_BASE + "/api/fr/NewProposal";
+const MODIFY_PROPOSAL_URL = API_BASE + "/api/fr/ModifyProposal";
+const DELETE_PROPOSAL_URL = API_BASE + "/api/fr/DeleteProposal";
+const GET_PROPOSAL_TYPE_LIST_URL = API_BASE + "/api/fr/getProposalTypeList";
 
 /** 目前頁面對應的專案 AID（來自 getProjectList 或 localStorage.projectAID） */
 let CURRENT_PROJECT_AID = "";
@@ -751,6 +868,9 @@ let backendProjectSynced = false;
 let adminNameListCache = null;
 let adminPickerMode = "taskAssignee";
 let taskStateListCache = null;
+let proposalTypeListCache = null;
+
+
 
 function getBackendTokenAndAdmin() {
   const token = localStorage.getItem("backendToken") || sessionStorage.getItem("backendToken");
@@ -785,6 +905,122 @@ function postJson(url, body) {
     if (!res.ok) throw new Error("HTTP " + res.status);
     return res.json();
   });
+}
+
+function normalizeProposalTypeItem(x) {
+  if (x == null) return null;
+  if (typeof x === "string") {
+    var s = x.trim();
+    return s ? { value: s, label: s } : null;
+  }
+  if (typeof x !== "object") return null;
+  var code = x.Code != null ? x.Code : x.code != null ? x.code : x.ProposalType != null ? x.ProposalType : x.TypeID != null ? x.TypeID : x.TypeCode != null ? x.TypeCode : x.ID != null ? x.ID : "";
+  var name = x.Name != null ? x.Name : x.name != null ? x.name : x.TypeName != null ? x.TypeName : x.Title != null ? x.Title : x.Label != null ? x.Label : "";
+  var value = String(code !== "" && code != null ? code : name).trim();
+  var label = String(name || code || value).trim();
+  if (!value && !label) return null;
+  return { value: value || label, label: label || value };
+}
+
+function extractProposalTypeArray(resp) {
+  if (!resp || typeof resp !== "object") return [];
+  var raw =
+    resp.ProposalTypeList ||
+    resp.proposalTypeList ||
+    resp.ProposalTypes ||
+    resp.Data ||
+    resp.List ||
+    resp.list;
+  if (Array.isArray(raw)) return raw;
+  if (raw && typeof raw === "object" && Array.isArray(raw.Items)) return raw.Items;
+  return [];
+}
+function getAvailableProposalTypes(list, isCeo) {
+  if (!Array.isArray(list)) return [];
+
+  if (isCeo) return list;
+
+  return list.filter(function (item) {
+    return String(item.Code || "") === "2";
+  });
+}
+async function loadProposalTypeSelect() {
+  var sel = document.getElementById("proposal-type-select");
+  var hint = document.getElementById("proposal-type-hint");
+  if (!sel) return;
+
+  var auth = getBackendTokenAndAdmin();
+  sel.innerHTML = "";
+  function addFallback() {
+    sel.innerHTML = '<option value="1">類別 1（預設）</option>';
+    if (hint) {
+      hint.textContent = "無法載入類別清單，已使用預設值。";
+      hint.classList.remove("hidden");
+    }
+  }
+
+  if (!auth) {
+    addFallback();
+    if (hint) {
+      hint.textContent = "未登入：無法取得 Proposal 類別清單，已顯示預設選項。";
+      hint.classList.remove("hidden");
+    }
+    return;
+  }
+
+  try {
+    var resp = await postJson(GET_PROPOSAL_TYPE_LIST_URL, {
+      AdminID: auth.adminID,
+      Token: auth.token,
+    });
+    var arr = extractProposalTypeArray(resp);
+    var isCeo = isProposalCeoUser();
+    var filteredArr = getAvailableProposalTypes(arr, isCeo);
+    var items = filteredArr.map(normalizeProposalTypeItem).filter(Boolean);
+    proposalTypeListCache = items;
+    if (!items.length) {
+      addFallback();
+      return;
+    }
+    items.forEach(function (it) {
+      var opt = document.createElement("option");
+      opt.value = it.value;
+      opt.textContent = it.label;
+      sel.appendChild(opt);
+    });
+    if (hint) hint.classList.add("hidden");
+  } catch (e) {
+    addFallback();
+  }
+}
+
+async function postNewProposalApi(note, url, proposalType) {
+  var auth = getBackendTokenAndAdmin();
+  if (!auth) throw new Error("尚未登入，缺少 AdminID / Token");
+  var aid = String(CURRENT_PROJECT_AID || localStorage.getItem("projectAID") || "").trim();
+  if (!aid) throw new Error("缺少專案 AID，請從 Dashboard 帶入 projectAID 或先建立專案");
+
+  var payload = {
+    AdminID: auth.adminID,
+    Token: auth.token,
+    AID: aid,
+    ProposalType: String(proposalType || "").trim(),
+    Note: String(note || "").trim(),
+    URL: String(url || "").trim(),
+  };
+
+  var resp = await postJson(NEW_PROPOSAL_URL, payload);
+  if (!isFrApiResultOk(resp)) {
+    throw new Error((resp && (resp.Message || resp.Msg || resp.message)) || "NewProposal 失敗");
+  }
+  var bidRaw = resp.BID != null ? resp.BID : resp.bid;
+  var bid = bidRaw != null && String(bidRaw).trim() !== "" ? String(bidRaw).trim() : "";
+  return { resp: resp, bid: bid };
+}
+
+function syncProposalBidHint(bid) {
+  // 需求：BID 不對使用者顯示（僅保留內部資料）
+  return;
 }
 
 function extractProjectArray(resp) {
@@ -844,6 +1080,152 @@ function resolveShareProjectUrlFromProject(selected) {
     if (u) return u;
   }
   return selected.ShareProject_URL != null ? String(selected.ShareProject_URL).trim() : "";
+}
+
+function formatProposalCheckTime(raw) {
+  if (raw == null || raw === "") return "";
+  const d = String(raw).replace(/\D/g, "");
+  if (d.length >= 14) {
+    return (
+      d.slice(0, 4) +
+      "/" +
+      d.slice(4, 6) +
+      "/" +
+      d.slice(6, 8) +
+      " " +
+      d.slice(8, 10) +
+      ":" +
+      d.slice(10, 12) +
+      ":" +
+      d.slice(12, 14)
+    );
+  }
+  if (d.length >= 8) {
+    return d.slice(0, 4) + "/" + d.slice(4, 6) + "/" + d.slice(6, 8);
+  }
+  return String(raw);
+}
+
+function isProposalActorCeo(actorStr) {
+  const s = String(actorStr || "").trim();
+  if (!s) return false;
+  if (/執行長|總經理/i.test(s)) return true;
+  const low = s.toLowerCase();
+  return low === "ceo";
+}
+
+function normalizeProposalItemAction(item, isCeo) {
+  const raw =
+    item.Action != null
+      ? item.Action
+      : item.action != null
+      ? item.action
+      : item.State != null
+      ? item.State
+      : item.ProposalState != null
+      ? item.ProposalState
+      : item.Result != null && !isCeo
+      ? item.Result
+      : "";
+  const a = String(raw).trim().toLowerCase();
+  if (a === "approved" || a === "approve" || a === "通過") return "approved";
+  if (a === "revision_required" || a === "revision" || a === "退回" || a === "reject") return "revision_required";
+  if (a === "submit" || a === "1") return "submit";
+  if (isCeo) {
+    const note = String(item.Note || item.note || "").trim();
+    if (/通過|同意|核准|立案/.test(note)) return "approved";
+    if (/退回|修改|補充|重送/.test(note)) return "revision_required";
+  }
+  return "submit";
+}
+
+/**
+ * 自 getProject 的 SingleProject.ProposalList 還原 Proposal 時間軸與狀態。
+ */
+function applyProposalListFromProject(selected) {
+  if (!selected || typeof selected !== "object") return;
+  const rawList = Array.isArray(selected.ProposalList)
+    ? selected.ProposalList
+    : Array.isArray(selected.proposalList)
+    ? selected.proposalList
+    : [];
+  const aid = String(CURRENT_PROJECT_AID || selected.AID || selected.ProjectAID || "").trim();
+
+  if (!rawList.length) {
+    PROPOSAL_REVIEW.status = "draft";
+    PROPOSAL_REVIEW.currentRound = 1;
+    PROPOSAL_REVIEW.lastActor = "—";
+    PROPOSAL_REVIEW.rounds = [];
+    if (aid) {
+      try {
+        localStorage.removeItem("proposalBID_" + aid);
+      } catch (e) {}
+    }
+    syncProposalBidHint("");
+    return;
+  }
+
+  const sorted = rawList.slice().sort(function (a, b) {
+    const ta = String((a && a.CheckTime) || (a && a.checkTime) || "").replace(/\D/g, "");
+    const tb = String((b && b.CheckTime) || (b && b.checkTime) || "").replace(/\D/g, "");
+    if (ta && tb) return ta.localeCompare(tb);
+    return 0;
+  });
+
+  let roundCounter = 0;
+  const rounds = [];
+  sorted.forEach(function (it, idx) {
+    const actor = String((it && it.Actor) || (it && it.actor) || "").trim() || "—";
+    const isCeo = isProposalActorCeo(actor);
+    if (!isCeo) roundCounter++;
+    const round = Math.max(1, roundCounter);
+    const note = String((it && it.Note) || (it && it.note) || "").trim();
+    const url = String((it && it.URL) || (it && it.url) || "").trim();
+    const bid = it && it.BID != null && String(it.BID).trim() !== "" ? String(it.BID).trim() : "";
+    const proposalType = String((it && it.ProposalType) || (it && it.proposalType) || "").trim();
+    const action = normalizeProposalItemAction(it, isCeo);
+    const createdAt = formatProposalCheckTime((it && it.CheckTime) || (it && it.checkTime));
+
+    const base = {
+      id: "p-api-" + idx,
+      round: round,
+      role: isCeo ? "ceo" : "proposer",
+      url: url,
+      actor: actor,
+      createdAt: createdAt || "—",
+      action: action,
+      bid: bid || undefined,
+      proposalType: proposalType || undefined,
+    };
+    if (isCeo) {
+      base.suggestion = note;
+    } else {
+      base.summary = note;
+    }
+    rounds.push(base);
+  });
+
+  PROPOSAL_REVIEW.rounds = rounds;
+
+  const last = rounds[rounds.length - 1];
+  PROPOSAL_REVIEW.currentRound = last ? last.round : 1;
+  PROPOSAL_REVIEW.lastActor = last ? last.actor : "—";
+
+  if (last && last.role === "ceo") {
+    if (last.action === "approved") PROPOSAL_REVIEW.status = "approved";
+    else if (last.action === "revision_required") PROPOSAL_REVIEW.status = "revision_required";
+    else PROPOSAL_REVIEW.status = "under_review";
+  } else {
+    PROPOSAL_REVIEW.status = "under_review";
+  }
+
+  var hintBid = last && last.bid ? last.bid : "";
+  if (hintBid && aid) {
+    try {
+      localStorage.setItem("proposalBID_" + aid, hintBid);
+    } catch (e) {}
+  }
+  syncProposalBidHint(hintBid);
 }
 
 async function deleteFileFromProject(bid) {
@@ -1654,6 +2036,11 @@ async function initProjectFromBackendIfPossible() {
     }
   } catch (e) {}
 
+  applyProposalListFromProject(selected);
+  if (typeof updateProposalUi === "function") {
+    updateProposalUi();
+  }
+
   // 若後端有傳 KPIList，就不額外接 UI（目前 KPI 畫面是靜態）
   backendProjectSynced = true;
 }
@@ -1672,6 +2059,16 @@ let DECISION_CHATGPT = {
   shareProjectUrl: "",
   topics: []
 };
+
+/** Proposal 流程（本機 UI）；送交執行長時會呼叫 NewProposal API */
+let PROPOSAL_REVIEW = {
+  status: "draft",
+  currentRound: 1,
+  currentRole: "proposer",
+  lastActor: "—",
+  rounds: [],
+};
+let editingProposalId = "";
 
 const AV = {};
 let editingTaskCol = null;
@@ -1729,6 +2126,481 @@ function fileIcon(type){
     jpeg:'🖼️'
   };
   return map[type] || '📄';
+}
+
+function proposalStatusMeta(status) {
+  const map = {
+    draft: { badge: "status-draft", text: "" },
+    under_review: { badge: "status-under_review", text: "送交執行長" }, // Code:2
+    revision_required: { badge: "status-revision_required", text: "退回修改" }, // Code:1
+    approved: { badge: "status-approved", text: "通過提案並轉為進行中" }, // Code:3
+  };
+  return map[status] || map.draft;
+}
+
+function isProposalCeoUser() {
+  const adminId = String(localStorage.getItem("adminID") || sessionStorage.getItem("adminID") || "").trim().toLowerCase();
+  return adminId === "jason";
+}
+
+function updateProposalPermissionUi() {
+  const isCeo = isProposalCeoUser();
+  const ceoBtn = document.getElementById("proposal-role-ceo");
+  const proposerBtn = document.getElementById("proposal-role-proposer");
+  const revisionBtn = document.getElementById("proposal-revision-btn");
+  const approveBtn = document.getElementById("proposal-approve-btn");
+  const submitBtn = document.getElementById("proposal-submit-btn");
+
+  if (!isCeo && PROPOSAL_REVIEW.currentRole === "ceo") {
+    PROPOSAL_REVIEW.currentRole = "proposer";
+  }
+
+  if (ceoBtn) {
+    ceoBtn.disabled = !isCeo;
+    if (!isCeo) {
+      ceoBtn.className = "proposal-role-btn border rounded-lg px-3 py-2 text-sm font-medium bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed";
+      ceoBtn.title = "僅執行長（jason）可切換";
+    } else {
+      ceoBtn.title = "";
+    }
+  }
+
+  if (proposerBtn) {
+    proposerBtn.disabled = false;
+  }
+
+  if (revisionBtn) revisionBtn.classList.toggle("hidden", !isCeo);
+  if (approveBtn) approveBtn.classList.toggle("hidden", !isCeo);
+  if (submitBtn) submitBtn.classList.remove("hidden");
+}
+
+function setProposalRole(role) {
+  if (role === "ceo" && !isProposalCeoUser()) {
+    PROPOSAL_REVIEW.currentRole = "proposer";
+    updateProposalPermissionUi();
+    showToast("僅執行長（jason）可切換為執行長角色", "warn");
+    return;
+  }
+  PROPOSAL_REVIEW.currentRole = role;
+  const proposerBtn = document.getElementById("proposal-role-proposer");
+  const ceoBtn = document.getElementById("proposal-role-ceo");
+  const labelEl = document.getElementById("proposal-summary-label");
+  if (proposerBtn) {
+    proposerBtn.className =
+      "proposal-role-btn border rounded-lg px-3 py-2 text-sm font-medium " +
+      (role === "proposer" ? "bg-blue-50 text-blue-600 border-blue-200" : "bg-white text-slate-600 border-slate-200");
+  }
+  if (ceoBtn) {
+    ceoBtn.className =
+      "proposal-role-btn border rounded-lg px-3 py-2 text-sm font-medium " +
+      (role === "ceo" ? "bg-blue-50 text-blue-600 border-blue-200" : "bg-white text-slate-600 border-slate-200");
+  }
+  if (labelEl) labelEl.textContent = role === "proposer" ? "提案摘要" : "提案建議";
+  updateProposalPermissionUi();
+}
+
+function renderProposalTimeline() {
+  const wrap = document.getElementById("proposal-timeline");
+  if (!wrap) return;
+  if (!PROPOSAL_REVIEW.rounds.length) {
+    wrap.innerHTML =
+      '<p class="text-sm text-slate-400 text-center py-8">尚無紀錄。送交執行長後會顯示於此。</p>';
+    return;
+  }
+  wrap.innerHTML = PROPOSAL_REVIEW.rounds
+    .map(function (item) {
+      const isCeo = item.role === "ceo";
+      const statusPill =
+        item.action === "approved"
+          ? '<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">通過</span>'
+          : item.action === "revision_required"
+          ? '<span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">需修改</span>'
+          : '<span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-semibold">送審</span>';
+      const typeLine =
+        item.proposalType
+          ? '<p class="text-xs text-slate-400">ProposalType：' + item.proposalType + "</p>"
+          : "";
+      return (
+        '<div class="border border-slate-200 rounded-xl p-4 ' +
+        (isCeo ? "bg-amber-50/50" : "bg-slate-50/60") +
+        '">' +
+        '<div class="flex items-start justify-between gap-3 mb-2">' +
+        "<div>" +
+        '<div class="flex items-center gap-2 flex-wrap">' +
+        '<span class="text-sm font-bold text-slate-800">Round ' +
+        item.round +
+        " · " +
+        (isCeo ? "執行長" : "提案人") +
+        "</span>" +
+        statusPill +
+        "</div>" +
+        '<p class="text-xs text-slate-400 mt-1">' +
+        item.actor +
+        " · " +
+        item.createdAt +
+        "</p>" +
+        typeLine +
+        "</div>" +
+        '<div class="flex items-center gap-2 whitespace-nowrap">' +
+        '<button type="button" onclick="openProposalEditModal(\'' +
+        item.id +
+        '\')" class="text-xs border border-slate-200 text-slate-600 hover:bg-slate-50 px-2.5 py-1 rounded-lg transition">編輯</button>' +
+        '<a href="' +
+        (item.url || "#") +
+        '" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline">查看討論</a>' +
+        "</div>" +
+        "</div>" +
+        '<div class="text-sm text-slate-700 leading-relaxed whitespace-pre-line">' +
+        (item.summary || item.suggestion || "") +
+        "</div>" +
+        "</div>"
+      );
+    })
+    .join("");
+}
+
+function updateProposalUi() {
+  updateProposalPermissionUi();
+  const meta = proposalStatusMeta(PROPOSAL_REVIEW.status);
+  const pill = document.getElementById("proposal-status-pill");
+  const thread = document.getElementById("proposal-thread-status");
+  if (pill) {
+    if (PROPOSAL_REVIEW.status === "draft" || !meta.text) {
+      pill.classList.add("hidden");
+    } else {
+      pill.classList.remove("hidden");
+      pill.className = meta.badge + " px-2.5 py-1 rounded-full font-semibold";
+      pill.textContent = meta.text;
+    }
+  }
+  if (thread) {
+    if (PROPOSAL_REVIEW.status === "draft" || !meta.text) {
+      thread.classList.add("hidden");
+    } else {
+      thread.classList.remove("hidden");
+      thread.className = meta.badge + " text-xs px-2.5 py-1 rounded-full font-semibold";
+      thread.textContent = meta.text;
+    }
+  }
+  const roundText = PROPOSAL_REVIEW.currentRound ? "Round " + PROPOSAL_REVIEW.currentRound : "Round 1";
+  const roundEl = document.getElementById("proposal-round-badge");
+  if (roundEl) roundEl.textContent = roundText;
+  const actorEl = document.getElementById("proposal-last-actor");
+  if (actorEl) actorEl.textContent = PROPOSAL_REVIEW.lastActor || "—";
+  const nextEl = document.getElementById("proposal-next-step");
+  if (nextEl) {
+    nextEl.textContent =
+      PROPOSAL_REVIEW.status === "approved"
+        ? "執行長已通過，可至 Decision 填寫正式記錄。"
+        : PROPOSAL_REVIEW.status === "revision_required"
+        ? "待提案人補充修正內容後再次送審。"
+        : PROPOSAL_REVIEW.status === "under_review"
+        ? "待執行長審核本輪提案內容。"
+        : "請提案人選擇類別並填寫摘要與 URL 後送交執行長。";
+  }
+  renderProposalTimeline();
+}
+
+async function submitProposalRound() {
+  if (PROPOSAL_REVIEW.currentRole !== "proposer") {
+    showToast("請先切換為提案人角色", "warn");
+    return;
+  }
+  const summaryEl = document.getElementById("proposal-summary-input");
+  const urlEl = document.getElementById("proposal-url-input");
+  const typeSel = document.getElementById("proposal-type-select");
+  const summary = summaryEl ? summaryEl.value.trim() : "";
+  const url = urlEl ? urlEl.value.trim() : "";
+  const proposalType = typeSel ? String(typeSel.value || "").trim() : "";
+
+  if (!summary || !url) {
+    showToast("請填寫提案摘要與討論 URL", "warn");
+    return;
+  }
+  if (!proposalType) {
+    showToast("請選擇 Proposal 類別", "warn");
+    return;
+  }
+
+  const btn = document.getElementById("proposal-submit-btn");
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.add("opacity-60", "cursor-wait");
+  }
+
+  let apiBid = "";
+  const auth = getBackendTokenAndAdmin();
+  const aid = String(CURRENT_PROJECT_AID || localStorage.getItem("projectAID") || "").trim();
+  if (auth && aid) {
+    try {
+      const out = await postNewProposalApi(summary, url, proposalType);
+      apiBid = out.bid || "";
+      if (apiBid) {
+        try {
+          localStorage.setItem("proposalBID_" + aid, apiBid);
+        } catch (e) {}
+      }
+      syncProposalBidHint(apiBid);
+      showToast("已送交執行長審核");
+    } catch (e) {
+      showToast(e && e.message ? e.message : "NewProposal 失敗", "warn");
+      if (btn) {
+        btn.disabled = false;
+        btn.classList.remove("opacity-60", "cursor-wait");
+      }
+      return;
+    }
+  } else {
+    showToast("未登入或缺少 AID：僅更新本機示範，未呼叫 API", "warn");
+  }
+
+  const maxRound = PROPOSAL_REVIEW.rounds.filter(function (r) {
+    return r.role === "proposer";
+  }).length;
+  const round =
+    PROPOSAL_REVIEW.status === "revision_required"
+      ? PROPOSAL_REVIEW.currentRound + 1
+      : Math.max(1, maxRound + 1);
+  PROPOSAL_REVIEW.currentRound = round;
+  PROPOSAL_REVIEW.status = "under_review";
+  PROPOSAL_REVIEW.lastActor = "提案人";
+  PROPOSAL_REVIEW.rounds.push({
+    id: "p" + Date.now(),
+    round: round,
+    role: "proposer",
+    summary: summary,
+    url: url,
+    actor: "提案人",
+    createdAt: new Date().toLocaleString("zh-TW", { hour12: false }),
+    action: "submit",
+    bid: apiBid || undefined,
+  });
+  if (summaryEl) summaryEl.value = "";
+  if (urlEl) urlEl.value = "";
+  updateProposalUi();
+  if (btn) {
+    btn.disabled = false;
+    btn.classList.remove("opacity-60", "cursor-wait");
+  }
+}
+
+function submitCeoFeedback(action) {
+  if (!isProposalCeoUser()) {
+    showToast("僅執行長（jason）可執行此操作", "warn");
+    return;
+  }
+  if (PROPOSAL_REVIEW.currentRole !== "ceo") {
+    showToast("請先切換為執行長角色", "warn");
+    return;
+  }
+  const suggestion = document.getElementById("proposal-summary-input").value.trim();
+  const url = document.getElementById("proposal-url-input").value.trim();
+  if (!suggestion || !url) {
+    showToast("請填寫提案建議與討論 URL", "warn");
+    return;
+  }
+  const round = PROPOSAL_REVIEW.currentRound || 1;
+  PROPOSAL_REVIEW.status = action;
+  PROPOSAL_REVIEW.lastActor = "執行長";
+  PROPOSAL_REVIEW.rounds.push({
+    id: "p" + Date.now(),
+    round: round,
+    role: "ceo",
+    suggestion: suggestion,
+    url: url,
+    actor: "執行長",
+    createdAt: new Date().toLocaleString("zh-TW", { hour12: false }),
+    action: action,
+  });
+  document.getElementById("proposal-summary-input").value = "";
+  document.getElementById("proposal-url-input").value = "";
+
+  if (action === "approved") {
+    projectStatus = "in_progress";
+    applyProjectStatusBadge(projectStatus);
+    showToast("執行長已通過（本機流程）");
+  } else {
+    showToast("已退回提案人修改");
+  }
+  updateProposalUi();
+}
+
+function recalcProposalReviewMeta() {
+  const rounds = Array.isArray(PROPOSAL_REVIEW.rounds) ? PROPOSAL_REVIEW.rounds : [];
+  const lastBid = rounds.length ? (rounds[rounds.length - 1].bid || "") : "";
+  syncProposalBidHint(lastBid);
+  if (!rounds.length) {
+    PROPOSAL_REVIEW.status = "draft";
+    PROPOSAL_REVIEW.currentRound = 1;
+    PROPOSAL_REVIEW.lastActor = "—";
+    return;
+  }
+  const last = rounds[rounds.length - 1];
+  PROPOSAL_REVIEW.currentRound = last.round || 1;
+  PROPOSAL_REVIEW.lastActor = last.actor || "—";
+  if (last.role === "ceo") {
+    if (last.action === "approved") PROPOSAL_REVIEW.status = "approved";
+    else if (last.action === "revision_required") PROPOSAL_REVIEW.status = "revision_required";
+    else PROPOSAL_REVIEW.status = "under_review";
+  } else {
+    PROPOSAL_REVIEW.status = "under_review";
+  }
+}
+
+async function modifyProposalApi(bid, note, url) {
+  const auth = getBackendTokenAndAdmin();
+  if (!auth) throw new Error("尚未登入，缺少 AdminID / Token");
+  const aid = String(CURRENT_PROJECT_AID || localStorage.getItem("projectAID") || "").trim();
+  if (!aid) throw new Error("缺少專案 AID");
+  const b = String(bid || "").trim();
+  if (!b) throw new Error("缺少 Proposal BID");
+  const resp = await postJson(MODIFY_PROPOSAL_URL, {
+    AdminID: auth.adminID,
+    Token: auth.token,
+    AID: aid,
+    BID: b,
+    Note: String(note || "").trim(),
+    URL: String(url || "").trim(),
+  });
+  if (!isFrApiResultOk(resp)) {
+    throw new Error((resp && (resp.Message || resp.Msg || resp.message)) || "ModifyProposal 失敗");
+  }
+  return resp;
+}
+
+async function deleteProposalApi(bid) {
+  const auth = getBackendTokenAndAdmin();
+  if (!auth) throw new Error("尚未登入，缺少 AdminID / Token");
+  const aid = String(CURRENT_PROJECT_AID || localStorage.getItem("projectAID") || "").trim();
+  if (!aid) throw new Error("缺少專案 AID");
+  const b = String(bid || "").trim();
+  if (!b) throw new Error("缺少 Proposal BID");
+  const resp = await postJson(DELETE_PROPOSAL_URL, {
+    AdminID: auth.adminID,
+    Token: auth.token,
+    AID: aid,
+    BID: b,
+  });
+  if (!isFrApiResultOk(resp)) {
+    throw new Error((resp && (resp.Message || resp.Msg || resp.message)) || "DeleteProposal 失敗");
+  }
+  return resp;
+}
+
+function openProposalEditModal(itemId) {
+  const item = (PROPOSAL_REVIEW.rounds || []).find(function (r) {
+    return String(r.id) === String(itemId);
+  });
+  if (!item) {
+    showToast("找不到 Proposal 項目", "warn");
+    return;
+  }
+  if (!item.bid) {
+    showToast("此筆缺少 BID，無法修改/刪除", "warn");
+    return;
+  }
+
+  editingProposalId = String(item.id);
+  const modal = document.getElementById("proposal-edit-modal");
+  const idEl = document.getElementById("proposal-edit-id");
+  const noteEl = document.getElementById("proposal-edit-note");
+  const urlEl = document.getElementById("proposal-edit-url");
+  const metaEl = document.getElementById("proposal-edit-meta");
+  if (idEl) idEl.value = editingProposalId;
+  if (noteEl) noteEl.value = item.summary || item.suggestion || "";
+  if (urlEl) urlEl.value = item.url || "";
+  if (metaEl) metaEl.textContent = "Round " + (item.round || 1) + " · BID " + item.bid + " · " + (item.actor || "—");
+  if (modal) modal.classList.remove("hidden");
+}
+
+function closeProposalEditModal(evt) {
+  if (evt && evt.target && evt.target.id !== "proposal-edit-modal") return;
+  const modal = document.getElementById("proposal-edit-modal");
+  if (modal) modal.classList.add("hidden");
+  editingProposalId = "";
+}
+
+async function saveProposalEdit() {
+  const itemId = editingProposalId || (document.getElementById("proposal-edit-id") || {}).value || "";
+  const noteEl = document.getElementById("proposal-edit-note");
+  const urlEl = document.getElementById("proposal-edit-url");
+  const note = noteEl ? noteEl.value.trim() : "";
+  const url = urlEl ? urlEl.value.trim() : "";
+  const item = (PROPOSAL_REVIEW.rounds || []).find(function (r) {
+    return String(r.id) === String(itemId);
+  });
+  if (!item) {
+    showToast("找不到 Proposal 項目", "warn");
+    return;
+  }
+  if (!item.bid) {
+    showToast("此筆缺少 BID，無法修改", "warn");
+    return;
+  }
+  if (!note || !url) {
+    showToast("請填寫摘要與討論 URL", "warn");
+    return;
+  }
+
+  const btn = document.getElementById("proposal-save-btn");
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.add("opacity-60", "cursor-wait");
+  }
+  try {
+    await modifyProposalApi(item.bid, note, url);
+    if (item.role === "ceo") item.suggestion = note;
+    else item.summary = note;
+    item.url = url;
+    updateProposalUi();
+    closeProposalEditModal();
+    showToast("Proposal 已更新");
+  } catch (e) {
+    showToast(e && e.message ? e.message : "ModifyProposal 失敗", "warn");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.classList.remove("opacity-60", "cursor-wait");
+    }
+  }
+}
+
+async function deleteProposalItem() {
+  const itemId = editingProposalId || (document.getElementById("proposal-edit-id") || {}).value || "";
+  const idx = (PROPOSAL_REVIEW.rounds || []).findIndex(function (r) {
+    return String(r.id) === String(itemId);
+  });
+  if (idx < 0) {
+    showToast("找不到 Proposal 項目", "warn");
+    return;
+  }
+  const item = PROPOSAL_REVIEW.rounds[idx];
+  if (!item.bid) {
+    showToast("此筆缺少 BID，無法刪除", "warn");
+    return;
+  }
+  if (!confirm("確定要刪除此 Proposal 嗎？")) return;
+
+  const btn = document.getElementById("proposal-delete-btn");
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.add("opacity-60", "cursor-wait");
+  }
+  try {
+    await deleteProposalApi(item.bid);
+    PROPOSAL_REVIEW.rounds.splice(idx, 1);
+    recalcProposalReviewMeta();
+    updateProposalUi();
+    closeProposalEditModal();
+    showToast("Proposal 已刪除");
+  } catch (e) {
+    showToast(e && e.message ? e.message : "DeleteProposal 失敗", "warn");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.classList.remove("opacity-60", "cursor-wait");
+    }
+  }
 }
 
 function setDetailTab(btn, tab) {
@@ -3024,6 +3896,15 @@ document.addEventListener('DOMContentLoaded', () => {
         applyFallbackDemoHeader();
       }
       initTaskStateSelectReferenceData().catch(function () {});
+      loadProposalTypeSelect().catch(function () {});
+      updateProposalUi();
+      setProposalRole(PROPOSAL_REVIEW.currentRole || "proposer");
+      try {
+        var aidPb = (CURRENT_PROJECT_AID || localStorage.getItem("projectAID") || "").trim();
+        var lastBid = aidPb ? (localStorage.getItem("proposalBID_" + aidPb) || "").trim() : "";
+        if (lastBid) syncProposalBidHint(lastBid);
+      } catch (e) {}
+
       renderKanban();
       renderFiles();
 

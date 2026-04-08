@@ -31,7 +31,6 @@
   @keyframes pRed{0%,100%{opacity:1}50%{opacity:.6}}
 
   .status-draft{background:#f1f5f9;color:#64748b}
-  .status-opening{background:#ede9fe;color:#6d28d9}
   .status-proposal{background:#ede9fe;color:#6d28d9}
   .status-ceo_feedback{background:#fff7ed;color:#c2410c}
   .status-in_progress{background:#dbeafe;color:#1d4ed8}
@@ -65,8 +64,31 @@
 </head>
 <body class="bg-slate-50 text-slate-800">
 
-<div id="projectos-header"></div>
-<script src="./shared-header.js"></script>
+<!-- NAV -->
+<nav class="bg-white border-b border-slate-200 sticky top-0 z-40">
+  <div class="max-w-screen-xl mx-auto px-4 flex items-center h-14 gap-4">
+    <a href="dashboard.html" class="flex items-center gap-2 font-bold text-blue-600 text-lg tracking-tight hover:opacity-80">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
+      </svg>
+      ProjectOS
+    </a>
+    <span class="text-xs text-slate-300 font-light">AI Decision OS</span>
+    <div class="flex-1"></div>
+    <a href="dashboard.html" class="text-sm text-blue-600 font-medium px-2 py-1 rounded-md hover:bg-blue-50 transition">Dashboard</a>
+    <a href="create-project.html" class="text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition">建立新專案</a>
+    <a href="task-tracking.html" class="text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition">Task 追蹤</a>
+    <button onclick="toggleNotif()" class="relative w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100 transition">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+      </svg>
+      <span class="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center font-bold" style="font-size:9px">3</span>
+    </button>
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">A</div>
+    </div>
+  </div>
+</nav>
 
 <div class="max-w-screen-xl mx-auto px-4 py-5">
 
@@ -118,13 +140,11 @@
       <div class="col-span-1">狀態</div>
       <div class="col-span-2">完成率</div>
       <div class="col-span-1">優先</div>
-      <div class="col-span-1">結束日</div>
+      <div class="col-span-1">更新</div>
       <div class="col-span-1 text-center">→</div>
     </div>
 
-    <div id="project-table" class="divide-y divide-slate-50">
-      <div id="project-table-loading" class="px-3 py-10 text-center text-sm text-slate-400">載入專案清單中…</div>
-    </div>
+    <div id="project-table" class="divide-y divide-slate-50"></div>
   </div>
 </div>
 
@@ -198,371 +218,17 @@
 </div>
 
 <script>
-// ─── BACKEND API (FR) ───
-const API_BASE = "https://23700999.com:8081/PM";
-const GET_PROJECT_LIST_URL = API_BASE + "/api/fr/getProjectList";
-const GET_PROJECT_STATE_CODE_URL = API_BASE + "/api/fr/getProjectStateCode";
-
-const GET_DEPARTMENT_URL = API_BASE + "/api/fr/getDepartmentCode";
-const TASK_STATE_LIST_URLS = [
-
-  API_BASE + "/api/fr/getTaskStateCode",
-  API_BASE + "/api/fr/getTaskState"
+// ─── DATA ───
+const PROJECTS = [
+  {id:1,name:'Q2 新產品線計畫',owner:'Alice',dept:'業務發展處',status:'proposal',done:1,total:7,blocked:1,delayed:false,staleDays:0,kpiMiss:false,daysLeft:96,updated:'3小時前',url:'task-tracking.html',kpi:{metric:'月銷售量',target:100,current:45,unit:'件'},blockedTask:'完成法務審核',blockedReason:'等待法務部門回覆，已發信 3 天',blockedAssignee:'Legal',delayDays:0},
+  {id:2,name:'官網改版計畫',owner:'Bob',dept:'創新研發處',status:'review',done:8,total:10,blocked:0,delayed:false,staleDays:1,kpiMiss:false,daysLeft:10,updated:'1天前',url:'#',kpi:{metric:'上線時程',target:100,current:80,unit:'%'},blockedTask:'',blockedReason:'',blockedAssignee:'',delayDays:0},
+  {id:3,name:'Q1 活動企劃',owner:'Carol',dept:'業務發展處',status:'in_progress',done:2,total:5,blocked:1,delayed:true,staleDays:5,kpiMiss:true,daysLeft:-5,updated:'5天前',url:'#',kpi:{metric:'活動報名數',target:500,current:180,unit:'人'},blockedTask:'行銷素材製作',blockedReason:'等待設計部門交付，已催促 2 次',blockedAssignee:'Carol',delayDays:5},
+  {id:4,name:'客服系統升級',owner:'Dave',dept:'客服暨會員關係部',status:'in_progress',done:7,total:10,blocked:2,delayed:false,staleDays:14,kpiMiss:true,daysLeft:30,updated:'14天前',url:'#',kpi:{metric:'客戶滿意度',target:90,current:68,unit:'%'},blockedTask:'API整合測試',blockedReason:'外部廠商未提供測試環境',blockedAssignee:'Dave',delayDays:0},
+  {id:5,name:'供應商評估計畫',owner:'Alice',dept:'總經理室',status:'ceo_feedback',done:0,total:4,blocked:0,delayed:true,staleDays:2,kpiMiss:false,daysLeft:-1,updated:'2天前',url:'#',kpi:{metric:'評估完成率',target:100,current:25,unit:'%'},blockedTask:'',blockedReason:'',blockedAssignee:'',delayDays:1},
+  {id:6,name:'員工培訓計畫 Q2',owner:'HR',dept:'總經理室',status:'draft',done:0,total:6,blocked:0,delayed:false,staleDays:10,kpiMiss:false,daysLeft:60,updated:'10天前',url:'#',kpi:{metric:'培訓人數',target:50,current:0,unit:'人'},blockedTask:'',blockedReason:'',blockedAssignee:'',delayDays:0},
+  {id:7,name:'舊官網下架計畫',owner:'Bob',dept:'創新研發處',status:'in_progress',done:3,total:5,blocked:1,delayed:true,staleDays:3,kpiMiss:false,daysLeft:-2,updated:'3天前',url:'#',kpi:{metric:'下架完成率',target:100,current:60,unit:'%'},blockedTask:'DNS 設定變更',blockedReason:'等待 IT 部門操作',blockedAssignee:'Bob',delayDays:2},
+  {id:8,name:'年度品牌重塑',owner:'Carol',dept:'業務發展處',status:'closed',done:12,total:12,blocked:0,delayed:false,staleDays:7,kpiMiss:false,daysLeft:0,updated:'1週前',url:'#',kpi:{metric:'品牌認知度',target:85,current:87,unit:'%'},blockedTask:'',blockedReason:'',blockedAssignee:'',delayDays:0},
 ];
-
-// 預設值：API 失敗時仍可顯示基本資訊
-let DEPARTMENT_CODE_TO_NAME = {
-  "1": "業務發展處",
-  "2": "總經理室",
-  "3": "創新研發處",
-  "4": "智慧醫療業務部",
-  "5": "客服暨會員關係部",
-};
-
-// dashboard 目前以 State Code 推導專案狀態，但保留 mapping 以利後續擴充
-let TASK_STATE_CODE_TO_NAME = {};
-let PROJECT_STATE_CODE_TO_NAME = {};
-
-/** @type {Array<object>} */
-let PROJECTS = [];
-
-function getBackendTokenAndAdmin() {
-  const token = localStorage.getItem("backendToken") || sessionStorage.getItem("backendToken");
-  const adminID = localStorage.getItem("adminID") || sessionStorage.getItem("adminID");
-  if (!token || !adminID) return null;
-  return { token, adminID };
-}
-
-function postJson(url, body) {
-  if (typeof window.projectOSPostJson === "function") {
-    return window.projectOSPostJson(url, body);
-  }
-  return fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body)
-  }).then(function (res) {
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    return res.json();
-  });
-}
-
-async function fetchFirstTaskStateList(authBody) {
-  for (var i = 0; i < TASK_STATE_LIST_URLS.length; i++) {
-    var url = TASK_STATE_LIST_URLS[i];
-    try {
-      var resp = await postJson(url, authBody);
-      if (!resp) continue;
-      if (String(resp.Result).toUpperCase() !== "OK") continue;
-      if (!Array.isArray(resp.TaskStateList)) continue;
-      return resp;
-    } catch (e) {
-      // try next url
-    }
-  }
-  return null;
-}
-
-async function initReferenceData() {
-  var auth = getBackendTokenAndAdmin();
-  if (!auth) return;
-
-  var authBody = { AdminID: auth.adminID, Token: auth.token };
-
-  // 部門對照表
-  try {
-    var deptResp = await postJson(GET_DEPARTMENT_URL, authBody);
-    if (
-      deptResp &&
-      String(deptResp.Result).toUpperCase() === "OK" &&
-      Array.isArray(deptResp.DepartmentList)
-    ) {
-      var next = {};
-      deptResp.DepartmentList.forEach(function (d) {
-        if (!d) return;
-        var code = String(d.Code || "").trim();
-        var name = String(d.Name || "").trim();
-        if (!code || !name) return;
-        next[code] = name;
-      });
-      DEPARTMENT_CODE_TO_NAME = next;
-    }
-  } catch (e) {
-    // keep defaults
-  }
-
-  // 任務狀態列表（目前不直接用於 UI 展示）
-  try {
-    var taskResp = await fetchFirstTaskStateList(authBody);
-    if (
-      taskResp &&
-      String(taskResp.Result).toUpperCase() === "OK" &&
-      Array.isArray(taskResp.TaskStateList)
-    ) {
-      var next2 = {};
-      taskResp.TaskStateList.forEach(function (st) {
-        if (!st) return;
-        var code = String(st.Code || "").trim();
-        var name = String(st.Name || "").trim();
-        if (!code || !name) return;
-        next2[code] = name;
-      });
-      TASK_STATE_CODE_TO_NAME = next2;
-    }
-  } catch (e) {
-    // keep empty
-  }
-
-  // 專案狀態列表（提案中 / 待執行長回覆 / 進行中 / Review / 完成 / 延遲 / Blocked）
-  try {
-    var projStateResp = await postJson(GET_PROJECT_STATE_CODE_URL, authBody);
-    if (
-      projStateResp &&
-      String(projStateResp.Result).toUpperCase() === "OK" &&
-      Array.isArray(projStateResp.ProjectStateList)
-    ) {
-      var next3 = {};
-      projStateResp.ProjectStateList.forEach(function (st) {
-        if (!st) return;
-        var code = String(st.Code || "").trim();
-        var name = String(st.Name || "").trim();
-        if (!code || !name) return;
-        next3[code] = name;
-      });
-      PROJECT_STATE_CODE_TO_NAME = next3;
-    }
-  } catch (e) {
-    // keep empty
-  }
-}
-
-function ymdToday() {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return "" + y + m + day;
-}
-
-function parseYmd(ymd) {
-  if (!ymd || String(ymd).length < 8) return null;
-  const s = String(ymd).replace(/\D/g, "");
-  if (s.length < 8) return null;
-  const y = parseInt(s.slice(0, 4), 10);
-  const mo = parseInt(s.slice(4, 6), 10) - 1;
-  const da = parseInt(s.slice(6, 8), 10);
-  return new Date(y, mo, da);
-}
-
-function daysBetweenYmd(a, b) {
-  const A = parseYmd(a);
-  const B = parseYmd(b);
-  if (!A || !B) return 0;
-  return Math.round((B - A) / 86400000);
-}
-
-function daysFromTodayToYmd(endYmd) {
-  return daysBetweenYmd(ymdToday(), endYmd);
-}
-
-function formatYmdSlash(ymd) {
-  var d = parseYmd(ymd);
-  if (!d) return "";
-  return (
-    d.getFullYear() +
-    "/" +
-    String(d.getMonth() + 1).padStart(2, "0") +
-    "/" +
-    String(d.getDate()).padStart(2, "0")
-  );
-}
-
-function extractProjectArray(resp) {
-  if (!resp || typeof resp !== "object") return [];
-  if (Array.isArray(resp)) return resp;
-  if (Array.isArray(resp.ProjectList)) return resp.ProjectList;
-  if (Array.isArray(resp.Data)) return resp.Data;
-  if (Array.isArray(resp.Projects)) return resp.Projects;
-  if (Array.isArray(resp.List)) return resp.List;
-  for (var k in resp) {
-    if (k === "Result" || k === "Message") continue;
-    if (Array.isArray(resp[k])) return resp[k];
-  }
-  return [];
-}
-
-function projectStateNameToInternalStatus(name, code) {
-  var n = String(name || "").trim();
-  var c = String(code || "").trim();
-  if (n === "提案中" || c === "1") return "proposal";
-  if (n === "待執行長回覆" || c === "2") return "ceo_feedback";
-  if (n === "進行中" || c === "3") return "in_progress";
-  if (n === "Review" || c === "4") return "review";
-  if (n === "完成" || c === "5") return "closed";
-  if (n === "延遲" || c === "6") return "in_progress";
-  if (n === "Blocked" || c === "7") return "in_progress";
-  return "";
-}
-
-function deriveProjectStatus(tasks) {
-  var total = tasks.length;
-  if (total === 0) return "opening";
-  var done = tasks.filter(function (t) {
-    return String(t.State) === "3";
-  }).length;
-  if (done === total) return "closed";
-  if (tasks.some(function (t) {
-    return String(t.State) === "4";
-  })) return "in_progress";
-  if (tasks.some(function (t) {
-    return String(t.State) === "2";
-  })) return "in_progress";
-  if (tasks.every(function (t) {
-    return String(t.State) === "1";
-  })) return "opening";
-  var ratio = done / total;
-  if (ratio >= 0.8 && done < total) return "review";
-  return "in_progress";
-}
-
-function countOverdueNotDone(tasks) {
-  var today = ymdToday();
-  return tasks.filter(function (t) {
-    if (String(t.State) === "3") return false;
-    var end = t.EndDate || t.StertDate;
-    return end && String(end).replace(/\D/g, "").slice(0, 8) < today;
-  }).length;
-}
-
-function firstBlockedLikeTask(tasks) {
-  var today = ymdToday();
-  for (var i = 0; i < tasks.length; i++) {
-    var t = tasks[i];
-    if (String(t.State) === "3") continue;
-    var end = t.EndDate || t.StertDate;
-    if (end && String(end).replace(/\D/g, "").slice(0, 8) < today) {
-      return {
-        task: (t.Topic || "").trim() || "任務",
-        reason: (t.Description || "").trim() || "已超過結束日仍未完成",
-        assignee: (t.ChargeMan || "").trim() || "—"
-      };
-    }
-  }
-  return { task: "", reason: "", assignee: "" };
-}
-
-function mapApiProjectToRow(raw, index) {
-  var tasks = Array.isArray(raw.TaskList) ? raw.TaskList : [];
-  var kpis = Array.isArray(raw.KPIList) ? raw.KPIList : [];
-  var deptCode = raw.Department != null ? String(raw.Department) : "";
-  var deptName = DEPARTMENT_CODE_TO_NAME[deptCode] || (deptCode ? "部門 " + deptCode : "—");
-  var total = tasks.length;
-  var done = tasks.filter(function (t) {
-    return String(t.State) === "3";
-  }).length;
-  var blocked = countOverdueNotDone(tasks);
-  var delayed = tasks.some(function (t) {
-    return String(t.State) === "4";
-  });
-  var endYmd = raw.EndDate ? String(raw.EndDate).replace(/\D/g, "").slice(0, 8) : "";
-  var projEnd = endYmd || "";
-  if (!delayed && projEnd && done < total) {
-    var dl = daysFromTodayToYmd(projEnd);
-    if (dl < 0) delayed = true;
-  }
-  var delayDays = 0;
-  if (projEnd && done < total) {
-    var dleft = daysFromTodayToYmd(projEnd);
-    if (dleft < 0) delayDays = Math.abs(dleft);
-  }
-  if (tasks.some(function (t) {
-    return String(t.State) === "4";
-  })) {
-    delayDays = Math.max(delayDays, 1);
-  }
-  var daysLeft = projEnd ? daysFromTodayToYmd(projEnd) : 90;
-  var staleDays = 0;
-  var projectStateCode = raw.State != null ? String(raw.State).trim() : "";
-  var projectStateName = PROJECT_STATE_CODE_TO_NAME[projectStateCode] || "";
-  var status = projectStateNameToInternalStatus(projectStateName, projectStateCode) || deriveProjectStatus(tasks);
-  if (!status && total === 0) status = "draft";
-  if (!status) status = "in_progress";
-  var firstKpi = kpis[0] || {};
-  var kpiMetric = (firstKpi.KPIName || "KPI").trim() || "KPI";
-  var kpiTargetStr = (firstKpi.KPITarget || "").trim();
-  var kpiNum = parseFloat(String(kpiTargetStr).replace(/[^\d.-]/g, ""));
-  var blk = firstBlockedLikeTask(tasks);
-  var name = (raw.ProjectName || "未命名專案").trim() || "未命名專案";
-  var q = encodeURIComponent(name);
-  // 專案跳轉需要用 AID 精準定位；否則可能被 task-tracking 的 localStorage 舊值覆蓋
-  var projectAID =
-    raw.AID != null ? String(raw.AID).trim() : raw.ProjectAID != null ? String(raw.ProjectAID).trim() : "";
-  return {
-    id: index + 1,
-    name: name,
-    owner: (raw.ChargeMan || "—").trim() || "—",
-    dept: deptName,
-    status: status,
-    done: done,
-    total: total,
-    blocked: blocked,
-    delayed: delayed,
-    staleDays: staleDays,
-    kpiMiss: false,
-    daysLeft: daysLeft,
-    updated: formatYmdSlash(endYmd) || "—",
-    // 需求：Dashboard 的專案跳轉統一導向 task-tracking 內頁
-    url: projectAID
-      ? "task-tracking.html?projectAID=" + encodeURIComponent(projectAID) + "&project=" + q
-      : "task-tracking.html?project=" + q,
-    kpi: {
-      metric: kpiMetric,
-      target: isNaN(kpiNum) ? 100 : kpiNum,
-      current: 0,
-      unit: ""
-    },
-    blockedTask: blk.task,
-    blockedReason: blk.reason,
-    blockedAssignee: blk.assignee,
-    delayDays: delayDays
-  };
-}
-
-function fetchProjectList() {
-  var auth = getBackendTokenAndAdmin();
-  if (!auth) {
-    window.location.href = "/projectOS/index.html";
-    return Promise.resolve();
-  }
-  var loadingEl = document.getElementById("project-table-loading");
-  if (loadingEl) loadingEl.style.display = "";
-
-  return postJson(GET_PROJECT_LIST_URL, {
-    AdminID: auth.adminID,
-    Token: auth.token
-  })
-    .then(function (data) {
-      if (data && data.Result != null && String(data.Result).toUpperCase() !== "OK") {
-        showToast("取得專案失敗：" + data.Result, "warn");
-        PROJECTS = [];
-        return;
-      }
-      var arr = extractProjectArray(data);
-      PROJECTS = arr.map(function (p, i) {
-        return mapApiProjectToRow(p, i);
-      });
-    })
-    .catch(function () {
-      showToast("無法連線取得專案清單", "warn");
-      PROJECTS = [];
-    })
-    .finally(function () {
-      if (loadingEl) loadingEl.style.display = "none";
-      renderStats();
-      renderCEOActionPanel();
-      renderProjectTable(PROJECTS);
-    });
-}
 
 // ─── ALGORITHMS ───
 function calcHealth(p) {
@@ -572,7 +238,7 @@ function calcHealth(p) {
   if (p.kpiMiss) s -= 15;
   if (p.staleDays > 14) s -= 20;
   else if (p.staleDays > 7) s -= 10;
-  const cr = p.total > 0 ? p.done / p.total : 0;
+  const cr = p.total ? p.done / p.total : 0;
   if (cr < 0.3 && p.daysLeft < 30 && p.daysLeft > 0) s -= 5;
   return Math.max(5, Math.min(100, s));
 }
@@ -662,7 +328,7 @@ let currentProjects = [];
 
 function togglePrioritySort() {
   prioritySorted = !prioritySorted;
-  document.getElementById('sort-btn').textContent = prioritySorted ? '排序：優先順序 ↓' : '排序：結束日 ↓';
+  document.getElementById('sort-btn').textContent = prioritySorted ? '排序：優先順序 ↓' : '排序：最後更新 ↓';
   renderProjectTable(currentProjects);
 }
 
@@ -670,8 +336,6 @@ function getStatusClass(status) {
   return {
     draft:'status-draft',
     opening:'status-opening',
-    proposal:'status-proposal',
-    ceo_feedback:'status-ceo_feedback',
     in_progress:'status-in_progress',
     review:'status-review',
     closed:'status-closed'
@@ -681,7 +345,6 @@ function getStatusClass(status) {
 function getStatusLabel(status) {
   return {
     draft:'草稿',
-    opening:'開案中',
     proposal:'提案中',
     ceo_feedback:'待執行長回覆',
     in_progress:'進行中',
@@ -690,44 +353,12 @@ function getStatusLabel(status) {
   }[status] || status;
 }
 
-function renderCEOActionPanel() {
-  const pending = PROJECTS.filter(p => p.status === 'ceo_feedback');
-  const countEl = document.getElementById('ceo-pending-count');
-  const listEl = document.getElementById('ceo-action-list');
-  if (!countEl || !listEl) return;
-  countEl.textContent = `${pending.length} 件待回覆`;
-  if (!pending.length) {
-    listEl.innerHTML = `<div class="col-span-full bg-white border border-orange-100 rounded-xl px-4 py-6 text-center text-sm text-slate-400">目前沒有待執行長回覆的提案</div>`;
-    return;
-  }
-  listEl.innerHTML = pending.map(p => `
-    <div class="bg-white border border-orange-200 rounded-xl p-4 flex items-start gap-3">
-      <div class="w-10 h-10 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center font-bold text-sm flex-shrink-0">${(p.owner || '—').charAt(0)}</div>
-      <div class="flex-1 min-w-0">
-        <div class="flex items-center gap-2 flex-wrap">
-          <p class="text-sm font-semibold text-slate-900 truncate">${p.name}</p>
-          <span class="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium">待執行長回覆</span>
-        </div>
-        <p class="text-xs text-slate-500 mt-1">提案人：${p.owner} · 最後更新：${p.updated}</p>
-        <p class="text-xs text-orange-700 mt-2">請確認提案摘要與討論 URL，並給予提案建議或直接通過。</p>
-      </div>
-      <a href="${p.url}" class="text-xs bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-lg font-medium transition whitespace-nowrap">立即查看</a>
-    </div>
-  `).join('');
-}
-
 function renderProjectTable(projects) {
   currentProjects = projects;
 
   const sorted = prioritySorted
     ? [...projects].sort((a, b) => calcPriority(b) - calcPriority(a))
     : projects;
-
-  if (!sorted.length) {
-    document.getElementById('project-table').innerHTML =
-      '<div class="px-3 py-12 text-center text-sm text-slate-400">尚無專案資料，或請確認後端已回傳列表。</div>';
-    return;
-  }
 
   const av = {
     Alice:'bg-blue-500',
@@ -738,7 +369,7 @@ function renderProjectTable(projects) {
   };
 
   document.getElementById('project-table').innerHTML = sorted.map(p => {
-    const pct = p.total ? Math.round((p.done / p.total) * 100) : 0;
+    const pct = Math.round((p.done / p.total) * 100);
     const bar = pct >= 75 ? 'bg-green-500' : pct >= 40 ? 'bg-blue-500' : 'bg-amber-500';
     const sc = getStatusClass(p.status);
     const sl = getStatusLabel(p.status);
@@ -808,7 +439,34 @@ function filterByStatus(s) {
   renderProjectTable(s ? PROJECTS.filter(p => p.status === s) : PROJECTS);
 }
 
+
+function renderCEOActionPanel() {
+  const pending = PROJECTS.filter(p => p.status === 'ceo_feedback');
+  const countEl = document.getElementById('ceo-pending-count');
+  const listEl = document.getElementById('ceo-action-list');
+  countEl.textContent = `${pending.length} 件待回覆`;
+  if (!pending.length) {
+    listEl.innerHTML = `<div class="col-span-full bg-white border border-orange-100 rounded-xl px-4 py-6 text-center text-sm text-slate-400">目前沒有待執行長回覆的提案</div>`;
+    return;
+  }
+  listEl.innerHTML = pending.map(p => `
+    <div class="bg-white border border-orange-200 rounded-xl p-4 flex items-start gap-3">
+      <div class="w-10 h-10 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center font-bold text-sm flex-shrink-0">${p.owner[0]}</div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 flex-wrap">
+          <p class="text-sm font-semibold text-slate-900 truncate">${p.name}</p>
+          <span class="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium">待執行長回覆</span>
+        </div>
+        <p class="text-xs text-slate-500 mt-1">提案人：${p.owner} · 最後更新：${p.updated}</p>
+        <p class="text-xs text-orange-700 mt-2">請確認提案摘要與討論 URL，並給予提案建議或直接通過。</p>
+      </div>
+      <a href="${p.url}" class="text-xs bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-lg font-medium transition whitespace-nowrap">立即查看</a>
+    </div>
+  `).join('');
+}
+
 // ─── NOTIFICATION ───
+
 function toggleNotif() {
   const panel = document.getElementById('notif-panel');
   const overlay = document.getElementById('notif-overlay');
@@ -837,28 +495,10 @@ function notifyOwner(name) {
 }
 
 // ─── INIT ───
-function initNavAvatar() {
-  try {
-    const el = document.getElementById('navUserAvatar');
-    if (!el) return;
-    const raw = localStorage.getItem('userData');
-    if (raw) {
-      const u = JSON.parse(raw);
-      const name = (u.Member && u.Member.Name) || u.Name || '會員';
-      el.textContent = String(name).trim().charAt(0).toUpperCase() || '?';
-      return;
-    }
-    const adminName = localStorage.getItem('adminName') || sessionStorage.getItem('adminName');
-    const adminId = localStorage.getItem('adminID') || sessionStorage.getItem('adminID');
-    const label = (adminName || adminId || '').trim();
-    if (label) el.textContent = label.charAt(0).toUpperCase() || '?';
-  } catch (e) {}
-}
-
-document.addEventListener('DOMContentLoaded', async () => {
-  initNavAvatar();
-  await initReferenceData().catch(function () {});
-  fetchProjectList();
+document.addEventListener('DOMContentLoaded', () => {
+  renderStats();
+  renderCEOActionPanel();
+  renderProjectTable(PROJECTS);
 });
 </script>
 </body>

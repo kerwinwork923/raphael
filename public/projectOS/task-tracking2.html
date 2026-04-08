@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProjectOS — Decision → Execution → Learning</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        brand: {
+          50:'#f0f7ff',
+          100:'#e0efff',
+          500:'#3b82f6',
+          600:'#2563eb',
+          700:'#1d4ed8'
+        }
+      }
+    }
+  }
+}
+</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  *{font-family:'Inter',sans-serif;}
+  .fade-in{animation:fadeIn .25s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .status-draft{background:#f1f5f9;color:#64748b}
+  .status-under_review{background:#ede9fe;color:#7c3aed}
+  .status-revision_required{background:#fff7ed;color:#c2410c}
+  .status-approved{background:#dcfce7;color:#15803d}
+  .status-in_progress{background:#dbeafe;color:#1d4ed8}
+  .status-review{background:#fef3c7;color:#b45309}
+  .status-closed{background:#dcfce7;color:#15803d}
+  .risk-pulse{animation:rPulse 2s infinite;}
+  @keyframes rPulse{0%,100%{opacity:1}50%{opacity:.5}}
+  textarea:focus,input:focus,select:focus{outline:none;box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-track{background:#f1f5f9}
+  ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+  .kanban-col{min-height:200px;}
+  .modal-backdrop{backdrop-filter:blur(2px);}
+  .desc-clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .progress-bar{transition:width .6s ease;}
+  .kpi-bar{transition:width .8s ease;}
+  .urgency-overdue{border-left:3px solid #ef4444!important;background:#fff5f5!important;}
+  .urgency-today{border-left:3px solid #f97316!important;background:#fffbf5!important;}
+  .urgency-soon{border-left:3px solid #eab308!important;}
+  .confetti-piece{position:fixed;width:8px;height:8px;border-radius:2px;animation:confettiFall 1.6s ease-in forwards;pointer-events:none;z-index:9999;}
+  @keyframes confettiFall{0%{transform:translateY(-80px) rotate(0deg) scale(1);opacity:1}100%{transform:translateY(100vh) rotate(720deg) scale(.5);opacity:0}}
+  .kanban-card{transition:transform .15s,box-shadow .15s;}
+  .kanban-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.1);}
+  .health-ring{transform:rotate(-90deg);}
+  .problem-modal{animation:modalIn .25s ease;}
+  @keyframes modalIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+  .detail-tab-content.hidden{display:none;}
+  .drop-zone-active{border-color:#3b82f6 !important;background:#eff6ff;}
+  .file-item{animation:fadeIn .2s ease;}
+   .modal-body-scroll {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+</style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+<nav class="bg-white border-b border-slate-200 sticky top-0 z-40">
+  <div class="max-w-screen-xl mx-auto px-4 flex items-center h-14 gap-4">
+    <a href="dashboard.html" class="flex items-center gap-2 font-bold text-blue-600 text-lg tracking-tight hover:opacity-80">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
+      </svg>
+      ProjectOS
+    </a>
+    <div class="flex-1"></div>
+    <a href="dashboard.html" class="text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition">Dashboard</a>
+    <a href="create-project.html" class="text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition">建立新專案</a>
+    <a href="task-tracking.html" class="text-sm text-blue-600 font-medium px-2 py-1 rounded-md hover:bg-blue-50 transition">Task 追蹤</a>
+    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">A</div>
+  </div>
+</nav>
+
+<div class="max-w-screen-xl mx-auto px-4 py-5">
+
+  <!-- PROJECT HEADER -->
+  <div class="flex flex-wrap items-start gap-3 mb-4">
+    <a href="dashboard.html" class="flex items-center gap-1 text-sm text-slate-500 hover:text-blue-600 transition mt-1">← 返回</a>
+    <div class="flex-1">
+      <div class="flex flex-wrap items-center gap-2">
+        <h1 class="text-xl font-extrabold text-slate-900">Q2 新產品線計畫</h1>
+        <span id="project-status-badge" class="status-in_progress text-xs px-2.5 py-1 rounded-full font-semibold">進行中</span>
+        <span class="text-xs bg-red-100 text-red-600 px-2.5 py-1 rounded-full font-semibold risk-pulse">🔴 Blocked ×1</span>
+      </div>
+      <p class="text-xs text-slate-500 mt-1">負責人：Alice Chen · 發起人：Alice Chen · 預計結案：2026-06-30</p>
+      <div class="mt-2 flex flex-wrap items-center gap-2 text-xs">
+        <span id="proposal-status-pill" class="status-approved px-2.5 py-1 rounded-full font-semibold">提案已通過</span>
+        <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium">目前輪次：<span id="proposal-round-badge">Round 2</span></span>
+        <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium">最後更新：<span id="proposal-last-actor">執行長</span></span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2 flex-wrap">
+      <a href="#" class="flex items-center gap-1 text-xs border border-slate-200 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+        </svg>
+        ShareProject
+      </a>
+      <button onclick="advanceStatus()" class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition">
+        推進至下一階段 →
+      </button>
+      <div class="bg-white border border-slate-200 rounded-xl px-3 py-2 flex items-center gap-2.5">
+        <div class="relative" style="width:40px;height:40px;">
+          <svg class="health-ring" width="40" height="40" viewBox="0 0 40 40">
+            <circle cx="20" cy="20" r="16" fill="none" stroke="#e2e8f0" stroke-width="4"/>
+            <circle id="health-ring-circle" cx="20" cy="20" r="16" fill="none" stroke="#22c55e" stroke-width="4" stroke-linecap="round" stroke-dasharray="0 100.5"/>
+          </svg>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <span id="health-score-num" class="font-extrabold" style="font-size:10px;color:#16a34a">0</span>
+          </div>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-slate-700">健康分數</p>
+          <p id="health-label" class="text-xs text-green-600 font-medium">計算中</p>
+        </div>
+      </div>
+      <button onclick="openNewTaskModal('todo')" class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2.5 rounded-lg font-medium transition">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        新增任務
+      </button>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="flex gap-1 border-b border-slate-200 mb-5">
+    <button onclick="setDetailTab(this,'proposal')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">Proposal</button>
+    <button onclick="setDetailTab(this,'decision')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">Decision</button>
+    <button onclick="setDetailTab(this,'tasks')" class="detail-tab active text-sm px-4 py-2.5 border-b-2 border-blue-600 text-blue-600 font-medium">Tasks</button>
+    <button onclick="setDetailTab(this,'kpi')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">KPI</button>
+    <button onclick="setDetailTab(this,'review')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">Review</button>
+  </div>
+
+  <!-- TASKS TAB -->
+  <div id="tab-tasks" class="detail-tab-content">
+    <div class="bg-white rounded-xl border border-slate-200 p-4 mb-4">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-sm font-bold text-slate-800">📊 KPI 追蹤</span>
+        <span class="text-xs text-slate-400 ml-auto">即時更新</span>
+      </div>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div>
+          <div class="flex justify-between text-xs mb-1.5"><span class="text-slate-600">月銷售量</span><span class="font-bold text-blue-700">45 / 100 件</span></div>
+          <div class="w-full bg-slate-100 rounded-full h-2"><div class="bg-blue-500 h-2 rounded-full kpi-bar" style="width:45%"></div></div>
+          <p class="text-xs text-slate-400 mt-1">目標達成率 45%</p>
+        </div>
+        <div>
+          <div class="flex justify-between text-xs mb-1.5"><span class="text-slate-600">新客轉換率</span><span class="font-bold text-amber-600">9% / 15%</span></div>
+          <div class="w-full bg-slate-100 rounded-full h-2"><div class="bg-amber-400 h-2 rounded-full kpi-bar" style="width:60%"></div></div>
+          <p class="text-xs text-slate-400 mt-1">目標達成率 60%</p>
+        </div>
+        <div>
+          <div class="flex justify-between text-xs mb-1.5"><span class="text-slate-600">上線時程</span><span class="font-bold text-amber-600" id="kpi-timeline-val">進行中</span></div>
+          <div class="w-full bg-slate-100 rounded-full h-2"><div id="kpi-progress-bar" class="bg-blue-400 h-2 rounded-full kpi-bar" style="width:43%"></div></div>
+          <p class="text-xs text-slate-400 mt-1" id="kpi-progress-label">任務完成 43%</p>
+        </div>
+        <div>
+          <div class="flex justify-between text-xs mb-1.5"><span class="text-slate-600">客戶滿意度</span><span class="font-bold text-green-600">目標 ≥85%</span></div>
+          <div class="w-full bg-slate-100 rounded-full h-2"><div class="bg-green-400 h-2 rounded-full kpi-bar" style="width:0%"></div></div>
+          <p class="text-xs text-slate-400 mt-1">上線後追蹤</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div class="bg-white rounded-xl border border-slate-200 p-4">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-semibold text-slate-700">整體進度</span>
+          <span id="progress-pct" class="text-sm font-bold text-blue-600">43%</span>
+        </div>
+        <div class="w-full bg-slate-100 rounded-full h-2.5 mb-2">
+          <div id="progress-bar" class="bg-blue-500 h-2.5 rounded-full progress-bar" style="width:43%"></div>
+        </div>
+        <div id="progress-summary" class="flex flex-wrap gap-3 text-xs text-slate-500"></div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-slate-200 p-4">
+        <p class="text-sm font-semibold text-slate-700 mb-2">⏰ 壓力指示</p>
+        <div class="flex gap-2">
+          <div class="flex-1 bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-center">
+            <p class="text-xs text-red-500 font-medium">今日到期</p>
+            <p class="text-xl font-extrabold text-red-600" id="count-urgent-today">0</p>
+          </div>
+          <div class="flex-1 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2 text-center">
+            <p class="text-xs text-orange-500 font-medium">3天內</p>
+            <p class="text-xl font-extrabold text-orange-600" id="count-urgent-soon">0</p>
+          </div>
+          <div class="flex-1 bg-red-50 border border-red-300 rounded-lg px-3 py-2 text-center">
+            <p class="text-xs text-red-600 font-bold risk-pulse">已延遲</p>
+            <p class="text-xl font-extrabold text-red-700" id="count-overdue">0</p>
+          </div>
+          <div class="flex-1 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2 text-center">
+            <p class="text-xs text-orange-500 font-medium">Blocked</p>
+            <p class="text-xl font-extrabold text-orange-600" id="count-blocked-summary">0</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div class="bg-slate-50 rounded-xl border border-slate-200 p-3">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-slate-400"></div><span class="text-xs font-bold text-slate-600 uppercase tracking-wide">待辦</span></div>
+          <span id="count-todo" class="text-xs bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full font-bold">0</span>
+        </div>
+        <div id="col-todo" class="space-y-2 kanban-col"></div>
+        <button onclick="openNewTaskModal('todo')" class="mt-3 w-full text-xs border border-dashed border-slate-300 text-slate-400 hover:text-blue-500 hover:border-blue-300 py-2 rounded-lg transition">+ 新增任務</button>
+      </div>
+
+      <div class="bg-blue-50 rounded-xl border border-blue-200 p-3">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div><span class="text-xs font-bold text-blue-700 uppercase tracking-wide">進行中</span></div>
+          <span id="count-doing" class="text-xs bg-blue-200 text-blue-700 px-1.5 py-0.5 rounded-full font-bold">0</span>
+        </div>
+        <div id="col-doing" class="space-y-2 kanban-col"></div>
+      </div>
+
+      <div class="bg-green-50 rounded-xl border border-green-200 p-3">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-green-500"></div><span class="text-xs font-bold text-green-700 uppercase tracking-wide">完成</span></div>
+          <span id="count-done" class="text-xs bg-green-200 text-green-700 px-1.5 py-0.5 rounded-full font-bold">0</span>
+        </div>
+        <div id="col-done" class="space-y-2 kanban-col"></div>
+      </div>
+
+      <div class="bg-red-50 rounded-xl border border-red-200 p-3">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-red-500 risk-pulse"></div><span class="text-xs font-bold text-red-700 uppercase tracking-wide">Blocked</span></div>
+          <span id="count-blocked" class="text-xs bg-red-200 text-red-700 px-1.5 py-0.5 rounded-full font-bold">0</span>
+        </div>
+        <div id="col-blocked" class="space-y-2 kanban-col"></div>
+        <button onclick="openNewTaskModal('blocked')" class="mt-3 w-full text-xs border border-dashed border-red-300 text-red-400 hover:text-red-600 hover:border-red-400 py-2 rounded-lg transition">+ 回報 Blocked</button>
+      </div>
+    </div>
+  </div>
+
+ 
+<!-- PROPOSAL TAB -->
+<div id="tab-proposal" class="detail-tab-content hidden">
+  <div class="grid grid-cols-1 xl:grid-cols-[1.35fr_.9fr] gap-4 mb-4">
+    <div class="bg-white rounded-xl border border-slate-200 p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="font-semibold flex items-center gap-2">
+            <span class="w-2 h-2 bg-violet-500 rounded-full inline-block"></span>
+            Proposal Review Timeline
+          </h3>
+          <p class="text-xs text-slate-400 mt-1">提案人與執行長的往返確認紀錄，通過後才進入正式 Decision。</p>
+        </div>
+        <span id="proposal-thread-status" class="status-approved text-xs px-2.5 py-1 rounded-full font-semibold">已通過</span>
+      </div>
+      <div id="proposal-timeline" class="space-y-3"></div>
+    </div>
+
+    <div class="space-y-4">
+      <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <h3 class="font-semibold mb-4 flex items-center gap-2">
+          <span class="w-2 h-2 bg-blue-500 rounded-full inline-block"></span>
+          Proposal 操作
+        </h3>
+        <div class="grid grid-cols-1 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">Proposal 類別</label>
+            <select id="proposal-type-select" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 bg-white">
+              <option value="">載入中…</option>
+            </select>
+            <p id="proposal-type-hint" class="text-xs text-slate-400 mt-1 hidden"></p>
+          </div>
+          <div>
+            <label id="proposal-summary-label" class="block text-xs font-semibold text-slate-500 mb-1.5">提案摘要</label>
+            <textarea id="proposal-summary-input" rows="5" placeholder="請輸入本輪提案摘要或執行長建議..." class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm resize-none leading-relaxed"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">討論 URL</label>
+            <input id="proposal-url-input" type="text" placeholder="https://chatgpt.com/share/..." class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">目前角色</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" id="proposal-role-proposer" onclick="setProposalRole('proposer')" class="proposal-role-btn bg-blue-50 text-blue-600 border border-blue-200 rounded-lg px-3 py-2 text-sm font-medium">提案人</button>
+              <button type="button" id="proposal-role-ceo" onclick="setProposalRole('ceo')" class="proposal-role-btn bg-white text-slate-600 border border-slate-200 rounded-lg px-3 py-2 text-sm font-medium">執行長</button>
+            </div>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-3 border border-slate-200">
+            <p class="text-xs text-slate-500 mb-1">目前流程判斷</p>
+            <p id="proposal-next-step" class="text-sm font-semibold text-slate-800">執行長已通過，專案可進行。</p>
+          </div>
+          <p id="proposal-bid-hint" class="text-xs text-slate-500 hidden"></p>
+          <div id="proposal-action-row" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button type="button" id="proposal-submit-btn" onclick="submitProposalRound()" class="bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-sm font-semibold transition">送交執行長</button>
+            <button type="button" onclick="submitCeoFeedback('revision_required')" class="border border-amber-200 text-amber-700 hover:bg-amber-50 py-2.5 rounded-lg text-sm font-semibold transition">退回修改</button>
+            <button type="button" onclick="submitCeoFeedback('approved')" class="sm:col-span-2 bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-lg text-sm font-semibold transition">通過提案並轉為進行中</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <h3 class="font-semibold mb-3">流程規則</h3>
+        <ul class="text-sm text-slate-600 space-y-2 leading-relaxed">
+          <li>1. 提案人先提供 <span class="font-semibold text-slate-800">提案摘要 + 討論 URL</span>。</li>
+          <li>2. 執行長回覆 <span class="font-semibold text-slate-800">提案建議 + 討論 URL</span>。</li>
+          <li>3. 可重複多輪，直到執行長按下 <span class="font-semibold text-green-700">通過提案</span>。</li>
+          <li>4. 通過後系統自動把專案狀態切換為 <span class="font-semibold text-blue-700">進行中</span>，Decision 成為正式記錄。</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DECISION TAB -->
+<div id="tab-decision" class="detail-tab-content hidden">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+    
+    <!-- LEFT -->
+    <div class="bg-white rounded-xl border border-slate-200 p-5">
+      <h3 class="font-semibold mb-4 flex items-center gap-2">
+        <span class="w-2 h-2 bg-purple-500 rounded-full inline-block"></span>
+        Decision 記錄
+      </h3>
+
+      <div class="space-y-4">
+        <!-- ChatGPT ShareProject URL -->
+        <div>
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">ChatGPT ShareProject URL</p>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input
+              id="decision-shareproject-url"
+              type="text"
+              placeholder="https://chatgpt.com/share/..."
+              class="flex-1 border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:border-blue-400 transition"
+            >
+            <a
+              id="decision-shareproject-link"
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center justify-center px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 transition whitespace-nowrap"
+            >
+              前往討論
+            </a>
+          </div>
+          <p class="text-xs text-slate-400 mt-1">提供員工連回 ChatGPT ShareProject 討論區</p>
+        </div>
+
+        <!-- Important discussion topics -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide">重要討論主題 URL</p>
+            <button
+              type="button"
+              onclick="addDecisionTopicRow()"
+              class="text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 px-2.5 py-1 rounded-lg font-medium transition"
+            >
+              + 新增主題
+            </button>
+          </div>
+
+          <div id="decision-topic-list" class="space-y-2">
+            <!-- JS render rows here -->
+          </div>
+
+          <div class="mt-2 text-xs text-slate-400">
+            可新增多筆重要的 ChatGPT 討論內容，並連結到對應 Task
+          </div>
+        </div>
+
+        <!-- Project background -->
+        <div>
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">專案背景</p>
+          <textarea
+            id="decision-background"
+            class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm resize-none leading-relaxed"
+            rows="4"
+          >本專案目標為建立 Q2 新產品線，聚焦新客獲取、通路上架與上市節奏控制，並透過跨部門協作降低法務與開發阻塞。</textarea>
+        </div>
+
+        <!-- Core decision -->
+        <div>
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">核心決策</p>
+          <textarea
+            id="decision-core"
+            class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm resize-none leading-relaxed"
+            rows="5"
+          >1. 先完成市場驗證，再擴大行銷預算。
+2. 上市節奏分兩階段，優先導入 MVP 通路。
+3. 法務審核與產品開發並行，避免整體排程延誤。
+4. KPI 以銷售量、轉換率、上線時程為主。</textarea>
+        </div>
+
+        <!-- Risk -->
+        <div>
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">風險與假設</p>
+          <textarea
+            id="decision-risk"
+            class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm resize-none leading-relaxed"
+            rows="4"
+          >- 法務審核若超過 5 天未完成，將影響上市時程。
+- 通路簽約需依賴前置市場與定價資料。
+- 若轉換率低於 10%，需調整行銷策略與 CTA。</textarea>
+        </div>
+
+        <button
+          onclick="saveDecisionData()"
+          class="w-full bg-slate-900 hover:bg-slate-700 text-white py-2.5 rounded-lg text-sm font-medium transition"
+        >
+          儲存 Decision
+        </button>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="space-y-4">
+      <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <h3 class="font-semibold mb-4 flex items-center gap-2">
+          <span class="w-2 h-2 bg-blue-500 rounded-full inline-block"></span>
+          附件與檔案
+        </h3>
+
+        <div id="drop-zone" class="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center transition"
+             ondragover="event.preventDefault();this.classList.add('drop-zone-active')"
+             ondragleave="this.classList.remove('drop-zone-active')"
+             ondrop="handleDrop(event)">
+          <p class="text-sm font-medium text-slate-700 mb-1">拖曳檔案到這裡，或點擊上傳</p>
+          <p class="text-xs text-slate-400 mb-3">支援 pdf / xlsx / docx / png / jpg</p>
+          <label class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg cursor-pointer transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            上傳附件
+            <input type="file" multiple class="hidden" onchange="handleFileUpload(this)">
+          </label>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold">已上傳檔案</h3>
+          <span class="text-xs text-slate-400" id="file-count-label">0 個檔案</span>
+        </div>
+        <div id="file-list" class="space-y-2"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- KPI TAB -->
+  <div id="tab-kpi" class="detail-tab-content hidden">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+      <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold">月銷售量</h3>
+          <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">追蹤中</span>
+        </div>
+        <div class="flex items-end gap-4 mb-4">
+          <div>
+            <p class="text-xs text-slate-400 mb-1">目標</p>
+            <p class="text-3xl font-bold text-slate-900">100 <span class="text-sm font-normal text-slate-400">件</span></p>
+          </div>
+          <div class="text-slate-300">vs</div>
+          <div>
+            <p class="text-xs text-slate-400 mb-1">實際</p>
+            <p class="text-3xl font-bold text-blue-600">45 <span class="text-sm font-normal text-slate-400">件</span></p>
+          </div>
+        </div>
+        <div class="w-full bg-slate-100 rounded-full h-3 mb-3"><div class="bg-blue-500 h-3 rounded-full" style="width:45%"></div></div>
+        <button onclick="showToast('已開啟 KPI 輸入')" class="w-full text-sm bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition">填入實際值</button>
+      </div>
+
+      <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold">新客轉換率</h3>
+          <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">追蹤中</span>
+        </div>
+        <div class="flex items-end gap-4 mb-4">
+          <div>
+            <p class="text-xs text-slate-400 mb-1">目標</p>
+            <p class="text-3xl font-bold text-slate-900">15 <span class="text-sm font-normal text-slate-400">%</span></p>
+          </div>
+          <div class="text-slate-300">vs</div>
+          <div>
+            <p class="text-xs text-slate-400 mb-1">實際</p>
+            <p class="text-3xl font-bold text-blue-600">9 <span class="text-sm font-normal text-slate-400">%</span></p>
+          </div>
+        </div>
+        <div class="w-full bg-slate-100 rounded-full h-3 mb-3"><div class="bg-amber-400 h-3 rounded-full" style="width:60%"></div></div>
+        <button onclick="showToast('已開啟 KPI 輸入')" class="w-full text-sm bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition">填入實際值</button>
+      </div>
+
+      <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold">上線時程</h3>
+          <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">注意中</span>
+        </div>
+        <div class="flex items-end gap-4 mb-4">
+          <div>
+            <p class="text-xs text-slate-400 mb-1">目標</p>
+            <p class="text-3xl font-bold text-slate-900">2026-06-30</p>
+          </div>
+          <div class="text-slate-300">vs</div>
+          <div>
+            <p class="text-xs text-slate-400 mb-1">目前</p>
+            <p class="text-3xl font-bold text-blue-600">43 <span class="text-sm font-normal text-slate-400">% 完成</span></p>
+          </div>
+        </div>
+        <div class="w-full bg-slate-100 rounded-full h-3 mb-3"><div class="bg-blue-400 h-3 rounded-full" style="width:43%"></div></div>
+        <button onclick="showToast('已開啟 KPI 輸入')" class="w-full text-sm bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition">填入實際值</button>
+      </div>
+
+      <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold">客戶滿意度</h3>
+          <span class="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full font-medium">待追蹤</span>
+        </div>
+        <div class="flex items-end gap-4 mb-4">
+          <div>
+            <p class="text-xs text-slate-400 mb-1">目標</p>
+            <p class="text-3xl font-bold text-slate-900">85 <span class="text-sm font-normal text-slate-400">%</span></p>
+          </div>
+          <div class="text-slate-300">vs</div>
+          <div>
+            <p class="text-xs text-slate-400 mb-1">實際</p>
+            <p class="text-3xl font-bold text-blue-600">— <span class="text-sm font-normal text-slate-400">尚未記錄</span></p>
+          </div>
+        </div>
+        <div class="w-full bg-slate-100 rounded-full h-3 mb-3"><div class="bg-slate-300 h-3 rounded-full" style="width:0%"></div></div>
+        <button onclick="showToast('已開啟 KPI 輸入')" class="w-full text-sm bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition">填入實際值</button>
+      </div>
+    </div>
+
+    <button onclick="showToast('新增 KPI 功能可再擴充')" class="flex items-center gap-2 text-sm text-blue-500 hover:underline font-medium">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      新增 KPI 指標
+    </button>
+  </div>
+
+  <!-- REVIEW TAB -->
+  <div id="tab-review" class="detail-tab-content hidden">
+    <div class="max-w-2xl">
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-5 flex gap-3">
+        <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        <div>
+          <p class="text-sm font-semibold text-amber-800">尚未填寫 Review</p>
+          <p class="text-xs text-amber-700 mt-0.5">專案進入 Review 階段後請填寫，沉澱為組織知識庫。</p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-slate-200 p-5 space-y-5">
+        <div>
+          <label class="block text-sm font-semibold text-green-700 mb-2">✅ 成功之處</label>
+          <textarea rows="3" placeholder="這個專案哪些地方做對了？" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm resize-none focus:border-green-400 transition leading-relaxed"></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-red-700 mb-2">❌ 失敗與不足</label>
+          <textarea rows="3" placeholder="哪裡沒做好？下次要避免什麼？" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm resize-none focus:border-red-400 transition leading-relaxed"></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-blue-700 mb-2">📌 可複製原則</label>
+          <textarea rows="3" placeholder="哪些做法值得在未來專案中複製？" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm resize-none focus:border-blue-400 transition leading-relaxed"></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">🔧 改善行動</label>
+          <textarea rows="2" placeholder="下次要採取哪些具體改善行動？" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm resize-none focus:border-slate-400 transition leading-relaxed"></textarea>
+        </div>
+        <div class="flex items-center gap-3 pt-2 border-t border-slate-100">
+          <span class="text-xs text-slate-500">結案狀態：</span>
+          <label class="flex items-center gap-1.5 cursor-pointer"><input type="radio" name="close-status"> <span class="text-xs text-green-700 font-medium">✅ 目標達成</span></label>
+          <label class="flex items-center gap-1.5 cursor-pointer"><input type="radio" name="close-status"> <span class="text-xs text-amber-700 font-medium">⚠️ 部分達成</span></label>
+          <label class="flex items-center gap-1.5 cursor-pointer"><input type="radio" name="close-status"> <span class="text-xs text-red-700 font-medium">❌ 目標未達</span></label>
+        </div>
+        <button onclick="saveReviewAndClose()" class="w-full bg-slate-900 hover:bg-slate-700 text-white py-2.5 rounded-lg text-sm font-medium transition">儲存 Review 並結案</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TASK MODAL -->
+<!-- TASK MODAL -->
+<div id="task-modal" class="fixed inset-0 z-50 hidden modal-backdrop" style="background:rgba(15,23,42,.45)" onclick="closeTaskModal(event)">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col fade-in" onclick="event.stopPropagation()">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-slate-100 flex-shrink-0">
+        <div class="flex items-center gap-2">
+          <div id="modal-status-dot" class="w-2.5 h-2.5 rounded-full bg-slate-400"></div>
+          <h3 class="font-bold text-slate-900" id="modal-title-label">任務詳情</h3>
+        </div>
+        <button onclick="closeTaskModal()" class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">✕</button>
+      </div>
+
+      <!-- Body -->
+      <div class="px-6 py-5 space-y-4 overflow-y-auto flex-1 min-h-0 modal-body-scroll">
+        <input type="hidden" id="modal-task-id">
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1.5">任務標題 <span class="text-red-500">*</span></label>
+          <input id="modal-task-title" type="text" placeholder="輸入任務標題..." class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm font-medium focus:border-blue-400 transition">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1.5">任務描述</label>
+          <textarea id="modal-task-desc" rows="3" placeholder="目標、範圍、注意事項..." class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none focus:border-blue-400 transition leading-relaxed"></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">開始日期</label>
+            <input id="modal-task-start" type="date" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 transition">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">結束日期</label>
+            <input id="modal-task-end" type="date" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 transition">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">負責人</label>
+            <input
+              id="modal-task-assignee"
+              type="text"
+              placeholder="請輸入負責人"
+              class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:border-blue-400 transition"
+            >
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">狀態</label>
+            <select id="modal-task-status" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:border-blue-400 transition">
+              <option value="todo">📋 待辦</option>
+              <option value="doing">🔄 進行中</option>
+              <option value="done">✅ 完成</option>
+              <option value="blocked">🔴 Blocked</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">前置任務（完成後才能開始）</label>
+            <select id="modal-task-dep" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:border-blue-400 transition">
+              <option value="">無前置任務</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">執行計畫 P</label>
+            <textarea
+              id="modal-task-plan"
+              rows="3"
+              placeholder="請輸入執行計畫（Plan）..."
+              class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none focus:border-blue-400 transition leading-relaxed"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1.5">執行狀況 D</label>
+            <textarea
+              id="modal-task-do"
+              rows="3"
+              placeholder="請輸入執行狀況（Do）..."
+              class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none focus:border-blue-400 transition leading-relaxed"
+            ></textarea>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1.5">執行結果 C</label>
+          <textarea
+            id="modal-task-check"
+            rows="3"
+            placeholder="請輸入執行結果（Check）..."
+            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none focus:border-blue-400 transition leading-relaxed"
+          ></textarea>
+        </div>
+<div>
+  <div class="flex items-center justify-between mb-2">
+    <label class="block text-xs font-semibold text-slate-500">重要討論主題 URL</label>
+    <button
+      type="button"
+      onclick="addTaskDiscussionRow()"
+      class="text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 px-2.5 py-1 rounded-lg font-medium transition"
+    >
+      + 新增討論 URL
+    </button>
+  </div>
+  <div id="task-discussion-list" class="space-y-2"></div>
+</div>
+        <div id="modal-blocked-section" class="hidden">
+          <label class="block text-xs font-semibold text-red-600 mb-1.5">🔴 阻擋原因 <span class="text-red-500">*</span></label>
+          <textarea id="modal-blocked-reason" rows="3" placeholder="說明阻擋原因、需要誰協助..." class="w-full border border-red-200 rounded-lg px-3 py-2 text-sm resize-none focus:border-red-400 transition"></textarea>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="flex gap-2 px-6 py-5 border-t border-slate-100 bg-white rounded-b-2xl flex-shrink-0">
+        <button onclick="saveTaskModal()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-sm font-semibold transition">儲存</button>
+        <button onclick="deleteTaskModal()" class="px-4 border border-slate-200 text-slate-500 py-2.5 rounded-lg text-sm hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition">刪除</button>
+        <button onclick="closeTaskModal()" class="px-4 border border-slate-200 text-slate-500 py-2.5 rounded-lg text-sm hover:bg-slate-50 transition">取消</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROBLEM CENTER MODAL -->
+<div id="problem-modal" class="fixed inset-0 z-50 hidden modal-backdrop" style="background:rgba(15,23,42,.45)" onclick="closeProblemModal(event)">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md problem-modal" onclick="event.stopPropagation()">
+      <div class="bg-red-600 px-6 py-4 rounded-t-2xl flex items-center justify-between">
+        <div class="flex items-center gap-2 text-white">
+          <span class="text-lg">🚨</span>
+          <h3 class="font-bold">Problem Center — Blocked 任務</h3>
+        </div>
+        <button onclick="closeProblemModal()" class="text-white/70 hover:text-white text-lg leading-none">✕</button>
+      </div>
+      <div class="px-6 py-5 space-y-4">
+        <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+          <p class="text-sm font-bold text-red-800 mb-1" id="problem-task-title">任務名稱</p>
+          <p class="text-xs text-red-600" id="problem-task-reason">阻擋原因</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3 text-xs">
+          <div class="bg-slate-50 rounded-lg p-3">
+            <p class="text-slate-400 mb-0.5">責任人</p>
+            <p class="font-semibold text-slate-700" id="problem-assignee">—</p>
+          </div>
+          <div class="bg-slate-50 rounded-lg p-3">
+            <p class="text-slate-400 mb-0.5">已 Blocked</p>
+            <p class="font-semibold text-red-600" id="problem-duration">—</p>
+          </div>
+        </div>
+        <p class="text-xs font-semibold text-slate-600 mb-2">💡 AI 建議處理方式：</p>
+        <ul class="text-xs text-slate-600 space-y-1.5 mb-4">
+          <li class="flex items-start gap-1.5"><span class="text-blue-500 flex-shrink-0 mt-0.5">→</span>直接致電或 IM 聯繫責任人，確認阻擋點</li>
+          <li class="flex items-start gap-1.5"><span class="text-blue-500 flex-shrink-0 mt-0.5">→</span>評估是否需要主管介入協調資源</li>
+          <li class="flex items-start gap-1.5"><span class="text-blue-500 flex-shrink-0 mt-0.5">→</span>是否可暫時繞過此任務，先推進其他子任務</li>
+        </ul>
+        <div class="flex gap-2">
+          <button onclick="showToast('已重新指派任務');closeProblemModal()" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-lg text-sm font-semibold transition">重新指派</button>
+        </div>
+        <button id="problem-unblock-btn" class="w-full border border-slate-200 hover:bg-green-50 hover:border-green-300 hover:text-green-700 text-slate-600 py-2 rounded-lg text-sm transition">✓ 標記為已解除，移至進行中</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CELEBRATE OVERLAY -->
+<div id="celebrate-overlay" class="fixed inset-0 z-50 pointer-events-none hidden">
+  <div class="flex items-center justify-center h-full">
+    <div id="celebrate-badge" class="bg-white rounded-2xl shadow-2xl px-8 py-6 text-center fade-in">
+      <div class="text-5xl mb-2" id="celebrate-emoji">🎉</div>
+      <p class="text-lg font-extrabold text-slate-900 mb-1" id="celebrate-title">任務完成！</p>
+      <p class="text-sm text-slate-500" id="celebrate-sub">+10 分</p>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="fixed bottom-5 right-5 z-50 hidden">
+  <div class="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 max-w-sm fade-in">
+    <svg id="toast-icon" class="w-4 h-4 text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+    </svg>
+    <p id="toast-msg" class="text-sm"></p>
+  </div>
+</div>
+
+<script>
+// ─── BACKEND API（與 task-tracking.html 同基底）───
+const API_BASE = "https://23700999.com:8081/PM";
+const NEW_PROPOSAL_URL = API_BASE + "/api/fr/NewProposal";
+const GET_PROPOSAL_TYPE_LIST_URL = API_BASE + "/api/fr/getProposalTypeList";
+
+/** 目前專案 AID（URL ?projectAID= 或 localStorage.projectAID） */
+let CURRENT_PROJECT_AID = "";
+let proposalTypeListCache = null;
+
+function getBackendTokenAndAdmin() {
+  const token = localStorage.getItem("backendToken") || sessionStorage.getItem("backendToken");
+  const adminID = localStorage.getItem("adminID") || sessionStorage.getItem("adminID");
+  if (!token || !adminID) return null;
+  return { token, adminID };
+}
+
+function isFrApiResultOk(resp) {
+  if (!resp || typeof resp !== "object") return false;
+  const errMsg = resp.Message || resp.Msg || resp.message;
+  const r = resp.Result !== undefined ? resp.Result : resp.result;
+  if (r === undefined || r === null || r === "") {
+    if (errMsg && String(errMsg).trim()) return false;
+    return true;
+  }
+  const s = String(r).trim().toUpperCase();
+  if (s === "NG" || s === "FAIL" || s === "ERROR" || s === "FALSE" || s === "0" || s === "NO") return false;
+  return s === "OK" || s === "SUCCESS" || s === "TRUE" || s === "1" || r === true || r === 1;
+}
+
+function postJson(url, body) {
+  if (typeof window.projectOSPostJson === "function") {
+    return window.projectOSPostJson(url, body);
+  }
+  return fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  }).then(function (res) {
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  });
+}
+
+function normalizeProposalTypeItem(x) {
+  if (x == null) return null;
+  if (typeof x === "string") {
+    const s = x.trim();
+    return s ? { value: s, label: s } : null;
+  }
+  if (typeof x !== "object") return null;
+  const code = x.Code ?? x.code ?? x.ProposalType ?? x.TypeID ?? x.TypeCode ?? x.ID ?? "";
+  const name = x.Name ?? x.name ?? x.TypeName ?? x.Title ?? x.Label ?? "";
+  const value = String(code !== "" && code != null ? code : name).trim();
+  const label = String(name || code || value).trim();
+  if (!value && !label) return null;
+  return { value: value || label, label: label || value };
+}
+
+function extractProposalTypeArray(resp) {
+  if (!resp || typeof resp !== "object") return [];
+  const raw =
+    resp.ProposalTypeList ||
+    resp.proposalTypeList ||
+    resp.ProposalTypes ||
+    resp.Data ||
+    resp.List ||
+    resp.list;
+  if (Array.isArray(raw)) return raw;
+  if (raw && typeof raw === "object" && Array.isArray(raw.Items)) return raw.Items;
+  return [];
+}
+
+async function loadProposalTypeSelect() {
+  const sel = document.getElementById("proposal-type-select");
+  const hint = document.getElementById("proposal-type-hint");
+  if (!sel) return;
+
+  const auth = getBackendTokenAndAdmin();
+  sel.innerHTML = "";
+  const addFallback = function () {
+    sel.innerHTML = '<option value="1">類別 1（預設）</option>';
+    if (hint) {
+      hint.textContent = "無法載入類別清單，已使用預設值；請確認已登入且 API 可用。";
+      hint.classList.remove("hidden");
+    }
+  };
+
+  if (!auth) {
+    addFallback();
+    if (hint) {
+      hint.textContent = "未登入：無法取得 Proposal 類別清單，已顯示預設選項。";
+      hint.classList.remove("hidden");
+    }
+    return;
+  }
+
+  try {
+    const resp = await postJson(GET_PROPOSAL_TYPE_LIST_URL, {
+      AdminID: auth.adminID,
+      Token: auth.token,
+    });
+    const arr = extractProposalTypeArray(resp);
+    const items = arr.map(normalizeProposalTypeItem).filter(Boolean);
+    proposalTypeListCache = items;
+    if (!items.length) {
+      addFallback();
+      return;
+    }
+    items.forEach(function (it) {
+      const opt = document.createElement("option");
+      opt.value = it.value;
+      opt.textContent = it.label;
+      sel.appendChild(opt);
+    });
+    if (hint) hint.classList.add("hidden");
+  } catch (e) {
+    addFallback();
+  }
+}
+
+async function postNewProposalApi(note, url, proposalType) {
+  const auth = getBackendTokenAndAdmin();
+  if (!auth) throw new Error("尚未登入，缺少 AdminID / Token");
+  const aid = String(CURRENT_PROJECT_AID || localStorage.getItem("projectAID") || "").trim();
+  if (!aid) throw new Error("缺少專案 AID，請從 Dashboard 帶入 projectAID 或先建立專案");
+
+  const payload = {
+    AdminID: auth.adminID,
+    Token: auth.token,
+    AID: aid,
+    ProposalType: String(proposalType || "").trim(),
+    Note: String(note || "").trim(),
+    URL: String(url || "").trim(),
+  };
+
+  const resp = await postJson(NEW_PROPOSAL_URL, payload);
+  if (!isFrApiResultOk(resp)) {
+    throw new Error((resp && (resp.Message || resp.Msg || resp.message)) || "NewProposal 失敗");
+  }
+  const bidRaw = resp.BID != null ? resp.BID : resp.bid;
+  const bid = bidRaw != null && String(bidRaw).trim() !== "" ? String(bidRaw).trim() : "";
+  return { resp, bid };
+}
+
+function syncProposalBidHint(bid) {
+  const el = document.getElementById("proposal-bid-hint");
+  if (!el) return;
+  if (bid) {
+    el.textContent = "Proposal ID（BID）：" + bid;
+    el.classList.remove("hidden");
+  } else {
+    el.textContent = "";
+    el.classList.add("hidden");
+  }
+}
+
+let nextId = 100;
+let TASKS = {
+  todo: [
+    {id:'t1',title:'制定行銷計畫',desc:'分析目標市場，制定完整行銷策略與預算規劃。',assignee:'Bob',startDate:'2026-04-01',endDate:'2026-04-15',blockedReason:'',dep:''},
+    {id:'t2',title:'建立銷售通路',desc:'評估線上/線下通路並完成簽約。',assignee:'Carol',startDate:'2026-04-10',endDate:'2026-05-01',blockedReason:'',dep:'t1'}
+  ],
+  doing: [
+    {id:'t3',title:'完成產品開發',desc:'包含前端、後端、API 整合與 QA 測試。',assignee:'Dev Team',startDate:'2026-03-15',endDate:'2026-04-30',blockedReason:'',dep:''}
+  ],
+  done: [
+    {id:'t4',title:'市場調查',desc:'完成競品分析報告 v2。',assignee:'Alice',startDate:'2026-03-01',endDate:'2026-03-15',blockedReason:'',dep:''},
+    {id:'t5',title:'競品分析',desc:'',assignee:'Alice',startDate:'2026-03-10',endDate:'2026-03-18',blockedReason:'',dep:''},
+    {id:'t6',title:'定價策略',desc:'',assignee:'Bob',startDate:'2026-03-15',endDate:'2026-03-22',blockedReason:'',dep:''}
+  ],
+  blocked: [
+    {id:'t7',title:'完成法務審核',desc:'確認產品上線相關合約與免責條款。',assignee:'Legal',startDate:'2026-04-01',endDate:'2026-04-10',blockedReason:'等待法務部門回覆，已發信 3 天',dep:'',blockedDays:3}
+  ]
+};
+
+let FILES = [
+  { id:'f1', name:'競品分析報告_v2.pdf', size:2457600, type:'pdf', uploadedAt:'2026-03-18', uploadedBy:'Alice' },
+  { id:'f2', name:'市場調查問卷.xlsx', size:153600, type:'xlsx', uploadedAt:'2026-03-10', uploadedBy:'Bob' }
+];
+
+let DECISION_CHATGPT = {
+  shareProjectUrl: 'https://chatgpt.com/share/example-project-room',
+  topics: [
+    {
+      id: 'dc1',
+      title: 'Q2 新產品線策略討論',
+      url: 'https://chatgpt.com/share/topic-001',
+      taskId: 't1'
+    },
+    {
+      id: 'dc2',
+      title: '通路上架優先順序討論',
+      url: 'https://chatgpt.com/share/topic-002',
+      taskId: 't2'
+    }
+  ]
+};
+
+let PROPOSAL_REVIEW = {
+  status: 'approved',
+  currentRound: 2,
+  currentRole: 'proposer',
+  lastActor: '執行長',
+  rounds: [
+    { id:'p1', round:1, role:'proposer', summary:'建立新產品線 MVP 方案，先以低風險通路驗證市場與轉換率，再決定是否擴大投入。', url:'https://chatgpt.com/share/proposal-round-1', actor:'Alice Chen', createdAt:'2026-03-20 10:30', action:'submit' },
+    { id:'p2', round:1, role:'ceo', suggestion:'請先補充法務與通路風險，並確認第一階段 KPI 是否聚焦轉換率與上線時程。', url:'https://chatgpt.com/share/ceo-feedback-1', actor:'執行長', createdAt:'2026-03-20 14:10', action:'revision_required' },
+    { id:'p3', round:2, role:'proposer', summary:'已補充法務時程、通路簽約前置條件與 KPI，並將上市分成兩階段推進。', url:'https://chatgpt.com/share/proposal-round-2', actor:'Alice Chen', createdAt:'2026-03-21 09:15', action:'submit' },
+    { id:'p4', round:2, role:'ceo', suggestion:'方案可行，同意立案，請依 Decision 與 Tasks 開始執行。', url:'https://chatgpt.com/share/ceo-approve-2', actor:'執行長', createdAt:'2026-03-21 11:00', action:'approved' }
+  ]
+};
+
+const AV = {Alice:'bg-blue-400',Bob:'bg-purple-400',Carol:'bg-pink-400','Dev Team':'bg-green-400',Legal:'bg-slate-400'};
+let editingTaskCol = null;
+let completedCount = 0;
+let projectStatus = 'in_progress';
+let problemTaskId = null;
+
+function today() { return new Date().toISOString().split('T')[0]; }
+function isOverdue(d) { return d && d < today(); }
+function daysUntil(d) {
+  if(!d) return 999;
+  const diff = (new Date(d) - new Date(today())) / 86400000;
+  return Math.ceil(diff);
+}
+function urgencyClass(task) {
+  const du = daysUntil(task.endDate);
+  if(du < 0) return 'urgency-overdue';
+  if(du === 0) return 'urgency-today';
+  if(du <= 3) return 'urgency-soon';
+  return '';
+}
+function urgencyBadge(task) {
+  const du = daysUntil(task.endDate);
+  if(du < 0) return `<span class="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-bold flex-shrink-0">延遲${Math.abs(du)}天</span>`;
+  if(du === 0) return `<span class="text-xs bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-bold flex-shrink-0 risk-pulse">今日到期</span>`;
+  if(du <= 3) return `<span class="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold flex-shrink-0">剩 ${du} 天</span>`;
+  return task.endDate ? `<span class="text-xs text-slate-400 flex-shrink-0">${task.endDate}</span>` : '';
+}
+function depBadge(task) {
+  if(!task.dep) return '';
+  const depTask = findTask(task.dep)?.task;
+  if(!depTask) return '';
+  const done = TASKS.done.find(t=>t.id===task.dep);
+  return done ? '' : `<span class="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded font-medium flex-shrink-0">⛓ 等待：${depTask.title.slice(0,8)}…</span>`;
+}
+function canStart(task) {
+  if(!task.dep) return true;
+  return !!TASKS.done.find(t=>t.id===task.dep);
+}
+function formatFileSize(bytes){
+  if(bytes < 1024) return bytes + ' B';
+  if(bytes < 1024*1024) return Math.round(bytes/1024) + ' KB';
+  return (bytes/1024/1024).toFixed(1) + ' MB';
+}
+function fileIcon(type){
+  const map = {
+    pdf:'📕',
+    xlsx:'📗',
+    xls:'📗',
+    doc:'📘',
+    docx:'📘',
+    png:'🖼️',
+    jpg:'🖼️',
+    jpeg:'🖼️'
+  };
+  return map[type] || '📄';
+}
+
+
+function proposalStatusMeta(status){
+  const map = {
+    draft:{badge:'status-draft',text:'草稿'},
+    under_review:{badge:'status-under_review',text:'待執行長審核'},
+    revision_required:{badge:'status-revision_required',text:'待提案人修改'},
+    approved:{badge:'status-approved',text:'提案已通過'}
+  };
+  return map[status] || map.draft;
+}
+
+function setProposalRole(role){
+  PROPOSAL_REVIEW.currentRole = role;
+  const proposerBtn = document.getElementById('proposal-role-proposer');
+  const ceoBtn = document.getElementById('proposal-role-ceo');
+  proposerBtn.className = `proposal-role-btn border rounded-lg px-3 py-2 text-sm font-medium ${role==='proposer'?'bg-blue-50 text-blue-600 border-blue-200':'bg-white text-slate-600 border-slate-200'}`;
+  ceoBtn.className = `proposal-role-btn border rounded-lg px-3 py-2 text-sm font-medium ${role==='ceo'?'bg-blue-50 text-blue-600 border-blue-200':'bg-white text-slate-600 border-slate-200'}`;
+  document.getElementById('proposal-summary-label').textContent = role === 'proposer' ? '提案摘要' : '提案建議';
+}
+
+function renderProposalTimeline(){
+  const wrap = document.getElementById('proposal-timeline');
+  if(!wrap) return;
+  wrap.innerHTML = PROPOSAL_REVIEW.rounds.map(item => {
+    const isCeo = item.role === 'ceo';
+    const statusPill = item.action === 'approved'
+      ? '<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">通過</span>'
+      : item.action === 'revision_required'
+      ? '<span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">需修改</span>'
+      : '<span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-semibold">送審</span>' ;
+    return `
+      <div class="border border-slate-200 rounded-xl p-4 ${isCeo?'bg-amber-50/50':'bg-slate-50/60'}">
+        <div class="flex items-start justify-between gap-3 mb-2">
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-sm font-bold text-slate-800">Round ${item.round} · ${isCeo ? '執行長' : '提案人'}</span>
+              ${statusPill}
+            </div>
+            <p class="text-xs text-slate-400 mt-1">${item.actor} · ${item.createdAt}</p>
+          </div>
+          <a href="${item.url || '#'}" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline whitespace-nowrap">查看討論</a>
+        </div>
+        <div class="text-sm text-slate-700 leading-relaxed whitespace-pre-line">${item.summary || item.suggestion || ''}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateProposalUi(){
+  const meta = proposalStatusMeta(PROPOSAL_REVIEW.status);
+  const pill = document.getElementById('proposal-status-pill');
+  const thread = document.getElementById('proposal-thread-status');
+  if(pill){ pill.className = `${meta.badge} px-2.5 py-1 rounded-full font-semibold`; pill.textContent = meta.text; }
+  if(thread){ thread.className = `${meta.badge} text-xs px-2.5 py-1 rounded-full font-semibold`; thread.textContent = meta.text; }
+  const roundText = PROPOSAL_REVIEW.currentRound ? `Round ${PROPOSAL_REVIEW.currentRound}` : 'Round 1';
+  const roundEl = document.getElementById('proposal-round-badge'); if(roundEl) roundEl.textContent = roundText;
+  const actorEl = document.getElementById('proposal-last-actor'); if(actorEl) actorEl.textContent = PROPOSAL_REVIEW.lastActor || '—';
+  const nextEl = document.getElementById('proposal-next-step');
+  if(nextEl){
+    nextEl.textContent = PROPOSAL_REVIEW.status === 'approved'
+      ? '執行長已通過，專案可進行。'
+      : PROPOSAL_REVIEW.status === 'revision_required'
+      ? '待提案人補充修正內容後再次送審。'
+      : '待執行長審核本輪提案內容。';
+  }
+  renderProposalTimeline();
+}
+
+function submitProposalRound(){
+  if(PROPOSAL_REVIEW.currentRole !== 'proposer'){
+    showToast('請先切換為提案人角色','warn');
+    return;
+  }
+  const summary = document.getElementById('proposal-summary-input').value.trim();
+  const url = document.getElementById('proposal-url-input').value.trim();
+  if(!summary || !url){
+    showToast('請填寫提案摘要與討論 URL','warn');
+    return;
+  }
+  const maxRound = PROPOSAL_REVIEW.rounds.filter(r=>r.role==='proposer').length;
+  const round = PROPOSAL_REVIEW.status === 'revision_required' ? PROPOSAL_REVIEW.currentRound + 1 : Math.max(1, maxRound + 1);
+  PROPOSAL_REVIEW.currentRound = round;
+  PROPOSAL_REVIEW.status = 'under_review';
+  PROPOSAL_REVIEW.lastActor = '提案人';
+  PROPOSAL_REVIEW.rounds.push({
+    id:'p' + Date.now(),
+    round,
+    role:'proposer',
+    summary,
+    url,
+    actor:'提案人',
+    createdAt:new Date().toLocaleString('zh-TW', {hour12:false}),
+    action:'submit'
+  });
+  document.getElementById('proposal-summary-input').value = '';
+  document.getElementById('proposal-url-input').value = '';
+  updateProposalUi();
+  showToast('已送交執行長審核');
+}
+
+function submitCeoFeedback(action){
+  if(PROPOSAL_REVIEW.currentRole !== 'ceo'){
+    showToast('請先切換為執行長角色','warn');
+    return;
+  }
+  const suggestion = document.getElementById('proposal-summary-input').value.trim();
+  const url = document.getElementById('proposal-url-input').value.trim();
+  if(!suggestion || !url){
+    showToast('請填寫提案建議與討論 URL','warn');
+    return;
+  }
+  const round = PROPOSAL_REVIEW.currentRound || 1;
+  PROPOSAL_REVIEW.status = action;
+  PROPOSAL_REVIEW.lastActor = '執行長';
+  PROPOSAL_REVIEW.rounds.push({
+    id:'p' + Date.now(),
+    round,
+    role:'ceo',
+    suggestion,
+    url,
+    actor:'執行長',
+    createdAt:new Date().toLocaleString('zh-TW', {hour12:false}),
+    action
+  });
+  document.getElementById('proposal-summary-input').value = '';
+  document.getElementById('proposal-url-input').value = '';
+
+  if(action === 'approved'){
+    projectStatus = 'in_progress';
+    syncProjectStatusBadge();
+    showToast('執行長已通過，專案狀態已切換為進行中');
+  } else {
+    showToast('已退回提案人修改');
+  }
+  updateProposalUi();
+}
+
+function syncProjectStatusBadge(){
+  const badge = document.getElementById('project-status-badge');
+  if(!badge) return;
+  if(projectStatus === 'draft'){
+    badge.className = 'status-draft text-xs px-2.5 py-1 rounded-full font-semibold';
+    badge.textContent = '草稿';
+  } else if(projectStatus === 'under_review'){
+    badge.className = 'status-under_review text-xs px-2.5 py-1 rounded-full font-semibold';
+    badge.textContent = '審核中';
+  } else if(projectStatus === 'in_progress'){
+    badge.className = 'status-in_progress text-xs px-2.5 py-1 rounded-full font-semibold';
+    badge.textContent = '進行中';
+  } else if(projectStatus === 'review'){
+    badge.className = 'status-review text-xs px-2.5 py-1 rounded-full font-semibold';
+    badge.textContent = 'Review';
+  } else if(projectStatus === 'closed'){
+    badge.className = 'status-closed text-xs px-2.5 py-1 rounded-full font-semibold';
+    badge.textContent = '已結案';
+  }
+}
+
+function setDetailTab(btn, tab) {
+  document.querySelectorAll('.detail-tab').forEach(el => {
+    el.classList.remove('active','border-blue-600','text-blue-600');
+    el.classList.add('border-transparent','text-slate-500');
+  });
+  btn.classList.add('active','border-blue-600','text-blue-600');
+  btn.classList.remove('border-transparent','text-slate-500');
+
+  document.querySelectorAll('.detail-tab-content').forEach(el => el.classList.add('hidden'));
+  document.getElementById('tab-' + tab).classList.remove('hidden');
+}
+
+function buildCard(t, col) {
+  const av = AV[t.assignee]||'bg-slate-400';
+  const hasDesc = t.desc && t.desc.trim().length > 0;
+  const uc = col !== 'done' && col !== 'blocked' ? urgencyClass(t) : '';
+  const ub = urgencyBadge(t);
+  const db = depBadge(t);
+  const locked = col === 'todo' && !canStart(t);
+
+  const titleHtml = `<p class="text-sm font-semibold text-slate-800 mb-1 cursor-pointer hover:text-blue-600 transition leading-snug" onclick="openEditModal('${t.id}')">${locked?'🔒 ':''}${t.title}</p>`;
+  const descHtml = hasDesc ? `<p class="text-xs text-slate-500 desc-clamp mb-1">${t.desc}</p>` : '';
+  const avatarHtml = `<div class="w-5 h-5 rounded-full ${av} flex items-center justify-center text-white font-bold flex-shrink-0" style="font-size:10px">${t.assignee[0]}</div><span class="text-xs text-slate-500">${t.assignee}</span>`;
+  const badgesHtml = db ? `<div class="flex flex-wrap gap-1 mt-1.5">${db}</div>` : '';
+
+  if(col==='done') return `
+    <div class="kanban-card bg-white rounded-xl border border-green-200 p-3 opacity-80 hover:opacity-100 transition fade-in ${uc}">
+      ${titleHtml}${descHtml}
+      <div class="flex items-center justify-between mt-2">
+        <div class="flex items-center gap-1">${avatarHtml}</div>
+        <div class="flex items-center gap-1">
+          ${ub}
+          <button onclick="quickMove('${t.id}','done','doing')" class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-600 py-0.5 px-2 rounded font-medium transition">↩ 重做</button>
+        </div>
+      </div>
+    </div>`;
+  if(col==='blocked') return `
+    <div class="kanban-card bg-white rounded-xl border border-red-200 p-3 fade-in">
+      ${titleHtml}${descHtml}
+      <div class="bg-red-50 border border-red-100 rounded-lg px-2.5 py-2 mb-2.5">
+        <p class="text-xs text-red-600 font-medium">${t.blockedReason||'尚未填寫阻擋原因'}</p>
+        <p class="text-xs text-slate-400 mt-0.5">${t.assignee} · ${t.blockedDays?t.blockedDays+'天前':'剛剛'}</p>
+      </div>
+      <div class="flex gap-1.5 flex-wrap">
+        <button onclick="openProblemModal('${t.id}')" class="flex-1 text-xs bg-red-600 hover:bg-red-700 text-white py-1.5 rounded-lg font-semibold transition">問題中心</button>
+        <button onclick="showToast('已重新指派')" class="text-xs bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 px-2.5 py-1.5 rounded-lg font-medium transition">指派</button>
+        <button onclick="quickMove('${t.id}','blocked','doing')" class="text-xs bg-green-50 hover:bg-green-100 text-green-700 px-2.5 py-1.5 rounded-lg font-medium transition">✓ 解除</button>
+      </div>
+    </div>`;
+  if(col==='doing') return `
+    <div class="kanban-card bg-white rounded-xl border border-blue-200 p-3 shadow-sm fade-in ${uc}">
+      <div class="flex items-start gap-1 flex-wrap mb-1">${ub}</div>
+      ${titleHtml}${descHtml}${badgesHtml}
+      <div class="flex items-center justify-between mt-2 mb-2.5"><div class="flex items-center gap-1">${avatarHtml}</div></div>
+      <div class="flex gap-1.5">
+        <button onclick="quickMove('${t.id}','doing','done')" class="flex-1 text-xs bg-green-600 hover:bg-green-700 text-white py-1.5 rounded-lg font-semibold transition">✓ 完成</button>
+        <button onclick="quickMove('${t.id}','doing','blocked')" class="flex-1 text-xs bg-red-50 hover:bg-red-100 text-red-600 py-1.5 rounded-lg font-medium transition">🔴 Blocked</button>
+      </div>
+    </div>`;
+  return `
+    <div class="kanban-card bg-white rounded-xl border border-slate-200 p-3 hover:border-blue-200 transition fade-in ${uc} ${locked?'opacity-60':''}">
+      <div class="flex items-start gap-1 flex-wrap mb-1">${ub}</div>
+      ${titleHtml}${descHtml}${badgesHtml}
+      <div class="flex items-center justify-between mt-2 mb-2.5"><div class="flex items-center gap-1">${avatarHtml}</div></div>
+      ${locked
+        ? `<div class="text-xs text-purple-600 bg-purple-50 border border-purple-200 rounded-lg px-2.5 py-1.5 font-medium">⛓ 前置任務未完成，無法開始</div>`
+        : `<button onclick="quickMove('${t.id}','todo','doing')" class="w-full text-xs bg-blue-50 hover:bg-blue-100 text-blue-600 py-1.5 rounded-lg font-medium transition">→ 開始進行</button>`
+      }
+    </div>`;
+}
+
+function renderKanban() {
+  ['todo','doing','done','blocked'].forEach(col => {
+    document.getElementById('col-'+col).innerHTML = TASKS[col].map(t=>buildCard(t,col)).join('');
+    document.getElementById('count-'+col).textContent = TASKS[col].length;
+  });
+  updateProgress();
+  updateUrgencyCounts();
+  updateHealth();
+  updateKpiProgress();
+  populateDepSelect();
+}
+
+function updateProgress() {
+  const done = TASKS.done.length;
+  const total = Object.values(TASKS).flat().length;
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById('progress-pct').textContent = pct+'%';
+  document.getElementById('progress-bar').style.width = pct+'%';
+  document.getElementById('progress-bar').className = `h-2.5 rounded-full progress-bar ${pct>=75?'bg-green-500':pct>=40?'bg-blue-500':'bg-amber-500'}`;
+  document.getElementById('progress-summary').innerHTML =
+    `<span>✅ 完成 ${TASKS.done.length}</span><span>🔄 進行 ${TASKS.doing.length}</span><span>📋 待辦 ${TASKS.todo.length}</span><span>🔴 Blocked ${TASKS.blocked.length}</span>`;
+}
+
+function updateUrgencyCounts() {
+  const allActive = [...TASKS.todo,...TASKS.doing];
+  document.getElementById('count-urgent-today').textContent = allActive.filter(t=>daysUntil(t.endDate)===0).length;
+  document.getElementById('count-urgent-soon').textContent = allActive.filter(t=>{ const d=daysUntil(t.endDate); return d>0&&d<=3; }).length;
+  document.getElementById('count-overdue').textContent = allActive.filter(t=>isOverdue(t.endDate)).length;
+  document.getElementById('count-blocked-summary').textContent = TASKS.blocked.length;
+}
+
+function updateHealth() {
+  let score = 100;
+  if(TASKS.blocked.length > 0) score -= TASKS.blocked.length * 10;
+  const overdue = [...TASKS.todo,...TASKS.doing].filter(t=>isOverdue(t.endDate)).length;
+  score -= overdue * 8;
+  const pct = Object.values(TASKS).flat().length ? TASKS.done.length / Object.values(TASKS).flat().length : 0;
+  if(pct < 0.3) score -= 5;
+  score = Math.max(10, Math.min(100, score));
+  const circ = 100.5;
+  const da = (score/100)*circ;
+  const color = score>=80?'#22c55e':score>=60?'#f59e0b':'#ef4444';
+  document.getElementById('health-ring-circle').setAttribute('stroke-dasharray',`${da} ${circ}`);
+  document.getElementById('health-ring-circle').setAttribute('stroke',color);
+  document.getElementById('health-score-num').textContent = score;
+  document.getElementById('health-score-num').style.color = color;
+  document.getElementById('health-label').textContent = score>=80?'🟢 健康':score>=60?'🟡 注意':'🔴 危險';
+  document.getElementById('health-label').className = `text-xs font-semibold ${score>=80?'text-green-600':score>=60?'text-amber-600':'text-red-600'}`;
+}
+
+function updateKpiProgress() {
+  const done = TASKS.done.length, total = Object.values(TASKS).flat().length;
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById('kpi-progress-bar').style.width = pct+'%';
+  document.getElementById('kpi-progress-label').textContent = `任務完成 ${pct}%`;
+}
+
+function populateDepSelect() {
+  const sel = document.getElementById('modal-task-dep');
+  const current = sel.value;
+  const allTasks = Object.entries(TASKS).flatMap(([col,tasks])=>tasks.map(t=>({...t,col})));
+  sel.innerHTML = '<option value="">無前置任務</option>';
+  allTasks.forEach(t=>{
+    if(t.id === document.getElementById('modal-task-id').value) return;
+    const opt = document.createElement('option');
+    opt.value = t.id;
+    opt.textContent = `${t.title} [${t.col==='done'?'✅':t.col==='doing'?'🔄':'📋'}]`;
+    sel.appendChild(opt);
+  });
+  sel.value = current;
+}
+
+function getTaskOptionsHtml(selectedId = '') {
+  const allTasks = Object.entries(TASKS).flatMap(([col, tasks]) =>
+    tasks.map(t => ({ ...t, col }))
+  );
+
+  return `
+    <option value="">不連結 Task</option>
+    ${allTasks.map(t => `
+      <option value="${t.id}" ${selectedId === t.id ? 'selected' : ''}>
+        ${t.title}
+      </option>
+    `).join('')}
+  `;
+}
+
+
+function quickMove(id, fromCol, toCol) {
+  const idx = TASKS[fromCol].findIndex(t=>t.id===id);
+  if(idx===-1) return;
+  if(toCol==='doing' && fromCol==='todo') {
+    const task = TASKS[fromCol][idx];
+    if(!canStart(task)){ showToast('⛓ 前置任務尚未完成，無法開始','warn'); return; }
+  }
+  const task = TASKS[fromCol].splice(idx,1)[0];
+  if(toCol==='blocked' && !task.blockedReason) task.blockedReason = '待補充阻擋原因';
+  TASKS[toCol].push(task);
+  if(toCol==='done') {
+    completedCount++;
+    celebrateCompletion(task.title);
+  } else {
+    showToast(`「${task.title}」已移至 ${toCol==='doing'?'進行中':toCol==='blocked'?'Blocked':toCol}`);
+  }
+  renderKanban();
+}
+
+function celebrateCompletion(title) {
+  launchConfetti();
+  const overlay = document.getElementById('celebrate-overlay');
+  const milestones = {3:'🏆 里程碑達成！',6:'🚀 超過半數完成！',10:'🌟 全部完成！'};
+  const emoji = milestones[completedCount] ? milestones[completedCount].split(' ')[0] : ['🎉','✨','⭐','🎊','💪'][completedCount%5];
+  document.getElementById('celebrate-emoji').textContent = emoji;
+  document.getElementById('celebrate-title').textContent = milestones[completedCount] ? milestones[completedCount] : `「${title.slice(0,12)}」完成！`;
+  document.getElementById('celebrate-sub').textContent = `+10 分 · 今日完成 ${completedCount} 項 🔥`;
+  overlay.classList.remove('hidden');
+  setTimeout(()=>{ overlay.classList.add('hidden'); showToast(`✅ 任務完成！今日 +10 分`); },1800);
+}
+
+function launchConfetti() {
+  const colors = ['#3b82f6','#22c55e','#f59e0b','#ec4899','#8b5cf6','#06b6d4'];
+  for(let i=0;i<30;i++){
+    const piece = document.createElement('div');
+    piece.className='confetti-piece';
+    piece.style.cssText=`left:${20+Math.random()*60}%;background:${colors[Math.floor(Math.random()*colors.length)]};animation-delay:${Math.random()*.5}s;animation-duration:${1.2+Math.random()*.8}s;border-radius:${Math.random()>.5?'50%':'2px'}`;
+    document.body.appendChild(piece);
+    setTimeout(()=>piece.remove(),2500);
+  }
+}
+
+function openNewTaskModal(col) {
+  editingTaskCol = col;
+  [
+    'modal-task-id',
+    'modal-task-title',
+    'modal-task-desc',
+    'modal-task-start',
+    'modal-task-end',
+    'modal-task-assignee',
+    'modal-task-dep',
+    'modal-task-plan',
+    'modal-task-do',
+    'modal-task-check',
+    'modal-blocked-reason'
+  ].forEach(id => {
+    if (document.getElementById(id)) document.getElementById(id).value = '';
+  });
+
+  document.getElementById('modal-task-status').value = col;
+  document.getElementById('modal-blocked-section').classList.toggle('hidden', col !== 'blocked');
+  document.getElementById('modal-title-label').textContent = '新增任務';
+  setModalDot(col);
+  populateDepSelect();
+  renderTaskDiscussionRows([]);
+  document.getElementById('task-modal').classList.remove('hidden');
+}
+
+function openEditModal(id) {
+  const found = findTask(id);
+  if (!found) return;
+
+  const { task: t, col } = found;
+  editingTaskCol = col;
+
+  document.getElementById('modal-task-id').value = t.id;
+  document.getElementById('modal-task-title').value = t.title || '';
+  document.getElementById('modal-task-desc').value = t.desc || '';
+  document.getElementById('modal-task-start').value = t.startDate || '';
+  document.getElementById('modal-task-end').value = t.endDate || '';
+  document.getElementById('modal-task-assignee').value = t.assignee || '';
+  document.getElementById('modal-task-status').value = col;
+  document.getElementById('modal-task-dep').value = t.dep || '';
+  document.getElementById('modal-task-plan').value = t.plan || '';
+  document.getElementById('modal-task-do').value = t.doingNote || '';
+  document.getElementById('modal-task-check').value = t.checkResult || '';
+  document.getElementById('modal-blocked-reason').value = t.blockedReason || '';
+
+  document.getElementById('modal-blocked-section').classList.toggle('hidden', col !== 'blocked');
+  document.getElementById('modal-title-label').textContent = '編輯任務';
+  setModalDot(col);
+  populateDepSelect();
+  renderTaskDiscussionRows(t.discussionLinks || []);
+  document.getElementById('task-modal').classList.remove('hidden');
+}
+
+function closeTaskModal(e) {
+  if(e&&e.target!==document.getElementById('task-modal')) return;
+  document.getElementById('task-modal').classList.add('hidden');
+}
+
+function setModalDot(col) {
+  const colors={todo:'bg-slate-400',doing:'bg-blue-500',done:'bg-green-500',blocked:'bg-red-500'};
+  document.getElementById('modal-status-dot').className=`w-2.5 h-2.5 rounded-full ${colors[col]||'bg-slate-400'}`;
+}
+
+function saveTaskModal() {
+  const title = document.getElementById('modal-task-title').value.trim();
+  if (!title) {
+    showToast('請填入任務標題', 'warn');
+    return;
+  }
+
+  const newStatus = document.getElementById('modal-task-status').value;
+
+  const taskData = {
+    title,
+    desc: document.getElementById('modal-task-desc').value.trim(),
+    startDate: document.getElementById('modal-task-start').value,
+    endDate: document.getElementById('modal-task-end').value,
+    assignee: document.getElementById('modal-task-assignee').value.trim(),
+    dep: document.getElementById('modal-task-dep').value,
+    plan: document.getElementById('modal-task-plan').value.trim(),
+    doingNote: document.getElementById('modal-task-do').value.trim(),
+    checkResult: document.getElementById('modal-task-check').value.trim(),
+    discussionLinks: getTaskDiscussionRowsFromDOM(),
+    blockedReason: newStatus === 'blocked'
+      ? document.getElementById('modal-blocked-reason').value.trim()
+      : '',
+    blockedDays: newStatus === 'blocked' ? 0 : undefined,
+  };
+
+  const id = document.getElementById('modal-task-id').value;
+
+  if (id) {
+    const found = findTask(id);
+    if (found) {
+      const { task: t, col } = found;
+      Object.assign(t, taskData);
+
+      if (col !== newStatus) {
+        TASKS[col] = TASKS[col].filter(x => x.id !== id);
+        TASKS[newStatus].push(t);
+      }
+
+      showToast(`「${title}」已更新`);
+    }
+  } else {
+    TASKS[newStatus].push({
+      id: 'task-' + (++nextId),
+      ...taskData
+    });
+    showToast(`「${title}」已建立`);
+  }
+
+  closeTaskModal();
+  renderKanban();
+}
+
+function deleteTaskModal() {
+  const id=document.getElementById('modal-task-id').value;
+  if(!id){closeTaskModal();return;}
+  const found=findTask(id);
+  if(!found){closeTaskModal();return;}
+  TASKS[found.col]=TASKS[found.col].filter(t=>t.id!==id);
+  closeTaskModal();
+  renderKanban();
+  showToast('任務已刪除');
+}
+
+function openProblemModal(id) {
+  const found = findTask(id); if(!found) return;
+  const {task:t} = found; problemTaskId = id;
+  document.getElementById('problem-task-title').textContent = t.title;
+  document.getElementById('problem-task-reason').textContent = t.blockedReason||'阻擋原因未填寫';
+  document.getElementById('problem-assignee').textContent = t.assignee;
+  document.getElementById('problem-duration').textContent = t.blockedDays ? `已 ${t.blockedDays} 天` : '剛剛發生';
+  document.getElementById('problem-unblock-btn').onclick = () => { quickMove(id,'blocked','doing'); closeProblemModal(); };
+  document.getElementById('problem-modal').classList.remove('hidden');
+}
+function closeProblemModal(e) {
+  if(e&&e.target!==document.getElementById('problem-modal')) return;
+  document.getElementById('problem-modal').classList.add('hidden');
+}
+
+function findTask(id) {
+  for(const col of ['todo','doing','done','blocked']){
+    const t=TASKS[col].find(t=>t.id===id);
+    if(t) return {task:t,col};
+  }
+  return null;
+}
+
+function handleFileUpload(input) {
+  Array.from(input.files).forEach(file => addFile(file));
+  input.value = '';
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drop-zone-active');
+  Array.from(e.dataTransfer.files).forEach(file => addFile(file));
+}
+function addFile(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+  const id = 'f' + Date.now() + Math.random().toString(36).slice(2,6);
+  FILES.push({ id, name: file.name, size: file.size, type: ext, uploadedAt: new Date().toISOString().slice(0,10), uploadedBy: 'Alice' });
+  renderFiles();
+  showToast(`已上傳「${file.name}」`);
+}
+function removeFile(id) {
+  const idx = FILES.findIndex(f => f.id === id);
+  if (idx === -1) return;
+  const name = FILES[idx].name;
+  FILES.splice(idx, 1);
+  renderFiles();
+  showToast(`已移除「${name}」`);
+}
+function renderFiles() {
+  const list = document.getElementById('file-list');
+  const label = document.getElementById('file-count-label');
+  label.textContent = `${FILES.length} 個檔案`;
+  if(!FILES.length){
+    list.innerHTML = '<p class="text-sm text-slate-400 text-center py-4">尚未上傳檔案</p>';
+    return;
+  }
+  list.innerHTML = FILES.map(f => `
+    <div class="file-item flex items-center gap-3 border border-slate-200 rounded-lg px-3 py-2">
+      <div class="text-lg">${fileIcon(f.type)}</div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium text-slate-800 truncate">${f.name}</p>
+        <p class="text-xs text-slate-400">${formatFileSize(f.size)} · ${f.uploadedAt} · ${f.uploadedBy}</p>
+      </div>
+      <button onclick="removeFile('${f.id}')" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50 transition">移除</button>
+    </div>
+  `).join('');
+}
+
+function renderDecisionTopicRows() {
+  const wrap = document.getElementById('decision-topic-list');
+  if (!wrap) return;
+
+  if (!DECISION_CHATGPT.topics.length) {
+    wrap.innerHTML = `
+      <div class="text-xs text-slate-400 border border-dashed border-slate-200 rounded-lg px-3 py-3 text-center">
+        尚未新增重要討論主題
+      </div>
+    `;
+    return;
+  }
+
+  wrap.innerHTML = DECISION_CHATGPT.topics.map((item, idx) => `
+    <div class="border border-slate-200 rounded-xl p-3 space-y-2">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <input
+          type="text"
+          value="${item.title || ''}"
+          placeholder="討論主題名稱"
+          onchange="updateDecisionTopicField(${idx}, 'title', this.value)"
+          class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+        >
+        <select
+          onchange="updateDecisionTopicField(${idx}, 'taskId', this.value)"
+          class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+        >
+          ${getTaskOptionsHtml(item.taskId || '')}
+        </select>
+      </div>
+      <div class="flex gap-2">
+        <input
+          type="text"
+          value="${item.url || ''}"
+          placeholder="https://chatgpt.com/share/..."
+          onchange="updateDecisionTopicField(${idx}, 'url', this.value)"
+          class="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm"
+        >
+        <a
+          href="${item.url || '#'}"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center justify-center px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 transition"
+        >
+          開啟
+        </a>
+        <button
+          type="button"
+          onclick="removeDecisionTopicRow(${idx})"
+          class="px-3 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 text-sm transition"
+        >
+          刪除
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addDecisionTopicRow() {
+  DECISION_CHATGPT.topics.push({
+    id: 'dc' + Date.now(),
+    title: '',
+    url: '',
+    taskId: ''
+  });
+  renderDecisionTopicRows();
+}
+
+
+function removeDecisionTopicRow(idx) {
+  DECISION_CHATGPT.topics.splice(idx, 1);
+  renderDecisionTopicRows();
+}
+
+function updateDecisionTopicField(idx, key, value) {
+  if (!DECISION_CHATGPT.topics[idx]) return;
+  DECISION_CHATGPT.topics[idx][key] = value;
+}
+
+function saveDecisionData() {
+  DECISION_CHATGPT.shareProjectUrl = document.getElementById('decision-shareproject-url').value.trim();
+  document.getElementById('decision-shareproject-link').href = DECISION_CHATGPT.shareProjectUrl || '#';
+  showToast('Decision 已儲存');
+}
+
+function renderTaskDiscussionRows(items = []) {
+  const wrap = document.getElementById('task-discussion-list');
+  if (!wrap) return;
+
+  if (!items.length) {
+    wrap.innerHTML = `
+      <div class="text-xs text-slate-400 border border-dashed border-slate-200 rounded-lg px-3 py-3 text-center">
+        尚未新增討論 URL
+      </div>
+    `;
+    return;
+  }
+
+  wrap.innerHTML = items.map((item, idx) => `
+    <div class="border border-slate-200 rounded-xl p-3 space-y-2">
+      <input
+        type="text"
+        value="${item.title || ''}"
+        placeholder="討論主題名稱"
+        class="task-discussion-title w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+      >
+      <div class="flex gap-2">
+        <input
+          type="text"
+          value="${item.url || ''}"
+          placeholder="https://chatgpt.com/share/..."
+          class="task-discussion-url flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm"
+        >
+        <button
+          type="button"
+          onclick="removeTaskDiscussionRow(${idx})"
+          class="px-3 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 text-sm transition"
+        >
+          刪除
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addTaskDiscussionRow() {
+  const list = getTaskDiscussionRowsFromDOM();
+  list.push({ id: 'td' + Date.now(), title: '', url: '' });
+  renderTaskDiscussionRows(list);
+}
+
+function removeTaskDiscussionRow(idx) {
+  const list = getTaskDiscussionRowsFromDOM();
+  list.splice(idx, 1);
+  renderTaskDiscussionRows(list);
+}
+
+function getTaskDiscussionRowsFromDOM() {
+  const wrap = document.getElementById('task-discussion-list');
+  if (!wrap) return [];
+
+  const cards = wrap.querySelectorAll('.border.border-slate-200.rounded-xl');
+  return Array.from(cards).map((card, index) => ({
+    id: 'td-' + index,
+    title: card.querySelector('.task-discussion-title')?.value.trim() || '',
+    url: card.querySelector('.task-discussion-url')?.value.trim() || ''
+  })).filter(item => item.title || item.url);
+}
+
+function advanceStatus() {
+  if(projectStatus === 'in_progress'){
+    projectStatus = 'review';
+    syncProjectStatusBadge();
+    showToast('專案狀態已推進至 Review');
+    const reviewTabBtn = [...document.querySelectorAll('.detail-tab')].find(btn => btn.textContent.trim() === 'Review');
+    if(reviewTabBtn) setDetailTab(reviewTabBtn, 'review');
+  } else if (projectStatus === 'under_review') {
+    showToast('提案尚未通過，請先完成 Proposal Review','warn');
+  } else {
+    showToast('目前已在 Review 或已結案');
+  }
+}
+
+function saveReviewAndClose() {
+  projectStatus = 'closed';
+  syncProjectStatusBadge();
+  showToast('Review 已儲存，專案已結案');
+}
+
+let toastTimer;
+function showToast(msg,type='success'){
+  const toast=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  document.getElementById('toast-icon').className=type==='warn'?'w-4 h-4 text-amber-400 flex-shrink-0':'w-4 h-4 text-green-400 flex-shrink-0';
+  toast.classList.remove('hidden');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>toast.classList.add('hidden'),3000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderKanban();
+  renderFiles();
+  syncProjectStatusBadge();
+  updateProposalUi();
+  setProposalRole(PROPOSAL_REVIEW.currentRole || 'proposer');
+
+  document.getElementById('decision-shareproject-url').value = DECISION_CHATGPT.shareProjectUrl || '';
+  document.getElementById('decision-shareproject-link').href = DECISION_CHATGPT.shareProjectUrl || '#';
+  renderDecisionTopicRows();
+
+  document.getElementById('modal-task-status').addEventListener('change', function(){
+    document.getElementById('modal-blocked-section').classList.toggle('hidden', this.value !== 'blocked');
+    setModalDot(this.value);
+  });
+});
+
+</script>
+</body>
+</html>
