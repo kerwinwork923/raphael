@@ -2158,9 +2158,9 @@ function isCurrentUserProjectExecutor() {
   );
 }
 
-/** 專案執行者同時為執行長：僅能以執行長審核，不需／不可切換為提案人 */
+/** jason（執行長）角色固定為執行長，不可切換為提案人 */
 function isProposalExecutorLockedToCeo() {
-  return isProposalCeoUser() && isCurrentUserProjectExecutor();
+  return isProposalCeoUser();
 }
 
 function updateProposalPermissionUi() {
@@ -2221,18 +2221,15 @@ function updateProposalPermissionUi() {
   if (revisionBtn) revisionBtn.classList.toggle("hidden", !isCeo);
   if (approveBtn) approveBtn.classList.toggle("hidden", !isCeo);
   if (submitBtn) {
-    submitBtn.classList.toggle("hidden", isCeo && role === "ceo");
-    submitBtn.classList.toggle("opacity-50", lockProposer);
-    submitBtn.classList.toggle("pointer-events-none", lockProposer);
-    if (lockProposer) submitBtn.title = "執行者＋執行長請使用退回／通過，不需送交提案";
-    else submitBtn.removeAttribute("title");
+    submitBtn.classList.remove("hidden", "opacity-50", "pointer-events-none");
+    submitBtn.removeAttribute("title");
   }
 }
 
 function setProposalRole(role) {
   if (role === "proposer" && isProposalExecutorLockedToCeo()) {
     updateProposalPermissionUi();
-    showToast("您為專案執行者且為執行長，無需切換為提案人", "warn");
+    showToast("jason（執行長）角色固定，無法切換為提案人", "warn");
     return;
   }
   if (role === "ceo" && !isProposalCeoUser()) {
@@ -2362,7 +2359,8 @@ function updateProposalUi() {
 }
 
 async function submitProposalRound() {
-  if (PROPOSAL_REVIEW.currentRole !== "proposer") {
+  const canSubmitAsLockedCeo = isProposalExecutorLockedToCeo() && PROPOSAL_REVIEW.currentRole === "ceo";
+  if (PROPOSAL_REVIEW.currentRole !== "proposer" && !canSubmitAsLockedCeo) {
     showToast("請先切換為提案人角色", "warn");
     return;
   }
