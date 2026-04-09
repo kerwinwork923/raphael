@@ -1068,6 +1068,7 @@ function applyProposalListFromProject(selected) {
     ? selected.proposalList
     : [];
   const aid = String(CURRENT_PROJECT_AID || selected.AID || selected.ProjectAID || "").trim();
+  const fallbackProposalUrl = normalizeExternalUrl(resolveShareProjectUrlFromProject(selected));
 
   if (!rawList.length) {
     PROPOSAL_REVIEW.status = "draft";
@@ -1110,7 +1111,8 @@ function applyProposalListFromProject(selected) {
     if (!isCeo) roundCounter++;
     const round = Math.max(1, roundCounter);
     const note = String((it && it.Note) || (it && it.note) || "").trim();
-    const url = String((it && it.URL) || (it && it.url) || "").trim();
+    const rawUrl = String((it && it.URL) || (it && it.url) || "").trim();
+    const url = normalizeExternalUrl(rawUrl) || fallbackProposalUrl || "";
     const bid = it && it.BID != null && String(it.BID).trim() !== "" ? String(it.BID).trim() : "";
     const proposalType = String((it && it.ProposalType) || (it && it.proposalType) || "").trim();
     const action = normalizeProposalItemAction(it, isCeo);
@@ -1495,6 +1497,14 @@ function normalizeUrlListItems(urlList) {
       return { title: "", url: "" };
     })
     .filter((x) => x.url && String(x.url).trim());
+}
+
+function normalizeExternalUrl(rawUrl) {
+  const v = String(rawUrl || "").trim();
+  if (!v) return "";
+  // 僅接受可開啟的絕對網址，避免 "18" 這類值被當成連結
+  if (/^https?:\/\//i.test(v)) return v;
+  return "";
 }
 
 async function modifyTaskStateBackend(taskCid, newStateCode) {
@@ -2196,6 +2206,8 @@ function renderProposalTimeline() {
   wrap.innerHTML = PROPOSAL_REVIEW.rounds
     .map(function (item) {
       const isCeo = item.role === "ceo";
+      const discussionUrl = normalizeExternalUrl(item.url);
+      const hasDiscussionUrl = !!discussionUrl;
       const statusPill =
         item.action === "approved"
           ? '<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">通過</span>'
@@ -2227,8 +2239,10 @@ function renderProposalTimeline() {
         item.id +
         '\')" class="text-xs border border-slate-200 text-slate-600 hover:bg-slate-50 px-2.5 py-1 rounded-lg transition">編輯</button>' +
         '<a href="' +
-        (item.url || "#") +
-        '" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline">查看討論</a>' +
+        (hasDiscussionUrl ? discussionUrl : "javascript:void(0)") +
+        '" target="_blank" rel="noopener noreferrer" class="text-xs ' +
+        (hasDiscussionUrl ? "text-blue-600 hover:underline" : "text-slate-300 pointer-events-none cursor-not-allowed") +
+        '">查看討論</a>' +
         "</div>" +
         "</div>" +
         '<div class="text-sm text-slate-700 leading-relaxed whitespace-pre-line">' +
