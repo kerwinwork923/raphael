@@ -863,6 +863,8 @@ const GET_PROPOSAL_TYPE_LIST_URL = API_BASE + "/api/fr/getProposalTypeList";
 
 /** 目前頁面對應的專案 AID（來自 getProjectList 或 localStorage.projectAID） */
 let CURRENT_PROJECT_AID = "";
+/** 專案負責人（ChargeMan），用於判斷是否為「執行者」以鎖定 Proposal 角色 */
+let CURRENT_PROJECT_CHARGE_MAN = "";
 /** 是否已成功自 getProjectList 套用專案與任務 */
 let backendProjectSynced = false;
 let adminNameListCache = null;
@@ -1898,6 +1900,7 @@ async function initProjectFromBackendIfPossible() {
   // 讓 header / status badge 與 tasks 同步
   const projectName = String(selected.ProjectName || selected.name || "未命名專案").trim();
   const chargeMan = String(selected.ChargeMan || selected.ChargePerson || selected.owner || selected.Owner || "—").trim();
+  CURRENT_PROJECT_CHARGE_MAN = chargeMan && chargeMan !== "—" ? chargeMan : "";
   const endYmdIso = toIsoDate(selected.EndDate || selected.endDate || "");
 
   const h1 = document.getElementById("project-title");
@@ -2143,8 +2146,26 @@ function isProposalCeoUser() {
   return adminId === "jason";
 }
 
+function isCurrentUserProjectExecutor() {
+  const cm = String(CURRENT_PROJECT_CHARGE_MAN || "").trim();
+  if (!cm) return false;
+  const adminId = String(localStorage.getItem("adminID") || sessionStorage.getItem("adminID") || "").trim();
+  const adminName = String(localStorage.getItem("adminName") || sessionStorage.getItem("adminName") || "").trim();
+  const cml = cm.toLowerCase();
+  return (
+    (adminId && adminId.toLowerCase() === cml) ||
+    (adminName && adminName.toLowerCase() === cml)
+  );
+}
+
+/** 專案執行者同時為執行長：僅能以執行長審核，不需／不可切換為提案人 */
+function isProposalExecutorLockedToCeo() {
+  return isProposalCeoUser() && isCurrentUserProjectExecutor();
+}
+
 function updateProposalPermissionUi() {
   const isCeo = isProposalCeoUser();
+  const lockProposer = isProposalExecutorLockedToCeo();
   const ceoBtn = document.getElementById("proposal-role-ceo");
   const proposerBtn = document.getElementById("proposal-role-proposer");
   const revisionBtn = document.getElementById("proposal-revision-btn");
@@ -2153,6 +2174,10 @@ function updateProposalPermissionUi() {
 
   if (!isCeo && PROPOSAL_REVIEW.currentRole === "ceo") {
     PROPOSAL_REVIEW.currentRole = "proposer";
+  }
+
+  if (lockProposer && isCeo) {
+    PROPOSAL_REVIEW.currentRole = "ceo";
   }
 
   if (ceoBtn) {
@@ -2166,15 +2191,50 @@ function updateProposalPermissionUi() {
   }
 
   if (proposerBtn) {
-    proposerBtn.disabled = false;
+    if (lockProposer) {
+      proposerBtn.disabled = true;
+      proposerBtn.className =
+        "proposal-role-btn border rounded-lg px-3 py-2 text-sm font-medium bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed";
+      proposerBtn.title = "您為專案執行者且為執行長，請以執行長身分審核，無需切換為提案人";
+    } else {
+      proposerBtn.disabled = false;
+      proposerBtn.title = "";
+    }
+  }
+
+  const role = PROPOSAL_REVIEW.currentRole;
+  if (proposerBtn && !proposerBtn.disabled) {
+    proposerBtn.className =
+      "proposal-role-btn border rounded-lg px-3 py-2 text-sm font-medium " +
+      (role === "proposer" ? "bg-blue-50 text-blue-600 border-blue-200" : "bg-white text-slate-600 border border-slate-200");
+  }
+  if (ceoBtn && !ceoBtn.disabled) {
+    ceoBtn.className =
+      "proposal-role-btn border rounded-lg px-3 py-2 text-sm font-medium " +
+      (role === "ceo" ? "bg-blue-50 text-blue-600 border-blue-200" : "bg-white text-slate-600 border border-slate-200");
+  }
+  const labelEl = document.getElementById("proposal-summary-label");
+  if (labelEl) {
+    labelEl.textContent = role === "proposer" ? "提案摘要" : "提案建議";
   }
 
   if (revisionBtn) revisionBtn.classList.toggle("hidden", !isCeo);
   if (approveBtn) approveBtn.classList.toggle("hidden", !isCeo);
-  if (submitBtn) submitBtn.classList.remove("hidden");
+  if (submitBtn) {
+    submitBtn.classList.toggle("hidden", isCeo && role === "ceo");
+    submitBtn.classList.toggle("opacity-50", lockProposer);
+    submitBtn.classList.toggle("pointer-events-none", lockProposer);
+    if (lockProposer) submitBtn.title = "執行者＋執行長請使用退回／通過，不需送交提案";
+    else submitBtn.removeAttribute("title");
+  }
 }
 
 function setProposalRole(role) {
+  if (role === "proposer" && isProposalExecutorLockedToCeo()) {
+    updateProposalPermissionUi();
+    showToast("您為專案執行者且為執行長，無需切換為提案人", "warn");
+    return;
+  }
   if (role === "ceo" && !isProposalCeoUser()) {
     PROPOSAL_REVIEW.currentRole = "proposer";
     updateProposalPermissionUi();
@@ -2317,6 +2377,7 @@ async function submitProposalRound() {
     showToast("請填寫提案摘要與討論 URL", "warn");
     return;
   }
+
   if (!proposalType) {
     showToast("請選擇 Proposal 類別", "warn");
     return;
@@ -2384,7 +2445,20 @@ async function submitProposalRound() {
   }
 }
 
-function submitCeoFeedback(action) {
+function resolveProposalTypeForCeoApi() {
+  const rounds = Array.isArray(PROPOSAL_REVIEW.rounds) ? PROPOSAL_REVIEW.rounds : [];
+  for (var i = rounds.length - 1; i >= 0; i--) {
+    var r = rounds[i];
+    if (r && r.role === "proposer" && r.proposalType) {
+      var pt = String(r.proposalType).trim();
+      if (pt) return pt;
+    }
+  }
+  var typeSel = document.getElementById("proposal-type-select");
+  return typeSel ? String(typeSel.value || "").trim() : "";
+}
+
+async function submitCeoFeedback(action) {
   if (!isProposalCeoUser()) {
     showToast("僅執行長（jason）可執行此操作", "warn");
     return;
@@ -2399,6 +2473,49 @@ function submitCeoFeedback(action) {
     showToast("請填寫提案建議與討論 URL", "warn");
     return;
   }
+
+  const auth = getBackendTokenAndAdmin();
+  const aid = String(CURRENT_PROJECT_AID || localStorage.getItem("projectAID") || "").trim();
+  let apiBid = "";
+  const proposalType = resolveProposalTypeForCeoApi();
+
+  if (auth && aid) {
+    if (!proposalType) {
+      showToast("缺少 Proposal 類別（請對照上一輪提案或於類別下拉選擇）", "warn");
+      return;
+    }
+    const revBtn = document.getElementById("proposal-revision-btn");
+    const appBtn = document.getElementById("proposal-approve-btn");
+    const busyBtn = action === "approved" ? appBtn : revBtn;
+    if (busyBtn) {
+      busyBtn.disabled = true;
+      busyBtn.classList.add("opacity-60", "cursor-wait");
+    }
+    try {
+      const out = await postNewProposalApi(suggestion, url, proposalType);
+      apiBid = out.bid || "";
+      if (apiBid) {
+        try {
+          localStorage.setItem("proposalBID_" + aid, apiBid);
+        } catch (e) {}
+      }
+      syncProposalBidHint(apiBid);
+    } catch (e) {
+      showToast(e && e.message ? e.message : "NewProposal 失敗", "warn");
+      if (busyBtn) {
+        busyBtn.disabled = false;
+        busyBtn.classList.remove("opacity-60", "cursor-wait");
+      }
+      return;
+    }
+    if (busyBtn) {
+      busyBtn.disabled = false;
+      busyBtn.classList.remove("opacity-60", "cursor-wait");
+    }
+  } else {
+    showToast("未登入或缺少 AID：僅更新本機示範，未呼叫 API", "warn");
+  }
+
   const round = PROPOSAL_REVIEW.currentRound || 1;
   PROPOSAL_REVIEW.status = action;
   PROPOSAL_REVIEW.lastActor = "執行長";
@@ -2411,6 +2528,8 @@ function submitCeoFeedback(action) {
     actor: "執行長",
     createdAt: new Date().toLocaleString("zh-TW", { hour12: false }),
     action: action,
+    proposalType: proposalType || undefined,
+    bid: apiBid || undefined,
   });
   document.getElementById("proposal-summary-input").value = "";
   document.getElementById("proposal-url-input").value = "";
@@ -2418,9 +2537,9 @@ function submitCeoFeedback(action) {
   if (action === "approved") {
     projectStatus = "in_progress";
     applyProjectStatusBadge(projectStatus);
-    showToast("執行長已通過（本機流程）");
+    showToast(apiBid ? "執行長已通過，已同步 NewProposal" : "執行長已通過（本機流程）");
   } else {
-    showToast("已退回提案人修改");
+    showToast(apiBid ? "已退回修改，已同步 NewProposal" : "已退回提案人修改");
   }
   updateProposalUi();
 }
