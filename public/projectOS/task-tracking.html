@@ -1502,8 +1502,9 @@ function normalizeUrlListItems(urlList) {
 function normalizeExternalUrl(rawUrl) {
   const v = String(rawUrl || "").trim();
   if (!v) return "";
-  // 僅接受可開啟的絕對網址，避免 "18" 這類值被當成連結
+  // 僅接受可開啟的網址；若後端缺協定，嘗試補上 https://
   if (/^https?:\/\//i.test(v)) return v;
+  if (/^[a-z0-9.-]+\.[a-z]{2,}(\/.*)?$/i.test(v)) return "https://" + v;
   return "";
 }
 
@@ -2198,6 +2199,7 @@ function setProposalRole(role) {
 function renderProposalTimeline() {
   const wrap = document.getElementById("proposal-timeline");
   if (!wrap) return;
+  const globalFallbackDiscussionUrl = normalizeExternalUrl(DECISION_CHATGPT && DECISION_CHATGPT.shareProjectUrl);
   if (!PROPOSAL_REVIEW.rounds.length) {
     wrap.innerHTML =
       '<p class="text-sm text-slate-400 text-center py-8">尚無紀錄。送交執行長後會顯示於此。</p>';
@@ -2206,7 +2208,7 @@ function renderProposalTimeline() {
   wrap.innerHTML = PROPOSAL_REVIEW.rounds
     .map(function (item) {
       const isCeo = item.role === "ceo";
-      const discussionUrl = normalizeExternalUrl(item.url);
+      const discussionUrl = normalizeExternalUrl(item.url) || globalFallbackDiscussionUrl || "";
       const hasDiscussionUrl = !!discussionUrl;
       const statusPill =
         item.action === "approved"
