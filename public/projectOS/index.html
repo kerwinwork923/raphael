@@ -62,7 +62,7 @@
         <!-- ① 一般登入 -->
         <div id="stepLogin">
           <h2 class="text-2xl font-extrabold text-slate-900">後台帳號登入</h2>
-          <p class="text-sm text-slate-500 mt-1">請輸入管理員帳號登入（免密碼）</p>
+          <p class="text-sm text-slate-500 mt-1">請輸入管理員帳號與密碼登入</p>
 
           <form id="loginForm" class="space-y-4 mt-6" novalidate>
             <div>
@@ -72,7 +72,7 @@
                 <input id="username" name="username" type="text" autocomplete="username" placeholder="請輸入帳號" class="flex-1 min-w-0 border-0 bg-transparent text-sm text-slate-800 placeholder:text-slate-400 focus:ring-0 p-0">
               </div>
             </div>
-            <div class="hidden">
+            <div>
               <label class="block text-xs font-medium text-slate-500 mb-1.5" for="password">密碼</label>
               <div class="flex items-center gap-2 w-full border border-slate-200 rounded-xl px-3.5 py-2.5 focus-within:border-blue-400 transition">
                 <svg class="shrink-0 w-5 h-5 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
@@ -162,6 +162,7 @@
     (function () {
       var API_BASE = "https://23700999.com:8081/PM";
       var LOGIN_URL = API_BASE + "/api/fr/Login";
+      var EXTERNAL_LOGIN_URL = API_BASE + "/api/fr/ExternalLogin";
       var LOGIN_KEY = "qrt897hpmd";
       var TRANSFER_SAFEKEY_WHITELIST = "dfvds256sfsdfsf35454adfasfsefthtrfh74879987";
       var FIRST_LOGIN_URL = API_BASE + "/API_FirstAdminLogin.jsp";
@@ -195,12 +196,12 @@
         loadingOverlay.classList.toggle("hidden", !on);
         loadingOverlay.classList.toggle("flex", on);
         if (form) {
-          submitBtn.disabled = on || !usernameEl.value.trim();
+          submitBtn.disabled = on || !usernameEl.value.trim() || !passwordEl.value;
         }
       }
   
       function updateSubmitState() {
-        submitBtn.disabled = !usernameEl.value.trim();
+        submitBtn.disabled = !usernameEl.value.trim() || !passwordEl.value;
       }
   
       function easeOutCubic(t) {
@@ -401,10 +402,11 @@
       form.addEventListener("submit", function (e) {
         e.preventDefault();
         var username = usernameEl.value.trim();
-        if (!username) return;
+        var password = passwordEl.value;
+        if (!username || !password) return;
   
         setLoading(true);
-        postJson(LOGIN_URL, { Key: LOGIN_KEY, AdminID: username })
+        postJson(EXTERNAL_LOGIN_URL, { AdminID: username, Password: password })
           .then(function (r) {
             if (r.Result === "OK" && r.Token) {
               var remember = rememberMeEl.checked;
@@ -416,7 +418,7 @@
               persistSession(r.Token, username, remember);
               window.location.href = "/projectOS/dashboard.html";
             } else {
-              alertMsg("登入失敗：" + (r && r.Result != null ? r.Result : "請檢查帳號密碼"));
+              alertMsg("外部登入失敗：" + (r && r.Result != null ? r.Result : "請檢查帳號或密碼"));
             }
           })
           .catch(function () {
