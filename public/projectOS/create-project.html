@@ -286,6 +286,7 @@ let departmentListCache = null;
 let taskStateListCache = null;
 let adminNameListCache = null;
 let adminPickerMode = "owner";
+let adminPickerSelectedMembers = new Set();
 
 function statusIconByCode(code) {
   switch (String(code)) {
@@ -384,6 +385,15 @@ function openAdminPicker(mode) {
       mode === "members" ? "可勾選多位，確定後以逗號分隔寫入欄位" : "請選擇一位負責人";
   }
   if (searchEl) searchEl.value = "";
+  if (mode === "members") {
+    adminPickerSelectedMembers = new Set();
+    (document.getElementById("m-members") ? document.getElementById("m-members").value : "")
+      .split(/[,，、\s]+/)
+      .forEach(function (s) {
+        const t = s.trim();
+        if (t) adminPickerSelectedMembers.add(t);
+      });
+  }
 
   function showModal() {
     const modal = document.getElementById("admin-picker-modal");
@@ -438,13 +448,9 @@ function renderAdminPickerList() {
   const taskAssigneeVal = document.getElementById("mt-assignee")
     ? document.getElementById("mt-assignee").value.trim()
     : "";
-  const memSet = new Set();
-  (document.getElementById("m-members") ? document.getElementById("m-members").value : "")
-    .split(/[,，、\s]+/)
-    .forEach(function (s) {
-      const t = s.trim();
-      if (t) memSet.add(t);
-    });
+  if (adminPickerMode === "members" && !(adminPickerSelectedMembers instanceof Set)) {
+    adminPickerSelectedMembers = new Set();
+  }
 
   if (!names.length) {
     listEl.innerHTML = '<p class="text-sm text-slate-400 text-center py-8">沒有符合的姓名</p>';
@@ -475,7 +481,7 @@ function renderAdminPickerList() {
   } else {
     listEl.innerHTML = names
       .map(function (name) {
-        const checked = memSet.has(name) ? " checked" : "";
+        const checked = adminPickerSelectedMembers.has(name) ? " checked" : "";
         return (
           '<label class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer text-sm text-slate-800">' +
           '<input type="checkbox" class="ap-mem-cb shrink-0 text-blue-600 rounded" value="' +
@@ -489,6 +495,18 @@ function renderAdminPickerList() {
         );
       })
       .join("");
+    const boxes = listEl.querySelectorAll(".ap-mem-cb");
+    boxes.forEach(function (cb) {
+      cb.addEventListener("change", function () {
+        const v = String(cb.value || "").trim();
+        if (!v) return;
+        if (cb.checked) {
+          adminPickerSelectedMembers.add(v);
+        } else {
+          adminPickerSelectedMembers.delete(v);
+        }
+      });
+    });
   }
 }
 
@@ -502,10 +520,7 @@ function applyAdminPicker() {
     const el = document.getElementById("mt-assignee");
     if (el) el.value = radio ? radio.value : "";
   } else {
-    const boxes = document.querySelectorAll("#admin-picker-list .ap-mem-cb:checked");
-    const vals = Array.from(boxes).map(function (cb) {
-      return cb.value;
-    });
+    const vals = Array.from(adminPickerSelectedMembers);
     const el = document.getElementById("m-members");
     if (el) el.value = vals.join(",");
   }
@@ -682,6 +697,11 @@ function collectManualProjectPayload() {
     return null;
   }
 
+  if (StartDate && EndDate && EndDate < StartDate) {
+    showToast("專案結束日期不可早於開始日期", "warn");
+    return null;
+  }
+
   return {
     ProjectName,
     ChargeMan,
@@ -825,11 +845,17 @@ function closeTaskModal() {
 function saveTaskModal() {
   const title = document.getElementById('mt-title').value.trim();
   if (!title) { showToast('請填入任務標題', 'warn'); return; }
+  const startDate = document.getElementById('mt-start').value;
+  const endDate = document.getElementById('mt-end').value;
+  if (startDate && endDate && endDate < startDate) {
+    showToast('結束日期不可早於開始日期', 'warn');
+    return;
+  }
   const data = {
     title,
     desc: document.getElementById('mt-desc').value.trim(),
-    startDate: document.getElementById('mt-start').value,
-    endDate: document.getElementById('mt-end').value,
+    startDate: startDate,
+    endDate: endDate,
     assignee: document.getElementById('mt-assignee').value,
     status: document.getElementById('mt-status').value,
     prerequisite: document.getElementById('mt-prereq').value,

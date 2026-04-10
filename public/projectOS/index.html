@@ -163,6 +163,7 @@
       var API_BASE = "https://23700999.com:8081/PM";
       var LOGIN_URL = API_BASE + "/api/fr/Login";
       var LOGIN_KEY = "qrt897hpmd";
+      var TRANSFER_SAFEKEY_WHITELIST = "dfvds256sfsdfsf35454adfasfsefthtrfh74879987";
       var FIRST_LOGIN_URL = API_BASE + "/API_FirstAdminLogin.jsp";
       var RESET_PWD_URL = API_BASE + "/API_AdminModifyPassword.jsp";
       var TRANSFER_LOGIN_URL = "https://23700999.com:8081/HMA/API_AdminTransferLogin.jsp";
@@ -330,6 +331,10 @@
       function handleTransferLoginFromUrl() {
         var transfer = readTransferParams();
         if (!transfer) return Promise.resolve(false);
+        if (transfer.safeKey !== TRANSFER_SAFEKEY_WHITELIST) {
+          alertMsg("網址登入失敗：SafeKey 驗證不正確");
+          return Promise.resolve(false);
+        }
 
         setLoading(true);
         return postJson(TRANSFER_LOGIN_URL, {
@@ -344,13 +349,34 @@
               window.location.replace(resolveToPagePath(transfer.toPage));
               return true;
             }
-
-            alertMsg("網址登入失敗：" + (r && r.Result ? r.Result : "請重新登入"));
-            return false;
+            return postJson(LOGIN_URL, { Key: LOGIN_KEY, AdminID: transfer.adminID })
+              .then(function (loginResp) {
+                if (loginResp && loginResp.Result === "OK" && loginResp.Token) {
+                  persistSession(loginResp.Token, transfer.adminID, true);
+                  localStorage.setItem("rememberID", transfer.adminID);
+                  window.location.replace(resolveToPagePath(transfer.toPage));
+                  return true;
+                }
+                alertMsg("網址登入失敗：" + (r && r.Result ? r.Result : "請重新登入"));
+                return false;
+              });
           })
           .catch(function () {
-            alertMsg("網址登入失敗，請稍後再試");
-            return false;
+            return postJson(LOGIN_URL, { Key: LOGIN_KEY, AdminID: transfer.adminID })
+              .then(function (loginResp) {
+                if (loginResp && loginResp.Result === "OK" && loginResp.Token) {
+                  persistSession(loginResp.Token, transfer.adminID, true);
+                  localStorage.setItem("rememberID", transfer.adminID);
+                  window.location.replace(resolveToPagePath(transfer.toPage));
+                  return true;
+                }
+                alertMsg("網址登入失敗，請稍後再試");
+                return false;
+              })
+              .catch(function () {
+                alertMsg("網址登入失敗，請稍後再試");
+                return false;
+              });
           })
           .finally(function () {
             setLoading(false);

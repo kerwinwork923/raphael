@@ -3474,14 +3474,20 @@ async function saveTaskModal() {
     showToast('請填入任務標題', 'warn');
     return;
   }
+  const startDate = document.getElementById('modal-task-start').value;
+  const endDate = document.getElementById('modal-task-end').value;
+  if (startDate && endDate && endDate < startDate) {
+    showToast('結束日期不可早於開始日期', 'warn');
+    return;
+  }
 
   const newStatus = document.getElementById('modal-task-status').value;
 
   const taskData = {
     title,
     desc: document.getElementById('modal-task-desc').value.trim(),
-    startDate: document.getElementById('modal-task-start').value,
-    endDate: document.getElementById('modal-task-end').value,
+    startDate: startDate,
+    endDate: endDate,
     assignee: document.getElementById('modal-task-assignee').value.trim(),
     dep: document.getElementById('modal-task-dep').value,
     plan: document.getElementById('modal-task-plan').value.trim(),
