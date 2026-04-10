@@ -120,6 +120,12 @@ tailwind.config = {
         </svg>
         新增任務
       </button>
+      <button onclick="openProjectEditTab()" class="flex items-center gap-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs px-4 py-2.5 rounded-lg font-medium transition">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+        專案修改
+      </button>
     </div>
   </div>
 
@@ -128,6 +134,7 @@ tailwind.config = {
     <button onclick="setDetailTab(this,'proposal')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">Proposal</button>
     <button onclick="setDetailTab(this,'decision')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">Decision</button>
     <button onclick="setDetailTab(this,'tasks')" class="detail-tab active text-sm px-4 py-2.5 border-b-2 border-blue-600 text-blue-600 font-medium">Tasks</button>
+    <button id="project-edit-tab-btn" onclick="setDetailTab(this,'project-edit')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">專案修改</button>
     <!-- <button onclick="setDetailTab(this,'kpi')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">KPI</button> -->
     <!-- <button onclick="setDetailTab(this,'review')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">Review</button> -->
   </div>
@@ -232,6 +239,93 @@ tailwind.config = {
         <div id="col-blocked" class="space-y-2 kanban-col"></div>
         <button onclick="openNewTaskModal('blocked')" class="mt-3 w-full text-xs border border-dashed border-red-300 text-red-400 hover:text-red-600 hover:border-red-400 py-2 rounded-lg transition">+ 回報 Blocked</button>
       </div>
+    </div>
+  </div>
+
+  <!-- PROJECT EDIT TAB -->
+  <div id="tab-project-edit" class="detail-tab-content hidden">
+    <div class="bg-white rounded-xl border border-slate-200 p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold">專案修改（ModifyProject）</h3>
+        <button id="project-edit-save-btn" type="button" onclick="submitProjectModify()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg font-semibold transition">儲存專案修改</button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1.5">專案名稱</label>
+          <input id="project-edit-name" type="text" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm" placeholder="ProjectName">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1.5">專案狀態 Code</label>
+          <select id="project-edit-state" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:border-blue-400 transition"></select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1.5">負責人</label>
+          <div class="flex gap-2">
+            <input
+              id="project-edit-charge-man"
+              type="text"
+              readonly
+              placeholder="點擊選擇負責人"
+              onclick="openAdminPicker('projectChargeMan')"
+              class="flex-1 border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:border-blue-400 transition cursor-pointer bg-white"
+              title="從員工名單選擇"
+            >
+            <button
+              type="button"
+              onclick="openAdminPicker('projectChargeMan')"
+              class="shrink-0 px-3 py-2 text-xs font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition"
+            >
+              選擇
+            </button>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1.5">部門 Code</label>
+          <select id="project-edit-department" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:border-blue-400 transition"></select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1.5">開始日</label>
+          <input id="project-edit-start-date" type="date" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1.5">結束日</label>
+          <input id="project-edit-end-date" type="date" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm">
+        </div>
+      </div>
+      <div class="mt-4">
+        <label class="block text-xs font-semibold text-slate-500 mb-1.5">參與人員（逗號分隔）</label>
+        <div class="flex gap-2">
+          <input
+            id="project-edit-participants"
+            type="text"
+            readonly
+            placeholder="點擊選擇參與人員"
+            onclick="openAdminPicker('projectParticipants')"
+            class="flex-1 border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:border-blue-400 transition cursor-pointer bg-white"
+            title="從員工名單選擇（可多選）"
+          >
+          <button
+            type="button"
+            onclick="openAdminPicker('projectParticipants')"
+            class="shrink-0 px-3 py-2 text-xs font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition"
+          >
+            選擇
+          </button>
+        </div>
+      </div>
+      <div class="mt-4 hidden">
+        <label class="block text-xs font-semibold text-slate-500 mb-1.5">ShareProject URL</label>
+        <input id="project-edit-share-url" type="text" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm" placeholder="https://chatgpt.com/share/...">
+      </div>
+      <div class="mt-4 hidden">
+        <label class="block text-xs font-semibold text-slate-500 mb-1.5">Decision（摘要）</label>
+        <textarea id="project-edit-decision" rows="3" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm resize-none" placeholder="Decision"></textarea>
+      </div>
+      <div class="mt-4 hidden">
+        <label class="block text-xs font-semibold text-slate-500 mb-1.5">KPIList（每行：KPIName|KPITarget）</label>
+        <textarea id="project-edit-kpi-lines" rows="4" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm resize-none" placeholder="營收|100000&#10;轉換率|20%"></textarea>
+      </div>
+      <p class="text-xs text-slate-400 mt-3">TaskList / FileList / DecisionList 會自動帶入目前頁面資料送到 ModifyProject API。</p>
     </div>
   </div>
 
@@ -848,20 +942,37 @@ const TASK_DELETE_URL = API_BASE + "/api/fr/DeleteTask";
 // 新增任務：目前程式碼庫未找到實際 endpoint；此為合理推測點位，可能需要你再確認/調整
 const NEW_TASK_URL = API_BASE + "/api/fr/NewTask";
 const GET_ADMIN_NAME_LIST_URL = API_BASE + "/api/fr/getAdminNameList";
+const GET_DEPARTMENT_URL = API_BASE + "/api/fr/getDepartmentCode";
 const TASK_STATE_LIST_URLS = [API_BASE + "/api/fr/getTaskStateCode", API_BASE + "/api/fr/getTaskState"];
 const NEW_PROPOSAL_URL = API_BASE + "/api/fr/NewProposal";
 const MODIFY_PROPOSAL_URL = API_BASE + "/api/fr/ModifyProposal";
 const DELETE_PROPOSAL_URL = API_BASE + "/api/fr/DeleteProposal";
+const MODIFY_PROJECT_URL = API_BASE + "/api/fr/ModifyProject";
 
 /** 目前頁面對應的專案 AID（來自 getProjectList 或 localStorage.projectAID） */
 let CURRENT_PROJECT_AID = "";
 /** 專案負責人（ChargeMan），用於判斷是否為「執行者」以鎖定 Proposal 角色 */
 let CURRENT_PROJECT_CHARGE_MAN = "";
+let CURRENT_PROJECT_STATE = "";
+let CURRENT_PROJECT_DEPARTMENT = "";
+let CURRENT_PROJECT_PARTICIPANTS = "";
+let CURRENT_PROJECT_START_DATE = "";
+let CURRENT_PROJECT_END_DATE = "";
 /** 是否已成功自 getProjectList 套用專案與任務 */
 let backendProjectSynced = false;
 let adminNameListCache = null;
 let adminPickerMode = "taskAssignee";
 let taskStateListCache = null;
+let departmentListCache = null;
+const PROJECT_STATE_LIST = [
+  { AID: "1", Code: "1", Name: "提案中" },
+  { AID: "2", Code: "2", Name: "待執行長回覆" },
+  { AID: "3", Code: "3", Name: "進行中" },
+  { AID: "4", Code: "4", Name: "Review" },
+  { AID: "5", Code: "5", Name: "完成" },
+  { AID: "6", Code: "6", Name: "延遲" },
+  { AID: "7", Code: "7", Name: "Blocked" },
+];
 
 
 
@@ -1273,8 +1384,12 @@ function openAdminPicker(mode) {
   const titleEl = document.getElementById("admin-picker-title");
   const hintEl = document.getElementById("admin-picker-hint");
   const searchEl = document.getElementById("admin-picker-search");
-  if (titleEl) titleEl.textContent = "選擇負責人";
-  if (hintEl) hintEl.textContent = "請選擇一位負責人";
+  if (titleEl) {
+    titleEl.textContent = mode === "projectParticipants" ? "選擇參與人員" : "選擇負責人";
+  }
+  if (hintEl) {
+    hintEl.textContent = mode === "projectParticipants" ? "可勾選多位，確定後以逗號分隔寫入欄位" : "請選擇一位負責人";
+  }
   if (searchEl) searchEl.value = "";
 
   function showModal() {
@@ -1349,8 +1464,48 @@ function renderAdminPickerList() {
         );
       })
       .join("");
+  } else if (adminPickerMode === "projectParticipants") {
+    const participantSet = new Set();
+    const participantText = (document.getElementById("project-edit-participants")?.value || "").trim();
+    participantText.split(/[,，、\s]+/).forEach(function (item) {
+      const v = String(item || "").trim();
+      if (v) participantSet.add(v);
+    });
+    listEl.innerHTML = filtered
+      .map(function (name) {
+        const checked = participantSet.has(name) ? " checked" : "";
+        return (
+          '<label class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer text-sm text-slate-800">' +
+          '<input type="checkbox" class="admin-picker-participant shrink-0 text-blue-600 rounded" value="' +
+          escapeAttr(name) +
+          '"' +
+          checked +
+          ">" +
+          "<span>" +
+          escapeHtml(name) +
+          "</span></label>"
+        );
+      })
+      .join("");
+  } else if (adminPickerMode === "projectChargeMan") {
+    const currentVal = (document.getElementById("project-edit-charge-man")?.value || "").trim();
+    listEl.innerHTML = filtered
+      .map(function (name) {
+        const checked = name === currentVal ? " checked" : "";
+        return (
+          '<label class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer text-sm text-slate-800">' +
+          '<input type="radio" name="admin-picker-project-charge-man" class="shrink-0 text-blue-600" value="' +
+          escapeAttr(name) +
+          '"' +
+          checked +
+          ">" +
+          "<span>" +
+          escapeHtml(name) +
+          "</span></label>"
+        );
+      })
+      .join("");
   } else {
-    // 預設只支援負責人選擇
     const taskAssigneeValEl = document.getElementById("modal-task-assignee");
     const checkedBase = taskAssigneeValEl ? taskAssigneeValEl.value.trim() : "";
     listEl.innerHTML = filtered
@@ -1377,8 +1532,109 @@ function applyAdminPicker() {
     const radio = document.querySelector('input[name="admin-picker-task-assignee"]:checked');
     const el = document.getElementById("modal-task-assignee");
     if (el) el.value = radio ? radio.value : "";
+  } else if (adminPickerMode === "projectParticipants") {
+    const boxes = document.querySelectorAll("#admin-picker-list .admin-picker-participant:checked");
+    const vals = Array.from(boxes).map(function (cb) {
+      return cb.value;
+    });
+    const el = document.getElementById("project-edit-participants");
+    if (el) el.value = vals.join(",");
+  } else if (adminPickerMode === "projectChargeMan") {
+    const radio = document.querySelector('input[name="admin-picker-project-charge-man"]:checked');
+    const el = document.getElementById("project-edit-charge-man");
+    if (el) el.value = radio ? radio.value : "";
   }
   closeAdminPicker();
+}
+
+function setSelectValueIfOptionExists(selectEl, desiredValue, fallbackValue) {
+  if (!selectEl) return;
+  const dv = desiredValue == null ? "" : String(desiredValue).trim();
+  const hasDesired = Array.from(selectEl.options).some(function (o) {
+    return String(o.value).trim() === dv;
+  });
+  if (hasDesired) {
+    selectEl.value = dv;
+    return;
+  }
+  const fv = fallbackValue == null ? "" : String(fallbackValue).trim();
+  const hasFallback = Array.from(selectEl.options).some(function (o) {
+    return String(o.value).trim() === fv;
+  });
+  if (hasFallback) {
+    selectEl.value = fv;
+    return;
+  }
+  if (selectEl.options.length) selectEl.value = selectEl.options[0].value;
+}
+
+function populateProjectStateSelect(selectEl) {
+  if (!selectEl) return;
+  const current = String(selectEl.value || "").trim();
+  selectEl.innerHTML = "";
+  PROJECT_STATE_LIST.forEach(function (st) {
+    if (!st) return;
+    const code = String(st.Code || "").trim();
+    const name = String(st.Name || "").trim();
+    if (!code) return;
+    const opt = document.createElement("option");
+    opt.value = code;
+    opt.textContent = name ? code + " - " + name : code;
+    selectEl.appendChild(opt);
+  });
+  setSelectValueIfOptionExists(selectEl, current, CURRENT_PROJECT_STATE || "3");
+}
+
+function populateDepartmentSelect(selectEl) {
+  if (!selectEl) return;
+  const current = String(selectEl.value || "").trim();
+  selectEl.innerHTML = "";
+  const list = Array.isArray(departmentListCache) ? departmentListCache : [];
+  if (!list.length) {
+    const fallback = document.createElement("option");
+    fallback.value = current || "";
+    fallback.textContent = current || "尚無部門資料";
+    selectEl.appendChild(fallback);
+    return;
+  }
+  list.forEach(function (d) {
+    if (!d) return;
+    const code = String(d.Code || "").trim();
+    const name = String(d.Name || "").trim();
+    if (!code && !name) return;
+    const opt = document.createElement("option");
+    opt.value = code || name;
+    opt.textContent = name && code ? name + " (" + code + ")" : name || code;
+    selectEl.appendChild(opt);
+  });
+
+  let preferred = current;
+  if (preferred && !Array.from(selectEl.options).some(function (o) { return String(o.value) === preferred; })) {
+    const byName = list.find(function (d) {
+      return String(d && d.Name || "").trim() === preferred;
+    });
+    if (byName) preferred = String(byName.Code || "").trim();
+  }
+  setSelectValueIfOptionExists(selectEl, preferred, selectEl.options[0]?.value || "");
+}
+
+async function initProjectEditReferenceData() {
+  populateProjectStateSelect(document.getElementById("project-edit-state"));
+  const session = getBackendTokenAndAdmin();
+  if (!session) {
+    populateDepartmentSelect(document.getElementById("project-edit-department"));
+    return;
+  }
+  try {
+    const resp = await postJson(GET_DEPARTMENT_URL, { AdminID: session.adminID, Token: session.token });
+    const list = resp && (resp.DepartmentList || resp.departmentList);
+    if (Array.isArray(list) && list.length) {
+      departmentListCache = list;
+    }
+  } catch (e) {
+    // noop
+  }
+  populateDepartmentSelect(document.getElementById("project-edit-department"));
 }
 
 function populateTaskStatusSelect(selectEl) {
@@ -1769,6 +2025,7 @@ async function initProjectFromBackendIfPossible() {
 
   const rawTasks = Array.isArray(selected.TaskList) ? selected.TaskList : [];
   const rawKpis = Array.isArray(selected.KPIList) ? selected.KPIList : [];
+  window.__CURRENT_KPI_LIST__ = rawKpis.slice();
 
   // 先重組 TASKS（renderKanban 會用 TASKS）
   const cidToLocalId = {};
@@ -1840,6 +2097,11 @@ async function initProjectFromBackendIfPossible() {
   const projectName = String(selected.ProjectName || selected.name || "未命名專案").trim();
   const chargeMan = String(selected.ChargeMan || selected.ChargePerson || selected.owner || selected.Owner || "—").trim();
   CURRENT_PROJECT_CHARGE_MAN = chargeMan && chargeMan !== "—" ? chargeMan : "";
+  CURRENT_PROJECT_STATE = String(selected.State || selected.ProjectState || "").trim();
+  CURRENT_PROJECT_DEPARTMENT = String(selected.Department || selected.Dept || "").trim();
+  CURRENT_PROJECT_PARTICIPANTS = String(selected.Participants || "").trim();
+  CURRENT_PROJECT_START_DATE = toYYYYMMDD(selected.StartDate || selected.startDate || "");
+  CURRENT_PROJECT_END_DATE = toYYYYMMDD(selected.EndDate || selected.endDate || "");
   const endYmdIso = toIsoDate(selected.EndDate || selected.endDate || "");
 
   const h1 = document.getElementById("project-title");
@@ -1985,6 +2247,7 @@ async function initProjectFromBackendIfPossible() {
 
   // 若後端有傳 KPIList，就不額外接 UI（目前 KPI 畫面是靜態）
   backendProjectSynced = true;
+  if (typeof populateProjectEditForm === "function") populateProjectEditForm();
 }
 
 let nextId = 100;
@@ -2656,6 +2919,203 @@ function setDetailTab(btn, tab) {
   document.getElementById('tab-' + tab).classList.remove('hidden');
 }
 
+function projectStatusToCode(status) {
+  if (status === "closed") return "4";
+  if (status === "review") return "3";
+  if (status === "in_progress") return "2";
+  return "1";
+}
+
+function buildProjectTaskListForModify() {
+  const aid = String(CURRENT_PROJECT_AID || "").trim();
+  const rows = [];
+  const cidByLocalId = {};
+  ['todo', 'doing', 'done', 'blocked'].forEach(function (col) {
+    (TASKS[col] || []).forEach(function (t) {
+      if (t && t.id && t.cid) cidByLocalId[String(t.id)] = String(t.cid).trim();
+    });
+  });
+
+  ['todo', 'doing', 'done', 'blocked'].forEach(function (col) {
+    (TASKS[col] || []).forEach(function (t) {
+      if (!t || !t.cid) return;
+      const depCid = t.dep && cidByLocalId[String(t.dep)] ? cidByLocalId[String(t.dep)] : "0";
+      const urls = Array.isArray(t.discussionLinks)
+        ? t.discussionLinks.map(function (x) {
+            return String((x && x.url) || "").trim();
+          }).filter(Boolean)
+        : [];
+      rows.push({
+        CID: String(t.cid).trim(),
+        AID: aid,
+        Topic: String(t.title || "").trim(),
+        Description: String(t.desc || "").trim(),
+        StartDate: toYYYYMMDD(t.startDate || ""),
+        EndDate: toYYYYMMDD(t.endDate || ""),
+        ChargeMan: String(t.assignee || "").trim(),
+        State: colToStateCode(col),
+        PreTaskID: depCid || "0",
+        ExePlan: String(t.plan || "").trim(),
+        ExeCond: String(t.doingNote || "").trim(),
+        ExeResult: String(t.checkResult || "").trim(),
+        URLList: urls,
+      });
+    });
+  });
+  return rows;
+}
+
+function buildProjectFileListForModify() {
+  const aid = String(CURRENT_PROJECT_AID || "").trim();
+  return (Array.isArray(FILES) ? FILES : []).map(function (f) {
+    return {
+      BID: String((f && f.bid) || "").trim(),
+      AID: aid,
+      base64String: String((f && f.base64String) || "").trim(),
+      FileName: String((f && f.name) || "").trim(),
+    };
+  }).filter(function (f) {
+    return f.BID || f.base64String || f.FileName;
+  });
+}
+
+function buildProjectDecisionListForModify() {
+  const aid = String(CURRENT_PROJECT_AID || "").trim();
+  const bid = String(localStorage.getItem("decisionBID_" + aid) || "").trim();
+  const topicList = (Array.isArray(DECISION_CHATGPT.topics) ? DECISION_CHATGPT.topics : []).map(function (tp, idx) {
+    const found = tp && tp.taskId ? findTask(String(tp.taskId)) : null;
+    const taskCid = found && found.task && found.task.cid ? String(found.task.cid).trim() : "";
+    return {
+      DID: String((tp && tp.did) || (idx + 1)),
+      BID: bid || "",
+      AID: aid,
+      TopicName: String((tp && tp.title) || "").trim(),
+      TaskID: taskCid,
+      TopicURL: String((tp && tp.url) || "").trim(),
+    };
+  }).filter(function (x) {
+    return x.TopicName || x.TopicURL || x.TaskID;
+  });
+
+  return [{
+    BID: bid || "",
+    AID: aid,
+    ShareProjectURL: String(document.getElementById("project-edit-share-url")?.value || "").trim(),
+    BackGround: String(document.getElementById("decision-background")?.value || "").trim(),
+    Kernal: String(document.getElementById("decision-core")?.value || "").trim(),
+    Risk: String(document.getElementById("decision-risk")?.value || "").trim(),
+    DecisionTopicList: topicList,
+  }];
+}
+
+function parseProjectKpiLines() {
+  const txt = String(document.getElementById("project-edit-kpi-lines")?.value || "").trim();
+  if (!txt) return [];
+  return txt.split(/\r?\n/).map(function (line) {
+    const raw = String(line || "").trim();
+    if (!raw) return null;
+    const parts = raw.split("|");
+    return {
+      KPIName: String(parts[0] || "").trim(),
+      KPITarget: String(parts.slice(1).join("|") || "").trim(),
+    };
+  }).filter(function (x) {
+    return x && (x.KPIName || x.KPITarget);
+  });
+}
+
+function populateProjectEditForm() {
+  const title = String(document.getElementById("project-title")?.textContent || "").trim();
+  const stateCode = CURRENT_PROJECT_STATE || projectStatusToCode(projectStatus);
+  const shareUrl = DECISION_CHATGPT.shareProjectUrl || "";
+  const core = String(document.getElementById("decision-core")?.value || "").trim();
+  const kpiLines = (Array.isArray(window.__CURRENT_KPI_LIST__) ? window.__CURRENT_KPI_LIST__ : []).map(function (k) {
+    return String((k && k.KPIName) || "").trim() + "|" + String((k && k.KPITarget) || "").trim();
+  }).filter(Boolean).join("\n");
+
+  const setVal = function (id, val) {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  };
+  setVal("project-edit-name", title);
+  setVal("project-edit-state", stateCode);
+  setVal("project-edit-charge-man", CURRENT_PROJECT_CHARGE_MAN || "");
+  setVal("project-edit-participants", CURRENT_PROJECT_PARTICIPANTS || "");
+  setVal("project-edit-start-date", toIsoDate(CURRENT_PROJECT_START_DATE || ""));
+  setVal("project-edit-end-date", toIsoDate(CURRENT_PROJECT_END_DATE || ""));
+  setVal("project-edit-department", CURRENT_PROJECT_DEPARTMENT || "");
+  setVal("project-edit-share-url", shareUrl);
+  setVal("project-edit-decision", core);
+  setVal("project-edit-kpi-lines", kpiLines);
+}
+
+function openProjectEditTab() {
+  populateProjectEditForm();
+  const btn = document.getElementById("project-edit-tab-btn");
+  if (btn) setDetailTab(btn, "project-edit");
+}
+
+async function submitProjectModify() {
+  const auth = getBackendTokenAndAdmin();
+  if (!auth) {
+    showToast("尚未登入，缺少 AdminID / Token", "warn");
+    return;
+  }
+  const aid = String(CURRENT_PROJECT_AID || localStorage.getItem("projectAID") || "").trim();
+  if (!aid) {
+    showToast("缺少專案 AID", "warn");
+    return;
+  }
+
+  const payload = {
+    AdminID: auth.adminID,
+    Token: auth.token,
+    AID: aid,
+    State: String(document.getElementById("project-edit-state")?.value || "").trim() || projectStatusToCode(projectStatus),
+    ProjectName: String(document.getElementById("project-edit-name")?.value || "").trim(),
+    ChargeMan: String(document.getElementById("project-edit-charge-man")?.value || "").trim(),
+    Participants: String(document.getElementById("project-edit-participants")?.value || "").trim(),
+    StartDate: toYYYYMMDD(document.getElementById("project-edit-start-date")?.value || ""),
+    EndDate: toYYYYMMDD(document.getElementById("project-edit-end-date")?.value || ""),
+    Department: String(document.getElementById("project-edit-department")?.value || "").trim(),
+    KPIList: parseProjectKpiLines(),
+    TaskList: buildProjectTaskListForModify(),
+    FileList: buildProjectFileListForModify(),
+    DecisionList: buildProjectDecisionListForModify(),
+  };
+
+  if (!payload.ProjectName) {
+    showToast("請填寫專案名稱", "warn");
+    return;
+  }
+
+  const btn = document.getElementById("project-edit-save-btn");
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.add("opacity-60", "cursor-wait");
+  }
+  try {
+    const resp = await postJson(MODIFY_PROJECT_URL, payload);
+    if (!isFrApiResultOk(resp)) {
+      throw new Error((resp && (resp.Message || resp.Msg || resp.message)) || "ModifyProject 失敗");
+    }
+    showToast("專案修改已儲存");
+    backendProjectSynced = false;
+    await initProjectFromBackendIfPossible().catch(function () {});
+    renderKanban();
+    renderFiles();
+    updateProposalUi();
+    populateProjectEditForm();
+  } catch (e) {
+    showToast(e && e.message ? e.message : "ModifyProject 失敗", "warn");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.classList.remove("opacity-60", "cursor-wait");
+    }
+  }
+}
+
 function buildCard(t, col) {
   const assigneeName = (t.assignee && String(t.assignee).trim()) ? String(t.assignee).trim() : "未指定";
   const av = AV[assigneeName] || "bg-slate-400";
@@ -2820,12 +3280,21 @@ function updateHealth() {
   const circ = 100.5;
   const da = (score/100)*circ;
   const color = score>=80?'#22c55e':score>=60?'#f59e0b':'#ef4444';
-  document.getElementById('health-ring-circle').setAttribute('stroke-dasharray',`${da} ${circ}`);
-  document.getElementById('health-ring-circle').setAttribute('stroke',color);
-  document.getElementById('health-score-num').textContent = score;
-  document.getElementById('health-score-num').style.color = color;
-  document.getElementById('health-label').textContent = score>=80?'🟢 健康':score>=60?'🟡 注意':'🔴 危險';
-  document.getElementById('health-label').className = `text-xs font-semibold ${score>=80?'text-green-600':score>=60?'text-amber-600':'text-red-600'}`;
+  const ring = document.getElementById('health-ring-circle');
+  if (ring) {
+    ring.setAttribute('stroke-dasharray',`${da} ${circ}`);
+    ring.setAttribute('stroke',color);
+  }
+  const scoreEl = document.getElementById('health-score-num');
+  if (scoreEl) {
+    scoreEl.textContent = score;
+    scoreEl.style.color = color;
+  }
+  const labelEl = document.getElementById('health-label');
+  if (labelEl) {
+    labelEl.textContent = score>=80?'🟢 健康':score>=60?'🟡 注意':'🔴 危險';
+    labelEl.className = `text-xs font-semibold ${score>=80?'text-green-600':score>=60?'text-amber-600':'text-red-600'}`;
+  }
 }
 
 function updateKpiProgress() {
@@ -3615,6 +4084,8 @@ function applyFallbackDemoHeader() {
   const s = document.getElementById("project-subtitle");
   if (t) t.textContent = "專案任務追蹤（本地預覽）";
   if (s) s.textContent = "未從後端同步 · 可於本頁操作 Kanban 與 Decision";
+  CURRENT_PROJECT_STATE = CURRENT_PROJECT_STATE || projectStatusToCode(projectStatus);
+  if (typeof populateProjectEditForm === "function") populateProjectEditForm();
 }
 
 function refreshDecisionSaveButtonLabel() {
@@ -3937,8 +4408,10 @@ document.addEventListener('DOMContentLoaded', () => {
         applyFallbackDemoHeader();
       }
       initTaskStateSelectReferenceData().catch(function () {});
+      initProjectEditReferenceData().catch(function () {});
       updateProposalUi();
       setProposalRole(PROPOSAL_REVIEW.currentRole || "proposer");
+      populateProjectEditForm();
       try {
         var aidPb = (CURRENT_PROJECT_AID || localStorage.getItem("projectAID") || "").trim();
         var lastBid = aidPb ? (localStorage.getItem("proposalBID_" + aidPb) || "").trim() : "";

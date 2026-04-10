@@ -62,7 +62,7 @@
         <!-- ① 一般登入 -->
         <div id="stepLogin">
           <h2 class="text-2xl font-extrabold text-slate-900">後台帳號登入</h2>
-          <p class="text-sm text-slate-500 mt-1">請輸入管理員帳號與密碼</p>
+          <p class="text-sm text-slate-500 mt-1">請輸入管理員帳號登入（免密碼）</p>
 
           <form id="loginForm" class="space-y-4 mt-6" novalidate>
             <div>
@@ -72,7 +72,7 @@
                 <input id="username" name="username" type="text" autocomplete="username" placeholder="請輸入帳號" class="flex-1 min-w-0 border-0 bg-transparent text-sm text-slate-800 placeholder:text-slate-400 focus:ring-0 p-0">
               </div>
             </div>
-            <div>
+            <div class="hidden">
               <label class="block text-xs font-medium text-slate-500 mb-1.5" for="password">密碼</label>
               <div class="flex items-center gap-2 w-full border border-slate-200 rounded-xl px-3.5 py-2.5 focus-within:border-blue-400 transition">
                 <svg class="shrink-0 w-5 h-5 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
@@ -162,8 +162,10 @@
     (function () {
       var API_BASE = "https://23700999.com:8081/PM";
       var LOGIN_URL = API_BASE + "/api/fr/Login";
+      var LOGIN_KEY = "qrt897hpmd";
       var FIRST_LOGIN_URL = API_BASE + "/API_FirstAdminLogin.jsp";
       var RESET_PWD_URL = API_BASE + "/API_AdminModifyPassword.jsp";
+      var TRANSFER_LOGIN_URL = "https://23700999.com:8081/HMA/API_AdminTransferLogin.jsp";
   
       var usernameEl = document.getElementById("username");
       var passwordEl = document.getElementById("password");
@@ -192,12 +194,12 @@
         loadingOverlay.classList.toggle("hidden", !on);
         loadingOverlay.classList.toggle("flex", on);
         if (form) {
-          submitBtn.disabled = on || !usernameEl.value.trim() || !passwordEl.value;
+          submitBtn.disabled = on || !usernameEl.value.trim();
         }
       }
   
       function updateSubmitState() {
-        submitBtn.disabled = !usernameEl.value.trim() || !passwordEl.value;
+        submitBtn.disabled = !usernameEl.value.trim();
       }
   
       function easeOutCubic(t) {
@@ -295,7 +297,64 @@
           sessionStorage.getItem("backendToken");
         if (t) {
           window.location.href = "/projectOS/dashboard.html";
+          return true;
         }
+        return false;
+      }
+
+      function resolveToPagePath(toPage) {
+        var pageMap = {
+          dashboard: "/projectOS/dashboard.html",
+          tasktracking: "/projectOS/task-tracking.html",
+          createproject: "/projectOS/create-project.html",
+        };
+        var normalized = (toPage || "").toLowerCase().replace(/\s+/g, "");
+        return pageMap[normalized] || "/projectOS/dashboard.html";
+      }
+
+      function readTransferParams() {
+        var params = new URLSearchParams(window.location.search || "");
+        var adminID = (params.get("AdminID") || params.get("adminid") || "").trim();
+        var safeKey = (params.get("SafeKey") || params.get("safekey") || "").trim();
+        var mobile = (params.get("Mobile") || params.get("mobile") || "").trim();
+        var toPage = (params.get("ToPage") || params.get("topage") || "").trim();
+        if (!adminID || !safeKey) return null;
+        return {
+          adminID: adminID,
+          safeKey: safeKey,
+          mobile: mobile,
+          toPage: toPage,
+        };
+      }
+
+      function handleTransferLoginFromUrl() {
+        var transfer = readTransferParams();
+        if (!transfer) return Promise.resolve(false);
+
+        setLoading(true);
+        return postJson(TRANSFER_LOGIN_URL, {
+          AdminID: transfer.adminID,
+          SafeKey: transfer.safeKey,
+          Mobile: transfer.mobile || "",
+        })
+          .then(function (r) {
+            if (r && r.Result === "OK" && r.Token) {
+              persistSession(r.Token, r.AdminID || transfer.adminID, true);
+              localStorage.setItem("rememberID", r.AdminID || transfer.adminID);
+              window.location.replace(resolveToPagePath(transfer.toPage));
+              return true;
+            }
+
+            alertMsg("網址登入失敗：" + (r && r.Result ? r.Result : "請重新登入"));
+            return false;
+          })
+          .catch(function () {
+            alertMsg("網址登入失敗，請稍後再試");
+            return false;
+          })
+          .finally(function () {
+            setLoading(false);
+          });
       }
   
       function postJson(url, body) {
@@ -316,15 +375,10 @@
       form.addEventListener("submit", function (e) {
         e.preventDefault();
         var username = usernameEl.value.trim();
-        var password = passwordEl.value;
-        if (!username || !password) return;
-        if (password.length < 6) {
-          alertMsg("密碼需至少 6 碼");
-          return;
-        }
+        if (!username) return;
   
         setLoading(true);
-        postJson(LOGIN_URL, { AdminID: username, Password: password })
+        postJson(LOGIN_URL, { Key: LOGIN_KEY, AdminID: username })
           .then(function (r) {
             if (r.Result === "OK" && r.Token) {
               var remember = rememberMeEl.checked;
@@ -347,7 +401,11 @@
           });
       });
   
-      redirectIfLoggedIn();
+      handleTransferLoginFromUrl().then(function (loggedByUrl) {
+        if (!loggedByUrl) {
+          redirectIfLoggedIn();
+        }
+      });
       updateSubmitState();
       initLoginMetrics();
     })();
