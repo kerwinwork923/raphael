@@ -329,6 +329,15 @@
         };
       }
 
+      function isResultOk(obj) {
+        return obj && obj.Result != null && String(obj.Result).toUpperCase() === "OK";
+      }
+
+      /**
+       * 外部網站先打 HMA Transfer 換到的 Token，常與 PM 的 /api/fr/* 不相容；
+       * Dashboard 會用同一組 backendToken 打 PM API，必須改存 /api/fr/Login（Key）取得的 Token，
+       * 行為才會與可正常使用的登入方式一致。
+       */
       function handleTransferLoginFromUrl() {
         var transfer = readTransferParams();
         if (!transfer) return Promise.resolve(false);
@@ -344,28 +353,44 @@
           Mobile: transfer.mobile || "",
         })
           .then(function (r) {
-            if (r && r.Result === "OK" && r.Token) {
-              persistSession(r.Token, r.AdminID || transfer.adminID, true);
-              localStorage.setItem("rememberID", r.AdminID || transfer.adminID);
-              window.location.replace(resolveToPagePath(transfer.toPage));
-              return true;
+            var transferOk = r && isResultOk(r) && r.Token;
+            var adminFromTransfer = (r && (r.AdminID || r.adminID)) || transfer.adminID;
+            adminFromTransfer = String(adminFromTransfer || "").trim() || transfer.adminID;
+
+            if (transferOk) {
+              return postJson(LOGIN_URL, { Key: LOGIN_KEY, AdminID: adminFromTransfer }).then(
+                function (loginResp) {
+                  if (loginResp && isResultOk(loginResp) && loginResp.Token) {
+                    persistSession(loginResp.Token, adminFromTransfer, true);
+                    localStorage.setItem("rememberID", adminFromTransfer);
+                    window.location.replace(resolveToPagePath(transfer.toPage));
+                    return true;
+                  }
+                  alertMsg(
+                    "網址登入已通過外部驗證，但無法取得專案系統（PM）登入憑證，請改用帳號密碼登入 ProjectOS"
+                  );
+                  return false;
+                }
+              );
             }
-            return postJson(LOGIN_URL, { Key: LOGIN_KEY, AdminID: transfer.adminID })
-              .then(function (loginResp) {
-                if (loginResp && loginResp.Result === "OK" && loginResp.Token) {
+
+            return postJson(LOGIN_URL, { Key: LOGIN_KEY, AdminID: transfer.adminID }).then(
+              function (loginResp) {
+                if (loginResp && isResultOk(loginResp) && loginResp.Token) {
                   persistSession(loginResp.Token, transfer.adminID, true);
                   localStorage.setItem("rememberID", transfer.adminID);
                   window.location.replace(resolveToPagePath(transfer.toPage));
                   return true;
                 }
-                alertMsg("網址登入失敗：" + (r && r.Result ? r.Result : "請重新登入"));
+                alertMsg("網址登入失敗：" + (r && r.Result != null ? r.Result : "請重新登入"));
                 return false;
-              });
+              }
+            );
           })
           .catch(function () {
             return postJson(LOGIN_URL, { Key: LOGIN_KEY, AdminID: transfer.adminID })
               .then(function (loginResp) {
-                if (loginResp && loginResp.Result === "OK" && loginResp.Token) {
+                if (loginResp && isResultOk(loginResp) && loginResp.Token) {
                   persistSession(loginResp.Token, transfer.adminID, true);
                   localStorage.setItem("rememberID", transfer.adminID);
                   window.location.replace(resolveToPagePath(transfer.toPage));
@@ -408,7 +433,7 @@
         setLoading(true);
         postJson(EXTERNAL_LOGIN_URL, { AdminID: username, Password: password })
           .then(function (r) {
-            if (r.Result === "OK" && r.Token) {
+            if (isResultOk(r) && r.Token) {
               var remember = rememberMeEl.checked;
               if (remember) {
                 localStorage.setItem("rememberID", username);
