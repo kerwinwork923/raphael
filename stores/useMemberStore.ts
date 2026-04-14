@@ -267,50 +267,28 @@ export const useMemberStore = defineStore('member', () => {
   }
 
   async function fetchFavoriteTPointsList(auth: any) {
-    // 產品使用紀錄：改用 UseRecordMIDList API + FavoriteTPointsMIDList 合併
+    // 產品使用紀錄：僅使用 UseRecordMIDList，不再依賴 FavoriteTPointsMIDList
     try {
       const { token, admin, sel } = auth
       if (!token || !admin || (!sel.MID && !sel.Mobile)) return
 
-      // 同時呼叫兩個 API
-      const [useRecordRes, favoriteRes] = await Promise.all([
-        fetch("https://23700999.com:8081/HMA/api/bk/UseRecordMIDList", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            AdminID: admin,
-            Token: token,
-            MID: sel.MID ?? "",
-            StartDate: "",
-            EndDate: "",
-          }),
+      const useRecordRes = await fetch("https://23700999.com:8081/HMA/api/bk/UseRecordMIDList", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          AdminID: admin,
+          Token: token,
+          MID: sel.MID ?? "",
+          StartDate: "",
+          EndDate: "",
         }),
-        fetch("https://23700999.com:8081/HMA/api/bk/FavoriteTPointsMIDList", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            AdminID: admin,
-            Token: token,
-            MID: sel.MID ?? "",
-          }),
-        }),
-      ])
-
-      const useRecordData = await useRecordRes.json()
-      const favoriteData = await favoriteRes.json()
-
-      // 建立我的最愛 AID → 資料的對照表
-      const favoriteMap = new Map<string, any>()
-      const favList = (favoriteData.Result === "OK") ? (favoriteData.FavoriteTPointsMIDList || []) : []
-      favoriteMIDList.value = favList
-      favList.forEach((fav: any) => {
-        const aid = String(fav.AID ?? "")
-        if (aid && aid !== "0") {
-          favoriteMap.set(aid, fav)
-        }
       })
 
-      // ---- 1. 處理 UseRecordMIDList（使用紀錄）----
+      const useRecordData = await useRecordRes.json()
+      // 不再打 FavoriteTPointsMIDList，避免額外 API 依賴
+      favoriteMIDList.value = []
+
+      // ---- 處理 UseRecordMIDList（使用紀錄）----
       const useRecordRows: any[] = []
       if (useRecordData.Result === "OK") {
         const list = useRecordData.UseRecordMIDList || []
@@ -334,12 +312,10 @@ export const useMemberStore = defineStore('member', () => {
             formattedEndTime = `${endTimeRaw.substring(8, 10)}:${endTimeRaw.substring(10, 12)}`
           }
 
-          // 比對 AID 取得我的最愛名稱
-          const aidStr = String(item.AID ?? "")
-          const matchedFavorite = favoriteMap.get(aidStr)
-          const favoriteName = matchedFavorite?.TName || item.FavoriteName || ""
-          const tMode = matchedFavorite?.TMode || ""
-          const cntFavorite = matchedFavorite?.cntFavorite || item.cntFavorite || "0"
+          // 直接使用產品使用紀錄欄位，避免依賴 Favorite API 補資料
+          const favoriteName = item.FavoriteName || ""
+          const tMode = item.TMode || ""
+          const cntFavorite = item.cntFavorite || "0"
 
           useRecordRows.push({
             id: item.UID || `use_${index}`,
@@ -365,58 +341,13 @@ export const useMemberStore = defineStore('member', () => {
         })
       }
 
-      // ---- 2. 處理 FavoriteTPointsMIDList（我的最愛清單）----
-      // 收集 UseRecordMIDList 中已出現的 AID
-      const usedAIDs = new Set(useRecordRows.map((r: any) => String(r.AID)))
-
-      const favoriteRows: any[] = []
-      favList.forEach((fav: any, index: number) => {
-        const aid = String(fav.AID ?? "")
-        // 不管 AID 是否在使用紀錄中出現，全部都加入顯示
-        const checkTime: string = fav.CheckTime || ""
-        let favDate = ""
-        let favStartTime = ""
-        if (checkTime.length >= 8) {
-          favDate = `${checkTime.substring(0, 4)}/${checkTime.substring(4, 6)}/${checkTime.substring(6, 8)}`
-        }
-        if (checkTime.length >= 12) {
-          favStartTime = `${checkTime.substring(8, 10)}:${checkTime.substring(10, 12)}`
-        }
-
-        // 只加入使用紀錄中「沒有出現過」的 AID，避免重複
-        if (!usedAIDs.has(aid)) {
-          favoriteRows.push({
-            id: `fav_${fav.AID || index}`,
-            AID: aid,
-            ConsultationDate: favDate,
-            FavoriteName: fav.TName || "",
-            ProductName: "",
-            TreatmentArea: "",
-            StartDate: favDate,
-            StartTime: checkTime,
-            EndTime: "",
-            FormattedStartTime: favStartTime,
-            FormattedEndTime: "",
-            PauseTime: "",
-            TreatmentTime: "",
-            TotalTime: "",
-            TMode: fav.TMode || "",
-            TemperatureDiff: "",
-            TotalUsage: fav.cntFavorite || "0",
-            AccMinutes: "0",
-            _source: "favorite",
-          })
-        }
-      })
-
-      // 合併：使用紀錄 + 未出現在使用紀錄中的我的最愛，按 StartTime 降序排列
-      const merged = [...useRecordRows, ...favoriteRows]
-      merged.sort((a: any, b: any) => {
+      // 僅使用產品使用紀錄，按 StartTime 降序排列
+      useRecordRows.sort((a: any, b: any) => {
         const aTime = a.StartTime || ""
         const bTime = b.StartTime || ""
         return bTime.localeCompare(aTime)
       })
-      favoriteTPointsList.value = merged
+      favoriteTPointsList.value = useRecordRows
     } catch (error) {
       console.error("取得產品使用紀錄失敗：", error)
       favoriteTPointsList.value = []
