@@ -962,6 +962,7 @@ let CURRENT_PROJECT_END_DATE = "";
 let backendProjectSynced = false;
 let adminNameListCache = null;
 let adminPickerMode = "taskAssignee";
+let adminPickerSelectedProjectParticipants = new Set();
 let taskStateListCache = null;
 let departmentListCache = null;
 const PROJECT_STATE_LIST = [
@@ -1171,6 +1172,8 @@ function normalizeProposalItemAction(item, isCeo) {
 /**
  * 自 getProject 的 SingleProject.ProposalList 還原 Proposal 時間軸與狀態。
  */
+
+
 function applyProposalListFromProject(selected) {
   if (!selected || typeof selected !== "object") return;
   const rawList = Array.isArray(selected.ProposalList)
@@ -1391,6 +1394,14 @@ function openAdminPicker(mode) {
     hintEl.textContent = mode === "projectParticipants" ? "可勾選多位，確定後以逗號分隔寫入欄位" : "請選擇一位負責人";
   }
   if (searchEl) searchEl.value = "";
+  if (mode === "projectParticipants") {
+    adminPickerSelectedProjectParticipants = new Set();
+    const participantText = (document.getElementById("project-edit-participants")?.value || "").trim();
+    participantText.split(/[,，、\s]+/).forEach(function (item) {
+      const v = String(item || "").trim();
+      if (v) adminPickerSelectedProjectParticipants.add(v);
+    });
+  }
 
   function showModal() {
     const modal = document.getElementById("admin-picker-modal");
@@ -1465,15 +1476,12 @@ function renderAdminPickerList() {
       })
       .join("");
   } else if (adminPickerMode === "projectParticipants") {
-    const participantSet = new Set();
-    const participantText = (document.getElementById("project-edit-participants")?.value || "").trim();
-    participantText.split(/[,，、\s]+/).forEach(function (item) {
-      const v = String(item || "").trim();
-      if (v) participantSet.add(v);
-    });
+    if (!(adminPickerSelectedProjectParticipants instanceof Set)) {
+      adminPickerSelectedProjectParticipants = new Set();
+    }
     listEl.innerHTML = filtered
       .map(function (name) {
-        const checked = participantSet.has(name) ? " checked" : "";
+        const checked = adminPickerSelectedProjectParticipants.has(name) ? " checked" : "";
         return (
           '<label class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer text-sm text-slate-800">' +
           '<input type="checkbox" class="admin-picker-participant shrink-0 text-blue-600 rounded" value="' +
@@ -1487,6 +1495,18 @@ function renderAdminPickerList() {
         );
       })
       .join("");
+    const boxes = listEl.querySelectorAll(".admin-picker-participant");
+    boxes.forEach(function (cb) {
+      cb.addEventListener("change", function () {
+        const value = String(cb.value || "").trim();
+        if (!value) return;
+        if (cb.checked) {
+          adminPickerSelectedProjectParticipants.add(value);
+        } else {
+          adminPickerSelectedProjectParticipants.delete(value);
+        }
+      });
+    });
   } else if (adminPickerMode === "projectChargeMan") {
     const currentVal = (document.getElementById("project-edit-charge-man")?.value || "").trim();
     listEl.innerHTML = filtered
@@ -1533,10 +1553,7 @@ function applyAdminPicker() {
     const el = document.getElementById("modal-task-assignee");
     if (el) el.value = radio ? radio.value : "";
   } else if (adminPickerMode === "projectParticipants") {
-    const boxes = document.querySelectorAll("#admin-picker-list .admin-picker-participant:checked");
-    const vals = Array.from(boxes).map(function (cb) {
-      return cb.value;
-    });
+    const vals = Array.from(adminPickerSelectedProjectParticipants);
     const el = document.getElementById("project-edit-participants");
     if (el) el.value = vals.join(",");
   } else if (adminPickerMode === "projectChargeMan") {
@@ -1585,6 +1602,32 @@ function populateProjectStateSelect(selectEl) {
   setSelectValueIfOptionExists(selectEl, current, CURRENT_PROJECT_STATE || "3");
 }
 
+function normalizeDeptName(raw) {
+  return String(raw == null ? "" : raw)
+    .replace(/\r\n/g, "")
+    .replace(/\n/g, "")
+    .replace(/\r/g, "")
+    .trim();
+}
+
+/**
+ * 後端 getDepartmentCode 的 Name 可能含 \\r\\n；送 ModifyProject 必須用部門 Code（與 SingleProject.Department 一致）。
+ */
+function departmentSelectValueToApiCode(raw) {
+  const v = String(raw == null ? "" : raw).trim();
+  if (!v) return "";
+  if (/^\d+$/.test(v)) return v;
+  const list = Array.isArray(departmentListCache) ? departmentListCache : [];
+  for (var i = 0; i < list.length; i++) {
+    var d = list[i];
+    if (!d) continue;
+    var code = String(d.Code != null ? d.Code : "").trim();
+    var name = normalizeDeptName(d.Name);
+    if (v === code || v === name) return code || v;
+  }
+  return v;
+}
+
 function populateDepartmentSelect(selectEl) {
   if (!selectEl) return;
   const current = String(selectEl.value || "").trim();
@@ -1599,8 +1642,8 @@ function populateDepartmentSelect(selectEl) {
   }
   list.forEach(function (d) {
     if (!d) return;
-    const code = String(d.Code || "").trim();
-    const name = String(d.Name || "").trim();
+    const code = String(d.Code != null ? d.Code : "").trim();
+    const name = normalizeDeptName(d.Name);
     if (!code && !name) return;
     const opt = document.createElement("option");
     opt.value = code || name;
@@ -1608,12 +1651,12 @@ function populateDepartmentSelect(selectEl) {
     selectEl.appendChild(opt);
   });
 
-  let preferred = current;
-  if (preferred && !Array.from(selectEl.options).some(function (o) { return String(o.value) === preferred; })) {
+  let preferred = normalizeDeptName(current) || current;
+  if (preferred && !Array.from(selectEl.options).some(function (o) { return String(o.value).trim() === preferred; })) {
     const byName = list.find(function (d) {
-      return String(d && d.Name || "").trim() === preferred;
+      return normalizeDeptName(d && d.Name) === preferred;
     });
-    if (byName) preferred = String(byName.Code || "").trim();
+    if (byName) preferred = String(byName.Code != null ? byName.Code : "").trim();
   }
   setSelectValueIfOptionExists(selectEl, preferred, selectEl.options[0]?.value || "");
 }
@@ -3049,7 +3092,8 @@ function populateProjectEditForm() {
   setVal("project-edit-kpi-lines", kpiLines);
 }
 
-function openProjectEditTab() {
+async function openProjectEditTab() {
+  await initProjectEditReferenceData().catch(function () {});
   populateProjectEditForm();
   const btn = document.getElementById("project-edit-tab-btn");
   if (btn) setDetailTab(btn, "project-edit");
@@ -3077,7 +3121,7 @@ async function submitProjectModify() {
     Participants: String(document.getElementById("project-edit-participants")?.value || "").trim(),
     StartDate: toYYYYMMDD(document.getElementById("project-edit-start-date")?.value || ""),
     EndDate: toYYYYMMDD(document.getElementById("project-edit-end-date")?.value || ""),
-    Department: String(document.getElementById("project-edit-department")?.value || "").trim(),
+    Department: departmentSelectValueToApiCode(document.getElementById("project-edit-department")?.value || ""),
     KPIList: parseProjectKpiLines(),
     TaskList: buildProjectTaskListForModify(),
     FileList: buildProjectFileListForModify(),
@@ -3086,6 +3130,22 @@ async function submitProjectModify() {
 
   if (!payload.ProjectName) {
     showToast("請填寫專案名稱", "warn");
+    return;
+  }
+  if (payload.StartDate && payload.EndDate && payload.EndDate < payload.StartDate) {
+    showToast("專案結束日期不可早於開始日期", "warn");
+    return;
+  }
+
+  const allTasks = []
+    .concat(TASKS.todo || [], TASKS.doing || [], TASKS.done || [], TASKS.blocked || []);
+  const invalidTask = allTasks.find(function (t) {
+    const startDate = toYYYYMMDD(t && t.startDate ? t.startDate : "");
+    const endDate = toYYYYMMDD(t && t.endDate ? t.endDate : "");
+    return startDate && endDate && endDate < startDate;
+  });
+  if (invalidTask) {
+    showToast("任務「" + (invalidTask.title || "未命名任務") + "」結束日期不可早於開始日期", "warn");
     return;
   }
 
@@ -3702,6 +3762,7 @@ function openProblemModal(id) {
   document.getElementById('problem-unblock-btn').onclick = () => { quickMove(id,'blocked','doing'); closeProblemModal(); };
   document.getElementById('problem-modal').classList.remove('hidden');
 }
+
 function closeProblemModal(e) {
   if(e&&e.target!==document.getElementById('problem-modal')) return;
   document.getElementById('problem-modal').classList.add('hidden');
@@ -4413,11 +4474,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!backendProjectSynced) {
         applyFallbackDemoHeader();
       }
-      initTaskStateSelectReferenceData().catch(function () {});
-      initProjectEditReferenceData().catch(function () {});
-      updateProposalUi();
-      setProposalRole(PROPOSAL_REVIEW.currentRole || "proposer");
-      populateProjectEditForm();
+      Promise.all([
+        initTaskStateSelectReferenceData().catch(function () {}),
+        initProjectEditReferenceData().catch(function () {}),
+      ]).finally(function () {
+        updateProposalUi();
+        setProposalRole(PROPOSAL_REVIEW.currentRole || "proposer");
+        populateProjectEditForm();
+      });
       try {
         var aidPb = (CURRENT_PROJECT_AID || localStorage.getItem("projectAID") || "").trim();
         var lastBid = aidPb ? (localStorage.getItem("proposalBID_" + aidPb) || "").trim() : "";
