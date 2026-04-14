@@ -135,7 +135,7 @@ tailwind.config = {
     <button onclick="setDetailTab(this,'decision')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">Decision</button>
     <button onclick="setDetailTab(this,'tasks')" class="detail-tab active text-sm px-4 py-2.5 border-b-2 border-blue-600 text-blue-600 font-medium">Tasks</button>
     <button id="project-edit-tab-btn" onclick="setDetailTab(this,'project-edit')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">專案修改</button>
-    <!-- <button onclick="setDetailTab(this,'kpi')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">KPI</button> -->
+    <button onclick="setDetailTab(this,'kpi')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">KPI</button>
     <!-- <button onclick="setDetailTab(this,'review')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">Review</button> -->
   </div>
 
@@ -317,13 +317,17 @@ tailwind.config = {
         <label class="block text-xs font-semibold text-slate-500 mb-1.5">ShareProject URL</label>
         <input id="project-edit-share-url" type="text" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm" placeholder="https://chatgpt.com/share/...">
       </div>
-      <div class="mt-4 hidden">
+      <div class="mt-4">
         <label class="block text-xs font-semibold text-slate-500 mb-1.5">Decision（摘要）</label>
         <textarea id="project-edit-decision" rows="3" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm resize-none" placeholder="Decision"></textarea>
       </div>
-      <div class="mt-4 hidden">
-        <label class="block text-xs font-semibold text-slate-500 mb-1.5">KPIList（每行：KPIName|KPITarget）</label>
-        <textarea id="project-edit-kpi-lines" rows="4" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm resize-none" placeholder="營收|100000&#10;轉換率|20%"></textarea>
+      <div class="mt-4">
+        <div class="flex items-center gap-2 mb-1.5">
+          <label class="block text-xs font-semibold text-slate-500">KPIList（建立專案格式）</label>
+          <button type="button" onclick="addProjectEditKPI()" class="ml-auto text-xs text-blue-600 hover:text-blue-800 font-medium">+ 新增</button>
+        </div>
+        <div id="project-edit-kpi-list" class="space-y-2.5 mb-2"></div>
+        <button type="button" onclick="addProjectEditKPI()" class="w-full border border-dashed border-slate-300 text-slate-400 hover:border-blue-300 hover:text-blue-500 py-2 rounded-lg text-xs transition">+ 新增 KPI 指標</button>
       </div>
       <p class="text-xs text-slate-400 mt-3">TaskList / FileList / DecisionList 會自動帶入目前頁面資料送到 ModifyProject API。</p>
     </div>
@@ -537,94 +541,7 @@ tailwind.config = {
 
   <!-- KPI TAB -->
   <div id="tab-kpi" class="detail-tab-content hidden">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-      <div class="bg-white rounded-xl border border-slate-200 p-5">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="font-semibold">月銷售量</h3>
-          <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">追蹤中</span>
-        </div>
-        <div class="flex items-end gap-4 mb-4">
-          <div>
-            <p class="text-xs text-slate-400 mb-1">目標</p>
-            <p class="text-3xl font-bold text-slate-500">— <span class="text-sm font-normal text-slate-400">件</span></p>
-          </div>
-          <div class="text-slate-300">vs</div>
-          <div>
-            <p class="text-xs text-slate-400 mb-1">實際</p>
-            <p class="text-3xl font-bold text-slate-500">— <span class="text-sm font-normal text-slate-400">件</span></p>
-          </div>
-        </div>
-        <div class="w-full bg-slate-100 rounded-full h-3 mb-3"><div class="bg-blue-500 h-3 rounded-full" style="width:0%"></div></div>
-        <button onclick="showToast('已開啟 KPI 輸入')" class="w-full text-sm bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition">填入實際值</button>
-      </div>
-
-      <div class="bg-white rounded-xl border border-slate-200 p-5">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="font-semibold">新客轉換率</h3>
-          <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">追蹤中</span>
-        </div>
-        <div class="flex items-end gap-4 mb-4">
-          <div>
-            <p class="text-xs text-slate-400 mb-1">目標</p>
-            <p class="text-3xl font-bold text-slate-500">— <span class="text-sm font-normal text-slate-400">%</span></p>
-          </div>
-          <div class="text-slate-300">vs</div>
-          <div>
-            <p class="text-xs text-slate-400 mb-1">實際</p>
-            <p class="text-3xl font-bold text-slate-500">— <span class="text-sm font-normal text-slate-400">%</span></p>
-          </div>
-        </div>
-        <div class="w-full bg-slate-100 rounded-full h-3 mb-3"><div class="bg-amber-400 h-3 rounded-full" style="width:0%"></div></div>
-        <button onclick="showToast('已開啟 KPI 輸入')" class="w-full text-sm bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition">填入實際值</button>
-      </div>
-
-      <div class="bg-white rounded-xl border border-slate-200 p-5">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="font-semibold">上線時程</h3>
-          <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">注意中</span>
-        </div>
-        <div class="flex items-end gap-4 mb-4">
-          <div>
-            <p class="text-xs text-slate-400 mb-1">目標</p>
-            <p class="text-3xl font-bold text-slate-500">—</p>
-          </div>
-          <div class="text-slate-300">vs</div>
-          <div>
-            <p class="text-xs text-slate-400 mb-1">目前</p>
-            <p class="text-3xl font-bold text-slate-500">— <span class="text-sm font-normal text-slate-400">% 完成</span></p>
-          </div>
-        </div>
-        <div class="w-full bg-slate-100 rounded-full h-3 mb-3"><div class="bg-blue-400 h-3 rounded-full" style="width:0%"></div></div>
-        <button onclick="showToast('已開啟 KPI 輸入')" class="w-full text-sm bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition">填入實際值</button>
-      </div>
-
-      <div class="bg-white rounded-xl border border-slate-200 p-5">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="font-semibold">客戶滿意度</h3>
-          <span class="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full font-medium">待追蹤</span>
-        </div>
-        <div class="flex items-end gap-4 mb-4">
-          <div>
-            <p class="text-xs text-slate-400 mb-1">目標</p>
-            <p class="text-3xl font-bold text-slate-500">— <span class="text-sm font-normal text-slate-400">%</span></p>
-          </div>
-          <div class="text-slate-300">vs</div>
-          <div>
-            <p class="text-xs text-slate-400 mb-1">實際</p>
-            <p class="text-3xl font-bold text-slate-500">— <span class="text-sm font-normal text-slate-400">尚未記錄</span></p>
-          </div>
-        </div>
-        <div class="w-full bg-slate-100 rounded-full h-3 mb-3"><div class="bg-slate-300 h-3 rounded-full" style="width:0%"></div></div>
-        <button onclick="showToast('已開啟 KPI 輸入')" class="w-full text-sm bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition">填入實際值</button>
-      </div>
-    </div>
-
-    <button onclick="showToast('新增 KPI 功能可再擴充')" class="flex items-center gap-2 text-sm text-blue-500 hover:underline font-medium">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-      </svg>
-      新增 KPI 指標
-    </button>
+    <div id="kpi-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4"></div>
   </div>
 
   <!-- REVIEW TAB -->
@@ -2069,6 +1986,7 @@ async function initProjectFromBackendIfPossible() {
   const rawTasks = Array.isArray(selected.TaskList) ? selected.TaskList : [];
   const rawKpis = Array.isArray(selected.KPIList) ? selected.KPIList : [];
   window.__CURRENT_KPI_LIST__ = rawKpis.slice();
+  renderKpiTabFromApi();
 
   // 先重組 TASKS（renderKanban 會用 TASKS）
   const cidToLocalId = {};
@@ -2962,6 +2880,46 @@ function setDetailTab(btn, tab) {
   document.getElementById('tab-' + tab).classList.remove('hidden');
 }
 
+function renderKpiTabFromApi() {
+  const grid = document.getElementById("kpi-grid");
+  if (!grid) return;
+
+  const list = Array.isArray(window.__CURRENT_KPI_LIST__) ? window.__CURRENT_KPI_LIST__ : [];
+  if (!list.length) {
+    grid.innerHTML = `
+      <div class="bg-white rounded-xl border border-slate-200 p-5 lg:col-span-2">
+        <p class="text-sm font-semibold text-slate-700 mb-1">目前尚無 KPI 資料</p>
+        <p class="text-xs text-slate-400">請先於專案修改填寫 KPIList，或等待後端回傳資料。</p>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = list.map(function (k, idx) {
+    const name = escapeHtml(String((k && k.KPIName) || "").trim() || ("KPI " + (idx + 1)));
+    const target = escapeHtml(String((k && k.KPITarget) || "").trim() || "—");
+    return `
+      <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <div class="mb-3">
+          <h3 class="font-semibold text-slate-800">${name}</h3>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-slate-50 rounded-lg px-3 py-2">
+            <p class="text-xs text-slate-400 mb-1">目標值</p>
+            <p class="text-base font-semibold text-slate-700 break-all">${target}</p>
+          </div>
+       
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+// 先不用實際值
+// <div class="bg-slate-50 rounded-lg px-3 py-2">
+//             <p class="text-xs text-slate-400 mb-1">實際值</p>
+//             <p class="text-base font-semibold text-slate-400">—</p>
+//           </div>
+
 function projectStatusToCode(status) {
   if (status === "closed") return "4";
   if (status === "review") return "3";
@@ -3025,6 +2983,11 @@ function buildProjectFileListForModify() {
 function buildProjectDecisionListForModify() {
   const aid = String(CURRENT_PROJECT_AID || "").trim();
   const bid = String(localStorage.getItem("decisionBID_" + aid) || "").trim();
+  const decisionSummary = String(
+    document.getElementById("project-edit-decision")?.value ||
+    document.getElementById("decision-core")?.value ||
+    ""
+  ).trim();
   const topicList = (Array.isArray(DECISION_CHATGPT.topics) ? DECISION_CHATGPT.topics : []).map(function (tp, idx) {
     const found = tp && tp.taskId ? findTask(String(tp.taskId)) : null;
     const taskCid = found && found.task && found.task.cid ? String(found.task.cid).trim() : "";
@@ -3045,26 +3008,87 @@ function buildProjectDecisionListForModify() {
     AID: aid,
     ShareProjectURL: String(document.getElementById("project-edit-share-url")?.value || "").trim(),
     BackGround: String(document.getElementById("decision-background")?.value || "").trim(),
-    Kernal: String(document.getElementById("decision-core")?.value || "").trim(),
+    Kernal: decisionSummary,
     Risk: String(document.getElementById("decision-risk")?.value || "").trim(),
     DecisionTopicList: topicList,
   }];
 }
 
 function parseProjectKpiLines() {
-  const txt = String(document.getElementById("project-edit-kpi-lines")?.value || "").trim();
-  if (!txt) return [];
-  return txt.split(/\r?\n/).map(function (line) {
-    const raw = String(line || "").trim();
-    if (!raw) return null;
-    const parts = raw.split("|");
+  return (Array.isArray(window.__PROJECT_EDIT_KPI_LIST__) ? window.__PROJECT_EDIT_KPI_LIST__ : []).map(function (k) {
     return {
-      KPIName: String(parts[0] || "").trim(),
-      KPITarget: String(parts.slice(1).join("|") || "").trim(),
+      KPIName: String((k && k.KPIName) || "").trim(),
+      KPITarget: String((k && k.KPITarget) || "").trim(),
     };
   }).filter(function (x) {
-    return x && (x.KPIName || x.KPITarget);
+    return x.KPIName || x.KPITarget;
   });
+}
+
+function normalizeProjectEditKpiList(list) {
+  if (!Array.isArray(list)) return [];
+  return list.map(function (item) {
+    return {
+      id: Date.now() + Math.floor(Math.random() * 1000) + Math.floor(Math.random() * 1000),
+      KPIName: String((item && item.KPIName) || "").trim(),
+      KPITarget: String((item && item.KPITarget) || "").trim(),
+    };
+  }).filter(function (x) {
+    return x.KPIName || x.KPITarget;
+  });
+}
+
+function updateProjectEditKPI(id, field, value) {
+  const list = Array.isArray(window.__PROJECT_EDIT_KPI_LIST__) ? window.__PROJECT_EDIT_KPI_LIST__ : [];
+  const target = list.find(function (x) { return x.id === id; });
+  if (!target) return;
+  target[field] = String(value == null ? "" : value);
+}
+
+function addProjectEditKPI() {
+  if (!Array.isArray(window.__PROJECT_EDIT_KPI_LIST__)) window.__PROJECT_EDIT_KPI_LIST__ = [];
+  const id = Date.now() + Math.floor(Math.random() * 1000);
+  window.__PROJECT_EDIT_KPI_LIST__.push({ id: id, KPIName: "", KPITarget: "" });
+  renderProjectEditKPIs();
+  setTimeout(function () {
+    const row = document.getElementById("project-edit-kpi-row-" + id);
+    if (!row) return;
+    const firstInput = row.querySelector("input");
+    if (firstInput) firstInput.focus();
+  }, 50);
+}
+
+function removeProjectEditKPI(id) {
+  if (!Array.isArray(window.__PROJECT_EDIT_KPI_LIST__)) window.__PROJECT_EDIT_KPI_LIST__ = [];
+  window.__PROJECT_EDIT_KPI_LIST__ = window.__PROJECT_EDIT_KPI_LIST__.filter(function (x) { return x.id !== id; });
+  renderProjectEditKPIs();
+}
+
+function renderProjectEditKPIs() {
+  const listEl = document.getElementById("project-edit-kpi-list");
+  if (!listEl) return;
+  const list = Array.isArray(window.__PROJECT_EDIT_KPI_LIST__) ? window.__PROJECT_EDIT_KPI_LIST__ : [];
+  listEl.innerHTML = list.map(function (k) {
+    return `
+      <div id="project-edit-kpi-row-${k.id}" class="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 task-chip">
+        <input
+          type="text"
+          placeholder="指標名稱"
+          value="${escapeAttr(k.KPIName || "")}"
+          oninput="updateProjectEditKPI(${k.id}, 'KPIName', this.value)"
+          class="w-28 bg-transparent text-xs text-slate-500 font-semibold focus:outline-none flex-shrink-0 border-b border-slate-300 pb-0.5"
+        >
+        <input
+          type="text"
+          placeholder="目標值"
+          value="${escapeAttr(k.KPITarget || "")}"
+          oninput="updateProjectEditKPI(${k.id}, 'KPITarget', this.value)"
+          class="flex-1 bg-transparent text-sm font-semibold text-slate-500 focus:outline-none border-b border-slate-300 pb-0.5"
+        >
+        <button type="button" onclick="removeProjectEditKPI(${k.id})" class="text-slate-300 hover:text-red-400 transition ml-2 text-sm">✕</button>
+      </div>
+    `;
+  }).join("");
 }
 
 function populateProjectEditForm() {
@@ -3072,9 +3096,6 @@ function populateProjectEditForm() {
   const stateCode = CURRENT_PROJECT_STATE || projectStatusToCode(projectStatus);
   const shareUrl = DECISION_CHATGPT.shareProjectUrl || "";
   const core = String(document.getElementById("decision-core")?.value || "").trim();
-  const kpiLines = (Array.isArray(window.__CURRENT_KPI_LIST__) ? window.__CURRENT_KPI_LIST__ : []).map(function (k) {
-    return String((k && k.KPIName) || "").trim() + "|" + String((k && k.KPITarget) || "").trim();
-  }).filter(Boolean).join("\n");
 
   const setVal = function (id, val) {
     const el = document.getElementById(id);
@@ -3089,7 +3110,8 @@ function populateProjectEditForm() {
   setVal("project-edit-department", CURRENT_PROJECT_DEPARTMENT || "");
   setVal("project-edit-share-url", shareUrl);
   setVal("project-edit-decision", core);
-  setVal("project-edit-kpi-lines", kpiLines);
+  window.__PROJECT_EDIT_KPI_LIST__ = normalizeProjectEditKpiList(window.__CURRENT_KPI_LIST__);
+  renderProjectEditKPIs();
 }
 
 async function openProjectEditTab() {
@@ -3111,6 +3133,13 @@ async function submitProjectModify() {
     return;
   }
 
+  const decisionSummary = String(
+    document.getElementById("project-edit-decision")?.value ||
+    document.getElementById("decision-core")?.value ||
+    ""
+  ).trim();
+  const shareProjectUrl = String(document.getElementById("project-edit-share-url")?.value || "").trim();
+
   const payload = {
     AdminID: auth.adminID,
     Token: auth.token,
@@ -3122,6 +3151,8 @@ async function submitProjectModify() {
     StartDate: toYYYYMMDD(document.getElementById("project-edit-start-date")?.value || ""),
     EndDate: toYYYYMMDD(document.getElementById("project-edit-end-date")?.value || ""),
     Department: departmentSelectValueToApiCode(document.getElementById("project-edit-department")?.value || ""),
+    ShareProject_URL: shareProjectUrl,
+    Decision: decisionSummary,
     KPIList: parseProjectKpiLines(),
     TaskList: buildProjectTaskListForModify(),
     FileList: buildProjectFileListForModify(),
