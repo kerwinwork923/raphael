@@ -136,6 +136,7 @@ tailwind.config = {
     <button onclick="setDetailTab(this,'tasks')" class="detail-tab active text-sm px-4 py-2.5 border-b-2 border-blue-600 text-blue-600 font-medium">Tasks</button>
     <button id="project-edit-tab-btn" onclick="setDetailTab(this,'project-edit')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">專案修改</button>
     <button onclick="setDetailTab(this,'kpi')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">KPI</button>
+    <button onclick="setDetailTab(this,'activity')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">操作紀錄</button>
     <!-- <button onclick="setDetailTab(this,'review')" class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium">Review</button> -->
   </div>
 
@@ -318,8 +319,8 @@ tailwind.config = {
         <input id="project-edit-share-url" type="text" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm" placeholder="https://chatgpt.com/share/...">
       </div>
       <div class="mt-4">
-        <label class="block text-xs font-semibold text-slate-500 mb-1.5">Decision（摘要）</label>
-        <textarea id="project-edit-decision" rows="3" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm resize-none" placeholder="Decision"></textarea>
+        <label class="block text-xs font-semibold text-slate-500 mb-1.5">DecisionSummary（摘要）</label>
+        <textarea id="project-edit-decision" rows="3" class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm resize-none" placeholder="DecisionSummary"></textarea>
       </div>
       <div class="mt-4">
         <div class="flex items-center gap-2 mb-1.5">
@@ -542,6 +543,17 @@ tailwind.config = {
   <!-- KPI TAB -->
   <div id="tab-kpi" class="detail-tab-content hidden">
     <div id="kpi-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4"></div>
+  </div>
+
+  <!-- ACTIVITY TAB -->
+  <div id="tab-activity" class="detail-tab-content hidden">
+    <div class="bg-white rounded-xl border border-slate-200 p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold text-slate-800">專案操作紀錄</h3>
+        <span class="text-xs text-slate-400">顯示專案 / 任務 / Decision 的操作</span>
+      </div>
+      <div id="activity-log-list" class="space-y-2"></div>
+    </div>
   </div>
 
   <!-- REVIEW TAB -->
@@ -1987,6 +1999,7 @@ async function initProjectFromBackendIfPossible() {
   const rawKpis = Array.isArray(selected.KPIList) ? selected.KPIList : [];
   window.__CURRENT_KPI_LIST__ = rawKpis.slice();
   renderKpiTabFromApi();
+  loadActivityLogsFromProject(selected);
 
   // 先重組 TASKS（renderKanban 會用 TASKS）
   const cidToLocalId = {};
@@ -2172,6 +2185,11 @@ async function initProjectFromBackendIfPossible() {
     if (riskEl && lastDecisionRecord.Risk != null) {
       riskEl.value = String(lastDecisionRecord.Risk || "").trim();
     }
+  } else if (typeof selected.DecisionSummary === "string" && selected.DecisionSummary.trim()) {
+    const decisionStr = String(selected.DecisionSummary).trim();
+    if (coreEl && (!coreEl.value || coreEl.value.trim() === "")) {
+      coreEl.value = decisionStr;
+    }
   } else if (typeof selected.Decision === "string" && selected.Decision.trim()) {
     const decisionStr = String(selected.Decision).trim();
     if (coreEl && (!coreEl.value || coreEl.value.trim() === "")) {
@@ -2235,6 +2253,8 @@ let PROPOSAL_REVIEW = {
   rounds: [],
 };
 let editingProposalId = "";
+let ACTIVITY_API_LOGS = [];
+let ACTIVITY_SESSION_LOGS = [];
 
 const AV = {};
 let editingTaskCol = null;
@@ -2878,6 +2898,155 @@ function setDetailTab(btn, tab) {
 
   document.querySelectorAll('.detail-tab-content').forEach(el => el.classList.add('hidden'));
   document.getElementById('tab-' + tab).classList.remove('hidden');
+  if (tab === "activity") renderActivityLogs();
+}
+
+function scopeTagClass(scope) {
+  if (scope === "project") return "bg-blue-50 text-blue-600";
+  if (scope === "task") return "bg-emerald-50 text-emerald-600";
+  if (scope === "decision") return "bg-violet-50 text-violet-600";
+  return "bg-slate-100 text-slate-600";
+}
+
+function checkTimeToMs(raw) {
+  const d = String(raw || "").replace(/\D/g, "");
+  if (d.length < 8) return 0;
+  const y = Number(d.slice(0, 4));
+  const m = Number(d.slice(4, 6)) - 1;
+  const day = Number(d.slice(6, 8));
+  const hh = d.length >= 10 ? Number(d.slice(8, 10)) : 0;
+  const mm = d.length >= 12 ? Number(d.slice(10, 12)) : 0;
+  const ss = d.length >= 14 ? Number(d.slice(12, 14)) : 0;
+  const dt = new Date(y, m, day, hh, mm, ss);
+  return Number.isNaN(dt.getTime()) ? 0 : dt.getTime();
+}
+
+function nowLabel() {
+  const d = new Date();
+  const pad = function (v) { return String(v).padStart(2, "0"); };
+  return (
+    d.getFullYear() +
+    "/" + pad(d.getMonth() + 1) +
+    "/" + pad(d.getDate()) +
+    " " + pad(d.getHours()) +
+    ":" + pad(d.getMinutes()) +
+    ":" + pad(d.getSeconds())
+  );
+}
+
+function resolveCurrentOperatorName() {
+  const auth = getBackendTokenAndAdmin();
+  if (auth && auth.adminID) return String(auth.adminID).trim();
+  try {
+    return String(
+      localStorage.getItem("adminName") ||
+      localStorage.getItem("adminID") ||
+      sessionStorage.getItem("adminName") ||
+      sessionStorage.getItem("adminID") ||
+      "目前使用者"
+    ).trim() || "目前使用者";
+  } catch (e) {
+    return "目前使用者";
+  }
+}
+
+function pushSessionActivity(scope, action, detail) {
+  ACTIVITY_SESSION_LOGS.push({
+    source: "session",
+    scope: String(scope || "").trim() || "other",
+    action: String(action || "").trim() || "操作",
+    detail: String(detail || "").trim(),
+    actor: resolveCurrentOperatorName(),
+    timeLabel: nowLabel(),
+    timeMs: Date.now(),
+  });
+  renderActivityLogs();
+}
+
+function loadActivityLogsFromProject(selected) {
+  if (!selected || typeof selected !== "object") {
+    ACTIVITY_API_LOGS = [];
+    renderActivityLogs();
+    return;
+  }
+
+  const rows = [];
+  const pushApi = function (scope, action, detail, actor, rawTime) {
+    const timeLabel = formatProposalCheckTime(rawTime) || "時間未提供";
+    rows.push({
+      source: "api",
+      scope: String(scope || "").trim() || "other",
+      action: String(action || "").trim() || "操作",
+      detail: String(detail || "").trim(),
+      actor: String(actor || "").trim() || "系統",
+      timeLabel: timeLabel,
+      timeMs: checkTimeToMs(rawTime),
+    });
+  };
+
+  if (selected.CheckTime || selected.AdminID) {
+    pushApi(
+      "project",
+      "專案資料更新",
+      String(selected.ProjectName || "").trim() || "未命名專案",
+      selected.AdminID,
+      selected.CheckTime
+    );
+  }
+
+  const taskStateMap = { "1": "待辦", "2": "進行中", "3": "完成", "4": "Blocked" };
+  const taskList = Array.isArray(selected.TaskList) ? selected.TaskList : [];
+  taskList.forEach(function (t) {
+    if (!(t && (t.CheckTime || t.AdminID))) return;
+    const topic = String((t && t.Topic) || "").trim() || "未命名任務";
+    const stateCode = String((t && t.State) || "").trim();
+    const stateText = taskStateMap[stateCode] || "未知狀態";
+    pushApi("task", "任務更新", topic + "（" + stateText + "）", t.AdminID, t.CheckTime);
+  });
+
+  const decision = getDecisionRecordFromProject(selected);
+  if (decision && (decision.CheckTime || decision.AdminID)) {
+    const detail = String(decision.Kernal || decision.Decision || "").trim() || "Decision 更新";
+    pushApi("decision", "Decision 更新", detail, decision.AdminID, decision.CheckTime);
+  }
+
+  ACTIVITY_API_LOGS = rows;
+  renderActivityLogs();
+}
+
+function renderActivityLogs() {
+  const wrap = document.getElementById("activity-log-list");
+  if (!wrap) return;
+
+  const merged = []
+    .concat(Array.isArray(ACTIVITY_SESSION_LOGS) ? ACTIVITY_SESSION_LOGS : [])
+    .concat(Array.isArray(ACTIVITY_API_LOGS) ? ACTIVITY_API_LOGS : [])
+    .sort(function (a, b) {
+      return Number(b.timeMs || 0) - Number(a.timeMs || 0);
+    });
+
+  if (!merged.length) {
+    wrap.innerHTML = `
+      <div class="border border-dashed border-slate-200 rounded-lg px-4 py-6 text-center">
+        <p class="text-sm text-slate-500">目前沒有可顯示的操作紀錄</p>
+      </div>
+    `;
+    return;
+  }
+
+  wrap.innerHTML = merged.map(function (row) {
+    return `
+      <div class="border border-slate-200 rounded-lg px-3 py-2.5">
+        <div class="flex items-center gap-2 mb-1.5">
+          <span class="text-[11px] px-2 py-0.5 rounded-full font-medium ${scopeTagClass(row.scope)}">${escapeHtml(row.scope)}</span>
+          <span class="text-xs text-slate-600 font-medium">${escapeHtml(row.action || "操作")}</span>
+          <span class="text-[11px] text-slate-400 ml-auto">${escapeHtml(row.timeLabel || "")}</span>
+        </div>
+        <p class="text-sm text-slate-700">${escapeHtml(row.detail || "—")}</p>
+        <p class="text-[11px] text-slate-400 mt-1">操作者：${escapeHtml(row.actor || "系統")}</p>
+      </div>
+    `;
+  }).join("");
 }
 
 function renderKpiTabFromApi() {
@@ -3095,7 +3264,11 @@ function populateProjectEditForm() {
   const title = String(document.getElementById("project-title")?.textContent || "").trim();
   const stateCode = CURRENT_PROJECT_STATE || projectStatusToCode(projectStatus);
   const shareUrl = DECISION_CHATGPT.shareProjectUrl || "";
-  const core = String(document.getElementById("decision-core")?.value || "").trim();
+  const core = String(
+    document.getElementById("project-edit-decision")?.value ||
+    document.getElementById("decision-core")?.value ||
+    ""
+  ).trim();
 
   const setVal = function (id, val) {
     const el = document.getElementById(id);
@@ -3152,7 +3325,7 @@ async function submitProjectModify() {
     EndDate: toYYYYMMDD(document.getElementById("project-edit-end-date")?.value || ""),
     Department: departmentSelectValueToApiCode(document.getElementById("project-edit-department")?.value || ""),
     ShareProject_URL: shareProjectUrl,
-    Decision: decisionSummary,
+    DecisionSummary: decisionSummary,
     KPIList: parseProjectKpiLines(),
     TaskList: buildProjectTaskListForModify(),
     FileList: buildProjectFileListForModify(),
@@ -3191,6 +3364,7 @@ async function submitProjectModify() {
       throw new Error((resp && (resp.Message || resp.Msg || resp.message)) || "ModifyProject 失敗");
     }
     showToast("專案修改已儲存");
+    pushSessionActivity("project", "儲存專案修改", payload.ProjectName || "未命名專案");
     backendProjectSynced = false;
     await initProjectFromBackendIfPossible().catch(function () {});
     renderKanban();
@@ -3468,6 +3642,14 @@ async function quickMove(id, fromCol, toCol) {
   } else {
     showToast(`「${moved.title}」已移至 ${toCol==='doing'?'進行中':toCol==='blocked'?'Blocked':toCol}`);
   }
+  pushSessionActivity(
+    "task",
+    "變更任務狀態",
+    "「" + String(moved.title || "未命名任務") + "」：" +
+      (fromCol === "todo" ? "待辦" : fromCol === "doing" ? "進行中" : fromCol === "done" ? "完成" : "Blocked") +
+      " → " +
+      (toCol === "todo" ? "待辦" : toCol === "doing" ? "進行中" : toCol === "done" ? "完成" : "Blocked")
+  );
   renderKanban();
 }
 
@@ -3657,6 +3839,7 @@ async function saveTaskModal() {
       }
 
       showToast(`「${title}」已更新`);
+      pushSessionActivity("task", "更新任務", title);
     }
   } else {
     // 先做本機新增（避免使用者體驗卡住）
@@ -3667,6 +3850,7 @@ async function saveTaskModal() {
     };
     TASKS[newStatus].push(newLocal);
     showToast(`「${title}」已建立`);
+    pushSessionActivity("task", "新增任務", title);
 
     // 再嘗試同步到後端新增任務（endpoint 依你後端實際為準）
     try {
@@ -3781,6 +3965,7 @@ async function deleteTaskModal() {
   syncDecisionBidHint();
 
   showToast('任務已刪除');
+  pushSessionActivity("task", "刪除任務", found.task && found.task.title ? found.task.title : "未命名任務");
 }
 
 function openProblemModal(id) {
@@ -4102,6 +4287,9 @@ function renderDecisionDisplay(selected) {
     if (sp) {
       html += `<p><a href="${escapeHtmlText(sp)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">👉 前往討論</a></p>`;
     }
+  } else if (typeof selected.DecisionSummary === "string" && String(selected.DecisionSummary).trim()) {
+    const dec = String(selected.DecisionSummary).trim();
+    html = `<p>${escapeHtmlText(dec)}</p>`;
   } else if (typeof selected.Decision === "string" && String(selected.Decision).trim()) {
     const dec = String(selected.Decision).trim();
     html = `<p>${escapeHtmlText(dec)}</p>`;
@@ -4352,6 +4540,11 @@ async function saveDecisionData() {
     showToast(
       (isModifyDecision ? "Decision 已更新" : "Decision 已提交") +
         (bid ? "（BID: " + bid + "）" : "")
+    );
+    pushSessionActivity(
+      "decision",
+      isModifyDecision ? "修改 Decision" : "新增 Decision",
+      kernal || "Decision 摘要未填寫"
     );
   } catch (e) {
     showToast("提交失敗：" + (e && e.message ? e.message : "未知錯誤"), "warn");
