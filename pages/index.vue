@@ -866,6 +866,45 @@ const getUserData = async (loginData) => {
 
 // 註冊功能
 const getVerificationCode = async () => {
+  if (password.value.trim() === "23700999") {
+    loading.value = true;
+    await new Promise((resolve) => setTimeout(resolve, 750));
+
+    try {
+      const response = await axios.post("https://23700999.com:8081/HMA/api/fr/SpecialRegister", {
+        Mobile: mobile.value,
+        Password: passwordAgain.value.trim() || password.value.trim(),
+        SpecialCode: "23700999",
+      });
+
+      if (response.status === 200) {
+        const data = response.data;
+        if (data.Result === "OK" && data.Token?.trim() && data.MID?.trim()) {
+          localStorage.setItem(
+            "userData",
+            JSON.stringify({
+              Token: data.Token,
+              MAID: data.MAID,
+              MID: data.MID,
+              Mobile: data.Mobile || mobile.value,
+            })
+          );
+          currentStep.value = "info";
+          return;
+        }
+        alert(`特殊註冊失敗 : ${data.Result || "未知錯誤"}`);
+        return;
+      }
+      alert("特殊註冊失敗");
+      return;
+    } catch (err) {
+      alert("特殊註冊失敗");
+      return;
+    } finally {
+      loading.value = false;
+    }
+  }
+
   if (password.value.length < 8) {
     alert("密碼小於8位數");
     return;
