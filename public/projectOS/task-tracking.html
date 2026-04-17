@@ -1747,6 +1747,7 @@
       const NEW_PROPOSAL_URL = API_BASE + "/api/fr/NewProposal";
       const MODIFY_PROPOSAL_URL = API_BASE + "/api/fr/ModifyProposal";
       const DELETE_PROPOSAL_URL = API_BASE + "/api/fr/DeleteProposal";
+      const SEND_EMAIL_URL = API_BASE + "/api/fr/SendEmail";
       const MODIFY_PROJECT_URL = API_BASE + "/api/fr/ModifyProject";
 
       /** 目前頁面對應的專案 AID（來自 getProjectList 或 localStorage.projectAID） */
@@ -1861,6 +1862,106 @@
             ? String(bidRaw).trim()
             : "";
         return { resp: resp, bid: bid };
+      }
+
+      function normalizeEmailList(input) {
+        const list = Array.isArray(input)
+          ? input
+          : String(input || "").split(/[,，;\s]+/);
+        const seen = new Set();
+        const out = [];
+        list.forEach(function (item) {
+          const email = String(item || "").trim();
+          if (!email) return;
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+          const key = email.toLowerCase();
+          if (seen.has(key)) return;
+          seen.add(key);
+          out.push(email);
+        });
+        return out;
+      }
+
+      function collectProposalEmailRecipients() {
+        // 測試用：先固定全部寄到指定信箱
+        return {
+          to: ["kuanyi@raphael.clinic"],
+          cc: [],
+        };
+      }
+
+      async function postSendEmailApi(subject, content, toList, ccList) {
+        const auth = getBackendTokenAndAdmin();
+        if (!auth) throw new Error("尚未登入，缺少 AdminID / Token");
+        const normalizedTo = normalizeEmailList(toList);
+        const normalizedCc = normalizeEmailList(ccList).filter(function (mail) {
+          return !normalizedTo.some(function (toMail) {
+            return String(toMail).toLowerCase() === String(mail).toLowerCase();
+          });
+        });
+        const payload = {
+          AdminID: auth.adminID,
+          Token: auth.token,
+          To: normalizedTo,
+          CC: normalizedCc,
+          Subject: String(subject || "").trim(),
+          Content: String(content || "").trim(),
+        };
+        if (!Array.isArray(payload.To) || !payload.To.length) {
+          throw new Error("缺少收件者 Email（To）");
+        }
+        if (!Array.isArray(payload.CC)) payload.CC = [];
+        const resp = await postJson(SEND_EMAIL_URL, payload);
+        if (!isFrApiResultOk(resp)) {
+          throw new Error(
+            (resp && (resp.Message || resp.Msg || resp.message)) ||
+              "SendEmail 失敗",
+          );
+        }
+        return resp;
+      }
+
+      async function sendProposalActionEmail(action, note, discussionUrl) {
+        const recipients = collectProposalEmailRecipients();
+        if (!recipients.to.length) {
+          showToast("未設定 Proposal 收件人 Email（可用 proposalEmailTo）", "warn");
+          return;
+        }
+        const actionLabel =
+          action === "approved"
+            ? "通過提案並轉為進行中"
+            : action === "revision_required"
+              ? "退回修改"
+              : "送交執行長";
+        const aid = String(
+          CURRENT_PROJECT_AID || localStorage.getItem("projectAID") || "",
+        ).trim();
+        const subject = "[Proposal] " + actionLabel + (aid ? "（AID:" + aid + "）" : "");
+        const content =
+          "Proposal 操作通知\n" +
+          "動作：" +
+          actionLabel +
+          "\n" +
+          "專案 AID：" +
+          (aid || "—") +
+          "\n" +
+          "操作者：" +
+          (action === "submit" ? "提案人" : "執行長") +
+          "\n" +
+          "內容：" +
+          String(note || "").trim() +
+          "\n" +
+          "討論 URL：" +
+          String(discussionUrl || "").trim();
+        try {
+          await postSendEmailApi(subject, content, recipients.to, recipients.cc);
+        } catch (e) {
+          showToast(
+            "Proposal 流程成功，但寄信失敗：" +
+              (e && e.message ? e.message : "SendEmail 失敗"),
+            "warn",
+          );
+        }
       }
 
       function syncProposalBidHint(bid) {
@@ -3876,6 +3977,7 @@
         if (summaryEl) summaryEl.value = "";
         if (urlEl) urlEl.value = "";
         updateProposalUi();
+        await sendProposalActionEmail("submit", summary, url);
         if (btn) {
           btn.disabled = false;
           btn.classList.remove("opacity-60", "cursor-wait");
@@ -3978,6 +4080,7 @@
           );
         }
         updateProposalUi();
+        await sendProposalActionEmail(action, suggestion, url);
       }
 
       function recalcProposalReviewMeta() {

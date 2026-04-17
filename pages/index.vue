@@ -866,7 +866,7 @@ const getUserData = async (loginData) => {
 
 // 註冊功能
 const getVerificationCode = async () => {
-  if (password.value.trim() === "23700999") {
+  if (password.value.trim() === "12345678") {
     loading.value = true;
     await new Promise((resolve) => setTimeout(resolve, 750));
 
