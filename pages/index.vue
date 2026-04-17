@@ -874,7 +874,7 @@ const getVerificationCode = async () => {
       const response = await axios.post("https://23700999.com:8081/HMA/api/fr/SpecialRegister", {
         Mobile: mobile.value,
         Password: passwordAgain.value.trim() || password.value.trim(),
-        SpecialCode: "23700999",
+        SpecialCode: "12345678",
       });
 
       if (response.status === 200) {
