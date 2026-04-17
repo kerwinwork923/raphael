@@ -1882,11 +1882,51 @@
         return out;
       }
 
+      function resolveEmailsByNameOrAdminId(identity) {
+        const target = String(identity || "").trim();
+        if (!target) return [];
+        const low = target.toLowerCase();
+        const list = Array.isArray(adminNameListCache) ? adminNameListCache : [];
+        return list
+          .filter(function (item) {
+            const name = String((item && item.Name) || "").trim().toLowerCase();
+            const adminID = String((item && item.AdminID) || "")
+              .trim()
+              .toLowerCase();
+            return name === low || adminID === low;
+          })
+          .map(function (item) {
+            return String((item && item.Email) || "").trim();
+          })
+          .filter(Boolean);
+      }
+
       function collectProposalEmailRecipients() {
-        // 測試用：先固定全部寄到指定信箱
+        const toSeed = [];
+        const ccSeed = [];
+        const chargeMan = String(CURRENT_PROJECT_CHARGE_MAN || "").trim();
+        if (chargeMan) toSeed.push.apply(toSeed, resolveEmailsByNameOrAdminId(chargeMan));
+
+        String(CURRENT_PROJECT_PARTICIPANTS || "")
+          .split(/[,，、\s]+/)
+          .map(function (x) {
+            return String(x || "").trim();
+          })
+          .filter(Boolean)
+          .forEach(function (person) {
+            ccSeed.push.apply(ccSeed, resolveEmailsByNameOrAdminId(person));
+          });
+
+        const currentAdminID = String(
+          localStorage.getItem("adminID") || sessionStorage.getItem("adminID") || "",
+        ).trim();
+        if (currentAdminID) {
+          ccSeed.push.apply(ccSeed, resolveEmailsByNameOrAdminId(currentAdminID));
+        }
+
         return {
-          to: ["kuanyi@raphael.clinic"],
-          cc: [],
+          to: normalizeEmailList(toSeed),
+          cc: normalizeEmailList(ccSeed),
         };
       }
 
@@ -1922,6 +1962,11 @@
       }
 
       async function sendProposalActionEmail(action, note, discussionUrl) {
+        if (!Array.isArray(adminNameListCache) || !adminNameListCache.length) {
+          try {
+            await fetchAdminNameList();
+          } catch (e) {}
+        }
         const recipients = collectProposalEmailRecipients();
         if (!recipients.to.length) {
           showToast("未設定 Proposal 收件人 Email（可用 proposalEmailTo）", "warn");
@@ -1973,7 +2018,7 @@
         if (!resp || typeof resp !== "object") return [];
         if (Array.isArray(resp)) return resp;
         if (Array.isArray(resp.ProjectList)) return resp.ProjectList;
-        if (Array.isArray(resp.Data)) return resp.Data;
+        if (Array.isArray(resp.Data)) return resp.Data; 
         if (Array.isArray(resp.Projects)) return resp.Projects;
         if (Array.isArray(resp.List)) return resp.List;
         for (var k in resp) {
@@ -2317,17 +2362,27 @@
         }
       }
 
-      function dedupeAdminNames(arr) {
+      function normalizeAdminDirectory(arr) {
         const seen = new Set();
         const out = [];
-        (arr || []).forEach(function (n) {
-          const s = String(n == null ? "" : n).trim();
-          if (!s || seen.has(s)) return;
-          seen.add(s);
-          out.push(s);
+        (arr || []).forEach(function (item) {
+          const name = String(
+            item && typeof item === "object" ? item.Name || "" : item || "",
+          ).trim();
+          const adminID = String(
+            item && typeof item === "object" ? item.AdminID || "" : "",
+          ).trim();
+          const email = String(
+            item && typeof item === "object" ? item.Email || "" : "",
+          ).trim();
+          if (!name) return;
+          const key = (name + "|" + adminID).toLowerCase();
+          if (seen.has(key)) return;
+          seen.add(key);
+          out.push({ Name: name, AdminID: adminID, Email: email });
         });
         out.sort(function (a, b) {
-          return a.localeCompare(b, "zh-Hant");
+          return String(a.Name || "").localeCompare(String(b.Name || ""), "zh-Hant");
         });
         return out;
       }
@@ -2357,7 +2412,7 @@
             throw new Error("bad result");
           const raw = r.adminNameList || r.AdminNameList || [];
           if (!Array.isArray(raw)) throw new Error("bad list");
-          adminNameListCache = dedupeAdminNames(raw);
+          adminNameListCache = normalizeAdminDirectory(raw);
           return adminNameListCache;
         });
       }
@@ -2445,7 +2500,11 @@
           .trim()
           .toLowerCase();
         const filtered = q
-          ? names.filter((n) => String(n).toLowerCase().indexOf(q) >= 0)
+          ? names.filter(function (n) {
+              const name = String((n && n.Name) || "").toLowerCase();
+              const adminID = String((n && n.AdminID) || "").toLowerCase();
+              return name.indexOf(q) >= 0 || adminID.indexOf(q) >= 0;
+            })
           : names;
 
         if (!filtered.length) {
@@ -2462,7 +2521,8 @@
             ? taskAssigneeValEl.value.trim()
             : "";
           listEl.innerHTML = filtered
-            .map(function (name) {
+            .map(function (admin) {
+              const name = String((admin && admin.Name) || "").trim();
               const checked = name === checkedBase ? " checked" : "";
               return (
                 '<label class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer text-sm text-slate-800">' +
@@ -2482,7 +2542,8 @@
             adminPickerSelectedProjectParticipants = new Set();
           }
           listEl.innerHTML = filtered
-            .map(function (name) {
+            .map(function (admin) {
+              const name = String((admin && admin.Name) || "").trim();
               const checked = adminPickerSelectedProjectParticipants.has(name)
                 ? " checked"
                 : "";
@@ -2516,7 +2577,8 @@
             document.getElementById("project-edit-charge-man")?.value || ""
           ).trim();
           listEl.innerHTML = filtered
-            .map(function (name) {
+            .map(function (admin) {
+              const name = String((admin && admin.Name) || "").trim();
               const checked = name === currentVal ? " checked" : "";
               return (
                 '<label class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer text-sm text-slate-800">' +
@@ -2539,7 +2601,8 @@
             ? taskAssigneeValEl.value.trim()
             : "";
           listEl.innerHTML = filtered
-            .map(function (name) {
+            .map(function (admin) {
+              const name = String((admin && admin.Name) || "").trim();
               const checked = name === checkedBase ? " checked" : "";
               return (
                 '<label class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer text-sm text-slate-800">' +

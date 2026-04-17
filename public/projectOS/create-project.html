@@ -327,17 +327,27 @@ function postJson(url, body) {
   });
 }
 
-function dedupeAdminNames(arr) {
+function normalizeAdminDirectory(arr) {
   const seen = new Set();
   const out = [];
-  (arr || []).forEach(function (n) {
-    const s = String(n == null ? "" : n).trim();
-    if (!s || seen.has(s)) return;
-    seen.add(s);
-    out.push(s);
+  (arr || []).forEach(function (item) {
+    const name = String(
+      item && typeof item === "object" ? item.Name || "" : item || "",
+    ).trim();
+    const adminID = String(
+      item && typeof item === "object" ? item.AdminID || "" : "",
+    ).trim();
+    const email = String(
+      item && typeof item === "object" ? item.Email || "" : "",
+    ).trim();
+    if (!name) return;
+    const key = (name + "|" + adminID).toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push({ Name: name, AdminID: adminID, Email: email });
   });
   out.sort(function (a, b) {
-    return a.localeCompare(b, "zh-Hant");
+    return String(a.Name || "").localeCompare(String(b.Name || ""), "zh-Hant");
   });
   return out;
 }
@@ -363,7 +373,7 @@ function fetchAdminNameList() {
     if (!r || String(r.Result).toUpperCase() !== "OK") throw new Error("bad result");
     const raw = r.adminNameList || r.AdminNameList || [];
     if (!Array.isArray(raw)) throw new Error("bad list");
-    adminNameListCache = dedupeAdminNames(raw);
+    adminNameListCache = normalizeAdminDirectory(raw);
     return adminNameListCache;
   });
 }
@@ -441,7 +451,9 @@ function renderAdminPickerList() {
 
   const q = (searchEl && searchEl.value ? searchEl.value : "").trim().toLowerCase();
   const names = adminNameListCache.filter(function (n) {
-    return !q || String(n).toLowerCase().indexOf(q) >= 0;
+    const name = String((n && n.Name) || "").toLowerCase();
+    const adminID = String((n && n.AdminID) || "").toLowerCase();
+    return !q || name.indexOf(q) >= 0 || adminID.indexOf(q) >= 0;
   });
 
   const ownerVal = document.getElementById("m-owner") ? document.getElementById("m-owner").value.trim() : "";
@@ -461,7 +473,8 @@ function renderAdminPickerList() {
     const checkedBase = adminPickerMode === "taskAssignee" ? taskAssigneeVal : ownerVal;
     const radioName = adminPickerMode === "taskAssignee" ? "admin-picker-task-assignee" : "admin-picker-owner";
     listEl.innerHTML = names
-      .map(function (name) {
+      .map(function (admin) {
+        const name = String((admin && admin.Name) || "").trim();
         const checked = name === checkedBase ? " checked" : "";
         return (
           '<label class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer text-sm text-slate-800">' +
@@ -480,7 +493,8 @@ function renderAdminPickerList() {
       .join("");
   } else {
     listEl.innerHTML = names
-      .map(function (name) {
+      .map(function (admin) {
+        const name = String((admin && admin.Name) || "").trim();
         const checked = adminPickerSelectedMembers.has(name) ? " checked" : "";
         return (
           '<label class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer text-sm text-slate-800">' +
