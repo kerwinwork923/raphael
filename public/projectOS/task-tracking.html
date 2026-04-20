@@ -1748,6 +1748,7 @@
       const MODIFY_PROPOSAL_URL = API_BASE + "/api/fr/ModifyProposal";
       const DELETE_PROPOSAL_URL = API_BASE + "/api/fr/DeleteProposal";
       const SEND_EMAIL_URL = API_BASE + "/api/fr/SendEmail";
+      const GLOBAL_CC_EMAIL = "wingchen@raphael.clinic";
       const MODIFY_PROJECT_URL = API_BASE + "/api/fr/ModifyProject";
 
       /** 目前頁面對應的專案 AID（來自 getProjectList 或 localStorage.projectAID） */
@@ -1759,6 +1760,12 @@
       let CURRENT_PROJECT_PARTICIPANTS = "";
       let CURRENT_PROJECT_START_DATE = "";
       let CURRENT_PROJECT_END_DATE = "";
+      let CURRENT_PROJECT_NAME = "";
+      /**
+       * 來自 getProject 的 SingleProject.ProposalList 快照。
+       * 寄信時依 AdminID 對 Email（不再為 CC 呼叫 getAdminNameList）。
+       */
+      let CURRENT_PROPOSAL_LIST_CACHE = [];
       /** 是否已成功自 getProjectList 套用專案與任務 */
       let backendProjectSynced = false;
       let adminNameListCache = null;
@@ -1889,26 +1896,113 @@
       }
 
       /**
-       * 以 getAdminNameList 回傳清單，依 AdminID（不分大小寫）取得 Email。
-       * 同名多人時以第一筆符合 AdminID 且 Email 有效者為準。
+       * 自 SingleProject.ProposalList 依 AdminID（不分大小寫）取得 Email。
+       * 多筆時優先採較新 CheckTime／較大 BID，且 Email 須為合法格式。
        */
-      function findEmailByAdminIdInList(list, adminIdRaw) {
+      function findEmailForAdminIdFromProposalList(proposalList, adminIdRaw) {
         const want = String(adminIdRaw || "").trim().toLowerCase();
-        if (!want || !Array.isArray(list)) return "";
-        for (let i = 0; i < list.length; i++) {
-          const row = list[i];
+        if (!want || !Array.isArray(proposalList)) return "";
+
+        const sorted = proposalList.slice().sort(function (a, b) {
+          const ta = String(
+            (a && a.CheckTime) || (a && a.checkTime) || "",
+          ).replace(/\D/g, "");
+          const tb = String(
+            (b && b.CheckTime) || (b && b.checkTime) || "",
+          ).replace(/\D/g, "");
+          if (ta && tb && ta !== tb) return tb.localeCompare(ta);
+          if (ta && !tb) return -1;
+          if (!ta && tb) return 1;
+
+          const ba = Number(
+            String((a && a.BID) || (a && a.bid) || "").trim(),
+          );
+          const bb = Number(
+            String((b && b.BID) || (b && b.bid) || "").trim(),
+          );
+          const na = Number.isFinite(ba);
+          const nb = Number.isFinite(bb);
+          if (na && nb && ba !== bb) return bb - ba;
+          if (na && !nb) return -1;
+          if (!na && nb) return 1;
+          return 0;
+        });
+
+        for (let i = 0; i < sorted.length; i++) {
+          const row = sorted[i];
           if (!row || typeof row !== "object") continue;
-          const aid = String(row.AdminID != null ? row.AdminID : "").trim();
-          if (aid.toLowerCase() !== want) continue;
-          const em = String(row.Email != null ? row.Email : "").trim();
+          const aid = String(
+            row.AdminID != null ? row.AdminID : "",
+          ).trim().toLowerCase();
+          if (aid !== want) continue;
+          const em = String(
+            row.Email != null ? row.Email : row.email != null ? row.email : "",
+          ).trim();
           if (isValidSendEmailAddress(em)) return em;
         }
         return "";
       }
 
       /**
-       * 寄信前載入員工清單，並把「目前登入 AdminID」對應的 Email 併入 CC（不重複）。
-       * 先前若 To 與自己信箱相同，CC 會被過濾掉導致看不到副本，故不再對 To 去重 CC。
+       * getAdminNameList 回傳之員工清單，依 AdminID（不分大小寫）取得 Email。
+       */
+      function findEmailByAdminIdFromAdminList(list, adminIdRaw) {
+        const want = String(adminIdRaw || "").trim().toLowerCase();
+        if (!want || !Array.isArray(list)) return "";
+        for (let i = 0; i < list.length; i++) {
+          const row = list[i];
+          if (!row || typeof row !== "object") continue;
+          const aid = String(
+            row.AdminID != null ? row.AdminID : "",
+          ).trim().toLowerCase();
+          if (aid !== want) continue;
+          const em = String(row.Email != null ? row.Email : "").trim();
+          if (isValidSendEmailAddress(em)) return em;
+        }
+        return "";
+      }
+
+      /** 與 isProposalCeoUser 一致：執行長帳號（寄信 To 用） */
+      const PROPOSAL_CEO_ADMIN_ID = "jason";
+
+      /**
+       * 執行長操作時：ProposalList 內 Actor 為「提案人」的其他人，To 用其 Email；
+       * 同一 AdminID 只取一次，優先 ProposalList，缺則再用 getAdminNameList。
+       */
+      function collectOtherProposerEmailsFromProposalList(excludeAdminId) {
+        const exclude = String(excludeAdminId || "").trim().toLowerCase();
+        const seenAid = new Set();
+        const out = [];
+        const list = Array.isArray(CURRENT_PROPOSAL_LIST_CACHE)
+          ? CURRENT_PROPOSAL_LIST_CACHE
+          : [];
+        list.forEach(function (row) {
+          if (!row || typeof row !== "object") return;
+          const actor = String(
+            row.Actor != null
+              ? row.Actor
+              : row.actor != null
+                ? row.actor
+                : "",
+          ).trim();
+          if (actor !== "提案人") return;
+          const aid = String(
+            row.AdminID != null ? row.AdminID : "",
+          ).trim().toLowerCase();
+          if (!aid || aid === exclude) return;
+          if (seenAid.has(aid)) return;
+          seenAid.add(aid);
+          let em = findEmailForAdminIdFromProposalList(list, aid);
+          if (!em && Array.isArray(adminNameListCache)) {
+            em = findEmailByAdminIdFromAdminList(adminNameListCache, aid);
+          }
+          if (em && isValidSendEmailAddress(em)) out.push(em);
+        });
+        return normalizeEmailList(out);
+      }
+
+      /**
+       * 一般寄信：把目前登入者在 getAdminNameList 的信箱併入 CC（不重複）。
        */
       async function mergeCcWithSelfFromAdminDirectory(ccList, auth) {
         if (!auth) return normalizeEmailList(ccList);
@@ -1916,7 +2010,7 @@
           await fetchAdminNameList();
         } catch (e) {}
         let out = normalizeEmailList(ccList);
-        const selfMail = findEmailByAdminIdInList(
+        const selfMail = findEmailByAdminIdFromAdminList(
           adminNameListCache,
           auth.adminID,
         );
@@ -1972,52 +2066,11 @@
         }
       }
 
-      function collectProposalEmailRecipients() {
-        const PROPOSAL_TEST_TO = "wingchen@raphael.clinic";
-        const toSeed = [];
-        const ccSeed = [];
-        // 依你的需求：測試期間 Proposal 一律先寄 kuanyi
-        toSeed.push(PROPOSAL_TEST_TO);
-
-        const auth = getBackendTokenAndAdmin();
-        const currentAdminID = String(
-          (auth && auth.adminID) ||
-            localStorage.getItem("adminID") ||
-            sessionStorage.getItem("adminID") ||
-            "",
-        ).trim();
-        const currentAdminName = String(
-          localStorage.getItem("adminName") || sessionStorage.getItem("adminName") || "",
-        ).trim();
-        if (currentAdminID) {
-          ccSeed.push.apply(ccSeed, resolveEmailsByNameOrAdminId(currentAdminID));
-          const direct = findEmailByAdminIdInList(
-            adminNameListCache,
-            currentAdminID,
-          );
-          if (direct) ccSeed.push(direct);
-        }
-        if (currentAdminName) {
-          ccSeed.push.apply(ccSeed, resolveEmailsByNameOrAdminId(currentAdminName));
-        }
-        ccSeed.push.apply(ccSeed, getSelfEmailFromUserData());
-        // 若 adminNameList 尚未對到資料，至少帶測試帳號避免空 CC
-        if (!ccSeed.length && currentAdminID === "kuanyi") ccSeed.push(PROPOSAL_TEST_TO);
-
-        return {
-          to: normalizeEmailList(toSeed),
-          cc: normalizeEmailList(ccSeed),
-        };
-      }
-
       async function postSendEmailApi(subject, content, toList, ccList) {
         const auth = getBackendTokenAndAdmin();
         if (!auth) throw new Error("尚未登入，缺少 AdminID / Token");
         const normalizedTo = normalizeEmailList(toList);
-        const normalizedCc = await mergeCcWithSelfFromAdminDirectory(
-          ccList,
-          auth,
-        );
+        const normalizedCc = normalizeEmailList(ccList);
         const payload = {
           AdminID: auth.adminID,
           Token: auth.token,
@@ -2041,6 +2094,9 @@
           throw new Error("缺少收件者 Email（To）");
         }
         if (!Array.isArray(payload.CC)) payload.CC = [];
+        payload.CC = normalizeEmailList(
+          payload.CC.concat(isValidSendEmailAddress(GLOBAL_CC_EMAIL) ? [GLOBAL_CC_EMAIL] : []),
+        );
         const resp = await postJson(SEND_EMAIL_URL, payload);
         if (!isFrApiResultOk(resp)) {
           throw new Error(
@@ -2055,9 +2111,54 @@
         try {
           await fetchAdminNameList();
         } catch (e) {}
-        const recipients = collectProposalEmailRecipients();
+
+        const auth = getBackendTokenAndAdmin();
+        const PROPOSAL_TEST_TO_FALLBACK = "kerwin@raphael.clinic";
+
+        let toSeed = [];
+        let ccSeed = [];
+
+        if (action === "submit") {
+          const ceoMail =
+            findEmailByAdminIdFromAdminList(
+              adminNameListCache,
+              PROPOSAL_CEO_ADMIN_ID,
+            ) || PROPOSAL_TEST_TO_FALLBACK;
+          toSeed.push(ceoMail);
+          if (auth) {
+            const senderMail = findEmailByAdminIdFromAdminList(
+              adminNameListCache,
+              auth.adminID,
+            );
+            if (senderMail) ccSeed.push(senderMail);
+          }
+          ccSeed.push.apply(ccSeed, getSelfEmailFromUserData());
+        } else {
+          if (auth) {
+            const ceoSelf = findEmailByAdminIdFromAdminList(
+              adminNameListCache,
+              auth.adminID,
+            );
+            if (ceoSelf) ccSeed.push(ceoSelf);
+          }
+          ccSeed.push.apply(ccSeed, getSelfEmailFromUserData());
+          toSeed = collectOtherProposerEmailsFromProposalList(
+            auth ? auth.adminID : "",
+          ).slice();
+        }
+
+        const recipients = {
+          to: normalizeEmailList(toSeed),
+          cc: normalizeEmailList(ccSeed),
+        };
+
         if (!recipients.to.length) {
-          showToast("找不到 Proposal 收件人 Email，請確認員工清單 Email 欄位", "warn");
+          showToast(
+            action === "submit"
+              ? "找不到執行長（jason）信箱，請確認 getAdminNameList"
+              : "ProposalList 中沒有其他「提案人」的有效 Email 可寄送",
+            "warn",
+          );
           return;
         }
         const actionLabel =
@@ -2066,20 +2167,32 @@
             : action === "revision_required"
               ? "退回修改"
               : "送交執行長";
-        const subject = "[Proposal] " + actionLabel;
+        const proposalTitleForMail = String(note || "").trim();
+        const projectNameForMail = String(
+          CURRENT_PROJECT_NAME ||
+            document.getElementById("project-title")?.textContent ||
+            "",
+        ).trim();
+        const subject =
+          action === "submit"
+            ? "經理人提案【" +
+              ( projectNameForMail || "未命名提案") +
+              "】，請執行長審核，謝謝。"
+            : action === "revision_required"
+              ? "請經理人依建議修改【" +
+                (projectNameForMail || "未命名專案") +
+                "】內容，謝謝。"
+              : action === "approved"
+                ? "【" + (projectNameForMail || "未命名專案") + "】專案通過審核。"
+                : projectNameForMail || "未命名專案";
         const content =
-          "Proposal 操作通知\n" +
-          "動作：" +
-          actionLabel +
+        "專案：" +
+          (projectNameForMail || "未命名專案") +
           "\n" +
-          "操作者：" +
-          (action === "submit" ? "提案人" : "執行長") +
+          "提案：" +
+          (proposalTitleForMail || "未命名提案") +
           "\n" +
-          "內容：" +
-          String(note || "").trim() +
-          "\n" +
-          "討論 URL：" +
-          String(discussionUrl || "").trim();
+          "動作：" + actionLabel + "\n" + "操作者：" + (action === "submit" ? "提案人" : "執行長") + "\n" + "討論 URL：" + String(discussionUrl || "").trim();
         try {
           await postSendEmailApi(subject, content, recipients.to, recipients.cc);
         } catch (e) {
@@ -2278,6 +2391,7 @@
           : Array.isArray(selected.proposalList)
             ? selected.proposalList
             : [];
+        CURRENT_PROPOSAL_LIST_CACHE = rawList.slice();
         const aid = String(
           CURRENT_PROJECT_AID || selected.AID || selected.ProjectAID || "",
         ).trim();
@@ -2286,6 +2400,7 @@
         );
 
         if (!rawList.length) {
+          CURRENT_PROPOSAL_LIST_CACHE = [];
           PROPOSAL_REVIEW.status = "draft";
           PROPOSAL_REVIEW.currentRound = 1;
           PROPOSAL_REVIEW.lastActor = "—";
@@ -3467,6 +3582,7 @@
         const projectName = String(
           selected.ProjectName || selected.name || "未命名專案",
         ).trim();
+        CURRENT_PROJECT_NAME = projectName || "";
         const chargeMan = String(
           selected.ChargeMan ||
             selected.ChargePerson ||
