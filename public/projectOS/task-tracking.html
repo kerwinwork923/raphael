@@ -1882,9 +1882,61 @@
         return out;
       }
 
+      /** 與 normalizeEmailList 相同條件：後端若回傳 "@raphael.clinic" 等無效字串則略過 */
+      function isValidSendEmailAddress(addr) {
+        const s = String(addr || "").trim();
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+      }
+
+      /**
+       * 以 getAdminNameList 回傳清單，依 AdminID（不分大小寫）取得 Email。
+       * 同名多人時以第一筆符合 AdminID 且 Email 有效者為準。
+       */
+      function findEmailByAdminIdInList(list, adminIdRaw) {
+        const want = String(adminIdRaw || "").trim().toLowerCase();
+        if (!want || !Array.isArray(list)) return "";
+        for (let i = 0; i < list.length; i++) {
+          const row = list[i];
+          if (!row || typeof row !== "object") continue;
+          const aid = String(row.AdminID != null ? row.AdminID : "").trim();
+          if (aid.toLowerCase() !== want) continue;
+          const em = String(row.Email != null ? row.Email : "").trim();
+          if (isValidSendEmailAddress(em)) return em;
+        }
+        return "";
+      }
+
+      /**
+       * 寄信前載入員工清單，並把「目前登入 AdminID」對應的 Email 併入 CC（不重複）。
+       * 先前若 To 與自己信箱相同，CC 會被過濾掉導致看不到副本，故不再對 To 去重 CC。
+       */
+      async function mergeCcWithSelfFromAdminDirectory(ccList, auth) {
+        if (!auth) return normalizeEmailList(ccList);
+        try {
+          await fetchAdminNameList();
+        } catch (e) {}
+        let out = normalizeEmailList(ccList);
+        const selfMail = findEmailByAdminIdInList(
+          adminNameListCache,
+          auth.adminID,
+        );
+        if (
+          selfMail &&
+          !out.some(function (m) {
+            return (
+              String(m).toLowerCase() === String(selfMail).toLowerCase()
+            );
+          })
+        ) {
+          out.push(selfMail);
+        }
+        return out;
+      }
+
       function resolveEmailsByNameOrAdminId(identity) {
         const target = String(identity || "").trim();
         if (!target) return [];
+        if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(target)) return [target];
         const low = target.toLowerCase();
         const list = Array.isArray(adminNameListCache) ? adminNameListCache : [];
         return list
@@ -1898,31 +1950,59 @@
           .map(function (item) {
             return String((item && item.Email) || "").trim();
           })
-          .filter(Boolean);
+          .filter(function (em) {
+            return isValidSendEmailAddress(em);
+          });
+      }
+
+      function getSelfEmailFromUserData() {
+        try {
+          const raw =
+            localStorage.getItem("userData") || sessionStorage.getItem("userData");
+          if (!raw) return [];
+          const u = JSON.parse(raw);
+          const e =
+            (u && u.Member && (u.Member.Email || u.Member.Mail)) ||
+            (u && (u.Email || u.Mail));
+          const s = String(e == null ? "" : e).trim();
+          if (!s || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)) return [];
+          return [s];
+        } catch (e) {
+          return [];
+        }
       }
 
       function collectProposalEmailRecipients() {
+        const PROPOSAL_TEST_TO = "wingchen@raphael.clinic";
         const toSeed = [];
         const ccSeed = [];
-        const chargeMan = String(CURRENT_PROJECT_CHARGE_MAN || "").trim();
-        if (chargeMan) toSeed.push.apply(toSeed, resolveEmailsByNameOrAdminId(chargeMan));
+        // 依你的需求：測試期間 Proposal 一律先寄 kuanyi
+        toSeed.push(PROPOSAL_TEST_TO);
 
-        String(CURRENT_PROJECT_PARTICIPANTS || "")
-          .split(/[,，、\s]+/)
-          .map(function (x) {
-            return String(x || "").trim();
-          })
-          .filter(Boolean)
-          .forEach(function (person) {
-            ccSeed.push.apply(ccSeed, resolveEmailsByNameOrAdminId(person));
-          });
-
+        const auth = getBackendTokenAndAdmin();
         const currentAdminID = String(
-          localStorage.getItem("adminID") || sessionStorage.getItem("adminID") || "",
+          (auth && auth.adminID) ||
+            localStorage.getItem("adminID") ||
+            sessionStorage.getItem("adminID") ||
+            "",
+        ).trim();
+        const currentAdminName = String(
+          localStorage.getItem("adminName") || sessionStorage.getItem("adminName") || "",
         ).trim();
         if (currentAdminID) {
           ccSeed.push.apply(ccSeed, resolveEmailsByNameOrAdminId(currentAdminID));
+          const direct = findEmailByAdminIdInList(
+            adminNameListCache,
+            currentAdminID,
+          );
+          if (direct) ccSeed.push(direct);
         }
+        if (currentAdminName) {
+          ccSeed.push.apply(ccSeed, resolveEmailsByNameOrAdminId(currentAdminName));
+        }
+        ccSeed.push.apply(ccSeed, getSelfEmailFromUserData());
+        // 若 adminNameList 尚未對到資料，至少帶測試帳號避免空 CC
+        if (!ccSeed.length && currentAdminID === "kuanyi") ccSeed.push(PROPOSAL_TEST_TO);
 
         return {
           to: normalizeEmailList(toSeed),
@@ -1934,11 +2014,10 @@
         const auth = getBackendTokenAndAdmin();
         if (!auth) throw new Error("尚未登入，缺少 AdminID / Token");
         const normalizedTo = normalizeEmailList(toList);
-        const normalizedCc = normalizeEmailList(ccList).filter(function (mail) {
-          return !normalizedTo.some(function (toMail) {
-            return String(toMail).toLowerCase() === String(mail).toLowerCase();
-          });
-        });
+        const normalizedCc = await mergeCcWithSelfFromAdminDirectory(
+          ccList,
+          auth,
+        );
         const payload = {
           AdminID: auth.adminID,
           Token: auth.token,
@@ -1947,6 +2026,17 @@
           Subject: String(subject || "").trim(),
           Content: String(content || "").trim(),
         };
+        if (!Array.isArray(payload.To) || !payload.To.length) {
+          throw new Error("缺少收件者 Email（To）");
+        }
+        if (!Array.isArray(payload.CC)) payload.CC = [];
+        return postSendEmailPayload(payload);
+      }
+
+      async function postSendEmailPayload(payload) {
+        if (!payload || typeof payload !== "object") {
+          throw new Error("SendEmail payload 格式錯誤");
+        }
         if (!Array.isArray(payload.To) || !payload.To.length) {
           throw new Error("缺少收件者 Email（To）");
         }
@@ -1962,14 +2052,12 @@
       }
 
       async function sendProposalActionEmail(action, note, discussionUrl) {
-        if (!Array.isArray(adminNameListCache) || !adminNameListCache.length) {
-          try {
-            await fetchAdminNameList();
-          } catch (e) {}
-        }
+        try {
+          await fetchAdminNameList();
+        } catch (e) {}
         const recipients = collectProposalEmailRecipients();
         if (!recipients.to.length) {
-          showToast("未設定 Proposal 收件人 Email（可用 proposalEmailTo）", "warn");
+          showToast("找不到 Proposal 收件人 Email，請確認員工清單 Email 欄位", "warn");
           return;
         }
         const actionLabel =
@@ -1978,17 +2066,11 @@
             : action === "revision_required"
               ? "退回修改"
               : "送交執行長";
-        const aid = String(
-          CURRENT_PROJECT_AID || localStorage.getItem("projectAID") || "",
-        ).trim();
-        const subject = "[Proposal] " + actionLabel + (aid ? "（AID:" + aid + "）" : "");
+        const subject = "[Proposal] " + actionLabel;
         const content =
           "Proposal 操作通知\n" +
           "動作：" +
           actionLabel +
-          "\n" +
-          "專案 AID：" +
-          (aid || "—") +
           "\n" +
           "操作者：" +
           (action === "submit" ? "提案人" : "執行長") +
@@ -2007,6 +2089,25 @@
             "warn",
           );
         }
+      }
+
+      // 提供可重用寄信方法（符合 /api/fr/SendEmail 規格）
+      async function sendEmailByFrApi(toList, ccList, subject, content) {
+        const auth = getBackendTokenAndAdmin();
+        if (!auth) throw new Error("尚未登入，缺少 AdminID / Token");
+        const normalizedCc = await mergeCcWithSelfFromAdminDirectory(
+          ccList,
+          auth,
+        );
+        const payload = {
+          AdminID: auth.adminID,
+          Token: auth.token,
+          To: normalizeEmailList(toList),
+          CC: normalizedCc,
+          Subject: String(subject || "").trim(),
+          Content: String(content || "").trim(),
+        };
+        return postSendEmailPayload(payload);
       }
 
       function syncProposalBidHint(bid) {
