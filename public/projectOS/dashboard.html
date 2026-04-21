@@ -757,7 +757,7 @@ function renderProjectTable(projects) {
     return `
       <div class="grid grid-cols-12 items-center px-3 py-3 hover:bg-slate-50 transition group">
         <div class="col-span-4 flex items-center gap-2 min-w-0">
-          <span class="text-sm font-medium text-slate-800 truncate group-hover:text-blue-600">${p.name}</span>
+          <a href='${p.url}'><span class="text-sm font-medium text-slate-800 truncate group-hover:text-blue-600">${p.name}</span></a>
           ${p.delayed ? `<span class="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-bold flex-shrink-0">+${p.delayDays}天</span>` : ''}
           ${p.blocked > 0 ? `<span class="text-xs bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded font-medium flex-shrink-0">🔴${p.blocked}</span>` : ''}
         </div>

@@ -1900,7 +1900,9 @@
        * 多筆時優先採較新 CheckTime／較大 BID，且 Email 須為合法格式。
        */
       function findEmailForAdminIdFromProposalList(proposalList, adminIdRaw) {
-        const want = String(adminIdRaw || "").trim().toLowerCase();
+        const want = String(adminIdRaw || "")
+          .trim()
+          .toLowerCase();
         if (!want || !Array.isArray(proposalList)) return "";
 
         const sorted = proposalList.slice().sort(function (a, b) {
@@ -1914,12 +1916,8 @@
           if (ta && !tb) return -1;
           if (!ta && tb) return 1;
 
-          const ba = Number(
-            String((a && a.BID) || (a && a.bid) || "").trim(),
-          );
-          const bb = Number(
-            String((b && b.BID) || (b && b.bid) || "").trim(),
-          );
+          const ba = Number(String((a && a.BID) || (a && a.bid) || "").trim());
+          const bb = Number(String((b && b.BID) || (b && b.bid) || "").trim());
           const na = Number.isFinite(ba);
           const nb = Number.isFinite(bb);
           if (na && nb && ba !== bb) return bb - ba;
@@ -1931,9 +1929,9 @@
         for (let i = 0; i < sorted.length; i++) {
           const row = sorted[i];
           if (!row || typeof row !== "object") continue;
-          const aid = String(
-            row.AdminID != null ? row.AdminID : "",
-          ).trim().toLowerCase();
+          const aid = String(row.AdminID != null ? row.AdminID : "")
+            .trim()
+            .toLowerCase();
           if (aid !== want) continue;
           const em = String(
             row.Email != null ? row.Email : row.email != null ? row.email : "",
@@ -1947,14 +1945,16 @@
        * getAdminNameList 回傳之員工清單，依 AdminID（不分大小寫）取得 Email。
        */
       function findEmailByAdminIdFromAdminList(list, adminIdRaw) {
-        const want = String(adminIdRaw || "").trim().toLowerCase();
+        const want = String(adminIdRaw || "")
+          .trim()
+          .toLowerCase();
         if (!want || !Array.isArray(list)) return "";
         for (let i = 0; i < list.length; i++) {
           const row = list[i];
           if (!row || typeof row !== "object") continue;
-          const aid = String(
-            row.AdminID != null ? row.AdminID : "",
-          ).trim().toLowerCase();
+          const aid = String(row.AdminID != null ? row.AdminID : "")
+            .trim()
+            .toLowerCase();
           if (aid !== want) continue;
           const em = String(row.Email != null ? row.Email : "").trim();
           if (isValidSendEmailAddress(em)) return em;
@@ -1970,7 +1970,9 @@
        * 同一 AdminID 只取一次，優先 ProposalList，缺則再用 getAdminNameList。
        */
       function collectOtherProposerEmailsFromProposalList(excludeAdminId) {
-        const exclude = String(excludeAdminId || "").trim().toLowerCase();
+        const exclude = String(excludeAdminId || "")
+          .trim()
+          .toLowerCase();
         const seenAid = new Set();
         const out = [];
         const list = Array.isArray(CURRENT_PROPOSAL_LIST_CACHE)
@@ -1979,16 +1981,12 @@
         list.forEach(function (row) {
           if (!row || typeof row !== "object") return;
           const actor = String(
-            row.Actor != null
-              ? row.Actor
-              : row.actor != null
-                ? row.actor
-                : "",
+            row.Actor != null ? row.Actor : row.actor != null ? row.actor : "",
           ).trim();
           if (actor !== "提案人") return;
-          const aid = String(
-            row.AdminID != null ? row.AdminID : "",
-          ).trim().toLowerCase();
+          const aid = String(row.AdminID != null ? row.AdminID : "")
+            .trim()
+            .toLowerCase();
           if (!aid || aid === exclude) return;
           if (seenAid.has(aid)) return;
           seenAid.add(aid);
@@ -2017,9 +2015,7 @@
         if (
           selfMail &&
           !out.some(function (m) {
-            return (
-              String(m).toLowerCase() === String(selfMail).toLowerCase()
-            );
+            return String(m).toLowerCase() === String(selfMail).toLowerCase();
           })
         ) {
           out.push(selfMail);
@@ -2032,10 +2028,14 @@
         if (!target) return [];
         if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(target)) return [target];
         const low = target.toLowerCase();
-        const list = Array.isArray(adminNameListCache) ? adminNameListCache : [];
+        const list = Array.isArray(adminNameListCache)
+          ? adminNameListCache
+          : [];
         return list
           .filter(function (item) {
-            const name = String((item && item.Name) || "").trim().toLowerCase();
+            const name = String((item && item.Name) || "")
+              .trim()
+              .toLowerCase();
             const adminID = String((item && item.AdminID) || "")
               .trim()
               .toLowerCase();
@@ -2074,7 +2074,10 @@
 
         const emailSeed = [];
         Array.from(identities).forEach(function (idOrName) {
-          emailSeed.push.apply(emailSeed, resolveEmailsByNameOrAdminId(idOrName));
+          emailSeed.push.apply(
+            emailSeed,
+            resolveEmailsByNameOrAdminId(idOrName),
+          );
         });
         return normalizeEmailList(emailSeed);
       }
@@ -2082,7 +2085,8 @@
       function getSelfEmailFromUserData() {
         try {
           const raw =
-            localStorage.getItem("userData") || sessionStorage.getItem("userData");
+            localStorage.getItem("userData") ||
+            sessionStorage.getItem("userData");
           if (!raw) return [];
           const u = JSON.parse(raw);
           const e =
@@ -2125,7 +2129,9 @@
         }
         if (!Array.isArray(payload.CC)) payload.CC = [];
         payload.CC = normalizeEmailList(
-          payload.CC.concat(isValidSendEmailAddress(GLOBAL_CC_EMAIL) ? [GLOBAL_CC_EMAIL] : []),
+          payload.CC.concat(
+            isValidSendEmailAddress(GLOBAL_CC_EMAIL) ? [GLOBAL_CC_EMAIL] : [],
+          ),
         );
         const resp = await postJson(SEND_EMAIL_URL, payload);
         if (!isFrApiResultOk(resp)) {
@@ -2212,25 +2218,39 @@
         const subject =
           action === "submit"
             ? "經理人提案【" +
-              ( projectNameForMail || "未命名提案") +
+              (projectNameForMail || "未命名提案") +
               "】，請執行長審核，謝謝。"
             : action === "revision_required"
               ? "請經理人依建議修改【" +
                 (projectNameForMail || "未命名專案") +
                 "】內容，謝謝。"
               : action === "approved"
-                ? "【" + (projectNameForMail || "未命名專案") + "】專案通過審核。"
+                ? "【" +
+                  (projectNameForMail || "未命名專案") +
+                  "】專案通過審核。"
                 : projectNameForMail || "未命名專案";
         const content =
-        "專案：" +
+          "專案：" +
           (projectNameForMail || "未命名專案") +
           "\n" +
           "提案：" +
           (proposalTitleForMail || "未命名提案") +
           "\n" +
-          "動作：" + actionLabel + "\n" + "操作者：" + (action === "submit" ? "提案人" : "執行長") + "\n" + "討論 URL：" + String(discussionUrl || "").trim();
+          "動作：" +
+          actionLabel +
+          "\n" +
+          "操作者：" +
+          (action === "submit" ? "提案人" : "執行長") +
+          "\n" +
+          "討論 URL：" +
+          String(discussionUrl || "").trim();
         try {
-          await postSendEmailApi(subject, content, recipients.to, recipients.cc);
+          await postSendEmailApi(
+            subject,
+            content,
+            recipients.to,
+            recipients.cc,
+          );
         } catch (e) {
           showToast(
             "Proposal 流程成功，但寄信失敗：" +
@@ -2268,7 +2288,7 @@
         if (!resp || typeof resp !== "object") return [];
         if (Array.isArray(resp)) return resp;
         if (Array.isArray(resp.ProjectList)) return resp.ProjectList;
-        if (Array.isArray(resp.Data)) return resp.Data; 
+        if (Array.isArray(resp.Data)) return resp.Data;
         if (Array.isArray(resp.Projects)) return resp.Projects;
         if (Array.isArray(resp.List)) return resp.List;
         for (var k in resp) {
@@ -2634,7 +2654,10 @@
           out.push({ Name: name, AdminID: adminID, Email: email });
         });
         out.sort(function (a, b) {
-          return String(a.Name || "").localeCompare(String(b.Name || ""), "zh-Hant");
+          return String(a.Name || "").localeCompare(
+            String(b.Name || ""),
+            "zh-Hant",
+          );
         });
         return out;
       }
@@ -3602,9 +3625,11 @@
             completedDate:
               stateCode === "3"
                 ? toIsoDate(
-                    (t && (t.CheckTime || t.checkTime || t.EndDate || t.endDate)) ||
+                    (t &&
+                      (t.CheckTime || t.checkTime || t.EndDate || t.endDate)) ||
                       "",
-                  ) || checkTimeToIsoDate(t && (t.CheckTime || t.checkTime || ""))
+                  ) ||
+                  checkTimeToIsoDate(t && (t.CheckTime || t.checkTime || ""))
                 : "",
             discussionLinks: normalizeUrlListItems(
               t && (t.URLList || t.UrlList || t.urlList || []),
