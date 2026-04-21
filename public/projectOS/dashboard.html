@@ -711,7 +711,7 @@ function renderCEOActionPanel() {
         <p class="text-xs text-slate-500 mt-1">提案人：${p.owner} · 最後更新：${p.updated}</p>
         <p class="text-xs text-orange-700 mt-2">請確認提案摘要與討論 URL，並給予提案建議或直接通過。</p>
       </div>
-      <a href="${p.url}" class="text-xs bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-lg font-medium transition whitespace-nowrap">立即查看</a>
+      <a href="${p.url}${p.url.indexOf('?') >= 0 ? '&' : '?'}tab=proposal" class="text-xs bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-lg font-medium transition whitespace-nowrap">立即查看</a>
     </div>
   `).join('');
 }

@@ -327,18 +327,21 @@
       <!-- TABS -->
       <div class="flex gap-1 border-b border-slate-200 mb-5">
         <button
+          id="proposal-tab-btn"
           onclick="setDetailTab(this, 'proposal')"
           class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium"
         >
           Proposal
         </button>
         <button
+          id="decision-tab-btn"
           onclick="setDetailTab(this, 'decision')"
           class="detail-tab text-sm px-4 py-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium"
         >
           Decision
         </button>
         <button
+          id="tasks-tab-btn"
           onclick="setDetailTab(this, 'tasks')"
           class="detail-tab active text-sm px-4 py-2.5 border-b-2 border-blue-600 text-blue-600 font-medium"
         >
@@ -470,7 +473,10 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-          <div class="bg-slate-50 rounded-xl border border-slate-200 p-3">
+          <div
+            class="bg-slate-50 rounded-xl border border-slate-200 p-3"
+            data-kanban-column="todo"
+          >
             <div class="flex items-center justify-between mb-3">
               <div class="flex items-center gap-2">
                 <div class="w-2 h-2 rounded-full bg-slate-400"></div>
@@ -494,7 +500,10 @@
             </button>
           </div>
 
-          <div class="bg-blue-50 rounded-xl border border-blue-200 p-3">
+          <div
+            class="bg-blue-50 rounded-xl border border-blue-200 p-3"
+            data-kanban-column="doing"
+          >
             <div class="flex items-center justify-between mb-3">
               <div class="flex items-center gap-2">
                 <div
@@ -514,7 +523,10 @@
             <div id="col-doing" class="space-y-2 kanban-col"></div>
           </div>
 
-          <div class="bg-green-50 rounded-xl border border-green-200 p-3">
+          <div
+            class="bg-green-50 rounded-xl border border-green-200 p-3"
+            data-kanban-column="done"
+          >
             <div class="flex items-center justify-between mb-3">
               <div class="flex items-center gap-2">
                 <div class="w-2 h-2 rounded-full bg-green-500"></div>
@@ -532,7 +544,10 @@
             <div id="col-done" class="space-y-2 kanban-col"></div>
           </div>
 
-          <div class="bg-red-50 rounded-xl border border-red-200 p-3">
+          <div
+            class="bg-red-50 rounded-xl border border-red-200 p-3"
+            data-kanban-column="blocked"
+          >
             <div class="flex items-center justify-between mb-3">
               <div class="flex items-center gap-2">
                 <div class="w-2 h-2 rounded-full bg-red-500 risk-pulse"></div>
@@ -1621,9 +1636,23 @@
               >
                 任務名稱
               </p>
-              <p class="text-xs text-red-600" id="problem-task-reason">
+              <p class="text-xs text-red-600 mb-2" id="problem-task-reason">
                 阻擋原因
               </p>
+              <textarea
+                id="problem-reason-input"
+                rows="3"
+                placeholder="請填寫阻擋原因或更新處理進度..."
+                class="w-full border border-red-200 rounded-lg px-3 py-2 text-sm resize-none focus:border-red-400 transition"
+              ></textarea>
+              <button
+                id="problem-reason-save-btn"
+                type="button"
+                onclick="saveProblemReason()"
+                class="mt-2 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg text-sm font-semibold transition"
+              >
+                確認阻擋原因
+              </button>
             </div>
             <div class="grid grid-cols-2 gap-3 text-xs">
               <div class="bg-slate-50 rounded-lg p-3">
@@ -1658,10 +1687,7 @@
             </ul>
             <div class="flex gap-2">
               <button
-                onclick="
-                  showToast('已重新指派任務');
-                  closeProblemModal();
-                "
+                onclick="reassignBlockedTask(problemTaskId)"
                 class="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-lg text-sm font-semibold transition"
               >
                 重新指派
@@ -2242,8 +2268,7 @@
           "操作者：" +
           (action === "submit" ? "提案人" : "執行長") +
           "\n" +
-          "討論 URL：" +
-          String(discussionUrl || "").trim();
+          '討論 URL：<a href="' + safeUrl + '">' + safeUrl + "</a>";
         try {
           await postSendEmailApi(
             subject,
@@ -3788,10 +3813,9 @@
                 const topicURL = String(
                   tp.TopicURL || tp.Url || tp.url || "",
                 ).trim();
-                if (!topicName && !topicURL) return null;
+                if (!topicURL) return null;
                 return {
                   id: "dc-api-" + idx,
-                  title: topicName || "",
                   url: topicURL || "",
                   taskId: localTaskId || "",
                 };
@@ -4679,6 +4703,24 @@
         if (tab === "activity") renderActivityLogs();
       }
 
+      function applyInitialDetailTabFromUrl() {
+        const params = new URLSearchParams(window.location.search || "");
+        const tabRaw = String(params.get("tab") || "").trim().toLowerCase();
+        const tabMap = {
+          proposal: "proposal-tab-btn",
+          decision: "decision-tab-btn",
+          tasks: "tasks-tab-btn",
+          task: "tasks-tab-btn",
+          kpi: "kpi-tab-btn",
+          activity: "activity-tab-btn",
+        };
+        const btnId = tabMap[tabRaw];
+        if (!btnId) return;
+        const tab = btnId.replace("-tab-btn", "");
+        const btn = document.getElementById(btnId);
+        if (btn) setDetailTab(btn, tab);
+      }
+
       function scopeTagClass(scope) {
         if (scope === "project") return "bg-blue-50 text-blue-600";
         if (scope === "task") return "bg-emerald-50 text-emerald-600";
@@ -5000,13 +5042,13 @@
               DID: String((tp && tp.did) || idx + 1),
               BID: bid || "",
               AID: aid,
-              TopicName: String((tp && tp.title) || "").trim(),
+              TopicName: "",
               TaskID: taskCid,
               TopicURL: String((tp && tp.url) || "").trim(),
             };
           })
           .filter(function (x) {
-            return x.TopicName || x.TopicURL || x.TaskID;
+            return x.TopicURL || x.TaskID;
           });
 
         return [
@@ -5347,7 +5389,7 @@
       </div>
       <div class="flex gap-1.5 flex-wrap">
         <button onclick="openProblemModal('${t.id}')" class="flex-1 text-xs bg-red-600 hover:bg-red-700 text-white py-1.5 rounded-lg font-semibold transition">問題中心</button>
-        <button onclick="showToast('已重新指派')" class="text-xs bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 px-2.5 py-1.5 rounded-lg font-medium transition">指派</button>
+        <button onclick="reassignBlockedTask('${t.id}')" class="text-xs bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 px-2.5 py-1.5 rounded-lg font-medium transition">指派</button>
         <button onclick="quickMove('${t.id}','blocked','doing')" class="text-xs bg-green-50 hover:bg-green-100 text-green-700 px-2.5 py-1.5 rounded-lg font-medium transition">✓ 解除</button>
       </div>
     </div>`;
@@ -5443,19 +5485,31 @@
         quickMove(payload.id, payload.fromCol, toCol);
       }
 
+      function bindKanbanDropEvents(targetEl, col) {
+        if (!targetEl) return;
+        targetEl.addEventListener("dragover", function (e) {
+          onColDragOver(e, col);
+        });
+        targetEl.addEventListener("drop", function (e) {
+          onColDrop(e, col);
+        });
+        targetEl.addEventListener("dragleave", function (e) {
+          const next = e.relatedTarget;
+          if (next && targetEl.contains(next)) return;
+          clearKanbanDropStyle();
+        });
+      }
+
       function initKanbanDragAndDrop() {
         ["todo", "doing", "done", "blocked"].forEach(function (col) {
           const el = document.getElementById("col-" + col);
           if (!el) return;
-          el.addEventListener("dragover", function (e) {
-            onColDragOver(e, col);
-          });
-          el.addEventListener("drop", function (e) {
-            onColDrop(e, col);
-          });
-          el.addEventListener("dragleave", function (e) {
-            if (e.target === el) el.classList.remove("kanban-drop-active");
-          });
+          const wrapper = el.closest('[data-kanban-column="' + col + '"]');
+          if (wrapper) {
+            bindKanbanDropEvents(wrapper, col);
+          } else {
+            bindKanbanDropEvents(el, col);
+          }
         });
       }
 
@@ -5588,6 +5642,11 @@
         }
 
         const task = TASKS[fromCol][idx];
+        if (toCol === "blocked" && !String(task.assignee || "").trim()) {
+          showToast("回報 Blocked 前請先設定負責人", "warn");
+          openEditModal(id);
+          return;
+        }
         const targetStateCode = colToStateCode(toCol);
 
         // 有後端 CID 才能同步狀態
@@ -5775,6 +5834,13 @@
           showToast("請填入任務標題", "warn");
           return;
         }
+        const assignee = document
+          .getElementById("modal-task-assignee")
+          .value.trim();
+        if (!assignee) {
+          showToast("請選擇任務負責人", "warn");
+          return;
+        }
         const startDate = document.getElementById("modal-task-start").value;
         const endDate = document.getElementById("modal-task-end").value;
         if (startDate && endDate && endDate < startDate) {
@@ -5789,7 +5855,7 @@
           desc: document.getElementById("modal-task-desc").value.trim(),
           startDate: startDate,
           endDate: endDate,
-          assignee: document.getElementById("modal-task-assignee").value.trim(),
+          assignee: assignee,
           dep: document.getElementById("modal-task-dep").value,
           plan: document.getElementById("modal-task-plan").value.trim(),
           doingNote: document.getElementById("modal-task-do").value.trim(),
@@ -6039,6 +6105,8 @@
         document.getElementById("problem-task-title").textContent = t.title;
         document.getElementById("problem-task-reason").textContent =
           t.blockedReason || "阻擋原因未填寫";
+        document.getElementById("problem-reason-input").value =
+          t.blockedReason || "";
         document.getElementById("problem-assignee").textContent = t.assignee;
         document.getElementById("problem-duration").textContent = t.blockedDays
           ? `已 ${t.blockedDays} 天`
@@ -6048,6 +6116,125 @@
           closeProblemModal();
         };
         document.getElementById("problem-modal").classList.remove("hidden");
+      }
+
+      async function reassignBlockedTask(id) {
+        const targetId = String(id || problemTaskId || "").trim();
+        if (!targetId) return;
+        const found = findTask(targetId);
+        if (!found) return;
+        const { task: t, col } = found;
+        const nextAssignee = window
+          .prompt("請輸入新的負責人", t.assignee || "")
+          ?.trim();
+        if (!nextAssignee) return;
+
+        try {
+          if (t.cid && CURRENT_PROJECT_AID) {
+            const depFound = t.dep ? findTask(String(t.dep)) : null;
+            const prereqCid =
+              depFound && depFound.task && depFound.task.cid
+                ? String(depFound.task.cid).trim()
+                : "0";
+            const urlList = Array.isArray(t.discussionLinks)
+              ? t.discussionLinks
+                  .map((x) => String((x && x.url) || "").trim())
+                  .filter(Boolean)
+              : [];
+            const descriptionToSend =
+              col === "blocked"
+                ? String(t.blockedReason || t.desc || "").trim()
+                : String(t.desc || "").trim();
+            await modifyTaskToBackend(t.cid, {
+              Topic: String(t.title || "").trim(),
+              Description: descriptionToSend,
+              StartDate: toYYYYMMDD(t.startDate || ""),
+              EndDate: toYYYYMMDD(t.endDate || ""),
+              ChargeMan: nextAssignee,
+              State: colToStateCode(col || "blocked"),
+              PreTaskID: prereqCid || "0",
+              ExePlan: String(t.plan || "").trim(),
+              ExeCond: String(t.doingNote || "").trim(),
+              ExeResult: String(t.checkResult || "").trim(),
+              URLList: urlList,
+            });
+          }
+
+          t.assignee = nextAssignee;
+          const assigneeEl = document.getElementById("problem-assignee");
+          if (assigneeEl) assigneeEl.textContent = nextAssignee;
+          renderKanban();
+          showToast("已重新指派任務");
+        } catch (e) {
+          showToast(
+            "重新指派失敗：" + (e && e.message ? e.message : "未知錯誤"),
+            "warn",
+          );
+        }
+      }
+
+      async function saveProblemReason() {
+        if (!problemTaskId) return;
+        const found = findTask(problemTaskId);
+        if (!found) return;
+        const { task: t, col } = found;
+        const reason = String(
+          document.getElementById("problem-reason-input")?.value || "",
+        ).trim();
+        if (!reason) {
+          showToast("請先填寫阻擋原因", "warn");
+          return;
+        }
+
+        const btn = document.getElementById("problem-reason-save-btn");
+        if (btn) {
+          btn.disabled = true;
+          btn.classList.add("opacity-60", "cursor-not-allowed");
+        }
+
+        try {
+          if (t.cid && CURRENT_PROJECT_AID) {
+            const depFound = t.dep ? findTask(String(t.dep)) : null;
+            const prereqCid =
+              depFound && depFound.task && depFound.task.cid
+                ? String(depFound.task.cid).trim()
+                : "0";
+            const urlList = Array.isArray(t.discussionLinks)
+              ? t.discussionLinks
+                  .map((x) => String((x && x.url) || "").trim())
+                  .filter(Boolean)
+              : [];
+
+            await modifyTaskToBackend(t.cid, {
+              Topic: String(t.title || "").trim(),
+              Description: reason,
+              StartDate: toYYYYMMDD(t.startDate || ""),
+              EndDate: toYYYYMMDD(t.endDate || ""),
+              ChargeMan: String(t.assignee || "").trim(),
+              State: colToStateCode(col || "blocked"),
+              PreTaskID: prereqCid || "0",
+              ExePlan: String(t.plan || "").trim(),
+              ExeCond: String(t.doingNote || "").trim(),
+              ExeResult: String(t.checkResult || "").trim(),
+              URLList: urlList,
+            });
+          }
+
+          t.blockedReason = reason;
+          document.getElementById("problem-task-reason").textContent = reason;
+          renderKanban();
+          showToast("阻擋原因已更新");
+        } catch (e) {
+          showToast(
+            "更新阻擋原因失敗：" + (e && e.message ? e.message : "未知錯誤"),
+            "warn",
+          );
+        } finally {
+          if (btn) {
+            btn.disabled = false;
+            btn.classList.remove("opacity-60", "cursor-not-allowed");
+          }
+        }
       }
 
       function closeProblemModal(e) {
@@ -6286,14 +6473,7 @@
           .map(
             (item, idx) => `
     <div class="border border-slate-200 rounded-xl p-3 space-y-2">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-        <input
-          type="text"
-          value="${item.title || ""}"
-          placeholder="討論主題名稱"
-          onchange="updateDecisionTopicField(${idx}, 'title', this.value)"
-          class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
-        >
+      <div>
         <select
           onchange="updateDecisionTopicField(${idx}, 'taskId', this.value)"
           class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
@@ -6314,9 +6494,9 @@
           href="${item.url ? item.url : "#"}"
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex items-center justify-center px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 transition ${item.url ? "" : "hidden"}"
+          class="inline-flex items-center justify-center px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 transition ${item.url ? "" : "opacity-50 pointer-events-none"}"
         >
-          開啟
+          前往
         </a>
         <button
           type="button"
@@ -6430,7 +6610,6 @@
       function addDecisionTopicRow() {
         DECISION_CHATGPT.topics.push({
           id: "dc" + Date.now(),
-          title: "",
           url: "",
           taskId: "",
         });
@@ -6454,7 +6633,8 @@
           if (link) {
             const url = (value || "").trim();
             link.href = url ? url : "#";
-            link.classList.toggle("hidden", !url);
+            link.classList.toggle("opacity-50", !url);
+            link.classList.toggle("pointer-events-none", !url);
           }
         }
       }
@@ -6605,17 +6785,16 @@
           .map(function (topic) {
             const localTaskId = (topic.taskId || "").trim();
             const taskCid = resolveTaskCidForDecision(localTaskId);
-            const TopicName = (topic.title || "").trim();
             const TopicURL = (topic.url || "").trim();
 
-            if (!TopicName && !TopicURL) return null;
+            if (!TopicURL) return null;
             if (!taskCid) {
               skippedMissingTask = true;
               return null;
             }
 
             return {
-              TopicName,
+              TopicName: "",
               TaskID: taskCid,
               TopicURL,
             };
@@ -6729,13 +6908,7 @@
         wrap.innerHTML = items
           .map(
             (item, idx) => `
-    <div class="border border-slate-200 rounded-xl p-3 space-y-2">
-      <input
-        type="text"
-        value="${item.title || ""}"
-        placeholder="討論主題名稱"
-        class="task-discussion-title w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
-      >
+    <div class="border border-slate-200 rounded-xl p-3">
       <div class="flex gap-2">
         <input
           type="text"
@@ -6780,7 +6953,7 @@
 
       function addTaskDiscussionRow() {
         const list = getTaskDiscussionRowsFromDOM();
-        list.push({ id: "td" + Date.now(), title: "", url: "" });
+        list.push({ id: "td" + Date.now(), url: "" });
         renderTaskDiscussionRows(list);
       }
 
@@ -6800,11 +6973,9 @@
         return Array.from(cards)
           .map((card, index) => ({
             id: "td-" + index,
-            title:
-              card.querySelector(".task-discussion-title")?.value.trim() || "",
             url: card.querySelector(".task-discussion-url")?.value.trim() || "",
           }))
-          .filter((item) => item.title || item.url);
+          .filter((item) => item.url);
       }
 
       function advanceStatus() {
@@ -6884,6 +7055,7 @@
               updateProposalUi();
               setProposalRole(PROPOSAL_REVIEW.currentRole || "proposer");
               populateProjectEditForm();
+              applyInitialDetailTabFromUrl();
             });
             try {
               var aidPb = (
