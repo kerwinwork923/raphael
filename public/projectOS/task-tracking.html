@@ -2049,6 +2049,36 @@
           });
       }
 
+      function collectAllProjectMemberEmails() {
+        const identities = new Set();
+        const owner = String(CURRENT_PROJECT_CHARGE_MAN || "").trim();
+        if (owner) identities.add(owner);
+
+        String(CURRENT_PROJECT_PARTICIPANTS || "")
+          .split(/[,，、\s]+/)
+          .map(function (s) {
+            return String(s || "").trim();
+          })
+          .filter(Boolean)
+          .forEach(function (s) {
+            identities.add(s);
+          });
+
+        ["todo", "doing", "done", "blocked"].forEach(function (col) {
+          const list = Array.isArray(TASKS[col]) ? TASKS[col] : [];
+          list.forEach(function (t) {
+            const assignee = String((t && t.assignee) || "").trim();
+            if (assignee) identities.add(assignee);
+          });
+        });
+
+        const emailSeed = [];
+        Array.from(identities).forEach(function (idOrName) {
+          emailSeed.push.apply(emailSeed, resolveEmailsByNameOrAdminId(idOrName));
+        });
+        return normalizeEmailList(emailSeed);
+      }
+
       function getSelfEmailFromUserData() {
         try {
           const raw =
@@ -2142,9 +2172,13 @@
             if (ceoSelf) ccSeed.push(ceoSelf);
           }
           ccSeed.push.apply(ccSeed, getSelfEmailFromUserData());
-          toSeed = collectOtherProposerEmailsFromProposalList(
-            auth ? auth.adminID : "",
-          ).slice();
+          if (action === "approved") {
+            toSeed = collectAllProjectMemberEmails();
+          } else {
+            toSeed = collectOtherProposerEmailsFromProposalList(
+              auth ? auth.adminID : "",
+            ).slice();
+          }
         }
 
         const recipients = {
@@ -2156,7 +2190,9 @@
           showToast(
             action === "submit"
               ? "找不到執行長（jason）信箱，請確認 getAdminNameList"
-              : "ProposalList 中沒有其他「提案人」的有效 Email 可寄送",
+              : action === "approved"
+                ? "找不到專案成員 Email，請確認專案人員與 getAdminNameList"
+                : "ProposalList 中沒有其他「提案人」的有效 Email 可寄送",
             "warn",
           );
           return;
@@ -3563,6 +3599,13 @@
             checkResult: String(
               t && (t.ExeResult || t.exeResult || t.exe_result || ""),
             ).trim(),
+            completedDate:
+              stateCode === "3"
+                ? toIsoDate(
+                    (t && (t.CheckTime || t.checkTime || t.EndDate || t.endDate)) ||
+                      "",
+                  ) || checkTimeToIsoDate(t && (t.CheckTime || t.checkTime || ""))
+                : "",
             discussionLinks: normalizeUrlListItems(
               t && (t.URLList || t.UrlList || t.urlList || []),
             ),
@@ -3857,6 +3900,32 @@
         if (!d) return 999;
         const diff = (new Date(d) - new Date(today())) / 86400000;
         return Math.ceil(diff);
+      }
+      function checkTimeToIsoDate(raw) {
+        const s = String(raw || "").replace(/\D/g, "");
+        if (s.length < 8) return "";
+        return s.slice(0, 4) + "-" + s.slice(4, 6) + "-" + s.slice(6, 8);
+      }
+      function completionDeltaBadge(task) {
+        const due = String(task && task.endDate ? task.endDate : "").trim();
+        const doneDate = String(
+          task && task.completedDate ? task.completedDate : "",
+        ).trim();
+        if (!due && !doneDate) return "";
+        if (!due) {
+          return `<span class="text-xs text-slate-400 flex-shrink-0">${doneDate || ""}</span>`;
+        }
+        if (!doneDate) {
+          return `<span class="text-xs text-slate-400 flex-shrink-0">${due}</span>`;
+        }
+        const diff = Math.ceil((new Date(doneDate) - new Date(due)) / 86400000);
+        if (diff > 0) {
+          return `<span class="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-bold flex-shrink-0">延遲${diff}天完成</span>`;
+        }
+        if (diff < 0) {
+          return `<span class="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-bold flex-shrink-0">提前${Math.abs(diff)}天完成</span>`;
+        }
+        return `<span class="text-xs bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold flex-shrink-0">準時完成</span>`;
       }
       function urgencyClass(task) {
         const du = daysUntil(task.endDate);
@@ -5218,7 +5287,7 @@
         const av = AV[assigneeName] || "bg-slate-400";
         const hasDesc = t.desc && t.desc.trim().length > 0;
         const uc = col !== "done" && col !== "blocked" ? urgencyClass(t) : "";
-        const ub = urgencyBadge(t);
+        const ub = col === "done" ? completionDeltaBadge(t) : urgencyBadge(t);
         const db = depBadge(t);
         const locked = col === "todo" && !canStart(t);
 
@@ -5512,6 +5581,11 @@
 
         // ✅ 到這裡表示：後端同步成功（或此任務沒有 cid 無法同步）
         const moved = TASKS[fromCol].splice(idx, 1)[0];
+        if (toCol === "done") {
+          moved.completedDate = today();
+        } else if (fromCol === "done") {
+          moved.completedDate = "";
+        }
         if (toCol === "blocked" && !moved.blockedReason)
           moved.blockedReason = "待補充阻擋原因";
         TASKS[toCol].push(moved);

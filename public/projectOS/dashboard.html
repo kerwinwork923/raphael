@@ -720,7 +720,12 @@ function renderProjectTable(projects) {
   currentProjects = projects;
 
   const sorted = prioritySorted
-    ? [...projects].sort((a, b) => calcPriority(b) - calcPriority(a))
+    ? [...projects].sort((a, b) => {
+        const aCeo = a.status === "ceo_feedback" ? 1 : 0;
+        const bCeo = b.status === "ceo_feedback" ? 1 : 0;
+        if (aCeo !== bCeo) return bCeo - aCeo;
+        return calcPriority(b) - calcPriority(a);
+      })
     : projects;
 
   if (!sorted.length) {
