@@ -6170,6 +6170,16 @@
           if (assigneeEl) assigneeEl.textContent = nextAssignee;
           renderKanban();
           showToast("已重新指派任務");
+
+          // 指派後的接續動作：可立即轉到待辦，作為「待確認」狀態
+          if (col === "blocked") {
+            const shouldMoveToTodo = window.confirm(
+              "已完成重新指派，是否同步移到「待辦（待確認）」？",
+            );
+            if (shouldMoveToTodo) {
+              quickMove(targetId, "blocked", "todo");
+            }
+          }
         } catch (e) {
           showToast(
             "重新指派失敗：" + (e && e.message ? e.message : "未知錯誤"),
@@ -6465,6 +6475,8 @@
         const wrap = document.getElementById("decision-topic-list");
         if (!wrap) return;
 
+        syncDecisionTopicsFromProjectContext();
+
         if (!DECISION_CHATGPT.topics.length) {
           wrap.innerHTML = `
       <div class="text-xs text-slate-400 border border-dashed border-slate-200 rounded-lg px-3 py-3 text-center">
@@ -6515,6 +6527,71 @@
   `,
           )
           .join("");
+      }
+
+      function syncDecisionTopicsFromProjectContext() {
+        const currentTopics = Array.isArray(DECISION_CHATGPT.topics)
+          ? DECISION_CHATGPT.topics
+          : [];
+        const merged = [];
+        const seen = new Set();
+        const pushTopic = function (url, taskId) {
+          const cleanUrl = String(url || "").trim();
+          if (!cleanUrl) return;
+          const key = cleanUrl.toLowerCase();
+          if (seen.has(key)) {
+            // 若同 URL 後續補到 taskId，回填到既有列
+            if (taskId) {
+              const found = merged.find((x) => x && x.url === cleanUrl);
+              if (found && !found.taskId) found.taskId = String(taskId).trim();
+            }
+            return;
+          }
+          seen.add(key);
+          merged.push({
+            id: "dc-auto-" + Date.now() + "-" + merged.length,
+            url: cleanUrl,
+            taskId: String(taskId || "").trim(),
+          });
+        };
+
+        // 1) 先保留既有 Decision Topic（含手動新增）
+        currentTopics.forEach(function (item) {
+          if (!item) return;
+          pushTopic(item.url, item.taskId);
+        });
+
+        // 2) 匯入所有 Task 的討論 URL（有 taskId）
+        ["todo", "doing", "done", "blocked"].forEach(function (col) {
+          (TASKS[col] || []).forEach(function (t) {
+            const taskId = String((t && t.id) || "").trim();
+            const list = Array.isArray(t && t.discussionLinks)
+              ? t.discussionLinks
+              : [];
+            list.forEach(function (lnk) {
+              const url = String((lnk && lnk.url) || "").trim();
+              pushTopic(url, taskId);
+            });
+          });
+        });
+
+        // 3) 匯入 Proposal 往返中的討論 URL（通常不綁 task）
+        (PROPOSAL_REVIEW && Array.isArray(PROPOSAL_REVIEW.rounds)
+          ? PROPOSAL_REVIEW.rounds
+          : []
+        ).forEach(function (round) {
+          pushTopic(round && round.url, "");
+        });
+
+        // 4) 匯入 ShareProject URL（若有）
+        pushTopic(
+          (document.getElementById("decision-shareproject-url") || {}).value ||
+            DECISION_CHATGPT.shareProjectUrl ||
+            "",
+          "",
+        );
+
+        DECISION_CHATGPT.topics = merged;
       }
 
       function renderDecisionDisplay(selected) {
