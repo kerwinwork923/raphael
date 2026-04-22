@@ -1643,6 +1643,7 @@
                 id="problem-reason-input"
                 rows="3"
                 placeholder="請填寫阻擋原因或更新處理進度..."
+                autocomplete="off"
                 class="w-full border border-red-200 rounded-lg px-3 py-2 text-sm resize-none focus:border-red-400 transition"
               ></textarea>
               <button
@@ -5771,9 +5772,7 @@
         });
 
         document.getElementById("modal-task-status").value = col;
-        document
-          .getElementById("modal-blocked-section")
-          .classList.toggle("hidden", col !== "blocked");
+        syncBlockedReasonField(col);
         document.getElementById("modal-title-label").textContent = "新增任務";
         setModalDot(col);
         populateDepSelect();
@@ -5802,9 +5801,7 @@
         document.getElementById("modal-blocked-reason").value =
           t.blockedReason || "";
 
-        document
-          .getElementById("modal-blocked-section")
-          .classList.toggle("hidden", col !== "blocked");
+        syncBlockedReasonField(col);
         document.getElementById("modal-title-label").textContent = "編輯任務";
         setModalDot(col);
         populateDepSelect();
@@ -5828,6 +5825,14 @@
           `w-2.5 h-2.5 rounded-full ${colors[col] || "bg-slate-400"}`;
       }
 
+      function syncBlockedReasonField(status) {
+        const blockedSection = document.getElementById("modal-blocked-section");
+        const blockedReasonInput = document.getElementById("modal-blocked-reason");
+        const isBlocked = status === "blocked";
+        if (blockedSection) blockedSection.classList.toggle("hidden", !isBlocked);
+        if (blockedReasonInput) blockedReasonInput.required = isBlocked;
+      }
+
       async function saveTaskModal() {
         const title = document.getElementById("modal-task-title").value.trim();
         if (!title) {
@@ -5849,6 +5854,14 @@
         }
 
         const newStatus = document.getElementById("modal-task-status").value;
+        const blockedReason = document
+          .getElementById("modal-blocked-reason")
+          .value.trim();
+        if (newStatus === "blocked" && !blockedReason) {
+          showToast("Block 任務請先填寫阻擋原因", "warn");
+          document.getElementById("modal-blocked-reason")?.focus();
+          return;
+        }
 
         const taskData = {
           title,
@@ -5861,17 +5874,9 @@
           doingNote: document.getElementById("modal-task-do").value.trim(),
           checkResult: document.getElementById("modal-task-check").value.trim(),
           discussionLinks: getTaskDiscussionRowsFromDOM(),
-          blockedReason:
-            newStatus === "blocked"
-              ? document.getElementById("modal-blocked-reason").value.trim()
-              : "",
+          blockedReason: newStatus === "blocked" ? blockedReason : "",
           blockedDays: newStatus === "blocked" ? 0 : undefined,
         };
-
-        if (newStatus === "blocked" && !taskData.blockedReason) {
-          // 與 quickMove 的行為一致：blocked 狀態至少要有提醒文字
-          taskData.blockedReason = "待補充阻擋原因";
-        }
 
         const id = document.getElementById("modal-task-id").value;
 
@@ -7091,9 +7096,7 @@
             document
               .getElementById("modal-task-status")
               .addEventListener("change", function () {
-                document
-                  .getElementById("modal-blocked-section")
-                  .classList.toggle("hidden", this.value !== "blocked");
+                syncBlockedReasonField(this.value);
                 setModalDot(this.value);
               });
           });
