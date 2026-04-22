@@ -21,6 +21,7 @@ export const useMemberStore = defineStore('member', () => {
   const favoriteMIDList = ref<any[]>([])
   const favoriteUseRecordList = ref<any[]>([])
   const stabilityAllList = ref<any[]>([])
+  const stableCareSensorList = ref<any[]>([])
   const optDetailList = ref<any[]>([])
   const vivoWatchList = ref<any[]>([])
   const asusHealthData = ref<any>(null)
@@ -417,6 +418,37 @@ export const useMemberStore = defineStore('member', () => {
     } catch (error) {
       console.error("取得護您穩平衡衣單筆資料失敗：", error)
       return null
+    }
+  }
+
+  async function fetchStableCareSensorList(auth: any) {
+    try {
+      const { token, admin, sel } = auth
+      if (!token || !admin || (!sel.MID && !sel.Mobile)) return []
+
+      const res = await fetch("https://23700999.com:8081/HMA/api/bk/StableCareSensor_query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          AdminID: admin,
+          Token: token,
+          MID: sel.MID ?? "",
+        }),
+      })
+
+      const data = await res.json()
+      if (data.Result === "OK") {
+        stableCareSensorList.value = Array.isArray(data.StableCareSensorList)
+          ? data.StableCareSensorList
+          : []
+      } else {
+        stableCareSensorList.value = []
+      }
+      return stableCareSensorList.value
+    } catch (error) {
+      console.error("取得護您穩感測紀錄失敗：", error)
+      stableCareSensorList.value = []
+      return []
     }
   }
 
@@ -942,6 +974,7 @@ export const useMemberStore = defineStore('member', () => {
     favoriteTPointsList.value = []
     favoriteUseRecordList.value = []
     stabilityAllList.value = []
+    stableCareSensorList.value = []
     favoriteMIDList.value = []
     optDetailList.value = []
     vivoWatchList.value = []
@@ -970,6 +1003,7 @@ export const useMemberStore = defineStore('member', () => {
     favoriteMIDList,
     favoriteUseRecordList,
     stabilityAllList,
+    stableCareSensorList,
     optDetailList,
     vivoWatchList,
     asusHealthData,
@@ -983,6 +1017,7 @@ export const useMemberStore = defineStore('member', () => {
     fetchFavoriteTPointsList,
     fetchStabilityAll,
     fetchStabilityDetail,
+    fetchStableCareSensorList,
     fetchFavoriteMIDList,
     fetchFavoriteTPointsMIDUseRecordList,
     fetchOptDetailMIDList,

@@ -72,6 +72,9 @@
           </div>
           <div class="operationModalHeaderCenter">
             <h3>操作紀錄</h3>
+            <p v-if="operationRecordMode === 'stability'" class="operationSubtitle">
+              Detection Time
+            </p>
           </div>
           <hr />
           <div class="operationModalHeaderRight">
@@ -130,7 +133,12 @@
         </div>
         <!-- 表格內容 -->
         <div class="operationModalTable">
-          <div class="operationTableHeader">
+          <div class="operationTableHeader" v-if="operationRecordMode === 'stability'">
+            <div class="operationTableHeaderItem">開始時間</div>
+            <div class="operationTableHeaderItem">事件</div>
+            <div class="operationTableHeaderItem">溫度</div>
+          </div>
+          <div class="operationTableHeader" v-else>
             <div class="operationTableHeaderItem">操作日期</div>
             <div class="operationTableHeaderItem">操作時間</div>
             <div class="operationTableHeaderItem">操作事件</div>
@@ -138,15 +146,28 @@
           <div class="operationTableHR" />
 
           <div class="operationTableBody">
-            <div
-              class="operationTableRow"
-              v-for="record in filteredOperationRecords"
-              :key="record.id"
-            >
-              <div class="operationTableCell">{{ record.date }}</div>
-              <div class="operationTableCell">{{ record.time }}</div>
-              <div class="operationTableCell">{{ record.event }}</div>
-            </div>
+            <template v-if="operationRecordMode === 'stability'">
+              <div
+                class="operationTableRow"
+                v-for="record in filteredStabilityOperationRecords"
+                :key="record.id"
+              >
+                <div class="operationTableCell">{{ record.startTime }}</div>
+                <div class="operationTableCell">{{ record.event }}</div>
+                <div class="operationTableCell">{{ record.temperature }}</div>
+              </div>
+            </template>
+            <template v-else>
+              <div
+                class="operationTableRow"
+                v-for="record in filteredOperationRecords"
+                :key="record.id"
+              >
+                <div class="operationTableCell">{{ record.date }}</div>
+                <div class="operationTableCell">{{ record.time }}</div>
+                <div class="operationTableCell">{{ record.event }}</div>
+              </div>
+            </template>
           </div>
         </div>
         <!-- 關閉按鈕 -->
@@ -436,13 +457,7 @@
             <!-- 合約 (沒有資料也要顯示空殼) -->
             <div class="memberInfoCard2">
               <div class="contractHeader">
-                <h3>
-                  {{
-                    selectedContractKey === ""
-                      ? "全部產品"
-                      : activeOrder?.ProductName || "—"
-                  }}
-                </h3>
+                <h3>{{ activeProductTitle }}</h3>
                 <div v-if="contractOptions.length > 1" class="contractDropdown">
                   <button
                     class="contractDropdownTrigger"
@@ -462,11 +477,7 @@
                     <div
                       class="contractDropdownItem"
                       :class="{ active: selectedContractKey === '' }"
-                      @click="
-                        selectedContractKey = '';
-                        selectedProductName = '';
-                        showContractDropdown = false;
-                      "
+                      @click="selectAllProducts"
                     >
                       全部產品
                     </div>
@@ -475,11 +486,7 @@
                       :key="option.key"
                       class="contractDropdownItem"
                       :class="{ active: selectedContractKey === option.key }"
-                      @click="
-                        selectedContractKey = option.key;
-                        selectedProductName = option.order.ProductName || '';
-                        showContractDropdown = false;
-                      "
+                      @click="selectContractOption(option)"
                     >
                       {{ option.label }}
                     </div>
@@ -1880,6 +1887,9 @@ const contractList = ref<any[]>([]);
 const selectedProductName = ref<string>("");
 const selectedContractKey = ref<string>("");
 const showContractDropdown = ref(false);
+const STABILITY_CONTRACT_KEY = "__stability_all__";
+const STABILITY_PRODUCT_NAME = "護您穩平衡衣";
+const STABILITY_OPTION_LABEL = "護您穩";
 
 function buildContractKey(order: any, index: number) {
   return `${order?.ProductName || ""}|${order?.RentStart || ""}|${order?.RentEnd || ""}|${index}`;
@@ -1903,8 +1913,8 @@ function getCurrentContractOrder(orders: ApiOrder[]) {
   return activeOrder ?? orders[0] ?? null;
 }
 
-const contractOptions = computed(() => {
-  return (orderList.value || []).map((o: any, index: number) => {
+const contractOptions = computed<any[]>(() => {
+  const options: any[] = (orderList.value || []).map((o: any, index: number) => {
     const productName = o?.ProductName || "未命名產品";
     const rentStart = o?.RentStart || "—";
     const rentEnd = o?.RentEnd || "—";
@@ -1914,10 +1924,20 @@ const contractOptions = computed(() => {
       order: o,
     };
   });
+  if ((stabilityAllList.value || []).length > 0) {
+    options.push({
+      key: STABILITY_CONTRACT_KEY,
+      label: STABILITY_OPTION_LABEL,
+      order: null,
+      productName: STABILITY_PRODUCT_NAME,
+    });
+  }
+  return options;
 });
 
 const activeOrder = computed(() => {
   if (!selectedContractKey.value) return currentOrder.value;
+  if (selectedContractKey.value === STABILITY_CONTRACT_KEY) return null;
   const target = contractOptions.value.find(
     (item: any) => item.key === selectedContractKey.value,
   );
@@ -1927,6 +1947,29 @@ const activeOrder = computed(() => {
     currentOrder.value
   );
 });
+
+const isStabilitySelected = computed(
+  () => selectedContractKey.value === STABILITY_CONTRACT_KEY,
+);
+
+const activeProductTitle = computed(() => {
+  if (!selectedContractKey.value) return "全部產品";
+  if (isStabilitySelected.value) return STABILITY_OPTION_LABEL;
+  return activeOrder.value?.ProductName || "—";
+});
+
+function selectAllProducts() {
+  selectedContractKey.value = "";
+  selectedProductName.value = "";
+  showContractDropdown.value = false;
+}
+
+function selectContractOption(option: any) {
+  selectedContractKey.value = option.key;
+  selectedProductName.value =
+    option?.productName || option?.order?.ProductName || "";
+  showContractDropdown.value = false;
+}
 
 // 基本資料編輯和刪除會員彈跳視窗
 const showEditBasicModal = ref(false);
@@ -4879,6 +4922,7 @@ const operationRecordAllowedProducts = [
 ];
 
 const showOperationRecordBtn = computed(() => {
+  if (isStabilitySelected.value) return true;
   const productName = activeOrder.value?.ProductName;
   if (!productName) return false;
   const normalized = String(productName).trim();
@@ -4890,6 +4934,7 @@ const operationDateRange = ref<Date[] | null>(null);
 const showEventFilter = ref(false);
 const selectedEvents = ref<string[]>([]);
 const operationRecordsData = ref<any[]>([]);
+const operationRecordMode = ref<"default" | "stability">("default");
 
 const eventOptions = [
   "結束治療",
@@ -4903,15 +4948,36 @@ const eventOptions = [
 ];
 
 async function openOperationRecord() {
-  // 取得操作紀錄（全部，不篩選 AID）
-  await memberStore.fetchOptDetailMIDList(getAuth(), "");
-  operationRecordsData.value = optDetailList.value || [];
+  selectedEvents.value = [];
+  operationDateRange.value = null;
+  showEventFilter.value = false;
+
+  if (isStabilitySelected.value) {
+    operationRecordMode.value = "stability";
+    const sensorList = await memberStore.fetchStableCareSensorList(getAuth());
+    operationRecordsData.value = normalizeStableCareSensorRows(sensorList);
+
+    // fallback：若新 API 暫無資料，回退舊資料來源避免畫面全空
+    if (!operationRecordsData.value.length) {
+      const targetAID = balanceClothCards.value[0]?.AID || "";
+      if (targetAID) {
+        const detail = await memberStore.fetchStabilityDetail(getAuth(), targetAID);
+        operationRecordsData.value = normalizeStabilityOperationRows(detail);
+      }
+    }
+  } else {
+    operationRecordMode.value = "default";
+    // 取得操作紀錄（全部，不篩選 AID）
+    await memberStore.fetchOptDetailMIDList(getAuth(), "");
+    operationRecordsData.value = optDetailList.value || [];
+  }
   showOperationRecord.value = true;
 }
 
 function closeOperationRecord() {
   showOperationRecord.value = false;
   showEventFilter.value = false;
+  operationRecordMode.value = "default";
 }
 
 function toggleEventFilter() {
@@ -4947,6 +5013,115 @@ const filteredOperationRecords = computed(() => {
   }
 
   // 事件篩選
+  if (selectedEvents.value.length > 0) {
+    data = data.filter((r: any) => selectedEvents.value.includes(r.event));
+  }
+
+  return data;
+});
+
+function normalizeStabilityOperationRows(detail: any) {
+  const sourceList =
+    detail?.OperationRec ||
+    detail?.DetectRec ||
+    detail?.DetectionRec ||
+    detail?.WearRec ||
+    [];
+
+  if (!Array.isArray(sourceList)) return [];
+
+  return sourceList.map((row: any, index: number) => {
+    const startTime = formatStabilityDateTime(
+      String(row?.StartTime || row?.CheckTime || row?.DateTime || ""),
+    );
+    const eventText = String(
+      row?.EventDesc || row?.Event || row?.Status || row?.Desc || "—",
+    ).trim();
+    const temperatureRaw = String(
+      row?.Temperature || row?.Temp || row?.BodyTemp || row?.T || "",
+    ).trim();
+
+    return {
+      id: row?.OID || row?.AID || `${startTime}_${index}`,
+      startTime,
+      event: eventText || "—",
+      temperature: temperatureRaw || "—",
+    };
+  });
+}
+
+function normalizeStableCareSensorRows(list: any[]) {
+  if (!Array.isArray(list)) return [];
+
+  return list
+    .map((row: any, index: number) => {
+      const switchRaw = String(row?.Switch || "").trim().toLowerCase();
+      const switchText =
+        switchRaw === "on" ? "感應ON" : switchRaw === "off" ? "感應OFF" : "—";
+      const temperatureRaw = String(row?.Temperature || "").trim();
+      return {
+        id: row?.AID || row?.UID || `${row?.RecordTime || ""}_${index}`,
+        startTime: formatStabilityDateTime(String(row?.RecordTime || "")),
+        event: switchText,
+        temperature: temperatureRaw ? `${temperatureRaw}` : "—",
+      };
+    })
+    .sort((a: any, b: any) => {
+      const ams = parseStabilityDateTimeToMs(String(a.startTime || ""));
+      const bms = parseStabilityDateTimeToMs(String(b.startTime || ""));
+      if (Number.isNaN(ams) || Number.isNaN(bms)) return 0;
+      return bms - ams;
+    });
+}
+
+function formatStabilityDateTime(value: string) {
+  if (!value) return "—";
+  const pure = value.replace(/[^\d]/g, "");
+  if (pure.length >= 14) {
+    const y = pure.substring(0, 4);
+    const m = pure.substring(4, 6);
+    const d = pure.substring(6, 8);
+    const hh = pure.substring(8, 10);
+    const mm = pure.substring(10, 12);
+    const ss = pure.substring(12, 14);
+    return `${y}/${m}/${d} ${hh}:${mm}:${ss}`;
+  }
+  if (pure.length >= 12) {
+    const y = pure.substring(0, 4);
+    const m = pure.substring(4, 6);
+    const d = pure.substring(6, 8);
+    const hh = pure.substring(8, 10);
+    const mm = pure.substring(10, 12);
+    return `${y}/${m}/${d} ${hh}:${mm}:00`;
+  }
+  return value;
+}
+
+function parseStabilityDateTimeToMs(value: string) {
+  const match = value.match(
+    /(\d{4})[\/\-](\d{2})[\/\-](\d{2})\s+(\d{2}):(\d{2})(?::(\d{2}))?/,
+  );
+  if (!match) return Number.NaN;
+  const [, y, m, d, hh, mm, ss] = match;
+  return Date.parse(`${y}-${m}-${d}T${hh}:${mm}:${ss || "00"}`);
+}
+
+const filteredStabilityOperationRecords = computed(() => {
+  let data = [...operationRecordsData.value];
+
+  if (operationDateRange.value && operationDateRange.value.length >= 1) {
+    const [from, to] = operationDateRange.value;
+    if (from) {
+      const start = toLocalDayStart(from);
+      const end = toLocalDayEnd(to ?? from);
+      data = data.filter((r: any) => {
+        const ms = parseStabilityDateTimeToMs(String(r.startTime || ""));
+        if (Number.isNaN(ms)) return false;
+        return ms >= start && ms <= end;
+      });
+    }
+  }
+
   if (selectedEvents.value.length > 0) {
     data = data.filter((r: any) => selectedEvents.value.includes(r.event));
   }
@@ -5922,6 +6097,16 @@ const availableEventOptions = computed(() => {
           letter-spacing: 0.12px;
           margin: 0;
         }
+        .operationSubtitle {
+          margin: 0.25rem 0 0;
+          color: #1ba39b;
+          font-size: 1rem;
+          font-style: normal;
+          font-weight: 500;
+          line-height: 1;
+          letter-spacing: 0.4px;
+        }
+   
       }
 
       .operationModalHeaderRight {
