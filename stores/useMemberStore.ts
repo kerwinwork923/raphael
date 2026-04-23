@@ -22,6 +22,7 @@ export const useMemberStore = defineStore('member', () => {
   const favoriteUseRecordList = ref<any[]>([])
   const stabilityAllList = ref<any[]>([])
   const stableCareSensorList = ref<any[]>([])
+  const memberLastStatus = ref<any>(null)
   const optDetailList = ref<any[]>([])
   const vivoWatchList = ref<any[]>([])
   const asusHealthData = ref<any>(null)
@@ -449,6 +450,37 @@ export const useMemberStore = defineStore('member', () => {
       console.error("取得護您穩感測紀錄失敗：", error)
       stableCareSensorList.value = []
       return []
+    }
+  }
+
+  async function fetchMemberLastStatus(auth: any, lang: string = "zhtw") {
+    try {
+      const { token, admin, sel } = auth
+      if (!token || !admin || (!sel.MID && !sel.Mobile)) return null
+
+      const res = await fetch("https://23700999.com:8081/HMA/api/fr/show_member_use_laststatus", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          MID: sel.MID ?? "",
+          Token: token,
+          MAID: admin,
+          Mobile: sel.Mobile ?? "",
+          Lang: lang,
+        }),
+      })
+
+      const data = await res.json()
+      if (data.Result === "OK") {
+        memberLastStatus.value = data
+      } else {
+        memberLastStatus.value = null
+      }
+      return memberLastStatus.value
+    } catch (error) {
+      console.error("取得會員最後登入資訊失敗：", error)
+      memberLastStatus.value = null
+      return null
     }
   }
 
@@ -975,6 +1007,7 @@ export const useMemberStore = defineStore('member', () => {
     favoriteUseRecordList.value = []
     stabilityAllList.value = []
     stableCareSensorList.value = []
+    memberLastStatus.value = null
     favoriteMIDList.value = []
     optDetailList.value = []
     vivoWatchList.value = []
@@ -1004,6 +1037,7 @@ export const useMemberStore = defineStore('member', () => {
     favoriteUseRecordList,
     stabilityAllList,
     stableCareSensorList,
+    memberLastStatus,
     optDetailList,
     vivoWatchList,
     asusHealthData,
@@ -1018,6 +1052,7 @@ export const useMemberStore = defineStore('member', () => {
     fetchStabilityAll,
     fetchStabilityDetail,
     fetchStableCareSensorList,
+    fetchMemberLastStatus,
     fetchFavoriteMIDList,
     fetchFavoriteTPointsMIDUseRecordList,
     fetchOptDetailMIDList,

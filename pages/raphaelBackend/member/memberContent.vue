@@ -750,6 +750,67 @@
 
         <!-- █ 健康日誌 & 本周摘要 ------------------------------------------------- -->
         <div class="memberInfoRow">
+          <div class="memberInfoCard" style="width: 400px;">
+            <div class="memberInfoTitleWrap">
+              <h3>APP登入紀錄</h3>
+            </div>
+            <div class="memberInfoCard2">
+
+
+   
+
+              <div class="memberInfoList">
+                <div class="memberInfoListTitle">
+                  最後登入時間
+                </div>
+                <div class="memberInfoListContent">
+                  {{ formatLastStatusTime(memberLastStatus?.last_login_time) }}
+                </div>
+              </div>
+
+              <div class="memberInfoList">
+                <div class="memberInfoListTitle">
+                 智慧管家時間
+                </div>
+                <div class="memberInfoListContent">
+                  {{
+                    formatLastStatusTime(memberLastStatus?.last_bluetoothpage_time)
+                  }}
+                </div>
+              </div>
+
+              <div class="memberInfoList">
+                <div class="memberInfoListTitle">
+                 最後上傳成功時間
+                </div>
+                <div class="memberInfoListContent">
+                  {{
+                    formatLastStatusTime(memberLastStatus?.last_uploadsuccess_time)
+                  }}
+                </div>
+              </div>
+
+              <div class="memberInfoList">
+                <div class="memberInfoListTitle">
+                 最後APP版本
+                </div>
+                <div class="memberInfoListContent">
+                  {{ memberLastStatus?.last_app_version || "—" }}
+                </div>
+              </div>
+
+              <div class="memberInfoList">
+                <div class="memberInfoListTitle">
+                 手機系統
+                </div>
+                <div class="memberInfoListContent">
+                  {{ lastOsDisplay }}
+                </div>
+              </div>
+
+    
+            </div>
+          </div>
           <!-- 健康日誌 -->
           <div class="memberInfoCard w-half">
             <div class="memberInfoTitleWrap">
@@ -1869,6 +1930,7 @@ const {
   weeklySummaryRecords,
   favoriteTPointsList,
   stabilityAllList,
+  memberLastStatus,
   optDetailList,
   vivoWatchList,
   asusHealthData,
@@ -1876,6 +1938,27 @@ const {
   garminHealthData,
   hasFetched,
 } = storeToRefs(memberStore);
+
+const lastOsDisplay = computed(() => {
+  const osType = String(memberLastStatus.value?.last_os_type || "").trim();
+  const osVersion = String(memberLastStatus.value?.last_os_version || "").trim();
+  if (osType && osVersion) return `${osType} / ${osVersion}`;
+  return osType || osVersion || "—";
+});
+
+function formatLastStatusTime(value?: string) {
+  const raw = String(value || "").trim();
+  if (!raw) return "—";
+  const pure = raw.replace(/[^\d]/g, "");
+  if (pure.length < 14) return raw;
+  const y = pure.substring(0, 4);
+  const m = pure.substring(4, 6);
+  const d = pure.substring(6, 8);
+  const hh = pure.substring(8, 10);
+  const mm = pure.substring(10, 12);
+  const ss = pure.substring(12, 14);
+  return `${y}/${m}/${d} ${hh}:${mm}:${ss}`;
+}
 
 // 產品使用紀錄從 store 取得（透過 processedHomeOrders 處理分組）
 
@@ -4539,6 +4622,8 @@ watch(
     await memberStore.fetchFavoriteTPointsList(getAuth());
     // 取得護您穩平衡衣卡片
     await memberStore.fetchStabilityAll(getAuth());
+    // 取得最後登入資訊
+    await memberStore.fetchMemberLastStatus(getAuth(), "zhtw");
 
     // 取得健康日誌（使用空白月份取得全部列表）
     await memberStore.fetchHealthLog(getAuth(), "", "");
@@ -4594,6 +4679,8 @@ async function refresh() {
   await memberStore.fetchFavoriteTPointsList(getAuth());
   // 取得護您穩平衡衣卡片
   await memberStore.fetchStabilityAll(getAuth());
+  // 取得最後登入資訊
+  await memberStore.fetchMemberLastStatus(getAuth(), "zhtw");
 
   // 取得健康日誌
   await memberStore.fetchHealthLog(getAuth(), "", "");
