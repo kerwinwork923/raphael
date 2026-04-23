@@ -134,7 +134,7 @@
         <!-- 表格內容 -->
         <div class="operationModalTable">
           <div class="operationTableHeader" v-if="operationRecordMode === 'stability'">
-            <div class="operationTableHeaderItem">開始時間</div>
+            <div class="operationTableHeaderItem">事件日期時間</div>
             <div class="operationTableHeaderItem">事件</div>
             <div class="operationTableHeaderItem">溫度</div>
           </div>
