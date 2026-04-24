@@ -921,4 +921,10 @@ watch(dateRange, () => {
     background: $primary-200;
   }
 }
+
+.text-btn.call {
+  @media (min-width: 1024px) {
+    display: none;
+  }
+}
 </style>
