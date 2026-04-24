@@ -978,7 +978,6 @@
   	let vipId = new URLSearchParams(location.search).get("vip") || "unknown";
    //vipId="1111";
     console.log("vipId="+vipId);
-	  //logEvent("leadingpage", EventType);
 
     function getBrowserId() {
         let id = localStorage.getItem("wisebalance_id");
@@ -988,12 +987,13 @@
          }
         return id;
      }
-
       const browserId = getBrowserId();
       console.log("browserId:", browserId);
+      
+      logEvent("leadingpage", EventType);
 
 	  async function logEvent(Event, EventType) {
-      const payload = {SafeKey:"qrt897hpmd", VIP: vipId, Event, EventType} ;
+      const payload = {SafeKey:"qrt897hpmd", VIP: vipId, Event, Browerid: browserId, EventType} ;
       console.log("payload1="+JSON.stringify(payload, null, 1));
        // 1) 先嘗試 sendBeacon（POST，Content-Type: text/plain; charset=UTF-8）
       try {
