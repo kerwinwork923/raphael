@@ -113,6 +113,24 @@
           <span v-show="!collapsed">分類管理</span>
         </li> 
 
+        <li 
+          :class="{ 
+            active: currentPage === 'events',
+            'has-focus': focusedItem === 'events' 
+          }" 
+          @click="handleMenuClick({ key: 'events', path: '/raphaelBackend/events' })"
+          @mouseenter="handleMouseEnter('events')"
+          @mouseleave="handleMouseLeave"
+          @focus="handleFocus('events')"
+          @blur="handleBlur"
+          tabindex="0"
+          role="menuitem"
+          aria-label="活動管理"
+        >
+          <img src="/assets/imgs/backend/event.png" alt="活動管理" />
+          <span v-show="!collapsed">活動管理</span>
+        </li>
+
         <!-- <li 
           :class="{ 
             active: currentPage === 'order',
@@ -318,6 +336,11 @@ watch(() => route.path, (newPath: string) => {
     currentPage.value = 'videoManage';
     emit('update:modelValue', 'videoManage');
     emit('page-change', 'videoManage');
+  }
+  else if (newPath.includes('/events')) {
+    currentPage.value = 'events';
+    emit('update:modelValue', 'events');
+    emit('page-change', 'events');
   }
    else if (newPath.includes('/categoryManagement')) {
     currentPage.value = 'categoryManagement';
