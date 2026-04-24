@@ -142,8 +142,15 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 24px;
-      margin-bottom: 70px;
+     
+    
+      img{
+        width: 64px;
+
+  
+
+
+      }
     }
 
     .hero .mini-btn {
@@ -265,25 +272,41 @@
     }
 
     .why {
-      background: #fff;
-    }
+  min-height: 620px;
+  display: grid;
+  align-items: center;
+  background:
+    linear-gradient(90deg, rgba(248,244,236,0.98) 0%, rgba(248,244,236,0.88) 46%, rgba(248,244,236,0.18) 76%),
+    url("imgs/banner.png") center right / cover no-repeat;
+}
 
-    .why-grid {
-      display: grid;
-      grid-template-columns: 0.9fr 1.1fr;
-      gap: 54px;
-      align-items: center;
-    }
+.why-grid {
+  display: block;
+  max-width: 620px;
+}
 
-    .why-photo {
-      min-height: 440px;
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,63,54,0.15)),
-        url("imgs/banner.png") center / cover no-repeat;
-      box-shadow: var(--shadow);
-    }
+.why .section-title {
+  color: var(--green-900);
+}
+
+.why p {
+  font-size: 19px;
+  font-weight: 700;
+  color: #26433f;
+}
+
+.why-photo {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .why {
+    min-height: auto;
+    background:
+      linear-gradient(180deg, rgba(248,244,236,0.98) 0%, rgba(248,244,236,0.9) 58%, rgba(248,244,236,0.68) 100%),
+      url("imgs/banner.png") center top / cover no-repeat;
+  }
+}
 
     .check-list {
       display: grid;
@@ -777,8 +800,7 @@
     <div class="container">
       <div class="hero-top">
         <a href="#" class="logo" aria-label="智平衡健康集團 WiseBalance">
-          <span class="logo-mark">♢</span>
-          <span>智平衡健康集團<small>WiseBalance</small></span>
+          <img src="imgs/logo.png" alt="智平衡健康集團 WiseBalance">
         </a>
       </div>
 
