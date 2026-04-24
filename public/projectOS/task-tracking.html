@@ -2170,6 +2170,47 @@
         return resp;
       }
 
+      function collectOtherActiveProposerEmails(excludeAdminId) {
+  const exclude = String(excludeAdminId || "").trim().toLowerCase();
+  const seen = new Set();
+  const out = [];
+
+  const activeBids = new Set(
+    (PROPOSAL_REVIEW.rounds || [])
+      .filter((r) => r && r.role === "proposer")
+      .map((r) => String(r.bid || "").trim())
+      .filter(Boolean),
+  );
+
+  const list = Array.isArray(CURRENT_PROPOSAL_LIST_CACHE)
+    ? CURRENT_PROPOSAL_LIST_CACHE
+    : [];
+
+  list.forEach(function (row) {
+    if (!row || typeof row !== "object") return;
+
+    const bid = String(row.BID || row.bid || "").trim();
+    if (bid && !activeBids.has(bid)) return;
+
+    const actor = String(row.Actor || row.actor || "").trim();
+    if (actor !== "提案人") return;
+
+    const aid = String(row.AdminID || "").trim().toLowerCase();
+    if (!aid || aid === exclude || seen.has(aid)) return;
+
+    seen.add(aid);
+
+    let em = findEmailForAdminIdFromProposalList(list, aid);
+    if (!em && Array.isArray(adminNameListCache)) {
+      em = findEmailByAdminIdFromAdminList(adminNameListCache, aid);
+    }
+
+    if (em && isValidSendEmailAddress(em)) out.push(em);
+  });
+
+  return normalizeEmailList(out);
+}
+
       async function sendProposalActionEmail(action, note, discussionUrl) {
         try {
           await fetchAdminNameList();
@@ -2208,9 +2249,7 @@
           if (action === "approved") {
             toSeed = collectAllProjectMemberEmails();
           } else {
-            toSeed = collectOtherProposerEmailsFromProposalList(
-              auth ? auth.adminID : "",
-            ).slice();
+            toSeed = collectOtherActiveProposerEmails(auth ? auth.adminID : "");
           }
         }
 
@@ -2256,6 +2295,7 @@
                   (projectNameForMail || "未命名專案") +
                   "】專案通過審核。"
                 : projectNameForMail || "未命名專案";
+                const safeUrl = normalizeExternalUrl(discussionUrl) || "";
         const content =
           "專案：" +
           (projectNameForMail || "未命名專案") +
@@ -2269,7 +2309,8 @@
           "操作者：" +
           (action === "submit" ? "提案人" : "執行長") +
           "\n" +
-          '討論 URL：<a href="' + safeUrl + '">' + safeUrl + "</a>";
+          "討論 URL：" +
+          (safeUrl || "未提供");
         try {
           await postSendEmailApi(
             subject,
@@ -4376,7 +4417,13 @@
         if (summaryEl) summaryEl.value = "";
         if (urlEl) urlEl.value = "";
         updateProposalUi();
-        await sendProposalActionEmail("submit", summary, url);
+        try {
+          await sendProposalActionEmail("submit", summary, url);
+          showToast("寄信已送出");
+        } catch (e) {
+          console.error("sendProposalActionEmail failed:", e);
+          showToast("寄信觸發失敗：" + (e?.message || "未知錯誤"), "warn");
+        }
         if (btn) {
           btn.disabled = false;
           btn.classList.remove("opacity-60", "cursor-wait");
@@ -5244,6 +5291,12 @@
           document.getElementById("project-edit-share-url")?.value || "",
         ).trim();
 
+ 
+        const decisionList = buildProjectDecisionListForModify().map(decision => ({
+          ...decision,
+          DecisionTopicList: (decision.DecisionTopicList || [])
+            .filter(item => String(item.TaskID || "").trim() !== "")
+        }));
         const payload = {
           AdminID: auth.adminID,
           Token: auth.token,
@@ -6862,6 +6915,7 @@
         // - 若 TaskID 解析不到（找不到對應任務 CID）：略過並提醒
         let skippedMissingTask = false;
         const decisionTopicList = (DECISION_CHATGPT.topics || [])
+        
           .map(function (topic) {
             const localTaskId = (topic.taskId || "").trim();
             const taskCid = resolveTaskCidForDecision(localTaskId);
