@@ -239,7 +239,7 @@ const REGISTER_QUERY_API =
 const API_PAYLOAD = {
   AdminID: "kerwin",
   Token: "byurf8BWSba2AIAhC7ffFtjmvzzlqELG",
-  EventType: "vip1",
+  EventType: "vipl1",
 };
 
 const loading = ref(false);
