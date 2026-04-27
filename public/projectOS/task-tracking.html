@@ -794,6 +794,35 @@
                     class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm"
                   />
                 </div>
+                <div class="hidden">
+                  <label
+                    class="block text-xs font-semibold text-slate-500 mb-1.5"
+                    >Proposal 附件</label
+                  >
+                  <div
+                    class="border border-dashed border-slate-300 rounded-lg px-3 py-3 bg-slate-50/60"
+                  >
+                    <label
+                      class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-2 rounded-lg cursor-pointer transition"
+                    >
+                      上傳 Proposal 附件
+                      <input
+                        id="proposal-decision-file-input"
+                        type="file"
+                        multiple
+                        class="hidden"
+                        onchange="handleProposalDecisionAttachmentUpload(this)"
+                      />
+                    </label>
+                    <p class="text-[11px] text-slate-400 mt-2">
+                      此欄位會將附件綁定在本輪 Proposal 紀錄中。
+                    </p>
+                    <div
+                      id="proposal-decision-attachments"
+                      class="space-y-1.5 mt-2"
+                    ></div>
+                  </div>
+                </div>
                 <div>
                   <label
                     class="block text-xs font-semibold text-slate-500 mb-1.5"
@@ -2509,6 +2538,8 @@
 
       function applyProposalListFromProject(selected) {
         if (!selected || typeof selected !== "object") return;
+        PROPOSAL_PENDING_ATTACHMENTS = [];
+        renderProposalPendingAttachments();
         const rawList = Array.isArray(selected.ProposalList)
           ? selected.ProposalList
           : Array.isArray(selected.proposalList)
@@ -3970,6 +4001,7 @@
         lastActor: "—",
         rounds: [],
       };
+      let PROPOSAL_PENDING_ATTACHMENTS = [];
       let editingProposalId = "";
       let ACTIVITY_API_LOGS = [];
       let ACTIVITY_SESSION_LOGS = [];
@@ -4223,6 +4255,157 @@
         updateProposalPermissionUi();
       }
 
+      function renderProposalPendingAttachments() {
+        const wrap = document.getElementById("proposal-decision-attachments");
+        if (!wrap) return;
+        if (!Array.isArray(PROPOSAL_PENDING_ATTACHMENTS)) {
+          PROPOSAL_PENDING_ATTACHMENTS = [];
+        }
+        if (!PROPOSAL_PENDING_ATTACHMENTS.length) {
+          wrap.innerHTML =
+            '<p class="text-xs text-slate-400">尚未加入 Proposal 附件</p>';
+          return;
+        }
+        wrap.innerHTML = PROPOSAL_PENDING_ATTACHMENTS.map(function (f) {
+          const name = escapeHtml(f && f.name ? f.name : "未命名附件");
+          const url = String((f && f.url) || "").trim();
+          const bid = String((f && f.bid) || "").trim();
+          const meta = escapeHtml(
+            formatFileSize(Number((f && f.size) || 0)) +
+              (bid ? " · BID " + bid : ""),
+          );
+          return (
+            '<div class="flex items-center justify-between gap-2 text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 bg-white">' +
+            '<div class="min-w-0 flex-1">' +
+            (url
+              ? '<a href="' +
+                escapeAttr(url) +
+                '" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline break-all">' +
+                name +
+                "</a>"
+              : '<span class="text-slate-700 break-all">' + name + "</span>") +
+            '<p class="text-[11px] text-slate-400 mt-0.5">' +
+            meta +
+            "</p>" +
+            "</div>" +
+            '<button type="button" onclick="removeProposalPendingAttachment(\'' +
+            escapeAttr(String(f.id || "")) +
+            '\')" class="text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50 transition">移除</button>' +
+            "</div>"
+          );
+        }).join("");
+      }
+
+      function removeProposalPendingAttachment(id) {
+        PROPOSAL_PENDING_ATTACHMENTS = (
+          Array.isArray(PROPOSAL_PENDING_ATTACHMENTS)
+            ? PROPOSAL_PENDING_ATTACHMENTS
+            : []
+        ).filter(function (f) {
+          return String((f && f.id) || "") !== String(id || "");
+        });
+        renderProposalPendingAttachments();
+      }
+
+      function cloneProposalPendingAttachments() {
+        return (Array.isArray(PROPOSAL_PENDING_ATTACHMENTS)
+          ? PROPOSAL_PENDING_ATTACHMENTS
+          : []
+        ).map(function (f) {
+          return {
+            id: String((f && f.id) || ""),
+            name: String((f && f.name) || ""),
+            url: String((f && f.url) || ""),
+            size: Number((f && f.size) || 0) || 0,
+            type: String((f && f.type) || ""),
+            bid: String((f && f.bid) || ""),
+            aid: String((f && f.aid) || ""),
+          };
+        });
+      }
+
+      async function handleProposalDecisionAttachmentUpload(input) {
+        const files = Array.from((input && input.files) || []);
+        if (!files.length) return;
+        for (const file of files) {
+          try {
+            const uploadResult = await uploadFileToProject(file);
+            const ext = file.name.includes(".")
+              ? file.name.split(".").pop().toLowerCase()
+              : "";
+            const item = {
+              id: "paf-" + Date.now() + Math.random().toString(36).slice(2, 6),
+              name: file.name,
+              size: Number(file.size || 0) || 0,
+              type: ext,
+              bid: String((uploadResult && uploadResult.bid) || "").trim(),
+              aid: String((uploadResult && uploadResult.aid) || "").trim(),
+              url: String((uploadResult && uploadResult.fileURL) || "").trim(),
+            };
+            PROPOSAL_PENDING_ATTACHMENTS.push(item);
+            if (
+              item.bid &&
+              !FILES.some(function (f) {
+                return String((f && f.bid) || "") === item.bid;
+              })
+            ) {
+              FILES.push({
+                id: "f-prop-" + Date.now() + Math.random().toString(36).slice(2, 6),
+                name: item.name,
+                size: item.size,
+                type: item.type,
+                uploadedAt: new Date().toISOString().slice(0, 10),
+                uploadedBy:
+                  localStorage.getItem("adminID") ||
+                  sessionStorage.getItem("adminID") ||
+                  "Admin",
+                url: item.url,
+                bid: item.bid,
+                aid: item.aid,
+              });
+            }
+            showToast(`已加入 Proposal 附件「${file.name}」`);
+          } catch (err) {
+            showToast(
+              `「${file.name}」上傳失敗：${err && err.message ? err.message : "未知錯誤"}`,
+              "warn",
+            );
+          }
+        }
+        renderProposalPendingAttachments();
+        renderFiles();
+        if (input) input.value = "";
+      }
+
+      function renderProposalAttachmentLinks(item) {
+        const attachments =
+          item && Array.isArray(item.attachments) ? item.attachments : [];
+        if (!attachments.length) return "";
+        const links = attachments
+          .map(function (f) {
+            const name = escapeHtml(
+              String((f && (f.name || f.fileName || "附件")) || "附件"),
+            );
+            const url = normalizeExternalUrl(
+              String((f && (f.url || f.fileURL || f.FileURL || "")) || "").trim(),
+            );
+            if (!url) return '<span class="text-slate-500">' + name + "</span>";
+            return (
+              '<a href="' +
+              escapeAttr(url) +
+              '" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">' +
+              name +
+              "</a>"
+            );
+          })
+          .join('<span class="text-slate-300"> · </span>');
+        return (
+          '<div class="mt-2 text-xs text-slate-500">Decision 附件：' +
+          links +
+          "</div>"
+        );
+      }
+
       function renderProposalTimeline() {
         const wrap = document.getElementById("proposal-timeline");
         if (!wrap) return;
@@ -4284,6 +4467,7 @@
               '<div class="text-sm text-slate-700 leading-relaxed whitespace-pre-line">' +
               (item.summary || item.suggestion || "") +
               "</div>" +
+              renderProposalAttachmentLinks(item) +
               "</div>"
             );
           })
@@ -4413,9 +4597,12 @@
           action: "submit",
           proposalType: proposalType,
           bid: apiBid || undefined,
+          attachments: cloneProposalPendingAttachments(),
         });
         if (summaryEl) summaryEl.value = "";
         if (urlEl) urlEl.value = "";
+        PROPOSAL_PENDING_ATTACHMENTS = [];
+        renderProposalPendingAttachments();
         updateProposalUi();
         try {
           await sendProposalActionEmail("submit", summary, url);
@@ -4508,9 +4695,12 @@
           action: action,
           proposalType: proposalType || undefined,
           bid: apiBid || undefined,
+          attachments: cloneProposalPendingAttachments(),
         });
         document.getElementById("proposal-summary-input").value = "";
         document.getElementById("proposal-url-input").value = "";
+        PROPOSAL_PENDING_ATTACHMENTS = [];
+        renderProposalPendingAttachments();
 
         if (action === "approved") {
           projectStatus = "in_progress";
@@ -7205,6 +7395,7 @@
 
             renderKanban();
             renderFiles();
+            renderProposalPendingAttachments();
 
             document.getElementById("decision-shareproject-url").value =
               DECISION_CHATGPT.shareProjectUrl || "";

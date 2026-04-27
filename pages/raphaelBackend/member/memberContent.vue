@@ -867,7 +867,7 @@
                     {{ row.VerbalContent || "—" }}
                   </div>
                   <div class="memberInfoTableRowItem">
-                    {{ row.VerbalDate || "—" }}
+                    {{ formatHealthLogDateTime(row) }}
                   </div>
                 </div>
               </template>
@@ -1958,6 +1958,25 @@ function formatLastStatusTime(value?: string) {
   const mm = pure.substring(10, 12);
   const ss = pure.substring(12, 14);
   return `${y}/${m}/${d} ${hh}:${mm}:${ss}`;
+}
+
+function formatHealthLogDateTime(row: any) {
+  const raw = String(row?.CheckTime || row?.VerbalDate || "").trim();
+  if (!raw) return "—";
+
+  // API 可能回傳 YYYY/MM/DD HH:mm:ss 或純數字時間格式
+  const pure = raw.replace(/[^\d]/g, "");
+  if (pure.length >= 14) {
+    const y = pure.substring(0, 4);
+    const m = pure.substring(4, 6);
+    const d = pure.substring(6, 8);
+    const hh = pure.substring(8, 10);
+    const mm = pure.substring(10, 12);
+    const ss = pure.substring(12, 14);
+    return `${y}/${m}/${d} ${hh}:${mm}:${ss}`;
+  }
+
+  return raw;
 }
 
 // 產品使用紀錄從 store 取得（透過 processedHomeOrders 處理分組）
