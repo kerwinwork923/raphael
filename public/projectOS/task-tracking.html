@@ -2708,6 +2708,26 @@
         return s.includes("-") ? s.replace(/-/g, "") : s;
       }
 
+      function parseTaskExactEndDate(task) {
+        return (
+          toIsoDate(
+            task &&
+              (task.ExactEndDate ||
+                task.exactEndDate ||
+                task.CompletedDate ||
+                task.completedDate ||
+                ""),
+          ) ||
+          ""
+        );
+      }
+
+      function buildTaskExactEndDateByState(stateCode, completedDate) {
+        return String(stateCode || "").trim() === "3"
+          ? toYYYYMMDD(completedDate || "")
+          : "";
+      }
+
       function colToStateCode(col) {
         // 與 initProjectFromBackendIfPossible 裡的分流對齊：1/2/3/4
         if (col === "todo") return "1";
@@ -3722,11 +3742,8 @@
             ).trim(),
             completedDate:
               stateCode === "3"
-                ? toIsoDate(
-                    (t &&
-                      (t.CheckTime || t.checkTime || t.EndDate || t.endDate)) ||
-                      "",
-                  ) ||
+                ? parseTaskExactEndDate(t) ||
+                  toIsoDate((t && (t.EndDate || t.endDate)) || "") ||
                   checkTimeToIsoDate(t && (t.CheckTime || t.checkTime || ""))
                 : "",
             discussionLinks: normalizeUrlListItems(
@@ -5228,6 +5245,10 @@
               Description: String(t.desc || "").trim(),
               StartDate: toYYYYMMDD(t.startDate || ""),
               EndDate: toYYYYMMDD(t.endDate || ""),
+              ExactEndDate: buildTaskExactEndDateByState(
+                colToStateCode(col),
+                t.completedDate || "",
+              ),
               ChargeMan: String(t.assignee || "").trim(),
               State: colToStateCode(col),
               PreTaskID: depCid || "0",
@@ -6126,6 +6147,11 @@
           if (found) {
             const { task: t, col } = found;
             const statusChanged = col !== newStatus;
+            taskData.completedDate =
+              newStatus === "done"
+                ? toIsoDate(taskData.completedDate || t.completedDate || "") ||
+                  today()
+                : "";
 
             // 1) 同步後端：修改任務內容/狀態/前置/討論 URL
             if (t.cid && CURRENT_PROJECT_AID) {
@@ -6151,6 +6177,10 @@
                   Description: descriptionToSend,
                   StartDate: toYYYYMMDD(taskData.startDate || ""),
                   EndDate: toYYYYMMDD(taskData.endDate || ""),
+                  ExactEndDate: buildTaskExactEndDateByState(
+                    colToStateCode(newStatus),
+                    taskData.completedDate || "",
+                  ),
                   ChargeMan: String(taskData.assignee || "").trim(),
                   State: colToStateCode(newStatus),
                   PreTaskID: prereqCid || "0",
@@ -6191,6 +6221,10 @@
             pushSessionActivity("task", "更新任務", title);
           }
         } else {
+          taskData.completedDate =
+            newStatus === "done"
+              ? toIsoDate(taskData.completedDate || "") || today()
+              : "";
           // 先做本機新增（避免使用者體驗卡住）
           const newLocal = {
             id: "task-" + ++nextId,
@@ -6230,6 +6264,10 @@
               Description: descriptionToSend,
               StartDate: toYYYYMMDD(taskData.startDate || ""),
               EndDate: toYYYYMMDD(taskData.endDate || ""),
+              ExactEndDate: buildTaskExactEndDateByState(
+                colToStateCode(newStatus),
+                taskData.completedDate || "",
+              ),
               ChargeMan: String(taskData.assignee || "").trim(),
               State: colToStateCode(newStatus),
               PreTaskID: prereqCid || "0",
@@ -6396,6 +6434,10 @@
               Description: descriptionToSend,
               StartDate: toYYYYMMDD(t.startDate || ""),
               EndDate: toYYYYMMDD(t.endDate || ""),
+              ExactEndDate: buildTaskExactEndDateByState(
+                colToStateCode(col || "blocked"),
+                t.completedDate || "",
+              ),
               ChargeMan: nextAssignee,
               State: colToStateCode(col || "blocked"),
               PreTaskID: prereqCid || "0",
@@ -6466,6 +6508,10 @@
               Description: reason,
               StartDate: toYYYYMMDD(t.startDate || ""),
               EndDate: toYYYYMMDD(t.endDate || ""),
+              ExactEndDate: buildTaskExactEndDateByState(
+                colToStateCode(col || "blocked"),
+                t.completedDate || "",
+              ),
               ChargeMan: String(t.assignee || "").trim(),
               State: colToStateCode(col || "blocked"),
               PreTaskID: prereqCid || "0",
