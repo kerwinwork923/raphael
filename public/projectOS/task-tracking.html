@@ -3337,6 +3337,7 @@
               CID: String(taskCid || "").trim(),
               AID: String(aid).trim(),
               NewState: String(newStateCode || "").trim(),
+              ExactEndDate: buildTaskExactEndDateByState(newStateCode, today()),
             },
           ],
         };
@@ -3742,9 +3743,7 @@
             ).trim(),
             completedDate:
               stateCode === "3"
-                ? parseTaskExactEndDate(t) ||
-                  toIsoDate((t && (t.EndDate || t.endDate)) || "") ||
-                  checkTimeToIsoDate(t && (t.CheckTime || t.checkTime || ""))
+                ? parseTaskExactEndDate(t)
                 : "",
             discussionLinks: normalizeUrlListItems(
               t && (t.URLList || t.UrlList || t.urlList || []),
