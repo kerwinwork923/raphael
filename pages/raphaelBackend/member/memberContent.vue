@@ -72,7 +72,10 @@
           </div>
           <div class="operationModalHeaderCenter">
             <h3>操作紀錄</h3>
-            <p v-if="operationRecordMode === 'stability'" class="operationSubtitle">
+            <p
+              v-if="operationRecordMode === 'stability'"
+              class="operationSubtitle"
+            >
               Detection Time
             </p>
           </div>
@@ -133,7 +136,10 @@
         </div>
         <!-- 表格內容 -->
         <div class="operationModalTable">
-          <div class="operationTableHeader" v-if="operationRecordMode === 'stability'">
+          <div
+            class="operationTableHeader"
+            v-if="operationRecordMode === 'stability'"
+          >
             <div class="operationTableHeaderItem">事件日期時間</div>
             <div class="operationTableHeaderItem">事件</div>
             <div class="operationTableHeaderItem">溫度</div>
@@ -550,8 +556,6 @@
                   <span>操作紀錄</span>
                 </button>
               </div>
-
-              
             </div>
           </div>
 
@@ -750,65 +754,53 @@
 
         <!-- █ 健康日誌 & 本周摘要 ------------------------------------------------- -->
         <div class="memberInfoRow">
-          <div class="memberInfoCard" style="width: 400px;">
+          <div class="memberInfoCard" style="width: 400px">
             <div class="memberInfoTitleWrap">
               <h3>APP登入紀錄</h3>
             </div>
             <div class="memberInfoCard2">
-
-
-   
-
               <div class="memberInfoList">
-                <div class="memberInfoListTitle">
-                  最後登入時間
-                </div>
+                <div class="memberInfoListTitle">最後登入時間</div>
                 <div class="memberInfoListContent">
                   {{ formatLastStatusTime(memberLastStatus?.last_login_time) }}
                 </div>
               </div>
 
               <div class="memberInfoList">
-                <div class="memberInfoListTitle">
-                 智慧管家時間
-                </div>
+                <div class="memberInfoListTitle">智慧管家時間</div>
                 <div class="memberInfoListContent">
                   {{
-                    formatLastStatusTime(memberLastStatus?.last_bluetoothpage_time)
+                    formatLastStatusTime(
+                      memberLastStatus?.last_bluetoothpage_time
+                    )
                   }}
                 </div>
               </div>
 
               <div class="memberInfoList">
-                <div class="memberInfoListTitle">
-                 最後上傳成功時間
-                </div>
+                <div class="memberInfoListTitle">最後上傳成功時間</div>
                 <div class="memberInfoListContent">
                   {{
-                    formatLastStatusTime(memberLastStatus?.last_uploadsuccess_time)
+                    formatLastStatusTime(
+                      memberLastStatus?.last_uploadsuccess_time
+                    )
                   }}
                 </div>
               </div>
 
               <div class="memberInfoList">
-                <div class="memberInfoListTitle">
-                 最後APP版本
-                </div>
+                <div class="memberInfoListTitle">最後APP版本</div>
                 <div class="memberInfoListContent">
                   {{ memberLastStatus?.last_app_version || "—" }}
                 </div>
               </div>
 
               <div class="memberInfoList">
-                <div class="memberInfoListTitle">
-                 手機系統
-                </div>
+                <div class="memberInfoListTitle">手機系統</div>
                 <div class="memberInfoListContent">
                   {{ lastOsDisplay }}
                 </div>
               </div>
-
-    
             </div>
           </div>
           <!-- 健康日誌 -->
@@ -837,15 +829,12 @@
 
             <div class="memberInfoTable">
               <div class="memberInfoTableTitle">
-                <div
-                  class="memberInfoTableTitleItem"
-                  @click="handleSort('healthLog', 'VerbalContent')"
-                >
+                <div class="memberInfoTableTitleItem">
                   口述內容
                 </div>
                 <div
                   class="memberInfoTableTitleItem"
-                  @click="handleSort('healthLog', 'VerbalDate')"
+                  @click="handleSort('healthLog', 'VerbalDateTime')"
                 >
                   口述日期
                   <img
@@ -864,10 +853,15 @@
                   :key="row.id"
                 >
                   <div class="memberInfoTableRowItem">
-                    {{ row.VerbalContent || "—" }}
+                    {{ row.PreSoundNote || row.Note || "—" }}
                   </div>
                   <div class="memberInfoTableRowItem">
-                    {{ formatHealthLogDateTime(row) }}
+                    <div class="health-log-date-time">
+                      <span>{{ splitHealthLogDateTime(row).date }}</span>
+                      <span class="health-log-date-time-separator">{{
+                        splitHealthLogDateTime(row).time
+                      }}</span>
+                    </div>
                   </div>
                 </div>
               </template>
@@ -1051,51 +1045,77 @@
             </div>
 
             <div class="watchChartsGrid" v-if="watchChart.labels.length">
-              <div class="watchChartCard watchChartCardClickable" @click="openWatchMetricPage('heartRate')">
+              <div
+                class="watchChartCard watchChartCardClickable"
+                @click="openWatchMetricPage('heartRate')"
+              >
                 <h4>心率</h4>
                 <canvas ref="heartRateCanvas" class="watchChartCanvas"></canvas>
               </div>
 
-              <div class="watchChartCard watchChartCardClickable" @click="openWatchMetricPage('spo2')">
+              <div
+                class="watchChartCard watchChartCardClickable"
+                @click="openWatchMetricPage('spo2')"
+              >
                 <h4>血氧</h4>
                 <canvas ref="spo2Canvas" class="watchChartCanvas"></canvas>
               </div>
 
-              <div class="watchChartCard watchChartCardClickable" @click="openWatchMetricPage('bp')">
+              <div
+                class="watchChartCard watchChartCardClickable"
+                @click="openWatchMetricPage('bp')"
+              >
                 <h4>血壓</h4>
                 <canvas ref="bpCanvas" class="watchChartCanvas"></canvas>
               </div>
 
-              <div class="watchChartCard watchChartCardClickable" @click="openWatchMetricPage('stress')">
+              <div
+                class="watchChartCard watchChartCardClickable"
+                @click="openWatchMetricPage('stress')"
+              >
                 <h4>壓力</h4>
                 <canvas ref="stressCanvas" class="watchChartCanvas"></canvas>
               </div>
 
-              <div class="watchChartCard watchChartCardClickable" @click="openWatchMetricPage('sleep')" >
+              <div
+                class="watchChartCard watchChartCardClickable"
+                @click="openWatchMetricPage('sleep')"
+              >
                 <h4>睡眠</h4>
                 <canvas ref="sleepCanvas" class="watchChartCanvas"></canvas>
               </div>
-            
-              <div class="watchChartCard watchChartCardClickable" @click="openWatchMetricPage('temp')" >
+
+              <div
+                class="watchChartCard watchChartCardClickable"
+                @click="openWatchMetricPage('temp')"
+              >
                 <h4>溫度</h4>
                 <canvas ref="tempCanvas" class="watchChartCanvas"></canvas>
               </div>
 
-              <div class="watchChartCard watchChartCardClickable" @click="openWatchMetricPage('steps')" >
+              <div
+                class="watchChartCard watchChartCardClickable"
+                @click="openWatchMetricPage('steps')"
+              >
                 <h4>運動</h4>
                 <canvas ref="stepsCanvas" class="watchChartCanvas"></canvas>
               </div>
 
-              <div class="watchChartCard watchChartCardClickable" @click="openWatchMetricPage('hrv')" >
+              <div
+                class="watchChartCard watchChartCardClickable"
+                @click="openWatchMetricPage('hrv')"
+              >
                 <h4>HRV</h4>
                 <canvas ref="hrvCanvas" class="watchChartCanvas"></canvas>
               </div>
 
-              <div class="watchChartCard watchChartCardClickable" @click="openWatchMetricPage('body')" >
+              <div
+                class="watchChartCard watchChartCardClickable"
+                @click="openWatchMetricPage('body')"
+              >
                 <h4>身體組成</h4>
                 <canvas ref="bodyCanvas" class="watchChartCanvas"></canvas>
               </div>
-              
             </div>
 
             <div class="watchChartEmpty" v-else>尚無手錶紀錄資料</div>
@@ -1121,7 +1141,10 @@
             </div>
 
             <div class="watchChartsGrid" v-if="acerRingChart.labels.length">
-              <div class="watchChartCard watchChartCardClickable" @click="openAcerMetricPage('heartRate')">
+              <div
+                class="watchChartCard watchChartCardClickable"
+                @click="openAcerMetricPage('heartRate')"
+              >
                 <h4>心率</h4>
                 <canvas
                   ref="acerHeartRateCanvas"
@@ -1129,22 +1152,34 @@
                 ></canvas>
               </div>
 
-              <div class="watchChartCard watchChartCardClickable" @click="openAcerMetricPage('spo2')">
+              <div
+                class="watchChartCard watchChartCardClickable"
+                @click="openAcerMetricPage('spo2')"
+              >
                 <h4>血氧</h4>
                 <canvas ref="acerSpo2Canvas" class="watchChartCanvas"></canvas>
               </div>
 
-              <div class="watchChartCard watchChartCardClickable" @click="openAcerMetricPage('sleep')">
+              <div
+                class="watchChartCard watchChartCardClickable"
+                @click="openAcerMetricPage('sleep')"
+              >
                 <h4>睡眠</h4>
                 <canvas ref="acerSleepCanvas" class="watchChartCanvas"></canvas>
               </div>
 
-              <div class="watchChartCard watchChartCardWide watchChartCardClickable" @click="openAcerMetricPage('temp')">
+              <div
+                class="watchChartCard watchChartCardWide watchChartCardClickable"
+                @click="openAcerMetricPage('temp')"
+              >
                 <h4>溫度</h4>
                 <canvas ref="acerTempCanvas" class="watchChartCanvas"></canvas>
               </div>
 
-              <div class="watchChartCard watchChartCardClickable" @click="openAcerMetricPage('activity')">
+              <div
+                class="watchChartCard watchChartCardClickable"
+                @click="openAcerMetricPage('activity')"
+              >
                 <h4>運動</h4>
                 <canvas ref="acerStepsCanvas" class="watchChartCanvas"></canvas>
               </div>
@@ -1172,29 +1207,59 @@
             </div>
 
             <div class="watchChartsGrid" v-if="garminChart.labels.length">
-              <div class="watchChartCard watchChartCardClickable" @click="openGarminMetricPage('heartRate')">
+              <div
+                class="watchChartCard watchChartCardClickable"
+                @click="openGarminMetricPage('heartRate')"
+              >
                 <h4>心率</h4>
-                <canvas ref="garminHeartRateCanvas" class="watchChartCanvas"></canvas>
+                <canvas
+                  ref="garminHeartRateCanvas"
+                  class="watchChartCanvas"
+                ></canvas>
               </div>
 
-              <div class="watchChartCard watchChartCardClickable" @click="openGarminMetricPage('spo2')">
+              <div
+                class="watchChartCard watchChartCardClickable"
+                @click="openGarminMetricPage('spo2')"
+              >
                 <h4>血氧</h4>
-                <canvas ref="garminSpo2Canvas" class="watchChartCanvas"></canvas>
+                <canvas
+                  ref="garminSpo2Canvas"
+                  class="watchChartCanvas"
+                ></canvas>
               </div>
 
-              <div class="watchChartCard watchChartCardClickable" @click="openGarminMetricPage('stress')">
+              <div
+                class="watchChartCard watchChartCardClickable"
+                @click="openGarminMetricPage('stress')"
+              >
                 <h4>壓力</h4>
-                <canvas ref="garminStressCanvas" class="watchChartCanvas"></canvas>
+                <canvas
+                  ref="garminStressCanvas"
+                  class="watchChartCanvas"
+                ></canvas>
               </div>
 
-              <div class="watchChartCard watchChartCardWide watchChartCardClickable" @click="openGarminMetricPage('sleep')">
+              <div
+                class="watchChartCard watchChartCardWide watchChartCardClickable"
+                @click="openGarminMetricPage('sleep')"
+              >
                 <h4>睡眠</h4>
-                <canvas ref="garminSleepCanvas" class="watchChartCanvas"></canvas>
+                <canvas
+                  ref="garminSleepCanvas"
+                  class="watchChartCanvas"
+                ></canvas>
               </div>
 
-              <div class="watchChartCard watchChartCardWide watchChartCardClickable" @click="openGarminMetricPage('temp')">
+              <div
+                class="watchChartCard watchChartCardWide watchChartCardClickable"
+                @click="openGarminMetricPage('temp')"
+              >
                 <h4>溫度</h4>
-                <canvas ref="garminTempCanvas" class="watchChartCanvas"></canvas>
+                <canvas
+                  ref="garminTempCanvas"
+                  class="watchChartCanvas"
+                ></canvas>
               </div>
             </div>
 
@@ -1207,7 +1272,6 @@
           <div class="memberInfoCard watchRecordCard">
             <div class="memberInfoTitleWrap">
               <h3>護您穩平衡衣</h3>
-      
             </div>
 
             <div class="balanceCardGrid" v-if="balanceClothCards.length">
@@ -1941,7 +2005,9 @@ const {
 
 const lastOsDisplay = computed(() => {
   const osType = String(memberLastStatus.value?.last_os_type || "").trim();
-  const osVersion = String(memberLastStatus.value?.last_os_version || "").trim();
+  const osVersion = String(
+    memberLastStatus.value?.last_os_version || ""
+  ).trim();
   if (osType && osVersion) return `${osType} / ${osVersion}`;
   return osType || osVersion || "—";
 });
@@ -1960,23 +2026,46 @@ function formatLastStatusTime(value?: string) {
   return `${y}/${m}/${d} ${hh}:${mm}:${ss}`;
 }
 
-function formatHealthLogDateTime(row: any) {
+function splitHealthLogDateTime(row: any) {
   const raw = String(row?.CheckTime || row?.VerbalDate || "").trim();
-  if (!raw) return "—";
 
-  // API 可能回傳 YYYY/MM/DD HH:mm:ss 或純數字時間格式
-  const pure = raw.replace(/[^\d]/g, "");
-  if (pure.length >= 14) {
-    const y = pure.substring(0, 4);
-    const m = pure.substring(4, 6);
-    const d = pure.substring(6, 8);
-    const hh = pure.substring(8, 10);
-    const mm = pure.substring(10, 12);
-    const ss = pure.substring(12, 14);
-    return `${y}/${m}/${d} ${hh}:${mm}:${ss}`;
+  if (!raw) return { date: "—", time: "—" };
+
+  // 支援：2026/02/09 17:03
+  const match = raw.match(
+    /^(\d{4}[/-]\d{2}[/-]\d{2})\s+(\d{2}:\d{2})(?::\d{2})?/
+  );
+
+  if (match) {
+    return {
+      date: match[1].replace(/-/g, "/"),
+      time: match[2],
+    };
   }
 
-  return raw;
+  return {
+    date: raw,
+    time: "—",
+  };
+}
+
+function getHealthLogSortTimestamp(row: any) {
+  const raw = String(row?.CheckTime || row?.VerbalDate || "").trim();
+  if (!raw) return Number.NEGATIVE_INFINITY;
+
+  const normalized = raw.replace(/\//g, "-");
+  const ms = Date.parse(normalized);
+  if (!Number.isNaN(ms)) return ms;
+
+  const match = raw.match(
+    /^(\d{4})[/-](\d{2})[/-](\d{2})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?/
+  );
+  if (!match) return Number.NEGATIVE_INFINITY;
+
+  const [, y, m, d, hh = "00", mm = "00", ss = "00"] = match;
+  const rebuilt = `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
+  const rebuiltMs = Date.parse(rebuilt);
+  return Number.isNaN(rebuiltMs) ? Number.NEGATIVE_INFINITY : rebuiltMs;
 }
 
 // 產品使用紀錄從 store 取得（透過 processedHomeOrders 處理分組）
@@ -1994,7 +2083,9 @@ const STABILITY_PRODUCT_NAME = "護您穩平衡衣";
 const STABILITY_OPTION_LABEL = "護您穩";
 
 function buildContractKey(order: any, index: number) {
-  return `${order?.ProductName || ""}|${order?.RentStart || ""}|${order?.RentEnd || ""}|${index}`;
+  return `${order?.ProductName || ""}|${order?.RentStart || ""}|${
+    order?.RentEnd || ""
+  }|${index}`;
 }
 
 function parseContractDate(value?: string) {
@@ -2016,16 +2107,18 @@ function getCurrentContractOrder(orders: ApiOrder[]) {
 }
 
 const contractOptions = computed<any[]>(() => {
-  const options: any[] = (orderList.value || []).map((o: any, index: number) => {
-    const productName = o?.ProductName || "未命名產品";
-    const rentStart = o?.RentStart || "—";
-    const rentEnd = o?.RentEnd || "—";
-    return {
-      key: buildContractKey(o, index),
-      label: `${productName} (${rentStart} ~ ${rentEnd})`,
-      order: o,
-    };
-  });
+  const options: any[] = (orderList.value || []).map(
+    (o: any, index: number) => {
+      const productName = o?.ProductName || "未命名產品";
+      const rentStart = o?.RentStart || "—";
+      const rentEnd = o?.RentEnd || "—";
+      return {
+        key: buildContractKey(o, index),
+        label: `${productName} (${rentStart} ~ ${rentEnd})`,
+        order: o,
+      };
+    }
+  );
   if ((stabilityAllList.value || []).length > 0) {
     options.push({
       key: STABILITY_CONTRACT_KEY,
@@ -2041,17 +2134,17 @@ const activeOrder = computed(() => {
   if (!selectedContractKey.value) return currentOrder.value;
   if (selectedContractKey.value === STABILITY_CONTRACT_KEY) return null;
   const target = contractOptions.value.find(
-    (item: any) => item.key === selectedContractKey.value,
+    (item: any) => item.key === selectedContractKey.value
   );
   if (target) return target.order;
   return (
-    contractOptions.value.find((item: any) => item.order === currentOrder.value)?.order ??
-    currentOrder.value
+    contractOptions.value.find((item: any) => item.order === currentOrder.value)
+      ?.order ?? currentOrder.value
   );
 });
 
 const isStabilitySelected = computed(
-  () => selectedContractKey.value === STABILITY_CONTRACT_KEY,
+  () => selectedContractKey.value === STABILITY_CONTRACT_KEY
 );
 
 const activeProductTitle = computed(() => {
@@ -2162,7 +2255,11 @@ function openWatchMetricPage(metric: string) {
 
 function openAcerMetricPage(metric: string) {
   const query: Record<string, string> = {};
-  if (acerRingRange.value && acerRingRange.value.length >= 1 && acerRingRange.value[0]) {
+  if (
+    acerRingRange.value &&
+    acerRingRange.value.length >= 1 &&
+    acerRingRange.value[0]
+  ) {
     const from = acerRingRange.value[0];
     const to = acerRingRange.value[1] ?? acerRingRange.value[0];
     query.start = formatDateYYYYMMDD(from);
@@ -2176,7 +2273,11 @@ function openAcerMetricPage(metric: string) {
 
 function openGarminMetricPage(metric: string) {
   const query: Record<string, string> = {};
-  if (garminRange.value && garminRange.value.length >= 1 && garminRange.value[0]) {
+  if (
+    garminRange.value &&
+    garminRange.value.length >= 1 &&
+    garminRange.value[0]
+  ) {
     const from = garminRange.value[0];
     const to = garminRange.value[1] ?? garminRange.value[0];
     query.start = formatDateYYYYMMDD(from);
@@ -2199,22 +2300,29 @@ function getBalanceStatusLabel(item: any) {
       item?.Status ??
       item?.TStatus ??
       item?.UseStatus ??
-      "",
+      ""
   ).trim();
   if (!raw) return "—";
 
   const lowered = raw.toLowerCase();
   if (
     ["1", "y", "yes", "true", "active", "enabled", "啟用", "已啟用"].includes(
-      lowered,
+      lowered
     )
   ) {
     return "已啟用";
   }
   if (
-    ["0", "n", "no", "false", "inactive", "disabled", "停用", "已停用"].includes(
-      lowered,
-    )
+    [
+      "0",
+      "n",
+      "no",
+      "false",
+      "inactive",
+      "disabled",
+      "停用",
+      "已停用",
+    ].includes(lowered)
   ) {
     return "已停用";
   }
@@ -2229,7 +2337,7 @@ function getBalanceSn(item: any) {
       item?.DeviceID ??
       item?.DeviceId ??
       item?.SerialNumber ??
-      "",
+      ""
   ).trim();
   return raw || "—";
 }
@@ -2373,7 +2481,7 @@ onUnmounted(() => {
 });
 
 const pageNumberList = computed(() =>
-  pageButtons(totalPagesHome.value, pageHome.value, maxButtons.value),
+  pageButtons(totalPagesHome.value, pageHome.value, maxButtons.value)
 );
 
 // 將治療時間字串轉為分鐘數（例："1小時30分鐘" -> 90）
@@ -2479,9 +2587,7 @@ const filteredHome = computed(() => {
         keywordTokens.push("未加入", "沒有最愛點", "未得", "未得點");
       }
 
-      return (
-        keywordTokens.some((text) => text.includes(keyword))
-      );
+      return keywordTokens.some((text) => text.includes(keyword));
     });
   }
 
@@ -2555,7 +2661,7 @@ const pageHome = ref(1);
 const totalHome = computed(() => filteredHome.value.length);
 
 const totalPagesHome = computed(() =>
-  Math.max(1, Math.ceil(totalHome.value / PAGE_MAIN)),
+  Math.max(1, Math.ceil(totalHome.value / PAGE_MAIN))
 );
 const paginatedHome = computed(() => {
   const s = (pageHome.value - 1) * PAGE_MAIN;
@@ -2656,11 +2762,11 @@ function buildWatchRecords(raw: any): any[] {
       const bps = row.bpRecords;
       const avgSys = Math.round(
         bps.reduce((s: number, b: any) => s + Number(b.sys || 0), 0) /
-          bps.length,
+          bps.length
       );
       const avgDia = Math.round(
         bps.reduce((s: number, b: any) => s + Number(b.dia || 0), 0) /
-          bps.length,
+          bps.length
       );
       row.bloodPressure = `${avgSys}/${avgDia}`;
 
@@ -2670,7 +2776,7 @@ function buildWatchRecords(raw: any): any[] {
       if (rmssdVals.length) {
         row.hrv = `${Math.round(
           rmssdVals.reduce((a: number, b: number) => a + b, 0) /
-            rmssdVals.length,
+            rmssdVals.length
         )} ms`;
       }
 
@@ -2680,14 +2786,14 @@ function buildWatchRecords(raw: any): any[] {
       if (stressVals.length) {
         row.stress = `${Math.round(
           stressVals.reduce((a: number, b: number) => a + b, 0) /
-            stressVals.length,
+            stressVals.length
         )}/100`;
       }
     }
 
     if (row.sleepRecords.length) {
       const best = row.sleepRecords.reduce((prev: any, cur: any) =>
-        Number(cur.SleepScore || 0) > Number(prev.SleepScore || 0) ? cur : prev,
+        Number(cur.SleepScore || 0) > Number(prev.SleepScore || 0) ? cur : prev
       );
       row.sleep = best.SleepScore ? `${best.SleepScore} 分` : "";
     }
@@ -2729,7 +2835,7 @@ function toLocalDayStart(date: Date) {
   return new Date(
     date.getFullYear(),
     date.getMonth(),
-    date.getDate(),
+    date.getDate()
   ).getTime();
 }
 
@@ -2741,7 +2847,7 @@ function toLocalDayEnd(date: Date) {
     23,
     59,
     59,
-    999,
+    999
   ).getTime();
 }
 
@@ -2774,7 +2880,11 @@ function getAsusApiDateRange() {
 }
 
 function getAcerApiDateRange() {
-  if (acerRingRange.value && acerRingRange.value.length >= 1 && acerRingRange.value[0]) {
+  if (
+    acerRingRange.value &&
+    acerRingRange.value.length >= 1 &&
+    acerRingRange.value[0]
+  ) {
     const from = acerRingRange.value[0];
     const to = acerRingRange.value[1] ?? acerRingRange.value[0];
     return {
@@ -2789,7 +2899,11 @@ function getAcerApiDateRange() {
 }
 
 function getGarminApiDateRange() {
-  if (garminRange.value && garminRange.value.length >= 1 && garminRange.value[0]) {
+  if (
+    garminRange.value &&
+    garminRange.value.length >= 1 &&
+    garminRange.value[0]
+  ) {
     const from = garminRange.value[0];
     const to = garminRange.value[1] ?? garminRange.value[0];
     return {
@@ -2892,7 +3006,7 @@ function createLineChart(
   key: keyof typeof watchCharts,
   canvas: HTMLCanvasElement | null,
   labels: string[],
-  datasets: any[],
+  datasets: any[]
 ) {
   if (!canvas) return;
   watchCharts[key]?.destroy();
@@ -2925,7 +3039,7 @@ function createBarChart(
   canvas: HTMLCanvasElement | null,
   labels: string[],
   datasets: any[],
-  stacked = false,
+  stacked = false
 ) {
   if (!canvas) return;
   watchCharts[key]?.destroy();
@@ -3064,10 +3178,10 @@ const watchChart = computed(() => {
   const labels = dates.map((d) => d.slice(5).replace("-", "/"));
 
   const heartRateMin = dates.map((d) =>
-    Number(hbMap.get(d)?.HeartrateMin || 0),
+    Number(hbMap.get(d)?.HeartrateMin || 0)
   );
   const heartRateMax = dates.map((d) =>
-    Number(hbMap.get(d)?.HeartrateMax || 0),
+    Number(hbMap.get(d)?.HeartrateMax || 0)
   );
   const spo2Min = dates.map((d) => Number(spo2Map.get(d)?.Spo2Min || 0));
   const spo2Max = dates.map((d) => Number(spo2Map.get(d)?.Spo2Max || 0));
@@ -3079,14 +3193,14 @@ const watchChart = computed(() => {
     const arr = bpGroup[d] || [];
     if (!arr.length) return 0;
     return Math.round(
-      arr.reduce((s: number, x: any) => s + Number(x.sys || 0), 0) / arr.length,
+      arr.reduce((s: number, x: any) => s + Number(x.sys || 0), 0) / arr.length
     );
   });
   const bpDia = dates.map((d) => {
     const arr = bpGroup[d] || [];
     if (!arr.length) return 0;
     return Math.round(
-      arr.reduce((s: number, x: any) => s + Number(x.dia || 0), 0) / arr.length,
+      arr.reduce((s: number, x: any) => s + Number(x.dia || 0), 0) / arr.length
     );
   });
   const stress = dates.map((d) => {
@@ -3094,7 +3208,7 @@ const watchChart = computed(() => {
     if (!arr.length) return 0;
     return Math.round(
       arr.reduce((s: number, x: any) => s + Number(x.deStressIndex || 0), 0) /
-        arr.length,
+        arr.length
     );
   });
   const hrv = dates.map((d) => {
@@ -3102,7 +3216,7 @@ const watchChart = computed(() => {
     if (!arr.length) return 0;
     return Math.round(
       arr.reduce((s: number, x: any) => s + Number(x.rmssd || 0), 0) /
-        arr.length,
+        arr.length
     );
   });
 
@@ -3111,7 +3225,7 @@ const watchChart = computed(() => {
   const sleepLight = dates.map((d) => sleepGroup[d]?.light || 0);
   const sleepAwake = dates.map((d) => sleepGroup[d]?.awake || 0);
   const sleepTotal = dates.map(
-    (_, i) => sleepDeep[i] + sleepRem[i] + sleepLight[i] + sleepAwake[i],
+    (_, i) => sleepDeep[i] + sleepRem[i] + sleepLight[i] + sleepAwake[i]
   );
   const sleepMax = Math.max(...sleepTotal, 1);
 
@@ -3248,7 +3362,7 @@ async function renderWatchCharts() {
         backgroundColor: "#d3e8b8",
       },
     ],
-    true,
+    true
   );
 
   createLineChart("temp", tempCanvas.value, labels, [
@@ -3355,7 +3469,10 @@ const acerRingChart = computed(() => {
     if (d) tpMap.set(d, x);
   });
 
-  const sleepGroup: Record<string, { deep: number; rem: number; light: number; awake: number }> = {};
+  const sleepGroup: Record<
+    string,
+    { deep: number; rem: number; light: number; awake: number }
+  > = {};
   (raw.Sleep || []).forEach((x: any) => {
     const d = parseAcerRawDateTimeToDateKey(x.RawDateTime || "");
     if (!d) return;
@@ -3472,13 +3589,33 @@ function renderAcerRingCharts() {
   }
 
   createAcerLineChart("heartRate", acerHeartRateCanvas.value, labels, [
-    { label: "最高", data: data.heartRateMax, borderColor: "#7cbc28", backgroundColor: "#7cbc28" },
-    { label: "最低", data: data.heartRateMin, borderColor: "#27a3a9", backgroundColor: "#27a3a9" },
+    {
+      label: "最高",
+      data: data.heartRateMax,
+      borderColor: "#7cbc28",
+      backgroundColor: "#7cbc28",
+    },
+    {
+      label: "最低",
+      data: data.heartRateMin,
+      borderColor: "#27a3a9",
+      backgroundColor: "#27a3a9",
+    },
   ]);
 
   createAcerLineChart("spo2", acerSpo2Canvas.value, labels, [
-    { label: "最高", data: data.spo2Max, borderColor: "#7cbc28", backgroundColor: "#7cbc28" },
-    { label: "最低", data: data.spo2Min, borderColor: "#27a3a9", backgroundColor: "#27a3a9" },
+    {
+      label: "最高",
+      data: data.spo2Max,
+      borderColor: "#7cbc28",
+      backgroundColor: "#7cbc28",
+    },
+    {
+      label: "最低",
+      data: data.spo2Min,
+      borderColor: "#27a3a9",
+      backgroundColor: "#27a3a9",
+    },
   ]);
 
   createAcerBarChart(
@@ -3495,8 +3632,18 @@ function renderAcerRingCharts() {
   );
 
   createAcerLineChart("temp", acerTempCanvas.value, labels, [
-    { label: "最高", data: data.tempMax, borderColor: "#7cbc28", backgroundColor: "#7cbc28" },
-    { label: "最低", data: data.tempMin, borderColor: "#27a3a9", backgroundColor: "#27a3a9" },
+    {
+      label: "最高",
+      data: data.tempMax,
+      borderColor: "#7cbc28",
+      backgroundColor: "#7cbc28",
+    },
+    {
+      label: "最低",
+      data: data.tempMin,
+      borderColor: "#27a3a9",
+      backgroundColor: "#27a3a9",
+    },
   ]);
 
   createAcerBarChart("steps", acerStepsCanvas.value, labels, [
@@ -3508,7 +3655,7 @@ function createGarminLineChart(
   key: keyof typeof garminCharts,
   canvas: HTMLCanvasElement | null,
   labels: string[],
-  datasets: any[],
+  datasets: any[]
 ) {
   if (!canvas) return;
   garminCharts[key]?.destroy();
@@ -3541,7 +3688,7 @@ function createGarminBarChart(
   canvas: HTMLCanvasElement | null,
   labels: string[],
   datasets: any[],
-  stacked = false,
+  stacked = false
 ) {
   if (!canvas) return;
   garminCharts[key]?.destroy();
@@ -3635,7 +3782,10 @@ const garminFakeDaily = computed(() => {
     if (d) stressMap.set(d, x);
   });
 
-  const sleepGroup: Record<string, { deep: number; rem: number; light: number; awake: number }> = {};
+  const sleepGroup: Record<
+    string,
+    { deep: number; rem: number; light: number; awake: number }
+  > = {};
   (raw.Sleep || []).forEach((x: any) => {
     const d = parseGarminRawDateTimeToDateKey(x.StartTime || "");
     if (!d) return;
@@ -3703,16 +3853,46 @@ function renderGarminCharts() {
     return;
   }
   createGarminLineChart("heartRate", garminHeartRateCanvas.value, labels, [
-    { label: "最高", data: data.heartRateMax, borderColor: "#7cbc28", backgroundColor: "#7cbc28" },
-    { label: "最低", data: data.heartRateMin, borderColor: "#27a3a9", backgroundColor: "#27a3a9" },
+    {
+      label: "最高",
+      data: data.heartRateMax,
+      borderColor: "#7cbc28",
+      backgroundColor: "#7cbc28",
+    },
+    {
+      label: "最低",
+      data: data.heartRateMin,
+      borderColor: "#27a3a9",
+      backgroundColor: "#27a3a9",
+    },
   ]);
   createGarminLineChart("spo2", garminSpo2Canvas.value, labels, [
-    { label: "最高", data: data.spo2Max, borderColor: "#7cbc28", backgroundColor: "#7cbc28" },
-    { label: "最低", data: data.spo2Min, borderColor: "#27a3a9", backgroundColor: "#27a3a9" },
+    {
+      label: "最高",
+      data: data.spo2Max,
+      borderColor: "#7cbc28",
+      backgroundColor: "#7cbc28",
+    },
+    {
+      label: "最低",
+      data: data.spo2Min,
+      borderColor: "#27a3a9",
+      backgroundColor: "#27a3a9",
+    },
   ]);
   createGarminLineChart("stress", garminStressCanvas.value, labels, [
-    { label: "最高", data: data.stressMax, borderColor: "#7cbc28", backgroundColor: "#7cbc28" },
-    { label: "最低", data: data.stressMin, borderColor: "#27a3a9", backgroundColor: "#27a3a9" },
+    {
+      label: "最高",
+      data: data.stressMax,
+      borderColor: "#7cbc28",
+      backgroundColor: "#7cbc28",
+    },
+    {
+      label: "最低",
+      data: data.stressMin,
+      borderColor: "#27a3a9",
+      backgroundColor: "#27a3a9",
+    },
   ]);
   createGarminBarChart(
     "sleep",
@@ -3724,11 +3904,21 @@ function renderGarminCharts() {
       { label: "淺眠", data: data.sleepLight, backgroundColor: "#a4ce77" },
       { label: "深眠", data: data.sleepDeep, backgroundColor: "#27a3a9" },
     ],
-    true,
+    true
   );
   createGarminLineChart("temp", garminTempCanvas.value, labels, [
-    { label: "最高", data: data.tempMax, borderColor: "#7cbc28", backgroundColor: "#7cbc28" },
-    { label: "最低", data: data.tempMin, borderColor: "#27a3a9", backgroundColor: "#27a3a9" },
+    {
+      label: "最高",
+      data: data.tempMax,
+      borderColor: "#7cbc28",
+      backgroundColor: "#7cbc28",
+    },
+    {
+      label: "最低",
+      data: data.tempMin,
+      borderColor: "#27a3a9",
+      backgroundColor: "#27a3a9",
+    },
   ]);
 }
 
@@ -3789,7 +3979,7 @@ const filteredRing = computed(() => {
   if (selectedWatchFilterOptions.value.length > 0) {
     const cat = watchFilterCategory.value;
     data = data.filter((r: any) =>
-      selectedWatchFilterOptions.value.includes(String(r[cat] || "")),
+      selectedWatchFilterOptions.value.includes(String(r[cat] || ""))
     );
   }
 
@@ -3798,8 +3988,8 @@ const filteredRing = computed(() => {
     const kw = watchKeyword.value.toLowerCase();
     data = data.filter((r: any) =>
       Object.values(r).some(
-        (v) => typeof v === "string" && v.toLowerCase().includes(kw),
-      ),
+        (v) => typeof v === "string" && v.toLowerCase().includes(kw)
+      )
     );
   }
 
@@ -3837,21 +4027,21 @@ const filteredRing = computed(() => {
 const PAGE_WATCH = 10;
 const totalRing = computed(() => filteredRing.value.length);
 const totalPagesRing = computed(() =>
-  Math.max(1, Math.ceil(totalRing.value / PAGE_WATCH)),
+  Math.max(1, Math.ceil(totalRing.value / PAGE_WATCH))
 );
 const paginatedRing = computed(() => {
   const s = (pageRing.value - 1) * PAGE_WATCH;
   return filteredRing.value.slice(s, s + PAGE_WATCH);
 });
 const pageNumberListRing = computed(() =>
-  pageButtons(totalPagesRing.value, pageRing.value, maxButtons.value),
+  pageButtons(totalPagesRing.value, pageRing.value, maxButtons.value)
 );
 
 /* ANS */
 const pageANS = ref(1);
 const totalANS = computed(() => ansRecords.value.length);
 const totalPagesANS = computed(() =>
-  Math.max(1, Math.ceil(totalANS.value / PAGE_SUB)),
+  Math.max(1, Math.ceil(totalANS.value / PAGE_SUB))
 );
 const filteredANSWithSort = computed(() => {
   let data = filteredANS.value;
@@ -3897,7 +4087,7 @@ const paginatedANS = computed(() => {
 const pageLife = ref(1);
 const totalLife = computed(() => lifeRecords.value.length);
 const totalPagesLife = computed(() =>
-  Math.max(1, Math.ceil(totalLife.value / PAGE_SUB)),
+  Math.max(1, Math.ceil(totalLife.value / PAGE_SUB))
 );
 const filteredLifeWithSort = computed(() => {
   let data = filteredLife.value;
@@ -3954,7 +4144,7 @@ const filteredVideo = computed(() => {
 });
 const totalVideo = computed(() => filteredVideo.value.length);
 const totalPagesVideo = computed(() =>
-  Math.max(1, Math.ceil(totalVideo.value / PAGE_SUB)),
+  Math.max(1, Math.ceil(totalVideo.value / PAGE_SUB))
 );
 const filteredVideoWithSort = computed(() => {
   let data = filteredVideo.value;
@@ -3998,7 +4188,7 @@ const paginatedVideo = computed(() => {
   return filteredVideoWithSort.value.slice(s, s + PAGE_SUB);
 });
 const pageNumberListVideo = computed(() =>
-  pageButtons(totalPagesVideo.value, pageVideo.value, maxButtons.value),
+  pageButtons(totalPagesVideo.value, pageVideo.value, maxButtons.value)
 );
 
 /* APP */
@@ -4016,7 +4206,7 @@ const filteredApp = computed(() => {
 });
 const totalApp = computed(() => filteredApp.value.length);
 const totalPagesApp = computed(() =>
-  Math.max(1, Math.ceil(totalApp.value / PAGE_SUB)),
+  Math.max(1, Math.ceil(totalApp.value / PAGE_SUB))
 );
 const filteredAppWithSort = computed(() => {
   let data = filteredApp.value;
@@ -4058,7 +4248,7 @@ const paginatedApp = computed(() => {
   return filteredAppWithSort.value.slice(s, s + PAGE_SUB);
 });
 const pageNumberListApp = computed(() =>
-  pageButtons(totalPagesApp.value, pageApp.value, maxButtons.value),
+  pageButtons(totalPagesApp.value, pageApp.value, maxButtons.value)
 );
 const filteredAppForChart = computed(() => {
   if (!appDateRange.value || appDateRange.value.length < 2)
@@ -4084,11 +4274,11 @@ const filteredHealthLog = computed(() => {
     if (from) {
       // 統一使用純日期字串比較（YYYY/MM/DD），避免時區偏移問題
       const startStr = `${from.getFullYear()}/${String(
-        from.getMonth() + 1,
+        from.getMonth() + 1
       ).padStart(2, "0")}/${String(from.getDate()).padStart(2, "0")}`;
       const endStr = `${to.getFullYear()}/${String(to.getMonth() + 1).padStart(
         2,
-        "0",
+        "0"
       )}/${String(to.getDate()).padStart(2, "0")}`;
       data = data.filter((r: any) => {
         if (!r.VerbalDate) return false;
@@ -4106,9 +4296,9 @@ const filteredHealthLog = computed(() => {
       let bVal = b[field];
 
       // 日期排序
-      if (field === "VerbalDate") {
-        aVal = new Date(aVal?.replace(/\//g, "-") || "").getTime();
-        bVal = new Date(bVal?.replace(/\//g, "-") || "").getTime();
+      if (field === "VerbalDate" || field === "VerbalDateTime") {
+        aVal = getHealthLogSortTimestamp(a);
+        bVal = getHealthLogSortTimestamp(b);
         const isAsc = sortState.value.healthLog.order === "asc";
         return isAsc ? aVal - bVal : bVal - aVal;
       }
@@ -4125,12 +4315,8 @@ const filteredHealthLog = computed(() => {
   } else {
     // 預設：口述日期降序（最新在前）
     data = [...data].sort((a: any, b: any) => {
-      const aTime = new Date(
-        (a.VerbalDate || "").replace(/\//g, "-") || "",
-      ).getTime();
-      const bTime = new Date(
-        (b.VerbalDate || "").replace(/\//g, "-") || "",
-      ).getTime();
+      const aTime = getHealthLogSortTimestamp(a);
+      const bTime = getHealthLogSortTimestamp(b);
       return bTime - aTime;
     });
   }
@@ -4139,14 +4325,14 @@ const filteredHealthLog = computed(() => {
 });
 const totalHealthLog = computed(() => filteredHealthLog.value.length);
 const totalPagesHealthLog = computed(() =>
-  Math.max(1, Math.ceil(totalHealthLog.value / PAGE_SUB)),
+  Math.max(1, Math.ceil(totalHealthLog.value / PAGE_SUB))
 );
 const paginatedHealthLog = computed(() => {
   const s = (pageHealthLog.value - 1) * PAGE_SUB;
   return filteredHealthLog.value.slice(s, s + PAGE_SUB);
 });
 const pageNumberListHealthLog = computed(() =>
-  pageButtons(totalPagesHealthLog.value, pageHealthLog.value, maxButtons.value),
+  pageButtons(totalPagesHealthLog.value, pageHealthLog.value, maxButtons.value)
 );
 
 /* 匯出健康日誌 Excel */
@@ -4244,7 +4430,7 @@ const filteredWeeklySummary = computed(() => {
 });
 const totalWeeklySummary = computed(() => filteredWeeklySummary.value.length);
 const totalPagesWeeklySummary = computed(() =>
-  Math.max(1, Math.ceil(totalWeeklySummary.value / PAGE_SUB)),
+  Math.max(1, Math.ceil(totalWeeklySummary.value / PAGE_SUB))
 );
 const paginatedWeeklySummary = computed(() => {
   const s = (pageWeeklySummary.value - 1) * PAGE_SUB;
@@ -4254,8 +4440,8 @@ const pageNumberListWeeklySummary = computed(() =>
   pageButtons(
     totalPagesWeeklySummary.value,
     pageWeeklySummary.value,
-    maxButtons.value,
-  ),
+    maxButtons.value
+  )
 );
 
 // 排序功能
@@ -4340,7 +4526,7 @@ async function fetchContractHistory() {
           Mobile: sel.Mobile ?? "",
           Token: token,
         }),
-      },
+      }
     );
     const data = await response.json();
     if (data.Result !== "OK") {
@@ -4363,10 +4549,10 @@ async function fetchContractHistory() {
 }
 
 /* ---------- 共用範本 ---------- */
-const makeFiltered = <T,>(
+const makeFiltered = <T>(
   src: Ref<T[]>,
   range: Ref<Date[] | null>,
-  dateKey: keyof T, // 欄位名稱，如 'CheckTime'
+  dateKey: keyof T // 欄位名稱，如 'CheckTime'
 ) =>
   computed(() => {
     if (!range.value || range.value.length < 2) return src.value;
@@ -4375,7 +4561,7 @@ const makeFiltered = <T,>(
     const end = to.getTime();
     return src.value.filter((r: any) => {
       const ms = Date.parse(
-        (r[dateKey] as string).split(" ")[0].replace(/\//g, "-"),
+        (r[dateKey] as string).split(" ")[0].replace(/\//g, "-")
       );
       return ms >= start && ms <= end;
     });
@@ -4416,7 +4602,7 @@ watch(
     ringRecords.value = buildWatchRecords(raw);
     pageRing.value = 1;
   },
-  { immediate: true },
+  { immediate: true }
 );
 watchEffect(
   () => {
@@ -4431,7 +4617,7 @@ watchEffect(
       });
     });
   },
-  { flush: "post" },
+  { flush: "post" }
 );
 watchEffect(
   () => {
@@ -4456,7 +4642,7 @@ watchEffect(
       });
     });
   },
-  { flush: "post" },
+  { flush: "post" }
 );
 watchEffect(
   () => {
@@ -4481,7 +4667,7 @@ watchEffect(
       });
     });
   },
-  { flush: "post" },
+  { flush: "post" }
 );
 watch(ringRange, async () => {
   await memberStore.fetchAsusHealthData(getAuth(), getAsusApiDateRange());
@@ -4541,7 +4727,7 @@ watch(
       }
     }
   },
-  { deep: true },
+  { deep: true }
 );
 
 function pageButtons(total: number, current: number, max = maxButtons.value) {
@@ -4561,10 +4747,10 @@ function pageButtons(total: number, current: number, max = maxButtons.value) {
 }
 
 const pageNumberListANS = computed(() =>
-  pageButtons(totalPagesANS.value, pageANS.value, maxButtons.value),
+  pageButtons(totalPagesANS.value, pageANS.value, maxButtons.value)
 );
 const pageNumberListLife = computed(() =>
-  pageButtons(totalPagesLife.value, pageLife.value, maxButtons.value),
+  pageButtons(totalPagesLife.value, pageLife.value, maxButtons.value)
 );
 
 /* ---------- 外部轉移登入 ---------- */
@@ -4586,7 +4772,7 @@ async function handleTransferLogin(): Promise<boolean> {
           SafeKey: safeKey,
           Mobile: mobile || "",
         }),
-      },
+      }
     );
     const data = await res.json();
 
@@ -4605,7 +4791,7 @@ async function handleTransferLogin(): Promise<boolean> {
       // 將 MID 與 Mobile 存入 selectedMember，供後續載入會員資料使用
       localStorage.setItem(
         "selectedMember",
-        JSON.stringify({ MID: data.MID, Mobile: mobile || "" }),
+        JSON.stringify({ MID: data.MID, Mobile: mobile || "" })
       );
       return true;
     } else {
@@ -4665,7 +4851,7 @@ watch(
 
     loading.value = false;
   },
-  { deep: true, immediate: true },
+  { deep: true, immediate: true }
 );
 
 /* ---------- 分頁操作 ---------- */
@@ -4741,7 +4927,7 @@ async function fetchANSDetail(a: any) {
     .slice()
     .sort(
       (x, y) =>
-        new Date(y.CheckTime).getTime() - new Date(x.CheckTime).getTime(),
+        new Date(y.CheckTime).getTime() - new Date(x.CheckTime).getTime()
     );
 
   // 找到當前記錄的索引
@@ -4759,7 +4945,7 @@ async function fetchANSDetail(a: any) {
     sortedList.map((item) => ({
       AID: item.AID,
       CheckTime: item.CheckTime,
-    })),
+    }))
   );
 
   const res = await fetch(
@@ -4775,7 +4961,7 @@ async function fetchANSDetail(a: any) {
         AID,
         preAID,
       }),
-    },
+    }
   );
   return await res.json();
 }
@@ -4878,7 +5064,7 @@ async function handleEditBasicSubmit(data: {
           Mobile: data.phone,
           Sex: sexValue,
         }),
-      },
+      }
     );
 
     const result = await response.json();
@@ -4925,7 +5111,7 @@ async function handleDeleteMemberConfirm() {
           MID: sel.MID,
           Mobile: sel.Mobile ?? "",
         }),
-      },
+      }
     );
 
     const result = await response.json();
@@ -4984,7 +5170,11 @@ function startOfDay(date: Date) {
 
 function diffDaysInclusive(start: Date, end: Date) {
   const msPerDay = 24 * 60 * 60 * 1000;
-  return Math.floor((startOfDay(end).getTime() - startOfDay(start).getTime()) / msPerDay) + 1;
+  return (
+    Math.floor(
+      (startOfDay(end).getTime() - startOfDay(start).getTime()) / msPerDay
+    ) + 1
+  );
 }
 
 const usedDaysDisplay = computed(() => {
@@ -5067,7 +5257,10 @@ async function openOperationRecord() {
     if (!operationRecordsData.value.length) {
       const targetAID = balanceClothCards.value[0]?.AID || "";
       if (targetAID) {
-        const detail = await memberStore.fetchStabilityDetail(getAuth(), targetAID);
+        const detail = await memberStore.fetchStabilityDetail(
+          getAuth(),
+          targetAID
+        );
         operationRecordsData.value = normalizeStabilityOperationRows(detail);
       }
     }
@@ -5138,13 +5331,13 @@ function normalizeStabilityOperationRows(detail: any) {
 
   return sourceList.map((row: any, index: number) => {
     const startTime = formatStabilityDateTime(
-      String(row?.StartTime || row?.CheckTime || row?.DateTime || ""),
+      String(row?.StartTime || row?.CheckTime || row?.DateTime || "")
     );
     const eventText = String(
-      row?.EventDesc || row?.Event || row?.Status || row?.Desc || "—",
+      row?.EventDesc || row?.Event || row?.Status || row?.Desc || "—"
     ).trim();
     const temperatureRaw = String(
-      row?.Temperature || row?.Temp || row?.BodyTemp || row?.T || "",
+      row?.Temperature || row?.Temp || row?.BodyTemp || row?.T || ""
     ).trim();
 
     return {
@@ -5161,7 +5354,9 @@ function normalizeStableCareSensorRows(list: any[]) {
 
   return list
     .map((row: any, index: number) => {
-      const switchRaw = String(row?.Switch || "").trim().toLowerCase();
+      const switchRaw = String(row?.Switch || "")
+        .trim()
+        .toLowerCase();
       const switchText =
         switchRaw === "on" ? "感應ON" : switchRaw === "off" ? "感應OFF" : "—";
       const temperatureRaw = String(row?.Temperature || "").trim();
@@ -5205,7 +5400,7 @@ function formatStabilityDateTime(value: string) {
 
 function parseStabilityDateTimeToMs(value: string) {
   const match = value.match(
-    /(\d{4})[\/\-](\d{2})[\/\-](\d{2})\s+(\d{2}):(\d{2})(?::(\d{2}))?/,
+    /(\d{4})[\/\-](\d{2})[\/\-](\d{2})\s+(\d{2}):(\d{2})(?::(\d{2}))?/
   );
   if (!match) return Number.NaN;
   const [, y, m, d, hh, mm, ss] = match;
@@ -5471,7 +5666,7 @@ const availableEventOptions = computed(() => {
           display: flex;
           align-items: center;
           gap: 8px;
-          margin-top: .25rem;
+          margin-top: 0.25rem;
 
           .memberInfoTag {
             border-radius: 50px;
@@ -5505,7 +5700,7 @@ const availableEventOptions = computed(() => {
           font-size: 14px;
           font-style: normal;
           font-weight: 400;
-          margin-top: .75rem;
+          margin-top: 0.75rem;
           cursor: pointer;
           transition: all 0.2s ease;
           &:hover {
@@ -5561,8 +5756,6 @@ const availableEventOptions = computed(() => {
           margin-top: 0.75rem;
           cursor: pointer;
           transition: all ese 0.2s;
-
-
 
           &:hover {
             background: $chip-success;
@@ -6149,8 +6342,6 @@ const availableEventOptions = computed(() => {
     display: flex;
     flex-direction: column;
 
-    
-
     // 自訂 scrollbar 樣式（Webkit）
     &::-webkit-scrollbar {
       width: 12px;
@@ -6212,7 +6403,6 @@ const availableEventOptions = computed(() => {
           line-height: 1;
           letter-spacing: 0.4px;
         }
-   
       }
 
       .operationModalHeaderRight {
@@ -6794,5 +6984,15 @@ const availableEventOptions = computed(() => {
       display: block;
     }
   }
+}
+
+.health-log-date-time {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.health-log-date-time-separator {
+  color: #6f7f9a;
 }
 </style>
