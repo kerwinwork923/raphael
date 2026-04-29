@@ -2737,6 +2737,37 @@
         return "1";
       }
 
+      function guessTaskColByStateName(nameStr) {
+        const n = String(nameStr || "").trim();
+        if (!n) return "";
+        if (/待辦|todo|draft|提案中/i.test(n)) return "todo";
+        if (/進行中|doing|in progress|執行中/i.test(n)) return "doing";
+        if (/完成|done|closed|結案|review/i.test(n)) return "done";
+        if (/延遲|blocked|block|阻擋|卡住/i.test(n)) return "blocked";
+        return "";
+      }
+
+      function taskStateCodeToCol(stateCode) {
+        const code = String(stateCode || "").trim();
+        if (!code) return "todo";
+
+        if (Array.isArray(taskStateListCache) && taskStateListCache.length) {
+          const matched = taskStateListCache.find(
+            (st) => String((st && st.Code) || "").trim() === code,
+          );
+          const byName = guessTaskColByStateName(matched && matched.Name);
+          if (byName) return byName;
+        }
+
+        if (code === "1") return "todo";
+        if (code === "2") return "doing";
+        if (code === "3") return "done";
+        if (code === "4") return "blocked";
+        if (code === "5") return "done";
+        if (code === "6" || code === "7") return "blocked";
+        return "doing";
+      }
+
       function statusIconByCode(code) {
         switch (String(code)) {
           case "1":
@@ -3682,6 +3713,7 @@
           const stateCode = String(
             t && (t.State || t.TaskState || t.taskState || "1"),
           ).trim();
+          const stateCol = taskStateCodeToCol(stateCode);
           const topic = String(
             t && (t.Topic || t.Title || t.topic || ""),
           ).trim();
@@ -3702,7 +3734,7 @@
             preStr && preStr !== "0" ? cidToLocalId[preStr] || "" : "";
 
           const blockedReason =
-            stateCode === "4"
+            stateCol === "blocked"
               ? String(
                   (t &&
                     (t.BlockedReason ||
@@ -3715,7 +3747,7 @@
                 ).trim()
               : "";
           const blockedDays =
-            stateCode === "4"
+            stateCol === "blocked"
               ? Number(t && (t.BlockedDays || t.blockedDays || 0)) ||
                 calcDaysOverdue(endDate)
               : undefined;
@@ -3742,7 +3774,7 @@
               t && (t.ExeResult || t.exeResult || t.exe_result || ""),
             ).trim(),
             completedDate:
-              stateCode === "3"
+              stateCol === "done"
                 ? parseTaskExactEndDate(t)
                 : "",
             discussionLinks: normalizeUrlListItems(
@@ -3750,10 +3782,11 @@
             ),
           };
 
-          if (stateCode === "1") colBuckets.todo.push(taskObj);
-          else if (stateCode === "2") colBuckets.doing.push(taskObj);
-          else if (stateCode === "3") colBuckets.done.push(taskObj);
-          else colBuckets.blocked.push(taskObj);
+          if (stateCol === "todo") colBuckets.todo.push(taskObj);
+          else if (stateCol === "doing") colBuckets.doing.push(taskObj);
+          else if (stateCol === "done") colBuckets.done.push(taskObj);
+          else if (stateCol === "blocked") colBuckets.blocked.push(taskObj);
+          else colBuckets.doing.push(taskObj);
         });
 
         // 把重組後的 TASKS 注入目前頁面

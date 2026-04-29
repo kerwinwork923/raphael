@@ -404,21 +404,53 @@ function projectStateNameToInternalStatus(name, code) {
   return "";
 }
 
+function guessTaskColByStateName(name) {
+  var n = String(name || "").trim();
+  if (!n) return "";
+  if (/待辦|todo|draft|提案中/i.test(n)) return "todo";
+  if (/進行中|doing|in progress|執行中/i.test(n)) return "doing";
+  if (/完成|done|closed|結案|review/i.test(n)) return "done";
+  if (/延遲|blocked|block|阻擋|卡住/i.test(n)) return "blocked";
+  return "";
+}
+
+function taskStateCodeToCol(stateCode) {
+  var code = String(stateCode || "").trim();
+  if (!code) return "todo";
+  var byName = guessTaskColByStateName(TASK_STATE_CODE_TO_NAME[code]);
+  if (byName) return byName;
+  if (code === "1") return "todo";
+  if (code === "2") return "doing";
+  if (code === "3") return "done";
+  if (code === "4") return "blocked";
+  if (code === "5") return "done";
+  if (code === "6" || code === "7") return "blocked";
+  return "doing";
+}
+
+function isTaskDone(task) {
+  return taskStateCodeToCol(task && task.State) === "done";
+}
+
+function isTaskBlocked(task) {
+  return taskStateCodeToCol(task && task.State) === "blocked";
+}
+
 function deriveProjectStatus(tasks) {
   var total = tasks.length;
   if (total === 0) return "opening";
   var done = tasks.filter(function (t) {
-    return String(t.State) === "3";
+    return isTaskDone(t);
   }).length;
   if (done === total) return "closed";
   if (tasks.some(function (t) {
-    return String(t.State) === "4";
+    return isTaskBlocked(t);
   })) return "in_progress";
   if (tasks.some(function (t) {
-    return String(t.State) === "2";
+    return taskStateCodeToCol(t && t.State) === "doing";
   })) return "in_progress";
   if (tasks.every(function (t) {
-    return String(t.State) === "1";
+    return taskStateCodeToCol(t && t.State) === "todo";
   })) return "opening";
   var ratio = done / total;
   if (ratio >= 0.8 && done < total) return "review";
@@ -428,9 +460,15 @@ function deriveProjectStatus(tasks) {
 function countOverdueNotDone(tasks) {
   var today = ymdToday();
   return tasks.filter(function (t) {
-    if (String(t.State) === "3") return false;
+    if (isTaskDone(t)) return false;
     var end = t.EndDate || t.StertDate;
     return end && String(end).replace(/\D/g, "").slice(0, 8) < today;
+  }).length;
+}
+
+function countBlockedTasks(tasks) {
+  return tasks.filter(function (t) {
+    return isTaskBlocked(t);
   }).length;
 }
 
@@ -438,7 +476,17 @@ function firstBlockedLikeTask(tasks) {
   var today = ymdToday();
   for (var i = 0; i < tasks.length; i++) {
     var t = tasks[i];
-    if (String(t.State) === "3") continue;
+    if (!isTaskBlocked(t)) continue;
+    return {
+      task: (t.Topic || "").trim() || "任務",
+      reason: (t.Description || "").trim() || "待補充阻擋原因",
+      assignee: (t.ChargeMan || "").trim() || "—"
+    };
+  }
+
+  for (var i = 0; i < tasks.length; i++) {
+    var t = tasks[i];
+    if (isTaskDone(t)) continue;
     var end = t.EndDate || t.StertDate;
     if (end && String(end).replace(/\D/g, "").slice(0, 8) < today) {
       return {
@@ -458,14 +506,16 @@ function mapApiProjectToRow(raw, index) {
   var deptName = DEPARTMENT_CODE_TO_NAME[deptCode] || (deptCode ? "部門 " + deptCode : "—");
   var total = tasks.length;
   var done = tasks.filter(function (t) {
-    return String(t.State) === "3";
+    return isTaskDone(t);
   }).length;
-  var blocked = countOverdueNotDone(tasks);
+  var blocked = countBlockedTasks(tasks);
+  var overdueNotDone = countOverdueNotDone(tasks);
   var delayed = tasks.some(function (t) {
-    return String(t.State) === "4";
+    return isTaskBlocked(t);
   });
   var endYmd = raw.EndDate ? String(raw.EndDate).replace(/\D/g, "").slice(0, 8) : "";
   var projEnd = endYmd || "";
+  if (!delayed && overdueNotDone > 0) delayed = true;
   if (!delayed && projEnd && done < total) {
     var dl = daysFromTodayToYmd(projEnd);
     if (dl < 0) delayed = true;
@@ -475,9 +525,7 @@ function mapApiProjectToRow(raw, index) {
     var dleft = daysFromTodayToYmd(projEnd);
     if (dleft < 0) delayDays = Math.abs(dleft);
   }
-  if (tasks.some(function (t) {
-    return String(t.State) === "4";
-  })) {
+  if (blocked > 0 || overdueNotDone > 0) {
     delayDays = Math.max(delayDays, 1);
   }
   var daysLeft = projEnd ? daysFromTodayToYmd(projEnd) : 90;
