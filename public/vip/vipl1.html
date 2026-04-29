@@ -235,7 +235,7 @@
     }
 
     .symptom-list {
-      width: min(720px, 100%);
+      width: 100%;
       margin: 0 auto;
       display: grid;
       gap: 14px;
@@ -251,7 +251,24 @@
       padding: 14px 20px;
       font-size: 19px;
       font-weight: 800;
+
     }
+
+    .symptom-item {
+  padding: 0;           /* 拿掉內距 */
+  background: none;     /* 拿掉灰底 */
+}
+
+.symptom-item {
+  display: block;
+}
+
+.symptom-item img {
+  width: 100%;
+  height: auto;
+
+  display: block;
+}
 
     .icon-box {
       width: 38px;
@@ -267,7 +284,7 @@
     .center-note {
       margin: 24px auto 0;
       text-align: center;
-      font-size: 19px;
+      font-size:24px;
       font-weight: 800;
     }
 
@@ -840,9 +857,7 @@
 
       <div class="symptom-list">
         <div class="symptom-item">
-          <span class="icon-box">▣</span>
-          <span>很多人的不舒服，不是單一症狀的問題，而是身體調節開始失衡。<br>
-            所以症狀會反覆出現在不同地方，檢查卻不一定立刻看得出來。</span>
+         <img src="imgs/banner2.png" alt="症狀圖示">
         </div>
       </div>
 
