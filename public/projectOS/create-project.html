@@ -195,6 +195,14 @@
           <option value="">無前置任務</option>
         </select>
       </div>
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="block text-sm font-semibold text-slate-700">任務附件</label>
+          <label for="mt-file-input" class="text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 px-2.5 py-1 rounded-lg font-medium transition cursor-pointer">+ 新增檔案</label>
+        </div>
+        <input id="mt-file-input" type="file" multiple class="hidden" onchange="handleTaskFileInput(this)">
+        <div id="mt-file-list" class="space-y-2"></div>
+      </div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
           <label class="block text-sm font-semibold text-slate-700 mb-1.5">執行計畫 P</label>
@@ -669,6 +677,7 @@ function collectManualTaskList() {
       Description: t.desc || "",
       StartDate: toYYYYMMDD(t.startDate || ""),
       EndDate: toYYYYMMDD(t.endDate || ""),
+      ExactEndDate: toYYYYMMDD(t.exactEndDate || t.endDate || ""),
       ChargeMan: t.assignee || "",
       State: statusToCode(t.status || "待辦"),
       PreTaskID: String(prereqCid).trim() || "0",
@@ -678,6 +687,12 @@ function collectManualTaskList() {
       URLList: (Array.isArray(t.discussionLinks) ? t.discussionLinks : [])
         .map((item) => String(item && item.url ? item.url : "").trim())
         .filter(Boolean),
+      FileList: (Array.isArray(t.fileList) ? t.fileList : [])
+        .map((f) => ({
+          FileName: String((f && (f.FileName || f.fileName || f.name)) || "").trim(),
+          base64String: String((f && (f.base64String || f.Base64String || f.base64)) || "").trim()
+        }))
+        .filter((f) => f.FileName && f.base64String),
     };
   });
 }
@@ -717,6 +732,7 @@ function collectManualProjectPayload() {
   }
 
   return {
+    State: "1",
     ProjectName,
     ChargeMan,
     Participants,
@@ -799,6 +815,7 @@ function renderManualKPIs() {
 // ─── MANUAL TASKS ───
 let manualTasks = [];
 let editingTaskId = null;
+let manualTaskFileDraft = [];
 
 const AV_COLORS_M = {Alice:'bg-blue-500',Bob:'bg-purple-500',Carol:'bg-pink-500',Dave:'bg-orange-400','Dev Team':'bg-green-500',Legal:'bg-slate-400'};
 const STATUS_STYLES_BY_CODE = {'1':'bg-slate-100 text-slate-600','2':'bg-blue-100 text-blue-700','3':'bg-green-100 text-green-700','4':'bg-red-100 text-red-700'};
@@ -816,6 +833,10 @@ function openTaskModal(id = null) {
     document.getElementById('mt-exe-plan').value = t.exePlan || '';
     document.getElementById('mt-exe-cond').value = t.exeCond || '';
     document.getElementById('mt-exe-result').value = t.exeResult || '';
+    manualTaskFileDraft = Array.isArray(t.fileList) ? t.fileList.map((f) => ({
+      FileName: String((f && (f.FileName || f.fileName || f.name)) || "").trim(),
+      base64String: String((f && (f.base64String || f.Base64String || f.base64)) || "").trim()
+    })).filter((f) => f.FileName && f.base64String) : [];
     const selStatus = document.getElementById('mt-status');
     setSelectValueIfOptionExists(selStatus, t.status || '待辦', selStatus?.options?.[0]?.value);
     document.getElementById('modal-title-text').textContent = '編輯任務';
@@ -830,12 +851,16 @@ function openTaskModal(id = null) {
     document.getElementById('mt-exe-plan').value = '';
     document.getElementById('mt-exe-cond').value = '';
     document.getElementById('mt-exe-result').value = '';
+    manualTaskFileDraft = [];
     const selStatus = document.getElementById('mt-status');
     setSelectValueIfOptionExists(selStatus, '待辦', selStatus?.options?.[0]?.value);
     document.getElementById('modal-title-text').textContent = '新增任務';
     deleteBtn.classList.add('hidden');
     renderTaskDiscussionRows([]);
   }
+  renderTaskFileRows();
+  const fileInput = document.getElementById("mt-file-input");
+  if (fileInput) fileInput.value = "";
   const prereq = document.getElementById('mt-prereq');
   prereq.innerHTML = '<option value="">無前置任務</option>' +
     manualTasks.filter(t => t.id !== id).map(t => `<option value="${t.id}"${(editingTaskId && manualTasks.find(x=>x.id===editingTaskId)?.prerequisite==t.id)?'selected':''}>${t.title}</option>`).join('');
@@ -856,7 +881,7 @@ function closeTaskModal() {
   editingTaskId = null;
 }
 
-function saveTaskModal() {
+async function saveTaskModal() {
   const title = document.getElementById('mt-title').value.trim();
   if (!title) { showToast('請填入任務標題', 'warn'); return; }
   const startDate = document.getElementById('mt-start').value;
@@ -877,6 +902,10 @@ function saveTaskModal() {
     exeCond: document.getElementById('mt-exe-cond').value.trim(),
     exeResult: document.getElementById('mt-exe-result').value.trim(),
     discussionLinks: getTaskDiscussionRowsFromDOM(),
+    fileList: manualTaskFileDraft.map((f) => ({
+      FileName: String((f && f.FileName) || "").trim(),
+      base64String: String((f && f.base64String) || "").trim()
+    })).filter((f) => f.FileName && f.base64String),
   };
   if (editingTaskId) {
     const idx = manualTasks.findIndex(t => t.id === editingTaskId);
@@ -950,6 +979,59 @@ function removeTaskDiscussionRow(idx) {
   const list = getTaskDiscussionRowsFromDOM();
   list.splice(idx, 1);
   renderTaskDiscussionRows(list);
+}
+
+function renderTaskFileRows() {
+  const listEl = document.getElementById('mt-file-list');
+  if (!listEl) return;
+  const rows = Array.isArray(manualTaskFileDraft) ? manualTaskFileDraft : [];
+  if (!rows.length) {
+    listEl.innerHTML = '<div class="text-xs text-slate-400 border border-dashed border-slate-200 rounded-lg px-3 py-3 text-center">尚未新增附件</div>';
+    return;
+  }
+  listEl.innerHTML = rows.map((f, idx) => `
+    <div class="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2">
+      <p class="text-xs text-slate-600 flex-1 truncate" title="${escapeAttr(f.FileName || "")}">${escapeAttr(f.FileName || "")}</p>
+      <button type="button" onclick="removeTaskFileRow(${idx})" class="px-2 py-1 rounded border border-red-200 text-red-600 hover:bg-red-50 text-xs transition">刪除</button>
+    </div>
+  `).join('');
+}
+
+function removeTaskFileRow(idx) {
+  if (!Array.isArray(manualTaskFileDraft)) return;
+  manualTaskFileDraft.splice(idx, 1);
+  renderTaskFileRows();
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result || "");
+      const base64 = result.includes(",") ? result.split(",")[1] : result;
+      resolve(base64);
+    };
+    reader.onerror = () => reject(new Error("讀取檔案失敗"));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleTaskFileInput(input) {
+  const files = Array.from((input && input.files) || []);
+  if (!files.length) return;
+  for (const file of files) {
+    try {
+      const base64String = await fileToBase64(file);
+      manualTaskFileDraft.push({
+        FileName: String(file.name || "").trim(),
+        base64String: String(base64String || "").trim()
+      });
+    } catch (err) {
+      showToast(`「${file.name || "檔案"}」讀取失敗`, "warn");
+    }
+  }
+  renderTaskFileRows();
+  if (input) input.value = "";
 }
 
 // ─── MANUAL SUBMIT ───

@@ -1388,6 +1388,28 @@
               </div>
             </div>
 
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <label class="block text-xs font-semibold text-slate-500"
+                  >任務附件</label
+                >
+                <label
+                  for="modal-task-file-input"
+                  class="text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 px-2.5 py-1 rounded-lg font-medium transition cursor-pointer"
+                >
+                  + 新增檔案
+                </label>
+              </div>
+              <input
+                id="modal-task-file-input"
+                type="file"
+                multiple
+                class="hidden"
+                onchange="handleModalTaskFileInput(this)"
+              />
+              <div id="modal-task-file-list" class="space-y-2"></div>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label class="block text-xs font-semibold text-slate-500 mb-1.5"
@@ -3340,6 +3362,42 @@
           .filter((x) => x.url && String(x.url).trim());
       }
 
+      function normalizeTaskFileList(fileList) {
+        if (!Array.isArray(fileList)) return [];
+        return fileList
+          .map((f) => {
+            let fileName = String(
+              (f && (f.FileName || f.fileName || f.Filename || f.name)) || "",
+            ).trim();
+            const fileURL = String(
+              (f &&
+                (f.FileURL ||
+                  f.FileUrl ||
+                  f.fileURL ||
+                  f.fileUrl ||
+                  f.url ||
+                  f.URL)) ||
+                "",
+            ).trim();
+            if (!fileName && fileURL) {
+              const seg = String(fileURL).split("/").pop() || "";
+              try {
+                fileName = decodeURIComponent(seg);
+              } catch (e) {
+                fileName = seg;
+              }
+            }
+            return {
+              FileName: fileName,
+              base64String: String(
+                (f && (f.base64String || f.Base64String || f.base64)) || "",
+              ).trim(),
+              FileURL: fileURL,
+            };
+          })
+          .filter((f) => f.FileName && (f.base64String || f.FileURL));
+      }
+
       function normalizeExternalUrl(rawUrl) {
         const v = String(rawUrl || "").trim();
         if (!v) return "";
@@ -3780,6 +3838,9 @@
             discussionLinks: normalizeUrlListItems(
               t && (t.URLList || t.UrlList || t.urlList || []),
             ),
+            fileList: normalizeTaskFileList(
+              t && (t.FileURLList || t.FileList || t.fileList || t.Files || []),
+            ),
           };
 
           if (stateCol === "todo") colBuckets.todo.push(taskObj);
@@ -4036,6 +4097,7 @@
       };
 
       let FILES = [];
+      let MODAL_TASK_FILES = [];
 
       let DECISION_CHATGPT = {
         shareProjectUrl: "",
@@ -5270,6 +5332,7 @@
                   })
                   .filter(Boolean)
               : [];
+            const fileList = normalizeTaskFileList(t.fileList || []);
             rows.push({
               CID: String(t.cid).trim(),
               AID: aid,
@@ -5288,6 +5351,7 @@
               ExeCond: String(t.doingNote || "").trim(),
               ExeResult: String(t.checkResult || "").trim(),
               URLList: urls,
+              FileList: fileList,
             });
           });
         });
@@ -5663,11 +5727,28 @@
         const badgesHtml = db
           ? `<div class="flex flex-wrap gap-1 mt-1.5">${db}</div>`
           : "";
+        const attachments = normalizeTaskFileList(t.fileList || []);
+        const attachmentsHtml = attachments.length
+          ? `<div class="mt-2 border border-slate-100 bg-slate-50 rounded-lg px-2.5 py-2">
+      <p class="text-[11px] text-slate-500 mb-1">附件 (${attachments.length})</p>
+      <div class="space-y-1">
+        ${attachments
+          .map(function (f) {
+            const name = escapeHtml(String((f && f.FileName) || "附件"));
+            const url = String((f && (f.FileURL || f.url || f.URL)) || "").trim();
+            if (!url)
+              return '<p class="text-xs text-slate-600 truncate">📎 ' + name + "</p>";
+            return '<a class="block text-xs text-blue-600 hover:text-blue-700 hover:underline truncate" href="' + escapeAttr(url) + '" target="_blank" rel="noopener noreferrer">📎 ' + name + "</a>";
+          })
+          .join("")}
+      </div>
+    </div>`
+          : "";
 
         if (col === "done")
           return `
     <div class="kanban-card bg-white rounded-xl border border-green-200 p-3 opacity-80 hover:opacity-100 transition fade-in ${uc}" draggable="true" ondragstart="onCardDragStart(event,'${t.id}','${col}')" ondragend="onCardDragEnd(event)">
-      ${titleHtml}${descHtml}
+      ${titleHtml}${descHtml}${attachmentsHtml}
       <div class="flex items-center justify-between mt-2">
         <div class="flex items-center gap-1">${avatarHtml}</div>
         <div class="flex items-center gap-1">
@@ -5679,7 +5760,7 @@
         if (col === "blocked")
           return `
     <div class="kanban-card bg-white rounded-xl border border-red-200 p-3 fade-in" draggable="true" ondragstart="onCardDragStart(event,'${t.id}','${col}')" ondragend="onCardDragEnd(event)">
-      ${titleHtml}${descHtml}
+      ${titleHtml}${descHtml}${attachmentsHtml}
       <div class="bg-red-50 border border-red-100 rounded-lg px-2.5 py-2 mb-2.5">
         <p class="text-xs text-red-600 font-medium">${t.blockedReason || "尚未填寫阻擋原因"}</p>
         <p class="text-xs text-slate-400 mt-0.5">${t.assignee} · ${t.blockedDays ? t.blockedDays + "天前" : "剛剛"}</p>
@@ -5692,7 +5773,7 @@
           return `
     <div class="kanban-card bg-white rounded-xl border border-blue-200 p-3 shadow-sm fade-in ${uc}" draggable="true" ondragstart="onCardDragStart(event,'${t.id}','${col}')" ondragend="onCardDragEnd(event)">
       <div class="flex items-start gap-1 flex-wrap mb-1">${ub}</div>
-      ${titleHtml}${descHtml}${badgesHtml}
+      ${titleHtml}${descHtml}${badgesHtml}${attachmentsHtml}
       <div class="flex items-center justify-between mt-2 mb-2.5"><div class="flex items-center gap-1">${avatarHtml}</div></div>
       <div class="flex gap-1.5">
         <button onclick="quickMove('${t.id}','doing','done')" class="flex-1 text-xs bg-green-600 hover:bg-green-700 text-white py-1.5 rounded-lg font-semibold transition">✓ 完成</button>
@@ -5702,7 +5783,7 @@
         return `
     <div class="kanban-card bg-white rounded-xl border border-slate-200 p-3 hover:border-blue-200 transition fade-in ${uc} ${locked ? "opacity-60" : ""}" draggable="true" ondragstart="onCardDragStart(event,'${t.id}','${col}')" ondragend="onCardDragEnd(event)">
       <div class="flex items-start gap-1 flex-wrap mb-1">${ub}</div>
-      ${titleHtml}${descHtml}${badgesHtml}
+      ${titleHtml}${descHtml}${badgesHtml}${attachmentsHtml}
       <div class="flex items-center justify-between mt-2 mb-2.5"><div class="flex items-center gap-1">${avatarHtml}</div></div>
       ${
         locked
@@ -6071,6 +6152,10 @@
         setModalDot(col);
         populateDepSelect();
         renderTaskDiscussionRows([]);
+        MODAL_TASK_FILES = [];
+        renderModalTaskFileRows();
+        const taskFileInput = document.getElementById("modal-task-file-input");
+        if (taskFileInput) taskFileInput.value = "";
         document.getElementById("task-modal").classList.remove("hidden");
       }
 
@@ -6100,6 +6185,10 @@
         setModalDot(col);
         populateDepSelect();
         renderTaskDiscussionRows(t.discussionLinks || []);
+        MODAL_TASK_FILES = normalizeTaskFileList(t.fileList || []);
+        renderModalTaskFileRows();
+        const taskFileInput = document.getElementById("modal-task-file-input");
+        if (taskFileInput) taskFileInput.value = "";
         document.getElementById("task-modal").classList.remove("hidden");
       }
 
@@ -6168,6 +6257,7 @@
           doingNote: document.getElementById("modal-task-do").value.trim(),
           checkResult: document.getElementById("modal-task-check").value.trim(),
           discussionLinks: getTaskDiscussionRowsFromDOM(),
+          fileList: normalizeTaskFileList(MODAL_TASK_FILES),
           blockedReason: newStatus === "blocked" ? blockedReason : "",
           blockedDays: newStatus === "blocked" ? 0 : undefined,
         };
@@ -6198,6 +6288,7 @@
                 const urlList = (taskData.discussionLinks || [])
                   .map((x) => String(x && x.url ? x.url : "").trim())
                   .filter(Boolean);
+                const fileList = normalizeTaskFileList(taskData.fileList || []);
 
                 const isBlocked = newStatus === "blocked";
                 const descriptionToSend = isBlocked
@@ -6220,6 +6311,7 @@
                   ExeCond: String(taskData.doingNote || "").trim(),
                   ExeResult: String(taskData.checkResult || "").trim(),
                   URLList: urlList,
+                  FileList: fileList,
                 };
 
                 const resp = await modifyTaskToBackend(
@@ -6279,6 +6371,7 @@
             const urlList = (taskData.discussionLinks || [])
               .map((x) => String(x && x.url ? x.url : "").trim())
               .filter(Boolean);
+            const fileList = normalizeTaskFileList(taskData.fileList || []);
 
             const isBlocked = newStatus === "blocked";
             const descriptionToSend = isBlocked
@@ -6307,6 +6400,7 @@
               ExeCond: String(taskData.doingNote || "").trim(),
               ExeResult: String(taskData.checkResult || "").trim(),
               URLList: urlList,
+              FileList: fileList,
             };
 
             if (backendTaskPayload.Topic && aid) {
@@ -6457,6 +6551,7 @@
                   .map((x) => String((x && x.url) || "").trim())
                   .filter(Boolean)
               : [];
+            const fileList = normalizeTaskFileList(t.fileList || []);
             const descriptionToSend =
               col === "blocked"
                 ? String(t.blockedReason || t.desc || "").trim()
@@ -6477,6 +6572,7 @@
               ExeCond: String(t.doingNote || "").trim(),
               ExeResult: String(t.checkResult || "").trim(),
               URLList: urlList,
+              FileList: fileList,
             });
           }
 
@@ -6534,6 +6630,7 @@
                   .map((x) => String((x && x.url) || "").trim())
                   .filter(Boolean)
               : [];
+            const fileList = normalizeTaskFileList(t.fileList || []);
 
             await modifyTaskToBackend(t.cid, {
               Topic: String(t.title || "").trim(),
@@ -6551,6 +6648,7 @@
               ExeCond: String(t.doingNote || "").trim(),
               ExeResult: String(t.checkResult || "").trim(),
               URLList: urlList,
+              FileList: fileList,
             });
           }
 
@@ -7378,6 +7476,61 @@
             url: card.querySelector(".task-discussion-url")?.value.trim() || "",
           }))
           .filter((item) => item.url);
+      }
+
+      function renderModalTaskFileRows() {
+        const wrap = document.getElementById("modal-task-file-list");
+        if (!wrap) return;
+        const list = normalizeTaskFileList(MODAL_TASK_FILES);
+        if (!list.length) {
+          wrap.innerHTML = `
+      <div class="text-xs text-slate-400 border border-dashed border-slate-200 rounded-lg px-3 py-3 text-center">
+        尚未新增附件
+      </div>
+    `;
+          return;
+        }
+        wrap.innerHTML = list
+          .map(
+            (f, idx) => `
+      <div class="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2">
+        <p class="text-xs text-slate-600 flex-1 truncate" title="${f.FileName || ""}">${f.FileName || ""}</p>
+        <button
+          type="button"
+          onclick="removeModalTaskFile(${idx})"
+          class="px-2 py-1 rounded border border-red-200 text-red-600 hover:bg-red-50 text-xs transition"
+        >
+          刪除
+        </button>
+      </div>
+    `,
+          )
+          .join("");
+      }
+
+      function removeModalTaskFile(idx) {
+        if (!Array.isArray(MODAL_TASK_FILES)) return;
+        MODAL_TASK_FILES.splice(idx, 1);
+        renderModalTaskFileRows();
+      }
+
+      async function handleModalTaskFileInput(input) {
+        const files = Array.from((input && input.files) || []);
+        if (!files.length) return;
+        for (const file of files) {
+          try {
+            const base64String = await fileToBase64(file);
+            MODAL_TASK_FILES.push({
+              FileName: String(file.name || "").trim(),
+              base64String: String(base64String || "").trim(),
+            });
+          } catch (e) {
+            showToast(`「${file.name || "檔案"}」讀取失敗`, "warn");
+          }
+        }
+        MODAL_TASK_FILES = normalizeTaskFileList(MODAL_TASK_FILES);
+        renderModalTaskFileRows();
+        if (input) input.value = "";
       }
 
       function advanceStatus() {
