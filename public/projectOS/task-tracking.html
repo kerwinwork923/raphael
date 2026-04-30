@@ -794,7 +794,7 @@
                     class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm"
                   />
                 </div>
-                <div class="hidden">
+                <div >
                   <label
                     class="block text-xs font-semibold text-slate-500 mb-1.5"
                     >Proposal 附件</label
@@ -1914,7 +1914,26 @@
         });
       }
 
-      async function postNewProposalApi(note, url, proposalType) {
+      function buildProposalApiFileList(attachments) {
+        return (Array.isArray(attachments) ? attachments : [])
+          .map(function (f) {
+            return {
+              FileName: String(
+                (f && (f.name || f.fileName || f.FileName || "")) || "",
+              ).trim(),
+              base64String: String(
+                (f &&
+                  (f.base64String || f.Base64String || f.base64 || "")) ||
+                  "",
+              ).trim(),
+            };
+          })
+          .filter(function (f) {
+            return f.FileName && f.base64String;
+          });
+      }
+
+      async function postNewProposalApi(note, url, proposalType, attachments) {
         var auth = getBackendTokenAndAdmin();
         if (!auth) throw new Error("尚未登入，缺少 AdminID / Token");
         var aid = String(
@@ -1932,6 +1951,7 @@
           ProposalType: String(proposalType || "").trim(),
           Note: String(note || "").trim(),
           URL: String(url || "").trim(),
+          FileList: buildProposalApiFileList(attachments),
         };
 
         var resp = await postJson(NEW_PROPOSAL_URL, payload);
@@ -2635,6 +2655,48 @@
           const createdAt = formatProposalCheckTime(
             (it && it.CheckTime) || (it && it.checkTime),
           );
+          const attachments = (
+            Array.isArray(it && it.FileURLList)
+              ? it.FileURLList
+              : Array.isArray(it && it.fileURLList)
+                ? it.fileURLList
+                : Array.isArray(it && it.FileList)
+                  ? it.FileList
+                  : []
+          )
+            .map(function (f, fi) {
+              if (!f || typeof f !== "object") return null;
+              const fileName = String(
+                (f &&
+                  (f.FileName ||
+                    f.fileName ||
+                    f.Filename ||
+                    f.filename ||
+                    "")) ||
+                  "",
+              ).trim();
+              const fileUrlRaw = String(
+                (f &&
+                  (f.FileURL ||
+                    f.fileURL ||
+                    f.FileUrl ||
+                    f.fileUrl ||
+                    f.URL ||
+                    f.url ||
+                    "")) ||
+                  "",
+              ).trim();
+              const fileUrl = normalizeExternalUrl(fileUrlRaw);
+              if (!fileName && !fileUrl) return null;
+              return {
+                id: "p-api-att-" + idx + "-" + fi,
+                name: fileName || "附件",
+                url: fileUrl || fileUrlRaw || "",
+                bid: String((f && (f.BID || f.bid || "")) || "").trim(),
+                aid: String((f && (f.AID || f.aid || "")) || "").trim(),
+              };
+            })
+            .filter(Boolean);
 
           const base = {
             id: "p-api-" + idx,
@@ -2646,6 +2708,7 @@
             action: action,
             bid: bid || undefined,
             proposalType: proposalType || undefined,
+            attachments: attachments,
           };
           if (isCeo) {
             base.suggestion = note;
@@ -4431,6 +4494,7 @@
             type: String((f && f.type) || ""),
             bid: String((f && f.bid) || ""),
             aid: String((f && f.aid) || ""),
+            base64String: String((f && f.base64String) || ""),
           };
         });
       }
@@ -4452,6 +4516,9 @@
               bid: String((uploadResult && uploadResult.bid) || "").trim(),
               aid: String((uploadResult && uploadResult.aid) || "").trim(),
               url: String((uploadResult && uploadResult.fileURL) || "").trim(),
+              base64String: String(
+                (uploadResult && uploadResult.base64String) || "",
+              ).trim(),
             };
             PROPOSAL_PENDING_ATTACHMENTS.push(item);
             if (
@@ -4511,7 +4578,7 @@
           })
           .join('<span class="text-slate-300"> · </span>');
         return (
-          '<div class="mt-2 text-xs text-slate-500">Decision 附件：' +
+          '<div class="mt-2 text-xs text-slate-500">Proposal 附件：' +
           links +
           "</div>"
         );
@@ -4666,7 +4733,12 @@
         ).trim();
         if (auth && aid) {
           try {
-            const out = await postNewProposalApi(summary, url, proposalType);
+            const out = await postNewProposalApi(
+              summary,
+              url,
+              proposalType,
+              cloneProposalPendingAttachments(),
+            );
             apiBid = out.bid || "";
             if (apiBid) {
               try {
@@ -4768,7 +4840,12 @@
             busyBtn.classList.add("opacity-60", "cursor-wait");
           }
           try {
-            const out = await postNewProposalApi(suggestion, url, proposalType);
+            const out = await postNewProposalApi(
+              suggestion,
+              url,
+              proposalType,
+              cloneProposalPendingAttachments(),
+            );
             apiBid = out.bid || "";
             if (apiBid) {
               try {
@@ -4857,7 +4934,7 @@
         }
       }
 
-      async function modifyProposalApi(bid, note, url) {
+      async function modifyProposalApi(bid, note, url, attachments) {
         const auth = getBackendTokenAndAdmin();
         if (!auth) throw new Error("尚未登入，缺少 AdminID / Token");
         const aid = String(
@@ -4873,6 +4950,7 @@
           BID: b,
           Note: String(note || "").trim(),
           URL: String(url || "").trim(),
+          FileList: buildProposalApiFileList(attachments),
         });
         if (!isFrApiResultOk(resp)) {
           throw new Error(
@@ -4979,7 +5057,7 @@
           btn.classList.add("opacity-60", "cursor-wait");
         }
         try {
-          await modifyProposalApi(item.bid, note, url);
+          await modifyProposalApi(item.bid, note, url, item.attachments || []);
           if (item.role === "ceo") item.suggestion = note;
           else item.summary = note;
           item.url = url;
@@ -6731,6 +6809,7 @@
           fileURL: String(resp.FileURL || "").trim(),
           aid: String(resp.AID || aid).trim(),
           bid: bidStr,
+          base64String: String(base64String || "").trim(),
         };
       }
 
