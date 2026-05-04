@@ -194,6 +194,7 @@ import BaseAlert from "@/components/raphaelBackend/BaseAlert.vue";
 import eyeOpen from "@/assets/imgs/backend/eye.svg";
 import eyeClosed from "@/assets/imgs/backend/eye-closed.svg";
 import { useSeo } from "~/composables/useSeo";
+import { probeRaphaelBackendSession } from "~/composables/useRaphaelBackendAuth";
 
 useSeo({
   title: "",
@@ -382,9 +383,11 @@ onMounted(() => {
   const token =
     localStorage.getItem("backendToken") ||
     sessionStorage.getItem("backendToken");
-  if (token) {
-    router.push("/raphaelBackend/member");
-  }
+  if (!token) return;
+  void (async () => {
+    const valid = await probeRaphaelBackendSession();
+    if (valid) router.push("/raphaelBackend/member");
+  })();
 });
 </script>
 

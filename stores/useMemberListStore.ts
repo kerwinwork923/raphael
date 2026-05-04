@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { redirectToRaphaelBackendLoginIfUnauthorized } from '~/composables/useRaphaelBackendAuth'
 
 /** API `MemberList` 單筆（欄位依後端可能增減） */
 export interface MemberRaw {
@@ -176,7 +177,17 @@ export const useMemberListStore = defineStore('memberList', () => {
         body: JSON.stringify(body),
       })
       if (!res.ok) throw new Error(res.statusText)
-      const { MemberList }: { MemberList: MemberRaw[] } = await res.json()
+      const data = (await res.json()) as {
+        Result?: string
+        MemberList?: MemberRaw[]
+        Message?: string
+      }
+      if (redirectToRaphaelBackendLoginIfUnauthorized(data, res.status)) return
+      if (data.Result !== "OK" || !Array.isArray(data.MemberList)) {
+        console.error("讀取 MemberList 失敗：", data.Result, data.Message)
+        return
+      }
+      const { MemberList } = data
 
       const midMap = new Map<string, MemberRaw>()
       for (const r of MemberList) {

@@ -253,6 +253,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import { guardRaphaelBackendSidebarSession } from "~/composables/useRaphaelBackendAuth";
 
 // 路由相關
 const router = useRouter();
@@ -355,6 +356,14 @@ watch(() => route.path, (newPath: string) => {
   
 }, { immediate: true });
 
+// 後台憑證：掛載與換頁時驗證 Token（各頁皆含 Sidebar 則一處統一檢查）
+watch(
+  () => route.fullPath,
+  () => {
+    void guardRaphaelBackendSidebarSession();
+  }
+);
+
 // 監聽 props 變化
 watch(() => props.currentPage, (newPage: string) => {
   if (newPage && newPage !== currentPage.value) {
@@ -431,6 +440,8 @@ onMounted(() => {
   }
 
   window.addEventListener("resize", handleResize);
+
+  void guardRaphaelBackendSidebarSession();
 });
 
 onUnmounted(() => window.removeEventListener("resize", handleResize));

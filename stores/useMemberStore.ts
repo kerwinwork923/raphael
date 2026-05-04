@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { redirectToRaphaelBackendLoginIfUnauthorized } from '~/composables/useRaphaelBackendAuth'
 
 export const useMemberStore = defineStore('member', () => {
   
@@ -68,6 +69,7 @@ export const useMemberStore = defineStore('member', () => {
 
       
       const basicData = await basicRes.json()
+      if (redirectToRaphaelBackendLoginIfUnauthorized(basicData, basicRes.status)) return
       if (basicData.Result === "OK") {
         member.value = basicData.MemberDetail.Member
       }
