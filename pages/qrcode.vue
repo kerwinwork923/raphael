@@ -367,28 +367,57 @@ async function stopScan() {
 }
 
 async function switchCamera() {
-  if (!canSwitchCamera.value || !isScanning.value || !scanner.value || isSwitchingCamera.value) return;
+  if (
+    !canSwitchCamera.value ||
+    !isScanning.value ||
+    !scanner.value ||
+    isSwitchingCamera.value
+  ) return;
+
   isSwitchingCamera.value = true;
+
   try {
+
+    // 先完全停止
     await scanner.value.stop();
+
+    // 完整清除 video stream
+    await scanner.value.clear();
+
     isScanning.value = false;
 
-    const nextIndex = currentCameraIndex.value + 1;
-    currentCameraIndex.value = nextIndex >= cameras.value.length ? 0 : nextIndex;
+    // 下一顆鏡頭
+    currentCameraIndex.value =
+      (currentCameraIndex.value + 1) % cameras.value.length;
 
+    // 重新建立 scanner
+    scanner.value = new Html5Qrcode("reader", false);
+
+    // 啟動新鏡頭
     await scanner.value.start(
       cameras.value[currentCameraIndex.value].id,
       scanConfig,
       onScanSuccess,
       onScanFailure
     );
+
     isScanning.value = true;
-    updateStatus(`已切換鏡頭（${cameraFacingText()}）`, "ok");
+
+    updateStatus(
+      `已切換鏡頭（${cameraFacingText()}）`,
+      "ok"
+    );
+
   } catch (error) {
+
     console.error("切換鏡頭失敗:", error);
+
     updateStatus("切換鏡頭失敗", "err");
+
   } finally {
+
     isSwitchingCamera.value = false;
+
   }
 }
 
