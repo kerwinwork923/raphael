@@ -150,7 +150,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { Html5Qrcode } from "html5-qrcode";
-
+const preferredFacingMode = ref("environment");
 interface ScanLog {
   aid: string;
   name: string;
@@ -162,6 +162,7 @@ interface CameraItem {
   id: string;
   label: string;
 }
+
 
 const CHECKIN_API = "https://23700999.com:8081/HMA/000TTEupdateQRCodeCheck.jsp";
 const CHECKIN_KEY = "qrt897hpmd";
