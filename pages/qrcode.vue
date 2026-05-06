@@ -184,7 +184,7 @@ const statusText = ref("尚未開始掃描");
 const statusType = ref<"default" | "ok" | "err">("default");
 const pollTimer = ref<number | null>(null);
 
-const canSwitchCamera = computed(() => cameras.value.length > 1);
+  const canSwitchCamera = computed(() => true);
 
 const scanConfig = {
   fps: 10,
@@ -336,18 +336,24 @@ async function onScanSuccess(decodedText: string) {
 function onScanFailure() {}
 
 async function startScan() {
-  if (isScanning.value) return;
+  if (isScanning.value || isSwitchingCamera.value) return;
+
   try {
     initScanner();
     await ensureCameras();
+
     await scanner.value?.start(
-      cameras.value[currentCameraIndex.value].id,
+      { facingMode: preferredFacingMode.value },
       scanConfig,
       onScanSuccess,
       onScanFailure
     );
+
     isScanning.value = true;
-    updateStatus(`正在掃描中（${cameraFacingText()}）`, "ok");
+    updateStatus(
+      `正在掃描中（${preferredFacingMode.value === "environment" ? "後鏡頭" : "前鏡頭"}）`,
+      "ok"
+    );
   } catch (error) {
     console.error("啟動掃描失敗:", error);
     updateStatus("啟動相機失敗，請確認權限與 HTTPS", "err");
@@ -355,47 +361,51 @@ async function startScan() {
 }
 
 async function stopScan() {
-  if (!isScanning.value || !scanner.value) return;
+  if (!scanner.value) return;
+
   try {
-    await scanner.value.stop();
+    if (isScanning.value) {
+      await scanner.value.stop();
+    }
+
+    await scanner.value.clear();
+
+    scanner.value = null;
     isScanning.value = false;
     updateStatus("已暫停掃描");
   } catch (error) {
     console.error("停止掃描失敗:", error);
-    updateStatus("停止掃描失敗", "err");
+    scanner.value = null;
+    isScanning.value = false;
+    updateStatus("已暫停掃描");
   }
 }
 
 async function switchCamera() {
-  if (
-    !canSwitchCamera.value ||
-    !isScanning.value ||
-    !scanner.value ||
-    isSwitchingCamera.value
-  ) return;
+  if (!isScanning.value || isSwitchingCamera.value) return;
 
   isSwitchingCamera.value = true;
 
   try {
+    updateStatus("正在切換鏡頭…");
 
-    // 先完全停止
-    await scanner.value.stop();
-
-    // 完整清除 video stream
-    await scanner.value.clear();
+    if (scanner.value) {
+      await scanner.value.stop();
+      await scanner.value.clear();
+      scanner.value = null;
+    }
 
     isScanning.value = false;
 
-    // 下一顆鏡頭
-    currentCameraIndex.value =
-      (currentCameraIndex.value + 1) % cameras.value.length;
+    preferredFacingMode.value =
+      preferredFacingMode.value === "environment" ? "user" : "environment";
 
-    // 重新建立 scanner
+    await new Promise((resolve) => window.setTimeout(resolve, 300));
+
     scanner.value = new Html5Qrcode("reader", false);
 
-    // 啟動新鏡頭
     await scanner.value.start(
-      cameras.value[currentCameraIndex.value].id,
+      { facingMode: preferredFacingMode.value },
       scanConfig,
       onScanSuccess,
       onScanFailure
@@ -404,20 +414,16 @@ async function switchCamera() {
     isScanning.value = true;
 
     updateStatus(
-      `已切換鏡頭（${cameraFacingText()}）`,
+      `已切換鏡頭（${preferredFacingMode.value === "environment" ? "後鏡頭" : "前鏡頭"}）`,
       "ok"
     );
-
   } catch (error) {
-
     console.error("切換鏡頭失敗:", error);
-
-    updateStatus("切換鏡頭失敗", "err");
-
+    isScanning.value = false;
+    scanner.value = null;
+    updateStatus("切換鏡頭失敗，請重新按開始掃描", "err");
   } finally {
-
     isSwitchingCamera.value = false;
-
   }
 }
 
