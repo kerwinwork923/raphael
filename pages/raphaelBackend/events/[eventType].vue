@@ -15,10 +15,15 @@
         </div>
       </header>
 
-      <section class="stats single">
+      <section class="stats double">
         <div class="stat-card total">
           <span>總報名數</span>
           <strong>{{ registrations.length }}</strong>
+        </div>
+
+        <div class="stat-card checkin">
+          <span>報到人數</span>
+          <strong>{{ checkedInCount }}</strong>
         </div>
       </section>
 
@@ -166,13 +171,19 @@
               <span>手機</span>
               <strong>{{ selectedItem.mobile || "-" }}</strong>
 
-        
-
               <span>報名時間</span>
               <strong>{{ selectedItem.createdAt || "-" }}</strong>
 
               <span>備註</span>
               <strong>{{ selectedItem.note || "-" }}</strong>
+
+              <span>報到狀態</span>
+              <strong>{{
+                selectedItem.qrcodeCheck === "true" ? "已報到" : "未報到"
+              }}</strong>
+
+              <span>報到時間</span>
+              <strong class="break">{{ selectedItem.qrcodeTime || "-" }}</strong>
             </div>
 
             <div v-if="selectedItem.aid" class="checkin-qrcode">
@@ -224,6 +235,8 @@ interface Registration {
   createdAt: string;
   aid: string;
   note: string;
+  qrcodeCheck: string;
+  qrcodeTime: string;
   eventType: string;
 }
 
@@ -235,6 +248,8 @@ interface ApiRegistration {
   CheckTime?: string;
   AID?: string;
   Note?: string;
+  Qrcodecheck?: string;
+  Qrcodetime?: string;
   EventType?: string;
 }
 
@@ -330,6 +345,8 @@ async function fetchRegisterList() {
         createdAt: formatCheckTime(item.CheckTime),
         aid: item.AID || "",
         note: item.Note || "",
+        qrcodeCheck: item.Qrcodecheck || "",
+        qrcodeTime: item.Qrcodetime || "",
         eventType: item.EventType || "",
       }));
     } else {
@@ -383,6 +400,12 @@ const filteredRegistrations = computed(() => {
 });
 
 const totalRegistrations = computed(() => filteredRegistrations.value.length);
+
+const checkedInCount = computed(() => {
+  return registrations.value.filter(
+    (item) => item.qrcodeCheck === "true" && Boolean(item.qrcodeTime)
+  ).length;
+});
 
 const totalPages = computed(() =>
   Math.max(1, Math.ceil(totalRegistrations.value / pageSize.value))
@@ -582,10 +605,18 @@ watch(dateRange, () => {
       grid-template-columns: minmax(220px, 320px);
     }
 
+  &.double {
+    grid-template-columns: minmax(220px, 320px) minmax(220px, 320px);
+  }
+
     @include respond-to("md") {
       &.single {
         grid-template-columns: 1fr;
       }
+
+    &.double {
+      grid-template-columns: 1fr;
+    }
     }
 
     .stat-card {
@@ -594,6 +625,10 @@ watch(dateRange, () => {
       padding: 1.25rem;
       box-shadow: 0px 2px 20px rgba(177, 192, 216, 0.25);
       border-left: 5px solid $chip-success;
+
+    &.checkin {
+      border-left-color: $primary-600;
+    }
 
       span {
         display: block;

@@ -82,10 +82,6 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
               切換鏡頭
             </button>
-            <button class="btn btn-danger" @click="clearLogs">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-              清除紀錄
-            </button>
           </div>
 
           <!-- Hint -->
@@ -100,11 +96,11 @@
           <div class="panel-header">
             <div class="panel-title-group">
               <span class="panel-eyebrow">Scan Records</span>
-              <h2 class="panel-title">掃描紀錄</h2>
+              <h2 class="panel-title">報到紀錄</h2>
             </div>
             <div class="count-chip">
               <span class="count-num">{{ logs.length }}</span>
-              <span class="count-label">筆</span>
+              <span class="count-label">位</span>
             </div>
           </div>
 
@@ -113,18 +109,17 @@
               <article
                 class="record-card"
                 v-for="(item, idx) in logs"
-                :key="`${item.text}-${item.time}-${idx}`"
-                :class="{ duplicate: item.duplicate }"
+                :key="`${item.aid}-${item.qrcodeTime}-${idx}`"
               >
                 <div class="record-num">#{{ logs.length - idx }}</div>
                 <div class="record-info">
-                  <p class="record-text">{{ item.text }}</p>
-                  <time class="record-time">{{ item.time }}</time>
+                  <p class="record-text">{{ item.name }}（AID: {{ item.aid }}）</p>
+                  <p class="record-mobile">{{ item.mobile || "-" }}</p>
+                  <time class="record-time">{{ item.qrcodeTime }}</time>
                 </div>
-                <span class="record-badge" :class="{ dup: item.duplicate }">
-                  <svg v-if="!item.duplicate" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                  <svg v-else width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                  {{ item.duplicate ? '重複' : '成功' }}
+                <span class="record-badge">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                  已報到
                 </span>
               </article>
             </TransitionGroup>
@@ -141,8 +136,8 @@
                   <rect x="18" y="19" width="3" height="2"/>
                 </svg>
               </div>
-              <p>尚無掃描紀錄</p>
-              <span>完成第一次掃描後，紀錄將顯示於此</span>
+              <p>尚無報到紀錄</p>
+              <span>系統每 15 秒自動更新一次</span>
             </div>
           </div>
         </section>
@@ -153,13 +148,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { Html5Qrcode } from "html5-qrcode";
 
 interface ScanLog {
-  text: string;
-  time: string;
-  duplicate: boolean;
+  aid: string;
+  name: string;
+  mobile: string;
+  qrcodeTime: string;
 }
 
 interface CameraItem {
@@ -169,6 +165,12 @@ interface CameraItem {
 
 const CHECKIN_API = "https://23700999.com:8081/HMA/000TTEupdateQRCodeCheck.jsp";
 const CHECKIN_KEY = "qrt897hpmd";
+const REGISTER_QUERY_API = "https://23700999.com:8081/HMA/api/bk/His_Register_query";
+const REGISTER_QUERY_PAYLOAD = {
+  AdminID: "kerwin",
+  EventType: "vipl1",
+  Token: "byurf8BWSba2AIAhC7ffFtjmvzzlqELG",
+};
 
 const scanner = ref<Html5Qrcode | null>(null);
 const cameras = ref<CameraItem[]>([]);
@@ -179,6 +181,7 @@ const logs = ref<ScanLog[]>([]);
 const scannedSet = ref(new Set<string>());
 const statusText = ref("尚未開始掃描");
 const statusType = ref<"default" | "ok" | "err">("default");
+const pollTimer = ref<number | null>(null);
 
 const canSwitchCamera = computed(() => cameras.value.length > 1);
 
@@ -284,7 +287,6 @@ async function onScanSuccess(decodedText: string) {
 
   const time = nowString();
   const duplicate = scannedSet.value.has(decodedText);
-  logs.value.unshift({ text: decodedText, time, duplicate });
   if (!duplicate) scannedSet.value.add(decodedText);
 
   const { aid, name } = extractFields(decodedText);
@@ -366,10 +368,56 @@ async function switchCamera() {
   }
 }
 
-function clearLogs() {
-  logs.value = [];
-  scannedSet.value.clear();
-  updateStatus("掃描紀錄已清除");
+interface RegisterQueryItem {
+  AID?: string;
+  Name?: string;
+  Mobile?: string;
+  Qrcodecheck?: string;
+  Qrcodetime?: string;
+}
+
+async function fetchCheckinRecords() {
+  try {
+    const response = await fetch(REGISTER_QUERY_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(REGISTER_QUERY_PAYLOAD),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    const list = Array.isArray(data?.regList) ? (data.regList as RegisterQueryItem[]) : [];
+
+    logs.value = list
+      .filter((item) => item.Qrcodecheck === "true" && Boolean(item.Qrcodetime))
+      .sort((a, b) => (b.Qrcodetime || "").localeCompare(a.Qrcodetime || ""))
+      .map((item) => ({
+        aid: item.AID || "-",
+        name: item.Name || "未命名",
+        mobile: item.Mobile || "",
+        qrcodeTime: item.Qrcodetime || "",
+      }));
+  } catch (error) {
+    console.error("取得報到紀錄失敗:", error);
+  }
+}
+
+function startCheckinPolling() {
+  stopCheckinPolling();
+  fetchCheckinRecords();
+  pollTimer.value = window.setInterval(() => {
+    fetchCheckinRecords();
+  }, 15000);
+}
+
+function stopCheckinPolling() {
+  if (pollTimer.value !== null) {
+    window.clearInterval(pollTimer.value);
+    pollTimer.value = null;
+  }
 }
 
 async function restartScanAfterDialog() {
@@ -381,11 +429,16 @@ async function restartScanAfterDialog() {
 }
 
 onBeforeUnmount(async () => {
+  stopCheckinPolling();
   if (scanner.value && isScanning.value) {
     try {
       await scanner.value.stop();
     } catch {}
   }
+});
+
+onMounted(() => {
+  startCheckinPolling();
 });
 </script>
 
@@ -804,6 +857,11 @@ onBeforeUnmount(async () => {
   margin-bottom: 14px;
 }
 
+.controls .btn-primary {
+  grid-column: 1 / -1;
+  min-height: 52px;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -960,7 +1018,13 @@ onBeforeUnmount(async () => {
   font-size: 0.875rem;
   word-break: break-all;
   line-height: 1.4;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
+}
+
+.record-mobile {
+  color: var(--text-2);
+  font-size: 0.8rem;
+  margin-bottom: 4px;
 }
 
 .record-time {
@@ -983,11 +1047,6 @@ onBeforeUnmount(async () => {
   background: var(--green-dim);
   color: #6ee7b7;
 
-  &.dup {
-    border-color: var(--red-border);
-    background: var(--red-dim);
-    color: #fca5a5;
-  }
 }
 
 /* ── Empty State ────────────────────────────────────── */
@@ -1056,6 +1115,10 @@ onBeforeUnmount(async () => {
 
   .controls {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .controls .btn-primary {
+    grid-column: 1 / -1;
   }
 
   .record-card {
