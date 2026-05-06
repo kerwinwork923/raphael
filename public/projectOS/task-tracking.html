@@ -6509,7 +6509,8 @@
               renderDecisionTopicRows();
               syncDecisionBidHint();
             }
-          } catch (e) {
+          }
+          catch (e) {
             // API 不一定存在或格式不同，先保留本機新增行為
             showToast(
               "新增任務 API 可能未串接成功：" +
@@ -6517,6 +6518,7 @@
               "warn",
             );
           }
+          
         }
 
         closeTaskModal();

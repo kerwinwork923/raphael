@@ -166,20 +166,25 @@
               <span>手機</span>
               <strong>{{ selectedItem.mobile || "-" }}</strong>
 
-              <span>VIP</span>
-              <strong>{{ selectedItem.vip || "-" }}</strong>
-
-              <span>AID</span>
-              <strong>{{ selectedItem.aid || "-" }}</strong>
-
-              <span>Email</span>
-              <strong class="break">{{ selectedItem.email || "-" }}</strong>
+        
 
               <span>報名時間</span>
               <strong>{{ selectedItem.createdAt || "-" }}</strong>
 
               <span>備註</span>
               <strong>{{ selectedItem.note || "-" }}</strong>
+            </div>
+
+            <div v-if="selectedItem.aid" class="checkin-qrcode">
+              <h4>報到 QRCode</h4>
+     
+              <img class="checkin-image" :src="checkinQrImageUrl" alt="報到QRCode" />
+              <div class="checkin-actions">
+                <button class="copy-btn" @click="downloadQrCode">下載 QRCode</button>
+                <a class="scan-link-btn" href="/qrcode" target="_blank" rel="noopener">
+                  開啟掃描頁
+                </a>
+              </div>
             </div>
           </section>
 
@@ -251,6 +256,7 @@ const pageSize = ref(10);
 
 const detailVisible = ref(false);
 const selectedItem = ref<Registration | null>(null);
+const checkinRouteBase = "https://neuroplus.com.tw/checkin";
 
 function goBack() {
   router.push("/raphaelBackend/events");
@@ -419,15 +425,46 @@ function closeDetail() {
   selectedItem.value = null;
 }
 
+const checkinUrl = computed(() => {
+  if (!selectedItem.value?.aid) return "";
+  const aid = encodeURIComponent(selectedItem.value.aid);
+  const name = encodeURIComponent(selectedItem.value.name || "");
+  return `${checkinRouteBase}?AID=${aid}&name=${name}`;
+});
+
+const checkinQrImageUrl = computed(() => {
+  if (!checkinUrl.value) return "";
+  const encoded = encodeURIComponent(checkinUrl.value);
+  return `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encoded}`;
+});
+
+async function downloadQrCode() {
+  if (!checkinQrImageUrl.value) return;
+
+  try {
+    const res = await fetch(checkinQrImageUrl.value);
+    const blob = await res.blob();
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+
+    a.href = url;
+    a.download = `checkin-qrcode-${selectedItem.value?.name || "user"}.png`;
+    a.click();
+
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error("下載 QRCode 失敗:", err);
+    alert("下載失敗");
+  }
+}
+
 function exportCSV() {
   const rows = [
-    ["姓名", "手機", "VIP", "AID", "Email", "報名時間", "備註", "EventType"],
+    ["姓名", "手機", "報名時間", "備註", "EventType"],
     ...filteredRegistrations.value.map((item) => [
       item.name,
       item.mobile,
-      item.vip,
-      item.aid,
-      item.email,
       item.createdAt,
       item.note,
       item.eventType,
@@ -864,6 +901,74 @@ watch(dateRange, () => {
 
         .break {
           word-break: break-all;
+        }
+      }
+
+      .checkin-qrcode {
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 16px;
+        background: #f7fafc;
+        border: 1px solid #e7edf4;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+
+        h4 {
+          margin: 0;
+          color: $primary-600;
+        }
+
+        .checkin-desc {
+          margin: 0;
+          color: $raphael-gray-500;
+          text-align: center;
+        }
+
+        .checkin-link {
+          width: 100%;
+          text-align: center;
+          word-break: break-all;
+          color: $chip-success;
+          font-weight: 700;
+        }
+
+        .checkin-image {
+          width: 220px;
+          height: 220px;
+          border-radius: 12px;
+          background: #fff;
+          border: 1px solid #e5e7eb;
+          padding: 8px;
+        }
+
+        .checkin-actions {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 0.5rem;
+        }
+
+        .copy-btn,
+        .scan-link-btn {
+          border: none;
+          border-radius: 999px;
+          padding: 8px 14px;
+          font-size: 14px;
+          font-weight: 700;
+          cursor: pointer;
+          text-decoration: none;
+        }
+
+        .copy-btn {
+          background: rgba(27, 163, 155, 0.12);
+          color: $chip-success;
+        }
+
+        .scan-link-btn {
+          background: rgba(177, 192, 216, 0.2);
+          color: $primary-600;
         }
       }
     }
