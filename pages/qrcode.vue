@@ -177,6 +177,7 @@ const cameras = ref<CameraItem[]>([]);
 const currentCameraIndex = ref(0);
 const isScanning = ref(false);
 const isProcessingScan = ref(false);
+const isSwitchingCamera = ref(false);
 const logs = ref<ScanLog[]>([]);
 const scannedSet = ref(new Set<string>());
 const statusText = ref("尚未開始掃描");
@@ -216,16 +217,33 @@ function cameraFacingText() {
 
 async function ensureCameras() {
   if (cameras.value.length) return;
-  const list = (await Html5Qrcode.getCameras()) as CameraItem[];
-  if (!list?.length) throw new Error("找不到可用相機");
-  cameras.value = list;
+  const rawList = (await Html5Qrcode.getCameras()) as CameraItem[];
+  if (!rawList?.length) throw new Error("找不到可用相機");
 
-  let backIndex = list.findIndex((c) => {
+  // 手機有時會回傳重複/虛擬鏡頭，先用 id 去重，避免切換編號異常增加
+  const uniqueMap = new Map<string, CameraItem>();
+  rawList.forEach((camera) => {
+    if (camera?.id && !uniqueMap.has(camera.id)) {
+      uniqueMap.set(camera.id, camera);
+    }
+  });
+  const uniqueList = Array.from(uniqueMap.values());
+
+  const backCamera = uniqueList.find((c) => {
     const label = (c.label || "").toLowerCase();
     return label.includes("back") || label.includes("environment");
   });
-  if (backIndex < 0) backIndex = 0;
-  currentCameraIndex.value = backIndex;
+  const frontCamera = uniqueList.find((c) => {
+    const label = (c.label || "").toLowerCase();
+    return label.includes("front") || label.includes("user");
+  });
+
+  // 優先保留前後鏡頭兩顆，沒有就退回全部去重後清單
+  const normalized = [backCamera, frontCamera].filter(
+    (item): item is CameraItem => Boolean(item)
+  );
+  cameras.value = normalized.length > 0 ? normalized : uniqueList;
+  currentCameraIndex.value = 0;
 }
 
 function initScanner() {
@@ -349,11 +367,15 @@ async function stopScan() {
 }
 
 async function switchCamera() {
-  if (!canSwitchCamera.value || !isScanning.value || !scanner.value) return;
+  if (!canSwitchCamera.value || !isScanning.value || !scanner.value || isSwitchingCamera.value) return;
+  isSwitchingCamera.value = true;
   try {
     await scanner.value.stop();
     isScanning.value = false;
-    currentCameraIndex.value = (currentCameraIndex.value + 1) % cameras.value.length;
+
+    const nextIndex = currentCameraIndex.value + 1;
+    currentCameraIndex.value = nextIndex >= cameras.value.length ? 0 : nextIndex;
+
     await scanner.value.start(
       cameras.value[currentCameraIndex.value].id,
       scanConfig,
@@ -365,6 +387,8 @@ async function switchCamera() {
   } catch (error) {
     console.error("切換鏡頭失敗:", error);
     updateStatus("切換鏡頭失敗", "err");
+  } finally {
+    isSwitchingCamera.value = false;
   }
 }
 
