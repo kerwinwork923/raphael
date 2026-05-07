@@ -56,7 +56,7 @@
         <div class="table-row table-header">
           <div class="name">姓名</div>
           <div class="mobile">手機</div>
-          <div class="vip">VIP</div>
+          <div class="checkin-status">報到狀態</div>
           <div class="created">報名時間</div>
           <div class="note">備註</div>
           <div class="action">操作</div>
@@ -79,9 +79,18 @@
               {{ item.mobile || "-" }}
             </div>
 
-            <div class="cell vip" data-label="VIP">
-              {{ item.vip || "-" }}
-            </div>
+            <div
+  class="cell checkin-status"
+  data-label="報到狀態"
+  :class="{
+    checked: item.qrcodeCheck === 'true',
+    unchecked: item.qrcodeCheck !== 'true',
+  }"
+>
+  <span>
+    {{ item.qrcodeCheck === "true" ? "已報到" : "未報到" }}
+  </span>
+</div>
 
             <div class="cell created" data-label="報名時間">
               {{ item.createdAt || "-" }}
@@ -106,16 +115,27 @@
           </div>
         </div>
 
-        <div v-if="!loading && filteredRegistrations.length === 0" class="no-data">
+        <div
+          v-if="!loading && filteredRegistrations.length === 0"
+          class="no-data"
+        >
           <p>尚無資料</p>
         </div>
 
         <nav class="pagination" v-if="totalPages > 1">
-          <button class="btn-page" :disabled="currentPage === 1" @click="gotoPage(1)">
+          <button
+            class="btn-page"
+            :disabled="currentPage === 1"
+            @click="gotoPage(1)"
+          >
             &lt;&lt;
           </button>
 
-          <button class="btn-page" :disabled="currentPage === 1" @click="prevPage">
+          <button
+            class="btn-page"
+            :disabled="currentPage === 1"
+            @click="prevPage"
+          >
             &lt;
           </button>
 
@@ -183,16 +203,29 @@
               }}</strong>
 
               <span>報到時間</span>
-              <strong class="break">{{ selectedItem.qrcodeTime || "-" }}</strong>
+              <strong class="break">{{
+                selectedItem.qrcodeTime || "-"
+              }}</strong>
             </div>
 
             <div v-if="selectedItem.aid" class="checkin-qrcode">
               <h4>報到 QRCode</h4>
-     
-              <img class="checkin-image" :src="checkinQrImageUrl" alt="報到QRCode" />
+
+              <img
+                class="checkin-image"
+                :src="checkinQrImageUrl"
+                alt="報到QRCode"
+              />
               <div class="checkin-actions">
-                <button class="copy-btn" @click="downloadQrCode">下載 QRCode</button>
-                <a class="scan-link-btn" href="/qrcode" target="_blank" rel="noopener">
+                <button class="copy-btn" @click="downloadQrCode">
+                  下載 QRCode
+                </button>
+                <a
+                  class="scan-link-btn"
+                  href="/qrcode"
+                  target="_blank"
+                  rel="noopener"
+                >
                   開啟掃描頁
                 </a>
               </div>
@@ -403,12 +436,12 @@ const totalRegistrations = computed(() => filteredRegistrations.value.length);
 
 const checkedInCount = computed(() => {
   return registrations.value.filter(
-    (item) => item.qrcodeCheck === "true" && Boolean(item.qrcodeTime)
+    (item) => item.qrcodeCheck === "true" && Boolean(item.qrcodeTime),
   ).length;
 });
 
 const totalPages = computed(() =>
-  Math.max(1, Math.ceil(totalRegistrations.value / pageSize.value))
+  Math.max(1, Math.ceil(totalRegistrations.value / pageSize.value)),
 );
 
 const paginatedRegistrations = computed(() => {
@@ -496,7 +529,9 @@ function exportCSV() {
 
   const csv = rows
     .map((row) =>
-      row.map((cell) => `"${String(cell || "").replaceAll('"', '""')}"`).join(",")
+      row
+        .map((cell) => `"${String(cell || "").replaceAll('"', '""')}"`)
+        .join(","),
     )
     .join("\n");
 
@@ -605,18 +640,18 @@ watch(dateRange, () => {
       grid-template-columns: minmax(220px, 320px);
     }
 
-  &.double {
-    grid-template-columns: minmax(220px, 320px) minmax(220px, 320px);
-  }
+    &.double {
+      grid-template-columns: minmax(220px, 320px) minmax(220px, 320px);
+    }
 
     @include respond-to("md") {
       &.single {
         grid-template-columns: 1fr;
       }
 
-    &.double {
-      grid-template-columns: 1fr;
-    }
+      &.double {
+        grid-template-columns: 1fr;
+      }
     }
 
     .stat-card {
@@ -626,9 +661,9 @@ watch(dateRange, () => {
       box-shadow: 0px 2px 20px rgba(177, 192, 216, 0.25);
       border-left: 5px solid $chip-success;
 
-    &.checkin {
-      border-left-color: $primary-600;
-    }
+      &.checkin {
+        border-left-color: $primary-600;
+      }
 
       span {
         display: block;
