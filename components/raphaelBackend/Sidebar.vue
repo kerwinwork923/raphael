@@ -22,6 +22,24 @@
     <nav class="menu">
       <ul>
 
+        <!-- <li 
+          :class="{ 
+            active: currentPage === 'careTracking',
+            'has-focus': focusedItem === 'careTracking' 
+          }" 
+          @click="handleMenuClick({ key: 'careTracking', path: '/raphaelBackend/careTracking' })"
+          @mouseenter="handleMouseEnter('careTracking')"
+          @mouseleave="handleMouseLeave"
+          @focus="handleFocus('careTracking')"
+          @blur="handleBlur"
+          tabindex="0"
+          role="menuitem"
+          aria-label="關懷追蹤"
+        >
+          <img src="/assets/imgs/backend/member.svg" alt="關懷追蹤" />
+          <span v-show="!collapsed">關懷追蹤</span>
+        </li> -->
+
         <li 
           :class="{ 
             active: currentPage === 'member',
@@ -342,6 +360,11 @@ watch(() => route.path, (newPath: string) => {
     currentPage.value = 'events';
     emit('update:modelValue', 'events');
     emit('page-change', 'events');
+  }
+  else if (newPath.includes('/careTracking')) {
+    currentPage.value = 'careTracking';
+    emit('update:modelValue', 'careTracking');
+    emit('page-change', 'careTracking');
   }
    else if (newPath.includes('/categoryManagement')) {
     currentPage.value = 'categoryManagement';
