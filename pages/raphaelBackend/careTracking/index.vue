@@ -53,7 +53,7 @@
                 <span class="risk-tag">{{ item.risk }}</span>
               </div>
               <p>{{ item.note }}</p>
-              <button type="button" @click="focusMember(item.id)">關懷</button>
+              <button type="button" @click="openMemberFromPriority(item.id)">關懷</button>
             </article>
           </div>
         </aside>
@@ -99,10 +99,14 @@
                 <strong>{{ row.status }}</strong>
                 <small>{{ row.statusDetail }}</small>
               </div>
-              <div class="cell member">
+              <button
+                type="button"
+                class="cell member memberLink"
+                @click="openMemberModal(row)"
+              >
                 <strong>{{ row.name }}</strong>
                 <small>{{ row.memberCode }}</small>
-              </div>
+              </button>
               <div class="cell risk">
                 <span class="chip" :class="row.riskTone">{{ row.riskLabel }}</span>
               </div>
@@ -144,12 +148,22 @@
         </section>
       </section>
     </main>
+
+    <CareMemberDetailModal
+      :show="memberModalOpen"
+      :member="selectedMember"
+      @close="closeMemberModal"
+      @care="onMemberModalCare"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import Sidebar from "@/components/raphaelBackend/Sidebar.vue";
+import CareMemberDetailModal, {
+  type CareMemberModalMember,
+} from "@/components/raphaelBackend/CareMemberDetailModal.vue";
 import { useSeo } from "~/composables/useSeo";
 
 useSeo({
@@ -187,6 +201,8 @@ const keyword = ref("");
 const currentPage = ref(1);
 const pageSize = 5;
 const focusedMemberId = ref("");
+const memberModalOpen = ref(false);
+const selectedMember = ref<CareMemberModalMember | null>(null);
 
 const overviewCards = [
   { key: "pending", label: "今日待關懷", value: 28, tone: "danger" },
@@ -327,6 +343,38 @@ const pagedRows = computed(() => {
 
 function focusMember(memberId: string) {
   focusedMemberId.value = memberId;
+}
+
+function rowToModalMember(row: CareRow): CareMemberModalMember {
+  return {
+    id: row.id,
+    name: row.name,
+    memberCode: row.memberCode,
+    riskLabel: row.riskLabel,
+    status: row.status,
+    latestEvent: row.latestEvent,
+    nextFollowUp: row.nextFollowUp,
+  };
+}
+
+function openMemberModal(row: CareRow) {
+  selectedMember.value = rowToModalMember(row);
+  memberModalOpen.value = true;
+  focusMember(row.id);
+}
+
+function openMemberFromPriority(memberId: string) {
+  const row = careRows.value.find((r: CareRow) => r.id === memberId);
+  if (row) openMemberModal(row);
+}
+
+function closeMemberModal() {
+  memberModalOpen.value = false;
+  selectedMember.value = null;
+}
+
+function onMemberModalCare(member: CareMemberModalMember) {
+  focusMember(member.id);
 }
 </script>
 
@@ -649,6 +697,27 @@ function focusMember(memberId: string) {
 
     small {
       color: #7b8798;
+    }
+  }
+
+  .memberLink {
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    border-radius: 8px;
+
+    &:hover {
+      background: rgba(27, 163, 155, 0.08);
+    }
+
+    &:focus-visible {
+      outline: 2px solid rgba(27, 163, 155, 0.5);
+      outline-offset: 2px;
     }
   }
 

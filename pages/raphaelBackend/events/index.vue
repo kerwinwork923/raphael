@@ -122,7 +122,7 @@
       eventType: "vipl1",
       eventDate: "20260514",
       displayDate: "2026 / 05 / 14（四）",
-      time: "13:30",
+      time: "10:00",
       location: "台北新光摩天大樓 30樓之1",
       status: "active",
     },
