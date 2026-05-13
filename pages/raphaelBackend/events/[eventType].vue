@@ -243,7 +243,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import Sidebar from "@/components/raphaelBackend/Sidebar.vue";
 import VueDatePicker from "@vuepic/vue-datepicker";
@@ -251,6 +251,21 @@ import "@vuepic/vue-datepicker/dist/main.css";
 import { useSeo } from "~/composables/useSeo";
 
 const router = useRouter();
+const route = useRoute();
+
+function resolveEventTypeParam(): string {
+  const p = route.params.eventType;
+  if (Array.isArray(p)) return p[0] || "vipl1";
+  return typeof p === "string" && p.trim() ? p : "vipl1";
+}
+
+const resolvedEventType = computed(() => resolveEventTypeParam());
+
+const API_PAYLOAD = computed(() => ({
+  AdminID: "kerwin",
+  Token: "byurf8BWSba2AIAhC7ffFtjmvzzlqELG",
+  EventType: resolvedEventType.value,
+}));
 
 useSeo({
   title: "講座報名管理",
@@ -288,12 +303,6 @@ interface ApiRegistration {
 
 const REGISTER_QUERY_API =
   "https://23700999.com:8081/HMA/api/bk/His_Register_query";
-
-const API_PAYLOAD = {
-  AdminID: "kerwin",
-  Token: "byurf8BWSba2AIAhC7ffFtjmvzzlqELG",
-  EventType: "vipl1",
-};
 
 const loading = ref(false);
 const registrations = ref<Registration[]>([]);
@@ -359,7 +368,7 @@ async function fetchRegisterList() {
   loading.value = true;
 
   try {
-    const response = await axios.post(REGISTER_QUERY_API, API_PAYLOAD, {
+    const response = await axios.post(REGISTER_QUERY_API, API_PAYLOAD.value, {
       headers: {
         "Content-Type": "application/json",
       },
@@ -543,13 +552,18 @@ function exportCSV() {
   const a = document.createElement("a");
 
   a.href = url;
-  a.download = `his-register-${API_PAYLOAD.EventType}.csv`;
+  a.download = `his-register-${API_PAYLOAD.value.EventType}.csv`;
   a.click();
 
   URL.revokeObjectURL(url);
 }
 
 onMounted(() => {
+  fetchRegisterList();
+});
+
+watch(resolvedEventType, () => {
+  currentPage.value = 1;
   fetchRegisterList();
 });
 

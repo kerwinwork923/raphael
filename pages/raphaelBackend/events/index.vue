@@ -126,6 +126,17 @@
       location: "台北新光摩天大樓 30樓之1",
       status: "active",
     },
+    {
+      id: "20260525-vipl2",
+      title: "明明很不舒服，為什麼檢查都說沒問題？",
+      category: "健康講座",
+      eventType: "vipl2",
+      eventDate: "20260525",
+      displayDate: "2026 / 05 / 25（一）",
+      time: "10:00",
+      location: "台北新光摩天大樓 30樓之1",
+      status: "active",
+    },
   ]);
   
   const filteredEvents = computed(() => {

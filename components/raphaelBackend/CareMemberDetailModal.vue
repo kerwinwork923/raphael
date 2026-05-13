@@ -13,43 +13,93 @@
           <h2 id="careMemberModalTitle" class="careMemberModal__title">
             會員詳細資料
           </h2>
-          <button type="button" class="careMemberModal__careBtn" @click="emitCare">
-            <span class="careMemberModal__careIcon" aria-hidden="true">＋</span>
-            關懷
-          </button>
         </header>
 
-        <section class="careMemberModal__profile">
-          <div class="careMemberModal__nameRow">
-            <strong class="careMemberModal__name">{{ member.name }}</strong>
-            <span class="careMemberModal__levelTag">{{ levelTag }}</span>
+        <div class="careMemberModal__careBar">
+          <div class="careMemberModal__careBarLeft">
+            <div class="careMemberModal__nameRow">
+              <strong class="careMemberModal__name">{{ member.name }}</strong>
+              <span class="careMemberModal__levelTag">{{ levelTag }}</span>
+            </div>
+            <p class="careMemberModal__meta">
+              <span class="careMemberModal__metaBit"
+                ><strong>病歷號</strong> <strong>{{ chartNo }}</strong></span
+              >
+              <span class="careMemberModal__metaSep" aria-hidden="true"
+                >｜</span
+              >
+              <span class="careMemberModal__metaBit"
+                ><strong>{{ age }} 歲</strong></span
+              >
+              <span class="careMemberModal__metaSep" aria-hidden="true"
+                >｜</span
+              >
+              <span class="careMemberModal__metaBit"
+                ><strong>{{ gender }}</strong></span
+              >
+              <span class="careMemberModal__metaSep" aria-hidden="true"
+                >｜</span
+              >
+              <span class="careMemberModal__metaBit"
+                ><strong>{{ city }}</strong></span
+              >
+              <span class="careMemberModal__metaSep" aria-hidden="true"
+                >｜</span
+              >
+              <span class="careMemberModal__metaBit"
+                ><strong>諮詢師</strong> <strong>{{ consultant }}</strong></span
+              >
+            </p>
           </div>
-          <p class="careMemberModal__meta">
-            病歷號 {{ chartNo }}｜{{ age }}歲｜{{ gender }}｜{{ city }}｜諮詢師
-            {{ consultant }}
-          </p>
-        </section>
+          <div class="careMemberModal__careBarRight">
+            <button
+              type="button"
+              class="careMemberModal__careBtn"
+              @click="emitCare"
+            >
+              <img
+                src="/assets/imgs/backend/member_white.svg"
+                alt=""
+                width="18"
+                height="18"
+              />
+              關懷
+            </button>
+          </div>
+        </div>
+
+        <section class="careMemberModal__profile"></section>
 
         <div class="careMemberModal__statGrid">
           <div class="careMemberModal__statCell">
             <span class="careMemberModal__statLabel">合約狀態</span>
-            <span class="careMemberModal__statValue careMemberModal__statValue--info">
+            <span
+              class="careMemberModal__statValue careMemberModal__statValue--info"
+            >
               {{ contractStatus }}
             </span>
           </div>
           <div class="careMemberModal__statCell">
             <span class="careMemberModal__statLabel">合約到期</span>
-            <span class="careMemberModal__statValue careMemberModal__statValue--danger">
+            <span
+              class="careMemberModal__statValue careMemberModal__statValue--danger"
+            >
               {{ contractEnd }}（剩{{ contractDaysLeft }}天）
             </span>
           </div>
           <div class="careMemberModal__statCell">
             <span class="careMemberModal__statLabel">最近回診</span>
-            <span class="careMemberModal__statValue">{{ lastVisit }}</span>
+            <span
+              class="careMemberModal__statValue careMemberModal__statValue--info"
+            >
+              {{ lastVisit }}
+            </span>
           </div>
           <div class="careMemberModal__statCell">
             <span class="careMemberModal__statLabel">下次回診</span>
-            <span class="careMemberModal__statValue careMemberModal__statValue--accent">
+            <span
+              class="careMemberModal__statValue careMemberModal__statValue--accent"
+            >
               {{ nextVisit }}
             </span>
           </div>
@@ -59,14 +109,17 @@
           <div class="careMemberModal__alertMain">
             <span class="careMemberModal__alertIcon" aria-hidden="true">⚠</span>
             <span>
-              本週自動示警（{{ alertWeekRange }}）接頭不良 5 次（第 4 週）退費相關
+              本週自動示警（{{ alertWeekRange }}）接頭不良 5 次（第 4
+              週）退費相關
             </span>
           </div>
           <div class="careMemberModal__alertActions">
             <button type="button" class="careMemberModal__btnOutline">
               ✓ 標記已確認
             </button>
-            <button type="button" class="careMemberModal__btnGhost">忽略</button>
+            <button type="button" class="careMemberModal__btnGhost">
+              忽略
+            </button>
           </div>
         </div>
 
@@ -77,8 +130,44 @@
             @click="instrumentSubOpen = true"
           >
             <div class="careMemberModal__eventCardTop">
-              <span class="careMemberModal__eventTitle">儀器操作事件</span>
-              <span class="careMemberModal__signal careMemberModal__signal--red" />
+              <div class="careMemberModal__eventTitleRow">
+                <span
+                  class="careMemberModal__eventIconWrap careMemberModal__eventIconWrap--device"
+                >
+                  <svg
+                    class="careMemberModal__eventSvg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <rect
+                      x="3"
+                      y="4"
+                      width="18"
+                      height="12"
+                      rx="2"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                    />
+                    <path
+                      d="M8 20h8"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                      stroke-linecap="round"
+                    />
+                    <path
+                      d="M12 16v4"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </span>
+                <span class="careMemberModal__eventTitle">儀器操作事件</span>
+              </div>
+              <span
+                class="careMemberModal__signal careMemberModal__signal--red"
+              />
             </div>
             <ul class="careMemberModal__eventList">
               <li>接頭接觸不良（5）</li>
@@ -88,8 +177,38 @@
           </button>
           <div class="careMemberModal__eventCard">
             <div class="careMemberModal__eventCardTop">
-              <span class="careMemberModal__eventTitle">APP 留言事件</span>
-              <span class="careMemberModal__signal careMemberModal__signal--red" />
+              <div class="careMemberModal__eventTitleRow">
+                <span
+                  class="careMemberModal__eventIconWrap careMemberModal__eventIconWrap--app"
+                >
+                  <svg
+                    class="careMemberModal__eventSvg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <rect
+                      x="7"
+                      y="3"
+                      width="10"
+                      height="18"
+                      rx="2"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                    />
+                    <path
+                      d="M10 18h4"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </span>
+                <span class="careMemberModal__eventTitle">APP 留言事件</span>
+              </div>
+              <span
+                class="careMemberModal__signal careMemberModal__signal--red"
+              />
             </div>
             <ul class="careMemberModal__eventList">
               <li>退費風險示警（1）</li>
@@ -99,8 +218,41 @@
           </div>
           <div class="careMemberModal__eventCard">
             <div class="careMemberModal__eventCardTop">
-              <span class="careMemberModal__eventTitle">健康數據事件</span>
-              <span class="careMemberModal__signal careMemberModal__signal--yellow" />
+              <div class="careMemberModal__eventTitleRow">
+                <span
+                  class="careMemberModal__eventIconWrap careMemberModal__eventIconWrap--chart"
+                >
+                  <svg
+                    class="careMemberModal__eventSvg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M4 18h16"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                      stroke-linecap="round"
+                    />
+                    <path
+                      d="M7 14l3-4 3 2 4-6 3 5"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <circle cx="7" cy="14" r="1.2" fill="currentColor" />
+                    <circle cx="10" cy="10" r="1.2" fill="currentColor" />
+                    <circle cx="13" cy="12" r="1.2" fill="currentColor" />
+                    <circle cx="17" cy="6" r="1.2" fill="currentColor" />
+                    <circle cx="20" cy="11" r="1.2" fill="currentColor" />
+                  </svg>
+                </span>
+                <span class="careMemberModal__eventTitle">健康數據事件</span>
+              </div>
+              <span
+                class="careMemberModal__signal careMemberModal__signal--yellow"
+              />
             </div>
             <ul class="careMemberModal__eventList">
               <li>健康數據中斷（1）</li>
@@ -128,12 +280,20 @@
           </button>
         </div>
 
-        <div v-if="activeTab === 'history'" class="careMemberModal__tabBody">
+        <div
+          v-if="activeTab === 'history'"
+          class="careMemberModal__tabBody careMemberModal__tabBody--history"
+        >
           <div class="careMemberModal__filters">
             <select class="careMemberModal__select" aria-label="來源">
               <option>全部來源</option>
               <option>LINE</option>
               <option>電話</option>
+            </select>
+            <select class="careMemberModal__select" aria-label="狀態">
+              <option>全部狀態</option>
+              <option>追蹤中</option>
+              <option>已結案</option>
             </select>
             <select class="careMemberModal__select" aria-label="燈號">
               <option>全部燈號</option>
@@ -141,105 +301,250 @@
               <option>黃燈</option>
               <option>綠燈</option>
             </select>
+            <input
+              type="search"
+              class="careMemberModal__searchInput"
+              placeholder="搜尋事件摘要"
+              aria-label="搜尋事件摘要"
+            />
             <div class="careMemberModal__dateRange">
               <span>區間</span>
-              <input type="date" class="careMemberModal__dateInput" value="2026-05-08" />
+              <input
+                type="date"
+                class="careMemberModal__dateInput"
+                value="2026-05-08"
+              />
               <span>—</span>
-              <input type="date" class="careMemberModal__dateInput" value="2026-05-08" />
+              <input
+                type="date"
+                class="careMemberModal__dateInput"
+                value="2026-05-08"
+              />
             </div>
-            <button type="button" class="careMemberModal__btnGhost">清除</button>
+            <button type="button" class="careMemberModal__btnGhost">
+              清除
+            </button>
           </div>
 
-          <div class="careMemberModal__historyHead">
-            <span>燈號</span>
-            <span>來源</span>
-            <span>事件摘要</span>
-            <span>開案時間</span>
-            <span>狀態</span>
-          </div>
-          <ul class="careMemberModal__historyList">
-            <li
-              v-for="(row, idx) in historyRows"
-              :key="idx"
-              class="careMemberModal__historyRow"
-            >
-              <span
-                class="careMemberModal__dot"
-                :class="`careMemberModal__dot--${row.light}`"
-              />
-              <span class="careMemberModal__srcTag">{{ row.source }}</span>
-              <div class="careMemberModal__historyMain">
-                <strong>{{ row.title }}</strong>
-                <p class="careMemberModal__historySub">{{ row.sub }}</p>
-                <div
-                  v-if="row.alert"
-                  class="careMemberModal__inlineAlert"
-                  :class="`careMemberModal__inlineAlert--${row.alertTone}`"
-                >
-                  {{ row.alert }}
+          <div class="careMemberModal__historyTableWrap">
+            <div class="careMemberModal__historyHead" role="row">
+              <span>燈號</span>
+              <span>來源</span>
+              <span>事件摘要</span>
+              <span>開案時間</span>
+              <span>狀態</span>
+            </div>
+            <ul class="careMemberModal__historyList">
+              <li
+                v-for="(row, idx) in historyRows"
+                :key="idx"
+                class="careMemberModal__historyRow"
+              >
+                <span
+                  class="careMemberModal__dot"
+                  :class="`careMemberModal__dot--${row.light}`"
+                />
+                <span class="careMemberModal__srcTag">{{ row.source }}</span>
+                <div class="careMemberModal__historyMain">
+                  <strong>{{ row.title }}</strong>
+                  <p class="careMemberModal__historySub">{{ row.sub }}</p>
+                  <div
+                    v-if="row.alert"
+                    class="careMemberModal__inlineAlert"
+                    :class="`careMemberModal__inlineAlert--${row.alertTone}`"
+                  >
+                    {{ row.alert }}
+                  </div>
+                  <p v-if="row.note" class="careMemberModal__historyNote">
+                    {{ row.note }}
+                  </p>
                 </div>
-                <p v-if="row.note" class="careMemberModal__historyNote">{{ row.note }}</p>
-              </div>
-              <time class="careMemberModal__historyTime">{{ row.time }}</time>
-              <div class="careMemberModal__historyStatus">
-                <button
-                  v-if="row.status === 'tracking'"
-                  type="button"
-                  class="careMemberModal__statusPill careMemberModal__statusPill--track"
-                >
-                  追蹤中
-                </button>
-                <button
-                  v-else
-                  type="button"
-                  class="careMemberModal__statusPill careMemberModal__statusPill--done"
-                >
-                  已結案
-                </button>
-              </div>
-            </li>
-          </ul>
+                <time class="careMemberModal__historyTime">{{ row.time }}</time>
+                <div class="careMemberModal__historyStatus">
+                  <button
+                    v-if="row.status === 'tracking'"
+                    type="button"
+                    class="careMemberModal__statusPill careMemberModal__statusPill--track"
+                  >
+                    追蹤中
+                  </button>
+                  <button
+                    v-else
+                    type="button"
+                    class="careMemberModal__statusPill careMemberModal__statusPill--done"
+                  >
+                    已結案
+                  </button>
+                </div>
+              </li>
+            </ul>
+          </div>
         </div>
 
         <div v-else class="careMemberModal__tabBody careMemberModal__basicBody">
           <div class="careMemberModal__basicCol">
             <section class="careMemberModal__cardBlock">
               <div class="careMemberModal__cardHead">
-                <span>個人資料</span>
-                <button type="button" class="careMemberModal__btnMini">編輯</button>
+                <span class="careMemberModal__cardHeadTitle">
+                  <span class="careMemberModal__sectionIcon" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      class="careMemberModal__sectionSvg"
+                    >
+                      <circle
+                        cx="12"
+                        cy="9"
+                        r="3.5"
+                        stroke="currentColor"
+                        stroke-width="1.6"
+                      />
+                      <path
+                        d="M6 19c0-3.3 2.7-6 6-6s6 2.7 6 6"
+                        stroke="currentColor"
+                        stroke-width="1.6"
+                        stroke-linecap="round"
+                      />
+                    </svg>
+                  </span>
+                  個人資料
+                </span>
+                <button type="button" class="careMemberModal__btnMini">
+                  編輯
+                </button>
               </div>
               <dl class="careMemberModal__kv">
-                <div><dt>姓名</dt><dd>{{ member.name }}</dd></div>
-                <div><dt>性別</dt><dd>{{ gender }}</dd></div>
-                <div><dt>生日</dt><dd>{{ birthday }}</dd></div>
-                <div><dt>病歷號</dt><dd>{{ chartNo }}</dd></div>
-                <div><dt>手機</dt><dd>{{ phone }}</dd></div>
-                <div><dt>院所</dt><dd>{{ branch }}</dd></div>
-                <div><dt>諮詢師</dt><dd>{{ consultant }}</dd></div>
+                <div>
+                  <dt>姓名</dt>
+                  <dd>{{ member.name }}</dd>
+                </div>
+                <div>
+                  <dt>性別</dt>
+                  <dd>{{ gender }}</dd>
+                </div>
+                <div>
+                  <dt>生日</dt>
+                  <dd>{{ birthday }}</dd>
+                </div>
+                <div>
+                  <dt>病歷號</dt>
+                  <dd>{{ chartNo }}</dd>
+                </div>
+                <div>
+                  <dt>電話</dt>
+                  <dd>{{ phoneFromParent }}</dd>
+                </div>
+                <div>
+                  <dt>分院</dt>
+                  <dd>{{ branch }}</dd>
+                </div>
+                <div>
+                  <dt>諮詢師</dt>
+                  <dd>{{ consultant }}</dd>
+                </div>
+                <div>
+                  <dt>主治醫師</dt>
+                  <dd>王志明</dd>
+                </div>
                 <div>
                   <dt>會員等級</dt>
-                  <dd><span class="careMemberModal__vip">VIP</span></dd>
+                  <dd>
+                    <span class="careMemberModal__vip">{{
+                      memberLevelFromParent
+                    }}</span>
+                  </dd>
                 </div>
               </dl>
             </section>
             <section class="careMemberModal__cardBlock">
-              <div class="careMemberModal__cardHead"><span>合約資訊</span></div>
+              <div class="careMemberModal__cardHead">
+                <span class="careMemberModal__cardHeadTitle">
+                  <span class="careMemberModal__sectionIcon" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      class="careMemberModal__sectionSvg"
+                    >
+                      <path
+                        d="M7 4h10v16H7V4z"
+                        stroke="currentColor"
+                        stroke-width="1.6"
+                        stroke-linejoin="round"
+                      />
+                      <path
+                        d="M9 8h6M9 12h6M9 16h4"
+                        stroke="currentColor"
+                        stroke-width="1.4"
+                        stroke-linecap="round"
+                      />
+                    </svg>
+                  </span>
+                  合約資訊
+                </span>
+              </div>
               <dl class="careMemberModal__kv">
-                <div><dt>方案</dt><dd>年度旗艦方案</dd></div>
                 <div>
-                  <dt>回診狀態</dt>
+                  <dt>合約類型</dt>
+                  <dd>年度旗艦方案</dd>
+                </div>
+                <div>
+                  <dt>到診狀況</dt>
                   <dd><span class="careMemberModal__ok">穩定回診</span></dd>
                 </div>
-                <div><dt>合約起迄</dt><dd>2025/07/01 — {{ contractEnd }}</dd></div>
-                <div><dt>特殊備註</dt><dd class="careMemberModal__noteBox">{{ specialNote }}</dd></div>
+                <div>
+                  <dt>合約起迄</dt>
+                  <dd>2025/07/01 — {{ contractEnd }}</dd>
+                </div>
+                <div>
+                  <dt>特殊備註</dt>
+                  <dd class="careMemberModal__noteBox">{{ specialNote }}</dd>
+                </div>
               </dl>
             </section>
           </div>
-          <div class="careMemberModal__basicCol careMemberModal__basicCol--wide">
+          <div
+            class="careMemberModal__basicCol careMemberModal__basicCol--wide"
+          >
             <section class="careMemberModal__cardBlock">
-              <div class="careMemberModal__cardHead careMemberModal__cardHead--split">
-                <span>設備使用履歷</span>
-                <button type="button" class="careMemberModal__btnOutline careMemberModal__btnSm">
+              <div
+                class="careMemberModal__cardHead careMemberModal__cardHead--split"
+              >
+                <span class="careMemberModal__cardHeadTitle">
+                  <span class="careMemberModal__sectionIcon" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      class="careMemberModal__sectionSvg"
+                    >
+                      <rect
+                        x="3"
+                        y="4"
+                        width="18"
+                        height="12"
+                        rx="2"
+                        stroke="currentColor"
+                        stroke-width="1.6"
+                      />
+                      <path
+                        d="M8 20h8"
+                        stroke="currentColor"
+                        stroke-width="1.6"
+                        stroke-linecap="round"
+                      />
+                      <path
+                        d="M12 16v4"
+                        stroke="currentColor"
+                        stroke-width="1.6"
+                        stroke-linecap="round"
+                      />
+                    </svg>
+                  </span>
+                  設備使用履歷
+                </span>
+                <button
+                  type="button"
+                  class="careMemberModal__btnOutline careMemberModal__btnSm"
+                >
                   新增設備配發
                 </button>
               </div>
@@ -247,27 +552,37 @@
                 <div class="careMemberModal__deviceTop">
                   <div>
                     <strong>主控制器（智平衡儀）</strong>
-                    <p class="careMemberModal__muted">型號 MC-200｜序號 SN-882910</p>
+                    <p class="careMemberModal__muted">
+                      型號 MC-200｜序號 SN-882910
+                    </p>
                   </div>
                   <span class="careMemberModal__tagOk">使用中</span>
                 </div>
                 <div class="careMemberModal__progress">
                   <span>使用壽命進度</span>
-                  <div class="careMemberModal__bar"><i style="width: 48%" /></div>
-                  <span class="careMemberModal__muted">177 / 365 天（48%）</span>
+                  <div class="careMemberModal__bar">
+                    <i style="width: 48%" />
+                  </div>
+                  <span class="careMemberModal__muted"
+                    >177 / 365 天（48%）</span
+                  >
                 </div>
               </div>
               <div class="careMemberModal__deviceCard">
                 <div class="careMemberModal__deviceTop">
                   <div>
                     <strong>第六代紅光理療衣</strong>
-                    <p class="careMemberModal__muted">型號 RL-6｜序號 SN-441022</p>
+                    <p class="careMemberModal__muted">
+                      型號 RL-6｜序號 SN-441022
+                    </p>
                   </div>
                   <span class="careMemberModal__tagOk">使用中</span>
                 </div>
                 <div class="careMemberModal__progress">
                   <span>耐用參考進度（建議 180 天）</span>
-                  <div class="careMemberModal__bar"><i style="width: 29%" /></div>
+                  <div class="careMemberModal__bar">
+                    <i style="width: 29%" />
+                  </div>
                   <span class="careMemberModal__muted">53 / 180 天（29%）</span>
                 </div>
               </div>
@@ -276,7 +591,11 @@
         </div>
 
         <footer class="careMemberModal__footer">
-          <button type="button" class="careMemberModal__closeMain" @click="handleClose">
+          <button
+            type="button"
+            class="careMemberModal__closeMain"
+            @click="handleClose"
+          >
             ✕ 關閉
           </button>
         </footer>
@@ -291,7 +610,32 @@
         >
           <div class="careMemberModal__subPanel" @click.stop>
             <header class="careMemberModal__subHead">
-              <strong>儀器操作事件</strong>
+              <span class="careMemberModal__subHeadTitle">
+                <span class="careMemberModal__subHeadIcon" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    class="careMemberModal__sectionSvg"
+                  >
+                    <rect
+                      x="3"
+                      y="4"
+                      width="18"
+                      height="12"
+                      rx="2"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                    />
+                    <path
+                      d="M8 20h8"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </span>
+                <strong>儀器操作事件</strong>
+              </span>
               <button
                 type="button"
                 class="careMemberModal__iconClose"
@@ -306,12 +650,18 @@
               <ul class="careMemberModal__subList">
                 <li>
                   <time>2026/05/02 09:20</time>
-                  <span class="careMemberModal__pill careMemberModal__pill--danger">C 接頭</span>
+                  <span
+                    class="careMemberModal__pill careMemberModal__pill--danger"
+                    >C 接頭</span
+                  >
                   <span>接頭接觸不良（第 5 次）</span>
                 </li>
                 <li>
                   <time>2026/05/01 21:05</time>
-                  <span class="careMemberModal__pill careMemberModal__pill--danger">C 接頭</span>
+                  <span
+                    class="careMemberModal__pill careMemberModal__pill--danger"
+                    >C 接頭</span
+                  >
                   <span>接頭接觸不良（第 4 次）</span>
                 </li>
               </ul>
@@ -321,13 +671,20 @@
               <ul class="careMemberModal__subList">
                 <li>
                   <time>2026/04/30 18:40</time>
-                  <span class="careMemberModal__pill careMemberModal__pill--warn">未完成</span>
+                  <span
+                    class="careMemberModal__pill careMemberModal__pill--warn"
+                    >未完成</span
+                  >
                   <span>當日治療紀錄未上傳</span>
                 </li>
               </ul>
             </section>
             <footer class="careMemberModal__subFooter">
-              <button type="button" class="careMemberModal__btnGhost" @click="instrumentSubOpen = false">
+              <button
+                type="button"
+                class="careMemberModal__btnGhost"
+                @click="instrumentSubOpen = false"
+              >
                 關閉
               </button>
             </footer>
@@ -350,6 +707,8 @@ export interface CareMemberModalMember {
   status: string;
   latestEvent?: string;
   nextFollowUp?: string;
+  /** 上次關懷時間（列表帶入；未傳則用預設示範） */
+  lastCareAt?: string;
 }
 
 const props = defineProps<{
@@ -377,7 +736,10 @@ watch(
 
 const levelTag = computed(() => {
   if (!props.member) return "";
-  if (props.member.riskLabel.includes("高") || props.member.riskLabel.includes("12"))
+  if (
+    props.member.riskLabel.includes("高") ||
+    props.member.riskLabel.includes("12")
+  )
     return "紅2A+";
   if (props.member.riskLabel.includes("7")) return "紅2A+平";
   return "標準追蹤";
@@ -397,10 +759,29 @@ const contractStatus = computed(() => "第四代紅光合約中");
 const contractEnd = computed(() => "2026/06/30");
 const contractDaysLeft = computed(() => 57);
 const lastVisit = computed(() => "2026/04/17 17:00");
-const nextVisit = computed(() => props.member?.nextFollowUp ?? "2026/05/08 11:00");
+const nextVisit = computed(
+  () => props.member?.nextFollowUp ?? "2026/05/08 11:00",
+);
 const alertWeekRange = computed(() => "04/28—05/04");
 const birthday = computed(() => "1968/05/12");
 const phone = computed(() => "0912-345-678");
+const displayLastCare = computed(
+  () => props.member?.lastCareAt ?? "2026/02/12 09:22",
+);
+
+const memberLevelFromParent = computed(() => {
+  const raw = props.member?.memberCode ?? "";
+  const parts = raw.split("·").map((s: string) => s.trim());
+  if (parts.length >= 2) return parts[1];
+  return "VIP";
+});
+
+const phoneFromParent = computed(() => {
+  const raw = props.member?.memberCode ?? "";
+  const parts = raw.split("·").map((s: string) => s.trim());
+  if (parts.length >= 2) return parts[0];
+  return phone.value;
+});
 const branch = computed(() => "台北總院");
 const specialNote = computed(
   () =>
@@ -441,6 +822,105 @@ const historyRows = computed(() => [
     alertTone: "danger" as const,
     note: "醫師：用藥與紅光療程並行，囑咐定期回診。",
   },
+  {
+    light: "danger" as const,
+    source: "LINE",
+    title: "退費風險示警",
+    sub: "APP 留言觸發｜需主管覆核",
+    time: "2026/05/05 09:00",
+    status: "tracking" as const,
+    alert: "",
+    alertTone: "danger" as const,
+    note: "諮詢師：已留訊息請會員回電。",
+  },
+  {
+    light: "warning" as const,
+    source: "照會",
+    title: "紅光使用異常",
+    sub: "連續 3 天使用時間過短",
+    time: "2026/05/04 14:20",
+    status: "tracking" as const,
+    alert: "設備示警：建議電聯確認配戴方式。",
+    alertTone: "warning" as const,
+    note: "",
+  },
+  {
+    light: "normal" as const,
+    source: "電話",
+    title: "關懷紀錄",
+    sub: "關懷完成｜已衛教",
+    time: "2026/05/01 11:30",
+    status: "closed" as const,
+    alert: "",
+    alertTone: "danger" as const,
+    note: "諮詢師：家屬代接，已確認用藥無誤。",
+  },
+  {
+    light: "normal" as const,
+    source: "看診摘要",
+    title: "例行回診",
+    sub: "血壓穩定",
+    time: "2026/04/28 16:45",
+    status: "closed" as const,
+    alert: "",
+    alertTone: "danger" as const,
+    note: "",
+  },
+  {
+    light: "warning" as const,
+    source: "LINE",
+    title: "APP 留言未回覆",
+    sub: "逾 48 小時",
+    time: "2026/04/25 08:15",
+    status: "closed" as const,
+    alert: "",
+    alertTone: "warning" as const,
+    note: "已於隔日完成回覆。",
+  },
+  {
+    light: "danger" as const,
+    source: "照會",
+    title: "設備示警｜治療紀錄遺漏",
+    sub: "系統自動開案",
+    time: "2026/04/22 19:02",
+    status: "tracking" as const,
+    alert: "當日治療紀錄未上傳，已發送提醒。",
+    alertTone: "danger" as const,
+    note: "",
+  },
+  {
+    light: "normal" as const,
+    source: "電話",
+    title: "預約改期",
+    sub: "會員來電改約",
+    time: "2026/04/18 10:00",
+    status: "closed" as const,
+    alert: "",
+    alertTone: "danger" as const,
+    note: "改至 2026/05/08 11:00。",
+  },
+  {
+    light: "normal" as const,
+    source: "看診摘要",
+    title: "營養諮詢",
+    sub: "飲食衛教完成",
+    time: "2026/04/10 13:40",
+    status: "closed" as const,
+    alert: "",
+    alertTone: "danger" as const,
+    note: "",
+  },
+  {
+    light: "warning" as const,
+    source: "LINE",
+    title: "穿戴同步延遲",
+    sub: "手環資料延遲 6 小時",
+    time: "2026/04/08 07:55",
+    status: "closed" as const,
+    alert: "",
+    alertTone: "warning" as const,
+    note: "已恢復同步。",
+  },
 ]);
 
 function handleClose() {
@@ -456,7 +936,7 @@ function emitCare() {
 $teal: #1ba39b;
 $red: #ff4d4f;
 $orange: #faad14;
-$text: #2d3047;
+$text: #1ba39b;
 $muted: #8c8c8c;
 
 .care-member-fade-enter-active,
@@ -501,32 +981,61 @@ $muted: #8c8c8c;
 }
 
 .careMemberModal__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem 1.25rem 0.5rem;
-  gap: 1rem;
+  padding: 1rem 1.25rem 0.35rem;
 }
 
 .careMemberModal__title {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 700;
-  color: $text;
+}
+
+.careMemberModal__careBar {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 1.25rem 0.65rem;
+  border-bottom: 1px solid #eef1f6;
+
+  margin-top: 0.5rem;
+}
+
+.careMemberModal__careBarLeft {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.careMemberModal__careBarRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+
+.careMemberModal__lastCare {
+  margin: 0;
+  font-size: 0.72rem;
+  color: $muted;
+  font-weight: 600;
 }
 
 .careMemberModal__careBtn {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.4rem;
   border: none;
   border-radius: 999px;
-  padding: 0.45rem 1rem;
+  padding: 0.45rem 1.1rem;
   background: $teal;
   color: #fff;
   font-weight: 700;
   cursor: pointer;
   font-size: 0.875rem;
+  img {
+    display: block;
+    flex-shrink: 0;
+  }
   &:hover {
     filter: brightness(1.05);
   }
@@ -539,7 +1048,7 @@ $muted: #8c8c8c;
 }
 
 .careMemberModal__profile {
-  padding: 0 1.25rem 0.75rem;
+  padding: 0.65rem 1.25rem 0.75rem;
 }
 
 .careMemberModal__nameRow {
@@ -551,22 +1060,41 @@ $muted: #8c8c8c;
 
 .careMemberModal__name {
   font-size: 1.35rem;
-  color: $text;
 }
 
 .careMemberModal__levelTag {
   font-size: 0.75rem;
   font-weight: 700;
   color: #fff;
-  background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+  border-radius: 9999px;
+  border: 1px solid #e8b4b0;
+  background: #fdf1f0;
   padding: 0.2rem 0.5rem;
-  border-radius: 6px;
+  color: #c0392b;
 }
 
 .careMemberModal__meta {
   margin: 0.35rem 0 0;
   font-size: 0.8125rem;
   color: $muted;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem 0;
+
+  strong {
+    font-weight: 700;
+  }
+}
+
+.careMemberModal__metaBit {
+  white-space: nowrap;
+}
+
+.careMemberModal__metaSep {
+  color: #c5cdd8;
+  font-weight: 400;
+  margin: 0 0.2rem;
 }
 
 .careMemberModal__statGrid {
@@ -577,8 +1105,8 @@ $muted: #8c8c8c;
 }
 
 .careMemberModal__statCell {
-  border: 1px solid #e8edf5;
-  border-radius: 10px;
+  border-radius: 8px;
+border: 1px solid var(--primary-200-opacity-25, rgba(177, 192, 216, 0.25));
   padding: 0.65rem 0.75rem;
   display: flex;
   flex-direction: column;
@@ -595,16 +1123,16 @@ $muted: #8c8c8c;
 .careMemberModal__statValue {
   font-size: 0.82rem;
   font-weight: 700;
-  color: $text;
+
   line-height: 1.35;
   &--info {
-    color: #1677ff;
+    color: #1BA39B;
   }
   &--danger {
-    color: $red;
+    color: #C0392B;
   }
   &--accent {
-    color: $teal;
+    color: #B85C00;
   }
 }
 
@@ -709,14 +1237,48 @@ $muted: #8c8c8c;
 .careMemberModal__eventCardTop {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 0.4rem;
+  gap: 0.35rem;
+}
+
+.careMemberModal__eventTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.careMemberModal__eventIconWrap {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  &--device {
+    background: rgba(27, 163, 155, 0.12);
+    color: $teal;
+  }
+  &--app {
+    background: rgba(37, 99, 235, 0.1);
+    color: #2563eb;
+  }
+  &--chart {
+    background: rgba(250, 173, 20, 0.14);
+    color: #d48806;
+  }
+}
+
+.careMemberModal__eventSvg {
+  width: 18px;
+  height: 18px;
 }
 
 .careMemberModal__eventTitle {
   font-size: 0.875rem;
   font-weight: 700;
-  color: $text;
 }
 
 .careMemberModal__signal {
@@ -801,6 +1363,13 @@ $muted: #8c8c8c;
   min-height: 0;
   overflow: auto;
   padding: 0.85rem 1.25rem 1rem;
+
+  &--history {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding-top: 0.65rem;
+  }
 }
 
 .careMemberModal__filters {
@@ -817,7 +1386,7 @@ $muted: #8c8c8c;
   border: 1px solid #dbe3f0;
   padding: 0 0.5rem;
   font-size: 0.8rem;
-  color: $text;
+
   background: #fff;
 }
 
@@ -838,22 +1407,50 @@ $muted: #8c8c8c;
   font-size: 0.75rem;
 }
 
+.careMemberModal__searchInput {
+  height: 34px;
+  min-width: 140px;
+  flex: 1;
+  max-width: 220px;
+  border: 1px solid #dbe3f0;
+  border-radius: 8px;
+  padding: 0 0.5rem;
+  font-size: 0.8rem;
+
+  background: #fff;
+}
+
+.careMemberModal__historyTableWrap {
+  flex: 1;
+  min-height: 0;
+  max-height: min(340px, 42vh);
+  overflow: auto;
+  border: 1px solid #edf1f6;
+  border-radius: 10px;
+  background: #fff;
+}
+
 .careMemberModal__historyHead {
   display: grid;
   grid-template-columns: 48px 72px 1fr 120px 88px;
   gap: 0.35rem;
   font-size: 0.7rem;
   font-weight: 700;
-  color: $muted;
-  padding: 0.35rem 0.5rem;
+  color: #5f6b7c;
+  padding: 0.5rem 0.6rem;
   background: #f6f8fc;
-  border-radius: 8px;
+  border-radius: 9px 9px 0 0;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  box-shadow: 0 1px 0 #e8edf5;
+  margin: 0;
 }
 
 .careMemberModal__historyList {
   list-style: none;
-  margin: 0.5rem 0 0;
-  padding: 0;
+  margin: 0;
+  padding: 0.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -903,7 +1500,7 @@ $muted: #8c8c8c;
   min-width: 0;
   strong {
     display: block;
-    color: $text;
+
     font-size: 0.85rem;
   }
 }
@@ -995,11 +1592,36 @@ $muted: #8c8c8c;
   margin-bottom: 0.5rem;
   font-weight: 700;
   font-size: 0.875rem;
-  color: $text;
+
+  gap: 0.5rem;
   &--split {
     flex-wrap: wrap;
     gap: 0.35rem;
   }
+}
+
+.careMemberModal__cardHeadTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.careMemberModal__sectionIcon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(27, 163, 155, 0.1);
+  color: $teal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.careMemberModal__sectionSvg {
+  width: 17px;
+  height: 17px;
 }
 
 .careMemberModal__kv {
@@ -1020,7 +1642,6 @@ $muted: #8c8c8c;
   }
   dd {
     margin: 0;
-    color: $text;
   }
 }
 
@@ -1061,7 +1682,6 @@ $muted: #8c8c8c;
   align-items: flex-start;
   strong {
     font-size: 0.85rem;
-    color: $text;
   }
 }
 
@@ -1141,10 +1761,31 @@ $muted: #8c8c8c;
   justify-content: space-between;
   padding: 0.85rem 1rem;
   border-bottom: 1px solid #eef1f6;
+  gap: 0.75rem;
+}
+
+.careMemberModal__subHeadTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
   strong {
     font-size: 1rem;
-    color: $text;
+
+    font-weight: 700;
   }
+}
+
+.careMemberModal__subHeadIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #f0f4f8;
+  color: #5f6b7c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .careMemberModal__iconClose {
@@ -1166,7 +1807,7 @@ $muted: #8c8c8c;
   h4 {
     margin: 0 0 0.5rem;
     font-size: 0.875rem;
-    color: $text;
+
     small {
       font-weight: 600;
       color: $muted;
@@ -1188,7 +1829,6 @@ $muted: #8c8c8c;
     gap: 0.4rem;
     align-items: center;
     font-size: 0.78rem;
-    color: $text;
   }
   time {
     color: $muted;
