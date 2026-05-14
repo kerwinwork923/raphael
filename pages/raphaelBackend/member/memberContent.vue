@@ -6973,7 +6973,7 @@ const availableEventOptions = computed(() => {
 
 .watchChartCardEmpty {
   width: 100%;
-  min-height: 250px;
+  height: 250px;
   display: flex;
   align-items: center;
   justify-content: center;
