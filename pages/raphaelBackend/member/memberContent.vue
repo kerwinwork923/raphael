@@ -136,6 +136,7 @@
         </div>
         <!-- 表格內容 -->
         <div class="operationModalTable">
+
           <div
             class="operationTableHeader"
             v-if="operationRecordMode === 'stability'"
@@ -144,11 +145,13 @@
             <div class="operationTableHeaderItem">事件</div>
             <div class="operationTableHeaderItem">溫度</div>
           </div>
+
           <div class="operationTableHeader" v-else>
             <div class="operationTableHeaderItem">操作日期</div>
             <div class="operationTableHeaderItem">操作時間</div>
             <div class="operationTableHeaderItem">操作事件</div>
           </div>
+
           <div class="operationTableHR" />
 
           <div class="operationTableBody">
@@ -1044,13 +1047,20 @@
               </div>
             </div>
 
-            <div class="watchChartsGrid" v-if="watchChart.labels.length">
+            <div class="watchChartsGrid" v-if="watchChart.hasAny">
               <div
                 class="watchChartCard watchChartCardClickable"
                 @click="openWatchMetricPage('heartRate')"
               >
                 <h4>心率</h4>
-                <canvas ref="heartRateCanvas" class="watchChartCanvas"></canvas>
+                <canvas
+                  v-if="watchChart.heartRate.labels.length"
+                  ref="heartRateCanvas"
+                  class="watchChartCanvas"
+                ></canvas>
+                <div v-else class="watchChartCardEmpty">
+                  沒有最近 7 次的紀錄
+                </div>
               </div>
 
               <div
@@ -1058,7 +1068,14 @@
                 @click="openWatchMetricPage('spo2')"
               >
                 <h4>血氧</h4>
-                <canvas ref="spo2Canvas" class="watchChartCanvas"></canvas>
+                <canvas
+                  v-if="watchChart.spo2.labels.length"
+                  ref="spo2Canvas"
+                  class="watchChartCanvas"
+                ></canvas>
+                <div v-else class="watchChartCardEmpty">
+                  沒有最近 7 次的紀錄
+                </div>
               </div>
 
               <div
@@ -1066,7 +1083,14 @@
                 @click="openWatchMetricPage('bp')"
               >
                 <h4>血壓</h4>
-                <canvas ref="bpCanvas" class="watchChartCanvas"></canvas>
+                <canvas
+                  v-if="watchChart.bp.labels.length"
+                  ref="bpCanvas"
+                  class="watchChartCanvas"
+                ></canvas>
+                <div v-else class="watchChartCardEmpty">
+                  沒有最近 7 次的紀錄
+                </div>
               </div>
 
               <div
@@ -1074,7 +1098,14 @@
                 @click="openWatchMetricPage('stress')"
               >
                 <h4>壓力</h4>
-                <canvas ref="stressCanvas" class="watchChartCanvas"></canvas>
+                <canvas
+                  v-if="watchChart.stress.labels.length"
+                  ref="stressCanvas"
+                  class="watchChartCanvas"
+                ></canvas>
+                <div v-else class="watchChartCardEmpty">
+                  沒有最近 7 次的紀錄
+                </div>
               </div>
 
               <div
@@ -1082,7 +1113,14 @@
                 @click="openWatchMetricPage('sleep')"
               >
                 <h4>睡眠</h4>
-                <canvas ref="sleepCanvas" class="watchChartCanvas"></canvas>
+                <canvas
+                  v-if="watchChart.sleep.labels.length"
+                  ref="sleepCanvas"
+                  class="watchChartCanvas"
+                ></canvas>
+                <div v-else class="watchChartCardEmpty">
+                  沒有最近 7 次的紀錄
+                </div>
               </div>
 
               <div
@@ -1090,7 +1128,14 @@
                 @click="openWatchMetricPage('temp')"
               >
                 <h4>溫度</h4>
-                <canvas ref="tempCanvas" class="watchChartCanvas"></canvas>
+                <canvas
+                  v-if="watchChart.temp.labels.length"
+                  ref="tempCanvas"
+                  class="watchChartCanvas"
+                ></canvas>
+                <div v-else class="watchChartCardEmpty">
+                  沒有最近 7 次的紀錄
+                </div>
               </div>
 
               <div
@@ -1098,7 +1143,14 @@
                 @click="openWatchMetricPage('steps')"
               >
                 <h4>運動</h4>
-                <canvas ref="stepsCanvas" class="watchChartCanvas"></canvas>
+                <canvas
+                  v-if="watchChart.steps.labels.length"
+                  ref="stepsCanvas"
+                  class="watchChartCanvas"
+                ></canvas>
+                <div v-else class="watchChartCardEmpty">
+                  沒有最近 7 次的紀錄
+                </div>
               </div>
 
               <div
@@ -1106,7 +1158,14 @@
                 @click="openWatchMetricPage('hrv')"
               >
                 <h4>HRV</h4>
-                <canvas ref="hrvCanvas" class="watchChartCanvas"></canvas>
+                <canvas
+                  v-if="watchChart.hrv.labels.length"
+                  ref="hrvCanvas"
+                  class="watchChartCanvas"
+                ></canvas>
+                <div v-else class="watchChartCardEmpty">
+                  沒有最近 7 次的紀錄
+                </div>
               </div>
 
               <div
@@ -1114,7 +1173,14 @@
                 @click="openWatchMetricPage('body')"
               >
                 <h4>身體組成</h4>
-                <canvas ref="bodyCanvas" class="watchChartCanvas"></canvas>
+                <canvas
+                  v-if="watchChart.body.labels.length"
+                  ref="bodyCanvas"
+                  class="watchChartCanvas"
+                ></canvas>
+                <div v-else class="watchChartCardEmpty">
+                  沒有最近 7 次的紀錄
+                </div>
               </div>
             </div>
 
@@ -1140,16 +1206,20 @@
               </div>
             </div>
 
-            <div class="watchChartsGrid" v-if="acerRingChart.labels.length">
+            <div class="watchChartsGrid" v-if="acerRingChart.hasAny">
               <div
                 class="watchChartCard watchChartCardClickable"
                 @click="openAcerMetricPage('heartRate')"
               >
                 <h4>心率</h4>
                 <canvas
+                  v-if="acerRingChart.heartRate.labels.length"
                   ref="acerHeartRateCanvas"
                   class="watchChartCanvas"
                 ></canvas>
+                <div v-else class="watchChartCardEmpty">
+                  沒有最近 7 次的紀錄
+                </div>
               </div>
 
               <div
@@ -1157,7 +1227,14 @@
                 @click="openAcerMetricPage('spo2')"
               >
                 <h4>血氧</h4>
-                <canvas ref="acerSpo2Canvas" class="watchChartCanvas"></canvas>
+                <canvas
+                  v-if="acerRingChart.spo2.labels.length"
+                  ref="acerSpo2Canvas"
+                  class="watchChartCanvas"
+                ></canvas>
+                <div v-else class="watchChartCardEmpty">
+                  沒有最近 7 次的紀錄
+                </div>
               </div>
 
               <div
@@ -1165,7 +1242,14 @@
                 @click="openAcerMetricPage('sleep')"
               >
                 <h4>睡眠</h4>
-                <canvas ref="acerSleepCanvas" class="watchChartCanvas"></canvas>
+                <canvas
+                  v-if="acerRingChart.sleep.labels.length"
+                  ref="acerSleepCanvas"
+                  class="watchChartCanvas"
+                ></canvas>
+                <div v-else class="watchChartCardEmpty">
+                  沒有最近 7 次的紀錄
+                </div>
               </div>
 
               <div
@@ -1173,7 +1257,14 @@
                 @click="openAcerMetricPage('temp')"
               >
                 <h4>溫度</h4>
-                <canvas ref="acerTempCanvas" class="watchChartCanvas"></canvas>
+                <canvas
+                  v-if="acerRingChart.temp.labels.length"
+                  ref="acerTempCanvas"
+                  class="watchChartCanvas"
+                ></canvas>
+                <div v-else class="watchChartCardEmpty">
+                  沒有最近 7 次的紀錄
+                </div>
               </div>
 
               <div
@@ -1181,7 +1272,14 @@
                 @click="openAcerMetricPage('activity')"
               >
                 <h4>運動</h4>
-                <canvas ref="acerStepsCanvas" class="watchChartCanvas"></canvas>
+                <canvas
+                  v-if="acerRingChart.steps.labels.length"
+                  ref="acerStepsCanvas"
+                  class="watchChartCanvas"
+                ></canvas>
+                <div v-else class="watchChartCardEmpty">
+                  沒有最近 7 次的紀錄
+                </div>
               </div>
             </div>
             <div class="watchChartEmpty" v-else>尚無宏碁指環紀錄資料</div>
@@ -1206,16 +1304,20 @@
               </div>
             </div>
 
-            <div class="watchChartsGrid" v-if="garminChart.labels.length">
+            <div class="watchChartsGrid" v-if="garminChart.hasAny">
               <div
                 class="watchChartCard watchChartCardClickable"
                 @click="openGarminMetricPage('heartRate')"
               >
                 <h4>心率</h4>
                 <canvas
+                  v-if="garminChart.heartRate.labels.length"
                   ref="garminHeartRateCanvas"
                   class="watchChartCanvas"
                 ></canvas>
+                <div v-else class="watchChartCardEmpty">
+                  沒有最近 7 次的紀錄
+                </div>
               </div>
 
               <div
@@ -1224,9 +1326,13 @@
               >
                 <h4>血氧</h4>
                 <canvas
+                  v-if="garminChart.spo2.labels.length"
                   ref="garminSpo2Canvas"
                   class="watchChartCanvas"
                 ></canvas>
+                <div v-else class="watchChartCardEmpty">
+                  沒有最近 7 次的紀錄
+                </div>
               </div>
 
               <div
@@ -1235,9 +1341,13 @@
               >
                 <h4>壓力</h4>
                 <canvas
+                  v-if="garminChart.stress.labels.length"
                   ref="garminStressCanvas"
                   class="watchChartCanvas"
                 ></canvas>
+                <div v-else class="watchChartCardEmpty">
+                  沒有最近 7 次的紀錄
+                </div>
               </div>
 
               <div
@@ -1246,9 +1356,13 @@
               >
                 <h4>睡眠</h4>
                 <canvas
+                  v-if="garminChart.sleep.labels.length"
                   ref="garminSleepCanvas"
                   class="watchChartCanvas"
                 ></canvas>
+                <div v-else class="watchChartCardEmpty">
+                  沒有最近 7 次的紀錄
+                </div>
               </div>
 
               <div
@@ -1257,9 +1371,13 @@
               >
                 <h4>溫度</h4>
                 <canvas
+                  v-if="garminChart.temp.labels.length"
                   ref="garminTempCanvas"
                   class="watchChartCanvas"
                 ></canvas>
+                <div v-else class="watchChartCardEmpty">
+                  沒有最近 7 次的紀錄
+                </div>
               </div>
             </div>
 
@@ -3087,38 +3205,72 @@ const watchChart = computed(() => {
     if (Number.isNaN(ms)) return false;
     return ms >= fromMs && ms <= toMs;
   };
+  const hasRange = fromMs !== null && toMs !== null;
 
-  const dateSet = new Set<string>();
-  (raw.Hb || []).forEach((x: any) => {
-    const d = toDateKey(x.Date || "");
-    if (d && inRange(d)) dateSet.add(d);
-  });
-  (raw.Spo2 || []).forEach((x: any) => {
-    const d = toDateKey(x.Date || "");
-    if (d && inRange(d)) dateSet.add(d);
-  });
-  (raw.Step || []).forEach((x: any) => {
-    const d = toDateKey(x.Date || "");
-    if (d && inRange(d)) dateSet.add(d);
-  });
-  (raw.Tp || []).forEach((x: any) => {
-    const d = toDateKey(x.Date || "");
-    if (d && inRange(d)) dateSet.add(d);
-  });
-  (raw.Bp || []).forEach((x: any) => {
-    const d = toDateKey(x.time || "");
-    if (d && inRange(d)) dateSet.add(d);
-  });
-  (raw.Sleep || []).forEach((x: any) => {
-    const d = toDateKey(x.StartTime || "");
-    if (d && inRange(d)) dateSet.add(d);
-  });
-  (raw.Bia || []).forEach((x: any) => {
-    const d = toDateKey(x.time || "");
-    if (d && inRange(d)) dateSet.add(d);
-  });
+  // 判斷某欄位是否有實際值（API 沒資料的日期會回傳空字串）
+  const hasNum = (v: any) => {
+    const n = Number(v);
+    return v !== null && v !== undefined && v !== "" && !Number.isNaN(n) && n > 0;
+  };
 
-  let dates = Array.from(dateSet).sort();
+  // 依各自的資料來源取最近 7 次有紀錄的日期（沒有指定日期區間時）
+  const buildDates = (
+    list: any[],
+    dateOf: (x: any) => string,
+    hasValue?: (x: any) => boolean
+  ) => {
+    const set = new Set<string>();
+    (list || []).forEach((x: any) => {
+      if (hasValue && !hasValue(x)) return;
+      const d = dateOf(x);
+      if (d && inRange(d)) set.add(d);
+    });
+    let dates = Array.from(set).sort();
+    if (!hasRange && dates.length > 7) dates = dates.slice(-7);
+    return dates;
+  };
+  const fmt = (dates: string[]) =>
+    dates.map((d) => d.slice(5).replace("-", "/"));
+
+  const hrDates = buildDates(
+    raw.Hb,
+    (x) => toDateKey(x.Date || ""),
+    (x) => hasNum(x.HeartrateMax) || hasNum(x.HeartrateMin)
+  );
+  const spo2Dates = buildDates(
+    raw.Spo2,
+    (x) => toDateKey(x.Date || ""),
+    (x) => hasNum(x.Spo2Max) || hasNum(x.Spo2Min)
+  );
+  const tempDates = buildDates(
+    raw.Tp,
+    (x) => toDateKey(x.Date || ""),
+    (x) => hasNum(x.TpMax) || hasNum(x.TpMin)
+  );
+  const stepDates = buildDates(
+    raw.Step,
+    (x) => toDateKey(x.Date || ""),
+    (x) => hasNum(x.stepsSUM)
+  );
+  const bpDates = buildDates(
+    raw.Bp,
+    (x) => toDateKey(x.time || ""),
+    (x) => hasNum(x.sys) || hasNum(x.dia)
+  );
+  const sleepDates = buildDates(
+    raw.Sleep,
+    (x) => toDateKey(x.StartTime || ""),
+    (x) =>
+      hasNum(x.ComfortCount) ||
+      hasNum(x.RemCount) ||
+      hasNum(x.LightCount) ||
+      hasNum(x.AwakeCount)
+  );
+  const biaDates = buildDates(
+    raw.Bia,
+    (x) => toDateKey(x.time || ""),
+    (x) => hasNum(x.water) || hasNum(x.fat) || hasNum(x.skm)
+  );
 
   const hbMap = new Map<string, any>();
   (raw.Hb || []).forEach((x: any) => {
@@ -3171,252 +3323,272 @@ const watchChart = computed(() => {
     biaGroup[d].push(x);
   });
 
-  // 華碩 API 也可能回傳空字串，保留日期軸與 0 值，避免整段圖表消失
-
-  if (fromMs === null && toMs === null && dates.length > 7)
-    dates = dates.slice(-7);
-  const labels = dates.map((d) => d.slice(5).replace("-", "/"));
-
-  const heartRateMin = dates.map((d) =>
-    Number(hbMap.get(d)?.HeartrateMin || 0)
+  const heartRate = {
+    labels: fmt(hrDates),
+    max: hrDates.map((d) => Number(hbMap.get(d)?.HeartrateMax || 0)),
+    min: hrDates.map((d) => Number(hbMap.get(d)?.HeartrateMin || 0)),
+  };
+  const spo2 = {
+    labels: fmt(spo2Dates),
+    max: spo2Dates.map((d) => Number(spo2Map.get(d)?.Spo2Max || 0)),
+    min: spo2Dates.map((d) => Number(spo2Map.get(d)?.Spo2Min || 0)),
+  };
+  const temp = {
+    labels: fmt(tempDates),
+    max: tempDates.map((d) => Number(tpMap.get(d)?.TpMax || 0)),
+    min: tempDates.map((d) => Number(tpMap.get(d)?.TpMin || 0)),
+  };
+  const stepsArr = stepDates.map((d) =>
+    Number(stepMap.get(d)?.stepsSUM || 0)
   );
-  const heartRateMax = dates.map((d) =>
-    Number(hbMap.get(d)?.HeartrateMax || 0)
+  const steps = {
+    labels: fmt(stepDates),
+    steps: stepsArr,
+  };
+
+  const bpAvg = (key: string) =>
+    bpDates.map((d) => {
+      const arr = bpGroup[d] || [];
+      if (!arr.length) return 0;
+      return Math.round(
+        arr.reduce((s: number, x: any) => s + Number(x[key] || 0), 0) /
+          arr.length
+      );
+    });
+  const bpLabels = fmt(bpDates);
+  const bp = { labels: bpLabels, sys: bpAvg("sys"), dia: bpAvg("dia") };
+  const stress = { labels: bpLabels, stress: bpAvg("deStressIndex") };
+  const hrv = { labels: bpLabels, hrv: bpAvg("rmssd") };
+
+  const sleepDeep = sleepDates.map((d) => sleepGroup[d]?.deep || 0);
+  const sleepRem = sleepDates.map((d) => sleepGroup[d]?.rem || 0);
+  const sleepLight = sleepDates.map((d) => sleepGroup[d]?.light || 0);
+  const sleepAwake = sleepDates.map((d) => sleepGroup[d]?.awake || 0);
+  const sleep = {
+    labels: fmt(sleepDates),
+    deep: sleepDeep,
+    rem: sleepRem,
+    light: sleepLight,
+    awake: sleepAwake,
+  };
+
+  const body = {
+    labels: fmt(biaDates),
+    water: biaDates.map((d) => {
+      const arr = biaGroup[d] || [];
+      if (!arr.length) return 0;
+      return Number(arr[arr.length - 1].water || 0) / 10;
+    }),
+    fat: biaDates.map((d) => {
+      const arr = biaGroup[d] || [];
+      if (!arr.length) return 0;
+      return Number(arr[arr.length - 1].fat || 0) / 10;
+    }),
+    muscle: biaDates.map((d) => {
+      const arr = biaGroup[d] || [];
+      if (!arr.length) return 0;
+      return Number(arr[arr.length - 1].skm || 0) / 10;
+    }),
+  };
+
+  const hasAny = !!(
+    heartRate.labels.length ||
+    spo2.labels.length ||
+    temp.labels.length ||
+    steps.labels.length ||
+    bp.labels.length ||
+    sleep.labels.length ||
+    body.labels.length
   );
-  const spo2Min = dates.map((d) => Number(spo2Map.get(d)?.Spo2Min || 0));
-  const spo2Max = dates.map((d) => Number(spo2Map.get(d)?.Spo2Max || 0));
-  const tempMin = dates.map((d) => Number(tpMap.get(d)?.TpMin || 0));
-  const tempMax = dates.map((d) => Number(tpMap.get(d)?.TpMax || 0));
-  const steps = dates.map((d) => Number(stepMap.get(d)?.stepsSUM || 0));
-
-  const bpSys = dates.map((d) => {
-    const arr = bpGroup[d] || [];
-    if (!arr.length) return 0;
-    return Math.round(
-      arr.reduce((s: number, x: any) => s + Number(x.sys || 0), 0) / arr.length
-    );
-  });
-  const bpDia = dates.map((d) => {
-    const arr = bpGroup[d] || [];
-    if (!arr.length) return 0;
-    return Math.round(
-      arr.reduce((s: number, x: any) => s + Number(x.dia || 0), 0) / arr.length
-    );
-  });
-  const stress = dates.map((d) => {
-    const arr = bpGroup[d] || [];
-    if (!arr.length) return 0;
-    return Math.round(
-      arr.reduce((s: number, x: any) => s + Number(x.deStressIndex || 0), 0) /
-        arr.length
-    );
-  });
-  const hrv = dates.map((d) => {
-    const arr = bpGroup[d] || [];
-    if (!arr.length) return 0;
-    return Math.round(
-      arr.reduce((s: number, x: any) => s + Number(x.rmssd || 0), 0) /
-        arr.length
-    );
-  });
-
-  const sleepDeep = dates.map((d) => sleepGroup[d]?.deep || 0);
-  const sleepRem = dates.map((d) => sleepGroup[d]?.rem || 0);
-  const sleepLight = dates.map((d) => sleepGroup[d]?.light || 0);
-  const sleepAwake = dates.map((d) => sleepGroup[d]?.awake || 0);
-  const sleepTotal = dates.map(
-    (_, i) => sleepDeep[i] + sleepRem[i] + sleepLight[i] + sleepAwake[i]
-  );
-  const sleepMax = Math.max(...sleepTotal, 1);
-
-  const bodyWater = dates.map((d) => {
-    const arr = biaGroup[d] || [];
-    if (!arr.length) return 0;
-    const last = arr[arr.length - 1];
-    return Number(last.water || 0) / 10;
-  });
-  const bodyFat = dates.map((d) => {
-    const arr = biaGroup[d] || [];
-    if (!arr.length) return 0;
-    const last = arr[arr.length - 1];
-    return Number(last.fat || 0) / 10;
-  });
-  const bodyMuscle = dates.map((d) => {
-    const arr = biaGroup[d] || [];
-    if (!arr.length) return 0;
-    const last = arr[arr.length - 1];
-    return Number(last.skm || 0) / 10;
-  });
 
   return {
-    labels,
-    heartRateMin,
-    heartRateMax,
-    spo2Min,
-    spo2Max,
-    bpSys,
-    bpDia,
+    hasAny,
+    heartRate,
+    spo2,
+    bp,
     stress,
-    tempMin,
-    tempMax,
+    sleep,
+    temp,
     steps,
     hrv,
-    sleepDeep,
-    sleepRem,
-    sleepLight,
-    sleepAwake,
-    sleepTotal,
-    sleepMax,
-    stepMax: Math.max(...steps, 1),
-    bodyWater,
-    bodyFat,
-    bodyMuscle,
+    body,
   };
 });
 
 async function renderWatchCharts() {
   await nextTick();
-  const labels = watchChart.value.labels;
-  if (!labels.length) {
+  const data = watchChart.value;
+  if (!data.hasAny) {
     destroyWatchCharts();
     return;
   }
 
-  createLineChart("heartRate", heartRateCanvas.value, labels, [
-    {
-      label: "最高",
-      data: watchChart.value.heartRateMax,
-      borderColor: "#7cbc28",
-      backgroundColor: "#7cbc28",
-    },
-    {
-      label: "最低",
-      data: watchChart.value.heartRateMin,
-      borderColor: "#27a3a9",
-      backgroundColor: "#27a3a9",
-    },
-  ]);
+  const renderOrSkip = (
+    key: keyof typeof watchCharts,
+    labels: string[],
+    render: () => void
+  ) => {
+    if (labels.length) {
+      render();
+    } else {
+      watchCharts[key]?.destroy();
+      watchCharts[key] = null;
+    }
+  };
 
-  createLineChart("spo2", spo2Canvas.value, labels, [
-    {
-      label: "最高",
-      data: watchChart.value.spo2Max,
-      borderColor: "#7cbc28",
-      backgroundColor: "#7cbc28",
-    },
-    {
-      label: "最低",
-      data: watchChart.value.spo2Min,
-      borderColor: "#27a3a9",
-      backgroundColor: "#27a3a9",
-    },
-  ]);
-
-  createLineChart("bp", bpCanvas.value, labels, [
-    {
-      label: "收縮壓",
-      data: watchChart.value.bpSys,
-      borderColor: "#7cbc28",
-      backgroundColor: "#7cbc28",
-    },
-    {
-      label: "舒張壓",
-      data: watchChart.value.bpDia,
-      borderColor: "#27a3a9",
-      backgroundColor: "#27a3a9",
-    },
-  ]);
-
-  createLineChart("stress", stressCanvas.value, labels, [
-    {
-      label: "舒壓指數",
-      data: watchChart.value.stress,
-      borderColor: "#7cbc28",
-      backgroundColor: "#7cbc28",
-    },
-  ]);
-
-  createBarChart(
-    "sleep",
-    sleepCanvas.value,
-    labels,
-    [
+  renderOrSkip("heartRate", data.heartRate.labels, () =>
+    createLineChart("heartRate", heartRateCanvas.value, data.heartRate.labels, [
       {
-        label: "深眠",
-        data: watchChart.value.sleepDeep,
-        backgroundColor: "#3f8c25",
+        label: "最高",
+        data: data.heartRate.max,
+        borderColor: "#7cbc28",
+        backgroundColor: "#7cbc28",
       },
       {
-        label: "REM",
-        data: watchChart.value.sleepRem,
-        backgroundColor: "#74b84a",
+        label: "最低",
+        data: data.heartRate.min,
+        borderColor: "#27a3a9",
+        backgroundColor: "#27a3a9",
       },
-      {
-        label: "淺眠",
-        data: watchChart.value.sleepLight,
-        backgroundColor: "#a4ce77",
-      },
-      {
-        label: "清醒",
-        data: watchChart.value.sleepAwake,
-        backgroundColor: "#d3e8b8",
-      },
-    ],
-    true
+    ])
   );
 
-  createLineChart("temp", tempCanvas.value, labels, [
-    {
-      label: "最高",
-      data: watchChart.value.tempMax,
-      borderColor: "#7cbc28",
-      backgroundColor: "#7cbc28",
-    },
-    {
-      label: "最低",
-      data: watchChart.value.tempMin,
-      borderColor: "#27a3a9",
-      backgroundColor: "#27a3a9",
-    },
-  ]);
+  renderOrSkip("spo2", data.spo2.labels, () =>
+    createLineChart("spo2", spo2Canvas.value, data.spo2.labels, [
+      {
+        label: "最高",
+        data: data.spo2.max,
+        borderColor: "#7cbc28",
+        backgroundColor: "#7cbc28",
+      },
+      {
+        label: "最低",
+        data: data.spo2.min,
+        borderColor: "#27a3a9",
+        backgroundColor: "#27a3a9",
+      },
+    ])
+  );
 
-  createBarChart("steps", stepsCanvas.value, labels, [
-    {
-      label: "總步數",
-      data: watchChart.value.steps,
-      backgroundColor: "#7cbc28",
-    },
-  ]);
+  renderOrSkip("bp", data.bp.labels, () =>
+    createLineChart("bp", bpCanvas.value, data.bp.labels, [
+      {
+        label: "收縮壓",
+        data: data.bp.sys,
+        borderColor: "#7cbc28",
+        backgroundColor: "#7cbc28",
+      },
+      {
+        label: "舒張壓",
+        data: data.bp.dia,
+        borderColor: "#27a3a9",
+        backgroundColor: "#27a3a9",
+      },
+    ])
+  );
 
-  createLineChart("hrv", hrvCanvas.value, labels, [
-    {
-      label: "RMSSD",
-      data: watchChart.value.hrv,
-      borderColor: "#7cbc28",
-      backgroundColor: "#7cbc28",
-    },
-  ]);
+  renderOrSkip("stress", data.stress.labels, () =>
+    createLineChart("stress", stressCanvas.value, data.stress.labels, [
+      {
+        label: "舒壓指數",
+        data: data.stress.stress,
+        borderColor: "#7cbc28",
+        backgroundColor: "#7cbc28",
+      },
+    ])
+  );
 
-  createLineChart("body", bodyCanvas.value, labels, [
-    {
-      label: "水分",
-      data: watchChart.value.bodyWater,
-      borderColor: "#27a3a9",
-      backgroundColor: "#27a3a9",
-    },
-    {
-      label: "體脂肪",
-      data: watchChart.value.bodyFat,
-      borderColor: "#7cbc28",
-      backgroundColor: "#7cbc28",
-    },
-    {
-      label: "肌肉量",
-      data: watchChart.value.bodyMuscle,
-      borderColor: "#2f6fa3",
-      backgroundColor: "#2f6fa3",
-    },
-  ]);
+  renderOrSkip("sleep", data.sleep.labels, () =>
+    createBarChart(
+      "sleep",
+      sleepCanvas.value,
+      data.sleep.labels,
+      [
+        {
+          label: "深眠",
+          data: data.sleep.deep,
+          backgroundColor: "#3f8c25",
+        },
+        {
+          label: "REM",
+          data: data.sleep.rem,
+          backgroundColor: "#74b84a",
+        },
+        {
+          label: "淺眠",
+          data: data.sleep.light,
+          backgroundColor: "#a4ce77",
+        },
+        {
+          label: "清醒",
+          data: data.sleep.awake,
+          backgroundColor: "#d3e8b8",
+        },
+      ],
+      true
+    )
+  );
+
+  renderOrSkip("temp", data.temp.labels, () =>
+    createLineChart("temp", tempCanvas.value, data.temp.labels, [
+      {
+        label: "最高",
+        data: data.temp.max,
+        borderColor: "#7cbc28",
+        backgroundColor: "#7cbc28",
+      },
+      {
+        label: "最低",
+        data: data.temp.min,
+        borderColor: "#27a3a9",
+        backgroundColor: "#27a3a9",
+      },
+    ])
+  );
+
+  renderOrSkip("steps", data.steps.labels, () =>
+    createBarChart("steps", stepsCanvas.value, data.steps.labels, [
+      {
+        label: "總步數",
+        data: data.steps.steps,
+        backgroundColor: "#7cbc28",
+      },
+    ])
+  );
+
+  renderOrSkip("hrv", data.hrv.labels, () =>
+    createLineChart("hrv", hrvCanvas.value, data.hrv.labels, [
+      {
+        label: "RMSSD",
+        data: data.hrv.hrv,
+        borderColor: "#7cbc28",
+        backgroundColor: "#7cbc28",
+      },
+    ])
+  );
+
+  renderOrSkip("body", data.body.labels, () =>
+    createLineChart("body", bodyCanvas.value, data.body.labels, [
+      {
+        label: "水分",
+        data: data.body.water,
+        borderColor: "#27a3a9",
+        backgroundColor: "#27a3a9",
+      },
+      {
+        label: "體脂肪",
+        data: data.body.fat,
+        borderColor: "#7cbc28",
+        backgroundColor: "#7cbc28",
+      },
+      {
+        label: "肌肉量",
+        data: data.body.muscle,
+        borderColor: "#2f6fa3",
+        backgroundColor: "#2f6fa3",
+      },
+    ])
+  );
 }
 
 const acerRingChart = computed(() => {
@@ -3428,30 +3600,58 @@ const acerRingChart = computed(() => {
     if (Number.isNaN(ms)) return false;
     return ms >= fromMs && ms <= toMs;
   };
+  const hasRange = fromMs !== null && toMs !== null;
 
-  const dateSet = new Set<string>();
-  (raw.Hb || []).forEach((x: any) => {
-    const d = toDateKey(x.Date || "");
-    if (d && inRange(d)) dateSet.add(d);
-  });
-  (raw.Spo2 || []).forEach((x: any) => {
-    const d = toDateKey(x.Date || "");
-    if (d && inRange(d)) dateSet.add(d);
-  });
-  (raw.Tp || []).forEach((x: any) => {
-    const d = toDateKey(x.Date || "");
-    if (d && inRange(d)) dateSet.add(d);
-  });
-  (raw.Sleep || []).forEach((x: any) => {
-    const d = parseAcerRawDateTimeToDateKey(x.RawDateTime || "");
-    if (d && inRange(d)) dateSet.add(d);
-  });
-  (raw.Activity || []).forEach((x: any) => {
-    const d = parseAcerRawDateTimeToDateKey(x.RawDateTime || "");
-    if (d && inRange(d)) dateSet.add(d);
-  });
+  const hasNum = (v: any) => {
+    const n = Number(v);
+    return v !== null && v !== undefined && v !== "" && !Number.isNaN(n) && n > 0;
+  };
 
-  let dates = Array.from(dateSet).sort();
+  // 依各自的資料來源取最近 7 次有紀錄的日期（沒有指定日期區間時）
+  const buildDates = (
+    list: any[],
+    dateOf: (x: any) => string,
+    hasValue?: (x: any) => boolean
+  ) => {
+    const set = new Set<string>();
+    (list || []).forEach((x: any) => {
+      if (hasValue && !hasValue(x)) return;
+      const d = dateOf(x);
+      if (d && inRange(d)) set.add(d);
+    });
+    let dates = Array.from(set).sort();
+    if (!hasRange && dates.length > 7) dates = dates.slice(-7);
+    return dates;
+  };
+  const fmt = (dates: string[]) =>
+    dates.map((d) => d.slice(5).replace("-", "/"));
+
+  const hrDates = buildDates(
+    raw.Hb,
+    (x) => toDateKey(x.Date || ""),
+    (x) => hasNum(x.HeartrateMax) || hasNum(x.HeartrateMin)
+  );
+  const spo2Dates = buildDates(
+    raw.Spo2,
+    (x) => toDateKey(x.Date || ""),
+    (x) => hasNum(x.Spo2Max) || hasNum(x.Spo2Min)
+  );
+  const tempDates = buildDates(
+    raw.Tp,
+    (x) => toDateKey(x.Date || ""),
+    (x) => hasNum(x.TpMax) || hasNum(x.TpMin)
+  );
+  const sleepDates = buildDates(
+    raw.Sleep,
+    (x) => parseAcerRawDateTimeToDateKey(x.RawDateTime || ""),
+    (x) =>
+      hasNum(x.ComfortCount) || hasNum(x.RemCount) || hasNum(x.LightCount)
+  );
+  const activityDates = buildDates(
+    raw.Activity,
+    (x) => parseAcerRawDateTimeToDateKey(x.RawDateTime || ""),
+    (x) => hasNum(x.step)
+  );
 
   const hbMap = new Map<string, any>();
   (raw.Hb || []).forEach((x: any) => {
@@ -3490,27 +3690,42 @@ const acerRingChart = computed(() => {
     activityGroup[d] += Number(x.step || 0);
   });
 
-  // 宏碁 API 常回傳空值字串，仍保留日期軸與 0 值，避免整段圖表消失
-
-  if (fromMs === null && toMs === null && dates.length > 7) {
-    dates = dates.slice(-7);
-  }
-
-  const labels = dates.map((d) => d.slice(5).replace("-", "/"));
-  return {
-    labels,
-    heartRateMax: dates.map((d) => Number(hbMap.get(d)?.HeartrateMax || 0)),
-    heartRateMin: dates.map((d) => Number(hbMap.get(d)?.HeartrateMin || 0)),
-    spo2Max: dates.map((d) => Number(spo2Map.get(d)?.Spo2Max || 0)),
-    spo2Min: dates.map((d) => Number(spo2Map.get(d)?.Spo2Min || 0)),
-    tempMax: dates.map((d) => Number(tpMap.get(d)?.TpMax || 0)),
-    tempMin: dates.map((d) => Number(tpMap.get(d)?.TpMin || 0)),
-    sleepDeep: dates.map((d) => sleepGroup[d]?.deep || 0),
-    sleepRem: dates.map((d) => sleepGroup[d]?.rem || 0),
-    sleepLight: dates.map((d) => sleepGroup[d]?.light || 0),
-    sleepAwake: dates.map((d) => sleepGroup[d]?.awake || 0),
-    steps: dates.map((d) => activityGroup[d] || 0),
+  const heartRate = {
+    labels: fmt(hrDates),
+    max: hrDates.map((d) => Number(hbMap.get(d)?.HeartrateMax || 0)),
+    min: hrDates.map((d) => Number(hbMap.get(d)?.HeartrateMin || 0)),
   };
+  const spo2 = {
+    labels: fmt(spo2Dates),
+    max: spo2Dates.map((d) => Number(spo2Map.get(d)?.Spo2Max || 0)),
+    min: spo2Dates.map((d) => Number(spo2Map.get(d)?.Spo2Min || 0)),
+  };
+  const temp = {
+    labels: fmt(tempDates),
+    max: tempDates.map((d) => Number(tpMap.get(d)?.TpMax || 0)),
+    min: tempDates.map((d) => Number(tpMap.get(d)?.TpMin || 0)),
+  };
+  const sleep = {
+    labels: fmt(sleepDates),
+    deep: sleepDates.map((d) => sleepGroup[d]?.deep || 0),
+    rem: sleepDates.map((d) => sleepGroup[d]?.rem || 0),
+    light: sleepDates.map((d) => sleepGroup[d]?.light || 0),
+    awake: sleepDates.map((d) => sleepGroup[d]?.awake || 0),
+  };
+  const steps = {
+    labels: fmt(activityDates),
+    steps: activityDates.map((d) => activityGroup[d] || 0),
+  };
+
+  const hasAny = !!(
+    heartRate.labels.length ||
+    spo2.labels.length ||
+    temp.labels.length ||
+    sleep.labels.length ||
+    steps.labels.length
+  );
+
+  return { hasAny, heartRate, spo2, temp, sleep, steps };
 });
 
 function createAcerLineChart(
@@ -3582,73 +3797,100 @@ function createAcerBarChart(
 
 function renderAcerRingCharts() {
   const data = acerRingChart.value;
-  const labels = data.labels;
-  if (!labels.length) {
+  if (!data.hasAny) {
     destroyAcerRingCharts();
     return;
   }
 
-  createAcerLineChart("heartRate", acerHeartRateCanvas.value, labels, [
-    {
-      label: "最高",
-      data: data.heartRateMax,
-      borderColor: "#7cbc28",
-      backgroundColor: "#7cbc28",
-    },
-    {
-      label: "最低",
-      data: data.heartRateMin,
-      borderColor: "#27a3a9",
-      backgroundColor: "#27a3a9",
-    },
-  ]);
+  const renderOrSkip = (
+    key: keyof typeof acerRingCharts,
+    labels: string[],
+    render: () => void
+  ) => {
+    if (labels.length) {
+      render();
+    } else {
+      acerRingCharts[key]?.destroy();
+      acerRingCharts[key] = null;
+    }
+  };
 
-  createAcerLineChart("spo2", acerSpo2Canvas.value, labels, [
-    {
-      label: "最高",
-      data: data.spo2Max,
-      borderColor: "#7cbc28",
-      backgroundColor: "#7cbc28",
-    },
-    {
-      label: "最低",
-      data: data.spo2Min,
-      borderColor: "#27a3a9",
-      backgroundColor: "#27a3a9",
-    },
-  ]);
-
-  createAcerBarChart(
-    "sleep",
-    acerSleepCanvas.value,
-    labels,
-    [
-      { label: "清醒", data: data.sleepAwake, backgroundColor: "#3f8c25" },
-      { label: "REM", data: data.sleepRem, backgroundColor: "#74b84a" },
-      { label: "淺眠", data: data.sleepLight, backgroundColor: "#a4ce77" },
-      { label: "深眠", data: data.sleepDeep, backgroundColor: "#27a3a9" },
-    ],
-    true
+  renderOrSkip("heartRate", data.heartRate.labels, () =>
+    createAcerLineChart(
+      "heartRate",
+      acerHeartRateCanvas.value,
+      data.heartRate.labels,
+      [
+        {
+          label: "最高",
+          data: data.heartRate.max,
+          borderColor: "#7cbc28",
+          backgroundColor: "#7cbc28",
+        },
+        {
+          label: "最低",
+          data: data.heartRate.min,
+          borderColor: "#27a3a9",
+          backgroundColor: "#27a3a9",
+        },
+      ]
+    )
   );
 
-  createAcerLineChart("temp", acerTempCanvas.value, labels, [
-    {
-      label: "最高",
-      data: data.tempMax,
-      borderColor: "#7cbc28",
-      backgroundColor: "#7cbc28",
-    },
-    {
-      label: "最低",
-      data: data.tempMin,
-      borderColor: "#27a3a9",
-      backgroundColor: "#27a3a9",
-    },
-  ]);
+  renderOrSkip("spo2", data.spo2.labels, () =>
+    createAcerLineChart("spo2", acerSpo2Canvas.value, data.spo2.labels, [
+      {
+        label: "最高",
+        data: data.spo2.max,
+        borderColor: "#7cbc28",
+        backgroundColor: "#7cbc28",
+      },
+      {
+        label: "最低",
+        data: data.spo2.min,
+        borderColor: "#27a3a9",
+        backgroundColor: "#27a3a9",
+      },
+    ])
+  );
 
-  createAcerBarChart("steps", acerStepsCanvas.value, labels, [
-    { label: "總步數", data: data.steps, backgroundColor: "#7cbc28" },
-  ]);
+  renderOrSkip("sleep", data.sleep.labels, () =>
+    createAcerBarChart(
+      "sleep",
+      acerSleepCanvas.value,
+      data.sleep.labels,
+      [
+        { label: "清醒", data: data.sleep.awake, backgroundColor: "#3f8c25" },
+        { label: "REM", data: data.sleep.rem, backgroundColor: "#74b84a" },
+        { label: "淺眠", data: data.sleep.light, backgroundColor: "#a4ce77" },
+        { label: "深眠", data: data.sleep.deep, backgroundColor: "#27a3a9" },
+      ],
+      true
+    )
+  );
+
+  renderOrSkip("temp", data.temp.labels, () =>
+    createAcerLineChart("temp", acerTempCanvas.value, data.temp.labels, [
+      {
+        label: "最高",
+        data: data.temp.max,
+        borderColor: "#7cbc28",
+        backgroundColor: "#7cbc28",
+      },
+      {
+        label: "最低",
+        data: data.temp.min,
+        borderColor: "#27a3a9",
+        backgroundColor: "#27a3a9",
+      },
+    ])
+  );
+
+  renderOrSkip("steps", data.steps.labels, () =>
+    createAcerBarChart("steps", acerStepsCanvas.value, data.steps.labels, [
+      { label: "總步數", data: data.steps.steps, backgroundColor: "#7cbc28" },
+    ])
+  );
 }
 
 function createGarminLineChart(
@@ -3718,7 +3960,7 @@ function createGarminBarChart(
   });
 }
 
-const garminFakeDaily = computed(() => {
+const garminChart = computed(() => {
   const raw = garminHealthData.value || {};
   const [fromMs, toMs] = getRangeBoundary(garminRange.value);
   const inRange = (dateKey: string) => {
@@ -3727,6 +3969,7 @@ const garminFakeDaily = computed(() => {
     if (Number.isNaN(ms)) return false;
     return ms >= fromMs && ms <= toMs;
   };
+  const hasRange = fromMs !== null && toMs !== null;
 
   const parseGarminRawDateTimeToDateKey = (rawDateTime: string) => {
     const value = String(rawDateTime || "");
@@ -3739,32 +3982,54 @@ const garminFakeDaily = computed(() => {
     return toDateKey(value);
   };
 
-  const dateSet = new Set<string>();
-  (raw.Hb || []).forEach((x: any) => {
-    const d = toDateKey(x.Date || "");
-    if (d && inRange(d)) dateSet.add(d);
-  });
-  (raw.Spo2 || []).forEach((x: any) => {
-    const d = toDateKey(x.Date || "");
-    if (d && inRange(d)) dateSet.add(d);
-  });
-  (raw.Stress || []).forEach((x: any) => {
-    const d = toDateKey(x.Date || "");
-    if (d && inRange(d)) dateSet.add(d);
-  });
-  (raw.Sleep || []).forEach((x: any) => {
-    const d = parseGarminRawDateTimeToDateKey(x.StartTime || "");
-    if (d && inRange(d)) dateSet.add(d);
-  });
-  (raw.Activity || []).forEach((x: any) => {
-    const d = parseGarminRawDateTimeToDateKey(x.rawDataTime || "");
-    if (d && inRange(d)) dateSet.add(d);
-  });
+  const hasNum = (v: any) => {
+    const n = Number(v);
+    return v !== null && v !== undefined && v !== "" && !Number.isNaN(n) && n > 0;
+  };
 
-  let dates = Array.from(dateSet).sort();
-  if (fromMs === null && toMs === null && dates.length > 7) {
-    dates = dates.slice(-7);
-  }
+  // 依各自的資料來源取最近 7 次有紀錄的日期（沒有指定日期區間時）
+  const buildDates = (
+    list: any[],
+    dateOf: (x: any) => string,
+    hasValue?: (x: any) => boolean
+  ) => {
+    const set = new Set<string>();
+    (list || []).forEach((x: any) => {
+      if (hasValue && !hasValue(x)) return;
+      const d = dateOf(x);
+      if (d && inRange(d)) set.add(d);
+    });
+    let dates = Array.from(set).sort();
+    if (!hasRange && dates.length > 7) dates = dates.slice(-7);
+    return dates;
+  };
+  const fmt = (dates: string[]) =>
+    dates.map((d) => d.slice(5).replace("-", "/"));
+
+  const hrDates = buildDates(
+    raw.Hb,
+    (x) => toDateKey(x.Date || ""),
+    (x) => hasNum(x.HeartrateMax) || hasNum(x.HeartrateMin)
+  );
+  const spo2Dates = buildDates(
+    raw.Spo2,
+    (x) => toDateKey(x.Date || ""),
+    (x) => hasNum(x.Spo2Max) || hasNum(x.Spo2Min)
+  );
+  const stressDates = buildDates(
+    raw.Stress,
+    (x) => toDateKey(x.Date || ""),
+    (x) => hasNum(x.StressMax) || hasNum(x.StressMin)
+  );
+  const sleepDates = buildDates(
+    raw.Sleep,
+    (x) => parseGarminRawDateTimeToDateKey(x.StartTime || ""),
+    (x) =>
+      hasNum(x.ComfortCount) ||
+      hasNum(x.RemCount) ||
+      hasNum(x.LightCount) ||
+      hasNum(x.AwakeCount)
+  );
 
   const hbMap = new Map<string, any>();
   (raw.Hb || []).forEach((x: any) => {
@@ -3796,130 +4061,154 @@ const garminFakeDaily = computed(() => {
     sleepGroup[d].awake += Number(x.AwakeCount || 0);
   });
 
-  const labels = dates.map((d) => d.slice(5).replace("-", "/"));
-  return labels.map((_, idx) => {
-    const d = dates[idx];
-    return {
-      date: d,
-      heartRateMax: Number(hbMap.get(d)?.HeartrateMax || 0),
-      heartRateMin: Number(hbMap.get(d)?.HeartrateMin || 0),
-      spo2Max: Number(spo2Map.get(d)?.Spo2Max || 0),
-      spo2Min: Number(spo2Map.get(d)?.Spo2Min || 0),
-      stressMax: Number(stressMap.get(d)?.StressMax || 0),
-      stressMin: Number(stressMap.get(d)?.StressMin || 0),
-      // Garmin 目前未提供溫度欄位，保留資料結構避免圖表崩潰
-      tempMax: 0,
-      tempMin: 0,
-      sleepDeep: sleepGroup[d]?.deep || 0,
-      sleepRem: sleepGroup[d]?.rem || 0,
-      sleepLight: sleepGroup[d]?.light || 0,
-      sleepAwake: sleepGroup[d]?.awake || 0,
-    };
-  });
-});
+  const heartRate = {
+    labels: fmt(hrDates),
+    max: hrDates.map((d) => Number(hbMap.get(d)?.HeartrateMax || 0)),
+    min: hrDates.map((d) => Number(hbMap.get(d)?.HeartrateMin || 0)),
+  };
+  const spo2 = {
+    labels: fmt(spo2Dates),
+    max: spo2Dates.map((d) => Number(spo2Map.get(d)?.Spo2Max || 0)),
+    min: spo2Dates.map((d) => Number(spo2Map.get(d)?.Spo2Min || 0)),
+  };
+  const stress = {
+    labels: fmt(stressDates),
+    max: stressDates.map((d) => Number(stressMap.get(d)?.StressMax || 0)),
+    min: stressDates.map((d) => Number(stressMap.get(d)?.StressMin || 0)),
+  };
+  const sleep = {
+    labels: fmt(sleepDates),
+    deep: sleepDates.map((d) => sleepGroup[d]?.deep || 0),
+    rem: sleepDates.map((d) => sleepGroup[d]?.rem || 0),
+    light: sleepDates.map((d) => sleepGroup[d]?.light || 0),
+    awake: sleepDates.map((d) => sleepGroup[d]?.awake || 0),
+  };
+  // Garmin 目前未提供溫度欄位，保留結構避免圖表崩潰
+  const temp = { labels: [] as string[], max: [] as number[], min: [] as number[] };
 
-const garminChart = computed(() => {
-  const [fromMs, toMs] = getRangeBoundary(garminRange.value);
-  const inRange = (dateKey: string) => {
-    if (fromMs === null || toMs === null) return true;
-    const ms = parseDateOnlyToMs(dateKey);
-    if (Number.isNaN(ms)) return false;
-    return ms >= fromMs && ms <= toMs;
-  };
-  const source = garminFakeDaily.value.filter((x: any) => inRange(x.date));
-  const labels = source.map((x: any) => x.date.slice(5).replace("-", "/"));
-  return {
-    labels,
-    heartRateMax: source.map((x: any) => x.heartRateMax),
-    heartRateMin: source.map((x: any) => x.heartRateMin),
-    spo2Max: source.map((x: any) => x.spo2Max),
-    spo2Min: source.map((x: any) => x.spo2Min),
-    stressMax: source.map((x: any) => x.stressMax),
-    stressMin: source.map((x: any) => x.stressMin),
-    tempMax: source.map((x: any) => Number(x.tempMax.toFixed(1))),
-    tempMin: source.map((x: any) => Number(x.tempMin.toFixed(1))),
-    sleepDeep: source.map((x: any) => x.sleepDeep),
-    sleepRem: source.map((x: any) => x.sleepRem),
-    sleepLight: source.map((x: any) => x.sleepLight),
-    sleepAwake: source.map((x: any) => x.sleepAwake),
-  };
+  const hasAny = !!(
+    heartRate.labels.length ||
+    spo2.labels.length ||
+    stress.labels.length ||
+    sleep.labels.length ||
+    temp.labels.length
+  );
+
+  return { hasAny, heartRate, spo2, stress, sleep, temp };
 });
 
 function renderGarminCharts() {
   const data = garminChart.value;
-  const labels = data.labels;
-  if (!labels.length) {
+  if (!data.hasAny) {
     destroyGarminCharts();
     return;
   }
-  createGarminLineChart("heartRate", garminHeartRateCanvas.value, labels, [
-    {
-      label: "最高",
-      data: data.heartRateMax,
-      borderColor: "#7cbc28",
-      backgroundColor: "#7cbc28",
-    },
-    {
-      label: "最低",
-      data: data.heartRateMin,
-      borderColor: "#27a3a9",
-      backgroundColor: "#27a3a9",
-    },
-  ]);
-  createGarminLineChart("spo2", garminSpo2Canvas.value, labels, [
-    {
-      label: "最高",
-      data: data.spo2Max,
-      borderColor: "#7cbc28",
-      backgroundColor: "#7cbc28",
-    },
-    {
-      label: "最低",
-      data: data.spo2Min,
-      borderColor: "#27a3a9",
-      backgroundColor: "#27a3a9",
-    },
-  ]);
-  createGarminLineChart("stress", garminStressCanvas.value, labels, [
-    {
-      label: "最高",
-      data: data.stressMax,
-      borderColor: "#7cbc28",
-      backgroundColor: "#7cbc28",
-    },
-    {
-      label: "最低",
-      data: data.stressMin,
-      borderColor: "#27a3a9",
-      backgroundColor: "#27a3a9",
-    },
-  ]);
-  createGarminBarChart(
-    "sleep",
-    garminSleepCanvas.value,
-    labels,
-    [
-      { label: "清醒", data: data.sleepAwake, backgroundColor: "#3f8c25" },
-      { label: "REM", data: data.sleepRem, backgroundColor: "#74b84a" },
-      { label: "淺眠", data: data.sleepLight, backgroundColor: "#a4ce77" },
-      { label: "深眠", data: data.sleepDeep, backgroundColor: "#27a3a9" },
-    ],
-    true
+
+  const renderOrSkip = (
+    key: keyof typeof garminCharts,
+    labels: string[],
+    render: () => void
+  ) => {
+    if (labels.length) {
+      render();
+    } else {
+      garminCharts[key]?.destroy();
+      garminCharts[key] = null;
+    }
+  };
+
+  renderOrSkip("heartRate", data.heartRate.labels, () =>
+    createGarminLineChart(
+      "heartRate",
+      garminHeartRateCanvas.value,
+      data.heartRate.labels,
+      [
+        {
+          label: "最高",
+          data: data.heartRate.max,
+          borderColor: "#7cbc28",
+          backgroundColor: "#7cbc28",
+        },
+        {
+          label: "最低",
+          data: data.heartRate.min,
+          borderColor: "#27a3a9",
+          backgroundColor: "#27a3a9",
+        },
+      ]
+    )
   );
-  createGarminLineChart("temp", garminTempCanvas.value, labels, [
-    {
-      label: "最高",
-      data: data.tempMax,
-      borderColor: "#7cbc28",
-      backgroundColor: "#7cbc28",
-    },
-    {
-      label: "最低",
-      data: data.tempMin,
-      borderColor: "#27a3a9",
-      backgroundColor: "#27a3a9",
-    },
-  ]);
+
+  renderOrSkip("spo2", data.spo2.labels, () =>
+    createGarminLineChart("spo2", garminSpo2Canvas.value, data.spo2.labels, [
+      {
+        label: "最高",
+        data: data.spo2.max,
+        borderColor: "#7cbc28",
+        backgroundColor: "#7cbc28",
+      },
+      {
+        label: "最低",
+        data: data.spo2.min,
+        borderColor: "#27a3a9",
+        backgroundColor: "#27a3a9",
+      },
+    ])
+  );
+
+  renderOrSkip("stress", data.stress.labels, () =>
+    createGarminLineChart(
+      "stress",
+      garminStressCanvas.value,
+      data.stress.labels,
+      [
+        {
+          label: "最高",
+          data: data.stress.max,
+          borderColor: "#7cbc28",
+          backgroundColor: "#7cbc28",
+        },
+        {
+          label: "最低",
+          data: data.stress.min,
+          borderColor: "#27a3a9",
+          backgroundColor: "#27a3a9",
+        },
+      ]
+    )
+  );
+
+  renderOrSkip("sleep", data.sleep.labels, () =>
+    createGarminBarChart(
+      "sleep",
+      garminSleepCanvas.value,
+      data.sleep.labels,
+      [
+        { label: "清醒", data: data.sleep.awake, backgroundColor: "#3f8c25" },
+        { label: "REM", data: data.sleep.rem, backgroundColor: "#74b84a" },
+        { label: "淺眠", data: data.sleep.light, backgroundColor: "#a4ce77" },
+        { label: "深眠", data: data.sleep.deep, backgroundColor: "#27a3a9" },
+      ],
+      true
+    )
+  );
+
+  renderOrSkip("temp", data.temp.labels, () =>
+    createGarminLineChart("temp", garminTempCanvas.value, data.temp.labels, [
+      {
+        label: "最高",
+        data: data.temp.max,
+        borderColor: "#7cbc28",
+        backgroundColor: "#7cbc28",
+      },
+      {
+        label: "最低",
+        data: data.temp.min,
+        borderColor: "#27a3a9",
+        backgroundColor: "#27a3a9",
+      },
+    ])
+  );
 }
 
 const watchFilterCategoryLabel = computed(() => {
@@ -4607,7 +4896,7 @@ watch(
 watchEffect(
   () => {
     if (loading.value) return;
-    if (!watchChart.value.labels.length) {
+    if (!watchChart.value.hasAny) {
       destroyWatchCharts();
       return;
     }
@@ -4621,20 +4910,19 @@ watchEffect(
 );
 watchEffect(
   () => {
-    const labels = acerRingChart.value.labels;
-    const canvasReady =
-      !!acerHeartRateCanvas.value &&
-      !!acerSpo2Canvas.value &&
-      !!acerSleepCanvas.value &&
-      !!acerTempCanvas.value &&
-      !!acerStepsCanvas.value;
-
-    if (!labels.length) {
+    const data = acerRingChart.value;
+    if (!data.hasAny) {
       destroyAcerRingCharts();
       return;
     }
-
-    if (!canvasReady) return;
+    // 至少要有「該指標有資料且對應的 canvas 已 ready」才開始渲染
+    const ready =
+      (!data.heartRate.labels.length || !!acerHeartRateCanvas.value) &&
+      (!data.spo2.labels.length || !!acerSpo2Canvas.value) &&
+      (!data.sleep.labels.length || !!acerSleepCanvas.value) &&
+      (!data.temp.labels.length || !!acerTempCanvas.value) &&
+      (!data.steps.labels.length || !!acerStepsCanvas.value);
+    if (!ready) return;
 
     nextTick(() => {
       requestAnimationFrame(() => {
@@ -4646,20 +4934,18 @@ watchEffect(
 );
 watchEffect(
   () => {
-    const labels = garminChart.value.labels;
-    const canvasReady =
-      !!garminHeartRateCanvas.value &&
-      !!garminSpo2Canvas.value &&
-      !!garminStressCanvas.value &&
-      !!garminSleepCanvas.value &&
-      !!garminTempCanvas.value;
-
-    if (!labels.length) {
+    const data = garminChart.value;
+    if (!data.hasAny) {
       destroyGarminCharts();
       return;
     }
-
-    if (!canvasReady) return;
+    const ready =
+      (!data.heartRate.labels.length || !!garminHeartRateCanvas.value) &&
+      (!data.spo2.labels.length || !!garminSpo2Canvas.value) &&
+      (!data.stress.labels.length || !!garminStressCanvas.value) &&
+      (!data.sleep.labels.length || !!garminSleepCanvas.value) &&
+      (!data.temp.labels.length || !!garminTempCanvas.value);
+    if (!ready) return;
 
     nextTick(() => {
       requestAnimationFrame(() => {
@@ -6683,6 +6969,21 @@ const availableEventOptions = computed(() => {
   color: #8a98a8;
   padding: 24px 12px;
   text-align: center;
+}
+
+.watchChartCardEmpty {
+  width: 100%;
+  min-height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px dashed #d9e3ee;
+  background: #f6f8fb;
+  color: #8a98a8;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  margin-top: 12px;
 }
 
 .balanceCardGrid {

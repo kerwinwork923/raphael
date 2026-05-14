@@ -80,17 +80,17 @@
             </div>
 
             <div
-  class="cell checkin-status"
-  data-label="報到狀態"
-  :class="{
-    checked: item.qrcodeCheck === 'true',
-    unchecked: item.qrcodeCheck !== 'true',
-  }"
->
-  <span>
-    {{ item.qrcodeCheck === "true" ? "已報到" : "未報到" }}
-  </span>
-</div>
+              class="cell checkin-status"
+              data-label="報到狀態"
+              :class="{
+                checked: item.qrcodeCheck === 'true',
+                unchecked: item.qrcodeCheck !== 'true',
+              }"
+            >
+              <span>
+                {{ item.qrcodeCheck === "true" ? "已報到" : "未報到" }}
+              </span>
+            </div>
 
             <div class="cell created" data-label="報名時間">
               {{ item.createdAt || "-" }}
@@ -445,12 +445,12 @@ const totalRegistrations = computed(() => filteredRegistrations.value.length);
 
 const checkedInCount = computed(() => {
   return registrations.value.filter(
-    (item) => item.qrcodeCheck === "true" && Boolean(item.qrcodeTime),
+    (item) => item.qrcodeCheck === "true" && Boolean(item.qrcodeTime)
   ).length;
 });
 
 const totalPages = computed(() =>
-  Math.max(1, Math.ceil(totalRegistrations.value / pageSize.value)),
+  Math.max(1, Math.ceil(totalRegistrations.value / pageSize.value))
 );
 
 const paginatedRegistrations = computed(() => {
@@ -540,7 +540,7 @@ function exportCSV() {
     .map((row) =>
       row
         .map((cell) => `"${String(cell || "").replaceAll('"', '""')}"`)
-        .join(","),
+        .join(",")
     )
     .join("\n");
 
