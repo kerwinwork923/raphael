@@ -169,7 +169,7 @@ const CHECKIN_KEY = "qrt897hpmd";
 const REGISTER_QUERY_API = "https://23700999.com:8081/HMA/api/bk/His_Register_query";
 const REGISTER_QUERY_PAYLOAD = {
   AdminID: "kerwin",
-  EventType: "vipl1",
+  EventType: "vipl2",
   Token: "byurf8BWSba2AIAhC7ffFtjmvzzlqELG",
 };
 

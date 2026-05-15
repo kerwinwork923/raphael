@@ -1133,16 +1133,17 @@
           }
      }
 
-     async function registerSignup({ Name, Mobile, Email, Note }) {
-         const payload = {
-           SafeKey: "qrt897hpmd",
-           VIP: vipId,
-           Name,
-           Mobile,
-           Email: getBrowserId(), 
-           Note,
-           EventType
-      };
+     async function registerSignup({ Name, Mobile, Email, Note, Area }) {
+  const payload = {
+    SafeKey: "qrt897hpmd",
+    VIP: vipId,
+    Name,
+    Mobile,
+    Email: getBrowserId(),
+    Area,
+    Note,
+    EventType
+  };
 
   console.log("[registerSignup] payload =", JSON.stringify(payload, null, 2));
 
@@ -1234,8 +1235,8 @@
     const data = Object.fromEntries(new FormData(f).entries());
     const { Name = "", Mobile = "", Email = "", Note = "", Region = "" } = data;
     const mergedNote = Region
-      ? `地區：${Region}${Note ? "\n" + Note : ""}`.trim()
-      : Note;
+  ? `地區：${Region}${Note ? "\n" + Note : ""}`.trim()
+  : Note;
 
     const btn = f.querySelector('button[type="submit"]');
     const old = btn.textContent;
@@ -1247,7 +1248,13 @@
       const logP = logEvent("submit_form", EventType);
 
       // 報名：允許 CORS / beacon / no-cors 三種路徑
-      const result = await registerSignup({ Name, Mobile, Email, Note: mergedNote });
+      const result = await registerSignup({
+  Name,
+  Mobile,
+  Email,
+  Area: Region,
+  Note
+});
       await Promise.allSettled([logP]);
 
       const delivered = !!result?.delivered;

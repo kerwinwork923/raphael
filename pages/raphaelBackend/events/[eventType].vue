@@ -56,6 +56,7 @@
         <div class="table-row table-header">
           <div class="name">姓名</div>
           <div class="mobile">手機</div>
+          <div class="area">地區</div>
           <div class="checkin-status">報到狀態</div>
           <div class="created">報名時間</div>
           <div class="note">備註</div>
@@ -77,6 +78,10 @@
 
             <div class="cell mobile" data-label="手機">
               {{ item.mobile || "-" }}
+            </div>
+
+            <div class="cell area" data-label="地區">
+              {{ item.area || "-" }}
             </div>
 
             <div
@@ -191,6 +196,9 @@
               <span>手機</span>
               <strong>{{ selectedItem.mobile || "-" }}</strong>
 
+              <span>地區</span>
+              <strong>{{ selectedItem.area || "-" }}</strong>
+
               <span>報名時間</span>
               <strong>{{ selectedItem.createdAt || "-" }}</strong>
 
@@ -277,6 +285,7 @@ interface Registration {
   id: string;
   vip: string;
   name: string;
+  area: string;
   email: string;
   mobile: string;
   checkTimeRaw: string;
@@ -291,6 +300,7 @@ interface Registration {
 interface ApiRegistration {
   VIP?: string;
   Name?: string;
+  Area?: string;
   Email?: string;
   Mobile?: string;
   CheckTime?: string;
@@ -381,6 +391,7 @@ async function fetchRegisterList() {
         id: item.AID || crypto.randomUUID(),
         vip: item.VIP || "",
         name: item.Name?.trim() || "",
+        area: item.Area || "",
         email: item.Email || "",
         mobile: item.Mobile || "",
         checkTimeRaw: item.CheckTime || "",
@@ -414,6 +425,7 @@ const filteredRegistrations = computed(() => {
       const text = [
         item.vip,
         item.name,
+        item.area,
         item.email,
         item.mobile,
         item.createdAt,
@@ -526,10 +538,11 @@ async function downloadQrCode() {
 
 function exportCSV() {
   const rows = [
-    ["姓名", "手機", "報名時間", "備註", "EventType"],
+    ["姓名", "手機", "地區", "報名時間", "備註", "EventType"],
     ...filteredRegistrations.value.map((item) => [
       item.name,
       item.mobile,
+      item.area,
       item.createdAt,
       item.note,
       item.eventType,
@@ -770,28 +783,57 @@ watch(dateRange, () => {
   }
 
   .register-table {
+    --table-cols: minmax(128px, 1.15fr) minmax(108px, 0.95fr) minmax(56px, 0.6fr)
+      minmax(88px, 0.75fr) minmax(152px, 1.2fr) minmax(72px, 1.35fr) 72px;
+
     background: #fff;
     border-radius: 20px;
-    padding: 1rem;
+    padding: 0.5rem 0.25rem 1rem;
     box-shadow: 0px 2px 20px rgba(177, 192, 216, 0.25);
+    overflow-x: auto;
 
     .table-row {
       display: grid;
-      grid-template-columns: 1.1fr 1fr 0.7fr 1.3fr 1.8fr 1fr;
-      gap: 1rem;
-      padding: 1rem 0;
+      grid-template-columns: var(--table-cols);
+      gap: 0.5rem 0.75rem;
+      padding: 0.75rem 1.25rem;
       align-items: center;
+      min-width: 880px;
 
       @include respond-to("md") {
         grid-template-columns: 1fr;
-        gap: 0.5rem;
+        min-width: 0;
+        gap: 0.35rem;
+        padding: 1rem;
+      }
+
+      > div {
+        min-width: 0;
+        font-size: 14px;
+        line-height: 1.4;
       }
 
       &.table-header {
         font-weight: 600;
+        font-size: 13px;
         color: $primary-600;
         border-bottom: 1px solid #b1c0d8;
+        padding-top: 0.625rem;
         padding-bottom: 0.75rem;
+        white-space: nowrap;
+
+        .name {
+          padding-left: 40px;
+        }
+
+        .area,
+        .checkin-status {
+          text-align: center;
+        }
+
+        .action {
+          text-align: right;
+        }
 
         @include respond-to("md") {
           display: none;
@@ -806,13 +848,15 @@ watch(dateRange, () => {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 0.5rem 0;
+          gap: 0.75rem;
+          padding: 0.4rem 0;
 
           &::before {
             content: attr(data-label);
+            flex: 0 0 5.5rem;
             font-weight: 600;
+            font-size: 13px;
             color: $primary-600;
-            margin-right: 1rem;
           }
         }
       }
@@ -836,6 +880,55 @@ watch(dateRange, () => {
         }
       }
 
+      .mobile,
+      .created {
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+
+        @include respond-to("md") {
+          white-space: normal;
+        }
+      }
+
+      .area {
+        text-align: center;
+
+        @include respond-to("md") {
+          text-align: right;
+        }
+      }
+
+      .checkin-status {
+        display: flex;
+        justify-content: center;
+
+        @include respond-to("md") {
+          justify-content: space-between;
+        }
+
+        span {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 64px;
+          padding: 4px 10px;
+          border-radius: 999px;
+          font-size: 12px;
+          font-weight: 700;
+          white-space: nowrap;
+        }
+
+        &.checked span {
+          background: rgba(27, 163, 155, 0.12);
+          color: $chip-success;
+        }
+
+        &.unchecked span {
+          background: rgba(177, 192, 216, 0.2);
+          color: $raphael-gray-500;
+        }
+      }
+
       .note {
         overflow: hidden;
         text-overflow: ellipsis;
@@ -846,18 +939,34 @@ watch(dateRange, () => {
         }
       }
 
+      .action {
+        justify-self: end;
+
+        @include respond-to("md") {
+          justify-self: stretch;
+        }
+      }
+
       .action-buttons {
         display: flex;
+        flex-wrap: nowrap;
+        justify-content: flex-end;
         gap: 0.5rem;
         align-items: center;
+
+        @include respond-to("md") {
+          justify-content: flex-end;
+        }
 
         .text-btn {
           border: none;
           border-radius: 50px;
-          padding: 6px 12px;
+          padding: 6px 14px;
           background: rgba(27, 163, 155, 0.1);
           color: $chip-success;
+          font-size: 13px;
           font-weight: 700;
+          white-space: nowrap;
           cursor: pointer;
           text-decoration: none;
 
@@ -865,6 +974,21 @@ watch(dateRange, () => {
             background: rgba(200, 146, 60, 0.1);
             color: #a36d18;
           }
+        }
+      }
+    }
+
+    .table-list {
+      .table-row {
+        border-bottom: 1px solid rgba(177, 192, 216, 0.35);
+        transition: background 0.15s ease;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &:hover {
+          background: rgba($primary-100, 0.65);
         }
       }
     }
@@ -967,20 +1091,27 @@ watch(dateRange, () => {
 
       .info-grid {
         display: grid;
-        grid-template-columns: 110px 1fr;
-        gap: 10px 16px;
-        padding: 1rem;
+        grid-template-columns: 96px 1fr;
+        gap: 14px 20px;
+        padding: 1.25rem 1.5rem;
         border-radius: 16px;
         background: $primary-100;
+        align-items: start;
 
         span {
           color: $raphael-gray-500;
+          font-size: 13px;
           font-weight: 700;
+          line-height: 1.5;
+          padding-top: 2px;
         }
 
         strong {
           color: #444;
+          font-size: 15px;
           font-weight: 700;
+          line-height: 1.5;
+          word-break: break-word;
         }
 
         .break {
