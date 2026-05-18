@@ -7,6 +7,7 @@
         <h2 class="title">
           講座報名管理
           <span class="count">({{ totalRegistrations }})</span>
+          <span v-if="selectedArea" class="area-tag">{{ selectedArea }}</span>
         </h2>
 
         <div class="header-actions">
@@ -18,7 +19,7 @@
       <section class="stats double">
         <div class="stat-card total">
           <span>總報名數</span>
-          <strong>{{ registrations.length }}</strong>
+          <strong>{{ totalRegistrations }}</strong>
         </div>
 
         <div class="stat-card checkin">
@@ -56,7 +57,6 @@
         <div class="table-row table-header">
           <div class="name">姓名</div>
           <div class="mobile">手機</div>
-          <div class="area">地區</div>
           <div class="checkin-status">報到狀態</div>
           <div class="created">報名時間</div>
           <div class="note">備註</div>
@@ -78,10 +78,6 @@
 
             <div class="cell mobile" data-label="手機">
               {{ item.mobile || "-" }}
-            </div>
-
-            <div class="cell area" data-label="地區">
-              {{ item.area || "-" }}
             </div>
 
             <div
@@ -195,9 +191,6 @@
 
               <span>手機</span>
               <strong>{{ selectedItem.mobile || "-" }}</strong>
-
-              <span>地區</span>
-              <strong>{{ selectedItem.area || "-" }}</strong>
 
               <span>報名時間</span>
               <strong>{{ selectedItem.createdAt || "-" }}</strong>
@@ -325,6 +318,12 @@ const detailVisible = ref(false);
 const selectedItem = ref<Registration | null>(null);
 const checkinRouteBase = "https://neuroplus.com.tw/checkin";
 
+const selectedArea = computed(() => {
+  const area = route.query.area;
+  const value = Array.isArray(area) ? area[0] : area;
+  return typeof value === "string" ? value.trim() : "";
+});
+
 function goBack() {
   router.push("/raphaelBackend/events");
 }
@@ -391,7 +390,7 @@ async function fetchRegisterList() {
         id: item.AID || crypto.randomUUID(),
         vip: item.VIP || "",
         name: item.Name?.trim() || "",
-        area: item.Area || "",
+        area: item.Area?.trim() || "",
         email: item.Email || "",
         mobile: item.Mobile || "",
         checkTimeRaw: item.CheckTime || "",
@@ -415,17 +414,25 @@ async function fetchRegisterList() {
   }
 }
 
-const filteredRegistrations = computed(() => {
-  let result = registrations.value;
+const areaRegistrations = computed<Registration[]>(() => {
+  if (!selectedArea.value) return registrations.value;
+
+  return registrations.value.filter((item: Registration) => {
+    if (item.area) return item.area === selectedArea.value;
+    return selectedArea.value === "台北";
+  });
+});
+
+const filteredRegistrations = computed<Registration[]>(() => {
+  let result: Registration[] = areaRegistrations.value;
 
   if (searchKeyword.value.trim()) {
     const keyword = searchKeyword.value.trim().toLowerCase();
 
-    result = result.filter((item) => {
+    result = result.filter((item: Registration) => {
       const text = [
         item.vip,
         item.name,
-        item.area,
         item.email,
         item.mobile,
         item.createdAt,
@@ -444,7 +451,7 @@ const filteredRegistrations = computed(() => {
     const start = formatDateToYYYYMMDD(dateRange.value[0]);
     const end = formatDateToYYYYMMDD(dateRange.value[1]);
 
-    result = result.filter((item) => {
+    result = result.filter((item: Registration) => {
       const dateKey = getDateKeyFromCheckTime(item.checkTimeRaw);
       return dateKey >= start && dateKey <= end;
     });
@@ -456,8 +463,9 @@ const filteredRegistrations = computed(() => {
 const totalRegistrations = computed(() => filteredRegistrations.value.length);
 
 const checkedInCount = computed(() => {
-  return registrations.value.filter(
-    (item) => item.qrcodeCheck === "true" && Boolean(item.qrcodeTime)
+  return filteredRegistrations.value.filter(
+    (item: Registration) =>
+      item.qrcodeCheck === "true" && Boolean(item.qrcodeTime)
   ).length;
 });
 
@@ -537,12 +545,11 @@ async function downloadQrCode() {
 }
 
 function exportCSV() {
-  const rows = [
-    ["姓名", "手機", "地區", "報名時間", "備註", "EventType"],
-    ...filteredRegistrations.value.map((item) => [
+  const rows: string[][] = [
+    ["姓名", "手機", "報名時間", "備註", "EventType"],
+    ...filteredRegistrations.value.map((item: Registration) => [
       item.name,
       item.mobile,
-      item.area,
       item.createdAt,
       item.note,
       item.eventType,
@@ -550,9 +557,9 @@ function exportCSV() {
   ];
 
   const csv = rows
-    .map((row) =>
+    .map((row: string[]) =>
       row
-        .map((cell) => `"${String(cell || "").replaceAll('"', '""')}"`)
+        .map((cell: string) => `"${String(cell || "").replaceAll('"', '""')}"`)
         .join(",")
     )
     .join("\n");
@@ -581,6 +588,10 @@ watch(resolvedEventType, () => {
 });
 
 watch(dateRange, () => {
+  currentPage.value = 1;
+});
+
+watch(selectedArea, () => {
   currentPage.value = 1;
 });
 </script>
@@ -637,6 +648,15 @@ watch(dateRange, () => {
       .count {
         color: $primary-200;
         font-size: 20px;
+        font-weight: 700;
+      }
+
+      .area-tag {
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(27, 163, 155, 0.1);
+        color: $chip-success;
+        font-size: 14px;
         font-weight: 700;
       }
     }
@@ -783,7 +803,7 @@ watch(dateRange, () => {
   }
 
   .register-table {
-    --table-cols: minmax(128px, 1.15fr) minmax(108px, 0.95fr) minmax(56px, 0.6fr)
+    --table-cols: minmax(128px, 1.15fr) minmax(108px, 0.95fr)
       minmax(88px, 0.75fr) minmax(152px, 1.2fr) minmax(72px, 1.35fr) 72px;
 
     background: #fff;
@@ -798,7 +818,7 @@ watch(dateRange, () => {
       gap: 0.5rem 0.75rem;
       padding: 0.75rem 1.25rem;
       align-items: center;
-      min-width: 880px;
+      min-width: 820px;
 
       @include respond-to("md") {
         grid-template-columns: 1fr;
@@ -826,7 +846,6 @@ watch(dateRange, () => {
           padding-left: 40px;
         }
 
-        .area,
         .checkin-status {
           text-align: center;
         }
@@ -887,14 +906,6 @@ watch(dateRange, () => {
 
         @include respond-to("md") {
           white-space: normal;
-        }
-      }
-
-      .area {
-        text-align: center;
-
-        @include respond-to("md") {
-          text-align: right;
         }
       }
 

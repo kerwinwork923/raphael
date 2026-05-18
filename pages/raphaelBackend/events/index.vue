@@ -6,7 +6,6 @@
         <header class="page-header">
           <div>
             <h2 class="title">活動報名管理</h2>
-         
           </div>
         </header>
   
@@ -22,62 +21,79 @@
           </div>
         </section>
   
-        <section class="event-grid">
-          <article
-            v-for="event in filteredEvents"
-            :key="event.id"
-            class="event-card"
+        <section class="area-sections">
+          <section
+            v-for="section in filteredEventAreaSections"
+            :key="section.area"
+            class="area-section"
           >
-            <div class="event-top">
-              <span class="event-type">{{ event.category }}</span>
-              <span class="status-badge" :class="event.status">
-                {{ statusText(event.status) }}
-              </span>
+            <div class="area-heading">
+              <h3>{{ section.area }}</h3>
+              <span>{{ section.events.length }} 場活動</span>
             </div>
-  
-            <h3>{{ event.title }}</h3>
-  
-            <div class="event-info">
-              <p>
-                <span>日期</span>
-                <strong>{{ event.displayDate }}</strong>
-              </p>
-  
-              <p>
-                <span>時間</span>
-                <strong>{{ event.time }}</strong>
-              </p>
-  
-              <p>
-                <span>地點</span>
-                <strong>{{ event.location }}</strong>
-              </p>
+
+            <div class="event-grid">
+              <article
+                v-for="event in section.events"
+                :key="event.cardId"
+                class="event-card"
+              >
+                <div class="event-top">
+                  <span class="event-type">{{ event.category }}</span>
+                  <span
+                    v-if="eventStatus(event) !== 'draft'"
+                    class="status-badge"
+                    :class="eventStatus(event)"
+                  >
+                    {{ statusText(eventStatus(event)) }}
+                  </span>
+                </div>
+
+                <h3>{{ event.title }}</h3>
+
+                <div class="event-info">
+                  <p>
+                    <span>日期</span>
+                    <strong>{{ event.displayDate }}</strong>
+                  </p>
+
+                  <p>
+                    <span>時間</span>
+                    <strong>{{ event.time }}</strong>
+                  </p>
+
+                  <p>
+                    <span>地點</span>
+                    <strong>{{ event.location }}</strong>
+                  </p>
+                </div>
+
+                <div class="event-footer">
+                  <div class="event-actions">
+                    <a
+                      class="entry-action-btn url"
+                      :href="`/vip/${event.eventType}.html`"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      報名網址
+                    </a>
+
+                    <button
+                      class="entry-action-btn list"
+                      type="button"
+                      @click="goToRegister(event)"
+                    >
+                      進入名單
+                    </button>
+                  </div>
+                </div>
+              </article>
             </div>
-  
-            <div class="event-footer">
-              <div class="event-actions">
-                <a
-                  class="entry-action-btn url"
-                  :href="`/vip/${event.eventType}.html`"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  報名網址
-                </a>
-  
-                <button
-                  class="entry-action-btn list"
-                  type="button"
-                  @click="goToRegister(event)"
-                >
-                  進入名單
-                </button>
-              </div>
-            </div>
-          </article>
+          </section>
         </section>
-  
-        <div v-if="filteredEvents.length === 0" class="no-data">
+
+        <div v-if="filteredEventAreaSections.length === 0" class="no-data">
           尚無符合條件的活動
         </div>
       </main>
@@ -97,6 +113,12 @@
   });
   
   type EventStatus = "active" | "closed" | "draft";
+
+  interface EventAreaOption {
+    area: string;
+    location: string;
+    status?: EventStatus;
+  }
   
   interface SeminarEvent {
     id: string;
@@ -106,13 +128,28 @@
     eventDate: string;
     displayDate: string;
     time: string;
-    location: string;
     status: EventStatus;
+    areas: EventAreaOption[];
+  }
+
+  interface SeminarEventCard {
+    cardId: string;
+    id: string;
+    title: string;
+    category: string;
+    eventType: string;
+    eventDate: string;
+    displayDate: string;
+    time: string;
+    status: EventStatus;
+    area: string;
+    location: string;
   }
   
   const router = useRouter();
   
   const searchKeyword = ref("");
+  const areaOrder = ["台北", "台中", "高雄"];
   
   const events = ref<SeminarEvent[]>([
     {
@@ -123,28 +160,66 @@
       eventDate: "20260514",
       displayDate: "2026 / 05 / 14（四）",
       time: "10:00",
-      location: "台北新光摩天大樓 30樓之1",
       status: "active",
+      areas: [
+        {
+          area: "台北",
+          location: "台北新光摩天大樓 30樓之1",
+        },
+      ],
     },
     {
-      id: "20260525-vipl2",
+      id: "20260528-vipl2",
       title: "明明很不舒服，為什麼檢查都說沒問題？",
       category: "健康講座",
       eventType: "vipl2",
-      eventDate: "20260525",
+      eventDate: "20260528",
       displayDate: "2026 / 05 / 28（四）",
       time: "10:00",
-      location: "台北新光摩天大樓 30樓之1",
       status: "active",
+      areas: [
+        {
+          area: "台北",
+          location: "台北新光摩天大樓 30樓之1",
+        },
+        {
+          area: "台中",
+          location: "活動資訊即將公布",
+          status: "draft",
+        },
+        {
+          area: "高雄",
+          location: "活動資訊即將公布",
+          status: "draft",
+        },
+      ],
     },
   ]);
+
+  const eventCards = computed<SeminarEventCard[]>(() =>
+    events.value.flatMap((event: SeminarEvent) =>
+      event.areas.map((areaOption: EventAreaOption) => ({
+        cardId: `${event.id}-${areaOption.area}`,
+        id: event.id,
+        title: event.title,
+        category: event.category,
+        eventType: event.eventType,
+        eventDate: event.eventDate,
+        displayDate: event.displayDate,
+        time: event.time,
+        status: areaOption.status || event.status,
+        area: areaOption.area,
+        location: areaOption.location,
+      })),
+    ),
+  );
   
-  const filteredEvents = computed(() => {
+  const filteredEventCards = computed(() => {
     const keyword = searchKeyword.value.trim().toLowerCase();
   
-    if (!keyword) return events.value;
+    if (!keyword) return eventCards.value;
   
-    return events.value.filter((event) =>
+    return eventCards.value.filter((event: SeminarEventCard) =>
       [
         event.title,
         event.category,
@@ -152,6 +227,7 @@
         event.eventDate,
         event.displayDate,
         event.time,
+        event.area,
         event.location,
       ]
         .join(" ")
@@ -159,21 +235,66 @@
         .includes(keyword),
     );
   });
+
+  const filteredEventAreaSections = computed(() => {
+    const sectionMap = new Map<string, SeminarEventCard[]>();
+
+    filteredEventCards.value.forEach((event: SeminarEventCard) => {
+      const list = sectionMap.get(event.area) || [];
+      list.push(event);
+      sectionMap.set(event.area, list);
+    });
+
+    const orderedAreas = [
+      ...areaOrder,
+      ...Array.from(sectionMap.keys()).filter((area) => !areaOrder.includes(area)),
+    ];
+
+    return orderedAreas
+      .map((area) => ({
+        area,
+        events: sectionMap.get(area) || [],
+      }))
+      .filter((section) => section.events.length > 0);
+  });
   
   function statusText(status: EventStatus) {
     return {
       active: "進行中",
-      closed: "已結束",
-      draft: "草稿",
+      closed: "已截止",
+      draft: "",
     }[status];
   }
+
+  function normalizeDateKey(value: string) {
+    return value.replace(/\D/g, "").slice(0, 8);
+  }
+
+  function todayKey() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    const d = String(now.getDate()).padStart(2, "0");
+    return `${y}${m}${d}`;
+  }
+
+  function isEventClosed(eventDate: string) {
+    const dateKey = normalizeDateKey(eventDate);
+    return Boolean(dateKey) && dateKey < todayKey();
+  }
+
+  function eventStatus(event: SeminarEventCard): EventStatus {
+    if (isEventClosed(event.eventDate)) return "closed";
+    return event.status;
+  }
   
-  function goToRegister(event: SeminarEvent) {
+  function goToRegister(event: SeminarEventCard) {
     router.push({
       path: `/raphaelBackend/events/${event.eventType}`,
       query: {
         eventDate: event.eventDate,
         title: event.title,
+        area: event.area,
       },
     });
   }
@@ -259,6 +380,43 @@
       }
     }
   
+    .area-sections {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .area-section {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .area-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0 0.25rem;
+
+      @include respond-to("md") {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+
+      h3 {
+        color: $primary-600;
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0;
+      }
+
+      span {
+        color: $raphael-gray-500;
+        font-size: 14px;
+        font-weight: 700;
+      }
+    }
+
     .event-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
