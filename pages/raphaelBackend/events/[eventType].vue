@@ -371,9 +371,12 @@ function parseSessionDateFromNote(note = ""): string {
 }
 
 function getRegistrationSessionDateKey(item: Registration): string {
-  const fromRegister = normalizeDateKey(item.registerDate);
-  if (fromRegister) return fromRegister;
-  return parseSessionDateFromNote(item.note);
+  // 備註中的場次日期優先
+  const fromNote = parseSessionDateFromNote(item.note);
+  if (fromNote) return fromNote;
+
+  // 沒有才 fallback 到 RegisterDate
+  return normalizeDateKey(item.registerDate);
 }
 
 function hasHisPid(item: Registration): boolean {
@@ -477,19 +480,19 @@ const areaRegistrations = computed<Registration[]>(() => {
   let result = registrations.value;
 
   if (selectedArea.value) {
-    result = result.filter((item: Registration) => {
-      if (item.area) return item.area === selectedArea.value;
-      return selectedArea.value === "台北";
-    });
-  }
+  result = result.filter((item: Registration) => {
+    return item.area === selectedArea.value;
+  });
+}
 
   if (selectedEventDate.value) {
-    result = result.filter((item: Registration) => {
-      const sessionKey = getRegistrationSessionDateKey(item);
-      if (!sessionKey) return true;
-      return sessionKey === selectedEventDate.value;
-    });
-  }
+  result = result.filter((item: Registration) => {
+    const sessionKey = getRegistrationSessionDateKey(item);
+
+    // 有指定日期時，只保留同日期
+    return sessionKey === selectedEventDate.value;
+  });
+}
 
   return result;
 });
