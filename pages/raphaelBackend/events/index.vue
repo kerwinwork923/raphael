@@ -118,6 +118,12 @@
     area: string;
     location: string;
     status?: EventStatus;
+    /** 覆寫卡片顯示日期（例：第二場台北、未定場次） */
+    displayDate?: string;
+    /** 覆寫卡片顯示時間 */
+    time?: string;
+    /** 覆寫 yyyymmdd，供搜尋與截止判斷；未定日期可省略 */
+    eventDate?: string;
   }
   
   interface SeminarEvent {
@@ -181,16 +187,32 @@
         {
           area: "台北",
           location: "台北新光摩天大樓 30樓之1",
+          eventDate: "20260528",
+          displayDate: "2026 / 05 / 28（四）",
+          time: "10:00",
+        },
+        {
+          area: "台北",
+          location: "台北新光摩天大樓 30樓之1",
+          eventDate: "20260611",
+          displayDate: "2026 / 06 / 11（四）",
+          time: "10:00",
         },
         {
           area: "台中",
           location: "活動資訊即將公布",
           status: "draft",
+          eventDate: "",
+          displayDate: "Coming soon",
+          time: "時間待定",
         },
         {
           area: "高雄",
           location: "活動資訊即將公布",
           status: "draft",
+          eventDate: "",
+          displayDate: "Coming soon",
+          time: "時間待定",
         },
       ],
     },
@@ -198,19 +220,22 @@
 
   const eventCards = computed<SeminarEventCard[]>(() =>
     events.value.flatMap((event: SeminarEvent) =>
-      event.areas.map((areaOption: EventAreaOption) => ({
-        cardId: `${event.id}-${areaOption.area}`,
-        id: event.id,
-        title: event.title,
-        category: event.category,
-        eventType: event.eventType,
-        eventDate: event.eventDate,
-        displayDate: event.displayDate,
-        time: event.time,
-        status: areaOption.status || event.status,
-        area: areaOption.area,
-        location: areaOption.location,
-      })),
+      event.areas.map((areaOption: EventAreaOption) => {
+        const eventDate = areaOption.eventDate ?? event.eventDate;
+        return {
+          cardId: `${event.id}-${areaOption.area}-${eventDate || "tbd"}`,
+          id: event.id,
+          title: event.title,
+          category: event.category,
+          eventType: event.eventType,
+          eventDate,
+          displayDate: areaOption.displayDate ?? event.displayDate,
+          time: areaOption.time ?? event.time,
+          status: areaOption.status || event.status,
+          area: areaOption.area,
+          location: areaOption.location,
+        };
+      }),
     ),
   );
   

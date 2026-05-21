@@ -111,6 +111,13 @@
                 >
                   撥打
                 </a>
+                <button
+                  v-if="!hasHisPid(item)"
+                  class="text-btn first-visit"
+                  @click="openFirstVisit(item)"
+                >
+                  會員資訊
+                </button>
               </div>
             </div>
           </div>
@@ -238,6 +245,14 @@
           </footer>
         </div>
       </div>
+      <FirstVisitHealthHistoryModal
+        :show="firstVisitVisible"
+        :patient="firstVisitPatient"
+        :seminar-source-label="firstVisitSeminarSourceLabel"
+        :seminar-source-date-yyyymmdd="firstVisitSeminarSourceDate"
+        @close="closeFirstVisit"
+        @save="handleFirstVisitSave"
+      />
     </main>
   </div>
 </template>
@@ -247,6 +262,10 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import Sidebar from "@/components/raphaelBackend/Sidebar.vue";
+import FirstVisitHealthHistoryModal, {
+  type FirstVisitPatient,
+  type FirstVisitFormData,
+} from "@/components/raphaelBackend/FirstVisitHealthHistoryModal.vue";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import { useSeo } from "~/composables/useSeo";
@@ -276,7 +295,11 @@ useSeo({
 
 interface Registration {
   id: string;
+  /** HIS 病歷 PID，有值表示已註冊 HIS */
+  hisPid: string;
+  pid: string;
   vip: string;
+  registerDate: string;
   name: string;
   area: string;
   email: string;
@@ -292,6 +315,8 @@ interface Registration {
 
 interface ApiRegistration {
   VIP?: string;
+  PID?: string;
+  RegisterDate?: string;
   Name?: string;
   Area?: string;
   Email?: string;
@@ -316,6 +341,10 @@ const pageSize = ref(10);
 
 const detailVisible = ref(false);
 const selectedItem = ref<Registration | null>(null);
+const firstVisitVisible = ref(false);
+const firstVisitPatient = ref<FirstVisitPatient>({});
+const firstVisitSeminarSourceLabel = ref("");
+const firstVisitSeminarSourceDate = ref("");
 const checkinRouteBase = "https://neuroplus.com.tw/checkin";
 
 const selectedArea = computed(() => {
@@ -323,6 +352,33 @@ const selectedArea = computed(() => {
   const value = Array.isArray(area) ? area[0] : area;
   return typeof value === "string" ? value.trim() : "";
 });
+
+const selectedEventDate = computed(() => {
+  const date = route.query.eventDate;
+  const value = Array.isArray(date) ? date[0] : date;
+  return typeof value === "string" ? normalizeDateKey(value) : "";
+});
+
+function normalizeDateKey(value = ""): string {
+  const digits = String(value).replace(/\D/g, "");
+  return digits.length >= 8 ? digits.slice(0, 8) : "";
+}
+
+function parseSessionDateFromNote(note = ""): string {
+  const m = note.match(/場次日期[：:]\s*(\d{4})\/(\d{2})\/(\d{2})/);
+  if (!m) return "";
+  return `${m[1]}${m[2]}${m[3]}`;
+}
+
+function getRegistrationSessionDateKey(item: Registration): string {
+  const fromRegister = normalizeDateKey(item.registerDate);
+  if (fromRegister) return fromRegister;
+  return parseSessionDateFromNote(item.note);
+}
+
+function hasHisPid(item: Registration): boolean {
+  return Boolean(item.hisPid?.trim());
+}
 
 function goBack() {
   router.push("/raphaelBackend/events");
@@ -388,6 +444,9 @@ async function fetchRegisterList() {
     if (response.data?.Result === "OK" && Array.isArray(list)) {
       registrations.value = list.map((item: ApiRegistration) => ({
         id: item.AID || crypto.randomUUID(),
+        hisPid: (item.PID || "").trim(),
+        pid: (item.PID || "").trim() || item.VIP || item.AID || "",
+        registerDate: (item.RegisterDate || "").trim(),
         vip: item.VIP || "",
         name: item.Name?.trim() || "",
         area: item.Area?.trim() || "",
@@ -415,12 +474,24 @@ async function fetchRegisterList() {
 }
 
 const areaRegistrations = computed<Registration[]>(() => {
-  if (!selectedArea.value) return registrations.value;
+  let result = registrations.value;
 
-  return registrations.value.filter((item: Registration) => {
-    if (item.area) return item.area === selectedArea.value;
-    return selectedArea.value === "台北";
-  });
+  if (selectedArea.value) {
+    result = result.filter((item: Registration) => {
+      if (item.area) return item.area === selectedArea.value;
+      return selectedArea.value === "台北";
+    });
+  }
+
+  if (selectedEventDate.value) {
+    result = result.filter((item: Registration) => {
+      const sessionKey = getRegistrationSessionDateKey(item);
+      if (!sessionKey) return true;
+      return sessionKey === selectedEventDate.value;
+    });
+  }
+
+  return result;
 });
 
 const filteredRegistrations = computed<Registration[]>(() => {
@@ -510,6 +581,48 @@ function closeDetail() {
   selectedItem.value = null;
 }
 
+function seminarSourceLabelFromEventType(eventType: string): string {
+  const t = (eventType || "").toLowerCase();
+  if (t.includes("vipl")) return "解析會";
+  return "講座活動";
+}
+
+function buildFirstVisitPatient(item: Registration): FirstVisitPatient {
+  const datePart = item.createdAt?.split(" ")[0] || "-";
+  const nameExtra = [item.vip, item.area].filter(Boolean).join(" ");
+  const chartId = item.hisPid || item.vip || item.aid || "-";
+  return {
+    pid: item.hisPid,
+    chartNo: chartId,
+    name: item.name || "-",
+    mobile: item.mobile || "",
+    nameExtra: nameExtra ? `(${nameExtra})` : "",
+    gender: "-",
+    age: "-",
+    firstVisitDate: datePart,
+  };
+}
+
+function openFirstVisit(item: Registration) {
+  firstVisitPatient.value = buildFirstVisitPatient(item);
+  firstVisitSeminarSourceLabel.value = seminarSourceLabelFromEventType(
+    item.eventType || resolvedEventType.value
+  );
+  const dateKey = getDateKeyFromCheckTime(item.checkTimeRaw);
+  firstVisitSeminarSourceDate.value =
+    dateKey || formatDateToYYYYMMDD(new Date());
+  firstVisitVisible.value = true;
+}
+
+function closeFirstVisit() {
+  firstVisitVisible.value = false;
+  firstVisitPatient.value = {};
+}
+
+function handleFirstVisitSave(_data: FirstVisitFormData) {
+  closeFirstVisit();
+}
+
 const checkinUrl = computed(() => {
   if (!selectedItem.value?.aid) return "";
   const aid = encodeURIComponent(selectedItem.value.aid);
@@ -592,6 +705,10 @@ watch(dateRange, () => {
 });
 
 watch(selectedArea, () => {
+  currentPage.value = 1;
+});
+
+watch(selectedEventDate, () => {
   currentPage.value = 1;
 });
 </script>
@@ -804,7 +921,7 @@ watch(selectedArea, () => {
 
   .register-table {
     --table-cols: minmax(128px, 1.15fr) minmax(108px, 0.95fr)
-      minmax(88px, 0.75fr) minmax(152px, 1.2fr) minmax(72px, 1.35fr) 72px;
+      minmax(88px, 0.75fr) minmax(152px, 1.2fr) minmax(72px, 1.35fr) minmax(140px, auto);
 
     background: #fff;
     border-radius: 20px;
@@ -960,7 +1077,7 @@ watch(selectedArea, () => {
 
       .action-buttons {
         display: flex;
-        flex-wrap: nowrap;
+        flex-wrap: wrap;
         justify-content: flex-end;
         gap: 0.5rem;
         align-items: center;
@@ -984,6 +1101,11 @@ watch(selectedArea, () => {
           &.call {
             background: rgba(200, 146, 60, 0.1);
             color: #a36d18;
+          }
+
+          &.first-visit {
+            background: rgba(27, 163, 155, 0.18);
+            color: $chip-success;
           }
         }
       }
