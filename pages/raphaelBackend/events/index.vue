@@ -158,22 +158,22 @@
   const areaOrder = ["台北", "台中", "高雄"];
   
   const events = ref<SeminarEvent[]>([
-    {
-      id: "20260514-vipl1",
-      title: "明明很不舒服，為什麼檢查都說沒問題？",
-      category: "健康講座",
-      eventType: "vipl1",
-      eventDate: "20260514",
-      displayDate: "2026 / 05 / 14（四）",
-      time: "10:00",
-      status: "active",
-      areas: [
-        {
-          area: "台北",
-          location: "台北新光摩天大樓 30樓之1",
-        },
-      ],
-    },
+    // {
+    //   id: "20260514-vipl1",
+    //   title: "明明很不舒服，為什麼檢查都說沒問題？",
+    //   category: "健康講座",
+    //   eventType: "vipl1",
+    //   eventDate: "20260514",
+    //   displayDate: "2026 / 05 / 14（四）",
+    //   time: "10:00",
+    //   status: "active",
+    //   areas: [
+    //     {
+    //       area: "台北",
+    //       location: "台北新光摩天大樓 30樓之1",
+    //     },
+    //   ],
+    // },
     {
       id: "20260528-vipl2",
       title: "明明很不舒服，為什麼檢查都說沒問題？",
