@@ -101,7 +101,11 @@
                 class="firstVisitModal__input firstVisitModal__input--date"
               />
             </label>
-            <div class="firstVisitModal__field firstVisitModal__field--full">
+            <!-- 來源欄位暫時隱藏 -->
+            <div
+              v-if="false"
+              class="firstVisitModal__field firstVisitModal__field--full"
+            >
               <span class="firstVisitModal__fieldLabel">來源</span>
               <div class="firstVisitModal__sourceReadonly">{{ sourceDisplayLine }}</div>
             </div>
@@ -449,7 +453,7 @@
           </section>
 
           <!-- 二、過去病史 -->
-          <!-- <section v-show="activeTab === 'past'" class="firstVisitModal__section">
+          <section v-show="activeTab === 'past'" class="firstVisitModal__section">
             <div class="firstVisitModal__sectionHead">
               <h3 class="firstVisitModal__sectionTitle">
                 <span class="firstVisitModal__sectionBar" aria-hidden="true" />
@@ -523,7 +527,7 @@
             >
               + 增加欄位
             </button>
-          </section> -->
+          </section>
 
           <!-- 三、家族史 -->
           <!-- <section v-show="activeTab === 'family'" class="firstVisitModal__section">
@@ -676,14 +680,14 @@
               取消
             </button>
             <div class="firstVisitModal__footerRight">
-              <button
+              <!-- <button
                 type="button"
                 class="firstVisitModal__btn firstVisitModal__btn--outline"
                 :disabled="insertingBasic || loadingIndividual"
                 @click="handleBasicNext"
               >
                 {{ insertingBasic ? "處理中..." : "下一步：初診健康史問卷" }}
-              </button>
+              </button> -->
               <button
                 type="button"
                 class="firstVisitModal__btn firstVisitModal__btn--primary"
@@ -757,6 +761,10 @@ import {
   buildInsertReportPayload,
   submitInsertReport,
 } from "@/utils/firstVisitInsertReport";
+import {
+  buildInsertReportPassPayload,
+  submitInsertReportPass,
+} from "@/utils/firstVisitInsertReportPass";
 import {
   submitInsertIndividual,
   type InsertIndividualPayload,
@@ -1397,8 +1405,11 @@ async function handleBasicSaveOnly() {
   insertingBasic.value = true;
   try {
     const r = await runSaveBasicProfile();
+
     if (r.ok) {
       alert(insertedPid.value ? "基本資料更新成功" : "基本資料儲存成功");
+
+      emit("close"); // ← 儲存成功後關閉視窗
     } else {
       alert(r.message || "建檔失敗");
     }
@@ -1492,10 +1503,63 @@ function resetForm() {
   medFilter.value = "";
 }
 
+async function saveLifeHistory(
+  adminID: string,
+  token: string,
+  pid: string,
+  formSnapshot: FirstVisitFormData
+) {
+  const payload = buildInsertReportPayload(adminID, token, pid, {
+    ...formSnapshot.life,
+  });
+  const result = await submitInsertReport(payload);
+
+  if (result.Result === "OK") {
+    emit("save", formSnapshot);
+    emit("close");
+    return;
+  }
+
+  alert(`儲存失敗：${result.Message || result.Result || "未知錯誤"}`);
+}
+
+async function savePastHistory(
+  adminID: string,
+  token: string,
+  pid: string,
+  formSnapshot: FirstVisitFormData
+) {
+  const payload = buildInsertReportPassPayload(
+    adminID,
+    token,
+    pid,
+    formSnapshot.pastHistory
+  );
+
+  if (!payload.Pass.length) {
+    alert("請至少填寫一筆過去病史（疾病欄位）");
+    return;
+  }
+
+  const result = await submitInsertReportPass(payload);
+
+  if (result.Result === "OK") {
+    emit("save", formSnapshot);
+    emit("close");
+    return;
+  }
+
+  alert(`儲存失敗：${result.Message || result.Result || "未知錯誤"}`);
+}
+
 async function handleSave() {
   const pid = effectivePid.value;
   if (!pid) {
-    alert("缺少病患病歷 PID，無法儲存生活史");
+    alert(
+      activeTab.value === "past"
+        ? "缺少病患病歷 PID，無法儲存過去病史"
+        : "缺少病患病歷 PID，無法儲存生活史"
+    );
     return;
   }
 
@@ -1511,21 +1575,21 @@ async function handleSave() {
 
   saving.value = true;
   try {
-    const payload = buildInsertReportPayload(adminID, token, pid, {
-      ...formSnapshot.life,
-    });
-    const result = await submitInsertReport(payload);
-
-    if (result.Result === "OK") {
-      emit("save", formSnapshot);
-      alert("生活史儲存成功");
-      emit("close");
+    if (activeTab.value === "past") {
+      await savePastHistory(adminID, token, pid, formSnapshot);
       return;
     }
 
-    alert(`儲存失敗：${result.Message || result.Result || "未知錯誤"}`);
+    if (activeTab.value === "life") {
+      await saveLifeHistory(adminID, token, pid, formSnapshot);
+      return;
+    }
+
+    alert("此區塊尚未開放儲存，請切換至生活史或過去病史");
   } catch (error: unknown) {
-    console.error("Insert_Report 失敗:", error);
+    const apiLabel =
+      activeTab.value === "past" ? "Insert_Report_Pass" : "Insert_Report";
+    console.error(`${apiLabel} 失敗:`, error);
     const err = error as { response?: { data?: { Message?: string } }; message?: string };
     alert(
       `儲存失敗：${err.response?.data?.Message || err.message || "請稍後再試"}`
