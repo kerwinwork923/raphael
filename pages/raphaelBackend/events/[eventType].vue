@@ -112,7 +112,6 @@
                   撥打
                 </a>
                 <button
-                  v-if="!hasHisPid(item)"
                   class="text-btn first-visit"
                   @click="openFirstVisit(item)"
                 >
@@ -273,6 +272,14 @@ import { useSeo } from "~/composables/useSeo";
 const router = useRouter();
 const route = useRoute();
 
+const token =
+  localStorage.getItem("backendToken") ||
+  sessionStorage.getItem("backendToken");
+
+  const adminID =
+  localStorage.getItem("adminID") ||
+  sessionStorage.getItem("adminID");
+
 function resolveEventTypeParam(): string {
   const p = route.params.eventType;
   if (Array.isArray(p)) return p[0] || "vipl1";
@@ -282,8 +289,8 @@ function resolveEventTypeParam(): string {
 const resolvedEventType = computed(() => resolveEventTypeParam());
 
 const API_PAYLOAD = computed(() => ({
-  AdminID: "kerwin",
-  Token: "byurf8BWSba2AIAhC7ffFtjmvzzlqELG",
+  AdminID: adminID,
+  Token: token,
   EventType: resolvedEventType.value,
 }));
 
@@ -377,10 +384,6 @@ function getRegistrationSessionDateKey(item: Registration): string {
 
   // 沒有才 fallback 到 RegisterDate
   return normalizeDateKey(item.registerDate);
-}
-
-function hasHisPid(item: Registration): boolean {
-  return Boolean(item.hisPid?.trim());
 }
 
 function goBack() {
@@ -611,9 +614,11 @@ function openFirstVisit(item: Registration) {
   firstVisitSeminarSourceLabel.value = seminarSourceLabelFromEventType(
     item.eventType || resolvedEventType.value
   );
-  const dateKey = getDateKeyFromCheckTime(item.checkTimeRaw);
+  const sessionKey = getRegistrationSessionDateKey(item);
   firstVisitSeminarSourceDate.value =
-    dateKey || formatDateToYYYYMMDD(new Date());
+    sessionKey ||
+    getDateKeyFromCheckTime(item.checkTimeRaw) ||
+    formatDateToYYYYMMDD(new Date());
   firstVisitVisible.value = true;
 }
 
@@ -624,6 +629,7 @@ function closeFirstVisit() {
 
 function handleFirstVisitSave(_data: FirstVisitFormData) {
   closeFirstVisit();
+  fetchRegisterList();
 }
 
 const checkinUrl = computed(() => {

@@ -8,7 +8,11 @@
       aria-labelledby="firstVisitModalTitle"
       @click.self="handleCloseRequest"
     >
-      <div class="firstVisitModal__box" @click.stop>
+      <div
+        class="firstVisitModal__box"
+        :class="{ 'firstVisitModal__box--wide': wizardStep === 2 }"
+        @click.stop
+      >
         <header class="firstVisitModal__header">
           <img
             src="/assets/imgs/backend/Subtract.svg"
@@ -59,8 +63,10 @@
           </div>
         </header>
 
-        <!-- 步驟一：基本資料表（Insert_Individual） -->
+        <!-- 步驟一：基本資料表（Query / Modify / Insert_Individual） -->
         <div v-show="wizardStep === 1" class="firstVisitModal__basicWrap">
+          <p v-if="loadingIndividual" class="firstVisitModal__loadingHint">載入會員資料中…</p>
+          <div class="firstVisitModal__basicCard">
           <h3 class="firstVisitModal__sectionTitle firstVisitModal__sectionTitle--basic">
             <span class="firstVisitModal__sectionBar" aria-hidden="true" />
             基本資料
@@ -171,6 +177,7 @@
           </div>
 
           <p class="firstVisitModal__filedAt">建檔日期：{{ profileCreatedAtDisplay }}</p>
+          </div>
         </div>
 
         <div v-show="wizardStep === 2" class="firstVisitModal__step2">
@@ -669,14 +676,14 @@
               取消
             </button>
             <div class="firstVisitModal__footerRight">
-              <!-- <button
+              <button
                 type="button"
                 class="firstVisitModal__btn firstVisitModal__btn--outline"
-                :disabled="insertingBasic"
+                :disabled="insertingBasic || loadingIndividual"
                 @click="handleBasicNext"
               >
                 {{ insertingBasic ? "處理中..." : "下一步：初診健康史問卷" }}
-              </button> -->
+              </button>
               <button
                 type="button"
                 class="firstVisitModal__btn firstVisitModal__btn--primary"
@@ -754,6 +761,11 @@ import {
   submitInsertIndividual,
   type InsertIndividualPayload,
 } from "@/utils/firstVisitInsertIndividual";
+import {
+  queryIndividual,
+  modifyIndividual,
+  type ModifyIndividualPayload,
+} from "@/utils/firstVisitIndividualApi";
 
 export type FirstVisitPatient = {
   /** Individual.PID，Insert_Report 必填 */
@@ -1036,8 +1048,11 @@ const teeSizes = ["XS", "S", "M", "L", "XL", "2L", "3L", "4L"] as const;
 const wizardStep = ref<1 | 2>(1);
 const insertedPid = ref("");
 const insertingBasic = ref(false);
+const loadingIndividual = ref(false);
 const cancelConfirmVisible = ref(false);
 const profileOpenedAt = ref<Date | null>(null);
+const loadedSourceLabel = ref("");
+const loadedSourceDate = ref("");
 
 const basicForm = reactive({
   name: "",
@@ -1065,13 +1080,18 @@ function padDateCompact(d: Date) {
 }
 
 const resolvedSourceDate = computed(() => {
+  const loaded = loadedSourceDate.value.trim();
+  if (/^\d{8}$/.test(loaded)) return loaded;
   const raw = props.seminarSourceDateYYYYMMDD?.trim();
   if (/^\d{8}$/.test(raw)) return raw;
   return padDateCompact(new Date());
 });
 
 const resolvedSourceLabel = computed(
-  () => props.seminarSourceLabel?.trim() || "講座活動"
+  () =>
+    loadedSourceLabel.value.trim() ||
+    props.seminarSourceLabel?.trim() ||
+    "講座活動"
 );
 
 function formatYYYYMMDDToSlash(yyyymmdd: string) {
@@ -1137,6 +1157,133 @@ function birthdayToApi(yyyyMmDd: string): string {
   return /^\d{8}$/.test(s) ? s : "";
 }
 
+function apiBirthdayToInput(value = ""): string {
+  const s = value.replace(/\D/g, "");
+  if (!/^\d{8}$/.test(s)) return "";
+  return `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
+}
+
+function applyTeeFromApi(ttType = "", ttSize = "") {
+  basicForm.teeMaleSize = "";
+  basicForm.teeFemaleSize = "";
+  basicForm.teeChildCustom = "";
+  const type = ttType.trim();
+  const size = ttSize.trim();
+  if (!size) return;
+  if (type === "兒童") {
+    basicForm.teeChildCustom = size;
+    return;
+  }
+  if (size.startsWith("男")) {
+    basicForm.teeMaleSize = size.slice(1);
+  } else if (size.startsWith("女")) {
+    basicForm.teeFemaleSize = size.slice(1);
+  }
+}
+
+function applyIndividualFromQuery(data: {
+  PID?: string;
+  Name?: string;
+  Mobile?: string;
+  Birthday?: string;
+  Source?: string;
+  SourceDate?: string;
+  Height?: string;
+  Weight?: string;
+  TT_Type?: string;
+  TT_Size?: string;
+}) {
+  const pid = (data.PID || "").trim();
+  if (pid) insertedPid.value = pid;
+
+  const name = (data.Name || "").trim();
+  if (name) basicForm.name = name;
+
+  const mobile = (data.Mobile || "").trim();
+  if (mobile) basicForm.mobile = mobile;
+
+  const birthday = apiBirthdayToInput(data.Birthday || "");
+  if (birthday) basicForm.birthdayInput = birthday;
+
+  const source = (data.Source || "").trim();
+  if (source) loadedSourceLabel.value = source;
+
+  const sourceDate = (data.SourceDate || "").replace(/\D/g, "").slice(0, 8);
+  if (/^\d{8}$/.test(sourceDate)) loadedSourceDate.value = sourceDate;
+
+  basicForm.height = (data.Height || "").trim();
+  basicForm.weight = (data.Weight || "").trim();
+  applyTeeFromApi(data.TT_Type, data.TT_Size);
+}
+
+async function fetchIndividualProfile() {
+  const { adminID, token } = getBackendAuth();
+  if (!adminID || !token) return;
+
+  const mobile = (props.patient?.mobile || basicForm.mobile || "").trim();
+  if (!mobile) return;
+
+  const pid = (props.patient?.pid || insertedPid.value || "").trim();
+
+  loadingIndividual.value = true;
+  try {
+    const data = await queryIndividual({
+      AdminID: adminID,
+      Token: token,
+      PID: pid,
+      Mobile: mobile,
+    });
+
+    if (data.Result === "OK") {
+      applyIndividualFromQuery(data);
+      return;
+    }
+
+    if (data.Result !== "目前無資料") {
+      console.warn("Query_Individual:", data.Result, data.Message);
+    }
+  } catch (error) {
+    console.error("Query_Individual 失敗:", error);
+  } finally {
+    loadingIndividual.value = false;
+  }
+}
+
+function buildBasicPayload(
+  adminID: string,
+  token: string
+): ModifyIndividualPayload | InsertIndividualPayload | null {
+  const name = basicForm.name.trim();
+  const mobile = basicForm.mobile.trim();
+  if (!name || !mobile) return null;
+
+  const birthday = birthdayToApi(basicForm.birthdayInput);
+  if (!birthday) return null;
+
+  const tee = buildTeePayload();
+  if (!tee) return null;
+
+  const base = {
+    AdminID: adminID,
+    Token: token,
+    Name: name,
+    Mobile: mobile,
+    Birthday: birthday,
+    Source: resolvedSourceLabel.value,
+    SourceDate: resolvedSourceDate.value,
+    Height: basicForm.height.trim(),
+    Weight: basicForm.weight.trim(),
+    TT_Type: tee.TT_Type,
+    TT_Size: tee.TT_Size,
+  };
+
+  const pid = effectivePid.value;
+  if (pid) {
+    return { ...base, PID: pid };
+  }
+  return base;
+}
+
 function buildTeePayload(): { TT_Type: string; TT_Size: string } | null {
   const child = basicForm.teeChildCustom.trim();
   if (child) {
@@ -1192,43 +1339,38 @@ const isQuestionnaireDirty = computed(
   () => JSON.stringify(form) !== questionnaireBaseline.value
 );
 
-async function runInsertIndividual(): Promise<{ ok: boolean; message?: string }> {
+async function runSaveBasicProfile(): Promise<{ ok: boolean; message?: string }> {
   const { adminID, token } = getBackendAuth();
   if (!adminID || !token) {
     return { ok: false, message: "請先登入後台" };
   }
 
-  const name = basicForm.name.trim();
-  const mobile = basicForm.mobile.trim();
-  if (!name || !mobile) {
-    return { ok: false, message: "請填寫姓名與電話" };
-  }
-
-  const birthday = birthdayToApi(basicForm.birthdayInput);
-  if (!birthday) {
-    return { ok: false, message: "請選擇出生年月日" };
-  }
-
-  const tee = buildTeePayload();
-  if (!tee) {
+  const payload = buildBasicPayload(adminID, token);
+  if (!payload) {
+    const name = basicForm.name.trim();
+    const mobile = basicForm.mobile.trim();
+    if (!name || !mobile) {
+      return { ok: false, message: "請填寫姓名與電話" };
+    }
+    if (!birthdayToApi(basicForm.birthdayInput)) {
+      return { ok: false, message: "請選擇出生年月日" };
+    }
     return { ok: false, message: "請選擇或填寫 T 恤尺寸" };
   }
 
-  const payload: InsertIndividualPayload = {
-    AdminID: adminID,
-    Token: token,
-    Name: name,
-    Mobile: mobile,
-    Birthday: birthday,
-    Source: resolvedSourceLabel.value,
-    SourceDate: resolvedSourceDate.value,
-    Height: basicForm.height.trim(),
-    Weight: basicForm.weight.trim(),
-    TT_Type: tee.TT_Type,
-    TT_Size: tee.TT_Size,
-  };
-
   try {
+    if ("PID" in payload && payload.PID) {
+      const data = await modifyIndividual(payload);
+      if (data.Result === "OK") {
+        insertedPid.value = String(data.PID || payload.PID).trim();
+        return { ok: true };
+      }
+      return {
+        ok: false,
+        message: data.Message || data.Result || "更新失敗",
+      };
+    }
+
     const data = await submitInsertIndividual(payload);
     if (data.Result === "OK" && data.PID) {
       insertedPid.value = String(data.PID).trim();
@@ -1239,14 +1381,14 @@ async function runInsertIndividual(): Promise<{ ok: boolean; message?: string }>
       message: data.Message || data.Result || "建檔失敗",
     };
   } catch (error: unknown) {
-    console.error("Insert_Individual 失敗:", error);
+    console.error("儲存基本資料失敗:", error);
     const err = error as {
       response?: { data?: { Message?: string } };
       message?: string;
     };
     return {
       ok: false,
-      message: err.response?.data?.Message || err.message || "建檔失敗",
+      message: err.response?.data?.Message || err.message || "儲存失敗",
     };
   }
 }
@@ -1254,9 +1396,9 @@ async function runInsertIndividual(): Promise<{ ok: boolean; message?: string }>
 async function handleBasicSaveOnly() {
   insertingBasic.value = true;
   try {
-    const r = await runInsertIndividual();
+    const r = await runSaveBasicProfile();
     if (r.ok) {
-      alert("基本資料儲存成功");
+      alert(insertedPid.value ? "基本資料更新成功" : "基本資料儲存成功");
     } else {
       alert(r.message || "建檔失敗");
     }
@@ -1268,9 +1410,9 @@ async function handleBasicSaveOnly() {
 async function handleBasicNext() {
   insertingBasic.value = true;
   try {
-    const r = await runInsertIndividual();
+    const r = await runSaveBasicProfile();
     if (!r.ok) {
-      alert(r.message || "建檔失敗");
+      alert(r.message || "儲存失敗");
       return;
     }
     wizardStep.value = 2;
@@ -1395,14 +1537,17 @@ async function handleSave() {
 
 watch(
   () => props.show,
-  (visible: boolean) => {
+  async (visible: boolean) => {
     if (visible) {
       profileOpenedAt.value = new Date();
       wizardStep.value = 1;
-      insertedPid.value = "";
+      insertedPid.value = (props.patient?.pid || "").trim();
+      loadedSourceLabel.value = "";
+      loadedSourceDate.value = "";
       cancelConfirmVisible.value = false;
       resetForm();
       initBasicFormFromProps();
+      await fetchIndividualProfile();
       nextTick(() => {
         basicDirtyBaseline.value = JSON.stringify(serializeBasicForm());
         questionnaireBaseline.value = JSON.stringify(form);
@@ -1413,7 +1558,7 @@ watch(
 </script>
 
 <style scoped lang="scss">
-$teal: #1ba39b;
+$teal: #13a399;
 $gray-bg: #f5f7fa;
 $border: #d8e2ef;
 $text: #2d3047;
@@ -1433,13 +1578,17 @@ $text-muted: #6b7a90;
 .firstVisitModal__box {
   display: flex;
   flex-direction: column;
-  width: min(1100px, 100%);
+  width: min(720px, 100%);
   max-height: min(92vh, 900px);
   background: #fff;
-  border: 3px solid $teal;
-  border-radius: 20px;
-  box-shadow: 0 2px 20px rgba(27, 163, 155, 0.25);
+  border: 1px solid #dce5ef;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(19, 163, 153, 0.12);
   overflow: hidden;
+
+  &--wide {
+    width: min(1100px, 100%);
+  }
 }
 
 .firstVisitModal__header {
@@ -1543,8 +1692,22 @@ $text-muted: #6b7a90;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 0 1.25rem 1.25rem;
-  background: #fafbfc;
+  padding: 0 1.5rem 1rem;
+  background: #fff;
+}
+
+.firstVisitModal__loadingHint {
+  margin: 0 0 0.75rem;
+  font-size: 13px;
+  color: $text-muted;
+  text-align: center;
+}
+
+.firstVisitModal__basicCard {
+  border: 1px solid #e4ebf3;
+  border-radius: 12px;
+  padding: 1rem 1.1rem 0;
+  background: #fff;
 }
 
 .firstVisitModal__sectionTitle--basic {
@@ -1553,8 +1716,8 @@ $text-muted: #6b7a90;
 
 .firstVisitModal__basicGrid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.85rem 1rem;
+  grid-template-columns: 1fr;
+  gap: 0.85rem;
   margin-bottom: 1rem;
 }
 
@@ -1584,8 +1747,24 @@ $text-muted: #6b7a90;
   color: $text-muted;
 }
 
+.firstVisitModal__input {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid $border;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fff;
+  min-height: 42px;
+
+  &:focus {
+    outline: none;
+    border-color: $teal;
+    box-shadow: 0 0 0 2px rgba($teal, 0.15);
+  }
+}
+
 .firstVisitModal__input--date {
-  min-height: 40px;
+  min-height: 42px;
 }
 
 .firstVisitModal__teeBlock {
@@ -1660,9 +1839,12 @@ $text-muted: #6b7a90;
 }
 
 .firstVisitModal__filedAt {
-  margin: 0;
-  font-size: 12px;
+  margin: 1rem -1.1rem 0;
+  padding: 0.65rem 1.1rem;
+  font-size: 13px;
   color: $text-muted;
+  background: #f0f3f7;
+  border-radius: 0 0 11px 11px;
 }
 
 .firstVisitModal__patientBar {
@@ -2173,8 +2355,8 @@ $text-muted: #6b7a90;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 0.75rem;
-  padding: 0.85rem 1.25rem;
-  border-top: 1px solid $border;
+  padding: 1rem 1.5rem 1.25rem;
+  border-top: none;
   background: #fff;
 }
 
