@@ -9,22 +9,86 @@
       <div class="scanline"></div>
     </div>
 
-    <main class="shell">
-      <!-- Header -->
-      <header class="hero">
-        <div class="hero-badge">
-          <span class="badge-dot"></span>
-          WiseBalance Check-in System
-        </div>
-        <h1 class="hero-title">
-          來賓報到
-          <span class="title-accent">掃描專區</span>
-        </h1>
-   
-      </header>
+    <main class="shell" :class="{ 'shell--select': pageStep === 'select' }">
+      <!-- Step 1：選擇場次 -->
+      <template v-if="pageStep === 'select'">
+        <header class="hero hero--select">
+          <div class="hero-badge">
+            <span class="badge-dot"></span>
+            WiseBalance Check-in System
+          </div>
+          <h1 class="hero-title">
+            來賓報到
+            <span class="title-accent">場次選擇</span>
+          </h1>
 
-      <!-- Main content -->
-      <div class="layout">
+          <section class="session-picker" aria-label="選擇報到場次">
+            <div class="session-picker-head">
+              <span class="session-picker-eyebrow">Session</span>
+              <h2 class="session-picker-title">請選擇報到場次</h2>
+              <p class="session-picker-hint">選定場次後將進入掃描報到畫面</p>
+            </div>
+
+            <div class="session-card-grid" role="list">
+              <button
+                v-for="card in sessionCards"
+                :key="card.cardId"
+                type="button"
+                role="listitem"
+                class="session-card"
+                @click="enterScanView(card.cardId)"
+              >
+                <span class="session-card-top">
+                  <span class="session-card-area">{{ card.area }}</span>
+                  <span class="session-card-enter" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                  </span>
+                </span>
+
+                <span class="session-card-date">{{ formatSessionDate(card) }}</span>
+                <span class="session-card-time">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                  {{ card.time }}
+                </span>
+                <span class="session-card-location">{{ card.location }}</span>
+
+                <span class="session-card-cta">進入掃描</span>
+              </button>
+            </div>
+          </section>
+        </header>
+      </template>
+
+      <!-- Step 2：掃描報到 -->
+      <template v-else>
+        <header class="hero hero--scan">
+          <div class="scan-topbar">
+            <button type="button" class="back-session-btn" @click="backToSessionSelect">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+              切換場次
+            </button>
+            <div class="hero-badge hero-badge--compact">
+              <span class="badge-dot"></span>
+              Check-in
+            </div>
+          </div>
+
+          <h1 class="hero-title hero-title--scan">
+            來賓報到
+            <span class="title-accent">掃描專區</span>
+          </h1>
+
+     
+        </header>
+
+        <div class="layout">
 
         <!-- Left: Scanner panel -->
         <section class="panel scanner-panel">
@@ -99,21 +163,23 @@
               <h2 class="panel-title">報到紀錄</h2>
             </div>
             <div class="count-chip">
-              <span class="count-num">{{ logs.length }}</span>
-              <span class="count-label">位</span>
+              <span class="count-num">{{ checkedInCount }}</span>
+              <span class="count-sep">/</span>
+              <span class="count-num count-num--muted">{{ totalRegistrations }}</span>
+              <span class="count-label">已報到</span>
             </div>
           </div>
 
           <div class="records-body">
-            <TransitionGroup name="record-list" tag="div" class="records-list" v-if="logs.length">
+            <TransitionGroup name="record-list" tag="div" class="records-list" v-if="checkinLogs.length">
               <article
                 class="record-card"
-                v-for="(item, idx) in logs"
-                :key="`${item.aid}-${item.qrcodeTime}-${idx}`"
+                v-for="(item, idx) in checkinLogs"
+                :key="`${item.name}-${item.qrcodeTime}-${idx}`"
               >
-                <div class="record-num">#{{ logs.length - idx }}</div>
+                <div class="record-num">#{{ checkinLogs.length - idx }}</div>
                 <div class="record-info">
-                  <p class="record-text">{{ item.name }}（AID: {{ item.aid }}）</p>
+                  <p class="record-text">{{ item.name }}</p>
                   <p class="record-mobile">{{ item.mobile || "-" }}</p>
                   <time class="record-time">{{ item.qrcodeTime }}</time>
                 </div>
@@ -142,7 +208,8 @@
           </div>
         </section>
 
-      </div>
+        </div>
+      </template>
     </main>
   </div>
 </template>
@@ -150,6 +217,27 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { Html5Qrcode } from "html5-qrcode";
+import {
+  DEFAULT_QRCODE_SESSION_CARD_ID,
+  SEMINAR_EVENTS,
+  buildSeminarEventCards,
+  isQrcodeSession,
+  type SeminarEventCard,
+} from "~/utils/seminarEventSessions";
+import {
+  buildPayloadFromSessionCard,
+  buildSeminarRegisterQueryPayload,
+  fetchSeminarRegisterList,
+  type SeminarRegisterApiItem,
+} from "~/utils/seminarRegisterQuery";
+
+const token =
+  localStorage.getItem("backendToken") ||
+  sessionStorage.getItem("backendToken");
+
+const adminID =
+  localStorage.getItem("adminID") ||
+  sessionStorage.getItem("adminID");
 const preferredFacingMode = ref("environment");
 interface ScanLog {
   aid: string;
@@ -163,15 +251,60 @@ interface CameraItem {
   label: string;
 }
 
-
 const CHECKIN_API = "https://23700999.com:8081/HMA/000TTEupdateQRCodeCheck.jsp";
 const CHECKIN_KEY = "qrt897hpmd";
-const REGISTER_QUERY_API = "https://23700999.com:8081/HMA/api/bk/His_Register_query";
-const REGISTER_QUERY_PAYLOAD = {
-  AdminID: "kerwin",
-  EventType: "vipl2",
-  Token: "byurf8BWSba2AIAhC7ffFtjmvzzlqELG",
-};
+
+const sessionCards = computed(() =>
+  buildSeminarEventCards(SEMINAR_EVENTS).filter(isQrcodeSession),
+);
+
+type PageStep = "select" | "scan";
+
+const pageStep = ref<PageStep>("select");
+const selectedSessionCardId = ref(DEFAULT_QRCODE_SESSION_CARD_ID);
+
+function enterScanView(cardId: string) {
+  selectedSessionCardId.value = cardId;
+  pageStep.value = "scan";
+  fetchCheckinRecords();
+  startCheckinPolling();
+}
+
+async function backToSessionSelect() {
+  if (isScanning.value) {
+    await stopScan();
+  }
+  stopCheckinPolling();
+  scanner.value = null;
+  registrationsRaw.value = [];
+  scannedSet.value.clear();
+  statusText.value = "尚未開始掃描";
+  statusType.value = "default";
+  pageStep.value = "select";
+}
+
+function formatSessionDate(card: SeminarEventCard) {
+  return card.displayDate.replace(/\s+/g, " ").trim();
+}
+
+const selectedSession = computed(() => {
+  const found = sessionCards.value.find(
+    (card) => card.cardId === selectedSessionCardId.value,
+  );
+  return found ?? sessionCards.value[0] ?? null;
+});
+
+const REGISTER_QUERY_PAYLOAD = computed(() => {
+  const session = selectedSession.value;
+  if (!session) {
+    return buildSeminarRegisterQueryPayload({
+      AdminID: adminID,
+      Token: token,
+      EventType: "vipl2",
+    });
+  }
+  return buildPayloadFromSessionCard(session, adminID, token);
+});
 
 const scanner = ref<Html5Qrcode | null>(null);
 const cameras = ref<CameraItem[]>([]);
@@ -179,7 +312,7 @@ const currentCameraIndex = ref(0);
 const isScanning = ref(false);
 const isProcessingScan = ref(false);
 const isSwitchingCamera = ref(false);
-const logs = ref<ScanLog[]>([]);
+const registrationsRaw = ref<SeminarRegisterApiItem[]>([]);
 const scannedSet = ref(new Set<string>());
 const statusText = ref("尚未開始掃描");
 const statusType = ref<"default" | "ok" | "err">("default");
@@ -310,15 +443,15 @@ async function onScanSuccess(decodedText: string) {
 
   const { aid, name } = extractFields(decodedText);
   if (!aid) {
-    updateStatus("找不到 AID 參數，請確認 QRCode 內容", "err");
-    alert("QRCode 內容缺少 AID，請確認是否為正確報到碼。");
+    updateStatus("無法辨識報到碼，請確認 QRCode 內容", "err");
+    alert("QRCode 內容無法辨識，請確認是否為正確報到碼。");
     isProcessingScan.value = false;
     await restartScanAfterDialog();
     return;
   }
 
   const displayName = name || "來賓";
-  updateStatus(`已掃描 AID=${aid}（${displayName}），送出報到中…`, "ok");
+  updateStatus(`已掃描 ${displayName}，送出報到中…`, "ok");
 
   try {
     await logEvent(aid, displayName, time);
@@ -428,38 +561,32 @@ async function switchCamera() {
   }
 }
 
-interface RegisterQueryItem {
-  AID?: string;
-  Name?: string;
-  Mobile?: string;
-  Qrcodecheck?: string;
-  Qrcodetime?: string;
-}
+const totalRegistrations = computed(() => registrationsRaw.value.length);
+
+const checkedInCount = computed(
+  () =>
+    registrationsRaw.value.filter(
+      (item) => item.Qrcodecheck === "true" && Boolean(item.Qrcodetime),
+    ).length,
+);
+
+const checkinLogs = computed<ScanLog[]>(() =>
+  registrationsRaw.value
+    .filter((item) => item.Qrcodecheck === "true" && Boolean(item.Qrcodetime))
+    .sort((a, b) => (b.Qrcodetime || "").localeCompare(a.Qrcodetime || ""))
+    .map((item) => ({
+      aid: item.AID || "-",
+      name: item.Name || "未命名",
+      mobile: item.Mobile || "",
+      qrcodeTime: item.Qrcodetime || "",
+    })),
+);
 
 async function fetchCheckinRecords() {
   try {
-    const response = await fetch(REGISTER_QUERY_API, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(REGISTER_QUERY_PAYLOAD),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-
-    const data = await response.json();
-    const list = Array.isArray(data?.regList) ? (data.regList as RegisterQueryItem[]) : [];
-
-    logs.value = list
-      .filter((item) => item.Qrcodecheck === "true" && Boolean(item.Qrcodetime))
-      .sort((a, b) => (b.Qrcodetime || "").localeCompare(a.Qrcodetime || ""))
-      .map((item) => ({
-        aid: item.AID || "-",
-        name: item.Name || "未命名",
-        mobile: item.Mobile || "",
-        qrcodeTime: item.Qrcodetime || "",
-      }));
+    registrationsRaw.value = await fetchSeminarRegisterList(
+      REGISTER_QUERY_PAYLOAD.value,
+    );
   } catch (error) {
     console.error("取得報到紀錄失敗:", error);
   }
@@ -498,7 +625,12 @@ onBeforeUnmount(async () => {
 });
 
 onMounted(() => {
-  startCheckinPolling();
+  if (
+    !sessionCards.value.some((card) => card.cardId === selectedSessionCardId.value)
+  ) {
+    selectedSessionCardId.value =
+      sessionCards.value[0]?.cardId || DEFAULT_QRCODE_SESSION_CARD_ID;
+  }
 });
 </script>
 
@@ -632,13 +764,83 @@ onMounted(() => {
   max-width: 1160px;
   margin: 0 auto;
   padding: clamp(32px, 5vw, 56px) clamp(16px, 3vw, 32px) 48px;
+
+  &--select {
+    max-width: 980px;
+  }
 }
 
 /* ── Hero ───────────────────────────────────────────── */
 .hero {
   text-align: center;
   margin-bottom: clamp(28px, 4vw, 44px);
+
+  &--select {
+    margin-bottom: 0;
+  }
+
+  &--scan {
+    margin-bottom: clamp(20px, 3vw, 28px);
+    text-align: left;
+  }
 }
+
+.scan-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.back-session-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-2);
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+
+  &:hover {
+    border-color: var(--border-accent);
+    color: var(--text-1);
+    background: var(--accent-dim);
+  }
+}
+
+.hero-badge--compact {
+  margin-bottom: 0;
+  padding: 5px 12px;
+  font-size: 0.65rem;
+}
+
+.hero-title--scan {
+  text-align: left;
+  margin-bottom: 14px;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+}
+
+
+
+.scan-session-area {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(122, 174, 255, 0.25);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+
 
 .hero-badge {
   display: inline-flex;
@@ -679,18 +881,227 @@ onMounted(() => {
 
 }
 
+.hero-title,
+.title-accent {
+  color: var(--text-1);
+  text-align: center;
+}
+
 .title-accent {
   display: inline-block;
   color: #1e1e1e;
 
 }
 
-.hero-sub {
-  color: var(--text-2);
-  font-size: clamp(0.9rem, 1.8vw, 1.05rem);
-  max-width: 500px;
+.session-picker {
+  max-width: 980px;
   margin: 0 auto;
-  line-height: 1.6;
+  text-align: left;
+  
+}
+
+.session-picker-head {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.session-picker-eyebrow {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.session-picker-title {
+  font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+  font-weight: 800;
+  color: var(--text-1);
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+}
+
+.session-picker-hint {
+  color: var(--text-2);
+  font-size: 0.86rem;
+}
+
+.session-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.session-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  padding: 16px 16px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+ 
+  background: rgba(255, 255, 255, 0.9);
+
+  box-shadow: 0 24px 80px rgba(255, 255, 255, .7);
+  border-radius: 8px;
+  color: var(--text-1);
+  text-align: left;
+  cursor: pointer;
+
+  transition:
+    border-color 0.25s,
+    background 0.25s,
+    box-shadow 0.25s,
+    transform 0.2s;
+
+  &:hover {
+    border-color: rgba(122, 174, 255, 0.35);
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+  }
+
+  &:focus-visible {
+    outline: none;
+    border-color: var(--border-accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.session-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
+.session-card-area {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(122, 174, 255, 0.25);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.session-card-enter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-2);
+  transition: background 0.2s, color 0.2s;
+}
+
+.session-card:hover .session-card-enter {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.session-card-date {
+  font-size: 1.02rem;
+  font-weight: 800;
+  line-height: 1.35;
+  color: var(--text-1);
+}
+
+.session-card-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-2);
+  font-size: 0.84rem;
+  font-weight: 600;
+
+  svg {
+    flex-shrink: 0;
+    opacity: 0.85;
+  }
+}
+
+.session-card-location {
+  color: var(--text-2);
+  font-size: 0.8rem;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.session-card-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.session-card-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  em {
+    font-style: normal;
+    font-size: 1.15rem;
+    font-weight: 900;
+    color: var(--text-1);
+    font-variant-numeric: tabular-nums;
+  }
+
+  small {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--text-3);
+    letter-spacing: 0.04em;
+  }
+}
+
+.session-card-stat-divider {
+  width: 1px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.session-card-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 4px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(122, 174, 255, 0.12);
+  border: 1px solid rgba(122, 174, 255, 0.22);
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.session-card:hover .session-card-cta {
+  background: rgba(122, 174, 255, 0.2);
+  border-color: rgba(122, 174, 255, 0.4);
 }
 
 /* ── Layout ─────────────────────────────────────────── */
@@ -1015,6 +1426,16 @@ onMounted(() => {
   font-weight: 900;
   color: var(--accent);
   font-variant-numeric: tabular-nums;
+
+  &--muted {
+    color: var(--text-2);
+    font-size: 0.95rem;
+  }
+}
+
+.count-sep {
+  color: var(--text-3);
+  font-weight: 700;
 }
 
 .count-label {
@@ -1172,6 +1593,29 @@ onMounted(() => {
   }
 
   .hero-title { letter-spacing: -0.01em; }
+
+  .session-card-grid {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+
+    &::-webkit-scrollbar { height: 4px; }
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+    }
+  }
+
+  .session-card {
+    flex: 0 0 min(88vw, 300px);
+    scroll-snap-align: start;
+  }
+
+
+
+
 
   .controls {
     grid-template-columns: 1fr 1fr;

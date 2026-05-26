@@ -105,138 +105,30 @@
   import { useRouter } from "vue-router";
   import Sidebar from "@/components/raphaelBackend/Sidebar.vue";
   import { useSeo } from "~/composables/useSeo";
-  
+  import {
+    SEMINAR_EVENTS,
+    buildSeminarEventCards,
+    normalizeDateKey,
+    type EventStatus,
+    type SeminarEvent,
+    type SeminarEventCard,
+  } from "~/utils/seminarEventSessions";
+
   useSeo({
     title: "活動報名入口",
     description: "拉菲爾健康講座活動報名管理入口",
     url: "https://neuroplus.com.tw",
   });
   
-  type EventStatus = "active" | "closed" | "draft";
-
-  interface EventAreaOption {
-    area: string;
-    location: string;
-    status?: EventStatus;
-    /** 覆寫卡片顯示日期（例：第二場台北、未定場次） */
-    displayDate?: string;
-    /** 覆寫卡片顯示時間 */
-    time?: string;
-    /** 覆寫 yyyymmdd，供搜尋與截止判斷；未定日期可省略 */
-    eventDate?: string;
-  }
-  
-  interface SeminarEvent {
-    id: string;
-    title: string;
-    category: string;
-    eventType: string;
-    eventDate: string;
-    displayDate: string;
-    time: string;
-    status: EventStatus;
-    areas: EventAreaOption[];
-  }
-
-  interface SeminarEventCard {
-    cardId: string;
-    id: string;
-    title: string;
-    category: string;
-    eventType: string;
-    eventDate: string;
-    displayDate: string;
-    time: string;
-    status: EventStatus;
-    area: string;
-    location: string;
-  }
-  
   const router = useRouter();
   
   const searchKeyword = ref("");
   const areaOrder = ["台北", "台中", "高雄"];
   
-  const events = ref<SeminarEvent[]>([
-    {
-      id: "20260514-vipl1",
-      title: "明明很不舒服，為什麼檢查都說沒問題？",
-      category: "健康講座",
-      eventType: "vipl1",
-      eventDate: "20260514",
-      displayDate: "2026 / 05 / 14（四）",
-      time: "10:00",
-      status: "active",
-      areas: [
-        {
-          area: "台北",
-          location: "台北新光摩天大樓 30樓之1",
-        },
-      ],
-    },
-    {
-      id: "20260528-vipl2",
-      title: "明明很不舒服，為什麼檢查都說沒問題？",
-      category: "健康講座",
-      eventType: "vipl2",
-      eventDate: "20260528",
-      displayDate: "2026 / 05 / 28（四）",
-      time: "10:00",
-      status: "active",
-      areas: [
-        {
-          area: "台北",
-          location: "台北新光摩天大樓 30樓之1",
-          eventDate: "20260528",
-          displayDate: "2026 / 05 / 28（四）",
-          time: "10:00",
-        },
-        {
-          area: "台北",
-          location: "台北新光摩天大樓 30樓之1",
-          eventDate: "20260611",
-          displayDate: "2026 / 06 / 11（四）",
-          time: "10:00",
-        },
-        {
-          area: "台中",
-          location: "活動資訊即將公布",
-          status: "draft",
-          eventDate: "",
-          displayDate: "Coming soon",
-          time: "時間待定",
-        },
-        {
-          area: "高雄",
-          location: "活動資訊即將公布",
-          status: "draft",
-          eventDate: "",
-          displayDate: "Coming soon",
-          time: "時間待定",
-        },
-      ],
-    },
-  ]);
+  const events = ref<SeminarEvent[]>([...SEMINAR_EVENTS]);
 
   const eventCards = computed<SeminarEventCard[]>(() =>
-    events.value.flatMap((event: SeminarEvent) =>
-      event.areas.map((areaOption: EventAreaOption) => {
-        const eventDate = areaOption.eventDate ?? event.eventDate;
-        return {
-          cardId: `${event.id}-${areaOption.area}-${eventDate || "tbd"}`,
-          id: event.id,
-          title: event.title,
-          category: event.category,
-          eventType: event.eventType,
-          eventDate,
-          displayDate: areaOption.displayDate ?? event.displayDate,
-          time: areaOption.time ?? event.time,
-          status: areaOption.status || event.status,
-          area: areaOption.area,
-          location: areaOption.location,
-        };
-      }),
-    ),
+    buildSeminarEventCards(events.value),
   );
   
   const filteredEventCards = computed(() => {
@@ -314,12 +206,13 @@
   }
   
   function goToRegister(event: SeminarEventCard) {
+    const eventDateKey = normalizeDateKey(event.eventDate);
     router.push({
       path: `/raphaelBackend/events/${event.eventType}`,
       query: {
-        eventDate: event.eventDate,
-        title: event.title,
         area: event.area,
+        title: event.title,
+        ...(eventDateKey ? { eventDate: eventDateKey } : {}),
       },
     });
   }

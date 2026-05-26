@@ -259,7 +259,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import axios from "axios";
 import Sidebar from "@/components/raphaelBackend/Sidebar.vue";
 import FirstVisitHealthHistoryModal, {
   type FirstVisitPatient,
@@ -268,6 +267,10 @@ import FirstVisitHealthHistoryModal, {
 import VueDatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import { useSeo } from "~/composables/useSeo";
+import {
+  buildSeminarRegisterQueryPayload,
+  fetchSeminarRegisterList,
+} from "~/utils/seminarRegisterQuery";
 
 const router = useRouter();
 const route = useRoute();
@@ -287,12 +290,6 @@ function resolveEventTypeParam(): string {
 }
 
 const resolvedEventType = computed(() => resolveEventTypeParam());
-
-const API_PAYLOAD = computed(() => ({
-  AdminID: adminID,
-  Token: token,
-  EventType: resolvedEventType.value,
-}));
 
 useSeo({
   title: "講座報名管理",
@@ -336,9 +333,6 @@ interface ApiRegistration {
   EventType?: string;
 }
 
-const REGISTER_QUERY_API =
-  "https://23700999.com:8081/HMA/api/bk/His_Register_query";
-
 const loading = ref(false);
 const registrations = ref<Registration[]>([]);
 const searchKeyword = ref("");
@@ -365,6 +359,16 @@ const selectedEventDate = computed(() => {
   const value = Array.isArray(date) ? date[0] : date;
   return typeof value === "string" ? normalizeDateKey(value) : "";
 });
+
+const API_PAYLOAD = computed(() =>
+  buildSeminarRegisterQueryPayload({
+    AdminID: adminID,
+    Token: token,
+    EventType: resolvedEventType.value,
+    area: selectedArea.value,
+    registerDate: selectedEventDate.value,
+  }),
+);
 
 function normalizeDateKey(value = ""): string {
   const digits = String(value).replace(/\D/g, "");
@@ -439,37 +443,26 @@ async function fetchRegisterList() {
   loading.value = true;
 
   try {
-    const response = await axios.post(REGISTER_QUERY_API, API_PAYLOAD.value, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const list = await fetchSeminarRegisterList(API_PAYLOAD.value);
 
-    const list = response.data?.regList || [];
-
-    if (response.data?.Result === "OK" && Array.isArray(list)) {
-      registrations.value = list.map((item: ApiRegistration) => ({
-        id: item.AID || crypto.randomUUID(),
-        hisPid: (item.PID || "").trim(),
-        pid: (item.PID || "").trim() || item.VIP || item.AID || "",
-        registerDate: (item.RegisterDate || "").trim(),
-        vip: item.VIP || "",
-        name: item.Name?.trim() || "",
-        area: item.Area?.trim() || "",
-        email: item.Email || "",
-        mobile: item.Mobile || "",
-        checkTimeRaw: item.CheckTime || "",
-        createdAt: formatCheckTime(item.CheckTime),
-        aid: item.AID || "",
-        note: item.Note || "",
-        qrcodeCheck: item.Qrcodecheck || "",
-        qrcodeTime: item.Qrcodetime || "",
-        eventType: item.EventType || "",
-      }));
-    } else {
-      registrations.value = [];
-      console.warn("API 回傳格式不符合預期:", response.data);
-    }
+    registrations.value = list.map((item: ApiRegistration) => ({
+      id: item.AID || crypto.randomUUID(),
+      hisPid: (item.PID || "").trim(),
+      pid: (item.PID || "").trim() || item.VIP || item.AID || "",
+      registerDate: (item.RegisterDate || "").trim(),
+      vip: item.VIP || "",
+      name: item.Name?.trim() || "",
+      area: item.Area?.trim() || "",
+      email: item.Email || "",
+      mobile: item.Mobile || "",
+      checkTimeRaw: item.CheckTime || "",
+      createdAt: formatCheckTime(item.CheckTime),
+      aid: item.AID || "",
+      note: item.Note || "",
+      qrcodeCheck: item.Qrcodecheck || "",
+      qrcodeTime: item.Qrcodetime || "",
+      eventType: item.EventType || "",
+    }));
   } catch (err) {
     console.error("取得講座報名列表失敗:", err);
     registrations.value = [];
@@ -704,20 +697,15 @@ onMounted(() => {
   fetchRegisterList();
 });
 
-watch(resolvedEventType, () => {
-  currentPage.value = 1;
-  fetchRegisterList();
-});
+watch(
+  () => [resolvedEventType.value, selectedArea.value, selectedEventDate.value],
+  () => {
+    currentPage.value = 1;
+    fetchRegisterList();
+  },
+);
 
 watch(dateRange, () => {
-  currentPage.value = 1;
-});
-
-watch(selectedArea, () => {
-  currentPage.value = 1;
-});
-
-watch(selectedEventDate, () => {
   currentPage.value = 1;
 });
 </script>
