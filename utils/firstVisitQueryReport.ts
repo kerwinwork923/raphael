@@ -48,9 +48,13 @@ export type QueryReportResponse = {
   Awake?: string;
   SleepNote?: string;
   nmh?: string;
+  NMH?: string;
   bloodPressure1?: string;
   bloodPressure2?: string;
+  BloodPressure1?: string;
+  BloodPressure2?: string;
   pulse?: string;
+  Pulse?: string;
   NMHOthers?: string;
   pressure?: string;
   Guo?: string;
@@ -270,11 +274,11 @@ export function mapQueryReportToLife(data: QueryReportResponse): LifeHistoryForm
     sleepFallHours: str(data.ToSleep2),
     sleepWakeCount: str(data.Awake),
     sleepRemark: str(data.SleepNote),
-    bpLevel: BP_API_TO_FORM[str(data.nmh)] ?? "",
+    bpLevel: BP_API_TO_FORM[str(data.nmh || data.NMH)] ?? "",
     bpOther: str(data.NMHOthers),
-    bpSystolic: str(data.bloodPressure1),
-    bpDiastolic: str(data.bloodPressure2),
-    pulse: str(data.pulse),
+    bpSystolic: str(data.bloodPressure1 || data.BloodPressure1),
+    bpDiastolic: str(data.bloodPressure2 || data.BloodPressure2),
+    pulse: str(data.pulse || data.Pulse),
     stressSource: str(data.pressure),
     skinAllergy:
       str(data.Guo) === "1" ? "yes" : str(data.Guo) === "0" ? "none" : "",

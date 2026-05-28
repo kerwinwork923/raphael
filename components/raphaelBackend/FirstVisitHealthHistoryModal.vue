@@ -426,28 +426,28 @@
                       :model-value="timeStringToPicker(form.life.sleepFrom)"
                       time-picker
                       :is-24="true"
+                    :minutes-increment="5"
+                    :minute-increment="5"
                       format="HH:mm"
                       placeholder="就寢"
                       teleport="body"
                       auto-apply
                       class="firstVisitModal__picker firstVisitModal__picker--time"
-                      @update:model-value="
-                        (v) => (form.life.sleepFrom = pickerToTimeString(v))
-                      "
+                      @update:model-value="updateSleepFrom"
                     />
                     <span>— AM</span>
                     <VueDatePicker
                       :model-value="timeStringToPicker(form.life.sleepTo)"
                       time-picker
                       :is-24="true"
+                    :minutes-increment="5"
+                    :minute-increment="5"
                       format="HH:mm"
                       placeholder="起床"
                       teleport="body"
                       auto-apply
                       class="firstVisitModal__picker firstVisitModal__picker--time"
-                      @update:model-value="
-                        (v) => (form.life.sleepTo = pickerToTimeString(v))
-                      "
+                      @update:model-value="updateSleepTo"
                     />
                     <span class="firstVisitModal__unit">入睡需花</span>
                     <input
@@ -663,20 +663,14 @@
                   </div>
                   <div class="firstVisitModal__pastCol">
                     <VueDatePicker
-  :model-value="yearStringToPicker(row.time)"
-  year-picker
-  format="yyyy"
-  placeholder="選年份"
-  teleport="body"
-  auto-apply
-  class="firstVisitModal__picker"
-  @update:model-value="(v) => (row.time = pickerToYearString(v))"
-/>
-                    <input
-                      v-model="row.time"
-                      type="text"
-                      class="firstVisitModal__input firstVisitModal__input--sub"
-                      placeholder="或輸入例：20多年"
+                      :model-value="yearStringToPicker(row.time)"
+                      year-picker
+                      format="yyyy"
+                      placeholder="選年份"
+                      teleport="body"
+                      auto-apply
+                      class="firstVisitModal__picker"
+                      @update:model-value="updatePastYear(row, $event)"
                     />
                   </div>
                   <div
@@ -874,14 +868,20 @@
                     rows="2"
                   />
                   <div class="firstVisitModal__durationPick">
-                    <input
+                    <select
                       v-model="row.durationNum"
-                      type="number"
-                      min="0"
-                      class="firstVisitModal__input firstVisitModal__input--durationNum"
-                      placeholder="數字"
-                      @input="syncPresentDuration(row)"
-                    />
+                      class="firstVisitModal__select firstVisitModal__select--durationNum"
+                      @change="syncPresentDuration(row)"
+                    >
+                      <option value="">數字</option>
+                      <option
+                        v-for="n in durationNumberOptions"
+                        :key="n"
+                        :value="String(n)"
+                      >
+                        {{ n }}
+                      </option>
+                    </select>
                     <select
                       v-model="row.durationUnit"
                       class="firstVisitModal__select firstVisitModal__select--durationUnit"
@@ -1329,13 +1329,34 @@ function timeStringToPicker(value: string): TimePickerValue | null {
   };
 }
 
-function pickerToTimeString(value: TimePickerValue | null): string {
+function pickerToTimeString(value: unknown): string {
   if (!value) return "";
 
-  const h = String(value.hours ?? 0).padStart(2, "0");
-  const m = String(value.minutes ?? 0).padStart(2, "0");
+  if (typeof value === "string") {
+    const m = value.trim().match(/^(\d{1,2}):(\d{2})$/);
+    if (m) return `${m[1].padStart(2, "0")}:${m[2]}`;
+    return "";
+  }
+
+  if (value instanceof Date) {
+    const h = String(value.getHours()).padStart(2, "0");
+    const m = String(value.getMinutes()).padStart(2, "0");
+    return `${h}:${m}`;
+  }
+
+  const t = value as { hours?: number; minutes?: number };
+  const h = String(t.hours ?? 0).padStart(2, "0");
+  const m = String(t.minutes ?? 0).padStart(2, "0");
 
   return `${h}:${m}`;
+}
+
+function updateSleepFrom(value: unknown) {
+  form.life.sleepFrom = pickerToTimeString(value);
+}
+
+function updateSleepTo(value: unknown) {
+  form.life.sleepTo = pickerToTimeString(value);
 }
 
 const sleepHours = computed(() => {
@@ -1379,6 +1400,10 @@ function pickerToYearString(value: number | Date | null): string {
   return String(value.getFullYear());
 }
 
+function updatePastYear(row: PastHistoryRow, value: unknown) {
+  row.time = pickerToYearString(value as number | Date | null);
+}
+
 const birthdayPickerValue = computed(() => basicForm.birthdayInput || null);
 
 function onBirthdayPickerChange(value: string | null) {
@@ -1386,23 +1411,34 @@ function onBirthdayPickerChange(value: string | null) {
 }
 
 function syncPresentDuration(row: PresentHistoryRow) {
-  const num = row.durationNum.trim();
-  const unit = row.durationUnit.trim();
+  const num = String(row.durationNum ?? "").trim();
+  const unit = String(row.durationUnit ?? "").trim();
   row.duration = num && unit ? `${num}${unit}` : "";
 }
 
 function applyDurationFromString(row: PresentHistoryRow) {
-  const raw = row.duration.trim();
+  const raw = String(row.duration ?? "").trim();
   const m = raw.match(/^(\d+)\s*([MYWD])$/i);
   if (m) {
     row.durationNum = m[1];
     row.durationUnit = m[2].toUpperCase();
+    return;
   }
+
+  row.durationNum = "";
+  row.durationUnit = "M";
 }
 
 function syncAllPresentDurations() {
-  form.presentHistory.forEach((row) => syncPresentDuration(row));
+  form.presentHistory.forEach((row: PresentHistoryRow) => {
+    if (row.duration && (!row.durationNum || !row.durationUnit)) {
+      applyDurationFromString(row);
+    }
+    syncPresentDuration(row);
+  });
 }
+
+const durationNumberOptions = Array.from({ length: 120 }, (_, i) => i + 1);
 
 function buildInitialForm(): FirstVisitFormData {
   return {
@@ -2413,6 +2449,10 @@ $text-muted: #6b7a90;
 .firstVisitModal__picker {
   width: 100%;
 
+  :deep(.dp__input_icon) {
+    display: none !important;
+  }
+
   :deep(.dp__input) {
     min-height: 42px;
     border: 1px solid $border;
@@ -2420,10 +2460,7 @@ $text-muted: #6b7a90;
     font-size: 14px;
     padding: 0.45rem 0.65rem;
   }
-  :deep(.dp__icon) {
-    right: 12px;
-    left: auto;
-  }
+
   :deep(.dp__input:focus) {
     border-color: $teal;
     box-shadow: 0 0 0 2px rgba($teal, 0.15);
@@ -2433,29 +2470,12 @@ $text-muted: #6b7a90;
     width: 7.5rem;
     min-width: 7.5rem;
   }
-
-  :deep(.dp__input_icon) {
-    display: none !important;
-  }
-}
-
-.firstVisitModal__input--sub {
-  margin-top: 0.35rem;
-  font-size: 13px;
-  min-height: 36px;
 }
 
 .firstVisitModal__durationPick {
   display: flex;
-  gap: 0.35rem;
   align-items: center;
-}
-
-.firstVisitModal__input--durationNum {
-  width: 4.5rem;
-  min-width: 4.5rem;
-  min-height: 38px;
-  padding: 0.4rem 0.5rem;
+  gap: 0.35rem;
 }
 
 .firstVisitModal__select--durationUnit {
@@ -2463,6 +2483,10 @@ $text-muted: #6b7a90;
   min-height: 38px;
 }
 
+.firstVisitModal__select--durationNum {
+  min-width: 5rem;
+  min-height: 38px;
+}
 .firstVisitModal__teeBlock {
   border: 1px solid rgba($teal, 0.35);
   border-radius: 10px;
@@ -3034,12 +3058,12 @@ $text-muted: #6b7a90;
 }
 
 .firstVisitModal__select {
-  width: 100%;
-  padding: 0.4rem 0.5rem;
-  border: 1px solid $border;
+  padding: 0 14px;
+  border: 1px solid #d7dce1;
   border-radius: 8px;
-  font-size: 13px;
   background: #fff;
+  font-size: 14px;
+  color: #505b6d;
 
   &:focus {
     outline: none;
