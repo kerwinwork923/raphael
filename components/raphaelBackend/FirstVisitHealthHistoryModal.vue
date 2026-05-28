@@ -33,7 +33,12 @@
             >
               <span class="firstVisitModal__stepCircle">
                 <template v-if="wizardStep === 2">
-                  <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 16 16"
+                    width="12"
+                    height="12"
+                    aria-hidden="true"
+                  >
                     <path
                       d="M3 8.5L6.5 12L13 4"
                       fill="none"
@@ -65,133 +70,170 @@
 
         <!-- 步驟一：基本資料表（Query / Modify / Insert_Individual） -->
         <div v-show="wizardStep === 1" class="firstVisitModal__basicWrap">
-          <p v-if="loadingIndividual" class="firstVisitModal__loadingHint">載入會員資料中…</p>
+          <p v-if="loadingIndividual" class="firstVisitModal__loadingHint">
+            載入會員資料中…
+          </p>
           <div class="firstVisitModal__basicCard">
-          <h3 class="firstVisitModal__sectionTitle firstVisitModal__sectionTitle--basic">
-            <span class="firstVisitModal__sectionBar" aria-hidden="true" />
-            基本資料
-          </h3>
-
-          <div class="firstVisitModal__basicGrid">
-            <label class="firstVisitModal__field">
-              <span class="firstVisitModal__fieldLabel">姓名</span>
-              <input
-                v-model="basicForm.name"
-                type="text"
-                class="firstVisitModal__input"
-                placeholder="輸入"
-                autocomplete="name"
-              />
-            </label>
-            <label class="firstVisitModal__field">
-              <span class="firstVisitModal__fieldLabel">電話</span>
-              <input
-                v-model="basicForm.mobile"
-                type="tel"
-                class="firstVisitModal__input"
-                placeholder="輸入"
-                autocomplete="tel"
-              />
-            </label>
-            <label class="firstVisitModal__field">
-              <span class="firstVisitModal__fieldLabel">出生年月日</span>
-              <input
-                v-model="basicForm.birthdayInput"
-                type="date"
-                class="firstVisitModal__input firstVisitModal__input--date"
-              />
-            </label>
-            <!-- 來源欄位暫時隱藏 -->
-            <div
-              v-if="false"
-              class="firstVisitModal__field firstVisitModal__field--full"
+            <h3
+              class="firstVisitModal__sectionTitle firstVisitModal__sectionTitle--basic"
             >
-              <span class="firstVisitModal__fieldLabel">來源</span>
-              <div class="firstVisitModal__sourceReadonly">{{ sourceDisplayLine }}</div>
-            </div>
-            <label class="firstVisitModal__field">
-              <span class="firstVisitModal__fieldLabel">身高 / cm</span>
-              <input
-                v-model="basicForm.height"
-                type="text"
-                inputmode="decimal"
-                class="firstVisitModal__input"
-                placeholder="輸入"
-              />
-            </label>
-            <label class="firstVisitModal__field">
-              <span class="firstVisitModal__fieldLabel">體重 / kg</span>
-              <input
-                v-model="basicForm.weight"
-                type="text"
-                inputmode="decimal"
-                class="firstVisitModal__input"
-                placeholder="輸入"
-              />
-            </label>
-          </div>
+              <span class="firstVisitModal__sectionBar" aria-hidden="true" />
+              基本資料
+            </h3>
 
-          <div class="firstVisitModal__teeBlock">
-            <div class="firstVisitModal__teeHead">
-              <span>平常 T 恤尺寸</span>
-              <span class="firstVisitModal__teeHeadSub">成人／兒童</span>
-              <span class="firstVisitModal__teeHeadSub">尺寸</span>
+            <div class="firstVisitModal__basicGrid">
+              <label class="firstVisitModal__field">
+                <span class="firstVisitModal__fieldLabel">姓名</span>
+                <input
+                  v-model="basicForm.name"
+                  type="text"
+                  class="firstVisitModal__input"
+                  placeholder="輸入"
+                  autocomplete="name"
+                />
+              </label>
+              <label class="firstVisitModal__field">
+                <span class="firstVisitModal__fieldLabel">電話</span>
+                <input
+                  v-model="basicForm.mobile"
+                  type="tel"
+                  class="firstVisitModal__input"
+                  placeholder="輸入"
+                  autocomplete="tel"
+                />
+              </label>
+              <label class="firstVisitModal__field">
+                <span class="firstVisitModal__fieldLabel">出生年月日</span>
+                <VueDatePicker
+                  :model-value="birthdayPickerValue"
+                  :enable-time-picker="false"
+                  format="yyyy/MM/dd"
+                  model-type="yyyy-MM-dd"
+                  placeholder="選擇日期"
+                  teleport="body"
+                  auto-apply
+                  class="firstVisitModal__picker"
+                  @update:model-value="onBirthdayPickerChange"
+                />
+              </label>
+              <!-- 來源欄位暫時隱藏 -->
+              <div
+                v-if="false"
+                class="firstVisitModal__field firstVisitModal__field--full"
+              >
+                <span class="firstVisitModal__fieldLabel">來源</span>
+                <div class="firstVisitModal__sourceReadonly">
+                  {{ sourceDisplayLine }}
+                </div>
+              </div>
+              <label class="firstVisitModal__field">
+                <span class="firstVisitModal__fieldLabel">身高 / cm</span>
+                <input
+                  v-model="basicForm.height"
+                  type="text"
+                  inputmode="decimal"
+                  class="firstVisitModal__input"
+                  placeholder="輸入"
+                />
+              </label>
+              <label class="firstVisitModal__field">
+                <span class="firstVisitModal__fieldLabel">體重 / kg</span>
+                <input
+                  v-model="basicForm.weight"
+                  type="text"
+                  inputmode="decimal"
+                  class="firstVisitModal__input"
+                  placeholder="輸入"
+                />
+              </label>
             </div>
-            <div class="firstVisitModal__teeRow firstVisitModal__teeRow--label">成人</div>
-            <div class="firstVisitModal__teeSubRow">
-              <span class="firstVisitModal__teeGender">男</span>
-              <div class="firstVisitModal__teeRadios">
-                <label v-for="sz in teeSizes" :key="'m-' + sz" class="firstVisitModal__teeRadio">
-                  <input
-                    v-model="basicForm.teeMaleSize"
-                    type="radio"
-                    name="tee-male"
-                    :value="sz"
-                    @change="onPickMaleTee(sz)"
-                  />
-                  {{ sz }}
-                </label>
+
+            <div class="firstVisitModal__teeBlock">
+              <div class="firstVisitModal__teeHead">
+                <span>平常 T 恤尺寸</span>
+                <span class="firstVisitModal__teeHeadSub">成人／兒童</span>
+                <span class="firstVisitModal__teeHeadSub">尺寸</span>
+              </div>
+              <div
+                class="firstVisitModal__teeRow firstVisitModal__teeRow--label"
+              >
+                成人
+              </div>
+              <div class="firstVisitModal__teeSubRow">
+                <span class="firstVisitModal__teeGender">男</span>
+                <div class="firstVisitModal__teeRadios">
+                  <label
+                    v-for="sz in teeSizes"
+                    :key="'m-' + sz"
+                    class="firstVisitModal__teeRadio"
+                  >
+                    <input
+                      v-model="basicForm.teeMaleSize"
+                      type="radio"
+                      name="tee-male"
+                      :value="sz"
+                      @change="onPickMaleTee(sz)"
+                    />
+                    {{ sz }}
+                  </label>
+                </div>
+              </div>
+              <div class="firstVisitModal__teeSubRow">
+                <span class="firstVisitModal__teeGender">女</span>
+                <div class="firstVisitModal__teeRadios">
+                  <label
+                    v-for="sz in teeSizes"
+                    :key="'f-' + sz"
+                    class="firstVisitModal__teeRadio"
+                  >
+                    <input
+                      v-model="basicForm.teeFemaleSize"
+                      type="radio"
+                      name="tee-female"
+                      :value="sz"
+                      @change="onPickFemaleTee(sz)"
+                    />
+                    {{ sz }}
+                  </label>
+                </div>
+              </div>
+              <div
+                class="firstVisitModal__teeRow firstVisitModal__teeRow--label"
+              >
+                兒童
+              </div>
+              <div class="firstVisitModal__teeChildRow">
+                <input
+                  v-model="basicForm.teeChildCustom"
+                  type="text"
+                  class="firstVisitModal__input"
+                  placeholder="自行輸入"
+                  @input="onChildTeeInput"
+                />
               </div>
             </div>
-            <div class="firstVisitModal__teeSubRow">
-              <span class="firstVisitModal__teeGender">女</span>
-              <div class="firstVisitModal__teeRadios">
-                <label v-for="sz in teeSizes" :key="'f-' + sz" class="firstVisitModal__teeRadio">
-                  <input
-                    v-model="basicForm.teeFemaleSize"
-                    type="radio"
-                    name="tee-female"
-                    :value="sz"
-                    @change="onPickFemaleTee(sz)"
-                  />
-                  {{ sz }}
-                </label>
-              </div>
-            </div>
-            <div class="firstVisitModal__teeRow firstVisitModal__teeRow--label">兒童</div>
-            <div class="firstVisitModal__teeChildRow">
-              <input
-                v-model="basicForm.teeChildCustom"
-                type="text"
-                class="firstVisitModal__input"
-                placeholder="自行輸入"
-                @input="onChildTeeInput"
-              />
-            </div>
-          </div>
 
-          <p class="firstVisitModal__filedAt">建檔日期：{{ profileCreatedAtDisplay }}</p>
+            <p class="firstVisitModal__filedAt">
+              建檔日期：{{ profileCreatedAtDisplay }}
+            </p>
           </div>
         </div>
 
         <div v-show="wizardStep === 2" class="firstVisitModal__step2">
+          <p v-if="loadingQuestionnaire" class="firstVisitModal__loadingHint">
+            載入健康史問卷中…
+          </p>
           <div class="firstVisitModal__patientBar">
-            <div class="firstVisitModal__patientItem firstVisitModal__patientItem--highlight">
+            <div
+              class="firstVisitModal__patientItem firstVisitModal__patientItem--highlight"
+            >
               病歷號碼：{{ patientForStep2.chartNo || "-" }}
             </div>
             <div class="firstVisitModal__patientItem">
               姓名：{{ patientForStep2.name || "-" }}
-              <template v-if="patientForStep2.nameExtra">{{ patientForStep2.nameExtra }}</template>
+              <template v-if="patientForStep2.nameExtra">{{
+                patientForStep2.nameExtra
+              }}</template>
             </div>
             <div class="firstVisitModal__patientItem">
               性別：{{ patientForStep2.gender || "-" }}
@@ -205,469 +247,662 @@
           </div>
 
           <nav class="firstVisitModal__tabs" aria-label="問卷分頁">
-          <button
-            v-for="tab in tabs"
-            :key="tab.key"
-            type="button"
-            class="firstVisitModal__tab"
-            :class="{ active: activeTab === tab.key }"
-            @click="activeTab = tab.key"
-          >
-            {{ tab.label }}
-          </button>
-        </nav>
-
-        <div class="firstVisitModal__body">
-          <!-- 一、生活史 -->
-          <section v-show="activeTab === 'life'" class="firstVisitModal__section">
-            <h3 class="firstVisitModal__sectionTitle">
-              <span class="firstVisitModal__sectionBar" aria-hidden="true" />
-              一、生活史
-            </h3>
-
-            <div
-              v-for="habit in habitFields"
-              :key="habit.key"
-              class="firstVisitModal__habitRow"
+            <button
+              v-for="tab in tabs"
+              :key="tab.key"
+              type="button"
+              class="firstVisitModal__tab"
+              :class="{ active: activeTab === tab.key }"
+              @click="activeTab = tab.key"
             >
-              <span class="firstVisitModal__habitLabel">{{ habit.label }}</span>
-              <div class="firstVisitModal__habitControls">
-                <div class="firstVisitModal__radioGroup">
-                  <label
-                    v-for="opt in habitOptions"
-                    :key="opt.value"
-                    class="firstVisitModal__radio"
+              {{ tab.label }}
+            </button>
+          </nav>
+
+          <div class="firstVisitModal__body">
+            <!-- 一、生活史 -->
+            <section
+              v-show="activeTab === 'life'"
+              class="firstVisitModal__section"
+            >
+              <h3 class="firstVisitModal__sectionTitle">
+                <span class="firstVisitModal__sectionBar" aria-hidden="true" />
+                一、生活史
+              </h3>
+
+              <div
+                v-for="habit in habitFields"
+                :key="habit.key"
+                class="firstVisitModal__habitRow"
+              >
+                <span class="firstVisitModal__habitLabel">{{
+                  habit.label
+                }}</span>
+                <div class="firstVisitModal__habitControls">
+                  <div class="firstVisitModal__radioGroup">
+                    <label
+                      v-for="opt in habitOptions"
+                      :key="opt.value"
+                      class="firstVisitModal__radio"
+                    >
+                      <input
+                        v-model="form.life[habit.key].option"
+                        type="radio"
+                        :name="`habit-${habit.key}`"
+                        :value="opt.value"
+                      />
+                      {{ opt.label }}
+                    </label>
+                  </div>
+                  <div
+                    v-if="habit.showAmount"
+                    class="firstVisitModal__inlineInputs"
                   >
                     <input
-                      v-model="form.life[habit.key].option"
-                      type="radio"
-                      :name="`habit-${habit.key}`"
+                      v-model="form.life[habit.key].amount"
+                      type="text"
+                      class="firstVisitModal__input firstVisitModal__input--xs"
+                      :disabled="!isHabitActive(form.life[habit.key].option)"
+                    />
+                    <span class="firstVisitModal__unit">{{ habit.unit }}</span>
+                  </div>
+                  <div class="firstVisitModal__remarkRow">
+                    <span class="firstVisitModal__remarkLabel">{{
+                      habit.remarkLabel
+                    }}</span>
+                    <input
+                      v-model="form.life[habit.key].remark"
+                      type="text"
+                      class="firstVisitModal__input"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="firstVisitModal__habitRow">
+                <span class="firstVisitModal__habitLabel">運動習慣</span>
+                <div class="firstVisitModal__habitControls">
+                  <div class="firstVisitModal__radioGroup">
+                    <label class="firstVisitModal__radio">
+                      <input
+                        v-model="form.life.exercise.option"
+                        type="radio"
+                        value="none"
+                      />
+                      無
+                    </label>
+                    <label class="firstVisitModal__radio">
+                      <input
+                        v-model="form.life.exercise.option"
+                        type="radio"
+                        value="yes"
+                      />
+                      有
+                    </label>
+                  </div>
+                  <div class="firstVisitModal__inlineInputs">
+                    <input
+                      v-model="form.life.exercise.timesPerWeek"
+                      type="text"
+                      class="firstVisitModal__input firstVisitModal__input--xs"
+                      :disabled="form.life.exercise.option !== 'yes'"
+                    />
+                    <span class="firstVisitModal__unit">次/週</span>
+                    <input
+                      v-model="form.life.exercise.minutesPerTime"
+                      type="text"
+                      class="firstVisitModal__input firstVisitModal__input--xs"
+                      :disabled="form.life.exercise.option !== 'yes'"
+                    />
+                    <span class="firstVisitModal__unit">分鐘/每次</span>
+                  </div>
+                  <div class="firstVisitModal__remarkRow">
+                    <span class="firstVisitModal__remarkLabel">運動備註</span>
+                    <input
+                      v-model="form.life.exercise.remark"
+                      type="text"
+                      class="firstVisitModal__input"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="firstVisitModal__habitRow">
+                <span class="firstVisitModal__habitLabel">工作狀態</span>
+                <div class="firstVisitModal__habitControls">
+                  <div class="firstVisitModal__radioGroup">
+                    <label
+                      v-for="opt in workStatusOptions"
+                      :key="opt.value"
+                      class="firstVisitModal__radio"
+                    >
+                      <input
+                        v-model="form.life.workStatus"
+                        type="radio"
+                        :value="opt.value"
+                      />
+                      {{ opt.label }}
+                    </label>
+                  </div>
+                  <div class="firstVisitModal__remarkRow">
+                    <span class="firstVisitModal__remarkLabel">工作備註</span>
+                    <input
+                      v-model="form.life.workRemark"
+                      type="text"
+                      class="firstVisitModal__input"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="firstVisitModal__habitRow">
+                <span class="firstVisitModal__habitLabel">睡眠習慣</span>
+                <div class="firstVisitModal__habitControls">
+                  <div class="firstVisitModal__radioGroup">
+                    <label
+                      v-for="opt in sleepMedOptions"
+                      :key="opt.value"
+                      class="firstVisitModal__radio"
+                    >
+                      <input
+                        v-model="form.life.sleepMed"
+                        type="radio"
+                        :value="opt.value"
+                      />
+                      {{ opt.label }}
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="firstVisitModal__habitRow">
+                <span class="firstVisitModal__habitLabel">睡眠時間</span>
+                <div class="firstVisitModal__habitControls">
+                  <div
+                    class="firstVisitModal__inlineInputs firstVisitModal__inlineInputs--wrap"
+                  >
+                    <span>PM</span>
+                    <VueDatePicker
+                      :model-value="timeStringToPicker(form.life.sleepFrom)"
+                      time-picker
+                      :is-24="true"
+                      format="HH:mm"
+                      placeholder="就寢"
+                      teleport="body"
+                      auto-apply
+                      class="firstVisitModal__picker firstVisitModal__picker--time"
+                      @update:model-value="
+                        (v) => (form.life.sleepFrom = pickerToTimeString(v))
+                      "
+                    />
+                    <span>— AM</span>
+                    <VueDatePicker
+                      :model-value="timeStringToPicker(form.life.sleepTo)"
+                      time-picker
+                      :is-24="true"
+                      format="HH:mm"
+                      placeholder="起床"
+                      teleport="body"
+                      auto-apply
+                      class="firstVisitModal__picker firstVisitModal__picker--time"
+                      @update:model-value="
+                        (v) => (form.life.sleepTo = pickerToTimeString(v))
+                      "
+                    />
+                    <span class="firstVisitModal__unit">入睡需花</span>
+                    <input
+                      readonly
+                      :value="sleepHours"
+                      type="text"
+                      class="firstVisitModal__input firstVisitModal__input--xs"
+                    />
+                    <span class="firstVisitModal__unit">小時</span>
+                    <span class="firstVisitModal__unit">半夜醒來</span>
+                    <input
+                      v-model="form.life.sleepWakeCount"
+                      type="text"
+                      class="firstVisitModal__input firstVisitModal__input--xs"
+                    />
+                    <span class="firstVisitModal__unit">次</span>
+                  </div>
+                  <div class="firstVisitModal__remarkRow">
+                    <span class="firstVisitModal__remarkLabel">睡眠備註</span>
+                    <input
+                      v-model="form.life.sleepRemark"
+                      type="text"
+                      class="firstVisitModal__input"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="firstVisitModal__habitRow">
+                <span class="firstVisitModal__habitLabel">血壓數值</span>
+                <div class="firstVisitModal__habitControls">
+                  <div class="firstVisitModal__radioGroup">
+                    <label
+                      v-for="opt in bpLevelOptions"
+                      :key="opt.value"
+                      class="firstVisitModal__radio"
+                    >
+                      <input
+                        v-model="form.life.bpLevel"
+                        type="radio"
+                        :value="opt.value"
+                      />
+                      {{ opt.label }}
+                    </label>
+                    <label
+                      class="firstVisitModal__radio firstVisitModal__radio--other"
+                    >
+                      <input
+                        v-model="form.life.bpLevel"
+                        type="radio"
+                        value="other"
+                      />
+                      其他
+                      <input
+                        v-model="form.life.bpOther"
+                        type="text"
+                        class="firstVisitModal__input firstVisitModal__input--sm"
+                        :disabled="form.life.bpLevel !== 'other'"
+                      />
+                    </label>
+                  </div>
+                  <div class="firstVisitModal__inlineInputs">
+                    <input
+                      v-model="form.life.bpSystolic"
+                      type="text"
+                      class="firstVisitModal__input firstVisitModal__input--xs"
+                    />
+                    <span>/</span>
+                    <input
+                      v-model="form.life.bpDiastolic"
+                      type="text"
+                      class="firstVisitModal__input firstVisitModal__input--xs"
+                    />
+                    <span class="firstVisitModal__unit">mmHg</span>
+                    <input
+                      v-model="form.life.pulse"
+                      type="text"
+                      class="firstVisitModal__input firstVisitModal__input--xs"
+                    />
+                    <span class="firstVisitModal__unit">脈搏 次/分</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="firstVisitModal__fieldBlock">
+                <span class="firstVisitModal__habitLabel">壓力源</span>
+                <textarea
+                  v-model="form.life.stressSource"
+                  class="firstVisitModal__textarea"
+                  rows="3"
+                />
+              </div>
+
+              <div class="firstVisitModal__habitRow">
+                <span class="firstVisitModal__habitLabel">皮膚過敏</span>
+                <div class="firstVisitModal__habitControls">
+                  <div class="firstVisitModal__radioGroup">
+                    <label class="firstVisitModal__radio">
+                      <input
+                        v-model="form.life.skinAllergy"
+                        type="radio"
+                        value="none"
+                      />
+                      無
+                    </label>
+                    <label class="firstVisitModal__radio">
+                      <input
+                        v-model="form.life.skinAllergy"
+                        type="radio"
+                        value="yes"
+                      />
+                      有
+                    </label>
+                  </div>
+                  <div class="firstVisitModal__remarkRow">
+                    <span class="firstVisitModal__remarkLabel">過敏源</span>
+                    <input
+                      v-model="form.life.allergen"
+                      type="text"
+                      class="firstVisitModal__input"
+                      :disabled="form.life.skinAllergy !== 'yes'"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="firstVisitModal__fieldBlock">
+                <span class="firstVisitModal__habitLabel">舒壓習慣</span>
+                <div class="firstVisitModal__checkboxGroup">
+                  <label
+                    v-for="opt in relaxOptions"
+                    :key="opt.value"
+                    class="firstVisitModal__checkbox"
+                  >
+                    <input
+                      v-model="form.life.relaxHabits"
+                      type="checkbox"
                       :value="opt.value"
                     />
                     {{ opt.label }}
                   </label>
-                </div>
-                <div v-if="habit.showAmount" class="firstVisitModal__inlineInputs">
-                  <input
-                    v-model="form.life[habit.key].amount"
-                    type="text"
-                    class="firstVisitModal__input firstVisitModal__input--xs"
-                    :disabled="!isHabitActive(form.life[habit.key].option)"
-                  />
-                  <span class="firstVisitModal__unit">{{ habit.unit }}</span>
-                </div>
-                <div class="firstVisitModal__remarkRow">
-                  <span class="firstVisitModal__remarkLabel">{{ habit.remarkLabel }}</span>
-                  <input
-                    v-model="form.life[habit.key].remark"
-                    type="text"
-                    class="firstVisitModal__input"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div class="firstVisitModal__habitRow">
-              <span class="firstVisitModal__habitLabel">運動習慣</span>
-              <div class="firstVisitModal__habitControls">
-                <div class="firstVisitModal__radioGroup">
-                  <label class="firstVisitModal__radio">
-                    <input v-model="form.life.exercise.option" type="radio" value="none" />
-                    無
-                  </label>
-                  <label class="firstVisitModal__radio">
-                    <input v-model="form.life.exercise.option" type="radio" value="yes" />
-                    有
-                  </label>
-                </div>
-                <div class="firstVisitModal__inlineInputs">
-                  <input
-                    v-model="form.life.exercise.timesPerWeek"
-                    type="text"
-                    class="firstVisitModal__input firstVisitModal__input--xs"
-                    :disabled="form.life.exercise.option !== 'yes'"
-                  />
-                  <span class="firstVisitModal__unit">次/週</span>
-                  <input
-                    v-model="form.life.exercise.minutesPerTime"
-                    type="text"
-                    class="firstVisitModal__input firstVisitModal__input--xs"
-                    :disabled="form.life.exercise.option !== 'yes'"
-                  />
-                  <span class="firstVisitModal__unit">分鐘/每次</span>
-                </div>
-                <div class="firstVisitModal__remarkRow">
-                  <span class="firstVisitModal__remarkLabel">運動備註</span>
-                  <input v-model="form.life.exercise.remark" type="text" class="firstVisitModal__input" />
-                </div>
-              </div>
-            </div>
-
-            <div class="firstVisitModal__habitRow">
-              <span class="firstVisitModal__habitLabel">工作狀態</span>
-              <div class="firstVisitModal__habitControls">
-                <div class="firstVisitModal__radioGroup">
                   <label
-                    v-for="opt in workStatusOptions"
-                    :key="opt.value"
-                    class="firstVisitModal__radio"
+                    class="firstVisitModal__checkbox firstVisitModal__checkbox--other"
                   >
-                    <input v-model="form.life.workStatus" type="radio" :value="opt.value" />
-                    {{ opt.label }}
-                  </label>
-                </div>
-                <div class="firstVisitModal__remarkRow">
-                  <span class="firstVisitModal__remarkLabel">工作備註</span>
-                  <input v-model="form.life.workRemark" type="text" class="firstVisitModal__input" />
-                </div>
-              </div>
-            </div>
-
-            <div class="firstVisitModal__habitRow">
-              <span class="firstVisitModal__habitLabel">睡眠習慣</span>
-              <div class="firstVisitModal__habitControls">
-                <div class="firstVisitModal__radioGroup">
-                  <label
-                    v-for="opt in sleepMedOptions"
-                    :key="opt.value"
-                    class="firstVisitModal__radio"
-                  >
-                    <input v-model="form.life.sleepMed" type="radio" :value="opt.value" />
-                    {{ opt.label }}
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div class="firstVisitModal__habitRow">
-              <span class="firstVisitModal__habitLabel">睡眠時間</span>
-              <div class="firstVisitModal__habitControls">
-                <div class="firstVisitModal__inlineInputs firstVisitModal__inlineInputs--wrap">
-                  <span>PM</span>
-                  <input v-model="form.life.sleepFrom" type="text" class="firstVisitModal__input firstVisitModal__input--xs" placeholder="時間" />
-                  <span>— AM</span>
-                  <input v-model="form.life.sleepTo" type="text" class="firstVisitModal__input firstVisitModal__input--xs" placeholder="時間" />
-                  <input v-model="form.life.sleepFallHours" type="text" class="firstVisitModal__input firstVisitModal__input--xs" />
-                  <span class="firstVisitModal__unit">小時/入睡需花</span>
-                  <input v-model="form.life.sleepWakeCount" type="text" class="firstVisitModal__input firstVisitModal__input--xs" />
-                  <span class="firstVisitModal__unit">次/半夜醒來</span>
-                </div>
-                <div class="firstVisitModal__remarkRow">
-                  <span class="firstVisitModal__remarkLabel">睡眠備註</span>
-                  <input v-model="form.life.sleepRemark" type="text" class="firstVisitModal__input" />
-                </div>
-              </div>
-            </div>
-
-            <div class="firstVisitModal__habitRow">
-              <span class="firstVisitModal__habitLabel">血壓數值</span>
-              <div class="firstVisitModal__habitControls">
-                <div class="firstVisitModal__radioGroup">
-                  <label
-                    v-for="opt in bpLevelOptions"
-                    :key="opt.value"
-                    class="firstVisitModal__radio"
-                  >
-                    <input v-model="form.life.bpLevel" type="radio" :value="opt.value" />
-                    {{ opt.label }}
-                  </label>
-                  <label class="firstVisitModal__radio firstVisitModal__radio--other">
-                    <input v-model="form.life.bpLevel" type="radio" value="other" />
+                    <input
+                      v-model="form.life.relaxHabits"
+                      type="checkbox"
+                      value="other"
+                    />
                     其他
                     <input
-                      v-model="form.life.bpOther"
+                      v-model="form.life.relaxOther"
                       type="text"
                       class="firstVisitModal__input firstVisitModal__input--sm"
-                      :disabled="form.life.bpLevel !== 'other'"
                     />
                   </label>
                 </div>
-                <div class="firstVisitModal__inlineInputs">
-                  <input v-model="form.life.bpSystolic" type="text" class="firstVisitModal__input firstVisitModal__input--xs" />
-                  <span>/</span>
-                  <input v-model="form.life.bpDiastolic" type="text" class="firstVisitModal__input firstVisitModal__input--xs" />
-                  <span class="firstVisitModal__unit">mmHg</span>
-                  <input v-model="form.life.pulse" type="text" class="firstVisitModal__input firstVisitModal__input--xs" />
-                  <span class="firstVisitModal__unit">脈搏 次/分</span>
-                </div>
               </div>
-            </div>
 
-            <div class="firstVisitModal__fieldBlock">
-              <span class="firstVisitModal__habitLabel">壓力源</span>
-              <textarea v-model="form.life.stressSource" class="firstVisitModal__textarea" rows="3" />
-            </div>
+              <div class="firstVisitModal__fieldBlock">
+                <span class="firstVisitModal__habitLabel">其他</span>
+                <textarea
+                  v-model="form.life.other"
+                  class="firstVisitModal__textarea"
+                  rows="3"
+                />
+              </div>
+            </section>
 
-            <div class="firstVisitModal__habitRow">
-              <span class="firstVisitModal__habitLabel">皮膚過敏</span>
-              <div class="firstVisitModal__habitControls">
-                <div class="firstVisitModal__radioGroup">
-                  <label class="firstVisitModal__radio">
-                    <input v-model="form.life.skinAllergy" type="radio" value="none" />
-                    無
-                  </label>
-                  <label class="firstVisitModal__radio">
-                    <input v-model="form.life.skinAllergy" type="radio" value="yes" />
-                    有
-                  </label>
-                </div>
-                <div class="firstVisitModal__remarkRow">
-                  <span class="firstVisitModal__remarkLabel">過敏源</span>
-                  <input
-                    v-model="form.life.allergen"
-                    type="text"
-                    class="firstVisitModal__input"
-                    :disabled="form.life.skinAllergy !== 'yes'"
+            <!-- 二、過去病史 -->
+            <section
+              v-show="activeTab === 'past'"
+              class="firstVisitModal__section"
+            >
+              <div class="firstVisitModal__sectionHead">
+                <h3 class="firstVisitModal__sectionTitle">
+                  <span
+                    class="firstVisitModal__sectionBar"
+                    aria-hidden="true"
                   />
-                </div>
+                  二、過去病史
+                </h3>
+                <span class="firstVisitModal__hint">(至多8項)</span>
               </div>
-            </div>
 
-            <div class="firstVisitModal__fieldBlock">
-              <span class="firstVisitModal__habitLabel">舒壓習慣</span>
-              <div class="firstVisitModal__checkboxGroup">
-                <label
-                  v-for="opt in relaxOptions"
-                  :key="opt.value"
-                  class="firstVisitModal__checkbox"
+              <div class="firstVisitModal__pastTable">
+                <div class="firstVisitModal__pastHead" role="row">
+                  <span>疾病</span>
+                  <span>時間</span>
+                  <span>處理方式 / 備註</span>
+                </div>
+
+                <div
+                  v-for="(row, index) in form.pastHistory"
+                  :key="row.id"
+                  class="firstVisitModal__pastRow"
                 >
-                  <input
-                    v-model="form.life.relaxHabits"
-                    type="checkbox"
-                    :value="opt.value"
-                  />
-                  {{ opt.label }}
-                </label>
-                <label class="firstVisitModal__checkbox firstVisitModal__checkbox--other">
-                  <input v-model="form.life.relaxHabits" type="checkbox" value="other" />
-                  其他
-                  <input v-model="form.life.relaxOther" type="text" class="firstVisitModal__input firstVisitModal__input--sm" />
-                </label>
+                  <div class="firstVisitModal__pastCol">
+                    <input
+                      v-model="row.disease"
+                      type="text"
+                      class="firstVisitModal__input"
+                      placeholder="輸入"
+                    />
+                    <button
+                      type="button"
+                      class="firstVisitModal__deleteBtn"
+                      :disabled="form.pastHistory.length <= 1"
+                      @click="removePastRow(index)"
+                    >
+                      <span aria-hidden="true">🗑</span> 刪除欄位
+                    </button>
+                  </div>
+                  <div class="firstVisitModal__pastCol">
+                    <VueDatePicker
+  :model-value="yearStringToPicker(row.time)"
+  year-picker
+  format="yyyy"
+  placeholder="選年份"
+  teleport="body"
+  auto-apply
+  class="firstVisitModal__picker"
+  @update:model-value="(v) => (row.time = pickerToYearString(v))"
+/>
+                    <input
+                      v-model="row.time"
+                      type="text"
+                      class="firstVisitModal__input firstVisitModal__input--sub"
+                      placeholder="或輸入例：20多年"
+                    />
+                  </div>
+                  <div
+                    class="firstVisitModal__pastCol firstVisitModal__pastCol--wide"
+                  >
+                    <div
+                      class="firstVisitModal__checkboxGroup firstVisitModal__checkboxGroup--compact"
+                    >
+                      <label
+                        v-for="t in treatmentOptions"
+                        :key="t.value"
+                        class="firstVisitModal__checkbox"
+                      >
+                        <input
+                          v-model="row.treatments"
+                          type="checkbox"
+                          :value="t.value"
+                        />
+                        {{ t.label }}
+                      </label>
+                    </div>
+                    <textarea
+                      v-model="row.remark"
+                      class="firstVisitModal__textarea"
+                      rows="2"
+                      placeholder="備註"
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <div class="firstVisitModal__fieldBlock">
-              <span class="firstVisitModal__habitLabel">其他</span>
-              <textarea v-model="form.life.other" class="firstVisitModal__textarea" rows="3" />
-            </div>
-          </section>
+              <button
+                type="button"
+                class="firstVisitModal__addBtn"
+                :disabled="form.pastHistory.length >= 8"
+                @click="addPastRow"
+              >
+                + 增加欄位
+              </button>
+            </section>
 
-          <!-- 二、過去病史 -->
-          <section v-show="activeTab === 'past'" class="firstVisitModal__section">
-            <div class="firstVisitModal__sectionHead">
+            <!-- 三、家族史 -->
+            <section
+              v-show="activeTab === 'family'"
+              class="firstVisitModal__section"
+            >
               <h3 class="firstVisitModal__sectionTitle">
                 <span class="firstVisitModal__sectionBar" aria-hidden="true" />
-                二、過去病史
+                三、家族史
               </h3>
-              <span class="firstVisitModal__hint">(至多8項)</span>
-            </div>
 
-            <div class="firstVisitModal__pastTable">
-              <div class="firstVisitModal__pastHead" role="row">
-                <span>疾病</span>
-                <span>時間</span>
-                <span>處理方式 / 備註</span>
-              </div>
+              <div class="firstVisitModal__familyTable">
+                <div class="firstVisitModal__familyHead" role="row">
+                  <span>關係</span>
+                  <span>疾病 (可複選)</span>
+                  <span>備註</span>
+                </div>
 
-              <div
-                v-for="(row, index) in form.pastHistory"
-                :key="row.id"
-                class="firstVisitModal__pastRow"
-              >
-                <div class="firstVisitModal__pastCol">
-                  <input
-                    v-model="row.disease"
-                    type="text"
-                    class="firstVisitModal__input"
-                    placeholder="輸入"
-                  />
-                  <button
-                    type="button"
-                    class="firstVisitModal__deleteBtn"
-                    :disabled="form.pastHistory.length <= 1"
-                    @click="removePastRow(index)"
-                  >
-                    <span aria-hidden="true">🗑</span> 刪除欄位
-                  </button>
-                </div>
-                <div class="firstVisitModal__pastCol">
-                  <input
-                    v-model="row.time"
-                    type="text"
-                    class="firstVisitModal__input"
-                    placeholder="輸入"
-                  />
-                </div>
-                <div class="firstVisitModal__pastCol firstVisitModal__pastCol--wide">
-                  <div class="firstVisitModal__checkboxGroup firstVisitModal__checkboxGroup--compact">
+                <div
+                  v-for="row in form.familyHistory"
+                  :key="row.relation"
+                  class="firstVisitModal__familyRow"
+                >
+                  <span class="firstVisitModal__familyRelation">{{
+                    row.relation
+                  }}</span>
+                  <div class="firstVisitModal__familyDiseases">
                     <label
-                      v-for="t in treatmentOptions"
-                      :key="t.value"
+                      v-for="d in familyDiseaseOptions"
+                      :key="d.value"
                       class="firstVisitModal__checkbox"
                     >
-                      <input v-model="row.treatments" type="checkbox" :value="t.value" />
-                      {{ t.label }}
+                      <input
+                        v-model="row.diseases"
+                        type="checkbox"
+                        :value="d.value"
+                      />
+                      {{ d.label }}
+                    </label>
+                    <label
+                      class="firstVisitModal__checkbox firstVisitModal__checkbox--other"
+                    >
+                      <input
+                        v-model="row.diseases"
+                        type="checkbox"
+                        value="other"
+                      />
+                      其它
+                      <input
+                        v-model="row.otherDisease"
+                        type="text"
+                        class="firstVisitModal__input firstVisitModal__input--sm"
+                        :disabled="!row.diseases.includes('other')"
+                      />
                     </label>
                   </div>
                   <textarea
                     v-model="row.remark"
                     class="firstVisitModal__textarea"
-                    rows="2"
-                    placeholder="備註"
+                    rows="3"
                   />
                 </div>
               </div>
-            </div>
+            </section>
 
-            <button
-              type="button"
-              class="firstVisitModal__addBtn"
-              :disabled="form.pastHistory.length >= 8"
-              @click="addPastRow"
+            <!-- 四、目前使用藥物 -->
+            <section
+              v-show="activeTab === 'medication'"
+              class="firstVisitModal__section"
             >
-              + 增加欄位
-            </button>
-          </section>
-
-          <!-- 三、家族史 -->
-          <!-- <section v-show="activeTab === 'family'" class="firstVisitModal__section">
-            <h3 class="firstVisitModal__sectionTitle">
-              <span class="firstVisitModal__sectionBar" aria-hidden="true" />
-              三、家族史
-            </h3>
-
-            <div class="firstVisitModal__familyTable">
-              <div class="firstVisitModal__familyHead" role="row">
-                <span>關係</span>
-                <span>疾病 (可複選)</span>
-                <span>備註</span>
+              <div class="firstVisitModal__sectionHead">
+                <h3 class="firstVisitModal__sectionTitle">
+                  <span
+                    class="firstVisitModal__sectionBar"
+                    aria-hidden="true"
+                  />
+                  四、目前使用藥物
+                </h3>
+                <span class="firstVisitModal__hint"
+                  >格式：藥名 - 數量 - 使用方式</span
+                >
               </div>
 
-              <div
-                v-for="row in form.familyHistory"
-                :key="row.relation"
-                class="firstVisitModal__familyRow"
-              >
-                <span class="firstVisitModal__familyRelation">{{ row.relation }}</span>
-                <div class="firstVisitModal__familyDiseases">
-                  <label
-                    v-for="d in familyDiseaseOptions"
-                    :key="d.value"
-                    class="firstVisitModal__checkbox"
-                  >
-                    <input v-model="row.diseases" type="checkbox" :value="d.value" />
-                    {{ d.label }}
-                  </label>
-                  <label class="firstVisitModal__checkbox firstVisitModal__checkbox--other">
-                    <input v-model="row.diseases" type="checkbox" value="other" />
-                    其它
-                    <input
-                      v-model="row.otherDisease"
-                      type="text"
-                      class="firstVisitModal__input firstVisitModal__input--sm"
-                      :disabled="!row.diseases.includes('other')"
-                    />
-                  </label>
-                </div>
+              <div class="firstVisitModal__medSplit">
                 <textarea
-                  v-model="row.remark"
-                  class="firstVisitModal__textarea"
-                  rows="3"
+                  v-model="form.medications.text"
+                  class="firstVisitModal__textarea firstVisitModal__textarea--med"
+                  placeholder="輸入藥物..."
+                  @input="filterMedications"
                 />
+                <ul class="firstVisitModal__medList">
+                  <li
+                    v-if="filteredMedicationSuggestions.length === 0"
+                    class="firstVisitModal__medEmpty"
+                  >
+                    無符合項目
+                  </li>
+                  <li
+                    v-for="item in filteredMedicationSuggestions"
+                    :key="item"
+                    class="firstVisitModal__medItem"
+                  >
+                    <button type="button" @click="appendMedication(item)">
+                      {{ item }}
+                    </button>
+                  </li>
+                </ul>
               </div>
-            </div>
-          </section> -->
+            </section>
 
-          <!-- 四、目前使用藥物 -->
-          <!-- <section v-show="activeTab === 'medication'" class="firstVisitModal__section">
-            <div class="firstVisitModal__sectionHead">
+            <!-- 五、現在病史 -->
+            <section
+              v-show="activeTab === 'present'"
+              class="firstVisitModal__section"
+            >
               <h3 class="firstVisitModal__sectionTitle">
                 <span class="firstVisitModal__sectionBar" aria-hidden="true" />
-                四、目前使用藥物
+                五、現在病史
               </h3>
-              <span class="firstVisitModal__hint">格式：藥名 - 數量 - 使用方式</span>
-            </div>
 
-            <div class="firstVisitModal__medSplit">
-              <textarea
-                v-model="form.medications.text"
-                class="firstVisitModal__textarea firstVisitModal__textarea--med"
-                placeholder="輸入藥物..."
-                @input="filterMedications"
-              />
-              <ul class="firstVisitModal__medList">
-                <li v-if="filteredMedicationSuggestions.length === 0" class="firstVisitModal__medEmpty">
-                  無符合項目
-                </li>
-                <li
-                  v-for="item in filteredMedicationSuggestions"
-                  :key="item"
-                  class="firstVisitModal__medItem"
+              <div class="firstVisitModal__presentTable">
+                <div class="firstVisitModal__presentHead" role="row">
+                  <span>嚴重順序</span>
+                  <span>疾病類</span>
+                  <span>症狀</span>
+                  <span>發病多久 (ex. 8M)</span>
+                  <span>備註</span>
+                </div>
+
+                <div
+                  v-for="(row, index) in form.presentHistory"
+                  :key="row.id"
+                  class="firstVisitModal__presentRow"
                 >
-                  <button type="button" @click="appendMedication(item)">
-                    {{ item }}
-                  </button>
-                </li>
-              </ul>
-            </div>
-          </section> -->
-
-          <!-- 五、現在病史 -->
-          <!-- <section v-show="activeTab === 'present'" class="firstVisitModal__section">
-            <h3 class="firstVisitModal__sectionTitle">
-              <span class="firstVisitModal__sectionBar" aria-hidden="true" />
-              五、現在病史
-            </h3>
-
-            <div class="firstVisitModal__presentTable">
-              <div class="firstVisitModal__presentHead" role="row">
-                <span>嚴重順序</span>
-                <span>疾病類</span>
-                <span>症狀</span>
-                <span>發病多久 (ex. 8M)</span>
-                <span>備註</span>
-              </div>
-
-              <div
-                v-for="(row, index) in form.presentHistory"
-                :key="row.id"
-                class="firstVisitModal__presentRow"
-              >
-                <span class="firstVisitModal__presentOrder">
-                  {{ String(index + 1).padStart(2, "0") }}
-                </span>
-                <select v-model="row.category" class="firstVisitModal__select">
-                  <option value="">請選擇疾病類</option>
-                  <option
-                    v-for="cat in diseaseCategories"
-                    :key="cat"
-                    :value="cat"
+                  <span class="firstVisitModal__presentOrder">
+                    {{ String(index + 1).padStart(2, "0") }}
+                  </span>
+                  <select
+                    v-model="row.category"
+                    class="firstVisitModal__select"
                   >
-                    {{ cat }}
-                  </option>
-                </select>
-                <textarea
-                  v-model="row.symptoms"
-                  class="firstVisitModal__textarea firstVisitModal__textarea--cell"
-                  placeholder="症狀"
-                  rows="2"
-                />
-                <textarea
-                  v-model="row.duration"
-                  class="firstVisitModal__textarea firstVisitModal__textarea--cell"
-                  placeholder="發病多久"
-                  rows="2"
-                />
-                <textarea
-                  v-model="row.remark"
-                  class="firstVisitModal__textarea firstVisitModal__textarea--cell"
-                  placeholder="備註"
-                  rows="2"
-                />
+                    <option value="">請選擇疾病類</option>
+                    <option
+                      v-for="cat in diseaseCategories"
+                      :key="cat"
+                      :value="cat"
+                    >
+                      {{ cat }}
+                    </option>
+                  </select>
+                  <textarea
+                    v-model="row.symptoms"
+                    class="firstVisitModal__textarea firstVisitModal__textarea--cell"
+                    placeholder="症狀"
+                    rows="2"
+                  />
+                  <div class="firstVisitModal__durationPick">
+                    <input
+                      v-model="row.durationNum"
+                      type="number"
+                      min="0"
+                      class="firstVisitModal__input firstVisitModal__input--durationNum"
+                      placeholder="數字"
+                      @input="syncPresentDuration(row)"
+                    />
+                    <select
+                      v-model="row.durationUnit"
+                      class="firstVisitModal__select firstVisitModal__select--durationUnit"
+                      @change="syncPresentDuration(row)"
+                    >
+                      <option value="M">月 (M)</option>
+                      <option value="Y">年 (Y)</option>
+                      <option value="W">週 (W)</option>
+                      <option value="D">天 (D)</option>
+                    </select>
+                  </div>
+                  <textarea
+                    v-model="row.remark"
+                    class="firstVisitModal__textarea firstVisitModal__textarea--cell"
+                    placeholder="備註"
+                    rows="2"
+                  />
+                </div>
               </div>
-            </div>
-          </section> -->
-        </div>
+            </section>
+          </div>
         </div>
 
         <footer class="firstVisitModal__footer">
@@ -680,14 +915,14 @@
               取消
             </button>
             <div class="firstVisitModal__footerRight">
-              <!-- <button
+              <button
                 type="button"
                 class="firstVisitModal__btn firstVisitModal__btn--outline"
                 :disabled="insertingBasic || loadingIndividual"
                 @click="handleBasicNext"
               >
                 {{ insertingBasic ? "處理中..." : "下一步：初診健康史問卷" }}
-              </button> -->
+              </button>
               <button
                 type="button"
                 class="firstVisitModal__btn firstVisitModal__btn--primary"
@@ -726,7 +961,12 @@
           role="presentation"
           @click.self="cancelConfirmVisible = false"
         >
-          <div class="firstVisitModal__confirmBox" role="dialog" aria-modal="true" aria-labelledby="fvCancelTitle">
+          <div
+            class="firstVisitModal__confirmBox"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="fvCancelTitle"
+          >
             <button
               type="button"
               class="firstVisitModal__confirmClose"
@@ -736,15 +976,29 @@
               ×
             </button>
             <div class="firstVisitModal__confirmHead">
-              <span class="firstVisitModal__confirmIcon" aria-hidden="true">!</span>
-              <h3 id="fvCancelTitle" class="firstVisitModal__confirmTitle">確定要取消嗎</h3>
+              <span class="firstVisitModal__confirmIcon" aria-hidden="true"
+                >!</span
+              >
+              <h3 id="fvCancelTitle" class="firstVisitModal__confirmTitle">
+                確定要取消嗎
+              </h3>
             </div>
-            <p class="firstVisitModal__confirmMsg">你填寫的東西都不會儲存喔～</p>
+            <p class="firstVisitModal__confirmMsg">
+              你填寫的東西都不會儲存喔～
+            </p>
             <div class="firstVisitModal__confirmActions">
-              <button type="button" class="firstVisitModal__confirmLink" @click="cancelConfirmVisible = false">
+              <button
+                type="button"
+                class="firstVisitModal__confirmLink"
+                @click="cancelConfirmVisible = false"
+              >
                 返回編輯
               </button>
-              <button type="button" class="firstVisitModal__btn firstVisitModal__btn--primary" @click="confirmAbortWizard">
+              <button
+                type="button"
+                class="firstVisitModal__btn firstVisitModal__btn--primary"
+                @click="confirmAbortWizard"
+              >
                 確定取消
               </button>
             </div>
@@ -757,6 +1011,8 @@
 
 <script setup lang="ts">
 import { ref, reactive, watch, computed, nextTick } from "vue";
+import VueDatePicker from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
 import {
   buildInsertReportPayload,
   submitInsertReport,
@@ -766,6 +1022,14 @@ import {
   submitInsertReportPass,
 } from "@/utils/firstVisitInsertReportPass";
 import {
+  buildInsertReportFdiseasePayload,
+  submitInsertReportFdisease,
+  buildInsertReportTakeDrugPayload,
+  submitInsertReportTakeDrug,
+  buildInsertReportSReportPayload,
+  submitInsertReportSReport,
+} from "@/utils/firstVisitInsertReportQuestionnaire";
+import {
   submitInsertIndividual,
   type InsertIndividualPayload,
 } from "@/utils/firstVisitInsertIndividual";
@@ -774,6 +1038,17 @@ import {
   modifyIndividual,
   type ModifyIndividualPayload,
 } from "@/utils/firstVisitIndividualApi";
+import {
+  queryReport,
+  queryReportTakeDrug,
+  queryReportSReport,
+  mapQueryReportToLife,
+  mapQueryReportToPastHistory,
+  mapQueryReportToFamilyHistory,
+  mapTakeDrugToText,
+  mapSReportListToPresentHistory,
+  isQueryOk,
+} from "@/utils/firstVisitQueryReport";
 
 export type FirstVisitPatient = {
   /** Individual.PID，Insert_Report 必填 */
@@ -818,7 +1093,15 @@ type PresentHistoryRow = {
   category: string;
   symptoms: string;
   duration: string;
+  durationNum: string;
+  durationUnit: string;
   remark: string;
+};
+
+type QuestionnaireSaveResult = {
+  ok: boolean;
+  label: string;
+  message?: string;
 };
 
 export type FirstVisitFormData = {
@@ -872,7 +1155,7 @@ const props = withDefaults(
     patient: () => ({}),
     seminarSourceLabel: "講座活動",
     seminarSourceDateYYYYMMDD: "",
-  }
+  },
 );
 
 const emit = defineEmits<{
@@ -906,10 +1189,34 @@ const habitFields: {
   remarkLabel: string;
   showAmount: boolean;
 }[] = [
-  { key: "coffee", label: "每天喝咖啡", unit: "杯/天", remarkLabel: "咖啡備註", showAmount: true },
-  { key: "tea", label: "每天喝茶", unit: "杯/天", remarkLabel: "喝茶備註", showAmount: true },
-  { key: "smoking", label: "每天抽菸", unit: "支/天", remarkLabel: "抽菸備註", showAmount: true },
-  { key: "alcohol", label: "每天喝酒", unit: "杯/天", remarkLabel: "喝酒備註", showAmount: true },
+  {
+    key: "coffee",
+    label: "每天喝咖啡",
+    unit: "杯/天",
+    remarkLabel: "咖啡備註",
+    showAmount: true,
+  },
+  {
+    key: "tea",
+    label: "每天喝茶",
+    unit: "杯/天",
+    remarkLabel: "喝茶備註",
+    showAmount: true,
+  },
+  {
+    key: "smoking",
+    label: "每天抽菸",
+    unit: "支/天",
+    remarkLabel: "抽菸備註",
+    showAmount: true,
+  },
+  {
+    key: "alcohol",
+    label: "每天喝酒",
+    unit: "杯/天",
+    remarkLabel: "喝酒備註",
+    showAmount: true,
+  },
 ];
 
 const workStatusOptions = [
@@ -997,8 +1304,104 @@ function createPresentRow(): PresentHistoryRow {
     category: "",
     symptoms: "",
     duration: "",
+    durationNum: "",
+    durationUnit: "M",
     remark: "",
   };
+}
+
+type TimePickerValue = {
+  hours: number;
+  minutes: number;
+  seconds?: number;
+};
+
+function timeStringToPicker(value: string): TimePickerValue | null {
+  const raw = (value || "").trim();
+  const m = raw.match(/^(\d{1,2}):(\d{2})$/);
+
+  if (!m) return null;
+
+  return {
+    hours: Number(m[1]),
+    minutes: Number(m[2]),
+    seconds: 0,
+  };
+}
+
+function pickerToTimeString(value: TimePickerValue | null): string {
+  if (!value) return "";
+
+  const h = String(value.hours ?? 0).padStart(2, "0");
+  const m = String(value.minutes ?? 0).padStart(2, "0");
+
+  return `${h}:${m}`;
+}
+
+const sleepHours = computed(() => {
+  const from = form.life.sleepFrom;
+  const to = form.life.sleepTo;
+
+  if (!from || !to) return "";
+
+  const [fh, fm] = from.split(":").map(Number);
+  const [th, tm] = to.split(":").map(Number);
+
+  let fromMinutes = fh * 60 + fm;
+  let toMinutes = th * 60 + tm;
+
+  // 跨日處理
+  if (toMinutes <= fromMinutes) {
+    toMinutes += 24 * 60;
+  }
+
+  const diffMinutes = toMinutes - fromMinutes;
+
+  return (diffMinutes / 60).toFixed(1);
+});
+
+function yearStringToPicker(value: string): number | null {
+  const raw = (value || "").trim();
+  const m = raw.match(/^(\d{4})/);
+
+  if (!m) return null;
+
+  return Number(m[1]);
+}
+
+function pickerToYearString(value: number | Date | null): string {
+  if (!value) return "";
+
+  if (typeof value === "number") {
+    return String(value);
+  }
+
+  return String(value.getFullYear());
+}
+
+const birthdayPickerValue = computed(() => basicForm.birthdayInput || null);
+
+function onBirthdayPickerChange(value: string | null) {
+  basicForm.birthdayInput = value || "";
+}
+
+function syncPresentDuration(row: PresentHistoryRow) {
+  const num = row.durationNum.trim();
+  const unit = row.durationUnit.trim();
+  row.duration = num && unit ? `${num}${unit}` : "";
+}
+
+function applyDurationFromString(row: PresentHistoryRow) {
+  const raw = row.duration.trim();
+  const m = raw.match(/^(\d+)\s*([MYWD])$/i);
+  if (m) {
+    row.durationNum = m[1];
+    row.durationUnit = m[2].toUpperCase();
+  }
+}
+
+function syncAllPresentDurations() {
+  form.presentHistory.forEach((row) => syncPresentDuration(row));
 }
 
 function buildInitialForm(): FirstVisitFormData {
@@ -1057,6 +1460,7 @@ const wizardStep = ref<1 | 2>(1);
 const insertedPid = ref("");
 const insertingBasic = ref(false);
 const loadingIndividual = ref(false);
+const loadingQuestionnaire = ref(false);
 const cancelConfirmVisible = ref(false);
 const profileOpenedAt = ref<Date | null>(null);
 const loadedSourceLabel = ref("");
@@ -1099,7 +1503,7 @@ const resolvedSourceLabel = computed(
   () =>
     loadedSourceLabel.value.trim() ||
     props.seminarSourceLabel?.trim() ||
-    "講座活動"
+    "講座活動",
 );
 
 function formatYYYYMMDDToSlash(yyyymmdd: string) {
@@ -1259,7 +1663,7 @@ async function fetchIndividualProfile() {
 
 function buildBasicPayload(
   adminID: string,
-  token: string
+  token: string,
 ): ModifyIndividualPayload | InsertIndividualPayload | null {
   const name = basicForm.name.trim();
   const mobile = basicForm.mobile.trim();
@@ -1325,8 +1729,8 @@ function onChildTeeInput() {
   }
 }
 
-const effectivePid = computed(
-  () => (insertedPid.value || props.patient?.pid || "").trim()
+const effectivePid = computed(() =>
+  (insertedPid.value || props.patient?.pid || "").trim(),
 );
 
 const patientForStep2 = computed<FirstVisitPatient>(() => {
@@ -1340,14 +1744,17 @@ const patientForStep2 = computed<FirstVisitPatient>(() => {
 });
 
 const isBasicFormDirty = computed(
-  () => JSON.stringify(serializeBasicForm()) !== basicDirtyBaseline.value
+  () => JSON.stringify(serializeBasicForm()) !== basicDirtyBaseline.value,
 );
 
 const isQuestionnaireDirty = computed(
-  () => JSON.stringify(form) !== questionnaireBaseline.value
+  () => JSON.stringify(form) !== questionnaireBaseline.value,
 );
 
-async function runSaveBasicProfile(): Promise<{ ok: boolean; message?: string }> {
+async function runSaveBasicProfile(): Promise<{
+  ok: boolean;
+  message?: string;
+}> {
   const { adminID, token } = getBackendAuth();
   if (!adminID || !token) {
     return { ok: false, message: "請先登入後台" };
@@ -1408,13 +1815,83 @@ async function handleBasicSaveOnly() {
 
     if (r.ok) {
       alert(insertedPid.value ? "基本資料更新成功" : "基本資料儲存成功");
-
-      emit("close"); // ← 儲存成功後關閉視窗
     } else {
       alert(r.message || "建檔失敗");
     }
   } finally {
     insertingBasic.value = false;
+  }
+}
+
+function trimApiValue(value: unknown): string {
+  return value == null ? "" : String(value).trim();
+}
+
+async function applyQuestionnaireFromApi(pid: string) {
+  const { adminID, token } = getBackendAuth();
+  if (!adminID || !token || !pid) return;
+
+  loadingQuestionnaire.value = true;
+  try {
+    const authPayload = { AdminID: adminID, Token: token, PID: pid };
+
+    const [reportData, takeDrugData, sReportData] = await Promise.all([
+      queryReport(authPayload),
+      queryReportTakeDrug(authPayload),
+      queryReportSReport(authPayload),
+    ]);
+
+    if (isQueryOk(reportData.Result)) {
+      Object.assign(form.life, mapQueryReportToLife(reportData));
+
+      const pastRows = mapQueryReportToPastHistory(reportData);
+      if (pastRows.length) {
+        form.pastHistory = pastRows.map((row) => ({
+          ...createPastRow(),
+          ...row,
+        }));
+      }
+
+      form.familyHistory = mapQueryReportToFamilyHistory(reportData).map(
+        (row) => ({
+          relation: row.relation,
+          diseases: [...row.diseases],
+          otherDisease: row.otherDisease,
+          remark: row.remark,
+        }),
+      );
+    }
+
+    if (isQueryOk(takeDrugData.Result) && trimApiValue(takeDrugData.TakeDrug)) {
+      form.medications.text = mapTakeDrugToText(takeDrugData.TakeDrug ?? "");
+      medFilter.value = form.medications.text;
+    }
+
+    if (
+      isQueryOk(sReportData.Result) &&
+      Array.isArray(sReportData.SReportList)
+    ) {
+      const presentRows = mapSReportListToPresentHistory(
+        sReportData.SReportList,
+      );
+      if (presentRows.length) {
+        const padded = [
+          ...presentRows.map((row) => {
+            const item = { ...createPresentRow(), ...row };
+            applyDurationFromString(item);
+            return item;
+          }),
+          ...Array.from({ length: Math.max(10 - presentRows.length, 0) }, () =>
+            createPresentRow(),
+          ),
+        ];
+        form.presentHistory = padded;
+      }
+    }
+  } catch (error) {
+    console.error("載入健康史問卷失敗:", error);
+  } finally {
+    loadingQuestionnaire.value = false;
   }
 }
 
@@ -1427,6 +1904,13 @@ async function handleBasicNext() {
       return;
     }
     wizardStep.value = 2;
+    const pid = effectivePid.value;
+    if (pid) {
+      await applyQuestionnaireFromApi(pid);
+      nextTick(() => {
+        questionnaireBaseline.value = JSON.stringify(form);
+      });
+    }
   } finally {
     insertingBasic.value = false;
   }
@@ -1463,7 +1947,7 @@ const filteredMedicationSuggestions = computed(() => {
   const keyword = medFilter.value.trim().toLowerCase();
   if (!keyword) return medicationSuggestions;
   return medicationSuggestions.filter((item) =>
-    item.toLowerCase().includes(keyword)
+    item.toLowerCase().includes(keyword),
   );
 });
 
@@ -1507,59 +1991,144 @@ async function saveLifeHistory(
   adminID: string,
   token: string,
   pid: string,
-  formSnapshot: FirstVisitFormData
-) {
+  formSnapshot: FirstVisitFormData,
+): Promise<QuestionnaireSaveResult> {
   const payload = buildInsertReportPayload(adminID, token, pid, {
     ...formSnapshot.life,
   });
   const result = await submitInsertReport(payload);
 
   if (result.Result === "OK") {
-    emit("save", formSnapshot);
-    emit("close");
-    return;
+    return { ok: true, label: "生活史" };
   }
 
-  alert(`儲存失敗：${result.Message || result.Result || "未知錯誤"}`);
+  return {
+    ok: false,
+    label: "生活史",
+    message: result.Message || result.Result || "未知錯誤",
+  };
 }
 
 async function savePastHistory(
   adminID: string,
   token: string,
   pid: string,
-  formSnapshot: FirstVisitFormData
-) {
+  formSnapshot: FirstVisitFormData,
+): Promise<QuestionnaireSaveResult> {
   const payload = buildInsertReportPassPayload(
     adminID,
     token,
     pid,
-    formSnapshot.pastHistory
+    formSnapshot.pastHistory,
   );
-
-  if (!payload.Pass.length) {
-    alert("請至少填寫一筆過去病史（疾病欄位）");
-    return;
-  }
 
   const result = await submitInsertReportPass(payload);
 
   if (result.Result === "OK") {
-    emit("save", formSnapshot);
-    emit("close");
-    return;
+    return { ok: true, label: "過去病史" };
   }
 
-  alert(`儲存失敗：${result.Message || result.Result || "未知錯誤"}`);
+  return {
+    ok: false,
+    label: "過去病史",
+    message: result.Message || result.Result || "未知錯誤",
+  };
+}
+
+async function saveFamilyHistory(
+  adminID: string,
+  token: string,
+  pid: string,
+  formSnapshot: FirstVisitFormData,
+): Promise<QuestionnaireSaveResult> {
+  const payload = buildInsertReportFdiseasePayload(
+    adminID,
+    token,
+    pid,
+    formSnapshot.familyHistory,
+  );
+  const result = await submitInsertReportFdisease(payload);
+
+  if (result.Result === "OK") {
+    return { ok: true, label: "家族史" };
+  }
+
+  return {
+    ok: false,
+    label: "家族史",
+    message: result.Message || result.Result || "未知錯誤",
+  };
+}
+
+async function saveTakeDrug(
+  adminID: string,
+  token: string,
+  pid: string,
+  formSnapshot: FirstVisitFormData,
+): Promise<QuestionnaireSaveResult> {
+  const payload = buildInsertReportTakeDrugPayload(
+    adminID,
+    token,
+    pid,
+    formSnapshot.medications.text,
+  );
+  const result = await submitInsertReportTakeDrug(payload);
+
+  if (result.Result === "OK") {
+    return { ok: true, label: "目前使用藥物" };
+  }
+
+  return {
+    ok: false,
+    label: "目前使用藥物",
+    message: result.Message || result.Result || "未知錯誤",
+  };
+}
+
+async function savePresentHistory(
+  adminID: string,
+  token: string,
+  pid: string,
+  formSnapshot: FirstVisitFormData,
+): Promise<QuestionnaireSaveResult> {
+  const payload = buildInsertReportSReportPayload(
+    adminID,
+    token,
+    pid,
+    formSnapshot.presentHistory,
+  );
+  const result = await submitInsertReportSReport(payload);
+
+  if (result.Result === "OK") {
+    return { ok: true, label: "現在病史" };
+  }
+
+  return {
+    ok: false,
+    label: "現在病史",
+    message: result.Message || result.Result || "未知錯誤",
+  };
+}
+
+async function saveAllQuestionnaire(
+  adminID: string,
+  token: string,
+  pid: string,
+  formSnapshot: FirstVisitFormData,
+): Promise<QuestionnaireSaveResult[]> {
+  return Promise.all([
+    saveLifeHistory(adminID, token, pid, formSnapshot),
+    savePastHistory(adminID, token, pid, formSnapshot),
+    saveFamilyHistory(adminID, token, pid, formSnapshot),
+    saveTakeDrug(adminID, token, pid, formSnapshot),
+    savePresentHistory(adminID, token, pid, formSnapshot),
+  ]);
 }
 
 async function handleSave() {
   const pid = effectivePid.value;
   if (!pid) {
-    alert(
-      activeTab.value === "past"
-        ? "缺少病患病歷 PID，無法儲存過去病史"
-        : "缺少病患病歷 PID，無法儲存生活史"
-    );
+    alert("缺少病患病歷 PID，無法儲存問卷");
     return;
   }
 
@@ -1569,30 +2138,40 @@ async function handleSave() {
     return;
   }
 
-  const formSnapshot = JSON.parse(
-    JSON.stringify(form)
-  ) as FirstVisitFormData;
+  syncAllPresentDurations();
+
+  const formSnapshot = JSON.parse(JSON.stringify(form)) as FirstVisitFormData;
 
   saving.value = true;
   try {
-    if (activeTab.value === "past") {
-      await savePastHistory(adminID, token, pid, formSnapshot);
+    const results = await saveAllQuestionnaire(
+      adminID,
+      token,
+      pid,
+      formSnapshot,
+    );
+
+    const failed = results.filter((r) => !r.ok);
+    if (!failed.length) {
+      emit("save", formSnapshot);
+      questionnaireBaseline.value = JSON.stringify(form);
+      alert("初診健康史問卷已全部儲存成功");
+      emit("close");
       return;
     }
 
-    if (activeTab.value === "life") {
-      await saveLifeHistory(adminID, token, pid, formSnapshot);
-      return;
-    }
-
-    alert("此區塊尚未開放儲存，請切換至生活史或過去病史");
+    const detail = failed
+      .map((r) => `${r.label}：${r.message || "儲存失敗"}`)
+      .join("\n");
+    alert(`部分儲存失敗，請檢查後再試：\n${detail}`);
   } catch (error: unknown) {
-    const apiLabel =
-      activeTab.value === "past" ? "Insert_Report_Pass" : "Insert_Report";
-    console.error(`${apiLabel} 失敗:`, error);
-    const err = error as { response?: { data?: { Message?: string } }; message?: string };
+    console.error("批次儲存問卷失敗:", error);
+    const err = error as {
+      response?: { data?: { Message?: string } };
+      message?: string;
+    };
     alert(
-      `儲存失敗：${err.response?.data?.Message || err.message || "請稍後再試"}`
+      `儲存失敗：${err.response?.data?.Message || err.message || "請稍後再試"}`,
     );
   } finally {
     saving.value = false;
@@ -1617,7 +2196,7 @@ watch(
         questionnaireBaseline.value = JSON.stringify(form);
       });
     }
-  }
+  },
 );
 </script>
 
@@ -1831,6 +2410,59 @@ $text-muted: #6b7a90;
   min-height: 42px;
 }
 
+.firstVisitModal__picker {
+  width: 100%;
+
+  :deep(.dp__input) {
+    min-height: 42px;
+    border: 1px solid $border;
+    border-radius: 8px;
+    font-size: 14px;
+    padding: 0.45rem 0.65rem;
+  }
+  :deep(.dp__icon) {
+    right: 12px;
+    left: auto;
+  }
+  :deep(.dp__input:focus) {
+    border-color: $teal;
+    box-shadow: 0 0 0 2px rgba($teal, 0.15);
+  }
+
+  &--time {
+    width: 7.5rem;
+    min-width: 7.5rem;
+  }
+
+  :deep(.dp__input_icon) {
+    display: none !important;
+  }
+}
+
+.firstVisitModal__input--sub {
+  margin-top: 0.35rem;
+  font-size: 13px;
+  min-height: 36px;
+}
+
+.firstVisitModal__durationPick {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.firstVisitModal__input--durationNum {
+  width: 4.5rem;
+  min-width: 4.5rem;
+  min-height: 38px;
+  padding: 0.4rem 0.5rem;
+}
+
+.firstVisitModal__select--durationUnit {
+  min-width: 5.5rem;
+  min-height: 38px;
+}
+
 .firstVisitModal__teeBlock {
   border: 1px solid rgba($teal, 0.35);
   border-radius: 10px;
@@ -1955,7 +2587,10 @@ $text-muted: #6b7a90;
   color: $text-muted;
   cursor: pointer;
   border-bottom: 3px solid transparent;
-  transition: color 0.15s, background 0.15s, border-color 0.15s;
+  transition:
+    color 0.15s,
+    background 0.15s,
+    border-color 0.15s;
 
   &.active {
     background: #fff;
