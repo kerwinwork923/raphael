@@ -636,7 +636,6 @@
               <div class="firstVisitModal__pastTable">
                 <div class="firstVisitModal__pastHead" role="row">
                   <span>疾病</span>
-                  <span>時間</span>
                   <span>處理方式 / 備註</span>
                 </div>
 
@@ -660,18 +659,6 @@
                     >
                       <span aria-hidden="true">🗑</span> 刪除欄位
                     </button>
-                  </div>
-                  <div class="firstVisitModal__pastCol">
-                    <VueDatePicker
-                      :model-value="yearStringToPicker(row.time)"
-                      year-picker
-                      format="yyyy"
-                      placeholder="選年份"
-                      teleport="body"
-                      auto-apply
-                      class="firstVisitModal__picker"
-                      @update:model-value="updatePastYear(row, $event)"
-                    />
                   </div>
                   <div
                     class="firstVisitModal__pastCol firstVisitModal__pastCol--wide"
@@ -834,7 +821,6 @@
               <div class="firstVisitModal__presentTable">
                 <div class="firstVisitModal__presentHead" role="row">
                   <span>嚴重順序</span>
-                  <span>疾病類</span>
                   <span>症狀</span>
                   <span>發病多久 (ex. 8M)</span>
                   <span>備註</span>
@@ -848,19 +834,6 @@
                   <span class="firstVisitModal__presentOrder">
                     {{ String(index + 1).padStart(2, "0") }}
                   </span>
-                  <select
-                    v-model="row.category"
-                    class="firstVisitModal__select"
-                  >
-                    <option value="">請選擇疾病類</option>
-                    <option
-                      v-for="cat in diseaseCategories"
-                      :key="cat"
-                      :value="cat"
-                    >
-                      {{ cat }}
-                    </option>
-                  </select>
                   <textarea
                     v-model="row.symptoms"
                     class="firstVisitModal__textarea firstVisitModal__textarea--cell"
@@ -1014,8 +987,8 @@ import { ref, reactive, watch, computed, nextTick } from "vue";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import {
-  buildInsertReportPayload,
-  submitInsertReport,
+  buildModifyReportPayload,
+  submitModifyReport,
 } from "@/utils/firstVisitInsertReport";
 import {
   buildInsertReportPassPayload,
@@ -1051,7 +1024,7 @@ import {
 } from "@/utils/firstVisitQueryReport";
 
 export type FirstVisitPatient = {
-  /** Individual.PID，Insert_Report 必填 */
+  /** Individual.PID，Modify_Report 必填 */
   pid?: string;
   chartNo?: string;
   name?: string;
@@ -1260,19 +1233,6 @@ const familyDiseaseOptions = [
   { value: "diabetes", label: "糖尿病" },
 ];
 
-const diseaseCategories = [
-  "神經系統",
-  "心血管系統",
-  "呼吸系統",
-  "消化系統",
-  "內分泌",
-  "肌肉骨骼",
-  "皮膚",
-  "精神心理",
-  "婦科",
-  "其他",
-];
-
 const medicationSuggestions = [
   "Stilnox (10)-0.5-HS",
   "Stilnox (10)-1-HS",
@@ -1380,29 +1340,6 @@ const sleepHours = computed(() => {
 
   return (diffMinutes / 60).toFixed(1);
 });
-
-function yearStringToPicker(value: string): number | null {
-  const raw = (value || "").trim();
-  const m = raw.match(/^(\d{4})/);
-
-  if (!m) return null;
-
-  return Number(m[1]);
-}
-
-function pickerToYearString(value: number | Date | null): string {
-  if (!value) return "";
-
-  if (typeof value === "number") {
-    return String(value);
-  }
-
-  return String(value.getFullYear());
-}
-
-function updatePastYear(row: PastHistoryRow, value: unknown) {
-  row.time = pickerToYearString(value as number | Date | null);
-}
 
 const birthdayPickerValue = computed(() => basicForm.birthdayInput || null);
 
@@ -2029,10 +1966,10 @@ async function saveLifeHistory(
   pid: string,
   formSnapshot: FirstVisitFormData,
 ): Promise<QuestionnaireSaveResult> {
-  const payload = buildInsertReportPayload(adminID, token, pid, {
+  const payload = buildModifyReportPayload(adminID, token, pid, {
     ...formSnapshot.life,
   });
-  const result = await submitInsertReport(payload);
+  const result = await submitModifyReport(payload);
 
   if (result.Result === "OK") {
     return { ok: true, label: "生活史" };
@@ -2175,6 +2112,7 @@ async function handleSave() {
   }
 
   syncAllPresentDurations();
+  form.life.sleepFallHours = sleepHours.value;
 
   const formSnapshot = JSON.parse(JSON.stringify(form)) as FirstVisitFormData;
 
@@ -2850,7 +2788,7 @@ $text-muted: #6b7a90;
 
 .firstVisitModal__pastHead {
   display: grid;
-  grid-template-columns: 1fr 0.7fr 1.4fr;
+  grid-template-columns: 1fr 1.4fr;
   gap: 0.5rem;
   padding: 0.6rem 0.75rem;
   background: rgba($teal, 0.12);
@@ -2861,7 +2799,7 @@ $text-muted: #6b7a90;
 
 .firstVisitModal__pastRow {
   display: grid;
-  grid-template-columns: 1fr 0.7fr 1.4fr;
+  grid-template-columns: 1fr 1.4fr;
   gap: 0.75rem;
   padding: 0.75rem;
   border-top: 1px solid $border;
@@ -3020,7 +2958,7 @@ $text-muted: #6b7a90;
 
 .firstVisitModal__presentHead {
   display: grid;
-  grid-template-columns: 72px 1fr 1fr 1fr 1fr;
+  grid-template-columns: 72px 1fr 1fr 1fr;
   gap: 0.35rem;
   padding: 0.6rem 0.5rem;
   background: rgba($teal, 0.12);
@@ -3035,7 +2973,7 @@ $text-muted: #6b7a90;
 
 .firstVisitModal__presentRow {
   display: grid;
-  grid-template-columns: 72px 1fr 1fr 1fr 1fr;
+  grid-template-columns: 72px 1fr 1fr 1fr;
   gap: 0.35rem;
   padding: 0.5rem;
   border-top: 1px solid $border;

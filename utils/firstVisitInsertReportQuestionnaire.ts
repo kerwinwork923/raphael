@@ -200,10 +200,7 @@ export function buildInsertReportSReportPayload(
 ): InsertReportSReportPayload {
   const filled = (rows ?? []).filter(
     (r) =>
-      r.category.trim() ||
-      r.symptoms.trim() ||
-      r.duration.trim() ||
-      r.remark.trim(),
+      r.symptoms.trim() || r.duration.trim() || r.remark.trim(),
   );
 
   const SReportList: InsertReportSReportItemPayload[] = filled.map(

@@ -3,6 +3,9 @@ import axios from "axios";
 export const INSERT_REPORT_API =
   "https://23700999.com:8081/HMA/api/bk/Insert_Report";
 
+export const MODIFY_REPORT_API =
+  "https://23700999.com:8081/HMA/api/bk/Modify_Report";
+
 export type LifeHistoryForm = {
   coffee: { option: string; amount: string; remark: string };
   tea: { option: string; amount: string; remark: string };
@@ -52,6 +55,7 @@ export type InsertReportPayload = {
   Drinkcup: string;
   DrinkNote: string;
   ExerciseCount: string;
+  Exerciseday: string;
   ExerciseMin: string;
   ExerciseNote: string;
   WorkHour: string;
@@ -78,6 +82,15 @@ export type InsertReportPayload = {
 };
 
 export type InsertReportResponse = {
+  PID?: string;
+  Result?: string;
+  Message?: string;
+};
+
+/** Modify_Report 請求與 Insert_Report 欄位相同 */
+export type ModifyReportPayload = InsertReportPayload;
+
+export type ModifyReportResponse = {
   PID?: string;
   Result?: string;
   Message?: string;
@@ -155,15 +168,29 @@ function buildRolling(habits: string[]): string {
     .join(",");
 }
 
-function buildExerciseNote(life: LifeHistoryForm): string {
-  const parts: string[] = [];
-  if (life.exercise.timesPerWeek.trim()) {
-    parts.push(`${life.exercise.timesPerWeek.trim()}次/週`);
+function computeSleepFallHours(sleepFrom: string, sleepTo: string): string {
+  const from = sleepFrom.trim();
+  const to = sleepTo.trim();
+  if (!from || !to) return "";
+
+  const fromMatch = from.match(/^(\d{1,2}):(\d{2})$/);
+  const toMatch = to.match(/^(\d{1,2}):(\d{2})$/);
+  if (!fromMatch || !toMatch) return "";
+
+  let fromMinutes = Number(fromMatch[1]) * 60 + Number(fromMatch[2]);
+  let toMinutes = Number(toMatch[1]) * 60 + Number(toMatch[2]);
+  if (toMinutes <= fromMinutes) {
+    toMinutes += 24 * 60;
   }
-  if (life.exercise.remark.trim()) {
-    parts.push(life.exercise.remark.trim());
-  }
-  return parts.join("；");
+
+  const hours = (toMinutes - fromMinutes) / 60;
+  return Number.isInteger(hours) ? String(hours) : hours.toFixed(1);
+}
+
+function resolveToSleep2(life: LifeHistoryForm): string {
+  const manual = life.sleepFallHours.trim();
+  if (manual) return manual;
+  return computeSleepFallHours(life.sleepFrom, life.sleepTo);
 }
 
 export function buildInsertReportPayload(
@@ -189,8 +216,9 @@ export function buildInsertReportPayload(
     Drinkcup: life.alcohol.amount.trim(),
     DrinkNote: life.alcohol.remark.trim(),
     ExerciseCount: mapExerciseOption(life.exercise.option),
+    Exerciseday: life.exercise.timesPerWeek.trim(),
     ExerciseMin: life.exercise.minutesPerTime.trim(),
-    ExerciseNote: buildExerciseNote(life),
+    ExerciseNote: life.exercise.remark.trim(),
     WorkHour: mapWorkStatus(life.workStatus),
     WorkNote: life.workRemark.trim(),
     SleepHour: mapSleepMed(life.sleepMed),
@@ -198,7 +226,7 @@ export function buildInsertReportPayload(
     NF1: life.sleepFrom.trim(),
     FromSleep3: "AM",
     NF2: life.sleepTo.trim(),
-    ToSleep2: life.sleepFallHours.trim(),
+    ToSleep2: resolveToSleep2(life),
     Awake: life.sleepWakeCount.trim(),
     SleepNote: life.sleepRemark.trim(),
     nmh: mapBpLevel(life.bpLevel),
@@ -219,6 +247,18 @@ export async function submitInsertReport(
   payload: InsertReportPayload
 ): Promise<InsertReportResponse> {
   const response = await axios.post<InsertReportResponse>(INSERT_REPORT_API, payload, {
+    headers: { "Content-Type": "application/json" },
+  });
+  return response.data ?? {};
+}
+
+/** 生活史 payload 與 Insert_Report 相同，供 Modify_Report 使用 */
+export const buildModifyReportPayload = buildInsertReportPayload;
+
+export async function submitModifyReport(
+  payload: ModifyReportPayload
+): Promise<ModifyReportResponse> {
+  const response = await axios.post<ModifyReportResponse>(MODIFY_REPORT_API, payload, {
     headers: { "Content-Type": "application/json" },
   });
   return response.data ?? {};
