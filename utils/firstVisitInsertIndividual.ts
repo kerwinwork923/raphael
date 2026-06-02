@@ -7,6 +7,8 @@ export type InsertIndividualPayload = {
   AdminID: string;
   Token: string;
   Name: string;
+  /** 0:女 1:男 */
+  Sex: string;
   Mobile: string;
   Birthday: string;
   Source: string;

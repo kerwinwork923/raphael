@@ -92,6 +92,29 @@
                   autocomplete="name"
                 />
               </label>
+              <div class="firstVisitModal__field">
+                <span class="firstVisitModal__fieldLabel">性別</span>
+                <div class="firstVisitModal__sexRadios">
+                  <label class="firstVisitModal__sexRadio">
+                    <input
+                      v-model="basicForm.sex"
+                      type="radio"
+                      name="basic-sex"
+                      value="0"
+                    />
+                    女
+                  </label>
+                  <label class="firstVisitModal__sexRadio">
+                    <input
+                      v-model="basicForm.sex"
+                      type="radio"
+                      name="basic-sex"
+                      value="1"
+                    />
+                    男
+                  </label>
+                </div>
+              </div>
               <label class="firstVisitModal__field">
                 <span class="firstVisitModal__fieldLabel">電話</span>
                 <input
@@ -114,6 +137,16 @@
                   auto-apply
                   class="firstVisitModal__picker"
                   @update:model-value="onBirthdayPickerChange"
+                />
+              </label>
+              <label class="firstVisitModal__field">
+                <span class="firstVisitModal__fieldLabel">年齡</span>
+                <input
+                  :value="ageDisplay || '-'"
+                  type="text"
+                  class="firstVisitModal__input firstVisitModal__input--readonly"
+                  readonly
+                  tabindex="-1"
                 />
               </label>
               <!-- 來源欄位暫時隱藏 -->
@@ -636,6 +669,7 @@
               <div class="firstVisitModal__pastTable">
                 <div class="firstVisitModal__pastHead" role="row">
                   <span>疾病</span>
+                  <span>時間</span>
                   <span>處理方式 / 備註</span>
                 </div>
 
@@ -659,6 +693,14 @@
                     >
                       <span aria-hidden="true">🗑</span> 刪除欄位
                     </button>
+                  </div>
+                  <div class="firstVisitModal__pastCol">
+                    <input
+                      v-model="row.time"
+                      type="text"
+                      class="firstVisitModal__input"
+                      placeholder="例：2018"
+                    />
                   </div>
                   <div
                     class="firstVisitModal__pastCol firstVisitModal__pastCol--wide"
@@ -818,9 +860,11 @@
                 五、現在病史
               </h3>
 
+              <div class="firstVisitModal__presentScroll">
               <div class="firstVisitModal__presentTable">
                 <div class="firstVisitModal__presentHead" role="row">
                   <span>嚴重順序</span>
+                  <span>疾病別</span>
                   <span>症狀</span>
                   <span>發病多久 (ex. 8M)</span>
                   <span>備註</span>
@@ -834,6 +878,19 @@
                   <span class="firstVisitModal__presentOrder">
                     {{ String(index + 1).padStart(2, "0") }}
                   </span>
+                  <select
+                    v-model="row.category"
+                    class="firstVisitModal__select firstVisitModal__select--category"
+                  >
+                    <option value="">選擇疾病別</option>
+                    <option
+                      v-for="c in presentDiseaseOptions"
+                      :key="c"
+                      :value="c"
+                    >
+                      {{ c }}
+                    </option>
+                  </select>
                   <textarea
                     v-model="row.symptoms"
                     class="firstVisitModal__textarea firstVisitModal__textarea--cell"
@@ -873,6 +930,7 @@
                     rows="2"
                   />
                 </div>
+              </div>
               </div>
             </section>
           </div>
@@ -1227,6 +1285,38 @@ const treatmentOptions = [
   { value: "other", label: "其它" },
 ];
 
+const presentDiseaseOptions = [
+  "Pain",
+  "GERD",
+  "Tinnitus",
+  "Neurosis",
+  "Dizziness",
+  "G-I problem",
+  "Skin problem",
+  "Facial palsy",
+  "Eye Problem",
+  "ENT problem",
+  "Herpes Zoster",
+  "Allergic rhinitis",
+  "Pediatric problem",
+  "Immunity Problem",
+  "Sleep Disturbance",
+  "Urological Problem",
+  "Neurological Problem",
+  "Gynecological Problem",
+  "Trigeminal Neuralgia(TN)",
+  "PED-Gross motor",
+  "PED-Fine motor",
+  "PED-Cognition",
+  "PED-ADL",
+  "PED-Interpersonal Skills",
+  "PED-Behavioral performance",
+  "PED-Sensory Integration",
+  "PED-Emotion",
+  "PED-Language",
+  "Other problem",
+] as const;
+
 const familyDiseaseOptions = [
   { value: "heart", label: "心臟病" },
   { value: "hypertension", label: "高血壓" },
@@ -1438,9 +1528,12 @@ const cancelConfirmVisible = ref(false);
 const profileOpenedAt = ref<Date | null>(null);
 const loadedSourceLabel = ref("");
 const loadedSourceDate = ref("");
+const ageDisplay = ref("");
 
 const basicForm = reactive({
   name: "",
+  /** 0:女 1:男 */
+  sex: "" as "" | "0" | "1",
   mobile: "",
   birthdayInput: "",
   height: "",
@@ -1504,9 +1597,23 @@ const profileCreatedAtDisplay = computed(() => {
   return `${d.getFullYear()}/${pad2(d.getMonth() + 1)}/${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
 });
 
+function sexQueryToForm(sex?: string): "" | "0" | "1" {
+  const s = (sex || "").trim();
+  if (s === "0" || s === "女") return "0";
+  if (s === "1" || s === "男") return "1";
+  return "";
+}
+
+function sexFormToDisplay(sex: string): string {
+  if (sex === "1") return "男";
+  if (sex === "0") return "女";
+  return "";
+}
+
 function serializeBasicForm() {
   return {
     name: basicForm.name,
+    sex: basicForm.sex,
     mobile: basicForm.mobile,
     birthdayInput: basicForm.birthdayInput,
     height: basicForm.height,
@@ -1519,6 +1626,7 @@ function serializeBasicForm() {
 
 function resetBasicFormFields() {
   basicForm.name = "";
+  basicForm.sex = "";
   basicForm.mobile = "";
   basicForm.birthdayInput = "";
   basicForm.height = "";
@@ -1526,6 +1634,7 @@ function resetBasicFormFields() {
   basicForm.teeMaleSize = "";
   basicForm.teeFemaleSize = "";
   basicForm.teeChildCustom = "";
+  ageDisplay.value = "";
 }
 
 function initBasicFormFromProps() {
@@ -1534,6 +1643,14 @@ function initBasicFormFromProps() {
   basicForm.name = n && n !== "-" ? n : "";
   const m = props.patient?.mobile?.trim();
   basicForm.mobile = m && m !== "-" ? m : "";
+  const g = props.patient?.gender?.trim();
+  if (g && g !== "-") {
+    basicForm.sex = sexQueryToForm(g);
+  }
+  const age = props.patient?.age?.trim();
+  if (age && age !== "-") {
+    ageDisplay.value = age;
+  }
 }
 
 function birthdayToApi(yyyyMmDd: string): string {
@@ -1569,8 +1686,10 @@ function applyTeeFromApi(ttType = "", ttSize = "") {
 function applyIndividualFromQuery(data: {
   PID?: string;
   Name?: string;
+  Sex?: string;
   Mobile?: string;
   Birthday?: string;
+  Age?: string;
   Source?: string;
   SourceDate?: string;
   Height?: string;
@@ -1584,11 +1703,17 @@ function applyIndividualFromQuery(data: {
   const name = (data.Name || "").trim();
   if (name) basicForm.name = name;
 
+  const sex = sexQueryToForm(data.Sex);
+  if (sex) basicForm.sex = sex;
+
   const mobile = (data.Mobile || "").trim();
   if (mobile) basicForm.mobile = mobile;
 
   const birthday = apiBirthdayToInput(data.Birthday || "");
   if (birthday) basicForm.birthdayInput = birthday;
+
+  const age = (data.Age || "").trim();
+  if (age) ageDisplay.value = age;
 
   const source = (data.Source || "").trim();
   if (source) loadedSourceLabel.value = source;
@@ -1648,10 +1773,14 @@ function buildBasicPayload(
   const tee = buildTeePayload();
   if (!tee) return null;
 
+  const sex = basicForm.sex;
+  if (sex !== "0" && sex !== "1") return null;
+
   const base = {
     AdminID: adminID,
     Token: token,
     Name: name,
+    Sex: sex,
     Mobile: mobile,
     Birthday: birthday,
     Source: resolvedSourceLabel.value,
@@ -1708,11 +1837,20 @@ const effectivePid = computed(() =>
 
 const patientForStep2 = computed<FirstVisitPatient>(() => {
   const pid = effectivePid.value;
+  const nameFromForm = basicForm.name.trim();
+  const genderFromForm = sexFormToDisplay(basicForm.sex);
+  const ageFromQuery = ageDisplay.value.trim();
+  const fallbackGender = props.patient?.gender?.trim();
+  const fallbackAge = props.patient?.age?.trim();
   return {
     ...props.patient,
     pid,
     chartNo: pid || props.patient?.chartNo || "-",
-    name: basicForm.name.trim() || props.patient?.name || "-",
+    name: nameFromForm || props.patient?.name || "-",
+    gender:
+      genderFromForm ||
+      (fallbackGender && fallbackGender !== "-" ? fallbackGender : "-"),
+    age: ageFromQuery || (fallbackAge && fallbackAge !== "-" ? fallbackAge : "-"),
   };
 });
 
@@ -1742,6 +1880,9 @@ async function runSaveBasicProfile(): Promise<{
     }
     if (!birthdayToApi(basicForm.birthdayInput)) {
       return { ok: false, message: "請選擇出生年月日" };
+    }
+    if (basicForm.sex !== "0" && basicForm.sex !== "1") {
+      return { ok: false, message: "請選擇性別" };
     }
     return { ok: false, message: "請選擇或填寫 T 恤尺寸" };
   }
@@ -1781,12 +1922,20 @@ async function runSaveBasicProfile(): Promise<{
   }
 }
 
+async function refreshBasicProfileAfterSave() {
+  await fetchIndividualProfile();
+  nextTick(() => {
+    basicDirtyBaseline.value = JSON.stringify(serializeBasicForm());
+  });
+}
+
 async function handleBasicSaveOnly() {
   insertingBasic.value = true;
   try {
     const r = await runSaveBasicProfile();
 
     if (r.ok) {
+      await refreshBasicProfileAfterSave();
       alert(insertedPid.value ? "基本資料更新成功" : "基本資料儲存成功");
     } else {
       alert(r.message || "建檔失敗");
@@ -1876,6 +2025,7 @@ async function handleBasicNext() {
       alert(r.message || "儲存失敗");
       return;
     }
+    await refreshBasicProfileAfterSave();
     wizardStep.value = 2;
     const pid = effectivePid.value;
     if (pid) {
@@ -2161,6 +2311,7 @@ watch(
       insertedPid.value = (props.patient?.pid || "").trim();
       loadedSourceLabel.value = "";
       loadedSourceDate.value = "";
+      ageDisplay.value = "";
       cancelConfirmVisible.value = false;
       resetForm();
       initBasicFormFromProps();
@@ -2378,6 +2529,32 @@ $text-muted: #6b7a90;
     border-color: $teal;
     box-shadow: 0 0 0 2px rgba($teal, 0.15);
   }
+
+  &--readonly {
+    background: $gray-bg;
+    color: $text-muted;
+    cursor: default;
+  }
+}
+
+.firstVisitModal__sexRadios {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 42px;
+}
+
+.firstVisitModal__sexRadio {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 14px;
+  color: $text;
+  cursor: pointer;
+
+  input {
+    accent-color: $teal;
+  }
 }
 
 .firstVisitModal__input--date {
@@ -2412,18 +2589,18 @@ $text-muted: #6b7a90;
 
 .firstVisitModal__durationPick {
   display: flex;
-  align-items: center;
-  gap: 0.35rem;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
 }
 
-.firstVisitModal__select--durationUnit {
-  min-width: 5.5rem;
-  min-height: 38px;
-}
-
+.firstVisitModal__select--durationUnit,
 .firstVisitModal__select--durationNum {
-  min-width: 5rem;
-  min-height: 38px;
+  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  font-size: 12px;
+  padding: 0 8px;
 }
 .firstVisitModal__teeBlock {
   border: 1px solid rgba($teal, 0.35);
@@ -2788,18 +2965,22 @@ $text-muted: #6b7a90;
 
 .firstVisitModal__pastHead {
   display: grid;
-  grid-template-columns: 1fr 1.4fr;
+  grid-template-columns: 1fr 120px 1.4fr;
   gap: 0.5rem;
   padding: 0.6rem 0.75rem;
   background: rgba($teal, 0.12);
   font-size: 13px;
   font-weight: 700;
   color: $teal;
+
+  @media (max-width: 900px) {
+    display: none;
+  }
 }
 
 .firstVisitModal__pastRow {
   display: grid;
-  grid-template-columns: 1fr 1.4fr;
+  grid-template-columns: 1fr 120px 1.4fr;
   gap: 0.75rem;
   padding: 0.75rem;
   border-top: 1px solid $border;
@@ -2949,22 +3130,28 @@ $text-muted: #6b7a90;
   font-size: 13px;
 }
 
-.firstVisitModal__presentTable {
+.firstVisitModal__presentScroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid $border;
   border-radius: 10px;
-  overflow: hidden;
   background: #fff;
+}
+
+.firstVisitModal__presentTable {
+  min-width: 920px;
 }
 
 .firstVisitModal__presentHead {
   display: grid;
-  grid-template-columns: 72px 1fr 1fr 1fr;
-  gap: 0.35rem;
-  padding: 0.6rem 0.5rem;
+  grid-template-columns: 44px 172px minmax(140px, 1.2fr) 168px minmax(120px, 1fr);
+  gap: 0.5rem;
+  padding: 0.6rem 0.65rem;
   background: rgba($teal, 0.12);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   color: $teal;
+  line-height: 1.35;
 
   @media (max-width: 900px) {
     display: none;
@@ -2973,16 +3160,39 @@ $text-muted: #6b7a90;
 
 .firstVisitModal__presentRow {
   display: grid;
-  grid-template-columns: 72px 1fr 1fr 1fr;
-  gap: 0.35rem;
-  padding: 0.5rem;
+  grid-template-columns: 44px 172px minmax(140px, 1.2fr) 168px minmax(120px, 1fr);
+  gap: 0.5rem;
+  padding: 0.55rem 0.65rem;
   border-top: 1px solid $border;
   align-items: start;
+
+  > * {
+    min-width: 0;
+  }
 
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
     padding: 0.75rem;
+    min-width: 0;
   }
+}
+
+@media (max-width: 900px) {
+  .firstVisitModal__presentTable {
+    min-width: 0;
+  }
+
+  .firstVisitModal__presentScroll {
+    overflow-x: visible;
+  }
+}
+
+.firstVisitModal__select--category {
+  width: 100%;
+  min-width: 0;
+  min-height: 38px;
+  font-size: 12px;
+  padding: 0 8px;
 }
 
 .firstVisitModal__presentOrder {

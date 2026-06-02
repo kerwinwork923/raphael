@@ -18,8 +18,12 @@ export type QueryIndividualPayload = IndividualAuthPayload & {
 export type QueryIndividualResponse = {
   PID?: string;
   Name?: string;
+  /** 查詢回傳為「女」或「男」 */
+  Sex?: string;
   Mobile?: string;
   Birthday?: string;
+  /** 例：(25歲8個月) */
+  Age?: string;
   Source?: string;
   SourceDate?: string;
   Height?: string;
@@ -33,6 +37,8 @@ export type QueryIndividualResponse = {
 export type ModifyIndividualPayload = IndividualAuthPayload & {
   PID: string;
   Name: string;
+  /** 0:女 1:男 */
+  Sex: string;
   Mobile: string;
   Birthday: string;
   Source: string;
