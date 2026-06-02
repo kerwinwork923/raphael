@@ -2,6 +2,7 @@
   var current = (window.location.pathname.split("/").pop() || "").toLowerCase();
   var isDashboard = current === "dashboard.html";
   var isCreate = current === "create-project.html";
+  var isDailyReport = current === "daily-report.html";
 
   var host = document.getElementById("projectos-header");
   if (!host) return;
@@ -25,6 +26,11 @@
       ? "text-sm text-blue-600 font-medium px-2 py-1 rounded-md hover:bg-blue-50 transition"
       : "text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition") +
     '">建立新專案</a>' +
+    '    <a href="daily-report.html" class="' +
+    (isDailyReport
+      ? "text-sm text-blue-600 font-medium px-2 py-1 rounded-md hover:bg-blue-50 transition"
+      : "text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition") +
+    '">工作日報</a>' +
     '    <a id="navUserAvatar" href="#" class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold hover:ring-2 hover:ring-blue-300 transition shrink-0" title="使用者">?</a>' +
     '    <button id="navLogoutBtn" class="text-sm text-slate-600 px-3 py-1 rounded-md border border-slate-200 hover:bg-slate-100 transition">登出</button>' +
     "  </div>" +

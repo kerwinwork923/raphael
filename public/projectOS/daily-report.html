@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ProjectOS - 工作日報</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+    * { font-family: "Inter", sans-serif; }
+    input:focus, select:focus, textarea:focus { outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, .15); }
+    .rpt-tab { padding: 10px 20px; font-size: 14px; font-weight: 500; cursor: default; border-bottom: 2px solid transparent; color: #64748b; transition: .15s; white-space: nowrap; }
+    .rpt-tab.active { color: #2563eb; border-bottom-color: #2563eb; font-weight: 700; }
+    .item-table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+    .item-table th { background: #f8fafc; padding: 7px 8px; text-align: left; font-size: 11px; color: #64748b; border: 1px solid #e2e8f0; font-weight: 700; }
+    .item-table td { padding: 5px 6px; border: 1px solid #e2e8f0; vertical-align: middle; }
+    .item-table tr:hover td { background: #f8fafc; }
+    .item-table input, .item-table select { border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 7px; font-size: 12px; width: 100%; background: #fff; }
+    .add-row-btn { margin-top: 8px; padding: 5px 12px; background: #f1f5f9; border: 1px dashed #94a3b8; border-radius: 6px; font-size: 12px; color: #64748b; cursor: pointer; transition: .15s; }
+    .add-row-btn:hover { background: #e2e8f0; }
+    .hours-bar { background: #f1f5f9; border-radius: 6px; height: 8px; overflow: hidden; width: 112px; }
+    .hours-bar-fill { height: 100%; border-radius: 6px; background: #3b82f6; transition: width .4s; }
+    .hours-bar-fill.warn { background: #f59e0b; }
+    .hours-bar-fill.danger { background: #ef4444; }
+    .hist-card { border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; padding: 12px; transition: .15s; }
+    .hist-card:hover { border-color: #93c5fd; box-shadow: 0 2px 10px rgba(0,0,0,.05); }
+    .hist-chip { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #f1f5f9; color: #475569; }
+    .hist-meta { font-size: 12px; color: #64748b; }
+    .hist-items-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    .hist-items-table th { background: #f8fafc; font-size: 11px; color: #64748b; text-align: left; padding: 6px 8px; border: 1px solid #e2e8f0; }
+    .hist-items-table td { font-size: 12px; color: #334155; padding: 6px 8px; border: 1px solid #e2e8f0; vertical-align: top; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <div id="projectos-header"></div>
+  <script src="./shared-header.js"></script>
+
+  <div class="bg-white border-b border-slate-200">
+    <div class="max-w-screen-xl mx-auto px-4 flex gap-0">
+      <button class="rpt-tab active">📝 我的日報</button>
+      <button class="rpt-tab">📊 工作貢獻 Dashboard</button>
+      <button class="rpt-tab">🔍 Lesson Learned</button>
+      <button class="rpt-tab">📋 週報產生器</button>
+    </div>
+  </div>
+
+  <main class="max-w-screen-xl mx-auto px-4 py-5">
+
+    <section class="bg-white rounded-xl border border-slate-200 shadow-sm px-5 py-3 mb-5 flex items-center gap-3 flex-wrap">
+      <div class="text-xs font-semibold text-slate-500">👤 員工</div>
+      <input id="employeeName" type="text" class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 text-slate-700" placeholder="由歷史日報查詢帶入" />
+      <div class="text-xs font-semibold text-slate-500 ml-2">登入帳號</div>
+      <span id="currentAdmin" class="text-sm font-semibold text-slate-700">-</span>
+    </section>
+
+
+
+
+    <section class="bg-white rounded-xl border border-slate-200 shadow-sm mb-5">
+      <div class="px-5 py-3 border-b border-slate-100 flex items-center gap-3">
+        <span class="font-semibold text-slate-700 text-sm">今日工作日報填寫</span>
+        <span id="editingBadge" class="text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-700 hidden">編輯模式</span>
+        <div class="flex-1"></div>
+        <span class="text-xs text-slate-400">日期</span>
+        <input id="reportDate" type="date" class="text-xs border border-slate-200 rounded px-2 py-1" />
+      </div>
+      <div class="p-5">
+
+        <div class="overflow-x-auto">
+          <table class="item-table">
+            <thead>
+              <tr>
+                <th class="min-w-[220px]">工作內容</th>
+                <th class="min-w-[130px]">工作類別</th>
+                <th class="min-w-[180px]">專案</th>
+                <th class="min-w-[100px]">工時</th>
+                <th class="min-w-[120px]">狀態</th>
+                <th class="w-[68px]">刪除</th>
+              </tr>
+            </thead>
+            <tbody id="itemsBody"></tbody>
+          </table>
+        </div>
+
+        <button id="btnAddRow" class="add-row-btn">+ 新增項目</button>
+
+        <div class="mt-4 flex items-center gap-2 text-xs">
+          <span class="text-slate-500">總工時：</span>
+          <span id="hours-total-display" class="font-bold text-slate-700">0.0 h</span>
+          <div class="hours-bar"><div id="hours-bar-fill" class="hours-bar-fill" style="width:0%"></div></div>
+          <span id="hours-hint" class="text-slate-400"></span>
+        </div>
+
+        <div class="mt-4">
+          <label class="block text-xs font-semibold text-slate-500 mb-1">今日異常 / 問題說明（選填）</label>
+          <textarea id="note" rows="2" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" placeholder="今日異常說明"></textarea>
+        </div>
+
+        <div class="mt-4 flex gap-3 flex-wrap items-center">
+          <button id="btnSave" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition shadow-sm">🚀 儲存（新增/修改）</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-white rounded-xl border border-slate-200 shadow-sm mb-5">
+      <div class="px-5 py-3 border-b border-slate-100 flex items-center gap-3 flex-wrap">
+        <span class="font-semibold text-slate-700 text-sm">我的歷史日報</span>
+        <div class="flex-1"></div>
+        <span class="text-xs text-slate-400">日期區間</span>
+        <input id="startDate" type="date" class="text-xs border border-slate-200 rounded px-2 py-1" />
+        <span class="text-xs text-slate-400">至</span>
+        <input id="endDate" type="date" class="text-xs border border-slate-200 rounded px-2 py-1" />
+        <button id="btnQuery" class="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-md hover:bg-blue-100 font-semibold">查詢</button>
+        <button id="btnNew" class="text-xs text-slate-500 hover:text-slate-700 px-2 py-1">新增今日日報</button>
+      </div>
+      <div class="px-5 py-2">
+        <span id="queryHint" class="text-xs text-slate-400"></span>
+      </div>
+      <div id="reportList" class="px-5 pb-5 space-y-3"></div>
+    </section>
+  </main>
+
+  <div id="toast" class="fixed bottom-5 right-5 hidden z-50">
+    <div class="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl text-sm" id="toastMsg"></div>
+  </div>
+
+  <script>
+    const API_BASE = "https://23700999.com:8081/PM";
+    const QUERY_DAILY_REPORT_URL = API_BASE + "/api/fr/QueryDailyReport";
+    const SAVE_DAILY_REPORT_URL = API_BASE + "/api/fr/SaveDailyReport";
+    const GET_PROJECT_LIST_URL = API_BASE + "/api/fr/getProjectList";
+    const CATEGORY_OPTIONS = [
+      "系統開發",
+      "資料分析",
+      "會議溝通",
+      "文件撰寫",
+      "研究調查",
+      "測試驗收",
+      "行政作業",
+      "其他"
+    ];
+
+    let auth = null;
+    let projectOptions = [];
+    let reportList = [];
+    let currentAID = "";
+
+    function setInputValue(id, value) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.value = value;
+    }
+
+    function setTextValue(id, value) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = value;
+    }
+
+    function calcTotalHoursFromItems() {
+      const rows = Array.from(document.querySelectorAll("#itemsBody tr"));
+      return rows.reduce(function (sum, tr) {
+        const el = tr.querySelector('[data-key="hours"]');
+        const h = parseFloat(String(el && el.value ? el.value : "0"));
+        return sum + (isNaN(h) ? 0 : h);
+      }, 0);
+    }
+
+    function updateHoursVisual() {
+      const total = calcTotalHoursFromItems();
+      const display = document.getElementById("hours-total-display");
+      const bar = document.getElementById("hours-bar-fill");
+      const hint = document.getElementById("hours-hint");
+      const pct = Math.max(0, Math.min((total / 8) * 100, 100));
+      display.textContent = total.toFixed(1) + " h";
+      bar.style.width = pct + "%";
+      bar.classList.remove("warn", "danger");
+      if (total > 8) {
+        bar.classList.add("danger");
+        hint.textContent = "超時";
+      } else if (total >= 7) {
+        bar.classList.add("warn");
+        hint.textContent = "接近滿工時";
+      } else {
+        hint.textContent = "";
+      }
+    }
+
+    function getAuth() {
+      const token = localStorage.getItem("backendToken") || sessionStorage.getItem("backendToken");
+      const adminID = localStorage.getItem("adminID") || sessionStorage.getItem("adminID");
+      if (!token || !adminID) return null;
+      return { token, adminID };
+    }
+
+    function postJson(url, body) {
+      if (typeof window.projectOSPostJson === "function") {
+        return window.projectOSPostJson(url, body);
+      }
+      return fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      }).then(function (res) {
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        return res.json();
+      });
+    }
+
+    function ymdToDateInput(ymd) {
+      const s = String(ymd || "").replace(/\D/g, "");
+      if (s.length !== 8) return "";
+      return s.slice(0, 4) + "-" + s.slice(4, 6) + "-" + s.slice(6, 8);
+    }
+
+    function dateInputToYmd(v) {
+      return String(v || "").replace(/\D/g, "").slice(0, 8);
+    }
+
+    function monthStartAndEnd() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = now.getMonth();
+      const first = new Date(y, m, 1);
+      const last = new Date(y, m + 1, 0);
+      const fmt = function (d) {
+        const yy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, "0");
+        const dd = String(d.getDate()).padStart(2, "0");
+        return yy + "-" + mm + "-" + dd;
+      };
+      return { start: fmt(first), end: fmt(last) };
+    }
+
+    function todayDateInput() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return y + "-" + m + "-" + day;
+    }
+
+    function toast(msg) {
+      const box = document.getElementById("toast");
+      const text = document.getElementById("toastMsg");
+      text.textContent = msg;
+      box.classList.remove("hidden");
+      clearTimeout(toast._timer);
+      toast._timer = setTimeout(function () {
+        box.classList.add("hidden");
+      }, 2800);
+    }
+
+    function getProjectNameById(projectId) {
+      const id = String(projectId || "").trim();
+      if (!id) return "";
+      const found = projectOptions.find(function (p) { return p.id === id; });
+      return found ? found.name : "";
+    }
+
+    function makeItemRow(item) {
+      return {
+        BID: String(item && item.BID != null ? item.BID : "").trim(),
+        AID: String(item && item.AID != null ? item.AID : "").trim(),
+        desc: String(item && item.desc != null ? item.desc : ""),
+        ProjectName: String(item && item.ProjectName != null ? item.ProjectName : ""),
+        category: String(item && item.category != null ? item.category : ""),
+        hours: String(item && item.hours != null ? item.hours : ""),
+        status: String(item && item.status != null ? item.status : ""),
+      };
+    }
+
+    function addItemRow(item) {
+      const body = document.getElementById("itemsBody");
+      const tr = document.createElement("tr");
+      const data = makeItemRow(item || {});
+      tr.innerHTML = `
+        <td class="px-2 py-2"><input data-key="desc" value="${escapeHtml(data.desc)}" class="w-full border border-slate-200 rounded px-2 py-1.5" /></td>
+        <td class="px-2 py-2">
+          <select data-key="category" class="w-full border border-slate-200 rounded px-2 py-1.5">
+            ${CATEGORY_OPTIONS.map(function (c) {
+              return '<option value="' + escapeHtml(c) + '"' + (data.category === c ? " selected" : "") + ">" + escapeHtml(c) + "</option>";
+            }).join("")}
+          </select>
+        </td>
+        <td class="px-2 py-2"><input data-key="ProjectName" value="${escapeHtml(data.ProjectName)}" class="w-full border border-slate-200 rounded px-2 py-1.5" placeholder="專案名稱" list="projectNameOptions" /></td>
+        <td class="px-2 py-2"><input data-key="hours" value="${escapeHtml(data.hours)}" type="number" min="0" step="0.01" class="w-full border border-slate-200 rounded px-2 py-1.5" /></td>
+        <td class="px-2 py-2">
+          <select data-key="status" class="w-full border border-slate-200 rounded px-2 py-1.5">
+            <option value="">請選擇</option>
+            <option value="進行中" ${data.status === "進行中" ? "selected" : ""}>進行中</option>
+            <option value="已完成" ${data.status === "已完成" ? "selected" : ""}>已完成</option>
+            <option value="待處理" ${data.status === "待處理" ? "selected" : ""}>待處理</option>
+          </select>
+        </td>
+        <td class="px-2 py-2 text-center">
+          <button class="text-xs px-2 py-1 rounded bg-red-50 text-red-600 hover:bg-red-100">刪除</button>
+        </td>
+      `;
+      tr.dataset.bid = data.BID;
+      tr.dataset.aid = data.AID;
+      tr.querySelector("button").addEventListener("click", function () {
+        tr.remove();
+        updateHoursVisual();
+      });
+      const hoursInput = tr.querySelector('input[data-key="hours"]');
+      hoursInput.addEventListener("input", updateHoursVisual);
+      body.appendChild(tr);
+      updateHoursVisual();
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function renderProjectDatalist() {
+      let datalist = document.getElementById("projectNameOptions");
+      if (!datalist) {
+        datalist = document.createElement("datalist");
+        datalist.id = "projectNameOptions";
+        document.body.appendChild(datalist);
+      }
+      datalist.innerHTML = projectOptions.map(function (p) {
+        return '<option value="' + escapeHtml(p.name) + '"></option>';
+      }).join("");
+    }
+
+    function readItemsFromForm() {
+      const rows = Array.from(document.querySelectorAll("#itemsBody tr"));
+      return rows
+        .map(function (tr) {
+          const row = {
+            BID: String(tr.dataset.bid || "").trim(),
+            AID: String(tr.dataset.aid || "").trim(),
+            desc: "",
+            ProjectName: "",
+            category: "",
+            hours: "",
+            status: "",
+          };
+          tr.querySelectorAll("[data-key]").forEach(function (el) {
+            row[el.dataset.key] = String(el.value || "").trim();
+          });
+          return row;
+        })
+        .filter(function (x) {
+          return x.desc || x.ProjectName || x.category || x.hours || x.status;
+        });
+    }
+
+    function clearEditor() {
+      currentAID = "";
+      document.getElementById("editingBadge").classList.add("hidden");
+      setInputValue("employeeName", "");
+      setInputValue("reportDate", "");
+      setInputValue("note", "");
+      document.getElementById("itemsBody").innerHTML = "";
+      addItemRow({});
+      updateHoursVisual();
+    }
+
+    function loadReportToEditor(report) {
+      currentAID = String(report.AID || "").trim();
+      document.getElementById("editingBadge").classList.remove("hidden");
+      setInputValue("reportDate", ymdToDateInput(report.date));
+      setInputValue("note", String(report.note || ""));
+      document.getElementById("itemsBody").innerHTML = "";
+      const items = Array.isArray(report.items) ? report.items : [];
+      if (!items.length) {
+        addItemRow({});
+      } else {
+        items.forEach(function (it) { addItemRow(it); });
+      }
+      updateHoursVisual();
+    }
+
+    function renderList() {
+      const wrap = document.getElementById("reportList");
+      if (!reportList.length) {
+        wrap.innerHTML = '<div class="text-sm text-slate-400 py-8 text-center">目前查無日報資料</div>';
+        return;
+      }
+      wrap.innerHTML = reportList.map(function (r) {
+        const date = ymdToDateInput(r.date) || r.date;
+        const totalHours = String(r.totalHours || "0");
+        const overtimeHours = String(r.overtimeHours || "0");
+        const actualWorkHours = String(r.actualWorkHours || "0");
+        const note = String(r.note || "");
+        const tomorrowNote = String(r.tomorrowNote || "");
+        const helpNote = String(r.helpNote || "");
+        const shift = String(r.shift || "");
+        const location = String(r.location || "");
+        const feeling = String(r.feeling || "");
+        const checkTime = String(r.CheckTime || "").trim();
+        const checkTimeLabel = checkTime.length >= 14
+          ? checkTime.slice(0, 4) + "/" + checkTime.slice(4, 6) + "/" + checkTime.slice(6, 8) + " " + checkTime.slice(8, 10) + ":" + checkTime.slice(10, 12)
+          : "";
+        const itemCount = Array.isArray(r.items) ? r.items.length : 0;
+        const itemsHtml = (Array.isArray(r.items) ? r.items : []).map(function (it) {
+          return (
+            "<tr>" +
+            "<td>" + escapeHtml(String(it.desc || "")) + "</td>" +
+            "<td>" + escapeHtml(String(it.category || "")) + "</td>" +
+            "<td>" + escapeHtml(String(it.ProjectName || "")) + "</td>" +
+            "<td>" + escapeHtml(String(it.hours || "0")) + "</td>" +
+            "<td>" + escapeHtml(String(it.status || "")) + "</td>" +
+            "</tr>"
+          );
+        }).join("");
+        return (
+          '<button data-aid="' + escapeHtml(r.AID || "") + '" class="hist-card w-full text-left">' +
+          '<div class="flex items-center gap-2 flex-wrap mb-2">' +
+          '<span class="text-sm font-bold text-slate-800">' + escapeHtml(date) + "</span>" +
+          '<span class="hist-chip">總工時: ' + escapeHtml(totalHours) + "h</span>" +
+
+          (shift ? '<span class="hist-chip">班別: ' + escapeHtml(shift) + "</span>" : "") +
+          (location ? '<span class="hist-chip">地點: ' + escapeHtml(location) + "</span>" : "") +
+          (feeling ? '<span class="hist-chip">感受: ' + escapeHtml(feeling) + "</span>" : "") +
+          "</div>" +
+          '<div class="hist-meta">項目數：' + escapeHtml(itemCount) + " 筆" + (checkTimeLabel ? "｜更新時間：" + escapeHtml(checkTimeLabel) : "") + "</div>" +
+          (note ? '<div class="hist-meta mt-1">異常/備註：' + escapeHtml(note) + "</div>" : "") +
+          (tomorrowNote ? '<div class="hist-meta mt-1">明日計畫：' + escapeHtml(tomorrowNote) + "</div>" : "") +
+          (helpNote ? '<div class="hist-meta mt-1">需協助事項：' + escapeHtml(helpNote) + "</div>" : "") +
+          (itemsHtml
+            ? '<table class="hist-items-table"><thead><tr><th>工作內容</th><th>類別</th><th>專案</th><th>工時</th><th>狀態</th></tr></thead><tbody>' + itemsHtml + "</tbody></table>"
+            : "") +
+          "</button>"
+        );
+      }).join("");
+      wrap.querySelectorAll("button[data-aid]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          const aid = String(btn.dataset.aid || "");
+          const found = reportList.find(function (x) { return String(x.AID || "") === aid; });
+          if (found) {
+            loadReportToEditor(found);
+          }
+        });
+      });
+    }
+
+    function normalizeDailyReportItem(rawItem, parentAID) {
+      const item = rawItem && typeof rawItem === "object" ? rawItem : {};
+      return {
+        BID: String(item.BID != null ? item.BID : "").trim(),
+        AID: String(item.AID != null ? item.AID : parentAID || "").trim(),
+        desc: String(item.desc != null ? item.desc : ""),
+        ProjectName: String(item.ProjectName != null ? item.ProjectName : ""),
+        category: String(item.category != null ? item.category : ""),
+        hours: String(item.hours != null ? item.hours : ""),
+        status: String(item.status != null ? item.status : ""),
+      };
+    }
+
+    function normalizeDailyReport(rawReport) {
+      const report = rawReport && typeof rawReport === "object" ? rawReport : {};
+      const aid = String(report.AID != null ? report.AID : "").trim();
+      const items = Array.isArray(report.items) ? report.items : [];
+      return {
+        AID: aid,
+        date: String(report.date != null ? report.date : ""),
+        totalHours: String(report.totalHours != null ? report.totalHours : ""),
+        overtimeHours: String(report.overtimeHours != null ? report.overtimeHours : ""),
+        actualWorkHours: String(report.actualWorkHours != null ? report.actualWorkHours : ""),
+        shift: String(report.shift != null ? report.shift : ""),
+        feeling: String(report.feeling != null ? report.feeling : ""),
+        tomorrowNote: String(report.tomorrowNote != null ? report.tomorrowNote : ""),
+        helpNote: String(report.helpNote != null ? report.helpNote : ""),
+        location: String(report.location != null ? report.location : ""),
+        note: String(report.note != null ? report.note : ""),
+        CheckTime: String(report.CheckTime != null ? report.CheckTime : ""),
+        items: items.map(function (it) {
+          return normalizeDailyReportItem(it, aid);
+        }),
+      };
+    }
+
+    async function queryReports() {
+      const startDate = dateInputToYmd(document.getElementById("startDate").value);
+      const endDate = dateInputToYmd(document.getElementById("endDate").value);
+      if (!startDate || !endDate) {
+        toast("請先選擇查詢日期區間");
+        return;
+      }
+      const hint = document.getElementById("queryHint");
+      hint.textContent = "查詢中...";
+      try {
+        const data = await postJson(QUERY_DAILY_REPORT_URL, {
+          AdminID: auth.adminID,
+          startDate: startDate,
+          endDate: endDate,
+          Token: auth.token,
+        });
+        if (!data || String(data.Result || "").toUpperCase() !== "OK") {
+          throw new Error((data && data.Result) || "查詢失敗");
+        }
+        reportList = (Array.isArray(data.dailyReports) ? data.dailyReports : [])
+          .map(normalizeDailyReport)
+          .sort(function (a, b) {
+            const aDate = String(a.date || "");
+            const bDate = String(b.date || "");
+            if (aDate !== bDate) return bDate.localeCompare(aDate);
+            return String(b.CheckTime || "").localeCompare(String(a.CheckTime || ""));
+          });
+        setInputValue("employeeName", String(data.employeeName || ""));
+        renderList();
+        if (reportList.length) {
+          loadReportToEditor(reportList[0]);
+        } else {
+          clearEditor();
+          setInputValue("reportDate", ymdToDateInput(endDate));
+        }
+        hint.textContent = "共 " + reportList.length + " 筆資料";
+      } catch (err) {
+        reportList = [];
+        renderList();
+        hint.textContent = "查詢失敗";
+        toast("查詢失敗：" + (err && err.message ? err.message : "請稍後再試"));
+      }
+    }
+
+    async function saveReport() {
+      const date = dateInputToYmd(document.getElementById("reportDate").value);
+      const totalHours = String(calcTotalHoursFromItems());
+      const note = String((document.getElementById("note") && document.getElementById("note").value) || "").trim();
+      const items = readItemsFromForm();
+      if (!date) {
+        toast("請選擇日報日期");
+        return;
+      }
+      if (!items.length) {
+        toast("請至少新增一筆工作項目");
+        return;
+      }
+      const payloadReport = {
+        date: date,
+        totalHours: totalHours || "0",
+        note: note,
+        items: items.map(function (it) {
+          const payloadItem = {
+            desc: it.desc,
+            ProjectId: "",
+            ProjectName: it.ProjectName,
+            category: it.category,
+            hours: it.hours,
+            status: it.status,
+          };
+          if (it.BID) payloadItem.BID = it.BID;
+          if (it.AID || currentAID) payloadItem.AID = it.AID || currentAID;
+          return payloadItem;
+        }),
+      };
+      if (currentAID) payloadReport.AID = currentAID;
+
+      try {
+        const data = await postJson(SAVE_DAILY_REPORT_URL, {
+          AdminID: auth.adminID,
+          Token: auth.token,
+          dailyReports: [payloadReport],
+        });
+        if (!data || String(data.Result || "").toUpperCase() !== "OK") {
+          throw new Error((data && data.Result) || "儲存失敗");
+        }
+        toast("日報儲存成功");
+        await queryReports();
+      } catch (err) {
+        toast("儲存失敗：" + (err && err.message ? err.message : "請稍後再試"));
+      }
+    }
+
+    async function fetchProjectOptions() {
+      try {
+        const data = await postJson(GET_PROJECT_LIST_URL, {
+          AdminID: auth.adminID,
+          Token: auth.token,
+        });
+        if (!data || String(data.Result || "").toUpperCase() !== "OK") return;
+        const list = Array.isArray(data.ProjectList)
+          ? data.ProjectList
+          : Array.isArray(data.Data)
+          ? data.Data
+          : [];
+        projectOptions = list
+          .map(function (p) {
+            const id = String((p && (p.AID || p.ProjectID || p.ProjectId || p.ID)) || "").trim();
+            const name = String((p && (p.ProjectName || p.Name)) || "").trim();
+            if (!id || !name) return null;
+            return { id: id, name: name };
+          })
+          .filter(Boolean);
+        renderProjectDatalist();
+      } catch (e) {
+        // 專案下拉僅為輔助，不阻斷日報填寫流程
+      }
+    }
+
+    function initDefaultDateRange() {
+      const m = monthStartAndEnd();
+      document.getElementById("startDate").value = m.start;
+      document.getElementById("endDate").value = m.end;
+      document.getElementById("reportDate").value = m.end;
+    }
+
+    async function init() {
+      auth = getAuth();
+      if (!auth) {
+        window.location.href = "/projectOS/index.html";
+        return;
+      }
+      setTextValue("currentAdmin", auth.adminID);
+      initDefaultDateRange();
+      clearEditor();
+      await fetchProjectOptions();
+      await queryReports();
+    }
+
+    document.getElementById("btnQuery").addEventListener("click", queryReports);
+    document.getElementById("btnAddRow").addEventListener("click", function () { addItemRow({}); });
+    document.getElementById("btnSave").addEventListener("click", saveReport);
+    document.getElementById("btnNew").addEventListener("click", function () {
+      clearEditor();
+      setInputValue("reportDate", todayDateInput());
+    });
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+</body>
+</html>

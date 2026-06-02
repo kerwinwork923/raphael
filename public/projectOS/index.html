@@ -309,8 +309,11 @@
           dashboard: "/projectOS/dashboard.html",
           tasktracking: "/projectOS/task-tracking.html",
           createproject: "/projectOS/create-project.html",
+          dailyreport: "/projectOS/daily-report.html",
         };
-        var normalized = (toPage || "").toLowerCase().replace(/\s+/g, "");
+        var normalized = (toPage || "")
+          .toLowerCase()
+          .replace(/[\s\-_]+/g, "");
         return pageMap[normalized] || "/projectOS/dashboard.html";
       }
 
