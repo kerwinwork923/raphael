@@ -87,7 +87,7 @@ export const SEMINAR_EVENTS: SeminarEvent[] = [
         location: "拉菲爾人本診所(新竹) 新竹市林森路196號2樓",
         eventDate: "20260617",
         displayDate: "2026 / 06 / 17（三）",
-        time: "10:00",
+        time: "10:30",
       },
       {
         area: "台中",
