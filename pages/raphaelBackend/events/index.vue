@@ -107,6 +107,7 @@
   import { useSeo } from "~/composables/useSeo";
   import {
     SEMINAR_EVENTS,
+    VIPL2_AREA_ORDER,
     buildSeminarEventCards,
     normalizeDateKey,
     type EventStatus,
@@ -123,7 +124,7 @@
   const router = useRouter();
   
   const searchKeyword = ref("");
-  const areaOrder = ["台北", "台中", "高雄"];
+  const areaOrder: string[] = [...VIPL2_AREA_ORDER];
   
   const events = ref<SeminarEvent[]>([...SEMINAR_EVENTS]);
 

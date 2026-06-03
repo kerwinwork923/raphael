@@ -8,6 +8,9 @@
           講座報名管理
           <span class="count">({{ totalRegistrations }})</span>
           <span v-if="selectedArea" class="area-tag">{{ selectedArea }}</span>
+          <span v-if="selectedEventDateLabel" class="date-tag">{{
+            selectedEventDateLabel
+          }}</span>
         </h2>
 
         <div class="header-actions">
@@ -358,6 +361,12 @@ const selectedEventDate = computed(() => {
   const date = route.query.eventDate;
   const value = Array.isArray(date) ? date[0] : date;
   return typeof value === "string" ? normalizeDateKey(value) : "";
+});
+
+const selectedEventDateLabel = computed(() => {
+  const key = selectedEventDate.value;
+  if (!key || key.length < 8) return "";
+  return `${key.slice(0, 4)}/${key.slice(4, 6)}/${key.slice(6, 8)}`;
 });
 
 const API_PAYLOAD = computed(() =>
@@ -765,7 +774,8 @@ watch(dateRange, () => {
         font-weight: 700;
       }
 
-      .area-tag {
+      .area-tag,
+      .date-tag {
         padding: 4px 10px;
         border-radius: 999px;
         background: rgba(27, 163, 155, 0.1);

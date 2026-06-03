@@ -21,7 +21,9 @@ export type LifeHistoryForm = {
   workRemark: string;
   sleepMed: string;
   sleepFrom: string;
+  sleepFromPeriod: string;
   sleepTo: string;
+  sleepToPeriod: string;
   sleepFallHours: string;
   sleepWakeCount: string;
   sleepRemark: string;
@@ -222,9 +224,9 @@ export function buildInsertReportPayload(
     WorkHour: mapWorkStatus(life.workStatus),
     WorkNote: life.workRemark.trim(),
     SleepHour: mapSleepMed(life.sleepMed),
-    FromSleep2: "PM",
+    FromSleep2: life.sleepFromPeriod.trim() || "PM",
     NF1: life.sleepFrom.trim(),
-    FromSleep3: "AM",
+    FromSleep3: life.sleepToPeriod.trim() || "AM",
     NF2: life.sleepTo.trim(),
     ToSleep2: resolveToSleep2(life),
     Awake: life.sleepWakeCount.trim(),

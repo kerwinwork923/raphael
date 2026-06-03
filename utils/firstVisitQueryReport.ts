@@ -190,6 +190,14 @@ function str(value: unknown): string {
   return value == null ? "" : String(value).trim();
 }
 
+function normalizeSleepPeriodApi(
+  value: string,
+  fallback: "AM" | "PM",
+): "AM" | "PM" {
+  const upper = value.trim().toUpperCase();
+  return upper === "AM" || upper === "PM" ? upper : fallback;
+}
+
 function mapHabitFromApi(
   count: string,
   amount: string,
@@ -270,7 +278,9 @@ export function mapQueryReportToLife(data: QueryReportResponse): LifeHistoryForm
     workRemark: str(data.WorkNote),
     sleepMed: SLEEP_API_TO_FORM[str(data.SleepHour)] ?? "",
     sleepFrom: str(data.NF1),
+    sleepFromPeriod: normalizeSleepPeriodApi(str(data.FromSleep2), "PM"),
     sleepTo: str(data.NF2),
+    sleepToPeriod: normalizeSleepPeriodApi(str(data.FromSleep3), "AM"),
     sleepFallHours: str(data.ToSleep2),
     sleepWakeCount: str(data.Awake),
     sleepRemark: str(data.SleepNote),

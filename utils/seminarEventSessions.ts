@@ -35,6 +35,9 @@ export interface SeminarEventCard {
   location: string;
 }
 
+/** vipl2 後台／入口列表地區排序 */
+export const VIPL2_AREA_ORDER = ["台北", "新竹", "台中", "高雄"] as const;
+
 /** 前台 qrcode 掃描頁使用的活動 id（不含 5/14 vipl1） */
 export const QRCODE_SEMINAR_EVENT_IDS = new Set(["20260528-vipl2"]);
 
@@ -77,6 +80,13 @@ export const SEMINAR_EVENTS: SeminarEvent[] = [
         location: "台北新光摩天大樓 30樓之1",
         eventDate: "20260611",
         displayDate: "2026 / 06 / 11（四）",
+        time: "10:00",
+      },
+      {
+        area: "新竹",
+        location: "拉菲爾人本診所(新竹) 新竹市林森路196號2樓",
+        eventDate: "20260617",
+        displayDate: "2026 / 06 / 17（三）",
         time: "10:00",
       },
       {
@@ -150,7 +160,9 @@ export function isScannableSession(card: SeminarEventCard): boolean {
 export function isQrcodeSession(card: SeminarEventCard): boolean {
   if (!QRCODE_SEMINAR_EVENT_IDS.has(card.id)) return false;
   if (card.status === "draft") return false;
-  if (card.area === "台北") return Boolean(normalizeDateKey(card.eventDate));
+  if (card.area === "台北" || card.area === "新竹") {
+    return Boolean(normalizeDateKey(card.eventDate));
+  }
   return card.area === "台中" || card.area === "高雄";
 }
 
@@ -160,4 +172,4 @@ export function sessionSelectLabel(card: SeminarEventCard): string {
 }
 
 export const DEFAULT_QRCODE_SESSION_CARD_ID =
-  "20260528-vipl2-台北-20260528";
+  "20260528-vipl2-台北-20260611";

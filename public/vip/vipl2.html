@@ -132,7 +132,8 @@
       min-height: 100vh;
       padding: 28px 0 70px;
       position: relative;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: visible;
       background:
         linear-gradient(90deg, rgba(248,244,236,0.98) 0%, rgba(248,244,236,0.9) 44%, rgba(248,244,236,0.18) 72%),
         url("imgs/header.png") center right / cover no-repeat;
@@ -159,6 +160,7 @@
     }
 
     .hero-content {
+      width: 100%;
       max-width: min(1120px, 100%);
     }
 
@@ -168,24 +170,16 @@
     }
 
     .event-cards-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      margin-top: 4px;
-    }
-
-    .event-cards-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      align-items: stretch;
-    }
-
-    .event-cards-row--pair {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 16px;
-      align-items: stretch;
+      margin-top: 4px;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .event-cards-row {
+      display: contents;
     }
 
     .hero h1 {
@@ -206,9 +200,11 @@
     }
 
     .event-card {
-      flex: 1 1 260px;
-      min-width: min(100%, 260px);
-      width: auto;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      width: 100%;
+      max-width: 100%;
       background: var(--green-900);
       color: #fff;
       border-radius: var(--radius-lg);
@@ -252,6 +248,14 @@
       font-size: clamp(19px, 2vw, 27px);
       font-weight: 900;
       line-height: 1.35;
+      min-width: 0;
+    }
+
+    .event-item > div {
+      flex: 1;
+      min-width: 0;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
 
     .event-item small {
@@ -265,9 +269,13 @@
 
     .event-card .btn {
       width: 100%;
-      margin-top: 16px;
-      font-size: 24px;
-      padding: 16px 24px;
+      max-width: 100%;
+      margin-top: auto;
+      font-size: clamp(17px, 2vw, 24px);
+      padding: 16px 20px;
+      white-space: normal;
+      text-align: center;
+      line-height: 1.35;
     }
 
     .event-note {
@@ -681,7 +689,7 @@
           url("imgs/header.png") center top / cover no-repeat;
       }
 
-      .event-cards-row--pair {
+      .event-cards-stack {
         grid-template-columns: 1fr;
       }
 
@@ -893,28 +901,9 @@
         </p>
 
         <div class="event-cards-stack">
-          <div class="event-cards-row event-cards-row--pair">
+          <div class="event-cards-row">
             <div class="event-card">
-              <div class="event-item">
-                <span>📅</span>
-                <div>2026/05/28(四)</div>
-              </div>
-
-              <div class="event-item">
-                <span>📍</span>
-                <div>
-                  台北新光摩天大樓
-                  <small>台北市中正區忠孝西路一段66號30樓之1</small>
-                </div>
-              </div>
-
-              <a class="btn" style="background:#999;pointer-events:none;box-shadow:none;" href="javascript:void(0)">
-                已截止
-              </a>
-              <p class="event-note">收到報名表後會有專人與您聯繫</p>
-            </div>
-
-            <div class="event-card">
+              <p class="event-city-label"><span>📍</span>台北</p>
               <div class="event-item">
                 <span>📅</span>
                 <div>2026/06/11(四)</div>
@@ -931,9 +920,27 @@
               <a class="btn" href="#register" data-prefill-region="台北" data-prefill-session="2026/06/11(四)">立即報名 ›</a>
               <p class="event-note">收到報名表後會有專人與您聯繫</p>
             </div>
+
+            <div class="event-card event-card--soon">
+              <p class="event-city-label"><span>📍</span>新竹</p>
+ 
+              <div class="event-item">
+                <span>📅</span>
+                <div> 2026/06/17(三)</div>
+              </div>
+              <div class="event-item">
+                <span>📍</span>
+                <div>
+                  拉菲爾人本診所(新竹)
+                  <small>新竹市林森路196號2樓</small>
+                </div>
+              </div>
+              <a class="btn" href="#register" data-prefill-region="新竹" data-prefill-session="2026/06/17(三)">立即報名 ›</a>
+              <p class="event-note">收到報名表後會有專人與您聯繫</p>
+            </div>
           </div>
 
-          <div class="event-cards-row event-cards-row--pair">
+          <div class="event-cards-row">
             <div class="event-card event-card--soon">
               <p class="event-city-label"><span>📍</span>台中</p>
               <div class="event-item">
@@ -1105,6 +1112,7 @@
               <select id="region" name="Region" required>
                 <option value="">請選擇地區</option>
                 <option value="台北">台北</option>
+                <option value="新竹">新竹</option>
                 <option value="台中">台中</option>
                 <option value="高雄">高雄</option>
               </select>
@@ -1255,6 +1263,10 @@
         { value: "", label: "請選擇場次日期" },
         { value: "2026/06/11(四)", label: "2026/06/11（四）" },
       ],
+      新竹: [
+        { value: "", label: "請選擇場次日期" },
+        { value: "2026/06/17(三)", label: "2026/06/17（三）" },
+      ],
       台中: [{ value: "日期未定", label: "日期尚未確定（先保留席次）" }],
       高雄: [{ value: "日期未定", label: "日期尚未確定（先保留席次）" }],
     };
@@ -1346,7 +1358,7 @@
       SessionDate = "",
     } = data;
 
-    if (Region === "台北" && !SessionDate) {
+    if ((Region === "台北" || Region === "新竹") && !SessionDate) {
       showError("請選擇場次日期。");
       return;
     }

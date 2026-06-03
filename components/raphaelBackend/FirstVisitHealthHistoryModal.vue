@@ -454,29 +454,79 @@
                   <div
                     class="firstVisitModal__inlineInputs firstVisitModal__inlineInputs--wrap"
                   >
-                    <span>PM</span>
+                    <span class="firstVisitModal__unit">睡覺</span>
+                    <div
+                      class="firstVisitModal__ampmStepper"
+                      role="group"
+                      aria-label="睡覺時間 AM/PM"
+                    >
+                      <button
+                        type="button"
+                        class="firstVisitModal__ampmBtn"
+                        aria-label="上一個時段"
+                        @click="cycleSleepPeriod('sleepFromPeriod', -1)"
+                      >
+                        ▲
+                      </button>
+                      <span class="firstVisitModal__ampmVal">{{
+                        form.life.sleepFromPeriod
+                      }}</span>
+                      <button
+                        type="button"
+                        class="firstVisitModal__ampmBtn"
+                        aria-label="下一個時段"
+                        @click="cycleSleepPeriod('sleepFromPeriod', 1)"
+                      >
+                        ▼
+                      </button>
+                    </div>
                     <VueDatePicker
                       :model-value="timeStringToPicker(form.life.sleepFrom)"
                       time-picker
                       :is-24="true"
-                    :minutes-increment="5"
-                    :minute-increment="5"
+                      :minutes-increment="5"
+                      :minute-increment="5"
                       format="HH:mm"
-                      placeholder="就寢"
+                      placeholder="睡覺時間"
                       teleport="body"
                       auto-apply
                       class="firstVisitModal__picker firstVisitModal__picker--time"
                       @update:model-value="updateSleepFrom"
                     />
-                    <span>— AM</span>
+                    <span class="firstVisitModal__unit">— 起床</span>
+                    <div
+                      class="firstVisitModal__ampmStepper"
+                      role="group"
+                      aria-label="起床時間 AM/PM"
+                    >
+                      <button
+                        type="button"
+                        class="firstVisitModal__ampmBtn"
+                        aria-label="上一個時段"
+                        @click="cycleSleepPeriod('sleepToPeriod', -1)"
+                      >
+                        ▲
+                      </button>
+                      <span class="firstVisitModal__ampmVal">{{
+                        form.life.sleepToPeriod
+                      }}</span>
+                      <button
+                        type="button"
+                        class="firstVisitModal__ampmBtn"
+                        aria-label="下一個時段"
+                        @click="cycleSleepPeriod('sleepToPeriod', 1)"
+                      >
+                        ▼
+                      </button>
+                    </div>
                     <VueDatePicker
                       :model-value="timeStringToPicker(form.life.sleepTo)"
                       time-picker
                       :is-24="true"
-                    :minutes-increment="5"
-                    :minute-increment="5"
+                      :minutes-increment="5"
+                      :minute-increment="5"
                       format="HH:mm"
-                      placeholder="起床"
+                      placeholder="起床時間"
                       teleport="body"
                       auto-apply
                       class="firstVisitModal__picker firstVisitModal__picker--time"
@@ -484,8 +534,7 @@
                     />
                     <span class="firstVisitModal__unit">入睡需花</span>
                     <input
-                      readonly
-                      :value="sleepHours"
+                      v-model="form.life.sleepFallHours"
                       type="text"
                       class="firstVisitModal__input firstVisitModal__input--xs"
                     />
@@ -1151,7 +1200,9 @@ export type FirstVisitFormData = {
     workRemark: string;
     sleepMed: string;
     sleepFrom: string;
+    sleepFromPeriod: "AM" | "PM";
     sleepTo: string;
+    sleepToPeriod: "AM" | "PM";
     sleepFallHours: string;
     sleepWakeCount: string;
     sleepRemark: string;
@@ -1409,27 +1460,24 @@ function updateSleepTo(value: unknown) {
   form.life.sleepTo = pickerToTimeString(value);
 }
 
-const sleepHours = computed(() => {
-  const from = form.life.sleepFrom;
-  const to = form.life.sleepTo;
+const sleepPeriodOptions = ["AM", "PM"] as const;
 
-  if (!from || !to) return "";
+function normalizeSleepPeriod(value: string): "AM" | "PM" {
+  const upper = value.trim().toUpperCase();
+  return upper === "AM" ? "AM" : "PM";
+}
 
-  const [fh, fm] = from.split(":").map(Number);
-  const [th, tm] = to.split(":").map(Number);
-
-  let fromMinutes = fh * 60 + fm;
-  let toMinutes = th * 60 + tm;
-
-  // 跨日處理
-  if (toMinutes <= fromMinutes) {
-    toMinutes += 24 * 60;
-  }
-
-  const diffMinutes = toMinutes - fromMinutes;
-
-  return (diffMinutes / 60).toFixed(1);
-});
+function cycleSleepPeriod(
+  field: "sleepFromPeriod" | "sleepToPeriod",
+  delta: number,
+) {
+  const current = normalizeSleepPeriod(form.life[field]);
+  const idx = sleepPeriodOptions.indexOf(current);
+  const base = idx >= 0 ? idx : 0;
+  const next =
+    (base + delta + sleepPeriodOptions.length) % sleepPeriodOptions.length;
+  form.life[field] = sleepPeriodOptions[next];
+}
 
 const birthdayPickerValue = computed(() => basicForm.birthdayInput || null);
 
@@ -1484,7 +1532,9 @@ function buildInitialForm(): FirstVisitFormData {
       workRemark: "",
       sleepMed: "",
       sleepFrom: "",
+      sleepFromPeriod: "PM",
       sleepTo: "",
+      sleepToPeriod: "AM",
       sleepFallHours: "",
       sleepWakeCount: "",
       sleepRemark: "",
@@ -2262,7 +2312,6 @@ async function handleSave() {
   }
 
   syncAllPresentDurations();
-  form.life.sleepFallHours = sleepHours.value;
 
   const formSnapshot = JSON.parse(JSON.stringify(form)) as FirstVisitFormData;
 
@@ -2872,6 +2921,43 @@ $text-muted: #6b7a90;
   &--wrap {
     row-gap: 0.5rem;
   }
+}
+
+.firstVisitModal__ampmStepper {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  flex-shrink: 0;
+}
+
+.firstVisitModal__ampmBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.1rem;
+  padding: 0;
+  border: 1px solid $border;
+  border-radius: 4px;
+  background: #fff;
+  color: $teal;
+  font-size: 9px;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $teal;
+    background: rgba($teal, 0.06);
+  }
+}
+
+.firstVisitModal__ampmVal {
+  min-width: 2rem;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: $text;
 }
 
 .firstVisitModal__unit {
