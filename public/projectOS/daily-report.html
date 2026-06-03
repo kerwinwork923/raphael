@@ -22,13 +22,18 @@
     .hours-bar-fill { height: 100%; border-radius: 6px; background: #3b82f6; transition: width .4s; }
     .hours-bar-fill.warn { background: #f59e0b; }
     .hours-bar-fill.danger { background: #ef4444; }
-    .hist-card { border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; padding: 12px; transition: .15s; }
-    .hist-card:hover { border-color: #93c5fd; box-shadow: 0 2px 10px rgba(0,0,0,.05); }
+    .hist-card { border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; transition: .15s; width: 100%; }
+    .hist-card:hover { border-color: #cbd5e1; box-shadow: 0 2px 10px rgba(0,0,0,.05); }
     .hist-chip { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #f1f5f9; color: #475569; }
     .hist-meta { font-size: 12px; color: #64748b; }
     .hist-items-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
     .hist-items-table th { background: #f8fafc; font-size: 11px; color: #64748b; text-align: left; padding: 6px 8px; border: 1px solid #e2e8f0; }
     .hist-items-table td { font-size: 12px; color: #334155; padding: 6px 8px; border: 1px solid #e2e8f0; vertical-align: top; }
+    .hist-card-header { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 12px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; border-radius: 12px 12px 0 0; }
+    .hist-card-body { padding: 10px 12px 12px; }
+    .hist-edit-btn { font-size: 12px; background: #fff; border: 1px solid #e2e8f0; padding: 4px 10px; border-radius: 6px; color: #475569; cursor: pointer; transition: .15s; white-space: nowrap; }
+    .hist-edit-btn:hover { border-color: #93c5fd; color: #2563eb; }
+    .hist-card.editing { border-color: #93c5fd; box-shadow: 0 0 0 2px rgba(37, 99, 235, .12); }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
@@ -56,10 +61,9 @@
 
 
 
-    <section class="bg-white rounded-xl border border-slate-200 shadow-sm mb-5">
+    <section id="reportEditor" class="bg-white rounded-xl border border-slate-200 shadow-sm mb-5">
       <div class="px-5 py-3 border-b border-slate-100 flex items-center gap-3">
         <span class="font-semibold text-slate-700 text-sm">今日工作日報填寫</span>
-        <span id="editingBadge" class="text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-700 hidden">編輯模式</span>
         <div class="flex-1"></div>
         <span class="text-xs text-slate-400">日期</span>
         <input id="reportDate" type="date" class="text-xs border border-slate-200 rounded px-2 py-1" />
@@ -97,7 +101,7 @@
         </div>
 
         <div class="mt-4 flex gap-3 flex-wrap items-center">
-          <button id="btnSave" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition shadow-sm">🚀 儲存（新增/修改）</button>
+          <button id="btnSave" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition shadow-sm">🚀 送出日報</button>
         </div>
       </div>
     </section>
@@ -115,13 +119,56 @@
       </div>
       <div class="px-5 py-2">
         <span id="queryHint" class="text-xs text-slate-400"></span>
+        <span class="text-xs text-slate-400 ml-2">點歷史日報的「✏️ 編輯」可於彈窗修改</span>
       </div>
-      <div id="reportList" class="px-5 pb-5 space-y-3"></div>
+      <div id="reportList" class="px-5 pb-5 space-y-3 w-full"></div>
     </section>
   </main>
 
-  <div id="toast" class="fixed bottom-5 right-5 hidden z-50">
+  <div id="toast" class="fixed bottom-5 right-5 hidden z-[60]">
     <div class="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl text-sm" id="toastMsg"></div>
+  </div>
+
+  <!-- 編輯歷史日報彈窗 -->
+  <div id="edit-modal" class="fixed inset-0 z-50 hidden">
+    <div id="edit-modal-backdrop" class="absolute inset-0 bg-black/40"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-2xl w-[calc(100%-2rem)] max-w-4xl max-h-[90vh] overflow-y-auto p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold text-slate-800">編輯日報</h3>
+        <button type="button" id="edit-modal-close" class="text-slate-400 hover:text-slate-700 text-xl leading-none">&times;</button>
+      </div>
+      <div id="edit-modal-meta" class="text-xs text-slate-500 mb-3"></div>
+      <div class="overflow-x-auto">
+        <table class="item-table">
+          <thead>
+            <tr>
+              <th class="min-w-[220px]">工作內容</th>
+              <th class="min-w-[130px]">工作類別</th>
+              <th class="min-w-[180px]">專案</th>
+              <th class="min-w-[100px]">工時</th>
+              <th class="min-w-[120px]">狀態</th>
+              <th class="w-[68px]">刪除</th>
+            </tr>
+          </thead>
+          <tbody id="edit-tbody"></tbody>
+        </table>
+      </div>
+      <button type="button" id="btnEditAddRow" class="add-row-btn">+ 新增項目</button>
+      <div class="mt-3 flex items-center gap-2 text-xs">
+        <span class="text-slate-500">總工時：</span>
+        <span id="edit-hours-total" class="font-bold text-slate-700">0.0 h</span>
+        <div class="hours-bar"><div id="edit-hours-bar-fill" class="hours-bar-fill" style="width:0%"></div></div>
+        <span id="edit-hours-hint" class="text-slate-400"></span>
+      </div>
+      <div class="mt-4">
+        <label class="block text-xs font-semibold text-slate-500 mb-1">今日異常 / 問題說明（選填）</label>
+        <textarea id="edit-note" rows="2" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none" placeholder="今日異常說明"></textarea>
+      </div>
+      <div class="flex gap-3 mt-4">
+        <button type="button" id="btnEditSave" class="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700">儲存</button>
+        <button type="button" id="btnEditCancel" class="px-4 py-2 bg-slate-100 text-slate-600 text-sm rounded-lg hover:bg-slate-200">取消</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -144,6 +191,7 @@
     let projectOptions = [];
     let reportList = [];
     let currentAID = "";
+    let editingModalAID = "";
 
     function setInputValue(id, value) {
       const el = document.getElementById(id);
@@ -157,8 +205,8 @@
       el.textContent = value;
     }
 
-    function calcTotalHoursFromItems() {
-      const rows = Array.from(document.querySelectorAll("#itemsBody tr"));
+    function calcTotalHoursFromTbody(tbodyId) {
+      const rows = Array.from(document.querySelectorAll("#" + tbodyId + " tr"));
       return rows.reduce(function (sum, tr) {
         const el = tr.querySelector('[data-key="hours"]');
         const h = parseFloat(String(el && el.value ? el.value : "0"));
@@ -166,24 +214,38 @@
       }, 0);
     }
 
-    function updateHoursVisual() {
-      const total = calcTotalHoursFromItems();
-      const display = document.getElementById("hours-total-display");
-      const bar = document.getElementById("hours-bar-fill");
-      const hint = document.getElementById("hours-hint");
+    function calcTotalHoursFromItems() {
+      return calcTotalHoursFromTbody("itemsBody");
+    }
+
+    function applyHoursVisual(total, displayId, barId, hintId) {
+      const display = document.getElementById(displayId);
+      const bar = document.getElementById(barId);
+      const hint = document.getElementById(hintId);
+      if (!display || !bar) return;
       const pct = Math.max(0, Math.min((total / 8) * 100, 100));
       display.textContent = total.toFixed(1) + " h";
       bar.style.width = pct + "%";
       bar.classList.remove("warn", "danger");
-      if (total > 8) {
-        bar.classList.add("danger");
-        hint.textContent = "超時";
-      } else if (total >= 7) {
-        bar.classList.add("warn");
-        hint.textContent = "接近滿工時";
-      } else {
-        hint.textContent = "";
+      if (hint) {
+        if (total > 8) {
+          bar.classList.add("danger");
+          hint.textContent = "超時";
+        } else if (total >= 7) {
+          bar.classList.add("warn");
+          hint.textContent = "接近滿工時";
+        } else {
+          hint.textContent = "";
+        }
       }
+    }
+
+    function updateHoursVisual() {
+      applyHoursVisual(calcTotalHoursFromItems(), "hours-total-display", "hours-bar-fill", "hours-hint");
+    }
+
+    function updateEditModalHoursVisual() {
+      applyHoursVisual(calcTotalHoursFromTbody("edit-tbody"), "edit-hours-total", "edit-hours-bar-fill", "edit-hours-hint");
     }
 
     function getAuth() {
@@ -270,8 +332,11 @@
       };
     }
 
-    function addItemRow(item) {
-      const body = document.getElementById("itemsBody");
+    function addItemRow(item, tbodyId) {
+      const bodyId = tbodyId || "itemsBody";
+      const body = document.getElementById(bodyId);
+      if (!body) return;
+      const isModal = bodyId === "edit-tbody";
       const tr = document.createElement("tr");
       const data = makeItemRow(item || {});
       tr.innerHTML = `
@@ -294,19 +359,19 @@
           </select>
         </td>
         <td class="px-2 py-2 text-center">
-          <button class="text-xs px-2 py-1 rounded bg-red-50 text-red-600 hover:bg-red-100">刪除</button>
+          <button type="button" class="text-xs px-2 py-1 rounded bg-red-50 text-red-600 hover:bg-red-100">刪除</button>
         </td>
       `;
       tr.dataset.bid = data.BID;
       tr.dataset.aid = data.AID;
+      const refreshHours = isModal ? updateEditModalHoursVisual : updateHoursVisual;
       tr.querySelector("button").addEventListener("click", function () {
         tr.remove();
-        updateHoursVisual();
+        refreshHours();
       });
-      const hoursInput = tr.querySelector('input[data-key="hours"]');
-      hoursInput.addEventListener("input", updateHoursVisual);
+      tr.querySelector('input[data-key="hours"]').addEventListener("input", refreshHours);
       body.appendChild(tr);
-      updateHoursVisual();
+      refreshHours();
     }
 
     function escapeHtml(str) {
@@ -330,8 +395,8 @@
       }).join("");
     }
 
-    function readItemsFromForm() {
-      const rows = Array.from(document.querySelectorAll("#itemsBody tr"));
+    function readItemsFromTbody(tbodyId) {
+      const rows = Array.from(document.querySelectorAll("#" + tbodyId + " tr"));
       return rows
         .map(function (tr) {
           const row = {
@@ -353,10 +418,26 @@
         });
     }
 
+    function readItemsFromForm() {
+      return readItemsFromTbody("itemsBody");
+    }
+
+    function highlightActiveHistCard() {
+      document.querySelectorAll(".hist-card[data-aid]").forEach(function (card) {
+        const aid = String(card.dataset.aid || "");
+        card.classList.toggle("editing", !!editingModalAID && aid === editingModalAID);
+      });
+    }
+
+    function scrollToEditor() {
+      const el = document.getElementById("reportEditor");
+      if (el && el.scrollIntoView) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+
     function clearEditor() {
       currentAID = "";
-      document.getElementById("editingBadge").classList.add("hidden");
-      setInputValue("employeeName", "");
       setInputValue("reportDate", "");
       setInputValue("note", "");
       document.getElementById("itemsBody").innerHTML = "";
@@ -364,19 +445,100 @@
       updateHoursVisual();
     }
 
-    function loadReportToEditor(report) {
-      currentAID = String(report.AID || "").trim();
-      document.getElementById("editingBadge").classList.remove("hidden");
-      setInputValue("reportDate", ymdToDateInput(report.date));
-      setInputValue("note", String(report.note || ""));
-      document.getElementById("itemsBody").innerHTML = "";
+    function closeEditModal() {
+      editingModalAID = "";
+      document.getElementById("edit-modal").classList.add("hidden");
+      document.getElementById("edit-tbody").innerHTML = "";
+      setInputValue("edit-note", "");
+      highlightActiveHistCard();
+    }
+
+    function openEditModal(report) {
+      editingModalAID = String(report.AID || "").trim();
+      const dateLabel = ymdToDateInput(report.date) || report.date;
+      const totalHours = String(report.totalHours || "0");
+      const meta = document.getElementById("edit-modal-meta");
+      meta.textContent = "日期：" + dateLabel + " ｜ 總工時 " + totalHours + "h";
+      setInputValue("edit-note", String(report.note || ""));
+      const tbody = document.getElementById("edit-tbody");
+      tbody.innerHTML = "";
       const items = Array.isArray(report.items) ? report.items : [];
       if (!items.length) {
-        addItemRow({});
+        addItemRow({}, "edit-tbody");
       } else {
-        items.forEach(function (it) { addItemRow(it); });
+        items.forEach(function (it) { addItemRow(it, "edit-tbody"); });
       }
-      updateHoursVisual();
+      updateEditModalHoursVisual();
+      highlightActiveHistCard();
+      document.getElementById("edit-modal").classList.remove("hidden");
+    }
+
+    function editHistoricalReport(aid) {
+      const found = reportList.find(function (x) { return String(x.AID || "") === String(aid || ""); });
+      if (!found) {
+        toast("找不到該筆日報");
+        return;
+      }
+      openEditModal(found);
+    }
+
+    async function saveEditModal() {
+      if (!editingModalAID) {
+        toast("無法儲存：未選擇日報");
+        return;
+      }
+      const found = reportList.find(function (x) { return String(x.AID || "") === editingModalAID; });
+      if (!found) {
+        toast("找不到該筆日報");
+        closeEditModal();
+        return;
+      }
+      const date = String(found.date || "").replace(/\D/g, "").slice(0, 8);
+      const totalHours = String(calcTotalHoursFromTbody("edit-tbody"));
+      const note = String((document.getElementById("edit-note") && document.getElementById("edit-note").value) || "").trim();
+      const items = readItemsFromTbody("edit-tbody");
+      if (!date) {
+        toast("日報日期無效");
+        return;
+      }
+      if (!items.length) {
+        toast("請至少保留一筆工作項目");
+        return;
+      }
+      const payloadReport = {
+        AID: editingModalAID,
+        date: date,
+        totalHours: totalHours || "0",
+        note: note,
+        items: items.map(function (it) {
+          const payloadItem = {
+            desc: it.desc,
+            ProjectId: "",
+            ProjectName: it.ProjectName,
+            category: it.category,
+            hours: it.hours,
+            status: it.status,
+          };
+          if (it.BID) payloadItem.BID = it.BID;
+          if (it.AID || editingModalAID) payloadItem.AID = it.AID || editingModalAID;
+          return payloadItem;
+        }),
+      };
+      try {
+        const data = await postJson(SAVE_DAILY_REPORT_URL, {
+          AdminID: auth.adminID,
+          Token: auth.token,
+          dailyReports: [payloadReport],
+        });
+        if (!data || String(data.Result || "").toUpperCase() !== "OK") {
+          throw new Error((data && data.Result) || "儲存失敗");
+        }
+        toast("日報修改成功");
+        closeEditModal();
+        await queryReports();
+      } catch (err) {
+        toast("儲存失敗：" + (err && err.message ? err.message : "請稍後再試"));
+      }
     }
 
     function renderList() {
@@ -412,16 +574,19 @@
             "</tr>"
           );
         }).join("");
+        const isActive = editingModalAID && String(r.AID || "") === editingModalAID;
         return (
-          '<button data-aid="' + escapeHtml(r.AID || "") + '" class="hist-card w-full text-left">' +
-          '<div class="flex items-center gap-2 flex-wrap mb-2">' +
+          '<div data-aid="' + escapeHtml(r.AID || "") + '" class="hist-card overflow-hidden' + (isActive ? " editing" : "") + '">' +
+          '<div class="hist-card-header">' +
           '<span class="text-sm font-bold text-slate-800">' + escapeHtml(date) + "</span>" +
           '<span class="hist-chip">總工時: ' + escapeHtml(totalHours) + "h</span>" +
-
           (shift ? '<span class="hist-chip">班別: ' + escapeHtml(shift) + "</span>" : "") +
           (location ? '<span class="hist-chip">地點: ' + escapeHtml(location) + "</span>" : "") +
           (feeling ? '<span class="hist-chip">感受: ' + escapeHtml(feeling) + "</span>" : "") +
+          '<div class="flex-1"></div>' +
+          '<button type="button" class="hist-edit-btn" data-action="edit" data-aid="' + escapeHtml(r.AID || "") + '">✏️ 編輯</button>' +
           "</div>" +
+          '<div class="hist-card-body">' +
           '<div class="hist-meta">項目數：' + escapeHtml(itemCount) + " 筆" + (checkTimeLabel ? "｜更新時間：" + escapeHtml(checkTimeLabel) : "") + "</div>" +
           (note ? '<div class="hist-meta mt-1">異常/備註：' + escapeHtml(note) + "</div>" : "") +
           (tomorrowNote ? '<div class="hist-meta mt-1">明日計畫：' + escapeHtml(tomorrowNote) + "</div>" : "") +
@@ -429,16 +594,13 @@
           (itemsHtml
             ? '<table class="hist-items-table"><thead><tr><th>工作內容</th><th>類別</th><th>專案</th><th>工時</th><th>狀態</th></tr></thead><tbody>' + itemsHtml + "</tbody></table>"
             : "") +
-          "</button>"
+          "</div></div>"
         );
       }).join("");
-      wrap.querySelectorAll("button[data-aid]").forEach(function (btn) {
-        btn.addEventListener("click", function () {
-          const aid = String(btn.dataset.aid || "");
-          const found = reportList.find(function (x) { return String(x.AID || "") === aid; });
-          if (found) {
-            loadReportToEditor(found);
-          }
+      wrap.querySelectorAll('button[data-action="edit"]').forEach(function (btn) {
+        btn.addEventListener("click", function (e) {
+          e.stopPropagation();
+          editHistoricalReport(String(btn.dataset.aid || ""));
         });
       });
     }
@@ -508,11 +670,9 @@
           });
         setInputValue("employeeName", String(data.employeeName || ""));
         renderList();
-        if (reportList.length) {
-          loadReportToEditor(reportList[0]);
-        } else {
+        if (!currentAID) {
           clearEditor();
-          setInputValue("reportDate", ymdToDateInput(endDate));
+          setInputValue("reportDate", todayDateInput());
         }
         hint.textContent = "共 " + reportList.length + " 筆資料";
       } catch (err) {
@@ -624,7 +784,15 @@
     document.getElementById("btnNew").addEventListener("click", function () {
       clearEditor();
       setInputValue("reportDate", todayDateInput());
+      scrollToEditor();
     });
+    document.getElementById("btnEditAddRow").addEventListener("click", function () {
+      addItemRow({}, "edit-tbody");
+    });
+    document.getElementById("btnEditSave").addEventListener("click", saveEditModal);
+    document.getElementById("btnEditCancel").addEventListener("click", closeEditModal);
+    document.getElementById("edit-modal-close").addEventListener("click", closeEditModal);
+    document.getElementById("edit-modal-backdrop").addEventListener("click", closeEditModal);
 
     document.addEventListener("DOMContentLoaded", init);
   </script>
