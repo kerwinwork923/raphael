@@ -1059,7 +1059,7 @@
                   class="watchChartCanvas"
                 ></canvas>
                 <div v-else class="watchChartCardEmpty">
-                  沒有最近 7 次的紀錄
+                  沒有最近30天的紀錄
                 </div>
               </div>
 
@@ -1074,7 +1074,7 @@
                   class="watchChartCanvas"
                 ></canvas>
                 <div v-else class="watchChartCardEmpty">
-                  沒有最近 7 次的紀錄
+                  沒有最近30天的紀錄
                 </div>
               </div>
 
@@ -1089,7 +1089,7 @@
                   class="watchChartCanvas"
                 ></canvas>
                 <div v-else class="watchChartCardEmpty">
-                  沒有最近 7 次的紀錄
+                  沒有最近30天的紀錄
                 </div>
               </div>
 
@@ -1104,7 +1104,7 @@
                   class="watchChartCanvas"
                 ></canvas>
                 <div v-else class="watchChartCardEmpty">
-                  沒有最近 7 次的紀錄
+                  沒有最近30天的紀錄
                 </div>
               </div>
 
@@ -1119,7 +1119,7 @@
                   class="watchChartCanvas"
                 ></canvas>
                 <div v-else class="watchChartCardEmpty">
-                  沒有最近 7 次的紀錄
+                  沒有最近30天的紀錄
                 </div>
               </div>
 
@@ -1134,7 +1134,7 @@
                   class="watchChartCanvas"
                 ></canvas>
                 <div v-else class="watchChartCardEmpty">
-                  沒有最近 7 次的紀錄
+                  沒有最近30天的紀錄
                 </div>
               </div>
 
@@ -1149,7 +1149,7 @@
                   class="watchChartCanvas"
                 ></canvas>
                 <div v-else class="watchChartCardEmpty">
-                  沒有最近 7 次的紀錄
+                  沒有最近30天的紀錄
                 </div>
               </div>
 
@@ -1164,7 +1164,7 @@
                   class="watchChartCanvas"
                 ></canvas>
                 <div v-else class="watchChartCardEmpty">
-                  沒有最近 7 次的紀錄
+                  沒有最近30天的紀錄
                 </div>
               </div>
 
@@ -1179,12 +1179,12 @@
                   class="watchChartCanvas"
                 ></canvas>
                 <div v-else class="watchChartCardEmpty">
-                  沒有最近 7 次的紀錄
+                  沒有最近30天的紀錄
                 </div>
               </div>
             </div>
 
-            <div class="watchChartEmpty" v-else>尚無手錶紀錄資料</div>
+            <div class="watchChartEmpty" v-else>沒有最近30天的紀錄</div>
           </div>
         </div>
 
@@ -1218,7 +1218,7 @@
                   class="watchChartCanvas"
                 ></canvas>
                 <div v-else class="watchChartCardEmpty">
-                  沒有最近 7 次的紀錄
+                  沒有最近30天的紀錄
                 </div>
               </div>
 
@@ -1233,7 +1233,7 @@
                   class="watchChartCanvas"
                 ></canvas>
                 <div v-else class="watchChartCardEmpty">
-                  沒有最近 7 次的紀錄
+                  沒有最近30天的紀錄
                 </div>
               </div>
 
@@ -1248,7 +1248,7 @@
                   class="watchChartCanvas"
                 ></canvas>
                 <div v-else class="watchChartCardEmpty">
-                  沒有最近 7 次的紀錄
+                  沒有最近30天的紀錄
                 </div>
               </div>
 
@@ -1263,7 +1263,7 @@
                   class="watchChartCanvas"
                 ></canvas>
                 <div v-else class="watchChartCardEmpty">
-                  沒有最近 7 次的紀錄
+                  沒有最近30天的紀錄
                 </div>
               </div>
 
@@ -1278,11 +1278,11 @@
                   class="watchChartCanvas"
                 ></canvas>
                 <div v-else class="watchChartCardEmpty">
-                  沒有最近 7 次的紀錄
+                  沒有最近30天的紀錄
                 </div>
               </div>
             </div>
-            <div class="watchChartEmpty" v-else>尚無宏碁指環紀錄資料</div>
+            <div class="watchChartEmpty" v-else>沒有最近30天的紀錄</div>
           </div>
         </div>
 
@@ -1316,7 +1316,7 @@
                   class="watchChartCanvas"
                 ></canvas>
                 <div v-else class="watchChartCardEmpty">
-                  沒有最近 7 次的紀錄
+                  沒有最近30天的紀錄
                 </div>
               </div>
 
@@ -1331,7 +1331,7 @@
                   class="watchChartCanvas"
                 ></canvas>
                 <div v-else class="watchChartCardEmpty">
-                  沒有最近 7 次的紀錄
+                  沒有最近30天的紀錄
                 </div>
               </div>
 
@@ -1346,7 +1346,7 @@
                   class="watchChartCanvas"
                 ></canvas>
                 <div v-else class="watchChartCardEmpty">
-                  沒有最近 7 次的紀錄
+                  沒有最近30天的紀錄
                 </div>
               </div>
 
@@ -1361,7 +1361,7 @@
                   class="watchChartCanvas"
                 ></canvas>
                 <div v-else class="watchChartCardEmpty">
-                  沒有最近 7 次的紀錄
+                  沒有最近30天的紀錄
                 </div>
               </div>
 
@@ -1376,12 +1376,12 @@
                   class="watchChartCanvas"
                 ></canvas>
                 <div v-else class="watchChartCardEmpty">
-                  沒有最近 7 次的紀錄
+                  沒有最近30天的紀錄
                 </div>
               </div>
             </div>
 
-            <div class="watchChartEmpty" v-else>尚無 Garmin 紀錄資料</div>
+            <div class="watchChartEmpty" v-else>沒有最近30天的紀錄</div>
           </div>
         </div>
 
@@ -2976,10 +2976,29 @@ function formatDateYYYYMMDD(date: Date) {
   return `${y}${m}${d}`;
 }
 
-function getRecent7StartDate() {
+function getRecent30StartDate() {
   const d = new Date();
-  d.setDate(d.getDate() - 6);
+  d.setDate(d.getDate() - 29);
   return formatDateYYYYMMDD(d);
+}
+
+function hasCustomDateRange(range: Date[] | null) {
+  return !!(range && range.length >= 1 && range[0]);
+}
+
+function getDefault30DayBoundary() {
+  const today = new Date();
+  const start = new Date();
+  start.setDate(today.getDate() - 29);
+  return [toLocalDayStart(start), toLocalDayEnd(today)] as const;
+}
+
+function getChartRangeBoundary(range: Date[] | null): readonly [number, number] {
+  if (hasCustomDateRange(range)) {
+    const [fromMs, toMs] = getRangeBoundary(range);
+    return [fromMs!, toMs!];
+  }
+  return getDefault30DayBoundary();
 }
 
 function getAsusApiDateRange() {
@@ -2992,7 +3011,7 @@ function getAsusApiDateRange() {
     };
   }
   return {
-    StartDate: getRecent7StartDate(),
+    StartDate: getRecent30StartDate(),
     EndDate: formatDateYYYYMMDD(new Date()),
   };
 }
@@ -3011,7 +3030,7 @@ function getAcerApiDateRange() {
     };
   }
   return {
-    StartDate: getRecent7StartDate(),
+    StartDate: getRecent30StartDate(),
     EndDate: formatDateYYYYMMDD(new Date()),
   };
 }
@@ -3030,7 +3049,7 @@ function getGarminApiDateRange() {
     };
   }
   return {
-    StartDate: getRecent7StartDate(),
+    StartDate: getRecent30StartDate(),
     EndDate: formatDateYYYYMMDD(new Date()),
   };
 }
@@ -3198,14 +3217,13 @@ const selectedWatchRecord = ref<any>(null);
 
 const watchChart = computed(() => {
   const raw = asusHealthData.value || {};
-  const [fromMs, toMs] = getRangeBoundary(ringRange.value);
+  const hasCustomRange = hasCustomDateRange(ringRange.value);
+  const [fromMs, toMs] = getChartRangeBoundary(ringRange.value);
   const inRange = (dateKey: string) => {
-    if (fromMs === null || toMs === null) return true;
     const ms = parseDateOnlyToMs(dateKey);
     if (Number.isNaN(ms)) return false;
     return ms >= fromMs && ms <= toMs;
   };
-  const hasRange = fromMs !== null && toMs !== null;
 
   // 判斷某欄位是否有實際值（API 沒資料的日期會回傳空字串）
   const hasNum = (v: any) => {
@@ -3213,7 +3231,7 @@ const watchChart = computed(() => {
     return v !== null && v !== undefined && v !== "" && !Number.isNaN(n) && n > 0;
   };
 
-  // 依各自的資料來源取最近 7 次有紀錄的日期（沒有指定日期區間時）
+  // 依各自的資料來源取最近30天內最新 7 次有紀錄的日期（沒有指定日期區間時）
   const buildDates = (
     list: any[],
     dateOf: (x: any) => string,
@@ -3226,7 +3244,7 @@ const watchChart = computed(() => {
       if (d && inRange(d)) set.add(d);
     });
     let dates = Array.from(set).sort();
-    if (!hasRange && dates.length > 7) dates = dates.slice(-7);
+    if (!hasCustomRange && dates.length > 7) dates = dates.slice(-7);
     return dates;
   };
   const fmt = (dates: string[]) =>
@@ -3593,21 +3611,20 @@ async function renderWatchCharts() {
 
 const acerRingChart = computed(() => {
   const raw = acerHealthData.value || {};
-  const [fromMs, toMs] = getRangeBoundary(acerRingRange.value);
+  const hasCustomRange = hasCustomDateRange(acerRingRange.value);
+  const [fromMs, toMs] = getChartRangeBoundary(acerRingRange.value);
   const inRange = (dateKey: string) => {
-    if (fromMs === null || toMs === null) return true;
     const ms = parseDateOnlyToMs(dateKey);
     if (Number.isNaN(ms)) return false;
     return ms >= fromMs && ms <= toMs;
   };
-  const hasRange = fromMs !== null && toMs !== null;
 
   const hasNum = (v: any) => {
     const n = Number(v);
     return v !== null && v !== undefined && v !== "" && !Number.isNaN(n) && n > 0;
   };
 
-  // 依各自的資料來源取最近 7 次有紀錄的日期（沒有指定日期區間時）
+  // 依各自的資料來源取最近30天內最新 7 次有紀錄的日期（沒有指定日期區間時）
   const buildDates = (
     list: any[],
     dateOf: (x: any) => string,
@@ -3620,7 +3637,7 @@ const acerRingChart = computed(() => {
       if (d && inRange(d)) set.add(d);
     });
     let dates = Array.from(set).sort();
-    if (!hasRange && dates.length > 7) dates = dates.slice(-7);
+    if (!hasCustomRange && dates.length > 7) dates = dates.slice(-7);
     return dates;
   };
   const fmt = (dates: string[]) =>
@@ -3962,14 +3979,13 @@ function createGarminBarChart(
 
 const garminChart = computed(() => {
   const raw = garminHealthData.value || {};
-  const [fromMs, toMs] = getRangeBoundary(garminRange.value);
+  const hasCustomRange = hasCustomDateRange(garminRange.value);
+  const [fromMs, toMs] = getChartRangeBoundary(garminRange.value);
   const inRange = (dateKey: string) => {
-    if (fromMs === null || toMs === null) return true;
     const ms = parseDateOnlyToMs(dateKey);
     if (Number.isNaN(ms)) return false;
     return ms >= fromMs && ms <= toMs;
   };
-  const hasRange = fromMs !== null && toMs !== null;
 
   const parseGarminRawDateTimeToDateKey = (rawDateTime: string) => {
     const value = String(rawDateTime || "");
@@ -3987,7 +4003,7 @@ const garminChart = computed(() => {
     return v !== null && v !== undefined && v !== "" && !Number.isNaN(n) && n > 0;
   };
 
-  // 依各自的資料來源取最近 7 次有紀錄的日期（沒有指定日期區間時）
+  // 依各自的資料來源取最近30天內最新 7 次有紀錄的日期（沒有指定日期區間時）
   const buildDates = (
     list: any[],
     dateOf: (x: any) => string,
@@ -4000,7 +4016,7 @@ const garminChart = computed(() => {
       if (d && inRange(d)) set.add(d);
     });
     let dates = Array.from(set).sort();
-    if (!hasRange && dates.length > 7) dates = dates.slice(-7);
+    if (!hasCustomRange && dates.length > 7) dates = dates.slice(-7);
     return dates;
   };
   const fmt = (dates: string[]) =>
