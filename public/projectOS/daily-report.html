@@ -123,6 +123,21 @@
       </div>
       <div id="reportList" class="px-5 pb-5 space-y-3 w-full"></div>
     </section>
+
+    <section id="personalWeeklyReport" class="bg-white rounded-xl border border-slate-200 shadow-sm mb-5">
+      <div class="px-5 py-3 border-b border-slate-100 flex items-center gap-3 flex-wrap">
+        <span class="font-semibold text-slate-700 text-sm">📋 個人週報產生器</span>
+        <span class="text-xs text-slate-400 font-normal">依日報資料彙整本週工作摘要</span>
+        <div class="flex-1"></div>
+        <span class="text-xs text-slate-400">起</span>
+        <input id="pwr-from" type="date" class="text-xs border border-slate-200 rounded px-2 py-1" />
+        <span class="text-xs text-slate-400">至</span>
+        <input id="pwr-to" type="date" class="text-xs border border-slate-200 rounded px-2 py-1" />
+        <button type="button" id="btnGenerateWR" class="text-xs bg-teal-600 hover:bg-teal-700 text-white px-4 py-1.5 rounded-md font-semibold transition">產生週報</button>
+      </div>
+      <div id="pwr-loading" class="hidden px-5 pb-3 text-xs text-slate-400">載入中...</div>
+      <div id="pwr-body" class="hidden"></div>
+    </section>
   </main>
 
   <div id="toast" class="fixed bottom-5 right-5 hidden z-[60]">
@@ -176,6 +191,7 @@
     const QUERY_DAILY_REPORT_URL = API_BASE + "/api/fr/QueryDailyReport";
     const SAVE_DAILY_REPORT_URL = API_BASE + "/api/fr/SaveDailyReport";
     const GET_PROJECT_LIST_URL = API_BASE + "/api/fr/getProjectList";
+    const GET_WEEKLY_REPORT_URL = API_BASE + "/api/fr/getWeeklyReport";
     const CATEGORY_OPTIONS = [
       "系統開發",
       "資料分析",
@@ -192,6 +208,37 @@
     let reportList = [];
     let currentAID = "";
     let editingModalAID = "";
+    let weeklyReportCache = [];
+    let weeklyEmployeeName = "";
+    window._pwrText = "";
+
+    function parseHours(v) {
+      const n = parseFloat(String(v != null ? v : "0"));
+      return isNaN(n) ? 0 : n;
+    }
+
+    function weekMonFriDateInputs() {
+      const today = new Date();
+      const mon = new Date(today);
+      mon.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+      const fri = new Date(mon);
+      fri.setDate(mon.getDate() + 4);
+      const fmt = function (d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return y + "-" + m + "-" + day;
+      };
+      return { start: fmt(mon), end: fmt(fri) };
+    }
+
+    function reportYmdInRange(ymd, fromInput, toInput) {
+      const d = String(ymd || "").replace(/\D/g, "").slice(0, 8);
+      const from = dateInputToYmd(fromInput);
+      const to = dateInputToYmd(toInput);
+      if (!d || !from || !to) return false;
+      return d >= from && d <= to;
+    }
 
     function setInputValue(id, value) {
       const el = document.getElementById(id);
@@ -758,11 +805,184 @@
       }
     }
 
+    async function fetchWeeklyReportData() {
+      const data = await postJson(GET_WEEKLY_REPORT_URL, {
+        AdminID: auth.adminID,
+        Token: auth.token,
+      });
+      if (!data || String(data.Result || "").toUpperCase() !== "OK") {
+        throw new Error((data && data.Result) || "週報資料取得失敗");
+      }
+      weeklyEmployeeName = String(data.employeeName || "").trim();
+      weeklyReportCache = (Array.isArray(data.dailyReports) ? data.dailyReports : []).map(normalizeDailyReport);
+      return weeklyReportCache;
+    }
+
+    function getEmployeeDisplayName() {
+      return (
+        weeklyEmployeeName ||
+        String((document.getElementById("employeeName") && document.getElementById("employeeName").value) || "").trim() ||
+        auth.adminID
+      );
+    }
+
+    function buildPWRText(employeeName, fromLabel, toLabel, reports) {
+      const lines = ["【個人週報】" + employeeName, "期間：" + fromLabel + " ～ " + toLabel, ""];
+      const totalH = reports.reduce(function (s, r) { return s + parseHours(r.totalHours); }, 0);
+      const allItems = reports.flatMap(function (r) { return Array.isArray(r.items) ? r.items : []; });
+      const doneItems = allItems.filter(function (i) { return i.status === "已完成"; });
+      const doneRate = allItems.length > 0 ? Math.round((doneItems.length / allItems.length) * 100) : 0;
+      lines.push("出勤天數：" + reports.length + " 天　總工時：" + totalH.toFixed(1) + "h　完成率：" + doneRate + "%", "");
+      const projMap = {};
+      allItems.forEach(function (i) {
+        const name = String(i.ProjectName || "").trim();
+        if (!name) return;
+        if (!projMap[name]) projMap[name] = 0;
+        projMap[name] += parseHours(i.hours);
+      });
+      const projList = Object.keys(projMap).sort(function (a, b) { return projMap[b] - projMap[a]; });
+      if (projList.length) {
+        lines.push("【專案投入】");
+        projList.forEach(function (n) { lines.push("  " + n + "：" + projMap[n].toFixed(1) + "h"); });
+        lines.push("");
+      }
+      lines.push("【工作項目】");
+      allItems.forEach(function (i) {
+        lines.push("  [" + (i.status || "") + "] " + (i.desc || "") + "（" + parseHours(i.hours).toFixed(1) + "h）");
+      });
+      return lines.join("\n");
+    }
+
+    function renderPersonalWR(reports, fromLabel, toLabel) {
+      const body = document.getElementById("pwr-body");
+      const employeeName = getEmployeeDisplayName();
+      if (!reports.length) {
+        body.classList.remove("hidden");
+        body.innerHTML = '<div class="px-5 py-8 text-center text-sm text-slate-400">所選區間無日報資料</div>';
+        window._pwrText = "";
+        return;
+      }
+      const totalDays = reports.length;
+      const totalH = reports.reduce(function (s, r) { return s + parseHours(r.totalHours); }, 0);
+      const otH = reports.reduce(function (s, r) { return s + parseHours(r.overtimeHours); }, 0);
+      const allItems = reports.flatMap(function (r) { return Array.isArray(r.items) ? r.items : []; });
+      const doneItems = allItems.filter(function (i) { return i.status === "已完成"; });
+      const doneRate = allItems.length > 0 ? Math.round((doneItems.length / allItems.length) * 100) : 0;
+      const projMap = {};
+      allItems.forEach(function (i) {
+        const name = String(i.ProjectName || "").trim();
+        if (!name) return;
+        if (!projMap[name]) projMap[name] = 0;
+        projMap[name] += parseHours(i.hours);
+      });
+      const catMap = {};
+      allItems.forEach(function (i) {
+        const c = String(i.category || "未分類").trim() || "未分類";
+        if (!catMap[c]) catMap[c] = 0;
+        catMap[c] += parseHours(i.hours);
+      });
+      const projHtml = Object.keys(projMap)
+        .sort(function (a, b) { return projMap[b] - projMap[a]; })
+        .map(function (name) {
+          return (
+            '<div class="flex items-center gap-2 bg-slate-50 rounded-lg px-3 py-2">' +
+            '<div class="text-xs font-semibold text-blue-700 min-w-0 flex-1">' + escapeHtml(name) + "</div>" +
+            '<div class="text-xs font-bold text-blue-600 whitespace-nowrap">' + projMap[name].toFixed(1) + "h</div></div>"
+          );
+        })
+        .join("");
+      const catHtml = Object.entries(catMap)
+        .sort(function (a, b) { return b[1] - a[1]; })
+        .map(function (entry) {
+          return (
+            '<div class="flex justify-between text-xs py-0.5 border-b border-slate-100">' +
+            "<span>" + escapeHtml(entry[0]) + '</span><span class="font-semibold text-purple-600">' + entry[1].toFixed(1) + "h</span></div>"
+          );
+        })
+        .join("");
+      const itemsHtml = allItems.slice(0, 8).map(function (i) {
+        const done = i.status === "已完成";
+        return (
+          '<div class="flex items-start gap-1.5 text-xs py-0.5">' +
+          '<span class="' + (done ? "text-green-500" : "text-amber-500") + ' mt-0.5">' + (done ? "✓" : "○") + "</span>" +
+          '<span class="text-slate-600 leading-snug">' + escapeHtml(i.desc || "") + "</span></div>"
+        );
+      }).join("");
+      body.innerHTML =
+        '<div class="px-5 py-4 space-y-4 border-t border-slate-100">' +
+        '<div class="flex items-center gap-3 flex-wrap">' +
+        '<div class="font-bold text-slate-800">' + escapeHtml(employeeName) + " 週報 — " + escapeHtml(fromLabel) + " ～ " + escapeHtml(toLabel) + "</div>" +
+        '<button type="button" id="btnCopyPWR" class="ml-auto text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 rounded font-semibold">📋 複製週報文字</button></div>' +
+        '<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">' +
+        '<div class="bg-blue-50 rounded-lg p-3 text-center"><div class="text-xs text-blue-600 font-semibold mb-1">出勤天數</div><div class="text-2xl font-bold text-blue-700">' + totalDays + "</div></div>" +
+        '<div class="bg-green-50 rounded-lg p-3 text-center"><div class="text-xs text-green-600 font-semibold mb-1">總工時</div><div class="text-2xl font-bold text-green-700">' + totalH.toFixed(1) + "h</div></div>" +
+        '<div class="bg-amber-50 rounded-lg p-3 text-center"><div class="text-xs text-amber-600 font-semibold mb-1">工項完成率</div><div class="text-2xl font-bold text-amber-700">' + doneRate + "%</div></div>" +
+        '<div class="bg-orange-50 rounded-lg p-3 text-center"><div class="text-xs text-orange-600 font-semibold mb-1">加班工時</div><div class="text-2xl font-bold text-orange-600">' + otH.toFixed(1) + "h</div></div></div>" +
+        (projHtml ? '<div><div class="text-xs font-semibold text-slate-600 mb-2">本週專案投入</div><div class="space-y-1">' + projHtml + "</div></div>" : "") +
+        '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">' +
+        '<div class="bg-slate-50 rounded-lg p-3"><div class="text-xs font-semibold text-slate-600 mb-2">工作類別分布</div>' + (catHtml || '<div class="text-xs text-slate-400">無類別資料</div>') + "</div>" +
+        '<div class="bg-slate-50 rounded-lg p-3"><div class="text-xs font-semibold text-slate-600 mb-2">本週工作項目（前 8 筆）</div>' + (itemsHtml || '<div class="text-xs text-slate-400">無項目</div>') + (allItems.length > 8 ? '<div class="text-xs text-slate-400 mt-1">...共 ' + allItems.length + " 筆</div>" : "") + "</div></div></div>";
+      body.classList.remove("hidden");
+      const copyBtn = document.getElementById("btnCopyPWR");
+      if (copyBtn) copyBtn.addEventListener("click", copyPersonalWR);
+      window._pwrText = buildPWRText(employeeName, fromLabel, toLabel, reports);
+    }
+
+    async function generatePersonalWR() {
+      const from = document.getElementById("pwr-from").value;
+      const to = document.getElementById("pwr-to").value;
+      if (!from || !to) {
+        toast("請選擇週報日期區間");
+        return;
+      }
+      const loading = document.getElementById("pwr-loading");
+      const body = document.getElementById("pwr-body");
+      if (loading) loading.classList.remove("hidden");
+      if (body) {
+        body.classList.add("hidden");
+        body.innerHTML = "";
+      }
+      try {
+        await fetchWeeklyReportData();
+        if (weeklyEmployeeName) setInputValue("employeeName", weeklyEmployeeName);
+        const filtered = weeklyReportCache
+          .filter(function (r) { return reportYmdInRange(r.date, from, to); })
+          .sort(function (a, b) { return String(a.date || "").localeCompare(String(b.date || "")); });
+        renderPersonalWR(filtered, from, to);
+        toast("週報產生完成");
+      } catch (err) {
+        window._pwrText = "";
+        if (body) {
+          body.classList.remove("hidden");
+          body.innerHTML = '<div class="px-5 py-8 text-center text-sm text-red-500">載入失敗：' + escapeHtml(err && err.message ? err.message : "請稍後再試") + "</div>";
+        }
+        toast("週報載入失敗：" + (err && err.message ? err.message : "請稍後再試"));
+      } finally {
+        if (loading) loading.classList.add("hidden");
+      }
+    }
+
+    function copyPersonalWR() {
+      const text = window._pwrText || "";
+      if (!text) {
+        toast("無週報內容，請先產生週報");
+        return;
+      }
+      navigator.clipboard.writeText(text).then(function () {
+        toast("已複製週報文字");
+      }).catch(function () {
+        toast("複製失敗，請手動選取");
+      });
+    }
+
     function initDefaultDateRange() {
       const m = monthStartAndEnd();
       document.getElementById("startDate").value = m.start;
       document.getElementById("endDate").value = m.end;
       document.getElementById("reportDate").value = m.end;
+      const w = weekMonFriDateInputs();
+      setInputValue("pwr-from", w.start);
+      setInputValue("pwr-to", w.end);
     }
 
     async function init() {
@@ -793,6 +1013,25 @@
     document.getElementById("btnEditCancel").addEventListener("click", closeEditModal);
     document.getElementById("edit-modal-close").addEventListener("click", closeEditModal);
     document.getElementById("edit-modal-backdrop").addEventListener("click", closeEditModal);
+    document.getElementById("btnGenerateWR").addEventListener("click", generatePersonalWR);
+
+    document.querySelectorAll(".rpt-tab").forEach(function (tab, index) {
+      tab.style.cursor = "pointer";
+      tab.addEventListener("click", function () {
+        if (index === 0) {
+          document.querySelectorAll(".rpt-tab").forEach(function (t, i) {
+            t.classList.toggle("active", i === 0);
+          });
+          return;
+        }
+        if (index === 3) {
+          const el = document.getElementById("personalWeeklyReport");
+          if (el && el.scrollIntoView) el.scrollIntoView({ behavior: "smooth", block: "start" });
+          return;
+        }
+        toast("此功能開發中");
+      });
+    });
 
     document.addEventListener("DOMContentLoaded", init);
   </script>
