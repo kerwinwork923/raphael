@@ -1156,21 +1156,6 @@
       border: 0;
     }
 
-
-    /* Hide side workflow and right-side judgement panel; keep only the center experience area. */
-    .workspace {
-      grid-template-columns: minmax(0, 1fr);
-    }
-
-    .side,
-    .insights {
-      display: none;
-    }
-
-    .stage {
-      grid-column: 1 / -1;
-    }
-
     @media (max-width: 1240px) {
       .workspace {
         grid-template-columns: 240px minmax(0, 1fr);
