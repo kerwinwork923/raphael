@@ -49,14 +49,22 @@ window.projectOSLogout = function () {
   if (window.__projectOSLogoutInProgress) return;
   window.__projectOSLogoutInProgress = true;
   try {
-    localStorage.removeItem("backendToken");
-    localStorage.removeItem("adminID");
-    localStorage.removeItem("adminName");
+    if (typeof window.projectOSClearSession === "function") {
+      window.projectOSClearSession();
+    } else {
+      localStorage.removeItem("backendToken");
+      localStorage.removeItem("adminID");
+      localStorage.removeItem("adminName");
+      localStorage.removeItem("deptWorkKey");
+      localStorage.removeItem("deptWorkType");
+      sessionStorage.removeItem("backendToken");
+      sessionStorage.removeItem("adminID");
+      sessionStorage.removeItem("adminName");
+      sessionStorage.removeItem("deptWorkKey");
+      sessionStorage.removeItem("deptWorkType");
+    }
     localStorage.removeItem("userData");
     localStorage.removeItem("projectAID");
-    sessionStorage.removeItem("backendToken");
-    sessionStorage.removeItem("adminID");
-    sessionStorage.removeItem("adminName");
   } catch (e) {}
   window.location.href = "/projectOS/index.html";
 };

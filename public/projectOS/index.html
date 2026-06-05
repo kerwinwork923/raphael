@@ -153,6 +153,7 @@
     </div>
   </main>
 
+  <script src="./projectos-session.js"></script>
   <script>
     window.__LOGIN_METRICS__ = {
       weeklyTrackingCount: 17,
@@ -274,8 +275,17 @@
         showStep("login");
       });
   
-      function clearOppositeStorage(useLocal) {
-        if (useLocal) {
+      function persistSession(token, adminId, remember, loginResp) {
+        if (typeof window.projectOSApplyLoginSession === "function") {
+          window.projectOSApplyLoginSession(
+            loginResp || { Token: token },
+            adminId,
+            remember
+          );
+          return;
+        }
+        var storage = remember ? localStorage : sessionStorage;
+        if (remember) {
           sessionStorage.removeItem("backendToken");
           sessionStorage.removeItem("adminID");
           sessionStorage.removeItem("adminName");
@@ -284,11 +294,6 @@
           localStorage.removeItem("adminID");
           localStorage.removeItem("adminName");
         }
-      }
-  
-      function persistSession(token, adminId, remember) {
-        var storage = remember ? localStorage : sessionStorage;
-        clearOppositeStorage(remember);
         storage.setItem("backendToken", token);
         storage.setItem("adminID", adminId);
       }
@@ -364,7 +369,7 @@
               return postJson(LOGIN_URL, { Key: LOGIN_KEY, AdminID: adminFromTransfer }).then(
                 function (loginResp) {
                   if (loginResp && isResultOk(loginResp) && loginResp.Token) {
-                    persistSession(loginResp.Token, adminFromTransfer, true);
+                    persistSession(loginResp.Token, adminFromTransfer, true, loginResp);
                     localStorage.setItem("rememberID", adminFromTransfer);
                     window.location.replace(resolveToPagePath(transfer.toPage));
                     return true;
@@ -380,7 +385,7 @@
             return postJson(LOGIN_URL, { Key: LOGIN_KEY, AdminID: transfer.adminID }).then(
               function (loginResp) {
                 if (loginResp && isResultOk(loginResp) && loginResp.Token) {
-                  persistSession(loginResp.Token, transfer.adminID, true);
+                  persistSession(loginResp.Token, transfer.adminID, true, loginResp);
                   localStorage.setItem("rememberID", transfer.adminID);
                   window.location.replace(resolveToPagePath(transfer.toPage));
                   return true;
@@ -394,7 +399,7 @@
             return postJson(LOGIN_URL, { Key: LOGIN_KEY, AdminID: transfer.adminID })
               .then(function (loginResp) {
                 if (loginResp && isResultOk(loginResp) && loginResp.Token) {
-                  persistSession(loginResp.Token, transfer.adminID, true);
+                  persistSession(loginResp.Token, transfer.adminID, true, loginResp);
                   localStorage.setItem("rememberID", transfer.adminID);
                   window.location.replace(resolveToPagePath(transfer.toPage));
                   return true;
@@ -443,7 +448,7 @@
               } else {
                 localStorage.removeItem("rememberID");
               }
-              persistSession(r.Token, username, remember);
+              persistSession(r.Token, username, remember, r);
               window.location.href = "/projectOS/dashboard.html";
             } else {
               alertMsg("外部登入失敗：" + (r && r.Result != null ? r.Result : "請檢查帳號或密碼"));

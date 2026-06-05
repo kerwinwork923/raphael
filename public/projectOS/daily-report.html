@@ -34,11 +34,19 @@
     .hist-edit-btn { font-size: 12px; background: #fff; border: 1px solid #e2e8f0; padding: 4px 10px; border-radius: 6px; color: #475569; cursor: pointer; transition: .15s; white-space: nowrap; }
     .hist-edit-btn:hover { border-color: #93c5fd; color: #2563eb; }
     .hist-card.editing { border-color: #93c5fd; box-shadow: 0 0 0 2px rgba(37, 99, 235, .12); }
+    .ops-feel-btn { cursor: pointer; transition: .15s; }
+    .ops-shift-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+    .shift-btn { padding: 7px 14px; border: 1.5px solid #e2e8f0; border-radius: 8px; cursor: pointer; background: #fff; font-size: 13px; font-weight: 600; color: #475569; transition: .15s; }
+    .shift-btn:hover { border-color: #93c5fd; color: #1d4ed8; }
+    .shift-btn.sel { border-color: #2563eb; background: #eff6ff; color: #1d4ed8; }
+    .qty-spin { width: 100%; min-width: 4.5rem; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
   <div id="projectos-header"></div>
   <script src="./shared-header.js"></script>
+  <script src="./projectos-session.js"></script>
+  <script src="./daily-report-dept.js"></script>
 
   <div class="bg-white border-b border-slate-200">
     <div class="max-w-screen-xl mx-auto px-4 flex gap-0">
@@ -53,9 +61,10 @@
 
     <section class="bg-white rounded-xl border border-slate-200 shadow-sm px-5 py-3 mb-5 flex items-center gap-3 flex-wrap">
       <div class="text-xs font-semibold text-slate-500">👤 員工</div>
-      <input id="employeeName" type="text" class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 text-slate-700" placeholder="由歷史日報查詢帶入" />
-      <div class="text-xs font-semibold text-slate-500 ml-2">登入帳號</div>
+      <input id="employeeName" type="text" class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 text-slate-700" placeholder="由日報查詢帶入" />
+      <div class="text-xs font-semibold text-slate-500 ml-1">登入帳號</div>
       <span id="currentAdmin" class="text-sm font-semibold text-slate-700">-</span>
+      <span id="deptLabel" class="hist-chip bg-blue-50 text-blue-700 font-semibold">—</span>
     </section>
 
 
@@ -63,30 +72,16 @@
 
     <section id="reportEditor" class="bg-white rounded-xl border border-slate-200 shadow-sm mb-5">
       <div class="px-5 py-3 border-b border-slate-100 flex items-center gap-3">
-        <span class="font-semibold text-slate-700 text-sm">今日工作日報填寫</span>
+        <div>
+          <span class="font-semibold text-slate-700 text-sm">今日工作日報填寫</span>
+          <span id="editorModeHint" class="text-xs text-slate-400 ml-2"></span>
+        </div>
         <div class="flex-1"></div>
         <span class="text-xs text-slate-400">日期</span>
         <input id="reportDate" type="date" class="text-xs border border-slate-200 rounded px-2 py-1" />
       </div>
       <div class="p-5">
-
-        <div class="overflow-x-auto">
-          <table class="item-table">
-            <thead>
-              <tr>
-                <th class="min-w-[220px]">工作內容</th>
-                <th class="min-w-[130px]">工作類別</th>
-                <th class="min-w-[180px]">專案</th>
-                <th class="min-w-[100px]">工時</th>
-                <th class="min-w-[120px]">狀態</th>
-                <th class="w-[68px]">刪除</th>
-              </tr>
-            </thead>
-            <tbody id="itemsBody"></tbody>
-          </table>
-        </div>
-
-        <button id="btnAddRow" class="add-row-btn">+ 新增項目</button>
+        <div id="dept-pane"></div>
 
         <div class="mt-4 flex items-center gap-2 text-xs">
           <span class="text-slate-500">總工時：</span>
@@ -190,21 +185,13 @@
     const API_BASE = "https://23700999.com:8081/PM";
     const QUERY_DAILY_REPORT_URL = API_BASE + "/api/fr/QueryDailyReport";
     const SAVE_DAILY_REPORT_URL = API_BASE + "/api/fr/SaveDailyReport";
-    const GET_PROJECT_LIST_URL = API_BASE + "/api/fr/getProjectList";
+    const GET_DAILY_COMMON_URL = API_BASE + "/api/fr/getDailyCommon";
     const GET_WEEKLY_REPORT_URL = API_BASE + "/api/fr/getWeeklyReport";
-    const CATEGORY_OPTIONS = [
-      "系統開發",
-      "資料分析",
-      "會議溝通",
-      "文件撰寫",
-      "研究調查",
-      "測試驗收",
-      "行政作業",
-      "其他"
-    ];
 
     let auth = null;
-    let projectOptions = [];
+    let deptWorkKey = "A1";
+    let reportMode = "standard";
+    let dailyCommon = { prjList: [], locations: [], shifts: [] };
     let reportList = [];
     let currentAID = "";
     let editingModalAID = "";
@@ -262,7 +249,65 @@
     }
 
     function calcTotalHoursFromItems() {
+      if (window.ProjectOSDailyReportDept) {
+        return window.ProjectOSDailyReportDept.calcTotalHours("itemsBody");
+      }
       return calcTotalHoursFromTbody("itemsBody");
+    }
+
+    function updateDeptDisplay() {
+      var deptEl = document.getElementById("deptLabel");
+      if (deptEl) {
+        var name =
+          typeof window.projectOSGetDeptLabel === "function"
+            ? window.projectOSGetDeptLabel(deptWorkKey)
+            : deptWorkKey;
+        deptEl.textContent = name + "（" + deptWorkKey + "）";
+      }
+      var hint = document.getElementById("editorModeHint");
+      if (hint) {
+        if (reportMode === "production") hint.textContent = "· 生產部門欄位";
+        else if (reportMode === "ops-sm") hint.textContent = "· 業務營運欄位";
+        else if (reportMode === "ops-cs") hint.textContent = "· 客服營運欄位";
+        else hint.textContent = "";
+      }
+    }
+
+    function renderWorkDescDatalist() {
+      var cats =
+        typeof window.projectOSGetCategoryOptions === "function"
+          ? window.projectOSGetCategoryOptions(deptWorkKey)
+          : [];
+      var datalist = document.getElementById("workDescOptions");
+      if (!datalist) {
+        datalist = document.createElement("datalist");
+        datalist.id = "workDescOptions";
+        document.body.appendChild(datalist);
+      }
+      datalist.innerHTML = cats
+        .map(function (c) {
+          return '<option value="' + escapeHtml(c) + '"></option>';
+        })
+        .join("");
+    }
+
+    function configureDeptPane() {
+      if (!window.ProjectOSDailyReportDept) return;
+      window.ProjectOSDailyReportDept.configure({
+        mode: reportMode,
+        deptKey: deptWorkKey,
+        prjList: dailyCommon.prjList,
+        locations: dailyCommon.locations,
+        escapeHtml: escapeHtml,
+        onHoursChange: updateHoursVisual,
+      });
+      reportMode =
+        typeof window.projectOSGetReportMode === "function"
+          ? window.projectOSGetReportMode(deptWorkKey)
+          : "standard";
+      reportMode = window.ProjectOSDailyReportDept.buildPane(deptWorkKey, dailyCommon);
+      updateDeptDisplay();
+      renderWorkDescDatalist();
     }
 
     function applyHoursVisual(total, displayId, barId, hintId) {
@@ -360,65 +405,27 @@
       }, 2800);
     }
 
-    function getProjectNameById(projectId) {
-      const id = String(projectId || "").trim();
-      if (!id) return "";
-      const found = projectOptions.find(function (p) { return p.id === id; });
-      return found ? found.name : "";
-    }
-
-    function makeItemRow(item) {
-      return {
-        BID: String(item && item.BID != null ? item.BID : "").trim(),
-        AID: String(item && item.AID != null ? item.AID : "").trim(),
-        desc: String(item && item.desc != null ? item.desc : ""),
-        ProjectName: String(item && item.ProjectName != null ? item.ProjectName : ""),
-        category: String(item && item.category != null ? item.category : ""),
-        hours: String(item && item.hours != null ? item.hours : ""),
-        status: String(item && item.status != null ? item.status : ""),
-      };
-    }
-
     function addItemRow(item, tbodyId) {
-      const bodyId = tbodyId || "itemsBody";
-      const body = document.getElementById(bodyId);
-      if (!body) return;
-      const isModal = bodyId === "edit-tbody";
-      const tr = document.createElement("tr");
-      const data = makeItemRow(item || {});
-      tr.innerHTML = `
-        <td class="px-2 py-2"><input data-key="desc" value="${escapeHtml(data.desc)}" class="w-full border border-slate-200 rounded px-2 py-1.5" /></td>
-        <td class="px-2 py-2">
-          <select data-key="category" class="w-full border border-slate-200 rounded px-2 py-1.5">
-            ${CATEGORY_OPTIONS.map(function (c) {
-              return '<option value="' + escapeHtml(c) + '"' + (data.category === c ? " selected" : "") + ">" + escapeHtml(c) + "</option>";
-            }).join("")}
-          </select>
-        </td>
-        <td class="px-2 py-2"><input data-key="ProjectName" value="${escapeHtml(data.ProjectName)}" class="w-full border border-slate-200 rounded px-2 py-1.5" placeholder="專案名稱" list="projectNameOptions" /></td>
-        <td class="px-2 py-2"><input data-key="hours" value="${escapeHtml(data.hours)}" type="number" min="0" step="0.01" class="w-full border border-slate-200 rounded px-2 py-1.5" /></td>
-        <td class="px-2 py-2">
-          <select data-key="status" class="w-full border border-slate-200 rounded px-2 py-1.5">
-            <option value="">請選擇</option>
-            <option value="進行中" ${data.status === "進行中" ? "selected" : ""}>進行中</option>
-            <option value="已完成" ${data.status === "已完成" ? "selected" : ""}>已完成</option>
-            <option value="待處理" ${data.status === "待處理" ? "selected" : ""}>待處理</option>
-          </select>
-        </td>
-        <td class="px-2 py-2 text-center">
-          <button type="button" class="text-xs px-2 py-1 rounded bg-red-50 text-red-600 hover:bg-red-100">刪除</button>
-        </td>
-      `;
-      tr.dataset.bid = data.BID;
-      tr.dataset.aid = data.AID;
-      const refreshHours = isModal ? updateEditModalHoursVisual : updateHoursVisual;
-      tr.querySelector("button").addEventListener("click", function () {
-        tr.remove();
-        refreshHours();
-      });
-      tr.querySelector('input[data-key="hours"]').addEventListener("input", refreshHours);
-      body.appendChild(tr);
-      refreshHours();
+      if (window.ProjectOSDailyReportDept) {
+        window.ProjectOSDailyReportDept.addRow(tbodyId || "itemsBody", item || {});
+        if (tbodyId === "edit-tbody") updateEditModalHoursVisual();
+        else updateHoursVisual();
+        return;
+      }
+    }
+
+    function readItemsFromForm() {
+      if (window.ProjectOSDailyReportDept) {
+        return window.ProjectOSDailyReportDept.readItemsFromTbody("itemsBody");
+      }
+      return readItemsFromTbody("itemsBody");
+    }
+
+    function readReportMetaForSave() {
+      if (window.ProjectOSDailyReportDept) {
+        return window.ProjectOSDailyReportDept.readReportMeta();
+      }
+      return { shift: "", location: "", feeling: "" };
     }
 
     function escapeHtml(str) {
@@ -428,18 +435,6 @@
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#39;");
-    }
-
-    function renderProjectDatalist() {
-      let datalist = document.getElementById("projectNameOptions");
-      if (!datalist) {
-        datalist = document.createElement("datalist");
-        datalist.id = "projectNameOptions";
-        document.body.appendChild(datalist);
-      }
-      datalist.innerHTML = projectOptions.map(function (p) {
-        return '<option value="' + escapeHtml(p.name) + '"></option>';
-      }).join("");
     }
 
     function readItemsFromTbody(tbodyId) {
@@ -465,10 +460,6 @@
         });
     }
 
-    function readItemsFromForm() {
-      return readItemsFromTbody("itemsBody");
-    }
-
     function highlightActiveHistCard() {
       document.querySelectorAll(".hist-card[data-aid]").forEach(function (card) {
         const aid = String(card.dataset.aid || "");
@@ -487,8 +478,9 @@
       currentAID = "";
       setInputValue("reportDate", "");
       setInputValue("note", "");
-      document.getElementById("itemsBody").innerHTML = "";
-      addItemRow({});
+      if (window.ProjectOSDailyReportDept) {
+        window.ProjectOSDailyReportDept.clearPane(deptWorkKey, dailyCommon);
+      }
       updateHoursVisual();
     }
 
@@ -543,7 +535,9 @@
       const date = String(found.date || "").replace(/\D/g, "").slice(0, 8);
       const totalHours = String(calcTotalHoursFromTbody("edit-tbody"));
       const note = String((document.getElementById("edit-note") && document.getElementById("edit-note").value) || "").trim();
-      const items = readItemsFromTbody("edit-tbody");
+      const items = window.ProjectOSDailyReportDept
+        ? window.ProjectOSDailyReportDept.readItemsFromTbody("edit-tbody")
+        : readItemsFromTbody("edit-tbody");
       if (!date) {
         toast("日報日期無效");
         return;
@@ -552,25 +546,20 @@
         toast("請至少保留一筆工作項目");
         return;
       }
+      const meta = { shift: "", location: "", feeling: "" };
       const payloadReport = {
         AID: editingModalAID,
         date: date,
         totalHours: totalHours || "0",
         note: note,
+        shift: meta.shift || "",
+        location: meta.location || "",
+        feeling: meta.feeling || "",
         items: items.map(function (it) {
-          const payloadItem = {
-            desc: it.desc,
-            ProjectId: "",
-            ProjectName: it.ProjectName,
-            category: it.category,
-            hours: it.hours,
-            status: it.status,
-          };
-          if (it.BID) payloadItem.BID = it.BID;
-          if (it.AID || editingModalAID) payloadItem.AID = it.AID || editingModalAID;
-          return payloadItem;
+          return buildPayloadItem(it, editingModalAID);
         }),
       };
+      if (meta.actualWorkHours) payloadReport.actualWorkHours = meta.actualWorkHours;
       try {
         const data = await postJson(SAVE_DAILY_REPORT_URL, {
           AdminID: auth.adminID,
@@ -597,8 +586,6 @@
       wrap.innerHTML = reportList.map(function (r) {
         const date = ymdToDateInput(r.date) || r.date;
         const totalHours = String(r.totalHours || "0");
-        const overtimeHours = String(r.overtimeHours || "0");
-        const actualWorkHours = String(r.actualWorkHours || "0");
         const note = String(r.note || "");
         const tomorrowNote = String(r.tomorrowNote || "");
         const helpNote = String(r.helpNote || "");
@@ -652,6 +639,23 @@
       });
     }
 
+    function buildPayloadItem(it, aid) {
+      const payloadItem = {
+        desc: it.desc,
+        ProjectId: "",
+        ProjectName: it.ProjectName,
+        category: it.category,
+        hours: it.hours,
+        status: it.status,
+      };
+      if (it.BID) payloadItem.BID = it.BID;
+      if (it.AID || aid) payloadItem.AID = it.AID || aid;
+      if (it.ALLPrdCnt != null && it.ALLPrdCnt !== "") payloadItem.ALLPrdCnt = it.ALLPrdCnt;
+      if (it.GoodPrdCnt != null && it.GoodPrdCnt !== "") payloadItem.GoodPrdCnt = it.GoodPrdCnt;
+      if (it.BadPrdCnt != null && it.BadPrdCnt !== "") payloadItem.BadPrdCnt = it.BadPrdCnt;
+      return payloadItem;
+    }
+
     function normalizeDailyReportItem(rawItem, parentAID) {
       const item = rawItem && typeof rawItem === "object" ? rawItem : {};
       return {
@@ -662,6 +666,9 @@
         category: String(item.category != null ? item.category : ""),
         hours: String(item.hours != null ? item.hours : ""),
         status: String(item.status != null ? item.status : ""),
+        ALLPrdCnt: String(item.ALLPrdCnt != null ? item.ALLPrdCnt : ""),
+        GoodPrdCnt: String(item.GoodPrdCnt != null ? item.GoodPrdCnt : ""),
+        BadPrdCnt: String(item.BadPrdCnt != null ? item.BadPrdCnt : ""),
       };
     }
 
@@ -673,7 +680,6 @@
         AID: aid,
         date: String(report.date != null ? report.date : ""),
         totalHours: String(report.totalHours != null ? report.totalHours : ""),
-        overtimeHours: String(report.overtimeHours != null ? report.overtimeHours : ""),
         actualWorkHours: String(report.actualWorkHours != null ? report.actualWorkHours : ""),
         shift: String(report.shift != null ? report.shift : ""),
         feeling: String(report.feeling != null ? report.feeling : ""),
@@ -743,25 +749,31 @@
         toast("請至少新增一筆工作項目");
         return;
       }
+      const meta = readReportMetaForSave();
+      if ((reportMode === "ops-sm" || reportMode === "ops-cs") && !meta.shift) {
+        toast("請選擇班別");
+        return;
+      }
+      if (reportMode === "ops-sm" && !meta.location) {
+        toast("請選擇院所 / 地點");
+        return;
+      }
       const payloadReport = {
         date: date,
-        totalHours: totalHours || "0",
+        totalHours: meta.totalHours || totalHours || "0",
         note: note,
+        shift: meta.shift || "",
+        location: meta.location || "",
+        feeling: meta.feeling || "",
         items: items.map(function (it) {
-          const payloadItem = {
-            desc: it.desc,
-            ProjectId: "",
-            ProjectName: it.ProjectName,
-            category: it.category,
-            hours: it.hours,
-            status: it.status,
-          };
-          if (it.BID) payloadItem.BID = it.BID;
-          if (it.AID || currentAID) payloadItem.AID = it.AID || currentAID;
-          return payloadItem;
+          return buildPayloadItem(it, currentAID);
         }),
       };
+      if (meta.actualWorkHours) payloadReport.actualWorkHours = meta.actualWorkHours;
       if (currentAID) payloadReport.AID = currentAID;
+      if (reportMode === "ops-sm" || reportMode === "ops-cs") {
+        payloadReport.actualWorkHours = meta.actualWorkHours || payloadReport.totalHours;
+      }
 
       try {
         const data = await postJson(SAVE_DAILY_REPORT_URL, {
@@ -779,29 +791,31 @@
       }
     }
 
-    async function fetchProjectOptions() {
+    async function fetchDailyCommon() {
       try {
-        const data = await postJson(GET_PROJECT_LIST_URL, {
+        const data = await postJson(GET_DAILY_COMMON_URL, {
           AdminID: auth.adminID,
           Token: auth.token,
         });
         if (!data || String(data.Result || "").toUpperCase() !== "OK") return;
-        const list = Array.isArray(data.ProjectList)
-          ? data.ProjectList
-          : Array.isArray(data.Data)
-          ? data.Data
-          : [];
-        projectOptions = list
-          .map(function (p) {
-            const id = String((p && (p.AID || p.ProjectID || p.ProjectId || p.ID)) || "").trim();
-            const name = String((p && (p.ProjectName || p.Name)) || "").trim();
-            if (!id || !name) return null;
-            return { id: id, name: name };
-          })
+        dailyCommon.prjList = (Array.isArray(data.PrjList) ? data.PrjList : [])
+          .map(function (x) { return String(x || "").trim(); })
           .filter(Boolean);
-        renderProjectDatalist();
+        dailyCommon.locations = (Array.isArray(data.Locations) ? data.Locations : [])
+          .map(function (x) { return String(x || "").trim(); })
+          .filter(Boolean);
+        dailyCommon.shifts = (Array.isArray(data.Shifts) ? data.Shifts : [])
+          .map(function (x) { return String(x || "").trim(); })
+          .filter(Boolean);
+        var apiMap = data.DeptWorkType && typeof data.DeptWorkType === "object" ? data.DeptWorkType : null;
+        if (apiMap && Object.keys(apiMap).length) {
+          var storage = window.projectOSGetAuthStorage ? window.projectOSGetAuthStorage() : localStorage;
+          try {
+            storage.setItem("deptWorkType", JSON.stringify(apiMap));
+          } catch (e) {}
+        }
       } catch (e) {
-        // 專案下拉僅為輔助，不阻斷日報填寫流程
+        // 輔助選項，不阻斷流程
       }
     }
 
@@ -864,7 +878,6 @@
       }
       const totalDays = reports.length;
       const totalH = reports.reduce(function (s, r) { return s + parseHours(r.totalHours); }, 0);
-      const otH = reports.reduce(function (s, r) { return s + parseHours(r.overtimeHours); }, 0);
       const allItems = reports.flatMap(function (r) { return Array.isArray(r.items) ? r.items : []; });
       const doneItems = allItems.filter(function (i) { return i.status === "已完成"; });
       const doneRate = allItems.length > 0 ? Math.round((doneItems.length / allItems.length) * 100) : 0;
@@ -913,11 +926,10 @@
         '<div class="flex items-center gap-3 flex-wrap">' +
         '<div class="font-bold text-slate-800">' + escapeHtml(employeeName) + " 週報 — " + escapeHtml(fromLabel) + " ～ " + escapeHtml(toLabel) + "</div>" +
         '<button type="button" id="btnCopyPWR" class="ml-auto text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 rounded font-semibold">📋 複製週報文字</button></div>' +
-        '<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">' +
+        '<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">' +
         '<div class="bg-blue-50 rounded-lg p-3 text-center"><div class="text-xs text-blue-600 font-semibold mb-1">出勤天數</div><div class="text-2xl font-bold text-blue-700">' + totalDays + "</div></div>" +
         '<div class="bg-green-50 rounded-lg p-3 text-center"><div class="text-xs text-green-600 font-semibold mb-1">總工時</div><div class="text-2xl font-bold text-green-700">' + totalH.toFixed(1) + "h</div></div>" +
-        '<div class="bg-amber-50 rounded-lg p-3 text-center"><div class="text-xs text-amber-600 font-semibold mb-1">工項完成率</div><div class="text-2xl font-bold text-amber-700">' + doneRate + "%</div></div>" +
-        '<div class="bg-orange-50 rounded-lg p-3 text-center"><div class="text-xs text-orange-600 font-semibold mb-1">加班工時</div><div class="text-2xl font-bold text-orange-600">' + otH.toFixed(1) + "h</div></div></div>" +
+        '<div class="bg-amber-50 rounded-lg p-3 text-center"><div class="text-xs text-amber-600 font-semibold mb-1">工項完成率</div><div class="text-2xl font-bold text-amber-700">' + doneRate + "%</div></div></div>" +
         (projHtml ? '<div><div class="text-xs font-semibold text-slate-600 mb-2">本週專案投入</div><div class="space-y-1">' + projHtml + "</div></div>" : "") +
         '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">' +
         '<div class="bg-slate-50 rounded-lg p-3"><div class="text-xs font-semibold text-slate-600 mb-2">工作類別分布</div>' + (catHtml || '<div class="text-xs text-slate-400">無類別資料</div>') + "</div>" +
@@ -992,14 +1004,26 @@
         return;
       }
       setTextValue("currentAdmin", auth.adminID);
+      deptWorkKey =
+        typeof window.projectOSGetDeptWorkKey === "function"
+          ? window.projectOSGetDeptWorkKey()
+          : "A1";
+      var storage = window.projectOSGetAuthStorage ? window.projectOSGetAuthStorage() : localStorage;
+      var adminName = storage.getItem("adminName") || "";
+      if (adminName) setInputValue("employeeName", adminName);
       initDefaultDateRange();
+      await fetchDailyCommon();
+      configureDeptPane();
       clearEditor();
-      await fetchProjectOptions();
       await queryReports();
     }
 
     document.getElementById("btnQuery").addEventListener("click", queryReports);
-    document.getElementById("btnAddRow").addEventListener("click", function () { addItemRow({}); });
+    document.addEventListener("click", function (e) {
+      if (e.target && e.target.id === "btnAddRow") {
+        addItemRow({});
+      }
+    });
     document.getElementById("btnSave").addEventListener("click", saveReport);
     document.getElementById("btnNew").addEventListener("click", function () {
       clearEditor();
