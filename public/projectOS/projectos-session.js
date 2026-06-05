@@ -1,8 +1,8 @@
 /**
- * ProjectOS 登入工作階段：Token、帳號、姓名、部門代碼 (A1–A9)、DeptWorkType
+ * ProjectOS 登入工作階段：Token、帳號、姓名
+ * 部門與工作類別由日報頁 getDailyCommon 的 Dept / DeptWorkType 取得
  */
 (function () {
-  var VALID_DEPT_KEYS = ["A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9"];
   var DEFAULT_DEPT_KEY = "A1";
 
   var DEPT_LABELS = {
@@ -40,33 +40,6 @@
     return "";
   }
 
-  function extractDeptWorkKey(loginResp) {
-    var r = loginResp && typeof loginResp === "object" ? loginResp : {};
-    var fields = [
-      r.DeptWorkKey,
-      r.deptWorkKey,
-      r.Department,
-      r.department,
-      r.DeptKey,
-      r.deptKey,
-      r.WorkDept,
-      r.AdminDept,
-      r.DeptCode,
-    ];
-    for (var i = 0; i < fields.length; i++) {
-      var key = normalizeDeptKey(fields[i]);
-      if (key) return key;
-    }
-    return DEFAULT_DEPT_KEY;
-  }
-
-  function extractDeptWorkType(loginResp) {
-    var r = loginResp && typeof loginResp === "object" ? loginResp : {};
-    var raw = r.DeptWorkType != null ? r.DeptWorkType : r.deptWorkType;
-    if (!raw || typeof raw !== "object") return {};
-    return raw;
-  }
-
   function extractAdminName(loginResp, adminId) {
     var r = loginResp && typeof loginResp === "object" ? loginResp : {};
     var name = String(
@@ -99,19 +72,11 @@
     clearAuthKeys(other);
     clearAuthKeys(storage);
 
-    var deptKey = extractDeptWorkKey(loginResp);
-    var deptWorkType = extractDeptWorkType(loginResp);
     var adminName = extractAdminName(loginResp, admin);
 
     storage.setItem("backendToken", token);
     storage.setItem("adminID", admin);
     storage.setItem("adminName", adminName);
-    storage.setItem("deptWorkKey", deptKey);
-    try {
-      storage.setItem("deptWorkType", JSON.stringify(deptWorkType));
-    } catch (e) {
-      storage.setItem("deptWorkType", "{}");
-    }
   };
 
   window.projectOSGetAuthStorage = function () {
@@ -120,22 +85,19 @@
     return localStorage;
   };
 
-  window.projectOSGetDeptWorkKey = function () {
-    var storage = window.projectOSGetAuthStorage();
-    var key = normalizeDeptKey(storage.getItem("deptWorkKey"));
-    return key || DEFAULT_DEPT_KEY;
-  };
-
-  window.projectOSGetDeptWorkTypeMap = function () {
-    var storage = window.projectOSGetAuthStorage();
-    try {
-      var raw = storage.getItem("deptWorkType");
-      if (!raw) return {};
-      var parsed = JSON.parse(raw);
-      return parsed && typeof parsed === "object" ? parsed : {};
-    } catch (e) {
-      return {};
+  /** 依 getDailyCommon 回傳的 Dept 部門名稱對應 A1–A9（僅供畫面模式判斷） */
+  window.projectOSDeptNameToKey = function (deptName) {
+    var name = String(deptName || "").trim();
+    if (!name) return DEFAULT_DEPT_KEY;
+    var keys = Object.keys(DEPT_LABELS);
+    for (var i = 0; i < keys.length; i++) {
+      if (DEPT_LABELS[keys[i]] === name) return keys[i];
     }
+    for (var j = 0; j < keys.length; j++) {
+      var label = DEPT_LABELS[keys[j]];
+      if (name.indexOf(label) >= 0 || label.indexOf(name) >= 0) return keys[j];
+    }
+    return DEFAULT_DEPT_KEY;
   };
 
   window.projectOSGetDeptLabel = function (deptKey) {
@@ -146,17 +108,6 @@
   window.projectOSGetReportMode = function (deptKey) {
     var k = normalizeDeptKey(deptKey) || DEFAULT_DEPT_KEY;
     return DEPT_REPORT_MODE[k] || "standard";
-  };
-
-  window.projectOSGetCategoryOptions = function (deptKey) {
-    var k = normalizeDeptKey(deptKey) || window.projectOSGetDeptWorkKey();
-    var map = window.projectOSGetDeptWorkTypeMap();
-    var list = Array.isArray(map[k]) ? map[k] : [];
-    return list
-      .map(function (x) {
-        return String(x || "").trim();
-      })
-      .filter(Boolean);
   };
 
   window.projectOSClearSession = function () {

@@ -191,7 +191,16 @@
     let auth = null;
     let deptWorkKey = "A1";
     let reportMode = "standard";
-    let dailyCommon = { prjList: [], locations: [], shifts: [] };
+    let dailyCommon = {
+      prjList: [],
+      locations: [],
+      shifts: [],
+      deptName: "",
+      employeeName: "",
+      workItem: [],
+      workCategories: [],
+      deptWorkTypeMap: {},
+    };
     let reportList = [];
     let currentAID = "";
     let editingModalAID = "";
@@ -258,11 +267,7 @@
     function updateDeptDisplay() {
       var deptEl = document.getElementById("deptLabel");
       if (deptEl) {
-        var name =
-          typeof window.projectOSGetDeptLabel === "function"
-            ? window.projectOSGetDeptLabel(deptWorkKey)
-            : deptWorkKey;
-        deptEl.textContent = name + "（" + deptWorkKey + "）";
+        deptEl.textContent = dailyCommon.deptName || "—";
       }
       var hint = document.getElementById("editorModeHint");
       if (hint) {
@@ -274,10 +279,7 @@
     }
 
     function renderWorkDescDatalist() {
-      var cats =
-        typeof window.projectOSGetCategoryOptions === "function"
-          ? window.projectOSGetCategoryOptions(deptWorkKey)
-          : [];
+      var cats = dailyCommon.workCategories || [];
       var datalist = document.getElementById("workDescOptions");
       if (!datalist) {
         datalist = document.createElement("datalist");
@@ -298,6 +300,8 @@
         deptKey: deptWorkKey,
         prjList: dailyCommon.prjList,
         locations: dailyCommon.locations,
+        shifts: dailyCommon.shifts,
+        workCategories: dailyCommon.workCategories,
         escapeHtml: escapeHtml,
         onHoursChange: updateHoursVisual,
       });
@@ -791,6 +795,17 @@
       }
     }
 
+    function resolveWorkCategories(apiMap, deptKey) {
+      var workItem = Array.isArray(dailyCommon.workItem) ? dailyCommon.workItem : [];
+      if (workItem.length) return workItem;
+      if (apiMap && deptKey && Array.isArray(apiMap[deptKey])) {
+        return apiMap[deptKey]
+          .map(function (x) { return String(x || "").trim(); })
+          .filter(Boolean);
+      }
+      return [];
+    }
+
     async function fetchDailyCommon() {
       try {
         const data = await postJson(GET_DAILY_COMMON_URL, {
@@ -798,8 +813,29 @@
           Token: auth.token,
         });
         if (!data || String(data.Result || "").toUpperCase() !== "OK") return;
-        dailyCommon.prjList = (Array.isArray(data.PrjList) ? data.PrjList : [])
+
+        dailyCommon.deptName = String(data.Dept != null ? data.Dept : "").trim();
+      
+        dailyCommon.employeeName = String(data.Name != null ? data.Name : "").trim();
+        deptWorkKey =
+          typeof window.projectOSDeptNameToKey === "function"
+            ? window.projectOSDeptNameToKey(dailyCommon.deptName)
+            : "A1";
+
+        dailyCommon.deptWorkTypeMap =
+          data.DeptWorkType && typeof data.DeptWorkType === "object" ? data.DeptWorkType : {};
+        dailyCommon.workItem = (Array.isArray(data.WorkItem) ? data.WorkItem : [])
           .map(function (x) { return String(x || "").trim(); })
+          .filter(Boolean);
+        dailyCommon.workCategories = resolveWorkCategories(dailyCommon.deptWorkTypeMap, deptWorkKey);
+
+        dailyCommon.prjList = (Array.isArray(data.PrjList) ? data.PrjList : [])
+          .map(function (x) {
+            if (x && typeof x === "object") {
+              return String(x.ProjectName != null ? x.ProjectName : x.projectName || "").trim();
+            }
+            return String(x || "").trim();
+          })
           .filter(Boolean);
         dailyCommon.locations = (Array.isArray(data.Locations) ? data.Locations : [])
           .map(function (x) { return String(x || "").trim(); })
@@ -807,12 +843,9 @@
         dailyCommon.shifts = (Array.isArray(data.Shifts) ? data.Shifts : [])
           .map(function (x) { return String(x || "").trim(); })
           .filter(Boolean);
-        var apiMap = data.DeptWorkType && typeof data.DeptWorkType === "object" ? data.DeptWorkType : null;
-        if (apiMap && Object.keys(apiMap).length) {
-          var storage = window.projectOSGetAuthStorage ? window.projectOSGetAuthStorage() : localStorage;
-          try {
-            storage.setItem("deptWorkType", JSON.stringify(apiMap));
-          } catch (e) {}
+
+        if (dailyCommon.employeeName) {
+          setInputValue("employeeName", dailyCommon.employeeName);
         }
       } catch (e) {
         // 輔助選項，不阻斷流程
@@ -835,6 +868,7 @@
     function getEmployeeDisplayName() {
       return (
         weeklyEmployeeName ||
+        dailyCommon.employeeName ||
         String((document.getElementById("employeeName") && document.getElementById("employeeName").value) || "").trim() ||
         auth.adminID
       );
@@ -1004,15 +1038,13 @@
         return;
       }
       setTextValue("currentAdmin", auth.adminID);
-      deptWorkKey =
-        typeof window.projectOSGetDeptWorkKey === "function"
-          ? window.projectOSGetDeptWorkKey()
-          : "A1";
-      var storage = window.projectOSGetAuthStorage ? window.projectOSGetAuthStorage() : localStorage;
-      var adminName = storage.getItem("adminName") || "";
-      if (adminName) setInputValue("employeeName", adminName);
       initDefaultDateRange();
       await fetchDailyCommon();
+      if (!dailyCommon.employeeName) {
+        var storage = window.projectOSGetAuthStorage ? window.projectOSGetAuthStorage() : localStorage;
+        var adminName = storage.getItem("adminName") || "";
+        if (adminName) setInputValue("employeeName", adminName);
+      }
       configureDeptPane();
       clearEditor();
       await queryReports();

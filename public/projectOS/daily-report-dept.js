@@ -30,6 +30,8 @@
     deptKey: "A1",
     prjList: [],
     locations: [],
+    shifts: [],
+    workCategories: [],
     escapeHtml: function (s) {
       return String(s || "");
     },
@@ -45,7 +47,10 @@
 
   function getShiftList(mode) {
     if (mode === "ops-cs") return Object.keys(SHIFT_HOURS_CS);
-    if (mode === "ops-sm") return Object.keys(SHIFT_HOURS_SM);
+    if (mode === "ops-sm") {
+      if (paneCtx.shifts && paneCtx.shifts.length) return paneCtx.shifts;
+      return Object.keys(SHIFT_HOURS_SM);
+    }
     return [];
   }
 
@@ -55,11 +60,12 @@
     return {};
   }
 
-  function getCategories(deptKey) {
-    var list =
-      typeof window.projectOSGetCategoryOptions === "function"
-        ? window.projectOSGetCategoryOptions(deptKey)
-        : [];
+  function getCategories() {
+    var list = (paneCtx.workCategories || [])
+      .map(function (x) {
+        return String(x || "").trim();
+      })
+      .filter(Boolean);
     if (list.length) return list;
     return ["系統開發", "資料分析", "會議溝通", "文件撰寫", "行政作業", "其他"];
   }
@@ -139,7 +145,7 @@
     var body = document.getElementById(tbodyId);
     if (!body) return;
     var data = item || {};
-    var cats = getCategories(paneCtx.deptKey);
+    var cats = getCategories();
     var tr = document.createElement("tr");
     tr.dataset.bid = String(data.BID || "").trim();
     tr.dataset.aid = String(data.AID || "").trim();
@@ -394,6 +400,8 @@
       paneCtx.deptKey = ctx.deptKey || "A1";
       paneCtx.prjList = ctx.prjList || [];
       paneCtx.locations = ctx.locations || [];
+      paneCtx.shifts = ctx.shifts || [];
+      paneCtx.workCategories = ctx.workCategories || [];
       paneCtx.escapeHtml = ctx.escapeHtml || function (s) { return String(s || ""); };
       paneCtx.onHoursChange = ctx.onHoursChange || function () {};
     },
