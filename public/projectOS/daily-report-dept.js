@@ -32,6 +32,7 @@
     locations: [],
     shifts: [],
     workCategories: [],
+    workDescHints: [],
     escapeHtml: function (s) {
       return String(s || "");
     },
@@ -67,6 +68,9 @@
       })
       .filter(Boolean);
     if (list.length) return list;
+    if (typeof window.projectOSGetDeptCategoryDefaults === "function") {
+      return window.projectOSGetDeptCategoryDefaults(paneCtx.deptKey);
+    }
     return ["系統開發", "資料分析", "會議溝通", "文件撰寫", "行政作業", "其他"];
   }
 
@@ -187,7 +191,7 @@
       tr.innerHTML =
         '<td class="px-2 py-2"><input data-key="desc" value="' +
         paneCtx.escapeHtml(data.desc) +
-        '" class="w-full border border-slate-200 rounded px-2 py-1.5" list="workDescOptions" /></td>' +
+        '" class="w-full border border-slate-200 rounded px-2 py-1.5"  /></td>' +
         '<td class="px-2 py-2"><select data-key="category" class="w-full border border-slate-200 rounded px-2 py-1.5">' +
         buildSelectOptions(cats, data.category, "請選擇") +
         "</select></td>" +
@@ -535,7 +539,6 @@
 
     calcTotalHours: function (tbodyId) {
       if (paneCtx.mode === "ops-sm" || paneCtx.mode === "ops-cs") {
-        updateOpsTotalHours();
         return opsState.totalWorkHours;
       }
       var rows = Array.from(document.querySelectorAll("#" + (tbodyId || "itemsBody") + " tr"));

@@ -403,6 +403,7 @@
     <div id="edit-modal" class="fixed inset-0 z-50 hidden">
       <div id="edit-modal-backdrop" class="absolute inset-0 bg-black/40"></div>
       <div
+        id="edit-modal-panel"
         class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-2xl w-[calc(100%-2rem)] max-w-4xl max-h-[90vh] overflow-y-auto p-6"
       >
         <div class="flex items-center justify-between mb-4">
@@ -419,14 +420,7 @@
         <div class="overflow-x-auto">
           <table class="item-table">
             <thead>
-              <tr>
-                <th class="min-w-[220px]">工作內容</th>
-                <th class="min-w-[130px]">工作類別</th>
-                <th class="min-w-[180px]">專案</th>
-                <th class="min-w-[100px]">工時</th>
-                <th class="min-w-[120px]">狀態</th>
-                <th class="w-[68px]">刪除</th>
-              </tr>
+              <tr id="edit-modal-thead-row"></tr>
             </thead>
             <tbody id="edit-tbody"></tbody>
           </table>
@@ -459,13 +453,20 @@
             placeholder="今日異常說明"
           ></textarea>
         </div>
-        <div class="flex gap-3 mt-4">
+        <div class="flex gap-3 mt-4 flex-wrap items-center">
           <button
             type="button"
             id="btnEditSave"
             class="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700"
           >
             儲存
+          </button>
+          <button
+            type="button"
+            id="btnEditDelete"
+            class="px-4 py-2 bg-red-50 text-red-600 text-sm font-semibold rounded-lg hover:bg-red-100"
+          >
+            刪除
           </button>
           <button
             type="button"
@@ -616,6 +617,7 @@
         );
         updateDeptDisplay();
         renderWorkDescDatalist();
+        updateEditModalTableHead();
       }
 
       function applyHoursVisual(total, displayId, barId, hintId) {
@@ -766,28 +768,74 @@
       }
 
       function readItemsFromTbody(tbodyId) {
+        return readAllItemsFromTbody(tbodyId).filter(function (x) {
+          return x.desc || x.ProjectName || x.category || x.hours || x.status;
+        });
+      }
+
+      function readAllItemsFromTbody(tbodyId) {
         const rows = Array.from(
           document.querySelectorAll("#" + tbodyId + " tr"),
         );
-        return rows
-          .map(function (tr) {
-            const row = {
-              BID: String(tr.dataset.bid || "").trim(),
-              AID: String(tr.dataset.aid || "").trim(),
-              desc: "",
-              ProjectName: "",
-              category: "",
-              hours: "",
-              status: "",
-            };
-            tr.querySelectorAll("[data-key]").forEach(function (el) {
-              row[el.dataset.key] = String(el.value || "").trim();
-            });
-            return row;
-          })
-          .filter(function (x) {
-            return x.desc || x.ProjectName || x.category || x.hours || x.status;
+        return rows.map(function (tr, index) {
+          const row = {
+            rowIndex: index + 1,
+            BID: String(tr.dataset.bid || "").trim(),
+            AID: String(tr.dataset.aid || "").trim(),
+            desc: "",
+            ProjectName: "",
+            category: "",
+            hours: "",
+            status: "",
+          };
+          tr.querySelectorAll("[data-key]").forEach(function (el) {
+            row[el.dataset.key] = String(el.value || "").trim();
           });
+          return row;
+        });
+      }
+
+      function isMeaningfulReportItem(it) {
+        return !!(
+          String(it.desc || "").trim() ||
+          String(it.category || "").trim() ||
+          String(it.ProjectName || "").trim() ||
+          String(it.hours || "").trim() ||
+          String(it.status || "").trim()
+        );
+      }
+
+      function validateReportItemRows(items, emptyMessage) {
+        const meaningful = (items || []).filter(isMeaningfulReportItem);
+        if (!meaningful.length) {
+          return {
+            ok: false,
+            message: emptyMessage || "請至少新增一筆工作項目",
+          };
+        }
+        for (let i = 0; i < meaningful.length; i++) {
+          const it = meaningful[i];
+          const n = it.rowIndex || i + 1;
+          if (!String(it.desc || "").trim()) {
+            return { ok: false, message: "第 " + n + " 筆：請填寫工作內容" };
+          }
+          if (!String(it.category || "").trim()) {
+            return { ok: false, message: "第 " + n + " 筆：請選擇工作類別" };
+          }
+          if (!String(it.ProjectName || "").trim()) {
+            return { ok: false, message: "第 " + n + " 筆：請選擇專案" };
+          }
+          if (!String(it.hours || "").trim() || parseHours(it.hours) <= 0) {
+            return {
+              ok: false,
+              message: "第 " + n + " 筆：請填寫工時（須大於 0）",
+            };
+          }
+          if (!String(it.status || "").trim()) {
+            return { ok: false, message: "第 " + n + " 筆：請選擇狀態" };
+          }
+        }
+        return { ok: true, items: meaningful };
       }
 
       function highlightActiveHistCard() {
@@ -819,6 +867,41 @@
         updateHoursVisual();
       }
 
+      function buildEditModalTableHeadHtml() {
+        if (reportMode === "production") {
+          return (
+            '<th class="min-w-[160px]">產品/工作項目</th>' +
+            '<th class="min-w-[110px]">工作類別</th>' +
+            '<th class="min-w-[140px]">專案</th>' +
+            '<th class="min-w-[72px]">工時</th>' +
+            '<th class="min-w-[80px]">生產數量</th>' +
+            '<th class="min-w-[72px]">良品數</th>' +
+            '<th class="min-w-[72px]">不良品數</th>' +
+            '<th class="min-w-[60px]">良率</th>' +
+            '<th class="min-w-[88px]">狀態</th>' +
+            '<th class="w-[56px]">刪除</th>'
+          );
+        }
+        return (
+          '<th class="min-w-[220px]">工作內容</th>' +
+          '<th class="min-w-[130px]">工作類別</th>' +
+          '<th class="min-w-[180px]">專案</th>' +
+          '<th class="min-w-[100px]">工時</th>' +
+          '<th class="min-w-[120px]">狀態</th>' +
+          '<th class="w-[68px]">刪除</th>'
+        );
+      }
+
+      function updateEditModalTableHead() {
+        const row = document.getElementById("edit-modal-thead-row");
+        if (row) row.innerHTML = buildEditModalTableHeadHtml();
+        const panel = document.getElementById("edit-modal-panel");
+        if (panel) {
+          panel.classList.toggle("max-w-6xl", reportMode === "production");
+          panel.classList.toggle("max-w-4xl", reportMode !== "production");
+        }
+      }
+
       function closeEditModal() {
         editingModalAID = "";
         document.getElementById("edit-modal").classList.add("hidden");
@@ -832,7 +915,8 @@
         const dateLabel = ymdToDateInput(report.date) || report.date;
 
         currentAID = editingModalAID;
-  setInputValue("reportDate", dateLabel);
+        setInputValue("reportDate", dateLabel);
+        updateEditModalTableHead();
 
         const totalHours = String(report.totalHours || "0");
         const meta = document.getElementById("edit-modal-meta");
@@ -849,19 +933,48 @@
             addItemRow(it, "edit-tbody");
           });
         }
-        bindEditHoursEvents();
+        bindEditModalRowEvents();
         highlightActiveHistCard();
         document.getElementById("edit-modal").classList.remove("hidden");
       }
 
-      function bindEditHoursEvents() {
-  document.querySelectorAll('#edit-tbody [data-key="hours"]').forEach(function (el) {
-    el.oninput = updateEditModalHoursVisual;
-    el.onchange = updateEditModalHoursVisual;
-  });
-
-  updateEditModalHoursVisual();
-}
+      function bindEditModalRowEvents() {
+        document
+          .querySelectorAll('#edit-tbody [data-key="hours"]')
+          .forEach(function (el) {
+            el.oninput = updateEditModalHoursVisual;
+            el.onchange = updateEditModalHoursVisual;
+          });
+        if (reportMode === "production") {
+          document.querySelectorAll("#edit-tbody tr").forEach(function (tr) {
+            function refreshYield() {
+              const qty =
+                parseFloat(
+                  String(
+                    tr.querySelector('[data-key="ALLPrdCnt"]')?.value || "0",
+                  ),
+                ) || 0;
+              const good =
+                parseFloat(
+                  String(
+                    tr.querySelector('[data-key="GoodPrdCnt"]')?.value || "0",
+                  ),
+                ) || 0;
+              const yieldEl = tr.querySelector("[data-yield-display]");
+              if (!yieldEl) return;
+              const yieldInfo = calcProdYieldDisplay(qty, good);
+              yieldEl.textContent = yieldInfo.text;
+              yieldEl.className = yieldInfo.className + " text-xs";
+            }
+            tr.querySelectorAll("[data-qty]").forEach(function (el) {
+              el.oninput = refreshYield;
+              el.onchange = refreshYield;
+            });
+            refreshYield();
+          });
+        }
+        updateEditModalHoursVisual();
+      }
       function editHistoricalReport(aid) {
         const found = reportList.find(function (x) {
           return String(x.AID || "") === String(aid || "");
@@ -895,17 +1008,20 @@
             document.getElementById("edit-note").value) ||
             "",
         ).trim();
-        const items = window.ProjectOSDailyReportDept
-          ? window.ProjectOSDailyReportDept.readItemsFromTbody("edit-tbody")
-          : readItemsFromTbody("edit-tbody");
+        const allRows = readAllItemsFromTbody("edit-tbody");
+        const validation = validateReportItemRows(
+          allRows,
+          "請至少保留一筆工作項目",
+        );
         if (!date) {
           toast("日報日期無效");
           return;
         }
-        if (!items.length) {
-          toast("請至少保留一筆工作項目");
+        if (!validation.ok) {
+          toast(validation.message);
           return;
         }
+        const items = validation.items;
         const meta = { shift: "", location: "", feeling: "" };
         const payloadReport = {
           AID: editingModalAID,
@@ -940,6 +1056,190 @@
         }
       }
 
+      async function deleteEditModalReport() {
+        if (!editingModalAID) {
+          toast("無法刪除：未選擇日報");
+          return;
+        }
+        const found = reportList.find(function (x) {
+          return String(x.AID || "") === editingModalAID;
+        });
+        if (!found) {
+          toast("找不到該筆日報");
+          closeEditModal();
+          return;
+        }
+        if (!window.confirm("確定要刪除此日報嗎？")) return;
+
+        const date = String(found.date || "")
+          .replace(/\D/g, "")
+          .slice(0, 8);
+        const payloadReport = {
+          AID: editingModalAID,
+          date: date,
+          totalHours: "0",
+          actualWorkHours: "0",
+          note: "此日報已刪除",
+          shift: "",
+          location: "",
+          feeling: "",
+          items: [
+            {
+              desc: "此日報已刪除",
+              ProjectId: "",
+              ProjectName: "",
+              category: "刪除",
+              hours: "0",
+              status: "已刪除",
+            },
+          ],
+        };
+
+        try {
+          const data = await postJson(SAVE_DAILY_REPORT_URL, {
+            AdminID: auth.adminID,
+            Token: auth.token,
+            dailyReports: [payloadReport],
+          });
+          if (!data || String(data.Result || "").toUpperCase() !== "OK") {
+            throw new Error((data && data.Result) || "刪除失敗");
+          }
+          toast("日報已刪除");
+          closeEditModal();
+          await queryReports();
+        } catch (err) {
+          toast(
+            "刪除失敗：" + (err && err.message ? err.message : "請稍後再試"),
+          );
+        }
+      }
+
+      function calcProdYieldDisplay(allCnt, goodCnt) {
+        const qty = parseFloat(String(allCnt != null ? allCnt : "0")) || 0;
+        const good = parseFloat(String(goodCnt != null ? goodCnt : "0")) || 0;
+        if (qty <= 0) {
+          return { text: "—", className: "text-slate-400" };
+        }
+        const rate = (good / qty) * 100;
+        return {
+          text: rate.toFixed(1) + "%",
+          className:
+            rate < 95
+              ? "text-red-600 font-semibold"
+              : "text-green-600 font-semibold",
+        };
+      }
+
+      function buildHistItemRowHtml(it) {
+        const isProd = reportMode === "production";
+        const yieldInfo = calcProdYieldDisplay(it.ALLPrdCnt, it.GoodPrdCnt);
+        let html =
+          "<tr>" +
+          "<td>" +
+          escapeHtml(String(it.desc || "")) +
+          "</td>" +
+          "<td>" +
+          escapeHtml(String(it.category || "")) +
+          "</td>" +
+          "<td>" +
+          escapeHtml(String(it.ProjectName || "")) +
+          "</td>" +
+          "<td>" +
+          escapeHtml(String(it.hours || "0")) +
+          "</td>";
+        if (isProd) {
+          html +=
+            "<td>" +
+            escapeHtml(String(it.ALLPrdCnt != null ? it.ALLPrdCnt : "")) +
+            "</td>" +
+            "<td>" +
+            escapeHtml(String(it.GoodPrdCnt != null ? it.GoodPrdCnt : "")) +
+            "</td>" +
+            "<td>" +
+            escapeHtml(String(it.BadPrdCnt != null ? it.BadPrdCnt : "")) +
+            "</td>" +
+            '<td><span class="' +
+            yieldInfo.className +
+            '">' +
+            escapeHtml(yieldInfo.text) +
+            "</span></td>";
+        }
+        html +=
+          "<td>" + escapeHtml(String(it.status || "")) + "</td>" + "</tr>";
+        return html;
+      }
+
+      function buildHistItemsTableHeadHtml() {
+        if (reportMode === "production") {
+          return (
+            "<th>工作內容</th><th>類別</th><th>專案</th><th>工時</th>" +
+            "<th>生產數量</th><th>良品數</th><th>不良品數</th><th>良率</th><th>狀態</th>"
+          );
+        }
+        return "<th>工作內容</th><th>類別</th><th>專案</th><th>工時</th><th>狀態</th>";
+      }
+
+      function histMetaDisplay(val) {
+        const v = String(val != null ? val : "").trim();
+        return v ? escapeHtml(v) : '<span class="text-slate-300">—</span>';
+      }
+
+      /** 智慧醫療部：院所、班別、班別感受；客服部：班別、班別感受 */
+      function buildHistOpsMetaHtml(r) {
+        const shift = String(r.shift || "");
+        const location = String(r.location || "");
+        const feeling = String(r.feeling || "");
+        if (reportMode === "ops-sm") {
+          return (
+            '<div class="hist-meta mt-1 flex flex-wrap gap-x-4 gap-y-1">' +
+            '<span><span class="text-slate-400">院所：</span>' +
+            histMetaDisplay(location) +
+            "</span>" +
+            '<span><span class="text-slate-400">班別：</span>' +
+            histMetaDisplay(shift) +
+            "</span>" +
+            '<span><span class="text-slate-400">班別感受：</span>' +
+            histMetaDisplay(feeling) +
+            "</span></div>"
+          );
+        }
+        if (reportMode === "ops-cs") {
+          return (
+            '<div class="hist-meta mt-1 flex flex-wrap gap-x-4 gap-y-1">' +
+            '<span><span class="text-slate-400">班別：</span>' +
+            histMetaDisplay(shift) +
+            "</span>" +
+            '<span><span class="text-slate-400">班別感受：</span>' +
+            histMetaDisplay(feeling) +
+            "</span></div>"
+          );
+        }
+        return "";
+      }
+
+      function buildHistHeaderMetaChips(r) {
+        const shift = String(r.shift || "");
+        const location = String(r.location || "");
+        const feeling = String(r.feeling || "");
+        if (reportMode === "ops-sm" || reportMode === "ops-cs") {
+          return "";
+        }
+        let html = "";
+        if (shift) {
+          html +=
+            '<span class="hist-chip">班別: ' + escapeHtml(shift) + "</span>";
+        }
+        if (location) {
+          html +=
+            '<span class="hist-chip">地點: ' + escapeHtml(location) + "</span>";
+        }
+        if (feeling) {
+          html +=
+            '<span class="hist-chip">感受: ' + escapeHtml(feeling) + "</span>";
+        }
+        return html;
+      }
+
       function renderList() {
         const wrap = document.getElementById("reportList");
         if (!reportList.length) {
@@ -951,12 +1251,16 @@
           .map(function (r) {
             const date = ymdToDateInput(r.date) || r.date;
             const totalHours = String(r.totalHours || "0");
+            const isDeleted =
+              String(r.note || "").indexOf("已刪除") >= 0 ||
+              (Array.isArray(r.items) &&
+                r.items.some(function (it) {
+                  return String(it.status || "") === "已刪除";
+                }));
             const note = String(r.note || "");
             const tomorrowNote = String(r.tomorrowNote || "");
             const helpNote = String(r.helpNote || "");
-            const shift = String(r.shift || "");
-            const location = String(r.location || "");
-            const feeling = String(r.feeling || "");
+            const opsMetaHtml = buildHistOpsMetaHtml(r);
             const checkTime = String(r.CheckTime || "").trim();
             const checkTimeLabel =
               checkTime.length >= 14
@@ -972,27 +1276,7 @@
                 : "";
             const itemCount = Array.isArray(r.items) ? r.items.length : 0;
             const itemsHtml = (Array.isArray(r.items) ? r.items : [])
-              .map(function (it) {
-                return (
-                  "<tr>" +
-                  "<td>" +
-                  escapeHtml(String(it.desc || "")) +
-                  "</td>" +
-                  "<td>" +
-                  escapeHtml(String(it.category || "")) +
-                  "</td>" +
-                  "<td>" +
-                  escapeHtml(String(it.ProjectName || "")) +
-                  "</td>" +
-                  "<td>" +
-                  escapeHtml(String(it.hours || "0")) +
-                  "</td>" +
-                  "<td>" +
-                  escapeHtml(String(it.status || "")) +
-                  "</td>" +
-                  "</tr>"
-                );
-              })
+              .map(buildHistItemRowHtml)
               .join("");
             const isActive =
               editingModalAID && String(r.AID || "") === editingModalAID;
@@ -1001,29 +1285,19 @@
               escapeHtml(r.AID || "") +
               '" class="hist-card overflow-hidden' +
               (isActive ? " editing" : "") +
+              (isDeleted ? " opacity-60" : "") +
               '">' +
               '<div class="hist-card-header">' +
               '<span class="text-sm font-bold text-slate-800">' +
               escapeHtml(date) +
               "</span>" +
+              (isDeleted
+                ? '<span class="hist-chip bg-red-50 text-red-600">已刪除</span>'
+                : "") +
               '<span class="hist-chip">總工時: ' +
               escapeHtml(totalHours) +
               "h</span>" +
-              (shift
-                ? '<span class="hist-chip">班別: ' +
-                  escapeHtml(shift) +
-                  "</span>"
-                : "") +
-              (location
-                ? '<span class="hist-chip">地點: ' +
-                  escapeHtml(location) +
-                  "</span>"
-                : "") +
-              (feeling
-                ? '<span class="hist-chip">感受: ' +
-                  escapeHtml(feeling) +
-                  "</span>"
-                : "") +
+              buildHistHeaderMetaChips(r) +
               '<div class="flex-1"></div>' +
               '<button type="button" class="hist-edit-btn" data-action="edit" data-aid="' +
               escapeHtml(r.AID || "") +
@@ -1037,6 +1311,7 @@
                 ? "｜更新時間：" + escapeHtml(checkTimeLabel)
                 : "") +
               "</div>" +
+              opsMetaHtml +
               (note
                 ? '<div class="hist-meta mt-1">異常/備註：' +
                   escapeHtml(note) +
@@ -1053,7 +1328,9 @@
                   "</div>"
                 : "") +
               (itemsHtml
-                ? '<table class="hist-items-table"><thead><tr><th>工作內容</th><th>類別</th><th>專案</th><th>工時</th><th>狀態</th></tr></thead><tbody>' +
+                ? '<table class="hist-items-table"><thead><tr>' +
+                  buildHistItemsTableHeadHtml() +
+                  "</tr></thead><tbody>" +
                   itemsHtml +
                   "</tbody></table>"
                 : "") +
@@ -1198,15 +1475,20 @@
             document.getElementById("note").value) ||
             "",
         ).trim();
-        const items = readItemsFromForm();
+        const allRows = readAllItemsFromTbody("itemsBody");
+        const validation = validateReportItemRows(
+          allRows,
+          "請至少新增一筆工作項目",
+        );
         if (!date) {
           toast("請選擇日報日期");
           return;
         }
-        if (!items.length) {
-          toast("請至少新增一筆工作項目");
+        if (!validation.ok) {
+          toast(validation.message);
           return;
         }
+        const items = validation.items;
         const meta = readReportMetaForSave();
         if (
           (reportMode === "ops-sm" || reportMode === "ops-cs") &&
@@ -1397,10 +1679,10 @@
             "%",
           "",
         );
+
         const projMap = {};
         allItems.forEach(function (i) {
-          const name = String(i.ProjectName || "").trim();
-          if (!name) return;
+          const name = String(i.ProjectName || "").trim() || "非專案產出";
           if (!projMap[name]) projMap[name] = 0;
           projMap[name] += parseHours(i.hours);
         });
@@ -1453,10 +1735,10 @@
           allItems.length > 0
             ? Math.round((doneItems.length / allItems.length) * 100)
             : 0;
+
         const projMap = {};
         allItems.forEach(function (i) {
-          const name = String(i.ProjectName || "").trim();
-          if (!name) return;
+          const name = String(i.ProjectName || "").trim() || "非專案產出";
           if (!projMap[name]) projMap[name] = 0;
           projMap[name] += parseHours(i.hours);
         });
@@ -1677,13 +1959,18 @@
         setInputValue("reportDate", todayDateInput());
         scrollToEditor();
       });
-      document.getElementById("btnEditAddRow").addEventListener("click", function () {
-  addItemRow({}, "edit-tbody");
-  bindEditHoursEvents();
-});
+      document
+        .getElementById("btnEditAddRow")
+        .addEventListener("click", function () {
+          addItemRow({}, "edit-tbody");
+          bindEditModalRowEvents();
+        });
       document
         .getElementById("btnEditSave")
         .addEventListener("click", saveEditModal);
+      document
+        .getElementById("btnEditDelete")
+        .addEventListener("click", deleteEditModalReport);
       document
         .getElementById("btnEditCancel")
         .addEventListener("click", closeEditModal);
