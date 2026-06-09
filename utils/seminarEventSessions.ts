@@ -91,11 +91,11 @@ export const SEMINAR_EVENTS: SeminarEvent[] = [
       },
       {
         area: "台中",
-        location: "活動資訊即將公布",
+        location: "南山大樓 台中市東區公園東路130號2F",
         status: "active",
-        eventDate: "",
-        displayDate: "日期待定",
-        time: "時間待定",
+        eventDate: "20260711",
+        displayDate: "2026 / 07 / 11（六）",
+        time: "9:30",
       },
       {
         area: "高雄",
