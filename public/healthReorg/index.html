@@ -3,26 +3,26 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>舊客 AI 健康資料重整體驗版</title>
+  <title>舊客居家活動度與按壓反應體驗版 V3 回溯舊點</title>
   <style>
     :root {
       --bg: #f6f8f7;
       --surface: #ffffff;
-      --surface-soft: #eef6f3;
-      --surface-warm: #fff7f2;
-      --ink: #162525;
-      --muted: #5f6f6c;
-      --line: #d8e4e0;
-      --line-strong: #bdd2cb;
-      --teal: #0e7c7b;
-      --teal-dark: #075d5c;
+      --soft: #edf6f3;
+      --soft-2: #f8fbfa;
+      --ink: #162424;
+      --muted: #61716e;
+      --line: #d7e4df;
+      --line-strong: #b7d3cc;
+      --teal: #0d7f7c;
+      --teal-dark: #075c59;
       --green: #2f855a;
       --coral: #d96a4c;
-      --blue: #42526e;
       --amber: #b7791f;
+      --indigo: #44546f;
       --danger: #b42318;
+      --shadow: 0 18px 55px rgba(22, 36, 36, .08);
       --radius: 8px;
-      --shadow: 0 18px 55px rgba(22, 37, 37, .08);
     }
 
     * {
@@ -32,9 +32,7 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background:
-        linear-gradient(180deg, rgba(246, 248, 247, .96), rgba(238, 246, 243, .96)),
-        radial-gradient(circle at 12% 6%, rgba(14, 124, 123, .08), transparent 28%);
+      background: linear-gradient(180deg, #f7faf9, #edf5f2);
       color: var(--ink);
       font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       line-height: 1.55;
@@ -43,7 +41,8 @@
 
     button,
     input,
-    textarea {
+    textarea,
+    select {
       font: inherit;
     }
 
@@ -56,25 +55,25 @@
       position: sticky;
       top: 0;
       z-index: 20;
-      border-bottom: 1px solid rgba(216, 228, 224, .86);
-      background: rgba(246, 248, 247, .88);
+      border-bottom: 1px solid rgba(215, 228, 223, .9);
+      background: rgba(247, 250, 249, .9);
       backdrop-filter: blur(18px);
     }
 
-    .topbar-inner {
+    .top-inner {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 20px;
+      gap: 18px;
       max-width: 1480px;
       margin: 0 auto;
-      padding: 16px 24px;
+      padding: 15px 24px;
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 13px;
+      gap: 12px;
       min-width: 0;
     }
 
@@ -84,21 +83,16 @@
       width: 42px;
       height: 42px;
       border-radius: 8px;
-      background: #133f3f;
+      background: #153f3f;
       color: #fff;
-      font-weight: 800;
-      letter-spacing: 0;
-    }
-
-    .brand-text {
-      min-width: 0;
+      font-weight: 900;
     }
 
     .eyebrow {
       margin: 0;
       color: var(--teal);
       font-size: 12px;
-      font-weight: 800;
+      font-weight: 900;
     }
 
     h1 {
@@ -111,15 +105,15 @@
     .top-actions {
       display: flex;
       align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
       justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
-    .status-pill,
-    .mode-pill {
+    .pill {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 7px;
       min-height: 34px;
       padding: 0 12px;
@@ -128,10 +122,11 @@
       background: rgba(255, 255, 255, .78);
       color: var(--muted);
       font-size: 13px;
+      font-weight: 700;
       white-space: nowrap;
     }
 
-    .status-dot {
+    .dot {
       width: 8px;
       height: 8px;
       border-radius: 999px;
@@ -139,10 +134,7 @@
       box-shadow: 0 0 0 4px rgba(47, 133, 90, .13);
     }
 
-    .ghost-top {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+    .top-btn {
       min-height: 34px;
       padding: 0 12px;
       border: 1px solid var(--line);
@@ -150,7 +142,7 @@
       background: #fff;
       color: var(--ink);
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 800;
     }
 
     .shell {
@@ -161,39 +153,36 @@
 
     .workspace {
       display: grid;
-      grid-template-columns: 276px minmax(0, 1fr) 354px;
+      grid-template-columns: 280px minmax(0, 1fr) 356px;
       gap: 18px;
       align-items: start;
     }
 
-    .side,
+    .panel,
     .stage,
     .insights {
-      background: rgba(255, 255, 255, .86);
       border: 1px solid var(--line);
       border-radius: var(--radius);
+      background: rgba(255, 255, 255, .88);
       box-shadow: var(--shadow);
     }
 
-    .side,
+    .panel,
     .insights {
       position: sticky;
-      top: 88px;
-    }
-
-    .side {
+      top: 86px;
       padding: 16px;
     }
 
-    .side-title,
+    .panel-title,
     .section-title {
       margin: 0;
+      color: #203030;
       font-size: 14px;
       font-weight: 900;
-      color: #203131;
     }
 
-    .side-sub {
+    .panel-sub {
       margin: 4px 0 14px;
       color: var(--muted);
       font-size: 13px;
@@ -204,7 +193,7 @@
       gap: 8px;
     }
 
-    .step-button {
+    .step {
       display: grid;
       grid-template-columns: 34px minmax(0, 1fr);
       gap: 10px;
@@ -216,20 +205,19 @@
       background: transparent;
       color: var(--ink);
       text-align: left;
-      transition: background .18s ease, border .18s ease, transform .18s ease;
     }
 
-    .step-button:hover {
-      background: #f8fbfa;
+    .step:hover {
       border-color: var(--line);
+      background: #f8fbfa;
     }
 
-    .step-button.active {
+    .step.active {
+      border-color: #acd1c9;
       background: #e8f4f1;
-      border-color: #afd1c9;
     }
 
-    .step-button.done .step-num {
+    .step.done .step-num {
       background: var(--teal);
       color: #fff;
     }
@@ -246,13 +234,13 @@
       font-weight: 900;
     }
 
-    .step-copy strong {
+    .step strong {
       display: block;
       font-size: 14px;
       line-height: 1.3;
     }
 
-    .step-copy span {
+    .step span span {
       display: block;
       margin-top: 3px;
       color: var(--muted);
@@ -260,14 +248,10 @@
       line-height: 1.35;
     }
 
-    .side-footer {
+    .panel-note {
       margin-top: 16px;
       padding-top: 14px;
       border-top: 1px solid var(--line);
-    }
-
-    .fine-print {
-      margin: 0;
       color: var(--muted);
       font-size: 12px;
     }
@@ -305,20 +289,20 @@
       font-size: 15px;
     }
 
-    .progress-block {
+    .progress {
       min-width: 132px;
       padding-top: 4px;
       text-align: right;
     }
 
-    .progress-label {
+    .progress p {
       margin: 0 0 8px;
       color: var(--muted);
       font-size: 12px;
-      font-weight: 800;
+      font-weight: 900;
     }
 
-    .progress-track {
+    .track {
       width: 132px;
       height: 8px;
       border-radius: 999px;
@@ -326,82 +310,79 @@
       overflow: hidden;
     }
 
-    .progress-fill {
-      width: 0%;
+    .fill {
+      width: 0;
       height: 100%;
       border-radius: inherit;
       background: var(--teal);
-      transition: width .25s ease;
+      transition: width .22s ease;
     }
 
     .stage-body {
       padding: 24px 26px 28px;
     }
 
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
     .two-col {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 330px;
+      grid-template-columns: minmax(0, 1fr) 324px;
       gap: 18px;
       align-items: start;
     }
 
-    .visual-frame {
-      overflow: hidden;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #f7faf8;
-    }
-
-    .visual-frame img {
-      display: block;
-      width: 100%;
-      height: auto;
-    }
-
-    .form-zone {
+    .block {
       display: grid;
-      gap: 18px;
-    }
-
-    .field-block {
-      display: grid;
-      gap: 10px;
+      gap: 12px;
       padding: 16px;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: #fff;
     }
 
-    .field-block.soft {
+    .block.soft {
       background: #f8fbfa;
     }
 
-    .field-head {
+    .block.warn {
+      border-color: #e2c188;
+      background: #fffaf0;
+    }
+
+    .block.danger {
+      border-color: #f0b4ae;
+      background: #fff6f5;
+    }
+
+    .block-head {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
       gap: 12px;
     }
 
-    .field-title {
+    .block-title {
       margin: 0;
       font-size: 16px;
       font-weight: 900;
     }
 
-    .field-caption {
+    .caption {
       margin: 3px 0 0;
       color: var(--muted);
       font-size: 13px;
     }
 
-    .choice-grid {
+    .choices {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
     }
 
-    .choice-grid.three {
+    .choices.three {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
@@ -415,13 +396,11 @@
       background: #fff;
       color: var(--ink);
       font-size: 14px;
-      font-weight: 800;
+      font-weight: 900;
       text-align: left;
-      transition: border .18s ease, background .18s ease, transform .18s ease;
     }
 
     .choice:hover {
-      transform: translateY(-1px);
       border-color: var(--line-strong);
     }
 
@@ -431,54 +410,27 @@
       color: var(--teal-dark);
     }
 
-    .preset-row {
+    .input-grid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .field {
+      display: grid;
       gap: 8px;
     }
 
-    .preset {
-      min-height: 42px;
-      padding: 8px 10px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fff;
-      color: var(--ink);
+    label,
+    .label {
+      color: var(--muted);
       font-size: 13px;
       font-weight: 800;
     }
 
-    .preset.active {
-      background: #153f3f;
-      color: #fff;
-      border-color: #153f3f;
-    }
-
-    .textarea {
-      width: 100%;
-      min-height: 116px;
-      resize: vertical;
-      padding: 12px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fff;
-      color: var(--ink);
-      outline: none;
-    }
-
-    .textarea:focus,
-    .input:focus {
-      border-color: var(--teal);
-      box-shadow: 0 0 0 4px rgba(14, 124, 123, .12);
-    }
-
-    .input-row {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      gap: 12px;
-    }
-
-    .input {
+    input[type="text"],
+    textarea,
+    select {
       width: 100%;
       min-height: 44px;
       padding: 10px 12px;
@@ -489,10 +441,22 @@
       outline: none;
     }
 
-    .range-wrap {
+    textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 4px rgba(13, 127, 124, .12);
+    }
+
+    .range-row {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 54px;
-      gap: 14px;
+      grid-template-columns: 98px minmax(0, 1fr) 58px;
+      gap: 12px;
       align-items: center;
     }
 
@@ -501,10 +465,10 @@
       accent-color: var(--teal);
     }
 
-    .range-value {
+    .value {
       display: grid;
       place-items: center;
-      height: 44px;
+      height: 42px;
       border-radius: 8px;
       background: #153f3f;
       color: #fff;
@@ -537,12 +501,12 @@
       accent-color: var(--teal);
     }
 
-    .action-row {
+    .actions {
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      gap: 10px;
       flex-wrap: wrap;
+      gap: 10px;
       margin-top: 4px;
     }
 
@@ -561,7 +525,7 @@
     .btn-primary {
       background: var(--teal);
       color: #fff;
-      box-shadow: 0 10px 22px rgba(14, 124, 123, .18);
+      box-shadow: 0 10px 22px rgba(13, 127, 124, .18);
     }
 
     .btn-primary:hover {
@@ -574,156 +538,27 @@
       color: var(--ink);
     }
 
-    .btn-warm {
-      background: var(--coral);
-      color: #fff;
-    }
-
     .btn-danger {
       background: var(--danger);
       color: #fff;
     }
 
-    .btn-icon {
+    .icon {
       display: grid;
       place-items: center;
       width: 22px;
       height: 22px;
       border-radius: 999px;
       background: rgba(255, 255, 255, .18);
-      font-weight: 900;
       line-height: 1;
     }
 
-    .btn-secondary .btn-icon {
+    .btn-secondary .icon {
       background: #edf5f2;
       color: var(--teal-dark);
     }
 
-    .result-box {
-      display: grid;
-      gap: 16px;
-      padding: 20px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fff;
-    }
-
-    .result-box.success {
-      border-color: #b9ddcb;
-      background: #f4fbf7;
-    }
-
-    .result-box.warn {
-      border-color: #e2c188;
-      background: #fffaf0;
-    }
-
-    .result-box.danger {
-      border-color: #f0b4ae;
-      background: #fff6f5;
-    }
-
-    .result-status {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .status-icon {
-      display: grid;
-      place-items: center;
-      width: 42px;
-      height: 42px;
-      border-radius: 8px;
-      background: var(--teal);
-      color: #fff;
-      font-weight: 900;
-    }
-
-    .warn .status-icon {
-      background: var(--amber);
-    }
-
-    .danger .status-icon {
-      background: var(--danger);
-    }
-
-    .result-status h2,
-    .route-card h2 {
-      margin: 0;
-      font-size: 22px;
-      line-height: 1.25;
-    }
-
-    .result-status p,
-    .route-card p {
-      margin: 3px 0 0;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .evidence-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
-    }
-
-    .evidence {
-      min-height: 98px;
-      padding: 12px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fff;
-    }
-
-    .evidence b {
-      display: block;
-      font-size: 13px;
-      color: var(--teal-dark);
-    }
-
-    .evidence span {
-      display: block;
-      margin-top: 7px;
-      color: var(--ink);
-      font-size: 14px;
-      font-weight: 700;
-    }
-
-    .loading-box {
-      display: grid;
-      place-items: center;
-      min-height: 420px;
-      padding: 30px;
-      text-align: center;
-    }
-
-    .loader {
-      position: relative;
-      width: 86px;
-      height: 86px;
-      margin-bottom: 18px;
-      border: 8px solid #e1eeea;
-      border-top-color: var(--teal);
-      border-radius: 999px;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    .plan-layout {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 286px;
-      gap: 18px;
-      align-items: start;
-    }
-
-    .point-map {
+    .diagram {
       display: grid;
       gap: 12px;
       padding: 16px;
@@ -732,50 +567,67 @@
       background: #f8fbfa;
     }
 
-    .body-figure {
+    .neck-map,
+    .head-map,
+    .body-map {
       position: relative;
-      height: 315px;
+      min-height: 300px;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: #eef6f3;
       overflow: hidden;
     }
 
-    .body-figure::before {
+    .neck-map::before,
+    .body-map::before {
       content: "";
       position: absolute;
       left: 50%;
-      top: 44px;
-      width: 74px;
-      height: 74px;
-      border: 3px solid #8abbb2;
+      top: 38px;
+      width: 72px;
+      height: 72px;
+      border: 3px solid #8bbcb3;
       border-radius: 999px;
-      background: #d5eae5;
+      background: #d7ebe6;
       transform: translateX(-50%);
     }
 
-    .body-figure::after {
+    .neck-map::after,
+    .body-map::after {
       content: "";
       position: absolute;
       left: 50%;
-      top: 122px;
-      width: 170px;
-      height: 164px;
-      border: 3px solid #8abbb2;
-      background: #d5eae5;
-      transform: translateX(-50%) skewX(-8deg);
-      clip-path: polygon(20% 0, 80% 0, 100% 20%, 82% 100%, 18% 100%, 0 20%);
+      top: 114px;
+      width: 180px;
+      height: 160px;
+      border: 3px solid #8bbcb3;
+      background: #d7ebe6;
+      transform: translateX(-50%);
+      clip-path: polygon(18% 0, 82% 0, 100% 24%, 84% 100%, 16% 100%, 0 24%);
     }
 
-    .map-line {
+    .head-map::before {
+      content: "";
       position: absolute;
       left: 50%;
-      top: 133px;
+      top: 38px;
+      width: 158px;
+      height: 190px;
+      border: 3px solid #8bbcb3;
+      border-radius: 48% 48% 44% 44%;
+      background: #d7ebe6;
+      transform: translateX(-50%);
+    }
+
+    .spine {
+      position: absolute;
+      left: 50%;
+      top: 124px;
+      z-index: 2;
       width: 4px;
-      height: 143px;
+      height: 140px;
       background: #78aaa2;
       transform: translateX(-50%);
-      z-index: 2;
     }
 
     .map-dot {
@@ -793,79 +645,140 @@
       font-weight: 900;
     }
 
-    .dot-a {
-      left: calc(50% + 42px);
-      top: 153px;
+    .neck-r { left: calc(50% + 54px); top: 118px; }
+    .neck-l { left: calc(50% - 86px); top: 118px; }
+    .shoulder-r { left: calc(50% + 74px); top: 170px; }
+    .shoulder-l { left: calc(50% - 104px); top: 170px; }
+    .hand-dot { right: 20px; bottom: 22px; background: var(--teal); }
+    .back-r { left: calc(50% + 58px); top: 176px; background: var(--indigo); }
+    .back-l { left: calc(50% - 88px); top: 176px; background: var(--indigo); }
+    .front { left: calc(50% - 16px); top: 194px; background: var(--green); }
+    .forehead { left: calc(50% - 16px); top: 66px; }
+    .temple-r { left: calc(50% + 58px); top: 112px; }
+    .temple-l { left: calc(50% - 88px); top: 112px; }
+    .occipital { left: calc(50% - 16px); top: 198px; background: var(--indigo); }
+
+    .angle-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
     }
 
-    .dot-b {
-      left: calc(50% + 58px);
-      top: 202px;
-    }
-
-    .dot-n {
-      left: calc(50% - 15px);
-      top: 130px;
-      background: var(--teal);
-    }
-
-    .map-caption {
-      margin: 0;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .instruction-list {
+    .angle-card {
       display: grid;
       gap: 10px;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    .instruction-list li {
-      display: grid;
-      grid-template-columns: 34px minmax(0, 1fr);
-      gap: 11px;
-      min-height: 54px;
-      padding: 10px;
+      padding: 14px;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: #fff;
     }
 
-    .instruction-list b {
-      display: grid;
-      place-items: center;
-      width: 32px;
-      height: 32px;
-      border-radius: 999px;
-      background: #e8f4f1;
-      color: var(--teal-dark);
-      font-size: 13px;
+    .angle-card strong {
+      font-size: 15px;
     }
 
-    .instruction-list span {
-      color: var(--ink);
-      font-size: 14px;
+    .test-table {
+      display: grid;
+      gap: 10px;
+    }
+
+    .test-row {
+      display: grid;
+      grid-template-columns: minmax(170px, .9fr) minmax(0, 1fr);
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .point-name {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .point-badge {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: var(--teal);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 900;
+      flex: 0 0 auto;
+    }
+
+    .point-name strong {
+      display: block;
+      font-size: 15px;
+    }
+
+    .point-name span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
       font-weight: 700;
     }
 
-    .timer-panel {
+    .score-grid {
       display: grid;
-      gap: 12px;
-      padding: 16px;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) 106px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .side-result {
+      display: grid;
+      place-items: center;
+      min-height: 46px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: #fff;
+      background: #f8fbfa;
+      color: var(--teal-dark);
+      font-size: 13px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .selected-point {
+      display: grid;
+      grid-template-columns: 86px minmax(0, 1fr);
+      gap: 14px;
+      align-items: center;
+      padding: 16px;
+      border: 1px solid #acd1c9;
+      border-radius: 8px;
+      background: #e8f4f1;
+    }
+
+    .selected-mark {
+      display: grid;
+      place-items: center;
+      width: 86px;
+      height: 86px;
+      border-radius: 8px;
+      background: var(--teal);
+      color: #fff;
+      font-size: 30px;
+      font-weight: 900;
+    }
+
+    .timer {
+      display: grid;
+      grid-template-columns: 172px minmax(0, 1fr);
+      gap: 18px;
+      align-items: center;
     }
 
     .timer-ring {
       display: grid;
       place-items: center;
-      width: 148px;
-      height: 148px;
-      margin: 0 auto;
+      width: 154px;
+      height: 154px;
       border-radius: 999px;
       background: conic-gradient(var(--teal) var(--timer, 0%), #e4ece9 0);
     }
@@ -873,96 +786,238 @@
     .timer-core {
       display: grid;
       place-items: center;
-      width: 112px;
-      height: 112px;
+      width: 114px;
+      height: 114px;
       border-radius: 999px;
       background: #fff;
-      color: var(--ink);
       font-size: 26px;
       font-weight: 900;
     }
 
-    .feedback-options {
+    .metrics {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 10px;
     }
 
-    .feeling {
-      min-height: 92px;
-      padding: 14px;
+    .metric {
+      min-height: 88px;
+      padding: 12px;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: #fff;
-      color: var(--ink);
-      text-align: left;
     }
 
-    .feeling.selected {
-      border-color: var(--teal);
-      background: #e8f4f1;
-    }
-
-    .feeling strong {
+    .metric b {
       display: block;
-      font-size: 15px;
+      font-size: 24px;
+      line-height: 1.15;
     }
 
-    .feeling span {
+    .metric span {
       display: block;
-      margin-top: 4px;
+      margin-top: 6px;
       color: var(--muted);
-      font-size: 13px;
-      font-weight: 600;
+      font-size: 12px;
+      font-weight: 800;
     }
 
-    .route-card {
-      display: grid;
-      gap: 16px;
-      padding: 20px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fff;
-    }
-
-    .path-table {
+    .route-table {
       display: grid;
       border: 1px solid var(--line);
       border-radius: 8px;
       overflow: hidden;
     }
 
-    .path-row {
+    .route-row {
       display: grid;
-      grid-template-columns: 180px minmax(0, 1fr);
+      grid-template-columns: 178px minmax(0, 1fr);
       min-height: 54px;
       border-bottom: 1px solid var(--line);
     }
 
-    .path-row:last-child {
+    .route-row:last-child {
       border-bottom: 0;
     }
 
-    .path-row b,
-    .path-row span {
+    .route-row b,
+    .route-row span {
       padding: 12px 14px;
     }
 
-    .path-row b {
+    .route-row b {
       background: #f5f9f8;
       color: var(--teal-dark);
       font-size: 13px;
     }
 
-    .path-row span {
-      color: var(--ink);
+    .route-row span {
       font-size: 14px;
       font-weight: 700;
     }
 
-    .insights {
-      padding: 16px;
+    .notice {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fbfa;
+      color: var(--muted);
+      font-size: 13px;
     }
+
+    .notice.danger {
+      border-color: #f0b4ae;
+      background: #fff0ef;
+      color: #8f1f17;
+    }
+
+    .history-tools {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 160px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .filter-btn {
+      min-height: 36px;
+      padding: 0 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .filter-btn.active {
+      border-color: var(--teal);
+      background: #e8f4f1;
+      color: var(--teal-dark);
+    }
+
+    .history-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .history-card {
+      display: grid;
+      gap: 10px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .history-card.active {
+      border-color: var(--teal);
+      background: #f0faf7;
+    }
+
+    .history-card h3 {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.35;
+    }
+
+    .history-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .history-result {
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .history-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .small-btn {
+      min-height: 34px;
+      padding: 0 11px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .small-btn.primary {
+      border-color: var(--teal);
+      background: var(--teal);
+      color: #fff;
+    }
+
+    .small-btn.danger {
+      border-color: #f0b4ae;
+      color: var(--danger);
+    }
+
+    .recall-detail {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      border: 1px solid #acd1c9;
+      border-radius: 8px;
+      background: #f0faf7;
+    }
+
+    .recall-detail strong {
+      font-size: 17px;
+    }
+
+    .empty-state {
+      padding: 16px;
+      border: 1px dashed var(--line-strong);
+      border-radius: 8px;
+      background: #f8fbfa;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 29px;
+      padding: 0 9px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .tag.teal { border-color: #acd1c9; background: #e8f4f1; color: var(--teal-dark); }
+    .tag.green { border-color: #b9ddcb; background: #f0faf4; color: #226241; }
+    .tag.coral { border-color: #efc0ad; background: #fff3ee; color: #923f2b; }
+    .tag.warn { border-color: #e7c98f; background: #fff8e8; color: #7a4d05; }
+    .tag.danger { border-color: #f0b4ae; background: #fff0ef; color: var(--danger); }
 
     .insight-section {
       padding: 14px 0;
@@ -980,7 +1035,7 @@
 
     .decision {
       display: grid;
-      gap: 10px;
+      gap: 8px;
       margin-top: 10px;
       padding: 13px;
       border: 1px solid var(--line);
@@ -1006,7 +1061,7 @@
       margin-top: 12px;
     }
 
-    .mini-metric {
+    .mini {
       min-height: 68px;
       padding: 10px;
       border: 1px solid var(--line);
@@ -1014,17 +1069,16 @@
       background: #fff;
     }
 
-    .mini-metric b {
+    .mini b {
       display: block;
-      color: var(--ink);
       font-size: 20px;
       line-height: 1.15;
     }
 
-    .mini-metric span {
+    .mini span {
       color: var(--muted);
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 800;
     }
 
     .summary-list {
@@ -1050,130 +1104,13 @@
     }
 
     .summary-list span {
-      color: var(--ink);
       font-size: 13px;
-      font-weight: 700;
-    }
-
-    .tag-cloud {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      min-height: 29px;
-      padding: 0 9px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: #fff;
-      color: var(--ink);
-      font-size: 12px;
       font-weight: 800;
-    }
-
-    .tag.teal {
-      border-color: #acd1c9;
-      background: #e8f4f1;
-      color: var(--teal-dark);
-    }
-
-    .tag.coral {
-      border-color: #efc0ad;
-      background: #fff3ee;
-      color: #923f2b;
-    }
-
-    .tag.green {
-      border-color: #b9ddcb;
-      background: #f0faf4;
-      color: #226241;
-    }
-
-    .tag.warn {
-      border-color: #e7c98f;
-      background: #fff8e8;
-      color: #7a4d05;
-    }
-
-    .tag.danger {
-      border-color: #f0b4ae;
-      background: #fff0ef;
-      color: var(--danger);
-    }
-
-    .notice {
-      padding: 12px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #f8fbfa;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .opened-items {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .open-item {
-      min-height: 88px;
-      padding: 12px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fff;
-      text-align: left;
-    }
-
-    .open-item strong {
-      display: block;
-      color: var(--ink);
-      font-size: 14px;
-    }
-
-    .open-item span {
-      display: block;
-      margin-top: 5px;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
-    }
-
-
-    /* Hide side workflow and right-side judgement panel; keep only the center experience area. */
-    .workspace {
-      grid-template-columns: minmax(0, 1fr);
-    }
-
-    .side,
-    .insights {
-      display: none;
-    }
-
-    .stage {
-      grid-column: 1 / -1;
     }
 
     @media (max-width: 1240px) {
       .workspace {
-        grid-template-columns: 240px minmax(0, 1fr);
+        grid-template-columns: 242px minmax(0, 1fr);
       }
 
       .insights {
@@ -1181,7 +1118,7 @@
         position: static;
       }
 
-      .insight-grid-wide {
+      .insight-grid {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 14px;
@@ -1198,15 +1135,21 @@
       }
     }
 
-    @media (max-width: 860px) {
-      .topbar-inner {
+    @media (max-width: 880px) {
+      .top-inner {
         align-items: flex-start;
         flex-direction: column;
         padding: 14px 16px;
       }
 
       .top-actions {
+        width: 100%;
         justify-content: flex-start;
+      }
+
+      .pill,
+      .top-btn {
+        width: 100%;
       }
 
       .shell {
@@ -1217,25 +1160,13 @@
         grid-template-columns: 1fr;
       }
 
-      .side,
+      .stage { order: 1; }
+      .panel { order: 2; }
+      .insights { order: 3; }
+
+      .panel,
       .insights {
         position: static;
-      }
-
-      .stage {
-        order: 1;
-      }
-
-      .side {
-        order: 2;
-      }
-
-      .insights {
-        order: 3;
-      }
-
-      .steps {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
       .stage-head {
@@ -1247,7 +1178,7 @@
         font-size: 24px;
       }
 
-      .progress-block {
+      .progress {
         text-align: left;
       }
 
@@ -1256,22 +1187,26 @@
       }
 
       .two-col,
-      .plan-layout,
-      .input-row,
-      .evidence-grid,
-      .choice-grid,
-      .choice-grid.three,
-      .feedback-options,
-      .opened-items,
-      .insight-grid-wide {
+      .input-grid,
+      .angle-grid,
+      .choices,
+      .choices.three,
+      .checks,
+      .test-row,
+      .score-grid,
+      .timer,
+      .metrics,
+      .history-tools,
+      .history-grid,
+      .insight-grid {
         grid-template-columns: 1fr;
       }
 
-      .preset-row {
+      .steps {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
-      .checks {
+      .route-row {
         grid-template-columns: 1fr;
       }
 
@@ -1280,10 +1215,6 @@
         border-bottom: 1px solid var(--line);
         padding: 14px 0;
       }
-
-      .path-row {
-        grid-template-columns: 1fr;
-      }
     }
 
     @media (max-width: 520px) {
@@ -1291,102 +1222,85 @@
         font-size: 17px;
       }
 
-      .steps {
-        grid-template-columns: 1fr;
-      }
-
-      .preset-row,
+      .steps,
       .mini-grid {
         grid-template-columns: 1fr;
       }
 
-      .status-pill,
-      .mode-pill,
-      .ghost-top {
-        width: 100%;
-        justify-content: center;
+      .selected-point {
+        grid-template-columns: 1fr;
+      }
+
+      .selected-mark {
+        width: 68px;
+        height: 68px;
       }
     }
   </style>
 </head>
 <body>
   <header class="topbar">
-    <div class="topbar-inner">
-      <div class="brand" aria-label="Raphael AI health data reshape">
+    <div class="top-inner">
+      <div class="brand">
         <div class="brand-mark">R</div>
-        <div class="brand-text">
-          <p class="eyebrow">AI HEALTH DATA REORGANIZATION</p>
-          <h1>舊客 AI 健康資料重整居家體驗版</h1>
+        <div>
+          <p class="eyebrow">HOME MOBILITY RESPONSE TEST</p>
+          <h1>舊客居家活動度與按壓反應體驗版 V3｜回溯舊點</h1>
         </div>
       </div>
       <div class="top-actions">
-        <span class="status-pill"><span class="status-dot"></span><span id="topStatus">可操作體驗版</span></span>
-        <span class="mode-pill">症狀陳述使用範例資料</span>
-        <button class="ghost-top" type="button" id="resetBtn">重設體驗</button>
+        <span class="pill"><span class="dot"></span><span id="topStatus">可操作測試版</span></span>
+        <span class="pill">前後測差異模式</span>
+        <button type="button" class="top-btn" id="recallTopBtn">回溯舊點</button>
+        <button type="button" class="top-btn" id="resetBtn">重設體驗</button>
       </div>
     </div>
   </header>
 
   <div class="shell">
     <div class="workspace">
-      <aside class="side" aria-label="體驗流程">
-        <p class="side-title">體驗流程</p>
-        <p class="side-sub">先讓舊客在家完成低門檻初評，再依狀態分流承接。</p>
+      <aside class="panel" aria-label="流程">
+        <p class="panel-title">測試流程</p>
+        <p class="panel-sub">先測左右活動度，再用三個示意位置做左右比較，最後看前後差異。</p>
         <nav class="steps" id="stepsNav"></nav>
-        <div class="side-footer">
-          <p class="fine-print">本頁為原型示範。正式點位、禁忌與承接話術需由醫療、法規與顧問團隊共同定版。</p>
-        </div>
+        <div class="panel-note">本頁為體驗原型。正式點位、禁忌、風險排除與話術需由醫療、法規與顧問團隊定版。</div>
       </aside>
 
       <main class="stage" aria-live="polite">
         <div class="stage-head">
           <div>
-            <p class="stage-kicker" id="stageKicker">01 舊客身份判斷</p>
-            <h2 class="stage-title" id="stageTitle">您過去留下的健康紀錄，現在可以被 AI 重新整理。</h2>
-            <p class="stage-desc" id="stageDesc">先確認過去與拉菲爾／智平衡的關係，再把目前最想處理的狀態回標到資料重整流程。</p>
+            <p class="stage-kicker" id="stageKicker">01 測試模式</p>
+            <h2 class="stage-title" id="stageTitle">先決定自己測，還是由家人協助。</h2>
+            <p class="stage-desc" id="stageDesc">可按到的位置會不同：自己測試以手部、前側或頸側為主；家人協助時才開放背部示意位置。</p>
           </div>
-          <div class="progress-block">
-            <p class="progress-label" id="progressLabel">完成度 0%</p>
-            <div class="progress-track" aria-hidden="true">
-              <div class="progress-fill" id="progressFill"></div>
-            </div>
+          <div class="progress">
+            <p id="progressLabel">完成度 0%</p>
+            <div class="track" aria-hidden="true"><div class="fill" id="progressFill"></div></div>
           </div>
         </div>
         <div class="stage-body" id="stageBody"></div>
       </main>
 
-      <aside class="insights" aria-label="系統摘要">
-        <div class="insight-grid-wide">
+      <aside class="insights" aria-label="即時摘要">
+        <div class="insight-grid">
           <section class="insight-section">
             <p class="section-title">目前判斷</p>
-            <div class="decision" id="decisionBox">
-              <strong>等待舊客回標</strong>
-              <p>完成身份與目前狀態後，系統會顯示是否符合開放體驗範圍。</p>
-            </div>
+            <div class="decision" id="decisionBox"></div>
             <div class="mini-grid">
-              <div class="mini-metric">
-                <b id="metricStep">1/6</b>
-                <span>流程位置</span>
-              </div>
-              <div class="mini-metric">
-                <b id="metricRisk">低</b>
-                <span>風險標記</span>
-              </div>
-              <div class="mini-metric">
-                <b id="metricTier">待分級</b>
-                <span>承接等級</span>
-              </div>
+              <div class="mini"><b id="miniStep">1/6</b><span>流程位置</span></div>
+              <div class="mini"><b id="miniRisk">低</b><span>安全標記</span></div>
+              <div class="mini"><b id="miniResult">待測</b><span>體驗結果</span></div>
             </div>
           </section>
 
           <section class="insight-section">
-            <p class="section-title">AI 重整摘要</p>
+            <p class="section-title">測試摘要</p>
             <ul class="summary-list" id="summaryList"></ul>
           </section>
 
           <section class="insight-section">
-            <p class="section-title">CRM 貼標</p>
-            <div class="tag-cloud" id="tagCloud"></div>
+            <p class="section-title">紀錄標籤</p>
+            <div class="tags" id="tagCloud"></div>
           </section>
         </div>
       </aside>
@@ -1395,162 +1309,102 @@
 
   <script>
     const steps = [
-      { title: "舊客身份", sub: "資料舊客或曾預約未到" },
-      { title: "症狀陳述", sub: "範例輸入與安全排除" },
-      { title: "AI 比對", sub: "開放範圍與風險判斷" },
-      { title: "點位體驗卡", sub: "有限、安全、可操作" },
-      { title: "體驗回填", sub: "有感、無感或不適增加" },
-      { title: "路徑承接", sub: "14／30／90 天分流" }
+      { title: "測試模式", sub: "自測／家人協助與主題" },
+      { title: "前測紀錄", sub: "左右轉角度與不適位置" },
+      { title: "三點比較", sub: "左右按壓反應測試" },
+      { title: "一分鐘按壓", sub: "依結果取得主要位置" },
+      { title: "後測回填", sub: "角度與痠痛變化" },
+      { title: "回溯保存", sub: "找回舊點或留下資料" }
     ];
 
-    const relationOptions = [
-      "曾經看診過",
-      "曾經做過療程",
-      "曾經購買或體驗產品",
-      "曾經預約但最後沒有來",
-      "曾經參加活動",
-      "不確定，但曾經接觸過"
+    const titles = [
+      {
+        kicker: "01 測試模式",
+        title: "先決定自己測，還是由家人協助。",
+        desc: "可按到的位置會不同：自己測試以手部、前側或頸側為主；家人協助時才開放背部示意位置。"
+      },
+      {
+        kicker: "02 前測紀錄",
+        title: "先量出按壓前的左右活動度與原本不適。",
+        desc: "此步驟建立基準值。後面不是用感覺說服，而是用角度與痠痛變化做前後對照。"
+      },
+      {
+        kicker: "03 三點左右比較",
+        title: "系統給三個位置，使用者左右都按看看。",
+        desc: "每個位置都比較左、右兩邊哪一邊比較明顯，系統再整理出本次主要按壓位置。"
+      },
+      {
+        kicker: "04 一分鐘按壓",
+        title: "依比較結果，取得本次一分鐘按壓位置。",
+        desc: "這裡只呈現示意區與安全提醒。正式位置與操作方式需由內部點位方案庫提供。"
+      },
+      {
+        kicker: "05 後測回填",
+        title: "按完後再測一次，觀察活動度與原本痠痛是否改變。",
+        desc: "判斷指標有兩個：左右轉動幅度是否增加，以及原本痠痛是否降低或消失。"
+      },
+      {
+        kicker: "06 保存與承接",
+        title: "把有效點存起來，下次可以回溯找回。",
+        desc: "舊客回來時，可依症狀、日期、有效程度找出以前按過有效的點，再決定直接查看、帶入本次按壓或重新測一次。"
+      }
     ];
 
-    const openPlans = {
-      rightScapula: {
-        label: "右側肩胛緊痛",
-        area: "肩胛／上背",
-        matchText: "右側肩胛靠近內側緊繃，久坐後更明顯。",
-        data: "過去紀錄曾出現肩頸與右上背反覆緊繃，且曾有調節後放鬆回饋。",
-        direction: "以右側肩胛內側緊繃示意區為主，搭配頸肩交界示意區觀察變化。",
-        handoff: "若體驗後明顯有感，建議進入 14 天觀察，並由健康管理師確認是否適合平衡衣或解析會。"
-      },
-      leftScapula: {
-        label: "左側肩胛緊痛",
-        area: "肩胛／上背",
-        matchText: "左側肩胛附近卡住，轉身或久坐後較明顯。",
-        data: "過去紀錄曾有上背緊繃與睡眠品質波動，適合先做低強度居家體驗。",
-        direction: "以左側肩胛內側示意區為主，先短時間觀察緊繃感是否下降。",
-        handoff: "若體驗後有一點變化，建議由健康管理師協助整理姿勢、睡眠與追蹤條件。"
-      },
-      neck: {
-        label: "肩頸緊繃",
-        area: "肩頸",
-        matchText: "肩頸整片緊繃，下午或壓力大時更明顯。",
-        data: "過去資料顯示肩頸緊繃與疲勞、睡眠品質有關，適合先做安全邊界內的體驗。",
-        direction: "以頸肩交界示意區為主，使用舒服力道短時間按壓並回填感受。",
-        handoff: "若有感，可進入 14 天觀察與穿戴數據追蹤；若無感，建議專人協助判斷。"
-      },
-      upperBack: {
-        label: "上背緊繃",
-        area: "上背",
-        matchText: "上背靠近肩胛中段悶緊，坐久會更卡。",
-        data: "過去資料與目前陳述都集中在上背與肩胛周邊，可進入第一階段體驗。",
-        direction: "以上背中段示意區為主，先短時間測試體感變化。",
-        handoff: "若回填有變化，建議安排 30 天啟動說明，確認居家管理節奏。"
-      }
-    };
-
-    const examples = {
-      rightScapula: {
-        label: "右側肩胛",
-        relation: "曾經看診過",
-        area: "rightScapula",
-        duration: "超過 1 週",
-        severity: 6,
-        statement: "右側肩胛靠近內側緊繃，久坐後更明顯，沒有外傷。以前曾經處理過肩頸問題，後來中斷追蹤。"
-      },
-      neck: {
-        label: "肩頸緊繃",
-        relation: "曾經購買或體驗產品",
-        area: "neck",
-        duration: "3 到 7 天",
-        severity: 5,
-        statement: "最近肩頸整片緊，下午工作後更明顯，睡前也不太容易放鬆。沒有突然劇痛。"
-      },
-      unsupported: {
-        label: "未開放項目",
-        relation: "曾經預約但最後沒有來",
-        area: "other",
-        duration: "超過 1 週",
-        severity: 5,
-        statement: "右膝外側痠痛，上下樓梯比較明顯，沒有外傷。想先知道能不能在家自己試試看。"
-      },
-      redflag: {
-        label: "安全排除",
-        relation: "曾經看診過",
-        area: "other",
-        duration: "今天開始",
-        severity: 8,
-        statement: "胸口悶痛，合併冒冷汗，剛剛突然變得很不舒服。",
-        flags: ["胸痛合併冒冷汗"]
-      }
+    const pointLibrary = {
+      selfNeck: [
+        { id: "H1", name: "手部示意點 H1", type: "hand", access: "自己可按", note: "手部可自行操作，適合遠端體驗第一階段。" },
+        { id: "F2", name: "前側示意點 F2", type: "front", access: "自己可按", note: "胸前或鎖骨下附近示意區，需避免過度用力。" },
+        { id: "N3", name: "頸側示意點 N3", type: "neck", access: "自己可按", note: "只做短時間輕按，若不適增加立即停止。" },
+        { id: "H4", name: "手腕示意點 H4", type: "hand", access: "自己可按", note: "替代手部示意區，用於隨機組合。" },
+        { id: "F5", name: "前肩示意點 F5", type: "front", access: "自己可按", note: "前肩可觸及位置，正式點位需審核。" }
+      ],
+      familyNeck: [
+        { id: "H1", name: "手部示意點 H1", type: "hand", access: "自己可按", note: "保留一個手部點，方便對照。" },
+        { id: "B1", name: "背部示意點 B1", type: "back", access: "需家人協助", note: "肩胛內側附近示意區，自己通常不易按到。" },
+        { id: "B2", name: "背部示意點 B2", type: "back", access: "需家人協助", note: "上背肩頸交界附近示意區，需家人協助比較左右。" },
+        { id: "S3", name: "肩後示意點 S3", type: "back", access: "需家人協助", note: "肩後側示意區，用於家人協助流程。" },
+        { id: "F2", name: "前側示意點 F2", type: "front", access: "自己可按", note: "搭配背部點做前後反應比較。" }
+      ],
+      headache: [
+        { id: "H1", name: "手部示意點 H1", type: "hand", access: "自己可按", note: "頭痛流程先使用自己可操作位置。" },
+        { id: "W2", name: "手腕示意點 W2", type: "hand", access: "自己可按", note: "短時間左右比較，不做強刺激。" },
+        { id: "A3", name: "前臂示意點 A3", type: "hand", access: "自己可按", note: "可自行操作，便於保存與回訪。" },
+        { id: "N4", name: "頸側示意點 N4", type: "neck", access: "自己可按", note: "頭痛合併頸緊時才作為示意選項。" }
+      ]
     };
 
     const state = {
       step: 0,
       relation: "曾經看診過",
-      area: "rightScapula",
-      duration: "超過 1 週",
-      severity: 6,
-      statement: examples.rightScapula.statement,
-      flags: [],
-      result: null,
-      feedback: "明顯比較輕鬆",
+      helper: "self",
+      topic: "neck",
+      headachePlace: "太陽穴",
+      symptomPlace: "右側肩頸",
+      beforeRightAngle: 75,
+      beforeLeftAngle: 60,
+      beforeRightFeel: "右轉到底時，左側脖子與肩膀會緊。",
+      beforeLeftFeel: "左轉到底時，左側肩頸痠，轉動幅度比較小。",
+      redFlags: [],
+      generatedAt: 0,
+      points: [],
+      scores: {},
+      selectedPointId: null,
+      timerLeft: 60,
+      timerRunning: false,
+      afterRightAngle: 90,
+      afterLeftAngle: 82,
+      symptomRelief: 6,
+      painAfter: 3,
       consent: true,
       contact: "LINE",
-      timerRunning: false,
-      timerLeft: 90
+      savedHeadachePoint: localStorage.getItem("raphael_saved_headache_point") || "",
+      recallFilter: "all",
+      recallKeyword: "",
+      activeRecallId: "",
+      pointRecords: loadPointRecords()
     };
 
-    let timerId = null;
-
-    const titles = [
-      {
-        kicker: "01 舊客身份判斷",
-        title: "您過去留下的健康紀錄，現在可以被 AI 重新整理。",
-        desc: "這一步先確認使用者與品牌的過去關係，讓後續文案能區分有資料舊客與曾預約未到者。"
-      },
-      {
-        kicker: "02 症狀陳述模組",
-        title: "先用範例陳述，讓系統判斷是否能進入居家體驗。",
-        desc: "第一版不開放無邊界問答，而是用部位、描述、程度與紅旗排除做安全判斷。"
-      },
-      {
-        kicker: "03 開放症狀匹配",
-        title: "AI 先比對安全邊界，再決定是否提供體驗卡。",
-        desc: "符合開放範圍才出點位體驗卡；未開放或疑似紅旗時，系統改以安全承接流程處理。"
-      },
-      {
-        kicker: "04 點位體驗卡",
-        title: "點位體驗是主軸，其他建議只放在體驗後承接。",
-        desc: "此處以示意區展示操作卡格式。正式點位與禁忌條件需由醫療與點位小組確認。"
-      },
-      {
-        kicker: "05 體驗後回填",
-        title: "不問改善百分比，只記錄身體是否有感覺變化。",
-        desc: "回填設計避免療效宣稱，同時讓後台能產生承接標籤。"
-      },
-      {
-        kicker: "06 路徑承接",
-        title: "把一次體驗轉成後續 14／30／90 天健康管理路徑。",
-        desc: "依回填結果分流到觀察、健康管理師、解析會、產品體驗或醫療評估。"
-      }
-    ];
-
-    const areaOptions = [
-      { id: "rightScapula", label: "右側肩胛" },
-      { id: "leftScapula", label: "左側肩胛" },
-      { id: "neck", label: "肩頸" },
-      { id: "upperBack", label: "上背" },
-      { id: "sleep", label: "睡前緊繃" },
-      { id: "other", label: "其他部位" }
-    ];
-
-    const flagOptions = [
-      "突發劇烈疼痛",
-      "胸痛合併冒冷汗",
-      "單側無力或語言不清",
-      "外傷後疼痛",
-      "發燒或感染疑慮",
-      "孕期或重大疾病特殊狀態"
-    ];
+    let timer = null;
 
     function render() {
       renderSteps();
@@ -1562,9 +1416,9 @@
     function renderSteps() {
       const nav = document.getElementById("stepsNav");
       nav.innerHTML = steps.map((item, index) => `
-        <button type="button" class="step-button ${state.step === index ? "active" : ""} ${state.step > index ? "done" : ""}" data-step="${index}" aria-current="${state.step === index ? "step" : "false"}">
+        <button type="button" class="step ${state.step === index ? "active" : ""} ${state.step > index ? "done" : ""}" data-step="${index}">
           <span class="step-num">${index + 1}</span>
-          <span class="step-copy"><strong>${item.title}</strong><span>${item.sub}</span></span>
+          <span><strong>${item.title}</strong><span>${item.sub}</span></span>
         </button>
       `).join("");
       nav.querySelectorAll("button").forEach(button => {
@@ -1580,728 +1434,814 @@
       const percent = Math.round((state.step / (steps.length - 1)) * 100);
       document.getElementById("progressLabel").textContent = `完成度 ${percent}%`;
       document.getElementById("progressFill").style.width = `${percent}%`;
-      document.getElementById("metricStep").textContent = `${state.step + 1}/6`;
+      document.getElementById("miniStep").textContent = `${state.step + 1}/6`;
     }
 
     function renderStage() {
-      const body = document.getElementById("stageBody");
-      const screens = [
-        renderIdentity,
-        renderSymptoms,
-        renderMatch,
-        renderPointCard,
-        renderFeedback,
-        renderRoute
-      ];
-      body.innerHTML = screens[state.step]();
-      bindStageEvents();
+      const views = [viewMode, viewBaseline, viewCompare, viewPress, viewAfter, viewRoute];
+      document.getElementById("stageBody").innerHTML = views[state.step]();
+      bindEvents();
     }
 
-    function renderIdentity() {
+    function viewMode() {
       return `
         <div class="two-col">
-          <div class="form-zone">
-            <section class="field-block">
-              <div class="field-head">
+          <div class="grid">
+            <section class="block">
+              <div class="block-head">
                 <div>
-                  <p class="field-title">您過去與拉菲爾／智平衡的關係是？</p>
-                  <p class="field-caption">系統會依照關係調整後續資料重整訊息。</p>
+                  <p class="block-title">這次由誰協助測試？</p>
+                  <p class="caption">這會決定系統能不能提供背部示意位置。</p>
                 </div>
               </div>
-              <div class="choice-grid">
-                ${relationOptions.map(option => `
-                  <button type="button" class="choice ${state.relation === option ? "selected" : ""}" data-relation="${option}">${option}</button>
-                `).join("")}
+              <div class="choices">
+                <button type="button" class="choice ${state.helper === "self" ? "selected" : ""}" data-helper="self">我自己測試</button>
+                <button type="button" class="choice ${state.helper === "family" ? "selected" : ""}" data-helper="family">家人協助測試</button>
               </div>
             </section>
 
-            <section class="field-block soft">
-              <p class="field-title">第一版體驗定位</p>
-              <p class="field-caption">不是重新推銷療程，而是讓舊客先看見：過去資料能被重新整理，並對照現在狀態產生下一步。</p>
-              <div class="tag-cloud" aria-label="定位標籤">
-                <span class="tag teal">舊客重新召喚</span>
-                <span class="tag green">低壓力居家入口</span>
-                <span class="tag coral">點位體驗主軸</span>
-                <span class="tag">CRM 回標</span>
+            <section class="block">
+              <p class="block-title">這次想測哪一類狀態？</p>
+              <div class="choices">
+                <button type="button" class="choice ${state.topic === "neck" ? "selected" : ""}" data-topic="neck">肩頸／脖子／肩膀痠緊</button>
+                <button type="button" class="choice ${state.topic === "headache" ? "selected" : ""}" data-topic="headache">頭痛示範流程</button>
               </div>
             </section>
 
-            <div class="action-row">
-              <button type="button" class="btn btn-primary" data-next="1">繼續填寫目前狀態 <span class="btn-icon">›</span></button>
+            <section class="block soft">
+              <p class="block-title">此模式和上一版的差異</p>
+              <p class="caption">上一版重點是「AI 判斷是否在開放症狀範圍」；這一版重點是「先建立前測，再透過三點左右比較，最後用後測差異產生有感」。</p>
+              <div class="tags">
+                <span class="tag teal">前後測</span>
+                <span class="tag green">左右比較</span>
+                <span class="tag coral">家人協助分流</span>
+                <span class="tag warn">頭痛位置保存</span>
+              </div>
+            </section>
+
+            <div class="actions">
+              <button type="button" class="btn btn-primary" data-next="1">開始前測紀錄 <span class="icon">›</span></button>
             </div>
           </div>
 
-          <figure class="visual-frame">
-            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABLAAAAL4CAIAAADkmJmjAADhiklEQVR4nOzdB1RTZxsH8Bv23kP2UJaAoCigOHHhwr392mrrXnVr3VpXnVVbtdY96h4I4mA4UWSILEFQEBmy94bkO+FqjCEJIQRIyP93PD3h5o73fe4NzcO7KOVVFQQAAAAAAACIH4nWLgAAAAAAAAC0DiSEAAAAAAAAYgoJIQAAAAAAgJhCQggAAAAAACCmkBACAAAAAACIKSSEAAAAAAAAYgoJIQAAAAAAgJhCQggAAAAAACCmkBACAAAAAACIKSSEAAAAAAAAYgoJIQAAAAAAgJhCQggAAAAAACCmkBACAAAAAACIKSSEAAAAAAAAYgoJIQAAAAAAgJhCQggAAAAAACCmkBACAAAAAACIKSSEAAAAAAAAYgoJIQAAAAAAgJhCQggAAAAAACCmkBACAAAAAACIKSSEAAAAAAAAYgoJIQAAAAAAgJhCQggAAAAAACCmkBACAAAAAACIKSSEAAAAAAAAYgoJIQAAAAAAgJhCQggAAAAAACCmkBACAAAAAACIKSSEAAAAAAAAYgoJIQAAAAAAgJhCQggAAAAAACCmkBACAAAAAACIKSSEAAAAAAAAYgoJIQAAAAAAgJhCQggAAAAAACCmkBACAAAAAACIKSSEAAAAAAAAYgoJIQAAAAAAgJhCQggAAAAAACCmkBACAAAAAACIKSSEAAAAAAAAYgoJIQAAAAAAgJhCQggAAAAAACCmkBACAAAAAACIKSSEAAAAAAAAYgoJIQAAAAAAgJhCQggAAAAAACCmkBACAAAAAACIKSSEAAAAAAAAYgoJIQAAAAAAgJhCQggAAAAAACCmkBACAAAAAACIKSlCPCRnZbR2EQAAAAAAQJSY6ugRbR2lvKqCaKOQBAIAAAAAgECYttHksG0mhPVTQWsD01YqCwAAAAAAiKS4tOQ2nxa2tYSQJRVEHggAAAAAAILNDE3bUFrYdhJC5lQQeSAAAAAAADRrZmjaJtLCNpIQMrJBpIIAAAAAANAyaaGp6OeEbWHZCWSDAAAAAADQYqy/TlDSBqaxFO0WQqSCAAAAAADQWuJEv6lQhFsIkQ0CAAAAAEArshb9pkJRTQiRDQIAAAAAQKuzFvGcUFQTQhKmkAEAAAAAgNZlLcprnotkQkgm3yIddwAAAAAAaDOs63ITUWwkFL2EENkgAAAAAAAIG2vRzAlFLCEUufgCAAAAAIBYSRapnEXEEkISOosCAAAAAICwsRbBQW2ilBCisygAAAAAAAgza1HrOCpKCSEAAAAAAACIY0KI5kEAAAAAABB+1iLVSCgyCSEAAAAAAACIY0IoKuk1AAAAAACACGUxopEQiu6kPQAAAAAAIG6sRSdzEaWEEAAAAAAAAAQICSEAAAAAAICYEoGEEPOLAgAAAACAaLEWkblGRSAhBAAAAAAAgOaAhBAAAAAAAEBMISEEAAAAAAAQU0gIAQAAAAAAxBQSQgAAAAAAADGFhBAAAAAAAEBMISEEAAAAAAAQU0gIAQAAAAAAxBQSQgAAAAAAADGFhBAAAAAAAEBMISEEAAAAAAAQU0gIAQAAAAAAxBQSQgAAAAAAADGFhBAAAAAAAEBMISEEAAAAAAAQU0gIAQAAAAAAxBQSQgAAAAAAADGFhBAAAAAAAEBMISEEAAAAAAAQU0gIAQAAAAAAxBQSQgAAAAAAADGFhBAAAAAAAEBMISEEAAAAAAAQU0gIAQAAAAAAxBQSQgAAAAAAADGFhBAAAAAAAEBMISEEAAAAAAAQU0gIAQAAAAAAxBQSQgAAAAAAADGFhBAAAAAAAEBMISEEAAAAAAAQU0gIAQAAAAAAxBQSQgAAAAAAADGFhBAAAAAAAEBMISEEAAAAAAAQU0gIAQAAAAAAxBQSQgAAAAAAADGFhBAAAAAAAEBMSbV2Adqm4KT41i4CAEBzcTGzQnABAADaBiSEzZIHWusZCfTEAADC+LsOmSEAAICoQ0IoAMgDAUCsMP7mhcwQAABA1CEhbKrgpHi0BwKAeGLODNFaCAAAIIqQEPKP/NM4skEAAGs9I/JXItJCAAAA0YKEkE9oGAQAYEb+dQxNhQAAAKIFy07wA9kgAAD3pkIAAAAQCUgIGw3ZIAAAF8gJAQAARAgSwsZBNggA0CDkhAAAAKICCWEjIBsEAOARckIAAACRgIQQAAAAAABATCEh5BWaBwEAGgWNhAAAAMIPCSFPkA0CAPABOSEAAICQQ0IIAAAAAAAgppAQAgAAAAAAiCkkhA1Df1EAAL6h1ygAAIAwQ0IIAAAAAAAgppAQAgAAAAAAiCkkhA1Af1EAgCZCr1EAAAChhYQQAAAAAABATCEhBAAAAAAAEFNICAEAAAAAAMQUEkIAAAAAAAAxhYQQAAAAAABATCEhBAAAAAAAEFNICAEAAAAAAMQUEkIAAADRM2rBAh03Nx03t78vXiTEuPzCFgeHUaPI8vg+edLaZRE7wvYwAIgKJIQAAAAAAABiCgkhAAAAn0rLy0379ycbJYbPncv7gXcCA8mjTPv3R/QBAKAVISEEAADg000/v7KKCvL1q8jIhI8fEUoAABAtSAgBAAD4dNHbm8uP0BQlZWU3Hj6c/ttvRy5dQiQREwBoPlLNeG4AAIC2K+Hjx9DoaIIgenfr9jQ0lEajXbl3b+2cOVKSkq1dtLbgl/XrA16+JAjC3tKytcsiLBATAGgOaCEEAADgx4Wv7YEDune3NDUlCCI7L88vKAjRFAgajYZIIiYA0AKQEAIAADRaTW3t1Xv3CIKgUCjD+/Yd0bcvuR29RgEAQLQgIQQAAGg0v6Cg7Lw8giC6Ozoa6uqO9/D4sv3Fi6zcXAQUAABEBRJCAACARrtw5w75YtzgwQRBmBkaOtnaki2HV+paDgEAAEQCJpUBAABonOy8PP+6+U5kpKVH9OtHbpzg4REWE0P2Gl0wdWrLxzQlI+Pc7dv+L1+mZWaWVVRoa2g429tP8/Ts2aULL4c/CQm55e//8s2bzNzc6poaLTU1O0vLwT17jh88WEZamsuBuQUF3o8ePQsLi05IyMnPLy0vV1ZUNNbTc3NymjFmjLGeHu9VSPj40W3KFJaNO48f33n8OOPHJT/+uGbWrOaLA3e1VKr3o0e+T568fvs2KzeXQqHoaWv36Nx5mqeng5UVjydpVMT4jokA7wuzUQsWBL1+TRDEpvnz59UV7D8fnxPXr8d9+CAjLT19zJj17Bbk5PvpSkxJufHgwfPXr98lJxeVlCjIyWmqq5sZGPRxdh4zYICOpib30vL9MPAXvfrBKSwpuXrvnldAQEpGRk5+vpqKipmBwcAePf43cqS6igrBA75DB8A7JIQAAACNc9nXt6a2liCIwT17qiopkRtH9e+/7s8/q2tqElNSgiMjXTp1asmwnrl1a+2BA1XV1YwtqZ8/p37+fOPhw/95ev6xYoWkBMc+QR/T05fu3Pk0LIx5Y2pmZmpm5r2nTw+cOfPPli2dbWzqH5hfVLT92LGL3t7VNTUs2/OLit7Exx+/cmX7kiU/jhpFiEIcGhQeG7tk5863798zb0z4+DHh48dzXl5Lfvxx5c8/cz9Dy0SsJe/L4u3b//PxIV9XVVcnpaYK6umqqKxc9+ef5+/coVKpjI2FJSWFJSUfPn3yf/lSTVl50tChAn8YBBi9xyEhszZuzC8sZGzJys3Nys0Njow8fOHCruXLRw8YwOVwvkMH0FhICAEAABqH8Q14fF1/UZK6qmr/7t3vPX1KNhK2ZEL457lz244eJctgbWZGoVDik5JyCwrId895eenr6CybPp3tsRFxcVOWL8/Jzyd/1FJXtzQ1laBQ3n/6lJGdTX4rHb1gwfWDB8k+scxex8aeuXWL8aOJvn47LS05WdnUz5/ff/pEEER1Tc2K3bt1tbQ8evbkpSIK8vK9unYlX0cnJJDfpE0NDIyYGmTMDA2bIw4NevTq1Y9r1pRXVJA/ysnK2pibqygp5RYUvH3/vpZK3XvqlKK8PPeT8BExPmIi8PvCyeELFxifBcE+XTW1tZOXLXte19pGEISyoqK5oaGqikpOfn52Xh45fJc7vh8GQUXPKyBg1saNVCpVUkLC2txcS129uLQ09v37ispKgiAKiovnbNpUVV09ccgQwYYOgA9ICAEAABrhVWRkwseP9C+aKirurq7Mb03w8CATwtv+/tuXLGkwPRCIZ+HhgcHBmmpq2379dWT//mSjB5VKvXr//vI//qisqiIIYv+ZMzPGjq3fRe1zTs7UFSvIL50m+vo7li7t7+pKoVAYZ/51+/aUjIyyiorZGzc+OX9eQU6ufgHMDA3nTJw4tE8fXab+exFxcTPXr/+Ynk4QxJa//hrs5sY4LRcGOjrX//yTfD1x6dLA4GCCICYNHbr0p5+aNQ4NSsnImLF2LZkNqquo/DZ79gQPD/mv0cgvKjp84cJfFy9uP3ZMgocWyEZFjO+YCPC+sFVcVvbPlSsKcnKrZs4cPWCAorx8RFwc2WGy6U/XyevXyWxQQkJiw9y5M8aOlZOVZbyblpXl++SJqYFB8z0MTYzeh9TUPadOSUlKLp4+feb48WrKyuT2isrKc15eW48cqaispNFoK/fs6WZnZ25k1BwfTADeYVIZAACARrj4tUnE092dZQzPIDc3sgdpWUXFLX//lgmr34sXqsrKd48dGzNwIKMLnISExMQhQ/atWkX+WFVd7RUQUP/YX3fsIBtbrM3NH5w4MaB7d+YvuD27dLlz5IimmhqZEdVvC5KRkflt9uyg//6bPmYM8/dmgiAcra1P/P47+ToxJeVNfDwhxHFo0JIdO0rKysiGmjtHjvw4ahQjGyRTxPVz5x7bvLmWSmXuoFhfy0SsZa5y4c6d6pqaG4cOzZ00qZ2WlrKiYi8np1W//CKQp+vGw4fki9kTJsybMoU5GyST5F/GjXN1cGiOh0Eg0Tt7+3ZVdfWV/ftXzJjByAbJhuWZ48df3rdPWoreJFNeUfHHiRMC/2ACNBYSQgAAAF6VVVTc/prpTfi61ASDjLT0yP79WaYhbQF7Vq5k25FyvIcHY/YLcsIbZuGxsQF1U+NIS0n9u3Ur26YSPW3tRf/7H6clFnt26fLrDz9wGpXXycqqY4cO5OvXsbGEsMahQW/i4xnjuPauXGlpasp2t5Hu7g2OK2uZiLXMVT7n5CyfPr1Lx45s323i05WelUW+sOAQ7eZ7GAQVvQ3z5vXo3JntW90dHedNnky+vhMYyDzIUCAfTIDGQkIIAADAq1t+fqXl5WQ/rm729vV3YCxIGBod/S45uQUia2pgMKxPH07vMjq1Jqelsbx16e5d8sWIfv04JTkEQTAGSsUkJpKtZLwz//qNnJdBX60VhwZd/hoom/bth/TuzWXPWRMmEE3TMhETyFXkZGVnjB3L6d0mPl0adc1fBEH4v3ghVA8Dj9HT1tD4afRoLieZOX482bu4uqbmVXR0C38wAVhgDCEAAECj+4uSyw/W52xvb6ynl5KRQe68af785g5u765duQwD62BsTL4oKi1leevZ11avQW5uXM5vrK9PoVBoNBqVSn3/6ROnxRWqqqsTPn5MSk1NSk1NTktLTktLSk1Nr5v9ghxvRghrHBr08s0b8gVjiREuV1FSUODx23nLRKz5ruLq4KCkoMDp3SY+XYN69IhNTCQIwufx4yU7dqybO5fsIdnCDwPf0evr7Mx9TQgdTU0LE5P4pCSCICLj4wczRUmwH0wAXiAhBBCAqUuXvXoTSRDEqtmzfpkwHjEFaJPef/r0KjKSe0JIoVDGe3jsPXWKIIgrvr7r5syRkpRs1lLp6+hweVfl66oYVXUTaTCQXyLJ13M2bZqzaRMv1yosKmLZUlVdfdHb+/qDB+GxsSzT9DOj0WhEM+MvDg2i0WhxHz6Qrx2trRvcX1lRkXtC2DIRa4Gr2Jibc3qr6U/XgqlTfR4/JmdvuuDtfcvff8zAgVNHjODUQ1WwD0PTo2eqr99gIU309cmEMO/r3KcC/GACNAoSQgAAAJ4wj9XpPmlSg/vn5Oc/fP6ceyfDppOTkeHyLqd0NL+oiI9koOzrogukN/HxM9au/VTXHMpMUV7exMDA1MAg7sOHD1+/3TY3/uLQoOLSUnLNSXJGGaJpWiZiLXMVNc6TtTb96VJRUrpz5MjibdvuP39OEERpefk5L69zXl7W5uazJkyY4OHBvf2tKQ+DQKLHywzDjKlByV7oAvxgAjQWEkJhdO/Jk4Wbt9bfLkGhKCspKisqqSgpmRsbOVhbO9hYO9jYSPA7ZzQAAPColkq94uvb2HBd8PZu7oSQP4wkhyAIJ1tbRpsJd8wZUXJa2rhFiwpLSsjZLwa6ufVzdu7Yvr2ZoSFjt3mbN7dYQthMmL+sc08zGtQyEWux+yLLOSVr+tNFH0aoqnrujz9eREQc+e+/h0FBtXXL08d9+LB0586D584dWreuOZb6bMmnmtGSrKyoKNjQATQWEkJRQqXRCotLCovpv6diExO9AwLpky/r6k7xHDFh6BAuf6sDAIAm8nvxIjM3l+wUKv/9JPhsf12Ty0/71x3FMnm9MGCeCn/VL7/0dXZu7Bm2HjlCfm82MzS8tHcv2xkdqc3fU7S5MQ+TK6qrL3dc+ou2TMSE4b40/eli6O7o2N3RMSM7+z8fn/NeXqmZmWTaNnbRov/27u3l5EQIVEtGjzEWUV1VtTlCB8A7zDIq7GSkpRn/JNl1ckjLzNx9/N+BP073ex7UfMUoLSvzDgicv2nzyWvXmu8qAADC3190SO/eyf7+3P+9uXWL7NJWS6Uy5qgUKrIyMoyvoYwxS7yrqKy8/+wZ+XrT/PlsvzcTBJHLNDhKRCkrKsp+bRiMqxvxxUV+YWExh3lKWiZiQnJfmvh01aenrb30p59eXr68fckSck3CqurqJTt2CHZsqgCjV1BczH2H8oqKd18fJ7uv61g0R+gAeIGEUKjJy8nF3LvL+Bf34N4bb6+nly5e2Ld3xcxf3JycGJNoFRQVzd2wcdc/x5upJIu2/L5k2/YHT59VVND/5g0AIFZy8vP9gr780W3MgAEN7q+uojKgRw/ytdAuG93Nzo58waga75JSUxkrsLNdfoPs/Bbx9i0h+jp9nb/Rr6ElELjs0DIRE5770pSnixMZaelfxo3bv3o1+WNKRkZM3UykgiLA6IVERXHfwfvRI7J3KIVC6fo1Vs0XOgDukBCKGAV5+Xba2s4OnWZNmnj6j50Pzpzy/LoIMkEQ/16+cvbmrea4Lo0Q+W4/AAB8u+LrS042qCgvz30ueIaJXxckfP/pE2PdAqEyoHt38kVAcHBkfHyjjq1gmp6RWje4q74rvr5k7zv+MGb+aPUJM/p07Uq+ePj8eTzntSWrqqsPnj/frBFrMCYtcF9a4OnijnnxD+b5OZtOgNELiojgUuvqmhrGo9LPxYVlBGDzhQ6AEySEos3UwGDvb6v3/rZaSurLcNDtfx/Brw8AAMFitPIN6d2b7LHWoAE9emh87fp14c4dIbwjE4YMIQcs0Wi0mRs2fM7J4bRnTn7+/K3fTXXWTkuL8frukyf1D4lPTt5w6FBTiscYGB+TkEC0qmmenmQmVkulztm4kW1vQCqVunLPHnIVAbYEErEGY9IC96UFni6CIC5znsAp4+vQO3pXUq7LSzSWAKNHo9FmbdyYk5/P9t3f9u9nPCpz681X3MTQAfABCWFb4Nm//+bFi8jXtVTqoTNnW7tEAABtR1hMDKNdaMzAgTweJS0lNfpr59I7gYE8LlbekhTk5LYs+vL/jqTU1AEzZlzw9ibnwmH48OnTtqNHXSdNYoytIulpa1uZmZGvNx4+fNHbm9GiUlNbe/XevRFz5pSVl1uYmPBdPDsLC/LFo1ev7j19SrQefR2dOV+/tcckJg6bPfvRq1fMo9diExMnLVt20du7l5OTDocJhAQSsQZj0gL3pQWeLoIglu3a5TFzpldAQPn3baFJqanztmwhX9t26CDYiggwehqqqh8+fRr088++T54wNzYmfPz4v5Urz9z60plr4pAhfbp1E2zoAPiAWUbbiAlDhzwODn7wjL5cz6PgV7GJiR2ZxigDAADfGO176qqq9b+9cTFx6NAT16+THfxu+vn9z9NT2O7CpKFDYxITj12+TBBEVm7ukh07Vu3ZY21urqGqWlZRkfr5c3pWFrln/env186e/UPdaK7yiopfd+z4/ejRDsbGFAolNjGR7FO3fu7ct+/fk2uL82Gku/u2o0erqqtrqdQfVq/uYGxs2K5dYXHx4J49l/70E9GyVs+c+To29vnr1+R3+glLlmhraHQwNpaSlPyYnp5St2adrqbmkY0bB/78M6eTND1ivMSkue9LyzxdBEGEx8b+sn69tJSUpamplro6jSDSPn9mzLMiJyt74LffBF5mQUVv7uTJD4OCXkVG/rhmjbqKipWZmbS0dFpmJvN6FT06d965bFlzhA6gsZAQth3zpk0lE0L6ROdBL9gmhHkFhfefPn0ZEfE28X1uQUFpebmSgoKRXjtXR8epIz0N27Vj3vlDyqfB02ewnGH/qdP7T53+dtGpU5bMmN6Uq/Bu6tJlr95E0idinj3rlwnjCYK4fu/+uVu3E5KTpaWlp3qOWDHzl/pHBYWH+wQ+ComKzs7Nramt1VBV7WjRwb2766iBA6W/9rNlK+nTJy//gOA3b96npBSVlCrIyWmoqpoYGLg5dRnu3k9bQ4N7aVM/f77sc/fxq1fpmVkVlZVa6uqdbTtOHDbU1dGR+4H8Ra9+cIpKSm499PN9/CT18+fc/Hw1FRUTff2+ri6Thg9TZZrVmgu+Q8dF/XKGx8Rc8vaJiH2bkZ0tLSVlb2U5ecRwj+/XbUtOSzt389azsLC0z5kUCkVbQ8PZodMPo0dx/6uH8EQSRFp5RcUtf3/ytWe/fo16+B2tra1MTcnWxYve3kKYENLn2V+0yNzQcPuxY+T33arq6vrjDoz09LYsXMiy0aNXr98XL950+DA5N0ZOfj6jg5ykhMRvs2cvnDZt3ubNfBdMX0dny8KFa/bvJ9viElNSElNSCIJolYn4ZaSlL+/fv/yPPy77+pLlyc7Ly87LY+zgZGt74vffOTUPCipivMSkue9LyzxdigoKVYWF5HC7+jPHWJmZ/b1hg72lpcALLKjoSUtKntu5c96WLf4vX+YXFbGMIpaQkPifp+fWRYu49D/nO3QAfEBC2HbYWlhYmZmRvdLJb7TMCouL9544edX3Xk3dvAjM2wuLi6PfJZy+cXPDgvmTRwxvShla5iqk1bv3XL93n3xdVV39MT2dZYdPGRlr9+578TqCeWN6VlZ6Vpbf86AjF/47sH4tY+44ZhWVldv+PnLF5y7zWkNFJSVFJSXJaWmPX71SVVYeM3gQl7L9d8d76+G/yCkoSGmZmWmZmd4BgROHDd3862JJCYlmjd7zsLBff99eUFTE2EJ+dwmNjj5++fKmxYuGMw3Kr4/v0DVKTU3NjqPHmKdBqqisDAp/HRT+evSggTtXrpCom0T31LXrfxz/lzkmnzIyPmVk3Lj/YNnPM2ZPniTMkYQ2wIupt+coHuYXZTFhyJCtR44w+p1amZoSwmf6mDFjBg26fPduYHBw3IcPuYWFVCpVRUnJWE/P3tLSo1evvs7ObH9rzZowoXfXrieuX38eHp6WlUWpWxrXrUuX6aNH27Rv3/SCzRg7toOx8bErV8JiYopKSlSUlCxNTd06dyZag4y09MG1a6ePGXPp7t3n4eEZ2dk1tbV62to25uYThw4d2KMH2xAJPGK8xKS570sLPF0hV67c9PMLfEXv8ZSZm1tVVaWooGCgq+tgZTWsb9+B3btL8BBt/ggqeuqqqhf37Ln75MlFb+/YxMTs/HxlRUUDXd2+zs7jBg2yNjdvvg8mQGNRyqtaefKuBiVn0XtiWBu0zv9Eg5PirfWMWvii9548WbiZPkpYXk4u0qcRUxFsOXT43K3bZFeKqLtflswiPQkJ+Xn1t84VRnp6upqasrKy6ZmZSampjO1Ht27p3+PL9FYZ2dmr/9hNvo5NfE9+JzbW1zdsp8vYf+SAAcypER9X4R1z0w2NRv3jn3+Z3x3cu9fhjRsYP0bFv5v521rGYkGaamrtTYwlKBJJqamZX8dny8vJnd39h2NHG+bz1NbW/rhiVfDXP+YpKSiYGhqoKCnnFRQw/lK4a+UKloSQuWw1NTV7T5wkR/9bmJpQKJTEjx/zCuh/6ST9+tOP8/83rX4FmxI95gIY6Or+uvV3Ko0mKSFhYWaqqaZeUlYa/yGJMQKBQqHsXLl8zCD2OS3foeMFczkTP368fu++BIXS0aKDqrIKSzWnjxv729w5/16+Qi6mIi8nZ2thISFB+ZDyiXmY/l+bNw3q6SackQRmcRmfXMya+kcEAABhNmrBgqC6fsWb5s+fN2VKaxcHhEJcGr2TiKmOHiHE0ELYpjB60FVUVhaXliorKrLsYGKgP33s2EE9e2prfuvxGBX/bvHW3z/VDYHY9c9x9+6u5PKGetraZ3b/Qe4zY/WapyGhBEGMHTxo3rSp3IvRqKvwoaSs7Mz1G/Jycr9O/3F4v34K8vJR8e8YKRzZ4X7W2nVkSmOkp7dh4YI+zt0Yl3sZEbFm997Uz5/LKyqWbNt+98RxeTk5xrHnb3uRp5KgUFbMmjltpCdzj46M7OyHz54b63P8VAdHRDwNCdVQU10/f/6Qvn3IP91RabRbDx9u2P9nZd2U1n9fuDht1EhOvQ2bGL2PaWmHz52XlJRcMHXKD6NHqyp/GV1QUVl5xefu7n9PVFRW0mi0TQcOdrG1NTUwYDm8KaFrFJ/AwOh3CW5OTtuXL9X/Ok1c9LuEpdt3JNUNsTh363ZXO7vdx+lp/w9jRi+bMV1BXp6cdc0n8NGaPXvJrGz3P8frJ4TCEEkAAAAAkYCG5jaFMSE12TuO+S0ZaemlP8+4f/rU1JGezN+PCYKwt7I8tHE9+Trp06fod/xP8N0yV7l617emtvbcnt0zxo3T0dRUUlDo3tnx159+ZOywZvdeshHJ0sz05pG/+ro4M3/pd3V0vPTnfg01+nTwqZ8/X/va75Tk5R9Avvhp7NhfJoxn6d+vp639w+hRXTmsV0vO6KOirHzl4MHh7v0YHTkkKJQxgwb9vnQJ+WNVdbXv48fNFL1L3j7V1dWn/9i18If/MXIYstH4hzGjT+7cQa5QUl5Z+efpM/UPb0roGiX6XUJXO7vj239nZIP0CfQsLU7/sZNMMmtqahZt2Uql0X6ZMH79/HlkNkg2yg1377dmzmzyx+S0tPrDKoQhkgAAAAAiAQlhm6Km8q3RqaDou4TQ1dFx7pTJnPqa21pYMLqzR8bF8V2AlrlKVm7ugv9Nc7CxZvtuZFzck5AQevO3lNTBDevZNsTpamkxxp5d873H/NbnrwsctTcx5q94W39dbGKgX3/7qIEDGBOZvI5923zRWzlrprNDJ7ZvdetkT06UUtcz+Snz0Limh66xtixZXH9+Dn0dnZFfh2nVUqmmBgZLf2ad2YjeUu0xmNE4GRkXL2yRBAAAABAVSAjblPKKb8vUSEnRV9HlnYnhlz5vnNZRFQiBXEVOVnbaSI6T9V2//4B84dG7V3tjjkld/+49yBdx79+XMq0PxlhI+vGrV3yUzVhff1Cvnpze7e38ZcL6lHR6l8XmiJ6WuvoUzxFcTvLD6FHkZC01NTXhMbECDF2jdLK2tuAwu4ZrZwfG6ymeI9hO6igrI2Nv9WV+uZR68wm1eiQBAAAARAXGELYp+UXfZi7hMiF+dU3N+48pH9PS6Ksn1f37mJbOaBkT1OrJzXeVrvZ2igoKnN5lzI3Zvzu3eWsM9dpRKBQajUal0ZJS0+wsv6z228/VJe7DB4IgHjx99tuefct/+ZnsIcmjHl06cxkbaW70ZYKiktLSZopez65O3KfF19bQaG9iklA3D35MQoJ7d1dBha5RuExIY6T3bYhmd87TCRrqtntF0Gd/KeYazFaJJAAAAICoQELYpqRlflmoVFpKSldLi+Xdqurqa7737vgHRMTFsUzHz4xc3YhvLXAVS1MzTm9RabTkr9NILtm2fcm27bycsKjkW/famZMm3n/27EMKfV6Tq76+Po8ejXDvN37IEE49VFnoaWtzeZcxzU9ldXUzRY85m+LEsF07Mo3Jr1vlSVChaxQtdXVObyl+HS5IEEQ7bdbHmEFB/kuX0aqqaqGKJAAAAIAIQULYpgRHfJlp06ZDB7IzG0P0u4QFmzenfc5kOURBXt5YT89YX+9dUnJyWloTC9AyV1FlGirJoqCwiI9Us6z82+IryoqKlw7sX717T8CLl3VvlV/2uXvZ566lmemPY8aMHtTAmuwyMjJc3pWUlGzu6DEmX+G2z9fRd6Xl5QIMXaNwCSOF+PboykhL8xHM1o0kAAAAgAhBQth2lJWXh0dHk6/dunzX0S4lPf3HFSuLSkrI+ULcXV16du1qZW5mYmCgqaZG7rNs+84mpmotcxXuSUJtbS3jtWNHm/oLb7Clqf6leCR1VdVjv28NiYw6cfXqo5fBtVQqQRDvkpLX7t137L9Lu1at6GpnRwhai0WvLnv50k9SiSk+AgmdMGj1SAIAAACIECSEbcfZm7fKv66XPdzdnfmt3cdPkN+PTQz0T+zYwXYOTCqNnvY0RctchTsVpuUBFv/4Y8+uTnyfqlsn+26d7DNzcq7fu3/Z5256Fr07bkp6+g/LVpzYuaN7Z0dCoFoyep+zv6wvr860TokAQ9e6Wj2SAAAgnm4dPtzaRQDgB2YZbSOy8/JOXL1Gvu7Z1cnS7Nv8jRWVlQEvXpCvV82exfb7cd0gqCbNm98yV2mQrIwMYzHGpK8j4ppCV0tr3rSpfufOrF8wn1yTsLqm5rc9e5s40rL5olf0/fqT9ZVXViZ8/Ei+Zqy+0ByhaxXCEEkAAAAAEYKEsC2oqq6et3ETuRKapITEqtmzmN/9mJ5e9XUKky62tmzPUFtbG1Vvde9GaZmr8KJzx47ki8fB/KwbwZa0lNQPo0dtX7aU/DH18+e49/SZSAVFgNFrcP2D+0+ekr1DKRRKZ9svsWq+0LUwIYkkAAAAgKhAQijycgsKflnzW8TXhc4XT/+JpbGisqqK8ZpaNxyuvpsPHpK97BqcwKOsgv0kIgK5ikD0dXEmXzwJCYlJSBDgmT369Ga7wkfTCTB6ryIjudS6pqbmn0uXyde9unZljKlr7tC1GCGJJAAAAICoQEIowqpraq7fuz9i1mzG8nGjBw2cM3kSy266mpqM1w+fPa9/nsSPH7cfOcr9WmpfVzXk1DImkKsIxOhBA1XrhsPRaLTFW3/Pys3ltGduQcGKnbtYNt548GVx9voYi9fRl0PQ4ra8RGMJMHo0Gu3XrdtyCwrYvrvl8F/kMgkEQcwYP1awoRMGQhJJAAAAAFGBhFCU0Gi0opKSlPR038dPthw63HfKtNW792Tn5pGd1mZOnLhjxfL6q6LramlZmH4ZUrjz6LFrvveoX8e/1dbW3nroN2nxr2UVFebGX9ZMZ8umQ3vyxbPQUL/nQfV3EMhVBEJeTu63uXPJ1x/T0kfNmXfV17fi63Q7pOS0tL0nTg784Sf/oC/jzRjW7zswbsFC38dPGDP0ME61fMeXFMi6vblgKyLA6KmrqianpY2ZO//h8+eMkxAE8SHl0+x16/+7403+OGbQIDcnJ8GGThgISSQBAAAARAVmGRVq5RUVth5DGT/W1NQwfzFlUFdV3b5s6QC3HpzOs3TG9LkbNpLTYKzZs3fPvyfMjIwoFCL+QxLZd27FzF/iPySRq7GzNbRPnz3HT1TX1NRSqXM3bDQzMjLQ1SkqLunfo/u8aVMFdRVBGTN40Nv3709fv0FOt/Pbnn0bDxy0NDNTV1Upr6hIy8xitPWxXVzhzdu4RVu2SklJdTAx1lRTp9FoGVlZjHlW5GRldyxfLvAyCyp6M8aNfRQcHBYdM2/DJlVlZQtTUxlpqfTMLOZVFpwdOm1ctKA5QicMhCSSAPypqq6+fPvmy/DQ4tLSjUtXtDf5NkNYg3z8H168ef347n0K8gq8H3Uv0P/mvbsbl67Q123HaZ/FG37rYGq+cMYvhJBVGZpJs97x5ibShQdoFWghFHZV1dWMf/WzQV0trTVzZz++eJ5LNkgQxAC3Huvmz2OMA8wtKAiNigqJjCoqKZGUkFgx85dZkyZyL0Y7be3f5s1lND8mffr0LDQsMj6eechW068iQGvnzd20aKGK0pelFKpramISEp6FhoVFxzBSGoN2ujtXLOe0HHlNTU3c+w/Pw8KCwsMZ2aCFqenlgwfsLC0EXmBBRU9KSuro1i19nOmjAQuLi0OjooLCXzNyGAkKZdLw4Sd2bOey6jrfoRMSwhNJaHvovak3/DZt4dxszh2qm+jy7Zt+T58McR+wZsFiMyNjovlRaXRE62n5Krekfy6cveHrQ4iHpldWeMJ1697dpZvWE0KD78gIT0hBmKGFUJTISEurqaioq6jo6Wh3tbd3cXCwt7JkfPHl7scxo7t37nzu1u3gN28+Z2URFIqejraro+MUzxFWZma8nGHaSE9zI8NT12+8eRtXVFKioqTU3tjYxdFBsFcRoKkjPUf0d7/54OHTkNB3SUn5RUVUKlVZUdGgXTtbiw79e3Tv2bWrpATr30QCzp/1CQx8GhIa9yEpOze3qrpaQV5eX0fH1tJicK9efV1dJOp1yhUUQUVPTUXl+PbfHz57fvXevfj3H3Ly85WVFPW0dXp2dfLs3595SRLBhk54CE8koY2JintbWlZmamT0+GXQuGEjmuMSb97GONraDR8wiGgpQ90HDHUfQLSelq9ySwoKeTWwTz9CPDS9smIVrpaJDEIKvEBCKIw8evdO8H8o8NNampluXbKY07t7f1u997fV3M/Qo0uXHl26NPdVOLmwb29jD1FRUvpxzOgfx4zm/RBlRcVJw4dPGj68Oco2ckD/kQP6t0D0KBTKoF49B/XqSfCLj9AJKlDmxka8PP/r5s9bN3+e8EcS2pLA508dOtoa6OkHPH86ZsgwiWb4s0hFZaW8mDU7i2GVAQCEChJCAACAhhUVF4dFRS6aMdNAT++6z503sTGd7ew57VxLpfoG+D15+SI7N0dBQaFnN5fJo8YQBFFSVur98MHr6Kjc/DwpKSlL8/b/GzteW1OLIIird27fuu9LEMTT4BdPg1/oamnv27SVPOTqHa+QiNdl5WV6uu1GeQxx6cxtHiMqlXbT1+fRi+cFhUW62tojBg7u5eLKPMhw52/rz1+/Fv8+YfSQYSMHD6k/8rCgqOiK163X0VHllRWmhkb/GzeB5RL5BQWXvG6+iY2pqKw0MzL+37gJf/57jHnUFo9lZltltoUkB9V7Pbj36nV4Tl6erKyMdQeLccM8jQ0MmKt2cOv2G3d9Qt68Jgiit2v3yaPG5uXnn712OTbhnYKcvKtT14meI6Uk2XzzIQ8/tmvvwyeP2IaOy43jdLtPXrrg/+wpQRB3/R/e9X8oKyN7ct+fbK9bv7LcA1hdU+Mb4Pc85FVmdpa0tEwHU9PlcxeQvTZ4iVL9y3G/45weZmacKsu9PAI5A/fCc7lxe4/9HZvw7ujOPdJS3x6Jv06ffJv47tDWHY2NACO8f23/w8fvQVDoq9Lyckvz9j9Pmqqr/W1ack53NiTi9YF/j/00YdLA3n3JPW/6+tz09fl91W9+Tx83+CA16gnk8nQ1+EGAtgoJIQAAQMOeBL+QkZZ26GgrLS1tYmgU8Pwpl4Tw9OX/nr16OcpjqJ5uu4+pn2Li48jtGZmZSSkp/Xq4aahr5OXnXfO5s++fI9tXr6NQKD2dXTuYmR89d9rE0GhIv/6yMjLkt+Et+3aXlpd7DvZQU1EJDg87eOL4whmEaxeOOeGJSxdKS0vHDKF3c/B/9uToudM0Gq23a3fGDv9cODdysMfK+QvZdvwuLSvbvO+PiorKEQMHaWtqvUv6sOfIXzW1NYwdiktKNu79o7q62nPgYHKH3X8fZt6B9zKzrTLbQpZXVGzetzs3P2+o+wAjA4OsnJx7gf4b9+5a/+syc2MTxlEHTx63NGs/Y9LUsMg3vgH+NBoR+uZ1Zzv7WVP/9yY25q7/Q0UFhVF1KVBjQ8flxnG63QN79+1s12n/8aOd7ez7dnfj0p5cv7JcAlhTW7Prr4OJSR8G9O4zfoRncXFJUFgIlUqVlJDgMUosl2vwjnN6mJmxrSyP5WnKGRosPJcb18e1R3hUZNTb2C72ncidq6qrw6PeDOrTj0KhjPIYOurrrH68RIDhyJlTSooK08ZOyMrJvnnv7p8n/tm26jfyOeFyZ7s5dnboaHfT925v1+6yMrIFhYXefg+GuA8wNjDk5UHi/Qnk5ePZ4O8QaHuQEAIAADTs0YvnTp0cpKWlCYLo7tT1yp3b+YWF6qqqbHd+8vJFLxdXsvnF2bHzsP4Dye0WZuZrFn7rzEylUi/cvJ6SlmpiaKSnq6unqystLa2hps5INa/53MnNz9/523qyTcO1S9etB/Ze8/HikhBWVVWtWfgr+QXUzdl59fatV7xv93JxZcwK5tDRtmsnR06H3/D1yc7N3bbqNxND+uos3Rw7G+rp/XP+LGOHm/fu5hXkf7dDO71/Lnzbgfcys60y20Je87mTmpG+adnKDqZfhgH3cnZdvmXj2auXNy1bydjNyrzDlNH0dUFduzh9zs66F+g/sHefnyZMJgjCpbNTWkbGs+CXXBJCLqHjcuM43W4jfQMjfQMJCkVHS5vL3w7YVpZLAL0fPnib8G7JrDmMQ/q59WxUlFgu1+Ad5/QwM2NbWR7L05QzNFh4LjfO0c5OSVExODyMkRCGR0VWVFbWz3x4iQCDmorK3B+nk68lJSX/u3XjfXJyh7rh69zv7E8TJq3ctvmuv9/oIcOu3Lmtoqw8tm6gMi8PEu9PIC8fzwZ/h0DbI7zTQgAAAAiJuMSEjMxM1y5dyR9du3SlUqmPX7JZlJWkqqISl5hQUFhI/shpNtr2dV9zs/M4zlkaFPqqm2MXRtdEgiA629lnZGYWlRRzOsRzkAfje5uUpJS7W6/8goL0zM+MHbp2+m4yMBYvw0MdOtqSX69JvV26y9SlwaTg12GdbL7boZeLK/MOfJS5PpZCvggNcehoy8gK6OO9lZT69nBLSPpQVPzttD2dv3Vss+lAnw7a3a03Y0sHM/OcvFwuU6o2GDpON47H281jZbkH8NGL59YdLNim9DxGieVyDd5xvmvHY3macoYGC8/lxklJSvXo2i0s6k11zZcWxRehIZbm7fV0dFmOalQEBvdzZ7y2t7YhCCIzJ5uXO6ujpTVykIe3/8Po+LdPgl/MmDSVS0X4LiEvH0/ePwjQZqCFEAAAoAGBz58pKih0sulI/qitqdnB1OxR0PORTN+cmE2fOPnQyX+XbF7fw6nbkH79DfX1GW99TP0UHhWZnPopKyc7MzuHPiSs+lsPN2YlZaVFxcXk+DqWt4pLSlWUlNkepaf73ddZnbpvfgVFRQbt9MgtGmrqnKpZVl5eUFhoxJRWkVMrqSgrM+/Qs5sL8w4SEhKMHfgrc33MhSwtKyssLjI2MGTZR78dfeHErNwcxtU11NUY7yrVrZWqran5bYuCQnUNHdnM29jQcblxXG53YyvLPYDSUtLZublsB2Q2IkpMl2vwjvNdO97Lw/cZpKSkGiw89xvXy6X7g8ePyF6jZeXlb2Kjf5wwqX5JGhUB8rEhqSir1AW5jMePxvCBg5+HvNpz5C+3rs5kMskjHkvI48ezwd8h0PYgIQQAAOCmrLzsVUR4VXX1D4vns7wVHR/H9ntbZzv7vRu3PHgcGBj07PHLoAkjRnoO8iBnd7h460YHUzMbC8vOdva1tbUnL13kdF0ald6W5dLZqf6MDppqahz/v/79WkRl5eUEQTBPmyElxXGxopq6ppL6+VJNbS35orqmmiAI5sF+LDvwV2Y2tWAqJJVKJRf/ZNmH3MK8vf4+zOl6gx3euISO+43jdLv5qCz3AFbVxV+K6W7yESXmyzV4x/muHe/l4fsMvBSe+40zNzYx1NMPfk3vNRr6JoIiIcHoBcCsURGQkGB95Mg2aV4+GlKSkoqKChlZmUpflwLmEY8l5PHj2eDvEGh7cHcBAAC4efbqVVV19dihw1VV6H/vJ1GptPPXrwY+f8bpD/nqqqoTPUeN8hhy6OS/V+7c7tHVWUVZ+ZLXrb493H6ZPI3cJ+ZdPJfrKikqysnK0gga9xFoLPIKChjzhRIEkZKeSqFQ9HXpjSoNUlRUlJaSyvi+b1hFRUVhUdGXIikoSklKZWRlMu9QzrwDX2XmTklRUUFePiU9jWV72ufPFAqlnY6OoC7EKXRV1dUN3rj6t1tLQ4OPMnAPoCxNVk5O7lO9UPAdpQbvON+1a/pda/AMsrJy3AvPy43r5eJ6+75vTW1NUFiIs2NneTk5toVp+v3l5aPhG+CXmpExedSYy1633Lo51596hwteSsjjx7Mpv0NARGEMIQAAADeBQc90tbXHDB3ev2dvxr+Bvft06dQpLPJN/aFxNBqN/Jt6XWOabHenbjQaraCwsKi4uLa2tp32t6/CQSGvuFyXQqF06mgbFvmmUaN3Hj55zHhdXFLy+EVQR0srsv9kgyQlJGwsLEPfRGTn0nvWke48vM8YdycpKWljaRkS8ZrTDvyVmTsKheLs2OV1dFRichJjY0lpaWDQs8529szfXJuIU+i43zhOt/vLFlnZ0tJS3svAPYB1oegcHhWZmJQkkCg1eMe5144Fc2X5K0+jztBg4Xn5xPXs5lJRWRkUEhITH9fHtUf9IjUqAlw0+NH4nJ111dtrzJBhw/oPNDMyPn7hXG1dG2n9yDSqhCwh5eXj2ZTfISCi0EII0BbwsuA7IJLAhw8fk1PSUsfVTffHol+Pnq9ehz8Nfsky62BNTc2yLRsG9OxtZGBYXl5+5+F9Q319M2NjCQkJbU1Nb78HsjKyykqKYZGRn7OzuF99woiRUW9jN+75Y1j/AYZ6+iVlpQkfPujp6g4fMIjTITHv4v46fcKpk2N5eblPwEMqlTptzHje6zt+xMgt+3Zv2vvH8AGD1dVUI2Njk1M/qTE1jU4Y7rll/55Ne/8YMXCwmqpqRExMSlqqmooKo2cfH2Vu0ETPUdHxb7cd3D+kX39TQ6Pc/Px7j/ylpKR+HM9mxBffYt/Fsw2dpro6lxvH6XaT75oZm4S8ibDq0CEzO3vCiJG8FIN7ACeNHB0TH7/t4D6Pfv3NjIyLS0uDQl+tXbREQkKCvyhxv+Pca8eCpbJ8lKexZ+BeeO43jqSmqmpvbXPlzi1NdXUbC8v6RWpUBPi+szQa7Z/zZzU1NDz6ulMolB/GTdy074+7/g9HDBzMNjK8l5DlQF4+npw+CARB/PH34ezcnO2r13IaiAsiCgkhAAAARwFBz8hFAuu/ZW9to6WhERj0jCUhlJSU7GLX6dGLoOKSYhVllS729mOGDJesG5azfPb8s9evXPK6KSMl7ebsPLhvv417dnGJvp6O7ublq6543fbx96uuqVZXVbVq34F7d6+ls+Ze875z/MJZgkKxMu+waMZMtuuAc2JubLJm4a+Xbt+8fOeWrIxMZ7tOaxYsXvfH9m87mJj+tmjJpds3L3nRd+hi3+m3hb8u27JB7mtfOz7K3CAVZeUtK1Zf9/F+EvzC++F9FWVlR1v7sUOHqzdmXGKDls6uC93Fc+QKFozQUSgULjeOy+0mCOKHcROOnT9z+vJ/9MlReEsIuQdQVVmlLhR3ngS/uOvvp6aq0tmuEzlWjb8ocb/j3GvHgqWyfJSnsWfgXnjuN46hl0v3w6f+HTN0ONtRpo2KAN939v7jwPj3iavmLyLP3MHMzK2b84273s6du+hqaXN/kBr1BPLy8eT0QajDcZJeEGmU8qoKQrglZ2UQBGFtYNoqVw9OirfW+zadMQAA8CEu45OLmRVC1yYVl5TMWb188qgxTWkDbF0+/g8v3rx+fPc+AXZABVHh9/Tx6SuX9m/ayrwYg3jCB6E5xKUlEwRhqiPUc7RiDCEAAADw74avN4VCceK6vCGAcKqqrvZ6cM/e2gbZIIgzdBkFAAAAXvk/exoZG9PR0lJdVa2wuCgs8k1U3NtRg4fUX84bQJiVlJXGxsf7PX1cXFo6dcy41i4OQGtCQggAAAC8Mjc2eRMbfefh/aKSElkZGRNDo4UzZrp2YbNUOoAw8/X38/F/aGJotGbBYkM9bmvNA7R5GEPYAIwhbAPWbdtqZmLy87QfWrsgYsrvUeAN7zt7t26Tl5cnhFJ1dfWtuz5hEa9Ly8qWzV9oytf0cTw+gc0XDSGPM8YQAgCAGIrDGEJorHfvE+ctXxoVG4vQASfnr1y++/BBCxzI94VEzq27Pk+Dnvfv03fRrDnGhoatXRwAAACAloNJZQBEzKvwsIqKihY4kO8LiZzYuDhbm44D+/azaN9eQgK/FQEAAECM4KsPAIi7yqpK+a9LqAEAAACIFUwqI0pKy8ru3LsbERVVVl7eTkfHo//ALg7fpvkuKCy8fdcnJu5tZWWlsaHRuJGjjp89zRi5VFpW9jAwIOptbH5BgZSkpLmp2fiRozQ1NBiH19TU+D95/Co8LDsnR1pa2szYZN7Pv/xz5tS7xMQ/Nm+Vkvr2qJy6cD7hw/tt6zawLOFKDmFat2zFNa/biUkfhg4c5NF/QIPFZntdspWmoqLifoD/68jIvPw8GRmZDubtR3h4GHwd+c3pckXFxbfv+kS9ja2sqDAyMBw3chTvEeZUmBPnz6ampW9ctZqxZ1Rs7JGT/65YuNjMxIRTYfgICHnIzo2bHz4KCAkPLy8vNzczmzJ2vLYWfXGk/65fffriBX23x4/8Hj+SkZE5sH0nSxWoVKr/40cvQ0Ny8vIU5OWdnbqOHjac7YFcHglOF+J+K7mrrqnxveP1KjysqrrazNh44pixOnWL7ZJ4ude/r1t/98GDiKhIgiBcuzmPGT4iv6Dgyq2bCe8T5eTkuzo6eg4dJvV1KV4ei+p17+49Pz+CIF6GhrwMDdHW1Ny8Zm2Dh3N/l5cnkEqj3n34IOhVcFFRkbaW1qB+/V26dmWcnI+Pav2GzdDX4acuXnDt2u1/EyfxeI8AAABADCEhFBkVFRV7/zpUXl4+2L2/irJKeGTEv+fO/Ez84OTgSJ89ubR0z6GDVTXVg9z7a2lofEhO/uvE8dqaGsbhmdlZKampbi6u6qpq+YUF3vfvHT118rely8ikrqa29tDxY0kfP/bu4ebpMaSktDTkdTiVSnXt5hwZExMbH9/J1pY8T3V1dWRsTF+3nizZIMO5K5c9+vdfMHMWI6njUmxO15WQkKioqNjz16H8/Pz+ffoa6Onl5OYFPH28++DBJfPmmxgZcbpcWXn5nsMHKyorB/VzJ+Pw98l/mePABZfC8HiPWArDR0BIpy9eUFRQGDdyVE5uru/DB8fPnlmzZCmFQunTo6edje0/Z07Z23Ts7uwiya5gl25cDw4LHTJgoK62Tmp6WnxCAkEQbA/k8kiw3Z+XknNx5r8L8vLyXyrl9/DvE/9uXLmafIp4vNcnzp01NzWdPG58ZHR0wJPHBI0WER1lZ9Nx2oRJsfFxfo8fKcgreAwY0Kiiujh1NTM2PXvpP0MDffdefWRlZBo8nPu7PD6BF69dKysrGzqQvor3s5cvzly6SKPRXLt14/ujyvKUJn54f/byJfuOHaeOn8DL3QEAAACxhYRQZHjfv5dfULBu2QqyrcDJ0XHf339537tHfg31ffggv7BgzZKlhvoGBEE42ndqp6t7/splxuHmJqaLZs9h/EilUm/c8UrLSCf3fxgYkPD+/eyfpjvY2ZM7uLm4EgRhZ9NRUUExPDKCkRBGxsZUVlZ27+bMqZy21taMkzRYbE7XJQ/M+Px5xcJFpsYmX767d+26edeOq7duLl+4iNPl7j64n5uXxxwHvXbtzl2+xEuEuRSGRyyF4SMgJBUV5Z8mTyVfS0pI3PTxTk5JMTMx0dfT09fTo1AoWpqa9h07si3Dy5BXLl27kU2RnTt1GtC3H0EQbA/k8kiw3Z+XknOhrPytUlJSUjfueH1ITm5vZsb7vW5vZj5m+Aj6pR0cs3JyAp4+6d3DbdKYsQRBdHFwSP/8+WVYCJkQ8l5UXW0dXW0daWkpdVU1HmvK/V0en8Dq6qpFs+eQOZ6zU9dte3Z73bvr0rUrhULh76PK7HNW1tFTJ02NjH/+348YEgkAAADcYQyhyAh5Hd7ZvhNzzzF7G5vM7KySkhKCIMIj33S0sia/MpJcu3aTlpbmdDZyYv3cvDzyx6BXwR3M29dPZqQkJbt17hwZE1PztYkj9PXr9qZmOtrfOvuxcLCz473YnK5Lv1DEa1tra0aGQBCEkqJiDxfXDx+Ti+uOZXu5sDcRttaNiAMzLoXhEUth+AgIqV/P3ozXNlZWBEFk5+bwWAYVZZWED+8Li4rIH3kfGsfySNTHS8m56NezF+O1tYUlQRA5ebmNutcuTt8WOrNo354giF7duzO2mJuY5OXn02i0pheV++Hc3+XxCRzsPoDRxi4lKdnTtXtBYeHnrCy+P6oMRSXFf/37j5qa2twZP0sz9fQGAAAAYAtfF0RDaVlZcUkJOcyJ5a2S0lJJKanCoiJnpy9jkEgSEhLKSkrMW1LT0yJjYlLT0rJzc8kEo7ouzauoqMjNy+vSif1gMJeu3R49f/b2Xbx9R9vyioqYuLcTR4/hUlQ1VTUeiy0lJcXpumXl5UXFxYwhZAztdHTqvhznMqrGfLnyiorCoiKX7+NAoVBY4sAW9yDwiLkwfARE6Ws5tTS/JRvKSsr0qpWX81iGiWPGnjh/duOO7V07d3bv3Vu/nR6XnTk9EvXxWHIutDQ1mSpF37+8bgpT/u61ooICQRCa6t8CpaCgUFNTU1NbW1VV1ZSicq8pRUKiwU8iL0+g7vd/UtGsu+NFxUV6urp8f1RJx06fqqmpWb5gkXCuRggAAADCBgmhaCDbPbo4OLg40UcZMVNTU6uqqiIIQqZeK0RtbS3jtd/jRze975gZm1i0b2/XsWNtbe1/16+Rb5Gtf8zTxjAzMTLSa9cu/M0b+462b6KiJCgS3LsIMmb1aLDYNdXVnK5LpVLp36QlWIcpko0qzMMXmS9HVkSaaxw44R4ECkGhEfS6sFSNBXNh+AgI47UE5VvTPVlZNhfjwL5jx82rf3v07Onz4JcvQl55Dhk62L0/2z25PBL18VhyLupXqrH3WqLesFXmdxmvm1jUBh7auueE07vVdY80L0+g5PePSkU5PTeWlpJuykeVpKutExUbk5L6yb7jl27eAAAAAFwgIRQNigoKsrKyNBr96379d6WlpKQkJTOzs5k3VlRUFBUXk6+rq6tv3/Xp4ezCmGEiPjHh28kVFeVkZdMyMjhd3bVrt3t+D2tqa+md5Tp1kuO5FyL3YtNkZDhdV1FBQV5OLr3eW58zMykUCvPslCxHSUlJZX7f766ispIRB25F5RoEaWlp5r6LBEHkFeQ3eM7GBkRQVFVURg4dNmTAwH/PnfXyvdutcxcNdXWWfbg/Ei1Zcv7udfMVtcGHlsu7MtLSPD6BBYWFzC14qRnpFApFV0e7iR9VgiCmjht/4nzFv+fOLpw1u4OZOc/1BgAAADGFMYSigUKhdLSyjoyJZjvKSFJS0qJ9h4ioSOYBYA8CAxitWMUlJbW1tTp1SxeQQsLDmU/u2KlTVGxM0sePbK/u3MWpsqoqNDw8PjGBy3QyjS02l+tSKJTOnRyiYmOTU769VVpW+jw42M6mI6e+cBISEpbtO0RER30fB3+2rXm8F4be6qKjU15ezniLSqW+ePWqwXM2NiA8kpWRLS0rY/sWjUYj+2HSkxMZma6dO9NoNMZ4QuYDuT8S9fcXSMnZ4u9ecz9hU4ra4EPL5V3en8DHQc8Yr0tKS1+8Crbs0EFRQbGJH1Xyt8Gsn6Zra2odOfFvanp6Y6oOAAAA4ggthMIoJu5tQWEB40cdbW2rDhYjhwx9+y5+96E/B/Tpq9euXVlZ2YfkZF1t7YH93AmC8BwyZO9fh3cf+nOQe39VZZWYuLep6ekqysoUgt6PTl1NTVND4+GjQFlZWUUFxciY6Kyc7yYpGTV0+LuExANH/3bv1dvY0LCktCzkdfivc+aSUxSqqqhYW1re9vVRV1MjJ/PgHfdic7nuyKHD4hLeHThyxL13byMDg/yCgoCnT6SkJLmPYBzhMWTvX4focejnrqqiGhsf9yktTUWZPgyPdOLc2dz8vJWLfq1/LJfCdO3c2efB/eNnTw8ZMFBWVjYoOJjvyRu5B4QXxoaGEdFRHczNs3NyPIcMZX6rprZ2087tvbr3MNDTL68ofxAYoN9Oz9jQsP6BIzyGcH8k6l+Ie8m5BLbhmPB1r5svyNwP5/5ug08gKT4h8eSF8w52dhUVFX6PHlFptHGeI5v+USXJy8nN/2XmHwcPHD5+bNmCRdpMozcBAAAAWKCFUBg9CXr+3/VrjH9kY5SOtvaKhYst23fwe/zo1Plz9/z9aqm1dl+HCZkYGS+eM1dbS+u2j/elG9cJCrF4zpzaWqqsrCzZsDB3xs8G+vq3fLwv37qhrKw8cfRo5iuqKCuvXPyri1PXl6Ehpy6cvx/gZ1C36gBjB9eu3QqLily7duO0/CAn3IvN5brKSkorF/3q0pX+1onz5x4+CrSxtFq1eEn93o/MTIyMFs+eq62pdfuuz6Ub12k02qLZc5jHXCV9/Ghnw74nIZfCaKipz/v5F2Ulpau3bt70vmPRvv2QuuUN+MA9ILwYP2p0Ox2dSzeux9WtMchMUkLCvqNt0KtXpy6ev/vggbWF5eI5cxnD1ZgPbPCRqH8h7iXnEtgG8Xevmy/I3A9v6JPYwBNImj19BpVae/7K5etet7U0NZfNX0hOq9P0jypJXU1t/i8zK6uqDv1zlJcu0wAAACC2KOVVXzqYCa3kLPqAGWsD01a5enBSvLXet6WxRUhJaenKjetHDx8xsG4luiZ6EhR0+eb1LWvWMs+2L3KKiotXb964ZskyI4NvqwIAAgstIC7jk4sZfQ0VAAAA8RGXlkxfREqH26zvrQ4thG3W3Qf3KRSKgy2blfEaq7q6+n6An42llUhngwRBfPiYrKaqimwQgQUAAAAAEsYQthFPX7yIjY+z7NBBTUWlqLg4Mib67bt3HgMGcFlBnhelZWXvEhOeBAWVlpaNHeFJiLjkJnRrBAQWAAAAoO1BQthGmBgZxcS9fRDgX1JaKiMtbWRg+PP/fuC+YCAv/J888nv0yFDfYNHsOXrt2hEibtSw4a1dhLYJgQUAAAAQURhD2GbHEAIACA+MIQQAADEUhzGEAAAAAAAAILQwqQwAAAAAAICYQkIIAAAAAAAgppAQAgAAAAAAiCkkhAAAAAAAAGIKCSEAAAAAAICYQkIIAAAAAAAgppAQAgAAAAAAiCkkhAAAAAAAAGIKCSEAAAAAAICYQkIIAAAAAAAgppAQAgAAAAAAiCkkhAAAAAAAAGIKCSEAAAAAAICYQkIIAAAAAAAgppAQAgAAAAAAiCmp1i4AAACAyHuXntLaRQAAEBaW+satXQRoBCSEAAAATc0DzdsZIIgAACy/G5EZigQkhAAAAHx+3UEeCABQH+N3I/mrEmmhkENCCAAA0Djv0lOQCgIANIj8VfkuPQU5oTBDQggAAMArNAwCADSWeTsDNBUKMySEAAAAPEHDIAAAf9BUKMyw7AQAAAAAAICYQkIIAADQMDQPAgAIqu8oCBV0GQUQMcefB/Cy20w39+YvC4C4QDYIACDAnBBzzAgVJIQAbSQD5H4U8kMAAAAAqA8JIUDbSQJ5PCGSQ4BGQfMgAIAAoZFQ2CAhBBCxVHCYgxMv5/F5E8b9EkgLAQAAAAAJIYCw54E8ZoDcj6qfHzKuiMwQAAAAQGwhIQQQ0lSQvzyQE8bZOGWGSAsB2EJ/UQAAgUOvUaGChBBAuLJBweaBvGeGx58HICcEAAAAEDdICAHEJRVkeznmtBBNhQAAAADiBgvTA7R+NjjMwamFs0Eulxb4BKcAAAAAILTQQgjQyqmgMNwAltZCNBUCAAAAiAm0EAKIezbIgKZCAAAAAHGDhBCgFbLBVuwjyh1LwdB9FAAAAKBtQ5dRgFbIBoU86MMcnJi7j2L2UYBmorlxY2vFNnfz5ta6NAAACBUkhADNTrSyQRJyQgBhSAW7m5gs7d2nm5GRnJTUu+zskyEhZ8JCaTQa8z7SkpJj7OwXurnZ6+kdDw5e7n2H9wIgLRR+pu79q6qrk/z9ZGVkWrssANA2ISEEaKFsUFRSQbYzzaCdEKDlWwUnOjgeHTtWgkIhf3TQ1/9z5EhHff1fvW6TW1Tl5KZ3c57t6qqvotKUwjR3WvjDylV+L14c2bRxZP/+zXohaFBuQcHIefNLy8ouH9hvaWqKiAEAxhACNC/RzQYZGCXHeEKAlswG9ZSV/xw5UoJC2RUYaL5ju+n2bUu8vKpqa6d369bHvD25z4iOHTcPGtROWfl0aMg/wS9boFQgQtKzstbs3bd6717mjTQajUqj0uq0XtEAQLhgUhmA5tIGskESckIAgWhU3vVTt27y0tJnQkO3B/jnlpXll5efDHm15eFDgiCmd+tK7uMVG/ssOanf0SOLb9/OKytrsbKBSAiPjT1z61ZufgHzRi119aD//ou4fcvKzKz1igYAwgUJIUCzaDPZIAk5IUATNTbj6t/BgiCIoy9fMLZ00NLytO1IEERPM3NyS1FFxbATJyLS0wVyd5ATAgCIJySEAILXtntXtu3aAQgJGx2d0qqqt1lZBEFQKJS53bs/mzff2ciYIAhtRUU1efnWLiAAALQRmFQGQMBEcU5RXmDeUYAWa3yTlpRUkpVNzs+j0Wim6hp/jxnjZmpaUVOz/v69UbZ2ToaGqnJyBeXlAr8jmhs3tuK8ozW1tedue13x9U1ITqZQKJamphOHDp3mOUJC4rs/XpdXVBy7fMUrwD85LV1WRqarne2y6TM+52TP+G3tgO7dz/6xi7FnUWnpxTveD549i09OKi4pVVVW7tG58/KfZ1iYmNS/+tPQ0HO3vUJjYnILCtSUlewtrRZMm+rq4DB/y5abD/1mTZiwaeEClkOehIROWrrUyc72zpEjDc4R+jLizZa//05MSVn8w/+W/vRTo6rMosF6HT5/YfuxY+Rrn8eP9Xv1JgjCysws8OwZTtOWUqnUO4GBV+/dj4yPLywuVlZUdLC2njpixNA+vTnV6H1Kyr7Tp19GvCktL7cwMZk3ZfKoAQO4FBsAhBYSQoDm0paywfo5IQA0H3JeUSqNNqOb8zYPDwUZmbDU1Dk3rr/Lzvawsq6bGqSthb+krOzHVatfREQoKyraW1lWVlXFJCau3rs36HX4kU2bKF+nWs0tKBi/eHHchyRpaenONjYKcnJhMbEj582bMXZs/XMu3bHj7uMnyoqKHTu0l5WRiUlIvBMY+OjVq/sn/jU1MGDsVlNbu3L3nks+PgRBWJiYdGzfPj0rM+DlSxN9PVcHh4lDht586Of96NHGBfMZxSDdrBvSOWno0AZrFxYT88Pq1dXV1fSalpY2qsp81MvU0GBA9+5ZeXmR8fE6GhqdrKwIgjBs145L8GeuX//4VYikhIS9lWUnK6tPGRmBwcGBwcHjPTz2r1ldP0F9GhY2c916PW1tO0uLd8kfoxMS5m3eUl5ROXn4sAajAQDCBgkhgCC1saGDXHJCLEQB0Hxj86pqa8urq801NPd7elbV1m7xe3jg6dNaKpXsL0oQRH55k6aQEcJGwmU7d72IiPDs7/7H8uUqSkoEQSSlpv5v5SqvgEB31+4ThniQuy3etj3uQ1J3R8cjmzfpaGgQBFFRWbn2wIFjly/XP6epvsE/W7d49OolJSlJEERZRcUPK1cFvX596Pz5vatWMXbbduToJR8ffR2do5s3dbWzIzeGRceExcbQR2w6ddHX0UnPygqLiWG8S79H1dW+T57Iy8nxspbG7hMnJg0dsnzGz9oa6o2tMh/1Gt637/C+fb0fPZq1fkM3e/vjv2/lXrwl23c8fhXiaGN9ZNMmE319cuPLN29mrlt/9d49KzPTeVOmsByyeNu2jQvm/zR6NNm6uO7An6dv3tx29Oi4wYOkpaUbDAgACBWMIQQQGHEbXCdu9QVoSR9ycwmCeJOe3ufI33sfPyazQXV5+faamulFRcWVlW3pdoTHxt4JDLS1sDi0di2ZGhEEYWZouHnhQoIgznt5kVvCYmICXr7UUlc/tWM7mQ0SBCEnK7t7xYouHenT7bBYN2/u8L59yayJIAgFObkldX01X7yOYOzz4dOn41evysnKXt6/jznfc7KznTVhAv17koTEuMGD6XO6Bnz3G+9hUFBRaenwvn2VFBQarGBtLXXX8uXM2SCPVWaLl3rxLiw6xufxYw1V1fO7dzOyQYIgXB0cDq5bS++AeuFiRb3nzd3FlcwGyRCtmzdXRUkpr7AwIi6OjzIAQOtCQgggeG21eVAcagcgJJ4lJxME4f32bWxmJmPjDGdnSQkJv4QEom255edHEMSUYcNYGpe6dbKnZ8Xx8eSieb6PnxAEMcHDg5FBkeg5mwc9Z2uQlRl9KfbsvDzGlusPHlCp1AlDPNob0yfsYWvi0CH0e/HoMfPafV/6iw5ruL8oQRC/jB/PX5V5VL9evPMKpCe6k4cP11BVZXmrn4uLqaFBQVFRaAy9sZQZIxskKcjJde5oQxBESkYGH2UAgNaFLqMAgtHmO4syQ8dRgOZ2JjRkpovLqn79iisrLr95U0OlTnJwXNPPnUqjHWNai6JtiE18TxDE2gMH1h44UP/d6urq4rIyFUXF6ER6JuxkZ1t/n3ZaWmzPnF9Y9DQ0NPb9++T0tI9p6UmpqfQT1tQwdngd+5YgiF5dvyztyJaZoWFXO7vQ6OiQqCjnTp0IgiguLfV/8dLUwMDVwYGXCtpZdOCvypxO2GC9eBebmEhPRJlaR5k5WFknp6YlfvzYs0sX5u3tjY1Y9mynSb8FZeUVfJQBAFoXEkIAARDnzpMYTAjQHGIyM3cFBq5xd985dNjOod8m6tj44H7058/ka30VlbcrVjIfNdPFZaaLC0EQ9+PjJ5w/Jyq3prCkhJ7p2dqqq6iw3YGcXyW/sIg+ylFNjcfT7jt9+tC585VVVeRRxnp6vbt29X70iHmf3AL6uu3a6t86c7I1ceiQ0Ohor4BAMiG8+/hxZVXVxKFDuEz9wky3Xr7KY5X5rhfvCorpJVFTUWb7rooSPSktqzelrbycHMsWGRl6U2ejGjYBQEggIQQQJHFoHiRhxlGA5rYzMCAxN2du9x62urq1VGpERvqhZ8/uxce3vcgr1GUX86ZMHtKbdZEDZpKSEowUjkVVFX0CT2bnvbz2nDipq6m5du6cfi4uZBpZUVnJkjiRaUxJWQOT9Hi6u6//86DP48dbFy+iUCg3HvpJSEhMGELvSsoLxni/xla5Ph7rxTuyJMWl7CNAbmfpowsAbQwSQoCmEufmQRIaCQGaybXIyGuRkZzeTS8qUl2/rg0E39zQMCQq6vXbt9yzI30dnYi3cQkfP9bPw95++MCy5T9v+jISW39dPLxvX8bG1M/fBmSSOhgZ0ycUjYlxd3XlcmllRcUhvXvdfOj3KjLK3MgoKDy8T7duetraRDNXuT4e68U7S1PTkKiosJjo/t3ZRCDq3TuCIDp2YO3yCgBtCSaVARAY8WkeFM/6AkAz6eviTBDElbu+RV/X6GOrpxP9d86Zm7eq6hb0YygpK7vs68uy8+ecHPrie7rfLb5XvxnNo3cvstmtoIjeH5WLiUPo88d4BQbc9vevpVJ5nE6miVWuj8d6kfOv0oPT0Aol5NLzF+94FxYXs7z1LCzsfUqKib6+gzV99UsAaKuQEAIAAEBrGtqnj7mRUVZe3vTVaz5nZzO2Z+bkbDh4MObrrKpjBw3SUlfPyM5esmNHWcWXyUty8vNn/La2sop1XQQjPT169njrFrliB0EQt/39j166xLLbIDe3bvb22Xn5U5evSE5NY2x/Fh5+4to15j3JBQkfPHt+/9lTdVUVj549W6DK9fFYL0bS+Dr2bf1Mj1k/Fxe3Lp2z8vKmrVz56evwVIIgQqOjF2yhL2C4bt5cyXoL0wNAW4IuowBNIlaTi9aH6UYBgEcbDh7cdfxflo3r5s4d2qe3tJTU8d+3Tlqy5EVEhMuEiZ2srdSUlTOyc+I+fKBSqZOHfZlTR1lR8e9NG39YuermQz//Fy87d7SpqqoOj4010NVdN2fusl27mKd4mT9lckhU1OW7d5+FhXUwMU5OTfv0+fOelSuW7tzFXAAKhfLP1i1Tli1//fZtz6lT7SwstDXUk9PS36ekzJk0kXlPckHCg+fOZWRnTx8zponLr/NY5fp4rBe5FoWdhUV0QkKvqdPsLCykpaTO7NrJ9pxHN2+eunxFWHRMj4mTOllZaaippn7OjE9KolAoG+bPH9anT1NqCgDCD3/yAQAAgGaXnZefnJbG8q+47EuHSRtzc79Tp2dPnGjYrl1U/LtnYeFlFeXjBg+6c+SITfv2jJP07NLl3r/HPd37SUtJvXgdkZGd/fO4cb7H/1GUl2d0kiQNdHO7+ueBnl26lFdUhEZF62lrX9yzZ/TAgfULpqup6XPs6Ib58+0tLd+npLyMeCMtJTl/6tTZkyaxXZCwLmFrUn/RRlWZBe/1olAoJ7dvG+jmVlNb+yoyUlWZ/Tyi5FSlXkf+3vbrr44dbRJTUp6EhhWXlo4bPPj+iX9ZsmIAaJMo5VXCvmJMchZ9kVNrA/qiqy0vOCneWo91sR2A+tPJiGcLIUEQPm/CGK9nurm3allAeL2IjiBE1oAu9IUc+Ka5cSMhUnI3byZEzb9Xr204ePCn0aO3L13SfFdJ+Pixz7T/2Vta3j/B2tQJAI314XOapb5xm49bXFoyQRCmOvTO3kILLYQAAiC22aCY1x0AhETwmzcEQdjWW/9dsE7fvEkQxCTO/TkBAEQREkIAAAAQYQkfPz4ICpKWkhrQo0fzXaWopOTavfsqSkrjBg9qvqsAALQ8TCoDAADNTl1T08XMShQD/S49pbWLAN/8uGr1L+PH9XRyYswfE/wmcsHWrdXV1T+PG6erqdlMwaqprV3/58Hi0tJlM6YrKyrilgBAW4KEEIBPYj6/KDPMNQoALeN5ePjDoCB1VRUb8/aSkpLJqankSglDevdeN3dOc1zx8t27573uZGRnp2dlOXfqtOh//2uOqwAAtCIkhAAAACAaLuzZc+Web3hMbPS7dxVVVRpqakN69x7vMXhwz57Ma04IkIy0TNyHD8pKSjMnjF/5yy/SUvjiBABtDX6vAQAAgGhwcejk4tCpJa84euCA0QMHtOQVAQBaGCaVAQAAAAAAEFNICAEAAAAAAMQUEkIAfmBGGRaMmXUYkQEAAAAA4YeEEAAAAAAAQEwhIQQAAAAAABBTSAgBAAAAAADEFBJCAAAAAAAAMYWEEAAAoBnlbt4sQvEVrdICAEDTISEEAACA1nT/UeD8NSszMjMFslujLNu0/u/TJ9m+5Rvg9+Oi+WXl5XyfvKq6+sKNa4vWrZmxZNGHj8lEy2qOcAkbLrePu6bf3LaK75CCSENCCAAA0LxEpdlN4OU8evb09F8XFhYV1X8r4cOHHxfN9w3wJwiCRqPSaLQGz1Z/txMXz9+6d5cQVlfv3A54+tSjX/+V8xeaGhm38NV5jKqYEPJHBaB1SbXy9QEAAKCN6uns+iI05GVY6OB+7ixvPQ8JlpSQ6NHNmSAIj379Pfr1b/Bs9XcLCg0Z2LsPIayiYmMdbG2H9h/QKlfnMapiQsgfFYDWhRZCAACAZif8jYTNUUJbKysNNbWg0Fcs22tqal69Du9ka6eqrEy0XRWVlfJy8q1dCgCABqCFEAAAoCXkbt6suXGjWOWrFAqlRzdn74cPMjIz9XR1GdsjoqNLy8p6ubiSP/oG+F26dfPIrj0K8vT0qZZKvRfg//xVcHZujoK8gpuz8wTPUSy7nb78X+DzZ3Ub/X0D/GVlZP7Zs58giNKy0mved8LeRJSWl+vr6o4Y5OHcuQvjuoVFRVe9vSKioyoqK00MDaeOGddgFahU6u17vk9eBhUUFulqaw8bMNDN2YXxLqfLXfe+4/XgHkEQz169fPbqpY6W1u4N9AiXV1R4P3wQEvE6Ny9PVlbGqn2HMcOGG+kbMMdh2+q1F29ej3+fOMpj6IhBgxusFCcsUSV/3Ld56+17vqFvIujtty6uE0eOzi/IP3/t6tuEBAV5OZcuTuNGeEpJSjH2/2vHH/5Pn7CtPqfScqnjgX+Oxr9PPLR9J3kJ0u/795ZXVGxbs7Y5bh9BEJweFYIgqqurL933DQoNqaqqam9q+sP4ibraOg3eXEbdD/6+466/34uwkLLycgsz858mTtbV1uZyL7gEs7Ss1MfPLyImKi8/X0pSysLcfMqYcdqamuS7f58+mZKaunPdBsYJI6Kj9/9zZMPS5e1Nzbh8ZJoppND2ICEEAAAQ65ywWVsvezq7ej98EBTyauzwEYyNz0OClZWUHG3t2B5y9srloJBgz8FD9HR0P6Z9in0XX3+fAb36ONraHzzxj6OtXW/XHpKS9B5P5RUVv+/fV1ZePnzgYFUVlVcR4X+dOkEQBPkNuLSsbOv+vRWVFcMGDNLW1ExM+rDv2JGa2lru5T99+b/SsrKRHkMJggh8/uyf82epNBqZynK5XA9n5/amZscvnDU2MBzc111WVubL/gf25ubnD+nX31BfPzs35/6jwC379vy2aImZ8bcRhv9ePD9i0OBlc+dLSjRcqcb669RJMnUJj4q8HxhA0GhhkW8cbO1+njI16m2sb4C/goKC5yAPXqrPsbSc69ijm/Pr6KiYuDiHr7c+Nz8vMTlp8qgxzXT7OD0qpH/On1GQV5gyZlx2To7Xfd99x47sXLuBQqHwGPZj584oKnw5/PZ938Mn/92ycjV5OFtcgpmRmZX8KaVPdzdNNfXcgvybd73/PH5s66o1XM7Gy0emmUIKbQ8SQgAAgJbOvoQkLWyBjqx6urrmJqYvwkLGDBtOfrstKS19ExszoHcfSUlJtoc8C37p5uxMNjd1dXQc6s5mDJ6hvr6hvj6FQtHR0nK0+5Jd3LzrnVeQ//vqtWTTiksXp+1/7r/h401+/b19725OXu6WlauNDQzpZ3ZwNGin9+/F89zLX1VVtXL+QrLkPbp1W7dj+3XvOz2dXSgUCpfL6eno6unoSktJa6ipMxcvLSNj/dLl7U1MyS1uzi6rtm45f/3K+iXLGVfs1LGjUycHxo/cK9VYlubtJ40aTaYEn7Oy7j8K7N+r9w/jJ5Jb0jIynr8KZk4IuVSfU2m51LGznb28vPyr168ZCeHLsDCJr0NJm+P2cXpUSCrKKrP/9yP5WkpK6tKtGwlJHyzN2/MYdlWVb4dLSEhc8br14WMy2WTHFpdgdjAzWzl/IWNPKpV66daNT+lpZGUbxOkj00whhbYHYwgB+DHT7csECT5vwhBB5jgwIgMAXORu3ty6owpbsgA9nV2yc3MTk5LIH1+Gh9bW1vZ26c5pf1UVlfj3iQVFheSP8nU9HnnxIiy0q0NnRkc7giAcbO0ysjKLS0oIgggOD+9k05H5G3ZPF1cZaWnu5xw+aDAj+ZGSlOrr5pZfWJCe+bnBy9X3Miy0k01HRqZEEISyolLfHj0Sk5KKiosZG7vYf8uv+LgKd27O9NSLZN3BgiCIfm49GVs6mJnl5OUxz03KpfpsS8u9jtLS0t0cHMOj3tTU1jD2d7S1U1ZSaqbbx92gPn0Zr22trAmCyM7N5T3sg/r0Y7y2t7EhCCIrJ4fL5RoMJoO5iQlzYRrE6SPT8iEFEYUWQgAAgNYh/DPNCISrk9PFG9eDQl9ZmJvT53t89crUyNhQX5/T/j+Mn/j36RMrtmzq7tR1UN9+hnoc92RWWlZaVFxMjtljeau4tERKUrKgqNBN34VliKNKQ7Pa6Ol8G/pIEIS2phY58kpNRYXL5cgM5/vilRUWFxsZGLA9f3ZeLqMkGmpqPFaq/lUaxHxyJUVFgiC0NL5lC4oKijV1pL9mBZyqb9BOj11pG65jj27OT16+IHuNZmRmpqSljhk6rPluH3dkdUgqyvRgltetTMhj2JkTLRUleklKy8u4XI57MFPSUl9HRX1M/ZSVk5OVk00f4ljzJW1uENuPTKuEFEQUEkIAAABoRooKio72dsHh4dPGjs/OzX3/Mfl/4ydw2d/Rzu6P9ZsePnn0OCjoycsX44Z7Dh84qMGrUOvatZw7d3Hr9t13XDJpqaqqJghCWpr1a09NTQMjplj6tZJLmUtLS3O/HLviUen9siisPbMoEvQmIwmmoWJSUt8K2dirNIhSvwBMl64/Yo1T9TmUtuE6Wnew0FBXJ3uNvgwLVVVW7lTXfbSZbh93EnXjHr8UkqA0NuzfHU6Gjuu6j1yC6Rvgf/n2zfamptYdLBxs7Wpra89cucRUNoL2/alpdaHm/pFplZCCiEJCCAAAAM2rp7NraEREZGzMh5SPUlJS3Z26ct9fTVV1/IiRnoOH/HXqxDVvL1enrloaGtwPUVJQlJOVpdFoLOPESNLSMlJSUp8zM5k3VlRWFBYXcT9tfkEBOUsn6VN6GoVC0dPRVVRQ4HI5tsWTl5f/lJHOsj39cyaFQmGe3JL3SrUATtXnu44UCqW7U7fA509raie/DA/t0c2FnI2mmW4ff5op7JyCWVVdffXO7T7de0yfNIV8i2UiJWkZGeZOxXWT8eQ3+JHRVFcXnpCCkMMYQgAAAGhenTraqigrh0S8Dg4P72LfSVGB3lmRLRqNRnbbIwhCVkamu1NXGo1W+HVwFAs5WdmSsi+d9CgUir1Nx/CoyIzvv+OSJCUkbCwsQiPfMI/L8nn4kHm8HFt+Tx8zXheXljx5+cLGwlJJUZH75eqjUCjOjp0joqPef0xmbCwpLX384rmjrR1znsByVKOuInCcqt+UOrp1cy4rLw94+vRzVhZjwtJmun1sH5UGNVPYOQWzqLi4trZWR+vbkhUvw0KZD9TT0SkrL3+f/GUULpVKfRr8osGPTHOHFNoStBAC8Gmmm/vx5wHkfCrDHJzEOY6YUQYAuJOUkOju1PVp8Muy8vL/jRvPZc+ampqVv292d+tlpG9QVlHu4/fAUE/f1OjbqgzMTI2Mw95EWJm3z8zJHjfcc9xwz+i4t1v27R7iPsBAT6+ktPR9cpKuts6wAQMJghg7zPP3A3u37t8zrP9ANVXVqLi3Hz99UlVR4V7yt+/eHTlzyqmTQ1l5+b0AfxqVOmXMWPIt7perb9xwz5j4uJ2H/hzct5+JoVFefv6Dx4FSklLTxnHrQMv9Kn+dOpGTl7dx2QqiebxN4Fh9vutooKdnbGB4LzDA3MTUQE+Px5o2ePu4h4LlUWmw4o29uU0Jpqa6upaGpq+/n5ysrJKi4uvoqM9ZWcwHujp1veV799CJfz0He8jLyT168Zy56y+Xj0xzfCKgTUJCCAAAAM2up4vr/UeBaqqq5HSOnEhKSna2s3/yMqiopERVWcXRzm6Ux1BOC1RMGzv++IVzZ69epq97Ppxop6Ozfuny6953fAP8qmtq1FRULdu3Z/SXMzM2XrVg0RWvW1e9vWRlZBxt7VcuWLhp9y7uxV48c/aNu94n6HPxUyzbt583/WfGOvLcL1efirLyhmUrb/n6PAsOvuv3UFlZ2aGj7eihw9RVuY0G5H6V98nJfbr3IJrNrzPn1FX/An3Jiu+r35Q6ujk7/3fzBsvQ0CbePu6hYHlUGtTYm9uUYFIolCWz51y4fu2K121paake3ZwH9um7Ze9uxoGa6hpLZs+9dOvmhevXlJQU+/XoaWxo+OfxYw1+ZJrjEwFtEqW8qoIQbslZGfRRyAbfpjBuScFJ8dZ6Rq1yaRB+ZAshQRBoISTjgDUngJO4jE8uZlaiGJ936Snm7bh9AwZoLYVFRYvWrdmycrWJoeC/qPgG+F26dfPIrj2curOKTyjELZgt5sPnNEt99o3/bUlcGr0HtanOt8ZwIYQxhAACIM6rEYpz3UEcWOobf/ic1tqlAGAjMTlJXVVNOFOgFoZQiBwxyQZFBRJCAP6hQQzRAABoLe+Tkx3q1mwAhAKgKTCGEAAAAED0TPAc2dpFEBYIBUBTYAxhAzCGEBokziMJMb8otPkxhCSMJAQAEBSx6i8ahzGEAAAAAAAAILQwhhBAYMRtehVxqy+IM0wtAwAgEGLVPCgqkBACNBWmlkEEQBwgJwQAaCJkg8IJCSGAIIlPo5n41BQAAACgDUNCCCAA4txEJs51B/FsJMSyhAAAjUX+8kRnUeGEhBBAwHmRODSdYXJREFuW+sboOwoA0ChkKohsUGghIQQQvLadE7bt2gHwAk2FAAC8QMOgSMDC9AACM9PNnbEmoThAZ1EQZ+Sfut+lp5A/mrczaO0SAQAIC0bXerQKigQkhADNkhP6vAlrk+vUo7MoADPGdx1GZggAAMgDRQsSQoDm0vZyQnQWBeAE334AAEBEYQwhQDN2pGxLGRRzXdBZFAAAAKBtQEIIIHhtO19q27UDAAAAECtICAGaRRtbhQJDBwEAAADaJCSEAM2lzeSEyAYBAAAA2iokhADNqA3khMgGAQAAANowJIQALZcTilZayFxgjBsEAAAAaJOw7ARAiy5Yz30tihbOGHksCbJBAAAAgLYKCSFA6+eErdVyyLgul/IgGwQAAABow5AQArROTkimYULSiZRTeZANAgAAALRtSAgBWicnZNswyKUPZ3NgKQCyQQAAAABxg4QQoEWRbW7MaWHL54H1r4tUEAAAAEA8YZZRgFbWWtmgsJUBAAAAAFoeEkKAlsbcPCg8mRhzSVgaMAEAAACgrUJCCNCihDMbJCEnBAAAABA3GEMI0DqELRskCc/EpwCi5V16SmsXAQBAWFjqG7d2EaARkBACtELzoHBmgyw54fHnAVh2AoDHPNC8nQFiBQDA8rsRmaFIQEIIAADA59cd5IEAAPUxfjeSvyqRFgo5JIQAAACN8y49BakgAECDyF+V79JTkBMKM0wqA9BCRKK/KEsJMd0oAIt36SnIBgEAGsW8nQH5yxNxE05oIQQAAOAJUkEAAP6gqVCYoYUQAAAAAABATCEhBAAAaBiaBwEABNJ3FGEUNkgIAQAAGoBsEABAIJATCiEkhAAAAAAAAGIKCSEAAAA3aB4EABAgNBIKGySEAAAAAAAAYgoJIQAAAAAAgJhCQggAAMAR+osCAAgceo0KFSSEAAAAAAAAYgoJIQAAAAAAgJhCQggAAAAAACCmkBACAAAAAACIKSSEAAAAAAAAYgoJIQAAAAAAgJiSau0CAAAAiKnkRaNb69KmB2+21qUBAECoICGENuv48wBCKPm8CSNEh7CFcaabe2sXAaDlUkG59h01Bo2TNbOSkJat+vyp8Nm9oqAHBI3G2EFCRk61n6eyUy9pbT1abW1F0tvcO+crUxJ5LADSQgAAQEIIbZCw5TAg8JuLtBDEoVVQuVtf3R+WEBQK+aOsUXudyfNljdpnX/qb3CKlpmWweJu0th75I0WaULDpomDdOf3o1rKYUN4L02JpIY1Gu//sme+Tp6HR0dl5ebVUqpaamqmhoUevXhOHDlGQk2uZYgAAADMkhNCmIBUUE0gLoc1ng1KqGjqT5xMUSp7vpcLH3gSVptSlp9b4mao9PUpePy+Pf0MQRG1xfnVWWml0SNEz3+rcLGlNHa2xvyh0dNIa+WMKbwkho1QtkBO+/fBh8e/bohMSCIKQlJBQV1WVkpL6nJPz6fPnp6GhXTraOFhbEyIoPSvr0LnzNIK2c9myVj+bYAsjDNpejQCEEBJCaJup4DAHp9YrC7RQn1ukhdCGRwyquA2myMgWPb+f53OR3FL4zJciK6s1eoaq22AyIaTV1qYf2cI4pCozLfPsfrOd52X0TSjSMrTqKuHJCZ+Fhc34bW1JWZmdhcXiH3/o6+ysKC9PEER1dXVoTMyFO3ckJSUJ0RQeG3vm1q1hffoIw9kEWxhh0PZqBCCEkBBCW2sSRCrY5pG3mCUtRD9SaGPzxyjYdCEIouCxN2OLtI6BkmMPgiDkLew5HVVbWkyrrSEISt1/G13CZsoJk9PSflm3vqSsbPqY0VsXL5aQ+DbDubS0dHdHx+6Ojs1xXQAA4AUSQhBVSAXFHEtaiAZDaGNk9IyplRVVGSn0HygUtT7DNUf+SJGWofe3VFaVUFCilpXUP0rW0JwiKVWRFEdQqYTQWP/nn0UlJR69em1bsqS1ywIAAKyQEILoQe9QqN8gjH6k0JaaBymSkhJy8tU5nwkaTVqrnc60xfIdbGnVVTk3Tyl1cZMzsZSUV2STEFIomp4/EASRd+8K3+UUeCPh2/fv/V+8lJaS+v3XxQ3u/CoyctT8Bd0dHa8fOsjylvP4CamfPwf995+poQG5xdS9f1V1dZK/38uIN1v+/jsxJWXxD/9b+tNP3N8iCKKmtvbcba8rvr4JyckUCsXS1HTi0KHTPEcwN10yzvA+JWXf6dMvI96UlpdbmJjMmzJ51IAB5D6Hz1/YfuwY+drn8WP9Xr0JgrAyMws8e4ZTBSurqq743rtyz/fDp08VlVV62tr9XFy2Ll7U4NmKSksv3vF+8OxZfHJScUmpqrJyj86dl/88w8LEhMfCNKrWodExB86cjox/Jy0l1c/FZd28ubqamrVU6j+Xr1y+e/djerqyomJ/V9ff5szR1lBnqWMrhhcA+IOEEEQJUkFoVD9STEYKIqtuZlEaTbXnEM0x0yVk5Co+vss6e6AqM1XR3rluh28rTzBojvifgk3ngkAvHqcYbRkPnj8nCKKfq4u+jk5znD8sJuaH1aurq6sJgigpLW3wrZKysh9XrX4REaGsqGhvZVlZVRWTmLh6796g1+FHNm2ifJ3TlfQ0LGzmuvV62tp2lhbvkj9GJyTM27ylvKJy8vBh9KzG0GBA9+5ZeXmR8fE6GhqdrKwIgjBs145TUSurqqYuXxH0+rWGqqqdhWVxaUnix5TTN26QCSH3sy3dsePu4yfKioodO7SXlZGJSUi8Exj46NWr+yf+NTUwaPDwRtX6TmDgsp27OllbWZmZRSckXH/w4PXbt/f+Pb5w6+8Pg4KcbG1tO3SITki47OsbERf34MS/0tLSjGNbMbwAwDckhCAakAoCL5AWQttYfZ5WW0OrrpLW1tOeNJdWW5N751z+w+tkL1BJZdW6sYKszYOaI6apDxpXHPok5+bJJpZWsI2EYdExBEG4dHIgmsfuEycmDR2yfMbP9Zuq2L61bOeuFxERnv3d/1i+XEVJiSCIpNTU/61c5RUQ6O7afcIQD+YzLN62beOC+T+Npt9BKpW67sCfp2/e3Hb06LjBg6SlpYf37Tu8b1/vR49mrd/Qzd7++O9buRf12OXLQa9f93HudnrHDlkZeu/fisrKC3fukO9yP5upvsE/W7d49OolVTf7TllFxQ8rVwW9fn3o/Pm9q1Y1eHijar358F9XDhxwcehEfx5S08b/+uuHT5/GL/418ePHm4cPdbOnD2F9l5w8fvHi+KSkm37+zIe3YngBgG/fmu8BhNPx5wHM2eAwBydMGwPcsTwkLI8QgEiozkqntyl9ev9p15L8+1e/ZIMKyjLa+jUFOdSKsm+7UijaE+eqD55QHPIo8+w+oRo9SBBEVl4eQRD6OtrNdP7aWuqu5cvrZ4Ns3wqPjb0TGGhrYXFo7VoyXSEIwszQcPPChQRBnPfyYjmDu4srma7QvzBJSKybN1dFSSmvsDAiLo6Poka/oy+5MaxPHzIbJAhCTlb253HjeDl23by5w/v2JbNB+pxDcnJL6nrAvngd0eCxja31xKFDyWyQbKabP3UKQRBv4uIWTJtKZoMEQViamv5YF5nn4eFCEl4A4BsSQhBeSAWhKZAWgkgrT4wmCKI08mVV+kfGRpVeHoSERNnb14wtFEnJdj8tV+01pPCZb+bZ/cKWDdIrUlFBnyOHqVehYP0yfjzvb93y8yMIYsqwYcy9HAmC6NaJnue8iY+n0b7ri8tIV0gKcnKdO9oQBJGSkcFHUQ10dQmCuO3vX1nViBVBOLEyMyUIIrsu3+ausbUeNaA/849dOnYkX0wZPoJ5O9mHMz0rU0jCCwB8Q5dREEboIAqCgk6kIKIKn99X7T1MfcgkanlZccgjGrVW2bmfxtApBI1W+OjLWhQUGVm9mWsUbLrkP7yee1tIZ9pQVVamz3NTWNhM57ez6MD7W7GJ7wmCWHvgwNoDB+rvX11dXVxWpqKoyNjS3tiIZZ92mlr0Hpvl9Cy3sX4ZP+6yr+/z8Nduk6fMGDd28tBh6qoqvB+eX1j0NDQ09v375PS0j2npSamp9DLXNLy+SGNrbaynx7yDrqYmQRDKiooszbBqdXe2orJKSMILAHxDQghCBCtJQDPB0oUgcqrSP+b5XtIYOllr3EytcTMZ23Nvna5MSyJfq7j2J5crVB84Vn3g2O8Oz0hJ2baAEAKmBgah0dGR8fFTR3zXviQoulpavL9VWEIfe+lka6uuwj4T+27OE4KQl5Nj2UFGht72xdLSxSMDXd2HJ0+s//Pgg+fPf//7yJ4TJycPH7Zm1iwlBYUGj913+vShc+fJpkVNNTVjPb3eXbt6P3rEy3UbW2tGj9Yv79bNDion+93Guq7KFJZQtG54AYBvSAhBKCAVhBaApQtBtOTd/a86K021r6esvgmNSq389L7A/2ZpdMi3Pb6fs1E4uXXpfO3+/ftPn21dvLjBjqPkygRVNfR5QVlUVlWyPYQxrI6XtxTqMpB5UyYP6U1fw6DlGejqnty+LSk19eyt2+du3z51/caL1699jh2rnxoxO+/ltefESV1NzbVz5/RzcdFUUyMnpOExIWyxWrd6eAGAP0gIoZWhdyi0MCxdCCKkOPRJcegTTu8WPvYpfOxDCLdhfftuPHQ4Ky/vn8tXFkybyktGkZmTy7K9pKwsOy+/6YUxNzQMiYp6/fZt62YsZoaGGxfM/2X8uJHz5sd9SLrl508utMDJf970u7z118XD+/ZlbEz9/G3wnpDUWkjCCwCNhUlloNVgzpgmstHSq/9PMPdGPGDWGYAWoKSgsHQ6fT7MP/79t8EWLWN9fQqFkpaZSQ6QY7ji6yuQwvR1oa/ieOWub9H3KxY2hZysLD1lLWea95U3Brq6ZOKUnJ7G/Wyfc3LoS/DpfrcEH9tgsj28OWot/OEFAN4hIYRWgFSwKbjnfsgMGwtpIUBzmzl+vGd/95ra2tkbNi7ZsTMmgb76AqmisvJZWNj8LVui6zYqKSi4dOpEo9HW7NtXUvYlBwiNjt576pRA5ikd2qePuZFRVl7e9NVrPmdnM7Zn5uRsOHiQuWC8I/O017FvC4uLue95ycfnfUoK48eSsrIXEfRFI2zMzbmfzahulpczt27Vfp1F9ra//9FLl3gsTHPUWgjDCwB8Q5dRaFHoINpEvLcB2mjpvc3BzN28wmSkAM2HQqH8vWGDoY7uP1euXL579/Ldu0oKCppqapXV1dm5uWSSM3viRHLntXPnjF246ElIaNex4+wtLcrKKyLi4pb+9NNlX9/Uz5+bWBJpKanjv2+dtGTJi4gIlwkTO1lbqSkrZ2TnxH34QKVSJw/j1m+TEyszUzsLi+iEhF5Tp9lZWEhLSZ3ZtZPtnjce+i3b9YdRu3bG+vo0GjUy/l1xaWlfZ+cR7u7czzZ/yuSQqKjLd+8+CwvrYGKcnJr26fPnPStXLN25i5fCNEethTC8AMA3tBBCC0GrYBPx0SMUnUgbC62FAM2EXHb80bmz8yZPtrOwkJKSSv38uaS0tIOJyaRhw87v/sPe0pLc08nW9vqhg32dnWk0WlhMbHVNzf41a5bNmC6oktiYm/udOj174kTDdu2i4t89CwsvqygfN3jQnSNHbNq35+OEFArl5PZtA93camprX0VGkstssDV9zOg+3bpVVlcHR0YmfkxxsLI6tH7d2T92SdZNpcPlbAPd3K7+eaBnly7lFRWhUdF62toX9+wZPXAg74UReK2FMLwAwDdKeZWwL/aSnEVv5bA2oC/A2vKCk+Kt9VjXyQHeYfpQgWji4EA0FfLB500Yy5aZbt/+ig+N9SKa3jVORA3o4tKUw5MXfbf6tvAzPXiztYsAAG3fh89plvrGRFsXl5ZM/72qI9SzPKDLKDQXpILNnQ0mLvCsv7HDYS+2Z0BO2FhYowIAAADEARJCEDwMFGxubFNB5rfYpoXAB6xRAQAAAG0bEkIQJKSCLdA8yCUbZN6HJSdk20gYER2zeO1GOVnZUwf36bfTZX4rL79g9E+/zPph6tSxItbbrZlg1pkmUtfUdDGzIkTQu/Rv00ICAAC0PZhUBgQDc8YITzbIaU9OXU+ra2p2/3WUrwKKHcw6AwAAAG0MEkJoKqSCLYb3bLBR+w/q2zs8Msr7gR+/5RI7SAsBAACgzUCXUeAfOoi2DX16uOYVFPx96oyLU2dtTc3WLo7IQCdSAAAAaAPQQgj8QKtgC2Dp4dnY5kG2R7HtNUqjESvmzyEIYu/f//BxCTGH1kIAAAAQaWghhEbAShJtlbam5rwZP+0+fOTh46cD+/Rq7eK0kdZCLF0IAAAAwg8JIfAEqWCbN3xg/8BnQQePn+zq2EldVbW1iyOSsHQhAAAAiBwkhNAADBQUHyvnz/lx4ZIDx/7dvHJZa5dFhGHpQgAAABAhSAiBI6SC4kZXR3vuT//bd/T405fBtlYiuWScUMGsMwAAACD8MKkMNJwNskybAW2Yp8cgRzvbfUePl5SVtXZZ2uysM61aHAAAAIDvICGEBiAVFCsUCmXVwnll5eUnzv/X2mVpU/A5AgAAAOGEhBBASL3NyWD+scNhLz5OwnIUyznZ0m+nO+t/Ux8FveDjcgBQn+nBmyIUFtEqLQAANB0SQmBvpps7+YIxkz6IjzHDhnTqaNPapWhTGJ8jxicLAEj3HwXOX7MyIzOTx4D4Bvj9uGh+WXl5WwqgSFSqsXdK4Kqqqy/cuLZo3ZoZSxZ9+Jgs5HVv9XAB8A6TygCIjA6HvRq1PH2DjYqOdraPb1+rv51CoRzasbXxBQQA9kwP3kxeNFo8mwfjEhJ2HDpAvqZQKKrKKmbGxsMHDu5gZkZupNGoNBpNsBc9cfG8pobGKI+hhHhomfo2x51qlKt3bgc8fTp2+AhzExNTI+OWvNH1617/0ixbWj1cALxDCyGA8Krfw5P3jqP19+SlvygAQHPo36v3jxMmTRs73sXJKSHpw45DBxgtPB79+v+9c7eerq4ALxcUGlJRUUGIjZapb3PcqUaJio11sLUd2n+AdQcLCQmJlrzR9ete/9IsW1o9XAC8Q0II4sVGS6/+P6LN5YTIBgGEjfCPzWvWEnaysXXv2WtA7z5TRo9d9+uy2tpa3wD/5rsctEkVlZXycvKtXQqANghdRoGjmW7u5BT5Pm/CRH2ORO5ZH+NdUWlDI/M9tt1H+Zt7BpoVBhCC8Hccbcl8VU9XV0FevrKqivzRN8Dv0q2bR3btUZD/8l0/v7DgqtftyNjYiqpKUyOjqWPGHz55vL2p2byfZjBOUl1dfem+b1BoSFVVVXtT0x/GT9TV1iEI4vTl/wKfP6s7rb9vgL+sjMw/e/azFKCWSr0X4P/8VXB2bo6CvIKbs/MEz1HkWzU1NfcC/YNCQzKzs2Wkpdubmi6ZPU9SQqK0rNTHzy8iJiovP19KUsrC3HzKmHHamprMVfhrxx/+T588eRlUUFikq609bMBAN2cXcoe/T59MSU3duW4DowwR0dH7/zmyYeny9qZfus4y4345ZpzqW1pWes37TtibiNLycn1d3RGDPJw7d2Eu7cHfd9z193sRFlJWXm5hZv7TxMm62trc41P/TpVXVHg/fBAS8To3L09WVsaqfYcxw4Yb6RvweCHea33d+47Xg3sEQTx79fLZq5c6Wlq2Vtb8VXzb6rUXb16Pf584ymPoiEGDeXw2mOteP+Y9ujnXLwxLuHiJBi9PPkBzQEIIbR/vbYA2WnpCmBO+zclgWwXecz8hrBRbbKspKoUHEN2csIVbL2PfxZeWldlaWrF9t7i0ZOu+vVXVVcMGDtLW1ExM+rD36F81tbUsu/1z/oyCvMKUMeOyc3K87vvuO3Zk59oNFAplQK8+jrb2B0/842hr19u1h6Qkm55QZ69cDgoJ9hw8RE9H92Pap9h38eT2mtqa3X8fTkxO6t+r99hhI4pLSl6GhdKoVEJCIiMzK/lTSp/ubppq6rkF+Tfvev95/NjWVWsoFArjtKcv/1daVjaybghZ4PNn/5w/S6XRerm48hEiXi5HYlvf8oqK3/fvKysvHz5wsKqKyquI8L9OnSAIgpEaEQRx7NwZRYUvAbx93/fwyX+3rFxNnp9TfFjQr3Jgb25+/pB+/Q319bNzc+4/Ctyyb89vi5aYGRvzciHea93D2bm9qdnxC2eNDQwH93WXlZVRVlTir+L/Xjw/YtDgZXPnS9Z1OmXBS93rx1xdVa3Bp67BaPD45AM0BySE0Jbx0R2UPETYkhBOOSGPxxLCrY213wLwkn0JSVrYYqlg5NuYvIL82traT+lpQaEh3Rw7D+jdh+2et+/55hXkb1m52tjAkCCIrg6O+u30Tlw8z7KbirLK7P/9SL6WkpK6dOtGQtIHS/P2hvr6hvr6FApFR0vL0c6O7SWeBb90c3YmW4e6OjoOdR9Abr/r5xeXmLDol1lOnRzILX17uJEvOpiZrZy/kHEGKpV66daNT+lpZCFJVVVVK+cvJL/c9+jWbd2O7de97/R0dmGb/HDHy+VIbOt78653XkH+76vXks1rLl2ctv+5/4aPN3NepKryLYASEhJXvG59+JhMNldyig+Lm3e90zIy1i9d3t7ElNzi5uyyauuW89evrF+ynJcL8V5rPR1dPR1daSlpDTV1RjX5q3injh0Z97c+XurONuYNPnUNRoPHJx+gOWAMIbRZTRkcKIQDC9/mZDQ2I+LjkJbXqPbbZi4LQMsxPXizdUcVtnAB/J8+OXPl0vnrV5+9Cp417YcFM36RlJRku2fI69f2Nh2ZM5+ezi4y0tIsuw3q05fx2tbKmiCI7NxcHgujqqIS/z6xoKiQ/FH+awfIxy+CrNp34JItMJibmNS/4vBBgxm5n5SkVF83t/zCgvTMzzyWqrGX4+JFWGhXh87MXUwdbO0ysjKLS0oYWwb16cd4bW9DX2coKyeHe3xYvAwL7WTTkZENEgShrKjUt0ePxKSkouJiXi4k2FrzWPEu9tzuL4915xuXaPD45AM0B7QQQtvEKXngfdydaHUfZbsnIdzaTPstQBueaUZQlsya26ljx+RPKX+fPnX59i1bKytFBcX6u5WXlxcUFbrpOzNvlJCQUFFWZtlTW1OL8VpFWYk8lsfC/DB+4t+nT6zYsqm7U9dBffsZ6umTvQ1z8nKdO3fmdFRKWurrqKiPqZ+ycnKycrLp4xhraph30NPRrV/CwqIig3b8/DGrwctxUlpWWlRcTI61Y3mruLREWUnpa/G+ZU0qSvTwlpaXcYlPvauUFRYXGxl8GS7IEoTsvFzGLeNyIQHWmveKa6ipcTkJL3VvCk7R4P3JB2gOSAhBXOaV4bKCH/mWqEzHwkiHRHrEXRPbb0WlmphRBoBBQkLC3MT015mzN+zeefn2rRmTp9YPTlXdt38ZaRmW7TU1rCOpyFUHSBSicX0yHe3s/li/6eGTR4+Dgp68fDFuuOfwgYNq6i4tJcX+e5FvgP/l2zfbm5pad7BwsLWrra09c+USyz4sbZ7kKvPSdS08FIKgEd8tSUejUbmUkJfLcUKtW/vOuXMXt25fprRhYM6Fvgsg2bBJ4xafelehl1+CwtrRjCJBP5UEUy9ZLhcSYK15rzinW8x73ZuCUzR4f/IBmgMSQmiD6icbvKznnrjAkyUn5J54vAgNu+sXEBufUFBYKCUlpayk1KOb09K5s4iWQpbt/NNAxpZpvb71RRFmbbX9FgAaZKivP6hPv3uB/n17uJkz9TYkKSkoSElKZWRlMm8sr6goLC4SbGzVVFXHjxjpOXjIX6dOXPP2cnXqqqmuLicrl5qeXn/nqurqq3du9+neY/qkKeQWtnON5BcUMKbfJAjiU3oahUIhW8ykZWSYe1ESBJGbn8+pbDxejhMlBUU5WVkajcZ9MFtj46OlocFyFXl5+U8ZrOFK/5xJoVDIGV8bpYm1FlTFeal7c2ixJx+ALYwhhLaGv2yQ055sU5ey8vLftu1avXVH+ufMwf36zJvx49Rxo50c7LNyGjHUAVgiz+k2cXkLAETRyMEeSgqKZ69eodU16TCTlJS0trAIfRPBPHLMx+9B/T25k5OVLSlj3y+RRqMxOpfKysh0d+pKo9EKiwopFEo3R8fX0VHvk5NYDikqLq6trdXR+rY8wMuw0Ppn9nv6mPG6uLTkycsXNhaWSor0nrF6Ojpl5eWMM1Op1KfBLzgVnsfLcaovhUKxt+kYHhWZkflddsEjTvFh2Y1CoTg7do6Ijnr/MZmxsaS09PGL5462dsyJMY/4qLVgK8573etfmtMW3gnqyQfgD1oIoY1rbC5Rv52QBZVKXb9zz5uY2DWLF3i4f5vVAISq/ZZKo02aNS87O+e/f/5qp9Pov1UDQPORl5cfNWTouWtXnrx80ad7D5Z3xw0f8fuBfVv37xk2YJCaikpkbGxKWqqqikqjeoWaGhmHvYmwMm+fmZM9bvh3v2FqampW/r7Z3a2Xkb5BWUW5j98DQz19UyP6MgnjPUfFvnu389Cfg/r2MzUyLiktfREasnrhYk11dS0NTV9/PzlZWSVFxdfRUZ+zsupf9G3CuyNnTjl1cigrL78X4E+jUqeMGUu+5erU9Zbv3UMn/vUc7CEvJ/foxXNKvc6WDDxejkt9xw33jI57u2Xf7iHuAwz09EpKS98nJ+lq6wwbMLDB0HGJD4txwz1j4uN2HvpzcN9+JoZGefn5Dx4HSklKTRs3ocGrCKTWgq14o+rO9hnj8tTxQiBPPgB/0EIIDZjp5s6yuLaYux/4ODTizaKZM5ANCmf7LSk04k1JSYmFudldP/og2NaCJekB2OrXs5eeru7VO7dL67WomBmbrF6wWFdL++qd22evXqZQiFULFtXW1srJyfEezGljx+vptjt79XJsPGu3Q0lJyc529k9eBh05e+qW711bK+tVCxaRw/9UlZU3LlvRo5vLs+Dgo2dOez+8b6RvQKmzZPYcIwODK163z127oqKs/L/xbHKeX2fOodFoJy5e+O/mDW0trbW/LmMs0a6prrFk9lwVZeUL169dun3TpoOl52APToXn8XJc6ttOR2f90uU2Fpa+AX5Hzpy68+B+TW0tjx0pucSHhYqy8oZlK3s608N15PTJuwF+tlbWm1as5K+DJR+1FmzFG1V3ts8Yl6eOFwJ58gH4QymvqiCEW3IWvRHA2oB1pEHLCE6Kt9YzIsQbOa8MQRDCP68MS4bAd1dDlsYo5paouSvW5BcWXjz2F/Og+VYkWmMIm36DuNwaZht27ZGQkDAzNvK6//Dqv0eZx/G3JCSEDHEZn1zM2C9ELuTepaeYt2OdShFaUnFpyYI1qyaOHD20P/sF8Vqdb4DfpVs3j+zaw0dXSQDRffKb6MPnNEt99g2wbUlcGr1btamOUC+dhRZCgEaorqmJS0js0sleSLJBYCu/sPB5cEj/Xm7uvdxycvNehr1GoIBvlvrGHz6nIYCt6JbvXQqF0sW+E+4CiJW2/eSLSTYoKjCGEKARioqLqTQa91WMoFnbb1kGE7IdSXgv4JGsrIxLly4yMtIdzEy9H/j16CbsjdsAQAp8/izqbayNhaWaqmphcdHrqMjouDjPQR4YDAxtG558aEVICEG8ViNsInKNoFKelz+GVnH3ob+bi7OMDH35r/69eh4/fzEnL68F5g1ngf6iAHwwMzaOjI3x9ntQXFIiIyNjYmg4f/rPzp27IJjQtuHJh1aEhBCgEZSVFDXU1WLi+BkvDi3jTUxsSlr6vBk/kj+69+px7Ox5X//A/43/Mt0fQGNZ6htjJGGLMTUyXjxzNiFShrgPGOLeNkd5QYsRxSefb+gvKmwwhhCgcfp0d41PfB/2JhKBE07eD/yUlRS7dXYkf2yno9PR0sLnoT9WcwIAAACoDy2EAI0zbdwY/6fPN+/Zv+23VfY21gifUKEvixz0srKqqv+YiSxvhb2J7Oro0ErlApGHRkIAAIFA86AQQkIIbcrbnAzmmUs6HPYS+MIGWpoaO9et+W37zoVr1ndzdHCw7aggL1dUUpKanlFcUrprw29NqwE0yYNHTyqrqqZPnqDONPEPjUo7fOLUnQd+SAihKZATAgA0EbJB4YSEEHiCeWWY2Vpbnj3851Uv76CQ0HPXrtdU1ygqKrTT0enTwxXPU+vyeehvoNfup0msyxm/jop+HhxSUFikpqrSQiV5E0a+mOnm3jJXBAAAAOADEkJo4xrbSMjSPMiJqoryL9Mm/zJtchOKJnaau/02LiExMSl5xpRJ9Y8aNqj/o6AX9wIeTRrNz1oXAMyNhARBYKl6AIBGIRd0xdqDwgmTykBbU39VOh5zPLZ71j8bCK07D/woFMrgfr3rv9XV0UFXR9vnoV9rlAvaFEt9YyxVDwDAR09RZINCCwkhtEH85YTIBlse77k6L/uvmD/n0a2rbFevlqBQrhw/cu7vg40vIwAbZE5I/sEbAAA4IX9VIhUUckgIgVeMoVCMwVGipcNhL07pBJe3QLDEpP0WAwjFqqkQmSEAAAvG70Y0DIoEjCEEsRiuxkf6IbTJRtu7NbwMJhShbBDECuPP3uTYQgAAwFhBkYOEEMQuJ+TxWEEXBxrO99imhWi8BZGADlEAACCikBBCW0bmdY1KC5EKtgC03wIAAAAICYwhhLaP9xwP2WCLaUqocZsAAAAABAUJIYjFvDJvczLIf3y8C816U5r7kJaHGWUAAABAhKDLKIgX4U8nxA3vQz1x7wAAAAAEDgkhALQyRqbHNjNEHggAAADQfJAQAoCwQO4HAAAA0MIwhhDEZRghQAvAAEIAAAAQLUgIAQAAAAAAxBQSQgAAAAAAADGFhBAAAAAAAEBMISEEAAAAAAAQU0gIodEwrwwAW5hRBgAAAEQOEkIAAAAAAAAxhYQQAAAAAABATGFhegAAgKZ6l56CIAIAkCz1jREKEYKEEPgx0839+PMActDUMAcnBBEAAwjFPA80b2fQ2mUBABC6343IDEUCEkIAAAA+v+4gDwQAqI/xu5H8VYm0UMghIQQAAGicd+kpSAUBABpE/qp8l56CnFCYISEEAADgFRoGAQAay7ydAZoKhRlmGQU+YTVCAAYMIBSrhkG0DQIANBb5yxPzbwknJIQAAAAAAABiCgkhAABAwzBuEACgidBIKJyQEAIAADQA2SAAgEAgJxRCSAgBAAAAAADEFBJC4B/mlQHAjDLiAM2DAAAChEZCYYOEEAAAAAAAQExhHUIQPTZaevU3vs3JaI2yAAAAAACIMCSEINp5YP13kRkCgAChvygAQDP1GrXUN0ZshQG6jIJoDCPkng3ytydA02FJegAAABBpaCEEYcdHgkcegqZCMYTuxAAAAACNgoQQhFpTmvtstPSQE4oJdCcGAAAA4A8SQhC9b/mJCzzrb+xw2IvtGZATtnmN6k6M5wEAAACAGRJCECVsU0Hmt9imhdBWoTsxAAAAQBMhIYSmmunmfvx5ADm7xjAHp+b7rs8lG2TehyUnZNsoFBEds3jtRvK1BIWiqKjQTkfHvqPN8IH925uaNLnsIC7diTGjDAAAAIg6JIQgjPjLBhuVExIEMWroYHMTEyqVWlxSkpiU7PPA76aP75Qxo2b9MLUJZYeWgO7E0DZ03flDa106dPXZ1ro0AAAIFSSEIAJ4zwYZ+/PSd9SlS5ce3b41aRYWFf++/+CF6ze1NNTHDB/KV0mh1aA7MbTJVLCzkdXPPTzt9TvISct8yEm/9tr/xutAGkFj7NCxndlUZ49uJraaiir55cURn96deekTlZ7IYwGQFgIAABJCgC9UVZR/X7Pip4VLT126OmLwQGlpaYRGOLVYd2JJSUldbe0+3V1+mDhOQV6+yQUHaFyr4DC7nltHzJGgUL48se1M1w/52aad6e++Jxn77Bq90Ehdl3ytpag2wNq5r6XT/Eu7gpNjeLlEC6eFOfn5F729A4ODkz6l5hcXKynIm+jr93Nx+WHkSF0trZYpAwAAsMDC9CB0y9OzfN1vbPMg26N4HG8mKyPj6TGwqLg49l0CHxcF4e9O3ODZSKOGDl46d9as/001NzH67+btVVu202jf2mRIGEAIzZoNaiuprx/yswSFcuzZjb4H5vTZP3vbvZPVtTXjOvd3MbVl7PY+O3WD97Ghf/3q8sdPE/5d8zIpSkpC8uceI5upVE1x8vr17hMn7fznePCbyJKyMm119aqq6oi3cftPn+kxecqp6zdaoAwAAFAfEkKA71h3aE8QRGq6AGYcAeHsTszLbi5duoz0GDRptOe231Z5uPeNjH37Pvkjv2UE4CfvGtvZXU5a5kZE4JEn1wvKigvLS66G+x96dJl8i7Hbr9f2eUU+SS/MrqypfpeVsusBva1PT7XRrW3NnRNuP3Zs3YE/S8vLRw8ccO/f44kPH4Rev5bw4L7/6VNThg+vqKxce+DAvtOnm7UMAADAFhJCgO/Iy8kRBFFZWYm4AMnW2oogiPKKCgQEmqKxGVcP804EQVwMucfYYqKhN8DamX4q446cjlKVVyIIIik3vQVKyLt7T58ePn+BQqHsWbXyrw0bOlnRP1Mkm/bt96xaeXj9egkJib0nTz0JCW2mMgAAACdICAG+k19YSP9SpaqKuAihVulOnJiULCcna25izMe1APjWXtuwrKrifXYaQRAUgjK1m8eVX7Z3MrAgCEJDUUVFTpFlfwUZORdT241Df6morjr2VIi6X1Kp1C1//U0QxOyJE6YMH852n9EDB/w8biyNRtt29GiLFxAAQNxhUhmA77yOos/EYGdlibhAfmFhwNPn3g/8Fv0yQ1FBAQEBvjW28U1KQlJRRi61IItG0AzVdDYPn+1kbF1ZU73f/+JAGxc7/fbKcgpFFaXkzgv6jP/FbRT5uqCseNbF7TEZH/gup8AnmHn06lVyWpqSgsKSn37istuCqdNO37gZ9e5dxNs4RxtrcqOpe/+q6uokf7+svLz9p888evUqr6BAR1NzkJvbkp9+1FRTYzlJTW3tudteV3x9E5KTKRSKpanpxKFDp3mOkJD49udvxjnfp6TsO336ZcSb0vJyCxOTeVMmjxowoMHqVFZVXfG9d+We74dPnyoqq/S0tfu5uGxdvIhlt6ehoedue4XGxOQWFKgpK9lbWi2YNtXVwYGxA5VKvRMYePXe/cj4+MLiYmVFRQdr66kjRgzt05vlVM0RBAAAZkgIQaiXp29hWTk53g8eOnd21NXRbu2yQGta8/sOxuuxw4cO7Mv6FQ0zykCzotTNLEqj0cZ36b+0/1R5adno9Pfr7xxNyk3vbdGl7i32B6opKB+euOJ335MP3r4Uknv0NJQ+2djgnj2VFVlbNZlpa6h3tbN7ERERFPGakRCSot8lTFu5UkKC0snKqqKy8nXs25PXr/sFBd3663A77W+/q0vKyn5ctfpFRISyoqK9lWVlVVVMYuLqvXuDXocf2bSJDOm3UoWFzVy3Xk9b287S4l3yx+iEhHmbt5RXVE4ePoxLISurqqYuXxH0+rWGqqqdhWVxaUnix5TTN24wJ4Q1tbUrd++55ONDEISFiUnH9u3TszIDXr400ddjJIQlZWUz169//CpEUkLC3sqyk5XVp4yMwODgwODg8R4e+9esrp+8NUcQAABISAgBvvjwMWXjrj2SEpKLZ/2MoIi5UUMHm5uYVFZVZXzODHj6/MmL4D2b15saGbZ2uUAk8TE2r7q2prKmykhdd63HjOramsOPrpx8cYdKo5L9RenrplaUMHY+/Pjq4cdX5aVlDdS0R3Tq/YPL0B0j56XmZ8Z+ThKGRsKYRPqiiF06chz3yNCxQ4cXERFJn1JZts/euHHq8OGrZv5Crgb0OTv7x9Vrot69W71v3+kd3/52s2znrhcREZ793f9YvlxFqW4sZWrq/1au8goIdHftPmGIB/M5F2/btnHB/J9GjyYb69Yd+PP0zZvbjh4dN3gQlzWHjl2+HPT6dR/nbqd37JCVkSEIoqKy8sKdO8z7bDty9JKPj76OztHNm7ra2ZEbw6JjwmK/LQSyZPuOx69CHG2sj2zaZKKvT258+ebNzHXrr967Z2VmOm/KlBYIAgAACf0HQOiwLA3HyxLz9bEcVX+5OYIggsPDb997cMPH9+TFy0s3bJmxeFlNbe2+rRsN9XlaowLaMHKW0QmewxfP+vnfA7vLKyoOnzjV2oUC8fIx7zP9d9fn5Mkn1/4bdJvMBlXllUw02mUW55VWlrPsX15dmZidut//4sVX9yUlJPvXTT8jDPLqBmZraag3uKe6Kj3XzS+i78/Mwdp63by5jDytnbb2gbW/SUhIPHwe9DH9y/Q54bGxdwIDbS0sDq1dSyZCBEGYGRpuXriQIIjzXqz/H3F3cSWzQfo3IQmJdfPmqigp5RUWRsTFcSlhdN2KRMP69CGzQYIg5GRlfx43jrHDh0+fjl+9Kicre3n/PkY2SBCEk53trAkTyNdh0TE+jx9rqKqe372bkQ0SBOHq4HBw3Vp6hn/hYkW9ic2aIwgAACQkhCC+bt29v+/IP4dPnPa6/1BCgrJkzswzhw5YmJu1drlAuGhpaJibGH9ITmntgoB4CUt5SxBE4LvQxOxvLWbjO/eXoEgEfYjkcmBxJX1sYfHXEYatrrq6mky6GtxTsm4fGekvuRYDI5VisDE3d+nUiUajvXzzhtxyy8+PIIgpw4axtO9162RPEMSb+HiWpUQZ2SBJQU6uc0cbgiBSMritOWSgq0sQxG1//8qqKrY7XH/wgEqlThji0d6Y4zRUXoH04RWThw/XqDd7WT8XF1NDg4KiotCYb82JzRcEAAASuoyCCAwj7HDYq1HzSTbYqOhoZ/v49rUmlwvEQlZOzvvkZHNTE8YWDCCEFnAjInCi06DZPUeXVpZ7Rz+rpVKH2/ec03sslUb7L+R+/f1lJKV1VTR6tnec3n1EVW31w7hgIblNair0dr/c/IIG98wvLGK0EzKzaW9ef+f/t3ffcVXVjx/Hz2UqyFAEZYogMgVUhoh7puLIkZXtXZbfbJiVNszKfpVlO01TM3NvxYG4N0NliLhwIHvIlnV/j8uxK12Gl30v9/V8+Me9557zOZ/zOTe7bz/j2NtYnzh79nZKqvg29vIVQRA+/P77D7//vurOJSUluQUFxpUmMTra2Srs09lM9vDGgsLaHjDzwpTJa4ODj0VEBj72+HOTJz02eoxCbSNjZTG+v49PLYXEVoyh9a3Uf1iZl7NLwq3Ey9ev9+slmyzapI0AACICIVTRhfQkhYcBKJ8Jq6bBaseLohV8Mer6LwXyoxTKrLrPqYiItIyMstLSpJTUvYcOl5SWvvzkE/WtNVAfl1JvLj666ZX+k94d/uS7w5+Ub/8+9J/41Hv91T1tnf988iOFA++WFs/d/ltidpqKtLujnd2ZqKizcXFPCeNr3zP6kmxApnu3bgrb5eMzKzMykAWbsrIy8e2dPNmkyt7u7u0r8mdVkuoeOVuZnp6sV632PjTrTp32LVs6d9EPe48dm//Lr98sXfZY0Jj3X3qp3b+rEGdky3Kvefvaxsdm58qqampsVO2nxu1k11VQWNgMjQAAIgIhWlUmJA2iUWzZJeuB0ZJIzM07+nh5Pf3oFDvr+1N9gObx25FN1zOTH/cd6WRuVyYtj0u+tuLkzsOXI6vuKRWkBXeLbmannEqIWRu27/YdVUmDgiD069Vrzc6de44euVs8s9pUI0rPygqLjhYEoa93T4WPystl8ycVpGVlVu5ONKgIeK89/tioAYprAjcu606dln3x+bVbt1Zu2frX1q1/btx0IjJy5++/iwlTTJV5BQW1lCBWNTe/+n3E7fIZgKrZCABaGQIh1ImY96qNhfVbewbqjuHEaN2CY44Hxxyv6dPImxe9v5gmqLbRAwd0+MEk886d39as+d9TNS64+uOqVcUlJQP9fO1trBU+SkhMdHV0VNgYHi2bZefu5CS+dbCxORMVFXnhQvNkoa42Nh+/Pv2FKZPHvzY97uq1LSH7xedVdLO1ky0oGhMzpE+fmo7tbm9/JioqPCZ6aEA1+0TFx4sLrqp+IwBoNVhUBo3pxcAhCpOsGqKmoZ7dftpW9U+dSoD6qnpPlf+3gEbpQGYCIVAnbfT1331B9iyfhX8u33P0aLX7bNy794/1G3R1dN5/6aWqn67dFaywZe/RYzeSkjqZmclX8hzkL1tVdd2u4Jz85ltNx7pTJzF6JdxOFLc8NKC/uJ5ndo5sPmS1xEfPr96+405ursJHR8PDr9y40cXKysvFRV0aAUArQCCESmtIoiMNtlb1y4QMJwZaytMTJkweObKktPSFD+fM+X5Rwq3EyiuszPziyxnzPxcEYf6bb3o6O1c9/M9Nm9YG349DZ6KiZi6QPXnvzWee1tHWFjeOHjjQwdY2NTPz2dnvJ6fdHzGbkp7+0Q8/xFTMTmy4NTt3Xrlxf8HhvIKCE2fPigt+iltGBAb69uiRlpk17Z13K1/m0YiIpRvurWQ22N8/sFfP1MzMJ2bNupkse7iIKCw6+vV5nwmCMOe1V8UFV1WzEQC0PgwZhXr8+leYT6jMIdAoDCcGVNmiDz+wsrD4ZfXqZRs3Ltu4sb2JsbGh7Ll/uRV9WabGxgveemvc0HtjTBS89+ILM7/4ctGKlY52tklp6eIqnY8FjXlq/P1VanR1dJbM/+zRmTNPnD3r/8hUTxdnUyOjpLT0uKtXy8vLHxsjG8/ZcJv2hbz91f/Zdu5sZ2UllZafvxifm58/yM9v7JB7NZdIJIs/m/f42+9EXrjQb9o0Dycn8w7tExJvX7lx45VHp8rL+e3TT6e98254dEzfqY96Ojt3MDW5lZxy8do1iUTy0fTpYwYOVOVGAND6EAihrmvM1LJn01cHKvp9UH74KN8ToDlJJJLZL7346OjRq7ZtOxQWdis5+XZqantj4x7duw8NCJg2bmwtj0N4fvJke2ubX1avPhYRqaejE+Dt/dSE8eOHDlXYzdXBIeTP5b+sXr332LGoi/ESicTSwnzyyBFPjhtfdfZd/Tw78WEdbe0LV6+eOn++g7Gxl7Pz1DGjxw8dWrlDr5OZ2c7ff1u+ecvW/fsvX79+5cYNW8vO06dNe2HK/efXm5mabvv1l7+3bd8Usi/+WkLR5WLz9u0njxz50tRHPP6dEKiyjQCg9ZEUFtf2yB1VkJAq+33vYm3fImc/de2ii6Xi04pQC/FRhIIgNO6jCCurNglo7O/7VUcOyF8/0X+woEnq1G/cWN8W5hDWz4lo2cg6NTWsl39DDvdZUONKKqopbPZKQTXYDxlaXFJybX9ILcuTtno0Alqrq8mJ3a3shNYuLjFB9h+yRT1/sTQPegihNo+nl9PY7IcWH05MGgQAAK0Mi8oAUG/KZzz+KQEAAEABPYQA1J486TGcWGW1NzPz71rNApKqL/72/VUlAQBofQiEAFoP+gABAADqhCGjUPXH0wMqggmEAACg9aGHEAAAqKKE0P0tXYWWRyMAaGr0EAIAAACAhiIQAgAAAICGIhACAAAAgIYiEKJJsK4MWhlWlAEAAK0SgRAAAAAANBSBEAAAAAA0FIEQAAAAADQUgRBNhWmEaDWYQIiGCJu9Uo0aUL1qCwBoOAIhAABoGcGhIU/PmF5QWCi+3XPwwPT3ZyWlpCh5uML+CqU98HR1VVxS8vemDTPmvP/czBlXryfUr5AHFlvXRmhNGniDWoG3P5n7y/JlLV0LaBydlq4AAACtXNjslT4LnhI0snsw7tKlL3/8XmHjhFGjHx41purOUmm5VCpVvvC67t9A67dvDT1yZFLQWIcuXext7Zqo2PirVxpyUUtXrzLr0GHCQ6NbsAQA6oVACAAAmtbQ/gNsLK3kb7vadal2t4cGD31o8FDli63r/g0UFRvr5e4+euiwJi22gRd1POzM8AEDG1KfhpcAQL0QCAEAaHKq30nYpLMHPV3dvT08BDVXdPdu2zZt1aVYAFASgRBN6MXAIUuOhYprcozx6k1bQx2xogw0IROqyFoywaEha7Zs/vWrbwza3gtIWXey12/bej42tqj4rr2t7bSJU35atsTRvutrzzxX7f6CIJSXl2/dHXz45PHsOzmdzM3HDBse6Odf0xnzC/I37Ngefu5sfmGhVadOY0c85NezV9XdNu7Yvm3vbkEQjp4+efT0SYuOHb/+6FNBEAqLinbs23vmbGRGZqa+vp6zY7eJY4JsrawrX87nsz9cvXnjxSuXJzw0euyIkQ8sVuGiqi2krLx8d+j+Y6dPpWWkG7Q1CPTze2TchOVr/zlw7GjFIfuDQ/fr6+kt/ua7mi5c+RLyC/J3hoScjYnKzMrS0dZxcnB4fOJkczMzeVG13yPlG1mupKRkzZ7g42FniouLHe3tn5oytZO5hfxTZdp84aefbd0dHHburCAI/fz7TB3/cFZ21qoN6y9cumTQto1/r96Tx47T0dapR/VKS0t3H9h/POxMSlqanq6uo739zJdf09bSqr2Vavom3MnJWb9j29noqKK7d7vY2EybOLmWZgGaDoEQAACNzoQqkgarys3P+2zht8UlxWOGjzA3M7t87eq3v/1cWlZW+1HL1/6TX1AwvmIK3IFjRxevWlkulfb371N1z8KiovnfLSwoLAwaPtLE2Pj02Yif/1wqCELVPNDXz8/RvuuSv1faWduMHDREX1/v3uHff5uRlTVq8FAbK6u0jPQ9Bw/MW/jNBzNmdrW7P8Pwj9Wrxo4Y+far07W1tJQptloKhaxct/b4mVPjRo6ytOh0PfFmbPxFQRCG9R/o7d7jh6WLvd09BvTpq61d28KBypeQlJKacPPGwIBAM9P2GdlZm3ftWLTk98/ee18ikShzj5RvZLnFq1YYtDV4fOLktPT0bXuCF/7+64IPPxJPp2Sb//znMqeuDs9MfSwi6vyeA6GCVBp+/pyXu8fzj0+LuhAbHLrfwMBg3IiH6lq90rLSr3/56XLCtaH9B0waMzY3L+9keJi0vFzQ0qq9laq9ifkFBZ99923R3aIxw+413cLff33g1xtoCgRCAACaO32pSCxU2Sgo2ro7ODM7a96s2XbWNrJG8/K26my5dPWq2o8qLi6eNf0N8Yd4X1/fOV9+sXHH9n5+/pV/mos279qRmZ01f/aHYk+Of6/eXyz6btPOHVXDgKVFJ0uLTro6uh1M28vHvm7etSMxKWnuW+84drEXtwT6+b/32bxVG9fNnfmO/FhPN7fenl7VVrXaYqulUMjRUycD/fzEXiYfb+/RQ2TzD22srGysrCQSiUXHjg8coKt8Cd26dp01/Q35geXl5Wu2bLp5O1G8KQ+8R8o3spyxkfHLTz4tvtbR0VmzZdOla1e7Ozgq3+bdHRwfnfCwmOuSU1P3HDwwtP+Ap6ZMFbckJiUdO31KDIR1qt6ukJC4y5dmvPCS/F4M6huoTCtVexO37t6VnplRuemsO1v+8aCvN9AUeOwEAADNLWz2ypYNY81cge8W//r0jOnyP5nZ2cocdSYysoerW+Wf1P38/PV0dWs/KmjESHn209HWGRQYmHUn+3ZKctU9T4SH+Xj1rDz60cvdIyk1JTcvT5nqnQwP83R1kycTQRCMDNsN6tv38rVrObm58o29elSfButEoRATY+OLVy5n59wR37atNGJWSfUuwaGLbEGgtIwMJe9RPRp5xMBB8tfuzi6VT6dkmwf6+clfu3RzEgRhcGA/+ZZuXbumZ2aKS7nWqXqHThx3duxWU7yvpZWqvYmnIiI8FZrOv88Dv95AU6CHEE2LaYRQa0wghCZ30DXdKqOGBgYPPKSwsDA7506gld9//hlbS8vYyKj2Ay0tOlV+a27WUZysZd3ZsvL2/IL8nNxccfKeQgm5+XlG7drVfpb8goI7ubm21tbVnj0tM0Nezw6mpkKDKRTy1JSpvyxf+u68TwJ6+4wYNLhy2yr4ZfmyUxHh8rdPP/LokH7961SCIAg3Em9FRkVdv3UzNT09NT1NNs2vtFSZe1S/RhZvmcjYSLZPYcWTCevX5u0MDQVB6NjhfuQzNDAsrVBcUqx89QqLitIzM/x69qxrK8lVrtW/Tfef2a0SieSBX2+gKRAIAQBA06rHKqPFFT+m9XQVp9WVlj5gkpW2tnblt+JTznWrdLyUV3QQ+fXsFeiruOSMMhGuXFouCz8SxZFWEi1Z56RWpeGpOjqN8FtLoRBvD4//m/vJvsMHDx0/fvjkiclB44KGj6j2wCljx42qGA4q6tihQ11LCA7dv3brZkd7e5duTl7uHmVlZSvWrVHyHtWvkbUqTbaUCJJ6tLmk6j7/+VRSj+qVVlxsTXezllaSq3ysmBV1dXXq+vUGmgKBEAAAqJx2BgY62jpJqSmVNxYWFd3Jzan9wKzs7MqLjt68nSiRSBS6DSvKN2yjry+VSuv3PIx2BoZt27a9mXRbYfvt5BSJRFJ5VcwmYmpiMmXs+HEjR/3859INO7b16e0jD3uVmZt1NDerfwnFJSXrt28dGND32UcfF7eIy88oeY8a2MhN3eZ1ql47Q8M2+m1u3VY8+wNbqVqGhoY6OjrJKf9puqK7D/56A02BOYQAAEDlaGtruzg5hZ07W3ki1s6QveLUr1qEHDkkf52bn3f45AlXp+7iuMHKJBJJD1e3iKjzSf/9Ua4kiUTi593zbHTUlesJ8o15+fmHThzzdveonEgbnVQqFYdQCoKgr6cX0NtHKpXe+Xc2YBt9/byCgsYqISc3t6yszKKjufzYk+Fhyt+jBjZyU7d5naonkUh8vb0jo6OuJFxT+Kj2VqqWtpaWq5NT2Plz/2m6ffse+PUGmgI9hAAAoGmdvxCTmZ0lf2tsZOTj5f3AoyYHjZ3//cLPvvtmzLARpsbG52NjbyTeMjE2Vlwt9L8uxMf/uuLP3p5eBYWFu0P3S8vLH584qYbyx0XHXZi38OtRQ4ZZW1rm5edfSbjWydxizLDhylzU5KBxMRfjFvy4aOSgwV1sbDOzsvYeOqCjrfPE5EeEplRaWjpr/qdDAvvbWlkXFBXuDNlrY2llb3vvoQv2tnbh5846OzimpKdNDhrXwBImjRnbsYNZ8P6QNvr67QwNI6OjklNT63SPGtjITd3mdarelHETYuPjF/y4aMSgwfa2dnn5+SfCzsx+439m7dvX3krVmjRm3Pzvv5U13dDhpiYmUXEXrt+8aWJsXL8LARqCQIgmx7oyUFOsKAM0lv1HDld+a29rp0wg7GrXZfbr/1u3bcv67Vv19fR6evR47/UZ783/tE2bNrUc9b8XX960a0fFkw8k3R0dX3v2eflTyxV0trCY+9Y7G3dsDw4NKSktNTU26e7oqPzgRmMjo4/enrUleOfRU6d2hewzMjLycnN/ePSY9iaNsIpMLbS1tXt69Dh88nhOXp6JkbG3h8eEh0bLZ04+MWnKkr//Wrl+reyqgxpawuSgcTNffuXvjRvWbduqq6vT19dv+MBB8779Wvl71MBGbuo2r1P1TIyMPn773U27ZGffHRpqamLs7d5DUqH2VqpWVzu7916fIWu6Hdv09fS83XvMev2NT77+qn4XAjSEpLC4SFBtCalJslWDre8vMdycTl276GJp2yKnbk2WHAsVX4zx6t3SdWltVh05IH/9RP/BLVqX1oZA2Ijikm76d3UW1FD87RsOnauPE2h+ufl5r7//3tTxD48een+hFKgU7hGUdDU5sbvVvX7pViwuUTbC2d7iP6scqxrmEAIAUKPuVnZXkxNpIBWxJXiXRCLp1cOzpSuCGnGPoAwNSYPqgiGjAABAFR04djTqQqyrU3dTE5M7uTmRUeej4+LGjXios0WTr+EJJXGPgFaAQIjmwDRCqB3GiwItrqud3fnYmB0he3Pz8vT09LrY2Ex/9nm/nr1aul64j3sEtAIEQgAAatPdyo6ZhC3C3tbufy++3DLnhnK4R6gHxouqGp2CkuKWrgMAAAAAtE4Fqh24WFQGAIAHYGkZAGgUdA+qIAIhmsmLgUMUpmYBKosJhKiKTAgADUQaVE0EQgAAAADQUCwqAwBAHVaXEQSBR9UDQJ2ID3Tl2YOqiUAIAICyxF8zLDoKAMpjpKiKIxACAFA3dBUCgDLoGFQLBEI0Hx5PD7XAijKoU1eh+JZBpACgkAMZI6ouCIQAANSTfD6MPBkCAJgrqF4IhAAANBS/fgAAaorHTgAAAACAhiIQolnxeHqoOCYQAgAAjUIgBAAAAAANRSAEAAAAAA1FIAQAAAAADUUgBAAAAAANRSBEc2NdGagsVpQBAACahkAIAAAAABqKQAgAAAAAGopACAAAAAAaikCIFsA0QqggJhACAAANRCAEAAAAAA1FIAQAAAAADUUgBAAAAAANpdPSFQAAQO3F377R0lUAAFXR3cqupauAOiAQomW8GDhkybFQcSWPMV69uQ1oWawogwbmQIfO1rQhACj83UgyVAsEQgAA6vlzhxwIAFXJ/24U/6okFqo4AiEAAHUTf/sGURAAHkj8qzL+9g0yoSojEAIAoCw6BgGgrhw6W9NVqMpYZRQthsfTQ0UwgRB16hikbxAA6kr8y5P1t1QTgRAAAAAANBSBEACAB2PeIAA0EJ2EqolACADAA5AGAaBRkAlVEIEQLYlphGhxTCAEAACajEAIAEBt6B4EgEZEJ6GqIRACAAAAgIYiEAIAAACAhiIQAgBQI8aLAkCjY9SoSiEQooWxrgxaECvKAAAADUcgBAAAAAANRSAEAAAAAA1FIAQAAAAADUUgRMtjGiFaBBMIAQAACIQAAAAAoKF0WroCAABoqJFT3mqpU+9Zv7ClTg0AUCkEQgAAVDQKerg6PD5xuFt3ez093Ru3UnbsPbYz5IRUKq26p56u7uKFs2ytLARBmPbqp8mpmcpUQE1jof2QocUlJdf2h+jr6dW0Bc3W+ADUHYEQAABV7BUcNsBn9ownJBKJ+NbJwWbmK1OdHGy++31d1Z2fe3yMrZVFeXm5llYdJoM0Tyx8atZ7ISdOVPvRvmVL3Z2cmvTsAIDaMYcQKoF1ZdDMWFEGKp4GzTqYvPXKVIlE8tf63ROf/WDC0+9/v3hdaWlZ0IjAXj26K+zs1t1+8thBZ6MvxV+52aS1agjzDu3tra0V/ujRy6Sqbqemvv/twtnfftvSFQHQ5OghBACgOdQpdwUN76uvr7dz34nla4LFLdv3HGujr/fK0xPGjOgbERUv31NPV/fd1x8vLCr+v59Wz337mXrXran7CefNmDF+6NAmPQUaUURs7IotW8YMHEirAq0ePYQAADS5uvbC+Xi7CIKwedch+RYbK4sBfbwFQfB271Z5z2ceG2Vn3emXPzelpGU2Zw0BAK0DPYQAAKgce1vLwqK7CTeTBUGQSCQPjx7wwhNj9fV0BUEwNTEyameQm1cgCIKrU5cpYwefiogN3n+ypasMAFBL9BBCVTCNEM2GCYRoZnXtfNPR1jZoq599J08qlVp2Mls4743pz02USITfV26Nu3RdEARDg7aCIOjq6sx6fVp+QdG3v/zTIvVsXOXl5Vv373/i3Vme48Z3GTzEI2jstHfe3XXocJMW+PGPP1r1H7Bg8RKFY0e/9JJV/wHBh/+z87bQA1b9B8yY//kDT336/Hmr/gMmvTGj6kd+Ux6x6j8g4VaifIv9kKFW/QfcLS6+mZz81oKvek2cZD9kqN+UR+Z8vygjO1uZK61TCTn5+b+tWTvx9Tfcg4LsBg3uMXbcyx99fOm67Hsl+mnV31b9B7w09yPZ35aHDln1H2DVf8Dgp55WKCf28uUX5szxCBprP2To0KefWbVtmzJVBaCCCIQAAKiYioVFy6XSsSMD//hutqebY9yl6y+//fW6raHFJaUVe8iePPHso6PtbDr9sGRDRlaOoObyCgqmvfvuq598euj0aZvOnfr7+JiZmh44deqFOXP+9/kX5eXlTVTg0D4BgiAcCQurfGxaZta5uIsV28Mrbz8WIXs7pI+/0ASi4y+NeO75PUePOHe17+nmmpqRsWzjxjEvvZyclta4Jbz15Zfzfv455vLl7vb2fXv1lE1PPXAg6OVXEhLvZVR7G+thAQGezs6CIFh06DAsIGBYQECAt2y4stzR8IigV16NuXTZo7tTB1PTC1evzvr6m19Wr2689gDQfBgyCgBAE6pHt1tpadnd4hLrzh3ffOmR0tKypat3rNm8X8wwpibtZJ08uQUuTl2mjBt8+MTZ0KPhjVvbFnk44cwvvjx0+oy3q8uvn3zSxcpK3Hjy3LkX58xdv3u3c1f71x5/vCkKDPD2Mmzb9vzFizl5ecbtZG0rCML+E8elUqmJkdHh/wbFo+ER2lpag/z8hCbw8scfTwsKeu/FF3R1ZQODk9PSnp79flR8/OyFC5d/+WUjlmBvZb34s3kP9e+vo60tCEJBUdFTs947Hhn546pV3773nmxBo0GDggYN2nHw4EtzP/Lt0WPJ/M+qnuuN+fM/fOXl5ydPFnti5/7ww58bN32/YuWzEye2bdOmURsGQJOjhxAAAJWTmCTr1bl09dYr7369euM+MQ0atTOwsTRPy8guKCzq7++ppaU1IMB7/8ZF8j+uTl0EQfj714/3b1z04hNjBVXy6iefioMP5X9enDNX/Cg8OmbnoUMdTExWff21PLwJgtDHy+uHOR/KBjH+vbro7l3lz6V8gbq6uv169y4rLz8WESHfbd/xEx3btx/k53f15s3bqanixuS0tGu3bvV0czM1NhaagJeLy5zXXhWznCAInc3Nv//wAy0trX3Hjl+/fbsRS5jz2qtBgwaJaVAQBIM2bWY+I1uc9kTkWeVrO9DXV0yDsp+SWlpzX33V1Ng4r6Ag8sIF5QsBoCIIhAAAqJxzMZdlYxRPn792I0m+cezIQC0trbCzcYIa6tSxo6OdXeU/nc3NxY+2HQgVBOGxoKAOJiYKRw3297e3sc7OyQmLiVH+XHUqcFhfcdTovY7WkpKSw2fODOnjH1gxnPJI+L3t4ouhAX2EpvHSI48obHF1cPD39JRKpSfPnWvSEpy72lcMlK3DKrXPTZpY+W0bfX1vF9m6uIkpKcoXAkBFMGQUKuTFwCFLjsn+L77zXPgYr94tXR20TqwoA7WwM+TEhFH9n5zyUH5BUcjhsLKy8uEDfZ6eOkoqlW7eJVvpZMmq7UtWbVc46qcFb7k6dZn26qfJqQ16BEVT+OT16TU9hzD2siz9+np4VPupl7NLwq3Ey9ev9+vVS8lz1anAoX1kGU8+OvR45Nn8wsLhgYFeFZPojoSFTR01qmICoawLcWhAgHzZmAnTX1co+fM333z2v0lJea6ODlU32ttYnzh79nZKauOWkHUn50hYWOyVKwm3E68n3r5265YsCZeK01OV4mhnp7ClU8eOgiAU3S1WvhAAKoJACACAyrl2/fbKdbufnjpq+nMTpz93P2Ms/mvblYT7C1S2Dtm5ebLpkcZG1X5q3M5QNtWtsLCJCuxsbu7WrVvs5cu3U1OtLCz2HT+uq6s70Ne3nYGBg63t0X97Do9FRHYyM3Pvdu8hkJ06dnx24sMKJbt2cxTqS19Pr+pGIwNZVcvKyhqxhIXLl//416q7xbLkZmZqamdpOcDHZ8fBg3WqrWFb2Tq3lenpyn5SSqWy5Y4AqBcCIQAAqmjlut23bqdNDBroYGdZVi69dPXmum2hJ8PqMHJSXRhULEOSmy97smJV4nb5ii9NUeDQgD6xly/LOgNHj95/4kTfnt7tDAwEQRjk57ds48a4q9f09XQTU1Kmjh4tkVSsACsIXaysPp85s6YKaGnJpuQUl5ZU/ehucfWTIatdSTUtS9bT295EqVmLypSwatu2b5Yu62Rm9uGrrwz29zczNa3o1rtb10AIoDUhEAIAoKJCj4bXaRHR12e3wAKhDdfd3v5MVFR4THS1M/Si4uMFQXD7t2uuKQocFhDw41+rDoeF9XRzu3779ouPTBG3D/KXBcKj4eFi55vyEwjFRJqSnqGwPa+gIC0zq9pDEhITXR0VOxjDo2X5393JSZmTKlPCPzt2CoLw2Zv/Cxo0SL7PrWQm/gEajUVloFp4PD2aFBMIARU0euAAQRBWb99xJzdX4aOj4eFXbtzoYmXlVbFmSRMV2Mvd3dTY+Gh4eMiJE4IgDA8MFLf37dlTV1f3SHj4scgIHW3tAb6+SlbAzspKIpEkpqSI0/Pk1gUH13TI2l2KH+09euxGUlInMzOfGiZD1qOE5PR0QRBsOnWuvFu13YNt9PVlCbaw+l5WAK0JgRAAALSkwf6yJT1TMzOfmDXrZnKyfHtYdPTr82QPwZvz2qvaFYMwm6hA8emCaZlZuw4ecnHoatv5Xl4yaNPGv0ePmEuXzsdd9O3Rw9hQNh9PGe0MDMTlPd9fuDCv4F6mCouO/vbPP/X+fSyEgj83bVpbKS6eiYqauUD28MA3n3la/oiI2ilTgq2lpSAIK7ZsKft3fOnW/ft/W7OmamliaIyMvVA1VANoZRgyCgAAWthvn3467Z13w6Nj+k591NPZuYOpya3klIvXrkkkko+mTx8zcGBTFzg0oM+WkJCI2Ng3nnyi8vZB/n5HK9YXfWJc3Z7r+OGrr0x6Y8bhM2E+kyb36O5UUFh0Ni7urWeeWRscfKtSRpV778UXZn7x5aIVKx3tbJPS0sWFUh8LGvPU+PFKnlGZEqY//tiZqKi1u3YdDQ/v1sUu4VbizeTkb2a9+9aCrxRKc+5q7+HkFH3pUv9pT3g4Oenq6Kz4akGdWgCAuqCHEAAAtDAzU9Ntv/7y+Ztveru5Xr5x43BYeG5+/uSRI/cs/eOVR6c2Q4GD/f3FlWCG9+1befsgPz/xxZA+9x44oaTe7u4bf/xhkJ+fVCoNj4ktKS397v33337u2Zr2f37y5D/mz+9gYnIsIvJWUlKAt/evn3z87XvvyZexeSBlShgeGLh+0ff9evUqLCoKi4q2NDdf/c03Dw8fXrU0iUSy7IvPhwcGlpaVnT5/3sSo+iVbAbQCkoz8HEG1pWbJ5mS7WMuemtr8Tl276GJp2yKn1mTi0wgFQeBphA+06sgB+esn+g9uwrui/phA2IJORJ8V1NawXv4NOXzklLcEtbJnvVquTKO+7IcMLS4pubY/pNrnRjRPCUDzu5qc2N1K8YGWrU9cYoIgCBbtzQQVRg8hAAAAAGgo5hAC6o1eQQAAANQbgRAA0OTam5n5d3VWx4aOv32jpasAAEATYsgoAAAAAGgoAiFUEY+nR6NjRRkAAICqGDIKAADQYhJC97d4CQA0GT2EAAAAAKChCIQAAAAAoKEIhFBRTCNEI2ICIQAAQLWYQwh1+jUPAAAAoBHRQwgAAAAAGopACDUYNQrwjQIAAGgKDBmFSiMTAgAAAE2HHkIAAJrQnvUL1ah91au2AICGIxACAAC19/Ync39ZvqyZTxocGvL0jOkFhYWCWtlz8MD092clpaSofk3UtIUB9UIgBACgaalLt1tT13P3gf0Lf/ulpk8LCgtfm/3um3M/bNI6aKalq1dt2b1L/lYqLZdKpYIKqFoThapqCM28aqgOAiEAAGhayamp3/z68z+bN5VLy2vaJ3h/SH5BAXeiKRwPO1NUVCR/+9Dgob8s+NqyU6cWb+2qNVGoqobQzKuG6iAQAgDQ5FS/k7Dparh41coPvvgsMem2qbFJTftkZmXtORhqbmbWRHUAANSEVUYBAGgOe9YvHDnlLQ3Mq2np6RNGjxkxcPCXP3xf0z4r1q9x6eZkamJyPjZWmTLv5OSs37HtbHRU0d27XWxspk2cXPnT/IL8nSEhZ2OiMrOydLR1nBwcHp84WUyb3y/5/UJ8/M9ffqWjc/8n0G8rl8dduvTdvPkSiUThRIVFRTv27T1zNjIjM1NfX8/ZsdvEMUG2VtaV9ykvL9+6O/jwyePZd3I6mZuPGTY80M9f/KisvHx36P5jp0+lZaQbtDUI9PN7ZNwEeSU37Ngefu5sfmGhVadOY0c85Nezl/hRcGjImi2bP5/94erNGy9euTzhodFXEq5dvHL5xy8W6Gjfr/b8774tLCr6/P0Pa7ne5Wv/OXDsaEWZ+4ND9+vr6S3+5jux/F+/+sagbVtlLlPc/4f5X+7aH3Ii/ExBYaFTV4dnpj7Wydy86q35beXy87ExP3/5f/LG/Oj/FhQWFX790afi28ysrJkfz3nxiSf7+fWpXJNqqyoeUlJSsmZP8PGwM8XFxY729k9NmdrJ3KKm70ZpaenuA/uPh51JSUvT09V1tLef+fJr2lpaDb/MhtzNmoqt5aqBZkMgBABAozNhU/defvjmAy75ZER4bHz8F+9/uH3vHmUKzC8o+Oy7b4vuFo0ZNsLczOzytasLf/+1tKxMvkNSSmrCzRsDAwLNTNtnZGdt3rVj0ZLfP3vvfYlE0t+/T2TU+agLsT17eIo7F5eUREadHzZgULVpcP7332ZkZY0aPNTGyiotI33PwQPzFn7zwYyZXe3s5LstX/tPfkHB+IdGC4Jw4NjRxatWlkul/f37CIKwct3a42dOjRs5ytKi0/XEm7HxF++X/N3CgsLCoOEjTYyNT5+N+PnPpYIgyFOEIAh/rF41dsTIt1+drq2ldToyIjI6KiYuzsvdQ/w0IyvzcsK1xyZMrP16h/Uf6O3e44eli73dPQb06autXc3QMCUv8/e/VhgaGDw+cXJaevrWPcE/Lftj3qzZVRvNy839RNiZhJs3xWOzc+7cSLwllUrTMzM7duggCELspYsSiaSHi5vCgbVUdfGqFQZt7516257ghb//uuDDj6qeWpYGy0q//uWnywnXhvYfMGnM2Ny8vJPhYdLyckFLq+GX2ZC7WVOxytwgoKkRCAEAaO70pSKxUBUGsqZnZq5Y+8/koHHmZh2VPGTr7l3pmRnzZs22s7YRBMHHy9u6s+Ufq1fJd+jWteus6W/I35aXl6/Zsunm7UQ7axsvd/d2hoanz0bKA6HYzSjmNwWbd+1ITEqa+9Y7jl3sxS2Bfv7vfTZv1cZ1c2e+I9+tuLh41vQ3xMzQ19d3zpdfbNyxvZ+fv0QiOXrqZKCf39gRI2X19PYePWSYvOTM7Kz5sz8U+/H8e/X+YtF3m3buqBwhPN3cent6ia97evRo27bt6chIeSA8GR6upaXV19ev9uu1sbKysbKSSCQWHTt6e9w7tn6XaWJs/PKTT4uvtbS01m3bcvV6gqN9V4XSeri6SSSS2Pg4MWWdi4mxtbLKyMqOjb84oE+ALBDGx3exsTExNlY4sJaqGhvdP7WOjs6aLZsuXbva3cGx6rXsCgmJu3xpxgsvyZtuUN/AxrrMhtzNmopV5gYBTY1/hwAAoLntWb+wZcNYi1dAVFZe/uuKZXY2NiMGDlL+qFMREZ6ubmIaFPXz76Onq1vT/g5dushGrmZkyOKEtk6f3j6RUedLS0vFT0+Ghzk5OHS2qGYI4snwME9XN3l+EATByLDdoL59L1+7lpObK98YNGKkvLdKR1tnUGBg1p3s2ynJYgy4eOVyds4d8dO2/w7RPBEe5uPVs/KcSS93j6TUlNy8PPmWXj3uRRpBEHR1dX29vCOizpWW3a+2t7uHUbt2tV+vMpS8zBEDB8tf93B1FQQhNT29amntDA0dutjLe8/OxUS7O7t0d3CQb7lwKd7T1V3Juv176vtfD3dnl1qu7tCJ486O3eRpsHEvsyF3U8nWA1oEPYQAALQMVYhkLWv1pg0paWnz3/ug2uF/vyxfdioiXP726UceHdKvf2FhYXbOnUCre5P0RBKJxNjIqPKWG4m3IqOirt+6mZqenpqeJpuH9m8C7OfXJ+Twoai4Cz09ehQWFp6LjXlqytSqZ88vKLiTm2tr/Z/pgoIgWFrIlsRMy8yQn1HcIid2dd7JybHubPnUlKm/LF/67rxPAnr7jBg02MbSSpxvlpObe/T0yaOnTyoUnpufJ894HUxNK3/U19fv8MkT4qjRpJSUG4m3Jo4eo8z11k75y6wceIzbyTbmF1a/KqyXm/uOfXtKS0slEknMxYvDBw7q2CFp297dgiCkpKVmZmV5utUtEFbuPTY2krVPYXVPJiwsKkrPzPDr2bOJLrMhd1P51gOaH4EQAAC0gIPHj4UePTJr+humJtWvPjpl7LhR/47KEwRBnIEm5hxdXcUfMKWl9+cQBofuX7t1s6O9vUs3Jy93j7KyshXr1sg/7WpnZ21peSYyoqdHj7Dz57S0tCoP7ZMTn5ChJVEcSyXRkmVXrUoJVltbu/IO4lPUdSt6LL09PP5v7if7Dh88dPz44ZMnJgeNCxo+orziyXt+PXsF+v4n1iqEwMrL3giC4NLNqUP79uKo0ZPhYSZGRp7/Dh+t/Xprp/xlalWsy3LvU3F7Dc8y9HRz37Rrx+Vr18ql5RItSXfHbh1MTf/asC4xKSn+6hWDtm0d7e930ynjP6cWqvm3A5HY66vQbo14mQ25m8q3HtD8CIQAAKAFbN+7p7y8fMGPixS2Pz1j+uDAfs9MfczcrKN5ledQGBoa6ujoJKekVN5YdLfoTm6O+Lq4pGT99q0DA/o+++jj4hb5YEW5fn59tu3dXVpWejI8zNfLu22bNlWr187AsG3btjeTbitsv52cIpFIKq9ymZWdLV+uUxCEm7cTJRKJvNvQ1MRkytjx40aO+vnPpRt2bOvT28esffs2+vpSqbROc8YkEklAb98Dx46Ulj12MiKsr6+/uHKmMtdbC+UvU3n2trYmRkYx8XF3i4t7uLhqa2l1MrcwNzOLjb8Yf/WKh4tr5XTUiNoZGrbRb3Pr9u2mu8zGupuASmEOIQAAaAGPjBv/3GPTKv/p7uBoaGDw3GPTqna2yGlrabk6OYWdP1d5FtnOffukFR01giDk5OaWlZVZdLz/RIST4WEKhfT19b179+6JsLDY+Iv9K1Y6qUoikfh59zwbHXXleoJ8Y15+/qETx7zdPSonwJAjh+Svc/PzDp884erUvZ2hoVQqlY9s1NfTC+jtI5VK7+Tcka2x6eoWEXU+6b+x9oECff0KCgtDjxxJTk2Vr4KjzPW20dfPKyho4GUqr+IC3eMuXYqOu+Dt0UPc6OHieuFS/MUrlz1dFdcXVbKqypzX19s7MjrqSsK1Rr/MRr+bjXXVQMPRQwgAAFqAf6/eCluuJFxLy8gYGNC39gMnjRk3//tvP/vumzFDh5uamETFXbh+86Z81Uqz9u07djAL3h/SRl+/naFhZHRUcmqqQgmmxibuzi4bdmzrYNrepZtTTSeaHDQu5mLcgh8XjRw0uIuNbWZW1t5DB3S0dZ6Y/Ejl3S7Ex/+64s/enl4FhYW7Q/dLy8sfnzhJHME4a/6nQwL721pZFxQV7gzZa2NpZW8rW3tzctC46LgL8xZ+PWrIMGtLy7z8/CsJ1zqZW4wZNryWC7e2tLSzttl9INShi721paXy12tvaxd+7qyzg2NKetrkoHH1u8w68XRzW7p6VWlZmafbvfjn4eK6dPWqgsLCHv9uqVbtVX2gKeMmxMbHL/hx0YhBg+1t7fLy80+EnZn9xv+0tLQaeJmNfjcb8aqBBiIQAgAAddLVzu6912es27Zl/Y5t+np63u49Zr3+xidffyV+KpFIZr78yt8bN6zbtlVXV6evr9/wgYPmffu1QiH9/Pv8unzZhFGjq13PRmRsZPTR27O2BO88eurUrpB9RkZGXm7uD48e097kP8u9/O/Flzft2rFU9twLSXdHx9eefV581rm2tnZPjx6HTx7PycszMTL29vCY8NBoccJhZwuLuW+9s3HH9uDQkJLSUlNjk+6OjsqMOQz08/tn86ag4SPkW5S53icmTVny918r16+VVSyonpdZJz1c3UpKSx272BsZ3ltVxb278927d+2srU2Nq58yqkxVH8jEyOjjt9/dtEt2LbtDQ01NjL3de4i3uIGX2RR3s7GuGmggSUb+vTH3Kis1SzYmxMW6bvOPG8upaxddLG1b5NQA0GrEJd307+osqKH42zccOiuuTIhWIPTokZXr13790aeVl38E0GyuJid2t5J1sbZucYmyUcoW7VX67xnmEAIAUKPuVnZXkxNpoFamuKRk+749Hi4upEGgRWhIGlQXDBkFAACaIr8gPzY+PvTokbz8/McmyGb6AYCGIxCqh6QMxQniAKA8S7P6rB0PtD67Q0N3hYZ0sbaZNf0N+bosAKDJCITqEQVbagolgNY0h4FYWD/dreyYSdhqTAoaOylobEvXAtBojBdVNQRC1UUUBNBYxH9UIhYCAAAFBEIVlZSRSq8ggCaKhXQV1hWdhADQKOgeVEGsMqqKSIMAmo6LtT3TkuuB5UYBoIFIg6qJQNjK02DIkUMzP/owOTVFaEp7Doa++M6bBYWFgpprNRfSzGZ/Pm/xqhWN+5Vr6nvRPP9pqCwyIQAAEBEIWzlpubRcKm3pWqDOVqz7Z/u+PerYcOrylatHPdX3pqBxOwl5LCEA1JX4lyfPHlRNzCFs5YNFhw8cNHzgoEYsEM3jZET4kMD+6tja6vKVq0c91femVMvF2p7JhPUg/pph0VEAUB5RUMURCAEAqM8aM4IgOHS2pu0AoCbikAo6BlUcgVDtuwd/Wrbk0rWr334yX0dbW75xwU+LioqKPnnnvT0HQzfs2Lbosy8N2rYVBKG8vHzvoQMnws6kZWYYtG0b0Nt30hjZ45gWr1pxMzHxs/c+kJdwPjbmx2VL3n/jTYcusirlFxTsPrD//IWYrOxsbW3tbvYOU8dP6NjBTMlKlpaW7j188FREWGp6up6uble7LjOef0lLS+uB5xVPvWX3zoio8wWFhZYWnUYPHe7j5V3TiQqLinaHhoSdP5eZlamnp9/dwXH8Q6NsLK3ET8XW+ObjeXsOhp6OiCgoLOzWtesTkx6x6Nixmob984+Lly999+nnOjr3/zP54++/Ll69/H9zPpFIJDXVQZmz1FLPVRvXHTpxXBCEvYcO7D10QF9P76cv/k/hFHW6HWJ9vprz8fa9eyKizguCEOjrNzloXFZ29j9bNl68crltm7a+3j0fHh0k/wrV3uZ3cnM279p5/kJMUdFdO2vrqeMnVj2d/CtXy91vyJdKPMt38z4/eOzo0dOn7uTcseho/tDgoQE+vso0ctV61n7XlLkpdW3n2i9fmQtsODoJG6WrUHxLMgQAOfnQeqKgWiAQqr0+vX3OxcbExl/0dHUTt2RmZ129njBl7PiqO/+9acOJ8DNBw0Z0Nre4cTsx7lK8kmdJTku9futmf/+ADiammXeyt+0J/vnPpR+99W4tuUiutKzsuyW/Xb2eMLhvvwkPOebl552OjCgvL9fSevAU1sKioq9+XlRQWDh6yDBjI+Ow82d//2u5IDzt49Wzpp0zs7JGDBxsbWmVnpERcuTglz98/+5rb9jb2sp3W7p6laGB4dTxE9IyMnbs2/vbyj/nznyn6oUE+vqdi4mOuRjn5e4hbikpKTkbGz00sL8yV13LWWqv5+C+/T1d3X9ZsczT1b2fn3+1rVSP2/H7Xysc7e2fnDzlbHT0vsMHpVJpZHRUD1e3px95LObihb2HDhi0NRgzbPgD27ygsOCrnxYV3b370OChHTuYXUm49uOyxaWlpfW4+w35UolWbViXX1AQNHykIAiHTx5btuZvqVTa19dP+S+DkndNmZtS13ZW5vJruUCoCPlvHXkyBACQA9ULgVDtebl7tG3TJvzcWXkgPB0ZoaWl1aeXT9Wdj585FeDjO3qo7PdoL0+vwkFDlDyLYxf7t15+Tf62vLx8/fatt5Ju21o9eLjUngP7469cfu2Z53t69BC39PcPUPK82/YEZ2Znf/L2LLHnxNe759e//Lh1d3C1gXDbnuDbycnvv/FmV7su4pYAH985X32+ZsvG2W+8Kd/NxNj4+ceeEF9raWlt3Ln92o3r8g5JuR6u7u0MDMPOn5UHwnOx0Xfv3u3r669MzWs5S+31tLa0tLa0lEgk5mZmnm7ujXU7nLo6TA4aJwiCj1fPlPS0kCOHBvXtN23i5Iot3onJySfCT4tBpfY23753T3pm5tyZ74jn6tXD06pz5+Vr/6nH3W/Il0pUXFLy1suviQmqT2+fT7/5avPunQE+vhKJRMkvg5J3TZmbUtd2Vubya7lAJZsIzYZfPwAANcUqo2pPV0e3t6fX2Zio0rIyccvpyAhPVzejdu2q7mxsZBx/9cqdnBzxbds2bep3UvFHdnpmpjI7Hzl9sruDozwP1MmpyPDePbwqDyPs4eqWnJaam5dXdefTZyM8XFzlAUAQhHaGhv39A65cT6i8/9B+A+Wv3Z1dBEFIy8ioWpqOtrZfz17nYqLl3V+nIyO62XftZG6uTM1rOYuS9Wzc29Gn9/1/IHB27CYIwsCAvvItjl3sM7KypBWrbtbe5mfORXq4uFYOLX19/HR1dRt+9+v0pRKNHjJMHo10tLUH9OmbfedOUsWTJOrXyEp+NxqlnZW5/FouEAAAoFHQQ9ga+PfyOXr6lDhqNDk15ebtxPEjR1W757SJkxevWvHBl/P9evYaNmCgdWdL5c9y83biuZjoG4mJaRnpaRnpFXPDSh54VGFRUUZmpo9njbP+apFfUJCbl3c87PTxsNMKH+Xl5ysk3oLCgpzcXPkMMbnOFhYVv7Mz5Pt3NOsg/1TcWNPD7gJ8/EKPHYmJv+jl5l5YVBQVd+Hxh2VdPcqo6SzK17Nxb0d7E1P5a0MDA0EQzNrfr6GhgUFpaWlpWWlxcUktba6jo3MnJ8e693++NhKJxLidUf3ufv2+VHKdzGWNptDmObm5psbG9Wtk5b8bDWxnXR1dZS6/pgu06tS5TrUCAACoCYGwNXB27NbB1FQcNXo6MsLYyKjHv8NHFXi6uc+f/WHo0SNHTp04dubUw6PGjBoyrOITiVT4T6+FQifG3kMHNuzY5mDXpbtjN083t7KyslUb1ytTN7F7rfK6LP9V23nF1z5e3gG9FRfSaG96/2e3qLxctrOWluJQOrGDpfIQOy3J/Y5xcbtCHeTsbW2tOncOP3fWy809Muq8lkSrlvVsFNR0FuXrWYt63I6qJWtV2iL/tPY2LymRxZWq/YGlZaX1uPv1/lLJaVdaSEmWPwuLKvrMderdyMp/NxrYzkpefk0XWKcqAQAA1IIfFq2BRCLx69n78MnjpWVlp89GBPT2rWXRC1Njk4mjg8YMG7H4r+Wbg3f69exl1r6Dnq6uwji6jOws+euSkpJNu3b08+vz1JSp4pa4y5eUrFs7Q8M2+vqJSUnVflr7eQ0NDPT19aVSae2ztuQ7t23T5laVEyWlpEgkEouOSo3zrKqvj9/OkL2yho2M6O3pVe9Bto1Yz4bcDmWqV0ub6+nq6ujoJKemVt5YdPduTm5uXe9+o1xF9p078rVMBUG4lXRbIpF0srAwbNskX4ZGpOTl13SBzVhTAADQyjGHUIVYmlnEJSbU79iA3r4FhYWHjh9NSUvr61P9IoRSqbSwSNbDIAiCvp6eX8/eUqlUnE/Y2cKioLDw6vV7Zy8vLz92+pT8wJy83LKysspPTTgVEa5kxSQSSS9Pr3Ox0fLCK6v9vBKJxMPZ5WxMdLISk6YkEklvT+/zsTHXblyXb8wryD966qSnq1vlX9V10qeXz93i4tMR4RcuxzfK6o5K1rONnn5+QUG1JTTkdihTvVraXEtLy9mxW2T0+fTM+zPrdh8IqXZSXO13v1Gu4sDxI/LXefn5R0+fdOnm1M7AsIm+DLXclLpS8vJrusBGqYMshSYmWJoRLwEA0Gj0ED6Af1fnU9cuuljWuE69irDq3NnWynrvoYNd7eysOlc/v6i0rPTDBfMHBQTaWFoVFBXtPhBi3dmyi43s0vx69tq2d/evK/8MGjaijX6bI6dOVO5j7GDa3qxDhz0HQ9vo6xsaGJ6LiU5JT1O+bpNGj427dOmb334e1n9gFxvbvPz805Hhb78yXUtLq/bzCoLw8Kig2PiLX/74/YiBg606d84vKLiSkNDJXPZAtqonmjg66MKl+G9+/XnYgIF21jaZ2Vn7jxzW1tF+7OFJQn2ZGBu7dXfeHLyzvampuEaI6Pe/VmRkZXww4616lKlMPbvY2EZGn3dycEhNT3941JjKhzfwdjxQ7W0+4aExX/28aMGPi0YOHmJqbBJzMe5G4i0TI+O63v1GuYq4y5eX/L2yp0ePwqKivQcPlEulj4yb0HRfhlpuSl0pefm1XKB6iUu66d/VuaVrAQAAqkEPYavqJMzMzgqs+aEI2lraXm4eR0+fWrL6r+17d7s6Ob/9ynRxklIH0/Yznn/JuJ3Rmi2bNuzY5uzYTVwZXySRSN547kVbK+uNO7f/s2WjsZHR43X5VW1sZPTB/2YG9PY9Hnb6j79XBoeGiCv4P/C8FYtqmM9+401nx257Dx1YsuqvXfv3lZWX1TSC1Khduw9mzAzwkZ1o8aoVew8ecOvefc7/3q68qkc99PXxzc6509fHr/IEsKvXEzxdHzyQtd71fHTCw50tOv29acOFKs+KbODteKDa29ze1vbtl18zNzPbvGvn6k0bpFLpWy+/VvMc0RrvfqNcxevPviCVSlesW7Nu25aOZmbvTZ8hX0imKb4MtdyUulLy8mu5wIajexAAAMh+lmTk33sCgcpKzZINTnOxVnxMXLNp5h7CpIzUFrxYVHXw+LHVmzd88f4c+ZMY7uTmvPPpR3NnvmNnbUOLtYg9B0M37Ni26LMv6z3+U8U1wwU2ZyCkhxAAoJniKnp6LNrff5qXCqKH8MH8uzrHJd0U1KGTEI2upKQkOHSfW3fnys/lu3o9wdTEhDQI9UUaBAAAIuYQqiIxE9JP2LLyCwriLl86ePxoXn7BI2P/M3Hr6vXr9R4vCrQ4BosCAAA5AqGKkvcTEgtbyr7DB/YcPGBrZf3Wy68qrNMzaczYFqsW0ADi3yqsLAoAAOSYQ6isllprNClD9sw3YiEAdYyCzB4EAGiyOHWYQ0gPoao/f0L8AcesQgAN/5ukmZEGAQBQfQRC9cAQLwAAAACNjlVGVXe5UQBQX3QPAgCgFgiEdUMmBIAHIg0CAKAuCIR1RiYEgFqQBgEAUCMEwvogEwJAtUiDAACoFxaVadCio7IHQrTEsygAQNWIU6z9uzq3dEUAAEAdEAjrT/zd01LPJwQA1UHHIAAAaopA2GhdhfQWAtA08oWX6RgEAEBNEQgbgfyXEMkQgCYgBwIA0GoQCJs2GQJA60N/IAAArQaBsEnwawkAAACA6uOxEwAAAACgoQiEAAAAAKChCIQAAAAAoKEIhAAAAACgoQiEAAAAAKChCIQAAAAAoKEIhAAAAACgoQiEAAAAAKChCIQAAAAAoKEIhAAAAACgoQiEAAAAAKChCIQAAAAAoKEIhAAAAACgoQiEAAAAAKChCIQAAAAAoKEIhAAAAACgoQiEAAAAAKChCIQAAAAAoKEIhAAAAACgoQiEAAAAAKChCIQAAAAAoKEIhAAAAACgoQiEAAAAAKChCIQAAAAAoKEIhAAAAACgoQiEAAAAAKChCIQAAAAAoKEIhAAAAACgoQiEAAAAAKChCIQAAAAAoKEIhAAAAACgoQiEAAAAAKChCIQAAAAAoKEIhAAAAACgoQiEAAAAAKChCIQAAAAAoKEIhAAAAACgoQiEAAAAAKChCIQAAAAAoKEIhAAAAACgoQiEAAAAAKChCIQAAAAAoKHUIBBatDcTBCEuMaGlKwIAAAAAShHzi5hlVJkaBEIAAAAAQFMgEAIAAACAhlKnQMioUQAAAACqL0595rupRyBU/aG3AAAAAKB2KUY9AiEAAAAAQHMDIWuNAgAAAFB9cWqyvqiaBUIAAAAAgOYGQjoJAQAAAKiyOLXqHlSzQKiOi/YAAAAA0BBxaphT1CwQqlHUBgAAAKCBLNQqs6hZIGTgKAAAAAAVFKdug0XVNRCSCQEAAAColDj1TIPqGgjVepAuAAAAgNYkTp1TiboGQnn4VuvWBwAAAKDW4v7NI+rYPajGgZBMCAAAAKBlxal5GhQEQZKRnyOoudSsDPGFi7V9S9cFAAAAQOsXp/5RUO17COUYPgoAAACg2cS1ljTYSnoIFfoJ6SoEAAAA0BTiKq1g0grSYKsKhFVjIckQAAAAQMPF/Xcly9YRBVtnIKw2FpIMAQAAANRVXJUnGrSmKNiaA2FNsRAAAAAA6sGi1UXB1h8IKyMcAgAAAKgTi1YaAjUxEAIAAAAAWuFjJwAAAAAA9UAgBAAAAAANRSAEAAAAAA1FIAQAAAAADUUgBAAAAAANRSAEAAAAAA1FIAQAAAAADUUgBAAAAAANRSAEAAAAAA1FIAQAAAAADUUgBAAAAAANRSAEAAAAAA1FIAQAAAAADUUgBAAAAAANRSAEAAAAAA1FIAQAAAAADUUgBAAAAAANRSAEAAAAAA1FIAQAAAAADUUgBAAAAAANRSAEAAAAAA1FIAQAAAAADUUgBAAAAAANRSAEAAAAAA1FIAQAAAAADUUgBAAAAAANRSAEAAAAAA1FIAQAAAAADUUgBAAAAAANRSAEAAAAAA1FIAQAAAAADUUgBAAAAAANRSAEAAAAAA1FIAQAAAAADUUgBAAAAAANRSAEAAAAAA1FIAQAAAAADUUgBAAAAAANRSAEAAAAAA1FIAQAAAAADUUgBAAAAAANRSAEAAAAAA1FIAQAAAAADUUgBAAAAAANRSAEAAAAAA1FIAQAAAAADUUgBAAAAAANRSAEAAAAAA1FIAQAAAAADUUgBAAAAAANRSAEAAAAAA1FIAQAAAAAQTP9P+qK7m5J8yMDAAAAAElFTkSuQmCC" alt="AI 健康資料重整示意圖，包含身體示意區與資料流程卡" />
-          </figure>
-        </div>
-      `;
-    }
-
-    function renderSymptoms() {
-      return `
-        <div class="form-zone">
-          <section class="field-block soft">
-            <div class="field-head">
-              <div>
-                <p class="field-title">快速帶入範例</p>
-                <p class="field-caption">症狀陳述模組先以範例跑流程，後續可接 AI 解析或後台方案庫。</p>
-              </div>
-            </div>
-            <div class="preset-row">
-              ${Object.entries(examples).map(([key, item]) => `
-                <button type="button" class="preset ${isExampleActive(item) ? "active" : ""}" data-example="${key}">${item.label}</button>
-              `).join("")}
-            </div>
-          </section>
-
-          <section class="field-block">
-            <div class="field-head">
-              <div>
-                <p class="field-title">您現在最想先體驗改善的是哪一個部位或狀態？</p>
-                <p class="field-caption">第一階段優先測試肩頸、肩胛、上背等較容易描述與回填的狀態。</p>
-              </div>
-            </div>
-            <div class="choice-grid three">
-              ${areaOptions.map(option => `
-                <button type="button" class="choice ${state.area === option.id ? "selected" : ""}" data-area="${option.id}">${option.label}</button>
-              `).join("")}
-            </div>
-          </section>
-
-          <section class="field-block">
-            <label class="field-title" for="statement">用一句話描述目前狀態</label>
-            <textarea class="textarea" id="statement">${escapeHtml(state.statement)}</textarea>
-            <div class="input-row">
-              <div>
-                <label class="field-caption" for="duration">持續多久</label>
-                <input class="input" id="duration" value="${escapeHtml(state.duration)}" />
-              </div>
-              <div>
-                <label class="field-caption" for="contact">希望承接方式</label>
-                <input class="input" id="contact" value="${escapeHtml(state.contact)}" />
-              </div>
-            </div>
-            <div class="range-wrap">
-              <label class="field-caption" for="severity">現在不適程度 0 到 10 分</label>
-              <output class="range-value" id="severityValue">${state.severity}</output>
-              <input type="range" id="severity" min="0" max="10" step="1" value="${state.severity}" aria-describedby="severityValue" />
-            </div>
-          </section>
-
-          <section class="field-block">
-            <p class="field-title">安全排除條件</p>
-            <p class="field-caption">若符合下列情況，系統不會提供居家點位操作建議。</p>
-            <div class="checks">
-              ${flagOptions.map(flag => `
-                <label class="check"><input type="checkbox" data-flag="${flag}" ${state.flags.includes(flag) ? "checked" : ""} /> ${flag}</label>
-              `).join("")}
-            </div>
-          </section>
-
-          <div class="action-row">
-            <button type="button" class="btn btn-secondary" data-prev="0"><span class="btn-icon">‹</span> 返回身份</button>
-            <button type="button" class="btn btn-primary" id="analyzeBtn">開始 AI 初步比對 <span class="btn-icon">›</span></button>
-          </div>
-        </div>
-      `;
-    }
-
-    function renderMatch() {
-      if (!state.result) {
-        return `
-          <div class="loading-box">
-            <div class="loader" aria-hidden="true"></div>
-            <h2 class="stage-title">正在比對您的狀態</h2>
-            <p class="stage-desc">系統正在根據部位、描述、程度與安全排除條件，判斷是否符合本次開放的居家點位體驗範圍。</p>
-          </div>
-        `;
-      }
-
-      if (state.result.type === "redflag") {
-        return `
-          <div class="result-box danger">
-            <div class="result-status">
-              <div class="status-icon">!</div>
-              <div>
-                <h2>此狀態不適合使用居家點位體驗</h2>
-                <p>您描述的狀態可能需要優先由醫療專業人員評估。為了安全，系統不會提供居家點位操作建議。</p>
-              </div>
-            </div>
-            <div class="evidence-grid">
-              <div class="evidence"><b>安全原因</b><span>${escapeHtml(state.result.reason)}</span></div>
-              <div class="evidence"><b>系統動作</b><span>停止自動產生點位卡</span></div>
-              <div class="evidence"><b>下一步</b><span>就醫或由專人協助判斷</span></div>
-            </div>
-            <div class="action-row">
-              <button type="button" class="btn btn-secondary" data-prev="1"><span class="btn-icon">‹</span> 重新填寫</button>
-              <button type="button" class="btn btn-danger" data-next="5">建立安全承接紀錄 <span class="btn-icon">›</span></button>
-            </div>
-          </div>
-        `;
-      }
-
-      if (state.result.type === "unsupported" || state.result.type === "ambiguous") {
-        const title = state.result.type === "ambiguous" ? "目前資訊還不足以產生點位體驗建議" : "目前尚未開放此狀態的居家點位體驗";
-        const copy = state.result.type === "ambiguous"
-          ? "您剛才描述的狀態較廣泛，系統暫時無法判斷是否符合本次居家點位體驗範圍。您可以重新選擇一個更明確的部位或感受，也可以請健康管理師協助整理。"
-          : "您描述的狀態目前尚未在本次居家點位體驗開放範圍內。為了安全與準確，系統暫時不會自動提供點位建議。這不代表您的狀態不能被處理，而是可能需要更多背景資料，或由健康管理師協助判斷下一步。";
-        return `
-          <div class="result-box warn">
-            <div class="result-status">
-              <div class="status-icon">i</div>
-              <div>
-                <h2>${title}</h2>
-                <p>${copy}</p>
-              </div>
-            </div>
-            <div class="opened-items">
-              ${Object.entries(openPlans).map(([id, plan]) => `
-                <button type="button" class="open-item" data-open-item="${id}">
-                  <strong>${plan.label}</strong>
-                  <span>${plan.area}，第一階段可示範</span>
-                </button>
-              `).join("")}
-            </div>
-            <div class="action-row">
-              <button type="button" class="btn btn-secondary" id="recordUnsupported">留下我的狀態</button>
-              <button type="button" class="btn btn-secondary" data-prev="1"><span class="btn-icon">‹</span> 重新選擇部位</button>
-              <button type="button" class="btn btn-primary" data-next="5">請專人協助判斷 <span class="btn-icon">›</span></button>
-            </div>
-          </div>
-        `;
-      }
-
-      const plan = openPlans[state.result.planId];
-      return `
-        <div class="result-box success">
-          <div class="result-status">
-            <div class="status-icon">✓</div>
-            <div>
-              <h2>符合本次開放的居家點位體驗範圍</h2>
-              <p>根據目前描述，系統判斷此狀態可以先進入有限、安全、可回填的示範體驗。</p>
-            </div>
-          </div>
-          <div class="evidence-grid">
-            <div class="evidence"><b>目前狀態</b><span>${plan.matchText}</span></div>
-            <div class="evidence"><b>資料線索</b><span>${plan.data}</span></div>
-            <div class="evidence"><b>體驗方向</b><span>${plan.direction}</span></div>
-          </div>
-          <div class="notice">此判斷為示範邏輯，不代表醫療診斷或治療處方。正式上線前需串接已審核的開放體驗方案庫。</div>
-          <div class="action-row">
-            <button type="button" class="btn btn-secondary" data-prev="1"><span class="btn-icon">‹</span> 修改狀態</button>
-            <button type="button" class="btn btn-primary" data-next="3">查看點位體驗卡 <span class="btn-icon">›</span></button>
-          </div>
-        </div>
-      `;
-    }
-
-    function renderPointCard() {
-      const plan = getActivePlan();
-      return `
-        <div class="plan-layout">
-          <section class="field-block">
-            <div class="field-head">
-              <div>
-                <p class="field-title">${plan.label}體驗卡</p>
-                <p class="field-caption">根據您目前描述，系統判斷此狀態符合本次開放的居家點位體驗範圍。</p>
-              </div>
-              <span class="tag coral">範例卡</span>
-            </div>
-            <ul class="instruction-list">
-              <li><b>1</b><span>先確認沒有安全排除條件，並以不造成疼痛的舒服力道操作。</span></li>
-              <li><b>2</b><span>按壓示意區 A 約 20 秒，休息 10 秒，重複 3 次。</span></li>
-              <li><b>3</b><span>再以相同方式觀察示意區 B，過程中注意肩頸與呼吸是否較放鬆。</span></li>
-              <li><b>4</b><span>若出現疼痛加劇、麻木、胸悶、頭暈或任何不適，立即停止並改由專人判斷。</span></li>
-            </ul>
-            <div class="notice">示意區不是正式醫療點位。正式版本應由醫療與點位小組提供位置、禁忌、工具與操作時間。</div>
-          </section>
-
-          <aside class="point-map">
-            <div class="body-figure" aria-label="肩胛與肩頸示意區">
-              <span class="map-line"></span>
-              <span class="map-dot dot-a">A</span>
-              <span class="map-dot dot-b">B</span>
-              <span class="map-dot dot-n">N</span>
-            </div>
-            <p class="map-caption">A／B 為示範區，N 為頸肩交界參考。正式點位需經審核。</p>
-            <div class="timer-panel">
-              <div class="timer-ring" id="timerRing" style="--timer: ${Math.round(((90 - state.timerLeft) / 90) * 100)}%">
-                <div class="timer-core" id="timerText">${formatTime(state.timerLeft)}</div>
-              </div>
-              <button type="button" class="btn btn-primary" id="timerBtn">${state.timerRunning ? "暫停計時" : "開始 90 秒體驗"}</button>
-            </div>
+          <aside class="diagram">
+            ${renderNeckMap()}
+            <p class="caption">示意圖用於說明流程，不代表正式點位位置。</p>
           </aside>
         </div>
-        <div class="action-row">
-          <button type="button" class="btn btn-secondary" data-prev="2"><span class="btn-icon">‹</span> 回到比對結果</button>
-          <button type="button" class="btn btn-primary" data-next="4">完成後回填反應 <span class="btn-icon">›</span></button>
-        </div>
       `;
     }
 
-    function renderFeedback() {
-      const feelings = [
-        { id: "明顯比較輕鬆", sub: "局部緊繃或卡住感有清楚變化" },
-        { id: "有一點變化", sub: "有些微放鬆，但還需要觀察" },
-        { id: "沒有明顯變化", sub: "操作後感受差異不明顯" },
-        { id: "變得更不舒服", sub: "疼痛、麻、暈或其他不適增加" }
-      ];
+    function viewBaseline() {
+      const headache = state.topic === "headache";
       return `
-        <div class="form-zone">
-          <section class="field-block">
-            <p class="field-title">體驗後是否有感覺變化？</p>
-            <p class="field-caption">這裡不要求使用者填改善百分比，只記錄可承接的身體反應。</p>
-            <div class="feedback-options">
-              ${feelings.map(feeling => `
-                <button type="button" class="feeling ${state.feedback === feeling.id ? "selected" : ""}" data-feeling="${feeling.id}">
-                  <strong>${feeling.id}</strong>
-                  <span>${feeling.sub}</span>
-                </button>
+        <div class="grid">
+          ${headache ? headacheBaselineBlock() : neckBaselineBlock()}
+          <section class="block danger">
+            <p class="block-title">安全排除</p>
+            <p class="caption">若有下列狀況，不進入居家按壓測試，改由醫療或專人協助判斷。</p>
+            <div class="checks">
+              ${redFlagOptions().map(item => `
+                <label class="check"><input type="checkbox" data-redflag="${item}" ${state.redFlags.includes(item) ? "checked" : ""}>${item}</label>
               `).join("")}
             </div>
           </section>
+          <div class="actions">
+            <button type="button" class="btn btn-secondary" data-prev="0"><span class="icon">‹</span> 返回模式</button>
+            <button type="button" class="btn btn-primary" id="baselineNext">${state.redFlags.length ? "建立安全承接" : "產生三個測試位置"} <span class="icon">›</span></button>
+          </div>
+        </div>
+      `;
+    }
 
-          <section class="field-block">
-            <p class="field-title">後續承接意願</p>
-            <div class="checks">
-              <label class="check"><input type="checkbox" id="consent" ${state.consent ? "checked" : ""} /> 我同意由健康管理師依此狀態協助判斷下一步</label>
-              <label class="check"><input type="checkbox" id="observe14" checked /> 我願意進入 14 天低壓力觀察</label>
+    function neckBaselineBlock() {
+      return `
+        <section class="block">
+          <p class="block-title">左右轉動前測</p>
+          <p class="caption">請坐挺，脖子往右邊轉到底，再往左邊轉到底，記錄大約角度與哪裡會緊、痠、痛。</p>
+          <div class="angle-grid">
+            <div class="angle-card">
+              <strong>右轉前測</strong>
+              ${range("beforeRightAngle", "右轉角度", state.beforeRightAngle, 0, 100, "度")}
+              <label for="beforeRightFeel">右轉時哪裡有感</label>
+              <textarea id="beforeRightFeel">${escapeHtml(state.beforeRightFeel)}</textarea>
             </div>
-            <div class="input-row">
-              <div>
-                <label class="field-caption" for="contactFeedback">偏好聯繫方式</label>
-                <input class="input" id="contactFeedback" value="${escapeHtml(state.contact)}" />
+            <div class="angle-card">
+              <strong>左轉前測</strong>
+              ${range("beforeLeftAngle", "左轉角度", state.beforeLeftAngle, 0, 100, "度")}
+              <label for="beforeLeftFeel">左轉時哪裡有感</label>
+              <textarea id="beforeLeftFeel">${escapeHtml(state.beforeLeftFeel)}</textarea>
+            </div>
+          </div>
+          <div class="input-grid">
+            <div class="field">
+              <label for="symptomPlace">最容易痠痛的位置</label>
+              <select id="symptomPlace">
+                ${["右側肩頸", "左側肩頸", "右肩膀", "左肩膀", "後頸", "上背靠近肩胛"].map(option => `<option ${state.symptomPlace === option ? "selected" : ""}>${option}</option>`).join("")}
+              </select>
+            </div>
+            <div class="field">
+              <label for="relation">舊客關係</label>
+              <select id="relation">
+                ${["曾經看診過", "曾經做過療程", "曾經購買或體驗產品", "曾經預約但最後沒有來", "不確定，但曾經接觸過"].map(option => `<option ${state.relation === option ? "selected" : ""}>${option}</option>`).join("")}
+              </select>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function headacheBaselineBlock() {
+      return `
+        <section class="block">
+          <p class="block-title">頭痛位置前測</p>
+          <p class="caption">目前頭痛流程先限定位置記錄與安全排除。若有紅旗狀況，系統不提供按壓測試。</p>
+          <div class="two-col">
+            <div class="grid">
+              <div class="choices">
+                ${["前額", "太陽穴", "後腦", "頭頂"].map(place => `
+                  <button type="button" class="choice ${state.headachePlace === place ? "selected" : ""}" data-headache="${place}">${place}</button>
+                `).join("")}
               </div>
-              <div>
-                <label class="field-caption" for="bestTime">方便聯繫時段</label>
-                <input class="input" id="bestTime" value="平日下午 2 到 5 點" />
+              <div class="input-grid">
+                <div class="field">
+                  <label for="painAfter">目前疼痛程度 0 到 10 分</label>
+                  ${range("painAfter", "目前疼痛", state.painAfter + 3, 0, 10, "分")}
+                </div>
+                <div class="field">
+                  <label for="relation">舊客關係</label>
+                  <select id="relation">
+                    ${["曾經看診過", "曾經做過療程", "曾經購買或體驗產品", "曾經預約但最後沒有來", "不確定，但曾經接觸過"].map(option => `<option ${state.relation === option ? "selected" : ""}>${option}</option>`).join("")}
+                  </select>
+                </div>
               </div>
+            </div>
+            <div class="diagram">${renderHeadMap()}<p class="caption">請先標記最接近的位置，再進入左右按壓反應比較。</p></div>
+          </div>
+        </section>
+      `;
+    }
+
+    function viewCompare() {
+      if (state.redFlags.length) return safetyBlock();
+      if (!state.points.length) generatePoints();
+      return `
+        <div class="grid">
+          <section class="block soft">
+            <div class="block-head">
+              <div>
+                <p class="block-title">三個測試位置</p>
+                <p class="caption">每一個位置都按左邊幾秒、右邊幾秒，記錄哪一邊比較明顯。正式位置名稱可由內部方案庫替換。</p>
+              </div>
+              <button type="button" class="btn btn-secondary" id="regenPoints">重新產生組合</button>
+            </div>
+          </section>
+          <section class="test-table">
+            ${state.points.map((point, index) => testRow(point, index)).join("")}
+          </section>
+          <div class="notice">目前保留一點隨機組合，但必須限制在已審核的方案庫內。不能讓系統自由生成未審核位置。</div>
+          <div class="actions">
+            <button type="button" class="btn btn-secondary" data-prev="1"><span class="icon">‹</span> 回前測</button>
+            <button type="button" class="btn btn-primary" id="selectMainPoint">整理主要按壓位置 <span class="icon">›</span></button>
+          </div>
+        </div>
+      `;
+    }
+
+    function testRow(point, index) {
+      const score = state.scores[point.id] || { left: 3, right: 6 };
+      const side = score.left === score.right ? "兩側接近" : score.left > score.right ? "左邊較明顯" : "右邊較明顯";
+      return `
+        <div class="test-row">
+          <div class="point-name">
+            <div class="point-badge">${index + 1}</div>
+            <div>
+              <strong>${point.name}</strong>
+              <span>${point.access}｜${point.note}</span>
+            </div>
+          </div>
+          <div class="score-grid">
+            ${scoreRange(point.id, "left", "左邊痛感", score.left)}
+            ${scoreRange(point.id, "right", "右邊痛感", score.right)}
+            <div class="side-result">${side}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function viewPress() {
+      if (state.redFlags.length) return safetyBlock();
+      const point = selectedPoint();
+      return `
+        <div class="two-col">
+          <div class="grid">
+            <section class="block">
+              <p class="block-title">本次主要按壓位置</p>
+              <div class="selected-point">
+                <div class="selected-mark">${point.id}</div>
+                <div>
+                  <h3 style="margin:0 0 6px;font-size:22px">${point.name}</h3>
+                  <p class="caption">${point.access}。請以舒服力道按壓一分鐘，過程中若有疼痛加劇、麻、暈、胸悶或任何不適，立即停止。</p>
+                </div>
+              </div>
+              <div class="timer">
+                <div class="timer-ring" id="timerRing" style="--timer:${Math.round(((60 - state.timerLeft) / 60) * 100)}%">
+                  <div class="timer-core" id="timerText">${formatTime(state.timerLeft)}</div>
+                </div>
+                <div class="grid">
+                  <p class="caption">完成一分鐘後，請回到後測：重新左右轉頭，確認原本會痠、會緊的位置是否下降。</p>
+                  <button type="button" class="btn btn-primary" id="timerBtn">${state.timerRunning ? "暫停計時" : "開始 1 分鐘"}</button>
+                </div>
+              </div>
+            </section>
+            <div class="actions">
+              <button type="button" class="btn btn-secondary" data-prev="2"><span class="icon">‹</span> 回三點比較</button>
+              <button type="button" class="btn btn-primary" data-next="4">前往後測回填 <span class="icon">›</span></button>
+            </div>
+          </div>
+
+          <aside class="diagram">
+            ${point.type === "back" ? renderBodyMap() : state.topic === "headache" ? renderHeadMap() : renderNeckMap()}
+            <p class="caption">圖中標記為示意，正式版本應替換為醫療端審核過的位置圖與操作文字。</p>
+          </aside>
+        </div>
+      `;
+    }
+
+    function viewAfter() {
+      return `
+        <div class="grid">
+          <section class="block">
+            <p class="block-title">後測回填</p>
+            <p class="caption">按完後再測一次。重點不是宣稱改善，而是記錄「活動度是否變大」與「原本不適是否下降」。</p>
+            ${state.topic === "headache" ? headacheAfterBlock() : neckAfterBlock()}
+          </section>
+          <section class="block soft">
+            <p class="block-title">目前前後差異</p>
+            <div class="metrics">
+              <div class="metric"><b>${rightGain()}°</b><span>右轉增加</span></div>
+              <div class="metric"><b>${leftGain()}°</b><span>左轉增加</span></div>
+              <div class="metric"><b>${state.symptomRelief}/10</b><span>原本不適下降感</span></div>
+            </div>
+          </section>
+          <div class="actions">
+            <button type="button" class="btn btn-secondary" data-prev="3"><span class="icon">‹</span> 回按壓頁</button>
+            <button type="button" class="btn btn-primary" data-next="5">產生紀錄與建議 <span class="icon">›</span></button>
+          </div>
+        </div>
+      `;
+    }
+
+    function neckAfterBlock() {
+      return `
+        <div class="angle-grid">
+          <div class="angle-card">
+            <strong>右轉後測</strong>
+            ${range("afterRightAngle", "右轉後角度", state.afterRightAngle, 0, 100, "度")}
+          </div>
+          <div class="angle-card">
+            <strong>左轉後測</strong>
+            ${range("afterLeftAngle", "左轉後角度", state.afterLeftAngle, 0, 100, "度")}
+          </div>
+        </div>
+        ${range("symptomRelief", "原本痠痛下降感", state.symptomRelief, 0, 10, "分")}
+      `;
+    }
+
+    function headacheAfterBlock() {
+      return `
+        ${range("painAfter", "按壓後頭痛程度", state.painAfter, 0, 10, "分")}
+        ${range("symptomRelief", "頭痛下降感", state.symptomRelief, 0, 10, "分")}
+      `;
+    }
+
+    function viewRoute() {
+      if (state.redFlags.length) return safetyRoute();
+      const point = selectedPoint();
+      const effective = isEffective();
+      return `
+        <div class="grid">
+          <section class="block ${effective ? "soft" : "warn"}">
+            <p class="block-title">${effective ? "本次體驗已有可記錄變化" : "本次變化不明顯，建議由專人整理"}</p>
+            <p class="caption">${effective ? "可以把這次的前後測差異留下來，後續對照門診資料再給建議。" : "不建議硬推同一位置，應先由健康管理師整理姿勢、症狀與過去資料。"}</p>
+            <div class="route-table">
+              <div class="route-row"><b>舊客關係</b><span>${escapeHtml(state.relation)}</span></div>
+              <div class="route-row"><b>測試方式</b><span>${state.helper === "family" ? "家人協助，可使用背部示意點" : "自己測試，只使用可自行按到的位置"}</span></div>
+              <div class="route-row"><b>本次主題</b><span>${state.topic === "headache" ? `頭痛：${state.headachePlace}` : `肩頸活動度：${state.symptomPlace}`}</span></div>
+              <div class="route-row"><b>主要位置</b><span>${point.name}（${point.access}）</span></div>
+              <div class="route-row"><b>前後差異</b><span>${resultSentence()}</span></div>
+              <div class="route-row"><b>後續建議</b><span>${nextStepSentence()}</span></div>
             </div>
           </section>
 
-          <div class="action-row">
-            <button type="button" class="btn btn-secondary" data-prev="3"><span class="btn-icon">‹</span> 返回體驗卡</button>
-            <button type="button" class="btn btn-primary" data-next="5">產生重整路徑卡 <span class="btn-icon">›</span></button>
+          ${saveCurrentPointBlock(point, effective)}
+          ${historyBlock()}
+
+          <section class="block">
+            <p class="block-title">留下資料，對照過去門診紀錄</p>
+            <p class="caption">建議話術方向：留下這次前後測紀錄，我們才能對照你過去在門診留下的資料，整理出下一步較明確的建議。</p>
+            <div class="checks">
+              <label class="check"><input type="checkbox" id="consent" ${state.consent ? "checked" : ""}>我同意由健康管理師依此紀錄協助判斷下一步</label>
+              <label class="check"><input type="checkbox" checked>我願意保留本次測試紀錄，供後續對照使用</label>
+            </div>
+            <div class="input-grid">
+              <div class="field">
+                <label for="contact">偏好聯繫方式</label>
+                <input id="contact" type="text" value="${escapeHtml(state.contact)}">
+              </div>
+              <div class="field">
+                <label for="memo">備註</label>
+                <input id="memo" type="text" value="希望後續對照門診資料">
+              </div>
+            </div>
+          </section>
+          <div class="actions">
+            <button type="button" class="btn btn-secondary" data-prev="4"><span class="icon">‹</span> 回後測</button>
+            <button type="button" class="btn btn-secondary" id="printBtn">列印／存成 PDF</button>
+            <button type="button" class="btn btn-primary" id="restartNeck">重新測一次 <span class="icon">›</span></button>
           </div>
         </div>
       `;
     }
 
-    function renderRoute() {
-      const route = getRouteCopy();
+    function safetyBlock() {
       return `
-        <div class="route-card">
-          <div class="result-status">
-            <div class="status-icon" style="background:${route.color}">${route.mark}</div>
+        <div class="block danger">
+          <p class="block-title">此狀態不進入居家按壓測試</p>
+          <p class="caption">您勾選了安全排除條件：${state.redFlags.map(escapeHtml).join("、")}。為了安全，系統不提供測試位置。</p>
+          <div class="notice danger">若症狀明顯、快速加重，或伴隨神經症狀、外傷、發燒、胸悶等情況，請優先尋求醫療評估。</div>
+          <div class="actions">
+            <button type="button" class="btn btn-secondary" data-prev="1"><span class="icon">‹</span> 重新確認</button>
+            <button type="button" class="btn btn-danger" data-next="5">建立安全承接紀錄 <span class="icon">›</span></button>
+          </div>
+        </div>
+      `;
+    }
+
+    function safetyRoute() {
+      return `
+        <div class="block danger">
+          <p class="block-title">安全承接紀錄</p>
+          <p class="caption">本次不提供居家按壓測試。紀錄保留給專人確認，避免把高風險狀態誤導成一般體驗。</p>
+          <div class="route-table">
+            <div class="route-row"><b>安全原因</b><span>${state.redFlags.map(escapeHtml).join("、")}</span></div>
+            <div class="route-row"><b>系統動作</b><span>停止產生點位與一分鐘按壓流程</span></div>
+            <div class="route-row"><b>建議下一步</b><span>醫療評估或由健康管理師先行確認狀態</span></div>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn btn-secondary" data-prev="1"><span class="icon">‹</span> 返回前測</button>
+            <button type="button" class="btn btn-primary" id="restartNeck">重新開始 <span class="icon">›</span></button>
+          </div>
+        </div>
+      `;
+    }
+
+    function headacheSaveBlock(point, effective) {
+      const saved = state.savedHeadachePoint;
+      return `
+        <section class="block">
+          <p class="block-title">頭痛位置保存</p>
+          <p class="caption">${effective ? "如果本次按壓後頭痛下降，可保存這個示意位置。下次忘記時回來即可查看。" : "本次變化不明顯，暫不建議保存為固定位置。"}</p>
+          ${saved ? `<div class="notice">目前已保存：${escapeHtml(saved)}</div>` : ""}
+          <div class="actions" style="justify-content:flex-start">
+            <button type="button" class="btn btn-primary" id="saveHeadache" ${effective ? "" : "disabled"}>保存本次頭痛位置</button>
+            <button type="button" class="btn btn-secondary" id="clearSaved">清除保存</button>
+          </div>
+        </section>
+      `;
+    }
+
+    function saveCurrentPointBlock(point, effective) {
+      return `
+        <section class="block">
+          <p class="block-title">${state.topic === "headache" ? "頭痛位置保存" : "本次有效點保存"}</p>
+          <p class="caption">${effective ? "如果這次前後測有變化，可以把主要位置、症狀、日期與前後差異存成一筆紀錄。下次回來可以直接找回。" : "本次變化不明顯，建議先不要保存為固定有效點，可保留測試紀錄給專人判斷。"}</p>
+          <div class="route-table">
+            <div class="route-row"><b>準備保存的位置</b><span>${point.name}（${point.id}｜${point.access}）</span></div>
+            <div class="route-row"><b>保存分類</b><span>${state.topic === "headache" ? `頭痛：${state.headachePlace}` : `肩頸：${state.symptomPlace}`}</span></div>
+            <div class="route-row"><b>回溯關鍵</b><span>${resultSentence()}</span></div>
+          </div>
+          <div class="actions" style="justify-content:flex-start">
+            <button type="button" class="btn btn-primary" id="savePointRecord" ${effective ? "" : "disabled"}>保存到回溯舊點</button>
+          </div>
+        </section>
+      `;
+    }
+
+    function historyBlock() {
+      const records = filteredPointRecords();
+      const active = activeRecallRecord();
+      return `
+        <section class="block">
+          <div class="block-head">
             <div>
-              <h2>${route.title}</h2>
-              <p>${route.desc}</p>
+              <p class="block-title">回溯舊點資料庫</p>
+              <p class="caption">依症狀、日期、點位或有效程度找出以前按過的點。正式版可接 CRM 或會員資料庫；此原型先存在這台瀏覽器。</p>
             </div>
           </div>
-          <div class="path-table">
-            <div class="path-row"><b>過去資料摘要</b><span>${getLegacySummary()}</span></div>
-            <div class="path-row"><b>目前最在意問題</b><span>${escapeHtml(getProblemSummary())}</span></div>
-            <div class="path-row"><b>本次系統判斷</b><span>${route.judgement}</span></div>
-            <div class="path-row"><b>回填結果</b><span>${escapeHtml(state.feedback || "尚未回填")}</span></div>
-            <div class="path-row"><b>建議下一步</b><span>${route.next}</span></div>
-            <div class="path-row"><b>CRM 貼標</b><span>${getTags().join("、")}</span></div>
+          <div class="history-tools">
+            <div class="filter-row">
+              ${[
+                ["all", "全部"],
+                ["neck", "肩頸"],
+                ["headache", "頭痛"],
+                ["effective", "有效紀錄"]
+              ].map(([id, label]) => `<button type="button" class="filter-btn ${state.recallFilter === id ? "active" : ""}" data-filter="${id}">${label}</button>`).join("")}
+            </div>
+            <input type="text" id="recallKeyword" value="${escapeHtml(state.recallKeyword)}" placeholder="搜尋：A3、頭頂、右肩頸">
           </div>
-          <div class="action-row">
-            <button type="button" class="btn btn-secondary" id="printBtn"><span class="btn-icon">↓</span> 列印／存成 PDF</button>
-            <button type="button" class="btn btn-secondary" id="tryAnother">重新體驗另一項</button>
-            <button type="button" class="btn btn-primary" data-next="1">回到症狀陳述 <span class="btn-icon">›</span></button>
+          ${active ? recallDetail(active) : ""}
+          ${records.length ? `<div class="history-grid">${records.map(record => recallCard(record)).join("")}</div>` : `<div class="empty-state">目前還沒有正式保存的有效點。完成一次有變化的後測後，按「保存到回溯舊點」，下次就能在這裡找回。</div>`}
+          <div class="actions" style="justify-content:flex-start">
+            <button type="button" class="btn btn-secondary" id="loadDemoRecords">載入示範回溯紀錄</button>
+            <button type="button" class="btn btn-secondary" id="clearPointRecords">清除全部回溯紀錄</button>
+          </div>
+        </section>
+      `;
+    }
+
+    function recallCard(record) {
+      return `
+        <article class="history-card ${state.activeRecallId === record.id ? "active" : ""}">
+          <div>
+            <h3>${escapeHtml(record.symptomLabel)}</h3>
+            <div class="history-meta">
+              <span>${escapeHtml(record.date)}</span>
+              <span>${escapeHtml(record.pointId)}</span>
+              <span>${escapeHtml(record.helperLabel)}</span>
+              ${record.demo ? "<span>示範</span>" : ""}
+            </div>
+          </div>
+          <div class="history-result">${escapeHtml(record.resultText)}</div>
+          <div class="tags">
+            <span class="tag ${record.topic === "headache" ? "warn" : "teal"}">${record.topic === "headache" ? "頭痛" : "肩頸"}</span>
+            <span class="tag green">有效紀錄</span>
+          </div>
+          <div class="history-actions">
+            <button type="button" class="small-btn" data-view-record="${record.id}">查看</button>
+            <button type="button" class="small-btn primary" data-use-record="${record.id}">帶入本次</button>
+            ${record.demo ? "" : `<button type="button" class="small-btn danger" data-delete-record="${record.id}">刪除</button>`}
+          </div>
+        </article>
+      `;
+    }
+
+    function recallDetail(record) {
+      return `
+        <div class="recall-detail">
+          <strong>已選擇：${escapeHtml(record.symptomLabel)}｜${escapeHtml(record.pointName)}</strong>
+          <div class="route-table">
+            <div class="route-row"><b>保存時間</b><span>${escapeHtml(record.date)}</span></div>
+            <div class="route-row"><b>當時測試</b><span>${escapeHtml(record.helperLabel)}，${escapeHtml(record.topic === "headache" ? record.headachePlace : record.symptomPlace)}</span></div>
+            <div class="route-row"><b>當時差異</b><span>${escapeHtml(record.resultText)}</span></div>
+            <div class="route-row"><b>回溯用途</b><span>可以直接查看此點，也可以帶入本次一分鐘按壓，再做新的後測紀錄。</span></div>
           </div>
         </div>
       `;
     }
 
-    function bindStageEvents() {
-      document.querySelectorAll("[data-relation]").forEach(button => {
-        button.addEventListener("click", () => {
-          state.relation = button.dataset.relation;
-          render();
-        });
-      });
+    function loadPointRecords() {
+      try {
+        const raw = localStorage.getItem("raphael_point_records_v3");
+        const records = raw ? JSON.parse(raw) : [];
+        const legacy = localStorage.getItem("raphael_saved_headache_point");
+        if (legacy && !records.some(record => record.legacy === true)) {
+          records.unshift({
+            id: "legacy-headache",
+            legacy: true,
+            topic: "headache",
+            date: "舊版保存",
+            pointId: "舊版",
+            pointName: legacy,
+            access: "自己可按",
+            helper: "self",
+            helperLabel: "自己測試",
+            headachePlace: "未標記",
+            symptomPlace: "",
+            symptomLabel: "舊版頭痛保存",
+            resultText: "由 V2 單筆保存轉入，建議重新測一次後更新。",
+            effective: true
+          });
+        }
+        return Array.isArray(records) ? records : [];
+      } catch (error) {
+        return [];
+      }
+    }
 
-      document.querySelectorAll("[data-area]").forEach(button => {
-        button.addEventListener("click", () => {
-          state.area = button.dataset.area;
-          if (openPlans[state.area]) state.statement = openPlans[state.area].matchText;
-          state.result = null;
-          render();
-        });
-      });
+    function savePointRecords() {
+      const persistent = state.pointRecords.filter(record => !record.demo);
+      localStorage.setItem("raphael_point_records_v3", JSON.stringify(persistent));
+    }
 
-      document.querySelectorAll("[data-example]").forEach(button => {
-        button.addEventListener("click", () => applyExample(button.dataset.example));
-      });
+    function demoPointRecords() {
+      return [
+        {
+          id: "demo-head-a3",
+          demo: true,
+          topic: "headache",
+          date: "2026/6/10",
+          pointId: "A3",
+          pointName: "前臂示意點 A3",
+          access: "自己可按",
+          helper: "self",
+          helperLabel: "自己測試",
+          headachePlace: "頭頂",
+          symptomPlace: "",
+          symptomLabel: "頭痛：頭頂",
+          resultText: "頭痛下降感 6/10，按壓後疼痛 3/10",
+          effective: true
+        },
+        {
+          id: "demo-neck-b2",
+          demo: true,
+          topic: "neck",
+          date: "2026/6/08",
+          pointId: "B2",
+          pointName: "背部示意點 B2",
+          access: "需家人協助",
+          helper: "family",
+          helperLabel: "家人協助",
+          headachePlace: "",
+          symptomPlace: "右側肩頸",
+          symptomLabel: "肩頸：右側肩頸",
+          resultText: "右轉 +15 度，左轉 +18 度，原本不適下降感 5/10",
+          effective: true
+        },
+        {
+          id: "demo-neck-h1",
+          demo: true,
+          topic: "neck",
+          date: "2026/6/03",
+          pointId: "H1",
+          pointName: "手部示意點 H1",
+          access: "自己可按",
+          helper: "self",
+          helperLabel: "自己測試",
+          headachePlace: "",
+          symptomPlace: "左側肩頸",
+          symptomLabel: "肩頸：左側肩頸",
+          resultText: "右轉 +8 度，左轉 +14 度，原本不適下降感 6/10",
+          effective: true
+        }
+      ];
+    }
 
-      document.querySelectorAll("[data-next]").forEach(button => {
-        button.addEventListener("click", () => goStep(Number(button.dataset.next)));
-      });
+    function makeCurrentPointRecord() {
+      const point = selectedPoint();
+      const now = new Date();
+      return {
+        id: `record-${Date.now()}`,
+        topic: state.topic,
+        date: now.toLocaleDateString("zh-TW"),
+        pointId: point.id,
+        pointName: point.name,
+        access: point.access,
+        helper: state.helper,
+        helperLabel: state.helper === "family" ? "家人協助" : "自己測試",
+        headachePlace: state.headachePlace,
+        symptomPlace: state.symptomPlace,
+        symptomLabel: state.topic === "headache" ? `頭痛：${state.headachePlace}` : `肩頸：${state.symptomPlace}`,
+        resultText: resultSentence(),
+        effective: isEffective(),
+        relation: state.relation,
+        beforeRightAngle: state.beforeRightAngle,
+        beforeLeftAngle: state.beforeLeftAngle,
+        afterRightAngle: state.afterRightAngle,
+        afterLeftAngle: state.afterLeftAngle,
+        symptomRelief: state.symptomRelief,
+        painAfter: state.painAfter
+      };
+    }
 
-      document.querySelectorAll("[data-prev]").forEach(button => {
-        button.addEventListener("click", () => goStep(Number(button.dataset.prev)));
+    function filteredPointRecords() {
+      const keyword = state.recallKeyword.trim().toLowerCase();
+      return state.pointRecords.filter(record => {
+        const filterOk =
+          state.recallFilter === "all" ||
+          record.topic === state.recallFilter ||
+          (state.recallFilter === "effective" && record.effective);
+        const haystack = `${record.symptomLabel} ${record.pointId} ${record.pointName} ${record.resultText} ${record.date} ${record.helperLabel}`.toLowerCase();
+        return filterOk && (!keyword || haystack.includes(keyword));
       });
+    }
 
-      document.querySelectorAll("[data-flag]").forEach(input => {
-        input.addEventListener("change", () => {
-          const flag = input.dataset.flag;
-          state.flags = input.checked
-            ? [...new Set([...state.flags, flag])]
-            : state.flags.filter(item => item !== flag);
-          state.result = null;
+    function activeRecallRecord() {
+      return state.pointRecords.find(record => record.id === state.activeRecallId) || null;
+    }
+
+    function useRecallRecord(record) {
+      state.topic = record.topic;
+      state.helper = record.helper || "self";
+      state.headachePlace = record.headachePlace || state.headachePlace;
+      state.symptomPlace = record.symptomPlace || state.symptomPlace;
+      const point = {
+        id: record.pointId,
+        name: record.pointName,
+        type: record.pointId.startsWith("B") || record.pointId.startsWith("S") ? "back" : record.topic === "headache" ? "hand" : "front",
+        access: record.access,
+        note: "由回溯舊點帶入；建議仍做新的後測紀錄。"
+      };
+      state.points = [point];
+      state.scores = { [point.id]: { left: 5, right: 7 } };
+      state.selectedPointId = point.id;
+      state.timerLeft = 60;
+      state.step = 3;
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function bindEvents() {
+      document.querySelectorAll("[data-step]").forEach(btn => btn.addEventListener("click", () => goStep(Number(btn.dataset.step))));
+      document.querySelectorAll("[data-next]").forEach(btn => btn.addEventListener("click", () => goStep(Number(btn.dataset.next))));
+      document.querySelectorAll("[data-prev]").forEach(btn => btn.addEventListener("click", () => goStep(Number(btn.dataset.prev))));
+
+      document.querySelectorAll("[data-helper]").forEach(btn => btn.addEventListener("click", () => {
+        state.helper = btn.dataset.helper;
+        resetGenerated();
+        render();
+      }));
+      document.querySelectorAll("[data-topic]").forEach(btn => btn.addEventListener("click", () => {
+        state.topic = btn.dataset.topic;
+        resetGenerated();
+        render();
+      }));
+      document.querySelectorAll("[data-headache]").forEach(btn => btn.addEventListener("click", () => {
+        state.headachePlace = btn.dataset.headache;
+        render();
+      }));
+      document.querySelectorAll("[data-redflag]").forEach(input => input.addEventListener("change", () => {
+        const value = input.dataset.redflag;
+        state.redFlags = input.checked ? [...new Set([...state.redFlags, value])] : state.redFlags.filter(item => item !== value);
+        render();
+      }));
+
+      ["beforeRightFeel", "beforeLeftFeel", "contact"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("input", event => {
+          state[id] = event.target.value;
           renderInsights();
         });
       });
-
-      document.querySelectorAll("[data-feeling]").forEach(button => {
-        button.addEventListener("click", () => {
-          state.feedback = button.dataset.feeling;
-          render();
+      ["relation", "symptomPlace"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("change", event => {
+          state[id] = event.target.value;
+          renderInsights();
         });
       });
+      document.querySelectorAll("[data-range]").forEach(input => input.addEventListener("input", event => {
+        const key = input.dataset.range;
+        state[key] = Number(event.target.value);
+        const output = document.querySelector(`[data-output="${key}"]`);
+        if (output) output.textContent = `${state[key]}${input.dataset.unit}`;
+        renderInsights();
+      }));
+      document.querySelectorAll("[data-score]").forEach(input => input.addEventListener("input", event => {
+        const [pointId, side] = input.dataset.score.split(":");
+        if (!state.scores[pointId]) state.scores[pointId] = { left: 3, right: 6 };
+        state.scores[pointId][side] = Number(event.target.value);
+        render();
+      }));
 
-      document.querySelectorAll("[data-open-item]").forEach(button => {
-        button.addEventListener("click", () => {
-          state.area = button.dataset.openItem;
-          state.statement = openPlans[state.area].matchText;
-          state.flags = [];
-          state.result = matchState();
-          goStep(2);
-        });
+      const baselineNext = document.getElementById("baselineNext");
+      if (baselineNext) baselineNext.addEventListener("click", () => {
+        if (!state.redFlags.length) generatePoints();
+        goStep(state.redFlags.length ? 5 : 2);
       });
-
-      const statement = document.getElementById("statement");
-      if (statement) {
-        statement.addEventListener("input", event => {
-          state.statement = event.target.value;
-          state.result = null;
-          renderInsights();
-        });
-      }
-
-      const duration = document.getElementById("duration");
-      if (duration) {
-        duration.addEventListener("input", event => {
-          state.duration = event.target.value;
-          renderInsights();
-        });
-      }
-
-      const contact = document.getElementById("contact");
-      if (contact) {
-        contact.addEventListener("input", event => {
-          state.contact = event.target.value;
-          renderInsights();
-        });
-      }
-
-      const contactFeedback = document.getElementById("contactFeedback");
-      if (contactFeedback) {
-        contactFeedback.addEventListener("input", event => {
-          state.contact = event.target.value;
-          renderInsights();
-        });
-      }
-
-      const severity = document.getElementById("severity");
-      if (severity) {
-        severity.addEventListener("input", event => {
-          state.severity = Number(event.target.value);
-          document.getElementById("severityValue").textContent = state.severity;
-          renderInsights();
-        });
-      }
-
-      const analyze = document.getElementById("analyzeBtn");
-      if (analyze) {
-        analyze.addEventListener("click", () => {
-          state.result = null;
-          state.step = 2;
-          render();
-          setTimeout(() => {
-            state.result = matchState();
-            render();
-          }, 650);
-        });
-      }
-
-      const recordUnsupported = document.getElementById("recordUnsupported");
-      if (recordUnsupported) {
-        recordUnsupported.addEventListener("click", () => {
-          state.feedback = "留下狀態，等待後續通知";
-          goStep(5);
-        });
-      }
-
+      const regen = document.getElementById("regenPoints");
+      if (regen) regen.addEventListener("click", () => {
+        resetGenerated();
+        generatePoints();
+        render();
+      });
+      const select = document.getElementById("selectMainPoint");
+      if (select) select.addEventListener("click", () => {
+        state.selectedPointId = computeSelectedPointId();
+        goStep(3);
+      });
       const timerBtn = document.getElementById("timerBtn");
-      if (timerBtn) {
-        timerBtn.addEventListener("click", toggleTimer);
-      }
-
+      if (timerBtn) timerBtn.addEventListener("click", toggleTimer);
+      const save = document.getElementById("saveHeadache");
+      if (save) save.addEventListener("click", () => {
+        const point = selectedPoint();
+        state.savedHeadachePoint = `${point.name}｜${state.headachePlace}｜${new Date().toLocaleDateString("zh-TW")}`;
+        localStorage.setItem("raphael_saved_headache_point", state.savedHeadachePoint);
+        render();
+      });
+      const clear = document.getElementById("clearSaved");
+      if (clear) clear.addEventListener("click", () => {
+        state.savedHeadachePoint = "";
+        localStorage.removeItem("raphael_saved_headache_point");
+        render();
+      });
+      const saveRecord = document.getElementById("savePointRecord");
+      if (saveRecord) saveRecord.addEventListener("click", () => {
+        const record = makeCurrentPointRecord();
+        state.pointRecords = [record, ...state.pointRecords.filter(item => !item.demo)];
+        state.activeRecallId = record.id;
+        savePointRecords();
+        render();
+      });
+      const keyword = document.getElementById("recallKeyword");
+      if (keyword) keyword.addEventListener("input", event => {
+        state.recallKeyword = event.target.value;
+        render();
+      });
+      document.querySelectorAll("[data-filter]").forEach(button => button.addEventListener("click", () => {
+        state.recallFilter = button.dataset.filter;
+        render();
+      }));
+      document.querySelectorAll("[data-view-record]").forEach(button => button.addEventListener("click", () => {
+        state.activeRecallId = button.dataset.viewRecord;
+        render();
+      }));
+      document.querySelectorAll("[data-use-record]").forEach(button => button.addEventListener("click", () => {
+        const record = state.pointRecords.find(item => item.id === button.dataset.useRecord);
+        if (record) useRecallRecord(record);
+      }));
+      document.querySelectorAll("[data-delete-record]").forEach(button => button.addEventListener("click", () => {
+        state.pointRecords = state.pointRecords.filter(item => item.id !== button.dataset.deleteRecord);
+        if (state.activeRecallId === button.dataset.deleteRecord) state.activeRecallId = "";
+        savePointRecords();
+        render();
+      }));
+      const loadDemo = document.getElementById("loadDemoRecords");
+      if (loadDemo) loadDemo.addEventListener("click", () => {
+        const existingIds = new Set(state.pointRecords.map(record => record.id));
+        state.pointRecords = [...state.pointRecords, ...demoPointRecords().filter(record => !existingIds.has(record.id))];
+        render();
+      });
+      const clearRecords = document.getElementById("clearPointRecords");
+      if (clearRecords) clearRecords.addEventListener("click", () => {
+        state.pointRecords = state.pointRecords.filter(record => record.demo);
+        state.activeRecallId = "";
+        localStorage.removeItem("raphael_point_records_v3");
+        render();
+      });
       const consent = document.getElementById("consent");
-      if (consent) {
-        consent.addEventListener("change", event => {
-          state.consent = event.target.checked;
-          renderInsights();
-        });
-      }
-
+      if (consent) consent.addEventListener("change", event => {
+        state.consent = event.target.checked;
+        renderInsights();
+      });
       const printBtn = document.getElementById("printBtn");
-      if (printBtn) {
-        printBtn.addEventListener("click", () => window.print());
-      }
-
-      const tryAnother = document.getElementById("tryAnother");
-      if (tryAnother) {
-        tryAnother.addEventListener("click", () => {
-          applyExample("neck");
-          goStep(1);
-        });
-      }
+      if (printBtn) printBtn.addEventListener("click", () => window.print());
+      const restart = document.getElementById("restartNeck");
+      if (restart) restart.addEventListener("click", () => {
+        state.step = 0;
+        resetGenerated();
+        stopTimer(false);
+        render();
+      });
     }
 
     function goStep(step) {
       state.step = Math.max(0, Math.min(steps.length - 1, step));
-      if (state.step === 2 && !state.result) {
-        setTimeout(() => {
-          if (state.step === 2 && !state.result) {
-            state.result = matchState();
-            render();
-          }
-        }, 450);
-      }
       if (state.step !== 3) stopTimer(false);
       render();
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
-    function applyExample(key) {
-      const example = examples[key];
-      state.relation = example.relation;
-      state.area = example.area;
-      state.duration = example.duration;
-      state.severity = example.severity;
-      state.statement = example.statement;
-      state.flags = example.flags ? [...example.flags] : [];
-      state.result = null;
-      state.feedback = "明顯比較輕鬆";
-      state.timerLeft = 90;
-      stopTimer(false);
-      render();
+    function generatePoints() {
+      const source = state.topic === "headache" ? pointLibrary.headache : state.helper === "family" ? pointLibrary.familyNeck : pointLibrary.selfNeck;
+      const requiredHand = source.find(point => point.type === "hand") || source[0];
+      const others = source.filter(point => point.id !== requiredHand.id);
+      const shuffled = [...others].sort(() => Math.random() - .5);
+      state.points = [requiredHand, ...shuffled.slice(0, 2)];
+      state.scores = {};
+      state.points.forEach((point, index) => {
+        state.scores[point.id] = index === 0 ? { left: 3, right: 6 } : index === 1 ? { left: 7, right: 4 } : { left: 4, right: 5 };
+      });
+      state.selectedPointId = null;
+      state.generatedAt += 1;
     }
 
-    function isExampleActive(example) {
-      return state.area === example.area && state.statement === example.statement;
+    function resetGenerated() {
+      state.points = [];
+      state.scores = {};
+      state.selectedPointId = null;
+      state.timerLeft = 60;
     }
 
-    function matchState() {
-      const text = `${state.statement} ${state.flags.join(" ")}`;
-      const dangerKeywords = ["胸痛", "冒冷汗", "單側無力", "語言不清", "外傷", "突然劇痛", "發燒", "劇烈疼痛"];
-      const dangerHit = dangerKeywords.find(keyword => hasAffirmedKeyword(text, keyword));
-      if (state.flags.length || dangerHit) {
-        return { type: "redflag", reason: dangerHit || state.flags[0] };
-      }
-
-      const trimmed = state.statement.trim();
-      if (trimmed.length < 8 || ["不舒服", "怪怪", "卡卡"].some(keyword => trimmed === keyword || trimmed.includes(keyword) && trimmed.length < 18)) {
-        return { type: "ambiguous" };
-      }
-
-      if (openPlans[state.area]) {
-        return { type: "open", planId: state.area };
-      }
-
-      if (trimmed.includes("肩胛") || trimmed.includes("上背") || trimmed.includes("肩頸")) {
-        const planId = trimmed.includes("左") ? "leftScapula" : trimmed.includes("肩頸") ? "neck" : "rightScapula";
-        return { type: "open", planId };
-      }
-
-      return { type: "unsupported" };
-    }
-
-    function hasAffirmedKeyword(text, keyword) {
-      let index = text.indexOf(keyword);
-      while (index !== -1) {
-        const prefix = text.slice(Math.max(0, index - 6), index);
-        if (!/(沒有|無|未|否認|不是|不會|沒有明顯)$/.test(prefix)) return true;
-        index = text.indexOf(keyword, index + keyword.length);
-      }
-      return false;
-    }
-
-    function getActivePlan() {
-      if (state.result && state.result.planId && openPlans[state.result.planId]) return openPlans[state.result.planId];
-      if (openPlans[state.area]) return openPlans[state.area];
-      return openPlans.rightScapula;
-    }
-
-    function getRouteCopy() {
-      if (state.result && state.result.type === "redflag") {
-        return {
-          title: "安全排除承接",
-          desc: "此狀態不進入居家點位體驗，系統只保留安全提醒與專人協助選項。",
-          judgement: "疑似紅旗或高風險描述",
-          next: "停止居家操作，建議就醫或由專人協助判斷",
-          color: "var(--danger)",
-          mark: "!"
-        };
-      }
-
-      if (state.result && (state.result.type === "unsupported" || state.result.type === "ambiguous")) {
-        return {
-          title: "未開放狀態已記錄",
-          desc: "系統保留需求資料，並提供已開放項目與專人協助兩種後續路徑。",
-          judgement: state.result.type === "ambiguous" ? "資訊不足，暫不產生點位建議" : "目前尚未開放此類居家點位體驗",
-          next: state.consent ? "健康管理師依使用者同意協助判斷下一步" : "等待後續開放通知",
-          color: "var(--amber)",
-          mark: "i"
-        };
-      }
-
-      if (state.feedback === "變得更不舒服") {
-        return {
-          title: "停止操作並轉專人判斷",
-          desc: "回填顯示不適增加，系統不再引導自行操作。",
-          judgement: "符合開放範圍，但回填為不適增加",
-          next: "健康管理師或醫療端優先確認安全狀態",
-          color: "var(--danger)",
-          mark: "!"
-        };
-      }
-
-      if (state.feedback === "沒有明顯變化") {
-        return {
-          title: "進入健康管理師判斷",
-          desc: "沒有明顯變化時，不強推產品，先整理資料與生活狀態。",
-          judgement: "符合開放範圍，體驗後未見明顯變化",
-          next: "由健康管理師協助判斷是否需要解析會或診所評估",
-          color: "var(--blue)",
-          mark: "→"
-        };
-      }
-
-      return {
-        title: "建議進入 14 天觀察路徑",
-        desc: "使用者在低門檻居家體驗中有感，可銜接平衡衣、穿戴追蹤或解析會。",
-        judgement: "符合開放體驗範圍，回填為有感或有一點變化",
-        next: "14 天低壓力觀察，並依同意狀態由健康管理師承接",
-        color: "var(--teal)",
-        mark: "✓"
-      };
-    }
-
-    function renderInsights() {
-      const result = state.result;
-      const decisionBox = document.getElementById("decisionBox");
-      const risk = getRiskLabel();
-      const tier = getTierLabel();
-      document.getElementById("metricRisk").textContent = risk.short;
-      document.getElementById("metricTier").textContent = tier;
-      document.getElementById("topStatus").textContent = getTopStatus();
-
-      decisionBox.innerHTML = `
-        <strong>${getDecisionTitle()}</strong>
-        <p>${getDecisionCopy()}</p>
-      `;
-      decisionBox.style.background = result && result.type === "redflag" ? "#fff6f5" : result && (result.type === "unsupported" || result.type === "ambiguous") ? "#fffaf0" : "#f8fbfa";
-      decisionBox.style.borderColor = result && result.type === "redflag" ? "#f0b4ae" : result && (result.type === "unsupported" || result.type === "ambiguous") ? "#e2c188" : "var(--line)";
-
-      document.getElementById("summaryList").innerHTML = `
-        <li><b>舊客關係</b><span>${escapeHtml(state.relation)}</span></li>
-        <li><b>目前陳述</b><span>${escapeHtml(getProblemSummary())}</span></li>
-        <li><b>資料重整方向</b><span>${escapeHtml(getInsightDirection())}</span></li>
-      `;
-
-      document.getElementById("tagCloud").innerHTML = getTags().map(tag => `<span class="tag ${tagClass(tag)}">${escapeHtml(tag)}</span>`).join("");
-    }
-
-    function getDecisionTitle() {
-      if (!state.result) return state.step <= 1 ? "等待舊客回標" : "正在準備比對";
-      if (state.result.type === "open") return "可進入點位體驗卡";
-      if (state.result.type === "redflag") return "安全排除";
-      if (state.result.type === "ambiguous") return "資訊不足";
-      return "未開放症狀承接";
-    }
-
-    function getDecisionCopy() {
-      if (!state.result) return "完成身份與目前狀態後，系統會顯示是否符合開放體驗範圍。";
-      if (state.result.type === "open") return "目前描述符合示範方案庫，可提供有限體驗卡並要求回填。";
-      if (state.result.type === "redflag") return "此狀態不提供居家點位，優先轉安全提醒與專人判斷。";
-      if (state.result.type === "ambiguous") return "目前描述太廣，需重新選擇明確部位或由專人協助整理。";
-      return "此狀態尚未在本次開放範圍內，改以留下狀態、查看開放項目或專人協助承接。";
-    }
-
-    function getTopStatus() {
-      if (!state.result) return "可操作體驗版";
-      if (state.result.type === "open") return "已符合開放範圍";
-      if (state.result.type === "redflag") return "安全排除中";
-      return "承接未開放狀態";
-    }
-
-    function getRiskLabel() {
-      if (state.result && state.result.type === "redflag") return { short: "高", full: "紅旗疑慮" };
-      if (state.flags.length) return { short: "高", full: "紅旗疑慮" };
-      if (state.result && (state.result.type === "unsupported" || state.result.type === "ambiguous")) return { short: "中", full: "需專人判斷" };
-      return { short: "低", full: "一般" };
-    }
-
-    function getTierLabel() {
-      if (state.result && state.result.type === "open" && state.feedback !== "沒有明顯變化") return "A 級";
-      if (state.result && state.result.type === "redflag") return "安全";
-      if (state.result) return "B 級";
-      return "待分級";
-    }
-
-    function getInsightDirection() {
-      if (state.result && state.result.type === "open") return getActivePlan().handoff;
-      if (state.result && state.result.type === "redflag") return "停止自動點位建議，轉安全提醒或專人協助。";
-      if (state.result && state.result.type === "ambiguous") return "重新整理部位、時間、程度與安全條件後再判斷。";
-      if (state.result && state.result.type === "unsupported") return "留下未開放狀態，累積下一批方案庫需求。";
-      return state.relation.includes("預約") ? "先用低門檻居家體驗重啟互動。" : "從過去資料重新對照現在狀態。";
-    }
-
-    function getLegacySummary() {
-      if (state.relation.includes("預約")) return "曾有需求與行動意願，但未形成完整診療資料";
-      if (state.relation.includes("不確定")) return "曾接觸品牌，需由後台確認資料完整度";
-      return "曾接觸、體驗或治療，後台可回查既有資料線索";
-    }
-
-    function getProblemSummary() {
-      if (state.statement.trim()) return state.statement.trim();
-      if (openPlans[state.area]) return openPlans[state.area].matchText;
-      return "尚未填寫目前狀態";
-    }
-
-    function getTags() {
-      const tags = ["舊客回流", state.relation, `程度 ${state.severity}/10`, `偏好 ${state.contact}`];
-      const risk = getRiskLabel();
-      tags.push(risk.full);
-      if (state.result) {
-        if (state.result.type === "open") {
-          tags.push("開放體驗項目", getActivePlan().label, state.feedback || "待回填");
-          if (state.consent) tags.push("同意專人聯繫");
-          if (state.feedback === "明顯比較輕鬆" || state.feedback === "有一點變化") tags.push("14 天觀察");
-        } else if (state.result.type === "redflag") {
-          tags.push("不提供點位", "安全承接");
-        } else {
-          tags.push("未開放症狀", "需求留存");
-          if (state.consent) tags.push("同意專人聯繫");
+    function computeSelectedPointId() {
+      if (!state.points.length) generatePoints();
+      let best = state.points[0];
+      let bestScore = -1;
+      state.points.forEach(point => {
+        const score = state.scores[point.id] || { left: 0, right: 0 };
+        const total = Math.max(score.left, score.right) + Math.abs(score.left - score.right) * .5;
+        if (total > bestScore) {
+          best = point;
+          bestScore = total;
         }
-      } else {
-        tags.push("尚未比對");
-      }
-      return [...new Set(tags)];
+      });
+      return best.id;
     }
 
-    function tagClass(tag) {
-      if (tag.includes("開放") || tag.includes("14")) return "green";
-      if (tag.includes("未開放") || tag.includes("需求")) return "warn";
-      if (tag.includes("安全") || tag.includes("不提供") || tag.includes("紅旗")) return "danger";
-      if (tag.includes("程度") || tag.includes("偏好") || tag.includes("肩")) return "coral";
-      return "teal";
+    function selectedPoint() {
+      if (!state.points.length) generatePoints();
+      const id = state.selectedPointId || computeSelectedPointId();
+      return state.points.find(point => point.id === id) || state.points[0];
     }
 
     function toggleTimer() {
@@ -2310,11 +2250,11 @@
         return;
       }
       state.timerRunning = true;
-      timerId = setInterval(() => {
+      timer = setInterval(() => {
         state.timerLeft = Math.max(0, state.timerLeft - 1);
         const ring = document.getElementById("timerRing");
         const text = document.getElementById("timerText");
-        if (ring) ring.style.setProperty("--timer", `${Math.round(((90 - state.timerLeft) / 90) * 100)}%`);
+        if (ring) ring.style.setProperty("--timer", `${Math.round(((60 - state.timerLeft) / 60) * 100)}%`);
         if (text) text.textContent = formatTime(state.timerLeft);
         if (state.timerLeft === 0) stopTimer(true);
       }, 1000);
@@ -2323,15 +2263,155 @@
 
     function stopTimer(shouldRender) {
       state.timerRunning = false;
-      if (timerId) clearInterval(timerId);
-      timerId = null;
+      if (timer) clearInterval(timer);
+      timer = null;
       if (shouldRender) render();
     }
 
+    function renderInsights() {
+      document.getElementById("topStatus").textContent = state.redFlags.length ? "安全承接模式" : state.step >= 4 ? "前後測回填中" : "可操作測試版";
+      document.getElementById("miniRisk").textContent = state.redFlags.length ? "高" : state.topic === "headache" ? "中" : "低";
+      document.getElementById("miniResult").textContent = state.step < 4 ? "待測" : isEffective() ? "有變化" : "待承接";
+      const decision = document.getElementById("decisionBox");
+      decision.innerHTML = `<strong>${decisionTitle()}</strong><p>${decisionCopy()}</p>`;
+      decision.style.borderColor = state.redFlags.length ? "#f0b4ae" : isEffective() && state.step >= 4 ? "#b9ddcb" : "var(--line)";
+      decision.style.background = state.redFlags.length ? "#fff6f5" : isEffective() && state.step >= 4 ? "#f0faf4" : "#f8fbfa";
+      document.getElementById("summaryList").innerHTML = `
+        <li><b>測試方式</b><span>${state.helper === "family" ? "家人協助" : "自己測試"}</span></li>
+        <li><b>主題</b><span>${state.topic === "headache" ? `頭痛：${state.headachePlace}` : `肩頸：${state.symptomPlace}`}</span></li>
+        <li><b>前後差異</b><span>${resultSentence()}</span></li>
+      `;
+      document.getElementById("tagCloud").innerHTML = tags().map(tag => `<span class="tag ${tagClass(tag)}">${escapeHtml(tag)}</span>`).join("");
+    }
+
+    function decisionTitle() {
+      if (state.redFlags.length) return "不進入居家測試";
+      if (state.step < 2) return "建立前測基準";
+      if (state.step < 4) return "左右比較中";
+      if (isEffective()) return "可保存為有效紀錄";
+      return "需要專人協助整理";
+    }
+
+    function decisionCopy() {
+      if (state.redFlags.length) return "已勾選安全排除條件，系統停止產生測試位置。";
+      if (state.step < 2) return "先記錄左右轉動角度與不適位置，後面才能比較前後差異。";
+      if (state.step < 4) return "透過三個示意位置的左右痛感比較，找出本次主要按壓位置。";
+      if (isEffective()) return "活動度或不適感已有變化，可留下紀錄供後續對照。";
+      return "本次差異不明顯，不建議硬推同一位置，應改由專人判斷。";
+    }
+
+    function tags() {
+      const list = ["舊客回流", state.relation, state.helper === "family" ? "家人協助" : "自己測試", state.topic === "headache" ? "頭痛流程" : "肩頸活動度"];
+      if (state.redFlags.length) list.push("安全排除", "不提供點位");
+      if (state.points.length) list.push("三點比較", selectedPoint().id);
+      if (state.step >= 4) list.push(isEffective() ? "有感紀錄" : "無明顯變化");
+      if (state.topic === "headache" && state.savedHeadachePoint) list.push("已保存頭痛位置");
+      if (state.consent) list.push("同意專人聯繫");
+      return [...new Set(list)];
+    }
+
+    function tagClass(tag) {
+      if (tag.includes("安全") || tag.includes("不提供")) return "danger";
+      if (tag.includes("頭痛") || tag.includes("保存")) return "warn";
+      if (tag.includes("有感") || tag.includes("同意")) return "green";
+      if (tag.includes("H") || tag.includes("B") || tag.includes("F") || tag.includes("N")) return "coral";
+      return "teal";
+    }
+
+    function isEffective() {
+      if (state.topic === "headache") return state.symptomRelief >= 5 || state.painAfter <= 3;
+      return rightGain() >= 10 || leftGain() >= 10 || state.symptomRelief >= 5;
+    }
+
+    function rightGain() {
+      return Math.max(0, state.afterRightAngle - state.beforeRightAngle);
+    }
+
+    function leftGain() {
+      return Math.max(0, state.afterLeftAngle - state.beforeLeftAngle);
+    }
+
+    function resultSentence() {
+      if (state.redFlags.length) return "未進入測試";
+      if (state.step < 4) return "待後測回填";
+      if (state.topic === "headache") return `頭痛下降感 ${state.symptomRelief}/10，按壓後疼痛 ${state.painAfter}/10`;
+      return `右轉 +${rightGain()} 度，左轉 +${leftGain()} 度，原本不適下降感 ${state.symptomRelief}/10`;
+    }
+
+    function nextStepSentence() {
+      if (state.topic === "headache" && isEffective()) return "保存本次頭痛示意位置；下次頭痛時可回來查看，並留下資料供後續對照。";
+      if (isEffective()) return "留下前後測紀錄，後續對照門診資料，安排 14 天觀察或健康管理師承接。";
+      return "先不保存為固定位置，建議由健康管理師協助整理原因與下一步。";
+    }
+
+    function redFlagOptions() {
+      if (state.topic === "headache") return ["突然劇烈頭痛", "單側無力、麻木或說話不清", "發燒合併脖子僵硬", "頭部外傷後頭痛", "胸痛或冒冷汗", "視力異常或意識混亂"];
+      return ["外傷後疼痛", "手腳無力或麻木", "胸痛或冒冷汗", "發燒或感染疑慮", "突然劇烈疼痛", "孕期或重大疾病特殊狀態"];
+    }
+
+    function range(key, label, value, min, max, unit) {
+      return `
+        <div class="range-row">
+          <span class="label">${label}</span>
+          <input type="range" min="${min}" max="${max}" step="1" value="${value}" data-range="${key}" data-unit="${unit}">
+          <output class="value" data-output="${key}">${value}${unit}</output>
+        </div>
+      `;
+    }
+
+    function scoreRange(pointId, side, label, value) {
+      return `
+        <div class="field">
+          <label>${label}</label>
+          <div class="range-row" style="grid-template-columns:minmax(0, 1fr) 48px">
+            <input type="range" min="0" max="10" step="1" value="${value}" data-score="${pointId}:${side}">
+            <output class="value" style="height:38px;font-size:16px">${value}</output>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderNeckMap() {
+      return `
+        <div class="neck-map" aria-label="肩頸活動度示意圖">
+          <span class="spine"></span>
+          <span class="map-dot neck-l">L</span>
+          <span class="map-dot neck-r">R</span>
+          <span class="map-dot shoulder-l">S</span>
+          <span class="map-dot shoulder-r">S</span>
+          <span class="map-dot hand-dot">H</span>
+        </div>
+      `;
+    }
+
+    function renderBodyMap() {
+      return `
+        <div class="body-map" aria-label="背部家人協助示意圖">
+          <span class="spine"></span>
+          <span class="map-dot back-l">B</span>
+          <span class="map-dot back-r">B</span>
+          <span class="map-dot front">F</span>
+          <span class="map-dot hand-dot">H</span>
+        </div>
+      `;
+    }
+
+    function renderHeadMap() {
+      return `
+        <div class="head-map" aria-label="頭痛位置示意圖">
+          <span class="map-dot forehead">前</span>
+          <span class="map-dot temple-l">太</span>
+          <span class="map-dot temple-r">太</span>
+          <span class="map-dot occipital">後</span>
+          <span class="map-dot hand-dot">H</span>
+        </div>
+      `;
+    }
+
     function formatTime(seconds) {
-      const m = String(Math.floor(seconds / 60)).padStart(2, "0");
-      const s = String(seconds % 60).padStart(2, "0");
-      return `${m}:${s}`;
+      const minutes = Math.floor(seconds / 60);
+      const remain = seconds % 60;
+      return `${String(minutes).padStart(2, "0")}:${String(remain).padStart(2, "0")}`;
     }
 
     function escapeHtml(value) {
@@ -2346,21 +2426,35 @@
     document.getElementById("resetBtn").addEventListener("click", () => {
       Object.assign(state, {
         step: 0,
-        relation: examples.rightScapula.relation,
-        area: examples.rightScapula.area,
-        duration: examples.rightScapula.duration,
-        severity: examples.rightScapula.severity,
-        statement: examples.rightScapula.statement,
-        flags: [],
-        result: null,
-        feedback: "明顯比較輕鬆",
-        consent: true,
-        contact: "LINE",
+        helper: "self",
+        topic: "neck",
+        headachePlace: "太陽穴",
+        symptomPlace: "右側肩頸",
+        beforeRightAngle: 75,
+        beforeLeftAngle: 60,
+        beforeRightFeel: "右轉到底時，左側脖子與肩膀會緊。",
+        beforeLeftFeel: "左轉到底時，左側肩頸痠，轉動幅度比較小。",
+        redFlags: [],
+        points: [],
+        scores: {},
+        selectedPointId: null,
+        timerLeft: 60,
         timerRunning: false,
-        timerLeft: 90
+        afterRightAngle: 90,
+        afterLeftAngle: 82,
+        symptomRelief: 6,
+        painAfter: 3,
+        consent: true,
+        contact: "LINE"
       });
       stopTimer(false);
       render();
+    });
+
+    document.getElementById("recallTopBtn").addEventListener("click", () => {
+      state.step = 5;
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
     render();
