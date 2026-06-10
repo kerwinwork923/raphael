@@ -78,7 +78,14 @@ export const SEMINAR_EVENTS: SeminarEvent[] = [
       {
         area: "台北",
         location: "台北新光摩天大樓 30樓之1",
-        eventDate: "",
+        eventDate: "20260611",
+        displayDate: "2026 / 06 / 11（四）",
+        time: "10:00",
+      },
+      {
+        area: "台北",
+        location: "台北新光摩天大樓 30樓之1",
+        eventDate: "20260626",
         displayDate: "2026 / 06 / 26（五）",
         time: "10:00",
       },
