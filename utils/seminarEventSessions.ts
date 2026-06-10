@@ -78,8 +78,8 @@ export const SEMINAR_EVENTS: SeminarEvent[] = [
       {
         area: "台北",
         location: "台北新光摩天大樓 30樓之1",
-        eventDate: "20260611",
-        displayDate: "2026 / 06 / 11（四）",
+        eventDate: "",
+        displayDate: "2026 / 06 / 26（五）",
         time: "10:00",
       },
       {
@@ -87,7 +87,7 @@ export const SEMINAR_EVENTS: SeminarEvent[] = [
         location: "拉菲爾人本診所(新竹) 新竹市林森路196號2樓",
         eventDate: "20260617",
         displayDate: "2026 / 06 / 17（三）",
-        time: "10:30",
+        time: "9:30",
       },
       {
         area: "台中",
@@ -99,11 +99,11 @@ export const SEMINAR_EVENTS: SeminarEvent[] = [
       },
       {
         area: "高雄",
-        location: "活動資訊即將公布",
+        location: "拉菲爾人本診所(高雄)",
         status: "active",
-        eventDate: "",
-        displayDate: "日期待定",
-        time: "時間待定",
+        eventDate: "20260703",
+        displayDate: "2026 / 07 / 03（五）",
+        time: "10:00",
       },
     ],
   },
@@ -172,4 +172,4 @@ export function sessionSelectLabel(card: SeminarEventCard): string {
 }
 
 export const DEFAULT_QRCODE_SESSION_CARD_ID =
-  "20260528-vipl2-台北-20260611";
+  "20260528-vipl2-台北-20260626";
