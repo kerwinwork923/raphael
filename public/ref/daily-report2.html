@@ -1,0 +1,3073 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>工作日報 — ProjectOS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script>
+  tailwind.config = {
+    theme: { extend: { colors: { brand: { 50:'#f0f7ff',100:'#e0efff',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8' } } } }
+  }
+</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+*{font-family:'Inter',sans-serif}
+.rpt-tab{padding:10px 20px;font-size:14px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:#64748b;transition:.15s;white-space:nowrap}
+.rpt-tab.active{color:#2563eb;border-bottom-color:#2563eb;font-weight:700}
+.rpt-tab:hover{color:#1d4ed8;background:#f0f7ff}
+.item-table{width:100%;border-collapse:collapse;margin-top:6px}
+.item-table th{background:#f8fafc;padding:7px 8px;text-align:left;font-size:11px;color:#64748b;border:1px solid #e2e8f0;font-weight:700}
+.item-table td{padding:5px 6px;border:1px solid #e2e8f0;vertical-align:middle}
+.item-table tr:hover td{background:#f8fafc}
+.item-table input,.item-table select,.item-table textarea{border:1px solid #cbd5e1;border-radius:4px;padding:4px 7px;font-size:12px;width:100%;background:#fff;font-family:inherit}
+.item-table input:focus,.item-table select:focus,.item-table textarea:focus{outline:none;border-color:#3b82f6}
+.item-table textarea{resize:vertical;min-height:44px;box-sizing:border-box;max-width:100%;width:100%}
+.add-row-btn{margin-top:6px;padding:5px 12px;background:#f1f5f9;border:1px dashed #94a3b8;border-radius:6px;font-size:12px;color:#64748b;cursor:pointer;transition:.15s}
+.add-row-btn:hover{background:#e2e8f0}
+.del-btn{background:none;border:none;color:#ef4444;cursor:pointer;font-size:15px;padding:2px 5px;border-radius:3px}
+.del-btn:hover{background:#fee2e2}
+.proj-tag{display:inline-block;padding:1px 7px;border-radius:4px;background:#ede9fe;color:#5b21b6;font-size:10px;font-weight:700;margin-left:4px;vertical-align:middle;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-chart{display:flex;flex-direction:column;gap:6px}
+.bar-row{display:flex;align-items:center;gap:8px;font-size:12px}
+.bar-label{width:140px;text-align:right;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px}
+.bar-outer{flex:1;background:#f1f5f9;border-radius:4px;height:16px;overflow:hidden}
+.bar-inner{height:100%;border-radius:4px;background:#3b82f6;transition:width .5s ease}
+.bar-inner.over{background:#ef4444}
+.bar-val{width:60px;font-size:11px;color:#64748b}
+.contrib-table{width:100%;border-collapse:collapse;font-size:12px}
+.contrib-table th{background:#f8fafc;padding:6px 8px;text-align:left;font-weight:700;color:#475569;border-bottom:1px solid #e2e8f0;font-size:11px}
+.contrib-table td{padding:5px 8px;border-bottom:1px solid #f1f5f9;color:#334155}
+.contrib-table tr:hover td{background:#f8fafc}
+.hours-bar{background:#f1f5f9;border-radius:6px;height:8px;overflow:hidden;margin-top:4px}
+.hours-bar-fill{height:100%;border-radius:6px;background:#3b82f6;transition:width .4s}
+.hours-bar-fill.warn{background:#f59e0b}
+.hours-bar-fill.danger{background:#ef4444}
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:999;animation:toastIn .3s ease;box-shadow:0 4px 20px rgba(0,0,0,.15)}
+@keyframes toastIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.ll-card{background:#fff;border-radius:10px;border:1px solid #e2e8f0;padding:16px 20px;margin-bottom:12px}
+.ll-badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700}
+.ll-warn{background:#fef3c7;color:#b45309}
+.ll-ok{background:#dcfce7;color:#15803d}
+.ll-danger{background:#fee2e2;color:#dc2626}
+.nodata{text-align:center;color:#94a3b8;padding:32px 0;font-size:13px}
+select.proj-select{font-size:11px!important}
+.wr-table{width:100%;border-collapse:collapse;font-family:'Microsoft JhengHei','微軟正黑體',Arial,sans-serif}
+.wr-table td{border:1px solid #999;padding:8px 10px;vertical-align:middle;font-size:13px;word-break:break-all}
+.wr-title{background:#1f1f1f;color:#fff;text-align:center;font-size:16px;font-weight:700;padding:14px;letter-spacing:1px}
+.wr-section{background:#d9d9d9;text-align:center;font-weight:700;font-size:14px;padding:10px}
+.wr-col-header{background:#d9d9d9;text-align:center;font-weight:700;font-size:13px;padding:8px}
+.wr-cat{text-align:center;font-weight:700;font-size:13px;background:#f9f9f9}
+.wr-content{font-size:13px;line-height:1.6}
+.wr-spinner{display:inline-block;width:16px;height:16px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ─── Ops Mode (smart-medical / customer-service) ─── */
+.ops-shift-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.shift-btn{padding:7px 14px;border:1.5px solid #e2e8f0;border-radius:8px;cursor:pointer;background:#fff;transition:all .14s;font-size:13px;font-weight:600;color:#475569;font-family:inherit}
+.shift-btn:hover{border-color:#93c5fd;color:#1d4ed8}
+.shift-btn.sel{border-color:#2563eb;background:#eff6ff;color:#1d4ed8}
+.ops-hours-wrap{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;margin-bottom:14px}
+.ops-hours-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.ops-hours-label{font-size:11px;color:#64748b;font-weight:700;min-width:80px;text-transform:uppercase;letter-spacing:.04em}
+.ops-hours-input{width:80px;padding:6px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:15px;font-weight:700;text-align:center;color:#1e293b;font-family:monospace;background:#fff}
+.ops-hours-input:focus{border-color:#3b82f6;outline:none;box-shadow:0 0 0 2px rgba(59,130,246,.15)}
+.ops-total-box{display:flex;align-items:center;gap:6px;background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:8px 14px}
+.ops-total-val{font-size:22px;font-weight:800;color:#1d4ed8;font-family:monospace;line-height:1}
+.ops-total-lbl{font-size:11px;color:#3b82f6;font-weight:600}
+.ops-overtime-row{display:flex;align-items:center;gap:8px}
+.ops-overtime-toggle{display:flex;align-items:center;gap:5px;font-size:12px;color:#64748b;cursor:pointer}
+.ops-overtime-toggle input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:#2563eb}
+.ops-task-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:7px;margin-bottom:12px}
+.ops-tc{padding:10px 12px 9px;border:1px solid #e2e8f0;border-radius:10px;cursor:pointer;background:#fff;transition:all .14s;display:flex;flex-direction:column;gap:3px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.ops-tc:hover{border-color:#93c5fd;box-shadow:0 2px 8px rgba(0,0,0,.07);transform:translateY(-1px)}
+.ops-tc.sel{border-color:#2563eb;background:#eff6ff;box-shadow:0 0 0 2px rgba(37,99,235,.14)}
+.ops-tc-let{font-size:9px;font-weight:700;color:#94a3b8;letter-spacing:.04em;font-family:monospace}
+.ops-tc.sel .ops-tc-let{color:#2563eb}
+.ops-tc-name{font-size:11px;font-weight:700;color:#1e293b;line-height:1.35}
+.ops-tc.sel .ops-tc-name{color:#1d4ed8}
+.ops-tc-sub{font-size:10px;color:#94a3b8;line-height:1.4}
+.ops-detail-block{border:1px solid #e2e8f0;border-radius:10px;background:#fff;margin-bottom:10px;overflow:hidden}
+.ops-detail-hdr{padding:10px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:7px}
+.ops-detail-hdr .ops-dh-ico{font-size:14px;color:#3b82f6}
+.ops-detail-hdr span{font-size:12px;font-weight:700;color:#1e293b}
+.ops-detail-body{padding:12px 14px}
+.ops-num-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:6px;margin-bottom:10px}
+.ops-nf label{font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#64748b;display:block;margin-bottom:3px}
+.ops-ni{text-align:center;font-size:15px;font-weight:600;padding:6px 8px;border:1px solid #cbd5e1;border-radius:6px;width:100%;background:#f8fafc;font-family:monospace}
+.ops-ni:focus{border-color:#3b82f6;outline:none;background:#fff}
+.ops-qs-area{background:#fffdf0;border:1px dashed #fbbf24;border-radius:6px;padding:9px 12px;margin-bottom:8px}
+.ops-qs-title{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#b45309;margin-bottom:6px}
+.ops-qs-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px}
+.ops-qc{padding:3px 10px;font-size:11px;border:1px solid #e2e8f0;border-radius:12px;cursor:pointer;background:#fff;color:#64748b;transition:all .12s;user-select:none}
+.ops-qc.sel{background:#fee2e2;border-color:#ef4444;color:#dc2626}
+.ops-status-chips{display:flex;flex-wrap:wrap;gap:5px}
+.ops-st{padding:4px 12px;font-size:11px;font-weight:500;border:1px solid #e2e8f0;border-radius:20px;cursor:pointer;background:#fff;color:#64748b;transition:all .12s;font-family:inherit}
+.ops-st.s-done{background:#dcfce7;border-color:#16a34a;color:#15803d}
+.ops-st.s-ongoing{background:#eff6ff;border-color:#3b82f6;color:#1d4ed8}
+.ops-st.s-tmr{background:#fefce8;border-color:#ca8a04;color:#854d0e}
+.ops-st.s-mgr{background:#fee2e2;border-color:#ef4444;color:#dc2626}
+.ops-feeling-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+.ops-feel-btn{padding:9px 10px;border:1.5px solid #e2e8f0;border-radius:8px;cursor:pointer;background:#fff;transition:all .14s;text-align:left;display:flex;align-items:center;gap:7px;font-family:inherit}
+.ops-feel-btn:hover{border-color:#cbd5e1;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.ops-feel-btn.sel-stable{border-color:#16a34a;background:#dcfce7}
+.ops-feel-btn.sel-busy{border-color:#3b82f6;background:#eff6ff}
+.ops-feel-btn.sel-stress{border-color:#f59e0b;background:#fefce8}
+.ops-feel-btn.sel-overload{border-color:#ef4444;background:#fee2e2}
+.ops-combo-sel{width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 14px;font-size:14px;color:#374151;background:#fff;cursor:pointer;transition:.15s;font-family:inherit}
+.ops-combo-sel:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.08)}
+.ops-combo-sel.has-val{border-color:#10b981;background:#f0fdf4;color:#065f46}
+
+/* ─── SM Ops Intelligence Dashboard ─── */
+.sm-kpi-box{background:rgba(255,255,255,.12);border-radius:10px;padding:14px}
+.sm-kpi-val{font-size:24px;font-weight:800;line-height:1.1;margin-bottom:2px;font-family:monospace}
+.sm-kpi-lbl{font-size:11px;opacity:.78;margin-top:3px}
+.sm-mgr-item{border-radius:8px;padding:10px 12px;font-size:12px;margin-bottom:6px;line-height:1.5;display:flex;align-items:flex-start;gap:8px}
+.sm-mgr-item.high{background:#fff1f2;border-left:3px solid #f87171}
+.sm-mgr-item.warn{background:#fffbeb;border-left:3px solid #fbbf24}
+.sm-mgr-item.info{background:#eff6ff;border-left:3px solid #60a5fa}
+.sm-suggest-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9}
+.sm-suggest-row:last-child{border-bottom:none;padding-bottom:0}
+
+.ops-feel-icon{font-size:16px;width:22px;text-align:center}
+.ops-feel-label{font-size:12px;font-weight:600;color:#1e293b}
+.ops-feel-sub{font-size:10px;color:#94a3b8}
+</style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+<!-- NAV -->
+<nav class="bg-white border-b border-slate-200 sticky top-0 z-40">
+  <div class="max-w-screen-xl mx-auto px-4 flex items-center h-14 gap-4">
+    <a href="dashboard2.html" class="flex items-center gap-2 font-bold text-blue-600 text-lg tracking-tight hover:opacity-80">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
+      </svg>
+      ProjectOS
+    </a>
+    <span class="text-xs text-slate-300 font-light">AI Decision OS</span>
+    <div class="flex-1"></div>
+    <a href="dashboard2.html" class="text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition">Dashboard</a>
+    <a href="create-project.html" class="text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition">建立新專案</a>
+    <a href="task-tracking.html" class="text-sm text-slate-600 px-2 py-1 rounded-md hover:bg-slate-100 transition">Task 追蹤</a>
+    <a href="daily-report.html" class="text-sm text-blue-600 font-semibold px-2 py-1 rounded-md bg-blue-50">工作日報</a>
+    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold" id="nav-chip">日</div>
+  </div>
+</nav>
+
+<!-- TABS -->
+<div class="bg-white border-b border-slate-200">
+  <div class="max-w-screen-xl mx-auto px-4 flex gap-0">
+    <button class="rpt-tab active" onclick="switchPage(0)">📝 我的日報</button>
+    <button class="rpt-tab" onclick="switchPage(1)">📊 工作貢獻 Dashboard</button>
+    <button class="rpt-tab" onclick="switchPage(2)">🔍 Lesson Learned</button>
+    <button class="rpt-tab" onclick="switchPage(3)">📋 週報產生器</button>
+  </div>
+</div>
+
+<div class="max-w-screen-xl mx-auto px-4 py-5">
+
+<!-- ===== PAGE 0: 我的日報 ===== -->
+<div class="page-content" id="page-0">
+
+  <!-- 日報表單 -->
+  <div id="report-section">
+    <!-- user bar -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm px-5 py-3 mb-4 flex items-center gap-3 flex-wrap">
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-semibold text-slate-500">🏢 部門</span>
+        <select id="f-dept" onchange="onDeptChange(this.value)" class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-100 bg-white cursor-pointer">
+          <option value="">— 請選擇部門 —</option>
+        </select>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-semibold text-slate-500">👤 員工</span>
+        <select id="f-member" onchange="onMemberChange(this.value)" class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-100 bg-white cursor-pointer" disabled>
+          <option value="">— 請先選擇部門 —</option>
+        </select>
+      </div>
+      <div class="flex-1"></div>
+      <!-- 工時合計提示 -->
+      <div class="flex items-center gap-2 text-xs">
+        <span class="text-slate-500">今日工時：</span>
+        <span class="font-bold text-slate-700" id="hours-total-display">0.0 h</span>
+        <div class="w-28 hours-bar"><div class="hours-bar-fill" id="hours-bar-fill" style="width:0%"></div></div>
+        <span class="text-slate-400" id="hours-hint"></span>
+      </div>
+    </div>
+
+    <!-- 表單卡 -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm mb-5">
+      <div class="px-5 py-3 border-b border-slate-100 flex items-center gap-3">
+        <span class="font-semibold text-slate-700 text-sm">今日工作日報填寫</span>
+        <span class="text-xs text-slate-400" id="f-date-display"></span>
+        <div class="flex-1"></div>
+        <input type="date" id="f-date" class="text-xs border border-slate-200 rounded-md px-2 py-1 text-slate-600">
+      </div>
+      <div class="p-5">
+        <!-- 9 dept panes -->
+        <div id="dept-pane"><div class="text-center text-slate-400 py-8 text-sm">請先選擇部門，即可開始填寫日報</div></div>
+        <!-- 異常說明 -->
+        <div class="mt-4">
+          <label class="block text-xs font-semibold text-slate-500 mb-1">今日異常 / 問題說明（選填）</label>
+          <textarea id="f-note" rows="2" placeholder="如有異常或待協助事項，請說明" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-100 resize-none"></textarea>
+        </div>
+        <!-- 資料品質提示 -->
+        <div id="quality-hint" class="mt-3 hidden"></div>
+        <!-- 按鈕 -->
+        <div class="mt-4 flex gap-3 flex-wrap items-center">
+          <button onclick="onSubmitBtn()" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition shadow-sm">🚀 送出日報</button>
+          <button onclick="resetForm()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm rounded-lg transition">清除重填</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 歷史日報 -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm">
+      <div class="px-5 py-3 border-b border-slate-100 flex items-center gap-3 flex-wrap">
+        <span class="font-semibold text-slate-700 text-sm">我的歷史日報</span>
+        <div class="flex-1"></div>
+        <span class="text-xs text-slate-400">日期區間</span>
+        <input type="date" id="d-from" class="text-xs border border-slate-200 rounded px-2 py-1">
+        <span class="text-xs text-slate-400">至</span>
+        <input type="date" id="d-to" class="text-xs border border-slate-200 rounded px-2 py-1">
+        <button onclick="renderHistory()" class="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-md hover:bg-blue-100">篩選</button>
+        <button onclick="clearFilter()" class="text-xs text-slate-400 hover:text-slate-600 px-2 py-1">清除</button>
+      </div>
+      <div class="px-5 py-2">
+        <span class="text-xs text-slate-400" id="hist-count"></span>
+      </div>
+      <div id="hist-body" class="px-5 pb-5 space-y-3"></div>
+    </div>
+
+    <!-- 個人週報 -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm mt-5">
+      <div class="px-5 py-3 border-b border-slate-100 flex items-center gap-3 flex-wrap">
+        <span class="font-semibold text-slate-700 text-sm">📋 個人週報產生器</span>
+        <span class="text-xs text-slate-400 font-normal">快速產生本週個人工作摘要</span>
+        <div class="flex-1"></div>
+        <span class="text-xs text-slate-400">起</span>
+        <input type="date" id="pwr-from" class="text-xs border border-slate-200 rounded px-2 py-1">
+        <span class="text-xs text-slate-400">至</span>
+        <input type="date" id="pwr-to" class="text-xs border border-slate-200 rounded px-2 py-1">
+        <button onclick="generatePersonalWR()" class="text-xs bg-teal-600 hover:bg-teal-700 text-white px-3 py-1.5 rounded-md font-semibold transition">產生週報</button>
+      </div>
+      <div id="pwr-body" class="hidden"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE 1: DASHBOARD ===== -->
+<div class="page-content hidden" id="page-1">
+  <div class="flex items-center gap-3 mb-5 flex-wrap">
+    <h2 class="text-lg font-bold text-slate-800">工作貢獻 Dashboard</h2>
+    <div class="flex-1"></div>
+    <span class="text-xs text-slate-400">日期區間</span>
+    <input type="date" id="db-from" class="text-xs border border-slate-200 rounded px-2 py-1">
+    <span class="text-xs text-slate-400">至</span>
+    <input type="date" id="db-to" class="text-xs border border-slate-200 rounded px-2 py-1">
+    <button onclick="renderDashboard()" class="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700">更新</button>
+  </div>
+  <div id="db-stat-row" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-5"></div>
+
+  <!-- 工作模式分布 -->
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-5">
+    <div class="font-semibold text-slate-700 text-sm mb-1">工作模式工時分布</div>
+    <div class="text-xs text-slate-400 mb-3">交班模式（智醫/客服）、標準專案工時、庶務工時三類分開統計</div>
+    <div id="chart-mode-breakdown"></div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+      <div class="font-semibold text-slate-700 text-sm mb-3">部門工作貢獻（工時）</div>
+      <div class="bar-chart" id="chart-dept"></div>
+    </div>
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+      <div class="font-semibold text-slate-700 text-sm mb-3">個人貢獻排行</div>
+      <table class="contrib-table" id="table-person"></table>
+    </div>
+  </div>
+
+  <!-- 交班模式分析（smart-medical/customer-service 專屬） -->
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-5" id="ops-analytics-card">
+    <div class="font-semibold text-slate-700 text-sm mb-1">⚕️ 交班模式分析</div>
+    <div class="text-xs text-slate-400 mb-3">智慧醫療業務部 & 客服部 ｜ 班別分布、任務包執行頻率、班別感受</div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5" id="ops-analytics-inner"></div>
+  </div>
+
+  <!-- 智醫業務部・智能營運儀表板 -->
+  <div id="sm-ops-dashboard" class="hidden mb-5">
+    <div id="sm-ops-header" class="rounded-xl p-5 mb-5" style="background:linear-gradient(135deg,#1a3a5c 0%,#1e4d8c 60%,#1a3a5c 100%)">
+      <div class="flex items-start justify-between mb-4 flex-wrap gap-2">
+        <div>
+          <div class="font-bold text-white text-base mb-0.5">智慧醫療業務部 ・ 今日營運摘要</div>
+          <div id="sm-ops-date" class="text-xs" style="color:rgba(191,219,254,.85)"></div>
+        </div>
+        <span class="text-xs px-3 py-1 rounded-full" style="background:rgba(255,255,255,.15);color:rgba(255,255,255,.9)">AI 生成・每日自動更新</span>
+      </div>
+      <div id="sm-ops-kpis" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5" id="sm-signal-card"></div>
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5" id="sm-mgr-card"></div>
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5" id="sm-heatmap-card"></div>
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5" id="sm-collab-card"></div>
+    </div>
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-5" id="sm-ai-card"></div>
+  </div>
+
+  <!-- 專案投入分析（標準模式限定） -->
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-5" id="project-analysis-card">
+    <div class="font-semibold text-slate-700 text-sm mb-1">專案投入工時分析（預估 vs 實際）</div>
+    <div class="text-xs text-slate-400 mb-3">僅計算標準填寫模式中有對應專案的工時（不含交班模式與庶務）</div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div class="bar-chart" id="chart-projects"></div>
+      <table class="contrib-table" id="table-projects"></table>
+    </div>
+  </div>
+
+  <!-- 工作類別 / 任務包分布 -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+      <div class="font-semibold text-slate-700 text-sm mb-3">標準模式・工作類別工時</div>
+      <div class="bar-chart" id="chart-category"></div>
+    </div>
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+      <div class="font-semibold text-slate-700 text-sm mb-3">交班模式・任務包執行次數</div>
+      <div class="bar-chart" id="chart-task-pkg"></div>
+    </div>
+  </div>
+
+  <!-- 日報明細 -->
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+    <div class="font-semibold text-slate-700 text-sm mb-3">日報明細</div>
+    <div id="detail-table-wrap" class="overflow-x-auto"></div>
+  </div>
+</div>
+
+<!-- ===== PAGE 2: LESSON LEARNED ===== -->
+<div class="page-content hidden" id="page-2">
+  <div class="flex items-center gap-3 mb-5">
+    <h2 class="text-lg font-bold text-slate-800">🔍 Lesson Learned 分析</h2>
+    <div class="flex-1"></div>
+    <button onclick="renderLessonLearned()" class="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700">重新分析</button>
+  </div>
+  <div id="ll-body"></div>
+</div>
+
+<!-- ===== PAGE 3: 週報產生器 ===== -->
+<div class="page-content hidden" id="page-3">
+  <!-- Settings -->
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-5">
+    <div class="font-bold text-slate-800 text-base mb-1">📋 AI 部門週報產生器</div>
+    <div class="text-xs text-slate-400 mb-4">依日報資料自動彙整，支援 Claude AI 智能撰寫週報敘述</div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 mb-1">週報起始日</label>
+        <input type="date" id="wr-from" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 mb-1">週報結束日</label>
+        <input type="date" id="wr-to" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 mb-1">部門</label>
+        <select id="wr-dept" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100">
+          <option value="all">全部門</option>
+          <option value="smart-medical">智慧醫療業務部</option>
+          <option value="customer-service">客服暨會員關係部</option>
+          <option value="management">管理部</option>
+          <option value="digital">數位轉型部</option>
+          <option value="rd">研發部</option>
+          <option value="production">生產部</option>
+          <option value="medical-ops">醫療營運部</option>
+          <option value="innovation-rd">創新研發處</option>
+          <option value="biz-dev">業務發展處</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-500 mb-1">填報主管姓名</label>
+        <input type="text" id="wr-reporter" placeholder="例：陳威穎" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100">
+      </div>
+    </div>
+
+    <!-- API Key Panel -->
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100 p-4 mb-4">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-blue-600 font-semibold text-sm">🤖 Claude AI 智能撰寫</span>
+        <span class="text-xs text-slate-400 bg-white px-2 py-0.5 rounded-full border border-slate-200">選填</span>
+      </div>
+      <div class="text-xs text-slate-500 mb-3">填入 Claude API Key 後，AI 會根據日報資料自動撰寫週報敘述，大幅提升報告品質</div>
+      <div class="flex gap-2">
+        <input type="password" id="wr-api-key" placeholder="sk-ant-api03-..."
+          class="flex-1 border border-blue-200 rounded-lg px-3 py-2 text-sm font-mono bg-white focus:outline-none focus:ring-2 focus:ring-blue-200">
+        <button onclick="saveApiKey()" class="px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition whitespace-nowrap">
+          💾 儲存 Key
+        </button>
+        <button onclick="clearApiKey()" class="px-3 py-2 bg-slate-100 text-slate-600 text-xs rounded-lg hover:bg-slate-200 transition">
+          清除
+        </button>
+      </div>
+      <div class="text-xs text-blue-400 mt-1.5">🔒 API Key 僅儲存於本機 localStorage，不會傳送至任何第三方伺服器</div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex gap-3 flex-wrap">
+      <button onclick="generateWeeklyReport(false)" id="btn-quick-gen"
+        class="px-6 py-2.5 bg-slate-700 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition shadow-sm">
+        ⚡ 快速產生（模板）
+      </button>
+      <button onclick="generateWeeklyReport(true)" id="btn-ai-gen"
+        class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-lg transition shadow-sm">
+        🤖 AI 智能產生
+      </button>
+    </div>
+  </div>
+
+  <!-- Preview area -->
+  <div id="wr-preview" class="hidden">
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm px-5 py-3 mb-4 flex items-center gap-3 flex-wrap">
+      <span class="font-semibold text-slate-700 text-sm" id="wr-preview-title">週報預覽</span>
+      <div class="flex-1"></div>
+      <button onclick="downloadWRExcel()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition">
+        📥 下載 Excel
+      </button>
+      <button onclick="copyWRText()" class="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg transition">
+        📋 複製文字
+      </button>
+      <button onclick="document.getElementById('wr-preview').classList.add('hidden')"
+        class="px-3 py-2 bg-slate-100 text-slate-500 text-xs rounded-lg hover:bg-slate-200 transition">
+        ✕ 關閉
+      </button>
+    </div>
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 overflow-x-auto">
+      <div id="wr-table"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- Edit Modal -->
+<div id="edit-modal" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 bg-black/40" onclick="closeEdit()"></div>
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-slate-800">編輯日報</h3>
+      <button onclick="closeEdit()" class="text-slate-400 hover:text-slate-700 text-xl">&times;</button>
+    </div>
+    <div id="edit-body"></div>
+    <div class="flex gap-3 mt-4">
+      <button onclick="saveEdit()" class="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700">儲存</button>
+      <button onclick="closeEdit()" class="px-4 py-2 bg-slate-100 text-slate-600 text-sm rounded-lg hover:bg-slate-200">取消</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────
+const projectData = [
+  {id:'P01',name:'舊客重啟營運策略',quarter:'Q2-2026',status:'active',estimatedHours:200,dept:'BD'},
+  {id:'P02',name:'C_BD_CRM與會員數據系統',quarter:'Q2-2026',status:'active',estimatedHours:320,dept:'BD'},
+  {id:'P03',name:'C_BD_智平衡會員服務管理介面',quarter:'Q2-2026',status:'active',estimatedHours:280,dept:'BD'},
+  {id:'P04',name:'C_CS_多媒體推播節奏與分眾推進系統',quarter:'Q2-2026',status:'active',estimatedHours:160,dept:'CS'},
+  {id:'P05',name:'C_CS_多媒體分發承接與數據優化系統',quarter:'Q2-2026',status:'active',estimatedHours:180,dept:'CS'},
+  {id:'P06',name:'C_BD_回診轉換優化系統',quarter:'Q2-2026',status:'active',estimatedHours:240,dept:'BD'},
+  {id:'P07',name:'C_BD_會員經營與再行銷系統',quarter:'Q2-2026',status:'active',estimatedHours:200,dept:'BD'},
+  {id:'P08',name:'C_BD_顧客流程體驗優化系統',quarter:'Q2-2026',status:'active',estimatedHours:160,dept:'BD'},
+  {id:'P09',name:'C_RD_AI營運系統',quarter:'Q2-2026',status:'active',estimatedHours:400,dept:'RD'},
+  {id:'P10',name:'C_RD_聯盟診所與B2B系統',quarter:'Q2-2026',status:'active',estimatedHours:280,dept:'RD'},
+  {id:'P11',name:'C_MA_考核與獎金制度系統',quarter:'Q2-2026',status:'active',estimatedHours:120,dept:'MA'},
+  {id:'P12',name:'C_BD_業務績效與獎金系統',quarter:'Q2-2026',status:'active',estimatedHours:140,dept:'BD'},
+  {id:'P13',name:'C_RD_ShareProject & Web專案系統建立',quarter:'Q2-2026',status:'active',estimatedHours:200,dept:'RD'},
+  {id:'P14',name:'C_RD_護您穩開立方式專案',quarter:'Q2-2026',status:'active',estimatedHours:180,dept:'RD'},
+  {id:'P15',name:'C_RD_穿戴裝置數據解讀專案',quarter:'Q2-2026',status:'active',estimatedHours:160,dept:'RD'},
+  {id:'P16',name:'C_RD_內搭平衡衣開發專案',quarter:'Q2-2026',status:'active',estimatedHours:200,dept:'RD'},
+  {id:'P17',name:'C_RD_紅光產品優化專案',quarter:'Q2-2026',status:'active',estimatedHours:140,dept:'RD'},
+  {id:'P18',name:'C_RD_倉儲 X 品管系統',quarter:'Q2-2026',status:'active',estimatedHours:160,dept:'RD'},
+  {id:'P19',name:'會員服務與產品系統',quarter:'Q2-2026',status:'active',estimatedHours:220,dept:'BD'},
+  {id:'P00',name:'無對應專案',quarter:'',status:'none',estimatedHours:0,dept:''},
+  // 庶務工作 (routine admin, not counted as formal project hours)
+  {id:'ADM-SM',name:'庶務工作',quarter:'',status:'routine',estimatedHours:0,dept:'smart-medical',isAdminWork:true},
+  {id:'ADM-CS',name:'庶務工作',quarter:'',status:'routine',estimatedHours:0,dept:'customer-service',isAdminWork:true},
+  {id:'ADM-MG',name:'庶務工作',quarter:'',status:'routine',estimatedHours:0,dept:'management',isAdminWork:true},
+  {id:'ADM-DG',name:'庶務工作',quarter:'',status:'routine',estimatedHours:0,dept:'digital',isAdminWork:true},
+  {id:'ADM-RD',name:'庶務工作',quarter:'',status:'routine',estimatedHours:0,dept:'rd',isAdminWork:true},
+  {id:'ADM-PR',name:'庶務工作',quarter:'',status:'routine',estimatedHours:0,dept:'production',isAdminWork:true},
+  {id:'ADM-MO',name:'庶務工作',quarter:'',status:'routine',estimatedHours:0,dept:'medical-ops',isAdminWork:true},
+  {id:'ADM-IR',name:'庶務工作',quarter:'',status:'routine',estimatedHours:0,dept:'innovation-rd',isAdminWork:true},
+  {id:'ADM-BD',name:'庶務工作',quarter:'',status:'routine',estimatedHours:0,dept:'biz-dev',isAdminWork:true}
+];
+
+// ─── Shift defaults ───────────────────────────────────────────────
+const SHIFT_HOURS = {
+  'smart-medical': {'看診班':8,'行政班':8,'混合班':8,'活動班':4,'專案支援班':4},
+  'customer-service': {'早班':8,'晚班':5.5,'假日班':6,'支援班':2,'遠端客服班':4}
+};
+// 院所選項（智慧醫療業務部）
+const SM_LOCATIONS = ['北區院所','中區院所','南區院所','33樓活動空間','遠端 / 居家'];
+
+// ─── Ops Task Packages (smart-medical) ───────────────────────────
+const SM_TASKS = {
+  A:{icon:'🚪',label:'A. 現場接待與看診流程',sub:'報到、候診、預約、動線',fields:[{k:'報到人數',u:'人'},{k:'改約人數',u:'人'},{k:'取消人數',u:'人'},{k:'異常候診',u:'筆'}],qs:['候診時間過長','動線不順','預約衝突','系統卡住','醫師延遲','顧客等待抱怨']},
+  B:{icon:'📋',label:'B. 健康管理諮詢 / 症狀紀錄',sub:'初診、回診、顧客疑慮',fields:[{k:'初診紀錄',u:'位'},{k:'回診症狀變化',u:'位'},{k:'顧客疑慮',u:'件'}],qs:['療程期待落差','描述症狀不清','價格疑慮','家屬反對','對效果沒信心']},
+  C:{icon:'🩺',label:'C. 跟診與醫師協作',sub:'醫囑交接、追蹤顧客',fields:[{k:'跟診人次',u:'人'},{k:'醫囑交接',u:'件'},{k:'需追蹤顧客',u:'位'}],qs:['醫囑交接不清','後續承接不明','語言轉換困難','顧客理解困難']},
+  D:{icon:'⚡',label:'D. 治療 / 療程執行',sub:'治療人次、設備耗材',fields:[{k:'治療人次',u:'人'},{k:'異常反應',u:'件'},{k:'設備耗材問題',u:'件'},{k:'衛教說明',u:'次'}],qs:['設備異常','顧客不適反應','耗材不足','排程過密','需醫師確認']},
+  E:{icon:'💼',label:'E. 業務諮詢與方案轉換',sub:'諮詢、成交、追蹤',fields:[{k:'諮詢人數',u:'位'},{k:'方案說明',u:'位'},{k:'成交',u:'件'},{k:'追蹤',u:'位'},{k:'流失',u:'位'}],qs:['價格疑慮','家屬反對','療程信任不足','想先比較','無法立即決定','退費風險']},
+  F:{icon:'💬',label:'F. LINE 線上承接',sub:'訊息、諮詢、預約',fields:[{k:'回覆訊息',u:'則'},{k:'有效諮詢',u:'位'},{k:'成功預約',u:'位'},{k:'待回覆',u:'位'}],qs:['價格疑慮','療程效果疑慮','家屬反對','想先比較','預約時間問題','FAQ不足']},
+  G:{icon:'🤝',label:'G. 會員 / 顧客關懷',sub:'回診前關懷、失聯',fields:[{k:'關懷名單',u:'位'},{k:'完成聯繫',u:'位'},{k:'確認回診',u:'位'},{k:'失聯',u:'位'}],qs:['失聯聯繫不上','想暫停療程','療效不明顯','家屬反對','想退費','改期需求']},
+  H:{icon:'📦',label:'H. 盤點 / 物料 / 設備',sub:'庫存、耗材、設備',fields:[{k:'盤點項目',u:'項'},{k:'缺料',u:'項'},{k:'設備異常',u:'件'}],qs:['庫存不足','耗材未補','設備故障','採購未回覆']},
+  I:{icon:'🤖',label:'I. AI / 專案 / 行政交辦',sub:'專案、SOP、會議',fields:[{k:'完成文件',u:'份'},{k:'會議',u:'場'},{k:'流程整理',u:'件'}],qs:['資料不足','系統未串接','流程未定義','跨部門未回覆','需主管確認方向']}
+};
+
+// ─── Ops Task Packages (customer-service) ────────────────────────
+const CS_TASKS = {
+  A:{icon:'📞',label:'A. 來電/線上客服承接',sub:'電話、官網、線上諮詢',fields:[{k:'來電件數',u:'通'},{k:'線上諮詢',u:'件'},{k:'成功轉接',u:'件'},{k:'未解決',u:'件'}],qs:['線路繁忙','資料查詢困難','客戶情緒偏高','需轉接多次','系統查詢慢']},
+  B:{icon:'💬',label:'B. LINE 回覆',sub:'LINE 訊息承接與回覆',fields:[{k:'收到訊息',u:'則'},{k:'已回覆',u:'則'},{k:'待回覆',u:'則'},{k:'有效轉化',u:'件'}],qs:['訊息量過大','客戶等待過久','FAQ不足','複雜問題無法快速回覆','需升級處理']},
+  C:{icon:'⚠️',label:'C. 客訴/異常案件處理',sub:'客訴受理、追蹤、結案',fields:[{k:'新增客訴',u:'件'},{k:'本日處理',u:'件'},{k:'結案',u:'件'},{k:'升級主管',u:'件'}],qs:['客訴原因不明','需跨部門配合','顧客情緒激動','處理超過時效','重複客訴']},
+  D:{icon:'📅',label:'D. 預約/改約/取消',sub:'預約管理與排程協調',fields:[{k:'新預約',u:'筆'},{k:'改約',u:'筆'},{k:'取消',u:'筆'},{k:'無回應',u:'筆'}],qs:['時段已滿','顧客反覆更改','系統異常','醫師排班變動','顧客爽約']},
+  E:{icon:'❤️',label:'E. 會員/回診提醒',sub:'會員關懷與回診追蹤',fields:[{k:'提醒名單',u:'位'},{k:'成功確認',u:'位'},{k:'失聯',u:'位'},{k:'拒絕回診',u:'位'}],qs:['聯繫不上','顧客暫停療程','療效疑慮','家屬反對','想退費']},
+  F:{icon:'📁',label:'F. 行政/資料建檔',sub:'資料整理、建檔、流程',fields:[{k:'建檔筆數',u:'筆'},{k:'資料更新',u:'筆'},{k:'文件整理',u:'份'}],qs:['資料不完整','系統操作問題','舊資料需補登','表單設計問題']},
+  G:{icon:'🤖',label:'G. AI/專案/主管交辦',sub:'專案、系統優化、跨部門',fields:[{k:'完成任務',u:'件'},{k:'會議',u:'場'},{k:'待處理',u:'件'}],qs:['需跨部門配合','資料不足','需主管確認','技術問題','優先級衝突']}
+};
+
+// ─── P&L Category Mapping ─────────────────────────────────────────
+const PNL_CATEGORY = {
+  '例行營運':'營運人力成本',
+  '顧客服務':'顧客服務人力成本',
+  '會員經營':'會員關係人力成本',
+  '業務轉換':'業務開發人力成本',
+  '活動支援':'活動人力成本',
+  'AI / 專案':'專案研發人力成本',
+  '主管交辦':'管理人力成本',
+  '行政作業':'行政人力成本',
+  '系統開發':'技術開發人力成本',
+  '研究調查':'研究人力成本',
+  '生產作業':'生產人力成本',
+  '品質管理':'品管人力成本',
+  'routineAdmin':'行政庶務成本'
+};
+
+function getQuarterStr(date){
+  const d=date||new Date();
+  const m=d.getMonth()+1,y=d.getFullYear();
+  const q=m<=3?'Q1':m<=6?'Q2':m<=9?'Q3':'Q4';
+  return q+'-'+y;
+}
+const currentQuarter = getQuarterStr();
+
+const deptWorkItems = {
+  'digital':['需求訪談','API 串接','前端開發','後端開發','測試驗證','Bug 修正','文件撰寫','會議溝通','系統分析','資料整理','程式碼審查','部署上線'],
+  'rd':['文獻研究','樣品測試','配方設計','供應商評估','SOP 撰寫','法規確認','實驗紀錄','數據分析','原料採購','品質確認'],
+  'production':['生產作業','品質檢驗','設備維護','倉儲管理','出貨作業','包裝作業','原料盤點','製程改善'],
+  'smart-medical':['個案評估','療程諮詢','資料建檔','追蹤回診','衛教說明','醫師協調','方案規劃'],
+  'customer-service':['客訴處理','會員服務','電話接待','問題追蹤','客戶關懷','退換貨處理','FAQ 更新'],
+  'management':['行政作業','會議籌備','文件整理','報表製作','流程優化','跨部門協調','預算追蹤'],
+  'medical-ops':['診間協助','排程管理','設備管理','耗材採購','醫療紀錄','品質管理'],
+  'innovation-rd':['市場調研','競品分析','創新規劃','技術評估','方案撰寫','跨部門討論','原型製作'],
+  'biz-dev':['客戶開發','提案簡報','合約洽談','市場分析','業績追蹤','通路拓展','售後服務']
+};
+
+const deptCategoryOptions = {
+  default:['系統開發','資料分析','會議溝通','文件撰寫','研究調查','測試驗收','行政作業','其他'],
+  production:['生產作業','品質管理','設備維護','倉儲管理','其他']
+};
+
+const employeeDB = {
+  'smart-medical':{label:'智慧醫療業務部',color:'bg-teal-100 text-teal-700',members:[
+    {id:'E01',name:'劉雅雯'},{id:'E02',name:'周志明'}]},
+  'customer-service':{label:'客服暨會員關係部',color:'bg-rose-100 text-rose-700',members:[
+    {id:'E03',name:'蔡佳慧'},{id:'E04',name:'謝宗翰'}]},
+  'management':{label:'管理部',color:'bg-slate-200 text-slate-700',members:[
+    {id:'E05',name:'吳淑芬'},{id:'E06',name:'林明哲'}]},
+  'digital':{label:'數位轉型部',color:'bg-blue-100 text-blue-700',members:[
+    {id:'E07',name:'陳志遠'},{id:'E08',name:'林佳穎'},{id:'E09',name:'王建民'}]},
+  'rd':{label:'研發部',color:'bg-purple-100 text-purple-700',members:[
+    {id:'E10',name:'張美玲'},{id:'E11',name:'李世豪'},{id:'E12',name:'吳雅芳'}]},
+  'production':{label:'生產部',color:'bg-green-100 text-green-700',members:[
+    {id:'E13',name:'黃建國'},{id:'E14',name:'陳淑娟'}]},
+  'medical-ops':{label:'醫療營運部',color:'bg-amber-100 text-amber-700',members:[
+    {id:'E15',name:'林志豪'},{id:'E16',name:'王雅婷'}]},
+  'innovation-rd':{label:'創新研發處',color:'bg-indigo-100 text-indigo-700',members:[
+    {id:'E17',name:'方建偉'},{id:'E18',name:'鄭淑華'}]},
+  'biz-dev':{label:'業務發展處',color:'bg-cyan-100 text-cyan-700',members:[
+    {id:'E19',name:'張志明'},{id:'E20',name:'李美玲'}]}
+};
+
+let currentUser = null;
+let reportDB = [];
+let editingId = null;
+
+// ─── HELPERS ────────────────────────────────────────────────────
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function fmt(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${dd}`}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2)}
+function toast(msg,type='success'){
+  const t=document.createElement('div');
+  t.className='toast text-sm';
+  t.style.background=type==='error'?'#ef4444':type==='warn'?'#f59e0b':'#10b981';
+  t.style.color='#fff';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3000);
+}
+
+function getProjById(id){return projectData.find(p=>p.id===id)||null}
+function getProjByName(name){return projectData.find(p=>p.name===name)||null}
+
+// Active quarter projects for dropdown
+function projOptHtml(selectedId, dept){
+  const active = projectData.filter(p=>p.status==='active'&&p.quarter===currentQuarter);
+  // 庶務 entry for this dept
+  const admEntry = dept ? projectData.find(p=>p.isAdminWork&&p.dept===dept) : null;
+  let html = `<option value="P00"${selectedId==='P00'?' selected':''}>無對應專案</option>`;
+  if(admEntry){
+    html += `<option value="${admEntry.id}"${selectedId===admEntry.id?' selected':''}>🗂 庶務工作（不計專案工時）</option>`;
+  }
+  html += '<optgroup label="── 本季進行中專案 ──">';
+  active.forEach(p=>{
+    html+=`<option value="${p.id}"${selectedId===p.id?' selected':''}>${escHtml(p.name)}</option>`;
+  });
+  html += '</optgroup>';
+  return html;
+}
+
+// Check if a project ID is admin work (庶務)
+function isAdminProj(projId){
+  const p=projectData.find(x=>x.id===projId);
+  return p&&p.isAdminWork===true;
+}
+
+// Common work items datalist per dept
+function datalistId(dept){return`wl-${dept}`}
+function buildDatalist(dept){
+  const items = deptWorkItems[dept]||deptWorkItems['default']||[];
+  return`<datalist id="${datalistId(dept)}">${items.map(i=>`<option value="${escHtml(i)}">`).join('')}</datalist>`;
+}
+
+// ─── SWITCH PAGE ─────────────────────────────────────────────────
+function switchPage(n){
+  document.querySelectorAll('.page-content').forEach((p,i)=>{
+    p.classList.toggle('hidden', i!==n);
+  });
+  document.querySelectorAll('.rpt-tab').forEach((t,i)=>{
+    t.classList.toggle('active', i===n);
+  });
+  if(n===1) renderDashboard();
+  if(n===2) renderLessonLearned();
+}
+
+// ─── BUILD DEPT SELECTOR ─────────────────────────────────────────
+function buildDeptSelector(){
+  const sel = document.getElementById('f-dept');
+  if(!sel) return;
+  sel.innerHTML = '<option value="">— 請選擇部門 —</option>' +
+    Object.entries(employeeDB).map(([dept,info])=>
+      `<option value="${dept}">${info.label}</option>`
+    ).join('');
+}
+
+// ─── DEPT / MEMBER CHANGE ────────────────────────────────────────
+function onDeptChange(val){
+  const memberSel = document.getElementById('f-member');
+  if(!val){
+    currentUser = null;
+    memberSel.innerHTML = '<option value="">— 請先選擇部門 —</option>';
+    memberSel.disabled = true;
+    document.getElementById('dept-pane').innerHTML = '<div class="text-center text-slate-400 py-8 text-sm">請先選擇部門，即可開始填寫日報</div>';
+    document.getElementById('hist-body').innerHTML = '';
+    document.getElementById('hist-count').textContent = '';
+    document.getElementById('nav-chip').textContent = '日';
+    return;
+  }
+  currentUser = {dept: val, id: null, name: null};
+  const info = employeeDB[val];
+  memberSel.innerHTML = '<option value="">— 請選擇員工 —</option>' +
+    info.members.map(m=>`<option value="${m.id}">${escHtml(m.name)}</option>`).join('');
+  memberSel.disabled = false;
+  document.getElementById('nav-chip').textContent = (info.label||val)[0]||'部';
+  buildDeptPane(val);
+  document.getElementById('hist-body').innerHTML = '';
+  document.getElementById('hist-count').textContent = '';
+}
+
+function onMemberChange(val){
+  if(!currentUser||!val) return;
+  const info = employeeDB[currentUser.dept];
+  const member = info?.members.find(m=>m.id===val);
+  if(!member) return;
+  currentUser.id = member.id;
+  currentUser.name = member.name;
+  document.getElementById('nav-chip').textContent = member.name[0]||'員';
+  renderHistory();
+}
+
+function logout(){
+  currentUser = null;
+  const deptSel = document.getElementById('f-dept');
+  const memberSel = document.getElementById('f-member');
+  if(deptSel) deptSel.value = '';
+  if(memberSel){ memberSel.innerHTML = '<option value="">— 請先選擇部門 —</option>'; memberSel.disabled = true; }
+  document.getElementById('dept-pane').innerHTML = '<div class="text-center text-slate-400 py-8 text-sm">請先選擇部門，即可開始填寫日報</div>';
+  document.getElementById('hist-body').innerHTML = '';
+  document.getElementById('hist-count').textContent = '';
+  document.getElementById('nav-chip').textContent = '日';
+}
+
+// ─── DEPT PANE ────────────────────────────────────────────────────
+// Ops mode state (for smart-medical / customer-service)
+let opsState = {
+  shift:'', location:'',
+  actualWorkHours:0, hasOvertime:false, overtimeHours:0,
+  totalWorkHours:0, feeling:'', selectedTasks:[]
+};
+
+function isOpsMode(dept){ return dept==='smart-medical'||dept==='customer-service'; }
+
+function buildDeptPane(dept){
+  const wrap = document.getElementById('dept-pane');
+  const isProd = dept==='production';
+  const isOps  = isOpsMode(dept);
+  if(isOps){
+    opsState={shift:'',location:'',actualWorkHours:0,hasOvertime:false,overtimeHours:0,totalWorkHours:0,feeling:'',selectedTasks:[]};
+    wrap.innerHTML = buildOpsPane(dept);
+  } else {
+    wrap.innerHTML = buildDatalist(dept) + (isProd ? buildProdPane() : buildStdPane(dept));
+    addRow();
+  }
+}
+
+function buildStdPane(dept){
+  return`<table class="item-table" id="item-tbl" style="table-layout:fixed">
+    <thead><tr>
+      <th style="width:26%">工作項目</th>
+      <th style="width:13%">工作類別</th>
+      <th style="width:22%">對應專案</th>
+      <th style="width:13%">花費工時(h)</th>
+      <th style="width:18%">完成狀態</th>
+      <th style="width:5%"></th>
+    </tr></thead>
+    <tbody id="item-tbody"></tbody>
+  </table>
+  <button class="add-row-btn" onclick="addRow()">＋ 新增工作項目</button>`;
+}
+
+function buildProdPane(){
+  return`<table class="item-table" id="item-tbl" style="table-layout:fixed">
+    <thead><tr>
+      <th style="width:18%">產品/工作項目</th>
+      <th style="width:11%">工作類別</th>
+      <th style="width:17%">對應專案</th>
+      <th style="width:8%">工時(h)</th>
+      <th style="width:9%">生產數量</th>
+      <th style="width:8%">良品數</th>
+      <th style="width:8%">不良品數</th>
+      <th style="width:8%">良率</th>
+      <th style="width:9%">完成狀態</th>
+      <th style="width:4%"></th>
+    </tr></thead>
+    <tbody id="item-tbody"></tbody>
+  </table>
+  <button class="add-row-btn" onclick="addRow()">＋ 新增工作項目</button>`;
+}
+
+// ─── OPS MODE PANE ───────────────────────────────────────────────
+function buildOpsPane(dept){
+  const shiftMap = SHIFT_HOURS[dept]||{};
+  const shifts = Object.keys(shiftMap);
+  const taskDefs = dept==='customer-service' ? CS_TASKS : SM_TASKS;
+  const isSM = dept==='smart-medical';
+
+  const taskCards = Object.entries(taskDefs).map(([key,t])=>
+    `<div class="ops-tc" data-task="${key}" onclick="toggleOpsTask('${key}','${dept}')">
+      <span class="ops-tc-let">${key}</span>
+      <span style="font-size:17px">${t.icon}</span>
+      <span class="ops-tc-name">${t.label.replace(/^[A-Z]\.\s*/,'')}</span>
+      <span class="ops-tc-sub">${t.sub}</span>
+    </div>`
+  ).join('');
+
+  const feelingBtns = `
+    <button class="ops-feel-btn" data-val="穩定" data-sel="sel-stable" onclick="setOpsFeeling(this)">
+      <span class="ops-feel-icon">😊</span>
+      <div><div class="ops-feel-label">穩定</div><div class="ops-feel-sub">流程順暢，節奏正常</div></div>
+    </button>
+    <button class="ops-feel-btn" data-val="忙碌" data-sel="sel-busy" onclick="setOpsFeeling(this)">
+      <span class="ops-feel-icon">⚡</span>
+      <div><div class="ops-feel-label">忙碌</div><div class="ops-feel-sub">任務多，但可應對</div></div>
+    </button>
+    <button class="ops-feel-btn" data-val="壓力偏高" data-sel="sel-stress" onclick="setOpsFeeling(this)">
+      <span class="ops-feel-icon">😤</span>
+      <div><div class="ops-feel-label">壓力偏高</div><div class="ops-feel-sub">人力緊繃，需支援</div></div>
+    </button>
+    <button class="ops-feel-btn" data-val="超載" data-sel="sel-overload" onclick="setOpsFeeling(this)">
+      <span class="ops-feel-icon">🔥</span>
+      <div><div class="ops-feel-label">超載</div><div class="ops-feel-sub">人力嚴重不足</div></div>
+    </button>`;
+
+  const hoursBlock = `
+    <div class="ops-hours-wrap">
+      <div class="ops-hours-row">
+        <span class="ops-hours-label">實際工時</span>
+        <input class="ops-hours-input" type="number" id="ops-actual-h" min="0" max="24" step="0.5" value="0"
+          oninput="updateOpsTotalHours()" placeholder="0.0">
+        <span class="text-xs text-slate-400">h（班別自動帶入，可修改）</span>
+      </div>
+      <div class="ops-overtime-row mb-3">
+        <label class="ops-overtime-toggle">
+          <input type="checkbox" id="ops-overtime-chk" onchange="toggleOpsOvertime()">
+          今日有加班
+        </label>
+        <div id="ops-overtime-wrap" class="hidden ml-4 flex items-center gap-2">
+          <input class="ops-hours-input" type="number" id="ops-ot-h" min="0" max="8" step="0.5" value="0"
+            oninput="updateOpsTotalHours()" placeholder="0.0">
+          <span class="text-xs text-slate-400">h 加班</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="ops-total-box">
+          <div>
+            <div class="ops-total-val" id="ops-total-h">0.0</div>
+            <div class="ops-total-lbl">今日總工時 h</div>
+          </div>
+        </div>
+        <div id="ops-hours-hint" class="text-xs text-slate-400"></div>
+      </div>
+    </div>`;
+
+  const followupBlock = `
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-4">
+    <div class="font-semibold text-slate-700 text-sm mb-3 flex items-center gap-2">
+      <span>📌</span> 需要接續或協助的事項？
+    </div>
+    <div class="mb-3">
+      <label class="block text-xs font-semibold text-slate-500 mb-1">明日接續事項 <span class="text-slate-300 font-normal">（選填）</span></label>
+      <textarea id="ops-followup" rows="2" placeholder="例：王小姐家屬疑慮待回電 / LINE 名單尚有 12 位未回覆" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-100 resize-none"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="block text-xs font-semibold text-slate-500 mb-1">需主管 / 跨部門協助 <span class="text-slate-300 font-normal">（選填）</span></label>
+      <textarea id="ops-help" rows="2" placeholder="說明需要什麼協助" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-100 resize-none"></textarea>
+    </div>
+    <div>
+      <label class="block text-xs font-semibold text-slate-500 mb-1">對應專案 <span class="text-slate-300 font-normal">（例行營運可不選）</span></label>
+      <select id="ops-proj-sel" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100">
+        ${projOptHtml('', dept)}
+      </select>
+    </div>
+  </div>`;
+
+  if(isSM){
+    // Smart-medical: 院所與班別 comboboxes + separate hours block
+    const locationOpts = SM_LOCATIONS.map(l=>`<option>${l}</option>`).join('');
+    return `
+    <!-- 院所與班別（智慧醫療業務部必填）-->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-4">
+      <div class="font-semibold text-slate-700 text-sm mb-4 flex items-center gap-2">
+        <span>📍</span> 院所與班別
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1.5">院所 / 區域 <span class="text-red-500">*</span></label>
+          <select id="ops-location" onchange="opsSetLocation(this.value)" class="ops-combo-sel">
+            <option value="">請選擇</option>
+            ${locationOpts}
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1.5">班別類型 <span class="text-red-500">*</span></label>
+          <select id="ops-shift-type" onchange="onOpsShiftClick('${dept}',this.value,null)" class="ops-combo-sel">
+            <option value="">請選擇</option>
+            ${shifts.map(s=>`<option>${s}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 工時填寫 -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-4">
+      <div class="font-semibold text-slate-700 text-sm mb-3 flex items-center gap-2">
+        <span>🕐</span> 工時填寫
+      </div>
+      ${hoursBlock}
+      <div class="font-semibold text-slate-600 text-xs mb-2 mt-3 uppercase tracking-wider">今日班別感受</div>
+      <div class="ops-feeling-grid" id="ops-feeling-grp">${feelingBtns}</div>
+    </div>
+
+    <!-- 任務包 -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-4">
+      <div class="font-semibold text-slate-700 text-sm mb-1 flex items-center gap-2">
+        <span>📦</span> 今天主要做了什麼？
+        <span class="text-xs text-slate-400 font-normal ml-1">選擇任務包（可複選）</span>
+      </div>
+      <div class="text-xs text-slate-400 mb-3">已選 <strong id="ops-task-count" class="text-blue-600">0</strong> 個任務包</div>
+      <div class="ops-task-grid" id="ops-task-grid">${taskCards}</div>
+    </div>
+    <div id="ops-detail-container"></div>
+    ${followupBlock}`;
+  } else {
+    // Customer-service: existing shift button layout
+    const shiftBtns = shifts.map(s=>
+      `<button class="shift-btn" onclick="onOpsShiftClick('${dept}','${s}',this)">${s}</button>`
+    ).join('');
+    return `
+    <!-- 班別與工時（客服部）-->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-4">
+      <div class="font-semibold text-slate-700 text-sm mb-3 flex items-center gap-2">
+        <span>🕐</span> 今天什麼班？請選擇班別
+      </div>
+      <div class="ops-shift-grid mb-3" id="ops-shift-grp">${shiftBtns}</div>
+      ${hoursBlock}
+      <div class="font-semibold text-slate-600 text-xs mb-2 mt-3 uppercase tracking-wider">今日班別感受</div>
+      <div class="ops-feeling-grid" id="ops-feeling-grp">${feelingBtns}</div>
+    </div>
+
+    <!-- 任務包 -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-4">
+      <div class="font-semibold text-slate-700 text-sm mb-1 flex items-center gap-2">
+        <span>📦</span> 今天主要做了什麼？
+        <span class="text-xs text-slate-400 font-normal ml-1">選擇任務包（可複選）</span>
+      </div>
+      <div class="text-xs text-slate-400 mb-3">已選 <strong id="ops-task-count" class="text-blue-600">0</strong> 個任務包</div>
+      <div class="ops-task-grid" id="ops-task-grid">${taskCards}</div>
+    </div>
+    <div id="ops-detail-container"></div>
+    ${followupBlock}`;
+  }
+}
+
+// Shift selection handler (el=null for select-based SM, el=button for CS)
+function onOpsShiftClick(dept, shift, el){
+  if(el){ // button click (customer-service)
+    document.querySelectorAll('#ops-shift-grp .shift-btn').forEach(b=>b.classList.remove('sel'));
+    el.classList.add('sel');
+  } else { // select change (smart-medical)
+    const sel = document.getElementById('ops-shift-type');
+    if(sel) sel.classList.toggle('has-val', !!shift);
+  }
+  opsState.shift = shift;
+  const h = (SHIFT_HOURS[dept]||{})[shift]||0;
+  opsState.actualWorkHours = h;
+  const inp = document.getElementById('ops-actual-h');
+  if(inp) inp.value = h||'';
+  updateOpsTotalHours();
+}
+
+function opsSetLocation(val){
+  opsState.location = val;
+  const sel = document.getElementById('ops-location');
+  if(sel) sel.classList.toggle('has-val', !!val);
+}
+
+function toggleOpsOvertime(){
+  const chk = document.getElementById('ops-overtime-chk');
+  const wrap = document.getElementById('ops-overtime-wrap');
+  opsState.hasOvertime = chk.checked;
+  wrap.classList.toggle('hidden', !chk.checked);
+  if(!chk.checked){
+    opsState.overtimeHours=0;
+    const el=document.getElementById('ops-ot-h');
+    if(el) el.value='0';
+  }
+  updateOpsTotalHours();
+}
+
+function updateOpsTotalHours(){
+  const actual = parseFloat(document.getElementById('ops-actual-h')?.value)||0;
+  const ot = parseFloat(document.getElementById('ops-ot-h')?.value)||0;
+  opsState.actualWorkHours = actual;
+  opsState.overtimeHours = ot;
+  const total = actual + ot;
+  opsState.totalWorkHours = total;
+  const el = document.getElementById('ops-total-h');
+  if(el) el.textContent = total.toFixed(1);
+  // Hint
+  const hint = document.getElementById('ops-hours-hint');
+  if(!hint) return;
+  const shift = opsState.shift;
+  if(total===0) hint.textContent='尚未填寫工時';
+  else if(total>12) hint.innerHTML='<span class="text-red-500">⛔ 超過 12 小時，請確認</span>';
+  else if(total<2) hint.innerHTML='<span class="text-amber-500">⚠ 不足 2 小時，請確認</span>';
+  else if(shift==='看診班'&&actual<6) hint.innerHTML='<span class="text-amber-500">⚠ 看診班實際工時低於 6 小時</span>';
+  else if(shift==='早班'&&actual<6) hint.innerHTML='<span class="text-amber-500">⚠ 早班實際工時低於 6 小時</span>';
+  else if((shift==='晚班')&&actual>8) hint.innerHTML='<span class="text-amber-500">⚠ 晚班工時超過 8 小時，已自動歸入加班</span>';
+  else hint.innerHTML='<span class="text-green-600">✓ 工時正常</span>';
+}
+
+function setOpsFeeling(el){
+  document.querySelectorAll('#ops-feeling-grp .ops-feel-btn').forEach(b=>b.className='ops-feel-btn');
+  el.classList.add(el.dataset.sel);
+  opsState.feeling = el.dataset.val;
+}
+
+// Task toggle
+function toggleOpsTask(key, dept){
+  const el = document.querySelector(`.ops-tc[data-task="${key}"]`);
+  const idx = opsState.selectedTasks.indexOf(key);
+  if(idx>=0){
+    opsState.selectedTasks.splice(idx,1);
+    el.classList.remove('sel');
+  } else {
+    opsState.selectedTasks.push(key);
+    el.classList.add('sel');
+  }
+  document.getElementById('ops-task-count').textContent = opsState.selectedTasks.length;
+  buildOpsTaskDetail(dept);
+}
+
+function buildOpsTaskDetail(dept){
+  const taskDefs = dept==='customer-service' ? CS_TASKS : SM_TASKS;
+  const container = document.getElementById('ops-detail-container');
+  if(!container) return;
+  if(opsState.selectedTasks.length===0){container.innerHTML='';return;}
+  container.innerHTML = opsState.selectedTasks.map(key=>{
+    const t = taskDefs[key];
+    if(!t) return '';
+    const numFields = t.fields.map(f=>
+      `<div class="ops-nf">
+        <label>${f.k}<span style="font-size:9px;color:#94a3b8;margin-left:3px">${f.u}</span></label>
+        <input class="ops-ni" type="number" min="0" placeholder="0" id="ops-f-${key}-${f.k.replace(/\//g,'-')}">
+      </div>`
+    ).join('');
+    const qsChips = t.qs.map(s=>
+      `<span class="ops-qc" onclick="this.classList.toggle('sel')">${s}</span>`
+    ).join('');
+    return `<div class="ops-detail-block">
+      <div class="ops-detail-hdr">
+        <span style="font-size:16px">${t.icon}</span>
+        <span>${t.label}</span>
+      </div>
+      <div class="ops-detail-body">
+        <div class="ops-num-grid">${numFields}</div>
+        <div class="ops-qs-area">
+          <div class="ops-qs-title">⚡ 快選訊號（有才選）</div>
+          <div class="ops-qs-chips">${qsChips}</div>
+        </div>
+        <div style="margin-bottom:6px">
+          <label class="block text-xs font-semibold text-slate-500 mb-1">補充說明 <span class="text-slate-300 font-normal">（選填）</span></label>
+          <textarea rows="2" id="ops-note-${key}" placeholder="如有異常或值得紀錄的細節" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs resize-none focus:outline-none focus:ring-1 focus:ring-blue-200"></textarea>
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-slate-500 mb-1">完成狀態</div>
+          <div class="ops-status-chips">
+            <button class="ops-st s-done" data-task="${key}" data-status="已完成" onclick="setOpsTaskStatus(this,'${key}')">✓ 已完成</button>
+            <button class="ops-st" data-task="${key}" data-status="進行中" onclick="setOpsTaskStatus(this,'${key}')">進行中</button>
+            <button class="ops-st" data-task="${key}" data-status="明日接續" onclick="setOpsTaskStatus(this,'${key}')">明日接續</button>
+            <button class="ops-st" data-task="${key}" data-status="待協助" onclick="setOpsTaskStatus(this,'${key}')">待協助</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setOpsTaskStatus(el, key){
+  el.closest('.ops-status-chips').querySelectorAll('.ops-st').forEach(b=>{
+    b.className='ops-st';
+  });
+  const s=el.dataset.status;
+  if(s==='已完成') el.classList.add('s-done');
+  else if(s==='進行中') el.classList.add('s-ongoing');
+  else if(s==='明日接續') el.classList.add('s-tmr');
+  else if(s==='待協助') el.classList.add('s-mgr');
+  else el.classList.add('s-ongoing');
+}
+
+// ─── SUBMIT OPS REPORT ───────────────────────────────────────────
+function submitOpsReport(dept){
+  const total = opsState.totalWorkHours;
+  const shift = opsState.shift;
+  // Validation
+  if(dept==='smart-medical'&&!opsState.location){toast('請選擇院所 / 區域','error');return;}
+  if(!shift){toast(dept==='smart-medical'?'請選擇班別類型':'請先選擇班別','error');return;}
+  if(total===0){toast('總工時為 0，請填寫實際工時','error');return;}
+  if(total>12){if(!confirm(`今日總工時 ${total}h 超過 12 小時，確定送出？`))return;}
+  else if(total<2){if(!confirm(`今日總工時 ${total}h 不足 2 小時，確定送出？`))return;}
+  if(shift==='看診班'&&opsState.actualWorkHours<6){if(!confirm(`看診班實際工時 ${opsState.actualWorkHours}h 低於 6 小時，確定？`))return;}
+  if(shift==='早班'&&opsState.actualWorkHours<6){if(!confirm(`早班實際工時 ${opsState.actualWorkHours}h 低於 6 小時，確定？`))return;}
+  if(opsState.selectedTasks.length===0){toast('請至少選擇一個任務包','error');return;}
+
+  const taskDefs = dept==='customer-service' ? CS_TASKS : SM_TASKS;
+  const projId = document.getElementById('ops-proj-sel')?.value||'P00';
+  const proj = getProjById(projId);
+  const note = document.getElementById('ops-followup')?.value||'';
+  const helpNote = document.getElementById('ops-help')?.value||'';
+  const date = document.getElementById('f-date').value;
+  const quarter = dateToQuarter(date);
+
+  // Collect task outcomes
+  const taskPerHour = total / opsState.selectedTasks.length;
+  const items = opsState.selectedTasks.map(key=>{
+    const t = taskDefs[key];
+    const fields = {};
+    t.fields.forEach(f=>{
+      const el=document.getElementById(`ops-f-${key}-${f.k.replace(/\//g,'-')}`);
+      fields[f.k]={val:parseInt(el?.value)||0, unit:f.u};
+    });
+    const signals = [...document.querySelectorAll(`#ops-detail-container .ops-qc.sel`)].filter(el=>el.closest('.ops-detail-block')?.querySelector(`[id$="ops-note-${key}"]`)?true:
+      el.closest('.ops-detail-block')?.querySelector(`textarea[id="ops-note-${key}"]`)
+    ).map(el=>el.textContent);
+    // get signals for this specific task block
+    const taskBlock = document.querySelector(`.ops-detail-block [id="ops-note-${key}"]`)?.closest('.ops-detail-block');
+    const taskSignals = taskBlock ? [...taskBlock.querySelectorAll('.ops-qc.sel')].map(el=>el.textContent) : [];
+    const statusEl = taskBlock?.querySelector('.ops-st.s-done,.ops-st.s-ongoing,.ops-st.s-tmr,.ops-st.s-mgr');
+    const status = statusEl?.dataset.status||'已完成';
+    const taskNote = document.getElementById(`ops-note-${key}`)?.value||'';
+    return {
+      desc: t.label,
+      taskKey: key,
+      taskIcon: t.icon,
+      category: '例行營運',
+      projectId: projId,
+      projectName: proj?.name||'無對應專案',
+      hours: parseFloat(taskPerHour.toFixed(2)),
+      status,
+      signals: taskSignals,
+      note: taskNote,
+      fields
+    };
+  });
+
+  // P&L fields
+  const pnlCat = PNL_CATEGORY['例行營運']||'營運人力成本';
+  const costCenter = employeeDB[dept]?.label||dept;
+
+  const dup = reportDB.find(r=>r.employeeId===currentUser.id&&r.date===date);
+  if(dup){if(!confirm('今日已有日報，確定要覆蓋嗎？'))return; reportDB=reportDB.filter(r=>r!==dup);}
+
+  reportDB.push({
+    id:uid(), employeeId:currentUser.id, name:currentUser.name, dept, date, quarter,
+    items, note, helpNote, totalHours:total,
+    submittedAt:new Date().toISOString(),
+    reportMode:'ops',
+    shift, location:opsState.location,
+    actualWorkHours:opsState.actualWorkHours,
+    overtimeHours:opsState.overtimeHours,
+    totalWorkHours:total,
+    feeling:opsState.feeling,
+    pnlCategory:pnlCat,
+    costCenter,
+    isProjectWork: projId!=='P00' && !isAdminProj(projId),
+    isRoutineWork: projId==='P00',
+    isAdminWork: isAdminProj(projId)
+  });
+
+  toast('日報送出成功！🎉');
+  renderHistory();
+  // Reset ops state
+  opsState={shift:'',location:'',actualWorkHours:0,hasOvertime:false,overtimeHours:0,totalWorkHours:0,feeling:'',selectedTasks:[]};
+  buildDeptPane(dept);
+}
+
+function getCatOpts(dept){
+  const cats = dept==='production' ? deptCategoryOptions.production : deptCategoryOptions.default;
+  return cats.map(c=>`<option>${c}</option>`).join('');
+}
+
+function addRow(){
+  const tbody = document.getElementById('item-tbody');
+  if(!tbody||!currentUser?.dept) return;
+  const dept = currentUser.dept;
+  const isProd = dept==='production';
+  const cats = getCatOpts(dept);
+  const projSel = `<select class="proj-select" onchange="onProjChange(this)">${projOptHtml('', dept)}</select>`;
+  const tr = document.createElement('tr');
+  if(isProd){
+    tr.innerHTML=`
+      <td><textarea placeholder="產品/工作項目" rows="2" style="resize:vertical;width:100%;box-sizing:border-box"></textarea></td>
+      <td><select>${cats}</select></td>
+      <td>${projSel}</td>
+      <td><input type="number" min="0" max="12" step="0.5" placeholder="0.0" style="text-align:right" oninput="updateHoursTotal()"></td>
+      <td><input type="number" min="0" placeholder="0" oninput="calcYield(this)"></td>
+      <td><input type="number" min="0" placeholder="0" oninput="calcYield(this)"></td>
+      <td><input type="number" min="0" placeholder="0" oninput="calcYield(this)"></td>
+      <td><input type="text" placeholder="—" readonly style="background:#f8fafc;text-align:center"></td>
+      <td><select><option>已完成</option><option>進行中</option><option>待協助</option><option>延後</option></select></td>
+      <td><button class="del-btn" onclick="delRow(this)">×</button></td>`;
+  } else {
+    tr.innerHTML=`
+      <td><textarea placeholder="工作內容" rows="2" style="resize:vertical;width:100%;box-sizing:border-box"></textarea></td>
+      <td><select>${cats}</select></td>
+      <td>${projSel}</td>
+      <td><input type="number" min="0" max="12" step="0.5" placeholder="0.0" style="text-align:right" oninput="updateHoursTotal()"></td>
+      <td><select><option>已完成</option><option>進行中</option><option>待協助</option><option>延後</option></select></td>
+      <td><button class="del-btn" onclick="delRow(this)">×</button></td>`;
+  }
+  tbody.appendChild(tr);
+  updateHoursTotal();
+  // No-project reason row
+  const reasonTr = document.createElement('tr');
+  reasonTr.className='no-proj-reason hidden';
+  reasonTr.innerHTML=`<td colspan="6" style="background:#fffbeb;padding:4px 8px"><span style="font-size:11px;color:#b45309">▸ 未對應專案原因：</span><input type="text" placeholder="請說明為何無對應專案" style="width:60%;font-size:11px;border:1px solid #fcd34d;border-radius:3px;padding:2px 6px;margin-left:4px"></td>`;
+  tbody.appendChild(reasonTr);
+}
+
+function onProjChange(sel){
+  const tr = sel.closest('tr');
+  const next = tr.nextElementSibling;
+  if(next&&next.classList.contains('no-proj-reason')){
+    next.classList.toggle('hidden', sel.value!=='P00');
+  }
+  updateHoursTotal();
+}
+
+function delRow(btn){
+  const tr = btn.closest('tr');
+  const next = tr.nextElementSibling;
+  if(next&&next.classList.contains('no-proj-reason')) next.remove();
+  tr.remove();
+  updateHoursTotal();
+}
+
+function calcYield(inp){
+  const tr = inp.closest('tr');
+  const nums = tr.querySelectorAll('input[type="number"]');
+  const qty    = parseFloat(nums[1]?.value)||0;
+  const good   = parseFloat(nums[2]?.value)||0;
+  const defect = parseFloat(nums[3]?.value)||0;
+  const yieldInput = tr.querySelector('td:nth-child(8) input');
+  if(yieldInput){
+    if(qty>0){
+      const rate=(good/qty*100).toFixed(1);
+      yieldInput.value=rate+'%';
+      yieldInput.style.color=parseFloat(rate)<95?'#dc2626':'#16a34a';
+    } else { yieldInput.value='—'; yieldInput.style.color=''; }
+  }
+  updateHoursTotal();
+}
+
+function updateHoursTotal(){
+  const tbody = document.getElementById('item-tbody');
+  if(!tbody) return;
+  let total=0;
+  tbody.querySelectorAll('tr:not(.no-proj-reason)').forEach(tr=>{
+    const nums=tr.querySelectorAll('input[type="number"]');
+    if(nums[0]) total+=parseFloat(nums[0].value)||0;
+  });
+  document.getElementById('hours-total-display').textContent=total.toFixed(1)+' h';
+  const pct=Math.min(total/10*100,100);
+  const fill=document.getElementById('hours-bar-fill');
+  fill.style.width=pct+'%';
+  fill.className='hours-bar-fill'+(total>10?' danger':total>8?' warn':'');
+  const hint=document.getElementById('hours-hint');
+  if(total===0) hint.textContent='尚未填寫工時';
+  else if(total<6) hint.textContent='⚠ 低於 6 小時';
+  else if(total>12) hint.textContent='⛔ 超過 12 小時';
+  else if(total>10) hint.textContent='⚠ 超過 10 小時';
+  else hint.textContent='✓ 工時正常';
+  hint.className='text-xs '+(total<6||total>10?'text-amber-500':'text-green-500');
+}
+
+// ─── SUBMIT DISPATCHER ────────────────────────────────────────────
+function onSubmitBtn(){
+  if(!currentUser?.dept){toast('請先選擇部門','error');return;}
+  if(!currentUser?.id){toast('請先選擇員工','error');return;}
+  if(isOpsMode(currentUser.dept)){
+    submitOpsReport(currentUser.dept);
+  } else {
+    submitReport();
+  }
+}
+
+// ─── SUBMIT ───────────────────────────────────────────────────────
+function submitReport(){
+  if(!currentUser?.id){toast('請先選擇員工','error');return;}
+  const tbody=document.getElementById('item-tbody');
+  if(!tbody){toast('找不到工作項目表格','error');return;}
+  const dept=currentUser.dept;
+  const isProd=dept==='production';
+  const rows=[...tbody.querySelectorAll('tr:not(.no-proj-reason)')];
+  if(rows.length===0){toast('請至少填寫一筆工作項目','error');return;}
+
+  let totalHours=0;
+  const items=[];
+  for(const tr of rows){
+    const nums=tr.querySelectorAll('input[type="number"]');
+    const sels=tr.querySelectorAll('select');
+    const texts=tr.querySelectorAll('input[type="text"],textarea');
+    const desc=(texts[0]?.value||'').trim();
+    if(!desc){toast('請填寫所有工作項目內容','error');return;}
+    const hours=parseFloat(nums[0]?.value)||0;
+    if(hours<=0){toast(`工作項目「${desc}」的工時不能為 0`,'error');return;}
+    totalHours+=hours;
+    const projId=sels[1]?.value||'P00';
+    const proj=getProjById(projId);
+    let noReason='';
+    const reasonTr=tr.nextElementSibling;
+    if(reasonTr&&reasonTr.classList.contains('no-proj-reason')&&projId==='P00'){
+      noReason=reasonTr.querySelector('input')?.value||'';
+    }
+    // 無對應專案原因必填 (skip for 庶務工作)
+    if(projId==='P00'&&!isAdminProj(projId)&&!(noReason||'').trim()){
+      toast(`工作項目「${desc}」選擇無對應專案，請填寫原因`,'error');
+      return;
+    }
+    if(isProd){
+      const _qty=parseInt(nums[1]?.value)||0;
+      const _good=parseInt(nums[2]?.value)||0;
+      const _defect=parseInt(nums[3]?.value)||0;
+      if(_qty>0 && _qty!==_good+_defect){
+        toast(`「${desc}」生產數量(${_qty}) ≠ 良品(${_good})+不良品(${_defect})，請確認`,'warn');
+      }
+      items.push({desc,category:sels[0]?.value||'',projectId:projId,projectName:proj?.name||'無對應專案',
+        hours,qty:_qty,good:_good,defect:_defect,status:sels[2]?.value||'已完成',noReason});
+    } else {
+      items.push({desc,category:sels[0]?.value||'',projectId:projId,projectName:proj?.name||'無對應專案',
+        hours,status:sels[2]?.value||'已完成',noReason});
+    }
+  }
+  if(totalHours>12){toast('本日工時超過 12 小時，請確認後再送出','error');return;}
+  if(totalHours<6) toast('提醒：本日工時低於 6 小時','warn');
+
+  const note=document.getElementById('f-note').value;
+  const date=document.getElementById('f-date').value;
+  const quarter=dateToQuarter(date);
+  const dup=reportDB.find(r=>r.employeeId===currentUser.id&&r.date===date);
+  if(dup){if(!confirm('今日已有日報，確定要覆蓋嗎？'))return; reportDB=reportDB.filter(r=>r!==dup);}
+  reportDB.push({id:uid(),employeeId:currentUser.id,name:currentUser.name,dept,date,quarter,items,note,totalHours,submittedAt:new Date().toISOString()});
+  toast('日報送出成功！');
+  renderHistory();
+  updateQualityHint(items,totalHours);
+}
+
+function dateToQuarter(dateStr){
+  if(!dateStr)return'Q2-2026';
+  const m=parseInt(dateStr.split('-')[1]);
+  const y=dateStr.split('-')[0];
+  const q=m<=3?'Q1':m<=6?'Q2':m<=9?'Q3':'Q4';
+  return`${q}-${y}`;
+}
+
+function updateQualityHint(items,total){
+  const hint=document.getElementById('quality-hint');
+  const noProjCount=items.filter(i=>i.projectId==='P00').length;
+  const pct=Math.round((1-noProjCount/items.length)*100);
+  let cls='bg-green-50 text-green-700 border border-green-200';
+  let msg=`✅ 資料完整度良好｜專案連結率 ${pct}%｜本日工時 ${total.toFixed(1)}h`;
+  if(noProjCount>0){cls='bg-amber-50 text-amber-700 border border-amber-200';msg=`⚠ 有 ${noProjCount} 筆工項未對應專案（${pct}% 已連結）`;}
+  hint.className=`rounded-lg px-4 py-2 text-xs font-medium ${cls}`;
+  hint.textContent=msg;
+  hint.classList.remove('hidden');
+}
+
+function resetForm(){
+  if(!currentUser?.dept)return;
+  document.getElementById('f-note').value='';
+  document.getElementById('quality-hint').classList.add('hidden');
+  if(isOpsMode(currentUser.dept)){
+    buildDeptPane(currentUser.dept);
+    return;
+  }
+  const tbody=document.getElementById('item-tbody');
+  if(tbody)tbody.innerHTML='';
+  addRow();
+}
+
+// ─── HISTORY ─────────────────────────────────────────────────────
+function renderHistory(){
+  if(!currentUser?.id)return;
+  const from=document.getElementById('d-from')?.value;
+  const to=document.getElementById('d-to')?.value;
+  let data=reportDB.filter(r=>r.employeeId===currentUser.id);
+  if(from) data=data.filter(r=>r.date>=from);
+  if(to) data=data.filter(r=>r.date<=to);
+  data.sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('hist-count').textContent=`共 ${data.length} 筆`;
+  const body=document.getElementById('hist-body');
+  if(data.length===0){body.innerHTML='<div class="nodata">目前尚無歷史日報紀錄</div>';return;}
+  body.innerHTML=data.map(r=>histCard(r)).join('');
+}
+
+function histCard(r){
+  const dept=employeeDB[r.dept];
+  const deptBadge=dept?`<span class="text-xs px-2 py-0.5 rounded-full font-semibold ${dept.color}">${dept.label}</span>`:'';
+  const isOps=r.reportMode==='ops';
+  let itemsHtml='';
+  if(isOps){
+    // Ops mode: show shift + task packages
+    const locBadge=r.location?`<span class="text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-700 font-semibold border border-green-100">📍 ${escHtml(r.location)}</span>`:'';
+    const shiftBadge=r.shift?`<span class="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-100">${escHtml(r.shift)}</span>`:'';
+    const feelBadge=r.feeling?`<span class="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">${escHtml(r.feeling)}</span>`:'';
+    const hoursDetail=`<span class="text-xs text-slate-400">實際 ${r.actualWorkHours||r.totalHours}h${r.overtimeHours?` + 加班 ${r.overtimeHours}h`:''}`;
+    itemsHtml=`<div class="flex flex-wrap gap-1.5 mb-2 px-4 pt-2">${locBadge}${shiftBadge}${feelBadge}${hoursDetail}</span></div>`;
+    itemsHtml+=r.items.map(i=>{
+      const sigStr=i.signals&&i.signals.length?`<span class="text-xs text-amber-600 ml-1">${i.signals.slice(0,2).join('、')}</span>`:'';
+      return`<div class="flex items-center gap-2 px-4 py-1 border-b border-slate-50 text-xs text-slate-600">
+        <span style="font-size:14px">${i.taskIcon||''}</span>
+        <span class="font-medium text-slate-700">${escHtml(i.desc)}</span>
+        ${sigStr}
+        <span class="px-1.5 py-0.5 rounded text-xs ml-auto ${i.status==='已完成'?'bg-green-100 text-green-700':'bg-amber-100 text-amber-700'}">${escHtml(i.status)}</span>
+      </div>`;
+    }).join('');
+  } else {
+    itemsHtml=r.items.map(i=>{
+      const projTag=i.projectId&&i.projectId!=='P00'
+        ?`<span class="proj-tag" title="${escHtml(i.projectName)}">${escHtml(i.projectName)}</span>`:
+        `<span class="text-xs text-slate-400 ml-1">無專案</span>`;
+      const extra=i.qty!=null?` ｜ 生產 ${i.qty} / 良品 ${i.good}`:'';
+      return`<div class="flex items-center gap-2 py-1 border-b border-slate-50 text-xs text-slate-600">
+        <span class="font-medium text-slate-700">${escHtml(i.desc)}</span>
+        ${projTag}
+        <span class="text-slate-400 ml-auto">${i.hours}h</span>
+        <span class="px-1.5 py-0.5 rounded text-xs ${i.status==='已完成'?'bg-green-100 text-green-700':'bg-amber-100 text-amber-700'}">${escHtml(i.status)}</span>
+        ${extra}
+      </div>`;
+    }).join('');
+    itemsHtml=`<div class="px-4 py-2">`+itemsHtml+`</div>`;
+  }
+  return`<div class="border border-slate-200 rounded-xl overflow-hidden">
+    <div class="px-4 py-2.5 bg-slate-50 flex items-center gap-2 flex-wrap">
+      <span class="font-semibold text-slate-700 text-sm">${r.date}</span>
+      ${deptBadge}
+      <span class="text-xs text-slate-400">總工時 ${r.totalHours.toFixed(1)}h</span>
+      ${isOps?`<span class="text-xs bg-teal-50 text-teal-700 px-2 py-0.5 rounded-full border border-teal-100">交班模式</span>`:''}
+      <div class="flex-1"></div>
+      <button onclick="editReport('${r.id}')" class="text-xs bg-white border border-slate-200 px-2.5 py-1 rounded-md text-slate-600 hover:border-blue-400 hover:text-blue-600 transition">✏️ 編輯</button>
+      <button onclick="deleteReport('${r.id}')" class="text-xs text-red-400 hover:text-red-600 px-2 py-1">🗑</button>
+    </div>
+    ${itemsHtml}
+    ${r.note?`<div class="px-4 pb-2 text-xs text-slate-400">接續：${escHtml(r.note)}</div>`:''}
+  </div>`;
+}
+
+function clearFilter(){
+  document.getElementById('d-from').value='';
+  document.getElementById('d-to').value='';
+  renderHistory();
+}
+
+function deleteReport(id){
+  if(!confirm('確定刪除此日報？'))return;
+  reportDB=reportDB.filter(r=>r.id!==id);
+  renderHistory();
+  toast('已刪除');
+}
+
+// ─── EDIT ─────────────────────────────────────────────────────────
+function editReport(id){
+  const r=reportDB.find(x=>x.id===id);
+  if(!r)return;
+  editingId=id;
+  // Ops mode: show simplified edit (just notes + delete option)
+  if(r.reportMode==='ops'){
+    const taskDefs = r.dept==='customer-service' ? CS_TASKS : SM_TASKS;
+    document.getElementById('edit-body').innerHTML=`
+      <div class="text-xs text-slate-500 mb-3">
+        日期：${r.date} ｜ ${employeeDB[r.dept]?.label||r.dept} ｜ ${r.shift||''}班 ｜ 總工時 ${r.totalHours}h
+        ${r.feeling?` ｜ 感受：${r.feeling}`:''}
+      </div>
+      <div class="space-y-2 mb-4">
+        ${r.items.map(i=>`
+          <div class="flex items-center gap-2 text-sm border border-slate-100 rounded-lg px-3 py-2">
+            <span style="font-size:15px">${i.taskIcon||''}</span>
+            <span class="font-medium text-slate-700">${escHtml(i.desc)}</span>
+            <span class="text-xs px-2 py-0.5 rounded-full ml-auto ${i.status==='已完成'?'bg-green-100 text-green-700':'bg-amber-100 text-amber-700'}">${escHtml(i.status)}</span>
+          </div>`).join('')}
+      </div>
+      <div class="mb-3">
+        <label class="block text-xs font-semibold text-slate-500 mb-1">接續事項</label>
+        <textarea id="edit-note" rows="2" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none">${escHtml(r.note||'')}</textarea>
+      </div>
+      <div class="text-xs text-blue-500 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
+        ℹ️ 交班模式日報僅支援修改接續事項。如需完整修改，請刪除後重新填寫。
+      </div>`;
+    document.getElementById('edit-modal').classList.remove('hidden');
+    return;
+  }
+  const dept=r.dept;
+  const isProd=dept==='production';
+  const cats=getCatOpts(dept);
+  const rowsHtml=r.items.map((item,idx)=>{
+    const projSel=`<select class="proj-select" style="font-size:11px">${projOptHtml(item.projectId||'P00', dept)}</select>`;
+    if(isProd){
+      return`<tr>
+        <td><textarea rows="2" style="resize:vertical;min-height:44px">${escHtml(item.desc)}</textarea></td>
+        <td><select>${cats.replace(`<option>${escHtml(item.category)}</option>`,`<option selected>${escHtml(item.category)}</option>`)}</select></td>
+        <td>${projSel}</td>
+        <td><input type="number" value="${item.hours}" min="0" max="12" step="0.5" style="text-align:right"></td>
+        <td><input type="number" value="${item.qty||0}" min="0"></td>
+        <td><input type="number" value="${item.good||0}" min="0"></td>
+        <td><input type="number" value="${item.defect||0}" min="0"></td>
+        <td><input type="text" value="${item.hours>0&&item.qty>0?(item.good/item.qty*100).toFixed(1)+'%':'—'}" readonly style="background:#f8fafc;text-align:center"></td>
+        <td><select>${['已完成','進行中','待協助','延後'].map(s=>`<option${s===item.status?' selected':''}>${s}</option>`).join('')}</select></td>
+        <td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td>
+      </tr>`;
+    }
+    return`<tr>
+      <td><textarea rows="2" style="resize:vertical;min-height:44px">${escHtml(item.desc)}</textarea></td>
+        <td><select>${cats.replace(`<option>${escHtml(item.category)}</option>`,`<option selected>${escHtml(item.category)}</option>`)}</select></td>
+      <td>${projSel}</td>
+      <td><input type="number" value="${item.hours}" min="0" max="12" step="0.5" style="text-align:right"></td>
+      <td><select>${['已完成','進行中','待協助','延後'].map(s=>`<option${s===item.status?' selected':''}>${s}</option>`).join('')}</select></td>
+      <td><button class="del-btn" onclick="this.closest('tr').remove()">×</button></td>
+    </tr>`;
+  }).join('');
+
+  const thead=isProd
+    ?`<tr><th>產品/工作項目</th><th>類別</th><th>對應專案</th><th>工時</th><th>生產</th><th>良品</th><th>不良品</th><th>良率</th><th>狀態</th><th></th></tr>`
+    :`<tr><th>工作項目</th><th>類別</th><th>對應專案</th><th>工時(h)</th><th>狀態</th><th></th></tr>`;
+
+  document.getElementById('edit-body').innerHTML=buildDatalist(dept)+`
+    <div class="text-xs text-slate-500 mb-3">日期：${r.date} ｜ ${employeeDB[dept]?.label||dept}</div>
+    <table class="item-table mb-3"><thead>${thead}</thead><tbody id="edit-tbody">${rowsHtml}</tbody></table>
+    <div class="mt-2 mb-3">
+      <label class="block text-xs font-semibold text-slate-500 mb-1">備註</label>
+      <textarea id="edit-note" rows="2" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none">${escHtml(r.note||'')}</textarea>
+    </div>`;
+  document.getElementById('edit-modal').classList.remove('hidden');
+}
+
+function saveEdit(){
+  const r=reportDB.find(x=>x.id===editingId);
+  if(!r)return;
+  // Ops mode: just update note
+  if(r.reportMode==='ops'){
+    r.note=document.getElementById('edit-note')?.value||'';
+    closeEdit();
+    renderHistory();
+    toast('已儲存');
+    return;
+  }
+  const tbody=document.getElementById('edit-tbody');
+  const rows=[...tbody.querySelectorAll('tr')];
+  const isProd=r.dept==='production';
+  const items=[];
+  let totalHours=0;
+  for(const tr of rows){
+    const nums=tr.querySelectorAll('input[type="number"]');
+    const sels=tr.querySelectorAll('select');
+    const texts=tr.querySelectorAll('textarea,input[type="text"]');
+    const desc=(texts[0]?.value||'').trim();
+    if(!desc)continue;
+    const hours=parseFloat(nums[0]?.value)||0;
+    totalHours+=hours;
+    const projId=sels[1]?.value||'P00';
+    const proj=getProjById(projId);
+    // For edit modal, skip strict 無對應專案 validation
+    if(isProd){
+      items.push({desc,category:sels[0]?.value||'',projectId:projId,projectName:proj?.name||'無對應專案',
+        hours,qty:parseInt(nums[1]?.value)||0,good:parseInt(nums[2]?.value)||0,defect:parseInt(nums[3]?.value)||0,status:sels[2]?.value||'已完成'});
+    } else {
+      items.push({desc,category:sels[0]?.value||'',projectId:projId,projectName:proj?.name||'無對應專案',
+        hours,status:sels[2]?.value||'已完成'});
+    }
+  }
+  r.items=items;
+  r.totalHours=totalHours;
+  r.note=document.getElementById('edit-note')?.value||'';
+  closeEdit();
+  renderHistory();
+  toast('已儲存');
+}
+
+function closeEdit(){
+  document.getElementById('edit-modal').classList.add('hidden');
+  editingId=null;
+}
+
+// ─── DASHBOARD ───────────────────────────────────────────────────
+function getDbData(){
+  const from=document.getElementById('db-from')?.value;
+  const to=document.getElementById('db-to')?.value;
+  let data=reportDB.slice();
+  if(from) data=data.filter(r=>r.date>=from);
+  if(to) data=data.filter(r=>r.date<=to);
+  return data;
+}
+
+function mkBar(label,val,max,color,suffix){
+  const pct=max>0?Math.min(val/max*100,100):0;
+  return`<div class="bar-row">
+    <div class="bar-label">${escHtml(String(label))}</div>
+    <div class="bar-outer"><div class="bar-inner" style="width:${pct}%;background:${color}"></div></div>
+    <div class="bar-val">${suffix!==undefined?suffix:(typeof val==='number'?val.toFixed(1)+'h':val)}</div>
+  </div>`;
+}
+
+function renderDashboard(){
+  const data=getDbData();
+
+  // ── Segment data
+  const opsReports=data.filter(r=>r.reportMode==='ops');
+  const stdReports=data.filter(r=>r.reportMode!=='ops');
+  const stdItems=stdReports.flatMap(r=>r.items);
+  const adminItems=stdItems.filter(i=>isAdminProj(i.projectId));
+  const formalItems=stdItems.filter(i=>!isAdminProj(i.projectId));
+
+  // ── Hour totals
+  const opsTotalHours=opsReports.reduce((s,r)=>s+(r.totalWorkHours||r.totalHours||0),0);
+  const adminHours=adminItems.reduce((s,i)=>s+i.hours,0);
+  const formalHours=formalItems.reduce((s,i)=>s+i.hours,0);
+  const totalHours=opsTotalHours+adminHours+formalHours;
+  const totalPersons=new Set(data.map(r=>r.employeeId)).size;
+  const totalDepts=new Set(data.map(r=>r.dept)).size;
+
+  // ── Project link rate (std formal only)
+  const projLinked=formalItems.filter(i=>i.projectId&&i.projectId!=='P00').length;
+  const linkRate=formalItems.length>0?Math.round(projLinked/formalItems.length*100):0;
+  const opsRate=totalHours>0?Math.round(opsTotalHours/totalHours*100):0;
+  const adminRate=totalHours>0?Math.round(adminHours/totalHours*100):0;
+
+  // ── 6-box stat row
+  document.getElementById('db-stat-row').innerHTML=[
+    {label:'總工時',val:totalHours.toFixed(1)+' h',sub:'',color:'text-blue-600'},
+    {label:'日報人數',val:totalPersons,sub:'',color:'text-purple-600'},
+    {label:'涉及部門',val:totalDepts,sub:'',color:'text-teal-600'},
+    {label:'交班模式工時',val:opsTotalHours.toFixed(1)+'h',sub:opsRate+'%',color:'text-green-600'},
+    {label:'庶務工時',val:adminHours.toFixed(1)+'h',sub:adminRate+'%',color:'text-orange-500'},
+    {label:'專案連結率',val:linkRate+'%',sub:'標準模式',color:linkRate<70?'text-red-500':'text-green-600'}
+  ].map(s=>`<div class="bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3">
+    <div class="text-xs text-slate-400 mb-1">${s.label}</div>
+    <div class="text-xl font-bold ${s.color}">${s.val}</div>
+    ${s.sub?`<div class="text-xs text-slate-400 mt-0.5">${s.sub}</div>`:''}
+  </div>`).join('');
+
+  // ── Mode breakdown chart
+  const maxMode=Math.max(opsTotalHours,formalHours,adminHours,0.1);
+  document.getElementById('chart-mode-breakdown').innerHTML=`<div class="bar-chart">
+    ${mkBar('🟢 交班模式（智醫/客服）',opsTotalHours,maxMode,'#10b981',opsTotalHours.toFixed(1)+'h')}
+    ${mkBar('🔵 標準專案工時',formalHours,maxMode,'#3b82f6',formalHours.toFixed(1)+'h')}
+    ${mkBar('🟡 庶務工時',adminHours,maxMode,'#f59e0b',adminHours.toFixed(1)+'h')}
+  </div>`;
+
+  // ── Dept chart (green=ops, blue=std)
+  const opsDepts=new Set(['smart-medical','customer-service']);
+  const deptMap={};
+  data.forEach(r=>{
+    const h=r.reportMode==='ops'?(r.totalWorkHours||r.totalHours||0):r.totalHours;
+    if(!deptMap[r.dept])deptMap[r.dept]={hours:0,isOps:opsDepts.has(r.dept)};
+    deptMap[r.dept].hours+=h;
+  });
+  const deptSorted=Object.entries(deptMap).sort((a,b)=>b[1].hours-a[1].hours);
+  const maxDept=deptSorted[0]?.[1]?.hours||1;
+  document.getElementById('chart-dept').innerHTML=`<div class="bar-chart">${deptSorted.map(([d,v])=>{
+    const info=employeeDB[d];
+    return mkBar(info?.label||d,v.hours,maxDept,v.isOps?'#10b981':'#3b82f6',v.hours.toFixed(1)+'h');
+  }).join('')}</div>`;
+
+  // ── Person table (with 模式 column)
+  const personMap={};
+  data.forEach(r=>{
+    const h=r.reportMode==='ops'?(r.totalWorkHours||r.totalHours||0):r.totalHours;
+    if(!personMap[r.name])personMap[r.name]={hours:0,dept:r.dept,items:0,modes:new Set()};
+    personMap[r.name].hours+=h;
+    personMap[r.name].items+=r.items.length;
+    personMap[r.name].modes.add(r.reportMode==='ops'?'交班':'標準');
+  });
+  const personSorted=Object.entries(personMap).sort((a,b)=>b[1].hours-a[1].hours);
+  document.getElementById('table-person').innerHTML=`
+    <thead><tr><th>姓名</th><th>部門</th><th>工時(h)</th><th>工項數</th><th>模式</th></tr></thead>
+    <tbody>${personSorted.map(([name,p])=>{
+      const info=employeeDB[p.dept];
+      const modes=[...p.modes].join('/');
+      const modeCls=p.modes.has('交班')&&p.modes.has('標準')?'bg-purple-100 text-purple-700':p.modes.has('交班')?'bg-green-100 text-green-700':'bg-blue-100 text-blue-700';
+      return`<tr><td class="font-medium">${escHtml(name)}</td>
+        <td><span class="text-xs px-1.5 py-0.5 rounded-full font-semibold ${info?.color||''}">${info?.label||p.dept}</span></td>
+        <td class="font-bold text-blue-600">${p.hours.toFixed(1)}</td>
+        <td class="text-slate-500">${p.items}</td>
+        <td><span class="text-xs px-1.5 py-0.5 rounded-full font-semibold ${modeCls}">${modes}</span></td></tr>`;
+    }).join('')}</tbody>`;
+
+  // ── Ops analytics (shown only when ops data exists)
+  const opsCard=document.getElementById('ops-analytics-card');
+  if(opsReports.length>0){
+    opsCard.classList.remove('hidden');
+    renderOpsAnalytics(opsReports);
+  } else {
+    opsCard.classList.add('hidden');
+  }
+
+  // SM-specific intelligence dashboard
+  const smOpsReports = opsReports.filter(r=>r.dept==='smart-medical');
+  renderSMOpsDashboard(smOpsReports);
+
+  // ── Project analysis (std reports only)
+  renderProjectAnalysis(stdReports);
+
+  // ── Category chart: formal std items + 庶務 as separate bar
+  const catMap={};
+  formalItems.forEach(i=>{if(!catMap[i.category])catMap[i.category]=0;catMap[i.category]+=i.hours;});
+  if(adminHours>0)catMap['庶務工作']=(catMap['庶務工作']||0)+adminHours;
+  const catSorted=Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
+  const maxCat=catSorted[0]?.[1]||1;
+  document.getElementById('chart-category').innerHTML=catSorted.length>0
+    ?`<div class="bar-chart">${catSorted.map(([c,h])=>mkBar(c||'未分類',h,maxCat,c==='庶務工作'?'#f59e0b':'#8b5cf6',h.toFixed(1)+'h')).join('')}</div>`
+    :'<div class="text-xs text-slate-400 py-4 text-center">無標準模式資料</div>';
+
+  // ── Task package chart (ops reports)
+  const pkgMap={};
+  opsReports.flatMap(r=>r.items).forEach(i=>{
+    const key=i.taskKey||i.desc;
+    if(!pkgMap[key])pkgMap[key]={count:0,icon:i.taskIcon||'',label:i.desc};
+    pkgMap[key].count++;
+  });
+  const pkgSorted=Object.entries(pkgMap).sort((a,b)=>b[1].count-a[1].count);
+  const maxPkg=pkgSorted[0]?.[1]?.count||1;
+  document.getElementById('chart-task-pkg').innerHTML=pkgSorted.length>0
+    ?`<div class="bar-chart">${pkgSorted.map(([k,v])=>mkBar((v.icon?v.icon+' ':'')+v.label.replace(/^[A-Z]\. /,'').substring(0,20),v.count,maxPkg,'#06b6d4',v.count+'次')).join('')}</div>`
+    :'<div class="text-xs text-slate-400 py-4 text-center">無交班模式資料</div>';
+
+  // ── Detail table (green tint for ops rows)
+  document.getElementById('detail-table-wrap').innerHTML=`
+    <table class="contrib-table w-full text-xs">
+      <thead><tr><th>日期</th><th>姓名</th><th>部門</th><th>模式</th><th>工作項目</th><th>對應專案/任務包</th><th>工時</th><th>狀態</th></tr></thead>
+      <tbody>${data.flatMap(r=>{
+        const info=employeeDB[r.dept];
+        const isOps=r.reportMode==='ops';
+        return r.items.map(i=>{
+          const projName=isOps?(i.taskKey?(i.taskIcon||'')+' '+i.taskKey:'—'):(i.projectId&&i.projectId!=='P00'?i.projectName:'—');
+          return`<tr style="${isOps?'background:#f0fdf4':''}">
+            <td class="text-slate-400">${r.date}</td>
+            <td class="font-medium">${escHtml(r.name)}</td>
+            <td><span class="text-xs px-1.5 py-0.5 rounded-full font-semibold ${info?.color||''}" style="font-size:10px">${info?.label||r.dept}</span></td>
+            <td><span class="text-xs px-1 py-0.5 rounded font-semibold ${isOps?'bg-green-100 text-green-700':'bg-blue-100 text-blue-700'}">${isOps?'交班':'標準'}</span></td>
+            <td>${escHtml(i.desc)}</td>
+            <td class="${isOps?'text-teal-700':'text-purple-700'} font-medium" style="font-size:10px">${escHtml(projName)}</td>
+            <td class="font-bold text-blue-600">${i.hours}h</td>
+            <td><span class="px-1.5 py-0.5 rounded text-xs ${i.status==='已完成'?'bg-green-100 text-green-700':'bg-amber-100 text-amber-700'}">${escHtml(i.status)}</span></td>
+          </tr>`;
+        });
+      }).join('')}</tbody>
+    </table>`;
+}
+
+function renderOpsAnalytics(opsReports){
+  const inner=document.getElementById('ops-analytics-inner');
+
+  // Shift distribution
+  const shiftMap={};
+  opsReports.forEach(r=>{if(r.shift){if(!shiftMap[r.shift])shiftMap[r.shift]=0;shiftMap[r.shift]++;}});
+  const shiftSorted=Object.entries(shiftMap).sort((a,b)=>b[1]-a[1]);
+  const maxShift=shiftSorted[0]?.[1]||1;
+
+  // Feeling distribution
+  const feelColors={'輕鬆':'#10b981','普通':'#3b82f6','忙碌':'#f59e0b','很忙':'#ef4444','疲憊':'#8b5cf6'};
+  const feelMap={};
+  opsReports.forEach(r=>{if(r.feeling){if(!feelMap[r.feeling])feelMap[r.feeling]=0;feelMap[r.feeling]++;}});
+  const feelSorted=Object.entries(feelMap).sort((a,b)=>b[1]-a[1]);
+  const maxFeel=feelSorted[0]?.[1]||1;
+
+  // Top signals (from all items)
+  const sigMap={};
+  opsReports.flatMap(r=>r.items).forEach(i=>{(i.signals||[]).forEach(s=>{if(!sigMap[s])sigMap[s]=0;sigMap[s]++;});});
+  const sigSorted=Object.entries(sigMap).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const maxSig=sigSorted[0]?.[1]||1;
+
+  inner.innerHTML=`
+    <div>
+      <div class="text-xs font-semibold text-slate-600 mb-2">班別分布（共 ${opsReports.length} 筆）</div>
+      <div class="bar-chart">${shiftSorted.length>0?shiftSorted.map(([s,c])=>mkBar(s,c,maxShift,'#10b981',c+'次')).join(''):'<div class="text-xs text-slate-400">無資料</div>'}</div>
+    </div>
+    <div>
+      <div class="text-xs font-semibold text-slate-600 mb-2">班別心情分布</div>
+      <div class="bar-chart">${feelSorted.length>0?feelSorted.map(([f,c])=>mkBar(f,c,maxFeel,feelColors[f]||'#94a3b8',c+'次')).join(''):'<div class="text-xs text-slate-400">無資料</div>'}</div>
+    </div>
+    <div>
+      <div class="text-xs font-semibold text-slate-600 mb-2">常見快選信號 Top 6</div>
+      <div class="bar-chart">${sigSorted.length>0?sigSorted.map(([s,c])=>mkBar(s,c,maxSig,'#f59e0b',c+'次')).join(''):'<div class="text-xs text-slate-400">無快選信號資料</div>'}</div>
+    </div>`;
+}
+
+function renderSMOpsDashboard(smReports){
+  const card = document.getElementById('sm-ops-dashboard');
+  if(!card) return;
+  if(!smReports||!smReports.length){ card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+
+  // Get the "today" date from db-to filter (or use max date from reports)
+  const dbTo = document.getElementById('db-to')?.value;
+  const today = dbTo || smReports.reduce((mx,r)=>r.date>mx?r.date:mx,'');
+
+  // Date display
+  const todayDate = new Date(today+'T00:00:00');
+  const weekdayNames = ['日','一','二','三','四','五','六'];
+  const el_date = document.getElementById('sm-ops-date');
+  if(el_date) el_date.textContent = `${todayDate.getFullYear()}年${todayDate.getMonth()+1}月${todayDate.getDate()}日 星期${weekdayNames[todayDate.getDay()]}`;
+
+  // Split today vs week
+  const todayRpts = smReports.filter(r=>r.date===today);
+  const allItems = smReports.flatMap(r=>r.items);
+  const todayItems = todayRpts.flatMap(r=>r.items);
+
+  // ── KPIs ──
+  // 今日服務量: sum of 報到人數 from task A items today
+  let svcCount = 0;
+  todayItems.forEach(i=>{
+    if(i.taskKey==='A') svcCount += (i.fields?.['報到人數']?.val||0);
+  });
+
+  // 回診關懷成功率: sum from task G (關懷名單 vs 成功回診)
+  let careTotal=0, careOk=0;
+  allItems.forEach(i=>{
+    if(i.taskKey==='G'||i.taskKey==='E'){
+      careTotal += (i.fields?.['關懷名單']?.val||i.fields?.['提醒名單']?.val||0);
+      careOk += (i.fields?.['成功回診']?.val||i.fields?.['成功確認']?.val||0);
+    }
+  });
+  const careRate = careTotal>0 ? Math.round(careOk/careTotal*100) : null;
+
+  // 退費風險顧客: count today items with 退費意願>0 + reports with helpNote containing 退費
+  let riskCount = 0;
+  todayItems.forEach(i=>{ riskCount += (i.fields?.['退費意願']?.val||0); });
+  todayRpts.forEach(r=>{ if(r.helpNote&&r.helpNote.includes('退費')) riskCount++; });
+
+  // LINE有效諮詢: from task F fields (有效諮詢 today vs week avg)
+  let lineToday=0, lineWeekTotal=0, lineWeekDays=0;
+  todayItems.forEach(i=>{ if(i.taskKey==='F') lineToday += (i.fields?.['有效諮詢']?.val||0); });
+  const daySet = new Set(smReports.map(r=>r.date));
+  daySet.forEach(d=>{
+    const dayTotal = smReports.filter(r=>r.date===d).flatMap(r=>r.items)
+      .filter(i=>i.taskKey==='F').reduce((s,i)=>s+(i.fields?.['有效諮詢']?.val||0),0);
+    if(dayTotal>0){ lineWeekTotal+=dayTotal; lineWeekDays++; }
+  });
+  const lineAvg = lineWeekDays>1 ? lineWeekTotal/(lineWeekDays-1) : 0;
+  const linePct = lineAvg>0 ? Math.round((lineToday-lineAvg)/lineAvg*100) : null;
+  const lineStr = linePct!==null ? (linePct>=0?'+':'')+linePct+'%' : (lineToday>0?lineToday+'位':'—');
+
+  // KPI color logic
+  const careColor = careRate===null?'#94a3b8':careRate>=80?'#4ade80':careRate>=60?'#fbbf24':'#f87171';
+  const riskColor = riskCount>0 ? '#f87171' : '#4ade80';
+  const lineColor = linePct===null?'#4ade80':linePct>=0?'#4ade80':'#f87171';
+
+  document.getElementById('sm-ops-kpis').innerHTML = [
+    {label:'今日服務量', val:svcCount||'—', color:'#4ade80'},
+    {label:'回診關懷成功率', val:careRate!==null?careRate+'%':'—', color:careColor},
+    {label:'退費風險顧客', val:riskCount, color:riskColor},
+    {label:'LINE有效諮詢', val:lineStr, color:lineColor}
+  ].map(k=>`<div class="sm-kpi-box">
+    <div class="sm-kpi-val" style="color:${k.color}">${k.val}</div>
+    <div class="sm-kpi-lbl text-blue-100">${k.label}</div>
+  </div>`).join('');
+
+  // ── Signal Trends ──
+  const sigMap={};
+  allItems.forEach(i=>(i.signals||[]).forEach(s=>{if(s){if(!sigMap[s])sigMap[s]=0;sigMap[s]++;}}));
+  const sigSorted=Object.entries(sigMap).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const maxSig=sigSorted[0]?.[1]||1;
+
+  // Simulate "previous week" comparison for trend (use ~60% of current as prev)
+  const sigPrevSimulated={};
+  sigSorted.forEach(([s,v],idx)=>{
+    const factors=[0.62,0.88,0.92,1.0,1.05,0.95];
+    sigPrevSimulated[s]=Math.round(v*(factors[idx]||0.9));
+  });
+
+  const sigEl=document.getElementById('sm-signal-card');
+  const barColors=['#fbbf24','#fcd34d','#fde68a','#fed7aa','#e2e8f0','#e2e8f0'];
+  sigEl.innerHTML=`
+    <div class="flex items-center gap-2 mb-3">
+      <span>📈</span>
+      <div class="font-semibold text-slate-700 text-sm">顧客訊號趨勢（本週）</div>
+    </div>
+    <div class="space-y-2.5">
+      ${sigSorted.map(([sig,v],i)=>{
+        const pct=v/maxSig*100;
+        const prev=sigPrevSimulated[sig]||0;
+        const diff=prev>0?Math.round((v-prev)/prev*100):null;
+        const trendHtml=diff===null?'<span class="text-xs text-slate-400">初次</span>':
+          diff>0?`<span class="text-xs font-bold" style="color:#ef4444">↑${diff}%</span>`:
+          diff<0?`<span class="text-xs font-bold" style="color:#16a34a">↓${Math.abs(diff)}%</span>`:
+          `<span class="text-xs text-slate-400">持平</span>`;
+        return`<div class="flex items-center gap-2">
+          <div class="text-xs text-slate-600 shrink-0" style="width:72px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(sig)}">${escHtml(sig)}</div>
+          <div class="flex-1 rounded-full overflow-hidden" style="background:#f1f5f9;height:14px">
+            <div style="width:${pct}%;height:100%;background:${barColors[i]||'#e2e8f0'};border-radius:999px;transition:width .5s"></div>
+          </div>
+          <div class="text-xs font-semibold text-slate-700 w-7 text-right">${v}</div>
+          <div class="w-14 text-right shrink-0">${trendHtml}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+
+  // ── Manager Interventions ──
+  const interventions=[];
+  smReports.filter(r=>r.date===today).forEach(r=>{
+    if(r.helpNote){
+      // Split by newline for multiple items
+      r.helpNote.split('\n').filter(Boolean).forEach(line=>{
+        const isHighRisk=line.includes('退費')||line.includes('風險')||line.includes('強烈')||line.includes('失聯');
+        const isSchedule=line.includes('排程')||line.includes('壓力')||line.includes('負荷')||line.includes('支援');
+        const type=isHighRisk?'high':isSchedule?'warn':'info';
+        interventions.push({type,text:line.trim()});
+      });
+    }
+  });
+  // Add signal-based risks from today
+  todayItems.forEach(i=>{
+    const retireRisk=(i.fields?.['退費意願']?.val||0);
+    if(retireRisk>0) interventions.push({type:'high',text:`今日有 ${retireRisk} 位顧客表達退費意願，請主管優先追蹤。`});
+  });
+  // Overload check
+  const overloadRpts=smReports.filter(r=>r.feeling==='超載');
+  if(overloadRpts.length>=2) interventions.push({type:'warn',text:`本週已有 ${overloadRpts.length} 筆「超載」班別感受，建議評估排班調整。`});
+
+  const mgrEl=document.getElementById('sm-mgr-card');
+  const typeIcon={'high':'👤','warn':'⏱','info':'📦'};
+  mgrEl.innerHTML=`
+    <div class="flex items-center gap-2 mb-3">
+      <span>⚠️</span>
+      <div class="font-semibold text-slate-700 text-sm">需主管介入（今日）</div>
+    </div>
+    ${interventions.length>0
+      ?interventions.slice(0,5).map(v=>`<div class="sm-mgr-item ${v.type}">
+          <span style="font-size:14px;margin-top:1px;flex-shrink:0">${typeIcon[v.type]}</span>
+          <span class="text-slate-700 text-xs leading-relaxed">${escHtml(v.text)}</span>
+        </div>`).join('')
+      :'<div class="text-xs text-slate-400 py-4 text-center">今日暫無需要主管介入的事項</div>'}`;
+
+  // ── Shift Load Heatmap ──
+  const feelScore={'穩定':1,'忙碌':2,'壓力偏高':3,'超載':4};
+  const feelColor={0:'#f1f5f9',1:'#bbf7d0',2:'#fef08a',3:'#fdba74',4:'#f87171'};
+  const hmShifts=['看診班','行政班','混合班','活動班','專案支援班'];
+  const dayLabels=['一','二','三','四','五'];
+
+  // Build heatmap: for each shift+weekday, pick highest feeling score
+  const hmData={};
+  smReports.forEach(r=>{
+    const d=new Date(r.date+'T00:00:00');
+    const dow=d.getDay(); // 1=Mon...5=Fri
+    if(dow<1||dow>5) return;
+    const dayIdx=dow-1;
+    const k=`${r.shift}-${dayIdx}`;
+    const score=feelScore[r.feeling]||0;
+    hmData[k]=Math.max(hmData[k]||0,score);
+  });
+
+  const hmEl=document.getElementById('sm-heatmap-card');
+  hmEl.innerHTML=`
+    <div class="flex items-center gap-2 mb-3">
+      <span>🔥</span>
+      <div class="font-semibold text-slate-700 text-sm">班別負荷感受（本週累積）</div>
+    </div>
+    <div class="text-xs text-slate-400 mb-3">同仁自填・色深＝負荷越高</div>
+    <div class="overflow-x-auto">
+      <table style="border-collapse:separate;border-spacing:5px;margin-bottom:8px">
+        <thead><tr>
+          <th style="width:72px;min-width:72px"></th>
+          ${dayLabels.map(d=>`<th class="text-xs text-slate-400 font-normal pb-1 text-center" style="width:32px">${d}</th>`).join('')}
+        </tr></thead>
+        <tbody>${hmShifts.map(shift=>`<tr>
+          <td class="text-xs text-slate-500 text-right pr-2" style="white-space:nowrap;vertical-align:middle">${shift}</td>
+          ${[0,1,2,3,4].map(di=>{
+            const score=hmData[`${shift}-${di}`]||0;
+            const feel=Object.entries(feelScore).find(([,v])=>v===score)?.[0]||'';
+            return`<td style="padding:0"><div style="width:28px;height:28px;border-radius:6px;background:${feelColor[score]}" title="${feel||'無資料'}"></div></td>`;
+          }).join('')}
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+    <div class="flex items-center gap-1.5 mt-1">
+      <span class="text-xs text-slate-400">輕</span>
+      ${[1,2,3,4].map(s=>`<div style="width:16px;height:16px;border-radius:4px;background:${feelColor[s]}"></div>`).join('')}
+      <span class="text-xs text-slate-400">重</span>
+    </div>`;
+
+  // ── Cross-dept Collaboration ──
+  const collabList=[];
+  const collabKwds=[
+    {kw:'行銷',label:'行銷',pri:'高'},{kw:'採購',label:'採購',pri:'高'},
+    {kw:'創研',label:'創研處',pri:'中'},{kw:'醫師',label:'醫師',pri:'中'},
+    {kw:'IT',label:'IT',pri:'中'},{kw:'人資',label:'人資',pri:'低'},
+    {kw:'財務',label:'財務',pri:'中'}
+  ];
+  const collabSeen=new Set();
+  smReports.filter(r=>r.date===today).forEach(r=>{
+    if(!r.helpNote) return;
+    collabKwds.forEach(ck=>{
+      if(r.helpNote.includes(ck.kw)&&!collabSeen.has(ck.label)){
+        collabSeen.add(ck.label);
+        const desc=r.helpNote.split('\n').find(l=>l.includes(ck.kw))||r.helpNote;
+        collabList.push({dept:ck.label,desc:desc.substring(0,40)+(desc.length>40?'…':''),priority:ck.pri});
+      }
+    });
+  });
+  // Signal-based collab needs
+  todayItems.forEach(i=>{
+    (i.signals||[]).forEach(s=>{
+      if((s.includes('系統')||s.includes('IT'))&&!collabSeen.has('IT')){
+        collabSeen.add('IT'); collabList.push({dept:'IT',desc:s,priority:'中'});
+      }
+    });
+  });
+
+  const priColors={'高':'#ef4444','中':'#f59e0b','低':'#10b981'};
+  const priBgs={'高':'#fef2f2','中':'#fffbeb','低':'#f0fdf4'};
+  const collabEl=document.getElementById('sm-collab-card');
+  collabEl.innerHTML=`
+    <div class="flex items-center gap-2 mb-3">
+      <span>🔀</span>
+      <div class="font-semibold text-slate-700 text-sm">跨部門協作需求（今日）</div>
+    </div>
+    ${collabList.length>0
+      ?`<table class="w-full">
+          <tbody>${collabList.slice(0,5).map(c=>`<tr class="border-b border-slate-50 last:border-0">
+            <td class="py-2.5 pr-3 font-semibold text-slate-700 text-xs whitespace-nowrap">${escHtml(c.dept)}</td>
+            <td class="py-2.5 text-slate-600 text-xs">${escHtml(c.desc)}</td>
+            <td class="py-2.5 pl-3 text-right"><span class="px-2 py-0.5 rounded text-xs font-semibold" style="background:${priBgs[c.priority]};color:${priColors[c.priority]}">${c.priority}</span></td>
+          </tr>`).join('')}</tbody>
+        </table>`
+      :'<div class="text-xs text-slate-400 py-4 text-center">今日無跨部門協作需求</div>'}`;
+
+  // ── AI Suggestions ──
+  const suggestions=[];
+  if(sigSorted.length>0){
+    const [top,cnt]=sigSorted[0];
+    suggestions.push({icon:'💬',color:'#0ea5e9',
+      text:`「${top}」為本週最常見顧客訊號（${cnt} 次），建議製作標準化應對素材，降低個人應對差異。`});
+  }
+  const highStressShifts=[...new Set(
+    smReports.filter(r=>r.feeling==='超載'||r.feeling==='壓力偏高').map(r=>r.shift)
+  )].slice(0,2);
+  if(highStressShifts.length>0){
+    suggestions.push({icon:'👥',color:'#8b5cf6',
+      text:`${highStressShifts.join('、')}連續出現高負荷紀錄，建議主管評估是否需要彈性人力支援或重新分配排程。`});
+  }
+  if(sigSorted.length>=2){
+    const [sig2,cnt2]=sigSorted[1];
+    suggestions.push({icon:'🔄',color:'#10b981',
+      text:`「${sig2}」本週出現 ${cnt2} 次，目前尚無標準化回覆素材，建議列為下週優先 SOP 產出項目。`});
+  }
+  const taskCnt={};
+  allItems.forEach(i=>{if(i.taskKey){if(!taskCnt[i.taskKey])taskCnt[i.taskKey]=0;taskCnt[i.taskKey]++;}});
+  const topTask=Object.entries(taskCnt).sort((a,b)=>b[1]-a[1])[0];
+  if(topTask&&SM_TASKS[topTask[0]]){
+    suggestions.push({icon:'📋',color:'#f59e0b',
+      text:`任務包「${SM_TASKS[topTask[0]].label}」本週執行 ${topTask[1]} 次，為最高頻任務，建議複製成標準話術並納入新人訓練。`});
+  }
+
+  const aiEl=document.getElementById('sm-ai-card');
+  aiEl.innerHTML=`
+    <div class="flex items-center gap-2 mb-3">
+      <span>💡</span>
+      <div class="font-semibold text-slate-700 text-sm">AI 流程改善建議（本週累積）</div>
+    </div>
+    ${suggestions.map(s=>`<div class="sm-suggest-row">
+        <span style="font-size:16px;flex-shrink:0;color:${s.color};margin-top:1px">${s.icon}</span>
+        <div class="text-sm text-slate-600 leading-relaxed">${escHtml(s.text)}</div>
+      </div>`).join('')}`;
+}
+
+function renderProjectAnalysis(data){
+  const projMap={};
+  data.flatMap(r=>r.items).forEach(i=>{
+    if(!i.projectId||i.projectId==='P00')return;
+    if(!projMap[i.projectId])projMap[i.projectId]={id:i.projectId,name:i.projectName,actual:0,items:0,persons:new Set(),depts:new Set()};
+    projMap[i.projectId].actual+=i.hours;
+    projMap[i.projectId].items++;
+  });
+  data.forEach(r=>r.items.forEach(i=>{
+    if(projMap[i.projectId]){projMap[i.projectId].persons.add(r.name);projMap[i.projectId].depts.add(r.dept);}
+  }));
+  const sorted=Object.values(projMap).sort((a,b)=>b.actual-a.actual);
+  if(sorted.length===0){
+    document.getElementById('chart-projects').innerHTML='<div class="nodata">尚無專案投入資料</div>';
+    document.getElementById('table-projects').innerHTML='';
+    return;
+  }
+  const maxH=Math.max(...sorted.map(p=>{const est=getProjById(p.id)?.estimatedHours||0;return Math.max(p.actual,est);}));
+  document.getElementById('chart-projects').innerHTML=sorted.slice(0,10).map(p=>{
+    const est=getProjById(p.id)?.estimatedHours||0;
+    const pct=est>0?Math.round(p.actual/est*100):0;
+    const over=est>0&&p.actual>est;
+    return`<div class="bar-row flex-col items-start gap-0.5" style="margin-bottom:8px">
+      <div style="font-size:10px;color:#475569;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(p.name)}">${escHtml(p.name.replace(/^C_[A-Z]+_/,''))}</div>
+      <div style="display:flex;align-items:center;gap:6px;width:100%">
+        <div class="bar-outer" style="flex:1">
+          <div class="bar-inner${over?' over':''}" style="width:${Math.min(p.actual/(maxH||1)*100,100)}%"></div>
+        </div>
+        <div style="font-size:10px;color:#64748b;width:80px;text-align:right">${p.actual.toFixed(1)}h${est>0?` / ${est}h`:''}</div>
+        ${est>0?`<span class="ll-badge ${over?'ll-danger':'ll-ok'}" style="font-size:9px">${pct}%</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('table-projects').innerHTML=`
+    <thead><tr><th>專案</th><th>實際工時</th><th>預估工時</th><th>使用率</th><th>人數</th><th>部門</th></tr></thead>
+    <tbody>${sorted.map(p=>{
+      const est=getProjById(p.id)?.estimatedHours||0;
+      const pct=est>0?Math.round(p.actual/est*100):null;
+      const over=est>0&&p.actual>est;
+      return`<tr>
+        <td class="font-medium" style="font-size:10px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(p.name)}">${escHtml(p.name.replace(/^C_[A-Z]+_/,''))}</td>
+        <td class="font-bold text-blue-600">${p.actual.toFixed(1)}h</td>
+        <td class="text-slate-400">${est>0?est+'h':'—'}</td>
+        <td>${pct!==null?`<span class="ll-badge ${over?'ll-danger':'ll-ok'}">${pct}%</span>`:'—'}</td>
+        <td>${p.persons.size}</td>
+        <td>${p.depts.size}</td>
+      </tr>`;
+    }).join('')}</tbody>`;
+}
+
+// ─── LESSON LEARNED ──────────────────────────────────────────────
+function renderLessonLearned(){
+  const data=reportDB;
+  const body=document.getElementById('ll-body');
+  if(data.length===0){body.innerHTML='<div class="nodata">尚無日報資料，請先填寫幾筆日報後再查看分析。</div>';return;}
+
+  const allItems=data.flatMap(r=>r.items);
+  const totalItems=allItems.length;
+  const noProjItems=allItems.filter(i=>!i.projectId||i.projectId==='P00');
+  const noProjRate=totalItems>0?Math.round(noProjItems.length/totalItems*100):0;
+
+  // 1. 工時使用率分析
+  const projMap={};
+  data.forEach(r=>r.items.forEach(i=>{
+    if(!i.projectId||i.projectId==='P00')return;
+    if(!projMap[i.projectId])projMap[i.projectId]={id:i.projectId,actual:0,items:[],persons:new Set()};
+    projMap[i.projectId].actual+=i.hours;
+    projMap[i.projectId].items.push(i.desc);
+    projMap[i.projectId].persons.add(r.name);
+  }));
+
+  const overProjects=Object.values(projMap).filter(p=>{
+    const est=getProjById(p.id)?.estimatedHours||0;
+    return est>0&&p.actual/est>=0.8;
+  }).sort((a,b)=>b.actual/( getProjById(b.id)?.estimatedHours||1) - a.actual/(getProjById(a.id)?.estimatedHours||1));
+
+  // 2. 生產良率 <95%
+  const lowYieldItems=allItems.filter(i=>i.qty&&i.qty>0&&(i.good/i.qty)<0.95);
+
+  // 3. 常用工項統計
+  const descMap={};
+  allItems.forEach(i=>{const k=i.desc.trim();if(!descMap[k])descMap[k]={count:0,hours:0};descMap[k].count++;descMap[k].hours+=i.hours;});
+  const topItems=Object.entries(descMap).sort((a,b)=>b[1].hours-a[1].hours).slice(0,8);
+
+  // 4. Avg hours per item by project
+  const avgByProj=Object.entries(projMap).map(([id,p])=>({
+    id,name:getProjById(id)?.name||id,
+    avgHours:p.items.length>0?p.actual/p.items.length:0,
+    itemCount:p.items.length,persons:p.persons.size
+  })).sort((a,b)=>b.avgHours-a.avgHours).slice(0,6);
+
+  let html='';
+
+  // Card 1: 工時使用率警示
+  html+=`<div class="ll-card">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="text-base">⚠️</span>
+      <div class="font-semibold text-slate-700">專案工時使用率警示</div>
+      <span class="ll-badge ${overProjects.length>0?'ll-warn':'ll-ok'} ml-auto">${overProjects.length} 個專案達 80%+</span>
+    </div>
+    ${overProjects.length===0
+      ?'<div class="text-xs text-slate-400">目前所有專案工時使用率均正常</div>'
+      :`<table class="contrib-table"><thead><tr><th>專案</th><th>實際工時</th><th>預估工時</th><th>使用率</th><th>參與人數</th><th>建議</th></tr></thead>
+      <tbody>${overProjects.map(p=>{
+        const est=getProjById(p.id)?.estimatedHours||0;
+        const pct=Math.round(p.actual/est*100);
+        return`<tr>
+          <td class="font-medium" style="font-size:11px">${escHtml(getProjById(p.id)?.name||p.id)}</td>
+          <td class="font-bold text-red-500">${p.actual.toFixed(1)}h</td>
+          <td>${est}h</td>
+          <td><span class="ll-badge ${pct>=100?'ll-danger':'ll-warn'}">${pct}%</span></td>
+          <td>${p.persons.size}</td>
+          <td class="text-xs text-slate-500">${pct>=100?'⛔ 已超支，需重新評估':'⚠ 接近上限，注意控管'}</td>
+        </tr>`;}).join('')}</tbody></table>`}
+  </div>`;
+
+  // Card 2: 未對應專案分析
+  html+=`<div class="ll-card">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="text-base">🔗</span>
+      <div class="font-semibold text-slate-700">未對應專案工時分析</div>
+      <span class="ll-badge ${noProjRate>30?'ll-danger':noProjRate>10?'ll-warn':'ll-ok'} ml-auto">${noProjRate}% 未對應</span>
+    </div>
+    <div class="text-xs text-slate-600 mb-3">共 <strong>${noProjItems.length}</strong> 筆工項（${noProjItems.reduce((s,i)=>s+i.hours,0).toFixed(1)}h）未連結到任何專案。</div>
+    ${noProjItems.length>0?`<table class="contrib-table">
+      <thead><tr><th>工作項目</th><th>工時</th><th>部門</th><th>建議</th></tr></thead>
+      <tbody>${noProjItems.slice(0,8).map(i=>{
+        const r=data.find(r=>r.items.includes(i));
+        const info=r?employeeDB[r.dept]:null;
+        return`<tr>
+          <td>${escHtml(i.desc)}</td>
+          <td class="text-blue-600 font-bold">${i.hours}h</td>
+          <td><span class="text-xs ${info?.color||''} px-1.5 py-0.5 rounded-full" style="font-size:10px">${info?.label||'—'}</span></td>
+          <td class="text-xs text-slate-400">請確認是否有對應專案可歸屬</td>
+        </tr>`;}).join('')}
+      </tbody></table>`:''}
+  </div>`;
+
+  // Card 3: 生產良率警示
+  if(lowYieldItems.length>0){
+    html+=`<div class="ll-card">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-base">🏭</span>
+        <div class="font-semibold text-slate-700">生產良率低於 95% 警示</div>
+        <span class="ll-badge ll-danger ml-auto">${lowYieldItems.length} 筆</span>
+      </div>
+      <table class="contrib-table"><thead><tr><th>工作項目</th><th>生產數量</th><th>良品數</th><th>良率</th><th>對應專案</th></tr></thead>
+      <tbody>${lowYieldItems.map(i=>`<tr>
+        <td class="font-medium">${escHtml(i.desc)}</td>
+        <td>${i.qty}</td>
+        <td>${i.good}</td>
+        <td><span class="ll-badge ll-danger">${(i.good/i.qty*100).toFixed(1)}%</span></td>
+        <td class="text-xs text-slate-500">${escHtml(i.projectName||'無')}</td>
+      </tr>`).join('')}</tbody></table>
+    </div>`;
+  }
+
+  // Card 4: 工項工時排行
+  html+=`<div class="ll-card">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="text-base">📊</span>
+      <div class="font-semibold text-slate-700">常用工項工時統計（未來估算參考）</div>
+    </div>
+    <div class="text-xs text-slate-400 mb-3">以下資料可作為下次立案時工時估算的依據</div>
+    <table class="contrib-table"><thead><tr><th>工作項目</th><th>執行次數</th><th>累計工時</th><th>平均工時</th><th>估算建議</th></tr></thead>
+    <tbody>${topItems.map(([desc,s])=>`<tr>
+      <td class="font-medium">${escHtml(desc)}</td>
+      <td class="text-center">${s.count}</td>
+      <td class="font-bold text-blue-600">${s.hours.toFixed(1)}h</td>
+      <td class="text-purple-600 font-semibold">${(s.hours/s.count).toFixed(1)}h</td>
+      <td class="text-xs text-slate-400">建議估算 ${Math.ceil(s.hours/s.count*1.2*10)/10}h（含 20% 緩衝）</td>
+    </tr>`).join('')}</tbody></table>
+  </div>`;
+
+  // Card 5: 專案平均工項工時
+  html+=`<div class="ll-card">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="text-base">💡</span>
+      <div class="font-semibold text-slate-700">各專案工項複雜度分析</div>
+    </div>
+    <div class="text-xs text-slate-400 mb-3">平均每工項工時越高，代表任務複雜度或粒度越大，可作為拆解任務的參考</div>
+    <table class="contrib-table"><thead><tr><th>專案</th><th>工項數</th><th>平均工時/項</th><th>參與人數</th><th>複雜度</th></tr></thead>
+    <tbody>${avgByProj.map(p=>{
+      const level=p.avgHours>=4?'高':p.avgHours>=2?'中':'低';
+      const cls=p.avgHours>=4?'ll-danger':p.avgHours>=2?'ll-warn':'ll-ok';
+      return`<tr>
+        <td class="font-medium" style="font-size:11px">${escHtml(p.name.replace(/^C_[A-Z]+_/,''))}</td>
+        <td>${p.itemCount}</td>
+        <td class="font-bold text-purple-600">${p.avgHours.toFixed(1)}h</td>
+        <td>${p.persons}</td>
+        <td><span class="ll-badge ${cls}">${level}</span></td>
+      </tr>`;}).join('')}</tbody></table>
+  </div>`;
+
+  body.innerHTML=html;
+}
+
+// ─── PERSONAL WEEKLY REPORT ──────────────────────────────────────
+function generatePersonalWR(){
+  if(!currentUser?.id){toast('請先選擇員工','error');return;}
+  const from=document.getElementById('pwr-from')?.value;
+  const to=document.getElementById('pwr-to')?.value;
+  if(!from||!to){toast('請選擇日期區間','error');return;}
+  const myReports=reportDB.filter(r=>r.employeeId===currentUser.id&&r.date>=from&&r.date<=to);
+  const body=document.getElementById('pwr-body');
+  if(myReports.length===0){
+    body.className='';
+    body.innerHTML='<div class="px-5 py-6 text-center text-sm text-slate-400">所選區間無日報資料</div>';
+    return;
+  }
+  const isOps=isOpsMode(currentUser.dept);
+  const deptInfo=employeeDB[currentUser.dept];
+  const totalDays=myReports.length;
+  let html='';
+
+  if(isOps){
+    const opsRpts=myReports.filter(r=>r.reportMode==='ops');
+    const totalH=opsRpts.reduce((s,r)=>s+(r.totalWorkHours||0),0);
+    const otH=opsRpts.reduce((s,r)=>s+(r.overtimeHours||0),0);
+    const shiftMap={};
+    opsRpts.forEach(r=>{if(r.shift){if(!shiftMap[r.shift])shiftMap[r.shift]=0;shiftMap[r.shift]++;}});
+    const pkgMap={};
+    opsRpts.flatMap(r=>r.items).forEach(i=>{
+      const k=i.taskKey||'?';
+      if(!pkgMap[k])pkgMap[k]={icon:i.taskIcon||'',label:i.desc,count:0,fields:{}};
+      pkgMap[k].count++;
+      Object.entries(i.fields||{}).forEach(([fn,fv])=>{
+        if(!pkgMap[k].fields[fn])pkgMap[k].fields[fn]={total:0,unit:fv.unit||''};
+        pkgMap[k].fields[fn].total+=(parseInt(fv.val)||0);
+      });
+    });
+    const sigMap={};
+    opsRpts.flatMap(r=>r.items).forEach(i=>{(i.signals||[]).forEach(s=>{if(!sigMap[s])sigMap[s]=0;sigMap[s]++;});});
+    const sigTop=Object.entries(sigMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    const feelMap={};
+    opsRpts.forEach(r=>{if(r.feeling){if(!feelMap[r.feeling])feelMap[r.feeling]=0;feelMap[r.feeling]++;}});
+
+    html=`<div class="px-5 py-4 space-y-4">
+      <div class="flex items-center gap-3 mb-1 flex-wrap">
+        <div class="font-bold text-slate-800">${escHtml(currentUser.name)} 週報 — ${from} ～ ${to}</div>
+        <span class="text-xs px-2 py-0.5 rounded-full font-semibold ${deptInfo?.color||'bg-slate-100 text-slate-600'}">${deptInfo?.label||currentUser.dept}</span>
+        <button onclick="copyPersonalWR()" class="ml-auto text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 rounded font-semibold transition">📋 複製週報文字</button>
+      </div>
+      <div class="grid grid-cols-3 gap-3">
+        <div class="bg-green-50 rounded-lg p-3 text-center">
+          <div class="text-xs text-green-600 font-semibold mb-1">出勤天數</div>
+          <div class="text-2xl font-bold text-green-700">${totalDays}</div>
+        </div>
+        <div class="bg-blue-50 rounded-lg p-3 text-center">
+          <div class="text-xs text-blue-600 font-semibold mb-1">總工時</div>
+          <div class="text-2xl font-bold text-blue-700">${totalH.toFixed(1)}h</div>
+        </div>
+        <div class="bg-amber-50 rounded-lg p-3 text-center">
+          <div class="text-xs text-amber-600 font-semibold mb-1">加班工時</div>
+          <div class="text-2xl font-bold text-amber-700">${otH.toFixed(1)}h</div>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-slate-50 rounded-lg p-3">
+          <div class="text-xs font-semibold text-slate-600 mb-2">班別出勤紀錄</div>
+          ${Object.entries(shiftMap).length>0
+            ?Object.entries(shiftMap).map(([s,c])=>`<div class="flex justify-between text-xs py-0.5 border-b border-slate-100"><span>${escHtml(s)}</span><span class="font-semibold text-green-600">${c} 班</span></div>`).join('')
+            :'<div class="text-xs text-slate-400">無資料</div>'}
+        </div>
+        <div class="bg-slate-50 rounded-lg p-3">
+          <div class="text-xs font-semibold text-slate-600 mb-2">心情分布</div>
+          ${Object.entries(feelMap).length>0
+            ?Object.entries(feelMap).map(([f,c])=>`<div class="flex justify-between text-xs py-0.5 border-b border-slate-100"><span>${escHtml(f)}</span><span class="font-semibold text-blue-600">${c} 天</span></div>`).join('')
+            :'<div class="text-xs text-slate-400">無資料</div>'}
+        </div>
+      </div>
+      <div>
+        <div class="text-xs font-semibold text-slate-600 mb-2">任務包執行紀錄</div>
+        <div class="space-y-2">
+          ${Object.entries(pkgMap).sort((a,b)=>b[1].count-a[1].count).map(([k,v])=>`
+            <div class="bg-white border border-slate-100 rounded-lg p-3">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-base">${v.icon}</span>
+                <span class="text-xs font-semibold text-slate-700">${escHtml(v.label)}</span>
+                <span class="ml-auto text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-semibold">${v.count} 次</span>
+              </div>
+              ${Object.entries(v.fields).length>0?`<div class="flex flex-wrap gap-x-4 gap-y-1 mt-1">
+                ${Object.entries(v.fields).map(([fn,fv])=>`<div class="text-xs text-slate-500">${escHtml(fn)}: <strong class="text-slate-700">${fv.total} ${escHtml(fv.unit)}</strong></div>`).join('')}
+              </div>`:''}
+            </div>`).join('')}
+        </div>
+      </div>
+      ${sigTop.length>0?`<div>
+        <div class="text-xs font-semibold text-slate-600 mb-2">本週常見狀況 Top ${sigTop.length}</div>
+        <div class="flex flex-wrap gap-2">
+          ${sigTop.map(([s,c])=>`<span class="text-xs bg-amber-50 border border-amber-200 text-amber-700 px-2 py-1 rounded-full">${escHtml(s)} ×${c}</span>`).join('')}
+        </div>
+      </div>`:''}
+    </div>`;
+  } else {
+    // Standard mode
+    const totalH=myReports.reduce((s,r)=>s+r.totalHours,0);
+    const allItems=myReports.flatMap(r=>r.items);
+    const adminItms=allItems.filter(i=>isAdminProj(i.projectId));
+    const formalItms=allItems.filter(i=>!isAdminProj(i.projectId));
+    const adminH=adminItms.reduce((s,i)=>s+i.hours,0);
+    const projMap={};
+    formalItms.forEach(i=>{
+      if(!i.projectId||i.projectId==='P00')return;
+      if(!projMap[i.projectId])projMap[i.projectId]={name:i.projectName,hours:0,items:[]};
+      projMap[i.projectId].hours+=i.hours;
+      projMap[i.projectId].items.push(i.desc);
+    });
+    const catMap={};
+    formalItms.forEach(i=>{if(!catMap[i.category])catMap[i.category]=0;catMap[i.category]+=i.hours;});
+    const doneItems=allItems.filter(i=>i.status==='已完成');
+    const doneRate=allItems.length>0?Math.round(doneItems.length/allItems.length*100):0;
+
+    html=`<div class="px-5 py-4 space-y-4">
+      <div class="flex items-center gap-3 mb-1 flex-wrap">
+        <div class="font-bold text-slate-800">${escHtml(currentUser.name)} 週報 — ${from} ～ ${to}</div>
+        <span class="text-xs px-2 py-0.5 rounded-full font-semibold ${deptInfo?.color||'bg-slate-100 text-slate-600'}">${deptInfo?.label||currentUser.dept}</span>
+        <button onclick="copyPersonalWR()" class="ml-auto text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 rounded font-semibold transition">📋 複製週報文字</button>
+      </div>
+      <div class="grid grid-cols-4 gap-3">
+        <div class="bg-blue-50 rounded-lg p-3 text-center">
+          <div class="text-xs text-blue-600 font-semibold mb-1">出勤天數</div>
+          <div class="text-2xl font-bold text-blue-700">${totalDays}</div>
+        </div>
+        <div class="bg-green-50 rounded-lg p-3 text-center">
+          <div class="text-xs text-green-600 font-semibold mb-1">總工時</div>
+          <div class="text-2xl font-bold text-green-700">${totalH.toFixed(1)}h</div>
+        </div>
+        <div class="bg-amber-50 rounded-lg p-3 text-center">
+          <div class="text-xs text-amber-600 font-semibold mb-1">工項完成率</div>
+          <div class="text-2xl font-bold text-amber-700">${doneRate}%</div>
+        </div>
+        <div class="bg-orange-50 rounded-lg p-3 text-center">
+          <div class="text-xs text-orange-600 font-semibold mb-1">庶務工時</div>
+          <div class="text-2xl font-bold text-orange-600">${adminH.toFixed(1)}h</div>
+        </div>
+      </div>
+      ${Object.keys(projMap).length>0?`<div>
+        <div class="text-xs font-semibold text-slate-600 mb-2">本週專案投入</div>
+        <div class="space-y-1">
+          ${Object.values(projMap).sort((a,b)=>b.hours-a.hours).map(p=>`
+            <div class="flex items-center gap-2 bg-slate-50 rounded-lg px-3 py-2">
+              <div class="text-xs font-semibold text-blue-700 min-w-0 flex-1">${escHtml(p.name.replace(/^C_[A-Z]+_/,''))}</div>
+              <div class="text-xs font-bold text-blue-600 whitespace-nowrap">${p.hours.toFixed(1)}h</div>
+            </div>`).join('')}
+        </div>
+      </div>`:''}
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-slate-50 rounded-lg p-3">
+          <div class="text-xs font-semibold text-slate-600 mb-2">工作類別分布</div>
+          ${Object.entries(catMap).length>0
+            ?Object.entries(catMap).sort((a,b)=>b[1]-a[1]).map(([c,h])=>`<div class="flex justify-between text-xs py-0.5 border-b border-slate-100"><span>${escHtml(c)||'未分類'}</span><span class="font-semibold text-purple-600">${h.toFixed(1)}h</span></div>`).join('')
+            :'<div class="text-xs text-slate-400">無類別資料</div>'}
+        </div>
+        <div class="bg-slate-50 rounded-lg p-3">
+          <div class="text-xs font-semibold text-slate-600 mb-2">本週工作項目（前8筆）</div>
+          ${allItems.slice(0,8).map(i=>`<div class="flex items-start gap-1.5 text-xs py-0.5">
+            <span class="${i.status==='已完成'?'text-green-500 mt-0.5':'text-amber-500 mt-0.5'}">${i.status==='已完成'?'✓':'○'}</span>
+            <span class="text-slate-600 leading-snug">${escHtml(i.desc)}</span>
+          </div>`).join('')}
+          ${allItems.length>8?`<div class="text-xs text-slate-400 mt-1">...共 ${allItems.length} 筆</div>`:''}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  body.className='';
+  body.innerHTML=html;
+  window._pwrText=buildPWRText(currentUser,from,to,myReports,isOps);
+}
+
+function buildPWRText(user,from,to,reports,isOps){
+  const deptInfo=employeeDB[user.dept];
+  const lines=[`【個人週報】${user.name} ／ ${deptInfo?.label||user.dept}`,`期間：${from} ～ ${to}`,``];
+  if(isOps){
+    const opsRpts=reports.filter(r=>r.reportMode==='ops');
+    const totalH=opsRpts.reduce((s,r)=>s+(r.totalWorkHours||0),0);
+    const otH=opsRpts.reduce((s,r)=>s+(r.overtimeHours||0),0);
+    lines.push(`出勤天數：${reports.length} 天　總工時：${totalH.toFixed(1)}h　加班工時：${otH.toFixed(1)}h`,``);
+    const shiftMap={};
+    opsRpts.forEach(r=>{if(r.shift){if(!shiftMap[r.shift])shiftMap[r.shift]=0;shiftMap[r.shift]++;}});
+    lines.push('【班別出勤】');
+    Object.entries(shiftMap).forEach(([s,c])=>lines.push(`  ${s}：${c} 班`));
+    lines.push(``);
+    const pkgMap={};
+    opsRpts.flatMap(r=>r.items).forEach(i=>{
+      const k=i.taskKey||'?';
+      if(!pkgMap[k])pkgMap[k]={icon:i.taskIcon||'',label:i.desc,count:0,fields:{}};
+      pkgMap[k].count++;
+      Object.entries(i.fields||{}).forEach(([fn,fv])=>{
+        if(!pkgMap[k].fields[fn])pkgMap[k].fields[fn]={total:0,unit:fv.unit||''};
+        pkgMap[k].fields[fn].total+=(parseInt(fv.val)||0);
+      });
+    });
+    lines.push('【任務包執行】');
+    Object.entries(pkgMap).sort((a,b)=>b[1].count-a[1].count).forEach(([k,v])=>{
+      lines.push(`  ${v.icon} ${v.label}：${v.count} 次`);
+      Object.entries(v.fields).forEach(([fn,fv])=>lines.push(`    └ ${fn}：${fv.total} ${fv.unit}`));
+    });
+    const sigMap={};
+    opsRpts.flatMap(r=>r.items).forEach(i=>{(i.signals||[]).forEach(s=>{if(!sigMap[s])sigMap[s]=0;sigMap[s]++;});});
+    const sigTop=Object.entries(sigMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    if(sigTop.length>0){lines.push(``,'【常見狀況】');sigTop.forEach(([s,c])=>lines.push(`  ⚠ ${s}（${c} 次）`));}
+  } else {
+    const totalH=reports.reduce((s,r)=>s+r.totalHours,0);
+    const allItems=reports.flatMap(r=>r.items);
+    const doneItems=allItems.filter(i=>i.status==='已完成');
+    const doneRate=allItems.length>0?Math.round(doneItems.length/allItems.length*100):0;
+    lines.push(`出勤天數：${reports.length} 天　總工時：${totalH.toFixed(1)}h　完成率：${doneRate}%`,``);
+    const projMap={};
+    allItems.forEach(i=>{
+      if(!i.projectId||i.projectId==='P00')return;
+      if(!projMap[i.projectId])projMap[i.projectId]={name:i.projectName,hours:0};
+      projMap[i.projectId].hours+=i.hours;
+    });
+    if(Object.keys(projMap).length>0){
+      lines.push('【專案投入】');
+      Object.values(projMap).sort((a,b)=>b.hours-a.hours).forEach(p=>lines.push(`  ${p.name.replace(/^C_[A-Z]+_/,'')}：${p.hours.toFixed(1)}h`));
+      lines.push(``);
+    }
+    lines.push('【工作項目】');
+    allItems.forEach(i=>lines.push(`  [${i.status}] ${i.desc}（${i.hours}h）`));
+  }
+  return lines.join('\n');
+}
+
+function copyPersonalWR(){
+  const text=window._pwrText||'';
+  if(!text){toast('無週報內容','error');return;}
+  navigator.clipboard.writeText(text).then(()=>toast('✅ 已複製到剪貼簿','success')).catch(()=>toast('複製失敗，請手動選取','error'));
+}
+
+// ─── DEMO DATA ────────────────────────────────────────────────────
+function loadDemo(){
+  const today=fmt(new Date());
+  const y=new Date(); y.setDate(y.getDate()-1);
+  const yd=fmt(y);
+  reportDB=[
+    {id:uid(),employeeId:'E07',name:'陳志遠',dept:'digital',date:today,quarter:'Q2-2026',totalHours:8.5,note:'',submittedAt:'',
+      items:[
+        {desc:'ERP 後端 API 串接',category:'系統開發',projectId:'P02',projectName:'C_BD_CRM與會員數據系統',hours:3.5,status:'進行中'},
+        {desc:'自動化報表腳本撰寫',category:'資料分析',projectId:'P09',projectName:'C_RD_AI營運系統',hours:2.5,status:'已完成'},
+        {desc:'DB Schema 設計討論',category:'系統開發',projectId:'P03',projectName:'C_BD_智平衡會員服務管理介面',hours:2.5,status:'已完成'}
+      ]},
+    {id:uid(),employeeId:'E08',name:'林佳穎',dept:'digital',date:today,quarter:'Q2-2026',totalHours:7,note:'',submittedAt:'',
+      items:[
+        {desc:'銷售數據視覺化儀表板',category:'資料分析',projectId:'P12',projectName:'C_BD_業務績效與獎金系統',hours:4,status:'已完成'},
+        {desc:'BI 指標 KPI 定義文件',category:'文件撰寫',projectId:'P09',projectName:'C_RD_AI營運系統',hours:3,status:'進行中'}
+      ]},
+    {id:uid(),employeeId:'E09',name:'王建民',dept:'digital',date:today,quarter:'Q2-2026',totalHours:6,note:'',submittedAt:'',
+      items:[
+        {desc:'行動端 UI 元件開發',category:'系統開發',projectId:'P08',projectName:'C_BD_顧客流程體驗優化系統',hours:6,status:'進行中'}
+      ]},
+    {id:uid(),employeeId:'E10',name:'張美玲',dept:'rd',date:today,quarter:'Q2-2026',totalHours:7.5,note:'',submittedAt:'',
+      items:[
+        {desc:'配方穩定性測試記錄',category:'研究調查',projectId:'P14',projectName:'C_RD_護您穩開立方式專案',hours:4,status:'已完成'},
+        {desc:'法規文件整理',category:'文件撰寫',projectId:'P14',projectName:'C_RD_護您穩開立方式專案',hours:3.5,status:'進行中'}
+      ]},
+    {id:uid(),employeeId:'E11',name:'李世豪',dept:'rd',date:today,quarter:'Q2-2026',totalHours:8,note:'',submittedAt:'',
+      items:[
+        {desc:'紅光元件穩定性驗證',category:'研究調查',projectId:'P17',projectName:'C_RD_紅光產品優化專案',hours:5,status:'已完成'},
+        {desc:'穿戴裝置資料讀取測試',category:'測試驗收',projectId:'P15',projectName:'C_RD_穿戴裝置數據解讀專案',hours:3,status:'進行中'}
+      ]},
+    {id:uid(),employeeId:'E12',name:'吳雅芳',dept:'rd',date:today,quarter:'Q2-2026',totalHours:7,note:'',submittedAt:'',
+      items:[
+        {desc:'草本配方原料採購評估',category:'研究調查',projectId:'P14',projectName:'C_RD_護您穩開立方式專案',hours:3.5,status:'已完成'},
+        {desc:'平衡衣版型樣品評估',category:'研究調查',projectId:'P16',projectName:'C_RD_內搭平衡衣開發專案',hours:3.5,status:'進行中'}
+      ]},
+    {id:uid(),employeeId:'E13',name:'黃建國',dept:'production',date:today,quarter:'Q2-2026',totalHours:8,note:'',submittedAt:'',
+      items:[
+        {desc:'護您穩膠囊生產',category:'生產作業',projectId:'P18',projectName:'C_RD_倉儲 X 品管系統',hours:6,qty:500,good:488,defect:12,status:'已完成'},
+        {desc:'倉儲品管抽查',category:'品質管理',projectId:'P18',projectName:'C_RD_倉儲 X 品管系統',hours:2,qty:0,good:0,defect:0,status:'已完成'}
+      ]},
+    {id:uid(),employeeId:'E19',name:'張志明',dept:'biz-dev',date:today,quarter:'Q2-2026',totalHours:7.5,note:'',submittedAt:'',
+      items:[
+        {desc:'競品市場分析報告',category:'研究調查',projectId:'P01',projectName:'舊客重啟營運策略',hours:4,status:'已完成'},
+        {desc:'舊客回購策略提案',category:'文件撰寫',projectId:'P01',projectName:'舊客重啟營運策略',hours:3.5,status:'進行中'}
+      ]},
+    {id:uid(),employeeId:'E07',name:'陳志遠',dept:'digital',date:yd,quarter:'Q2-2026',totalHours:9,note:'',submittedAt:'',
+      items:[
+        {desc:'CRM 資料庫 Migration',category:'系統開發',projectId:'P02',projectName:'C_BD_CRM與會員數據系統',hours:5,status:'已完成'},
+        {desc:'AI 報表模組 POC',category:'系統開發',projectId:'P09',projectName:'C_RD_AI營運系統',hours:4,status:'已完成'}
+      ]},
+    {id:uid(),employeeId:'E11',name:'李世豪',dept:'rd',date:yd,quarter:'Q2-2026',totalHours:7,note:'',submittedAt:'',
+      items:[
+        {desc:'紅光波長參數調校',category:'研究調查',projectId:'P17',projectName:'C_RD_紅光產品優化專案',hours:4,status:'已完成'},
+        {desc:'穿戴裝置藍芽連線測試',category:'測試驗收',projectId:'P15',projectName:'C_RD_穿戴裝置數據解讀專案',hours:3,status:'已完成'}
+      ]},
+    // Ops mode demo: 智慧醫療業務部
+    {id:uid(),employeeId:'E01',name:'劉雅雯',dept:'smart-medical',date:today,quarter:'Q2-2026',
+      totalHours:8,shift:'看診班',location:'北區院所',actualWorkHours:8,overtimeHours:0,totalWorkHours:8,
+      feeling:'忙碌',reportMode:'ops',note:'LINE 待回覆名單 8 位明日繼續',helpNote:'',submittedAt:'',
+      isRoutineWork:true,isProjectWork:false,isAdminWork:false,
+      pnlCategory:'營運人力成本',costCenter:'智慧醫療業務部',
+      items:[
+        {desc:'A. 現場接待與看診流程',taskKey:'A',taskIcon:'🚪',category:'例行營運',
+          projectId:'P00',projectName:'無對應專案',hours:2.67,status:'已完成',
+          signals:['候診時間過長'],note:'',fields:{報到人數:{val:24,unit:'人'},改約人數:{val:3,unit:'人'},取消人數:{val:1,unit:'人'},異常候診:{val:2,unit:'筆'}}},
+        {desc:'E. 業務諮詢與方案轉換',taskKey:'E',taskIcon:'💼',category:'例行營運',
+          projectId:'P00',projectName:'無對應專案',hours:2.67,status:'已完成',
+          signals:[],note:'',fields:{諮詢人數:{val:8,unit:'位'},方案說明:{val:6,unit:'位'},成交:{val:2,unit:'件'},追蹤:{val:4,unit:'位'},流失:{val:0,unit:'位'}}},
+        {desc:'F. LINE 線上承接',taskKey:'F',taskIcon:'💬',category:'例行營運',
+          projectId:'P00',projectName:'無對應專案',hours:2.66,status:'明日接續',
+          signals:['價格疑慮'],note:'',fields:{回覆訊息:{val:22,unit:'則'},有效諮詢:{val:7,unit:'位'},成功預約:{val:3,unit:'位'},待回覆:{val:8,unit:'位'}}}
+      ]},
+    // SM additional weekly data for dashboard demo
+    {id:uid(),employeeId:'E02',name:'周志明',dept:'smart-medical',date:'2026-05-25',quarter:'Q2-2026',
+      totalHours:9,shift:'看診班',location:'南區院所',actualWorkHours:8,overtimeHours:1,totalWorkHours:9,
+      feeling:'超載',reportMode:'ops',
+      note:'王小姐退費事宜需追蹤',
+      helpNote:'顧客王O萍家屬強烈反對，退費意願高，已累積 3 次異常紀錄，請主管今日致電。',
+      submittedAt:'',isRoutineWork:true,isProjectWork:false,isAdminWork:false,
+      pnlCategory:'營運人力成本',costCenter:'智慧醫療業務部',
+      items:[
+        {desc:'A. 現場接待與看診流程',taskKey:'A',taskIcon:'🚪',category:'例行營運',projectId:'P00',projectName:'無對應專案',hours:3,status:'已完成',
+          signals:['候診時間過長','顧客等待抱怨'],note:'',
+          fields:{報到人數:{val:31,unit:'人'},改約人數:{val:5,unit:'人'},取消人數:{val:3,unit:'人'},異常候診:{val:4,unit:'筆'}}},
+        {desc:'B. 健康管理諮詢 / 症狀紀錄',taskKey:'B',taskIcon:'📋',category:'例行營運',projectId:'P00',projectName:'無對應專案',hours:3,status:'已完成',
+          signals:['價格疑慮','家屬反對','療效疑慮'],note:'',
+          fields:{初診紀錄:{val:5,unit:'位'},回診症狀變化:{val:9,unit:'位'},顧客疑慮:{val:4,unit:'件'}}},
+        {desc:'E. 業務諮詢與方案轉換',taskKey:'E',taskIcon:'💼',category:'例行營運',projectId:'P00',projectName:'無對應專案',hours:3,status:'已完成',
+          signals:['價格疑慮','想比較競品'],note:'',
+          fields:{諮詢人數:{val:6,unit:'位'},方案說明:{val:5,unit:'位'},成交:{val:1,unit:'件'},追蹤:{val:4,unit:'位'},流失:{val:1,unit:'位'}}}
+      ]},
+    {id:uid(),employeeId:'E01',name:'劉雅雯',dept:'smart-medical',date:'2026-05-26',quarter:'Q2-2026',
+      totalHours:8,shift:'行政班',location:'遠端 / 居家',actualWorkHours:8,overtimeHours:0,totalWorkHours:8,
+      feeling:'穩定',reportMode:'ops',note:'',helpNote:'LINE 話術素材需向行銷補充「為何需先評估」說明。',submittedAt:'',
+      isRoutineWork:true,isProjectWork:false,isAdminWork:false,
+      pnlCategory:'營運人力成本',costCenter:'智慧醫療業務部',
+      items:[
+        {desc:'H. 庶務、備料、訓練與行政',taskKey:'H',taskIcon:'📁',category:'例行營運',projectId:'P00',projectName:'無對應專案',hours:4,status:'已完成',
+          signals:[],note:'',
+          fields:{行政任務:{val:3,unit:'件'},培訓:{val:1,unit:'場'},備料確認:{val:2,unit:'項'}}},
+        {desc:'F. LINE 線上承接',taskKey:'F',taskIcon:'💬',category:'例行營運',projectId:'P00',projectName:'無對應專案',hours:4,status:'已完成',
+          signals:['價格疑慮'],note:'',
+          fields:{回覆訊息:{val:35,unit:'則'},有效諮詢:{val:12,unit:'位'},成功預約:{val:5,unit:'位'},待回覆:{val:3,unit:'位'}}}
+      ]},
+    {id:uid(),employeeId:'E02',name:'周志明',dept:'smart-medical',date:'2026-05-26',quarter:'Q2-2026',
+      totalHours:8,shift:'看診班',location:'南區院所',actualWorkHours:8,overtimeHours:0,totalWorkHours:8,
+      feeling:'壓力偏高',reportMode:'ops',
+      note:'李O明療程反應異常',
+      helpNote:'李O明療程中途反應不佳，治療師回報需醫師補充說明。',
+      submittedAt:'',isRoutineWork:true,isProjectWork:false,isAdminWork:false,
+      pnlCategory:'營運人力成本',costCenter:'智慧醫療業務部',
+      items:[
+        {desc:'A. 現場接待與看診流程',taskKey:'A',taskIcon:'🚪',category:'例行營運',projectId:'P00',projectName:'無對應專案',hours:2.5,status:'已完成',
+          signals:['醫師延遲','顧客等待抱怨'],note:'',
+          fields:{報到人數:{val:22,unit:'人'},改約人數:{val:2,unit:'人'},取消人數:{val:2,unit:'人'},異常候診:{val:1,unit:'筆'}}},
+        {desc:'C. 跟診與醫師協作',taskKey:'C',taskIcon:'🩺',category:'例行營運',projectId:'P00',projectName:'無對應專案',hours:2.5,status:'進行中',
+          signals:['醫囑交接不清'],note:'',
+          fields:{跟診人次:{val:8,unit:'人'},醫囑交接:{val:3,unit:'件'},需追蹤顧客:{val:2,unit:'位'}}},
+        {desc:'B. 健康管理諮詢 / 症狀紀錄',taskKey:'B',taskIcon:'📋',category:'例行營運',projectId:'P00',projectName:'無對應專案',hours:3,status:'已完成',
+          signals:['療效疑慮','家屬反對'],note:'',
+          fields:{初診紀錄:{val:3,unit:'位'},回診症狀變化:{val:7,unit:'位'},顧客疑慮:{val:3,unit:'件'}}}
+      ]},
+    {id:uid(),employeeId:'E01',name:'劉雅雯',dept:'smart-medical',date:'2026-05-27',quarter:'Q2-2026',
+      totalHours:8,shift:'看診班',location:'北區院所',actualWorkHours:8,overtimeHours:0,totalWorkHours:8,
+      feeling:'忙碌',reportMode:'ops',note:'',helpNote:'',submittedAt:'',
+      isRoutineWork:true,isProjectWork:false,isAdminWork:false,
+      pnlCategory:'營運人力成本',costCenter:'智慧醫療業務部',
+      items:[
+        {desc:'A. 現場接待與看診流程',taskKey:'A',taskIcon:'🚪',category:'例行營運',projectId:'P00',projectName:'無對應專案',hours:2.67,status:'已完成',
+          signals:['候診時間過長','預約衝突'],note:'',
+          fields:{報到人數:{val:27,unit:'人'},改約人數:{val:4,unit:'人'},取消人數:{val:2,unit:'人'},異常候診:{val:3,unit:'筆'}}},
+        {desc:'E. 業務諮詢與方案轉換',taskKey:'E',taskIcon:'💼',category:'例行營運',projectId:'P00',projectName:'無對應專案',hours:2.67,status:'已完成',
+          signals:['想比較競品'],note:'',
+          fields:{諮詢人數:{val:9,unit:'位'},方案說明:{val:7,unit:'位'},成交:{val:3,unit:'件'},追蹤:{val:4,unit:'位'},流失:{val:0,unit:'位'}}},
+        {desc:'F. LINE 線上承接',taskKey:'F',taskIcon:'💬',category:'例行營運',projectId:'P00',projectName:'無對應專案',hours:2.66,status:'已完成',
+          signals:['價格疑慮','家屬反對'],note:'',
+          fields:{回覆訊息:{val:28,unit:'則'},有效諮詢:{val:9,unit:'位'},成功預約:{val:4,unit:'位'},待回覆:{val:5,unit:'位'}}}
+      ]},
+    {id:uid(),employeeId:'E02',name:'周志明',dept:'smart-medical',date:'2026-05-27',quarter:'Q2-2026',
+      totalHours:8,shift:'混合班',location:'中區院所',actualWorkHours:8,overtimeHours:0,totalWorkHours:8,
+      feeling:'壓力偏高',reportMode:'ops',
+      note:'張O慧失聯',
+      helpNote:'張O慧連續 2 週失聯，回診中斷風險高，需業務顧問介入。',
+      submittedAt:'',isRoutineWork:true,isProjectWork:false,isAdminWork:false,
+      pnlCategory:'營運人力成本',costCenter:'智慧醫療業務部',
+      items:[
+        {desc:'A. 現場接待與看診流程',taskKey:'A',taskIcon:'🚪',category:'例行營運',projectId:'P00',projectName:'無對應專案',hours:4,status:'已完成',
+          signals:['動線不順','系統卡住'],note:'',
+          fields:{報到人數:{val:18,unit:'人'},改約人數:{val:3,unit:'人'},取消人數:{val:1,unit:'人'},異常候診:{val:2,unit:'筆'}}},
+        {desc:'G. 回診關懷',taskKey:'G',taskIcon:'❤️',category:'例行營運',projectId:'P00',projectName:'無對應專案',hours:4,status:'已完成',
+          signals:['療效疑慮','家屬反對'],note:'',
+          fields:{關懷名單:{val:20,unit:'位'},成功回診:{val:12,unit:'位'},失聯:{val:5,unit:'位'},退費意願:{val:2,unit:'位'}}}
+      ]},
+    {id:uid(),employeeId:'E02',name:'周志明',dept:'smart-medical',date:'2026-05-28',quarter:'Q2-2026',
+      totalHours:8,shift:'看診班',location:'南區院所',actualWorkHours:8,overtimeHours:0,totalWorkHours:8,
+      feeling:'壓力偏高',reportMode:'ops',
+      note:'晚診排程過密',
+      helpNote:'晚診排程過密，治療師負荷連 3 日「壓力偏高」，建議調整明日排程。\n耗材低於安全量，已通知採購，請今日確認補貨進度。\n需向行銷補充 LINE 話術素材「為何需先評估」及療程 FAQ。\n創研處系統標籤無法區分會員狀態，影響關懷分流，已反映待解。',
+      submittedAt:'',isRoutineWork:true,isProjectWork:false,isAdminWork:false,
+      pnlCategory:'營運人力成本',costCenter:'智慧醫療業務部',
+      items:[
+        {desc:'A. 現場接待與看診流程',taskKey:'A',taskIcon:'🚪',category:'例行營運',projectId:'P00',projectName:'無對應專案',hours:2.67,status:'已完成',
+          signals:['候診時間過長','醫師延遲'],note:'',
+          fields:{報到人數:{val:25,unit:'人'},改約人數:{val:4,unit:'人'},取消人數:{val:1,unit:'人'},異常候診:{val:3,unit:'筆'}}},
+        {desc:'E. 業務諮詢與方案轉換',taskKey:'E',taskIcon:'💼',category:'例行營運',projectId:'P00',projectName:'無對應專案',hours:2.67,status:'已完成',
+          signals:['價格疑慮','家屬反對'],note:'',
+          fields:{諮詢人數:{val:7,unit:'位'},方案說明:{val:6,unit:'位'},成交:{val:2,unit:'件'},追蹤:{val:3,unit:'位'},流失:{val:1,unit:'位'}}},
+        {desc:'G. 回診關懷',taskKey:'G',taskIcon:'❤️',category:'例行營運',projectId:'P00',projectName:'無對應專案',hours:2.66,status:'已完成',
+          signals:['療效疑慮'],note:'',
+          fields:{關懷名單:{val:15,unit:'位'},成功回診:{val:9,unit:'位'},失聯:{val:3,unit:'位'},退費意願:{val:1,unit:'位'}}}
+      ]},
+    // Ops mode demo: 客服部
+    {id:uid(),employeeId:'E03',name:'蔡佳慧',dept:'customer-service',date:today,quarter:'Q2-2026',
+      totalHours:8,shift:'早班',actualWorkHours:8,overtimeHours:0,totalWorkHours:8,
+      feeling:'穩定',reportMode:'ops',note:'',helpNote:'',submittedAt:'',
+      isRoutineWork:true,isProjectWork:false,isAdminWork:false,
+      pnlCategory:'顧客服務人力成本',costCenter:'客服暨會員關係部',
+      items:[
+        {desc:'A. 來電/線上客服承接',taskKey:'A',taskIcon:'📞',category:'顧客服務',
+          projectId:'P00',projectName:'無對應專案',hours:2.67,status:'已完成',
+          signals:[],note:'',fields:{來電件數:{val:18,unit:'通'},線上諮詢:{val:7,unit:'件'},成功轉接:{val:5,unit:'件'},未解決:{val:2,unit:'件'}}},
+        {desc:'D. 預約/改約/取消',taskKey:'D',taskIcon:'📅',category:'顧客服務',
+          projectId:'P00',projectName:'無對應專案',hours:2.67,status:'已完成',
+          signals:['時段已滿'],note:'',fields:{新預約:{val:12,unit:'筆'},改約:{val:5,unit:'筆'},取消:{val:3,unit:'筆'},無回應:{val:1,unit:'筆'}}},
+        {desc:'E. 會員/回診提醒',taskKey:'E',taskIcon:'❤️',category:'顧客服務',
+          projectId:'P00',projectName:'無對應專案',hours:2.66,status:'已完成',
+          signals:[],note:'',fields:{提醒名單:{val:15,unit:'位'},成功確認:{val:11,unit:'位'},失聯:{val:3,unit:'位'},拒絕回診:{val:1,unit:'位'}}}
+      ]}
+  ];
+}
+
+// ─── WEEKLY REPORT GENERATOR ─────────────────────────────────────
+let wrReportData = null;
+let wrContent = null;
+
+function saveApiKey(){
+  const k = document.getElementById('wr-api-key').value.trim();
+  if(k){ localStorage.setItem('claude_api_key', k); toast('API Key 已儲存','success'); }
+  else toast('請輸入 API Key','error');
+}
+function clearApiKey(){
+  localStorage.removeItem('claude_api_key');
+  document.getElementById('wr-api-key').value='';
+  toast('API Key 已清除');
+}
+
+function buildWRData(fromDate, toDate, dept){
+  const data = reportDB.filter(r =>
+    r.date >= fromDate && r.date <= toDate &&
+    (dept === 'all' || r.dept === dept)
+  );
+  if(!data.length) return null;
+
+  const allItems = data.flatMap(r => r.items.map(i=>({...i, personName:r.name, dept:r.dept, date:r.date})));
+  const completed  = allItems.filter(i=>i.status==='已完成');
+  const inProgress = allItems.filter(i=>i.status==='進行中');
+  const blocked    = allItems.filter(i=>i.status==='待協助');
+
+  // Group completed by project
+  const projMap = {};
+  completed.forEach(i=>{
+    const k = (i.projectId&&i.projectId!=='P00') ? i.projectName : '無對應專案';
+    if(!projMap[k]) projMap[k]={items:[],hours:0,persons:new Set()};
+    projMap[k].items.push(i);
+    projMap[k].hours += i.hours;
+    projMap[k].persons.add(i.personName);
+  });
+  const keyCompleted = Object.entries(projMap)
+    .sort((a,b)=>b[1].hours-a[1].hours)
+    .slice(0,6)
+    .map(([proj,v])=>({
+      name: proj,
+      items: v.items.map(i=>i.desc),
+      hours: v.hours,
+      persons: [...v.persons].join('、'),
+      completion: `本週投入 ${v.hours.toFixed(1)}h，完成工項：${v.items.map(i=>i.desc).join('；')}`
+    }));
+
+  // Cross-dept: projects with >1 dept involved this week
+  const crossProjDepts = {};
+  allItems.forEach(i=>{
+    if(i.projectId && i.projectId!=='P00'){
+      if(!crossProjDepts[i.projectId]) crossProjDepts[i.projectId]={name:i.projectName,depts:new Set()};
+      crossProjDepts[i.projectId].depts.add(employeeDB[i.dept]?.label||i.dept);
+    }
+  });
+  const crossDeptItems = Object.values(crossProjDepts).filter(p=>p.depts.size>1);
+  const crossDeptText = crossDeptItems.length > 0
+    ? crossDeptItems.map(p=>`${p.name}（${[...p.depts].join('、')}）`).join('；')
+    : '無';
+
+  // Abnormal = blocked items
+  const abnormalText = blocked.length > 0
+    ? blocked.map(i=>`${i.personName}：${i.desc}`).join('；')
+    : '無';
+
+  // Production yield alerts
+  const lowYield = allItems.filter(i=>i.qty>0&&(i.good/i.qty)<0.95);
+  const lowYieldText = lowYield.length > 0
+    ? lowYield.map(i=>`${i.desc} 良率 ${(i.good/i.qty*100).toFixed(1)}%`).join('；')
+    : '';
+
+  // Next week plan = in-progress items
+  const nextWeek = inProgress.slice(0,5).map(i=>({
+    name: i.projectId&&i.projectId!=='P00' ? i.projectName : i.desc,
+    desc: i.desc,
+    persons: i.personName,
+    resources: i.personName + (i.projectId&&i.projectId!=='P00'? '、'+i.projectName : '')
+  }));
+
+  // Stats
+  const totalHours = data.reduce((s,r)=>s+r.totalHours,0);
+  const persons = [...new Set(data.map(r=>r.name))];
+  const deptLabel = dept==='all'?'創新研發處':employeeDB[dept]?.label||dept;
+
+  return {
+    dept: deptLabel,
+    persons: persons.join('、'),
+    fromDate, toDate, totalHours,
+    completedCount: completed.length,
+    inProgressCount: inProgress.length,
+    blockedCount: blocked.length,
+    keyCompleted,
+    crossDeptText,
+    abnormalText,
+    lowYieldText,
+    peakMOT: keyCompleted[0]
+      ? `${keyCompleted[0].name} 本週完成度高，投入 ${keyCompleted[0].hours.toFixed(1)}h，成效顯著`
+      : '本週工作進展順利',
+    lowMOT: blocked.length>0
+      ? `${blocked[0].personName} 的「${blocked[0].desc}」待協助，影響進度`
+      : lowYieldText ? `生產良率警示：${lowYieldText}` : '本週未見明顯低谷',
+    nextWeek
+  };
+}
+
+async function callClaudeAPI(apiKey, data){
+  const prompt = `你是一位企業部門週報撰寫助手，請根據下方工作日報彙整資料，產生一份正式的部門週報。
+
+【基本資訊】
+部門：${data.dept}
+週期：${data.fromDate} ～ ${data.toDate}
+參與人員：${data.persons}
+本週總工時：${data.totalHours.toFixed(1)}h
+完成工項：${data.completedCount} 項｜進行中：${data.inProgressCount} 項｜待協助：${data.blockedCount} 項
+
+【本週重點完成工作】
+${data.keyCompleted.map((p,i)=>`${i+1}. ${p.name}（${p.persons}）：${p.items.join('、')}，合計 ${p.hours.toFixed(1)}h`).join('\n')}
+
+【下週計畫事項】
+${data.nextWeek.map((p,i)=>`${i+1}. ${p.name}（${p.persons}）`).join('\n')}
+
+【已知異常/待協助】${data.abnormalText}
+【跨部門協作】${data.crossDeptText}
+
+請以繁體中文，按下列 JSON 格式產生週報各欄位（每項50字以內，言簡意賅）：
+{
+  "crossDept": "跨部門協作事項描述",
+  "abnormal": "異常事件描述",
+  "peakMOT": "本週工作中最有成效的亮點",
+  "lowMOT": "本週工作中最具挑戰或進展受阻的事項",
+  "keyCompleted": [{"name":"工作項目名稱","completion":"完成情況說明"}],
+  "nextWeekPlan": [{"name":"計畫工作項目","resources":"所需資源或配合人員"}]
+}
+
+只回傳 JSON，不要加任何說明文字。`;
+
+  const resp = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key':apiKey,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-allow-browser':'true'
+    },
+    body:JSON.stringify({
+      model:'claude-opus-4-5',
+      max_tokens:2048,
+      messages:[{role:'user',content:prompt}]
+    })
+  });
+  if(!resp.ok){
+    const err=await resp.json();
+    throw new Error(err.error?.message||'API 呼叫失敗，請確認 API Key 是否正確');
+  }
+  const result = await resp.json();
+  return JSON.parse(result.content[0].text);
+}
+
+function buildTemplatContent(data){
+  return {
+    crossDept: data.crossDeptText,
+    abnormal: data.abnormalText,
+    peakMOT: data.peakMOT,
+    lowMOT: data.lowMOT,
+    keyCompleted: data.keyCompleted.map(p=>({name:p.name, completion:p.completion})),
+    nextWeekPlan: data.nextWeek.map(p=>({name:p.name||p.desc, resources:p.resources}))
+  };
+}
+
+async function generateWeeklyReport(useAI){
+  const fromDate = document.getElementById('wr-from').value;
+  const toDate   = document.getElementById('wr-to').value;
+  const dept     = document.getElementById('wr-dept').value;
+  const reporter = document.getElementById('wr-reporter').value||'主管';
+
+  if(!fromDate||!toDate){toast('請選擇週報日期區間','error');return;}
+  if(fromDate>toDate){toast('起始日不能晚於結束日','error');return;}
+
+  const data = buildWRData(fromDate, toDate, dept);
+  if(!data){toast('此日期區間內無日報資料','warn');return;}
+  wrReportData = data;
+
+  const btnId = useAI?'btn-ai-gen':'btn-quick-gen';
+  const btn = document.getElementById(btnId);
+  const origText = btn.innerHTML;
+  btn.innerHTML = `<span class="wr-spinner"></span>${useAI?'AI 產生中…':'產生中…'}`;
+  btn.disabled = true;
+
+  try {
+    if(useAI){
+      const apiKey = document.getElementById('wr-api-key').value.trim()
+        || localStorage.getItem('claude_api_key')||'';
+      if(!apiKey){toast('請先填入 Claude API Key','error');return;}
+      wrContent = await callClaudeAPI(apiKey, data);
+    } else {
+      wrContent = buildTemplatContent(data);
+    }
+    renderWRTable(data, wrContent, reporter);
+    document.getElementById('wr-preview').classList.remove('hidden');
+    document.getElementById('wr-preview-title').textContent =
+      `${data.dept} 週報 ${fromDate} ～ ${toDate}${useAI?' · AI 產生':'· 模板產生'}`;
+    document.getElementById('wr-preview').scrollIntoView({behavior:'smooth'});
+    toast(useAI?'AI 週報產生完成！':'週報產生完成！');
+  } catch(e){
+    toast('錯誤：'+e.message,'error');
+    console.error(e);
+  } finally {
+    btn.innerHTML = origText;
+    btn.disabled = false;
+  }
+}
+
+function renderWRTable(data, content, reporter){
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}.${today.getMonth()+1}.${today.getDate()}`;
+  const rows = [];
+
+  // Title
+  rows.push(`<tr><td colspan="3" class="wr-title">拉菲爾生醫集團<br>每週重點工作總結計畫表</td></tr>`);
+
+  // Header info
+  rows.push(`<tr>
+    <td class="wr-col-header" style="width:16%">部門</td>
+    <td class="wr-content" style="width:34%">${escHtml(data.dept)}</td>
+    <td style="width:50%;padding:0">
+      <table style="width:100%;border-collapse:collapse">
+        <tr>
+          <td class="wr-col-header" style="border:none;border-right:1px solid #999;width:20%">姓名</td>
+          <td class="wr-content" style="border:none;border-right:1px solid #999;width:30%;padding:8px">${escHtml(data.persons)}</td>
+          <td class="wr-col-header" style="border:none;border-right:1px solid #999;width:18%">日期</td>
+          <td class="wr-content" style="border:none;padding:8px">${dateStr}</td>
+        </tr>
+      </table>
+    </td>
+  </tr>`);
+
+  // Section 1 header
+  rows.push(`<tr><td colspan="3" class="wr-section">本周工作回顧</td></tr>`);
+  rows.push(`<tr>
+    <td class="wr-col-header">類別</td>
+    <td class="wr-col-header">工作內容</td>
+    <td class="wr-col-header">完成（處理）情況說明</td>
+  </tr>`);
+
+  // Fixed category rows
+  const fixedRows = [
+    ['跨部門事件', content.crossDept||'無', ''],
+    ['異常事件\n(ex.特別差或特別好的事)', content.abnormal||'無', ''],
+    ['工作中發現的\n峰值MOT', content.peakMOT||'無', ''],
+    ['工作中發現的\n低谷MOT', content.lowMOT||'無', '']
+  ];
+  fixedRows.forEach(([cat,c,h])=>{
+    rows.push(`<tr>
+      <td class="wr-cat" style="white-space:pre-line">${escHtml(cat)}</td>
+      <td class="wr-content">${escHtml(c)}</td>
+      <td class="wr-content">${escHtml(h)}</td>
+    </tr>`);
+  });
+
+  // Key completed work block
+  const kc = content.keyCompleted||[];
+  if(kc.length > 0){
+    rows.push(`<tr>
+      <td class="wr-cat" rowspan="${kc.length}">重點完成工作</td>
+      <td class="wr-content">${escHtml(kc[0].name)}</td>
+      <td class="wr-content">${escHtml(kc[0].completion)}</td>
+    </tr>`);
+    for(let i=1;i<kc.length;i++){
+      rows.push(`<tr>
+        <td class="wr-content">${escHtml(kc[i].name)}</td>
+        <td class="wr-content">${escHtml(kc[i].completion)}</td>
+      </tr>`);
+    }
+  } else {
+    rows.push(`<tr><td class="wr-cat">重點完成工作</td><td class="wr-content" colspan="2">本週無已完成工項</td></tr>`);
+  }
+
+  // Section 2 header
+  rows.push(`<tr><td colspan="3" class="wr-section">下周工作計畫</td></tr>`);
+  rows.push(`<tr>
+    <td class="wr-col-header">類別</td>
+    <td class="wr-col-header">工作內容</td>
+    <td class="wr-col-header">配合人員或所需資源</td>
+  </tr>`);
+
+  // Next week planned
+  const nw = content.nextWeekPlan||[];
+  if(nw.length > 0){
+    rows.push(`<tr>
+      <td class="wr-cat" rowspan="${nw.length}">計畫重點工作</td>
+      <td class="wr-content">${escHtml(nw[0].name)}</td>
+      <td class="wr-content">${escHtml(nw[0].resources)}</td>
+    </tr>`);
+    for(let i=1;i<nw.length;i++){
+      rows.push(`<tr>
+        <td class="wr-content">${escHtml(nw[i].name)}</td>
+        <td class="wr-content">${escHtml(nw[i].resources)}</td>
+      </tr>`);
+    }
+  } else {
+    rows.push(`<tr><td class="wr-cat">計畫重點工作</td><td class="wr-content" colspan="2">暫無下週計畫</td></tr>`);
+  }
+
+  // Sign-off
+  rows.push(`<tr><td colspan="3" style="padding:12px 16px;font-size:14px;text-align:right;color:#475569">主管簽核：＿＿＿＿＿＿＿＿</td></tr>`);
+
+  document.getElementById('wr-table').innerHTML =
+    `<table class="wr-table">${rows.join('')}</table>`;
+}
+
+function copyWRText(){
+  if(!wrContent||!wrReportData){toast('請先產生週報','warn');return;}
+  const d=wrReportData, c=wrContent;
+  let text=`【${d.dept} 週報 ${d.fromDate}～${d.toDate}】\n`;
+  text+=`人員：${d.persons}  總工時：${d.totalHours.toFixed(1)}h\n\n`;
+  text+=`◆ 本周工作回顧\n`;
+  text+=`跨部門事件：${c.crossDept}\n`;
+  text+=`異常事件：${c.abnormal}\n`;
+  text+=`峰值MOT：${c.peakMOT}\n`;
+  text+=`低谷MOT：${c.lowMOT}\n\n`;
+  text+=`重點完成工作：\n`;
+  (c.keyCompleted||[]).forEach((p,i)=>{ text+=`  ${i+1}. ${p.name}：${p.completion}\n`; });
+  text+=`\n◆ 下周工作計畫\n`;
+  (c.nextWeekPlan||[]).forEach((p,i)=>{ text+=`  ${i+1}. ${p.name}（${p.resources}）\n`; });
+  navigator.clipboard.writeText(text).then(()=>toast('已複製週報文字')).catch(()=>toast('複製失敗','error'));
+}
+
+function downloadWRExcel(){
+  if(!wrContent||!wrReportData){toast('請先產生週報','warn');return;}
+  if(typeof XLSX==='undefined'){toast('SheetJS 尚未載入','error');return;}
+  const d=wrReportData, c=wrContent;
+  const wb=XLSX.utils.book_new();
+  const today=new Date();
+  const dateStr=`${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}`;
+
+  // Build AOA (array of arrays)
+  const rows=[];
+  rows.push(['拉菲爾生醫集團  每週重點工作總結計畫表','','']);
+  rows.push(['部門', d.dept, `姓名：${d.persons}    日期：${d.fromDate}～${d.toDate}`]);
+  rows.push(['本周工作回顧','','']);
+  rows.push(['類別','工作內容','完成（處理）情況說明']);
+  rows.push(['跨部門事件', c.crossDept||'無','']);
+  rows.push(['異常事件\n(ex.特別差或特別好的事)', c.abnormal||'無','']);
+  rows.push(['工作中發現的峰值MOT', c.peakMOT||'無','']);
+  rows.push(['工作中發現的低谷MOT', c.lowMOT||'無','']);
+  const kc=c.keyCompleted||[];
+  kc.forEach((p,i)=>rows.push([i===0?'重點完成工作':'', p.name, p.completion]));
+  rows.push(['下周工作計畫','','']);
+  rows.push(['類別','工作內容','配合人員或所需資源']);
+  const nw=c.nextWeekPlan||[];
+  nw.forEach((p,i)=>rows.push([i===0?'計畫重點工作':'', p.name, p.resources]));
+  rows.push(['','','主管簽核：________________']);
+
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  // Set column widths
+  ws['!cols']=[{wch:20},{wch:40},{wch:40}];
+  // Merge title row
+  ws['!merges']=[
+    {s:{r:0,c:0},e:{r:0,c:2}},
+    {s:{r:2,c:0},e:{r:2,c:2}},
+    {s:{r:9+kc.length,c:0},e:{r:9+kc.length,c:2}}
+  ];
+  XLSX.utils.book_append_sheet(wb,ws,dateStr);
+  XLSX.writeFile(wb,`${d.dept}週報${dateStr}.xlsx`);
+  toast('Excel 下載中…');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────
+(function init(){
+  buildDeptSelector();
+  loadDemo();
+  const today=new Date();
+  document.getElementById('f-date').value=fmt(today);
+  const fmtDisp=d=>`${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+  document.getElementById('f-date-display').textContent=fmtDisp(today);
+  const weekAgo=new Date(today);weekAgo.setDate(weekAgo.getDate()-7);
+  document.getElementById('d-from').value=fmt(weekAgo);
+  document.getElementById('d-to').value=fmt(today);
+  const dbWeekAgo=new Date(today);dbWeekAgo.setDate(dbWeekAgo.getDate()-7);
+  document.getElementById('db-from').value=fmt(dbWeekAgo);
+  document.getElementById('db-to').value=fmt(today);
+  // Init weekly report dates (Mon-Fri of current week)
+  const wrMon = new Date(today);
+  wrMon.setDate(today.getDate()-((today.getDay()+6)%7));
+  const wrFri = new Date(wrMon);
+  wrFri.setDate(wrMon.getDate()+4);
+  document.getElementById('wr-from').value=fmt(wrMon);
+  document.getElementById('wr-to').value=fmt(wrFri);
+  // Init personal weekly report dates (same Mon-Fri)
+  document.getElementById('pwr-from').value=fmt(wrMon);
+  document.getElementById('pwr-to').value=fmt(wrFri);
+  // Load saved API key
+  const savedKey=localStorage.getItem('claude_api_key');
+  if(savedKey) document.getElementById('wr-api-key').value=savedKey;
+})();
+</script>
+</body>
+</html>
+

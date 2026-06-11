@@ -102,6 +102,90 @@
     return html;
   }
 
+  function normalizePrjEntry(opt) {
+    if (opt && typeof opt === "object") {
+      return {
+        ProjectName: String(
+          opt.ProjectName != null ? opt.ProjectName : opt.projectName || "",
+        ).trim(),
+        ProjectId: String(
+          opt.ProjectId != null ? opt.ProjectId : opt.projectId || "",
+        ).trim(),
+      };
+    }
+    return { ProjectName: String(opt || "").trim(), ProjectId: "" };
+  }
+
+  function resolveProjectIdFromList(name, id) {
+    var pid = String(id != null ? id : "").trim();
+    if (pid) return pid;
+    var n = String(name || "").trim();
+    if (!n) return "";
+    var found = (paneCtx.prjList || []).find(function (p) {
+      var entry = normalizePrjEntry(p);
+      return entry.ProjectName === n;
+    });
+    return found ? normalizePrjEntry(found).ProjectId : "";
+  }
+
+  function buildProjectSelectOptions(prjList, selectedName, selectedId, emptyLabel) {
+    var selName = String(selectedName || "").trim();
+    var selId = String(selectedId || "").trim();
+    var html = emptyLabel
+      ? '<option value="">' + paneCtx.escapeHtml(emptyLabel) + "</option>"
+      : "";
+    (prjList || []).forEach(function (opt) {
+      var entry = normalizePrjEntry(opt);
+      if (!entry.ProjectName) return;
+      var isSelected = selName === entry.ProjectName || (selId && selId === entry.ProjectId);
+      html +=
+        '<option value="' +
+        paneCtx.escapeHtml(entry.ProjectName) +
+        '" data-project-id="' +
+        paneCtx.escapeHtml(entry.ProjectId) +
+        '"' +
+        (isSelected ? " selected" : "") +
+        ">" +
+        paneCtx.escapeHtml(entry.ProjectName) +
+        "</option>";
+    });
+    if (
+      selName &&
+      !(prjList || []).some(function (p) {
+        return normalizePrjEntry(p).ProjectName === selName;
+      })
+    ) {
+      html +=
+        '<option value="' +
+        paneCtx.escapeHtml(selName) +
+        '" data-project-id="' +
+        paneCtx.escapeHtml(selId) +
+        '" selected>' +
+        paneCtx.escapeHtml(selName) +
+        "（歷史）</option>";
+    }
+    return html;
+  }
+
+  function bindProjectSelect(tr, initialProjectId) {
+    var projSel = tr.querySelector('[data-key="ProjectName"]');
+    var projIdEl = tr.querySelector('[data-key="ProjectId"]');
+    if (!projSel || !projIdEl) return;
+    var syncProjectId = function () {
+      var opt = projSel.options[projSel.selectedIndex];
+      var id = opt ? String(opt.getAttribute("data-project-id") || "").trim() : "";
+      if (!id && projSel.value) {
+        id = resolveProjectIdFromList(projSel.value, "");
+      }
+      projIdEl.value = id;
+    };
+    if (initialProjectId) {
+      projIdEl.value = String(initialProjectId).trim();
+    }
+    projSel.addEventListener("change", syncProjectId);
+    syncProjectId();
+  }
+
   function prodQtyInput(key, value) {
     return (
       '<input data-key="' +
@@ -150,6 +234,7 @@
     if (!body) return;
     var data = item || {};
     var cats = getCategories();
+    var projectId = resolveProjectIdFromList(data.ProjectName, data.ProjectId);
     var tr = document.createElement("tr");
     tr.dataset.bid = String(data.BID || "").trim();
     tr.dataset.aid = String(data.AID || "").trim();
@@ -162,8 +247,15 @@
         '<td class="px-2 py-2"><select data-key="category" class="w-full border border-slate-200 rounded px-2 py-1.5">' +
         buildSelectOptions(cats, data.category, "請選擇") +
         "</select></td>" +
-        '<td class="px-2 py-2"><select data-key="ProjectName" class="w-full border border-slate-200 rounded px-2 py-1.5">' +
-        buildSelectOptions(paneCtx.prjList, data.ProjectName, "請選擇專案") +
+        '<td class="px-2 py-2"><input type="hidden" data-key="ProjectId" value="' +
+        paneCtx.escapeHtml(projectId) +
+        '" /><select data-key="ProjectName" class="w-full border border-slate-200 rounded px-2 py-1.5">' +
+        buildProjectSelectOptions(
+          paneCtx.prjList,
+          data.ProjectName,
+          projectId,
+          "請選擇專案",
+        ) +
         "</select></td>" +
         '<td class="px-2 py-2"><input data-key="hours" value="' +
         paneCtx.escapeHtml(data.hours) +
@@ -195,8 +287,15 @@
         '<td class="px-2 py-2"><select data-key="category" class="w-full border border-slate-200 rounded px-2 py-1.5">' +
         buildSelectOptions(cats, data.category, "請選擇") +
         "</select></td>" +
-        '<td class="px-2 py-2"><select data-key="ProjectName" class="w-full border border-slate-200 rounded px-2 py-1.5">' +
-        buildSelectOptions(paneCtx.prjList, data.ProjectName, "請選擇專案") +
+        '<td class="px-2 py-2"><input type="hidden" data-key="ProjectId" value="' +
+        paneCtx.escapeHtml(projectId) +
+        '" /><select data-key="ProjectName" class="w-full border border-slate-200 rounded px-2 py-1.5">' +
+        buildProjectSelectOptions(
+          paneCtx.prjList,
+          data.ProjectName,
+          projectId,
+          "請選擇專案",
+        ) +
         "</select></td>" +
         '<td class="px-2 py-2"><input data-key="hours" value="' +
         paneCtx.escapeHtml(data.hours) +
@@ -211,6 +310,8 @@
         ">待處理</option></select></td>" +
         '<td class="px-2 py-2 text-center"><button type="button" class="text-xs px-2 py-1 rounded bg-red-50 text-red-600 hover:bg-red-100">刪除</button></td>';
     }
+
+    bindProjectSelect(tr, projectId);
 
     tr.querySelector("button").addEventListener("click", function () {
       tr.remove();
@@ -455,6 +556,7 @@
             BID: String(tr.dataset.bid || "").trim(),
             AID: String(tr.dataset.aid || "").trim(),
             desc: "",
+            ProjectId: "",
             ProjectName: "",
             category: "",
             hours: "",
@@ -468,6 +570,9 @@
           tr.querySelectorAll("[data-key]").forEach(function (el) {
             row[el.dataset.key] = String(el.value || "").trim();
           });
+          if (!row.ProjectId && row.ProjectName) {
+            row.ProjectId = resolveProjectIdFromList(row.ProjectName, "");
+          }
           return row;
         })
         .filter(function (x) {

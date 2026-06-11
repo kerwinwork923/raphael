@@ -203,6 +203,100 @@
         width: 100%;
         min-width: 4.5rem;
       }
+      .page-content.hidden {
+        display: none;
+      }
+      .bar-chart {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .bar-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+      }
+      .bar-label {
+        width: 140px;
+        text-align: right;
+        color: #475569;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 11px;
+      }
+      .bar-outer {
+        flex: 1;
+        background: #f1f5f9;
+        border-radius: 4px;
+        height: 16px;
+        overflow: hidden;
+      }
+      .bar-inner {
+        height: 100%;
+        border-radius: 4px;
+        background: #3b82f6;
+        transition: width 0.5s ease;
+      }
+      .bar-inner.over {
+        background: #ef4444;
+      }
+      .bar-val {
+        width: 60px;
+        font-size: 11px;
+        color: #64748b;
+      }
+      .ll-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .ll-ok {
+        background: #dcfce7;
+        color: #15803d;
+      }
+      .ll-danger {
+        background: #fee2e2;
+        color: #dc2626;
+      }
+      .nodata {
+        text-align: center;
+        color: #94a3b8;
+        padding: 32px 0;
+        font-size: 13px;
+      }
+      .contrib-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+      .contrib-table th {
+        background: #f8fafc;
+        padding: 6px 8px;
+        text-align: left;
+        font-weight: 700;
+        color: #475569;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 11px;
+      }
+      .contrib-table td {
+        padding: 10px 8px;
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
+        min-width: 100px;
+      }
+      .contrib-table tr:hover td {
+        background: #f8fafc;
+      }
+      .db-nodata {
+        text-align: center;
+        color: #94a3b8;
+        padding: 32px 0;
+        font-size: 13px;
+      }
     </style>
   </head>
   <body class="bg-slate-50 text-slate-800">
@@ -221,6 +315,7 @@
     </div>
 
     <main class="max-w-screen-xl mx-auto px-4 py-5">
+      <div id="page-0" class="page-content">
       <section
         class="bg-white rounded-xl border border-slate-200 shadow-sm px-5 py-3 mb-5 flex items-center gap-3 flex-wrap"
       >
@@ -390,6 +485,191 @@
         </div>
         <div id="pwr-body" class="hidden"></div>
       </section>
+      </div>
+
+      <div id="page-1" class="page-content hidden">
+        <div class="flex items-center gap-3 mb-5 flex-wrap">
+          <h2 class="text-lg font-bold text-slate-800">工作貢獻 Dashboard</h2>
+          <div class="flex-1"></div>
+          <span class="text-xs text-slate-400">日期區間</span>
+          <input
+            id="db-from"
+            type="date"
+            class="text-xs border border-slate-200 rounded px-2 py-1"
+          />
+          <span class="text-xs text-slate-400">至</span>
+          <input
+            id="db-to"
+            type="date"
+            class="text-xs border border-slate-200 rounded px-2 py-1"
+          />
+          <button
+            type="button"
+            id="btnDbQuery"
+            class="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700"
+          >
+            更新
+          </button>
+        </div>
+        <div id="db-loading" class="hidden text-xs text-slate-400 mb-4">
+          載入統計資料中...
+        </div>
+        <div
+          id="db-stat-row"
+          class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-5"
+        ></div>
+
+        <div
+          class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-5"
+        >
+          <div class="font-semibold text-slate-700 text-sm mb-1">
+            工作模式工時分布
+          </div>
+          <div class="text-xs text-slate-400 mb-3">
+            交班模式（智醫/客服）、標準專案工時、庶務工時三類分開統計
+          </div>
+          <div id="chart-mode-breakdown"></div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+          <div
+            class="bg-white rounded-xl border border-slate-200 shadow-sm p-5"
+          >
+            <div class="font-semibold text-slate-700 text-sm mb-3">
+              部門工作貢獻（工時）
+            </div>
+            <div class="bar-chart" id="chart-dept"></div>
+          </div>
+          <div
+            class="bg-white rounded-xl border border-slate-200 shadow-sm p-5"
+          >
+            <div class="font-semibold text-slate-700 text-sm mb-3">
+              個人貢獻排行
+            </div>
+            <table class="contrib-table" id="table-person"></table>
+          </div>
+        </div>
+
+        <div
+          class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-5 hidden"
+          id="ops-analytics-card"
+        >
+          <div class="font-semibold text-slate-700 text-sm mb-1">
+            ⚕️ 交班模式分析
+          </div>
+          <div class="text-xs text-slate-400 mb-3">
+            智慧醫療業務部 & 客服部 ｜ 班別分布、任務包執行頻率、班別感受
+          </div>
+          <div
+            class="grid grid-cols-1 lg:grid-cols-3 gap-5"
+            id="ops-analytics-inner"
+          ></div>
+        </div>
+
+        <div id="sm-ops-dashboard" class="hidden mb-5">
+          <div
+            id="sm-ops-header"
+            class="rounded-xl p-5 mb-5"
+            style="
+              background: linear-gradient(
+                135deg,
+                #1a3a5c 0%,
+                #1e4d8c 60%,
+                #1a3a5c 100%
+              );
+            "
+          >
+            <div
+              class="flex items-start justify-between mb-4 flex-wrap gap-2"
+            >
+              <div>
+                <div class="font-bold text-white text-base mb-0.5">
+                  智慧醫療業務部 ・ 今日營運摘要
+                </div>
+                <div
+                  id="sm-ops-date"
+                  class="text-xs"
+                  style="color: rgba(191, 219, 254, 0.85)"
+                ></div>
+              </div>
+              <span
+                class="text-xs px-3 py-1 rounded-full"
+                style="
+                  background: rgba(255, 255, 255, 0.15);
+                  color: rgba(255, 255, 255, 0.9);
+                "
+                >AI 生成・每日自動更新</span
+              >
+            </div>
+            <div
+              id="sm-ops-kpis"
+              class="grid grid-cols-2 md:grid-cols-4 gap-3"
+            ></div>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+            <div
+              class="bg-white rounded-xl border border-slate-200 shadow-sm p-5"
+              id="sm-signal-card"
+            ></div>
+            <div
+              class="bg-white rounded-xl border border-slate-200 shadow-sm p-5"
+              id="sm-mgr-card"
+            ></div>
+            <div
+              class="bg-white rounded-xl border border-slate-200 shadow-sm p-5"
+              id="sm-heatmap-card"
+            ></div>
+            <div
+              class="bg-white rounded-xl border border-slate-200 shadow-sm p-5"
+              id="sm-collab-card"
+            ></div>
+          </div>
+          <div
+            class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-5"
+            id="sm-ai-card"
+          ></div>
+        </div>
+
+        <div
+          class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-5"
+          id="project-analysis-card"
+        >
+          <div class="font-semibold text-slate-700 text-sm mb-1">
+            專案投入工時分析
+          </div>
+          <div class="text-xs text-slate-400 mb-3">
+            各專案累計工時與參與人數、部門數
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <div class="bar-chart" id="chart-projects"></div>
+            <table class="contrib-table" id="table-projects"></table>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+          <div
+            class="bg-white rounded-xl border border-slate-200 shadow-sm p-5"
+          >
+            <div class="font-semibold text-slate-700 text-sm mb-3">
+              標準模式・工作類別工時
+            </div>
+            <div class="bar-chart" id="chart-category"></div>
+          </div>
+          <div
+            class="bg-white rounded-xl border border-slate-200 shadow-sm p-5"
+          >
+            <div class="font-semibold text-slate-700 text-sm mb-3">
+              交班模式・任務包執行次數
+            </div>
+            <div class="bar-chart" id="chart-task-pkg"></div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <div class="font-semibold text-slate-700 text-sm mb-3">日報明細</div>
+          <div id="detail-table-wrap" class="overflow-x-auto"></div>
+        </div>
+      </div>
     </main>
 
     <div id="toast" class="fixed bottom-5 right-5 hidden z-[60]">
@@ -485,6 +765,7 @@
       const SAVE_DAILY_REPORT_URL = API_BASE + "/api/fr/SaveDailyReport";
       const GET_DAILY_COMMON_URL = API_BASE + "/api/fr/getDailyCommon";
       const GET_WEEKLY_REPORT_URL = API_BASE + "/api/fr/getWeeklyReport";
+      const QUERY_STA_REPORT_URL = API_BASE + "/api/fr/QueryStaReport";
 
       let auth = null;
       let deptWorkKey = "A1";
@@ -504,11 +785,38 @@
       let editingModalAID = "";
       let weeklyReportCache = [];
       let weeklyEmployeeName = "";
+      let staReportCache = [];
+      let currentPage = 0;
       window._pwrText = "";
 
       function parseHours(v) {
         const n = parseFloat(String(v != null ? v : "0"));
         return isNaN(n) ? 0 : n;
+      }
+
+      function normalizePrjListEntry(x) {
+        if (x && typeof x === "object") {
+          return {
+            ProjectName: String(
+              x.ProjectName != null ? x.ProjectName : x.projectName || "",
+            ).trim(),
+            ProjectId: String(
+              x.ProjectId != null ? x.ProjectId : x.projectId || "",
+            ).trim(),
+          };
+        }
+        return { ProjectName: String(x || "").trim(), ProjectId: "" };
+      }
+
+      function resolveProjectIdByName(name, projectId) {
+        const pid = String(projectId != null ? projectId : "").trim();
+        if (pid) return pid;
+        const n = String(name || "").trim();
+        if (!n) return "";
+        const found = (dailyCommon.prjList || []).find(function (p) {
+          return normalizePrjListEntry(p).ProjectName === n;
+        });
+        return found ? normalizePrjListEntry(found).ProjectId : "";
       }
 
       function weekMonFriDateInputs() {
@@ -783,6 +1091,7 @@
             BID: String(tr.dataset.bid || "").trim(),
             AID: String(tr.dataset.aid || "").trim(),
             desc: "",
+            ProjectId: "",
             ProjectName: "",
             category: "",
             hours: "",
@@ -791,6 +1100,9 @@
           tr.querySelectorAll("[data-key]").forEach(function (el) {
             row[el.dataset.key] = String(el.value || "").trim();
           });
+          if (!row.ProjectId && row.ProjectName) {
+            row.ProjectId = resolveProjectIdByName(row.ProjectName, "");
+          }
           return row;
         });
       }
@@ -1351,7 +1663,7 @@
       function buildPayloadItem(it, aid) {
         const payloadItem = {
           desc: it.desc,
-          ProjectId: "",
+          ProjectId: resolveProjectIdByName(it.ProjectName, it.ProjectId),
           ProjectName: it.ProjectName,
           category: it.category,
           hours: it.hours,
@@ -1370,11 +1682,19 @@
 
       function normalizeDailyReportItem(rawItem, parentAID) {
         const item = rawItem && typeof rawItem === "object" ? rawItem : {};
+        const projectName = String(
+          item.ProjectName != null ? item.ProjectName : "",
+        );
+        const projectId = resolveProjectIdByName(
+          projectName,
+          item.ProjectId != null ? item.ProjectId : "",
+        );
         return {
           BID: String(item.BID != null ? item.BID : "").trim(),
           AID: String(item.AID != null ? item.AID : parentAID || "").trim(),
           desc: String(item.desc != null ? item.desc : ""),
-          ProjectName: String(item.ProjectName != null ? item.ProjectName : ""),
+          ProjectId: projectId,
+          ProjectName: projectName,
           category: String(item.category != null ? item.category : ""),
           hours: String(item.hours != null ? item.hours : ""),
           status: String(item.status != null ? item.status : ""),
@@ -1592,15 +1912,10 @@
           dailyCommon.prjList = (
             Array.isArray(data.PrjList) ? data.PrjList : []
           )
-            .map(function (x) {
-              if (x && typeof x === "object") {
-                return String(
-                  x.ProjectName != null ? x.ProjectName : x.projectName || "",
-                ).trim();
-              }
-              return String(x || "").trim();
-            })
-            .filter(Boolean);
+            .map(normalizePrjListEntry)
+            .filter(function (p) {
+              return !!p.ProjectName;
+            });
           dailyCommon.locations = (
             Array.isArray(data.Locations) ? data.Locations : []
           )
@@ -1919,9 +2234,514 @@
         document.getElementById("startDate").value = m.start;
         document.getElementById("endDate").value = m.end;
         document.getElementById("reportDate").value = m.end;
+        setInputValue("db-from", m.start);
+        setInputValue("db-to", m.end);
         const w = weekMonFriDateInputs();
         setInputValue("pwr-from", w.start);
         setInputValue("pwr-to", w.end);
+      }
+
+      function switchPage(n) {
+        currentPage = n;
+        document.querySelectorAll(".page-content").forEach(function (p, i) {
+          p.classList.toggle("hidden", i !== n);
+        });
+        document.querySelectorAll(".rpt-tab").forEach(function (t, i) {
+          t.classList.toggle("active", i === n);
+        });
+        if (n === 1) loadDashboard();
+      }
+
+      function mkBar(label, val, max, color, suffix) {
+        const pct = max > 0 ? Math.min((val / max) * 100, 100) : 0;
+        const display =
+          suffix !== undefined
+            ? suffix
+            : typeof val === "number"
+              ? val.toFixed(1) + "h"
+              : val;
+        return (
+          '<div class="bar-row">' +
+          '<div class="bar-label">' +
+          escapeHtml(String(label)) +
+          "</div>" +
+          '<div class="bar-outer"><div class="bar-inner" style="width:' +
+          pct +
+          "%;background:" +
+          color +
+          '"></div></div>' +
+          '<div class="bar-val">' +
+          display +
+          "</div></div>"
+        );
+      }
+
+      function aggregateStaReports(reports) {
+        const agg = {
+          totalHours: 0,
+          personSet: new Set(),
+          depts: new Set(),
+          attHours: 0,
+          otHours: 0,
+          prjHours: 0,
+          nonPrjHours: 0,
+          allPrj: 0,
+          completePrj: 0,
+          deptHours: {},
+          persons: {},
+          projects: {},
+          dailyItems: [],
+          categoryHours: {},
+        };
+
+        (reports || []).forEach(function (r) {
+          agg.totalHours += parseHours(r.ALLHours);
+          agg.attHours += parseHours(r.ATTHours);
+          agg.otHours += parseHours(r.OTHours);
+          agg.prjHours += parseHours(r.PrjALLHours);
+          agg.nonPrjHours += parseHours(r.NonPrjALLHours);
+          agg.allPrj += parseInt(String(r.ALLPrj || "0"), 10) || 0;
+          agg.completePrj += parseInt(String(r.CompletePrj || "0"), 10) || 0;
+
+          (r.DeptList || []).forEach(function (d) {
+            if (d) agg.depts.add(String(d));
+          });
+
+          const mapTT = r.mapTTHours || {};
+          Object.keys(mapTT).forEach(function (dept) {
+            agg.deptHours[dept] =
+              (agg.deptHours[dept] || 0) + parseHours(mapTT[dept]);
+          });
+
+          (r.nameItemList || []).forEach(function (p) {
+            const name = String(p.Name || "").trim();
+            const dept = String(p.Dept || "").trim();
+            const key = name + "|" + dept;
+            if (!agg.persons[key]) {
+              agg.persons[key] = {
+                Name: name,
+                Dept: dept,
+                Hours: 0,
+                Items: 0,
+              };
+            }
+            agg.persons[key].Hours += parseHours(p.Hours);
+            agg.persons[key].Items += parseInt(String(p.Items || "0"), 10) || 0;
+            if (name) agg.personSet.add(name);
+          });
+
+          (r.PrjList || []).forEach(function (prj) {
+            const key =
+              String(prj.ProjectId || "").trim() ||
+              String(prj.ProjectName || "").trim();
+            if (!key) return;
+            if (!agg.projects[key]) {
+              agg.projects[key] = {
+                ProjectId: prj.ProjectId,
+                ProjectName: prj.ProjectName,
+                PrjHours: 0,
+                PersonCnt: 0,
+                DeptCnt: 0,
+              };
+            }
+            agg.projects[key].PrjHours += parseHours(prj.PrjHours);
+            agg.projects[key].PersonCnt = Math.max(
+              agg.projects[key].PersonCnt,
+              parseInt(String(prj.PersonCnt || "0"), 10) || 0,
+            );
+            agg.projects[key].DeptCnt = Math.max(
+              agg.projects[key].DeptCnt,
+              parseInt(String(prj.DeptCnt || "0"), 10) || 0,
+            );
+          });
+
+          (r.DailyItemList || []).forEach(function (item) {
+            agg.dailyItems.push(item);
+            const cat = String(item.category || "").trim();
+            if (cat) {
+              agg.categoryHours[cat] =
+                (agg.categoryHours[cat] || 0) + parseHours(item.hours);
+            }
+          });
+        });
+
+        agg.completeRate =
+          agg.allPrj > 0
+            ? ((agg.completePrj / agg.allPrj) * 100).toFixed(2)
+            : "0";
+        return agg;
+      }
+
+      function shortenProjectName(name) {
+        return String(name || "")
+          .replace(/^C_[A-Z]+_/, "")
+          .trim();
+      }
+
+      function renderProjectAnalysis(prjSorted) {
+        const chartEl = document.getElementById("chart-projects");
+        const tableEl = document.getElementById("table-projects");
+        if (!chartEl || !tableEl) return;
+
+        if (!prjSorted.length) {
+          chartEl.innerHTML = '<div class="nodata">尚無專案投入資料</div>';
+          tableEl.innerHTML = "";
+          return;
+        }
+
+        const maxH = Math.max.apply(
+          null,
+          prjSorted.map(function (p) {
+            return p.PrjHours;
+          }).concat([0.1]),
+        );
+
+        chartEl.innerHTML = prjSorted
+          .slice(0, 10)
+          .map(function (p) {
+            const name = String(p.ProjectName || p.ProjectId || "—");
+            const hours = p.PrjHours;
+            const pct = Math.min((hours / maxH) * 100, 100);
+            return (
+              '<div class="bar-row flex-col items-start gap-0.5" style="margin-bottom:8px">' +
+              '<div style="font-size:10px;color:#475569;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' +
+              escapeHtml(name) +
+              '">' +
+              escapeHtml(shortenProjectName(name)) +
+              "</div>" +
+              '<div style="display:flex;align-items:center;gap:6px;width:100%">' +
+              '<div class="bar-outer" style="flex:1">' +
+              '<div class="bar-inner" style="width:' +
+              pct +
+              '%"></div></div>' +
+              '<div style="font-size:10px;color:#64748b;width:80px;text-align:right">' +
+              hours.toFixed(1) +
+              "h</div></div></div>"
+            );
+          })
+          .join("");
+
+        tableEl.innerHTML =
+          "<thead><tr><th>專案</th><th>實際工時</th><th>參與人數</th><th>參與部門</th></tr></thead><tbody>" +
+          prjSorted
+            .map(function (p) {
+              const name = String(p.ProjectName || p.ProjectId || "—");
+              return (
+                '<tr><td class="font-medium" style="font-size:10px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' +
+                escapeHtml(name) +
+                '">' +
+                escapeHtml(shortenProjectName(name)) +
+                '</td><td class="font-bold text-blue-600">' +
+                p.PrjHours.toFixed(1) +
+                "h</td><td>" +
+                p.PersonCnt +
+                "</td><td>" +
+                p.DeptCnt +
+                "</td></tr>"
+              );
+            })
+            .join("") +
+          "</tbody>";
+      }
+
+      function renderDashboard() {
+        const agg = aggregateStaReports(staReportCache);
+        const totalHours = agg.totalHours;
+        const totalPersons = agg.personSet.size;
+        const totalDepts = agg.depts.size;
+        const attRate =
+          totalHours > 0
+            ? Math.round((agg.attHours / totalHours) * 100)
+            : 0;
+        const otRate =
+          totalHours > 0 ? Math.round((agg.otHours / totalHours) * 100) : 0;
+
+        const statRow = document.getElementById("db-stat-row");
+        if (statRow) {
+          statRow.innerHTML = [
+            {
+              label: "總工時",
+              val: totalHours.toFixed(1) + " h",
+              sub: "",
+              color: "text-blue-600",
+            },
+            {
+              label: "日報人數",
+              val: String(totalPersons),
+              sub: "",
+              color: "text-purple-600",
+            },
+            {
+              label: "涉及部門",
+              val: String(totalDepts),
+              sub: "",
+              color: "text-teal-600",
+            },
+            {
+              label: "交班模式工時",
+              val: agg.attHours.toFixed(1) + "h",
+              sub: attRate + "%",
+              color: "text-green-600",
+            },
+            {
+              label: "庶務工時",
+              val: agg.otHours.toFixed(1) + "h",
+              sub: otRate + "%",
+              color: "text-orange-500",
+            },
+            {
+              label: "專案完成率",
+              val: agg.completeRate + "%",
+              sub: agg.completePrj + "/" + agg.allPrj + " 專案",
+              color:
+                parseFloat(agg.completeRate) < 70
+                  ? "text-red-500"
+                  : "text-green-600",
+            },
+          ]
+            .map(function (s) {
+              return (
+                '<div class="bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3">' +
+                '<div class="text-xs text-slate-400 mb-1">' +
+                s.label +
+                "</div>" +
+                '<div class="text-xl font-bold ' +
+                s.color +
+                '">' +
+                s.val +
+                "</div>" +
+                (s.sub
+                  ? '<div class="text-xs text-slate-400 mt-0.5">' +
+                    s.sub +
+                    "</div>"
+                  : "") +
+                "</div>"
+              );
+            })
+            .join("");
+        }
+
+        const maxMode = Math.max(
+          agg.attHours,
+          agg.prjHours,
+          agg.otHours,
+          0.1,
+        );
+        const modeEl = document.getElementById("chart-mode-breakdown");
+        if (modeEl) {
+          modeEl.innerHTML =
+            '<div class="bar-chart">' +
+            mkBar(
+              "🟢 交班模式（智醫/客服）",
+              agg.attHours,
+              maxMode,
+              "#10b981",
+              agg.attHours.toFixed(1) + "h",
+            ) +
+            mkBar(
+              "🔵 標準專案工時",
+              agg.prjHours,
+              maxMode,
+              "#3b82f6",
+              agg.prjHours.toFixed(1) + "h",
+            ) +
+            mkBar(
+              "🟡 庶務工時",
+              agg.otHours,
+              maxMode,
+              "#f59e0b",
+              agg.otHours.toFixed(1) + "h",
+            ) +
+            "</div>";
+        }
+
+        const deptSorted = Object.entries(agg.deptHours).sort(function (a, b) {
+          return b[1] - a[1];
+        });
+        const maxDept = deptSorted[0] ? deptSorted[0][1] : 1;
+        const deptEl = document.getElementById("chart-dept");
+        if (deptEl) {
+          deptEl.innerHTML = deptSorted.length
+            ? '<div class="bar-chart">' +
+              deptSorted
+                .map(function (entry) {
+                  return mkBar(
+                    entry[0],
+                    entry[1],
+                    maxDept,
+                    "#3b82f6",
+                    entry[1].toFixed(1) + "h",
+                  );
+                })
+                .join("") +
+              "</div>"
+            : '<div class="nodata">此區間無部門工時資料</div>';
+        }
+
+        const personSorted = Object.values(agg.persons).sort(function (a, b) {
+          return b.Hours - a.Hours;
+        });
+        const personEl = document.getElementById("table-person");
+        if (personEl) {
+          personEl.innerHTML = personSorted.length
+            ? "<thead><tr><th>姓名</th><th>部門</th><th>工時(h)</th><th>工項數</th></tr></thead><tbody>" +
+              personSorted
+                .map(function (p) {
+                  return (
+                    "<tr><td class=\"font-medium\">" +
+                    escapeHtml(p.Name) +
+                    '</td><td><span class="text-xs px-1.5 py-0.5 rounded-full font-semibold bg-blue-50 text-blue-700">' +
+                    escapeHtml(p.Dept) +
+                    '</span></td><td class="font-bold text-blue-600">' +
+                    p.Hours.toFixed(1) +
+                    '</td><td class="text-slate-500">' +
+                    p.Items +
+                    "</td></tr>"
+                  );
+                })
+                .join("") +
+              "</tbody>"
+            : '<tbody><tr><td colspan="4" class="nodata">此區間無個人貢獻資料</td></tr></tbody>';
+        }
+
+        const opsCard = document.getElementById("ops-analytics-card");
+        if (opsCard) opsCard.classList.add("hidden");
+        const smDash = document.getElementById("sm-ops-dashboard");
+        if (smDash) smDash.classList.add("hidden");
+
+        const prjSorted = Object.values(agg.projects).sort(function (a, b) {
+          return b.PrjHours - a.PrjHours;
+        });
+        renderProjectAnalysis(prjSorted);
+
+        const catMap = Object.assign({}, agg.categoryHours);
+        if (agg.otHours > 0) {
+          catMap["庶務工作"] = (catMap["庶務工作"] || 0) + agg.otHours;
+        }
+        const catSorted = Object.entries(catMap).sort(function (a, b) {
+          return b[1] - a[1];
+        });
+        const maxCat = catSorted[0] ? catSorted[0][1] : 1;
+        const catEl = document.getElementById("chart-category");
+        if (catEl) {
+          catEl.innerHTML = catSorted.length
+            ? '<div class="bar-chart">' +
+              catSorted
+                .map(function (entry) {
+                  return mkBar(
+                    entry[0] || "未分類",
+                    entry[1],
+                    maxCat,
+                    entry[0] === "庶務工作" ? "#f59e0b" : "#8b5cf6",
+                    entry[1].toFixed(1) + "h",
+                  );
+                })
+                .join("") +
+              "</div>"
+            : '<div class="text-xs text-slate-400 py-4 text-center">無標準模式資料</div>';
+        }
+
+        const taskPkgEl = document.getElementById("chart-task-pkg");
+        if (taskPkgEl) {
+          taskPkgEl.innerHTML =
+            '<div class="text-xs text-slate-400 py-4 text-center">無交班模式資料</div>';
+        }
+
+        const detailEl = document.getElementById("detail-table-wrap");
+        if (detailEl) {
+          const items = agg.dailyItems.slice().sort(function (a, b) {
+            const da = String(a.date || "").replace(/\D/g, "");
+            const db = String(b.date || "").replace(/\D/g, "");
+            return db.localeCompare(da);
+          });
+          detailEl.innerHTML = items.length
+            ? '<table class="contrib-table w-full text-xs"><thead><tr><th>日期</th><th>姓名</th><th>部門</th><th>工作項目</th><th>對應專案/任務包</th><th>工時</th><th>狀態</th></tr></thead><tbody>' +
+              items
+                .map(function (it) {
+                  const dateStr = ymdToDateInput(it.date) || it.date || "—";
+                  const status = String(it.status || "");
+                  const statusCls =
+                    status === "已完成"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-amber-100 text-amber-700";
+                  return (
+                    "<tr>" +
+                    '<td class="text-slate-400">' +
+                    escapeHtml(dateStr) +
+                    "</td>" +
+                    '<td class="font-medium">' +
+                    escapeHtml(String(it.Name || "")) +
+                    "</td>" +
+                    '<td><span class="text-xs px-1.5 py-0.5 rounded-full font-semibold bg-blue-50 text-blue-700" style="font-size:10px">' +
+                    escapeHtml(String(it.Dept || "")) +
+                    "</span></td>" +
+                    "<td>" +
+                    escapeHtml(String(it.desc || "")) +
+                    "</td>" +
+                    '<td class="text-purple-700 font-medium" style="font-size:10px">' +
+                    escapeHtml(String(it.ProjectName || "—")) +
+                    "</td>" +
+                    '<td class="font-bold text-blue-600">' +
+                    escapeHtml(String(it.hours || "0")) +
+                    "h</td>" +
+                    '<td><span class="px-1.5 py-0.5 rounded text-xs ' +
+                    statusCls +
+                    '">' +
+                    escapeHtml(status || "—") +
+                    "</span></td></tr>"
+                  );
+                })
+                .join("") +
+              "</tbody></table>"
+            : '<div class="nodata">此區間無日報明細</div>';
+        }
+      }
+
+      async function fetchStaReport() {
+        const from = dateInputToYmd(document.getElementById("db-from").value);
+        const to = dateInputToYmd(document.getElementById("db-to").value);
+        if (!from || !to) {
+          toast("請選擇統計日期區間");
+          return false;
+        }
+        if (from > to) {
+          toast("起始日不可晚於結束日");
+          return false;
+        }
+
+        const loading = document.getElementById("db-loading");
+        if (loading) loading.classList.remove("hidden");
+
+        try {
+          const data = await postJson(QUERY_STA_REPORT_URL, {
+            AdminID: auth.adminID,
+            Token: auth.token,
+            startDate: from,
+            endDate: to,
+          });
+          if (!data || String(data.Result || "").toUpperCase() !== "OK") {
+            throw new Error((data && data.Result) || "統計資料取得失敗");
+          }
+          staReportCache = Array.isArray(data.StaReports)
+            ? data.StaReports
+            : [];
+          renderDashboard();
+          return true;
+        } catch (err) {
+          staReportCache = [];
+          renderDashboard();
+          toast(
+            "統計載入失敗：" +
+              (err && err.message ? err.message : "請稍後再試"),
+          );
+          return false;
+        } finally {
+          if (loading) loading.classList.add("hidden");
+        }
+      }
+
+      async function loadDashboard() {
+        await fetchStaReport();
       }
 
       async function init() {
@@ -1984,16 +2804,19 @@
         .getElementById("btnGenerateWR")
         .addEventListener("click", generatePersonalWR);
 
+      document
+        .getElementById("btnDbQuery")
+        .addEventListener("click", fetchStaReport);
+
       document.querySelectorAll(".rpt-tab").forEach(function (tab, index) {
         tab.style.cursor = "pointer";
         tab.addEventListener("click", function () {
-          if (index === 0) {
-            document.querySelectorAll(".rpt-tab").forEach(function (t, i) {
-              t.classList.toggle("active", i === 0);
-            });
+          if (index === 0 || index === 1) {
+            switchPage(index);
             return;
           }
           if (index === 3) {
+            switchPage(0);
             const el = document.getElementById("personalWeeklyReport");
             if (el && el.scrollIntoView)
               el.scrollIntoView({ behavior: "smooth", block: "start" });
