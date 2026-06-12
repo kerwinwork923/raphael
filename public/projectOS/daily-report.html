@@ -763,6 +763,7 @@
       const API_BASE = "https://23700999.com:8081/PM";
       const QUERY_DAILY_REPORT_URL = API_BASE + "/api/fr/QueryDailyReport";
       const SAVE_DAILY_REPORT_URL = API_BASE + "/api/fr/SaveDailyReport";
+      const DELETE_DAILY_REPORT_URL = API_BASE + "/api/fr/DeleteDailyReport";
       const GET_DAILY_COMMON_URL = API_BASE + "/api/fr/getDailyCommon";
       const GET_WEEKLY_REPORT_URL = API_BASE + "/api/fr/getWeeklyReport";
       const QUERY_STA_REPORT_URL = API_BASE + "/api/fr/QueryStaReport";
@@ -1386,32 +1387,16 @@
         const date = String(found.date || "")
           .replace(/\D/g, "")
           .slice(0, 8);
-        const payloadReport = {
-          AID: editingModalAID,
-          date: date,
-          totalHours: "0",
-          actualWorkHours: "0",
-          note: "此日報已刪除",
-          shift: "",
-          location: "",
-          feeling: "",
-          items: [
-            {
-              desc: "此日報已刪除",
-              ProjectId: "",
-              ProjectName: "",
-              category: "刪除",
-              hours: "0",
-              status: "已刪除",
-            },
-          ],
-        };
+        if (date.length !== 8) {
+          toast("無法刪除：日期格式不正確");
+          return;
+        }
 
         try {
-          const data = await postJson(SAVE_DAILY_REPORT_URL, {
+          const data = await postJson(DELETE_DAILY_REPORT_URL, {
             AdminID: auth.adminID,
             Token: auth.token,
-            dailyReports: [payloadReport],
+            Date: date,
           });
           if (!data || String(data.Result || "").toUpperCase() !== "OK") {
             throw new Error((data && data.Result) || "刪除失敗");
