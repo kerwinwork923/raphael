@@ -297,6 +297,31 @@
         padding: 32px 0;
         font-size: 13px;
       }
+      .scroll-panel-hist {
+        max-height: min(60vh, 520px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .scroll-panel-rank {
+        max-height: min(50vh, 420px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .scroll-panel-rank .contrib-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        box-shadow: 0 1px 0 #e2e8f0;
+      }
+      .scroll-panel-hist::-webkit-scrollbar,
+      .scroll-panel-rank::-webkit-scrollbar {
+        width: 6px;
+      }
+      .scroll-panel-hist::-webkit-scrollbar-thumb,
+      .scroll-panel-rank::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 3px;
+      }
     </style>
   </head>
   <body class="bg-slate-50 text-slate-800">
@@ -441,7 +466,9 @@
             >點歷史日報的「✏️ 編輯」可於彈窗修改</span
           >
         </div>
-        <div id="reportList" class="px-5 pb-5 space-y-3 w-full"></div>
+        <div class="px-5 pb-5 scroll-panel-hist">
+          <div id="reportList" class="space-y-3 w-full"></div>
+        </div>
       </section>
 
       <section
@@ -490,6 +517,12 @@
       <div id="page-1" class="page-content hidden">
         <div class="flex items-center gap-3 mb-5 flex-wrap">
           <h2 class="text-lg font-bold text-slate-800">工作貢獻 Dashboard</h2>
+          <select
+            id="db-dept"
+            class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 text-slate-700 bg-white min-w-[9rem] max-w-[12rem]"
+          >
+            <option value="">全部部門</option>
+          </select>
           <div class="flex-1"></div>
           <span class="text-xs text-slate-400">日期區間</span>
           <input
@@ -546,7 +579,9 @@
             <div class="font-semibold text-slate-700 text-sm mb-3">
               個人貢獻排行
             </div>
-            <table class="contrib-table" id="table-person"></table>
+            <div class="scroll-panel-rank">
+              <table class="contrib-table" id="table-person"></table>
+            </div>
           </div>
         </div>
 
@@ -2261,7 +2296,62 @@
         );
       }
 
-      function aggregateStaReports(reports) {
+      function getDashboardDeptFilter() {
+        const el = document.getElementById("db-dept");
+        return el ? String(el.value || "").trim() : "";
+      }
+
+      function collectDeptNamesFromStaReports(reports) {
+        const set = new Set();
+        (reports || []).forEach(function (r) {
+          (r.DeptList || []).forEach(function (d) {
+            if (d) set.add(String(d).trim());
+          });
+          Object.keys(r.mapTTHours || {}).forEach(function (d) {
+            if (d) set.add(String(d).trim());
+          });
+          (r.nameItemList || []).forEach(function (p) {
+            if (p && p.Dept) set.add(String(p.Dept).trim());
+          });
+        });
+        for (var i = 1; i <= 9; i++) {
+          if (typeof window.projectOSGetDeptLabel === "function") {
+            var label = window.projectOSGetDeptLabel("A" + i);
+            if (label) set.add(label);
+          }
+        }
+        return Array.from(set)
+          .filter(Boolean)
+          .sort(function (a, b) {
+            return a.localeCompare(b, "zh-Hant");
+          });
+      }
+
+      function populateDashboardDeptSelect() {
+        const el = document.getElementById("db-dept");
+        if (!el) return;
+        const prev = String(el.value || "");
+        const names = collectDeptNamesFromStaReports(staReportCache);
+        el.innerHTML =
+          '<option value="">全部部門</option>' +
+          names
+            .map(function (name) {
+              return (
+                '<option value="' +
+                escapeHtml(name) +
+                '">' +
+                escapeHtml(name) +
+                "</option>"
+              );
+            })
+            .join("");
+        if (prev && names.indexOf(prev) >= 0) {
+          el.value = prev;
+        }
+      }
+
+      function aggregateStaReports(reports, deptFilter) {
+        const filterDept = deptFilter ? String(deptFilter).trim() : "";
         const agg = {
           totalHours: 0,
           personSet: new Set(),
@@ -2280,25 +2370,60 @@
         };
 
         (reports || []).forEach(function (r) {
-          agg.totalHours += parseHours(r.ALLHours);
-          agg.attHours += parseHours(r.ATTHours);
-          agg.otHours += parseHours(r.OTHours);
-          agg.prjHours += parseHours(r.PrjALLHours);
-          agg.nonPrjHours += parseHours(r.NonPrjALLHours);
-          agg.allPrj += parseInt(String(r.ALLPrj || "0"), 10) || 0;
-          agg.completePrj += parseInt(String(r.CompletePrj || "0"), 10) || 0;
+          let nameItems = r.nameItemList || [];
+          let dailyItems = r.DailyItemList || [];
+          let mapTT = r.mapTTHours || {};
+          let deptList = r.DeptList || [];
 
-          (r.DeptList || []).forEach(function (d) {
+          if (filterDept) {
+            nameItems = nameItems.filter(function (p) {
+              return String(p.Dept || "").trim() === filterDept;
+            });
+            dailyItems = dailyItems.filter(function (item) {
+              return String(item.Dept || "").trim() === filterDept;
+            });
+            mapTT =
+              mapTT[filterDept] != null
+                ? { [filterDept]: mapTT[filterDept] }
+                : {};
+            deptList = deptList.filter(function (d) {
+              return String(d).trim() === filterDept;
+            });
+          }
+
+          if (filterDept) {
+            const personHours = nameItems.reduce(function (sum, p) {
+              return sum + parseHours(p.Hours);
+            }, 0);
+            const mapHours = parseHours(mapTT[filterDept]);
+            agg.totalHours += personHours > 0 ? personHours : mapHours;
+            dailyItems.forEach(function (item) {
+              const h = parseHours(item.hours);
+              agg.prjHours += h;
+            });
+            if (!dailyItems.length && personHours > 0) {
+              agg.prjHours += personHours;
+            }
+          } else {
+            agg.totalHours += parseHours(r.ALLHours);
+            agg.attHours += parseHours(r.ATTHours);
+            agg.otHours += parseHours(r.OTHours);
+            agg.prjHours += parseHours(r.PrjALLHours);
+            agg.nonPrjHours += parseHours(r.NonPrjALLHours);
+            agg.allPrj += parseInt(String(r.ALLPrj || "0"), 10) || 0;
+            agg.completePrj += parseInt(String(r.CompletePrj || "0"), 10) || 0;
+          }
+
+          deptList.forEach(function (d) {
             if (d) agg.depts.add(String(d));
           });
 
-          const mapTT = r.mapTTHours || {};
           Object.keys(mapTT).forEach(function (dept) {
             agg.deptHours[dept] =
               (agg.deptHours[dept] || 0) + parseHours(mapTT[dept]);
           });
 
-          (r.nameItemList || []).forEach(function (p) {
+          nameItems.forEach(function (p) {
             const name = String(p.Name || "").trim();
             const dept = String(p.Dept || "").trim();
             const key = name + "|" + dept;
@@ -2315,37 +2440,56 @@
             if (name) agg.personSet.add(name);
           });
 
-          (r.PrjList || []).forEach(function (prj) {
-            const key =
-              String(prj.ProjectId || "").trim() ||
-              String(prj.ProjectName || "").trim();
-            if (!key) return;
-            if (!agg.projects[key]) {
-              agg.projects[key] = {
-                ProjectId: prj.ProjectId,
-                ProjectName: prj.ProjectName,
-                PrjHours: 0,
-                PersonCnt: 0,
-                DeptCnt: 0,
-              };
-            }
-            agg.projects[key].PrjHours += parseHours(prj.PrjHours);
-            agg.projects[key].PersonCnt = Math.max(
-              agg.projects[key].PersonCnt,
-              parseInt(String(prj.PersonCnt || "0"), 10) || 0,
-            );
-            agg.projects[key].DeptCnt = Math.max(
-              agg.projects[key].DeptCnt,
-              parseInt(String(prj.DeptCnt || "0"), 10) || 0,
-            );
-          });
+          if (!filterDept) {
+            (r.PrjList || []).forEach(function (prj) {
+              const key =
+                String(prj.ProjectId || "").trim() ||
+                String(prj.ProjectName || "").trim();
+              if (!key) return;
+              if (!agg.projects[key]) {
+                agg.projects[key] = {
+                  ProjectId: prj.ProjectId,
+                  ProjectName: prj.ProjectName,
+                  PrjHours: 0,
+                  PersonCnt: 0,
+                  DeptCnt: 0,
+                };
+              }
+              agg.projects[key].PrjHours += parseHours(prj.PrjHours);
+              agg.projects[key].PersonCnt = Math.max(
+                agg.projects[key].PersonCnt,
+                parseInt(String(prj.PersonCnt || "0"), 10) || 0,
+              );
+              agg.projects[key].DeptCnt = Math.max(
+                agg.projects[key].DeptCnt,
+                parseInt(String(prj.DeptCnt || "0"), 10) || 0,
+              );
+            });
+          }
 
-          (r.DailyItemList || []).forEach(function (item) {
+          dailyItems.forEach(function (item) {
             agg.dailyItems.push(item);
             const cat = String(item.category || "").trim();
             if (cat) {
               agg.categoryHours[cat] =
                 (agg.categoryHours[cat] || 0) + parseHours(item.hours);
+            }
+            if (filterDept) {
+              const prjKey =
+                String(item.ProjectId || "").trim() ||
+                String(item.ProjectName || "").trim();
+              if (prjKey) {
+                if (!agg.projects[prjKey]) {
+                  agg.projects[prjKey] = {
+                    ProjectId: item.ProjectId || "",
+                    ProjectName: item.ProjectName || prjKey,
+                    PrjHours: 0,
+                    PersonCnt: 0,
+                    DeptCnt: 1,
+                  };
+                }
+                agg.projects[prjKey].PrjHours += parseHours(item.hours);
+              }
             }
           });
         });
@@ -2430,7 +2574,9 @@
       }
 
       function renderDashboard() {
-        const agg = aggregateStaReports(staReportCache);
+        populateDashboardDeptSelect();
+        const deptFilter = getDashboardDeptFilter();
+        const agg = aggregateStaReports(staReportCache, deptFilter);
         const totalHours = agg.totalHours;
         const totalPersons = agg.personSet.size;
         const totalDepts = agg.depts.size;
@@ -2792,6 +2938,9 @@
       document
         .getElementById("btnDbQuery")
         .addEventListener("click", fetchStaReport);
+      document
+        .getElementById("db-dept")
+        .addEventListener("change", renderDashboard);
 
       document.querySelectorAll(".rpt-tab").forEach(function (tab, index) {
         tab.style.cursor = "pointer";
