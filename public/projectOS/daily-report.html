@@ -313,12 +313,26 @@
         z-index: 1;
         box-shadow: 0 1px 0 #e2e8f0;
       }
+      .scroll-panel-detail {
+        max-height: min(55vh, 480px);
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .scroll-panel-detail .contrib-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        box-shadow: 0 1px 0 #e2e8f0;
+      }
       .scroll-panel-hist::-webkit-scrollbar,
-      .scroll-panel-rank::-webkit-scrollbar {
+      .scroll-panel-rank::-webkit-scrollbar,
+      .scroll-panel-detail::-webkit-scrollbar {
         width: 6px;
+        height: 6px;
       }
       .scroll-panel-hist::-webkit-scrollbar-thumb,
-      .scroll-panel-rank::-webkit-scrollbar-thumb {
+      .scroll-panel-rank::-webkit-scrollbar-thumb,
+      .scroll-panel-detail::-webkit-scrollbar-thumb {
         background: #cbd5e1;
         border-radius: 3px;
       }
@@ -549,7 +563,7 @@
         </div>
         <div
           id="db-stat-row"
-          class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-5"
+          class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-5"
         ></div>
 
         <div
@@ -702,7 +716,7 @@
 
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
           <div class="font-semibold text-slate-700 text-sm mb-3">日報明細</div>
-          <div id="detail-table-wrap" class="overflow-x-auto"></div>
+          <div id="detail-table-wrap" class="scroll-panel-detail"></div>
         </div>
       </div>
     </main>
@@ -2327,6 +2341,102 @@
           });
       }
 
+      function classifyDailyItemWorkMode(item) {
+        const cat = String(item.category || "").trim();
+        const projName = String(item.ProjectName || "").trim();
+        const projId = String(item.ProjectId || "").trim();
+        const workType = String(
+          item.workType || item.WorkType || item.reportMode || "",
+        )
+          .trim()
+          .toLowerCase();
+        if (
+          workType === "ops" ||
+          workType === "ops-sm" ||
+          workType === "ops-cs"
+        ) {
+          return "att";
+        }
+        if (cat === "例行營運") return "att";
+        if (item.shift || item.Shift) return "att";
+        if (/庶務/.test(projName) || /庶務/.test(cat)) return "ot";
+        if (item.isAdminWork || item.IsAdminWork) return "ot";
+        if (String(item.NonPrj || item.nonPrj || "") === "1") return "ot";
+        if (
+          projId === "P00" ||
+          projName === "無對應專案" ||
+          projName === "庶務工作"
+        ) {
+          return "ot";
+        }
+        return "prj";
+      }
+
+      function readDeptHoursFromMap(map, dept) {
+        if (!map || !dept || map[dept] == null) return 0;
+        return parseHours(map[dept]);
+      }
+
+      function accumulateFilteredModeHours(agg, report, filterDept, dailyItems) {
+        const mapOTHours =
+          report.mapOTHours || report.mapOtHours || report.mapOT || {};
+        const mapATTHours =
+          report.mapATTHours || report.mapAttHours || report.mapATT || {};
+        const mapPrjHours =
+          report.mapPrjHours ||
+          report.mapPrjALLHours ||
+          report.mapPrj ||
+          {};
+        let attH = readDeptHoursFromMap(mapATTHours, filterDept);
+        let otH = readDeptHoursFromMap(mapOTHours, filterDept);
+        let prjH = readDeptHoursFromMap(mapPrjHours, filterDept);
+        const hasMapSplit = attH > 0 || otH > 0 || prjH > 0;
+
+        if (dailyItems.length) {
+          attH = 0;
+          otH = 0;
+          prjH = 0;
+          dailyItems.forEach(function (item) {
+            const h = parseHours(item.hours);
+            const mode = classifyDailyItemWorkMode(item);
+            if (mode === "att") attH += h;
+            else if (mode === "ot") otH += h;
+            else prjH += h;
+          });
+        } else if (!hasMapSplit) {
+          const mapTT = report.mapTTHours || {};
+          const deptH = readDeptHoursFromMap(mapTT, filterDept);
+          const allH = Object.keys(mapTT).reduce(function (sum, key) {
+            return sum + parseHours(mapTT[key]);
+          }, 0);
+          const ratio = allH > 0 ? deptH / allH : 0;
+          if (ratio > 0) {
+            attH = parseHours(report.ATTHours) * ratio;
+            otH = parseHours(report.OTHours) * ratio;
+            prjH = parseHours(report.PrjALLHours) * ratio;
+          }
+        }
+
+        agg.attHours += attH;
+        agg.otHours += otH;
+        agg.prjHours += prjH;
+        const modeTotal = attH + otH + prjH;
+        if (modeTotal > 0) {
+          agg.totalHours += modeTotal;
+          return;
+        }
+
+        const personHours = (report.nameItemList || [])
+          .filter(function (p) {
+            return String(p.Dept || "").trim() === filterDept;
+          })
+          .reduce(function (sum, p) {
+            return sum + parseHours(p.Hours);
+          }, 0);
+        const mapHours = readDeptHoursFromMap(report.mapTTHours || {}, filterDept);
+        agg.totalHours += personHours > 0 ? personHours : mapHours;
+      }
+
       function populateDashboardDeptSelect() {
         const el = document.getElementById("db-dept");
         if (!el) return;
@@ -2360,8 +2470,6 @@
           otHours: 0,
           prjHours: 0,
           nonPrjHours: 0,
-          allPrj: 0,
-          completePrj: 0,
           deptHours: {},
           persons: {},
           projects: {},
@@ -2392,26 +2500,13 @@
           }
 
           if (filterDept) {
-            const personHours = nameItems.reduce(function (sum, p) {
-              return sum + parseHours(p.Hours);
-            }, 0);
-            const mapHours = parseHours(mapTT[filterDept]);
-            agg.totalHours += personHours > 0 ? personHours : mapHours;
-            dailyItems.forEach(function (item) {
-              const h = parseHours(item.hours);
-              agg.prjHours += h;
-            });
-            if (!dailyItems.length && personHours > 0) {
-              agg.prjHours += personHours;
-            }
+            accumulateFilteredModeHours(agg, r, filterDept, dailyItems);
           } else {
             agg.totalHours += parseHours(r.ALLHours);
             agg.attHours += parseHours(r.ATTHours);
             agg.otHours += parseHours(r.OTHours);
             agg.prjHours += parseHours(r.PrjALLHours);
             agg.nonPrjHours += parseHours(r.NonPrjALLHours);
-            agg.allPrj += parseInt(String(r.ALLPrj || "0"), 10) || 0;
-            agg.completePrj += parseInt(String(r.CompletePrj || "0"), 10) || 0;
           }
 
           deptList.forEach(function (d) {
@@ -2494,10 +2589,6 @@
           });
         });
 
-        agg.completeRate =
-          agg.allPrj > 0
-            ? ((agg.completePrj / agg.allPrj) * 100).toFixed(2)
-            : "0";
         return agg;
       }
 
@@ -2619,15 +2710,6 @@
               val: agg.otHours.toFixed(1) + "h",
               sub: otRate + "%",
               color: "text-orange-500",
-            },
-            {
-              label: "專案完成率",
-              val: agg.completeRate + "%",
-              sub: agg.completePrj + "/" + agg.allPrj + " 專案",
-              color:
-                parseFloat(agg.completeRate) < 70
-                  ? "text-red-500"
-                  : "text-green-600",
             },
           ]
             .map(function (s) {
