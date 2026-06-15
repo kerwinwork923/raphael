@@ -108,7 +108,7 @@ export const SEMINAR_EVENTS: SeminarEvent[] = [
         area: "高雄",
         location: "拉菲爾人本診所(高雄)",
         status: "active",
-        eventDate: "20260703",
+        eventDate: "",
         displayDate: "2026 / 07 / 03（五）",
         time: "10:00",
       },
