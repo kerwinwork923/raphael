@@ -1,0 +1,2505 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Raphael V7 肩頸放鬆開關遊戲</title>
+  <style>
+    :root {
+      --bg: #eef6f3;
+      --surface: #ffffff;
+      --surface-soft: #f5faf8;
+      --ink: #10211f;
+      --muted: #61736f;
+      --line: #d6e6e1;
+      --line-strong: #aecfc7;
+      --teal: #0b7c75;
+      --teal-dark: #065f59;
+      --teal-soft: #e6f5f2;
+      --gold: #c79022;
+      --gold-soft: #fff6df;
+      --coral: #d76545;
+      --red: #b42318;
+      --green: #268451;
+      --blue: #415672;
+      --shadow: 0 18px 44px rgba(16, 33, 31, .11);
+      --radius: 18px;
+      --radius-sm: 12px;
+      --bottom: calc(172px + env(safe-area-inset-bottom));
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      background:
+        linear-gradient(180deg, rgba(238, 246, 243, .96), rgba(247, 251, 249, .98)),
+        radial-gradient(circle at 12% -5%, rgba(11, 124, 117, .12), transparent 34%);
+      color: var(--ink);
+      font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+      letter-spacing: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input, textarea, select { font: inherit; }
+    button { border: 0; cursor: pointer; }
+
+    .app {
+      min-height: 100vh;
+      max-width: 460px;
+      margin: 0 auto;
+      background: linear-gradient(180deg, #f8fbfa, #eef6f3);
+      box-shadow: 0 0 0 1px rgba(174, 207, 199, .55), 0 20px 70px rgba(16, 33, 31, .12);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .app::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .72), transparent 180px);
+      z-index: 0;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding: calc(12px + env(safe-area-inset-top)) 18px 12px;
+      background: rgba(248, 251, 250, .92);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(214, 230, 225, .75);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .mark {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(145deg, #0e4f4b, #0b7c75);
+      color: #fff;
+      font-weight: 900;
+      box-shadow: 0 10px 18px rgba(11, 124, 117, .22);
+    }
+
+    .brand small {
+      display: block;
+      color: var(--teal);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .brand strong {
+      display: block;
+      margin-top: 1px;
+      font-size: 16px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .progress-wrap {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .track {
+      height: 8px;
+      border-radius: 999px;
+      background: #dfece8;
+      overflow: hidden;
+    }
+
+    .fill {
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--teal), #13a094);
+      transition: width .25s ease;
+    }
+
+    .step-count {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+      min-height: calc(100vh - 112px);
+      padding: 18px 16px var(--bottom);
+    }
+
+    .screen {
+      display: grid;
+      gap: 14px;
+      animation: rise .22s ease both;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .level-chip {
+      width: max-content;
+      max-width: 100%;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .level-chip.gold {
+      background: var(--gold-soft);
+      color: #8a5608;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+
+    .title {
+      font-size: 30px;
+      line-height: 1.18;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .card {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, .92);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, .8), 0 10px 26px rgba(16, 33, 31, .06);
+    }
+
+    .card.soft {
+      background: var(--surface-soft);
+    }
+
+    .card.gold {
+      border-color: #ecd096;
+      background: linear-gradient(180deg, #fffaf0, #fffdf8);
+    }
+
+    .card.danger {
+      border-color: #f0b4ae;
+      background: #fff5f3;
+    }
+
+    .hero-art {
+      min-height: 178px;
+      border-radius: 22px;
+      background:
+        linear-gradient(145deg, rgba(11, 124, 117, .9), rgba(6, 95, 89, .96)),
+        linear-gradient(180deg, #fff, #eef6f3);
+      color: #fff;
+      padding: 20px;
+      display: grid;
+      align-content: space-between;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero-art::after {
+      content: "";
+      position: absolute;
+      right: -46px;
+      top: -34px;
+      width: 170px;
+      height: 170px;
+      border-radius: 999px;
+      border: 30px solid rgba(255, 255, 255, .12);
+    }
+
+    .switch-icon {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      width: 68px;
+      height: 68px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, .16);
+      border: 1px solid rgba(255, 255, 255, .28);
+      font-size: 30px;
+      font-weight: 900;
+    }
+
+    .hero-art strong {
+      position: relative;
+      z-index: 1;
+      display: block;
+      margin-top: 18px;
+      font-size: 24px;
+      line-height: 1.25;
+    }
+
+    .hero-art span {
+      position: relative;
+      z-index: 1;
+      color: rgba(255, 255, 255, .78);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .list {
+      display: grid;
+      gap: 9px;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    .list li {
+      display: grid;
+      grid-template-columns: 26px minmax(0, 1fr);
+      gap: 9px;
+      align-items: start;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .checkmark {
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .choice-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .choice {
+      width: 100%;
+      min-height: 64px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+      color: var(--ink);
+      text-align: left;
+      display: grid;
+      gap: 4px;
+      box-shadow: 0 1px 0 rgba(255, 255, 255, .8);
+    }
+
+    .choice strong {
+      font-size: 16px;
+      line-height: 1.25;
+    }
+
+    .choice span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .choice.selected {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+      box-shadow: 0 0 0 4px rgba(11, 124, 117, .09);
+    }
+
+    .choice.danger.selected {
+      border-color: var(--red);
+      background: #fff1ef;
+      box-shadow: 0 0 0 4px rgba(180, 35, 24, .08);
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .seg {
+      min-height: 54px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .seg.selected {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+    }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .score-btn {
+      min-height: 54px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 19px;
+      font-weight: 900;
+    }
+
+    .score-btn.selected {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+      box-shadow: 0 0 0 4px rgba(11, 124, 117, .09);
+    }
+
+    .scale-help {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .scale-help span {
+      min-height: 38px;
+      padding: 8px;
+      border-radius: 12px;
+      background: #f6fbf9;
+      border: 1px solid var(--line);
+      text-align: center;
+    }
+
+    .local-user-card {
+      display: grid;
+      gap: 10px;
+    }
+
+    .local-user-line {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+    }
+
+    .mini-btn {
+      min-height: 48px;
+      padding: 0 14px;
+      border-radius: 14px;
+      background: var(--teal);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .profile-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .profile-pill {
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .profile-pill.selected {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+    }
+
+    .account-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: #f2faf7;
+      border: 1px solid var(--line);
+      font-weight: 900;
+    }
+
+    .account-status span {
+      color: var(--teal-dark);
+    }
+
+    .record-preview {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .record-preview strong {
+      font-size: 15px;
+    }
+
+    .record-preview p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .saved-overview {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .saved-overview-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .saved-overview-head strong {
+      display: block;
+      font-size: 16px;
+    }
+
+    .saved-count-pill {
+      display: inline-flex;
+      min-height: 30px;
+      align-items: center;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .latest-saved {
+      display: grid;
+      gap: 4px;
+      padding: 10px;
+      border-radius: 14px;
+      background: #f6fbf9;
+      border: 1px solid var(--line);
+    }
+
+    .latest-saved b,
+    .latest-saved small {
+      font-size: 13px;
+    }
+
+    .latest-saved span,
+    .latest-saved small {
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .mini-btn.wide {
+      width: 100%;
+    }
+
+    .saved-record-panel {
+      display: grid;
+      gap: 10px;
+      padding-top: 4px;
+    }
+
+    .saved-record-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .saved-record-item {
+      width: 100%;
+      display: grid;
+      gap: 5px;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      text-align: left;
+    }
+
+    .saved-record-item.selected {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+    }
+
+    .saved-record-item b,
+    .saved-record-item strong,
+    .saved-record-item em,
+    .saved-record-item span {
+      display: block;
+    }
+
+    .saved-record-item b {
+      font-size: 14px;
+    }
+
+    .saved-record-item small {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .saved-record-item strong {
+      color: var(--teal-dark);
+      font-size: 13px;
+    }
+
+    .saved-record-item em {
+      color: var(--muted);
+      font-size: 13px;
+      font-style: normal;
+      font-weight: 800;
+    }
+
+    .saved-record-item .open-copy {
+      width: max-content;
+      margin-top: 2px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: var(--gold-soft);
+      color: #8a5608;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .saved-empty {
+      padding: 12px;
+      border-radius: 14px;
+      background: #f6fbf9;
+      border: 1px dashed var(--line-strong);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .saved-region-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .saved-region-card {
+      display: grid;
+      grid-template-columns: 86px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      padding: 10px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #f6fbf9;
+    }
+
+    .saved-region-card img {
+      width: 86px;
+      height: 70px;
+      border-radius: 12px;
+      object-fit: cover;
+      object-position: center;
+      background: #fffaf4;
+      border: 1px solid rgba(214, 230, 225, .9);
+    }
+
+    .saved-region-card b {
+      display: block;
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .saved-region-card small {
+      display: inline-flex;
+      width: max-content;
+      margin: 4px 0;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .saved-region-card p {
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      min-height: 48px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--teal);
+    }
+
+    .range-line {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 54px;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .value {
+      display: grid;
+      place-items: center;
+      min-height: 40px;
+      border-radius: 12px;
+      background: #153f3d;
+      color: #fff;
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    textarea, input[type="text"] {
+      width: 100%;
+      min-height: 48px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+    }
+
+    textarea {
+      min-height: 84px;
+      resize: vertical;
+    }
+
+    textarea:focus, input[type="text"]:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 4px rgba(11, 124, 117, .1);
+    }
+
+    .image-card {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+    }
+
+    .image-card img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .image-card.compact img {
+      max-height: 300px;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    .caption {
+      padding: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .admin-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px;
+      border: 1px dashed var(--line-strong);
+      border-radius: 15px;
+      background: #fbfdfc;
+    }
+
+    .switch {
+      position: relative;
+      width: 54px;
+      height: 32px;
+      flex: 0 0 auto;
+    }
+
+    .switch input {
+      position: absolute;
+      opacity: 0;
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: #d9e7e2;
+      transition: .2s;
+    }
+
+    .slider::after {
+      content: "";
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .14);
+      transition: .2s;
+    }
+
+    .switch input:checked + .slider {
+      background: var(--teal);
+    }
+
+    .switch input:checked + .slider::after {
+      transform: translateX(22px);
+    }
+
+    .result-pair {
+      display: grid;
+      gap: 12px;
+    }
+
+    .region-card {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+    }
+
+    .region-card.selected {
+      border-color: var(--teal);
+      background: #f0faf7;
+    }
+
+    .region-thumb {
+      width: 100%;
+      max-height: 150px;
+      aspect-ratio: 16 / 9;
+      object-fit: contain;
+      border-radius: 14px;
+      background: #fffaf4;
+      border: 1px solid rgba(214, 230, 225, .9);
+    }
+
+    .region-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .region-head b {
+      font-size: 17px;
+    }
+
+    .region-side {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: var(--teal-soft);
+      color: var(--teal-dark);
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .region-card p {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .unlocking-card {
+      min-height: 420px;
+      align-content: center;
+      gap: 20px;
+    }
+
+    .unlocking-badge {
+      display: grid;
+      place-items: center;
+      width: 92px;
+      height: 92px;
+      border-radius: 28px;
+      background: linear-gradient(145deg, var(--teal), #0b6c66);
+      color: #fff;
+      font-size: 34px;
+      font-weight: 900;
+      box-shadow: 0 18px 38px rgba(14, 139, 130, .26);
+      animation: unlockPulse 1.1s ease-in-out infinite alternate;
+    }
+
+    .unlock-meter {
+      height: 10px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #dfece8;
+    }
+
+    .unlock-meter span {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--gold), var(--teal));
+      transform-origin: left center;
+      animation: unlockFill 2.4s ease forwards;
+    }
+
+    .unlock-lines {
+      display: grid;
+      gap: 10px;
+    }
+
+    .unlock-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: #f5fbf8;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .unlock-line b {
+      color: var(--ink);
+      font-size: 15px;
+    }
+
+    @keyframes unlockFill {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
+
+    @keyframes unlockPulse {
+      from { transform: translateY(0) scale(1); }
+      to { transform: translateY(-4px) scale(1.03); }
+    }
+
+    .timer-card {
+      min-height: 280px;
+      display: grid;
+      place-items: center;
+      gap: 16px;
+      padding: 24px 18px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: #fff;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .timer-ring {
+      --pct: 0%;
+      display: grid;
+      place-items: center;
+      width: 184px;
+      height: 184px;
+      border-radius: 999px;
+      background: conic-gradient(var(--teal) var(--pct), #e2ece8 0);
+    }
+
+    .timer-core {
+      display: grid;
+      place-items: center;
+      width: 132px;
+      height: 132px;
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 36px;
+      font-weight: 900;
+      box-shadow: inset 0 0 0 1px var(--line);
+    }
+
+    .timer-title {
+      font-size: 21px;
+      line-height: 1.3;
+      font-weight: 900;
+    }
+
+    .timer-sub {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .mini-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .mini {
+      min-height: 84px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+    }
+
+    .mini b {
+      display: block;
+      font-size: 24px;
+      line-height: 1.15;
+    }
+
+    .mini span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .final-card {
+      display: grid;
+      gap: 14px;
+      padding: 18px;
+      border-radius: 24px;
+      background: #fff;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .final-status {
+      display: grid;
+      place-items: center;
+      width: 64px;
+      height: 64px;
+      border-radius: 20px;
+      color: #fff;
+      font-size: 30px;
+      font-weight: 900;
+      background: var(--teal);
+    }
+
+    .final-status.none { background: var(--blue); }
+    .final-status.bad { background: var(--red); }
+
+    .summary {
+      display: grid;
+      gap: 8px;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    .summary li {
+      display: grid;
+      grid-template-columns: 94px minmax(0, 1fr);
+      gap: 10px;
+      min-height: 42px;
+      padding: 10px 0;
+      border-top: 1px solid var(--line);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .summary b {
+      color: var(--teal-dark);
+      font-size: 13px;
+    }
+
+    .bottom-bar {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      z-index: 30;
+      transform: translateX(-50%);
+      width: min(100%, 460px);
+      padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+      background: linear-gradient(180deg, rgba(248, 251, 250, .68), rgba(248, 251, 250, .96) 38%);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid rgba(214, 230, 225, .78);
+      display: grid;
+      gap: 8px;
+    }
+
+    .primary-btn,
+    .secondary-btn {
+      width: 100%;
+      min-height: 56px;
+      border-radius: 18px;
+      font-weight: 900;
+      font-size: 16px;
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, var(--teal), #13a094);
+      color: #fff;
+      box-shadow: 0 12px 28px rgba(11, 124, 117, .22);
+    }
+
+    .primary-btn:disabled {
+      opacity: .48;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .secondary-btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .two-actions {
+      display: grid;
+      grid-template-columns: .82fr 1fr;
+      gap: 8px;
+    }
+
+    .small-link {
+      min-height: 36px;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    @media (min-width: 461px) {
+      .bottom-bar {
+        border-inline: 1px solid rgba(214, 230, 225, .78);
+        border-radius: 24px 24px 0 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark">R</div>
+        <div>
+          <small>Raphael Switch Game</small>
+          <strong>肩頸放鬆開關遊戲 V7</strong>
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="track" aria-hidden="true"><div class="fill" id="progressFill"></div></div>
+        <div class="step-count" id="stepCount">1/11</div>
+      </div>
+    </header>
+
+    <main id="screen"></main>
+    <footer class="bottom-bar" id="bottomBar"></footer>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "raphael_v7_switch_game_state";
+    const SESSION_KEY = "raphael_v7_switch_game_sessions";
+    const USER_KEY = "raphael_v7_switch_game_current_user";
+    const USERS_KEY = "raphael_v7_switch_game_users";
+    const TOTAL_STEPS = 13;
+
+    const routes = [
+      "welcome",
+      "safety",
+      "neck",
+      "elbowInnerTop",
+      "elbowOuterTop",
+      "elbowInnerSecond",
+      "elbowOuterSecond",
+      "unlocking",
+      "unlock",
+      "timer1",
+      "timer2",
+      "retest",
+      "final"
+    ];
+
+    const regionCopy = {
+      left_clavicle_region: {
+        id: "left_clavicle_region",
+        side: "左側",
+        type: "clavicle",
+        title: "左側鎖骨按壓區域",
+        short: "鎖骨按壓區域",
+        image: "v7-assets/clavicle.png",
+        text: "從鎖骨靠近胸口的一端開始，沿著鎖骨慢慢按壓搓揉，到外側約三分之一的位置。可用食指、中指、無名指三指一起按壓搓揉。"
+      },
+      right_clavicle_region: {
+        id: "right_clavicle_region",
+        side: "右側",
+        type: "clavicle",
+        title: "右側鎖骨按壓區域",
+        short: "鎖骨按壓區域",
+        image: "v7-assets/clavicle.png",
+        text: "從鎖骨靠近胸口的一端開始，沿著鎖骨慢慢按壓搓揉，到外側約三分之一的位置。可用食指、中指、無名指三指一起按壓搓揉。"
+      },
+      left_scapular_region: {
+        id: "left_scapular_region",
+        side: "左側",
+        type: "scapular",
+        title: "左側肩胛骨旁按壓區域",
+        short: "肩胛骨旁按壓區域",
+        image: "v7-assets/shoulder-scapular.png",
+        text: "在肩胛骨內緣上角到斜上方，肩膀上方到肩胛骨之間的區域，慢慢按壓搓揉。可用食指、中指、無名指三指一起按壓搓揉。"
+      },
+      right_scapular_region: {
+        id: "right_scapular_region",
+        side: "右側",
+        type: "scapular",
+        title: "右側肩胛骨旁按壓區域",
+        short: "肩胛骨旁按壓區域",
+        image: "v7-assets/shoulder-scapular.png",
+        text: "在肩胛骨內緣上角到斜上方，肩膀上方到肩胛骨之間的區域，慢慢按壓搓揉。可用食指、中指、無名指三指一起按壓搓揉。"
+      }
+    };
+
+    const state = loadState();
+    let timerId = null;
+    let unlockTimerId = null;
+
+    function defaultState() {
+      return {
+        route: "welcome",
+        localUserId: getCurrentUser().id,
+        localUserName: getCurrentUser().name,
+        safety: "",
+        neckSide: "",
+        baseline_score: null,
+        neckBeforeLeft: 60,
+        neckBeforeRight: 75,
+        neckFeeling: "",
+        elbowInnerTop: "",
+        elbowOuterTop: "",
+        elbowInnerSecond: "",
+        elbowOuterSecond: "",
+        elbowInnerSecondCode: randomSecondCode("inner"),
+        elbowOuterSecondCode: randomSecondCode("outer"),
+        unlocked: [],
+        activeTimerIndex: 0,
+        timerLeft: 30,
+        timerRunning: false,
+        regionDone: [],
+        neckAfterLeft: 78,
+        neckAfterRight: 88,
+        feelingChange: "",
+        post_relative_remaining: null,
+        estimated_post_score: null,
+        improvement_percent: null,
+        result_after: "",
+        result_category: "",
+        finalStatus: "",
+        savedAt: "",
+        note: "",
+        showSavedRecords: false,
+        selectedSavedRecordId: ""
+      };
+    }
+
+    function loadState() {
+      try {
+        const user = getCurrentUser();
+        const saved = JSON.parse(localStorage.getItem(stateKeyFor(user.id)) || localStorage.getItem(STORAGE_KEY) || "null");
+        const merged = { ...defaultState(), ...(saved || {}) };
+        merged.localUserId = user.id;
+        merged.localUserName = user.name;
+        if (!merged.elbowInnerSecondCode) merged.elbowInnerSecondCode = randomSecondCode("inner");
+        if (!merged.elbowOuterSecondCode) merged.elbowOuterSecondCode = randomSecondCode("outer");
+        migrateOldState(merged);
+        if (merged.route === "assist") merged.route = "unlock";
+        if (merged.route === "elbow1") merged.route = "elbowInnerTop";
+        if (merged.route === "elbow2") merged.route = "elbowOuterSecond";
+        if (!routes.includes(merged.route)) merged.route = "welcome";
+        return merged;
+      } catch {
+        return defaultState();
+      }
+    }
+
+    function persist() {
+      localStorage.setItem(stateKeyFor(state.localUserId || "guest"), JSON.stringify(state));
+    }
+
+    function go(route) {
+      stopTimer(false);
+      state.route = route;
+      if (route === "unlocking" || route === "unlock") state.unlocked = unlockRegions();
+      if (route === "timer1") {
+        state.activeTimerIndex = 0;
+        state.timerLeft = 30;
+      }
+      if (route === "timer2") {
+        state.activeTimerIndex = 1;
+        state.timerLeft = 30;
+      }
+      persist();
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function currentIndex() {
+      return Math.max(0, routes.indexOf(state.route));
+    }
+
+    function canContinue() {
+      switch (state.route) {
+        case "safety": return state.safety !== "";
+        case "neck": return state.neckSide !== "" && state.baseline_score !== null;
+        case "elbowInnerTop": return state.elbowInnerTop !== "";
+        case "elbowOuterTop": return state.elbowOuterTop !== "";
+        case "elbowInnerSecond": return state.elbowInnerSecond !== "";
+        case "elbowOuterSecond": return state.elbowOuterSecond !== "";
+        case "retest": return state.post_relative_remaining !== null || state.result_after === "discomfort" || state.result_after === "unsure";
+        case "final": return state.result_after !== "" || state.finalStatus !== "";
+        default: return true;
+      }
+    }
+
+    function nextRoute() {
+      const index = currentIndex();
+      return routes[Math.min(routes.length - 1, index + 1)];
+    }
+
+    function backRoute() {
+      if (state.route === "unlocking" || state.route === "unlock") return "elbowOuterSecond";
+      const index = currentIndex();
+      return routes[Math.max(0, index - 1)];
+    }
+
+    function render() {
+      clearUnlockTimer();
+      document.getElementById("progressFill").style.width = `${((currentIndex() + 1) / TOTAL_STEPS) * 100}%`;
+      document.getElementById("stepCount").textContent = `${currentIndex() + 1}/${TOTAL_STEPS}`;
+      const screen = document.getElementById("screen");
+      screen.innerHTML = views[state.route]();
+      renderBottom();
+      bindEvents();
+      if (state.route === "unlocking") scheduleUnlockAdvance();
+    }
+
+    function scheduleUnlockAdvance() {
+      unlockTimerId = window.setTimeout(() => {
+        if (state.route === "unlocking") go("unlock");
+      }, 2400);
+    }
+
+    function clearUnlockTimer() {
+      if (unlockTimerId) window.clearTimeout(unlockTimerId);
+      unlockTimerId = null;
+    }
+
+    const views = {
+      welcome() {
+        const users = getUsers();
+        const sessions = getSessions();
+        return `
+          <section class="screen">
+            <div class="hero-art">
+              <div>
+                <div class="switch-icon">ON</div>
+                <strong>3 分鐘，找出今天的肩頸放鬆開關</strong>
+              </div>
+              <span>先轉頭、再按手肘，解鎖左右 2 個肩頸按壓區域。</span>
+            </div>
+            <div class="card">
+              <span class="level-chip gold">遊戲開始</span>
+              <h1 class="title">今天肩頸哪裡比較卡？</h1>
+              <p class="subtitle">跟著步驟做一次，看看按完後脖子有沒有比較鬆。憑感覺選就好，不用想太久。</p>
+            </div>
+            <div class="card local-user-card">
+              <div>
+                <h3>這台手機的使用者</h3>
+                <p class="subtitle">請先選擇或新增使用者。不同名字會保存不同紀錄與按壓區域。</p>
+              </div>
+              <div class="account-status">
+                <b>目前使用</b>
+                <span>${escapeHtml(state.localUserName || "訪客")}</span>
+              </div>
+              ${sessions.length ? savedRecordsOverview(sessions) : `<p class="subtitle">這位使用者目前還沒有保存紀錄。</p>`}
+              <div class="local-user-line">
+                <input type="text" id="localUserNameInput" value="" placeholder="輸入新名字或暱稱" />
+                <button type="button" class="mini-btn" id="saveLocalUser">新增/切換</button>
+              </div>
+              ${users.length ? `
+                <p class="subtitle">點下面名字即可切換使用者：</p>
+                <div class="profile-row">
+                  ${users.map(user => `<button type="button" class="profile-pill ${user.id === state.localUserId ? "selected" : ""}" data-profile-id="${user.id}">${escapeHtml(user.name)}</button>`).join("")}
+                </div>
+              ` : ""}
+            </div>
+            <div class="card soft">
+              <ul class="list">
+                <li><span class="checkmark">1</span><span>先轉頭，找出今天比較卡的一邊。</span></li>
+                <li><span class="checkmark">2</span><span>按手肘內側、外側，選出比較有感的一邊。</span></li>
+                <li><span class="checkmark">3</span><span>解鎖左右 2 個肩頸按壓區域。</span></li>
+                <li><span class="checkmark">4</span><span>各按 30 秒，再轉一次看看差異。</span></li>
+              </ul>
+            </div>
+          </section>
+        `;
+      },
+      safety() {
+        return `
+          <section class="screen">
+            <span class="level-chip">安全確認</span>
+            <h1 class="title">開始前，先確認一下</h1>
+            <p class="subtitle">如果今天只是一般肩頸緊、痠，可以繼續體驗。若有下面狀況，先不要自己按壓。</p>
+            <div class="choice-grid">
+              ${choice("safety", "ok", "沒有以上狀況", "開始找今天的開關。")}
+              ${choice("safety", "warning", "我有以上狀況", "劇烈疼痛、手麻無力、頭暈、胸悶、剛受傷，或症狀快速變嚴重。", "danger")}
+            </div>
+            ${state.safety === "warning" ? `
+              <div class="card danger">
+                <h3>今天先不要自己按壓</h3>
+                <p class="subtitle">建議先由專人或醫療人員確認，之後再回來體驗。</p>
+              </div>
+            ` : ""}
+          </section>
+        `;
+      },
+      neck() {
+        return `
+          <section class="screen">
+            <span class="level-chip">第 1 關｜先轉頭</span>
+            <h1 class="title">先找出今天卡在哪裡</h1>
+            <p class="subtitle">坐正看前方，慢慢往右轉，再慢慢往左轉。哪一邊比較卡、緊或不舒服？</p>
+            <div class="card">
+              <h3>剛才哪一邊比較卡？</h3>
+              <div class="choice-grid">
+                ${choice("neckSide", "right", "右轉比較卡", "頭往右轉時比較緊或不舒服。")}
+                ${choice("neckSide", "left", "左轉比較卡", "頭往左轉時比較緊或不舒服。")}
+                ${choice("neckSide", "tie", "兩邊差不多", "左右感覺差不多。")}
+                ${choice("neckSide", "unsure", "不確定", "沒關係，後面用手肘反應來判斷。")}
+              </div>
+            </div>
+            <div class="card">
+              <h3>最卡或最不舒服，大概幾分？</h3>
+              <p class="subtitle">0 分是完全不卡，10 分是非常不舒服。憑感覺選就可以，不用想太久。</p>
+              ${scoreGrid("baseline_score")}
+              <div class="scale-help">
+                <span>0：完全不卡</span>
+                <span>5：中等不舒服</span>
+                <span>10：非常不舒服</span>
+              </div>
+            </div>
+            <div class="card soft">
+              <div class="field">
+                <label for="neckFeeling">想補充的位置，可簡單寫（可不填）</label>
+                <textarea id="neckFeeling" placeholder="${escapeHtml(neckFeelingExample())}">${escapeHtml(state.neckFeeling)}</textarea>
+              </div>
+            </div>
+          </section>
+        `;
+      },
+      elbowInnerTop() { return elbowView("elbowInnerTop"); },
+      elbowOuterTop() { return elbowView("elbowOuterTop"); },
+      elbowInnerSecond() { return elbowView("elbowInnerSecond"); },
+      elbowOuterSecond() { return elbowView("elbowOuterSecond"); },
+      unlocking() {
+        const analysis = getUnlockAnalysis();
+        return `
+          <section class="screen">
+            <span class="level-chip gold">解鎖中</span>
+            <div class="card gold unlocking-card">
+              <div class="unlocking-badge">ON</div>
+              <div>
+                <h1 class="title">正在整理你的身體反應</h1>
+                <p class="subtitle">系統正在比對轉脖子結果與兩輪手肘反應，解鎖左右肩頸開關中。</p>
+              </div>
+              <div class="unlock-meter" aria-hidden="true"><span></span></div>
+              <div class="unlock-lines">
+                <div class="unlock-line"><b>轉脖子結果</b><span>${neckSideText(analysis.neckSide)}</span></div>
+                <div class="unlock-line"><b>手肘投票</b><span>左 ${analysis.leftVotes} / 右 ${analysis.rightVotes}</span></div>
+                <div class="unlock-line"><b>解鎖狀態</b><span>左右肩頸開關中</span></div>
+              </div>
+            </div>
+          </section>
+        `;
+      },
+      unlock() {
+        const regions = getUnlocked();
+        const analysis = getUnlockAnalysis();
+        return `
+          <section class="screen">
+            <span class="level-chip gold">解鎖</span>
+            <h1 class="title">今天的放鬆開關已解鎖</h1>
+            <p class="subtitle">系統不輸出單一點，而是依照脖子主側與手肘投票，解鎖左右各一個按壓區域。</p>
+            <div class="result-pair">
+              ${regions.map((region, index) => regionCard(region, index)).join("")}
+            </div>
+            <div class="card soft">
+              <h3>本次解鎖依據</h3>
+              <ul class="summary">
+                <li><b>脖子主側</b><span>${sideText(analysis.primarySide)}（${neckSideText(analysis.neckSide)}）</span></li>
+                <li><b>內側反應</b><span>上方：${reactionText(state.elbowInnerTop)}，${elbowLabel("elbowInnerSecond")}：${reactionText(state.elbowInnerSecond)}</span></li>
+                <li><b>外側反應</b><span>上方：${reactionText(state.elbowOuterTop)}，${elbowLabel("elbowOuterSecond")}：${reactionText(state.elbowOuterSecond)}</span></li>
+                <li><b>手肘投票</b><span>左 ${analysis.leftVotes} / 右 ${analysis.rightVotes}，${voteLeadText(analysis.voteLead)}</span></li>
+              </ul>
+            </div>
+          </section>
+        `;
+      },
+      timer1() {
+        return timerView(0);
+      },
+      timer2() {
+        return timerView(1);
+      },
+      retest() {
+        return `
+          <section class="screen">
+            <span class="level-chip">再感覺一次</span>
+            <h1 class="title">看看有沒有變鬆</h1>
+            <p class="subtitle">現在再轉一次剛才比較卡的方向。如果把剛才按壓前的感覺當作 10 分，現在大概剩幾分？</p>
+            <div class="card">
+              <h3>現在大概剩幾分？</h3>
+              ${scoreGrid("post_relative_remaining")}
+              <div class="scale-help">
+                <span>0：幾乎沒有了</span>
+                <span>5：剩一半</span>
+                <span>10：跟剛才差不多</span>
+              </div>
+            </div>
+            <div class="card">
+              <h3>如果不適合用分數</h3>
+              <div class="choice-grid">
+                ${specialResultChoice("discomfort", "反而不舒服", "先停止，不要繼續按壓。", "danger")}
+                ${specialResultChoice("unsure", "不確定", "感覺不明顯或不好判斷。")}
+              </div>
+            </div>
+            <div class="card soft">
+              <div class="field">
+                <label for="feelingChange">想補充的感覺</label>
+                <textarea id="feelingChange">${escapeHtml(state.feelingChange)}</textarea>
+              </div>
+            </div>
+          </section>
+        `;
+      },
+      final() {
+        const status = finalStatusMeta();
+        const metrics = getResultMetrics();
+        return `
+          <section class="screen">
+            <span class="level-chip gold">Final Result</span>
+            <h1 class="title">今天的結果</h1>
+            <div class="final-card">
+              <div class="final-status ${status.className}">${status.icon}</div>
+              <h2>${status.title}</h2>
+              <p class="subtitle">${status.copy}</p>
+              <ul class="summary">
+                ${hasCompletedElbowFlow() ? `<li><b>解鎖區域</b><span>${getUnlocked().map(region => region.title).join("、")}</span></li>` : `<li><b>狀態</b><span>未進入按壓流程，已保留安全提醒。</span></li>`}
+                ${state.post_relative_remaining !== null ? `<li><b>剩餘感受</b><span>剛才當作 10 分，現在大約剩下 ${state.post_relative_remaining} 分。</span></li>` : ""}
+                ${metrics.improvement_percent !== null ? `<li><b>這次變化</b><span>這次體驗約減少 ${metrics.improvement_percent}% 的不舒服感。</span></li>` : ""}
+                <li><b>本機保存</b><span>保存後，同一支手機與同一個瀏覽器可用「本機使用者」找回紀錄。</span></li>
+              </ul>
+            </div>
+            ${state.savedAt ? `
+              <div class="card gold">
+                <h3>已保存到：${escapeHtml(state.localUserName || "訪客")} 的本機紀錄</h3>
+                <p class="subtitle">下次用同一支手機、同一個瀏覽器打開本頁，選「${escapeHtml(state.localUserName || "訪客")}」，首頁會顯示這次保存的按壓區域圖卡。</p>
+              </div>
+            ` : `
+              <div class="card soft">
+                <h3>保存後在哪裡看？</h3>
+                <p class="subtitle">按下保存後，這筆紀錄會存在「${escapeHtml(state.localUserName || "訪客")}」這位本機使用者底下。回首頁選同一個名字即可查看。</p>
+              </div>
+            `}
+          </section>
+        `;
+      }
+    };
+
+    function timerView(index) {
+      const region = getUnlocked()[index] || getUnlocked()[0];
+      const isActive = state.timerRunning && state.activeTimerIndex === index;
+      const pct = Math.round(((30 - state.timerLeft) / 30) * 100);
+      return `
+        <section class="screen">
+          <span class="level-chip">${index === 0 ? "第 3 關｜區域 1" : "第 3 關｜區域 2"}</span>
+          <h1 class="title">${region.title}</h1>
+          <div class="image-card">
+            <img src="${region.image}" alt="${region.title}示意圖" />
+            <div class="caption">${region.short}示意圖。請依文字說明慢慢按壓搓揉。</div>
+          </div>
+          <div class="card selected">
+            <div class="region-head">
+              <b>${region.short}</b>
+              <span class="region-side">${region.side}</span>
+            </div>
+            <p>${region.text}</p>
+          </div>
+          <div class="timer-card">
+            <div class="timer-ring" id="timerRing" style="--pct: ${pct}%">
+              <div class="timer-core" id="timerCore">${formatTime(state.timerLeft)}</div>
+            </div>
+            <div>
+              <div class="timer-title">30 秒倒數</div>
+              <div class="timer-sub" id="timerSub">${isActive ? "計時中，保持舒服力道" : "準備好後開始計時"}</div>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderBottom() {
+      const bottom = document.getElementById("bottomBar");
+      const route = state.route;
+      if (route === "welcome") {
+        bottom.innerHTML = `<button class="primary-btn" id="primaryAction">開始找今天的開關</button><button class="small-link" id="resetAction">清除這位使用者紀錄</button>`;
+        return;
+      }
+      if (route === "safety" && state.safety === "warning") {
+        bottom.innerHTML = `<button class="primary-btn" id="primaryAction">我了解，先保存安全提醒</button><button class="secondary-btn" id="backAction">返回</button>`;
+        return;
+      }
+      if (route === "unlocking") {
+        bottom.innerHTML = `<button class="primary-btn" disabled>正在解鎖...</button>`;
+        return;
+      }
+      if (route === "timer1" || route === "timer2") {
+        const done = state.timerLeft === 0;
+        if (done) {
+          bottom.innerHTML = `
+            <button class="primary-btn" id="primaryAction">${route === "timer1" ? "按下一個區域" : "按完了，看看有沒有變鬆"}</button>
+            <button class="secondary-btn" id="timerAction">重新計時</button>
+          `;
+        } else {
+          bottom.innerHTML = `
+            <button class="primary-btn" id="timerAction">${state.timerRunning ? "暫停倒數" : "開始按壓"}</button>
+            <div class="two-actions">
+              <button class="secondary-btn" id="backAction">上一頁</button>
+              <button class="secondary-btn" id="skipTimerAction">${route === "timer1" ? "我已經按完，下一區" : "我已經按完，看變化"}</button>
+            </div>
+          `;
+        }
+        return;
+      }
+      if (route === "final") {
+        const saved = !!state.savedAt;
+        bottom.innerHTML = `
+          <button class="primary-btn" id="saveSession" ${state.result_after || state.finalStatus ? "" : "disabled"}>${saved ? "已保存到這台手機" : "保存今天的開關"}</button>
+          <div class="two-actions">
+            <button class="secondary-btn" id="switchUserAction">換人使用</button>
+            <button class="primary-btn" id="restartAction">再玩一次</button>
+          </div>
+        `;
+        return;
+      }
+      bottom.innerHTML = `
+        <div class="two-actions">
+          <button class="secondary-btn" id="backAction">上一頁</button>
+          <button class="primary-btn" id="primaryAction" ${canContinue() ? "" : "disabled"}>${nextLabel()}</button>
+        </div>
+      `;
+    }
+
+    function nextLabel() {
+      const labels = {
+        safety: "開始找開關",
+        neck: "開始按手肘",
+        elbowInnerTop: "下一小關",
+        elbowOuterTop: "下一小關",
+        elbowInnerSecond: "下一小關",
+        elbowOuterSecond: "解鎖放鬆開關",
+        unlocking: "查看解鎖結果",
+        unlock: "開始按壓",
+        retest: "查看今天結果"
+      };
+      return labels[state.route] || "下一步";
+    }
+
+    function bindEvents() {
+      document.querySelectorAll("[data-field]").forEach(button => {
+        button.addEventListener("click", () => {
+          state[button.dataset.field] = button.dataset.value;
+          if (button.dataset.field === "neckSide") {
+            syncLegacyNeckAngles();
+          }
+          if (button.dataset.field === "safety" && button.dataset.value === "ok") {
+            state.result_after = "";
+            state.result_category = "";
+            state.finalStatus = "";
+          }
+          persist();
+          render();
+        });
+      });
+
+      document.querySelectorAll("[data-score]").forEach(button => {
+        button.addEventListener("click", () => {
+          const field = button.dataset.score;
+          state[field] = Number(button.dataset.value);
+          if (field === "post_relative_remaining") {
+            applyPostScoreResult();
+          }
+          persist();
+          render();
+        });
+      });
+
+      document.querySelectorAll("[data-special-result]").forEach(button => {
+        button.addEventListener("click", () => {
+          state.post_relative_remaining = null;
+          state.estimated_post_score = null;
+          state.improvement_percent = null;
+          state.result_after = button.dataset.specialResult;
+          state.result_category = button.dataset.specialResult === "discomfort" ? "不適" : "不確定";
+          state.finalStatus = button.dataset.specialResult === "discomfort" ? "bad" : "none";
+          persist();
+          render();
+        });
+      });
+
+      document.querySelectorAll("[data-range]").forEach(input => {
+        input.addEventListener("input", () => {
+          state[input.dataset.range] = Number(input.value);
+          persist();
+          render();
+        });
+      });
+
+      ["neckFeeling", "feelingChange"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener("input", () => {
+            state[id] = el.value;
+            persist();
+          });
+        }
+      });
+
+      const primary = document.getElementById("primaryAction");
+      if (primary) {
+        primary.addEventListener("click", () => {
+          if (state.route === "safety" && state.safety === "warning") {
+            state.finalStatus = "bad";
+            state.result_after = "discomfort";
+            state.result_category = "不適";
+            state.note = "安全提醒：使用者勾選不適或不確定，未進入按壓流程。";
+            saveSession();
+            go("final");
+            return;
+          }
+          if (state.route === "timer1") {
+            markRegionDone(0);
+            go("timer2");
+            return;
+          }
+          if (state.route === "timer2") {
+            markRegionDone(1);
+            go("retest");
+            return;
+          }
+          go(nextRoute());
+        });
+      }
+
+      const back = document.getElementById("backAction");
+      if (back) back.addEventListener("click", () => go(backRoute()));
+
+      const timerAction = document.getElementById("timerAction");
+      if (timerAction) timerAction.addEventListener("click", toggleTimer);
+
+      const skipTimer = document.getElementById("skipTimerAction");
+      if (skipTimer) skipTimer.addEventListener("click", completeCurrentTimerStep);
+
+      const save = document.getElementById("saveSession");
+      if (save) save.addEventListener("click", saveSession);
+
+      const restart = document.getElementById("restartAction");
+      if (restart) restart.addEventListener("click", restartGame);
+
+      const switchUser = document.getElementById("switchUserAction");
+      if (switchUser) switchUser.addEventListener("click", () => go("welcome"));
+
+      const reset = document.getElementById("resetAction");
+      if (reset) {
+        reset.addEventListener("click", () => {
+          localStorage.removeItem(stateKeyFor(state.localUserId || "guest"));
+          localStorage.removeItem(sessionKeyFor(state.localUserId || "guest"));
+          Object.assign(state, defaultState());
+          render();
+        });
+      }
+
+      const saveLocalUser = document.getElementById("saveLocalUser");
+      if (saveLocalUser) {
+        saveLocalUser.addEventListener("click", () => {
+          const input = document.getElementById("localUserNameInput");
+          switchLocalUser(input ? input.value : "");
+        });
+      }
+
+      const toggleSavedRecords = document.getElementById("toggleSavedRecords");
+      if (toggleSavedRecords) {
+        toggleSavedRecords.addEventListener("click", () => {
+          state.showSavedRecords = !state.showSavedRecords;
+          if (!state.showSavedRecords) state.selectedSavedRecordId = "";
+          persist();
+          render();
+          if (state.showSavedRecords) {
+            window.setTimeout(() => {
+              document.getElementById("savedRecordList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }, 0);
+          }
+        });
+      }
+
+      document.querySelectorAll("[data-saved-record-id]").forEach(button => {
+        button.addEventListener("click", () => {
+          state.showSavedRecords = true;
+          state.selectedSavedRecordId = button.dataset.savedRecordId;
+          persist();
+          render();
+          window.setTimeout(() => {
+            document.getElementById("savedRecordDetail")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }, 0);
+        });
+      });
+
+      document.querySelectorAll("[data-profile-id]").forEach(button => {
+        button.addEventListener("click", () => {
+          switchLocalUserById(button.dataset.profileId);
+        });
+      });
+    }
+
+    function choice(field, value, title, copy, extraClass = "") {
+      const selected = state[field] === value ? "selected" : "";
+      return `<button type="button" class="choice ${selected} ${extraClass}" data-field="${field}" data-value="${value}"><strong>${title}</strong><span>${copy}</span></button>`;
+    }
+
+    function seg(field, value, title) {
+      const selected = state[field] === value ? "selected" : "";
+      return `<button type="button" class="seg ${selected}" data-field="${field}" data-value="${value}">${title}</button>`;
+    }
+
+    function range(field, label, value, min, max, unit) {
+      return `
+        <div class="field">
+          <label>${label}</label>
+          <div class="range-line">
+            <input type="range" min="${min}" max="${max}" value="${value}" data-range="${field}" />
+            <output class="value">${value}${unit}</output>
+          </div>
+        </div>
+      `;
+    }
+
+    function neckFeelingExample() {
+      const examples = {
+        right: "範例：右轉時左側肩頸比較緊，轉到一半會卡。",
+        left: "範例：左轉時右邊脖子卡卡的，肩膀也有點緊。",
+        tie: "範例：兩邊差不多，只是肩膀上方都有點緊。",
+        unsure: "範例：不太確定哪邊比較卡，先照感覺測。"
+      };
+      return examples[state.neckSide] || "範例：右轉時左側肩頸比較緊，左轉角度比較卡。";
+    }
+
+    function savedRecordsOverview(sessions) {
+      const latest = sessions[0];
+      return `
+        <div class="saved-overview" id="savedRecordHub">
+          <div class="saved-overview-head">
+            <div>
+              <strong>我的保存區域</strong>
+              <p class="subtitle">已保存 ${sessions.length} 組放鬆開關，可選一筆叫回按壓圖。</p>
+            </div>
+            <span class="saved-count-pill">${sessions.length} 組</span>
+          </div>
+          <div class="latest-saved">
+            <b>最近一次</b>
+            <span>${escapeHtml(recordMetaText(latest))}</span>
+            <small>${escapeHtml(formatRecordRegions(latest))}</small>
+          </div>
+          <button type="button" class="mini-btn wide" id="toggleSavedRecords">${state.showSavedRecords ? "收起保存清單" : "查看我的保存區域"}</button>
+          ${state.showSavedRecords ? savedRecordsPanel(sessions) : ""}
+        </div>
+      `;
+    }
+
+    function savedRecordsPanel(sessions) {
+      const selected = getSelectedSavedSession(sessions);
+      return `
+        <div class="saved-record-panel" id="savedRecordList">
+          <p class="subtitle">點一筆紀錄，就會顯示那次保存的 2 個按壓區域。</p>
+          <div class="saved-record-list">
+            ${sessions.map((record, index) => savedRecordListItem(record, index)).join("")}
+          </div>
+          ${selected ? recordPreview(selected) : `<div class="saved-empty">先點上方某一筆紀錄，圖片與按壓文字會出現在這裡。</div>`}
+        </div>
+      `;
+    }
+
+    function savedRecordListItem(record, index) {
+      const selected = state.selectedSavedRecordId === record.id ? "selected" : "";
+      const label = index === 0 ? "最近一次" : `第 ${index + 1} 筆`;
+      return `
+        <button type="button" class="saved-record-item ${selected}" data-saved-record-id="${escapeHtml(record.id || "")}">
+          <b>${label}<small>${escapeHtml(record.date || record.saved_at || "")}</small></b>
+          <strong>${escapeHtml(resultCategoryText(record.result_after, record.result_category))}</strong>
+          <em>${escapeHtml(formatRecordRegions(record))}</em>
+          <span class="open-copy">${selected ? "已展開" : "看這組按壓圖"}</span>
+        </button>
+      `;
+    }
+
+    function getSelectedSavedSession(sessions = getSessions()) {
+      if (!state.selectedSavedRecordId) return null;
+      return sessions.find(record => record.id === state.selectedSavedRecordId) || null;
+    }
+
+    function recordMetaText(record) {
+      const category = resultCategoryText(record.result_after, record.result_category);
+      const improvement = record.improvement_percent !== null && record.improvement_percent !== undefined
+        ? `｜約減少 ${record.improvement_percent}%`
+        : "";
+      return `${record.date || record.saved_at || ""}｜${category}${improvement}`;
+    }
+
+    function recordPreview(record) {
+      return `
+        <div class="record-preview" id="savedRecordDetail">
+          <strong>這組保存的按壓區域</strong>
+          <p>${escapeHtml(recordMetaText(record))}</p>
+          <p>下次肩頸緊時，可以照著這兩個區域按壓。</p>
+          ${savedRegionCards(record)}
+          ${record.post_relative_remaining !== null && record.post_relative_remaining !== undefined ? `<p>按壓後大約剩 ${record.post_relative_remaining} 分，約減少 ${record.improvement_percent ?? "-"}%。</p>` : ""}
+        </div>
+      `;
+    }
+
+    function formatRecordRegions(record) {
+      const ids = [record.left_output_region || record.leftOutputRegion, record.right_output_region || record.rightOutputRegion].filter(Boolean);
+      return ids.map(id => regionCopy[id]?.title || id).join("、") || "尚未保存按壓區域";
+    }
+
+    function savedRegionCards(record) {
+      const ids = [record.left_output_region || record.leftOutputRegion, record.right_output_region || record.rightOutputRegion].filter(Boolean);
+      if (!ids.length) return `<p>目前這筆紀錄沒有保存按壓區域。</p>`;
+      return `
+        <div class="saved-region-list">
+          ${ids.map((id, index) => savedRegionCard(regionCopy[id], index)).join("")}
+        </div>
+      `;
+    }
+
+    function savedRegionCard(region, index) {
+      if (!region) return "";
+      return `
+        <div class="saved-region-card">
+          <img src="${region.image}" alt="${region.title}示意圖" loading="lazy" />
+          <div>
+            <b>${index === 0 ? "區域 1" : "區域 2"}｜${region.title}</b>
+            <small>${region.side}</small>
+            <p>${region.text}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function scoreGrid(field) {
+      const value = state[field];
+      return `
+        <div class="score-grid">
+          ${Array.from({ length: 11 }, (_, score) => `
+            <button type="button" class="score-btn ${value === score ? "selected" : ""}" data-score="${field}" data-value="${score}">${score}</button>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function specialResultChoice(value, title, copy, extraClass = "") {
+      const selected = state.result_after === value ? "selected" : "";
+      return `<button type="button" class="choice ${selected} ${extraClass}" data-special-result="${value}"><strong>${title}</strong><span>${copy}</span></button>`;
+    }
+
+    function elbowView(key) {
+      const test = elbowTest(key);
+      return `
+        <section class="screen">
+          <span class="level-chip">第 2 關｜手肘小關 ${test.step}</span>
+          <h1 class="title">${test.title}</h1>
+          <p class="subtitle">先按左手，再按右手。按到有感即可，不需要越痛越好。</p>
+          <div class="image-card compact">
+            <img src="${test.image}" alt="${test.title}示意圖" />
+            <div class="caption">${test.caption}</div>
+          </div>
+          <div class="card soft">
+            <h3>今天測這個位置</h3>
+            <p class="subtitle">${test.guide}</p>
+          </div>
+          <div class="card">
+            <h3>哪一邊比較明顯？</h3>
+            <div class="segmented">
+              ${seg(key, "left", "左手")}
+              ${seg(key, "right", "右手")}
+              ${seg(key, "tie", "差不多")}
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function elbowTest(key) {
+      const tests = {
+        elbowInnerTop: {
+          step: 1,
+          side: "inner",
+          code: "E1",
+          label: "上方",
+          title: "手肘內側｜上方",
+          image: "v7-assets/elbow-inner.png",
+          caption: "手掌朝上，看手肘彎曲線，找「上：靠外側」的位置。",
+          guide: "按圖上的上方位置，左右手都按看看。"
+        },
+        elbowOuterTop: {
+          step: 2,
+          side: "outer",
+          code: "E2",
+          label: "上方",
+          title: "手肘外側｜上方",
+          image: "v7-assets/elbow-outer.png",
+          caption: "手掌朝下，先摸到手肘外側突出的尖骨，再找「上：尖骨上方」。",
+          guide: "按圖上的上方位置，左右手都按看看。"
+        },
+        elbowInnerSecond: innerSecondTest(),
+        elbowOuterSecond: outerSecondTest()
+      };
+      return tests[key];
+    }
+
+    function innerSecondTest() {
+      const isMiddle = state.elbowInnerSecondCode === "E9";
+      return {
+        step: 3,
+        side: "inner",
+        code: state.elbowInnerSecondCode,
+        label: isMiddle ? "中間" : "下方",
+        title: `手肘內側｜${isMiddle ? "中間" : "下方"}`,
+        image: "v7-assets/elbow-inner.png",
+        caption: `手掌朝上，看手肘彎曲線，找「${isMiddle ? "中：在中間" : "下：靠手腕方向"}」的位置。`,
+        guide: `按圖上的${isMiddle ? "中間" : "下方"}位置，左右手都按看看。`
+      };
+    }
+
+    function outerSecondTest() {
+      const isMiddle = state.elbowOuterSecondCode === "E10";
+      return {
+        step: 4,
+        side: "outer",
+        code: state.elbowOuterSecondCode,
+        label: isMiddle ? "中間" : "下方",
+        title: `手肘外側｜${isMiddle ? "中間" : "下方"}`,
+        image: "v7-assets/elbow-outer.png",
+        caption: `手掌朝下，找手肘外側尖骨附近「${isMiddle ? "中：尖骨外側" : "下：尖骨內側"}」的位置。`,
+        guide: `按圖上的${isMiddle ? "中間" : "下方"}位置，左右手都按看看。`
+      };
+    }
+
+    function elbowLabel(key) {
+      return elbowTest(key).label;
+    }
+
+    function randomSecondCode(side) {
+      if (side === "inner") return Math.random() < .5 ? "E9" : "E5";
+      return Math.random() < .5 ? "E10" : "E6";
+    }
+
+    function migrateOldState(target) {
+      if (!target.elbowInnerTop && target.round1) target.elbowInnerTop = target.round1;
+      if (!target.elbowOuterTop && target.round1) target.elbowOuterTop = target.round1;
+      if (!target.elbowInnerSecond && target.round2) target.elbowInnerSecond = target.round2;
+      if (!target.elbowOuterSecond && target.round2) target.elbowOuterSecond = target.round2;
+      if (!target.neckSide) target.neckSide = inferNeckSideFromAngles(target);
+      if (target.baseline_score === undefined) target.baseline_score = null;
+      if (target.post_relative_remaining === undefined) target.post_relative_remaining = null;
+      if (target.showSavedRecords === undefined) target.showSavedRecords = false;
+      if (target.selectedSavedRecordId === undefined) target.selectedSavedRecordId = "";
+    }
+
+    function getElbowResults() {
+      return [
+        state.elbowInnerTop,
+        state.elbowOuterTop,
+        state.elbowInnerSecond,
+        state.elbowOuterSecond
+      ].filter(Boolean);
+    }
+
+    function hasCompletedElbowFlow() {
+      return getElbowResults().length === 4;
+    }
+
+    function getUnlockAnalysis() {
+      const neckSide = inferNeckSide();
+      const elbowResults = getElbowResults();
+      const leftVotes = elbowResults.filter(value => value === "left").length;
+      const rightVotes = elbowResults.filter(value => value === "right").length;
+      const voteLead = rightVotes > leftVotes ? "right" : leftVotes > rightVotes ? "left" : "tie";
+      const primarySide = neckSide || (voteLead === "left" ? "left" : "right");
+      const primaryRegionType = voteLead === "left" ? "clavicle" : "scapular";
+      const oppositeRegionType = primaryRegionType === "scapular" ? "clavicle" : "scapular";
+      const leftRegion = regionIdFor("left", primarySide === "left" ? primaryRegionType : oppositeRegionType);
+      const rightRegion = regionIdFor("right", primarySide === "right" ? primaryRegionType : oppositeRegionType);
+      return {
+        neckSide,
+        primarySide,
+        leftVotes,
+        rightVotes,
+        voteLead,
+        leftRegion,
+        rightRegion
+      };
+    }
+
+    function inferNeckSide() {
+      if (state.neckSide === "right" || state.neckSide === "left") return state.neckSide;
+      return inferNeckSideFromAngles(state);
+    }
+
+    function inferNeckSideFromAngles(source) {
+      if (source.neckBeforeRight < source.neckBeforeLeft) return "right";
+      if (source.neckBeforeLeft < source.neckBeforeRight) return "left";
+      return null;
+    }
+
+    function regionIdFor(side, type) {
+      return `${side}_${type}_region`;
+    }
+
+    function unlockRegions() {
+      const analysis = getUnlockAnalysis();
+      return [regionCopy[analysis.leftRegion], regionCopy[analysis.rightRegion]];
+    }
+
+    function getUnlocked() {
+      state.unlocked = unlockRegions();
+      return state.unlocked;
+    }
+
+    function regionCard(region, index) {
+      return `
+        <div class="region-card selected">
+          <img class="region-thumb" src="${region.image}" alt="${region.title}按壓示意圖" loading="lazy" />
+          <div class="region-head">
+            <b>${index === 0 ? "區域 1" : "區域 2"}｜${region.title}</b>
+            <span class="region-side">${region.side}</span>
+          </div>
+          <p>${region.text}</p>
+        </div>
+      `;
+    }
+
+    function reactionText(value) {
+      return value === "left" ? "左邊比較明顯" : value === "right" ? "右邊比較明顯" : "兩邊差不多";
+    }
+
+    function sideText(value) {
+      return value === "left" ? "左側" : value === "right" ? "右側" : "未定";
+    }
+
+    function neckSideText(value) {
+      return value === "left" ? "左轉比較卡" : value === "right" ? "右轉比較卡" : "兩邊差不多，依手肘投票判斷";
+    }
+
+    function voteLeadText(value) {
+      return value === "left" ? "左邊票數較高" : value === "right" ? "右邊票數較高" : "兩邊平手";
+    }
+
+    function syncLegacyNeckAngles() {
+      if (state.neckSide === "right") {
+        state.neckBeforeRight = 60;
+        state.neckBeforeLeft = 75;
+      } else if (state.neckSide === "left") {
+        state.neckBeforeLeft = 60;
+        state.neckBeforeRight = 75;
+      } else {
+        state.neckBeforeLeft = 70;
+        state.neckBeforeRight = 70;
+      }
+    }
+
+    function applyPostScoreResult() {
+      const metrics = getResultMetrics();
+      state.estimated_post_score = metrics.estimated_post_score;
+      state.improvement_percent = metrics.improvement_percent;
+      if (state.post_relative_remaining <= 3) {
+        state.result_after = "much_better";
+        state.result_category = "明顯有感";
+        state.finalStatus = "felt";
+      } else if (state.post_relative_remaining <= 6) {
+        state.result_after = "better";
+        state.result_category = "有一點變化";
+        state.finalStatus = "felt";
+      } else {
+        state.result_after = "no_change";
+        state.result_category = "反應不明顯";
+        state.finalStatus = "none";
+      }
+    }
+
+    function getResultMetrics() {
+      if (state.baseline_score === null || state.post_relative_remaining === null) {
+        return {
+          estimated_post_score: state.estimated_post_score ?? null,
+          improvement_percent: state.improvement_percent ?? null
+        };
+      }
+      return {
+        estimated_post_score: Number((state.baseline_score * (state.post_relative_remaining / 10)).toFixed(1)),
+        improvement_percent: (10 - state.post_relative_remaining) * 10
+      };
+    }
+
+    function resultCategoryText(result, fallback = "") {
+      const map = {
+        much_better: "明顯有感",
+        better: "有一點變化",
+        no_change: "反應不明顯",
+        discomfort: "不適",
+        unsure: "不確定",
+        felt: "有感",
+        none: "無感",
+        bad: "不適"
+      };
+      return fallback || map[result] || "尚未完成";
+    }
+
+    function getCurrentUser() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(USER_KEY) || "null");
+        if (saved && saved.id && saved.name) return saved;
+      } catch {}
+      return { id: "guest", name: "訪客" };
+    }
+
+    function stateKeyFor(userId) {
+      return `${STORAGE_KEY}_${userId || "guest"}`;
+    }
+
+    function sessionKeyFor(userId) {
+      return `${SESSION_KEY}_${userId || "guest"}`;
+    }
+
+    function getUsers() {
+      try {
+        const users = JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
+        return Array.isArray(users) ? users : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function setUsers(users) {
+      localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    }
+
+    function makeUserId(name) {
+      const clean = String(name || "訪客").trim() || "訪客";
+      return `local-${encodeURIComponent(clean).replace(/%/g, "").slice(0, 32).toLowerCase() || "guest"}`;
+    }
+
+    function switchLocalUser(name) {
+      const clean = String(name || "").trim() || "訪客";
+      const user = { id: makeUserId(clean), name: clean };
+      const users = getUsers().filter(item => item.id !== user.id);
+      users.unshift(user);
+      setUsers(users.slice(0, 8));
+      localStorage.setItem(USER_KEY, JSON.stringify(user));
+      Object.assign(state, loadState());
+      persist();
+      render();
+    }
+
+    function switchLocalUserById(id) {
+      const user = getUsers().find(item => item.id === id);
+      if (!user) return;
+      localStorage.setItem(USER_KEY, JSON.stringify(user));
+      Object.assign(state, loadState());
+      render();
+    }
+
+    function getSessions() {
+      try {
+        const sessions = JSON.parse(localStorage.getItem(sessionKeyFor(state.localUserId || "guest")) || "[]");
+        return Array.isArray(sessions) ? sessions : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function getLastSession() {
+      return getSessions()[0] || null;
+    }
+
+    function toggleTimer() {
+      if (state.timerRunning) {
+        stopTimer(true);
+        return;
+      }
+      if (state.timerLeft === 0) state.timerLeft = 30;
+      state.timerRunning = true;
+      persist();
+      render();
+      startTimerInterval();
+    }
+
+    function startTimerInterval() {
+      if (timerId) clearInterval(timerId);
+      timerId = setInterval(() => {
+        state.timerLeft = Math.max(0, state.timerLeft - 1);
+        if (state.timerLeft === 0) {
+          stopTimer(false);
+          markRegionDone(state.activeTimerIndex);
+          persist();
+          render();
+          return;
+        }
+        persist();
+        updateTimerDisplay();
+      }, 1000);
+      updateTimerDisplay();
+    }
+
+    function updateTimerDisplay() {
+      const ring = document.getElementById("timerRing");
+      const core = document.getElementById("timerCore");
+      const sub = document.getElementById("timerSub");
+      const timerButton = document.getElementById("timerAction");
+      const pct = Math.round(((30 - state.timerLeft) / 30) * 100);
+      if (ring) ring.style.setProperty("--pct", `${pct}%`);
+      if (core) core.textContent = formatTime(state.timerLeft);
+      if (sub) sub.textContent = state.timerRunning ? "計時中，保持舒服力道" : "準備好後開始計時";
+      if (timerButton) timerButton.textContent = state.timerRunning ? "暫停倒數" : "開始按壓";
+    }
+
+    function stopTimer(shouldRender) {
+      state.timerRunning = false;
+      if (timerId) clearInterval(timerId);
+      timerId = null;
+      persist();
+      if (shouldRender) render();
+    }
+
+    function completeCurrentTimerStep() {
+      markRegionDone(state.activeTimerIndex);
+      if (state.route === "timer1") {
+        go("timer2");
+      } else {
+        go("retest");
+      }
+    }
+
+    function markRegionDone(index) {
+      const region = getUnlocked()[index];
+      if (!region) return;
+      state.regionDone = [...new Set([...(state.regionDone || []), region.id])];
+      persist();
+    }
+
+    function formatTime(seconds) {
+      return `00:${String(seconds).padStart(2, "0")}`;
+    }
+
+    function finalStatusMeta() {
+      const result = state.result_after || state.finalStatus;
+      const map = {
+        much_better: {
+          icon: "✓",
+          title: "你找到了今天的肩頸放鬆開關",
+          copy: "這代表剛才兩個按壓區域，對今天的肩頸狀態有反應。你可以保存這組區域，下次肩頸緊時先從這裡開始。",
+          className: ""
+        },
+        better: {
+          icon: "✓",
+          title: "你找到了今天的肩頸放鬆開關",
+          copy: "這代表剛才兩個按壓區域，對今天的肩頸狀態有反應。你可以保存這組區域，下次肩頸緊時先從這裡開始。",
+          className: ""
+        },
+        no_change: {
+          icon: "→",
+          title: "這次反應不明顯，但這也是重要線索",
+          copy: "今天這組按壓區域沒有明顯變化，可能需要換一組區域，或由專人協助判斷。",
+          className: "none"
+        },
+        unsure: {
+          icon: "→",
+          title: "這次反應不明顯，但這也是重要線索",
+          copy: "今天的感覺不容易判斷，先保留這次紀錄，下次可再對照。",
+          className: "none"
+        },
+        discomfort: {
+          icon: "!",
+          title: "請先停止本次操作",
+          copy: "你剛才回填的反應不適合繼續自行按壓。請先停止，若不適持續或加重，建議尋求專業評估。",
+          className: "bad"
+        },
+        felt: {
+          icon: "✓",
+          title: "你找到了今天的肩頸放鬆開關",
+          copy: "可以保存今天解鎖的左右按壓區域，下一次回來可作為對照。",
+          className: ""
+        },
+        none: {
+          icon: "→",
+          title: "這次反應不明顯，但這也是重要線索",
+          copy: "保留手肘反應、按壓區域與重測結果，下次再比較。",
+          className: "none"
+        },
+        bad: {
+          icon: "!",
+          title: "請先停止本次操作",
+          copy: "若按壓後不舒服，先停止操作，建議由專人協助確認。",
+          className: "bad"
+        },
+      };
+      return map[result] || {
+        icon: "?",
+        title: "還差一步",
+        copy: "請先完成後測分數，系統會自動產生結果。",
+        className: "none"
+      };
+    }
+
+    function saveSession() {
+      if (state.savedAt) {
+        render();
+        return;
+      }
+      if (state.post_relative_remaining !== null) applyPostScoreResult();
+      const sessions = getSessions();
+      const analysis = getUnlockAnalysis();
+      const metrics = getResultMetrics();
+      const savedAt = new Date().toLocaleString("zh-TW");
+      const item = {
+        id: `v7-${Date.now()}`,
+        date: savedAt,
+        saved_at: savedAt,
+        user_id: state.localUserId,
+        user_name: state.localUserName,
+        baseline_score: state.baseline_score,
+        post_relative_remaining: state.post_relative_remaining,
+        estimated_post_score: metrics.estimated_post_score,
+        improvement_percent: metrics.improvement_percent,
+        result_after: state.result_after,
+        result_category: state.result_category || resultCategoryText(state.result_after),
+        elbow_inner_top_code: "E1",
+        elbow_inner_top_result: state.elbowInnerTop,
+        elbow_outer_top_code: "E2",
+        elbow_outer_top_result: state.elbowOuterTop,
+        elbow_inner_second_code: state.elbowInnerSecondCode,
+        elbow_inner_second_result: state.elbowInnerSecond,
+        elbow_outer_second_code: state.elbowOuterSecondCode,
+        elbow_outer_second_result: state.elbowOuterSecond,
+        unlocked: getUnlocked().map(region => region.id),
+        primarySide: analysis.primarySide,
+        leftVotes: analysis.leftVotes,
+        rightVotes: analysis.rightVotes,
+        leftOutputRegion: analysis.leftRegion,
+        rightOutputRegion: analysis.rightRegion,
+        left_output_region: analysis.leftRegion,
+        right_output_region: analysis.rightRegion,
+        neckBeforeLeft: state.neckBeforeLeft,
+        neckBeforeRight: state.neckBeforeRight,
+        neckAfterLeft: state.neckAfterLeft,
+        neckAfterRight: state.neckAfterRight,
+        finalStatus: state.finalStatus,
+        note: state.note || state.feelingChange
+      };
+      state.savedAt = savedAt;
+      state.selectedSavedRecordId = "";
+      localStorage.setItem(sessionKeyFor(state.localUserId || "guest"), JSON.stringify([item, ...sessions].slice(0, 20)));
+      persist();
+      render();
+    }
+
+    function restartGame() {
+      Object.assign(state, defaultState());
+      persist();
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    render();
+  </script>
+</body>
+</html>
