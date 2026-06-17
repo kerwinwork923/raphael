@@ -43,34 +43,12 @@ body {
   display: flex; flex-direction: column; align-items: center;
   overflow: hidden;
 }
-@media (min-width: 541px) {
-  /* Desktop: show as centered card, allow page scroll */
-  #app {
-    position: relative;
-    min-height: 100vh;
-    height: auto !important;
-    overflow: visible;
-  }
-  .screen {
-    height: auto !important;
-    min-height: 100vh;
-    overflow: visible;
-  }
-  .screen-body {
-    overflow: visible;
-    flex: unset;
-  }
-  .screen-foot {
-    position: sticky;
-    bottom: 0;
-    background: var(--bg);
-  }
-}
 
 .screen {
   width: 100%; max-width: 480px; height: 100%;
   display: flex; flex-direction: column;
   overflow: hidden;
+  contain: strict;
 }
 
 @keyframes fadeUp {
@@ -169,13 +147,13 @@ body {
 
 /* ── SCROLL BODY ── */
 .screen-body {
-  flex: 1; min-height: 0; overflow-y: scroll; padding: 10px 20px 16px;
-  display: flex; flex-direction: column; gap: 12px;
+  flex: 1; overflow-y: scroll; padding: 12px 20px 24px;
+  display: flex; flex-direction: column; gap: 16px;
   -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
 }
 /* ── FOOT ── */
 .screen-foot {
-  flex-shrink: 0; padding: 10px 20px max(32px, env(safe-area-inset-bottom, 32px));
+  flex-shrink: 0; padding: 10px 20px 32px;
   display: flex; flex-direction: column; gap: 10px;
   background: var(--bg);
 }
@@ -186,10 +164,9 @@ body {
   display: flex; flex-direction: column;
 }
 .intro-body {
-  flex: 1; min-height: 0; display: flex; flex-direction: column;
+  flex: 1; display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  padding: clamp(16px, 4vh, 40px) 32px clamp(8px, 2vh, 20px); text-align: center; gap: 0;
-  overflow: hidden;
+  padding: 40px 32px; text-align: center; gap: 0;
 }
 .intro-logo {
   width: 80px; height: 80px; border-radius: 22px;
@@ -211,7 +188,7 @@ body {
   animation: cursorBlink .8s step-end infinite;
   vertical-align: text-bottom;
 }
-.intro-foot { flex-shrink: 0; padding: 0 24px max(32px, env(safe-area-inset-bottom, 32px)); }
+.intro-foot { flex-shrink: 0; padding: 0 24px 48px; }
 .btn-start {
   width: 100%; padding: 18px; border: 2px solid var(--accent);
   border-radius: var(--radius); font-size: 17px; font-weight: 900;
@@ -300,7 +277,7 @@ body {
   background: #f0ebe3; border-bottom: 1px solid var(--border);
   display: flex; flex-direction: column; align-items: stretch; position: relative;
 }
-.elbow-diagram-wrap img { width: 100%; height: 38vw; min-height: 140px; max-height: 200px; display: block; object-fit: cover; object-position: center 60%; }
+.elbow-diagram-wrap img { width: 100%; height: 44vw; min-height: 160px; display: block; object-fit: contain; object-position: center center; background: transparent; }
 .elbow-pos-chip { position: absolute; top: 8px; left: 8px; display: flex; gap: 5px; flex-wrap: wrap; }
 .pos-chip { padding: 3px 9px; border-radius: 999px; font-size: 10px; font-weight: 900; backdrop-filter: blur(4px); }
 .pos-chip.active { background: rgba(10,107,98,.88); color: #fff; }
@@ -500,89 +477,6 @@ body {
 .text-muted { color: var(--muted2); }
 .text-center { text-align: center; }
 .hint-text { font-size: 12px; color: var(--muted2); text-align: center; }
-
-/* ══════════════════════════════════════════════
-   PRESS BREATHING ANIMATION
-══════════════════════════════════════════════ */
-@keyframes breathExpand {
-  0%,100% { transform:scale(1);   opacity:.55; }
-  50%      { transform:scale(1.18); opacity:.9; }
-}
-@keyframes breathRing {
-  0%   { transform:scale(.9);  opacity:.7; }
-  50%  { transform:scale(1.25); opacity:.2; }
-  100% { transform:scale(.9);  opacity:.7; }
-}
-.breath-wrap {
-  position:relative; display:flex; align-items:center;
-  justify-content:center; width:130px; height:130px; margin:0 auto 4px;
-}
-.breath-ring {
-  position:absolute; width:100%; height:100%;
-  border-radius:50%; border:2px solid var(--accent);
-  animation:breathRing 4s ease-in-out infinite;
-}
-.breath-ring.r2 { animation-delay:1.3s; opacity:.4; }
-.breath-ring.r3 { animation-delay:2.6s; opacity:.25; }
-.breath-core {
-  width:70px; height:70px; border-radius:50%;
-  background:radial-gradient(circle, rgba(10,107,98,.35) 0%, rgba(10,107,98,.08) 70%);
-  animation:breathExpand 4s ease-in-out infinite;
-  display:flex; align-items:center; justify-content:center;
-  font-size:28px;
-}
-.press-color-bar {
-  height:5px; border-radius:3px; width:100%; max-width:280px;
-  background:linear-gradient(90deg, #c0602a, #0a6b62);
-  margin:0 auto 10px; overflow:hidden; position:relative;
-}
-.press-color-fill {
-  position:absolute; left:0; top:0; height:100%;
-  background:linear-gradient(90deg,#0a6b62,#2cb5a8);
-  transition:width .8s linear; border-radius:3px;
-}
-/* ══════════════════════════════════════════════
-   REVEAL CINEMATIC ANIMATIONS
-══════════════════════════════════════════════ */
-@keyframes revealGlow {
-  0%   { opacity:0; transform:scale(.85); }
-  60%  { opacity:1; transform:scale(1.04); }
-  100% { opacity:1; transform:scale(1); }
-}
-@keyframes revealFadeUp {
-  0%   { opacity:0; transform:translateY(18px); }
-  100% { opacity:1; transform:translateY(0); }
-}
-@keyframes revealPop {
-  0%   { opacity:0; transform:scale(.6); }
-  70%  { transform:scale(1.08); }
-  100% { opacity:1; transform:scale(1); }
-}
-@keyframes revealPulse {
-  0%,100% { box-shadow:0 0 0 0 rgba(10,107,98,.0); }
-  50%      { box-shadow:0 0 0 18px rgba(10,107,98,.12); }
-}
-.reveal-cinematic-wrap {
-  display:flex; flex-direction:column; align-items:center;
-  gap:0; width:100%; padding:0 4px;
-}
-.reveal-pre-text {
-  font-size:15px; color:var(--muted2); letter-spacing:.08em;
-  opacity:0; animation:revealFadeUp .5s ease forwards;
-  animation-delay:.3s; text-align:center; margin-bottom:6px;
-}
-.reveal-found-text {
-  font-size:13px; color:var(--accent); font-weight:800; letter-spacing:.12em;
-  opacity:0; animation:revealFadeUp .5s ease forwards;
-  animation-delay:1.4s; text-align:center; margin-bottom:18px;
-}
-.reveal-point-pop {
-  opacity:0; animation:revealPop .55s cubic-bezier(.36,.07,.19,.97) forwards;
-  animation-delay:1.8s;
-}
-.reveal-point-pop.secondary {
-  animation-delay:2.3s;
-}
 </style>
 </head>
 <body>
@@ -596,15 +490,15 @@ body {
       <label for="lName">姓名</label>
       <input type="text" id="lName" placeholder="例：王小姐" autocomplete="name">
     </div>
-    <div class="lfield" style="display:none">
+    <div class="lfield">
       <label for="lBday">生日</label>
-      <input type="date" id="lBday" autocomplete="bday" value="2000-01-01">
+      <input type="date" id="lBday" autocomplete="bday">
     </div>
     <div class="lfield">
       <label for="lPhone">電話（後四碼）</label>
       <input type="tel" id="lPhone" placeholder="例：5678" maxlength="10">
     </div>
-    <div class="lerror" id="lError">請填寫姓名與電話後再繼續。</div>
+    <div class="lerror" id="lError">請填寫姓名、生日與電話後再繼續。</div>
     <button class="btn btn-primary" id="lEnterBtn">進入冒險 →</button>
     <p class="lnote">⚠ 此三項資料組合僅用於辨識你的紀錄，不會傳送至伺服器。</p>
     <p class="lnote" style="margin-top:8px;font-size:10px;color:var(--muted)">本工具提供自我感受參考，非醫療診斷。</p>
@@ -732,90 +626,32 @@ const GA = {
     const t=this.ctx.currentTime;
     [[440,0],[370,.2],[311,.4]].forEach(function(pair){ GA._osc(pair[0],'sawtooth',t+pair[1],0.28,0.07); });
   },
-  // ── 進場音效：輕柔鐘聲（4音上行）──
-  entryChime(){
-    this.init();
-    if(this.muted||!this.ctx)return;
-    const t=this.ctx.currentTime;
-    [[523,0,0.18],[659,0.18,0.22],[784,0.38,0.30],[1047,0.60,0.50]].forEach(function(p){
-      const o=GA.ctx.createOscillator();
-      const g=GA.ctx.createGain();
-      o.connect(g); g.connect(GA.ctx.destination);
-      o.type='sine'; o.frequency.value=p[0];
-      g.gain.setValueAtTime(0,t+p[1]);
-      g.gain.linearRampToValueAtTime(0.14,t+p[1]+0.03);
-      g.gain.exponentialRampToValueAtTime(0.001,t+p[1]+p[2]);
-      o.start(t+p[1]); o.stop(t+p[1]+p[2]+0.05);
-    });
-  },
-  // ── 森林水聲背景（pink noise 水流 + 水珠點綴 + 偶發鳥鳴）──
   startAmbient(){
     if(this.muted||!this.ctx||this.bgScheduled)return;
     this.bgScheduled=true;
-    const ctx=this.ctx;
-    const master=ctx.createGain(); master.gain.value=0; master.connect(ctx.destination);
-    master.gain.linearRampToValueAtTime(0.55,ctx.currentTime+3);
-    // Pink noise generator (4s buffer, looped)
-    function makePinkNoise(){
-      const bufLen=ctx.sampleRate*4;
-      const buf=ctx.createBuffer(1,bufLen,ctx.sampleRate);
-      const data=buf.getChannelData(0);
-      var b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
-      for(var i=0;i<bufLen;i++){
-        var wh=Math.random()*2-1;
-        b0=0.99886*b0+wh*0.0555179; b1=0.99332*b1+wh*0.0750759;
-        b2=0.96900*b2+wh*0.1538520; b3=0.86650*b3+wh*0.3104856;
-        b4=0.55000*b4+wh*0.5329522; b5=-0.7616*b5-wh*0.0168980;
-        data[i]=(b0+b1+b2+b3+b4+b5+b6+wh*0.5362)*0.11;
-        b6=wh*0.115926;
-      }
-      return buf;
-    }
-    function loopNoise(){
-      if(GA.muted||!GA.ctx)return;
-      var src=ctx.createBufferSource(); src.buffer=makePinkNoise(); src.loop=true;
-      var bp1=ctx.createBiquadFilter(); bp1.type='bandpass'; bp1.frequency.value=600; bp1.Q.value=0.7;
-      var bp2=ctx.createBiquadFilter(); bp2.type='bandpass'; bp2.frequency.value=1400; bp2.Q.value=0.4;
-      var lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=3200;
-      src.connect(bp1); src.connect(bp2); bp1.connect(lp); bp2.connect(lp); lp.connect(master);
-      src.start(); GA._bgNoiseSrc=src;
-    }
-    loopNoise();
-    // Water trickle accents
-    function trickle(){
-      if(GA.muted||!GA.ctx)return;
-      var o=ctx.createOscillator(); var g=ctx.createGain();
-      var f=ctx.createBiquadFilter(); f.type='bandpass'; f.Q.value=10;
-      var freq=900+Math.random()*900; f.frequency.value=freq;
-      o.type='sine'; o.frequency.value=freq;
-      o.connect(f); f.connect(g); g.connect(master);
-      var t=ctx.currentTime; var vol=0.03+Math.random()*0.05;
-      g.gain.setValueAtTime(0,t);
-      g.gain.linearRampToValueAtTime(vol,t+0.015);
-      g.gain.exponentialRampToValueAtTime(0.001,t+0.1+Math.random()*0.12);
-      o.start(t); o.stop(t+0.3);
-      setTimeout(trickle,80+Math.random()*500);
-    }
-    setTimeout(trickle,1500);
-    // Occasional bird chirp
-    var birdNotes=[2093,2349,2637,3136,3520];
-    function birdChirp(){
-      if(GA.muted||!GA.ctx)return;
-      var t=ctx.currentTime; var n=Math.floor(Math.random()*birdNotes.length);
-      var reps=1+Math.floor(Math.random()*3);
-      for(var r=0;r<reps;r++){
-        (function(off){
-          var o=ctx.createOscillator(); var g=ctx.createGain();
-          o.connect(g); g.connect(master); o.type='sine'; o.frequency.value=birdNotes[n];
-          g.gain.setValueAtTime(0,t+off);
-          g.gain.linearRampToValueAtTime(0.035,t+off+0.01);
-          g.gain.exponentialRampToValueAtTime(0.001,t+off+0.08);
-          o.start(t+off); o.stop(t+off+0.12);
-        })(r*0.13);
-      }
-      setTimeout(birdChirp,7000+Math.random()*14000);
-    }
-    setTimeout(birdChirp,5000+Math.random()*5000);
+    const masterGain=this.ctx.createGain();
+    masterGain.gain.value=0.025;
+    masterGain.connect(this.ctx.destination);
+    const seq=[[110,3],[146,2],[164,2],[196,3],[110,2],[164,3],[146,2]];
+    let t=this.ctx.currentTime+0.5;
+    var schedule=function(){
+      seq.forEach(function(item){
+        const freq=item[0], dur=item[1];
+        const o=GA.ctx.createOscillator();
+        const g=GA.ctx.createGain();
+        o.connect(g); g.connect(masterGain);
+        o.frequency.value=freq; o.type='sine';
+        g.gain.setValueAtTime(0,t);
+        g.gain.linearRampToValueAtTime(1,t+0.8);
+        g.gain.setValueAtTime(1,t+dur-0.8);
+        g.gain.linearRampToValueAtTime(0,t+dur);
+        o.start(t); o.stop(t+dur);
+        t+=dur;
+      });
+      const msLeft=(t-GA.ctx.currentTime-1)*1000;
+      if(msLeft>0) setTimeout(schedule,msLeft);
+    };
+    schedule();
   },
   toggle(){
     this.muted=!this.muted;
@@ -931,25 +767,18 @@ let S = {
   screen: "intro",
   introStep: 0,
   neckR: null, neckL: null, neckSide: null, neckSideManual: false,
-  neckSubStep: 0,         // 0=rightSide 1=rightLevel 2=leftSide 3=leftLevel
-  neckRSide: null, neckRLevel: null, // right-turn: 'left'|'right', 'tight'|'normal'
-  neckLSide: null, neckLLevel: null,  // left-turn: same
   round2Key: Math.random() < .5 ? "r2a" : "r2b",
   scores: {},
   dominantArm: null,
   pressPoints: [],
-  timerLeft: 30, timerActive: false, timerInterval: null,
+  timerLeft: 60, timerActive: false, timerInterval: null,
   pressIdx: 0,
   afterR: null, afterL: null,
   userId: null, userName: null,
   records: [], _saved: false,
-  feltPress: null, // true=有感 false=無感
   ansAnswers: {}, // ANS self-check
   elbowPtIdx: 0,
   elbowPoints: [],
-  elbowSubStep: 0,   // 0-3=inner 4-7=outer
-  elbowInnerSide: null, elbowInnerLevel: null,
-  elbowOuterSide: null, elbowOuterLevel: null,
 };
 
 function isANSUnlocked(){
@@ -971,7 +800,7 @@ function djb2(s){
 function userKey(){ return "raphael_v7_"+S.userId; }
 
 function doLogin(name,bday,phone){
-  const raw=(name.trim()+"|"+phone.replace(/\D/g,"").slice(-4)).toLowerCase();
+  const raw=(name.trim()+"|"+bday+"|"+phone.replace(/\D/g,"").slice(-4)).toLowerCase();
   S.userId=djb2(raw); S.userName=name.trim();
   const d=localStorage.getItem(userKey());
   S.records=d?JSON.parse(d):[];
@@ -1004,21 +833,7 @@ function saveRecord(rec){
    DECISION LOGIC
 ══════════════════════════════════════════════ */
 function computeDominantArm(){
-  // New elbow test: use inner+outer side selections
-  if(S.elbowInnerSide||S.elbowOuterSide){
-    var sides=[S.elbowInnerSide,S.elbowOuterSide].filter(Boolean);
-    var lvls=[S.elbowInnerLevel,S.elbowOuterLevel];
-    var lCount=sides.filter(function(s){return s==="left";}).length;
-    var rCount=sides.filter(function(s){return s==="right";}).length;
-    if(rCount>lCount) return "right";
-    if(lCount>rCount) return "left";
-    // Tie: use severity
-    if(lvls[0]==="severe"&&S.elbowInnerSide) return S.elbowInnerSide;
-    if(lvls[1]==="severe"&&S.elbowOuterSide) return S.elbowOuterSide;
-    return sides[0]||"right";
-  }
-  // Fallback: legacy scores
-  var l=0,r=0;
+  let l=0,r=0;
   Object.values(S.scores).forEach(function(v){
     if(v==="left") l++;
     else if(v==="right") r++;
@@ -1026,63 +841,12 @@ function computeDominantArm(){
   return r>=l?"right":"left";
 }
 
-/* ══════════════════════════════════════════════
-   FEEDBACK SENTENCE POOLS
-   zone: "shoulder" | "collarbone"
-   felt: true = 有感, false = 無感
-══════════════════════════════════════════════ */
-const FEEDBACK = {
-  shoulder: {
-    felt: [
-      "肩峰後面是很多人從來沒認真碰過的地方。你今天去了。",
-      "{側}肩的緊繃今天讓你找到了。接下來幾小時，留意這裡的變化。",
-      "這裡的酸脹感是身體在說話。你今天聽到了。",
-      "肩胛旁的點不容易找，找到了表示真的在用心感受。",
-      "今天的開關在{側}肩。你花了不到兩分鐘，但這兩分鐘是給自己的。",
-      "{側}肩今天有被照顧到。明天再來看看它的狀態。",
-      "每個人的{側}肩開關位置都有點不同。你今天記住了你自己的。",
-    ],
-    nofeel: [
-      "今天{側}肩的感覺不明顯——有時候身體需要幾次才會開口。",
-      "找不到感覺不代表沒有，有時候緊繃藏得很深。明天再試試。",
-      "身體的感受需要練習才能讀到。今天是其中一次練習。",
-      "沒有酸脹感也沒關係。每次按都是在讓這個位置對你更熟悉。",
-      "{側}肩今天反應不明顯，下次試著把力道往骨頭方向再深一點。",
-    ],
-  },
-  collarbone: {
-    felt: [
-      "鎖骨外側這個位置，大多數人一輩子不會主動去碰它。你今天碰了。",
-      "這裡的緊繃跟你的呼吸有關。按完之後，試著深吸一口氣。",
-      "鎖骨外側端點的下方，是很多人的「隱形緊繃點」。你找到了。",
-      "如果按的時候有點意外地酸，表示這裡等你來很久了。",
-      "按完這裡，有些人會感覺呼吸變深了一點。留意看看。",
-      "今天的開關在{側}側鎖骨。不起眼的位置，卻是整個肩頸的連結點。",
-      "這裡通了，整個{側}側的頸肩會覺得輕一點。感受看看。",
-    ],
-    nofeel: [
-      "鎖骨這個位置第一次按，通常不容易有感覺。多幾次會不同。",
-      "沒有感覺有時是位置稍微偏了。下次試著往鎖骨正下方移一指。",
-      "今天這裡比較安靜。身體不是每天都一樣，明天可能就有反應了。",
-      "找不到感覺也是一種資訊——說明需要更多次才能建立連結。",
-      "每次去碰這個位置，身體就多記住你一次。今天算數。",
-    ],
-  },
-};
-
-function getFeedbackLine(zone, felt, sideLabel){
-  const pool = (FEEDBACK[zone]||(FEEDBACK.shoulder))[felt?"felt":"nofeel"];
-  const day = new Date().getDate();
-  const line = pool[day % pool.length];
-  return line.replace(/\{側\}/g, sideLabel);
-}
-
 function makePressPoint(side,zone,isPrimary){
   const sL=side==="right"?"右":"左";
   const zN=zone==="shoulder"?"肩膀／肩胛旁":"鎖骨外側";
   const zNote=zone==="shoulder"
-    ?sL+"側肩膀，在肩膀中間處，肌肉和肩胛骨交接處。用食指中指無名指按深揉壓——慢慢找到有輕微酸脹感的位置，在那裡持續揉壓，保持自然呼吸。"
-    :sL+"側鎖骨外側端點下方約一指處，整個鎖骨外1/3，按在鎖骨上。用食指中指無名指按深後輕輕揉動，找到有微微酸脹感的位置，持續揉壓，保持自然呼吸。";
+    ?sL+"側肩膀，在肩峰（最高的骨頭點）往後下方約兩根手指處。用對側拇指按深後，以小圓圈揉壓——慢慢找到有輕微酸脹感的位置，在那裡持續揉壓，保持自然呼吸。"
+    :sL+"側鎖骨外側端點下方約一指處。用中指按深後輕輕揉動，找到有微微酸脹感的位置，持續揉壓，保持自然呼吸。";
   return {side:side, zone:zone, isPrimary:isPrimary, sideLabel:sL, zoneName:zN, zoneNote:zNote};
 }
 
@@ -1099,7 +863,7 @@ function computePressPoints(){
 ══════════════════════════════════════════════ */
 function elbowSVG(pos){
   const isInner = pos.endsWith("i");
-  const imgSrc = isInner ? "v7-assets/elbow-inner.png" : "v7-assets/elbow-outer.png";
+  const imgSrc = isInner ? "/v7-assets/elbow-inner.png" : "/v7-assets/elbow-outer.png";
   const allPositions = isInner
     ? [{k:"ui",l:"上方"},{k:"mi",l:"中段"},{k:"li",l:"下方"}]
     : [{k:"uo",l:"上方"},{k:"mo",l:"中段"},{k:"lo",l:"下方"}];
@@ -1115,7 +879,7 @@ function elbowSVG(pos){
 function bodySVG(side,zone){
   const isSh = zone==="shoulder";
   const sideLabel = side==="right"?"右側":"左側";
-  const imgSrc = isSh ? "v7-assets/shoulder-scapular.png" : "v7-assets/clavicle.png";
+  const imgSrc = isSh ? "/v7-assets/shoulder-scapular.png" : "/v7-assets/clavicle.png";
   return '<div class="body-img-wrap">'
     +'<img src="'+imgSrc+'" alt="'+sideLabel+(isSh?"肩胛骨旁":"鎖骨按壓區域")+'" loading="lazy" style="border-radius:var(--radius-sm)"/>'
     +'<div class="body-side-badge">'+sideLabel+'</div>'
@@ -1123,7 +887,7 @@ function bodySVG(side,zone){
 }
 
 function pressImgSrc(zone){
-  return zone==="shoulder"?"v7-assets/shoulder-scapular.png":"v7-assets/clavicle.png";
+  return zone==="shoulder"?"/v7-assets/shoulder-scapular.png":"/v7-assets/clavicle.png";
 }
 
 /* ══════════════════════════════════════════════
@@ -1131,7 +895,7 @@ function pressImgSrc(zone){
 ══════════════════════════════════════════════ */
 function progMap(){
   const nodes=['neck','elbow','reveal','press','result'];
-  const order={intro:0,neckRight:0,neckLeft:0,neck:0,elbow1:1,elbow2:1,elbowPt:1,elbowInner:1,elbowOuter:1,reveal:2,press:3,after:4,result:4};
+  const order={intro:0,neck:0,elbow1:1,elbow2:1,elbowPt:1,reveal:2,press:3,after:4,result:4};
   const cur=order[S.screen]!==undefined?order[S.screen]:0;
   let html='';
   nodes.forEach(function(n,i){
@@ -1185,6 +949,9 @@ function runTypewriter(){
   setTimeout(function(){ document.addEventListener('click',skip); },200);
 }
 
+/* ══════════════════════════════════════════════
+   SCREENS
+══════════════════════════════════════════════ */
 function screenIntro(){
   return '<div class="screen intro-screen">'
     +'<div class="intro-body">'
@@ -1200,62 +967,38 @@ function screenIntro(){
     +'</div>';
 }
 
-function neckCard(dir){
-  // dir: 'right' | 'left'
-  var isR = dir==='right';
-  var emoji = isR ? '➡️' : '⬅️';
-  var label = isR ? '往右轉頭' : '往左轉頭';
-  var side  = isR ? S.neckRSide  : S.neckLSide;
-  var level = isR ? S.neckRLevel : S.neckLLevel;
+function screenNeck(){
+  const autoSide = S.neckR!==null && S.neckL!==null
+    ? (S.neckR >= S.neckL ? "right" : "left") : null;
+  const canNext = S.neckR!==null && S.neckL!==null && S.neckSide!==null;
 
-  function selBtn(val, cur, text){
-    var isSel = cur===val;
-    return '<button class="btn '+(isSel?'btn-primary':'btn-secondary')+' neck-'+dir+'-side" '
-      +'style="font-size:16px;padding:16px 0;font-weight:900;transition:all .15s" '
-      +'data-dir="'+dir+'" data-val="'+val+'">'+text+'</button>';
-  }
-  function selLvl(val, cur, text){
-    var isSel = cur===val;
-    return '<button class="btn '+(isSel?'btn-primary':'btn-secondary')+' neck-'+dir+'-level" '
-      +'style="font-size:16px;padding:16px 0;font-weight:900;transition:all .15s" '
-      +'data-dir="'+dir+'" data-val="'+val+'">'+text+'</button>';
+  let sideCard = "";
+  if(S.neckR!==null && S.neckL!==null){
+    sideCard = '<div class="card">'
+      +'<p style="font-weight:800;margin-bottom:6px;color:var(--text)">🎯 確認一下比較緊的那一側</p>'
+      +'<p style="font-size:14px;color:var(--text);margin-bottom:14px">根據你的選擇，推測是 <b style="color:var(--accent)">'+(autoSide==="right"?"右側":"左側")+'</b> 比較緊——這樣對嗎？</p>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+      +'<button class="btn btn-primary" id="confirmSideYes">✓ 對，是'+(autoSide==="right"?"右":"左")+'側</button>'
+      +'<button class="btn btn-secondary" id="confirmSideNo">不，是'+(autoSide==="right"?"左":"右")+'側</button>'
+      +'</div>'
+      +'</div>';
   }
 
-  return '<div class="card" style="padding:22px 20px;margin-bottom:0">'
-    +'<p style="font-size:24px;margin-bottom:4px">'+emoji+'</p>'
-    +'<p style="font-weight:900;font-size:18px;color:var(--text);margin-bottom:4px">'+label+'</p>'
-    +'<p style="font-size:13px;color:var(--muted);margin-bottom:18px">慢慢轉到底，感受兩側的緊繃感</p>'
-    +'<p style="font-size:13px;font-weight:800;color:var(--muted2);margin-bottom:8px">哪邊覺得比較緊或不舒服？</p>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">'
-    +selBtn('left',  side, '← 左邊')
-    +selBtn('right', side, '右邊 →')
-    +'</div>'
-    +'<p style="font-size:13px;font-weight:800;color:var(--muted2);margin-bottom:8px">緊繃程度？</p>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
-    +selLvl('tight',  level, '😣 很緊')
-    +selLvl('normal', level, '😐 普通')
-    +'</div>'
-    +'</div>';
-}
-
-function neckScreen(dir){
-  var isR = dir==='right';
-  var side  = isR ? S.neckRSide  : S.neckLSide;
-  var level = isR ? S.neckRLevel : S.neckLLevel;
-  var canNext = side!==null && level!==null;
-
-  // Quick return card (first neck screen only)
-  var quickCard='';
-  if(isR && S.records&&S.records.length>0){
-    var lastRec=S.records[S.records.length-1];
-    var pts=lastRec.pressPoints||[];
-    var pri=pts.find(function(p){return p.isPrimary;})||pts[0];
+  // Quick return card: show last effective press points if available
+  let quickCard="";
+  if(S.records&&S.records.length>0){
+    const lastRec=S.records[S.records.length-1];
+    const pts=lastRec.pressPoints||[];
+    const pri=pts.find(function(p){return p.isPrimary;})||pts[0];
+    const sec=pts.find(function(p){return !p.isPrimary;})||pts[1];
     if(pri){
-      var ZN={shoulder:'肩膀',collarbone:'鎖骨外側'};
-      var priTxt=(pri.side==='right'?'右':'左')+'側 '+(ZN[pri.zone]||pri.zone);
-      quickCard='<div style="background:linear-gradient(135deg,rgba(10,107,98,.07),rgba(10,107,98,.02));border:1.5px solid var(--border-glow);border-radius:var(--radius);padding:14px 16px">'
-        +'<p style="font-size:11px;font-weight:800;color:var(--accent);margin-bottom:6px">📌 上次開關位置（'+lastRec.date+'）</p>'
-        +'<div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:12px">'+priTxt+'</div>'
+      const ZN={shoulder:"肩膀／肩胛旁",collarbone:"鎖骨外側"};
+      const priTxt=(pri.side==="right"?"右":"左")+"側 "+(ZN[pri.zone]||pri.zone);
+      const secTxt=sec?(sec.side==="right"?"右":"左")+"側 "+(ZN[sec.zone]||sec.zone):"";
+      quickCard='<div style="background:linear-gradient(135deg,rgba(10,107,98,.07),rgba(10,107,98,.02));border:1.5px solid var(--border-glow);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px">'
+        +'<p style="font-size:11px;font-weight:800;color:var(--accent);margin-bottom:6px">📌 上次有效的按壓點（'+lastRec.date+'）</p>'
+        +'<div style="font-size:14px;font-weight:900;color:var(--text);margin-bottom:2px">開關一：'+priTxt+'</div>'
+        +(secTxt?'<div style="font-size:12px;color:var(--muted2);margin-bottom:10px">開關二：'+secTxt+'</div>':'<div style="margin-bottom:10px"></div>')
         +'<button class="btn btn-primary" id="quickPressBtn" style="font-size:13px;padding:11px">▶ 直接開始按壓</button>'
         +'</div>';
     }
@@ -1276,21 +1019,38 @@ function neckScreen(dir){
     +'</div>'
     +'<div class="screen-body">'
     +quickCard
-    +neckCard(dir)
+    +'<div>'
+    +'<p class="kicker">找出緊繃方向</p>'
+    +'<h2 class="screen-title">先轉轉脖子<br>哪邊比較緊？</h2>'
+    +'<p class="screen-sub">坐挺，慢慢把頭轉到底，選最接近的感受。</p>'
+    +'</div>'
+    +'<div class="card">'
+    +'<p style="font-weight:800;margin-bottom:12px;color:var(--text)">➡️ 往右轉到底</p>'
+    +'<div class="emoji-scale">'
+    +EMOJIS.map(function(e,i){
+      return '<button class="emoji-btn '+(S.neckR===i?"sel":"")+'" data-neck-r="'+i+'">'
+        +'<span class="e">'+e+'</span><span class="lbl">'+EMOJI_LBLS[i]+'</span>'
+        +'</button>';
+    }).join("")
+    +'</div>'
+    +'</div>'
+    +'<div class="card">'
+    +'<p style="font-weight:800;margin-bottom:12px;color:var(--text)">⬅️ 往左轉到底</p>'
+    +'<div class="emoji-scale">'
+    +EMOJIS.map(function(e,i){
+      return '<button class="emoji-btn '+(S.neckL===i?"sel":"")+'" data-neck-l="'+i+'">'
+        +'<span class="e">'+e+'</span><span class="lbl">'+EMOJI_LBLS[i]+'</span>'
+        +'</button>';
+    }).join("")
+    +'</div>'
+    +'</div>'
+    +sideCard
     +'</div>'
     +'<div class="screen-foot">'
-    +'<button class="btn btn-primary" id="neckNextBtn" '+(canNext?'':'disabled')+'>'
-    +(isR?'往左轉測試 →':'進入手肘測試 →')
-    +'</button>'
+    +'<button class="btn btn-primary" id="nextNeck" '+(canNext?"":"disabled")+'>手肘測試 →</button>'
     +'</div>'
     +'</div>';
 }
-
-function screenNeckRight(){ return neckScreen('right'); }
-function screenNeckLeft(){  return neckScreen('left');  }
-// Legacy alias
-function screenNeck(){ return neckScreen('right'); }
-
 
 function elbowPointCard(p){
   const sel=S.scores[p.id];
@@ -1363,26 +1123,21 @@ function screenReveal(){
     +'<button class="back-btn" id="backBtn">←</button>'
     +'<div class="brand-mark">智</div>'
     +'</div>'
-    +'<span class="step-chip" style="color:var(--gold);border-color:var(--gold-glow)">結果揭曉</span>'
+    +'<span class="step-chip" style="color:var(--gold);border-color:var(--gold-glow)">結果揭曉！</span>'
     +'<div style="display:flex;align-items:center;gap:6px">'
     +'<button class="mute-btn" id="muteBtn">🔊</button>'
     +'<span class="user-chip">'+esc(S.userName)+'</span>'
     +'</div>'
     +'</div>'
-    +'<div class="screen-body" style="align-items:center;padding-top:10px">'
-    +'<div class="reveal-cinematic-wrap">'
-    // Pre-text line 1
-    +'<p class="reveal-pre-text">今天的開關⋯⋯</p>'
-    // Glow icon
-    +'<div style="opacity:0;animation:revealGlow .7s ease forwards;animation-delay:.9s;margin-bottom:4px">'
-    +'<div style="font-size:52px;animation:revealPulse 2s ease 2.2s infinite">🔑</div>'
+    +'<div class="reveal-body">'
+    +'<div class="reveal-icon" id="revealIcon">🔑</div>'
+    +'<div>'
+    +'<h2 class="reveal-title">🔓 開關解鎖！</h2>'
+    +'<p class="reveal-sub" style="margin-top:6px">你今天的肩頸開關在這裡 ✨</p>'
     +'</div>'
-    // Found text
-    +'<p class="reveal-found-text">找到了 ✦</p>'
-    // Primary card
-    +'<div class="reveal-point-pop" style="width:100%">'
-    +'<div class="point-card primary" style="margin-bottom:10px">'
-    +'<div class="primary-badge">開關一・優先按壓</div>'
+    +'<div class="point-cards">'
+    +'<div class="point-card primary">'
+    +'<div class="primary-badge">優先按壓</div>'
     +'<div class="point-inner">'
     +'<div class="point-svg-wrap">'+bodySVG(pri.side,pri.zone)+'</div>'
     +'<div>'
@@ -1391,9 +1146,6 @@ function screenReveal(){
     +'</div>'
     +'</div>'
     +'</div>'
-    +'</div>'
-    // Secondary card
-    +'<div class="reveal-point-pop secondary" style="width:100%">'
     +'<div class="point-card">'
     +'<div class="point-inner">'
     +'<div class="point-svg-wrap">'+bodySVG(sec.side,sec.zone)+'</div>'
@@ -1404,11 +1156,10 @@ function screenReveal(){
     +'</div>'
     +'</div>'
     +'</div>'
-    +'<p style="font-size:12px;color:var(--muted2);max-width:270px;text-align:center;opacity:0;animation:revealFadeUp .4s ease forwards;animation-delay:2.8s">先按開關一一分鐘，再按開關二一分鐘，完成後重新轉頭對比。</p>'
+    +'<p style="font-size:12px;color:var(--muted2);max-width:270px;text-align:center">先按開關一一分鐘，再按開關二一分鐘，完成後重新轉頭對比。</p>'
     +'</div>'
-    +'</div>'
-    +'<div class="screen-foot" style="opacity:0;animation:revealFadeUp .4s ease forwards;animation-delay:2.9s">'
-    +'<button class="btn btn-primary" id="startPress">▶ 開始按壓 ⏱</button>'
+    +'<div class="screen-foot">'
+    +'<button class="btn btn-primary" id="startPress">▶ 開始解鎖按壓 ⏱</button>'
     +'</div>'
     +'</div>';
 }
@@ -1416,7 +1167,7 @@ function screenReveal(){
 function screenPress(){
   const pt=S.pressPoints[S.pressIdx];
   const isFirst=S.pressIdx===0;
-  const total=30, left=S.timerLeft;
+  const total=60, left=S.timerLeft;
   const R=34, circ=2*Math.PI*R;
   const dash=circ*(left/total);
   const done=left<=0;
@@ -1442,15 +1193,6 @@ function screenPress(){
     +'</div>'
     +(done?'<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:64px">✅</div>':"")
     +'</div>'
-    +'<div class="breath-wrap" style="'+(S.timerActive&&!done?'':'display:none')+'">'
-    +'<div class="breath-ring"></div>'
-    +'<div class="breath-ring r2"></div>'
-    +'<div class="breath-ring r3"></div>'
-    +'<div class="breath-core">🤲</div>'
-    +'</div>'
-    +'<div class="press-color-bar" id="pressColorBar" style="'+(S.timerActive&&!done?'':'display:none')+'">'
-    +'<div class="press-color-fill" id="colorFill" style="width:'+(Math.round((1-(left/60))*100))+'%"></div>'
-    +'</div>'
     +'<div class="timer-bottom">'
     +'<div class="timer-ring">'
     +'<svg width="86" height="86" viewBox="0 0 80 80">'
@@ -1462,7 +1204,7 @@ function screenPress(){
     +'<div class="timer-num" id="timerNum" style="color:'+(done?"#22c55e":"var(--accent)")+'">'+left+'</div>'
     +'</div>'
     +'<div class="timer-hint" id="timerHint">'
-    +(done?"按壓完成！":S.timerActive?"慢慢揉壓，找到酸脹感後維持…":"準備好了按「開始計時」")
+    +(done?"按壓完成！":S.timerActive?"輕輕按壓，保持自然呼吸…":"準備好了按「開始計時」")
     +'</div>'
     +'</div>'
     +'</div>'
@@ -1478,37 +1220,20 @@ function screenPress(){
     +'</div>';
 }
 
-function scoreRow(dir, val){
-  var nums='';
-  for(var n=1;n<=10;n++){
-    var isSel=val===n;
-    nums+='<button class="btn '+(isSel?'btn-primary':'btn-secondary')+' score-btn" '
-      +'style="width:calc(10% - 4px);min-width:28px;padding:10px 0;font-size:14px;font-weight:900;border-radius:10px" '
-      +'data-dir="'+dir+'" data-score="'+n+'">'+n+'</button>';
-  }
-  return '<div style="display:flex;flex-wrap:wrap;gap:4px">'+nums+'</div>';
-}
-
 function screenAfter(){
   const canNext=S.afterR!==null && S.afterL!==null;
-
-  // Compare summary
-  var compareCard='';
-  if(canNext){
-    var rScore=S.afterR, lScore=S.afterL;
-    compareCard='<div class="card" style="background:rgba(10,107,98,.05);border-color:var(--border-glow)">'
-      +'<p style="font-weight:800;color:var(--accent);margin-bottom:10px">📊 現在的狀態</p>'
-      +'<div style="display:flex;gap:16px">'
-      +'<div style="flex:1;text-align:center">'
-      +'<div style="font-size:11px;color:var(--muted);margin-bottom:4px">右轉</div>'
-      +'<div style="font-size:28px;font-weight:900;color:'+(rScore<=4?'var(--accent)':rScore<=7?'var(--gold)':'var(--red)')+'">'+rScore+'</div>'
-      +'<div style="font-size:10px;color:var(--muted)">/ 10</div>'
-      +'</div>'
-      +'<div style="flex:1;text-align:center">'
-      +'<div style="font-size:11px;color:var(--muted);margin-bottom:4px">左轉</div>'
-      +'<div style="font-size:28px;font-weight:900;color:'+(lScore<=4?'var(--accent)':lScore<=7?'var(--gold)':'var(--red)')+'">'+lScore+'</div>'
-      +'<div style="font-size:10px;color:var(--muted)">/ 10</div>'
-      +'</div>'
+  let compareCard="";
+  if(S.afterR!==null && S.afterL!==null && S.neckSide!==null){
+    const isRight=S.neckSide==="right";
+    const bef=isRight?S.neckR:S.neckL;
+    const aft=isRight?S.afterR:S.afterL;
+    const imp=aft<bef;
+    compareCard='<div class="card" style="background:rgba(0,200,255,.05);border-color:var(--border-glow)">'
+      +'<p style="font-weight:800;color:var(--accent);margin-bottom:8px">📊 即時對比（'+(S.neckSide==="right"?"右":"左")+'側）</p>'
+      +'<div class="compare-row">'
+      +'<div class="cmp-box"><div class="cmp-lbl">按壓前</div><div class="cmp-emoji">'+EMOJIS[bef]+'</div><div class="cmp-text">'+EMOJI_LBLS[bef]+'</div></div>'
+      +'<div class="cmp-arrow">→</div>'
+      +'<div class="cmp-box '+(imp?"improved":"")+'"><div class="cmp-lbl">按壓後</div><div class="cmp-emoji">'+EMOJIS[aft]+'</div><div class="cmp-text">'+EMOJI_LBLS[aft]+'</div></div>'
       +'</div>'
       +'</div>';
   }
@@ -1529,22 +1254,25 @@ function screenAfter(){
     +'<h2 class="screen-title">按完了，<br>再試試看</h2>'
     +'<p class="screen-sub">重複一開始的動作，感受現在和剛才有什麼不同。</p>'
     +'</div>'
-    +'<div class="card" style="padding:14px 16px">'
-    +'<p style="font-weight:800;color:var(--text);margin-bottom:10px">按壓時有沒有感覺到酸脹感？</p>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
-    +'<button class="btn '+(S.feltPress===true?"btn-primary":"btn-secondary")+'" id="feltYes" style="font-size:13px">✓ 有感覺</button>'
-    +'<button class="btn '+(S.feltPress===false?"btn-primary":"btn-secondary")+'" id="feltNo" style="font-size:13px">沒什麼感覺</button>'
+    +'<div class="card">'
+    +'<p style="font-weight:800;margin-bottom:12px;color:var(--text)">➡️ 往右轉到底（現在）</p>'
+    +'<div class="emoji-scale">'
+    +EMOJIS.map(function(e,i){
+      return '<button class="emoji-btn '+(S.afterR===i?"sel":"")+'" data-after-r="'+i+'">'
+        +'<span class="e">'+e+'</span><span class="lbl">'+EMOJI_LBLS[i]+'</span>'
+        +'</button>';
+    }).join("")
     +'</div>'
     +'</div>'
     +'<div class="card">'
-    +'<p style="font-weight:800;margin-bottom:4px;color:var(--text)">➡️ 往右轉——現在幾分？</p>'
-    +'<p style="font-size:12px;color:var(--muted);margin-bottom:12px">如果之前的不舒服是 10 分，現在是幾分？</p>'
-    +scoreRow("R", S.afterR)
+    +'<p style="font-weight:800;margin-bottom:12px;color:var(--text)">⬅️ 往左轉到底（現在）</p>'
+    +'<div class="emoji-scale">'
+    +EMOJIS.map(function(e,i){
+      return '<button class="emoji-btn '+(S.afterL===i?"sel":"")+'" data-after-l="'+i+'">'
+        +'<span class="e">'+e+'</span><span class="lbl">'+EMOJI_LBLS[i]+'</span>'
+        +'</button>';
+    }).join("")
     +'</div>'
-    +'<div class="card">'
-    +'<p style="font-weight:800;margin-bottom:4px;color:var(--text)">⬅️ 往左轉——現在幾分？</p>'
-    +'<p style="font-size:12px;color:var(--muted);margin-bottom:12px">如果之前的不舒服是 10 分，現在是幾分？</p>'
-    +scoreRow("L", S.afterL)
     +'</div>'
     +compareCard
     +'</div>'
@@ -1555,14 +1283,11 @@ function screenAfter(){
 }
 
 function screenResult(){
-  const rA=S.afterR||5, lA=S.afterL||5;
+  const rB=S.neckR||0, lB=S.neckL||0, rA=S.afterR||0, lA=S.afterL||0;
   const isRight=S.neckSide==="right";
-  const mainAfter=isRight?rA:lA;
-  // 1-10 scale: improved = low score (1-4), same = 5-6, worse = 7-10
-  const improved=mainAfter<=4, same=mainAfter<=6&&mainAfter>=5, worse=mainAfter>=7;
-  const mainBefore=10;  // baseline
+  const mainBefore=isRight?rB:lB, mainAfter=isRight?rA:lA;
+  const improved=mainBefore>mainAfter, same=mainBefore===mainAfter, worse=mainBefore<mainAfter;
   const sideLabel=isRight?"右":"左";
-  function s2e(score){ return Math.min(4,Math.round((score-1)/9*4)); }
 
   if(!S._saved && S.userId){
     saveRecord({
@@ -1570,7 +1295,7 @@ function screenResult(){
       date:new Date().toISOString().slice(0,10),
       neckSide:S.neckSide, dominantArm:S.dominantArm,
       pressPoints:S.pressPoints.map(function(p){ return {side:p.side,zone:p.zone,isPrimary:p.isPrimary}; }),
-      beforeR:10,beforeL:10,afterR:rA,afterL:lA,
+      beforeR:rB,beforeL:lB,afterR:rA,afterL:lA,
       improved:improved, worse:worse, round2:S.round2Key,
     });
     S._saved=true;
@@ -1611,13 +1336,12 @@ function screenResult(){
     +'<div style="font-size:28px;margin:6px 0">'+(improved?"⭐⭐⭐":same?"⭐⭐☆":"⭐☆☆")+'</div>'
     +'<p class="screen-sub">'+(improved?"按壓後感受有變化，這個點對你有效！":same?"感受和之前差不多，可以下次再試開關二。":"感受沒改善，建議回診讓治療師調整。")+'</p>'
     +'</div>'
-    +(S.pressPoints&&S.pressPoints.length?'<div class="card" style="background:linear-gradient(135deg,rgba(10,107,98,.07),rgba(10,107,98,.02));border-color:var(--border-glow);padding:16px"><p style="font-size:13px;line-height:1.65;color:var(--text)">'+getFeedbackLine(S.pressPoints[0].zone,S.feltPress!==false,S.pressPoints[0].sideLabel)+'</p></div>':"")
     +'<div class="card">'
     +'<p style="font-weight:800;margin-bottom:12px;color:var(--text)">📊 前後對比（'+sideLabel+'側）</p>'
     +'<div class="compare-row">'
-    +'<div class="cmp-box"><div class="cmp-lbl">按壓前</div><div class="cmp-emoji">'+EMOJIS[s2e(mainBefore)]+'</div><div class="cmp-text">'+EMOJI_LBLS[s2e(mainBefore)]+'</div></div>'
+    +'<div class="cmp-box"><div class="cmp-lbl">按壓前</div><div class="cmp-emoji">'+EMOJIS[mainBefore]+'</div><div class="cmp-text">'+EMOJI_LBLS[mainBefore]+'</div></div>'
     +'<div class="cmp-arrow">→</div>'
-    +'<div class="cmp-box '+(improved?"improved":"")+'"><div class="cmp-lbl">按壓後</div><div class="cmp-emoji">'+EMOJIS[s2e(mainAfter)]+'</div><div class="cmp-text">'+EMOJI_LBLS[s2e(mainAfter)]+'</div></div>'
+    +'<div class="cmp-box '+(improved?"improved":"")+'"><div class="cmp-lbl">按壓後</div><div class="cmp-emoji">'+EMOJIS[mainAfter]+'</div><div class="cmp-text">'+EMOJI_LBLS[mainAfter]+'</div></div>'
     +'</div>'
     +(improved?'<div class="improved-banner" style="margin-top:12px">✅ '+sideLabel+'側轉動感受改善了 '+(mainBefore-mainAfter)+' 級！</div>':"")
     +'</div>'
@@ -1656,30 +1380,16 @@ function screenResult(){
 /* ══════════════════════════════════════════════
    SCREEN: SINGLE ELBOW POINT
 ══════════════════════════════════════════════ */
-function elbowScreen(type){
-  var isInner = type==='inner';
-  var imgSrc  = isInner ? 'v7-assets/elbow-inner.png' : 'v7-assets/elbow-outer.png';
-  var title   = isInner ? '手肘內側測試' : '手肘外側測試（翻面）';
-  var desc    = isInner
-    ? '手掌向上。找到手肘大拇指側的點，用拇指按深，左右手肘同一位置各按約 10 秒，感受哪邊比較酸痛。'
-    : '手心朝下，找到手肘背面外側突起骨頭上面一指。用拇指按深，左右各按約 10 秒，感受哪邊比較酸痛。';
-
-  var side  = isInner ? S.elbowInnerSide  : S.elbowOuterSide;
-  var level = isInner ? S.elbowInnerLevel : S.elbowOuterLevel;
-  var canNext = side!==null && level!==null;
-
-  function selSide(val, cur, text){
-    var sel = cur===val;
-    return '<button class="btn '+(sel?'btn-primary':'btn-secondary')+' elbow-'+type+'-side" '
-      +'style="font-size:16px;padding:16px 0;font-weight:900" '
-      +'data-type="'+type+'" data-val="'+val+'">'+text+'</button>';
+function screenElbowPt(){
+  if(!S.elbowPoints.length){
+    S.elbowPoints=[...E_GROUPS.r1,...E_GROUPS[S.round2Key]];
   }
-  function selLvl(val, cur, text){
-    var sel = cur===val;
-    return '<button class="btn '+(sel?'btn-primary':'btn-secondary')+' elbow-'+type+'-level" '
-      +'style="font-size:16px;padding:16px 0;font-weight:900" '
-      +'data-type="'+type+'" data-val="'+val+'">'+text+'</button>';
-  }
+  const p=S.elbowPoints[S.elbowPtIdx];
+  const isLast=(S.elbowPtIdx>=S.elbowPoints.length-1);
+  const sel=S.scores[p.id];
+  const sideResult=sel==="left"?"👈 左手比較有感"
+    :sel==="right"?"👉 右手比較有感"
+    :sel==="tie"?"兩側差不多":null;
 
   return '<div class="screen">'
     +progMap()
@@ -1688,44 +1398,41 @@ function elbowScreen(type){
     +'<button class="back-btn" id="backBtn">←</button>'
     +'<div class="brand-mark">智</div>'
     +'</div>'
-    +'<span class="step-chip">第二關 🔍 '+(isInner?'內側':'外側')+'</span>'
+    +'<span class="step-chip">第二關 🔍 '+(S.elbowPtIdx+1)+'/4</span>'
     +'<div style="display:flex;align-items:center;gap:6px">'
     +'<button class="mute-btn" id="muteBtn">🔊</button>'
     +'<span class="user-chip">'+esc(S.userName)+'</span>'
     +'</div>'
     +'</div>'
     +'<div class="screen-body">'
-    +'<div class="card" style="padding:0 0 4px;overflow:hidden">'
-    +'<img src="'+imgSrc+'" alt="手肘示意" style="width:100%;height:38vw;min-height:120px;max-height:180px;object-fit:cover;object-position:center 60%;display:block">'
-    +'<div style="padding:16px 18px 4px">'
-    +'<p style="font-weight:900;font-size:16px;color:var(--text);margin-bottom:6px">'+title+'</p>'
-    +'<p style="font-size:13px;color:var(--muted);margin-bottom:16px">'+desc+'</p>'
-    +'<p style="font-size:13px;font-weight:800;color:var(--muted2);margin-bottom:8px">哪邊比較痛？</p>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">'
-    +selSide('left',  side, '← 左邊')
-    +selSide('right', side, '右邊 →')
+    +'<div>'
+    +'<h2 class="screen-title" style="margin-top:4px">手肘左右<br>各按看看</h2>'
+    +'<p class="screen-sub">輕壓下方位置，比較左手和右手哪邊比較有感覺。</p>'
     +'</div>'
-    +'<p style="font-size:13px;font-weight:800;color:var(--muted2);margin-bottom:8px">疼痛程度？</p>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px">'
-    +selLvl('mild',   level, '😐 稍微痛')
-    +selLvl('severe', level, '😣 很痛')
+    +'<div class="elbow-card">'
+    +'<div class="elbow-diagram-wrap" style="position:relative">'
+    +elbowSVG(p.pos)
     +'</div>'
+    +'<div class="elbow-info">'
+    +'<div class="elbow-title-row">'+esc(p.title)+'</div>'
+    +'<p class="elbow-note">'+esc(p.note)+'</p>'
+    +'<div class="side-sel-row">'
+    +'<button class="side-sel-btn '+(sel==="left"?"sel":"")+'" data-side-sel="'+p.id+':left">👈 左邊</button>'
+    +'<button class="side-sel-btn '+(sel==="tie"?"sel":"")+'" data-side-sel="'+p.id+':tie">差不多</button>'
+    +'<button class="side-sel-btn '+(sel==="right"?"sel":"")+'" data-side-sel="'+p.id+':right">右邊 👉</button>'
+    +'</div>'
+    +'<div class="side-result" id="sr-'+p.id+'" style="color:'+(sel&&sel!=="tie"?"var(--accent)":"var(--muted)")+';min-height:20px">'+(sideResult||"")+'</div>'
     +'</div>'
     +'</div>'
     +'</div>'
     +'<div class="screen-foot">'
-    +'<button class="btn btn-primary" id="elbowNextBtn" '+(canNext?'':'disabled')+'>'
-    +(isInner?'外側測試 →':'分析我的開關 🔍')
+    +'<button class="btn btn-primary" id="nextElbowPt" '+(sel!==undefined?"":"disabled")+'>'
+    +(isLast?"分析我的開關 🔍":"繼續下一個 →")
     +'</button>'
+    +(!sel?'<p class="hint-text">選出左右哪邊比較有感再繼續</p>':"")
     +'</div>'
     +'</div>';
 }
-
-function screenElbowInner(){ return elbowScreen('inner'); }
-function screenElbowOuter(){ return elbowScreen('outer'); }
-// Legacy
-function screenElbowPt(){ return elbowScreen('inner'); }
-
 
 /* ══════════════════════════════════════════════
    UTILS
@@ -1754,7 +1461,7 @@ function showToast(msg,dur){
 
 function updateTimerDisplay(){
   const left=S.timerLeft;
-  const R=34,circ=2*Math.PI*R,dash=circ*(left/30);
+  const R=34,circ=2*Math.PI*R,dash=circ*(left/60);
   const numEl=document.getElementById("timerNum");
   const circEl=document.getElementById("timerCircle");
   const hintEl=document.getElementById("timerHint");
@@ -1767,7 +1474,7 @@ function renderHistList(){
   const list=document.getElementById("histList");
   if(!list)return;
   const ZONE_NAME={shoulder:"肩膀／肩胛旁",collarbone:"鎖骨外側"};
-  const ZONE_IMG={shoulder:"v7-assets/shoulder-scapular.png",collarbone:"v7-assets/clavicle.png"};
+  const ZONE_IMG={shoulder:"/v7-assets/shoulder-scapular.png",collarbone:"/v7-assets/clavicle.png"};
   if(!S.records.length){
     list.innerHTML='<p style="text-align:center;color:var(--muted);padding:20px 0">還沒有紀錄</p>';
     return;
@@ -2168,12 +1875,9 @@ function render(){
   const map={
     intro: screenIntro,
     welcome: screenIntro,
-    neckRight: screenNeckRight,
-    neckLeft: screenNeckLeft,
+    neck: screenNeck,
     elbow1: function(){ return screenElbow(1); },
     elbow2: function(){ return screenElbow(2); },
-    elbowInner: screenElbowInner,
-    elbowOuter: screenElbowOuter,
     elbowPt: screenElbowPt,
     reveal: screenReveal,
     press: screenPress,
@@ -2209,19 +1913,21 @@ function bindAll(){
   /* Intro */
   if(S.screen==="intro"||S.screen==="welcome"){
     runTypewriter();
-    // Audio unlocked on startBtn click (entryChime + startAmbient)
+    // Web Audio requires user gesture — unlock on first tap
+    if(!GA._audioUnlocked){
+      var _unlockAudio=function(){
+        GA._audioUnlocked=true;
+        GA.init();
+        if(!GA.muted){ GA.startAmbient(); }
+        document.removeEventListener("click",_unlockAudio);
+      };
+      document.addEventListener("click",_unlockAudio);
+    }
   }
 
   $b("startBtn")&&$b("startBtn").addEventListener("click",function(){
-    // Unlock audio + play entry chime + start ambient immediately on first tap
-    GA.init();
-    if(!GA._audioUnlocked){
-      GA._audioUnlocked=true;
-      if(!GA.muted){ GA.entryChime(); /* startAmbient disabled */ }
-    } else {
-      GA.click();
-    }
-    if(S.userId){S.screen="neckRight";render();}
+    GA.click();
+    if(S.userId){S.screen="neck";render();}
     else document.getElementById("loginOverlay").classList.remove("hidden");
   });
 
@@ -2234,85 +1940,84 @@ function bindAll(){
     });
   }
 
-  /* Neck side buttons */
-  qsa("[class*='neck-'][class*='-side']").forEach(function(b){
+  /* Neck */
+  qsa("[data-neck-r]").forEach(function(b){
     b.addEventListener("click",function(){
       GA.click();
-      var dir=b.dataset.dir, val=b.dataset.val;
-      if(dir==='right') S.neckRSide=val; else S.neckLSide=val;
+      S.neckR=+b.dataset.neckR;
+      if(!S.neckSideManual && S.neckR!==null && S.neckL!==null)
+        S.neckSide=(S.neckR>=S.neckL?"right":"left");
       render();
     });
   });
-  /* Neck level buttons */
-  qsa("[class*='neck-'][class*='-level']").forEach(function(b){
+  qsa("[data-neck-l]").forEach(function(b){
     b.addEventListener("click",function(){
       GA.click();
-      var dir=b.dataset.dir, val=b.dataset.val;
-      if(dir==='right') S.neckRLevel=val; else S.neckLLevel=val;
+      S.neckL=+b.dataset.neckL;
+      if(!S.neckSideManual && S.neckR!==null && S.neckL!==null)
+        S.neckSide=(S.neckR>=S.neckL?"right":"left");
       render();
     });
   });
-  /* Neck next button */
-  $b("neckNextBtn")&&$b("neckNextBtn").addEventListener("click",function(){
-    GA.levelUp();
-    if(S.screen==="neckRight"){
-      S.screen="neckLeft"; render();
-    } else {
-      // Left neck done — compute neckSide and advance to elbow
-      var sides=[S.neckRSide,S.neckLSide];
-      var levels=[S.neckRLevel,S.neckLLevel];
-      if(sides[0]===sides[1]){ S.neckSide=sides[0]; }
-      else if(levels[0]==='tight'){ S.neckSide=sides[0]; }
-      else if(levels[1]==='tight'){ S.neckSide=sides[1]; }
-      else { S.neckSide=sides[0]||'right'; }
-      S.neckSideManual=false;
-      S.screen="elbowInner"; render();
-    }
+  /* Option C confirmation buttons */
+  var autoSideNow=S.neckR!==null&&S.neckL!==null?(S.neckR>=S.neckL?"right":"left"):null;
+  $b("confirmSideYes")&&$b("confirmSideYes").addEventListener("click",function(){
+    GA.click();
+    S.neckSide=autoSideNow;
+    S.neckSideManual=false;
+    render();
+  });
+  $b("confirmSideNo")&&$b("confirmSideNo").addEventListener("click",function(){
+    GA.click();
+    S.neckSide=autoSideNow==="right"?"left":"right";
+    S.neckSideManual=true;
+    render();
   });
 
-  /* Elbow side buttons (inner/outer) */
-  qsa("[class*='elbow-'][class*='-side']").forEach(function(b){
+  /* Elbow scores */
+  qsa("[data-side-sel]").forEach(function(b){
     b.addEventListener("click",function(){
       GA.click();
-      var type=b.dataset.type, val=b.dataset.val;
-      if(type==='inner') S.elbowInnerSide=val; else S.elbowOuterSide=val;
-      render();
+      const parts=b.dataset.sideSel.split(":");
+      const id=parts[0], val=parts[1];
+      S.scores[id]=val;
+      document.querySelectorAll('[data-side-sel^="'+id+':"]').forEach(function(btn){
+        btn.classList.toggle("sel", btn===b);
+      });
+      const resEl=document.getElementById("sr-"+id);
+      if(resEl){
+        const txt=val==="left"?"👈 左手比較有感":val==="right"?"👉 右手比較有感":"兩側差不多";
+        resEl.textContent=txt;
+        resEl.style.color=val==="tie"?"var(--muted)":"var(--accent)";
+      }
+      if(S.screen==="elbowPt"){
+        const curPt=S.elbowPoints[S.elbowPtIdx];
+        const nb=document.getElementById("nextElbowPt");
+        if(nb&&curPt) nb.disabled=(S.scores[curPt.id]===undefined);
+      } else {
+        const pts=S.screen==="elbow1"?E_GROUPS.r1:E_GROUPS[S.round2Key];
+        const done=pts.every(function(p){ return S.scores[p.id]!==undefined; });
+        const nb=document.getElementById(S.screen==="elbow1"?"nextElbow1":"nextElbow2");
+        if(nb) nb.disabled=!done;
+      }
     });
-  });
-  /* Elbow level buttons */
-  qsa("[class*='elbow-'][class*='-level']").forEach(function(b){
-    b.addEventListener("click",function(){
-      GA.click();
-      var type=b.dataset.type, val=b.dataset.val;
-      if(type==='inner') S.elbowInnerLevel=val; else S.elbowOuterLevel=val;
-      render();
-    });
-  });
-  /* Elbow next button */
-  $b("elbowNextBtn")&&$b("elbowNextBtn").addEventListener("click",function(){
-    GA.levelUp();
-    if(S.screen==="elbowInner"){
-      S.screen="elbowOuter"; render();
-    } else {
-      S.dominantArm=computeDominantArm();
-      S.pressPoints=computePressPoints();
-      GA.success();
-      S.screen="reveal"; render();
-    }
   });
 
   /* After */
-  qsa(".score-btn").forEach(function(b){
-    b.addEventListener("click",function(){
-      GA.click();
-      var d=b.dataset.dir, n=+b.dataset.score;
-      if(d==="R") S.afterR=n; else S.afterL=n;
-      render();
-    });
+  qsa("[data-after-r]").forEach(function(b){
+    b.addEventListener("click",function(){ GA.click(); S.afterR=+b.dataset.afterR; render(); });
+  });
+  qsa("[data-after-l]").forEach(function(b){
+    b.addEventListener("click",function(){ GA.click(); S.afterL=+b.dataset.afterL; render(); });
   });
 
   /* Nav buttons */
-  // nextNeck removed — neck auto-advances after step 3
+  $b("nextNeck")&&$b("nextNeck").addEventListener("click",function(){
+    GA.levelUp();
+    S.elbowPoints=[...E_GROUPS.r1,...E_GROUPS[S.round2Key]];
+    S.elbowPtIdx=0;
+    S.screen="elbowPt"; render();
+  });
   $b("nextElbow1")&&$b("nextElbow1").addEventListener("click",function(){
     GA.levelUp(); S.screen="elbow2"; render();
   });
@@ -2322,38 +2027,37 @@ function bindAll(){
     GA.success();
     S.screen="reveal"; render();
   });
-  // nextElbowPt removed — elbow auto-advances via sub-step buttons
+  $b("nextElbowPt")&&$b("nextElbowPt").addEventListener("click",function(){
+    GA.levelUp();
+    if(S.elbowPtIdx<S.elbowPoints.length-1){
+      S.elbowPtIdx++;
+      render();
+    } else {
+      S.dominantArm=computeDominantArm();
+      S.pressPoints=computePressPoints();
+      GA.success();
+      S.screen="reveal"; render();
+    }
+  });
   $b("startPress")&&$b("startPress").addEventListener("click",function(){
     GA.click();
-    S.pressIdx=0;S.timerLeft=30;S.timerActive=false;
+    S.pressIdx=0;S.timerLeft=60;S.timerActive=false;
     clearInterval(S.timerInterval);
     S.screen="press";render();
   });
   $b("toggleTimer")&&$b("toggleTimer").addEventListener("click",function(){
     GA.click();
     if(S.timerActive){
-      clearInterval(S.timerInterval);S.timerActive=false;
-      var bw=document.querySelector(".breath-wrap");if(bw)bw.style.display="none";
-      var cb=document.getElementById("pressColorBar");if(cb)cb.style.display="none";
-      var btn=document.getElementById("toggleTimer");if(btn)btn.innerHTML="▶ 繼續計時";
-      var ht=document.getElementById("timerHint");if(ht)ht.textContent="暫停中，點「繼續計時」";
+      clearInterval(S.timerInterval);S.timerActive=false;render();
     } else {
       S.timerActive=true;
-      var bw=document.querySelector(".breath-wrap");if(bw)bw.style.display="flex";
-      var cb=document.getElementById("pressColorBar");if(cb)cb.style.display="block";
-      var btn=document.getElementById("toggleTimer");if(btn)btn.innerHTML="⏸ 暫停計時";
-      var ht=document.getElementById("timerHint");if(ht)ht.textContent="慢慢揉壓，找到酸脹感後維持…";
       S.timerInterval=setInterval(function(){
         S.timerLeft--;
         GA.tick();
-        if(S.timerLeft<=0){S.timerLeft=0;
+        if(S.timerLeft<=0){
           S.timerLeft=0;S.timerActive=false;clearInterval(S.timerInterval);
-          var bw2=document.querySelector(".breath-wrap");if(bw2)bw2.style.display="none";
-          var cb2=document.getElementById("pressColorBar");if(cb2)cb2.style.display="none";
           render();return;
         }
-        var cf=document.getElementById("colorFill");
-        if(cf){cf.style.width=Math.round((1-(S.timerLeft/60))*100)+"%";}
         updateTimerDisplay();
       },1000);
     }
@@ -2365,17 +2069,11 @@ function bindAll(){
   $b("nextPress")&&$b("nextPress").addEventListener("click",function(){
     GA.click();
     if(S.pressIdx===0){
-      S.pressIdx=1;S.timerLeft=30;S.timerActive=false;
+      S.pressIdx=1;S.timerLeft=60;S.timerActive=false;
       clearInterval(S.timerInterval);render();
     } else {
       S.screen="after";render();
     }
-  });
-  $b("feltYes")&&$b("feltYes").addEventListener("click",function(){
-    GA.click(); S.feltPress=true; render();
-  });
-  $b("feltNo")&&$b("feltNo").addEventListener("click",function(){
-    GA.click(); S.feltPress=false; render();
   });
   $b("nextAfter")&&$b("nextAfter").addEventListener("click",function(){
     GA.click();
@@ -2385,12 +2083,12 @@ function bindAll(){
     GA.click();
     clearInterval(S.timerInterval);
     Object.assign(S,{
-      screen:"neckRight",neckR:null,neckL:null,neckSide:null,neckSideManual:false,neckSubStep:0,neckRSide:null,neckRLevel:null,neckLSide:null,neckLLevel:null,
+      screen:"neck",neckR:null,neckL:null,neckSide:null,neckSideManual:false,
       scores:{},dominantArm:null,pressPoints:[],
-      timerLeft:30,timerActive:false,pressIdx:0,
+      timerLeft:60,timerActive:false,pressIdx:0,
       afterR:null,afterL:null,_saved:false,
       round2Key:Math.random()<.5?"r2a":"r2b",
-      elbowPtIdx:0,elbowPoints:[],elbowSubStep:0,elbowInnerSide:null,elbowInnerLevel:null,elbowOuterSide:null,elbowOuterLevel:null,feltPress:null,ansAnswers:{},
+      elbowPtIdx:0,elbowPoints:[],ansAnswers:{},
     });
     render();
   });
@@ -2403,24 +2101,23 @@ function bindAll(){
     clearInterval(S.timerInterval);
     doLogout();
     Object.assign(S,{
-      screen:"intro",neckR:null,neckL:null,neckSide:null,neckSideManual:false,neckSubStep:0,neckRSide:null,neckRLevel:null,neckLSide:null,neckLLevel:null,
+      screen:"intro",neckR:null,neckL:null,neckSide:null,neckSideManual:false,
       scores:{},dominantArm:null,pressPoints:[],
-      timerLeft:30,timerActive:false,pressIdx:0,
+      timerLeft:60,timerActive:false,pressIdx:0,
       afterR:null,afterL:null,_saved:false,records:[],
       round2Key:Math.random()<.5?"r2a":"r2b",
-      elbowPtIdx:0,elbowPoints:[],elbowSubStep:0,elbowInnerSide:null,elbowInnerLevel:null,elbowOuterSide:null,elbowOuterLevel:null,feltPress:null,ansAnswers:{},
+      elbowPtIdx:0,elbowPoints:[],ansAnswers:{},
     });
     render();
   });
   $b("backBtn")&&$b("backBtn").addEventListener("click",function(){
     GA.click();
     if(S.screen==="elbowPt"){
-      if(S.elbowSubStep>0){ S.elbowSubStep--; render(); }
-      else { S.screen="elbowInner"; render(); }
+      if(S.elbowPtIdx>0){ S.elbowPtIdx--; render(); }
+      else { S.screen="neck"; render(); }
       return;
     }
-
-    const prev={neckRight:"intro",neckLeft:"neckRight",elbowInner:"neckLeft",elbowOuter:"elbowInner",elbow1:"neckLeft",elbow2:"elbow1",reveal:"elbowOuter",elbowPt:"neckLeft"};
+    const prev={neck:"intro",elbow1:"neck",elbow2:"elbow1",reveal:"elbowPt"};
     if(prev[S.screen]){
       clearInterval(S.timerInterval);S.timerActive=false;
       S.screen=prev[S.screen];
@@ -2473,40 +2170,22 @@ function bindAll(){
 ══════════════════════════════════════════════ */
 document.getElementById("lEnterBtn").addEventListener("click",function(){
   const name=$l("lName").value.trim();
-  const bday="";
+  const bday=$l("lBday").value;
   const phone=$l("lPhone").value;
   const err=$l("lError");
-  if(!name||phone.replace(/\D/g,"").length<4){
+  if(!name||!bday||phone.replace(/\D/g,"").length<4){
     err.classList.add("show");return;
   }
   err.classList.remove("show");
   doLogin(name,bday,phone);
   document.getElementById("loginOverlay").classList.add("hidden");
   GA.levelUp();
-  S.screen="neckRight";render();
+  S.screen="neck";render();
 });
 
 /* ══════════════════════════════════════════════
    INIT
 ════════════════════════════════ */
-// ── MOBILE VIEWPORT HEIGHT FIX ──
-// Fixes "100vh > visual viewport" on Android Chrome / iOS Safari
-// IMPORTANT: skip resize when keyboard is open (input focused) —
-// otherwise the height change closes the keyboard instantly.
-function fixVH(){
-  if(window.innerWidth>540){
-    document.getElementById("app").style.height="";
-    return;
-  }
-  var a=document.activeElement;
-  var inputOpen=a&&(a.tagName==="INPUT"||a.tagName==="TEXTAREA"||a.tagName==="SELECT");
-  var h=window.innerHeight;
-  document.getElementById("app").style.height=h+"px";
-}
-fixVH();
-window.addEventListener("resize",fixVH);
-window.addEventListener("orientationchange",function(){ setTimeout(fixVH,150); });
-
 if(initSession()){
   S.screen="intro";
   render();
@@ -2516,4 +2195,3 @@ if(initSession()){
 </script>
 </body>
 </html>
-                                                                                                                           
