@@ -336,67 +336,6 @@
         background: #cbd5e1;
         border-radius: 3px;
       }
-      .wr-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-family: "Microsoft JhengHei", "微軟正黑體", Arial, sans-serif;
-      }
-      .wr-table td {
-        border: 1px solid #999;
-        padding: 8px 10px;
-        vertical-align: middle;
-        font-size: 13px;
-        word-break: break-all;
-      }
-      .wr-title {
-        background: #1f1f1f;
-        color: #fff;
-        text-align: center;
-        font-size: 16px;
-        font-weight: 700;
-        padding: 14px;
-        letter-spacing: 1px;
-      }
-      .wr-section {
-        background: #d9d9d9;
-        text-align: center;
-        font-weight: 700;
-        font-size: 14px;
-        padding: 10px;
-      }
-      .wr-col-header {
-        background: #d9d9d9;
-        text-align: center;
-        font-weight: 700;
-        font-size: 13px;
-        padding: 8px;
-      }
-      .wr-cat {
-        text-align: center;
-        font-weight: 700;
-        font-size: 13px;
-        background: #f9f9f9;
-      }
-      .wr-content {
-        font-size: 13px;
-        line-height: 1.6;
-      }
-      .wr-spinner {
-        display: inline-block;
-        width: 16px;
-        height: 16px;
-        border: 2px solid #fff;
-        border-top-color: transparent;
-        border-radius: 50%;
-        animation: wr-spin 0.7s linear infinite;
-        vertical-align: middle;
-        margin-right: 6px;
-      }
-      @keyframes wr-spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
     </style>
   </head>
   <body class="bg-slate-50 text-slate-800">
@@ -451,10 +390,6 @@
             <span
               id="editorModeHint"
               class="text-xs text-slate-400 ml-2"
-            ></span>
-            <span
-              id="editorLoadHint"
-              class="hidden text-xs text-amber-600 font-semibold ml-2"
             ></span>
           </div>
           <div class="flex-1"></div>
@@ -561,18 +496,20 @@
             >📋 個人週報產生器</span
           >
           <span class="text-xs text-slate-400 font-normal"
-            >依日報資料自動彙整，AI 智能撰寫週報敘述</span
+            >依日報資料彙整本週工作摘要</span
           >
           <div class="flex-1"></div>
           <span class="text-xs text-slate-400">起</span>
           <input
             id="pwr-from"
+            disabled
             type="date"
             class="text-xs border border-slate-200 rounded px-2 py-1"
           />
           <span class="text-xs text-slate-400">至</span>
           <input
             id="pwr-to"
+            disabled
             type="date"
             class="text-xs border border-slate-200 rounded px-2 py-1"
           />
@@ -581,48 +518,14 @@
             id="btnGenerateWR"
             class="text-xs bg-teal-600 hover:bg-teal-700 text-white px-4 py-1.5 rounded-md font-semibold transition"
           >
-            🤖 產生週報
+            產生週報
           </button>
         </div>
         <div id="pwr-loading" class="hidden px-5 pb-3 text-xs text-slate-400">
-          <span class="wr-spinner border-slate-300 border-t-teal-600"></span>
-          正在產生週報，請稍候...
+          載入中...
         </div>
-        <div id="pwr-stats" class="hidden px-5 pb-5"></div>
-        <div id="pwr-preview" class="hidden px-5 pb-5">
-          <div
-            class="flex items-center gap-3 flex-wrap mb-4 pt-4 border-t border-slate-100"
-          >
-            <span
-              class="font-semibold text-slate-700 text-sm"
-              id="pwr-preview-title"
-              >週報預覽</span
-            >
-            <div class="flex-1"></div>
-            <button
-              type="button"
-              id="btnDownloadPWR"
-              class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-md font-semibold transition"
-            >
-              📥 下載 Excel
-            </button>
-            <button
-              type="button"
-              id="btnCopyPWR"
-              class="text-xs bg-slate-600 hover:bg-slate-700 text-white px-3 py-1.5 rounded-md font-semibold transition"
-            >
-              📋 複製文字
-            </button>
-          </div>
-          <div
-            class="bg-slate-50 rounded-xl border border-slate-200 p-4 overflow-x-auto mb-4"
-          >
-            <div id="pwr-table"></div>
-          </div>
-          <div id="pwr-extra" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
-        </div>
+        <div id="pwr-body" class="hidden"></div>
       </section>
-
       </div>
 
       <div id="page-1" class="page-content hidden">
@@ -816,103 +719,6 @@
           <div id="detail-table-wrap" class="scroll-panel-detail"></div>
         </div>
       </div>
-
-      <div id="page-3" class="page-content hidden">
-        <div
-          class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-5"
-        >
-          <div class="font-bold text-slate-800 text-base mb-1">
-            📋 AI 部門週報產生器
-          </div>
-          <div class="text-xs text-slate-400 mb-4">
-            依部門日報資料自動彙整，AI 智能撰寫部門週報敘述
-          </div>
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-            <div>
-              <label class="block text-xs font-semibold text-slate-500 mb-1"
-                >週報起始日</label
-              >
-              <input
-                id="dwr-from"
-                type="date"
-                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-500 mb-1"
-                >週報結束日</label
-              >
-              <input
-                id="dwr-to"
-                type="date"
-                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
-              />
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-500 mb-1"
-                >部門</label
-              >
-              <div
-                id="dwr-dept"
-                class="w-full border border-slate-100 rounded-lg px-3 py-2 text-sm bg-slate-50 text-slate-600"
-              >
-                —
-              </div>
-            </div>
-          </div>
-          <button
-            type="button"
-            id="btnGenerateDWR"
-            class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-lg transition shadow-sm"
-          >
-            🤖 產生部門週報
-          </button>
-        </div>
-
-        <div id="dwr-loading" class="hidden px-2 pb-3 text-sm text-slate-400">
-          <span class="wr-spinner border-slate-300 border-t-blue-600"></span>
-          正在產生部門週報，請稍候...
-        </div>
-
-        <div id="dwr-stats" class="hidden mb-5"></div>
-
-        <div id="dwr-preview" class="hidden">
-          <div
-            class="bg-white rounded-xl border border-slate-200 shadow-sm px-5 py-3 mb-4 flex items-center gap-3 flex-wrap"
-          >
-            <span
-              class="font-semibold text-slate-700 text-sm"
-              id="dwr-preview-title"
-              >部門週報預覽</span
-            >
-            <div class="flex-1"></div>
-            <button
-              type="button"
-              id="btnDownloadDWR"
-              class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition"
-            >
-              📥 下載 Excel
-            </button>
-            <button
-              type="button"
-              id="btnCopyDWR"
-              class="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg transition"
-            >
-              📋 複製文字
-            </button>
-          </div>
-          <div
-            class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 overflow-x-auto mb-5"
-          >
-            <div id="dwr-table"></div>
-          </div>
-          <div
-            id="dwr-extra"
-            class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5"
-          ></div>
-          <div id="dwr-employees" class="mb-5"></div>
-        </div>
-      </div>
     </main>
 
     <div id="toast" class="fixed bottom-5 right-5 hidden z-[60]">
@@ -1008,8 +814,7 @@
       const SAVE_DAILY_REPORT_URL = API_BASE + "/api/fr/SaveDailyReport";
       const DELETE_DAILY_REPORT_URL = API_BASE + "/api/fr/DeleteDailyReport";
       const GET_DAILY_COMMON_URL = API_BASE + "/api/fr/getDailyCommon";
-      const GENERATE_WEEKLY_REPORT_URL =
-        API_BASE + "/api/weekly-report/generate";
+      const GET_WEEKLY_REPORT_URL = API_BASE + "/api/fr/getWeeklyReport";
       const QUERY_STA_REPORT_URL = API_BASE + "/api/fr/QueryStaReport";
 
       let auth = null;
@@ -1028,12 +833,11 @@
       let reportList = [];
       let currentAID = "";
       let editingModalAID = "";
+      let weeklyReportCache = [];
+      let weeklyEmployeeName = "";
       let staReportCache = [];
       let currentPage = 0;
       window._pwrText = "";
-      window._pwrExcelUrl = "";
-      window._dwrText = "";
-      window._dwrExcelUrl = "";
 
       function parseHours(v) {
         const n = parseFloat(String(v != null ? v : "0"));
@@ -1423,94 +1227,6 @@
           window.ProjectOSDailyReportDept.clearPane(deptWorkKey, dailyCommon);
         }
         updateHoursVisual();
-        const loadHint = document.getElementById("editorLoadHint");
-        if (loadHint) {
-          loadHint.textContent = "";
-          loadHint.classList.add("hidden");
-        }
-      }
-
-      function findReportByWorkDate(ymd) {
-        const d = String(ymd || "")
-          .replace(/\D/g, "")
-          .slice(0, 8);
-        if (!d) return null;
-        const matches = reportList.filter(function (x) {
-          return (
-            String(x.date || "")
-              .replace(/\D/g, "")
-              .slice(0, 8) === d
-          );
-        });
-        if (!matches.length) return null;
-        matches.sort(function (a, b) {
-          return String(b.CheckTime || "").localeCompare(
-            String(a.CheckTime || ""),
-          );
-        });
-        return matches[0];
-      }
-
-      function loadEditorFromReport(report) {
-        if (!report) return;
-        currentAID = String(report.AID || "").trim();
-        const dateLabel = ymdToDateInput(report.date) || todayDateInput();
-        setInputValue("reportDate", dateLabel);
-        setInputValue("note", String(report.note || ""));
-
-        if (window.ProjectOSDailyReportDept) {
-          window.ProjectOSDailyReportDept.clearPane(deptWorkKey, dailyCommon);
-          window.ProjectOSDailyReportDept.applyReportMeta(report);
-        }
-
-        const items = Array.isArray(report.items) ? report.items : [];
-        const tbody = document.getElementById("itemsBody");
-        if (tbody) tbody.innerHTML = "";
-
-        if (!items.length) {
-          addItemRow({ AID: currentAID });
-        } else {
-          items.forEach(function (it) {
-            addItemRow(
-              Object.assign({}, it, { AID: String(it.AID || currentAID) }),
-            );
-          });
-        }
-        updateHoursVisual();
-        const loadHint = document.getElementById("editorLoadHint");
-        if (loadHint) {
-          loadHint.textContent = "今日已填寫過日報";
-          loadHint.classList.remove("hidden");
-        }
-      }
-
-      function resetEditorFormForDate(dateInputValue) {
-        currentAID = "";
-        setInputValue("reportDate", dateInputValue || todayDateInput());
-        setInputValue("note", "");
-        if (window.ProjectOSDailyReportDept) {
-          window.ProjectOSDailyReportDept.clearPane(deptWorkKey, dailyCommon);
-        }
-        updateHoursVisual();
-        const loadHint = document.getElementById("editorLoadHint");
-        if (loadHint) {
-          loadHint.textContent = "";
-          loadHint.classList.add("hidden");
-        }
-      }
-
-      function syncEditorWithWorkDate(ymd) {
-        const d = String(ymd || "")
-          .replace(/\D/g, "")
-          .slice(0, 8);
-        if (!d) return;
-        const dateInput = ymdToDateInput(d);
-        const found = findReportByWorkDate(d);
-        if (found) {
-          loadEditorFromReport(found);
-        } else {
-          resetEditorFormForDate(dateInput);
-        }
       }
 
       function buildEditModalTableHeadHtml() {
@@ -1560,6 +1276,8 @@
         editingModalAID = String(report.AID || "").trim();
         const dateLabel = ymdToDateInput(report.date) || report.date;
 
+        currentAID = editingModalAID;
+        setInputValue("reportDate", dateLabel);
         updateEditModalTableHead();
 
         const totalHours = String(report.totalHours || "0");
@@ -1619,7 +1337,6 @@
         }
         updateEditModalHoursVisual();
       }
-      
       function editHistoricalReport(aid) {
         const found = reportList.find(function (x) {
           return String(x.AID || "") === String(aid || "");
@@ -2087,8 +1804,10 @@
             });
           setInputValue("employeeName", String(data.employeeName || ""));
           renderList();
-          setInputValue("reportDate", todayDateInput());
-          syncEditorWithWorkDate(dateInputToYmd(todayDateInput()));
+          if (!currentAID) {
+            clearEditor();
+            setInputValue("reportDate", todayDateInput());
+          }
           hint.textContent = "共 " + reportList.length + " 筆資料";
         } catch (err) {
           reportList = [];
@@ -2135,12 +1854,6 @@
         if (reportMode === "ops-sm" && !meta.location) {
           toast("請選擇院所 / 地點");
           return;
-        }
-        if (!currentAID) {
-          const existing = findReportByWorkDate(date);
-          if (existing) {
-            currentAID = String(existing.AID || "").trim();
-          }
         }
         const payloadReport = {
           date: date,
@@ -2253,14 +1966,29 @@
           if (dailyCommon.employeeName) {
             setInputValue("employeeName", dailyCommon.employeeName);
           }
-          syncDWRFormFields();
         } catch (e) {
           // 輔助選項，不阻斷流程
         }
       }
 
+      async function fetchWeeklyReportData() {
+        const data = await postJson(GET_WEEKLY_REPORT_URL, {
+          AdminID: auth.adminID,
+          Token: auth.token,
+        });
+        if (!data || String(data.Result || "").toUpperCase() !== "OK") {
+          throw new Error((data && data.Result) || "週報資料取得失敗");
+        }
+        weeklyEmployeeName = String(data.employeeName || "").trim();
+        weeklyReportCache = (
+          Array.isArray(data.dailyReports) ? data.dailyReports : []
+        ).map(normalizeDailyReport);
+        return weeklyReportCache;
+      }
+
       function getEmployeeDisplayName() {
         return (
+          weeklyEmployeeName ||
           dailyCommon.employeeName ||
           String(
             (document.getElementById("employeeName") &&
@@ -2271,623 +1999,242 @@
         );
       }
 
-      function syncDWRFormFields() {
-        const deptEl = document.getElementById("dwr-dept");
-        if (deptEl) {
-          deptEl.textContent = dailyCommon.deptName || "—";
-        }
-      }
-
-      function formatYmdLabel(ymd) {
-        const s = String(ymd || "")
-          .replace(/\D/g, "")
-          .slice(0, 8);
-        if (s.length !== 8) return String(ymd || "");
-        return s.slice(0, 4) + "/" + s.slice(4, 6) + "/" + s.slice(6, 8);
-      }
-
-      function naOr(val, fallback) {
-        const v = String(val != null ? val : "").trim();
-        if (!v || v.toUpperCase() === "NA") return fallback || "無";
-        return v;
-      }
-
-      function parseWeeklyReportContent(data) {
-        const raw = data && data.weeklyReport && data.weeklyReport.response;
-        if (!raw) return null;
-        try {
-          return typeof raw === "string" ? JSON.parse(raw) : raw;
-        } catch (e) {
-          return null;
-        }
-      }
-
-      function findWeeklyReviewItem(items, category) {
-        const found = (items || []).find(function (i) {
-          return String(i.category || "").trim() === category;
+      function buildPWRText(employeeName, fromLabel, toLabel, reports) {
+        const lines = [
+          "【個人週報】" + employeeName,
+          "期間：" + fromLabel + " ～ " + toLabel,
+          "",
+        ];
+        const totalH = reports.reduce(function (s, r) {
+          return s + parseHours(r.totalHours);
+        }, 0);
+        const allItems = reports.flatMap(function (r) {
+          return Array.isArray(r.items) ? r.items : [];
         });
-        return (
-          found || {
-            work_content: "無",
-            completion_note: "",
-          }
+        const doneItems = allItems.filter(function (i) {
+          return i.status === "已完成";
+        });
+        const doneRate =
+          allItems.length > 0
+            ? Math.round((doneItems.length / allItems.length) * 100)
+            : 0;
+        lines.push(
+          "出勤天數：" +
+            reports.length +
+            " 天　總工時：" +
+            totalH.toFixed(1) +
+            "h　完成率：" +
+            doneRate +
+            "%",
+          "",
         );
+
+        const projMap = {};
+        allItems.forEach(function (i) {
+          const name = String(i.ProjectName || "").trim() || "非專案產出";
+          if (!projMap[name]) projMap[name] = 0;
+          projMap[name] += parseHours(i.hours);
+        });
+        const projList = Object.keys(projMap).sort(function (a, b) {
+          return projMap[b] - projMap[a];
+        });
+        if (projList.length) {
+          lines.push("【專案投入】");
+          projList.forEach(function (n) {
+            lines.push("  " + n + "：" + projMap[n].toFixed(1) + "h");
+          });
+          lines.push("");
+        }
+        lines.push("【工作項目】");
+        allItems.forEach(function (i) {
+          lines.push(
+            "  [" +
+              (i.status || "") +
+              "] " +
+              (i.desc || "") +
+              "（" +
+              parseHours(i.hours).toFixed(1) +
+              "h）",
+          );
+        });
+        return lines.join("\n");
       }
 
-      function renderWRStats(prefix, data, fromLabel, toLabel, opts) {
-        const statsEl = document.getElementById(prefix + "-stats");
-        if (!statsEl) return;
-        const isDept = opts && opts.reportType === "department";
-        const stats =
-          (data.transcript && data.transcript.statistics) ||
-          (parseWeeklyReportContent(data) || {}).statistics ||
-          {};
-        const titleName = isDept
-          ? data.department || dailyCommon.deptName || "—"
-          : data.employeeName || getEmployeeDisplayName();
-        const dept = data.department || dailyCommon.deptName || "—";
-        const mainProjects = Array.isArray(stats.mainProjects)
-          ? stats.mainProjects
-          : [];
-        const projHtml = mainProjects
-          .map(function (p) {
-            const name =
-              typeof p === "string"
-                ? p
-                : p.projectName || p.project_name || "";
-            const hours = typeof p === "object" ? parseHours(p.hours) : 0;
-            const participants =
-              typeof p === "object" && Array.isArray(p.participants)
-                ? p.participants.join("、")
-                : "";
+      function renderPersonalWR(reports, fromLabel, toLabel) {
+        const body = document.getElementById("pwr-body");
+        const employeeName = getEmployeeDisplayName();
+        if (!reports.length) {
+          body.classList.remove("hidden");
+          body.innerHTML =
+            '<div class="px-5 py-8 text-center text-sm text-slate-400">所選區間無日報資料</div>';
+          window._pwrText = "";
+          return;
+        }
+        const totalDays = reports.length;
+        const totalH = reports.reduce(function (s, r) {
+          return s + parseHours(r.totalHours);
+        }, 0);
+        const allItems = reports.flatMap(function (r) {
+          return Array.isArray(r.items) ? r.items : [];
+        });
+        const doneItems = allItems.filter(function (i) {
+          return i.status === "已完成";
+        });
+        const doneRate =
+          allItems.length > 0
+            ? Math.round((doneItems.length / allItems.length) * 100)
+            : 0;
+
+        const projMap = {};
+        allItems.forEach(function (i) {
+          const name = String(i.ProjectName || "").trim() || "非專案產出";
+          if (!projMap[name]) projMap[name] = 0;
+          projMap[name] += parseHours(i.hours);
+        });
+        const catMap = {};
+        allItems.forEach(function (i) {
+          const c = String(i.category || "未分類").trim() || "未分類";
+          if (!catMap[c]) catMap[c] = 0;
+          catMap[c] += parseHours(i.hours);
+        });
+        const projHtml = Object.keys(projMap)
+          .sort(function (a, b) {
+            return projMap[b] - projMap[a];
+          })
+          .map(function (name) {
             return (
               '<div class="flex items-center gap-2 bg-slate-50 rounded-lg px-3 py-2">' +
               '<div class="text-xs font-semibold text-blue-700 min-w-0 flex-1">' +
               escapeHtml(name) +
-              (participants
-                ? '<div class="text-[10px] text-slate-400 font-normal mt-0.5">' +
-                  escapeHtml(participants) +
-                  "</div>"
-                : "") +
               "</div>" +
-              (hours > 0
-                ? '<div class="text-xs font-bold text-blue-600 whitespace-nowrap">' +
-                  hours.toFixed(1) +
-                  "h</div>"
-                : "") +
-              "</div>"
+              '<div class="text-xs font-bold text-blue-600 whitespace-nowrap">' +
+              projMap[name].toFixed(1) +
+              "h</div></div>"
             );
           })
           .join("");
-        const fourthStat = isDept
-          ? '<div class="bg-purple-50 rounded-lg p-3 text-center"><div class="text-xs text-purple-600 font-semibold mb-1">部門人數</div><div class="text-2xl font-bold text-purple-700">' +
-            (stats.employeeCount || 0) +
-            "</div></div>"
-          : '<div class="bg-purple-50 rounded-lg p-3 text-center"><div class="text-xs text-purple-600 font-semibold mb-1">日報筆數</div><div class="text-2xl font-bold text-purple-700">' +
-            (stats.dailyReportCount || data.rowCount || 0) +
-            "</div></div>";
-        statsEl.innerHTML =
-          '<div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">' +
-          '<div class="flex items-center gap-3 flex-wrap mb-4">' +
+        const catHtml = Object.entries(catMap)
+          .sort(function (a, b) {
+            return b[1] - a[1];
+          })
+          .map(function (entry) {
+            return (
+              '<div class="flex justify-between text-xs py-0.5 border-b border-slate-100">' +
+              "<span>" +
+              escapeHtml(entry[0]) +
+              '</span><span class="font-semibold text-purple-600">' +
+              entry[1].toFixed(1) +
+              "h</span></div>"
+            );
+          })
+          .join("");
+        const itemsHtml = allItems
+          .slice(0, 8)
+          .map(function (i) {
+            const done = i.status === "已完成";
+            return (
+              '<div class="flex items-start gap-1.5 text-xs py-0.5">' +
+              '<span class="' +
+              (done ? "text-green-500" : "text-amber-500") +
+              ' mt-0.5">' +
+              (done ? "✓" : "○") +
+              "</span>" +
+              '<span class="text-slate-600 leading-snug">' +
+              escapeHtml(i.desc || "") +
+              "</span></div>"
+            );
+          })
+          .join("");
+        body.innerHTML =
+          '<div class="px-5 py-4 space-y-4 border-t border-slate-100">' +
+          '<div class="flex items-center gap-3 flex-wrap">' +
           '<div class="font-bold text-slate-800">' +
-          escapeHtml(titleName) +
-          (isDept ? " 部門週報" : " 週報") +
-          " — " +
+          escapeHtml(employeeName) +
+          " 週報 — " +
           escapeHtml(fromLabel) +
           " ～ " +
           escapeHtml(toLabel) +
           "</div>" +
-          (!isDept
-            ? '<span class="text-xs px-2 py-0.5 rounded-full font-semibold bg-blue-50 text-blue-700">' +
-              escapeHtml(dept) +
-              "</span>"
-            : "") +
-          "</div>" +
-          '<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">' +
-          '<div class="bg-blue-50 rounded-lg p-3 text-center"><div class="text-xs text-blue-600 font-semibold mb-1">總工時</div><div class="text-2xl font-bold text-blue-700">' +
-          parseHours(stats.totalHours).toFixed(1) +
-          "h</div></div>" +
-          '<div class="bg-green-50 rounded-lg p-3 text-center"><div class="text-xs text-green-600 font-semibold mb-1">專案工時</div><div class="text-2xl font-bold text-green-700">' +
-          parseHours(stats.projectHours).toFixed(1) +
-          "h</div></div>" +
-          '<div class="bg-amber-50 rounded-lg p-3 text-center"><div class="text-xs text-amber-600 font-semibold mb-1">非專案工時</div><div class="text-2xl font-bold text-amber-700">' +
-          parseHours(stats.nonProjectHours).toFixed(1) +
-          "h</div></div>" +
-          fourthStat +
-          "</div>" +
-          '<div class="grid grid-cols-3 gap-3 mb-4">' +
-          '<div class="bg-slate-50 rounded-lg p-3 text-center"><div class="text-xs text-slate-500 mb-1">已完成</div><div class="text-lg font-bold text-slate-700">' +
-          (stats.completedCount || 0) +
+          '<button type="button" id="btnCopyPWR" class="ml-auto text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 rounded font-semibold">📋 複製週報文字</button></div>' +
+          '<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">' +
+          '<div class="bg-blue-50 rounded-lg p-3 text-center"><div class="text-xs text-blue-600 font-semibold mb-1">出勤天數</div><div class="text-2xl font-bold text-blue-700">' +
+          totalDays +
           "</div></div>" +
-          '<div class="bg-slate-50 rounded-lg p-3 text-center"><div class="text-xs text-slate-500 mb-1">進行中</div><div class="text-lg font-bold text-slate-700">' +
-          (stats.inProgressCount || 0) +
-          "</div></div>" +
-          '<div class="bg-slate-50 rounded-lg p-3 text-center"><div class="text-xs text-slate-500 mb-1">專案數</div><div class="text-lg font-bold text-slate-700">' +
-          (stats.projectCount || 0) +
-          "</div></div></div>" +
+          '<div class="bg-green-50 rounded-lg p-3 text-center"><div class="text-xs text-green-600 font-semibold mb-1">總工時</div><div class="text-2xl font-bold text-green-700">' +
+          totalH.toFixed(1) +
+          "h</div></div>" +
+          '<div class="bg-amber-50 rounded-lg p-3 text-center"><div class="text-xs text-amber-600 font-semibold mb-1">工項完成率</div><div class="text-2xl font-bold text-amber-700">' +
+          doneRate +
+          "%</div></div></div>" +
           (projHtml
-            ? '<div><div class="text-xs font-semibold text-slate-600 mb-2">主要專案投入</div><div class="space-y-1">' +
+            ? '<div><div class="text-xs font-semibold text-slate-600 mb-2">本週專案投入</div><div class="space-y-1">' +
               projHtml +
               "</div></div>"
             : "") +
-          "</div>";
-        statsEl.classList.remove("hidden");
+          '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">' +
+          '<div class="bg-slate-50 rounded-lg p-3"><div class="text-xs font-semibold text-slate-600 mb-2">工作類別分布</div>' +
+          (catHtml || '<div class="text-xs text-slate-400">無類別資料</div>') +
+          "</div>" +
+          '<div class="bg-slate-50 rounded-lg p-3"><div class="text-xs font-semibold text-slate-600 mb-2">本週工作項目（前 8 筆）</div>' +
+          (itemsHtml || '<div class="text-xs text-slate-400">無項目</div>') +
+          (allItems.length > 8
+            ? '<div class="text-xs text-slate-400 mt-1">...共 ' +
+              allItems.length +
+              " 筆</div>"
+            : "") +
+          "</div></div></div>";
+        body.classList.remove("hidden");
+        const copyBtn = document.getElementById("btnCopyPWR");
+        if (copyBtn) copyBtn.addEventListener("click", copyPersonalWR);
+        window._pwrText = buildPWRText(
+          employeeName,
+          fromLabel,
+          toLabel,
+          reports,
+        );
       }
 
-      function renderWRTable(tableElId, wrContent, meta) {
-        const tableEl = document.getElementById(tableElId);
-        if (!tableEl || !wrContent) return;
-        const today = new Date();
-        const dateStr =
-          today.getFullYear() +
-          "." +
-          (today.getMonth() + 1) +
-          "." +
-          today.getDate();
-        const rows = [];
-        const title =
-          wrContent.weekly_report_title ||
-          "拉菲爾生醫集團 每週重點工作總結計畫表";
-        const review = wrContent.weekly_review || [];
-        const nextPlan = wrContent.next_week_plan || [];
+      async function generatePersonalWR() {
+        // const from = document.getElementById("pwr-from").value;
+        // const to = document.getElementById("pwr-to").value;
 
-        rows.push(
-          '<tr><td colspan="3" class="wr-title">' +
-            escapeHtml(title) +
-            "</td></tr>",
-        );
-        rows.push(
-          "<tr>" +
-            '<td class="wr-col-header" style="width:16%">部門</td>' +
-            '<td class="wr-content" style="width:34%">' +
-            escapeHtml(meta.department) +
-            "</td>" +
-            '<td style="width:50%;padding:0">' +
-            '<table style="width:100%;border-collapse:collapse">' +
-            "<tr>" +
-            '<td class="wr-col-header" style="border:none;border-right:1px solid #999;width:20%">姓名</td>' +
-            '<td class="wr-content" style="border:none;border-right:1px solid #999;width:30%;padding:8px">' +
-            escapeHtml(meta.employeeName) +
-            "</td>" +
-            '<td class="wr-col-header" style="border:none;border-right:1px solid #999;width:18%">日期</td>' +
-            '<td class="wr-content" style="border:none;padding:8px">' +
-            escapeHtml(dateStr) +
-            "</td></tr></table></td></tr>",
-        );
+        const w = weekMonFriDateInputs();
+        const from = w.start;
+        const to = w.end;
 
-        rows.push(
-          '<tr><td colspan="3" class="wr-section">本周工作回顧</td></tr>',
-        );
-        rows.push(
-          "<tr>" +
-            '<td class="wr-col-header">類別</td>' +
-            '<td class="wr-col-header">工作內容</td>' +
-            '<td class="wr-col-header">完成（處理）情況說明</td></tr>',
-        );
+        setInputValue("pwr-from", from);
+        setInputValue("pwr-to", to);
 
-        const fixedCats = [
-          ["跨部門事件", "跨部門事件"],
-          ["異常事件", "異常事件\n(ex.特別差或特別好的事)"],
-          ["工作中發現的峰值MOT", "工作中發現的\n峰值MOT"],
-          ["工作中發現的低谷MOT", "工作中發現的\n低谷MOT"],
-          ["需要協助的事", "需要協助的事"],
-        ];
-        fixedCats.forEach(function (pair) {
-          const item = findWeeklyReviewItem(review, pair[0]);
-          rows.push(
-            "<tr>" +
-              '<td class="wr-cat" style="white-space:pre-line">' +
-              escapeHtml(pair[1]) +
-              "</td>" +
-              '<td class="wr-content">' +
-              escapeHtml(naOr(item.work_content, "無")) +
-              "</td>" +
-              '<td class="wr-content">' +
-              escapeHtml(naOr(item.completion_note, "")) +
-              "</td></tr>",
-          );
-        });
-
-        const keyDone = findWeeklyReviewItem(review, "重點完成工作");
-        rows.push(
-          "<tr>" +
-            '<td class="wr-cat">重點完成工作</td>' +
-            '<td class="wr-content">' +
-            escapeHtml(naOr(keyDone.work_content, "本週無已完成工項")) +
-            "</td>" +
-            '<td class="wr-content">' +
-            escapeHtml(naOr(keyDone.completion_note, "")) +
-            "</td></tr>",
-        );
-
-        rows.push(
-          '<tr><td colspan="3" class="wr-section">下周工作計畫</td></tr>',
-        );
-        rows.push(
-          "<tr>" +
-            '<td class="wr-col-header">類別</td>' +
-            '<td class="wr-col-header">工作內容</td>' +
-            '<td class="wr-col-header">配合人員或所需資源</td></tr>',
-        );
-
-        if (nextPlan.length) {
-          nextPlan.forEach(function (item, idx) {
-            rows.push(
-              "<tr>" +
-                (idx === 0
-                  ? '<td class="wr-cat" rowspan="' +
-                    nextPlan.length +
-                    '">' +
-                    escapeHtml(item.category || "計畫重點工作") +
-                    "</td>"
-                  : "") +
-                '<td class="wr-content">' +
-                escapeHtml(naOr(item.work_content, "暫無下週計畫")) +
-                "</td>" +
-                '<td class="wr-content">' +
-                escapeHtml(naOr(item.required_support, "")) +
-                "</td></tr>",
-            );
-          });
-        } else {
-          rows.push(
-            "<tr>" +
-              '<td class="wr-cat">計畫重點工作</td>' +
-              '<td class="wr-content" colspan="2">暫無下週計畫</td></tr>',
-          );
-        }
-
-        rows.push(
-          '<tr><td colspan="3" style="padding:12px 16px;font-size:14px;text-align:right;color:#475569">主管簽核：＿＿＿＿＿＿＿＿</td></tr>',
-        );
-
-        tableEl.innerHTML =
-          '<table class="wr-table">' + rows.join("") + "</table>";
-      }
-
-      function renderWRExtra(extraElId, wrContent, opts) {
-        const extraEl = document.getElementById(extraElId);
-        if (!extraEl || !wrContent) return;
-        const isDept = opts && opts.reportType === "department";
-        const projects = wrContent.project_summary || [];
-        const growth = wrContent.personal_growth_summary || "";
-        const aiSummary =
-          wrContent.ai_management_summary ||
-          wrContent.department_management_summary ||
-          "";
-        let html = "";
-        if (projects.length) {
-          html +=
-            '<div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">' +
-            '<div class="text-sm font-semibold text-slate-700 mb-3">專案摘要</div>' +
-            '<div class="space-y-3">' +
-            projects
-              .map(function (p) {
-                return (
-                  '<div class="bg-slate-50 rounded-lg p-3">' +
-                  '<div class="flex items-center gap-2 mb-1">' +
-                  '<span class="text-xs font-semibold text-blue-700 flex-1 min-w-0">' +
-                  escapeHtml(p.project_name || p.projectName || "") +
-                  "</span>" +
-                  '<span class="text-xs font-bold text-blue-600 whitespace-nowrap">' +
-                  parseHours(p.hours).toFixed(1) +
-                  "h</span></div>" +
-                  '<div class="text-xs text-slate-600 mb-1">' +
-                  escapeHtml(p.status_summary || "") +
-                  "</div>" +
-                  (p.management_suggestion
-                    ? '<div class="text-xs text-slate-400">建議：' +
-                      escapeHtml(p.management_suggestion) +
-                      "</div>"
-                    : "") +
-                  "</div>"
-                );
-              })
-              .join("") +
-            "</div></div>";
-        }
-        if (!isDept && (growth || aiSummary)) {
-          html +=
-            '<div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">' +
-            (growth
-              ? '<div><div class="text-sm font-semibold text-slate-700 mb-2">個人成長摘要</div><div class="text-xs text-slate-600 leading-relaxed">' +
-                escapeHtml(growth) +
-                "</div></div>"
-              : "") +
-            (aiSummary
-              ? '<div><div class="text-sm font-semibold text-slate-700 mb-2">AI 管理摘要</div><div class="text-xs text-slate-600 leading-relaxed">' +
-                escapeHtml(aiSummary) +
-                "</div></div>"
-              : "") +
-            "</div>";
-        } else if (isDept && aiSummary) {
-          html +=
-            '<div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">' +
-            '<div class="text-sm font-semibold text-slate-700 mb-2">AI 部門管理摘要</div>' +
-            '<div class="text-xs text-slate-600 leading-relaxed">' +
-            escapeHtml(aiSummary) +
-            "</div></div>";
-        }
-        extraEl.innerHTML = html;
-        extraEl.classList.toggle("hidden", !html);
-      }
-
-      function renderDWREmployees(data) {
-        const el = document.getElementById("dwr-employees");
-        if (!el) return;
-        const employees =
-          (data.transcript && data.transcript.employees) || [];
-        if (!employees.length) {
-          el.innerHTML = "";
-          el.classList.add("hidden");
-          return;
-        }
-        el.innerHTML =
-          '<div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">' +
-          '<div class="text-sm font-semibold text-slate-700 mb-3">部門成員工時摘要</div>' +
-          '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">' +
-          employees
-            .map(function (emp) {
-              const st = emp.statistics || {};
-              const name = emp.employeeName || emp.adminId || "—";
-              return (
-                '<div class="bg-slate-50 rounded-lg p-3 border border-slate-100">' +
-                '<div class="text-xs font-bold text-slate-800 mb-2">' +
-                escapeHtml(name) +
-                "</div>" +
-                '<div class="grid grid-cols-2 gap-2 text-xs">' +
-                '<div><span class="text-slate-400">總工時</span><div class="font-bold text-blue-700">' +
-                parseHours(st.totalHours).toFixed(1) +
-                "h</div></div>" +
-                '<div><span class="text-slate-400">專案</span><div class="font-bold text-green-700">' +
-                parseHours(st.projectHours).toFixed(1) +
-                "h</div></div>" +
-                '<div><span class="text-slate-400">完成</span><div class="font-bold text-slate-700">' +
-                (st.completedCount || 0) +
-                "</div></div>" +
-                '<div><span class="text-slate-400">進行中</span><div class="font-bold text-amber-600">' +
-                (st.inProgressCount || 0) +
-                "</div></div></div></div>"
-              );
-            })
-            .join("") +
-          "</div></div>";
-        el.classList.remove("hidden");
-      }
-
-      function buildWRTextFromApi(data, wrContent, opts) {
-        const isDept = opts && opts.reportType === "department";
-        const fromYmd =
-          (data.period && data.period[0]) ||
-          (wrContent.period && wrContent.period.start_date) ||
-          "";
-        const toYmd =
-          (data.period && data.period[1]) ||
-          (wrContent.period && wrContent.period.end_date) ||
-          "";
-        const stats =
-          (data.transcript && data.transcript.statistics) ||
-          wrContent.statistics ||
-          {};
-        const dept = data.department || wrContent.department || "";
-        const titleName = isDept
-          ? dept
-          : data.employeeName || wrContent.employee_name || "";
-        const lines = [
-          (isDept ? "【部門週報】" : "【個人週報】") + titleName,
-          "期間：" +
-            formatYmdLabel(fromYmd) +
-            " ～ " +
-            formatYmdLabel(toYmd),
-          "",
-          "總工時：" +
-            parseHours(stats.totalHours || stats.total_hours).toFixed(1) +
-            "h　專案工時：" +
-            parseHours(stats.projectHours || stats.project_hours).toFixed(1) +
-            "h　非專案工時：" +
-            parseHours(stats.nonProjectHours || stats.non_project_hours).toFixed(
-              1,
-            ) +
-            "h" +
-            (isDept && stats.employeeCount
-              ? "　部門人數：" + stats.employeeCount
-              : ""),
-          "",
-          "◆ 本周工作回顧",
-        ];
-        (wrContent.weekly_review || []).forEach(function (item) {
-          lines.push(
-            item.category +
-              "：" +
-              naOr(item.work_content, "無") +
-              (item.completion_note &&
-              naOr(item.completion_note, "") !== "無"
-                ? "（" + naOr(item.completion_note, "") + "）"
-                : ""),
-          );
-        });
-        lines.push("", "◆ 下周工作計畫");
-        (wrContent.next_week_plan || []).forEach(function (item, i) {
-          lines.push(
-            "  " +
-              (i + 1) +
-              ". " +
-              naOr(item.work_content, "") +
-              (item.required_support
-                ? "（" + naOr(item.required_support, "") + "）"
-                : ""),
-          );
-        });
-        if (!isDept && wrContent.personal_growth_summary) {
-          lines.push("", "◆ 個人成長", wrContent.personal_growth_summary);
-        }
-        const aiSummary =
-          wrContent.ai_management_summary ||
-          wrContent.department_management_summary ||
-          "";
-        if (aiSummary) {
-          lines.push("", "◆ AI 管理摘要", aiSummary);
-        }
-        if (isDept) {
-          const employees =
-            (data.transcript && data.transcript.employees) || [];
-          if (employees.length) {
-            lines.push("", "◆ 部門成員工時");
-            employees.forEach(function (emp) {
-              const st = emp.statistics || {};
-              lines.push(
-                "  " +
-                  (emp.employeeName || emp.adminId) +
-                  "：" +
-                  parseHours(st.totalHours).toFixed(1) +
-                  "h（專案 " +
-                  parseHours(st.projectHours).toFixed(1) +
-                  "h）",
-              );
-            });
-          }
-        }
-        return lines.join("\n");
-      }
-
-      async function fetchGenerateWeeklyReport(reportType, startDate, endDate) {
-        const department = String(dailyCommon.deptName || "").trim();
-        if (!department) throw new Error("部門資料尚未載入，請稍後再試");
-        const body = {
-          reportType: reportType,
-          adminId: auth.adminID,
-          department: department,
-          startDate: startDate,
-          endDate: endDate,
-        };
-        if (reportType === "employee") {
-          const employeeName = getEmployeeDisplayName();
-          if (!employeeName) throw new Error("請先填寫員工姓名");
-          body.employeeName = employeeName;
-        }
-        const data = await postJson(GENERATE_WEEKLY_REPORT_URL, body);
-        if (!data || !data.success) {
-          throw new Error(
-            (data && (data.message || data.error || data.Result)) ||
-              "週報產生失敗",
-          );
-        }
-        return data;
-      }
-
-      function getWRMetaFromApi(data, wrContent, reportType) {
-        const isDept = reportType === "department";
-        return {
-          department: data.department || dailyCommon.deptName || "",
-          employeeName: isDept
-            ? wrContent.manager_name ||
-              wrContent.reporter_name ||
-              data.managerAdminId ||
-              "部門彙總"
-            : data.employeeName || getEmployeeDisplayName(),
-        };
-      }
-
-      function renderWRFromApi(prefix, data, fromInput, toInput, reportType) {
-        const wrContent = parseWeeklyReportContent(data);
-        const preview = document.getElementById(prefix + "-preview");
-        const titleEl = document.getElementById(prefix + "-preview-title");
-        const isDept = reportType === "department";
-        const excelKey = prefix === "dwr" ? "_dwrExcelUrl" : "_pwrExcelUrl";
-        const textKey = prefix === "dwr" ? "_dwrText" : "_pwrText";
-
-        window[excelKey] = String(data.ExcelURL || data.excelURL || "");
-        const meta = getWRMetaFromApi(data, wrContent || {}, reportType);
-
-        renderWRStats(prefix, data, fromInput, toInput, { reportType: reportType });
-
-        if (wrContent) {
-          renderWRTable(prefix + "-table", wrContent, meta);
-          renderWRExtra(prefix + "-extra", wrContent, {
-            reportType: reportType,
-          });
-          if (isDept) renderDWREmployees(data);
-          window[textKey] = buildWRTextFromApi(data, wrContent, {
-            reportType: reportType,
-          });
-        } else {
-          const tableEl = document.getElementById(prefix + "-table");
-          if (tableEl) {
-            tableEl.innerHTML =
-              '<div class="text-sm text-slate-400 text-center py-8">週報內容解析失敗，請稍後再試</div>';
-          }
-          window[textKey] = "";
-        }
-
-        if (titleEl) {
-          titleEl.textContent =
-            (isDept
-              ? data.department || dailyCommon.deptName
-              : data.employeeName || getEmployeeDisplayName()) +
-            " 週報 " +
-            fromInput +
-            " ～ " +
-            toInput +
-            " · AI 產生";
-        }
-        if (preview) {
-          preview.classList.remove("hidden");
-          preview.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      }
-
-      async function generateWR(prefix, reportType) {
-        const from = document.getElementById(prefix + "-from").value;
-        const to = document.getElementById(prefix + "-to").value;
         if (!from || !to) {
           toast("請選擇週報日期區間");
           return;
         }
-        const startDate = dateInputToYmd(from);
-        const endDate = dateInputToYmd(to);
-        if (startDate > endDate) {
-          toast("起始日不可晚於結束日");
-          return;
-        }
-
-        const loading = document.getElementById(prefix + "-loading");
-        const stats = document.getElementById(prefix + "-stats");
-        const preview = document.getElementById(prefix + "-preview");
-        const btnId = prefix === "dwr" ? "btnGenerateDWR" : "btnGenerateWR";
-        const btn = document.getElementById(btnId);
-        const origBtnHtml = btn ? btn.innerHTML : "";
-        const excelKey = prefix === "dwr" ? "_dwrExcelUrl" : "_pwrExcelUrl";
-        const textKey = prefix === "dwr" ? "_dwrText" : "_pwrText";
-
+        const loading = document.getElementById("pwr-loading");
+        const body = document.getElementById("pwr-body");
         if (loading) loading.classList.remove("hidden");
-        if (stats) stats.classList.add("hidden");
-        if (preview) preview.classList.add("hidden");
-        window[textKey] = "";
-        window[excelKey] = "";
-
-        if (btn) {
-          btn.disabled = true;
-          btn.innerHTML = '<span class="wr-spinner"></span>產生中...';
+        if (body) {
+          body.classList.add("hidden");
+          body.innerHTML = "";
         }
-
         try {
-          const data = await fetchGenerateWeeklyReport(
-            reportType,
-            startDate,
-            endDate,
-          );
-          if (reportType === "employee" && data.employeeName) {
-            setInputValue("employeeName", data.employeeName);
-          }
-          renderWRFromApi(prefix, data, from, to, reportType);
-          toast(reportType === "department" ? "部門週報產生完成" : "週報產生完成");
+          await fetchWeeklyReportData();
+          if (weeklyEmployeeName)
+            setInputValue("employeeName", weeklyEmployeeName);
+          const filtered = weeklyReportCache
+            .filter(function (r) {
+              return reportYmdInRange(r.date, from, to);
+            })
+            .sort(function (a, b) {
+              return String(a.date || "").localeCompare(String(b.date || ""));
+            });
+          renderPersonalWR(filtered, from, to);
+          toast("週報產生完成");
         } catch (err) {
-          window[textKey] = "";
-          window[excelKey] = "";
-          if (stats) {
-            stats.classList.remove("hidden");
-            stats.innerHTML =
-              '<div class="bg-white rounded-xl border border-red-200 shadow-sm p-8 text-center text-sm text-red-500">載入失敗：' +
+          window._pwrText = "";
+          if (body) {
+            body.classList.remove("hidden");
+            body.innerHTML =
+              '<div class="px-5 py-8 text-center text-sm text-red-500">載入失敗：' +
               escapeHtml(err && err.message ? err.message : "請稍後再試") +
               "</div>";
           }
@@ -2897,41 +2244,11 @@
           );
         } finally {
           if (loading) loading.classList.add("hidden");
-          if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = origBtnHtml;
-          }
         }
       }
 
-      function generatePersonalWR() {
-        return generateWR("pwr", "employee");
-      }
-
-      function generateDepartmentWR() {
-        syncDWRFormFields();
-        return generateWR("dwr", "department");
-      }
-
-      function downloadWRExcel(excelKey) {
-        const url = window[excelKey] || "";
-        if (!url) {
-          toast("無 Excel 下載連結，請先產生週報");
-          return;
-        }
-        window.open(url, "_blank", "noopener,noreferrer");
-      }
-
-      function downloadPWRExcel() {
-        downloadWRExcel("_pwrExcelUrl");
-      }
-
-      function downloadDWRExcel() {
-        downloadWRExcel("_dwrExcelUrl");
-      }
-
-      function copyWRText(textKey) {
-        const text = window[textKey] || "";
+      function copyPersonalWR() {
+        const text = window._pwrText || "";
         if (!text) {
           toast("無週報內容，請先產生週報");
           return;
@@ -2946,14 +2263,6 @@
           });
       }
 
-      function copyPersonalWR() {
-        copyWRText("_pwrText");
-      }
-
-      function copyDepartmentWR() {
-        copyWRText("_dwrText");
-      }
-
       function initDefaultDateRange() {
         const m = monthStartAndEnd();
         document.getElementById("startDate").value = m.start;
@@ -2964,22 +2273,17 @@
         const w = weekMonFriDateInputs();
         setInputValue("pwr-from", w.start);
         setInputValue("pwr-to", w.end);
-        setInputValue("dwr-from", w.start);
-        setInputValue("dwr-to", w.end);
       }
 
       function switchPage(n) {
         currentPage = n;
-        const pageMap = { 0: "page-0", 1: "page-1", 3: "page-3" };
-        const targetId = pageMap[n] || "page-0";
-        document.querySelectorAll(".page-content").forEach(function (p) {
-          p.classList.toggle("hidden", p.id !== targetId);
+        document.querySelectorAll(".page-content").forEach(function (p, i) {
+          p.classList.toggle("hidden", i !== n);
         });
         document.querySelectorAll(".rpt-tab").forEach(function (t, i) {
           t.classList.toggle("active", i === n);
         });
         if (n === 1) loadDashboard();
-        if (n === 3) syncDWRFormFields();
       }
 
       function mkBar(label, val, max, color, suffix) {
@@ -3671,7 +2975,6 @@
         }
         configureDeptPane();
         clearEditor();
-        syncDWRFormFields();
         await queryReports();
       }
 
@@ -3684,14 +2987,9 @@
         }
       });
       document.getElementById("btnSave").addEventListener("click", saveReport);
-      document
-        .getElementById("reportDate")
-        .addEventListener("change", function () {
-          syncEditorWithWorkDate(dateInputToYmd(this.value));
-        });
       document.getElementById("btnNew").addEventListener("click", function () {
+        clearEditor();
         setInputValue("reportDate", todayDateInput());
-        syncEditorWithWorkDate(dateInputToYmd(todayDateInput()));
         scrollToEditor();
       });
       document
@@ -3718,21 +3016,6 @@
       document
         .getElementById("btnGenerateWR")
         .addEventListener("click", generatePersonalWR);
-      document
-        .getElementById("btnDownloadPWR")
-        .addEventListener("click", downloadPWRExcel);
-      document
-        .getElementById("btnCopyPWR")
-        .addEventListener("click", copyPersonalWR);
-      document
-        .getElementById("btnGenerateDWR")
-        .addEventListener("click", generateDepartmentWR);
-      document
-        .getElementById("btnDownloadDWR")
-        .addEventListener("click", downloadDWRExcel);
-      document
-        .getElementById("btnCopyDWR")
-        .addEventListener("click", copyDepartmentWR);
 
       document
         .getElementById("btnDbQuery")
@@ -3744,8 +3027,15 @@
       document.querySelectorAll(".rpt-tab").forEach(function (tab, index) {
         tab.style.cursor = "pointer";
         tab.addEventListener("click", function () {
-          if (index === 0 || index === 1 ) {
+          if (index === 0 || index === 1) {
             switchPage(index);
+            return;
+          }
+          if (index === 3) {
+            switchPage(0);
+            const el = document.getElementById("personalWeeklyReport");
+            if (el && el.scrollIntoView)
+              el.scrollIntoView({ behavior: "smooth", block: "start" });
             return;
           }
           toast("此功能開發中");
