@@ -1099,7 +1099,7 @@ function computePressPoints(){
 ══════════════════════════════════════════════ */
 function elbowSVG(pos){
   const isInner = pos.endsWith("i");
-  const imgSrc = isInner ? "v7-assets/elbow-inner.png" : "v7-assets/elbow-outer.png";
+  const imgSrc = isInner ? "/v7-assets/elbow-inner.png" : "/v7-assets/elbow-outer.png";
   const allPositions = isInner
     ? [{k:"ui",l:"上方"},{k:"mi",l:"中段"},{k:"li",l:"下方"}]
     : [{k:"uo",l:"上方"},{k:"mo",l:"中段"},{k:"lo",l:"下方"}];
@@ -1115,7 +1115,7 @@ function elbowSVG(pos){
 function bodySVG(side,zone){
   const isSh = zone==="shoulder";
   const sideLabel = side==="right"?"右側":"左側";
-  const imgSrc = isSh ? "v7-assets/shoulder-scapular.png" : "v7-assets/clavicle.png";
+  const imgSrc = isSh ? "/v7-assets/shoulder-scapular.png" : "/v7-assets/clavicle.png";
   return '<div class="body-img-wrap">'
     +'<img src="'+imgSrc+'" alt="'+sideLabel+(isSh?"肩胛骨旁":"鎖骨按壓區域")+'" loading="lazy" style="border-radius:var(--radius-sm)"/>'
     +'<div class="body-side-badge">'+sideLabel+'</div>'
@@ -1123,7 +1123,7 @@ function bodySVG(side,zone){
 }
 
 function pressImgSrc(zone){
-  return zone==="shoulder"?"v7-assets/shoulder-scapular.png":"v7-assets/clavicle.png";
+  return zone==="shoulder"?"/v7-assets/shoulder-scapular.png":"/v7-assets/clavicle.png";
 }
 
 /* ══════════════════════════════════════════════
@@ -1658,7 +1658,7 @@ function screenResult(){
 ══════════════════════════════════════════════ */
 function elbowScreen(type){
   var isInner = type==='inner';
-  var imgSrc  = isInner ? 'v7-assets/elbow-inner.png' : 'v7-assets/elbow-outer.png';
+  var imgSrc  = isInner ? '/v7-assets/elbow-inner.png' : '/v7-assets/elbow-outer.png';
   var title   = isInner ? '手肘內側測試' : '手肘外側測試（翻面）';
   var desc    = isInner
     ? '手掌向上。找到手肘大拇指側的點，用拇指按深，左右手肘同一位置各按約 10 秒，感受哪邊比較酸痛。'
@@ -1767,7 +1767,7 @@ function renderHistList(){
   const list=document.getElementById("histList");
   if(!list)return;
   const ZONE_NAME={shoulder:"肩膀／肩胛旁",collarbone:"鎖骨外側"};
-  const ZONE_IMG={shoulder:"v7-assets/shoulder-scapular.png",collarbone:"v7-assets/clavicle.png"};
+  const ZONE_IMG={shoulder:"/v7-assets/shoulder-scapular.png",collarbone:"/v7-assets/clavicle.png"};
   if(!S.records.length){
     list.innerHTML='<p style="text-align:center;color:var(--muted);padding:20px 0">還沒有紀錄</p>';
     return;
