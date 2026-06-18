@@ -203,30 +203,17 @@
         paneCtx.onHoursChange();
       });
     }
-    tr.querySelectorAll("[data-qty]").forEach(function (el) {
-      el.addEventListener("input", function () {
-        calcProdYield(tr);
-        paneCtx.onHoursChange();
-      });
-    });
   }
 
-  function calcProdYield(tr) {
-    var qty = parseFloat(tr.querySelector('[data-key="ALLPrdCnt"]')?.value) || 0;
-    var good = parseFloat(tr.querySelector('[data-key="GoodPrdCnt"]')?.value) || 0;
-    var yieldEl = tr.querySelector("[data-yield-display]");
-    if (!yieldEl) return;
-    if (qty > 0) {
-      var rate = ((good / qty) * 100).toFixed(1);
-      yieldEl.textContent = rate + "%";
-      yieldEl.className =
-        parseFloat(rate) < 95
-          ? "text-red-600 text-xs font-bold"
-          : "text-green-600 text-xs font-bold";
-    } else {
-      yieldEl.textContent = "—";
-      yieldEl.className = "text-slate-400 text-xs";
-    }
+  function sumItemsBodyHours(tbodyId) {
+    var rows = Array.from(
+      document.querySelectorAll("#" + (tbodyId || "itemsBody") + " tr"),
+    );
+    return rows.reduce(function (sum, tr) {
+      var el = tr.querySelector('[data-key="hours"]');
+      var h = parseFloat(String(el && el.value ? el.value : "0"));
+      return sum + (isNaN(h) ? 0 : h);
+    }, 0);
   }
 
   function addStdRow(tbodyId, item, isProd) {
@@ -263,13 +250,6 @@
         '<td class="px-2 py-2">' +
         prodQtyInput("ALLPrdCnt", data.ALLPrdCnt) +
         "</td>" +
-        '<td class="px-2 py-2">' +
-        prodQtyInput("GoodPrdCnt", data.GoodPrdCnt) +
-        "</td>" +
-        '<td class="px-2 py-2">' +
-        prodQtyInput("BadPrdCnt", data.BadPrdCnt) +
-        "</td>" +
-        '<td class="px-2 py-2 text-center"><span data-yield-display class="text-slate-400 text-xs">—</span></td>' +
         '<td class="px-2 py-2"><select data-key="status" class="w-full border border-slate-200 rounded px-2 py-1.5">' +
         '<option value="">請選擇</option><option value="進行中"' +
         (data.status === "進行中" ? " selected" : "") +
@@ -318,7 +298,6 @@
       paneCtx.onHoursChange();
     });
     bindRowHours(tr);
-    if (isProd) calcProdYield(tr);
     body.appendChild(tr);
   }
 
@@ -327,7 +306,7 @@
       return (
         '<div class="overflow-x-auto"><table class="item-table"><thead><tr>' +
         "<th>產品/工作項目</th><th>工作類別</th><th>專案</th><th>工時</th>" +
-        "<th>生產數量</th><th>良品數</th><th>不良品數</th><th>良率</th><th>狀態</th><th>刪除</th>" +
+        "<th>生產數量</th><th>狀態</th><th>刪除</th>" +
         '</tr></thead><tbody id="itemsBody"></tbody></table></div>' +
         '<button type="button" id="btnAddRow" class="add-row-btn">+ 新增項目</button>'
       );
@@ -342,12 +321,9 @@
     );
   }
 
-  function updateOpsTotalHours() {
-    var actual = parseFloat(document.getElementById("ops-actual-h")?.value) || 0;
-    opsState.actualWorkHours = actual;
-    opsState.totalWorkHours = actual;
-    var display = document.getElementById("ops-total-h");
-    if (display) display.textContent = opsState.totalWorkHours.toFixed(1);
+  function syncOpsHoursFromItems() {
+    opsState.totalWorkHours = sumItemsBodyHours("itemsBody");
+    opsState.actualWorkHours = opsState.totalWorkHours;
     paneCtx.onHoursChange();
   }
 
@@ -359,16 +335,12 @@
     if (btn) btn.classList.add("ring-2", "ring-blue-400", "bg-blue-50");
   }
 
-  function selectOpsShift(shiftName, mode) {
+  function selectOpsShift(shiftName) {
     opsState.shift = shiftName;
     document.querySelectorAll(".shift-btn").forEach(function (btn) {
       btn.classList.toggle("sel", btn.getAttribute("data-shift") === shiftName);
     });
-    var map = getShiftHoursMap(mode);
-    var h = map[shiftName] || 0;
-    var actualEl = document.getElementById("ops-actual-h");
-    if (actualEl && h) actualEl.value = String(h);
-    updateOpsTotalHours();
+    syncOpsHoursFromItems();
   }
 
   function buildCsShiftButtons() {
@@ -383,19 +355,6 @@
         );
       })
       .join("");
-  }
-
-  function buildOpsHoursBlock() {
-    return (
-      '<div class="rounded-lg border border-blue-100 bg-blue-50/50 p-4">' +
-      '<div class="flex flex-wrap items-center gap-3 text-sm">' +
-      '<span class="text-slate-600">今日工時</span>' +
-      '<input id="ops-actual-h" type="number" min="0" max="24" step="0.5" value="0" class="w-20 border border-slate-200 rounded px-2 py-1 text-center font-bold" />' +
-      '<span class="text-slate-400 text-xs">h（可依實際調整）</span>' +
-      '<div class="ml-auto bg-white border border-blue-200 rounded-lg px-3 py-1">' +
-      '<span class="text-xs text-blue-600">總工時 </span><span id="ops-total-h" class="font-bold text-blue-700">0.0</span><span class="text-xs text-blue-600"> h</span>' +
-      "</div></div></div>"
-    );
   }
 
   function buildFeelingBlock() {
@@ -442,7 +401,6 @@
         shiftSelect +
         "</div></div></div>" +
         buildFeelingBlock() +
-        buildOpsHoursBlock() +
         '<div class="text-xs font-bold text-slate-600">工作項目紀錄</div>' +
         stdTableHtml(false) +
         "</div>"
@@ -457,7 +415,6 @@
       buildCsShiftButtons() +
       "</div></div>" +
       buildFeelingBlock() +
-      buildOpsHoursBlock() +
       '<div class="text-xs font-bold text-slate-600">工作項目紀錄</div>' +
       stdTableHtml(false) +
       "</div>"
@@ -476,13 +433,13 @@
       }
       if (shift) {
         shift.addEventListener("change", function () {
-          selectOpsShift(shift.value, mode);
+          selectOpsShift(shift.value);
         });
       }
     } else {
       document.querySelectorAll(".shift-btn").forEach(function (btn) {
         btn.addEventListener("click", function () {
-          selectOpsShift(btn.getAttribute("data-shift"), mode);
+          selectOpsShift(btn.getAttribute("data-shift"));
         });
       });
     }
@@ -491,8 +448,6 @@
         setOpsFeeling(btn.getAttribute("data-feel"), btn);
       });
     });
-    var actualEl = document.getElementById("ops-actual-h");
-    if (actualEl) actualEl.addEventListener("input", updateOpsTotalHours);
   }
 
   window.ProjectOSDailyReportDept = {
@@ -564,8 +519,6 @@
           };
           if (isProd) {
             row.ALLPrdCnt = "";
-            row.GoodPrdCnt = "";
-            row.BadPrdCnt = "";
           }
           tr.querySelectorAll("[data-key]").forEach(function (el) {
             row[el.dataset.key] = String(el.value || "").trim();
@@ -589,12 +542,12 @@
         } else {
           opsState.location = "";
         }
-        updateOpsTotalHours();
+        syncOpsHoursFromItems();
         return {
           shift: opsState.shift,
           location: opsState.location,
           feeling: opsState.feeling,
-          actualWorkHours: String(opsState.actualWorkHours),
+          actualWorkHours: "",
           totalHours: String(opsState.totalWorkHours),
         };
       }
@@ -630,28 +583,16 @@
         if (shiftSel) shiftSel.value = opsState.shift;
       }
 
-      var actual = parseFloat(r.actualWorkHours || r.totalHours) || 0;
-      var actualEl = document.getElementById("ops-actual-h");
-      if (actualEl) actualEl.value = String(actual);
-
       document.querySelectorAll(".ops-feel-btn").forEach(function (btn) {
         if (btn.getAttribute("data-feel") === opsState.feeling) {
           setOpsFeeling(opsState.feeling, btn);
         }
       });
-      updateOpsTotalHours();
+      syncOpsHoursFromItems();
     },
 
     calcTotalHours: function (tbodyId) {
-      if (paneCtx.mode === "ops-sm" || paneCtx.mode === "ops-cs") {
-        return opsState.totalWorkHours;
-      }
-      var rows = Array.from(document.querySelectorAll("#" + (tbodyId || "itemsBody") + " tr"));
-      return rows.reduce(function (sum, tr) {
-        var el = tr.querySelector('[data-key="hours"]');
-        var h = parseFloat(String(el && el.value ? el.value : "0"));
-        return sum + (isNaN(h) ? 0 : h);
-      }, 0);
+      return sumItemsBodyHours(tbodyId || "itemsBody");
     },
 
     getMode: function () {

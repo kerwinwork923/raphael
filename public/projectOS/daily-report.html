@@ -683,12 +683,29 @@
               部門工作貢獻（工時）
             </div>
             <div class="bar-chart" id="chart-dept"></div>
+            <div
+              id="dept-prod-qty-section"
+              class="hidden mt-5 pt-4 border-t border-slate-100"
+            >
+              <div class="font-semibold text-slate-700 text-sm mb-3">
+                生產數量統計
+              </div>
+              <div class="bar-chart" id="chart-dept-prod-qty"></div>
+            </div>
           </div>
           <div
             class="bg-white rounded-xl border border-slate-200 shadow-sm p-5"
           >
-            <div class="font-semibold text-slate-700 text-sm mb-3">
-              個人貢獻排行
+            <div class="flex items-center w-full mb-3 flex-wrap gap-2">
+              <div class="font-semibold text-slate-700 text-sm">
+                個人貢獻排行
+              </div>
+              <select
+                id="db-person-category"
+                class="hidden ml-auto text-xs border border-slate-200 rounded-lg px-2 py-1 text-slate-700 bg-white min-w-[8rem]"
+              >
+                <option value="">全部工作類別</option>
+              </select>
             </div>
             <div class="scroll-panel-rank">
               <table class="contrib-table" id="table-person"></table>
@@ -774,22 +791,6 @@
             class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-5"
             id="sm-ai-card"
           ></div>
-        </div>
-
-        <div
-          class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-5"
-          id="project-analysis-card"
-        >
-          <div class="font-semibold text-slate-700 text-sm mb-1">
-            專案投入工時分析
-          </div>
-          <div class="text-xs text-slate-400 mb-3">
-            各專案累計工時與參與人數、部門數
-          </div>
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            <div class="bar-chart" id="chart-projects"></div>
-            <table class="contrib-table" id="table-projects"></table>
-          </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
@@ -1011,6 +1012,7 @@
       const GENERATE_WEEKLY_REPORT_URL =
         API_BASE + "/api/weekly-report/generate";
       const QUERY_STA_REPORT_URL = API_BASE + "/api/fr/QueryStaReport";
+      const PRODUCTION_DEPT_LABEL = "生產部";
 
       let auth = null;
       let deptWorkKey = "A1";
@@ -1038,6 +1040,26 @@
       function parseHours(v) {
         const n = parseFloat(String(v != null ? v : "0"));
         return isNaN(n) ? 0 : n;
+      }
+
+      function parsePrdCnt(v) {
+        const n = parseFloat(String(v != null ? v : "0"));
+        return isNaN(n) ? 0 : n;
+      }
+
+      function getItemPrdCnt(item) {
+        if (!item || typeof item !== "object") return 0;
+        if (item.ALLPrdCnt != null && item.ALLPrdCnt !== "")
+          return parsePrdCnt(item.ALLPrdCnt);
+        if (item.PrdCnt != null && item.PrdCnt !== "")
+          return parsePrdCnt(item.PrdCnt);
+        if (item.productionCount != null && item.productionCount !== "")
+          return parsePrdCnt(item.productionCount);
+        return 0;
+      }
+
+      function isProductionDashboardView(deptFilter) {
+        return String(deptFilter || "").trim() === PRODUCTION_DEPT_LABEL;
       }
 
       function normalizePrjListEntry(x) {
@@ -1521,9 +1543,6 @@
             '<th class="min-w-[140px]">專案</th>' +
             '<th class="min-w-[72px]">工時</th>' +
             '<th class="min-w-[80px]">生產數量</th>' +
-            '<th class="min-w-[72px]">良品數</th>' +
-            '<th class="min-w-[72px]">不良品數</th>' +
-            '<th class="min-w-[60px]">良率</th>' +
             '<th class="min-w-[88px]">狀態</th>' +
             '<th class="w-[56px]">刪除</th>'
           );
@@ -1589,34 +1608,6 @@
             el.oninput = updateEditModalHoursVisual;
             el.onchange = updateEditModalHoursVisual;
           });
-        if (reportMode === "production") {
-          document.querySelectorAll("#edit-tbody tr").forEach(function (tr) {
-            function refreshYield() {
-              const qty =
-                parseFloat(
-                  String(
-                    tr.querySelector('[data-key="ALLPrdCnt"]')?.value || "0",
-                  ),
-                ) || 0;
-              const good =
-                parseFloat(
-                  String(
-                    tr.querySelector('[data-key="GoodPrdCnt"]')?.value || "0",
-                  ),
-                ) || 0;
-              const yieldEl = tr.querySelector("[data-yield-display]");
-              if (!yieldEl) return;
-              const yieldInfo = calcProdYieldDisplay(qty, good);
-              yieldEl.textContent = yieldInfo.text;
-              yieldEl.className = yieldInfo.className + " text-xs";
-            }
-            tr.querySelectorAll("[data-qty]").forEach(function (el) {
-              el.oninput = refreshYield;
-              el.onchange = refreshYield;
-            });
-            refreshYield();
-          });
-        }
         updateEditModalHoursVisual();
       }
       
@@ -1680,8 +1671,6 @@
             return buildPayloadItem(it, editingModalAID);
           }),
         };
-        if (meta.actualWorkHours)
-          payloadReport.actualWorkHours = meta.actualWorkHours;
         try {
           const data = await postJson(SAVE_DAILY_REPORT_URL, {
             AdminID: auth.adminID,
@@ -1743,25 +1732,8 @@
         }
       }
 
-      function calcProdYieldDisplay(allCnt, goodCnt) {
-        const qty = parseFloat(String(allCnt != null ? allCnt : "0")) || 0;
-        const good = parseFloat(String(goodCnt != null ? goodCnt : "0")) || 0;
-        if (qty <= 0) {
-          return { text: "—", className: "text-slate-400" };
-        }
-        const rate = (good / qty) * 100;
-        return {
-          text: rate.toFixed(1) + "%",
-          className:
-            rate < 95
-              ? "text-red-600 font-semibold"
-              : "text-green-600 font-semibold",
-        };
-      }
-
       function buildHistItemRowHtml(it) {
         const isProd = reportMode === "production";
-        const yieldInfo = calcProdYieldDisplay(it.ALLPrdCnt, it.GoodPrdCnt);
         let html =
           "<tr>" +
           "<td>" +
@@ -1780,18 +1752,7 @@
           html +=
             "<td>" +
             escapeHtml(String(it.ALLPrdCnt != null ? it.ALLPrdCnt : "")) +
-            "</td>" +
-            "<td>" +
-            escapeHtml(String(it.GoodPrdCnt != null ? it.GoodPrdCnt : "")) +
-            "</td>" +
-            "<td>" +
-            escapeHtml(String(it.BadPrdCnt != null ? it.BadPrdCnt : "")) +
-            "</td>" +
-            '<td><span class="' +
-            yieldInfo.className +
-            '">' +
-            escapeHtml(yieldInfo.text) +
-            "</span></td>";
+            "</td>";
         }
         html +=
           "<td>" + escapeHtml(String(it.status || "")) + "</td>" + "</tr>";
@@ -1802,7 +1763,7 @@
         if (reportMode === "production") {
           return (
             "<th>工作內容</th><th>類別</th><th>專案</th><th>工時</th>" +
-            "<th>生產數量</th><th>良品數</th><th>不良品數</th><th>良率</th><th>狀態</th>"
+            "<th>生產數量</th><th>狀態</th>"
           );
         }
         return "<th>工作內容</th><th>類別</th><th>專案</th><th>工時</th><th>狀態</th>";
@@ -1990,10 +1951,6 @@
         if (it.AID || aid) payloadItem.AID = it.AID || aid;
         if (it.ALLPrdCnt != null && it.ALLPrdCnt !== "")
           payloadItem.ALLPrdCnt = it.ALLPrdCnt;
-        if (it.GoodPrdCnt != null && it.GoodPrdCnt !== "")
-          payloadItem.GoodPrdCnt = it.GoodPrdCnt;
-        if (it.BadPrdCnt != null && it.BadPrdCnt !== "")
-          payloadItem.BadPrdCnt = it.BadPrdCnt;
         return payloadItem;
       }
 
@@ -2153,13 +2110,7 @@
             return buildPayloadItem(it, currentAID);
           }),
         };
-        if (meta.actualWorkHours)
-          payloadReport.actualWorkHours = meta.actualWorkHours;
         if (currentAID) payloadReport.AID = currentAID;
-        if (reportMode === "ops-sm" || reportMode === "ops-cs") {
-          payloadReport.actualWorkHours =
-            meta.actualWorkHours || payloadReport.totalHours;
-        }
 
         try {
           const data = await postJson(SAVE_DAILY_REPORT_URL, {
@@ -3171,6 +3122,8 @@
           projects: {},
           dailyItems: [],
           categoryHours: {},
+          prodQtyByCategory: {},
+          prodQtyTotal: 0,
         };
 
         (reports || []).forEach(function (r) {
@@ -3224,6 +3177,7 @@
                 Dept: dept,
                 Hours: 0,
                 Items: 0,
+                PrdCnt: 0,
               };
             }
             agg.persons[key].Hours += parseHours(p.Hours);
@@ -3265,6 +3219,28 @@
               agg.categoryHours[cat] =
                 (agg.categoryHours[cat] || 0) + parseHours(item.hours);
             }
+            const prdCnt = getItemPrdCnt(item);
+            const itemDept = String(item.Dept || "").trim();
+            if (prdCnt > 0 && itemDept === PRODUCTION_DEPT_LABEL) {
+              agg.prodQtyTotal += prdCnt;
+              const prdCat = cat || "未分類";
+              agg.prodQtyByCategory[prdCat] =
+                (agg.prodQtyByCategory[prdCat] || 0) + prdCnt;
+            }
+            const itemName = String(item.Name || "").trim();
+            if (itemName) {
+              const personKey = itemName + "|" + itemDept;
+              if (!agg.persons[personKey]) {
+                agg.persons[personKey] = {
+                  Name: itemName,
+                  Dept: itemDept,
+                  Hours: 0,
+                  Items: 0,
+                  PrdCnt: 0,
+                };
+              }
+              agg.persons[personKey].PrdCnt += prdCnt;
+            }
             if (filterDept) {
               const prjKey =
                 String(item.ProjectId || "").trim() ||
@@ -3288,82 +3264,131 @@
         return agg;
       }
 
+      function getProductionDashboardItems(agg, categoryFilter) {
+        let items = (agg.dailyItems || []).filter(function (it) {
+          return String(it.Dept || "").trim() === PRODUCTION_DEPT_LABEL;
+        });
+        const catFilter = String(categoryFilter || "").trim();
+        if (catFilter) {
+          items = items.filter(function (it) {
+            return String(it.category || "").trim() === catFilter;
+          });
+        }
+        return items;
+      }
+
+      function buildPersonRankingFromItems(items) {
+        const map = {};
+        (items || []).forEach(function (item) {
+          const name = String(item.Name || "").trim();
+          const dept = String(item.Dept || "").trim();
+          if (!name) return;
+          const key = name + "|" + dept;
+          if (!map[key]) {
+            map[key] = {
+              Name: name,
+              Dept: dept,
+              Hours: 0,
+              Items: 0,
+              PrdCnt: 0,
+            };
+          }
+          map[key].Hours += parseHours(item.hours);
+          map[key].PrdCnt += getItemPrdCnt(item);
+          map[key].Items += 1;
+        });
+        return Object.values(map).sort(function (a, b) {
+          return b.Hours - a.Hours;
+        });
+      }
+
+      function collectProductionCategories(items) {
+        const set = new Set();
+        (items || []).forEach(function (it) {
+          const c = String(it.category || "").trim();
+          if (c) set.add(c);
+        });
+        return Array.from(set).sort(function (a, b) {
+          return a.localeCompare(b, "zh-Hant");
+        });
+      }
+
+      function populatePersonCategorySelect(agg, deptFilter) {
+        const el = document.getElementById("db-person-category");
+        if (!el) return;
+        if (!isProductionDashboardView(deptFilter)) {
+          el.classList.add("hidden");
+          return;
+        }
+        const prev = String(el.value || "");
+        const prodItems = getProductionDashboardItems(agg, "");
+        const cats = collectProductionCategories(prodItems);
+        el.innerHTML =
+          '<option value="">全部工作類別</option>' +
+          cats
+            .map(function (c) {
+              return (
+                '<option value="' +
+                escapeHtml(c) +
+                '">' +
+                escapeHtml(c) +
+                "</option>"
+              );
+            })
+            .join("");
+        if (prev && cats.indexOf(prev) >= 0) {
+          el.value = prev;
+        } else {
+          el.value = "";
+        }
+        el.classList.remove("hidden");
+      }
+
+      function renderProductionQtyChart(categoriesMap) {
+        const el = document.getElementById("chart-dept-prod-qty");
+        if (!el) return;
+        const sorted = Object.entries(categoriesMap || {}).sort(function (
+          a,
+          b,
+        ) {
+          return b[1] - a[1];
+        });
+        if (!sorted.length) {
+          el.innerHTML =
+            '<div class="text-xs text-slate-400 py-4 text-center">尚無生產數量資料</div>';
+          return;
+        }
+        const maxQty = sorted[0] ? sorted[0][1] : 1;
+        el.innerHTML =
+          '<div class="bar-chart">' +
+          sorted
+            .map(function (entry) {
+              return mkBar(
+                entry[0] || "未分類",
+                entry[1],
+                maxQty,
+                "#10b981",
+                entry[1].toLocaleString(),
+              );
+            })
+            .join("") +
+          "</div>";
+      }
+
       function shortenProjectName(name) {
         return String(name || "")
           .replace(/^C_[A-Z]+_/, "")
           .trim();
       }
 
-      function renderProjectAnalysis(prjSorted) {
-        const chartEl = document.getElementById("chart-projects");
-        const tableEl = document.getElementById("table-projects");
-        if (!chartEl || !tableEl) return;
-
-        if (!prjSorted.length) {
-          chartEl.innerHTML = '<div class="nodata">尚無專案投入資料</div>';
-          tableEl.innerHTML = "";
-          return;
-        }
-
-        const maxH = Math.max.apply(
-          null,
-          prjSorted.map(function (p) {
-            return p.PrjHours;
-          }).concat([0.1]),
-        );
-
-        chartEl.innerHTML = prjSorted
-          .slice(0, 10)
-          .map(function (p) {
-            const name = String(p.ProjectName || p.ProjectId || "—");
-            const hours = p.PrjHours;
-            const pct = Math.min((hours / maxH) * 100, 100);
-            return (
-              '<div class="bar-row flex-col items-start gap-0.5" style="margin-bottom:8px">' +
-              '<div style="font-size:10px;color:#475569;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' +
-              escapeHtml(name) +
-              '">' +
-              escapeHtml(shortenProjectName(name)) +
-              "</div>" +
-              '<div style="display:flex;align-items:center;gap:6px;width:100%">' +
-              '<div class="bar-outer" style="flex:1">' +
-              '<div class="bar-inner" style="width:' +
-              pct +
-              '%"></div></div>' +
-              '<div style="font-size:10px;color:#64748b;width:80px;text-align:right">' +
-              hours.toFixed(1) +
-              "h</div></div></div>"
-            );
-          })
-          .join("");
-
-        tableEl.innerHTML =
-          "<thead><tr><th>專案</th><th>實際工時</th><th>參與人數</th><th>參與部門</th></tr></thead><tbody>" +
-          prjSorted
-            .map(function (p) {
-              const name = String(p.ProjectName || p.ProjectId || "—");
-              return (
-                '<tr><td class="font-medium" style="font-size:10px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' +
-                escapeHtml(name) +
-                '">' +
-                escapeHtml(shortenProjectName(name)) +
-                '</td><td class="font-bold text-blue-600">' +
-                p.PrjHours.toFixed(1) +
-                "h</td><td>" +
-                p.PersonCnt +
-                "</td><td>" +
-                p.DeptCnt +
-                "</td></tr>"
-              );
-            })
-            .join("") +
-          "</tbody>";
-      }
-
       function renderDashboard() {
         populateDashboardDeptSelect();
         const deptFilter = getDashboardDeptFilter();
+        const isProdView = isProductionDashboardView(deptFilter);
         const agg = aggregateStaReports(staReportCache, deptFilter);
+        populatePersonCategorySelect(agg, deptFilter);
+        const personCategoryFilter =
+          document.getElementById("db-person-category")?.value || "";
         const totalHours = agg.totalHours;
         const totalPersons = agg.personSet.size;
         const totalDepts = agg.depts.size;
@@ -3487,13 +3512,27 @@
             : '<div class="nodata">此區間無部門工時資料</div>';
         }
 
-        const personSorted = Object.values(agg.persons).sort(function (a, b) {
-          return b.Hours - a.Hours;
-        });
+        const deptProdSection = document.getElementById("dept-prod-qty-section");
+        if (deptProdSection) {
+          deptProdSection.classList.toggle("hidden", !isProdView);
+        }
+        if (isProdView) {
+          renderProductionQtyChart(agg.prodQtyByCategory);
+        }
+
+        const personSorted = isProdView
+          ? buildPersonRankingFromItems(
+              getProductionDashboardItems(agg, personCategoryFilter),
+            )
+          : Object.values(agg.persons).sort(function (a, b) {
+              return b.Hours - a.Hours;
+            });
         const personEl = document.getElementById("table-person");
         if (personEl) {
           personEl.innerHTML = personSorted.length
-            ? "<thead><tr><th>姓名</th><th>部門</th><th>工時(h)</th><th>工項數</th></tr></thead><tbody>" +
+            ? "<thead><tr><th>姓名</th><th>部門</th><th>工時(h)</th>" +
+              (isProdView ? "<th>生產數量</th>" : "") +
+              "<th>工項數</th></tr></thead><tbody>" +
               personSorted
                 .map(function (p) {
                   return (
@@ -3503,25 +3542,28 @@
                     escapeHtml(p.Dept) +
                     '</span></td><td class="font-bold text-blue-600">' +
                     p.Hours.toFixed(1) +
-                    '</td><td class="text-slate-500">' +
+                    "</td>" +
+                    (isProdView
+                      ? '<td class="font-bold text-green-600">' +
+                        (p.PrdCnt || 0).toLocaleString() +
+                        "</td>"
+                      : "") +
+                    '<td class="text-slate-500">' +
                     p.Items +
                     "</td></tr>"
                   );
                 })
                 .join("") +
               "</tbody>"
-            : '<tbody><tr><td colspan="4" class="nodata">此區間無個人貢獻資料</td></tr></tbody>';
+            : '<tbody><tr><td colspan="' +
+              (isProdView ? "5" : "4") +
+              '" class="nodata">此區間無個人貢獻資料</td></tr></tbody>';
         }
 
         const opsCard = document.getElementById("ops-analytics-card");
         if (opsCard) opsCard.classList.add("hidden");
         const smDash = document.getElementById("sm-ops-dashboard");
         if (smDash) smDash.classList.add("hidden");
-
-        const prjSorted = Object.values(agg.projects).sort(function (a, b) {
-          return b.PrjHours - a.PrjHours;
-        });
-        renderProjectAnalysis(prjSorted);
 
         const catMap = Object.assign({}, agg.categoryHours);
         if (agg.otHours > 0) {
@@ -3564,7 +3606,9 @@
             return db.localeCompare(da);
           });
           detailEl.innerHTML = items.length
-            ? '<table class="contrib-table w-full text-xs"><thead><tr><th>日期</th><th>姓名</th><th>部門</th><th>工作項目</th><th>對應專案/任務包</th><th>工時</th><th>狀態</th></tr></thead><tbody>' +
+            ? '<table class="contrib-table w-full text-xs"><thead><tr><th>日期</th><th>姓名</th><th>部門</th><th>工作項目</th><th>對應專案/任務包</th><th>工時</th>' +
+              (isProdView ? "<th>生產數量</th>" : "") +
+              "<th>狀態</th></tr></thead><tbody>" +
               items
                 .map(function (it) {
                   const dateStr = ymdToDateInput(it.date) || it.date || "—";
@@ -3573,6 +3617,7 @@
                     status === "已完成"
                       ? "bg-green-100 text-green-700"
                       : "bg-amber-100 text-amber-700";
+                  const prdCnt = getItemPrdCnt(it);
                   return (
                     "<tr>" +
                     '<td class="text-slate-400">' +
@@ -3593,6 +3638,11 @@
                     '<td class="font-bold text-blue-600">' +
                     escapeHtml(String(it.hours || "0")) +
                     "h</td>" +
+                    (isProdView
+                      ? '<td class="font-bold text-green-600">' +
+                        (prdCnt > 0 ? prdCnt.toLocaleString() : "—") +
+                        "</td>"
+                      : "") +
                     '<td><span class="px-1.5 py-0.5 rounded text-xs ' +
                     statusCls +
                     '">' +
@@ -3740,11 +3790,14 @@
       document
         .getElementById("db-dept")
         .addEventListener("change", renderDashboard);
+      document
+        .getElementById("db-person-category")
+        .addEventListener("change", renderDashboard);
 
       document.querySelectorAll(".rpt-tab").forEach(function (tab, index) {
         tab.style.cursor = "pointer";
         tab.addEventListener("click", function () {
-          if (index === 0 || index === 1 ) {
+          if (index === 0 || index === 1 || index === 3) {
             switchPage(index);
             return;
           }
