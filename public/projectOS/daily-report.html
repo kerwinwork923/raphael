@@ -170,35 +170,6 @@
         border-color: #93c5fd;
         box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
       }
-      .ops-feel-btn {
-        cursor: pointer;
-        transition: 0.15s;
-      }
-      .ops-shift-grid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-      }
-      .shift-btn {
-        padding: 7px 14px;
-        border: 1.5px solid #e2e8f0;
-        border-radius: 8px;
-        cursor: pointer;
-        background: #fff;
-        font-size: 13px;
-        font-weight: 600;
-        color: #475569;
-        transition: 0.15s;
-      }
-      .shift-btn:hover {
-        border-color: #93c5fd;
-        color: #1d4ed8;
-      }
-      .shift-btn.sel {
-        border-color: #2563eb;
-        background: #eff6ff;
-        color: #1d4ed8;
-      }
       .qty-spin {
         width: 100%;
         min-width: 4.5rem;
@@ -446,7 +417,7 @@
         >
           <div>
             <span class="font-semibold text-slate-700 text-sm"
-              >今日工作日報填寫</span
+              >工作日報填寫</span
             >
             <span
               id="editorModeHint"
@@ -458,7 +429,7 @@
             ></span>
           </div>
           <div class="flex-1"></div>
-          <span class="text-xs text-slate-400">日期</span>
+          <span class="text-xs text-slate-400">選擇填寫日期</span>
           <input
             id="reportDate"
             type="date"
@@ -485,13 +456,13 @@
 
           <div class="mt-4">
             <label class="block text-xs font-semibold text-slate-500 mb-1"
-              >今日異常 / 問題說明（選填）</label
+              >異常 / 問題說明（選填）</label
             >
             <textarea
               id="note"
               rows="2"
               class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
-              placeholder="今日異常說明"
+              placeholder="當日異常說明"
             ></textarea>
           </div>
 
@@ -536,7 +507,7 @@
             id="btnNew"
             class="text-xs text-slate-500 hover:text-slate-700 px-2 py-1"
           >
-            新增今日日報
+            新增日報
           </button>
         </div>
         <div class="px-5 py-2">
@@ -667,10 +638,10 @@
           class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-5"
         >
           <div class="font-semibold text-slate-700 text-sm mb-1">
-            工作模式工時分布
+            工時分布
           </div>
           <div class="text-xs text-slate-400 mb-3">
-            交班模式（智醫/客服）、標準專案工時、庶務工時三類分開統計
+            標準專案工時、庶務工時分開統計
           </div>
           <div id="chart-mode-breakdown"></div>
         </div>
@@ -714,102 +685,12 @@
         </div>
 
         <div
-          class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-5 hidden"
-          id="ops-analytics-card"
+          class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-5"
         >
-          <div class="font-semibold text-slate-700 text-sm mb-1">
-            ⚕️ 交班模式分析
+          <div class="font-semibold text-slate-700 text-sm mb-3">
+            工作類別工時
           </div>
-          <div class="text-xs text-slate-400 mb-3">
-            智慧醫療業務部 & 客服部 ｜ 班別分布、任務包執行頻率、班別感受
-          </div>
-          <div
-            class="grid grid-cols-1 lg:grid-cols-3 gap-5"
-            id="ops-analytics-inner"
-          ></div>
-        </div>
-
-        <div id="sm-ops-dashboard" class="hidden mb-5">
-          <div
-            id="sm-ops-header"
-            class="rounded-xl p-5 mb-5"
-            style="
-              background: linear-gradient(
-                135deg,
-                #1a3a5c 0%,
-                #1e4d8c 60%,
-                #1a3a5c 100%
-              );
-            "
-          >
-            <div
-              class="flex items-start justify-between mb-4 flex-wrap gap-2"
-            >
-              <div>
-                <div class="font-bold text-white text-base mb-0.5">
-                  智慧醫療業務部 ・ 今日營運摘要
-                </div>
-                <div
-                  id="sm-ops-date"
-                  class="text-xs"
-                  style="color: rgba(191, 219, 254, 0.85)"
-                ></div>
-              </div>
-              <span
-                class="text-xs px-3 py-1 rounded-full"
-                style="
-                  background: rgba(255, 255, 255, 0.15);
-                  color: rgba(255, 255, 255, 0.9);
-                "
-                >AI 生成・每日自動更新</span
-              >
-            </div>
-            <div
-              id="sm-ops-kpis"
-              class="grid grid-cols-2 md:grid-cols-4 gap-3"
-            ></div>
-          </div>
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
-            <div
-              class="bg-white rounded-xl border border-slate-200 shadow-sm p-5"
-              id="sm-signal-card"
-            ></div>
-            <div
-              class="bg-white rounded-xl border border-slate-200 shadow-sm p-5"
-              id="sm-mgr-card"
-            ></div>
-            <div
-              class="bg-white rounded-xl border border-slate-200 shadow-sm p-5"
-              id="sm-heatmap-card"
-            ></div>
-            <div
-              class="bg-white rounded-xl border border-slate-200 shadow-sm p-5"
-              id="sm-collab-card"
-            ></div>
-          </div>
-          <div
-            class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-5"
-            id="sm-ai-card"
-          ></div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
-          <div
-            class="bg-white rounded-xl border border-slate-200 shadow-sm p-5"
-          >
-            <div class="font-semibold text-slate-700 text-sm mb-3">
-              標準模式・工作類別工時
-            </div>
-            <div class="bar-chart" id="chart-category"></div>
-          </div>
-          <div
-            class="bg-white rounded-xl border border-slate-200 shadow-sm p-5"
-          >
-            <div class="font-semibold text-slate-700 text-sm mb-3">
-              交班模式・任務包執行次數
-            </div>
-            <div class="bar-chart" id="chart-task-pkg"></div>
-          </div>
+          <div class="bar-chart" id="chart-category"></div>
         </div>
 
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
@@ -968,13 +849,13 @@
         </div>
         <div class="mt-4">
           <label class="block text-xs font-semibold text-slate-500 mb-1"
-            >今日異常 / 問題說明（選填）</label
+            >異常 / 問題說明（選填）</label
           >
           <textarea
             id="edit-note"
             rows="2"
             class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none"
-            placeholder="今日異常說明"
+            placeholder="當日異常說明"
           ></textarea>
         </div>
         <div class="flex gap-3 mt-4 flex-wrap items-center">
@@ -1150,8 +1031,6 @@
         var hint = document.getElementById("editorModeHint");
         if (hint) {
           if (reportMode === "production") hint.textContent = "· 生產部門欄位";
-          else if (reportMode === "ops-sm") hint.textContent = "· 業務營運欄位";
-          else if (reportMode === "ops-cs") hint.textContent = "· 客服營運欄位";
           else hint.textContent = "";
         }
       }
@@ -1439,7 +1318,6 @@
 
       function clearEditor() {
         currentAID = "";
-        setInputValue("reportDate", "");
         setInputValue("note", "");
         if (window.ProjectOSDailyReportDept) {
           window.ProjectOSDailyReportDept.clearPane(deptWorkKey, dailyCommon);
@@ -1450,6 +1328,18 @@
           loadHint.textContent = "";
           loadHint.classList.add("hidden");
         }
+      }
+
+      function getEditorDateInput() {
+        const el = document.getElementById("reportDate");
+        const picked = el && el.value ? String(el.value).trim() : "";
+        return picked || todayDateInput();
+      }
+
+      function syncEditorWithSelectedDate() {
+        const dateInput = getEditorDateInput();
+        setInputValue("reportDate", dateInput);
+        syncEditorWithWorkDate(dateInputToYmd(dateInput));
       }
 
       function findReportByWorkDate(ymd) {
@@ -1482,7 +1372,6 @@
 
         if (window.ProjectOSDailyReportDept) {
           window.ProjectOSDailyReportDept.clearPane(deptWorkKey, dailyCommon);
-          window.ProjectOSDailyReportDept.applyReportMeta(report);
         }
 
         const items = Array.isArray(report.items) ? report.items : [];
@@ -1501,7 +1390,7 @@
         updateHoursVisual();
         const loadHint = document.getElementById("editorLoadHint");
         if (loadHint) {
-          loadHint.textContent = "今日已填寫過日報";
+          loadHint.textContent = "此日期已有日報";
           loadHint.classList.remove("hidden");
         }
       }
@@ -1769,67 +1658,6 @@
         return "<th>工作內容</th><th>類別</th><th>專案</th><th>工時</th><th>狀態</th>";
       }
 
-      function histMetaDisplay(val) {
-        const v = String(val != null ? val : "").trim();
-        return v ? escapeHtml(v) : '<span class="text-slate-300">—</span>';
-      }
-
-      /** 智慧醫療部：院所、班別、班別感受；客服部：班別、班別感受 */
-      function buildHistOpsMetaHtml(r) {
-        const shift = String(r.shift || "");
-        const location = String(r.location || "");
-        const feeling = String(r.feeling || "");
-        if (reportMode === "ops-sm") {
-          return (
-            '<div class="hist-meta mt-1 flex flex-wrap gap-x-4 gap-y-1">' +
-            '<span><span class="text-slate-400">院所：</span>' +
-            histMetaDisplay(location) +
-            "</span>" +
-            '<span><span class="text-slate-400">班別：</span>' +
-            histMetaDisplay(shift) +
-            "</span>" +
-            '<span><span class="text-slate-400">班別感受：</span>' +
-            histMetaDisplay(feeling) +
-            "</span></div>"
-          );
-        }
-        if (reportMode === "ops-cs") {
-          return (
-            '<div class="hist-meta mt-1 flex flex-wrap gap-x-4 gap-y-1">' +
-            '<span><span class="text-slate-400">班別：</span>' +
-            histMetaDisplay(shift) +
-            "</span>" +
-            '<span><span class="text-slate-400">班別感受：</span>' +
-            histMetaDisplay(feeling) +
-            "</span></div>"
-          );
-        }
-        return "";
-      }
-
-      function buildHistHeaderMetaChips(r) {
-        const shift = String(r.shift || "");
-        const location = String(r.location || "");
-        const feeling = String(r.feeling || "");
-        if (reportMode === "ops-sm" || reportMode === "ops-cs") {
-          return "";
-        }
-        let html = "";
-        if (shift) {
-          html +=
-            '<span class="hist-chip">班別: ' + escapeHtml(shift) + "</span>";
-        }
-        if (location) {
-          html +=
-            '<span class="hist-chip">地點: ' + escapeHtml(location) + "</span>";
-        }
-        if (feeling) {
-          html +=
-            '<span class="hist-chip">感受: ' + escapeHtml(feeling) + "</span>";
-        }
-        return html;
-      }
-
       function renderList() {
         const wrap = document.getElementById("reportList");
         if (!reportList.length) {
@@ -1850,7 +1678,6 @@
             const note = String(r.note || "");
             const tomorrowNote = String(r.tomorrowNote || "");
             const helpNote = String(r.helpNote || "");
-            const opsMetaHtml = buildHistOpsMetaHtml(r);
             const checkTime = String(r.CheckTime || "").trim();
             const checkTimeLabel =
               checkTime.length >= 14
@@ -1887,7 +1714,6 @@
               '<span class="hist-chip">總工時: ' +
               escapeHtml(totalHours) +
               "h</span>" +
-              buildHistHeaderMetaChips(r) +
               '<div class="flex-1"></div>' +
               '<button type="button" class="hist-edit-btn" data-action="edit" data-aid="' +
               escapeHtml(r.AID || "") +
@@ -1901,7 +1727,6 @@
                 ? "｜更新時間：" + escapeHtml(checkTimeLabel)
                 : "") +
               "</div>" +
-              opsMetaHtml +
               (note
                 ? '<div class="hist-meta mt-1">異常/備註：' +
                   escapeHtml(note) +
@@ -2044,8 +1869,7 @@
             });
           setInputValue("employeeName", String(data.employeeName || ""));
           renderList();
-          setInputValue("reportDate", todayDateInput());
-          syncEditorWithWorkDate(dateInputToYmd(todayDateInput()));
+          syncEditorWithSelectedDate();
           hint.textContent = "共 " + reportList.length + " 筆資料";
         } catch (err) {
           reportList = [];
@@ -2082,17 +1906,6 @@
         }
         const items = validation.items;
         const meta = readReportMetaForSave();
-        if (
-          (reportMode === "ops-sm" || reportMode === "ops-cs") &&
-          !meta.shift
-        ) {
-          toast("請選擇班別");
-          return;
-        }
-        if (reportMode === "ops-sm" && !meta.location) {
-          toast("請選擇院所 / 地點");
-          return;
-        }
         if (!currentAID) {
           const existing = findReportByWorkDate(date);
           if (existing) {
@@ -2992,20 +2805,6 @@
         const cat = String(item.category || "").trim();
         const projName = String(item.ProjectName || "").trim();
         const projId = String(item.ProjectId || "").trim();
-        const workType = String(
-          item.workType || item.WorkType || item.reportMode || "",
-        )
-          .trim()
-          .toLowerCase();
-        if (
-          workType === "ops" ||
-          workType === "ops-sm" ||
-          workType === "ops-cs"
-        ) {
-          return "att";
-        }
-        if (cat === "例行營運") return "att";
-        if (item.shift || item.Shift) return "att";
         if (/庶務/.test(projName) || /庶務/.test(cat)) return "ot";
         if (item.isAdminWork || item.IsAdminWork) return "ot";
         if (String(item.NonPrj || item.nonPrj || "") === "1") return "ot";
@@ -3034,20 +2833,19 @@
           report.mapPrjALLHours ||
           report.mapPrj ||
           {};
-        let attH = readDeptHoursFromMap(mapATTHours, filterDept);
         let otH = readDeptHoursFromMap(mapOTHours, filterDept);
-        let prjH = readDeptHoursFromMap(mapPrjHours, filterDept);
-        const hasMapSplit = attH > 0 || otH > 0 || prjH > 0;
+        let prjH =
+          readDeptHoursFromMap(mapPrjHours, filterDept) +
+          readDeptHoursFromMap(mapATTHours, filterDept);
+        const hasMapSplit = otH > 0 || prjH > 0;
 
         if (dailyItems.length) {
-          attH = 0;
           otH = 0;
           prjH = 0;
           dailyItems.forEach(function (item) {
             const h = parseHours(item.hours);
             const mode = classifyDailyItemWorkMode(item);
-            if (mode === "att") attH += h;
-            else if (mode === "ot") otH += h;
+            if (mode === "ot") otH += h;
             else prjH += h;
           });
         } else if (!hasMapSplit) {
@@ -3058,16 +2856,16 @@
           }, 0);
           const ratio = allH > 0 ? deptH / allH : 0;
           if (ratio > 0) {
-            attH = parseHours(report.ATTHours) * ratio;
             otH = parseHours(report.OTHours) * ratio;
-            prjH = parseHours(report.PrjALLHours) * ratio;
+            prjH =
+              (parseHours(report.PrjALLHours) + parseHours(report.ATTHours)) *
+              ratio;
           }
         }
 
-        agg.attHours += attH;
         agg.otHours += otH;
         agg.prjHours += prjH;
-        const modeTotal = attH + otH + prjH;
+        const modeTotal = otH + prjH;
         if (modeTotal > 0) {
           agg.totalHours += modeTotal;
           return;
@@ -3113,7 +2911,6 @@
           totalHours: 0,
           personSet: new Set(),
           depts: new Set(),
-          attHours: 0,
           otHours: 0,
           prjHours: 0,
           nonPrjHours: 0,
@@ -3152,9 +2949,9 @@
             accumulateFilteredModeHours(agg, r, filterDept, dailyItems);
           } else {
             agg.totalHours += parseHours(r.ALLHours);
-            agg.attHours += parseHours(r.ATTHours);
             agg.otHours += parseHours(r.OTHours);
-            agg.prjHours += parseHours(r.PrjALLHours);
+            agg.prjHours +=
+              parseHours(r.PrjALLHours) + parseHours(r.ATTHours);
             agg.nonPrjHours += parseHours(r.NonPrjALLHours);
           }
 
@@ -3392,9 +3189,9 @@
         const totalHours = agg.totalHours;
         const totalPersons = agg.personSet.size;
         const totalDepts = agg.depts.size;
-        const attRate =
+        const prjRate =
           totalHours > 0
-            ? Math.round((agg.attHours / totalHours) * 100)
+            ? Math.round((agg.prjHours / totalHours) * 100)
             : 0;
         const otRate =
           totalHours > 0 ? Math.round((agg.otHours / totalHours) * 100) : 0;
@@ -3421,10 +3218,10 @@
               color: "text-teal-600",
             },
             {
-              label: "交班模式工時",
-              val: agg.attHours.toFixed(1) + "h",
-              sub: attRate + "%",
-              color: "text-green-600",
+              label: "專案工時",
+              val: agg.prjHours.toFixed(1) + "h",
+              sub: prjRate + "%",
+              color: "text-blue-600",
             },
             {
               label: "庶務工時",
@@ -3455,23 +3252,11 @@
             .join("");
         }
 
-        const maxMode = Math.max(
-          agg.attHours,
-          agg.prjHours,
-          agg.otHours,
-          0.1,
-        );
+        const maxMode = Math.max(agg.prjHours, agg.otHours, 0.1);
         const modeEl = document.getElementById("chart-mode-breakdown");
         if (modeEl) {
           modeEl.innerHTML =
             '<div class="bar-chart">' +
-            mkBar(
-              "🟢 交班模式（智醫/客服）",
-              agg.attHours,
-              maxMode,
-              "#10b981",
-              agg.attHours.toFixed(1) + "h",
-            ) +
             mkBar(
               "🔵 標準專案工時",
               agg.prjHours,
@@ -3560,11 +3345,6 @@
               '" class="nodata">此區間無個人貢獻資料</td></tr></tbody>';
         }
 
-        const opsCard = document.getElementById("ops-analytics-card");
-        if (opsCard) opsCard.classList.add("hidden");
-        const smDash = document.getElementById("sm-ops-dashboard");
-        if (smDash) smDash.classList.add("hidden");
-
         const catMap = Object.assign({}, agg.categoryHours);
         if (agg.otHours > 0) {
           catMap["庶務工作"] = (catMap["庶務工作"] || 0) + agg.otHours;
@@ -3589,13 +3369,7 @@
                 })
                 .join("") +
               "</div>"
-            : '<div class="text-xs text-slate-400 py-4 text-center">無標準模式資料</div>';
-        }
-
-        const taskPkgEl = document.getElementById("chart-task-pkg");
-        if (taskPkgEl) {
-          taskPkgEl.innerHTML =
-            '<div class="text-xs text-slate-400 py-4 text-center">無交班模式資料</div>';
+            : '<div class="text-xs text-slate-400 py-4 text-center">尚無工作類別資料</div>';
         }
 
         const detailEl = document.getElementById("detail-table-wrap");
@@ -3720,7 +3494,8 @@
           if (adminName) setInputValue("employeeName", adminName);
         }
         configureDeptPane();
-        clearEditor();
+        setInputValue("reportDate", todayDateInput());
+        resetEditorFormForDate(todayDateInput());
         syncDWRFormFields();
         await queryReports();
       }
@@ -3737,11 +3512,12 @@
       document
         .getElementById("reportDate")
         .addEventListener("change", function () {
-          syncEditorWithWorkDate(dateInputToYmd(this.value));
+          syncEditorWithSelectedDate();
         });
       document.getElementById("btnNew").addEventListener("click", function () {
-        setInputValue("reportDate", todayDateInput());
-        syncEditorWithWorkDate(dateInputToYmd(todayDateInput()));
+        const dateInput = getEditorDateInput();
+        setInputValue("reportDate", dateInput);
+        resetEditorFormForDate(dateInput);
         scrollToEditor();
       });
       document
