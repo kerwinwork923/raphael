@@ -87,9 +87,24 @@
             />
           </div>
 
-
-
-    
+          <div class="editBasicInfoModalField">
+            <label>會員等級</label>
+            <div class="selectWrap">
+              <select
+                v-model="formData.grade"
+                :class="{ selected: !!formData.grade }"
+              >
+                <option value="" disabled>請選擇等級</option>
+                <option
+                  v-for="grade in gradeOptions"
+                  :key="grade.value"
+                  :value="grade.value"
+                >
+                  {{ grade.label }}
+                </option>
+              </select>
+            </div>
+          </div>
 
           <div class="editBasicInfoModalField">
             <label>城市</label>
@@ -168,12 +183,22 @@ type EditBasicFormData = {
   height: string;
   weight: string;
   birthday: string;
+  grade: string;
   dspr: string;
   hrvCalTime: string;
   city: string;
   zone: string;
   phone: string;
 };
+
+const gradeOptions = [
+  { value: "A", label: "A：員工" },
+  { value: "B", label: "B：1年會員" },
+  { value: "C", label: "C：2年會員" },
+  { value: "D", label: "D：3年會員" },
+  { value: "E", label: "E：第五代" },
+  { value: "F", label: "F：非會員" },
+];
 
 const props = defineProps<{
   show: boolean;
@@ -195,6 +220,7 @@ function buildFormData(newData?: Partial<EditBasicFormData>): EditBasicFormData 
     height: newData?.height || "",
     weight: newData?.weight || "",
     birthday: newData?.birthday || "",
+    grade: newData?.grade || "",
     dspr: newData?.dspr || "",
     hrvCalTime: newData?.hrvCalTime || "",
     city: newData?.city || "",
@@ -212,6 +238,7 @@ const formData = ref<EditBasicFormData>({
   height: "",
   weight: "",
   birthday: "",
+  grade: "",
   dspr: "",
   hrvCalTime: "",
   city: "",

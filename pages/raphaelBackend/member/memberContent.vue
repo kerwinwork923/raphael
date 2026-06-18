@@ -38,6 +38,7 @@
         height: String(member?.Height ?? ''),
         weight: String(member?.Weight ?? ''),
         birthday: String(member?.Birthday ?? ''),
+        grade: String(member?.Grade ?? ''),
         dspr: String(member?.DSPR ?? ''),
         hrvCalTime: String(member?.HRVCalTime ?? ''),
         city: String(member?.City ?? ''),
@@ -2069,6 +2070,7 @@ type ApiMember = {
   Birthday: string;
   Mobile: string;
   GradeName: string;
+  Grade?: string;
   memType: string;
   CheckTime: string;
 };
@@ -5321,6 +5323,7 @@ async function handleEditBasicSubmit(data: {
   height: string;
   weight: string;
   birthday: string;
+  grade: string;
   dspr: string;
   hrvCalTime: string;
   city: string;
@@ -5359,6 +5362,7 @@ async function handleEditBasicSubmit(data: {
           Height: data.height,
           Weight: data.weight,
           Birthday: data.birthday,
+          Type: data.grade,
           DSPR: data.dspr,
           HRVCalTime: data.hrvCalTime,
           City: data.city,
