@@ -90,10 +90,24 @@ export const SEMINAR_EVENTS: SeminarEvent[] = [
         time: "10:00",
       },
       {
+        area: "台北",
+        location: "台北新光摩天大樓 30樓之1",
+        eventDate: "20260709",
+        displayDate: "2026 / 07 / 09（四）",
+        time: "10:00",
+      },
+      {
         area: "新竹",
         location: "拉菲爾人本診所(新竹) 新竹市林森路196號2樓",
         eventDate: "20260617",
         displayDate: "2026 / 06 / 17（三）",
+        time: "9:30",
+      },
+      {
+        area: "新竹",
+        location: "拉菲爾人本診所(新竹) 新竹市林森路196號2樓",
+        eventDate: "20260715",
+        displayDate: "2026 / 07 / 15（三）",
         time: "9:30",
       },
       {
