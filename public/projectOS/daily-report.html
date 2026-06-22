@@ -2804,14 +2804,17 @@
       function classifyDailyItemWorkMode(item) {
         const cat = String(item.category || "").trim();
         const projName = String(item.ProjectName || "").trim();
-        const projId = String(item.ProjectId || "").trim();
+        const projId = String(item.ProjectId ?? "").trim();
         if (/庶務/.test(projName) || /庶務/.test(cat)) return "ot";
         if (item.isAdminWork || item.IsAdminWork) return "ot";
         if (String(item.NonPrj || item.nonPrj || "") === "1") return "ot";
         if (
+          projId === "0" ||
           projId === "P00" ||
           projName === "無對應專案" ||
-          projName === "庶務工作"
+          projName === "庶務工作" ||
+          projName === "非專案工作" ||
+          /非專案/.test(projName)
         ) {
           return "ot";
         }
@@ -3573,7 +3576,7 @@
       document.querySelectorAll(".rpt-tab").forEach(function (tab, index) {
         tab.style.cursor = "pointer";
         tab.addEventListener("click", function () {
-          if (index === 0 || index === 1 ) {
+          if (index === 0 || index === 1 || index === 3 ) {
             switchPage(index);
             return;
           }
