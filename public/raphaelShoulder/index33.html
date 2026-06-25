@@ -130,9 +130,9 @@ body {
   padding: 8px 16px 6px; flex-shrink: 0;
 }
 .brand-mark {
-  width: 54px; height: 32px; border-radius: 9px;
+  width: 32px; height: 32px; border-radius: 9px;
   background: linear-gradient(135deg,var(--accent-dim),var(--accent));
-  color: #fff; font-size: 10px; font-weight: 900; letter-spacing: .5px;
+  color: #fff; font-size: 12px; font-weight: 900;
   display: grid; place-items: center;
   box-shadow: 0 0 12px var(--accent-glow);
 }
@@ -196,14 +196,13 @@ body {
   background: linear-gradient(135deg,var(--accent-dim),var(--accent));
   border: 2px solid rgba(255,255,255,0.3);
   box-shadow: 0 0 32px var(--accent-glow2);
-  color: #fff; font-size: 16px; font-weight: 900; letter-spacing: 1px;
+  color: #fff; font-size: 22px; font-weight: 900;
   display: grid; place-items: center; margin-bottom: 32px;
   animation: glowPulse 2s infinite;
 }
 .intro-story {
   font-size: 18px; line-height: 2; color: var(--muted2);
   margin-bottom: 32px; min-height: 160px;
-  width: 100%; text-align: center;
 }
 .intro-story .highlight { color: var(--accent); font-weight: 900; }
 .cursor-blink {
@@ -602,10 +601,10 @@ body {
       <input type="date" id="lBday" autocomplete="bday" value="2000-01-01">
     </div>
     <div class="lfield">
-      <label for="lPhone">電話（手機或市話）</label>
-      <input type="tel" id="lPhone" placeholder="例：0912345678 或 02-12345678">
+      <label for="lPhone">電話（後四碼）</label>
+      <input type="tel" id="lPhone" placeholder="例：5678" maxlength="10">
     </div>
-    <div class="lerror" id="lError">請填寫姓名與完整電話（手機 10 碼或市話 8–10 碼）。</div>
+    <div class="lerror" id="lError">請填寫姓名與電話後再繼續。</div>
     <button class="btn btn-primary" id="lEnterBtn">進入冒險 →</button>
     <p class="lnote">⚠ 姓名與電話將同步至雲端紀錄，方便追蹤你的測試歷程。</p>
     <p class="lnote" style="margin-top:8px;font-size:10px;color:var(--muted)">本工具提供自我感受參考，非醫療診斷。</p>
@@ -960,55 +959,8 @@ function isANSUnlocked(){
   return earned.includes("streak3");
 }
 
-let H = {expandedId:null, timerLeft:30, timerInterval:null, timerActive:false};
-function resetHistTimer(){ clearInterval(H.timerInterval); H.timerInterval=null; H.timerActive=false; H.timerLeft=30; }
-
-/* ══════════════════════════════════════════════
-   VOICE GUIDANCE (Web Speech API)
-══════════════════════════════════════════════ */
-var _voiceReady = false;      // unlocked after first user interaction
-var _lastSpokenScreen = null; // prevent repeat on same-screen re-renders
-
-var VOICE_SCRIPTS = {
-  login:      "來，先輸入你的姓名，還有完整的手機號碼或市話，我幫你建立紀錄。",
-  neckRight:  "好，先坐直，不要靠背喔。現在，慢慢把頭轉向右邊……轉到底了，停一下，感受看看，緊不緊？",
-  neckLeft:   "換左邊囉。同樣慢慢轉，轉到底了停一下……感受一下左邊的感覺。",
-  elbowInner: "彎起你的手肘，找到手肘內側的位置，輕輕按下去，告訴我你的感受。",
-  elbowOuter: "好，再試試手肘外側。同樣按一按，感受看看。",
-  reveal:     "找到了！這就是你今天的肩頸開關，我們一起來解鎖它。",
-  press:      "依照圖示，找到那個點，按下去……保持住，感受身體的回應。",
-  after:      "很好。再按壓一次，感受看看，有沒有什麼不一樣？",
-  result:     "完成了！以下是你今天的肩頸狀況，辛苦你了。",
-};
-
-function speak(text){
-  if(!_voiceReady) return;
-  if(!window.speechSynthesis) return;
-  speechSynthesis.cancel();
-  var u = new SpeechSynthesisUtterance(text);
-  u.lang   = "zh-TW";
-  u.rate   = 0.80;   // 偏慢，更從容
-  u.pitch  = 1.18;   // 稍高，甜美溫暖
-  u.volume = 0.95;
-  // 優先選女聲 (iOS=Mei-Jia / macOS=Ya-Ling / Android 依裝置)
-  var voices = speechSynthesis.getVoices();
-  var pick = voices.find(function(v){
-    return v.lang==="zh-TW" && /mei.jia|ya.ling|sin.ji|female/i.test(v.name);
-  }) || voices.find(function(v){
-    return v.lang==="zh-TW";
-  }) || voices.find(function(v){
-    return v.lang.startsWith("zh");
-  });
-  if(pick) u.voice = pick;
-  speechSynthesis.speak(u);
-}
-
-function speakForScreen(screen){
-  if(!VOICE_SCRIPTS[screen]) return;
-  if(screen === _lastSpokenScreen) return; // 同一頁不重複播放
-  _lastSpokenScreen = screen;
-  setTimeout(function(){ speak(VOICE_SCRIPTS[screen]); }, 350); // 等畫面渲染後再播
-}
+let H = {expandedId:null, timerLeft:60, timerInterval:null, timerActive:false};
+function resetHistTimer(){ clearInterval(H.timerInterval); H.timerInterval=null; H.timerActive=false; H.timerLeft=60; }
 
 /* ══════════════════════════════════════════════
    AUTH
@@ -1021,7 +973,7 @@ function djb2(s){
 function userKey(){ return "raphael_v7_"+S.userId; }
 
 function doLogin(name,bday,phone){
-  const raw=(name.trim()+"|"+phone.replace(/\D/g,"").slice(-8)).toLowerCase();
+  const raw=(name.trim()+"|"+phone.replace(/\D/g,"").slice(-4)).toLowerCase();
   S.userId=djb2(raw); S.userName=name.trim(); S.userPhone=phone.trim();
   const d=localStorage.getItem(userKey());
   S.records=d?JSON.parse(d):[];
@@ -1176,18 +1128,15 @@ function elbowSVG(pos){
 function bodySVG(side,zone){
   const isSh = zone==="shoulder";
   const sideLabel = side==="right"?"右側":"左側";
-  const imgSrc = isSh
-    ? (side==="right"?"/v7-assets/shoulder-right.jpg":"/v7-assets/shoulder-left.jpg")
-    : (side==="right"?"/v7-assets/clavicle-right.png":"/v7-assets/clavicle-left.png");
+  const imgSrc = isSh ? "/v7-assets/shoulder-scapular.png" : "/v7-assets/clavicle.png";
   return '<div class="body-img-wrap">'
     +'<img src="'+imgSrc+'" alt="'+sideLabel+(isSh?"肩胛骨旁":"鎖骨按壓區域")+'" loading="lazy" style="border-radius:var(--radius-sm)"/>'
     +'<div class="body-side-badge">'+sideLabel+'</div>'
     +'</div>';
 }
 
-function pressImgSrc(zone,side){
-  if(zone==="shoulder") return side==="right"?"/v7-assets/shoulder-right.jpg":"/v7-assets/shoulder-left.jpg";
-  return side==="right"?"/v7-assets/clavicle-right.png":"/v7-assets/clavicle-left.png";
+function pressImgSrc(zone){
+  return zone==="shoulder"?"/v7-assets/shoulder-scapular.png":"/v7-assets/clavicle.png";
 }
 
 /* ══════════════════════════════════════════════
@@ -1210,14 +1159,13 @@ function progMap(){
    STORY LINES
 ══════════════════════════════════════════════ */
 const STORY_LINES = [
-  '肩頸一直緊、一直痠？',
+  '你的肩頸，',
+  '有一個隱藏的開關。',
   '',
-  '你身上有一個痠痛開關，',
-  '進入解鎖關卡',
+  '每個人的位置都不同。',
   '',
-  '找到它——',
-  '按下去，',
-  '感受會告訴你答案。',
+  '今天——',
+  '我們來找出你的。',
 ];
 
 /* ══════════════════════════════════════════════
@@ -1253,7 +1201,7 @@ function runTypewriter(){
 function screenIntro(){
   return '<div class="screen intro-screen">'
     +'<div class="intro-body">'
-    +'<div class="intro-logo">智平衡</div>'
+    +'<div class="intro-logo">智</div>'
     +'<div class="intro-story" id="introStory">'
     +'<span id="introText"></span><span class="cursor-blink"></span>'
     +'</div>'
@@ -1286,10 +1234,7 @@ function neckCard(dir){
       +'data-dir="'+dir+'" data-val="'+val+'">'+text+'</button>';
   }
 
-  var neckImg = isR ? '/v7-assets/turn-right.png' : '/v7-assets/turn-left.png';
-  return '<div class="card" style="padding:0 0 22px;margin-bottom:0">'
-    +'<img src="'+neckImg+'" alt="'+label+'" style="width:100%;height:180px;object-fit:cover;object-position:center;display:block;border-radius:16px 16px 0 0;margin-bottom:16px">'
-    +'<div style="padding:0 20px">'
+  return '<div class="card" style="padding:22px 20px;margin-bottom:0">'
     +'<p style="font-size:24px;margin-bottom:4px">'+emoji+'</p>'
     +'<p style="font-weight:900;font-size:18px;color:var(--text);margin-bottom:4px">'+label+'</p>'
     +'<p style="font-size:13px;color:var(--muted);margin-bottom:18px">慢慢轉到底，感受兩側的緊繃感</p>'
@@ -1303,7 +1248,6 @@ function neckCard(dir){
     +selLvl('tight',  level, '😣 很緊')
     +selLvl('normal', level, '😐 普通')
     +'</div>'
-    +'</div>'   // close padding div
     +'</div>';
 }
 
@@ -1313,14 +1257,29 @@ function neckScreen(dir){
   var level = isR ? S.neckRLevel : S.neckLLevel;
   var canNext = side!==null && level!==null;
 
+  // Quick return card (first neck screen only)
   var quickCard='';
+  if(isR && S.records&&S.records.length>0){
+    var lastRec=S.records[S.records.length-1];
+    var pts=lastRec.pressPoints||[];
+    var pri=pts.find(function(p){return p.isPrimary;})||pts[0];
+    if(pri){
+      var ZN={shoulder:'肩膀',collarbone:'鎖骨外側'};
+      var priTxt=(pri.side==='right'?'右':'左')+'側 '+(ZN[pri.zone]||pri.zone);
+      quickCard='<div style="background:linear-gradient(135deg,rgba(10,107,98,.07),rgba(10,107,98,.02));border:1.5px solid var(--border-glow);border-radius:var(--radius);padding:14px 16px">'
+        +'<p style="font-size:11px;font-weight:800;color:var(--accent);margin-bottom:6px">📌 上次開關位置（'+lastRec.date+'）</p>'
+        +'<div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:12px">'+priTxt+'</div>'
+        +'<button class="btn btn-primary" id="quickPressBtn" style="font-size:13px;padding:11px">▶ 直接開始按壓</button>'
+        +'</div>';
+    }
+  }
 
   return '<div class="screen">'
     +progMap()
     +'<div class="topbar">'
     +'<div style="display:flex;align-items:center;gap:6px">'
     +'<button class="back-btn" id="backBtn">←</button>'
-    +'<div class="brand-mark">智平衡</div>'
+    +'<div class="brand-mark">智</div>'
     +'</div>'
     +'<span class="step-chip">第一關 🔄</span>'
     +'<div style="display:flex;align-items:center;gap:6px">'
@@ -1380,7 +1339,7 @@ function screenElbow(round){
     +'<div class="topbar">'
     +'<div style="display:flex;align-items:center;gap:6px">'
     +'<button class="back-btn" id="backBtn">←</button>'
-    +'<div class="brand-mark">智平衡</div>'
+    +'<div class="brand-mark">智</div>'
     +'</div>'
     +'<span class="step-chip">第二關 🔍</span>'
     +'<div style="display:flex;align-items:center;gap:6px">'
@@ -1415,7 +1374,7 @@ function screenReveal(){
     +'<div class="topbar">'
     +'<div style="display:flex;align-items:center;gap:6px">'
     +'<button class="back-btn" id="backBtn">←</button>'
-    +'<div class="brand-mark">智平衡</div>'
+    +'<div class="brand-mark">智</div>'
     +'</div>'
     +'<span class="step-chip" style="color:var(--gold);border-color:var(--gold-glow)">結果揭曉</span>'
     +'<div style="display:flex;align-items:center;gap:6px">'
@@ -1478,7 +1437,7 @@ function screenPress(){
   return '<div class="screen" style="background:#1a1208">'
     +progMap()
     +'<div class="topbar" style="background:transparent">'
-    +'<div class="brand-mark">智平衡</div>'
+    +'<div class="brand-mark">智</div>'
     +'<span class="step-chip" style="background:rgba(255,255,255,.12);color:#fff">'+(isFirst?"開關一":"開關二")+'</span>'
     +'<div style="display:flex;align-items:center;gap:6px">'
     +'<button class="mute-btn" id="muteBtn" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.7)">🔊</button>'
@@ -1487,7 +1446,7 @@ function screenPress(){
     +'</div>'
     +'<div class="timer-body">'
     +'<div class="timer-img-zone">'
-    +'<img src="'+pressImgSrc(pt.zone,pt.side)+'" alt="'+pt.zoneName+'"/>'
+    +'<img src="'+pressImgSrc(pt.zone)+'" alt="'+pt.zoneName+'"/>'
     +'<div class="timer-img-overlay"></div>'
     +'<div class="timer-img-text">'
     +'<div class="timer-img-badge">'+(isFirst?"優先按壓":"開關二")+'</div>'
@@ -1544,16 +1503,33 @@ function scoreRow(dir, val){
 }
 
 function screenAfter(){
-  var isRight = S.neckSide==="right";
-  var sideEmoji = isRight ? '➡️' : '⬅️';
-  var sideLabel = isRight ? '右' : '左';
-  var afterScore = isRight ? S.afterR : S.afterL;
-  var canNext = afterScore !== null;
+  const canNext=S.afterR!==null && S.afterL!==null;
+
+  // Compare summary
+  var compareCard='';
+  if(canNext){
+    var rScore=S.afterR, lScore=S.afterL;
+    compareCard='<div class="card" style="background:rgba(10,107,98,.05);border-color:var(--border-glow)">'
+      +'<p style="font-weight:800;color:var(--accent);margin-bottom:10px">📊 現在的狀態</p>'
+      +'<div style="display:flex;gap:16px">'
+      +'<div style="flex:1;text-align:center">'
+      +'<div style="font-size:11px;color:var(--muted);margin-bottom:4px">右轉</div>'
+      +'<div style="font-size:28px;font-weight:900;color:'+(rScore<=4?'var(--accent)':rScore<=7?'var(--gold)':'var(--red)')+'">'+rScore+'</div>'
+      +'<div style="font-size:10px;color:var(--muted)">/ 10</div>'
+      +'</div>'
+      +'<div style="flex:1;text-align:center">'
+      +'<div style="font-size:11px;color:var(--muted);margin-bottom:4px">左轉</div>'
+      +'<div style="font-size:28px;font-weight:900;color:'+(lScore<=4?'var(--accent)':lScore<=7?'var(--gold)':'var(--red)')+'">'+lScore+'</div>'
+      +'<div style="font-size:10px;color:var(--muted)">/ 10</div>'
+      +'</div>'
+      +'</div>'
+      +'</div>';
+  }
 
   return '<div class="screen">'
     +progMap()
     +'<div class="topbar">'
-    +'<div class="brand-mark">智平衡</div>'
+    +'<div class="brand-mark">智</div>'
     +'<span class="step-chip">第三關 🔁</span>'
     +'<div style="display:flex;align-items:center;gap:6px">'
     +'<button class="mute-btn" id="muteBtn">🔊</button>'
@@ -1562,7 +1538,7 @@ function screenAfter(){
     +'</div>'
     +'<div class="screen-body">'
     +'<div>'
-    +'<p class="kicker">後測</p>'
+    +'<p class="kicker">前後對比</p>'
     +'<h2 class="screen-title">按完了，<br>再試試看</h2>'
     +'<p class="screen-sub">重複一開始的動作，感受現在和剛才有什麼不同。</p>'
     +'</div>'
@@ -1574,24 +1550,32 @@ function screenAfter(){
     +'</div>'
     +'</div>'
     +'<div class="card">'
-    +'<p style="font-weight:800;margin-bottom:4px;color:var(--text)">'+sideEmoji+' 往'+sideLabel+'轉——現在幾分？</p>'
-    +'<p style="font-size:12px;color:var(--muted);margin-bottom:12px">按壓前是 10 分，現在是幾分？（越低越好）</p>'
-    +scoreRow(isRight?"R":"L", afterScore)
+    +'<p style="font-weight:800;margin-bottom:4px;color:var(--text)">➡️ 往右轉——現在幾分？</p>'
+    +'<p style="font-size:12px;color:var(--muted);margin-bottom:12px">如果之前的不舒服是 10 分，現在是幾分？</p>'
+    +scoreRow("R", S.afterR)
     +'</div>'
+    +'<div class="card">'
+    +'<p style="font-weight:800;margin-bottom:4px;color:var(--text)">⬅️ 往左轉——現在幾分？</p>'
+    +'<p style="font-size:12px;color:var(--muted);margin-bottom:12px">如果之前的不舒服是 10 分，現在是幾分？</p>'
+    +scoreRow("L", S.afterL)
+    +'</div>'
+    +compareCard
     +'</div>'
     +'<div class="screen-foot">'
-    +'<button class="btn btn-primary" id="nextAfter" '+(canNext?"":"disabled")+'>看結果 →</button>'
+    +'<button class="btn btn-primary" id="nextAfter" '+(canNext?"":"disabled")+'>看完整結果 →</button>'
     +'</div>'
     +'</div>';
 }
 
 function screenResult(){
+  const rA=S.afterR||5, lA=S.afterL||5;
   const isRight=S.neckSide==="right";
-  const mainAfter=(isRight?S.afterR:S.afterL)||10;
+  const mainAfter=isRight?rA:lA;
+  // 1-10 scale: improved = low score (1-4), same = 5-6, worse = 7-10
+  const improved=mainAfter<=4, same=mainAfter<=6&&mainAfter>=5, worse=mainAfter>=7;
+  const mainBefore=10;  // baseline
   const sideLabel=isRight?"右":"左";
-  const improvePct=Math.round((10-mainAfter)/10*100);
-  const resultLevel = improvePct>=40?"great":improvePct>=20?"slight":"same";
-  const improved=resultLevel==="great", same=resultLevel==="same", worse=false;
+  function s2e(score){ return Math.min(4,Math.round((score-1)/9*4)); }
 
   if(!S._saved && S.userId){
     saveRecord({
@@ -1599,7 +1583,7 @@ function screenResult(){
       date:new Date().toISOString().slice(0,10),
       neckSide:S.neckSide, dominantArm:S.dominantArm,
       pressPoints:S.pressPoints.map(function(p){ return {side:p.side,zone:p.zone,isPrimary:p.isPrimary}; }),
-      beforeR:10,beforeL:10,afterR:S.afterR||10,afterL:S.afterL||10,
+      beforeR:10,beforeL:10,afterR:rA,afterL:lA,
       improved:improved, worse:worse, round2:S.round2Key,
     });
     if(window.ShoulderAPI) ShoulderAPI.onResult(S);
@@ -1627,7 +1611,7 @@ function screenResult(){
   return '<div class="screen">'
     +progMap()
     +'<div class="topbar">'
-    +'<div class="brand-mark">智平衡</div>'
+    +'<div class="brand-mark">智</div>'
     +'<span class="step-chip" style="color:var(--green);border-color:rgba(16,185,129,.3)">完成 ✓</span>'
     +'<div style="display:flex;align-items:center;gap:6px">'
     +'<button class="mute-btn" id="muteBtn">🔊</button>'
@@ -1637,27 +1621,20 @@ function screenResult(){
     +'<div class="screen-body">'
     +'<div>'
     +'<p class="kicker">你的結果</p>'
-    +'<h2 class="screen-title">'
-      +(resultLevel==="great"?"🎉 明顯改善！":resultLevel==="slight"?"😊 些微改善":  "🤔 感受相近")
-    +'</h2>'
-    +'<div style="font-size:28px;margin:6px 0">'+(resultLevel==="great"?"⭐⭐⭐":resultLevel==="slight"?"⭐⭐☆":"⭐☆☆")+'</div>'
-    +'<p class="screen-sub">'
-      +(resultLevel==="great"?"這個點對你有效，按壓後感受明顯變化！":
-        resultLevel==="slight"?"有些許改善，繼續保持觀察。":
-        "感受相近，可以下次再試開關二。")
-    +'</p>'
-    +'</div>'
-    +'<div class="card" style="background:linear-gradient(135deg,rgba(10,107,98,.07),rgba(10,107,98,.02));border-color:var(--border-glow);padding:20px;text-align:center">'
-    +'<p style="font-size:12px;color:var(--muted2);margin-bottom:6px">'+sideLabel+'側轉動感受</p>'
-    +'<div style="display:flex;align-items:center;justify-content:center;gap:16px">'
-    +'<div style="text-align:center"><div style="font-size:11px;color:var(--muted)">按壓前</div><div style="font-size:32px;font-weight:900;color:var(--muted2)">10</div></div>'
-    +'<div style="font-size:20px;color:var(--muted)">→</div>'
-    +'<div style="text-align:center"><div style="font-size:11px;color:var(--muted)">按壓後</div><div style="font-size:32px;font-weight:900;color:'+(resultLevel==="great"?"var(--accent)":resultLevel==="slight"?"var(--gold)":"var(--muted2)")+'">'+mainAfter+'</div></div>'
-    +'</div>'
-    +(improvePct>0?'<div style="margin-top:10px;font-size:13px;font-weight:800;color:var(--accent)">改善了 '+improvePct+'%</div>':"")
+    +'<h2 class="screen-title">'+(improved?"👏 有感！":same?"🤔 差不多":"😅 沒有明顯改善")+'</h2>'
+    +'<div style="font-size:28px;margin:6px 0">'+(improved?"⭐⭐⭐":same?"⭐⭐☆":"⭐☆☆")+'</div>'
+    +'<p class="screen-sub">'+(improved?"按壓後感受有變化，這個點對你有效！":same?"感受和之前差不多，可以下次再試開關二。":"感受沒改善，建議回診讓治療師調整。")+'</p>'
     +'</div>'
     +(S.pressPoints&&S.pressPoints.length?'<div class="card" style="background:linear-gradient(135deg,rgba(10,107,98,.07),rgba(10,107,98,.02));border-color:var(--border-glow);padding:16px"><p style="font-size:13px;line-height:1.65;color:var(--text)">'+getFeedbackLine(S.pressPoints[0].zone,S.feltPress!==false,S.pressPoints[0].sideLabel)+'</p></div>':"")
     +'<div class="card">'
+    +'<p style="font-weight:800;margin-bottom:12px;color:var(--text)">📊 前後對比（'+sideLabel+'側）</p>'
+    +'<div class="compare-row">'
+    +'<div class="cmp-box"><div class="cmp-lbl">按壓前</div><div class="cmp-emoji">'+EMOJIS[s2e(mainBefore)]+'</div><div class="cmp-text">'+EMOJI_LBLS[s2e(mainBefore)]+'</div></div>'
+    +'<div class="cmp-arrow">→</div>'
+    +'<div class="cmp-box '+(improved?"improved":"")+'"><div class="cmp-lbl">按壓後</div><div class="cmp-emoji">'+EMOJIS[s2e(mainAfter)]+'</div><div class="cmp-text">'+EMOJI_LBLS[s2e(mainAfter)]+'</div></div>'
+    +'</div>'
+    +(improved?'<div class="improved-banner" style="margin-top:12px">✅ '+sideLabel+'側轉動感受改善了 '+(mainBefore-mainAfter)+' 級！</div>':"")
+    +'</div>'
     +'<div class="card">'
     +'<p style="font-weight:800;margin-bottom:12px;color:var(--text)">本次測出的按壓點</p>'
     +S.pressPoints.map(function(p){
@@ -1684,7 +1661,7 @@ function screenResult(){
     +'</div>'
     +'<div class="screen-foot">'
     +'<button class="btn btn-primary" id="restartBtn">重新測試 ↺</button>'
-    +'<button class="btn btn-secondary" id="showHistBtn">查看測試紀錄 📋</button>'
+    +'<button class="btn btn-secondary" id="showHistBtn">查看所有紀錄 📋</button>'
     +'<button class="btn btn-secondary" id="switchUserBtn">換人使用</button>'
     +'</div>'
     +'</div>';
@@ -1699,7 +1676,7 @@ function elbowScreen(type){
   var title   = isInner ? '手肘內側測試' : '手肘外側測試（翻面）';
   var desc    = isInner
     ? '手掌向上。找到手肘大拇指側的點，用拇指按深，左右手肘同一位置各按約 10 秒，感受哪邊比較酸痛。'
-    : '掌心朝自己，找到手肘背面外側突起骨頭上面一指。用拇指按深，左右各按約 10 秒，感受哪邊比較酸痛。';
+    : '手心朝下，找到手肘背面外側突起骨頭上面一指。用拇指按深，左右各按約 10 秒，感受哪邊比較酸痛。';
 
   var side  = isInner ? S.elbowInnerSide  : S.elbowOuterSide;
   var level = isInner ? S.elbowInnerLevel : S.elbowOuterLevel;
@@ -1723,7 +1700,7 @@ function elbowScreen(type){
     +'<div class="topbar">'
     +'<div style="display:flex;align-items:center;gap:6px">'
     +'<button class="back-btn" id="backBtn">←</button>'
-    +'<div class="brand-mark">智平衡</div>'
+    +'<div class="brand-mark">智</div>'
     +'</div>'
     +'<span class="step-chip">第二關 🔍 '+(isInner?'內側':'外側')+'</span>'
     +'<div style="display:flex;align-items:center;gap:6px">'
@@ -1732,8 +1709,8 @@ function elbowScreen(type){
     +'</div>'
     +'</div>'
     +'<div class="screen-body">'
-    +'<div class="card" style="padding:0 0 4px">'
-    +'<img src="'+imgSrc+'" alt="手肘示意" style="width:100%;height:auto;display:block;border-radius:16px 16px 0 0">'
+    +'<div class="card" style="padding:0 0 4px;overflow:hidden">'
+    +'<img src="'+imgSrc+'" alt="手肘示意" style="width:100%;height:38vw;min-height:120px;max-height:180px;object-fit:cover;object-position:center 60%;display:block">'
     +'<div style="padding:16px 18px 4px">'
     +'<p style="font-weight:900;font-size:16px;color:var(--text);margin-bottom:6px">'+title+'</p>'
     +'<p style="font-size:13px;color:var(--muted);margin-bottom:16px">'+desc+'</p>'
@@ -1804,7 +1781,7 @@ function renderHistList(){
   const list=document.getElementById("histList");
   if(!list)return;
   const ZONE_NAME={shoulder:"肩膀／肩胛旁",collarbone:"鎖骨外側"};
-  function zoneImg(zone,side){ return pressImgSrc(zone,side); }
+  const ZONE_IMG={shoulder:"/v7-assets/shoulder-scapular.png",collarbone:"/v7-assets/clavicle.png"};
   if(!S.records.length){
     list.innerHTML='<p style="text-align:center;color:var(--muted);padding:20px 0">還沒有紀錄</p>';
     return;
@@ -1823,15 +1800,15 @@ function renderHistList(){
     let expandHTML="";
     if(isExp){
       const td=H.timerLeft<=0;
-      const R2=24,circ2=2*Math.PI*R2,dash2=circ2*(H.timerLeft/30);
+      const R2=24,circ2=2*Math.PI*R2,dash2=circ2*(H.timerLeft/60);
       expandHTML='<div class="hist-expand">'
         +'<div class="hist-press-pair">'
         +(pri?'<div class="hist-press-item">'
-          +'<img class="hist-press-img" src="'+zoneImg(pri.zone,pri.side)+'" alt="'+priTxt+'"/>'
+          +'<img class="hist-press-img" src="'+(ZONE_IMG[pri.zone]||"")+'" alt="'+priTxt+'"/>'
           +'<div class="hist-press-label" style="background:var(--accent-glow);color:var(--accent)">開關一：'+priTxt+'</div>'
           +'</div>':"")
         +(sec?'<div class="hist-press-item">'
-          +'<img class="hist-press-img" src="'+zoneImg(sec.zone,sec.side)+'" alt="'+secTxt+'"/>'
+          +'<img class="hist-press-img" src="'+(ZONE_IMG[sec.zone]||"")+'" alt="'+secTxt+'"/>'
           +'<div class="hist-press-label" style="background:rgba(251,191,36,.15);color:var(--gold)">開關二：'+secTxt+'</div>'
           +'</div>':"")
         +'</div>'
@@ -1876,7 +1853,7 @@ function renderHistList(){
   if(timerBtn){
     timerBtn.addEventListener("click",function(e){
       e.stopPropagation();
-      if(H.timerLeft<=0){H.timerLeft=30;H.timerActive=false;renderHistList();return;}
+      if(H.timerLeft<=0){H.timerLeft=60;H.timerActive=false;renderHistList();return;}
       if(H.timerActive){
         clearInterval(H.timerInterval);H.timerActive=false;renderHistList();
       } else {
@@ -1887,7 +1864,7 @@ function renderHistList(){
             H.timerLeft=0;H.timerActive=false;clearInterval(H.timerInterval);
             renderHistList();return;
           }
-          const R2=24,circ2=2*Math.PI*R2,dash2=circ2*(H.timerLeft/30);
+          const R2=24,circ2=2*Math.PI*R2,dash2=circ2*(H.timerLeft/60);
           const ne=document.getElementById("histTimerNum");
           const ce=document.getElementById("histTimerCircle");
           if(ne)ne.textContent=H.timerLeft;
@@ -2048,20 +2025,11 @@ function showAchievPage(){
 
   overlay.classList.remove("hidden");
 
-  // Bind: quick press from profile → open history overlay with last record expanded
+  // Bind: quick press from profile
   const qpBtn=document.getElementById("profileQuickPressBtn");
   if(qpBtn) qpBtn.addEventListener("click",function(){
     overlay.classList.add("hidden");
-    if(S.records&&S.records.length>0){
-      const lastRec=S.records[S.records.length-1];
-      const lastId=lastRec.id||String(S.records.length-1);
-      resetHistTimer(); H.expandedId=lastId;
-      const histOverlay=document.getElementById("histOverlay");
-      const histTitle=document.getElementById("histTitle");
-      if(histTitle) histTitle.textContent=S.userName+" 的紀錄（共 "+S.records.length+" 次）";
-      renderHistList();
-      if(histOverlay) histOverlay.classList.remove("hidden");
-    }
+    if(S.records&&S.records.length>0) startQuickPress(S.records[S.records.length-1]);
   });
 
   // Bind: re-press from history list
@@ -2239,7 +2207,6 @@ function render(){
     sc.style.animation=anim;
   }
   bindAll();
-  speakForScreen(S.screen);
 }
 
 /* ══════════════════════════════════════════════
@@ -2268,12 +2235,8 @@ function bindAll(){
     } else {
       GA.click();
     }
-    _voiceReady = true; // unlock Web Speech after first interaction
     if(S.userId){S.screen="neckRight";render();}
-    else{
-      document.getElementById("loginOverlay").classList.remove("hidden");
-      speakForScreen("login");
-    }
+    else document.getElementById("loginOverlay").classList.remove("hidden");
   });
 
   /* Mute button — all screens */
@@ -2310,7 +2273,6 @@ function bindAll(){
       if(window.ShoulderAPI) ShoulderAPI.syncNeckRight(S);
       S.screen="neckLeft"; render();
     } else {
-      // Left neck done — compute neckSide and advance to elbow
       var sides=[S.neckRSide,S.neckLSide];
       var levels=[S.neckRLevel,S.neckLLevel];
       if(sides[0]===sides[1]){ S.neckSide=sides[0]; }
@@ -2534,7 +2496,6 @@ function bindAll(){
   }
 }
 
-
 /* ══════════════════════════════════════════════
    LOGIN BINDING
 ══════════════════════════════════════════════ */
@@ -2543,7 +2504,7 @@ document.getElementById("lEnterBtn").addEventListener("click",function(){
   const bday="";
   const phone=$l("lPhone").value;
   const err=$l("lError");
-  if(!name||phone.replace(/\D/g,"").length<8){
+  if(!name||phone.replace(/\D/g,"").length<4){
     err.classList.add("show");return;
   }
   err.classList.remove("show");
@@ -2555,8 +2516,11 @@ document.getElementById("lEnterBtn").addEventListener("click",function(){
 
 /* ══════════════════════════════════════════════
    INIT
-════════════════ */
+════════════════════════════════ */
 // ── MOBILE VIEWPORT HEIGHT FIX ──
+// Fixes "100vh > visual viewport" on Android Chrome / iOS Safari
+// IMPORTANT: skip resize when keyboard is open (input focused) —
+// otherwise the height change closes the keyboard instantly.
 function fixVH(){
   if(window.innerWidth>540){
     document.getElementById("app").style.height="";
@@ -2564,7 +2528,6 @@ function fixVH(){
   }
   var a=document.activeElement;
   var inputOpen=a&&(a.tagName==="INPUT"||a.tagName==="TEXTAREA"||a.tagName==="SELECT");
-  if(inputOpen)return;
   var h=window.innerHeight;
   document.getElementById("app").style.height=h+"px";
 }
@@ -2580,4 +2543,5 @@ if(initSession()){
 }
 </script>
 </body>
-</html>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+</html>
+                                                                                                                           
