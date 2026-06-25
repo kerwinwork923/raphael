@@ -607,7 +607,7 @@ body {
     </div>
     <div class="lerror" id="lError">請填寫姓名與完整電話（手機 10 碼或市話 8–10 碼）。</div>
     <button class="btn btn-primary" id="lEnterBtn">進入冒險 →</button>
-    <p class="lnote">⚠ 此三項資料組合僅用於辨識你的紀錄，不會傳送至伺服器。</p>
+    <p class="lnote">⚠ 姓名與電話將同步至雲端紀錄，方便追蹤你的測試歷程。</p>
     <p class="lnote" style="margin-top:8px;font-size:10px;color:var(--muted)">本工具提供自我感受參考，非醫療診斷。</p>
   </div>
 </div>
@@ -645,6 +645,7 @@ body {
 <!-- APP ROOT -->
 <div id="app"></div>
 
+<script src="shoulder-api.js"></script>
 <script>
 /* ══════════════════════════════════════════════
    CONSTANTS
@@ -942,7 +943,8 @@ let S = {
   timerLeft: 30, timerActive: false, timerInterval: null,
   pressIdx: 0,
   afterR: null, afterL: null,
-  userId: null, userName: null,
+  userId: null, userName: null, userPhone: null,
+  apiUserId: null, userCode: null, sessionId: null, sessionToken: null,
   records: [], _saved: false,
   feltPress: null, // true=有感 false=無感
   ansAnswers: {}, // ANS self-check
@@ -1020,22 +1022,33 @@ function userKey(){ return "raphael_v7_"+S.userId; }
 
 function doLogin(name,bday,phone){
   const raw=(name.trim()+"|"+phone.replace(/\D/g,"").slice(-8)).toLowerCase();
-  S.userId=djb2(raw); S.userName=name.trim();
+  S.userId=djb2(raw); S.userName=name.trim(); S.userPhone=phone.trim();
   const d=localStorage.getItem(userKey());
   S.records=d?JSON.parse(d):[];
-  sessionStorage.setItem("rv7sess",JSON.stringify({uid:S.userId,name:S.userName}));
+  sessionStorage.setItem("rv7sess",JSON.stringify({uid:S.userId,name:S.userName,phone:S.userPhone}));
+  if(window.ShoulderAPI){
+    ShoulderAPI.loadApiUser(S);
+    ShoulderAPI.onLogin(S,S.userName,S.userPhone);
+  }
 }
 function doLogout(){
   sessionStorage.removeItem("rv7sess");
-  S.userId=null; S.userName=null; S.records=[];
+  S.userId=null; S.userName=null; S.userPhone=null;
+  S.apiUserId=null; S.userCode=null;
+  S.records=[];
+  if(window.ShoulderAPI) ShoulderAPI.resetSession(S);
 }
 function initSession(){
   const d=sessionStorage.getItem("rv7sess");
   if(!d) return false;
   const p=JSON.parse(d);
-  S.userId=p.uid; S.userName=p.name;
+  S.userId=p.uid; S.userName=p.name; S.userPhone=p.phone||"";
   const stored=localStorage.getItem(userKey());
   S.records=stored?JSON.parse(stored):[];
+  if(window.ShoulderAPI){
+    ShoulderAPI.loadApiUser(S);
+    if(S.userName&&S.userPhone) ShoulderAPI.syncLogin(S,S.userName,S.userPhone);
+  }
   return true;
 }
 
@@ -1589,6 +1602,7 @@ function screenResult(){
       beforeR:10,beforeL:10,afterR:S.afterR||10,afterL:S.afterL||10,
       improved:improved, worse:worse, round2:S.round2Key,
     });
+    if(window.ShoulderAPI) ShoulderAPI.onResult(S);
     S._saved=true;
     if(worse) GA.fail();
     else if(improved) GA.success();
@@ -2293,6 +2307,7 @@ function bindAll(){
   $b("neckNextBtn")&&$b("neckNextBtn").addEventListener("click",function(){
     GA.levelUp();
     if(S.screen==="neckRight"){
+      if(window.ShoulderAPI) ShoulderAPI.syncNeckRight(S);
       S.screen="neckLeft"; render();
     } else {
       // Left neck done — compute neckSide and advance to elbow
@@ -2303,6 +2318,7 @@ function bindAll(){
       else if(levels[1]==='tight'){ S.neckSide=sides[1]; }
       else { S.neckSide=sides[0]||'right'; }
       S.neckSideManual=false;
+      if(window.ShoulderAPI) ShoulderAPI.syncNeckLeft(S);
       S.screen="elbowInner"; render();
     }
   });
@@ -2329,11 +2345,17 @@ function bindAll(){
   $b("elbowNextBtn")&&$b("elbowNextBtn").addEventListener("click",function(){
     GA.levelUp();
     if(S.screen==="elbowInner"){
+      if(window.ShoulderAPI) ShoulderAPI.syncElbowInner(S);
       S.screen="elbowOuter"; render();
     } else {
       S.dominantArm=computeDominantArm();
       S.pressPoints=computePressPoints();
       GA.success();
+      if(window.ShoulderAPI){
+        ShoulderAPI.syncElbowOuter(S).then(function(){
+          ShoulderAPI.syncPress(S);
+        });
+      }
       S.screen="reveal"; render();
     }
   });
@@ -2357,6 +2379,11 @@ function bindAll(){
     S.dominantArm=computeDominantArm();
     S.pressPoints=computePressPoints();
     GA.success();
+    if(window.ShoulderAPI){
+      ShoulderAPI.syncElbowOuter(S).then(function(){
+        ShoulderAPI.syncPress(S);
+      });
+    }
     S.screen="reveal"; render();
   });
   // nextElbowPt removed — elbow auto-advances via sub-step buttons
@@ -2429,6 +2456,7 @@ function bindAll(){
       round2Key:Math.random()<.5?"r2a":"r2b",
       elbowPtIdx:0,elbowPoints:[],elbowSubStep:0,elbowInnerSide:null,elbowInnerLevel:null,elbowOuterSide:null,elbowOuterLevel:null,feltPress:null,ansAnswers:{},
     });
+    if(window.ShoulderAPI) ShoulderAPI.onRestart(S);
     render();
   });
   $b("showHistBtn")&&$b("showHistBtn").addEventListener("click",function(){
@@ -2444,6 +2472,7 @@ function bindAll(){
       scores:{},dominantArm:null,pressPoints:[],
       timerLeft:30,timerActive:false,pressIdx:0,
       afterR:null,afterL:null,_saved:false,records:[],
+      apiUserId:S.apiUserId,userCode:S.userCode,sessionId:null,sessionToken:null,
       round2Key:Math.random()<.5?"r2a":"r2b",
       elbowPtIdx:0,elbowPoints:[],elbowSubStep:0,elbowInnerSide:null,elbowInnerLevel:null,elbowOuterSide:null,elbowOuterLevel:null,feltPress:null,ansAnswers:{},
     });
