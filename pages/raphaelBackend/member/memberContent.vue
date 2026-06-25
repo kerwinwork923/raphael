@@ -1034,8 +1034,24 @@
         <div class="memberInfoRow">
           <div class="memberInfoCard watchRecordCard">
             <div class="memberInfoTitleWrap">
-              <h3>華碩手錶紀錄</h3>
-              <div class="memberInfoTitleGroup">
+              <div class="memberInfoTitleLeft">
+                <h3>華碩手錶紀錄</h3>
+                <button
+                  type="button"
+                  class="sectionLoadBtn"
+                  :disabled="asusSectionLoading"
+                  @click="loadAsusSection"
+                >
+                  {{
+                    asusSectionLoading
+                      ? "載入中..."
+                      : asusSectionLoaded
+                        ? "重新載入"
+                        : "載入資料"
+                  }}
+                </button>
+              </div>
+              <div class="memberInfoTitleGroup" v-if="asusSectionLoaded">
                 <VueDatePicker
                   v-model="ringRange"
                   range
@@ -1048,6 +1064,10 @@
               </div>
             </div>
 
+            <div class="watchChartEmpty" v-if="asusSectionLoading">
+              載入中，請稍候...
+            </div>
+            <template v-else-if="asusSectionLoaded">
             <div class="watchChartsGrid" v-if="watchChart.hasAny">
               <div
                 class="watchChartCard watchChartCardClickable"
@@ -1186,6 +1206,10 @@
             </div>
 
             <div class="watchChartEmpty" v-else>沒有最近30天的紀錄</div>
+            </template>
+            <div class="watchChartEmpty" v-else>
+              點擊「載入資料」以查看華碩手錶紀錄
+            </div>
           </div>
         </div>
 
@@ -1193,8 +1217,24 @@
         <div class="memberInfoRow">
           <div class="memberInfoCard watchRecordCard">
             <div class="memberInfoTitleWrap">
-              <h3>宏碁指環紀錄</h3>
-              <div class="memberInfoTitleGroup">
+              <div class="memberInfoTitleLeft">
+                <h3>宏碁指環紀錄</h3>
+                <button
+                  type="button"
+                  class="sectionLoadBtn"
+                  :disabled="acerSectionLoading"
+                  @click="loadAcerSection"
+                >
+                  {{
+                    acerSectionLoading
+                      ? "載入中..."
+                      : acerSectionLoaded
+                        ? "重新載入"
+                        : "載入資料"
+                  }}
+                </button>
+              </div>
+              <div class="memberInfoTitleGroup" v-if="acerSectionLoaded">
                 <VueDatePicker
                   v-model="acerRingRange"
                   range
@@ -1207,6 +1247,10 @@
               </div>
             </div>
 
+            <div class="watchChartEmpty" v-if="acerSectionLoading">
+              載入中，請稍候...
+            </div>
+            <template v-else-if="acerSectionLoaded">
             <div class="watchChartsGrid" v-if="acerRingChart.hasAny">
               <div
                 class="watchChartCard watchChartCardClickable"
@@ -1284,6 +1328,10 @@
               </div>
             </div>
             <div class="watchChartEmpty" v-else>沒有最近30天的紀錄</div>
+            </template>
+            <div class="watchChartEmpty" v-else>
+              點擊「載入資料」以查看宏碁指環紀錄
+            </div>
           </div>
         </div>
 
@@ -1291,8 +1339,24 @@
         <div class="memberInfoRow">
           <div class="memberInfoCard watchRecordCard">
             <div class="memberInfoTitleWrap">
-              <h3>Garmin 紀錄</h3>
-              <div class="memberInfoTitleGroup">
+              <div class="memberInfoTitleLeft">
+                <h3>Garmin 紀錄</h3>
+                <button
+                  type="button"
+                  class="sectionLoadBtn"
+                  :disabled="garminSectionLoading"
+                  @click="loadGarminSection"
+                >
+                  {{
+                    garminSectionLoading
+                      ? "載入中..."
+                      : garminSectionLoaded
+                        ? "重新載入"
+                        : "載入資料"
+                  }}
+                </button>
+              </div>
+              <div class="memberInfoTitleGroup" v-if="garminSectionLoaded">
                 <VueDatePicker
                   v-model="garminRange"
                   range
@@ -1305,6 +1369,10 @@
               </div>
             </div>
 
+            <div class="watchChartEmpty" v-if="garminSectionLoading">
+              載入中，請稍候...
+            </div>
+            <template v-else-if="garminSectionLoaded">
             <div class="watchChartsGrid" v-if="garminChart.hasAny">
               <div
                 class="watchChartCard watchChartCardClickable"
@@ -1383,6 +1451,10 @@
             </div>
 
             <div class="watchChartEmpty" v-else>沒有最近30天的紀錄</div>
+            </template>
+            <div class="watchChartEmpty" v-else>
+              點擊「載入資料」以查看 Garmin 紀錄
+            </div>
           </div>
         </div>
 
@@ -1390,9 +1462,29 @@
         <div class="memberInfoRow">
           <div class="memberInfoCard watchRecordCard">
             <div class="memberInfoTitleWrap">
-              <h3>護您穩平衡衣</h3>
+              <div class="memberInfoTitleLeft">
+                <h3>護您穩平衡衣</h3>
+                <button
+                  type="button"
+                  class="sectionLoadBtn"
+                  :disabled="stabilitySectionLoading"
+                  @click="loadStabilitySection"
+                >
+                  {{
+                    stabilitySectionLoading
+                      ? "載入中..."
+                      : stabilitySectionLoaded
+                        ? "重新載入"
+                        : "載入資料"
+                  }}
+                </button>
+              </div>
             </div>
 
+            <div class="watchChartEmpty" v-if="stabilitySectionLoading">
+              載入中，請稍候...
+            </div>
+            <template v-else-if="stabilitySectionLoaded">
             <div class="balanceCardGrid" v-if="balanceClothCards.length">
               <button
                 type="button"
@@ -1427,6 +1519,10 @@
             </div>
 
             <div class="watchChartEmpty" v-else>尚無護您穩平衡衣資料</div>
+            </template>
+            <div class="watchChartEmpty" v-else>
+              點擊「載入資料」以查看護您穩平衡衣資料
+            </div>
           </div>
         </div>
 
@@ -4885,6 +4981,66 @@ const chartANS = computed(() => ansRecords.value);
 const chartLife = computed(() => lifeRecords.value);
 const loading = ref(false);
 
+const asusSectionLoaded = ref(false);
+const asusSectionLoading = ref(false);
+const acerSectionLoaded = ref(false);
+const acerSectionLoading = ref(false);
+const garminSectionLoaded = ref(false);
+const garminSectionLoading = ref(false);
+const stabilitySectionLoaded = ref(false);
+const stabilitySectionLoading = ref(false);
+
+function resetLazySections() {
+  asusSectionLoaded.value = false;
+  acerSectionLoaded.value = false;
+  garminSectionLoaded.value = false;
+  stabilitySectionLoaded.value = false;
+}
+
+async function loadAsusSection() {
+  if (asusSectionLoading.value) return;
+  asusSectionLoading.value = true;
+  try {
+    await memberStore.fetchAsusHealthData(getAuth(), getAsusApiDateRange());
+    asusSectionLoaded.value = true;
+  } finally {
+    asusSectionLoading.value = false;
+  }
+}
+
+async function loadAcerSection() {
+  if (acerSectionLoading.value) return;
+  acerSectionLoading.value = true;
+  try {
+    await memberStore.fetchAcerHealthData(getAuth(), getAcerApiDateRange());
+    acerSectionLoaded.value = true;
+  } finally {
+    acerSectionLoading.value = false;
+  }
+}
+
+async function loadGarminSection() {
+  if (garminSectionLoading.value) return;
+  garminSectionLoading.value = true;
+  try {
+    await memberStore.fetchGarminHealthData(getAuth(), getGarminApiDateRange());
+    garminSectionLoaded.value = true;
+  } finally {
+    garminSectionLoading.value = false;
+  }
+}
+
+async function loadStabilitySection() {
+  if (stabilitySectionLoading.value) return;
+  stabilitySectionLoading.value = true;
+  try {
+    await memberStore.fetchStabilityAll(getAuth());
+    stabilitySectionLoaded.value = true;
+  } finally {
+    stabilitySectionLoading.value = false;
+  }
+}
+
 /* ---------- watch & lifecycle ---------- */
 
 watch(selectedHomeFilterOptions, () => {
@@ -4974,13 +5130,16 @@ watchEffect(
   { flush: "post" }
 );
 watch(ringRange, async () => {
+  if (!asusSectionLoaded.value) return;
   await memberStore.fetchAsusHealthData(getAuth(), getAsusApiDateRange());
   pageRing.value = 1;
 });
 watch(acerRingRange, async () => {
+  if (!acerSectionLoaded.value) return;
   await memberStore.fetchAcerHealthData(getAuth(), getAcerApiDateRange());
 });
 watch(garminRange, async () => {
+  if (!garminSectionLoaded.value) return;
   await memberStore.fetchGarminHealthData(getAuth(), getGarminApiDateRange());
 });
 watch(watchKeyword, () => {
@@ -5125,12 +5284,11 @@ watch(
     }
 
     memberStore.clear();
+    resetLazySections();
     await memberStore.fetchAll(getAuth());
 
     // 取得產品使用紀錄
     await memberStore.fetchFavoriteTPointsList(getAuth());
-    // 取得護您穩平衡衣卡片
-    await memberStore.fetchStabilityAll(getAuth());
     // 取得最後登入資訊
     await memberStore.fetchMemberLastStatus(getAuth(), "zhtw");
 
@@ -5145,13 +5303,6 @@ watch(
     if (sel?.MID) {
       await memberStore.fetchVivoWatchList(sel.MID);
     }
-
-    // 取得華碩健康數據（華碩手錶紀錄）
-    await memberStore.fetchAsusHealthData(getAuth(), getAsusApiDateRange());
-    // 取得宏碁健康數據（宏碁指環紀錄）
-    await memberStore.fetchAcerHealthData(getAuth(), getAcerApiDateRange());
-    // 取得 Garmin 健康數據（Garmin 紀錄）
-    await memberStore.fetchGarminHealthData(getAuth(), getGarminApiDateRange());
 
     loading.value = false;
   },
@@ -5180,14 +5331,18 @@ function closeContract() {
 
 /* ---------- 其他 ---------- */
 async function refresh() {
+  const shouldReloadAsus = asusSectionLoaded.value;
+  const shouldReloadAcer = acerSectionLoaded.value;
+  const shouldReloadGarmin = garminSectionLoaded.value;
+  const shouldReloadStability = stabilitySectionLoaded.value;
+
   loading.value = true;
   memberStore.clear();
+  resetLazySections();
   await memberStore.fetchAll(getAuth());
 
   // 取得產品使用紀錄
   await memberStore.fetchFavoriteTPointsList(getAuth());
-  // 取得護您穩平衡衣卡片
-  await memberStore.fetchStabilityAll(getAuth());
   // 取得最後登入資訊
   await memberStore.fetchMemberLastStatus(getAuth(), "zhtw");
 
@@ -5203,12 +5358,22 @@ async function refresh() {
     await memberStore.fetchVivoWatchList(sel.MID);
   }
 
-  // 重新取得華碩健康數據
-  await memberStore.fetchAsusHealthData(getAuth(), getAsusApiDateRange());
-  // 重新取得宏碁健康數據
-  await memberStore.fetchAcerHealthData(getAuth(), getAcerApiDateRange());
-  // 重新取得 Garmin 健康數據
-  await memberStore.fetchGarminHealthData(getAuth(), getGarminApiDateRange());
+  if (shouldReloadAsus) {
+    await memberStore.fetchAsusHealthData(getAuth(), getAsusApiDateRange());
+    asusSectionLoaded.value = true;
+  }
+  if (shouldReloadAcer) {
+    await memberStore.fetchAcerHealthData(getAuth(), getAcerApiDateRange());
+    acerSectionLoaded.value = true;
+  }
+  if (shouldReloadGarmin) {
+    await memberStore.fetchGarminHealthData(getAuth(), getGarminApiDateRange());
+    garminSectionLoaded.value = true;
+  }
+  if (shouldReloadStability) {
+    await memberStore.fetchStabilityAll(getAuth());
+    stabilitySectionLoaded.value = true;
+  }
   loading.value = false;
 }
 function goBack() {
@@ -6084,6 +6249,32 @@ const availableEventOptions = computed(() => {
             justify-content: space-between;
             width: 100%;
             margin-bottom: 0;
+          }
+        }
+        .memberInfoTitleLeft {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          flex-wrap: wrap;
+        }
+        .sectionLoadBtn {
+          border: none;
+          border-radius: 50px;
+          background: $primary-200;
+          color: #fff;
+          font-size: 14px;
+          padding: 0.25rem 1rem;
+          cursor: pointer;
+          white-space: nowrap;
+          transition: all 0.2s ease;
+
+          &:hover:not(:disabled) {
+            background: $primary-300;
+          }
+
+          &:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
           }
         }
         .memberInfoTitleGroup {
