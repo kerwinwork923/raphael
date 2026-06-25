@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QRCode 掃描頁轉址中</title>
+    <meta http-equiv="refresh" content="0; url=/qrcode" />
+    <script>
+      window.location.replace("/qrcode");
+    </script>
+  </head>
+  <body>
+    <p>正在導向 Vue 掃描頁，若未自動跳轉，請前往 <a href="/qrcode">/qrcode</a>。</p>
+  </body>
+</html>
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>智平衡訂製健康共創未來發表會｜員工報到掃描</title>
+
+  <!-- QRcode 掃描函式庫（CDN） -->
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+  <style>
+    :root {
+      --deep: #0f3b3b;
+      --ink: #1f2a37;
+      --gold: #c9a14a;
+      --muted: #6b7280;
+      --bg: #ffffff;
+      --chip: #f8f4ea;
+      --accent: #22c55e; /* 掃描按鈕用一點綠色呼應健康感 */
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "PingFang TC","Microsoft JhengHei",sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    .gold-bg {
+      position: relative;
+      isolation: isolate;
+    }
+
+    .gold-svg {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      opacity: .85;
+      pointer-events: none;
+    }
+
+    header {
+      text-align: center;
+      padding: 40px 16px 20px;
+    }
+
+    .logo {
+      width: 120px;
+      margin-bottom: 16px;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(201,161,74,.3);
+    }
+
+    h1 {
+      font-size: clamp(24px,4vw,32px);
+      font-weight: 800;
+      color: var(--deep);
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #8b6a2d;
+      font-weight: 500;
+      font-size: clamp(14px,2.5vw,16px);
+      line-height: 1.8;
+      margin: 0 auto;
+      max-width: 640px;
+    }
+
+    .section {
+      padding: 32px 20px 40px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .title {
+      font-size: clamp(20px,3vw,26px);
+      text-align: center;
+      color: var(--deep);
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .title::after {
+      content: "";
+      display: block;
+      width: 100px;
+      height: 3px;
+      background: linear-gradient(90deg,transparent,var(--gold),transparent);
+      margin: 10px auto 0;
+      border-radius: 2px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid rgba(201,161,74,.35);
+      box-shadow: 0 12px 36px rgba(17,24,39,.06);
+    }
+
+    .hint {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+      line-height: 1.7;
+    }
+
+    .scanner-layout {
+      display: grid;
+      grid-template-columns: minmax(260px, 380px) minmax(0, 1fr);
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    /* 外層殼：決定大小、圓角與裁切，避免畫面溢出 */
+    .reader-wrap {
+      width: 100%;
+      max-width: 360px;
+      margin: 0 auto;
+      border-radius: 16px;
+      overflow: hidden; /* 關鍵：超出的相機畫面會被裁掉 */
+      box-shadow: 0 8px 24px rgba(0,0,0,.12);
+      background: #000;
+    }
+
+    /* 內層給 html5-qrcode 使用，填滿容器即可 */
+    #reader {
+      width: 100%;
+      height: 100%;
+    }
+
+    .controls {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    button.secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    button.danger {
+      background: var(--danger);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .status {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .status span.ok {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .status span.err {
+      color: var(--danger);
+      font-weight: 600;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin-top: 10px;
+    }
+
+    thead {
+      background: #f9fafb;
+    }
+
+    th, td {
+      padding: 8px 6px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+    }
+
+    th:nth-child(1),
+    td:nth-child(1) {
+      width: 40px;
+      text-align: center;
+    }
+
+    th:nth-child(3),
+    td:nth-child(3) {
+      width: 160px;
+      white-space: nowrap;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #e5f8eb;
+      color: var(--accent);
+      font-size: 0.75rem;
+    }
+
+    .badge.dup {
+      background: #fef2f2;
+      color: var(--danger);
+    }
+
+    footer {
+      border-top: 1px solid rgba(201,161,74,.3);
+      padding: 18px;
+      text-align: center;
+      color: var(--muted);
+      background: linear-gradient(135deg,rgba(201,161,74,.08),rgba(255,255,255,0));
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 768px) {
+      header {
+        padding: 28px 12px 12px;
+      }
+
+      .section {
+        padding: 24px 14px 32px;
+      }
+
+      .scanner-layout {
+        grid-template-columns: 1fr;
+      }
+
+      /* 手機時讓相機寬度吃滿卡片 */
+      .reader-wrap {
+        max-width: 100%;
+      }
+
+      th:nth-child(3),
+      td:nth-child(3) {
+        width: auto;
+      }
+    }
+  </style>
+</head>
+<body class="gold-bg">
+  <!-- 背景金色線條 -->
+  <svg class="gold-svg" viewBox="0 0 1200 800" preserveAspectRatio="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#e9d9b0" stop-opacity="0"/>
+        <stop offset="40%" stop-color="#d9c491" stop-opacity=".55"/>
+        <stop offset="100%" stop-color="#c9a14a" stop-opacity=".9"/>
+      </linearGradient>
+    </defs>
+    <g fill="none" stroke="url(#g)" stroke-width="3">
+      <path d="M-50,60 L600,420 L1250,-10" />
+      <path d="M-100,720 L740,260 L1250,500" />
+      <path d="M-50,380 L420,10 L1250,260" />
+      <path d="M-10,560 L380,280 L1200,720" />
+    </g>
+  </svg>
+
+  <!-- 頁首：沿用發表會品牌 -->
+  <header>
+    <img src="https://i.pinimg.com/736x/89/6d/93/896d9311bb3fb31441530bc508b16f73.jpg" class="logo" alt="WiseBalance Logo" />
+    <h1>智平衡訂製健康共創未來發表會</h1>
+  </header>
+
+  <!-- 掃描主體 -->
+  <section class="section">
+    <div class="container">
+      <h2 class="title">來賓報到掃描專區</h2>
+      <div class="card">
+        <p class="hint">
+          使用說明：<br>
+          1️⃣ 將來賓手機上的 QRcode 對準畫面中央，系統會自動辨識<br>
+        </p>
+
+        <div class="scanner-layout">
+          <!-- 左側：相機掃描 -->
+          <div>
+            <div class="reader-wrap">
+              <div id="reader"></div>
+            </div>
+            <div class="controls">
+              <button id="startBtn" class="primary">▶ 開始掃描</button>
+              <button id="stopBtn" class="secondary" disabled>⏹ 暫停掃描</button>
+              <button id="switchCamBtn" class="secondary" disabled>🔄 切換鏡頭</button>
+              <button id="clearBtn" class="danger">🗑 清除紀錄</button>
+            </div>
+            <div class="status" id="statusText">
+              狀態：<span>尚未開始掃描</span>
+            </div>
+          </div>
+
+          <!-- 右側：報到紀錄 -->
+          <div>
+            <p class="muted" style="margin-bottom:6px;">
+              掃描結果紀錄（最新會顯示在最上方）：
+            </p>
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>QRcode 內容</th>
+                  <th>掃描時間</th>
+                  <th>狀態</th>
+                </tr>
+              </thead>
+              <tbody id="logBody">
+                <!-- 掃描紀錄會自動插入 -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    © 2025 智平衡健康集團 WiseBalance — 員工後台報到系統（僅供現場工作人員使用）
+  </footer>
+
+  <script>
+    // ====== 報到掃描邏輯 ======
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const switchCamBtn = document.getElementById("switchCamBtn");
+    const statusText = document.getElementById("statusText");
+    const logBody = document.getElementById("logBody");
+    const EventType = "qrcode";
+  
+    let scanner = null;              // Html5Qrcode 物件
+    let isScanning = false;          // 是否正在掃描
+    let logs = [];                   // 掃描紀錄
+    let scannedSet = new Set();      // 用來判斷是否重複掃描
+  
+    let cameras = [];                // 可用鏡頭列表
+    let currentCameraIndex = 0;      // 目前使用的鏡頭 index
+  
+    let isProcessingScan = false;    // 避免同一張 QR 被重複觸發報到流程
+  
+    const CHECKIN_API = "https://23700999.com:8081/HMA/000TTELOG_EVENT.jsp";
+  
+    const scanConfig = {
+      fps: 10,
+      aspectRatio: 1.0,
+      qrbox: { width: 320, height: 320 } // 正方形掃描框
+    };
+  
+    function initScanner() {
+      if (scanner) return;
+      scanner = new Html5Qrcode("reader", false);
+    }
+  
+    function nowString() {
+      const d = new Date();
+      const pad = (n) => n.toString().padStart(2, "0");
+      const yyyy = d.getFullYear();
+      const mm = pad(d.getMonth() + 1);
+      const dd = pad(d.getDate());
+      const hh = pad(d.getHours());
+      const mi = pad(d.getMinutes());
+      const ss = pad(d.getSeconds());
+      return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
+    }
+  
+    function cameraFacingText() {
+      if (!cameras.length) return "";
+      const label = (cameras[currentCameraIndex].label || "").toLowerCase();
+      if (label.includes("back") || label.includes("environment")) return "後鏡頭";
+      if (label.includes("front") || label.includes("user")) return "前鏡頭";
+      return `鏡頭 ${currentCameraIndex + 1}`;
+    }
+  
+    function updateStatus(prefix = "正在掃描中") {
+      const facing = cameraFacingText();
+      statusText.innerHTML =
+        `狀態：<span class="ok">${prefix}（${facing}）…</span>`;
+    }
+  
+    function renderLogs() {
+      logBody.innerHTML = "";
+      logs.forEach((item, idx) => {
+        const tr = document.createElement("tr");
+  
+        const tdIndex = document.createElement("td");
+        tdIndex.textContent = idx + 1;
+  
+        const tdText = document.createElement("td");
+        tdText.textContent = item.text;
+  
+        const tdTime = document.createElement("td");
+        tdTime.textContent = item.time;
+  
+        const tdStatus = document.createElement("td");
+        const badge = document.createElement("span");
+        badge.classList.add("badge");
+        if (item.duplicate) {
+          badge.classList.add("dup");
+          badge.textContent = "重複";
+        } else {
+          badge.textContent = "成功";
+        }
+        tdStatus.appendChild(badge);
+  
+        tr.appendChild(tdIndex);
+        tr.appendChild(tdText);
+        tr.appendChild(tdTime);
+        tr.appendChild(tdStatus);
+  
+        // 最新一筆放最上面
+        logBody.insertBefore(tr, logBody.firstChild);
+      });
+    }
+  
+    // 解析 vip=11087&name=陳威穎
+    function extractFields(decodedText) {
+      let vip = null;
+      let name = null;
+  
+      // 1) 若為 URL
+      try {
+        const url = new URL(decodedText);
+        vip = url.searchParams.get("vip") || url.searchParams.get("VIP");
+        name = url.searchParams.get("name");
+      } catch (e) {
+        // Not URL → fallback
+      }
+  
+      // 2) 用正則解析 vip=
+      if (!vip) {
+        const vipMatch = decodedText.match(/vip=([^&]+)/i);
+        if (vipMatch) vip = vipMatch[1];
+      }
+  
+      // 3) 用正則解析 name=
+      if (!name) {
+        const nameMatch = decodedText.match(/name=([^&]+)/i);
+        if (nameMatch) name = decodeURIComponent(nameMatch[1]);
+      }
+  
+      return { vip, name };
+    }
+  
+    async function logEvent(vip, name, Event, EventType) {
+      const payload = { SafeKey: "qrt897hpmd", VIP: vip, Event, EventType };
+      console.log("payload1=" + JSON.stringify(payload, null, 1));
+  
+      // 1) sendBeacon
+      try {
+        const ok = navigator.sendBeacon(
+          CHECKIN_API,
+          new Blob([JSON.stringify(payload)], { type: "text/plain;charset=UTF-8" })
+        );
+        if (ok) {
+          console.info("[logEvent] sendBeacon sent");
+          return true;
+        }
+      } catch (e) {
+        console.warn("[logEvent] sendBeacon failed, fallback to fetch no-cors", e);
+      }
+  
+      // 2) fetch no-cors
+      try {
+        await fetch(CHECKIN_API, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=UTF-8" },
+          body: new Blob([JSON.stringify(payload)], { type: "text/plain;charset=UTF-8" }),
+          keepalive: true
+        });
+        console.info("[logEvent] fetch(no-cors) sent (opaque response)");
+        return true;
+      } catch (err) {
+        console.error("[logEvent] still failed:", err);
+        return false;
+      }
+    }
+  
+    // （目前沒用到 JSON API，如要改成 JSON 就調這個）
+    async function sendCheckin(vip, name, time, rawText) {
+      const payload = {
+        VIP: vip,
+        Name: name,
+        ts: time,
+        qrRaw: rawText
+      };
+  
+      const res = await fetch(CHECKIN_API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+  
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return true;
+    }
+  
+    // 掃描成功時
+    async function onScanSuccess(decodedText, decodedResult) {
+      if (isProcessingScan) return;
+      isProcessingScan = true;
+  
+      // 🔴 先停止掃描，避免同一張 QR 被連續讀取
+      if (scanner && isScanning) {
+        try {
+          await scanner.stop();
+        } catch (e) {
+          console.warn("stop error:", e);
+        }
+        isScanning = false;
+        startBtn.disabled = true;
+        stopBtn.disabled = true;
+      }
+  
+      const time = nowString();
+      const isDup = scannedSet.has(decodedText);
+  
+      logs.push({
+        text: decodedText,
+        time,
+        duplicate: isDup
+      });
+      if (!isDup) scannedSet.add(decodedText);
+  
+      renderLogs();
+  
+      // 解析 vip 與 name
+      const { vip, name } = extractFields(decodedText);
+  
+      if (!vip) {
+        alert("QRCode 內容中找不到 vip=xxxx，請確認是否為正確報到 QRcode。");
+        statusText.innerHTML =
+          `狀態：<span class="err">找不到 VIP 編號</span>`;
+        isProcessingScan = false;
+        // 失敗一樣嘗試重新啟動掃描
+        restartScanAfterDialog();
+        return;
+      }
+  
+      const displayName = name || "來賓";
+  
+      statusText.innerHTML =
+        `狀態：<span class="ok">已掃描：VIP=${vip}（${displayName}），送出報到中…</span>`;
+  
+      try {
+        // 依你現在實作使用 logEvent
+        await logEvent(vip, name, "QrcodeCheckin", EventType);
+  
+        // 🎉 報到成功，顯示中文名字
+        alert(`報到成功！\n${displayName} 已完成報到 ✔`);
+        statusText.innerHTML =
+          `狀態：<span class="ok">${displayName} 報到成功，請掃描下一位。</span>`;
+      } catch (e) {
+        console.error("[checkin] error:", e);
+        alert("報到失敗，請再掃一次或改用人工登記。");
+        statusText.innerHTML =
+          `狀態：<span class="err">API 呼叫失敗</span>`;
+      } finally {
+        isProcessingScan = false;
+        // ✅ 使用者按下 alert 的「確定」後，才會跑到這裡 → 再重新開始掃描
+        restartScanAfterDialog();
+      }
+    }
+  
+    // 按下 alert「確定」後重新啟動掃描
+    async function restartScanAfterDialog() {
+      if (!scanner) return;
+      try {
+        await ensureCameras();
+        const cameraId = cameras[currentCameraIndex].id;
+        await scanner.start(cameraId, scanConfig, onScanSuccess, onScanFailure);
+  
+        isScanning = true;
+        startBtn.disabled = true;               // 已在掃描中，不需要再按
+        stopBtn.disabled = false;
+        switchCamBtn.disabled = cameras.length < 2;
+        updateStatus("正在掃描中");
+      } catch (e) {
+        console.error("[restartScanAfterDialog] error:", e);
+        statusText.innerHTML =
+          `狀態：<span class="err">重新啟動掃描失敗，請按「開始掃描」再試一次。</span>`;
+        // 讓使用者可以手動重新按開始
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+      }
+    }
+  
+    function onScanFailure(error) {
+      // 為避免洗版，不在這裡輸出 console
+    }
+  
+    async function ensureCameras() {
+      if (cameras.length) return;
+      cameras = await Html5Qrcode.getCameras();
+      if (!cameras || cameras.length === 0) {
+        throw new Error("找不到相機");
+      }
+  
+      // 優先找「後鏡頭」
+      let backIndex = cameras.findIndex(c =>
+        (c.label || "").toLowerCase().includes("back") ||
+        (c.label || "").toLowerCase().includes("environment")
+      );
+      if (backIndex === -1) backIndex = 0;
+      currentCameraIndex = backIndex;
+  
+      // 如果有兩顆以上鏡頭，才開放切換按鈕
+      switchCamBtn.disabled = cameras.length < 2;
+    }
+  
+    async function startScan() {
+      if (isScanning) return;
+      initScanner();
+  
+      try {
+        await ensureCameras();
+  
+        const cameraId = cameras[currentCameraIndex].id;
+        await scanner.start(cameraId, scanConfig, onScanSuccess, onScanFailure);
+  
+        isScanning = true;
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+        switchCamBtn.disabled = cameras.length < 2;
+        updateStatus("正在掃描中");
+      } catch (e) {
+        console.error(e);
+        statusText.innerHTML =
+          `狀態：<span class="err">啟動相機失敗，請確認相機權限與 HTTPS</span>`;
+      }
+    }
+  
+    async function stopScan() {
+      if (!isScanning || !scanner) return;
+      try {
+        await scanner.stop();
+        isScanning = false;
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        statusText.innerHTML = `狀態：<span>已暫停掃描</span>`;
+      } catch (e) {
+        console.error(e);
+        statusText.innerHTML =
+          `狀態：<span class="err">停止掃描時發生錯誤</span>`;
+      }
+    }
+  
+    async function switchCamera() {
+      if (!scanner || !cameras.length) return;
+      if (!isScanning) {
+        statusText.innerHTML =
+          `狀態：<span class="err">請先按「開始掃描」，再切換鏡頭</span>`;
+        return;
+      }
+  
+      try {
+        await scanner.stop();
+        isScanning = false;
+  
+        currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
+        const cameraId = cameras[currentCameraIndex].id;
+  
+        await scanner.start(cameraId, scanConfig, onScanSuccess, onScanFailure);
+  
+        isScanning = true;
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+        switchCamBtn.disabled = cameras.length < 2;
+        updateStatus("已切換鏡頭，正在掃描中");
+      } catch (e) {
+        console.error(e);
+        statusText.innerHTML =
+          `狀態：<span class="err">切換鏡頭失敗，請再試一次</span>`;
+      }
+    }
+  
+    function clearLogs() {
+      logs = [];
+      scannedSet.clear();
+      renderLogs();
+      statusText.innerHTML = `狀態：<span>掃描紀錄已清除</span>`;
+    }
+  
+    startBtn.addEventListener("click", startScan);
+    stopBtn.addEventListener("click", stopScan);
+    clearBtn.addEventListener("click", clearLogs);
+    switchCamBtn.addEventListener("click", switchCamera);
+  
+    // 若想一開頁就自動啟動掃描，可開啟下行：
+    // window.addEventListener("load", startScan);
+  </script>
+  
+  
+  
+</body>
+</html>

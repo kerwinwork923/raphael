@@ -1,0 +1,2463 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>舊客居家活動度與按壓反應體驗版 V3 回溯舊點</title>
+  <style>
+    :root {
+      --bg: #f6f8f7;
+      --surface: #ffffff;
+      --soft: #edf6f3;
+      --soft-2: #f8fbfa;
+      --ink: #162424;
+      --muted: #61716e;
+      --line: #d7e4df;
+      --line-strong: #b7d3cc;
+      --teal: #0d7f7c;
+      --teal-dark: #075c59;
+      --green: #2f855a;
+      --coral: #d96a4c;
+      --amber: #b7791f;
+      --indigo: #44546f;
+      --danger: #b42318;
+      --shadow: 0 18px 55px rgba(22, 36, 36, .08);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #f7faf9, #edf5f2);
+      color: var(--ink);
+      font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid rgba(215, 228, 223, .9);
+      background: rgba(247, 250, 249, .9);
+      backdrop-filter: blur(18px);
+    }
+
+    .top-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 15px 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      background: #153f3f;
+      color: #fff;
+      font-weight: 900;
+    }
+
+    .eyebrow {
+      margin: 0;
+      color: var(--teal);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    h1 {
+      margin: 2px 0 0;
+      font-size: 19px;
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 34px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .78);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--green);
+      box-shadow: 0 0 0 4px rgba(47, 133, 90, .13);
+    }
+
+    .top-btn {
+      min-height: 34px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .shell {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr) 356px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel,
+    .stage,
+    .insights {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, .88);
+      box-shadow: var(--shadow);
+    }
+
+    .panel,
+    .insights {
+      position: sticky;
+      top: 86px;
+      padding: 16px;
+    }
+
+    .panel-title,
+    .section-title {
+      margin: 0;
+      color: #203030;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .panel-sub {
+      margin: 4px 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .steps {
+      display: grid;
+      gap: 8px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      gap: 10px;
+      width: 100%;
+      min-height: 66px;
+      padding: 10px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--ink);
+      text-align: left;
+    }
+
+    .step:hover {
+      border-color: var(--line);
+      background: #f8fbfa;
+    }
+
+    .step.active {
+      border-color: #acd1c9;
+      background: #e8f4f1;
+    }
+
+    .step.done .step-num {
+      background: var(--teal);
+      color: #fff;
+    }
+
+    .step-num {
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--line-strong);
+      border-radius: 999px;
+      color: var(--teal-dark);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .step strong {
+      display: block;
+      font-size: 14px;
+      line-height: 1.3;
+    }
+
+    .step span span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .panel-note {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .stage {
+      min-height: calc(100vh - 132px);
+      overflow: hidden;
+    }
+
+    .stage-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 24px 26px 0;
+    }
+
+    .stage-kicker {
+      margin: 0 0 8px;
+      color: var(--teal);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .stage-title {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.22;
+      letter-spacing: 0;
+    }
+
+    .stage-desc {
+      max-width: 760px;
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .progress {
+      min-width: 132px;
+      padding-top: 4px;
+      text-align: right;
+    }
+
+    .progress p {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .track {
+      width: 132px;
+      height: 8px;
+      border-radius: 999px;
+      background: #e4ece9;
+      overflow: hidden;
+    }
+
+    .fill {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--teal);
+      transition: width .22s ease;
+    }
+
+    .stage-body {
+      padding: 24px 26px 28px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 324px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .block {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .block.soft {
+      background: #f8fbfa;
+    }
+
+    .block.warn {
+      border-color: #e2c188;
+      background: #fffaf0;
+    }
+
+    .block.danger {
+      border-color: #f0b4ae;
+      background: #fff6f5;
+    }
+
+    .block-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .block-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    .caption {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .choices {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .choices.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .choice {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 900;
+      text-align: left;
+    }
+
+    .choice:hover {
+      border-color: var(--line-strong);
+    }
+
+    .choice.selected {
+      border-color: var(--teal);
+      background: #e8f4f1;
+      color: var(--teal-dark);
+    }
+
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    label,
+    .label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+    }
+
+    textarea {
+      min-height: 92px;
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 4px rgba(13, 127, 124, .12);
+    }
+
+    .range-row {
+      display: grid;
+      grid-template-columns: 98px minmax(0, 1fr) 58px;
+      gap: 12px;
+      align-items: center;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--teal);
+    }
+
+    .value {
+      display: grid;
+      place-items: center;
+      height: 42px;
+      border-radius: 8px;
+      background: #153f3f;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .checks {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .check {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      min-height: 44px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .check input {
+      margin-top: 3px;
+      accent-color: var(--teal);
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 0 16px;
+      border-radius: 8px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--teal);
+      color: #fff;
+      box-shadow: 0 10px 22px rgba(13, 127, 124, .18);
+    }
+
+    .btn-primary:hover {
+      background: var(--teal-dark);
+    }
+
+    .btn-secondary {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .icon {
+      display: grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .18);
+      line-height: 1;
+    }
+
+    .btn-secondary .icon {
+      background: #edf5f2;
+      color: var(--teal-dark);
+    }
+
+    .diagram {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fbfa;
+    }
+
+    .neck-map,
+    .head-map,
+    .body-map {
+      position: relative;
+      min-height: 300px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #eef6f3;
+      overflow: hidden;
+    }
+
+    .neck-map::before,
+    .body-map::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 38px;
+      width: 72px;
+      height: 72px;
+      border: 3px solid #8bbcb3;
+      border-radius: 999px;
+      background: #d7ebe6;
+      transform: translateX(-50%);
+    }
+
+    .neck-map::after,
+    .body-map::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 114px;
+      width: 180px;
+      height: 160px;
+      border: 3px solid #8bbcb3;
+      background: #d7ebe6;
+      transform: translateX(-50%);
+      clip-path: polygon(18% 0, 82% 0, 100% 24%, 84% 100%, 16% 100%, 0 24%);
+    }
+
+    .head-map::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 38px;
+      width: 158px;
+      height: 190px;
+      border: 3px solid #8bbcb3;
+      border-radius: 48% 48% 44% 44%;
+      background: #d7ebe6;
+      transform: translateX(-50%);
+    }
+
+    .spine {
+      position: absolute;
+      left: 50%;
+      top: 124px;
+      z-index: 2;
+      width: 4px;
+      height: 140px;
+      background: #78aaa2;
+      transform: translateX(-50%);
+    }
+
+    .map-dot {
+      position: absolute;
+      z-index: 3;
+      display: grid;
+      place-items: center;
+      width: 31px;
+      height: 31px;
+      border: 4px solid #fff;
+      border-radius: 999px;
+      background: var(--coral);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .neck-r { left: calc(50% + 54px); top: 118px; }
+    .neck-l { left: calc(50% - 86px); top: 118px; }
+    .shoulder-r { left: calc(50% + 74px); top: 170px; }
+    .shoulder-l { left: calc(50% - 104px); top: 170px; }
+    .hand-dot { right: 20px; bottom: 22px; background: var(--teal); }
+    .back-r { left: calc(50% + 58px); top: 176px; background: var(--indigo); }
+    .back-l { left: calc(50% - 88px); top: 176px; background: var(--indigo); }
+    .front { left: calc(50% - 16px); top: 194px; background: var(--green); }
+    .forehead { left: calc(50% - 16px); top: 66px; }
+    .temple-r { left: calc(50% + 58px); top: 112px; }
+    .temple-l { left: calc(50% - 88px); top: 112px; }
+    .occipital { left: calc(50% - 16px); top: 198px; background: var(--indigo); }
+
+    .angle-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .angle-card {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .angle-card strong {
+      font-size: 15px;
+    }
+
+    .test-table {
+      display: grid;
+      gap: 10px;
+    }
+
+    .test-row {
+      display: grid;
+      grid-template-columns: minmax(170px, .9fr) minmax(0, 1fr);
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .point-name {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .point-badge {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: var(--teal);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 900;
+      flex: 0 0 auto;
+    }
+
+    .point-name strong {
+      display: block;
+      font-size: 15px;
+    }
+
+    .point-name span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) 106px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .side-result {
+      display: grid;
+      place-items: center;
+      min-height: 46px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fbfa;
+      color: var(--teal-dark);
+      font-size: 13px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .selected-point {
+      display: grid;
+      grid-template-columns: 86px minmax(0, 1fr);
+      gap: 14px;
+      align-items: center;
+      padding: 16px;
+      border: 1px solid #acd1c9;
+      border-radius: 8px;
+      background: #e8f4f1;
+    }
+
+    .selected-mark {
+      display: grid;
+      place-items: center;
+      width: 86px;
+      height: 86px;
+      border-radius: 8px;
+      background: var(--teal);
+      color: #fff;
+      font-size: 30px;
+      font-weight: 900;
+    }
+
+    .timer {
+      display: grid;
+      grid-template-columns: 172px minmax(0, 1fr);
+      gap: 18px;
+      align-items: center;
+    }
+
+    .timer-ring {
+      display: grid;
+      place-items: center;
+      width: 154px;
+      height: 154px;
+      border-radius: 999px;
+      background: conic-gradient(var(--teal) var(--timer, 0%), #e4ece9 0);
+    }
+
+    .timer-core {
+      display: grid;
+      place-items: center;
+      width: 114px;
+      height: 114px;
+      border-radius: 999px;
+      background: #fff;
+      font-size: 26px;
+      font-weight: 900;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      min-height: 88px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .metric b {
+      display: block;
+      font-size: 24px;
+      line-height: 1.15;
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .route-table {
+      display: grid;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .route-row {
+      display: grid;
+      grid-template-columns: 178px minmax(0, 1fr);
+      min-height: 54px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .route-row:last-child {
+      border-bottom: 0;
+    }
+
+    .route-row b,
+    .route-row span {
+      padding: 12px 14px;
+    }
+
+    .route-row b {
+      background: #f5f9f8;
+      color: var(--teal-dark);
+      font-size: 13px;
+    }
+
+    .route-row span {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .notice {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fbfa;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .notice.danger {
+      border-color: #f0b4ae;
+      background: #fff0ef;
+      color: #8f1f17;
+    }
+
+    .history-tools {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 160px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .filter-btn {
+      min-height: 36px;
+      padding: 0 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .filter-btn.active {
+      border-color: var(--teal);
+      background: #e8f4f1;
+      color: var(--teal-dark);
+    }
+
+    .history-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .history-card {
+      display: grid;
+      gap: 10px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .history-card.active {
+      border-color: var(--teal);
+      background: #f0faf7;
+    }
+
+    .history-card h3 {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.35;
+    }
+
+    .history-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .history-result {
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .history-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .small-btn {
+      min-height: 34px;
+      padding: 0 11px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .small-btn.primary {
+      border-color: var(--teal);
+      background: var(--teal);
+      color: #fff;
+    }
+
+    .small-btn.danger {
+      border-color: #f0b4ae;
+      color: var(--danger);
+    }
+
+    .recall-detail {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      border: 1px solid #acd1c9;
+      border-radius: 8px;
+      background: #f0faf7;
+    }
+
+    .recall-detail strong {
+      font-size: 17px;
+    }
+
+    .empty-state {
+      padding: 16px;
+      border: 1px dashed var(--line-strong);
+      border-radius: 8px;
+      background: #f8fbfa;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 29px;
+      padding: 0 9px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .tag.teal { border-color: #acd1c9; background: #e8f4f1; color: var(--teal-dark); }
+    .tag.green { border-color: #b9ddcb; background: #f0faf4; color: #226241; }
+    .tag.coral { border-color: #efc0ad; background: #fff3ee; color: #923f2b; }
+    .tag.warn { border-color: #e7c98f; background: #fff8e8; color: #7a4d05; }
+    .tag.danger { border-color: #f0b4ae; background: #fff0ef; color: var(--danger); }
+
+    .insight-section {
+      padding: 14px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .insight-section:first-child {
+      padding-top: 0;
+    }
+
+    .insight-section:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .decision {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fbfa;
+    }
+
+    .decision strong {
+      font-size: 19px;
+      line-height: 1.25;
+    }
+
+    .decision p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .mini {
+      min-height: 68px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .mini b {
+      display: block;
+      font-size: 20px;
+      line-height: 1.15;
+    }
+
+    .mini span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .summary-list {
+      display: grid;
+      gap: 9px;
+      margin: 10px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .summary-list li {
+      display: grid;
+      gap: 3px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .summary-list b {
+      color: var(--teal-dark);
+      font-size: 12px;
+    }
+
+    .summary-list span {
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    @media (max-width: 1240px) {
+      .workspace {
+        grid-template-columns: 242px minmax(0, 1fr);
+      }
+
+      .insights {
+        grid-column: 1 / -1;
+        position: static;
+      }
+
+      .insight-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .insight-section {
+        border-bottom: 0;
+        border-right: 1px solid var(--line);
+        padding: 0 14px 0 0;
+      }
+
+      .insight-section:last-child {
+        border-right: 0;
+      }
+    }
+
+    @media (max-width: 880px) {
+      .top-inner {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 14px 16px;
+      }
+
+      .top-actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .pill,
+      .top-btn {
+        width: 100%;
+      }
+
+      .shell {
+        padding: 14px;
+      }
+
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .stage { order: 1; }
+      .panel { order: 2; }
+      .insights { order: 3; }
+
+      .panel,
+      .insights {
+        position: static;
+      }
+
+      .stage-head {
+        flex-direction: column;
+        padding: 20px 18px 0;
+      }
+
+      .stage-title {
+        font-size: 24px;
+      }
+
+      .progress {
+        text-align: left;
+      }
+
+      .stage-body {
+        padding: 18px;
+      }
+
+      .two-col,
+      .input-grid,
+      .angle-grid,
+      .choices,
+      .choices.three,
+      .checks,
+      .test-row,
+      .score-grid,
+      .timer,
+      .metrics,
+      .history-tools,
+      .history-grid,
+      .insight-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .steps {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .route-row {
+        grid-template-columns: 1fr;
+      }
+
+      .insight-section {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+        padding: 14px 0;
+      }
+    }
+
+    @media (max-width: 520px) {
+      h1 {
+        font-size: 17px;
+      }
+
+      .steps,
+      .mini-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .selected-point {
+        grid-template-columns: 1fr;
+      }
+
+      .selected-mark {
+        width: 68px;
+        height: 68px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="top-inner">
+      <div class="brand">
+        <div class="brand-mark">R</div>
+        <div>
+          <p class="eyebrow">HOME MOBILITY RESPONSE TEST</p>
+          <h1>舊客居家活動度與按壓反應體驗版 V3｜回溯舊點</h1>
+        </div>
+      </div>
+      <div class="top-actions">
+        <span class="pill"><span class="dot"></span><span id="topStatus">可操作測試版</span></span>
+        <span class="pill">前後測差異模式</span>
+        <button type="button" class="top-btn" id="recallTopBtn">回溯舊點</button>
+        <button type="button" class="top-btn" id="resetBtn">重設體驗</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+    <div class="workspace">
+      <aside class="panel" aria-label="流程">
+        <p class="panel-title">測試流程</p>
+        <p class="panel-sub">先測左右活動度，再用三個示意位置做左右比較，最後看前後差異。</p>
+        <nav class="steps" id="stepsNav"></nav>
+        <div class="panel-note">本頁為體驗原型。正式點位、禁忌、風險排除與話術需由醫療、法規與顧問團隊定版。</div>
+      </aside>
+
+      <main class="stage" aria-live="polite">
+        <div class="stage-head">
+          <div>
+            <p class="stage-kicker" id="stageKicker">01 測試模式</p>
+            <h2 class="stage-title" id="stageTitle">先決定自己測，還是由家人協助。</h2>
+            <p class="stage-desc" id="stageDesc">可按到的位置會不同：自己測試以手部、前側或頸側為主；家人協助時才開放背部示意位置。</p>
+          </div>
+          <div class="progress">
+            <p id="progressLabel">完成度 0%</p>
+            <div class="track" aria-hidden="true"><div class="fill" id="progressFill"></div></div>
+          </div>
+        </div>
+        <div class="stage-body" id="stageBody"></div>
+      </main>
+
+      <aside class="insights" aria-label="即時摘要">
+        <div class="insight-grid">
+          <section class="insight-section">
+            <p class="section-title">目前判斷</p>
+            <div class="decision" id="decisionBox"></div>
+            <div class="mini-grid">
+              <div class="mini"><b id="miniStep">1/6</b><span>流程位置</span></div>
+              <div class="mini"><b id="miniRisk">低</b><span>安全標記</span></div>
+              <div class="mini"><b id="miniResult">待測</b><span>體驗結果</span></div>
+            </div>
+          </section>
+
+          <section class="insight-section">
+            <p class="section-title">測試摘要</p>
+            <ul class="summary-list" id="summaryList"></ul>
+          </section>
+
+          <section class="insight-section">
+            <p class="section-title">紀錄標籤</p>
+            <div class="tags" id="tagCloud"></div>
+          </section>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const steps = [
+      { title: "測試模式", sub: "自測／家人協助與主題" },
+      { title: "前測紀錄", sub: "左右轉角度與不適位置" },
+      { title: "三點比較", sub: "左右按壓反應測試" },
+      { title: "一分鐘按壓", sub: "依結果取得主要位置" },
+      { title: "後測回填", sub: "角度與痠痛變化" },
+      { title: "回溯保存", sub: "找回舊點或留下資料" }
+    ];
+
+    const titles = [
+      {
+        kicker: "01 測試模式",
+        title: "先決定自己測，還是由家人協助。",
+        desc: "可按到的位置會不同：自己測試以手部、前側或頸側為主；家人協助時才開放背部示意位置。"
+      },
+      {
+        kicker: "02 前測紀錄",
+        title: "先量出按壓前的左右活動度與原本不適。",
+        desc: "此步驟建立基準值。後面不是用感覺說服，而是用角度與痠痛變化做前後對照。"
+      },
+      {
+        kicker: "03 三點左右比較",
+        title: "系統給三個位置，使用者左右都按看看。",
+        desc: "每個位置都比較左、右兩邊哪一邊比較明顯，系統再整理出本次主要按壓位置。"
+      },
+      {
+        kicker: "04 一分鐘按壓",
+        title: "依比較結果，取得本次一分鐘按壓位置。",
+        desc: "這裡只呈現示意區與安全提醒。正式位置與操作方式需由內部點位方案庫提供。"
+      },
+      {
+        kicker: "05 後測回填",
+        title: "按完後再測一次，觀察活動度與原本痠痛是否改變。",
+        desc: "判斷指標有兩個：左右轉動幅度是否增加，以及原本痠痛是否降低或消失。"
+      },
+      {
+        kicker: "06 保存與承接",
+        title: "把有效點存起來，下次可以回溯找回。",
+        desc: "舊客回來時，可依症狀、日期、有效程度找出以前按過有效的點，再決定直接查看、帶入本次按壓或重新測一次。"
+      }
+    ];
+
+    const pointLibrary = {
+      selfNeck: [
+        { id: "H1", name: "手部示意點 H1", type: "hand", access: "自己可按", note: "手部可自行操作，適合遠端體驗第一階段。" },
+        { id: "F2", name: "前側示意點 F2", type: "front", access: "自己可按", note: "胸前或鎖骨下附近示意區，需避免過度用力。" },
+        { id: "N3", name: "頸側示意點 N3", type: "neck", access: "自己可按", note: "只做短時間輕按，若不適增加立即停止。" },
+        { id: "H4", name: "手腕示意點 H4", type: "hand", access: "自己可按", note: "替代手部示意區，用於隨機組合。" },
+        { id: "F5", name: "前肩示意點 F5", type: "front", access: "自己可按", note: "前肩可觸及位置，正式點位需審核。" }
+      ],
+      familyNeck: [
+        { id: "H1", name: "手部示意點 H1", type: "hand", access: "自己可按", note: "保留一個手部點，方便對照。" },
+        { id: "B1", name: "背部示意點 B1", type: "back", access: "需家人協助", note: "肩胛內側附近示意區，自己通常不易按到。" },
+        { id: "B2", name: "背部示意點 B2", type: "back", access: "需家人協助", note: "上背肩頸交界附近示意區，需家人協助比較左右。" },
+        { id: "S3", name: "肩後示意點 S3", type: "back", access: "需家人協助", note: "肩後側示意區，用於家人協助流程。" },
+        { id: "F2", name: "前側示意點 F2", type: "front", access: "自己可按", note: "搭配背部點做前後反應比較。" }
+      ],
+      headache: [
+        { id: "H1", name: "手部示意點 H1", type: "hand", access: "自己可按", note: "頭痛流程先使用自己可操作位置。" },
+        { id: "W2", name: "手腕示意點 W2", type: "hand", access: "自己可按", note: "短時間左右比較，不做強刺激。" },
+        { id: "A3", name: "前臂示意點 A3", type: "hand", access: "自己可按", note: "可自行操作，便於保存與回訪。" },
+        { id: "N4", name: "頸側示意點 N4", type: "neck", access: "自己可按", note: "頭痛合併頸緊時才作為示意選項。" }
+      ]
+    };
+
+    const state = {
+      step: 0,
+      relation: "曾經看診過",
+      helper: "self",
+      topic: "neck",
+      headachePlace: "太陽穴",
+      symptomPlace: "右側肩頸",
+      beforeRightAngle: 75,
+      beforeLeftAngle: 60,
+      beforeRightFeel: "右轉到底時，左側脖子與肩膀會緊。",
+      beforeLeftFeel: "左轉到底時，左側肩頸痠，轉動幅度比較小。",
+      redFlags: [],
+      generatedAt: 0,
+      points: [],
+      scores: {},
+      selectedPointId: null,
+      timerLeft: 60,
+      timerRunning: false,
+      afterRightAngle: 90,
+      afterLeftAngle: 82,
+      symptomRelief: 6,
+      painAfter: 3,
+      consent: true,
+      contact: "LINE",
+      savedHeadachePoint: localStorage.getItem("raphael_saved_headache_point") || "",
+      recallFilter: "all",
+      recallKeyword: "",
+      activeRecallId: "",
+      pointRecords: loadPointRecords()
+    };
+
+    let timer = null;
+
+    function render() {
+      renderSteps();
+      renderHeader();
+      renderStage();
+      renderInsights();
+    }
+
+    function renderSteps() {
+      const nav = document.getElementById("stepsNav");
+      nav.innerHTML = steps.map((item, index) => `
+        <button type="button" class="step ${state.step === index ? "active" : ""} ${state.step > index ? "done" : ""}" data-step="${index}">
+          <span class="step-num">${index + 1}</span>
+          <span><strong>${item.title}</strong><span>${item.sub}</span></span>
+        </button>
+      `).join("");
+      nav.querySelectorAll("button").forEach(button => {
+        button.addEventListener("click", () => goStep(Number(button.dataset.step)));
+      });
+    }
+
+    function renderHeader() {
+      const meta = titles[state.step];
+      document.getElementById("stageKicker").textContent = meta.kicker;
+      document.getElementById("stageTitle").textContent = meta.title;
+      document.getElementById("stageDesc").textContent = meta.desc;
+      const percent = Math.round((state.step / (steps.length - 1)) * 100);
+      document.getElementById("progressLabel").textContent = `完成度 ${percent}%`;
+      document.getElementById("progressFill").style.width = `${percent}%`;
+      document.getElementById("miniStep").textContent = `${state.step + 1}/6`;
+    }
+
+    function renderStage() {
+      const views = [viewMode, viewBaseline, viewCompare, viewPress, viewAfter, viewRoute];
+      document.getElementById("stageBody").innerHTML = views[state.step]();
+      bindEvents();
+    }
+
+    function viewMode() {
+      return `
+        <div class="two-col">
+          <div class="grid">
+            <section class="block">
+              <div class="block-head">
+                <div>
+                  <p class="block-title">這次由誰協助測試？</p>
+                  <p class="caption">這會決定系統能不能提供背部示意位置。</p>
+                </div>
+              </div>
+              <div class="choices">
+                <button type="button" class="choice ${state.helper === "self" ? "selected" : ""}" data-helper="self">我自己測試</button>
+                <button type="button" class="choice ${state.helper === "family" ? "selected" : ""}" data-helper="family">家人協助測試</button>
+              </div>
+            </section>
+
+            <section class="block">
+              <p class="block-title">這次想測哪一類狀態？</p>
+              <div class="choices">
+                <button type="button" class="choice ${state.topic === "neck" ? "selected" : ""}" data-topic="neck">肩頸／脖子／肩膀痠緊</button>
+                <button type="button" class="choice ${state.topic === "headache" ? "selected" : ""}" data-topic="headache">頭痛示範流程</button>
+              </div>
+            </section>
+
+            <section class="block soft">
+              <p class="block-title">此模式和上一版的差異</p>
+              <p class="caption">上一版重點是「AI 判斷是否在開放症狀範圍」；這一版重點是「先建立前測，再透過三點左右比較，最後用後測差異產生有感」。</p>
+              <div class="tags">
+                <span class="tag teal">前後測</span>
+                <span class="tag green">左右比較</span>
+                <span class="tag coral">家人協助分流</span>
+                <span class="tag warn">頭痛位置保存</span>
+              </div>
+            </section>
+
+            <div class="actions">
+              <button type="button" class="btn btn-primary" data-next="1">開始前測紀錄 <span class="icon">›</span></button>
+            </div>
+          </div>
+
+          <aside class="diagram">
+            ${renderNeckMap()}
+            <p class="caption">示意圖用於說明流程，不代表正式點位位置。</p>
+          </aside>
+        </div>
+      `;
+    }
+
+    function viewBaseline() {
+      const headache = state.topic === "headache";
+      return `
+        <div class="grid">
+          ${headache ? headacheBaselineBlock() : neckBaselineBlock()}
+          <section class="block danger">
+            <p class="block-title">安全排除</p>
+            <p class="caption">若有下列狀況，不進入居家按壓測試，改由醫療或專人協助判斷。</p>
+            <div class="checks">
+              ${redFlagOptions().map(item => `
+                <label class="check"><input type="checkbox" data-redflag="${item}" ${state.redFlags.includes(item) ? "checked" : ""}>${item}</label>
+              `).join("")}
+            </div>
+          </section>
+          <div class="actions">
+            <button type="button" class="btn btn-secondary" data-prev="0"><span class="icon">‹</span> 返回模式</button>
+            <button type="button" class="btn btn-primary" id="baselineNext">${state.redFlags.length ? "建立安全承接" : "產生三個測試位置"} <span class="icon">›</span></button>
+          </div>
+        </div>
+      `;
+    }
+
+    function neckBaselineBlock() {
+      return `
+        <section class="block">
+          <p class="block-title">左右轉動前測</p>
+          <p class="caption">請坐挺，脖子往右邊轉到底，再往左邊轉到底，記錄大約角度與哪裡會緊、痠、痛。</p>
+          <div class="angle-grid">
+            <div class="angle-card">
+              <strong>右轉前測</strong>
+              ${range("beforeRightAngle", "右轉角度", state.beforeRightAngle, 0, 100, "度")}
+              <label for="beforeRightFeel">右轉時哪裡有感</label>
+              <textarea id="beforeRightFeel">${escapeHtml(state.beforeRightFeel)}</textarea>
+            </div>
+            <div class="angle-card">
+              <strong>左轉前測</strong>
+              ${range("beforeLeftAngle", "左轉角度", state.beforeLeftAngle, 0, 100, "度")}
+              <label for="beforeLeftFeel">左轉時哪裡有感</label>
+              <textarea id="beforeLeftFeel">${escapeHtml(state.beforeLeftFeel)}</textarea>
+            </div>
+          </div>
+          <div class="input-grid">
+            <div class="field">
+              <label for="symptomPlace">最容易痠痛的位置</label>
+              <select id="symptomPlace">
+                ${["右側肩頸", "左側肩頸", "右肩膀", "左肩膀", "後頸", "上背靠近肩胛"].map(option => `<option ${state.symptomPlace === option ? "selected" : ""}>${option}</option>`).join("")}
+              </select>
+            </div>
+            <div class="field">
+              <label for="relation">舊客關係</label>
+              <select id="relation">
+                ${["曾經看診過", "曾經做過療程", "曾經購買或體驗產品", "曾經預約但最後沒有來", "不確定，但曾經接觸過"].map(option => `<option ${state.relation === option ? "selected" : ""}>${option}</option>`).join("")}
+              </select>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function headacheBaselineBlock() {
+      return `
+        <section class="block">
+          <p class="block-title">頭痛位置前測</p>
+          <p class="caption">目前頭痛流程先限定位置記錄與安全排除。若有紅旗狀況，系統不提供按壓測試。</p>
+          <div class="two-col">
+            <div class="grid">
+              <div class="choices">
+                ${["前額", "太陽穴", "後腦", "頭頂"].map(place => `
+                  <button type="button" class="choice ${state.headachePlace === place ? "selected" : ""}" data-headache="${place}">${place}</button>
+                `).join("")}
+              </div>
+              <div class="input-grid">
+                <div class="field">
+                  <label for="painAfter">目前疼痛程度 0 到 10 分</label>
+                  ${range("painAfter", "目前疼痛", state.painAfter + 3, 0, 10, "分")}
+                </div>
+                <div class="field">
+                  <label for="relation">舊客關係</label>
+                  <select id="relation">
+                    ${["曾經看診過", "曾經做過療程", "曾經購買或體驗產品", "曾經預約但最後沒有來", "不確定，但曾經接觸過"].map(option => `<option ${state.relation === option ? "selected" : ""}>${option}</option>`).join("")}
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="diagram">${renderHeadMap()}<p class="caption">請先標記最接近的位置，再進入左右按壓反應比較。</p></div>
+          </div>
+        </section>
+      `;
+    }
+
+    function viewCompare() {
+      if (state.redFlags.length) return safetyBlock();
+      if (!state.points.length) generatePoints();
+      return `
+        <div class="grid">
+          <section class="block soft">
+            <div class="block-head">
+              <div>
+                <p class="block-title">三個測試位置</p>
+                <p class="caption">每一個位置都按左邊幾秒、右邊幾秒，記錄哪一邊比較明顯。正式位置名稱可由內部方案庫替換。</p>
+              </div>
+              <button type="button" class="btn btn-secondary" id="regenPoints">重新產生組合</button>
+            </div>
+          </section>
+          <section class="test-table">
+            ${state.points.map((point, index) => testRow(point, index)).join("")}
+          </section>
+          <div class="notice">目前保留一點隨機組合，但必須限制在已審核的方案庫內。不能讓系統自由生成未審核位置。</div>
+          <div class="actions">
+            <button type="button" class="btn btn-secondary" data-prev="1"><span class="icon">‹</span> 回前測</button>
+            <button type="button" class="btn btn-primary" id="selectMainPoint">整理主要按壓位置 <span class="icon">›</span></button>
+          </div>
+        </div>
+      `;
+    }
+
+    function testRow(point, index) {
+      const score = state.scores[point.id] || { left: 3, right: 6 };
+      const side = score.left === score.right ? "兩側接近" : score.left > score.right ? "左邊較明顯" : "右邊較明顯";
+      return `
+        <div class="test-row">
+          <div class="point-name">
+            <div class="point-badge">${index + 1}</div>
+            <div>
+              <strong>${point.name}</strong>
+              <span>${point.access}｜${point.note}</span>
+            </div>
+          </div>
+          <div class="score-grid">
+            ${scoreRange(point.id, "left", "左邊痛感", score.left)}
+            ${scoreRange(point.id, "right", "右邊痛感", score.right)}
+            <div class="side-result">${side}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function viewPress() {
+      if (state.redFlags.length) return safetyBlock();
+      const point = selectedPoint();
+      return `
+        <div class="two-col">
+          <div class="grid">
+            <section class="block">
+              <p class="block-title">本次主要按壓位置</p>
+              <div class="selected-point">
+                <div class="selected-mark">${point.id}</div>
+                <div>
+                  <h3 style="margin:0 0 6px;font-size:22px">${point.name}</h3>
+                  <p class="caption">${point.access}。請以舒服力道按壓一分鐘，過程中若有疼痛加劇、麻、暈、胸悶或任何不適，立即停止。</p>
+                </div>
+              </div>
+              <div class="timer">
+                <div class="timer-ring" id="timerRing" style="--timer:${Math.round(((60 - state.timerLeft) / 60) * 100)}%">
+                  <div class="timer-core" id="timerText">${formatTime(state.timerLeft)}</div>
+                </div>
+                <div class="grid">
+                  <p class="caption">完成一分鐘後，請回到後測：重新左右轉頭，確認原本會痠、會緊的位置是否下降。</p>
+                  <button type="button" class="btn btn-primary" id="timerBtn">${state.timerRunning ? "暫停計時" : "開始 1 分鐘"}</button>
+                </div>
+              </div>
+            </section>
+            <div class="actions">
+              <button type="button" class="btn btn-secondary" data-prev="2"><span class="icon">‹</span> 回三點比較</button>
+              <button type="button" class="btn btn-primary" data-next="4">前往後測回填 <span class="icon">›</span></button>
+            </div>
+          </div>
+
+          <aside class="diagram">
+            ${point.type === "back" ? renderBodyMap() : state.topic === "headache" ? renderHeadMap() : renderNeckMap()}
+            <p class="caption">圖中標記為示意，正式版本應替換為醫療端審核過的位置圖與操作文字。</p>
+          </aside>
+        </div>
+      `;
+    }
+
+    function viewAfter() {
+      return `
+        <div class="grid">
+          <section class="block">
+            <p class="block-title">後測回填</p>
+            <p class="caption">按完後再測一次。重點不是宣稱改善，而是記錄「活動度是否變大」與「原本不適是否下降」。</p>
+            ${state.topic === "headache" ? headacheAfterBlock() : neckAfterBlock()}
+          </section>
+          <section class="block soft">
+            <p class="block-title">目前前後差異</p>
+            <div class="metrics">
+              <div class="metric"><b>${rightGain()}°</b><span>右轉增加</span></div>
+              <div class="metric"><b>${leftGain()}°</b><span>左轉增加</span></div>
+              <div class="metric"><b>${state.symptomRelief}/10</b><span>原本不適下降感</span></div>
+            </div>
+          </section>
+          <div class="actions">
+            <button type="button" class="btn btn-secondary" data-prev="3"><span class="icon">‹</span> 回按壓頁</button>
+            <button type="button" class="btn btn-primary" data-next="5">產生紀錄與建議 <span class="icon">›</span></button>
+          </div>
+        </div>
+      `;
+    }
+
+    function neckAfterBlock() {
+      return `
+        <div class="angle-grid">
+          <div class="angle-card">
+            <strong>右轉後測</strong>
+            ${range("afterRightAngle", "右轉後角度", state.afterRightAngle, 0, 100, "度")}
+          </div>
+          <div class="angle-card">
+            <strong>左轉後測</strong>
+            ${range("afterLeftAngle", "左轉後角度", state.afterLeftAngle, 0, 100, "度")}
+          </div>
+        </div>
+        ${range("symptomRelief", "原本痠痛下降感", state.symptomRelief, 0, 10, "分")}
+      `;
+    }
+
+    function headacheAfterBlock() {
+      return `
+        ${range("painAfter", "按壓後頭痛程度", state.painAfter, 0, 10, "分")}
+        ${range("symptomRelief", "頭痛下降感", state.symptomRelief, 0, 10, "分")}
+      `;
+    }
+
+    function viewRoute() {
+      if (state.redFlags.length) return safetyRoute();
+      const point = selectedPoint();
+      const effective = isEffective();
+      return `
+        <div class="grid">
+          <section class="block ${effective ? "soft" : "warn"}">
+            <p class="block-title">${effective ? "本次體驗已有可記錄變化" : "本次變化不明顯，建議由專人整理"}</p>
+            <p class="caption">${effective ? "可以把這次的前後測差異留下來，後續對照門診資料再給建議。" : "不建議硬推同一位置，應先由健康管理師整理姿勢、症狀與過去資料。"}</p>
+            <div class="route-table">
+              <div class="route-row"><b>舊客關係</b><span>${escapeHtml(state.relation)}</span></div>
+              <div class="route-row"><b>測試方式</b><span>${state.helper === "family" ? "家人協助，可使用背部示意點" : "自己測試，只使用可自行按到的位置"}</span></div>
+              <div class="route-row"><b>本次主題</b><span>${state.topic === "headache" ? `頭痛：${state.headachePlace}` : `肩頸活動度：${state.symptomPlace}`}</span></div>
+              <div class="route-row"><b>主要位置</b><span>${point.name}（${point.access}）</span></div>
+              <div class="route-row"><b>前後差異</b><span>${resultSentence()}</span></div>
+              <div class="route-row"><b>後續建議</b><span>${nextStepSentence()}</span></div>
+            </div>
+          </section>
+
+          ${saveCurrentPointBlock(point, effective)}
+          ${historyBlock()}
+
+          <section class="block">
+            <p class="block-title">留下資料，對照過去門診紀錄</p>
+            <p class="caption">建議話術方向：留下這次前後測紀錄，我們才能對照你過去在門診留下的資料，整理出下一步較明確的建議。</p>
+            <div class="checks">
+              <label class="check"><input type="checkbox" id="consent" ${state.consent ? "checked" : ""}>我同意由健康管理師依此紀錄協助判斷下一步</label>
+              <label class="check"><input type="checkbox" checked>我願意保留本次測試紀錄，供後續對照使用</label>
+            </div>
+            <div class="input-grid">
+              <div class="field">
+                <label for="contact">偏好聯繫方式</label>
+                <input id="contact" type="text" value="${escapeHtml(state.contact)}">
+              </div>
+              <div class="field">
+                <label for="memo">備註</label>
+                <input id="memo" type="text" value="希望後續對照門診資料">
+              </div>
+            </div>
+          </section>
+          <div class="actions">
+            <button type="button" class="btn btn-secondary" data-prev="4"><span class="icon">‹</span> 回後測</button>
+            <button type="button" class="btn btn-secondary" id="printBtn">列印／存成 PDF</button>
+            <button type="button" class="btn btn-primary" id="restartNeck">重新測一次 <span class="icon">›</span></button>
+          </div>
+        </div>
+      `;
+    }
+
+    function safetyBlock() {
+      return `
+        <div class="block danger">
+          <p class="block-title">此狀態不進入居家按壓測試</p>
+          <p class="caption">您勾選了安全排除條件：${state.redFlags.map(escapeHtml).join("、")}。為了安全，系統不提供測試位置。</p>
+          <div class="notice danger">若症狀明顯、快速加重，或伴隨神經症狀、外傷、發燒、胸悶等情況，請優先尋求醫療評估。</div>
+          <div class="actions">
+            <button type="button" class="btn btn-secondary" data-prev="1"><span class="icon">‹</span> 重新確認</button>
+            <button type="button" class="btn btn-danger" data-next="5">建立安全承接紀錄 <span class="icon">›</span></button>
+          </div>
+        </div>
+      `;
+    }
+
+    function safetyRoute() {
+      return `
+        <div class="block danger">
+          <p class="block-title">安全承接紀錄</p>
+          <p class="caption">本次不提供居家按壓測試。紀錄保留給專人確認，避免把高風險狀態誤導成一般體驗。</p>
+          <div class="route-table">
+            <div class="route-row"><b>安全原因</b><span>${state.redFlags.map(escapeHtml).join("、")}</span></div>
+            <div class="route-row"><b>系統動作</b><span>停止產生點位與一分鐘按壓流程</span></div>
+            <div class="route-row"><b>建議下一步</b><span>醫療評估或由健康管理師先行確認狀態</span></div>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn btn-secondary" data-prev="1"><span class="icon">‹</span> 返回前測</button>
+            <button type="button" class="btn btn-primary" id="restartNeck">重新開始 <span class="icon">›</span></button>
+          </div>
+        </div>
+      `;
+    }
+
+    function headacheSaveBlock(point, effective) {
+      const saved = state.savedHeadachePoint;
+      return `
+        <section class="block">
+          <p class="block-title">頭痛位置保存</p>
+          <p class="caption">${effective ? "如果本次按壓後頭痛下降，可保存這個示意位置。下次忘記時回來即可查看。" : "本次變化不明顯，暫不建議保存為固定位置。"}</p>
+          ${saved ? `<div class="notice">目前已保存：${escapeHtml(saved)}</div>` : ""}
+          <div class="actions" style="justify-content:flex-start">
+            <button type="button" class="btn btn-primary" id="saveHeadache" ${effective ? "" : "disabled"}>保存本次頭痛位置</button>
+            <button type="button" class="btn btn-secondary" id="clearSaved">清除保存</button>
+          </div>
+        </section>
+      `;
+    }
+
+    function saveCurrentPointBlock(point, effective) {
+      return `
+        <section class="block">
+          <p class="block-title">${state.topic === "headache" ? "頭痛位置保存" : "本次有效點保存"}</p>
+          <p class="caption">${effective ? "如果這次前後測有變化，可以把主要位置、症狀、日期與前後差異存成一筆紀錄。下次回來可以直接找回。" : "本次變化不明顯，建議先不要保存為固定有效點，可保留測試紀錄給專人判斷。"}</p>
+          <div class="route-table">
+            <div class="route-row"><b>準備保存的位置</b><span>${point.name}（${point.id}｜${point.access}）</span></div>
+            <div class="route-row"><b>保存分類</b><span>${state.topic === "headache" ? `頭痛：${state.headachePlace}` : `肩頸：${state.symptomPlace}`}</span></div>
+            <div class="route-row"><b>回溯關鍵</b><span>${resultSentence()}</span></div>
+          </div>
+          <div class="actions" style="justify-content:flex-start">
+            <button type="button" class="btn btn-primary" id="savePointRecord" ${effective ? "" : "disabled"}>保存到回溯舊點</button>
+          </div>
+        </section>
+      `;
+    }
+
+    function historyBlock() {
+      const records = filteredPointRecords();
+      const active = activeRecallRecord();
+      return `
+        <section class="block">
+          <div class="block-head">
+            <div>
+              <p class="block-title">回溯舊點資料庫</p>
+              <p class="caption">依症狀、日期、點位或有效程度找出以前按過的點。正式版可接 CRM 或會員資料庫；此原型先存在這台瀏覽器。</p>
+            </div>
+          </div>
+          <div class="history-tools">
+            <div class="filter-row">
+              ${[
+                ["all", "全部"],
+                ["neck", "肩頸"],
+                ["headache", "頭痛"],
+                ["effective", "有效紀錄"]
+              ].map(([id, label]) => `<button type="button" class="filter-btn ${state.recallFilter === id ? "active" : ""}" data-filter="${id}">${label}</button>`).join("")}
+            </div>
+            <input type="text" id="recallKeyword" value="${escapeHtml(state.recallKeyword)}" placeholder="搜尋：A3、頭頂、右肩頸">
+          </div>
+          ${active ? recallDetail(active) : ""}
+          ${records.length ? `<div class="history-grid">${records.map(record => recallCard(record)).join("")}</div>` : `<div class="empty-state">目前還沒有正式保存的有效點。完成一次有變化的後測後，按「保存到回溯舊點」，下次就能在這裡找回。</div>`}
+          <div class="actions" style="justify-content:flex-start">
+            <button type="button" class="btn btn-secondary" id="loadDemoRecords">載入示範回溯紀錄</button>
+            <button type="button" class="btn btn-secondary" id="clearPointRecords">清除全部回溯紀錄</button>
+          </div>
+        </section>
+      `;
+    }
+
+    function recallCard(record) {
+      return `
+        <article class="history-card ${state.activeRecallId === record.id ? "active" : ""}">
+          <div>
+            <h3>${escapeHtml(record.symptomLabel)}</h3>
+            <div class="history-meta">
+              <span>${escapeHtml(record.date)}</span>
+              <span>${escapeHtml(record.pointId)}</span>
+              <span>${escapeHtml(record.helperLabel)}</span>
+              ${record.demo ? "<span>示範</span>" : ""}
+            </div>
+          </div>
+          <div class="history-result">${escapeHtml(record.resultText)}</div>
+          <div class="tags">
+            <span class="tag ${record.topic === "headache" ? "warn" : "teal"}">${record.topic === "headache" ? "頭痛" : "肩頸"}</span>
+            <span class="tag green">有效紀錄</span>
+          </div>
+          <div class="history-actions">
+            <button type="button" class="small-btn" data-view-record="${record.id}">查看</button>
+            <button type="button" class="small-btn primary" data-use-record="${record.id}">帶入本次</button>
+            ${record.demo ? "" : `<button type="button" class="small-btn danger" data-delete-record="${record.id}">刪除</button>`}
+          </div>
+        </article>
+      `;
+    }
+
+    function recallDetail(record) {
+      return `
+        <div class="recall-detail">
+          <strong>已選擇：${escapeHtml(record.symptomLabel)}｜${escapeHtml(record.pointName)}</strong>
+          <div class="route-table">
+            <div class="route-row"><b>保存時間</b><span>${escapeHtml(record.date)}</span></div>
+            <div class="route-row"><b>當時測試</b><span>${escapeHtml(record.helperLabel)}，${escapeHtml(record.topic === "headache" ? record.headachePlace : record.symptomPlace)}</span></div>
+            <div class="route-row"><b>當時差異</b><span>${escapeHtml(record.resultText)}</span></div>
+            <div class="route-row"><b>回溯用途</b><span>可以直接查看此點，也可以帶入本次一分鐘按壓，再做新的後測紀錄。</span></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function loadPointRecords() {
+      try {
+        const raw = localStorage.getItem("raphael_point_records_v3");
+        const records = raw ? JSON.parse(raw) : [];
+        const legacy = localStorage.getItem("raphael_saved_headache_point");
+        if (legacy && !records.some(record => record.legacy === true)) {
+          records.unshift({
+            id: "legacy-headache",
+            legacy: true,
+            topic: "headache",
+            date: "舊版保存",
+            pointId: "舊版",
+            pointName: legacy,
+            access: "自己可按",
+            helper: "self",
+            helperLabel: "自己測試",
+            headachePlace: "未標記",
+            symptomPlace: "",
+            symptomLabel: "舊版頭痛保存",
+            resultText: "由 V2 單筆保存轉入，建議重新測一次後更新。",
+            effective: true
+          });
+        }
+        return Array.isArray(records) ? records : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function savePointRecords() {
+      const persistent = state.pointRecords.filter(record => !record.demo);
+      localStorage.setItem("raphael_point_records_v3", JSON.stringify(persistent));
+    }
+
+    function demoPointRecords() {
+      return [
+        {
+          id: "demo-head-a3",
+          demo: true,
+          topic: "headache",
+          date: "2026/6/10",
+          pointId: "A3",
+          pointName: "前臂示意點 A3",
+          access: "自己可按",
+          helper: "self",
+          helperLabel: "自己測試",
+          headachePlace: "頭頂",
+          symptomPlace: "",
+          symptomLabel: "頭痛：頭頂",
+          resultText: "頭痛下降感 6/10，按壓後疼痛 3/10",
+          effective: true
+        },
+        {
+          id: "demo-neck-b2",
+          demo: true,
+          topic: "neck",
+          date: "2026/6/08",
+          pointId: "B2",
+          pointName: "背部示意點 B2",
+          access: "需家人協助",
+          helper: "family",
+          helperLabel: "家人協助",
+          headachePlace: "",
+          symptomPlace: "右側肩頸",
+          symptomLabel: "肩頸：右側肩頸",
+          resultText: "右轉 +15 度，左轉 +18 度，原本不適下降感 5/10",
+          effective: true
+        },
+        {
+          id: "demo-neck-h1",
+          demo: true,
+          topic: "neck",
+          date: "2026/6/03",
+          pointId: "H1",
+          pointName: "手部示意點 H1",
+          access: "自己可按",
+          helper: "self",
+          helperLabel: "自己測試",
+          headachePlace: "",
+          symptomPlace: "左側肩頸",
+          symptomLabel: "肩頸：左側肩頸",
+          resultText: "右轉 +8 度，左轉 +14 度，原本不適下降感 6/10",
+          effective: true
+        }
+      ];
+    }
+
+    function makeCurrentPointRecord() {
+      const point = selectedPoint();
+      const now = new Date();
+      return {
+        id: `record-${Date.now()}`,
+        topic: state.topic,
+        date: now.toLocaleDateString("zh-TW"),
+        pointId: point.id,
+        pointName: point.name,
+        access: point.access,
+        helper: state.helper,
+        helperLabel: state.helper === "family" ? "家人協助" : "自己測試",
+        headachePlace: state.headachePlace,
+        symptomPlace: state.symptomPlace,
+        symptomLabel: state.topic === "headache" ? `頭痛：${state.headachePlace}` : `肩頸：${state.symptomPlace}`,
+        resultText: resultSentence(),
+        effective: isEffective(),
+        relation: state.relation,
+        beforeRightAngle: state.beforeRightAngle,
+        beforeLeftAngle: state.beforeLeftAngle,
+        afterRightAngle: state.afterRightAngle,
+        afterLeftAngle: state.afterLeftAngle,
+        symptomRelief: state.symptomRelief,
+        painAfter: state.painAfter
+      };
+    }
+
+    function filteredPointRecords() {
+      const keyword = state.recallKeyword.trim().toLowerCase();
+      return state.pointRecords.filter(record => {
+        const filterOk =
+          state.recallFilter === "all" ||
+          record.topic === state.recallFilter ||
+          (state.recallFilter === "effective" && record.effective);
+        const haystack = `${record.symptomLabel} ${record.pointId} ${record.pointName} ${record.resultText} ${record.date} ${record.helperLabel}`.toLowerCase();
+        return filterOk && (!keyword || haystack.includes(keyword));
+      });
+    }
+
+    function activeRecallRecord() {
+      return state.pointRecords.find(record => record.id === state.activeRecallId) || null;
+    }
+
+    function useRecallRecord(record) {
+      state.topic = record.topic;
+      state.helper = record.helper || "self";
+      state.headachePlace = record.headachePlace || state.headachePlace;
+      state.symptomPlace = record.symptomPlace || state.symptomPlace;
+      const point = {
+        id: record.pointId,
+        name: record.pointName,
+        type: record.pointId.startsWith("B") || record.pointId.startsWith("S") ? "back" : record.topic === "headache" ? "hand" : "front",
+        access: record.access,
+        note: "由回溯舊點帶入；建議仍做新的後測紀錄。"
+      };
+      state.points = [point];
+      state.scores = { [point.id]: { left: 5, right: 7 } };
+      state.selectedPointId = point.id;
+      state.timerLeft = 60;
+      state.step = 3;
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function bindEvents() {
+      document.querySelectorAll("[data-step]").forEach(btn => btn.addEventListener("click", () => goStep(Number(btn.dataset.step))));
+      document.querySelectorAll("[data-next]").forEach(btn => btn.addEventListener("click", () => goStep(Number(btn.dataset.next))));
+      document.querySelectorAll("[data-prev]").forEach(btn => btn.addEventListener("click", () => goStep(Number(btn.dataset.prev))));
+
+      document.querySelectorAll("[data-helper]").forEach(btn => btn.addEventListener("click", () => {
+        state.helper = btn.dataset.helper;
+        resetGenerated();
+        render();
+      }));
+      document.querySelectorAll("[data-topic]").forEach(btn => btn.addEventListener("click", () => {
+        state.topic = btn.dataset.topic;
+        resetGenerated();
+        render();
+      }));
+      document.querySelectorAll("[data-headache]").forEach(btn => btn.addEventListener("click", () => {
+        state.headachePlace = btn.dataset.headache;
+        render();
+      }));
+      document.querySelectorAll("[data-redflag]").forEach(input => input.addEventListener("change", () => {
+        const value = input.dataset.redflag;
+        state.redFlags = input.checked ? [...new Set([...state.redFlags, value])] : state.redFlags.filter(item => item !== value);
+        render();
+      }));
+
+      ["beforeRightFeel", "beforeLeftFeel", "contact"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("input", event => {
+          state[id] = event.target.value;
+          renderInsights();
+        });
+      });
+      ["relation", "symptomPlace"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("change", event => {
+          state[id] = event.target.value;
+          renderInsights();
+        });
+      });
+      document.querySelectorAll("[data-range]").forEach(input => input.addEventListener("input", event => {
+        const key = input.dataset.range;
+        state[key] = Number(event.target.value);
+        const output = document.querySelector(`[data-output="${key}"]`);
+        if (output) output.textContent = `${state[key]}${input.dataset.unit}`;
+        renderInsights();
+      }));
+      document.querySelectorAll("[data-score]").forEach(input => input.addEventListener("input", event => {
+        const [pointId, side] = input.dataset.score.split(":");
+        if (!state.scores[pointId]) state.scores[pointId] = { left: 3, right: 6 };
+        state.scores[pointId][side] = Number(event.target.value);
+        render();
+      }));
+
+      const baselineNext = document.getElementById("baselineNext");
+      if (baselineNext) baselineNext.addEventListener("click", () => {
+        if (!state.redFlags.length) generatePoints();
+        goStep(state.redFlags.length ? 5 : 2);
+      });
+      const regen = document.getElementById("regenPoints");
+      if (regen) regen.addEventListener("click", () => {
+        resetGenerated();
+        generatePoints();
+        render();
+      });
+      const select = document.getElementById("selectMainPoint");
+      if (select) select.addEventListener("click", () => {
+        state.selectedPointId = computeSelectedPointId();
+        goStep(3);
+      });
+      const timerBtn = document.getElementById("timerBtn");
+      if (timerBtn) timerBtn.addEventListener("click", toggleTimer);
+      const save = document.getElementById("saveHeadache");
+      if (save) save.addEventListener("click", () => {
+        const point = selectedPoint();
+        state.savedHeadachePoint = `${point.name}｜${state.headachePlace}｜${new Date().toLocaleDateString("zh-TW")}`;
+        localStorage.setItem("raphael_saved_headache_point", state.savedHeadachePoint);
+        render();
+      });
+      const clear = document.getElementById("clearSaved");
+      if (clear) clear.addEventListener("click", () => {
+        state.savedHeadachePoint = "";
+        localStorage.removeItem("raphael_saved_headache_point");
+        render();
+      });
+      const saveRecord = document.getElementById("savePointRecord");
+      if (saveRecord) saveRecord.addEventListener("click", () => {
+        const record = makeCurrentPointRecord();
+        state.pointRecords = [record, ...state.pointRecords.filter(item => !item.demo)];
+        state.activeRecallId = record.id;
+        savePointRecords();
+        render();
+      });
+      const keyword = document.getElementById("recallKeyword");
+      if (keyword) keyword.addEventListener("input", event => {
+        state.recallKeyword = event.target.value;
+        render();
+      });
+      document.querySelectorAll("[data-filter]").forEach(button => button.addEventListener("click", () => {
+        state.recallFilter = button.dataset.filter;
+        render();
+      }));
+      document.querySelectorAll("[data-view-record]").forEach(button => button.addEventListener("click", () => {
+        state.activeRecallId = button.dataset.viewRecord;
+        render();
+      }));
+      document.querySelectorAll("[data-use-record]").forEach(button => button.addEventListener("click", () => {
+        const record = state.pointRecords.find(item => item.id === button.dataset.useRecord);
+        if (record) useRecallRecord(record);
+      }));
+      document.querySelectorAll("[data-delete-record]").forEach(button => button.addEventListener("click", () => {
+        state.pointRecords = state.pointRecords.filter(item => item.id !== button.dataset.deleteRecord);
+        if (state.activeRecallId === button.dataset.deleteRecord) state.activeRecallId = "";
+        savePointRecords();
+        render();
+      }));
+      const loadDemo = document.getElementById("loadDemoRecords");
+      if (loadDemo) loadDemo.addEventListener("click", () => {
+        const existingIds = new Set(state.pointRecords.map(record => record.id));
+        state.pointRecords = [...state.pointRecords, ...demoPointRecords().filter(record => !existingIds.has(record.id))];
+        render();
+      });
+      const clearRecords = document.getElementById("clearPointRecords");
+      if (clearRecords) clearRecords.addEventListener("click", () => {
+        state.pointRecords = state.pointRecords.filter(record => record.demo);
+        state.activeRecallId = "";
+        localStorage.removeItem("raphael_point_records_v3");
+        render();
+      });
+      const consent = document.getElementById("consent");
+      if (consent) consent.addEventListener("change", event => {
+        state.consent = event.target.checked;
+        renderInsights();
+      });
+      const printBtn = document.getElementById("printBtn");
+      if (printBtn) printBtn.addEventListener("click", () => window.print());
+      const restart = document.getElementById("restartNeck");
+      if (restart) restart.addEventListener("click", () => {
+        state.step = 0;
+        resetGenerated();
+        stopTimer(false);
+        render();
+      });
+    }
+
+    function goStep(step) {
+      state.step = Math.max(0, Math.min(steps.length - 1, step));
+      if (state.step !== 3) stopTimer(false);
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function generatePoints() {
+      const source = state.topic === "headache" ? pointLibrary.headache : state.helper === "family" ? pointLibrary.familyNeck : pointLibrary.selfNeck;
+      const requiredHand = source.find(point => point.type === "hand") || source[0];
+      const others = source.filter(point => point.id !== requiredHand.id);
+      const shuffled = [...others].sort(() => Math.random() - .5);
+      state.points = [requiredHand, ...shuffled.slice(0, 2)];
+      state.scores = {};
+      state.points.forEach((point, index) => {
+        state.scores[point.id] = index === 0 ? { left: 3, right: 6 } : index === 1 ? { left: 7, right: 4 } : { left: 4, right: 5 };
+      });
+      state.selectedPointId = null;
+      state.generatedAt += 1;
+    }
+
+    function resetGenerated() {
+      state.points = [];
+      state.scores = {};
+      state.selectedPointId = null;
+      state.timerLeft = 60;
+    }
+
+    function computeSelectedPointId() {
+      if (!state.points.length) generatePoints();
+      let best = state.points[0];
+      let bestScore = -1;
+      state.points.forEach(point => {
+        const score = state.scores[point.id] || { left: 0, right: 0 };
+        const total = Math.max(score.left, score.right) + Math.abs(score.left - score.right) * .5;
+        if (total > bestScore) {
+          best = point;
+          bestScore = total;
+        }
+      });
+      return best.id;
+    }
+
+    function selectedPoint() {
+      if (!state.points.length) generatePoints();
+      const id = state.selectedPointId || computeSelectedPointId();
+      return state.points.find(point => point.id === id) || state.points[0];
+    }
+
+    function toggleTimer() {
+      if (state.timerRunning) {
+        stopTimer(true);
+        return;
+      }
+      state.timerRunning = true;
+      timer = setInterval(() => {
+        state.timerLeft = Math.max(0, state.timerLeft - 1);
+        const ring = document.getElementById("timerRing");
+        const text = document.getElementById("timerText");
+        if (ring) ring.style.setProperty("--timer", `${Math.round(((60 - state.timerLeft) / 60) * 100)}%`);
+        if (text) text.textContent = formatTime(state.timerLeft);
+        if (state.timerLeft === 0) stopTimer(true);
+      }, 1000);
+      render();
+    }
+
+    function stopTimer(shouldRender) {
+      state.timerRunning = false;
+      if (timer) clearInterval(timer);
+      timer = null;
+      if (shouldRender) render();
+    }
+
+    function renderInsights() {
+      document.getElementById("topStatus").textContent = state.redFlags.length ? "安全承接模式" : state.step >= 4 ? "前後測回填中" : "可操作測試版";
+      document.getElementById("miniRisk").textContent = state.redFlags.length ? "高" : state.topic === "headache" ? "中" : "低";
+      document.getElementById("miniResult").textContent = state.step < 4 ? "待測" : isEffective() ? "有變化" : "待承接";
+      const decision = document.getElementById("decisionBox");
+      decision.innerHTML = `<strong>${decisionTitle()}</strong><p>${decisionCopy()}</p>`;
+      decision.style.borderColor = state.redFlags.length ? "#f0b4ae" : isEffective() && state.step >= 4 ? "#b9ddcb" : "var(--line)";
+      decision.style.background = state.redFlags.length ? "#fff6f5" : isEffective() && state.step >= 4 ? "#f0faf4" : "#f8fbfa";
+      document.getElementById("summaryList").innerHTML = `
+        <li><b>測試方式</b><span>${state.helper === "family" ? "家人協助" : "自己測試"}</span></li>
+        <li><b>主題</b><span>${state.topic === "headache" ? `頭痛：${state.headachePlace}` : `肩頸：${state.symptomPlace}`}</span></li>
+        <li><b>前後差異</b><span>${resultSentence()}</span></li>
+      `;
+      document.getElementById("tagCloud").innerHTML = tags().map(tag => `<span class="tag ${tagClass(tag)}">${escapeHtml(tag)}</span>`).join("");
+    }
+
+    function decisionTitle() {
+      if (state.redFlags.length) return "不進入居家測試";
+      if (state.step < 2) return "建立前測基準";
+      if (state.step < 4) return "左右比較中";
+      if (isEffective()) return "可保存為有效紀錄";
+      return "需要專人協助整理";
+    }
+
+    function decisionCopy() {
+      if (state.redFlags.length) return "已勾選安全排除條件，系統停止產生測試位置。";
+      if (state.step < 2) return "先記錄左右轉動角度與不適位置，後面才能比較前後差異。";
+      if (state.step < 4) return "透過三個示意位置的左右痛感比較，找出本次主要按壓位置。";
+      if (isEffective()) return "活動度或不適感已有變化，可留下紀錄供後續對照。";
+      return "本次差異不明顯，不建議硬推同一位置，應改由專人判斷。";
+    }
+
+    function tags() {
+      const list = ["舊客回流", state.relation, state.helper === "family" ? "家人協助" : "自己測試", state.topic === "headache" ? "頭痛流程" : "肩頸活動度"];
+      if (state.redFlags.length) list.push("安全排除", "不提供點位");
+      if (state.points.length) list.push("三點比較", selectedPoint().id);
+      if (state.step >= 4) list.push(isEffective() ? "有感紀錄" : "無明顯變化");
+      if (state.topic === "headache" && state.savedHeadachePoint) list.push("已保存頭痛位置");
+      if (state.consent) list.push("同意專人聯繫");
+      return [...new Set(list)];
+    }
+
+    function tagClass(tag) {
+      if (tag.includes("安全") || tag.includes("不提供")) return "danger";
+      if (tag.includes("頭痛") || tag.includes("保存")) return "warn";
+      if (tag.includes("有感") || tag.includes("同意")) return "green";
+      if (tag.includes("H") || tag.includes("B") || tag.includes("F") || tag.includes("N")) return "coral";
+      return "teal";
+    }
+
+    function isEffective() {
+      if (state.topic === "headache") return state.symptomRelief >= 5 || state.painAfter <= 3;
+      return rightGain() >= 10 || leftGain() >= 10 || state.symptomRelief >= 5;
+    }
+
+    function rightGain() {
+      return Math.max(0, state.afterRightAngle - state.beforeRightAngle);
+    }
+
+    function leftGain() {
+      return Math.max(0, state.afterLeftAngle - state.beforeLeftAngle);
+    }
+
+    function resultSentence() {
+      if (state.redFlags.length) return "未進入測試";
+      if (state.step < 4) return "待後測回填";
+      if (state.topic === "headache") return `頭痛下降感 ${state.symptomRelief}/10，按壓後疼痛 ${state.painAfter}/10`;
+      return `右轉 +${rightGain()} 度，左轉 +${leftGain()} 度，原本不適下降感 ${state.symptomRelief}/10`;
+    }
+
+    function nextStepSentence() {
+      if (state.topic === "headache" && isEffective()) return "保存本次頭痛示意位置；下次頭痛時可回來查看，並留下資料供後續對照。";
+      if (isEffective()) return "留下前後測紀錄，後續對照門診資料，安排 14 天觀察或健康管理師承接。";
+      return "先不保存為固定位置，建議由健康管理師協助整理原因與下一步。";
+    }
+
+    function redFlagOptions() {
+      if (state.topic === "headache") return ["突然劇烈頭痛", "單側無力、麻木或說話不清", "發燒合併脖子僵硬", "頭部外傷後頭痛", "胸痛或冒冷汗", "視力異常或意識混亂"];
+      return ["外傷後疼痛", "手腳無力或麻木", "胸痛或冒冷汗", "發燒或感染疑慮", "突然劇烈疼痛", "孕期或重大疾病特殊狀態"];
+    }
+
+    function range(key, label, value, min, max, unit) {
+      return `
+        <div class="range-row">
+          <span class="label">${label}</span>
+          <input type="range" min="${min}" max="${max}" step="1" value="${value}" data-range="${key}" data-unit="${unit}">
+          <output class="value" data-output="${key}">${value}${unit}</output>
+        </div>
+      `;
+    }
+
+    function scoreRange(pointId, side, label, value) {
+      return `
+        <div class="field">
+          <label>${label}</label>
+          <div class="range-row" style="grid-template-columns:minmax(0, 1fr) 48px">
+            <input type="range" min="0" max="10" step="1" value="${value}" data-score="${pointId}:${side}">
+            <output class="value" style="height:38px;font-size:16px">${value}</output>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderNeckMap() {
+      return `
+        <div class="neck-map" aria-label="肩頸活動度示意圖">
+          <span class="spine"></span>
+          <span class="map-dot neck-l">L</span>
+          <span class="map-dot neck-r">R</span>
+          <span class="map-dot shoulder-l">S</span>
+          <span class="map-dot shoulder-r">S</span>
+          <span class="map-dot hand-dot">H</span>
+        </div>
+      `;
+    }
+
+    function renderBodyMap() {
+      return `
+        <div class="body-map" aria-label="背部家人協助示意圖">
+          <span class="spine"></span>
+          <span class="map-dot back-l">B</span>
+          <span class="map-dot back-r">B</span>
+          <span class="map-dot front">F</span>
+          <span class="map-dot hand-dot">H</span>
+        </div>
+      `;
+    }
+
+    function renderHeadMap() {
+      return `
+        <div class="head-map" aria-label="頭痛位置示意圖">
+          <span class="map-dot forehead">前</span>
+          <span class="map-dot temple-l">太</span>
+          <span class="map-dot temple-r">太</span>
+          <span class="map-dot occipital">後</span>
+          <span class="map-dot hand-dot">H</span>
+        </div>
+      `;
+    }
+
+    function formatTime(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      const remain = seconds % 60;
+      return `${String(minutes).padStart(2, "0")}:${String(remain).padStart(2, "0")}`;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      Object.assign(state, {
+        step: 0,
+        helper: "self",
+        topic: "neck",
+        headachePlace: "太陽穴",
+        symptomPlace: "右側肩頸",
+        beforeRightAngle: 75,
+        beforeLeftAngle: 60,
+        beforeRightFeel: "右轉到底時，左側脖子與肩膀會緊。",
+        beforeLeftFeel: "左轉到底時，左側肩頸痠，轉動幅度比較小。",
+        redFlags: [],
+        points: [],
+        scores: {},
+        selectedPointId: null,
+        timerLeft: 60,
+        timerRunning: false,
+        afterRightAngle: 90,
+        afterLeftAngle: 82,
+        symptomRelief: 6,
+        painAfter: 3,
+        consent: true,
+        contact: "LINE"
+      });
+      stopTimer(false);
+      render();
+    });
+
+    document.getElementById("recallTopBtn").addEventListener("click", () => {
+      state.step = 5;
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    render();
+  </script>
+</body>
+</html>

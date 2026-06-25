@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProjectOS — AI Decision OS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          brand: {
+            50: '#f0f7ff',
+            100: '#e0efff',
+            500: '#3b82f6',
+            600: '#2563eb',
+            700: '#1d4ed8'
+          }
+        }
+      }
+    }
+  }
+</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  *{font-family:'Inter',sans-serif;}
+  .fade-in{animation:fadeIn .3s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .pulse-red{animation:pRed 2s infinite;}
+  @keyframes pRed{0%,100%{opacity:1}50%{opacity:.6}}
+
+  .status-draft{background:#f1f5f9;color:#64748b}
+  .status-opening{background:#ede9fe;color:#6d28d9}
+  .status-proposal{background:#ede9fe;color:#6d28d9}
+  .status-ceo_feedback{background:#fff7ed;color:#c2410c}
+  .status-in_progress{background:#dbeafe;color:#1d4ed8}
+  .status-review{background:#fef3c7;color:#b45309}
+  .status-closed{background:#dcfce7;color:#15803d}
+
+  .notif-panel{
+    position:fixed;top:0;right:0;height:100%;width:320px;background:white;
+    box-shadow:-4px 0 24px rgba(0,0,0,.12);z-index:60;
+    transform:translateX(100%);transition:transform .3s ease;
+  }
+  .notif-panel.open{transform:translateX(0);}
+  .notif-overlay{
+    position:fixed;inset:0;background:rgba(15,23,42,.3);
+    z-index:59;display:none;
+  }
+  .notif-overlay.open{display:block;}
+
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-track{background:#f1f5f9}
+  ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+  textarea:focus,input:focus,select:focus{outline:none;box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+
+  .prio-critical{background:#fee2e2;color:#dc2626;}
+  .prio-high{background:#fed7aa;color:#c2410c;}
+  .prio-medium{background:#fef9c3;color:#854d0e;}
+  .prio-low{background:#f0fdf4;color:#15803d;}
+
+  .progress-bar{transition:width .6s ease;}
+</style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+<div id="projectos-header"></div>
+<script src="./shared-header.js"></script>
+
+<div class="max-w-screen-xl mx-auto px-4 py-5">
+
+  <!-- STATS BAR -->
+  <div id="stats-bar" class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3 mb-5"></div>
+
+  <!-- CEO ACTION PANEL -->
+  <div class="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-5">
+    <div class="flex flex-col md:flex-row md:items-center gap-3">
+      <div>
+        <p class="text-sm font-bold text-orange-900">待執行長回覆提案</p>
+        <p class="text-xs text-orange-700 mt-1">執行長一登入即可優先看到目前輪到自己回覆的提案。</p>
+      </div>
+      <div class="flex-1"></div>
+      <div class="text-xs bg-white border border-orange-200 text-orange-700 px-3 py-1.5 rounded-lg font-medium" id="ceo-pending-count">0 件待回覆</div>
+    </div>
+    <div id="ceo-action-list" class="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-3"></div>
+  </div>
+
+  <!-- ALL PROJECTS TABLE -->
+  <div class="bg-white rounded-xl border border-slate-200 p-5">
+    <div class="flex flex-col md:flex-row md:items-center gap-3 mb-4">
+      <h2 class="font-semibold text-slate-900">所有專案</h2>
+      <div class="flex-1"></div>
+      <div class="flex flex-wrap gap-2">
+        <div class="relative">
+          <svg class="w-3.5 h-3.5 absolute left-2.5 top-2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
+          </svg>
+          <input type="text" placeholder="搜尋..." class="pl-7 pr-3 py-1.5 border border-slate-200 rounded-lg text-xs w-36 focus:border-blue-300 transition" oninput="filterProjects(this.value)">
+        </div>
+        <select class="border border-slate-200 rounded-lg text-xs px-2 py-1.5 text-slate-600" onchange="filterByStatus(this.value)">
+          <option value="">全部狀態</option>
+          <option value="draft">草稿</option>
+          <option value="proposal">提案中</option>
+          <option value="ceo_feedback">待執行長回覆</option>
+          <option value="in_progress">進行中</option>
+          <option value="review">Review</option>
+          <option value="closed">已結案</option>
+        </select>
+        <button onclick="togglePrioritySort()" id="sort-btn" class="border border-slate-200 rounded-lg text-xs px-3 py-1.5 text-slate-600 hover:bg-slate-50 transition">排序：優先順序 ↓</button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-12 text-xs font-medium text-slate-400 px-3 pb-2 border-b border-slate-100">
+      <div class="col-span-4">專案名稱</div>
+      <div class="col-span-1 text-center">健康</div>
+      <div class="col-span-1">負責人</div>
+      <div class="col-span-1">狀態</div>
+      <div class="col-span-2">完成率</div>
+      <div class="col-span-1">優先</div>
+      <div class="col-span-1">結束日</div>
+      <div class="col-span-1 text-center">→</div>
+    </div>
+
+    <div id="project-table" class="divide-y divide-slate-50">
+      <div id="project-table-loading" class="px-3 py-10 text-center text-sm text-slate-400">載入專案清單中…</div>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATION PANEL -->
+<div class="notif-overlay" id="notif-overlay" onclick="toggleNotif()"></div>
+<div class="notif-panel" id="notif-panel">
+  <div class="flex items-center justify-between px-5 pt-5 pb-4 border-b border-slate-100">
+    <h3 class="font-semibold text-slate-900">通知中心</h3>
+    <button onclick="toggleNotif()" class="text-slate-400 hover:text-slate-600 text-lg leading-none">✕</button>
+  </div>
+  <div class="px-5 py-4 space-y-3 overflow-y-auto" style="max-height:calc(100vh - 80px)">
+    <div class="bg-red-50 border border-red-200 rounded-xl p-3 fade-in">
+      <div class="flex items-start gap-2">
+        <span class="text-sm mt-0.5">🔴</span>
+        <div class="flex-1">
+          <p class="text-sm font-semibold text-red-800">Q1 活動企劃 延遲 +5 天</p>
+          <p class="text-xs text-red-600 mt-0.5">行銷素材未交付，Carol 負責</p>
+          <div class="flex gap-2 mt-2">
+            <button onclick="notifyOwner('Carol');toggleNotif()" class="text-xs bg-red-100 hover:bg-red-200 text-red-700 px-2.5 py-1 rounded-lg font-medium transition">通知 Carol</button>
+            <button onclick="showToast('已升級給主管');toggleNotif()" class="text-xs bg-white border border-red-200 text-red-600 px-2.5 py-1 rounded-lg font-medium transition">升級</button>
+          </div>
+        </div>
+        <span class="text-xs text-slate-400">5天前</span>
+      </div>
+    </div>
+
+    <div class="bg-orange-50 border border-orange-200 rounded-xl p-3 fade-in">
+      <div class="flex items-start gap-2">
+        <span class="text-sm mt-0.5">🟠</span>
+        <div class="flex-1">
+          <p class="text-sm font-semibold text-orange-800">法務審核 Blocked 3 天</p>
+          <p class="text-xs text-orange-600 mt-0.5">等待法務部門回覆，Legal 負責</p>
+          <div class="flex gap-2 mt-2">
+            <button onclick="notifyOwner('Legal');toggleNotif()" class="text-xs bg-orange-100 hover:bg-orange-200 text-orange-700 px-2.5 py-1 rounded-lg font-medium transition">通知 Legal</button>
+            <button onclick="showToast('已指派給 Alice');toggleNotif()" class="text-xs bg-white border border-orange-200 text-orange-600 px-2.5 py-1 rounded-lg font-medium transition">指派</button>
+          </div>
+        </div>
+        <span class="text-xs text-slate-400">3天前</span>
+      </div>
+    </div>
+
+    <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 fade-in">
+      <div class="flex items-start gap-2">
+        <span class="text-sm mt-0.5">🟡</span>
+        <div class="flex-1">
+          <p class="text-sm font-semibold text-amber-800">客服系統 KPI 未達標</p>
+          <p class="text-xs text-amber-600 mt-0.5">客戶滿意度 68%，目標 90%（-22%）</p>
+          <div class="flex gap-2 mt-2">
+            <a href="task-tracking.html" class="text-xs bg-amber-100 hover:bg-amber-200 text-amber-700 px-2.5 py-1 rounded-lg font-medium transition">查看詳情</a>
+          </div>
+        </div>
+        <span class="text-xs text-slate-400">今天</span>
+      </div>
+    </div>
+
+    <div class="pt-3 border-t border-slate-100">
+      <p class="text-xs text-center text-slate-400">通知智慧合併，避免通知疲勞</p>
+      <p class="text-xs text-center text-slate-400 mt-1">每日最多 5 則優先通知</p>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="fixed bottom-5 right-5 z-50 hidden">
+  <div class="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 max-w-sm fade-in">
+    <svg id="toast-icon" class="w-4 h-4 text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+    </svg>
+    <p id="toast-msg" class="text-sm"></p>
+  </div>
+</div>
+
+<script>
+// ─── BACKEND API (FR) ───
+const API_BASE = "https://23700999.com:8081/PM";
+const GET_PROJECT_LIST_URL = API_BASE + "/api/fr/getProjectList";
+const GET_PROJECT_STATE_CODE_URL = API_BASE + "/api/fr/getProjectStateCode";
+
+const GET_DEPARTMENT_URL = API_BASE + "/api/fr/getDepartmentCode";
+const TASK_STATE_LIST_URLS = [
+
+  API_BASE + "/api/fr/getTaskStateCode",
+  API_BASE + "/api/fr/getTaskState"
+];
+
+// 預設值：API 失敗時仍可顯示基本資訊
+let DEPARTMENT_CODE_TO_NAME = {
+  "1": "業務發展處",
+  "2": "總經理室",
+  "3": "創新研發處",
+  "4": "智慧醫療業務部",
+  "5": "客服暨會員關係部",
+};
+
+// dashboard 目前以 State Code 推導專案狀態，但保留 mapping 以利後續擴充
+let TASK_STATE_CODE_TO_NAME = {};
+let PROJECT_STATE_CODE_TO_NAME = {};
+
+/** @type {Array<object>} */
+let PROJECTS = [];
+
+function getBackendTokenAndAdmin() {
+  const token = localStorage.getItem("backendToken") || sessionStorage.getItem("backendToken");
+  const adminID = localStorage.getItem("adminID") || sessionStorage.getItem("adminID");
+  if (!token || !adminID) return null;
+  return { token, adminID };
+}
+
+function postJson(url, body) {
+  if (typeof window.projectOSPostJson === "function") {
+    return window.projectOSPostJson(url, body);
+  }
+  return fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  }).then(function (res) {
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  });
+}
+
+async function fetchFirstTaskStateList(authBody) {
+  for (var i = 0; i < TASK_STATE_LIST_URLS.length; i++) {
+    var url = TASK_STATE_LIST_URLS[i];
+    try {
+      var resp = await postJson(url, authBody);
+      if (!resp) continue;
+      if (String(resp.Result).toUpperCase() !== "OK") continue;
+      if (!Array.isArray(resp.TaskStateList)) continue;
+      return resp;
+    } catch (e) {
+      // try next url
+    }
+  }
+  return null;
+}
+
+async function initReferenceData() {
+  var auth = getBackendTokenAndAdmin();
+  if (!auth) return;
+
+  var authBody = { AdminID: auth.adminID, Token: auth.token };
+
+  // 部門對照表
+  try {
+    var deptResp = await postJson(GET_DEPARTMENT_URL, authBody);
+    if (
+      deptResp &&
+      String(deptResp.Result).toUpperCase() === "OK" &&
+      Array.isArray(deptResp.DepartmentList)
+    ) {
+      var next = {};
+      deptResp.DepartmentList.forEach(function (d) {
+        if (!d) return;
+        var code = String(d.Code || "").trim();
+        var name = String(d.Name || "").trim();
+        if (!code || !name) return;
+        next[code] = name;
+      });
+      DEPARTMENT_CODE_TO_NAME = next;
+    }
+  } catch (e) {
+    // keep defaults
+  }
+
+  // 任務狀態列表（目前不直接用於 UI 展示）
+  try {
+    var taskResp = await fetchFirstTaskStateList(authBody);
+    if (
+      taskResp &&
+      String(taskResp.Result).toUpperCase() === "OK" &&
+      Array.isArray(taskResp.TaskStateList)
+    ) {
+      var next2 = {};
+      taskResp.TaskStateList.forEach(function (st) {
+        if (!st) return;
+        var code = String(st.Code || "").trim();
+        var name = String(st.Name || "").trim();
+        if (!code || !name) return;
+        next2[code] = name;
+      });
+      TASK_STATE_CODE_TO_NAME = next2;
+    }
+  } catch (e) {
+    // keep empty
+  }
+
+  // 專案狀態列表（提案中 / 待執行長回覆 / 進行中 / Review / 完成 / 延遲 / Blocked）
+  try {
+    var projStateResp = await postJson(GET_PROJECT_STATE_CODE_URL, authBody);
+    if (
+      projStateResp &&
+      String(projStateResp.Result).toUpperCase() === "OK" &&
+      Array.isArray(projStateResp.ProjectStateList)
+    ) {
+      var next3 = {};
+      projStateResp.ProjectStateList.forEach(function (st) {
+        if (!st) return;
+        var code = String(st.Code || "").trim();
+        var name = String(st.Name || "").trim();
+        if (!code || !name) return;
+        next3[code] = name;
+      });
+      PROJECT_STATE_CODE_TO_NAME = next3;
+    }
+  } catch (e) {
+    // keep empty
+  }
+}
+
+function ymdToday() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return "" + y + m + day;
+}
+
+function parseYmd(ymd) {
+  if (!ymd || String(ymd).length < 8) return null;
+  const s = String(ymd).replace(/\D/g, "");
+  if (s.length < 8) return null;
+  const y = parseInt(s.slice(0, 4), 10);
+  const mo = parseInt(s.slice(4, 6), 10) - 1;
+  const da = parseInt(s.slice(6, 8), 10);
+  return new Date(y, mo, da);
+}
+
+function daysBetweenYmd(a, b) {
+  const A = parseYmd(a);
+  const B = parseYmd(b);
+  if (!A || !B) return 0;
+  return Math.round((B - A) / 86400000);
+}
+
+function daysFromTodayToYmd(endYmd) {
+  return daysBetweenYmd(ymdToday(), endYmd);
+}
+
+function formatYmdSlash(ymd) {
+  var d = parseYmd(ymd);
+  if (!d) return "";
+  return (
+    d.getFullYear() +
+    "/" +
+    String(d.getMonth() + 1).padStart(2, "0") +
+    "/" +
+    String(d.getDate()).padStart(2, "0")
+  );
+}
+
+function extractProjectArray(resp) {
+  if (!resp || typeof resp !== "object") return [];
+  if (Array.isArray(resp)) return resp;
+  if (Array.isArray(resp.ProjectList)) return resp.ProjectList;
+  if (Array.isArray(resp.Data)) return resp.Data;
+  if (Array.isArray(resp.Projects)) return resp.Projects;
+  if (Array.isArray(resp.List)) return resp.List;
+  for (var k in resp) {
+    if (k === "Result" || k === "Message") continue;
+    if (Array.isArray(resp[k])) return resp[k];
+  }
+  return [];
+}
+
+function projectStateNameToInternalStatus(name, code) {
+  var n = String(name || "").trim();
+  var c = String(code || "").trim();
+  if (n === "提案中" || c === "1") return "proposal";
+  if (n === "待執行長回覆" || c === "2") return "ceo_feedback";
+  if (n === "進行中" || c === "3") return "in_progress";
+  if (n === "Review" || c === "4") return "review";
+  if (n === "完成" || c === "5") return "closed";
+  if (n === "延遲" || c === "6") return "in_progress";
+  if (n === "Blocked" || c === "7") return "in_progress";
+  return "";
+}
+
+function guessTaskColByStateName(name) {
+  var n = String(name || "").trim();
+  if (!n) return "";
+  if (/待辦|todo|draft|提案中/i.test(n)) return "todo";
+  if (/進行中|doing|in progress|執行中/i.test(n)) return "doing";
+  if (/完成|done|closed|結案|review/i.test(n)) return "done";
+  if (/延遲|blocked|block|阻擋|卡住/i.test(n)) return "blocked";
+  return "";
+}
+
+function taskStateCodeToCol(stateCode) {
+  var code = String(stateCode || "").trim();
+  if (!code) return "todo";
+  var byName = guessTaskColByStateName(TASK_STATE_CODE_TO_NAME[code]);
+  if (byName) return byName;
+  if (code === "1") return "todo";
+  if (code === "2") return "doing";
+  if (code === "3") return "done";
+  if (code === "4") return "blocked";
+  if (code === "5") return "done";
+  if (code === "6" || code === "7") return "blocked";
+  return "doing";
+}
+
+function isTaskDone(task) {
+  return taskStateCodeToCol(task && task.State) === "done";
+}
+
+function isTaskBlocked(task) {
+  return taskStateCodeToCol(task && task.State) === "blocked";
+}
+
+function deriveProjectStatus(tasks) {
+  var total = tasks.length;
+  if (total === 0) return "opening";
+  var done = tasks.filter(function (t) {
+    return isTaskDone(t);
+  }).length;
+  if (done === total) return "closed";
+  if (tasks.some(function (t) {
+    return isTaskBlocked(t);
+  })) return "in_progress";
+  if (tasks.some(function (t) {
+    return taskStateCodeToCol(t && t.State) === "doing";
+  })) return "in_progress";
+  if (tasks.every(function (t) {
+    return taskStateCodeToCol(t && t.State) === "todo";
+  })) return "opening";
+  var ratio = done / total;
+  if (ratio >= 0.8 && done < total) return "review";
+  return "in_progress";
+}
+
+function countOverdueNotDone(tasks) {
+  var today = ymdToday();
+  return tasks.filter(function (t) {
+    if (isTaskDone(t)) return false;
+    var end = t.EndDate || t.StertDate;
+    return end && String(end).replace(/\D/g, "").slice(0, 8) < today;
+  }).length;
+}
+
+function countBlockedTasks(tasks) {
+  return tasks.filter(function (t) {
+    return isTaskBlocked(t);
+  }).length;
+}
+
+function firstBlockedLikeTask(tasks) {
+  var today = ymdToday();
+  for (var i = 0; i < tasks.length; i++) {
+    var t = tasks[i];
+    if (!isTaskBlocked(t)) continue;
+    return {
+      task: (t.Topic || "").trim() || "任務",
+      reason: (t.Description || "").trim() || "待補充阻擋原因",
+      assignee: (t.ChargeMan || "").trim() || "—"
+    };
+  }
+
+  for (var i = 0; i < tasks.length; i++) {
+    var t = tasks[i];
+    if (isTaskDone(t)) continue;
+    var end = t.EndDate || t.StertDate;
+    if (end && String(end).replace(/\D/g, "").slice(0, 8) < today) {
+      return {
+        task: (t.Topic || "").trim() || "任務",
+        reason: (t.Description || "").trim() || "已超過結束日仍未完成",
+        assignee: (t.ChargeMan || "").trim() || "—"
+      };
+    }
+  }
+  return { task: "", reason: "", assignee: "" };
+}
+
+function mapApiProjectToRow(raw, index) {
+  var tasks = Array.isArray(raw.TaskList) ? raw.TaskList : [];
+  var kpis = Array.isArray(raw.KPIList) ? raw.KPIList : [];
+  var deptCode = raw.Department != null ? String(raw.Department) : "";
+  var deptName = DEPARTMENT_CODE_TO_NAME[deptCode] || (deptCode ? "部門 " + deptCode : "—");
+  var total = tasks.length;
+  var done = tasks.filter(function (t) {
+    return isTaskDone(t);
+  }).length;
+  var blocked = countBlockedTasks(tasks);
+  var overdueNotDone = countOverdueNotDone(tasks);
+  var delayed = tasks.some(function (t) {
+    return isTaskBlocked(t);
+  });
+  var endYmd = raw.EndDate ? String(raw.EndDate).replace(/\D/g, "").slice(0, 8) : "";
+  var projEnd = endYmd || "";
+  if (!delayed && overdueNotDone > 0) delayed = true;
+  if (!delayed && projEnd && done < total) {
+    var dl = daysFromTodayToYmd(projEnd);
+    if (dl < 0) delayed = true;
+  }
+  var delayDays = 0;
+  if (projEnd && done < total) {
+    var dleft = daysFromTodayToYmd(projEnd);
+    if (dleft < 0) delayDays = Math.abs(dleft);
+  }
+  if (blocked > 0 || overdueNotDone > 0) {
+    delayDays = Math.max(delayDays, 1);
+  }
+  var daysLeft = projEnd ? daysFromTodayToYmd(projEnd) : 90;
+  var staleDays = 0;
+  var projectStateCode = raw.State != null ? String(raw.State).trim() : "";
+  var projectStateName = PROJECT_STATE_CODE_TO_NAME[projectStateCode] || "";
+  var status = projectStateNameToInternalStatus(projectStateName, projectStateCode) || deriveProjectStatus(tasks);
+  if (!status && total === 0) status = "draft";
+  if (!status) status = "in_progress";
+  var firstKpi = kpis[0] || {};
+  var kpiMetric = (firstKpi.KPIName || "KPI").trim() || "KPI";
+  var kpiTargetStr = (firstKpi.KPITarget || "").trim();
+  var kpiNum = parseFloat(String(kpiTargetStr).replace(/[^\d.-]/g, ""));
+  var blk = firstBlockedLikeTask(tasks);
+  var name = (raw.ProjectName || "未命名專案").trim() || "未命名專案";
+  var q = encodeURIComponent(name);
+  // 專案跳轉需要用 AID 精準定位；否則可能被 task-tracking 的 localStorage 舊值覆蓋
+  var projectAID =
+    raw.AID != null ? String(raw.AID).trim() : raw.ProjectAID != null ? String(raw.ProjectAID).trim() : "";
+  return {
+    id: index + 1,
+    name: name,
+    owner: (raw.ChargeMan || "—").trim() || "—",
+    dept: deptName,
+    status: status,
+    done: done,
+    total: total,
+    blocked: blocked,
+    delayed: delayed,
+    staleDays: staleDays,
+    kpiMiss: false,
+    daysLeft: daysLeft,
+    updated: formatYmdSlash(endYmd) || "—",
+    // 需求：Dashboard 的專案跳轉統一導向 task-tracking 內頁
+    url: projectAID
+      ? "task-tracking.html?projectAID=" + encodeURIComponent(projectAID) + "&project=" + q
+      : "task-tracking.html?project=" + q,
+    kpi: {
+      metric: kpiMetric,
+      target: isNaN(kpiNum) ? 100 : kpiNum,
+      current: 0,
+      unit: ""
+    },
+    blockedTask: blk.task,
+    blockedReason: blk.reason,
+    blockedAssignee: blk.assignee,
+    delayDays: delayDays
+  };
+}
+
+function fetchProjectList() {
+  var auth = getBackendTokenAndAdmin();
+  if (!auth) {
+    window.location.href = "/projectOS/index.html";
+    return Promise.resolve();
+  }
+  var loadingEl = document.getElementById("project-table-loading");
+  if (loadingEl) loadingEl.style.display = "";
+
+  return postJson(GET_PROJECT_LIST_URL, {
+    AdminID: auth.adminID,
+    Token: auth.token
+  })
+    .then(function (data) {
+      if (data && data.Result != null && String(data.Result).toUpperCase() !== "OK") {
+        showToast("取得專案失敗：" + data.Result, "warn");
+        PROJECTS = [];
+        return;
+      }
+      var arr = extractProjectArray(data);
+      PROJECTS = arr.map(function (p, i) {
+        return mapApiProjectToRow(p, i);
+      });
+    })
+    .catch(function () {
+      showToast("無法連線取得專案清單", "warn");
+      PROJECTS = [];
+    })
+    .finally(function () {
+      if (loadingEl) loadingEl.style.display = "none";
+      renderStats();
+      renderCEOActionPanel();
+      renderProjectTable(PROJECTS);
+    });
+}
+
+// ─── ALGORITHMS ───
+function calcHealth(p) {
+  let s = 100;
+  if (p.delayed) s -= 20;
+  s -= p.blocked * 10;
+  if (p.kpiMiss) s -= 15;
+  if (p.staleDays > 14) s -= 20;
+  else if (p.staleDays > 7) s -= 10;
+  const cr = p.total > 0 ? p.done / p.total : 0;
+  if (cr < 0.3 && p.daysLeft < 30 && p.daysLeft > 0) s -= 5;
+  return Math.max(5, Math.min(100, s));
+}
+
+function calcPriority(p) {
+  let s = 0;
+  if (p.delayed) s += 40 + p.delayDays * 5;
+  s += p.blocked * 15;
+  if (p.kpiMiss) s += 25;
+  if (p.staleDays > 14) s += 20;
+  else if (p.staleDays > 7) s += 10;
+  if (p.daysLeft < 0) s += 30;
+  else if (p.daysLeft < 7) s += 20;
+  else if (p.daysLeft < 14) s += 10;
+  return s;
+}
+
+function healthColor(h) {
+  return h >= 80 ? '#22c55e' : h >= 60 ? '#f59e0b' : '#ef4444';
+}
+
+function priorityLabel(score) {
+  if (score >= 80) return {label:'緊急',cls:'prio-critical'};
+  if (score >= 50) return {label:'高',cls:'prio-high'};
+  if (score >= 20) return {label:'中',cls:'prio-medium'};
+  return {label:'低',cls:'prio-low'};
+}
+
+// ─── STATS ───
+function renderStats() {
+  const total = PROJECTS.length;
+  const proposal = PROJECTS.filter(p => p.status === 'proposal').length;
+  const ceoFeedback = PROJECTS.filter(p => p.status === 'ceo_feedback').length;
+  const inProgress = PROJECTS.filter(p => p.status === 'in_progress').length;
+  const review = PROJECTS.filter(p => p.status === 'review').length;
+  const closed = PROJECTS.filter(p => p.status === 'closed').length;
+  const delayed = PROJECTS.filter(p => p.delayed).length;
+  const blocked = PROJECTS.reduce((sum, p) => sum + (p.blocked || 0), 0);
+
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="bg-white rounded-xl border border-slate-200 p-3.5 text-center">
+      <p class="text-xs text-slate-400 font-medium mb-1">全部專案</p>
+      <p class="text-2xl font-bold text-slate-900">${total}</p>
+      <p class="text-xs text-slate-400 mt-0.5">目前總數</p>
+    </div>
+    <div class="bg-violet-50 rounded-xl border border-violet-200 p-3.5 text-center">
+      <p class="text-xs text-violet-500 font-medium mb-1">提案中</p>
+      <p class="text-2xl font-bold text-violet-700">${proposal}</p>
+      <p class="text-xs text-violet-400 mt-0.5">提案人整理中</p>
+    </div>
+    <div class="bg-orange-50 rounded-xl border border-orange-200 p-3.5 text-center ${ceoFeedback > 0 ? 'pulse-red' : ''}">
+      <p class="text-xs text-orange-500 font-medium mb-1">待執行長回覆</p>
+      <p class="text-2xl font-bold text-orange-700">${ceoFeedback}</p>
+      <p class="text-xs text-orange-400 mt-0.5">等待審核</p>
+    </div>
+    <div class="bg-blue-50 rounded-xl border border-blue-200 p-3.5 text-center">
+      <p class="text-xs text-blue-500 font-medium mb-1">進行中</p>
+      <p class="text-2xl font-bold text-blue-700">${inProgress}</p>
+      <p class="text-xs text-blue-400 mt-0.5">${total ? Math.round(inProgress / total * 100) : 0}%</p>
+    </div>
+    <div class="bg-amber-50 rounded-xl border border-amber-200 p-3.5 text-center">
+      <p class="text-xs text-amber-500 font-medium mb-1">Review</p>
+      <p class="text-2xl font-bold text-amber-700">${review}</p>
+      <p class="text-xs text-amber-400 mt-0.5">等待結案</p>
+    </div>
+    <div class="bg-green-50 rounded-xl border border-green-200 p-3.5 text-center">
+      <p class="text-xs text-green-500 font-medium mb-1">已結案</p>
+      <p class="text-2xl font-bold text-green-700">${closed}</p>
+      <p class="text-xs text-green-400 mt-0.5">已完成</p>
+    </div>
+    <div class="bg-red-50 rounded-xl border border-red-200 p-3.5 text-center ${delayed > 0 ? 'pulse-red' : ''}">
+      <p class="text-xs text-red-500 font-medium mb-1">延遲</p>
+      <p class="text-2xl font-bold text-red-600">${delayed}</p>
+      <p class="text-xs text-red-400 mt-0.5">需關注</p>
+    </div>
+    <div class="bg-orange-50 rounded-xl border border-orange-200 p-3.5 text-center">
+      <p class="text-xs text-orange-500 font-medium mb-1">Blocked</p>
+      <p class="text-2xl font-bold text-orange-600">${blocked}</p>
+      <p class="text-xs text-orange-400 mt-0.5">等待解除</p>
+    </div>
+  `;
+}
+
+// ─── PROJECT TABLE ───
+let prioritySorted = true;
+let currentProjects = [];
+
+function togglePrioritySort() {
+  prioritySorted = !prioritySorted;
+  document.getElementById('sort-btn').textContent = prioritySorted ? '排序：優先順序 ↓' : '排序：結束日 ↓';
+  renderProjectTable(currentProjects);
+}
+
+function getStatusClass(status) {
+  return {
+    draft:'status-draft',
+    opening:'status-opening',
+    proposal:'status-proposal',
+    ceo_feedback:'status-ceo_feedback',
+    in_progress:'status-in_progress',
+    review:'status-review',
+    closed:'status-closed'
+  }[status] || '';
+}
+
+function getStatusLabel(status) {
+  return {
+    draft:'草稿',
+    opening:'開案中',
+    proposal:'提案中',
+    ceo_feedback:'待執行長回覆',
+    in_progress:'進行中',
+    review:'Review',
+    closed:'已結案'
+  }[status] || status;
+}
+
+function renderCEOActionPanel() {
+  const pending = PROJECTS.filter(p => p.status === 'ceo_feedback');
+  const countEl = document.getElementById('ceo-pending-count');
+  const listEl = document.getElementById('ceo-action-list');
+  if (!countEl || !listEl) return;
+  countEl.textContent = `${pending.length} 件待回覆`;
+  if (!pending.length) {
+    listEl.innerHTML = `<div class="col-span-full bg-white border border-orange-100 rounded-xl px-4 py-6 text-center text-sm text-slate-400">目前沒有待執行長回覆的提案</div>`;
+    return;
+  }
+  listEl.innerHTML = pending.map(p => `
+    <div class="bg-white border border-orange-200 rounded-xl p-4 flex items-start gap-3">
+      <div class="w-10 h-10 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center font-bold text-sm flex-shrink-0">${(p.owner || '—').charAt(0)}</div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 flex-wrap">
+          <p class="text-sm font-semibold text-slate-900 truncate">${p.name}</p>
+          <span class="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium">待執行長回覆</span>
+        </div>
+        <p class="text-xs text-slate-500 mt-1">提案人：${p.owner} · 最後更新：${p.updated}</p>
+        <p class="text-xs text-orange-700 mt-2">請確認提案摘要與討論 URL，並給予提案建議或直接通過。</p>
+      </div>
+      <a href="${p.url}${p.url.indexOf('?') >= 0 ? '&' : '?'}tab=proposal" class="text-xs bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-lg font-medium transition whitespace-nowrap">立即查看</a>
+    </div>
+  `).join('');
+}
+
+function renderProjectTable(projects) {
+  currentProjects = projects;
+
+  const sorted = prioritySorted
+    ? [...projects].sort((a, b) => {
+        const aCeo = a.status === "ceo_feedback" ? 1 : 0;
+        const bCeo = b.status === "ceo_feedback" ? 1 : 0;
+        if (aCeo !== bCeo) return bCeo - aCeo;
+        return calcPriority(b) - calcPriority(a);
+      })
+    : projects;
+
+  if (!sorted.length) {
+    document.getElementById('project-table').innerHTML =
+      '<div class="px-3 py-12 text-center text-sm text-slate-400">尚無專案資料，或請確認後端已回傳列表。</div>';
+    return;
+  }
+
+  const av = {
+    Alice:'bg-blue-500',
+    Bob:'bg-purple-500',
+    Carol:'bg-pink-500',
+    Dave:'bg-amber-500',
+    HR:'bg-green-500'
+  };
+
+  document.getElementById('project-table').innerHTML = sorted.map(p => {
+    const pct = p.total ? Math.round((p.done / p.total) * 100) : 0;
+    const bar = pct >= 75 ? 'bg-green-500' : pct >= 40 ? 'bg-blue-500' : 'bg-amber-500';
+    const sc = getStatusClass(p.status);
+    const sl = getStatusLabel(p.status);
+    const h = calcHealth(p);
+    const hc = healthColor(h);
+    const pr = calcPriority(p);
+    const pl = priorityLabel(pr);
+    const circ = 88;
+    const da = (h / 100) * circ;
+
+    return `
+      <div class="grid grid-cols-12 items-center px-3 py-3 hover:bg-slate-50 transition group">
+        <div class="col-span-4 flex items-center gap-2 min-w-0">
+          <a href='${p.url}'><span class="text-sm font-medium text-slate-800 truncate group-hover:text-blue-600">${p.name}</span></a>
+          ${p.delayed ? `<span class="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-bold flex-shrink-0">+${p.delayDays}天</span>` : ''}
+          ${p.blocked > 0 ? `<span class="text-xs bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded font-medium flex-shrink-0">🔴${p.blocked}</span>` : ''}
+        </div>
+        <div class="col-span-1 flex justify-center">
+          <div class="relative" style="width:32px;height:32px;">
+            <svg style="transform:rotate(-90deg)" width="32" height="32" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="14" fill="none" stroke="#e2e8f0" stroke-width="3.5"/>
+              <circle cx="18" cy="18" r="14" fill="none" stroke="${hc}" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="${da} ${circ}"/>
+            </svg>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <span style="font-size:8px;font-weight:700;color:${hc}">${h}</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-span-1 flex items-center gap-1">
+          <div class="w-6 h-6 rounded-full ${av[p.owner] || 'bg-slate-400'} flex items-center justify-center text-white text-xs font-bold">${p.owner[0]}</div>
+        </div>
+        <div class="col-span-1">
+          <span class="${sc} text-xs px-2 py-0.5 rounded-full font-medium">${sl}</span>
+        </div>
+        <div class="col-span-2">
+          <div class="flex items-center gap-2">
+            <div class="flex-1 bg-slate-100 rounded-full h-1.5">
+              <div class="${bar} h-1.5 rounded-full progress-bar" style="width:${pct}%"></div>
+            </div>
+            <span class="text-xs text-slate-500 w-7 text-right">${pct}%</span>
+          </div>
+        </div>
+        <div class="col-span-1">
+          <span class="${pl.cls} text-xs px-2 py-0.5 rounded-full font-medium">${pl.label}</span>
+        </div>
+        <div class="col-span-1 text-xs text-slate-400">${p.updated}</div>
+        <div class="col-span-1 text-center">
+          <a href="${p.url}" class="text-slate-400 hover:text-blue-600 transition font-bold">↗</a>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function filterProjects(q) {
+  renderProjectTable(
+    q
+      ? PROJECTS.filter(p =>
+          p.name.toLowerCase().includes(q.toLowerCase()) ||
+          p.owner.toLowerCase().includes(q.toLowerCase())
+        )
+      : PROJECTS
+  );
+}
+
+function filterByStatus(s) {
+  renderProjectTable(s ? PROJECTS.filter(p => p.status === s) : PROJECTS);
+}
+
+// ─── NOTIFICATION ───
+function toggleNotif() {
+  const panel = document.getElementById('notif-panel');
+  const overlay = document.getElementById('notif-overlay');
+  panel.classList.toggle('open');
+  overlay.classList.toggle('open');
+}
+
+// ─── TOAST ───
+let toastTimer;
+
+function showToast(msg, type='success') {
+  const toast = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  document.getElementById('toast-icon').className =
+    type === 'warn'
+      ? 'w-4 h-4 text-amber-400 flex-shrink-0'
+      : 'w-4 h-4 text-green-400 flex-shrink-0';
+
+  toast.classList.remove('hidden');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.add('hidden'), 3000);
+}
+
+function notifyOwner(name) {
+  showToast(`已通知 ${name}，系統發送提醒`);
+}
+
+// ─── INIT ───
+function initNavAvatar() {
+  try {
+    const el = document.getElementById('navUserAvatar');
+    if (!el) return;
+    const raw = localStorage.getItem('userData');
+    if (raw) {
+      const u = JSON.parse(raw);
+      const name = (u.Member && u.Member.Name) || u.Name || '會員';
+      el.textContent = String(name).trim().charAt(0).toUpperCase() || '?';
+      return;
+    }
+    const adminName = localStorage.getItem('adminName') || sessionStorage.getItem('adminName');
+    const adminId = localStorage.getItem('adminID') || sessionStorage.getItem('adminID');
+    const label = (adminName || adminId || '').trim();
+    if (label) el.textContent = label.charAt(0).toUpperCase() || '?';
+  } catch (e) {}
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  initNavAvatar();
+  await initReferenceData().catch(function () {});
+  fetchProjectList();
+});
+</script>
+</body>
+</html>

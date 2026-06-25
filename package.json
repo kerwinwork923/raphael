@@ -12,11 +12,14 @@
   },
   "dependencies": {
     "@pinia/nuxt": "^0.5.4",
+    "@tailwindcss/vite": "^4.3.1",
+    "@tiaohsun/vue-datepicker": "^2.0.0",
     "@vladmandic/face-api": "^1.7.15",
     "@vuepic/vue-datepicker": "^9.0.3",
     "axios": "^1.7.7",
     "chart.js": "^4.4.7",
     "chartjs-plugin-datalabels": "^2.2.0",
+    "echarts": "^6.1.0",
     "firebase": "^11.0.1",
     "firebase-admin": "^12.7.0",
     "heic2any": "^0.0.4",
@@ -25,6 +28,7 @@
     "nuxt": "^3.12.0",
     "pinia": "^2.0.0",
     "swiper": "^11.2.10",
+    "tailwindcss": "^4.3.1",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

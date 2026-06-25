@@ -1,0 +1,1362 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NeuroPlus 自律神經HRV檢測</title>
+    <!-- <link href="css/my.css" rel="stylesheet" /> -->
+    <!-- <link href="css/bootstrap.min.css" rel="stylesheet" /> -->
+
+    <style>
+      .a-ellipsis {
+        text-overflow: ellipsis;
+        padding-right: 0px;
+        padding-left: 0px;
+        width: 200px;
+        max-width: 200px;
+        display: block;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      .auto_table {
+        width: 100%;
+        margin-bottom: 0px;
+      }
+
+      @media only screen and (min-width: 768px) {
+        /* For desktop: */
+        .auto_table {
+          width: 210px;
+          margin-bottom: 0px;
+        }
+
+        .a-ellipsis {
+          text-overflow: ellipsis;
+          padding-right: 0px;
+          padding-left: 0px;
+          width: 200px;
+          max-width: 200px;
+          display: block;
+          overflow: hidden;
+          white-space: nowrap;
+        }
+      }
+    </style>
+    <!-- <script src="js/thirdparty/charts/dist/chart.min.js"></script> -->
+    <script src="js/vital_result_printer.js"></script>
+    <!-- <script src="js/spower_chart.js"></script> -->
+  </head>
+
+  <body>
+    <div id="raphaelLoading" class="raphaelLoading" 　style="display: none;">
+      <img src="images/raphael/spinner.gif" alt="Loading..." />
+    </div>
+    <div class="finishWrap">
+      <div class="raphaelNavbar">
+        <div class="logoGroup">
+          <a to="/user">
+            <img src="images/raphael/neuro-plus.svg" alt="" />
+          </a>
+        </div>
+        <div class="optionGroup">
+          <!-- <img class="cartIcon" src="images/raphael/cart.svg" alt="" />
+        <img class="alertIcon" src="images/raphael/alert.svg" alt="" />
+        <img class="settingIcon" src="images/raphael/setting.svg" alt="" /> -->
+        </div>
+      </div>
+      <div class="titleGroup">
+        <div class="textGroup">
+          <h3 class="nameText">您好</h3>
+          <div class="timeGroup">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+            >
+              <path
+                d="M7 13C10.3137 13 13 10.3137 13 7C13 3.68629 10.3137 1 7 1C3.68629 1 1 3.68629 1 7C1 10.3137 3.68629 13 7 13Z"
+                stroke="#666666"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M6.33325 4.33334V7.66668H9.66659"
+                stroke="#666666"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <h4>2024/08/23</h4>
+          </div>
+        </div>
+        <img
+          src="images/raphael/doctor_nocomment.png"
+          class="doctorImg"
+          alt=""
+        />
+      </div>
+
+      <div class="scanInfo">
+        <div class="row">
+          <div class="years">
+            <h3>生理年齡</h3>
+            <div class="value" id="f_v_bioage"></div>
+            <div class="info">years old</div>
+            <img src="images/raphael/HRVFace.svg" class="HRVFace" alt="" />
+          </div>
+          <div class="HRV">
+            <h3>心律變異性</h3>
+            <div id="f_v_hrv" class="value"></div>
+            <div class="info">ms</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="Rhythm">
+            <div class="titleGroup">
+              <h3>心率</h3>
+              <img src="images/raphael/heartBeat.svg" alt="" />
+            </div>
+            <div id="f_v_hr" class="value"></div>
+            <div class="info">bpm</div>
+            <img class="bgImg" src="images/raphael/greenChart.svg" alt="" />
+          </div>
+          <div class="bloodPressure">
+            <div class="titleGroup">
+              <h3>血壓</h3>
+              <img src="images/raphael/bloodPressure.svg" alt="" />
+            </div>
+            <div class="value">
+              <span id="f_v_sbp"></span>/<span id="f_v_dbp"></span>
+            </div>
+            <div class="info">mmHg</div>
+            <img class="bgImg" src="images/raphael/purpleChart.svg" alt="" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="BO">
+            <div class="titleGroup">
+              <h3>血氧</h3>
+              <img src="images/raphael/spo2.svg" alt="" />
+            </div>
+            <div id="f_v_spo2" class="value"></div>
+            <div class="info">SpO2%</div>
+            <img class="bgImg" src="images/raphael/blueChart.svg" alt="" />
+          </div>
+          <div class="breathe">
+            <div class="titleGroup">
+              <h3>呼吸</h3>
+              <img src="images/raphael/spo2.svg" alt="" />
+            </div>
+            <div id="f_v_rr" class="value"></div>
+            <div class="info">bpm</div>
+            <img class="bgImg" src="images/raphael/brownChart.svg" alt="" />
+          </div>
+          <div class="pressure">
+            <div class="titleGroup">
+              <h3>壓力</h3>
+              <img src="images/raphael/pressure.svg" alt="" />
+            </div>
+            <div id="f_v_si" class="value"></div>
+            <div class="info">low</div>
+            <img class="bgImg" src="images/raphael/redChart.svg" alt="" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="boxGroup">
+            <div class="titleGroup">
+              <h3>交感/副交感比例</h3>
+            </div>
+            <div class="boxText">
+              <div class="text-container-PLF">
+                <h4>交感神經</h4>
+                <div class="value"></div>
+              </div>
+              <div class="text-container-PHF">
+                <h4>副交感神經</h4>
+                <div class="value"></div>
+              </div>
+            </div>
+            <div class="box">
+              <div class="circle-PLF"></div>
+              <div class="circle-PHF"></div>
+            </div>
+          </div>
+          <svg style="display: none">
+            <defs>
+              <filter id="blob">
+                <feGaussianBlur
+                  in="SourceGraphic"
+                  stdDeviation="10"
+                  result="blur"
+                ></feGaussianBlur>
+                <feColorMatrix
+                  in="blur"
+                  mode="matrix"
+                  values="
+                     1 0 0 0 0
+                     0 1 0 0 0
+                     0 0 1 0 0
+                     0 0 0 20 -10"
+                ></feColorMatrix>
+              </filter>
+            </defs>
+          </svg>
+        </div>
+
+        <div class="row">
+          <div class="progressItem Health">
+            <h3>健康力</h3>
+            <img id="f_v_health" src="images/raphael/progress1.png" alt="" />
+          </div>
+          <div class="progressItem Sleep">
+            <h3>睡眠力</h3>
+            <img id="f_v_sleep" src="images/raphael/progress2.png" alt="" />
+          </div>
+          <div class="progressItem Metabolic">
+            <h3>代謝力</h3>
+            <img
+              id="f_v_metabolism"
+              src="images/raphael/progress3.png"
+              alt=""
+            />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="progressItem Balance">
+            <h3>平衡力</h3>
+            <img
+              id="f_v_equilibrium"
+              src="images/raphael/progress4.png"
+              alt=""
+            />
+          </div>
+          <div class="progressItem Active">
+            <h3>活動力</h3>
+            <img id="f_v_activity" src="images/raphael/progress5.png" alt="" />
+          </div>
+          <div class="progressItem Relax">
+            <h3>放鬆力</h3>
+            <img
+              id="f_v_relaxation"
+              src="images/raphael/progress1.png"
+              alt=""
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="resultTextGroup">
+        <h3>根據您的神經系統數據分析</h3>
+        <p></p>
+      </div>
+
+      <!-- <div class="detectionWrap">
+        <div
+          class="detection"
+          v-for="(history, index) in store.History"
+          :key="index"
+        >
+          <div class="cGroup">
+            <img class="img" src="../assets/imgs/calendar.png" alt="" />
+          </div>
+          <h3 class="detectionDate">
+            {{ formatTimestamp2(history?.CheckTime) }}
+          </h3>
+          <div class="detectionGroup">
+            <div class="scroeTotal">
+              <h5>總分</h5>
+              <div
+                :style="{
+                  color: scoreColorFn(computedScore(history?.Score), sex),
+                }"
+                class="totalScore"
+              >
+                {{ history?.Score }}
+              </div>
+            </div>
+            <div class="seriousDegreeGroup">
+              <h5>嚴重程度</h5>
+              <div
+                :style="{
+                  color: scoreColorFn(computedScore(history?.Score), sex),
+                }"
+                class="seriousScore"
+              >
+                {{ history.Ratio }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div> -->
+      <div class="detectionWrap">
+        <h4 class="textResultText">檢測紀錄</h4>
+        <div class="detectionContainer"></div>
+        <!-- <div class="detection">
+          <div class="cGroup">
+            <img class="img" src="images/detectTime.svg" alt="" />
+          </div>
+          <h3 class="detectionDate">11/02</h3>
+          <div class="detectionGroup">
+            <div class="scroeTotal">
+              <h5>生理年齡</h5>
+              <div
+                :style="{
+                  color: scoreColorFn(computedScore(history?.Score), sex),
+                }"
+                class="totalScore"
+              >
+             
+                24 歲
+              </div>
+            </div>
+            <div class="seriousDegreeGroup">
+              <h5>HRV</h5>
+              <div
+                :style="{
+                  color: scoreColorFn(computedScore(history?.Score), sex),
+                }"
+                class="seriousScore"
+              >
+                37ms
+              </div>
+            </div>
+          </div>
+        </div> -->
+      </div>
+
+      <div class="subBtnGroup">
+        <a href="/user">
+          <button class="backToUserBtn" class="">會員中心</button>
+        </a>
+
+        <a href="/vital/scan.html">
+          <button class="backToDetect">重新檢測</button>
+        </a>
+      </div>
+
+      <!-- 暫放 -->
+      <!-- <div class="col-5 px-0 m-auto hide">
+        <p id="f_v_bioage" class="text-center text-dark fs-6 m-0 hide">--</p>
+      </div> -->
+
+      <!-- <div class="col-5 px-0 m-auto hide">
+        <p id="f_v_ba4" class="text-center text-dark fs-6 m-0">--</p>
+      </div> -->
+
+      <div class="col-5 px-0 m-auto hide">
+        <p id="f_v_ans_index_sns" class="text-center text-dark fs-6 m-0">--</p>
+      </div>
+
+      <p id="f_v_ans_index_pns" class="text-center text-dark fs-6 m-0 hide">
+        --
+      </p>
+
+      <canvas
+        id="f_spower_canvas"
+        class="hide"
+        width="100%"
+        height="100%"
+      ></canvas>
+
+      <button
+        type="button"
+        class="btn btn-secondary btn-lg hide"
+        id="f_eid_btn_home"
+      >
+        回首頁
+      </button>
+
+      <button type="button" class="btn btn-secondary btn-lg hide" id="f_back">
+        回首頁
+      </button>
+    </div>
+    <script src="js/tools.js"></script>
+    <script src="js/finish.js?v=1.0.2"></script>
+  </body>
+</html>
+
+<script>
+
+let upbioage = 0;
+
+let upba2 = 0;
+let upba4 = 0;
+let pLF = 0;
+let pHF = 0;
+let aSDNN = 0;
+let aSDNNage = 0;
+
+let result = JSON.parse(sessionStorage.getItem("result"));
+
+// SetSPowerValue(VIEW_FINISH_ACTIVITY, result.activity);
+// SetSPowerValue(VIEW_FINISH_EQUILIBRIUM, result.equilibrium);
+// SetSPowerValue(VIEW_FINISH_HEALTH, result.health);
+// SetSPowerValue(VIEW_FINISH_METABOLISM, result.metabolism);
+// SetSPowerValue(VIEW_FINISH_RELAXATION, result.relaxation);
+// SetSPowerValue(VIEW_FINISH_SLEEP, result.sleep);
+
+let storedData = JSON.parse(sessionStorage.getItem("Age"));
+console.log(storedData);
+
+if (storedData.length > 0) {
+  let aValues = [];
+  let bValues = [];
+  let cValues = [];
+  let dValues = [];
+  let eValues = [];
+  let fValues = [];
+  let gValues = [];
+  let hValues = [];
+
+  // 遍歷 storedData，取出正值並分別存入三個陣列
+  storedData.forEach((data) => {
+    let [a, b, c, d, e, f, g, h] = data;
+    if (a > 0 && a < 100) aValues.push(a);
+    if (b > 0 && b < 100) bValues.push(b);
+    if (c > 0 && c < 100) cValues.push(c);
+    if (d > 0 && d < 100) dValues.push(d);
+    if (e > 0 && e < 100) eValues.push(e);
+    if (f > 0) fValues.push(f);
+    if (g > 0) gValues.push(g);
+    if (h > 0) hValues.push(h);
+  });
+
+  console.log("PLF=", dValues);
+  console.log("PHF=", eValues);
+  console.log("LF=", fValues);
+  console.log("HF=", gValues);
+  console.log("SDNNI=", hValues);
+
+  // 計算平均值的函數
+  const calculateAverage = (values) => {
+    if (values.length === 0) return 0; // 避免除以 0
+    let sum = values.reduce((acc, val) => acc + val, 0);
+    return sum / values.length;
+  };
+
+  // 函數：計算移除極端值後的平均數
+  function trimmedMean(arr, trimPercent) {
+    // 先對數據進行排序
+    const sortedArr = arr.slice().sort((a, b) => a - b);
+    // 計算要移除的數據筆數
+    const trimCount = Math.floor(trimPercent * sortedArr.length);
+    // 移除最小和最大指定百分比的數據
+    const trimmedArr = sortedArr.slice(
+      trimCount,
+      sortedArr.length - trimCount
+    );
+    // 計算剩餘數據的平均數
+    const sum = trimmedArr.reduce((acc, value) => acc + value, 0);
+    const mean = sum / trimmedArr.length;
+    return mean;
+  }
+  // 假設移除最小與最大各5%的數據
+  const trimPercent = 0.05; // 移除5%資料
+
+  // 計算 A, B, C 的平均值
+  upbioage = trimmedMean(aValues, trimPercent);
+  upba2 = trimmedMean(bValues, trimPercent);
+  upba4 = trimmedMean(cValues, trimPercent);
+  pLF = trimmedMean(dValues, trimPercent);
+  pHF = trimmedMean(eValues, trimPercent);
+  aSDNN = trimmedMean(hValues, trimPercent);
+  let SDNNc = aSDNN * Math.exp(-0.02263 * (60 - result.hr));
+  aSDNNage = SDNNdetermineAge(SDNNc, infodata.sex);
+
+  console.log("result:" + sessionStorage.getItem("result"));
+
+  // 顯示結果
+  console.log(
+    `upbioage: ${aSDNNage}, upba2: ${upba2}, upba4: ${upba4}, SYN%: ${pLF}`
+  );
+  // SaveHRV2(result, upba2, upba4, aSDNNage, pLF, pHF);
+} 
+</script>
+
+
+<script>
+  //dom獲取元素
+  f_v_bioage = document.querySelector("#f_v_bioage");
+  f_v_hrv = document.querySelector("#f_v_hrv");
+  f_v_hr = document.querySelector("#f_v_hr");
+  f_v_sbp = document.querySelector("#f_v_sbp");
+  f_v_dbp = document.querySelector("#f_v_dbp");
+  f_v_spo2 = document.querySelector("#f_v_spo2");
+  f_v_rr = document.querySelector("#f_v_rr");
+  f_v_si = document.querySelector("#f_v_si");
+  // f_v_health = document.querySelector("#f_v_health");
+  // f_v_sleep = document.querySelector("#f_v_sleep");
+  // f_v_metabolism = document.querySelector("#f_v_metabolism");
+  // f_v_equilibrium = document.querySelector("#f_v_equilibrium");
+  // f_v_activity = document.querySelector("#f_v_activity");
+  // f_v_relaxation = document.querySelector("#f_v_relaxation");
+  resultTextGroupP = document.querySelector(".resultTextGroup p");
+  nameText = document.querySelector(".nameText");
+  PLFValue = document.querySelector(".text-container-PLF .value");
+  PHFValue = document.querySelector(".text-container-PHF .value");
+  let boxSize = 100;
+
+  // 從本地儲存中獲取 userData
+  const userData = JSON.parse(localStorage.getItem("userData"));
+  const currentResult = JSON.parse(sessionStorage.getItem("result"));
+  //登入
+  const localData = localStorage.getItem("userData");
+
+  if (!localData) {
+    console.warn("No user data found, redirecting...");
+    window.location.href = "/";
+  }
+
+  function showLoading() {
+    document.getElementById("raphaelLoading").style.display = "flex";
+  }
+
+  function hideLoading() {
+    document.getElementById("raphaelLoading").style.display = "none";
+  }
+
+  if (userData?.Name) {
+    nameText.textContent = `${userData?.Name}，您好`;
+    const currentDate = new Date();
+  }
+  if (currentResult && currentResult.ANSIndex) {
+    const resultTextGroupP = document.querySelector(".resultTextGroup p");
+
+    const SNS = currentResult?.ANSIndex.SNS;
+    const PNS = currentResult?.ANSIndex.PNS;
+
+    // 判斷 SNS 和 PNS 的狀態並顯示對應訊息
+    // if (
+    //   (SNS > 2 || (2 > SNS && SNS > 1)) &&
+    //   (PNS < -2 || (-2 < PNS && PNS < -1))
+    // ) {
+    //   resultTextGroupP.textContent =
+    //     "您的自律神經失調狀態極為嚴重，建議保持規律作息，避免過度壓力，適當運動，並練習深呼吸或冥想等放鬆技巧。如果症狀持續或加重，應尋求專業醫療協助，透過專業診斷與治療來改善身體狀況。";
+    // } else if (
+    //   ((-2 < SNS && SNS < -1) || SNS < -2) &&
+    //   ((2 > PNS && PNS > 1) || PNS > 2)
+    // ) {
+    //   resultTextGroupP.textContent =
+    //     "當交感神經嚴重低落，副交感神經極度亢奮時，患者可能會出現心跳過慢、低血壓、疲倦、頭暈等症狀。建議病患調整生活作息，逐步增加適度的體力活動，如散步或輕運動，以促進交感神經的回復。避免長時間靜坐或臥床，並可透過冷水淋浴或短暫的冷熱交替淋浴來刺激交感神經。同時，減少過度放鬆的活動，如過長的冥想或呼吸練習，並密切監測身體反應，必要時尋求專業醫療協助。";
+    // } else if (SNS > 2 || (2 > SNS && SNS > 1)) {
+    //   resultTextGroupP.textContent =
+    //     "您的交感神經過於亢奮，可能導致長期緊張、心跳過快、血壓升高、焦慮、失眠等症狀。建議保持規律作息，避免過度壓力，適當運動，並練習深呼吸或冥想等放鬆技巧。如果症狀持續或加重，應尋求專業醫療協助，透過專業診斷與治療來改善身體狀況。";
+    // } else if (PNS < -2 || (-2 < PNS && PNS < -1)) {
+    //   resultTextGroupP.textContent =
+    //     "您的副交感神經過於低落，可能會導致心跳加快、睡眠質量差、消化不良、容易感到焦慮和壓力等問題。建議保持規律作息，避免過度壓力，適當運動，並練習深呼吸或冥想等放鬆技巧。如果症狀持續或加重，應尋求專業醫療協助，透過專業診斷與治療來改善身體狀況。";
+    // } else {
+    //   resultTextGroupP.textContent =
+    //     "其他您的自律神經狀態正常，仍建議保持規律作息、適度運動，如散步或瑜伽，並進行放鬆練習，減輕壓力。維持均衡飲食，攝取足夠的維生素與礦物質，避免過多的咖啡因與糖分。保持良好的心理健康，進行社交互動和正念練習，有助於維持自律神經的平衡和長期健康。";
+    // }
+  }
+
+ 
+
+  async function fetchResultIfChanged() {
+    const previousResult = sessionStorage.getItem("lastFetchedResult");
+
+    if (JSON.stringify(currentResult) === previousResult) {
+      console.log("結果未改變，跳過 API 呼叫。");
+      return;
+    }
+
+    try {
+      sessionStorage.setItem(
+        "lastFetchedResult",
+        JSON.stringify(currentResult)
+      );
+
+      const response = await fetch(
+        "https://23700999.com:8081/HMA/API_HRV2Save.jsp",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            MID: userData.MID,
+            MAID: userData.MAID,
+            Token: userData.Token,
+            Mobile: userData.Mobile,
+            PNS: String(currentResult.ANSIndex.PNS),
+            SNS: String(currentResult.ANSIndex.SNS),
+            DBP: String(currentResult.dbp),
+            HR: String(currentResult.hr),
+            HRV: String(currentResult.hrv_indices.SDNNI),
+            rr: String(currentResult.rr),
+            SBP: String(currentResult.sbp),
+            SPO2: String(currentResult.spo2),
+            Activity: String(currentResult.activity),
+            Equilibrium: String(currentResult.equilibrium),
+            Health: String(currentResult.health),
+            Metabolism: String(currentResult.metabolism),
+            Relaxation: String(currentResult.relaxation),
+            Sleep: String(currentResult.sleep),
+            HF: String(currentResult.hrv_indices.HF),
+            LF: String(currentResult.hrv_indices.LF),
+            LF_HF_Ratio: String(currentResult.hrv_indices.LF_HF_RATIO),
+            Mean_RR: String(currentResult.hrv_indices.MEAN_RR),
+            PHF: String(currentResult.hrv_indices.PHF), //
+            PLF: String(currentResult.hrv_indices.PLF), //
+            RMSSD: String(currentResult.hrv_indices.RMSSD),
+            RRIV: String(currentResult.hrv_indices.RRIV),
+            SD1: String(currentResult.hrv_indices.SD1),
+            SD2: String(currentResult.hrv_indices.SD2),
+            SDNN: String(currentResult.hrv_indices.SDNN),
+            si: String(currentResult.si),
+            bioage: String(Math.floor(upbioage)),
+            Selage: String(Math.floor(upba2)),
+            ba2: String(Math.floor(upba2)),
+            ba4: String(Math.floor(upba4)),
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("網路響應不是成功狀態");
+      }
+
+      const apiResult = await response.json();
+      return apiResult;
+    } catch (error) {
+      console.error("Fetch error:", error);
+    }
+  }
+
+  async function API_HRV2() {
+    try {
+      const response = await fetch(
+        "https://23700999.com:8081/HMA/API_HRV2.jsp",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            MID: userData.MID,
+            MAID: userData.MAID,
+            Token: userData.Token,
+            Mobile: userData.Mobile,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("網路響應不是成功狀態");
+      }
+
+      const apiResult = await response.json();
+      console.log(apiResult);
+
+      if (apiResult.HRV2 && apiResult.HRV2.length > 0) {
+        const HRVData = apiResult.HRV2[0];
+        f_v_bioage.textContent = `${HRVData.bioage - 4} - ${HRVData.bioage}`;
+        f_v_hrv.textContent = Math.round(HRVData.HRV * 10) / 10;
+        f_v_hr.textContent = HRVData.HR;
+        f_v_sbp.textContent = HRVData.SBP;
+        f_v_dbp.textContent = HRVData.DBP;
+        f_v_spo2.textContent = HRVData.SPO2;
+        f_v_rr.textContent = HRVData.rr;
+        f_v_si.textContent = HRVData.stress;
+        const PLF = HRVData.PLF;
+        const roundedPLF = Math.round(PLF);
+        const PHF = 100 - roundedPLF;
+
+        let PLFBoxSize = boxSize + roundedPLF;
+        let PHFBoxSize = boxSize + PHF;
+        console.log(roundedPLF, PHF, PLFBoxSize, PHFBoxSize);
+
+        document.querySelector(
+          ".text-container-PLF"
+        ).style.width = `${PLFBoxSize}px`;
+        document.querySelector(
+          ".text-container-PHF"
+        ).style.width = `${PHFBoxSize}px`;
+        document.querySelector(".circle-PLF").style.width = `${PLFBoxSize}px`;
+        document.querySelector(".circle-PLF").style.height = `${PLFBoxSize}px`;
+        document.querySelector(".circle-PHF").style.width = `${PHFBoxSize}px`;
+        document.querySelector(".circle-PHF").style.height = `${PHFBoxSize}px`;
+        PLFValue.textContent = roundedPLF + "%";
+        PHFValue.textContent = PHF + "%";
+        function getProgressImage(score) {
+          return `images/raphael/progress-${score}.png`;
+        }
+
+        document.getElementById("f_v_health").src = getProgressImage(
+          HRVData.Health
+        );
+        document.getElementById("f_v_sleep").src = getProgressImage(
+          HRVData.Sleep
+        );
+        document.getElementById("f_v_metabolism").src = getProgressImage(
+          HRVData.Metabolism
+        );
+        document.getElementById("f_v_equilibrium").src = getProgressImage(
+          HRVData.Equilibrium
+        );
+        document.getElementById("f_v_activity").src = getProgressImage(
+          HRVData.Activity
+        );
+        document.getElementById("f_v_relaxation").src = getProgressImage(
+          HRVData.Relaxation
+        );
+
+        resultTextGroupP.textContent = HRVData.TotalDesc;
+        let checkTime = HRVData.CheckTime;
+        let formattedDate = formatCheckDate(checkTime);
+        document.querySelector(".titleGroup .timeGroup h4").textContent =
+          formattedDate;
+
+        const detectionContainer = document.querySelector(
+          ".detectionContainer"
+        );
+        detectionContainer.innerHTML = ""; // 清空容器
+
+        apiResult.HRV2.forEach((history) => {
+          const detectionDiv = document.createElement("div");
+          detectionDiv.classList.add("detection");
+
+          const age = parseInt(history.bioage, 10);
+          const hrvValue = parseFloat(history.HRV);
+          const gender = userData.Sex;
+
+          const [minHRV, maxHRV] = getHRVRange(age, gender);
+          const isBelowAverage = hrvValue < minHRV;
+
+          // 使用每筆紀錄的 AID
+          detectionDiv.innerHTML = `
+            <a href='detail.html?AID=${history.AID}'>
+              <div class="cGroup">
+                <img class="img" src="images/detectTime.svg" alt="" />
+              </div>
+              <h3 class="detectionDate">${formatDate(history.CheckTime)}</h3>
+              <div class="detectionGroup">
+                <div class="scroeTotal">
+                  <h5>生理年齡</h5>
+                  <div class="totalScore">
+                    <span>${history.bioage - 4} - ${history.bioage}</span> 歲
+                  </div>
+                </div>
+                <div class="seriousDegreeGroup">
+                  <h5>HRV</h5>
+                  <div class="seriousScore ${isBelowAverage ? "redValue" : ""}">
+                    <span>${Math.round(history.HRV * 10) / 10}</span> ms
+                  </div>
+                </div>
+              </div>
+            </a>
+          `;
+
+          detectionContainer.appendChild(detectionDiv);
+        });
+
+        function getHRVRange(age, gender) {
+          if (age >= 0 && age <= 29) {
+            return gender === "M" ? [29, 53] : [30, 57];
+          } else if (age >= 30 && age <= 39) {
+            return gender === "M" ? [25, 47] : [25, 44];
+          } else if (age >= 40 && age <= 49) {
+            return gender === "M" ? [21, 40] : [20, 40];
+          } else if (age >= 50 && age <= 59) {
+            return gender === "M" ? [15, 34] : [18, 38];
+          } else if (age >= 60) {
+            return gender === "M" ? [16, 33] : [15, 30];
+          }
+          return [0, Infinity];
+        }
+
+        function formatDate(checkTime) {
+          const dateOnly = checkTime.split(" ")[0];
+          const [year, month, day] = dateOnly.split("/");
+          return `${month}/${day}`;
+        }
+
+        function formatCheckDate(checkTime) {
+          const dateOnly = checkTime.split(" ")[0];
+          return dateOnly;
+        }
+      }
+
+      return apiResult;
+    } catch (error) {
+      console.error("Fetch error:", error);
+    }
+  }
+
+  async function fetchData() {
+    try {
+      showLoading();
+      await fetchResultIfChanged();
+      await API_HRV2();
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      hideLoading();
+    }
+  }
+
+  fetchData();
+</script>
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  .hide {
+    position: absolute;
+    bottom: 0;
+    height: 0;
+    opacity: 0;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  .raphaelLoading {
+    width: 100%;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99;
+    background: rgba(217, 217, 217, 0.5);
+    backdrop-filter: blur(2.5px);
+  }
+
+  .raphaelLoading img {
+    transform: translateY(-15%);
+  }
+
+  .finishWrap {
+    background: url("images/raphael/gradient-bg.png");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    min-height: 100vh;
+    width: 100%;
+  }
+
+  .raphaelNavbar {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px 1rem;
+    display: flex;
+    width: 100%;
+    z-index: 999;
+    align-items: center;
+    max-width: 768px;
+    height: 50px;
+  }
+
+  .raphaelNavbar .logoGroup {
+    width: 65%;
+  }
+
+  .raphaelNavbar .optionGroup {
+    display: flex;
+    justify-content: flex-end;
+    gap: 2px;
+    width: 35%;
+    margin-right: auto;
+  }
+
+  .raphaelNavbar .optionGroup img {
+    cursor: pointer;
+  }
+
+  .finishWrap {
+    padding-top: 50px;
+    width: 100%;
+  }
+
+  .finishWrap > .titleGroup {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    padding: 0 1rem;
+  }
+
+  .doctorImg {
+    height: 150px;
+  }
+
+  .finishWrap .textGroup .timeGroup {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 0.25rem;
+  }
+
+  .finishWrap .textGroup h3 {
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin: 0;
+  }
+
+  .finishWrap .textGroup .timeGroup svg {
+    transform: translateY(-4%);
+  }
+
+  .finishWrap .textGroup .timeGroup h4 {
+    font-size: 14px;
+    font-weight: 400;
+    margin: 0;
+  }
+
+  .scanInfo {
+    display: flex;
+    margin-top: -12px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 0 1rem;
+  }
+
+  .scanInfo h3 {
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 0.15px;
+    padding: 0;
+    margin: 0;
+  }
+
+  .scanInfo .row {
+    display: flex;
+    flex-wrap: nowrap;
+    width: 100%;
+    gap: 3%;
+    margin-bottom: 1rem;
+  }
+
+  .scanInfo .years {
+    width: 55%;
+    padding: 6px;
+    border-radius: 8px;
+    background: linear-gradient(
+      180deg,
+      #74bc1f 0%,
+      rgba(116, 188, 31, 0.35) 100%
+    );
+    padding: 12px;
+    align-items: center;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scanInfo .years .value {
+    font-size: 48px;
+    font-weight: bold;
+    margin-top: 0.25rem;
+  }
+
+  .scanInfo .years .info {
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+  }
+
+  .scanInfo .years .HRVFace {
+    position: absolute;
+    right: -12%;
+    top: 0;
+    width: 74%;
+  }
+
+  .scanInfo .HRV {
+    background: linear-gradient(
+      180deg,
+      #dfecc5 0%,
+      rgba(223, 236, 197, 0.35) 100%
+    );
+    padding: 12px;
+    border-radius: 8px;
+    width: 45%;
+  }
+
+  .scanInfo .HRV .value {
+    color: #74bc1f;
+    font-size: 48px;
+    font-weight: bold;
+    margin-top: 0.25rem;
+  }
+
+  .scanInfo .HRV .info {
+    color: #666;
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    width: 45%;
+  }
+
+  .scanInfo .Rhythm,
+  .scanInfo .bloodPressure {
+    width: 50%;
+    background-color: #fff;
+    border-radius: 8px;
+    border-top-style: 8px;
+    position: relative;
+    overflow: hidden;
+    padding: 12px;
+  }
+
+  .scanInfo .Rhythm .titleGroup,
+  .scanInfo .bloodPressure .titleGroup {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .scanInfo .Rhythm .titleGroup img,
+  .scanInfo .bloodPressure .titleGroup img {
+    width: 20px;
+  }
+
+  .scanInfo .Rhythm .value,
+  .scanInfo .bloodPressure .value {
+    color: #74bc1f;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.12px;
+    margin-top: 0.5rem;
+  }
+
+  .scanInfo .Rhythm .info,
+  .scanInfo .bloodPressure .info {
+    color: #ccc;
+    letter-spacing: 0.5px;
+  }
+
+  .scanInfo .Rhythm .bgImg,
+  .scanInfo .bloodPressure .bgImg {
+    position: absolute;
+    bottom: 0%;
+    width: 100%;
+  }
+
+  .scanInfo .BO,
+  .scanInfo .breathe,
+  .scanInfo .pressure {
+    width: 33.333%;
+    background-color: #fff;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    padding: 12px;
+  }
+
+  .scanInfo .BO .titleGroup,
+  .scanInfo .breathe .titleGroup,
+  .scanInfo .pressure .titleGroup {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .scanInfo .BO .titleGroup img,
+  .scanInfo .breathe .titleGroup img,
+  .scanInfo .pressure .titleGroup img {
+    width: 20px;
+  }
+
+  .scanInfo .BO .value,
+  .scanInfo .breathe .value,
+  .scanInfo .pressure .value {
+    color: #74bc1f;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.12px;
+    margin-top: 0.5rem;
+  }
+
+  .scanInfo .BO .info,
+  .scanInfo .breathe .info,
+  .scanInfo .pressure .info {
+    color: #ccc;
+    letter-spacing: 0.5px;
+  }
+
+  .scanInfo .BO .bgImg,
+  .scanInfo .breathe .bgImg,
+  .scanInfo .pressure .bgImg {
+    position: absolute;
+    bottom: 0%;
+    width: 100%;
+  }
+
+  .progressItem {
+    width: 33.3333%;
+    text-align: center;
+    background-color: #fff;
+    padding: 12px;
+  }
+
+  .progressItem img {
+    width: 100%;
+    margin-top: 0.25rem;
+  }
+
+  .textResultText {
+    color: #666;
+    margin: 0;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: #1e1e1e;
+    letter-spacing: 0.5px;
+  }
+
+  .resultTextGroup {
+    background-color: #fff;
+    border-radius: 12px;
+    margin: 12px;
+    margin-top: 0;
+    padding: 12px;
+  }
+
+  .resultTextGroup h3 {
+    margin: 0;
+    font-weight: 400;
+  }
+
+  .resultTextGroup p {
+    margin: 0;
+    margin-top: 0.5rem;
+  }
+
+  .subBtnGroup {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 3%;
+    margin-top: 0.75rem;
+    margin-bottom: 66px;
+    padding: 0 1rem;
+  }
+
+  .subBtnGroup a {
+    text-decoration: none;
+    width: 100%;
+    text-align: center;
+  }
+
+  .subBtnGroup button {
+    background-color: #74bc1f;
+    color: #fff;
+    padding: 8px;
+    width: 90%;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    transition: 0.25s ease;
+    width: 100%;
+  }
+
+  .subBtnGroup .backToUserBtn {
+    background-color: #eee;
+    color: #666;
+  }
+
+  .detectionWrap {
+    background-color: #fff;
+    border-radius: 12px;
+    margin: 0 12px;
+    margin-top: 0.85rem;
+    padding: 12px;
+  }
+
+  .detectionWrap .detectionContainer {
+    overflow-y: auto;
+    max-height: 400px;
+  }
+
+  .detectionWrap .detection a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 80px;
+    text-decoration: none;
+    color: #1e1e1e;
+    margin: 1rem 0;
+  }
+
+  .detectionWrap .detection a:hover {
+    background-color: #f4f4f4;
+  }
+
+  .detectionWrap .detection a .cGroup {
+    border: 2px solid #74bc1f;
+    padding: 0.25rem;
+    border-radius: 7px;
+  }
+
+  .detectionWrap .detection a h5 {
+    margin: 0;
+    margin-top: 0.25rem;
+    color: #666;
+    font-weight: 400;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+  }
+
+  .detectionWrap .detection a .cGroup img {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .detectionWrap .detectionGroup {
+    margin-left: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .detectionWrap .detectionGroup span {
+    font-weight: bold;
+    font-size: 1.5rem;
+    letter-spacing: 0.05px;
+    color: #1e1e1e;
+  }
+
+  .detectionWrap .detectionGroup .redValue {
+    color: #ec4f4f;
+  }
+
+  .boxGroup {
+    display: grid;
+    place-items: center;
+    gap: 0.75rem;
+    background-color: #fff;
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+  }
+
+  .boxGroup h3 {
+    color: #1e1e1e;
+  }
+
+  .box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-column: 1/2;
+    grid-row: 2;
+    filter: url(#blob);
+    width: 100%;
+    height: 200px;
+  }
+
+  .circle-PHF,
+  .circle-PLF {
+    position: relative;
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    filter: drop-shadow(0px 3px 5px #fff) brightness(1.06);
+  }
+
+  .boxGroup {
+    position: relative;
+    height: 100%;
+  }
+
+  .boxText {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-column: 1/2;
+    grid-row: 2;
+    width: 100%;
+    height: 200px;
+    z-index: 2;
+  }
+
+  .text-container-PLF {
+    text-align: center;
+    color: #fff;
+    animation: 1.5s moveRight forwards ease-out;
+  }
+
+  .text-container-PHF {
+    text-align: center;
+    color: #fff;
+    animation: 1.75s moveLeft forwards ease-out;
+  }
+
+  .boxText h4 {
+    margin: 0;
+  }
+
+  .circle-PLF {
+    background-color: rgba(236, 79, 79, 0.75);
+    animation: 1.5s moveRight forwards ease-out;
+  }
+
+  .circle-PHF {
+    background-color: rgba(31, 188, 179, 0.75);
+    animation: 1.75s moveLeft forwards ease-out;
+  }
+
+  .text-container-PLF .value,
+  .text-container-PHF .value {
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: 0.12px;
+  }
+
+  @keyframes moveLeft {
+    0% {
+      left: -50px;
+    }
+
+    50% {
+      left: -25px;
+    }
+
+    70% {
+      left: -36px;
+    }
+
+    100% {
+      left: 0;
+    }
+  }
+
+  @keyframes moveRight {
+    0% {
+      left: 50px;
+    }
+
+    50% {
+      left: 25px;
+    }
+
+    70% {
+      left: 36px;
+    }
+
+    100% {
+      left: 0;
+    }
+  }
+</style>

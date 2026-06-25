@@ -1,0 +1,1 @@
+import{y as o,z as t,A as r}from"#entry";import{_ as n}from"./DlAUqK2U.js";const s=""+new URL("spinner.BM0L7vzu.gif",import.meta.url).href,_={},a={class:"raphaelLoading"};function c(i,e){return t(),o("div",a,[...e[0]||(e[0]=[r("img",{src:s,alt:""},null,-1)])])}const d=n(_,[["render",c],["__scopeId","data-v-a650dbc2"]]);export{d as _};

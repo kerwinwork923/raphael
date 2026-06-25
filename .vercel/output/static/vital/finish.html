@@ -1,0 +1,758 @@
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NeuroPlus 自律神經HRV檢測</title>
+</head>
+
+<body>
+  <div id="raphaelLoading" class="raphaelLoading" 　style="display: none;">
+    <img src="images/raphael/spinner.gif" alt="Loading..." />
+  </div>
+  <div class="finishWrap">
+    <div class="raphaelNavbar">
+      <div class="logoGroup">
+        <a to="/user">
+          <img src="images/raphael/neuro-plus.svg" alt="" />
+        </a>
+      </div>
+      <div class="optionGroup">
+        <!-- <img class="cartIcon" src="images/raphael/cart.svg" alt="" />
+        <img class="alertIcon" src="images/raphael/alert.svg" alt="" />
+        <img class="settingIcon" src="images/raphael/setting.svg" alt="" /> -->
+      </div>
+    </div>
+    <div class="titleGroup">
+      <div class="textGroup">
+        <h3 class="nameText">您好</h3>
+        <div class="timeGroup">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path
+              d="M7 13C10.3137 13 13 10.3137 13 7C13 3.68629 10.3137 1 7 1C3.68629 1 1 3.68629 1 7C1 10.3137 3.68629 13 7 13Z"
+              stroke="#666666" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M6.33325 4.33334V7.66668H9.66659" stroke="#666666" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+          <h4>2024/08/23</h4>
+        </div>
+      </div>
+      <div class="imgGroup">
+        <img src="../vital/images/raphael/3dWatch.svg" class="watchImg" />
+        <img src="images/raphael/doctor_nocomment.png" class="doctorImg" alt="" />
+      </div>
+    </div>
+
+    <div class="scanInfo">
+      <div class="row">
+        <img src="images/tinified/A1.png" alt="" />
+        <img src="images/tinified/B2.png" alt="" />
+        <img src="images/tinified/C3.png" alt="" />
+        <img src="images/tinified/D4.png" alt="" />
+      </div>
+      <div class="personalizedSuggestions">
+        <h3>個人化建議</h3>
+        <p>
+          您的 LF/HF 比值小於
+          0.5，顯示副交感神經過度活躍，身體處於嚴重放鬆狀態，可能導致血壓過低、心跳過慢、頭暈乏力等症狀。建議增加活動量、避免久坐或久躺，適量攝取咖啡因，並維持規律作息。警示：若出現持續頭暈、胸悶或昏厥，請立即就醫，避免潛在的心血管風險。
+        </p>
+      </div>
+    </div>
+
+    <div class="resultTextGroup">
+      <h3>根據您的神經系統數據分析</h3>
+      <p></p>
+    </div>
+
+    <div class="detectionWrap">
+      <h4 class="textResultText">檢測紀錄</h4>
+      <div class="detectionContainer"></div>
+      <!-- <div class="detection">
+          <div class="cGroup">
+            <img class="img" src="images/detectTime.svg" alt="" />
+          </div>
+          <h3 class="detectionDate">11/02</h3>
+          <div class="detectionGroup">
+            <div class="scroeTotal">
+              <h5>生理年齡</h5>
+              <div
+                :style="{
+                  color: scoreColorFn(computedScore(history?.Score), sex),
+                }"
+                class="totalScore"
+              >
+             
+                24 歲
+              </div>
+            </div>
+            <div class="seriousDegreeGroup">
+              <h5>HRV</h5>
+              <div
+                :style="{
+                  color: scoreColorFn(computedScore(history?.Score), sex),
+                }"
+                class="seriousScore"
+              >
+                37ms
+              </div>
+            </div>
+          </div>
+        </div> -->
+    </div>
+
+    <div class="subBtnGroup">
+      <a href="/user">
+        <button class="backToUserBtn">會員中心</button>
+      </a>
+      <a href="/vital/scan3.html">
+        <button class="backToDetect">重新檢測</button>
+      </a>
+    </div>
+
+    <div class="subBtnGroup2" style="display: none">
+      <a class="goToUsage">
+        <button class="backToUserBtn2">前往使用紀錄</button>
+      </a>
+    </div>
+
+    <button type="button" class="btn btn-secondary btn-lg hide" id="f_eid_btn_home">
+      回首頁
+    </button>
+
+    <button type="button" class="btn btn-secondary btn-lg hide" id="f_back">
+      回首頁
+    </button>
+  </div>
+</body>
+
+</html>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const uid = urlParams.get("UID");
+    const form = urlParams.get("form");
+    const hasAsterisk = form?.includes("*");
+
+    const backToUserBtn2 = document.querySelector(".backToUserBtn2");
+    const goToUsageLink = document.querySelector(".goToUsage");
+    const subBtnGroup = document.querySelector(".subBtnGroup");
+    const subBtnGroup2 = document.querySelector(".subBtnGroup2");
+
+    console.log("UID:", uid);
+    console.log("Form:", form);
+    console.log("Has Asterisk:", hasAsterisk);
+
+    if (form) {
+      if (hasAsterisk) {
+        if (backToUserBtn2) backToUserBtn2.textContent = "看報告";
+        if (goToUsageLink) goToUsageLink.href = `/usageHRVResult/${uid}`;
+      } else {
+        localStorage.setItem(`${form}_isFirstHRVDetect`, true);
+        if (goToUsageLink) goToUsageLink.href = `/usage/${form}`;
+      }
+      subBtnGroup.style.display = "none";
+      subBtnGroup2.style.display = "flex";
+    } else {
+      subBtnGroup.style.display = "flex";
+      subBtnGroup2.style.display = "none";
+    }
+
+    let userData = {};
+    userData = JSON.parse(localStorage.getItem("userData"));
+
+    // 從 URL 獲取 AID
+    const aid = urlParams.get("AID");
+
+    // HRV3 API 參數
+    const hrv3Params = {
+      MID: userData.MID,
+      Token: userData.Token,
+      MAID: userData.MAID,
+      Mobile: userData.Mobile,
+      AID: aid || "" // 加入 AID 參數
+    };
+
+    // 呼叫 HRV3 API
+    fetch("https://23700999.com:8081/HMA/api/fr/HRV3Detail", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(hrv3Params),
+    })
+      .then(res => res.json())
+      .then(data => {
+        console.log("HRV3 API 回傳：", data);
+
+        // 計算各項指標
+        const lf_hf = parseFloat(data.lf_hf);
+        const sdnn = parseFloat(data.sdnn);
+        const hbr = parseInt(data.hbr);
+        const rr = parseInt(data.rr);
+        const lf = parseFloat(data.lf);
+        const hf = parseFloat(data.hf);
+        const sbp = parseInt(data.sbp);
+        const dbp = parseInt(data.dbp);
+
+        // 自律神經平衡 (A)
+        let balanceScore = 3; // 預設中等
+        let balanceSymbol = "😌 穩定";
+        if (lf_hf > 2) {
+          balanceScore = 5;
+          balanceSymbol = "🧠 焦躁（交感極高）";
+        } else if (lf_hf > 1.5) {
+          balanceScore = 4;
+          balanceSymbol = "😱 緊繃";
+        } else if (lf_hf >= 1) {
+          balanceScore = 3;
+          balanceSymbol = "😌 穩定";
+        } else if (lf_hf >= 0.5) {
+          balanceScore = 2;
+          balanceSymbol = "🐱 微放鬆";
+        } else {
+          balanceScore = 1;
+          balanceSymbol = "🐈 深度放鬆";
+        }
+
+        // 生理疲勞 (B)
+        let fatigueScore = 3; // 預設中等
+        let fatigueSymbol = "😐 普通";
+        if (sdnn < 20) {
+          fatigueScore = 5;
+          fatigueSymbol = "💀 非常疲憊";
+        } else if (sdnn < 30) {
+          fatigueScore = 4;
+          fatigueSymbol = "😪 疲勞";
+        } else if (sdnn < 50) {
+          fatigueScore = 3;
+          fatigueSymbol = "😐 普通";
+        } else if (sdnn < 70) {
+          fatigueScore = 2;
+          fatigueSymbol = "🥳 有精神";
+        } else {
+          fatigueScore = 1;
+          fatigueSymbol = "💪 精力充沛";
+        }
+
+        // 心情指北針 (C)
+        let moodScore = 3; // 預設中等
+        let moodSymbol = "💪 專注";
+        if (hbr && rr && lf && hf) {
+          let score = 0;
+          if (hbr > 90) score += 5;
+          else if (hbr > 80) score += 4;
+          else if (hbr > 70) score += 3;
+          else if (hbr > 60) score += 2;
+          else score += 1;
+
+          if (rr > 18) score += 5;
+          else if (rr > 15) score += 4;
+          else if (rr > 12) score += 3;
+          else if (rr > 10) score += 2;
+          else score += 1;
+
+          const lf_hf_ratio = lf / hf;
+          if (lf_hf_ratio > 2) score += 5;
+          else if (lf_hf_ratio > 1.5) score += 4;
+          else if (lf_hf_ratio > 1) score += 3;
+          else if (lf_hf_ratio > 0.5) score += 2;
+          else score += 1;
+
+          if (score >= 14) {
+            moodScore = 5;
+            moodSymbol = "🔥 高度焦躁";
+          } else if (score >= 12) {
+            moodScore = 4;
+            moodSymbol = "😠 緊繃";
+          } else if (score >= 9) {
+            moodScore = 3;
+            moodSymbol = "💪 專注";
+          } else if (score >= 5) {
+            moodScore = 2;
+            moodSymbol = "😌 微放鬆";
+          } else {
+            moodScore = 1;
+            moodSymbol = "😴 沉靜";
+          }
+        }
+
+        // 血壓氣球 (D)
+        let pressureScore = 3; // 預設中等
+        let pressureSymbol = "🎈 穩定氣球";
+        if (sbp > 145 || dbp > 95) {
+          pressureScore = 5;
+          pressureSymbol = "💥 高張氣球";
+        } else if (sbp >= 130 || dbp >= 85) {
+          pressureScore = 4;
+          pressureSymbol = "💨 偏高氣球";
+        } else if (sbp >= 110 && sbp <= 129 && dbp >= 70 && dbp <= 84) {
+          pressureScore = 3;
+          pressureSymbol = "🎈 穩定氣球";
+        } else if (sbp >= 95 && dbp >= 60) {
+          pressureScore = 2;
+          pressureSymbol = "💧 微低氣球";
+        } else {
+          pressureScore = 1;
+          pressureSymbol = "💦 洩氣氣球";
+        }
+
+        // 更新圖片
+        const row = document.querySelector('.scanInfo .row');
+        row.innerHTML = `
+          <img src="images/tinified/A${balanceScore}.png" alt="自律神經平衡" />
+          <img src="images/tinified/B${fatigueScore}.png" alt="生理疲勞" />
+          <img src="images/tinified/C${moodScore}.png" alt="心情指北針" />
+          <img src="images/tinified/D${pressureScore}.png" alt="血壓氣球" />
+        `;
+
+        // 更新個人化建議
+        const suggestions = document.querySelector('.personalizedSuggestions p');
+        suggestions.textContent = `
+          您的 LF/HF 比值為 ${lf_hf.toFixed(2)}，${balanceSymbol}。
+          生理疲勞程度：${fatigueSymbol}。
+          心情狀態：${moodSymbol}。
+          血壓狀態：${pressureSymbol}。
+        `;
+
+      })
+      .catch(err => {
+        console.error("HRV3 API 錯誤：", err);
+      });
+
+    console.log("Final goToUsageLink.href:", goToUsageLink?.href);
+  });
+
+  //dom獲取元素
+
+  resultTextGroupP = document.querySelector(".resultTextGroup p");
+  nameText = document.querySelector(".nameText");
+
+  // 從本地儲存中獲取 userData
+  const userData = JSON.parse(localStorage.getItem("userData"));
+
+  const userHRV = JSON.parse(sessionStorage.getItem("rHRV"));
+  console.log("USERHRV=", userHRV);
+
+  //登入
+  const localData = localStorage.getItem("userData");
+
+  if (!localData) {
+    console.warn("No user data found, redirecting...");
+    window.location.href = "/";
+  }
+
+  function showLoading() {
+    document.getElementById("raphaelLoading").style.display = "flex";
+  }
+
+  function hideLoading() {
+    document.getElementById("raphaelLoading").style.display = "none";
+  }
+
+  if (userData?.Name) {
+    nameText.textContent = `${userData?.Name}，您好`;
+  }
+
+  async function fetchData() {
+    try {
+      // showLoading();
+      // await fetchResultIfChanged();
+      // await API_HRV2();
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      hideLoading();
+    }
+  }
+
+  fetchData();
+
+
+</script>
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  .hide {
+    position: absolute;
+    bottom: 0;
+    height: 0;
+    opacity: 0;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  .raphaelLoading {
+    width: 100%;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99;
+    background: rgba(217, 217, 217, 0.5);
+    backdrop-filter: blur(2.5px);
+  }
+
+  .raphaelLoading img {
+    width: 44px;
+    transform: translateY(-15%);
+  }
+
+  .finishWrap {
+    background: url("images/raphael/gradient-bg.png");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    min-height: 100vh;
+    width: 100%;
+  }
+
+  .raphaelNavbar {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px 1rem;
+    display: flex;
+    width: 100%;
+    z-index: 999;
+    align-items: center;
+    max-width: 768px;
+    height: 50px;
+  }
+
+  .raphaelNavbar .logoGroup {
+    width: 65%;
+  }
+
+  .raphaelNavbar .optionGroup {
+    display: flex;
+    justify-content: flex-end;
+    gap: 2px;
+    width: 35%;
+    margin-right: auto;
+  }
+
+  .raphaelNavbar .optionGroup img {
+    cursor: pointer;
+  }
+
+  .finishWrap {
+    padding-top: 50px;
+    padding-bottom: 116px;
+  }
+
+  .finishWrap>.titleGroup {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    padding: 0 1rem;
+  }
+
+  .imgGroup {
+    position: relative;
+  }
+
+  .watchImg {
+    position: absolute;
+    top: 52%;
+    right: 0;
+    width: 26px;
+    cursor: pointer;
+  }
+
+  .doctorImg {
+    height: 150px;
+  }
+
+  .finishWrap>.titleGroup>.textGroup {
+    flex: 1;
+    padding: 0.75rem;
+  }
+
+  .finishWrap .textGroup .timeGroup {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 0.25rem;
+  }
+
+  .finishWrap .textGroup h3 {
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin: 0;
+  }
+
+  .finishWrap .textGroup .timeGroup svg {
+    transform: translateY(-4%);
+  }
+
+  .finishWrap .textGroup .timeGroup h4 {
+    font-size: 14px;
+    font-weight: 400;
+    margin: 0;
+  }
+
+  .scanInfo {
+    max-width: 90%;
+    margin-left: 5%;
+  }
+
+  .scanInfo .row {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  @media screen and (max-width: 768px) {
+    .scanInfo .row {
+      flex-wrap: wrap;
+    }
+
+    .scanInfo .row img {
+      width: 49%;
+    }
+  }
+
+  .textResultText {
+    color: #666;
+    margin: 0;
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: #1e1e1e;
+    letter-spacing: 0.5px;
+  }
+
+  .resultTextGroup {
+    display: none;
+    background-color: #fff;
+    border-radius: 12px;
+    margin: 12px;
+    margin-top: 0;
+    padding: 12px;
+  }
+
+  .resultTextGroup h3 {
+    margin: 0;
+    font-weight: 400;
+  }
+
+  .resultTextGroup p {
+    margin: 0;
+    margin-top: 0.5rem;
+  }
+
+  .subBtnGroup {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 0.75rem;
+    padding: 0 1rem;
+    padding-top: 0.75rem;
+    padding-bottom: 3.125rem;
+    position: fixed;
+    bottom: 0;
+    background: #fff;
+  }
+
+  .subBtnGroup a {
+    text-decoration: none;
+    width: 100%;
+    text-align: center;
+  }
+
+  .subBtnGroup button {
+    background-color: #74bc1f;
+    color: #fff;
+    cursor: pointer;
+    padding: 8px;
+    width: 90%;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    transition: 0.25s ease;
+    width: 100%;
+  }
+
+  .subBtnGroup button:hover {
+    filter: brightness(0.95);
+  }
+
+  .subBtnGroup .backToUserBtn {
+    background-color: #eee;
+    color: #666;
+  }
+
+  .subBtnGroup2 {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 0.75rem;
+    padding: 0 1rem;
+    padding-top: 0.75rem;
+    padding-bottom: 3.125rem;
+    position: fixed;
+    bottom: 0;
+    background: #fff;
+  }
+
+  .subBtnGroup2 a {
+    text-decoration: none;
+    width: 100%;
+    text-align: center;
+  }
+
+  .subBtnGroup2 button {
+    background-color: #74bc1f;
+    color: #fff;
+    padding: 8px;
+    width: 90%;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    transition: 0.25s ease;
+    width: 100%;
+  }
+
+  .detectionWrap {
+    background-color: #fff;
+    border-radius: 12px;
+    margin: 0 12px;
+    padding: 12px;
+  }
+
+  .detectionWrap .detectionContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow-y: auto;
+    max-height: 400px;
+  }
+
+  .detectionWrap .detection {
+    transition: all 0.2s ease;
+  }
+
+  .detectionWrap .detection:hover {
+    box-shadow: 0px 5px 10px -2px #ccc inset;
+  }
+
+  .detectionWrap .detection a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: #1e1e1e;
+  }
+
+  .detectionWrap .detection a .cGroup {
+    border: 2px solid #74bc1f;
+    padding: 0.25rem;
+    border-radius: 7px;
+  }
+
+  .detectionWrap .detectionDate {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .detectSmallInfo {
+    color: #666;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+  }
+
+  .detectionWrap .detection a h5 {
+    margin: 0;
+    margin-top: 0.25rem;
+    color: #666;
+    font-weight: 400;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+  }
+
+  .detectionWrap .detection a .cGroup img {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .detectionWrap .detectionGroup {
+    margin-left: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .detectionWrap .detectionGroup span {
+    font-weight: bold;
+    font-size: 1.5rem;
+    letter-spacing: 0.05px;
+    color: #1e1e1e;
+  }
+
+  .detectionWrap .detectionGroup .redValue {
+    color: #ec4f4f;
+  }
+
+  .detectionWrap .detectionGroup .scroeTotal {
+    display: none;
+  }
+
+  .detectionWrap .detectionGroup .scroeTotal .totalScore span {
+    display: inline-flex;
+    min-width: 68px;
+  }
+
+  .detectionWrap .detectionGroup .seriousDegreeGroup .seriousScore span {
+    display: inline-flex;
+    min-width: 50px;
+  }
+
+  .personalizedSuggestions {
+    background-color: #fff;
+    border-radius: 12px;
+    border: 1px solid $raphael-white;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0px 0px 12px 0px $raphael-white inset,
+      0px 0px 6px 0px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(2px);
+
+    margin-top: .75rem;
+    padding: .5rem 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .personalizedSuggestions h3 {
+    color: var(--Neutral-black, #1e1e1e);
+
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    margin: 0;
+    letter-spacing: var(--Static-Title-Medium-Tracking, 0.15px);
+  }
+
+  .personalizedSuggestions p {
+    color: var(--Neutral-black, #1e1e1e);
+
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    margin: 0;
+    letter-spacing: 0.09px;
+  }
+</style>

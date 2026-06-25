@@ -1,0 +1,2019 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>自律神經節奏平衡覺察問卷</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap");
+      body {
+        font-family: "Noto Sans TC", sans-serif;
+        background-color: #f8fbfa;
+        color: #334155;
+      }
+      .question-section {
+        transition: all 0.3s ease;
+      }
+      .radio-button {
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .radio-button:hover {
+        background-color: #e2e8f0;
+      }
+      .radio-button.selected {
+        background-color: #dbeafe;
+        border-color: #0bf12d;
+      }
+      .progress-bar {
+        transition: width 0.5s ease;
+      }
+      .result-card {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.5s ease;
+      }
+      .result-card.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .emoji {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+      }
+      .result-section {
+        border-left: 4px solid #73eee0;
+        padding-left: 1rem;
+        margin-bottom: 1.5rem;
+      }
+      .recommendation-card {
+        transition: all 0.3s ease;
+        transform: translateY(0);
+        width: 100%;
+      }
+      .recommendation-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+      .category-tab {
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      .category-tab.active {
+        background-color: #46e551;
+        color: white;
+      }
+      .category-content {
+        display: none;
+        animation: fadeIn 0.5s ease;
+      }
+      .category-content.active {
+        display: block;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .recommendation-icon {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="min-h-screen bg-gradient-to-b from-blue-50 to-green-100">
+      <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <header class="text-center mb-8">
+          <h1 class="text-3xl font-bold text-green-800 mb-2">
+            自律神經節奏平衡覺察問卷
+          </h1>
+          <p class="text-lg text-green-600">
+            了解您的身體節奏型態，獲得個人化調理建議
+          </p>
+        </header>
+
+        <div
+          id="progress-container"
+          class="mb-8 bg-white rounded-full h-4 shadow-md"
+        >
+          <div
+            id="progress-bar"
+            class="bg-green-600 h-4 rounded-full progress-bar"
+            style="width: 0%"
+          ></div>
+        </div>
+
+        <div id="questionnaire" class="bg-white rounded-xl shadow-lg p-6 mb-8">
+          <div id="question-container"></div>
+
+          <div class="flex justify-between mt-8">
+            <button
+              id="prev-btn"
+              class="px-6 py-2 bg-green-200 text-green-700 rounded-lg hover:bg-green-300 transition hidden"
+            >
+              上一題
+            </button>
+            <button
+              id="next-btn"
+              class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+            >
+              下一題
+            </button>
+          </div>
+        </div>
+
+        <div id="results" class="hidden">
+          <div class="text-center mb-8">
+            <h2 class="text-2xl font-bold text-green-800 mb-2">
+              您的自律神經節奏型態
+            </h2>
+            <p class="text-lg text-green-600">
+              根據您的回答，我們為您分析出以下結果
+            </p>
+          </div>
+
+          <div
+            id="result-card"
+            class="result-card bg-white rounded-xl shadow-lg p-6 mb-8"
+          ></div>
+
+          <div class="text-center">
+            <button
+              id="restart-btn"
+              class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+            >
+              重新測驗
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 問卷數據
+      const questionnaire = [
+        {
+          section: "睡眠作息與品質",
+          questions: [
+            {
+              id: "sleep_time",
+              text: "過去這一個月來，您每天躺在床上多久?",
+              options: ["> 7小時", "6~7小時", "5~6小時", "< 5小時"],
+              values: [0, 1, 2, 3],
+            },
+            {
+              id: "fall_asleep_time",
+              text: "過去這一個月來，您在上床後，通常躺多久才能入睡？",
+              options: ["< 15分鐘", "15~30分鐘", "30~60分鐘", "超過1小時"],
+              values: [0, 1, 2, 3],
+            },
+            {
+              id: "sleep_duration",
+              text: "過去這一個月來，您每天真正睡著的時間約多少？（這可能和您躺在床上所花的時間不同）",
+              options: ["> 7小時", "6~7小時", "5~6小時", "< 5小時"],
+              values: [0, 1, 2, 3],
+            },
+            {
+              id: "sleep_difficulty",
+              text: "過去這一個月來，躺下後超過30分鐘仍難入睡的頻率如何？",
+              options: ["從未", "≦1次/週", "2次/週", "≧3次/週"],
+              values: [0, 1, 2, 3],
+            },
+            {
+              id: "wake_up_night",
+              text: "過去這一個月來，半夜或清晨醒來的頻率如何？",
+              options: ["從未", "≦1次/週", "2次/週", "≧3次/週"],
+              values: [0, 1, 2, 3],
+              showNextBtn: true,
+              subQuestion: {
+                conditionIndex: [2, 3], // 當選到哪幾個 index 時顯示子題
+                text: "您通常在夜間醒來的次數為？",
+                options: ["1~2次/晚", "3~4次/晚", "≧5次/晚"],
+                values: [1, 2, 3],
+                id: "wake_up_night_detail",
+              },
+            },
+            {
+              id: "bathroom_wake",
+              text: "過去這一個月來，因半夜因有尿意而醒來的頻率如何？",
+              options: ["從未", "≦1次/週", "2次/週", "≧3次/週"],
+              values: [0, 1, 2, 3],
+              showNextBtn: true,
+              subQuestion: {
+                conditionIndex: [2, 3], // 當選到哪幾個 index 時顯示子題
+                text: "您每晚大約因有尿意而醒來幾次？",
+                options: ["1~2次/晚", "3~4次/晚", "≧5次/晚"],
+                values: [1, 2, 3],
+                id: "bathroom_frequency_detail",
+              },
+            },
+            {
+              id: "snooze_wake",
+              text: "過去這一個月來，因咳嗽或大聲打鼾醒來的頻率如何？",
+              options: ["從未", "≦1次/週", "2次/週", "≧3次/週"],
+              values: [0, 1, 2, 3],
+            },
+            {
+              id: "nightmare_wake",
+              text: "過去這一個月來，因做噩夢醒來的頻率如何？",
+              options: ["從未", "≦1次/週", "2次/週", "≧3次/週"],
+              values: [0, 1, 2, 3],
+            },
+            {
+              id: "pain_wake",
+              text: "過去這一個月來，因疼痛醒來的頻率如何？",
+              options: ["從未", "≦1次/週", "2次/週", "≧3次/週"],
+              values: [0, 1, 2, 3],
+            },
+            {
+              id: "sleep_medication",
+              text: "過去這一個月來，您有多少次需要藉助藥物(醫師處方或成藥)來幫助你的睡眠？",
+              options: ["從未", "≦1次/週", "2次/週", "≧3次/週"],
+              values: [0, 1, 2, 3],
+            },
+            {
+              id: "daytime_sleepiness",
+              text: "過去這一個月來，當您在開車、用餐、從事日常社交活動時，有多少次覺得難以保持清醒狀態？",
+              options: ["從未", "≦1次/週", "2次/週", "≧3次/週"],
+              values: [0, 1, 2, 3],
+            },
+            {
+              id: "daytime_nopower",
+              text: "過去這一個月來，要打起精神來完成您應該做的事情對您有多少困擾？",
+              options: ["從未困擾", "很少困擾", "有些困擾", "很大困擾"],
+              values: [0, 1, 2, 3],
+            },
+            {
+              id: "sleep_quality_slider",
+              text: "過去這一個月來，您對您自己的睡眠品質的整體評價為何？（0 = 非常差，10 = 非常好）",
+              slider: true, // 新增識別屬性
+              min: 0,
+              max: 10,
+              step: 1,
+              default: 5,
+              showNextBtn: true,
+            },
+          ],
+        },
+        {
+          section: "腸胃與排便狀況",
+          questions: [
+            {
+              id: "constipation_effort",
+              text: "過去這一個月來，排便時常感到費力？",
+              options: ["從未", "偶爾", "大多數時間", "幾乎總是"],
+              values: [0, 1, 2, 3],
+            },
+            {
+              id: "constipation_hard",
+              text: "過去這一個月來，糞便偏硬或顆粒狀？",
+              options: ["從未", "偶爾", "大多數時間", "幾乎總是"],
+              values: [0, 1, 2, 3],
+            },
+            {
+              id: "constipation_incomplete",
+              text: "過去這一個月來，排便後仍感不完全？",
+              options: ["從未", "偶爾", "大多數時間", "幾乎總是"],
+              values: [0, 1, 2, 3],
+            },
+            {
+              id: "constipation_frequency",
+              text: "過去這一個月來，每週排便少於3次？",
+              options: ["從未", "偶爾", "大多數時間", "幾乎總是"],
+              values: [0, 1, 2, 3],
+            },
+            {
+              id: "constipation_distension",
+              text: "過去這一個月來，飯後容易腹脹、排氣？",
+              options: ["從未", "偶爾", "大多數時間", "幾乎總是"],
+              values: [0, 1, 2, 3],
+            },
+          ],
+        },
+        {
+          section: "壓力與掌控感",
+          questions: [
+            {
+              id: "stress_control",
+              text: "過去這一個月來，您覺得無法控制重要事情的感覺有多頻繁？",
+              options: ["從未", "偶爾", "大多數時間", "幾乎總是"],
+              values: [0, 1, 2, 3],
+            },
+            {
+              id: "stress_overwhelm",
+              text: "過去這一個月來，您感覺自己處於極大壓力中，有多常覺得無法應對正在發生的事情？",
+              options: ["從未", "偶爾", "大多數時間", "幾乎總是"],
+              values: [0, 1, 2, 3],
+            },
+            {
+              id: "stress_plan",
+              text: "過去這一個月來，您覺得事情如您所願地發展的頻率？",
+              options: ["從未", "偶爾", "大多數時間", "幾乎總是"],
+              values: [3, 2, 1, 0],
+            },
+            {
+              id: "stress_daily",
+              text: "過去這一個月來，您覺得難以應付生活中所有累積的問題或麻煩，有多頻繁？",
+              options: ["從未", "偶爾", "大多數時間", "幾乎總是"],
+              values: [0, 1, 2, 3],
+            },
+          ],
+        },
+        {
+          section: "自律神經反應狀況",
+          questions: [
+            {
+              id: "ans_dry_mouth",
+              text: "過去這一個月來，我感到口乾舌燥。",
+              options: ["幾乎沒有", "偶爾", "經常", "幾乎每天"],
+              values: [0, 1, 2, 3],
+            },
+            {
+              id: "ans_breathing",
+              text: "過去這一個月來，我會感到呼吸困難(例如：呼吸不順或喘氣困難，即使沒有運動）。",
+              options: ["幾乎沒有", "偶爾", "經常", "幾乎每天"],
+              values: [0, 1, 2, 3],
+            },
+            {
+              id: "ans_fear",
+              text: "過去這一個月來，我突然感到強烈的恐懼，甚至像是要驚恐發作。",
+              options: ["幾乎沒有", "偶爾", "經常", "幾乎每天"],
+              values: [0, 1, 2, 3],
+            },
+            {
+              id: "ans_trembling",
+              text: "過去這一個月來，我手腳會顫抖(如手抖或腳抖）。",
+              options: ["幾乎沒有", "偶爾", "經常", "幾乎每天"],
+              values: [0, 1, 2, 3],
+            },
+            {
+              id: "ans_worry",
+              text: "過去這一個月來，我會擔心一些對我來說可能毫無道理的事。",
+              options: ["幾乎沒有", "偶爾", "經常", "幾乎每天"],
+              values: [0, 1, 2, 3],
+            },
+            {
+              id: "ans_restless",
+              text: "過去這一個月來，我會感到坐立難安，無法放鬆下來。",
+              options: ["幾乎沒有", "偶爾", "經常", "幾乎每天"],
+              values: [0, 1, 2, 3],
+            },
+            {
+              id: "ans_heart",
+              text: "過去這一個月來，我會感覺心跳加快(例如：心悸），即使沒有激烈活動。",
+              options: ["幾乎沒有", "偶爾", "經常", "幾乎每天"],
+              values: [0, 1, 2, 3],
+            },
+          ],
+        },
+        {
+          section: "用藥與疾病紀錄",
+          questions: [
+            {
+              id: "medication",
+              text: "您是否有其他需長期服用藥物的疾病?（可複選）",
+              options: [
+                "焦慮症／憂鬱症",
+                "心血管與代謝疾病(如高血壓、糖尿病、心律不整等)",
+                "腸胃問題(如功能性腸躁症、胃食道逆流等)",
+                "自體免疫疾病(如類風濕性關節炎、紅斑性狼瘡等)",
+                "內分泌與婦科相關(如甲狀腺疾病、更年期荷爾蒙治療等)",
+                "癌症治療後續追蹤用藥",
+                "其他藥物",
+                "沒有長期服用藥物",
+              ],
+              multiple: true,
+              showNextBtn: true,
+              values: [1, 1, 1, 1, 1, 1, 1, 0],
+            },
+          ],
+        },
+      ];
+
+      // 節奏型態數據
+      const rhythmTypes = {
+        1: {
+          name: "深夜貓頭鷹型（入睡困難）",
+          emoji: "🦉",
+          description:
+            "交感神經持續亢奮，副交感神經活性抑制，導致睡前大腦興奮、思緒活躍，影響自然入睡節奏切換。",
+          awareness: "感受入睡前思緒紛飛難以平靜，睡前放鬆空間不足。",
+          recommendations: [
+            {
+              category: "產品建議",
+              icon: "🛌",
+              color: "bg-purple-100",
+              iconColor: "text-purple-600",
+              items: [
+                "穿戴「護您穩・好好睏睡眠調節衣」，採用專利石墨烯與遠紅外線複合墨料，利用體溫自然啟動溫和熱效應，精準刺激胸腔及頭部副交感神經節點，幫助降低交感神經亢奮，促進身心平緩過渡到放鬆狀態，改善入睡困難與睡前思緒紛飛問題。本產品無需插電，穿戴即用，並能長效維持功能，適合敏感肌膚睡眠使用。",
+              ],
+            },
+            {
+              category: "生活習慣調整",
+              icon: "🌙",
+              color: "bg-blue-100",
+              iconColor: "text-blue-600",
+              items: [
+                "建立固定睡前儀式，如泡溫水澡、閱讀紙本書籍或冥想15-20分鐘",
+                "睡前2小時避免使用手機、電腦等藍光設備",
+                "睡前避免攝取咖啡因、酒精及重口味食物",
+                "調整臥室環境，保持溫度18-22°C，濕度50-60%",
+              ],
+            },
+            {
+              category: "放鬆技巧",
+              icon: "🧘",
+              color: "bg-green-100",
+              iconColor: "text-green-600",
+              items: [
+                "練習4-7-8呼吸法：吸氣4秒，屏息7秒，呼氣8秒，重複4-5次",
+                "漸進式肌肉放鬆：從腳趾開始，逐步向上放鬆全身肌肉",
+                "睡前寫下明天待辦事項，幫助大腦「放下」思緒",
+              ],
+            },
+          ],
+          reminder: "給自己更多入睡前放鬆時間，循序漸進找到專屬安穩夜晚。",
+        },
+        "1+": {
+          name: "緊繃捲捲蛇型（入睡困難＋便秘）",
+          emoji: "🐍",
+          description:
+            "您同時面臨入睡困難與腸胃蠕動遲緩，顯示交感神經過度活躍，抑制副交感神經功能，中樞神經與腸胃自律神經系統雙重失衡。",
+          awareness:
+            "交感神經持續緊繃，抑制腸胃正常蠕動，造成排便不順且伴有腹部不適，心理壓力透過腸腦軸影響腸胃功能。",
+          recommendations: [
+            {
+              category: "產品建議",
+              icon: "🛌",
+              color: "bg-purple-100",
+              iconColor: "text-purple-600",
+              items: [
+                "使用「護您穩・好好睏睡眠調節衣」，設計特別加入腹部腸胃節律點的石墨烯遠紅外線熱轉印墨料，溫和刺激腹部及胸腔副交感神經，促進腸胃蠕動與神經調節同步進行。此穿戴式保健衣物協助緩解入睡困難及便秘雙重困擾，搭配規律作息能達最佳效果。",
+              ],
+            },
+            {
+              category: "飲食調整",
+              icon: "🥗",
+              color: "bg-green-100",
+              iconColor: "text-green-600",
+              items: [
+                "增加膳食纖維攝取：每日25-30克，包括全穀類、蔬菜、水果、堅果",
+                "保持充足水分：每日至少2000-2500ml，早晨起床先喝一杯溫水",
+                "添加益生菌食品：優格、優酪乳、發酵食品，幫助腸道菌群平衡",
+                "避免刺激性食物：減少辛辣、油炸、高糖、高脂食物攝取",
+              ],
+            },
+            {
+              category: "運動與按摩",
+              icon: "🧠",
+              color: "bg-blue-100",
+              iconColor: "text-blue-600",
+              items: [
+                "每日30分鐘有氧運動，如散步、游泳、瑜伽",
+                "腹部順時針按摩：每天早晚各5-10分鐘，幫助腸胃蠕動",
+                "練習腹式呼吸：每天3-5分鐘，促進腹部血液循環",
+              ],
+            },
+            {
+              category: "作息調整",
+              icon: "⏰",
+              color: "bg-amber-100",
+              iconColor: "text-amber-600",
+              items: [
+                "建立固定排便時間：早餐後留出15-20分鐘的如廁時間",
+                "睡前放鬆練習：冥想、深呼吸或溫和伸展",
+                "避免長時間久坐，每小時起身活動5分鐘",
+              ],
+            },
+          ],
+          reminder:
+            "身心互動密切，改善一方常帶動另一方進步。每天花5-10分鐘輕柔按摩腹部，促進腸道與神經放鬆。",
+        },
+        2: {
+          name: "敏感松鼠型（淺眠易醒）",
+          emoji: "🐿",
+          description:
+            "您的睡眠淺且易醒，交感神經亢奮導致對外界聲光刺激敏感，難以維持深度睡眠。長期淺眠影響記憶鞏固與免疫功能，降低身體修復力。",
+          awareness:
+            "神經系統高度警覺，環境刺激易引發覺醒反應，造成睡眠斷裂與疲憊感。",
+          recommendations: [
+            {
+              category: "產品建議",
+              icon: "🛌",
+              color: "bg-purple-100",
+              iconColor: "text-purple-600",
+              items: [
+                "穿戴「護您穩・好好睏睡眠調節衣」，結合遠紅外線與石墨烯熱效應，精準刺激胸腔及腹部副交感神經節點，降低對外界聲光刺激的敏感度，延長深層睡眠時段。此產品透過自然體溫啟動，無須外加設備，適合對睡眠環境敏感者長時間穿戴使用。",
+              ],
+            },
+            {
+              category: "睡眠環境優化",
+              icon: "🌙",
+              color: "bg-green-100",
+              iconColor: "text-green-600",
+              items: [
+                "使用遮光窗簾或睡眠眼罩，創造完全黑暗的睡眠環境",
+                "配戴舒適耳塞或使用白噪音機，遮蔽干擾聲音",
+                "選擇適合的床墊與枕頭，提供良好支撐",
+                "保持臥室溫度18-22°C，濕度50-60%",
+              ],
+            },
+            {
+              category: "睡前放鬆儀式",
+              icon: "🧘",
+              color: "bg-teal-100",
+              iconColor: "text-teal-600",
+              items: [
+                "睡前1-2小時進行溫和伸展或瑜伽",
+                "泡溫水澡或熱足浴，幫助身體溫度調節",
+                "練習正念冥想或引導式放鬆，每晚10-15分鐘",
+                "睡前寫日記，記錄感受與想法，幫助大腦「卸下」負擔",
+              ],
+            },
+            {
+              category: "生活習慣調整",
+              icon: "☀️",
+              color: "bg-amber-100",
+              iconColor: "text-amber-600",
+              items: [
+                "固定作息時間，即使週末也保持相似的睡醒時間",
+                "睡前避免刺激性飲食，如咖啡因、酒精、辛辣食物",
+                "白天適度曬太陽，幫助調節生理時鐘",
+                "睡前避免劇烈運動或情緒激動的活動",
+              ],
+            },
+          ],
+          reminder:
+            "敏感神經系統亦為優勢，嘗試將敏感轉化為創造力。睡前書寫感受，有助大腦放下雜念，準備入睡。",
+        },
+        "2+": {
+          name: "小心刺蝟型（淺眠易醒＋便秘）",
+          emoji: "🦔",
+          description:
+            "您的睡眠質量不佳同時伴有腸胃蠕動不足，屬交感神經過度亢奮與副交感神經功能低下，造成雙重身心節奏失衡。此種狀態容易引發慢性疲勞與腸躁症等慢性健康問題，影響日常生活品質。",
+          awareness:
+            "您可能會發現自己不僅睡眠淺且易醒，同時腸胃功能也不佳，排便不順且不規律。壓力增加時，這兩種症狀往往會同時加重。您的身體似乎總是處於「防禦」狀態，難以真正放鬆，反映了自律神經系統整體失衡。",
+          recommendations: [
+            {
+              category: "產品建議",
+              icon: "🛌",
+              color: "bg-purple-100",
+              iconColor: "text-purple-600",
+              items: [
+                "結合「護您穩・好好睏睡眠調節衣」與益生菌雙重調理，透過神經節點激活與腸道菌群平衡，促進自律神經及腸胃功能恢復。建議規律飲食與排便，避免憋便，加強壓力管理，配合瑜伽和適度運動。",
+              ],
+            },
+            {
+              category: "飲食調整",
+              icon: "🥗",
+              color: "bg-green-100",
+              iconColor: "text-green-600",
+              items: [
+                "增加膳食纖維攝取：每日25-30克，包括全穀類、蔬菜、水果、堅果",
+                "保持充足水分：每日至少2000-2500ml，早晨起床先喝一杯溫水",
+                "添加益生菌食品：優格、優酪乳、發酵食品，幫助腸道菌群平衡",
+                "避免刺激性食物：減少辛辣、油炸、高糖、高脂食物攝取",
+              ],
+            },
+            {
+              category: "運動與按摩",
+              icon: "🧠",
+              color: "bg-blue-100",
+              iconColor: "text-blue-600",
+              items: [
+                "每日30分鐘有氧運動，如散步、游泳、瑜伽",
+                "腹部順時針按摩：每天早晚各5-10分鐘，幫助腸胃蠕動",
+                "練習腹式呼吸：每天3-5分鐘，促進腹部血液循環",
+              ],
+            },
+            {
+              category: "作息調整",
+              icon: "⏰",
+              color: "bg-amber-100",
+              iconColor: "text-amber-600",
+              items: [
+                "建立固定排便時間：早餐後留出15-20分鐘的如廁時間",
+                "睡前放鬆練習：冥想、深呼吸或溫和伸展",
+                "避免長時間久坐，每小時起身活動5分鐘",
+              ],
+            },
+          ],
+          reminder:
+            "您的身體正在向您發出關愛訊號。建議建立自我關懷儀式，例如定時泡溫水澡或15分鐘溫和伸展。緊張時提醒自己：「我很安全，可以放鬆。」",
+        },
+        3: {
+          name: "夜行袋鼠型（夜尿頻繁）",
+          emoji: "🦘",
+          description:
+            "您夜間頻尿可能與膀胱過動或泌尿神經失調有關，交感神經活性過高導致膀胱括約肌功能異常與尿意頻繁。此現象嚴重影響睡眠連續性，降低生活品質及日間精神，長期可能引發慢性疲勞。",
+          awareness:
+            "您可能發現夜間多次起床如廁，即使睡前未大量飲水。頻繁睡眠中斷使您難以進入深度睡眠，早晨醒來感疲憊。膀胱對輕微脹感特別敏感，神經系統對膀胱信號閾值較低。",
+          recommendations: [
+            {
+              category: "產品建議",
+              icon: "🛌",
+              color: "bg-purple-100",
+              iconColor: "text-purple-600",
+              items: [
+                "「護您穩・好好睏睡眠調節衣」運用遠紅外線溫和刺激腰薦及腹部副交感神經節點，促進膀胱神經節奏穩定，降低夜尿頻率。建議晚間控制飲水，減少膀胱負擔，睡前練習放鬆技巧，配合醫師建議治療慢性泌尿疾病。",
+              ],
+            },
+            {
+              category: "飲食調整",
+              icon: "🥗",
+              color: "bg-green-100",
+              iconColor: "text-green-600",
+              items: [
+                "增加膳食纖維攝取：每日25-30克，包括全穀類、蔬菜、水果、堅果",
+                "保持充足水分：每日至少2000-2500ml，早晨起床先喝一杯溫水",
+                "添加益生菌食品：優格、優酪乳、發酵食品，幫助腸道菌群平衡",
+                "避免刺激性食物：減少辛辣、油炸、高糖、高脂食物攝取",
+              ],
+            },
+            {
+              category: "運動與按摩",
+              icon: "🧠",
+              color: "bg-blue-100",
+              iconColor: "text-blue-600",
+              items: [
+                "每日30分鐘有氧運動，如散步、游泳、瑜伽",
+                "腹部順時針按摩：每天早晚各5-10分鐘，幫助腸胃蠕動",
+                "練習腹式呼吸：每天3-5分鐘，促進腹部血液循環",
+              ],
+            },
+            {
+              category: "作息調整",
+              icon: "⏰",
+              color: "bg-amber-100",
+              iconColor: "text-amber-600",
+              items: [
+                "建立固定排便時間：早餐後留出15-20分鐘的如廁時間",
+                "睡前放鬆練習：冥想、深呼吸或溫和伸展",
+                "避免長時間久坐，每小時起身活動5分鐘",
+              ],
+            },
+          ],
+          reminder:
+            "改善夜尿需時間與耐心。每減少一次夜間起床都是進步。可嘗試凱格爾運動增強膀胱控制力，保持積極心態，身體能重建健康排尿節奏。",
+        },
+        "3+": {
+          name: "雙擾小象型（夜尿＋便秘）",
+          emoji: "🐘",
+          description:
+            "您同時存在夜尿頻繁與排便困難，代表泌尿與腸胃神經節奏雙重失衡。持續交感神經亢奮抑制副交感系統，造成日夜節奏嚴重不協調，長期影響身體功能與免疫調節，可能導致多系統功能紊亂。",
+          awareness:
+            "您可能會發現自己不僅夜間頻繁起床排尿，白天還面臨排便困難的問題。這種雙重困擾反映了自律神經系統的全面失衡，特別是控制膀胱和腸道功能的神經節點。您的身體似乎無法正確調節這些基本功能的節奏。",
+          recommendations: [
+            {
+              category: "產品建議",
+              icon: "🛌",
+              color: "bg-purple-100",
+              iconColor: "text-purple-600",
+              items: [
+                "「護您穩・好好睏睡眠調節衣」雙節點設計，針對腰薦及腹部神經節點同步調理，輔以天然膠囊與益生菌，能協助恢復泌尿與腸胃神經節奏平衡。建議培養規律排便與排尿時間，減少晚間刺激性飲食，配合有氧運動，促進腸胃蠕動與代謝。",
+              ],
+            },
+            {
+              category: "飲食調整",
+              icon: "🥗",
+              color: "bg-green-100",
+              iconColor: "text-green-600",
+              items: [
+                "增加膳食纖維攝取：每日25-30克，包括全穀類、蔬菜、水果、堅果",
+                "保持充足水分：每日至少2000-2500ml，早晨起床先喝一杯溫水",
+                "添加益生菌食品：優格、優酪乳、發酵食品，幫助腸道菌群平衡",
+                "避免刺激性食物：減少辛辣、油炸、高糖、高脂食物攝取",
+              ],
+            },
+            {
+              category: "運動與按摩",
+              icon: "🧠",
+              color: "bg-blue-100",
+              iconColor: "text-blue-600",
+              items: [
+                "每日30分鐘有氧運動，如散步、游泳、瑜伽",
+                "腹部順時針按摩：每天早晚各5-10分鐘，幫助腸胃蠕動",
+                "練習腹式呼吸：每天3-5分鐘，促進腹部血液循環",
+              ],
+            },
+            {
+              category: "作息調整",
+              icon: "⏰",
+              color: "bg-amber-100",
+              iconColor: "text-amber-600",
+              items: [
+                "建立固定排便時間：早餐後留出15-20分鐘的如廁時間",
+                "睡前放鬆練習：冥想、深呼吸或溫和伸展",
+                "避免長時間久坐，每小時起身活動5分鐘",
+              ],
+            },
+          ],
+          reminder:
+            "面對雙重困擾時，請記住身體各系統是相互連結的。改善一方面常能帶動另一方面的進步。請給自己設定合理的期望，慶祝每一個小進步。嘗試每天記錄您的症狀變化，這不僅有助於追蹤改善情況，也能幫助您發現可能的誘發因素。",
+        },
+        4: {
+          name: "慢醒樹懶熊型（睡眠品質差）",
+          emoji: "🐻",
+          description:
+            "您雖有足夠睡眠時間，但深度睡眠及恢復功能不足，反映神經系統調節能力下降。此狀態使身體無法完成充分修復，造成醒後疲憊及精神不濟，長期可能影響代謝功能和免疫系統，增加慢性疾病風險。",
+          awareness:
+            "您可能會發現自己即使睡了很長時間，醒來仍感覺疲倦，需要較長時間才能完全清醒。白天可能感到精神不濟、注意力難以集中。這表明您的睡眠雖然時間充足，但質量不佳，缺乏足夠的深度睡眠階段。",
+          recommendations: [
+            {
+              category: "產品建議",
+              icon: "🛌",
+              color: "bg-purple-100",
+              iconColor: "text-purple-600",
+              items: [
+                "深層睡眠調節衣利用遠紅外線作用，加強神經系統的修復與平衡，提升睡眠品質與細胞活力。建議避免睡前攝入咖啡因與刺激性物質，維持規律作息與睡眠環境，採用睡前放鬆訓練如呼吸法、冥想，幫助身體進入更深層的睡眠狀態。",
+              ],
+            },
+            {
+              category: "飲食調整",
+              icon: "🥗",
+              color: "bg-green-100",
+              iconColor: "text-green-600",
+              items: [
+                "增加膳食纖維攝取：每日25-30克，包括全穀類、蔬菜、水果、堅果",
+                "保持充足水分：每日至少2000-2500ml，早晨起床先喝一杯溫水",
+                "添加益生菌食品：優格、優酪乳、發酵食品，幫助腸道菌群平衡",
+                "避免刺激性食物：減少辛辣、油炸、高糖、高脂食物攝取",
+              ],
+            },
+            {
+              category: "運動與按摩",
+              icon: "🧠",
+              color: "bg-blue-100",
+              iconColor: "text-blue-600",
+              items: [
+                "每日30分鐘有氧運動，如散步、游泳、瑜伽",
+                "腹部順時針按摩：每天早晚各5-10分鐘，幫助腸胃蠕動",
+                "練習腹式呼吸：每天3-5分鐘，促進腹部血液循環",
+              ],
+            },
+            {
+              category: "作息調整",
+              icon: "⏰",
+              color: "bg-amber-100",
+              iconColor: "text-amber-600",
+              items: [
+                "建立固定排便時間：早餐後留出15-20分鐘的如廁時間",
+                "睡前放鬆練習：冥想、深呼吸或溫和伸展",
+                "避免長時間久坐，每小時起身活動5分鐘",
+              ],
+            },
+          ],
+          reminder:
+            "睡眠質量比睡眠時間更重要。請關注自己的睡眠環境和睡前習慣，創造有利於深度睡眠的條件。嘗試在固定時間入睡和起床，即使週末也保持一致，這有助於穩定您的生理時鐘。相信通過持續的調整，您的身體能夠重新學習如何進入深度修復性睡眠。",
+        },
+        "4+": {
+          name: "虛慢節奏龜型（睡差＋便秘）",
+          emoji: "🐢",
+          description:
+            "您處於深度節奏停滯階段，睡眠修復及腸胃排空功能顯著減弱。副交感神經系統功能低下，導致身體代謝與免疫力下降，容易引發慢性疲勞與代謝性疾病，是自律神經失衡的較嚴重階段。",
+          awareness:
+            "您可能會發現自己整體生理節奏緩慢，不僅睡眠無法提供足夠的恢復能量，腸胃功能也顯得遲緩。這種狀態下，您可能感到持續的疲倦、精神不振，同時面臨排便困難。身體的自然節奏似乎被打亂，各系統運作效率降低。",
+          recommendations: [
+            {
+              category: "產品建議",
+              icon: "🛌",
+              color: "bg-purple-100",
+              iconColor: "text-purple-600",
+              items: [
+                "系統性階段穿戴睡眠調節衣，分早、中、晚多時段刺激神經節點，結合營養調理及腸道保健，協助全面恢復神經與腸胃功能。建議維持均衡飲食與充足水分，適度運動促進循環與新陳代謝，管理心理壓力，確保充足休息，全面提升身體活力。",
+              ],
+            },
+            {
+              category: "飲食調整",
+              icon: "🥗",
+              color: "bg-green-100",
+              iconColor: "text-green-600",
+              items: [
+                "增加膳食纖維攝取：每日25-30克，包括全穀類、蔬菜、水果、堅果",
+                "保持充足水分：每日至少2000-2500ml，早晨起床先喝一杯溫水",
+                "添加益生菌食品：優格、優酪乳、發酵食品，幫助腸道菌群平衡",
+                "避免刺激性食物：減少辛辣、油炸、高糖、高脂食物攝取",
+              ],
+            },
+            {
+              category: "運動與按摩",
+              icon: "🧠",
+              color: "bg-blue-100",
+              iconColor: "text-blue-600",
+              items: [
+                "每日30分鐘有氧運動，如散步、游泳、瑜伽",
+                "腹部順時針按摩：每天早晚各5-10分鐘，幫助腸胃蠕動",
+                "練習腹式呼吸：每天3-5分鐘，促進腹部血液循環",
+              ],
+            },
+            {
+              category: "作息調整",
+              icon: "⏰",
+              color: "bg-amber-100",
+              iconColor: "text-amber-600",
+              items: [
+                "建立固定排便時間：早餐後留出15-20分鐘的如廁時間",
+                "睡前放鬆練習：冥想、深呼吸或溫和伸展",
+                "避免長時間久坐，每小時起身活動5分鐘",
+              ],
+            },
+          ],
+          reminder:
+            "恢復身體的自然節奏需要時間和耐心。請將調整視為一段自我療癒的旅程，而非立即見效的治療。嘗試每天進行溫和的活動，如散步或伸展，即使只有短短10分鐘也能幫助激活身體系統。相信您的身體有自我修復的能力，只需要適當的支持和時間。",
+        },
+      };
+
+      const products = {};
+
+      async function getProducts() {
+        try {
+          const userData = JSON.parse(localStorage.getItem("userData"));
+          const params = {
+            MID: userData.MID,
+            Token: userData.Token,
+            MAID: userData.MAID,
+            Mobile: userData.Mobile,
+            Lang: "zhtw",
+          };
+          const res = await fetch(
+            "https://23700999.com:8081/HMA/api/fr/maProduct",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(params),
+            }
+          );
+          const data = await res.json();
+          if (data.Result === "OK" && Array.isArray(data.RetMaProduct)) {
+            // 處理產品資料
+            return data.RetMaProduct;
+          } else {
+            alert("取得產品資料失敗");
+            return [];
+          }
+        } catch (e) {
+          alert("API 錯誤：" + e.message);
+          return [];
+        }
+      }
+
+      // 建立全域產品對照表，供 showResults 使用
+      window.productMap = {};
+      window.typeToProductId = {
+        1: "1",
+        2: "2",
+        3: "3",
+        4: "4",
+        5: "5",
+        "1+": "6",
+        "2+": "7",
+        "3+": "8",
+        "4+": "9",
+        "5+": "10",
+        "0+": "11",
+      };
+
+      getProducts().then((products) => {
+        // 將產品資料存入全域變數，供 showResults 使用
+        products.forEach((product) => {
+          window.productMap[product.ProductID] = product;
+        });
+        console.log("產品資料已載入:", window.productMap);
+      });
+
+      // 問卷狀態與控制相關功能
+      let currentQuestionIndex = 0;
+      let answers = {};
+      let totalQuestions = 0;
+      let type = ""; //問卷類型
+      let constipationScore = 0; //功能性便秘
+      let nightUrinationScore = 0; //第4c題
+      let midWakeScore = 0; //第4b題
+      let SleepinDifficulty = 0; //第4a題 難以入睡
+      let SleepMedicineScore = 0; //安眠藥物使用
+      let SleepLatencyScore = 0; //睡眠潛伏期分數
+      let lightSleepScore = 0; //睡眠困擾
+
+      questionnaire.forEach((section) => {
+        totalQuestions += section.questions.length;
+      });
+
+      const questionContainer = document.getElementById("question-container");
+      const prevBtn = document.getElementById("prev-btn");
+      const nextBtn = document.getElementById("next-btn");
+      const progressBar = document.getElementById("progress-bar");
+      const questionnaireDiv = document.getElementById("questionnaire");
+      const resultsDiv = document.getElementById("results");
+      const resultCard = document.getElementById("result-card");
+      const restartBtn = document.getElementById("restart-btn");
+
+      const errorMsgId = "error-msg";
+      function showErrorMessage(message) {
+        let errorMsg = document.getElementById(errorMsgId);
+        if (!errorMsg) {
+          errorMsg = document.createElement("div");
+          errorMsg.id = errorMsgId;
+          errorMsg.className = "text-red-600 mt-2 text-sm font-medium";
+          nextBtn.parentNode.insertBefore(errorMsg, nextBtn.nextSibling);
+        }
+        errorMsg.textContent = message;
+      }
+      function clearErrorMessage() {
+        const errorMsg = document.getElementById(errorMsgId);
+        if (errorMsg) {
+          errorMsg.remove();
+        }
+      }
+
+      function initQuestionnaire() {
+        currentQuestionIndex = 0;
+        answers = {};
+        getCSurveyParams();
+        renderQuestion();
+        updateProgressBar();
+      }
+
+      function restartQuestionnaire() {
+        currentQuestionIndex = 0;
+        answers = {};
+        renderQuestion();
+        updateProgressBar();
+      }
+
+      function renderQuestion() {
+        // 找出目前所在的題組與題目
+        let currentSectionIndex = 0;
+        let questionCount = 0;
+
+        for (let i = 0; i < questionnaire.length; i++) {
+          if (
+            questionCount + questionnaire[i].questions.length >
+            currentQuestionIndex
+          ) {
+            currentSectionIndex = i;
+            break;
+          }
+          questionCount += questionnaire[i].questions.length;
+        }
+
+        const currentSection = questionnaire[currentSectionIndex];
+        const currentQuestion =
+          currentSection.questions[currentQuestionIndex - questionCount];
+
+        // 題頭資訊
+        let html = `
+        <div class="mb-6">
+          <h2 class="text-xl font-semibold text-indigo-800 mb-1">${
+            currentSection.section
+          }</h2>
+          <p class="text-gray-500 text-sm">第 ${
+            currentQuestionIndex + 1
+          } 題，共 ${totalQuestions} 題</p>
+        </div>
+        <div class="mb-6">
+          <h3 class="text-lg font-medium mb-4">${currentQuestion.text}</h3>
+      `;
+
+        // --- 處理 slider 題型 ---
+        if (currentQuestion.slider) {
+          html += `
+      <div class="mb-6">
+        <label for="slider_${
+          currentQuestion.id
+        }" class="block text-green-700 mb-2">
+          ${currentQuestion.text}
+        </label>
+        <input type="range" min="${currentQuestion.min}" max="${
+            currentQuestion.max
+          }" step="${currentQuestion.step}"
+          id="slider_${currentQuestion.id}" class="w-full"
+          value="${answers[currentQuestion.id] ?? currentQuestion.default}"
+          oninput="document.getElementById('output_${
+            currentQuestion.id
+          }').value = this.value">
+        <div class="flex justify-between text-sm text-green-500">
+          <span>${currentQuestion.min}</span><span>${currentQuestion.max}</span>
+        </div>
+        <output id="output_${
+          currentQuestion.id
+        }" class="block text-center mt-2 font-bold text-green-800">
+          ${answers[currentQuestion.id] ?? currentQuestion.default}
+        </output>
+      </div>
+    `;
+
+          questionContainer.innerHTML = html;
+          nextBtn.disabled = false;
+          clearErrorMessage();
+          prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+          nextBtn.textContent =
+            currentQuestionIndex === totalQuestions - 1 ? "查看結果" : "下一題";
+
+          // 寫入 slider 回答值（這要在 questionContainer.innerHTML 更新後觸發）
+          if (currentQuestion.slider) {
+            const slider = document.getElementById(
+              `slider_${currentQuestion.id}`
+            );
+            slider.addEventListener("input", (e) => {
+              answers[currentQuestion.id] = parseInt(e.target.value);
+              clearErrorMessage();
+
+              // ✅ 若這題需要手動跳題（如第13題），就讓按鈕解鎖
+              if (currentQuestion.showNextBtn) {
+                nextBtn.classList.remove("hidden");
+                nextBtn.disabled = false;
+              }
+            });
+          }
+          return;
+        }
+
+        // --- 處理 checkbox 題型 (multiple) ---
+        if (currentQuestion.multiple) {
+          html += `<div class="space-y-3">`;
+          currentQuestion.options.forEach((option, index) => {
+            const isChecked = answers[currentQuestion.id]?.includes(index);
+            const isOther =
+              currentQuestion.id === "medication" && option.includes("其他");
+
+            html += `
+        <div class="flex items-start">
+          <input type="checkbox" id="${currentQuestion.id}_${index}" 
+            class="w-5 h-5 text-green-600 border-green-300 rounded focus:ring-green-500 mt-1"
+            ${isChecked ? "checked" : ""}
+            data-question="${currentQuestion.id}" 
+            data-index="${index}" 
+            data-value="${currentQuestion.values[index]}">
+          <label for="${
+            currentQuestion.id
+          }_${index}" class="ml-3 text-green-700">${option}</label>
+          ${
+            isOther
+              ? `
+            <input type="text" id="otherInput" class="ml-3 px-2 py-1 border rounded text-sm hidden"
+              placeholder="請說明其他藥物..." />
+          `
+              : ""
+          }
+        </div>
+      `;
+          });
+          html += `</div>`;
+        }
+
+        // --- 處理單選題型 ---
+        else {
+          html += `<div class="grid grid-cols-1 gap-3 md:grid-cols-2">`;
+          currentQuestion.options.forEach((option, index) => {
+            const isSelected = answers[currentQuestion.id] === index;
+            html += `
+    <div class="radio-button border rounded-lg p-4 ${
+      isSelected ? "selected" : ""
+    }"
+      data-question="${currentQuestion.id}"
+      data-index="${index}"
+      data-value="${currentQuestion.values[index]}">
+      <div class="flex items-center">
+        <div class="w-5 h-5 rounded-full border-2 ${
+          isSelected ? "border-green-600 bg-green-600" : "border-green-300"
+        } flex items-center justify-center">
+          ${
+            isSelected
+              ? '<div class="w-2 h-2 rounded-full bg-white"></div>'
+              : ""
+          }
+        </div>
+        <span class="ml-3">${option}</span>
+      </div>
+    </div>
+  `;
+          });
+
+          html += `</div>`; // 結束主選項區塊
+
+          // ✅ 渲染子題（單次集中）
+          if (
+            currentQuestion.subQuestion &&
+            currentQuestion.subQuestion.conditionIndex.includes(
+              answers[currentQuestion.id]
+            )
+          ) {
+            const subQ = currentQuestion.subQuestion;
+            html += `
+    <div id="sub-question" class="mt-6 ml-4 space-y-2 text-sm text-green-700">
+      <label class="block mb-2 font-medium">${subQ.text}</label>
+      <div class="flex flex-col space-y-2">
+        ${subQ.options
+          .map(
+            (opt, idx) => `
+          <label>
+            <input type="radio" name="${subQ.id}" value="${
+              subQ.values[idx]
+            }" class="mr-2"
+              ${answers[subQ.id] == subQ.values[idx] ? "checked" : ""}>
+            ${opt}
+          </label>
+        `
+          )
+          .join("")}
+      </div>
+    </div>
+  `;
+          }
+
+          html += `</div>`;
+        }
+
+        html += `</div>`; // 收尾
+
+        // --- 渲染畫面 ---
+        questionContainer.innerHTML = html;
+
+        // 加入事件
+        if (currentQuestion.multiple) {
+          questionContainer
+            .querySelectorAll('input[type="checkbox"]')
+            .forEach((box) =>
+              box.addEventListener("change", handleCheckboxChange)
+            );
+          nextBtn.disabled = false;
+        } else {
+          questionContainer
+            .querySelectorAll(".radio-button")
+            .forEach((btn) =>
+              btn.addEventListener("click", handleRadioButtonClick)
+            );
+          nextBtn.disabled = answers[currentQuestion.id] === undefined;
+        }
+        console.log("目前題號", currentQuestionIndex, currentQuestion.id);
+
+        clearErrorMessage();
+        prevBtn.classList.toggle("hidden", currentQuestionIndex === 0);
+        //nextBtn.textContent = currentQuestionIndex === totalQuestions - 1 ? "查看結果" : "下一題";
+        // ✅ 僅第 5、6、13 題顯示下一題按鈕（index 為 4, 5, 12）
+        if (currentQuestion.showNextBtn) {
+          nextBtn.classList.remove("hidden");
+          nextBtn.textContent =
+            currentQuestionIndex === totalQuestions - 1 ? "查看結果" : "下一題";
+          let hasAnswer = false;
+
+          if (currentQuestion.multiple) {
+            hasAnswer =
+              Array.isArray(answers[currentQuestion.id]) &&
+              answers[currentQuestion.id].length > 0;
+          } else {
+            hasAnswer = currentQuestion.id in answers;
+          }
+
+          // const hasAnswer = answers[currentQuestion.id] !== undefined;
+          console.log("hasAnswer=" + hasAnswer);
+
+          if (currentQuestion.type === "range") {
+            nextBtn.disabled = !hasAnswer;
+          } else if (
+            currentQuestion.subQuestion &&
+            currentQuestion.subQuestion.conditionIndex.includes(
+              answers[currentQuestion.id]
+            )
+          ) {
+            const hasSubAnswer =
+              answers[currentQuestion.subQuestion.id] !== undefined;
+            nextBtn.disabled = !(hasAnswer && hasSubAnswer);
+          } else {
+            nextBtn.disabled = !hasAnswer;
+          }
+        } else {
+          nextBtn.classList.add("hidden");
+        }
+      }
+
+      function handleRadioButtonClick(event) {
+        const button = event.currentTarget;
+        const questionId = button.dataset.question;
+        const optionIndex = parseInt(button.dataset.index);
+
+        // 儲存主題答案
+        answers[questionId] = optionIndex;
+
+        // 切換選項樣式
+        const allButtons = questionContainer.querySelectorAll(
+          `.radio-button[data-question="${questionId}"]`
+        );
+        allButtons.forEach((btn) => btn.classList.remove("selected"));
+        button.classList.add("selected");
+
+        nextBtn.disabled = false;
+        clearErrorMessage();
+
+        // 取得當前題目
+        const currentSectionIndex = getCurrentSectionIndex();
+        const currentQuestion =
+          questionnaire[currentSectionIndex].questions[
+            getQuestionInSectionIndex()
+          ];
+        // 若該題有子題設定
+        if (currentQuestion.subQuestion) {
+          const subQ = currentQuestion.subQuestion;
+
+          // 先移除既有的子題 UI
+          const existingSub = document.getElementById("sub-question");
+          if (existingSub) existingSub.remove();
+
+          // 若當前主選項符合子題觸發條件
+          if (subQ.conditionIndex.includes(optionIndex)) {
+            const subHTML = `
+        <div id="sub-question" class="mt-6 ml-4 space-y-2 text-sm text-green-700">
+          <label class="block mb-2 font-medium">${subQ.text}</label>
+          <div class="flex flex-col space-y-2">
+            ${subQ.options
+              .map(
+                (opt, idx) => `
+              <label>
+                <input type="radio" name="${subQ.id}" value="${
+                  subQ.values[idx]
+                }" class="mr-2"
+                  ${answers[subQ.id] == subQ.values[idx] ? "checked" : ""}>
+                ${opt}
+              </label>
+            `
+              )
+              .join("")}
+          </div>
+        </div>
+      `;
+
+            questionContainer.insertAdjacentHTML("beforeend", subHTML);
+
+            // 綁定子題選項變更事件
+            const radios = document.getElementsByName(subQ.id);
+            radios.forEach((radio) => {
+              radio.addEventListener("change", (e) => {
+                answers[subQ.id] = parseInt(e.target.value);
+                clearErrorMessage(); // ✅ 清除錯誤訊息
+                nextBtn.disabled = false; // ✅ 啟用按鈕
+              });
+            });
+          } else {
+            // 若這次選項不符合條件，清除子題答案
+            delete answers[subQ.id];
+          }
+        }
+
+        // 自動跳下一題（延遲）
+        setTimeout(() => {
+          const shouldSkip =
+            !currentQuestion.subQuestion ||
+            !currentQuestion.subQuestion.conditionIndex.includes(optionIndex);
+
+          if (shouldSkip && currentQuestionIndex < totalQuestions - 1) {
+            console.log("nextQuestion=", currentQuestionIndex);
+            nextQuestion();
+          }
+        }, 500);
+      }
+
+      function handleCheckboxChange(event) {
+        const checkbox = event.currentTarget;
+        const questionId = checkbox.dataset.question;
+        const optionIndex = parseInt(checkbox.dataset.index);
+
+        if (!answers[questionId]) {
+          answers[questionId] = [];
+        }
+
+        if (checkbox.checked) {
+          if (!answers[questionId].includes(optionIndex)) {
+            answers[questionId].push(optionIndex);
+          }
+        } else {
+          answers[questionId] = answers[questionId].filter(
+            (index) => index !== optionIndex
+          );
+        }
+
+        if (questionId === "medication" && optionIndex === 6) {
+          const otherInput = document.getElementById("otherInput");
+          if (checkbox.checked) {
+            otherInput.classList.remove("hidden");
+          } else {
+            otherInput.classList.add("hidden");
+            otherInput.value = "";
+          }
+        }
+        // ✅ 判斷是否已經勾選至少一個選項
+        const hasChecked = answers[questionId]?.length > 0;
+        nextBtn.disabled = !hasChecked;
+      }
+
+      function nextQuestion() {
+        const currentSectionIndex = getCurrentSectionIndex();
+        const questionInSectionIndex = getQuestionInSectionIndex();
+        const currentQuestion =
+          questionnaire[currentSectionIndex].questions[questionInSectionIndex];
+
+        if (
+          answers[currentQuestion.id] === undefined &&
+          !currentQuestion.multiple
+        ) {
+          showErrorMessage("請選擇一個選項再繼續");
+          nextBtn.disabled = true;
+          return;
+        }
+
+        if (
+          currentQuestion.multiple &&
+          (!answers[currentQuestion.id] ||
+            answers[currentQuestion.id].length === 0)
+        ) {
+          const lastOptionIndex = currentQuestion.options.length - 1;
+          console.log("nextQuestion2=", lastOptionIndex);
+          answers[currentQuestion.id] = [lastOptionIndex];
+        }
+
+        // 檢查是否需要回答子題且未填寫時禁止繼續
+        if (
+          currentQuestion.subQuestion &&
+          currentQuestion.subQuestion.conditionIndex.includes(
+            answers[currentQuestion.id]
+          ) &&
+          answers[currentQuestion.subQuestion.id] === undefined
+        ) {
+          showErrorMessage("請完成所有子題再繼續");
+          nextBtn.disabled = true;
+          return;
+        }
+
+        if (
+          currentQuestion.id === "medication" &&
+          answers[currentQuestion.id]?.includes(6)
+        ) {
+          const otherText = document.getElementById("otherInput")?.value.trim();
+          answers["medication_other"] = otherText || "";
+        }
+        clearErrorMessage();
+        nextBtn.disabled = false;
+
+        if (currentQuestionIndex < totalQuestions - 1) {
+          currentQuestionIndex++;
+          renderQuestion();
+          updateProgressBar();
+        } else {
+          console.log("問卷完成！開始處理結果...");
+          loadparms();
+          showResults();
+        }
+      }
+
+      function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+          currentQuestionIndex--;
+          renderQuestion();
+          updateProgressBar();
+        }
+      }
+
+      function getCurrentSectionIndex() {
+        let questionCount = 0;
+        for (let i = 0; i < questionnaire.length; i++) {
+          if (
+            questionCount + questionnaire[i].questions.length >
+            currentQuestionIndex
+          ) {
+            return i;
+          }
+          questionCount += questionnaire[i].questions.length;
+        }
+        return 0;
+      }
+
+      function getQuestionInSectionIndex() {
+        let questionCount = 0;
+        for (let i = 0; i < questionnaire.length; i++) {
+          if (
+            questionCount + questionnaire[i].questions.length >
+            currentQuestionIndex
+          ) {
+            return currentQuestionIndex - questionCount;
+          }
+          questionCount += questionnaire[i].questions.length;
+        }
+        return 0;
+      }
+
+      function updateProgressBar() {
+        const progress = ((currentQuestionIndex + 1) / totalQuestions) * 100;
+        progressBar.style.width = `${progress}%`;
+      }
+
+      function calculatetype() {
+        if (
+          (SleepinDifficulty >= 2 || SleepMedicineScore >= 1) &&
+          midWakeScore >= 2 &&
+          nightUrinationScore <= 1
+        ) {
+          //難以入睡 (4a題大於等於2，或是5題大於等於2)，且睡眠易中斷 (4b題大於等於2，且4C題小於等於1)
+          type = "5";
+        } else if (
+          (SleepinDifficulty >= 2 || SleepMedicineScore >= 2) &&
+          nightUrinationScore >= 2
+        ) {
+          //難以入睡 (4a題大於等於2，或是5題大於等於1)，且夜尿頻繁( 4c題大於等於2)
+          type = "4";
+        } else if (SleepinDifficulty >= 2 || SleepMedicineScore >= 2) {
+          //4a題大於等於2，或是5題大於等於2
+          type = "1";
+        } else if (midWakeScore >= 2 && nightUrinationScore <= 1) {
+          //4b題大於等於2，且4C題小於等於1
+          type = "3";
+        } else if (nightUrinationScore >= 2) {
+          //( 4c題大於等於2
+          type = "2";
+        } else {
+          type = "0";
+        }
+
+        if (constipationScore >= 7) {
+          //有便祕
+          type += "+";
+        }
+      }
+
+      function getCSurveyParams() {
+        // 呼叫 CSurvey API 讀取資料庫
+        const userData = JSON.parse(localStorage.getItem("userData"));
+        console.log("userData:" + userData.MID);
+        console.log("userData2:" + userData.MAID);
+        console.log("userData3:" + userData.Token);
+        console.log("userData4:" + userData.Mobile);
+        fetch("https://23700999.com:8081/HMA/api/fr/getCSurveyParams", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            MID: userData?.MID || "",
+            MAID: userData?.MAID || "",
+            Token: userData?.Token || "",
+            Mobile: userData?.Mobile || "",
+          }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            console.log("讀取複雜問卷資料 API 回傳：", data);
+            if (data) {
+              // 填入類型
+              constipationScore = data.ConstipationScore; //功能性便秘
+              let nightUrinationMidScore=data.Q6+data.Q6a;
+              let midWakeMidSore=data.Q5+data.Q5a;
+              if(nightUrinationMidScore>=6){nightUrinationScore = 3;} //第4c題
+              else if(nightUrinationMidScore>=4 && nightUrinationMidScore<=5){nightUrinationScore = 2;}
+              else if(nightUrinationMidScore>=2 && nightUrinationMidScore<=3){nightUrinationScore = 1;}
+              else{nightUrinationScore = 0;}
+              if(midWakeMidSore>=6){midWakeScore = 3;} //第4b題
+              else if(midWakeMidSore>=4 && midWakeMidSore<=5){midWakeScore = 2;}
+              else if(midWakeMidSore>=2 && midWakeMidSore<=3){midWakeScore = 1;}
+              else{midWakeScore = 0;}
+              SleepinDifficulty= data.Q4; //第4題
+
+              SleepMedicineScore = data.Q10; //安眠藥物使用
+              SleepLatencyScore += data.Q2; //睡眠潛伏期分數
+              SleepLatencyScore += data.Q4; //睡眠潛伏期分數
+              lightSleepScore += data.Q5;
+              lightSleepScore += data.Q6;
+              lightSleepScore += data.Q7;
+              lightSleepScore += data.Q8;
+              lightSleepScore += data.Q9;
+              
+              // 儲存 CSAID
+              if (data.AID) {
+                localStorage.setItem("CSAID", data.AID);
+                console.log("已儲存 CSAID:", data.AID);
+              }
+              
+              showResults();
+            }
+          })
+          .catch((error) => {
+            console.error("讀取複雜問卷資料 API 錯誤：", error);
+          });
+      }
+
+      function loadparms() {
+        // 檢查是否有 userData 和 MID
+        let userData = {};
+        try {
+          userData = JSON.parse(localStorage.getItem("userData") || "{}");
+        } catch (error) {
+          console.error("解析 userData 失敗:", error);
+          userData = {};
+        }
+
+        // 防呆機制：如果沒有 MID，返回 survey
+        if (!userData.MID) {
+          console.error("未找到 MID，返回 survey 頁面");
+          alert("請先登入會員");
+          window.location.href = "/survey";
+          return;
+        }
+
+        console.log("檢查 userData:", userData);
+
+        let sleeplatency = 0; //睡眠潛伏期
+        let sleepDifficulty = 0; //睡眠困擾
+        let daytimeScore = 0; //日間活動失能
+        let daytimedisability = 0; //日間活動失能
+        let stressScore = 0; //目前壓力狀態
+        let ansScore = 0; //目前焦慮狀態
+        let showconstipation = "";
+        let showstress = "";
+        let showANS = "";
+        let needDoctor = false; //需要醫師進一步介入
+        let sleepefficiency = 0; //睡眠效率
+        let sleepquality = 0; //睡眠品質
+        let bathroomDetail = answers["bathroom_frequency_detail"] || 0; //第4c2題
+        let nightwakeDetail = answers["wake_up_night_detail"] || 0; //第4b2題
+        let selectedMeds = getSelectedCheckboxLabels("medication");
+        let bathroomDetailLabel = getLabelByValue(
+          "bathroom_frequency_detail",
+          bathroomDetail
+        );
+        let nightwakeDetailLabel = getLabelByValue(
+          "wake_up_night_detail",
+          nightwakeDetail
+        );
+        
+        //2025.7.17改規則
+        let S4c=getValueForQuestion("bathroom_wake"); //第4c題
+        let nightUrinationMidScore=S4c+bathroomDetail;
+        if(nightUrinationMidScore>=6){nightUrinationScore = 3;}
+        else if(nightUrinationMidScore>=4 && nightUrinationMidScore<=5){nightUrinationScore = 2;}
+        else if(nightUrinationMidScore>=2 && nightUrinationMidScore<=3){nightUrinationScore = 1;}
+        else{nightUrinationScore = 0;}
+        let S4b = getValueForQuestion("wake_up_night"); //第4b題
+        let midWakeMidSore=S4b+nightwakeDetail;
+        if(midWakeMidSore>=6){midWakeScore = 3;}
+        else if(midWakeMidSore>=4 && midWakeMidSore<=5){midWakeScore = 2;}
+        else if(midWakeMidSore>=2 && midWakeMidSore<=3){midWakeScore = 1;}
+        else{midWakeScore = 0;}
+        SleepinDifficulty = getValueForQuestion("sleep_difficulty"); //第4a題
+       
+
+        psleepduration = getValueForQuestion("sleep_duration"); //第三題 睡眠時數
+        pst = getValueForQuestion("sleep_time"); //第一題
+        sleepqualityScore = getValueForQuestion("sleep_quality_slider"); //睡眠品質0-10分
+
+        if (sleepqualityScore <= 2) {
+          sleepquality = 3;
+        } else if (sleepqualityScore <= 5 && sleepqualityScore >= 3) {
+          sleepquality = 2;
+        } else if (sleepqualityScore <= 8 && sleepqualityScore >= 6) {
+          sleepquality = 1;
+        }
+
+        //計算睡眠效率
+        if (
+          (psleepduration == 1 && pst == 0) ||
+          (psleepduration == 2 && pst == 1) ||
+          (psleepduration == 3 && pst == 2)
+        ) {
+          sleepefficiency = 1;
+        } else if (
+          (psleepduration == 2 && pst == 0) ||
+          (psleepduration == 3 && pst == 1)
+        ) {
+          sleepefficiency = 2;
+        } else if (psleepduration == 3 && pst == 0) {
+          sleepefficiency = 3;
+        }
+        //計算睡眠潛伏期
+        SleepLatencyScore += getValueForQuestion("fall_asleep_time"); //第二題
+        SleepLatencyScore += getValueForQuestion("sleep_difficulty"); //第4a題
+        if (SleepLatencyScore >= 5) {
+          sleeplatency = 3;
+        } else if (SleepLatencyScore >= 3 && SleepLatencyScore <= 4) {
+          sleeplatency = 2;
+        } else if (SleepLatencyScore >= 1 && SleepLatencyScore <= 2) {
+          sleeplatency = 1;
+        } else {
+          sleeplatency = 0;
+        }
+
+        lightSleepScore += getValueForQuestion("wake_up_night"); //第4b題
+        lightSleepScore += getValueForQuestion("bathroom_wake"); //第4c題
+        lightSleepScore += getValueForQuestion("snooze_wake"); //第4e題
+        lightSleepScore += getValueForQuestion("nightmare_wake"); //第4f題
+        lightSleepScore += getValueForQuestion("pain_wake"); //第4g題
+        if (lightSleepScore >= 11) {
+          sleepDifficulty = 3;
+        } else if (lightSleepScore >= 6 && lightSleepScore <= 10) {
+          sleepDifficulty = 2;
+        } else if (lightSleepScore >= 1 && lightSleepScore <= 5) {
+          sleepDifficulty = 1;
+        } else {
+          sleepDifficulty = 0;
+        }
+
+        SleepMedicineScore += getValueForQuestion("sleep_medication"); //第5題 安眠藥物使用
+
+        //日間活動失能
+        daytimeScore += getValueForQuestion("daytime_sleepiness"); //第6題
+        daytimeScore += getValueForQuestion("daytime_nopower"); //第7題
+        if (daytimeScore >= 5) {
+          daytimedisability = 3;
+        } else if (daytimeScore >= 3 && daytimeScore <= 4) {
+          daytimedisability = 2;
+        } else if (daytimeScore >= 1 && daytimeScore <= 2) {
+          daytimedisability = 1;
+        } else {
+          daytimedisability = 0;
+        }
+
+        //功能性便秘
+        constipationScore += getValueForQuestion("constipation_effort");
+        constipationScore += getValueForQuestion("constipation_hard");
+        constipationScore += getValueForQuestion("constipation_incomplete");
+        constipationScore += getValueForQuestion("constipation_frequency");
+        constipationScore += getValueForQuestion("constipation_distension");
+        if (constipationScore <= 2) {
+          showconstipation = "低風險，排便功能正常，可維持現況。";
+        } else if (constipationScore >= 3 && constipationScore <= 6) {
+          showconstipation = "亞健康區，偶爾出現便祕傾向，建議調整飲食與作息。";
+        } else if (constipationScore >= 7 && constipationScore <= 9) {
+          showconstipation =
+            "中度風險，功能性便祕可能性高，建議進行生活介入與觀察。";
+        } else {
+          showconstipation =
+            "高風險，高度疑似功能性便祕，建議醫師進一步評估或檢查。";
+        }
+
+        //目前壓力狀態
+        stressScore += getValueForQuestion("stress_control");
+        stressScore += getValueForQuestion("stress_overwhelm");
+        stressScore += getValueForQuestion("stress_plan");
+        stressScore += getValueForQuestion("stress_daily");
+        if (stressScore <= 5) {
+          showstress = "低壓力";
+        } else if (stressScore >= 6 && stressScore <= 9) {
+          showstress = "中等壓力";
+        } else {
+          showstress = "高壓力";
+        }
+
+        //目前焦慮狀態
+        ansScore += getValueForQuestion("ans_dry_mouth");
+        ansScore += getValueForQuestion("ans_breathing");
+        ansScore += getValueForQuestion("ans_fear");
+        ansScore += getValueForQuestion("ans_trembling");
+        ansScore += getValueForQuestion("ans_worry");
+        ansScore += getValueForQuestion("ans_restless");
+        ansScore += getValueForQuestion("ans_heart");
+        if (ansScore <= 4) {
+          showANS = "正常";
+        } else if (ansScore >= 5 && ansScore <= 9) {
+          showANS = "輕度焦慮";
+        } else if (ansScore >= 10 && ansScore <= 14) {
+          showANS = "中度焦慮";
+        } else if (ansScore >= 15 && ansScore <= 19) {
+          showANS = "重度焦慮";
+        } else {
+          showANS = "極重度焦慮";
+        }
+
+        //判斷是否需要醫師介入
+        if (
+          ansScore >= 10 ||
+          getValueForQuestion("ans_fear") >= 1 ||
+          answers.length >= 1
+        ) {
+          needDoctor = true;
+        }
+
+        console.log("睡眠品質=", sleepquality);
+        console.log("睡眠品質分數=", sleepqualityScore);
+        console.log("睡眠潛伏期=", sleeplatency);
+        console.log("睡眠時數=", psleepduration);
+        console.log("睡眠效率=", sleepefficiency);
+        console.log("睡眠困擾=", sleepDifficulty);
+        console.log("安眠藥物使用=", SleepMedicineScore);
+        console.log("日間活動失能=", daytimedisability);
+        console.log("功能性便秘=", showconstipation);
+        console.log("功能性便秘分數=", constipationScore);
+        console.log("目前壓力狀態=", showstress);
+        console.log("目前壓力狀態分數=", stressScore);
+        console.log("目前焦慮狀態=", showANS);
+        console.log("目前焦慮狀態分數=", ansScore);
+        console.log("需要轉介醫師=", needDoctor);
+        console.log("半夜醒來次數=", nightwakeDetailLabel);
+        console.log("半夜夜尿次數=", bathroomDetailLabel);
+        console.log("選取的藥物：", selectedMeds.join("，"));
+
+        // 複雜問卷 API 參數
+        //幫我都轉成字串
+        const CSurveyParams = {
+          MID: userData?.MID || "",
+          MAID: userData?.MAID || "",
+          Token: userData?.Token || "",
+          Mobile: userData?.Mobile || "",
+          SleepqualityScore: sleepqualityScore.toString(), //睡眠品質分數
+          Sleepquality: sleepquality.toString(), //睡眠品質
+          Sleeplatency: sleeplatency.toString(), //睡眠潛伏期
+          Sleepduration: psleepduration.toString(), //睡眠時數
+          Sleepefficiency: sleepefficiency.toString(), //睡眠效率
+          SleepDifficulty: sleepDifficulty.toString(), //睡眠困擾
+          SleepMedicineScore: SleepMedicineScore.toString(), //安眠藥物使用
+          Daytimedisability: daytimedisability.toString(), //日間活動失能
+          ConstipationScore: constipationScore.toString(), //功能性便秘分數
+          StressScore: stressScore.toString(), //目前壓力狀態分數
+          AnsScore: ansScore.toString(), //目前焦慮狀態分數
+          NeedDoctor: needDoctor.toString(), //需要轉介醫師
+          SelectMeds: selectedMeds.join("，"), //選取的藥物
+          Q1: pst.toString(),
+          Q2: getValueForQuestion("fall_asleep_time").toString(),
+          Q3: psleepduration.toString(),
+          Q4: getValueForQuestion("sleep_difficulty").toString(),
+          Q5: getValueForQuestion("wake_up_night").toString(),
+          Q5a: nightwakeDetail.toString(),
+          Q6: getValueForQuestion("bathroom_wake").toString(),
+          Q6a: bathroomDetail.toString(),
+          Q7: getValueForQuestion("snooze_wake").toString(),
+          Q8: getValueForQuestion("nightmare_wake").toString(),
+          Q9: getValueForQuestion("pain_wake").toString(),
+          Q10: SleepMedicineScore.toString(),
+          Q11: getValueForQuestion("daytime_sleepiness").toString(),
+          Q12: getValueForQuestion("daytime_nopower").toString(),
+          Q13: sleepqualityScore.toString(),
+          Q14: getValueForQuestion("constipation_effort").toString(),
+          Q15: getValueForQuestion("constipation_hard").toString(),
+          Q16: getValueForQuestion("constipation_incomplete").toString(),
+          Q17: getValueForQuestion("constipation_frequency").toString(),
+          Q18: getValueForQuestion("constipation_distension").toString(),
+          Q19: getValueForQuestion("stress_control").toString(),
+          Q20: getValueForQuestion("stress_overwhelm").toString(),
+          Q21: getValueForQuestion("stress_plan").toString(),
+          Q22: getValueForQuestion("stress_daily").toString(),
+          Q23: getValueForQuestion("ans_dry_mouth").toString(),
+          Q24: getValueForQuestion("ans_breathing").toString(),
+          Q25: getValueForQuestion("ans_fear").toString(),
+          Q26: getValueForQuestion("ans_trembling").toString(),
+          Q27: getValueForQuestion("ans_worry").toString(),
+          Q28: getValueForQuestion("ans_restless").toString(),
+          Q29: getValueForQuestion("ans_heart").toString(),
+        };
+
+        console.log("傳送資料：", JSON.stringify(CSurveyParams));
+        // 呼叫 CSurvey API 寫入資料庫
+        fetch("https://23700999.com:8081/HMA/api/fr/CSurveyParams", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(CSurveyParams),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            console.log("複雜問卷 API 回傳：", data);
+          })
+          .catch((error) => {
+            console.error("複雜問卷 API 錯誤：", error);
+          });
+      }
+
+      function showResults() {
+        calculatetype();
+        const result = rhythmTypes[type] || {
+          name: "整體功能趨於正常",
+          emoji: "❓",
+          description: "您的回答未符合特定類型判定。",
+          awareness: "",
+          recommendations: [],
+          reminder: "",
+        };
+
+        let resultHTML = `
+        <div class="text-center mb-8">
+          <div class="emoji">${result.emoji}</div>
+          <h3 class="text-2xl font-bold text-green-800">${type}型 | ${result.name}</h3>
+        </div>
+        
+        <div class="space-y-6">
+          <div class="result-section">
+            <h4 class="font-semibold text-green-800 mb-2">身心狀態說明</h4>
+            <p class="text-green-700">${result.description}</p>
+          </div>
+          
+          <div class="result-section">
+            <h4 class="font-semibold text-green-800 mb-2">生理機轉分析</h4>
+            <p class="text-green-700">${result.awareness}</p>
+          </div>
+          
+          <div class="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-5 mb-6">
+            <h4 class="font-semibold text-green-800 mb-4">個人化調理建議</h4>
+            
+            <div class="flex flex-wrap gap-2 mb-4">
+      `;
+
+        result.recommendations.forEach((category, index) => {
+          resultHTML += `
+          <div class="category-tab px-4 py-2 rounded-full text-sm font-medium ${
+            index === 0 ? "active" : ""
+          }" 
+            data-category="${index}">
+            ${category.icon} ${category.category}
+          </div>
+        `;
+        });
+
+        resultHTML += `
+            </div>
+            
+            <div class="category-content-container">
+      `;
+
+        result.recommendations.forEach((category, index) => {
+          resultHTML += `
+          <div class="category-content ${
+            index === 0 ? "active" : ""
+          }" data-category="${index}">
+        `;
+          resultHTML += `
+            <div class="flex flex-col gap-4">
+        `;
+
+          category.items.forEach((item) => {
+            resultHTML += `
+            <div class="recommendation-card ${category.color} w-full rounded-lg p-4 shadow-sm box-border">
+              <div class="recommendation-icon ${category.iconColor}">${category.icon}</div>
+              <p class="text-green-700">${item}</p>
+            </div>
+          `;
+          });
+
+          resultHTML += `
+            </div>
+        `;
+          // 如果是產品建議，就插產品卡片（可針對不同型態顯示不同商品）
+          if (category.category === "產品建議") {
+            const productId = window.typeToProductId[type];
+            if (window.productMap[productId]) {
+              resultHTML += renderProductCardById(productId);
+            }
+          }
+          resultHTML += `  
+          </div>
+        `;
+        });
+
+        resultHTML += `
+            </div>
+          </div>
+          
+          <div class="result-section bg-amber-50 p-4 rounded-lg">
+            <h4 class="font-semibold text-amber-800 mb-2">溫馨提醒</h4>
+            <p class="text-green-700">${result.reminder}</p>
+          </div>
+        </div>
+      `;
+
+        resultCard.innerHTML = resultHTML;
+
+        const categoryTabs = resultCard.querySelectorAll(".category-tab");
+        categoryTabs.forEach((tab) => {
+          tab.addEventListener("click", () => {
+            const categoryIndex = tab.dataset.category;
+
+            categoryTabs.forEach((t) => t.classList.remove("active"));
+            tab.classList.add("active");
+
+            const categoryContents =
+              resultCard.querySelectorAll(".category-content");
+            categoryContents.forEach((content) => {
+              if (content.dataset.category === categoryIndex) {
+                content.classList.add("active");
+              } else {
+                content.classList.remove("active");
+              }
+            });
+          });
+        });
+
+        questionnaireDiv.classList.add("hidden");
+        resultsDiv.classList.remove("hidden");
+
+        setTimeout(() => {
+          resultCard.classList.add("show");
+        }, 100);
+      }
+
+      function renderProductCardById(productId) {
+        const p = window.productMap[productId];
+        if (!p) return "";
+        return `
+        <div class="flex flex-col md:flex-row items-center bg-white rounded-xl shadow-lg p-4 my-4 border border-green-200 cursor-pointer"
+             onclick="window.location.href='/cart/product${p.ProductID}'">
+          <img src="${p.FPicture}" alt="${
+          p.ProductName
+        }" class="w-32 h-32 object-contain rounded-lg mr-6 mb-3 md:mb-0" />
+          <div class="flex-1">
+            <h4 class="text-lg font-bold text-green-800 mb-2">${
+              p.ProductName
+            }</h4>
+            <p class="text-gray-700 mb-2">${p.Feature}</p>
+            <div class="mb-2 text-green-700 font-semibold">
+              NT$${p.Price} 
+              <span class="text-gray-400 line-through text-base font-normal">原價NT$${Math.round(
+                p.Price / 0.7
+              )}</span>
+            </div>
+            <button class="inline-block px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold text-center mt-2 transition">
+              立即選購
+            </button>
+          </div>
+        </div>
+      `;
+      }
+
+      function getValueForQuestion(questionId) {
+        for (const section of questionnaire) {
+          for (const question of section.questions) {
+            if (question.id === questionId) {
+              if (question.multiple) {
+                if (!answers[questionId]) return 0;
+                return answers[questionId].reduce(
+                  (sum, index) => sum + question.values[index],
+                  0
+                );
+              } else if (question.slider) {
+                return answers[questionId] ?? question.default;
+              } else {
+                if (answers[questionId] === undefined) return 0;
+                return question.values[answers[questionId]];
+              }
+            }
+          }
+        }
+        return 0;
+      }
+
+      function getSelectedCheckboxLabels(questionId) {
+        const labels = [];
+        for (const section of questionnaire) {
+          for (const question of section.questions) {
+            if (question.id === "medication" && question.multiple) {
+              if (!answers["medication"]) return [];
+
+              answers["medication"].forEach((index) => {
+                const label = question.options[index];
+                if (index === 6) {
+                  // 「其他藥物」選項
+                  const otherText = answers["medication_other"]?.trim();
+                  if (otherText) {
+                    labels.push(`${label}：${otherText}`);
+                  } else {
+                    labels.push(label); // 沒有填寫內容也顯示「其他藥物」
+                  }
+                } else {
+                  labels.push(label);
+                }
+              });
+            }
+          }
+        }
+        return labels;
+      }
+
+      function getLabelByValue(questionId, value) {
+        for (const section of questionnaire) {
+          for (const question of section.questions) {
+            if (
+              question.subQuestion &&
+              question.subQuestion.id === questionId
+            ) {
+              const index = question.subQuestion.values.indexOf(value);
+              return index !== -1
+                ? question.subQuestion.options[index]
+                : "未填答";
+            }
+          }
+        }
+        return "未填答";
+      }
+
+      function restart() {
+        resultsDiv.classList.add("hidden");
+        questionnaireDiv.classList.remove("hidden");
+        resultCard.classList.remove("show");
+        restartQuestionnaire();
+      }
+
+      prevBtn.addEventListener("click", prevQuestion);
+      nextBtn.addEventListener("click", nextQuestion);
+      restartBtn.addEventListener("click", restart);
+
+          initQuestionnaire();
+    </script>
+  </body>
+</html>

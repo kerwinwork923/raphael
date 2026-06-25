@@ -1,0 +1,343 @@
+{
+  "version": 3,
+  "overrides": {
+    "point/index.html": {
+      "path": "point"
+    },
+    "HRV/index.html": {
+      "path": "HRV"
+    },
+    "robot/index.html": {
+      "path": "robot"
+    },
+    "user/index.html": {
+      "path": "user"
+    },
+    "qrcode/index.html": {
+      "path": "qrcode"
+    },
+    "user2/index.html": {
+      "path": "user2"
+    },
+    "qrcoder/index.html": {
+      "path": "qrcoder"
+    },
+    "CSRobot/index.html": {
+      "path": "CSRobot"
+    },
+    "Finish/index.html": {
+      "path": "Finish"
+    },
+    "member/index.html": {
+      "path": "member"
+    },
+    "package/index.html": {
+      "path": "package"
+    },
+    "weekly/index.html": {
+      "path": "weekly"
+    },
+    "service/index.html": {
+      "path": "service"
+    },
+    "weekly2/index.html": {
+      "path": "weekly2"
+    },
+    "pwa-test/index.html": {
+      "path": "pwa-test"
+    },
+    "contract/index.html": {
+      "path": "contract"
+    },
+    "register/index.html": {
+      "path": "register"
+    },
+    "healthLog/index.html": {
+      "path": "healthLog"
+    },
+    "bluetooth/index.html": {
+      "path": "bluetooth"
+    },
+    "robot1021/index.html": {
+      "path": "robot1021"
+    },
+    "robot0908/index.html": {
+      "path": "robot0908"
+    },
+    "robot0909/index.html": {
+      "path": "robot0909"
+    },
+    "robot0205/index.html": {
+      "path": "robot0205"
+    },
+    "robot1222/index.html": {
+      "path": "robot1222"
+    },
+    "robot1029/index.html": {
+      "path": "robot1029"
+    },
+    "robot1028/index.html": {
+      "path": "robot1028"
+    },
+    "robotDemo/index.html": {
+      "path": "robotDemo"
+    },
+    "HRVHistory/index.html": {
+      "path": "HRVHistory"
+    },
+    "babyRecord/index.html": {
+      "path": "babyRecord"
+    },
+    "cart/index.html": {
+      "path": "cart"
+    },
+    "disclaimer/index.html": {
+      "path": "disclaimer"
+    },
+    "orderQuery/index.html": {
+      "path": "orderQuery"
+    },
+    "robot1209/index.html": {
+      "path": "robot1209"
+    },
+    "healthLog2/index.html": {
+      "path": "healthLog2"
+    },
+    "point-copy/index.html": {
+      "path": "point-copy"
+    },
+    "index copy/index.html": {
+      "path": "index copy"
+    },
+    "usageIndex/index.html": {
+      "path": "usageIndex"
+    },
+    "pointRules/index.html": {
+      "path": "pointRules"
+    },
+    "robot-copy/index.html": {
+      "path": "robot-copy"
+    },
+    "member-copy/index.html": {
+      "path": "member-copy"
+    },
+    "userRecord/index.html": {
+      "path": "userRecord"
+    },
+    "privacyPage/index.html": {
+      "path": "privacyPage"
+    },
+    "orderDetail/index.html": {
+      "path": "orderDetail"
+    },
+    "pointRecord/index.html": {
+      "path": "pointRecord"
+    },
+    "pointExange/index.html": {
+      "path": "pointExange"
+    },
+    "returnGoods/index.html": {
+      "path": "returnGoods"
+    },
+    "changeMember/index.html": {
+      "path": "changeMember"
+    },
+    "privacy-copy/index.html": {
+      "path": "privacy-copy"
+    },
+    "point-copy 2/index.html": {
+      "path": "point-copy 2"
+    },
+    "UsageHistory/index.html": {
+      "path": "UsageHistory"
+    },
+    "privacyPage2/index.html": {
+      "path": "privacyPage2"
+    },
+    "cart/cartList/index.html": {
+      "path": "cart/cartList"
+    },
+    "clinicStories/index.html": {
+      "path": "clinicStories"
+    },
+    "contract-copy/index.html": {
+      "path": "contract-copy"
+    },
+    "accountManage/index.html": {
+      "path": "accountManage"
+    },
+    "HRVHistoryAll/index.html": {
+      "path": "HRVHistoryAll"
+    },
+    "cart/payMethod/index.html": {
+      "path": "cart/payMethod"
+    },
+    "deleteConfirm/index.html": {
+      "path": "deleteConfirm"
+    },
+    "exchangeRecord/index.html": {
+      "path": "exchangeRecord"
+    },
+    "forgetPassword/index.html": {
+      "path": "forgetPassword"
+    },
+    "robotDemo copy/index.html": {
+      "path": "robotDemo copy"
+    },
+    "babyRecord-copy/index.html": {
+      "path": "babyRecord-copy"
+    },
+    "index.html": {
+      "path": ""
+    },
+    "cart/pay/index.html": {
+      "path": "cart/pay"
+    },
+    "personalizedInfo/index.html": {
+      "path": "personalizedInfo"
+    },
+    "cart/invoiceType/index.html": {
+      "path": "cart/invoiceType"
+    },
+    "healthDataSetting/index.html": {
+      "path": "healthDataSetting"
+    },
+    "HRVHistory copy/index.html": {
+      "path": "HRVHistory copy"
+    },
+    "cart/addAddress/index.html": {
+      "path": "cart/addAddress"
+    },
+    "pointExange copy/index.html": {
+      "path": "pointExange copy"
+    },
+    "returnGoodsConfirm/index.html": {
+      "path": "returnGoodsConfirm"
+    },
+    "specialAssistance/index.html": {
+      "path": "specialAssistance"
+    },
+    "cart/invoiceSelect2/index.html": {
+      "path": "cart/invoiceSelect2"
+    },
+    "cart/invoiceSelect1/index.html": {
+      "path": "cart/invoiceSelect1"
+    },
+    "cart/invoiceSelect3/index.html": {
+      "path": "cart/invoiceSelect3"
+    },
+    "raphaelBackend/index.html": {
+      "path": "raphaelBackend"
+    },
+    "raphaelBackend/member/index.html": {
+      "path": "raphaelBackend/member"
+    },
+    "raphaelBackend/member/stable/index.html": {
+      "path": "raphaelBackend/member/stable"
+    },
+    "raphaelBackend/order/index.html": {
+      "path": "raphaelBackend/order"
+    },
+    "raphaelBackend/events/index.html": {
+      "path": "raphaelBackend/events"
+    },
+    "cart/checkoutSuccess/index.html": {
+      "path": "cart/checkoutSuccess"
+    },
+    "raphaelBackend/member/acerNumber/index.html": {
+      "path": "raphaelBackend/member/acerNumber"
+    },
+    "raphaelBackend/production/index.html": {
+      "path": "raphaelBackend/production"
+    },
+    "raphaelBackend/member/addSerial/index.html": {
+      "path": "raphaelBackend/member/addSerial"
+    },
+    "raphaelBackend/member/myFavorite/index.html": {
+      "path": "raphaelBackend/member/myFavorite"
+    },
+    "raphaelBackend/videoManage/index.html": {
+      "path": "raphaelBackend/videoManage"
+    },
+    "raphaelBackend/messageManage/index.html": {
+      "path": "raphaelBackend/messageManage"
+    },
+    "raphaelBackend/careTracking/index.html": {
+      "path": "raphaelBackend/careTracking"
+    },
+    "raphaelBackend/member/memberContent/index.html": {
+      "path": "raphaelBackend/member/memberContent"
+    },
+    "raphaelBackend/customerSupportAdmin/index.html": {
+      "path": "raphaelBackend/customerSupportAdmin"
+    },
+    "raphaelBackend/videoManage/addVideo/index.html": {
+      "path": "raphaelBackend/videoManage/addVideo"
+    },
+    "raphaelBackend/categoryManagement/index.html": {
+      "path": "raphaelBackend/categoryManagement"
+    },
+    "raphaelBackend/member/memberContent copy/index.html": {
+      "path": "raphaelBackend/member/memberContent copy"
+    },
+    "usage/clothTypeCopy/index.html": {
+      "path": "usage/clothTypeCopy"
+    },
+    "admin/customer-service/index.html": {
+      "path": "admin/customer-service"
+    },
+    "usage0606/clothTypeCopy/index.html": {
+      "path": "usage0606/clothTypeCopy"
+    },
+    "raphaelBackend/member/watchMetric/metricCopy/index.html": {
+      "path": "raphaelBackend/member/watchMetric/metricCopy"
+    },
+    "raphaelBackend/categoryManagement/add/index.html": {
+      "path": "raphaelBackend/categoryManagement/add"
+    }
+  },
+  "routes": [
+    {
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      },
+      "src": "/_nuxt/builds/meta/(.*)"
+    },
+    {
+      "headers": {
+        "cache-control": "public, max-age=1, immutable"
+      },
+      "src": "/_nuxt/builds/(.*)"
+    },
+    {
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      },
+      "src": "/_nuxt/(.*)"
+    },
+    {
+      "src": "/_nuxt/builds/meta(.*)",
+      "headers": {
+        "cache-control": "public,max-age=31536000,immutable"
+      },
+      "continue": true
+    },
+    {
+      "src": "/_nuxt/builds(.*)",
+      "headers": {
+        "cache-control": "public,max-age=31536000,immutable"
+      },
+      "continue": true
+    },
+    {
+      "src": "/_nuxt(.*)",
+      "headers": {
+        "cache-control": "public,max-age=31536000,immutable"
+      },
+      "continue": true
+    },
+    {
+      "handle": "filesystem"
+    }
+  ]
+}

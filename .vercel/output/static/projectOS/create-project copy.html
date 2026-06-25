@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProjectOS — 建立新專案</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{50:'#f0f7ff',100:'#e0efff',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8'}}}}}</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  *{font-family:'Inter',sans-serif;}
+  .fade-in{animation:fadeIn .35s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .slide-up{animation:slideUp .4s ease;}
+  @keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+  textarea:focus,input:focus,select:focus{outline:none;box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+  ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#f1f5f9}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+  .ai-btn{background:linear-gradient(135deg,#7c3aed,#4f46e5,#2563eb);transition:all .2s;}
+  .ai-btn:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 6px 20px rgba(79,70,229,.35);}
+  .typing-cursor::after{content:'|';animation:blink .7s infinite;color:#7c3aed;}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+  .task-chip{animation:chipIn .2s ease;}
+  @keyframes chipIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+  .progress-bar{transition:width .5s ease;}
+  .step-dot{transition:all .3s;}
+  .ai-gradient-text{background:linear-gradient(135deg,#7c3aed,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .section-card{border:1.5px solid transparent;transition:border-color .3s;}
+  .section-card:hover{border-color:#e0e7ff;}
+  .risk-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;}
+  .gen-appear{animation:genAppear .5s ease forwards;}
+  @keyframes genAppear{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  .pulse-ring{animation:pulseRing 2s infinite;}
+  @keyframes pulseRing{0%{box-shadow:0 0 0 0 rgba(124,58,237,.4)}70%{box-shadow:0 0 0 10px rgba(124,58,237,0)}100%{box-shadow:0 0 0 0 rgba(124,58,237,0)}}
+</style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+<div id="projectos-header"></div>
+<script src="./shared-header.js"></script>
+
+<div class="max-w-screen-xl mx-auto px-4 py-8">
+
+  <!-- HEADER -->    
+
+  <div class="flex items-center gap-3 mb-8 mt-2">
+
+
+    <div class="flex-1">
+      <h1 class="text-2xl font-extrabold text-slate-900">建立新專案</h1>
+      <p class="text-sm text-slate-500 mt-0.5">選擇 AI 自動生成，或手動填寫建立專案</p>
+    </div>
+    <!-- Progress Steps -->
+    <div class="hidden md:flex items-center gap-2 text-xs text-slate-400">
+      <div class="flex items-center gap-1.5">
+        <div class="step-dot w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold" id="step1-dot">1</div>
+        <span class="font-medium text-blue-600">描述</span>
+      </div>
+      <div class="w-8 h-px bg-slate-200"></div>
+      <div class="flex items-center gap-1.5">
+        <div class="step-dot w-6 h-6 rounded-full bg-slate-200 text-slate-400 flex items-center justify-center text-xs font-bold" id="step2-dot">2</div>
+        <span id="step2-label" class="text-slate-400">AI 生成</span>
+      </div>
+      <div class="w-8 h-px bg-slate-200"></div>
+      <div class="flex items-center gap-1.5">
+        <div class="step-dot w-6 h-6 rounded-full bg-slate-200 text-slate-400 flex items-center justify-center text-xs font-bold" id="step3-dot">3</div>
+        <span id="step3-label" class="text-slate-400">確認建立</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 1: INPUT -->
+  <div id="step-input" class="fade-in">
+
+    <!-- Mode Tabs -->
+    <div class="flex gap-1.5 mb-5 p-1.5 bg-slate-100 rounded-xl">
+      <button id="tab-ai" onclick="switchMode('ai')" class="flex-1 py-2.5 rounded-lg text-sm font-semibold transition bg-white text-slate-800 shadow-sm flex items-center justify-center gap-2">
+        <span>✨</span> AI 生成
+      </button>
+      <button id="tab-manual" onclick="switchMode('manual')" class="flex-1 py-2.5 rounded-lg text-sm font-semibold transition text-slate-500 hover:text-slate-700 flex items-center justify-center gap-2">
+        <span>✏️</span> 手動建立
+      </button>
+    </div>
+
+    <!-- AI Mode -->
+    <div id="ai-mode">
+      <div class="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm mb-4">
+        <div class="flex items-center gap-3 mb-5">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center text-white text-lg">✨</div>
+          <div>
+            <h2 class="font-bold text-slate-900">AI-first 專案生成</h2>
+            <p class="text-xs text-slate-500">輸入一句話，AI 幫你生成 Decision、KPI、Tasks、Timeline</p>
+          </div>
+        </div>
+
+        <div class="relative mb-4">
+          <textarea id="ai-input" rows="4" placeholder="例：我想推出 Q2 新產品線，目標是月銷售 100 件，由 Alice 主導，4 月底上線..." class="w-full border-2 border-slate-200 focus:border-violet-400 rounded-xl px-4 py-3.5 text-base resize-none transition leading-relaxed" style="min-height:100px"></textarea>
+          <div class="absolute bottom-3 right-3 flex items-center gap-2">
+            <span id="char-count" class="text-xs text-slate-400">0 字</span>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2 mb-5">
+          <p class="text-xs text-slate-400 w-full mb-1">💡 快速範例：</p>
+          <button onclick="useExample(this)" data-ex="我想在 Q2 推出新產品線，目標月銷售 100 件，Alice 主導，4 月底完成開發上線" class="text-xs bg-violet-50 border border-violet-200 text-violet-700 px-3 py-1.5 rounded-lg hover:bg-violet-100 transition">Q2 新產品線</button>
+          <button onclick="useExample(this)" data-ex="客服系統全面升級，提升客戶滿意度至 90%，Dave 負責，6 月底完成導入" class="text-xs bg-blue-50 border border-blue-200 text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition">客服系統升級</button>
+          <button onclick="useExample(this)" data-ex="舉辦 Q3 大型線上活動，目標吸引 1000 人參加，Carol 統籌，8 月開始報名" class="text-xs bg-green-50 border border-green-200 text-green-700 px-3 py-1.5 rounded-lg hover:bg-green-100 transition">Q3 行銷活動</button>
+        </div>
+
+        <button id="generate-btn" onclick="startGenerate()" class="ai-btn w-full text-white py-3.5 rounded-xl font-bold text-base flex items-center justify-center gap-2.5 pulse-ring">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          AI 生成完整專案
+          <span class="text-xs opacity-75 font-normal">約 3 秒</span>
+        </button>
+      </div>
+
+      <!-- Generating Progress (hidden by default) -->
+      <div id="gen-progress" class="hidden bg-white rounded-2xl border border-violet-200 p-6 shadow-sm mb-4">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center">
+            <svg class="w-4 h-4 text-violet-600 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+          </div>
+          <p class="text-sm font-semibold text-violet-800">AI 正在分析並生成...</p>
+        </div>
+        <div class="space-y-2" id="gen-steps"></div>
+      </div>
+    </div>
+
+    <!-- Manual Mode -->
+    <div id="manual-mode" class="hidden fade-in">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+        <!-- LEFT COL (2/3) -->
+        <div class="lg:col-span-2 space-y-4">
+
+          <!-- Basic Info -->
+          <div class="section-card bg-white rounded-xl border border-slate-200 p-5">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center text-sm">📄</div>
+              <h3 class="font-semibold text-slate-800">基本資訊</h3>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="col-span-2"><label class="block text-xs font-medium text-slate-500 mb-1.5">專案名稱 <span class="text-red-400">*</span></label><input id="m-proj-name" type="text" placeholder="輸入專案名稱..." class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 transition font-medium"></div>
+              <div><label class="block text-xs font-medium text-slate-500 mb-1.5">負責人</label>
+                <div class="flex gap-2">
+                  <input id="m-owner" type="text" readonly placeholder="點擊選擇負責人" onclick="openAdminPicker('owner')" class="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 transition cursor-pointer bg-white" title="從員工名單選擇">
+                  <button type="button" onclick="openAdminPicker('owner')" class="shrink-0 px-3 py-2 text-xs font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition">選擇</button>
+                </div>
+              </div>
+              <div><label class="block text-xs font-medium text-slate-500 mb-1.5">參與人員</label>
+                <div class="flex gap-2">
+                  <input id="m-members" type="text" readonly placeholder="點擊選擇參與人員（可多選）" onclick="openAdminPicker('members')" class="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 transition cursor-pointer bg-white" title="從員工名單選擇">
+                  <button type="button" onclick="openAdminPicker('members')" class="shrink-0 px-3 py-2 text-xs font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition">選擇</button>
+                </div>
+              </div>
+              <div><label class="block text-xs font-medium text-slate-500 mb-1.5">開始日期</label><input id="m-start" type="date" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 transition"></div>
+              <div><label class="block text-xs font-medium text-slate-500 mb-1.5">預計結束</label><input id="m-end" type="date" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 transition"></div>
+              <div><label class="block text-xs font-medium text-slate-500 mb-1.5">部門</label>
+                <select id="m-dept" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-600 focus:border-blue-400 transition">
+                  <option value="">選擇部門</option>
+                  <option>業務發展處</option><option>總經理室</option><option>創新研發處</option><option>智慧醫療業務部</option><option>客服暨會員關係部</option>
+                </select>
+              </div>
+              <div><label class="block text-xs font-medium text-slate-500 mb-1.5">ShareProject URL</label><input id="m-url" type="text" placeholder="https://chatgpt.com/share/..." class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 transition"></div>
+            </div>
+          </div>
+
+          <!-- Decision -->
+          <div class="section-card bg-white rounded-xl border border-slate-200 p-5">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-7 h-7 bg-purple-100 rounded-lg flex items-center justify-center text-sm">⚡</div>
+              <h3 class="font-semibold text-slate-800">決策摘要</h3>
+            </div>
+            <textarea id="m-decision" rows="4" placeholder="描述此專案的核心決策、目標與背景..." class="w-full border border-slate-200 rounded-lg px-3 py-3 text-sm resize-none focus:border-blue-400 transition leading-relaxed"></textarea>
+          </div>
+
+          <!-- KPI -->
+          <div class="section-card bg-white rounded-xl border border-slate-200 p-5">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-7 h-7 bg-green-100 rounded-lg flex items-center justify-center text-sm">📊</div>
+              <h3 class="font-semibold text-slate-800">KPI 指標</h3>
+              <button onclick="addManualKPI()" class="ml-auto text-xs text-blue-600 hover:text-blue-800 font-medium">+ 新增</button>
+            </div>
+            <div id="m-kpi-list" class="space-y-2.5 mb-2"></div>
+            <button onclick="addManualKPI()" class="w-full border border-dashed border-slate-300 text-slate-400 hover:border-blue-300 hover:text-blue-500 py-2 rounded-lg text-xs transition">+ 新增 KPI 指標</button>
+          </div>
+
+        </div>
+
+        <!-- RIGHT COL (1/3) -->
+        <div class="space-y-4">
+
+          <!-- Tasks -->
+          <div class="section-card bg-white rounded-xl border border-slate-200 p-5">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-7 h-7 bg-amber-100 rounded-lg flex items-center justify-center text-sm">✅</div>
+              <h3 class="font-semibold text-slate-800">任務清單</h3>
+              <span class="text-xs text-slate-400 ml-auto" id="m-task-count">0 個任務</span>
+            </div>
+            <div id="m-task-list" class="space-y-2 mb-3"></div>
+            <button onclick="openTaskModal()" class="w-full border border-dashed border-slate-300 text-slate-400 hover:border-blue-300 hover:text-blue-500 py-2.5 rounded-lg text-xs transition flex items-center justify-center gap-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              新增任務
+            </button>
+          </div>
+
+          <!-- Submit -->
+          <div class="bg-white rounded-xl border border-slate-200 p-5">
+            <button onclick="submitManualProject()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition mb-2.5 flex items-center justify-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              建立專案
+            </button>
+           
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- STEP 2: GENERATED CONTENT (hidden by default) -->
+  <div id="step-generated" class="hidden space-y-4">
+
+    <!-- Generated Banner -->
+    <div class="bg-gradient-to-r from-violet-600 to-blue-600 rounded-xl p-4 text-white flex items-center gap-3 fade-in">
+      <span class="text-2xl">✨</span>
+      <div class="flex-1">
+        <p class="font-bold">AI 生成完成！</p>
+        <p class="text-sm opacity-80">已生成 Decision、4 個 KPI、7 個任務、完整 Timeline。請確認後修改，再建立專案。</p>
+      </div>
+      <div class="text-right flex-shrink-0">
+        <p class="text-xs opacity-70">生成時間</p>
+        <p class="font-bold">2.8 秒</p>
+      </div>
+    </div>
+
+    <!-- Grid: Left + Right -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+      <!-- LEFT COL (2/3) -->
+      <div class="lg:col-span-2 space-y-4">
+
+        <!-- Basic Info (auto-filled) -->
+        <div class="section-card bg-white rounded-xl border border-slate-200 p-5 gen-appear" style="animation-delay:.05s">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center text-sm">📄</div>
+            <h3 class="font-semibold text-slate-800">基本資訊</h3>
+            <span class="text-xs text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full ml-1">AI 填入</span>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="col-span-2"><label class="block text-xs font-medium text-slate-500 mb-1.5">專案名稱</label><input id="proj-name" type="text" value="Q2 新產品線計畫" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 transition font-medium"></div>
+            <div><label class="block text-xs font-medium text-slate-500 mb-1.5">負責人</label><input type="text" value="Alice" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 transition"></div>
+            <div><label class="block text-xs font-medium text-slate-500 mb-1.5">參與人員</label><input type="text" value="Bob, Carol, Dev Team" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 transition"></div>
+            <div><label class="block text-xs font-medium text-slate-500 mb-1.5">開始日期</label><input type="date" value="2026-04-01" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 transition"></div>
+            <div><label class="block text-xs font-medium text-slate-500 mb-1.5">預計結束</label><input type="date" value="2026-06-30" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 transition"></div>
+            <div><label class="block text-xs font-medium text-slate-500 mb-1.5">部門</label>
+              <select class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-600 focus:border-blue-400 transition"><option selected>業務發展處</option><option>總經理室</option><option>創新研發處</option><option>智慧醫療業務部</option><option>客服暨會員關係部</option></select>
+            </div>
+            <div><label class="block text-xs font-medium text-slate-500 mb-1.5">ShareProject URL</label><input type="text" placeholder="https://chatgpt.com/share/..." class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-blue-400 transition"></div>
+          </div>
+        </div>
+
+        <!-- Decision -->
+        <div class="section-card bg-white rounded-xl border border-slate-200 p-5 gen-appear" style="animation-delay:.1s">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-7 h-7 bg-purple-100 rounded-lg flex items-center justify-center text-sm">⚡</div>
+            <h3 class="font-semibold text-slate-800">Decision（決策）</h3>
+            <span class="text-xs text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full ml-1">AI 生成</span>
+          </div>
+          <div class="bg-slate-50 rounded-lg p-4 space-y-3 mb-3">
+            <div>
+              <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">決策摘要</p>
+              <p class="text-sm text-slate-800 leading-relaxed" id="decision-summary">推出 Q2 新產品線，以搶佔市場空白為核心目標，由 Alice 主導，計畫 4 月底完成產品開發，6 月底達成月銷售 100 件里程碑。</p>
+            </div>
+            <div>
+              <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">決策原因</p>
+              <p class="text-sm text-slate-700 leading-relaxed">市場調查顯示存在明確需求缺口，競品尚未完整佈局此賽道，為搶佔先機決定在 Q2 啟動。預計 ROI 回本週期 6 個月。</p>
+            </div>
+          </div>
+          <textarea rows="2" placeholder="補充決策背景或調整..." class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs resize-none focus:border-blue-400 transition text-slate-600" style="font-size:12px"></textarea>
+        </div>
+
+        <!-- KPI -->
+        <div class="section-card bg-white rounded-xl border border-slate-200 p-5 gen-appear" style="animation-delay:.15s">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-7 h-7 bg-green-100 rounded-lg flex items-center justify-center text-sm">📊</div>
+            <h3 class="font-semibold text-slate-800">KPI 指標</h3>
+            <span class="text-xs text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full ml-1">AI 生成</span>
+            <button onclick="addKPI()" class="ml-auto text-xs text-blue-600 hover:text-blue-800 font-medium">+ 新增</button>
+          </div>
+          <div id="kpi-list" class="space-y-2.5">
+            <div class="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2.5">
+              <span class="text-xs text-slate-500 w-28 flex-shrink-0">月銷售量</span>
+              <input type="text" value="100 件 / 月" class="flex-1 bg-transparent text-sm font-semibold text-blue-700 focus:outline-none">
+              <button onclick="removeKPI(this)" class="text-slate-300 hover:text-red-400 transition ml-2 text-sm">✕</button>
+            </div>
+            <div class="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2.5">
+              <span class="text-xs text-slate-500 w-28 flex-shrink-0">新客轉換率</span>
+              <input type="text" value="15%" class="flex-1 bg-transparent text-sm font-semibold text-blue-700 focus:outline-none">
+              <button onclick="removeKPI(this)" class="text-slate-300 hover:text-red-400 transition ml-2 text-sm">✕</button>
+            </div>
+            <div class="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2.5">
+              <span class="text-xs text-slate-500 w-28 flex-shrink-0">產品上線時程</span>
+              <input type="text" value="2026-04-30" class="flex-1 bg-transparent text-sm font-semibold text-blue-700 focus:outline-none">
+              <button onclick="removeKPI(this)" class="text-slate-300 hover:text-red-400 transition ml-2 text-sm">✕</button>
+            </div>
+            <div class="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2.5">
+              <span class="text-xs text-slate-500 w-28 flex-shrink-0">客戶滿意度</span>
+              <input type="text" value="≥ 85%" class="flex-1 bg-transparent text-sm font-semibold text-blue-700 focus:outline-none">
+              <button onclick="removeKPI(this)" class="text-slate-300 hover:text-red-400 transition ml-2 text-sm">✕</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tasks -->
+        <div class="section-card bg-white rounded-xl border border-slate-200 p-5 gen-appear" style="animation-delay:.2s">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-7 h-7 bg-amber-100 rounded-lg flex items-center justify-center text-sm">✅</div>
+            <h3 class="font-semibold text-slate-800">任務清單</h3>
+            <span class="text-xs text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full ml-1">AI 生成</span>
+            <span class="text-xs text-slate-400 ml-auto" id="task-count">7 個任務</span>
+          </div>
+          <div id="task-chips" class="space-y-2 mb-3"></div>
+          <div class="flex gap-2">
+            <input id="new-task-input" type="text" placeholder="新增任務..." class="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:border-blue-400 transition" onkeydown="if(event.key==='Enter')addTaskManual()">
+            <button onclick="addTaskManual()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg text-xs font-medium transition">新增</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COL (1/3) -->
+      <div class="space-y-4">
+
+        <!-- Timeline -->
+        <div class="section-card bg-white rounded-xl border border-slate-200 p-5 gen-appear" style="animation-delay:.12s">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-7 h-7 bg-sky-100 rounded-lg flex items-center justify-center text-sm">🗓</div>
+            <h3 class="font-semibold text-slate-800">Timeline</h3>
+            <span class="text-xs text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full ml-1">AI 生成</span>
+          </div>
+          <div class="space-y-3" id="timeline-list">
+            <div class="flex gap-3 items-start">
+              <div class="flex flex-col items-center flex-shrink-0"><div class="w-3 h-3 rounded-full bg-blue-500 mt-0.5"></div><div class="w-0.5 h-8 bg-slate-200 mt-1"></div></div>
+              <div><p class="text-xs font-semibold text-slate-700">4月1日 — 啟動</p><p class="text-xs text-slate-500">Kick-off 會議、資源確認</p></div>
+            </div>
+            <div class="flex gap-3 items-start">
+              <div class="flex flex-col items-center flex-shrink-0"><div class="w-3 h-3 rounded-full bg-blue-400 mt-0.5"></div><div class="w-0.5 h-8 bg-slate-200 mt-1"></div></div>
+              <div><p class="text-xs font-semibold text-slate-700">4月15日 — 設計完成</p><p class="text-xs text-slate-500">UI/UX + 行銷素材交付</p></div>
+            </div>
+            <div class="flex gap-3 items-start">
+              <div class="flex flex-col items-center flex-shrink-0"><div class="w-3 h-3 rounded-full bg-blue-400 mt-0.5"></div><div class="w-0.5 h-8 bg-slate-200 mt-1"></div></div>
+              <div><p class="text-xs font-semibold text-slate-700">4月30日 — 開發上線</p><p class="text-xs text-slate-500">產品開發、測試、上線</p></div>
+            </div>
+            <div class="flex gap-3 items-start">
+              <div class="flex flex-col items-center flex-shrink-0"><div class="w-3 h-3 rounded-full bg-green-400 mt-0.5"></div><div class="w-0.5 h-8 bg-slate-200 mt-1"></div></div>
+              <div><p class="text-xs font-semibold text-slate-700">5月15日 — 銷售啟動</p><p class="text-xs text-slate-500">行銷活動、通路開通</p></div>
+            </div>
+            <div class="flex gap-3 items-start">
+              <div class="flex flex-col items-center flex-shrink-0"><div class="w-3 h-3 rounded-full bg-green-500 mt-0.5"></div></div>
+              <div><p class="text-xs font-semibold text-slate-700">6月30日 — KPI Review</p><p class="text-xs text-slate-500">月銷售 100 件達成確認</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Strategy Advice -->
+        <div class="section-card bg-white rounded-xl border border-slate-200 p-5 gen-appear" style="animation-delay:.25s">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-7 h-7 bg-violet-100 rounded-lg flex items-center justify-center text-sm">🧠</div>
+            <h3 class="font-semibold text-slate-800">AI 策略分析</h3>
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <p class="text-xs font-bold text-red-600 mb-2 flex items-center gap-1.5">⚠️ 風險評估</p>
+              <div class="space-y-1.5">
+                <div class="flex items-start gap-2 bg-red-50 rounded-lg p-2.5">
+                  <span class="risk-badge" style="background:#fee2e2;color:#dc2626">高</span>
+                  <p class="text-xs text-slate-700">法務審核週期長，建議提前 2 週送審</p>
+                </div>
+                <div class="flex items-start gap-2 bg-amber-50 rounded-lg p-2.5">
+                  <span class="risk-badge" style="background:#fef3c7;color:#b45309">中</span>
+                  <p class="text-xs text-slate-700">4 月底上線時程緊張，需每週追蹤開發進度</p>
+                </div>
+                <div class="flex items-start gap-2 bg-blue-50 rounded-lg p-2.5">
+                  <span class="risk-badge" style="background:#dbeafe;color:#1d4ed8">低</span>
+                  <p class="text-xs text-slate-700">市場競爭激烈，建議差異化定位策略</p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <p class="text-xs font-bold text-blue-600 mb-2 flex items-center gap-1.5">💡 優化建議</p>
+              <ul class="space-y-1.5 text-xs text-slate-600">
+                <li class="flex items-start gap-1.5"><span class="text-green-500 flex-shrink-0 mt-0.5">✓</span>建議設立週更新機制，避免資訊落差</li>
+                <li class="flex items-start gap-1.5"><span class="text-green-500 flex-shrink-0 mt-0.5">✓</span>KPI 目標拆分為月度里程碑，更易追蹤</li>
+                <li class="flex items-start gap-1.5"><span class="text-green-500 flex-shrink-0 mt-0.5">✓</span>加入 Beta 用戶測試階段（4/15 前）</li>
+              </ul>
+            </div>
+
+            <div>
+              <p class="text-xs font-bold text-green-600 mb-2 flex items-center gap-1.5">🎯 預測成效</p>
+              <div class="bg-green-50 rounded-lg p-3">
+                <div class="flex justify-between text-xs mb-1"><span class="text-slate-600">達標機率</span><span class="font-bold text-green-700">72%</span></div>
+                <div class="w-full bg-slate-200 rounded-full h-1.5 mb-2"><div class="bg-green-500 h-1.5 rounded-full" style="width:72%"></div></div>
+                <p class="text-xs text-slate-500">基於類似專案的歷史數據推算</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Actions -->
+        <div class="bg-white rounded-xl border border-slate-200 p-5 gen-appear" style="animation-delay:.3s">
+          <button onclick="submitProject()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition mb-2.5 flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            建立專案
+          </button>
+        
+          <button onclick="resetForm()" class="w-full text-slate-400 hover:text-slate-600 py-2 text-xs transition mt-1">重新輸入</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TASK MODAL -->
+<div id="task-modal" class="fixed inset-0 z-50 hidden items-center justify-center" style="background:rgba(0,0,0,0.45)" onclick="if(event.target===this)closeTaskModal()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-6 fade-in">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-3 h-3 rounded-full bg-slate-300 flex-shrink-0"></div>
+      <h3 class="font-bold text-slate-900 text-lg" id="modal-title-text">新增任務</h3>
+      <button onclick="closeTaskModal()" class="ml-auto text-slate-400 hover:text-slate-600 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1.5">任務標題 <span class="text-red-500">*</span></label>
+        <input id="mt-title" type="text" placeholder="輸入任務標題..." class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-blue-400 transition">
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1.5">任務描述</label>
+        <textarea id="mt-desc" rows="3" placeholder="目標、範圍、注意事項..." class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm resize-none focus:border-blue-400 transition"></textarea>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1.5">開始日期</label>
+          <input id="mt-start" type="date" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-blue-400 transition">
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1.5">結束日期</label>
+          <input id="mt-end" type="date" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-blue-400 transition">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1.5">負責人</label>
+          <div class="flex gap-2">
+            <input id="mt-assignee" type="text" readonly placeholder="點擊選擇負責人" onclick="openAdminPicker('taskAssignee')" class="flex-1 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-blue-400 transition cursor-pointer bg-white" title="從員工名單選擇">
+            <button type="button" onclick="openAdminPicker('taskAssignee')" class="shrink-0 px-3 py-2 text-xs font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition">選擇</button>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1.5">狀態</label>
+          <select id="mt-status" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-blue-400 transition">
+            <option value="待辦">📋 待辦</option>
+            <option value="進行中">🔵 進行中</option>
+            <option value="完成">✅ 完成</option>
+            <option value="延遲">⚠️ 延遲</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1.5">前置任務（完成後才能開始）</label>
+        <select id="mt-prereq" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:border-blue-400 transition">
+          <option value="">無前置任務</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="flex gap-3 mt-6">
+      <button onclick="saveTaskModal()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition">儲存</button>
+      <button id="mt-delete-btn" onclick="deleteTaskModal()" class="hidden border border-slate-200 text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 px-5 py-3 rounded-xl text-sm font-medium transition">刪除</button>
+      <button onclick="closeTaskModal()" class="border border-slate-200 text-slate-600 hover:bg-slate-50 px-5 py-3 rounded-xl text-sm font-medium transition">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN NAME PICKER MODAL -->
+<div id="admin-picker-modal" class="fixed inset-0 z-[55] hidden items-center justify-center" style="background:rgba(0,0,0,0.45)" onclick="if(event.target===this)closeAdminPicker()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 fade-in max-h-[90vh] flex flex-col" onclick="event.stopPropagation()">
+    <div class="flex items-center gap-3 mb-4">
+      <h3 class="font-bold text-slate-900 text-lg" id="admin-picker-title">選擇員工</h3>
+      <button type="button" onclick="closeAdminPicker()" class="ml-auto text-slate-400 hover:text-slate-600 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <input id="admin-picker-search" type="text" placeholder="搜尋姓名…" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:border-blue-400 transition mb-3" oninput="renderAdminPickerList()">
+    <p class="text-xs text-slate-400 mb-2" id="admin-picker-hint"></p>
+    <div id="admin-picker-list" class="flex-1 min-h-[200px] max-h-[min(50vh,360px)] overflow-y-auto border border-slate-100 rounded-xl divide-y divide-slate-100"></div>
+    <div class="flex gap-3 mt-5">
+      <button type="button" onclick="applyAdminPicker()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition">確定</button>
+      <button type="button" onclick="closeAdminPicker()" class="border border-slate-200 text-slate-600 hover:bg-slate-50 px-5 py-3 rounded-xl text-sm font-medium transition">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="fixed bottom-5 right-5 z-50 hidden">
+  <div class="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 max-w-sm fade-in">
+    <svg id="toast-icon" class="w-4 h-4 text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+    <p id="toast-msg" class="text-sm"></p>
+  </div>
+</div>
+
+<script>
+// ─── BACKEND API (FR) ───
+const API_BASE = "https://23700999.com:8081/PM";
+const NEW_PROJECT_URL = API_BASE + "/api/fr/NewProject";
+
+const GET_DEPARTMENT_URL = API_BASE + "/api/fr/getDepartmentCode";
+const GET_ADMIN_NAME_LIST_URL = API_BASE + "/api/fr/getAdminNameList";
+const TASK_STATE_LIST_URLS = [
+  API_BASE + "/api/fr/getTaskStateCode",
+  API_BASE + "/api/fr/getTaskState"
+];
+
+// 預設值：API 若失敗時仍可運作
+let DEPARTMENT_CODE_MAP = {
+  "業務發展處": "1",
+  "總經理室": "2",
+  "創新研發處": "3",
+  "智慧醫療業務部": "4",
+  "客服暨會員關係部": "5"
+};
+
+// 依照 UI 狀態文字做「猜測」對應 Code；會在取得 TaskStateList 後自動更新
+let TASK_STATE_CODE_MAP = {
+  "待辦": "1",
+  "進行中": "2",
+  "完成": "3",
+  "延遲": "4"
+};
+
+let departmentListCache = null;
+let taskStateListCache = null;
+let adminNameListCache = null;
+let adminPickerMode = "owner";
+
+function statusIconByCode(code) {
+  switch (String(code)) {
+    case "1":
+      return "📋";
+    case "2":
+      return "🔵";
+    case "3":
+      return "✅";
+    case "4":
+      return "⚠️";
+    default:
+      return "•";
+  }
+}
+
+function getBackendTokenAndAdmin() {
+  const token = localStorage.getItem("backendToken") || sessionStorage.getItem("backendToken");
+  const adminID = localStorage.getItem("adminID") || sessionStorage.getItem("adminID");
+  if (!token || !adminID) {
+    showToast("請先登入後台（右上角頭像需要有登入狀態）", "warn");
+    return null;
+  }
+  return { token, adminID };
+}
+
+function postJson(url, body) {
+  return fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  }).then(function (res) {
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  });
+}
+
+function dedupeAdminNames(arr) {
+  const seen = new Set();
+  const out = [];
+  (arr || []).forEach(function (n) {
+    const s = String(n == null ? "" : n).trim();
+    if (!s || seen.has(s)) return;
+    seen.add(s);
+    out.push(s);
+  });
+  out.sort(function (a, b) {
+    return a.localeCompare(b, "zh-Hant");
+  });
+  return out;
+}
+
+function escAttr(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;");
+}
+
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function fetchAdminNameList() {
+  const session = getBackendTokenAndAdmin();
+  if (!session) return Promise.reject(new Error("no session"));
+  return postJson(GET_ADMIN_NAME_LIST_URL, { AdminID: session.adminID, Token: session.token }).then(function (r) {
+    if (!r || String(r.Result).toUpperCase() !== "OK") throw new Error("bad result");
+    const raw = r.adminNameList || r.AdminNameList || [];
+    if (!Array.isArray(raw)) throw new Error("bad list");
+    adminNameListCache = dedupeAdminNames(raw);
+    return adminNameListCache;
+  });
+}
+
+function openAdminPicker(mode) {
+  adminPickerMode = mode;
+  const session = getBackendTokenAndAdmin();
+  if (!session) return;
+
+  const titleEl = document.getElementById("admin-picker-title");
+  const hintEl = document.getElementById("admin-picker-hint");
+  const searchEl = document.getElementById("admin-picker-search");
+  if (titleEl) {
+    titleEl.textContent =
+      mode === "owner" || mode === "taskAssignee" ? "選擇負責人" : "選擇參與人員";
+  }
+  if (hintEl) {
+    hintEl.textContent =
+      mode === "members" ? "可勾選多位，確定後以逗號分隔寫入欄位" : "請選擇一位負責人";
+  }
+  if (searchEl) searchEl.value = "";
+
+  function showModal() {
+    const modal = document.getElementById("admin-picker-modal");
+    if (modal) {
+      modal.classList.remove("hidden");
+      modal.style.display = "flex";
+    }
+    renderAdminPickerList();
+    setTimeout(function () {
+      if (searchEl) searchEl.focus();
+    }, 50);
+  }
+
+  if (adminNameListCache && adminNameListCache.length) {
+    showModal();
+    return;
+  }
+
+  fetchAdminNameList()
+    .then(function () {
+      showModal();
+    })
+    .catch(function () {
+      showToast("無法取得員工名單", "warn");
+    });
+}
+
+function closeAdminPicker() {
+  const modal = document.getElementById("admin-picker-modal");
+  if (modal) {
+    modal.classList.add("hidden");
+    modal.style.display = "";
+  }
+}
+
+function renderAdminPickerList() {
+  const listEl = document.getElementById("admin-picker-list");
+  const searchEl = document.getElementById("admin-picker-search");
+  if (!listEl || !adminNameListCache || !adminNameListCache.length) {
+    if (listEl && (!adminNameListCache || !adminNameListCache.length)) {
+      listEl.innerHTML = '<p class="text-sm text-slate-400 text-center py-8">載入中或尚無資料</p>';
+    }
+    return;
+  }
+
+  const q = (searchEl && searchEl.value ? searchEl.value : "").trim().toLowerCase();
+  const names = adminNameListCache.filter(function (n) {
+    return !q || String(n).toLowerCase().indexOf(q) >= 0;
+  });
+
+  const ownerVal = document.getElementById("m-owner") ? document.getElementById("m-owner").value.trim() : "";
+  const taskAssigneeVal = document.getElementById("mt-assignee")
+    ? document.getElementById("mt-assignee").value.trim()
+    : "";
+  const memSet = new Set();
+  (document.getElementById("m-members") ? document.getElementById("m-members").value : "")
+    .split(/[,，、\s]+/)
+    .forEach(function (s) {
+      const t = s.trim();
+      if (t) memSet.add(t);
+    });
+
+  if (!names.length) {
+    listEl.innerHTML = '<p class="text-sm text-slate-400 text-center py-8">沒有符合的姓名</p>';
+    return;
+  }
+
+  if (adminPickerMode === "owner" || adminPickerMode === "taskAssignee") {
+    const checkedBase = adminPickerMode === "taskAssignee" ? taskAssigneeVal : ownerVal;
+    const radioName = adminPickerMode === "taskAssignee" ? "admin-picker-task-assignee" : "admin-picker-owner";
+    listEl.innerHTML = names
+      .map(function (name) {
+        const checked = name === checkedBase ? " checked" : "";
+        return (
+          '<label class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer text-sm text-slate-800">' +
+          '<input type="radio" name="' +
+          radioName +
+          '" class="shrink-0 text-blue-600" value="' +
+          escAttr(name) +
+          '"' +
+          checked +
+          ">" +
+          "<span>" +
+          escHtml(name) +
+          "</span></label>"
+        );
+      })
+      .join("");
+  } else {
+    listEl.innerHTML = names
+      .map(function (name) {
+        const checked = memSet.has(name) ? " checked" : "";
+        return (
+          '<label class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 cursor-pointer text-sm text-slate-800">' +
+          '<input type="checkbox" class="ap-mem-cb shrink-0 text-blue-600 rounded" value="' +
+          escAttr(name) +
+          '"' +
+          checked +
+          ">" +
+          "<span>" +
+          escHtml(name) +
+          "</span></label>"
+        );
+      })
+      .join("");
+  }
+}
+
+function applyAdminPicker() {
+  if (adminPickerMode === "owner") {
+    const radio = document.querySelector('input[name="admin-picker-owner"]:checked');
+    const el = document.getElementById("m-owner");
+    if (el) el.value = radio ? radio.value : "";
+  } else if (adminPickerMode === "taskAssignee") {
+    const radio = document.querySelector('input[name="admin-picker-task-assignee"]:checked');
+    const el = document.getElementById("mt-assignee");
+    if (el) el.value = radio ? radio.value : "";
+  } else {
+    const boxes = document.querySelectorAll("#admin-picker-list .ap-mem-cb:checked");
+    const vals = Array.from(boxes).map(function (cb) {
+      return cb.value;
+    });
+    const el = document.getElementById("m-members");
+    if (el) el.value = vals.join(",");
+  }
+  closeAdminPicker();
+}
+
+function toYYYYMMDD(d) {
+  if (!d) return "";
+  const s = String(d).trim();
+  return s.includes("-") ? s.replace(/-/g, "") : s;
+}
+
+function departmentNameToCode(deptText) {
+  if (!deptText) return "";
+  const s = String(deptText).trim();
+  return DEPARTMENT_CODE_MAP[s] || (/^\d+$/.test(s) ? s : "");
+}
+
+function statusToCode(statusText) {
+  if (!statusText) return "1";
+  const s = String(statusText).trim();
+  return TASK_STATE_CODE_MAP[s] || (/^\d+$/.test(s) ? s : "1");
+}
+
+function setSelectValueIfOptionExists(selectEl, desiredValue, fallbackValue) {
+  if (!selectEl) return;
+  const dv = desiredValue == null ? "" : String(desiredValue);
+  const exists = Array.from(selectEl.options).some((o) => String(o.value) === dv);
+  if (exists) {
+    selectEl.value = dv;
+    return;
+  }
+  const fv = fallbackValue == null ? "" : String(fallbackValue);
+  if (fv && Array.from(selectEl.options).some((o) => String(o.value) === fv)) {
+    selectEl.value = fv;
+    return;
+  }
+  if (selectEl.options.length) selectEl.value = selectEl.options[0].value;
+}
+
+function populateDepartmentSelect(selectEl, placeholderText) {
+  if (!selectEl) return;
+  const current = selectEl.value;
+  selectEl.innerHTML = "";
+
+  if (placeholderText != null) {
+    const ph = document.createElement("option");
+    ph.value = "";
+    ph.textContent = placeholderText;
+    selectEl.appendChild(ph);
+  }
+
+  const list =
+    Array.isArray(departmentListCache) && departmentListCache.length
+      ? departmentListCache
+      : Object.keys(DEPARTMENT_CODE_MAP).map((name) => ({
+          Name: name,
+          Code: DEPARTMENT_CODE_MAP[name],
+        }));
+
+  list.forEach((d) => {
+    const opt = document.createElement("option");
+    opt.value = String(d.Name);
+    opt.textContent = String(d.Name);
+    selectEl.appendChild(opt);
+  });
+
+  setSelectValueIfOptionExists(
+    selectEl,
+    current,
+    placeholderText != null ? "" : selectEl.options[0]?.value
+  );
+}
+
+function populateTaskStateSelect(selectEl) {
+  if (!selectEl) return;
+  const current = selectEl.value;
+  selectEl.innerHTML = "";
+
+  const list =
+    Array.isArray(taskStateListCache) && taskStateListCache.length
+      ? taskStateListCache
+      : Object.keys(TASK_STATE_CODE_MAP).map((name) => ({
+          Name: name,
+          Code: TASK_STATE_CODE_MAP[name],
+        }));
+
+  list.forEach((st) => {
+    const opt = document.createElement("option");
+    opt.value = String(st.Name);
+    opt.textContent = `${statusIconByCode(st.Code)} ${String(st.Name)}`;
+    selectEl.appendChild(opt);
+  });
+
+  setSelectValueIfOptionExists(selectEl, current, selectEl.options[0]?.value);
+}
+
+function collectManualKPIList() {
+  const rows = document.querySelectorAll("#m-kpi-list > div");
+  return Array.from(rows)
+    .map((row) => {
+      const inputs = row.querySelectorAll("input");
+      const KPIName = inputs[0] ? inputs[0].value.trim() : "";
+      const KPITarget = inputs[1] ? inputs[1].value.trim() : "";
+      if (!KPIName && !KPITarget) return null;
+      return { KPIName: KPIName, KPITarget: KPITarget };
+    })
+    .filter(Boolean);
+}
+
+function collectManualTaskList() {
+  // 把前置任務的「本機 id」轉成「1-based CID」：後端 spec 範例用 CID 不能是空白
+  const idToCid = {};
+  manualTasks.forEach((t, idx) => {
+    idToCid[t.id] = String(idx + 1);
+  });
+
+  return manualTasks.map((t) => {
+    const prereqCid = t.prerequisite ? idToCid[t.prerequisite] || "0" : "0";
+    return {
+      Topic: t.title || "",
+      Description: t.desc || "",
+      StartDate: toYYYYMMDD(t.startDate || ""),
+      EndDate: toYYYYMMDD(t.endDate || ""),
+      ChargeMan: t.assignee || "",
+      State: statusToCode(t.status || "待辦"),
+      PreTaskID: String(prereqCid).trim() || "0",
+    };
+  });
+}
+
+function collectManualProjectPayload() {
+  const ProjectName = document.getElementById("m-proj-name").value.trim();
+  const ChargeMan = document.getElementById("m-owner").value.trim();
+  const Participants = document.getElementById("m-members").value.trim();
+  const StartDate = toYYYYMMDD(document.getElementById("m-start").value);
+  const EndDate = toYYYYMMDD(document.getElementById("m-end").value);
+  const deptText = document.getElementById("m-dept").value;
+  const Department = departmentNameToCode(deptText);
+  const ShareProject_URL = document.getElementById("m-url").value.trim();
+  const Decision = document.getElementById("m-decision").value.trim();
+
+  const KPIList = collectManualKPIList();
+  const TaskList = collectManualTaskList();
+
+  const missing = [];
+  if (!ProjectName) missing.push("專案名稱");
+  if (!ChargeMan) missing.push("負責人");
+  if (!Participants) missing.push("參與人員");
+  if (!StartDate) missing.push("開始日期");
+  if (!EndDate) missing.push("結束日期");
+  if (!Department) missing.push("部門");
+  if (!Decision) missing.push("決策摘要");
+  if (!KPIList.length) missing.push("KPIList");
+  if (!TaskList.length) missing.push("TaskList");
+  if (missing.length) {
+    showToast("請補齊： " + missing.join("、"), "warn");
+    return null;
+  }
+
+  return {
+    ProjectName,
+    ChargeMan,
+    Participants,
+    StartDate,
+    EndDate,
+    Department,
+    ShareProject_URL,
+    Decision,
+    KPIList,
+    TaskList,
+  };
+}
+
+function collectAIGeneratedProjectPayload() {
+  const ProjectName = document.getElementById("proj-name").value.trim();
+  const basicCard = document.getElementById("proj-name").closest(".section-card");
+  const textInputs = basicCard ? basicCard.querySelectorAll("input[type='text']") : [];
+  // 基本資訊區塊的 input 順序：proj-name / owner / members / share url
+  const ChargeMan = textInputs[1] ? textInputs[1].value.trim() : "";
+  const Participants = textInputs[2] ? textInputs[2].value.trim() : "";
+  const ShareProject_URL = textInputs[3] ? textInputs[3].value.trim() : "";
+
+  const dateInputs = basicCard ? basicCard.querySelectorAll("input[type='date']") : [];
+  const StartDate = toYYYYMMDD(dateInputs[0] ? dateInputs[0].value : "");
+  const EndDate = toYYYYMMDD(dateInputs[1] ? dateInputs[1].value : "");
+
+  const deptSelect = basicCard ? basicCard.querySelector("select") : null;
+  const Department = deptSelect ? departmentNameToCode(deptSelect.value) : "";
+
+  const decisionSummaryEl = document.getElementById("decision-summary");
+  const textarea = document.querySelector("#step-generated textarea");
+  const Decision =
+    (decisionSummaryEl ? decisionSummaryEl.textContent.trim() : "") +
+    (textarea && textarea.value.trim() ? "\n" + textarea.value.trim() : "");
+
+  // KPIList：kpi-list 區塊（span 版與 addKPI 的 input 版都支援）
+  const kpiRows = document.querySelectorAll("#step-generated #kpi-list > div");
+  const KPIList = Array.from(kpiRows)
+    .map((row) => {
+      const span = row.querySelector("span");
+      const inputs = row.querySelectorAll("input");
+
+      if (span) {
+        const KPIName = (span.textContent || "").trim();
+        const KPITarget = inputs[0] ? inputs[0].value.trim() : "";
+        if (!KPIName && !KPITarget) return null;
+        return { KPIName, KPITarget };
+      }
+
+      // addKPI() 產生的 row：input[0]=名稱, input[1]=目標值
+      const KPIName = inputs[0] ? inputs[0].value.trim() : "";
+      const KPITarget = inputs[1] ? inputs[1].value.trim() : "";
+      if (!KPIName && !KPITarget) return null;
+      return { KPIName, KPITarget };
+    })
+    .filter(Boolean);
+
+  // TaskList：從 generatedTasks 直接轉（缺少前置任務/狀態，就用後端可接受的預設）
+  const TaskList = generatedTasks.map((t) => ({
+    Topic: t.title || "",
+    Description: t.note || "",
+    StartDate: StartDate,
+    EndDate: toYYYYMMDD(t.due || ""),
+    ChargeMan: t.assignee || "",
+    State: "1",
+    PreTaskID: "0",
+  }));
+
+  const missing = [];
+  if (!ProjectName) missing.push("專案名稱");
+  if (!ChargeMan) missing.push("負責人");
+  if (!Participants) missing.push("參與人員");
+  if (!StartDate) missing.push("開始日期");
+  if (!EndDate) missing.push("結束日期");
+  if (!Department) missing.push("部門");
+  if (!Decision) missing.push("決策摘要");
+  if (!KPIList.length) missing.push("KPIList");
+  if (!TaskList.length) missing.push("TaskList");
+  if (missing.length) {
+    showToast("請補齊： " + missing.join("、"), "warn");
+    return null;
+  }
+
+  return {
+    ProjectName,
+    ChargeMan,
+    Participants,
+    StartDate,
+    EndDate,
+    Department,
+    ShareProject_URL,
+    Decision,
+    KPIList,
+    TaskList,
+  };
+}
+
+// ─── TASKS DATA ───
+let generatedTasks = [
+  {id:1, title:'市場調查與競品分析', assignee:'Alice', due:'2026-04-08', priority:'高'},
+  {id:2, title:'產品規格書撰寫', assignee:'Alice', due:'2026-04-10', priority:'高'},
+  {id:3, title:'UI/UX 設計', assignee:'Bob', due:'2026-04-15', priority:'高'},
+  {id:4, title:'行銷素材製作', assignee:'Carol', due:'2026-04-20', priority:'中'},
+  {id:5, title:'後端開發與 API 整合', assignee:'Dev Team', due:'2026-04-25', priority:'高'},
+  {id:6, title:'法務審核（合約/免責條款）', assignee:'Legal', due:'2026-04-15', priority:'高', note:'⚠️ 建議提前送審'},
+  {id:7, title:'QA 測試與 Bug 修復', assignee:'Dev Team', due:'2026-04-28', priority:'中'},
+];
+
+const PRIORITY_COLORS = {高:'bg-red-100 text-red-700', 中:'bg-amber-100 text-amber-700', 低:'bg-green-100 text-green-700'};
+const AV_COLORS = {Alice:'bg-blue-500',Bob:'bg-purple-500',Carol:'bg-pink-500','Dev Team':'bg-green-500',Legal:'bg-slate-400'};
+
+// ─── RENDER TASKS ───
+function renderTasks() {
+  const container = document.getElementById('task-chips');
+  container.innerHTML = generatedTasks.map(t => `
+    <div class="task-chip flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2.5 hover:border-blue-200 hover:bg-slate-50 transition group">
+      <div class="w-6 h-6 rounded-full ${AV_COLORS[t.assignee]||'bg-slate-400'} flex items-center justify-center text-white text-xs font-bold flex-shrink-0">${t.assignee[0]}</div>
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-medium text-slate-700 truncate">${t.title}${t.note?` <span class="text-orange-500">${t.note}</span>`:''}</p>
+        <p class="text-xs text-slate-400">${t.assignee} · ${t.due}</p>
+      </div>
+      <span class="text-xs ${PRIORITY_COLORS[t.priority]||''} px-2 py-0.5 rounded-full flex-shrink-0">${t.priority}</span>
+      <button onclick="removeTask(${t.id})" class="text-slate-200 hover:text-red-400 transition opacity-0 group-hover:opacity-100 flex-shrink-0">✕</button>
+    </div>`).join('');
+  document.getElementById('task-count').textContent = `${generatedTasks.length} 個任務`;
+}
+
+function removeTask(id) { generatedTasks = generatedTasks.filter(t=>t.id!==id); renderTasks(); }
+function addTaskManual() {
+  const input = document.getElementById('new-task-input');
+  const title = input.value.trim();
+  if(!title){ showToast('請輸入任務名稱','warn'); return; }
+  const newId = Math.max(...generatedTasks.map(t=>t.id),0)+1;
+  generatedTasks.push({id:newId,title,assignee:'Alice',due:'2026-06-30',priority:'中'});
+  input.value = '';
+  renderTasks();
+  showToast(`已新增任務：${title}`);
+}
+function addKPI() {
+  const kpiList = document.getElementById('kpi-list');
+  const div = document.createElement('div');
+  div.className = 'flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2.5 task-chip';
+  div.innerHTML = `<input type="text" placeholder="指標名稱" class="w-28 bg-transparent text-xs text-slate-500 focus:outline-none flex-shrink-0">
+    <input type="text" placeholder="目標值" class="flex-1 bg-transparent text-sm font-semibold text-blue-700 focus:outline-none">
+    <button onclick="removeKPI(this)" class="text-slate-300 hover:text-red-400 transition ml-2 text-sm">✕</button>`;
+  kpiList.appendChild(div);
+  div.querySelector('input').focus();
+}
+function removeKPI(btn) { btn.closest('div').remove(); }
+
+// ─── EXAMPLE ───
+function useExample(btn) {
+  const ex = btn.getAttribute('data-ex');
+  document.getElementById('ai-input').value = ex;
+  updateCharCount();
+}
+
+document.getElementById('ai-input').addEventListener('input', updateCharCount);
+function updateCharCount() {
+  const len = document.getElementById('ai-input').value.length;
+  document.getElementById('char-count').textContent = `${len} 字`;
+}
+
+// ─── AI GENERATE ───
+const GEN_STEPS = [
+  {label:'分析專案目標與範疇...', delay:0},
+  {label:'生成 Decision 框架...', delay:500},
+  {label:'設定 KPI 指標...', delay:1000},
+  {label:'拆解任務清單（7 個任務）...', delay:1500},
+  {label:'建立 Timeline...', delay:2000},
+  {label:'AI 策略風險評估...', delay:2300},
+];
+
+function startGenerate() {
+  const input = document.getElementById('ai-input').value.trim();
+  if(input.length < 10){ showToast('請輸入至少 10 個字的描述','warn'); return; }
+
+  document.getElementById('generate-btn').disabled = true;
+  document.getElementById('generate-btn').innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> 生成中...';
+
+  const progressDiv = document.getElementById('gen-progress');
+  progressDiv.classList.remove('hidden');
+  const stepsDiv = document.getElementById('gen-steps');
+
+  GEN_STEPS.forEach((step, i) => {
+    setTimeout(() => {
+      stepsDiv.innerHTML += `<div class="flex items-center gap-2 text-sm fade-in">
+        <span class="text-green-500 flex-shrink-0">${i < GEN_STEPS.length-1 ? '✓' : '⚡'}</span>
+        <span class="text-slate-700">${step.label}</span>
+      </div>`;
+    }, step.delay);
+  });
+
+  // Step dots
+  setTimeout(() => {
+    document.getElementById('step2-dot').className = 'step-dot w-6 h-6 rounded-full bg-violet-500 text-white flex items-center justify-center text-xs font-bold';
+    document.getElementById('step2-label').className = 'font-medium text-violet-600';
+  }, 100);
+
+  setTimeout(() => {
+    progressDiv.classList.add('hidden');
+    document.getElementById('step-input').classList.add('hidden');
+    document.getElementById('step-generated').classList.remove('hidden');
+    document.getElementById('step3-dot').className = 'step-dot w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold';
+    document.getElementById('step3-label').className = 'font-medium text-blue-600';
+    renderTasks();
+    showToast('AI 生成完成！請確認並修改');
+  }, 2900);
+}
+
+// ─── RESET ───
+function resetForm() {
+  document.getElementById('step-input').classList.remove('hidden');
+  document.getElementById('step-generated').classList.add('hidden');
+  document.getElementById('gen-progress').classList.add('hidden');
+  document.getElementById('gen-steps').innerHTML = '';
+  document.getElementById('ai-input').value = '';
+  updateCharCount();
+  const btn = document.getElementById('generate-btn');
+  btn.disabled = false;
+  btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> AI 生成完整專案 <span class="text-xs opacity-75 font-normal">約 3 秒</span>';
+  [1,2,3].forEach(i => {
+    const dot = document.getElementById(`step${i}-dot`);
+    dot.className = i===1 ? 'step-dot w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold' : 'step-dot w-6 h-6 rounded-full bg-slate-200 text-slate-400 flex items-center justify-center text-xs font-bold';
+  });
+}
+
+// ─── SUBMIT ───
+
+function submitProject() {
+  const session = getBackendTokenAndAdmin();
+  if (!session) return;
+
+  const payload = collectAIGeneratedProjectPayload();
+  if (!payload) return;
+
+  showToast("建立專案中…", "success");
+  postJson(NEW_PROJECT_URL, Object.assign({ AdminID: session.adminID, Token: session.token }, payload))
+    .then(function (r) {
+      if (r && r.Result === "OK") {
+        if (r.AID != null) localStorage.setItem("projectAID", String(r.AID));
+        showToast("🎉 專案建立成功！");
+          setTimeout(() => { window.location.href = "/projectOS/task-tracking.html"; }, 800);
+      } else {
+        showToast("建立失敗：" + (r && (r.Message || r.Result) ? (r.Message || r.Result) : "未知錯誤"), "warn");
+      }
+    })
+    .catch(function () {
+      showToast("伺服器錯誤，請稍後再試", "warn");
+    });
+}
+
+// ─── MODE TOGGLE ───
+function switchMode(mode) {
+  const aiEl = document.getElementById('ai-mode');
+  const manualEl = document.getElementById('manual-mode');
+  const tabAI = document.getElementById('tab-ai');
+  const tabManual = document.getElementById('tab-manual');
+  const activeTab = 'flex-1 py-2.5 rounded-lg text-sm font-semibold transition bg-white text-slate-800 shadow-sm flex items-center justify-center gap-2';
+  const inactiveTab = 'flex-1 py-2.5 rounded-lg text-sm font-semibold transition text-slate-500 hover:text-slate-700 flex items-center justify-center gap-2';
+  if (mode === 'ai') {
+    aiEl.classList.remove('hidden');
+    manualEl.classList.add('hidden');
+    tabAI.className = activeTab;
+    tabManual.className = inactiveTab;
+  } else {
+    aiEl.classList.add('hidden');
+    manualEl.classList.remove('hidden');
+    tabAI.className = inactiveTab;
+    tabManual.className = activeTab;
+  }
+}
+
+// ─── MANUAL KPI ───
+let manualKPIs = [];
+function addManualKPI() {
+  const id = Date.now();
+  manualKPIs.push({id});
+  renderManualKPIs();
+  setTimeout(() => {
+    const row = document.getElementById('m-kpi-row-' + id);
+    if (row) row.querySelector('input').focus();
+  }, 50);
+}
+function removeManualKPI(id) {
+  manualKPIs = manualKPIs.filter(k => k.id !== id);
+  renderManualKPIs();
+}
+function renderManualKPIs() {
+  document.getElementById('m-kpi-list').innerHTML = manualKPIs.map(k => `
+    <div id="m-kpi-row-${k.id}" class="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2.5 task-chip">
+      <input type="text" placeholder="指標名稱" class="w-28 bg-transparent text-xs text-slate-500 focus:outline-none flex-shrink-0 border-b border-slate-300 pb-0.5">
+      <input type="text" placeholder="目標值" class="flex-1 bg-transparent text-sm font-semibold text-blue-700 focus:outline-none border-b border-blue-300 pb-0.5">
+      <button onclick="removeManualKPI(${k.id})" class="text-slate-300 hover:text-red-400 transition ml-2 text-sm">✕</button>
+    </div>`).join('');
+}
+
+// ─── MANUAL TASKS ───
+let manualTasks = [];
+let editingTaskId = null;
+
+const AV_COLORS_M = {Alice:'bg-blue-500',Bob:'bg-purple-500',Carol:'bg-pink-500',Dave:'bg-orange-400','Dev Team':'bg-green-500',Legal:'bg-slate-400'};
+const STATUS_STYLES_BY_CODE = {'1':'bg-slate-100 text-slate-600','2':'bg-blue-100 text-blue-700','3':'bg-green-100 text-green-700','4':'bg-red-100 text-red-700'};
+
+function openTaskModal(id = null) {
+  editingTaskId = id;
+  const deleteBtn = document.getElementById('mt-delete-btn');
+  if (id) {
+    const t = manualTasks.find(t => t.id === id);
+    document.getElementById('mt-title').value = t.title;
+    document.getElementById('mt-desc').value = t.desc || '';
+    document.getElementById('mt-start').value = t.startDate || '';
+    document.getElementById('mt-end').value = t.endDate || '';
+    document.getElementById('mt-assignee').value = t.assignee || '';
+    const selStatus = document.getElementById('mt-status');
+    setSelectValueIfOptionExists(selStatus, t.status || '待辦', selStatus?.options?.[0]?.value);
+    document.getElementById('modal-title-text').textContent = '編輯任務';
+    deleteBtn.classList.remove('hidden');
+  } else {
+    document.getElementById('mt-title').value = '';
+    document.getElementById('mt-desc').value = '';
+    document.getElementById('mt-start').value = '';
+    document.getElementById('mt-end').value = '';
+    document.getElementById('mt-assignee').value = '';
+    const selStatus = document.getElementById('mt-status');
+    setSelectValueIfOptionExists(selStatus, '待辦', selStatus?.options?.[0]?.value);
+    document.getElementById('modal-title-text').textContent = '新增任務';
+    deleteBtn.classList.add('hidden');
+  }
+  const prereq = document.getElementById('mt-prereq');
+  prereq.innerHTML = '<option value="">無前置任務</option>' +
+    manualTasks.filter(t => t.id !== id).map(t => `<option value="${t.id}"${(editingTaskId && manualTasks.find(x=>x.id===editingTaskId)?.prerequisite==t.id)?'selected':''}>${t.title}</option>`).join('');
+  if (id) {
+    const cur = manualTasks.find(t => t.id === id);
+    prereq.value = cur?.prerequisite || '';
+  }
+  const modal = document.getElementById('task-modal');
+  modal.classList.remove('hidden');
+  modal.style.display = 'flex';
+  setTimeout(() => document.getElementById('mt-title').focus(), 100);
+}
+
+function closeTaskModal() {
+  const modal = document.getElementById('task-modal');
+  modal.classList.add('hidden');
+  modal.style.display = '';
+  editingTaskId = null;
+}
+
+function saveTaskModal() {
+  const title = document.getElementById('mt-title').value.trim();
+  if (!title) { showToast('請填入任務標題', 'warn'); return; }
+  const data = {
+    title,
+    desc: document.getElementById('mt-desc').value.trim(),
+    startDate: document.getElementById('mt-start').value,
+    endDate: document.getElementById('mt-end').value,
+    assignee: document.getElementById('mt-assignee').value,
+    status: document.getElementById('mt-status').value,
+    prerequisite: document.getElementById('mt-prereq').value,
+  };
+  if (editingTaskId) {
+    const idx = manualTasks.findIndex(t => t.id === editingTaskId);
+    manualTasks[idx] = { ...manualTasks[idx], ...data };
+    showToast('任務已更新');
+  } else {
+    manualTasks.push({ id: Date.now(), ...data });
+    showToast('已新增任務：' + title);
+  }
+  closeTaskModal();
+  renderManualTasks();
+}
+
+function deleteTaskModal() {
+  manualTasks = manualTasks.filter(t => t.id !== editingTaskId);
+  closeTaskModal();
+  renderManualTasks();
+  showToast('任務已刪除');
+}
+
+function renderManualTasks() {
+  document.getElementById('m-task-list').innerHTML = manualTasks.map(t => `
+    <div class="task-chip flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2.5 hover:border-blue-200 hover:bg-slate-50 transition cursor-pointer" onclick="openTaskModal(${t.id})">
+      <div class="w-6 h-6 rounded-full ${AV_COLORS_M[t.assignee]||'bg-slate-400'} flex items-center justify-center text-white text-xs font-bold flex-shrink-0">${(t.assignee||'?')[0]}</div>
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-medium text-slate-700 truncate">${t.title}</p>
+        <p class="text-xs text-slate-400">${t.assignee||'未指定'}${t.endDate?' · '+t.endDate:''}</p>
+      </div>
+      <span class="text-xs ${STATUS_STYLES_BY_CODE[statusToCode(t.status||'待辦')]||'bg-slate-100 text-slate-500'} px-2 py-0.5 rounded-full flex-shrink-0">${t.status||'待辦'}</span>
+    </div>`).join('');
+  document.getElementById('m-task-count').textContent = manualTasks.length + ' 個任務';
+}
+
+// ─── MANUAL SUBMIT ───
+function submitManualProject() {
+  const session = getBackendTokenAndAdmin();
+  if (!session) return;
+
+  const payload = collectManualProjectPayload();
+  if (!payload) return;
+
+  showToast("建立專案中…", "success");
+  postJson(NEW_PROJECT_URL, Object.assign({ AdminID: session.adminID, Token: session.token }, payload))
+    .then(function (r) {
+      if (r && r.Result === "OK") {
+        if (r.AID != null) localStorage.setItem("projectAID", String(r.AID));
+        showToast("🎉 專案建立成功！");
+        setTimeout(() => { window.location.href = "/projectOS/task-tracking.html"; }, 800);
+      } else {
+        showToast("建立失敗：" + (r && (r.Message || r.Result) ? (r.Message || r.Result) : "未知錯誤"), "warn");
+      }
+    })
+    .catch(function () {
+      showToast("伺服器錯誤，請稍後再試", "warn");
+    });
+}
+
+// ─── TOAST ───
+let toastTimer;
+function showToast(msg, type='success') {
+  const toast=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  document.getElementById('toast-icon').className=type==='warn'?'w-4 h-4 text-amber-400 flex-shrink-0':'w-4 h-4 text-green-400 flex-shrink-0';
+  toast.classList.remove('hidden');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>toast.classList.add('hidden'),3500);
+}
+
+(function initNavAvatar(){
+  try {
+    const el = document.getElementById('navUserAvatar');
+    if (!el) return;
+    const raw = localStorage.getItem('userData');
+    if (raw) {
+      const u = JSON.parse(raw);
+      const name = (u.Member && u.Member.Name) || u.Name || '會員';
+      el.textContent = String(name).trim().charAt(0).toUpperCase() || '?';
+      return;
+    }
+    const adminName = localStorage.getItem('adminName') || sessionStorage.getItem('adminName');
+    const adminId = localStorage.getItem('adminID') || sessionStorage.getItem('adminID');
+    const label = (adminName || adminId || '').trim();
+    if (label) el.textContent = label.charAt(0).toUpperCase() || '?';
+  } catch (e) {}
+})();
+
+// ─── INIT REFERENCE DATA (Departments / Task States) ───
+(function initReferenceData() {
+  // 不用 await：只要更新 UI 即可
+  var session = getBackendTokenAndAdmin();
+  if (!session) return;
+
+  var authBody = { AdminID: session.adminID, Token: session.token };
+
+  // 1) 部門資訊
+  postJson(GET_DEPARTMENT_URL, authBody)
+    .then(function (resp) {
+      if (resp && String(resp.Result).toUpperCase() === "OK" && Array.isArray(resp.DepartmentList)) {
+        departmentListCache = resp.DepartmentList;
+        DEPARTMENT_CODE_MAP = {};
+        resp.DepartmentList.forEach(function (d) {
+          if (!d) return;
+          var name = String(d.Name || "").trim();
+          var code = String(d.Code || "").trim();
+          if (!name || !code) return;
+          DEPARTMENT_CODE_MAP[name] = code;
+        });
+
+        populateDepartmentSelect(document.getElementById('m-dept'), '選擇部門');
+        // AI 生成步驟用的部門 select（只會存在於 #step-generated 區塊）
+        populateDepartmentSelect(document.querySelector('#step-generated select'), null);
+      }
+    })
+    .catch(function () {
+      // API 失敗時保留預設 select + map
+    });
+
+  // 2) 任務狀態列表（嘗試多個可能 endpoint）
+  var tryUrls = TASK_STATE_LIST_URLS.slice();
+  var tryNext = function () {
+    if (!tryUrls.length) return;
+    var url = tryUrls.shift();
+    postJson(url, authBody)
+      .then(function (resp) {
+        if (!resp) return;
+        if (String(resp.Result).toUpperCase() !== "OK") return;
+        if (!Array.isArray(resp.TaskStateList)) return;
+
+        taskStateListCache = resp.TaskStateList;
+        TASK_STATE_CODE_MAP = {};
+        resp.TaskStateList.forEach(function (st) {
+          if (!st) return;
+          var name = String(st.Name || "").trim();
+          var code = String(st.Code || "").trim();
+          if (!name || !code) return;
+          TASK_STATE_CODE_MAP[name] = code;
+        });
+
+        populateTaskStateSelect(document.getElementById('mt-status'));
+      })
+      .catch(function () {
+        tryNext();
+      });
+  };
+  tryNext();
+})();
+</script>
+</body>
+</html>

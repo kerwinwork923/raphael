@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProjectOS — 會員資料</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8' }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    * { font-family: 'Inter', sans-serif; }
+    input:focus, button:focus { outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, .15); }
+    #loadingOverlay { pointer-events: all; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+  <div id="loadingOverlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 backdrop-blur-sm">
+    <div class="flex flex-col items-center gap-3 rounded-2xl border border-slate-200 bg-white px-10 py-8 shadow-xl">
+      <div class="h-9 w-9 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"></div>
+      <p class="text-sm text-slate-600">更新資料中…</p>
+    </div>
+  </div>
+
+  <div id="projectos-header"></div>
+  <script src="./shared-header.js"></script>
+
+  <div class="max-w-screen-lg mx-auto px-4 py-8">
+    <div class="flex flex-wrap items-center gap-3 mb-8">
+      <a href="dashboard.html" class="flex items-center gap-1 text-sm text-slate-500 hover:text-blue-600 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        返回 Dashboard
+      </a>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="bg-gradient-to-r from-blue-600 to-violet-600 px-6 py-8 text-white">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-5">
+          <div id="heroAvatar" class="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center text-3xl font-extrabold ring-2 ring-white/30 shrink-0">?</div>
+          <div class="min-w-0 flex-1">
+            <p id="heroBadge" class="text-xs font-medium text-blue-100 uppercase tracking-wider">帳號</p>
+            <h1 id="heroName" class="text-2xl sm:text-3xl font-extrabold mt-1 truncate">會員</h1>
+            <p id="heroSub" class="text-sm text-blue-100/90 mt-1 font-mono"></p>
+          </div>
+          <div class="flex flex-col sm:items-end gap-2 shrink-0">
+            <button type="button" id="btnRefresh" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-sm font-semibold border border-white/30 transition">
+              重新整理資料
+            </button>
+            <button type="button" id="btnLogout" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-white text-blue-700 text-sm font-bold hover:bg-blue-50 transition shadow-sm">
+              登出
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-6 md:p-8">
+        <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-4">基本資料</h2>
+        <dl id="fieldList" class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4"></dl>
+
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var API_BASE = 'https://23700999.com:8081/HMA/';
+      var USER_DATA_URL = API_BASE + 'API_AA6.jsp';
+
+      var SENSITIVE = { Token: 1, Password: 1, password: 1 };
+
+      var loadingOverlay = document.getElementById('loadingOverlay');
+      var fieldList = document.getElementById('fieldList');
+      var heroName = document.getElementById('heroName');
+      var heroBadge = document.getElementById('heroBadge');
+      var heroSub = document.getElementById('heroSub');
+      var heroAvatar = document.getElementById('heroAvatar');
+      var navAvatar = document.getElementById('navUserAvatar');
+      var btnRefresh = document.getElementById('btnRefresh');
+
+      function getBackendSession() {
+        var fromLocal = localStorage.getItem('backendToken');
+        var fromSess = sessionStorage.getItem('backendToken');
+        var token = fromLocal || fromSess;
+        if (!token) return null;
+        var storage = fromLocal ? localStorage : sessionStorage;
+        return {
+          mode: 'backend',
+          Token: token,
+          backendToken: token,
+          adminID: storage.getItem('adminID') || '',
+          adminName: storage.getItem('adminName') || '',
+          _storage: fromLocal ? 'local' : 'session'
+        };
+      }
+
+      function requireLogin() {
+        var backend = getBackendSession();
+        if (backend) return backend;
+
+        try {
+          var raw = localStorage.getItem('userData');
+          if (!raw) throw new Error('no user');
+          var d = JSON.parse(raw);
+          var tokenOk = d.Token && String(d.Token).trim();
+          var maidOk = d.MAID && String(d.MAID).trim();
+          var mobileOk = d.Mobile && String(d.Mobile).trim();
+          if (!tokenOk || !maidOk || !mobileOk) throw new Error('incomplete');
+          d.mode = 'member';
+          return d;
+        } catch (e) {
+          window.location.href = '/projectOS/index.html';
+          return null;
+        }
+      }
+
+      function displayName(u) {
+        if (u.Member && u.Member.Name) return String(u.Member.Name).trim();
+        if (u.Name) return String(u.Name).trim();
+        return '會員';
+      }
+
+      function initialChar(name) {
+        var s = name.trim();
+        return s ? s.charAt(0).toUpperCase() : '?';
+      }
+
+      function labelForKey(key) {
+        var map = {
+          MID: '會員編號 (MID)',
+          MAID: '帳號 ID (MAID)',
+          Mobile: '手機號碼',
+          Name: '姓名',
+          Sex: '性別',
+          Birthday: '生日',
+          Mail: '電子郵件',
+          NowAvaPoints: '可用積分',
+          Result: 'API 狀態',
+          adminID: '管理員帳號',
+          AdminName: '管理員姓名',
+  
+        };
+        return map[key] || key;
+      }
+
+      function formatValue(key, val) {
+        if (val == null || val === '') return '—';
+
+        return String(val);
+      }
+
+      function orderedKeys(u) {
+        var out = [];
+        var seen = {};
+
+        function pushRow(key, val, fromMember) {
+          if (val == null || val === '') return;
+          if (SENSITIVE[key]) return;
+          if (seen[key]) return;
+          seen[key] = 1;
+          out.push({ key: key, val: val, fromMember: !!fromMember });
+        }
+
+        if (u.mode === 'backend') {
+          pushRow('adminID', u.adminID, false);
+          if (u.adminName) pushRow('AdminName', u.adminName, false);
+      
+          return out;
+        }
+
+        if (u.Member && u.Member.Name != null && String(u.Member.Name).trim() !== '') {
+          pushRow('Name', u.Member.Name, true);
+        } else if (u.Name != null && String(u.Name).trim() !== '') {
+          pushRow('Name', u.Name, false);
+        }
+
+        ['Mobile', 'MID', 'MAID', 'Sex', 'Birthday', 'Mail', 'NowAvaPoints', 'Result'].forEach(function (k) {
+          pushRow(k, u[k], false);
+        });
+
+        Object.keys(u).forEach(function (k) {
+          if (k === 'Member' || k === 'mode' || SENSITIVE[k]) return;
+          if (typeof u[k] === 'object' && u[k] !== null) return;
+          if (seen[k]) return;
+          pushRow(k, u[k], false);
+        });
+
+        return out;
+      }
+
+      function render(u) {
+        var name;
+        if (u.mode === 'backend') {
+          heroBadge.textContent = '後台管理員';
+          name = u.adminName || u.adminID || '管理員';
+          heroSub.textContent = u.adminID ? '帳號：' + u.adminID : '';
+          btnRefresh.classList.add('hidden');
+        } else {
+          heroBadge.textContent = 'NeuroPlus 會員';
+          name = displayName(u);
+          heroSub.textContent = u.Mobile ? String(u.Mobile) : '';
+          btnRefresh.classList.remove('hidden');
+        }
+        heroName.textContent = name;
+        var ini = initialChar(name);
+        heroAvatar.textContent = ini;
+        if (navAvatar) navAvatar.textContent = ini;
+
+        var rows = orderedKeys(u);
+        fieldList.innerHTML = rows.map(function (row) {
+          var label = row.fromMember ? '姓名（Member）' : labelForKey(row.key);
+          var val = formatValue(row.key, row.val);
+          return (
+            '<div class="border-b border-slate-100 pb-3 sm:border-b-0 sm:pb-0">' +
+              '<dt class="text-xs font-medium text-slate-400 mb-1">' + escapeHtml(label) + '</dt>' +
+              '<dd class="text-sm font-medium text-slate-800 break-all">' + escapeHtml(val) + '</dd>' +
+            '</div>'
+          );
+        }).join('');
+
+        if (!rows.length) {
+          fieldList.innerHTML = '<p class="text-sm text-slate-500 col-span-2">尚無可顯示的欄位。</p>';
+        }
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function setLoading(on) {
+        loadingOverlay.classList.toggle('hidden', !on);
+        loadingOverlay.classList.toggle('flex', on);
+      }
+
+      function postJson(url, body) {
+        return fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        }).then(function (res) {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.json();
+        });
+      }
+
+      function refreshFromServer() {
+        var u = requireLogin();
+        if (!u) return;
+        if (u.mode === 'backend') {
+          alert('後台帳號無法透過此功能同步會員資料。');
+          return;
+        }
+        setLoading(true);
+        return postJson(USER_DATA_URL, {
+          MID: u.MID,
+          Token: u.Token,
+          MAID: u.MAID,
+          Mobile: u.Mobile
+        })
+          .then(function (data) {
+            if (data && data.Result === 'OK') {
+              var merged = Object.assign({}, u, data);
+              localStorage.setItem('userData', JSON.stringify(merged));
+              render(merged);
+            } else {
+              alert('更新失敗：' + (data && data.Result != null ? data.Result : '請稍後再試'));
+            }
+          })
+          .catch(function () {
+            alert('無法連線更新資料，請檢查網路後重試。');
+          })
+          .finally(function () {
+            setLoading(false);
+          });
+      }
+
+      function logout() {
+
+        localStorage.removeItem('userData');
+        localStorage.removeItem('backendToken');
+        localStorage.removeItem('adminID');
+        localStorage.removeItem('adminName');
+        sessionStorage.removeItem('backendToken');
+        sessionStorage.removeItem('adminID');
+        sessionStorage.removeItem('adminName');
+        window.location.href = '/projectOS/index.html';
+      }
+
+      var user = requireLogin();
+      if (!user) return;
+      render(user);
+
+      document.getElementById('btnRefresh').addEventListener('click', refreshFromServer);
+      document.getElementById('btnLogout').addEventListener('click', logout);
+    })();
+  </script>
+</body>
+</html>

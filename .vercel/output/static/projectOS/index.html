@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProjectOS - 登入</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+    * { font-family: "Inter", sans-serif; }
+    .glow {
+      position: absolute;
+      border-radius: 9999px;
+      filter: blur(40px);
+      opacity: .4;
+      pointer-events: none;
+    }
+    input:focus { outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, .15); }
+    #loadingOverlay { pointer-events: all; }
+    .step-hidden { display: none !important; }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-900 text-slate-100 relative overflow-hidden">
+  <div id="loadingOverlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/70 backdrop-blur-sm">
+    <div class="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-slate-800/90 px-10 py-8 shadow-xl">
+      <div class="h-10 w-10 animate-spin rounded-full border-2 border-blue-400 border-t-transparent"></div>
+      <p class="text-sm text-slate-200">處理中…</p>
+    </div>
+  </div>
+
+  <div class="glow w-80 h-80 bg-blue-400 top-[-60px] left-[-40px]"></div>
+  <div class="glow w-96 h-96 bg-violet-500 bottom-[-100px] right-[-80px]"></div>
+
+  <main class="min-h-screen flex items-center justify-center px-4 py-10">
+    <div class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
+      <section class="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-md p-7 md:p-9">
+        <p class="text-xs font-semibold tracking-wider uppercase text-blue-200">ProjectOS / AI Decision OS</p>
+        <h1 class="text-3xl md:text-4xl font-extrabold mt-3 leading-tight">讓每個決策<br>都能被快速執行</h1>
+        <p class="text-sm text-slate-300 mt-4 leading-relaxed">請使用與 Neuro-Plus+ 後台相同的管理員帳號登入，登入後可進入 Dashboard、建立專案並追蹤任務。</p>
+
+        <!-- <div class="grid grid-cols-2 gap-3 mt-7">
+          <div class="bg-white/10 border border-white/10 rounded-2xl p-4">
+            <p class="text-xs text-slate-300">本週待追蹤</p>
+            <p
+              id="weeklyTrackingCount"
+              class="text-2xl font-extrabold mt-1 tabular-nums"
+            >0</p>
+          </div>
+          <div class="bg-white/10 border border-white/10 rounded-2xl p-4">
+            <p class="text-xs text-slate-300">風險任務</p>
+            <p
+              id="riskTaskCount"
+              class="text-2xl font-extrabold mt-1 text-orange-300 tabular-nums"
+            >0</p>
+          </div>
+        </div> -->
+      </section>
+
+      <section class="rounded-3xl border border-slate-200 bg-white p-7 md:p-9 text-slate-800 shadow-2xl">
+  
+
+        <!-- ① 一般登入 -->
+        <div id="stepLogin">
+          <h2 class="text-2xl font-extrabold text-slate-900">後台帳號登入</h2>
+          <p class="text-sm text-slate-500 mt-1">請輸入管理員帳號與密碼登入</p>
+
+          <form id="loginForm" class="space-y-4 mt-6" novalidate>
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1.5" for="username">帳號</label>
+              <div class="flex items-center gap-2 w-full border border-slate-200 rounded-xl px-3.5 py-2.5 focus-within:border-blue-400 transition">
+                <svg class="shrink-0 w-5 h-5 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                <input id="username" name="username" type="text" autocomplete="username" placeholder="請輸入帳號" class="flex-1 min-w-0 border-0 bg-transparent text-sm text-slate-800 placeholder:text-slate-400 focus:ring-0 p-0">
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1.5" for="password">密碼</label>
+              <div class="flex items-center gap-2 w-full border border-slate-200 rounded-xl px-3.5 py-2.5 focus-within:border-blue-400 transition">
+                <svg class="shrink-0 w-5 h-5 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                <input id="password" name="password" type="password" autocomplete="current-password" placeholder="請輸入密碼（至少 6 碼）" minlength="6" class="flex-1 min-w-0 border-0 bg-transparent text-sm text-slate-800 placeholder:text-slate-400 focus:ring-0 p-0">
+                <button type="button" id="togglePwd" class="shrink-0 p-1 text-slate-500 hover:text-slate-800 rounded-lg" aria-label="顯示或隱藏密碼" title="顯示/隱藏密碼">
+                  <svg id="eyeOpen" class="w-5 h-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  <svg id="eyeClose" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between text-sm">
+              <label class="flex items-center gap-2 cursor-pointer text-slate-600 text-xs">
+                <input type="checkbox" id="rememberMe" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                記住帳號（並將登入狀態保留在本機）
+              </label>
+           
+            </div>
+
+            <button type="submit" id="submitBtn" disabled class="w-full bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2.5 rounded-xl font-bold text-sm transition">登入 ProjectOS</button>
+          </form>
+        </div>
+
+        <!-- ② 首次登入改密碼 -->
+        <div id="stepFirst" class="step-hidden">
+          <h2 class="text-2xl font-extrabold text-slate-900">首次登入請修改密碼</h2>
+          <p class="text-sm text-slate-500 mt-1">請設定新密碼後再使用 ProjectOS。</p>
+
+          <div class="space-y-4 mt-6">
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1.5">帳號</label>
+              <input id="firstUsername" type="text" disabled class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm bg-slate-50 text-slate-600">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1.5" for="oldPwd">舊密碼</label>
+              <input id="oldPwd" type="password" autocomplete="current-password" class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1.5" for="newPwd">新密碼</label>
+              <input id="newPwd" type="password" autocomplete="new-password" class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm" placeholder="至少 6 碼">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1.5" for="newPwd2">再次輸入新密碼</label>
+              <input id="newPwd2" type="password" autocomplete="new-password" class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm">
+            </div>
+            <button type="button" id="btnFirstSubmit" class="w-full bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white py-2.5 rounded-xl font-bold text-sm transition">送出後請使用新密碼登入</button>
+          </div>
+        </div>
+
+        <!-- ③ 重設密碼 -->
+        <div id="stepReset" class="step-hidden">
+          <h2 class="text-2xl font-extrabold text-slate-900">重設密碼</h2>
+          <p class="text-sm text-slate-500 mt-1">設定完成後請回到登入畫面。</p>
+
+          <div class="space-y-4 mt-6">
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1.5" for="resetAcc">帳號</label>
+              <input id="resetAcc" type="text" class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm" placeholder="請輸入帳號">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1.5" for="resetNew">新密碼</label>
+              <input id="resetNew" type="password" class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm" placeholder="至少 6 碼">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1.5" for="resetNew2">再次輸入新密碼</label>
+              <input id="resetNew2" type="password" class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm">
+            </div>
+            <button type="button" id="btnResetSubmit" class="w-full bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white py-2.5 rounded-xl font-bold text-sm transition">送出重設</button>
+            <button type="button" id="gotoLogin" class="w-full border border-slate-200 text-slate-600 py-2.5 rounded-xl text-sm font-medium hover:bg-slate-50 transition">返回登入</button>
+          </div>
+        </div>
+
+        <div class="flex justify-center gap-5 mt-8 text-xs text-slate-500">
+          <a href="https://www.raphaelclinic.com.tw/privacy" target="_blank" rel="noopener noreferrer" class="hover:text-blue-600">隱私權政策</a>
+          <a href="/disclaimer" class="hover:text-blue-600">免責聲明</a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="./projectos-session.js"></script>
+  <script>
+    window.__LOGIN_METRICS__ = {
+      weeklyTrackingCount: 17,
+      riskTaskCount: 5
+    };
+  
+    (function () {
+      var API_BASE = "https://23700999.com:8081/PM";
+      var LOGIN_URL = API_BASE + "/api/fr/Login";
+      var EXTERNAL_LOGIN_URL = API_BASE + "/api/fr/ExternalLogin";
+      var LOGIN_KEY = "qrt897hpmd";
+      var TRANSFER_SAFEKEY_WHITELIST = "dfvds256sfsdfsf35454adfasfsefthtrfh74879987";
+      var FIRST_LOGIN_URL = API_BASE + "/API_FirstAdminLogin.jsp";
+      var RESET_PWD_URL = API_BASE + "/API_AdminModifyPassword.jsp";
+      var TRANSFER_LOGIN_URL = "https://23700999.com:8081/HMA/API_AdminTransferLogin.jsp";
+  
+      var usernameEl = document.getElementById("username");
+      var passwordEl = document.getElementById("password");
+      var rememberMeEl = document.getElementById("rememberMe");
+      var submitBtn = document.getElementById("submitBtn");
+      var form = document.getElementById("loginForm");
+      var loadingOverlay = document.getElementById("loadingOverlay");
+      var togglePwd = document.getElementById("togglePwd");
+      var eyeOpen = document.getElementById("eyeOpen");
+      var eyeClose = document.getElementById("eyeClose");
+  
+      var stepLogin = document.getElementById("stepLogin");
+      var stepFirst = document.getElementById("stepFirst");
+      var stepReset = document.getElementById("stepReset");
+  
+      var weeklyTrackingCountEl = document.getElementById("weeklyTrackingCount");
+      var riskTaskCountEl = document.getElementById("riskTaskCount");
+  
+      var remembered = localStorage.getItem("rememberID");
+      if (remembered) {
+        usernameEl.value = remembered;
+        rememberMeEl.checked = true;
+      }
+  
+      function setLoading(on) {
+        loadingOverlay.classList.toggle("hidden", !on);
+        loadingOverlay.classList.toggle("flex", on);
+        if (form) {
+          submitBtn.disabled = on || !usernameEl.value.trim() || !passwordEl.value;
+        }
+      }
+  
+      function updateSubmitState() {
+        submitBtn.disabled = !usernameEl.value.trim() || !passwordEl.value;
+      }
+  
+      function easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+      }
+  
+      function animateCount(el, endValue, duration) {
+        if (!el) return;
+  
+        var startValue = 0;
+        var startTime = null;
+        var finalValue = Number(endValue) || 0;
+  
+        function frame(timestamp) {
+          if (!startTime) startTime = timestamp;
+  
+          var progress = Math.min((timestamp - startTime) / duration, 1);
+          var eased = easeOutCubic(progress);
+          var current = Math.round(startValue + (finalValue - startValue) * eased);
+  
+          el.textContent = current.toLocaleString("zh-TW");
+  
+          if (progress < 1) {
+            requestAnimationFrame(frame);
+          } else {
+            el.textContent = finalValue.toLocaleString("zh-TW");
+          }
+        }
+  
+        requestAnimationFrame(frame);
+      }
+  
+      function initLoginMetrics() {
+        var metrics = window.__LOGIN_METRICS__ || {};
+        animateCount(weeklyTrackingCountEl, metrics.weeklyTrackingCount || 0, 1200);
+        animateCount(riskTaskCountEl, metrics.riskTaskCount || 0, 1400);
+      }
+  
+      usernameEl.addEventListener("input", updateSubmitState);
+      passwordEl.addEventListener("input", updateSubmitState);
+  
+      togglePwd.addEventListener("click", function () {
+        var show = passwordEl.type === "password";
+        passwordEl.type = show ? "text" : "password";
+        eyeOpen.classList.toggle("hidden", !show);
+        eyeClose.classList.toggle("hidden", show);
+      });
+  
+      rememberMeEl.addEventListener("change", function () {
+        if (rememberMeEl.checked && usernameEl.value.trim()) {
+          localStorage.setItem("rememberID", usernameEl.value.trim());
+        } else if (!rememberMeEl.checked) {
+          localStorage.removeItem("rememberID");
+        }
+      });
+  
+      usernameEl.addEventListener("input", function () {
+        if (rememberMeEl.checked) {
+          localStorage.setItem("rememberID", usernameEl.value.trim());
+        }
+      });
+  
+      function showStep(step) {
+        stepLogin.classList.toggle("step-hidden", step !== "login");
+        stepFirst.classList.toggle("step-hidden", step !== "first");
+        stepReset.classList.toggle("step-hidden", step !== "reset");
+      }
+  
+      document.getElementById("gotoLogin").addEventListener("click", function () {
+        showStep("login");
+      });
+  
+      function persistSession(token, adminId, remember, loginResp) {
+        if (typeof window.projectOSApplyLoginSession === "function") {
+          window.projectOSApplyLoginSession(
+            loginResp || { Token: token },
+            adminId,
+            remember
+          );
+          return;
+        }
+        var storage = remember ? localStorage : sessionStorage;
+        if (remember) {
+          sessionStorage.removeItem("backendToken");
+          sessionStorage.removeItem("adminID");
+          sessionStorage.removeItem("adminName");
+        } else {
+          localStorage.removeItem("backendToken");
+          localStorage.removeItem("adminID");
+          localStorage.removeItem("adminName");
+        }
+        storage.setItem("backendToken", token);
+        storage.setItem("adminID", adminId);
+      }
+  
+      function redirectIfLoggedIn() {
+        var t =
+          localStorage.getItem("backendToken") ||
+          sessionStorage.getItem("backendToken");
+        if (t) {
+          window.location.href = "/projectOS/dashboard.html";
+          return true;
+        }
+        return false;
+      }
+
+      function resolveToPagePath(toPage) {
+        var pageMap = {
+          dashboard: "/projectOS/dashboard.html",
+          tasktracking: "/projectOS/task-tracking.html",
+          createproject: "/projectOS/create-project.html",
+          dailyreport: "/projectOS/daily-report.html",
+        };
+        var normalized = (toPage || "")
+          .toLowerCase()
+          .replace(/[\s\-_]+/g, "");
+        return pageMap[normalized] || "/projectOS/dashboard.html";
+      }
+
+      function readTransferParams() {
+        var params = new URLSearchParams(window.location.search || "");
+        var adminID = (params.get("AdminID") || params.get("adminid") || "").trim();
+        var safeKey = (params.get("SafeKey") || params.get("safekey") || "").trim();
+        var mobile = (params.get("Mobile") || params.get("mobile") || "").trim();
+        var toPage = (params.get("ToPage") || params.get("topage") || "").trim();
+        if (!adminID || !safeKey) return null;
+        return {
+          adminID: adminID,
+          safeKey: safeKey,
+          mobile: mobile,
+          toPage: toPage,
+        };
+      }
+
+      function isResultOk(obj) {
+        return obj && obj.Result != null && String(obj.Result).toUpperCase() === "OK";
+      }
+
+      /**
+       * 外部網站先打 HMA Transfer 換到的 Token，常與 PM 的 /api/fr/* 不相容；
+       * Dashboard 會用同一組 backendToken 打 PM API，必須改存 /api/fr/Login（Key）取得的 Token，
+       * 行為才會與可正常使用的登入方式一致。
+       */
+      function handleTransferLoginFromUrl() {
+        var transfer = readTransferParams();
+        if (!transfer) return Promise.resolve(false);
+        if (transfer.safeKey !== TRANSFER_SAFEKEY_WHITELIST) {
+          alertMsg("網址登入失敗：SafeKey 驗證不正確");
+          return Promise.resolve(false);
+        }
+
+        setLoading(true);
+        return postJson(TRANSFER_LOGIN_URL, {
+          AdminID: transfer.adminID,
+          SafeKey: transfer.safeKey,
+          Mobile: transfer.mobile || "",
+        })
+          .then(function (r) {
+            var transferOk = r && isResultOk(r) && r.Token;
+            var adminFromTransfer = (r && (r.AdminID || r.adminID)) || transfer.adminID;
+            adminFromTransfer = String(adminFromTransfer || "").trim() || transfer.adminID;
+
+            if (transferOk) {
+              return postJson(LOGIN_URL, { Key: LOGIN_KEY, AdminID: adminFromTransfer }).then(
+                function (loginResp) {
+                  if (loginResp && isResultOk(loginResp) && loginResp.Token) {
+                    persistSession(loginResp.Token, adminFromTransfer, true, loginResp);
+                    localStorage.setItem("rememberID", adminFromTransfer);
+                    window.location.replace(resolveToPagePath(transfer.toPage));
+                    return true;
+                  }
+                  alertMsg(
+                    "網址登入已通過外部驗證，但無法取得專案系統（PM）登入憑證，請改用帳號密碼登入 ProjectOS"
+                  );
+                  return false;
+                }
+              );
+            }
+
+            return postJson(LOGIN_URL, { Key: LOGIN_KEY, AdminID: transfer.adminID }).then(
+              function (loginResp) {
+                if (loginResp && isResultOk(loginResp) && loginResp.Token) {
+                  persistSession(loginResp.Token, transfer.adminID, true, loginResp);
+                  localStorage.setItem("rememberID", transfer.adminID);
+                  window.location.replace(resolveToPagePath(transfer.toPage));
+                  return true;
+                }
+                alertMsg("網址登入失敗：" + (r && r.Result != null ? r.Result : "請重新登入"));
+                return false;
+              }
+            );
+          })
+          .catch(function () {
+            return postJson(LOGIN_URL, { Key: LOGIN_KEY, AdminID: transfer.adminID })
+              .then(function (loginResp) {
+                if (loginResp && isResultOk(loginResp) && loginResp.Token) {
+                  persistSession(loginResp.Token, transfer.adminID, true, loginResp);
+                  localStorage.setItem("rememberID", transfer.adminID);
+                  window.location.replace(resolveToPagePath(transfer.toPage));
+                  return true;
+                }
+                alertMsg("網址登入失敗，請稍後再試");
+                return false;
+              })
+              .catch(function () {
+                alertMsg("網址登入失敗，請稍後再試");
+                return false;
+              });
+          })
+          .finally(function () {
+            setLoading(false);
+          });
+      }
+  
+      function postJson(url, body) {
+        return fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }).then(function (res) {
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          return res.json();
+        });
+      }
+  
+      function alertMsg(msg) {
+        alert(msg);
+      }
+  
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var username = usernameEl.value.trim();
+        var password = passwordEl.value;
+        if (!username || !password) return;
+  
+        setLoading(true);
+        postJson(EXTERNAL_LOGIN_URL, { AdminID: username, Password: password })
+          .then(function (r) {
+            if (isResultOk(r) && r.Token) {
+              var remember = rememberMeEl.checked;
+              if (remember) {
+                localStorage.setItem("rememberID", username);
+              } else {
+                localStorage.removeItem("rememberID");
+              }
+              persistSession(r.Token, username, remember, r);
+              window.location.href = "/projectOS/dashboard.html";
+            } else {
+              alertMsg("外部登入失敗：" + (r && r.Result != null ? r.Result : "請檢查帳號或密碼"));
+            }
+          })
+          .catch(function () {
+            alertMsg("伺服器錯誤，請稍後再試");
+          })
+          .finally(function () {
+            setLoading(false);
+          });
+      });
+  
+      handleTransferLoginFromUrl().then(function (loggedByUrl) {
+        if (!loggedByUrl) {
+          redirectIfLoggedIn();
+        }
+      });
+      updateSubmitState();
+      initLoginMetrics();
+    })();
+  </script>
+</body>
+</html>

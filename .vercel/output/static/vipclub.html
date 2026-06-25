@@ -1,0 +1,997 @@
+<!DOCTYPE html> 
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>智平衡會員頻道｜專屬影片體驗</title>
+  <style>
+    :root {
+      --deep:#0f3b3b;
+      --gold:#c9a14a;
+      --muted:#6b7280;
+      --ink:#1f2a37;
+      --bg:#ffffff;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body {
+      font-family:"PingFang TC","Microsoft JhengHei",system-ui,Segoe UI,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--ink);
+      line-height:1.8;
+    }
+    header {
+      text-align:center;
+      padding:80px 16px 40px;
+    }
+    header h1 {
+      font-size:clamp(28px,4vw,42px);
+      font-weight:800;
+      color:var(--deep);
+      letter-spacing:1px;
+    }
+    header p {
+      max-width:800px;
+      margin:14px auto 0;
+      color:var(--muted);
+    }
+    header .accent {
+      width:140px;
+      height:3px;
+      background:var(--gold);
+      margin:20px auto;
+      border-radius:2px;
+    }
+    /* Hero 區塊 */
+    .hero {
+      max-width:1000px;
+      margin:0 auto 80px;
+      padding:0 16px;
+      text-align:center;
+    }
+    .hero-intro h2 {
+      font-size:28px;
+      color:var(--deep);
+      font-weight:800;
+      margin-bottom:10px;
+    }
+    .hero-intro p {
+      font-size:17px;
+      color:var(--muted);
+      margin-bottom:24px;
+    }
+    .hero iframe {
+      width:100%;
+      max-width:960px;
+      height:540px;
+      border:none;
+      border-radius:16px;
+      box-shadow:0 8px 30px rgba(0,0,0,0.15);
+    }
+
+    /* 單支影片區 */
+    .single-video {
+      max-width:960px;
+      margin:0 auto 80px;
+      padding:0 16px;
+      text-align:center;
+    }
+    .single-video h3 {
+      font-size:20px;
+      color:var(--deep);
+      font-weight:800;
+      margin:16px 0 8px;
+    }
+    .single-video p {
+      color:var(--muted);
+      font-size:15px;
+      margin-bottom:16px;
+    }
+    .single-video iframe {
+      width:100%;
+      max-width:960px;
+      height:540px;
+      border:none;
+      border-radius:16px;
+      box-shadow:0 8px 24px rgba(0,0,0,0.1);
+    }
+    .cta {
+      display:inline-block;
+      padding:10px 22px;
+      border-radius:999px;
+      background:var(--gold);
+      color:#fff;
+      text-decoration:none;
+      font-weight:800;
+      border:2px solid var(--gold);
+      transition:.2s;
+    }
+    .cta:hover { background:transparent; color:var(--gold); }
+    
+    /* 雙欄影片區 */
+    .grid-two {
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(400px,1fr));
+      gap:30px;
+      max-width:1160px;
+      margin:0 auto 80px;
+      padding:0 16px;
+    }
+    .card {
+      background:#fff;
+      border-radius:18px;
+      border:1px solid rgba(201,161,74,.35);
+      box-shadow:0 10px 34px rgba(17,24,39,.08);
+      overflow:hidden;
+      transition:.25s;
+    }
+    .card:hover {
+      transform:translateY(-4px);
+      box-shadow:0 14px 40px rgba(201,161,74,.28);
+    }
+    .thumb { aspect-ratio:16/9; background:#000; }
+    .thumb iframe {
+      width:100%;
+      height:100%;
+      border:0;
+      display:block;
+    }
+    .content { padding:20px 24px 26px; }
+    .content h4 {
+      font-size:18px;
+      color:var(--deep);
+      font-weight:800;
+      margin-bottom:8px;
+    }
+    .content p {
+      color:var(--muted);
+      font-size:15px;
+      margin-bottom:18px;
+    }
+
+    /* POP 彈窗 */
+    .popup-overlay {
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.5);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:1000;
+      animation:fadeIn .4s ease forwards;
+    }
+    .popup {
+      background:#fff;
+      border:2px solid var(--gold);
+      border-radius:18px;
+      box-shadow:0 0 40px rgba(201,161,74,.3);
+      padding:30px 26px;
+      text-align:center;
+      max-width:360px;
+      width:90%;
+      animation:popIn .4s ease forwards;
+    }
+    .popup h2 {
+      font-size:20px;
+      color:var(--deep);
+      margin-bottom:14px;
+      font-weight:800;
+    }
+    .popup p {
+      color:var(--muted);
+      margin-bottom:16px;
+    }
+    .popup input {
+      width:100%;
+      padding:10px;
+      border-radius:8px;
+      border:1px solid #ccc;
+      margin-bottom:10px;
+      font-size:15px;
+      text-align:center;
+    }
+    .popup button {
+      background:var(--gold);
+      border:none;
+      color:#fff;
+      font-weight:800;
+      padding:10px 30px;
+      border-radius:999px;
+      cursor:pointer;
+      transition:.2s;
+    }
+    .popup button:hover { background:#b8903c; }
+    #errorMsg {
+      color:#b94a48;
+      font-size:14px;
+      display:none;
+      margin-top:8px;
+    }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    @keyframes popIn { from{transform:scale(.8);opacity:0} to{transform:scale(1);opacity:1} }
+
+    footer {
+      margin-top:60px;
+      text-align:center;
+      padding:40px 10px;
+      border-top:1px solid rgba(201,161,74,.35);
+      color:var(--muted);
+      font-size:14px;
+      background:linear-gradient(135deg,rgba(201,161,74,.07),rgba(255,255,255,0));
+    }
+   .section { padding: 50px 20px; }
+   .container { max-width: 1100px; margin: 0 auto; }
+   .title { font-size: clamp(22px,3vw,28px); text-align: center; color: var(--deep); margin-bottom: 20px; position: relative; }
+   .title::after { content: ""; display: block; width: 100px; height: 3px; background: linear-gradient(90deg,transparent,var(--gold),transparent); margin: 10px auto 0; border-radius: 2px; }
+   .grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 16px; }
+   .feature { background: #fff; border: 1px solid rgba(201,161,74,.35); border-radius: 14px; padding: 18px; text-align: center; }
+   .feature h3 { color: var(--deep); margin: 6px 0 4px; font-size: 18px; }
+   .feature p { color: var(--muted); font-size: 14px; }
+   .card { background: #fff; border-radius: 16px; padding: 28px; border: 1px solid rgba(201,161,74,.35); box-shadow: 0 12px 36px rgba(17,24,39,.06); }
+   .hl { list-style: none; margin: 8px 0 0; padding: 0; }
+   .hl li { padding: 8px 0 8px 20px; border-bottom: 1px dashed rgba(201,161,74,.35); position: relative; }
+   .hl li::before { content: "◆"; color: var(--gold); position: absolute; left: 0; top: 8px; }
+   .survey-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1200;}
+   .survey-wrap{background:#fff;border:2px solid var(--gold);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.25);width:min(780px,94vw);max-height:90vh;overflow:auto;padding:20px;}
+   .survey-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+   .survey-head h3{margin:0;font-size:18px;color:var(--deep);font-weight:800}
+   .survey-close{appearance:none;border:0;background:#eee;border-radius:10px;padding:6px 10px;cursor:pointer}
+   .survey-close:hover{background:#e4e4e4}
+   .survey-wrap fieldset{margin:12px 0;padding:10px 12px;border:1px solid #eee;border-radius:10px}
+   .survey-wrap legend{padding:0 6px;color:#444;font-weight:700}
+   .survey-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+   .btn{padding:10px 16px;border-radius:999px;border:2px solid var(--gold);font-weight:800;cursor:pointer}
+   .btn-primary{background:var(--gold);color:#fff}
+   .btn-primary:hover{opacity:.9}
+   .btn-ghost{background:transparent;color:var(--gold)}
+   .survey-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111;color:#fff;border-radius:10px;padding:10px 14px;font-size:14px;display:none;z-index:1300}
+   
+  </style>
+</head>
+<body>
+  <!-- POP 彈窗 -->
+  <div class="popup-overlay" id="vipPopup">
+    <div class="popup">
+      <h2>💛 智平衡 VIP 專屬邀請 💛</h2>
+      <p>請輸入您的專屬邀請碼以開始體驗</p>
+      <input type="text" id="vipCode" placeholder="請輸入邀請碼" />
+      <button id="confirmBtn">確認</button>
+      <p id="errorMsg">邀請碼錯誤，請再試一次</p>
+    </div>
+  </div>
+
+  <header>
+    <h1>智平衡會員頻道｜影片體驗活動</h1>
+    <div class="accent"></div>
+    <p>專為智平衡會員打造的影片體驗，邀請您重新感受「被照顧的安心感」。<br>看完影片並完成3支影片的問卷，就有機會獲得價值 <b style="color:var(--gold)">貴賓典藏禮</b>！</p>
+  </header>
+
+  <!-- 第一區：Hero 會員頻道發刊宣言 -->
+  <section class="hero">
+    <div class="hero-intro">
+      <h2>親愛的會員，您好。</h2>
+      <p>這是一個屬於您的專屬時刻。<br>放下外界的喧囂，讓我們一起回到「被照顧」的節奏。<br>智平衡邀請您，透過每一段真誠的聲音，重新連結身心的穩定與信任。</p>
+    </div>
+    <!-- 可自行替換連結 -->
+    <iframe src="https://www.youtube.com/watch?v=G0T5fxefVLc" data-video-id="video001" allowfullscreen title="會員頻道發刊宣言" ></iframe>
+  </section>
+
+ 
+  <!-- 第三區：醫師真心話-1、醫師真心話- -->
+  <div class="grid-two">
+    <article class="card">
+      <div class="thumb">
+        <!-- 你可能從沒這樣大便過 -->
+        <iframe src="https://www.youtube.com/watch?app=desktop&v=heS-mRhncAg&feature=youtu.be" allowfullscreen data-video-id="video006" title="腦洞大開：你可能從沒這樣大便過"></iframe>
+      </div>
+      <div class="content">
+        <h4>《腦洞大開：原來「大腦」也會影響大便？醫師揭開量子糾纏的身體祕密！》</h4>
+        <p>你以為「大便不順」只是腸子的問題嗎？執行長在門診裡發現，真正的關鍵——可能藏在「你的大腦」裡。</p>
+        <a class="cta" href="#q">填寫問卷</a>
+      </div>
+    </article>
+    
+  </div>
+
+ 
+<div class="survey-overlay" id="surveyOverlay" aria-hidden="true">
+  <div class="survey-wrap" role="dialog" aria-modal="true" aria-labelledby="surveyTitle">
+    <div class="survey-head">
+      <h3 id="surveyTitle">填寫問卷</h3>
+      <button class="survey-close" type="button" aria-label="關閉" id="surveyClose">關閉</button>
+    </div>
+
+    <form id="dynamic-form">
+      <!-- 隱藏欄位：自動注入 -->
+      <input type="hidden" name="userId">
+      <input type="hidden" name="videoId">
+      <input type="hidden" name="youtubeId">
+      <input type="hidden" name="title">
+      <input type="hidden" name="openedAt">
+      <input type="hidden" name="pageUrl" value="">
+      <input type="hidden" name="sessionId" value="">
+      <input type="hidden" name="surveyKey" value="">
+      <!-- 問卷主體會插入到這裡 -->
+      <div id="surveyQuestions" aria-live="polite"></div>
+
+      <div class="survey-actions">
+        <button type="button" class="btn btn-ghost" id="surveyCancel">取消</button>
+        <button type="submit" class="btn btn-primary" aria-label="送出問卷">送出問卷</button>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="survey-toast" id="surveyToast" role="status" aria-live="polite">已送出，感謝你的回覆！</div>
+
+  <footer>© 2026 智平衡健康集團 — 感謝您一直以來的信任。</footer>
+
+<script>
+/** === 設定 === */
+const SURVEY_POST_URL = "https://23700999.com:8081/HMA/000TTEMemberChannelSurvey.jsp"; // ← 換成你的問卷紀錄 API";
+const API_LOG_EVENT = "https://23700999.com:8081/HMA/000TTELOG_EVENT.jsp";
+const STORAGE_EVENTS_KEY  = "videoEvents";   // 事件流水帳（可選）
+const STORAGE_WATCHED_KEY = "watchedVideos"; // 完成清單（可選）
+const EventType="vipclub";
+let vipId = new URLSearchParams(location.search).get("vip") || "unknown";
+   //vipId="1111";
+console.log("vipId="+vipId);
+logEvent("leadingpage", EventType);
+
+async function logEvent(Event, EventType) {
+    const payload = {SafeKey:"qrt897hpmd", VIP: vipId, Event, EventType} ;
+    console.log("payload1="+JSON.stringify(payload, null, 1));
+       // 1) 先嘗試 sendBeacon（POST，Content-Type: text/plain; charset=UTF-8）
+    try {
+           const ok = navigator.sendBeacon(API_LOG_EVENT, new Blob(
+           [JSON.stringify(payload)], { type: "text/plain;charset=UTF-8" }
+          ));
+          if (ok) {console.info("[logEvent] sendBeacon sent");return;}     
+    } catch (e) {
+         console.warn("[logEvent] sendBeacon failed, fallback to fetch no-cors", e);
+    }
+      // 2) fallback: simple request（no-cors + text/plain → 不會 preflight）
+    try {
+             await fetch(API_LOG_EVENT, {
+               method: "POST",
+               mode: "no-cors",
+               headers: { "Content-Type": "text/plain;charset=UTF-8" }, // 注意：不要 application/json
+               body: new Blob([JSON.stringify(payload)], { type: "text/plain;charset=UTF-8" }),
+               keepalive: true,
+               });
+              console.info("[logEvent] fetch(no-cors) sent (opaque response)");
+        } catch (err) {
+             console.error("[logEvent] still failed:", err);
+          }
+}
+
+/** VIP 解鎖 → 把 code 當作 userId 儲存（若你要） */
+function bindVipUnlock() {
+  const popup = document.getElementById("vipPopup");
+  const btn = document.getElementById("confirmBtn");
+  const input = document.getElementById("vipCode");
+  const error = document.getElementById("errorMsg");
+  if (!btn || !input || !popup) return;
+  btn.addEventListener("click", () => {
+    const code = input.value.trim();
+    if (code === "1314") {
+      popup.style.display = "none";
+      logEvent("unlock_success", EventType);
+    } else {
+      error.style.display = "block";
+      input.value = "";
+      logEvent("unlock_failed", EventType);
+    }
+  });
+}
+
+/** === 取得使用者ID（優先序：window.USER_ID → URL ?uid → localStorage → VIP碼） === */
+function getUserId() {
+  if (window.USER_ID && String(window.USER_ID).trim()) return String(window.USER_ID).trim();
+  const urlUid = new URLSearchParams(location.search).get("uid");
+  if (urlUid) { localStorage.setItem("userId", urlUid); return urlUid; }
+  const saved = localStorage.getItem("userId");
+  if (saved) return saved;
+  // 先回傳暫時ID，若 VIP 之後輸入成功會覆蓋
+  const gen = "guest_" + Math.random().toString(36).slice(2,10);
+  localStorage.setItem("userId", gen);
+  return gen;
+}
+
+/** === 基礎工具 === */
+function appendLocalEvent(evt) {
+  try {
+    const arr = JSON.parse(localStorage.getItem(STORAGE_EVENTS_KEY) || "[]");
+    arr.push(evt);
+    localStorage.setItem(STORAGE_EVENTS_KEY, JSON.stringify(arr));
+  } catch {}
+}
+
+/** 解析 YouTube 來源為 { id(ytId), url(可追蹤embed) } */
+function normalizeYouTubeSrc(src) {
+  if (!src) return null;
+  const be = src.match(/youtu\.be\/([A-Za-z0-9_-]{6,})/);
+  const watch = src.match(/[?&]v=([A-Za-z0-9_-]{6,})/);
+  const embed = src.match(/\/embed\/([A-Za-z0-9_-]{6,})/);
+  const ytId = be?.[1] || watch?.[1] || embed?.[1];
+  if (!ytId) return null;
+  const url = new URL("https://www.youtube-nocookie.com/embed/" + ytId);
+  url.searchParams.set("enablejsapi", "1");
+  url.searchParams.set("rel", "0");
+  url.searchParams.set("modestbranding", "1");
+  url.searchParams.set("playsinline", "1");
+  return { id: ytId, url: url.toString() };
+}
+
+/** 掃描 iframes → 正規化 → 補資料屬性 */
+function prepareIframes() {
+  const iframes = Array.from(document.querySelectorAll("iframe"));
+  let idx = 0;
+  for (const el of iframes) {
+    const norm = normalizeYouTubeSrc(el.getAttribute("src"));
+    if (!norm) continue;
+
+    el.src = norm.url;
+    if (!el.id) el.id = `ytp-${++idx}`;
+
+    let title = el.getAttribute("title") || `video-${idx}`;
+    const card = el.closest(".card, .single-video, .hero");
+    const h = card?.querySelector("h3, h4, h2");
+    if (h?.textContent) title = h.textContent.trim();
+
+    el.dataset.track    = "yt";
+    el.dataset.title    = title;
+    el.dataset.youtubeId= norm.id;                 // 真正 YouTube ID
+    el.dataset.videoId  = el.dataset.videoId || norm.id; // 你的商務ID（未填就用 ytId）
+  }
+}
+
+/** 播放器&狀態旗標 */
+const players = {};
+const flags = {}; // { [iframeId]: { clicked, sent50, sent100 } }
+
+/** 標記 100% 完成清單（可選） */
+function markWatched(record) {
+  try {
+    const list = JSON.parse(localStorage.getItem(STORAGE_WATCHED_KEY) || "[]");
+    if (!list.find(x => x.videoId === record.videoId)) {
+      list.push(record);
+      localStorage.setItem(STORAGE_WATCHED_KEY, JSON.stringify(list));
+    }
+  } catch {}
+}
+
+/** 送事件的統一函式 */
+function sendProgress({ iframeId, status, player, meta }) {
+  const duration = Math.round(player?.getDuration?.() || 0);
+  const watched  = Math.round(player?.getCurrentTime?.() || 0);
+  const payload = {
+    vipId,
+    status,                    // "click" | "50" | "100"
+    videoId:   meta.videoId,   // 你的商務ID
+    youtubeId: meta.youtubeId, // 真正 YT ID
+    title:     meta.title,
+    watchedSec: watched,
+    duration,
+    ts: new Date().toISOString()
+  };
+  console.log("payload1="+JSON.stringify(payload, null, 1));
+  //postEvent(payload);
+  if (status === "100") {
+    markWatched(payload);
+  }
+}
+
+/** 建立播放器並追蹤 click / 50% / 100% */
+function createPlayers() {
+  const iframes = Array.from(document.querySelectorAll('iframe[data-track="yt"]'));
+  iframes.forEach((el) => {
+    const iframeId = el.id;
+    const meta = {
+      videoId:   el.dataset.videoId,
+      youtubeId: el.dataset.youtubeId,
+      title:     el.dataset.title || el.title || el.dataset.videoId || el.dataset.youtubeId
+    };
+    flags[iframeId] = { clicked: false, sent50: false, sent100: false };
+
+    players[iframeId] = new YT.Player(iframeId, {
+      events: {
+        onStateChange: (e) => {
+          const state  = e.data;
+          const player = players[iframeId];
+
+          // click（首次播放）
+          if (state === YT.PlayerState.PLAYING && !flags[iframeId].clicked) {
+            flags[iframeId].clicked = true;
+            sendProgress({ iframeId, status: "click", player, meta });
+            logEvent("videoPlay_"+el.dataset.videoId, EventType);
+          }
+
+          // 每秒檢查一次是否跨過 50%
+          if (state === YT.PlayerState.PLAYING && !flags[iframeId].sent50) {
+            if (!flags[iframeId].halfTimer) {
+              flags[iframeId].halfTimer = setInterval(() => {
+                try {
+                  const d = player.getDuration?.() || 0;
+                  const c = player.getCurrentTime?.() || 0;
+                  if (d > 0 && c / d >= 0.5 && !flags[iframeId].sent50) {
+                    flags[iframeId].sent50 = true;
+                    sendProgress({ iframeId, status: "50", player, meta });
+                    logEvent("videoPlay50_"+el.dataset.videoId, EventType);
+                    clearInterval(flags[iframeId].halfTimer);
+                    flags[iframeId].halfTimer = null;
+                  }
+                } catch {}
+              }, 1000);
+            }
+          }
+
+          // 100%（播放結束）
+          if (state === YT.PlayerState.ENDED && !flags[iframeId].sent100) {
+            flags[iframeId].sent100 = true;
+            if (flags[iframeId].halfTimer) {
+              clearInterval(flags[iframeId].halfTimer);
+              flags[iframeId].halfTimer = null;
+            }
+            sendProgress({ iframeId, status: "100", player, meta });
+            logEvent("videoPlay100_"+el.dataset.videoId, EventType);
+          }
+        }
+      }
+    });
+  });
+}
+
+/** 啟動 */
+document.addEventListener("DOMContentLoaded", () => {
+  prepareIframes();
+  bindVipUnlock();
+   // 讓 VIP 連結帶上 ?vip=
+  wireVipLink();
+  const s = document.createElement("script");
+  s.src = "https://www.youtube.com/iframe_api";
+  document.head.appendChild(s);
+});
+window.onYouTubeIframeAPIReady = createPlayers;
+
+
+
+/** ===== 四支影片的問卷定義（依你的 data-video-id 對應）===== */
+/** 建議對應下列 4 支：
+ *  video003：醫師真心話-1
+ *  video004：醫師真心話-2
+ *  video005：正念×芳香×修復
+ *  video006：你可能從沒這樣大便過
+ * 若你想用 youtubeId 對應，也可在 SURVEY_DEFS 用 key: 'o0yUTESrNkg' 這種寫法。
+ */
+const SURVEY_DEFS = {
+  /* 醫師真心話-1（沿用你提供的B類問卷） */
+  "video003": {
+    title: "醫師真心話-1｜不是控制症狀，而是找回源頭（B 類問卷）",
+    html: `
+      <fieldset aria-labelledby="q1" data-role="q1" data-metric="理解峰" data-imprint="洞見" data-cta="First Visit">
+        <legend id="q1">Q1｜哪一句話最讓你有感？（單選）</legend>
+        <label><input type="radio" name="q1" value="我們不要一直只針對症狀，應該是去找原因，把問題解決掉" required> 我們不要一直只針對症狀，應該是去找原因，把問題解決掉。</label><br>
+        <label><input type="radio" name="q1" value="藥物只是挖東牆補西牆"> 藥物只是挖東牆補西牆，越補越亂。</label><br>
+        <label><input type="radio" name="q1" value="人體本身有非常精密的運作，不需要被過度控制"> 人體本身有非常精密的運作，不需要被過度控制。</label><br>
+        <label><input type="radio" name="q1" value="我還不確定"> 我還不確定，需要再想想。</label>
+      </fieldset>
+      <fieldset aria-labelledby="q2" data-role="q2" data-metric="決策" data-imprint="行動意圖" data-cta="Immediate Conversion">
+        <legend id="q2">Q2｜今天你最想先完成哪件事？（單選）</legend>
+        <label><input type="radio" name="q2" value="找出自己長期不舒服的「真正原因」" required> 找出自己長期不舒服的「真正原因」。</label><br>
+        <label><input type="radio" name="q2" value="嘗試減少一種長期服用的藥物，並觀察變化"> 嘗試減少一種長期服用的藥物，並觀察變化。</label><br>
+        <label><input type="radio" name="q2" value="學會記錄症狀與生活作息之間的關聯"> 學會記錄症狀與生活作息之間的關聯。</label><br>
+        <label><input type="radio" name="q2" value="諮詢專業醫師，了解功能性問題的根源"> 諮詢專業醫師，了解功能性問題的根源。</label>
+      </fieldset>
+      <fieldset aria-labelledby="q3" data-role="q3" data-metric="實踐" data-imprint="行動印記" data-cta="Repeat Engagement">
+        <legend id="q3">Q3｜這週你想挑戰哪個任務？（單選）</legend>
+        <label><input type="radio" name="q3" value="實作一次「找原因而非止症狀」的健康檢視" required> 實作一次「找原因而非止症狀」的健康檢視。</label><br>
+        <label><input type="radio" name="q3" value="重新整理自己的用藥與身體變化紀錄"> 重新整理自己的用藥與身體變化紀錄。</label><br>
+        <label><input type="radio" name="q3" value="練習一天不依賴止痛藥、觀察身體反應"> 練習一天不依賴止痛藥、觀察身體反應。</label><br>
+        <label><input type="radio" name="q3" value="與家人或朋友分享「從源頭看病」的新觀點"> 與家人或朋友分享「從源頭看病」的新觀點。</label>
+      </fieldset>
+      <fieldset aria-labelledby="q4" data-role="q4" data-metric="共創" data-imprint="信任印記" data-cta="Referral/Advocacy">
+        <legend id="q4">Q4｜下一支影片你希望「完成」哪件事？（可複選）</legend>
+        <label><input type="checkbox" name="q4[]" value="學會如何找出功能性問題的真正源頭"> 學會如何找出功能性問題的真正源頭。</label><br>
+        <label><input type="checkbox" name="q4[]" value="了解「身體訊號」與「自律神經」之間的連動"> 了解「身體訊號」與「自律神經」之間的連動。</label><br>
+        <label><input type="checkbox" name="q4[]" value="看實例"> 看實例：不用藥也能改善的臨床案例。</label><br>
+        <label><input type="checkbox" name="q4[]" value="學會建立屬於自己的健康調節計畫"> 學會建立屬於自己的健康調節計畫。</label><br>
+        <label>其他（請補充）：<input type="text" name="q4_other" placeholder="請輸入"></label>
+      </fieldset>
+    `
+  },
+
+  /* 醫師真心話-2（教養情境） */
+  "video004": {
+    title: "醫師真心話-2｜不吼不罵的關鍵方法（教養情境問卷）",
+    html: `
+       <fieldset data-role="q1" data-metric="理解峰" data-cta="First Visit" data-imprint="理解">
+        <legend>Q1｜哪一句話最讓你有感？（單選）</legend>
+        <label><input type="radio" name="q1" value="雖不滿意，但可以商量的方式，一次又一次去體會">「雖不滿意，但可以商量的方式，一次又一次去體會。」</label><br>
+        <label><input type="radio" name="q1" value="給他五分鐘把事情做完，然後再乖乖上課">「給他五分鐘把事情做完，然後再乖乖上課。」</label><br>
+        <label><input type="radio" name="q1" value="不喜歡就冷處理，轉移注意力">「不喜歡就冷處理，轉移注意力，帶他去做他喜歡的事。」</label><br>
+        <label><input type="radio" name="q1" value="我還不確定">我還不確定，需要再想想。</label>
+       </fieldset> 
+    <fieldset data-role="q2" data-metric="行動決策" data-cta="Immediate Conversion" data-imprint="行動">
+    <legend>Q2｜目前你最想先嘗試哪件事？（單選）</legend>
+    <label><input type="radio" name="q2" value="練習短時段協商">在日常中練習「短時段完成任務」的協商（例如：給 5 分鐘）。</label><br>
+    <label><input type="radio" name="q2" value="冷處理與轉移">學會如何用「冷處理＋轉移」減少對方負面反應。</label><br>
+    <label><input type="radio" name="q2" value="協商共識">與老師/家長協商一致的行為管理小策略（可執行的步驟）。</label><br>
+    <label><input type="radio" name="q2" value="先觀察行為模式">先觀察孩子/當事人一週的行為模式再決定。</label>
+  </fieldset>
+
+  <fieldset data-role="q3" data-metric="任務化行動" data-cta="Repeat Engagement" data-imprint="行動">
+    <legend>Q3｜這週你想挑戰哪個任務？（單選）</legend>
+    <label><input type="radio" name="q3" value="協商流程紀錄">嘗試一次「給 5 分鐘完成 → 再上課」的協商流程並記錄結果。</label><br>
+    <label><input type="radio" name="q3" value="忽略轉移練習">練習「忽略不當行為 → 立即轉移到喜歡活動」兩次以上。</label><br>
+    <label><input type="radio" name="q3" value="溝通共識建立">與老師溝通並建立簡單的行為處理共識（同一個指令/回饋語）。</label><br>
+    <label><input type="radio" name="q3" value="尋求專業諮詢">找專業諮詢，了解行為背後的可能原因與調整方向。</label>
+  </fieldset>
+
+  <fieldset data-role="q4" data-metric="共創願景" data-cta="Referral/Advocacy" data-imprint="信任">
+    <legend>Q4｜下一支影片你希望「完成」哪件事？（可複選）</legend>
+    <label><input type="checkbox" name="q4[]" value="示範完整流程">示範一個完整的「5 分鐘協商 → 回課程」操作流程（可模仿）。</label><br>
+    <label><input type="checkbox" name="q4[]" value="老師角度執行">示範如何在課堂上用「冷處理＋轉移」安全執行（老師角度）。</label><br>
+    <label><input type="checkbox" name="q4[]" value="三句可用語句">提供家長／老師能用的 3 個即刻可用的語句或步驟。</label><br>
+    <label><input type="checkbox" name="q4[]" value="情緒支持討論">討論行為改變時常見的情緒反應與如何支持（家長情緒面）。</label>
+    <label>其他（請補充）：<input type="text" name="q4_other" placeholder="請輸入"></label>
+  </fieldset> `
+  },
+
+  /* 正念×芳香×修復（身心放鬆） */
+  "video005": {
+    title: "醫師真心話-4 問卷｜嗅覺修復與大腦重啟",
+    html: `
+       <fieldset data-role="q1" data-metric="理解峰" data-cta="First Visit" data-imprint="理解">
+    <legend>Q1｜哪一句話最讓你有感？（單選）</legend>
+    <label><input type="radio" name="q1" value="疫情改變了我們的大腦">「疫情改變了世界，也悄悄改變了我們的大腦。」</label><br>
+    <label><input type="radio" name="q1" value="嗅覺是通往大腦的直接通道">「嗅覺是通往大腦最直接的通道，能重新連結記憶與情緒。」</label><br>
+    <label><input type="radio" name="q1" value="正念與呼吸能修復神經連結">「結合正念與穩定呼吸，大腦的神經連結會開始修復。」</label><br>
+    <label><input type="radio" name="q1" value="我還不確定">我還不確定，需要再想想。</label>
+  </fieldset>
+
+  <fieldset data-role="q2" data-metric="行動決策" data-cta="Immediate Conversion" data-imprint="行動">
+    <legend>Q2｜今天你最想先嘗試哪件事？（單選）</legend>
+    <label><input type="radio" name="q2" value="每日香氣練習">每天睡前進行 2 分鐘「聞香＋深呼吸」訓練。</label><br>
+    <label><input type="radio" name="q2" value="建立嗅覺儀式">為自己建立固定時間的嗅覺放鬆儀式（早晨或晚間）。</label><br>
+    <label><input type="radio" name="q2" value="記錄情緒變化">記錄嗅覺練習後的專注力、情緒變化。</label><br>
+    <label><input type="radio" name="q2" value="了解修復機制">閱讀或了解「大腦修復與嗅覺神經連結」的相關研究。</label>
+  </fieldset>
+
+  <fieldset data-role="q3" data-metric="任務化行動" data-cta="Repeat Engagement" data-imprint="行動">
+    <legend>Q3｜這週你想挑戰哪個任務？（單選）</legend>
+    <label><input type="radio" name="q3" value="連續七天聞香訓練">連續七天睡前聞香＋深呼吸 2 分鐘。</label><br>
+    <label><input type="radio" name="q3" value="配合正念冥想">每天早上配合 3 分鐘正念呼吸與嗅覺觀察。</label><br>
+    <label><input type="radio" name="q3" value="減少過度刺激">減少多工與藍光干擾，觀察腦霧改善變化。</label><br>
+    <label><input type="radio" name="q3" value="分享修復心得">與朋友或家人分享「嗅覺修復」的體驗心得。</label>
+  </fieldset>
+
+  <fieldset data-role="q4" data-metric="共創願景" data-cta="Referral/Advocacy" data-imprint="信任">
+    <legend>Q4｜下一支影片你希望「完成」哪件事？（可複選）</legend>
+    <label><input type="checkbox" name="q4[]" value="示範嗅覺練習">示範一段完整的「嗅覺修復」練習流程（含呼吸指導）。</label><br>
+    <label><input type="checkbox" name="q4[]" value="解釋腦霧與壓力關聯">講解「腦霧、焦慮」與自律神經的關聯機制。</label><br>
+    <label><input type="checkbox" name="q4[]" value="提供香氣指南">提供不同香氣對情緒與記憶修復的指南。</label><br>
+    <label><input type="checkbox" name="q4[]" value="延伸神經修復主題">延伸探討「五感修復 × 神經可塑性」的生活應用。</label>
+    <label>其他（請補充）：<input type="text" name="q4_other" placeholder="請輸入"></label>
+  </fieldset>
+
+    `
+  },
+
+  /* 你可能從沒這樣大便過（腸腦軸） */
+  "video006": {
+    title: "腦洞大開：你可能從沒這樣大便過（腸腦軸自評問卷）",
+    html: `
+       <fieldset data-role="q1" data-metric="理解峰" data-cta="First Visit" data-imprint="理解">
+    <legend>Q1｜哪一句話最讓你有感？（單選）</legend>
+    <label><input type="radio" name="q1" value="你的大腦意識與大腸其實有量子的關係">「你的大腦的意識跟大腸其實有量子的關係。」</label><br>
+    <label><input type="radio" name="q1" value="滑手機會讓大腦和腸子分離">「滑手機的時候，大腦和腸子是分離的，各做各的。」</label><br>
+    <label><input type="radio" name="q1" value="觀察腸子的動作會讓排便更順">「當你觀察腸子的動作、放慢呼吸時，排便會變得很順。」</label><br>
+    <label><input type="radio" name="q1" value="我還不確定">我還不確定，需要再想想。</label>
+  </fieldset>
+
+  <fieldset data-role="q2" data-metric="行動決策" data-cta="Immediate Conversion" data-imprint="行動">
+    <legend>Q2｜今天你最想先嘗試哪件事？（單選）</legend>
+    <label><input type="radio" name="q2" value="排便時不滑手機">排便時暫停滑手機，專心觀察呼吸與腸道動作。</label><br>
+    <label><input type="radio" name="q2" value="練習量子觀察法">每天早上練習 3 分鐘「量子觀察」身體狀態。</label><br>
+    <label><input type="radio" name="q2" value="建立排便儀式">固定時間、固定姿勢地建立排便儀式感。</label><br>
+    <label><input type="radio" name="q2" value="記錄身體反應">記錄一週內排便與心情變化的關聯。</label>
+  </fieldset>
+
+  <fieldset data-role="q3" data-metric="任務化行動" data-cta="Repeat Engagement" data-imprint="行動">
+    <legend>Q3｜這週你想挑戰哪個任務？（單選）</legend>
+    <label><input type="radio" name="q3" value="觀察排便節奏">觀察一次完整的「放下手機→觀察→順利排出」過程。</label><br>
+    <label><input type="radio" name="q3" value="每日三分鐘觀察">每天三分鐘靜坐觀察腹部起伏。</label><br>
+    <label><input type="radio" name="q3" value="減少干擾練習">嘗試在如廁時減少外在干擾，體驗差異。</label><br>
+    <label><input type="radio" name="q3" value="分享體驗">與家人或朋友分享「身體意識與排便順暢」的體驗。</label>
+  </fieldset>
+
+  <fieldset data-role="q4" data-metric="共創願景" data-cta="Referral/Advocacy" data-imprint="信任">
+    <legend>Q4｜下一支影片你希望「完成」哪件事？（可複選）</legend>
+    <label><input type="checkbox" name="q4[]" value="示範觀察練習">示範一個「觀察腸道與呼吸」的實際練習流程。</label><br>
+    <label><input type="checkbox" name="q4[]" value="解析腸腦連線">講解「腸腦軸線」與身心健康的具體關聯。</label><br>
+    <label><input type="checkbox" name="q4[]" value="提供自我檢測表">提供一份「腸腦同步狀態」的自我檢測表。</label><br>
+    <label><input type="checkbox" name="q4[]" value="探討專注與健康">討論現代人專注力與身體信號的關係。</label>
+    <label>其他（請補充）：<input type="text" name="q4_other" placeholder="請輸入"></label>
+  </fieldset>
+    `
+  }
+};
+
+/** ===== 傳送 JSON（sendBeacon 優先） ===== */
+function postJSON(url, data) {
+  try {
+    const ok = navigator.sendBeacon?.(url, new Blob([JSON.stringify(data)], {type:"application/json"}));
+    if (ok) return Promise.resolve();
+  } catch {}
+  return fetch(url, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(data), keepalive:true })
+    .then(()=>{}).catch(()=>{});
+}
+
+/** ===== UI 控制與渲染 ===== */
+const $overlay = document.getElementById("surveyOverlay");
+const $form = document.getElementById("dynamic-form");
+const $close = document.getElementById("surveyClose");
+const $cancel = document.getElementById("surveyCancel");
+const $toast = document.getElementById("surveyToast");
+const $qhost = document.getElementById("surveyQuestions");
+const $title = document.getElementById("surveyTitle");
+let _sessionId = (crypto?.randomUUID?.() || ("s_" + Math.random().toString(36).slice(2)));
+let _openedMeta = null;
+
+/** 依 videoId / youtubeId 找到問卷定義 */
+function resolveSurveyKey(meta) {
+  if (SURVEY_DEFS[meta.videoId]) return meta.videoId;
+  if (SURVEY_DEFS[meta.youtubeId]) return meta.youtubeId;
+  return null;
+}
+
+function renderSurvey(meta) {
+  const key = resolveSurveyKey(meta);
+  const def = key ? SURVEY_DEFS[key] : null;
+
+  // 注入隱藏欄位
+  $form.elements["userId"].value = _getUserIdFallback();
+  $form.elements["videoId"].value = meta.videoId || meta.youtubeId || "";
+  $form.elements["youtubeId"].value = meta.youtubeId || "";
+  $form.elements["title"].value = meta.title || document.title;
+  $form.elements["openedAt"].value = new Date().toISOString();
+  $form.elements["pageUrl"].value = location.href;
+  $form.elements["sessionId"].value = _sessionId;
+  $form.elements["surveyKey"].value = key || "default";
+  logEvent("open_survey_"+key, EventType);
+  // 渲染題目
+  if (def) {
+    $qhost.innerHTML = def.html;
+    $title.textContent = `問卷｜${def.title}`;
+  } else {
+    // 後備：若未定義，顯示簡版問卷
+    $qhost.innerHTML = `
+      <fieldset><legend>Q1｜這部影片對你有幫助嗎？</legend>
+        <label><input type="radio" name="u1" value="YES" required> 是</label>
+        <label><input type="radio" name="u1" value="NO"> 否</label>
+      </fieldset>
+      <fieldset><legend>Q2｜想再看到哪些主題？（選填）</legend>
+        <input type="text" name="u2_note" placeholder="輸入主題…">
+      </fieldset>
+    `;
+    $title.textContent = `問卷｜${meta.title || '影片問卷'}`;
+  }
+}
+
+function openSurvey(meta) {
+  _openedMeta = meta;
+  renderSurvey(meta);
+  $overlay.style.display = "flex";
+  $overlay.setAttribute("aria-hidden", "false");
+}
+function closeSurvey() {
+  $overlay.style.display = "none";
+  $overlay.setAttribute("aria-hidden", "true");
+}
+
+/** 綁定所有 .cta 打開對應問卷 */
+document.querySelectorAll('a.cta[href="#q"]:not(#goVip)').forEach(a => {
+  a.addEventListener("click", (e) => {
+    e.preventDefault();
+    const meta = getContextFromCTA(a);
+    openSurvey(meta);
+  });
+});
+
+
+/** 關閉行為 */
+$close.addEventListener("click", closeSurvey);
+$cancel.addEventListener("click", closeSurvey);
+$overlay.addEventListener("click", (e)=>{ if(e.target===$overlay) closeSurvey(); });
+document.addEventListener("keydown", (e)=>{ if(e.key==="Escape") closeSurvey(); });
+
+async function SurveySubmit(videoId, youtubeId, answers) {
+  const payload = {
+    SafeKey: "qrt897hpmd",
+    VIP: vipId,
+    videoId: videoId,
+    youtubeId:youtubeId,
+    surveyKey: videoId,
+    answers: answers
+  };
+  console.log("[SurveySubmit] payload =", JSON.stringify(payload, null, 2));
+
+  // 1) 先用 sendBeacon（不可讀回應，但能送達）
+  try {
+    const ok = navigator.sendBeacon(
+      SURVEY_POST_URL,
+      new Blob([JSON.stringify(payload)], { type: "text/plain;charset=UTF-8" })
+    );
+    if (ok) {
+      console.info("[SurveySubmit] delivered via sendBeacon");
+      return { delivered: true, mode: "beacon" };
+    }
+  } catch (e) {
+    console.warn("[SurveySubmit] sendBeacon failed, fallback to fetch no-cors", e);
+  }
+
+  // 2) 再用 fetch(no-cors)（opaque，視為送達）
+  try {
+    await fetch(SURVEY_POST_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=UTF-8" },
+      body: new Blob([JSON.stringify(payload)], { type: "text/plain;charset=UTF-8" }),
+      keepalive: true,
+    });
+    console.info("[SurveySubmit] delivered via fetch(no-cors)");
+    return { delivered: true, mode: "no-cors" };
+  } catch (err) {
+    console.error("[SurveySubmit] all methods failed:", err);
+    return { delivered: false, mode: "no-cors" };
+  }
+}
+
+
+
+
+/** 送出表單 → 呼叫問卷紀錄 API（答案＋id）+ 打點 survey_submit */
+$form.addEventListener("submit", async (evt) => {
+  evt.preventDefault();
+
+  // 停用按鈕避免重複送出
+  const submitBtn = $form.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+  try {
+    const fd = new FormData($form);
+
+    // 1) 先把所有欄位取出
+    const raw = Object.fromEntries(fd);
+
+    // 2) 將複選（name 以 [] 結尾）正規化成陣列
+    for (const [k] of fd.entries()) {
+      if (k.endsWith("[]")) {
+        raw[k.slice(0, -2)] = fd.getAll(k);
+        delete raw[k];
+      }
+    }
+
+    // 2.5) 統一第4題格式：若是單選的 q4（非 q4[]），包成陣列
+    if (
+         Object.prototype.hasOwnProperty.call(raw, "q4") &&
+         !Array.isArray(raw.q4) &&
+         raw.q4 !== undefined &&
+         raw.q4 !== ""
+        ) {
+            // 單選 q4 包成陣列
+           raw.q4 = [raw.q4];
+          // 若沒有 q4_other，或原本就不是複選問卷 → 給空字串
+           raw.q4_other = "";
+        }
+
+
+    // 3) 抽出 ID 與問卷 meta（你要的 id 都在這裡）
+    const payloadBase = {
+      userId:   raw.userId,
+      videoId:  raw.videoId,
+      youtubeId: raw.youtubeId,
+      surveyKey: raw.surveyKey
+    };
+
+    // 4) 只把「答案題目」收進 answers，排除隱藏 meta 欄位
+    const hiddenKeys = new Set([
+      "userId", "videoId", "youtubeId",
+      "title", "openedAt", "pageUrl",
+      "sessionId", "surveyKey"
+    ]);
+
+    const answers = {};
+    for (const [k, v] of Object.entries(raw)) {
+      if (!hiddenKeys.has(k)) answers[k] = v;
+    }
+
+    // 5) 組 API 要送的 JSON（精簡乾淨）
+    //const surveyPayload = {
+    //  ...payloadBase,
+    //  answers, // 只包含題目答案
+    //};
+   
+   // console.log("surveyPayload="+JSON.stringify(surveyPayload, null, 2));
+    
+    // 6) 寫入你的問卷紀錄 API
+    // postJSON(SURVEY_POST_URL, surveyPayload);
+    await SurveySubmit(raw.videoId, raw.youtubeId, answers);
+
+    // 7)（可選）再打一筆追蹤事件（前台行為流用）
+    logEvent("survey_submit_"+raw.videoId, EventType);
+   
+
+    // 8) UI 收尾
+    closeSurvey();
+    $toast.style.display = "block";
+    setTimeout(() => { $toast.style.display = "none"; }, 1800);
+    $form.reset();
+
+  } catch (err) {
+    console.warn("Submit survey failed:", err);
+    alert("送出失敗，請再試一次。");
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+
+/** ===== 工具：取 userId（沿用既有 getUserId，否則 fallback）===== */
+function _getUserIdFallback() {
+  try { if (typeof getUserId === "function") return getUserId(); } catch {}
+  if (window.USER_ID && String(window.USER_ID).trim()) return String(window.USER_ID).trim();
+  const urlUid = new URLSearchParams(location.search).get("uid");
+  if (urlUid) { localStorage.setItem("userId", urlUid); return urlUid; }
+  const saved = localStorage.getItem("userId");
+  if (saved) return saved;
+  const gen = "guest_" + Math.random().toString(36).slice(2,10);
+  localStorage.setItem("userId", gen);
+  return gen;
+}
+
+/** ===== 從 CTA 就近抓影片資訊 ===== */
+function getContextFromCTA(btn) {
+  const card = btn.closest(".card, .single-video, .hero") || document.body;
+  const iframe = card.querySelector("iframe");
+  const videoId   = iframe?.dataset.videoId || "";
+  const youtubeId = iframe?.dataset.youtubeId || (iframe?.src?.match(/(embed\/|v=|youtu\.be\/)([A-Za-z0-9_-]{6,})/)?.[2] || "");
+  const titleEl = card.querySelector("h3, h4, h2");
+  const title = (titleEl?.textContent || iframe?.title || document.title).trim();
+  return { videoId, youtubeId, title, iframe };
+}
+
+// 讓「前往VIP盛宴」自動帶上 ?vip= 參數
+function wireVipLink(){
+  const a = document.getElementById("goVip") || document.querySelector("#vip a.btn");
+  if (!a) return;
+
+  // 目標頁面
+  const target = "./vip1.html";
+  // 若目標本身已有查詢參數就用 & 接續
+  const url = new URL(target, location.href);
+  url.searchParams.set("vip", vipId);
+
+  // 如需一併帶其他參數（例如 uid），取消下行註解：
+  // const uid = new URLSearchParams(location.search).get("uid");
+  // if (uid) url.searchParams.set("uid", uid);
+  a.href = url.toString();
+  // 點擊時打一筆事件
+  a.addEventListener("click", () => {
+    logEvent("goto_vip1", EventType);
+  });
+}
+
+
+
+
+
+/** 開發時可用的小工具 */
+window.VideoTrack = {
+  events()  { return JSON.parse(localStorage.getItem(STORAGE_EVENTS_KEY) || "[]"); },
+  watched() { return JSON.parse(localStorage.getItem(STORAGE_WATCHED_KEY) || "[]"); },
+  clear()   { localStorage.removeItem(STORAGE_EVENTS_KEY); localStorage.removeItem(STORAGE_WATCHED_KEY); }
+};
+</script>
+
+
+</body>
+</html>

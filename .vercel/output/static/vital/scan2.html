@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroPlus AI 人臉掃描系統</title>
+
+    <!-- ■ 字型與外部樣式 ---------------------------------------------- -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/material.css" />
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+
+    <!-- ■ 內部樣式 ----------------------------------------------------- -->
+    <style>
+        /* Reset */
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{
+            font-family:'Orbitron',monospace;
+            background:radial-gradient(ellipse at center,#0a0a2e 0%,#000 100%);
+            color:#00ffff;
+            min-height:100vh;
+            overflow-x:hidden;
+        }
+
+        /* Navbar */
+        .raphaelNavbar{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:768px;height:50px;display:flex;align-items:center;padding:0 5%;z-index:1000;}
+        .raphaelNavbar .logoGroup{flex:1;}
+        .raphaelNavbar img{height:32px;}
+
+        /* Main Wrapper */
+        .scanWrap{max-width:768px;margin:0 auto;padding:64px 5% 32px;position:relative;}
+        .video-wrapper{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;}
+        .video-container{width:100%;max-width:360px;position:relative;overflow:hidden;border:2px solid #00ffff;border-radius:20px;box-shadow:0 0 32px rgba(0,255,255,.35),inset 0 0 32px rgba(0,255,255,.15);}        
+        video{width:100%;height:auto;display:block;}
+
+        /* ▶── Face guide dashed box （保留舊版的引導區） */
+        #face-guide-box{position:absolute;border:2px dashed rgba(0,255,136,.4);border-radius:16px;width:80%;height:75%;left:10%;top:12%;pointer-events:none;z-index:6;}
+
+        /* Scanning Overlay 共用 futuristic 效果 */
+        .scanning-overlay{position:absolute;inset:0;pointer-events:none;display:none;}
+        .scanning-overlay.active{display:block;}
+
+        /* Grid background */
+        .scan-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,255,255,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,255,.1) 1px,transparent 1px);background-size:30px 30px;animation:gridFlow 6s linear infinite;}
+        @keyframes gridFlow{0%{transform:translate(0,0);}100%{transform:translate(30px,30px);}}
+
+        /* Vertical beam */
+        .scan-beam{position:absolute;top:0;left:0;width:100%;height:4px;background:linear-gradient(90deg,transparent 0%,rgba(0,255,255,.8) 30%,#fff 50%,rgba(0,255,255,.8) 70%,transparent 100%);box-shadow:0 0 20px rgba(0,255,255,.8),0 0 40px rgba(0,255,255,.5);animation:scanBeam 2s ease-in-out infinite;}
+        @keyframes scanBeam{0%{top:0;}100%{top:calc(100% - 4px);}}
+
+        /* Horizontal beam */
+        .horizontal-scan{position:absolute;left:0;top:50%;width:4px;height:100%;background:linear-gradient(0deg,transparent 0%,rgba(0,255,255,.6) 30%,#fff 50%,rgba(0,255,255,.6) 70%,transparent 100%);box-shadow:0 0 20px rgba(0,255,255,.6);animation:horizontalScan 3s ease-in-out infinite;animation-delay:1s;}
+        @keyframes horizontalScan{0%{left:0;}100%{left:calc(100% - 4px);}}
+
+        /* Moving crosshair */
+        .laser-crosshair{position:absolute;width:60px;height:60px;border:2px solid rgba(255,0,100,.8);border-radius:50%;animation:crosshairMove 4s ease-in-out infinite;}
+        .laser-crosshair::before,.laser-crosshair::after{content:"";position:absolute;background:rgba(255,0,100,.8);box-shadow:0 0 8px rgba(255,0,100,.8);} 
+        .laser-crosshair::before{width:18px;height:2px;top:50%;left:50%;transform:translate(-50%,-50%);} 
+        .laser-crosshair::after{width:2px;height:18px;top:50%;left:50%;transform:translate(-50%,-50%);} 
+        @keyframes crosshairMove{0%,100%{top:20%;left:20%;}25%{top:20%;left:80%;}50%{top:80%;left:80%;}75%{top:80%;left:20%;}}
+
+        /* Speed lines */
+        .speed-lines{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+        .speed-line{position:absolute;height:2px;background:linear-gradient(90deg,transparent 0%,rgba(0,255,255,.8) 50%,transparent 100%);animation:speedLine .8s linear infinite;}
+        @keyframes speedLine{0%{left:-100%;opacity:0;}50%{opacity:1;}100%{left:100%;opacity:0;}}
+
+        /* Countdown */
+        #countdown{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:96px;font-weight:900;color:#00ffff;text-shadow:0 0 20px #00ffff;background:rgba(0,0,0,.4);display:none;}
+
+        /* Progress bar */
+        #progress-bar-container{position:absolute;right:10px;bottom:10px;width:100px;height:18px;background:rgba(255,255,255,.35);border-radius:10px;overflow:hidden;z-index:7;}
+        #progress-bar-fill{height:100%;width:0%;background:#74bc1f;transition:width .2s ease-out;}
+        #progress-bar-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;color:#111;}
+
+        /* Button */
+        #start{margin-top:16px;padding:10px 24px;font-size:1.2rem;background:#6366f1;color:#fff;border:none;border-radius:8px;cursor:pointer;box-shadow:0 0 12px rgba(99,102,241,.6);transition:background .2s ease;}
+        #start:disabled{opacity:.5;cursor:not-allowed;}
+
+        /* Gauges layout */
+        #gauge-container{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;width:100%;max-width:500px;margin:32px auto 0;}
+    </style>
+</head>
+<body>
+    <!-- ◆ Navbar -->
+    <div class="raphaelNavbar">
+        <div class="logoGroup"><img src="images/raphael/neuro-plus.svg" alt="NeuroPlus"/></div>
+    </div>
+
+    <!-- ◆ Scanner Block -->
+    <div class="scanWrap">
+        <div class="video-wrapper">
+            <!-- Video + overlay -->
+            <div class="video-container">
+                <video id="video" autoplay playsinline></video>
+                <div id="countdown"></div>
+                <div class="scanning-overlay" id="overlay">
+                    <div class="scan-grid"></div>
+                    <div class="scan-beam"></div>
+                    <div class="horizontal-scan"></div>
+                    <div class="laser-crosshair"></div>
+                    <div class="speed-lines" id="speed-lines"></div>
+                </div>
+                <div id="face-guide-box"></div>
+                <div id="progress-bar-container"><div id="progress-bar-fill"></div><div id="progress-bar-text">0%</div></div>
+            </div>
+
+            <!-- Controls & tips -->
+            <button id="start">開始檢測</button>
+            <p class="text-white-50" style="font-size:.9rem;max-width:360px;">請將臉部填滿視窗，點擊【開始檢測】後倒數三秒開始量測，過程中保持不動。量測 15 秒後自動顯示結果。</p>
+            <div id="logs" style="max-width:360px;font-size:.85rem;text-align:left;"></div>
+        </div>
+
+        <!-- Gauges -->
+        <div id="gauge-container">
+            <div id="gauge-balance"></div>
+            <div id="gauge-fatigue"></div>
+            <div id="gauge-mood"></div>
+            <div id="gauge-pressure"></div>
+        </div>
+    </div>
+
+    <!-- ■ 依賴腳本 -->
+    <script src="https://cdn.syncfusion.com/ej2/dist/ej2.min.js"></script>
+    <script src="js/bootstrap.bundle.min.js"></script>
+
+    <!-- ■ 主要邏輯腳本 -->
+    <script>
+        // 快速 DOM 參照
+        const video=document.getElementById('video');
+        const startBtn=document.getElementById('start');
+        const countdownEl=document.getElementById('countdown');
+        const overlay=document.getElementById('overlay');
+        const speedLinesWrap=document.getElementById('speed-lines');
+        const progressFill=document.getElementById('progress-bar-fill');
+        const progressText=document.getElementById('progress-bar-text');
+        const logsEl=document.getElementById('logs');
+
+        // 生成速度線特效
+        for(let i=0;i<8;i++){
+            const line=document.createElement('div');
+            line.className='speed-line';
+            line.style.top=`${i*60}px`;
+            line.style.width=`${Math.random()*200+100}px`;
+            line.style.animationDelay=`${(Math.random()*0.8).toFixed(2)}s`;
+            line.style.animationDuration=`${(Math.random()*0.4+0.6).toFixed(2)}s`;
+            speedLinesWrap.appendChild(line);
+        }
+
+        // LocalStorage 使用者資料驗證
+        let userData={};
+        try{
+            const str=localStorage.getItem('userData');
+            if(!str) throw new Error('localStorage 缺少 userData');
+            userData=JSON.parse(str);
+            if(!userData.Mobile||!userData.Height||!userData.Weight) throw new Error('userData 格式不完整');
+        }catch(err){
+            alert('讀取使用者資料失敗，請重新登入');
+            logsEl.innerHTML+=`<p style="color:red;">錯誤：${err.message}</p>`;
+        }
+
+        // 相機錄影
+        let mediaRecorder,recordedChunks=[];
+        async function initCamera(){
+            try{
+                const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:true});
+                video.srcObject=stream;
+                mediaRecorder=new MediaRecorder(stream);
+                mediaRecorder.ondataavailable=e=>e.data.size>0&&recordedChunks.push(e.data);
+                mediaRecorder.onstop=onRecordStop;
+            }catch(err){
+                alert('無法啟動相機/麥克風');
+            }
+        }
+
+        async function onRecordStop(){
+            const blob=new Blob(recordedChunks,{type:'video/webm'});
+            const reader=new FileReader();
+            reader.onloadend=()=>sendToAPI(reader.result.split(',')[1]);
+            reader.readAsDataURL(blob);
+            video.srcObject.getTracks().forEach(t=>t.stop());
+            overlay.classList.remove('active');
+        }
+
+        async function sendToAPI(base64){
+            const payload={uuid:userData.Mobile,height:userData.Height,weight:userData.Weight,content:base64};
+            try{
+                logsEl.innerText='AI 分析中...';
+                const res=await fetch('https://face.zconai.com/api/v1.0/measure/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+                const txt=await res.text();
+                renderResult(txt);
+            }catch(err){
+                alert(err.message);
+            }
+        }
+
+        // 倒數 + 錄影
+        function countdown(sec,cb){
+            countdownEl.style.display='flex';
+            let remain=sec;
+            const timer=setInterval(()=>{
+                countdownEl.textContent=remain;
+                remain--; if(remain<0){clearInterval(timer);countdownEl.style.display='none';cb();}},1000);
+        }
+
+        function startRecording(){
+            recordedChunks=[];
+            mediaRecorder.start();
+            overlay.classList.add('active');
+            let percent=0;
+            const barInt=setInterval(()=>{
+                percent+=100/75;
+                if(percent>=100){percent=100;clearInterval(barInt);}progressFill.style.width=`${percent}%`;progressText.textContent=`${Math.round(percent)}%`;},200);
+            setTimeout(()=>{mediaRecorder.stop();startBtn.disabled=false;},15000);
+        }
+
+        startBtn.addEventListener('click',()=>{startBtn.disabled=true;countdown(3,startRecording);});
+
+        // Render Gauges and log
+        function createGauge(id,val,label,icon){
+            new ej.circulargauge.CircularGauge({ width:'100%', height:'100%', background:'transparent', axes:[{radius:'90%',minimum:0,maximum:5,background:'transparent', pointers:[{value:val,radius:'65%',color:'#6366f1',pointerWidth:10,cap:{radius:8,color:'#333'},needleTail:{length:'15%'},animation:{enable:true,duration:1000}}], ranges:[{start:1,end:2,color:'#f87171'},{start:2,end:3,color:'#fbbf24'},{start:3,end:4,color:'#34d399'},{start:4,end:5,color:'#22d3ee'}], majorTicks:{interval:1,height:10,color:'#999'},minorTicks:{interval:.5,height:5}, labelStyle:{font:{size:'12px',color:'#fff'}}, annotations:[{content:`<div style='font-size:14px;font-weight:bold;text-align:center;color:#fff;'>${icon}<br>${label}</div>`,angle:90,radius:'130%',zIndex:'1'}] }] }).appendTo(`#${id}`);
+        }
+
+        function renderResult(str){
+            let d;try{d=typeof str==='string'?JSON.parse(str):str;}catch(e){alert('結果解析失敗');return;}
+            const hrv=d.hrv?.[0]||{};const sdnn=hrv.SDNN||0;const ratio=hrv['LF/HF']||0;
+            const bal=ratio>2.5?1:ratio>1.5?2:ratio>=0.8?3:ratio>=0.5?4:5;
+            const fat=sdnn<20?1:sdnn<30?2:sdnn<50?3:sdnn<70?4:5;
+            const mood=3; // 可再細化
+            const press=d.ica?.[0]?.SBP>145?1:3;
+            document.getElementById('gauge-container').innerHTML='<div id="gauge-balance"></div><div id="gauge-fatigue"></div><div id="gauge-mood"></div><div id="gauge-pressure"></div>';
+            createGauge('gauge-balance',bal,'自律神經平衡','🐱');
+            createGauge('gauge-fatigue',fat,'生理疲勞','💤');
+            createGauge('gauge-mood',mood,'心情','🧠');
+            createGauge('gauge-pressure',press,'血壓','🎈');
+            logsEl.innerHTML=`<pre style="white-space:pre-wrap;color:#aaffff;">${JSON.stringify(d,null,2)}</pre>`;
+        }
+
+        // 初始化
+        initCamera();
+    </script>
+</body>
+</html>

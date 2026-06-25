@@ -1,0 +1,2519 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>智平衡｜找出今天的肩頸開關</title>
+<style>
+:root {
+  --bg: #faf8f4;
+  --surface: #ffffff;
+  --surface2: #f0ebe3;
+  --border: #d8cfc4;
+  --border-glow: rgba(10,107,98,0.25);
+  --accent: #0a6b62;
+  --accent-dim: #085950;
+  --accent-glow: rgba(10,107,98,0.10);
+  --accent-glow2: rgba(10,107,98,0.25);
+  --gold: #e8862a;
+  --gold-glow: rgba(232,134,42,0.25);
+  --green: #1a7a47;
+  --green-glow: rgba(26,122,71,0.15);
+  --red: #c9542e;
+  --red-glow: rgba(201,84,46,0.15);
+  --text: #1a1208;
+  --muted: #7a6e64;
+  --muted2: #5a5248;
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "PingFang TC","Microsoft JhengHei","Noto Sans TC",system-ui,sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+#app {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column; align-items: center;
+  overflow: hidden;
+}
+@media (min-width: 541px) {
+  /* Desktop: show as centered card, allow page scroll */
+  #app {
+    position: relative;
+    min-height: 100vh;
+    height: auto !important;
+    overflow: visible;
+  }
+  .screen {
+    height: auto !important;
+    min-height: 100vh;
+    overflow: visible;
+  }
+  .screen-body {
+    overflow: visible;
+    flex: unset;
+  }
+  .screen-foot {
+    position: sticky;
+    bottom: 0;
+    background: var(--bg);
+  }
+}
+
+.screen {
+  width: 100%; max-width: 480px; height: 100%;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes glowPulse {
+  0%,100% { box-shadow: 0 0 12px var(--accent-glow); }
+  50%      { box-shadow: 0 0 28px var(--accent-glow2); }
+}
+@keyframes bounceIn {
+  0%   { transform: scale(0); opacity: 0; }
+  60%  { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes confettiFall {
+  0%   { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+@keyframes achieveSlide {
+  0%   { transform: translateY(-80px); opacity: 0; }
+  15%  { transform: translateY(0); opacity: 1; }
+  80%  { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-80px); opacity: 0; }
+}
+@keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+.screen { animation: fadeUp .28s ease; }
+
+/* ── PROGRESS MAP ── */
+.prog-map {
+  display: flex; align-items: center; justify-content: center;
+  padding: 10px 20px 6px; flex-shrink: 0; gap: 0;
+}
+.prog-node {
+  width: 10px; height: 10px; border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  flex-shrink: 0; transition: all .3s;
+}
+.prog-node.done  { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow2); }
+.prog-node.active{ background: var(--gold);   border-color: var(--gold);   box-shadow: 0 0 8px var(--gold-glow); animation: glowPulse 1.6s infinite; }
+.prog-line { flex: 1; height: 2px; background: var(--border); transition: background .3s; }
+.prog-line.done  { background: var(--accent); }
+
+/* ── TOP BAR ── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 16px 6px; flex-shrink: 0;
+}
+.brand-mark {
+  width: 32px; height: 32px; border-radius: 9px;
+  background: linear-gradient(135deg,var(--accent-dim),var(--accent));
+  color: #fff; font-size: 12px; font-weight: 900;
+  display: grid; place-items: center;
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+.step-chip {
+  background: var(--surface2); color: var(--accent);
+  padding: 4px 12px; border-radius: 999px;
+  font-size: 11px; font-weight: 800;
+  border: 1px solid var(--border-glow);
+}
+.user-chip {
+  background: var(--surface2); border: 1px solid var(--border);
+  padding: 4px 12px; border-radius: 999px;
+  font-size: 11px; color: var(--muted2);
+  cursor: pointer; white-space: nowrap;
+  max-width: 90px; overflow: hidden; text-overflow: ellipsis;
+}
+.user-chip:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── BACK BUTTON ── */
+.back-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 18px; color: var(--muted2); padding: 4px 8px;
+  border-radius: 8px; display: flex; align-items: center; line-height: 1;
+}
+.back-btn:hover { color: var(--accent); }
+
+/* ── MUTE BUTTON ── */
+.mute-btn {
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--muted2); border-radius: 8px;
+  padding: 4px 8px; font-size: 14px; cursor: pointer;
+}
+.mute-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── SCROLL BODY ── */
+.screen-body {
+  flex: 1; min-height: 0; overflow-y: scroll; padding: 10px 20px 16px;
+  display: flex; flex-direction: column; gap: 12px;
+  -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+}
+/* ── FOOT ── */
+.screen-foot {
+  flex-shrink: 0; padding: 10px 20px max(32px, env(safe-area-inset-bottom, 32px));
+  display: flex; flex-direction: column; gap: 10px;
+  background: var(--bg);
+}
+
+/* ── INTRO/WELCOME ── */
+.intro-screen {
+  background: var(--bg);
+  display: flex; flex-direction: column;
+}
+.intro-body {
+  flex: 1; min-height: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: clamp(16px, 4vh, 40px) 32px clamp(8px, 2vh, 20px); text-align: center; gap: 0;
+  overflow: hidden;
+}
+.intro-logo {
+  width: 80px; height: 80px; border-radius: 22px;
+  background: linear-gradient(135deg,var(--accent-dim),var(--accent));
+  border: 2px solid rgba(255,255,255,0.3);
+  box-shadow: 0 0 32px var(--accent-glow2);
+  color: #fff; font-size: 22px; font-weight: 900;
+  display: grid; place-items: center; margin-bottom: 32px;
+  animation: glowPulse 2s infinite;
+}
+.intro-story {
+  font-size: 18px; line-height: 2; color: var(--muted2);
+  margin-bottom: 32px; min-height: 160px;
+}
+.intro-story .highlight { color: var(--accent); font-weight: 900; }
+.cursor-blink {
+  display: inline-block; width: 2px; height: 1.2em;
+  background: var(--accent); margin-left: 2px;
+  animation: cursorBlink .8s step-end infinite;
+  vertical-align: text-bottom;
+}
+.intro-foot { flex-shrink: 0; padding: 0 24px max(32px, env(safe-area-inset-bottom, 32px)); }
+.btn-start {
+  width: 100%; padding: 18px; border: 2px solid var(--accent);
+  border-radius: var(--radius); font-size: 17px; font-weight: 900;
+  background: transparent; color: var(--accent); cursor: pointer;
+  box-shadow: 0 0 24px var(--accent-glow2);
+  transition: all .15s; letter-spacing: .05em;
+  position: relative; overflow: hidden;
+}
+.btn-start::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--accent-glow), transparent);
+  opacity: 0; transition: opacity .2s;
+}
+.btn-start:hover::before { opacity: 1; }
+.btn-start:active { transform: scale(.97); }
+.intro-copyright {
+  text-align: center; font-size: 11px; color: var(--muted);
+  margin-top: 12px;
+}
+
+/* ── BUTTONS ── */
+.btn {
+  width: 100%; padding: 15px; border: none; border-radius: var(--radius);
+  font-size: 15px; font-weight: 800; cursor: pointer;
+  transition: all .12s; display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn:active { transform: scale(.98); }
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-dim), var(--accent));
+  color: #fff; box-shadow: 0 4px 20px var(--accent-glow2);
+}
+.btn-secondary {
+  background: var(--surface2); color: var(--text);
+  border: 1.5px solid var(--border);
+}
+.btn:disabled { opacity: .35; pointer-events: none; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface); border-radius: var(--radius);
+  border: 1px solid var(--border); padding: 18px;
+}
+.card-glow {
+  background: var(--surface); border-radius: var(--radius);
+  border: 1px solid var(--border-glow); padding: 18px;
+  box-shadow: 0 0 16px var(--accent-glow);
+}
+
+/* ── SECTION HEADER ── */
+.kicker { font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+.screen-title { font-size: 23px; font-weight: 900; line-height: 1.25; letter-spacing: -.3px; color: var(--text); }
+.screen-sub { font-size: 13px; color: var(--muted2); line-height: 1.7; margin-top: 6px; }
+
+/* ── EMOJI SCALE ── */
+.emoji-scale { display: flex; gap: 6px; }
+.emoji-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  padding: 10px 2px 8px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border); background: var(--surface2);
+  cursor: pointer; transition: all .13s; gap: 3px;
+}
+.emoji-btn .e { font-size: 22px; line-height: 1; }
+.emoji-btn .lbl { font-size: 9px; color: var(--muted); text-align: center; font-weight: 700; line-height: 1.2; }
+.emoji-btn.sel { border-color: var(--accent); background: var(--accent-glow); }
+.emoji-btn.sel .lbl { color: var(--accent); }
+
+/* ── SIDE SELECTOR ── */
+.side-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.side-btn {
+  padding: 18px 12px; border-radius: var(--radius);
+  border: 1.5px solid var(--border); background: var(--surface2);
+  cursor: pointer; text-align: center; transition: all .13s;
+}
+.side-btn .big { font-size: 28px; margin-bottom: 4px; }
+.side-btn .lbl { font-size: 15px; font-weight: 900; color: var(--text); }
+.side-btn .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.side-btn.sel { border-color: var(--accent); background: var(--accent-glow); box-shadow: 0 0 16px var(--accent-glow); }
+.side-btn.sel .lbl { color: var(--accent); }
+
+/* ── ELBOW CARD ── */
+.elbow-card {
+  background: var(--surface); border-radius: var(--radius);
+  border: 1px solid var(--border); overflow: hidden;
+}
+.elbow-diagram-wrap {
+  background: #f0ebe3; border-bottom: 1px solid var(--border);
+  display: flex; flex-direction: column; align-items: stretch; position: relative;
+}
+.elbow-diagram-wrap img { width: 100%; height: 38vw; min-height: 140px; max-height: 200px; display: block; object-fit: cover; object-position: center 60%; }
+.elbow-pos-chip { position: absolute; top: 8px; left: 8px; display: flex; gap: 5px; flex-wrap: wrap; }
+.pos-chip { padding: 3px 9px; border-radius: 999px; font-size: 10px; font-weight: 900; backdrop-filter: blur(4px); }
+.pos-chip.active { background: rgba(10,107,98,.88); color: #fff; }
+.pos-chip.dim { background: rgba(0,0,0,.3); color: rgba(255,255,255,.7); }
+.elbow-info { padding: 14px 16px 16px; }
+.elbow-title-row { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 900; margin-bottom: 5px; color: var(--text); }
+.elbow-note { font-size: 12px; color: var(--muted2); line-height: 1.55; }
+
+/* ── SIDE SELECT (3-button) ── */
+.side-sel-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 14px; }
+.side-sel-btn {
+  padding: 12px 4px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border); background: var(--surface2);
+  cursor: pointer; font-size: 13px; font-weight: 800;
+  color: var(--muted2); transition: all .12s;
+}
+.side-sel-btn.sel { border-color: var(--accent); background: var(--accent-glow); color: var(--accent); }
+.side-result { text-align: center; margin-top: 8px; font-size: 12px; font-weight: 800; color: var(--muted); min-height: 20px; }
+
+/* ── ROUND CHIP ── */
+.round-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface2); color: var(--accent);
+  padding: 5px 12px; border-radius: 999px;
+  font-size: 12px; font-weight: 800; border: 1px solid var(--border-glow);
+}
+
+/* ── REVEAL ── */
+.reveal-body {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; gap: 20px; padding: 20px 24px; overflow-y: auto;
+}
+.reveal-icon { font-size: 64px; animation: bounceIn .6s ease; }
+.reveal-title { font-size: 28px; font-weight: 900; letter-spacing: -.3px; color: var(--gold); text-shadow: 0 0 20px var(--gold-glow); }
+.reveal-sub { font-size: 13px; color: var(--muted2); }
+.point-cards { display: grid; gap: 14px; width: 100%; max-width: 360px; }
+.point-card {
+  background: var(--surface); border-radius: var(--radius);
+  border: 1px solid var(--border); padding: 16px; position: relative;
+}
+.point-card.primary { border-color: var(--accent); box-shadow: 0 0 16px var(--accent-glow); }
+.primary-badge {
+  position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+  background: var(--accent); color: #fff;
+  font-size: 10px; font-weight: 900; padding: 3px 14px;
+  border-radius: 999px; white-space: nowrap;
+}
+.point-inner { display: flex; align-items: center; gap: 14px; text-align: left; }
+.point-svg-wrap { width: 90px; flex-shrink: 0; }
+.point-svg-wrap img { width: 100%; border-radius: 8px; display: block; }
+.point-name { font-size: 16px; font-weight: 900; color: var(--text); }
+.point-desc { font-size: 12px; color: var(--muted2); margin-top: 4px; line-height: 1.55; }
+
+/* ── TIMER ── */
+.timer-body { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.timer-img-zone { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+.timer-img-zone img { width: 100%; height: 100%; object-fit: contain; object-position: center center; display: block; background: #1a1208; }
+.timer-img-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 50%, rgba(2,5,18,.85) 100%); }
+.timer-img-text { position: absolute; bottom: 0; left: 0; right: 0; padding: 14px 20px; color: #fff; }
+.timer-img-badge { font-size: 11px; font-weight: 800; opacity: .7; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 3px; color: var(--accent); }
+.timer-img-name { font-size: 20px; font-weight: 900; line-height: 1.2; }
+.timer-img-desc { font-size: 12px; opacity: .8; margin-top: 4px; line-height: 1.5; }
+.timer-bottom { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px 8px; gap: 16px; flex-shrink: 0; background: #1f1710; }
+.timer-ring { position: relative; width: 86px; height: 86px; flex-shrink: 0; }
+.timer-ring svg { transform: rotate(-90deg); }
+.timer-num { position: absolute; inset: 0; display: grid; place-items: center; font-size: 28px; font-weight: 900; color: var(--accent); font-variant-numeric: tabular-nums; }
+.timer-hint { font-size: 13px; color: var(--muted2); line-height: 1.5; flex: 1; }
+
+/* ── RESULT ── */
+.compare-row { display: grid; grid-template-columns: 1fr 32px 1fr; gap: 8px; align-items: center; }
+.cmp-box { background: var(--surface2); border-radius: var(--radius-sm); border: 1px solid var(--border); padding: 12px 8px; text-align: center; }
+.cmp-box.improved { border-color: var(--green); box-shadow: 0 0 12px var(--green-glow); }
+.cmp-lbl { font-size: 10px; color: var(--muted); font-weight: 800; margin-bottom: 3px; }
+.cmp-emoji { font-size: 28px; }
+.cmp-text { font-size: 10px; color: var(--muted2); margin-top: 3px; }
+.cmp-arrow { font-size: 18px; color: var(--accent); font-weight: 900; text-align: center; }
+.improved-banner {
+  background: rgba(16,185,129,.15); border: 1.5px solid var(--green);
+  border-radius: var(--radius-sm); padding: 12px 16px;
+  color: var(--green); font-weight: 800; text-align: center; font-size: 14px;
+  box-shadow: 0 0 12px var(--green-glow);
+}
+
+/* ── BODY POINT IMAGE ── */
+.body-img-wrap { position: relative; overflow: hidden; border-radius: var(--radius-sm); }
+.body-img-wrap img { width: 100%; height: auto; display: block; }
+.body-side-badge {
+  position: absolute; top: 8px; right: 8px;
+  padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 900;
+  background: rgba(10,107,98,.88); color: #fff;
+}
+
+/* ── LOGIN SHEET ── */
+.login-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(26,18,8,.65); backdrop-filter: blur(10px); display: flex; align-items: flex-end; justify-content: center; }
+.login-overlay.hidden { display: none; }
+.login-sheet { background: var(--surface); border-radius: 24px 24px 0 0; padding: 24px 24px 48px; width: 100%; max-width: 480px; box-shadow: 0 -16px 60px rgba(0,0,0,.2); border-top: 1px solid var(--border-glow); }
+.login-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 22px; }
+.login-title { font-size: 20px; font-weight: 900; margin-bottom: 18px; color: var(--text); }
+.lfield { margin-bottom: 13px; }
+.lfield label { display: block; font-size: 12px; font-weight: 800; margin-bottom: 5px; color: var(--muted2); }
+.lfield input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 16px; background: var(--surface2); outline: none; transition: border-color .15s; color: var(--text); }
+.lfield input:focus { border-color: var(--accent); }
+.lerror { color: var(--red); font-size: 12px; font-weight: 800; display: none; margin-bottom: 10px; }
+.lerror.show { display: block; }
+.lnote { font-size: 11px; color: var(--muted); text-align: center; margin-top: 12px; line-height: 1.5; }
+
+/* ── HISTORY SHEET ── */
+.hist-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(26,18,8,.65); backdrop-filter: blur(10px); display: flex; align-items: flex-end; justify-content: center; }
+.hist-overlay.hidden { display: none; }
+.hist-sheet { background: var(--surface); border-radius: 24px 24px 0 0; padding: 20px 20px 48px; width: 100%; max-width: 480px; box-shadow: 0 -16px 60px rgba(0,0,0,.2); max-height: 80vh; overflow-y: scroll; border-top: 1px solid var(--border-glow); }
+.hist-row { padding: 12px 0; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 12px; cursor: pointer; }
+.hist-row:last-child { border-bottom: none; }
+.hist-date { font-size: 11px; font-weight: 800; color: var(--muted); min-width: 70px; padding-top: 2px; }
+.hist-detail { flex: 1; }
+.hist-pts { font-size: 13px; font-weight: 800; color: var(--text); }
+.hist-meta { font-size: 11px; color: var(--muted2); margin-top: 2px; }
+.hist-result { font-size: 11px; font-weight: 800; padding: 2px 10px; border-radius: 999px; margin-top: 4px; display: inline-block; }
+.hist-result.good { background: rgba(16,185,129,.2); color: var(--green); border: 1px solid var(--green); }
+.hist-result.neutral { background: var(--accent-glow); color: var(--accent); border: 1px solid var(--border-glow); }
+.hist-result.bad { background: rgba(239,68,68,.15); color: var(--red); border: 1px solid var(--red); }
+.hist-expand { padding: 10px 0 4px; border-top: 1px solid var(--border); }
+.hist-press-pair { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 10px; }
+.hist-press-item { border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border); }
+.hist-press-img { width: 100%; height: 160px; object-fit: contain; background: #f0ebe3; display: block; }
+.hist-press-label { padding: 6px 10px; font-size: 11px; font-weight: 800; }
+.hist-mini-timer { display: flex; align-items: center; gap: 12px; background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 14px; border: 1px solid var(--border); }
+
+/* ── ACHIEVEMENTS ── */
+.achievement-popup {
+  position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+  z-index: 600; background: var(--surface);
+  border: 1.5px solid var(--gold); border-radius: var(--radius);
+  padding: 12px 20px; box-shadow: 0 0 24px var(--gold-glow);
+  display: flex; align-items: center; gap: 12px; min-width: 260px;
+  animation: achieveSlide 3s ease forwards;
+  pointer-events: none;
+}
+.ach-icon { font-size: 28px; }
+.ach-name { font-size: 14px; font-weight: 900; color: var(--gold); }
+.ach-desc { font-size: 11px; color: var(--muted2); margin-top: 2px; }
+
+/* ── TOAST ── */
+.toast { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%); background: rgba(10,107,98,.92); color: #fff; padding: 10px 22px; border-radius: 999px; font-size: 13px; font-weight: 800; z-index: 500; opacity: 0; transition: opacity .4s; pointer-events: none; white-space: nowrap; }
+.toast.show { opacity: 1; }
+
+/* ── CONFETTI ── */
+.confetti-piece { position: fixed; border-radius: 2px; animation: confettiFall linear forwards; pointer-events: none; z-index: 999; }
+
+/* ── ACHIEVEMENT BADGE CHIPS ── */
+.ach-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.ach-chip { display: inline-flex; align-items: center; gap: 5px; background: var(--surface2); border: 1px solid var(--gold); color: var(--gold); border-radius: 999px; padding: 4px 12px; font-size: 11px; font-weight: 800; }
+
+/* ── ACHIEVEMENT PAGE ── */
+.achiev-title-row { text-align:center; padding:16px 0 8px; }
+.achiev-current-title { font-size:32px; margin-bottom:4px; }
+.achiev-title-name { font-size:18px; font-weight:900; color:var(--accent); }
+.achiev-next-hint { font-size:12px; color:var(--muted2); margin-top:4px; }
+.achiev-progress-bar { height:6px; border-radius:3px; background:var(--surface2); border:1px solid var(--border); margin:10px 0; overflow:hidden; }
+.achiev-progress-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--accent-dim),var(--accent)); transition:width .4s; }
+.achiev-stats-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin:10px 0; }
+.achiev-stat { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px 8px; text-align:center; }
+.achiev-stat-num { font-size:24px; font-weight:900; color:var(--accent); }
+.achiev-stat-lbl { font-size:10px; color:var(--muted); font-weight:700; margin-top:2px; }
+.badge-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:10px 0; }
+.badge-item { background:var(--surface2); border:1.5px solid var(--border); border-radius:var(--radius); padding:14px 8px; text-align:center; cursor:pointer; transition:all .15s; }
+.badge-item.earned { border-color:var(--gold); background:rgba(232,134,42,.08); box-shadow:0 0 12px var(--gold-glow); }
+.badge-item.locked { opacity:.4; filter:grayscale(.8); }
+.badge-emoji { font-size:28px; margin-bottom:4px; }
+.badge-name { font-size:10px; font-weight:900; color:var(--text); }
+.badge-cond { font-size:9px; color:var(--muted); margin-top:2px; line-height:1.3; }
+.badge-date { font-size:9px; color:var(--gold); font-weight:800; margin-top:2px; }
+.ans-unlock-card { border:1.5px solid var(--accent); border-radius:var(--radius); padding:16px; background:var(--accent-glow); text-align:center; margin:10px 0; }
+.ans-locked-card { border:1.5px dashed var(--border); border-radius:var(--radius); padding:16px; background:var(--surface2); text-align:center; margin:10px 0; opacity:.6; }
+
+/* ── ANS QUIZ ── */
+.ans-q { margin-bottom:18px; }
+.ans-q-text { font-size:14px; font-weight:800; color:var(--text); margin-bottom:10px; }
+.ans-scale { display:flex; gap:6px; }
+.ans-btn { flex:1; padding:10px 2px; border-radius:var(--radius-sm); border:1.5px solid var(--border); background:var(--surface2); cursor:pointer; font-size:12px; font-weight:800; color:var(--muted2); text-align:center; transition:all .12s; }
+.ans-btn.sel { border-color:var(--accent); background:var(--accent-glow); color:var(--accent); }
+.ans-yesno { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.ans-yesno .ans-btn { padding:12px; font-size:14px; }
+.ans-result-card { border-radius:var(--radius); padding:20px; text-align:center; margin:10px 0; }
+.ans-result-card.sym { background:rgba(10,107,98,.1); border:1.5px solid var(--accent); }
+.ans-result-card.sym_hi { background:rgba(201,84,46,.1); border:1.5px solid var(--red); }
+.ans-result-card.para_lo { background:rgba(232,134,42,.1); border:1.5px solid var(--gold); }
+.ans-result-emoji { font-size:48px; margin-bottom:10px; }
+.ans-result-type { font-size:18px; font-weight:900; margin-bottom:6px; }
+.ans-result-desc { font-size:13px; color:var(--muted2); line-height:1.7; }
+.ans-cta-card { background:linear-gradient(135deg,var(--accent-dim),var(--accent)); border-radius:var(--radius); padding:20px; text-align:center; color:#fff; margin:12px 0; }
+.ans-cta-title { font-size:16px; font-weight:900; margin-bottom:6px; }
+.ans-cta-sub { font-size:12px; opacity:.85; margin-bottom:14px; line-height:1.6; }
+.btn-cta-white { background:#fff; color:var(--accent); border:none; border-radius:999px; padding:12px 24px; font-size:14px; font-weight:900; cursor:pointer; }
+
+/* ── UTIL ── */
+.text-muted { color: var(--muted2); }
+.text-center { text-align: center; }
+.hint-text { font-size: 12px; color: var(--muted2); text-align: center; }
+
+/* ══════════════════════════════════════════════
+   PRESS BREATHING ANIMATION
+══════════════════════════════════════════════ */
+@keyframes breathExpand {
+  0%,100% { transform:scale(1);   opacity:.55; }
+  50%      { transform:scale(1.18); opacity:.9; }
+}
+@keyframes breathRing {
+  0%   { transform:scale(.9);  opacity:.7; }
+  50%  { transform:scale(1.25); opacity:.2; }
+  100% { transform:scale(.9);  opacity:.7; }
+}
+.breath-wrap {
+  position:relative; display:flex; align-items:center;
+  justify-content:center; width:130px; height:130px; margin:0 auto 4px;
+}
+.breath-ring {
+  position:absolute; width:100%; height:100%;
+  border-radius:50%; border:2px solid var(--accent);
+  animation:breathRing 4s ease-in-out infinite;
+}
+.breath-ring.r2 { animation-delay:1.3s; opacity:.4; }
+.breath-ring.r3 { animation-delay:2.6s; opacity:.25; }
+.breath-core {
+  width:70px; height:70px; border-radius:50%;
+  background:radial-gradient(circle, rgba(10,107,98,.35) 0%, rgba(10,107,98,.08) 70%);
+  animation:breathExpand 4s ease-in-out infinite;
+  display:flex; align-items:center; justify-content:center;
+  font-size:28px;
+}
+.press-color-bar {
+  height:5px; border-radius:3px; width:100%; max-width:280px;
+  background:linear-gradient(90deg, #c0602a, #0a6b62);
+  margin:0 auto 10px; overflow:hidden; position:relative;
+}
+.press-color-fill {
+  position:absolute; left:0; top:0; height:100%;
+  background:linear-gradient(90deg,#0a6b62,#2cb5a8);
+  transition:width .8s linear; border-radius:3px;
+}
+/* ══════════════════════════════════════════════
+   REVEAL CINEMATIC ANIMATIONS
+══════════════════════════════════════════════ */
+@keyframes revealGlow {
+  0%   { opacity:0; transform:scale(.85); }
+  60%  { opacity:1; transform:scale(1.04); }
+  100% { opacity:1; transform:scale(1); }
+}
+@keyframes revealFadeUp {
+  0%   { opacity:0; transform:translateY(18px); }
+  100% { opacity:1; transform:translateY(0); }
+}
+@keyframes revealPop {
+  0%   { opacity:0; transform:scale(.6); }
+  70%  { transform:scale(1.08); }
+  100% { opacity:1; transform:scale(1); }
+}
+@keyframes revealPulse {
+  0%,100% { box-shadow:0 0 0 0 rgba(10,107,98,.0); }
+  50%      { box-shadow:0 0 0 18px rgba(10,107,98,.12); }
+}
+.reveal-cinematic-wrap {
+  display:flex; flex-direction:column; align-items:center;
+  gap:0; width:100%; padding:0 4px;
+}
+.reveal-pre-text {
+  font-size:15px; color:var(--muted2); letter-spacing:.08em;
+  opacity:0; animation:revealFadeUp .5s ease forwards;
+  animation-delay:.3s; text-align:center; margin-bottom:6px;
+}
+.reveal-found-text {
+  font-size:13px; color:var(--accent); font-weight:800; letter-spacing:.12em;
+  opacity:0; animation:revealFadeUp .5s ease forwards;
+  animation-delay:1.4s; text-align:center; margin-bottom:18px;
+}
+.reveal-point-pop {
+  opacity:0; animation:revealPop .55s cubic-bezier(.36,.07,.19,.97) forwards;
+  animation-delay:1.8s;
+}
+.reveal-point-pop.secondary {
+  animation-delay:2.3s;
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN OVERLAY -->
+<div class="login-overlay hidden" id="loginOverlay">
+  <div class="login-sheet">
+    <div class="login-handle"></div>
+    <h2 class="login-title">建立你的個人紀錄</h2>
+    <div class="lfield">
+      <label for="lName">姓名</label>
+      <input type="text" id="lName" placeholder="例：王小姐" autocomplete="name">
+    </div>
+    <div class="lfield" style="display:none">
+      <label for="lBday">生日</label>
+      <input type="date" id="lBday" autocomplete="bday" value="2000-01-01">
+    </div>
+    <div class="lfield">
+      <label for="lPhone">電話（後四碼）</label>
+      <input type="tel" id="lPhone" placeholder="例：5678" maxlength="10">
+    </div>
+    <div class="lerror" id="lError">請填寫姓名與電話後再繼續。</div>
+    <button class="btn btn-primary" id="lEnterBtn">進入冒險 →</button>
+    <p class="lnote">⚠ 此三項資料組合僅用於辨識你的紀錄，不會傳送至伺服器。</p>
+    <p class="lnote" style="margin-top:8px;font-size:10px;color:var(--muted)">本工具提供自我感受參考，非醫療診斷。</p>
+  </div>
+</div>
+
+<div class="toast" id="globalToast"></div>
+
+<!-- HISTORY OVERLAY -->
+<div class="hist-overlay hidden" id="histOverlay">
+  <div class="hist-sheet">
+    <div class="login-handle"></div>
+    <h2 class="login-title" id="histTitle">我的紀錄</h2>
+    <div id="histList"></div>
+    <button class="btn btn-secondary" id="histCloseBtn" style="margin-top:16px">關閉</button>
+  </div>
+</div>
+
+<!-- ACHIEVEMENT OVERLAY -->
+<div class="hist-overlay hidden" id="achievOverlay">
+  <div class="hist-sheet" style="max-height:85vh">
+    <div class="login-handle"></div>
+    <div id="achievContent"></div>
+    <button class="btn btn-secondary" id="achievCloseBtn" style="margin-top:14px">關閉</button>
+  </div>
+</div>
+
+<!-- ANS OVERLAY -->
+<div class="hist-overlay hidden" id="ansOverlay">
+  <div class="hist-sheet" style="max-height:90vh">
+    <div class="login-handle"></div>
+    <div id="ansContent"></div>
+    <button class="btn btn-secondary" id="ansCloseBtn" style="margin-top:14px">關閉</button>
+  </div>
+</div>
+
+<!-- APP ROOT -->
+<div id="app"></div>
+
+<script>
+/* ══════════════════════════════════════════════
+   CONSTANTS
+══════════════════════════════════════════════ */
+const EMOJIS      = ["😌","🙂","😕","😣","😫"];
+const EMOJI_LBLS  = ["很順暢","還好","有點緊","明顯緊","幾乎轉不到"];
+const SCORE_EMOJIS = ["😌","🙂","😕","😣","😫"];
+const SCORE_LBLS   = ["沒感覺","輕微","有感","明顯","很強"];
+
+// Always test Round 1 (E1+E2 upper), then randomly Round 2a (E9/E10 mid) OR 2b (E5/E6 lower)
+const E_GROUPS = {
+  r1: [
+    { id:"E1", title:"手肘內側 上方", side:"inner", pos:"ui",
+      note:"手肘彎曲約 90 度，找到內側骨頭突起（肱骨內上髁）上方約一指處。用拇指按深後，前後或畫圓輕輕揉動，感受有沒有酸脹感。比較左右哪邊感覺較明顯。" },
+    { id:"E2", title:"手肘外側 上方", side:"outer", pos:"uo",
+      note:"手肘彎曲約 90 度，找到外側骨頭突起（肱骨外上髁）上方約一指處。外側不好找：把手肘打直，外側最凸的骨頭往上一指就是。用拇指按深後前後揉動，比較左右酸脹感差異。" },
+  ],
+  r2a: [
+    { id:"E9",  title:"手肘內側 中段", side:"inner", pos:"mi",
+      note:"手肘內側骨頭突起（肱骨內上髁）的正中央。用拇指按深，接著前後或畫圓揉動——感受左右哪側酸脹感更明顯。" },
+    { id:"E10", title:"手肘外側 中段", side:"outer", pos:"mo",
+      note:"手肘外側骨頭突起（肱骨外上髁）的正中央。用拇指按深後前後揉動，比較左右哪邊更有酸脹感。" },
+  ],
+  r2b: [
+    { id:"E5", title:"手肘內側 下方", side:"inner", pos:"li",
+      note:"手肘內側骨頭突起（肱骨內上髁）下方約一指處。用拇指按深後輕輕揉動，找到酸脹感後比較左右兩側差異。" },
+    { id:"E6", title:"手肘外側 下方", side:"outer", pos:"lo",
+      note:"手肘外側骨頭突起（肱骨外上髁）下方約一指處。用拇指按深後前後揉動，比較左右酸脹感差異。" },
+  ],
+};
+
+/* ══════════════════════════════════════════════
+   AUDIO
+══════════════════════════════════════════════ */
+const GA = {
+  ctx: null, muted: false, bgNodes: [], bgScheduled: false, _audioUnlocked: false,
+  init(){
+    if(!this.ctx){
+      try{ this.ctx=new(window.AudioContext||window.webkitAudioContext)(); }catch(e){}
+    }
+    if(this.ctx&&this.ctx.state==='suspended') this.ctx.resume();
+  },
+  _osc(freq,type,startT,dur,vol){
+    vol=vol||0.12;
+    if(!this.ctx)return;
+    const o=this.ctx.createOscillator();
+    const g=this.ctx.createGain();
+    o.connect(g); g.connect(this.ctx.destination);
+    o.frequency.value=freq; o.type=type||'sine';
+    g.gain.setValueAtTime(0,startT);
+    g.gain.linearRampToValueAtTime(vol,startT+0.01);
+    g.gain.exponentialRampToValueAtTime(0.001,startT+dur);
+    o.start(startT); o.stop(startT+dur);
+  },
+  click(){
+    this.init();
+    if(this.muted||!this.ctx)return;
+    this._osc(700,'sine',this.ctx.currentTime,0.08,0.06);
+  },
+  levelUp(){
+    this.init();
+    if(this.muted||!this.ctx)return;
+    const t=this.ctx.currentTime;
+    [[440,0],[554,.1],[659,.2],[880,.3]].forEach(function(pair){ GA._osc(pair[0],'square',t+pair[1],0.18,0.1); });
+  },
+  success(){
+    this.init();
+    if(this.muted||!this.ctx)return;
+    const t=this.ctx.currentTime;
+    [[261,0],[329,.09],[392,.18],[523,.27],[659,.36],[784,.45],[1047,.54]].forEach(function(pair){ GA._osc(pair[0],'triangle',t+pair[1],0.22,0.12); });
+  },
+  tick(){
+    this.init();
+    if(this.muted||!this.ctx)return;
+    this._osc(380,'sine',this.ctx.currentTime,0.04,0.03);
+  },
+  achievement(){
+    this.init();
+    if(this.muted||!this.ctx)return;
+    const t=this.ctx.currentTime;
+    [[523,0],[659,.1],[784,.2],[1047,.3],[784,.5],[1047,.65]].forEach(function(pair){ GA._osc(pair[0],'sine',t+pair[1],0.2,0.1); });
+  },
+  fail(){
+    this.init();
+    if(this.muted||!this.ctx)return;
+    const t=this.ctx.currentTime;
+    [[440,0],[370,.2],[311,.4]].forEach(function(pair){ GA._osc(pair[0],'sawtooth',t+pair[1],0.28,0.07); });
+  },
+  // ── 進場音效：輕柔鐘聲（4音上行）──
+  entryChime(){
+    this.init();
+    if(this.muted||!this.ctx)return;
+    const t=this.ctx.currentTime;
+    [[523,0,0.18],[659,0.18,0.22],[784,0.38,0.30],[1047,0.60,0.50]].forEach(function(p){
+      const o=GA.ctx.createOscillator();
+      const g=GA.ctx.createGain();
+      o.connect(g); g.connect(GA.ctx.destination);
+      o.type='sine'; o.frequency.value=p[0];
+      g.gain.setValueAtTime(0,t+p[1]);
+      g.gain.linearRampToValueAtTime(0.14,t+p[1]+0.03);
+      g.gain.exponentialRampToValueAtTime(0.001,t+p[1]+p[2]);
+      o.start(t+p[1]); o.stop(t+p[1]+p[2]+0.05);
+    });
+  },
+  // ── 森林水聲背景（pink noise 水流 + 水珠點綴 + 偶發鳥鳴）──
+  startAmbient(){
+    if(this.muted||!this.ctx||this.bgScheduled)return;
+    this.bgScheduled=true;
+    const ctx=this.ctx;
+    const master=ctx.createGain(); master.gain.value=0; master.connect(ctx.destination);
+    master.gain.linearRampToValueAtTime(0.55,ctx.currentTime+3);
+    // Pink noise generator (4s buffer, looped)
+    function makePinkNoise(){
+      const bufLen=ctx.sampleRate*4;
+      const buf=ctx.createBuffer(1,bufLen,ctx.sampleRate);
+      const data=buf.getChannelData(0);
+      var b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+      for(var i=0;i<bufLen;i++){
+        var wh=Math.random()*2-1;
+        b0=0.99886*b0+wh*0.0555179; b1=0.99332*b1+wh*0.0750759;
+        b2=0.96900*b2+wh*0.1538520; b3=0.86650*b3+wh*0.3104856;
+        b4=0.55000*b4+wh*0.5329522; b5=-0.7616*b5-wh*0.0168980;
+        data[i]=(b0+b1+b2+b3+b4+b5+b6+wh*0.5362)*0.11;
+        b6=wh*0.115926;
+      }
+      return buf;
+    }
+    function loopNoise(){
+      if(GA.muted||!GA.ctx)return;
+      var src=ctx.createBufferSource(); src.buffer=makePinkNoise(); src.loop=true;
+      var bp1=ctx.createBiquadFilter(); bp1.type='bandpass'; bp1.frequency.value=600; bp1.Q.value=0.7;
+      var bp2=ctx.createBiquadFilter(); bp2.type='bandpass'; bp2.frequency.value=1400; bp2.Q.value=0.4;
+      var lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=3200;
+      src.connect(bp1); src.connect(bp2); bp1.connect(lp); bp2.connect(lp); lp.connect(master);
+      src.start(); GA._bgNoiseSrc=src;
+    }
+    loopNoise();
+    // Water trickle accents
+    function trickle(){
+      if(GA.muted||!GA.ctx)return;
+      var o=ctx.createOscillator(); var g=ctx.createGain();
+      var f=ctx.createBiquadFilter(); f.type='bandpass'; f.Q.value=10;
+      var freq=900+Math.random()*900; f.frequency.value=freq;
+      o.type='sine'; o.frequency.value=freq;
+      o.connect(f); f.connect(g); g.connect(master);
+      var t=ctx.currentTime; var vol=0.03+Math.random()*0.05;
+      g.gain.setValueAtTime(0,t);
+      g.gain.linearRampToValueAtTime(vol,t+0.015);
+      g.gain.exponentialRampToValueAtTime(0.001,t+0.1+Math.random()*0.12);
+      o.start(t); o.stop(t+0.3);
+      setTimeout(trickle,80+Math.random()*500);
+    }
+    setTimeout(trickle,1500);
+    // Occasional bird chirp
+    var birdNotes=[2093,2349,2637,3136,3520];
+    function birdChirp(){
+      if(GA.muted||!GA.ctx)return;
+      var t=ctx.currentTime; var n=Math.floor(Math.random()*birdNotes.length);
+      var reps=1+Math.floor(Math.random()*3);
+      for(var r=0;r<reps;r++){
+        (function(off){
+          var o=ctx.createOscillator(); var g=ctx.createGain();
+          o.connect(g); g.connect(master); o.type='sine'; o.frequency.value=birdNotes[n];
+          g.gain.setValueAtTime(0,t+off);
+          g.gain.linearRampToValueAtTime(0.035,t+off+0.01);
+          g.gain.exponentialRampToValueAtTime(0.001,t+off+0.08);
+          o.start(t+off); o.stop(t+off+0.12);
+        })(r*0.13);
+      }
+      setTimeout(birdChirp,7000+Math.random()*14000);
+    }
+    setTimeout(birdChirp,5000+Math.random()*5000);
+  },
+  toggle(){
+    this.muted=!this.muted;
+    return this.muted;
+  }
+};
+
+/* ══════════════════════════════════════════════
+   ACHIEVEMENTS
+══════════════════════════════════════════════ */
+const ACHIEV = {
+  first_test:  {id:'first_test',  name:'初探者',   desc:'完成第一次測試',     icon:'🎯'},
+  first_feel:  {id:'first_feel',  name:'有感！',   desc:'第一次按壓感受有改善', icon:'⭐'},
+  streak3:     {id:'streak3',     name:'三日不輟', desc:'連續 3 天測試',       icon:'🔥'},
+  streak7:     {id:'streak7',     name:'七日傳說', desc:'連續 7 天測試',       icon:'💎'},
+  test10:      {id:'test10',      name:'測試達人', desc:'累積 10 次測試',      icon:'🏆'},
+  both_sides:  {id:'both_sides',  name:'雙側解鎖', desc:'左右兩側都試過',      icon:'🔓'},
+};
+
+function getAchievKey(){ return 'raphael_v7_ach_'+(S.userId||'anon'); }
+
+function getEarnedAch(){
+  try{ return JSON.parse(localStorage.getItem(getAchievKey())||'[]'); }catch(e){ return []; }
+}
+
+function grantAch(id){
+  const earned=getEarnedAch();
+  if(earned.includes(id))return;
+  earned.push(id);
+  localStorage.setItem(getAchievKey(),JSON.stringify(earned));
+  const a=ACHIEV[id];
+  if(!a)return;
+  GA.achievement();
+  const el=document.createElement('div');
+  el.className='achievement-popup';
+  el.innerHTML='<div class="ach-icon">'+a.icon+'</div><div><div class="ach-name">成就解鎖：'+a.name+'</div><div class="ach-desc">'+a.desc+'</div></div>';
+  document.body.appendChild(el);
+  setTimeout(function(){ el.remove(); },3200);
+}
+
+function checkAchievements(rec){
+  if(S.records.length>=1) grantAch('first_test');
+  if(rec.improved) grantAch('first_feel');
+  if(S.records.length>=10) grantAch('test10');
+  const sides=new Set(S.records.map(function(r){ return r.neckSide; }));
+  if(sides.has('left')&&sides.has('right')) grantAch('both_sides');
+  const streak=computeStreak(S.records);
+  if(streak>=3) grantAch('streak3');
+  if(streak>=7) grantAch('streak7');
+}
+
+/* ══════════════════════════════════════════════
+   TITLES
+══════════════════════════════════════════════ */
+const TITLES = [
+  {id:"master",    emoji:"👑", name:"智平衡達人", minStreak:30, minCount:0,  needBothSides:false},
+  {id:"symmetric", emoji:"🎯", name:"對稱感知者", minStreak:0,  minCount:3,  needBothSides:true},
+  {id:"veteran",   emoji:"💪", name:"肩頸老手",   minStreak:0,  minCount:10, needBothSides:false},
+  {id:"guardian",  emoji:"⚖️", name:"平衡守護者", minStreak:7,  minCount:0,  needBothSides:false},
+  {id:"explorer",  emoji:"🔍", name:"感知探索者", minStreak:3,  minCount:0,  needBothSides:false},
+  {id:"novice",    emoji:"🌱", name:"初醒者",     minStreak:0,  minCount:1,  needBothSides:false},
+];
+
+function computeStreak(records){
+  if(!records||!records.length)return 0;
+  const dates=[...new Set(records.map(function(r){return r.date;}))].sort().reverse();
+  const today=new Date().toISOString().slice(0,10);
+  const yesterday=new Date(Date.now()-86400000).toISOString().slice(0,10);
+  if(dates[0]!==today&&dates[0]!==yesterday)return 0;
+  let streak=1;
+  for(let i=1;i<dates.length;i++){
+    const diff=Math.round((new Date(dates[i-1])-new Date(dates[i]))/86400000);
+    if(diff===1)streak++;
+    else break;
+  }
+  return streak;
+}
+
+function getUserStats(){
+  const records=S.records||[];
+  const streak=computeStreak(records);
+  const count=records.length;
+  const sides=new Set(records.map(function(r){return r.neckSide;}));
+  const bothSides=sides.has("left")&&sides.has("right");
+  return {streak:streak, count:count, bothSides:bothSides};
+}
+
+function getUserTitle(){
+  if(!S.userId||!S.records||!S.records.length)return null;
+  const st=getUserStats();
+  for(let i=0;i<TITLES.length;i++){
+    const t=TITLES[i];
+    if(st.streak>=t.minStreak&&st.count>=t.minCount&&(!t.needBothSides||st.bothSides)) return t;
+  }
+  return null;
+}
+
+function getNextTitle(){
+  const st=getUserStats();
+  const cur=getUserTitle();
+  const curIdx=cur?TITLES.findIndex(function(t){return t.id===cur.id;}):-1;
+  // Return the title just above current (lower index = higher rank)
+  for(let i=curIdx-1;i>=0;i--){
+    return TITLES[i];
+  }
+  return null;
+}
+
+/* ══════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════ */
+let S = {
+  screen: "intro",
+  introStep: 0,
+  neckR: null, neckL: null, neckSide: null, neckSideManual: false,
+  neckSubStep: 0,         // 0=rightSide 1=rightLevel 2=leftSide 3=leftLevel
+  neckRSide: null, neckRLevel: null, // right-turn: 'left'|'right', 'tight'|'normal'
+  neckLSide: null, neckLLevel: null,  // left-turn: same
+  round2Key: Math.random() < .5 ? "r2a" : "r2b",
+  scores: {},
+  dominantArm: null,
+  pressPoints: [],
+  timerLeft: 30, timerActive: false, timerInterval: null,
+  pressIdx: 0,
+  afterR: null, afterL: null,
+  userId: null, userName: null,
+  records: [], _saved: false,
+  feltPress: null, // true=有感 false=無感
+  ansAnswers: {}, // ANS self-check
+  elbowPtIdx: 0,
+  elbowPoints: [],
+  elbowSubStep: 0,   // 0-3=inner 4-7=outer
+  elbowInnerSide: null, elbowInnerLevel: null,
+  elbowOuterSide: null, elbowOuterLevel: null,
+};
+
+function isANSUnlocked(){
+  const earned=getEarnedAch();
+  return earned.includes("streak3");
+}
+
+let H = {expandedId:null, timerLeft:60, timerInterval:null, timerActive:false};
+function resetHistTimer(){ clearInterval(H.timerInterval); H.timerInterval=null; H.timerActive=false; H.timerLeft=60; }
+
+/* ══════════════════════════════════════════════
+   AUTH
+══════════════════════════════════════════════ */
+function djb2(s){
+  let h=5381;
+  for(let i=0;i<s.length;i++) h=((h<<5)+h)^s.charCodeAt(i);
+  return "u"+(h>>>0).toString(36);
+}
+function userKey(){ return "raphael_v7_"+S.userId; }
+
+function doLogin(name,bday,phone){
+  const raw=(name.trim()+"|"+phone.replace(/\D/g,"").slice(-4)).toLowerCase();
+  S.userId=djb2(raw); S.userName=name.trim();
+  const d=localStorage.getItem(userKey());
+  S.records=d?JSON.parse(d):[];
+  sessionStorage.setItem("rv7sess",JSON.stringify({uid:S.userId,name:S.userName}));
+}
+function doLogout(){
+  sessionStorage.removeItem("rv7sess");
+  S.userId=null; S.userName=null; S.records=[];
+}
+function initSession(){
+  const d=sessionStorage.getItem("rv7sess");
+  if(!d) return false;
+  const p=JSON.parse(d);
+  S.userId=p.uid; S.userName=p.name;
+  const stored=localStorage.getItem(userKey());
+  S.records=stored?JSON.parse(stored):[];
+  return true;
+}
+
+function saveRecord(rec){
+  S.records.push(rec);
+  localStorage.setItem(userKey(),JSON.stringify(S.records));
+  setTimeout(function(){
+    checkAchievements(rec);
+    showToast("已儲存 · 點右上角名字可查看紀錄");
+  },600);
+}
+
+/* ══════════════════════════════════════════════
+   DECISION LOGIC
+══════════════════════════════════════════════ */
+function computeDominantArm(){
+  // New elbow test: use inner+outer side selections
+  if(S.elbowInnerSide||S.elbowOuterSide){
+    var sides=[S.elbowInnerSide,S.elbowOuterSide].filter(Boolean);
+    var lvls=[S.elbowInnerLevel,S.elbowOuterLevel];
+    var lCount=sides.filter(function(s){return s==="left";}).length;
+    var rCount=sides.filter(function(s){return s==="right";}).length;
+    if(rCount>lCount) return "right";
+    if(lCount>rCount) return "left";
+    // Tie: use severity
+    if(lvls[0]==="severe"&&S.elbowInnerSide) return S.elbowInnerSide;
+    if(lvls[1]==="severe"&&S.elbowOuterSide) return S.elbowOuterSide;
+    return sides[0]||"right";
+  }
+  // Fallback: legacy scores
+  var l=0,r=0;
+  Object.values(S.scores).forEach(function(v){
+    if(v==="left") l++;
+    else if(v==="right") r++;
+  });
+  return r>=l?"right":"left";
+}
+
+/* ══════════════════════════════════════════════
+   FEEDBACK SENTENCE POOLS
+   zone: "shoulder" | "collarbone"
+   felt: true = 有感, false = 無感
+══════════════════════════════════════════════ */
+const FEEDBACK = {
+  shoulder: {
+    felt: [
+      "肩峰後面是很多人從來沒認真碰過的地方。你今天去了。",
+      "{側}肩的緊繃今天讓你找到了。接下來幾小時，留意這裡的變化。",
+      "這裡的酸脹感是身體在說話。你今天聽到了。",
+      "肩胛旁的點不容易找，找到了表示真的在用心感受。",
+      "今天的開關在{側}肩。你花了不到兩分鐘，但這兩分鐘是給自己的。",
+      "{側}肩今天有被照顧到。明天再來看看它的狀態。",
+      "每個人的{側}肩開關位置都有點不同。你今天記住了你自己的。",
+    ],
+    nofeel: [
+      "今天{側}肩的感覺不明顯——有時候身體需要幾次才會開口。",
+      "找不到感覺不代表沒有，有時候緊繃藏得很深。明天再試試。",
+      "身體的感受需要練習才能讀到。今天是其中一次練習。",
+      "沒有酸脹感也沒關係。每次按都是在讓這個位置對你更熟悉。",
+      "{側}肩今天反應不明顯，下次試著把力道往骨頭方向再深一點。",
+    ],
+  },
+  collarbone: {
+    felt: [
+      "鎖骨外側這個位置，大多數人一輩子不會主動去碰它。你今天碰了。",
+      "這裡的緊繃跟你的呼吸有關。按完之後，試著深吸一口氣。",
+      "鎖骨外側端點的下方，是很多人的「隱形緊繃點」。你找到了。",
+      "如果按的時候有點意外地酸，表示這裡等你來很久了。",
+      "按完這裡，有些人會感覺呼吸變深了一點。留意看看。",
+      "今天的開關在{側}側鎖骨。不起眼的位置，卻是整個肩頸的連結點。",
+      "這裡通了，整個{側}側的頸肩會覺得輕一點。感受看看。",
+    ],
+    nofeel: [
+      "鎖骨這個位置第一次按，通常不容易有感覺。多幾次會不同。",
+      "沒有感覺有時是位置稍微偏了。下次試著往鎖骨正下方移一指。",
+      "今天這裡比較安靜。身體不是每天都一樣，明天可能就有反應了。",
+      "找不到感覺也是一種資訊——說明需要更多次才能建立連結。",
+      "每次去碰這個位置，身體就多記住你一次。今天算數。",
+    ],
+  },
+};
+
+function getFeedbackLine(zone, felt, sideLabel){
+  const pool = (FEEDBACK[zone]||(FEEDBACK.shoulder))[felt?"felt":"nofeel"];
+  const day = new Date().getDate();
+  const line = pool[day % pool.length];
+  return line.replace(/\{側\}/g, sideLabel);
+}
+
+function makePressPoint(side,zone,isPrimary){
+  const sL=side==="right"?"右":"左";
+  const zN=zone==="shoulder"?"肩膀／肩胛旁":"鎖骨外側";
+  const zNote=zone==="shoulder"
+    ?sL+"側肩膀，在肩膀中間處，肌肉和肩胛骨交接處。用食指中指無名指按深揉壓——慢慢找到有輕微酸脹感的位置，在那裡持續揉壓，保持自然呼吸。"
+    :sL+"側鎖骨外側端點下方約一指處，整個鎖骨外1/3，按在鎖骨上。用食指中指無名指按深後輕輕揉動，找到有微微酸脹感的位置，持續揉壓，保持自然呼吸。";
+  return {side:side, zone:zone, isPrimary:isPrimary, sideLabel:sL, zoneName:zN, zoneNote:zNote};
+}
+
+function computePressPoints(){
+  const dom=S.dominantArm, neck=S.neckSide, other=neck==="right"?"left":"right";
+  const neckZone = dom==="right" ? "shoulder" : "collarbone";
+  const otherZone= dom==="right" ? "collarbone": "shoulder";
+
+  return [makePressPoint(neck,neckZone,true), makePressPoint(other,otherZone,false)];
+}
+
+/* ══════════════════════════════════════════════
+   IMAGE HELPERS
+══════════════════════════════════════════════ */
+function elbowSVG(pos){
+  const isInner = pos.endsWith("i");
+  const imgSrc = isInner ? "/v7-assets/elbow-inner.png" : "/v7-assets/elbow-outer.png";
+  const allPositions = isInner
+    ? [{k:"ui",l:"上方"},{k:"mi",l:"中段"},{k:"li",l:"下方"}]
+    : [{k:"uo",l:"上方"},{k:"mo",l:"中段"},{k:"lo",l:"下方"}];
+
+  return '<img src="'+imgSrc+'" alt="手肘'+(isInner?"內側":"外側")+'示意圖" loading="lazy"/>'
+    +'<div class="elbow-pos-chip">'
+    +allPositions.map(function(p){
+      return '<span class="pos-chip '+(p.k===pos?"active":"dim")+'">'+p.l+'</span>';
+    }).join("")
+    +'</div>';
+}
+
+function bodySVG(side,zone){
+  const isSh = zone==="shoulder";
+  const sideLabel = side==="right"?"右側":"左側";
+  const imgSrc = isSh ? "/v7-assets/shoulder-scapular.png" : "/v7-assets/clavicle.png";
+  return '<div class="body-img-wrap">'
+    +'<img src="'+imgSrc+'" alt="'+sideLabel+(isSh?"肩胛骨旁":"鎖骨按壓區域")+'" loading="lazy" style="border-radius:var(--radius-sm)"/>'
+    +'<div class="body-side-badge">'+sideLabel+'</div>'
+    +'</div>';
+}
+
+function pressImgSrc(zone){
+  return zone==="shoulder"?"/v7-assets/shoulder-scapular.png":"/v7-assets/clavicle.png";
+}
+
+/* ══════════════════════════════════════════════
+   PROGRESS MAP
+══════════════════════════════════════════════ */
+function progMap(){
+  const nodes=['neck','elbow','reveal','press','result'];
+  const order={intro:0,neckRight:0,neckLeft:0,neck:0,elbow1:1,elbow2:1,elbowPt:1,elbowInner:1,elbowOuter:1,reveal:2,press:3,after:4,result:4};
+  const cur=order[S.screen]!==undefined?order[S.screen]:0;
+  let html='';
+  nodes.forEach(function(n,i){
+    const done=i<cur, isActive=i===cur;
+    html+='<div class="prog-node '+(done?'done':isActive?'active':'')+'"></div>';
+    if(i<nodes.length-1) html+='<div class="prog-line '+(done?'done':'')+'"></div>';
+  });
+  return '<div class="prog-map">'+html+'</div>';
+}
+
+/* ══════════════════════════════════════════════
+   STORY LINES
+══════════════════════════════════════════════ */
+const STORY_LINES = [
+  '你的肩頸，',
+  '有一個隱藏的開關。',
+  '',
+  '每個人的位置都不同。',
+  '',
+  '今天——',
+  '我們來找出你的。',
+];
+
+/* ══════════════════════════════════════════════
+   TYPEWRITER
+══════════════════════════════════════════════ */
+function runTypewriter(){
+  const el=document.getElementById("introText");
+  const startBtn=document.getElementById("startBtn");
+  if(!el)return;
+
+  const fullText=STORY_LINES.join('\n');
+  let i=0;
+
+  const interval=setInterval(function(){
+    if(i<=fullText.length){
+      el.innerHTML=fullText.slice(0,i).replace(/\n/g,'<br>');
+      i++;
+    } else {
+      clearInterval(interval);
+      if(startBtn) startBtn.style.display='block';
+    }
+  },60);
+
+  var skip=function(){
+    clearInterval(interval);
+    el.innerHTML=fullText.replace(/\n/g,'<br>');
+    if(startBtn) startBtn.style.display='block';
+    document.removeEventListener('click',skip);
+  };
+  setTimeout(function(){ document.addEventListener('click',skip); },200);
+}
+
+function screenIntro(){
+  return '<div class="screen intro-screen">'
+    +'<div class="intro-body">'
+    +'<div class="intro-logo">智</div>'
+    +'<div class="intro-story" id="introStory">'
+    +'<span id="introText"></span><span class="cursor-blink"></span>'
+    +'</div>'
+    +'</div>'
+    +'<div class="intro-foot">'
+    +'<button class="btn-start" id="startBtn" style="display:none">▶ 開始探索</button>'
+    +'<p class="intro-copyright">© 智平衡生醫集團 版權所有</p>'
+    +'</div>'
+    +'</div>';
+}
+
+function neckCard(dir){
+  // dir: 'right' | 'left'
+  var isR = dir==='right';
+  var emoji = isR ? '➡️' : '⬅️';
+  var label = isR ? '往右轉頭' : '往左轉頭';
+  var side  = isR ? S.neckRSide  : S.neckLSide;
+  var level = isR ? S.neckRLevel : S.neckLLevel;
+
+  function selBtn(val, cur, text){
+    var isSel = cur===val;
+    return '<button class="btn '+(isSel?'btn-primary':'btn-secondary')+' neck-'+dir+'-side" '
+      +'style="font-size:16px;padding:16px 0;font-weight:900;transition:all .15s" '
+      +'data-dir="'+dir+'" data-val="'+val+'">'+text+'</button>';
+  }
+  function selLvl(val, cur, text){
+    var isSel = cur===val;
+    return '<button class="btn '+(isSel?'btn-primary':'btn-secondary')+' neck-'+dir+'-level" '
+      +'style="font-size:16px;padding:16px 0;font-weight:900;transition:all .15s" '
+      +'data-dir="'+dir+'" data-val="'+val+'">'+text+'</button>';
+  }
+
+  return '<div class="card" style="padding:22px 20px;margin-bottom:0">'
+    +'<p style="font-size:24px;margin-bottom:4px">'+emoji+'</p>'
+    +'<p style="font-weight:900;font-size:18px;color:var(--text);margin-bottom:4px">'+label+'</p>'
+    +'<p style="font-size:13px;color:var(--muted);margin-bottom:18px">慢慢轉到底，感受兩側的緊繃感</p>'
+    +'<p style="font-size:13px;font-weight:800;color:var(--muted2);margin-bottom:8px">哪邊覺得比較緊或不舒服？</p>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">'
+    +selBtn('left',  side, '← 左邊')
+    +selBtn('right', side, '右邊 →')
+    +'</div>'
+    +'<p style="font-size:13px;font-weight:800;color:var(--muted2);margin-bottom:8px">緊繃程度？</p>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+    +selLvl('tight',  level, '😣 很緊')
+    +selLvl('normal', level, '😐 普通')
+    +'</div>'
+    +'</div>';
+}
+
+function neckScreen(dir){
+  var isR = dir==='right';
+  var side  = isR ? S.neckRSide  : S.neckLSide;
+  var level = isR ? S.neckRLevel : S.neckLLevel;
+  var canNext = side!==null && level!==null;
+
+  // Quick return card (first neck screen only)
+  var quickCard='';
+  if(isR && S.records&&S.records.length>0){
+    var lastRec=S.records[S.records.length-1];
+    var pts=lastRec.pressPoints||[];
+    var pri=pts.find(function(p){return p.isPrimary;})||pts[0];
+    if(pri){
+      var ZN={shoulder:'肩膀',collarbone:'鎖骨外側'};
+      var priTxt=(pri.side==='right'?'右':'左')+'側 '+(ZN[pri.zone]||pri.zone);
+      quickCard='<div style="background:linear-gradient(135deg,rgba(10,107,98,.07),rgba(10,107,98,.02));border:1.5px solid var(--border-glow);border-radius:var(--radius);padding:14px 16px">'
+        +'<p style="font-size:11px;font-weight:800;color:var(--accent);margin-bottom:6px">📌 上次開關位置（'+lastRec.date+'）</p>'
+        +'<div style="font-size:15px;font-weight:900;color:var(--text);margin-bottom:12px">'+priTxt+'</div>'
+        +'<button class="btn btn-primary" id="quickPressBtn" style="font-size:13px;padding:11px">▶ 直接開始按壓</button>'
+        +'</div>';
+    }
+  }
+
+  return '<div class="screen">'
+    +progMap()
+    +'<div class="topbar">'
+    +'<div style="display:flex;align-items:center;gap:6px">'
+    +'<button class="back-btn" id="backBtn">←</button>'
+    +'<div class="brand-mark">智</div>'
+    +'</div>'
+    +'<span class="step-chip">第一關 🔄</span>'
+    +'<div style="display:flex;align-items:center;gap:6px">'
+    +'<button class="mute-btn" id="muteBtn">🔊</button>'
+    +'<span class="user-chip" id="userChip">'+esc(S.userName)+'</span>'
+    +'</div>'
+    +'</div>'
+    +'<div class="screen-body">'
+    +quickCard
+    +neckCard(dir)
+    +'</div>'
+    +'<div class="screen-foot">'
+    +'<button class="btn btn-primary" id="neckNextBtn" '+(canNext?'':'disabled')+'>'
+    +(isR?'往左轉測試 →':'進入手肘測試 →')
+    +'</button>'
+    +'</div>'
+    +'</div>';
+}
+
+function screenNeckRight(){ return neckScreen('right'); }
+function screenNeckLeft(){  return neckScreen('left');  }
+// Legacy alias
+function screenNeck(){ return neckScreen('right'); }
+
+
+function elbowPointCard(p){
+  const sel=S.scores[p.id];
+  const sideResult = sel==="left" ? "👈 左手比較有感"
+    : sel==="right" ? "👉 右手比較有感"
+    : sel==="tie" ? "兩側差不多" : null;
+
+  return '<div class="elbow-card">'
+    +'<div class="elbow-diagram-wrap" style="position:relative">'
+    +elbowSVG(p.pos)
+    +'</div>'
+    +'<div class="elbow-info">'
+    +'<div class="elbow-title-row">'+esc(p.title)+'</div>'
+    +'<p class="elbow-note">'+esc(p.note)+'</p>'
+    +'<div class="side-sel-row">'
+    +'<button class="side-sel-btn '+(sel==="left"?"sel":"")+'" data-side-sel="'+p.id+':left">👈 左邊</button>'
+    +'<button class="side-sel-btn '+(sel==="tie"?"sel":"")+'" data-side-sel="'+p.id+':tie">差不多</button>'
+    +'<button class="side-sel-btn '+(sel==="right"?"sel":"")+'" data-side-sel="'+p.id+':right">右邊 👉</button>'
+    +'</div>'
+    +'<div class="side-result" id="sr-'+p.id+'" style="color:'+(sel&&sel!=="tie"?"var(--accent)":"var(--muted)")+';min-height:20px">'+(sideResult||"")+'</div>'
+    +'</div>'
+    +'</div>';
+}
+
+function screenElbow(round){
+  const isR1 = round===1;
+  const pts = isR1 ? E_GROUPS.r1 : E_GROUPS[S.round2Key];
+  const allDone = pts.every(function(p){ return S.scores[p.id]!==undefined; });
+  const roundLabel = isR1 ? "第一輪：上方位置" : S.round2Key==="r2a" ? "第二輪：中段位置" : "第二輪：下方位置";
+
+  return '<div class="screen">'
+    +progMap()
+    +'<div class="topbar">'
+    +'<div style="display:flex;align-items:center;gap:6px">'
+    +'<button class="back-btn" id="backBtn">←</button>'
+    +'<div class="brand-mark">智</div>'
+    +'</div>'
+    +'<span class="step-chip">第二關 🔍</span>'
+    +'<div style="display:flex;align-items:center;gap:6px">'
+    +'<button class="mute-btn" id="muteBtn">🔊</button>'
+    +'<span class="user-chip">'+esc(S.userName)+'</span>'
+    +'</div>'
+    +'</div>'
+    +'<div class="screen-body">'
+    +'<div>'
+    +'<span class="round-chip">'+(isR1?"🔵":"🟢")+' '+roundLabel+'</span>'
+    +'<h2 class="screen-title" style="margin-top:8px">手肘左右<br>各按看看</h2>'
+    +'<p class="screen-sub">分別在兩個位置輕壓，選出左手和右手哪邊比較有感覺。</p>'
+    +'</div>'
+    +pts.map(function(p){ return elbowPointCard(p); }).join("")
+    +'</div>'
+    +'<div class="screen-foot">'
+    +'<button class="btn btn-primary" id="nextElbow'+round+'" '+(allDone?"":"disabled")+'>'
+    +(isR1?"繼續第二輪 →":"分析我的開關 🔍")
+    +'</button>'
+    +(!allDone?'<p class="hint-text">每個點的左右感受都填完才能繼續</p>':"")
+    +'</div>'
+    +'</div>';
+}
+
+function screenReveal(){
+  const pp=S.pressPoints;
+  const pri=pp.find(function(p){ return p.isPrimary; });
+  const sec=pp.find(function(p){ return !p.isPrimary; });
+
+  return '<div class="screen">'
+    +progMap()
+    +'<div class="topbar">'
+    +'<div style="display:flex;align-items:center;gap:6px">'
+    +'<button class="back-btn" id="backBtn">←</button>'
+    +'<div class="brand-mark">智</div>'
+    +'</div>'
+    +'<span class="step-chip" style="color:var(--gold);border-color:var(--gold-glow)">結果揭曉</span>'
+    +'<div style="display:flex;align-items:center;gap:6px">'
+    +'<button class="mute-btn" id="muteBtn">🔊</button>'
+    +'<span class="user-chip">'+esc(S.userName)+'</span>'
+    +'</div>'
+    +'</div>'
+    +'<div class="screen-body" style="align-items:center;padding-top:10px">'
+    +'<div class="reveal-cinematic-wrap">'
+    // Pre-text line 1
+    +'<p class="reveal-pre-text">今天的開關⋯⋯</p>'
+    // Glow icon
+    +'<div style="opacity:0;animation:revealGlow .7s ease forwards;animation-delay:.9s;margin-bottom:4px">'
+    +'<div style="font-size:52px;animation:revealPulse 2s ease 2.2s infinite">🔑</div>'
+    +'</div>'
+    // Found text
+    +'<p class="reveal-found-text">找到了 ✦</p>'
+    // Primary card
+    +'<div class="reveal-point-pop" style="width:100%">'
+    +'<div class="point-card primary" style="margin-bottom:10px">'
+    +'<div class="primary-badge">開關一・優先按壓</div>'
+    +'<div class="point-inner">'
+    +'<div class="point-svg-wrap">'+bodySVG(pri.side,pri.zone)+'</div>'
+    +'<div>'
+    +'<div class="point-name">'+pri.sideLabel+'側<br>'+pri.zoneName+'</div>'
+    +'<div class="point-desc">'+pri.zoneNote+'</div>'
+    +'</div>'
+    +'</div>'
+    +'</div>'
+    +'</div>'
+    // Secondary card
+    +'<div class="reveal-point-pop secondary" style="width:100%">'
+    +'<div class="point-card">'
+    +'<div class="point-inner">'
+    +'<div class="point-svg-wrap">'+bodySVG(sec.side,sec.zone)+'</div>'
+    +'<div>'
+    +'<div class="point-name" style="font-size:14px">'+sec.sideLabel+'側<br>'+sec.zoneName+'</div>'
+    +'<div class="point-desc" style="font-size:11px;color:var(--muted2);margin-top:3px">開關二，一起試試</div>'
+    +'</div>'
+    +'</div>'
+    +'</div>'
+    +'</div>'
+    +'<p style="font-size:12px;color:var(--muted2);max-width:270px;text-align:center;opacity:0;animation:revealFadeUp .4s ease forwards;animation-delay:2.8s">先按開關一一分鐘，再按開關二一分鐘，完成後重新轉頭對比。</p>'
+    +'</div>'
+    +'</div>'
+    +'<div class="screen-foot" style="opacity:0;animation:revealFadeUp .4s ease forwards;animation-delay:2.9s">'
+    +'<button class="btn btn-primary" id="startPress">▶ 開始按壓 ⏱</button>'
+    +'</div>'
+    +'</div>';
+}
+
+function screenPress(){
+  const pt=S.pressPoints[S.pressIdx];
+  const isFirst=S.pressIdx===0;
+  const total=30, left=S.timerLeft;
+  const R=34, circ=2*Math.PI*R;
+  const dash=circ*(left/total);
+  const done=left<=0;
+
+  return '<div class="screen" style="background:#1a1208">'
+    +progMap()
+    +'<div class="topbar" style="background:transparent">'
+    +'<div class="brand-mark">智</div>'
+    +'<span class="step-chip" style="background:rgba(255,255,255,.12);color:#fff">'+(isFirst?"開關一":"開關二")+'</span>'
+    +'<div style="display:flex;align-items:center;gap:6px">'
+    +'<button class="mute-btn" id="muteBtn" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.7)">🔊</button>'
+    +'<span class="user-chip" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.7)">'+esc(S.userName)+'</span>'
+    +'</div>'
+    +'</div>'
+    +'<div class="timer-body">'
+    +'<div class="timer-img-zone">'
+    +'<img src="'+pressImgSrc(pt.zone)+'" alt="'+pt.zoneName+'"/>'
+    +'<div class="timer-img-overlay"></div>'
+    +'<div class="timer-img-text">'
+    +'<div class="timer-img-badge">'+(isFirst?"優先按壓":"開關二")+'</div>'
+    +'<div class="timer-img-name">'+pt.sideLabel+'側 '+pt.zoneName+'</div>'
+    +'<div class="timer-img-desc">'+pt.zoneNote+'</div>'
+    +'</div>'
+    +(done?'<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:64px">✅</div>':"")
+    +'</div>'
+    +'<div class="breath-wrap" style="'+(S.timerActive&&!done?'':'display:none')+'">'
+    +'<div class="breath-ring"></div>'
+    +'<div class="breath-ring r2"></div>'
+    +'<div class="breath-ring r3"></div>'
+    +'<div class="breath-core">🤲</div>'
+    +'</div>'
+    +'<div class="press-color-bar" id="pressColorBar" style="'+(S.timerActive&&!done?'':'display:none')+'">'
+    +'<div class="press-color-fill" id="colorFill" style="width:'+(Math.round((1-(left/60))*100))+'%"></div>'
+    +'</div>'
+    +'<div class="timer-bottom">'
+    +'<div class="timer-ring">'
+    +'<svg width="86" height="86" viewBox="0 0 80 80">'
+    +'<circle cx="40" cy="40" r="'+R+'" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="6"/>'
+    +'<circle id="timerCircle" cx="40" cy="40" r="'+R+'" fill="none" stroke="'+(done?"#22c55e":"var(--accent)")+'" stroke-width="6"'
+    +' stroke-dasharray="'+dash+' '+circ+'" stroke-linecap="round"'
+    +' style="transition:stroke-dasharray .8s linear"/>'
+    +'</svg>'
+    +'<div class="timer-num" id="timerNum" style="color:'+(done?"#22c55e":"var(--accent)")+'">'+left+'</div>'
+    +'</div>'
+    +'<div class="timer-hint" id="timerHint">'
+    +(done?"按壓完成！":S.timerActive?"慢慢揉壓，找到酸脹感後維持…":"準備好了按「開始計時」")
+    +'</div>'
+    +'</div>'
+    +'</div>'
+    +'<div class="screen-foot" style="background:#1f1710;padding-top:10px">'
+    +(!done
+      ? '<button class="btn btn-primary" id="toggleTimer">'+(S.timerActive?"⏸ 暫停":"▶ 開始計時")+'</button>'
+        +'<button class="btn btn-secondary" id="skipTimer" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:rgba(255,255,255,.65)">跳過這個點</button>'
+      : '<button class="btn btn-primary" id="nextPress">'
+        +(isFirst?"繼續按開關二 →":"完成！來看結果 →")
+        +'</button>'
+    )
+    +'</div>'
+    +'</div>';
+}
+
+function scoreRow(dir, val){
+  var nums='';
+  for(var n=1;n<=10;n++){
+    var isSel=val===n;
+    nums+='<button class="btn '+(isSel?'btn-primary':'btn-secondary')+' score-btn" '
+      +'style="width:calc(10% - 4px);min-width:28px;padding:10px 0;font-size:14px;font-weight:900;border-radius:10px" '
+      +'data-dir="'+dir+'" data-score="'+n+'">'+n+'</button>';
+  }
+  return '<div style="display:flex;flex-wrap:wrap;gap:4px">'+nums+'</div>';
+}
+
+function screenAfter(){
+  const canNext=S.afterR!==null && S.afterL!==null;
+
+  // Compare summary
+  var compareCard='';
+  if(canNext){
+    var rScore=S.afterR, lScore=S.afterL;
+    compareCard='<div class="card" style="background:rgba(10,107,98,.05);border-color:var(--border-glow)">'
+      +'<p style="font-weight:800;color:var(--accent);margin-bottom:10px">📊 現在的狀態</p>'
+      +'<div style="display:flex;gap:16px">'
+      +'<div style="flex:1;text-align:center">'
+      +'<div style="font-size:11px;color:var(--muted);margin-bottom:4px">右轉</div>'
+      +'<div style="font-size:28px;font-weight:900;color:'+(rScore<=4?'var(--accent)':rScore<=7?'var(--gold)':'var(--red)')+'">'+rScore+'</div>'
+      +'<div style="font-size:10px;color:var(--muted)">/ 10</div>'
+      +'</div>'
+      +'<div style="flex:1;text-align:center">'
+      +'<div style="font-size:11px;color:var(--muted);margin-bottom:4px">左轉</div>'
+      +'<div style="font-size:28px;font-weight:900;color:'+(lScore<=4?'var(--accent)':lScore<=7?'var(--gold)':'var(--red)')+'">'+lScore+'</div>'
+      +'<div style="font-size:10px;color:var(--muted)">/ 10</div>'
+      +'</div>'
+      +'</div>'
+      +'</div>';
+  }
+
+  return '<div class="screen">'
+    +progMap()
+    +'<div class="topbar">'
+    +'<div class="brand-mark">智</div>'
+    +'<span class="step-chip">第三關 🔁</span>'
+    +'<div style="display:flex;align-items:center;gap:6px">'
+    +'<button class="mute-btn" id="muteBtn">🔊</button>'
+    +'<span class="user-chip">'+esc(S.userName)+'</span>'
+    +'</div>'
+    +'</div>'
+    +'<div class="screen-body">'
+    +'<div>'
+    +'<p class="kicker">前後對比</p>'
+    +'<h2 class="screen-title">按完了，<br>再試試看</h2>'
+    +'<p class="screen-sub">重複一開始的動作，感受現在和剛才有什麼不同。</p>'
+    +'</div>'
+    +'<div class="card" style="padding:14px 16px">'
+    +'<p style="font-weight:800;color:var(--text);margin-bottom:10px">按壓時有沒有感覺到酸脹感？</p>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+    +'<button class="btn '+(S.feltPress===true?"btn-primary":"btn-secondary")+'" id="feltYes" style="font-size:13px">✓ 有感覺</button>'
+    +'<button class="btn '+(S.feltPress===false?"btn-primary":"btn-secondary")+'" id="feltNo" style="font-size:13px">沒什麼感覺</button>'
+    +'</div>'
+    +'</div>'
+    +'<div class="card">'
+    +'<p style="font-weight:800;margin-bottom:4px;color:var(--text)">➡️ 往右轉——現在幾分？</p>'
+    +'<p style="font-size:12px;color:var(--muted);margin-bottom:12px">如果之前的不舒服是 10 分，現在是幾分？</p>'
+    +scoreRow("R", S.afterR)
+    +'</div>'
+    +'<div class="card">'
+    +'<p style="font-weight:800;margin-bottom:4px;color:var(--text)">⬅️ 往左轉——現在幾分？</p>'
+    +'<p style="font-size:12px;color:var(--muted);margin-bottom:12px">如果之前的不舒服是 10 分，現在是幾分？</p>'
+    +scoreRow("L", S.afterL)
+    +'</div>'
+    +compareCard
+    +'</div>'
+    +'<div class="screen-foot">'
+    +'<button class="btn btn-primary" id="nextAfter" '+(canNext?"":"disabled")+'>看完整結果 →</button>'
+    +'</div>'
+    +'</div>';
+}
+
+function screenResult(){
+  const rA=S.afterR||5, lA=S.afterL||5;
+  const isRight=S.neckSide==="right";
+  const mainAfter=isRight?rA:lA;
+  // 1-10 scale: improved = low score (1-4), same = 5-6, worse = 7-10
+  const improved=mainAfter<=4, same=mainAfter<=6&&mainAfter>=5, worse=mainAfter>=7;
+  const mainBefore=10;  // baseline
+  const sideLabel=isRight?"右":"左";
+  function s2e(score){ return Math.min(4,Math.round((score-1)/9*4)); }
+
+  if(!S._saved && S.userId){
+    saveRecord({
+      id:Date.now().toString(),
+      date:new Date().toISOString().slice(0,10),
+      neckSide:S.neckSide, dominantArm:S.dominantArm,
+      pressPoints:S.pressPoints.map(function(p){ return {side:p.side,zone:p.zone,isPrimary:p.isPrimary}; }),
+      beforeR:10,beforeL:10,afterR:rA,afterL:lA,
+      improved:improved, worse:worse, round2:S.round2Key,
+    });
+    S._saved=true;
+    if(worse) GA.fail();
+    else if(improved) GA.success();
+  }
+
+  // Achievement chips
+  const earned=getEarnedAch();
+  let achHTML="";
+  if(earned.length>0){
+    achHTML='<div class="card">'
+      +'<p style="font-weight:800;margin-bottom:10px;color:var(--gold)">🏅 已解鎖成就</p>'
+      +'<div class="ach-chips">'
+      +earned.map(function(id){
+        const a=ACHIEV[id];
+        if(!a)return "";
+        return '<div class="ach-chip">'+a.icon+' '+a.name+'</div>';
+      }).join("")
+      +'</div>'
+      +'</div>';
+  }
+
+  return '<div class="screen">'
+    +progMap()
+    +'<div class="topbar">'
+    +'<div class="brand-mark">智</div>'
+    +'<span class="step-chip" style="color:var(--green);border-color:rgba(16,185,129,.3)">完成 ✓</span>'
+    +'<div style="display:flex;align-items:center;gap:6px">'
+    +'<button class="mute-btn" id="muteBtn">🔊</button>'
+    +'<span class="user-chip">'+esc(S.userName)+'</span>'
+    +'</div>'
+    +'</div>'
+    +'<div class="screen-body">'
+    +'<div>'
+    +'<p class="kicker">你的結果</p>'
+    +'<h2 class="screen-title">'+(improved?"👏 有感！":same?"🤔 差不多":"😅 沒有明顯改善")+'</h2>'
+    +'<div style="font-size:28px;margin:6px 0">'+(improved?"⭐⭐⭐":same?"⭐⭐☆":"⭐☆☆")+'</div>'
+    +'<p class="screen-sub">'+(improved?"按壓後感受有變化，這個點對你有效！":same?"感受和之前差不多，可以下次再試開關二。":"感受沒改善，建議回診讓治療師調整。")+'</p>'
+    +'</div>'
+    +(S.pressPoints&&S.pressPoints.length?'<div class="card" style="background:linear-gradient(135deg,rgba(10,107,98,.07),rgba(10,107,98,.02));border-color:var(--border-glow);padding:16px"><p style="font-size:13px;line-height:1.65;color:var(--text)">'+getFeedbackLine(S.pressPoints[0].zone,S.feltPress!==false,S.pressPoints[0].sideLabel)+'</p></div>':"")
+    +'<div class="card">'
+    +'<p style="font-weight:800;margin-bottom:12px;color:var(--text)">📊 前後對比（'+sideLabel+'側）</p>'
+    +'<div class="compare-row">'
+    +'<div class="cmp-box"><div class="cmp-lbl">按壓前</div><div class="cmp-emoji">'+EMOJIS[s2e(mainBefore)]+'</div><div class="cmp-text">'+EMOJI_LBLS[s2e(mainBefore)]+'</div></div>'
+    +'<div class="cmp-arrow">→</div>'
+    +'<div class="cmp-box '+(improved?"improved":"")+'"><div class="cmp-lbl">按壓後</div><div class="cmp-emoji">'+EMOJIS[s2e(mainAfter)]+'</div><div class="cmp-text">'+EMOJI_LBLS[s2e(mainAfter)]+'</div></div>'
+    +'</div>'
+    +(improved?'<div class="improved-banner" style="margin-top:12px">✅ '+sideLabel+'側轉動感受改善了 '+(mainBefore-mainAfter)+' 級！</div>':"")
+    +'</div>'
+    +'<div class="card">'
+    +'<p style="font-weight:800;margin-bottom:12px;color:var(--text)">本次測出的按壓點</p>'
+    +S.pressPoints.map(function(p){
+      return '<div style="display:flex;align-items:center;gap:12px;padding:8px 0;'+(p.isPrimary?"":"border-top:1px solid var(--border)")+'">'
+        +'<div style="width:72px;flex-shrink:0">'+bodySVG(p.side,p.zone)+'</div>'
+        +'<div>'
+        +'<div style="font-size:14px;font-weight:900;color:var(--text)">'+p.sideLabel+'側 '+p.zoneName+'</div>'
+        +'<span style="display:inline-block;padding:2px 10px;border-radius:999px;font-size:10px;font-weight:800;margin-top:3px;background:'+(p.isPrimary?"var(--accent-glow)":"rgba(251,191,36,.15)")+';color:'+(p.isPrimary?"var(--accent)":"var(--gold)")+';border:1px solid '+(p.isPrimary?"var(--border-glow)":"var(--gold-glow)")+'">'+(p.isPrimary?"開關一":"開關二")+'</span>'
+        +'</div>'
+        +'</div>';
+    }).join("")
+    +'</div>'
+    +(improved?'<div style="background:rgba(0,200,255,.1);border:1px solid var(--border-glow);border-radius:var(--radius);padding:16px;text-align:center">'
+      +'<div style="font-size:24px;margin-bottom:6px">🎉</div>'
+      +'<div style="font-weight:900;margin-bottom:4px;color:var(--text)">已自動保存到你的紀錄</div>'
+      +'<div style="font-size:12px;color:var(--muted2)">下次可以直接找回這個有效點</div>'
+      +'</div>':"")
+    +achHTML
+    +(S.records.length>0?'<div class="card" style="text-align:center;padding:14px">'
+      +'<div style="font-size:12px;color:var(--muted2)">你已累積 <b style="color:var(--accent)">'+S.records.length+'</b> 筆紀錄</div>'
+      +'<div style="font-size:11px;color:var(--accent);margin-top:5px;font-weight:800">👆 點右上角名字 → 看成就 / 查看紀錄</div>'
+      +(isANSUnlocked()?'<div style="font-size:11px;color:var(--muted2);margin-top:3px">🧠 自律神經自評已解鎖（點名字→成就頁進入）</div>':"")
+    +'</div>':"")
+    +'</div>'
+    +'<div class="screen-foot">'
+    +'<button class="btn btn-primary" id="restartBtn">重新測試 ↺</button>'
+    +'<button class="btn btn-secondary" id="showHistBtn">查看所有紀錄 📋</button>'
+    +'<button class="btn btn-secondary" id="switchUserBtn">換人使用</button>'
+    +'</div>'
+    +'</div>';
+}
+
+/* ══════════════════════════════════════════════
+   SCREEN: SINGLE ELBOW POINT
+══════════════════════════════════════════════ */
+function elbowScreen(type){
+  var isInner = type==='inner';
+  var imgSrc  = isInner ? '/v7-assets/elbow-inner.png' : '/v7-assets/elbow-outer.png';
+  var title   = isInner ? '手肘內側測試' : '手肘外側測試（翻面）';
+  var desc    = isInner
+    ? '手掌向上。找到手肘大拇指側的點，用拇指按深，左右手肘同一位置各按約 10 秒，感受哪邊比較酸痛。'
+    : '手心朝下，找到手肘背面外側突起骨頭上面一指。用拇指按深，左右各按約 10 秒，感受哪邊比較酸痛。';
+
+  var side  = isInner ? S.elbowInnerSide  : S.elbowOuterSide;
+  var level = isInner ? S.elbowInnerLevel : S.elbowOuterLevel;
+  var canNext = side!==null && level!==null;
+
+  function selSide(val, cur, text){
+    var sel = cur===val;
+    return '<button class="btn '+(sel?'btn-primary':'btn-secondary')+' elbow-'+type+'-side" '
+      +'style="font-size:16px;padding:16px 0;font-weight:900" '
+      +'data-type="'+type+'" data-val="'+val+'">'+text+'</button>';
+  }
+  function selLvl(val, cur, text){
+    var sel = cur===val;
+    return '<button class="btn '+(sel?'btn-primary':'btn-secondary')+' elbow-'+type+'-level" '
+      +'style="font-size:16px;padding:16px 0;font-weight:900" '
+      +'data-type="'+type+'" data-val="'+val+'">'+text+'</button>';
+  }
+
+  return '<div class="screen">'
+    +progMap()
+    +'<div class="topbar">'
+    +'<div style="display:flex;align-items:center;gap:6px">'
+    +'<button class="back-btn" id="backBtn">←</button>'
+    +'<div class="brand-mark">智</div>'
+    +'</div>'
+    +'<span class="step-chip">第二關 🔍 '+(isInner?'內側':'外側')+'</span>'
+    +'<div style="display:flex;align-items:center;gap:6px">'
+    +'<button class="mute-btn" id="muteBtn">🔊</button>'
+    +'<span class="user-chip">'+esc(S.userName)+'</span>'
+    +'</div>'
+    +'</div>'
+    +'<div class="screen-body">'
+    +'<div class="card" style="padding:0 0 4px;overflow:hidden">'
+    +'<img src="'+imgSrc+'" alt="手肘示意" style="width:100%;height:38vw;min-height:120px;max-height:180px;object-fit:cover;object-position:center 60%;display:block">'
+    +'<div style="padding:16px 18px 4px">'
+    +'<p style="font-weight:900;font-size:16px;color:var(--text);margin-bottom:6px">'+title+'</p>'
+    +'<p style="font-size:13px;color:var(--muted);margin-bottom:16px">'+desc+'</p>'
+    +'<p style="font-size:13px;font-weight:800;color:var(--muted2);margin-bottom:8px">哪邊比較痛？</p>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">'
+    +selSide('left',  side, '← 左邊')
+    +selSide('right', side, '右邊 →')
+    +'</div>'
+    +'<p style="font-size:13px;font-weight:800;color:var(--muted2);margin-bottom:8px">疼痛程度？</p>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px">'
+    +selLvl('mild',   level, '😐 稍微痛')
+    +selLvl('severe', level, '😣 很痛')
+    +'</div>'
+    +'</div>'
+    +'</div>'
+    +'</div>'
+    +'<div class="screen-foot">'
+    +'<button class="btn btn-primary" id="elbowNextBtn" '+(canNext?'':'disabled')+'>'
+    +(isInner?'外側測試 →':'分析我的開關 🔍')
+    +'</button>'
+    +'</div>'
+    +'</div>';
+}
+
+function screenElbowInner(){ return elbowScreen('inner'); }
+function screenElbowOuter(){ return elbowScreen('outer'); }
+// Legacy
+function screenElbowPt(){ return elbowScreen('inner'); }
+
+
+/* ══════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════ */
+function titleChipHtml(extraStyle){
+  const t=getUserTitle();
+  const es=extraStyle||"";
+  const label=t?(t.emoji+" "+esc(S.userName)):esc(S.userName);
+  return '<span class="user-chip" id="userChip" style="'+es+'">'+label+'</span>';
+}
+function esc(s){
+  if(!s)return "";
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function qsa(sel){return Array.from(document.querySelectorAll(sel));}
+function $l(id){return document.getElementById(id);}
+
+function showToast(msg,dur){
+  dur=dur||2500;
+  const t=document.getElementById("globalToast");
+  if(!t)return;
+  t.textContent=msg;
+  t.classList.add("show");
+  setTimeout(function(){ t.classList.remove("show"); },dur);
+}
+
+function updateTimerDisplay(){
+  const left=S.timerLeft;
+  const R=34,circ=2*Math.PI*R,dash=circ*(left/30);
+  const numEl=document.getElementById("timerNum");
+  const circEl=document.getElementById("timerCircle");
+  const hintEl=document.getElementById("timerHint");
+  if(numEl)numEl.textContent=left;
+  if(circEl)circEl.setAttribute("stroke-dasharray",dash+" "+circ);
+  if(hintEl&&S.timerActive)hintEl.textContent="慢慢揉壓，找到酸脹感後維持…";
+}
+
+function renderHistList(){
+  const list=document.getElementById("histList");
+  if(!list)return;
+  const ZONE_NAME={shoulder:"肩膀／肩胛旁",collarbone:"鎖骨外側"};
+  const ZONE_IMG={shoulder:"/v7-assets/shoulder-scapular.png",collarbone:"/v7-assets/clavicle.png"};
+  if(!S.records.length){
+    list.innerHTML='<p style="text-align:center;color:var(--muted);padding:20px 0">還沒有紀錄</p>';
+    return;
+  }
+  const reversed=[...S.records].reverse();
+  list.innerHTML=reversed.map(function(r,i){
+    const rid=r.id||String(i);
+    const pts=r.pressPoints||[];
+    const pri=pts.find(function(p){ return p.isPrimary; })||pts[0];
+    const sec=pts.find(function(p){ return !p.isPrimary; })||pts[1];
+    const resClass=r.improved?"good":r.worse?"bad":"neutral";
+    const resText=r.improved?"有感 ✅":"無明顯改善";
+    const priTxt=pri?(pri.side==="right"?"右":"左")+"側 "+(ZONE_NAME[pri.zone]||pri.zone):"—";
+    const secTxt=sec?(sec.side==="right"?"右":"左")+"側 "+(ZONE_NAME[sec.zone]||sec.zone):"—";
+    const isExp=H.expandedId===rid;
+    let expandHTML="";
+    if(isExp){
+      const td=H.timerLeft<=0;
+      const R2=24,circ2=2*Math.PI*R2,dash2=circ2*(H.timerLeft/60);
+      expandHTML='<div class="hist-expand">'
+        +'<div class="hist-press-pair">'
+        +(pri?'<div class="hist-press-item">'
+          +'<img class="hist-press-img" src="'+(ZONE_IMG[pri.zone]||"")+'" alt="'+priTxt+'"/>'
+          +'<div class="hist-press-label" style="background:var(--accent-glow);color:var(--accent)">開關一：'+priTxt+'</div>'
+          +'</div>':"")
+        +(sec?'<div class="hist-press-item">'
+          +'<img class="hist-press-img" src="'+(ZONE_IMG[sec.zone]||"")+'" alt="'+secTxt+'"/>'
+          +'<div class="hist-press-label" style="background:rgba(251,191,36,.15);color:var(--gold)">開關二：'+secTxt+'</div>'
+          +'</div>':"")
+        +'</div>'
+        +'<div class="hist-mini-timer">'
+        +'<svg width="56" height="56" viewBox="0 0 56 56" style="flex-shrink:0;transform:rotate(-90deg)">'
+        +'<circle cx="28" cy="28" r="'+R2+'" fill="none" stroke="var(--border)" stroke-width="4"/>'
+        +'<circle id="histTimerCircle" cx="28" cy="28" r="'+R2+'" fill="none" stroke="'+(td?"#22c55e":"var(--accent)")+'" stroke-width="4"'
+        +' stroke-dasharray="'+dash2+' '+circ2+'" stroke-linecap="round"'
+        +' style="transition:stroke-dasharray .8s linear"/>'
+        +'</svg>'
+        +'<div style="flex:1">'
+        +'<div id="histTimerNum" style="font-size:22px;font-weight:900;color:'+(td?"#22c55e":"var(--accent)")+';line-height:1">'+H.timerLeft+'</div>'
+        +'<div id="histTimerHint" style="font-size:11px;color:var(--muted2);margin-top:3px">'+(td?"按壓完成 ✅":H.timerActive?"輕輕按壓中…":"點按鈕開始")+'</div>'
+        +'</div>'
+        +'<button id="histTimerBtn" style="padding:8px 16px;border-radius:999px;border:none;background:'+(td?"#22c55e":H.timerActive?"var(--red)":"var(--accent)")+';color:'+(td?"#fff":"#000")+';font-size:12px;font-weight:800;cursor:pointer;flex-shrink:0">'
+        +(td?"再來一次":H.timerActive?"暫停":"▶ 開始")
+        +'</button>'
+        +'</div>'
+        +'</div>';
+    }
+    return '<div class="hist-row" data-hist-id="'+rid+'" style="cursor:pointer;align-items:center">'
+      +'<div class="hist-date">'+(r.date||"")+'</div>'
+      +'<div class="hist-detail">'
+      +'<div class="hist-pts">開關一：'+priTxt+'</div>'
+      +'<div class="hist-meta">開關二：'+secTxt+'</div>'
+      +'<span class="hist-result '+resClass+'">'+resText+'</span>'
+      +'</div>'
+      +'<div style="color:var(--muted);font-size:12px;flex-shrink:0;margin-left:4px">'+(isExp?"▲":"▼")+'</div>'
+      +'</div>'+expandHTML;
+  }).join("");
+
+  list.querySelectorAll(".hist-row[data-hist-id]").forEach(function(row){
+    row.addEventListener("click",function(){
+      const rid=row.dataset.histId;
+      if(H.expandedId===rid){resetHistTimer();H.expandedId=null;}
+      else{resetHistTimer();H.expandedId=rid;}
+      renderHistList();
+    });
+  });
+
+  const timerBtn=document.getElementById("histTimerBtn");
+  if(timerBtn){
+    timerBtn.addEventListener("click",function(e){
+      e.stopPropagation();
+      if(H.timerLeft<=0){H.timerLeft=60;H.timerActive=false;renderHistList();return;}
+      if(H.timerActive){
+        clearInterval(H.timerInterval);H.timerActive=false;renderHistList();
+      } else {
+        H.timerActive=true;
+        H.timerInterval=setInterval(function(){
+          H.timerLeft--;
+          if(H.timerLeft<=0){
+            H.timerLeft=0;H.timerActive=false;clearInterval(H.timerInterval);
+            renderHistList();return;
+          }
+          const R2=24,circ2=2*Math.PI*R2,dash2=circ2*(H.timerLeft/60);
+          const ne=document.getElementById("histTimerNum");
+          const ce=document.getElementById("histTimerCircle");
+          if(ne)ne.textContent=H.timerLeft;
+          if(ce)ce.setAttribute("stroke-dasharray",dash2+" "+circ2);
+        },1000);
+      }
+    });
+  }
+}
+
+function showHistory(){
+  const overlay=document.getElementById("histOverlay");
+  if(!overlay)return;
+  const title=document.getElementById("histTitle");
+  title.textContent=S.userName+" 的紀錄（共 "+S.records.length+" 次）";
+  resetHistTimer();H.expandedId=null;
+  renderHistList();
+  overlay.classList.remove("hidden");
+}
+
+/* ══════════════════════════════════════════════
+   ACHIEVEMENT PAGE RENDERER
+══════════════════════════════════════════════ */
+const ACH_META = {
+  first_test: {cond:"完成第一次測試"},
+  first_feel: {cond:"第一次按壓有感改善"},
+  streak3:    {cond:"連續 3 天測試", unlocks:"🧠 自律神經自評"},
+  streak7:    {cond:"連續 7 天測試"},
+  test10:     {cond:"累積 10 次測試"},
+  both_sides: {cond:"左右兩側都試過"},
+};
+
+function startQuickPress(rec){
+  if(!rec||!rec.pressPoints||!rec.pressPoints.length) return;
+  clearInterval(S.timerInterval); S.timerActive=false;
+  S.pressPoints=rec.pressPoints;
+  S.screen="press"; render();
+}
+
+function showAchievPage(){
+  const overlay=document.getElementById("achievOverlay");
+  if(!overlay)return;
+  const content=document.getElementById("achievContent");
+  if(!content)return;
+
+  const earned=getEarnedAch();
+  const st=getUserStats();
+  const title=getUserTitle();
+  const next=getNextTitle();
+  const ansUnlocked=isANSUnlocked();
+
+  // Progress to next title
+  let progressPct=100;
+  let progressHint="";
+  if(!title){progressPct=st.count>0?10:0;progressHint="完成第一次測試解鎖稱號";}
+  else if(next){
+    const cur=next.minStreak>0?st.streak:st.count;
+    const req=next.minStreak>0?next.minStreak:next.minCount;
+    progressPct=Math.min(99,Math.round(cur/req*100));
+    progressHint="距離「"+next.emoji+" "+next.name+"」還差 "+(req-cur)+" "+(next.minStreak>0?"天":"次");
+  }
+
+  // Last session quick-press card
+  let lastCard="";
+  if(S.records&&S.records.length>0){
+    const lastRec=S.records[S.records.length-1];
+    const pts=lastRec.pressPoints||[];
+    const pri=pts.find(function(p){return p.isPrimary;})||pts[0];
+    const sec=pts.find(function(p){return !p.isPrimary;})||pts[1];
+    if(pri){
+      const ZN={shoulder:"肩膀／肩胛旁",collarbone:"鎖骨外側"};
+      const priTxt=(pri.side==="right"?"右":"左")+"側 "+(ZN[pri.zone]||pri.zone);
+      const secTxt=sec?(sec.side==="right"?"右":"左")+"側 "+(ZN[sec.zone]||sec.zone):"";
+      lastCard='<div style="background:linear-gradient(135deg,rgba(10,107,98,.09),rgba(10,107,98,.02));border:1.5px solid var(--border-glow);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px">'
+        +'<p style="font-size:11px;font-weight:800;color:var(--accent);margin-bottom:8px">📌 上次有效的按壓點（'+lastRec.date+'）</p>'
+        +'<div style="font-size:14px;font-weight:900;color:var(--text);margin-bottom:2px">開關一：'+priTxt+'</div>'
+        +(secTxt?'<div style="font-size:12px;color:var(--muted2);margin-bottom:10px">開關二：'+secTxt+'</div>':'<div style="margin-bottom:10px"></div>')
+        +'<button class="btn btn-primary" id="profileQuickPressBtn" style="font-size:13px;padding:11px">▶ 直接開始按壓</button>'
+        +'</div>';
+    }
+  }
+
+  // Badge grid HTML
+  const badgeHTML=Object.keys(ACHIEV).map(function(id){
+    const a=ACHIEV[id];
+    const isEarned=earned.includes(id);
+    const meta=ACH_META[id]||{};
+    const unlockTxt=meta.unlocks?"🔓 解鎖："+meta.unlocks:"";
+    return '<div class="badge-item '+(isEarned?"earned":"locked")+'">'
+      +'<div class="badge-emoji">'+a.icon+'</div>'
+      +'<div class="badge-name">'+a.name+'</div>'
+      +'<div class="badge-cond">'+(meta.cond||a.desc)+'</div>'
+      +(unlockTxt?'<div class="badge-date" style="color:var(--accent)">'+unlockTxt+'</div>':"")
+      +(isEarned?'<div class="badge-date">已解鎖 ✓</div>':'<div class="badge-date" style="color:var(--muted)">🔒 未解鎖</div>')
+      +'</div>';
+  }).join("");
+
+  // History list (last 5)
+  let histHTML="";
+  if(S.records&&S.records.length>0){
+    const slice=S.records.slice(-5).reverse();
+    histHTML='<div style="font-weight:900;font-size:14px;color:var(--text);margin:14px 0 6px">📋 最近紀錄</div>';
+    histHTML+=slice.map(function(r){
+      const pts=r.pressPoints||[];
+      const pri=pts.find(function(p){return p.isPrimary;})||pts[0];
+      const ZN={shoulder:"肩膀",collarbone:"鎖骨"};
+      const ptTxt=pri?(pri.side==="right"?"右":"左")+"側 "+(ZN[pri.zone]||pri.zone):"—";
+      const ridx=S.records.indexOf(r);
+      return '<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">'
+        +'<div><div style="font-size:11px;color:var(--muted);margin-bottom:2px">'+r.date+'</div>'
+        +'<div style="font-size:13px;font-weight:700;color:var(--text)">'+ptTxt+'</div></div>'
+        +'<button class="btn" style="font-size:11px;padding:7px 12px;background:var(--border-glow);color:var(--accent);border:1px solid var(--border-glow)" data-rec-idx="'+ridx+'">再次按壓</button>'
+        +'</div>';
+    }).join("");
+    histHTML+='<button class="btn" id="allHistBtn" style="font-size:12px;padding:9px;width:100%;background:transparent;border:1px solid var(--border);color:var(--muted2)">查看所有紀錄</button>';
+  }
+
+  // ANS card
+  const ansCard=ansUnlocked
+    ?'<div class="ans-unlock-card">'
+      +'<div style="font-size:28px;margin-bottom:6px">🧠</div>'
+      +'<div style="font-size:16px;font-weight:900;color:var(--accent);margin-bottom:4px">自律神經自評</div>'
+      +'<div style="font-size:12px;color:var(--muted2);margin-bottom:12px">5 道題，了解你現在的交感/副交感狀態</div>'
+      +'<button class="btn btn-primary" id="openANSBtn" style="max-width:240px">開始自評 →</button>'
+      +'</div>'
+    :'<div class="ans-locked-card">'
+      +'<div style="font-size:28px;margin-bottom:6px">🧠</div>'
+      +'<div style="font-size:15px;font-weight:900;color:var(--muted2);margin-bottom:4px">自律神經自評（未解鎖）</div>'
+      +'<div style="font-size:12px;color:var(--muted);margin-bottom:4px">連續 3 天測試後解鎖</div>'
+      +'<div style="font-size:11px;color:var(--muted)">目前連續：'+st.streak+' 天</div>'
+      +'</div>';
+
+  content.innerHTML=
+    // 1. Title + progress
+    '<div class="achiev-title-row">'
+    +'<div class="achiev-current-title">'+(title?title.emoji:"🌸")+'</div>'
+    +'<div class="achiev-title-name">'+(title?title.name:"尚未解鎖稱號")+'</div>'
+    +(progressHint?'<div class="achiev-next-hint">'+progressHint+'</div>':"")
+    +'<div class="achiev-progress-bar" style="margin-top:10px">'
+    +'<div class="achiev-progress-fill" style="width:'+progressPct+'%"></div>'
+    +'</div>'
+    +'</div>'
+    // 2. Last press points + quick start
+    +lastCard
+    // 3. Stats
+    +'<div class="achiev-stats-row">'
+    +'<div class="achiev-stat"><div class="achiev-stat-num">'+st.count+'</div><div class="achiev-stat-lbl">累積次數</div></div>'
+    +'<div class="achiev-stat"><div class="achiev-stat-num">'+st.streak+'</div><div class="achiev-stat-lbl">連續天數</div></div>'
+    +'<div class="achiev-stat"><div class="achiev-stat-num">'+(st.bothSides?"✓":"—")+'</div><div class="achiev-stat-lbl">雙側測試</div></div>'
+    +'</div>'
+    // 4. Achievement badges
+    +'<div style="font-weight:900;font-size:14px;color:var(--text);margin:14px 0 6px">🏆 成就徽章</div>'
+    +'<div class="badge-grid">'+badgeHTML+'</div>'
+    // 5. History
+    +histHTML
+    // 6. ANS
+    +ansCard;
+
+  overlay.classList.remove("hidden");
+
+  // Bind: quick press from profile
+  const qpBtn=document.getElementById("profileQuickPressBtn");
+  if(qpBtn) qpBtn.addEventListener("click",function(){
+    overlay.classList.add("hidden");
+    if(S.records&&S.records.length>0) startQuickPress(S.records[S.records.length-1]);
+  });
+
+  // Bind: re-press from history list
+  content.querySelectorAll("[data-rec-idx]").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      const idx=parseInt(btn.getAttribute("data-rec-idx"));
+      if(S.records[idx]){
+        overlay.classList.add("hidden");
+        startQuickPress(S.records[idx]);
+      }
+    });
+  });
+
+  // Bind: all history
+  const allHistBtn=document.getElementById("allHistBtn");
+  if(allHistBtn) allHistBtn.addEventListener("click",function(){
+    overlay.classList.add("hidden");
+    showHistory();
+  });
+
+  const openANS=document.getElementById("openANSBtn");
+  if(openANS) openANS.addEventListener("click",function(){
+    overlay.classList.add("hidden");
+    showANSPage();
+  });
+  const closeBtn=document.getElementById("achievCloseBtn");
+  if(closeBtn) closeBtn.addEventListener("click",function(){
+    overlay.classList.add("hidden");
+  });
+  overlay.addEventListener("click",function(e){
+    if(e.target===overlay) overlay.classList.add("hidden");
+  });
+}
+
+/* ══════════════════════════════════════════════
+   ANS PAGE RENDERER
+══════════════════════════════════════════════ */
+const ANS_Qs = [
+  {id:"sleep",   text:"今天睡醒後精神如何？",   type:"scale", opts:["很差","差","普通","不錯","很好"]},
+  {id:"stress",  text:"今天的壓力感受？",        type:"scale", opts:["沒壓力","輕微","中等","偏高","很高"]},
+  {id:"tension", text:"肩頸緊繃程度？",          type:"scale", opts:["很輕鬆","輕微","有感","明顯","很緊"]},
+  {id:"digest",  text:"消化或食慾正常嗎？",       type:"yesno", opts:["正常","不太正常"]},
+  {id:"mood",    text:"今天心情波動大嗎？",       type:"yesno", opts:["穩定","波動大"]},
+];
+
+function computeANSResult(){
+  const a=S.ansAnswers;
+  // Score 0-4 for scale (higher = more sympathetic stress)
+  const sleep=(a.sleep!==undefined)?4-a.sleep:2;   // reverse: bad sleep = more sympathetic
+  const stress=a.stress!==undefined?a.stress:2;
+  const tension=a.tension!==undefined?a.tension:2;
+  const digest=a.digest===1?2:0;   // not normal = +2
+  const mood=a.mood===1?2:0;       // unstable = +2
+  const total=sleep+stress+tension+digest+mood;
+  if(total<=4) return {type:"sym", label:"副交感主導", emoji:"😌", color:"var(--accent)",
+    desc:"你目前的狀態偏向放鬆、副交感活躍。今天的按壓以「維持」為主，開關二可以輕輕按即可。",
+    point:"開關二（鎖骨外側）"};
+  if(total<=8) return {type:"sym", label:"大致平衡", emoji:"🙂", color:"var(--accent)",
+    desc:"交感與副交感大致平衡。今天按壓兩個開關各一分鐘即可。",
+    point:"開關一和開關二各一分鐘"};
+  if(total<=11) return {type:"sym_hi", label:"交感偏高", emoji:"😣", color:"var(--red)",
+    desc:"你今天的交感神經活性偏高，建議先從開關一多按一輪（2 分鐘），幫助平衡。",
+    point:"開關一（優先，多按一輪）"};
+  return {type:"para_lo", label:"高度緊繃", emoji:"😫", color:"var(--gold)",
+    desc:"整體緊繃度較高。建議今天按壓後做 5 次深呼吸（4秒吸、7秒憋、8秒吐）幫助副交感回升。",
+    point:"開關一（2 分鐘）+ 深呼吸"};
+}
+
+function showANSPage(){
+  const overlay=document.getElementById("ansOverlay");
+  if(!overlay)return;
+  const content=document.getElementById("ansContent");
+  if(!content)return;
+
+  const allDone=ANS_Qs.every(function(q){return S.ansAnswers[q.id]!==undefined;});
+
+  let qHTML=ANS_Qs.map(function(q){
+    const sel=S.ansAnswers[q.id];
+    if(q.type==="scale"){
+      return '<div class="ans-q">'
+        +'<div class="ans-q-text">'+q.text+'</div>'
+        +'<div class="ans-scale">'
+        +q.opts.map(function(o,i){
+          return '<button class="ans-btn '+(sel===i?"sel":"")+'" data-ans-q="'+q.id+'" data-ans-v="'+i+'">'+o+'</button>';
+        }).join("")
+        +'</div>'
+        +'</div>';
+    } else {
+      return '<div class="ans-q">'
+        +'<div class="ans-q-text">'+q.text+'</div>'
+        +'<div class="ans-yesno">'
+        +q.opts.map(function(o,i){
+          return '<button class="ans-btn '+(sel===i?"sel":"")+'" data-ans-q="'+q.id+'" data-ans-v="'+i+'">'+o+'</button>';
+        }).join("")
+        +'</div>'
+        +'</div>';
+    }
+  }).join("");
+
+  let resultHTML="";
+  if(allDone){
+    const r=computeANSResult();
+    resultHTML='<div class="ans-result-card '+r.type+'">'
+      +'<div class="ans-result-emoji">'+r.emoji+'</div>'
+      +'<div class="ans-result-type" style="color:'+r.color+'">'+r.label+'</div>'
+      +'<div class="ans-result-desc">'+r.desc+'</div>'
+      +'<div style="margin-top:10px;font-size:12px;font-weight:800;color:'+r.color+'">今日建議：'+r.point+'</div>'
+      +'</div>'
+      +'<div class="ans-cta-card">'
+      +'<div class="ans-cta-title">想要更精準的自律神經檢測？</div>'
+      +'<div class="ans-cta-sub">智平衡生醫集團提供 HRV 心率變異自律神經分析<br>由專業治療師解讀，給你個人化的建議方向</div>'
+      +'<button class="btn-cta-white" id="ansCTABtn">預約 HRV 檢測 →</button>'
+      +'</div>';
+  }
+
+  content.innerHTML='<h2 class="login-title" style="margin-bottom:4px">🧠 自律神經自評</h2>'
+    +'<p style="font-size:12px;color:var(--muted2);margin-bottom:18px">5 道題評估你現在的交感／副交感狀態</p>'
+    +qHTML
+    +resultHTML
+    +(!allDone?'<p class="hint-text" style="margin-top:8px">全部填完才能看結果</p>':"");
+
+  overlay.classList.remove("hidden");
+
+  // Bind ANS answer buttons
+  content.querySelectorAll("[data-ans-q]").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      S.ansAnswers[btn.dataset.ansQ]=parseInt(btn.dataset.ansV);
+      showANSPage(); // re-render ANS content
+    });
+  });
+
+  const ctaBtn=document.getElementById("ansCTABtn");
+  if(ctaBtn) ctaBtn.addEventListener("click",function(){
+    window.open("https://www.neuroplus.com.tw/","_blank");
+  });
+
+  const closeBtn=document.getElementById("ansCloseBtn");
+  if(closeBtn) closeBtn.addEventListener("click",function(){
+    overlay.classList.add("hidden");
+  });
+  overlay.addEventListener("click",function(e){
+    if(e.target===overlay) overlay.classList.add("hidden");
+  });
+}
+
+/* ══════════════════════════════════════════════
+   RENDER
+══════════════════════════════════════════════ */
+function render(){
+  const map={
+    intro: screenIntro,
+    welcome: screenIntro,
+    neckRight: screenNeckRight,
+    neckLeft: screenNeckLeft,
+    elbow1: function(){ return screenElbow(1); },
+    elbow2: function(){ return screenElbow(2); },
+    elbowInner: screenElbowInner,
+    elbowOuter: screenElbowOuter,
+    elbowPt: screenElbowPt,
+    reveal: screenReveal,
+    press: screenPress,
+    after: screenAfter,
+    result: screenResult,
+  };
+  document.getElementById("app").innerHTML=(map[S.screen]||screenIntro)();
+  // Force CSS animation restart on every screen change
+  var sc=document.querySelector("#app .screen");
+  if(sc){
+    var anim=S.screen==="reveal"?"bounceIn .45s cubic-bezier(.36,.07,.19,.97)"
+      :S.screen==="result"?"fadeIn .4s ease"
+      :S.screen==="press"?"slideInRight .3s ease"
+      :"fadeUp .3s ease";
+    sc.style.animation="none";
+    void sc.offsetWidth; // force reflow
+    sc.style.animation=anim;
+  }
+  bindAll();
+}
+
+/* ══════════════════════════════════════════════
+   EVENTS
+══════════════════════════════════════════════ */
+function bindAll(){
+  const $b = function(id){ return document.getElementById(id); };
+
+  // Add click sound to all interactive elements
+  function addClickSound(el){
+    el.addEventListener("click",function(){ GA.click(); });
+  }
+
+  /* Intro */
+  if(S.screen==="intro"||S.screen==="welcome"){
+    runTypewriter();
+    // Audio unlocked on startBtn click (entryChime + startAmbient)
+  }
+
+  $b("startBtn")&&$b("startBtn").addEventListener("click",function(){
+    // Unlock audio + play entry chime + start ambient immediately on first tap
+    GA.init();
+    if(!GA._audioUnlocked){
+      GA._audioUnlocked=true;
+      if(!GA.muted){ GA.entryChime(); /* startAmbient disabled */ }
+    } else {
+      GA.click();
+    }
+    if(S.userId){S.screen="neckRight";render();}
+    else document.getElementById("loginOverlay").classList.remove("hidden");
+  });
+
+  /* Mute button — all screens */
+  var muteBtn=$b("muteBtn");
+  if(muteBtn){
+    muteBtn.addEventListener("click",function(){
+      const m=GA.toggle();
+      muteBtn.textContent=m?"🔇":"🔊";
+    });
+  }
+
+  /* Neck side buttons */
+  qsa("[class*='neck-'][class*='-side']").forEach(function(b){
+    b.addEventListener("click",function(){
+      GA.click();
+      var dir=b.dataset.dir, val=b.dataset.val;
+      if(dir==='right') S.neckRSide=val; else S.neckLSide=val;
+      render();
+    });
+  });
+  /* Neck level buttons */
+  qsa("[class*='neck-'][class*='-level']").forEach(function(b){
+    b.addEventListener("click",function(){
+      GA.click();
+      var dir=b.dataset.dir, val=b.dataset.val;
+      if(dir==='right') S.neckRLevel=val; else S.neckLLevel=val;
+      render();
+    });
+  });
+  /* Neck next button */
+  $b("neckNextBtn")&&$b("neckNextBtn").addEventListener("click",function(){
+    GA.levelUp();
+    if(S.screen==="neckRight"){
+      S.screen="neckLeft"; render();
+    } else {
+      // Left neck done — compute neckSide and advance to elbow
+      var sides=[S.neckRSide,S.neckLSide];
+      var levels=[S.neckRLevel,S.neckLLevel];
+      if(sides[0]===sides[1]){ S.neckSide=sides[0]; }
+      else if(levels[0]==='tight'){ S.neckSide=sides[0]; }
+      else if(levels[1]==='tight'){ S.neckSide=sides[1]; }
+      else { S.neckSide=sides[0]||'right'; }
+      S.neckSideManual=false;
+      S.screen="elbowInner"; render();
+    }
+  });
+
+  /* Elbow side buttons (inner/outer) */
+  qsa("[class*='elbow-'][class*='-side']").forEach(function(b){
+    b.addEventListener("click",function(){
+      GA.click();
+      var type=b.dataset.type, val=b.dataset.val;
+      if(type==='inner') S.elbowInnerSide=val; else S.elbowOuterSide=val;
+      render();
+    });
+  });
+  /* Elbow level buttons */
+  qsa("[class*='elbow-'][class*='-level']").forEach(function(b){
+    b.addEventListener("click",function(){
+      GA.click();
+      var type=b.dataset.type, val=b.dataset.val;
+      if(type==='inner') S.elbowInnerLevel=val; else S.elbowOuterLevel=val;
+      render();
+    });
+  });
+  /* Elbow next button */
+  $b("elbowNextBtn")&&$b("elbowNextBtn").addEventListener("click",function(){
+    GA.levelUp();
+    if(S.screen==="elbowInner"){
+      S.screen="elbowOuter"; render();
+    } else {
+      S.dominantArm=computeDominantArm();
+      S.pressPoints=computePressPoints();
+      GA.success();
+      S.screen="reveal"; render();
+    }
+  });
+
+  /* After */
+  qsa(".score-btn").forEach(function(b){
+    b.addEventListener("click",function(){
+      GA.click();
+      var d=b.dataset.dir, n=+b.dataset.score;
+      if(d==="R") S.afterR=n; else S.afterL=n;
+      render();
+    });
+  });
+
+  /* Nav buttons */
+  // nextNeck removed — neck auto-advances after step 3
+  $b("nextElbow1")&&$b("nextElbow1").addEventListener("click",function(){
+    GA.levelUp(); S.screen="elbow2"; render();
+  });
+  $b("nextElbow2")&&$b("nextElbow2").addEventListener("click",function(){
+    S.dominantArm=computeDominantArm();
+    S.pressPoints=computePressPoints();
+    GA.success();
+    S.screen="reveal"; render();
+  });
+  // nextElbowPt removed — elbow auto-advances via sub-step buttons
+  $b("startPress")&&$b("startPress").addEventListener("click",function(){
+    GA.click();
+    S.pressIdx=0;S.timerLeft=30;S.timerActive=false;
+    clearInterval(S.timerInterval);
+    S.screen="press";render();
+  });
+  $b("toggleTimer")&&$b("toggleTimer").addEventListener("click",function(){
+    GA.click();
+    if(S.timerActive){
+      clearInterval(S.timerInterval);S.timerActive=false;
+      var bw=document.querySelector(".breath-wrap");if(bw)bw.style.display="none";
+      var cb=document.getElementById("pressColorBar");if(cb)cb.style.display="none";
+      var btn=document.getElementById("toggleTimer");if(btn)btn.innerHTML="▶ 繼續計時";
+      var ht=document.getElementById("timerHint");if(ht)ht.textContent="暫停中，點「繼續計時」";
+    } else {
+      S.timerActive=true;
+      var bw=document.querySelector(".breath-wrap");if(bw)bw.style.display="flex";
+      var cb=document.getElementById("pressColorBar");if(cb)cb.style.display="block";
+      var btn=document.getElementById("toggleTimer");if(btn)btn.innerHTML="⏸ 暫停計時";
+      var ht=document.getElementById("timerHint");if(ht)ht.textContent="慢慢揉壓，找到酸脹感後維持…";
+      S.timerInterval=setInterval(function(){
+        S.timerLeft--;
+        GA.tick();
+        if(S.timerLeft<=0){S.timerLeft=0;
+          S.timerLeft=0;S.timerActive=false;clearInterval(S.timerInterval);
+          var bw2=document.querySelector(".breath-wrap");if(bw2)bw2.style.display="none";
+          var cb2=document.getElementById("pressColorBar");if(cb2)cb2.style.display="none";
+          render();return;
+        }
+        var cf=document.getElementById("colorFill");
+        if(cf){cf.style.width=Math.round((1-(S.timerLeft/60))*100)+"%";}
+        updateTimerDisplay();
+      },1000);
+    }
+  });
+  $b("skipTimer")&&$b("skipTimer").addEventListener("click",function(){
+    GA.click();
+    clearInterval(S.timerInterval);S.timerActive=false;S.timerLeft=0;render();
+  });
+  $b("nextPress")&&$b("nextPress").addEventListener("click",function(){
+    GA.click();
+    if(S.pressIdx===0){
+      S.pressIdx=1;S.timerLeft=30;S.timerActive=false;
+      clearInterval(S.timerInterval);render();
+    } else {
+      S.screen="after";render();
+    }
+  });
+  $b("feltYes")&&$b("feltYes").addEventListener("click",function(){
+    GA.click(); S.feltPress=true; render();
+  });
+  $b("feltNo")&&$b("feltNo").addEventListener("click",function(){
+    GA.click(); S.feltPress=false; render();
+  });
+  $b("nextAfter")&&$b("nextAfter").addEventListener("click",function(){
+    GA.click();
+    S.screen="result";render();
+  });
+  $b("restartBtn")&&$b("restartBtn").addEventListener("click",function(){
+    GA.click();
+    clearInterval(S.timerInterval);
+    Object.assign(S,{
+      screen:"neckRight",neckR:null,neckL:null,neckSide:null,neckSideManual:false,neckSubStep:0,neckRSide:null,neckRLevel:null,neckLSide:null,neckLLevel:null,
+      scores:{},dominantArm:null,pressPoints:[],
+      timerLeft:30,timerActive:false,pressIdx:0,
+      afterR:null,afterL:null,_saved:false,
+      round2Key:Math.random()<.5?"r2a":"r2b",
+      elbowPtIdx:0,elbowPoints:[],elbowSubStep:0,elbowInnerSide:null,elbowInnerLevel:null,elbowOuterSide:null,elbowOuterLevel:null,feltPress:null,ansAnswers:{},
+    });
+    render();
+  });
+  $b("showHistBtn")&&$b("showHistBtn").addEventListener("click",function(){
+    GA.click();
+    if(S.userId) showHistory();
+  });
+  $b("switchUserBtn")&&$b("switchUserBtn").addEventListener("click",function(){
+    GA.click();
+    clearInterval(S.timerInterval);
+    doLogout();
+    Object.assign(S,{
+      screen:"intro",neckR:null,neckL:null,neckSide:null,neckSideManual:false,neckSubStep:0,neckRSide:null,neckRLevel:null,neckLSide:null,neckLLevel:null,
+      scores:{},dominantArm:null,pressPoints:[],
+      timerLeft:30,timerActive:false,pressIdx:0,
+      afterR:null,afterL:null,_saved:false,records:[],
+      round2Key:Math.random()<.5?"r2a":"r2b",
+      elbowPtIdx:0,elbowPoints:[],elbowSubStep:0,elbowInnerSide:null,elbowInnerLevel:null,elbowOuterSide:null,elbowOuterLevel:null,feltPress:null,ansAnswers:{},
+    });
+    render();
+  });
+  $b("backBtn")&&$b("backBtn").addEventListener("click",function(){
+    GA.click();
+    if(S.screen==="elbowPt"){
+      if(S.elbowSubStep>0){ S.elbowSubStep--; render(); }
+      else { S.screen="elbowInner"; render(); }
+      return;
+    }
+
+    const prev={neckRight:"intro",neckLeft:"neckRight",elbowInner:"neckLeft",elbowOuter:"elbowInner",elbow1:"neckLeft",elbow2:"elbow1",reveal:"elbowOuter",elbowPt:"neckLeft"};
+    if(prev[S.screen]){
+      clearInterval(S.timerInterval);S.timerActive=false;
+      S.screen=prev[S.screen];
+      render();
+    }
+  });
+
+  /* Quick press from last session */
+  $b("quickPressBtn")&&$b("quickPressBtn").addEventListener("click",function(){
+    GA.click();
+    if(S.records&&S.records.length>0) startQuickPress(S.records[S.records.length-1]);
+  });
+
+  /* User chip — tap to open achievement page; long-press opens history */
+  qsa(".user-chip").forEach(function(chip){
+    var pressTimer=null;
+    chip.addEventListener("click",function(){
+      if(S.userId) showAchievPage();
+    });
+    chip.addEventListener("contextmenu",function(e){
+      e.preventDefault();
+      if(S.userId) showHistory();
+    });
+  });
+  $b("histCloseBtn")&&$b("histCloseBtn").addEventListener("click",function(){
+    document.getElementById("histOverlay").classList.add("hidden");
+  });
+  document.getElementById("histOverlay")&&document.getElementById("histOverlay").addEventListener("click",function(e){
+    if(e.target===document.getElementById("histOverlay"))
+      document.getElementById("histOverlay").classList.add("hidden");
+  });
+
+  /* Confetti on reveal screen */
+  if(S.screen==="reveal"){
+    setTimeout(function(){
+      const colors=["#0a6b62","#1a7a47","#e8862a","#c9542e","#8b5cf6","#f59e0b"];
+      for(let i=0;i<48;i++){
+        const el=document.createElement("div");
+        el.className="confetti-piece";
+        el.style.cssText="left:"+Math.random()*100+"vw;top:-20px;background:"+colors[Math.floor(Math.random()*colors.length)]+";animation-duration:"+(1.2+Math.random()*1.5)+"s;animation-delay:"+(Math.random()*0.6)+"s;width:"+(6+Math.random()*8)+"px;height:"+(6+Math.random()*8)+"px;";
+        document.body.appendChild(el);
+        setTimeout(function(){ el.remove(); },3000);
+      }
+    },200);
+  }
+}
+
+/* ══════════════════════════════════════════════
+   LOGIN BINDING
+══════════════════════════════════════════════ */
+document.getElementById("lEnterBtn").addEventListener("click",function(){
+  const name=$l("lName").value.trim();
+  const bday="";
+  const phone=$l("lPhone").value;
+  const err=$l("lError");
+  if(!name||phone.replace(/\D/g,"").length<4){
+    err.classList.add("show");return;
+  }
+  err.classList.remove("show");
+  doLogin(name,bday,phone);
+  document.getElementById("loginOverlay").classList.add("hidden");
+  GA.levelUp();
+  S.screen="neckRight";render();
+});
+
+/* ══════════════════════════════════════════════
+   INIT
+════════════════════════════════ */
+// ── MOBILE VIEWPORT HEIGHT FIX ──
+// Fixes "100vh > visual viewport" on Android Chrome / iOS Safari
+// IMPORTANT: skip resize when keyboard is open (input focused) —
+// otherwise the height change closes the keyboard instantly.
+function fixVH(){
+  if(window.innerWidth>540){
+    document.getElementById("app").style.height="";
+    return;
+  }
+  var a=document.activeElement;
+  var inputOpen=a&&(a.tagName==="INPUT"||a.tagName==="TEXTAREA"||a.tagName==="SELECT");
+  var h=window.innerHeight;
+  document.getElementById("app").style.height=h+"px";
+}
+fixVH();
+window.addEventListener("resize",fixVH);
+window.addEventListener("orientationchange",function(){ setTimeout(fixVH,150); });
+
+if(initSession()){
+  S.screen="intro";
+  render();
+} else {
+  render();
+}
+</script>
+</body>
+</html>
+                                                                                                                           

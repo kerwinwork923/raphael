@@ -1,4 +1,5 @@
 export default defineNuxtConfig({
+  css: ["@tiaohsun/vue-datepicker/style"],
   compatibilityDate: "2024-04-03",
   ssr: false, // 使用 SPA 模式
   devtools: { enabled: true },
@@ -95,7 +96,7 @@ export default defineNuxtConfig({
     },
     // 添加 Vite 配置來解決模組解析問題
     optimizeDeps: {
-      include: ['vue', 'vue-router']
+      include: ["vue", "vue-router", "echarts", "@tiaohsun/vue-datepicker"],
     },
     resolve: {
       alias: {

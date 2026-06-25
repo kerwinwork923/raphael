@@ -1,0 +1,13 @@
+<svg id="icon_spo2" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="32" height="32" fill="white" />
+    <path
+        d="M20.8947 16.3705C20.8947 21.1061 16.9197 25 11.9474 25C6.97502 25 3 21.1061 3 16.3705C3 11.6348 6.97502 7.74091 11.9474 7.74091C16.9197 7.74091 20.8947 11.6348 20.8947 16.3705Z"
+        stroke="#90D7E7" stroke-width="2" />
+    <ellipse cx="26.6842" cy="9.33331" rx="3.31579" ry="3.33331" fill="#90D7E7" />
+    <ellipse cx="25.5789" cy="17.8518" rx="1.47368" ry="1.48147" fill="#90D7E7" />
+    <path d="M26.6149 7.01607C26.1764 7.00603 25.1482 7.32626 24.5428 8.68756" stroke="white"
+        stroke-linecap="round" />
+    <path d="M11.251 11.2257C10.1789 11.2507 7.82784 11.8914 7.00005 14.2543" stroke="#90D7E7" stroke-width="2"
+        stroke-linecap="round" />
+    <ellipse cx="6.42092" cy="16.3702" rx="0.736842" ry="0.740735" fill="#90D7E7" />
+</svg>

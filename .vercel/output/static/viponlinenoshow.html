@@ -1,0 +1,682 @@
+<!DOCTYPE html> 
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>智平衡健康複利系統發表會</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind theme -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            wb: {
+              deep: '#0f3b3b',
+              gold: '#c9a14a',
+              ink:  '#1f2a37',
+              muted:'#6b7280',
+              ivory:'#f6f1e7',
+              line: 'rgba(201,161,74,.35)'
+            }
+          },
+          boxShadow: {
+            soft: '0 12px 36px rgba(17,24,39,.08)',
+            strong: '0 20px 60px rgba(0,0,0,.18)'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root{
+      --deep:#0f3b3b;
+      --gold:#c9a14a;
+      --muted:#6b7280;
+      --ink:#1f2a37;
+      --bg:#ffffff;
+      --card:#ffffff;
+      --line:rgba(201,161,74,.35);
+  
+      --radius:18px;
+      --radius-sm:14px;
+      --shadow:0 12px 36px rgba(17,24,39,.08);
+      --shadow-strong:0 20px 60px rgba(0,0,0,.25);
+      --focus:0 0 0 4px rgba(201,161,74,.14);
+    }
+  
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:"PingFang TC","Microsoft JhengHei",system-ui,Segoe UI,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--ink);
+      line-height:1.8;
+    }
+    .wb-geo-lines {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+    }
+
+    /* 金色幾何底線 */
+    .wb-geo-svg {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      width: 100%;
+      height: 100%;
+      opacity: .9;
+      pointer-events: none;
+    }
+
+    a{color:inherit}
+    img,iframe,video{max-width:100%;display:block}
+  
+    /* ===== Layout ===== */
+    .wrap{max-width:1100px;margin:0 auto;padding:0 16px 70px;}
+    .container{max-width:1100px;margin:0 auto;}
+    .section{padding:50px 20px;}
+    @media (max-width:640px){
+      .section{padding:34px 16px;}
+    }
+  
+    /* ===== Header ===== */
+    header{
+      text-align:center;
+      padding:88px 16px 34px;
+    }
+    header .brand{
+      max-width:1100px;
+      margin:0 auto;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:16px;
+    }
+    header h1{
+      font-size:clamp(44px,6.2vw,74px);
+      font-weight:900;
+      letter-spacing:2px;
+      line-height:1.18;
+      color:var(--deep);
+    }
+    header .divider{
+      width:190px;
+      height:4px;
+      background:var(--gold);
+      border-radius:999px;
+      margin-top:6px;
+    }
+    header .subtitle{
+      max-width:920px;
+      color:var(--muted);
+      font-size:18px;
+      line-height:1.65;
+      margin-top:6px;
+    }
+  
+    /* ===== Cards ===== */
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+    .card-pad{padding:22px 22px 24px;}
+    .card-media{overflow:hidden;}          /* 影片卡：需要裁切圓角 */
+    .card-media .card-pad{padding:22px 22px 24px;}
+  
+    .kicker{
+      color:var(--deep);
+      font-weight:900;
+      font-size:18px;
+      margin-bottom:8px;
+      text-align: center;
+    }
+    .sub{color:var(--muted);font-size:15px;}
+  
+    /* ===== Title ===== */
+    .title{
+      font-size:clamp(22px,3vw,28px);
+      text-align:center;
+      color:var(--deep);
+      margin-bottom:18px;
+      position:relative;
+    }
+    .title::after{
+      content:"";
+      display:block;
+      width:120px;
+      height:3px;
+      background:linear-gradient(90deg,transparent,var(--gold),transparent);
+      margin:10px auto 0;
+      border-radius:2px;
+    }
+    #form h3{
+      max-width:920px;
+      margin:8px auto 0;
+      color:var(--muted);
+      font-weight:700;
+      line-height:1.7;
+      font-size:16px;
+      text-align:left;
+    }
+    @media (max-width:640px){
+      #form h3{font-size:15px;}
+    }
+  
+    /* ===== Pills / Tags ===== */
+    .pill{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      padding:8px 14px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      color:var(--deep);
+      font-weight:800;
+      font-size:14px;
+      background:rgba(201,161,74,.08);
+      margin-top:10px;
+    }
+  
+    /* ===== Video ===== */
+    .video-wrap{border-top:1px solid rgba(0,0,0,.05);}
+    .video{
+      width:100%;
+      aspect-ratio:16/9;
+      border:0;
+      background:#000;
+      display:block;
+      object-fit:contain;
+    }
+  
+    /* ===== CTA button ===== */
+    .btn{
+      appearance:none;
+      border:0;
+      cursor:pointer;
+      font-weight:900;
+      border-radius:999px;
+      transition:.2s;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+    }
+    .btn-primary{
+      background:var(--gold);
+      color:#fff;
+      border:2px solid var(--gold);
+      padding:12px 18px;
+    }
+    .btn-primary:hover{filter:brightness(.98)}
+    .btn-primary:active{transform:translateY(1px)}
+    .btn-ghost{
+      background:transparent;
+      color:var(--gold);
+      border:2px solid var(--gold);
+      padding:10px 16px;
+    }
+  
+    .cta-btn{ /* 兼容你原本 class */
+      background:var(--gold);
+      color:#fff;
+      border:2px solid var(--gold);
+      padding:11px 18px;
+      border-radius:999px;
+      font-weight:900;
+      display:inline-block;
+      text-decoration:none;
+      transition:.2s;
+      margin-top:14px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      font-size: 18px;
+     letter-spacing: 2px;
+     cursor: pointer;
+    }
+    .cta-btn img{
+      width: 25px;
+      height: 25px;
+      margin-left: 2px;
+    }
+    .cta-btn:hover{background:#c28e20;color:var(--bg);}
+  
+    /* ===== Bullets ===== */
+    .bullets{
+      margin-top:14px;
+      list-style:none;
+      padding:0;
+    }
+    .bullets li{
+      padding:10px 0 10px 22px;
+      border-bottom:1px dashed var(--line);
+      position:relative;
+      font-size:15px;
+    }
+    .bullets li:last-child{border-bottom:none}
+    .bullets li::before{
+      content:"◆";
+      position:absolute;
+      left:0;
+      top:10px;
+      color:var(--gold);
+    }
+  
+    /* ===== Form ===== */
+    form{margin-top:12px;}
+    .form-card{
+      max-width:920px;
+      margin:18px auto 0;
+      padding:26px;
+    }
+    @media (max-width:640px){
+      .form-card{padding:18px;}
+    }
+  
+    .form-field{margin:0 0 16px;}
+    .form-field:last-of-type{margin-bottom:10px;}
+  
+    .req{color:#c0392b;font-weight:900;}
+  
+    .form-field label{
+      display:block;
+      font-size:13px;
+      color:var(--muted);
+      margin:0 0 8px;
+      font-weight:900;
+      letter-spacing:.5px;
+    }
+  
+    .form-card input,
+    .form-card textarea{
+      width:100%;
+      padding:14px 14px;
+      border-radius:var(--radius-sm);
+      border:1px solid rgba(17,24,39,.14);
+      font-size:16px;
+      outline:none;
+      background:#fff;
+      transition:border-color .15s, box-shadow .15s;
+    }
+    .form-card textarea{
+      resize:vertical;
+      min-height:140px;
+      line-height:1.6;
+    }
+    .form-card input:focus,
+    .form-card textarea:focus{
+      border-color:rgba(201,161,74,.95);
+      box-shadow:var(--focus);
+    }
+  
+    .form-actions{
+      margin-top:14px;
+      display:flex;
+      align-items:center;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+    .note{color:var(--muted);font-size:13px;}
+  
+    .btn-submit{
+      background:var(--gold);
+      color:#fff;
+      font-weight:900;
+      padding:14px 22px;
+      border-radius:999px;
+      border:0;
+      cursor:pointer;
+      transition:.2s;
+      min-height:50px;
+      width:100%; /* 表單主按鈕滿版 */
+    }
+    .btn-submit:hover{filter:brightness(.98)}
+    .btn-submit:active{transform:translateY(1px)}
+    .btn-submit:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+    .pad{ padding:22px 22px 24px; }
+    
+  
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @keyframes popIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+  
+
+    #full .key-points{
+  list-style: none;
+  padding-left: 0;
+}
+#full .key-points li{
+  position: relative;
+  padding-left: 26px;
+}
+#full .key-points li::before{
+  content: "◆";
+  position: absolute;
+  left: 0;
+  top: 0.2em;
+  color: var(--gold);
+}
+/* 最後那一句提示 */
+#full .key-cta{
+  margin-top: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--deep);
+}
+#full.section{
+  padding-top: 5px;   /* 原本 50px → 25px */
+}
+    /* ===== Footer ===== */
+    footer{
+      margin-top:60px;
+      text-align:center;
+      padding:40px 10px;
+      border-top:1px solid var(--line);
+      color:var(--muted);
+      font-size:14px;
+      background:linear-gradient(135deg,rgba(201,161,74,.07),rgba(255,255,255,0));
+    }
+  </style>
+  
+</head>
+<body>
+  <div class="wb-geo-lines">
+
+    <!-- 金色幾何背景 -->
+    <svg class="wb-geo-svg" viewBox="0 0 1440 900" preserveAspectRatio="none">
+      <g fill="none" stroke="rgba(201,161,74,.35)" stroke-width="3">
+        <path d="M-80,120 L420,0 L980,240 L1540,40" />
+        <path d="M-120,520 L520,260 L1040,520 L1540,300" />
+        <path d="M-120,860 L520,620 L1040,860 L1540,660" />
+        <path d="M-60,60 L320,260 L760,120 L1120,320 L1540,220" opacity=".55"/>
+        <path d="M-60,720 L320,520 L760,660 L1120,460 L1540,560" opacity=".55"/>
+      </g>
+    </svg>
+  <header>
+    <div class="brand">
+      <h1>智平衡健康複利系統發表會</h1>
+      <div class="divider"></div>
+      <div class="subtitle">
+        健康不靠意志力<br>關鍵，在對的方法與系統
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- 精華版 -->
+    <section id="full" class="section card">
+      <div class="pad">
+        <div class="kicker">
+          50秒抓到關鍵<br>
+          50 秒，讓您掌握關鍵重點<br>
+          完整影片，帶您找到健康新方向
+        </div>
+      </div>
+      <div class="video-wrap">
+        <video 
+          class="video" 
+          id="video-player"
+          data-video-id="video013"
+          data-title="智平衡健康複利系統發表會｜精華版"
+          controls
+          playsinline
+          preload="metadata">
+          <source src="/video/1221_2.mp4" type="video/mp4">
+          您的瀏覽器不支援影片播放。
+        </video>
+      </div>
+      <div>
+        <div class="pad">
+          <div class="sub">你現在看到的，是濃縮後的重點。完整版會用一套「看得懂、做得到」的方式，幫你釐清：你到底卡在哪一段。<br> 
+            <br>你會聽到三個多數人一直沒被好好說清楚的關鍵：<br>
+            </div><br>
+            <ul class="key-points">
+              <li>為什麼有人調整很快，有人卻一直原地打轉</li>
+              <li>不是不努力，而是走在錯的入口</li>
+              <li>哪個一啟動，身體才會真的開始「回來」</li>
+            </ul>
+            <p class="key-cta">
+              👉 你現在需要的是把狀態理清，完整版會更適合你。
+            </p>
+        </div>
+        <button class="gift cta-btn" type="button">
+          立即觀看完整發表會 <img src="/imgs/click.png" alt="point">
+        </button>
+      </div>
+    </section>
+
+    <footer>© 2026 智平衡健康集團 — 感謝您一直以來的信任。</footer>
+  </main>
+</div>
+<script>
+/** === 設定 === */
+const SURVEY_POST_URL = "https://23700999.com:8081/HMA/000TTEMemberChannelSurvey.jsp"; // ← 換成你的問卷紀錄 API";
+const REGISTER_POST_URL = "https://23700999.com:8081/HMA/000TTEonlineRegister.jsp"; // ← 換成你的問卷紀錄 API";
+const API_LOG_EVENT = "https://23700999.com:8081/HMA/000TTELOG_EVENT.jsp";
+const STORAGE_EVENTS_KEY  = "videoEvents";   // 事件流水帳（可選）
+const STORAGE_WATCHED_KEY = "watchedVideos"; // 完成清單（可選）
+const EventType="viponlinenoshow";
+let vipId = new URLSearchParams(location.search).get("vip") || "unknown";
+let EventCode="";
+console.log("vipId="+vipId);
+logEvent("leadingpage", EventType);
+
+async function logEvent(Event, EventType) {
+    const payload = {SafeKey:"qrt897hpmd", VIP: vipId, Event, EventType} ;
+    console.log("payload1="+JSON.stringify(payload, null, 1));
+       // 1) 先嘗試 sendBeacon（POST，Content-Type: text/plain; charset=UTF-8）
+    try {
+           const ok = navigator.sendBeacon(API_LOG_EVENT, new Blob(
+           [JSON.stringify(payload)], { type: "text/plain;charset=UTF-8" }
+          ));
+          if (ok) {console.info("[logEvent] sendBeacon sent");return;}     
+    } catch (e) {
+         console.warn("[logEvent] sendBeacon failed, fallback to fetch no-cors", e);
+    }
+      // 2) fallback: simple request（no-cors + text/plain → 不會 preflight）
+    try {
+             await fetch(API_LOG_EVENT, {
+               method: "POST",
+               mode: "no-cors",
+               headers: { "Content-Type": "text/plain;charset=UTF-8" }, // 注意：不要 application/json
+               body: new Blob([JSON.stringify(payload)], { type: "text/plain;charset=UTF-8" }),
+               keepalive: true,
+               });
+              console.info("[logEvent] fetch(no-cors) sent (opaque response)");
+        } catch (err) {
+             console.error("[logEvent] still failed:", err);
+          }
+}
+
+const giftBtn = document.querySelector("button.gift");
+    if (giftBtn) {
+        giftBtn.addEventListener("click", () => {
+        // 記錄按鈕點擊事件（可選）
+        logEvent("complete_video", EventType);
+         // 帶參數跳轉
+        //const targetUrl = `https://neuroplus.com.tw/viponline.html?vip=${encodeURIComponent(vipId)}`;
+        const targetUrl = `./viponline.html?vip=${encodeURIComponent(vipId)}`;
+        window.location.href = targetUrl;
+      });
+     }
+
+
+    document.querySelectorAll('a[href="#form"]').forEach(btn => {
+    btn.addEventListener("click", (e) => {
+        e.preventDefault(); // 阻止預設跳轉行為
+        logEvent("click_register", EventType);
+    // 2️⃣ 平滑滾動至表單
+      const formSection = document.querySelector("#form");
+      if (formSection) formSection.scrollIntoView({ behavior: "smooth", block: "start" });
+
+      // ⚠️ 這裡改為 Name（原本是 name）
+      const firstInput = document.querySelector('#form input[name="Name"]');
+      if (firstInput) setTimeout(() => firstInput.focus({ preventScroll: true }), 400);
+  
+  });
+});
+
+ 
+/** === 取得使用者ID（優先序：window.USER_ID → URL ?uid → localStorage → VIP碼） === */
+function getUserId() {
+  if (window.USER_ID && String(window.USER_ID).trim()) return String(window.USER_ID).trim();
+  const urlUid = new URLSearchParams(location.search).get("uid");
+  if (urlUid) { localStorage.setItem("userId", urlUid); return urlUid; }
+  const saved = localStorage.getItem("userId");
+  if (saved) return saved;
+  // 先回傳暫時ID，若 VIP 之後輸入成功會覆蓋
+  const gen = "guest_" + Math.random().toString(36).slice(2,10);
+  localStorage.setItem("userId", gen);
+  return gen;
+}
+/** ====== 基礎工具：本地事件流水帳（可選） ====== */
+function appendLocalEvent(evt) {
+  try {
+    const arr = JSON.parse(localStorage.getItem(STORAGE_EVENTS_KEY) || "[]");
+    arr.push(evt);
+    localStorage.setItem(STORAGE_EVENTS_KEY, JSON.stringify(arr));
+  } catch {}
+}
+
+/** ====== 準備影片元素 ====== */
+function prepareVideos() {
+  const videos = Array.from(document.querySelectorAll("video[data-video-id]"));
+  let idx = 0;
+
+  for (const el of videos) {
+    // 給 id（如果沒有）
+    if (!el.id) el.id = `video-${++idx}`;
+
+    // 確保資料屬性存在
+    el.dataset.track = "video";
+    el.dataset.title = el.dataset.title || el.getAttribute("title") || `video-${idx}`;
+    el.dataset.videoId = el.dataset.videoId || `video-${idx}`;
+  }
+}
+
+/** ====== 播放器與旗標 ====== */
+const players = {};
+const flags = {}; // { [videoId]: { clicked, sent50, sent100, halfTimer, endTimer } }
+
+/** ====== 100% 完成清單（可選） ====== */
+function markWatched(record) {
+  try {
+    const list = JSON.parse(localStorage.getItem(STORAGE_WATCHED_KEY) || "[]");
+    if (!list.find(x => x.videoId === record.videoId)) {
+      list.push(record);
+      localStorage.setItem(STORAGE_WATCHED_KEY, JSON.stringify(list));
+    }
+  } catch {}
+}
+
+/** ====== 送事件（目前你還是只 console + 本地流水帳；DB 由 logEvent 打） ====== */
+function sendProgress({ videoId, status, player, meta }) {
+  const duration = Math.round(player?.duration || 0);
+  const watched  = Math.round(player?.currentTime || 0);
+
+  const payload = {
+    vipId,
+    status,                    // click | 50 | 100
+    videoId:   meta.videoId,   // 你的商務ID
+    title:     meta.title,
+    watchedSec: watched,
+    duration,
+    ts: new Date().toISOString(),
+  };
+
+  console.log("[sendProgress]", payload);
+  appendLocalEvent(payload);
+
+  if (status === "100") markWatched(payload);
+}
+
+/** ====== 建立播放器並追蹤 click / 50% / 100% ====== */
+function createPlayers() {
+  const videos = Array.from(document.querySelectorAll('video[data-track="video"]'));
+  console.log("[Video] found videos:", videos.length);
+
+  videos.forEach((el) => {
+    const videoId = el.id;
+
+    const meta = {
+      videoId: el.dataset.videoId,
+      title: el.dataset.title || el.getAttribute("title") || el.dataset.videoId,
+    };
+
+    flags[videoId] = { clicked: false, sent50: false, sent100: false, halfTimer: null, endTimer: null };
+    players[videoId] = el;
+
+    // 影片載入完成
+    el.addEventListener("loadedmetadata", () => {
+      console.log("[Video ready]", videoId, meta);
+    });
+
+    // 影片錯誤
+    el.addEventListener("error", (err) => {
+      console.log("[Video error]", videoId, err);
+    });
+
+    // 首次播放（click 事件）
+    el.addEventListener("play", () => {
+      if (!flags[videoId].clicked) {
+        flags[videoId].clicked = true;
+        sendProgress({ videoId, status: "click", player: el, meta });
+        logEvent("videoPlay_" + meta.videoId, EventType);
+      }
+    });
+
+    // 追蹤播放進度
+    el.addEventListener("timeupdate", () => {
+      const duration = el.duration || 0;
+      const currentTime = el.currentTime || 0;
+
+      if (duration > 0 && !el.paused) {
+        const progress = currentTime / duration;
+
+        // 50% 進度
+        if (progress >= 0.5 && !flags[videoId].sent50) {
+          flags[videoId].sent50 = true;
+          sendProgress({ videoId, status: "50", player: el, meta });
+          logEvent("videoPlay50_" + meta.videoId, EventType);
+        }
+
+        // 99% 當作 100%（避免 ended 事件不觸發）
+        if (progress >= 0.99 && !flags[videoId].sent100) {
+          flags[videoId].sent100 = true;
+          sendProgress({ videoId, status: "100", player: el, meta });
+          logEvent("videoPlay100_" + meta.videoId, EventType);
+        }
+      }
+    });
+
+    // 影片結束
+    el.addEventListener("ended", () => {
+      if (!flags[videoId].sent100) {
+        flags[videoId].sent100 = true;
+        sendProgress({ videoId, status: "100", player: el, meta });
+        logEvent("videoPlay100_" + meta.videoId, EventType);
+      }
+    });
+  });
+}
+
+/** ====== 啟動 ====== */
+document.addEventListener("DOMContentLoaded", () => {
+  prepareVideos();
+  createPlayers();
+});
+
+/** ====== 開發時工具 ====== */
+window.VideoTrack = {
+  events()  { return JSON.parse(localStorage.getItem(STORAGE_EVENTS_KEY) || "[]"); },
+  watched() { return JSON.parse(localStorage.getItem(STORAGE_WATCHED_KEY) || "[]"); },
+  clear()   { localStorage.removeItem(STORAGE_EVENTS_KEY); localStorage.removeItem(STORAGE_WATCHED_KEY); }
+};
+</script>
+
+</body>
+</html>

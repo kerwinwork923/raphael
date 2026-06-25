@@ -1,0 +1,1184 @@
+<!DOCTYPE html> 
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>智平衡｜嗅覺 × 正念呼吸 × 神經修復練習</title>
+  <style>
+    :root {
+      --deep:#0f3b3b;
+      --gold:#c9a14a;
+      --muted:#6b7280;
+      --ink:#1f2a37;
+      --bg:#ffffff;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body {
+      font-family:"PingFang TC","Microsoft JhengHei",system-ui,Segoe UI,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--ink);
+      line-height:1.8;
+    }
+    header {
+      text-align:center;
+      padding:32px 16px 10px;
+    }
+    header h1 {
+      font-size:clamp(26px,4vw,38px);
+      font-weight:800;
+      color:var(--deep);
+      letter-spacing:1px;
+    }
+    header p {
+      max-width:800px;
+      margin:10px auto 0;
+      color:var(--muted);
+      font-size:15px;
+    }
+    header .accent {
+      width:140px;
+      height:3px;
+      background:var(--gold);
+      margin:18px auto 0;
+      border-radius:2px;
+    }
+
+    .page-wrap {
+      max-width:1080px;
+      margin:0 auto 60px;
+      padding:0 16px;
+    }
+
+    .intro-card {
+      margin-top:24px;
+      padding:20px 22px;
+      border-radius:18px;
+      border:1px solid rgba(201,161,74,.35);
+      box-shadow:0 10px 30px rgba(15,59,59,0.08);
+      background:#fff;
+    }
+    .intro-card h2 {
+      font-size:20px;
+      color:var(--deep);
+      margin-bottom:6px;
+      font-weight:800;
+    }
+    .intro-card p {
+      font-size:15px;
+      color:var(--muted);
+      margin-bottom:4px;
+    }
+    .intro-card ul {
+      margin:8px 0 0 18px;
+      color:var(--muted);
+      font-size:14px;
+    }
+    .intro-card li { margin-bottom:4px; }
+
+    .mode-switch {
+      margin-top:26px;
+      display:flex;
+      justify-content:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .mode-btn {
+      padding:10px 22px;
+      border-radius:999px;
+      border:1px solid rgba(201,161,74,.6);
+      background:#fff;
+      color:var(--deep);
+      font-weight:800;
+      font-size:14px;
+      cursor:pointer;
+      transition:.2s;
+    }
+    .mode-btn.active {
+      background:var(--gold);
+      color:#fff;
+      box-shadow:0 8px 22px rgba(201,161,74,.45);
+    }
+    .mode-btn:hover { transform:translateY(-1px); }
+
+    .panel {
+      margin-top:24px;
+      border-radius:18px;
+      border:1px solid rgba(201,161,74,.35);
+      box-shadow:0 12px 34px rgba(17,24,39,.06);
+      background:#fff;
+      padding:22px 22px 26px;
+      display:none;
+    }
+    .panel.active { display:block; }
+
+    .panel-header h3 {
+      font-size:20px;
+      color:var(--deep);
+      font-weight:800;
+      margin-bottom:4px;
+    }
+    .panel-header p {
+      font-size:14px;
+      color:var(--muted);
+      margin-bottom:10px;
+    }
+
+    .video-wrap {
+      margin-top:10px;
+      border-radius:16px;
+      overflow:hidden;
+      box-shadow:0 8px 28px rgba(0,0,0,0.14);
+    }
+    .video-wrap iframe {
+      width:100%;
+      aspect-ratio:16/9;
+      border:0;
+      display:block;
+    }
+
+    .two-col {
+      margin-top:18px;
+      display:grid;
+      grid-template-columns:minmax(0,1.6fr) minmax(0,1.2fr);
+      gap:18px;
+    }
+    @media (max-width:768px){
+      .two-col { grid-template-columns:1fr; }
+    }
+
+    .bullet-box {
+      padding:14px 16px;
+      border-radius:14px;
+      border:1px dashed rgba(201,161,74,.6);
+      background:rgba(201,161,74,.03);
+      font-size:14px;
+      color:var(--muted);
+    }
+    .bullet-box h4 {
+      font-size:15px;
+      color:var(--deep);
+      font-weight:800;
+      margin-bottom:6px;
+    }
+    .bullet-box ul {
+      margin-left:18px;
+    }
+    .bullet-box li { margin-bottom:4px; }
+
+    .practice-controls {
+      padding:14px 16px;
+      border-radius:14px;
+      border:1px solid rgba(201,161,74,.35);
+      background:linear-gradient(135deg,rgba(201,161,74,.08),#fff);
+    }
+    .practice-controls h4 {
+      font-size:15px;
+      font-weight:800;
+      color:var(--deep);
+      margin-bottom:6px;
+    }
+    .practice-controls p {
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:10px;
+    }
+    .btn-primary, .btn-ghost {
+      display:inline-block;
+      padding:9px 18px;
+      border-radius:999px;
+      font-size:14px;
+      font-weight:800;
+      cursor:pointer;
+      border:2px solid var(--gold);
+      transition:.2s;
+    }
+    .btn-primary {
+      background:var(--gold);
+      color:#fff;
+      margin-right:6px;
+    }
+    .btn-primary:disabled {
+      opacity:.4;
+      cursor:not-allowed;
+    }
+    .btn-primary:not(:disabled):hover {
+      background:transparent;
+      color:var(--gold);
+    }
+    .btn-ghost {
+      background:transparent;
+      color:var(--gold);
+    }
+    .btn-ghost:hover {
+      background:rgba(201,161,74,.08);
+    }
+
+    .practice-stats {
+      padding:14px 16px;
+      border-radius:14px;
+      border:1px solid rgba(148,163,184,0.4);
+      font-size:14px;
+      color:var(--muted);
+      background:#fafafa;
+    }
+    .practice-stats h4 {
+      font-size:15px;
+      color:var(--deep);
+      font-weight:800;
+      margin-bottom:6px;
+    }
+    .practice-stats strong { color:var(--gold); }
+    .stat-row { margin-bottom:4px; }
+
+    .session-list {
+      margin-top:8px;
+      max-height:220px;
+      overflow:auto;
+      padding-left:16px;
+    }
+    .session-list li {
+      margin-bottom:4px;
+      font-size:13px;
+    }
+
+    .toast {
+      position:fixed;
+      left:50%;
+      bottom:24px;
+      transform:translateX(-50%);
+      background:#111827;
+      color:#fff;
+      padding:10px 16px;
+      border-radius:999px;
+      font-size:13px;
+      display:none;
+      z-index:999;
+    }
+
+    footer {
+      margin-top:40px;
+      text-align:center;
+      padding:26px 10px 32px;
+      border-top:1px solid rgba(201,161,74,.28);
+      color:var(--muted);
+      font-size:13px;
+      background:linear-gradient(135deg,rgba(201,161,74,.05),rgba(255,255,255,0));
+    }
+
+     /* ====== 強化：① 每日練習按鈕更顯眼 ====== */
+.mode-btn-practice{
+  border-width:2px;
+  padding:12px 26px;
+  font-size:15px;
+  position:relative;
+  box-shadow:0 10px 26px rgba(15,59,59,0.12);
+}
+.mode-btn-practice.active{
+  box-shadow:0 14px 34px rgba(201,161,74,.55);
+  transform:translateY(-1px);
+}
+
+/* 小標籤 */
+.pill{
+  display:inline-block;
+  margin-left:8px;
+  padding:3px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  background:rgba(15,59,59,0.08);
+  color:var(--deep);
+}
+.mode-btn-practice.active .pill{
+  background:rgba(255,255,255,0.22);
+  color:#fff;
+}
+
+/* 輕微呼吸動畫（只在 active 時） */
+@keyframes breathe {
+  0%, 100% { transform:translateY(-1px) scale(1); }
+  50%      { transform:translateY(-2px) scale(1.02); }
+}
+.mode-btn-practice.active{
+  animation:breathe 1.8s ease-in-out infinite;
+}
+
+
+
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>每日30分鐘嘆息呼吸練習</h1>
+  <div class="accent"></div>
+  <p>透過「嗅覺 × 嘆息呼吸 × 神經修復」，讓自律神經從緊繃模式，回到修復與穩定。建議每天固定一個時間，給自己 30 分鐘，只專心照顧自己。</p>
+</header>
+
+<main class="page-wrap">
+  <section class="intro-card">
+    <ul>
+      <li>0-5 分鐘：雙鼻循環嘆息呼吸法 - 緩慢吸氣緩慢吐氣</li>
+      <li>5-15 分鐘：右側單鼻正念呼吸(塞住左鼻)- 提高交感神經活性</li>
+      <li>15-20 分鐘: 雙鼻循環嘆息呼吸法 - 緩慢吸氣緩慢吐氣 </li>
+      <li>20-30 分鐘: 左側單鼻正念呼吸(塞住右鼻)- 提高副交感神經活性</li>
+    </ul>
+  </section>
+
+  <div class="mode-switch" aria-label="練習模式選擇">
+    <button class="mode-btn active" data-target="panel-practice">① 每日練習紀錄</button>
+    <button class="mode-btn" data-target="panel-learn">② 教學影片複習</button>
+  </div>
+
+  <section id="panel-learn" class="panel" aria-labelledby="learn-title">
+    <div class="panel-header">
+      <h3 id="learn-title">了解原理與操作｜教學影片</h3>
+      <p>建議先完整看完一次教學影片，確認你清楚以下幾件事：擴香儀怎麼切換左右、導息器怎麼使用、四個段落各在做什麼。</p>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="video-wrap">
+          <iframe
+            src="https://www.youtube.com/embed/nWhNM32nYfk?rel=0&modestbranding=1"
+            title="單側芳香 × 正念呼吸 教學影片"
+            data-video-id="videobreath001"
+            allowfullscreen
+          ></iframe>
+        </div>
+      </div>
+
+      <div class="bullet-box">
+        <h4>這支教學影片，會帶你看懂：</h4>
+        <ul>
+          <li>如何正確操作智平衡雙噴頭擴香儀（左、右精油切換）</li>
+          <li>30 分鐘的 4 個段落：嘆息呼吸 × 右鼻正念 × 嘆息呼吸 × 左鼻正念</li>
+          <li>導息器要塞哪一邊？什麼時候拔掉、什麼時候換香氣。</li>
+          <li>每一段練習時，身體與情緒可能出現的變化，以及如何溫柔地帶自己回來。</li>
+        </ul>
+        <p style="margin-top:6px;">當你已經熟悉整個 30 分鐘的節奏，就可以切換到第二個模式：每天跟著實作影片練習，並開始累積自己的紀錄。</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="panel-practice" class="panel active" aria-labelledby="practice-title">
+    <div class="panel-header">
+      <h3 id="practice-title">每日實作｜30 分鐘芳香 × 循環嘆息呼吸</h3>
+      <p>請先準備好：擴香儀、左右兩瓶精油、導息器與一個不被打擾的角落。<br>
+      每次都從這裡開始，按下「開始本次練習」，影片會啟動，同時幫您留下今天的一筆紀錄。</p>
+    </div>
+    <div class="two-col">
+      <div>
+        <div class="video-wrap"> 
+          <iframe
+            id="practiceVideo"
+            
+            src="https://www.youtube.com/embed/LQWKNEmk58U?enablejsapi=1&rel=0&modestbranding=1"
+            title="單側芳香 × 正念呼吸 實作引導"
+            allow="autoplay; encrypted-media"
+            data-video-id="videobreath002"
+            allowfullscreen
+          ></iframe>
+        </div>
+        <div class="practice-controls" style="margin-top:14px;">
+          <h4>實作前請先確認：</h4>
+          <p>擴香儀中左右精油分別放好；導息器在手邊。找尋一個安靜的角落，讓這30 分鐘只屬於您。</p>
+          <button id="btnStart" class="btn-primary">開始本次練習</button>
+          <button id="btnFinish" class="btn-ghost" disabled>我已完成</button>
+          <p style="font-size:12px;margin-top:6px;color:var(--muted);">
+            ✅ 按下「開始」後，系統會自動記錄開始時間。<br>
+            ✅ 練習結束時，請記得按「我已完成」，或等影片播完自動紀錄完成。
+          </p>
+        </div>
+      </div>
+
+      <div class="practice-stats">
+        <h4>我的練習成長紀錄 </h4>
+        <p class="stat-row">累積完成次數：<strong id="statTotal">0</strong> 次</p>
+        <p class="stat-row">最近一次完成時間：<strong id="statLast">尚未開始</strong></p>
+        <p class="stat-row">持續練習天數（至少一天一次）：<strong id="statStreak">0</strong> 天</p>
+
+        <ul id="sessionList" class="session-list"></ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<footer>© 2025 智平衡健康集團 — 感謝您願意花時間好好照顧自己。</footer>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+  /* ====== API 設定 ====== */
+  const Save_Breath_Record_URL = "https://23700999.com:8081/HMA/000TTEUPDATE_BREATH_RECORD.jsp";
+  const Get_Breath_Record_URL  = "https://23700999.com:8081/HMA/000TTEGET_BREATH_RECORD.jsp";
+  const API_LOG_EVENT          = "https://23700999.com:8081/HMA/000TTELOG_EVENT.jsp";
+  const EventType = "Breath";
+  const STORAGE_WATCHED_KEY = "yt_watched_list";
+  let vipId = new URLSearchParams(location.search).get("vip") || "unknown";
+  let BID="";
+  // ===== YouTube 追蹤播放器初始化旗標 =====
+  let ytApiReady = false;           // YT Iframe API 是否載入完成
+  let playersInitialized = false;   // createPlayers 是否已經跑過
+  let wantInitOtherPlayers = false; // 是否已經有人要求初始化其它影片
+
+  logEvent("leadingpage", EventType);
+
+  /* ====== 取得手機裝置與系統資訊 ====== */
+  function getDeviceInfo() {
+    var ua = navigator.userAgent || "";
+    var uaData = navigator.userAgentData || null;
+
+    var os = "未知";
+    if (/Android/i.test(ua)) {
+      os = "Android";
+    } else if (/iPhone|iPad|iPod/i.test(ua)) {
+      os = "iOS";
+    } else if (/Win/i.test(ua)) {
+      os = "Windows";
+    } else if (/Mac/i.test(ua)) {
+      os = "macOS";
+    } else if (/Linux/i.test(ua)) {
+      os = "Linux";
+    }
+
+    var deviceModel = "無法辨識";
+    var m = ua.match(/\(([^)]+)\)/);
+    if (m) {
+      var inside = m[1];
+      if (inside.indexOf("Android") !== -1) {
+        var parts = inside.split(";");
+        deviceModel = parts[parts.length - 1].trim();
+      } else if (/iPhone/.test(inside)) {
+        deviceModel = "iPhone";
+      } else if (/iPad/.test(inside)) {
+        deviceModel = "iPad";
+      }
+    }
+
+    var platform = "";
+    if (uaData && uaData.platform) {
+      platform = uaData.platform;
+    } else if (navigator.platform) {
+      platform = navigator.platform;
+    }
+
+    return { os: os, deviceModel: deviceModel, platform: platform, userAgent: ua };
+  }
+
+  const deviceInfo = getDeviceInfo();
+  console.log("vipId=" + vipId, deviceInfo);
+
+
+  async function logEvent(Event, EventType) {
+    const payload = {SafeKey:"qrt897hpmd", VIP: vipId, Event, EventType} ;
+    console.log("payload1="+JSON.stringify(payload, null, 1));
+       // 1) 先嘗試 sendBeacon（POST，Content-Type: text/plain; charset=UTF-8）
+    try {
+           const ok = navigator.sendBeacon(API_LOG_EVENT, new Blob(
+           [JSON.stringify(payload)], { type: "text/plain;charset=UTF-8" }
+          ));
+          if (ok) {console.info("[logEvent] sendBeacon sent");return;}     
+    } catch (e) {
+         console.warn("[logEvent] sendBeacon failed, fallback to fetch no-cors", e);
+    }
+      // 2) fallback: simple request（no-cors + text/plain → 不會 preflight）
+    try {
+             await fetch(API_LOG_EVENT, {
+               method: "POST",
+               mode: "no-cors",
+               headers: { "Content-Type": "text/plain;charset=UTF-8" }, // 注意：不要 application/json
+               body: new Blob([JSON.stringify(payload)], { type: "text/plain;charset=UTF-8" }),
+               keepalive: true,
+               });
+              console.info("[logEvent] fetch(no-cors) sent (opaque response)");
+        } catch (err) {
+             console.error("[logEvent] still failed:", err);
+          }
+}
+
+  /* ====== 練習事件送到後端：type = start / end ====== */
+  async function sendPracticeEvent(type, data) {
+
+   const payload = {
+       Key: "qrt897hpmd",
+       BID: BID,                     // ⭐ 這裡會帶上一開始取得的 BID
+       type: type,                  // start / end
+       VIP: vipId,
+       DeviceModel: deviceInfo.deviceModel,
+       Os: deviceInfo.os,
+       Platform: deviceInfo.platform,
+       userAgent: deviceInfo.userAgent
+    };
+
+//console.log("payload4="+JSON.stringify(payload, null, 1));
+
+/* =====================================================
+   第 1 階段：用正常 fetch 送（可取得 JSON 回應）
+   ===================================================== */
+try {
+  const res = await fetch(Save_Breath_Record_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+
+  const text = await res.text();
+ // console.log("📥 API 回應原始文字 =", text);
+
+  // 嘗試解析 JSON
+  let json = null;
+  try {
+    json = JSON.parse(text);
+  } catch (e) {
+    console.warn("⚠ 回應不是 JSON，無法更新 BID");
+  }
+
+  // ⭐ 如果成功解析 JSON & 有 BID，更新全域 BID
+  if (json && json.BID) {
+    BID = json.BID;
+    console.log("⭐ BID 已更新為：", BID);
+  }
+  // 已成功送出就 return，不走 fallback
+  return;
+}
+catch (e) {
+  console.warn("❌ 正常 fetch 失敗，改用 sendBeacon / no-cors fallback！", e);
+}
+
+/* 第 2 階段：sendBeacon（無法取得回應）*/
+try {
+  const ok = navigator.sendBeacon(
+    Save_Breath_Record_URL,
+    new Blob([JSON.stringify(payload)], {
+      type: "text/plain;charset=UTF-8"
+    })
+  );
+
+  if (ok) {
+    console.info("📡 sendBeacon 已送出（但無法取得 BID）");
+    return;
+  }
+} catch (e) {
+  console.warn("sendBeacon 失敗 -> fallback to no-cors fetch", e);
+}
+/* 第 3 階段：no-cors fallback（無法取得回應） */
+try {
+  await fetch(Save_Breath_Record_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: {
+      "Content-Type": "text/plain;charset=UTF-8"
+    },
+    body: new Blob([JSON.stringify(payload)], {
+      type: "text/plain;charset=UTF-8"
+    }),
+    keepalive: true
+  });
+
+  console.info("🌐 fetch(no-cors) 已送出（無法取得 BID）");
+} catch (err) {
+  console.error("💥 fallback 全部失敗：", err);
+}
+}
+
+async function getBreathRecord() {
+  const payload = {
+    Key: "qrt897hpmd",
+    VIP: vipId,
+  };
+  console.log("payloadg=" + JSON.stringify(payload, null, 1));
+
+  try {
+    const res = await fetch(Get_Breath_Record_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const text = await res.text();
+    //console.log("📥 Get_Breath_Record 回應原始文字 =", text);
+
+    let json = null;
+    try {
+      json = JSON.parse(text);
+    } catch (e) {
+      console.warn("⚠ Get_Breath_Record 回應不是 JSON，無法解析成紀錄陣列");
+      return [];
+    }
+
+    return json;   // 期待後端回傳的是陣列
+  } catch (e) {
+    console.warn("❌ 呼叫 Get_Breath_Record_URL 失敗：", e);
+    return [];
+  }
+}
+
+
+function parseBackendTime(ts) {
+  if (!ts) return null;
+  ts = String(ts).trim();
+
+  // 14 碼：yyyyMMddHHmmss  →  2025 11 26 09:10:23
+  if (/^\d{14}$/.test(ts)) {
+    const year  = parseInt(ts.slice(0, 4), 10);
+    const month = parseInt(ts.slice(4, 6), 10) - 1; // 0-based
+    const day   = parseInt(ts.slice(6, 8), 10);
+    const hour  = parseInt(ts.slice(8,10), 10);
+    const min   = parseInt(ts.slice(10,12), 10);
+    const sec   = parseInt(ts.slice(12,14), 10);
+    return new Date(year, month, day, hour, min, sec);
+  }
+
+  // 如果以後後端改成 timestamp (13 碼毫秒)
+  if (/^\d{13}$/.test(ts)) {
+    const ms = parseInt(ts, 10);
+    const d  = new Date(ms);
+    if (!isNaN(d.getTime())) return d;
+  }
+
+  // 最後才嘗試用原生 Date 解析（例如已經是 ISO 字串）
+  const d = new Date(ts);
+  if (isNaN(d.getTime())) return null;
+  return d;
+}
+
+
+   // 先把原本建立 practicePlayer 的內容抽成一個函式
+function initPracticePlayer() {
+  console.log("YouTube Iframe API Ready");
+  var iframe = document.getElementById("practiceVideo");
+  if (!iframe) {
+    console.log("找不到 practiceVideo iframe");
+    return;
+  }
+
+  practicePlayer = new YT.Player("practiceVideo", {
+    events: {
+      onStateChange: function(e) {
+        var state = e.data;
+        var player = practicePlayer;
+
+        if (state === YT.PlayerState.PLAYING) {
+          if (!practiceFlags.clicked) {
+            practiceFlags.clicked = true;
+            trackVideoStatusToSession(YT_STATUS.CLICK, player);
+          }
+
+          if (!practiceFlags.halfTimer && !practiceFlags.sent50) {
+            practiceFlags.halfTimer = setInterval(function() {
+              try {
+                var d = player.getDuration ? player.getDuration() : 0;
+                var c = player.getCurrentTime ? player.getCurrentTime() : 0;
+                if (d > 0 && c / d >= 0.5 && !practiceFlags.sent50) {
+                  practiceFlags.sent50 = true;
+                  trackVideoStatusToSession(YT_STATUS.HALF, player);
+                  clearInterval(practiceFlags.halfTimer);
+                  practiceFlags.halfTimer = null;
+                }
+              } catch (err) {}
+            }, 1000);
+          }
+        }
+
+        if (state === YT.PlayerState.ENDED) {
+          if (!practiceFlags.sent100) {
+            practiceFlags.sent100 = true;
+
+            if (practiceFlags.halfTimer) {
+              clearInterval(practiceFlags.halfTimer);
+              practiceFlags.halfTimer = null;
+            }
+
+            trackVideoStatusToSession(YT_STATUS.END, player);
+
+            if (currentSession && !currentSession.finishedBy) {
+              finishPractice("autoVideoEnded");
+            }
+          }
+        }
+      }
+    }
+  });
+
+  if (pendingStartPlay && practicePlayer && typeof practicePlayer.playVideo === "function") {
+    console.log("pendingStartPlay -> autoplay now");
+    practicePlayer.playVideo();
+    pendingStartPlay = false;
+  }
+}
+
+  /* ====== 模式切換 ====== */
+  var modeBtns = document.querySelectorAll(".mode-btn");
+  var panels = document.querySelectorAll(".panel");
+  modeBtns.forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      var target = btn.dataset.target;
+      modeBtns.forEach(function(b) { b.classList.toggle("active", b === btn); });
+      panels.forEach(function(p) { p.classList.toggle("active", p.id === target); });
+    });
+  });
+
+  /* ====== YouTube Player & 練習 Session ====== */
+  var practicePlayer = null;
+  var currentSession = null;
+  var pendingStartPlay = false;
+
+  var practiceFlags = {
+    clicked: false,
+    sent50: false,
+    sent100: false,
+    halfTimer: null
+  };
+
+  var YT_STATUS = {
+    CLICK: "click",
+    HALF: "50",
+    END: "100"
+  };
+
+  function trackVideoStatusToSession(status, player) {
+    if (!currentSession) return;
+
+    if (!currentSession.videoEvents) {
+      currentSession.videoEvents = [];
+    }
+
+    var meta = null;
+    try {
+      if (player && typeof player.getVideoData === "function") {
+        var data = player.getVideoData();
+        if (data) {
+          meta = {
+            videoId: data.video_id,
+            title: data.title,
+            author: data.author
+          };
+        }
+      }
+    } catch (e) {}
+
+    var now = Date.now();
+    var currentTime = null;
+    var duration = null;
+    try {
+      if (player && typeof player.getCurrentTime === "function") {
+        currentTime = player.getCurrentTime();
+      }
+      if (player && typeof player.getDuration === "function") {
+        duration = player.getDuration();
+      }
+    } catch (e) {}
+
+    currentSession.videoEvents.push({
+      status: status,
+      at: now,
+      currentTime: currentTime,
+      duration: duration,
+      meta: meta
+    });
+
+    console.log("YT event recorded:", status, currentSession.videoEvents);
+  }
+
+  // YouTube API 載入完成後，統一從這裡呼叫
+  window.onYouTubeIframeAPIReady = function () {
+     ytApiReady = true;
+     initPracticePlayer();  // 30 分鐘練習影片
+
+  // 如果之前 startPractice 已經呼叫過 ensurePlayersInitialized()
+  //（wantInitOtherPlayers=true），那這裡幫忙真的去 createPlayers()
+     //if (wantInitOtherPlayers && !playersInitialized) {
+         createPlayers();
+         playersInitialized = true;
+    // }
+};
+
+// 確保只在「API 已載入」且「尚未建立」時呼叫 createPlayers()
+function ensurePlayersInitialized() {
+   // 有按過「開始練習」就設為 true
+   wantInitOtherPlayers = true;
+
+// API 還沒 ready 就先記下意圖，等 onYouTubeIframeAPIReady 補作
+   if (!ytApiReady) return;
+
+   if (playersInitialized) return;   // 已經建過就不要重複 new
+
+   createPlayers();
+   playersInitialized = true;
+}
+
+/* ====== 成長紀錄：從 DB (Get_Breath_Record_URL) 取得 ====== */
+
+
+
+  function formatDate(ts) {
+  var d = parseBackendTime(ts);
+  if (!d) return "時間格式錯誤";
+  var pad = function(n){ return String(n).padStart(2,"0"); };
+  return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+" "+pad(d.getHours())+":"+pad(d.getMinutes());
+}
+
+function formatDateYMD(ts) {
+  var d = parseBackendTime(ts);
+  if (!d) return null;
+  var pad = function(n){ return String(n).padStart(2,"0"); };
+  return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+}
+
+function computeStreakFromRecords(records) {
+  if (!records || !records.length) return 0;
+
+  var daysSet = new Set();
+  records.forEach(function(r){
+    // 優先用 Endtime，其次 Starttime / CheckTime
+    var ts =
+      r.Endtime   || r.ENDTIME   ||
+      r.Starttime || r.STARTTIME ||
+      r.CheckTime || r.CHECKTIME;
+
+    var dayStr = formatDateYMD(ts);
+    if (dayStr) daysSet.add(dayStr);
+  });
+
+  var days = Array.from(daysSet).sort();
+  if (!days.length) return 0;
+
+  var streak = 1;
+  for (var i = days.length - 2; i >= 0; i--) {
+    var cur  = new Date(days[i]);
+    var next = new Date(days[i+1]);
+    var diff = (next - cur) / (1000*60*60*24);
+    if (diff === 1) streak++;
+    else if (diff > 1) break;
+  }
+  return streak;
+}
+
+
+function renderSessionsFromDB() {
+  var totalEl  = document.getElementById("statTotal");
+  var lastEl   = document.getElementById("statLast");
+  var streakEl = document.getElementById("statStreak");
+  var listEl   = document.getElementById("sessionList");
+
+  // ⭐ 這裡記得用 Promise 方式接 async 結果
+  getBreathRecord()
+    .then(function(records) {
+      if (!Array.isArray(records)) {
+        console.warn("Get_Breath_Record_URL 回傳不是陣列，實際值 =", records);
+        records = [];
+      }
+
+      // 1) 累積完成次數
+      totalEl.textContent = records.length;
+
+      // 2) 最近一次完成時間：用最後一筆的 Endtime / Starttime / CheckTime
+      if (records.length) {
+        var last = records[records.length - 1];
+        var lastEnd =
+          last.Endtime   || last.ENDTIME   ||
+          last.Starttime || last.STARTTIME ||
+          last.CheckTime || last.CHECKTIME;
+
+        lastEl.textContent = formatDate(lastEnd);
+      } else {
+        lastEl.textContent = "尚未開始";
+      }
+
+      // 3) 連續天數
+      streakEl.textContent = computeStreakFromRecords(records);
+
+      // 4) 列表明細
+      listEl.innerHTML = "";
+      records.slice().reverse().forEach(function(rec){
+         var li = document.createElement("li");
+
+         var start = rec.Starttime || rec.STARTTIME;
+         var end   = rec.Endtime   || rec.ENDTIME;
+
+  // ---- 1. 先用 Duration（秒）換算成分鐘 ----
+         var rawSec =
+             parseInt(rec.Duration, 10)  ||
+             parseInt(rec.DURATION, 10)  ||
+             parseInt(rec.duration, 10)  ||
+             parseInt(rec.DURATION2, 10) || 0;
+
+          var mins = 0;
+          if (!isNaN(rawSec) && rawSec > 0) {
+             mins = Math.round(rawSec / 60);      // 37 秒 → 四捨五入成 1 分鐘
+              if (mins < 1) mins = 1;              // 最少顯示 1 分鐘
+            } else {
+    // ---- 2. 沒有 Duration，就用 Start / End 算 ----
+            var sDate = parseBackendTime(start);
+            var eDate = parseBackendTime(end);
+            if (sDate && eDate) {
+               var diffMs = eDate - sDate;
+               mins = Math.round(diffMs / 60000);
+               if (mins < 1) mins = 1;
+             } else {
+                mins = 30; // 實在算不出來時就給預設 30 分鐘
+              }
+             }
+
+             var startStr = start ? formatDate(start) : "未知開始時間";
+             var endStr   = end   ? formatDate(end)   : "未知結束時間";
+
+             li.textContent = startStr + " ～ " + endStr + " — 完成 " + mins + " 分鐘";
+             listEl.appendChild(li);
+    });
+
+    })
+    .catch(function(err) {
+      console.error("❌ renderSessionsFromDB 發生錯誤：", err);
+    });
+}
+
+  
+
+
+
+  /* ====== 控制按鈕 & 流程 ====== */
+  var btnStart  = document.getElementById("btnStart");
+  var btnFinish = document.getElementById("btnFinish");
+  var toast     = document.getElementById("toast");
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.style.display = "block";
+    setTimeout(function(){ toast.style.display = "none"; }, 1800);
+  }
+
+  function resetPracticeFlags() {
+    if (practiceFlags.halfTimer) {
+      clearInterval(practiceFlags.halfTimer);
+      practiceFlags.halfTimer = null;
+    }
+    practiceFlags.clicked = false;
+    practiceFlags.sent50  = false;
+    practiceFlags.sent100 = false;
+  }
+
+  function startPractice() {
+    
+    ensurePlayersInitialized();
+
+    if (currentSession) {
+      showToast("已經在進行一個練習囉。先完成這次再開始下一次。");
+      return;
+    }
+
+    currentSession = { 
+      start: Date.now(), 
+      finishedBy: null,
+      device: deviceInfo
+    };
+
+    // 呼叫 API：開始練習（可以把 start_time 傳出去）
+    sendPracticeEvent("start", {
+      start_time: currentSession.start
+    });
+
+    resetPracticeFlags();
+    
+    btnStart.disabled  = true;
+    btnFinish.disabled = false;
+
+    console.log("startPractice: practicePlayer =", practicePlayer);
+
+    if (practicePlayer && typeof practicePlayer.playVideo === "function") {
+      practicePlayer.playVideo();
+    } else {
+      console.log("player 尚未 ready，設定 pendingStartPlay = true");
+      pendingStartPlay = true;
+    }
+
+    showToast("已開始本次練習，祝你有一段安穩的 30 分鐘。");
+  }
+
+  function finishPractice(mode) {
+    if (!currentSession) {
+      showToast("目前沒有正在進行的練習。");
+      return;
+    }
+
+    currentSession.end      = Date.now();
+    currentSession.duration = (currentSession.end - currentSession.start) / 1000; // 秒
+    currentSession.finishedBy = mode || "manual";
+
+    var minutes = Math.round(currentSession.duration / 60);
+
+    // 呼叫 API：結束練習，把 start / end / minutes 傳到資料庫
+    sendPracticeEvent("end", {
+      start_time: currentSession.start,
+      end_time: currentSession.end,
+      duration_sec: currentSession.duration,
+      minutes: minutes
+    });
+
+    currentSession = null;
+
+    btnStart.disabled  = false;
+    btnFinish.disabled = true;
+
+    // 從資料庫重新抓最新成長紀錄
+    renderSessionsFromDB();
+
+    showToast("已為你記錄這次練習，辛苦了！");
+  }
+
+  btnStart.addEventListener("click", function(){ startPractice(); });
+  btnFinish.addEventListener("click", function(){ finishPractice("manual"); });
+
+  document.addEventListener("DOMContentLoaded", function(){
+    // 一進頁面就先抓資料庫成長紀錄
+      renderSessionsFromDB();
+
+// ★ 對所有 iframe 做正規化 & 加上 data-track="yt"
+      prepareIframes();
+  });
+
+
+
+  /** 解析 YouTube 來源為 { id(ytId), url(可追蹤embed) } */
+function normalizeYouTubeSrc(src) {
+  if (!src) return null;
+  const be = src.match(/youtu\.be\/([A-Za-z0-9_-]{6,})/);
+  const watch = src.match(/[?&]v=([A-Za-z0-9_-]{6,})/);
+  const embed = src.match(/\/embed\/([A-Za-z0-9_-]{6,})/);
+  const ytId = be?.[1] || watch?.[1] || embed?.[1];
+  if (!ytId) return null;
+  const url = new URL("https://www.youtube-nocookie.com/embed/" + ytId);
+  url.searchParams.set("enablejsapi", "1");
+  url.searchParams.set("rel", "0");
+  url.searchParams.set("modestbranding", "1");
+  url.searchParams.set("playsinline", "1");
+  return { id: ytId, url: url.toString() };
+}
+
+/** 掃描 iframes → 正規化 → 補資料屬性 */
+function prepareIframes() {
+  const iframes = Array.from(document.querySelectorAll("iframe"));
+  let idx = 0;
+  for (const el of iframes) {
+    // ★ 跳過實作用的主影片，不要讓 createPlayers 管它
+    if (el.id === "practiceVideo") continue;
+
+    const norm = normalizeYouTubeSrc(el.getAttribute("src"));
+    if (!norm) continue;
+
+    el.src = norm.url;
+    if (!el.id) el.id = `ytp-${++idx}`;
+
+    let title = el.getAttribute("title") || `video-${idx}`;
+    const card = el.closest(".card, .single-video, .hero");
+    const h = card?.querySelector("h3, h4, h2");
+    if (h?.textContent) title = h.textContent.trim();
+
+    el.dataset.track     = "yt";
+    el.dataset.title     = title;
+    el.dataset.youtubeId = norm.id;
+    el.dataset.videoId   = el.dataset.videoId || norm.id;
+  }
+}
+
+
+/** 播放器&狀態旗標 */
+const players = {};
+const flags = {}; // { [iframeId]: { clicked, sent50, sent100 } }
+
+/** 標記 100% 完成清單（可選） */
+function markWatched(record) {
+  try {
+    const list = JSON.parse(localStorage.getItem(STORAGE_WATCHED_KEY) || "[]");
+    if (!list.find(x => x.videoId === record.videoId)) {
+      list.push(record);
+      localStorage.setItem(STORAGE_WATCHED_KEY, JSON.stringify(list));
+    }
+  } catch {}
+}
+
+/** 送事件的統一函式 */
+function sendProgress({ iframeId, status, player, meta }) {
+  const duration = Math.round(player?.getDuration?.() || 0);
+  const watched  = Math.round(player?.getCurrentTime?.() || 0);
+  const payload = {
+    vipId,
+    status,                    // "click" | "50" | "100"
+    videoId:   meta.videoId,   // 你的商務ID
+    youtubeId: meta.youtubeId, // 真正 YT ID
+    title:     meta.title,
+    watchedSec: watched,
+    duration,
+    ts: new Date().toISOString()
+  };
+  console.log("payload1="+JSON.stringify(payload, null, 1));
+  //postEvent(payload);
+  if (status === "100") {
+    markWatched(payload);
+  }
+}
+function createPlayers() {
+  const iframes = Array.from(document.querySelectorAll('iframe[data-track="yt"]'));
+  iframes.forEach((el) => {
+    const iframeId = el.id;
+    const meta = {
+      videoId:   el.dataset.videoId,
+      youtubeId: el.dataset.youtubeId,
+      title:     el.dataset.title || el.title || el.dataset.videoId || el.dataset.youtubeId
+    };
+    flags[iframeId] = { clicked: false, sent50: false, sent100: false };
+
+    players[iframeId] = new YT.Player(iframeId, {
+      events: {
+        onStateChange: (e) => {
+          const state  = e.data;
+          const player = players[iframeId];
+
+          // click（首次播放）
+          if (state === YT.PlayerState.PLAYING && !flags[iframeId].clicked) {
+            flags[iframeId].clicked = true;
+            sendProgress({ iframeId, status: "click", player, meta });
+            logEvent("videoPlay_"+el.dataset.videoId, EventType);
+          }
+
+          // 每秒檢查一次是否跨過 50%
+          if (state === YT.PlayerState.PLAYING && !flags[iframeId].sent50) {
+            if (!flags[iframeId].halfTimer) {
+              flags[iframeId].halfTimer = setInterval(() => {
+                try {
+                  const d = player.getDuration?.() || 0;
+                  const c = player.getCurrentTime?.() || 0;
+                  if (d > 0 && c / d >= 0.5 && !flags[iframeId].sent50) {
+                    flags[iframeId].sent50 = true;
+                    sendProgress({ iframeId, status: "50", player, meta });
+                    logEvent("videoPlay50_"+el.dataset.videoId, EventType);
+                    clearInterval(flags[iframeId].halfTimer);
+                    flags[iframeId].halfTimer = null;
+                  }
+                } catch {}
+              }, 1000);
+            }
+          }
+
+          // 100%（播放結束）
+          if (state === YT.PlayerState.ENDED && !flags[iframeId].sent100) {
+            flags[iframeId].sent100 = true;
+            if (flags[iframeId].halfTimer) {
+              clearInterval(flags[iframeId].halfTimer);
+              flags[iframeId].halfTimer = null;
+            }
+            sendProgress({ iframeId, status: "100", player, meta });
+            logEvent("videoPlay100_"+el.dataset.videoId, EventType);
+          }
+        }
+      }
+    });
+  });
+}
+
+</script>
+
+</body>
+</html>

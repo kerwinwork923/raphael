@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VIP發表會邀請｜WiseBalance</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tailwind theme -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            wb: {
+              deep: '#0f3b3b',
+              gold: '#c9a14a',
+              ink:  '#1f2a37',
+              muted:'#6b7280',
+              ivory:'#f6f1e7',
+              line: 'rgba(201,161,74,.35)'
+            }
+          },
+          boxShadow: {
+            soft: '0 12px 36px rgba(17,24,39,.08)',
+            strong: '0 20px 60px rgba(0,0,0,.18)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: "PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+    }
+    
+    html { font-size: 20px; }              /* 原本瀏覽器預設約 16px */
+
+    /* 背景容器 */
+    .wb-geo-lines {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+    }
+
+    /* 金色幾何底線 */
+    .wb-geo-svg {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      width: 100%;
+      height: 100%;
+      opacity: .9;
+      pointer-events: none;
+    }
+
+
+  </style>
+</head>
+
+<body class="min-h-screen bg-wb-ivory text-wb-ink antialiased>
+
+  <div class="wb-geo-lines">
+
+    <!-- 金色幾何背景 -->
+    <svg class="wb-geo-svg" viewBox="0 0 1440 900" preserveAspectRatio="none">
+      <g fill="none" stroke="rgba(201,161,74,.35)" stroke-width="3">
+        <path d="M-80,120 L420,0 L980,240 L1540,40" />
+        <path d="M-120,520 L520,260 L1040,520 L1540,300" />
+        <path d="M-120,860 L520,620 L1040,860 L1540,660" />
+        <path d="M-60,60 L320,260 L760,120 L1120,320 L1540,220" opacity=".55"/>
+        <path d="M-60,720 L320,520 L760,660 L1120,460 L1540,560" opacity=".55"/>
+      </g>
+    </svg>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 border-b border-wb-line bg-wb-ivory/80 backdrop-blur">
+      <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+        <div class="flex items-center gap-3">
+          <div class="h-10 w-10 overflow-hidden rounded-xl border border-wb-line bg-white shadow-soft">
+            <img src="https://i.pinimg.com/736x/89/6d/93/896d9311bb3fb31441530bc508b16f73.jpg"
+                 class="h-full w-full object-cover" />
+          </div>
+          <div>
+            <div class="text-sm font-semibold text-wb-deep">智平衡健康集團 WiseBalance</div>
+            <div class="text-xs text-wb-muted">VIP 邀請制發表會｜台北君悅</div>
+          </div>
+        </div>
+        <a href="#rsvp"
+           class="rounded-xl bg-wb-deep px-4 py-2 text-sm font-semibold text-white shadow-soft">
+          保留席次
+        </a>
+      </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="mx-auto max-w-5xl px-4 pt-10 pb-8">
+      <div class="rounded-2xl border border-wb-line bg-white/85 shadow-soft">
+        <div class="p-7 md:p-10">
+          <h1 class="mt-3 text-2xl md:text-4xl font-semibold text-wb-deep">
+            你好!我是黃忠信博士，讀完了寄給你的信，以下是我想繼續對你說的話。
+          </h1>
+          <p class="mt-5 max-w-2xl text-base text-wb-ink/90">
+            這些年來，你身體一直沒有真正穩定下來。我將會說明「你為什麼會卡住」與「為什麼這次不同」。
+          </p>
+        </div>
+        <div class="relative aspect-video overflow-hidden rounded-2xl border border-wb-line bg-white shadow-soft">
+          <iframe
+            class="absolute inset-0 h-full w-full"
+            src="https://www.youtube-nocookie.com/embed/ykZo9JzAB_8?autoplay=1&mute=1&playsinline=1&controls=1&modestbranding=1&rel=0"
+            title="YouTube video"
+            allow="autoplay; encrypted-media; picture-in-picture"
+            allowfullscreen
+          ></iframe>
+        </div>        
+      </div>
+    </section>
+
+    <!-- Why -->
+<section id="why" class="mx-auto max-w-5xl px-4 py-8">
+  <div class="rounded-3xl border border-wb-line bg-white p-7 shadow-soft">
+    <h2 class="text-xl md:text-2xl font-semibold text-wb-deep mb-6">
+      這次，你會清楚理解哪一些健康關鍵
+    </h2>
+
+    <div class="grid gap-4 md:grid-cols-3">
+      <div class="rounded-xl border border-wb-line bg-white p-5">
+        <div class="text-xs text-wb-muted">你會聽懂</div>
+        <div class="mt-2 font-semibold text-wb-ink">為什麼反覆調整仍不穩定</div>
+        <ul class="mt-3 space-y-2 text-sm text-wb-ink/80">
+          <li>• 為什麼健康問題會在不同地方輪流出現</li>
+          <li>• 為什麼只處理結果，效果無法累積</li>
+        </ul>
+      </div>
+
+      <div class="rounded-xl border border-wb-line bg-white p-5">
+        <div class="text-xs text-wb-muted">你會看見</div>
+        <div class="mt-2 font-semibold text-wb-ink">哪些健康關鍵一直沒被處理好</div>
+        <ul class="mt-3 space-y-2 text-sm text-wb-ink/80">
+          <li>• 哪些健康資訊過去被零散的處理</li>
+          <li>• 哪些健康線索其實彼此牽動</li>
+        </ul>
+      </div>
+
+      <div class="rounded-xl border border-wb-line bg-white p-5">
+        <div class="text-xs text-wb-muted">你會理解</div>
+        <div class="mt-2 font-semibold text-wb-ink">接下來怎麼走得下去</div>
+        <ul class="mt-3 space-y-2 text-sm text-wb-ink/80">
+          <li>• 不再只靠意志力硬撐</li>
+          <li>• 讓健康回到可持續的節奏</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="mt-6 text-sm leading-relaxed text-wb-ink/80">
+      這是一場把整個脈絡一次說清楚的正式發表會。
+    </p>
+  </div>
+</section>
+
+    <!-- Event Info（同風格：白卡＋金線邊框＋深綠標題＋灰文字） -->
+<section class="mx-auto max-w-5xl px-4 py-8">
+  <div class="rounded-3xl border border-wb-line bg-white/85 p-7 shadow-soft md:p-9">
+    <h2 class="text-xl font-semibold text-wb-deep md:text-2xl">活動資訊</h2>
+
+    <div class="mt-5 grid gap-4 md:grid-cols-2">
+      <div class="rounded-2xl border border-wb-line bg-white p-5 shadow-soft">
+        <div class="text-xs text-wb-muted">時間</div>
+        <div class="mt-1 text-sm font-semibold text-wb-ink">2026 年 1 月 10 日（六）</div>
+        <div class="mt-1 text-sm text-wb-ink/80">13:00 入場｜13:30 正式開始</div>
+      </div>
+
+      <div class="rounded-2xl border border-wb-line bg-white p-5 shadow-soft">
+        <div class="text-xs text-wb-muted">地點</div>
+        <div class="mt-1 text-sm font-semibold text-wb-ink">台北君悅酒店</div>
+        <div class="mt-1 text-sm text-wb-ink/80">凱悅聽二區(3F)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Fit（同風格：左白卡、右深綠對比卡） -->
+<section class="mx-auto max-w-5xl px-4 py-8">
+  <div class="grid gap-4 md:grid-cols-2">
+    <div class="rounded-3xl border border-wb-line bg-wb-deep p-7 shadow-strong">
+      <h2 class="text-lg font-semibold text-white">這場發表會適合這樣的你</h2>
+      <ul class="mt-4 space-y-2 text-sm text-white/90">
+        <li>• 症狀反覆、不穩定、長期影響生活節奏</li>
+        <li>• 嘗試過許多方式，仍覺得少一個關鍵</li>
+        <li>• 願意用一個下午，把事情真正聽懂</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- RSVP（同風格：白卡＋步驟白卡＋深綠主按鈕＋米白補充框） -->
+<section id="rsvp" class="mx-auto max-w-5xl px-4 pt-8 pb-14">
+  <div class="rounded-3xl border border-wb-line bg-white/90 p-7 shadow-soft md:p-9">
+    
+    <div class="mt-6">
+      <h2 class="text-xl md:text-2xl font-semibold text-wb-deep">VIP 報名表單</h2>
+      <p class="mt-2 text-sm text-wb-muted">填寫資料以利現場報到與座位安排。</p>
+    
+      <form class="mt-4 rounded-3xl border border-wb-line bg-white/90 p-6 shadow-soft md:p-8"
+            onsubmit="submitForm(event)">
+    
+        <div class="grid gap-4 md:grid-cols-2">
+          <div>
+            <label class="block text-sm font-semibold text-wb-deep mb-2">姓名 *</label>
+            <input
+              class="w-full rounded-xl border border-wb-line bg-white px-4 py-3 text-sm text-wb-ink placeholder:text-wb-muted/70 focus:outline-none focus:ring-2 focus:ring-wb-gold/30"
+              type="text" name="Name" required placeholder="請輸入您的姓名" />
+          </div>
+    
+          <div>
+            <label class="block text-sm font-semibold text-wb-deep mb-2">手機</label>
+            <input
+              class="w-full rounded-xl border border-wb-line bg-white px-4 py-3 text-sm text-wb-ink placeholder:text-wb-muted/70 focus:outline-none focus:ring-2 focus:ring-wb-gold/30"
+              type="tel" name="Mobile" placeholder="0912345678" />
+          </div>
+        </div>
+    
+        <div class="mt-4">
+          <label class="block text-sm font-semibold text-wb-deep mb-2">其他需求或備註</label>
+          <textarea
+            class="w-full rounded-xl border border-wb-line bg-white px-4 py-3 text-sm text-wb-ink placeholder:text-wb-muted/70 focus:outline-none focus:ring-2 focus:ring-wb-gold/30"
+            name="Note" rows="4" placeholder="如有特殊需求，請告訴我們..."></textarea>
+        </div>
+    
+        <!-- Buttons -->
+        <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <!-- ✅ 送出表單 -->
+           <button
+            class="inline-flex justify-center rounded-2xl bg-wb-deep px-6 py-3 text-sm font-semibold text-white shadow-soft ring-1 ring-wb-line hover:opacity-95"
+            type="submit">
+            確認送出
+          </button>
+        </div>
+    
+        <div id="ok"
+             class="mt-4 hidden rounded-2xl border border-wb-line bg-wb-ivory/70 p-4 text-center text-sm font-semibold text-wb-deep">
+          ✓ 報名成功！已寄出確認信。
+        </div>
+      </form>
+    </div>
+    <div class="mt-6 rounded-2xl border border-wb-line bg-wb-ivory/70 p-5 text-sm">
+      <button
+        class="gift inline-flex w-full justify-center rounded-2xl bg-wb-gold px-6 py-3 text-sm font-semibold text-wb-deep shadow-soft ring-1 ring-wb-line hover:brightness-95 active:brightness-90"
+        type="button"
+      >
+        點我! 觀看影片、現場領取限量貴賓禮
+      </button>
+    </div>
+    
+    <div class="mt-6 rounded-2xl border border-wb-line bg-wb-ivory/70 p-5 text-sm">
+      <div class="font-semibold text-wb-deep">補充說明</div>
+      <ul class="mt-2 space-y-1 text-sm text-wb-muted">
+        <li>• 本場為邀請制發表會，席次有限。</li>
+        <li>• 實際出席與相關說明，請依邀請函內容為準。</li>
+        <li>• 相關出席確認與提醒，將另行通知。</li>
+      </ul>
+    </div>
+  </div>
+</section>
+    <!-- Footer -->
+    <footer class="border-t border-wb-line bg-wb-ivory/80">
+      <div class="mx-auto max-w-5xl px-4 py-6 text-xs text-wb-muted text-center">
+        © 2026 智平衡健康集團｜VIP 邀請制發表會
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const API_LOG_EVENT = "https://23700999.com:8081/HMA/000TTELOG_EVENT.jsp";
+    const API_REGISTER  = "https://23700999.com:8081/HMA/000TTERegister.jsp";
+    const EventType="vip5";
+  	let vipId = new URLSearchParams(location.search).get("vip") || "unknown";
+   //vipId="1111";
+    console.log("vipId="+vipId);
+	  logEvent("leadingpage", EventType);
+
+    const giftBtn = document.querySelector("button.gift");
+    if (giftBtn) {
+        giftBtn.addEventListener("click", () => {
+        // 記錄按鈕點擊事件（可選）
+        logEvent("click_gift", EventType);
+         // 帶參數跳轉
+        const targetUrl = `https://neuroplus.com.tw/vipclub.html?vip=${encodeURIComponent(vipId)}`;
+        window.location.href = targetUrl;
+      });
+     }
+
+	  async function logEvent(Event, EventType) {
+      const payload = {SafeKey:"qrt897hpmd", VIP: vipId, Event, EventType} ;
+      console.log("payload1="+JSON.stringify(payload, null, 1));
+       // 1) 先嘗試 sendBeacon（POST，Content-Type: text/plain; charset=UTF-8）
+      try {
+           const ok = navigator.sendBeacon(API_LOG_EVENT, new Blob(
+           [JSON.stringify(payload)], { type: "text/plain;charset=UTF-8" }
+          ));
+          if (ok) {console.info("[logEvent] sendBeacon sent");return;}     
+      } catch (e) {
+         console.warn("[logEvent] sendBeacon failed, fallback to fetch no-cors", e);
+       }
+      // 2) fallback: simple request（no-cors + text/plain → 不會 preflight）
+       try {
+             await fetch(API_LOG_EVENT, {
+               method: "POST",
+               mode: "no-cors",
+               headers: { "Content-Type": "text/plain;charset=UTF-8" }, // 注意：不要 application/json
+               body: new Blob([JSON.stringify(payload)], { type: "text/plain;charset=UTF-8" }),
+               keepalive: true,
+               });
+              console.info("[logEvent] fetch(no-cors) sent (opaque response)");
+        } catch (err) {
+             console.error("[logEvent] still failed:", err);
+          }
+     }
+
+     async function registerSignup({ Name, Mobile, Email, Note }) {
+  const payload = {
+    SafeKey: "qrt897hpmd",
+    VIP: vipId,
+    Name,
+    Mobile,
+    Email,
+    Note,
+    EventType
+  };
+
+  console.log("[registerSignup] payload =", JSON.stringify(payload, null, 2));
+
+  try {
+    const res = await fetch(API_REGISTER, {
+      method: "POST",
+      mode: "cors", // 後端需允許 CORS 才能讀 body
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: JSON.stringify(payload),
+      keepalive: true,
+    });
+
+    // HTTP 非 2xx
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new Error(`HTTP ${res.status} ${res.statusText} ${text}`);
+    }
+
+    // 盡量用 JSON 解析；若不是 JSON 就退回 text
+    let data = null;
+    const ct = res.headers.get("content-type") || "";
+    if (ct.includes("application/json")) {
+      data = await res.json();
+    } else {
+      const text = await res.text();
+      try { data = JSON.parse(text); } catch { data = { Result: text }; }
+    }
+
+    console.log("[registerSignup] response =", data);
+
+    return {
+      delivered: true,
+      result: data?.Result ?? null,
+      raw: data,
+    };
+  } catch (err) {
+    console.error("[registerSignup] failed:", err);
+    return { delivered: false, error: String(err) };
+  }
+}
+
+
+    document.querySelectorAll('a[href="#form"]').forEach(btn => {
+    btn.addEventListener("click", (e) => {
+        e.preventDefault(); // 阻止預設跳轉行為
+        logEvent("click_register", EventType);
+    // 2️⃣ 平滑滾動至表單
+      const formSection = document.querySelector("#form");
+      if (formSection) formSection.scrollIntoView({ behavior: "smooth", block: "start" });
+
+      // ⚠️ 這裡改為 Name（原本是 name）
+      const firstInput = document.querySelector('#form input[name="Name"]');
+      if (firstInput) setTimeout(() => firstInput.focus({ preventScroll: true }), 400);
+  
+  });
+});
+//document.querySelectorAll('form input, form textarea').forEach(el => el.addEventListener("input", () => logEvent("input_field", { name: el.name }), { once: true }));
+
+    const target = new Date("2025-12-18T13:30:00+08:00").getTime();
+    function tick(){ 
+	     const diff=Math.max(0,target-Date.now()); 
+       const s=Math.floor(diff/1000); 
+	     const d=Math.floor(s/86400),h=Math.floor((s%86400)/3600),m=Math.floor((s%3600)/60),ss=s%60; ["d","h","m","s"].forEach((k,i)=>{const v=[d,h,m,ss][i]; 
+	     const el=document.getElementById(k); 
+	     if(el) el.textContent=String(v).padStart(2,"0");});
+	    }
+       tick(); setInterval(tick,1000);
+
+   // 簡單彈窗（不想自訂 UI 也可用 alert）
+   function showSuccess(msg = "報名成功！期待您的一起訂製健康共創未來!") {
+         alert(msg);
+    }
+
+  function showError(msg = "報名忙碌中，請稍後再試。") {
+    alert(msg);
+  }
+
+  async function submitForm(event) {
+    event.preventDefault();
+
+    const f = event.target;
+    const data = Object.fromEntries(new FormData(f).entries());
+    const { Name = "", Mobile = "", Email = "", Note = "" } = data;
+
+    const btn = f.querySelector('button[type="submit"]');
+    const old = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "送出中…";
+
+    try {
+      // 事件上報（不影響流程）
+      const logP = logEvent("submit_form", EventType);
+
+      // 報名：允許 CORS / beacon / no-cors 三種路徑
+      const result = await registerSignup({ Name, Mobile, Email, Note });
+      await Promise.allSettled([logP]);
+
+      const delivered = !!result?.delivered;
+      const msg = result?.result;
+
+      console.log("delivered=", delivered);
+      console.log("Result=", msg);
+
+      if (delivered) {
+          localStorage.setItem("vip_form", JSON.stringify({ ts: Date.now(), vip: vipId, ...data }));
+
+      // ✅ 根據後端 Result 顯示不同提示
+          if (msg && msg.includes("已經報名")) {
+              showSuccess("您已經報名過囉！我們已保留您的資料，期待現場見。");
+          } else {
+              showSuccess("報名成功！期待您的一起訂製健康共創未來!");
+           }
+
+          // 顯示頁面上的綠色提示（你有 #ok）
+          const okEl = document.getElementById("ok");
+          if (okEl) okEl.classList.remove("hidden");
+
+          // f.reset(); // 需要就開
+          } else {
+              showError(result?.error || "報名忙碌中，請稍後再試。"); 
+          }
+
+          } catch (err) {
+              console.error("[submitForm] unexpected error:", err);
+              showError("系統忙碌中，請稍後再試。");
+          } finally {
+              btn.disabled = false;
+              btn.textContent = old;
+          }
+      }
+
+    const videoEl=document.querySelector("video");
+    if (videoEl) {
+        let started = false;
+        let watched50 = false;
+        let completed = false;
+
+  // 第一次播放
+  videoEl.addEventListener("play", () => {
+    if (!started) {
+      started = true;
+     // logEvent("video_play", EventType);
+    }
+  });
+
+  // 只偵測 50%
+  videoEl.addEventListener("timeupdate", () => {
+    const p = (videoEl.currentTime / videoEl.duration) * 100;
+    if (!watched50 && p >= 50) {
+      watched50 = true;
+     // logEvent("video_progress50", EventType);
+      console.log("🎯 Video reached 50%");
+    }
+  });
+
+  // 播放結束（100%）
+  videoEl.addEventListener("ended", () => {
+  if (!completed) {
+    completed = true;
+    logEvent("video_complete", EventType);
+    console.log("✅ Video completed");
+  }
+});
+}
+  </script>
+
+</body>
+</html>
