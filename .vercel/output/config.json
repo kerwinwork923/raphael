@@ -4,83 +4,89 @@
     "HRV/index.html": {
       "path": "HRV"
     },
-    "robot/index.html": {
-      "path": "robot"
-    },
-    "member/index.html": {
-      "path": "member"
-    },
-    "CSRobot/index.html": {
-      "path": "CSRobot"
+    "user/index.html": {
+      "path": "user"
     },
     "user2/index.html": {
       "path": "user2"
     },
-    "user/index.html": {
-      "path": "user"
+    "member/index.html": {
+      "path": "member"
     },
-    "package/index.html": {
-      "path": "package"
-    },
-    "qrcode/index.html": {
-      "path": "qrcode"
+    "robot/index.html": {
+      "path": "robot"
     },
     "point/index.html": {
       "path": "point"
     },
-    "weekly2/index.html": {
-      "path": "weekly2"
+    "package/index.html": {
+      "path": "package"
     },
-    "contract/index.html": {
-      "path": "contract"
-    },
-    "bluetooth/index.html": {
-      "path": "bluetooth"
-    },
-    "pwa-test/index.html": {
-      "path": "pwa-test"
-    },
-    "register/index.html": {
-      "path": "register"
+    "CSRobot/index.html": {
+      "path": "CSRobot"
     },
     "Finish/index.html": {
       "path": "Finish"
     },
-    "healthLog/index.html": {
-      "path": "healthLog"
+    "contract/index.html": {
+      "path": "contract"
     },
-    "robot0909/index.html": {
-      "path": "robot0909"
+    "qrcoder/index.html": {
+      "path": "qrcoder"
     },
-    "robot0908/index.html": {
-      "path": "robot0908"
+    "pwa-test/index.html": {
+      "path": "pwa-test"
     },
-    "robot1028/index.html": {
-      "path": "robot1028"
+    "qrcode/index.html": {
+      "path": "qrcode"
     },
-    "service/index.html": {
-      "path": "service"
+    "bluetooth/index.html": {
+      "path": "bluetooth"
     },
-    "robot1209/index.html": {
-      "path": "robot1209"
-    },
-    "robotDemo/index.html": {
-      "path": "robotDemo"
-    },
-    "robot1222/index.html": {
-      "path": "robot1222"
-    },
-    "babyRecord/index.html": {
-      "path": "babyRecord"
-    },
-    "cart/index.html": {
-      "path": "cart"
+    "register/index.html": {
+      "path": "register"
     },
     "robot0205/index.html": {
       "path": "robot0205"
     },
+    "healthLog/index.html": {
+      "path": "healthLog"
+    },
+    "service/index.html": {
+      "path": "service"
+    },
+    "robot1029/index.html": {
+      "path": "robot1029"
+    },
+    "robot1021/index.html": {
+      "path": "robot1021"
+    },
+    "weekly/index.html": {
+      "path": "weekly"
+    },
+    "robot1209/index.html": {
+      "path": "robot1209"
+    },
+    "robot0908/index.html": {
+      "path": "robot0908"
+    },
+    "robotDemo/index.html": {
+      "path": "robotDemo"
+    },
+    "weekly2/index.html": {
+      "path": "weekly2"
+    },
     "healthLog2/index.html": {
       "path": "healthLog2"
+    },
+    "disclaimer/index.html": {
+      "path": "disclaimer"
+    },
+    "cart/index.html": {
+      "path": "cart"
+    },
+    "babyRecord/index.html": {
+      "path": "babyRecord"
     },
     "HRVHistory/index.html": {
       "path": "HRVHistory"
@@ -88,32 +94,29 @@
     "index copy/index.html": {
       "path": "index copy"
     },
-    "robot1029/index.html": {
-      "path": "robot1029"
+    "robot1222/index.html": {
+      "path": "robot1222"
     },
-    "orderQuery/index.html": {
-      "path": "orderQuery"
-    },
-    "qrcoder/index.html": {
-      "path": "qrcoder"
-    },
-    "point-copy/index.html": {
-      "path": "point-copy"
-    },
-    "robot1021/index.html": {
-      "path": "robot1021"
+    "robot0909/index.html": {
+      "path": "robot0909"
     },
     "usageIndex/index.html": {
       "path": "usageIndex"
     },
-    "userRecord/index.html": {
-      "path": "userRecord"
+    "robot-copy/index.html": {
+      "path": "robot-copy"
+    },
+    "orderQuery/index.html": {
+      "path": "orderQuery"
     },
     "member-copy/index.html": {
       "path": "member-copy"
     },
-    "disclaimer/index.html": {
-      "path": "disclaimer"
+    "robot1028/index.html": {
+      "path": "robot1028"
+    },
+    "pointExange/index.html": {
+      "path": "pointExange"
     },
     "orderDetail/index.html": {
       "path": "orderDetail"
@@ -121,14 +124,11 @@
     "pointRecord/index.html": {
       "path": "pointRecord"
     },
-    "pointExange/index.html": {
-      "path": "pointExange"
+    "pointRules/index.html": {
+      "path": "pointRules"
     },
-    "robot-copy/index.html": {
-      "path": "robot-copy"
-    },
-    "privacyPage/index.html": {
-      "path": "privacyPage"
+    "userRecord/index.html": {
+      "path": "userRecord"
     },
     "index.html": {
       "path": ""
@@ -136,11 +136,11 @@
     "returnGoods/index.html": {
       "path": "returnGoods"
     },
-    "weekly/index.html": {
-      "path": "weekly"
+    "point-copy/index.html": {
+      "path": "point-copy"
     },
-    "pointRules/index.html": {
-      "path": "pointRules"
+    "privacyPage/index.html": {
+      "path": "privacyPage"
     },
     "cart/pay/index.html": {
       "path": "cart/pay"
@@ -157,8 +157,8 @@
     "contract-copy/index.html": {
       "path": "contract-copy"
     },
-    "privacyPage2/index.html": {
-      "path": "privacyPage2"
+    "clinicStories/index.html": {
+      "path": "clinicStories"
     },
     "deleteConfirm/index.html": {
       "path": "deleteConfirm"
@@ -166,68 +166,71 @@
     "HRVHistoryAll/index.html": {
       "path": "HRVHistoryAll"
     },
-    "exchangeRecord/index.html": {
-      "path": "exchangeRecord"
+    "privacyPage2/index.html": {
+      "path": "privacyPage2"
     },
     "cart/payMethod/index.html": {
       "path": "cart/payMethod"
     },
-    "forgetPassword/index.html": {
-      "path": "forgetPassword"
+    "babyRecord-copy/index.html": {
+      "path": "babyRecord-copy"
     },
     "robotDemo copy/index.html": {
       "path": "robotDemo copy"
     },
-    "privacy-copy/index.html": {
-      "path": "privacy-copy"
-    },
-    "HRVHistory copy/index.html": {
-      "path": "HRVHistory copy"
-    },
     "cart/addAddress/index.html": {
       "path": "cart/addAddress"
     },
-    "babyRecord-copy/index.html": {
-      "path": "babyRecord-copy"
+    "exchangeRecord/index.html": {
+      "path": "exchangeRecord"
+    },
+    "forgetPassword/index.html": {
+      "path": "forgetPassword"
     },
     "cart/invoiceType/index.html": {
       "path": "cart/invoiceType"
     },
-    "pointExange copy/index.html": {
-      "path": "pointExange copy"
-    },
     "personalizedInfo/index.html": {
       "path": "personalizedInfo"
     },
-    "specialAssistance/index.html": {
-      "path": "specialAssistance"
+    "healthDataSetting/index.html": {
+      "path": "healthDataSetting"
+    },
+    "pointExange copy/index.html": {
+      "path": "pointExange copy"
+    },
+    "HRVHistory copy/index.html": {
+      "path": "HRVHistory copy"
     },
     "cart/invoiceSelect1/index.html": {
       "path": "cart/invoiceSelect1"
     },
-    "clinicStories/index.html": {
-      "path": "clinicStories"
-    },
-    "UsageHistory/index.html": {
-      "path": "UsageHistory"
+    "returnGoodsConfirm/index.html": {
+      "path": "returnGoodsConfirm"
     },
     "cart/invoiceSelect2/index.html": {
       "path": "cart/invoiceSelect2"
     },
-    "cart/cartList/index.html": {
-      "path": "cart/cartList"
+    "cart/checkoutSuccess/index.html": {
+      "path": "cart/checkoutSuccess"
+    },
+    "specialAssistance/index.html": {
+      "path": "specialAssistance"
+    },
+    "raphaelBackend/index.html": {
+      "path": "raphaelBackend"
     },
     "cart/invoiceSelect3/index.html": {
       "path": "cart/invoiceSelect3"
     },
-    "cart/checkoutSuccess/index.html": {
-      "path": "cart/checkoutSuccess"
+    "privacy-copy/index.html": {
+      "path": "privacy-copy"
+    },
+    "cart/cartList/index.html": {
+      "path": "cart/cartList"
     },
     "raphaelBackend/order/index.html": {
       "path": "raphaelBackend/order"
-    },
-    "raphaelBackend/member/index.html": {
-      "path": "raphaelBackend/member"
     },
     "raphaelBackend/member/stable/index.html": {
       "path": "raphaelBackend/member/stable"
@@ -235,38 +238,35 @@
     "raphaelBackend/production/index.html": {
       "path": "raphaelBackend/production"
     },
-    "raphaelBackend/member/addSerial/index.html": {
-      "path": "raphaelBackend/member/addSerial"
+    "raphaelBackend/events/index.html": {
+      "path": "raphaelBackend/events"
     },
     "raphaelBackend/member/acerNumber/index.html": {
       "path": "raphaelBackend/member/acerNumber"
     },
-    "raphaelBackend/videoManage/index.html": {
-      "path": "raphaelBackend/videoManage"
-    },
-    "returnGoodsConfirm/index.html": {
-      "path": "returnGoodsConfirm"
-    },
     "raphaelBackend/careTracking/index.html": {
       "path": "raphaelBackend/careTracking"
     },
-    "raphaelBackend/events/index.html": {
-      "path": "raphaelBackend/events"
+    "raphaelBackend/member/addSerial/index.html": {
+      "path": "raphaelBackend/member/addSerial"
+    },
+    "raphaelBackend/videoManage/index.html": {
+      "path": "raphaelBackend/videoManage"
     },
     "raphaelBackend/member/myFavorite/index.html": {
       "path": "raphaelBackend/member/myFavorite"
     },
-    "raphaelBackend/member/memberContent/index.html": {
-      "path": "raphaelBackend/member/memberContent"
+    "UsageHistory/index.html": {
+      "path": "UsageHistory"
     },
     "raphaelBackend/messageManage/index.html": {
       "path": "raphaelBackend/messageManage"
     },
-    "raphaelBackend/index.html": {
-      "path": "raphaelBackend"
+    "raphaelBackend/member/index.html": {
+      "path": "raphaelBackend/member"
     },
-    "healthDataSetting/index.html": {
-      "path": "healthDataSetting"
+    "raphaelBackend/member/memberContent/index.html": {
+      "path": "raphaelBackend/member/memberContent"
     },
     "raphaelBackend/videoManage/addVideo/index.html": {
       "path": "raphaelBackend/videoManage/addVideo"
@@ -277,11 +277,11 @@
     "usage/clothTypeCopy/index.html": {
       "path": "usage/clothTypeCopy"
     },
-    "admin/customer-service/index.html": {
-      "path": "admin/customer-service"
-    },
     "usage0606/clothTypeCopy/index.html": {
       "path": "usage0606/clothTypeCopy"
+    },
+    "admin/customer-service/index.html": {
+      "path": "admin/customer-service"
     },
     "raphaelBackend/member/memberContent copy/index.html": {
       "path": "raphaelBackend/member/memberContent copy"
