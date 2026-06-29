@@ -96,9 +96,12 @@
           <svg class="w-3.5 h-3.5 absolute left-2.5 top-2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
           </svg>
-          <input type="text" placeholder="搜尋..." class="pl-7 pr-3 py-1.5 border border-slate-200 rounded-lg text-xs w-36 focus:border-blue-300 transition" oninput="filterProjects(this.value)">
+          <input id="project-search" type="text" placeholder="搜尋..." class="pl-7 pr-3 py-1.5 border border-slate-200 rounded-lg text-xs w-36 focus:border-blue-300 transition" oninput="applyProjectFilters()">
         </div>
-        <select class="border border-slate-200 rounded-lg text-xs px-2 py-1.5 text-slate-600" onchange="filterByStatus(this.value)">
+        <select id="dept-filter" class="border border-slate-200 rounded-lg text-xs px-2 py-1.5 text-slate-600" onchange="applyProjectFilters()">
+          <option value="">全部部門</option>
+        </select>
+        <select id="status-filter" class="border border-slate-200 rounded-lg text-xs px-2 py-1.5 text-slate-600" onchange="applyProjectFilters()">
           <option value="">全部狀態</option>
           <option value="draft">草稿</option>
           <option value="proposal">提案中</option>
@@ -334,6 +337,8 @@ async function initReferenceData() {
   } catch (e) {
     // keep empty
   }
+
+  populateDepartmentFilterSelect();
 }
 
 function ymdToday() {
@@ -550,6 +555,7 @@ function mapApiProjectToRow(raw, index) {
     name: name,
     owner: (raw.ChargeMan || "—").trim() || "—",
     dept: deptName,
+    deptCode: deptCode,
     status: status,
     done: done,
     total: total,
@@ -846,19 +852,48 @@ function renderProjectTable(projects) {
   }).join('');
 }
 
-function filterProjects(q) {
-  renderProjectTable(
-    q
-      ? PROJECTS.filter(p =>
-          p.name.toLowerCase().includes(q.toLowerCase()) ||
-          p.owner.toLowerCase().includes(q.toLowerCase())
-        )
-      : PROJECTS
-  );
+function populateDepartmentFilterSelect() {
+  var sel = document.getElementById("dept-filter");
+  if (!sel) return;
+  var current = sel.value;
+  var codes = Object.keys(DEPARTMENT_CODE_TO_NAME).sort(function (a, b) {
+    return DEPARTMENT_CODE_TO_NAME[a].localeCompare(DEPARTMENT_CODE_TO_NAME[b], "zh-TW");
+  });
+  sel.innerHTML =
+    '<option value="">全部部門</option>' +
+    codes
+      .map(function (code) {
+        return (
+          '<option value="' +
+          code +
+          '">' +
+          DEPARTMENT_CODE_TO_NAME[code] +
+          "</option>"
+        );
+      })
+      .join("");
+  if (current && DEPARTMENT_CODE_TO_NAME[current]) sel.value = current;
 }
 
-function filterByStatus(s) {
-  renderProjectTable(s ? PROJECTS.filter(p => p.status === s) : PROJECTS);
+function applyProjectFilters() {
+  var q = (document.getElementById("project-search")?.value || "").trim().toLowerCase();
+  var status = document.getElementById("status-filter")?.value || "";
+  var dept = document.getElementById("dept-filter")?.value || "";
+
+  var list = PROJECTS.filter(function (p) {
+    if (status && p.status !== status) return false;
+    if (dept && String(p.deptCode || "") !== dept) return false;
+    if (
+      q &&
+      !p.name.toLowerCase().includes(q) &&
+      !p.owner.toLowerCase().includes(q) &&
+      !(p.dept || "").toLowerCase().includes(q)
+    ) {
+      return false;
+    }
+    return true;
+  });
+  renderProjectTable(list);
 }
 
 // ─── NOTIFICATION ───

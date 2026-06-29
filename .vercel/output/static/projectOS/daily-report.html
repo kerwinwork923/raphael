@@ -16,6 +16,7 @@
         outline: none;
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
       }
+      
       .rpt-tab {
         padding: 10px 20px;
         font-size: 14px;
@@ -700,7 +701,22 @@
         </div>
 
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-          <div class="font-semibold text-slate-700 text-sm mb-3">日報明細</div>
+          <div class="flex items-center flex-wrap gap-2 mb-3">
+            <div class="font-semibold text-slate-700 text-sm">日報明細</div>
+            <div class="flex-1"></div>
+            <select
+              id="db-detail-dept"
+              class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 text-slate-700 bg-white min-w-[8rem] max-w-[12rem]"
+            >
+              <option value="">全部部門</option>
+            </select>
+            <select
+              id="db-detail-person"
+              class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 text-slate-700 bg-white min-w-[8rem] max-w-[12rem]"
+            >
+              <option value="">全部人員</option>
+            </select>
+          </div>
           <div id="detail-table-wrap" class="scroll-panel-detail"></div>
         </div>
       </div>
@@ -2954,6 +2970,102 @@
         }
       }
 
+      function collectDeptNamesFromDailyItems(items) {
+        const set = new Set();
+        (items || []).forEach(function (item) {
+          const dept = String(item.Dept || "").trim();
+          if (dept) set.add(dept);
+        });
+        return Array.from(set).sort(function (a, b) {
+          return a.localeCompare(b, "zh-Hant");
+        });
+      }
+
+      function collectPersonNamesFromDailyItems(items) {
+        const set = new Set();
+        (items || []).forEach(function (item) {
+          const name = String(item.Name || "").trim();
+          if (name) set.add(name);
+        });
+        return Array.from(set).sort(function (a, b) {
+          return a.localeCompare(b, "zh-Hant");
+        });
+      }
+
+      function populateDetailFilterSelects(allItems) {
+        const deptEl = document.getElementById("db-detail-dept");
+        const personEl = document.getElementById("db-detail-person");
+        if (!deptEl || !personEl) return;
+
+        const prevDept = String(deptEl.value || "");
+        const prevPerson = String(personEl.value || "");
+        const depts = collectDeptNamesFromDailyItems(allItems);
+
+        deptEl.innerHTML =
+          '<option value="">全部部門</option>' +
+          depts
+            .map(function (name) {
+              return (
+                '<option value="' +
+                escapeHtml(name) +
+                '">' +
+                escapeHtml(name) +
+                "</option>"
+              );
+            })
+            .join("");
+        if (prevDept && depts.indexOf(prevDept) >= 0) {
+          deptEl.value = prevDept;
+        } else {
+          deptEl.value = "";
+        }
+
+        const selectedDept = String(deptEl.value || "").trim();
+        const personSource = selectedDept
+          ? (allItems || []).filter(function (item) {
+              return String(item.Dept || "").trim() === selectedDept;
+            })
+          : allItems || [];
+        const persons = collectPersonNamesFromDailyItems(personSource);
+
+        personEl.innerHTML =
+          '<option value="">全部人員</option>' +
+          persons
+            .map(function (name) {
+              return (
+                '<option value="' +
+                escapeHtml(name) +
+                '">' +
+                escapeHtml(name) +
+                "</option>"
+              );
+            })
+            .join("");
+        if (prevPerson && persons.indexOf(prevPerson) >= 0) {
+          personEl.value = prevPerson;
+        } else {
+          personEl.value = "";
+        }
+      }
+
+      function filterDetailItems(items) {
+        const deptFilter = String(
+          document.getElementById("db-detail-dept")?.value || "",
+        ).trim();
+        const personFilter = String(
+          document.getElementById("db-detail-person")?.value || "",
+        ).trim();
+        return (items || []).filter(function (item) {
+          if (deptFilter && String(item.Dept || "").trim() !== deptFilter) {
+            return false;
+          }
+          if (personFilter && String(item.Name || "").trim() !== personFilter) {
+            return false;
+          }
+          return true;
+        });
+      }
+
       function aggregateStaReports(reports, deptFilter) {
         const filterDept = deptFilter ? String(deptFilter).trim() : "";
         const agg = {
@@ -3423,7 +3535,8 @@
 
         const detailEl = document.getElementById("detail-table-wrap");
         if (detailEl) {
-          const items = agg.dailyItems.slice().sort(function (a, b) {
+          populateDetailFilterSelects(agg.dailyItems);
+          const items = filterDetailItems(agg.dailyItems).slice().sort(function (a, b) {
             const da = String(a.date || "").replace(/\D/g, "");
             const db = String(b.date || "").replace(/\D/g, "");
             return db.localeCompare(da);
@@ -3475,7 +3588,9 @@
                 })
                 .join("") +
               "</tbody></table>"
-            : '<div class="nodata">此區間無日報明細</div>';
+            : agg.dailyItems.length
+              ? '<div class="nodata">查無符合條件的日報明細</div>'
+              : '<div class="nodata">此區間無日報明細</div>';
         }
       }
 
@@ -3618,6 +3733,12 @@
         .addEventListener("change", renderDashboard);
       document
         .getElementById("db-person-category")
+        .addEventListener("change", renderDashboard);
+      document
+        .getElementById("db-detail-dept")
+        .addEventListener("change", renderDashboard);
+      document
+        .getElementById("db-detail-person")
         .addEventListener("change", renderDashboard);
 
       document.querySelectorAll(".rpt-tab").forEach(function (tab, index) {
