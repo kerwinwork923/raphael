@@ -279,15 +279,30 @@
         -webkit-overflow-scrolling: touch;
       }
       .scroll-panel-rank {
-        max-height: min(50vh, 420px);
-        overflow-y: auto;
+        flex: 1 1 auto;
+        min-height: 12rem;
+        max-height: min(60vh, 520px);
+        overflow: auto;
         -webkit-overflow-scrolling: touch;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background: #fafbfc;
+      }
+      .scroll-panel-rank .contrib-table {
+        background: #fff;
       }
       .scroll-panel-rank .contrib-table thead th {
         position: sticky;
         top: 0;
         z-index: 1;
         box-shadow: 0 1px 0 #e2e8f0;
+        background: #f8fafc;
+      }
+      .scroll-panel-rank .contrib-table td {
+        padding: 8px;
+      }
+      .scroll-panel-rank .contrib-table tr:last-child td {
+        border-bottom: none;
       }
       .scroll-panel-detail {
         max-height: min(55vh, 480px);
@@ -672,12 +687,16 @@
             </div>
           </div>
           <div
-            class="bg-white rounded-xl border border-slate-200 shadow-sm p-5"
+            class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col min-h-0 lg:h-full"
           >
-            <div class="flex items-center w-full mb-3 flex-wrap gap-2">
+            <div class="flex items-center w-full mb-3 flex-wrap gap-2 shrink-0">
               <div class="font-semibold text-slate-700 text-sm">
                 個人貢獻排行
               </div>
+              <span
+                id="person-rank-count"
+                class="text-xs text-slate-400"
+              ></span>
               <select
                 id="db-person-category"
                 class="hidden ml-auto text-xs border border-slate-200 rounded-lg px-2 py-1 text-slate-700 bg-white min-w-[8rem]"
@@ -3473,16 +3492,25 @@
           : Object.values(agg.persons).sort(function (a, b) {
               return b.Hours - a.Hours;
             });
+        const personRankCountEl = document.getElementById("person-rank-count");
+        if (personRankCountEl) {
+          personRankCountEl.textContent = personSorted.length
+            ? "共 " + personSorted.length + " 人"
+            : "";
+        }
         const personEl = document.getElementById("table-person");
         if (personEl) {
+          const personColspan = isProdView ? 6 : 5;
           personEl.innerHTML = personSorted.length
-            ? "<thead><tr><th>姓名</th><th>部門</th><th>工時(h)</th>" +
+            ? "<thead><tr><th class=\"w-10 text-center\">#</th><th>姓名</th><th>部門</th><th>工時(h)</th>" +
               (isProdView ? "<th>生產數量</th>" : "") +
               "<th>工項數</th></tr></thead><tbody>" +
               personSorted
-                .map(function (p) {
+                .map(function (p, idx) {
                   return (
-                    "<tr><td class=\"font-medium\">" +
+                    "<tr><td class=\"text-slate-400 text-center font-medium\">" +
+                    (idx + 1) +
+                    "</td><td class=\"font-medium\">" +
                     escapeHtml(p.Name) +
                     '</td><td><span class="text-xs px-1.5 py-0.5 rounded-full font-semibold bg-blue-50 text-blue-700">' +
                     escapeHtml(p.Dept) +
@@ -3502,7 +3530,7 @@
                 .join("") +
               "</tbody>"
             : '<tbody><tr><td colspan="' +
-              (isProdView ? "5" : "4") +
+              personColspan +
               '" class="nodata">此區間無個人貢獻資料</td></tr></tbody>';
         }
 
